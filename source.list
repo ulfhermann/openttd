@@ -1,4 +1,7 @@
 # Source Files
+cargodist.cpp
+demands.cpp
+graph.cpp
 airport.cpp
 animated_tile.cpp
 articulated_vehicles.cpp
@@ -123,6 +126,9 @@ window.cpp
 	sound/allegro_s.h
 	video/allegro_v.h
 #end
+cargodist.h
+demands.h
+graph.h
 aircraft.h
 airport.h
 airport_movement.h
@@ -455,6 +461,7 @@ water_cmd.cpp
 waypoint_cmd.cpp
 
 # Save/Load handlers
+saveload/cargodist_sl.cpp
 saveload/afterload.cpp
 saveload/ai_sl.cpp
 saveload/animated_tile_sl.cpp

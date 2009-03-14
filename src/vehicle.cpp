@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: vehicle.cpp 15711 2009-03-14 18:16:29Z rubidium $ */
 
 /** @file vehicle.cpp Base implementations of all vehicles. */
 
@@ -623,7 +623,20 @@ void CallVehicleTicks()
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
+		StationID old_station = v->last_station_visited;
 		v->Tick();
+		StationID new_station = v->last_station_visited;
+		if (old_station != INVALID_STATION &&
+				new_station != INVALID_STATION &&
+				old_station != new_station) {
+			Station * station = GetStation(new_station);
+			for (Vehicle * part = v; part != NULL; part = part->Next()) {
+				if (part->cargo_cap == 0) continue;
+				LinkStat & ls =	station->goods[part->cargo_type].link_stats[old_station];
+				ls.capacity += part->cargo_cap;
+				ls.usage += part->cargo.Count();
+			}
+		}
 
 		switch (v->type) {
 			default: break;
@@ -720,9 +733,9 @@ CargoID FindFirstRefittableCargo(EngineID engine_type)
 }
 
 /** Learn the price of refitting a certain engine
-* @param engine_type Which engine to refit
-* @return Price for refitting
-*/
+ * @param engine_type Which engine to refit
+ * @return Price for refitting
+ */
 CommandCost GetRefitCost(EngineID engine_type)
 {
 	Money base_cost;

@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: station_cmd.cpp 15601 2009-03-02 22:57:47Z rubidium $ */
 
 /** @file station_cmd.cpp Handling of station tiles. */
 
@@ -32,11 +32,13 @@
 #include "oldpool_func.h"
 #include "animated_tile_func.h"
 #include "elrail_func.h"
+#include "graph.h"
 
 #include "table/strings.h"
 
 DEFINE_OLD_POOL_GENERIC(Station, Station)
 DEFINE_OLD_POOL_GENERIC(RoadStop, RoadStop)
+
 
 
 /**
@@ -2850,6 +2852,22 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
+
+static void UpdateStationStats(Station * st) {
+	uint length = _settings_game.economy.moving_average_length;
+	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+		GoodsEntry & good = st->goods[goods_index];
+		good.supply *= length;
+		good.supply /= (length + 1);
+		LinkStatMap & links = good.link_stats;
+		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
+			LinkStat & ls = i->second;
+			ls *= length;
+			ls /= (length + 1);
+		}
+	}
+}
+
 /* called for every station each tick */
 static void StationHandleSmallTick(Station *st)
 {
@@ -2874,6 +2892,9 @@ void OnTick_Station()
 	Station *st;
 	FOR_ALL_STATIONS(st) {
 		StationHandleSmallTick(st);
+		// update the station statistics every <unit> days
+		if ((_tick_counter + st->index) % (DAY_TICKS * _settings_game.economy.moving_average_unit) == 0)
+			UpdateStationStats(st);
 
 		/* Run 250 tick interval trigger for station animation.
 		 * Station index is included so that triggers are not all done
@@ -2886,7 +2907,6 @@ void OnTick_Station()
 
 void StationMonthlyLoop()
 {
-	/* not used */
 }
 
 
@@ -2910,8 +2930,10 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 
 static void UpdateStationWaiting(Station *st, CargoID type, uint amount)
 {
-	st->goods[type].cargo.Append(new CargoPacket(st->index, amount));
-	SetBit(st->goods[type].acceptance_pickup, GoodsEntry::PICKUP);
+	GoodsEntry & good = st->goods[type];
+	good.cargo.Append(new CargoPacket(st->index, amount));
+	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
+	good.supply += amount;
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
 

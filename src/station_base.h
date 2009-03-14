@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: station_base.h 15635 2009-03-07 18:19:53Z rubidium $ */
 
 /** @file station_base.h Base classes/functions for stations. */
 
@@ -19,11 +19,37 @@
 #include "core/geometry_type.hpp"
 #include "viewport_type.h"
 #include <list>
+#include <map>
 
 DECLARE_OLD_POOL(Station, Station, 6, 1000)
 DECLARE_OLD_POOL(RoadStop, RoadStop, 5, 2000)
 
+class ComponentHandler;
+
 static const byte INITIAL_STATION_RATING = 175;
+
+class LinkStat {
+public:
+	uint capacity;
+	uint usage;
+	LinkStat() : capacity(0), usage(0) {}
+
+	inline LinkStat & operator*=(uint factor) {
+		capacity *= factor;
+		usage *= factor;
+		return *this;
+	}
+
+	inline LinkStat & operator/=(uint divident) {
+		capacity /= divident;
+		usage /= divident;
+		return *this;
+	}
+};
+
+
+
+typedef std::map<StationID, LinkStat> LinkStatMap;
 
 struct GoodsEntry {
 	enum AcceptancePickup {
@@ -39,12 +65,14 @@ struct GoodsEntry {
 		last_age(255)
 	{}
 
-	byte acceptance_pickup;
+	byte acceptance_pickup; // bit ACCEPTANCE tells if station accepts this good, bit PICKUP if it supplies it
 	byte days_since_pickup;
 	byte rating;
 	byte last_speed;
 	byte last_age;
 	CargoList cargo; ///< The cargo packets of cargo waiting in this station
+	uint supply;
+	LinkStatMap link_stats; // capacities of incoming links
 };
 
 /** A Stop for a Road Vehicle */

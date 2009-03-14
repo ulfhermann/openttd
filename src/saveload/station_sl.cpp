@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: station_sl.cpp 15436 2009-02-09 22:49:28Z peter1138 $ */
 
 /** @file station_sl.cpp Code handling saving and loading of economy data */
 
@@ -106,6 +106,7 @@ static const SaveLoad _station_desc[] = {
 };
 
 static uint16 _waiting_acceptance;
+static uint16 _num_links;
 static uint16 _cargo_source;
 static uint32 _cargo_source_xy;
 static uint16 _cargo_days;
@@ -118,6 +119,13 @@ static const SaveLoad _station_speclist_desc[] = {
 	SLE_END()
 };
 
+static StationID _station_id;
+
+static const SaveLoad _linkstat_desc[] = {
+		SLEG_CONDVAR(		  _station_id, SLE_UINT16, CARGODIST_SV, SL_MAX_VERSION),
+		SLE_CONDVAR(LinkStat, capacity, SLE_UINT32, CARGODIST_SV, SL_MAX_VERSION),
+		SLE_CONDVAR(LinkStat, usage, SLE_UINT32, CARGODIST_SV, SL_MAX_VERSION)
+};
 
 void SaveLoad_STNS(Station *st)
 {
@@ -136,10 +144,11 @@ void SaveLoad_STNS(Station *st)
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
-
+		SLEG_CONDVAR(			 _num_links,		  SLE_UINT16,				 CARGODIST_SV, SL_MAX_VERSION),
 		SLE_END()
 	};
 
+	bool process_link_stats = !CheckSavegameVersion(CARGODIST_SV);
 
 	SlObject(st, _station_desc);
 
@@ -148,6 +157,9 @@ void SaveLoad_STNS(Station *st)
 	uint num_cargo = CheckSavegameVersion(55) ? 12 : NUM_CARGO;
 	for (CargoID i = 0; i < num_cargo; i++) {
 		GoodsEntry *ge = &st->goods[i];
+		LinkStatMap & stats = ge->link_stats;
+		if (process_link_stats)
+			_num_links = stats.size(); // for saving, is overwritten by next line when loading
 		SlObject(ge, _goods_desc);
 		if (CheckSavegameVersion(68)) {
 			SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
@@ -164,6 +176,20 @@ void SaveLoad_STNS(Station *st)
 				cp->feeder_share    = _cargo_feeder_share;
 				SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
 				ge->cargo.Append(cp);
+			}
+		}
+		if (process_link_stats) {
+			if (stats.empty()) { // loading
+				LinkStat ls;
+				for (uint i = 0; i < _num_links; ++i) {
+					SlObject(&ls, _linkstat_desc);
+					stats[_station_id] = ls;
+				}
+			} else { // saving
+				for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
+					_station_id = i->first;
+					SlObject(&(i->second), _linkstat_desc);
+				}
 			}
 		}
 	}

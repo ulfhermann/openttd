@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: saveload.h 15584 2009-02-25 21:45:14Z yexo $ */
 
 /** @file saveload.h Functions/types related to saving and loading games. */
 
@@ -332,5 +332,7 @@ void SlObject(void *object, const SaveLoad *sld);
 bool SlObjectMember(void *object, const SaveLoad *sld);
 
 extern char _savegame_format[8];
+
+#define CARGODIST_SV 130
 
 #endif /* SAVELOAD_H */

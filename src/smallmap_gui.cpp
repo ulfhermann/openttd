@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: smallmap_gui.cpp 15711 2009-03-14 18:16:29Z rubidium $ */
 
 /** @file smallmap_gui.cpp GUI that shows a small map of the world with metadata like owner or height. */
 
@@ -20,30 +20,37 @@
 #include "vehicle_base.h"
 #include "sound_func.h"
 #include "window_func.h"
+#include "cargotype.h"
+#include "openttd.h"
+#include "company_func.h"
+#include "station_base.h"
+#include "graph.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
 
 static const Widget _smallmap_widgets[] = {
-{  WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_BROWN,     0,    10,     0,    13, STR_00C5,                STR_018B_CLOSE_WINDOW},
-{   WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_BROWN,    11,   337,     0,    13, STR_00B0_MAP,            STR_018C_WINDOW_TITLE_DRAG_THIS},
-{ WWT_STICKYBOX,     RESIZE_LR,  COLOUR_BROWN,   338,   349,     0,    13, 0x0,                     STR_STICKY_BUTTON},
-{     WWT_PANEL,     RESIZE_RB,  COLOUR_BROWN,     0,   349,    14,   157, 0x0,                     STR_NULL},
-{     WWT_INSET,     RESIZE_RB,  COLOUR_BROWN,     2,   347,    16,   155, 0x0,                     STR_NULL},
-{     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   261,   158,   201, 0x0,                     STR_NULL},
-{     WWT_PANEL,   RESIZE_LRTB,  COLOUR_BROWN,   262,   349,   158,   158, 0x0,                     STR_NULL},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   158,   179, SPR_IMG_SHOW_COUNTOURS,  STR_0191_SHOW_LAND_CONTOURS_ON_MAP},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   158,   179, SPR_IMG_SHOW_VEHICLES,   STR_0192_SHOW_VEHICLES_ON_MAP},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   158,   179, SPR_IMG_INDUSTRY,        STR_0193_SHOW_INDUSTRIES_ON_MAP},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   180,   201, SPR_IMG_SHOW_ROUTES,     STR_0194_SHOW_TRANSPORT_ROUTES_ON},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   180,   201, SPR_IMG_PLANTTREES,      STR_0195_SHOW_VEGETATION_ON_MAP},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   180,   201, SPR_IMG_COMPANY_GENERAL, STR_0196_SHOW_LAND_OWNERS_ON_MAP},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   158,   179, SPR_IMG_SMALLMAP,        STR_SMALLMAP_CENTER},
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   180,   201, SPR_IMG_TOWN,            STR_0197_TOGGLE_TOWN_NAMES_ON_OFF},
-{     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   337,   202,   213, 0x0,                     STR_NULL},
-{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,     0,    99,   202,   213, STR_MESSAGES_ENABLE_ALL, STR_NULL},
-{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,   100,   201,   202,   213, STR_MESSAGES_DISABLE_ALL,STR_NULL},
-{ WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_BROWN,   338,   349,   202,   213, 0x0,                     STR_RESIZE_BUTTON},
+{  WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_BROWN,     0,    10,     0,    13, STR_00C5,                 STR_018B_CLOSE_WINDOW},
+{   WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_BROWN,    11,   337,     0,    13, STR_00B0_MAP,             STR_018C_WINDOW_TITLE_DRAG_THIS},
+{ WWT_STICKYBOX,     RESIZE_LR,  COLOUR_BROWN,   338,   349,     0,    13, 0x0,                      STR_STICKY_BUTTON},
+{     WWT_PANEL,     RESIZE_RB,  COLOUR_BROWN,     0,   349,    14,   157, 0x0,                      STR_NULL},
+{     WWT_INSET,     RESIZE_RB,  COLOUR_BROWN,     2,   347,    16,   155, 0x0,                      STR_NULL},
+{     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   239,   158,   201, 0x0,                      STR_NULL},
+{     WWT_PANEL,   RESIZE_LRTB,  COLOUR_BROWN,   240,   349,   158,   158, 0x0,                      STR_NULL},
+{     WWT_PANEL,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   158,   179, 0x0,                      STR_NULL},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   158,   179, SPR_IMG_SHOW_COUNTOURS,   STR_0191_SHOW_LAND_CONTOURS_ON_MAP},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   158,   179, SPR_IMG_SHOW_VEHICLES,    STR_0192_SHOW_VEHICLES_ON_MAP},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   158,   179, SPR_IMG_INDUSTRY,         STR_0193_SHOW_INDUSTRIES_ON_MAP},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   180,   201, SPR_IMG_SHOW_ROUTES,      STR_0194_SHOW_TRANSPORT_ROUTES_ON},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   180,   201, SPR_IMG_SHOW_ROUTES,      STR_0194_SHOW_TRANSPORT_ROUTES_ON},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   180,   201, SPR_IMG_PLANTTREES,       STR_0195_SHOW_VEGETATION_ON_MAP},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   180,   201, SPR_IMG_COMPANY_GENERAL,  STR_0196_SHOW_LAND_OWNERS_ON_MAP},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   158,   179, SPR_IMG_SMALLMAP,         STR_SMALLMAP_CENTER},
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   180,   201, SPR_IMG_TOWN,             STR_0197_TOGGLE_TOWN_NAMES_ON_OFF},
+{     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   337,   202,   213, 0x0,                      STR_NULL},
+{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,     0,    99,   202,   213, STR_MESSAGES_ENABLE_ALL,  STR_NULL},
+{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,   100,   201,   202,   213, STR_MESSAGES_DISABLE_ALL, STR_NULL},
+{ WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_BROWN,   338,   349,   202,   213, 0x0,                      STR_RESIZE_BUTTON},
 {  WIDGETS_END},
 };
 
@@ -171,10 +178,13 @@ void BuildIndustriesLegend()
 	_smallmap_industry_count = j;
 }
 
+static LegendAndColour _legend_routemap[NUM_CARGO + 1];
+
 static const LegendAndColour * const _legend_table[] = {
 	_legend_land_contours,
 	_legend_vehicles,
 	_legend_from_industries,
+	_legend_routemap,
 	_legend_routes,
 	_legend_vegetation,
 	_legend_land_owners,
@@ -495,6 +505,7 @@ static GetSmallMapPixels *_smallmap_draw_procs[] = {
 	GetSmallMapVehiclesPixels,
 	GetSmallMapIndustriesPixels,
 	GetSmallMapRoutesPixels,
+	GetSmallMapRoutesPixels,
 	GetSmallMapVegetationPixels,
 	GetSmallMapOwnerPixels,
 };
@@ -521,19 +532,39 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_MAP,
 	SM_WIDGET_LEGEND,
 	SM_WIDGET_BUTTONSPANEL,
+	SM_WIDGET_BLANK,
 	SM_WIDGET_CONTOUR,
 	SM_WIDGET_VEHICLES,
 	SM_WIDGET_INDUSTRIES,
+	SM_WIDGET_ROUTEMAP,
 	SM_WIDGET_ROUTES,
 	SM_WIDGET_VEGETATION,
 	SM_WIDGET_OWNERS,
 	SM_WIDGET_CENTERMAP,
 	SM_WIDGET_TOGGLETOWNNAME,
 	SM_WIDGET_BOTTOMPANEL,
-	SM_WIDGET_ENABLEINDUSTRIES,
-	SM_WIDGET_DISABLEINDUSTRIES,
+	SM_WIDGET_ENABLE_ALL,
+	SM_WIDGET_DISABLE_ALL,
 	SM_WIDGET_RESIZEBOX,
 };
+
+void DrawVertex(int x, int y, int size, int color)
+{
+	size--;
+	int w1 = size / 2;
+	int w2 = size / 2 + size % 2;
+
+	for (int i = y - w1; i <= y + w2; ++i) {
+		GfxDrawLine(x - w1, i, x + w2, i, color);
+	}
+
+	w1++;
+	w2++;
+	GfxDrawLine(x - w1, y - w1, x + w2, y - w1, 0x0);
+	GfxDrawLine(x - w1, y + w2, x + w2, y + w2, 0x0);
+	GfxDrawLine(x - w1, y - w1, x - w1, y + w2, 0x0);
+	GfxDrawLine(x + w2, y - w1, x + w2, y + w2, 0x0);
+}
 
 class SmallMapWindow : public Window
 {
@@ -541,6 +572,7 @@ class SmallMapWindow : public Window
 		SMT_CONTOUR,
 		SMT_VEHICLES,
 		SMT_INDUSTRY,
+		SMT_ROUTEMAP,
 		SMT_ROUTES,
 		SMT_VEGETATION,
 		SMT_OWNER,
@@ -548,6 +580,7 @@ class SmallMapWindow : public Window
 
 	static SmallMapType map_type;
 	static bool show_towns;
+	static uint32 cargo_types;
 
 	int32 scroll_x;
 	int32 scroll_y;
@@ -556,6 +589,45 @@ class SmallMapWindow : public Window
 
 	static const int COLUMN_WIDTH = 119;
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
+
+	int routemap_count;
+
+	/**
+	 * Populate legend table for the route map view.
+	 */
+	void BuildRouteMapLegend()
+	{
+		/* Clear the legend */
+		memset(_legend_routemap, 0, sizeof(_legend_routemap));
+
+		uint i = 0;
+
+		for (CargoID c = 0; c != NUM_CARGO; ++c) {
+			const CargoSpec *cs = GetCargo(c);
+			if (!cs->IsValid()) continue;
+
+			_legend_routemap[i].legend = cs->name;
+			_legend_routemap[i].colour = cs->legend_colour;
+			_legend_routemap[i].type = c;
+			_legend_routemap[i].show_on_map = HasBit(this->cargo_types, c);
+
+			i++;
+		}
+
+		this->routemap_count = i;
+
+		_legend_routemap[i].end = true;
+
+		this->SetWidgetDisabledState(SM_WIDGET_ROUTEMAP, this->routemap_count == 0);
+		if (this->routemap_count == 0 && this->map_type == SMT_ROUTEMAP) {
+			this->map_type = SMT_CONTOUR;
+		}
+	}
+
+	bool HasButtons()
+	{
+		return this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP;
+	}
 
 public:
 	/**
@@ -719,6 +791,117 @@ public:
 			}
 		}
 
+
+		if (this->map_type == SMT_ROUTEMAP && _game_mode == GM_NORMAL) {
+			float monthScale = ((float)_settings_game.economy.moving_average_length * (float)_settings_game.economy.moving_average_unit) / 30.0;
+			for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
+				if (!tbl->show_on_map) continue;
+
+				CargoID c = tbl->type;
+				const Station * stb;
+				FOR_ALL_STATIONS(stb) {
+					const LinkStatMap & links = stb->goods[c].link_stats;
+					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
+
+						const Station *sta = GetStation(i->first);
+
+
+						if (sta->owner != _local_company && IsValidCompanyID(sta->owner)) continue;
+						if (stb->owner != _local_company && IsValidCompanyID(stb->owner)) continue;
+
+						TileIndex ta = sta->xy;
+						TileIndex tb = stb->xy;
+
+						Point pta = RemapCoords(
+								(int)(TileX(ta) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
+								(int)(TileY(ta) * TILE_SIZE - this->scroll_y) / TILE_SIZE,
+								0);
+						pta.x -= this->subscroll + 3;
+
+						Point ptb = RemapCoords(
+								(int)(TileX(tb) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
+								(int)(TileY(tb) * TILE_SIZE - this->scroll_y) / TILE_SIZE,
+								0);
+						ptb.x -= this->subscroll + 3;
+
+						GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
+						GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
+						GfxDrawLine(pta.x, pta.y - 1, ptb.x, ptb.y - 1, _colour_gradient[COLOUR_GREY][1]);
+						GfxDrawLine(pta.x, pta.y + 1, ptb.x, ptb.y + 1, _colour_gradient[COLOUR_GREY][1]);
+						GfxDrawLine(pta.x, pta.y, ptb.x, ptb.y, tbl->colour);
+
+						const LinkStat & ls = i->second;
+						uint usage = (float)ls.usage / monthScale;
+						uint usageDisplay = usage / 10;
+						uint capacity = (float)ls.capacity / monthScale;
+						uint capacityDisplay = capacity / 10;
+
+
+
+						Point ptm;
+
+						if (!show_towns) {
+							ptm.x = (pta.x + ptb.x) / 2;
+							if (pta.x > ptb.x) {
+								ptm.x +=5;
+							}
+							ptm.y = (pta.y + ptb.y) / 2;
+							GfxFillRect(ptm.x, ptm.y - usageDisplay, ptm.x + 3, ptm.y, _colour_gradient[COLOUR_GREY][1]);
+							GfxFillRect(ptm.x, ptm.y - capacityDisplay, ptm.x + 3, ptm.y - usageDisplay - 1, _colour_gradient[COLOUR_WHITE][7]);
+						} else {
+							ptm.x = (2*pta.x + ptb.x) / 3;
+							ptm.y = (2*pta.y + ptb.y) / 3;
+							SetDParam(0, usage);
+							SetDParam(1, capacity);
+							DrawString(ptm.x, ptm.y, STR_NUM_RELATION , TC_BLACK);
+						}
+					}
+				}
+			}
+
+			/* Colour for player owned stations */
+			//int p_colour = _colour_gradient[GetCompany(_local_company)->colour][6];
+			/* Colour for non-player owned stations */
+			//int o_colour = _colour_gradient[COLOUR_GREY][4];
+
+			const Station *st;
+
+			FOR_ALL_STATIONS(st) {
+				if (st->owner != _local_company && IsValidCompanyID(st->owner)) continue;
+
+				TileIndex t = st->xy;
+
+				Point pt = RemapCoords(
+					(int)(TileX(t) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
+					(int)(TileY(t) * TILE_SIZE - this->scroll_y) / TILE_SIZE,
+					0);
+				pt.x -= this->subscroll + 3;
+
+				/* Add up cargo supplied for each selected cargo type */
+				uint q = 0;
+				int colour = 0;
+				int numCargos = 0;
+				for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
+					if (!tbl->show_on_map) continue;
+					CargoID c = tbl->type;
+					q += (float)st->goods[c].supply / monthScale;
+					ComponentHandler & g = CargoDist::handlers[c];
+					colour += g.getColor(st->index);
+					numCargos++;
+				}
+				if (numCargos > 1)
+					colour /= numCargos;
+
+				uint r = 2;
+				if (q >= 10) r++;
+				if (q >= 20) r++;
+				if (q >= 40) r++;
+				if (q >= 80) r++;
+				if (q >= 160) r++;
+				DrawVertex(pt.x, pt.y, r, colour);
+			}
+		}
+
 		if (this->show_towns) {
 			const Town *t;
 
@@ -789,7 +972,13 @@ public:
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 		int rows = (legend->bottom - legend->top) - 1;
 		int columns = (legend->right - legend->left) / COLUMN_WIDTH;
-		int new_rows = (this->map_type == SMT_INDUSTRY) ? ((_smallmap_industry_count + columns - 1) / columns) * 6 : MIN_LEGEND_HEIGHT;
+		int new_rows = 0;
+
+		if (this->map_type == SMT_INDUSTRY) {
+			new_rows = ((_smallmap_industry_count + columns - 1) / columns) * 6;
+		} else if (this->map_type == SMT_ROUTEMAP) {
+			new_rows = ((this->routemap_count + columns - 1) / columns) * 6;
+		}
 
 		new_rows = max(new_rows, MIN_LEGEND_HEIGHT);
 
@@ -815,6 +1004,8 @@ public:
 
 	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number)
 	{
+		this->BuildRouteMapLegend();
+
 		this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
 		this->SetWidgetLoweredState(SM_WIDGET_TOGGLETOWNNAME, this->show_towns);
 
@@ -827,8 +1018,8 @@ public:
 		DrawPixelInfo new_dpi;
 
 		/* Hide Enable all/Disable all buttons if is not industry type small map*/
-		this->SetWidgetHiddenState(SM_WIDGET_ENABLEINDUSTRIES, this->map_type != SMT_INDUSTRY);
-		this->SetWidgetHiddenState(SM_WIDGET_DISABLEINDUSTRIES, this->map_type != SMT_INDUSTRY);
+		this->SetWidgetHiddenState(SM_WIDGET_ENABLE_ALL, !this->HasButtons());
+		this->SetWidgetHiddenState(SM_WIDGET_DISABLE_ALL, !this->HasButtons());
 
 		/* draw the window */
 		SetDParam(0, STR_00E5_CONTOURS + this->map_type);
@@ -860,6 +1051,16 @@ public:
 					DrawString(x + 11, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
 				} else {
 					DrawString(x + 11, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
+					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
+				}
+			} else if (this->map_type == SMT_ROUTEMAP) {
+				SetDParam(0, tbl->legend);
+				if (!tbl->show_on_map) {
+					/* Simply draw the string, not the black border of the legend colour.
+					 * This will enforce the idea of the disabled item */
+					DrawString(x + 11, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_GREY);
+				} else {
+					DrawString(x + 11, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
 			} else {
@@ -904,6 +1105,7 @@ public:
 			case SM_WIDGET_CONTOUR:    // Show land contours
 			case SM_WIDGET_VEHICLES:   // Show vehicles
 			case SM_WIDGET_INDUSTRIES: // Show industries
+			case SM_WIDGET_ROUTEMAP:   // Show route map
 			case SM_WIDGET_ROUTES:     // Show transport routes
 			case SM_WIDGET_VEGETATION: // Show vegetation
 			case SM_WIDGET_OWNERS:     // Show land owners
@@ -934,7 +1136,7 @@ public:
 
 			case SM_WIDGET_LEGEND: // Legend
 				/* if industry type small map*/
-				if (this->map_type == SMT_INDUSTRY) {
+				if (this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP) {
 					/* if click on industries label, find right industry type and enable/disable it */
 					Widget *wi = &this->widget[SM_WIDGET_LEGEND]; // label panel
 					uint column = (pt.x - 4) / COLUMN_WIDTH;
@@ -942,37 +1144,50 @@ public:
 					int rows_per_column = (wi->bottom - wi->top) / 6;
 
 					/* check if click is on industry label*/
-					int industry_pos = (column * rows_per_column) + line;
-					if (industry_pos < _smallmap_industry_count) {
-						_legend_from_industries[industry_pos].show_on_map = !_legend_from_industries[industry_pos].show_on_map;
+					int click_pos = (column * rows_per_column) + line;
+					if (this->map_type == SMT_INDUSTRY) {
+						if (click_pos < _smallmap_industry_count) {
+							_legend_from_industries[click_pos].show_on_map = !_legend_from_industries[click_pos].show_on_map;
+						}
+					} else if (this->map_type == SMT_ROUTEMAP) {
+						if (click_pos < this->routemap_count) {
+							_legend_routemap[click_pos].show_on_map = !_legend_routemap[click_pos].show_on_map;
+							ToggleBit(this->cargo_types, click_pos);
+						}
 					}
 
 					/* Raise the two buttons "all", as we have done a specific choice */
-					this->RaiseWidget(SM_WIDGET_ENABLEINDUSTRIES);
-					this->RaiseWidget(SM_WIDGET_DISABLEINDUSTRIES);
+					this->RaiseWidget(SM_WIDGET_ENABLE_ALL);
+					this->RaiseWidget(SM_WIDGET_DISABLE_ALL);
 					this->SetDirty();
 				}
 				break;
 
-			case SM_WIDGET_ENABLEINDUSTRIES: // Enable all industries
-				for (int i = 0; i != _smallmap_industry_count; i++) {
-					_legend_from_industries[i].show_on_map = true;
+			case SM_WIDGET_ENABLE_ALL: { // Enable all items
+				LegendAndColour *tbl = (this->map_type == SMT_INDUSTRY) ? _legend_from_industries : _legend_routemap;
+				for (; !tbl->end; ++tbl) {
+					tbl->show_on_map = true;
 				}
+				this->cargo_types = UINT_MAX;
 				/* toggle appeareance indicating the choice */
-				this->LowerWidget(SM_WIDGET_ENABLEINDUSTRIES);
-				this->RaiseWidget(SM_WIDGET_DISABLEINDUSTRIES);
+				this->LowerWidget(SM_WIDGET_ENABLE_ALL);
+				this->RaiseWidget(SM_WIDGET_DISABLE_ALL);
 				this->SetDirty();
 				break;
+			}
 
-			case SM_WIDGET_DISABLEINDUSTRIES: // disable all industries
-				for (int i = 0; i != _smallmap_industry_count; i++) {
-					_legend_from_industries[i].show_on_map = false;
+			case SM_WIDGET_DISABLE_ALL: { // Disable all items
+				LegendAndColour *tbl = (this->map_type == SMT_INDUSTRY) ? _legend_from_industries : _legend_routemap;
+				for (; !tbl->end; ++tbl) {
+					tbl->show_on_map = false;
 				}
+				this->cargo_types = 0;
 				/* toggle appeareance indicating the choice */
-				this->RaiseWidget(SM_WIDGET_ENABLEINDUSTRIES);
-				this->LowerWidget(SM_WIDGET_DISABLEINDUSTRIES);
+				this->RaiseWidget(SM_WIDGET_ENABLE_ALL);
+				this->LowerWidget(SM_WIDGET_DISABLE_ALL);
 				this->SetDirty();
 				break;
+			}
 		}
 	}
 
@@ -1048,12 +1263,13 @@ public:
 
 	virtual void OnResize(Point new_size, Point delta)
 	{
-		if (delta.x != 0 && this->map_type == SMT_INDUSTRY) this->ResizeLegend();
+		if (delta.x != 0 && (this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP)) this->ResizeLegend();
 	}
 };
 
 SmallMapWindow::SmallMapType SmallMapWindow::map_type = SMT_CONTOUR;
 bool SmallMapWindow::show_towns = true;
+uint32 SmallMapWindow::cargo_types = UINT_MAX;
 
 static const WindowDesc _smallmap_desc = {
 	WDP_AUTO, WDP_AUTO, 350, 214, 446, 314,
@@ -1152,7 +1368,6 @@ public:
 				/* set this view to same location. Based on the center, adjusting for zoom */
 				w->viewport->dest_scrollpos_x =  x - (w->viewport->virtual_width -  this->viewport->virtual_width) / 2;
 				w->viewport->dest_scrollpos_y =  y - (w->viewport->virtual_height - this->viewport->virtual_height) / 2;
-				w->viewport->follow_vehicle   = INVALID_VEHICLE;
 			} break;
 
 			case EVW_VIEW_TO_MAIN: { // inverse location button (move this view to same spot as main view) 'Copy Location'

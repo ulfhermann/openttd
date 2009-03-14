@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: settings_gui.cpp 15601 2009-03-02 22:57:47Z rubidium $ */
 
 /** @file settings_gui.cpp GUI for settings. */
 
@@ -1128,6 +1128,8 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry(&_settings_economy_industries_page, STR_CONFIG_SETTING_ECONOMY_INDUSTRIES),
 	SettingEntry("economy.inflation"),
 	SettingEntry("economy.smooth_economy"),
+	SettingEntry("economy.moving_average_unit"),
+	SettingEntry("economy.moving_average_length"),
 };
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};

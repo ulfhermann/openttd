@@ -1111,6 +1111,9 @@ STR_CONFIG_SETTING_LARGER_TOWNS                                 :{LTBLUE}Proport
 STR_CONFIG_SETTING_LARGER_TOWNS_DISABLED                        :{LTBLUE}Proportion of towns that will become cities: {ORANGE}None
 STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Initial city size multiplier: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove absurd road-elements during the road construction: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_AVERAGE_UNIT									:{LTBLUE}Capacity/Usage Moving Average Unit: {ORANGE}{STRING1} days
+STR_CONFIG_SETTING_AVERAGE_LENGTH								:{LTBLUE}Capacity/Usage Moving Average Length: {ORANGE}{STRING1} units
+STR_CONFIG_SETTING_CARGODIST_INTERVAL							:{LTBLUE}CargoDist recalculation interval: {ORANGE}{STRING1} days
 
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
@@ -3302,6 +3305,7 @@ STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Max. Tra
 STR_NUM_1                                                       :{BLACK}{SKIP}{NUM}
 STR_NUM_2                                                       :{BLACK}{SKIP}{SKIP}{NUM}
 STR_NUM_3                                                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM}
+STR_NUM_RELATION												:{COMMA}/{COMMA}
 
 ########### String for New Landscape Generator
 
@@ -3357,6 +3361,7 @@ STR_FLAT_WORLD_HEIGHT                                           :{BLACK}Height o
 
 STR_SMALLMAP_CENTER                                             :{BLACK}Center the smallmap on the current position
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_ROUTEMAP_LEGEND                                    :{TINYFONT}{STRING}
 
 # Strings for map borders at game generation
 STR_BORDER_TYPE                                                 :{BLACK}Map edges:
