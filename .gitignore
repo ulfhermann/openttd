@@ -10,3 +10,8 @@ bundle/*
 config.*
 objs/*
 src/rev.cpp
+.cproject
+.project
+data/
+media/openttd.desktop
+patches/
