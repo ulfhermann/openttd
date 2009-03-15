@@ -11,67 +11,47 @@
 #include "stdafx.h"
 #include "station_base.h"
 #include "cargo_type.h"
-#include "thread.h"
-#include "cargodist.h"
-#include "demands.h"
-#include <queue>
+#include <list>
+
+class InitEdge {
+public:
+	InitEdge(StationID st1, StationID st2, uint cap) :
+		from(st1), to(st2), capacity(cap) {}
+	StationID from;
+	StationID to;
+	uint capacity;
+};
+
+class InitNode {
+public:
+	InitNode() : supply(0), station(INVALID_STATION) {}
+	InitNode(StationID st, uint sup) : supply(sup), station(st) {}
+	uint supply;
+	StationID station;
+};
+
+typedef std::list<InitNode> InitNodeList;
+typedef std::list<InitEdge> InitEdgeList;
 
 typedef ushort colour;
 
-void runCargoDist(void * cargoDist);
-
-struct SaveLoad;
-extern const SaveLoad * getCargoDistDesc(uint);
-
-class CargoDist {
+class Graph {
 public:
-	CargoDist(CargoID cargo);
-	CargoDist(const InitNodeList & nodes, const InitEdgeList & edges, uint numNodes, CargoID cargo, ushort colour);
-	void join() {thread->Join();}
-	void start() {ThreadObject::New(&(runCargoDist), this, &thread);}
-	CargoDistGraph & getGraph() {return graph;}
-	uint16 getJoinTime() const {return joinTime;}
-	colour getColour() const {return componentColour;}
-	static ComponentHandler handlers[NUM_CARGO];
-private:
-	friend const SaveLoad * getCargoDistDesc(uint);
-	friend void runCargoDist(void *);
-	ThreadObject * thread;
-	void calculateDemands() {demands.calcDemands(graph);}
-	void calculateUsage();
-	CargoDistGraph graph;
-	DemandCalculator demands;
-	uint16 joinTime;
-	colour componentColour;
-};
-
-typedef std::list<CargoDist *> CargoDistList;
-
-
-class ComponentHandler {
-public:
-	ComponentHandler();
-	void runAnalysis();
-	colour getColor(StationID station) const {return stationColours[station];}
-	CargoID getCargo() const {return cargo;}
-	bool join();
-	bool nextComponent();
-	uint getNumComponents();
-	CargoDistList & getComponents() {return components;}
-	void addComponent(CargoDist * component);
-	const static uint CARGO_DIST_TICK = 21;
+	Graph();
+	colour GetColour(StationID station) const {return station_colours[station];}
+	CargoID GetCargo() const {return cargo;}
+	bool NextComponent();
+	void InitColours();
+	const static uint COMPONENTS_TICK = 21;
 
 private:
-	friend const SaveLoad * getCargoDistDesc(uint);
 	colour c;
-	StationID currentStation;
+	StationID current_station;
 	CargoID cargo;
-	CargoDistList components;
-	colour stationColours[Station_POOL_MAX_BLOCKS];
+	colour station_colours[Station_POOL_MAX_BLOCKS];
 };
 
-
-
+extern Graph _link_graphs[NUM_CARGO];
 
 
 

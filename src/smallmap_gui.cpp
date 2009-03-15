@@ -24,6 +24,7 @@
 #include "openttd.h"
 #include "company_func.h"
 #include "station_base.h"
+#include "graph.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -884,7 +885,7 @@ public:
 					if (!tbl->show_on_map) continue;
 					CargoID c = tbl->type;
 					q += (float)st->goods[c].supply / monthScale;
-					colour += tbl->colour; 
+					colour += _link_graphs[c].GetColour(st->index);
 					numCargos++;
 				}
 				if (numCargos > 1)
