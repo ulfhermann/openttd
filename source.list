@@ -1,7 +1,4 @@
 # Source Files
-cargodist.cpp
-demands.cpp
-graph.cpp
 airport.cpp
 animated_tile.cpp
 articulated_vehicles.cpp
@@ -32,6 +29,7 @@ gamelog.cpp
 genworld.cpp
 gfx.cpp
 gfxinit.cpp
+graph.cpp
 heightmap.cpp
 highscore.cpp
 ini.cpp
@@ -126,9 +124,6 @@ window.cpp
 	sound/allegro_s.h
 	video/allegro_v.h
 #end
-cargodist.h
-demands.h
-graph.h
 aircraft.h
 airport.h
 airport_movement.h
@@ -193,6 +188,7 @@ genworld.h
 gfx_func.h
 gfx_type.h
 gfxinit.h
+graph.h
 group.h
 group_gui.h
 group_type.h
@@ -461,7 +457,6 @@ water_cmd.cpp
 waypoint_cmd.cpp
 
 # Save/Load handlers
-saveload/cargodist_sl.cpp
 saveload/afterload.cpp
 saveload/ai_sl.cpp
 saveload/animated_tile_sl.cpp

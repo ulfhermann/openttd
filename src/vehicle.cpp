@@ -1,4 +1,4 @@
-/* $Id: vehicle.cpp 15711 2009-03-14 18:16:29Z rubidium $ */
+/* $Id$ */
 
 /** @file vehicle.cpp Base implementations of all vehicles. */
 
@@ -733,9 +733,9 @@ CargoID FindFirstRefittableCargo(EngineID engine_type)
 }
 
 /** Learn the price of refitting a certain engine
- * @param engine_type Which engine to refit
- * @return Price for refitting
- */
+* @param engine_type Which engine to refit
+* @return Price for refitting
+*/
 CommandCost GetRefitCost(EngineID engine_type)
 {
 	Money base_cost;

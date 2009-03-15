@@ -7,36 +7,36 @@
 
 
 #include "graph.h"
-#include "demands.h"
 #include "settings_type.h"
 #include "station_func.h"
 #include "date_func.h"
 #include "variables.h"
+#include <queue>
 
-ComponentHandler CargoDist::handlers[NUM_CARGO];
+Graph _link_graphs[NUM_CARGO];
 
-
-bool ComponentHandler::nextComponent() {
+bool Graph::NextComponent()
+{
 	InitNodeList nodes;
 	InitEdgeList edges;
 	uint numNodes = 0;
 	std::queue<Station *> searchQueue;
 	while (true) {
 		// find first station of next component
-		if (stationColours[currentStation] > USHRT_MAX / 2 && IsValidStationID(currentStation)) {
-			Station * station = GetStation(currentStation);
+		if (station_colours[current_station] > USHRT_MAX / 2 && IsValidStationID(current_station)) {
+			Station * station = GetStation(current_station);
 			LinkStatMap & links = station->goods[cargo].link_stats;
 			if (!links.empty()) {
 				if (++c == USHRT_MAX / 2) {
 					c = 0;
 				}
 				searchQueue.push(station);
-				stationColours[currentStation] = c;
+				station_colours[current_station] = c;
 				break; // found a station
 			}
 		}
-		if (++currentStation == GetMaxStationIndex()) {
-			currentStation = 0;
+		if (++current_station == GetMaxStationIndex()) {
+			current_station = 0;
 			return false;
 		}
 	}
@@ -46,97 +46,49 @@ bool ComponentHandler::nextComponent() {
 		StationID targetID = target->index;
 		searchQueue.pop();
 		GoodsEntry & good = target->goods[cargo];
-		nodes.push_back(Node(targetID, good.supply));
+		nodes.push_back(InitNode(targetID, good.supply));
 		numNodes++;
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID sourceID = i->first;
 			Station * source = GetStation(i->first);
 			LinkStat & linkStat = i->second;
-			if (stationColours[sourceID] != c) {
-				stationColours[sourceID] = c;
+			if (station_colours[sourceID] != c) {
+				station_colours[sourceID] = c;
 				searchQueue.push(source);
 			}
 			edges.push_back(InitEdge(sourceID, targetID, linkStat.capacity));
 		}
 	}
-	CargoDist * cd = new CargoDist(nodes, edges, numNodes, cargo, c);
-	components.push_back(cd);
-	cd->start();
+	// here the list of nodes and edges for this component is complete.
 	return true;
 }
 
-
-bool ComponentHandler::join() {
-	if (components.empty()) {
-		return false;
+void Graph::InitColours()
+{
+	for (int i = 0; i < Station_POOL_MAX_BLOCKS; ++i) {
+		station_colours[i] = USHRT_MAX;
 	}
-	CargoDist * cd = components.front();
-
-	if (cd->getJoinTime() > _tick_counter) {
-		return false;
-	}
-
-	components.pop_front();
-
-	cd->join();
-	CargoDistGraph & graph = cd->getGraph();
-
-	for(uint i = 0; i < graph.size(); ++i) {
-		Node & node = graph.node(i);
-		StationID id = node.station;
-		stationColours[id] += USHRT_MAX / 2;
-		if (id < currentStation) currentStation = id;
-		//TODO: handle edges
-	}
-	return true;
 }
 
-CargoDist::CargoDist(CargoID cargo) :
-	graph(0), demands(cargo), joinTime(0), componentColour(0) {}
 
-CargoDist::CargoDist(const InitNodeList & nodes, const InitEdgeList & edges, uint numNodes, CargoID cargo, colour pCol) :
-	graph(nodes, edges, numNodes), demands(cargo), joinTime(_tick_counter + _settings_game.economy.cdist_recalc_interval * DAY_TICKS), componentColour(pCol)
-{}
-
-void runCargoDist(void * cd) {
-	CargoDist * cargoDist = (CargoDist *)cd;
-	cargoDist->calculateDemands();
-	//cargoDist->calculateUsage();
-}
-
-void OnTick_CargoDist() {
-	if ((_tick_counter + ComponentHandler::CARGO_DIST_TICK) % DAY_TICKS == 0) {
+void OnTick_LinkGraph()
+{
+	if ((_tick_counter + Graph::COMPONENTS_TICK) % DAY_TICKS == 0) {
 		CargoID cargo = (_date) % NUM_CARGO;
-		ComponentHandler & handler = CargoDist::handlers[cargo];
-		if (!handler.nextComponent()) {
-			handler.join();
+		Graph & graph = _link_graphs[cargo];
+		if (!graph.NextComponent()) {
+			graph.InitColours();
 		}
 	}
 }
 
-ComponentHandler::ComponentHandler()  : c(0), currentStation(0), cargo(CT_INVALID) {
-	for (int i = 0; i < Station_POOL_MAX_BLOCKS; ++i) {
-		stationColours[i] = USHRT_MAX;
-	}
-	//memset(stationColors, CHAR_MAX, sizeof(stationColors));
+Graph::Graph()  : c(0), current_station(0), cargo(CT_INVALID)
+{
 	for (CargoID i = 0; i < NUM_CARGO; ++i) {
-		if (this == &(CargoDist::handlers[i])) {
+		if (this == &(_link_graphs[i])) {
 			cargo = i;
 		}
 	}
-}
-
-uint ComponentHandler::getNumComponents() {
-	return components.size();
-}
-
-void ComponentHandler::addComponent(CargoDist * component) {
-	 components.push_back(component);
-	 CargoDistGraph & graph = component->getGraph();
-	 colour componentColour = component->getColour();
-	 for(uint i = 0; i < graph.size(); ++i) {
-		 stationColours[graph.node(i).station] = componentColour;
-	 }
-	 component->start();
+	InitColours();
 }

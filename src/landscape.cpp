@@ -1,4 +1,4 @@
-/* $Id: landscape.cpp 15685 2009-03-12 14:21:18Z rubidium $ */
+/* $Id$ */
 
 /** @file landscape.cpp Functions related to the landscape (slopes etc.). */
 
@@ -942,7 +942,7 @@ void OnTick_Industry();
 
 void OnTick_Companies();
 void OnTick_Train();
-void OnTick_CargoDist();
+void OnTick_LinkGraph();
 
 void CallLandscapeTick()
 {
@@ -953,5 +953,5 @@ void CallLandscapeTick()
 
 	OnTick_Companies();
 	OnTick_Train();
-	OnTick_CargoDist();
+	OnTick_LinkGraph();
 }
