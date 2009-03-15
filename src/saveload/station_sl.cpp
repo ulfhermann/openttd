@@ -1,4 +1,4 @@
-/* $Id: station_sl.cpp 15436 2009-02-09 22:49:28Z peter1138 $ */
+/* $Id$ */
 
 /** @file station_sl.cpp Code handling saving and loading of economy data */
 
@@ -122,9 +122,9 @@ static const SaveLoad _station_speclist_desc[] = {
 static StationID _station_id;
 
 static const SaveLoad _linkstat_desc[] = {
-		SLEG_CONDVAR(		  _station_id, SLE_UINT16, CARGODIST_SV, SL_MAX_VERSION),
-		SLE_CONDVAR(LinkStat, capacity, SLE_UINT32, CARGODIST_SV, SL_MAX_VERSION),
-		SLE_CONDVAR(LinkStat, usage, SLE_UINT32, CARGODIST_SV, SL_MAX_VERSION)
+		SLEG_CONDVAR(		  _station_id, SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION),
+		SLE_CONDVAR(LinkStat, capacity, SLE_UINT32, CAPACITIES_SV, SL_MAX_VERSION),
+		SLE_CONDVAR(LinkStat, usage, SLE_UINT32, CAPACITIES_SV, SL_MAX_VERSION)
 };
 
 void SaveLoad_STNS(Station *st)
@@ -144,11 +144,11 @@ void SaveLoad_STNS(Station *st)
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
-		SLEG_CONDVAR(			 _num_links,		  SLE_UINT16,				 CARGODIST_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(		 _num_links,	      SLE_UINT16,		  CAPACITIES_SV, SL_MAX_VERSION),
 		SLE_END()
 	};
 
-	bool process_link_stats = !CheckSavegameVersion(CARGODIST_SV);
+	bool process_link_stats = !CheckSavegameVersion(CAPACITIES_SV);
 
 	SlObject(st, _station_desc);
 

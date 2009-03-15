@@ -1,4 +1,4 @@
-/* $Id: settings_gui.cpp 15601 2009-03-02 22:57:47Z rubidium $ */
+/* $Id$ */
 
 /** @file settings_gui.cpp GUI for settings. */
 
