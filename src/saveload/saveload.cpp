@@ -1,4 +1,4 @@
-/* $Id: saveload.cpp 15695 2009-03-12 23:54:20Z belugas $ */
+/* $Id$ */
 
 /** @file saveload.cpp
  * All actions handling saving and loading goes on in this file. The general actions
@@ -41,7 +41,7 @@
 #include "saveload_internal.h"
 
 
-extern const uint16 SAVEGAME_VERSION = CARGODIST_SV;
+extern const uint16 SAVEGAME_VERSION = CAPACITIES_SV;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -1333,7 +1333,6 @@ extern const ChunkHandler _newgrf_chunk_handlers[];
 extern const ChunkHandler _group_chunk_handlers[];
 extern const ChunkHandler _cargopacket_chunk_handlers[];
 extern const ChunkHandler _autoreplace_chunk_handlers[];
-extern const ChunkHandler _cargodist_chunk_handlers[];
 
 static const ChunkHandler * const _chunk_handlers[] = {
 	_gamelog_chunk_handlers,
@@ -1360,7 +1359,6 @@ static const ChunkHandler * const _chunk_handlers[] = {
 	_group_chunk_handlers,
 	_cargopacket_chunk_handlers,
 	_autoreplace_chunk_handlers,
-	_cargodist_chunk_handlers,
 	NULL,
 };
 

@@ -1,4 +1,4 @@
-/* $Id: station_cmd.cpp 15601 2009-03-02 22:57:47Z rubidium $ */
+/* $Id$ */
 
 /** @file station_cmd.cpp Handling of station tiles. */
 
@@ -32,13 +32,11 @@
 #include "oldpool_func.h"
 #include "animated_tile_func.h"
 #include "elrail_func.h"
-#include "graph.h"
 
 #include "table/strings.h"
 
 DEFINE_OLD_POOL_GENERIC(Station, Station)
 DEFINE_OLD_POOL_GENERIC(RoadStop, RoadStop)
-
 
 
 /**
@@ -2852,7 +2850,6 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
-
 static void UpdateStationStats(Station * st) {
 	uint length = _settings_game.economy.moving_average_length;
 	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
@@ -2907,6 +2904,7 @@ void OnTick_Station()
 
 void StationMonthlyLoop()
 {
+	/* not used */
 }
 
 

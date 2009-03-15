@@ -1,4 +1,4 @@
-/* $Id: station_base.h 15635 2009-03-07 18:19:53Z rubidium $ */
+/* $Id$ */
 
 /** @file station_base.h Base classes/functions for stations. */
 
@@ -24,8 +24,6 @@
 DECLARE_OLD_POOL(Station, Station, 6, 1000)
 DECLARE_OLD_POOL(RoadStop, RoadStop, 5, 2000)
 
-class ComponentHandler;
-
 static const byte INITIAL_STATION_RATING = 175;
 
 class LinkStat {
@@ -47,8 +45,6 @@ public:
 	}
 };
 
-
-
 typedef std::map<StationID, LinkStat> LinkStatMap;
 
 struct GoodsEntry {
@@ -65,7 +61,7 @@ struct GoodsEntry {
 		last_age(255)
 	{}
 
-	byte acceptance_pickup; // bit ACCEPTANCE tells if station accepts this good, bit PICKUP if it supplies it
+	byte acceptance_pickup;
 	byte days_since_pickup;
 	byte rating;
 	byte last_speed;
