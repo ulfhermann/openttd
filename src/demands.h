@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "cargo_type.h"
 #include "map_func.h"
+#include "linkgraph.h"
 
 enum DistributionType {
 	symmetric,
@@ -19,20 +20,19 @@ enum DistributionType {
 };
 
 
-class DemandCalculator {
+class DemandCalculator : public ComponentHandler {
 public:
-	DemandCalculator(CargoID c) : cargo(c) {
-		if (maxDistance == 0) maxDistance = MapSizeX() + MapSizeY();
+	DemandCalculator(CargoID c) : cargo(c), max_distance(MapSizeX() + MapSizeY()) {}
+	virtual void Run(Component * graph) {
+		CalcSymmetric(graph);
+		PrintDemandMatrix(graph);
 	}
-	void CalcDemands(Component & graph) {
-		calcSymmetric(graph);
-		printDemandMatrix(graph);
-	}
-	void PrintDemandMatrix(Component & graph);
+	void PrintDemandMatrix(Component * graph);
+	virtual ~DemandCalculator() {}
 private:
 	CargoID cargo;
-	static uint max_distance;
-	void CalcSymmetric(Component & graph);
+	uint max_distance;
+	void CalcSymmetric(Component * graph);
 };
 
 #endif /* DEMANDS_H_ */

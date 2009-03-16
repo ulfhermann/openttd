@@ -13,28 +13,26 @@ using std::cout;
 
 typedef std::list<uint> NodeList;
 
-uint DemandCalculator::max_distance = 0;
-
-void DemandCalculator::PrintDemandMatrix(Component & graph) {
-	for (uint from = 0; from < graph.GetSize(); ++from) {
-		cout << graph.Node(from).station << "\t";
-		for(uint to = 0; to < graph.GetSize(); ++to) {
+void DemandCalculator::PrintDemandMatrix(Component * graph) {
+	for (uint from = 0; from < graph->GetSize(); ++from) {
+		cout << graph->GetNode(from).station << "\t";
+		for(uint to = 0; to < graph->GetSize(); ++to) {
 			if (from == to) {
-				cout << graph.Node(from).supply << "\t";
+				cout << graph->GetNode(from).supply << "\t";
 			} else {
-				cout << graph.Edge(from, to).demand << "\t";
+				cout << graph->GetEdge(from, to).demand << "\t";
 			}
 		}
 		cout << "\n";
 	}
 }
 
-void DemandCalculator::CalcSymmetric(Component & graph) {
+void DemandCalculator::CalcSymmetric(Component * graph) {
 	NodeList nodes;
 	uint supply_sum = 0;
-	for(uint node = 0; node < graph.GetSize(); node++) {
+	for(uint node = 0; node < graph->GetSize(); node++) {
 		nodes.push_back(node);
-		supply_sum += graph.Node(node).supply;
+		supply_sum += graph->GetNode(node).supply;
 	}
 
 	if (supply_sum == 0) {
@@ -45,14 +43,14 @@ void DemandCalculator::CalcSymmetric(Component & graph) {
 		uint node1 = nodes.front();
 		nodes.pop_front();
 
-		Node & from = graph.Node(node1);
+		Node & from = graph->GetNode(node1);
 
 		for(NodeList::iterator i = nodes.begin(); i != nodes.end(); ++i) {
 			uint node2 = *i;
-			Edge & forward = graph.Edge(node1, node2);
-			Edge & backward = graph.Edge(node2, node1);
+			Edge & forward = graph->GetEdge(node1, node2);
+			Edge & backward = graph->GetEdge(node2, node1);
 
-			Node & to = graph.Node(node2);
+			Node & to = graph->GetNode(node2);
 
 			uint demand = from.supply * to.supply * (max_distance - forward.distance) / max_distance / supply_sum + 1;
 			demand = min(demand, from.supply);

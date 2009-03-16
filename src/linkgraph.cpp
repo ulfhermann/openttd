@@ -12,6 +12,7 @@
 #include "date_func.h"
 #include "variables.h"
 #include "map_func.h"
+#include "demands.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -73,6 +74,7 @@ bool LinkGraph::NextComponent()
 	// here the list of nodes and edges for this component is complete.
 	component->CalculateDistances();
 	components.push_back(component);
+	SpawnComponentThread(component);
 	return true;
 }
 
@@ -137,6 +139,7 @@ void Component::SetSize(uint size) {
 }
 
 Component::Component(colour col) :
+	thread(NULL),
 	num_nodes(0),
 	join_time(_tick_counter + _settings_game.economy.linkgraph_recalc_interval * DAY_TICKS), 
 	component_colour(col)
@@ -144,6 +147,7 @@ Component::Component(colour col) :
 }
 
 Component::Component(uint size, uint join, colour c) : 
+	thread(NULL),
 	num_nodes(size),
 	join_time(join), 
 	component_colour(c),
@@ -179,4 +183,32 @@ void LinkGraph::AddComponent(Component * component) {
 	 for(uint i = 0; i < component->GetSize(); ++i) {
 		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
+	 SpawnComponentThread(component);
+}
+
+void LinkGraphJob::Run() {
+	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+		ComponentHandler * handler = *i;
+		handler->Run(component);
+	}
+}
+
+LinkGraphJob::~LinkGraphJob() {
+	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+		ComponentHandler * handler = *i;
+		delete handler;
+	}
+	handlers.clear();
+}
+
+void RunLinkGraphJob(void * j) {
+	LinkGraphJob * job = (LinkGraphJob *)j;
+	job->Run();
+	delete job;
+}
+
+void LinkGraph::SpawnComponentThread(Component * c) {
+	LinkGraphJob * job = new LinkGraphJob(c);
+	job->AddHandler(new DemandCalculator(cargo));
+	ThreadObject::New(&(RunLinkGraphJob), job, &c->GetThread());
 }

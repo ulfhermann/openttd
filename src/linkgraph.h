@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "station_base.h"
 #include "cargo_type.h"
+#include "thread.h"
 #include <list>
 #include <vector>
 
@@ -26,12 +27,16 @@ public:
 
 class Edge {
 public:
-	Edge() : distance(0), capacity(0) {}
+	Edge() : distance(0), capacity(0), demand(0) {}
 	uint distance;
 	uint capacity;
+	uint demand;
 };
 
 
+
+
+void SpawnComponentThread(void * handlers);
 
 typedef ushort colour;
 
@@ -51,6 +56,7 @@ public:
 		return nodes[num];
 	}
 
+	void Join() {thread->Join();}
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
 	uint AddNode(StationID st, uint supply);
@@ -58,8 +64,10 @@ public:
 	void CalculateDistances();
 	uint GetJoinTime() const {return join_time;}
 	colour GetColour() const {return component_colour;}
+	ThreadObject * & GetThread() {return thread;}
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
+	ThreadObject * thread;
 	uint num_nodes;
 	uint join_time;
 	colour component_colour;
@@ -69,6 +77,25 @@ private:
 };
 
 typedef std::list<Component *> ComponentList;
+
+class ComponentHandler {
+public:
+	virtual void Run(Component * component) = 0;
+	virtual ~ComponentHandler() {}
+};
+
+class LinkGraphJob {
+	typedef std::list<ComponentHandler *> HandlerList;
+public:
+	LinkGraphJob(Component * c) : component(c) {}
+	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
+	void Run();
+	~LinkGraphJob();
+private:
+	Component * component;
+	HandlerList handlers;
+};
+
 
 class LinkGraph {
 public:
@@ -84,6 +111,7 @@ public:
 	const static uint COMPONENTS_TICK = 21;
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
+	void SpawnComponentThread(Component * c);
 	colour current_colour;
 	StationID current_station;
 	CargoID cargo;
@@ -92,9 +120,6 @@ private:
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
-
-
-
 
 
 #endif /* LINKGRAPH_H_ */
