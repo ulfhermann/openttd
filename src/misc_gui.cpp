@@ -51,12 +51,12 @@ static const Widget _land_info_widgets[] = {
 {    WIDGETS_END},
 };
 
-static const WindowDesc _land_info_desc = {
+static const WindowDesc _land_info_desc(
 	WDP_AUTO, WDP_AUTO, 300, 100, 300, 100,
 	WC_LAND_INFO, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_land_info_widgets,
-};
+	_land_info_widgets
+);
 
 class LandInfoWindow : public Window {
 	enum {
@@ -283,12 +283,12 @@ static const Widget _about_widgets[] = {
 {    WIDGETS_END},
 };
 
-static const WindowDesc _about_desc = {
+static const WindowDesc _about_desc(
 	WDP_CENTER, WDP_CENTER, 420, 272, 420, 272,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_about_widgets,
-};
+	_about_widgets
+);
 
 struct AboutWindow : public Window {
 	int scroll_height;
@@ -315,25 +315,27 @@ struct AboutWindow : public Window {
 			"  Matthijs Kooijman (blathijs) - Pathfinder-guru, pool rework",
 			"  Victor Fischer (Celestar) - Programming everywhere you need him to",
 			"  Christoph Elsenhans (frosch) - General coding",
-			"  Loïc Guilloux (glx) - General coding",
-			"  Jaroslav Mazanec (KUDr) - YAPG (Yet Another Pathfinder God) ;)",
-			"  Jonathan Coome (Maedhros) - High priest of the newGRF Temple",
-			"  Attila Bán (MiHaMiX) - WebTranslator, Nightlies, Wiki and bugtracker host",
+			"  Loïc Guilloux (glx) - Windows Expert",
+			"  Michael Lutz (michi_cc) - Path based signals",
 			"  Owen Rudge (orudge) - Forum host, OS/2 port",
 			"  Peter Nelson (peter1138) - Spiritual descendant from newGRF gods",
 			"  Remko Bijker (Rubidium) - Lead coder and way more",
-			"  Benedikt Brüggemeier (skidd13) - Bug fixer and code reworker",
 			"  Zdenek Sojka (SmatZ) - Bug finder and fixer",
+			"  Thijs Marinussen (Yexo) - AI Framework",
 			"",
 			"Inactive Developers:",
 			"  Tamás Faragó (Darkvater) - Ex-Lead coder",
+			"  Jaroslav Mazanec (KUDr) - YAPG (Yet Another Pathfinder God) ;)",
+			"  Jonathan Coome (Maedhros) - High priest of the NewGRF Temple",
+			"  Attila Bán (MiHaMiX) - WebTranslator, Nightlies, Wiki and bugtracker host",
 			"  Christoph Mallon (Tron) - Programmer, code correctness police",
 			"",
 			"Retired Developers:",
 			"  Ludvig Strigeus (ludde) - OpenTTD author, main coder (0.1 - 0.3.3)",
 			"  Serge Paquet (vurlix) - Assistant project manager, coder (0.1 - 0.3.3)",
 			"  Dominik Scherer (dominik81) - Lead programmer, GUI expert (0.3.0 - 0.3.6)",
-			"  Patric Stout (TrueLight) - Programmer, webhoster (0.3 - pre0.6)",
+			"  Benedikt Brüggemeier (skidd13) - Bug fixer and code reworker",
+			"  Patric Stout (TrueLight) - Programmer, webhoster (0.3 - pre0.7)",
 			"",
 			"Special thanks go out to:",
 			"  Josef Drexler - For his great work on TTDPatch",
@@ -1176,12 +1178,12 @@ static const Widget _query_string_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _query_string_desc = {
+static const WindowDesc _query_string_desc(
 	190, 219, 260, 42, 260, 42,
 	WC_QUERY_STRING, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_query_string_widgets,
-};
+	_query_string_widgets
+);
 
 /** Show a query popup window with a textbox in it.
  * @param str StringID for the text shown in the textbox
@@ -1316,12 +1318,12 @@ static const Widget _query_widgets[] = {
 {   WIDGETS_END },
 };
 
-static const WindowDesc _query_desc = {
+static const WindowDesc _query_desc(
 	WDP_CENTER, WDP_CENTER, 210, 82, 210, 82,
 	WC_CONFIRM_POPUP_QUERY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_DEF_WIDGET | WDF_MODAL,
-	_query_widgets,
-};
+	_query_widgets
+);
 
 /** Show a modal confirmation window with standard 'yes' and 'no' buttons
  * The window is aligned to the centre of its parent.
@@ -1731,19 +1733,19 @@ public:
 	}
 };
 
-static const WindowDesc _load_dialog_desc = {
+static const WindowDesc _load_dialog_desc(
 	WDP_CENTER, WDP_CENTER, 257, 154, 257, 294,
 	WC_SAVELOAD, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_load_dialog_widgets,
-};
+	_load_dialog_widgets
+);
 
-static const WindowDesc _save_dialog_desc = {
+static const WindowDesc _save_dialog_desc(
 	WDP_CENTER, WDP_CENTER, 257, 180, 257, 320,
 	WC_SAVELOAD, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_save_dialog_widgets,
-};
+	_save_dialog_widgets
+);
 
 /** These values are used to convert the file/operations mode into a corresponding file type.
  * So each entry, as expressed by the related comment, is based on the enum   */

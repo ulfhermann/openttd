@@ -733,9 +733,9 @@ CargoID FindFirstRefittableCargo(EngineID engine_type)
 }
 
 /** Learn the price of refitting a certain engine
-* @param engine_type Which engine to refit
-* @return Price for refitting
-*/
+ * @param engine_type Which engine to refit
+ * @return Price for refitting
+ */
 CommandCost GetRefitCost(EngineID engine_type)
 {
 	Money base_cost;
@@ -1210,7 +1210,7 @@ Trackdir GetVehicleTrackdir(const Vehicle *v)
 
 		case VEH_SHIP:
 			if (v->IsInDepot())
-				// We'll assume the ship is facing outwards
+				/* We'll assume the ship is facing outwards */
 				return DiagDirToDiagTrackdir(GetShipDepotDirection(v->tile));
 
 			if (v->u.ship.state == TRACK_BIT_WORMHOLE) // ship on aqueduct, so just use his direction and assume a diagonal track

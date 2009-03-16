@@ -108,7 +108,7 @@ static uint32 RemapOldTownName(uint32 townnameparts, byte old_town_name_type)
 		case 1: // French
 			/* For some reason 86 needs to be subtracted from townnameparts
 			 * 0000 0000 0000 0000 0000 0000 1111 1111 */
-			return FIXNUM(townnameparts - 86, lengthof(name_french_real), 0);
+			return FIXNUM(townnameparts - 86, lengthof(_name_french_real), 0);
 
 		case 2: // German
 			DEBUG(misc, 0, "German Townnames are buggy (%d)", townnameparts);
@@ -116,13 +116,13 @@ static uint32 RemapOldTownName(uint32 townnameparts, byte old_town_name_type)
 
 		case 4: // Latin-American
 			/* 0000 0000 0000 0000 0000 0000 1111 1111 */
-			return FIXNUM(townnameparts, lengthof(name_spanish_real), 0);
+			return FIXNUM(townnameparts, lengthof(_name_spanish_real), 0);
 
 		case 5: // Silly
 			/* NUM_SILLY_1 - lower 16 bits
 			 * NUM_SILLY_2 - upper 16 bits without leading 1 (first 8 bytes)
 			 * 1000 0000 2222 2222 0000 0000 1111 1111 */
-			return FIXNUM(townnameparts, lengthof(name_silly_1), 0) | FIXNUM(GB(townnameparts, 16, 8), lengthof(name_silly_2), 16);
+			return FIXNUM(townnameparts, lengthof(_name_silly_1), 0) | FIXNUM(GB(townnameparts, 16, 8), lengthof(_name_silly_2), 16);
 	}
 	return 0;
 }
@@ -691,9 +691,9 @@ static bool LoadOldCargoPaymentRate(LoadgameState *ls, int num)
 
 	if (_savegame_type == SGT_TTO) {
 		/* SVXConverter about cargo payment rates correction:
-		* "increase them to compensate for the faster time advance in TTD compared to TTO
-		* which otherwise would cause much less income while the annual running costs of
-		* the vehicles stay the same" */
+		 * "increase them to compensate for the faster time advance in TTD compared to TTO
+		 * which otherwise would cause much less income while the annual running costs of
+		 * the vehicles stay the same" */
 
 		Money m = ((((Money)_old_price) << 16) + (uint)_old_price_frac) * 124 / 74;
 
@@ -1039,15 +1039,15 @@ static bool LoadOldCompany(LoadgameState *ls, int num)
 				c->name_1 = STR_SV_UNNAMED;
 		} else {
 			/* Beside some multiplayer maps (1 on 1), which we don't official support,
-			* all other companys are an AI.. mark them as such */
+			 * all other companys are an AI.. mark them as such */
 			c->is_ai = true;
 		}
 
 		/* Sometimes it is better to not ask.. in old scenarios, the money
-		* was always 893288 pounds. In the newer versions this is correct,
-		* but correct for those oldies
-		* Ps: this also means that if you had exact 893288 pounds, you will go back
-		* to 100000.. this is a very VERY small chance ;) */
+		 * was always 893288 pounds. In the newer versions this is correct,
+		 * but correct for those oldies
+		 * Ps: this also means that if you had exact 893288 pounds, you will go back
+		 * to 100000.. this is a very VERY small chance ;) */
 		if (c->money == 893288) c->money = c->current_loan = 100000;
 	}
 
@@ -1260,14 +1260,14 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 			uint type = ReadByte(ls);
 			switch (type) {
 				default: return false;
-				case 0x00 /*VEH_INVALID */: v = new (_current_vehicle_id) InvalidVehicle();  break;
-				case 0x25 /* MONORAIL   */:
-				case 0x20 /*VEH_TRAIN   */: v = new (_current_vehicle_id) Train();           break;
-				case 0x21 /*VEH_ROAD    */: v = new (_current_vehicle_id) RoadVehicle();     break;
-				case 0x22 /*VEH_SHIP    */: v = new (_current_vehicle_id) Ship();            break;
-				case 0x23 /*VEH_AIRCRAFT*/: v = new (_current_vehicle_id) Aircraft();        break;
-				case 0x24 /*VEH_EFFECT  */: v = new (_current_vehicle_id) EffectVehicle();   break;
-				case 0x26 /*VEH_DISASTER*/: v = new (_current_vehicle_id) DisasterVehicle(); break;
+				case 0x00 /* VEH_INVALID */: v = new (_current_vehicle_id) InvalidVehicle();  break;
+				case 0x25 /* MONORAIL     */:
+				case 0x20 /* VEH_TRAIN    */: v = new (_current_vehicle_id) Train();           break;
+				case 0x21 /* VEH_ROAD     */: v = new (_current_vehicle_id) RoadVehicle();     break;
+				case 0x22 /* VEH_SHIP     */: v = new (_current_vehicle_id) Ship();            break;
+				case 0x23 /* VEH_AIRCRAFT */: v = new (_current_vehicle_id) Aircraft();        break;
+				case 0x24 /* VEH_EFFECT   */: v = new (_current_vehicle_id) EffectVehicle();   break;
+				case 0x26 /* VEH_DISASTER */: v = new (_current_vehicle_id) DisasterVehicle(); break;
 			}
 
 			if (!LoadChunk(ls, v, vehicle_chunk)) return false;
@@ -1336,13 +1336,13 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 			/* Read the vehicle type and allocate the right vehicle */
 			switch (ReadByte(ls)) {
 				default: NOT_REACHED();
-				case 0x00 /*VEH_INVALID */: v = new (_current_vehicle_id) InvalidVehicle();  break;
-				case 0x10 /*VEH_TRAIN   */: v = new (_current_vehicle_id) Train();           break;
-				case 0x11 /*VEH_ROAD    */: v = new (_current_vehicle_id) RoadVehicle();     break;
-				case 0x12 /*VEH_SHIP    */: v = new (_current_vehicle_id) Ship();            break;
-				case 0x13 /*VEH_AIRCRAFT*/: v = new (_current_vehicle_id) Aircraft();        break;
-				case 0x14 /*VEH_EFFECT  */: v = new (_current_vehicle_id) EffectVehicle();   break;
-				case 0x15 /*VEH_DISASTER*/: v = new (_current_vehicle_id) DisasterVehicle(); break;
+				case 0x00 /* VEH_INVALID */: v = new (_current_vehicle_id) InvalidVehicle();  break;
+				case 0x10 /* VEH_TRAIN   */: v = new (_current_vehicle_id) Train();           break;
+				case 0x11 /* VEH_ROAD    */: v = new (_current_vehicle_id) RoadVehicle();     break;
+				case 0x12 /* VEH_SHIP    */: v = new (_current_vehicle_id) Ship();            break;
+				case 0x13 /* VEH_AIRCRAFT*/: v = new (_current_vehicle_id) Aircraft();        break;
+				case 0x14 /* VEH_EFFECT  */: v = new (_current_vehicle_id) EffectVehicle();   break;
+				case 0x15 /* VEH_DISASTER*/: v = new (_current_vehicle_id) DisasterVehicle(); break;
 			}
 			if (!LoadChunk(ls, v, vehicle_chunk)) return false;
 

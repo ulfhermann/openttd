@@ -9,34 +9,34 @@
 #include "../core/mem_func.hpp"
 
 /** Base class for simple binary blobs.
-*  Item is byte.
-*  The word 'simple' means:
-*    - no configurable allocator type (always made from heap)
-*    - no smart deallocation - deallocation must be called from the same
-*        module (DLL) where the blob was allocated
-*    - no configurable allocation policy (how big blocks should be allocated)
-*    - no extra ownership policy (i.e. 'copy on write') when blob is copied
-*    - no thread synchronization at all
-*
-*  Internal member layout:
-*  1. The only class member is pointer to the first item (see union ptr_u).
-*  2. Allocated block contains the blob header (see CHdr) followed by the raw byte data.
-*     Always, when it allocates memory the allocated size is:
-*                                                      sizeof(CHdr) + <data capacity>
-*  3. Two 'virtual' members (m_size and m_max_size) are stored in the CHdr at beginning
-*     of the alloated block.
-*  4. The pointter (in ptr_u) pobsize_ts behind the header (to the first data byte).
-*     When memory block is allocated, the sizeof(CHdr) it added to it.
-*  5. Benefits of this layout:
-*     - items are accessed in the simplest possible way - just dereferencing the pointer,
-*       which is good for performance (assuming that data are accessed most often).
-*     - sizeof(blob) is the same as the size of any other pointer
-*  6. Drawbacks of this layout:
-*     - the fact, that pointer to the alocated block is adjusted by sizeof(CHdr) before
-*       it is stored can lead to several confusions:
-*         - it is not common pattern so the implementation code is bit harder to read
-*         - valgrind can generate warning that allocated block is lost (not accessible)
-* */
+ *  Item is byte.
+ *  The word 'simple' means:
+ *    - no configurable allocator type (always made from heap)
+ *    - no smart deallocation - deallocation must be called from the same
+ *        module (DLL) where the blob was allocated
+ *    - no configurable allocation policy (how big blocks should be allocated)
+ *    - no extra ownership policy (i.e. 'copy on write') when blob is copied
+ *    - no thread synchronization at all
+ *
+ *  Internal member layout:
+ *  1. The only class member is pointer to the first item (see union ptr_u).
+ *  2. Allocated block contains the blob header (see CHdr) followed by the raw byte data.
+ *     Always, when it allocates memory the allocated size is:
+ *                                                      sizeof(CHdr) + <data capacity>
+ *  3. Two 'virtual' members (m_size and m_max_size) are stored in the CHdr at beginning
+ *     of the alloated block.
+ *  4. The pointter (in ptr_u) pobsize_ts behind the header (to the first data byte).
+ *     When memory block is allocated, the sizeof(CHdr) it added to it.
+ *  5. Benefits of this layout:
+ *     - items are accessed in the simplest possible way - just dereferencing the pointer,
+ *       which is good for performance (assuming that data are accessed most often).
+ *     - sizeof(blob) is the same as the size of any other pointer
+ *  6. Drawbacks of this layout:
+ *     - the fact, that pointer to the alocated block is adjusted by sizeof(CHdr) before
+ *       it is stored can lead to several confusions:
+ *         - it is not common pattern so the implementation code is bit harder to read
+ *         - valgrind can generate warning that allocated block is lost (not accessible)
+ */
 class CBlobBaseSimple {
 public:
 	typedef ::ptrdiff_t bsize_t;
@@ -93,7 +93,7 @@ public:
 
 protected:
 	/** initialize the empty blob by setting the ptr_u.m_pHdr_1 pointer to the static CHdr with
-	*  both m_size and m_max_size containing zero */
+	 *  both m_size and m_max_size containing zero */
 	FORCEINLINE void InitEmpty()
 	{
 		static CHdr hdrEmpty[] = {{0, 0}, {0, 0}};
@@ -217,7 +217,7 @@ public:
 	}
 
 	/** Reallocate if there is no free space for num_bytes bytes.
-	*  @return pointer to the new data to be added */
+	 *  @return pointer to the new data to be added */
 	FORCEINLINE bitem_t *MakeRawFreeSpace(bsize_t num_bytes)
 	{
 		assert(num_bytes >= 0);
@@ -227,7 +227,7 @@ public:
 	}
 
 	/** Increase RawSize() by num_bytes.
-	*  @return pointer to the new data added */
+	 *  @return pointer to the new data added */
 	FORCEINLINE bitem_t *GrowRawSize(bsize_t num_bytes)
 	{
 		bitem_t *pNewData = MakeRawFreeSpace(num_bytes);
@@ -250,19 +250,19 @@ public:
 	{
 		bsize_t old_max_size = MaxRawSize();
 		if (old_max_size >= new_size) return;
-		// calculate minimum block size we need to allocate
+		/* calculate minimum block size we need to allocate */
 		bsize_t min_alloc_size = sizeof(CHdr) + new_size + Ttail_reserve;
-		// ask allocation policy for some reasonable block size
+		/* ask allocation policy for some reasonable block size */
 		bsize_t alloc_size = AllocPolicy(min_alloc_size);
-		// allocate new block
+		/* allocate new block */
 		CHdr *pNewHdr = RawAlloc(alloc_size);
-		// setup header
+		/* setup header */
 		pNewHdr->m_size = RawSize();
 		pNewHdr->m_max_size = alloc_size - (sizeof(CHdr) + Ttail_reserve);
-		// copy existing data
+		/* copy existing data */
 		if (RawSize() > 0)
 			memcpy(pNewHdr + 1, ptr_u.m_pData, pNewHdr->m_size);
-		// replace our block with new one
+		/* replace our block with new one */
 		CHdr *pOldHdr = &Hdr();
 		Init(pNewHdr);
 		if (old_max_size > 0)
@@ -312,15 +312,15 @@ public:
 };
 
 /** Blob - simple dynamic Titem_ array. Titem_ (template argument) is a placeholder for any type.
-*  Titem_ can be any integral type, pointer, or structure. Using Blob instead of just plain C array
-*  simplifies the resource management in several ways:
-*  1. When adding new item(s) it automatically grows capacity if needed.
-*  2. When variable of type Blob comes out of scope it automatically frees the data buffer.
-*  3. Takes care about the actual data size (number of used items).
-*  4. Dynamically constructs only used items (as opposite of static array which constructs all items) */
+ *  Titem_ can be any integral type, pointer, or structure. Using Blob instead of just plain C array
+ *  simplifies the resource management in several ways:
+ *  1. When adding new item(s) it automatically grows capacity if needed.
+ *  2. When variable of type Blob comes out of scope it automatically frees the data buffer.
+ *  3. Takes care about the actual data size (number of used items).
+ *  4. Dynamically constructs only used items (as opposite of static array which constructs all items) */
 template <class Titem_, class Tbase_ = CBlobBaseSimple>
 class CBlobT : public Tbase_ {
-	// make template arguments public:
+	/* make template arguments public: */
 public:
 	typedef Titem_ Titem;
 	typedef Tbase_ Tbase;
@@ -418,7 +418,7 @@ public:
 		assert((Tbase::RawSize() % Titem_size) == 0);
 		bsize_t old_size = Size();
 		if (old_size > 0) {
-			// destroy removed items;
+			/* destroy removed items; */
 			Titem *pI_last_to_destroy = Data(0);
 			for (Titem *pI = Data(old_size - 1); pI >= pI_last_to_destroy; pI--) pI->~Titem_();
 		}
@@ -445,10 +445,10 @@ public:
 		bsize_t old_size = Size();
 		assert(num_items <= old_size);
 		bsize_t new_size = (num_items <= old_size) ? (old_size - num_items) : 0;
-		// destroy removed items;
+		/* destroy removed items; */
 		Titem *pI_last_to_destroy = Data(new_size);
 		for (Titem *pI = Data(old_size - 1); pI >= pI_last_to_destroy; pI--) pI->~Titem();
-		// remove them
+		/* remove them */
 		Tbase::ReduceRawSize(num_items * Titem_size);
 	}
 
@@ -482,7 +482,7 @@ public:
 	FORCEINLINE void RemoveBySwap(bsize_t idx)
 	{
 		CheckIdx(idx);
-		// destroy removed item
+		/* destroy removed item */
 		Titem *pRemoved = Data(idx);
 		RemoveBySwap(pRemoved);
 	}
@@ -492,19 +492,19 @@ public:
 	{
 		Titem *pLast = Data(Size() - 1);
 		assert(pItem >= Data() && pItem <= pLast);
-		// move last item to its new place
+		/* move last item to its new place */
 		if (pItem != pLast) {
 			pItem->~Titem_();
 			new (pItem) Titem_(*pLast);
 		}
-		// destroy the last item
+		/* destroy the last item */
 		pLast->~Titem_();
-		// and reduce the raw blob size
+		/* and reduce the raw blob size */
 		Tbase::ReduceRawSize(Titem_size);
 	}
 
 	/** Ensures that given number of items can be added to the end of Blob. Returns pointer to the
-	*  first free (unused) item */
+	 *  first free (unused) item */
 	FORCEINLINE Titem *MakeFreeSpace(bsize_t num_items)
 	{
 		return (Titem*)Tbase::MakeRawFreeSpace(num_items * Titem_size);

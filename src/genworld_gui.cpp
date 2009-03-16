@@ -555,10 +555,9 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 		EventState state;
 		this->HandleEditBoxKey(GLAND_RANDOM_EDITBOX, key, keycode, state);
 		/* the seed is unsigned, therefore atoi cannot be used.
-			* As 2^32 - 1 (UINT32_MAX) is a 'magic' value
-			* (use random seed) it should not be possible to be
-			* entered into the input field; the generate seed
-			* button can be used instead. */
+		 * As UINT32_MAX is a 'magic' value (use random seed) it
+		 * should not be possible to be entered into the input
+		 * field; the generate seed button can be used instead. */
 		_settings_newgame.game_creation.generation_seed = minu(strtoul(this->edit_str_buf, NULL, 10), UINT32_MAX - 1);
 		return state;
 	}
@@ -638,19 +637,19 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 	}
 };
 
-static const WindowDesc _generate_landscape_desc = {
+static const WindowDesc _generate_landscape_desc(
 	WDP_CENTER, WDP_CENTER, 338, 313, 338, 313,
 	WC_GENERATE_LANDSCAPE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_generate_landscape_widgets,
-};
+	_generate_landscape_widgets
+);
 
-static const WindowDesc _heightmap_load_desc = {
+static const WindowDesc _heightmap_load_desc(
 	WDP_CENTER, WDP_CENTER, 338, 236, 338, 236,
 	WC_GENERATE_LANDSCAPE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS,
-	_heightmap_load_widgets,
-};
+	_heightmap_load_widgets
+);
 
 static void _ShowGenerateLandscape(glwp_modes mode)
 {
@@ -886,12 +885,12 @@ static const Widget _create_scenario_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _create_scenario_desc = {
+static const WindowDesc _create_scenario_desc(
 	WDP_CENTER, WDP_CENTER, 338, 170, 338, 170,
 	WC_GENERATE_LANDSCAPE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS,
-	_create_scenario_widgets,
-};
+	_create_scenario_widgets
+);
 
 void ShowCreateScenario()
 {
@@ -907,12 +906,12 @@ static const Widget _generate_progress_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _generate_progress_desc = {
+static const WindowDesc _generate_progress_desc(
 	WDP_CENTER, WDP_CENTER, 181, 97, 181, 97,
 	WC_GENERATE_PROGRESS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_generate_progress_widgets,
-};
+	_generate_progress_widgets
+);
 
 struct tp_info {
 	uint percent;

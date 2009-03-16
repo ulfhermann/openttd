@@ -67,7 +67,7 @@ private:
 
 	/* Constants for sorting the bridges */
 	static const StringID sorter_names[];
-	static GUIBridgeList::SortFunction *const sorter_funcs[];
+	static GUIBridgeList::SortFunction * const sorter_funcs[];
 
 	/* Internal variables */
 	TileIndex start_tile;
@@ -268,12 +268,12 @@ static const Widget _build_bridge_widgets[] = {
 };
 
 /* Window definition for the rail bridge selection window */
-static const WindowDesc _build_bridge_desc = {
+static const WindowDesc _build_bridge_desc(
 	WDP_AUTO, WDP_AUTO, 200, 114, 200, 114,
 	WC_BUILD_BRIDGE, WC_BUILD_TOOLBAR,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	_build_bridge_widgets,
-};
+	_build_bridge_widgets
+);
 
 /**
  * Prepare the data for the build a bridge window.

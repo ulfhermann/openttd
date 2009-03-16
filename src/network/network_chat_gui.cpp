@@ -316,9 +316,9 @@ public:
 			*item = MAX_CLIENT_SLOTS;
 		}
 
-		/* Then, try townnames */
-		/* Not that the following assumes all town indices are adjacent, ie no
-		* towns have been deleted. */
+		/* Then, try townnames
+		 * Not that the following assumes all town indices are adjacent, ie no
+		 * towns have been deleted. */
 		if (*item <= (uint)MAX_CLIENT_SLOTS + GetMaxTownIndex()) {
 			const Town *t;
 
@@ -375,7 +375,7 @@ public:
 
 			if (_chat_tab_completion_active) {
 				/* We are pressing TAB again on the same name, is there an other name
-				*  that starts with this? */
+				 *  that starts with this? */
 				if (!second_scan) {
 					size_t offset;
 					size_t length;
@@ -501,12 +501,12 @@ static const Widget _chat_window_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _chat_window_desc = {
+static const WindowDesc _chat_window_desc(
 	WDP_CENTER, -26, 320, 14, 640, 14, // x, y, width, height
 	WC_SEND_NETWORK_MSG, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET,
-	_chat_window_widgets,
-};
+	_chat_window_widgets
+);
 
 void ShowNetworkChatQueryWindow(DestType type, int dest)
 {

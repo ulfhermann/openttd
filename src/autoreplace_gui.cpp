@@ -207,7 +207,7 @@ public:
 		if (vehicletype == VEH_TRAIN) {
 			this->wagon_btnstate = true;
 			/* The train window is bigger so we will move some of the widgets to fit the new size.
-			* We will start by moving the resize button to the lower right corner.                 */
+			 * We will start by moving the resize button to the lower right corner.                 */
 			widget[RVW_WIDGET_RESIZE].top         = widget[RVW_WIDGET_TRAIN_ENGINEWAGON_TOGGLE].top;
 			widget[RVW_WIDGET_RESIZE].bottom      = widget[RVW_WIDGET_TRAIN_ENGINEWAGON_TOGGLE].bottom;
 			widget[RVW_WIDGET_STOP_REPLACE].right = widget[RVW_WIDGET_RESIZE].right;
@@ -342,7 +342,7 @@ public:
 				this->SetDirty();
 				break;
 
-			case RVW_WIDGET_TRAIN_RAILTYPE_DROPDOWN: { /* Railtype selection dropdown menu */
+			case RVW_WIDGET_TRAIN_RAILTYPE_DROPDOWN: { // Railtype selection dropdown menu
 				const Company *c = GetCompany(_local_company);
 				DropDownList *list = new DropDownList();
 				for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
@@ -355,18 +355,18 @@ public:
 				break;
 			}
 
-			case RVW_WIDGET_TRAIN_WAGONREMOVE_TOGGLE: /* toggle renew_keep_length */
+			case RVW_WIDGET_TRAIN_WAGONREMOVE_TOGGLE: // toggle renew_keep_length
 				DoCommandP(0, 5, GetCompany(_local_company)->renew_keep_length ? 0 : 1, CMD_SET_AUTOREPLACE);
 				break;
 
-			case RVW_WIDGET_START_REPLACE: { /* Start replacing */
+			case RVW_WIDGET_START_REPLACE: { // Start replacing
 				EngineID veh_from = this->sel_engine[0];
 				EngineID veh_to = this->sel_engine[1];
 				DoCommandP(0, 3 + (this->sel_group << 16) , veh_from + (veh_to << 16), CMD_SET_AUTOREPLACE);
 				this->SetDirty();
 			} break;
 
-			case RVW_WIDGET_STOP_REPLACE: { /* Stop replacing */
+			case RVW_WIDGET_STOP_REPLACE: { // Stop replacing
 				EngineID veh_from = this->sel_engine[0];
 				DoCommandP(0, 3 + (this->sel_group << 16), veh_from + (INVALID_ENGINE << 16), CMD_SET_AUTOREPLACE);
 				this->SetDirty();
@@ -421,12 +421,12 @@ public:
 
 		if (delta.x != 0) {
 			/* We changed the width of the window so we have to resize the lists.
-				* Because ResizeButtons() makes each widget the same size it can't be used on the lists
-				* because then the lists would have the same size as the scrollbars.
-				* Instead we use it on the detail panels.
-				* Afterwards we use the new location of the detail panels (the middle of the window)
-				* to place the lists.
-				* This way the lists will have equal size while keeping the width of the scrollbars unchanged. */
+			 * Because ResizeButtons() makes each widget the same size it can't be used on the lists
+			 * because then the lists would have the same size as the scrollbars.
+			 * Instead we use it on the detail panels.
+			 * Afterwards we use the new location of the detail panels (the middle of the window)
+			 * to place the lists.
+			 * This way the lists will have equal size while keeping the width of the scrollbars unchanged. */
 			ResizeButtons(this, RVW_WIDGET_LEFT_DETAILS, RVW_WIDGET_RIGHT_DETAILS);
 			widget[RVW_WIDGET_RIGHT_MATRIX].left    = widget[RVW_WIDGET_RIGHT_DETAILS].left;
 			widget[RVW_WIDGET_LEFT_SCROLLBAR].right = widget[RVW_WIDGET_LEFT_DETAILS].right;
@@ -470,19 +470,19 @@ static const Widget _replace_vehicle_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _replace_rail_vehicle_desc = {
+static const WindowDesc _replace_rail_vehicle_desc(
 	WDP_AUTO, WDP_AUTO, 456, 140, 456, 140,
 	WC_REPLACE_VEHICLE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	_replace_vehicle_widgets,
-};
+	_replace_vehicle_widgets
+);
 
-static const WindowDesc _replace_vehicle_desc = {
+static const WindowDesc _replace_vehicle_desc(
 	WDP_AUTO, WDP_AUTO, 456, 118, 456, 118,
 	WC_REPLACE_VEHICLE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	_replace_vehicle_widgets,
-};
+	_replace_vehicle_widgets
+);
 
 RailType ReplaceVehicleWindow::sel_railtype = RAILTYPE_RAIL;
 
