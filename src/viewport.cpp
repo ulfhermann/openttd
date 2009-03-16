@@ -137,7 +137,7 @@ TileHighlightData _thd;
 static TileInfo *_cur_ti;
 bool _draw_bounding_boxes = false;
 
-static Point MapXYZToViewport(const ViewPort *vp, uint x, uint y, uint z)
+static Point MapXYZToViewport(const ViewPort *vp, int x, int y, int z)
 {
 	Point p = RemapCoords(x, y, z);
 	p.x -= vp->virtual_width / 2;
@@ -817,7 +817,7 @@ static bool IsPartOfAutoLine(int px, int py)
 	}
 }
 
-// [direction][side]
+/* [direction][side] */
 static const HighLightStyle _autorail_type[6][2] = {
 	{ HT_DIR_X,  HT_DIR_X },
 	{ HT_DIR_Y,  HT_DIR_Y },
@@ -900,7 +900,7 @@ static void DrawTileSelection(const TileInfo *ti)
 				}
 			}
 			DrawSelectionSprite(_cur_dpi->zoom <= ZOOM_LVL_DETAIL ? SPR_DOT : SPR_DOT_SMALL, PAL_NONE, ti, z, foundation_part);
-		} else if (_thd.drawstyle & HT_RAIL /*&& _thd.place_mode == VHM_RAIL*/) {
+		} else if (_thd.drawstyle & HT_RAIL /* && _thd.place_mode == VHM_RAIL*/) {
 			/* autorail highlight piece under cursor */
 			uint type = _thd.drawstyle & 0xF;
 			assert(type <= 5);
@@ -2065,10 +2065,12 @@ void PlaceObject()
 
 
 /* scrolls the viewport in a window to a given location */
-bool ScrollWindowTo(int x , int y, Window *w, bool instant)
+bool ScrollWindowTo(int x, int y, int z, Window *w, bool instant)
 {
 	/* The slope cannot be acquired outside of the map, so make sure we are always within the map. */
-	Point pt = MapXYZToViewport(w->viewport, x, y, GetSlopeZ(Clamp(x, 0, MapSizeX() * TILE_SIZE - 1), Clamp(y, 0, MapSizeY() * TILE_SIZE - 1)));
+	if (z == -1) z = GetSlopeZ(Clamp(x, 0, MapSizeX() * TILE_SIZE - 1), Clamp(y, 0, MapSizeY() * TILE_SIZE - 1));
+
+	Point pt = MapXYZToViewport(w->viewport, x, y, z);
 	w->viewport->follow_vehicle = INVALID_VEHICLE;
 
 	if (w->viewport->dest_scrollpos_x == pt.x && w->viewport->dest_scrollpos_y == pt.y)
@@ -2086,7 +2088,7 @@ bool ScrollWindowTo(int x , int y, Window *w, bool instant)
 
 bool ScrollMainWindowToTile(TileIndex tile, bool instant)
 {
-	return ScrollMainWindowTo(TileX(tile) * TILE_SIZE + TILE_SIZE / 2, TileY(tile) * TILE_SIZE + TILE_SIZE / 2, instant);
+	return ScrollMainWindowTo(TileX(tile) * TILE_SIZE + TILE_SIZE / 2, TileY(tile) * TILE_SIZE + TILE_SIZE / 2, -1, instant);
 }
 
 void SetRedErrorSquare(TileIndex tile)
@@ -2251,9 +2253,9 @@ void VpSetPlaceSizingLimit(int limit)
 }
 
 /**
-* Highlights all tiles between a set of two tiles. Used in dock and tunnel placement
-* @param from TileIndex of the first tile to highlight
-* @param to TileIndex of the last tile to highlight */
+ * Highlights all tiles between a set of two tiles. Used in dock and tunnel placement
+ * @param from TileIndex of the first tile to highlight
+ * @param to TileIndex of the last tile to highlight */
 void VpSetPresizeRange(TileIndex from, TileIndex to)
 {
 	uint64 distance = DistanceManhattan(from, to) + 1;
@@ -2338,19 +2340,19 @@ static bool SwapDirection(HighLightStyle style, TileIndex start_tile, TileIndex 
 }
 
 /** Calculates height difference between one tile and another
-* Multiplies the result to suit the standard given by minimap - 50 meters high
-* To correctly get the height difference we need the direction we are dragging
-* in, as well as with what kind of tool we are dragging. For example a horizontal
-* autorail tool that starts in bottom and ends at the top of a tile will need the
-* maximum of SW, S and SE, N corners respectively. This is handled by the lookup table below
-* See _tileoffs_by_dir in map.c for the direction enums if you can't figure out
-* the values yourself.
-* @param style HightlightStyle of drag. This includes direction and style (autorail, rect, etc.)
-* @param distance amount of tiles dragged, important for horizontal/vertical drags
-*        ignored for others
-* @param start_tile, end_tile start and end tile of drag operation
-* @return height difference between two tiles. Tile measurement tool utilizes
-* this value in its tooltips */
+ * Multiplies the result to suit the standard given by minimap - 50 meters high
+ * To correctly get the height difference we need the direction we are dragging
+ * in, as well as with what kind of tool we are dragging. For example a horizontal
+ * autorail tool that starts in bottom and ends at the top of a tile will need the
+ * maximum of SW, S and SE, N corners respectively. This is handled by the lookup table below
+ * See _tileoffs_by_dir in map.c for the direction enums if you can't figure out
+ * the values yourself.
+ * @param style HightlightStyle of drag. This includes direction and style (autorail, rect, etc.)
+ * @param distance amount of tiles dragged, important for horizontal/vertical drags
+ *        ignored for others
+ * @param start_tile, end_tile start and end tile of drag operation
+ * @return height difference between two tiles. Tile measurement tool utilizes
+ * this value in its tooltips */
 static int CalcHeightdiff(HighLightStyle style, uint distance, TileIndex start_tile, TileIndex end_tile)
 {
 	bool swap = SwapDirection(style, start_tile, end_tile);
@@ -2363,8 +2365,8 @@ static int CalcHeightdiff(HighLightStyle style, uint distance, TileIndex start_t
 	switch (style & HT_DRAG_MASK) {
 		case HT_RECT: {
 			static const TileIndexDiffC heightdiff_area_by_dir[] = {
-				/* Start */ {1, 0}, /* Dragging east */ {0, 0}, /* Dragging south */
-				/* End   */ {0, 1}, /* Dragging east */ {1, 1}  /* Dragging south */
+				/* Start */ {1, 0}, /* Dragging east */ {0, 0}, // Dragging south
+				/* End   */ {0, 1}, /* Dragging east */ {1, 1}  // Dragging south
 			};
 
 			/* In the case of an area we can determine whether we were dragging south or
@@ -2378,18 +2380,18 @@ static int CalcHeightdiff(HighLightStyle style, uint distance, TileIndex start_t
 			h0 = TileHeight(start_tile);
 			h1 = TileHeight(end_tile);
 			break;
-		default: { /* All other types, this is mostly only line/autorail */
+		default: { // All other types, this is mostly only line/autorail
 			static const HighLightStyle flip_style_direction[] = {
 				HT_DIR_X, HT_DIR_Y, HT_DIR_HL, HT_DIR_HU, HT_DIR_VR, HT_DIR_VL
 			};
 			static const TileIndexDiffC heightdiff_line_by_dir[] = {
-				/* Start */ {1, 0}, {1, 1}, /* HT_DIR_X  */ {0, 1}, {1, 1}, /* HT_DIR_Y  */
-				/* Start */ {1, 0}, {0, 0}, /* HT_DIR_HU */ {1, 0}, {1, 1}, /* HT_DIR_HL */
-				/* Start */ {1, 0}, {1, 1}, /* HT_DIR_VL */ {0, 1}, {1, 1}, /* HT_DIR_VR */
+				/* Start */ {1, 0}, {1, 1}, /* HT_DIR_X  */ {0, 1}, {1, 1}, // HT_DIR_Y
+				/* Start */ {1, 0}, {0, 0}, /* HT_DIR_HU */ {1, 0}, {1, 1}, // HT_DIR_HL
+				/* Start */ {1, 0}, {1, 1}, /* HT_DIR_VL */ {0, 1}, {1, 1}, // HT_DIR_VR
 
-				/* Start */ {0, 1}, {0, 0}, /* HT_DIR_X  */ {1, 0}, {0, 0}, /* HT_DIR_Y  */
-				/* End   */ {0, 1}, {0, 0}, /* HT_DIR_HU */ {1, 1}, {0, 1}, /* HT_DIR_HL */
-				/* End   */ {1, 0}, {0, 0}, /* HT_DIR_VL */ {0, 0}, {0, 1}, /* HT_DIR_VR */
+				/* Start */ {0, 1}, {0, 0}, /* HT_DIR_X  */ {1, 0}, {0, 0}, // HT_DIR_Y
+				/* End   */ {0, 1}, {0, 0}, /* HT_DIR_HU */ {1, 1}, {0, 1}, // HT_DIR_HL
+				/* End   */ {1, 0}, {0, 0}, /* HT_DIR_VL */ {0, 0}, {0, 1}, // HT_DIR_VR
 			};
 
 			distance %= 2; // we're only interested if the distance is even or uneven
@@ -2471,10 +2473,10 @@ static void CalcRaildirsDrawstyle(TileHighlightData *thd, int x, int y, int meth
 		thd->selend.x = thd->selend.x & ~0xF;
 		thd->selend.y = thd->selend.y & ~0xF;
 
-		// four cases.
+		/* four cases. */
 		if (x > thd->selstart.x) {
 			if (y > thd->selstart.y) {
-				// south
+				/* south */
 				if (d == 0) {
 					b = (x & 0xF) > (y & 0xF) ? HT_LINE | HT_DIR_VL : HT_LINE | HT_DIR_VR;
 				} else if (d >= 0) {
@@ -2486,7 +2488,7 @@ static void CalcRaildirsDrawstyle(TileHighlightData *thd, int x, int y, int meth
 					b = HT_LINE | HT_DIR_VR;
 				} // return px == py || px == py - 16;
 			} else {
-				// west
+				/* west */
 				if (d == 0) {
 					b = (x & 0xF) + (y & 0xF) >= 0x10 ? HT_LINE | HT_DIR_HL : HT_LINE | HT_DIR_HU;
 				} else if (d >= 0) {
@@ -2499,7 +2501,7 @@ static void CalcRaildirsDrawstyle(TileHighlightData *thd, int x, int y, int meth
 			}
 		} else {
 			if (y > thd->selstart.y) {
-				// east
+				/* east */
 				if (d == 0) {
 					b = (x & 0xF) + (y & 0xF) >= 0x10 ? HT_LINE | HT_DIR_HL : HT_LINE | HT_DIR_HU;
 				} else if (d >= 0) {
@@ -2511,7 +2513,7 @@ static void CalcRaildirsDrawstyle(TileHighlightData *thd, int x, int y, int meth
 					b = HT_LINE | HT_DIR_HL;
 				} // return px == -py || px == -py + 16;
 			} else {
-				// north
+				/* north */
 				if (d == 0) {
 					b = (x & 0xF) > (y & 0xF) ? HT_LINE | HT_DIR_VL : HT_LINE | HT_DIR_VR;
 				} else if (d >= 0) {
@@ -2521,7 +2523,7 @@ static void CalcRaildirsDrawstyle(TileHighlightData *thd, int x, int y, int meth
 				} else {
 					y = thd->selstart.y - w;
 					b = HT_LINE | HT_DIR_VL;
-				} //return px == py || px == py + 16;
+				} // return px == py || px == py + 16;
 			}
 		}
 	}
@@ -2588,7 +2590,7 @@ void VpSelectTilesWithMethod(int x, int y, ViewportPlaceMethod method)
 	sy = _thd.selstart.y;
 
 	switch (method) {
-		case VPM_X_OR_Y: /* drag in X or Y direction */
+		case VPM_X_OR_Y: // drag in X or Y direction
 			if (abs(sy - y) < abs(sx - x)) {
 				y = sy;
 				style = HT_DIR_X;
@@ -2597,11 +2599,11 @@ void VpSelectTilesWithMethod(int x, int y, ViewportPlaceMethod method)
 				style = HT_DIR_Y;
 			}
 			goto calc_heightdiff_single_direction;
-		case VPM_FIX_X: /* drag in Y direction */
+		case VPM_FIX_X: // drag in Y direction
 			x = sx;
 			style = HT_DIR_Y;
 			goto calc_heightdiff_single_direction;
-		case VPM_FIX_Y: /* drag in X direction */
+		case VPM_FIX_Y: // drag in X direction
 			y = sy;
 			style = HT_DIR_X;
 
@@ -2628,12 +2630,12 @@ calc_heightdiff_single_direction:;
 				ShowMeasurementTooltips(measure_strings_length[index], index, params);
 			} break;
 
-		case VPM_X_AND_Y_LIMITED: { /* drag an X by Y constrained rect area */
+		case VPM_X_AND_Y_LIMITED: { // drag an X by Y constrained rect area
 			int limit = (_thd.sizelimit - 1) * TILE_SIZE;
 			x = sx + Clamp(x - sx, -limit, limit);
 			y = sy + Clamp(y - sy, -limit, limit);
-			} /* Fallthrough */
-		case VPM_X_AND_Y: { /* drag an X by Y area */
+			} // Fallthrough
+		case VPM_X_AND_Y: { // drag an X by Y area
 			if (_settings_client.gui.measure_tooltip) {
 				static const StringID measure_strings_area[] = {
 					STR_NULL, STR_NULL, STR_MEASURE_AREA, STR_MEASURE_AREA_HEIGHTDIFF

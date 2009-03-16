@@ -65,6 +65,8 @@ Please include the following information in your bug report:
           version without the bug and the first version including
           the bug. That way we can fix it quicker by looking at the
           changes made.
+        - Attach crash.dmp, crash.log and crash.sav from the data
+          directory if they exist.
 
 2.2) Reporting Desyncs:
 ---- ------------------
@@ -251,9 +253,11 @@ features known from TTDPatch (http://www.ttdpatch.net/).
 
 Several important non-standard controls:
 
-* Use Ctrl to place semaphore signals
+* Ctrl makes much commands more powerful. For example Ctrl clicking on signals
+  with the build signal tool on signals changes their behaviour.
 * Ingame console. More information at
   http://wiki.openttd.org/index.php/Console
+* Right clicking shows tooltips
 
 
 5.1) Logging of potentially dangerous actions:
@@ -291,6 +295,9 @@ OpenTTD in debug mode.
 The configuration file for OpenTTD (openttd.cfg) is in a simple Windows-like
 .INI format. It's mostly undocumented. Almost all settings can be changed
 ingame by using the 'Advanced Settings' window.
+When you can not find openttd.cfg you should look in the directories as
+described in section 4.2. If you do not have an openttd.cfg OpenTTD will
+create one after closing.
 
 
 7.0) Compiling:
@@ -467,26 +474,27 @@ The OpenTTD team (in alphabetical order):
   Matthijs Kooijman (blathijs)   - Pathfinder-guru, pool rework
   Victor Fischer (Celestar)      - Programming everywhere you need him to
   Christoph Elsenhans (frosch)   - General coding
-  Loïc Guilloux (glx)            - General coding
-  Jaroslav Mazanec (KUDr)        - YAPG (Yet Another Pathfinder God) ;)
-  Jonathan Coome (Maedhros)      - High priest of the NewGRF Temple
+  Loïc Guilloux (glx)            - Windows Expert
   Michael Lutz (michi_cc)        - Path based signals
-  Attila Bán (MiHaMiX)           - WebTranslator, Nightlies, Wiki and bugtracker host
   Owen Rudge (orudge)            - Forum host, OS/2 port
   Peter Nelson (peter1138)       - Spiritual descendant from newGRF gods
   Remko Bijker (Rubidium)        - Lead coder and way more
-  Benedikt Brüggemeier (skidd13) - Bug fixer and code reworker
   Zdenek Sojka (SmatZ)           - Bug finder and fixer
+  Thijs Marinussen (Yexo)        - AI Framework
 
 Inactive Developers:
   Tamás Faragó (Darkvater)       - Ex-Lead coder
+  Jaroslav Mazanec (KUDr)        - YAPG (Yet Another Pathfinder God) ;)
+  Jonathan Coome (Maedhros)      - High priest of the NewGRF Temple
+  Attila Bán (MiHaMiX)           - WebTranslator, Nightlies, Wiki and bugtracker host
   Christoph Mallon (Tron)        - Programmer, code correctness police
 
 Retired Developers:
   Ludvig Strigeus (ludde)        - OpenTTD author, main coder (0.1 - 0.3.3)
   Serge Paquet (vurlix)          - Assistant project manager, coder (0.1 - 0.3.3)
   Dominik Scherer (dominik81)    - Lead programmer, GUI expert (0.3.0 - 0.3.6)
-  Patric Stout (TrueLight)       - Programmer, webhoster (0.3 - pre0.6)
+  Benedikt Brüggemeier (skidd13) - Bug fixer and code reworker
+  Patric Stout (TrueLight)       - Programmer, webhoster (0.3 - pre0.7)
 
 Thanks to:
   Josef Drexler                  - For his great work on TTDPatch.

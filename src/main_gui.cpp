@@ -121,8 +121,8 @@ void ShowNetworkGiveMoneyWindow(CompanyID company)
 #endif /* ENABLE_NETWORK */
 
 
-/* Zooms a viewport in a window in or out */
-/* No button handling or what so ever */
+/* Zooms a viewport in a window in or out
+ * No button handling or what so ever */
 bool DoZoomInOutWindow(int how, Window *w)
 {
 	ViewPort *vp;
@@ -176,7 +176,7 @@ void ZoomInOrOutToCursorWindow(bool in, Window *w)
 
 		Point pt = GetTileZoomCenterWindow(in, w);
 		if (pt.x != -1) {
-			ScrollWindowTo(pt.x, pt.y, w, true);
+			ScrollWindowTo(pt.x, pt.y, -1, w, true);
 
 			DoZoomInOutWindow(in ? ZOOM_IN : ZOOM_OUT, w);
 		}
@@ -219,9 +219,9 @@ struct MainWindow : Window
 		}
 
 		/* Disable all key shortcuts, except quit shortcuts when
-		* generating the world, otherwise they create threading
-		* problem during the generating, resulting in random
-		* assertions that are hard to trigger and debug */
+		 * generating the world, otherwise they create threading
+		 * problem during the generating, resulting in random
+		 * assertions that are hard to trigger and debug */
 		if (IsGeneratingWorld()) return ES_NOT_HANDLED;
 
 		if (keycode == WKC_BACKQUOTE) {

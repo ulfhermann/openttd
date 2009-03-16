@@ -255,7 +255,7 @@ struct GameOptionsWindow : Window {
 	virtual void OnDropdownSelect(int widget, int index)
 	{
 		switch (widget) {
-			case GAMEOPT_CURRENCY_BTN: /* Currency */
+			case GAMEOPT_CURRENCY_BTN: // Currency
 				if (index == CUSTOM_CURRENCY_ID) ShowCustCurrency();
 				this->opt->locale.currency = index;
 				MarkWholeScreenDirty();
@@ -352,12 +352,12 @@ static const Widget _game_options_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _game_options_desc = {
+static const WindowDesc _game_options_desc(
 	WDP_CENTER, WDP_CENTER, 370, 243, 370, 243,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_game_options_widgets,
-};
+	_game_options_widgets
+);
 
 
 void ShowGameOptions()
@@ -386,12 +386,12 @@ static const Widget _game_difficulty_widgets[] = {
 };
 
 /* Window definition for the game difficulty settings window */
-static const WindowDesc _game_difficulty_desc = {
+static const WindowDesc _game_difficulty_desc(
 	WDP_CENTER, WDP_CENTER, 370, 279, 370, 279,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_game_difficulty_widgets,
-};
+	_game_difficulty_widgets
+);
 
 void SetDifficultyLevel(int mode, DifficultySettings *gm_opt);
 
@@ -485,7 +485,7 @@ public:
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case GDW_SETTING_BG: { /* Difficulty settings widget, decode click */
+			case GDW_SETTING_BG: { // Difficulty settings widget, decode click
 				/* Don't allow clients to make any changes */
 				if (_networking && !_network_server) return;
 
@@ -1431,12 +1431,12 @@ static const Widget _settings_selection_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _settings_selection_desc = {
+static const WindowDesc _settings_selection_desc(
 	WDP_CENTER, WDP_CENTER, 412, 188, 450, 397,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_RESIZABLE,
-	_settings_selection_widgets,
-};
+	_settings_selection_widgets
+);
 
 void ShowGameSettings()
 {
@@ -1627,7 +1627,7 @@ struct CustomCurrencyWindow : Window {
 				_custom_currency.rate = Clamp(atoi(str), 1, UINT16_MAX);
 				break;
 
-			case CUSTCURR_SEPARATOR: /* Thousands seperator */
+			case CUSTCURR_SEPARATOR: // Thousands seperator
 				_custom_currency.separator = StrEmpty(str) ? ' ' : str[0];
 				strecpy(this->separator, str, lastof(this->separator));
 				break;
@@ -1640,7 +1640,7 @@ struct CustomCurrencyWindow : Window {
 				strecpy(_custom_currency.suffix, str, lastof(_custom_currency.suffix));
 				break;
 
-			case CUSTCURR_TO_EURO: { /* Year to switch to euro */
+			case CUSTCURR_TO_EURO: { // Year to switch to euro
 				int val = atoi(str);
 
 				_custom_currency.to_euro = (val < 2000 ? CF_NOEURO : min(val, MAX_YEAR));
@@ -1664,12 +1664,12 @@ static const Widget _cust_currency_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _cust_currency_desc = {
+static const WindowDesc _cust_currency_desc(
 	WDP_CENTER, WDP_CENTER, 230, 120, 230, 120,
 	WC_CUSTOM_CURRENCY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_cust_currency_widgets,
-};
+	_cust_currency_widgets
+);
 
 static void ShowCustCurrency()
 {

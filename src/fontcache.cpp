@@ -38,7 +38,7 @@ enum {
  * If no appropiate font is found, the function returns an error */
 #ifdef WIN32
 #include <windows.h>
-#include <shlobj.h> // SHGetFolderPath
+#include <shlobj.h> /* SHGetFolderPath */
 #include "win32.h"
 
 /**
@@ -376,8 +376,8 @@ static FT_Error GetFontByFaceName(const char *font_name, FT_Face *face)
 					if (font_style != NULL && strcasecmp(font_style, (char*)style) != 0) continue;
 
 					/* Font config takes the best shot, which, if the family name is spelled
-					* wrongly a 'random' font, so check whether the family name is the
-					* same as the supplied name */
+					 * wrongly a 'random' font, so check whether the family name is the
+					 * same as the supplied name */
 					if (strcasecmp(font_family, (char*)family) == 0) {
 						err = FT_New_Face(_library, (char *)file, 0, face);
 					}
@@ -713,7 +713,7 @@ const Sprite *GetGlyph(FontSize size, WChar key)
 	sprite.width = width;
 	sprite.height = height;
 	sprite.x_offs = slot->bitmap_left;
-	// XXX 2 should be determined somehow... it's right for the normal face
+	/* XXX 2 should be determined somehow... it's right for the normal face */
 	y_adj = (size == FS_NORMAL) ? 2 : 0;
 	sprite.y_offs = GetCharacterHeight(size) - slot->bitmap_top - y_adj;
 

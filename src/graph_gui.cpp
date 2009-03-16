@@ -98,12 +98,12 @@ static const Widget _graph_legend_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _graph_legend_desc = {
+static const WindowDesc _graph_legend_desc(
 	WDP_AUTO, WDP_AUTO, 250, 198, 250, 198,
 	WC_GRAPH_LEGEND, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_graph_legend_widgets,
-};
+	_graph_legend_widgets
+);
 
 static void ShowGraphLegend()
 {
@@ -125,8 +125,8 @@ protected:
 
 		GRAPH_NUM_LINES_Y = 9, ///< How many horizontal lines to draw.
 		/* 9 is convenient as that means the distance between them is the gd_height of the graph / 8,
-		* which is the same
-		* as height >> 3. */
+		 * which is the same
+		 * as height >> 3. */
 	};
 
 	uint excluded_data; ///< bitmask of the datasets that shouldn't be displayed.
@@ -159,7 +159,7 @@ protected:
 		int x_axis_offset;               ///< Distance from the top of the graph to the x axis.
 
 		/* the colours and cost array of GraphDrawer must accomodate
-		* both values for cargo and companies. So if any are higher, quit */
+		 * both values for cargo and companies. So if any are higher, quit */
 		assert(GRAPH_MAX_DATASETS >= (int)NUM_CARGO && GRAPH_MAX_DATASETS >= (int)MAX_COMPANIES);
 		assert(this->num_vert_lines > 0);
 
@@ -209,9 +209,9 @@ protected:
 		assert(this->num_dataset > 0);
 
 		/* Start of with a value of twice the gd_height of the graph in pixels. It's a
-		* bit arbitrary, but it makes the cargo payment graph look a little nicer,
-		* and prevents division by zero when calculating where the datapoint
-		* should be drawn. */
+		 * bit arbitrary, but it makes the cargo payment graph look a little nicer,
+		 * and prevents division by zero when calculating where the datapoint
+		 * should be drawn. */
 		highest_value = x_axis_offset * 2;
 
 		for (int i = 0; i < this->num_dataset; i++) {
@@ -221,8 +221,8 @@ protected:
 
 					if (datapoint != INVALID_DATAPOINT) {
 						/* For now, if the graph has negative values the scaling is
-						* symmetrical about the x axis, so take the absolute value
-						* of each data point. */
+						 * symmetrical about the x axis, so take the absolute value
+						 * of each data point. */
 						highest_value = max(highest_value, abs(datapoint));
 					}
 				}
@@ -230,7 +230,7 @@ protected:
 		}
 
 		/* Round up highest_value so that it will divide cleanly into the number of
-		* axis labels used. */
+		 * axis labels used. */
 		int round_val = highest_value % (GRAPH_NUM_LINES_Y - 1);
 		if (round_val != 0) highest_value += (GRAPH_NUM_LINES_Y - 1 - round_val);
 
@@ -239,7 +239,7 @@ protected:
 		int64 y_label_separation = highest_value / (GRAPH_NUM_LINES_Y - 1);
 
 		/* If there are negative values, the graph goes from highest_value to
-		* -highest_value, not highest_value to 0. */
+		 * -highest_value, not highest_value to 0. */
 		if (this->has_negative_values) y_label_separation *= 2;
 
 		x = this->gd_left + GRAPH_X_POSITION_BEGINNING + 1;
@@ -303,16 +303,16 @@ protected:
 
 					if (datapoint != INVALID_DATAPOINT) {
 						/*
-						* Check whether we need to reduce the 'accuracy' of the
-						* datapoint value and the highest value to splut overflows.
-						* And when 'drawing' 'one million' or 'one million and one'
-						* there is no significant difference, so the least
-						* significant bits can just be removed.
-						*
-						* If there are more bits needed than would fit in a 32 bits
-						* integer, so at about 31 bits because of the sign bit, the
-						* least significant bits are removed.
-						*/
+						 * Check whether we need to reduce the 'accuracy' of the
+						 * datapoint value and the highest value to splut overflows.
+						 * And when 'drawing' 'one million' or 'one million and one'
+						 * there is no significant difference, so the least
+						 * significant bits can just be removed.
+						 *
+						 * If there are more bits needed than would fit in a 32 bits
+						 * integer, so at about 31 bits because of the sign bit, the
+						 * least significant bits are removed.
+						 */
 						int mult_range = FindLastBit(x_axis_offset) + FindLastBit(abs(datapoint));
 						int reduce_range = max(mult_range - 31, 0);
 
@@ -439,12 +439,12 @@ static const Widget _operating_profit_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _operating_profit_desc = {
+static const WindowDesc _operating_profit_desc(
 	WDP_AUTO, WDP_AUTO, 576, 174, 576, 174,
 	WC_OPERATING_PROFIT, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_operating_profit_widgets,
-};
+	_operating_profit_widgets
+);
 
 
 void ShowOperatingProfitGraph()
@@ -478,12 +478,12 @@ static const Widget _income_graph_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _income_graph_desc = {
+static const WindowDesc _income_graph_desc(
 	WDP_AUTO, WDP_AUTO, 576, 142, 576, 142,
 	WC_INCOME_GRAPH, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_income_graph_widgets,
-};
+	_income_graph_widgets
+);
 
 void ShowIncomeGraph()
 {
@@ -515,12 +515,12 @@ static const Widget _delivered_cargo_graph_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _delivered_cargo_graph_desc = {
+static const WindowDesc _delivered_cargo_graph_desc(
 	WDP_AUTO, WDP_AUTO, 576, 142, 576, 142,
 	WC_DELIVERED_CARGO, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_delivered_cargo_graph_widgets,
-};
+	_delivered_cargo_graph_widgets
+);
 
 void ShowDeliveredCargoGraph()
 {
@@ -559,12 +559,12 @@ static const Widget _performance_history_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _performance_history_desc = {
+static const WindowDesc _performance_history_desc(
 	WDP_AUTO, WDP_AUTO, 576, 238, 576, 238,
 	WC_PERFORMANCE_HISTORY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_performance_history_widgets,
-};
+	_performance_history_widgets
+);
 
 void ShowPerformanceHistoryGraph()
 {
@@ -596,12 +596,12 @@ static const Widget _company_value_graph_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _company_value_graph_desc = {
+static const WindowDesc _company_value_graph_desc(
 	WDP_AUTO, WDP_AUTO, 576, 238, 576, 238,
 	WC_COMPANY_VALUE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_company_value_graph_widgets,
-};
+	_company_value_graph_widgets
+);
 
 void ShowCompanyValueGraph()
 {
@@ -720,12 +720,12 @@ static const Widget _cargo_payment_rates_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _cargo_payment_rates_desc = {
+static const WindowDesc _cargo_payment_rates_desc(
 	WDP_AUTO, WDP_AUTO, 568, 46, 568, 46,
 	WC_PAYMENT_RATES, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_cargo_payment_rates_widgets,
-};
+	_cargo_payment_rates_widgets
+);
 
 
 void ShowCargoPaymentRates()
@@ -843,12 +843,12 @@ static const Widget _company_league_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _company_league_desc = {
+static const WindowDesc _company_league_desc(
 	WDP_AUTO, WDP_AUTO, 400, 167, 400, 167,
 	WC_COMPANY_LEAGUE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON,
-	_company_league_widgets,
-};
+	_company_league_widgets
+);
 
 void ShowCompanyLeagueTable()
 {
@@ -1008,7 +1008,7 @@ public:
 			if (i == SCORE_LOAN) val = needed - val;
 
 			/* Draw the amount we have against what is needed
-				* For some of them it is in currency format */
+			 * For some of them it is in currency format */
 			SetDParam(0, val);
 			SetDParam(1, needed);
 			switch (i) {
@@ -1088,12 +1088,12 @@ static const Widget _performance_rating_detail_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _performance_rating_detail_desc = {
+static const WindowDesc _performance_rating_detail_desc(
 	WDP_AUTO, WDP_AUTO, 299, 241, 299, 241,
 	WC_PERFORMANCE_DETAIL, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_performance_rating_detail_widgets,
-};
+	_performance_rating_detail_widgets
+);
 
 void ShowPerformanceRatingDetail()
 {

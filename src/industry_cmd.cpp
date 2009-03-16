@@ -1720,11 +1720,11 @@ enum {
 
 static const byte _numof_industry_table[NB_DIFFICULTY_LEVEL][NB_NUMOFINDUSTRY] = {
 	/* difficulty settings for number of industries */
-	{0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0},   //none
-	{0, 1, 1, 1, 1, 1, 1, 1,  1,  1,  1},   //very low
-	{0, 1, 1, 1, 2, 2, 3, 3,  4,  4,  5},   //low
-	{0, 1, 2, 3, 4, 5, 6, 7,  8,  9, 10},   //normal
-	{0, 2, 3, 4, 6, 7, 8, 9, 10, 10, 10},   //high
+	{0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0},   // none
+	{0, 1, 1, 1, 1, 1, 1, 1,  1,  1,  1},   // very low
+	{0, 1, 1, 1, 2, 2, 3, 3,  4,  4,  5},   // low
+	{0, 1, 2, 3, 4, 5, 6, 7,  8,  9, 10},   // normal
+	{0, 2, 3, 4, 6, 7, 8, 9, 10, 10, 10},   // high
 };
 
 /** This function is the one who really do the creation work
@@ -1848,7 +1848,7 @@ struct ProbabilityHelper {
  */
 static void MaybeNewIndustry(void)
 {
-	Industry *ind;               //will receive the industry's creation pointer
+	Industry *ind;               // will receive the industry's creation pointer
 	IndustryType rndtype, j;     // Loop controlers
 	const IndustrySpec *ind_spc;
 	uint num = 0;
@@ -1921,14 +1921,14 @@ static bool CheckIndustryCloseDownProtection(IndustryType type)
 }
 
 /**
-* Can given cargo type be accepted or produced by the industry?
-* @param cargo: Cargo type
-* @param ind: Industry
-* @param *c_accepts: Pointer to boolean for acceptance of cargo
-* @param *c_produces: Pointer to boolean for production of cargo
-* @return: \c *c_accepts is set when industry accepts the cargo type,
-*          \c *c_produces is set when the industry produces the cargo type
-*/
+ * Can given cargo type be accepted or produced by the industry?
+ * @param cargo: Cargo type
+ * @param ind: Industry
+ * @param *c_accepts: Pointer to boolean for acceptance of cargo
+ * @param *c_produces: Pointer to boolean for production of cargo
+ * @return: \c *c_accepts is set when industry accepts the cargo type,
+ *          \c *c_produces is set when the industry produces the cargo type
+ */
 static void CanCargoServiceIndustry(CargoID cargo, Industry *ind, bool *c_accepts, bool *c_produces)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(ind->type);
@@ -1959,18 +1959,18 @@ static void CanCargoServiceIndustry(CargoID cargo, Industry *ind, bool *c_accept
 }
 
 /**
-* Compute who can service the industry.
-*
-* Here, 'can service' means that he/she has trains and stations close enough
-* to the industry with the right cargo type and the right orders (ie has the
-* technical means).
-*
-* @param ind: Industry being investigated.
-*
-* @return: 0 if nobody can service the industry, 2 if the local company can
-* service the industry, and 1 otherwise (only competitors can service the
-* industry)
-*/
+ * Compute who can service the industry.
+ *
+ * Here, 'can service' means that he/she has trains and stations close enough
+ * to the industry with the right cargo type and the right orders (ie has the
+ * technical means).
+ *
+ * @param ind: Industry being investigated.
+ *
+ * @return: 0 if nobody can service the industry, 2 if the local company can
+ * service the industry, and 1 otherwise (only competitors can service the
+ * industry)
+ */
 int WhoCanServiceIndustry(Industry *ind)
 {
 	/* Find all stations within reach of the industry */
@@ -2024,12 +2024,12 @@ int WhoCanServiceIndustry(Industry *ind)
 }
 
 /**
-* Report news that industry production has changed significantly
-*
-* @param ind: Industry with changed production
-* @param type: Cargo type that has changed
-* @param percent: Percentage of change (>0 means increase, <0 means decrease)
-*/
+ * Report news that industry production has changed significantly
+ *
+ * @param ind: Industry with changed production
+ * @param type: Cargo type that has changed
+ * @param percent: Percentage of change (>0 means increase, <0 means decrease)
+ */
 static void ReportNewsProductionChangeIndustry(Industry *ind, CargoID type, int percent)
 {
 	NewsSubtype ns;
@@ -2377,18 +2377,18 @@ static CommandCost TerraformTile_Industry(TileIndex tile, DoCommandFlag flags, u
 }
 
 extern const TileTypeProcs _tile_type_industry_procs = {
-	DrawTile_Industry,           /* draw_tile_proc */
-	GetSlopeZ_Industry,          /* get_slope_z_proc */
-	ClearTile_Industry,          /* clear_tile_proc */
-	GetAcceptedCargo_Industry,   /* get_accepted_cargo_proc */
-	GetTileDesc_Industry,        /* get_tile_desc_proc */
-	GetTileTrackStatus_Industry, /* get_tile_track_status_proc */
-	ClickTile_Industry,          /* click_tile_proc */
-	AnimateTile_Industry,        /* animate_tile_proc */
-	TileLoop_Industry,           /* tile_loop_proc */
-	ChangeTileOwner_Industry,    /* change_tile_owner_proc */
-	GetProducedCargo_Industry,   /* get_produced_cargo_proc */
-	NULL,                        /* vehicle_enter_tile_proc */
-	GetFoundation_Industry,      /* get_foundation_proc */
-	TerraformTile_Industry,      /* terraform_tile_proc */
+	DrawTile_Industry,           // draw_tile_proc
+	GetSlopeZ_Industry,          // get_slope_z_proc
+	ClearTile_Industry,          // clear_tile_proc
+	GetAcceptedCargo_Industry,   // get_accepted_cargo_proc
+	GetTileDesc_Industry,        // get_tile_desc_proc
+	GetTileTrackStatus_Industry, // get_tile_track_status_proc
+	ClickTile_Industry,          // click_tile_proc
+	AnimateTile_Industry,        // animate_tile_proc
+	TileLoop_Industry,           // tile_loop_proc
+	ChangeTileOwner_Industry,    // change_tile_owner_proc
+	GetProducedCargo_Industry,   // get_produced_cargo_proc
+	NULL,                        // vehicle_enter_tile_proc
+	GetFoundation_Industry,      // get_foundation_proc
+	TerraformTile_Industry,      // terraform_tile_proc
 };

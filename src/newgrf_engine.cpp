@@ -122,7 +122,8 @@ const GRFFile *GetEngineGRF(EngineID engine)
  */
 uint32 GetEngineGRFID(EngineID engine)
 {
-	return GetEngineGRF(engine)->grfid;
+	const GRFFile *file = GetEngineGRF(engine);
+	return file == NULL ? 0 : file->grfid;
 }
 
 
@@ -500,6 +501,9 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 
 	/* Calculated vehicle parameters */
 	switch (variable) {
+		case 0x25: // Get engine GRF ID
+			return GetEngineGRFID(v->engine_type);
+
 		case 0x40: // Get length of consist
 			if (!HasBit(v->cache_valid, 0)) {
 				v->cached_var40 = PositionHelper(v, false);
@@ -1044,8 +1048,8 @@ static void DoTriggerVehicle(Vehicle *v, VehicleTrigger trigger, byte base_rando
 	switch (trigger) {
 		case VEHICLE_TRIGGER_NEW_CARGO:
 			/* All vehicles in chain get ANY_NEW_CARGO trigger now.
-			 * So we call it for the first one and they will recurse. */
-			/* Indexing part of vehicle random bits needs to be
+			 * So we call it for the first one and they will recurse.
+			 * Indexing part of vehicle random bits needs to be
 			 * same for all triggered vehicles in the chain (to get
 			 * all the random-cargo wagons carry the same cargo,
 			 * i.e.), so we give them all the NEW_CARGO triggered
