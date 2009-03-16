@@ -2860,13 +2860,13 @@ static void UpdateStationStats(Station * st) {
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID id = i->first;
 			if (!IsValidStationID(id)) {
-				links.erase(i++);
+				links.erase(i--);
 			} else {
 				LinkStat & ls = i->second;
 				ls *= length;
 				ls /= (length + 1);
 				if (ls.capacity == 0) {
-					links.erase(i++);
+					links.erase(i--);
 				}
 			}
 		}
