@@ -16,6 +16,7 @@ currency.cpp
 date.cpp
 debug.cpp
 dedicated.cpp
+demands.cpp
 depot.cpp
 driver.cpp
 economy.cpp
@@ -159,6 +160,7 @@ currency.h
 date_func.h
 date_type.h
 debug.h
+demands.h
 video/dedicated_v.h
 depot_base.h
 depot_func.h
@@ -468,6 +470,7 @@ saveload/depot_sl.cpp
 saveload/economy_sl.cpp
 saveload/engine_sl.cpp
 saveload/gamelog_sl.cpp
+saveload/graph_sl.cpp
 saveload/group_sl.cpp
 saveload/industry_sl.cpp
 saveload/map_sl.cpp

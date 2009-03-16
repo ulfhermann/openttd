@@ -8,7 +8,7 @@
 #ifndef DEMANDS_H_
 #define DEMANDS_H_
 
-#include "cargodist.h"
+#include "stdafx.h"
 #include "cargo_type.h"
 #include "map_func.h"
 
@@ -21,18 +21,18 @@ enum DistributionType {
 
 class DemandCalculator {
 public:
-	DemandCalculator(CargoID pCargo) : cargo(pCargo) {
+	DemandCalculator(CargoID c) : cargo(c) {
 		if (maxDistance == 0) maxDistance = MapSizeX() + MapSizeY();
 	}
-	void calcDemands(CargoDistGraph & graph) {
+	void calcDemands(Component & graph) {
 		calcSymmetric(graph);
 		printDemandMatrix(graph);
 	}
-	void printDemandMatrix(CargoDistGraph & graph);
+	void printDemandMatrix(Component & graph);
 private:
 	CargoID cargo;
 	static uint maxDistance;
-	void calcSymmetric(CargoDistGraph & graph);
+	void calcSymmetric(Component & graph);
 };
 
 #endif /* DEMANDS_H_ */

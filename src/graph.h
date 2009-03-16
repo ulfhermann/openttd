@@ -53,6 +53,33 @@ private:
 
 extern Graph _link_graphs[NUM_CARGO];
 
+typedef InitNode Node;
+
+class Component {
+	typedef std::vector<Node> NodeVector;
+
+	typedef std::vector<std::vector<Edge> > EdgeMatrix;
+
+public:
+	CargoDistGraph(uint numNodes);
+	CargoDistGraph(const InitNodeList & pNodes, const InitEdgeList & pEdges, uint numNodes);
+	Edge & edge(uint from, uint to) {
+		return edges[from][to];
+	}
+
+	Node & node(uint num) {
+		return nodes[num];
+	}
+
+	uint size() const {return numNodes;}
+	void setSize(uint size);
+private:
+	uint numNodes;
+	NodeVector nodes;
+	EdgeMatrix edges;
+
+};
+
 
 
 
