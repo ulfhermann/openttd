@@ -801,8 +801,11 @@ public:
 				FOR_ALL_STATIONS(stb) {
 					const LinkStatMap & links = stb->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
-
-						const Station *sta = GetStation(i->first);
+						StationID id = i->first;
+						if (!IsValidStationID(id)) {
+							continue; // dead link
+						}
+						const Station *sta = GetStation(id);
 
 
 						if (sta->owner != _local_company && IsValidCompanyID(sta->owner)) continue;
@@ -834,8 +837,6 @@ public:
 						uint usageDisplay = usage / 10;
 						uint capacity = (float)ls.capacity / monthScale;
 						uint capacityDisplay = capacity / 10;
-
-
 
 						Point ptm;
 

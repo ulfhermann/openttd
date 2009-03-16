@@ -2858,9 +2858,14 @@ static void UpdateStationStats(Station * st) {
 		good.supply /= (length + 1);
 		LinkStatMap & links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
-			LinkStat & ls = i->second;
-			ls *= length;
-			ls /= (length + 1);
+			StationID id = i->first;
+			if (!IsValidStationID(id)) {
+				links.erase(i--);
+			} else {
+				LinkStat & ls = i->second;
+				ls *= length;
+				ls /= (length + 1);
+			}
 		}
 	}
 }
