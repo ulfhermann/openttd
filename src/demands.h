@@ -24,15 +24,15 @@ public:
 	DemandCalculator(CargoID c) : cargo(c) {
 		if (maxDistance == 0) maxDistance = MapSizeX() + MapSizeY();
 	}
-	void calcDemands(Component & graph) {
+	void CalcDemands(Component & graph) {
 		calcSymmetric(graph);
 		printDemandMatrix(graph);
 	}
-	void printDemandMatrix(Component & graph);
+	void PrintDemandMatrix(Component & graph);
 private:
 	CargoID cargo;
-	static uint maxDistance;
-	void calcSymmetric(Component & graph);
+	static uint max_distance;
+	void CalcSymmetric(Component & graph);
 };
 
 #endif /* DEMANDS_H_ */
