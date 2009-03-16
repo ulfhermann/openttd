@@ -24,7 +24,7 @@
 #include "openttd.h"
 #include "company_func.h"
 #include "station_base.h"
-#include "graph.h"
+#include "linkgraph.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"

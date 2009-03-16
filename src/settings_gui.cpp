@@ -1130,6 +1130,7 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.smooth_economy"),
 	SettingEntry("economy.moving_average_unit"),
 	SettingEntry("economy.moving_average_length"),
+	SettingEntry("economy.linkgraph_recalc_interval"),
 };
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};
