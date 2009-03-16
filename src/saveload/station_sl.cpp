@@ -122,7 +122,7 @@ static const SaveLoad _station_speclist_desc[] = {
 static StationID _station_id;
 
 static const SaveLoad _linkstat_desc[] = {
-		SLEG_CONDVAR(            _station_id,         SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
+	       SLEG_CONDVAR(            _station_id,         SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLE_END()
