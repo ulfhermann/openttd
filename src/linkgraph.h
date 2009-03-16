@@ -31,8 +31,6 @@ public:
 	uint capacity;
 };
 
-
-
 typedef ushort colour;
 
 class Component {
@@ -43,13 +41,9 @@ class Component {
 public:
 	Component(uint size, uint join, colour c);
 	Component(colour c);
-	Edge & GetEdge(uint from, uint to) {
-		return edges[from][to];
-	}
+	Edge & GetEdge(uint from, uint to) {return edges[from][to];}
 
-	Node & GetNode(uint num) {
-		return nodes[num];
-	}
+	Node & GetNode(uint num) {return nodes[num];}
 
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
@@ -92,9 +86,5 @@ private:
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
-
-
-
-
 
 #endif /* LINKGRAPH_H_ */
