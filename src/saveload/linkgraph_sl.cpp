@@ -94,8 +94,8 @@ static void Load_LGRP()
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		for (uint i = 0; i < _num_components; ++i) {
 			Component * comp = new Component(cargo);
-			comp->SetSize(comp->GetSize());
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
+			comp->SetSize(comp->GetSize());
 			SaveLoad_Component(comp);
 			graph.AddComponent(comp);
 		}
