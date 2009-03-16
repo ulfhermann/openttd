@@ -33,9 +33,6 @@ public:
 	uint demand;
 };
 
-
-
-
 void SpawnComponentThread(void * handlers);
 
 typedef ushort colour;
@@ -48,13 +45,9 @@ class Component {
 public:
 	Component(uint size, uint join, colour c);
 	Component(colour c);
-	Edge & GetEdge(uint from, uint to) {
-		return edges[from][to];
-	}
+	Edge & GetEdge(uint from, uint to) {return edges[from][to];}
 
-	Node & GetNode(uint num) {
-		return nodes[num];
-	}
+	Node & GetNode(uint num) {return nodes[num];}
 
 	void Join() {thread->Join();}
 	uint GetSize() const {return num_nodes;}
@@ -96,7 +89,6 @@ private:
 	HandlerList handlers;
 };
 
-
 class LinkGraph {
 public:
 	LinkGraph();
@@ -120,6 +112,5 @@ private:
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
-
 
 #endif /* LINKGRAPH_H_ */
