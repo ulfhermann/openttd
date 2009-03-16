@@ -43,11 +43,11 @@ class Component {
 public:
 	Component(uint size, uint join, colour c);
 	Component(colour c);
-	Edge & edge(uint from, uint to) {
+	Edge & GetEdge(uint from, uint to) {
 		return edges[from][to];
 	}
 
-	Node & node(uint num) {
+	Node & GetNode(uint num) {
 		return nodes[num];
 	}
 

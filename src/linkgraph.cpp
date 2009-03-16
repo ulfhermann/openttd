@@ -165,7 +165,7 @@ bool LinkGraph::Join() {
 	components.pop_front();
 
 	for(uint i = 0; i < comp->GetSize(); ++i) {
-		Node & node = comp->node(i);
+		Node & node = comp->GetNode(i);
 		StationID id = node.station;
 		station_colours[id] += USHRT_MAX / 2;
 		if (id < current_station) current_station = id;
@@ -177,6 +177,6 @@ void LinkGraph::AddComponent(Component * component) {
 	 components.push_back(component);
 	 colour component_colour = component->GetColour();
 	 for(uint i = 0; i < component->GetSize(); ++i) {
-		 station_colours[component->node(i).station] = component_colour;
+		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
 }
