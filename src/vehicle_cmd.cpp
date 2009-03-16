@@ -513,9 +513,9 @@ CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool s
 		CommandCost ret = DoCommand(v->tile, v->index, (service ? 1 : 0) | DEPOT_DONT_CANCEL, flags, GetCmdSendToDepot(type));
 
 		/* Return 0 if DC_EXEC is not set this is a valid goto depot command)
-			* In this case we know that at least one vehicle can be sent to a depot
-			* and we will issue the command. We can now safely quit the loop, knowing
-			* it will succeed at least once. With DC_EXEC we really need to send them to the depot */
+		 * In this case we know that at least one vehicle can be sent to a depot
+		 * and we will issue the command. We can now safely quit the loop, knowing
+		 * it will succeed at least once. With DC_EXEC we really need to send them to the depot */
 		if (CmdSucceeded(ret) && !(flags & DC_EXEC)) {
 			return CommandCost();
 		}
@@ -563,7 +563,7 @@ CommandCost CmdRenameVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
  */
 CommandCost CmdChangeServiceInt(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	uint16 serv_int = GetServiceIntervalClamped(p2); /* Double check the service interval from the user-input */
+	uint16 serv_int = GetServiceIntervalClamped(p2); // Double check the service interval from the user-input
 
 	if (serv_int != p2 || !IsValidVehicleID(p1)) return CMD_ERROR;
 

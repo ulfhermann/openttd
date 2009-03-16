@@ -151,7 +151,7 @@ static void TownDrawHouseLift(const TileInfo *ti)
 }
 
 typedef void TownDrawTileProc(const TileInfo *ti);
-static TownDrawTileProc *const _town_draw_tile_procs[1] = {
+static TownDrawTileProc * const _town_draw_tile_procs[1] = {
 	TownDrawHouseLift
 };
 
@@ -1128,7 +1128,7 @@ static void GrowTownInTile(TileIndex *tile_ptr, RoadBits cur_rb, DiagDirection t
 			switch (t1->layout) {
 				default: NOT_REACHED();
 
-				case TL_3X3_GRID: /* Use 2x2 grid afterwards! */
+				case TL_3X3_GRID: // Use 2x2 grid afterwards!
 					GrowTownWithExtraHouse(t1, TileAddByDiagDir(house_tile, target_dir));
 					/* FALL THROUGH */
 
@@ -1137,7 +1137,7 @@ static void GrowTownInTile(TileIndex *tile_ptr, RoadBits cur_rb, DiagDirection t
 					allow_house = (rcmd == ROAD_NONE);
 					break;
 
-				case TL_BETTER_ROADS: /* Use original afterwards! */
+				case TL_BETTER_ROADS: // Use original afterwards!
 					GrowTownWithExtraHouse(t1, TileAddByDiagDir(house_tile, target_dir));
 					/* FALL THROUGH */
 
@@ -1374,15 +1374,16 @@ extern int _nb_orig_names;
  * Speeds things up a bit because these values are computed only once per name generation.
  */
 struct TownNameParams {
-	bool grf;            ///< true iff a newgrf is used to generate town name
 	uint32 grfid;        ///< newgrf ID
 	uint16 townnametype; ///< town name style
+	bool grf;            ///< true iff a newgrf is used to generate town name
 
-	TownNameParams(byte town_name) :
-		grf(town_name >= _nb_orig_names),
-		grfid(this->grf ? GetGRFTownNameId(town_name - _nb_orig_names) : 0),
-		townnametype(this->grf ? GetGRFTownNameType(town_name - _nb_orig_names) : SPECSTR_TOWNNAME_START + town_name)
-	{ }
+	TownNameParams(byte town_name)
+	{
+		this->grf = town_name >= _nb_orig_names;
+		this->grfid = this->grf ? GetGRFTownNameId(town_name - _nb_orig_names) : 0;
+		this->townnametype = this->grf ? GetGRFTownNameType(town_name - _nb_orig_names) : SPECSTR_TOWNNAME_START + town_name;
+	}
 };
 
 /**
@@ -2330,7 +2331,7 @@ static void TownActionBribe(Town *t)
 }
 
 typedef void TownActionProc(Town *t);
-static TownActionProc *const _town_action_proc[] = {
+static TownActionProc * const _town_action_proc[] = {
 	TownActionAdvertiseSmall,
 	TownActionAdvertiseMedium,
 	TownActionAdvertiseLarge,
