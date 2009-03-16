@@ -1,4 +1,4 @@
-/* $Id: saveload.h 15584 2009-02-25 21:45:14Z yexo $ */
+/* $Id$ */
 
 /** @file saveload.h Functions/types related to saving and loading games. */
 
