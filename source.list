@@ -30,11 +30,11 @@ gamelog.cpp
 genworld.cpp
 gfx.cpp
 gfxinit.cpp
-graph.cpp
 heightmap.cpp
 highscore.cpp
 ini.cpp
 landscape.cpp
+linkgraph.cpp
 map.cpp
 md5.cpp
 minilzo.cpp
@@ -190,7 +190,6 @@ genworld.h
 gfx_func.h
 gfx_type.h
 gfxinit.h
-graph.h
 group.h
 group_gui.h
 group_type.h
@@ -202,6 +201,7 @@ industry_type.h
 ini_type.h
 landscape.h
 landscape_type.h
+linkgraph.h
 livery.h
 lzoconf.h
 map_func.h
@@ -473,6 +473,7 @@ saveload/gamelog_sl.cpp
 saveload/graph_sl.cpp
 saveload/group_sl.cpp
 saveload/industry_sl.cpp
+saveload/linkgraph_sl.cpp
 saveload/map_sl.cpp
 saveload/misc_sl.cpp
 saveload/newgrf_sl.cpp
