@@ -22,9 +22,8 @@ typedef std::map<StationID, uint> ReverseNodeIndex;
 bool LinkGraph::NextComponent()
 {
 	ReverseNodeIndex index;
-	uint numNodes = 0;
-	uint num = 0;
-	std::queue<Station *> searchQueue;
+	uint node = 0;
+	std::queue<Station *> search_queue;
 	Component * component = NULL;
 	while (true) {
 		// find first station of next component
@@ -35,11 +34,11 @@ bool LinkGraph::NextComponent()
 				if (++current_colour == USHRT_MAX / 2) {
 					current_colour = 0;
 				}
-				searchQueue.push(station);
+				search_queue.push(station);
 				station_colours[current_station] = current_colour;
 				component = new Component(current_colour);
-				num = component->AddNode(current_station, station->goods[cargo].supply);
-				index[current_station++] = num;
+				node = component->AddNode(current_station, station->goods[cargo].supply);
+				index[current_station++] = node;
 				break; // found a station
 			}
 		}
@@ -49,26 +48,25 @@ bool LinkGraph::NextComponent()
 		}
 	}
 	// find all stations belonging to the current component
-	while(!searchQueue.empty()) {
-		Station * target = searchQueue.front();
-		StationID targetID = target->index;
-		searchQueue.pop();
+	while(!search_queue.empty()) {
+		Station * target = search_queue.front();
+		StationID target_id = target->index;
+		search_queue.pop();
 		GoodsEntry & good = target->goods[cargo];
-		numNodes++;
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
-			StationID sourceID = i->first;
+			StationID source_id = i->first;
 			Station * source = GetStation(i->first);
-			LinkStat & linkStat = i->second;
-			if (station_colours[sourceID] != current_colour) {
-				station_colours[sourceID] = current_colour;
-				searchQueue.push(source);
-				num = component->AddNode(sourceID, source->goods[cargo].supply);
-				index[sourceID] = num;
+			LinkStat & link_stat = i->second;
+			if (station_colours[source_id] != current_colour) {
+				station_colours[source_id] = current_colour;
+				search_queue.push(source);
+				node = component->AddNode(source_id, source->goods[cargo].supply);
+				index[source_id] = node;
 			} else {
-				num = index[sourceID];
+				node = index[source_id];
 			}
-			component->AddEdge(num, index[targetID], linkStat.capacity);
+			component->AddEdge(node, index[target_id], link_stat.capacity);
 		}
 	}
 	// here the list of nodes and edges for this component is complete.
