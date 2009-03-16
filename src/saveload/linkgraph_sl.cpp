@@ -7,9 +7,6 @@
 #include "../linkgraph.h"
 #include "saveload.h"
 
-
-
-static uint _num_nodes;
 static uint _num_components;
 
 enum {
@@ -64,11 +61,11 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 
 
 static void SaveLoad_Component(Component * comp) {
-	for (uint from = 0; from < _num_nodes; ++from) {
-		SlObject(&comp->node(from), GetLinkGraphDesc(LGRP_NODE));
+	for (uint from = 0; from < comp->GetSize(); ++from) {
+		SlObject(&comp->GetNode(from), GetLinkGraphDesc(LGRP_NODE));
 		for (uint to = 0; to < from; ++to) {
-			SlObject(&comp->edge(from, to), GetLinkGraphDesc(LGRP_EDGE));
-			SlObject(&comp->edge(to, from), GetLinkGraphDesc(LGRP_EDGE));
+			SlObject(&comp->GetEdge(from, to), GetLinkGraphDesc(LGRP_EDGE));
+			SlObject(&comp->GetEdge(to, from), GetLinkGraphDesc(LGRP_EDGE));
 		}
 	}
 }
@@ -97,8 +94,8 @@ static void Load_LGRP()
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		for (uint i = 0; i < _num_components; ++i) {
 			Component * comp = new Component(cargo);
+			comp->SetSize(comp->GetSize());
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
-			comp->SetSize(_num_nodes);
 			SaveLoad_Component(comp);
 			graph.AddComponent(comp);
 		}
