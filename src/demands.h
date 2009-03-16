@@ -33,6 +33,7 @@ private:
 	CargoID cargo;
 	uint max_distance;
 	void CalcSymmetric(Component * graph);
+	void CalcAntiSymmetric(Component * graph);
 };
 
 #endif /* DEMANDS_H_ */
