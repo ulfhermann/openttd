@@ -76,7 +76,7 @@ void UpdateNetworkGameWindow(bool unselect)
 enum NetworkGameWindowWidgets {
 	NGWW_CLOSE,         ///< Close 'X' button
 	NGWW_CAPTION,       ///< Caption of the window
-	NGWW_RESIZE,        ///< Resize button
+	NGWW_MAIN,          ///< Main panel
 
 	NGWW_CONNECTION,    ///< Label in from of connection droplist
 	NGWW_CONN_BTN,      ///< 'Connection' droplist button
@@ -104,6 +104,8 @@ enum NetworkGameWindowWidgets {
 	NGWW_ADD,           ///< 'Add server' button
 	NGWW_START,         ///< 'Start server' button
 	NGWW_CANCEL,        ///< 'Cancel' button
+
+	NGWW_RESIZE,        ///< Resize button
 };
 
 typedef GUIList<NetworkGameList*> GUIGameServerList;
@@ -116,7 +118,7 @@ protected:
 	static Listing last_sorting;
 
 	/* Constants for sorting servers */
-	static GUIGameServerList::SortFunction *const sorter_funcs[];
+	static GUIGameServerList::SortFunction * const sorter_funcs[];
 
 	byte field;                  ///< selected text-field
 	NetworkGameList *server;     ///< selected server
@@ -713,8 +715,8 @@ public:
 		SetVScrollCount(this, this->servers.Length());
 
 		/* Additional colums in server list */
-		if (this->width > NetworkGameWindow::MIN_EXTRA_COLUMNS_WIDTH + GetWidgetWidth(NGWW_MAPSIZE)
-				+ GetWidgetWidth(NGWW_DATE) + GetWidgetWidth(NGWW_YEARS)) {
+		if (this->width > NetworkGameWindow::MIN_EXTRA_COLUMNS_WIDTH + GetWidgetWidth(NGWW_MAPSIZE) +
+				GetWidgetWidth(NGWW_DATE) + GetWidgetWidth(NGWW_YEARS)) {
 			/* show columns 'Map size', 'Date' and 'Years' */
 			this->SetWidgetsHiddenState(false, NGWW_MAPSIZE, NGWW_DATE, NGWW_YEARS, WIDGET_LIST_END);
 			AlignWidgetRight(NGWW_YEARS,   NGWW_INFO);
@@ -758,7 +760,7 @@ public:
 };
 
 Listing NetworkGameWindow::last_sorting = {false, 5};
-GUIGameServerList::SortFunction *const NetworkGameWindow::sorter_funcs[] = {
+GUIGameServerList::SortFunction * const NetworkGameWindow::sorter_funcs[] = {
 	&NGameNameSorter,
 	&NGameClientSorter,
 	&NGameMapSizeSorter,
@@ -772,7 +774,7 @@ static const Widget _network_game_window_widgets[] = {
 /* TOP */
 {   WWT_CLOSEBOX,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,     0,    10,     0,    13, STR_00C5,                         STR_018B_CLOSE_WINDOW},            // NGWW_CLOSE
 {    WWT_CAPTION,   RESIZE_RIGHT,  COLOUR_LIGHT_BLUE,    11,   449,     0,    13, STR_NETWORK_MULTIPLAYER,          STR_NULL},                         // NGWW_CAPTION
-{      WWT_PANEL,   RESIZE_RB,     COLOUR_LIGHT_BLUE,     0,   449,    14,   263, 0x0,                              STR_NULL},                         // NGWW_RESIZE
+{      WWT_PANEL,   RESIZE_RB,     COLOUR_LIGHT_BLUE,     0,   449,    14,   263, 0x0,                              STR_NULL},                         // NGWW_MAIN
 
 {       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,     9,    85,    23,    35, STR_NETWORK_CONNECTION,           STR_NULL},                         // NGWW_CONNECTION
 { WWT_DROPDOWNIN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,    90,   181,    22,    33, STR_NETWORK_LAN_INTERNET_COMBO,   STR_NETWORK_CONNECTION_TIP},       // NGWW_CONN_BTN
@@ -806,17 +808,17 @@ static const Widget _network_game_window_widgets[] = {
 { WWT_PUSHTXTBTN,   RESIZE_TB,     COLOUR_WHITE,        226,   326,   246,   257, STR_NETWORK_START_SERVER,         STR_NETWORK_START_SERVER_TIP},     // NGWW_START
 { WWT_PUSHTXTBTN,   RESIZE_TB,     COLOUR_WHITE,        334,   434,   246,   257, STR_012E_CANCEL,                  STR_NULL},                         // NGWW_CANCEL
 
-{  WWT_RESIZEBOX,   RESIZE_LRTB,   COLOUR_LIGHT_BLUE,   438,   449,   252,   263, 0x0,                              STR_RESIZE_BUTTON },
+{  WWT_RESIZEBOX,   RESIZE_LRTB,   COLOUR_LIGHT_BLUE,   438,   449,   252,   263, 0x0,                              STR_RESIZE_BUTTON },               // NGWW_RESIZE
 
 {   WIDGETS_END},
 };
 
-static const WindowDesc _network_game_window_desc = {
+static const WindowDesc _network_game_window_desc(
 	WDP_CENTER, WDP_CENTER, 450, 264, 780, 264,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_network_game_window_widgets,
-};
+	_network_game_window_widgets
+);
 
 void ShowNetworkGameWindow()
 {
@@ -828,7 +830,7 @@ void ShowNetworkGameWindow()
 		char * const *srv;
 
 		first = false;
-		// add all servers from the config file to our list
+		/* add all servers from the config file to our list */
 		for (srv = &_network_host_list[0]; srv != endof(_network_host_list) && *srv != NULL; srv++) {
 			NetworkAddServer(*srv);
 		}
@@ -1028,7 +1030,7 @@ struct NetworkStartServerWindow : public QueryStringBaseWindow {
 			case NSSW_LOAD: // Load game
 				_is_network_server = true;
 				/* XXX - WC_NETWORK_WINDOW (this window) should stay, but if it stays, it gets
-				* copied all the elements of 'load game' and upon closing that, it segfaults */
+				 * copied all the elements of 'load game' and upon closing that, it segfaults */
 				delete this;
 				ShowSaveLoadDialog(SLD_LOAD_GAME);
 				break;
@@ -1135,12 +1137,12 @@ static const Widget _network_start_server_window_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _network_start_server_window_desc = {
+static const WindowDesc _network_start_server_window_desc(
 	WDP_CENTER, WDP_CENTER, 420, 244, 420, 244,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_network_start_server_window_widgets,
-};
+	_network_start_server_window_widgets
+);
 
 static void ShowNetworkStartServerWindow()
 {
@@ -1361,12 +1363,12 @@ static const Widget _network_lobby_window_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _network_lobby_window_desc = {
+static const WindowDesc _network_lobby_window_desc(
 	WDP_CENTER, WDP_CENTER, 420, 235, 420, 235,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_network_lobby_window_widgets,
-};
+	_network_lobby_window_widgets
+);
 
 /* Show the networklobbywindow with the selected server
  * @param ngl Selected game pointer which is passed to the new window */
@@ -1391,16 +1393,16 @@ NetworkCompanyInfo *GetLobbyCompanyInfo(CompanyID company)
 	return (lobby != NULL && company < MAX_COMPANIES) ? &lobby->company_info[company] : NULL;
 }
 
-// The window below gives information about the connected clients
-//  and also makes able to give money to them, kick them (if server)
-//  and stuff like that.
+/* The window below gives information about the connected clients
+ *  and also makes able to give money to them, kick them (if server)
+ *  and stuff like that. */
 
 extern void DrawCompanyIcon(CompanyID cid, int x, int y);
 
-// Every action must be of this form
+/* Every action must be of this form */
 typedef void ClientList_Action_Proc(byte client_no);
 
-// Max 10 actions per client
+/* Max 10 actions per client */
 #define MAX_CLIENTLIST_ACTION 10
 
 enum {
@@ -1422,14 +1424,14 @@ static const Widget _client_list_popup_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _client_list_desc = {
+static const WindowDesc _client_list_desc(
 	WDP_AUTO, WDP_AUTO, 250, 1, 250, 1,
 	WC_CLIENT_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON,
-	_client_list_widgets,
-};
+	_client_list_widgets
+);
 
-// Finds the Xth client-info that is active
+/* Finds the Xth client-info that is active */
 static const NetworkClientInfo *NetworkFindClientInfo(byte client_no)
 {
 	const NetworkClientInfo *ci;
@@ -1442,7 +1444,7 @@ static const NetworkClientInfo *NetworkFindClientInfo(byte client_no)
 	return NULL;
 }
 
-// Here we start to define the options out of the menu
+/* Here we start to define the options out of the menu */
 static void ClientList_Kick(byte client_no)
 {
 	const NetworkClientInfo *ci = NetworkFindClientInfo(client_no);
@@ -1576,7 +1578,7 @@ struct NetworkClientListPopupWindow : Window {
 	{
 		int num = 0;
 
-		// Find the amount of actions
+		/* Find the amount of actions */
 		for (int i = 0; i < MAX_CLIENTLIST_ACTION; i++) {
 			if (this->action[i][0] == '\0') continue;
 			if (this->proc[i] == NULL) continue;
@@ -1677,7 +1679,7 @@ struct NetworkClientListWindow : Window
 
 		/* If height is changed */
 		if (this->height != CLNWND_OFFSET + num + 1) {
-			// XXX - magic unfortunately; (num + 2) has to be one bigger than heigh (num + 1)
+			/* XXX - magic unfortunately; (num + 2) has to be one bigger than heigh (num + 1) */
 			this->SetDirty();
 			this->widget[3].bottom = this->widget[3].top + num + 2;
 			this->height = CLNWND_OFFSET + num + 1;
@@ -1778,7 +1780,7 @@ void ShowNetworkNeedPassword(NetworkPasswordType npt)
 	ShowQueryString(STR_EMPTY, caption, 20, 180, FindWindowById(WC_NETWORK_STATUS_WINDOW, 0), CS_ALPHANUMERAL, QSF_NONE);
 }
 
-// Vars needed for the join-GUI
+/* Vars needed for the join-GUI */
 NetworkJoinStatus _network_join_status;
 uint8 _network_join_waiting;
 uint32 _network_join_bytes;
@@ -1812,7 +1814,7 @@ struct NetworkJoinStatusWindow : Window {
 				SetDParam(1, _network_join_bytes_total);
 				DrawStringCentered(125, 46, STR_NETWORK_CONNECTING_DOWNLOADING, TC_GREY);
 				/* Fallthrough */
-			default: /* Waiting is 15%, so the resting receivement of map is maximum 70% */
+			default: // Waiting is 15%, so the resting receivement of map is maximum 70%
 				progress = 15 + _network_join_bytes * (100 - 15) / _network_join_bytes_total;
 		}
 
@@ -1822,7 +1824,7 @@ struct NetworkJoinStatusWindow : Window {
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		if (widget == 2) { //Disconnect button
+		if (widget == 2) { // Disconnect button
 			NetworkDisconnect();
 			SwitchToMode(SM_MENU);
 			ShowNetworkGameWindow();
@@ -1847,12 +1849,12 @@ static const Widget _network_join_status_window_widget[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _network_join_status_window_desc = {
+static const WindowDesc _network_join_status_window_desc(
 	WDP_CENTER, WDP_CENTER, 250, 85, 250, 85,
 	WC_NETWORK_STATUS_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_MODAL,
-	_network_join_status_window_widget,
-};
+	_network_join_status_window_widget
+);
 
 void ShowJoinStatusWindow()
 {
@@ -1960,12 +1962,12 @@ static const Widget _ncp_window_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _ncp_window_desc = {
+static const WindowDesc _ncp_window_desc(
 	WDP_AUTO, WDP_AUTO, 300, 63, 300, 63,
 	WC_COMPANY_PASSWORD_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
-	_ncp_window_widgets,
-};
+	_ncp_window_widgets
+);
 
 void ShowNetworkCompanyPasswordWindow(Window *parent)
 {

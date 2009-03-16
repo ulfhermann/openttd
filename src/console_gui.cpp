@@ -204,7 +204,7 @@ struct IConsoleWindow : Window
 		const int scroll_height = (this->height / ICON_LINE_HEIGHT) - 1;
 		switch (keycode) {
 			case WKC_UP:
-				IConsoleHistoryNavigate(+1);
+				IConsoleHistoryNavigate(1);
 				this->SetDirty();
 				break;
 
@@ -317,12 +317,12 @@ static const Widget _iconsole_window_widgets[] = {
 	{WIDGETS_END}
 };
 
-static const WindowDesc _iconsole_window_desc = {
+static const WindowDesc _iconsole_window_desc(
 	0, 0, 2, 2, 2, 2,
 	WC_CONSOLE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_iconsole_window_widgets,
-};
+	_iconsole_window_widgets
+);
 
 void IConsoleGUIInit()
 {

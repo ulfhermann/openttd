@@ -267,8 +267,8 @@ struct NewsWindow : Window {
 
 			case 0:
 				if (this->ni->flags & NF_VEHICLE) {
-					Vehicle *v = GetVehicle(this->ni->data_a);
-					ScrollMainWindowTo(v->x_pos, v->y_pos);
+					const Vehicle *v = GetVehicle(this->ni->data_a);
+					ScrollMainWindowTo(v->x_pos, v->y_pos, v->z_pos);
 				} else if (this->ni->flags & NF_TILE) {
 					if (_ctrl_pressed) {
 						ShowExtraViewPortWindow(this->ni->data_a);
@@ -325,12 +325,12 @@ static const Widget _news_type13_widgets[] = {
 {   WIDGETS_END},
 };
 
-static WindowDesc _news_type13_desc = {
+static WindowDesc _news_type13_desc(
 	WDP_CENTER, 476, 430, 170, 430, 170,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type13_widgets,
-};
+	_news_type13_widgets
+);
 
 static const Widget _news_type2_widgets[] = {
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_WHITE,     0,   429,     0,   129, 0x0, STR_NULL},
@@ -338,12 +338,12 @@ static const Widget _news_type2_widgets[] = {
 {   WIDGETS_END},
 };
 
-static WindowDesc _news_type2_desc = {
+static WindowDesc _news_type2_desc(
 	WDP_CENTER, 476, 430, 130, 430, 130,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type2_widgets,
-};
+	_news_type2_widgets
+);
 
 static const Widget _news_type0_widgets[] = {
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_LIGHT_BLUE,     0,   279,    14,    86, 0x0,              STR_NULL},
@@ -353,12 +353,12 @@ static const Widget _news_type0_widgets[] = {
 {   WIDGETS_END},
 };
 
-static WindowDesc _news_type0_desc = {
+static WindowDesc _news_type0_desc(
 	WDP_CENTER, 476, 280, 87, 280, 87,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type0_widgets,
-};
+	_news_type0_widgets
+);
 
 
 /** Open up an own newspaper window for the news item */
@@ -773,12 +773,12 @@ static const Widget _message_history_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _message_history_desc = {
+static const WindowDesc _message_history_desc(
 	240, 22, 400, 140, 400, 140,
 	WC_MESSAGE_HISTORY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_message_history_widgets,
-};
+	_message_history_widgets
+);
 
 /** Display window with news messages history */
 void ShowMessageHistory()
@@ -843,7 +843,7 @@ struct MessageOptionsWindow : Window {
 		/* Draw the string of each setting on each button. */
 		for (int i = 0, y = 26; i < NT_END; i++, y += 12) {
 			/* 51 comes from 13 + 89 (left and right of the button)+1, shiefted by one as to get division,
-				* which will give centered position */
+			 * which will give centered position */
 			DrawStringCentered(51, y + 1, _message_opt[_news_type_data[i].display], TC_BLACK);
 		}
 	}
@@ -890,28 +890,28 @@ struct MessageOptionsWindow : Window {
 
 
 /*
-* The news settings window widgets
-*
-* Main part of the window is a list of news-setting lines, one for each news category.
-* Each line is constructed by an expansion of the \c NEWS_SETTINGS_LINE macro
-*/
+ * The news settings window widgets
+ *
+ * Main part of the window is a list of news setting lines, one for each news category.
+ * Each line is constructed by an expansion of the \c NEWS_SETTINGS_LINE macro
+ */
 
 /**
-* Macro to construct one news-setting line in the news-settings window.
-* One line consists of four widgets, namely
-* - A [<] button
-* - A [...] label
-* - A [>] button
-* - A text label describing the news category
-* Horizontal positions of the widgets are hard-coded, vertical start position is (\a basey + \a linenum * \c NEWS_SETTING_BASELINE_SKIP).
-* Height of one line is 12, with the text label shifted 1 pixel down.
-*
-* First line should be widget number WIDGET_NEWSOPT_START_OPTION
-*
-* @param basey: Base Y coordinate
-* @param linenum: Count, news-setting is the \a linenum-th line
-* @param text: StringID for the text label to display
-*/
+ * Macro to construct one news setting line in the news - settings window.
+ * One line consists of four widgets, namely
+ * - A [<] button
+ * - A [...] label
+ * - A [>] button
+ * - A text label describing the news category
+ * Horizontal positions of the widgets are hard coded, vertical start position is (\a basey + \a linenum * \c NEWS_SETTING_BASELINE_SKIP).
+ * Height of one line is 12, with the text label shifted 1 pixel down.
+ *
+ * First line should be widget number WIDGET_NEWSOPT_START_OPTION
+ *
+ * @param basey: Base Y coordinate
+ * @param linenum: Count, news - setting is the \a linenum - th line
+ * @param text: StringID for the text label to display
+ */
 #define NEWS_SETTINGS_LINE(basey, linenum, text) \
 	{ WWT_PUSHIMGBTN, RESIZE_NONE, COLOUR_YELLOW, \
 	    4,  12,  basey     + linenum * NEWS_SETTING_BASELINE_SKIP,  basey + 11 + linenum * NEWS_SETTING_BASELINE_SKIP, \
@@ -982,13 +982,13 @@ NEWS_SETTINGS_LINE(26, NT_GENERAL,          STR_020F_GENERAL_INFORMATION),
 {   WIDGETS_END},
 };
 
-static const WindowDesc _message_options_desc = {
+static const WindowDesc _message_options_desc(
 	270,  22,  410,  65 + NT_END * NEWS_SETTING_BASELINE_SKIP,
 	           410,  65 + NT_END * NEWS_SETTING_BASELINE_SKIP,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_message_options_widgets,
-};
+	_message_options_widgets
+);
 
 void ShowMessageOptions()
 {

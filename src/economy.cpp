@@ -190,7 +190,7 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 			do {
 				min_income = min(min_income, cee->income + cee->expenses);
 				max_income = max(max_income, cee->income + cee->expenses);
-			} while (++cee,--numec);
+			} while (++cee, --numec);
 
 			if (min_income > 0) {
 				_score_part[owner][SCORE_MIN_INCOME] = ClampToI32(min_income);
@@ -212,7 +212,7 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 			total_delivered = 0;
 			do {
 				total_delivered += cee->delivered_cargo;
-			} while (++cee,--numec);
+			} while (++cee, --numec);
 
 			_score_part[owner][SCORE_DELIVERED] = total_delivered;
 		}
@@ -332,7 +332,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 		if (new_owner != INVALID_OWNER) {
 			if (HasBit(t->have_ratings, old_owner)) {
 				if (HasBit(t->have_ratings, new_owner)) {
-					// use max of the two ratings.
+					/* use max of the two ratings. */
 					t->ratings[new_owner] = max(t->ratings[new_owner], t->ratings[old_owner]);
 				} else {
 					SetBit(t->have_ratings, new_owner);
@@ -962,7 +962,7 @@ struct FoundRoute {
 
 static void FindSubsidyPassengerRoute(FoundRoute *fr)
 {
-	Town *from,*to;
+	Town *from, *to;
 
 	fr->distance = UINT_MAX;
 
@@ -1062,13 +1062,13 @@ static void SubsidyMonthlyHandler()
 	for (s = _subsidies; s != endof(_subsidies); s++) {
 		if (s->cargo_type == CT_INVALID) continue;
 
-		if (s->age == 12-1) {
+		if (s->age == 12 - 1) {
 			pair = SetupSubsidyDecodeParam(s, 1);
 			AddNewsItem(STR_202E_OFFER_OF_SUBSIDY_EXPIRED, NS_SUBSIDIES, pair.a, pair.b);
 			s->cargo_type = CT_INVALID;
 			modified = true;
 			AI::BroadcastNewEvent(new AIEventSubsidyOfferExpired(s - _subsidies));
-		} else if (s->age == 2*12-1) {
+		} else if (s->age == 2 * 12 - 1) {
 			st = GetStation(s->to);
 			if (st->owner == _local_company) {
 				pair = SetupSubsidyDecodeParam(s, 1);
@@ -1083,7 +1083,7 @@ static void SubsidyMonthlyHandler()
 	}
 
 	/* 25% chance to go on */
-	if (Chance16(1,4)) {
+	if (Chance16(1, 4)) {
 		/*  Find a free slot*/
 		s = _subsidies;
 		while (s->cargo_type != CT_INVALID) {
@@ -1514,7 +1514,7 @@ void VehiclePayment(Vehicle *front_v)
 	}
 
 	/* Call the production machinery of industries only once for every vehicle chain */
-	const Industry *const *isend = industry_set.End();
+	const Industry * const *isend = industry_set.End();
 	for (Industry **iid = industry_set.Begin(); iid != isend; iid++) {
 		TriggerIndustryProduction(*iid);
 	}
@@ -1734,7 +1734,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	if (anything_loaded || anything_unloaded) {
 		if (_settings_game.order.gradual_loading) {
 			/* The time it takes to load one 'slice' of cargo or passengers depends
-			* on the vehicle type - the values here are those found in TTDPatch */
+			 * on the vehicle type - the values here are those found in TTDPatch */
 			const uint gradual_loading_wait_time[] = { 40, 20, 10, 20 };
 
 			unloading_time = gradual_loading_wait_time[v->type];
@@ -1889,8 +1889,8 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 {
 	CommandCost cost(EXPENSES_OTHER);
 
-	/* Check if buying shares is allowed (protection against modified clients) */
-	/* Cannot buy own shares */
+	/* Check if buying shares is allowed (protection against modified clients)
+	 * Cannot buy own shares */
 	if (!IsValidCompanyID((CompanyID)p1) || !_settings_game.economy.allow_shares || _current_company == (CompanyID)p1) return CMD_ERROR;
 
 	Company *c = GetCompany((CompanyID)p1);
@@ -1909,7 +1909,7 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 		OwnerByte *b = c->share_owners;
 		int i;
 
-		while (*b != COMPANY_SPECTATOR) b++; /* share owners is guaranteed to contain at least one COMPANY_SPECTATOR */
+		while (*b != COMPANY_SPECTATOR) b++; // share owners is guaranteed to contain at least one COMPANY_SPECTATOR
 		*b = _current_company;
 
 		for (i = 0; c->share_owners[i] == _current_company;) {
@@ -1932,8 +1932,8 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
  */
 CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	/* Check if selling shares is allowed (protection against modified clients) */
-	/* Cannot sell own shares */
+	/* Check if selling shares is allowed (protection against modified clients)
+	 * Cannot sell own shares */
 	if (!IsValidCompanyID((CompanyID)p1) || !_settings_game.economy.allow_shares || _current_company == (CompanyID)p1) return CMD_ERROR;
 
 	Company *c = GetCompany((CompanyID)p1);

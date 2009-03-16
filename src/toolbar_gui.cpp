@@ -948,33 +948,33 @@ static void SplitToolbar(Window *w)
 typedef void MenuClickedProc(int index);
 
 static MenuClickedProc * const _menu_clicked_procs[] = {
-	NULL,                 /* 0 */
-	NULL,                 /* 1 */
-	MenuClickSettings,    /* 2 */
-	MenuClickSaveLoad,    /* 3 */
-	MenuClickMap,         /* 4 */
-	MenuClickTown,        /* 5 */
-	MenuClickSubsidies,   /* 6 */
-	MenuClickStations,    /* 7 */
-	MenuClickFinances,    /* 8 */
-	MenuClickCompany,     /* 9 */
-	MenuClickGraphs,      /* 10 */
-	MenuClickLeague,      /* 11 */
-	MenuClickIndustry,    /* 12 */
-	MenuClickShowTrains,  /* 13 */
-	MenuClickShowRoad,    /* 14 */
-	MenuClickShowShips,   /* 15 */
-	MenuClickShowAir,     /* 16 */
-	MenuClickMap,         /* 17 */
-	NULL,                 /* 18 */
-	MenuClickBuildRail,   /* 19 */
-	MenuClickBuildRoad,   /* 20 */
-	MenuClickBuildWater,  /* 21 */
-	MenuClickBuildAir,    /* 22 */
-	MenuClickForest,      /* 23 */
-	MenuClickMusicWindow, /* 24 */
-	MenuClickNewspaper,   /* 25 */
-	MenuClickHelp,        /* 26 */
+	NULL,                 // 0
+	NULL,                 // 1
+	MenuClickSettings,    // 2
+	MenuClickSaveLoad,    // 3
+	MenuClickMap,         // 4
+	MenuClickTown,        // 5
+	MenuClickSubsidies,   // 6
+	MenuClickStations,    // 7
+	MenuClickFinances,    // 8
+	MenuClickCompany,     // 9
+	MenuClickGraphs,      // 10
+	MenuClickLeague,      // 11
+	MenuClickIndustry,    // 12
+	MenuClickShowTrains,  // 13
+	MenuClickShowRoad,    // 14
+	MenuClickShowShips,   // 15
+	MenuClickShowAir,     // 16
+	MenuClickMap,         // 17
+	NULL,                 // 18
+	MenuClickBuildRail,   // 19
+	MenuClickBuildRoad,   // 20
+	MenuClickBuildWater,  // 21
+	MenuClickBuildAir,    // 22
+	MenuClickForest,      // 23
+	MenuClickMusicWindow, // 24
+	MenuClickNewspaper,   // 25
+	MenuClickHelp,        // 26
 };
 
 /* --- Toolbar handling for the 'normal' case */
@@ -1032,8 +1032,8 @@ struct MainToolbarWindow : Window {
 		GfxFillRect(0, 0, this->width - 1, this->height - 1, 0xB4, FILLRECT_CHECKER);
 
 		/* If spectator, disable all construction buttons
-		* ie : Build road, rail, ships, airports and landscaping
-		* Since enabled state is the default, just disable when needed */
+		 * ie : Build road, rail, ships, airports and landscaping
+		 * Since enabled state is the default, just disable when needed */
 		this->SetWidgetsDisabledState(_local_company == COMPANY_SPECTATOR, TBN_RAILS, TBN_ROADS, TBN_WATER, TBN_AIR, TBN_LANDSCAPE, WIDGET_LIST_END);
 		/* disable company list drop downs, if there are no companies */
 		this->SetWidgetsDisabledState(ActiveCompanyCount() == TBN_PAUSE, TBN_STATIONS, TBN_FINANCES, TBN_TRAINS, TBN_ROADVEHS, TBN_SHIPS, TBN_AIRCRAFTS, WIDGET_LIST_END);
@@ -1180,12 +1180,12 @@ static const Widget _toolb_normal_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _toolb_normal_desc = {
+static const WindowDesc _toolb_normal_desc(
 	0, 0, 0, TBP_BUTTONHEIGHT, 640, TBP_BUTTONHEIGHT,
 	WC_MAIN_TOOLBAR, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_NO_FOCUS,
-	_toolb_normal_widgets,
-};
+	_toolb_normal_widgets
+);
 
 
 /* --- Toolbar handling for the scenario editor */
@@ -1433,12 +1433,12 @@ static const Widget _toolb_scen_widgets[] = {
 {WIDGETS_END},
 };
 
-static const WindowDesc _toolb_scen_desc = {
+static const WindowDesc _toolb_scen_desc(
 	0, 0, 130, TBP_BUTTONHEIGHT, 640, TBP_BUTTONHEIGHT,
 	WC_MAIN_TOOLBAR, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
-	_toolb_scen_widgets,
-};
+	_toolb_scen_widgets
+);
 
 /* --- Allocating the toolbar --- */
 

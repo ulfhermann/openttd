@@ -286,7 +286,7 @@ struct CompanyFinancesWindow : Window {
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case CFW_WIDGET_TOGGLE_SIZE: {/* toggle size */
+			case CFW_WIDGET_TOGGLE_SIZE: {// toggle size
 				bool new_mode = !this->small;
 				bool stickied = !!(this->flags4 & WF_STICKY);
 				int oldtop = this->top;   ///< current top position of the window before closing it
@@ -299,30 +299,30 @@ struct CompanyFinancesWindow : Window {
 			}
 			break;
 
-			case CFW_WIDGET_INCREASE_LOAN: /* increase loan */
+			case CFW_WIDGET_INCREASE_LOAN: // increase loan
 				DoCommandP(0, 0, _ctrl_pressed, CMD_INCREASE_LOAN | CMD_MSG(STR_702C_CAN_T_BORROW_ANY_MORE_MONEY));
 				break;
 
-			case CFW_WIDGET_REPAY_LOAN: /* repay loan */
+			case CFW_WIDGET_REPAY_LOAN: // repay loan
 				DoCommandP(0, 0, _ctrl_pressed, CMD_DECREASE_LOAN | CMD_MSG(STR_702F_CAN_T_REPAY_LOAN));
 				break;
 		}
 	}
 };
 
-static const WindowDesc _company_finances_desc = {
+static const WindowDesc _company_finances_desc(
 	WDP_AUTO, WDP_AUTO, 407, 60 + 10, 407, 60 + 10,
 	WC_FINANCES, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
-	_company_finances_widgets,
-};
+	_company_finances_widgets
+);
 
-static const WindowDesc _company_finances_small_desc = {
+static const WindowDesc _company_finances_small_desc(
 	WDP_AUTO, WDP_AUTO, 280, 60, 280, 60,
 	WC_FINANCES, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
-	_company_finances_small_widgets,
-};
+	_company_finances_small_widgets
+);
 
 /**
  * Open the small/large finance window of the company
@@ -550,11 +550,11 @@ public:
 				break;
 			}
 
-			case SCLW_WIDGET_PRI_COL_DROPDOWN: /* First colour dropdown */
+			case SCLW_WIDGET_PRI_COL_DROPDOWN: // First colour dropdown
 				ShowColourDropDownMenu(SCLW_WIDGET_PRI_COL_DROPDOWN);
 				break;
 
-			case SCLW_WIDGET_SEC_COL_DROPDOWN: /* Second colour dropdown */
+			case SCLW_WIDGET_SEC_COL_DROPDOWN: // Second colour dropdown
 				ShowColourDropDownMenu(SCLW_WIDGET_SEC_COL_DROPDOWN);
 				break;
 
@@ -626,12 +626,12 @@ static const Widget _select_company_livery_widgets[] = {
 { WIDGETS_END },
 };
 
-static const WindowDesc _select_company_livery_desc = {
+static const WindowDesc _select_company_livery_desc(
 	WDP_AUTO, WDP_AUTO, 400, 49 + 1 * 14, 400, 49 + 1 * 14,
 	WC_COMPANY_COLOUR, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_select_company_livery_widgets,
-};
+	_select_company_livery_widgets
+);
 
 /**
  * Draws the face of a company manager's face.
@@ -667,7 +667,7 @@ void DrawCompanyManagerFace(CompanyManagerFace cmf, int colour, int x, int y)
 	for (CompanyManagerFaceVariable cmfv = CMFV_CHEEKS; cmfv < CMFV_END; cmfv++) {
 		switch (cmfv) {
 			case CMFV_MOUSTACHE:   if (!has_moustache)   continue; break;
-			case CMFV_LIPS:        /* FALL THROUGH */
+			case CMFV_LIPS:        // FALL THROUGH
 			case CMFV_NOSE:        if (has_moustache)    continue; break;
 			case CMFV_TIE_EARRING: if (!has_tie_earring) continue; break;
 			case CMFV_GLASSES:     if (!has_glasses)     continue; break;
@@ -877,8 +877,8 @@ public:
 
 
 			/* Disable dynamically the widgets which CompanyManagerFaceVariable has less than 2 options
-			* (or in other words you haven't any choice).
-			* If the widgets depend on a HAS-variable and this is false the widgets will be disabled, too. */
+			 * (or in other words you haven't any choice).
+			 * If the widgets depend on a HAS-variable and this is false the widgets will be disabled, too. */
 
 			/* Eye colour buttons */
 			this->SetWidgetsDisabledState(_cmf_info[CMFV_EYE_COLOUR].valid_values[this->ge] < 2,
@@ -1037,10 +1037,10 @@ public:
 
 			default:
 				/* For all buttons from SCMFW_WIDGET_HAS_MOUSTACHE_EARRING to SCMFW_WIDGET_GLASSES_R is the same function.
-				* Therefor is this combined function.
-				* First it checks which CompanyManagerFaceVariable will be change and then
-				* a: invert the value for boolean variables
-				* or b: it checks inside of IncreaseCompanyManagerFaceBits() if a left (_L) butten is pressed and then decrease else increase the variable */
+				 * Therefor is this combined function.
+				 * First it checks which CompanyManagerFaceVariable will be change and then
+				 * a: invert the value for boolean variables
+				 * or b: it checks inside of IncreaseCompanyManagerFaceBits() if a left (_L) butten is pressed and then decrease else increase the variable */
 				if (this->advanced && widget >= SCMFW_WIDGET_HAS_MOUSTACHE_EARRING && widget <= SCMFW_WIDGET_GLASSES_R) {
 					CompanyManagerFaceVariable cmfv; // which CompanyManagerFaceVariable shall be edited
 
@@ -1093,20 +1093,20 @@ public:
 };
 
 /** normal/simple company manager face selection window description */
-static const WindowDesc _select_company_manager_face_desc = {
+static const WindowDesc _select_company_manager_face_desc(
 	WDP_AUTO, WDP_AUTO, 190, 163, 190, 163,
 	WC_COMPANY_MANAGER_FACE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
-	_select_company_manager_face_widgets,
-};
+	_select_company_manager_face_widgets
+);
 
 /** advanced company manager face selection window description */
-static const WindowDesc _select_company_manager_face_adv_desc = {
+static const WindowDesc _select_company_manager_face_adv_desc(
 	WDP_AUTO, WDP_AUTO, 220, 220, 220, 220,
 	WC_COMPANY_MANAGER_FACE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
-	_select_company_manager_face_adv_widgets,
-};
+	_select_company_manager_face_adv_widgets
+);
 
 /**
  * Open the simple/advanced company manager face selection window
@@ -1268,7 +1268,7 @@ struct CompanyWindow : Window
 		this->SetWidgetHiddenState(CW_WIDGET_PRESIDENT_NAME, !local);
 		this->SetWidgetHiddenState(CW_WIDGET_COMPANY_NAME,   !local);
 		this->widget[CW_WIDGET_BUILD_VIEW_HQ].data = (local && c->location_of_HQ == INVALID_TILE) ? STR_706F_BUILD_HQ : STR_7072_VIEW_HQ;
-		if (local && c->location_of_HQ != INVALID_TILE) this->widget[CW_WIDGET_BUILD_VIEW_HQ].type = WWT_PUSHTXTBTN; //HQ is already built.
+		if (local && c->location_of_HQ != INVALID_TILE) this->widget[CW_WIDGET_BUILD_VIEW_HQ].type = WWT_PUSHTXTBTN; // HQ is already built.
 		this->SetWidgetDisabledState(CW_WIDGET_BUILD_VIEW_HQ, !local && c->location_of_HQ == INVALID_TILE);
 		this->SetWidgetHiddenState(CW_WIDGET_RELOCATE_HQ,      !local || c->location_of_HQ == INVALID_TILE);
 		this->SetWidgetHiddenState(CW_WIDGET_BUY_SHARE,        local);
@@ -1456,12 +1456,12 @@ struct CompanyWindow : Window
 	}
 };
 
-static const WindowDesc _company_desc = {
+static const WindowDesc _company_desc(
 	WDP_AUTO, WDP_AUTO, 360, 170, 360, 170,
 	WC_COMPANY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_company_widgets,
-};
+	_company_widgets
+);
 
 void ShowCompany(CompanyID company)
 {
@@ -1515,12 +1515,12 @@ static const Widget _buy_company_widgets[] = {
 {   WIDGETS_END},
 };
 
-static const WindowDesc _buy_company_desc = {
+static const WindowDesc _buy_company_desc(
 	153, 171, 334, 137, 334, 137,
 	WC_BUY_COMPANY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION,
-	_buy_company_widgets,
-};
+	_buy_company_widgets
+);
 
 
 void ShowBuyCompanyDialog(CompanyID company)
