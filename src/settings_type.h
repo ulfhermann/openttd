@@ -325,9 +325,9 @@ struct EconomySettings {
 	bool   allow_town_roads;                 ///< towns are allowed to build roads (always allowed when generating world / in SE)
 	bool   station_noise_level;              ///< build new airports when the town noise level is still within accepted limits
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
-	uint16 moving_average_unit;	 	 ///< unit of time to use for calculating the moving average of capacities and usage of links
-	uint16 moving_average_length;		 ///< length of the moving average for capacities and usage of links
-	uint16 linkgraph_recalc_interval;	 ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving average of capacities and usage of links
+	uint16 moving_average_length;            ///< length of the moving average for capacities and usage of links
+	uint16 linkgraph_recalc_interval;	     ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
 };
 
 /** Settings related to stations. */
