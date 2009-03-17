@@ -1131,6 +1131,11 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.moving_average_unit"),
 	SettingEntry("economy.moving_average_length"),
 	SettingEntry("economy.linkgraph_recalc_interval"),
+	SettingEntry("economy.demand_pax"),
+	SettingEntry("economy.demand_mail"),
+	SettingEntry("economy.demand_express"),
+	SettingEntry("economy.demand_armoured"),
+	SettingEntry("economy.demand_default"),
 };
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};

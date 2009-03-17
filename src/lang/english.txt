@@ -1114,6 +1114,26 @@ STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove 
 STR_CONFIG_SETTING_AVERAGE_UNIT                                 :{LTBLUE}Capacity/Usage Moving Average Unit: {ORANGE}{STRING1} days
 STR_CONFIG_SETTING_AVERAGE_LENGTH                               :{LTBLUE}Capacity/Usage Moving Average Length: {ORANGE}{STRING1} units
 STR_CONFIG_SETTING_LINKGRAPH_INTERVAL                           :{LTBLUE}Link graph recalculation interval: {ORANGE}{STRING1} days
+STR_CONFIG_SETTING_DEMAND_PAX                                   :{LTBLUE}Demand function for the PASSENGERS cargo class: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DEMAND_PAX_SYMMETRIC                         :symmetric
+STR_CONFIG_SETTING_DEMAND_PAX_ANTISYMMETRIC                     :antisymmetric
+STR_CONFIG_SETTING_DEMAND_PAX_UNHANDLED                         :unhandled
+STR_CONFIG_SETTING_DEMAND_MAIL                                  :{LTBLUE}Demand function for the MAIL cargo class: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DEMAND_MAIL_SYMMETRIC                        :symmetric
+STR_CONFIG_SETTING_DEMAND_MAIL_ANTISYMMETRIC                    :antisymmetric
+STR_CONFIG_SETTING_DEMAND_MAIL_UNHANDLED                        :unhandled
+STR_CONFIG_SETTING_DEMAND_EXPRESS                               :{LTBLUE}Demand function for the EXPRESS cargo class: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DEMAND_EXPRESS_SYMMETRIC                     :symmetric
+STR_CONFIG_SETTING_DEMAND_EXPRESS_ANTISYMMETRIC                 :antisymmetric
+STR_CONFIG_SETTING_DEMAND_EXPRESS_UNHANDLED                     :unhandled
+STR_CONFIG_SETTING_DEMAND_ARMOURED                              :{LTBLUE}Demand function for the ARMOURED cargo class: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DEMAND_ARMOURED_SYMMETRIC                    :symmetric
+STR_CONFIG_SETTING_DEMAND_ARMOURED_ANTISYMMETRIC                :antisymmetric
+STR_CONFIG_SETTING_DEMAND_ARMOURED_UNHANDLED                    :unhandled
+STR_CONFIG_SETTING_DEMAND_DEFAULT                               :{LTBLUE}Demand function for other cargo classes: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DEMAND_DEFAULT_SYMMETRIC                     :symmetric
+STR_CONFIG_SETTING_DEMAND_DEFAULT_ANTISYMMETRIC                 :antisymmetric
+STR_CONFIG_SETTING_DEMAND_DEFAULT_UNHANDLED                     :unhandled
 
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction

@@ -7,10 +7,16 @@
 
 #include "demands.h"
 #include "station_base.h"
+#include "settings_type.h"
+#include "newgrf_cargo.h"
+#include "cargotype.h"
 #include <list>
 #include <iostream>
 
 typedef std::list<uint> NodeList;
+
+uint DemandCalculator::_max_distance;
+DistributionType DemandCalculator::_distribution_types[NUM_CARGO];
 
 void DemandCalculator::PrintDemandMatrix(Component * graph) {
 	for (uint from = 0; from < graph->GetSize(); ++from) {
@@ -51,7 +57,7 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 
 			Node & to = graph->GetNode(node2);
 
-			uint demand = from.supply * to.supply * (max_distance - forward.distance) / max_distance / supply_sum + 1;
+			uint demand = from.supply * to.supply * (_max_distance - forward.distance) / _max_distance / supply_sum + 1;
 			demand = min(demand, from.supply);
 			demand = min(demand, to.supply);
 
@@ -111,7 +117,7 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 
 			Node & to = graph->GetNode(node2);
 
-			uint demand = from.supply * to.supply * (max_distance - forward.distance) / max_distance / supply_sum + 1;
+			uint demand = from.supply * to.supply * (_max_distance - forward.distance) / _max_distance / supply_sum + 1;
 			demand = min(demand, from.supply);
 			demand = min(demand, to.supply);
 
@@ -141,6 +147,41 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 			} else {
 				nodes.push_back(node1);
 			}
+		}
+	}
+}
+
+void DemandCalculator::Run(Component * graph) {
+	switch (_distribution_types[cargo]) {
+	case DT_SYMMETRIC:
+		CalcSymmetric(graph);
+		break;
+	case DT_ANTISYMMETRIC:
+		CalcAntiSymmetric(graph);
+		break;
+	default:
+		/* ignore */
+		break;
+	}
+
+	PrintDemandMatrix(graph);
+}
+
+void InitializeDemands() {
+	DemandCalculator::_max_distance = MapMaxX() + MapMaxY();
+	EconomySettings & settings = _settings_game.economy;
+	DistributionType * types = DemandCalculator::_distribution_types;
+	for (CargoID c = 0; c < NUM_CARGO; ++c) {
+		if (IsCargoInClass(c, CC_PASSENGERS)) {
+			types[c] = settings.demand_pax;
+		} else if (IsCargoInClass(c, CC_MAIL)) {
+			types[c] = settings.demand_mail;
+		} else if (IsCargoInClass(c, CC_EXPRESS)) {
+			types[c] = settings.demand_express;
+		} else if (IsCargoInClass(c, CC_ARMOURED)) {
+			types[c] = settings.demand_armoured;
+		} else {
+			types[c] = settings.demand_default;
 		}
 	}
 }
