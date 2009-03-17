@@ -36,8 +36,11 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 	NodeList nodes;
 	uint supply_sum = 0;
 	for(uint node = 0; node < graph->GetSize(); node++) {
-		nodes.push_back(node);
-		supply_sum += graph->GetNode(node).supply;
+		Node & n = graph->GetNode(node);
+		if (n.demand > 0 && n.supply > 0) {
+			nodes.push_back(node);
+			supply_sum += n.supply;
+		}
 	}
 
 	if (supply_sum == 0) {
@@ -58,8 +61,6 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 			Node & to = graph->GetNode(node2);
 
 			uint demand = from.supply * to.supply * (_max_distance - forward.distance) / _max_distance / supply_sum + 1;
-			demand = min(demand, from.supply);
-			demand = min(demand, to.supply);
 
 			forward.demand += demand;
 			backward.demand += demand;
@@ -93,60 +94,51 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 
 
 void DemandCalculator::CalcAntiSymmetric(Component * graph) {
-	NodeList nodes;
+	NodeList supplies;
+	NodeList demands;
 	uint supply_sum = 0;
+	uint num_demands = 0;
 	for(uint node = 0; node < graph->GetSize(); node++) {
-		nodes.push_back(node);
-		supply_sum += graph->GetNode(node).supply;
+		Node & n = graph->GetNode(node);
+		if (n.supply > 0) {
+			supplies.push_back(node);
+			supply_sum += n.supply;
+		}
+		if (n.demand > 0) {
+			demands.push_back(node);
+			num_demands++;
+		}
 	}
 
-	if (supply_sum == 0) {
+	if (supply_sum == 0 || num_demands == 0) {
 		return;
 	}
 
-	while(!nodes.empty()) {
-		uint node1 = nodes.front();
-		nodes.pop_front();
+	uint demand_per_node = supply_sum / num_demands + 1;
+
+	while(!supplies.empty()) {
+		uint node1 = supplies.front();
+		supplies.pop_front();
 
 		Node & from = graph->GetNode(node1);
 
-		for(NodeList::iterator i = nodes.begin(); i != nodes.end(); ++i) {
-			uint node2 = *i;
-			Edge & forward = graph->GetEdge(node1, node2);
-			Edge & backward = graph->GetEdge(node2, node1);
-
-			Node & to = graph->GetNode(node2);
-
-			uint demand = from.supply * to.supply * (_max_distance - forward.distance) / _max_distance / supply_sum + 1;
-			demand = min(demand, from.supply);
-			demand = min(demand, to.supply);
-
-			forward.demand += demand;
-			backward.demand += demand;
-
-			from.supply -= demand;
-			to.supply -= demand;
-
-			if (to.supply == 0) {
-				i = nodes.erase(i);
-				if (nodes.empty()) {
-					// only one node left
-					return;
-				} else {
-					--i;
-				}
+		for(uint i = 0; i < num_demands; ++i) {
+			uint node2 = demands.front();
+			demands.pop_front();
+			demands.push_back(node2);
+			if (node1 == node2) {
+				continue;
 			}
+			Edge & edge = graph->GetEdge(node1, node2);
+			uint demand = from.supply * demand_per_node * (_max_distance - edge.distance) / _max_distance / supply_sum + 1;
+			edge.demand += demand;
+			from.supply -= demand;
 			if (from.supply == 0) {
 				break;
 			}
 		}
 		if (from.supply != 0) {
-			if (nodes.empty()) {
-				// only one node left
-				return;
-			} else {
-				nodes.push_back(node1);
-			}
+			supplies.push_back(node1);
 		}
 	}
 }
@@ -168,7 +160,7 @@ void DemandCalculator::Run(Component * graph) {
 }
 
 void InitializeDemands() {
-	DemandCalculator::_max_distance = MapMaxX() + MapMaxY();
+	DemandCalculator::_max_distance = MapSizeX() + MapSizeY();
 	EconomySettings & settings = _settings_game.economy;
 	DistributionType * types = DemandCalculator::_distribution_types;
 	for (CargoID c = 0; c < NUM_CARGO; ++c) {
