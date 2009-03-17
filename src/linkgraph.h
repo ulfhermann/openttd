@@ -18,9 +18,10 @@ struct SaveLoad;
 
 class Node {
 public:
-	Node() : supply(0), station(INVALID_STATION) {}
-	Node(StationID st, uint sup) : supply(sup), station(st) {}
+	Node() : supply(0), demand(false), station(INVALID_STATION) {}
+	Node(StationID st, uint sup, uint dem) : supply(sup), demand(dem), station(st) {}
 	uint supply;
+	uint demand;
 	StationID station;
 };
 
@@ -47,7 +48,7 @@ public:
 
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
-	uint AddNode(StationID st, uint supply);
+	uint AddNode(StationID st, uint supply, uint demand);
 	void AddEdge(uint from, uint to, uint capacity);
 	void CalculateDistances();
 	uint GetJoinTime() const {return join_time;}

@@ -12,6 +12,7 @@
 #include "date_func.h"
 #include "variables.h"
 #include "map_func.h"
+#include "core/bitmath_func.hpp"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -36,7 +37,8 @@ bool LinkGraph::NextComponent()
 				search_queue.push(station);
 				station_colours[current_station] = current_colour;
 				component = new Component(current_colour);
-				node = component->AddNode(current_station, station->goods[cargo].supply);
+				GoodsEntry & good = station->goods[cargo];
+				node = component->AddNode(current_station, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[current_station++] = node;
 				break; // found a station
 			}
@@ -60,7 +62,8 @@ bool LinkGraph::NextComponent()
 			if (station_colours[source_id] != current_colour) {
 				station_colours[source_id] = current_colour;
 				search_queue.push(source);
-				node = component->AddNode(source_id, source->goods[cargo].supply);
+				GoodsEntry & good = source->goods[cargo];
+				node = component->AddNode(source_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[source_id] = node;
 			} else {
 				node = index[source_id];
@@ -103,8 +106,8 @@ LinkGraph::LinkGraph()  : current_colour(0), current_station(0), cargo(CT_INVALI
 	InitColours();
 }
 
-uint Component::AddNode(StationID st, uint supply) {
-	nodes.push_back(Node(st, supply));
+uint Component::AddNode(StationID st, uint supply, uint demand) {
+	nodes.push_back(Node(st, supply, demand));
 	for(uint i = 0; i < num_nodes; ++i) {
 		edges[i].push_back(Edge());
 	}
@@ -136,14 +139,14 @@ void Component::SetSize(uint size) {
 
 Component::Component(colour col) :
 	num_nodes(0),
-	join_time(_tick_counter + _settings_game.economy.linkgraph_recalc_interval * DAY_TICKS), 
+	join_time(_tick_counter + _settings_game.economy.linkgraph_recalc_interval * DAY_TICKS),
 	component_colour(col)
 {
 }
 
-Component::Component(uint size, uint join, colour c) : 
+Component::Component(uint size, uint join, colour c) :
 	num_nodes(size),
-	join_time(join), 
+	join_time(join),
 	component_colour(c),
 	nodes(size),
 	edges(size, std::vector<Edge>(size))
