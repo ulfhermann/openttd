@@ -228,7 +228,7 @@ bool Window::HasWidgetOfType(WidgetType widget_type) const
 }
 
 static void StartWindowDrag(Window *w);
-static void StartWindowSizing(Window *w);
+static void StartWindowSizing(Window *w, bool to_left);
 
 /**
  * Dispatch left mouse-button (possibly double) click in window.
@@ -322,7 +322,9 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, bool double_click)
 		}
 
 		if (w->desc_flags & WDF_RESIZABLE && wi->type == WWT_RESIZEBOX) {
-			StartWindowSizing(w);
+			/* When the resize widget is on the left size of the window
+			 * we assume that that button is used to resize to the left. */
+			StartWindowSizing(w, wi->left < (w->width / 2));
 			w->InvalidateWidget(widget);
 			return;
 		}
@@ -1375,8 +1377,6 @@ static bool HandleWindowDragging()
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
 		if (w->flags4 & WF_DRAGGING) {
-			const Widget *t = &w->widget[1]; // the title bar ... ugh
-
 			/* Stop the dragging if the left mouse button was released */
 			if (!_left_button_down) {
 				w->flags4 &= ~WF_DRAGGING;
@@ -1466,10 +1466,18 @@ static bool HandleWindowDragging()
 				}
 			}
 
-			/* Make sure the window doesn't leave the screen
-			 * 13 is the height of the title bar */
-			nx = Clamp(nx, 13 - t->right, _screen.width - 13 - t->left);
-			ny = Clamp(ny, 0, _screen.height - 13);
+			/* Search for the title bar */
+			const Widget *t = w->widget;
+			while (t->type != WWT_CAPTION && t->type != WWT_LAST) t++;
+			assert(t->type == WWT_CAPTION);
+
+			/* The minimum number of pixels of the title bar must be visible
+			 * in both the X or Y direction */
+			static const int MIN_VISIBLE_TITLE_BAR = 13;
+
+			/* Make sure the window doesn't leave the screen */
+			nx = Clamp(nx, MIN_VISIBLE_TITLE_BAR - t->right, _screen.width - MIN_VISIBLE_TITLE_BAR - t->left);
+			ny = Clamp(ny, 0, _screen.height - MIN_VISIBLE_TITLE_BAR);
 
 			/* Make sure the title bar isn't hidden by behind the main tool bar */
 			Window *v = FindWindowById(WC_MAIN_TOOLBAR, 0);
@@ -1477,18 +1485,18 @@ static bool HandleWindowDragging()
 				int v_bottom = v->top + v->height;
 				int v_right = v->left + v->width;
 				if (ny + t->top >= v->top && ny + t->top < v_bottom) {
-					if ((v->left < 13 && nx + t->left < v->left) ||
-							(v_right > _screen.width - 13 && nx + t->right > v_right)) {
+					if ((v->left < MIN_VISIBLE_TITLE_BAR && nx + t->left < v->left) ||
+							(v_right > _screen.width - MIN_VISIBLE_TITLE_BAR && nx + t->right > v_right)) {
 						ny = v_bottom;
 					} else {
-						if (nx + t->left > v->left - 13 &&
-								nx + t->right < v_right + 13) {
+						if (nx + t->left > v->left - MIN_VISIBLE_TITLE_BAR &&
+								nx + t->right < v_right + MIN_VISIBLE_TITLE_BAR) {
 							if (w->top >= v_bottom) {
 								ny = v_bottom;
 							} else if (w->left < nx) {
-								nx = v->left - 13 - t->left;
+								nx = v->left - MIN_VISIBLE_TITLE_BAR - t->left;
 							} else {
-								nx = v_right + 13 - t->right;
+								nx = v_right + MIN_VISIBLE_TITLE_BAR - t->right;
 							}
 						}
 					}
@@ -1505,8 +1513,6 @@ static bool HandleWindowDragging()
 			w->SetDirty();
 			return false;
 		} else if (w->flags4 & WF_SIZING) {
-			int x, y;
-
 			/* Stop the sizing if the left mouse button was released */
 			if (!_left_button_down) {
 				w->flags4 &= ~WF_SIZING;
@@ -1514,8 +1520,15 @@ static bool HandleWindowDragging()
 				break;
 			}
 
-			x = _cursor.pos.x - _drag_delta.x;
-			y = _cursor.pos.y - _drag_delta.y;
+			/* Compute difference in pixels between cursor position and reference point in the window.
+			 * If resizing the left edge of the window, moving to the left makes the window bigger not smaller.
+			 */
+			int x, y = _cursor.pos.y - _drag_delta.y;
+			if (w->flags4 & WF_SIZING_LEFT) {
+				x = _drag_delta.x - _cursor.pos.x;
+			} else {
+				x = _cursor.pos.x - _drag_delta.x;
+			}
 
 			/* X and Y has to go by step.. calculate it.
 			 * The cast to int is necessary else x/y are implicitly casted to
@@ -1525,18 +1538,26 @@ static bool HandleWindowDragging()
 			if (w->resize.step_height > 1) y -= y % (int)w->resize.step_height;
 
 			/* Check if we don't go below the minimum set size */
-			if ((int)w->width + x < (int)w->resize.width)
+			if ((int)w->width + x < (int)w->resize.width) {
 				x = w->resize.width - w->width;
-			if ((int)w->height + y < (int)w->resize.height)
+			}
+			if ((int)w->height + y < (int)w->resize.height) {
 				y = w->resize.height - w->height;
+			}
 
 			/* Window already on size */
 			if (x == 0 && y == 0) return false;
 
-			/* Now find the new cursor pos.. this is NOT _cursor, because
-			    we move in steps. */
-			_drag_delta.x += x;
+			/* Now find the new cursor pos.. this is NOT _cursor, because we move in steps. */
 			_drag_delta.y += y;
+			if (w->flags4 & WF_SIZING_LEFT && x != 0) {
+				_drag_delta.x -= x; // x > 0 -> window gets longer -> left-edge moves to left -> subtract x to get new position.
+				w->SetDirty();
+				w->left -= x;  // If dragging left edge, move left window edge in opposite direction by the same amount.
+				/* ResizeWindow() below ensures marking new position as dirty. */
+			} else {
+				_drag_delta.x += x;
+			}
 
 			/* ResizeWindow sets both pre- and after-size to dirty for redrawal */
 			ResizeWindow(w, x, y);
@@ -1573,12 +1594,13 @@ static void StartWindowDrag(Window *w)
 }
 
 /**
- * Start resizing a window
- * @param w Window to start resizing
+ * Start resizing a window.
+ * @param w       Window to start resizing.
+ * @param to_left Whether to drag towards the left or not
  */
-static void StartWindowSizing(Window *w)
+static void StartWindowSizing(Window *w, bool to_left)
 {
-	w->flags4 |= WF_SIZING;
+	w->flags4 |= to_left ? WF_SIZING_LEFT : WF_SIZING_RIGHT;
 	_dragging_window = true;
 
 	_drag_delta.x = _cursor.pos.x;
