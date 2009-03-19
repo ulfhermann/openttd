@@ -50,7 +50,6 @@ void InitializeCompanies();
 void InitializeCheats();
 void InitializeNPF();
 void InitializeOldNames();
-void InitializeDemands();
 
 void InitializeGame(uint size_x, uint size_y, bool reset_date)
 {
@@ -112,7 +111,6 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date)
 	InitializeAnimatedTiles();
 
 	InitializeLandscapeVariables(false);
-	InitializeDemands();
 
 	ResetObjectToPlace();
 

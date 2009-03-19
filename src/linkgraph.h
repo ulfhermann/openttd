@@ -20,8 +20,9 @@ struct SaveLoad;
 class Node {
 public:
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
-	Node(StationID st, uint sup, uint dem) : supply(sup), demand(dem), station(st) {}
+	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
 	uint supply;
+	uint undelivered_supply;
 	uint demand;
 	StationID station;
 };

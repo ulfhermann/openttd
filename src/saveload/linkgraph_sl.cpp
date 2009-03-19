@@ -5,6 +5,7 @@
  *      Author: alve
  */
 #include "../linkgraph.h"
+#include "../demands.h"
 #include "saveload.h"
 
 static uint _num_components;
@@ -63,7 +64,9 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 
 static void SaveLoad_Component(Component * comp) {
 	for (uint from = 0; from < comp->GetSize(); ++from) {
-		SlObject(&comp->GetNode(from), GetLinkGraphDesc(LGRP_NODE));
+		Node * node = &comp->GetNode(from);
+		SlObject(node, GetLinkGraphDesc(LGRP_NODE));
+		node->undelivered_supply = node->supply;
 		for (uint to = 0; to < from; ++to) {
 			SlObject(&comp->GetEdge(from, to), GetLinkGraphDesc(LGRP_EDGE));
 			SlObject(&comp->GetEdge(to, from), GetLinkGraphDesc(LGRP_EDGE));

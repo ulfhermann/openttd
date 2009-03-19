@@ -297,6 +297,7 @@ void GenerateWorld(GenerateWorldMode mode, uint size_x, uint size_y)
 	LoadStringWidthTable();
 
 	InitializeGame(_gw.size_x, _gw.size_y, false);
+	InitializeDemands();
 	PrepareGenerateWorldProgress();
 
 	/* Re-init the windowing system */

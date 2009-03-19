@@ -13,6 +13,8 @@
 #include "map_func.h"
 #include "linkgraph.h"
 
+void InitializeDemands();
+
 enum DistributionType {
 	DT_BEGIN = 0,
 	DT_SYMMETRIC = 0,
