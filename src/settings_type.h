@@ -328,7 +328,7 @@ struct EconomySettings {
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
 	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving average of capacities and usage of links
 	uint16 moving_average_length;            ///< length of the moving average for capacities and usage of links
-	uint16 linkgraph_recalc_interval;	     ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	uint16 linkgraph_recalc_interval;        ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
 	DistributionTypeByte  demand_pax;        ///< demand calculation for passengers
 	DistributionTypeByte  demand_mail;       ///< demand calculation for mail
 	DistributionTypeByte  demand_express;    ///< demand calculation for express cargo class
