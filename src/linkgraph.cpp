@@ -147,7 +147,6 @@ Component::Component(colour col) :
 {
 }
 
-
 Component::Component(uint size, uint join, colour c) :
 	thread(NULL),
 	num_nodes(size),
