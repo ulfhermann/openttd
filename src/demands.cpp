@@ -161,7 +161,7 @@ void DemandCalculator::Run(Component * graph) {
 		break;
 	}
 
-	PrintDemandMatrix(graph);
+	//PrintDemandMatrix(graph);
 }
 
 void InitializeDemands() {

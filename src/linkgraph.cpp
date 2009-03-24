@@ -14,6 +14,7 @@
 #include "map_func.h"
 #include "demands.h"
 #include "core/bitmath_func.hpp"
+#include "mcf.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -211,5 +212,6 @@ void RunLinkGraphJob(void * j) {
 void LinkGraph::SpawnComponentThread(Component * c) {
 	LinkGraphJob * job = new LinkGraphJob(c);
 	job->AddHandler(new DemandCalculator(cargo));
+	job->AddHandler(new MultiCommodityFlow);
 	ThreadObject::New(&(RunLinkGraphJob), job, &c->GetThread());
 }

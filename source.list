@@ -36,6 +36,7 @@ ini.cpp
 landscape.cpp
 linkgraph.cpp
 map.cpp
+mcf.cpp
 md5.cpp
 minilzo.cpp
 misc.cpp
@@ -206,6 +207,7 @@ livery.h
 lzoconf.h
 map_func.h
 map_type.h
+mcf.h
 md5.h
 minilzo.h
 mixer.h
