@@ -7,15 +7,20 @@
 
 #include "mcf.h"
 
+ThreadMutex * MultiCommodityFlow::mutex() {
+	static ThreadMutex * m = ThreadMutex::New();
+	return m;
+}
+
 void MultiCommodityFlow::Run(Component * g) {
 	graph = g;
-	assert(set_add_rowmode(lp, TRUE));
+	mutex()->BeginCritical();
 	BuildPathForest();
 	SetPathConstraints();
 	SetSourceConstraints();
 	SetEdgeConstraints();
-
 	Solve();
+	mutex()->EndCritical();
 }
 
 void MultiCommodityFlow::BuildPathForest() {
@@ -98,103 +103,108 @@ bool PathEntry::HasPredecessor(NodeID node) {
 }
 
 void MultiCommodityFlow::SetDemandContraints(NodeID source, NodeID dest, PathList paths) {
-	//int ncol = get_Ncolumns(lp);
-	//int nrow = get_Nrows(lp);
-	int paths_size = paths.size();
-	//int new_size = ncol + paths_size;
-	//resize_lp(lp, nrow, new_size);
-	REAL * row = 0;
-	int * colno = 0;
-	row = (REAL *) malloc(paths_size * sizeof(*row));
-	colno = (int *) malloc(paths_size * sizeof(*colno));
-
-	int col = 0;
-	for (PathList::iterator i = paths.begin(); i != paths.end(); ++i) {
-		add_columnex(lp, 1, NULL, NULL);
-		row[col] = 1;
-		uint pathID = (*i)->id;
-		colno[col++] = pathID;
+	uint paths_size = paths.size();
+	if (paths_size == 0) {
+		return; //nothing to do
 	}
-	assert(add_constraintex(lp, paths_size, row, colno, LE, graph->GetEdge(source, dest).demand));
-	free(row);
-	free(colno);
+	glp_add_cols(lp, paths_size);
+	int row = glp_add_rows(lp, 1);
+	glp_set_row_bnds(lp, row, GLP_DB, 0.0, graph->GetEdge(source, dest).demand);
+
+	int * cols = new int[1+paths_size];
+	double * vals = new double[1+paths_size];
+
+	int col = 1;
+	for (PathList::iterator i = paths.begin(); i != paths.end(); ++i) {
+		cols[col] = (*i)->id;
+		vals[col] = 1.0;
+		col++;
+	}
+	glp_set_mat_row(lp, row, paths_size, cols, vals);
+	delete[] cols;
+	delete[] vals;
 }
 
 void MultiCommodityFlow::SetPathConstraints() {
 	for (SourceMapping::iterator i = source_mapping.begin(); i != source_mapping.end(); ++i) {
 		Path * p = i->second;
-		REAL row[1] = {1};
-		int colno[1] = {p->id};
-		assert(add_constraintex(lp, 1, row, colno, LE, p->capacity));
+		glp_set_col_bnds(lp, p->id, GLP_DB, 0.0, p->capacity);
+		glp_set_obj_coef(lp, p->id, 1.0);
 	}
 }
 
 void MultiCommodityFlow::SetSourceConstraints() {
 	NodeID source = UINT_MAX;
 	uint num_paths = 0;
-	uint index = 0;
-	REAL * row = 0;
-	int * colno = 0;
+	uint index = 1;
+	int * cols = 0;
+	double * vals = 0;
+	int row = 0;
 	for (SourceMapping::iterator i = source_mapping.begin(); i != source_mapping.end(); ++i) {
 		if (i->first != source) {
 			if (num_paths != 0) {
-				assert(add_constraintex(lp, num_paths, row, colno, LE, graph->GetNode(source).supply));
-				index = 0;
+				glp_set_mat_row(lp, row, num_paths, cols, vals);
+				index = 1;
 			}
 			source = i->first;
+			row = glp_add_rows(lp, 1);
 			uint new_num = source_mapping.count(source);
 			if (new_num > num_paths) {
-				free(row);
-				free(colno);
-				row = (REAL *)malloc(new_num * sizeof(*row));
-				colno = (int *)malloc(new_num * sizeof(*colno));
+				delete[] cols;
+				delete[] vals;
+				cols = new int[1+new_num];
+				vals = new double[1+new_num];
 			}
-
 			num_paths = new_num;
 		}
 		Path * p = i->second;
-		row[index] = 1;
-		colno[index] = p->id;
+		cols[index] = p->id;
+		vals[index] = 1.0;
 		index++;
 	}
-	free(row);
-	free(colno);
+	delete[] cols;
+	delete[] vals;
 }
 
 void MultiCommodityFlow::SetEdgeConstraints() {
 	Edge * edge = 0;
 	uint num_paths = 0;
-	uint index = 0;
+	uint index = 1;
 	// TODO: save maximum size
-	REAL * row = 0;
-	int * colno = 0;
+	int * cols = 0;
+	double * vals = 0;
+	int row = 0;
 	for (PathMapping::iterator i = path_mapping.begin(); i != path_mapping.end(); ++i) {
 		if (i->first != edge) {
 			if (num_paths != 0) {
-				assert(add_constraintex(lp, num_paths, row, colno, LE, edge->capacity));
-				index = 0;
+				glp_set_mat_row(lp, row, num_paths, cols, vals);
+				index = 1;
 			}
 			edge = i->first;
+			row = glp_add_rows(lp, 1);
 			uint new_num = path_mapping.count(edge);
 			if (new_num > num_paths) {
-				free(row);
-				free(colno);
-				row = (REAL *)malloc(new_num * sizeof(*row));
-				colno = (int *)malloc(new_num * sizeof(*colno));
+				delete[] cols;
+				delete[] vals;
+				cols = new int[1+new_num];
+				vals = new double[1+new_num];
 			}
 			num_paths = new_num;
 		}
 		Path * p = i->second;
-		row[index] = 1;
-		colno[index] = p->id;
+		cols[index] = p->id;
+		vals[index] = 1.0;
 		index++;
 	}
-	free(row);
-	free(colno);
+	delete[] cols;
+	delete[] vals;
 }
 
 void MultiCommodityFlow::Solve() {
-	assert(set_add_rowmode(lp, FALSE));
+	glp_set_obj_dir(lp, GLP_MAX);
+	glp_write_lp(lp, NULL, "/dev/stdout");
+	glp_simplex(lp, NULL);
+/*	assert(set_add_rowmode(lp, FALSE));
 	uint cols = get_Ncolumns(lp);
 	REAL * row = (REAL *)malloc(cols + 1 * sizeof(*row));
 	for (uint i = 0; i <= cols; ++i) {
@@ -207,16 +217,16 @@ void MultiCommodityFlow::Solve() {
 	if (solve(lp) != OPTIMAL) {
 		printf("couldn't find an optimal solution!\n");
 	}
-	/* a solution is calculated, now lets get some results */
 
-    /* objective value */
+
+
     printf("Objective value: %f\n", get_objective(lp));
-    /* variable values */
+
 
     get_variables(lp, row);
     for(uint j = 0; j < cols; j++) {
       printf("%i: %f\n", j + 1, row[j]);
     }
     delete row;
-    /* we are done now */
+    */
 }

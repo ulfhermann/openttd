@@ -9,7 +9,7 @@
 #define MCF_H_
 
 #include "linkgraph.h"
-#include "lpsolve/lp_lib.h"
+#include "glpk.h"
 #include <map>
 
 typedef uint NodeID;
@@ -40,8 +40,8 @@ typedef std::list<PathEntry *> PathTree;
 class MultiCommodityFlow : public ComponentHandler {
 public:
 	virtual void Run(Component * graph);
-	MultiCommodityFlow() : graph(NULL), lp(make_lp(0, 0)) {}
-	virtual ~MultiCommodityFlow() {delete_lp(lp);}
+	MultiCommodityFlow() : graph(NULL), lp(glp_create_prob()) {}
+	virtual ~MultiCommodityFlow() {glp_delete_prob(lp);}
 private:
 	void BuildPathForest();
 	void BuildPathTree(NodeID source, NodeID dest, PathTree & tree);
@@ -50,10 +50,11 @@ private:
 	void SetEdgeConstraints();    // sum of all paths passing edge e <= capacity(e)
 	void SetDemandContraints(NodeID source, NodeID dest, PathList paths); // sum of all paths <= demand(source, dest)
 	void Solve();
+	static ThreadMutex * mutex();
 	SourceMapping source_mapping;
 	PathMapping path_mapping;
 	Component * graph;
-	lprec * lp;
+	glp_prob * lp;
 };
 
 #endif /* MCF_H_ */
