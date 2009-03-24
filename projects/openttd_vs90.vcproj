@@ -1669,6 +1669,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\core\math_func.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\core\math_func.hpp"
 				>
 			</File>
@@ -2073,6 +2077,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\saveload\labelmaps_sl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\saveload\map_sl.cpp"
 				>
 			</File>
@@ -2218,6 +2226,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\table\roadveh_movement.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\settings.h"
 				>
 			</File>
 			<File

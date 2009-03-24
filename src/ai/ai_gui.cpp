@@ -79,7 +79,7 @@ struct AIListWindow : public Window {
 		int y = this->widget[AIL_WIDGET_LIST].top;
 		/* First AI in the list is hardcoded to random */
 		if (this->vscroll.pos == 0) {
-			DrawStringTruncated(4, y + 3, STR_AI_RANDOM_AI, this->selected == -1 ? TC_WHITE : TC_BLACK, this->width - 8);
+			DrawString(4, this->widget[AIL_WIDGET_LIST].right - 4, y + 3, STR_AI_RANDOM_AI, this->selected == -1 ? TC_WHITE : TC_BLACK);
 			y += 14;
 		}
 		AIInfo *selected_info = NULL;
@@ -87,7 +87,7 @@ struct AIListWindow : public Window {
 		for (int i = 1; it != this->ai_info_list->end(); i++, it++) {
 			if (this->selected == i - 1) selected_info = (*it).second;
 			if (IsInsideBS(i, this->vscroll.pos, this->vscroll.cap)) {
-				DoDrawStringTruncated((*it).second->GetName(), 4, y + 3, (this->selected == i - 1) ? TC_WHITE : TC_BLACK, this->width - 8);
+				DrawString(4, this->widget[AIL_WIDGET_LIST].right - 4, y + 3, (*it).second->GetName(), (this->selected == i - 1) ? TC_WHITE : TC_BLACK);
 				y += 14;
 			}
 		}
@@ -95,16 +95,14 @@ struct AIListWindow : public Window {
 		/* Some info about the currently selected AI. */
 		if (selected_info != NULL) {
 			int y = this->widget[AIL_WIDGET_INFO_BG].top + 6;
-			int x = DrawString(4, y, STR_AI_AUTHOR, TC_BLACK);
-			DoDrawStringTruncated(selected_info->GetAuthor(), x + 5, y, TC_BLACK, this->width - x - 8);
+			SetDParamStr(0, selected_info->GetAuthor());
+			DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_AUTHOR, TC_BLACK);
 			y += 13;
-			x = DrawString(4, y, STR_AI_VERSION, TC_BLACK);
-			static char buf[8];
-			sprintf(buf, "%d", selected_info->GetVersion());
-			DoDrawStringTruncated(buf, x + 5, y, TC_BLACK, this->width - x - 8);
+			SetDParam(0, selected_info->GetVersion());
+			DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_VERSION, TC_BLACK);
 			y += 13;
 			SetDParamStr(0, selected_info->GetDescription());
-			DrawStringMultiLine(4, y, STR_JUST_RAW_STRING, this->width - 8, this->widget[AIL_WIDGET_INFO_BG].bottom - y);
+			DrawStringMultiLine(4, this->width - 8, y, this->widget[AIL_WIDGET_INFO_BG].bottom, STR_JUST_RAW_STRING);
 		}
 	}
 
@@ -263,14 +261,14 @@ struct AISettingsWindow : public Window {
 			} else {
 				DrawArrowButtons(4, y + 2, COLOUR_YELLOW, (this->clicked_button == i) ? 1 + !!this->clicked_increase : 0, current_value > (*it).min_value, current_value < (*it).max_value);
 				if (it->labels != NULL && it->labels->Find(current_value) != it->labels->End()) {
-					x = DoDrawStringTruncated(it->labels->Find(current_value)->second, 28, y + 3, TC_ORANGE, this->width - 32);
+					x = DrawString(28, this->widget[AIS_WIDGET_BACKGROUND].right - 4, y + 3, it->labels->Find(current_value)->second, TC_ORANGE);
 				} else {
 					SetDParam(0, current_value);
-					x = DrawStringTruncated(28, y + 3, STR_JUST_INT, TC_ORANGE, this->width - 32);
+					x = DrawString(28, this->widget[AIS_WIDGET_BACKGROUND].right - 4, y + 3, STR_JUST_INT, TC_ORANGE);
 				}
 			}
 
-			DoDrawStringTruncated((*it).description, max(x + 3, 54), y + 3, TC_LIGHT_BLUE, this->width - (4 + max(x + 3, 54)));
+			DrawString(max(x + 3, 54), this->widget[AIS_WIDGET_BACKGROUND].right - 4, y + 3, (*it).description, TC_LIGHT_BLUE);
 			y += 14;
 		}
 	}
@@ -461,7 +459,7 @@ struct AIConfigWindow : public Window {
 		byte max_competitors = _settings_newgame.difficulty.max_no_competitors;
 		DrawArrowButtons(10, 18, COLOUR_YELLOW, this->clicked_button ? 1 + !!this->clicked_increase : 0, max_competitors > 0, max_competitors < MAX_COMPANIES - 1);
 		SetDParam(0, _settings_newgame.difficulty.max_no_competitors);
-		DrawString(36, 18, STR_6805_MAXIMUM_NO_COMPETITORS, TC_FROMSTRING);
+		DrawString(36, this->widget[AIC_WIDGET_BACKGROUND].right, 18, STR_6805_MAXIMUM_NO_COMPETITORS, TC_FROMSTRING);
 
 		int y = this->widget[AIC_WIDGET_LIST].top;
 		for (int i = this->vscroll.pos; i < this->vscroll.pos + this->vscroll.cap && i < MAX_COMPANIES; i++) {
@@ -475,7 +473,7 @@ struct AIConfigWindow : public Window {
 			} else {
 				text = STR_AI_RANDOM_AI;
 			}
-			DrawStringTruncated(10, y + 3, text, (this->selected_slot == i) ? TC_WHITE : ((i > _settings_newgame.difficulty.max_no_competitors || i == 0) ? TC_SILVER : TC_ORANGE), this->width - 20);
+			DrawString(10, this->widget[AIC_WIDGET_LIST].right - 10, y + 3, text, (this->selected_slot == i) ? TC_WHITE : ((i > _settings_newgame.difficulty.max_no_competitors || i == 0) ? TC_SILVER : TC_ORANGE));
 			y += 14;
 		}
 	}
@@ -657,7 +655,7 @@ struct AIDebugWindow : public Window {
 		assert(info != NULL);
 		char name[1024];
 		snprintf(name, sizeof(name), "%s (v%d)", info->GetName(), info->GetVersion());
-		DoDrawString(name, 7, 47, TC_BLACK);
+		DrawString(7, this->widget[AID_WIDGET_VIEW].right, 47, name, TC_BLACK);
 
 		CompanyID old_company = _current_company;
 		_current_company = ai_debug_company;
@@ -683,7 +681,7 @@ struct AIDebugWindow : public Window {
 				default:                  colour = TC_BLACK;  break;
 			}
 
-			DoDrawStringTruncated(log->lines[pos], 7, this->widget[AID_WIDGET_LOG_PANEL].top + y, colour, this->widget[AID_WIDGET_LOG_PANEL].right - this->widget[AID_WIDGET_LOG_PANEL].left - 14);
+			DrawString(this->widget[AID_WIDGET_LOG_PANEL].left + 7, this->widget[AID_WIDGET_LOG_PANEL].right - 7, this->widget[AID_WIDGET_LOG_PANEL].top + y, log->lines[pos], colour);
 			y += 12;
 		}
 	}

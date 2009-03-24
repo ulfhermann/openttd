@@ -170,7 +170,7 @@ STR_00C6                                                        :{SILVER}{CROSS}
 STR_00C7_QUIT                                                   :{WHITE}Verlassen
 STR_00C8_YES                                                    :{BLACK}Ja
 STR_00C9_NO                                                     :{BLACK}Nein
-STR_00CA_ARE_YOU_SURE_YOU_WANT_TO                               :{YELLOW}Das Spiel wirklich abbrechen und zu {STRING} zurückkehren?
+STR_00CA_ARE_YOU_SURE_YOU_WANT_TO                               :{YELLOW}OpenTTD wirklich beenden und zu {}{STRING} zurückkehren?
 STR_00CB_1                                                      :{BLACK}1
 STR_00CC_2                                                      :{BLACK}2
 STR_00CD_3                                                      :{BLACK}3
@@ -315,7 +315,7 @@ STR_015B_OPENTTD                                                :{WHITE}OpenTTD
 STR_015C_SAVE_GAME                                              :Spiel speichern
 STR_015D_LOAD_GAME                                              :Spiel laden
 STR_015E_QUIT_GAME                                              :Spiel beenden
-STR_015F_QUIT                                                   :Beenden
+STR_015F_QUIT                                                   :OpenTTD beenden
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Das Spiel wirklich beenden?
 STR_0161_QUIT_GAME                                              :{WHITE}Spiel beenden
 STR_SORT_ORDER_TIP                                              :{BLACK}Sortierreihenfolge auswählen (absteigend/aufsteigend)
@@ -1714,12 +1714,10 @@ STR_2023_TRANSPORT_COMPANY_RATINGS                              :{BLACK}Bewertun
 STR_2024                                                        :{YELLOW}{COMPANY} {COMPANYNUM}: {ORANGE}{STRING}
 STR_2025_SUBSIDIES                                              :{WHITE}Subventionen
 STR_2026_SUBSIDIES_ON_OFFER_FOR                                 :{BLACK}Subventionsangebot für:
-STR_2027_FROM_TO                                                :{ORANGE}{STRING} von {STRING} nach {STRING}
-STR_2028_BY                                                     :{YELLOW} (bis {DATE_SHORT})
+STR_2027_FROM_TO                                                :{ORANGE}{STRING} von {STRING} nach {STRING}{YELLOW} (bis {DATE_SHORT})
 STR_202A_NONE                                                   :{ORANGE}Keine
 STR_202B_SERVICES_ALREADY_SUBSIDISED                            :{BLACK}Bereits vergebene Subventionen:
-STR_202C_FROM_TO                                                :{ORANGE}{STRING} von {STATION} nach {STATION}{YELLOW} ({COMPANY}
-STR_202D_UNTIL                                                  :{YELLOW}, bis {DATE_SHORT})
+STR_202C_FROM_TO                                                :{ORANGE}{STRING} von {STATION} nach {STATION}{YELLOW} ({COMPANY}{YELLOW}, bis {DATE_SHORT})
 STR_202E_OFFER_OF_SUBSIDY_EXPIRED                               :{BLACK}{BIGFONT}Subventionsangebot abgelaufen:{}{}{STRING}transport von {STRING} nach {STRING} wird nicht mehr subventioniert.
 STR_202F_SUBSIDY_WITHDRAWN_SERVICE                              :{BLACK}{BIGFONT}Subventionsende:{}{}{STRING}transport von {STATION} nach {STATION} wird nicht mehr subventioniert.
 STR_2030_SERVICE_SUBSIDY_OFFERED                                :{BLACK}{BIGFONT}Subventionsangebot:{}{}Erster {STRING}transport von {STRING} nach {STRING} wird ein Jahr von den örtlichen Behörden subventioniert!
@@ -1981,7 +1979,7 @@ STR_482A_PRODUCTION_LAST_MONTH                                  :{BLACK}Produkti
 STR_482B_TRANSPORTED                                            :{YELLOW}{CARGO}{STRING}{BLACK} ({COMMA}% befördert)
 STR_482C_CENTER_THE_MAIN_VIEW_ON                                :{BLACK}Hauptansicht zum Industriegebiet scrollen
 STR_482D_NEW_UNDER_CONSTRUCTION                                 :{BLACK}{BIGFONT}Neue{G r "" s ""} {STRING} {G 0 wird wird wird werden} nahe {TOWN} gebaut!
-STR_482E_NEW_BEING_PLANTED_NEAR                                 :{BLACK}{BIGFONT}Neue{G r "" s ""} {STRING} {G 0 wird wird wird werden} nahe {TOWN} aufgeforstet!
+STR_482E_NEW_BEING_PLANTED_NEAR                                 :{BLACK}{BIGFONT}Neue{G r "" s ""} {STRING} {G 0 wird wird wird werden} nahe {TOWN} angepflanzt!
 STR_482F_COST                                                   :{BLACK}Kosten: {YELLOW}{CURRENCY}
 STR_4830_CAN_T_CONSTRUCT_THIS_INDUSTRY                          :{WHITE}Industrie kann hier nicht gebaut werden...
 STR_4831_FOREST_CAN_ONLY_BE_PLANTED                             :{WHITE}...Wald kann nur oberhalb der Schneegrenze gepflanzt werden
@@ -3178,9 +3176,9 @@ STR_LOADGAME_REMOVED_TRAMS                                      :{WHITE}Spiel wu
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Eigene Währung
 STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Wechselkurs: {ORANGE}{CURRENCY} = £ {COMMA}
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Trennsymbol:
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Präfix:
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffix:
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Trennsymbol: {STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Präfix: {STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffix: {STRING}
 STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Umstellung auf Euro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Umstellung auf Euro: {ORANGE}nie
 STR_CURRENCY_PREVIEW                                            :{LTBLUE}Vorschau: {ORANGE}{CURRENCY}
@@ -3582,8 +3580,8 @@ STR_AI_RESET                                                    :{BLACK}Rückset
 STR_AI_HUMAN_PLAYER                                             :menschlicher Spieler
 STR_AI_RANDOM_AI                                                :Zufällige KI
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}KI Parameter
-STR_AI_AUTHOR                                                   :Autor:
-STR_AI_VERSION                                                  :Version:
+STR_AI_AUTHOR                                                   :Autor: {STRING}
+STR_AI_VERSION                                                  :Version: {NUM}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Einer der laufenden KIs ist abgestürzt. Es ist nett, den Fehler dem Autor der KI mittels eines Screenshots vom KI-Debug-Fenster unter Angabe der OpenTTD-Versionsnummer zu melden.
 ########
 

@@ -34,16 +34,17 @@
  * coordinates. If amount exceeds 576 units, it is shown 'full', same
  * goes for the rating: at above 90% orso (224) it is also 'full'
  *
- * @param x coordinate to draw the box at
- * @param y coordinate to draw the box at
- * @param type Cargo type
+ * @param left   left most coordinate to draw the box at
+ * @param right  right most coordinate to draw the box at
+ * @param y      coordinate to draw the box at
+ * @param type   Cargo type
  * @param amount Cargo amount
  * @param rating ratings data for that particular cargo
  *
  * @note Each cargo-bar is 16 pixels wide and 6 pixels high
  * @note Each rating 14 pixels wide and 1 pixel high and is 1 pixel below the cargo-bar
  */
-static void StationsWndShowStationRating(int x, int y, CargoID type, uint amount, byte rating)
+static void StationsWndShowStationRating(int left, int right, int y, CargoID type, uint amount, byte rating)
 {
 	static const uint units_full  = 576; ///< number of units to show station as 'full'
 	static const uint rating_full = 224; ///< rating needed so it is shown as 'full'
@@ -55,25 +56,25 @@ static void StationsWndShowStationRating(int x, int y, CargoID type, uint amount
 	uint w = (minu(amount, units_full) + 5) / 36;
 
 	/* Draw total cargo (limited) on station (fits into 16 pixels) */
-	if (w != 0) GfxFillRect(x, y, x + w - 1, y + 6, colour);
+	if (w != 0) GfxFillRect(left, y, left + w - 1, y + 6, colour);
 
 	/* Draw a one pixel-wide bar of additional cargo meter, useful
 	 * for stations with only a small amount (<=30) */
 	if (w == 0) {
 		uint rest = amount / 5;
 		if (rest != 0) {
-			w += x;
+			w += left;
 			GfxFillRect(w, y + 6 - rest, w, y + 6, colour);
 		}
 	}
 
-	DrawString(x + 1, y, cs->abbrev, TC_BLACK);
+	DrawString(left + 1, right, y, cs->abbrev, TC_BLACK);
 
 	/* Draw green/red ratings bar (fits into 14 pixels) */
 	y += 8;
-	GfxFillRect(x + 1, y, x + 14, y, 0xB8);
+	GfxFillRect(left + 1, y, left + 14, y, 0xB8);
 	rating = minu(rating, rating_full) / 16;
-	if (rating != 0) GfxFillRect(x + 1, y, x + rating, y, 0xD0);
+	if (rating != 0) GfxFillRect(left + 1, y, left + rating, y, 0xD0);
 }
 
 typedef GUIList<const Station*> GUIStationList;
@@ -334,23 +335,22 @@ public:
 
 			cg_ofst = HasBit(this->cargo_filter, c) ? 2 : 1;
 			GfxFillRect(x + cg_ofst, y + cg_ofst, x + cg_ofst + 10 , y + cg_ofst + 7, cs->rating_colour);
-			DrawStringCentered(x + 6 + cg_ofst, y + cg_ofst, cs->abbrev, TC_BLACK);
+			DrawString(x + cg_ofst, x + 12 + cg_ofst, y + cg_ofst, cs->abbrev, TC_BLACK, SA_CENTER);
 			x += 14;
 			i++;
 		}
 
-		x += 6;
 		cg_ofst = this->IsWidgetLowered(SLW_NOCARGOWAITING) ? 2 : 1;
-		DrawStringCentered(x + cg_ofst, y + cg_ofst, STR_ABBREV_NONE, TC_BLACK);
+		DrawString(x + cg_ofst, x + cg_ofst + 12, y + cg_ofst, STR_ABBREV_NONE, TC_BLACK, SA_CENTER);
 		x += 14;
 		cg_ofst = this->IsWidgetLowered(SLW_CARGOALL) ? 2 : 1;
-		DrawStringCentered(x + cg_ofst, y + cg_ofst, STR_ABBREV_ALL, TC_BLACK);
+		DrawString(x + cg_ofst, x + cg_ofst + 12, y + cg_ofst, STR_ABBREV_ALL, TC_BLACK, SA_CENTER);
 
 		cg_ofst = this->IsWidgetLowered(SLW_FACILALL) ? 2 : 1;
-		DrawString(71 + cg_ofst, y + cg_ofst, STR_ABBREV_ALL, TC_BLACK);
+		DrawString(71 + cg_ofst, 71 + cg_ofst + 12, y + cg_ofst, STR_ABBREV_ALL, TC_BLACK);
 
 		if (this->vscroll.count == 0) { // company has no stations
-			DrawString(xb, 40, STR_304A_NONE, TC_FROMSTRING);
+			DrawString(xb, this->width, 40, STR_304A_NONE, TC_FROMSTRING);
 			return;
 		}
 
@@ -369,12 +369,12 @@ public:
 
 			SetDParam(0, st->index);
 			SetDParam(1, st->facilities);
-			x = DrawString(xb, y, STR_3049_0, TC_FROMSTRING) + 5;
+			x = DrawString(xb, this->widget[SLW_LIST].right, y, STR_3049_0, TC_FROMSTRING) + 5;
 
 			/* show cargo waiting and station ratings */
 			for (CargoID j = 0; j < NUM_CARGO; j++) {
 				if (!st->goods[j].cargo.Empty()) {
-					StationsWndShowStationRating(x, y, j, st->goods[j].cargo.Count(), st->goods[j].rating);
+					StationsWndShowStationRating(x, this->widget[SLW_LIST].right, y, j, st->goods[j].cargo.Count(), st->goods[j].rating);
 					x += 20;
 				}
 			}
@@ -803,7 +803,7 @@ struct StationViewWindow : public Window {
 				if (!st->goods[i].cargo.Empty()) str = STR_EMPTY;
 			}
 			SetDParam(0, str);
-			DrawString(x, y, STR_0008_WAITING, TC_FROMSTRING);
+			DrawString(x, this->widget[SVW_WAITING].right - 2, y, STR_0008_WAITING, TC_FROMSTRING);
 			y += 10;
 		}
 
@@ -818,16 +818,16 @@ struct StationViewWindow : public Window {
 					if (HasBit(transfers, cd->cargo)) {
 						/* This cargo has transfers waiting so show the expand or shrink 'button' */
 						const char *sym = HasBit(this->cargo, cd->cargo) ? "-" : "+";
-						DrawStringRightAligned(x + width - 8, y, STR_0009, TC_FROMSTRING);
-						DoDrawString(sym, x + width - 6, y, TC_YELLOW);
+						DrawString(this->widget[SVW_WAITING].left, this->widget[SVW_WAITING].right - 12, y, STR_0009, TC_FROMSTRING, SA_RIGHT);
+						DrawString(this->widget[SVW_WAITING].right - 10, this->widget[SVW_WAITING].right, y, sym, TC_YELLOW);
 					} else {
-						DrawStringRightAligned(x + width, y, STR_0009, TC_FROMSTRING);
+						DrawString(this->widget[SVW_WAITING].left, this->widget[SVW_WAITING].right - 4, y, STR_0009, TC_FROMSTRING, SA_RIGHT);
 					}
 				} else {
 					SetDParam(0, cd->cargo);
 					SetDParam(1, cd->count);
 					SetDParam(2, cd->source);
-					DrawStringRightAlignedTruncated(x + width, y, STR_EN_ROUTE_FROM, TC_FROMSTRING, width);
+					DrawString(x, x + width, y, STR_EN_ROUTE_FROM, TC_FROMSTRING, SA_RIGHT);
 				}
 
 				y += 10;
@@ -864,11 +864,11 @@ struct StationViewWindow : public Window {
 			assert(b < endof(string));
 
 			SetDParamStr(0, string);
-			DrawStringMultiLine(2, this->widget[SVW_ACCEPTLIST].top + 1, STR_JUST_RAW_STRING, this->widget[SVW_ACCEPTLIST].right - this->widget[SVW_ACCEPTLIST].left);
+			DrawStringMultiLine(this->widget[SVW_ACCEPTLIST].left + 2, this->widget[SVW_ACCEPTLIST].right - 2, this->widget[SVW_ACCEPTLIST].top + 1, this->widget[SVW_ACCEPTLIST].bottom - 1, STR_JUST_RAW_STRING);
 		} else { // extended window with list of cargo ratings
 			y = this->widget[SVW_RATINGLIST].top + 1;
 
-			DrawString(2, y, STR_3034_LOCAL_RATING_OF_TRANSPORT, TC_FROMSTRING);
+			DrawString(this->widget[SVW_ACCEPTLIST].left + 2, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_3034_LOCAL_RATING_OF_TRANSPORT, TC_FROMSTRING);
 			y += 10;
 
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
@@ -881,7 +881,7 @@ struct StationViewWindow : public Window {
 				SetDParam(0, cs->name);
 				SetDParam(2, ge->rating * 101 >> 8);
 				SetDParam(1, STR_3035_APPALLING + (ge->rating >> 5));
-				DrawString(8, y, STR_303D, TC_FROMSTRING);
+				DrawString(this->widget[SVW_ACCEPTLIST].left + 8, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_303D, TC_FROMSTRING);
 				y += 10;
 			}
 		}
@@ -1143,7 +1143,7 @@ struct SelectStationWindow : Window {
 
 		uint y = 17;
 		if (this->vscroll.pos == 0) {
-			DrawStringTruncated(3, y, STR_CREATE_SPLITTED_STATION, TC_FROMSTRING, this->widget[JSW_PANEL].right - 5);
+			DrawString(3, this->widget[JSW_PANEL].right - 2, y, STR_CREATE_SPLITTED_STATION, TC_FROMSTRING);
 			y += 10;
 		}
 
@@ -1154,7 +1154,7 @@ struct SelectStationWindow : Window {
 			const Station *st = GetStation(_stations_nearby_list[i - 1]);
 			SetDParam(0, st->index);
 			SetDParam(1, st->facilities);
-			DrawStringTruncated(3, y, STR_3049_0, TC_FROMSTRING, this->widget[JSW_PANEL].right - 5);
+			DrawString(3, this->widget[JSW_PANEL].right - 2, y, STR_3049_0, TC_FROMSTRING);
 		}
 	}
 
