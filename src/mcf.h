@@ -9,10 +9,8 @@
 #define MCF_H_
 
 #include "linkgraph.h"
-#include "glpk.h"
+#include <glpk.h>
 #include <map>
-
-typedef uint NodeID;
 
 class Path {
 public:
