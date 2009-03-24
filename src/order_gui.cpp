@@ -280,7 +280,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 	}
 
 	SetDParam(0, order_index + 1);
-	DrawStringTruncated(2, y, str, selected ? TC_WHITE : TC_BLACK, width);
+	DrawString(2, width + 2, y, str, selected ? TC_WHITE : TC_BLACK);
 }
 
 
@@ -833,7 +833,7 @@ public:
 
 		if (i - this->vscroll.pos < this->vscroll.cap) {
 			str = shared_orders ? STR_END_OF_SHARED_ORDERS : STR_882A_END_OF_ORDERS;
-			DrawString(2, y, str, (i == this->selected_order) ? TC_WHITE : TC_BLACK);
+			DrawString(this->widget[ORDER_WIDGET_ORDER_LIST].left + 2, this->widget[ORDER_WIDGET_ORDER_LIST].right - 2, y, str, (i == this->selected_order) ? TC_WHITE : TC_BLACK);
 		}
 	}
 

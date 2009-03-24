@@ -67,24 +67,24 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint w, uint bott
 		GetString(message, c->error->custom_message == NULL ? c->error->message : STR_JUST_RAW_STRING, lastof(message));
 
 		SetDParamStr(0, message);
-		y += DrawStringMultiLine(x, y, c->error->severity, w, bottom - y);
+		y = DrawStringMultiLine(x, x + w, y, bottom, c->error->severity);
 	}
 
 	/* Draw filename or not if it is not known (GRF sent over internet) */
 	if (c->filename != NULL) {
 		SetDParamStr(0, c->filename);
-		y += DrawStringMultiLine(x, y, STR_NEWGRF_FILENAME, w, bottom - y);
+		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_FILENAME);
 	}
 
 	/* Prepare and draw GRF ID */
 	snprintf(buff, lengthof(buff), "%08X", BSWAP32(c->grfid));
 	SetDParamStr(0, buff);
-	y += DrawStringMultiLine(x, y, STR_NEWGRF_GRF_ID, w, bottom - y);
+	y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_GRF_ID);
 
 	/* Prepare and draw MD5 sum */
 	md5sumToString(buff, lastof(buff), c->md5sum);
 	SetDParamStr(0, buff);
-	y += DrawStringMultiLine(x, y, STR_NEWGRF_MD5SUM, w, bottom - y);
+	y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_MD5SUM);
 
 	/* Show GRF parameter list */
 	if (show_params) {
@@ -95,25 +95,25 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint w, uint bott
 		} else {
 			SetDParam(0, STR_01A9_NONE);
 		}
-		y += DrawStringMultiLine(x, y, STR_NEWGRF_PARAMETER, w, bottom - y);
+		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_PARAMETER);
 
 		/* Draw the palette of the NewGRF */
 		SetDParamStr(0, c->windows_paletted ? "Windows" : "DOS");
-		y += DrawStringMultiLine(x, y, STR_NEWGRF_PALETTE, w, bottom - y);
+		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_PALETTE);
 	}
 
 	/* Show flags */
-	if (c->status == GCS_NOT_FOUND)        y += DrawStringMultiLine(x, y, STR_NEWGRF_NOT_FOUND, w, bottom - y);
-	if (c->status == GCS_DISABLED)         y += DrawStringMultiLine(x, y, STR_NEWGRF_DISABLED, w, bottom - y);
-	if (HasBit(c->flags, GCF_COMPATIBLE)) y += DrawStringMultiLine(x, y, STR_NEWGRF_COMPATIBLE_LOADED, w, bottom - y);
+	if (c->status == GCS_NOT_FOUND)       y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_NOT_FOUND);
+	if (c->status == GCS_DISABLED)        y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_DISABLED);
+	if (HasBit(c->flags, GCF_COMPATIBLE)) y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_COMPATIBLE_LOADED);
 
 	/* Draw GRF info if it exists */
 	if (c->info != NULL && !StrEmpty(c->info)) {
 		SetDParam(0, STR_JUST_RAW_STRING);
 		SetDParamStr(1, c->info);
-		y += DrawStringMultiLine(x, y, STR_02BD, w, bottom - y);
+		y = DrawStringMultiLine(x, x + w, y, bottom, STR_02BD);
 	} else {
-		y += DrawStringMultiLine(x, y, STR_NEWGRF_NO_INFO, w, bottom - y);
+		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_NO_INFO);
 	}
 }
 
@@ -171,7 +171,7 @@ struct NewGRFAddWindow : public Window {
 
 				/* Draw selection background */
 				if (h) GfxFillRect(3, y, this->width - 15, y + 9, 156);
-				DoDrawStringTruncated(text, 4, y, h ? TC_WHITE : TC_ORANGE, this->width - 18);
+				DrawString(4, this->width - 22, y, text, h ? TC_WHITE : TC_ORANGE);
 				y += 10;
 			}
 		}
@@ -274,9 +274,9 @@ public:
 		return true;
 	}
 
-	void Draw(int x, int y, uint width, uint height, bool sel, int bg_colour) const
+	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
-		DoDrawStringTruncated(_grf_preset_list[this->result], x + 2, y, sel ? TC_WHITE : TC_BLACK, x + width);
+		DrawString(left + 2, right + 2, top, _grf_preset_list[this->result], sel ? TC_WHITE : TC_BLACK);
 	}
 };
 
@@ -448,7 +448,7 @@ struct NewGRFWindow : public Window {
 				DrawSprite(SPR_SQUARE, pal, 5, y + 2);
 				if (c->error != NULL) DrawSprite(SPR_WARNING_SIGN, 0, 20, y + 2);
 				txtoffset = c->error != NULL ? 35 : 25;
-				DoDrawStringTruncated(text, txtoffset, y + 3, this->sel == c ? TC_WHITE : TC_BLACK, this->width - txtoffset - 10);
+				DrawString(txtoffset, this->widget[SNGRFS_FILE_LIST].right - 2, y + 3, text, this->sel == c ? TC_WHITE : TC_BLACK);
 				y += 14;
 			}
 		}

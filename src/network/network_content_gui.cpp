@@ -128,17 +128,17 @@ public:
 		SetDParam(0, this->downloaded_bytes);
 		SetDParam(1, this->total_bytes);
 		SetDParam(2, this->downloaded_bytes * 100 / this->total_bytes);
-		DrawStringCentered(this->width / 2, 35, STR_CONTENT_DOWNLOAD_PROGRESS_SIZE, TC_GREY);
+		DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 35, STR_CONTENT_DOWNLOAD_PROGRESS_SIZE, TC_GREY, SA_CENTER);
 
 		if  (this->downloaded_bytes == this->total_bytes) {
-			DrawStringCentered(this->width / 2, 50, STR_CONTENT_DOWNLOAD_COMPLETE, TC_GREY);
+			DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 50, STR_CONTENT_DOWNLOAD_COMPLETE, TC_GREY, SA_CENTER);
 		} else if (!StrEmpty(this->name)) {
 			SetDParamStr(0, this->name);
 			SetDParam(1, this->downloaded_files);
 			SetDParam(2, this->total_files);
-			DrawStringMultiCenter(this->width / 2, 50, STR_CONTENT_DOWNLOAD_FILE, this->width);
+			DrawStringMultiLine(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 43, 67, STR_CONTENT_DOWNLOAD_FILE, SA_CENTER);
 		} else {
-			DrawStringCentered(this->width / 2, 50, STR_CONTENT_DOWNLOAD_INITIALISE, TC_GREY);
+			DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 50, STR_CONTENT_DOWNLOAD_INITIALISE, TC_GREY, SA_CENTER);
 		}
 	}
 
@@ -392,7 +392,7 @@ public:
 
 		/* Edit box to filter for keywords */
 		this->DrawEditBox(NCLWW_FILTER);
-		DrawStringRightAligned(this->widget[NCLWW_FILTER].left - 8, this->widget[NCLWW_FILTER].top + 2, STR_CONTENT_FILTER_TITLE, TC_FROMSTRING);
+		DrawString(this->widget[NCLWW_MATRIX].left, this->widget[NCLWW_FILTER].left - 8, this->widget[NCLWW_FILTER].top + 2, STR_CONTENT_FILTER_TITLE, TC_FROMSTRING, SA_RIGHT);
 
 		switch (this->content.SortType()) {
 			case NCLWW_CHECKBOX - NCLWW_CHECKBOX: this->DrawSortButtonState(NCLWW_CHECKBOX, arrow); break;
@@ -421,21 +421,21 @@ public:
 			DrawSprite(sprite, pal, this->widget[NCLWW_CHECKBOX].left + (pal == PAL_NONE ? 3 : 4), y + (pal == PAL_NONE ? 1 : 0));
 
 			StringID str = STR_CONTENT_TYPE_BASE_GRAPHICS + ci->type - CONTENT_TYPE_BASE_GRAPHICS;
-			DrawStringCenteredTruncated(this->widget[NCLWW_TYPE].left, this->widget[NCLWW_TYPE].right, y, str, TC_BLACK);
+			DrawString(this->widget[NCLWW_TYPE].left, this->widget[NCLWW_TYPE].right, y, str, TC_BLACK, SA_CENTER);
 
 			SetDParamStr(0, ci->name);
-			DrawStringTruncated(this->widget[NCLWW_NAME].left + 5, y, STR_JUST_RAW_STRING, TC_BLACK, this->widget[NCLWW_NAME].right - this->widget[NCLWW_NAME].left - 5);
+			DrawString(this->widget[NCLWW_NAME].left + 5, this->widget[NCLWW_NAME].right, y, STR_JUST_RAW_STRING, TC_BLACK);
 			y += this->resize.step_height;
 		}
 
 		/* Create the nice grayish rectangle at the details top */
 		GfxFillRect(this->widget[NCLWW_DETAILS].left + 1, this->widget[NCLWW_DETAILS].top + 1, this->widget[NCLWW_DETAILS].right - 1, this->widget[NCLWW_DETAILS].top + 50, 157);
-		DrawStringCentered((this->widget[NCLWW_DETAILS].left + this->widget[NCLWW_DETAILS].right) / 2, this->widget[NCLWW_DETAILS].top + 11, STR_CONTENT_DETAIL_TITLE, TC_FROMSTRING);
+		DrawString(this->widget[NCLWW_DETAILS].left + 2, this->widget[NCLWW_DETAILS].right - 2, this->widget[NCLWW_DETAILS].top + 11, STR_CONTENT_DETAIL_TITLE, TC_FROMSTRING, SA_CENTER);
 
 		if (this->selected == NULL) return;
 
 		/* And fill the rest of the details when there's information to place there */
-		DrawStringMultiCenter((this->widget[NCLWW_DETAILS].left + this->widget[NCLWW_DETAILS].right) / 2, this->widget[NCLWW_DETAILS].top + 32, STR_CONTENT_DETAIL_SUBTITLE_UNSELECTED + this->selected->state, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 10);
+		DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, this->widget[NCLWW_DETAILS].top + 25, this->widget[NCLWW_DETAILS].top + 50, STR_CONTENT_DETAIL_SUBTITLE_UNSELECTED + this->selected->state, SA_CENTER);
 
 		/* Also show the total download size, so keep some space from the bottom */
 		const uint max_y = this->widget[NCLWW_DETAILS].bottom - 15;
@@ -443,34 +443,34 @@ public:
 
 		if (this->selected->upgrade) {
 			SetDParam(0, STR_CONTENT_TYPE_BASE_GRAPHICS + this->selected->type - CONTENT_TYPE_BASE_GRAPHICS);
-			y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_UPDATE, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+			y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_UPDATE);
 			y += 11;
 		}
 
 		SetDParamStr(0, this->selected->name);
-		y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_NAME, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+		y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_NAME);
 
 		if (!StrEmpty(this->selected->version)) {
 			SetDParamStr(0, this->selected->version);
-			y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_VERSION, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+			y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_VERSION);
 		}
 
 		if (!StrEmpty(this->selected->description)) {
 			SetDParamStr(0, this->selected->description);
-			y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_DESCRIPTION, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+			y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_DESCRIPTION);
 		}
 
 		if (!StrEmpty(this->selected->url)) {
 			SetDParamStr(0, this->selected->url);
-			y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_URL, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+			y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_URL);
 		}
 
 		SetDParam(0, STR_CONTENT_TYPE_BASE_GRAPHICS + this->selected->type - CONTENT_TYPE_BASE_GRAPHICS);
-		y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_TYPE, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+		y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_TYPE);
 
 		y += 11;
 		SetDParam(0, this->selected->filesize);
-		y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_FILESIZE, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+		y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_FILESIZE);
 
 		if (this->selected->dependency_count != 0) {
 			/* List dependencies */
@@ -490,7 +490,7 @@ public:
 				}
 			}
 			SetDParamStr(0, buf);
-			y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_DEPENDENCIES, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+			y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_DEPENDENCIES);
 		}
 
 		if (this->selected->tag_count != 0) {
@@ -501,7 +501,7 @@ public:
 				p += seprintf(p, lastof(buf), i == 0 ? "%s" : ", %s", this->selected->tags[i]);
 			}
 			SetDParamStr(0, buf);
-			y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_TAGS, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+			y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_TAGS);
 		}
 
 		if (this->selected->IsSelected()) {
@@ -519,13 +519,13 @@ public:
 			}
 			if (p != buf) {
 				SetDParamStr(0, buf);
-				y += DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, y, STR_CONTENT_DETAIL_SELECTED_BECAUSE_OF, this->widget[NCLWW_DETAILS].right - this->widget[NCLWW_DETAILS].left - 5, max_y - y);
+				y = DrawStringMultiLine(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, y, max_y, STR_CONTENT_DETAIL_SELECTED_BECAUSE_OF);
 			}
 		}
 
 		/* Draw the total download size */
 		SetDParam(0, filesize);
-		DrawString(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].bottom - 12, STR_CONTENT_TOTAL_DOWNLOAD_SIZE, TC_BLACK);
+		DrawString(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, this->widget[NCLWW_DETAILS].bottom - 12, STR_CONTENT_TOTAL_DOWNLOAD_SIZE, TC_BLACK);
 	}
 
 	virtual void OnDoubleClick(Point pt, int widget)

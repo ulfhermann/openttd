@@ -388,8 +388,6 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 		this->DrawEditBox(GLAND_RANDOM_EDITBOX);
 
 		if (mode != GLWP_GENERATE) {
-			char buffer[512];
-
 			if (_settings_newgame.game_creation.heightmap_rotation == HM_CLOCKWISE) {
 				SetDParam(0, this->y);
 				SetDParam(1, this->x);
@@ -397,12 +395,11 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 				SetDParam(0, this->x);
 				SetDParam(1, this->y);
 			}
-			GetString(buffer, STR_HEIGHTMAP_SIZE, lastof(buffer));
-			DrawStringRightAligned(326, 91, STR_HEIGHTMAP_SIZE, TC_BLACK);
+			int right = DrawString(0, 326, 91, STR_HEIGHTMAP_SIZE, TC_BLACK, SA_RIGHT);
 
-			DrawString( 12,  91, STR_HEIGHTMAP_NAME, TC_BLACK);
+			DrawString( 12, 114, 91, STR_HEIGHTMAP_NAME, TC_BLACK);
 			SetDParamStr(0, this->name);
-			DrawStringTruncated(114,  91, STR_JUST_RAW_STRING, TC_ORANGE, 326 - 114 - GetStringBoundingBox(buffer).width - 5);
+			DrawString(114, right - 5, 91, STR_JUST_RAW_STRING, TC_ORANGE);
 		}
 	}
 
@@ -969,15 +966,15 @@ public:
 		DrawFrameRect(19, 20, (this->width - 18), 37, COLOUR_GREY, FR_BORDERONLY);
 		DrawFrameRect(20, 21, (int)((this->width - 40) * _tp.percent / 100) + 20, 36, COLOUR_MAUVE, FR_NONE);
 		SetDParam(0, _tp.percent);
-		DrawStringCentered(90, 25, STR_PROGRESS, TC_FROMSTRING);
+		DrawString(this->widget[GPWW_BACKGROUND].left, this->widget[GPWW_BACKGROUND].right, 25, STR_PROGRESS, TC_FROMSTRING, SA_CENTER);
 
 		/* Tell which class we are generating */
-		DrawStringCentered(90, 46, _tp.cls, TC_FROMSTRING);
+		DrawString(this->widget[GPWW_BACKGROUND].left, this->widget[GPWW_BACKGROUND].right, 46, _tp.cls, TC_FROMSTRING, SA_CENTER);
 
 		/* And say where we are in that class */
 		SetDParam(0, _tp.current);
 		SetDParam(1, _tp.total);
-		DrawStringCentered(90, 58, STR_GENERATION_PROGRESS, TC_FROMSTRING);
+		DrawString(this->widget[GPWW_BACKGROUND].left, this->widget[GPWW_BACKGROUND].right, 58, STR_GENERATION_PROGRESS, TC_FROMSTRING, SA_CENTER);
 
 		this->SetDirty();
 	}
