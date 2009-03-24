@@ -57,7 +57,7 @@ static bool DrawScrollingStatusText(const NewsItem *ni, int pos, int width)
 	DrawPixelInfo *old_dpi = _cur_dpi;
 	_cur_dpi = &tmp_dpi;
 
-	int x = DoDrawString(buffer, pos, 0, TC_LIGHT_BLUE);
+	int x = DrawString(pos, pos + width, 0, buffer, TC_LIGHT_BLUE);
 	_cur_dpi = old_dpi;
 
 	return x > 0;
@@ -97,21 +97,21 @@ struct StatusBarWindow : Window {
 
 		this->DrawWidgets();
 		SetDParam(0, _date);
-		DrawStringCentered(70, 1, (_pause_game || _settings_client.gui.status_long_date) ? STR_00AF : STR_00AE, TC_FROMSTRING);
+		DrawString(this->widget[SBW_RIGHT].left + 1, this->widget[SBW_RIGHT].right - 1, 1, (_pause_game || _settings_client.gui.status_long_date) ? STR_00AF : STR_00AE, TC_FROMSTRING, SA_CENTER);
 
 		if (c != NULL) {
 			/* Draw company money */
 			SetDParam(0, c->money);
-			DrawStringCentered(this->widget[SBW_RIGHT].left + 70, 1, STR_0004, TC_FROMSTRING);
+			DrawString(this->widget[SBW_LEFT].left + 1, this->widget[SBW_LEFT].right - 1, 1, STR_0004, TC_FROMSTRING, SA_CENTER);
 		}
 
 		/* Draw status bar */
 		if (this->saving) { // true when saving is active
-			DrawStringCenteredTruncated(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_SAVING_GAME, TC_FROMSTRING);
+			DrawString(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_SAVING_GAME, TC_FROMSTRING, SA_CENTER);
 		} else if (_do_autosave) {
-			DrawStringCenteredTruncated(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_032F_AUTOSAVE, TC_FROMSTRING);
+			DrawString(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_032F_AUTOSAVE, TC_FROMSTRING, SA_CENTER);
 		} else if (_pause_game) {
-			DrawStringCenteredTruncated(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_0319_PAUSED, TC_FROMSTRING);
+			DrawString(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_0319_PAUSED, TC_FROMSTRING, SA_CENTER);
 		} else if (this->ticker_scroll > TICKER_STOP && FindWindowById(WC_NEWS_WINDOW, 0) == NULL && _statusbar_news_item.string_id != 0) {
 			/* Draw the scrolling news text */
 			if (!DrawScrollingStatusText(&_statusbar_news_item, this->ticker_scroll, this->widget[SBW_MIDDLE].right - this->widget[SBW_MIDDLE].left - 2)) {
@@ -119,14 +119,14 @@ struct StatusBarWindow : Window {
 				if (c != NULL) {
 					/* This is the default text */
 					SetDParam(0, c->index);
-					DrawStringCenteredTruncated(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_02BA, TC_FROMSTRING);
+					DrawString(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_02BA, TC_FROMSTRING, SA_CENTER);
 				}
 			}
 		} else {
 			if (c != NULL) {
 				/* This is the default text */
 				SetDParam(0, c->index);
-				DrawStringCenteredTruncated(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_02BA, TC_FROMSTRING);
+				DrawString(this->widget[SBW_MIDDLE].left + 1, this->widget[SBW_MIDDLE].right - 1, 1, STR_02BA, TC_FROMSTRING, SA_CENTER);
 			}
 		}
 

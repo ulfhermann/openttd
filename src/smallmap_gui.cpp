@@ -854,7 +854,7 @@ public:
 							ptm.y = (2*pta.y + ptb.y) / 3;
 							SetDParam(0, usage);
 							SetDParam(1, capacity);
-							DrawString(ptm.x, ptm.y, STR_NUM_RELATION , TC_BLACK);
+							DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
 						}
 					}
 				}
@@ -921,7 +921,7 @@ public:
 						y < dpi->top + dpi->height) {
 					/* And draw it. */
 					SetDParam(0, t->index);
-					DrawString(x, y, STR_2056, TC_WHITE);
+					DrawString(x, x + t->sign.width_2, y, STR_2056, TC_WHITE);
 				}
 			}
 		}
@@ -1048,9 +1048,9 @@ public:
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
+					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
 				} else {
-					DrawString(x + 11, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
+					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
 			} else if (this->map_type == SMT_ROUTEMAP) {
@@ -1058,15 +1058,15 @@ public:
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_GREY);
+					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_GREY);
 				} else {
-					DrawString(x + 11, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_BLACK);
+					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
 			} else {
 				/* Anything that is not an industry is using normal process */
 				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
-				DrawString(x + 11, y, tbl->legend, TC_FROMSTRING);
+				DrawString(x + 11, x + COLUMN_WIDTH - 1, y, tbl->legend, TC_FROMSTRING);
 			}
 			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
 

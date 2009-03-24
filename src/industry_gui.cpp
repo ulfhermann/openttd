@@ -189,6 +189,7 @@ public:
 		int y_str = this->widget[DPIW_INFOPANEL].top + 3;
 		const Widget *wi = &this->widget[DPIW_INFOPANEL];
 		int max_width = wi->right - wi->left - 4;
+		int right = wi->right - 1;
 
 		/* Raw industries might be prospected. Show this fact by changing the string
 		 * In Editor, you just build, while ingame, or you fund or you prospect */
@@ -213,25 +214,25 @@ public:
 			bool selected = this->selected_index == i + this->vscroll.pos;
 
 			if (this->index[i + this->vscroll.pos] == INVALID_INDUSTRYTYPE) {
-				DrawStringTruncated(20, y + offset, STR_MANY_RANDOM_INDUSTRIES, selected ? TC_WHITE : TC_ORANGE, max_width - 25);
+				DrawString(20, right, y + offset, STR_MANY_RANDOM_INDUSTRIES, selected ? TC_WHITE : TC_ORANGE);
 				continue;
 			}
 			const IndustrySpec *indsp = GetIndustrySpec(this->index[i + this->vscroll.pos]);
 
 			/* Draw the name of the industry in white is selected, otherwise, in orange */
-			DrawStringTruncated(20, y + offset, indsp->name, selected ? TC_WHITE : TC_ORANGE, max_width - 25);
+			DrawString(20, right, y + offset, indsp->name, selected ? TC_WHITE : TC_ORANGE);
 			GfxFillRect(x,     y + 1 + offset,  x + 10, y + 7 + offset, selected ? 15 : 0);
 			GfxFillRect(x + 1, y + 2 + offset,  x +  9, y + 6 + offset, indsp->map_colour);
 		}
 
 		if (this->selected_type == INVALID_INDUSTRYTYPE) {
-			DrawStringMultiLine(x_str, y_str, STR_RANDOM_INDUSTRIES_TIP, max_width, wi->bottom - wi->top - 40);
+			DrawStringMultiLine(x_str, x_str + max_width, y_str, wi->bottom, STR_RANDOM_INDUSTRIES_TIP);
 			return;
 		}
 
 		if (_game_mode != GM_EDITOR) {
 			SetDParam(0, indsp->GetConstructionCost());
-			DrawStringTruncated(x_str, y_str, STR_482F_COST, TC_FROMSTRING, max_width);
+			DrawString(x_str, right, y_str, STR_482F_COST, TC_FROMSTRING);
 			y_str += 11;
 		}
 
@@ -246,7 +247,7 @@ public:
 			SetDParam(p++, GetCargo(indsp->accepts_cargo[j])->name);
 			SetDParam(p++, GetCargoSuffix(j, CST_FUND, NULL, this->selected_type, indsp));
 		}
-		DrawStringTruncated(x_str, y_str, str, TC_FROMSTRING, max_width);
+		DrawString(x_str, right, y_str, str, TC_FROMSTRING);
 		y_str += 11;
 
 		/* Draw the produced cargos, if any. Otherwhise, will print "Nothing" */
@@ -260,7 +261,7 @@ public:
 			SetDParam(p++, GetCargo(indsp->produced_cargo[j])->name);
 			SetDParam(p++, GetCargoSuffix(j + 3, CST_FUND, NULL, this->selected_type, indsp));
 		}
-		DrawStringTruncated(x_str, y_str, str, TC_FROMSTRING, max_width);
+		DrawString(x_str, right, y_str, str, TC_FROMSTRING);
 		y_str += 11;
 
 		/* Get the additional purchase info text, if it has not already been */
@@ -279,7 +280,7 @@ public:
 		str = this->text[this->selected_index];
 		if (str != STR_NULL && str != STR_UNDEFINED) {
 			SetDParam(0, str);
-			DrawStringMultiLine(x_str, y_str, STR_JUST_STRING, max_width, wi->bottom - wi->top - 40);
+			DrawStringMultiLine(x_str, x_str + max_width, y_str, wi->bottom, STR_JUST_STRING);
 		}
 	}
 
@@ -487,14 +488,14 @@ public:
 				if (i->accepts_cargo[j] == CT_INVALID) continue;
 				has_accept = true;
 				if (first) {
-					DrawStringTruncated(2, y, STR_INDUSTRY_WINDOW_WAITING_FOR_PROCESSING, TC_FROMSTRING, this->widget[IVW_INFO].right - 2);
+					DrawString(2, this->widget[IVW_INFO].right, y, STR_INDUSTRY_WINDOW_WAITING_FOR_PROCESSING, TC_FROMSTRING);
 					y += 10;
 					first = false;
 				}
 				SetDParam(0, i->accepts_cargo[j]);
 				SetDParam(1, i->incoming_cargo_waiting[j]);
 				SetDParam(2, GetCargoSuffix(j, CST_VIEW, i, i->type, ind));
-				DrawStringTruncated(4, y, STR_INDUSTRY_WINDOW_WAITING_STOCKPILE_CARGO, TC_FROMSTRING, this->widget[IVW_INFO].right - 4);
+				DrawString(4, this->widget[IVW_INFO].right, y, STR_INDUSTRY_WINDOW_WAITING_STOCKPILE_CARGO, TC_FROMSTRING);
 				y += 10;
 			}
 		} else {
@@ -508,7 +509,7 @@ public:
 				SetDParam(p++, GetCargoSuffix(j, CST_VIEW, i, i->type, ind));
 			}
 			if (has_accept) {
-				DrawStringTruncated(2, y, str, TC_FROMSTRING, this->widget[IVW_INFO].right - 2);
+				DrawString(2, this->widget[IVW_INFO].right, y, str, TC_FROMSTRING);
 				y += 10;
 			}
 		}
@@ -518,7 +519,7 @@ public:
 			if (i->produced_cargo[j] == CT_INVALID) continue;
 			if (first) {
 				if (has_accept) y += 10;
-				DrawStringTruncated(2, y, STR_482A_PRODUCTION_LAST_MONTH, TC_FROMSTRING, this->widget[IVW_INFO].right - 2);
+				DrawString(2, this->widget[IVW_INFO].right, y, STR_482A_PRODUCTION_LAST_MONTH, TC_FROMSTRING);
 				y += 10;
 				this->production_offset_y = y;
 				first = false;
@@ -530,7 +531,7 @@ public:
 
 			SetDParam(3, i->last_month_pct_transported[j] * 100 >> 8);
 			uint x = 4 + (IsProductionAlterable(i) ? 30 : 0);
-			DrawStringTruncated(x, y, STR_482B_TRANSPORTED, TC_FROMSTRING, this->widget[IVW_INFO].right - x);
+			DrawString(x, this->widget[IVW_INFO].right, y, STR_482B_TRANSPORTED, TC_FROMSTRING);
 			/* Let's put out those buttons.. */
 			if (IsProductionAlterable(i)) {
 				DrawArrowButtons(5, y, COLOUR_YELLOW, (this->clicked_line == j + 1) ? this->clicked_button : 0,
@@ -550,7 +551,7 @@ public:
 
 					PrepareTextRefStackUsage(6);
 					/* Use all the available space left from where we stand up to the end of the window */
-					y += DrawStringMultiLine(2, y, message, wi->right - wi->left - 4, -1);
+					y = DrawStringMultiLine(wi->left + 2, wi->right -2, y, wi->bottom, message);
 					StopTextRefStackUsage();
 				}
 			}
@@ -903,7 +904,7 @@ public:
 			/* Drawing the right string */
 			StringID str = STR_INDUSTRYDIR_ITEM_NOPROD;
 			if (p != 1) str = (p == 5) ? STR_INDUSTRYDIR_ITEM : STR_INDUSTRYDIR_ITEM_TWO;
-			DrawStringTruncated(4, y, str, TC_FROMSTRING, this->widget[IDW_INDUSTRY_LIST].right - 4);
+			DrawString(4, this->widget[IDW_INDUSTRY_LIST].right, y, str, TC_FROMSTRING);
 
 			y += 10;
 		}

@@ -128,9 +128,16 @@ static const CheatEntry _cheats_ui[] = {
 static const Widget _cheat_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,   STR_018B_CLOSE_WINDOW},
 {    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   399,     0,    13, STR_CHEATS, STR_018C_WINDOW_TITLE_DRAG_THIS},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   399,    14,   169, 0x0,        STR_NULL},
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   399,    14,   169, 0x0,        STR_CHEATS_TIP},
 {   WIDGETS_END},
+};
+
+static const NWidgetPart _nested_cheat_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, 0),
+		NWidget(WWT_CAPTION, COLOUR_GREY, 1), SetDataTip(STR_CHEATS, STR_018C_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, 2), SetMinimalSize(400, 156), SetDataTip(0x0, STR_CHEATS_TIP), EndContainer(),
 };
 
 struct CheatWindow : Window {
@@ -144,7 +151,7 @@ struct CheatWindow : Window {
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
-		DrawStringMultiCenter(200, 25, STR_CHEATS_WARNING, width - 50);
+		DrawStringMultiLine(20, this->width - 20, 15, 45, STR_CHEATS_WARNING, SA_CENTER);
 
 		for (int i = 0, x = 0, y = 45; i != lengthof(_cheats_ui); i++) {
 			const CheatEntry *ce = &_cheats_ui[i];
@@ -186,7 +193,7 @@ struct CheatWindow : Window {
 				} break;
 			}
 
-			DrawString(50, y + 1, ce->str, TC_FROMSTRING);
+			DrawString(50, this->width, y + 1, ce->str, TC_FROMSTRING);
 
 			y += 12;
 		}
@@ -239,7 +246,7 @@ static const WindowDesc _cheats_desc(
 	240, 22, 400, 170, 400, 170,
 	WC_CHEATS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_cheat_widgets
+	_cheat_widgets, _nested_cheat_widgets, lengthof(_nested_cheat_widgets)
 );
 
 

@@ -30,27 +30,36 @@ StringID GetEngineCategoryName(EngineID engine)
 	}
 }
 
+/** Widgets used for the engine preview window */
+enum EnginePreviewWidgets {
+	EPW_CLOSE,      ///< Close button
+	EPW_CAPTION,    ///< Title bar/caption
+	EPW_BACKGROUND, ///< Background
+	EPW_NO,         ///< No button
+	EPW_YES,        ///< Yes button
+};
+
 static const Widget _engine_preview_widgets[] = {
-{   WWT_CLOSEBOX,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,    0,   10,    0,   13, STR_00C5,                                  STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,   11,  299,    0,   13, STR_8100_MESSAGE_FROM_VEHICLE_MANUFACTURE, STR_018C_WINDOW_TITLE_DRAG_THIS},
-{      WWT_PANEL,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,    0,  299,   14,  191, 0x0,                                       STR_NULL},
-{ WWT_PUSHTXTBTN,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,   85,  144,  172,  183, STR_00C9_NO,                               STR_NULL},
-{ WWT_PUSHTXTBTN,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,  155,  214,  172,  183, STR_00C8_YES,                              STR_NULL},
+{   WWT_CLOSEBOX,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,    0,   10,    0,   13, STR_00C5,                                  STR_018B_CLOSE_WINDOW},           // EPW_CLOSE
+{    WWT_CAPTION,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,   11,  299,    0,   13, STR_8100_MESSAGE_FROM_VEHICLE_MANUFACTURE, STR_018C_WINDOW_TITLE_DRAG_THIS}, // EPW_CAPTION
+{      WWT_PANEL,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,    0,  299,   14,  191, 0x0,                                       STR_NULL},                        // EPW_BACKGROUND
+{ WWT_PUSHTXTBTN,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,   85,  144,  172,  183, STR_00C9_NO,                               STR_NULL},                        // EPW_NO
+{ WWT_PUSHTXTBTN,  RESIZE_NONE,  COLOUR_LIGHT_BLUE,  155,  214,  172,  183, STR_00C8_YES,                              STR_NULL},                        // EPW_YES
 {   WIDGETS_END},
 };
 
 typedef void DrawEngineProc(int x, int y, EngineID engine, SpriteID pal);
-typedef void DrawEngineInfoProc(EngineID, int x, int y, int maxw);
+typedef void DrawEngineInfoProc(EngineID, int left, int right, int top, int bottom);
 
 struct DrawEngineInfo {
 	DrawEngineProc *engine_proc;
 	DrawEngineInfoProc *info_proc;
 };
 
-static void DrawTrainEngineInfo(EngineID engine, int x, int y, int maxw);
-static void DrawRoadVehEngineInfo(EngineID engine, int x, int y, int maxw);
-static void DrawShipEngineInfo(EngineID engine, int x, int y, int maxw);
-static void DrawAircraftEngineInfo(EngineID engine, int x, int y, int maxw);
+static void DrawTrainEngineInfo(EngineID engine, int left, int right, int top, int bottom);
+static void DrawRoadVehEngineInfo(EngineID engine, int left, int right, int top, int bottom);
+static void DrawShipEngineInfo(EngineID engine, int left, int right, int top, int bottom);
+static void DrawAircraftEngineInfo(EngineID engine, int left, int right, int top, int bottom);
 
 static const DrawEngineInfo _draw_engine_list[4] = {
 	{ DrawTrainEngine,    DrawTrainEngineInfo    },
@@ -71,25 +80,25 @@ struct EnginePreviewWindow : Window {
 
 		EngineID engine = this->window_number;
 		SetDParam(0, GetEngineCategoryName(engine));
-		DrawStringMultiCenter(150, 44, STR_8101_WE_HAVE_JUST_DESIGNED_A, 296);
+		DrawStringMultiLine(this->widget[EPW_BACKGROUND].left + 2, this->widget[EPW_BACKGROUND].right - 2, 18, 80, STR_8101_WE_HAVE_JUST_DESIGNED_A, SA_CENTER);
 
 		SetDParam(0, engine);
-		DrawStringCentered(this->width >> 1, 80, STR_ENGINE_NAME, TC_BLACK);
+		DrawString(this->widget[EPW_BACKGROUND].left + 2, this->widget[EPW_BACKGROUND].right - 2, 80, STR_ENGINE_NAME, TC_BLACK, SA_CENTER);
 
 		const DrawEngineInfo *dei = &_draw_engine_list[GetEngine(engine)->type];
 
 		int width = this->width;
 		dei->engine_proc(width >> 1, 100, engine, 0);
-		dei->info_proc(engine, width >> 1, 130, width - 52);
+		dei->info_proc(engine, this->widget[EPW_BACKGROUND].left + 26, this->widget[EPW_BACKGROUND].right - 26, 100, 170);
 	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case 4:
+			case EPW_YES:
 				DoCommandP(0, this->window_number, 0, CMD_WANT_ENGINE_PREVIEW);
 				/* Fallthrough */
-			case 3:
+			case EPW_NO:
 				delete this;
 				break;
 		}
@@ -121,7 +130,7 @@ uint GetTotalCapacityOfArticulatedParts(EngineID engine, VehicleType type)
 	return total;
 }
 
-static void DrawTrainEngineInfo(EngineID engine, int x, int y, int maxw)
+static void DrawTrainEngineInfo(EngineID engine, int left, int right, int top, int bottom)
 {
 	const Engine *e = GetEngine(engine);
 
@@ -139,10 +148,10 @@ static void DrawTrainEngineInfo(EngineID engine, int x, int y, int maxw)
 	} else {
 		SetDParam(5, CT_INVALID);
 	}
-	DrawStringMultiCenter(x, y, STR_VEHICLE_INFO_COST_WEIGHT_SPEED_POWER, maxw);
+	DrawStringMultiLine(left, right, top, bottom, STR_VEHICLE_INFO_COST_WEIGHT_SPEED_POWER, SA_CENTER);
 }
 
-static void DrawAircraftEngineInfo(EngineID engine, int x, int y, int maxw)
+static void DrawAircraftEngineInfo(EngineID engine, int left, int right, int top, int bottom)
 {
 	const Engine *e = GetEngine(engine);
 	CargoID cargo = e->GetDefaultCargoType();
@@ -154,7 +163,7 @@ static void DrawAircraftEngineInfo(EngineID engine, int x, int y, int maxw)
 		SetDParam(3, e->u.air.mail_capacity);
 		SetDParam(4, e->GetRunningCost());
 
-		DrawStringMultiCenter(x, y, STR_A02E_COST_MAX_SPEED_CAPACITY, maxw);
+		DrawStringMultiLine(left, right, top, bottom, STR_A02E_COST_MAX_SPEED_CAPACITY, SA_CENTER);
 	} else {
 		SetDParam(0, e->GetCost());
 		SetDParam(1, e->GetDisplayMaxSpeed());
@@ -162,11 +171,11 @@ static void DrawAircraftEngineInfo(EngineID engine, int x, int y, int maxw)
 		SetDParam(3, e->GetDisplayDefaultCapacity());
 		SetDParam(4, e->GetRunningCost());
 
-		DrawStringMultiCenter(x, y, STR_982E_COST_MAX_SPEED_CAPACITY, maxw);
+		DrawStringMultiLine(left, right, top, bottom, STR_982E_COST_MAX_SPEED_CAPACITY, SA_CENTER);
 	}
 }
 
-static void DrawRoadVehEngineInfo(EngineID engine, int x, int y, int maxw)
+static void DrawRoadVehEngineInfo(EngineID engine, int left, int right, int top, int bottom)
 {
 	const Engine *e = GetEngine(engine);
 
@@ -181,10 +190,10 @@ static void DrawRoadVehEngineInfo(EngineID engine, int x, int y, int maxw)
 		SetDParam(3, CT_INVALID);
 	}
 
-	DrawStringMultiCenter(x, y, STR_902A_COST_SPEED_RUNNING_COST, maxw);
+	DrawStringMultiLine(left, right, top, bottom, STR_902A_COST_SPEED_RUNNING_COST, SA_CENTER);
 }
 
-static void DrawShipEngineInfo(EngineID engine, int x, int y, int maxw)
+static void DrawShipEngineInfo(EngineID engine, int left, int right, int top, int bottom)
 {
 	const Engine *e = GetEngine(engine);
 
@@ -193,7 +202,7 @@ static void DrawShipEngineInfo(EngineID engine, int x, int y, int maxw)
 	SetDParam(2, e->GetDefaultCargoType());
 	SetDParam(3, e->GetDisplayDefaultCapacity());
 	SetDParam(4, e->GetRunningCost());
-	DrawStringMultiCenter(x, y, STR_982E_COST_MAX_SPEED_CAPACITY, maxw);
+	DrawStringMultiLine(left, right, top, bottom, STR_982E_COST_MAX_SPEED_CAPACITY, SA_CENTER);
 }
 
 void DrawNewsNewVehicleAvail(Window *w, const NewsItem *ni)
@@ -202,16 +211,16 @@ void DrawNewsNewVehicleAvail(Window *w, const NewsItem *ni)
 	const DrawEngineInfo *dei = &_draw_engine_list[GetEngine(engine)->type];
 
 	SetDParam(0, GetEngineCategoryName(engine));
-	DrawStringMultiCenter(w->width >> 1, 20, STR_NEW_VEHICLE_NOW_AVAILABLE, w->width - 2);
+	DrawStringMultiLine(1, w->width - 2, 0, 56, STR_NEW_VEHICLE_NOW_AVAILABLE, SA_CENTER);
 
 	GfxFillRect(25, 56, w->width - 25, w->height - 2, 10);
 
 	SetDParam(0, engine);
-	DrawStringMultiCenter(w->width >> 1, 57, STR_NEW_VEHICLE_TYPE, w->width - 2);
+	DrawStringMultiLine(1, w->width - 2, 56, 88, STR_NEW_VEHICLE_TYPE, SA_CENTER);
 
 	dei->engine_proc(w->width >> 1, 88, engine, 0);
 	GfxFillRect(25, 56, w->width - 56, 112, PALETTE_TO_STRUCT_GREY, FILLRECT_RECOLOUR);
-	dei->info_proc(engine, w->width >> 1, 129, w->width - 52);
+	dei->info_proc(engine, 26, w->width - 26, 100, 170);
 }
 
 

@@ -365,6 +365,7 @@ core/endian_func.hpp
 core/endian_type.hpp
 core/enum_type.hpp
 core/geometry_type.hpp
+core/math_func.cpp
 core/math_func.hpp
 core/mem_func.hpp
 core/overflowsafe_type.hpp
@@ -470,6 +471,7 @@ saveload/engine_sl.cpp
 saveload/gamelog_sl.cpp
 saveload/group_sl.cpp
 saveload/industry_sl.cpp
+saveload/labelmaps_sl.cpp
 saveload/linkgraph_sl.cpp
 saveload/map_sl.cpp
 saveload/misc_sl.cpp
@@ -509,6 +511,7 @@ table/palettes.h
 table/railtypes.h
 table/road_land.h
 table/roadveh_movement.h
+table/settings.h
 table/sprites.h
 table/station_land.h
 ../objs/langs/table/strings.h

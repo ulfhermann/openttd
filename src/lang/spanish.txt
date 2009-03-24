@@ -1714,12 +1714,10 @@ STR_2023_TRANSPORT_COMPANY_RATINGS                              :{BLACK}Ranking 
 STR_2024                                                        :{YELLOW}{COMPANY} {COMPANYNUM}: {ORANGE}{STRING}
 STR_2025_SUBSIDIES                                              :{WHITE}Subvenciones
 STR_2026_SUBSIDIES_ON_OFFER_FOR                                 :{BLACK}Se ofrecen subvenciones por llevar:
-STR_2027_FROM_TO                                                :{ORANGE}{STRING} desde {STRING} a {STRING}
-STR_2028_BY                                                     :{YELLOW} (antes de {DATE_SHORT})
+STR_2027_FROM_TO                                                :{ORANGE}{STRING} desde {STRING} a {STRING}{YELLOW} (antes de {DATE_SHORT})
 STR_202A_NONE                                                   :{ORANGE}Ninguna
 STR_202B_SERVICES_ALREADY_SUBSIDISED                            :{BLACK}Líneas ya subvencionadas:
-STR_202C_FROM_TO                                                :{ORANGE}{STRING} desde {STATION} a {STATION}{YELLOW} ({COMPANY}
-STR_202D_UNTIL                                                  :{YELLOW}, hasta {DATE_SHORT})
+STR_202C_FROM_TO                                                :{ORANGE}{STRING} desde {STATION} a {STATION}{YELLOW} ({COMPANY}{YELLOW}, hasta {DATE_SHORT})
 STR_202E_OFFER_OF_SUBSIDY_EXPIRED                               :{BLACK}{BIGFONT}Oferta de subsidio caducada:{}{}{STRING} de {STRING} a {STRING} ya no conlleva una subvención.
 STR_202F_SUBSIDY_WITHDRAWN_SERVICE                              :{BLACK}{BIGFONT}Subvención retirada:{}{}Servicio de {STRING} desde {STATION} a {STATION} ya no está subvencionado.
 STR_2030_SERVICE_SUBSIDY_OFFERED                                :{BLACK}{BIGFONT}Se ofrece subvención en la línea:{}{}El primer {STRING} que cubra la línea desde {STRING} a {STRING} recibirá una subvención durante un año por parte de las autoridades locales!
@@ -3171,15 +3169,16 @@ STR_NEWGRF_BROKEN                                               :{WHITE}Problema
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Cambia la longitud del vehículo para '{1:ENGINE}' cuando no está dentro de un depósito
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Tren '{VEHICLE}' perteneciente a '{COMPANY}' tiene una longitud incorrecta. Puede ser debido a problemas con los NewGRF. El juego puede fallar.
 
+STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{STRING}' da información incorrecta.
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Información de carga/recarga para '{1:ENGINE}' difiere de la lista de compra después de la construcción. Esto puede causar que la autorenovación/cambio falle.
 
 STR_LOADGAME_REMOVED_TRAMS                                      :{WHITE}El juego ha sido grabado en una versión sin soporte de tranvía. Todos los tranvías serán eliminados.
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Moneda personalizada
 STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Tasa de cambio: {ORANGE}{CURRENCY} = £ {COMMA}
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Separador:
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefijo:
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sufijo:
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Separador: {STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefijo: {STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sufijo: {STRING}
 STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Cambio al Euro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Cambio al Euro: {ORANGE}nunca
 STR_CURRENCY_PREVIEW                                            :{LTBLUE}Previa: {ORANGE}{CURRENCY}
@@ -3581,8 +3580,8 @@ STR_AI_RESET                                                    :{BLACK}Reinicia
 STR_AI_HUMAN_PLAYER                                             :Jugador Humano
 STR_AI_RANDOM_AI                                                :IA aleatoria
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}Parámetros de la IA
-STR_AI_AUTHOR                                                   :Autor:
-STR_AI_VERSION                                                  :Versión:
+STR_AI_AUTHOR                                                   :Autor: {STRING}
+STR_AI_VERSION                                                  :Versión: {NUM}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Una de las AI ejecutadas ha fallado. Por favor, reporte el fallo al autor de la misma desde la ventana AI Debug.
 ########
 

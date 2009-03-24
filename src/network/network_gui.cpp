@@ -240,7 +240,7 @@ protected:
 		if (highlight) GfxFillRect(this->widget[NGWW_NAME].left + 1, y - 2, this->widget[NGWW_INFO].right - 1, y + 9, 10);
 
 		SetDParamStr(0, cur_item->info.server_name);
-		DrawStringTruncated(this->widget[NGWW_NAME].left + 5, y, STR_JUST_RAW_STRING, TC_BLACK, this->widget[NGWW_NAME].right - this->widget[NGWW_NAME].left - 5);
+		DrawString(this->widget[NGWW_NAME].left + 5, this->widget[NGWW_NAME].right, y, STR_JUST_RAW_STRING, TC_BLACK);
 
 		/* only draw details if the server is online */
 		if (cur_item->online) {
@@ -248,13 +248,13 @@ protected:
 			SetDParam(1, cur_item->info.clients_max);
 			SetDParam(2, cur_item->info.companies_on);
 			SetDParam(3, cur_item->info.companies_max);
-			DrawStringCentered(this->widget[NGWW_CLIENTS].left + 39, y, STR_NETWORK_GENERAL_ONLINE, TC_GOLD);
+			DrawString(this->widget[NGWW_CLIENTS].left, this->widget[NGWW_CLIENTS].right, y, STR_NETWORK_GENERAL_ONLINE, TC_GOLD, SA_CENTER);
 
 			/* map size */
 			if (!this->IsWidgetHidden(NGWW_MAPSIZE)) {
 				SetDParam(0, cur_item->info.map_width);
 				SetDParam(1, cur_item->info.map_height);
-				DrawStringCentered(this->widget[NGWW_MAPSIZE].left + 39, y, STR_NETWORK_MAP_SIZE_SHORT, TC_BLACK);
+				DrawString(this->widget[NGWW_MAPSIZE].left, this->widget[NGWW_MAPSIZE].right, y, STR_NETWORK_MAP_SIZE_SHORT, TC_BLACK, SA_CENTER);
 			}
 
 			/* current date */
@@ -262,7 +262,7 @@ protected:
 				YearMonthDay ymd;
 				ConvertDateToYMD(cur_item->info.game_date, &ymd);
 				SetDParam(0, ymd.year);
-				DrawStringCentered(this->widget[NGWW_DATE].left + 29, y, STR_JUST_INT, TC_BLACK);
+				DrawString(this->widget[NGWW_DATE].left, this->widget[NGWW_DATE].right, y, STR_JUST_INT, TC_BLACK, SA_CENTER);
 			}
 
 			/* number of years the game is running */
@@ -271,7 +271,7 @@ protected:
 				ConvertDateToYMD(cur_item->info.game_date, &ymd_cur);
 				ConvertDateToYMD(cur_item->info.start_date, &ymd_start);
 				SetDParam(0, ymd_cur.year - ymd_start.year);
-				DrawStringCentered(this->widget[NGWW_YEARS].left + 29, y, STR_JUST_INT, TC_BLACK);
+				DrawString(this->widget[NGWW_YEARS].left, this->widget[NGWW_YEARS].right, y, STR_JUST_INT, TC_BLACK, SA_CENTER);
 			}
 
 			/* draw a lock if the server is password protected */
@@ -307,6 +307,22 @@ protected:
 public:
 	NetworkGameWindow(const WindowDesc *desc) : QueryStringBaseWindow(NETWORK_NAME_LENGTH, desc)
 	{
+		this->widget[NGWW_CLIENTS].left = this->widget[NGWW_NAME].right + 1;
+		this->widget[NGWW_MAPSIZE].left = this->widget[NGWW_NAME].right + 1;
+		this->widget[NGWW_DATE].left = this->widget[NGWW_NAME].right + 1;
+		this->widget[NGWW_YEARS].left = this->widget[NGWW_NAME].right + 1;
+
+		this->widget[NGWW_CLIENTS].right = this->widget[NGWW_INFO].left - 1;
+		this->widget[NGWW_MAPSIZE].right = this->widget[NGWW_INFO].left - 1;
+		this->widget[NGWW_DATE].right = this->widget[NGWW_INFO].left - 1 - 20;
+		this->widget[NGWW_YEARS].right = this->widget[NGWW_INFO].left - 1 - 20;
+
+		this->widget[NGWW_NAME].display_flags &= ~RESIZE_LRTB;
+		this->widget[NGWW_CLIENTS].display_flags &= ~RESIZE_LRTB;
+		this->widget[NGWW_MAPSIZE].display_flags &= ~RESIZE_LRTB;
+		this->widget[NGWW_DATE].display_flags &= ~RESIZE_LRTB;
+		this->widget[NGWW_YEARS].display_flags &= ~RESIZE_LRTB;
+
 		ttd_strlcpy(this->edit_str_buf, _settings_client.network.client_name, this->edit_str_size);
 		this->afilter = CS_ALPHANUMERAL;
 		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, 120);
@@ -365,7 +381,7 @@ public:
 		/* Edit box to set client name */
 		this->DrawEditBox(NGWW_CLIENT);
 
-		DrawString(this->widget[NGWW_CLIENT].left - 100, 23, STR_NETWORK_PLAYER_NAME, TC_GOLD);
+		DrawString(0, this->widget[NGWW_CLIENT].left - 5, 23, STR_NETWORK_PLAYER_NAME, TC_GOLD, SA_RIGHT);
 
 		/* Sort based on widgets: name, clients, compatibility */
 		switch (this->servers.SortType()) {
@@ -394,71 +410,71 @@ public:
 		/* Draw the right menu */
 		GfxFillRect(this->widget[NGWW_DETAILS].left + 1, 43, this->widget[NGWW_DETAILS].right - 1, 92, 157);
 		if (sel == NULL) {
-			DrawStringCentered(this->widget[NGWW_DETAILS].left + 115, 58, STR_NETWORK_GAME_INFO, TC_FROMSTRING);
+			DrawString(this->widget[NGWW_DETAILS].left + 1, this->widget[NGWW_DETAILS].right - 1, 58, STR_NETWORK_GAME_INFO, TC_FROMSTRING, SA_CENTER);
 		} else if (!sel->online) {
 			SetDParamStr(0, sel->info.server_name);
-			DrawStringCentered(this->widget[NGWW_DETAILS].left + 115, 68, STR_JUST_RAW_STRING, TC_ORANGE); // game name
+			DrawString(this->widget[NGWW_DETAILS].left + 1, this->widget[NGWW_DETAILS].right - 1, 68, STR_JUST_RAW_STRING, TC_ORANGE, SA_CENTER); // game name
 
-			DrawStringCentered(this->widget[NGWW_DETAILS].left + 115, 132, STR_NETWORK_SERVER_OFFLINE, TC_FROMSTRING); // server offline
+			DrawString(this->widget[NGWW_DETAILS].left + 1, this->widget[NGWW_DETAILS].right - 1, 132, STR_NETWORK_SERVER_OFFLINE, TC_FROMSTRING, SA_CENTER); // server offline
 		} else { // show game info
 			uint16 y = 100;
 			const uint16 x = this->widget[NGWW_DETAILS].left + 5;
 
-			DrawStringCentered(this->widget[NGWW_DETAILS].left + 115, 48, STR_NETWORK_GAME_INFO, TC_FROMSTRING);
+			DrawString(this->widget[NGWW_DETAILS].left + 1, this->widget[NGWW_DETAILS].right - 1, 48, STR_NETWORK_GAME_INFO, TC_FROMSTRING, SA_CENTER);
 
 
 			SetDParamStr(0, sel->info.server_name);
-			DrawStringCenteredTruncated(this->widget[NGWW_DETAILS].left, this->widget[NGWW_DETAILS].right, 62, STR_JUST_RAW_STRING, TC_ORANGE); // game name
+			DrawString(this->widget[NGWW_DETAILS].left, this->widget[NGWW_DETAILS].right, 62, STR_JUST_RAW_STRING, TC_ORANGE, SA_CENTER); // game name
 
 			SetDParamStr(0, sel->info.map_name);
-			DrawStringCenteredTruncated(this->widget[NGWW_DETAILS].left, this->widget[NGWW_DETAILS].right, 74, STR_JUST_RAW_STRING, TC_BLACK); // map name
+			DrawString(this->widget[NGWW_DETAILS].left, this->widget[NGWW_DETAILS].right, 74, STR_JUST_RAW_STRING, TC_BLACK, SA_CENTER); // map name
 
 			SetDParam(0, sel->info.clients_on);
 			SetDParam(1, sel->info.clients_max);
 			SetDParam(2, sel->info.companies_on);
 			SetDParam(3, sel->info.companies_max);
-			DrawString(x, y, STR_NETWORK_CLIENTS, TC_GOLD);
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_CLIENTS, TC_GOLD);
 			y += 10;
 
 			SetDParam(0, STR_NETWORK_LANG_ANY + sel->info.server_lang);
-			DrawString(x, y, STR_NETWORK_LANGUAGE, TC_GOLD); // server language
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_LANGUAGE, TC_GOLD); // server language
 			y += 10;
 
 			SetDParam(0, STR_TEMPERATE_LANDSCAPE + sel->info.map_set);
-			DrawString(x, y, STR_NETWORK_TILESET, TC_GOLD); // tileset
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_TILESET, TC_GOLD); // tileset
 			y += 10;
 
 			SetDParam(0, sel->info.map_width);
 			SetDParam(1, sel->info.map_height);
-			DrawString(x, y, STR_NETWORK_MAP_SIZE, TC_GOLD); // map size
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_MAP_SIZE, TC_GOLD); // map size
 			y += 10;
 
 			SetDParamStr(0, sel->info.server_revision);
-			DrawString(x, y, STR_NETWORK_SERVER_VERSION, TC_GOLD); // server version
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_SERVER_VERSION, TC_GOLD); // server version
 			y += 10;
 
 			SetDParamStr(0, sel->info.hostname);
 			SetDParam(1, sel->port);
-			DrawString(x, y, STR_NETWORK_SERVER_ADDRESS, TC_GOLD); // server address
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_SERVER_ADDRESS, TC_GOLD); // server address
 			y += 10;
 
 			SetDParam(0, sel->info.start_date);
-			DrawString(x, y, STR_NETWORK_START_DATE, TC_GOLD); // start date
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_START_DATE, TC_GOLD); // start date
 			y += 10;
 
 			SetDParam(0, sel->info.game_date);
-			DrawString(x, y, STR_NETWORK_CURRENT_DATE, TC_GOLD); // current date
+			DrawString(x, this->widget[NGWW_DETAILS].right, y, STR_NETWORK_CURRENT_DATE, TC_GOLD); // current date
 			y += 10;
 
 			y += 2;
 
 			if (!sel->info.compatible) {
-				DrawStringCentered(this->widget[NGWW_DETAILS].left + 115, y, sel->info.version_compatible ? STR_NETWORK_GRF_MISMATCH : STR_NETWORK_VERSION_MISMATCH, TC_FROMSTRING); // server mismatch
+				DrawString(this->widget[NGWW_DETAILS].left + 1, this->widget[NGWW_DETAILS].right - 1, y, sel->info.version_compatible ? STR_NETWORK_GRF_MISMATCH : STR_NETWORK_VERSION_MISMATCH, TC_FROMSTRING, SA_CENTER); // server mismatch
 			} else if (sel->info.clients_on == sel->info.clients_max) {
 				/* Show: server full, when clients_on == max_clients */
-				DrawStringCentered(this->widget[NGWW_DETAILS].left + 115, y, STR_NETWORK_SERVER_FULL, TC_FROMSTRING); // server full
+				DrawString(this->widget[NGWW_DETAILS].left + 1, this->widget[NGWW_DETAILS].right - 1, y, STR_NETWORK_SERVER_FULL, TC_FROMSTRING, SA_CENTER); // server full
 			} else if (sel->info.use_password) {
-				DrawStringCentered(this->widget[NGWW_DETAILS].left + 115, y, STR_NETWORK_PASSWORD, TC_FROMSTRING); // password warning
+				DrawString(this->widget[NGWW_DETAILS].left + 1, this->widget[NGWW_DETAILS].right - 1, y, STR_NETWORK_PASSWORD, TC_FROMSTRING, SA_CENTER); // password warning
 			}
 
 			y += 10;
@@ -777,7 +793,7 @@ static const Widget _network_game_window_widgets[] = {
 {      WWT_PANEL,   RESIZE_RB,     COLOUR_LIGHT_BLUE,     0,   449,    14,   263, 0x0,                              STR_NULL},                         // NGWW_MAIN
 
 {       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,     9,    85,    23,    35, STR_NETWORK_CONNECTION,           STR_NULL},                         // NGWW_CONNECTION
-{ WWT_DROPDOWNIN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,    90,   181,    22,    33, STR_NETWORK_LAN_INTERNET_COMBO,   STR_NETWORK_CONNECTION_TIP},       // NGWW_CONN_BTN
+{   WWT_DROPDOWN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,    90,   181,    22,    33, STR_NETWORK_LAN_INTERNET_COMBO,   STR_NETWORK_CONNECTION_TIP},       // NGWW_CONN_BTN
 
 {    WWT_EDITBOX,   RESIZE_LR,     COLOUR_LIGHT_BLUE,   290,   440,    22,    33, STR_NETWORK_PLAYER_NAME_OSKTITLE, STR_NETWORK_ENTER_NAME_TIP},       // NGWW_CLIENT
 
@@ -813,11 +829,119 @@ static const Widget _network_game_window_widgets[] = {
 {   WIDGETS_END},
 };
 
+/* Generates incorrect display_flags for widgets NGWW_NAME, and incorrect
+ * display_flags and/or left/right side for the overlapping widgets
+ * NGWW_CLIENTS through NGWW_YEARS.
+ */
+NWidgetPart _nested_network_game_widgets[] = {
+	/* TOP */
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE, NGWW_CLOSE),
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE, NGWW_CAPTION), SetMinimalSize(439, 14), SetDataTip(STR_NETWORK_MULTIPLAYER, STR_NULL), // XXX Add default caption tooltip!
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NGWW_MAIN),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 8), SetResize(1, 0),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(9, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_SPACER), SetMinimalSize(0,1), // Text is one pixel further down
+				NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NGWW_CONNECTION), SetMinimalSize(77, 13), SetDataTip(STR_NETWORK_CONNECTION, STR_NULL),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(4, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(WWT_DROPDOWN, COLOUR_LIGHT_BLUE, NGWW_CONN_BTN), SetMinimalSize(92, 12),
+									SetDataTip(STR_NETWORK_LAN_INTERNET_COMBO, STR_NETWORK_CONNECTION_TIP),
+				NWidget(NWID_SPACER), SetMinimalSize(0,2), // Text ends two pixels further down
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(108, 0), SetFill(1,0), SetResize(1,0),
+			NWidget(NWID_VERTICAL),
+				NWidget(WWT_EDITBOX, COLOUR_LIGHT_BLUE, NGWW_CLIENT), SetMinimalSize(151, 12),
+									SetDataTip(STR_NETWORK_PLAYER_NAME_OSKTITLE, STR_NETWORK_ENTER_NAME_TIP),
+				NWidget(NWID_SPACER), SetMinimalSize(0,2), // Text ends two pixels further down
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(9, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 6), SetResize(1, 0),
+		NWidget(NWID_HORIZONTAL),
+			/* LEFT SIDE */
+			NWidget(NWID_SPACER), SetMinimalSize(10, 0), SetResize(0, 1),
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_NAME), SetMinimalSize(61, 12), SetResize(1, 0),
+									SetDataTip(STR_NETWORK_GAME_NAME, STR_NETWORK_GAME_NAME_TIP),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_CLIENTS), SetMinimalSize(20, 12),
+									SetDataTip(STR_NETWORK_CLIENTS_CAPTION, STR_NETWORK_CLIENTS_CAPTION_TIP),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_MAPSIZE), SetMinimalSize(20, 12),
+									SetDataTip(STR_NETWORK_MAP_SIZE_CAPTION, STR_NETWORK_MAP_SIZE_CAPTION_TIP),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_DATE), SetMinimalSize(20, 12), SetDataTip(STR_NETWORK_DATE_CAPTION, STR_NETWORK_DATE_CAPTION_TIP),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_YEARS), SetMinimalSize(20, 12), SetDataTip(STR_NETWORK_YEARS_CAPTION, STR_NETWORK_YEARS_CAPTION_TIP),
+					NWidget(NWID_SPACER), SetMinimalSize(0, 0), SetFill(0, 0), SetResize(1, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_INFO), SetMinimalSize(40, 12), SetDataTip(STR_EMPTY, STR_NETWORK_INFO_ICONS_TIP),
+				EndContainer(),
+				NWidget(WWT_MATRIX, COLOUR_LIGHT_BLUE, NGWW_MATRIX), SetMinimalSize(181, 155), SetResize(1,1),
+									SetDataTip((11 << 8) + 1, STR_NETWORK_CLICK_GAME_TO_SELECT),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2), SetResize(1, 0),
+				NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NGWW_LASTJOINED_LABEL), SetMinimalSize(181, 12), SetFill(1,0),
+									SetDataTip(STR_NETWORK_LAST_JOINED_SERVER, STR_NULL), SetResize(1, 0),
+				NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NGWW_LASTJOINED), SetMinimalSize(181, 14), SetFill(1,0), SetResize(1, 0),
+									SetDataTip(0x0, STR_NETWORK_CLICK_TO_SELECT_LAST),
+				EndContainer(),
+			EndContainer(),
+			NWidget(NWID_VERTICAL),
+				NWidget(WWT_SCROLLBAR, COLOUR_LIGHT_BLUE, NGWW_SCROLLBAR), SetMinimalSize(12, 165),
+				NWidget(NWID_SPACER), SetMinimalSize(0,28),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(7, 0), SetResize(0, 1),
+			/* RIGHT SIDE */
+			NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NGWW_DETAILS),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 155), SetResize(0, 1),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetMinimalSize(120, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_NEWGRF), SetMinimalSize(106, 12), SetDataTip(STR_NEWGRF_SETTINGS_BUTTON, STR_NULL),
+					NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 6),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_JOIN), SetMinimalSize(101, 12), SetDataTip(STR_NETWORK_JOIN_GAME, STR_NULL),
+					NWidget(NWID_SPACER), SetMinimalSize(14, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_REFRESH), SetMinimalSize(106, 12), SetDataTip(STR_NETWORK_REFRESH, STR_NETWORK_REFRESH_TIP),
+					NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 10),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(9, 0), SetResize(0, 1),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 9), SetResize(1, 0),
+		/* BOTTOM */
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(10, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_FIND), SetMinimalSize(101, 12), SetDataTip(STR_NETWORK_FIND_SERVER, STR_NETWORK_FIND_SERVER_TIP),
+					NWidget(NWID_SPACER), SetMinimalSize(7, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_ADD), SetMinimalSize(101, 12), SetDataTip(STR_NETWORK_ADD_SERVER, STR_NETWORK_ADD_SERVER_TIP),
+					NWidget(NWID_SPACER), SetMinimalSize(7, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_START), SetMinimalSize(101, 12), SetDataTip(STR_NETWORK_START_SERVER, STR_NETWORK_START_SERVER_TIP),
+					NWidget(NWID_SPACER), SetMinimalSize(7, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NGWW_CANCEL), SetMinimalSize(101, 12), SetDataTip(STR_012E_CANCEL, STR_NULL),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetMinimalSize(0,6),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(3, 0), SetResize(1, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 6),
+				NWidget(WWT_RESIZEBOX, COLOUR_LIGHT_BLUE, NGWW_RESIZE),
+			EndContainer(),
+		EndContainer(),
+	EndContainer(),
+};
+
 static const WindowDesc _network_game_window_desc(
 	WDP_CENTER, WDP_CENTER, 450, 264, 780, 264,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_network_game_window_widgets
+	_network_game_window_widgets, _nested_network_game_widgets, lengthof(_nested_network_game_widgets)
 );
 
 void ShowNetworkGameWindow()
@@ -906,20 +1030,21 @@ struct NetworkStartServerWindow : public QueryStringBaseWindow {
 		this->DrawEditBox(NSSW_GAMENAME);
 
 		/* if password is set, draw red '*' next to 'Set password' button */
-		if (!StrEmpty(_settings_client.network.server_password)) DoDrawString("*", 408, 23, TC_RED);
+		if (!StrEmpty(_settings_client.network.server_password)) DrawString(408, this->width - 2, 23, "*", TC_RED);
 
 		/* draw list of maps */
-		GfxFillRect(11, 63, 258, 215, 0xD7);  // black background of maps list
+		GfxFillRect(this->widget[NSSW_SELMAP].left + 1, this->widget[NSSW_SELMAP].top + 1, this->widget[NSSW_SELMAP].right - 1, this->widget[NSSW_SELMAP].bottom - 1, 0xD7);  // black background of maps list
 
 		for (uint pos = this->vscroll.pos; pos < _fios_items.Length() + 1; pos++) {
 			item = _fios_items.Get(pos - 1);
-			if (item == this->map || (pos == 0 && this->map == NULL))
-				GfxFillRect(11, y - 1, 258, y + 10, 155); // show highlighted item with a different colour
+			if (item == this->map || (pos == 0 && this->map == NULL)) {
+				GfxFillRect(this->widget[NSSW_SELMAP].left + 1, y - 1, this->widget[NSSW_SELMAP].right - 1, y + 10, 155); // show highlighted item with a different colour
+			}
 
 			if (pos == 0) {
-				DrawString(14, y, STR_4010_GENERATE_RANDOM_NEW_GAME, TC_DARK_GREEN);
+				DrawString(this->widget[NSSW_SELMAP].left + 4, this->widget[NSSW_SELMAP].right - 4, y, STR_4010_GENERATE_RANDOM_NEW_GAME, TC_DARK_GREEN);
 			} else {
-				DoDrawString(item->title, 14, y, _fios_colours[item->type] );
+				DrawString(this->widget[NSSW_SELMAP].left + 4, this->widget[NSSW_SELMAP].right - 4, y, item->title, _fios_colours[item->type] );
 			}
 			y += NSSWND_ROWSIZE;
 
@@ -1108,26 +1233,26 @@ static const Widget _network_start_server_window_widgets[] = {
 {  WWT_SCROLLBAR,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   259,   270,    63,   215, 0x0,                                STR_0190_SCROLL_BAR_SCROLLS_LIST},
 
 /* Combo/selection boxes to control Connection Type / Max Clients / Max Companies / Max Observers / Language */
-{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   419,    63,    75, STR_NETWORK_CONNECTION,             STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,    77,    88, STR_NETWORK_LAN_INTERNET_COMBO,     STR_NETWORK_CONNECTION_TIP},           // NSSW_CONNTYPE_BTN
+{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,    63,    75, STR_NETWORK_CONNECTION,             STR_NULL},
+{   WWT_DROPDOWN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,    77,    88, STR_NETWORK_LAN_INTERNET_COMBO,     STR_NETWORK_CONNECTION_TIP},           // NSSW_CONNTYPE_BTN
 
-{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   419,    95,   107, STR_NETWORK_NUMBER_OF_CLIENTS,      STR_NULL},
+{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,    95,   107, STR_NETWORK_NUMBER_OF_CLIENTS,      STR_NULL},
 {     WWT_IMGBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   291,   109,   120, SPR_ARROW_DOWN,                     STR_NETWORK_NUMBER_OF_CLIENTS_TIP},    // NSSW_CLIENTS_BTND
 { WWT_PUSHTXTBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   292,   397,   109,   120, STR_NETWORK_CLIENTS_SELECT,         STR_NETWORK_NUMBER_OF_CLIENTS_TIP},    // NSSW_CLIENTS_TXT
 {     WWT_IMGBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   398,   410,   109,   120, SPR_ARROW_UP,                       STR_NETWORK_NUMBER_OF_CLIENTS_TIP},    // NSSW_CLIENTS_BTNU
 
-{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   419,   127,   139, STR_NETWORK_NUMBER_OF_COMPANIES,    STR_NULL},
+{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,   127,   139, STR_NETWORK_NUMBER_OF_COMPANIES,    STR_NULL},
 {     WWT_IMGBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   291,   141,   152, SPR_ARROW_DOWN,                     STR_NETWORK_NUMBER_OF_COMPANIES_TIP},  // NSSW_COMPANIES_BTND
 { WWT_PUSHTXTBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   292,   397,   141,   152, STR_NETWORK_COMPANIES_SELECT,       STR_NETWORK_NUMBER_OF_COMPANIES_TIP},  // NSSW_COMPANIES_TXT
 {     WWT_IMGBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   398,   410,   141,   152, SPR_ARROW_UP,                       STR_NETWORK_NUMBER_OF_COMPANIES_TIP},  // NSSW_COMPANIES_BTNU
 
-{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   419,   159,   171, STR_NETWORK_NUMBER_OF_SPECTATORS,   STR_NULL},
+{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,   159,   171, STR_NETWORK_NUMBER_OF_SPECTATORS,   STR_NULL},
 {     WWT_IMGBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   291,   173,   184, SPR_ARROW_DOWN,                     STR_NETWORK_NUMBER_OF_SPECTATORS_TIP}, // NSSW_SPECTATORS_BTND
 { WWT_PUSHTXTBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   292,   397,   173,   184, STR_NETWORK_SPECTATORS_SELECT,      STR_NETWORK_NUMBER_OF_SPECTATORS_TIP}, // NSSW_SPECTATORS_TXT
 {     WWT_IMGBTN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   398,   410,   173,   184, SPR_ARROW_UP,                       STR_NETWORK_NUMBER_OF_SPECTATORS_TIP}, // NSSW_SPECTATORS_BTNU
 
-{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   419,   191,   203, STR_NETWORK_LANGUAGE_SPOKEN,        STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,   205,   216, STR_NETWORK_LANGUAGE_COMBO,         STR_NETWORK_LANGUAGE_TIP},             // NSSW_LANGUAGE_BTN
+{       WWT_TEXT,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,   191,   203, STR_NETWORK_LANGUAGE_SPOKEN,        STR_NULL},
+{   WWT_DROPDOWN,   RESIZE_NONE,   COLOUR_LIGHT_BLUE,   280,   410,   205,   216, STR_NETWORK_LANGUAGE_COMBO,         STR_NETWORK_LANGUAGE_TIP},             // NSSW_LANGUAGE_BTN
 
 /* Buttons Start / Load / Cancel */
 { WWT_PUSHTXTBTN,   RESIZE_NONE,   COLOUR_WHITE,         40,   140,   224,   235, STR_NETWORK_START_GAME,             STR_NETWORK_START_GAME_TIP},           // NSSW_START
@@ -1215,7 +1340,7 @@ struct NetworkLobbyWindow : public Window {
 				GfxFillRect(11, y - 1, 154, y + 10, 10); // show highlighted item with a different colour
 			}
 
-			DoDrawStringTruncated(this->company_info[company].company_name, 13, y, TC_BLACK, 135 - 13);
+			DrawString(13, 135, y, this->company_info[company].company_name, TC_BLACK);
 			if (this->company_info[company].use_password != 0) DrawSprite(SPR_LOCK, PAL_NONE, 135, y);
 
 			/* If the company's income was positive puts a green dot else a red dot */
@@ -1229,41 +1354,40 @@ struct NetworkLobbyWindow : public Window {
 
 		/* Draw info about selected company when it is selected in the left window */
 		GfxFillRect(174, 39, 403, 75, 157);
-		DrawStringCentered(290, 50, STR_NETWORK_COMPANY_INFO, TC_FROMSTRING);
+		DrawString(this->widget[NLWW_DETAILS].left + 10, this->widget[NLWW_DETAILS].right - 10, 50, STR_NETWORK_COMPANY_INFO, TC_FROMSTRING, SA_CENTER);
 		if (this->company != INVALID_COMPANY && !StrEmpty(this->company_info[this->company].company_name)) {
-			const uint x = 183;
-			const uint trunc_width = this->widget[NLWW_DETAILS].right - x;
+			const uint x = this->widget[NLWW_DETAILS].left + 10;
 			y = 80;
 
 			SetDParam(0, gi->clients_on);
 			SetDParam(1, gi->clients_max);
 			SetDParam(2, gi->companies_on);
 			SetDParam(3, gi->companies_max);
-			DrawString(x, y, STR_NETWORK_CLIENTS, TC_GOLD);
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_CLIENTS, TC_GOLD);
 			y += 10;
 
 			SetDParamStr(0, this->company_info[this->company].company_name);
-			DrawStringTruncated(x, y, STR_NETWORK_COMPANY_NAME, TC_GOLD, trunc_width);
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_COMPANY_NAME, TC_GOLD);
 			y += 10;
 
 			SetDParam(0, this->company_info[this->company].inaugurated_year);
-			DrawString(x, y, STR_NETWORK_INAUGURATION_YEAR, TC_GOLD); // inauguration year
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_INAUGURATION_YEAR, TC_GOLD); // inauguration year
 			y += 10;
 
 			SetDParam(0, this->company_info[this->company].company_value);
-			DrawString(x, y, STR_NETWORK_VALUE, TC_GOLD); // company value
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_VALUE, TC_GOLD); // company value
 			y += 10;
 
 			SetDParam(0, this->company_info[this->company].money);
-			DrawString(x, y, STR_NETWORK_CURRENT_BALANCE, TC_GOLD); // current balance
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_CURRENT_BALANCE, TC_GOLD); // current balance
 			y += 10;
 
 			SetDParam(0, this->company_info[this->company].income);
-			DrawString(x, y, STR_NETWORK_LAST_YEARS_INCOME, TC_GOLD); // last year's income
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_LAST_YEARS_INCOME, TC_GOLD); // last year's income
 			y += 10;
 
 			SetDParam(0, this->company_info[this->company].performance);
-			DrawString(x, y, STR_NETWORK_PERFORMANCE, TC_GOLD); // performance
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_PERFORMANCE, TC_GOLD); // performance
 			y += 10;
 
 			SetDParam(0, this->company_info[this->company].num_vehicle[0]);
@@ -1271,7 +1395,7 @@ struct NetworkLobbyWindow : public Window {
 			SetDParam(2, this->company_info[this->company].num_vehicle[2]);
 			SetDParam(3, this->company_info[this->company].num_vehicle[3]);
 			SetDParam(4, this->company_info[this->company].num_vehicle[4]);
-			DrawString(x, y, STR_NETWORK_VEHICLES, TC_GOLD); // vehicles
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_VEHICLES, TC_GOLD); // vehicles
 			y += 10;
 
 			SetDParam(0, this->company_info[this->company].num_station[0]);
@@ -1279,11 +1403,11 @@ struct NetworkLobbyWindow : public Window {
 			SetDParam(2, this->company_info[this->company].num_station[2]);
 			SetDParam(3, this->company_info[this->company].num_station[3]);
 			SetDParam(4, this->company_info[this->company].num_station[4]);
-			DrawString(x, y, STR_NETWORK_STATIONS, TC_GOLD); // stations
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_STATIONS, TC_GOLD); // stations
 			y += 10;
 
 			SetDParamStr(0, this->company_info[this->company].clients);
-			DrawStringTruncated(x, y, STR_NETWORK_PLAYERS, TC_GOLD, trunc_width); // players
+			DrawString(x, this->widget[NLWW_DETAILS].right, y, STR_NETWORK_PLAYERS, TC_GOLD); // players
 		}
 	}
 
@@ -1610,7 +1734,7 @@ struct NetworkClientListPopupWindow : Window {
 				colour = TC_BLACK;
 			}
 
-			DoDrawString(this->action[i], 4, y, colour);
+			DrawString(4, this->width - 4, y, this->action[i], colour);
 		}
 	}
 
@@ -1711,15 +1835,15 @@ struct NetworkClientListWindow : Window
 			}
 
 			if (ci->client_id == CLIENT_ID_SERVER) {
-				DrawString(4, y, STR_NETWORK_SERVER, colour);
+				DrawString(4, 81, y, STR_NETWORK_SERVER, colour);
 			} else {
-				DrawString(4, y, STR_NETWORK_CLIENT, colour);
+				DrawString(4, 81, y, STR_NETWORK_CLIENT, colour);
 			}
 
 			/* Filter out spectators */
 			if (IsValidCompanyID(ci->client_playas)) DrawCompanyIcon(ci->client_playas, 64, y + 1);
 
-			DoDrawString(ci->client_name, 81, y, colour);
+			DrawString(81, this->width - 2, y, ci->client_name, colour);
 
 			y += CLNWND_ROWSIZE;
 		}
@@ -1786,6 +1910,13 @@ uint8 _network_join_waiting;
 uint32 _network_join_bytes;
 uint32 _network_join_bytes_total;
 
+/** Widgets used for the join status window. */
+enum NetworkJoinStatusWidgets {
+	NJSW_CAPTION,    ///< Caption of the window
+	NJSW_BACKGROUND, ///< Background
+	NJSW_CANCELOK,   ///< Cancel/OK button
+};
+
 struct NetworkJoinStatusWindow : Window {
 	NetworkJoinStatusWindow(const WindowDesc *desc) : Window(desc)
 	{
@@ -1798,7 +1929,7 @@ struct NetworkJoinStatusWindow : Window {
 		uint8 progress; // used for progress bar
 		this->DrawWidgets();
 
-		DrawStringCentered(125, 35, STR_NETWORK_CONNECTING_1 + _network_join_status, TC_GREY);
+		DrawString(this->widget[NJSW_BACKGROUND].left + 2, this->widget[NJSW_BACKGROUND].right - 2, 35, STR_NETWORK_CONNECTING_1 + _network_join_status, TC_GREY, SA_CENTER);
 		switch (_network_join_status) {
 			case NETWORK_JOIN_STATUS_CONNECTING: case NETWORK_JOIN_STATUS_AUTHORIZING:
 			case NETWORK_JOIN_STATUS_GETTING_COMPANY_INFO:
@@ -1806,13 +1937,13 @@ struct NetworkJoinStatusWindow : Window {
 				break;
 			case NETWORK_JOIN_STATUS_WAITING:
 				SetDParam(0, _network_join_waiting);
-				DrawStringCentered(125, 46, STR_NETWORK_CONNECTING_WAITING, TC_GREY);
+				DrawString(this->widget[NJSW_BACKGROUND].left + 2, this->widget[NJSW_BACKGROUND].right - 2, 46, STR_NETWORK_CONNECTING_WAITING, TC_GREY, SA_CENTER);
 				progress = 15; // third stage is 15%
 				break;
 			case NETWORK_JOIN_STATUS_DOWNLOADING:
 				SetDParam(0, _network_join_bytes);
 				SetDParam(1, _network_join_bytes_total);
-				DrawStringCentered(125, 46, STR_NETWORK_CONNECTING_DOWNLOADING, TC_GREY);
+				DrawString(this->widget[NJSW_BACKGROUND].left + 2, this->widget[NJSW_BACKGROUND].right - 2, 46, STR_NETWORK_CONNECTING_DOWNLOADING, TC_GREY, SA_CENTER);
 				/* Fallthrough */
 			default: // Waiting is 15%, so the resting receivement of map is maximum 70%
 				progress = 15 + _network_join_bytes * (100 - 15) / _network_join_bytes_total;
@@ -1824,7 +1955,7 @@ struct NetworkJoinStatusWindow : Window {
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		if (widget == 2) { // Disconnect button
+		if (widget == NJSW_CANCELOK) { // Disconnect button
 			NetworkDisconnect();
 			SwitchToMode(SM_MENU);
 			ShowNetworkGameWindow();
@@ -1843,9 +1974,9 @@ struct NetworkJoinStatusWindow : Window {
 };
 
 static const Widget _network_join_status_window_widget[] = {
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,      0,   249,     0,    13, STR_NETWORK_CONNECTING, STR_018C_WINDOW_TITLE_DRAG_THIS},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,      0,   249,    14,    84, 0x0,                    STR_NULL},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_WHITE,    75,   175,    69,    80, STR_NETWORK_DISCONNECT, STR_NULL},
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,      0,   249,     0,    13, STR_NETWORK_CONNECTING, STR_018C_WINDOW_TITLE_DRAG_THIS}, // NSJW_CAPTION
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,      0,   249,    14,    84, 0x0,                    STR_NULL},                        // NJSW_BACKGROUND
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_WHITE,    75,   175,    69,    80, STR_NETWORK_DISCONNECT, STR_NULL},                        // NJSW_CANCELOK
 {   WIDGETS_END},
 };
 
