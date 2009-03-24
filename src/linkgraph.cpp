@@ -17,12 +17,12 @@
 
 LinkGraph _link_graphs[NUM_CARGO];
 
-typedef std::map<StationID, uint> ReverseNodeIndex;
+typedef std::map<StationID, NodeID> ReverseNodeIndex;
 
 bool LinkGraph::NextComponent()
 {
 	ReverseNodeIndex index;
-	uint node = 0;
+	NodeID node = 0;
 	std::queue<Station *> search_queue;
 	Component * component = NULL;
 	while (true) {
@@ -79,7 +79,7 @@ bool LinkGraph::NextComponent()
 
 void LinkGraph::InitColours()
 {
-	for (int i = 0; i < Station_POOL_MAX_BLOCKS; ++i) {
+	for (uint i = 0; i < Station_POOL_MAX_BLOCKS; ++i) {
 		station_colours[i] = USHRT_MAX;
 	}
 }
@@ -108,20 +108,20 @@ LinkGraph::LinkGraph()  : current_colour(0), current_station(0), cargo(CT_INVALI
 
 uint Component::AddNode(StationID st, uint supply, uint demand) {
 	nodes.push_back(Node(st, supply, demand));
-	for(uint i = 0; i < num_nodes; ++i) {
+	for(NodeID i = 0; i < num_nodes; ++i) {
 		edges[i].push_back(Edge());
 	}
 	edges.push_back(std::vector<Edge>(++num_nodes));
 	return num_nodes - 1;
 }
 
-void Component::AddEdge(uint from, uint to, uint capacity) {
+void Component::AddEdge(NodeID from, NodeID to, uint capacity) {
 	edges[from][to].capacity = capacity;
 }
 
 void Component::CalculateDistances() {
-	for(uint i = 0; i < num_nodes; ++i) {
-		for(uint j = 0; j < i; ++j) {
+	for(NodeID i = 0; i < num_nodes; ++i) {
+		for(NodeID j = 0; j < i; ++j) {
 			Station * st1 = GetStation(nodes[i].station);
 			Station * st2 = GetStation(nodes[j].station);
 			uint distance = DistanceManhattan(st1->xy, st2->xy);
@@ -165,7 +165,7 @@ bool LinkGraph::Join() {
 
 	components.pop_front();
 
-	for(uint i = 0; i < comp->GetSize(); ++i) {
+	for(NodeID i = 0; i < comp->GetSize(); ++i) {
 		Node & node = comp->GetNode(i);
 		StationID id = node.station;
 		station_colours[id] += USHRT_MAX / 2;
@@ -177,7 +177,7 @@ bool LinkGraph::Join() {
 void LinkGraph::AddComponent(Component * component) {
 	 components.push_back(component);
 	 colour component_colour = component->GetColour();
-	 for(uint i = 0; i < component->GetSize(); ++i) {
+	 for(NodeID i = 0; i < component->GetSize(); ++i) {
 		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
 }
