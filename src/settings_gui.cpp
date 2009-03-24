@@ -179,7 +179,7 @@ struct GameOptionsWindow : Window {
 		SetDParamStr(9, GetGraphicsSetName(GetIndexOfCurrentGraphicsSet()));
 
 		this->DrawWidgets();
-		DrawString(20, 175, STR_OPTIONS_FULLSCREEN, TC_FROMSTRING); // fullscreen
+		DrawString(20, this->width / 2, 175, STR_OPTIONS_FULLSCREEN, TC_FROMSTRING); // fullscreen
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -326,28 +326,28 @@ static const Widget _game_options_widgets[] = {
 {    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   369,     0,    13, STR_00B1_GAME_OPTIONS,             STR_018C_WINDOW_TITLE_DRAG_THIS},
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   369,    14,   242, 0x0,                               STR_NULL},
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,    20,    55, STR_02E0_CURRENCY_UNITS,           STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    34,    45, STR_02E1,                          STR_02E2_CURRENCY_UNITS_SELECTION},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    34,    45, STR_02E1,                          STR_02E2_CURRENCY_UNITS_SELECTION},
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,    20,    55, STR_MEASURING_UNITS,               STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    34,    45, STR_02E4,                          STR_MEASURING_UNITS_SELECTION},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    34,    45, STR_02E4,                          STR_MEASURING_UNITS_SELECTION},
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,    62,    97, STR_02E6_ROAD_VEHICLES,            STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    76,    87, STR_02E7,                          STR_02E8_SELECT_SIDE_OF_ROAD_FOR},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    76,    87, STR_02E7,                          STR_02E8_SELECT_SIDE_OF_ROAD_FOR},
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,    62,    97, STR_02EB_TOWN_NAMES,               STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    76,    87, STR_02EC,                          STR_02ED_SELECT_STYLE_OF_TOWN_NAMES},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    76,    87, STR_02EC,                          STR_02ED_SELECT_STYLE_OF_TOWN_NAMES},
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   104,   139, STR_02F4_AUTOSAVE,                 STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   118,   129, STR_02F5,                          STR_02F6_SELECT_INTERVAL_BETWEEN},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   118,   129, STR_02F5,                          STR_02F6_SELECT_INTERVAL_BETWEEN},
 
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,   104,   139, STR_OPTIONS_LANG,                  STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   118,   129, STR_OPTIONS_LANG_CBO,              STR_OPTIONS_LANG_TIP},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   118,   129, STR_OPTIONS_LANG_CBO,              STR_OPTIONS_LANG_TIP},
 
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   146,   190, STR_OPTIONS_RES,                   STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   160,   171, STR_OPTIONS_RES_CBO,               STR_OPTIONS_RES_TIP},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   160,   171, STR_OPTIONS_RES_CBO,               STR_OPTIONS_RES_TIP},
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,   149,   169,   176,   184, STR_EMPTY,                         STR_OPTIONS_FULLSCREEN_TIP},
 
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,   146,   190, STR_OPTIONS_SCREENSHOT_FORMAT,     STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   160,   171, STR_OPTIONS_SCREENSHOT_FORMAT_CBO, STR_OPTIONS_SCREENSHOT_FORMAT_TIP},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   160,   171, STR_OPTIONS_SCREENSHOT_FORMAT_CBO, STR_OPTIONS_SCREENSHOT_FORMAT_TIP},
 
 {      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   197,   232, STR_OPTIONS_BASE_GRF,              STR_NULL},
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   211,   222, STR_OPTIONS_BASE_GRF_CBO,          STR_OPTIONS_BASE_GRF_TIP},
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   211,   222, STR_OPTIONS_BASE_GRF_CBO,          STR_OPTIONS_BASE_GRF_TIP},
 
 {   WIDGETS_END},
 };
@@ -475,7 +475,7 @@ public:
 
 			value += sdb->str;
 			SetDParam(0, value);
-			DrawString(30, y, str, TC_FROMSTRING);
+			DrawString(30, this->width, y, str, TC_FROMSTRING);
 
 			y += GAMEDIFF_WND_ROWSIZE + 2; // space items apart a bit
 			str++;
@@ -849,7 +849,7 @@ uint SettingEntry::Draw(GameSettings *settings_ptr, int base_x, int base_y, int 
 		case SEF_SUBTREE_KIND:
 			if (cur_row >= first_row) {
 				DrawSprite((this->d.sub.folded ? SPR_CIRCLE_FOLDED : SPR_CIRCLE_UNFOLDED), PAL_NONE, x, y);
-				DrawStringTruncated(x + 12, y, this->d.sub.title, TC_FROMSTRING, max_x - x - 12);
+				DrawString(x + 12, max_x, y, this->d.sub.title, TC_FROMSTRING);
 			}
 			cur_row++;
 			if (!this->d.sub.folded) {
@@ -916,7 +916,7 @@ void SettingEntry::DrawSetting(GameSettings *settings_ptr, const SettingDesc *sd
 			SetDParam(1, value);
 		}
 	}
-	DrawStringTruncated(x + 25, y, (sdb->str) + disabled, TC_FROMSTRING, max_x - x - 25);
+	DrawString(x + 25, max_x, y, (sdb->str) + disabled, TC_FROMSTRING);
 }
 
 
@@ -1460,8 +1460,8 @@ void DrawArrowButtons(int x, int y, Colours button_colour, byte state, bool clic
 
 	DrawFrameRect(x,      y + 1, x +  9, y + 9, button_colour, (state == 1) ? FR_LOWERED : FR_NONE);
 	DrawFrameRect(x + 10, y + 1, x + 19, y + 9, button_colour, (state == 2) ? FR_LOWERED : FR_NONE);
-	DrawStringCentered(x +  5, y + 1, STR_6819, TC_FROMSTRING); // [<]
-	DrawStringCentered(x + 15, y + 1, STR_681A, TC_FROMSTRING); // [>]
+	DrawString(x,      x +  9, y + 1, STR_6819, TC_FROMSTRING, SA_CENTER); // [<]
+	DrawString(x + 10, x + 19, y + 1, STR_681A, TC_FROMSTRING, SA_CENTER); // [>]
 
 	/* Grey out the buttons that aren't clickable */
 	if (!clickable_left) {
@@ -1497,7 +1497,7 @@ struct CustomCurrencyWindow : Window {
 
 	virtual void OnPaint()
 	{
-		int x;
+		int const right = this->width - 1;
 		int y = 20;
 		this->DrawWidgets();
 
@@ -1505,37 +1505,37 @@ struct CustomCurrencyWindow : Window {
 		DrawArrowButtons(10, y, COLOUR_YELLOW, GB(this->click, 0, 2), true, true);
 		SetDParam(0, 1);
 		SetDParam(1, 1);
-		DrawString(35, y + 1, STR_CURRENCY_EXCHANGE_RATE, TC_FROMSTRING);
+		DrawString(35, right, y + 1, STR_CURRENCY_EXCHANGE_RATE, TC_FROMSTRING);
 		y += 12;
 
 		/* separator */
 		DrawFrameRect(10, y + 1, 29, y + 9, COLOUR_DARK_BLUE, GB(this->click, 2, 2) ? FR_LOWERED : FR_NONE);
-		x = DrawString(35, y + 1, STR_CURRENCY_SEPARATOR, TC_FROMSTRING);
-		DoDrawString(this->separator, x + 4, y + 1, TC_ORANGE);
+		SetDParamStr(0, this->separator);
+		DrawString(35, right, y + 1, STR_CURRENCY_SEPARATOR, TC_FROMSTRING);
 		y += 12;
 
 		/* prefix */
 		DrawFrameRect(10, y + 1, 29, y + 9, COLOUR_DARK_BLUE, GB(this->click, 4, 2) ? FR_LOWERED : FR_NONE);
-		x = DrawString(35, y + 1, STR_CURRENCY_PREFIX, TC_FROMSTRING);
-		DoDrawString(_custom_currency.prefix, x + 4, y + 1, TC_ORANGE);
+		SetDParamStr(0, _custom_currency.prefix);
+		DrawString(35, right, y + 1, STR_CURRENCY_PREFIX, TC_FROMSTRING);
 		y += 12;
 
 		/* suffix */
 		DrawFrameRect(10, y + 1, 29, y + 9, COLOUR_DARK_BLUE, GB(this->click, 6, 2) ? FR_LOWERED : FR_NONE);
-		x = DrawString(35, y + 1, STR_CURRENCY_SUFFIX, TC_FROMSTRING);
-		DoDrawString(_custom_currency.suffix, x + 4, y + 1, TC_ORANGE);
+		SetDParamStr(0, _custom_currency.suffix);
+		DrawString(35, right, y + 1, STR_CURRENCY_SUFFIX, TC_FROMSTRING);
 		y += 12;
 
 		/* switch to euro */
 		DrawArrowButtons(10, y, COLOUR_YELLOW, GB(this->click, 8, 2), true, true);
 		SetDParam(0, _custom_currency.to_euro);
-		DrawString(35, y + 1, (_custom_currency.to_euro != CF_NOEURO) ? STR_CURRENCY_SWITCH_TO_EURO : STR_CURRENCY_SWITCH_TO_EURO_NEVER, TC_FROMSTRING);
+		DrawString(35, right, y + 1, (_custom_currency.to_euro != CF_NOEURO) ? STR_CURRENCY_SWITCH_TO_EURO : STR_CURRENCY_SWITCH_TO_EURO_NEVER, TC_FROMSTRING);
 		y += 12;
 
 		/* Preview */
 		y += 12;
 		SetDParam(0, 10000);
-		DrawString(35, y + 1, STR_CURRENCY_PREVIEW, TC_FROMSTRING);
+		DrawString(35, right, y + 1, STR_CURRENCY_PREVIEW, TC_FROMSTRING);
 	}
 
 	virtual void OnClick(Point pt, int widget)

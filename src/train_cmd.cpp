@@ -324,7 +324,7 @@ void TrainConsistChanged(Vehicle *v, bool same_length)
 			veh_len = GetVehicleCallback(CBID_VEHICLE_LENGTH, 0, 0, u->engine_type, u);
 		}
 		if (veh_len == CALLBACK_FAILED) veh_len = rvi_u->shorten_factor;
-		veh_len = 8 - Clamp(veh_len, 0, u->Next() == NULL ? 7 : 5); // the clamp on vehicles not the last in chain is stricter, as too short wagons can break the 'follow next vehicle' code
+		veh_len = 8 - Clamp(veh_len, 0, 7);
 
 		/* verify length hasn't changed */
 		if (same_length && veh_len != u->u.rail.cached_veh_length) RailVehicleLengthChanged(u);
@@ -3356,42 +3356,6 @@ static byte AfterSetTrainPos(Vehicle *v, bool new_tile)
 	return old_z;
 }
 
-static const Direction _new_vehicle_direction_table[11] = {
-	DIR_N , DIR_NW, DIR_W , INVALID_DIR,
-	DIR_NE, DIR_N , DIR_SW, INVALID_DIR,
-	DIR_E , DIR_SE, DIR_S
-};
-
-static inline Direction GetNewVehicleDirectionByTile(TileIndex new_tile, TileIndex old_tile)
-{
-	uint offs = (TileY(new_tile) - TileY(old_tile) + 1) * 4 +
-							TileX(new_tile) - TileX(old_tile) + 1;
-	assert(offs < 11);
-	return _new_vehicle_direction_table[offs];
-}
-
-static inline int GetDirectionToVehicle(const Vehicle *v, int x, int y)
-{
-	byte offs;
-
-	x -= v->x_pos;
-	if (x >= 0) {
-		offs = (x > 2) ? 0 : 1;
-	} else {
-		offs = (x < -2) ? 2 : 1;
-	}
-
-	y -= v->y_pos;
-	if (y >= 0) {
-		offs += ((y > 2) ? 0 : 1) * 4;
-	} else {
-		offs += ((y < -2) ? 2 : 1) * 4;
-	}
-
-	assert(offs < 11);
-	return _new_vehicle_direction_table[offs];
-}
-
 /* Check if the vehicle is compatible with the specified tile */
 static inline bool CheckCompatibleRail(const Vehicle *v, TileIndex tile)
 {
@@ -3664,8 +3628,7 @@ static void TrainController(Vehicle *v, Vehicle *nomove)
 				/* A new tile is about to be entered. */
 
 				/* Determine what direction we're entering the new tile from */
-				Direction dir = GetNewVehicleDirectionByTile(gp.new_tile, gp.old_tile);
-				enterdir = DirToDiagDir(dir);
+				enterdir = DiagdirBetweenTiles(gp.old_tile, gp.new_tile);
 				assert(IsValidDiagDirection(enterdir));
 
 				/* Get the status of the tracks in the new tile and mask
@@ -3735,15 +3698,30 @@ static void TrainController(Vehicle *v, Vehicle *nomove)
 						TryReserveRailTrack(gp.new_tile, TrackBitsToTrack(chosen_track));
 					}
 				} else {
-					static const TrackBits _matching_tracks[8] = {
-							TRACK_BIT_LEFT  | TRACK_BIT_RIGHT, TRACK_BIT_X,
-							TRACK_BIT_UPPER | TRACK_BIT_LOWER, TRACK_BIT_Y,
-							TRACK_BIT_LEFT  | TRACK_BIT_RIGHT, TRACK_BIT_X,
-							TRACK_BIT_UPPER | TRACK_BIT_LOWER, TRACK_BIT_Y
-					};
-
 					/* The wagon is active, simply follow the prev vehicle. */
-					chosen_track = (TrackBits)(byte)(_matching_tracks[GetDirectionToVehicle(prev, gp.x, gp.y)] & bits);
+					if (prev->tile == gp.new_tile) {
+						/* Choose the same track as prev */
+						if (prev->u.rail.track == TRACK_BIT_WORMHOLE) {
+							/* Vehicles entering tunnels enter the wormhole earlier than for bridges.
+							 * However, just choose the track into the wormhole. */
+							assert(IsTunnel(prev->tile));
+							chosen_track = bits;
+						} else {
+							chosen_track = prev->u.rail.track;
+						}
+					} else {
+						/* Choose the track that leads to the tile where prev is. */
+						static const TrackBits _connecting_track[DIAGDIR_END][DIAGDIR_END] = {
+							{TRACK_BIT_Y,     TRACK_BIT_LOWER, TRACK_BIT_NONE,  TRACK_BIT_LEFT },
+							{TRACK_BIT_UPPER, TRACK_BIT_X,     TRACK_BIT_LEFT,  TRACK_BIT_NONE },
+							{TRACK_BIT_NONE,  TRACK_BIT_RIGHT, TRACK_BIT_Y,     TRACK_BIT_UPPER},
+							{TRACK_BIT_RIGHT, TRACK_BIT_NONE,  TRACK_BIT_LOWER, TRACK_BIT_X    }
+						};
+						DiagDirection exitdir = DiagdirBetweenTiles(gp.new_tile, prev->tile);
+						assert(IsValidDiagDirection(exitdir));
+						chosen_track = _connecting_track[enterdir][exitdir];
+					}
+					chosen_track &= bits;
 				}
 
 				/* Make sure chosen track is a valid track */

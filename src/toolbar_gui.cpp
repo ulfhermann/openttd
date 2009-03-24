@@ -129,12 +129,12 @@ public:
 
 	virtual ~DropDownListCheckedItem() {}
 
-	void Draw(int x, int y, uint width, uint height, bool sel, int bg_colour) const
+	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
 		if (checked) {
-			DrawString(x + 2, y, STR_CHECKMARK, sel ? TC_WHITE : TC_BLACK);
+			DrawString(left + 2, right - 2, top, STR_CHECKMARK, sel ? TC_WHITE : TC_BLACK);
 		}
-		DrawStringTruncated(x + 2, y, this->String(), sel ? TC_WHITE : TC_BLACK, width);
+		DrawString(left + 2, right - 2, top, this->String(), sel ? TC_WHITE : TC_BLACK);
 	}
 };
 
@@ -164,10 +164,10 @@ public:
 		return GetStringBoundingBox(buffer).width + 19;
 	}
 
-	void Draw(int x, int y, uint width, uint height, bool sel, int bg_colour) const
+	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
 		CompanyID company = (CompanyID)result;
-		DrawCompanyIcon(company, x + 2, y + 1);
+		DrawCompanyIcon(company, left + 2, top + 1);
 
 		SetDParam(0, company);
 		SetDParam(1, company);
@@ -177,7 +177,7 @@ public:
 		} else {
 			col = sel ? TC_WHITE : TC_BLACK;
 		}
-		DrawStringTruncated(x + 19, y, STR_7021, col, width - 17);
+		DrawString(left + 19, right - 2, top, STR_7021, col);
 	}
 };
 
@@ -1243,13 +1243,13 @@ public:
 		this->DrawWidgets();
 
 		SetDParam(0, ConvertYMDToDate(_settings_newgame.game_creation.starting_year, 0, 1));
-		DrawStringCenteredTruncated(this->widget[TBSE_DATEBACKWARD].right, this->widget[TBSE_DATEFORWARD].left, 6, STR_00AF, TC_FROMSTRING);
+		DrawString(this->widget[TBSE_DATEBACKWARD].right, this->widget[TBSE_DATEFORWARD].left, 6, STR_00AF, TC_FROMSTRING, SA_CENTER);
 
 		/* We hide this panel when the toolbar space gets too small */
 		const Widget *panel = &this->widget[TBSE_SPACERPANEL];
 		if (panel->left != panel->right) {
-			DrawStringCenteredTruncated(panel->left + 1, panel->right - 1,  1, STR_0221_OPENTTD, TC_FROMSTRING);
-			DrawStringCenteredTruncated(panel->left + 1, panel->right - 1, 11, STR_0222_SCENARIO_EDITOR, TC_FROMSTRING);
+			DrawString(panel->left + 1, panel->right - 1,  1, STR_0221_OPENTTD, TC_FROMSTRING, SA_CENTER);
+			DrawString(panel->left + 1, panel->right - 1, 11, STR_0222_SCENARIO_EDITOR, TC_FROMSTRING, SA_CENTER);
 		}
 	}
 
