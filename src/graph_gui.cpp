@@ -57,7 +57,7 @@ struct GraphLegendWindow : Window {
 
 			SetDParam(0, c->index);
 			SetDParam(1, c->index);
-			DrawString(21, 17 + c->index * 12, STR_7021, HasBit(_legend_excluded_companies, c->index) ? TC_BLACK : TC_WHITE);
+			DrawString(21, this->width - 4, 17 + c->index * 12, STR_7021, HasBit(_legend_excluded_companies, c->index) ? TC_BLACK : TC_WHITE);
 		}
 	}
 
@@ -248,7 +248,7 @@ protected:
 		for (int i = 0; i < GRAPH_NUM_LINES_Y; i++) {
 			SetDParam(0, this->format_str_y_axis);
 			SetDParam(1, y_label);
-			DrawStringRightAligned(x, y, STR_0170, graph_axis_label_colour);
+			DrawString(x - GRAPH_X_POSITION_BEGINNING, x, y, STR_0170, graph_axis_label_colour, SA_RIGHT);
 
 			y_label -= y_label_separation;
 			y += (this->gd_height / (GRAPH_NUM_LINES_Y - 1));
@@ -264,7 +264,7 @@ protected:
 				SetDParam(0, month + STR_0162_JAN);
 				SetDParam(1, month + STR_0162_JAN + 2);
 				SetDParam(2, year);
-				DrawString(x, y, month == 0 ? STR_016F : STR_016E, graph_axis_label_colour);
+				DrawString(x, x + GRAPH_X_POSITION_SEPARATION, y, month == 0 ? STR_016F : STR_016E, graph_axis_label_colour);
 
 				month += 3;
 				if (month >= 12) {
@@ -275,13 +275,13 @@ protected:
 			}
 		} else {
 			/* Draw the label under the data point rather than on the grid line. */
-			x = this->gd_left + GRAPH_X_POSITION_BEGINNING + (GRAPH_X_POSITION_SEPARATION / 2) + 1;
+			x = this->gd_left + GRAPH_X_POSITION_BEGINNING;
 			y = this->gd_top + this->gd_height + 1;
 			uint16 label = this->x_values_start;
 
 			for (int i = 0; i < this->num_on_x_axis; i++) {
 				SetDParam(0, label);
-				DrawStringCentered(x, y, STR_01CB, graph_axis_label_colour);
+				DrawString(x + 1, x + GRAPH_X_POSITION_SEPARATION - 1, y, STR_01CB, graph_axis_label_colour, SA_CENTER);
 
 				label += this->x_values_increment;
 				x += GRAPH_X_POSITION_SEPARATION;
@@ -684,7 +684,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 				GfxFillRect(x + clk_dif, y + clk_dif, x + 8 + clk_dif, y + 5 + clk_dif, 0);
 				GfxFillRect(x + 1 + clk_dif, y + 1 + clk_dif, x + 7 + clk_dif, y + 4 + clk_dif, cs->legend_colour);
 				SetDParam(0, cs->name);
-				DrawString(x + 14 + clk_dif, y + clk_dif, STR_7065, TC_FROMSTRING);
+				DrawString(x + 14 + clk_dif, this->width, y + clk_dif, STR_7065, TC_FROMSTRING);
 				y += 8;
 			}
 
@@ -699,8 +699,8 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 
 		this->DrawGraph();
 
-		DrawString(2 + 46, 24 + this->gd_height + 7, STR_7062_DAYS_IN_TRANSIT, TC_FROMSTRING);
-		DrawString(2 + 84, 24 - 9, STR_7063_PAYMENT_FOR_DELIVERING, TC_FROMSTRING);
+		DrawString(2 + 46, this->width, 24 + this->gd_height + 7, STR_7062_DAYS_IN_TRANSIT, TC_FROMSTRING);
+		DrawString(2 + 84, this->width, 24 - 9, STR_7063_PAYMENT_FOR_DELIVERING, TC_FROMSTRING);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -812,7 +812,7 @@ public:
 			SetDParam(2, c->index);
 			SetDParam(3, GetPerformanceTitleFromValue(c->old_economy[1].performance_history));
 
-			DrawString(2, 15 + i * 10, i == 0 ? STR_7054 : STR_7055, TC_FROMSTRING);
+			DrawString(2, this->width, 15 + i * 10, i == 0 ? STR_7054 : STR_7055, TC_FROMSTRING);
 			DrawCompanyIcon(c->index, 27, 16 + i * 10);
 		}
 	}
@@ -978,11 +978,11 @@ public:
 				total_score += score;
 			}
 
-			DrawString(7, y, STR_PERFORMANCE_DETAIL_VEHICLES + i, TC_FROMSTRING);
+			DrawString(7, 107, y, STR_PERFORMANCE_DETAIL_VEHICLES + i, TC_FROMSTRING);
 
 			/* Draw the score */
 			SetDParam(0, score);
-			DrawStringRightAligned(107, y, STR_PERFORMANCE_DETAIL_INT, TC_FROMSTRING);
+			DrawString(7, 107, y, STR_PERFORMANCE_DETAIL_INT, TC_FROMSTRING, SA_RIGHT);
 
 			/* Calculate the %-bar */
 			x = Clamp(val, 0, needed) * 50 / needed;
@@ -1002,7 +1002,7 @@ public:
 
 			/* Draw it */
 			SetDParam(0, x);
-			DrawStringCentered(137, y, STR_PERFORMANCE_DETAIL_PERCENT, TC_FROMSTRING);
+			DrawString(112, 162, y, STR_PERFORMANCE_DETAIL_PERCENT, TC_FROMSTRING, SA_CENTER);
 
 			/* SCORE_LOAN is inversed */
 			if (i == SCORE_LOAN) val = needed - val;
@@ -1017,10 +1017,10 @@ public:
 				case SCORE_MAX_INCOME:
 				case SCORE_MONEY:
 				case SCORE_LOAN:
-					DrawString(167, y, STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY, TC_FROMSTRING);
+					DrawString(167, this->width, y, STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY, TC_FROMSTRING);
 					break;
 				default:
-					DrawString(167, y, STR_PERFORMANCE_DETAIL_AMOUNT_INT, TC_FROMSTRING);
+					DrawString(167, this->width, y, STR_PERFORMANCE_DETAIL_AMOUNT_INT, TC_FROMSTRING);
 			}
 		}
 	}

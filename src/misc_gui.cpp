@@ -44,10 +44,17 @@ static bool _fios_path_changed;
 static bool _savegame_sort_dirty;
 int _caret_timer;
 
+/** Widgets for the land info window. */
+enum LandInfoWidgets {
+	LIW_CLOSE,      ///< Close the window
+	LIW_CAPTION,    ///< Title bar of the window
+	LIW_BACKGROUND, ///< Background to draw on
+};
+
 static const Widget _land_info_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                       STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   299,     0,    13, STR_01A3_LAND_AREA_INFORMATION, STR_018C_WINDOW_TITLE_DRAG_THIS},
-{      WWT_PANEL, RESIZE_BOTTOM,  COLOUR_GREY,     0,   299,    14,    99, 0x0,                            STR_NULL},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                       STR_018B_CLOSE_WINDOW},           // LIW_CLOSE
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   299,     0,    13, STR_01A3_LAND_AREA_INFORMATION, STR_018C_WINDOW_TITLE_DRAG_THIS}, // LIW_CAPTION
+{      WWT_PANEL, RESIZE_BOTTOM,  COLOUR_GREY,     0,   299,    14,    99, 0x0,                            STR_NULL},                        // LIW_BACKGROUND
 {    WIDGETS_END},
 };
 
@@ -78,15 +85,13 @@ public:
 		for (uint i = 0; i < LAND_INFO_CENTERED_LINES; i++) {
 			if (StrEmpty(this->landinfo_data[i])) break;
 
-			DoDrawStringCentered(150, y, this->landinfo_data[i], i == 0 ? TC_LIGHT_BLUE : TC_FROMSTRING);
+			DrawString(this->widget[LIW_BACKGROUND].left + 2, this->widget[LIW_BACKGROUND].right - 2, y, this->landinfo_data[i], i == 0 ? TC_LIGHT_BLUE : TC_FROMSTRING, SA_CENTER);
 			y += i == 0 ? 16 : 12;
 		}
 
-		y += 6;
-
 		if (!StrEmpty(this->landinfo_data[LAND_INFO_MULTICENTER_LINE])) {
 			SetDParamStr(0, this->landinfo_data[LAND_INFO_MULTICENTER_LINE]);
-			DrawStringMultiCenter(150, y, STR_JUST_RAW_STRING, this->width - 4);
+			DrawStringMultiLine(this->widget[LIW_BACKGROUND].left + 2, this->widget[LIW_BACKGROUND].right - 2, y, y + 22, STR_JUST_RAW_STRING, SA_CENTER);
 		}
 	}
 
@@ -275,11 +280,19 @@ void PlaceLandBlockInfo()
 	}
 }
 
+/** Widgets for the land info window. */
+enum AboutWidgets {
+	AW_CLOSE,      ///< Close the window
+	AW_CAPTION,    ///< Title bar of the window
+	AW_BACKGROUND, ///< Background to draw on
+	AW_FRAME,      ///< The scrolling frame with goodies
+};
+
 static const Widget _about_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,         STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   419,     0,    13, STR_015B_OPENTTD, STR_NULL},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   419,    14,   271, 0x0,              STR_NULL},
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,     5,   414,    40,   245, STR_NULL,         STR_NULL},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,         STR_018B_CLOSE_WINDOW},           // AW_CLOSE
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   419,     0,    13, STR_015B_OPENTTD, STR_018C_WINDOW_TITLE_DRAG_THIS}, // AW_CAPTION
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   419,    14,   271, 0x0,              STR_NULL},                        // AW_BACKGROUND
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,     5,   414,    40,   245, STR_NULL,         STR_NULL},                        // AW_FRAME
 {    WIDGETS_END},
 };
 
@@ -363,15 +376,15 @@ struct AboutWindow : public Window {
 		this->DrawWidgets();
 
 		/* Show original copyright and revision version */
-		DrawStringCentered(210, 17, STR_00B6_ORIGINAL_COPYRIGHT, TC_FROMSTRING);
-		DrawStringCentered(210, 17 + 10, STR_00B7_VERSION, TC_FROMSTRING);
+		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, 17, STR_00B6_ORIGINAL_COPYRIGHT, TC_FROMSTRING, SA_CENTER);
+		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, 17 + 10, STR_00B7_VERSION, TC_FROMSTRING, SA_CENTER);
 
 		int y = this->scroll_height;
 
 		/* Show all scrolling credits */
 		for (uint i = 0; i < lengthof(credits); i++) {
 			if (y >= 50 && y < (this->height - 40)) {
-				DoDrawString(credits[i], 10, y, TC_BLACK);
+				DrawString(this->widget[AW_FRAME].left + 5, this->widget[AW_FRAME].right - 5, y, credits[i], TC_BLACK);
 			}
 			y += 10;
 		}
@@ -379,8 +392,8 @@ struct AboutWindow : public Window {
 		/* If the last text has scrolled start a new from the start */
 		if (y < 50) this->scroll_height = this->height - 40;
 
-		DoDrawStringCentered(210, this->height - 25, "Website: http://www.openttd.org", TC_BLACK);
-		DrawStringCentered(210, this->height - 15, STR_00BA_COPYRIGHT_OPENTTD, TC_FROMSTRING);
+		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, this->height - 25, "Website: http://www.openttd.org", TC_BLACK, SA_CENTER);
+		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, this->height - 15, STR_00BA_COPYRIGHT_OPENTTD, TC_FROMSTRING, SA_CENTER);
 	}
 
 	virtual void OnTick()
@@ -421,7 +434,7 @@ private:
 	StringID message_2;
 	bool show_company_manager_face;
 
-	int y[2];
+	int y[4];
 
 public:
 	ErrmsgWindow(Point pt, int width, int height, StringID msg1, StringID msg2, const Widget *widget, bool show_company_manager_face) :
@@ -439,22 +452,23 @@ public:
 
 		assert(msg2 != INVALID_STRING_ID);
 
-		int h2 = 3 + GetStringHeight(msg2, width - 2); // msg2 is printed first
-		int h1 = (msg1 == INVALID_STRING_ID) ? 0 : 3 + GetStringHeight(msg1, width - 2);
+		int h2 = GetStringHeight(msg2, width - 2); // msg2 is printed first
+		int h1 = (msg1 == INVALID_STRING_ID) ? 0 : GetStringHeight(msg1, width - 2);
 
 		SwitchToNormalRefStack();
 
-		int h = 15 + h1 + h2;
+		int h = 20 + h1 + h2;
 		height = max<int>(height, h);
 
 		if (msg1 == INVALID_STRING_ID) {
-			/* only 1 line will be printed */
-			y[1] = (height - 15) / 2 + 15 - 5;
+			y[2] = 14 + 1;
+			y[3] = height - 1;
 		} else {
-			int over = (height - h) / 4;
-
-			y[1] = 15 + h2 / 2 + 1 - 5 + over;
-			y[0] = height - 3 - h1 / 2 - 5 - over;
+			int over = (height - 16 - h1 - h2) / 2;
+			y[1] = height - 1;
+			y[0] = y[1] - h1 - over;
+			y[2] = 14 + 1;
+			y[3] = y[2] + h2 + over;
 		}
 
 		this->FindWindowPlacementAndResize(width, height);
@@ -477,8 +491,8 @@ public:
 			DrawCompanyManagerFace(c->face, c->colour, 2, 16);
 		}
 
-		DrawStringMultiCenter(this->width - 120, y[1], this->message_2, this->width - 2);
-		if (this->message_1 != INVALID_STRING_ID) DrawStringMultiCenter(this->width - 120, y[0], this->message_1, this->width - 2);
+		DrawStringMultiLine(1, this->width - 1, y[2], y[3] , this->message_2, SA_CENTER);
+		if (this->message_1 != INVALID_STRING_ID) DrawStringMultiLine(1, this->width - 1, y[0], y[1], this->message_1, SA_CENTER);
 
 		/* Switch back to the normal text ref. stack for NewGRF texts */
 		SwitchToNormalRefStack();
@@ -649,7 +663,7 @@ struct TooltipsWindow : public Window
 		for (uint arg = 0; arg < this->paramcount; arg++) {
 			SetDParam(arg, this->params[arg]);
 		}
-		DrawStringMultiCenter((this->width >> 1), (this->height >> 1) - 5, this->string_id, this->width - 2);
+		DrawStringMultiLine(1, this->width - 1, 0, this->height, this->string_id, SA_CENTER);
 	}
 
 	virtual void OnMouseLoop()
@@ -733,7 +747,7 @@ static int DrawStationCoverageText(const AcceptedCargo cargo,
 	assert(b < endof(string));
 
 	SetDParamStr(0, string);
-	return DrawStringMultiLine(str_x, str_y, STR_JUST_RAW_STRING, 144);
+	return DrawStringMultiLine(str_x, str_x + 144, str_y, INT32_MAX, STR_JUST_RAW_STRING);
 }
 
 /**
@@ -755,7 +769,7 @@ int DrawStationCoverageAreaText(int sx, int sy, StationCoverageType sct, int rad
 		} else {
 			GetAcceptanceAroundTiles(cargo, tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE , rad);
 		}
-		return sy + DrawStationCoverageText(cargo, sx, sy, sct, supplies);
+		return DrawStationCoverageText(cargo, sx, sy, sct, supplies);
 	}
 
 	return sy;
@@ -1049,8 +1063,8 @@ void QueryString::DrawEditBox(Window *w, int wid)
 
 	if (tb->caretxoffs + delta < 0) delta = -tb->caretxoffs;
 
-	DoDrawString(tb->buf, delta, 0, TC_YELLOW);
-	if (HasEditBoxFocus(w, wid) && tb->caret) DoDrawString("_", tb->caretxoffs + delta, 0, TC_WHITE);
+	DrawString(delta, tb->width, 0, tb->buf, TC_YELLOW);
+	if (HasEditBoxFocus(w, wid) && tb->caret) DrawString(tb->caretxoffs + delta, tb->width + 10, 0, "_", TC_WHITE);
 
 	_cur_dpi = old_dpi;
 }
@@ -1264,7 +1278,7 @@ struct QueryWindow : public Window {
 		this->DrawWidgets();
 		CopyInDParam(0, this->params, lengthof(this->params));
 
-		DrawStringMultiCenter(this->width / 2, (this->height / 2) - 10, this->message, this->width - 2);
+		DrawStringMultiLine(1, this->width - 1, 14, 62, this->message, SA_CENTER);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -1408,8 +1422,8 @@ static void DrawFiosTexts(uint maxw)
 	}
 
 	if (str != STR_4006_UNABLE_TO_READ_DRIVE) SetDParam(0, tot);
-	DrawString(2, 37, str, TC_FROMSTRING);
-	DoDrawStringTruncated(path, 2, 27, TC_BLACK, maxw);
+	DrawString(2, 2 + maxw, 37, str, TC_FROMSTRING);
+	DrawString(2, 2 + maxw, 27, path, TC_BLACK);
 }
 
 static void MakeSortedSaveGameList()
@@ -1570,7 +1584,7 @@ public:
 		for (uint pos = this->vscroll.pos; pos < _fios_items.Length(); pos++) {
 			const FiosItem *item = _fios_items.Get(pos);
 
-			DoDrawStringTruncated(item->title, 4, y, _fios_colours[item->type], this->width - 18);
+			DrawString(4, widg->right - 2, y, item->title, _fios_colours[item->type]);
 			y += 10;
 			if (y >= this->vscroll.cap * 10 + widg->top + 1) break;
 		}

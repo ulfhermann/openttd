@@ -41,20 +41,44 @@ enum BuildVehicleWidgets {
 };
 
 static const Widget _build_vehicle_widgets[] = {
-	{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                STR_018B_CLOSE_WINDOW },
-	{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   239,     0,    13, 0x0,                     STR_018C_WINDOW_TITLE_DRAG_THIS },
-	{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    14,    25, STR_SORT_BY,             STR_SORT_ORDER_TIP},
-	{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   239,    14,    25, 0x0,                     STR_SORT_CRITERIA_TIP},
-	{     WWT_MATRIX,     RESIZE_RB,  COLOUR_GREY,     0,   227,    26,    39, 0x101,                   STR_NULL },
-	{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   228,   239,    26,    39, 0x0,                     STR_0190_SCROLL_BAR_SCROLLS_LIST },
-	{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   239,    40,   161, 0x0,                     STR_NULL },
+	{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,     STR_018B_CLOSE_WINDOW },            // BUILD_VEHICLE_WIDGET_CLOSEBOX
+	{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   239,     0,    13, 0x0,          STR_018C_WINDOW_TITLE_DRAG_THIS },  // BUILD_VEHICLE_WIDGET_CAPTION
+	{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    14,    25, STR_SORT_BY,  STR_SORT_ORDER_TIP},                // BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING
+	{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   239,    14,    25, 0x0,          STR_SORT_CRITERIA_TIP},             // BUILD_VEHICLE_WIDGET_SORT_DROPDOWN
+	{     WWT_MATRIX,     RESIZE_RB,  COLOUR_GREY,     0,   227,    26,    39, 0x101,        STR_NULL },                         // BUILD_VEHICLE_WIDGET_LIST
+	{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   228,   239,    26,    39, 0x0,          STR_0190_SCROLL_BAR_SCROLLS_LIST }, // BUILD_VEHICLE_WIDGET_SCROLLBAR
+	{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   239,    40,   161, 0x0,          STR_NULL },                         // BUILD_VEHICLE_WIDGET_PANEL
 
-	{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,   114,   162,   173, 0x0,                     STR_NULL },
-	{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   115,   227,   162,   173, 0x0,                     STR_NULL },
-	{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   228,   239,   162,   173, 0x0,                     STR_RESIZE_BUTTON },
+	{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,   114,   162,   173, 0x0,          STR_NULL },                         // BUILD_VEHICLE_WIDGET_BUILD
+	{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   115,   227,   162,   173, 0x0,          STR_NULL },                         // BUILD_VEHICLE_WIDGET_RENAME
+	{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   228,   239,   162,   173, 0x0,          STR_RESIZE_BUTTON },                // BUILD_VEHICLE_WIDGET_RESIZE
 	{   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_build_vehicle_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CAPTION), SetFill(1, 0), SetResize(1, 0), SetDataTip(0x0, STR_018C_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	/* Sort order + criteria button row. */
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING), SetMinimalSize(81, 12), SetDataTip(STR_SORT_BY, STR_SORT_ORDER_TIP),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SORT_DROPDOWN), SetMinimalSize(159, 12), SetResize(1, 0), SetDataTip(0x0, STR_SORT_CRITERIA_TIP),
+	EndContainer(),
+	/* Vehicle list. */
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_MATRIX, COLOUR_GREY, BUILD_VEHICLE_WIDGET_LIST), SetMinimalSize(228, 14), SetResize(1, 1), SetDataTip(0x101, STR_NULL),
+		NWidget(WWT_SCROLLBAR, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SCROLLBAR),
+	EndContainer(),
+	/* Panel with details. */
+	NWidget(WWT_PANEL, COLOUR_GREY, BUILD_VEHICLE_WIDGET_PANEL), SetMinimalSize(240, 122), SetResize(1, 0), EndContainer(),
+	/* Build/rename buttons, resize button. */
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_BUILD), SetMinimalSize(115, 12),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_RENAME), SetMinimalSize(113, 12), SetResize(1, 0),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY, BUILD_VEHICLE_WIDGET_RESIZE),
+	EndContainer(),
+};
 
 static bool _internal_sort_order; // descending/ascending
 static byte _last_sort_criteria[]    = {0, 0, 0, 0};
@@ -120,8 +144,8 @@ static int CDECL EngineReliabilitySorter(const void *a, const void *b)
 
 static int CDECL EngineCostSorter(const void *a, const void *b)
 {
-	int va = GetEngine(*(const EngineID*)a)->GetRunningCost();
-	int vb = GetEngine(*(const EngineID*)b)->GetRunningCost();
+	Money va = GetEngine(*(const EngineID*)a)->GetCost();
+	Money vb = GetEngine(*(const EngineID*)b)->GetCost();
 	int r = ClampToI32(va - vb);
 
 	/* Use EngineID to sort instead since we want consistent sorting */
@@ -353,7 +377,7 @@ static const StringID _sort_listing[][11] = {{
 	INVALID_STRING_ID
 }};
 
-static int DrawCargoCapacityInfo(int x, int y, EngineID engine, VehicleType type, bool refittable)
+static int DrawCargoCapacityInfo(int left, int right, int y, EngineID engine, VehicleType type, bool refittable)
 {
 	uint16 *cap = GetCapacityOfArticulatedParts(engine, type);
 
@@ -363,7 +387,7 @@ static int DrawCargoCapacityInfo(int x, int y, EngineID engine, VehicleType type
 		SetDParam(0, c);
 		SetDParam(1, cap[c]);
 		SetDParam(2, refittable ? STR_9842_REFITTABLE : STR_EMPTY);
-		DrawString(x, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
 		y += 10;
 
 		/* Only show as refittable once */
@@ -374,13 +398,13 @@ static int DrawCargoCapacityInfo(int x, int y, EngineID engine, VehicleType type
 }
 
 /* Draw rail wagon specific details */
-static int DrawRailWagonPurchaseInfo(int x, int y, EngineID engine_number, const RailVehicleInfo *rvi)
+static int DrawRailWagonPurchaseInfo(int left, int right, int y, EngineID engine_number, const RailVehicleInfo *rvi)
 {
 	const Engine *e = GetEngine(engine_number);
 
 	/* Purchase cost */
 	SetDParam(0, e->GetCost());
-	DrawString(x, y, STR_PURCHASE_INFO_COST, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_COST, TC_FROMSTRING);
 	y += 10;
 
 	/* Wagon weight - (including cargo) */
@@ -388,7 +412,7 @@ static int DrawRailWagonPurchaseInfo(int x, int y, EngineID engine_number, const
 	SetDParam(0, weight);
 	uint cargo_weight = (e->CanCarryCargo() ? GetCargo(e->GetDefaultCargoType())->weight * e->GetDisplayDefaultCapacity() >> 4 : 0);
 	SetDParam(1, cargo_weight + weight);
-	DrawString(x, y, STR_PURCHASE_INFO_WEIGHT_CWEIGHT, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_WEIGHT_CWEIGHT, TC_FROMSTRING);
 	y += 10;
 
 	/* Wagon speed limit, displayed if above zero */
@@ -396,7 +420,7 @@ static int DrawRailWagonPurchaseInfo(int x, int y, EngineID engine_number, const
 		uint max_speed = e->GetDisplayMaxSpeed();
 		if (max_speed > 0) {
 			SetDParam(0, max_speed);
-			DrawString(x, y, STR_PURCHASE_INFO_SPEED, TC_FROMSTRING);
+			DrawString(left, right, y, STR_PURCHASE_INFO_SPEED, TC_FROMSTRING);
 			y += 10;
 		}
 	}
@@ -404,7 +428,7 @@ static int DrawRailWagonPurchaseInfo(int x, int y, EngineID engine_number, const
 	/* Running cost */
 	if (rvi->running_cost_class != 0xFF) {
 		SetDParam(0, e->GetRunningCost());
-		DrawString(x, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
 		y += 10;
 	}
 
@@ -412,33 +436,33 @@ static int DrawRailWagonPurchaseInfo(int x, int y, EngineID engine_number, const
 }
 
 /* Draw locomotive specific details */
-static int DrawRailEnginePurchaseInfo(int x, int y, EngineID engine_number, const RailVehicleInfo *rvi)
+static int DrawRailEnginePurchaseInfo(int left, int right, int y, EngineID engine_number, const RailVehicleInfo *rvi)
 {
 	const Engine *e = GetEngine(engine_number);
 
 	/* Purchase Cost - Engine weight */
 	SetDParam(0, e->GetCost());
 	SetDParam(1, e->GetDisplayWeight());
-	DrawString(x, y, STR_PURCHASE_INFO_COST_WEIGHT, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_COST_WEIGHT, TC_FROMSTRING);
 	y += 10;
 
 	/* Max speed - Engine power */
 	SetDParam(0, e->GetDisplayMaxSpeed());
 	SetDParam(1, e->GetPower());
-	DrawString(x, y, STR_PURCHASE_INFO_SPEED_POWER, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_SPEED_POWER, TC_FROMSTRING);
 	y += 10;
 
 	/* Max tractive effort - not applicable if old acceleration or maglev */
 	if (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && rvi->railtype != RAILTYPE_MAGLEV) {
 		SetDParam(0, e->GetDisplayMaxTractiveEffort());
-		DrawString(x, y, STR_PURCHASE_INFO_MAX_TE, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_MAX_TE, TC_FROMSTRING);
 		y += 10;
 	}
 
 	/* Running cost */
 	if (rvi->running_cost_class != 0xFF) {
 		SetDParam(0, e->GetRunningCost());
-		DrawString(x, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
 		y += 10;
 	}
 
@@ -446,7 +470,7 @@ static int DrawRailEnginePurchaseInfo(int x, int y, EngineID engine_number, cons
 	if (rvi->pow_wag_power != 0) {
 		SetDParam(0, rvi->pow_wag_power);
 		SetDParam(1, rvi->pow_wag_weight);
-		DrawString(x, y, STR_PURCHASE_INFO_PWAGPOWER_PWAGWEIGHT, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_PWAGPOWER_PWAGWEIGHT, TC_FROMSTRING);
 		y += 10;
 	};
 
@@ -454,52 +478,52 @@ static int DrawRailEnginePurchaseInfo(int x, int y, EngineID engine_number, cons
 }
 
 /* Draw road vehicle specific details */
-static int DrawRoadVehPurchaseInfo(int x, int y, EngineID engine_number)
+static int DrawRoadVehPurchaseInfo(int left, int right, int y, EngineID engine_number)
 {
 	const Engine *e = GetEngine(engine_number);
 
 	/* Purchase cost - Max speed */
 	SetDParam(0, e->GetCost());
 	SetDParam(1, e->GetDisplayMaxSpeed());
-	DrawString(x, y, STR_PURCHASE_INFO_COST_SPEED, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_COST_SPEED, TC_FROMSTRING);
 	y += 10;
 
 	/* Running cost */
 	SetDParam(0, e->GetRunningCost());
-	DrawString(x, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
 	y += 10;
 
 	return y;
 }
 
 /* Draw ship specific details */
-static int DrawShipPurchaseInfo(int x, int y, EngineID engine_number, const ShipVehicleInfo *svi, bool refittable)
+static int DrawShipPurchaseInfo(int left, int right, int y, EngineID engine_number, const ShipVehicleInfo *svi, bool refittable)
 {
 	const Engine *e = GetEngine(engine_number);
 
 	/* Purchase cost - Max speed */
 	SetDParam(0, e->GetCost());
 	SetDParam(1, e->GetDisplayMaxSpeed());
-	DrawString(x, y, STR_PURCHASE_INFO_COST_SPEED, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_COST_SPEED, TC_FROMSTRING);
 	y += 10;
 
 	/* Cargo type + capacity */
 	SetDParam(0, e->GetDefaultCargoType());
 	SetDParam(1, e->GetDisplayDefaultCapacity());
 	SetDParam(2, refittable ? STR_9842_REFITTABLE : STR_EMPTY);
-	DrawString(x, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
 	y += 10;
 
 	/* Running cost */
 	SetDParam(0, e->GetRunningCost());
-	DrawString(x, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
 	y += 10;
 
 	return y;
 }
 
 /* Draw aircraft specific details */
-static int DrawAircraftPurchaseInfo(int x, int y, EngineID engine_number, const AircraftVehicleInfo *avi, bool refittable)
+static int DrawAircraftPurchaseInfo(int left, int right, int y, EngineID engine_number, const AircraftVehicleInfo *avi, bool refittable)
 {
 	const Engine *e = GetEngine(engine_number);
 	CargoID cargo = e->GetDefaultCargoType();
@@ -507,27 +531,27 @@ static int DrawAircraftPurchaseInfo(int x, int y, EngineID engine_number, const 
 	/* Purchase cost - Max speed */
 	SetDParam(0, e->GetCost());
 	SetDParam(1, e->GetDisplayMaxSpeed());
-	DrawString(x, y, STR_PURCHASE_INFO_COST_SPEED, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_COST_SPEED, TC_FROMSTRING);
 	y += 10;
 
 	/* Cargo capacity */
 	if (cargo == CT_INVALID || cargo == CT_PASSENGERS) {
 		SetDParam(0, e->GetDisplayDefaultCapacity());
 		SetDParam(1, avi->mail_capacity);
-		DrawString(x, y, STR_PURCHASE_INFO_AIRCRAFT_CAPACITY, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_AIRCRAFT_CAPACITY, TC_FROMSTRING);
 	} else {
 		/* Note, if the default capacity is selected by the refit capacity
 		 * callback, then the capacity shown is likely to be incorrect. */
 		SetDParam(0, cargo);
 		SetDParam(1, e->GetDisplayDefaultCapacity());
 		SetDParam(2, refittable ? STR_9842_REFITTABLE : STR_EMPTY);
-		DrawString(x, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
 	}
 	y += 10;
 
 	/* Running cost */
 	SetDParam(0, e->GetRunningCost());
-	DrawString(x, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
+	DrawString(left, right, y, STR_PURCHASE_INFO_RUNNINGCOST, TC_FROMSTRING);
 	y += 10;
 
 	return y;
@@ -535,12 +559,11 @@ static int DrawAircraftPurchaseInfo(int x, int y, EngineID engine_number, const 
 
 /**
  * Draw the purchase info details of a vehicle at a given location.
- * @param x,y location where to draw the info
- * @param w how wide are the text allowed to be (size of widget/window to Draw in)
+ * @param left,right,y location where to draw the info
  * @param engine_number the engine of which to draw the info of
  * @return y after drawing all the text
  */
-int DrawVehiclePurchaseInfo(int x, int y, uint w, EngineID engine_number)
+int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number)
 {
 	const Engine *e = GetEngine(engine_number);
 	YearMonthDay ymd;
@@ -552,18 +575,18 @@ int DrawVehiclePurchaseInfo(int x, int y, uint w, EngineID engine_number)
 		case VEH_TRAIN: {
 			const RailVehicleInfo *rvi = RailVehInfo(engine_number);
 			if (rvi->railveh_type == RAILVEH_WAGON) {
-				y = DrawRailWagonPurchaseInfo(x, y, engine_number, rvi);
+				y = DrawRailWagonPurchaseInfo(left, right, y, engine_number, rvi);
 			} else {
-				y = DrawRailEnginePurchaseInfo(x, y, engine_number, rvi);
+				y = DrawRailEnginePurchaseInfo(left, right, y, engine_number, rvi);
 			}
 
 			/* Cargo type + capacity, or N/A */
-			int new_y = DrawCargoCapacityInfo(x, y, engine_number, VEH_TRAIN, refittable);
+			int new_y = DrawCargoCapacityInfo(left, right, y, engine_number, VEH_TRAIN, refittable);
 
 			if (new_y == y) {
 				SetDParam(0, CT_INVALID);
 				SetDParam(2, STR_EMPTY);
-				DrawString(x, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
+				DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
 				y += 10;
 			} else {
 				y = new_y;
@@ -571,15 +594,15 @@ int DrawVehiclePurchaseInfo(int x, int y, uint w, EngineID engine_number)
 			break;
 		}
 		case VEH_ROAD: {
-			y = DrawRoadVehPurchaseInfo(x, y, engine_number);
+			y = DrawRoadVehPurchaseInfo(left, right, y, engine_number);
 
 			/* Cargo type + capacity, or N/A */
-			int new_y = DrawCargoCapacityInfo(x, y, engine_number, VEH_ROAD, refittable);
+			int new_y = DrawCargoCapacityInfo(left, right, y, engine_number, VEH_ROAD, refittable);
 
 			if (new_y == y) {
 				SetDParam(0, CT_INVALID);
 				SetDParam(2, STR_EMPTY);
-				DrawString(x, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
+				DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY, TC_FROMSTRING);
 				y += 10;
 			} else {
 				y = new_y;
@@ -587,10 +610,10 @@ int DrawVehiclePurchaseInfo(int x, int y, uint w, EngineID engine_number)
 			break;
 		}
 		case VEH_SHIP:
-			y = DrawShipPurchaseInfo(x, y, engine_number, ShipVehInfo(engine_number), refittable);
+			y = DrawShipPurchaseInfo(left, right, y, engine_number, ShipVehInfo(engine_number), refittable);
 			break;
 		case VEH_AIRCRAFT:
-			y = DrawAircraftPurchaseInfo(x, y, engine_number, AircraftVehInfo(engine_number), refittable);
+			y = DrawAircraftPurchaseInfo(left, right, y, engine_number, AircraftVehInfo(engine_number), refittable);
 			break;
 	}
 
@@ -599,18 +622,18 @@ int DrawVehiclePurchaseInfo(int x, int y, uint w, EngineID engine_number)
 		/* Design date - Life length */
 		SetDParam(0, ymd.year);
 		SetDParam(1, e->lifelength);
-		DrawString(x, y, STR_PURCHASE_INFO_DESIGNED_LIFE, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_DESIGNED_LIFE, TC_FROMSTRING);
 		y += 10;
 
 		/* Reliability */
 		SetDParam(0, e->reliability * 100 >> 16);
-		DrawString(x, y, STR_PURCHASE_INFO_RELIABILITY, TC_FROMSTRING);
+		DrawString(left, right, y, STR_PURCHASE_INFO_RELIABILITY, TC_FROMSTRING);
 		y += 10;
 	}
 
 	/* Additional text from NewGRF */
-	y += ShowAdditionalText(x, y, w, engine_number);
-	if (refittable) y += ShowRefitOptionsList(x, y, w, engine_number);
+	y = ShowAdditionalText(left, right, y, engine_number);
+	if (refittable) y = ShowRefitOptionsList(left, right, y, engine_number);
 
 	return y;
 }
@@ -668,19 +691,17 @@ void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *
 		default: NOT_REACHED();
 	}
 
-	uint maxw = r - x - x_offset;
-
 	for (; min < max; min++, y += step_size) {
 		const EngineID engine = (*eng_list)[min];
 		/* Note: num_engines is only used in the autoreplace GUI, so it is correct to use _local_company here. */
 		const uint num_engines = GetGroupNumEngines(_local_company, selected_group, engine);
 
 		SetDParam(0, engine);
-		DrawStringTruncated(x + x_offset, y, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK, maxw);
+		DrawString(x + x_offset, r, y, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK);
 		DrawVehicleEngine(type, x, y + y_offset, engine, (count_location != 0 && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
 		if (count_location != 0) {
 			SetDParam(0, num_engines);
-			DrawStringRightAligned(count_location, y + (GetVehicleListHeight(type) == 14 ? 3 : 8), STR_TINY_BLACK, TC_FROMSTRING);
+			DrawString(x, count_location, y + (GetVehicleListHeight(type) == 14 ? 3 : 8), STR_TINY_BLACK, TC_FROMSTRING, SA_RIGHT);
 		}
 	}
 }
@@ -1033,7 +1054,7 @@ struct BuildVehicleWindow : Window {
 
 		if (this->sel_engine != INVALID_ENGINE) {
 			const Widget *wi = &this->widget[BUILD_VEHICLE_WIDGET_PANEL];
-			int text_end = DrawVehiclePurchaseInfo(2, wi->top + 1, wi->right - wi->left - 2, this->sel_engine);
+			int text_end = DrawVehiclePurchaseInfo(wi->left + 2, wi->right - 2, wi->top + 1, this->sel_engine);
 
 			if (text_end > wi->bottom) {
 				this->SetDirty();
@@ -1094,7 +1115,7 @@ static const WindowDesc _build_vehicle_desc(
 	WDP_AUTO, WDP_AUTO, 240, 174, 240, 256,
 	WC_BUILD_VEHICLE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	_build_vehicle_widgets
+	_build_vehicle_widgets, _nested_build_vehicle_widgets, lengthof(_nested_build_vehicle_widgets)
 );
 
 void ShowBuildVehicleWindow(TileIndex tile, VehicleType type)

@@ -1054,10 +1054,10 @@ public:
 			_cur_dpi = old_dpi;
 		}
 
-		DrawStringCentered(74, 15 + y_offset, STR_3002_ORIENTATION, TC_FROMSTRING);
-		DrawStringCentered(74, 76 + y_offset, STR_3003_NUMBER_OF_TRACKS, TC_FROMSTRING);
-		DrawStringCentered(74, 101 + y_offset, STR_3004_PLATFORM_LENGTH, TC_FROMSTRING);
-		DrawStringCentered(74, 141 + y_offset, STR_3066_COVERAGE_AREA_HIGHLIGHT, TC_FROMSTRING);
+		DrawString(this->widget[BRSW_PLATFORM_LEN_1].left, this->widget[BRSW_PLATFORM_LEN_7].right, 15 + y_offset, STR_3002_ORIENTATION, TC_FROMSTRING, SA_CENTER);
+		DrawString(this->widget[BRSW_PLATFORM_LEN_1].left, this->widget[BRSW_PLATFORM_LEN_7].right, 76 + y_offset, STR_3003_NUMBER_OF_TRACKS, TC_FROMSTRING, SA_CENTER);
+		DrawString(this->widget[BRSW_PLATFORM_LEN_1].left, this->widget[BRSW_PLATFORM_LEN_7].right, 101 + y_offset, STR_3004_PLATFORM_LENGTH, TC_FROMSTRING, SA_CENTER);
+		DrawString(this->widget[BRSW_PLATFORM_LEN_1].left, this->widget[BRSW_PLATFORM_LEN_7].right, 141 + y_offset, STR_3066_COVERAGE_AREA_HIGHLIGHT, TC_FROMSTRING, SA_CENTER);
 
 		int text_end = DrawStationCoverageAreaText(2, 166 + y_offset, SCT_ALL, rad, false);
 		text_end = DrawStationCoverageAreaText(2, text_end + 4, SCT_ALL, rad, true) + 4;
@@ -1078,9 +1078,9 @@ public:
 						GfxFillRect(8, y - 2, 127, y + 10, 0, FILLRECT_CHECKER);
 					}
 
-					DrawStringTruncated(9, y, statspec->name, i == _railstation.station_type ? TC_WHITE : TC_BLACK, 118);
+					DrawString(9, 127, y, statspec->name, i == _railstation.station_type ? TC_WHITE : TC_BLACK);
 				} else {
-					DrawStringTruncated(9, y, STR_STAT_CLASS_DFLT, i == _railstation.station_type ? TC_WHITE : TC_BLACK, 118);
+					DrawString(9, 127, y, STR_STAT_CLASS_DFLT, i == _railstation.station_type ? TC_WHITE : TC_BLACK);
 				}
 
 				y += 14;
@@ -1327,7 +1327,7 @@ static const Widget _newstation_builder_widgets[] = {
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,        74,   133,   242,   253, STR_02DA_ON,                     STR_3064_HIGHLIGHT_COVERAGE_AREA},    // BRSW_HIGHLIGHT_ON
 
 /* newstations gui additions */
-{ WWT_DROPDOWNIN,   RESIZE_NONE,  COLOUR_GREY,         7,   140,    17,    28, STR_02BD,                        STR_SELECT_STATION_CLASS_TIP},        // BRSW_NEWST_DROPDOWN
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,         7,   140,    17,    28, STR_02BD,                        STR_SELECT_STATION_CLASS_TIP},        // BRSW_NEWST_DROPDOWN
 {     WWT_MATRIX,   RESIZE_NONE,  COLOUR_GREY,         7,   128,    32,   102, 0x501,                           STR_SELECT_STATION_TYPE_TIP},         // BRSW_NEWST_LIST
 {  WWT_SCROLLBAR,   RESIZE_NONE,  COLOUR_GREY,       129,   140,    32,   102, 0x0,                             STR_0190_SCROLL_BAR_SCROLLS_LIST},    // BRSW_NEWST_SCROLL
 {   WIDGETS_END},
@@ -1432,9 +1432,8 @@ public:
 
 		/* Draw dragging signal density value in the BSW_DRAG_SIGNALS_DENSITY widget */
 		SetDParam(0, _settings_client.gui.drag_signals_density);
-		DrawStringCentered(this->widget[BSW_DRAG_SIGNALS_DENSITY].left + (this->widget[BSW_DRAG_SIGNALS_DENSITY].right -
-				this->widget[BSW_DRAG_SIGNALS_DENSITY].left) / 2 + 1,
-				this->widget[BSW_DRAG_SIGNALS_DENSITY].top + 2, STR_JUST_INT, TC_ORANGE);
+		DrawString(this->widget[BSW_DRAG_SIGNALS_DENSITY].left, this->widget[BSW_DRAG_SIGNALS_DENSITY].right,
+				this->widget[BSW_DRAG_SIGNALS_DENSITY].top + 2, STR_JUST_INT, TC_ORANGE, SA_CENTER);
 	}
 
 	virtual void OnClick(Point pt, int widget)

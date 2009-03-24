@@ -489,6 +489,7 @@ STR_01A2_IS_GETTING_VERY_OLD_AND                                :{WHITE}{VEHICLE
 STR_01A3_LAND_AREA_INFORMATION                                  :{WHITE}Informacja o terenie
 STR_01A4_COST_TO_CLEAR_N_A                                      :{BLACK}Koszt czyszczenia: {LTBLUE}N/D
 STR_01A5_COST_TO_CLEAR                                          :{BLACK}Koszt czyszczenia: {RED}{CURRENCY}
+STR_REVENUE_WHEN_CLEARED                                        :{BLACK}Zysk gdy czyszczone: {LTBLUE}{CURRENCY}
 STR_01A6_N_A                                                    :Brak
 STR_01A7_OWNER                                                  :{BLACK}Właściciel: {LTBLUE}{STRING}
 STR_ROAD_OWNER                                                  :{BLACK}Wlasciciel drogi: {LTBLUE}{STRING}
@@ -651,6 +652,7 @@ STR_CANNOT_GENERATE_TOWN                                        :{WHITE}Nie moż
 STR_NO_SPACE_FOR_TOWN                                           :{WHITE}...nie ma więcej miejsca na mapie
 STR_023B_INCREASE_SIZE_OF_TOWN                                  :{BLACK}Zwiększ rozmiar miasta
 STR_023C_EXPAND                                                 :{BLACK}Rozszerz
+STR_TOWN_EXPAND_WARN_NO_ROADS                                   :{WHITE} Miasto nie będzie budować dróg. Możesz zezwolić na budowę dróg poprzez Zaawansowane Ustawienia->Ekonomia->Miasta.
 STR_023D_RANDOM_TOWN                                            :{BLACK}Losowe miasto
 STR_023E_BUILD_TOWN_IN_RANDOM_LOCATION                          :{BLACK}Budowa miasta w losowym miejscu
 STR_0285_CAN_T_BUILD_HERE                                       :{WHITE}Nie można tutaj wybudować: {STRING}...
@@ -694,6 +696,8 @@ STR_FOUND_TOWN_CITY_TOOLTIP                                     :{BLACK}Duże mi
 STR_02A4_SELECT_TOWN_SIZE                                       :{BLACK}Wybierz wielkość miasta
 STR_02A5_TOWN_SIZE                                              :{YELLOW}Wielkość miasta:
 
+STR_TOWN_ROAD_LAYOUT                                            :{YELLOW} Układ dróg miasta
+STR_SELECT_TOWN_ROAD_LAYOUT                                     :{BLACK}Wybierz układ dróg dla tego miasta
 STR_SELECT_LAYOUT_ORIGINAL                                      :{BLACK}Oryginalnie
 STR_SELECT_LAYOUT_BETTER_ROADS                                  :{BLACK}Lepsze drogi
 STR_SELECT_LAYOUT_2X2_GRID                                      :{BLACK}Siatka 2x2
@@ -956,10 +960,12 @@ STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Pozwól
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Zezwól na bardziej realistyczny zasięg obejmowania: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Pozwól usuwać drogi, mosty, tunele, itp. należące do miasta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Pozwól budować bardzo długie pociągi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Model przyspieszenia pociągu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Oryginalnie
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistycznie
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zabroń pociągom i statkom skręcać o 90st: {ORANGE}{STRING} {LTBLUE} (wymaga NPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Połącz stacje budowane jedna obok drugiej: {ORANGE}{STRING}
+STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Zezwól na łączenie stacji nie sąsiadujących bezpośrednio: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Użyj ulepszonego algorytmu załadunku: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Stopniowy załadunek pojazdów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflacja: {ORANGE}{STRING}
@@ -985,6 +991,7 @@ STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Niejedn
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Mnożnik wagi dla symulacji ciężkich pociągów towarowych: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Wspolczynnik predkosci samolotu: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Pozwól na budowę przystanków typu ro-ro na drogach miejskich: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Zezwól na przejazd przez przystanki należące do przeciwników: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Pozwól na budowę stacji przyległych do stacji przeciwnika (z CTRL): {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES                              :{LTBLUE}Zezwol na wiele zestawow NewGRF: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Zmiana tego ustawienia nie jest możliwa, gdy znajdują się tutaj pojazdy.
@@ -1022,6 +1029,9 @@ STR_CONFIG_SETTING_HEIGHTMAP_ROTATION                           :{LTBLUE}Obrót 
 STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_COUNTER_CLOCKWISE         :Przec. do wsk. zegara
 STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_CLOCKWISE                 :Zg. ze wsk. zegara
 STR_CONFIG_SETTING_SE_FLAT_WORLD_HEIGHT                         :{LTBLUE}Wysokość jaką dostaje płaska mapa: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ENABLE_FREEFORM_EDGES                        :{LTBLUE}Włącz terraformowanie pól na krawędzi mapy: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EDGES_NOT_EMPTY                              :{WHITE}Jedno lub więcej pól na północnej krawędzi nie jest puste
+STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Jedno lub więcej pól na krawędzi nie jest wodą
 
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Maks. wielkość stacji: {ORANGE}{STRING} {RED}Uwaga: Duże wartości spowalniają grę
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Automatycznie serwisuj helikoptery na lądowiskach: {ORANGE}{STRING}
@@ -1073,6 +1083,8 @@ STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Pierwszy dostę
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Najnowszy
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Najczęściej używany
 STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Pokaz zarezerwowane tory: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Pozostaw aktywne narzędzi do budowania po ich użyciu: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Pogrupuj wydatki w oknie finsnasów firmy: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Pokaż okno narzędzi do budowy nawet gdy nie ma odpowiednich pojazdów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Maks. liczba pociągów na gracza: {ORANGE}{STRING}
@@ -1100,6 +1112,7 @@ STR_CONFIG_SETTING_NOSERVICE                                    :{LTBLUE}Wyłąc
 STR_CONFIG_SETTING_WAGONSPEEDLIMITS                             :{LTBLUE}Włącz limity prędkości wagonów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISABLE_ELRAILS                              :{LTBLUE}Zabroń korzystanie z kolei elektrycznych: {ORANGE}{STRING}
 
+STR_CONFIG_SETTING_COLOURED_NEWS_YEAR                           :{LTBLUE}Pojawianie się kolorowych wiadomości w: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STARTING_YEAR                                :{LTBLUE}Data rozpoczęcia gry: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_ECONOMY                               :{LTBLUE}Pozwól na łagodną ekonomię (więcej małych zmian): {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_SHARES                                 :{LTBLUE}Pozwól kupować udziały w innych firmach: {ORANGE}{STRING}
@@ -1121,6 +1134,7 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_BETTER_ROADS                     :lepsze drogi
 STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :siatka 2x2
 STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :siatka 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :losowo
+STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Miasta mogą budować drogi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Zezwól miastom kontrolować poziom hałasu dla lotnisk: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Pozycja głównego paska narzędzi: {ORANGE}{STRING}
@@ -1149,9 +1163,11 @@ STR_CONFIG_SETTING_AI                                           :{ORANGE}Zawodni
 STR_CONFIG_SETTING_DISPLAY_OPTIONS                              :{ORANGE}Wyświetl opcje
 STR_CONFIG_SETTING_INTERACTION                                  :{ORANGE}Oddziaływanie
 STR_CONFIG_SETTING_CONSTRUCTION_SIGNALS                         :{ORANGE}Sygnały
+STR_CONFIG_SETTING_STATIONS_CARGOHANDLING                       :{ORANGE}Obsługa ładunków
 STR_CONFIG_SETTING_AI_NPC                                       :{ORANGE}Gracze komputerowi
 STR_CONFIG_SETTING_VEHICLES_AUTORENEW                           :{ORANGE}Autoodnowa
 STR_CONFIG_SETTING_VEHICLES_SERVICING                           :{ORANGE}Serwisowanie
+STR_CONFIG_SETTING_VEHICLES_ROUTING                             :{ORANGE}Wyznaczanie trasy
 STR_CONFIG_SETTING_VEHICLES_TRAINS                              :{ORANGE}Pociągi
 STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Miasteczka
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Fabryki
@@ -1223,6 +1239,7 @@ STR_CANT_REMOVE_TRAIN_WAYPOINT                                  :{WHITE}Nie moż
 STR_BUILD_AUTORAIL_TIP                                          :{BLACK}Budowa torów używając trybu Autorail
 
 STR_NO_TOWN_IN_SCENARIO                                         :{WHITE}...nie ma żadnego miasta w scenariuszu
+STR_COULD_NOT_CREATE_TOWN                                       :{WHITE}Generowanie mapy anulowane...{}...brak odpowiednich miesjc dla miast
 
 STR_MANY_RANDOM_TOWNS                                           :{BLACK}Wiele losowych miast
 STR_RANDOM_TOWNS_TIP                                            :{BLACK}Pokryj mapę losowo położonymi miastami
@@ -1509,7 +1526,9 @@ STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Gra wznowiona (
 ############ End of leave-in-this-order
 STR_NETWORK_CLIENT_LEAVING                                      :opuszczanie
 STR_NETWORK_CLIENT_JOINED                                       :*** {STRING} dołączył do gry.
+STR_NETWORK_CLIENT_COMPANY_JOIN                                 :*** {STRING} dołączył do firmy #{2:NUM}
 STR_NETWORK_CLIENT_COMPANY_SPECTATE                             :*** {STRING} dołączył do obserwatorów
+STR_NETWORK_CLIENT_COMPANY_NEW                                  :*** {STRING} założył nową firmę (#{2:NUM})
 STR_NETWORK_CLIENT_LEFT                                         :*** {STRING} opuścił grę ({2:STRING})
 STR_NETWORK_NAME_CHANGE                                         :*** {STRING} zmienił/zmieniła swoje imię na {STRING}
 STR_NETWORK_GIVE_MONEY                                          :*** {STRING} dał/dała twojemu przedsiębiorstwu {2:CURRENCY}
@@ -1709,7 +1728,9 @@ STR_200B_CENTER_THE_MAIN_VIEW_ON                                :{BLACK}Centruj 
 STR_200C_CHANGE_TOWN_NAME                                       :{BLACK}Zmień nazwę miasta
 STR_200D_PASSENGERS_LAST_MONTH_MAX                              :{BLACK}Pasażerów w zeszłym miesiącu: {ORANGE}{COMMA}{BLACK}  maks: {ORANGE}{COMMA}
 STR_200E_MAIL_LAST_MONTH_MAX                                    :{BLACK}Poczta w zeszłym miesiącu: {ORANGE}{COMMA}{BLACK}  maks: {ORANGE}{COMMA}
+STR_CARGO_FOR_TOWNGROWTH                                        :{BLACK}Towar potrzebny do rozrostu miasta:
 STR_CARGO_FOR_TOWNGROWTH_REQUIRED                               :{SETX 20}{ORANGE}{STRING}{BLACK} required
+STR_CARGO_FOR_TOWNGROWTH_LAST_MONTH                             :{SETX 20}{ORANGE}{CARGO}{BLACK} dowiezionych w zeszłym miesiącu
 STR_200F_TALL_OFFICE_BLOCK                                      :Wysoki biurowiec
 STR_2010_OFFICE_BLOCK                                           :Biurowiec
 STR_2011_SMALL_BLOCK_OF_FLATS                                   :Mały blok mieszkalny
@@ -1734,12 +1755,10 @@ STR_2023_TRANSPORT_COMPANY_RATINGS                              :{BLACK}Ocena tr
 STR_2024                                                        :{YELLOW}{COMPANY} {COMPANYNUM}: {ORANGE}{STRING}
 STR_2025_SUBSIDIES                                              :{WHITE}Subsydia
 STR_2026_SUBSIDIES_ON_OFFER_FOR                                 :{BLACK}Oferta subsydiów dla usługi przewozu:
-STR_2027_FROM_TO                                                :{ORANGE}{STRING} z {STRING} do {STRING}
-STR_2028_BY                                                     :{YELLOW} (do {DATE_SHORT})
+STR_2027_FROM_TO                                                :{ORANGE}{STRING} z {STRING} do {STRING}{YELLOW} (do {DATE_SHORT})
 STR_202A_NONE                                                   :{ORANGE}Żadne
 STR_202B_SERVICES_ALREADY_SUBSIDISED                            :{BLACK}Usługi już subsydiowane:
-STR_202C_FROM_TO                                                :{ORANGE}{STRING} z {STATION} do {STATION}{YELLOW} ({COMPANY}
-STR_202D_UNTIL                                                  :{YELLOW}, do {DATE_SHORT})
+STR_202C_FROM_TO                                                :{ORANGE}{STRING} z {STATION} do {STATION}{YELLOW} ({COMPANY}{YELLOW}, do {DATE_SHORT})
 STR_202E_OFFER_OF_SUBSIDY_EXPIRED                               :{BLACK}{BIGFONT}Subsydiowanie wygasło:{}{}{STRING} z {STRING} do {STRING} już nie będzie dotowane.
 STR_202F_SUBSIDY_WITHDRAWN_SERVICE                              :{BLACK}{BIGFONT}Koniec dotacji:{}{}Przewóz {STRING.d} z {STATION} do {STATION} już nie jest subsydiowany.
 STR_2030_SERVICE_SUBSIDY_OFFERED                                :{BLACK}{BIGFONT}Oferta usługi dotowanej:{}{}Pierwszy przewóz {STRING.d} z {STRING} do {STRING} będzie dotowany przez rok przez lokalne władze!
@@ -1748,6 +1767,7 @@ STR_2032_SERVICE_SUBSIDY_AWARDED                                :{BLACK}{BIGFONT
 STR_2033_SERVICE_SUBSIDY_AWARDED                                :{BLACK}{BIGFONT}Przyznano subsydia dla {COMPANY}!{}{}Przewóz {STRING.d} z {STATION} do {STATION} będzie opłacany potrójnie przez następny rok!
 STR_2034_SERVICE_SUBSIDY_AWARDED                                :{BLACK}{BIGFONT}Przyznano subsydia dla {COMPANY}!{}{}Przewóz {STRING.d} z {STATION} do {STATION} będzie opłacany poczwórnie przez następny rok!
 STR_2035_LOCAL_AUTHORITY_REFUSES                                :{WHITE}Lokalne władze {TOWN} nie pozwalają na budowę kolejnego lotniska w tym mieście
+STR_LOCAL_AUTHORITY_REFUSES_NOISE                               :{WHITE}{TOWN} lokalne władzę odmawiają zgody na lotnisko ze względu na poziom hałasu
 STR_2036_COTTAGES                                               :Domki
 STR_2037_HOUSES                                                 :Domy
 STR_2038_FLATS                                                  :Mieszkania
@@ -2055,6 +2075,7 @@ STR_INDUSTRY_PROD_GODOWN                                        :{BLACK}{BIGFONT
 
 ##id 0x5000
 STR_5003_ANOTHER_TUNNEL_IN_THE_WAY                              :{WHITE}Inny tunel na drodze
+STR_TUNNEL_THROUGH_MAP_BORDER                                   :{WHITE}Koniec tunelu poza mapą
 STR_5005_UNABLE_TO_EXCAVATE_LAND                                :{WHITE}Nie można wydrążyć drugiego końca tunelu
 STR_5006_MUST_DEMOLISH_TUNNEL_FIRST                             :{WHITE}Należy najpierw usunąć tunel
 STR_5007_MUST_DEMOLISH_BRIDGE_FIRST                             :{WHITE}Należy najpierw usunąć most
@@ -2336,6 +2357,7 @@ STR_7071_CAN_T_BUILD_COMPANY_HEADQUARTERS                       :{WHITE}Nie moż
 STR_7072_VIEW_HQ                                                :{BLACK}Zobacz SG
 STR_RELOCATE_HQ                                                 :{BLACK}Przenieś SG
 STR_COMPANY_JOIN                                                :{BLACK}Dołącz
+STR_COMPANY_JOIN_TIP                                            :{BLACK}Dołącz i graj jako ta firma
 STR_COMPANY_PASSWORD                                            :{BLACK}Hasło
 STR_COMPANY_PASSWORD_TOOLTIP                                    :{BLACK}Ochrona hasłem Twojej firmy zapobiega nieautoryzowanemu przyłączeniu się
 STR_SET_COMPANY_PASSWORD                                        :{BLACK}Ustaw hasło firmy
@@ -3159,6 +3181,7 @@ STR_PERFORMANCE_DETAIL_LOAN_TIP                                 :{BLACK}Wielkoś
 STR_PERFORMANCE_DETAIL_TOTAL_TIP                                :{BLACK}Suma przyznanych punktów
 
 STR_NEWGRF_SETTINGS_BUTTON                                      :{BLACK}Ustawienia NewGRF
+STR_NEWGRF_SETTINGS_BUTTON_TIP                                  :{BLACK}Wyświetl ustawienia NewGRF
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}Ustawienia NewGRF
 STR_NEWGRF_APPLY_CHANGES                                        :{BLACK}Zastosuj zmiany
 STR_NEWGRF_TOGGLE_PALETTE                                       :{BLACK}Zmień paletę
@@ -3188,6 +3211,7 @@ STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Unexpected spri
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Unknown Action 0 property.
 STR_NEWGRF_ERROR_INVALID_ID                                     :Attempt to use invalid ID.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} zawiera uszkodzoną teksturę. Wszystkie uszkodzone tekstury będą pokazane jako czerwony znak zapytania (?).
+STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Zawiera wiele wpisów Action 8
 
 STR_NEWGRF_PRESET_LIST_TIP                                      :{BLACK}Załaduj wskazany stan ustawień
 STR_NEWGRF_PRESET_SAVE                                          :{BLACK}Zapisz stan ustawień
@@ -3228,14 +3252,15 @@ STR_NEWGRF_BROKEN                                               :{WHITE}Zachowan
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Zmienia długość pojazdu dla '{1:ENGINE}' gdy nie jest w zajezdni.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Pociąg '{VEHICLE}' należący do '{COMPANY}' ma niepoprawną długość. Prawdopodobnie problemem powoduje NewGRFs. Gra może działać niestabilnie lub się zawiesić.
 
+STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' dostarcza niepoprawnych danych.
 
 STR_LOADGAME_REMOVED_TRAMS                                      :{WHITE}Gra została zapisana w wersji nie obsługującej tramwajów. Wszystkie tramwaje zostały usunięte.
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Własna waluta
 STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Współczynnik wymiany: {ORANGE}{CURRENCY} = £ {COMMA}
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Separator:
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefiks:
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sufiks:
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Separator: {STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefiks: {STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sufiks: {STRING}
 STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Przejście na Euro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Przejście na Euro: {ORANGE}nigdy
 STR_CURRENCY_PREVIEW                                            :{LTBLUE}Podgląd: {ORANGE}{CURRENCY}
@@ -3323,6 +3348,7 @@ STR_MASS_START_LIST_TIP                                         :{BLACK}Kliknij 
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista tablic - {COMMA} Tablice
 
+STR_ORDER_REFIT_FAILED                                          :{WHITE}Zaplanowane przeładowanie zatrzymane {VEHICLE}
 
 ############ Lists rail types
 
@@ -3618,11 +3644,13 @@ STR_AI_DEBUG                                                    :{WHITE}SI Debug
 STR_AI_DEBUG_NAME_TIP                                           :{BLACK}Nazwa SI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Przeładuj SI
 STR_AI_DEBUG_RELOAD_TIP                                         :{BLACK}Zabij SI, przeładuj skrypt i zrestartuj SI
+STR_AI_DEBUG_SERVER_ONLY                                        :{YELLOW}Okno debugowania AI jest dostępne tylko w serwerze
 STR_AI_CONFIG_CAPTION                                           :{WHITE}Konfiguracja SI
 STR_AI_CHANGE                                                   :{BLACK}Wybierz SI
 STR_AI_CONFIGURE                                                :{BLACK}Konfiguruj
 STR_AI_CHANGE_TIP                                               :{BLACK}Wczytaj kolejne SI
 STR_AI_CONFIGURE_TIP                                            :{BLACK}Konfiguruj parametry SI
+STR_AI_LIST_TIP                                                 :{BLACK}Wszystkie SI które będą załadowane w następnej grze
 STR_AI_LIST_CAPTION                                             :{WHITE}Dostępne SI
 STR_AI_AILIST_TIP                                               :{BLACK}Kliknij, aby wybrać SI
 STR_AI_ACCEPT                                                   :{BLACK}Zaakceptuj
@@ -3634,8 +3662,8 @@ STR_AI_RESET                                                    :{BLACK}Resetuj
 STR_AI_HUMAN_PLAYER                                             :Ludzki gracz
 STR_AI_RANDOM_AI                                                :Losowe SI
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}Parametry SI
-STR_AI_AUTHOR                                                   :Autor:
-STR_AI_VERSION                                                  :Wersja:
+STR_AI_AUTHOR                                                   :Autor: {STRING}
+STR_AI_VERSION                                                  :Wersja: {NUM}
 ########
 
 ############ town controlled noise level
@@ -3664,22 +3692,43 @@ STR_CONTENT_SELECT_UPDATES_CAPTION                              :{BLACK}Wybierz 
 STR_CONTENT_SELECT_UPDATES_CAPTION_TIP                          :{BLACK}Wybierz całą zawartość do pobrania, która jest ulepszeniem dla istniejącej zawartości
 STR_CONTENT_UNSELECT_ALL_CAPTION                                :{BLACK}Odznacz wszystko
 STR_CONTENT_UNSELECT_ALL_CAPTION_TIP                            :{BLACK}Zaznacz całą zawartość, aby nie była pobrana
+STR_CONTENT_FILTER_OSKTITLE                                     :{BLACK}Wpisz słowo filtru
+STR_CONTENT_FILTER_TIP                                          :{BLACK}Wpisz słowo kluczowe dla listy filtru
+STR_CONTENT_FILTER_TITLE                                        :{BLACK}Filtr etykiety/nazwy:
 STR_CONTENT_DOWNLOAD_CAPTION                                    :{BLACK}Pobierz
+STR_CONTENT_DOWNLOAD_CAPTION_TIP                                :{BLACK}Rozpocznij ściąganie zaznaczonych danych
+STR_CONTENT_TOTAL_DOWNLOAD_SIZE                                 :{SILVER}Całkowity rozmiar: {WHITE}{BYTES}
 STR_CONTENT_DETAIL_TITLE                                        :{SILVER}OPIS ZAWARTOŚCI
+STR_CONTENT_DETAIL_SUBTITLE_UNSELECTED                          :{SILVER}To nie zsotało wybrane do ściągnięcia
+STR_CONTENT_DETAIL_SUBTITLE_SELECTED                            :{SILVER}To zostało wybrane do ściągnięcia
+STR_CONTENT_DETAIL_SUBTITLE_AUTOSELECTED                        :{SILVER}Ta zależność została wybrana do ściągnięcia
 STR_CONTENT_DETAIL_SUBTITLE_ALREADY_HERE                        :{SILVER}Już to posiadasz
+STR_CONTENT_DETAIL_SUBTITLE_DOES_NOT_EXIST                      :{SILVER}Te dane są nieznane i nie mogą być ściągnięte przez OpenTTD
+STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}To jest zamiennik dla {STRING}
 STR_CONTENT_DETAIL_NAME                                         :{SILVER}Nazwa: {WHITE}{STRING}
 STR_CONTENT_DETAIL_VERSION                                      :{SILVER}Wersja: {WHITE}{STRING}
 STR_CONTENT_DETAIL_DESCRIPTION                                  :{SILVER}Opis: {WHITE}{STRING}
 STR_CONTENT_DETAIL_URL                                          :{SILVER}URL: {WHITE}{STRING}
 STR_CONTENT_DETAIL_TYPE                                         :{SILVER}Typ: {WHITE}{STRING}
 STR_CONTENT_DETAIL_FILESIZE                                     :{SILVER}Rozmiar pobrania: {WHITE}{BYTES}
+STR_CONTENT_DETAIL_SELECTED_BECAUSE_OF                          :{SILVER}Zaznaczono z powodu: {WHITE}{STRING}
+STR_CONTENT_DETAIL_DEPENDENCIES                                 :{SILVER}Zależności: {WHITE}{STRING}
 STR_CONTENT_DETAIL_TAGS                                         :{SILVER}Tagi: {WHITE}{STRING}
 
+STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Ściąganie...
 STR_CONTENT_DOWNLOAD_INITIALISE                                 :{WHITE}Żądanie plików...
+STR_CONTENT_DOWNLOAD_FILE                                       :{WHITE}Obecnie ściągane {STRING} ({NUM} of {NUM})
 STR_CONTENT_DOWNLOAD_COMPLETE                                   :{WHITE}Pobieranie ukończone
+STR_CONTENT_DOWNLOAD_PROGRESS_SIZE                              :{WHITE} Ściągnięto {BYTES} z {BYTES} ({NUM} %)
 
+STR_CONTENT_ERROR_COULD_NOT_CONNECT                             :{WHITE}Nie można połączyć do serwera dodatków...
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD                            :{WHITE}Pobieranie nie powiodło się...
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... utracono połączenie
+STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... plik tylko do odczytu
 STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Nie udało się dekompresować pobranego pliku
 
+STR_CONTENT_INTRO_BUTTON                                        :{BLACK}Sprawdź Dodatki Online
+STR_CONTENT_INTRO_BUTTON_TIP                                    :{BLACK}Poszukaj nowych lub zaktualizowanych dodatków do pobrania
+STR_CONTENT_INTRO_MISSING_BUTTON                                :{BLACK}Znajdź zgubiony dodatek online
+STR_CONTENT_INTRO_MISSING_BUTTON_TIP                            :{BLACK}Sprawdź czy zagubiony dodatek może być znaleziony online
 ########

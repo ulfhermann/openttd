@@ -237,7 +237,7 @@ void NetworkDrawChatMessage()
 
 	/* Paint the chat messages starting with the lowest at the bottom */
 	for (uint y = NETWORK_CHAT_LINE_HEIGHT; count-- != 0; y += NETWORK_CHAT_LINE_HEIGHT) {
-		DoDrawString(_chatmsg_list[count].message, _chatmsg_box.x + 3, _screen.height - _chatmsg_box.y - y + 1, _chatmsg_list[count].colour);
+		DrawString(_chatmsg_box.x + 3, _chatmsg_box.x + _chatmsg_box.width - 1, _screen.height - _chatmsg_box.y - y + 1, _chatmsg_list[count].message, _chatmsg_list[count].colour);
 	}
 
 	/* Make sure the data is updated next flush */
@@ -445,7 +445,7 @@ public:
 		this->DrawWidgets();
 
 		assert((uint)this->dtype < lengthof(chat_captions));
-		DrawStringRightAligned(this->widget[NWCW_TEXTBOX].left - 2, this->widget[NWCW_TEXTBOX].top + 1, chat_captions[this->dtype], TC_BLACK);
+		DrawString(this->widget[NWCW_BACKGROUND].left, this->widget[NWCW_TEXTBOX].left - 2, this->widget[NWCW_TEXTBOX].top + 1, chat_captions[this->dtype], TC_BLACK, SA_RIGHT);
 		this->DrawEditBox(NWCW_TEXTBOX);
 	}
 

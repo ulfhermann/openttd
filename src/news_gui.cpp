@@ -53,52 +53,36 @@ static void DrawNewsBankrupcy(Window *w, const NewsItem *ni)
 	GfxFillRect(3, 23, 3 + 91, 23 + 118, PALETTE_TO_STRUCT_GREY, FILLRECT_RECOLOUR);
 
 	SetDParamStr(0, cni->president_name);
-	DrawStringMultiCenter(49, 148, STR_JUST_RAW_STRING, 94);
+	DrawStringMultiLine(49 - MAX_LENGTH_PRESIDENT_NAME_PIXELS / 2, 49 + MAX_LENGTH_PRESIDENT_NAME_PIXELS / 2, 141, 169, STR_JUST_RAW_STRING, SA_CENTER);
 
 	switch (ni->subtype) {
 		case NS_COMPANY_TROUBLE:
-			DrawStringCentered(w->width >> 1, 1, STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, TC_FROMSTRING);
+			DrawString(0, w->width, 1, STR_7056_TRANSPORT_COMPANY_IN_TROUBLE, TC_FROMSTRING, SA_CENTER);
 
 			SetDParam(0, ni->params[2]);
 
-			DrawStringMultiCenter(
-				((w->width - 101) >> 1) + 98,
-				90,
-				STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED,
-				w->width - 101);
+			DrawStringMultiLine(100, w->width - 2, 20, 169, STR_7057_WILL_BE_SOLD_OFF_OR_DECLARED, SA_CENTER);
 			break;
 
 		case NS_COMPANY_MERGER:
-			DrawStringCentered(w->width >> 1, 1, STR_7059_TRANSPORT_COMPANY_MERGER, TC_FROMSTRING);
+			DrawString(0, w->width, 1, STR_7059_TRANSPORT_COMPANY_MERGER, TC_FROMSTRING, SA_CENTER);
 			SetDParam(0, ni->params[2]);
 			SetDParam(1, ni->params[3]);
 			SetDParam(2, ni->params[4]);
-			DrawStringMultiCenter(
-				((w->width - 101) >> 1) + 98,
-				90,
-				ni->params[4] == 0 ? STR_707F_HAS_BEEN_TAKEN_OVER_BY : STR_705A_HAS_BEEN_SOLD_TO_FOR,
-				w->width - 101);
+			DrawStringMultiLine(100, w->width - 2, 20, 169, ni->params[4] == 0 ? STR_707F_HAS_BEEN_TAKEN_OVER_BY : STR_705A_HAS_BEEN_SOLD_TO_FOR, SA_CENTER);
 			break;
 
 		case NS_COMPANY_BANKRUPT:
-			DrawStringCentered(w->width >> 1, 1, STR_705C_BANKRUPT, TC_FROMSTRING);
+			DrawString(0, w->width, 1, STR_705C_BANKRUPT, TC_FROMSTRING, SA_CENTER);
 			SetDParam(0, ni->params[2]);
-			DrawStringMultiCenter(
-				((w->width - 101) >> 1) + 98,
-				90,
-				STR_705D_HAS_BEEN_CLOSED_DOWN_BY,
-				w->width - 101);
+			DrawStringMultiLine(100, w->width - 2, 20, 169, STR_705D_HAS_BEEN_CLOSED_DOWN_BY, SA_CENTER);
 			break;
 
 		case NS_COMPANY_NEW:
-			DrawStringCentered(w->width >> 1, 1, STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED, TC_FROMSTRING);
+			DrawString(0, w->width, 1, STR_705E_NEW_TRANSPORT_COMPANY_LAUNCHED, TC_FROMSTRING, SA_CENTER);
 			SetDParam(0, ni->params[2]);
 			SetDParam(1, ni->params[3]);
-			DrawStringMultiCenter(
-				((w->width - 101) >> 1) + 98,
-				90,
-				STR_705F_STARTS_CONSTRUCTION_NEAR,
-				w->width - 101);
+			DrawStringMultiLine(100, w->width - 2, 20, 169, STR_705F_STARTS_CONSTRUCTION_NEAR, SA_CENTER);
 			break;
 
 		default:
@@ -120,7 +104,7 @@ struct NewsSubtypeData {
 /**
  * Data common to all news items of a given subtype (actual data)
  */
-static const struct NewsSubtypeData _news_subtype_data[NS_END] = {
+static const NewsSubtypeData _news_subtype_data[] = {
 	/* type,               display_mode, flags,                  callback */
 	{ NT_ARRIVAL_COMPANY,  NM_THIN,     NF_VIEWPORT|NF_VEHICLE, NULL                    }, ///< NS_ARRIVAL_COMPANY
 	{ NT_ARRIVAL_OTHER,    NM_THIN,     NF_VIEWPORT|NF_VEHICLE, NULL                    }, ///< NS_ARRIVAL_OTHER
@@ -143,10 +127,12 @@ static const struct NewsSubtypeData _news_subtype_data[NS_END] = {
 	{ NT_GENERAL,          NM_NORMAL,   NF_TILE,                NULL                    }, ///< NS_GENERAL
 };
 
+assert_compile(lengthof(_news_subtype_data) == NS_END);
+
 /**
  * Per-NewsType data
  */
-NewsTypeData _news_type_data[NT_END] = {
+NewsTypeData _news_type_data[] = {
 	/* name,              age, sound,           display */
 	{ "arrival_player",    60, SND_1D_APPLAUSE, ND_FULL },  ///< NT_ARRIVAL_COMPANY
 	{ "arrival_other",     60, SND_1D_APPLAUSE, ND_FULL },  ///< NT_ARRIVAL_OTHER
@@ -164,6 +150,8 @@ NewsTypeData _news_type_data[NT_END] = {
 	{ "subsidies",        180, SND_BEGIN,       ND_FULL },  ///< NT_SUBSIDIES
 	{ "general",           60, SND_BEGIN,       ND_FULL },  ///< NT_GENERAL
 };
+
+assert_compile(lengthof(_news_type_data) == NT_END);
 
 struct NewsWindow : Window {
 	uint16 chat_height;
@@ -196,7 +184,7 @@ struct NewsWindow : Window {
 		GfxFillRect(left,  top,    right, top,    0xD7);
 		GfxFillRect(left,  bottom, right, bottom, 0xD7);
 
-		DrawString(left + 2, top + 1, STR_00C6, TC_FROMSTRING);
+		DrawString(left + 2, right - 2, top + 1, STR_00C6, TC_FROMSTRING);
 	}
 
 	virtual void OnPaint()
@@ -213,15 +201,14 @@ struct NewsWindow : Window {
 					break;
 				}
 
-				DrawString(2, 1, STR_00C6, TC_FROMSTRING);
+				DrawString(2, this->width - 1, 1, STR_00C6, TC_FROMSTRING);
 
 				SetDParam(0, this->ni->date);
-				DrawStringRightAligned(428, 1, STR_01FF, TC_FROMSTRING);
+				DrawString(2, this->width - 1, 1, STR_01FF, TC_FROMSTRING, SA_RIGHT);
 
 				if (!(this->ni->flags & NF_VIEWPORT)) {
 					CopyInDParam(0, this->ni->params, lengthof(this->ni->params));
-					DrawStringMultiCenter(215, display_mode == NM_NORMAL ? 76 : 56,
-						this->ni->string_id, this->width - 4);
+					DrawStringMultiLine(2, this->width - 2, 20, this->height, this->ni->string_id, SA_CENTER);
 				} else {
 					/* Back up transparency options to draw news view */
 					TransparencyOptionBits to_backup = _transparency_opt;
@@ -237,7 +224,7 @@ struct NewsWindow : Window {
 					);
 
 					CopyInDParam(0, this->ni->params, lengthof(this->ni->params));
-					DrawStringMultiCenter(this->width / 2, 20, this->ni->string_id, this->width - 4);
+					DrawStringMultiLine(2, this->width - 2, 0, 58, this->ni->string_id, SA_CENTER);
 				}
 				break;
 			}
@@ -246,11 +233,11 @@ struct NewsWindow : Window {
 				this->DrawWidgets();
 				if (!(this->ni->flags & NF_VIEWPORT)) {
 					CopyInDParam(0, this->ni->params, lengthof(this->ni->params));
-					DrawStringMultiCenter(140, 38, this->ni->string_id, 276);
+					DrawStringMultiLine(2, 278, 38, this->ni->string_id, SA_CENTER);
 				} else {
 					this->DrawViewport();
 					CopyInDParam(0, this->ni->params, lengthof(this->ni->params));
-					DrawStringMultiCenter(this->width / 2, this->height - 16, this->ni->string_id, this->width - 4);
+					DrawStringMultiLine(2, this->width - 2, 64, this->height, this->ni->string_id, SA_CENTER);
 				}
 				break;
 		}
@@ -353,11 +340,34 @@ static const Widget _news_type0_widgets[] = {
 {   WIDGETS_END},
 };
 
+static NWidgetPart _nested_news_type0_widgets[] = {
+	/* Caption + close box */
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE, 1), SetMinimalSize(11, 14), SetDataTip(STR_00C5, STR_018B_CLOSE_WINDOW),
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE, 2), SetMinimalSize(269, 14), SetDataTip(STR_012C_MESSAGE, STR_NULL),
+	EndContainer(),
+
+	/* Main part */
+	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, 0),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+
+			NWidget(WWT_INSET, COLOUR_LIGHT_BLUE, 3), SetMinimalSize(276, 49),
+			EndContainer(),
+
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 22),
+	EndContainer(),
+};
+
 static WindowDesc _news_type0_desc(
 	WDP_CENTER, 476, 280, 87, 280, 87,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type0_widgets
+	_news_type0_widgets,
+	_nested_news_type0_widgets, lengthof(_nested_news_type0_widgets)
 );
 
 
@@ -698,7 +708,7 @@ static void DrawNewsString(int x, int y, TextColour colour, const NewsItem *ni, 
 
 	*dest = '\0';
 	/* Truncate and show string; postfixed by '...' if neccessary */
-	DoDrawStringTruncated(buffer2, x, y, colour, maxw);
+	DrawString(x, x + maxw, y, buffer2, colour);
 }
 
 
@@ -732,7 +742,7 @@ struct MessageHistoryWindow : Window {
 
 		for (int n = this->vscroll.cap; n > 0; n--) {
 			SetDParam(0, ni->date);
-			DrawString(4, y, STR_SHORT_DATE, TC_WHITE);
+			DrawString(4, 82, y, STR_SHORT_DATE, TC_WHITE);
 
 			DrawNewsString(82, y, TC_WHITE, ni, this->width - 95);
 			y += 12;
@@ -773,11 +783,29 @@ static const Widget _message_history_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_message_history[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, 0), SetMinimalSize(11, 14), SetDataTip(STR_00C5, STR_018B_CLOSE_WINDOW),
+		NWidget(WWT_CAPTION, COLOUR_BROWN, 1), SetMinimalSize(377, 14), SetDataTip(STR_MESSAGE_HISTORY, STR_018C_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN, 2), SetMinimalSize(12, 14), SetDataTip(0x0, STR_STICKY_BUTTON),
+	EndContainer(),
+
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_BROWN, 3), SetMinimalSize(388, 125), SetDataTip(0x0, STR_MESSAGE_HISTORY_TIP), SetResize(1, 1),
+		EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, 4), SetMinimalSize(12, 114), SetDataTip(0x0, STR_0190_SCROLL_BAR_SCROLLS_LIST), SetResize(0, 1),
+			NWidget(WWT_RESIZEBOX, COLOUR_BROWN, 5), SetMinimalSize(12, 12), SetDataTip(0x0, STR_RESIZE_BUTTON),
+		EndContainer(),
+	EndContainer(),
+};
+
 static const WindowDesc _message_history_desc(
 	240, 22, 400, 140, 400, 140,
 	WC_MESSAGE_HISTORY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_message_history_widgets
+	_message_history_widgets,
+	_nested_message_history, lengthof(_nested_message_history)
 );
 
 /** Display window with news messages history */
@@ -842,9 +870,7 @@ struct MessageOptionsWindow : Window {
 
 		/* Draw the string of each setting on each button. */
 		for (int i = 0, y = 26; i < NT_END; i++, y += 12) {
-			/* 51 comes from 13 + 89 (left and right of the button)+1, shiefted by one as to get division,
-			 * which will give centered position */
-			DrawStringCentered(51, y + 1, _message_opt[_news_type_data[i].display], TC_BLACK);
+			DrawString(this->widget[WIDGET_NEWSOPT_START_OPTION + 1].left, this->widget[WIDGET_NEWSOPT_START_OPTION + 1].right, y + 1, _message_opt[_news_type_data[i].display], TC_BLACK, SA_CENTER);
 		}
 	}
 
