@@ -17,6 +17,8 @@
 
 struct SaveLoad;
 
+typedef uint NodeID;
+
 class Node {
 public:
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
@@ -47,15 +49,15 @@ class Component {
 public:
 	Component(uint size, uint join, colour c);
 	Component(colour c);
-	Edge & GetEdge(uint from, uint to) {return edges[from][to];}
+	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 
-	Node & GetNode(uint num) {return nodes[num];}
+	Node & GetNode(NodeID num) {return nodes[num];}
 
 	void Join() {thread->Join();}
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
 	uint AddNode(StationID st, uint supply, uint demand);
-	void AddEdge(uint from, uint to, uint capacity);
+	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
 	uint GetJoinTime() const {return join_time;}
 	colour GetColour() const {return component_colour;}
