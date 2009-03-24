@@ -13,15 +13,15 @@
 #include <list>
 #include <iostream>
 
-typedef std::list<uint> NodeList;
+typedef std::list<NodeID> NodeList;
 
 uint DemandCalculator::_max_distance;
 DistributionType DemandCalculator::_distribution_types[NUM_CARGO];
 
 void DemandCalculator::PrintDemandMatrix(Component * graph) {
-	for (uint from = 0; from < graph->GetSize(); ++from) {
+	for (NodeID from = 0; from < graph->GetSize(); ++from) {
 		std::cout << graph->GetNode(from).station << "\t";
-		for(uint to = 0; to < graph->GetSize(); ++to) {
+		for(NodeID to = 0; to < graph->GetSize(); ++to) {
 			if (from == to) {
 				std::cout << graph->GetNode(from).supply << "\t";
 			} else {
@@ -35,7 +35,7 @@ void DemandCalculator::PrintDemandMatrix(Component * graph) {
 void DemandCalculator::CalcSymmetric(Component * graph) {
 	NodeList nodes;
 	uint supply_sum = 0;
-	for(uint node = 0; node < graph->GetSize(); node++) {
+	for(NodeID node = 0; node < graph->GetSize(); node++) {
 		Node & n = graph->GetNode(node);
 		if (n.demand > 0 && n.supply > 0) {
 			nodes.push_back(node);
@@ -48,13 +48,13 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 	}
 
 	while(!nodes.empty()) {
-		uint node1 = nodes.front();
+		NodeID node1 = nodes.front();
 		nodes.pop_front();
 
 		Node & from = graph->GetNode(node1);
 
 		for(NodeList::iterator i = nodes.begin(); i != nodes.end(); ++i) {
-			uint node2 = *i;
+			NodeID node2 = *i;
 			Edge & forward = graph->GetEdge(node1, node2);
 			Edge & backward = graph->GetEdge(node2, node1);
 
@@ -102,7 +102,7 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 	NodeList demands;
 	uint supply_sum = 0;
 	uint num_demands = 0;
-	for(uint node = 0; node < graph->GetSize(); node++) {
+	for(NodeID node = 0; node < graph->GetSize(); node++) {
 		Node & n = graph->GetNode(node);
 		if (n.supply > 0) {
 			supplies.push_back(node);
@@ -121,13 +121,13 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 	uint demand_per_node = supply_sum / num_demands + 1;
 
 	while(!supplies.empty()) {
-		uint node1 = supplies.front();
+		NodeID node1 = supplies.front();
 		supplies.pop_front();
 
 		Node & from = graph->GetNode(node1);
 
 		for(uint i = 0; i < num_demands; ++i) {
-			uint node2 = demands.front();
+			NodeID node2 = demands.front();
 			demands.pop_front();
 			demands.push_back(node2);
 			if (node1 == node2) {
@@ -160,8 +160,6 @@ void DemandCalculator::Run(Component * graph) {
 		/* ignore */
 		break;
 	}
-
-	PrintDemandMatrix(graph);
 }
 
 void InitializeDemands() {
