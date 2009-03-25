@@ -429,7 +429,6 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, economy.moving_average_unit,         SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 4, 1, 4096, 1,	STR_CONFIG_SETTING_AVERAGE_UNIT,           NULL),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_length,       SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 256, 1, 4096, 64, STR_CONFIG_SETTING_AVERAGE_LENGTH,      NULL),
 
-
 	 SDT_CONDVAR(GameSettings, pf.wait_for_pbs_path,                 SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    30,     2,     255, 0, STR_NULL,                                  NULL),
 	SDT_CONDBOOL(GameSettings, pf.reserve_paths,                               100, SL_MAX_VERSION, 0, 0, false,                    STR_NULL,                                  NULL),
 	 SDT_CONDVAR(GameSettings, pf.path_backoff_interval,             SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    20,     1,     255, 0, STR_NULL,                                  NULL),
