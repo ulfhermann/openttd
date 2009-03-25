@@ -425,7 +425,7 @@ const SettingDesc _settings[] = {
 	     SDT_VAR(GameSettings, economy.dist_local_authority,         SLE_UINT8,                     0, 0,    20,     5,      60, 0, STR_NULL,                                  NULL),
 	     SDT_VAR(GameSettings, pf.wait_oneway_signal,                SLE_UINT8,                     0, 0,    15,     2,     255, 0, STR_NULL,                                  NULL),
 	     SDT_VAR(GameSettings, pf.wait_twoway_signal,                SLE_UINT8,                     0, 0,    41,     2,     255, 0, STR_NULL,                                  NULL),
-	SDT_CONDLISTO(GameSettings, economy.town_noise_population, 3,    SLE_UINT16, 96, SL_MAX_VERSION, 0,D0, "800,2000,4000",          STR_NULL,                                  NULL, CheckNoiseToleranceLevel),
+	SDT_CONDLISTO(GameSettings, economy.town_noise_population, 3,   SLE_UINT16, 96, SL_MAX_VERSION, 0,D0, "800,2000,4000",          STR_NULL,                                  NULL, CheckNoiseToleranceLevel),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_unit,         SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 4, 1, 4096, 1,	STR_CONFIG_SETTING_AVERAGE_UNIT,           NULL),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_length,       SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 256, 1, 4096, 64, STR_CONFIG_SETTING_AVERAGE_LENGTH,      NULL),
 
