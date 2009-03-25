@@ -853,7 +853,7 @@ public:
 							ptm.y = (2*pta.y + ptb.y) / 3;
 							SetDParam(0, usage);
 							SetDParam(1, capacity);
-							DrawString(ptm.x, ptm.y, STR_NUM_RELATION , TC_BLACK);
+							DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
 						}
 					}
 				}
@@ -885,7 +885,7 @@ public:
 					if (!tbl->show_on_map) continue;
 					CargoID c = tbl->type;
 					q += (float)st->goods[c].supply / monthScale;
-					colour += tbl->colour; 
+					colour += tbl->colour;
 					numCargos++;
 				}
 				if (numCargos > 1)
@@ -1057,9 +1057,9 @@ public:
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_GREY);
+					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_GREY);
 				} else {
-					DrawString(x + 11, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_BLACK);
+					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
 			} else {
