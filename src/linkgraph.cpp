@@ -13,8 +13,8 @@
 #include "variables.h"
 #include "map_func.h"
 #include "demands.h"
-#include "core/bitmath_func.hpp"
 #include "mcf.h"
+#include "core/bitmath_func.hpp"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];

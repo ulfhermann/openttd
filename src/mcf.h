@@ -38,8 +38,8 @@ typedef std::list<PathEntry *> PathTree;
 class MultiCommodityFlow : public ComponentHandler {
 public:
 	virtual void Run(Component * graph);
-	MultiCommodityFlow() : graph(NULL), lp(glp_create_prob()) {}
-	virtual ~MultiCommodityFlow() {glp_delete_prob(lp);}
+	MultiCommodityFlow() : graph(NULL), lp(NULL) {}
+	virtual ~MultiCommodityFlow() {}
 private:
 	void BuildPathForest();
 	void BuildPathTree(NodeID source, NodeID dest, PathTree & tree);

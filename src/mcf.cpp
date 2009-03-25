@@ -15,11 +15,13 @@ ThreadMutex * MultiCommodityFlow::mutex() {
 void MultiCommodityFlow::Run(Component * g) {
 	graph = g;
 	mutex()->BeginCritical();
+	lp = glp_create_prob();
 	BuildPathForest();
 	SetPathConstraints();
 	SetSourceConstraints();
 	SetEdgeConstraints();
 	Solve();
+	glp_delete_prob(lp);
 	mutex()->EndCritical();
 }
 
@@ -201,6 +203,9 @@ void MultiCommodityFlow::SetEdgeConstraints() {
 }
 
 void MultiCommodityFlow::Solve() {
+	if (glp_get_num_cols(lp) == 0 || glp_get_num_rows(lp) == 0) {
+		return;
+	}
 	glp_set_obj_dir(lp, GLP_MAX);
 	glp_write_lp(lp, NULL, "/dev/stdout");
 	glp_simplex(lp, NULL);
