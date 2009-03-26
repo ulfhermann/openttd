@@ -15,3 +15,4 @@ src/rev.cpp
 data/
 media/openttd.desktop
 patches/
+old/
