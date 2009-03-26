@@ -138,7 +138,7 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 			edge.demand += demand;
 			assert(demand <= from.undelivered_supply);
 			from.undelivered_supply -= demand;
-			if (from.supply == 0) {
+			if (from.undelivered_supply == 0) {
 				break;
 			}
 		}
