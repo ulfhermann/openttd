@@ -85,6 +85,9 @@ void MultiCommodityFlow::BuildPathTree(NodeID source, NodeID dest, PathTree & tr
 				growing_paths.push_back(path->fork(next));
 			}
 		}
+		if (path->num_forks == 0) {
+			delete path;
+		}
 	}
 }
 
