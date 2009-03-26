@@ -16,3 +16,5 @@ data/
 media/openttd.desktop
 patches/
 old/
+grf/
+docs/own
