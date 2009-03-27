@@ -215,3 +215,24 @@ void LinkGraph::SpawnComponentThread(Component * c) {
 	job->AddHandler(new MultiCommodityFlow);
 	ThreadObject::New(&(RunLinkGraphJob), job, &c->GetThread());
 }
+
+
+void Path::Fork(Path * base, float cap, float dist) {
+	capacity = min(base->capacity, cap);
+	distance = base->distance + dist;
+	if (parent != base) {
+		if (parent != NULL) {
+			parent->num_children--;
+		}
+		parent = base;
+		parent->num_children++;
+	}
+}
+
+void Path::AddFlow(float f) {
+	flow +=f;
+	if (parent != NULL) {
+		parent->AddFlow(f);
+	}
+}
+

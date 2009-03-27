@@ -6,235 +6,174 @@
  */
 
 #include "mcf.h"
+#include <cmath>
 
-ThreadMutex * MultiCommodityFlow::mutex() {
-	static ThreadMutex * m = ThreadMutex::New();
-	return m;
-}
+float MultiCommodityFlow::epsilon = 0.25;
 
 void MultiCommodityFlow::Run(Component * g) {
 	graph = g;
-	mutex()->BeginCritical();
-	lp = glp_create_prob();
-	BuildPathForest();
-	SetPathConstraints();
-	SetSourceConstraints();
-	SetEdgeConstraints();
-	Solve();
-	glp_delete_prob(lp);
-	mutex()->EndCritical();
+	edges.resize(graph->GetSize(), std::vector<McfEdge>(graph->GetSize()));
+	CalcDelta();
+	CalcInitialL();
+	Prescale();
+	Karakostas();
+	//Postscale is unnecessary as we are only interested in the flow ratios
 }
 
-void MultiCommodityFlow::BuildPathForest() {
-	uint path_id = 1;
-	for(NodeID source = 0; source < graph->GetSize(); ++source) {
-		for (NodeID dest = 0; dest < graph->GetSize(); ++dest) {
-			if(dest == source || graph->GetEdge(source, dest).demand == 0) {
-				continue;
+void MultiCommodityFlow::CountEdges() {
+	m = 0;
+	k = 0;
+	for (NodeID i = 0; i < graph->GetSize(); ++i) {
+		for (NodeID j = 0; j < graph->GetSize(); ++j) {
+			if (i == j) continue;
+			Edge & e = graph->GetEdge(i, j);
+			if (e.capacity > 0) m++;
+			if (e.demand > 0) k++;
+		}
+	}
+}
+
+void MultiCommodityFlow::CalcDelta() {
+	CountEdges();
+	delta =
+		1.0 / (pow((1.0 + k * epsilon), (1.0 - epsilon) / epsilon))
+		* pow((1.0 - epsilon) / m, 1.0 /epsilon);
+}
+
+void MultiCommodityFlow::CalcInitialL() {
+	for (NodeID i = 0; i < graph->GetSize(); ++i) {
+		McfEdge * last = NULL;
+		for (NodeID j = 0; j < graph->GetSize(); ++j) {
+			if (i == j) continue;
+			Edge * e = &(graph->GetEdge(i, j));
+			McfEdge * mcf = &edges[i][j];
+			if (e->capacity > 0) {
+				mcf->l = delta / ((float)e->capacity);
+				if (last != NULL) {
+					last->next = mcf;
+				} else {
+					edges[i][i].next = mcf;
+				}
+				last = mcf;
 			}
-			PathList paths;
-			PathTree tree;
-			BuildPathTree(source, dest, tree);
-			PathEntry * entry = NULL;
-			while(!tree.empty()) {
-				PathEntry * entry = tree.front();
-				tree.pop_front();
-				Path * path = new Path(path_id++);
-				paths.push_back(path);
-				source_mapping.insert(std::make_pair(source, path));
-				while(entry->prev != NULL) {
-					PathEntry * predecessor = entry->prev;
+			mcf->d = e->demand;
+			mcf->to = j;
+		}
+	}
+}
 
-					Edge & edge = graph->GetEdge(predecessor->dest, entry->dest);
-					if (edge.capacity < path->capacity) {
-						path->capacity = edge.capacity;
-					}
-					if (entry->num_forks == 0) {
-						delete entry;
-						predecessor->num_forks--;
-					}
-					entry = predecessor;
 
-					path_mapping.insert(std::make_pair(&edge, path));
+bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, float, float dist) const {
+	return (base->distance + dist < distance);
+}
+
+bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, float cap, float) const {
+	return (min(base->capacity, cap) > capacity);
+}
+
+
+template<class ANNOTATION>
+void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
+	typedef std::set<ANNOTATION *, typename ANNOTATION::comp> AnnoSet;
+	uint size = graph->GetSize();
+	AnnoSet annos;
+	paths.resize(size, NULL);
+	for (NodeID node = 0; node < size; ++node) {
+		ANNOTATION * anno = new ANNOTATION(node, node == from);
+		annos.insert(anno);
+		paths[node] = anno;
+	}
+
+	while(!annos.empty()) {
+		typename AnnoSet::iterator i = annos.begin();
+		ANNOTATION * source = *i;
+		NodeID from = source->GetNode();
+		annos.erase(i);
+		for (McfEdge * edge = GetFirstEdge(from); edge != NULL; edge = edge->next) {
+			NodeID to = edge->to;
+			float capacity = graph->GetEdge(from, to).capacity;
+			float distance = edge->l;
+			ANNOTATION * dest = (ANNOTATION *)paths[to];
+			if (dest->IsBetter(source, capacity, distance)) {
+				annos.erase(dest);
+				dest->Fork(source, capacity, distance);
+				annos.insert(dest);
+			}
+		}
+	}
+}
+
+
+void MultiCommodityFlow::Prescale() {
+	// search for min(C_i/d_i)
+	PathVector p;
+	uint size = graph->GetSize();
+	float min_c_d = std::numeric_limits<float>::max();
+	for (NodeID from = 0; from < size; ++from) {
+		Dijkstra<CapacityAnnotation>(0, p);
+		for (NodeID to = 0; to < size; ++to) {
+			Path * path = p[to];
+			if (from != to) {
+				float c_d = path->GetCapacity() / edges[from][to].d;
+				min_c_d = min(c_d, min_c_d);
+			}
+			delete path;
+			p[to] = NULL;
+		}
+	}
+	// scale all demands
+	float scale_factor = min_c_d / k;
+	for (NodeID from = 0; from < size; ++from) {
+		for (NodeID to = 0; to < size; ++to) {
+			edges[from][to].d *= scale_factor;
+		}
+	}
+}
+
+void MultiCommodityFlow::CalcD() {
+	d_l = 0;
+	for (NodeID from = 0; from < graph->GetSize(); ++from) {
+		for (McfEdge * edge = GetFirstEdge(from); edge != NULL; edge = edge->next) {
+			d_l += edge->l * (float)graph->GetEdge(from, edge->to).capacity;
+		}
+	}
+}
+
+void MultiCommodityFlow::Karakostas() {
+	CalcD();
+	uint size = graph->GetSize();
+	typedef std::set<McfEdge *> EdgeSet;
+	EdgeSet unsatisfied_demands;
+	PathVector paths;
+	while(d_l < 1) {
+		for (NodeID source = 0; source < size; ++source) {
+			for (NodeID dest = 0; dest < size; ++dest) {
+				McfEdge & edge = edges[source][dest];
+				edge.dx = edge.d;
+				if (edge.dx > 0) {
+					unsatisfied_demands.insert(&edge);
 				}
 			}
-			if (entry != NULL) {
-				delete entry;
+			Dijkstra<DistanceAnnotation>(source, paths);
+			float c = std::numeric_limits<float>::max();
+			for (EdgeSet::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end(); ++i) {
+				Path * path = paths[(*i)->to];
+				if (path->capacity > 0) {
+					c = min(path->capacity, c);
+				}
 			}
-			SetDemandContraints(source, dest, paths);
-		}
-	}
-}
-
-
-void MultiCommodityFlow::BuildPathTree(NodeID source, NodeID dest, PathTree & tree) {
-	PathEntry * origin = new PathEntry(source);
-	PathTree growing_paths;
-	growing_paths.push_back(origin);
-	while(!growing_paths.empty()) {
-		PathEntry * path = growing_paths.front();
-		NodeID prev = path->dest;
-		growing_paths.pop_front();
-		for (NodeID next = 0; next < graph->GetSize(); ++next) {
-			assert(path == origin || path->HasPredecessor(source));
-			if (prev == next) continue;
-			if (graph->GetEdge(prev, next).capacity == 0) continue;
-			if (next == dest) {
-				tree.push_back(path->fork(next));
-			} else if (!path->HasPredecessor(next)) {
-				growing_paths.push_back(path->fork(next));
+			for (EdgeSet::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end();) {
+				McfEdge * edge = *i;
+				Path * path = paths[edge->to];
+				f_cq = min(edge->dx, c);
+				edge->dx -= f_cq;
+				path->AddFlow(f_cq);
+				if (edge->dx <= 0) {
+					unsatisfied_demands.erase(i++);
+				} else {
+					++i;
+				}
 			}
 		}
-		if (path->num_forks == 0) {
-			delete path;
-		}
 	}
-}
-
-PathEntry * PathEntry::fork(NodeID next) {
-	num_forks++;
-	return new PathEntry(next, this);
-}
-
-bool PathEntry::HasPredecessor(NodeID node) {
-	PathEntry * entry = prev;
-	while(entry != NULL) {
-		if (entry->dest == node) {
-			return true;
-		}
-		entry = entry->prev;
-	}
-	return false;
-}
-
-void MultiCommodityFlow::SetDemandContraints(NodeID source, NodeID dest, PathList paths) {
-	uint paths_size = paths.size();
-	if (paths_size == 0) {
-		return; //nothing to do
-	}
-	glp_add_cols(lp, paths_size);
-	int row = glp_add_rows(lp, 1);
-	glp_set_row_bnds(lp, row, GLP_DB, 0.0, graph->GetEdge(source, dest).demand);
-
-	int * cols = new int[1+paths_size];
-	double * vals = new double[1+paths_size];
-
-	int col = 1;
-	for (PathList::iterator i = paths.begin(); i != paths.end(); ++i) {
-		cols[col] = (*i)->id;
-		vals[col] = 1.0;
-		col++;
-	}
-	glp_set_mat_row(lp, row, paths_size, cols, vals);
-	delete[] cols;
-	delete[] vals;
-}
-
-void MultiCommodityFlow::SetPathConstraints() {
-	for (SourceMapping::iterator i = source_mapping.begin(); i != source_mapping.end(); ++i) {
-		Path * p = i->second;
-		glp_set_col_bnds(lp, p->id, GLP_DB, 0.0, p->capacity);
-		glp_set_obj_coef(lp, p->id, 1.0);
-	}
-}
-
-void MultiCommodityFlow::SetSourceConstraints() {
-	NodeID source = UINT_MAX;
-	uint num_paths = 0;
-	uint index = 1;
-	int * cols = 0;
-	double * vals = 0;
-	int row = 0;
-	for (SourceMapping::iterator i = source_mapping.begin(); i != source_mapping.end(); ++i) {
-		if (i->first != source) {
-			if (num_paths != 0) {
-				glp_set_mat_row(lp, row, num_paths, cols, vals);
-				index = 1;
-			}
-			source = i->first;
-			row = glp_add_rows(lp, 1);
-			uint new_num = source_mapping.count(source);
-			if (new_num > num_paths) {
-				delete[] cols;
-				delete[] vals;
-				cols = new int[1+new_num];
-				vals = new double[1+new_num];
-			}
-			num_paths = new_num;
-		}
-		Path * p = i->second;
-		cols[index] = p->id;
-		vals[index] = 1.0;
-		index++;
-	}
-	delete[] cols;
-	delete[] vals;
-}
-
-void MultiCommodityFlow::SetEdgeConstraints() {
-	Edge * edge = 0;
-	uint num_paths = 0;
-	uint index = 1;
-	// TODO: save maximum size
-	int * cols = 0;
-	double * vals = 0;
-	int row = 0;
-	for (PathMapping::iterator i = path_mapping.begin(); i != path_mapping.end(); ++i) {
-		if (i->first != edge) {
-			if (num_paths != 0) {
-				glp_set_mat_row(lp, row, num_paths, cols, vals);
-				index = 1;
-			}
-			edge = i->first;
-			row = glp_add_rows(lp, 1);
-			uint new_num = path_mapping.count(edge);
-			if (new_num > num_paths) {
-				delete[] cols;
-				delete[] vals;
-				cols = new int[1+new_num];
-				vals = new double[1+new_num];
-			}
-			num_paths = new_num;
-		}
-		Path * p = i->second;
-		cols[index] = p->id;
-		vals[index] = 1.0;
-		index++;
-	}
-	delete[] cols;
-	delete[] vals;
-}
-
-void MultiCommodityFlow::Solve() {
-	if (glp_get_num_cols(lp) == 0 || glp_get_num_rows(lp) == 0) {
-		return;
-	}
-	glp_set_obj_dir(lp, GLP_MAX);
-	glp_write_lp(lp, NULL, "/dev/stdout");
-	glp_simplex(lp, NULL);
-/*	assert(set_add_rowmode(lp, FALSE));
-	uint cols = get_Ncolumns(lp);
-	REAL * row = (REAL *)malloc(cols + 1 * sizeof(*row));
-	for (uint i = 0; i <= cols; ++i) {
-		row[i] = 1;
-	}
-	assert(set_obj_fn(lp, row));
-	set_maxim(lp);
-
-	write_LP(lp, stdout);
-	if (solve(lp) != OPTIMAL) {
-		printf("couldn't find an optimal solution!\n");
-	}
-
-
-
-    printf("Objective value: %f\n", get_objective(lp));
-
-
-    get_variables(lp, row);
-    for(uint j = 0; j < cols; j++) {
-      printf("%i: %f\n", j + 1, row[j]);
-    }
-    delete row;
-    */
 }

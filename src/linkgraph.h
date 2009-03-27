@@ -14,6 +14,8 @@
 #include "thread.h"
 #include <list>
 #include <vector>
+#include <set>
+#include <limits>
 
 struct SaveLoad;
 
@@ -29,12 +31,36 @@ public:
 	StationID station;
 };
 
+class Path;
+
+typedef std::set<Path *> PathSet;
+
 class Edge {
 public:
 	Edge() : distance(0), capacity(0), demand(0) {}
 	uint distance;
 	uint capacity;
 	uint demand;
+	PathSet paths;
+};
+
+typedef std::list<Edge *> EdgeList;
+
+class Path {
+public:
+	Path(NodeID n) : capacity(std::numeric_limits<float>::max()), flow(0), node(n), num_children(0), parent(NULL) {}
+	NodeID GetNode() const {return node;}
+	Path * GetParent() {return parent;}
+	float GetCapacity() const {return capacity;}
+	void Fork(Path * base, float cap, float dist);
+	void AddFlow(float f);
+protected:
+	float distance;
+	float capacity;
+	float flow;
+	NodeID node;
+	uint num_children;
+	Path * parent;
 };
 
 void SpawnComponentThread(void * handlers);
