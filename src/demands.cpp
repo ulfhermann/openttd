@@ -53,7 +53,7 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 
 		Node & from = graph->GetNode(node1);
 
-		for(NodeList::iterator i = nodes.begin(); i != nodes.end(); ++i) {
+		for(NodeList::iterator i = nodes.begin(); i != nodes.end();) {
 			NodeID node2 = *i;
 			Edge & forward = graph->GetEdge(node1, node2);
 			Edge & backward = graph->GetEdge(node2, node1);
@@ -71,18 +71,13 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 			from.undelivered_supply -= demand;
 			to.undelivered_supply -= demand;
 
-
-			if (to.undelivered_supply == 0) {
-				i = nodes.erase(i);
-				if (nodes.empty()) {
-					// only one node left
-					return;
-				} else {
-					--i;
-				}
-			}
 			if (from.undelivered_supply == 0) {
 				break;
+			}
+			if (to.undelivered_supply == 0) {
+				nodes.erase(i++);
+			} else {
+				++i;
 			}
 		}
 		if (from.undelivered_supply != 0) {
