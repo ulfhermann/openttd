@@ -743,12 +743,15 @@
     GetMinLength():     -1
   Valid Bridges:        10
   IsBridgeTile():       false
+  GetBridgeID():        -1
   RemoveBridge():       false
   GetLastErrorString(): ERR_PRECONDITION_FAILED
   GetOtherBridgeEnd():  -1
   BuildBridge():        true
   IsBridgeTile():       true
+  GetBridgeID():        5
   IsBridgeTile():       true
+  GetBridgeID():        5
   GetOtherBridgeEnd():  33155
   BuildBridge():        false
   GetLastErrorString(): ERR_ALREADY_BUILT
@@ -824,6 +827,7 @@
     GetCargoIncome(10, 10):  -1
     GetCargoIncome(100, 10): -1
     GetCargoIncome(10, 100): -1
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 0
     IsValidCargo():          true
     GetCargoLabel():         'PASS'
@@ -834,6 +838,7 @@
     GetCargoIncome(10, 10):  3
     GetCargoIncome(100, 10): 39
     GetCargoIncome(10, 100): 3
+    GetRoadVehicleTypeForCargo(): 0
   Cargo 1
     IsValidCargo():          true
     GetCargoLabel():         'COAL'
@@ -844,6 +849,7 @@
     GetCargoIncome(10, 10):  7
     GetCargoIncome(100, 10): 75
     GetCargoIncome(10, 100): 6
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 2
     IsValidCargo():          true
     GetCargoLabel():         'MAIL'
@@ -854,6 +860,7 @@
     GetCargoIncome(10, 10):  5
     GetCargoIncome(100, 10): 58
     GetCargoIncome(10, 100): 5
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 3
     IsValidCargo():          true
     GetCargoLabel():         'OIL_'
@@ -864,6 +871,7 @@
     GetCargoIncome(10, 10):  5
     GetCargoIncome(100, 10): 56
     GetCargoIncome(10, 100): 5
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 4
     IsValidCargo():          true
     GetCargoLabel():         'LVST'
@@ -874,6 +882,7 @@
     GetCargoIncome(10, 10):  5
     GetCargoIncome(100, 10): 55
     GetCargoIncome(10, 100): 4
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 5
     IsValidCargo():          true
     GetCargoLabel():         'GOOD'
@@ -884,6 +893,7 @@
     GetCargoIncome(10, 10):  7
     GetCargoIncome(100, 10): 78
     GetCargoIncome(10, 100): 6
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 6
     IsValidCargo():          true
     GetCargoLabel():         'GRAI'
@@ -894,6 +904,7 @@
     GetCargoIncome(10, 10):  6
     GetCargoIncome(100, 10): 60
     GetCargoIncome(10, 100): 5
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 7
     IsValidCargo():          true
     GetCargoLabel():         'WOOD'
@@ -904,6 +915,7 @@
     GetCargoIncome(10, 10):  6
     GetCargoIncome(100, 10): 63
     GetCargoIncome(10, 100): 5
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 8
     IsValidCargo():          true
     GetCargoLabel():         'IORE'
@@ -914,6 +926,7 @@
     GetCargoIncome(10, 10):  6
     GetCargoIncome(100, 10): 65
     GetCargoIncome(10, 100): 5
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 9
     IsValidCargo():          true
     GetCargoLabel():         'STEL'
@@ -924,6 +937,7 @@
     GetCargoIncome(10, 10):  7
     GetCargoIncome(100, 10): 72
     GetCargoIncome(10, 100): 6
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 10
     IsValidCargo():          true
     GetCargoLabel():         'VALU'
@@ -934,6 +948,7 @@
     GetCargoIncome(10, 10):  9
     GetCargoIncome(100, 10): 94
     GetCargoIncome(10, 100): 7
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 11
     IsValidCargo():          false
     GetCargoLabel():         '(null : 0x00000000)'
@@ -944,6 +959,7 @@
     GetCargoIncome(10, 10):  -1
     GetCargoIncome(100, 10): -1
     GetCargoIncome(10, 100): -1
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 12
     IsValidCargo():          false
     GetCargoLabel():         '(null : 0x00000000)'
@@ -954,6 +970,7 @@
     GetCargoIncome(10, 10):  -1
     GetCargoIncome(100, 10): -1
     GetCargoIncome(10, 100): -1
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 13
     IsValidCargo():          false
     GetCargoLabel():         '(null : 0x00000000)'
@@ -964,6 +981,7 @@
     GetCargoIncome(10, 10):  -1
     GetCargoIncome(100, 10): -1
     GetCargoIncome(10, 100): -1
+    GetRoadVehicleTypeForCargo(): 1
   Cargo 14
     IsValidCargo():          false
     GetCargoLabel():         '(null : 0x00000000)'
@@ -974,6 +992,7 @@
     GetCargoIncome(10, 10):  -1
     GetCargoIncome(100, 10): -1
     GetCargoIncome(10, 100): -1
+    GetRoadVehicleTypeForCargo(): 1
 
 --CargoList--
   Count():            11
