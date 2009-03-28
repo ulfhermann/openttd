@@ -96,9 +96,10 @@ enum WidgetType {
 	WWT_LAST,       ///< Last Item. use WIDGETS_END to fill up padding!!
 
 	/* Nested widget types. */
-	NWID_HORIZONTAL,  ///< Horizontal container.
-	NWID_VERTICAL,    ///< Vertical container.
-	NWID_SPACER,      ///< Invisible widget that takes some space.
+	NWID_HORIZONTAL,     ///< Horizontal container.
+	NWID_HORIZONTAL_LTR, ///< Horizontal container that doesn't change the order of the widgets for RTL languages.
+	NWID_VERTICAL,       ///< Vertical container.
+	NWID_SPACER,         ///< Invisible widget that takes some space.
 
 	/* Nested widget part types. */
 	WPT_RESIZE,       ///< Widget part for specifying resizing.
@@ -108,6 +109,8 @@ enum WidgetType {
 	WPT_FILL,         ///< Widget part for specifying fill.
 	WPT_DATATIP,      ///< Widget part for specifying data and tooltip.
 	WPT_DATATIP_PTR,  ///< Widget part for specifying data and tooltip via a pointer.
+	WPT_PADDING,      ///< Widget part for specifying a padding.
+	WPT_PIPSPACE,     ///< Widget part for specifying pre/inter/post space for containers.
 	WPT_ENDCONTAINER, ///< Widget part to denote end of a container.
 
 	/* Pushable window widget types. */
@@ -150,19 +153,24 @@ public:
 
 	virtual void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl) = 0;
 
-	WidgetType type;   ///< Type of the widget / nested widget.
-	uint min_x;        ///< Minimal horizontal size.
-	uint min_y;        ///< Minimal vertical size.
-	bool fill_x;       ///< Allow horizontal filling from initial size.
-	bool fill_y;       ///< Allow vertical filling from initial size.
-	uint resize_x;     ///< Horizontal resize step (\c 0 means not resizable).
-	uint resize_y;     ///< Vertical resize step (\c 0 means not resizable).
+	WidgetType type;      ///< Type of the widget / nested widget.
+	uint min_x;           ///< Minimal horizontal size.
+	uint min_y;           ///< Minimal vertical size.
+	bool fill_x;          ///< Allow horizontal filling from initial size.
+	bool fill_y;          ///< Allow vertical filling from initial size.
+	uint resize_x;        ///< Horizontal resize step (\c 0 means not resizable).
+	uint resize_y;        ///< Vertical resize step (\c 0 means not resizable).
 
-	uint pos_x;        ///< Horizontal position of top-left corner of the widget in the window.
-	uint pos_y;        ///< Vertical position of top-left corner of the widget in the window.
+	uint pos_x;           ///< Horizontal position of top-left corner of the widget in the window.
+	uint pos_y;           ///< Vertical position of top-left corner of the widget in the window.
 
-	NWidgetBase *next; ///< Pointer to next widget in container. Managed by parent container widget.
-	NWidgetBase *prev; ///< Pointer to previous widget in container. Managed by parent container widget.
+	NWidgetBase *next;    ///< Pointer to next widget in container. Managed by parent container widget.
+	NWidgetBase *prev;    ///< Pointer to previous widget in container. Managed by parent container widget.
+
+	uint8 padding_top;    ///< Paddings added to the top of the widget. Managed by parent container widget.
+	uint8 padding_right;  ///< Paddings added to the right of the widget. Managed by parent container widget.
+	uint8 padding_bottom; ///< Paddings added to the bottom of the widget. Managed by parent container widget.
+	uint8 padding_left;   ///< Paddings added to the left of the widget. Managed by parent container widget.
 };
 
 /** Base class for a resizable nested widget. */
@@ -201,6 +209,10 @@ public:
 	~NWidgetContainer();
 
 	void Add(NWidgetBase *wid);
+
+	uint8 pip_pre;     ///< Amount of space before first widget.
+	uint8 pip_inter;   ///< Amount of space between widgets.
+	uint8 pip_post;    ///< Amount of space after last widget.
 protected:
 	NWidgetBase *head; ///< Pointer to first widget in container.
 	NWidgetBase *tail; ///< Pointer to last widget in container.
@@ -212,6 +224,16 @@ public:
 	NWidgetHorizontal();
 
 	int ComputeMinimalSize();
+	void AssignMinimalPosition(uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl);
+
+	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
+};
+
+/** Horizontal container that doesn't change the direction of the widgets for RTL languages. */
+class NWidgetHorizontalLTR : public NWidgetHorizontal {
+public:
+	NWidgetHorizontalLTR();
+
 	void AssignMinimalPosition(uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl);
 
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
@@ -277,6 +299,16 @@ struct NWidgetPartWidget {
 	int16 index;    ///< Widget index in the widget array.
 };
 
+/** Widget part for storing padding. */
+struct NWidgetPartPaddings {
+	uint8 top, right, bottom, left; ///< Paddings for all directions.
+};
+
+/** Widget part for storing pre/inter/post spaces. */
+struct NWidgetPartPIP {
+	uint8 pre, inter, post; ///< Amount of space before/between/after child widgets.
+};
+
 /** Partial widget specification to allow NWidgets to be written nested. */
 struct NWidgetPart {
 	WidgetType type;                         ///< Type of the part. @see NWidgetPartType.
@@ -286,6 +318,8 @@ struct NWidgetPart {
 		NWidgetPartDataTip data_tip;     ///< Part with a data/tooltip.
 		NWidgetPartDataTip *datatip_ptr; ///< Part with a pointer to data/tooltip.
 		NWidgetPartWidget widget;        ///< Part with a start of a widget.
+		NWidgetPartPaddings padding;     ///< Part with paddings.
+		NWidgetPartPIP pip;              ///< Part with pre/inter/post spaces.
 	} u;
 };
 
@@ -408,6 +442,53 @@ static inline NWidgetPart SetDataTip(NWidgetPartDataTip *ptr)
 }
 
 /**
+ * Widget part function for setting a padding.
+ * @param top The padding above the widget.
+ * @param right The padding right of the widget.
+ * @param bottom The padding below the widget.
+ * @param left The padding left of the widget.
+ */
+static inline NWidgetPart SetPadding(uint8 top, uint8 right, uint8 bottom, uint8 left)
+{
+	NWidgetPart part;
+
+	part.type = WPT_PADDING;
+	part.u.padding.top = top;
+	part.u.padding.right = right;
+	part.u.padding.bottom = bottom;
+	part.u.padding.left = left;
+
+	return part;
+}
+
+/**
+ * Widget part function for setting a padding.
+ * @param padding The padding to use for all directions.
+ */
+static inline NWidgetPart SetPadding(uint8 padding)
+{
+	return SetPadding(padding, padding, padding, padding);
+}
+
+/**
+ * Widget part function for setting a pre/inter/post spaces.
+ * @param pre The amount of space before the first widget.
+ * @param inter The amount of space between widgets.
+ * @param post The amount of space after the last widget.
+ */
+static inline NWidgetPart SetPIP(uint8 pre, uint8 inter, uint8 post)
+{
+	NWidgetPart part;
+
+	part.type = WPT_PIPSPACE;
+	part.u.pip.pre = pre;
+	part.u.pip.inter = inter;
+	part.u.pip.post = post;
+
+	return part;
+}
+
+/**
  * Widget part function for starting a new 'real' widget.
  * @param tp  Type of the new nested widget.
  * @param col Colour of the new widget.
@@ -428,7 +509,7 @@ static inline NWidgetPart NWidget(WidgetType tp, Colours col, int16 idx)
 
 /**
  * Widget part function for starting a new horizontal container, vertical container, or spacer widget.
- * @param tp Type of the new nested widget, #NWID_HORIZONTAL, #NWID_VERTICAL, or #NWID_SPACER
+ * @param tp Type of the new nested widget, #NWID_HORIZONTAL(_LTR), #NWID_VERTICAL, or #NWID_SPACER
  */
 static inline NWidgetPart NWidget(WidgetType tp)
 {
