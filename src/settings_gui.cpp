@@ -95,17 +95,31 @@ static int GetCurRes()
 	return i;
 }
 
+/** Widgets of the game options menu */
 enum GameOptionsWidgets {
-	GAMEOPT_CURRENCY_BTN    =  4,
-	GAMEOPT_DISTANCE_BTN    =  6,
-	GAMEOPT_ROADSIDE_BTN    =  8,
-	GAMEOPT_TOWNNAME_BTN    = 10,
-	GAMEOPT_AUTOSAVE_BTN    = 12,
-	GAMEOPT_LANG_BTN        = 14,
-	GAMEOPT_RESOLUTION_BTN  = 16,
-	GAMEOPT_FULLSCREEN,
-	GAMEOPT_SCREENSHOT_BTN  = 19,
-	GAMEOPT_BASE_GRF_BTN    = 21,
+	GOW_CLOSEBOX = 0,        ///< Close the window
+	GOW_CAPTION,             ///< Caption of the window
+	GOW_BACKGROUND,          ///< Background of the window
+	GOW_CURRENCY_FRAME,      ///< Frame of the currency dropdown
+	GOW_CURRENCY_DROPDOWN,   ///< Currency dropdown
+	GOW_DISTANCE_FRAME,      ///< Measuring unit frame
+	GOW_DISTANCE_DROPDOWN,   ///< Measuring unit dropdown
+	GOW_ROADSIDE_FRAME,      ///< Road side frame
+	GOW_ROADSIDE_DROPDOWN,   ///< Dropdown to select the road side (to set the right side ;))
+	GOW_TOWNNAME_FRAME,      ///< Frame for the town name dropdown
+	GOW_TOWNNAME_DROPDOWN,   ///< Town name dropdown
+	GOW_AUTOSAVE_FRAME,      ///< Frame for autosave
+	GOW_AUTOSAVE_DROPDOWN,   ///< Dropdown to say how often to autosave
+	GOW_LANG_FRAME,          ///< Language dropdown frame
+	GOW_LANG_DROPDOWN,       ///< Language dropdown
+	GOW_RESOLUTION_FRAME,    ///< Frame for the dropdown for the resolution
+	GOW_RESOLUTION_DROPDOWN, ///< Dropdown for the resolution
+	GOW_FULLSCREEN_LABEL,    ///< Text (right) to the fullscreen button
+	GOW_FULLSCREEN_BUTTON,   ///< Toggle fullscreen
+	GOW_SCREENSHOT_FRAME,    ///< Frame for the screenshot type
+	GOW_SCREENSHOT_DROPDOWN, ///< Select the screenshot type... please use PNG!
+	GOW_BASE_GRF_FRAME,      ///< Base GRF selection frame
+	GOW_BASE_GRF_DROPDOWN,   ///< Use to select a base GRF
 };
 
 /**
@@ -129,7 +143,7 @@ static void ShowTownnameDropdown(Window *w, int sel)
 		list->push_back(new DropDownListStringItem((*it).first, (*it).second, !(_game_mode == GM_MENU || GetNumTowns() == 0 || (*it).second == sel)));
 	}
 
-	ShowDropDownList(w, list, sel, GAMEOPT_TOWNNAME_BTN);
+	ShowDropDownList(w, list, sel, GOW_TOWNNAME_DROPDOWN);
 }
 
 static void ShowCustCurrency();
@@ -144,7 +158,7 @@ static void ShowGraphicsSetMenu(Window *w)
 		list->push_back(new DropDownListCharStringItem(GetGraphicsSetName(i), i, (_game_mode == GM_MENU) ? false : (current != i)));
 	}
 
-	ShowDropDownList(w, list, current, GAMEOPT_BASE_GRF_BTN);
+	ShowDropDownList(w, list, current, GOW_BASE_GRF_DROPDOWN);
 }
 
 struct GameOptionsWindow : Window {
@@ -175,25 +189,24 @@ struct GameOptionsWindow : Window {
 		int i = GetCurRes();
 		SetDParam(7, i == _num_resolutions ? STR_RES_OTHER : SPECSTR_RESOLUTION_START + i);
 		SetDParam(8, SPECSTR_SCREENSHOT_START + _cur_screenshot_format);
-		this->SetWidgetLoweredState(GAMEOPT_FULLSCREEN, _fullscreen);
+		this->SetWidgetLoweredState(GOW_FULLSCREEN_BUTTON, _fullscreen);
 		SetDParamStr(9, GetGraphicsSetName(GetIndexOfCurrentGraphicsSet()));
 
 		this->DrawWidgets();
-		DrawString(20, this->width / 2, 175, STR_OPTIONS_FULLSCREEN, TC_FROMSTRING); // fullscreen
 	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case GAMEOPT_CURRENCY_BTN: // Setup currencies dropdown
-				ShowDropDownMenu(this, BuildCurrencyDropdown(), this->opt->locale.currency, GAMEOPT_CURRENCY_BTN, _game_mode == GM_MENU ? 0 : ~GetMaskOfAllowedCurrencies(), 0);
+			case GOW_CURRENCY_DROPDOWN: // Setup currencies dropdown
+				ShowDropDownMenu(this, BuildCurrencyDropdown(), this->opt->locale.currency, GOW_CURRENCY_DROPDOWN, _game_mode == GM_MENU ? 0 : ~GetMaskOfAllowedCurrencies(), 0);
 				break;
 
-			case GAMEOPT_DISTANCE_BTN: // Setup distance unit dropdown
-				ShowDropDownMenu(this, _units_dropdown, this->opt->locale.units, GAMEOPT_DISTANCE_BTN, 0, 0);
+			case GOW_DISTANCE_DROPDOWN: // Setup distance unit dropdown
+				ShowDropDownMenu(this, _units_dropdown, this->opt->locale.units, GOW_DISTANCE_DROPDOWN, 0, 0);
 				break;
 
-			case GAMEOPT_ROADSIDE_BTN: { // Setup road-side dropdown
+			case GOW_ROADSIDE_DROPDOWN: { // Setup road-side dropdown
 				int i = 0;
 				extern bool RoadVehiclesAreBuilt();
 
@@ -203,18 +216,18 @@ struct GameOptionsWindow : Window {
 					i = (-1) ^ (1 << this->opt->vehicle.road_side); // disable the other value
 				}
 
-				ShowDropDownMenu(this, _driveside_dropdown, this->opt->vehicle.road_side, GAMEOPT_ROADSIDE_BTN, i, 0);
+				ShowDropDownMenu(this, _driveside_dropdown, this->opt->vehicle.road_side, GOW_ROADSIDE_DROPDOWN, i, 0);
 			} break;
 
-			case GAMEOPT_TOWNNAME_BTN: // Setup townname dropdown
+			case GOW_TOWNNAME_DROPDOWN: // Setup townname dropdown
 				ShowTownnameDropdown(this, this->opt->game_creation.town_name);
 				break;
 
-			case GAMEOPT_AUTOSAVE_BTN: // Setup autosave dropdown
-				ShowDropDownMenu(this, _autosave_dropdown, _settings_client.gui.autosave, GAMEOPT_AUTOSAVE_BTN, 0, 0);
+			case GOW_AUTOSAVE_DROPDOWN: // Setup autosave dropdown
+				ShowDropDownMenu(this, _autosave_dropdown, _settings_client.gui.autosave, GOW_AUTOSAVE_DROPDOWN, 0, 0);
 				break;
 
-			case GAMEOPT_LANG_BTN: { // Setup interface language dropdown
+			case GOW_LANG_DROPDOWN: { // Setup interface language dropdown
 				typedef std::map<StringID, int, StringIDCompare> LangList;
 
 				/* Sort language names */
@@ -226,27 +239,27 @@ struct GameOptionsWindow : Window {
 					list->push_back(new DropDownListStringItem((*it).first, (*it).second, false));
 				}
 
-				ShowDropDownList(this, list, _dynlang.curr, GAMEOPT_LANG_BTN);
+				ShowDropDownList(this, list, _dynlang.curr, GOW_LANG_DROPDOWN);
 			} break;
 
-			case GAMEOPT_RESOLUTION_BTN: // Setup resolution dropdown
-				ShowDropDownMenu(this, BuildDynamicDropdown(SPECSTR_RESOLUTION_START, _num_resolutions), GetCurRes(), GAMEOPT_RESOLUTION_BTN, 0, 0);
+			case GOW_RESOLUTION_DROPDOWN: // Setup resolution dropdown
+				ShowDropDownMenu(this, BuildDynamicDropdown(SPECSTR_RESOLUTION_START, _num_resolutions), GetCurRes(), GOW_RESOLUTION_DROPDOWN, 0, 0);
 				break;
 
-			case GAMEOPT_FULLSCREEN: // Click fullscreen on/off
+			case GOW_FULLSCREEN_BUTTON: // Click fullscreen on/off
 				/* try to toggle full-screen on/off */
 				if (!ToggleFullScreen(!_fullscreen)) {
 					ShowErrorMessage(INVALID_STRING_ID, STR_FULLSCREEN_FAILED, 0, 0);
 				}
-				this->SetWidgetLoweredState(GAMEOPT_FULLSCREEN, _fullscreen);
+				this->SetWidgetLoweredState(GOW_FULLSCREEN_BUTTON, _fullscreen);
 				this->SetDirty();
 				break;
 
-			case GAMEOPT_SCREENSHOT_BTN: // Setup screenshot format dropdown
-				ShowDropDownMenu(this, BuildDynamicDropdown(SPECSTR_SCREENSHOT_START, _num_screenshot_formats), _cur_screenshot_format, GAMEOPT_SCREENSHOT_BTN, 0, 0);
+			case GOW_SCREENSHOT_DROPDOWN: // Setup screenshot format dropdown
+				ShowDropDownMenu(this, BuildDynamicDropdown(SPECSTR_SCREENSHOT_START, _num_screenshot_formats), _cur_screenshot_format, GOW_SCREENSHOT_DROPDOWN, 0, 0);
 				break;
 
-			case GAMEOPT_BASE_GRF_BTN:
+			case GOW_BASE_GRF_DROPDOWN:
 				ShowGraphicsSetMenu(this);
 				break;
 		}
@@ -255,18 +268,18 @@ struct GameOptionsWindow : Window {
 	virtual void OnDropdownSelect(int widget, int index)
 	{
 		switch (widget) {
-			case GAMEOPT_CURRENCY_BTN: // Currency
+			case GOW_CURRENCY_DROPDOWN: // Currency
 				if (index == CUSTOM_CURRENCY_ID) ShowCustCurrency();
 				this->opt->locale.currency = index;
 				MarkWholeScreenDirty();
 				break;
 
-			case GAMEOPT_DISTANCE_BTN: // Measuring units
+			case GOW_DISTANCE_DROPDOWN: // Measuring units
 				this->opt->locale.units = index;
 				MarkWholeScreenDirty();
 				break;
 
-			case GAMEOPT_ROADSIDE_BTN: // Road side
+			case GOW_ROADSIDE_DROPDOWN: // Road side
 				if (this->opt->vehicle.road_side != index) { // only change if setting changed
 					uint i;
 					if (GetSettingFromName("vehicle.road_side", &i) == NULL) NOT_REACHED();
@@ -275,19 +288,19 @@ struct GameOptionsWindow : Window {
 				}
 				break;
 
-			case GAMEOPT_TOWNNAME_BTN: // Town names
+			case GOW_TOWNNAME_DROPDOWN: // Town names
 				if (_game_mode == GM_MENU || GetNumTowns() == 0) {
 					this->opt->game_creation.town_name = index;
 					InvalidateWindow(WC_GAME_OPTIONS, 0);
 				}
 				break;
 
-			case GAMEOPT_AUTOSAVE_BTN: // Autosave options
+			case GOW_AUTOSAVE_DROPDOWN: // Autosave options
 				_settings_client.gui.autosave = index;
 				this->SetDirty();
 				break;
 
-			case GAMEOPT_LANG_BTN: // Change interface language
+			case GOW_LANG_DROPDOWN: // Change interface language
 				ReadLanguagePack(index);
 				CheckForMissingGlyphsInLoadedLanguagePack();
 				UpdateAllStationVirtCoord();
@@ -295,18 +308,18 @@ struct GameOptionsWindow : Window {
 				MarkWholeScreenDirty();
 				break;
 
-			case GAMEOPT_RESOLUTION_BTN: // Change resolution
+			case GOW_RESOLUTION_DROPDOWN: // Change resolution
 				if (index < _num_resolutions && ChangeResInGame(_resolutions[index].width, _resolutions[index].height)) {
 					this->SetDirty();
 				}
 				break;
 
-			case GAMEOPT_SCREENSHOT_BTN: // Change screenshot format
+			case GOW_SCREENSHOT_DROPDOWN: // Change screenshot format
 				SetScreenshotFormat(index);
 				this->SetDirty();
 				break;
 
-			case GAMEOPT_BASE_GRF_BTN:
+			case GOW_BASE_GRF_DROPDOWN:
 				if (_game_mode == GM_MENU) {
 					const char *name = GetGraphicsSetName(index);
 
@@ -322,41 +335,91 @@ struct GameOptionsWindow : Window {
 };
 
 static const Widget _game_options_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                          STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   369,     0,    13, STR_00B1_GAME_OPTIONS,             STR_018C_WINDOW_TITLE_DRAG_THIS},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   369,    14,   242, 0x0,                               STR_NULL},
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,    20,    55, STR_02E0_CURRENCY_UNITS,           STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    34,    45, STR_02E1,                          STR_02E2_CURRENCY_UNITS_SELECTION},
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,    20,    55, STR_MEASURING_UNITS,               STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    34,    45, STR_02E4,                          STR_MEASURING_UNITS_SELECTION},
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,    62,    97, STR_02E6_ROAD_VEHICLES,            STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    76,    87, STR_02E7,                          STR_02E8_SELECT_SIDE_OF_ROAD_FOR},
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,    62,    97, STR_02EB_TOWN_NAMES,               STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    76,    87, STR_02EC,                          STR_02ED_SELECT_STYLE_OF_TOWN_NAMES},
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   104,   139, STR_02F4_AUTOSAVE,                 STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   118,   129, STR_02F5,                          STR_02F6_SELECT_INTERVAL_BETWEEN},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                          STR_018B_CLOSE_WINDOW},               // GOW_CLOSEBOX
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   369,     0,    13, STR_00B1_GAME_OPTIONS,             STR_018C_WINDOW_TITLE_DRAG_THIS},     // GOW_CAPTION
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   369,    14,   242, 0x0,                               STR_NULL},                            // GOW_BACKGROUND
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,    20,    55, STR_02E0_CURRENCY_UNITS,           STR_NULL},                            // GOW_CURRENCY_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    34,    45, STR_02E1,                          STR_02E2_CURRENCY_UNITS_SELECTION},   // GOW_CURRENCY_DROPDOWN
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,    20,    55, STR_MEASURING_UNITS,               STR_NULL},                            // GOW_DISTANCE_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    34,    45, STR_02E4,                          STR_MEASURING_UNITS_SELECTION},       // GOW_DISTANCE_DROPDOWN
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,    62,    97, STR_02E6_ROAD_VEHICLES,            STR_NULL},                            // GOW_ROADSIDE_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,    76,    87, STR_02E7,                          STR_02E8_SELECT_SIDE_OF_ROAD_FOR},    // GOW_ROADSIDE_DROPDOWN
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,    62,    97, STR_02EB_TOWN_NAMES,               STR_NULL},                            // GOW_TOWNNAME_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,    76,    87, STR_02EC,                          STR_02ED_SELECT_STYLE_OF_TOWN_NAMES}, // GOW_TOWNNAME_DROPDOWN
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   104,   139, STR_02F4_AUTOSAVE,                 STR_NULL},                            // GOW_AUTOSAVE_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   118,   129, STR_02F5,                          STR_02F6_SELECT_INTERVAL_BETWEEN},    // GOW_AUTOSAVE_DROPDOWN
 
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,   104,   139, STR_OPTIONS_LANG,                  STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   118,   129, STR_OPTIONS_LANG_CBO,              STR_OPTIONS_LANG_TIP},
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,   104,   139, STR_OPTIONS_LANG,                  STR_NULL},                            // GOW_LANG_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   118,   129, STR_OPTIONS_LANG_CBO,              STR_OPTIONS_LANG_TIP},                // GOW_LANG_DROPDOWN
 
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   146,   190, STR_OPTIONS_RES,                   STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   160,   171, STR_OPTIONS_RES_CBO,               STR_OPTIONS_RES_TIP},
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,   149,   169,   176,   184, STR_EMPTY,                         STR_OPTIONS_FULLSCREEN_TIP},
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   146,   190, STR_OPTIONS_RES,                   STR_NULL},                            // GOW_RESOLUTION_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   160,   171, STR_OPTIONS_RES_CBO,               STR_OPTIONS_RES_TIP},                 // GOW_RESOLUTION_DROPDOWN
+{       WWT_TEXT,   RESIZE_NONE,  COLOUR_GREY,    20,   146,   175,   186, STR_OPTIONS_FULLSCREEN,            STR_NULL},                            // GOW_FULLSCREEN_LABEL
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,   149,   169,   176,   184, STR_EMPTY,                         STR_OPTIONS_FULLSCREEN_TIP},          // GOW_FULLSCREEN_BUTTON
 
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,   146,   190, STR_OPTIONS_SCREENSHOT_FORMAT,     STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   160,   171, STR_OPTIONS_SCREENSHOT_FORMAT_CBO, STR_OPTIONS_SCREENSHOT_FORMAT_TIP},
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,   190,   359,   146,   190, STR_OPTIONS_SCREENSHOT_FORMAT,     STR_NULL},                            // GOW_SCREENSHOT_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   200,   349,   160,   171, STR_OPTIONS_SCREENSHOT_FORMAT_CBO, STR_OPTIONS_SCREENSHOT_FORMAT_TIP},   // GOW_SCREENSHOT_DROPDOWN
 
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   197,   232, STR_OPTIONS_BASE_GRF,              STR_NULL},
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   211,   222, STR_OPTIONS_BASE_GRF_CBO,          STR_OPTIONS_BASE_GRF_TIP},
+{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,    10,   179,   197,   232, STR_OPTIONS_BASE_GRF,              STR_NULL},                            // GOW_BASE_GRF_FRAME
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    20,   169,   211,   222, STR_OPTIONS_BASE_GRF_CBO,          STR_OPTIONS_BASE_GRF_TIP},            // GOW_BASE_GRF_DROPDOWN
 
 {   WIDGETS_END},
+};
+
+static const NWidgetPart _nested_game_options_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, GOW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, GOW_CAPTION), SetDataTip(STR_00B1_GAME_OPTIONS, STR_018C_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, GOW_BACKGROUND),
+		NWidget(NWID_HORIZONTAL), SetPIP(10, 10, 10),
+			NWidget(NWID_VERTICAL), SetPIP(6, 6, 10),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_CURRENCY_FRAME), SetDataTip(STR_02E0_CURRENCY_UNITS, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_CURRENCY_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_02E1, STR_02E2_CURRENCY_UNITS_SELECTION), SetPadding(14, 10, 10, 10),
+				EndContainer(),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_ROADSIDE_FRAME), SetDataTip(STR_02E6_ROAD_VEHICLES, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_ROADSIDE_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_02E7, STR_02E8_SELECT_SIDE_OF_ROAD_FOR), SetPadding(14, 10, 10, 10),
+				EndContainer(),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_AUTOSAVE_FRAME), SetDataTip(STR_02F4_AUTOSAVE, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_AUTOSAVE_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_02F5, STR_02F6_SELECT_INTERVAL_BETWEEN), SetPadding(14, 10, 10, 10),
+				EndContainer(),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_RESOLUTION_FRAME), SetDataTip(STR_OPTIONS_RES, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_RESOLUTION_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_OPTIONS_RES_CBO, STR_OPTIONS_RES_TIP), SetPadding(14, 10, 3, 10),
+					NWidget(NWID_HORIZONTAL),
+						NWidget(WWT_TEXT, COLOUR_GREY, GOW_FULLSCREEN_LABEL), SetMinimalSize(0, 12), SetFill(true, false), SetDataTip(STR_OPTIONS_FULLSCREEN, STR_NULL), SetPadding(0, 2, 4, 10),
+						NWidget(WWT_TEXTBTN, COLOUR_GREY, GOW_FULLSCREEN_BUTTON), SetMinimalSize(21, 9), SetDataTip(STR_EMPTY, STR_OPTIONS_FULLSCREEN_TIP), SetPadding(0, 10, 4, 0),
+					EndContainer(),
+				EndContainer(),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_BASE_GRF_FRAME), SetDataTip(STR_OPTIONS_BASE_GRF, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_BASE_GRF_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_OPTIONS_BASE_GRF_CBO, STR_OPTIONS_BASE_GRF_TIP), SetPadding(14, 10, 10, 10),
+				EndContainer(),
+			EndContainer(),
+
+			NWidget(NWID_VERTICAL), SetPIP(6, 6, 10),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_DISTANCE_FRAME), SetDataTip(STR_MEASURING_UNITS, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_DISTANCE_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_02E4, STR_MEASURING_UNITS_SELECTION), SetPadding(14, 10, 10, 10),
+				EndContainer(),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_TOWNNAME_FRAME), SetDataTip(STR_02EB_TOWN_NAMES, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_TOWNNAME_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_02EC, STR_02ED_SELECT_STYLE_OF_TOWN_NAMES), SetPadding(14, 10, 10, 10),
+				EndContainer(),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_LANG_FRAME), SetDataTip(STR_OPTIONS_LANG, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_LANG_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_OPTIONS_LANG_CBO, STR_OPTIONS_LANG_TIP), SetPadding(14, 10, 10, 10),
+				EndContainer(),
+				NWidget(WWT_FRAME, COLOUR_GREY, GOW_SCREENSHOT_FRAME), SetDataTip(STR_OPTIONS_SCREENSHOT_FORMAT, STR_NULL),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_SCREENSHOT_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_OPTIONS_SCREENSHOT_FORMAT_CBO, STR_OPTIONS_SCREENSHOT_FORMAT_TIP), SetPadding(14, 10, 10, 10),
+					NWidget(NWID_SPACER), SetMinimalSize(0, 9),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetFill(false, true),
+			EndContainer(),
+		EndContainer(),
+	EndContainer(),
 };
 
 static const WindowDesc _game_options_desc(
 	WDP_CENTER, WDP_CENTER, 370, 243, 370, 243,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_game_options_widgets
+	_game_options_widgets, _nested_game_options_widgets, lengthof(_nested_game_options_widgets)
 );
 
 
@@ -368,10 +431,25 @@ void ShowGameOptions()
 
 extern void StartupEconomy();
 
+
+/* Names of the game difficulty settings window */
+enum GameDifficultyWidgets {
+	GDW_CAPTION,
+	GDW_UPPER_BG,
+	GDW_LVL_EASY,
+	GDW_LVL_MEDIUM,
+	GDW_LVL_HARD,
+	GDW_LVL_CUSTOM,
+	GDW_HIGHSCORE,
+	GDW_SETTING_BG,
+	GDW_LOWER_BG,
+	GDW_ACCEPT,
+	GDW_CANCEL,
+};
+
 /* Widget definition for the game difficulty settings window */
 static const Widget _game_difficulty_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_MAUVE,      0,    10,     0,    13, STR_00C5,                     STR_018B_CLOSE_WINDOW},           // GDW_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_MAUVE,     11,   369,     0,    13, STR_6800_DIFFICULTY_LEVEL,    STR_018C_WINDOW_TITLE_DRAG_THIS}, // GDW_CAPTION
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,     0,    13, STR_6800_DIFFICULTY_LEVEL,    STR_018C_WINDOW_TITLE_DRAG_THIS}, // GDW_CAPTION
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,    14,    41, 0x0,                          STR_NULL},                        // GDW_UPPER_BG
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    96,    16,    27, STR_6801_EASY,                STR_NULL},                        // GDW_LVL_EASY
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    97,   183,    16,    27, STR_6802_MEDIUM,              STR_NULL},                        // GDW_LVL_MEDIUM
@@ -385,12 +463,45 @@ static const Widget _game_difficulty_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_game_difficulty_widgets[] = {
+	NWidget(WWT_CAPTION, COLOUR_MAUVE, GDW_CAPTION), SetMinimalSize(370, 14), SetDataTip(STR_6800_DIFFICULTY_LEVEL, STR_018C_WINDOW_TITLE_DRAG_THIS),
+	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_UPPER_BG),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(10, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_EASY), SetMinimalSize(87, 12), SetDataTip(STR_6801_EASY, STR_NULL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_MEDIUM), SetMinimalSize(87, 12), SetDataTip(STR_6802_MEDIUM, STR_NULL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_HARD), SetMinimalSize(87, 12), SetDataTip(STR_6803_HARD, STR_NULL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_CUSTOM), SetMinimalSize(87, 12), SetDataTip(STR_6804_CUSTOM, STR_NULL),
+			NWidget(NWID_SPACER), SetMinimalSize(12, 0),
+		EndContainer(),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(10, 0),
+			NWidget(WWT_TEXTBTN, COLOUR_GREEN, GDW_HIGHSCORE), SetMinimalSize(348, 12), SetDataTip(STR_6838_SHOW_HI_SCORE_CHART, STR_NULL),
+			NWidget(NWID_SPACER), SetMinimalSize(12, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_SETTING_BG), SetMinimalSize(370, 221),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_LOWER_BG),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(105, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_ACCEPT), SetMinimalSize(81, 12), SetDataTip(STR_OPTIONS_SAVE_CHANGES, STR_NULL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_CANCEL), SetMinimalSize(81, 12), SetDataTip(STR_012E_CANCEL, STR_NULL),
+			NWidget(NWID_SPACER), SetMinimalSize(103, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+	EndContainer(),
+};
+
 /* Window definition for the game difficulty settings window */
 static const WindowDesc _game_difficulty_desc(
 	WDP_CENTER, WDP_CENTER, 370, 279, 370, 279,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_game_difficulty_widgets
+	_game_difficulty_widgets, _nested_game_difficulty_widgets, lengthof(_nested_game_difficulty_widgets)
 );
 
 void SetDifficultyLevel(int mode, DifficultySettings *gm_opt);
@@ -411,22 +522,6 @@ private:
 		NO_SETTINGS_BUTTON = 0xFF,
 	};
 
-	/* Names of the game difficulty settings window */
-	enum GameDifficultyWidgets {
-		GDW_CLOSEBOX = 0,
-		GDW_CAPTION,
-		GDW_UPPER_BG,
-		GDW_LVL_EASY,
-		GDW_LVL_MEDIUM,
-		GDW_LVL_HARD,
-		GDW_LVL_CUSTOM,
-		GDW_HIGHSCORE,
-		GDW_SETTING_BG,
-		GDW_LOWER_BG,
-		GDW_ACCEPT,
-		GDW_CANCEL,
-	};
-
 public:
 	GameDifficultyWindow() : Window(&_game_difficulty_desc)
 	{
@@ -436,9 +531,6 @@ public:
 		this->clicked_increase = false;
 		this->clicked_button = NO_SETTINGS_BUTTON;
 		this->timeout = 0;
-		/* Hide the closebox to make sure that the user aborts or confirms his changes */
-		this->HideWidget(GDW_CLOSEBOX);
-		this->widget[GDW_CAPTION].left = 0;
 		/* Setup disabled buttons when creating window
 		 * disable all other difficulty buttons during gameplay except for 'custom' */
 		this->SetWidgetsDisabledState(_game_mode == GM_NORMAL,
