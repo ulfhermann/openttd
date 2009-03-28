@@ -172,6 +172,7 @@ bool LinkGraph::Join() {
 		station_colours[id] += USHRT_MAX / 2;
 		if (id < current_station) current_station = id;
 	}
+	delete comp;
 	return true;
 }
 
