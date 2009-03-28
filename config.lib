@@ -1016,7 +1016,7 @@ make_cflags_and_ldflags() {
 	# CFlags for HOST and C-Compiler
 	CC_FLAGS=""
 	# Libs to compile. In fact this is just LDFLAGS
-	LIBS="-lstdc++ -lglpk"
+	LIBS="-lstdc++"
 	# LDFLAGS used for HOST
 	LDFLAGS="$LDFLAGS"
 

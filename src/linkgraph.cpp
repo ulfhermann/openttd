@@ -15,6 +15,7 @@
 #include "demands.h"
 #include "mcf.h"
 #include "core/bitmath_func.hpp"
+#include <limits>
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];

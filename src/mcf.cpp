@@ -7,8 +7,8 @@
 
 #include "mcf.h"
 #include "debug.h"
+#include <limits>
 #include <cmath>
-#include <iostream>
 
 MultiCommodityFlow::MultiCommodityFlow() :
 	epsilon(1.0 / (float)_settings_game.economy.mcf_accuracy),
@@ -174,7 +174,6 @@ void MultiCommodityFlow::IncreaseL(Path * path, float sum_f_cq) {
 	}
 }
 
-// Wurm drin: Ein path, der gelöscht ist, kann später in der Liste auftauchen!
 void MultiCommodityFlow::CleanupPaths(PathVector & paths) {
 	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Path * path = *i;

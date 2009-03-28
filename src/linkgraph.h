@@ -15,7 +15,6 @@
 #include <list>
 #include <vector>
 #include <set>
-#include <limits>
 
 struct SaveLoad;
 

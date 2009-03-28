@@ -10,31 +10,7 @@
 
 #include "linkgraph.h"
 #include "settings_type.h"
-#include <limits>
 #include <vector>
-
-/*
- * PathMapping will look like:
- *
- * class PathMapping {
- * 	Node * origin;
- *  Node * this_node;
- * 	map<Node *, float> flows;
- * }
- *
- * for each node there will be as many mappings as there are origins of flow passing this_node.
- * Translated to stations we will have another member of GoodsEntry like
- * map<StationID, map<StationID, float> > with the first StationID being origin and the second "via"
- *
- * Can this be computed from the PathList the MCF algo generates?
- * Yes:
- * - traverse all nodes and for each node collect all adjacent McfEdges
- * - Search the McfEdges for paths from the same origin
- * - build a flow mapping for this origin from the paths
- * - traverse all McfEdges and delete them. Deleting an edge deletes any paths associated with it
- * - deleting a path removes it from all McfEdges associated with it
- */
-
 
 class McfEdge {
 public:
