@@ -334,6 +334,7 @@ struct EconomySettings {
 	DistributionTypeByte  demand_express;    ///< demand calculation for express cargo class
 	DistributionTypeByte  demand_armoured;   ///< demand calculation for armoured cargo class
 	DistributionTypeByte  demand_default;    ///< demand calculation for all other goods
+	uint8  mcf_accuracy;                     ///< accuracy when approximating the multi commodity flow problem. low accuracy => low running time
 };
 
 /** Settings related to stations. */

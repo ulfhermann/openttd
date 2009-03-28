@@ -1136,6 +1136,7 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.demand_express"),
 	SettingEntry("economy.demand_armoured"),
 	SettingEntry("economy.demand_default"),
+	SettingEntry("economy.mcf_accuracy"),
 };
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};

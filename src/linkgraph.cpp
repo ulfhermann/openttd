@@ -220,6 +220,7 @@ void LinkGraph::SpawnComponentThread(Component * c) {
 void Path::Fork(Path * base, float cap, float dist) {
 	capacity = min(base->capacity, cap);
 	distance = base->distance + dist;
+	assert(distance > 0);
 	if (parent != base) {
 		if (parent != NULL) {
 			parent->num_children--;
@@ -229,10 +230,24 @@ void Path::Fork(Path * base, float cap, float dist) {
 	}
 }
 
-void Path::AddFlow(float f) {
+void Path::AddFlow(float f, Component * graph) {
 	flow +=f;
+	graph->GetNode(node).paths.insert(this);
 	if (parent != NULL) {
-		parent->AddFlow(f);
+		parent->AddFlow(f, graph);
 	}
 }
+
+void Path::UnFork() {
+	if (parent != NULL) {
+		parent->num_children--;
+		parent = NULL;
+	}
+}
+
+Path::Path(NodeID n, bool source)  :
+	distance(source ? 0 : std::numeric_limits<float>::max()),
+	capacity(source ? std::numeric_limits<float>::max() : 0),
+	flow(0), node(n), num_children(0), parent(NULL)
+{}
 

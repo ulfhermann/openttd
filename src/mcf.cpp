@@ -6,9 +6,19 @@
  */
 
 #include "mcf.h"
+#include "debug.h"
 #include <cmath>
+#include <iostream>
 
-float MultiCommodityFlow::epsilon = 0.25;
+MultiCommodityFlow::MultiCommodityFlow() :
+	epsilon(1.0 / (float)_settings_game.economy.mcf_accuracy),
+	graph(NULL), delta(0), k(0), m(0)
+{
+	if (_settings_game.economy.mcf_accuracy == 0) {
+		debug("invalid accuracy setting!");
+		epsilon = 1;
+	}
+}
 
 void MultiCommodityFlow::Run(Component * g) {
 	graph = g;
@@ -49,6 +59,7 @@ void MultiCommodityFlow::CalcInitialL() {
 			McfEdge * mcf = &edges[i][j];
 			if (e->capacity > 0) {
 				mcf->l = delta / ((float)e->capacity);
+				assert(mcf->l > 0);
 				if (last != NULL) {
 					last->next = mcf;
 				} else {
@@ -93,7 +104,7 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
 			NodeID to = edge->to;
 			float capacity = graph->GetEdge(from, to).capacity;
 			float distance = edge->l;
-			ANNOTATION * dest = (ANNOTATION *)paths[to];
+			ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
 			if (dest->IsBetter(source, capacity, distance)) {
 				annos.erase(dest);
 				dest->Fork(source, capacity, distance);
@@ -110,12 +121,15 @@ void MultiCommodityFlow::Prescale() {
 	uint size = graph->GetSize();
 	float min_c_d = std::numeric_limits<float>::max();
 	for (NodeID from = 0; from < size; ++from) {
-		Dijkstra<CapacityAnnotation>(0, p);
+		Dijkstra<CapacityAnnotation>(from, p);
 		for (NodeID to = 0; to < size; ++to) {
 			Path * path = p[to];
 			if (from != to) {
-				float c_d = path->GetCapacity() / edges[from][to].d;
-				min_c_d = min(c_d, min_c_d);
+				float cap = path->GetCapacity();
+				if (cap > 0) {
+					float c_d = cap / edges[from][to].d;
+					min_c_d = min(c_d, min_c_d);
+				}
 			}
 			delete path;
 			p[to] = NULL;
@@ -123,6 +137,9 @@ void MultiCommodityFlow::Prescale() {
 	}
 	// scale all demands
 	float scale_factor = min_c_d / k;
+	if (scale_factor > 1) {
+		DEBUG(misc, 3, "very high scale factor: %f", scale_factor);
+	}
 	for (NodeID from = 0; from < size; ++from) {
 		for (NodeID to = 0; to < size; ++to) {
 			edges[from][to].d *= scale_factor;
@@ -139,14 +156,53 @@ void MultiCommodityFlow::CalcD() {
 	}
 }
 
+void MultiCommodityFlow::IncreaseL(Path * path, float sum_f_cq) {
+	Path * parent = path->GetParent();
+	while (parent != NULL) {
+		NodeID to = path->GetNode();
+		NodeID from = parent->GetNode();
+		McfEdge & mcf = edges[from][to];
+		Edge & edge = graph->GetEdge(from, to);
+		float capacity = edge.capacity;
+		float difference = mcf.l * epsilon * sum_f_cq / capacity;
+		assert(difference > 0);
+		mcf.l += difference;
+		assert(mcf.l > 0);
+		d_l += difference * capacity;
+		path = parent;
+		parent = path->GetParent();
+	}
+}
+
+// Wurm drin: Ein path, der gelöscht ist, kann später in der Liste auftauchen!
+void MultiCommodityFlow::CleanupPaths(PathVector & paths) {
+	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
+		Path * path = *i;
+		while (path != NULL && path->GetFlow() <= 0) {
+			Path * parent = path->GetParent();
+			path->UnFork();
+			if (path->GetNumChildren() == 0) {
+				NodeID node = path->GetNode();
+				delete path;
+				paths[node] = NULL;
+			}
+			path = parent;
+		}
+	}
+	paths.clear();
+}
+
 void MultiCommodityFlow::Karakostas() {
 	CalcD();
 	uint size = graph->GetSize();
 	typedef std::set<McfEdge *> EdgeSet;
 	EdgeSet unsatisfied_demands;
 	PathVector paths;
-	while(d_l < 1) {
-		for (NodeID source = 0; source < size; ++source) {
+	float last_d_l = 1;
+	uint loops = 0; // TODO: when #loops surpasses a certain threshold double all d's to speed things up
+	while(d_l < 1 && d_l < last_d_l) {
+		last_d_l = d_l;
+		for (NodeID source = 0; source < size && d_l < 1; ++source) {
 			for (NodeID dest = 0; dest < size; ++dest) {
 				McfEdge & edge = edges[source][dest];
 				edge.dx = edge.d;
@@ -158,22 +214,53 @@ void MultiCommodityFlow::Karakostas() {
 			float c = std::numeric_limits<float>::max();
 			for (EdgeSet::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end(); ++i) {
 				Path * path = paths[(*i)->to];
-				if (path->capacity > 0) {
-					c = min(path->capacity, c);
+				if (path->GetCapacity() > 0) {
+					c = min(path->GetCapacity(), c);
 				}
 			}
-			for (EdgeSet::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end();) {
-				McfEdge * edge = *i;
-				Path * path = paths[edge->to];
-				f_cq = min(edge->dx, c);
-				edge->dx -= f_cq;
-				path->AddFlow(f_cq);
-				if (edge->dx <= 0) {
-					unsatisfied_demands.erase(i++);
-				} else {
-					++i;
+			while(!unsatisfied_demands.empty() && d_l < 1) {
+				for (EdgeSet::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end();) {
+					McfEdge * edge = *i;
+					Path * path = paths[edge->to];
+					float f_cq = min(edge->dx, c);
+					edge->dx -= f_cq;
+					IncreaseL(path, f_cq);
+					path->AddFlow(f_cq, graph);
+					if (edge->dx <= 0) {
+						unsatisfied_demands.erase(i++);
+					} else {
+						++i;
+					}
 				}
 			}
+			CleanupPaths(paths);
+			loops++;
 		}
 	}
+	if (loops < size) {
+		DEBUG(misc, 3, "fewer loops than origin nodes: %d/%d", loops, size);
+	}
+}
+
+/**
+ * avoid accidentally deleting different paths of the same capacity/distance in a set.
+ * When the annotation is the same the pointers themselves are compared, so there are no equal ranges.
+ * (The problem might have been something else ... but this isn't expensive I guess)
+ */
+bool greater(float x_anno, float y_anno, const Path * x, const Path * y) {
+	if (x_anno > y_anno) {
+		return true;
+	} else if (x_anno < y_anno) {
+		return false;
+	} else {
+		return x > y;
+	}
+}
+
+bool CapacityAnnotation::comp::operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const {
+	return greater(x->GetAnnotation(), y->GetAnnotation(), x, y);
+}
+
+bool DistanceAnnotation::comp::operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const {
+	return !greater(x->GetAnnotation(), y->GetAnnotation(), x, y);
 }

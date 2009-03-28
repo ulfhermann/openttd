@@ -21,6 +21,10 @@ struct SaveLoad;
 
 typedef uint NodeID;
 
+class Path;
+
+typedef std::set<Path *> PathSet;
+
 class Node {
 public:
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
@@ -29,11 +33,8 @@ public:
 	uint undelivered_supply;
 	uint demand;
 	StationID station;
+	PathSet paths;
 };
-
-class Path;
-
-typedef std::set<Path *> PathSet;
 
 class Edge {
 public:
@@ -41,27 +42,11 @@ public:
 	uint distance;
 	uint capacity;
 	uint demand;
-	PathSet paths;
 };
 
 typedef std::list<Edge *> EdgeList;
 
-class Path {
-public:
-	Path(NodeID n) : capacity(std::numeric_limits<float>::max()), flow(0), node(n), num_children(0), parent(NULL) {}
-	NodeID GetNode() const {return node;}
-	Path * GetParent() {return parent;}
-	float GetCapacity() const {return capacity;}
-	void Fork(Path * base, float cap, float dist);
-	void AddFlow(float f);
-protected:
-	float distance;
-	float capacity;
-	float flow;
-	NodeID node;
-	uint num_children;
-	Path * parent;
-};
+
 
 void SpawnComponentThread(void * handlers);
 
@@ -139,6 +124,26 @@ private:
 	CargoID cargo;
 	colour station_colours[Station_POOL_MAX_BLOCKS];
 	ComponentList components;
+};
+
+class Path {
+public:
+	Path(NodeID n, bool source = false);
+	NodeID GetNode() const {return node;}
+	Path * GetParent() {return parent;}
+	float GetCapacity() const {return capacity;}
+	void Fork(Path * base, float cap, float dist);
+	void AddFlow(float f, Component * graph);
+	float GetFlow() {return flow;}
+	uint GetNumChildren() {return num_children;}
+	void UnFork();
+protected:
+	float distance;
+	float capacity;
+	float flow;
+	NodeID node;
+	uint num_children;
+	Path * parent;
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];

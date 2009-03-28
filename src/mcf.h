@@ -9,6 +9,7 @@
 #define MCF_H_
 
 #include "linkgraph.h"
+#include "settings_type.h"
 #include <limits>
 #include <vector>
 
@@ -37,35 +38,32 @@
 
 class McfEdge {
 public:
-	McfEdge() : l(0), d(0), dx(0), next(NULL), to(UINT_MAX) {}
+	McfEdge() : l(0), d(0), dx(0), f_cq(0), next(NULL), to(UINT_MAX) {}
 	float l;
 	float d;
 	float dx;
+	float f_cq;
 	McfEdge * next;
 	NodeID to;
 };
 
 class DistanceAnnotation : public Path {
 public:
-	DistanceAnnotation(NodeID n, bool source = false) : Path(n)
-		{distance = source ? 0 : std::numeric_limits<float>::max();}
+	DistanceAnnotation(NodeID n, bool source = false) : Path(n, source) {}
 	bool IsBetter(const DistanceAnnotation * base, float cap, float dist) const;
 	float GetAnnotation() const {return distance;}
 	struct comp {
-		bool operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const
-		{ return x->GetAnnotation() < y->GetAnnotation(); }
+		bool operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const;
 	};
 };
 
 class CapacityAnnotation : public Path {
 public:
-	CapacityAnnotation(NodeID n, bool source = false) : Path(n)
-		{capacity = source ? std::numeric_limits<float>::max() : 0;}
+	CapacityAnnotation(NodeID n, bool source = false) : Path(n, source) {}
 	bool IsBetter(const CapacityAnnotation * base, float cap, float dist) const;
 	float GetAnnotation() const {return capacity;}
 	struct comp {
-		bool operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const
-		{ return x->GetAnnotation() > y->GetAnnotation(); }
+		bool operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const;
 	};
 };
 
@@ -75,9 +73,8 @@ typedef std::vector<Path *> PathVector;
 class MultiCommodityFlow : public ComponentHandler {
 public:
 	virtual void Run(Component * graph);
-	MultiCommodityFlow() : graph(NULL), delta(0), k(0), m(0) {}
+	MultiCommodityFlow();
 	virtual ~MultiCommodityFlow() {}
-	static float epsilon;
 private:
 	McfEdge * GetFirstEdge(NodeID n) {return edges[n][n].next;}
 	void CalcInitialL();
@@ -87,8 +84,10 @@ private:
 	void CountEdges();
 	template<class ANNOTATION>
 		void Dijkstra(NodeID from, PathVector & paths);
-
+	void IncreaseL(Path * path, float f_cq);
 	void Karakostas();
+	void CleanupPaths(PathVector & paths);
+	float epsilon;
 	McfGraph edges;
 	Component * graph;
 	float delta;
