@@ -53,12 +53,10 @@ public:
 	uint AddNode(StationID st, uint supply, uint demand);
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
-	uint GetJoinTime() const {return join_time;}
 	colour GetColour() const {return component_colour;}
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
 	uint num_nodes;
-	uint join_time;
 	colour component_colour;
 	NodeVector nodes;
 	EdgeMatrix edges;

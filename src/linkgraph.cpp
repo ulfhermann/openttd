@@ -139,14 +139,12 @@ void Component::SetSize(uint size) {
 
 Component::Component(colour col) :
 	num_nodes(0),
-	join_time(_tick_counter + _settings_game.economy.linkgraph_recalc_interval * DAY_TICKS),
 	component_colour(col)
 {
 }
 
 Component::Component(uint size, uint join, colour c) :
 	num_nodes(size),
-	join_time(join),
 	component_colour(c),
 	nodes(size),
 	edges(size, std::vector<Edge>(size))
@@ -159,10 +157,6 @@ bool LinkGraph::Join() {
 	}
 	Component * comp = components.front();
 
-	if (comp->GetJoinTime() > _tick_counter) {
-		return false;
-	}
-
 	components.pop_front();
 
 	for(NodeID i = 0; i < comp->GetSize(); ++i) {
@@ -171,6 +165,7 @@ bool LinkGraph::Join() {
 		station_colours[id] += USHRT_MAX / 2;
 		if (id < current_station) current_station = id;
 	}
+	delete comp;
 	return true;
 }
 
