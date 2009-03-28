@@ -43,11 +43,9 @@ class Component {
 
 public:
 	Component(uint size, colour c);
-	Component(colour c);
+	Component(colour c = USHRT_MAX);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
-
 	Node & GetNode(NodeID num) {return nodes[num];}
-
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
 	uint AddNode(StationID st, uint supply, uint demand);
