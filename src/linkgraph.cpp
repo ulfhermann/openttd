@@ -143,7 +143,7 @@ Component::Component(colour col) :
 {
 }
 
-Component::Component(uint size, uint join, colour c) :
+Component::Component(uint size, colour c) :
 	num_nodes(size),
 	component_colour(c),
 	nodes(size),

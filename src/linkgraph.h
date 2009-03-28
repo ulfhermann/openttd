@@ -42,7 +42,7 @@ class Component {
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	Component(uint size, uint join, colour c);
+	Component(uint size, colour c);
 	Component(colour c);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 
