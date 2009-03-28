@@ -87,10 +87,13 @@ void DrawSprite(SpriteID img, SpriteID pal, int x, int y, const SubSprite *sub =
 
 /** How to align the to-be drawn text. */
 enum StringAlignment {
-	SA_LEFT,   ///< Left align the text
-	SA_CENTER, ///< Center the text
-	SA_RIGHT,  ///< Right align the text
+	SA_LEFT,      ///< Left align the text
+	SA_CENTER,    ///< Center the text
+	SA_RIGHT,     ///< Right align the text
+	SA_MASK  = 3, ///< Mask for base alignment
+	SA_FORCE = 4, ///< Force the alignment, i.e. don't swap for RTL languages.
 };
+DECLARE_ENUM_AS_BIT_SET(StringAlignment);
 
 int DrawString(int left, int right, int top, const char *str, TextColour colour, StringAlignment align = SA_LEFT, bool underline = false);
 int DrawString(int left, int right, int top, StringID str, TextColour colour, StringAlignment align = SA_LEFT, bool underline = false);
@@ -155,13 +158,14 @@ byte GetCharacterWidth(FontSize size, uint32 key);
  */
 static inline byte GetCharacterHeight(FontSize size)
 {
-	switch (size) {
-		default: NOT_REACHED();
-		case FS_NORMAL: return 10;
-		case FS_SMALL:  return 6;
-		case FS_LARGE:  return 18;
-	}
+	assert(size < FS_END);
+	extern int _font_height[FS_END];
+	return _font_height[size];
 }
+
+#define FONT_HEIGHT_SMALL  (GetCharacterHeight(FS_SMALL))
+#define FONT_HEIGHT_NORMAL (GetCharacterHeight(FS_NORMAL))
+#define FONT_HEIGHT_LARGE  (GetCharacterHeight(FS_LARGE))
 
 extern DrawPixelInfo *_cur_dpi;
 

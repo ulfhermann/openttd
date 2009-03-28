@@ -633,7 +633,8 @@ void Window::DrawSortButtonState(int widget, SortButtonState state) const
 	if (state == SBS_OFF) return;
 
 	int offset = this->IsWidgetLowered(widget) ? 1 : 0;
-	DrawString(this->widget[widget].right - 11 + offset, this->widget[widget].right, this->widget[widget].top + 1 + offset, state == SBS_DOWN ? DOWNARROW : UPARROW, TC_BLACK);
+	int base = offset + (_dynlang.text_dir == TD_LTR ? this->widget[widget].right - 11 : this->widget[widget].left);
+	DrawString(base, base + 11, this->widget[widget].top + 1 + offset, state == SBS_DOWN ? DOWNARROW : UPARROW, TC_BLACK, SA_CENTER);
 }
 
 
@@ -875,12 +876,19 @@ int NWidgetHorizontal::ComputeMinimalSize()
 	this->resize_x = 0;   // smallest non-zero child widget resize step.
 	this->resize_y = 1;   // smallest common child resize step
 
+	if (this->head != NULL) this->head->padding_left += this->pip_pre;
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
 		int idx = child_wid->ComputeMinimalSize();
 		biggest_index = max(biggest_index, idx);
 
-		this->min_x += child_wid->min_x;
-		this->min_y = max(this->min_y, child_wid->min_y);
+		if (child_wid->next != NULL) {
+			child_wid->padding_right += this->pip_inter;
+		} else {
+			child_wid->padding_right += this->pip_post;
+		}
+
+		this->min_x += child_wid->min_x + child_wid->padding_left + child_wid->padding_right;
+		this->min_y = max(this->min_y, child_wid->min_y + child_wid->padding_top + child_wid->padding_bottom);
 		this->fill_x |= child_wid->fill_x;
 		this->fill_y &= child_wid->fill_y;
 
@@ -889,6 +897,8 @@ int NWidgetHorizontal::ComputeMinimalSize()
 		}
 		this->resize_y = LeastCommonMultiple(this->resize_y, child_wid->resize_y);
 	}
+	/* We need to zero the PIP settings so we can re-initialize the tree. */
+	this->pip_pre = this->pip_inter = this->pip_post = 0;
 
 	return biggest_index;
 }
@@ -917,15 +927,16 @@ void NWidgetHorizontal::AssignMinimalPosition(uint x, uint y, uint given_width, 
 	allow_resize_x = (this->resize_x > 0);
 	child_wid = rtl ? this->tail : this->head;
 	while (child_wid != NULL) {
+		assert(given_height >= child_wid->min_y + child_wid->padding_top + child_wid->padding_bottom);
 		/* Decide about vertical filling of the child. */
 		uint child_height; // Height of the child widget.
 		uint child_pos_y; // Vertical position of child relative to the top of the container.
 		if (child_wid->fill_y) {
-			child_height = given_height;
-			child_pos_y = 0;
+			child_height = given_height - child_wid->padding_top - child_wid->padding_bottom;
+			child_pos_y = child_wid->padding_top;
 		} else {
 			child_height = child_wid->min_y;
-			child_pos_y = (given_height - child_height) / 2;
+			child_pos_y = (given_height - child_wid->padding_top - child_wid->padding_bottom - child_height) / 2 + child_wid->padding_top;
 		}
 
 		/* Decide about horizontal filling of the child. */
@@ -940,8 +951,8 @@ void NWidgetHorizontal::AssignMinimalPosition(uint x, uint y, uint given_width, 
 			child_width += increment;
 		}
 
-		child_wid->AssignMinimalPosition(x + position, y + child_pos_y, child_width, child_height, allow_resize_x, (this->resize_y > 0), rtl);
-		position += child_width;
+		child_wid->AssignMinimalPosition(x + position + (rtl ? child_wid->padding_right : child_wid->padding_left), y + child_pos_y, child_width, child_height, allow_resize_x, (this->resize_y > 0), rtl);
+		position += child_width + child_wid->padding_right + child_wid->padding_left;
 		if (child_wid->resize_x > 0) allow_resize_x = false; // Widget array allows only one child resizing
 
 		child_wid = rtl ? child_wid->prev : child_wid->next;
@@ -959,6 +970,21 @@ void NWidgetHorizontal::StoreWidgets(Widget *widgets, int length, bool left_movi
 	}
 }
 
+NWidgetHorizontalLTR::NWidgetHorizontalLTR() : NWidgetHorizontal()
+{
+	this->type = NWID_HORIZONTAL_LTR;
+}
+
+void NWidgetHorizontalLTR::AssignMinimalPosition(uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl)
+{
+	NWidgetHorizontal::AssignMinimalPosition(x, y, given_width, given_height, allow_resize_x, allow_resize_y, false);
+}
+
+void NWidgetHorizontalLTR::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
+{
+	NWidgetHorizontal::StoreWidgets(widgets, length, left_moving, top_moving, false);
+}
+
 NWidgetVertical::NWidgetVertical() : NWidgetContainer(NWID_VERTICAL)
 {
 }
@@ -973,12 +999,19 @@ int NWidgetVertical::ComputeMinimalSize()
 	this->resize_x = 1;   // smallest common child resize step
 	this->resize_y = 0;   // smallest non-zero child widget resize step.
 
+	if (this->head != NULL) this->head->padding_top += this->pip_pre;
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
 		int idx = child_wid->ComputeMinimalSize();
 		biggest_index = max(biggest_index, idx);
 
-		this->min_y += child_wid->min_y;
-		this->min_x = max(this->min_x, child_wid->min_x);
+		if (child_wid->next != NULL) {
+			child_wid->padding_bottom += this->pip_inter;
+		} else {
+			child_wid->padding_bottom += this->pip_post;
+		}
+
+		this->min_y += child_wid->min_y + child_wid->padding_top + child_wid->padding_bottom;
+		this->min_x = max(this->min_x, child_wid->min_x + child_wid->padding_left + child_wid->padding_right);
 		this->fill_y |= child_wid->fill_y;
 		this->fill_x &= child_wid->fill_x;
 
@@ -987,6 +1020,8 @@ int NWidgetVertical::ComputeMinimalSize()
 		}
 		this->resize_x = LeastCommonMultiple(this->resize_x, child_wid->resize_x);
 	}
+	/* We need to zero the PIP settings so we can re-initialize the tree. */
+	this->pip_pre = this->pip_inter = this->pip_post = 0;
 
 	return biggest_index;
 }
@@ -1013,15 +1048,16 @@ void NWidgetVertical::AssignMinimalPosition(uint x, uint y, uint given_width, ui
 	uint position = 0; // Place to put next child relative to origin of the container.
 	allow_resize_y = (this->resize_y > 0);
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
+		assert(given_width >= child_wid->min_x + child_wid->padding_left + child_wid->padding_right);
 		/* Decide about horizontal filling of the child. */
 		uint child_width; // Width of the child widget.
 		uint child_pos_x; // Horizontal position of child relative to the left of the container.
 		if (child_wid->fill_x) {
-			child_width = given_width;
-			child_pos_x = 0;
+			child_width = given_width - child_wid->padding_left - child_wid->padding_right;
+			child_pos_x = (rtl ? child_wid->padding_right : child_wid->padding_left);
 		} else {
 			child_width = child_wid->min_x;
-			child_pos_x = (given_width - child_width) / 2;
+			child_pos_x = (given_width - child_wid->padding_left - child_wid->padding_right - child_width) / 2 + (rtl ? child_wid->padding_right : child_wid->padding_left);
 		}
 
 		/* Decide about vertical filling of the child. */
@@ -1036,8 +1072,8 @@ void NWidgetVertical::AssignMinimalPosition(uint x, uint y, uint given_width, ui
 			child_height += increment;
 		}
 
-		child_wid->AssignMinimalPosition(x + child_pos_x, y + position, child_width, child_height, (this->resize_x > 0), allow_resize_y, rtl);
-		position += child_height;
+		child_wid->AssignMinimalPosition(x + child_pos_x, y + position + child_wid->padding_top, child_width, child_height, (this->resize_x > 0), allow_resize_y, rtl);
+		position += child_height + child_wid->padding_top + child_wid->padding_bottom;
 		if (child_wid->resize_y > 0) allow_resize_y = false; // Widget array allows only one child resizing
 	}
 }
@@ -1137,7 +1173,12 @@ void NWidgetBackground::AssignMinimalPosition(uint x, uint y, uint given_width, 
 	if (!allow_resize_x) this->resize_x = 0;
 	if (!allow_resize_y) this->resize_y = 0;
 
-	if (this->child != NULL) this->child->AssignMinimalPosition(x, y, given_width, given_height, (this->resize_x > 0), (this->resize_y > 0), rtl);
+	if (this->child != NULL) {
+		uint x_offset = (rtl ? this->child->padding_right : this->child->padding_left);
+		uint width = given_width - this->child->padding_right - this->child->padding_left;
+		uint height = given_height - this->child->padding_top - this->child->padding_bottom;
+		this->child->AssignMinimalPosition(x + x_offset, y + this->child->padding_top, width, height, (this->resize_x > 0), (this->resize_y > 0), rtl);
+	}
 }
 
 void NWidgetBackground::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
@@ -1195,7 +1236,7 @@ NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, 
 			this->SetFill(true, false);
 			this->SetResize(1, 0);
 			this->min_y = 14;
-			this->SetDataTip(0x0, STR_018C_WINDOW_TITLE_DRAG_THIS);
+			this->SetDataTip(data, STR_018C_WINDOW_TITLE_DRAG_THIS);
 			break;
 
 		case WWT_HSCROLLBAR:
@@ -1345,6 +1386,11 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest)
 				*dest = new NWidgetHorizontal();
 				break;
 
+			case NWID_HORIZONTAL_LTR:
+				if (*dest != NULL) return num_used;
+				*dest = new NWidgetHorizontalLTR();
+				break;
+
 			case WWT_PANEL:
 			case WWT_INSET:
 			case WWT_FRAME:
@@ -1417,6 +1463,27 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest)
 				break;
 			}
 
+			case WPT_PADDING: {
+				NWidgetBase *nwb = *dest;
+				if (nwb != NULL) {
+					nwb->padding_top = parts->u.padding.top;
+					nwb->padding_right = parts->u.padding.right;
+					nwb->padding_bottom = parts->u.padding.bottom;
+					nwb->padding_left = parts->u.padding.left;
+				}
+				break;
+			}
+
+			case WPT_PIPSPACE: {
+				NWidgetContainer *nwc = dynamic_cast<NWidgetContainer *>(*dest);
+				if (nwc != NULL) {
+					nwc->pip_pre = parts->u.pip.pre;
+					nwc->pip_inter = parts->u.pip.inter;
+					nwc->pip_post = parts->u.pip.post;
+				}
+				break;
+			}
+
 			case WPT_ENDCONTAINER:
 				return num_used;
 
@@ -1463,7 +1530,7 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
 
 		/* If sub-widget is a container, recursively fill that container. */
 		WidgetType tp = sub_widget->type;
-		if (tp == NWID_HORIZONTAL || tp == NWID_VERTICAL || tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET) {
+		if (tp == NWID_HORIZONTAL || tp == NWID_HORIZONTAL_LTR || tp == NWID_VERTICAL || tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET) {
 			int num_used = MakeWidgetTree(parts, count - total_used, sub_widget);
 			parts += num_used;
 			total_used += num_used;
