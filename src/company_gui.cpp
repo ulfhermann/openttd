@@ -83,42 +83,62 @@ static const ExpensesList _expenses_list_types[] = {
 	{ _expenses_list_2, lengthof(_expenses_list_2), lengthof(_expenses_list_2) * 10 + 3 * 12 },
 };
 
-static void DrawCompanyEconomyStats(const Company *c, bool small)
+/** Widgets of the company finances windows. */
+enum CompanyFinancesWindowWidgets {
+	CFW_CLOSEBOX = 0,  ///< Close the window
+	CFW_CAPTION,       ///< Caption of the window
+	CFW_TOGGLE_SIZE,   ///< Toggle windows size
+	CFW_STICKY,        ///< Sticky button
+	CFW_EXPS_PANEL,    ///< Panel for expenses
+	CFW_EXPS_CATEGORY, ///< Column for expenses category strings
+	CFW_EXPS_PRICE1,   ///< Column for year Y-2 expenses
+	CFW_EXPS_PRICE2,   ///< Column for year Y-1 expenses
+	CFW_EXPS_PRICE3,   ///< Column for year Y expenses
+	CFW_TOTAL_PANEL,   ///< Panel for totals
+	CFW_TOTAL_LABELS,  ///< Column for totals labels
+	CFW_TOTAL_VALUES,  ///< Column for totals values
+	CFW_TOTAL_MAXLOAN, ///< Column for max loan string
+	CFW_INCREASE_LOAN, ///< Increase loan
+	CFW_REPAY_LOAN,    ///< Decrease loan
+};
+
+static void DrawCompanyEconomyStats(const Company *c, bool small, const Widget *widget)
 {
 	int type = _settings_client.gui.expenses_layout;
-	int x, y, i, j, year;
+	int y;
 	const Money (*tbl)[EXPENSES_END];
 	StringID str;
 
 	if (!small) { // normal sized economics window
+		const Widget *w = &widget[CFW_EXPS_CATEGORY];
 		/* draw categories */
-		DrawString(0, 122, 15, STR_700F_EXPENDITURE_INCOME, TC_FROMSTRING, SA_CENTER, true);
+		DrawString(w->left, w->right, 15, STR_700F_EXPENDITURE_INCOME, TC_FROMSTRING, SA_CENTER, true);
 
 		y = 27;
-		for (i = 0; i < _expenses_list_types[type].length; i++) {
+		for (int i = 0; i < _expenses_list_types[type].length; i++) {
 			ExpensesType et = _expenses_list_types[type].et[i];
 			if (et == INVALID_EXPENSES) {
 				y += 2;
-				DrawString(2, 111, y, STR_7020_TOTAL, TC_FROMSTRING, SA_RIGHT);
+				DrawString(w->left + 2, w->right - 2, y, STR_7020_TOTAL, TC_FROMSTRING, SA_RIGHT);
 				y += 20;
 			} else {
-				DrawString(2, 111, y, STR_7011_CONSTRUCTION + et, TC_FROMSTRING);
+				DrawString(w->left + 2, w->right - 2, y, STR_7011_CONSTRUCTION + et, TC_FROMSTRING);
 				y += 10;
 			}
 		}
 
-		DrawString(0, 111, y + 2, STR_7020_TOTAL, TC_FROMSTRING, SA_RIGHT);
+		DrawString(w->left + 2, w->right - 2, y + 2, STR_7020_TOTAL, TC_FROMSTRING, SA_RIGHT);
 
 		/* draw the price columns */
-		year = _cur_year - 2;
-		j = 3;
-		x = 215;
+		int year = _cur_year - 2;
+		int j = 3;
+		w++;
 		tbl = c->yearly_expenses + 2;
 
 		do {
 			if (year >= c->inaugurated_year) {
 				SetDParam(0, year);
-				DrawString(x - 75, x, 15, STR_7010, TC_FROMSTRING, SA_RIGHT, true);
+				DrawString(w->left, w->right, 15, STR_7010, TC_FROMSTRING, SA_RIGHT, true);
 
 				Money sum = 0;
 				Money subtotal = 0;
@@ -130,7 +150,7 @@ static void DrawCompanyEconomyStats(const Company *c, bool small)
 					Money cost;
 
 					if (et == INVALID_EXPENSES) {
-						GfxFillRect(x - 75, y, x, y, 215);
+						GfxFillRect(w->left, y, w->right, y, 215);
 						cost = subtotal;
 						subtotal = 0;
 						y += 2;
@@ -144,7 +164,7 @@ static void DrawCompanyEconomyStats(const Company *c, bool small)
 						str = STR_701E;
 						if (cost < 0) { cost = -cost; str++; }
 						SetDParam(0, cost);
-						DrawString(x - 75, x, y, str, TC_FROMSTRING, SA_RIGHT);
+						DrawString(w->left, w->right, y, str, TC_FROMSTRING, SA_RIGHT);
 					}
 					y += (et == INVALID_EXPENSES) ? 20 : 10;
 				}
@@ -152,10 +172,10 @@ static void DrawCompanyEconomyStats(const Company *c, bool small)
 				str = STR_701E;
 				if (sum < 0) { sum = -sum; str++; }
 				SetDParam(0, sum);
-				DrawString(x - 75, x, y + 2, str, TC_FROMSTRING, SA_RIGHT);
+				DrawString(w->left, w->right, y + 2, str, TC_FROMSTRING, SA_RIGHT);
 
-				GfxFillRect(x - 75, y, x, y, 215);
-				x += 95;
+				GfxFillRect(w->left, y, w->right, y, 215);
+				w++;
 			}
 			year++;
 			tbl--;
@@ -165,58 +185,124 @@ static void DrawCompanyEconomyStats(const Company *c, bool small)
 
 		/* draw max loan aligned to loan below (y += 10) */
 		SetDParam(0, _economy.max_loan);
-		DrawString(202, 406, y + 10, STR_MAX_LOAN, TC_FROMSTRING);
+		DrawString(widget[CFW_TOTAL_MAXLOAN].left, widget[CFW_TOTAL_MAXLOAN].right, y + 10, STR_MAX_LOAN, TC_FROMSTRING);
 	} else {
 		y = 15;
 	}
 
-	DrawString(2, 182, y, STR_7026_BANK_BALANCE, TC_FROMSTRING);
+	DrawString(widget[CFW_TOTAL_LABELS].left, widget[CFW_TOTAL_LABELS].right, y, STR_7026_BANK_BALANCE, TC_FROMSTRING);
 	SetDParam(0, c->money);
-	DrawString(182 - 75, 182, y, STR_7028, TC_FROMSTRING, SA_RIGHT);
+	DrawString(widget[CFW_TOTAL_VALUES].left, widget[CFW_TOTAL_VALUES].right, y, STR_7028, TC_FROMSTRING, SA_RIGHT);
 
 	y += 10;
 
-	DrawString(2, 182, y, STR_7027_LOAN, TC_FROMSTRING);
+	DrawString(widget[CFW_TOTAL_LABELS].left, widget[CFW_TOTAL_LABELS].right, y, STR_7027_LOAN, TC_FROMSTRING);
 	SetDParam(0, c->current_loan);
-	DrawString(182 - 75, 182, y, STR_7028, TC_FROMSTRING, SA_RIGHT);
+	DrawString(widget[CFW_TOTAL_VALUES].left, widget[CFW_TOTAL_VALUES].right, y, STR_7028, TC_FROMSTRING, SA_RIGHT);
 
 	y += 12;
 
-	GfxFillRect(182 - 75, y - 2, 182, y - 2, 215);
+	GfxFillRect(widget[CFW_TOTAL_VALUES].left, y - 2, widget[CFW_TOTAL_VALUES].right, y - 2, 215);
 
 	SetDParam(0, c->money - c->current_loan);
-	DrawString(182 - 75, 182, y, STR_7028, TC_FROMSTRING, SA_RIGHT);
+	DrawString(widget[CFW_TOTAL_VALUES].left, widget[CFW_TOTAL_VALUES].right, y, STR_7028, TC_FROMSTRING, SA_RIGHT);
 }
 
-enum CompanyFinancesWindowWidgets {
-	CFW_WIDGET_TOGGLE_SIZE   = 2,
-	CFW_WIDGET_EXPS_PANEL    = 4,
-	CFW_WIDGET_TOTAL_PANEL   = 5,
-	CFW_WIDGET_INCREASE_LOAN = 6,
-	CFW_WIDGET_REPAY_LOAN    = 7,
+static const NWidgetPart _nested_company_finances_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CFW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, CFW_CAPTION), SetMinimalSize(369, 14), SetDataTip(STR_700E_FINANCES, STR_018C_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, CFW_TOGGLE_SIZE), SetMinimalSize(14, 14), SetDataTip(SPR_LARGE_SMALL_WINDOW, STR_7075_TOGGLE_LARGE_SMALL_WINDOW),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY, CFW_STICKY),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, CFW_EXPS_PANEL),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_CATEGORY), SetMinimalSize(123, 0),
+			NWidget(NWID_SPACER), SetMinimalSize(7, 0),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_PRICE1), SetMinimalSize(86, 0),
+			NWidget(NWID_SPACER), SetMinimalSize(9, 0),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_PRICE2), SetMinimalSize(86, 0),
+			NWidget(NWID_SPACER), SetMinimalSize(9, 0),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_PRICE3), SetMinimalSize(86, 0),
+			NWidget(NWID_SPACER), SetMinimalSize(1, 0),
+		EndContainer(),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, CFW_TOTAL_PANEL),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_TOTAL_LABELS), SetMinimalSize(95, 34),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_TOTAL_VALUES), SetMinimalSize(86, 34),
+			NWidget(NWID_SPACER), SetMinimalSize(19, 0),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_TOTAL_MAXLOAN), SetMinimalSize(205, 34),
+		EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CFW_INCREASE_LOAN), SetMinimalSize(203, 12), SetDataTip(STR_7029_BORROW, STR_7035_INCREASE_SIZE_OF_LOAN),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CFW_REPAY_LOAN), SetMinimalSize(204, 12), SetDataTip(STR_702A_REPAY, STR_7036_REPAY_PART_OF_LOAN),
+	EndContainer(),
 };
 
 static const Widget _company_finances_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,       0,      13, STR_00C5,               STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   379,       0,      13, STR_700E_FINANCES,      STR_018C_WINDOW_TITLE_DRAG_THIS},
-{     WWT_IMGBTN,   RESIZE_NONE,  COLOUR_GREY,   380,   394,       0,      13, SPR_LARGE_SMALL_WINDOW, STR_7075_TOGGLE_LARGE_SMALL_WINDOW},
-{  WWT_STICKYBOX,   RESIZE_NONE,  COLOUR_GREY,   395,   406,       0,      13, 0x0,                    STR_STICKY_BUTTON},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   406,      14, 13 + 10, 0x0,                    STR_NULL},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   406, 14 + 10, 47 + 10, 0x0,                    STR_NULL},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   202, 48 + 10, 59 + 10, STR_7029_BORROW,        STR_7035_INCREASE_SIZE_OF_LOAN},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   203,   406, 48 + 10, 59 + 10, STR_702A_REPAY,         STR_7036_REPAY_PART_OF_LOAN},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,               STR_018B_CLOSE_WINDOW},              // CFW_CLOSEBOX
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   380,     0,    13, STR_700E_FINANCES,      STR_018C_WINDOW_TITLE_DRAG_THIS},    // CFW_CAPTION
+{     WWT_IMGBTN,   RESIZE_NONE,  COLOUR_GREY,   381,   394,     0,    13, SPR_LARGE_SMALL_WINDOW, STR_7075_TOGGLE_LARGE_SMALL_WINDOW}, // CFW_TOGGLE_SIZE
+{  WWT_STICKYBOX,   RESIZE_NONE,  COLOUR_GREY,   395,   406,     0,    13, 0x0,                    STR_STICKY_BUTTON},                  // CFW_STICKY
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   406,    14,    14, 0x0,                    STR_NULL},                           // CFW_EXPS_PANEL
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,   122,    14,    14, 0x0,                    STR_NULL},                           // CFW_EXPS_CATEGORY
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,   130,   215,    14,    14, 0x0,                    STR_NULL},                           // CFW_EXPS_PRICE1
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,   225,   310,    14,    14, 0x0,                    STR_NULL},                           // CFW_EXPS_PRICE2
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,   320,   405,    14,    14, 0x0,                    STR_NULL},                           // CFW_EXPS_PRICE3
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   406,    14,    47, 0x0,                    STR_NULL},                           // CFW_TOTAL_PANEL
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     2,    96,    14,    47, 0x0,                    STR_NULL},                           // CFW_TOTAL_LABELS
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,    97,   182,    14,    47, 0x0,                    STR_NULL},                           // CFW_TOTAL_VALUES
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,   202,   406,    14,    47, 0x0,                    STR_NULL},                           // CFW_TOTAL_MAXLOAN
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   202,    48,    59, STR_7029_BORROW,        STR_7035_INCREASE_SIZE_OF_LOAN},     // CFW_INCREASE_LOAN
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   203,   406,    48,    59, STR_702A_REPAY,         STR_7036_REPAY_PART_OF_LOAN},        // CFW_REPAY_LOAN
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_company_finances_small_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CFW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, CFW_CAPTION), SetMinimalSize(243, 14), SetDataTip(STR_700E_FINANCES, STR_018C_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, CFW_TOGGLE_SIZE), SetMinimalSize(14, 14), SetDataTip(SPR_LARGE_SMALL_WINDOW, STR_7075_TOGGLE_LARGE_SMALL_WINDOW),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY, CFW_STICKY),
+	EndContainer(),
+	NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_PANEL),
+	NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_CATEGORY),
+	NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_PRICE1),
+	NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_PRICE2),
+	NWidget(WWT_EMPTY, COLOUR_GREY, CFW_EXPS_PRICE3),
+	NWidget(WWT_PANEL, COLOUR_GREY, CFW_TOTAL_PANEL),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_TOTAL_LABELS), SetMinimalSize(95, 34),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_TOTAL_VALUES), SetMinimalSize(86, 34),
+			NWidget(WWT_EMPTY, COLOUR_GREY, CFW_TOTAL_MAXLOAN), SetMinimalSize(97, 0),
+		EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CFW_INCREASE_LOAN), SetMinimalSize(140, 12), SetDataTip(STR_7029_BORROW, STR_7035_INCREASE_SIZE_OF_LOAN),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CFW_REPAY_LOAN), SetMinimalSize(140, 12), SetDataTip(STR_702A_REPAY, STR_7036_REPAY_PART_OF_LOAN),
+	EndContainer(),
+};
+
 static const Widget _company_finances_small_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,               STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   253,     0,    13, STR_700E_FINANCES,      STR_018C_WINDOW_TITLE_DRAG_THIS},
-{     WWT_IMGBTN,   RESIZE_NONE,  COLOUR_GREY,   254,   267,     0,    13, SPR_LARGE_SMALL_WINDOW, STR_7075_TOGGLE_LARGE_SMALL_WINDOW},
-{  WWT_STICKYBOX,   RESIZE_NONE,  COLOUR_GREY,   268,   279,     0,    13, 0x0,                    STR_STICKY_BUTTON},
-{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                    STR_NULL},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   279,    14,    47, STR_NULL,               STR_NULL},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   139,    48,    59, STR_7029_BORROW,        STR_7035_INCREASE_SIZE_OF_LOAN},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   140,   279,    48,    59, STR_702A_REPAY,         STR_7036_REPAY_PART_OF_LOAN},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,               STR_018B_CLOSE_WINDOW},              // CFW_CLOSEBOX
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   253,     0,    13, STR_700E_FINANCES,      STR_018C_WINDOW_TITLE_DRAG_THIS},    // CFW_CAPTION
+{     WWT_IMGBTN,   RESIZE_NONE,  COLOUR_GREY,   254,   267,     0,    13, SPR_LARGE_SMALL_WINDOW, STR_7075_TOGGLE_LARGE_SMALL_WINDOW}, // CFW_TOGGLE_SIZE
+{  WWT_STICKYBOX,   RESIZE_NONE,  COLOUR_GREY,   268,   279,     0,    13, 0x0,                    STR_STICKY_BUTTON},                  // CFW_STICKY
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                    STR_NULL},                           // CFW_EXPS_PANEL
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                    STR_NULL},                           // CFW_EXPS_CATEGORY
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                    STR_NULL},                           // CFW_EXPS_PRICE1
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                    STR_NULL},                           // CFW_EXPS_PRICE2
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                    STR_NULL},                           // CFW_EXPS_PRICE3
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   279,    14,    47, 0x0,                    STR_NULL},                           // CFW_TOTAL_PANEL
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     2,    96,    14,    47, 0x0,                    STR_NULL},                           // CFW_TOTAL_LABELS
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,    97,   182,    14,    47, 0x0,                    STR_NULL},                           // CFW_TOTAL_VALUES
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                    STR_NULL},                           // CFW_TOTAL_MAXLOAN
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   139,    48,    59, STR_7029_BORROW,        STR_7035_INCREASE_SIZE_OF_LOAN},     // CFW_INCREASE_LOAN
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   140,   279,    48,    59, STR_702A_REPAY,         STR_7036_REPAY_PART_OF_LOAN},        // CFW_REPAY_LOAN
 {   WIDGETS_END},
 };
 
@@ -248,45 +334,48 @@ struct CompanyFinancesWindow : Window {
 
 		if (!small) {
 			int type = _settings_client.gui.expenses_layout;
-			int height = this->widget[CFW_WIDGET_EXPS_PANEL].bottom - this->widget[CFW_WIDGET_EXPS_PANEL].top + 1;
+			if (this->widget[CFW_EXPS_PANEL].bottom < this->widget[CFW_EXPS_PANEL].top) {
+				this->widget[CFW_EXPS_PANEL].bottom = this->widget[CFW_EXPS_PANEL].top;
+			}
+			int height = this->widget[CFW_EXPS_PANEL].bottom - this->widget[CFW_EXPS_PANEL].top + 1;
 			if (_expenses_list_types[type].height + 26 != height) {
 				this->SetDirty();
-				ResizeWindowForWidget(this, CFW_WIDGET_EXPS_PANEL, 0, _expenses_list_types[type].height - height + 26);
+				ResizeWindowForWidget(this, CFW_EXPS_PANEL, 0, _expenses_list_types[type].height - height + 26);
 				this->SetDirty();
 				return;
 			}
 		}
 
 		/* Recheck the size of the window as it might need to be resized due to the local company changing */
-		int new_height = this->widget[(company == _local_company) ? CFW_WIDGET_INCREASE_LOAN : CFW_WIDGET_TOTAL_PANEL].bottom + 1;
+		int new_height = this->widget[(company == _local_company) ? CFW_INCREASE_LOAN : CFW_TOTAL_PANEL].bottom + 1;
 		if (this->height != new_height) {
 			/* Make window dirty before and after resizing */
 			this->SetDirty();
 			this->height = new_height;
 			this->SetDirty();
 
-			this->SetWidgetHiddenState(CFW_WIDGET_INCREASE_LOAN, company != _local_company);
-			this->SetWidgetHiddenState(CFW_WIDGET_REPAY_LOAN,    company != _local_company);
+			this->SetWidgetHiddenState(CFW_INCREASE_LOAN, company != _local_company);
+			this->SetWidgetHiddenState(CFW_REPAY_LOAN,    company != _local_company);
 		}
 
 		/* Borrow button only shows when there is any more money to loan */
-		this->SetWidgetDisabledState(CFW_WIDGET_INCREASE_LOAN, c->current_loan == _economy.max_loan);
+		this->SetWidgetDisabledState(CFW_INCREASE_LOAN, c->current_loan == _economy.max_loan);
 
 		/* Repay button only shows when there is any more money to repay */
-		this->SetWidgetDisabledState(CFW_WIDGET_REPAY_LOAN, company != _local_company || c->current_loan == 0);
+		this->SetWidgetDisabledState(CFW_REPAY_LOAN, company != _local_company || c->current_loan == 0);
 
 		SetDParam(0, c->index);
 		SetDParam(1, c->index);
 		SetDParam(2, LOAN_INTERVAL);
 		this->DrawWidgets();
 
-		DrawCompanyEconomyStats(c, this->small);
+		DrawCompanyEconomyStats(c, this->small, this->widget);
 	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case CFW_WIDGET_TOGGLE_SIZE: {// toggle size
+			case CFW_TOGGLE_SIZE: {// toggle size
 				bool new_mode = !this->small;
 				bool stickied = !!(this->flags4 & WF_STICKY);
 				int oldtop = this->top;   ///< current top position of the window before closing it
@@ -299,11 +388,11 @@ struct CompanyFinancesWindow : Window {
 			}
 			break;
 
-			case CFW_WIDGET_INCREASE_LOAN: // increase loan
+			case CFW_INCREASE_LOAN: // increase loan
 				DoCommandP(0, 0, _ctrl_pressed, CMD_INCREASE_LOAN | CMD_MSG(STR_702C_CAN_T_BORROW_ANY_MORE_MONEY));
 				break;
 
-			case CFW_WIDGET_REPAY_LOAN: // repay loan
+			case CFW_REPAY_LOAN: // repay loan
 				DoCommandP(0, 0, _ctrl_pressed, CMD_DECREASE_LOAN | CMD_MSG(STR_702F_CAN_T_REPAY_LOAN));
 				break;
 		}
@@ -311,17 +400,17 @@ struct CompanyFinancesWindow : Window {
 };
 
 static const WindowDesc _company_finances_desc(
-	WDP_AUTO, WDP_AUTO, 407, 60 + 10, 407, 60 + 10,
+	WDP_AUTO, WDP_AUTO, 407, 60, 407, 60,
 	WC_FINANCES, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
-	_company_finances_widgets
+	_company_finances_widgets, _nested_company_finances_widgets, lengthof(_nested_company_finances_widgets)
 );
 
 static const WindowDesc _company_finances_small_desc(
 	WDP_AUTO, WDP_AUTO, 280, 60, 280, 60,
 	WC_FINANCES, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
-	_company_finances_small_widgets
+	_company_finances_small_widgets, _nested_company_finances_small_widgets, lengthof(_nested_company_finances_small_widgets)
 );
 
 /**
@@ -391,7 +480,7 @@ public:
 
 	uint Height(uint width) const
 	{
-		return 14;
+		return max(FONT_HEIGHT_NORMAL, (byte)14);
 	}
 
 	bool Selectable() const
@@ -402,29 +491,30 @@ public:
 	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
 		DrawSprite(SPR_VEH_BUS_SIDE_VIEW, PALETTE_RECOLOUR_START + this->result, left + 16, top + 7);
-		DrawString(left + 32, right - 2, top + 3, this->String(), sel ? TC_WHITE : TC_BLACK);
+		DrawString(left + 32, right - 2, top + max(0, 13 - FONT_HEIGHT_NORMAL), this->String(), sel ? TC_WHITE : TC_BLACK);
 	}
+};
+
+/** Widgets of the select company livery window. */
+enum SelectCompanyLiveryWindowWidgets {
+	SCLW_WIDGET_CLOSE,
+	SCLW_WIDGET_CAPTION,
+	SCLW_WIDGET_CLASS_GENERAL,
+	SCLW_WIDGET_CLASS_RAIL,
+	SCLW_WIDGET_CLASS_ROAD,
+	SCLW_WIDGET_CLASS_SHIP,
+	SCLW_WIDGET_CLASS_AIRCRAFT,
+	SCLW_WIDGET_SPACER_CLASS,
+	SCLW_WIDGET_SPACER_DROPDOWN,
+	SCLW_WIDGET_PRI_COL_DROPDOWN,
+	SCLW_WIDGET_SEC_COL_DROPDOWN,
+	SCLW_WIDGET_MATRIX,
 };
 
 struct SelectCompanyLiveryWindow : public Window {
 private:
 	uint32 sel;
 	LiveryClass livery_class;
-
-	enum SelectCompanyLiveryWindowWidgets {
-		SCLW_WIDGET_CLOSE,
-		SCLW_WIDGET_CAPTION,
-		SCLW_WIDGET_CLASS_GENERAL,
-		SCLW_WIDGET_CLASS_RAIL,
-		SCLW_WIDGET_CLASS_ROAD,
-		SCLW_WIDGET_CLASS_SHIP,
-		SCLW_WIDGET_CLASS_AIRCRAFT,
-		SCLW_WIDGET_SPACER_CLASS,
-		SCLW_WIDGET_SPACER_DROPDOWN,
-		SCLW_WIDGET_PRI_COL_DROPDOWN,
-		SCLW_WIDGET_SEC_COL_DROPDOWN,
-		SCLW_WIDGET_MATRIX,
-	};
 
 	void ShowColourDropDownMenu(uint32 widget)
 	{
@@ -610,6 +700,27 @@ public:
 	}
 };
 
+static const NWidgetPart _nested_select_company_livery_widgets [] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SCLW_WIDGET_CLOSE),
+		NWidget(WWT_CAPTION, COLOUR_GREY, SCLW_WIDGET_CAPTION), SetMinimalSize(389, 14), SetDataTip(STR_7007_NEW_COLOUR_SCHEME, STR_018C_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_GENERAL), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_COMPANY_GENERAL, STR_LIVERY_GENERAL_TIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_RAIL), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_TRAINLIST, STR_LIVERY_TRAIN_TIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_ROAD), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_TRUCKLIST, STR_LIVERY_ROADVEH_TIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_SHIP), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_SHIPLIST, STR_LIVERY_SHIP_TIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_AIRCRAFT), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_AIRPLANESLIST, STR_LIVERY_AIRCRAFT_TIP),
+		NWidget(WWT_PANEL, COLOUR_GREY, SCLW_WIDGET_SPACER_CLASS), SetMinimalSize(290, 22), EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_GREY, SCLW_WIDGET_SPACER_DROPDOWN), SetMinimalSize(150, 12), EndContainer(),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SCLW_WIDGET_PRI_COL_DROPDOWN), SetMinimalSize(125, 12), SetDataTip(STR_02BD, STR_LIVERY_PRIMARY_TIP),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SCLW_WIDGET_SEC_COL_DROPDOWN), SetMinimalSize(125, 12), SetDataTip(STR_02E1, STR_LIVERY_SECONDARY_TIP),
+	EndContainer(),
+	NWidget(WWT_MATRIX, COLOUR_GREY, SCLW_WIDGET_MATRIX), SetMinimalSize(400, 15), SetDataTip((1 << 8) | 1, STR_LIVERY_PANEL_TIP),
+};
+
 static const Widget _select_company_livery_widgets[] = {
 { WWT_CLOSEBOX, RESIZE_NONE,  COLOUR_GREY,   0,  10,   0,  13, STR_00C5,                   STR_018B_CLOSE_WINDOW },
 {  WWT_CAPTION, RESIZE_NONE,  COLOUR_GREY,  11, 399,   0,  13, STR_7007_NEW_COLOUR_SCHEME, STR_018C_WINDOW_TITLE_DRAG_THIS },
@@ -630,7 +741,7 @@ static const WindowDesc _select_company_livery_desc(
 	WDP_AUTO, WDP_AUTO, 400, 49 + 1 * 14, 400, 49 + 1 * 14,
 	WC_COMPANY_COLOUR, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_select_company_livery_widgets
+	_select_company_livery_widgets, _nested_select_company_livery_widgets, lengthof(_nested_select_company_livery_widgets)
 );
 
 /**
@@ -677,6 +788,96 @@ void DrawCompanyManagerFace(CompanyManagerFace cmf, int colour, int x, int y)
 	}
 }
 
+/**
+ * Names of the widgets. Keep them in the same order as in the widget array.
+ * Do not change the order of the widgets from SCMFW_WIDGET_HAS_MOUSTACHE_EARRING to SCMFW_WIDGET_GLASSES_R,
+ * this order is needed for the WE_CLICK event of DrawFaceStringLabel().
+ */
+enum SelectCompanyManagerFaceWidgets {
+	SCMFW_WIDGET_CLOSEBOX = 0,
+	SCMFW_WIDGET_CAPTION,
+	SCMFW_WIDGET_TOGGLE_LARGE_SMALL,
+	SCMFW_WIDGET_SELECT_FACE,
+	SCMFW_WIDGET_CANCEL,
+	SCMFW_WIDGET_ACCEPT,
+	SCMFW_WIDGET_MALE,
+	SCMFW_WIDGET_FEMALE,
+	SCMFW_WIDGET_RANDOM_NEW_FACE,
+	SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON,
+	SCMFM_WIDGET_FACE,
+	/* from here is the advanced company manager face selection window */
+	SCMFW_WIDGET_LOAD,
+	SCMFW_WIDGET_FACECODE,
+	SCMFW_WIDGET_SAVE,
+	SCMFW_WIDGET_ETHNICITY_EUR,
+	SCMFW_WIDGET_ETHNICITY_AFR,
+	SCMFW_WIDGET_HAS_MOUSTACHE_EARRING,
+	SCMFW_WIDGET_HAS_GLASSES,
+	SCMFW_WIDGET_EYECOLOUR_L,
+	SCMFW_WIDGET_EYECOLOUR,
+	SCMFW_WIDGET_EYECOLOUR_R,
+	SCMFW_WIDGET_CHIN_L,
+	SCMFW_WIDGET_CHIN,
+	SCMFW_WIDGET_CHIN_R,
+	SCMFW_WIDGET_EYEBROWS_L,
+	SCMFW_WIDGET_EYEBROWS,
+	SCMFW_WIDGET_EYEBROWS_R,
+	SCMFW_WIDGET_LIPS_MOUSTACHE_L,
+	SCMFW_WIDGET_LIPS_MOUSTACHE,
+	SCMFW_WIDGET_LIPS_MOUSTACHE_R,
+	SCMFW_WIDGET_NOSE_L,
+	SCMFW_WIDGET_NOSE,
+	SCMFW_WIDGET_NOSE_R,
+	SCMFW_WIDGET_HAIR_L,
+	SCMFW_WIDGET_HAIR,
+	SCMFW_WIDGET_HAIR_R,
+	SCMFW_WIDGET_JACKET_L,
+	SCMFW_WIDGET_JACKET,
+	SCMFW_WIDGET_JACKET_R,
+	SCMFW_WIDGET_COLLAR_L,
+	SCMFW_WIDGET_COLLAR,
+	SCMFW_WIDGET_COLLAR_R,
+	SCMFW_WIDGET_TIE_EARRING_L,
+	SCMFW_WIDGET_TIE_EARRING,
+	SCMFW_WIDGET_TIE_EARRING_R,
+	SCMFW_WIDGET_GLASSES_L,
+	SCMFW_WIDGET_GLASSES,
+	SCMFW_WIDGET_GLASSES_R,
+	SCMFW_WIDGET_LABELS,
+};
+
+static const NWidgetPart _nested_select_company_manager_face_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SCMFW_WIDGET_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, SCMFW_WIDGET_CAPTION), SetMinimalSize(164, 14), SetDataTip(STR_7043_FACE_SELECTION, STR_018C_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCMFW_WIDGET_TOGGLE_LARGE_SMALL), SetMinimalSize(15, 14), SetDataTip(SPR_LARGE_SMALL_WINDOW, STR_FACE_ADVANCED_TIP),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, SCMFW_WIDGET_SELECT_FACE),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(WWT_EMPTY, COLOUR_GREY, SCMFM_WIDGET_FACE), SetMinimalSize(92, 119), SetPadding(2, 0, 2, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_RANDOM_NEW_FACE), SetMinimalSize(92, 12), SetDataTip(STR_7046_NEW_FACE, STR_704B_GENERATE_RANDOM_NEW_FACE),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(1, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON), SetMinimalSize(93, 12), SetDataTip(STR_FACE_ADVANCED, STR_FACE_ADVANCED_TIP),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 47),
+				NWidget(WWT_TEXTBTN, COLOUR_GREY, SCMFW_WIDGET_MALE), SetMinimalSize(93, 12), SetDataTip(STR_7044_MALE, STR_7049_SELECT_MALE_FACES),
+				NWidget(WWT_TEXTBTN, COLOUR_GREY, SCMFW_WIDGET_FEMALE), SetMinimalSize(93, 12), SetDataTip(STR_7045_FEMALE, STR_704A_SELECT_FEMALE_FACES),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 52),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+		EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_CANCEL), SetMinimalSize(95, 12), SetDataTip(STR_012E_CANCEL, STR_7047_CANCEL_NEW_FACE_SELECTION),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_ACCEPT), SetMinimalSize(95, 12), SetDataTip(STR_012F_OK, STR_7048_ACCEPT_NEW_FACE_SELECTION),
+	EndContainer(),
+};
+
 /** Widget description for the normal/simple company manager face selection dialog */
 static const Widget _select_company_manager_face_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                STR_018B_CLOSE_WINDOW},              // SCMFW_WIDGET_CLOSEBOX
@@ -689,7 +890,115 @@ static const Widget _select_company_manager_face_widgets[] = {
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   187,    87,    98, STR_7045_FEMALE,         STR_704A_SELECT_FEMALE_FACES},       // SCMFW_WIDGET_FEMALE
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   137,   148, STR_7046_NEW_FACE,       STR_704B_GENERATE_RANDOM_NEW_FACE},  // SCMFW_WIDGET_RANDOM_NEW_FACE
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   187,    16,    27, STR_FACE_ADVANCED,       STR_FACE_ADVANCED_TIP},              // SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     2,    93,    16,   134, 0x0,                     STR_NULL},                           // SCMFW_WIDGET_FACE
 {   WIDGETS_END},
+};
+
+static const NWidgetPart _nested_select_company_manager_face_adv_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SCMFW_WIDGET_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, SCMFW_WIDGET_CAPTION), SetMinimalSize(194, 14), SetDataTip(STR_7043_FACE_SELECTION, STR_018C_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCMFW_WIDGET_TOGGLE_LARGE_SMALL), SetMinimalSize(15, 14), SetDataTip(SPR_LARGE_SMALL_WINDOW, STR_FACE_SIMPLE_TIP),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, SCMFW_WIDGET_SELECT_FACE),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(WWT_EMPTY, COLOUR_GREY, SCMFM_WIDGET_FACE), SetMinimalSize(92, 119), SetPadding(2, 0, 2, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_RANDOM_NEW_FACE), SetMinimalSize(92, 12), SetDataTip(STR_RANDOM, STR_704B_GENERATE_RANDOM_NEW_FACE),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 9),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_LOAD), SetMinimalSize(92, 12), SetDataTip(STR_FACE_LOAD, STR_FACE_LOAD_TIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_FACECODE), SetMinimalSize(92, 12), SetDataTip(STR_FACE_FACECODE, STR_FACE_FACECODE_TIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_SAVE), SetMinimalSize(92, 12), SetDataTip(STR_FACE_SAVE, STR_FACE_SAVE_TIP),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 14),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(1, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON), SetMinimalSize(123, 12), SetDataTip(STR_FACE_SIMPLE, STR_FACE_SIMPLE_TIP),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 4),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_SPACER), SetMinimalSize(1, 0),
+					NWidget(NWID_VERTICAL),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_TEXTBTN, COLOUR_GREY, SCMFW_WIDGET_MALE), SetMinimalSize(61, 12), SetDataTip(STR_7044_MALE, STR_7049_SELECT_MALE_FACES),
+							NWidget(WWT_TEXTBTN, COLOUR_GREY, SCMFW_WIDGET_FEMALE), SetMinimalSize(61, 12), SetDataTip(STR_7045_FEMALE, STR_704A_SELECT_FEMALE_FACES),
+						EndContainer(),
+						NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_TEXTBTN, COLOUR_GREY, SCMFW_WIDGET_ETHNICITY_EUR), SetMinimalSize(61, 12), SetDataTip(STR_FACE_EUROPEAN, STR_FACE_SELECT_EUROPEAN),
+							NWidget(WWT_TEXTBTN, COLOUR_GREY, SCMFW_WIDGET_ETHNICITY_AFR), SetMinimalSize(61, 12), SetDataTip(STR_FACE_AFRICAN, STR_FACE_SELECT_AFRICAN),
+						EndContainer(),
+					EndContainer(),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_EMPTY, COLOUR_GREY, SCMFW_WIDGET_LABELS), SetMinimalSize(75, 146), SetPadding(0, 4, 0, 1),
+					NWidget(NWID_VERTICAL),
+						NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_HAS_MOUSTACHE_EARRING), SetMinimalSize(43, 12), SetDataTip(STR_EMPTY, STR_FACE_MOUSTACHE_EARRING_TIP),
+						NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_HAS_GLASSES), SetMinimalSize(43, 12), SetDataTip(STR_EMPTY, STR_FACE_GLASSES_TIP),
+						NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_HAIR_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_HAIR_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_HAIR), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_HAIR_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_HAIR_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_HAIR_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_EYEBROWS_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_EYEBROWS_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_EYEBROWS), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_EYEBROWS_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_EYEBROWS_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_EYEBROWS_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_EYECOLOUR_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_EYECOLOUR_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_EYECOLOUR), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_EYECOLOUR_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_EYECOLOUR_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_EYECOLOUR_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_GLASSES_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_GLASSES_TIP_2),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_GLASSES), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_GLASSES_TIP_2),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_GLASSES_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_GLASSES_TIP_2),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_NOSE_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_NOSE_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_NOSE), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_NOSE_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_NOSE_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_NOSE_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_LIPS_MOUSTACHE_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_LIPS_MOUSTACHE_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_LIPS_MOUSTACHE), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_LIPS_MOUSTACHE_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_LIPS_MOUSTACHE_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_LIPS_MOUSTACHE_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_CHIN_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_CHIN_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_CHIN), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_CHIN_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_CHIN_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_CHIN_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_JACKET_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_JACKET_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_JACKET), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_JACKET_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_JACKET_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_JACKET_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_COLLAR_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_COLLAR_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_COLLAR), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_COLLAR_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_COLLAR_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_COLLAR_TIP),
+						EndContainer(),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_TIE_EARRING_L), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_FACE_TIE_EARRING_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_TIE_EARRING), SetMinimalSize(25, 12), SetDataTip(STR_EMPTY, STR_FACE_TIE_EARRING_TIP),
+							NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SCMFW_WIDGET_TIE_EARRING_R), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_FACE_TIE_EARRING_TIP),
+						EndContainer(),
+					EndContainer(),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
+		EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_CANCEL), SetMinimalSize(95, 12), SetDataTip(STR_012E_CANCEL, STR_7047_CANCEL_NEW_FACE_SELECTION),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SCMFW_WIDGET_ACCEPT), SetMinimalSize(125, 12), SetDataTip(STR_012F_OK, STR_7048_ACCEPT_NEW_FACE_SELECTION),
+	EndContainer(),
 };
 
 /** Widget description for the advanced company manager face selection dialog */
@@ -704,6 +1013,7 @@ static const Widget _select_company_manager_face_adv_widgets[] = {
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,   157,   217,    32,    43, STR_7045_FEMALE,         STR_704A_SELECT_FEMALE_FACES},       // SCMFW_WIDGET_FEMALE
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   137,   148, STR_RANDOM,              STR_704B_GENERATE_RANDOM_NEW_FACE},  // SCMFW_WIDGET_RANDOM_NEW_FACE
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   217,    16,    27, STR_FACE_SIMPLE,         STR_FACE_SIMPLE_TIP},                // SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     2,    93,    16,   134, 0x0,                     STR_NULL},                           // SCMFW_WIDGET_FACE
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   158,   169, STR_FACE_LOAD,           STR_FACE_LOAD_TIP},                  // SCMFW_WIDGET_LOAD
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   170,   181, STR_FACE_FACECODE,       STR_FACE_FACECODE_TIP},              // SCMFW_WIDGET_FACECODE
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   182,   193, STR_FACE_SAVE,           STR_FACE_SAVE_TIP},                  // SCMFW_WIDGET_SAVE
@@ -711,36 +1021,37 @@ static const Widget _select_company_manager_face_adv_widgets[] = {
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,   157,   217,    46,    57, STR_FACE_AFRICAN,        STR_FACE_SELECT_AFRICAN},            // SCMFW_WIDGET_ETHNICITY_AFR
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   217,    60,    71, STR_EMPTY,               STR_FACE_MOUSTACHE_EARRING_TIP},     // SCMFW_WIDGET_HAS_MOUSTACHE_EARRING
 { WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   217,    72,    83, STR_EMPTY,               STR_FACE_GLASSES_TIP},               // SCMFW_WIDGET_HAS_GLASSES
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   110,   121, SPR_ARROW_LEFT,          STR_FACE_EYECOLOUR_TIP},             // SCMFW_WIDGET_EYECOLOUR_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   110,   121, STR_EMPTY,               STR_FACE_EYECOLOUR_TIP},             // SCMFW_WIDGET_EYECOLOUR
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   110,   121, SPR_ARROW_RIGHT,         STR_FACE_EYECOLOUR_TIP},             // SCMFW_WIDGET_EYECOLOUR_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   158,   169, SPR_ARROW_LEFT,          STR_FACE_CHIN_TIP},                  // SCMFW_WIDGET_CHIN_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   158,   169, STR_EMPTY,               STR_FACE_CHIN_TIP},                  // SCMFW_WIDGET_CHIN
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   158,   169, SPR_ARROW_RIGHT,         STR_FACE_CHIN_TIP},                  // SCMFW_WIDGET_CHIN_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,    98,   109, SPR_ARROW_LEFT,          STR_FACE_EYEBROWS_TIP},              // SCMFW_WIDGET_EYEBROWS_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,    98,   109, STR_EMPTY,               STR_FACE_EYEBROWS_TIP},              // SCMFW_WIDGET_EYEBROWS
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,    98,   109, SPR_ARROW_RIGHT,         STR_FACE_EYEBROWS_TIP},              // SCMFW_WIDGET_EYEBROWS_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   146,   157, SPR_ARROW_LEFT,          STR_FACE_LIPS_MOUSTACHE_TIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   146,   157, STR_EMPTY,               STR_FACE_LIPS_MOUSTACHE_TIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   146,   157, SPR_ARROW_RIGHT,         STR_FACE_LIPS_MOUSTACHE_TIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   134,   145, SPR_ARROW_LEFT,          STR_FACE_NOSE_TIP},                  // SCMFW_WIDGET_NOSE_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   134,   145, STR_EMPTY,               STR_FACE_NOSE_TIP},                  // SCMFW_WIDGET_NOSE
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   134,   145, SPR_ARROW_RIGHT,         STR_FACE_NOSE_TIP},                  // SCMFW_WIDGET_NOSE_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,    86,    97, SPR_ARROW_LEFT,          STR_FACE_HAIR_TIP},                  // SCMFW_WIDGET_HAIR_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,    86,    97, STR_EMPTY,               STR_FACE_HAIR_TIP},                  // SCMFW_WIDGET_HAIR
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,    86,    97, SPR_ARROW_RIGHT,         STR_FACE_HAIR_TIP},                  // SCMFW_WIDGET_HAIR_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   170,   181, SPR_ARROW_LEFT,          STR_FACE_JACKET_TIP},                // SCMFW_WIDGET_JACKET_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   170,   181, STR_EMPTY,               STR_FACE_JACKET_TIP},                // SCMFW_WIDGET_JACKET
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   170,   181, SPR_ARROW_RIGHT,         STR_FACE_JACKET_TIP},                // SCMFW_WIDGET_JACKET_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   182,   193, SPR_ARROW_LEFT,          STR_FACE_COLLAR_TIP},                // SCMFW_WIDGET_COLLAR_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   182,   193, STR_EMPTY,               STR_FACE_COLLAR_TIP},                // SCMFW_WIDGET_COLLAR
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   182,   193, SPR_ARROW_RIGHT,         STR_FACE_COLLAR_TIP},                // SCMFW_WIDGET_COLLAR_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   194,   205, SPR_ARROW_LEFT,          STR_FACE_TIE_EARRING_TIP},           // SCMFW_WIDGET_TIE_EARRING_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   194,   205, STR_EMPTY,               STR_FACE_TIE_EARRING_TIP},           // SCMFW_WIDGET_TIE_EARRING
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   194,   205, SPR_ARROW_RIGHT,         STR_FACE_TIE_EARRING_TIP},           // SCMFW_WIDGET_TIE_EARRING_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    175,  183,   122,   133, SPR_ARROW_LEFT,          STR_FACE_GLASSES_TIP_2},             // SCMFW_WIDGET_GLASSES_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    184,  208,   122,   133, STR_EMPTY,               STR_FACE_GLASSES_TIP_2},             // SCMFW_WIDGET_GLASSES
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,    209,  217,   122,   133, SPR_ARROW_RIGHT,         STR_FACE_GLASSES_TIP_2},             // SCMFW_WIDGET_GLASSES_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   110,   121, SPR_ARROW_LEFT,          STR_FACE_EYECOLOUR_TIP},             // SCMFW_WIDGET_EYECOLOUR_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   110,   121, STR_EMPTY,               STR_FACE_EYECOLOUR_TIP},             // SCMFW_WIDGET_EYECOLOUR
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   110,   121, SPR_ARROW_RIGHT,         STR_FACE_EYECOLOUR_TIP},             // SCMFW_WIDGET_EYECOLOUR_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   158,   169, SPR_ARROW_LEFT,          STR_FACE_CHIN_TIP},                  // SCMFW_WIDGET_CHIN_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   158,   169, STR_EMPTY,               STR_FACE_CHIN_TIP},                  // SCMFW_WIDGET_CHIN
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   158,   169, SPR_ARROW_RIGHT,         STR_FACE_CHIN_TIP},                  // SCMFW_WIDGET_CHIN_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,    98,   109, SPR_ARROW_LEFT,          STR_FACE_EYEBROWS_TIP},              // SCMFW_WIDGET_EYEBROWS_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,    98,   109, STR_EMPTY,               STR_FACE_EYEBROWS_TIP},              // SCMFW_WIDGET_EYEBROWS
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,    98,   109, SPR_ARROW_RIGHT,         STR_FACE_EYEBROWS_TIP},              // SCMFW_WIDGET_EYEBROWS_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   146,   157, SPR_ARROW_LEFT,          STR_FACE_LIPS_MOUSTACHE_TIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   146,   157, STR_EMPTY,               STR_FACE_LIPS_MOUSTACHE_TIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   146,   157, SPR_ARROW_RIGHT,         STR_FACE_LIPS_MOUSTACHE_TIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   134,   145, SPR_ARROW_LEFT,          STR_FACE_NOSE_TIP},                  // SCMFW_WIDGET_NOSE_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   134,   145, STR_EMPTY,               STR_FACE_NOSE_TIP},                  // SCMFW_WIDGET_NOSE
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   134,   145, SPR_ARROW_RIGHT,         STR_FACE_NOSE_TIP},                  // SCMFW_WIDGET_NOSE_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,    86,    97, SPR_ARROW_LEFT,          STR_FACE_HAIR_TIP},                  // SCMFW_WIDGET_HAIR_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,    86,    97, STR_EMPTY,               STR_FACE_HAIR_TIP},                  // SCMFW_WIDGET_HAIR
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,    86,    97, SPR_ARROW_RIGHT,         STR_FACE_HAIR_TIP},                  // SCMFW_WIDGET_HAIR_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   170,   181, SPR_ARROW_LEFT,          STR_FACE_JACKET_TIP},                // SCMFW_WIDGET_JACKET_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   170,   181, STR_EMPTY,               STR_FACE_JACKET_TIP},                // SCMFW_WIDGET_JACKET
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   170,   181, SPR_ARROW_RIGHT,         STR_FACE_JACKET_TIP},                // SCMFW_WIDGET_JACKET_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   182,   193, SPR_ARROW_LEFT,          STR_FACE_COLLAR_TIP},                // SCMFW_WIDGET_COLLAR_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   182,   193, STR_EMPTY,               STR_FACE_COLLAR_TIP},                // SCMFW_WIDGET_COLLAR
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   182,   193, SPR_ARROW_RIGHT,         STR_FACE_COLLAR_TIP},                // SCMFW_WIDGET_COLLAR_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   194,   205, SPR_ARROW_LEFT,          STR_FACE_TIE_EARRING_TIP},           // SCMFW_WIDGET_TIE_EARRING_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   194,   205, STR_EMPTY,               STR_FACE_TIE_EARRING_TIP},           // SCMFW_WIDGET_TIE_EARRING
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   194,   205, SPR_ARROW_RIGHT,         STR_FACE_TIE_EARRING_TIP},           // SCMFW_WIDGET_TIE_EARRING_R
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   122,   133, SPR_ARROW_LEFT,          STR_FACE_GLASSES_TIP_2},             // SCMFW_WIDGET_GLASSES_L
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   122,   133, STR_EMPTY,               STR_FACE_GLASSES_TIP_2},             // SCMFW_WIDGET_GLASSES
+{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   122,   133, SPR_ARROW_RIGHT,         STR_FACE_GLASSES_TIP_2},             // SCMFW_WIDGET_GLASSES_R
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,    96,   170,    60,   205, 0x0,                     STR_NULL},                           // SCMFW_WIDGET_LABELS
 {   WIDGETS_END},
 };
 
@@ -754,61 +1065,6 @@ class SelectCompanyManagerFaceWindow : public Window
 	bool is_moust_male;
 
 	/**
-	 * Names of the widgets. Keep them in the same order as in the widget array.
-	 * Do not change the order of the widgets from SCMFW_WIDGET_HAS_MOUSTACHE_EARRING to SCMFW_WIDGET_GLASSES_R,
-	 * this order is needed for the WE_CLICK event of DrawFaceStringLabel().
-	 */
-	enum SelectCompanyManagerFaceWidgets {
-		SCMFW_WIDGET_CLOSEBOX = 0,
-		SCMFW_WIDGET_CAPTION,
-		SCMFW_WIDGET_TOGGLE_LARGE_SMALL,
-		SCMFW_WIDGET_SELECT_FACE,
-		SCMFW_WIDGET_CANCEL,
-		SCMFW_WIDGET_ACCEPT,
-		SCMFW_WIDGET_MALE,
-		SCMFW_WIDGET_FEMALE,
-		SCMFW_WIDGET_RANDOM_NEW_FACE,
-		SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON,
-		/* from here is the advanced company manager face selection window */
-		SCMFW_WIDGET_LOAD,
-		SCMFW_WIDGET_FACECODE,
-		SCMFW_WIDGET_SAVE,
-		SCMFW_WIDGET_ETHNICITY_EUR,
-		SCMFW_WIDGET_ETHNICITY_AFR,
-		SCMFW_WIDGET_HAS_MOUSTACHE_EARRING,
-		SCMFW_WIDGET_HAS_GLASSES,
-		SCMFW_WIDGET_EYECOLOUR_L,
-		SCMFW_WIDGET_EYECOLOUR,
-		SCMFW_WIDGET_EYECOLOUR_R,
-		SCMFW_WIDGET_CHIN_L,
-		SCMFW_WIDGET_CHIN,
-		SCMFW_WIDGET_CHIN_R,
-		SCMFW_WIDGET_EYEBROWS_L,
-		SCMFW_WIDGET_EYEBROWS,
-		SCMFW_WIDGET_EYEBROWS_R,
-		SCMFW_WIDGET_LIPS_MOUSTACHE_L,
-		SCMFW_WIDGET_LIPS_MOUSTACHE,
-		SCMFW_WIDGET_LIPS_MOUSTACHE_R,
-		SCMFW_WIDGET_NOSE_L,
-		SCMFW_WIDGET_NOSE,
-		SCMFW_WIDGET_NOSE_R,
-		SCMFW_WIDGET_HAIR_L,
-		SCMFW_WIDGET_HAIR,
-		SCMFW_WIDGET_HAIR_R,
-		SCMFW_WIDGET_JACKET_L,
-		SCMFW_WIDGET_JACKET,
-		SCMFW_WIDGET_JACKET_R,
-		SCMFW_WIDGET_COLLAR_L,
-		SCMFW_WIDGET_COLLAR,
-		SCMFW_WIDGET_COLLAR_R,
-		SCMFW_WIDGET_TIE_EARRING_L,
-		SCMFW_WIDGET_TIE_EARRING,
-		SCMFW_WIDGET_TIE_EARRING_R,
-		SCMFW_WIDGET_GLASSES_L,
-		SCMFW_WIDGET_GLASSES,
-		SCMFW_WIDGET_GLASSES_R,
-	};
-	/**
 	 * Draw dynamic a label to the left of the button and a value in the button
 	 *
 	 * @param widget_index   index of this widget in the window
@@ -819,7 +1075,7 @@ class SelectCompanyManagerFaceWindow : public Window
 	void DrawFaceStringLabel(byte widget_index, StringID str, uint8 val, bool is_bool_widget)
 	{
 		/* Write the label in gold (0x2) to the left of the button. */
-		DrawString(0, this->widget[widget_index].left - (is_bool_widget ? 5 : 14), this->widget[widget_index].top + 1, str, TC_GOLD, SA_RIGHT);
+		DrawString(this->widget[SCMFW_WIDGET_LABELS].left, this->widget[SCMFW_WIDGET_LABELS].right, this->widget[widget_index].top + 1, str, TC_GOLD, SA_RIGHT);
 
 		if (!this->IsWidgetDisabled(widget_index)) {
 			if (is_bool_widget) {
@@ -955,7 +1211,7 @@ public:
 		}
 
 		/* Draw the company manager face picture */
-		DrawCompanyManagerFace(this->face, GetCompany((CompanyID)this->window_number)->colour, 2, 16);
+		DrawCompanyManagerFace(this->face, GetCompany((CompanyID)this->window_number)->colour, this->widget[SCMFM_WIDGET_FACE].left, this->widget[SCMFM_WIDGET_FACE].top);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -1097,7 +1353,7 @@ static const WindowDesc _select_company_manager_face_desc(
 	WDP_AUTO, WDP_AUTO, 190, 163, 190, 163,
 	WC_COMPANY_MANAGER_FACE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
-	_select_company_manager_face_widgets
+	_select_company_manager_face_widgets, _nested_select_company_manager_face_widgets, lengthof(_nested_select_company_manager_face_widgets)
 );
 
 /** advanced company manager face selection window description */
@@ -1105,7 +1361,7 @@ static const WindowDesc _select_company_manager_face_adv_desc(
 	WDP_AUTO, WDP_AUTO, 220, 220, 220, 220,
 	WC_COMPANY_MANAGER_FACE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
-	_select_company_manager_face_adv_widgets
+	_select_company_manager_face_adv_widgets, _nested_select_company_manager_face_adv_widgets, lengthof(_nested_select_company_manager_face_adv_widgets)
 );
 
 /**

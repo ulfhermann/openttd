@@ -75,8 +75,8 @@ bool LinkGraph::NextComponent()
 	}
 	// here the list of nodes and edges for this component is complete.
 	component->CalculateDistances();
-	components.push_back(component);
-	SpawnComponentThread(component);
+	jobs.push_back(component);
+	jobs.back().SpawnThread(cargo);
 	return true;
 }
 
@@ -141,17 +141,13 @@ void Component::SetSize(uint size) {
 }
 
 Component::Component(colour col) :
-	thread(NULL),
 	num_nodes(0),
-	join_time(_tick_counter + _settings_game.economy.linkgraph_recalc_interval * DAY_TICKS),
 	component_colour(col)
 {
 }
 
-Component::Component(uint size, uint join, colour c) :
-	thread(NULL),
+Component::Component(uint size, colour c) :
 	num_nodes(size),
-	join_time(join),
 	component_colour(c),
 	nodes(size),
 	edges(size, std::vector<Edge>(size))
@@ -159,16 +155,17 @@ Component::Component(uint size, uint join, colour c) :
 }
 
 bool LinkGraph::Join() {
-	if (components.empty()) {
+	if (jobs.empty()) {
 		return false;
 	}
-	Component * comp = components.front();
+	LinkGraphJob & job = jobs.front();
 
-	if (comp->GetJoinTime() > _tick_counter) {
+	if (job.GetJoinTime() > _tick_counter) {
 		return false;
 	}
 
-	components.pop_front();
+	Component * comp = job.GetComponent();
+	jobs.pop_front();
 
 	for(NodeID i = 0; i < comp->GetSize(); ++i) {
 		Node & node = comp->GetNode(i);
@@ -176,16 +173,17 @@ bool LinkGraph::Join() {
 		station_colours[id] += USHRT_MAX / 2;
 		if (id < current_station) current_station = id;
 	}
+	delete comp;
 	return true;
 }
 
-void LinkGraph::AddComponent(Component * component) {
-	 components.push_back(component);
+void LinkGraph::AddComponent(Component * component, uint join) {
 	 colour component_colour = component->GetColour();
 	 for(NodeID i = 0; i < component->GetSize(); ++i) {
 		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
-	 SpawnComponentThread(component);
+	 jobs.push_back(LinkGraphJob(component, join));
+	 jobs.back().SpawnThread(cargo);
 }
 
 void LinkGraphJob::Run() {
@@ -206,16 +204,7 @@ LinkGraphJob::~LinkGraphJob() {
 void RunLinkGraphJob(void * j) {
 	LinkGraphJob * job = (LinkGraphJob *)j;
 	job->Run();
-	delete job;
 }
-
-void LinkGraph::SpawnComponentThread(Component * c) {
-	LinkGraphJob * job = new LinkGraphJob(c);
-	job->AddHandler(new DemandCalculator(cargo));
-	job->AddHandler(new MultiCommodityFlow);
-	ThreadObject::New(&(RunLinkGraphJob), job, &c->GetThread());
-}
-
 
 void Path::Fork(Path * base, float cap, float dist) {
 	capacity = min(base->capacity, cap);
@@ -251,3 +240,30 @@ Path::Path(NodeID n, bool source)  :
 	flow(0), node(n), num_children(0), parent(NULL)
 {}
 
+void LinkGraphJob::SpawnThread(CargoID cargo) {
+	AddHandler(new DemandCalculator(cargo));
+	AddHandler(new MultiCommodityFlow());
+	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
+		thread = NULL;
+		// Of course this will hang a bit.
+		// On the other hand, if you want to play games which make this hang noticably
+		// on a platform without threads then you'll probably get other problems first.
+		// OK:
+		// If someone comes and tells me that this hangs for him/her, I'll implement a
+		// smaller grained "Step" method for all handlers and add some more ticks where
+		// "Step" is called. No problem in principle.
+		RunLinkGraphJob(this);
+	}
+}
+
+LinkGraphJob::LinkGraphJob(Component * c) :
+	thread(NULL),
+	join_time(_tick_counter + _settings_game.economy.linkgraph_recalc_interval * DAY_TICKS),
+	component(c)
+{}
+
+LinkGraphJob::LinkGraphJob(Component * c, uint join) :
+	thread(NULL),
+	join_time(join),
+	component(c)
+{}

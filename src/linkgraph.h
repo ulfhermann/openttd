@@ -44,12 +44,6 @@ public:
 	uint demand;
 };
 
-typedef std::list<Edge *> EdgeList;
-
-
-
-void SpawnComponentThread(void * handlers);
-
 typedef ushort colour;
 
 class Component {
@@ -58,33 +52,24 @@ class Component {
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	Component(uint size, uint join, colour c);
-	Component(colour c);
+	Component(uint size, colour c);
+	Component(colour c = USHRT_MAX);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
-
 	Node & GetNode(NodeID num) {return nodes[num];}
-
-	void Join() {thread->Join();}
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
 	uint AddNode(StationID st, uint supply, uint demand);
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
-	uint GetJoinTime() const {return join_time;}
 	colour GetColour() const {return component_colour;}
-	ThreadObject * & GetThread() {return thread;}
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
-	ThreadObject * thread;
 	uint num_nodes;
-	uint join_time;
 	colour component_colour;
 	NodeVector nodes;
 	EdgeMatrix edges;
 
 };
-
-typedef std::list<Component *> ComponentList;
 
 class ComponentHandler {
 public:
@@ -95,14 +80,23 @@ public:
 class LinkGraphJob {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
-	LinkGraphJob(Component * c) : component(c) {}
+	LinkGraphJob(Component * c);
+	LinkGraphJob(Component * c, uint join);
 	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
 	void Run();
+	void SpawnThread(CargoID cargo);
+	uint GetJoinTime() const {return join_time;}
+	void Join() {if (thread != NULL) thread->Join();}
+	Component * GetComponent() {return component;}
 	~LinkGraphJob();
 private:
+	ThreadObject * thread;
+	uint join_time;
 	Component * component;
 	HandlerList handlers;
 };
+
+typedef std::list<LinkGraphJob> JobList;
 
 class LinkGraph {
 public:
@@ -112,18 +106,18 @@ public:
 	bool NextComponent();
 	void InitColours();
 	bool Join();
-	uint GetNumComponents() const {return components.size();}
-	ComponentList & GetComponents() {return components;}
-	void AddComponent(Component * component);
+	uint GetNumJobs() const {return jobs.size();}
+	JobList & GetJobs() {return jobs;}
+	void AddComponent(Component * component, uint join);
 	const static uint COMPONENTS_TICK = 21;
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
-	void SpawnComponentThread(Component * c);
+	void StartJob(Component * component);
 	colour current_colour;
 	StationID current_station;
 	CargoID cargo;
 	colour station_colours[Station_POOL_MAX_BLOCKS];
-	ComponentList components;
+	JobList jobs;
 };
 
 class Path {
