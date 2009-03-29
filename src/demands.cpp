@@ -71,13 +71,13 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 			from.undelivered_supply -= demand;
 			to.undelivered_supply -= demand;
 
-			if (from.undelivered_supply == 0) {
-				break;
-			}
 			if (to.undelivered_supply == 0) {
 				nodes.erase(i++);
 			} else {
 				++i;
+			}
+			if (from.undelivered_supply == 0) {
+				break;
 			}
 		}
 		if (from.undelivered_supply != 0) {
