@@ -22,6 +22,8 @@ MultiCommodityFlow::MultiCommodityFlow() :
 
 void MultiCommodityFlow::Run(Component * g) {
 	graph = g;
+	CountEdges();
+	if (k == 0) return;
 	edges.resize(graph->GetSize(), std::vector<McfEdge>(graph->GetSize()));
 	CalcDelta();
 	CalcInitialL();
@@ -44,7 +46,6 @@ void MultiCommodityFlow::CountEdges() {
 }
 
 void MultiCommodityFlow::CalcDelta() {
-	CountEdges();
 	delta =
 		1.0 / (pow((1.0 + k * epsilon), (1.0 - epsilon) / epsilon))
 		* pow((1.0 - epsilon) / m, 1.0 /epsilon);
