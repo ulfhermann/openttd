@@ -602,7 +602,7 @@ class SmallMapWindow : public Window
 
 		uint i = 0;
 
-		for (CargoID c = 0; c != NUM_CARGO; ++c) {
+		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
 			const CargoSpec *cs = GetCargo(c);
 			if (!cs->IsValid()) continue;
 
@@ -1261,7 +1261,7 @@ public:
 		this->SetDirty();
 	}
 
-	virtual void OnResize(Point new_size, Point delta)
+	virtual void OnResize(Point delta)
 	{
 		if (delta.x != 0 && (this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP)) this->ResizeLegend();
 	}
@@ -1382,7 +1382,7 @@ public:
 		}
 	}
 
-	virtual void OnResize(Point new_size, Point delta)
+	virtual void OnResize(Point delta)
 	{
 		this->viewport->width          += delta.x;
 		this->viewport->height         += delta.y;
