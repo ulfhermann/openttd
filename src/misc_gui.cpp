@@ -1588,7 +1588,7 @@ public:
 		for (uint pos = this->vscroll.pos; pos < _fios_items.Length(); pos++) {
 			const FiosItem *item = _fios_items.Get(pos);
 
-			DrawString(widg->left + 4, widg->right - 2, y, item->title, _fios_colours[item->type]);
+			DrawString(widg->left + 2, widg->right - 2, y, item->title, _fios_colours[item->type]);
 			y += 10;
 			if (y >= this->vscroll.cap * 10 + widg->top + 1) break;
 		}
@@ -1727,7 +1727,7 @@ public:
 		}
 	}
 
-	virtual void OnResize(Point new_size, Point delta)
+	virtual void OnResize(Point delta)
 	{
 		/* Widget 2 and 3 have to go with halve speed, make it so obiwan */
 		uint diff = delta.x / 2;
