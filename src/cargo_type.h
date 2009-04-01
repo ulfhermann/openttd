@@ -9,6 +9,7 @@ typedef byte CargoID;
 
 /** Available types of cargo */
 enum CargoTypes {
+	CT_BEGIN        =  0,
 	/* Temperate */
 	CT_PASSENGERS   =  0,
 	CT_COAL         =  1,
@@ -50,6 +51,7 @@ enum CargoTypes {
 	CT_FIZZY_DRINKS = 11,
 
 	NUM_CARGO       = 32,
+	CT_END          = 32,
 
 	CT_NO_REFIT     = 0xFE,
 	CT_INVALID      = 0xFF

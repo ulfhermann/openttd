@@ -601,7 +601,7 @@ class SmallMapWindow : public Window
 
 		uint i = 0;
 
-		for (CargoID c = 0; c != NUM_CARGO; ++c) {
+		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
 			const CargoSpec *cs = GetCargo(c);
 			if (!cs->IsValid()) continue;
 
