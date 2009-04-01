@@ -161,7 +161,7 @@ void InitializeDemands() {
 	DemandCalculator::_max_distance = MapSizeX() + MapSizeY();
 	EconomySettings & settings = _settings_game.economy;
 	DistributionType * types = DemandCalculator::_distribution_types;
-	for (CargoID c = 0; c < NUM_CARGO; ++c) {
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
 		if (IsCargoInClass(c, CC_PASSENGERS)) {
 			types[c] = settings.demand_pax;
 		} else if (IsCargoInClass(c, CC_MAIL)) {
