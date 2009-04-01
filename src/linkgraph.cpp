@@ -102,7 +102,7 @@ void OnTick_LinkGraph()
 
 LinkGraph::LinkGraph()  : current_colour(0), current_station(0), cargo(CT_INVALID)
 {
-	for (CargoID i = 0; i < NUM_CARGO; ++i) {
+	for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 		if (this == &(_link_graphs[i])) {
 			cargo = i;
 		}

@@ -77,7 +77,7 @@ static void SaveLoad_Component(Component * comp) {
 
 static void DoSave_LGRP(void *)
 {
-	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
+	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
 		_num_components = graph.GetNumJobs();
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
@@ -95,7 +95,7 @@ static void DoSave_LGRP(void *)
 
 static void Load_LGRP()
 {
-	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
+	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		for (uint i = 0; i < _num_components; ++i) {
