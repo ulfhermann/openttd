@@ -2853,7 +2853,7 @@ static void UpdateStationRating(Station *st)
 
 static void UpdateStationStats(Station * st) {
 	uint length = _settings_game.economy.moving_average_length;
-	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = st->goods[goods_index];
 		good.supply *= length;
 		good.supply /= (length + 1);

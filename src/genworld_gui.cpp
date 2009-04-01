@@ -51,7 +51,11 @@ static inline void SetNewLandscapeType(byte landscape)
 }
 
 enum GenerateLandscapeWindowWidgets {
-	GLAND_TEMPERATE = 3,
+	GLAND_CLOSEBOX,
+	GLAND_TITLEBAR,
+	GLAND_BACKGROUND,
+
+	GLAND_TEMPERATE,
 	GLAND_ARCTIC,
 	GLAND_TROPICAL,
 	GLAND_TOYLAND,
@@ -109,9 +113,9 @@ enum GenerateLandscapeWindowWidgets {
 };
 
 static const Widget _generate_landscape_widgets[] = {
-{  WWT_CLOSEBOX,  RESIZE_NONE, COLOUR_BROWN,    0,  10,   0,  13, STR_00C5,                     STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION, RESIZE_NONE, COLOUR_BROWN,   11, 337,   0,  13, STR_WORLD_GENERATION_CAPTION, STR_NULL},
-{      WWT_PANEL, RESIZE_NONE, COLOUR_BROWN,    0, 337,  14, 313, 0x0,                          STR_NULL},
+{  WWT_CLOSEBOX,  RESIZE_NONE, COLOUR_BROWN,    0,  10,   0,  13, STR_00C5,                     STR_018B_CLOSE_WINDOW},                  // GLAND_CLOSEBOX
+{    WWT_CAPTION, RESIZE_NONE, COLOUR_BROWN,   11, 337,   0,  13, STR_WORLD_GENERATION_CAPTION, STR_NULL},                               // GLAND_TITLEBAR
+{      WWT_PANEL, RESIZE_NONE, COLOUR_BROWN,    0, 337,  14, 313, 0x0,                          STR_NULL},                               // GLAND_BACKGROUND
 
 /* Landscape selection */
 {   WWT_IMGBTN_2, RESIZE_NONE, COLOUR_ORANGE,  10,  86,  24,  78, SPR_SELECT_TEMPERATE,         STR_030E_SELECT_TEMPERATE_LANDSCAPE},    // GLAND_TEMPERATE
@@ -189,9 +193,9 @@ static const Widget _generate_landscape_widgets[] = {
 };
 
 static const Widget _heightmap_load_widgets[] = {
-{   WWT_CLOSEBOX, RESIZE_NONE, COLOUR_BROWN,    0,  10,   0,  13, STR_00C5,                     STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION, RESIZE_NONE, COLOUR_BROWN,   11, 337,   0,  13, STR_WORLD_GENERATION_CAPTION, STR_NULL},
-{      WWT_PANEL, RESIZE_NONE, COLOUR_BROWN,    0, 337,  14, 235, 0x0,                          STR_NULL},
+{   WWT_CLOSEBOX, RESIZE_NONE, COLOUR_BROWN,    0,  10,   0,  13, STR_00C5,                     STR_018B_CLOSE_WINDOW},                 // GLAND_CLOSEBOX
+{    WWT_CAPTION, RESIZE_NONE, COLOUR_BROWN,   11, 337,   0,  13, STR_WORLD_GENERATION_CAPTION, STR_NULL},                              // GLAND_TITLEBAR
+{      WWT_PANEL, RESIZE_NONE, COLOUR_BROWN,    0, 337,  14, 235, 0x0,                          STR_NULL},                              // GLAND_BACKGROUND
 
 /* Landscape selection */
 {   WWT_IMGBTN_2, RESIZE_NONE, COLOUR_ORANGE,  10,  86,  24,  78, SPR_SELECT_TEMPERATE,        STR_030E_SELECT_TEMPERATE_LANDSCAPE},    // GLAND_TEMPERATE
@@ -697,25 +701,29 @@ void StartNewGameWithoutGUI(uint seed)
 	StartGeneratingLandscape(GLWP_GENERATE);
 }
 
+/** Widget numbers of the create scenario window. */
 enum CreateScenarioWindowWidgets {
-	CSCEN_TEMPERATE = 3,
-	CSCEN_ARCTIC,
-	CSCEN_TROPICAL,
-	CSCEN_TOYLAND,
-	CSCEN_EMPTY_WORLD,
-	CSCEN_RANDOM_WORLD,
-	CSCEN_MAPSIZE_X_TEXT,
-	CSCEN_MAPSIZE_X_PULLDOWN,
-	CSCEN_MAPSIZE_Y_TEXT,
-	CSCEN_MAPSIZE_Y_PULLDOWN,
-	CSCEN_START_DATE_LABEL,
-	CSCEN_START_DATE_DOWN,
-	CSCEN_START_DATE_TEXT,
-	CSCEN_START_DATE_UP,
-	CSCEN_FLAT_LAND_HEIGHT_LABEL,
-	CSCEN_FLAT_LAND_HEIGHT_DOWN,
-	CSCEN_FLAT_LAND_HEIGHT_TEXT,
-	CSCEN_FLAT_LAND_HEIGHT_UP
+	CSCEN_CLOSEBOX,               ///< Close button.
+	CSCEN_CAPTION,                ///< Title bar.
+	CSCEN_BACKGROUND,             ///< Background panel.
+	CSCEN_TEMPERATE,              ///< Select temperate landscape style.
+	CSCEN_ARCTIC,                 ///< Select arctic landscape style.
+	CSCEN_TROPICAL,               ///< Select tropical landscape style.
+	CSCEN_TOYLAND,                ///< Select toy-land landscape style.
+	CSCEN_EMPTY_WORLD,            ///< Generate an empty flat world.
+	CSCEN_RANDOM_WORLD,           ///< Generate random land button
+	CSCEN_MAPSIZE_X_TEXT,         ///< Clickable currently selected x map size.
+	CSCEN_MAPSIZE_X_PULLDOWN,     ///< Pull-down arrow for x map size.
+	CSCEN_MAPSIZE_Y_TEXT,         ///< Clickable currently selected y map size.
+	CSCEN_MAPSIZE_Y_PULLDOWN,     ///< Pull-down arrow for y map size.
+	CSCEN_START_DATE_LABEL,       ///< 'Date' label
+	CSCEN_START_DATE_DOWN,        ///< Decrease start year (start earlier).
+	CSCEN_START_DATE_TEXT,        ///< Clickable start date value.
+	CSCEN_START_DATE_UP,          ///< Increase start year (start later).
+	CSCEN_FLAT_LAND_HEIGHT_LABEL, ///< 'Height of flat land' label.
+	CSCEN_FLAT_LAND_HEIGHT_DOWN,  ///< Decrease flat land height.
+	CSCEN_FLAT_LAND_HEIGHT_TEXT,  ///< Clickable flat land height value.
+	CSCEN_FLAT_LAND_HEIGHT_UP     ///< Increase flat land height.
 };
 
 
@@ -847,9 +855,9 @@ struct CreateScenarioWindow : public Window
 };
 
 static const Widget _create_scenario_widgets[] = {
-{   WWT_CLOSEBOX, RESIZE_NONE, COLOUR_BROWN,    0,  10,   0,  13, STR_00C5,                STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION, RESIZE_NONE, COLOUR_BROWN,   11, 337,   0,  13, STR_SE_CAPTION,          STR_NULL},
-{      WWT_PANEL, RESIZE_NONE, COLOUR_BROWN,    0, 337,  14, 169, 0x0,                     STR_NULL},
+{   WWT_CLOSEBOX, RESIZE_NONE, COLOUR_BROWN,    0,  10,   0,  13, STR_00C5,                STR_018B_CLOSE_WINDOW},                  // CSCEN_CLOSEBOX
+{    WWT_CAPTION, RESIZE_NONE, COLOUR_BROWN,   11, 337,   0,  13, STR_SE_CAPTION,          STR_NULL},                               // CSCEN_CAPTION
+{      WWT_PANEL, RESIZE_NONE, COLOUR_BROWN,    0, 337,  14, 169, 0x0,                     STR_NULL},                               // CSCEN_BACKGROUND
 
 /* Landscape selection */
 {   WWT_IMGBTN_2, RESIZE_NONE, COLOUR_ORANGE,  10,  86,  24,  78, SPR_SELECT_TEMPERATE,    STR_030E_SELECT_TEMPERATE_LANDSCAPE},    // CSCEN_TEMPERATE
@@ -882,11 +890,69 @@ static const Widget _create_scenario_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_create_scenario_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, CSCEN_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_BROWN, CSCEN_CAPTION), SetDataTip(STR_SE_CAPTION, STR_NULL),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_BROWN, CSCEN_BACKGROUND),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 10),
+		/* Landscape style selection. */
+		NWidget(NWID_HORIZONTAL), SetPIP(10, 3, 11),
+			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, CSCEN_TEMPERATE), SetMinimalSize(77, 55), SetDataTip(SPR_SELECT_TEMPERATE, STR_030E_SELECT_TEMPERATE_LANDSCAPE),
+			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, CSCEN_ARCTIC), SetMinimalSize(77, 55), SetDataTip(SPR_SELECT_SUB_ARCTIC, STR_030F_SELECT_SUB_ARCTIC_LANDSCAPE),
+			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, CSCEN_TROPICAL), SetMinimalSize(77, 55), SetDataTip(SPR_SELECT_SUB_TROPICAL, STR_0310_SELECT_SUB_TROPICAL_LANDSCAPE),
+			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, CSCEN_TOYLAND), SetMinimalSize(77, 55), SetDataTip(SPR_SELECT_TOYLAND, STR_0311_SELECT_TOYLAND_LANDSCAPE),
+		EndContainer(),
+		NWidget(NWID_HORIZONTAL), SetPIP(12, 19, 11),
+			/* Green generation type buttons: 'Flat land' and 'Random land'. */
+			NWidget(NWID_VERTICAL), SetPIP(16, 6, 9),
+				NWidget(WWT_TEXTBTN, COLOUR_GREEN, CSCEN_EMPTY_WORLD), SetMinimalSize(104, 30), SetDataTip(STR_SE_FLAT_WORLD, STR_SE_FLAT_WORLD_TIP),
+				NWidget(WWT_TEXTBTN, COLOUR_GREEN, CSCEN_RANDOM_WORLD), SetMinimalSize(104, 30), SetDataTip(STR_SE_RANDOM_LAND, STR_022A_GENERATE_RANDOM_LAND),
+			EndContainer(),
+			/* Labels + setting drop-downs */
+			NWidget(NWID_VERTICAL), SetPIP(16, 6, 0),
+				/* Map size. */
+				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_MAPSIZE_X_TEXT), SetMinimalSize(78, 11),
+												SetDataTip(STR_MAPSIZE, STR_NULL), SetPadding(1, 0, 0, 0),
+					NWidget(NWID_SPACER), SetFill(1, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, CSCEN_MAPSIZE_X_PULLDOWN), SetMinimalSize(48, 12),
+												SetDataTip(STR_NUM_1, STR_NULL), SetPadding(0, 4, 0, 0),
+					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_MAPSIZE_Y_TEXT), SetMinimalSize(9, 11),
+												SetDataTip(STR_BY, STR_NULL), SetPadding(1, 2, 0, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, CSCEN_MAPSIZE_Y_PULLDOWN), SetMinimalSize(48, 12),
+												SetDataTip(STR_NUM_2, STR_NULL),
+				EndContainer(),
+				/* Date. */
+				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_START_DATE_LABEL), SetMinimalSize(78, 11),
+												SetDataTip(STR_DATE, STR_NULL), SetPadding(1, 0, 0, 0),
+					NWidget(NWID_SPACER), SetFill(1, 0),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_START_DATE_DOWN), SetMinimalSize(12, 12), SetDataTip(SPR_ARROW_DOWN, STR_029E_MOVE_THE_STARTING_DATE),
+					NWidget(WWT_TEXTBTN, COLOUR_ORANGE, CSCEN_START_DATE_TEXT), SetMinimalSize(87, 12), SetDataTip(STR_GENERATE_DATE, STR_NULL),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_START_DATE_UP), SetMinimalSize(12, 12), SetDataTip(SPR_ARROW_UP, STR_029F_MOVE_THE_STARTING_DATE),
+				EndContainer(),
+				/* Flat map height. */
+				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_LABEL), SetMinimalSize(144, 11),
+												SetDataTip(STR_FLAT_WORLD_HEIGHT, STR_NULL), SetPadding(1, 0, 0, 0),
+					NWidget(NWID_SPACER), SetFill(1, 0),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_DOWN), SetMinimalSize(12, 12), SetDataTip(SPR_ARROW_DOWN, STR_FLAT_WORLD_HEIGHT_DOWN),
+					NWidget(WWT_TEXTBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_TEXT), SetMinimalSize(21, 12), SetDataTip(STR_NUM_3, STR_NULL),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_UP), SetMinimalSize(12, 12), SetDataTip(SPR_ARROW_UP, STR_FLAT_WORLD_HEIGHT_UP),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetFill(1, 1),
+			EndContainer(),
+		EndContainer(),
+	EndContainer(),
+};
+
 static const WindowDesc _create_scenario_desc(
 	WDP_CENTER, WDP_CENTER, 338, 170, 338, 170,
 	WC_GENERATE_LANDSCAPE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS,
-	_create_scenario_widgets
+	_create_scenario_widgets, _nested_create_scenario_widgets, lengthof(_nested_create_scenario_widgets)
 );
 
 void ShowCreateScenario()
