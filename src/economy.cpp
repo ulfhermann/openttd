@@ -1618,14 +1618,15 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 				unloading_time += delivered;
 				anything_unloaded = true;
 				result |= 1;
-			} else {
+			}
+
+			if (!_settings_game.order.gradual_loading || delivered < amount_unloaded || delivered == 0){
+				/* done delivering */
 				if (!v->cargo.Empty()) {
 					completely_emptied = false;
 				}
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
-				continue;
 			}
-
 			continue;
 		}
 
