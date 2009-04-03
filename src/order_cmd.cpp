@@ -246,6 +246,7 @@ const Order * OrderList::GetNextUnloadingOrder(const Order * curr) const {
 			next = GetFirstOrder();
 		}
 	} while (next != curr && !next->IsUnloadingOrder());
+	return next;
 }
 
 void OrderList::InsertOrderAt(Order *new_order, int index)
