@@ -149,8 +149,6 @@ void SaveLoad_STNS(Station *st)
 		SLE_END()
 	};
 
-	bool process_link_stats = !CheckSavegameVersion(CAPACITIES_SV);
-
 	SlObject(st, _station_desc);
 
 	_waiting_acceptance = 0;
@@ -159,8 +157,7 @@ void SaveLoad_STNS(Station *st)
 	for (CargoID i = 0; i < num_cargo; i++) {
 		GoodsEntry *ge = &st->goods[i];
 		LinkStatMap & stats = ge->link_stats;
-		if (process_link_stats)
-			_num_links = stats.size(); // for saving, is overwritten by next line when loading
+		_num_links = stats.size(); // for saving, is overwritten by next line when loading
 		SlObject(ge, _goods_desc);
 		if (CheckSavegameVersion(68)) {
 			SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
@@ -179,18 +176,17 @@ void SaveLoad_STNS(Station *st)
 				ge->cargo.Append(cp);
 			}
 		}
-		if (process_link_stats) {
-			if (stats.empty()) { // loading
-				LinkStat ls;
-				for (uint i = 0; i < _num_links; ++i) {
-					SlObject(&ls, _linkstat_desc);
-					stats[_station_id] = ls;
-				}
-			} else { // saving
-				for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
-					_station_id = i->first;
-					SlObject(&(i->second), _linkstat_desc);
-				}
+
+		if (stats.empty() && _num_links > 0) { // loading
+			LinkStat ls;
+			for (uint i = 0; i < _num_links; ++i) {
+				SlObject(&ls, _linkstat_desc);
+				stats[_station_id] = ls;
+			}
+		} else { // saving
+			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
+				_station_id = i->first;
+				SlObject(&(i->second), _linkstat_desc);
 			}
 		}
 	}
