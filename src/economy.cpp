@@ -1613,13 +1613,11 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 
 			uint delivered = v->cargo.MoveToStation(ge, amount_unloaded, unload_flags, last_visited, next_station);
-			if (delivered > 0) {
-				/* Deliver goods to the station */
-				st->time_since_unload = 0;
-				unloading_time += delivered;
-				anything_unloaded = true;
-				result |= 1;
-			}
+
+			st->time_since_unload = 0;
+			unloading_time += delivered;
+			anything_unloaded = true;
+			result |= 1;
 
 			if (!_settings_game.order.gradual_loading || delivered < amount_unloaded || delivered == 0){
 				/* done delivering */
@@ -1685,14 +1683,15 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			 * In that case force_load should be set and all cargo available
 			 * be moved onto the vehicle.
 			 */
-			ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
+			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
+			cargo_left[v->cargo_type] += (cap - loaded); // revert unused reservation
 
 			st->time_since_load = 0;
 			st->last_vehicle_type = v->type;
 
 			StationAnimationTrigger(st, st->xy, STAT_ANIM_CARGO_TAKEN, v->cargo_type);
 
-			unloading_time += cap;
+			unloading_time += loaded;
 
 			result |= 2;
 		}
