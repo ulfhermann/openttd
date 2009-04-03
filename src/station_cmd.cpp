@@ -2961,7 +2961,20 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 static void UpdateStationWaiting(Station *st, CargoID type, uint amount)
 {
 	GoodsEntry & good = st->goods[type];
-	good.cargo.Append(new CargoPacket(st->index, amount));
+	StationID id = st->index;
+	StationID next = INVALID_STATION;
+	FlowStatSet & flow_stats = good.flows[id];
+	FlowStatSet::iterator i = flow_stats.begin();
+	if (i != flow_stats.end()) {
+		StationID via = i->via;
+		uint planned = i->planned;
+		uint sent = i->sent + amount;
+		flow_stats.erase(i);
+		flow_stats.insert(FlowStat(via, planned, sent));
+		next = via;
+	}
+	CargoPacket * packet = new CargoPacket(id, next, amount);
+	good.cargo.Append(packet);
 	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
 	good.supply += amount;
 

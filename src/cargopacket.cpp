@@ -4,7 +4,9 @@
 
 #include "stdafx.h"
 #include "station_base.h"
+#include "core/bitmath_func.hpp"
 #include "oldpool_func.h"
+#include "order_type.h"
 
 /* Initialize the cargopacket-pool */
 DEFINE_OLD_POOL_GENERIC(CargoPacket, CargoPacket)
@@ -16,11 +18,12 @@ void InitializeCargoPackets()
 	_CargoPacket_pool.AddBlockToPool();
 }
 
-CargoPacket::CargoPacket(StationID source, uint16 count)
+CargoPacket::CargoPacket(StationID source, StationID next, uint16 count)
 {
 	if (source != INVALID_STATION) assert(count != 0);
 
 	this->source          = source;
+	this->next            = next;
 	this->source_xy       = (source != INVALID_STATION) ? GetStation(source)->xy : 0;
 	this->loaded_at_xy    = this->source_xy;
 
@@ -37,7 +40,8 @@ CargoPacket::~CargoPacket()
 
 bool CargoPacket::SameSource(const CargoPacket *cp) const
 {
-	return this->source_xy == cp->source_xy && this->days_in_transit == cp->days_in_transit && this->paid_for == cp->paid_for;
+	return this->source_xy == cp->source_xy && this->days_in_transit == cp->days_in_transit
+		&& this->paid_for == cp->paid_for && this->next == cp->next;
 }
 
 /*
@@ -146,73 +150,176 @@ void CargoList::Truncate(uint count)
 	InvalidateCache();
 }
 
-bool CargoList::MoveTo(CargoList *dest, uint count, CargoList::MoveToAction mta, uint data)
-{
-	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
-	CargoList tmp;
+CargoPacket * CargoPacket::Split(uint new_size) {
+	CargoPacket *cp_new = new CargoPacket(source, next, new_size);
+	Money fs = feeder_share * new_size / static_cast<uint>(count);
+	feeder_share -= fs;
+	cp_new->source_xy       = source_xy;
+	cp_new->loaded_at_xy    = loaded_at_xy;
+	cp_new->days_in_transit = days_in_transit;
+	cp_new->paid_for        = paid_for;
+	cp_new->feeder_share    = fs;
+	count -= new_size;
+	return cp_new;
+}
 
-	while (!packets.empty() && count > 0) {
-		CargoPacket *cp = *packets.begin();
-		if (cp->count <= count) {
-			/* Can move the complete packet */
-			packets.remove(cp);
-			switch (mta) {
-				case MTA_FINAL_DELIVERY:
-					if (cp->source == data) {
-						tmp.Append(cp);
-					} else {
-						count -= cp->count;
-						delete cp;
-					}
-					break;
-				case MTA_CARGO_LOAD:
-					cp->loaded_at_xy = data;
-					/* When cargo is moved into another vehicle you have *always* paid for it */
-					cp->paid_for     = false;
-					/* FALL THROUGH */
-				case MTA_OTHER:
-					count -= cp->count;
-					dest->packets.push_back(cp);
-					break;
-			}
+void CargoList::DeliverPacket(List::iterator & c, uint & remaining_unload) {
+	CargoPacket * p = *c;
+	if (p->count <= remaining_unload) {
+		remaining_unload -= p->count;
+		delete p;
+		packets.erase(c++);
+	} else {
+		p->count -= remaining_unload;
+		remaining_unload = 0;
+		++c;
+	}
+}
+
+void CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest) {
+	CargoPacket * p = *c;
+	if (p->count <= remaining_unload) {
+		packets.erase(c++);
+	} else {
+		p = p->Split(remaining_unload);
+		++c;
+	}
+	dest->cargo.packets.push_back(p);
+	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
+	remaining_unload -= p->count;
+}
+
+void CargoList::UnloadPacketOld(UnloadDescription & ul, List::iterator & c, uint & remaining_unload) {
+	CargoPacket * p = *c;
+	p->next = INVALID_STATION;
+
+	/* try to unload cargo */
+	bool move = ul.flags & (OUFB_UNLOAD | OUF_UNLOAD_IF_POSSIBLE);
+	/* try to deliver cargo if unloading */
+	bool deliver = (ul.flags & OUF_UNLOAD_IF_POSSIBLE) && !(ul.flags & OUFB_TRANSFER) && (p->source != ul.curr_station);
+	/* transfer cargo if delivery was unsuccessful */
+	bool transfer = ul.flags & (OUFB_TRANSFER | OUFB_UNLOAD);
+
+	if (move) {
+		if(deliver) {
+			DeliverPacket(c, remaining_unload);
+		} else if (transfer) {
+			TransferPacket(c, remaining_unload, ul.dest);
 		} else {
-			/* Can move only part of the packet, so split it into two pieces */
-			if (mta != MTA_FINAL_DELIVERY) {
-				CargoPacket *cp_new = new CargoPacket();
+			/* this case is for (non-)delivery to the source station without special flags.
+			 * like the code in MoveTo did, we keep the packet in this case
+			 */
+			++c;
+		}
+	} else {
+		++c;
+	}
+}
 
-				Money fs = cp->feeder_share * count / static_cast<uint>(cp->count);
-				cp->feeder_share -= fs;
+void CargoList::UnloadPacketCargoDist(UnloadDescription & ul, List::iterator & c, uint & remaining_unload) {
+	CargoPacket * p = *c;
+	uint last_remaining = remaining_unload;
 
-				cp_new->source          = cp->source;
-				cp_new->source_xy       = cp->source_xy;
-				cp_new->loaded_at_xy    = (mta == MTA_CARGO_LOAD) ? data : cp->loaded_at_xy;
+	FlowStatSet & flow_stats = ul.dest->flows[p->source];
+	FlowStatSet::iterator flow_it = flow_stats.begin();
+	StationID via = flow_it->via;
+	bool plan_fulfilled = true;
 
-				cp_new->days_in_transit = cp->days_in_transit;
-				cp_new->feeder_share    = fs;
-				/* When cargo is moved into another vehicle you have *always* paid for it */
-				cp_new->paid_for        = (mta == MTA_CARGO_LOAD) ? false : cp->paid_for;
-
-				cp_new->count = count;
-				dest->packets.push_back(cp_new);
+	if (via == ul.curr_station) {
+		/* this is the final destination, deliver ... */
+		p->next = INVALID_STATION;
+		if (ul.flags & OUFB_TRANSFER) {
+			/* .. except if explicitly told not to do so ... */
+			TransferPacket(c, remaining_unload, ul.dest);
+			plan_fulfilled = false;
+		} else if (ul.flags & OUF_UNLOAD_IF_POSSIBLE) {
+			DeliverPacket(c, remaining_unload);
+		} else {
+			/* .. or if the station suddenly doesn't accept our cargo. */
+			++c;
+			plan_fulfilled = false;
+		}
+	} else {
+		p->next = via;
+		/* packet has to travel on, find out if it can stay on board */
+		if (ul.flags & OUFB_UNLOAD) {
+			/* order overrides cargodist:
+			 * play by the old loading rules here as player is interfering with cargodist
+			 * try to deliver, as move has been forced upon us */
+			if ((ul.flags & OUF_UNLOAD_IF_POSSIBLE) && !(ul.flags & OUFB_TRANSFER) &&	p->source != ul.curr_station) {
+				DeliverPacket(c, remaining_unload);
+				plan_fulfilled = false;
+			} else {
+				/* transfer cargo, as unloading didn't work
+				 * transfer condition doesn't need to be checked as MTF_FORCE_MOVE is known to be set
+				 * the plan is still fulfilled as the packet can be picked up by another vehicle travelling to via
+				 */
+				TransferPacket(c, remaining_unload, ul.dest);
 			}
-			cp->count -= count;
-
-			count = 0;
+		} else if (ul.next_station == via) {
+			/* vehicle goes to the packet's next hop, keep the packet*/
+			++c;
+		} else {
+			/* vehicle goes somewhere else, transfer the packet*/
+			TransferPacket(c, remaining_unload, ul.dest);
 		}
 	}
 
-	bool remaining = !packets.empty();
+	if(plan_fulfilled) {
+		uint planned = flow_it->planned;
+		uint sent = flow_it->sent + last_remaining - remaining_unload;
+		flow_stats.erase(flow_it);
+		flow_stats.insert(FlowStat(via, planned, sent));
+	}
+}
 
-	if (mta == MTA_FINAL_DELIVERY && !tmp.Empty()) {
-		/* There are some packets that could not be delivered at the station, put them back */
-		tmp.MoveTo(this, UINT_MAX);
-		tmp.packets.clear();
+uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, StationID curr_station, StationID next_station) {
+	uint remaining_unload = max_unload;
+	UnloadDescription ul(dest, curr_station, next_station, flags);
+
+	for(List::iterator c = packets.begin(); c != packets.end() && remaining_unload > 0;) {
+		CargoPacket * p = *c;
+		if (p->next != curr_station || dest->flows[p->source].empty()) {
+			/* there is no plan: use normal unloading */
+			UnloadPacketOld(ul, c, remaining_unload);
+		} else {
+			/* use cargodist unloading*/
+			UnloadPacketCargoDist(ul, c, remaining_unload);
+		}
 	}
 
-	if (dest != NULL) dest->InvalidateCache();
+	dest->cargo.InvalidateCache();
+	InvalidateCache();
+	return max_unload - remaining_unload;
+}
+
+uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, bool force_load, StationID next_station, TileIndex load_place) {
+	uint space_remaining = max_load;
+	for(List::iterator c = packets.begin(); c != packets.end() && space_remaining > 0;) {
+		CargoPacket * p = *c;
+		if (force_load || p->next == next_station || p->next == INVALID_STATION) {
+			/* load the packet if possible */
+			if (p->count <= space_remaining) {
+				/* load all of the packet */
+				space_remaining -= count;
+				packets.erase(c++);
+			} else {
+				/* packet needs to be split */
+				p = p->Split(space_remaining);
+				space_remaining = 0;
+				++c;
+			}
+			dest->packets.push_back(p);
+			if (load_place != INVALID_TILE) {
+				p->loaded_at_xy = load_place;
+				p->paid_for = false;
+			}
+		}
+	}
+	dest->InvalidateCache();
 	InvalidateCache();
 
-	return remaining;
+	return max_load - space_remaining;
 }
 
 void CargoList::InvalidateCache()

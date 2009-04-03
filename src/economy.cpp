@@ -1598,33 +1598,32 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 
-		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (u->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
+		const Order * curr = &(u->current_order);
+		const Order * next = curr;
+		do {
+			next = next->next;
+			if (next == NULL) {
+				next = u->orders.list->GetFirstOrder();
+			}
+		} while (next != curr && !next->IsUnloadingOrder());
+
+		uint unload_flags = curr->GetUnloadType();
+		StationID next_station = next->GetDestination();
+
+		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (unload_flags & OUFB_NO_UNLOAD) == 0) {
+			// vehicle wants to unload something
+
 			uint cargo_count = v->cargo.Count();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
-			bool remaining = false; // Are there cargo entities in this vehicle that can still be unloaded here?
-			bool accepted  = false; // Is the cargo accepted by the station?
 
-			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
-				/* The cargo has reached it's final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo(NULL, amount_unloaded, CargoList::MTA_FINAL_DELIVERY, last_visited);
-
-				result |= 1;
-				accepted = true;
+			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
+				unload_flags |= OUF_UNLOAD_IF_POSSIBLE;
 			}
 
-			/* The !accepted || v->cargo.Count == cargo_count clause is there
-			 * to make it possible to force unload vehicles at the station where
-			 * they were loaded, but to not force unload the vehicle when the
-			 * station is still accepting the cargo in the vehicle. It doesn't
-			 * accept cargo that was loaded at the same station. */
-			if (u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER) && (!accepted || v->cargo.Count() == cargo_count)) {
-				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded);
-				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
-
-				result |= 2;
-			} else if (!accepted) {
-				/* The order changed while unloading (unset unload/transfer) or the
-				 * station does not accept goods anymore. */
+			uint delivered = v->cargo.MoveToStation(ge, amount_unloaded, unload_flags, last_visited, next_station);
+			if (delivered > 0) {
+				result |= 1;
+			} else {
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 				continue;
 			}
@@ -1635,7 +1634,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			unloading_time += amount_unloaded;
 
 			anything_unloaded = true;
-			if (_settings_game.order.gradual_loading && remaining) {
+			if (_settings_game.order.gradual_loading && delivered < amount_unloaded) {
 				completely_emptied = false;
 			} else {
 				/* We have finished unloading (cargo count == 0) */
@@ -1695,7 +1694,11 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			completely_emptied = false;
 			anything_loaded = true;
 
-			ge->cargo.MoveTo(&v->cargo, cap, CargoList::MTA_CARGO_LOAD, st->xy);
+			/* The full load order could be seen as interference by the user.
+			 * In that case force_load should be set and all cargo available
+			 * be moved onto the vehicle.
+			 */
+			ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
 
 			st->time_since_load = 0;
 			st->last_vehicle_type = v->type;

@@ -225,6 +225,19 @@ Order *OrderList::GetOrderAt(int index) const
 	return order;
 }
 
+bool Order::IsStoppingOrder() const
+{
+	return (this->GetNonStopType() == ONSF_STOP_EVERYWHERE || this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
+}
+
+bool Order::IsUnloadingOrder() const
+{
+	if (this->GetType() != OT_GOTO_STATION) return false;
+	if (GetStation(this->GetDestination())->IsBuoy()) return false;
+
+	return (this->IsStoppingOrder() && this->GetUnloadType() != OUFB_NO_UNLOAD);
+}
+
 void OrderList::InsertOrderAt(Order *new_order, int index)
 {
 	if (this->first == NULL) {
