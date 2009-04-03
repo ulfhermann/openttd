@@ -20,6 +20,22 @@ private:
 	size_t address_length;    ///< The length of the resolved address
 	sockaddr_storage address; ///< The resolved address
 
+	/**
+	 * Helper function to resolve something to a socket.
+	 * @param runp information about the socket to try not
+	 * @return the opened socket or INVALID_SOCKET
+	 */
+	typedef SOCKET (*LoopProc)(addrinfo *runp);
+
+	/**
+	 * Resolve this address into a socket
+	 * @param family the type of 'protocol' (IPv4, IPv6)
+	 * @param socktype the type of socket (TCP, UDP, etc)
+	 * @param flags the flags to send to getaddrinfo
+	 * @param func the inner working while looping over the address info
+	 * @return the resolved socket or INVALID_SOCKET.
+	 */
+	SOCKET Resolve(int family, int socktype, int flags, LoopProc func);
 public:
 	/**
 	 * Create a network address based on a resolved IP and port
@@ -45,6 +61,18 @@ public:
 		address_length(address_length),
 		address(address)
 	{
+	}
+
+	/**
+	 * Create a network address based on a resolved IP and port
+	 * @param address the IP address with port
+	 */
+	NetworkAddress(sockaddr *address, size_t address_length) :
+		hostname(NULL),
+		address_length(address_length)
+	{
+		memset(&this->address, 0, sizeof(this->address));
+		memcpy(&this->address, address, address_length);
 	}
 
 	/**
@@ -137,6 +165,23 @@ public:
 	{
 		if (this->IsResolved() && address.IsResolved()) return memcmp(&this->address, &address.address, sizeof(this->address)) == 0;
 		return this->GetPort() == address.GetPort() && strcmp(this->GetHostname(), address.GetHostname()) == 0;
+	}
+
+	/**
+	 * Compare the address of this class with the address of another.
+	 * @param address the other address.
+	 */
+	bool operator < (NetworkAddress &address)
+	{
+		int r = this->address.ss_family - address.address.ss_family;
+		if (r == 0 && this->IsResolved() && address.IsResolved()) {
+			r = this->address_length - address.address_length;
+			if (r == 0) r = memcmp(&this->address, &address.address, this->address_length) == 0;
+		} else {
+			r = strcmp(this->GetHostname(), address.GetHostname());
+		}
+		if (r == 0) r = this->GetPort() - address.GetPort();
+		return r < 0;
 	}
 
 	/**
