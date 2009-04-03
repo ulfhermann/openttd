@@ -1584,6 +1584,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 	v->cur_speed = 0;
 
+	/* loop over all vehicles in the current consist */
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 

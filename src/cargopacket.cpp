@@ -315,14 +315,13 @@ uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, bool force_load, S
 			/* load the packet if possible */
 			if (p->count <= space_remaining) {
 				/* load all of the packet */
-				space_remaining -= count;
 				packets.erase(c++);
 			} else {
 				/* packet needs to be split */
 				p = p->Split(space_remaining);
-				space_remaining = 0;
 				++c;
 			}
+			space_remaining -= p->count;
 			dest->packets.push_back(p);
 			if (load_place != INVALID_TILE) {
 				p->loaded_at_xy = load_place;
