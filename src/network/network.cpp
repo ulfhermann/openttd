@@ -480,6 +480,7 @@ static void NetworkAcceptClients()
 	assert(_listensocket != INVALID_SOCKET);
 
 	for (;;) {
+		memset(&sin, 0, sizeof(sin));
 		socklen_t sin_len = sizeof(sin);
 		SOCKET s = accept(_listensocket, (struct sockaddr*)&sin, &sin_len);
 		if (s == INVALID_SOCKET) return;
@@ -555,39 +556,20 @@ static void NetworkAcceptClients()
 /* Set up the listen socket for the server */
 static bool NetworkListen()
 {
-	SOCKET ls;
-	struct sockaddr_in sin;
+	NetworkAddress address(_settings_client.network.server_bind_ip, _settings_client.network.server_port);
 
-	DEBUG(net, 1, "Listening on %s:%d", _settings_client.network.server_bind_ip, _settings_client.network.server_port);
+	DEBUG(net, 1, "Listening on %s", address.GetAddressAsString());
 
-	ls = socket(AF_INET, SOCK_STREAM, 0);
+	SOCKET ls = address.Listen(AF_INET, SOCK_STREAM);
 	if (ls == INVALID_SOCKET) {
-		ServerStartError("socket() on listen socket failed");
+		ServerStartError("Could not create listening socket");
 		return false;
 	}
 
-	{ // reuse the socket
-		int reuse = 1;
-		/* The (const char*) cast is needed for windows!! */
-		if (setsockopt(ls, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) == -1) {
-			ServerStartError("setsockopt() on listen socket failed");
-			return false;
-		}
-	}
-
-	if (!SetNonBlocking(ls)) DEBUG(net, 0, "Setting non-blocking mode failed"); // XXX should this be an error?
-
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = _network_server_bind_ip;
-	sin.sin_port = htons(_settings_client.network.server_port);
-
-	if (bind(ls, (struct sockaddr*)&sin, sizeof(sin)) != 0) {
-		ServerStartError("bind() failed");
-		return false;
-	}
-
-	if (listen(ls, 1) != 0) {
-		ServerStartError("listen() failed");
+	int reuse = 1;
+	/* The (const char*) cast is needed for windows!! */
+	if (setsockopt(ls, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) == -1) {
+		ServerStartError("setsockopt() on listen socket failed");
 		return false;
 	}
 
@@ -714,7 +696,7 @@ void NetworkRebuildHostList()
 	while (item != NULL && i != lengthof(_network_host_list)) {
 		if (item->manually) {
 			free(_network_host_list[i]);
-			_network_host_list[i++] = str_fmt("%s:%i", item->info.hostname, item->port);
+			_network_host_list[i++] = str_fmt("%s:%i", item->info.hostname, item->address.GetPort());
 		}
 		item = item->next;
 	}
@@ -794,7 +776,7 @@ bool NetworkServerStart()
 
 	/* Try to start UDP-server */
 	_network_udp_server = true;
-	_network_udp_server = _udp_server_socket->Listen(_network_server_bind_ip, _settings_client.network.server_port, false);
+	_network_udp_server = _udp_server_socket->Listen(NetworkAddress(_network_server_bind_ip, _settings_client.network.server_port), false);
 
 	_network_company_states = CallocT<NetworkCompanyState>(MAX_COMPANIES);
 	_network_server = true;
@@ -1089,29 +1071,15 @@ static void NetworkGenerateUniqueId()
 void NetworkStartDebugLog(NetworkAddress address)
 {
 	extern SOCKET _debug_socket;  // Comes from debug.c
-	SOCKET s;
-	struct sockaddr_in sin;
 
 	DEBUG(net, 0, "Redirecting DEBUG() to %s:%d", address.GetHostname(), address.GetPort());
 
-	s = socket(AF_INET, SOCK_STREAM, 0);
+	SOCKET s = address.Connect();
 	if (s == INVALID_SOCKET) {
 		DEBUG(net, 0, "Failed to open socket for redirection DEBUG()");
 		return;
 	}
 
-	if (!SetNoDelay(s)) DEBUG(net, 1, "Setting TCP_NODELAY failed");
-
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = address.GetIP();
-	sin.sin_port = htons(address.GetPort());
-
-	if (connect(s, (struct sockaddr *)&sin, sizeof(sin)) != 0) {
-		DEBUG(net, 0, "Failed to redirection DEBUG() to %s:%d", address.GetHostname(), address.GetPort());
-		return;
-	}
-
-	if (!SetNonBlocking(s)) DEBUG(net, 0, "Setting non-blocking mode failed");
 	_debug_socket = s;
 
 	DEBUG(net, 0, "DEBUG() is now redirected");
