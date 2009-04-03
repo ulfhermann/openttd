@@ -238,6 +238,16 @@ bool Order::IsUnloadingOrder() const
 	return (this->IsStoppingOrder() && this->GetUnloadType() != OUFB_NO_UNLOAD);
 }
 
+const Order * OrderList::GetNextUnloadingOrder(const Order * curr) const {
+	const Order * next = curr;
+	do {
+		next = next->next;
+		if (next == NULL) {
+			next = GetFirstOrder();
+		}
+	} while (next != curr && !next->IsUnloadingOrder());
+}
+
 void OrderList::InsertOrderAt(Order *new_order, int index)
 {
 	if (this->first == NULL) {

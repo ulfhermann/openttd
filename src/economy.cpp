@@ -1461,8 +1461,10 @@ void VehiclePayment(Vehicle *front_v)
 	industry_set.Clear();
 
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
+		const Order * curr = &front_v->current_order;
+		OrderUnloadFlags order_flags = curr->GetUnloadType();
 		/* No cargo to unload */
-		if (v->cargo_cap == 0 || v->cargo.Empty() || front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) continue;
+		if (v->cargo_cap == 0 || v->cargo.Empty() || order_flags & OUFB_NO_UNLOAD) continue;
 
 		/* All cargo has already been paid for, no need to pay again */
 		if (!v->cargo.UnpaidCargo()) {
@@ -1471,14 +1473,21 @@ void VehiclePayment(Vehicle *front_v)
 		}
 
 		GoodsEntry *ge = &st->goods[v->cargo_type];
-		const CargoList::List *cargos = v->cargo.Packets();
+		CargoList & cargo_list = v->cargo;
+		const CargoList::List *cargos = cargo_list.Packets();
+		UnloadDescription ul(ge, last_visited, front_v->orders.list->GetNextUnloadingOrder(curr)->GetDestination(), order_flags);
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
 			CargoPacket *cp = *it;
-			if (!cp->paid_for &&
-					cp->source != last_visited &&
-					HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) &&
-					(front_v->current_order.GetUnloadType() & OUFB_TRANSFER) == 0) {
+
+			uint unload_flags = cargo_list.WillUnload(ul, cp);
+
+			if (!(unload_flags & UL_KEEP)) {
+				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
+				result = 2;
+			}
+
+			if (!cp->paid_for && (unload_flags & UL_DELIVER)) {
 				/* Deliver goods to the station */
 				st->time_since_unload = 0;
 
@@ -1487,27 +1496,19 @@ void VehiclePayment(Vehicle *front_v)
 				cp->paid_for = true;
 				route_profit   += profit; // display amount paid for final route delivery, A-D of a chain A-B-C-D
 				vehicle_profit += profit - cp->feeder_share;                    // whole vehicle is not payed for transfers picked up earlier
+				result = 1;
+			} else if (!cp->paid_for && (unload_flags & UL_TRANSFER)) {
+				Money profit = GetTransportedGoodsIncome(
+					cp->count,
+					/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
+					DistanceManhattan(cp->loaded_at_xy, GetStation(last_visited)->xy),
+					cp->days_in_transit,
+					v->cargo_type);
 
-				result |= 1;
-
-				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
-			} else if (front_v->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) {
-				if (!cp->paid_for && (front_v->current_order.GetUnloadType() & OUFB_TRANSFER) != 0) {
-					Money profit = GetTransportedGoodsIncome(
-						cp->count,
-						/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-						DistanceManhattan(cp->loaded_at_xy, GetStation(last_visited)->xy),
-						cp->days_in_transit,
-						v->cargo_type);
-
-					front_v->profit_this_year += profit << 8;
-					virtual_profit   += profit; // accumulate transfer profits for whole vehicle
-					cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
-					cp->paid_for      = true;   // record that the cargo has been paid for to eliminate double counting
-				}
-				result |= 2;
-
-				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
+				front_v->profit_this_year += profit << 8;
+				virtual_profit   += profit; // accumulate transfer profits for whole vehicle
+				cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
+				cp->paid_for      = true;   // record that the cargo has been paid for to eliminate double counting
 			}
 		}
 		v->cargo.InvalidateCache();
@@ -1599,13 +1600,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 
 		const Order * curr = &(u->current_order);
-		const Order * next = curr;
-		do {
-			next = next->next;
-			if (next == NULL) {
-				next = u->orders.list->GetFirstOrder();
-			}
-		} while (next != curr && !next->IsUnloadingOrder());
+		const Order * next = u->orders.list->GetNextUnloadingOrder(curr);
 
 		uint unload_flags = curr->GetUnloadType();
 		StationID next_station = next->GetDestination();
