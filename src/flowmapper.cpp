@@ -19,7 +19,7 @@ void FlowMapper::CalcScaleFactors() {
 				flow_sum += path->GetFlow();
 			}
 		}
-		scale_factors[node_id] = float(UINT_MAX) / flow_sum;
+		scale_factors[node_id] = node.supply / flow_sum;
 	}
 }
 
