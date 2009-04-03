@@ -170,20 +170,20 @@ bool LinkGraph::Join() {
 	jobs.pop_front();
 
 	FlowStatSet new_flows;
-	for(NodeID i = 0; i < comp->GetSize(); ++i) {
-		Node & node = comp->GetNode(i);
+	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
+		Node & node = comp->GetNode(node_id);
 		StationID id = node.station;
 		station_colours[id] += USHRT_MAX / 2;
 		if (id < current_station) current_station = id;
 		FlowStatMap & flows = GetStation(id)->goods[cargo].flows;
-		for(FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
-			StationID source = i->first;
+		for(FlowStatMap::iterator flowmap_it = flows.begin(); flowmap_it != flows.end(); ++flowmap_it) {
+			StationID source = flowmap_it->first;
 			FlowViaMap & node_flows = node.flows[source];
-			FlowStatSet & via_set = i->second;
-			for (FlowStatSet::iterator j = via_set.begin(); j != via_set.end(); ++j) {
-				FlowViaMap::iterator update = node_flows.find(j->via);
+			FlowStatSet & via_set = flowmap_it->second;
+			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end(); ++flowset_it) {
+				FlowViaMap::iterator update = node_flows.find(flowset_it->via);
 				if (update != node_flows.end()) {
-					new_flows.insert(FlowStat(j->via, update->second, j->sent));
+					new_flows.insert(FlowStat(flowset_it->via, update->second, flowset_it->sent));
 					node_flows.erase(update);
 				}
 			}
