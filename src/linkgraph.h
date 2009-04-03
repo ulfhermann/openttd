@@ -24,15 +24,21 @@ class Path;
 
 typedef std::set<Path *> PathSet;
 
+typedef std::map<StationID, uint> FlowViaMap;
+typedef std::map<StationID, FlowViaMap> FlowMap;
+
+
 class Node {
 public:
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
+	~Node();
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
 	uint supply;
 	uint undelivered_supply;
 	uint demand;
 	StationID station;
 	PathSet paths;
+	FlowMap flows;
 };
 
 class Edge {
@@ -123,6 +129,7 @@ class Path {
 public:
 	Path(NodeID n, bool source = false);
 	NodeID GetNode() const {return node;}
+	NodeID GetOrigin() const {return parent == NULL ? node : parent->GetOrigin();}
 	Path * GetParent() {return parent;}
 	float GetCapacity() const {return capacity;}
 	void Fork(Path * base, float cap, float dist);

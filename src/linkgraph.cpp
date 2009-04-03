@@ -14,6 +14,7 @@
 #include "map_func.h"
 #include "demands.h"
 #include "mcf.h"
+#include "flowmapper.h"
 #include "core/bitmath_func.hpp"
 #include <limits>
 #include <queue>
@@ -168,11 +169,31 @@ bool LinkGraph::Join() {
 	Component * comp = job.GetComponent();
 	jobs.pop_front();
 
+	FlowStatSet new_flows;
 	for(NodeID i = 0; i < comp->GetSize(); ++i) {
 		Node & node = comp->GetNode(i);
 		StationID id = node.station;
 		station_colours[id] += USHRT_MAX / 2;
 		if (id < current_station) current_station = id;
+		FlowStatMap & flows = GetStation(id)->goods[cargo].flows;
+		for(FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
+			StationID source = i->first;
+			FlowViaMap & node_flows = node.flows[source];
+			FlowStatSet & via_set = i->second;
+			for (FlowStatSet::iterator j = via_set.begin(); j != via_set.end(); ++j) {
+				FlowViaMap::iterator update = node_flows.find(j->via);
+				if (update != node_flows.end()) {
+					new_flows.insert(FlowStat(j->via, update->second, j->sent));
+					node_flows.erase(update);
+				}
+			}
+			via_set.swap(new_flows);
+			new_flows.clear();
+			for (FlowViaMap::iterator update = node_flows.begin(); update != node_flows.end();) {
+				via_set.insert(FlowStat(update->first, update->second, 0));
+				node_flows.erase(update++);
+			}
+		}
 	}
 	delete comp;
 	return true;
@@ -244,6 +265,7 @@ Path::Path(NodeID n, bool source)  :
 void LinkGraphJob::SpawnThread(CargoID cargo) {
 	AddHandler(new DemandCalculator(cargo));
 	AddHandler(new MultiCommodityFlow());
+	AddHandler(new FlowMapper());
 	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
 		// Of course this will hang a bit.
@@ -268,3 +290,9 @@ LinkGraphJob::LinkGraphJob(Component * c, uint join) :
 	join_time(join),
 	component(c)
 {}
+
+Node::~Node() {
+	for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+		 delete (*i);
+	}
+}

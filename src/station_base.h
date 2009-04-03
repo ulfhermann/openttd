@@ -20,6 +20,7 @@
 #include "viewport_type.h"
 #include <list>
 #include <map>
+#include <set>
 
 DECLARE_OLD_POOL(Station, Station, 6, 1000)
 DECLARE_OLD_POOL(RoadStop, RoadStop, 5, 2000)
@@ -45,7 +46,24 @@ public:
 	}
 };
 
+class FlowStat {
+public:
+	FlowStat(StationID st = INVALID_STATION, uint p = 0, uint s = 0) :
+		planned(p), sent(s), via(st) {}
+	uint planned;
+	uint sent;
+	StationID via;
+	struct comp {
+		bool operator()(const FlowStat & x, const FlowStat & y) const {
+			return x.planned - x.sent > y.planned - y.sent;
+		}
+	};
+
+};
+
+typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow to be sent via specified station (or consumed locally)
 typedef std::map<StationID, LinkStat> LinkStatMap;
+typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by origin stations
 
 struct GoodsEntry {
 	enum AcceptancePickup {
@@ -68,7 +86,9 @@ struct GoodsEntry {
 	byte last_age;
 	CargoList cargo;        ///< The cargo packets of cargo waiting in this station
 	uint supply;
+	FlowStatMap flows;      ///< The planned flows through this station
 	LinkStatMap link_stats; ///< capacities and usage statistics for incoming links
+
 };
 
 /** A Stop for a Road Vehicle */

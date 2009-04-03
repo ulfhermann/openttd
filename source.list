@@ -25,6 +25,7 @@ elrail.cpp
 engine.cpp
 fileio.cpp
 fios.cpp
+flowmapper.cpp
 fontcache.cpp
 gamelog.cpp
 genworld.cpp
@@ -183,6 +184,7 @@ engine_type.h
 fileio_func.h
 fileio_type.h
 fios.h
+flowmapper.h
 fontcache.h
 functions.h
 gamelog.h

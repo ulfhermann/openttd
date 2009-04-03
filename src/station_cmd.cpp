@@ -2853,6 +2853,7 @@ static void UpdateStationRating(Station *st)
 
 static void UpdateStationStats(Station * st) {
 	uint length = _settings_game.economy.moving_average_length;
+	FlowStatSet new_flows;
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = st->goods[goods_index];
 		good.supply *= length;
@@ -2871,6 +2872,25 @@ static void UpdateStationStats(Station * st) {
 				} else {
 					++i;
 				}
+			}
+		}
+
+		FlowStatMap & flows = good.flows;
+		for (FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
+			StationID source = i->first;
+			if (!IsValidStationID(source)) {
+				flows.erase(i++);
+			} else {
+				FlowStatSet & flow_set = i->second;
+				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+					StationID via = j->via;
+					if (IsValidStationID(via)) {
+						new_flows.insert(FlowStat(via, j->planned, (j->sent * length) / (length + 1)));
+					}
+				}
+				flow_set.swap(new_flows);
+				new_flows.clear();
+				++i;
 			}
 		}
 	}

@@ -108,6 +108,7 @@ static const SaveLoad _station_desc[] = {
 
 static uint16 _waiting_acceptance;
 static uint16 _num_links;
+static uint16 _num_flows;
 static uint16 _cargo_source;
 static uint32 _cargo_source_xy;
 static uint16 _cargo_days;
@@ -129,6 +130,21 @@ static const SaveLoad _linkstat_desc[] = {
 		 SLE_END()
 };
 
+static const SaveLoad _flowstat_desc[] = {
+		SLEG_CONDVAR(             _station_id,         SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    via,                 SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    planned,             SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    sent,                SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_END()
+};
+
+void CountFlows(FlowStatMap & flows) {
+	_num_flows = 0;
+	for(FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
+		_num_flows += i->second.size();
+	}
+}
+
 void SaveLoad_STNS(Station *st)
 {
 	static const SaveLoad _goods_desc[] = {
@@ -147,6 +163,7 @@ void SaveLoad_STNS(Station *st)
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_flows,          SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
 		SLE_END()
 	};
 
@@ -158,7 +175,9 @@ void SaveLoad_STNS(Station *st)
 	for (CargoID i = 0; i < num_cargo; i++) {
 		GoodsEntry *ge = &st->goods[i];
 		LinkStatMap & stats = ge->link_stats;
+		FlowStatMap & flows = ge->flows;
 		_num_links = stats.size(); // for saving, is overwritten by next line when loading
+		CountFlows(flows);
 		SlObject(ge, _goods_desc);
 		if (CheckSavegameVersion(68)) {
 			SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
@@ -177,17 +196,28 @@ void SaveLoad_STNS(Station *st)
 				ge->cargo.Append(cp);
 			}
 		}
-
-		if (stats.empty() && _num_links > 0) { // loading
+		if ((stats.empty() && _num_links > 0) || (flows.empty() && _num_flows > 0)) { // loading
 			LinkStat ls;
 			for (uint i = 0; i < _num_links; ++i) {
 				SlObject(&ls, _linkstat_desc);
 				stats[_station_id] = ls;
 			}
+			FlowStat fs;
+			for (uint i = 0; i < _num_flows; ++i) {
+				SlObject(&fs, _flowstat_desc);
+				flows[_station_id].insert(fs);
+			}
 		} else { // saving
 			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
 				_station_id = i->first;
 				SlObject(&(i->second), _linkstat_desc);
+			}
+			for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
+				_station_id = i->first;
+				FlowStatSet & flow_set = i->second;
+				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+					SlObject(const_cast<FlowStat *>(&(*j)), _flowstat_desc);
+				}
 			}
 		}
 	}
