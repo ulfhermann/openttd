@@ -27,8 +27,12 @@ const char *NetworkAddress::GetHostname()
 uint16 NetworkAddress::GetPort() const
 {
 	switch (this->address.ss_family) {
+		case AF_UNSPEC:
 		case AF_INET:
 			return ntohs(((struct sockaddr_in *)&this->address)->sin_port);
+
+		case AF_INET6:
+			return ntohs(((struct sockaddr_in6 *)&this->address)->sin6_port);
 
 		default:
 			NOT_REACHED();
@@ -38,8 +42,13 @@ uint16 NetworkAddress::GetPort() const
 void NetworkAddress::SetPort(uint16 port)
 {
 	switch (this->address.ss_family) {
+		case AF_UNSPEC:
 		case AF_INET:
 			((struct sockaddr_in*)&this->address)->sin_port = htons(port);
+			break;
+
+		case AF_INET6:
+			((struct sockaddr_in6*)&this->address)->sin6_port = htons(port);
 			break;
 
 		default:
@@ -162,6 +171,14 @@ static SOCKET ListenLoopProc(addrinfo *runp)
 	}
 
 	if (!SetNoDelay(sock)) DEBUG(net, 1, "Setting TCP_NODELAY failed");
+
+	int reuse = 1;
+	/* The (const char*) cast is needed for windows!! */
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) == -1) {
+		DEBUG(net, 1, "Could not bind, setsockopt() failed:", strerror(errno));
+		closesocket(sock);
+		return INVALID_SOCKET;
+	}
 
 	if (bind(sock, runp->ai_addr, runp->ai_addrlen) != 0) {
 		DEBUG(net, 1, "Could not bind: %s", strerror(errno));
