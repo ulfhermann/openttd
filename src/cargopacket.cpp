@@ -176,7 +176,7 @@ void CargoList::DeliverPacket(List::iterator & c, uint & remaining_unload) {
 	}
 }
 
-void CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest) {
+CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest) {
 	CargoPacket * p = *c;
 	if (p->count <= remaining_unload) {
 		packets.erase(c++);
@@ -187,89 +187,77 @@ void CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, Good
 	dest->cargo.packets.push_back(p);
 	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
 	remaining_unload -= p->count;
+	return p;
 }
 
-void CargoList::UnloadPacketOld(UnloadDescription & ul, List::iterator & c, uint & remaining_unload) {
-	CargoPacket * p = *c;
-	p->next = INVALID_STATION;
+uint CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) const {
+	if (p->next != ul.curr_station || ul.dest->flows[p->source].empty()) {
+		/* there is no plan: use normal unloading */
+		return WillUnloadOld(ul, p);
+	} else {
+		/* use cargodist unloading*/
+		return WillUnloadCargoDist(ul, p);
+	}
+}
 
+uint CargoList::WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const {
 	/* try to unload cargo */
 	bool move = ul.flags & (OUFB_UNLOAD | OUF_UNLOAD_IF_POSSIBLE);
 	/* try to deliver cargo if unloading */
 	bool deliver = (ul.flags & OUF_UNLOAD_IF_POSSIBLE) && !(ul.flags & OUFB_TRANSFER) && (p->source != ul.curr_station);
 	/* transfer cargo if delivery was unsuccessful */
 	bool transfer = ul.flags & (OUFB_TRANSFER | OUFB_UNLOAD);
-
 	if (move) {
 		if(deliver) {
-			DeliverPacket(c, remaining_unload);
+			return UL_DELIVER;
 		} else if (transfer) {
-			TransferPacket(c, remaining_unload, ul.dest);
+			return UL_TRANSFER;
 		} else {
 			/* this case is for (non-)delivery to the source station without special flags.
 			 * like the code in MoveTo did, we keep the packet in this case
 			 */
-			++c;
+			return UL_KEEP;
 		}
 	} else {
-		++c;
+		return UL_KEEP;
 	}
 }
 
-void CargoList::UnloadPacketCargoDist(UnloadDescription & ul, List::iterator & c, uint & remaining_unload) {
-	CargoPacket * p = *c;
-	uint last_remaining = remaining_unload;
-
-	FlowStatSet & flow_stats = ul.dest->flows[p->source];
-	FlowStatSet::iterator flow_it = flow_stats.begin();
-	StationID via = flow_it->via;
-	bool plan_fulfilled = true;
-
+uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const {
+	StationID via = ul.dest->flows[p->source].begin()->via;
 	if (via == ul.curr_station) {
 		/* this is the final destination, deliver ... */
-		p->next = INVALID_STATION;
 		if (ul.flags & OUFB_TRANSFER) {
 			/* .. except if explicitly told not to do so ... */
-			TransferPacket(c, remaining_unload, ul.dest);
-			plan_fulfilled = false;
+			return UL_TRANSFER;
 		} else if (ul.flags & OUF_UNLOAD_IF_POSSIBLE) {
-			DeliverPacket(c, remaining_unload);
+			return UL_DELIVER | UL_PLANNED;
 		} else {
 			/* .. or if the station suddenly doesn't accept our cargo. */
-			++c;
-			plan_fulfilled = false;
+			return UL_KEEP;
 		}
 	} else {
-		p->next = via;
 		/* packet has to travel on, find out if it can stay on board */
 		if (ul.flags & OUFB_UNLOAD) {
 			/* order overrides cargodist:
 			 * play by the old loading rules here as player is interfering with cargodist
 			 * try to deliver, as move has been forced upon us */
 			if ((ul.flags & OUF_UNLOAD_IF_POSSIBLE) && !(ul.flags & OUFB_TRANSFER) &&	p->source != ul.curr_station) {
-				DeliverPacket(c, remaining_unload);
-				plan_fulfilled = false;
+				return UL_DELIVER;
 			} else {
 				/* transfer cargo, as unloading didn't work
 				 * transfer condition doesn't need to be checked as MTF_FORCE_MOVE is known to be set
-				 * the plan is still fulfilled as the packet can be picked up by another vehicle travelling to via
+				 * the plan is still fulfilled as the packet can be picked up by another vehicle travelling to "via"
 				 */
-				TransferPacket(c, remaining_unload, ul.dest);
+				return UL_TRANSFER | UL_PLANNED;
 			}
 		} else if (ul.next_station == via) {
 			/* vehicle goes to the packet's next hop, keep the packet*/
-			++c;
+			return UL_KEEP | UL_PLANNED;
 		} else {
 			/* vehicle goes somewhere else, transfer the packet*/
-			TransferPacket(c, remaining_unload, ul.dest);
+			return UL_TRANSFER | UL_PLANNED;
 		}
-	}
-
-	if(plan_fulfilled) {
-		uint planned = flow_it->planned;
-		uint sent = flow_it->sent + last_remaining - remaining_unload;
-		flow_stats.erase(flow_it);
-		flow_stats.insert(FlowStat(via, planned, sent));
 	}
 }
 
@@ -278,13 +266,39 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, St
 	UnloadDescription ul(dest, curr_station, next_station, flags);
 
 	for(List::iterator c = packets.begin(); c != packets.end() && remaining_unload > 0;) {
+
 		CargoPacket * p = *c;
-		if (p->next != curr_station || dest->flows[p->source].empty()) {
-			/* there is no plan: use normal unloading */
-			UnloadPacketOld(ul, c, remaining_unload);
-		} else {
-			/* use cargodist unloading*/
-			UnloadPacketCargoDist(ul, c, remaining_unload);
+		StationID source = p->source;
+		uint last_remaining = remaining_unload;
+		uint unload_flags = WillUnload(ul, p);
+
+		if (unload_flags & UL_KEEP) {
+			++c;
+		} else if (unload_flags & UL_DELIVER) {
+			DeliverPacket(c, remaining_unload);
+		} else if (unload_flags & UL_TRANSFER) {
+			/* TransferPacket may split the packet and return the transferred part */
+			p = TransferPacket(c, remaining_unload, dest);
+		}
+
+		if (unload_flags & UL_PLANNED) {
+			/*
+			 * cargodist has handled this packet as planned
+			 * update the flow mapping
+			 */
+			FlowStatSet & flow_stats = ul.dest->flows[source];
+			FlowStatSet::iterator flow_it = flow_stats.begin();
+			StationID via = flow_it->via;
+			uint planned = flow_it->planned;
+			uint sent = flow_it->sent + last_remaining - remaining_unload;
+
+			if (!(unload_flags & UL_DELIVER)) {
+				p->next = via;
+			}
+			flow_stats.erase(flow_it);
+			flow_stats.insert(FlowStat(via, planned, sent));
+		} else if (!(unload_flags & UL_DELIVER)) {
+			p->next = INVALID_STATION;
 		}
 	}
 

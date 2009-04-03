@@ -77,6 +77,31 @@ struct CargoPacket : PoolItem<CargoPacket, CargoPacketID, &_CargoPacket_pool> {
 
 extern void SaveLoad_STNS(Station *st);
 
+struct UnloadDescription {
+	UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint f) :
+			dest(d), curr_station(curr), next_station(next), flags(f) {}
+	GoodsEntry * dest;
+	/**
+	 * station we are trying to unload at now
+	 */
+	StationID curr_station;
+	/**
+	 * station the vehicle will unload at next
+	 */
+	StationID next_station;
+	/**
+	 * delivery flags
+	 */
+	uint flags;
+};
+
+enum UnloadFlags {
+	UL_DELIVER  = 1 << 0,
+	UL_TRANSFER = 1 << 1,
+	UL_KEEP     = 1 << 2,
+	UL_PLANNED  = 1 << 3,
+};
+
 /**
  * Simple collection class for a list of cargo packets
  */
@@ -95,28 +120,10 @@ private:
 	StationID source;     ///< Cache for the source of the packet
 	uint days_in_transit; ///< Cache for the number of days in transit
 
-	struct UnloadDescription {
-		UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint f) :
-			dest(d), curr_station(curr), next_station(next), flags(f) {}
-		GoodsEntry * dest;
-		/**
-		 * station we are trying to unload at now
-		 */
-		StationID curr_station;
-		/**
-		 * station the vehicle will unload at next
-		 */
-		StationID next_station;
-		/**
-		 * delivery flags
-		 */
-		uint flags;
-	};
-
 	void DeliverPacket(List::iterator & c, uint & remaining_unload);
-	void TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
-	void UnloadPacketOld(UnloadDescription & desc, List::iterator & c, uint & remaining_unload);
-	void UnloadPacketCargoDist(UnloadDescription & desc, List::iterator & c, uint & remaining_unload);
+	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
+	uint WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
+	uint WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
 
 public:
 	friend void SaveLoad_STNS(Station *st);
@@ -210,6 +217,8 @@ public:
 	 * @return the number of cargo entities actually moved
 	 */
 	uint MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, StationID curr_station, StationID next_station);
+
+	uint WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
 
 	/**
 	 * Moves the given amount of cargo to a vehicle.
