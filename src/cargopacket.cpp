@@ -328,6 +328,8 @@ uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, bool force_load, S
 				p->loaded_at_xy = load_place;
 				p->paid_for = false;
 			}
+		} else {
+			++c;
 		}
 	}
 	dest->InvalidateCache();
@@ -356,5 +358,13 @@ void CargoList::InvalidateCache()
 	}
 	days_in_transit = dit / count;
 	source = (*packets.begin())->source;
+}
+
+UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint f) :
+	dest(d), curr_station(curr), next_station(next), flags(f)
+{
+	if (HasBit(dest->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
+		flags |= OUF_UNLOAD_IF_POSSIBLE;
+	}
 }
 

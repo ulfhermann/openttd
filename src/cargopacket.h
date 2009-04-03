@@ -78,8 +78,7 @@ struct CargoPacket : PoolItem<CargoPacket, CargoPacketID, &_CargoPacket_pool> {
 extern void SaveLoad_STNS(Station *st);
 
 struct UnloadDescription {
-	UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint f) :
-			dest(d), curr_station(curr), next_station(next), flags(f) {}
+	UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint f);
 	GoodsEntry * dest;
 	/**
 	 * station we are trying to unload at now
@@ -199,8 +198,10 @@ public:
 
 	/**
 	 * Moves the given amount of cargo from a vehicle to a station.
-	 * Depending on the value of flags the side effects of this function differ:
-	 *  - OUF_UNLOAD_IF_POSSIBLE: packets are accepted here and may be unloaded and/or delivered (=destroyed);
+	 * Depending on the value of flags and dest the side effects of this function differ:
+	 *  - dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
+	 *                        => MoveToStation sets OUF_UNLOAD_IF_POSSIBLE in the flags
+	 *                        packets are accepted here and may be unloaded and/or delivered (=destroyed);
 	 *                        if not using cargodist: all packets are unloaded and delivered
 	 *                        if using cargodist: only packets which have this station as final destination are unloaded and delivered
 	 *                        if using cargodist: other packets may or may not be unloaded, depending on next_station

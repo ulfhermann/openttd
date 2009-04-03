@@ -1611,29 +1611,19 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			uint cargo_count = v->cargo.Count();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 
-			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
-				unload_flags |= OUF_UNLOAD_IF_POSSIBLE;
-			}
-
 			uint delivered = v->cargo.MoveToStation(ge, amount_unloaded, unload_flags, last_visited, next_station);
 			if (delivered > 0) {
+				/* Deliver goods to the station */
+				st->time_since_unload = 0;
+				unloading_time += delivered;
+				anything_unloaded = true;
 				result |= 1;
 			} else {
+				if (!v->cargo.Empty()) {
+					completely_emptied = false;
+				}
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 				continue;
-			}
-
-			/* Deliver goods to the station */
-			st->time_since_unload = 0;
-
-			unloading_time += amount_unloaded;
-
-			anything_unloaded = true;
-			if (_settings_game.order.gradual_loading && delivered < amount_unloaded) {
-				completely_emptied = false;
-			} else {
-				/* We have finished unloading (cargo count == 0) */
-				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
 
 			continue;
