@@ -2901,8 +2901,9 @@ void OnTick_Station()
 	FOR_ALL_STATIONS(st) {
 		StationHandleSmallTick(st);
 		// update the station statistics every <unit> days
-		if ((_tick_counter + st->index) % (DAY_TICKS * _settings_game.economy.moving_average_unit) == 0)
+		if ((_tick_counter + st->index) % (DAY_TICKS * _settings_game.economy.moving_average_unit) == 0) {
 			UpdateStationStats(st);
+		}
 
 		/* Run 250 tick interval trigger for station animation.
 		 * Station index is included so that triggers are not all done
