@@ -169,7 +169,6 @@ bool LinkGraph::Join() {
 	}
 
 	Component * comp = job.GetComponent();
-	jobs.pop_front();
 
 	for(NodeID i = 0; i < comp->GetSize(); ++i) {
 		Node & node = comp->GetNode(i);
@@ -177,7 +176,7 @@ bool LinkGraph::Join() {
 		station_colours[id] += USHRT_MAX / 2;
 		if (id < current_station) current_station = id;
 	}
-	delete comp;
+	jobs.pop_front();
 	return true;
 }
 
@@ -203,6 +202,8 @@ LinkGraphJob::~LinkGraphJob() {
 		delete handler;
 	}
 	handlers.clear();
+	delete component;
+	delete thread;
 }
 
 void RunLinkGraphJob(void * j) {
@@ -271,3 +272,15 @@ LinkGraphJob::LinkGraphJob(Component * c, uint join) :
 	join_time(join),
 	component(c)
 {}
+
+void LinkGraph::Clear() {
+	jobs.clear();
+	InitColours();
+	current_colour = 0;
+	current_station = 0;
+}
+
+void InitializeLinkGraphs() {
+	InitializeDemands();
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
+}

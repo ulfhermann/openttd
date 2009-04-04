@@ -95,6 +95,7 @@ static void DoSave_LGRP(void *)
 
 static void Load_LGRP()
 {
+	InitializeLinkGraphs();
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
