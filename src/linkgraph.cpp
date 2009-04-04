@@ -170,9 +170,10 @@ void LinkGraph::Join() {
 	}
 	LinkGraphJob * job = jobs.front();
 
-	if (job->GetJoinTime() > _tick_counter) {
+	if (job->GetJoinDate() > _date) {
 		return;
 	}
+	job->Join();
 
 	delete job;
 	jobs.pop_front();
@@ -262,19 +263,21 @@ void LinkGraphJob::SpawnThread(CargoID cargo) {
 
 LinkGraphJob::LinkGraphJob(Component * c) :
 	thread(NULL),
-	join_time(_tick_counter + _settings_game.economy.linkgraph_recalc_interval * DAY_TICKS),
+	join_date(_date + _settings_game.economy.linkgraph_recalc_interval),
 	component(c)
 {}
 
-LinkGraphJob::LinkGraphJob(Component * c, uint join) :
+LinkGraphJob::LinkGraphJob(Component * c, Date join) :
 	thread(NULL),
-	join_time(join),
+	join_date(join),
 	component(c)
 {}
 
 void LinkGraph::Clear() {
 	for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
-		delete (*i);
+		LinkGraphJob * job = *i;
+		job->Join();
+		delete job;
 	}
 	jobs.clear();
 	InitColours();
