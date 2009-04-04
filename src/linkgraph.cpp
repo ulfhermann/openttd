@@ -88,10 +88,13 @@ void LinkGraph::InitColours()
 void OnTick_LinkGraph()
 {
 	if ((_tick_counter + LinkGraph::COMPONENTS_TICK) % DAY_TICKS == 0) {
-		CargoID cargo = (_date) % NUM_CARGO;
-		LinkGraph & graph = _link_graphs[cargo];
-		if (!graph.NextComponent()) {
-			graph.Join();
+		for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
+			if ((_date + cargo) % _settings_game.economy.linkgraph_recalc_interval == 0) {
+				LinkGraph & graph = _link_graphs[cargo];
+				if (!graph.NextComponent()) {
+					graph.Join();
+				}
+			}
 		}
 	}
 }
