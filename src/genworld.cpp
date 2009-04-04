@@ -27,6 +27,7 @@
 #include "void_map.h"
 #include "settings_type.h"
 #include "town.h"
+#include "linkgraph.h"
 
 #include "table/sprites.h"
 
@@ -297,6 +298,7 @@ void GenerateWorld(GenerateWorldMode mode, uint size_x, uint size_y)
 	LoadStringWidthTable();
 
 	InitializeGame(_gw.size_x, _gw.size_y, false);
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 	PrepareGenerateWorldProgress();
 
 	/* Re-init the windowing system */

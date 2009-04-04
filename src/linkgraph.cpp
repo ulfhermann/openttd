@@ -179,3 +179,11 @@ void LinkGraph::AddComponent(Component * component) {
 		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
 }
+
+void LinkGraph::Clear() {
+	for(ComponentList::iterator i = components.begin(); i != components.end(); ++i) {
+		delete *i;
+	}
+	components.clear();
+	InitColours();
+}

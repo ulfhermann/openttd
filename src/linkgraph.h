@@ -66,6 +66,7 @@ typedef std::list<Component *> ComponentList;
 class LinkGraph {
 public:
 	LinkGraph();
+	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
 	bool NextComponent();
