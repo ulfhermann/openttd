@@ -87,13 +87,13 @@ class LinkGraphJob {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
 	LinkGraphJob(Component * c);
-	LinkGraphJob(Component * c, uint join);
+	LinkGraphJob(Component * c, Date join);
 
 	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
 	void Run();
 	void SpawnThread(CargoID cargo);
-	uint GetJoinTime() const {return join_time;}
 	void Join() {if (thread != NULL) thread->Join();}
+	Date GetJoinDate() {return join_date;}
 	Component * GetComponent() {return component;}
 	~LinkGraphJob();
 private:
@@ -102,7 +102,7 @@ private:
 	 */
 	LinkGraphJob(const LinkGraphJob & other) {NOT_REACHED();}
 	ThreadObject * thread;
-	uint join_time;
+	Date join_date;
 	Component * component;
 	HandlerList handlers;
 };
