@@ -1671,6 +1671,13 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 
+			/* The full load order could be seen as interference by the user.
+			 * In that case force_load should be set and all cargo available
+			 * be moved onto the vehicle.
+			 */
+			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
+			cargo_left[v->cargo_type] += (cap - loaded); // revert unused reservation
+
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
 			 * loading them. Since this will cause
@@ -1678,15 +1685,10 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			 * the whole vehicle chain is really totally empty, the
 			 * completely_emptied assignment can then be safely
 			 * removed; that's how TTDPatch behaves too. --pasky */
-			completely_emptied = false;
-			anything_loaded = true;
-
-			/* The full load order could be seen as interference by the user.
-			 * In that case force_load should be set and all cargo available
-			 * be moved onto the vehicle.
-			 */
-			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
-			cargo_left[v->cargo_type] += (cap - loaded); // revert unused reservation
+			if (loaded > 0) {
+				completely_emptied = false;
+				anything_loaded = true;
+			}
 
 			st->time_since_load = 0;
 			st->last_vehicle_type = v->type;
