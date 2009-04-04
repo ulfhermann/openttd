@@ -95,8 +95,10 @@ static void DoSave_LGRP(void *)
 
 static void Load_LGRP()
 {
+	InitializeDemands();
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
+		graph.Clear();
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		for (uint i = 0; i < _num_components; ++i) {
 			Component * comp = new Component();
