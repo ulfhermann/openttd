@@ -189,3 +189,7 @@ void LinkGraph::Clear() {
 	current_colour = 0;
 	current_station = 0;
 }
+
+void InitializeLinkGraphs() {
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
+}
