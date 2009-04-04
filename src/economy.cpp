@@ -1482,33 +1482,35 @@ void VehiclePayment(Vehicle *front_v)
 
 			uint unload_flags = cargo_list.WillUnload(ul, cp);
 
-			if (!(unload_flags & UL_KEEP)) {
+			if (unload_flags & (UL_DELIVER | UL_TRANSFER)) {
 				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 				result = 2;
 			}
 
-			if (!cp->paid_for && (unload_flags & UL_DELIVER)) {
-				/* Deliver goods to the station */
-				st->time_since_unload = 0;
+			if (!cp->paid_for) {
+				if (unload_flags & UL_DELIVER) {
+					/* Deliver goods to the station */
+					st->time_since_unload = 0;
 
-				/* handle end of route payment */
-				Money profit = DeliverGoods(cp->count, v->cargo_type, cp->source, last_visited, cp->source_xy, cp->days_in_transit, &industry_set);
-				cp->paid_for = true;
-				route_profit   += profit; // display amount paid for final route delivery, A-D of a chain A-B-C-D
-				vehicle_profit += profit - cp->feeder_share;                    // whole vehicle is not payed for transfers picked up earlier
-				result = 1;
-			} else if (!cp->paid_for && (unload_flags & UL_TRANSFER)) {
-				Money profit = GetTransportedGoodsIncome(
-					cp->count,
-					/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-					DistanceManhattan(cp->loaded_at_xy, GetStation(last_visited)->xy),
-					cp->days_in_transit,
-					v->cargo_type);
+					/* handle end of route payment */
+					Money profit = DeliverGoods(cp->count, v->cargo_type, cp->source, last_visited, cp->source_xy, cp->days_in_transit, &industry_set);
+					cp->paid_for = true;
+					route_profit   += profit; // display amount paid for final route delivery, A-D of a chain A-B-C-D
+					vehicle_profit += profit - cp->feeder_share;                    // whole vehicle is not payed for transfers picked up earlier
+					result = 1;
+				} else if (unload_flags & UL_TRANSFER) {
+					Money profit = GetTransportedGoodsIncome(
+							cp->count,
+							/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
+							DistanceManhattan(cp->loaded_at_xy, GetStation(last_visited)->xy),
+							cp->days_in_transit,
+							v->cargo_type);
 
-				front_v->profit_this_year += profit << 8;
-				virtual_profit   += profit; // accumulate transfer profits for whole vehicle
-				cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
-				cp->paid_for      = true;   // record that the cargo has been paid for to eliminate double counting
+					front_v->profit_this_year += profit << 8;
+					virtual_profit   += profit; // accumulate transfer profits for whole vehicle
+					cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
+					cp->paid_for      = true;   // record that the cargo has been paid for to eliminate double counting
+				}
 			}
 		}
 		v->cargo.InvalidateCache();

@@ -202,11 +202,11 @@ uint CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) 
 
 uint CargoList::WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const {
 	/* try to unload cargo */
-	bool move = ul.flags & (OUFB_UNLOAD | OUF_UNLOAD_IF_POSSIBLE);
+	bool move = ul.flags & (UL_DELIVER | UL_ACCEPTED);
 	/* try to deliver cargo if unloading */
-	bool deliver = (ul.flags & OUF_UNLOAD_IF_POSSIBLE) && !(ul.flags & OUFB_TRANSFER) && (p->source != ul.curr_station);
+	bool deliver = (ul.flags & UL_ACCEPTED) && !(ul.flags & UL_TRANSFER) && (p->source != ul.curr_station);
 	/* transfer cargo if delivery was unsuccessful */
-	bool transfer = ul.flags & (OUFB_TRANSFER | OUFB_UNLOAD);
+	bool transfer = ul.flags & (UL_TRANSFER | UL_DELIVER);
 	if (move) {
 		if(deliver) {
 			return UL_DELIVER;
@@ -227,10 +227,10 @@ uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPac
 	StationID via = ul.dest->flows[p->source].begin()->via;
 	if (via == ul.curr_station) {
 		/* this is the final destination, deliver ... */
-		if (ul.flags & OUFB_TRANSFER) {
+		if (ul.flags & UL_TRANSFER) {
 			/* .. except if explicitly told not to do so ... */
 			return UL_TRANSFER;
-		} else if (ul.flags & OUF_UNLOAD_IF_POSSIBLE) {
+		} else if (ul.flags & UL_ACCEPTED) {
 			return UL_DELIVER | UL_PLANNED;
 		} else {
 			/* .. or if the station suddenly doesn't accept our cargo. */
@@ -238,11 +238,11 @@ uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPac
 		}
 	} else {
 		/* packet has to travel on, find out if it can stay on board */
-		if (ul.flags & OUFB_UNLOAD) {
+		if (ul.flags & UL_DELIVER) {
 			/* order overrides cargodist:
 			 * play by the old loading rules here as player is interfering with cargodist
 			 * try to deliver, as move has been forced upon us */
-			if ((ul.flags & OUF_UNLOAD_IF_POSSIBLE) && !(ul.flags & OUFB_TRANSFER) &&	p->source != ul.curr_station) {
+			if ((ul.flags & UL_ACCEPTED) && !(ul.flags & UL_TRANSFER) && p->source != ul.curr_station) {
 				return UL_DELIVER;
 			} else {
 				/* transfer cargo, as unloading didn't work
@@ -272,13 +272,13 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, St
 		uint last_remaining = remaining_unload;
 		uint unload_flags = WillUnload(ul, p);
 
-		if (unload_flags & UL_KEEP) {
-			++c;
-		} else if (unload_flags & UL_DELIVER) {
+		if (unload_flags & UL_DELIVER) {
 			DeliverPacket(c, remaining_unload);
 		} else if (unload_flags & UL_TRANSFER) {
 			/* TransferPacket may split the packet and return the transferred part */
 			p = TransferPacket(c, remaining_unload, dest);
+		} else /* UL_KEEP */ {
+			++c;
 		}
 
 		if (unload_flags & UL_PLANNED) {
@@ -359,11 +359,17 @@ void CargoList::InvalidateCache()
 	source = (*packets.begin())->source;
 }
 
-UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint f) :
-	dest(d), curr_station(curr), next_station(next), flags(f)
+UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint order_flags) :
+	dest(d), curr_station(curr), next_station(next), flags(0)
 {
 	if (HasBit(dest->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
-		flags |= OUF_UNLOAD_IF_POSSIBLE;
+		flags |= UL_ACCEPTED;
+	}
+	if (HasBit(order_flags, OUFB_UNLOAD)) {
+		flags |= UL_DELIVER;
+	}
+	if (HasBit(order_flags, OUFB_TRANSFER)) {
+		flags |= UL_TRANSFER;
 	}
 }
 

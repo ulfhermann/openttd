@@ -95,10 +95,11 @@ struct UnloadDescription {
 };
 
 enum UnloadFlags {
-	UL_DELIVER  = 1 << 0,
-	UL_TRANSFER = 1 << 1,
-	UL_KEEP     = 1 << 2,
-	UL_PLANNED  = 1 << 3,
+	UL_KEEP     = 0,      ///< keep cargo on vehicle
+	UL_DELIVER  = 1 << 0, ///< deliver cargo
+	UL_TRANSFER = 1 << 1, ///< transfer cargo
+	UL_PLANNED  = 1 << 2, ///< transaction takes place as planned
+	UL_ACCEPTED = 1 << 3, ///< cargo is accepted
 };
 
 /**
