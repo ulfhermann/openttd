@@ -298,8 +298,7 @@ void GenerateWorld(GenerateWorldMode mode, uint size_x, uint size_y)
 	LoadStringWidthTable();
 
 	InitializeGame(_gw.size_x, _gw.size_y, false);
-	InitializeDemands();
-	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
+	InitializeLinkGraphs();
 	PrepareGenerateWorldProgress();
 
 	/* Re-init the windowing system */

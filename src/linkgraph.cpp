@@ -237,11 +237,13 @@ LinkGraphJob::LinkGraphJob(Component * c, uint join) :
 {}
 
 void LinkGraph::Clear() {
-	for(JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
-		delete *i;
-	}
 	jobs.clear();
 	InitColours();
 	current_colour = 0;
 	current_station = 0;
+}
+
+void InitializeLinkGraphs() {
+	InitializeDemands();
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 }
