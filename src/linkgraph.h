@@ -23,22 +23,23 @@ typedef uint NodeID;
 class Path;
 
 typedef std::set<Path *> PathSet;
-
 typedef std::map<StationID, uint> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
-
 
 class Node {
 public:
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
 	~Node();
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
+	void ExportFlows(FlowStatMap & station_flows);
 	uint supply;
 	uint undelivered_supply;
 	uint demand;
 	StationID station;
 	PathSet paths;
 	FlowMap flows;
+private:
+	void ExportNewFlows(FlowMap::iterator source_flows_it, FlowStatSet & via_set);
 };
 
 class Edge {

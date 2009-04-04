@@ -172,35 +172,64 @@ bool LinkGraph::Join() {
 
 	Component * comp = job->GetComponent();
 
-	FlowStatSet new_flows;
 	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
 		Node & node = comp->GetNode(node_id);
-		StationID id = node.station;
-		station_colours[id] += USHRT_MAX / 2;
-		if (id < current_station) current_station = id;
-		FlowStatMap & flows = GetStation(id)->goods[cargo].flows;
-		for(FlowStatMap::iterator flowmap_it = flows.begin(); flowmap_it != flows.end(); ++flowmap_it) {
-			StationID source = flowmap_it->first;
-			FlowViaMap & node_flows = node.flows[source];
-			FlowStatSet & via_set = flowmap_it->second;
-			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end(); ++flowset_it) {
-				FlowViaMap::iterator update = node_flows.find(flowset_it->via);
-				if (update != node_flows.end()) {
-					new_flows.insert(FlowStat(flowset_it->via, update->second, flowset_it->sent));
-					node_flows.erase(update);
-				}
-			}
-			via_set.swap(new_flows);
-			new_flows.clear();
-			for (FlowViaMap::iterator update = node_flows.begin(); update != node_flows.end();) {
-				via_set.insert(FlowStat(update->first, update->second, 0));
-				node_flows.erase(update++);
-			}
-		}
+		StationID station_id = node.station;
+		FlowStatMap & station_flows = GetStation(station_id)->goods[cargo].flows;
+		node.ExportFlows(station_flows);
+		station_colours[station_id] += USHRT_MAX / 2;
+		if (station_id < current_station) current_station = station_id;
 	}
 	delete job;
 	jobs.pop_front();
 	return true;
+}
+
+/**
+ * exports all entries in the FlowViaMap pointed to by source_flows it and erases it afterwards
+ */
+void Node::ExportNewFlows(FlowMap::iterator source_flows_it, FlowStatSet & via_set) {
+	FlowViaMap & source_flows = source_flows_it->second;
+	for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
+		via_set.insert(FlowStat(update->first, update->second, 0));
+		source_flows.erase(update++);
+	}
+	flows.erase(source_flows_it++);
+}
+
+void Node::ExportFlows(FlowStatMap & station_flows) {
+	FlowStatSet new_flows;
+	/* loop over all existing flows in the station and update them */
+	for(FlowStatMap::iterator flowmap_it = station_flows.begin(); flowmap_it != station_flows.end();) {
+		FlowMap::iterator source_flows_it = flows.find(flowmap_it->first);
+		if (source_flows_it == flows.end()) {
+			/* there are no flows for this source node anymore */
+			station_flows.erase(flowmap_it++);
+		} else {
+			FlowViaMap & source_flows = source_flows_it->second;
+			FlowStatSet & via_set = flowmap_it->second;
+			/* loop over the station's flow stats for this source node and update them */
+			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end();) {
+				FlowViaMap::iterator update = source_flows.find(flowset_it->via);
+				if (update != source_flows.end()) {
+					new_flows.insert(FlowStat(flowset_it->via, update->second, flowset_it->sent));
+					source_flows.erase(update);
+				}
+				via_set.erase(flowset_it++);
+			}
+			/* swap takes constant time, so we swap instead of adding all entries */
+			/* note: via_set is empty here */
+			via_set.swap(new_flows);
+			/* insert remaining flows for this source node */
+			ExportNewFlows(source_flows_it, via_set);
+			++flowmap_it;
+		}
+	}
+	/* loop over remaining flows (for other sources) in the node's map and insert them into the station */
+	for (FlowMap::iterator source_flows_it = flows.begin(); source_flows_it != flows.end();) {
+		FlowStatSet & via_set = station_flows[source_flows_it->first];
+		ExportNewFlows(source_flows_it, via_set);
+	}
 }
 
 void LinkGraph::AddComponent(Component * component, uint join) {
