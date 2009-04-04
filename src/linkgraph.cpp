@@ -170,7 +170,6 @@ bool LinkGraph::Join() {
 	}
 
 	Component * comp = job.GetComponent();
-	jobs.pop_front();
 
 	FlowStatSet new_flows;
 	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
@@ -198,7 +197,7 @@ bool LinkGraph::Join() {
 			}
 		}
 	}
-	delete comp;
+	jobs.pop_front();
 	return true;
 }
 
@@ -224,6 +223,8 @@ LinkGraphJob::~LinkGraphJob() {
 		delete handler;
 	}
 	handlers.clear();
+	delete component;
+	delete thread;
 }
 
 void RunLinkGraphJob(void * j) {
@@ -298,4 +299,16 @@ Node::~Node() {
 	for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
 		 delete (*i);
 	}
+}
+
+void LinkGraph::Clear() {
+	jobs.clear();
+	InitColours();
+	current_colour = 0;
+	current_station = 0;
+}
+
+void InitializeLinkGraphs() {
+	InitializeDemands();
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 }

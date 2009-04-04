@@ -106,6 +106,7 @@ typedef std::list<LinkGraphJob> JobList;
 class LinkGraph {
 public:
 	LinkGraph();
+	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
 	bool NextComponent();
@@ -147,5 +148,7 @@ protected:
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
+
+void InitializeLinkGraphs();
 
 #endif /* LINKGRAPH_H_ */
