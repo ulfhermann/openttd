@@ -23,22 +23,23 @@ typedef uint NodeID;
 class Path;
 
 typedef std::set<Path *> PathSet;
-
 typedef std::map<StationID, uint> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
-
 
 class Node {
 public:
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
 	~Node();
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
+	void ExportFlows(FlowStatMap & station_flows);
 	uint supply;
 	uint undelivered_supply;
 	uint demand;
 	StationID station;
 	PathSet paths;
 	FlowMap flows;
+private:
+	void ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set);
 };
 
 class Edge {
@@ -49,7 +50,7 @@ public:
 	uint demand;
 };
 
-typedef ushort colour;
+typedef uint16 colour;
 
 class Component {
 	typedef std::vector<Node> NodeVector;
@@ -58,7 +59,7 @@ class Component {
 
 public:
 	Component(uint size, colour c);
-	Component(colour c = USHRT_MAX);
+	Component(colour c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -87,6 +88,7 @@ class LinkGraphJob {
 public:
 	LinkGraphJob(Component * c);
 	LinkGraphJob(Component * c, uint join);
+
 	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
 	void Run();
 	void SpawnThread(CargoID cargo);
@@ -95,26 +97,35 @@ public:
 	Component * GetComponent() {return component;}
 	~LinkGraphJob();
 private:
+	/**
+	 * there cannot be two identical LinkGraphJobs,
+	 */
+	LinkGraphJob(const LinkGraphJob & other) {NOT_REACHED();}
 	ThreadObject * thread;
 	uint join_time;
 	Component * component;
 	HandlerList handlers;
 };
 
-typedef std::list<LinkGraphJob> JobList;
+typedef std::list<LinkGraphJob *> JobList;
 
 class LinkGraph {
 public:
 	LinkGraph();
+	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
-	bool NextComponent();
+	void NextComponent();
 	void InitColours();
-	bool Join();
+
+	void Join();
 	uint GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}
 	void AddComponent(Component * component, uint join);
-	const static uint COMPONENTS_TICK = 21;
+
+	const static uint COMPONENTS_SPAWN_TICK = 21;
+	const static uint COMPONENTS_JOIN_TICK  = 58;
+
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
 	void StartJob(Component * component);
@@ -147,5 +158,7 @@ protected:
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
+
+void InitializeLinkGraphs();
 
 #endif /* LINKGRAPH_H_ */

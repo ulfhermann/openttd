@@ -252,7 +252,6 @@ static void Load_STNS()
 
 	/* This is to ensure all pointers are within the limits of _stations_size */
 	if (_station_tick_ctr > GetMaxStationIndex()) _station_tick_ctr = 0;
-	InitializeDemands();
 }
 
 static void Save_ROADSTOP()

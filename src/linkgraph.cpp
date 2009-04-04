@@ -23,20 +23,21 @@ LinkGraph _link_graphs[NUM_CARGO];
 
 typedef std::map<StationID, NodeID> ReverseNodeIndex;
 
-bool LinkGraph::NextComponent()
+void LinkGraph::NextComponent()
 {
+	StationID last_station = current_station;
 	ReverseNodeIndex index;
 	NodeID node = 0;
 	std::queue<Station *> search_queue;
 	Component * component = NULL;
 	while (true) {
 		// find first station of next component
-		if (station_colours[current_station] > USHRT_MAX / 2 && IsValidStationID(current_station)) {
+		if (station_colours[current_station] == 0 && IsValidStationID(current_station)) {
 			Station * station = GetStation(current_station);
 			LinkStatMap & links = station->goods[cargo].link_stats;
 			if (!links.empty()) {
-				if (++current_colour == USHRT_MAX / 2) {
-					current_colour = 0;
+				if (++current_colour == UINT16_MAX) {
+					current_colour = 1;
 				}
 				search_queue.push(station);
 				station_colours[current_station] = current_colour;
@@ -49,7 +50,10 @@ bool LinkGraph::NextComponent()
 		}
 		if (++current_station == GetMaxStationIndex()) {
 			current_station = 0;
-			return false;
+			InitColours();
+		}
+		if (current_station == last_station) {
+			return;
 		}
 	}
 	// find all stations belonging to the current component
@@ -77,31 +81,36 @@ bool LinkGraph::NextComponent()
 	}
 	// here the list of nodes and edges for this component is complete.
 	component->CalculateDistances();
-	jobs.push_back(component);
-	jobs.back().SpawnThread(cargo);
-	return true;
+	LinkGraphJob * job = new LinkGraphJob(component);
+	job->SpawnThread(cargo);
+	jobs.push_back(job);
 }
 
 void LinkGraph::InitColours()
 {
-	for (uint i = 0; i < Station_POOL_MAX_BLOCKS; ++i) {
-		station_colours[i] = USHRT_MAX;
-	}
+	memset(station_colours, 0, Station_POOL_MAX_BLOCKS * sizeof(uint16));
 }
 
 
 void OnTick_LinkGraph()
 {
-	if ((_tick_counter + LinkGraph::COMPONENTS_TICK) % DAY_TICKS == 0) {
-		CargoID cargo = (_date) % NUM_CARGO;
-		LinkGraph & graph = _link_graphs[cargo];
-		if (!graph.NextComponent()) {
-			graph.Join();
+	bool spawn = (_tick_counter + LinkGraph::COMPONENTS_SPAWN_TICK) % DAY_TICKS == 0;
+	bool join =  (_tick_counter + LinkGraph::COMPONENTS_JOIN_TICK)  % DAY_TICKS == 0;
+	if (spawn || join) {
+		for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
+			if ((_date + cargo) % _settings_game.economy.linkgraph_recalc_interval == 0) {
+				LinkGraph & graph = _link_graphs[cargo];
+				if (spawn) {
+					graph.NextComponent();
+				} else {
+					graph.Join();
+				}
+			}
 		}
 	}
 }
 
-LinkGraph::LinkGraph()  : current_colour(0), current_station(0), cargo(CT_INVALID)
+LinkGraph::LinkGraph()  : current_colour(1), current_station(0), cargo(CT_INVALID)
 {
 	for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 		if (this == &(_link_graphs[i])) {
@@ -156,47 +165,72 @@ Component::Component(uint size, colour c) :
 {
 }
 
-bool LinkGraph::Join() {
+void LinkGraph::Join() {
 	if (jobs.empty()) {
-		return false;
+		return;
 	}
-	LinkGraphJob & job = jobs.front();
+	LinkGraphJob * job = jobs.front();
 
-	if (job.GetJoinTime() > _tick_counter) {
-		return false;
+	if (job->GetJoinTime() > _tick_counter) {
+		return;
 	}
 
-	Component * comp = job.GetComponent();
-	jobs.pop_front();
+	Component * comp = job->GetComponent();
 
-	FlowStatSet new_flows;
 	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
 		Node & node = comp->GetNode(node_id);
-		StationID id = node.station;
-		station_colours[id] += USHRT_MAX / 2;
-		if (id < current_station) current_station = id;
-		FlowStatMap & flows = GetStation(id)->goods[cargo].flows;
-		for(FlowStatMap::iterator flowmap_it = flows.begin(); flowmap_it != flows.end(); ++flowmap_it) {
-			StationID source = flowmap_it->first;
-			FlowViaMap & node_flows = node.flows[source];
+		FlowStatMap & station_flows = GetStation(node.station)->goods[cargo].flows;
+		node.ExportFlows(station_flows);
+	}
+	delete job;
+	jobs.pop_front();
+}
+
+/**
+ * exports all entries in the FlowViaMap pointed to by source_flows it and erases it afterwards
+ */
+void Node::ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set) {
+	FlowViaMap & source_flows = source_flows_it->second;
+	for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
+		via_set.insert(FlowStat(update->first, update->second, 0));
+		source_flows.erase(update++);
+	}
+	flows.erase(source_flows_it++);
+}
+
+void Node::ExportFlows(FlowStatMap & station_flows) {
+	FlowStatSet new_flows;
+	/* loop over all existing flows in the station and update them */
+	for(FlowStatMap::iterator flowmap_it = station_flows.begin(); flowmap_it != station_flows.end();) {
+		FlowMap::iterator source_flows_it = flows.find(flowmap_it->first);
+		if (source_flows_it == flows.end()) {
+			/* there are no flows for this source node anymore */
+			station_flows.erase(flowmap_it++);
+		} else {
+			FlowViaMap & source_flows = source_flows_it->second;
 			FlowStatSet & via_set = flowmap_it->second;
-			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end(); ++flowset_it) {
-				FlowViaMap::iterator update = node_flows.find(flowset_it->via);
-				if (update != node_flows.end()) {
+			/* loop over the station's flow stats for this source node and update them */
+			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end();) {
+				FlowViaMap::iterator update = source_flows.find(flowset_it->via);
+				if (update != source_flows.end()) {
 					new_flows.insert(FlowStat(flowset_it->via, update->second, flowset_it->sent));
-					node_flows.erase(update);
+					source_flows.erase(update);
 				}
+				via_set.erase(flowset_it++);
 			}
+			/* swap takes constant time, so we swap instead of adding all entries */
+			/* note: via_set is empty here */
 			via_set.swap(new_flows);
-			new_flows.clear();
-			for (FlowViaMap::iterator update = node_flows.begin(); update != node_flows.end();) {
-				via_set.insert(FlowStat(update->first, update->second, 0));
-				node_flows.erase(update++);
-			}
+			/* insert remaining flows for this source node */
+			ExportNewFlows(source_flows_it, via_set);
+			++flowmap_it;
 		}
 	}
-	delete comp;
-	return true;
+	/* loop over remaining flows (for other sources) in the node's map and insert them into the station */
+	for (FlowMap::iterator source_flows_it = flows.begin(); source_flows_it != flows.end();) {
+		FlowStatSet & via_set = station_flows[source_flows_it->first];
+		ExportNewFlows(source_flows_it, via_set);
+	}
 }
 
 void LinkGraph::AddComponent(Component * component, uint join) {
@@ -204,8 +238,9 @@ void LinkGraph::AddComponent(Component * component, uint join) {
 	 for(NodeID i = 0; i < component->GetSize(); ++i) {
 		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
-	 jobs.push_back(LinkGraphJob(component, join));
-	 jobs.back().SpawnThread(cargo);
+	 LinkGraphJob * job = new LinkGraphJob(component, join);
+	 job->SpawnThread(cargo);
+	 jobs.push_back(job);
 }
 
 void LinkGraphJob::Run() {
@@ -221,6 +256,8 @@ LinkGraphJob::~LinkGraphJob() {
 		delete handler;
 	}
 	handlers.clear();
+	delete component;
+	delete thread;
 }
 
 void RunLinkGraphJob(void * j) {
@@ -295,4 +332,19 @@ Node::~Node() {
 	for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
 		 delete (*i);
 	}
+}
+
+void LinkGraph::Clear() {
+	for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
+		delete (*i);
+	}
+	jobs.clear();
+	InitColours();
+	current_colour = 1;
+	current_station = 0;
+}
+
+void InitializeLinkGraphs() {
+	InitializeDemands();
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 }
