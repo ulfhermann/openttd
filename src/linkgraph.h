@@ -81,6 +81,7 @@ class LinkGraphJob {
 public:
 	LinkGraphJob(Component * c);
 	LinkGraphJob(Component * c, uint join);
+
 	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
 	void Run();
 	void SpawnThread(CargoID cargo);
@@ -89,13 +90,17 @@ public:
 	Component * GetComponent() {return component;}
 	~LinkGraphJob();
 private:
+	/**
+	 * there cannot be two identical LinkGraphJobs,
+	 */
+	LinkGraphJob(const LinkGraphJob & other) {NOT_REACHED();}
 	ThreadObject * thread;
 	uint join_time;
 	Component * component;
 	HandlerList handlers;
 };
 
-typedef std::list<LinkGraphJob> JobList;
+typedef std::list<LinkGraphJob *> JobList;
 
 class LinkGraph {
 public:

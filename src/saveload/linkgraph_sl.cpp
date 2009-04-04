@@ -81,8 +81,9 @@ static void DoSave_LGRP(void *)
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		JobList & jobs = graph.GetJobs();
 		for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
-			Component * comp = i->GetComponent();
-			_join_time = i->GetJoinTime();
+			LinkGraphJob * job = *i;
+			Component * comp = job->GetComponent();
+			_join_time = job->GetJoinTime();
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			SaveLoad_Component(comp);
 		}
