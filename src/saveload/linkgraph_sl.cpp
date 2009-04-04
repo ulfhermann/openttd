@@ -16,7 +16,6 @@ enum {
 	LGRP_EDGE = 3,
 };
 
-
 const SaveLoad * GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad _linkgraph_desc[] = {
@@ -59,7 +58,6 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 
 }
 
-
 static void SaveLoad_Component(Component * comp) {
 	for (uint from = 0; from < comp->GetSize(); ++from) {
 		SlObject(&comp->GetNode(from), GetLinkGraphDesc(LGRP_NODE));
@@ -85,11 +83,8 @@ static void DoSave_LGRP(void *)
 	}
 }
 
-
-
 static void Load_LGRP()
 {
-	InitializeLinkGraphs();
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
@@ -102,7 +97,6 @@ static void Load_LGRP()
 		}
 	}
 }
-
 
 static void Save_LGRP() {
 	SlAutolength((AutolengthProc*)DoSave_LGRP, NULL);

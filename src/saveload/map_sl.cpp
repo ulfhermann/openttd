@@ -6,6 +6,7 @@
 #include "../map_func.h"
 #include "../core/alloc_type.hpp"
 #include "../core/bitmath_func.hpp"
+#include "../linkgraph.h"
 
 #include "saveload.h"
 
@@ -221,6 +222,7 @@ static void Load_MAP7()
 		SlArray(buf, MAP_SL_BUF_SIZE, SLE_UINT8);
 		for (uint j = 0; j != MAP_SL_BUF_SIZE; j++) _me[i++].m7 = buf[j];
 	}
+	InitializeLinkGraphs();
 }
 
 static void Save_MAP7()
