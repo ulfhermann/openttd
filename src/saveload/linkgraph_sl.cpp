@@ -9,7 +9,7 @@
 #include "saveload.h"
 
 static uint _num_components;
-static uint _join_time;
+static Date _join_date;
 
 enum {
 	LGRP_GRAPH = 0,
@@ -31,7 +31,7 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 	static const SaveLoad _component_desc[] = {
 		 SLE_CONDVAR(Component, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(Component, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(           _join_time,     SLE_UINT16,     DEMANDS_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(           _join_date,       SLE_INT32,     DEMANDS_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
@@ -83,7 +83,7 @@ static void DoSave_LGRP(void *)
 		for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
 			LinkGraphJob * job = *i;
 			Component * comp = job->GetComponent();
-			_join_time = job->GetJoinTime();
+			_join_date = job->GetJoinDate();
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			SaveLoad_Component(comp);
 		}
@@ -100,7 +100,7 @@ static void Load_LGRP()
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			comp->SetSize(comp->GetSize());
 			SaveLoad_Component(comp);
-			graph.AddComponent(comp, _join_time);
+			graph.AddComponent(comp, _join_date);
 		}
 	}
 }
