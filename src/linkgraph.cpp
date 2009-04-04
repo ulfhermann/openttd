@@ -186,4 +186,6 @@ void LinkGraph::Clear() {
 	}
 	components.clear();
 	InitColours();
+	current_colour = 0;
+	current_station = 0;
 }
