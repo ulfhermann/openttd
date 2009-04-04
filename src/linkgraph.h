@@ -34,7 +34,7 @@ public:
 	uint capacity;
 };
 
-typedef ushort colour;
+typedef uint16 colour;
 
 class Component {
 	typedef std::vector<Node> NodeVector;
@@ -43,7 +43,7 @@ class Component {
 
 public:
 	Component(uint size, colour c);
-	Component(colour c = USHRT_MAX);
+	Component(colour c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -69,13 +69,14 @@ public:
 	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
-	bool NextComponent();
+	void NextComponent();
 	void InitColours();
-	bool Join();
+	void Join();
 	uint GetNumComponents() const {return components.size();}
 	ComponentList & GetComponents() {return components;}
 	void AddComponent(Component * component);
-	const static uint COMPONENTS_TICK = 21;
+	const static uint COMPONENTS_SPAWN_TICK = 21;
+	const static uint COMPONENTS_JOIN_TICK  = 58;
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
 	colour current_colour;
