@@ -23,20 +23,21 @@ LinkGraph _link_graphs[NUM_CARGO];
 
 typedef std::map<StationID, NodeID> ReverseNodeIndex;
 
-bool LinkGraph::NextComponent()
+void LinkGraph::NextComponent()
 {
+	StationID last_station = current_station;
 	ReverseNodeIndex index;
 	NodeID node = 0;
 	std::queue<Station *> search_queue;
 	Component * component = NULL;
 	while (true) {
 		// find first station of next component
-		if (station_colours[current_station] > USHRT_MAX / 2 && IsValidStationID(current_station)) {
+		if (station_colours[current_station] == 0 && IsValidStationID(current_station)) {
 			Station * station = GetStation(current_station);
 			LinkStatMap & links = station->goods[cargo].link_stats;
 			if (!links.empty()) {
-				if (++current_colour == USHRT_MAX / 2) {
-					current_colour = 0;
+				if (++current_colour == UINT16_MAX) {
+					current_colour = 1;
 				}
 				search_queue.push(station);
 				station_colours[current_station] = current_colour;
@@ -49,7 +50,10 @@ bool LinkGraph::NextComponent()
 		}
 		if (++current_station == GetMaxStationIndex()) {
 			current_station = 0;
-			return false;
+			InitColours();
+		}
+		if (current_station == last_station) {
+			return;
 		}
 	}
 	// find all stations belonging to the current component
@@ -80,24 +84,25 @@ bool LinkGraph::NextComponent()
 	LinkGraphJob * job = new LinkGraphJob(component);
 	job->SpawnThread(cargo);
 	jobs.push_back(job);
-	return true;
 }
 
 void LinkGraph::InitColours()
 {
-	for (uint i = 0; i < Station_POOL_MAX_BLOCKS; ++i) {
-		station_colours[i] = USHRT_MAX;
-	}
+	memset(station_colours, 0, Station_POOL_MAX_BLOCKS * sizeof(uint16));
 }
 
 
 void OnTick_LinkGraph()
 {
-	if ((_tick_counter + LinkGraph::COMPONENTS_TICK) % DAY_TICKS == 0) {
+	bool spawn = (_tick_counter + LinkGraph::COMPONENTS_SPAWN_TICK) % DAY_TICKS == 0;
+	bool join =  (_tick_counter + LinkGraph::COMPONENTS_JOIN_TICK)  % DAY_TICKS == 0;
+	if (spawn || join) {
 		for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 			if ((_date + cargo) % _settings_game.economy.linkgraph_recalc_interval == 0) {
 				LinkGraph & graph = _link_graphs[cargo];
-				if (!graph.NextComponent()) {
+				if (spawn) {
+					graph.NextComponent();
+				} else {
 					graph.Join();
 				}
 			}
@@ -105,7 +110,7 @@ void OnTick_LinkGraph()
 	}
 }
 
-LinkGraph::LinkGraph()  : current_colour(0), current_station(0), cargo(CT_INVALID)
+LinkGraph::LinkGraph()  : current_colour(1), current_station(0), cargo(CT_INVALID)
 {
 	for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 		if (this == &(_link_graphs[i])) {
@@ -160,29 +165,25 @@ Component::Component(uint size, colour c) :
 {
 }
 
-bool LinkGraph::Join() {
+void LinkGraph::Join() {
 	if (jobs.empty()) {
-		return false;
+		return;
 	}
 	LinkGraphJob * job = jobs.front();
 
 	if (job->GetJoinTime() > _tick_counter) {
-		return false;
+		return;
 	}
 
 	Component * comp = job->GetComponent();
 
 	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
 		Node & node = comp->GetNode(node_id);
-		StationID station_id = node.station;
-		FlowStatMap & station_flows = GetStation(station_id)->goods[cargo].flows;
+		FlowStatMap & station_flows = GetStation(node.station)->goods[cargo].flows;
 		node.ExportFlows(station_flows);
-		station_colours[station_id] += USHRT_MAX / 2;
-		if (station_id < current_station) current_station = station_id;
 	}
 	delete job;
 	jobs.pop_front();
-	return true;
 }
 
 /**
@@ -339,7 +340,7 @@ void LinkGraph::Clear() {
 	}
 	jobs.clear();
 	InitColours();
-	current_colour = 0;
+	current_colour = 1;
 	current_station = 0;
 }
 
