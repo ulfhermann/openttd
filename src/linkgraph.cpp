@@ -77,8 +77,9 @@ bool LinkGraph::NextComponent()
 	}
 	// here the list of nodes and edges for this component is complete.
 	component->CalculateDistances();
-	jobs.push_back(component);
-	jobs.back().SpawnThread(cargo);
+	LinkGraphJob * job = new LinkGraphJob(component);
+	job->SpawnThread(cargo);
+	jobs.push_back(job);
 	return true;
 }
 
@@ -163,13 +164,13 @@ bool LinkGraph::Join() {
 	if (jobs.empty()) {
 		return false;
 	}
-	LinkGraphJob & job = jobs.front();
+	LinkGraphJob * job = jobs.front();
 
-	if (job.GetJoinTime() > _tick_counter) {
+	if (job->GetJoinTime() > _tick_counter) {
 		return false;
 	}
 
-	Component * comp = job.GetComponent();
+	Component * comp = job->GetComponent();
 
 	FlowStatSet new_flows;
 	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
@@ -197,6 +198,7 @@ bool LinkGraph::Join() {
 			}
 		}
 	}
+	delete job;
 	jobs.pop_front();
 	return true;
 }
@@ -206,8 +208,9 @@ void LinkGraph::AddComponent(Component * component, uint join) {
 	 for(NodeID i = 0; i < component->GetSize(); ++i) {
 		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
-	 jobs.push_back(LinkGraphJob(component, join));
-	 jobs.back().SpawnThread(cargo);
+	 LinkGraphJob * job = new LinkGraphJob(component, join);
+	 job->SpawnThread(cargo);
+	 jobs.push_back(job);
 }
 
 void LinkGraphJob::Run() {
@@ -302,6 +305,9 @@ Node::~Node() {
 }
 
 void LinkGraph::Clear() {
+	for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
+		delete (*i);
+	}
 	jobs.clear();
 	InitColours();
 	current_colour = 0;
