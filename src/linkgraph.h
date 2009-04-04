@@ -39,7 +39,7 @@ public:
 	PathSet paths;
 	FlowMap flows;
 private:
-	void ExportNewFlows(FlowMap::iterator source_flows_it, FlowStatSet & via_set);
+	void ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set);
 };
 
 class Edge {

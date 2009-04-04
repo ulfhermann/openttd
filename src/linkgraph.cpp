@@ -189,7 +189,7 @@ void LinkGraph::Join() {
 /**
  * exports all entries in the FlowViaMap pointed to by source_flows it and erases it afterwards
  */
-void Node::ExportNewFlows(FlowMap::iterator source_flows_it, FlowStatSet & via_set) {
+void Node::ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set) {
 	FlowViaMap & source_flows = source_flows_it->second;
 	for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
 		via_set.insert(FlowStat(update->first, update->second, 0));
