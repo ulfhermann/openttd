@@ -150,6 +150,7 @@ void SaveLoad_STNS(Station *st)
 		SLE_END()
 	};
 
+
 	SlObject(st, _station_desc);
 
 	_waiting_acceptance = 0;

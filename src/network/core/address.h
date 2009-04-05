@@ -20,6 +20,22 @@ private:
 	size_t address_length;    ///< The length of the resolved address
 	sockaddr_storage address; ///< The resolved address
 
+	/**
+	 * Helper function to resolve something to a socket.
+	 * @param runp information about the socket to try not
+	 * @return the opened socket or INVALID_SOCKET
+	 */
+	typedef SOCKET (*LoopProc)(addrinfo *runp);
+
+	/**
+	 * Resolve this address into a socket
+	 * @param family the type of 'protocol' (IPv4, IPv6)
+	 * @param socktype the type of socket (TCP, UDP, etc)
+	 * @param flags the flags to send to getaddrinfo
+	 * @param func the inner working while looping over the address info
+	 * @return the resolved socket or INVALID_SOCKET.
+	 */
+	SOCKET Resolve(int family, int socktype, int flags, LoopProc func);
 public:
 	/**
 	 * Create a network address based on a resolved IP and port
@@ -48,16 +64,29 @@ public:
 	}
 
 	/**
+	 * Create a network address based on a resolved IP and port
+	 * @param address the IP address with port
+	 */
+	NetworkAddress(sockaddr *address, size_t address_length) :
+		hostname(NULL),
+		address_length(address_length)
+	{
+		memset(&this->address, 0, sizeof(this->address));
+		memcpy(&this->address, address, address_length);
+	}
+
+	/**
 	 * Create a network address based on a unresolved host and port
 	 * @param ip the unresolved hostname
 	 * @param port the port
+	 * @param family the address family
 	 */
-	NetworkAddress(const char *hostname = "0.0.0.0", uint16 port = 0) :
+	NetworkAddress(const char *hostname = "0.0.0.0", uint16 port = 0, int family = AF_INET) :
 		hostname(strdup(hostname)),
 		address_length(0)
 	{
 		memset(&this->address, 0, sizeof(this->address));
-		this->address.ss_family = AF_INET;
+		this->address.ss_family = family;
 		this->SetPort(port);
 	}
 
@@ -130,13 +159,43 @@ public:
 	}
 
 	/**
+	 * Checks whether this IP address is contained by the given netmask.
+	 * @param netmask the netmask in CIDR notation to test against.
+	 * @note netmask without /n assumes all bits need to match.
+	 * @return true if this IP is within the netmask.
+	 */
+	bool IsInNetmask(char *netmask);
+
+	/**
+	 * Compare the address of this class with the address of another.
+	 * @param address the other address.
+	 * @return < 0 if address is less, 0 if equal and > 0 if address is more
+	 */
+	int CompareTo(NetworkAddress address)
+	{
+		int r = this->GetAddressLength() - address.GetAddressLength();
+		if (r == 0) r = this->address.ss_family - address.address.ss_family;
+		if (r == 0) r = memcmp(&this->address, &address.address, this->address_length) == 0;
+		if (r == 0) r = this->GetPort() - address.GetPort();
+		return r;
+	}
+
+	/**
 	 * Compare the address of this class with the address of another.
 	 * @param address the other address.
 	 */
-	bool operator == (NetworkAddress &address)
+	bool operator == (NetworkAddress address)
 	{
-		if (this->IsResolved() && address.IsResolved()) return memcmp(&this->address, &address.address, sizeof(this->address)) == 0;
-		return this->GetPort() == address.GetPort() && strcmp(this->GetHostname(), address.GetHostname()) == 0;
+		return this->CompareTo(address) == 0;
+	}
+
+	/**
+	 * Compare the address of this class with the address of another.
+	 * @param address the other address.
+	 */
+	bool operator < (NetworkAddress address)
+	{
+		return this->CompareTo(address) < 0;
 	}
 
 	/**
