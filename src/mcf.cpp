@@ -166,6 +166,7 @@ void MultiCommodityFlow::IncreaseL(Path * path, float sum_f_cq) {
 		Edge & edge = graph->GetEdge(from, to);
 		float capacity = edge.capacity;
 		float difference = mcf.l * epsilon * sum_f_cq / capacity;
+		assert(!(difference < 0));
 		mcf.l += difference;
 		assert(mcf.l > 0);
 		d_l += difference * capacity;
