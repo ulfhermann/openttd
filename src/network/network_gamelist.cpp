@@ -50,7 +50,7 @@ static void NetworkGameListHandleDelayedInsert()
 				strecpy(item->info.hostname, ins_item->info.hostname, lastof(item->info.hostname));
 				item->online = false;
 			}
-			item->manually = ins_item->manually;
+			item->manually |= ins_item->manually;
 			UpdateNetworkGameWindow(false);
 		}
 		free(ins_item);
@@ -60,7 +60,7 @@ static void NetworkGameListHandleDelayedInsert()
 
 /** Add a new item to the linked gamelist. If the IP and Port match
  * return the existing item instead of adding it again
- * @param ip the IP-address (inet_addr) of the to-be added item
+ * @param address the address of the to-be added item
  * @param port the port the server is running on
  * @return a point to the newly added or already existing item */
 NetworkGameList *NetworkGameListAddItem(NetworkAddress address)

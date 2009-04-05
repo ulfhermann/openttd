@@ -5,8 +5,8 @@
  */
 
 #ifndef NETWORK_CORE_HOST_H
+#define NETWORK_CORE_HOST_H
 
-void NetworkFindBroadcastIPs(uint32 *broadcast, int limit);
-uint32 NetworkResolveHost(const char *hostname);
+void NetworkFindBroadcastIPs(NetworkAddress *broadcast, int limit);
 
 #endif /* NETWORK_CORE_HOST_H */
