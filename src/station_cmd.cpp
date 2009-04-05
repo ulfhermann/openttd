@@ -2851,6 +2851,25 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
+static void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+	FlowStatMap & flows = GetStation(at)->goods[c_id].flows;
+	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
+		FlowStatSet & s_flows = f_it->second;
+		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
+			if (s_it->via == to) {
+				s_flows.erase(s_it++);
+			} else {
+				++s_it;
+			}
+		}
+		if (s_flows.empty()) {
+			flows.erase(f_it++);
+		} else {
+			++f_it;
+		}
+	}
+}
+
 static void UpdateStationStats(Station * st) {
 	uint length = _settings_game.economy.moving_average_length;
 	FlowStatSet new_flows;
@@ -2874,6 +2893,7 @@ static void UpdateStationStats(Station * st) {
 				if (ls.capacity == 0) {
 					CargoList & cargo = GetStation(id)->goods[goods_index].cargo;
 					cargo.ReleaseStalePackets(st->index);
+					DeleteStaleFlows(id, goods_index, st->index);
 					links.erase(i++);
 				} else {
 					++i;
