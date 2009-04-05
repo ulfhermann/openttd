@@ -951,13 +951,11 @@ void ShowNetworkGameWindow()
 
 	/* Only show once */
 	if (first) {
-		char * const *srv;
-
 		first = false;
 		/* add all servers from the config file to our list */
-		for (srv = &_network_host_list[0]; srv != endof(_network_host_list) && *srv != NULL; srv++) {
-			NetworkAddServer(*srv);
-		}
+		for (char **iter = _network_host_list.Begin(); iter != _network_host_list.End(); iter++) {
+			NetworkAddServer(*iter);
+  }
 	}
 
 	new NetworkGameWindow(&_network_game_window_desc);
@@ -1556,9 +1554,9 @@ static const WindowDesc _client_list_desc(
 );
 
 /* Finds the Xth client-info that is active */
-static const NetworkClientInfo *NetworkFindClientInfo(byte client_no)
+static NetworkClientInfo *NetworkFindClientInfo(byte client_no)
 {
-	const NetworkClientInfo *ci;
+	NetworkClientInfo *ci;
 
 	FOR_ALL_CLIENT_INFOS(ci) {
 		if (client_no == 0) return ci;
@@ -1580,7 +1578,7 @@ static void ClientList_Kick(byte client_no)
 
 static void ClientList_Ban(byte client_no)
 {
-	const NetworkClientInfo *ci = NetworkFindClientInfo(client_no);
+	NetworkClientInfo *ci = NetworkFindClientInfo(client_no);
 
 	if (ci == NULL) return;
 
