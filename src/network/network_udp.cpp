@@ -363,13 +363,12 @@ static void NetworkUDPBroadCast(NetworkUDPSocketHandler *socket)
 {
 	uint i;
 
-	for (i = 0; _broadcast_list[i] != 0; i++) {
+	for (i = 0; !StrEmpty(_broadcast_list[i].GetHostname()); i++) {
 		Packet p(PACKET_UDP_CLIENT_FIND_SERVER);
-		NetworkAddress out_addr(_broadcast_list[i], _settings_client.network.server_port);
 
-		DEBUG(net, 4, "[udp] broadcasting to %s", out_addr.GetHostname());
+		DEBUG(net, 4, "[udp] broadcasting to %s", _broadcast_list[i].GetHostname());
 
-		socket->SendPacket(&p, &out_addr);
+		socket->SendPacket(&p, &_broadcast_list[i]);
 	}
 }
 
@@ -430,7 +429,7 @@ void NetworkUDPQueryServerThread(void *pntr)
 	/* Clear item in gamelist */
 	NetworkGameList *item = CallocT<NetworkGameList>(1);
 	item->address = *info;
-	strecpy(item->info.server_name, info->GetHostname(), lastof(item->info.server_name));
+	strecpy(item->info.server_name, info->GetAddressAsString(), lastof(item->info.server_name));
 	strecpy(item->info.hostname, info->GetHostname(), lastof(item->info.hostname));
 	item->manually = info->manually;
 	NetworkGameListAddItemDelayed(item);
@@ -483,7 +482,7 @@ void NetworkUDPRemoveAdvertise()
 
 	/* check for socket */
 	if (!_udp_master_socket->IsConnected()) {
-		if (!_udp_master_socket->Listen(NetworkAddress(_network_server_bind_ip, 0), false)) return;
+		if (!_udp_master_socket->Listen(NetworkAddress(_settings_client.network.server_bind_ip, 0), false)) return;
 	}
 
 	if (!ThreadObject::New(NetworkUDPRemoveAdvertiseThread, NULL)) {
@@ -520,7 +519,7 @@ void NetworkUDPAdvertise()
 
 	/* check for socket */
 	if (!_udp_master_socket->IsConnected()) {
-		if (!_udp_master_socket->Listen(NetworkAddress(_network_server_bind_ip, 0), false)) return;
+		if (!_udp_master_socket->Listen(NetworkAddress(_settings_client.network.server_bind_ip, 0), false)) return;
 	}
 
 	if (_network_need_advertise) {
