@@ -2856,8 +2856,12 @@ static void UpdateStationStats(Station * st) {
 	FlowStatSet new_flows;
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = st->goods[goods_index];
-		good.supply *= length;
-		good.supply /= (length + 1);
+		if (good.supply >= length) {
+			good.supply *= length;
+			good.supply /= (length + 1);
+		} else if (RandomRange(length) <= good.supply) {
+			good.supply--;
+		}
 		LinkStatMap & links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
