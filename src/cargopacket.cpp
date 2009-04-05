@@ -126,6 +126,12 @@ void CargoList::Append(CargoPacket *cp)
 	InvalidateCache();
 }
 
+void CargoList::Import(List & list)
+{
+	packets.splice(packets.end(), list);
+	InvalidateCache();
+}
+
 
 void CargoList::Truncate(uint count)
 {
@@ -307,33 +313,43 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, St
 	return max_unload - remaining_unload;
 }
 
-uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, bool force_load, StationID next_station, TileIndex load_place) {
-	uint space_remaining = max_load;
-	for(List::iterator c = packets.begin(); c != packets.end() && space_remaining > 0;) {
-		CargoPacket * p = *c;
+uint CargoList::LoadPackets(List & dest, StationID next_station, uint cap, bool force_load, TileIndex load_place) {
+	List rejected;
+	while(!packets.empty() && cap > 0) {
+		CargoPacket * p = packets.front();
 		if (force_load || p->next == next_station || p->next == INVALID_STATION) {
 			/* load the packet if possible */
-			if (p->count <= space_remaining) {
+			if (p->count <= cap) {
 				/* load all of the packet */
-				packets.erase(c++);
+				packets.pop_front();
 			} else {
 				/* packet needs to be split */
-				p = p->Split(space_remaining);
-				++c;
+				p = p->Split(cap);
+				assert(p->count == cap);
 			}
-			space_remaining -= p->count;
-			dest->packets.push_back(p);
+			cap -= p->count;
+			dest.push_back(p);
 			if (load_place != INVALID_TILE) {
 				p->loaded_at_xy = load_place;
 				p->paid_for = false;
 			}
 		} else {
-			++c;
+			packets.pop_front();
+			rejected.push_back(p);
 		}
 	}
-	dest->InvalidateCache();
+	packets.splice(packets.end(), rejected);
 	InvalidateCache();
+	return cap;
+}
 
+void CargoList::ReservePacketsForLoading(StationID next_station, List & reserved, uint cap) {
+	LoadPackets(reserved, next_station, cap);
+}
+
+uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, bool force_load, StationID next_station, TileIndex load_place) {
+	uint space_remaining = LoadPackets(dest->packets, next_station, max_load, force_load, load_place);
+	dest->InvalidateCache();
 	return max_load - space_remaining;
 }
 

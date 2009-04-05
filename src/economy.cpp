@@ -1548,22 +1548,27 @@ void VehiclePayment(Vehicle *front_v)
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
  */
-static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
+static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & reserved)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
+	Vehicle *u = v;
+	const Order * curr = &(u->current_order);
+	const Order * next = u->orders.list->GetNextUnloadingOrder(curr);
+
+	StationID next_station = next->GetDestination();
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--v->load_unload_time_rem != 0) {
 		if (_settings_game.order.improved_load && (v->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 			/* 'Reserve' this cargo for this vehicle, because we were first. */
 			for (; v != NULL; v = v->Next()) {
-				int cap_left = v->cargo_cap - v->cargo.Count();
-				if (cap_left > 0) cargo_left[v->cargo_type] -= cap_left;
+				v->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
 			}
 		}
 		return;
 	}
 
+	uint unload_flags = curr->GetUnloadType();
 	StationID last_visited = v->last_station_visited;
 	Station *st = GetStation(last_visited);
 
@@ -1575,7 +1580,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	}
 
 	int unloading_time = 0;
-	Vehicle *u = v;
+
 	int result = 0;
 
 	bool completely_emptied = true;
@@ -1601,12 +1606,6 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		}
 
 		GoodsEntry *ge = &st->goods[v->cargo_type];
-
-		const Order * curr = &(u->current_order);
-		const Order * next = u->orders.list->GetNextUnloadingOrder(curr);
-
-		uint unload_flags = curr->GetUnloadType();
-		StationID next_station = next->GetDestination();
 
 		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (unload_flags & OUFB_NO_UNLOAD) == 0) {
 			// vehicle wants to unload something
@@ -1654,19 +1653,13 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			uint cap = cap_left;
 			uint count = ge->cargo.Count();
 
-			/* Skip loading this vehicle if another train/vehicle is already handling
-			 * the same cargo type at this station */
-			if (_settings_game.order.improved_load && cargo_left[v->cargo_type] <= 0) {
-				SetBit(cargo_not_full, v->cargo_type);
-				continue;
-			}
-
 			if (cap > count) cap = count;
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
 			if (_settings_game.order.improved_load) {
 				/* Don't load stuff that is already 'reserved' for other vehicles */
-				cap = min((uint)cargo_left[v->cargo_type], cap);
-				cargo_left[v->cargo_type] -= cap;
+				/* TODO: if not improved_load then DO load stuff from the reserved list ...*/
+				//cap = min((uint)cargo_left[v->cargo_type], cap);
+				//cargo_left[v->cargo_type] -= cap;
 			}
 
 			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
@@ -1676,7 +1669,6 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			 * be moved onto the vehicle.
 			 */
 			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
-			cargo_left[v->cargo_type] += (cap - loaded); // revert unused reservation
 
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
@@ -1698,7 +1690,13 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			unloading_time += loaded;
 
 			result |= 2;
+		} else if (_settings_game.order.improved_load && ge->cargo.Empty()) {
+			/* Skip loading this vehicle if another train/vehicle is already handling
+			 * the same cargo type at this station */
+			SetBit(cargo_not_full, v->cargo_type);
+			continue;
 		}
+
 
 		if (v->cargo.Count() >= v->cargo_cap) {
 			SetBit(cargo_full, v->cargo_type);
@@ -1717,8 +1715,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update left cargo */
 		for (v = u; v != NULL; v = v->Next()) {
-			int cap_left = v->cargo_cap - v->cargo.Count();
-			if (cap_left > 0) cargo_left[v->cargo_type] -= cap_left;
+			v->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
 		}
 	}
 
@@ -1800,14 +1797,17 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
  */
 void LoadUnloadStation(Station *st)
 {
-	int cargo_left[NUM_CARGO];
-
-	for (uint i = 0; i < NUM_CARGO; i++) cargo_left[i] = st->goods[i].cargo.Count();
+	std::map<CargoID, CargoList::List> reserved;
 
 	std::list<Vehicle *>::iterator iter;
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
-		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, cargo_left);
+		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, reserved);
+	}
+
+	std::multimap<CargoID, CargoList::List>::iterator res_i;
+	for (res_i = reserved.begin(); res_i != reserved.end(); ++res_i) {
+		st->goods[res_i->first].cargo.Import(res_i->second);
 	}
 }
 

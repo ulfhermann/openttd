@@ -10,6 +10,7 @@
 #include "tile_type.h"
 #include "station_type.h"
 #include <list>
+#include <map>
 
 typedef uint32 CargoPacketID;
 struct CargoPacket;
@@ -124,6 +125,8 @@ private:
 	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
 	uint WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	uint WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
+	uint LoadPackets(List & dest, StationID next_station, uint cap, bool force_load = false, TileIndex load_place = INVALID_TILE);
+
 
 public:
 	friend void SaveLoad_STNS(Station *st);
@@ -191,6 +194,12 @@ public:
 	void Append(CargoPacket *cp);
 
 	/**
+	 * imports a complete CargoList by splicing its elements into this one
+	 * runs in constant time.
+	 */
+	void Import(List & list);
+
+	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
 	 * @param count the maximum amount of entities to be in the list after the command
@@ -234,6 +243,8 @@ public:
 	uint MoveToVehicle(CargoList *dest, uint max_load, bool force_load, StationID next_station = INVALID_STATION, TileIndex load_place = INVALID_TILE);
 
 	void ReleaseStalePackets(StationID to);
+
+	void ReservePacketsForLoading(StationID next_station, List & reserved, uint cap);
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
