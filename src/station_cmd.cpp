@@ -2858,7 +2858,7 @@ static void UpdateStationStats(Station * st) {
 		if (good.supply >= length) {
 			good.supply *= length;
 			good.supply /= (length + 1);
-		} else if (RandomRange(length) <= good.supply) {
+		} else if (RandomRange(length) < good.supply) {
 			good.supply--;
 		}
 		LinkStatMap & links = good.link_stats;
