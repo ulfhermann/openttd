@@ -233,6 +233,8 @@ public:
 	 */
 	uint MoveToVehicle(CargoList *dest, uint max_load, bool force_load, StationID next_station = INVALID_STATION, TileIndex load_place = INVALID_TILE);
 
+	void ReleaseStalePackets(StationID to);
+
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };

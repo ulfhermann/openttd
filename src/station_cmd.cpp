@@ -2872,6 +2872,8 @@ static void UpdateStationStats(Station * st) {
 				ls *= length;
 				ls /= (length + 1);
 				if (ls.capacity == 0) {
+					CargoList & cargo = GetStation(id)->goods[goods_index].cargo;
+					cargo.ReleaseStalePackets(st->index);
 					links.erase(i++);
 				} else {
 					++i;
