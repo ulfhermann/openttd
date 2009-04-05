@@ -200,6 +200,13 @@ public:
 	void Import(List & list);
 
 	/**
+	 * exports this CargoList by splicing its elements into another one
+	 * this one is empty afterwards
+	 * runs in constant time.
+	 */
+	void Export(List & list);
+
+	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
 	 * @param count the maximum amount of entities to be in the list after the command

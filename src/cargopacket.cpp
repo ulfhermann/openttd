@@ -132,6 +132,11 @@ void CargoList::Import(List & list)
 	InvalidateCache();
 }
 
+void CargoList::Export(List & list)
+{
+	list.splice(list.end(), packets);
+	InvalidateCache();
+}
 
 void CargoList::Truncate(uint count)
 {

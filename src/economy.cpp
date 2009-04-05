@@ -1555,6 +1555,8 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
 	Vehicle *u = v;
 	const Order * curr = &(u->current_order);
 	const Order * next = u->orders.list->GetNextUnloadingOrder(curr);
+	StationID last_visited = u->last_station_visited;
+	Station *st = GetStation(last_visited);
 
 	StationID next_station = next->GetDestination();
 	/* We have not waited enough time till the next round of loading/unloading */
@@ -1562,15 +1564,15 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
 		if (_settings_game.order.improved_load && (v->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 			/* 'Reserve' this cargo for this vehicle, because we were first. */
 			for (; v != NULL; v = v->Next()) {
-				v->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
+				GoodsEntry *ge = &st->goods[v->cargo_type];
+				ge->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
 			}
 		}
 		return;
 	}
 
 	uint unload_flags = curr->GetUnloadType();
-	StationID last_visited = v->last_station_visited;
-	Station *st = GetStation(last_visited);
+
 
 	if (v->type == VEH_TRAIN && (!IsTileType(v->tile, MP_STATION) || GetStationIndex(v->tile) != st->index)) {
 		/* The train reversed in the station. Take the "easy" way
@@ -1655,12 +1657,6 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
 
 			if (cap > count) cap = count;
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
-			if (_settings_game.order.improved_load) {
-				/* Don't load stuff that is already 'reserved' for other vehicles */
-				/* TODO: if not improved_load then DO load stuff from the reserved list ...*/
-				//cap = min((uint)cargo_left[v->cargo_type], cap);
-				//cargo_left[v->cargo_type] -= cap;
-			}
 
 			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 
@@ -1669,6 +1665,14 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
 			 * be moved onto the vehicle.
 			 */
 			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
+			if (!_settings_game.order.improved_load) {
+				/* if not improved_load then DO load stuff from the reserved list ...*/
+				CargoList::List & reserved_list = reserved[v->cargo_type];
+				CargoList tmp;
+				tmp.Import(reserved_list);
+				loaded += tmp.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
+				tmp.Export(reserved_list);
+			}
 
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
@@ -1713,9 +1717,10 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
 	 * loading algorithm for the wagons (only fill wagon when there is
 	 * enough to fill the previous wagons) */
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
-		/* Update left cargo */
+		/* Update reserved cargo */
 		for (v = u; v != NULL; v = v->Next()) {
-			v->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
+			GoodsEntry *ge = &st->goods[v->cargo_type];
+			ge->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
 		}
 	}
 
