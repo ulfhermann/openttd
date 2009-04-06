@@ -88,6 +88,4 @@ private:
 
 extern LinkGraph _link_graphs[NUM_CARGO];
 
-void InitializeLinkGraphs();
-
 #endif /* LINKGRAPH_H_ */
