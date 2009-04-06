@@ -625,11 +625,10 @@ void VehicleEnteredDepotThisTick(Vehicle *v)
  * at most moving_average_length - base.
  */
 inline uint GetCapIncrease(uint base, uint add) {
-	uint new_base = base + add;
-	if (new_base > _settings_game.economy.moving_average_length || new_base == 0) {
+	if (base >= _settings_game.economy.moving_average_length / 2 || add == 0) {
 		return add;
 	} else {
-		return (_settings_game.economy.moving_average_length) / (new_base) * add;
+		return (_settings_game.economy.moving_average_length) / (base + add) * add;
 	}
 }
 
