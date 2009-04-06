@@ -84,6 +84,7 @@ public:
 class LinkGraphJob {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
+	class Exception {};
 	LinkGraphJob(Component * c);
 	LinkGraphJob(Component * c, Date join);
 

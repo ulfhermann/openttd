@@ -65,6 +65,8 @@ private:
 	void IncreaseL(Path * path, Number f_cq);
 	void Karakostas();
 	void CleanupPaths(PathVector & paths);
+	void HandleInstability();
+
 	Number epsilon;
 	McfGraph edges;
 	Component * graph;
