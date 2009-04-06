@@ -15,8 +15,8 @@ MultiCommodityFlow::MultiCommodityFlow() :
 {}
 
 void MultiCommodityFlow::Run(Component * g) {
-	assert(g->settings.mcf_accuracy > 0);
-	epsilon = 1.0 / (float)g->settings.economy.mcf_accuracy;
+	assert(g->GetSettings().mcf_accuracy > 0);
+	epsilon = 1.0 / (float)g->GetSettings().mcf_accuracy;
 	graph = g;
 	CountEdges();
 	if (k == 0) return;
