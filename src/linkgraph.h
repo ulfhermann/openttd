@@ -27,6 +27,7 @@ typedef std::set<Path *> PathSet;
 
 class Node {
 public:
+	static const NodeID INVALID = UINT_MAX;
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
 	uint supply;
