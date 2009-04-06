@@ -8,7 +8,6 @@
 #include "../core/alloc_func.hpp"
 #include "../variables.h"
 #include "../newgrf_station.h"
-#include "../demands.h"
 
 #include "saveload.h"
 
