@@ -92,7 +92,7 @@ void OnTick_LinkGraph()
 	bool join =  (_tick_counter + LinkGraph::COMPONENTS_JOIN_TICK)  % DAY_TICKS == 0;
 	if (spawn || join) {
 		for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
-			if ((_date + cargo) % _settings_game.economy.linkgraph_recalc_interval == 0) {
+			if ((_date + cargo) % _settings_game.linkgraph.recalc_interval == 0) {
 				LinkGraph & graph = _link_graphs[cargo];
 				if (spawn) {
 					graph.NextComponent();

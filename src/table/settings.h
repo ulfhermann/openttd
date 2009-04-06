@@ -428,7 +428,8 @@ const SettingDesc _settings[] = {
 	SDT_CONDLISTO(GameSettings, economy.town_noise_population, 3,   SLE_UINT16, 96, SL_MAX_VERSION, 0,D0, "800,2000,4000",          STR_NULL,                                  NULL, CheckNoiseToleranceLevel),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_unit,         SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 4, 1, 4096, 1,	STR_CONFIG_SETTING_AVERAGE_UNIT,           NULL),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_length,       SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 256, 1, 4096, 64, STR_CONFIG_SETTING_AVERAGE_LENGTH,      NULL),
-	 SDT_CONDVAR(GameSettings, economy.linkgraph_recalc_interval,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION,  0, 0, 30, 1,	4096, 1, STR_CONFIG_SETTING_LINKGRAPH_INTERVAL,    NULL),
+
+	 SDT_CONDVAR(GameSettings, linkgraph.recalc_interval,           SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION,  0, 0,16, 1, 4096, 1, STR_CONFIG_SETTING_LINKGRAPH_INTERVAL,    NULL),
 
 	 SDT_CONDVAR(GameSettings, pf.wait_for_pbs_path,                 SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    30,     2,     255, 0, STR_NULL,                                  NULL),
 	SDT_CONDBOOL(GameSettings, pf.reserve_paths,                               100, SL_MAX_VERSION, 0, 0, false,                    STR_NULL,                                  NULL),
