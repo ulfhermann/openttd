@@ -60,7 +60,12 @@ void MultiCommodityFlow::CalcInitialL() {
 			McfEdge * mcf = &edges[i][j];
 			if (e->capacity > 0) {
 				mcf->l = delta / ((float)e->capacity);
-				assert(mcf->l > 0);
+				if (!mcf->l > 0) {
+					epsilon *= 2.0;
+					DEBUG(misc, 0, "numeric instability detected, increasing epsilon: %f", epsilon);
+					CalcInitialL();
+					return;
+				}
 				if (last != NULL) {
 					last->next = mcf;
 				} else {
