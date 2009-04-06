@@ -793,7 +793,7 @@ public:
 
 
 		if (this->map_type == SMT_ROUTEMAP && _game_mode == GM_NORMAL) {
-			float monthScale = ((float)_settings_game.economy.moving_average_length * (float)_settings_game.economy.moving_average_unit) / 30.0;
+			uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
 			for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
 				if (!tbl->show_on_map) continue;
 
@@ -834,9 +834,9 @@ public:
 						GfxDrawLine(pta.x, pta.y, ptb.x, ptb.y, tbl->colour);
 
 						const LinkStat & ls = i->second;
-						uint usage = (float)ls.usage / monthScale;
+						uint usage = ls.usage * 30 / scale;
 						uint usageDisplay = usage / 10;
-						uint capacity = (float)ls.capacity / monthScale;
+						uint capacity = ls.capacity * 30 / scale;
 						uint capacityDisplay = capacity / 10;
 
 						Point ptm;
@@ -885,7 +885,8 @@ public:
 				for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
 					if (!tbl->show_on_map) continue;
 					CargoID c = tbl->type;
-					q += (float)st->goods[c].supply / monthScale;
+					q += st->goods[c].supply * 30 / scale;
+					colour += tbl->colour;
 					colour += _link_graphs[c].GetColour(st->index);
 					numCargos++;
 				}
