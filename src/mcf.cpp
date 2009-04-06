@@ -63,6 +63,7 @@ void MultiCommodityFlow::CalcInitialL() {
 				if (!mcf->l > 0) {
 					epsilon *= 2.0;
 					DEBUG(misc, 0, "numeric instability detected, increasing epsilon: %f", epsilon);
+					CalcDelta();
 					CalcInitialL();
 					return;
 				}
