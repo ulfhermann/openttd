@@ -114,8 +114,8 @@ public:
 	JobList & GetJobs() {return jobs;}
 	void AddComponent(Component * component, uint join);
 
-	const static uint COMPONENTS_SPAWN_TICK = 21;
-	const static uint COMPONENTS_JOIN_TICK  = 58;
+	const static uint COMPONENTS_JOIN_TICK  = 21;
+	const static uint COMPONENTS_SPAWN_TICK = 58;
 
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
