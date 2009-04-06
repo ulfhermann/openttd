@@ -12,33 +12,16 @@
 #include "cargo_type.h"
 #include "map_func.h"
 #include "linkgraph.h"
-
-void InitializeDemands();
-
-enum DistributionType {
-	DT_BEGIN = 0,
-	DT_SYMMETRIC = 0,
-	DT_ANTISYMMETRIC,
-	DT_UNHANDLED,
-	DT_NUM
-};
-
-/** It needs to be 8bits, because we save and load it as such
- * Define basic enum properties */
-template <> struct EnumPropsT<DistributionType> : MakeEnumPropsT<DistributionType, byte, DT_BEGIN, DT_NUM, DT_NUM> {};
-typedef TinyEnumT<DistributionType> DistributionTypeByte; // typedefing-enumification of DistributionType
+#include "demand_settings.h"
 
 class DemandCalculator : public ComponentHandler {
 public:
-	DemandCalculator(CargoID c) : cargo(c) {}
+	DemandCalculator() : max_distance(MapSizeX() + MapSizeY()) {}
 	virtual void Run(Component * graph);
 	void PrintDemandMatrix(Component * graph);
 	virtual ~DemandCalculator() {}
-	static DistributionType _distribution_types[NUM_CARGO];
 private:
-	friend void InitializeDemands();
-	CargoID cargo;
-	static uint _max_distance;
+	uint max_distance;
 	void CalcSymmetric(Component * graph);
 	void CalcAntiSymmetric(Component * graph);
 };

@@ -10,13 +10,11 @@
 #include "settings_type.h"
 #include "newgrf_cargo.h"
 #include "cargotype.h"
+#include "core/math_func.hpp"
 #include <list>
 #include <iostream>
 
 typedef std::list<NodeID> NodeList;
-
-uint DemandCalculator::_max_distance;
-DistributionType DemandCalculator::_distribution_types[NUM_CARGO];
 
 void DemandCalculator::PrintDemandMatrix(Component * graph) {
 	for (NodeID from = 0; from < graph->GetSize(); ++from) {
@@ -60,7 +58,7 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 
 			Node & to = graph->GetNode(node2);
 
-			uint demand = from.undelivered_supply * to.undelivered_supply * (_max_distance - forward.distance) / _max_distance / supply_sum + 1;
+			uint demand = from.undelivered_supply * to.undelivered_supply * (max_distance - forward.distance) / max_distance / supply_sum + 1;
 
 			forward.demand += demand;
 			backward.demand += demand;
@@ -113,7 +111,7 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 		return;
 	}
 
-	uint demand_per_node = supply_sum / num_demands + 1;
+	uint demand_per_node = max(supply_sum / num_demands, (uint)1);
 
 	while(!supplies.empty()) {
 		NodeID node1 = supplies.front();
@@ -129,7 +127,7 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 				continue;
 			}
 			Edge & edge = graph->GetEdge(node1, node2);
-			uint demand = from.undelivered_supply * demand_per_node * (_max_distance - edge.distance) / _max_distance / supply_sum + 1;
+			uint demand = from.undelivered_supply * demand_per_node * (max_distance - edge.distance) / max_distance / supply_sum + 1;
 			edge.demand += demand;
 			assert(demand <= from.undelivered_supply);
 			from.undelivered_supply -= demand;
@@ -144,7 +142,20 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 }
 
 void DemandCalculator::Run(Component * graph) {
-	switch (_distribution_types[cargo]) {
+	CargoID cargo = graph->GetCargo();
+	const LinkGraphSettings & settings = graph->GetSettings();
+	DistributionType type = settings.demand_default;
+	if (IsCargoInClass(cargo, CC_PASSENGERS)) {
+		type = settings.demand_pax;
+	} else if (IsCargoInClass(cargo, CC_MAIL)) {
+		type = settings.demand_mail;
+	} else if (IsCargoInClass(cargo, CC_EXPRESS)) {
+		type = settings.demand_express;
+	} else if (IsCargoInClass(cargo, CC_ARMOURED)) {
+		type = settings.demand_armoured;
+	}
+
+	switch (type) {
 	case DT_SYMMETRIC:
 		CalcSymmetric(graph);
 		break;
@@ -154,24 +165,5 @@ void DemandCalculator::Run(Component * graph) {
 	default:
 		/* ignore */
 		break;
-	}
-}
-
-void InitializeDemands() {
-	DemandCalculator::_max_distance = MapSizeX() + MapSizeY();
-	EconomySettings & settings = _settings_game.economy;
-	DistributionType * types = DemandCalculator::_distribution_types;
-	for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
-		if (IsCargoInClass(c, CC_PASSENGERS)) {
-			types[c] = settings.demand_pax;
-		} else if (IsCargoInClass(c, CC_MAIL)) {
-			types[c] = settings.demand_mail;
-		} else if (IsCargoInClass(c, CC_EXPRESS)) {
-			types[c] = settings.demand_express;
-		} else if (IsCargoInClass(c, CC_ARMOURED)) {
-			types[c] = settings.demand_armoured;
-		} else {
-			types[c] = settings.demand_default;
-		}
 	}
 }
