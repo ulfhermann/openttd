@@ -16,6 +16,7 @@
 #include "mcf.h"
 #include "flowmapper.h"
 #include "core/bitmath_func.hpp"
+#include "debug.h"
 #include <limits>
 #include <queue>
 
@@ -239,9 +240,13 @@ void LinkGraph::AddComponent(Component * component, uint join) {
 }
 
 void LinkGraphJob::Run() {
-	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
-		ComponentHandler * handler = *i;
-		handler->Run(component);
+	try {
+		for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+			ComponentHandler * handler = *i;
+			handler->Run(component);
+		}
+	} catch(Exception e) {
+		DEBUG(misc, 0, "link graph calculation aborted");
 	}
 }
 

@@ -47,6 +47,17 @@ void MultiCommodityFlow::CalcDelta() {
 		* pow((1.0 - epsilon) / m, 1.0 /epsilon);
 }
 
+void MultiCommodityFlow::HandleInstability() {
+	Number inverse_epsilon = 1.0 / epsilon - 1.0;
+	if (inverse_epsilon < 1.0) {
+		DEBUG(misc, 0, "explosion of numeric instability, giving up");
+		throw LinkGraphJob::Exception();
+	} else {
+		epsilon = 1.0 / inverse_epsilon;
+		DEBUG(misc, 0, "numeric instability detected, increasing epsilon: %f", epsilon);
+	}
+}
+
 void MultiCommodityFlow::CalcInitialL() {
 	for (NodeID i = 0; i < graph->GetSize(); ++i) {
 		McfEdge * last = NULL;
@@ -57,8 +68,7 @@ void MultiCommodityFlow::CalcInitialL() {
 			if (e->capacity > 0) {
 				mcf->l = delta / ((Number)e->capacity);
 				if (!mcf->l > 0) {
-					epsilon *= 2.0;
-					DEBUG(misc, 0, "numeric instability detected, increasing epsilon: %f", epsilon);
+					HandleInstability();
 					CalcDelta();
 					CalcInitialL();
 					return;
