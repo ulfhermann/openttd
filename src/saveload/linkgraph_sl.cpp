@@ -7,7 +7,6 @@
 #include "../linkgraph.h"
 #include "../demands.h"
 #include "../settings_internal.h"
-#include "../settings_func.h"
 #include "saveload.h"
 #include <vector>
 
@@ -62,7 +61,6 @@ const SaveLoad * GetComponentDesc() {
 }
 
 const SaveLoad * GetLinkGraphDesc(uint type) {
-
 
 	static const SaveLoad _linkgraph_desc[] = {
 		SLEG_CONDVAR(           _num_components,  SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
