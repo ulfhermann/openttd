@@ -12,13 +12,15 @@
 #include "settings_type.h"
 #include <vector>
 
+typedef double Number;
+
 class McfEdge {
 public:
-	McfEdge() : l(0), d(0), dx(0), f_cq(0), next(NULL), to(UINT_MAX) {}
-	float l;
-	float d;
-	float dx;
-	float f_cq;
+	McfEdge() : l(0), d(0), dx(0), f_cq(0), next(NULL), to(Node::INVALID) {}
+	Number l;
+	Number d;
+	Number dx;
+	Number f_cq;
 	McfEdge * next;
 	NodeID to;
 };
@@ -26,8 +28,8 @@ public:
 class DistanceAnnotation : public Path {
 public:
 	DistanceAnnotation(NodeID n, bool source = false) : Path(n, source) {}
-	bool IsBetter(const DistanceAnnotation * base, float cap, float dist) const;
-	float GetAnnotation() const {return distance;}
+	bool IsBetter(const DistanceAnnotation * base, Number cap, Number dist) const;
+	Number GetAnnotation() const {return distance;}
 	struct comp {
 		bool operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const;
 	};
@@ -36,8 +38,8 @@ public:
 class CapacityAnnotation : public Path {
 public:
 	CapacityAnnotation(NodeID n, bool source = false) : Path(n, source) {}
-	bool IsBetter(const CapacityAnnotation * base, float cap, float dist) const;
-	float GetAnnotation() const {return capacity;}
+	bool IsBetter(const CapacityAnnotation * base, Number cap, Number dist) const;
+	Number GetAnnotation() const {return capacity;}
 	struct comp {
 		bool operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const;
 	};
@@ -60,16 +62,16 @@ private:
 	void CountEdges();
 	template<class ANNOTATION>
 		void Dijkstra(NodeID from, PathVector & paths);
-	void IncreaseL(Path * path, float f_cq);
+	void IncreaseL(Path * path, Number f_cq);
 	void Karakostas();
 	void CleanupPaths(PathVector & paths);
-	float epsilon;
+	Number epsilon;
 	McfGraph edges;
 	Component * graph;
-	float delta;
-	float k;
-	float m;
-	float d_l; // actually D(l), but coding style overruled that
+	Number delta;
+	Number k;
+	Number m;
+	Number d_l; // actually D(l), but coding style overruled that
 };
 
 #endif /* MCF_H_ */

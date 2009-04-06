@@ -16,7 +16,7 @@ MultiCommodityFlow::MultiCommodityFlow() :
 
 void MultiCommodityFlow::Run(Component * g) {
 	assert(g->GetSettings().mcf_accuracy > 0);
-	epsilon = 1.0 / (float)g->GetSettings().mcf_accuracy;
+	epsilon = 1.0 / (Number)g->GetSettings().mcf_accuracy;
 	graph = g;
 	CountEdges();
 	if (k == 0) return;
@@ -55,7 +55,7 @@ void MultiCommodityFlow::CalcInitialL() {
 			Edge * e = &(graph->GetEdge(i, j));
 			McfEdge * mcf = &edges[i][j];
 			if (e->capacity > 0) {
-				mcf->l = delta / ((float)e->capacity);
+				mcf->l = delta / ((Number)e->capacity);
 				if (!mcf->l > 0) {
 					epsilon *= 2.0;
 					DEBUG(misc, 0, "numeric instability detected, increasing epsilon: %f", epsilon);
@@ -77,11 +77,11 @@ void MultiCommodityFlow::CalcInitialL() {
 }
 
 
-bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, float, float dist) const {
+bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, Number, Number dist) const {
 	return (base->distance + dist < distance);
 }
 
-bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, float cap, float) const {
+bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, Number cap, Number) const {
 	return (min(base->capacity, cap) > capacity);
 }
 
@@ -105,8 +105,8 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
 		annos.erase(i);
 		for (McfEdge * edge = GetFirstEdge(from); edge != NULL; edge = edge->next) {
 			NodeID to = edge->to;
-			float capacity = graph->GetEdge(from, to).capacity;
-			float distance = edge->l;
+			Number capacity = graph->GetEdge(from, to).capacity;
+			Number distance = edge->l;
 			ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
 			if (dest->IsBetter(source, capacity, distance)) {
 				annos.erase(dest);
@@ -122,15 +122,15 @@ void MultiCommodityFlow::Prescale() {
 	// search for min(C_i/d_i)
 	PathVector p;
 	uint size = graph->GetSize();
-	float min_c_d = std::numeric_limits<float>::max();
+	Number min_c_d = std::numeric_limits<Number>::max();
 	for (NodeID from = 0; from < size; ++from) {
 		Dijkstra<CapacityAnnotation>(from, p);
 		for (NodeID to = 0; to < size; ++to) {
 			Path * path = p[to];
 			if (from != to) {
-				float cap = path->GetCapacity();
+				Number cap = path->GetCapacity();
 				if (cap > 0) {
-					float c_d = cap / edges[from][to].d;
+					Number c_d = cap / edges[from][to].d;
 					min_c_d = min(c_d, min_c_d);
 				}
 			}
@@ -139,7 +139,7 @@ void MultiCommodityFlow::Prescale() {
 		}
 	}
 	// scale all demands
-	float scale_factor = min_c_d / k;
+	Number scale_factor = min_c_d / k;
 	if (scale_factor > 1) {
 		DEBUG(misc, 3, "very high scale factor: %f", scale_factor);
 	}
@@ -154,20 +154,20 @@ void MultiCommodityFlow::CalcD() {
 	d_l = 0;
 	for (NodeID from = 0; from < graph->GetSize(); ++from) {
 		for (McfEdge * edge = GetFirstEdge(from); edge != NULL; edge = edge->next) {
-			d_l += edge->l * (float)graph->GetEdge(from, edge->to).capacity;
+			d_l += edge->l * (Number)graph->GetEdge(from, edge->to).capacity;
 		}
 	}
 }
 
-void MultiCommodityFlow::IncreaseL(Path * path, float sum_f_cq) {
+void MultiCommodityFlow::IncreaseL(Path * path, Number sum_f_cq) {
 	Path * parent = path->GetParent();
 	while (parent != NULL) {
 		NodeID to = path->GetNode();
 		NodeID from = parent->GetNode();
 		McfEdge & mcf = edges[from][to];
 		Edge & edge = graph->GetEdge(from, to);
-		float capacity = edge.capacity;
-		float difference = mcf.l * epsilon * sum_f_cq / capacity;
+		Number capacity = edge.capacity;
+		Number difference = mcf.l * epsilon * sum_f_cq / capacity;
 		assert(!(difference < 0));
 		mcf.l += difference;
 		assert(mcf.l > 0);
@@ -200,7 +200,7 @@ void MultiCommodityFlow::Karakostas() {
 	typedef std::set<McfEdge *> EdgeSet;
 	EdgeSet unsatisfied_demands;
 	PathVector paths;
-	float last_d_l = 1;
+	Number last_d_l = 1;
 	uint loops = 0; // TODO: when #loops surpasses a certain threshold double all d's to speed things up
 	while(d_l < 1 && d_l < last_d_l) {
 		last_d_l = d_l;
@@ -213,7 +213,7 @@ void MultiCommodityFlow::Karakostas() {
 				}
 			}
 			Dijkstra<DistanceAnnotation>(source, paths);
-			float c = std::numeric_limits<float>::max();
+			Number c = std::numeric_limits<Number>::max();
 			for (EdgeSet::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end(); ++i) {
 				Path * path = paths[(*i)->to];
 				if (path->GetCapacity() > 0) {
@@ -224,7 +224,7 @@ void MultiCommodityFlow::Karakostas() {
 				for (EdgeSet::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end();) {
 					McfEdge * edge = *i;
 					Path * path = paths[edge->to];
-					float f_cq = min(edge->dx, c);
+					Number f_cq = min(edge->dx, c);
 					edge->dx -= f_cq;
 					IncreaseL(path, f_cq);
 					path->AddFlow(f_cq, graph);
@@ -249,7 +249,7 @@ void MultiCommodityFlow::Karakostas() {
  * When the annotation is the same the pointers themselves are compared, so there are no equal ranges.
  * (The problem might have been something else ... but this isn't expensive I guess)
  */
-bool greater(float x_anno, float y_anno, const Path * x, const Path * y) {
+bool greater(Number x_anno, Number y_anno, const Path * x, const Path * y) {
 	if (x_anno > y_anno) {
 		return true;
 	} else if (x_anno < y_anno) {
