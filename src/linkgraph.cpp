@@ -40,7 +40,7 @@ void LinkGraph::NextComponent()
 				}
 				search_queue.push(station);
 				station_colours[current_station] = current_colour;
-				component = new Component(current_colour);
+				component = new Component(cargo, current_colour);
 				GoodsEntry & good = station->goods[cargo];
 				node = component->AddNode(current_station, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[current_station++] = node;
@@ -97,7 +97,7 @@ void OnTick_LinkGraph()
 	bool join =  (_tick_counter + LinkGraph::COMPONENTS_JOIN_TICK)  % DAY_TICKS == 0;
 	if (spawn || join) {
 		for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
-			if ((_date + cargo) % _settings_game.economy.linkgraph_recalc_interval == 0) {
+			if ((_date + cargo) % _settings_game.linkgraph.recalc_interval == 0) {
 				LinkGraph & graph = _link_graphs[cargo];
 				if (spawn) {
 					graph.NextComponent();
@@ -150,17 +150,11 @@ void Component::SetSize(uint size) {
 	edges.resize(num_nodes, std::vector<Edge>(num_nodes));
 }
 
-Component::Component(colour col) :
+Component::Component(CargoID car, colour col) :
+	settings(_settings_game.linkgraph),
+	cargo(car),
 	num_nodes(0),
 	component_colour(col)
-{
-}
-
-Component::Component(uint size, colour c) :
-	num_nodes(size),
-	component_colour(c),
-	nodes(size),
-	edges(size, std::vector<Edge>(size))
 {
 }
 
@@ -246,8 +240,8 @@ Path::Path(NodeID n, bool source)  :
 {}
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
-	AddHandler(new DemandCalculator(cargo));
-	AddHandler(new MultiCommodityFlow());
+	AddHandler(new DemandCalculator);
+	AddHandler(new MultiCommodityFlow);
 	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
 		// Of course this will hang a bit.
@@ -286,6 +280,5 @@ void LinkGraph::Clear() {
 }
 
 void InitializeLinkGraphs() {
-	InitializeDemands();
 	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 }

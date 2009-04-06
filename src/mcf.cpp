@@ -11,16 +11,12 @@
 #include <cmath>
 
 MultiCommodityFlow::MultiCommodityFlow() :
-	epsilon(1.0 / (float)_settings_game.economy.mcf_accuracy),
-	graph(NULL), delta(0), k(0), m(0)
-{
-	if (_settings_game.economy.mcf_accuracy == 0) {
-		debug("invalid accuracy setting!");
-		epsilon = 1;
-	}
-}
+	epsilon(0.5), graph(NULL), delta(0), k(0), m(0)
+{}
 
 void MultiCommodityFlow::Run(Component * g) {
+	assert(g->settings.mcf_accuracy > 0);
+	epsilon = 1.0 / (float)g->settings.economy.mcf_accuracy;
 	graph = g;
 	CountEdges();
 	if (k == 0) return;
