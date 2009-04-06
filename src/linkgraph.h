@@ -42,8 +42,7 @@ class Component {
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	Component(uint size, colour c);
-	Component(colour c = 0);
+	Component(CargoID cargo, colour c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -52,8 +51,10 @@ public:
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
 	colour GetColour() const {return component_colour;}
+	CargoID GetCargo() const {return cargo;}
 private:
-	friend const SaveLoad * GetLinkGraphDesc(uint);
+	friend const SaveLoad * GetComponentDesc();
+	CargoID cargo;
 	uint num_nodes;
 	colour component_colour;
 	NodeVector nodes;
@@ -71,12 +72,15 @@ public:
 	CargoID GetCargo() const {return cargo;}
 	void NextComponent();
 	void InitColours();
+
 	void Join();
 	uint GetNumComponents() const {return components.size();}
 	ComponentList & GetComponents() {return components;}
 	void AddComponent(Component * component);
-	const static uint COMPONENTS_SPAWN_TICK = 21;
-	const static uint COMPONENTS_JOIN_TICK  = 58;
+
+	const static uint COMPONENTS_JOIN_TICK  = 21;
+	const static uint COMPONENTS_SPAWN_TICK = 58;
+
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
 	colour current_colour;

@@ -16,6 +16,18 @@ enum {
 	LGRP_EDGE = 3,
 };
 
+const SaveLoad * GetComponentDesc() {
+
+	static const SaveLoad _component_desc[] = {
+		 SLE_CONDVAR(Component, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Component, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_END()
+	};
+
+	return _component_desc;
+}
+
+
 const SaveLoad * GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad _linkgraph_desc[] = {
@@ -26,11 +38,7 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 		 SLE_END()
 	};
 
-	static const SaveLoad _component_desc[] = {
-		 SLE_CONDVAR(Component, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Component, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_END()
-	};
+	static const SaveLoad * _component_desc = GetComponentDesc();
 
 	// edges and nodes are saved in the correct order, so we don't need to save their ids.
 
@@ -89,7 +97,7 @@ static void Load_LGRP()
 		LinkGraph & graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		for (uint i = 0; i < _num_components; ++i) {
-			Component * comp = new Component();
+			Component * comp = new Component(cargo);
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			comp->SetSize(comp->GetSize());
 			SaveLoad_Component(comp);

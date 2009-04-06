@@ -37,7 +37,7 @@ void LinkGraph::NextComponent()
 				}
 				search_queue.push(station);
 				station_colours[current_station] = current_colour;
-				component = new Component(current_colour);
+				component = new Component(cargo, current_colour);
 				GoodsEntry & good = station->goods[cargo];
 				node = component->AddNode(current_station, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[current_station++] = node;
@@ -145,17 +145,10 @@ void Component::SetSize(uint size) {
 	edges.resize(num_nodes, std::vector<Edge>(num_nodes));
 }
 
-Component::Component(colour col) :
+Component::Component(CargoID car, colour col) :
+	cargo(car),
 	num_nodes(0),
 	component_colour(col)
-{
-}
-
-Component::Component(uint size, colour c) :
-	num_nodes(size),
-	component_colour(c),
-	nodes(size),
-	edges(size, std::vector<Edge>(size))
 {
 }
 
