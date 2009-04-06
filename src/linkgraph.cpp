@@ -249,6 +249,5 @@ void LinkGraph::Clear() {
 }
 
 void InitializeLinkGraphs() {
-	InitializeDemands();
 	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 }
