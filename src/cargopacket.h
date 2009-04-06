@@ -125,8 +125,7 @@ private:
 	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
 	uint WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	uint WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
-	uint LoadPackets(List & dest, StationID next_station, uint cap, bool force_load = false, TileIndex load_place = INVALID_TILE);
-
+	uint LoadPackets(List * dest, uint cap, StationID next_station, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
 
 public:
 	friend void SaveLoad_STNS(Station *st);
@@ -200,13 +199,6 @@ public:
 	void Import(List & list);
 
 	/**
-	 * exports this CargoList by splicing its elements into another one
-	 * this one is empty afterwards
-	 * runs in constant time.
-	 */
-	void Export(List & list);
-
-	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
 	 * @param count the maximum amount of entities to be in the list after the command
@@ -247,14 +239,17 @@ public:
 	 * @param load_place   The place where the loading takes/took place;
 	 *                     if load_place != INVALID_TILE CargoPacket::loaded_at_xy will be set accordingly
 	 */
-	uint MoveToVehicle(CargoList *dest, uint max_load, bool force_load, StationID next_station = INVALID_STATION, TileIndex load_place = INVALID_TILE);
+	uint MoveToVehicle(CargoList *dest, uint max_load, StationID next_station = INVALID_STATION, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
 
 	void ReleaseStalePackets(StationID to);
 
-	void ReservePacketsForLoading(StationID next_station, List & reserved, uint cap);
+	void ReservePacketsForLoading(List * reserved, uint cap, StationID next_station, List * rejected)
+		{LoadPackets(reserved, cap, next_station, rejected);}
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
+
+typedef std::map<CargoID, CargoList::List> CargoReservation;
 
 #endif /* CARGOPACKET_H */

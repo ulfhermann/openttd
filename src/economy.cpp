@@ -1541,6 +1541,32 @@ void VehiclePayment(Vehicle *front_v)
 }
 
 /**
+ * Moves packets from the reservation list back into the station
+ */
+static void ReimportReserved(Station * st, CargoReservation & reserved) {
+	for (CargoReservation::iterator i = reserved.begin(); i != reserved.end(); ++i) {
+		st->goods[i->first].cargo.Import(i->second);
+	}
+}
+
+/**
+ * reserves cargo if the full load order and improved_load is set. Moves rejected packets from the rejection list
+ * back into the station
+ */
+static void ReserveAndUnreject(Station * st, Vehicle * u, StationID next_station, CargoReservation & reserved, CargoReservation & rejected)
+{
+	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
+		/* Update reserved cargo */
+		for (Vehicle * v = u; v != NULL; v = v->Next()) {
+			CargoID cargo = v->cargo_type;
+			CargoList & list = st->goods[cargo].cargo;
+			list.ReservePacketsForLoading(&reserved[cargo], v->cargo_cap - v->cargo.Count(), next_station, &rejected[cargo]);
+		}
+	}
+	ReimportReserved(st, rejected);
+}
+
+/**
  * Loads/unload the vehicle if possible.
  * @param v the vehicle to be (un)loaded
  * @param cargo_left the amount of each cargo type that is
@@ -1548,30 +1574,24 @@ void VehiclePayment(Vehicle *front_v)
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
  */
-static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & reserved)
+static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 {
+	CargoReservation rejected;
 	assert(v->current_order.IsType(OT_LOADING));
 
 	Vehicle *u = v;
-	const Order * curr = &(u->current_order);
-	const Order * next = u->orders.list->GetNextUnloadingOrder(curr);
+	const Order * next = u->orders.list->GetNextUnloadingOrder(&(u->current_order));
 	StationID last_visited = u->last_station_visited;
 	Station *st = GetStation(last_visited);
 
 	StationID next_station = next->GetDestination();
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--v->load_unload_time_rem != 0) {
-		if (_settings_game.order.improved_load && (v->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
-			/* 'Reserve' this cargo for this vehicle, because we were first. */
-			for (; v != NULL; v = v->Next()) {
-				GoodsEntry *ge = &st->goods[v->cargo_type];
-				ge->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
-			}
-		}
+	if (--u->load_unload_time_rem != 0) {
+		ReserveAndUnreject(st, u, next_station, reserved, rejected);
 		return;
 	}
 
-	uint unload_flags = curr->GetUnloadType();
+	uint unload_flags = u->current_order.GetUnloadType();
 
 
 	if (v->type == VEH_TRAIN && (!IsTileType(v->tile, MP_STATION) || GetStationIndex(v->tile) != st->index)) {
@@ -1664,15 +1684,7 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
 			 * In that case force_load should be set and all cargo available
 			 * be moved onto the vehicle.
 			 */
-			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
-			if (!_settings_game.order.improved_load) {
-				/* if not improved_load then DO load stuff from the reserved list ...*/
-				CargoList::List & reserved_list = reserved[v->cargo_type];
-				CargoList tmp;
-				tmp.Import(reserved_list);
-				loaded += tmp.MoveToVehicle(&v->cargo, cap, false, next_station, st->xy);
-				tmp.Export(reserved_list);
-			}
+			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, next_station, &rejected[v->cargo_type], st->xy);
 
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
@@ -1716,13 +1728,7 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
 	 * all wagons at the same time instead of using the same 'improved'
 	 * loading algorithm for the wagons (only fill wagon when there is
 	 * enough to fill the previous wagons) */
-	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
-		/* Update reserved cargo */
-		for (v = u; v != NULL; v = v->Next()) {
-			GoodsEntry *ge = &st->goods[v->cargo_type];
-			ge->cargo.ReservePacketsForLoading(next_station, reserved[v->cargo_type], v->cargo_cap - v->cargo.Count());
-		}
-	}
+	ReserveAndUnreject(st, u, next_station, reserved, rejected);
 
 	v = u;
 
@@ -1802,7 +1808,7 @@ static void LoadUnloadVehicle(Vehicle *v, std::map<CargoID, CargoList::List> & r
  */
 void LoadUnloadStation(Station *st)
 {
-	std::map<CargoID, CargoList::List> reserved;
+	CargoReservation reserved;
 
 	std::list<Vehicle *>::iterator iter;
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
@@ -1810,10 +1816,7 @@ void LoadUnloadStation(Station *st)
 		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, reserved);
 	}
 
-	std::multimap<CargoID, CargoList::List>::iterator res_i;
-	for (res_i = reserved.begin(); res_i != reserved.end(); ++res_i) {
-		st->goods[res_i->first].cargo.Import(res_i->second);
-	}
+	ReimportReserved(st, reserved);
 }
 
 void CompaniesMonthlyLoop()

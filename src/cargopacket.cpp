@@ -132,12 +132,6 @@ void CargoList::Import(List & list)
 	InvalidateCache();
 }
 
-void CargoList::Export(List & list)
-{
-	list.splice(list.end(), packets);
-	InvalidateCache();
-}
-
 void CargoList::Truncate(uint count)
 {
 	for (List::iterator it = packets.begin(); it != packets.end(); it++) {
@@ -318,11 +312,10 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, St
 	return max_unload - remaining_unload;
 }
 
-uint CargoList::LoadPackets(List & dest, StationID next_station, uint cap, bool force_load, TileIndex load_place) {
-	List rejected;
+uint CargoList::LoadPackets(List * dest, uint cap, StationID next_station, List * rejected, TileIndex load_place) {
 	while(!packets.empty() && cap > 0) {
 		CargoPacket * p = packets.front();
-		if (force_load || p->next == next_station || p->next == INVALID_STATION) {
+		if (rejected == NULL || p->next == next_station || p->next == INVALID_STATION) {
 			/* load the packet if possible */
 			if (p->count <= cap) {
 				/* load all of the packet */
@@ -333,27 +326,22 @@ uint CargoList::LoadPackets(List & dest, StationID next_station, uint cap, bool 
 				assert(p->count == cap);
 			}
 			cap -= p->count;
-			dest.push_back(p);
+			dest->push_back(p);
 			if (load_place != INVALID_TILE) {
 				p->loaded_at_xy = load_place;
 				p->paid_for = false;
 			}
 		} else {
 			packets.pop_front();
-			rejected.push_back(p);
+			rejected->push_back(p);
 		}
 	}
-	packets.splice(packets.end(), rejected);
 	InvalidateCache();
 	return cap;
 }
 
-void CargoList::ReservePacketsForLoading(StationID next_station, List & reserved, uint cap) {
-	LoadPackets(reserved, next_station, cap);
-}
-
-uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, bool force_load, StationID next_station, TileIndex load_place) {
-	uint space_remaining = LoadPackets(dest->packets, next_station, max_load, force_load, load_place);
+uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, StationID next_station, List * rejected, TileIndex load_place) {
+	uint space_remaining = LoadPackets(&dest->packets, max_load, next_station, rejected, load_place);
 	dest->InvalidateCache();
 	return max_load - space_remaining;
 }
