@@ -12,8 +12,6 @@
 #include "settings_type.h"
 #include <vector>
 
-typedef double Number;
-
 class McfEdge {
 public:
 	McfEdge() : l(0), d(0), dx(0), f_cq(0), next(NULL), to(Node::INVALID) {}
