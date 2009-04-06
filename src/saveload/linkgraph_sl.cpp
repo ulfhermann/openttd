@@ -6,7 +6,12 @@
  */
 #include "../linkgraph.h"
 #include "../demands.h"
+#include "../settings_internal.h"
+#include "../settings_func.h"
 #include "saveload.h"
+#include <vector>
+
+const SettingDesc *GetSettingDescription(uint index);
 
 static uint _num_components;
 static Date _join_date;
@@ -18,7 +23,46 @@ enum {
 	LGRP_EDGE = 3,
 };
 
+const SaveLoad * GetComponentDesc() {
+
+	static const SaveLoad _component_desc[] = {
+		 SLE_CONDVAR(Component, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Component, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(           _join_date,       SLE_INT32,    DEMANDS_SV, SL_MAX_VERSION),
+		 SLE_END()
+	};
+
+	size_t offset_gamesettings = cpp_offsetof(GameSettings, linkgraph);
+	size_t offset_component = cpp_offsetof(Component, settings);
+
+	typedef std::vector<SaveLoad> SaveLoadVector;
+	static SaveLoadVector saveloads;
+	static const char * prefix = "linkgraph.";
+	int prefixlen = strlen(prefix);
+
+	int setting = 0;
+	const SettingDesc * desc = GetSettingDescription(setting);
+	while (desc->save.cmd != SL_END) {
+		if (strncmp(desc->desc.name, prefix, prefixlen) == 0) {
+			SaveLoad sl = desc->save;
+			char *& address = reinterpret_cast<char *&>(sl.address);
+			address -= offset_gamesettings;
+			address += offset_component;
+			saveloads.push_back(sl);
+		}
+		desc = GetSettingDescription(++setting);
+	}
+
+	int i = 0;
+	do {
+		saveloads.push_back(_component_desc[i++]);
+	} while (saveloads.back().cmd != SL_END);
+
+	return saveloads.data();
+}
+
 const SaveLoad * GetLinkGraphDesc(uint type) {
+
 
 	static const SaveLoad _linkgraph_desc[] = {
 		SLEG_CONDVAR(           _num_components,  SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
@@ -28,12 +72,7 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 		 SLE_END()
 	};
 
-	static const SaveLoad _component_desc[] = {
-		 SLE_CONDVAR(Component, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Component, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(           _join_date,       SLE_INT32,    DEMANDS_SV, SL_MAX_VERSION),
-		 SLE_END()
-	};
+	static const SaveLoad * _component_desc = GetComponentDesc();
 
 	// edges and nodes are saved in the correct order, so we don't need to save their ids.
 
@@ -96,7 +135,7 @@ static void Load_LGRP()
 		LinkGraph & graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		for (uint i = 0; i < _num_components; ++i) {
-			Component * comp = new Component();
+			Component * comp = new Component(cargo);
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			comp->SetSize(comp->GetSize());
 			SaveLoad_Component(comp);

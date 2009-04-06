@@ -1222,15 +1222,21 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.smooth_economy"),
 	SettingEntry("economy.moving_average_unit"),
 	SettingEntry("economy.moving_average_length"),
-	SettingEntry("economy.linkgraph_recalc_interval"),
-	SettingEntry("economy.demand_pax"),
-	SettingEntry("economy.demand_mail"),
-	SettingEntry("economy.demand_express"),
-	SettingEntry("economy.demand_armoured"),
-	SettingEntry("economy.demand_default"),
 };
+
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};
+
+static SettingEntry _settings_linkgraph[] = {
+	SettingEntry("linkgraph.recalc_interval"),
+	SettingEntry("linkgraph.demand_pax"),
+	SettingEntry("linkgraph.demand_mail"),
+	SettingEntry("linkgraph.demand_express"),
+	SettingEntry("linkgraph.demand_armoured"),
+	SettingEntry("linkgraph.demand_default"),
+};
+
+static SettingsPage _settings_linkgraph_page = {_settings_linkgraph, lengthof(_settings_linkgraph)};
 
 static SettingEntry _settings_ai_npc[] = {
 	SettingEntry("ai.ai_in_multiplayer"),
@@ -1319,6 +1325,7 @@ static SettingEntry _settings_main[] = {
 	SettingEntry(&_settings_vehicles_page,     STR_CONFIG_SETTING_VEHICLES),
 	SettingEntry(&_settings_stations_page,     STR_CONFIG_SETTING_STATIONS),
 	SettingEntry(&_settings_economy_page,      STR_CONFIG_SETTING_ECONOMY),
+	SettingEntry(&_settings_linkgraph_page,    STR_CONFIG_SETTING_LINKGRAPH),
 	SettingEntry(&_settings_ai_page,           STR_CONFIG_SETTING_AI),
 };
 

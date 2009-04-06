@@ -10,7 +10,7 @@
 #include "transport_type.h"
 #include "network/core/config.h"
 #include "company_type.h"
-#include "demands.h"
+#include "demand_settings.h"
 
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
@@ -330,11 +330,15 @@ struct EconomySettings {
 	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving average of capacities and usage of links
 	uint16 moving_average_length;            ///< length of the moving average for capacities and usage of links
 	uint16 linkgraph_recalc_interval;        ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
-	DistributionTypeByte  demand_pax;        ///< demand calculation for passengers
-	DistributionTypeByte  demand_mail;       ///< demand calculation for mail
-	DistributionTypeByte  demand_express;    ///< demand calculation for express cargo class
-	DistributionTypeByte  demand_armoured;   ///< demand calculation for armoured cargo class
-	DistributionTypeByte  demand_default;    ///< demand calculation for all other goods
+};
+
+struct LinkGraphSettings {
+	uint16 recalc_interval;                  ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	DistributionTypeByte demand_pax;         ///< demand calculation for passengers
+	DistributionTypeByte demand_mail;        ///< demand calculation for mail
+	DistributionTypeByte demand_express;     ///< demand calculation for express cargo class
+	DistributionTypeByte demand_armoured;    ///< demand calculation for armoured cargo class
+	DistributionTypeByte demand_default;     ///< demand calculation for all other goods
 };
 
 /** Settings related to stations. */
@@ -359,6 +363,7 @@ struct GameSettings {
 	OrderSettings        order;              ///< settings related to orders
 	VehicleSettings      vehicle;            ///< options for vehicles
 	EconomySettings      economy;            ///< settings to change the economy
+	LinkGraphSettings    linkgraph;          ///< settings for link graph calculations
 	StationSettings      station;            ///< settings related to station management
 	LocaleSettings       locale;             ///< settings related to used currency/unit system in the current game
 };

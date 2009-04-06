@@ -12,6 +12,7 @@
 #include "station_base.h"
 #include "cargo_type.h"
 #include "thread.h"
+#include "settings_type.h"
 #include <list>
 #include <vector>
 
@@ -45,8 +46,7 @@ class Component {
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	Component(uint size, colour c);
-	Component(colour c = 0);
+	Component(CargoID cargo, colour c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -55,8 +55,12 @@ public:
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
 	colour GetColour() const {return component_colour;}
+	CargoID GetCargo() const {return cargo;}
+	const LinkGraphSettings & GetSettings() const {return settings;}
 private:
-	friend const SaveLoad * GetLinkGraphDesc(uint);
+	friend const SaveLoad * GetComponentDesc();
+	LinkGraphSettings settings;
+	CargoID cargo;
 	uint num_nodes;
 	colour component_colour;
 	NodeVector nodes;
