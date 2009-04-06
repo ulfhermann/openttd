@@ -18,11 +18,11 @@
 #include <set>
 
 struct SaveLoad;
-
-typedef uint NodeID;
-
 class Path;
 
+typedef uint16 colour;
+typedef uint NodeID;
+typedef double Number;
 typedef std::set<Path *> PathSet;
 typedef std::map<StationID, uint> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
@@ -52,11 +52,8 @@ public:
 	uint demand;
 };
 
-typedef uint16 colour;
-
 class Component {
 	typedef std::vector<Node> NodeVector;
-
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
@@ -148,16 +145,16 @@ public:
 	NodeID GetNode() const {return node;}
 	NodeID GetOrigin() const {return parent == NULL ? node : parent->GetOrigin();}
 	Path * GetParent() {return parent;}
-	float GetCapacity() const {return capacity;}
-	void Fork(Path * base, float cap, float dist);
-	void AddFlow(float f, Component * graph);
-	float GetFlow() {return flow;}
+	Number GetCapacity() const {return capacity;}
+	void Fork(Path * base, Number cap, Number dist);
+	void AddFlow(Number f, Component * graph);
+	Number GetFlow() {return flow;}
 	uint GetNumChildren() {return num_children;}
 	void UnFork();
 protected:
-	float distance;
-	float capacity;
-	float flow;
+	Number distance;
+	Number capacity;
+	Number flow;
 	NodeID node;
 	uint num_children;
 	Path * parent;

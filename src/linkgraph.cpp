@@ -265,7 +265,7 @@ void RunLinkGraphJob(void * j) {
 	job->Run();
 }
 
-void Path::Fork(Path * base, float cap, float dist) {
+void Path::Fork(Path * base, Number cap, Number dist) {
 	capacity = min(base->capacity, cap);
 	distance = base->distance + dist;
 	assert(distance > 0);
@@ -278,7 +278,7 @@ void Path::Fork(Path * base, float cap, float dist) {
 	}
 }
 
-void Path::AddFlow(float f, Component * graph) {
+void Path::AddFlow(Number f, Component * graph) {
 	flow +=f;
 	graph->GetNode(node).paths.insert(this);
 	if (parent != NULL) {
@@ -294,8 +294,8 @@ void Path::UnFork() {
 }
 
 Path::Path(NodeID n, bool source)  :
-	distance(source ? 0 : std::numeric_limits<float>::max()),
-	capacity(source ? std::numeric_limits<float>::max() : 0),
+	distance(source ? 0 : std::numeric_limits<Number>::max()),
+	capacity(source ? std::numeric_limits<Number>::max() : 0),
 	flow(0), node(n), num_children(0), parent(NULL)
 {}
 
