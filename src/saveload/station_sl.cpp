@@ -196,13 +196,14 @@ void SaveLoad_STNS(Station *st)
 				ge->cargo.Append(cp);
 			}
 		}
-		if ((stats.empty() && _num_links > 0) || (flows.empty() && _num_flows > 0)) { // loading
+
+		FlowStat fs;
+		if (stats.empty() && flows.empty()) { // loading
 			LinkStat ls;
 			for (uint i = 0; i < _num_links; ++i) {
 				SlObject(&ls, _linkstat_desc);
 				stats[_station_id] = ls;
 			}
-			FlowStat fs;
 			for (uint i = 0; i < _num_flows; ++i) {
 				SlObject(&fs, _flowstat_desc);
 				flows[_station_id].insert(fs);
@@ -216,7 +217,8 @@ void SaveLoad_STNS(Station *st)
 				_station_id = i->first;
 				FlowStatSet & flow_set = i->second;
 				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
-					SlObject(const_cast<FlowStat *>(&(*j)), _flowstat_desc);
+					fs = *j;
+					SlObject(&fs, _flowstat_desc);
 				}
 			}
 		}
