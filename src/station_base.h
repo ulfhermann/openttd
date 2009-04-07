@@ -55,7 +55,13 @@ public:
 	StationID via;
 	struct comp {
 		bool operator()(const FlowStat & x, const FlowStat & y) const {
-			return x.planned - x.sent > y.planned - y.sent;
+			int diff_x = (int)x.planned - (int)x.sent;
+			int diff_y = (int)y.planned - (int)y.sent;
+			if (diff_x != diff_y) {
+				return diff_x > diff_y;
+			} else {
+				return x.via > y.via;
+			}
 		}
 	};
 
