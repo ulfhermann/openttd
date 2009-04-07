@@ -3365,6 +3365,20 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
+FlowStat GoodsEntry::GetSumFlowVia(StationID via) const {
+	FlowStat ret(via);
+	for(FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
+		const FlowStatSet & flow_set = i->second;
+		for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+			const FlowStat & flow = *j;
+			if (flow.via == via) {
+				ret.planned += flow.planned;
+				ret.sent += flow.sent;
+			}
+		}
+	}
+	return ret;
+}
 
 extern const TileTypeProcs _tile_type_station_procs = {
 	DrawTile_Station,           // draw_tile_proc
