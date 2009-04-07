@@ -23,9 +23,11 @@ void MultiCommodityFlow::Run(Component * g) {
 	edges.resize(graph->GetSize(), std::vector<McfEdge>(graph->GetSize()));
 	CalcDelta();
 	CalcInitialL();
-	Prescale();
-	Karakostas();
-	//Postscale is unnecessary as we are only interested in the flow ratios
+	if (Prescale()) {
+		/* paths were found */
+		Karakostas();
+	}
+	/* Postscale is unnecessary as we are only interested in the flow ratios */
 }
 
 void MultiCommodityFlow::CountEdges() {
@@ -128,11 +130,12 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
 }
 
 
-void MultiCommodityFlow::Prescale() {
+bool MultiCommodityFlow::Prescale() {
 	// search for min(C_i/d_i)
 	PathVector p;
 	uint size = graph->GetSize();
-	Number min_c_d = std::numeric_limits<Number>::max();
+	Number max_num = std::numeric_limits<Number>::max();
+	Number min_c_d = max_num;
 	for (NodeID from = 0; from < size; ++from) {
 		Dijkstra<CapacityAnnotation>(from, p);
 		for (NodeID to = 0; to < size; ++to) {
@@ -148,6 +151,10 @@ void MultiCommodityFlow::Prescale() {
 			p[to] = NULL;
 		}
 	}
+	if (!(min_c_d < max_num)) {
+		DEBUG(misc, 3, "no paths found. giving up");
+		return false;
+	}
 	// scale all demands
 	Number scale_factor = min_c_d / k;
 	if (scale_factor > 1) {
@@ -158,6 +165,7 @@ void MultiCommodityFlow::Prescale() {
 			edges[from][to].d *= scale_factor;
 		}
 	}
+	return true;
 }
 
 void MultiCommodityFlow::CalcD() {

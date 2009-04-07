@@ -54,7 +54,9 @@ public:
 private:
 	McfEdge * GetFirstEdge(NodeID n) {return edges[n][n].next;}
 	void CalcInitialL();
-	void Prescale(); // scale the demands so that beta >= 1
+
+	/* find out if there are any paths and if so scale the demands so that beta >= 1 */
+	bool Prescale();
 	void CalcDelta();
 	void CalcD();
 	void CountEdges();
