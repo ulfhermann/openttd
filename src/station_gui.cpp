@@ -690,11 +690,13 @@ static void DrawCargoIcons(CargoID i, uint waiting, int x, int y, uint width)
 struct CargoData {
 	CargoID cargo;
 	StationID source;
+	StationID next;
 	uint count;
 
-	CargoData(CargoID cargo, StationID source, uint count) :
+	CargoData(CargoID cargo, StationID source, StationID next, uint count) :
 		cargo(cargo),
 		source(source),
+		next(next),
 		count(count)
 	{ }
 };
@@ -742,7 +744,7 @@ struct StationViewWindow : public Window {
 				this->cargo_rows[i] = 0;
 			} else {
 				/* Add an entry for total amount of cargo of this type waiting. */
-				cargolist.push_back(CargoData(i, INVALID_STATION, st->goods[i].cargo.Count()));
+				cargolist.push_back(CargoData(i, INVALID_STATION, INVALID_STATION, st->goods[i].cargo.Count()));
 
 				/* Set the row for this cargo entry for the expand/hide button */
 				this->cargo_rows[i] = (uint16)cargolist.size();
@@ -751,27 +753,27 @@ struct StationViewWindow : public Window {
 				const CargoList::List *packets = st->goods[i].cargo.Packets();
 				for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
 					const CargoPacket *cp = *it;
-					if (cp->source != station_id) {
-						bool added = false;
 
-						/* Enable the expand/hide button for this cargo type */
-						SetBit(transfers, i);
+					bool added = false;
 
-						/* Don't add cargo lines if not expanded */
-						if (!HasBit(this->cargo, i)) break;
+					/* Enable the expand/hide button for this cargo type */
+					SetBit(transfers, i);
 
-						/* Check if we already have this source in the list */
-						for (CargoDataList::iterator jt = cargolist.begin(); jt != cargolist.end(); jt++) {
-							CargoData *cd = &(*jt);
-							if (cd->cargo == i && cd->source == cp->source) {
-								cd->count += cp->count;
-								added = true;
-								break;
-							}
+					/* Don't add cargo lines if not expanded */
+					if (!HasBit(this->cargo, i)) break;
+
+					/* Check if we already have this source in the list */
+					for (CargoDataList::iterator jt = cargolist.begin(); jt != cargolist.end(); jt++) {
+						CargoData *cd = &(*jt);
+						if (cd->cargo == i && cd->source == cp->source && cd->next == cp->next) {
+							cd->count += cp->count;
+							added = true;
+							break;
 						}
-
-						if (!added) cargolist.push_back(CargoData(i, cp->source, cp->count));
 					}
+
+					if (!added) cargolist.push_back(CargoData(i, cp->source, cp->next, cp->count));
+
 				}
 			}
 		}
@@ -827,7 +829,8 @@ struct StationViewWindow : public Window {
 					SetDParam(0, cd->cargo);
 					SetDParam(1, cd->count);
 					SetDParam(2, cd->source);
-					DrawString(x, x + width, y, STR_EN_ROUTE_FROM, TC_FROMSTRING, SA_RIGHT);
+					SetDParam(3, cd->next);
+					DrawString(x, x + width, y, STR_EN_ROUTE_FROM_VIA, TC_FROMSTRING, SA_RIGHT);
 				}
 
 				y += 10;

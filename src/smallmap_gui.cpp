@@ -844,21 +844,23 @@ public:
 						Point ptm;
 
 						if (!show_towns) {
-							typedef std::map<int, byte, std::greater<int> > SizeMap;
+							typedef std::multimap<uint, byte, std::greater<uint> > SizeMap;
 							SizeMap sizes;
-							sizes[sqrt(ls.usage)] = _colour_gradient[COLOUR_GREY][1];
-							sizes[sqrt(ls.capacity)] = _colour_gradient[COLOUR_WHITE][7];
-							sizes[sqrt(flow.planned)] = _colour_gradient[COLOUR_BLUE][3];
-							sizes[sqrt(flow.sent)] = _colour_gradient[COLOUR_GREEN][4];
+							sizes.insert(std::make_pair(sqrt(ls.usage), _colour_gradient[COLOUR_GREY][1]));
+							sizes.insert(std::make_pair(sqrt(ls.capacity), _colour_gradient[COLOUR_WHITE][7]));
+							sizes.insert(std::make_pair(sqrt(flow.planned),  _colour_gradient[COLOUR_RED][5]));
+							sizes.insert(std::make_pair(sqrt(flow.sent), _colour_gradient[COLOUR_YELLOW][5]));
 
 							ptm.x = (pta.x + ptb.x) / 2;
 							ptm.y = (pta.y + ptb.y) / 2;
 
 							for (SizeMap::iterator i = sizes.begin(); i != sizes.end(); ++i) {
 								if (pta.x > ptb.x) {
-									GfxFillRect(ptm.x - i->first / 2 - 1, ptm.y - i->first * 2, ptm.x - 1, ptm.y, i->second);
+									ptm.x -= 1;
+									GfxFillRect(ptm.x - i->first / 2, ptm.y - i->first * 2, ptm.x, ptm.y, i->second);
 								} else {
-									GfxFillRect(ptm.x + 1, ptm.y - i->first * 2, ptm.x + i->first / 2 + 1, ptm.y, i->second);
+									ptm.x += 1;
+									GfxFillRect(ptm.x, ptm.y - i->first * 2, ptm.x + i->first / 2, ptm.y, i->second);
 								}
 							}
 
@@ -902,7 +904,6 @@ public:
 					CargoID c = tbl->type;
 					q += st->goods[c].supply * 30 / scale;
 					colour += tbl->colour;
-					colour += _link_graphs[c].GetColour(st->index);
 					numCargos++;
 				}
 				if (numCargos > 1)
