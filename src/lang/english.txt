@@ -18,7 +18,7 @@ STR_0007_FLAT_LAND_REQUIRED                                     :{WHITE}Flat lan
 STR_0008_WAITING                                                :{BLACK}Waiting: {WHITE}{STRING}
 STR_0009                                                        :{WHITE}{CARGO}
 STR_EN_ROUTE_FROM                                               :{YELLOW}({SHORTCARGO} en-route from {STATION})
-STR_EN_ROUTE_FROM_VIA                                           :{YELLOW}{SHORTCARGO} en-route from {STATION} via {STATION}
+STR_EN_ROUTE_FROM_VIA                                           :{YELLOW}{SHORTCARGO} from {STATION} to {STATION}
 STR_000C_ACCEPTS                                                :{BLACK}Accepts: {WHITE}
 STR_000D_ACCEPTS                                                :{BLACK}Accepts: {GOLD}
 STR_SUPPLIES                                                    :{BLACK}Supplies: {GOLD}
@@ -242,6 +242,8 @@ STR_DEFAULT                                                     :{BLACK}Default
 STR_012E_CANCEL                                                 :{BLACK}Cancel
 STR_012F_OK                                                     :{BLACK}OK
 STR_0130_RENAME                                                 :{BLACK}Rename
+STR_PLANNED_VIEW                                                :{BLACK}Planned Cargo
+STR_REAL_FLOW_VIEW                                              :{BLACK}Real Cargo
 
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS

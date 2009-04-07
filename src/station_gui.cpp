@@ -638,9 +638,10 @@ static const Widget _station_view_widgets[] = {
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    14,    65, 0x0,               STR_NULL},                             // SVW_WAITING
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    14,    65, 0x0,               STR_0190_SCROLL_BAR_SCROLLS_LIST},
 {      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    66,    97, 0x0,               STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    59,    98,   109, STR_00E4_LOCATION, STR_3053_CENTER_MAIN_VIEW_ON_STATION}, // SVW_LOCATION
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    60,   120,    98,   109, STR_3032_RATINGS,  STR_3054_SHOW_STATION_RATINGS},        // SVW_RATINGS / SVW_ACCEPTS
-{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   121,   180,    98,   109, STR_0130_RENAME,   STR_3055_CHANGE_NAME_OF_STATION},      // SVW_RENAME
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    44,    98,   109, STR_00E4_LOCATION, STR_3053_CENTER_MAIN_VIEW_ON_STATION}, // SVW_LOCATION
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    45,    89,    98,   109, STR_3032_RATINGS,  STR_3054_SHOW_STATION_RATINGS},        // SVW_RATINGS / SVW_ACCEPTS
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    90,   134,    98,   109, STR_PLANNED_VIEW,  STR_REAL_FLOW_VIEW},
+{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   135,   180,    98,   109, STR_0130_RENAME,   STR_3055_CHANGE_NAME_OF_STATION},      // SVW_RENAME
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,    98,   109, STR_TRAIN,         STR_SCHEDULED_TRAINS_TIP },            // SVW_TRAINS
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,    98,   109, STR_LORRY,         STR_SCHEDULED_ROAD_VEHICLES_TIP },     // SVW_ROADVEHS
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   209,   222,    98,   109, STR_PLANE,         STR_SCHEDULED_AIRCRAFT_TIP },          // SVW_PLANES
@@ -731,36 +732,44 @@ struct StationViewWindow : public Window {
 		DeleteWindowById(WC_AIRCRAFT_LIST, wno | (VEH_AIRCRAFT << 11), false);
 	}
 
-	virtual void OnPaint()
-	{
-		StationID station_id = this->window_number;
-		const Station *st = GetStation(station_id);
-		CargoDataList cargolist;
-		uint32 transfers = 0;
+	void BuildFlowList(CargoID i, const FlowStatMap & flows, CargoDataList & cargolist) {
+		CargoDataList tmp;
+		uint sum = 0;
+		for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
+			StationID from = it->first;
+			const FlowStatSet & flow_set = it->second;
+			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
+				const FlowStat & stat = *flow_it;
+				sum += stat.planned;
+				if (HasBit(this->cargo, i)) {
+					tmp.push_back(CargoData(i, from, stat.via, stat.planned));
+				}
+			}
+		}
+		if (sum > 0) {
+			cargolist.push_back(CargoData(i, INVALID_STATION, INVALID_STATION, sum));
+			/* Set the row for this cargo entry for the expand/hide button */
+			this->cargo_rows[i] = (uint16)cargolist.size();
+			cargolist.splice(cargolist.end(), tmp);
+		} else {
+			this->cargo_rows[i] = 0;
+		}
+	}
 
-		/* count types of cargos waiting in station */
-		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			if (st->goods[i].cargo.Empty()) {
-				this->cargo_rows[i] = 0;
-			} else {
-				/* Add an entry for total amount of cargo of this type waiting. */
-				cargolist.push_back(CargoData(i, INVALID_STATION, INVALID_STATION, st->goods[i].cargo.Count()));
-
-				/* Set the row for this cargo entry for the expand/hide button */
-				this->cargo_rows[i] = (uint16)cargolist.size();
-
+	void BuildCargoList(CargoID i, const CargoList & packets, CargoDataList & cargolist) {
+		if (packets.Empty()) {
+			this->cargo_rows[i] = 0;
+		} else {
+			/* Add an entry for total amount of cargo of this type waiting. */
+			cargolist.push_back(CargoData(i, INVALID_STATION, INVALID_STATION, packets.Count()));
+			/* Set the row for this cargo entry for the expand/hide button */
+			this->cargo_rows[i] = (uint16)cargolist.size();
+			if (HasBit(this->cargo, i)) {
 				/* Add an entry for each distinct cargo source. */
-				const CargoList::List *packets = st->goods[i].cargo.Packets();
-				for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
+				for (CargoList::List::const_iterator it = packets.Packets()->begin(); it != packets.Packets()->end(); it++) {
 					const CargoPacket *cp = *it;
 
 					bool added = false;
-
-					/* Enable the expand/hide button for this cargo type */
-					SetBit(transfers, i);
-
-					/* Don't add cargo lines if not expanded */
-					if (!HasBit(this->cargo, i)) break;
 
 					/* Check if we already have this source in the list */
 					for (CargoDataList::iterator jt = cargolist.begin(); jt != cargolist.end(); jt++) {
@@ -771,12 +780,35 @@ struct StationViewWindow : public Window {
 							break;
 						}
 					}
-
 					if (!added) cargolist.push_back(CargoData(i, cp->source, cp->next, cp->count));
-
 				}
 			}
 		}
+	}
+
+	void BuildCargoList(CargoDataList & cargolist, const Station * st) {
+		/* count types of cargos waiting in station */
+		for (CargoID i = 0; i < NUM_CARGO; i++) {
+
+			/* Don't add cargo lines if not expanded */
+
+			if (this->widget[SVW_FLOWS].data == STR_REAL_FLOW_VIEW) {
+				BuildFlowList(i, st->goods[i].flows, cargolist);
+			} else {
+				BuildCargoList(i, st->goods[i].cargo, cargolist);
+			}
+		}
+	}
+
+	virtual void OnPaint()
+	{
+		StationID station_id = this->window_number;
+		const Station *st = GetStation(station_id);
+		CargoDataList cargolist;
+		uint32 transfers = 0xFFFF;
+		BuildCargoList(cargolist, st);
+
+
 		SetVScrollCount(this, (int)cargolist.size() + 1); // update scrollbar
 
 		/* disable some buttons */
@@ -966,6 +998,17 @@ struct StationViewWindow : public Window {
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of local company */
 				Owner owner = (st->owner == OWNER_NONE) ? _local_company : st->owner;
 				ShowVehicleListWindow(owner, VEH_SHIP, (StationID)this->window_number);
+				break;
+			}
+
+			case SVW_FLOWS: {
+				this->SetDirty();
+				if (this->widget[SVW_FLOWS].data == STR_PLANNED_VIEW) {
+					this->widget[SVW_FLOWS].data = STR_REAL_FLOW_VIEW;
+				} else {
+					this->widget[SVW_FLOWS].data = STR_PLANNED_VIEW;
+				}
+				this->SetDirty();
 				break;
 			}
 		}
