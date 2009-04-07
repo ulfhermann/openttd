@@ -29,6 +29,8 @@
 #include "table/strings.h"
 #include "table/sprites.h"
 
+#include <cmath>
+
 static const Widget _smallmap_widgets[] = {
 {  WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_BROWN,     0,    10,     0,    13, STR_00C5,                 STR_018B_CLOSE_WINDOW},
 {   WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_BROWN,    11,   337,     0,    13, STR_00B0_MAP,             STR_018C_WINDOW_TITLE_DRAG_THIS},
@@ -808,7 +810,6 @@ public:
 						}
 						const Station *sta = GetStation(id);
 
-
 						if (sta->owner != _local_company && IsValidCompanyID(sta->owner)) continue;
 						if (stb->owner != _local_company && IsValidCompanyID(stb->owner)) continue;
 
@@ -833,27 +834,41 @@ public:
 						GfxDrawLine(pta.x, pta.y + 1, ptb.x, ptb.y + 1, _colour_gradient[COLOUR_GREY][1]);
 						GfxDrawLine(pta.x, pta.y, ptb.x, ptb.y, tbl->colour);
 
-						const LinkStat & ls = i->second;
-						uint usage = ls.usage * 30 / scale;
-						uint usageDisplay = usage / 10;
-						uint capacity = ls.capacity * 30 / scale;
-						uint capacityDisplay = capacity / 10;
+						LinkStat ls = i->second;
+						ls *= 30;
+						ls /= scale;
+						FlowStat flow = sta->goods[c].GetSumFlowVia(stb->index);
+						flow *= 30;
+						flow /= scale;
 
 						Point ptm;
 
 						if (!show_towns) {
+							typedef std::map<int, byte, std::greater<int> > SizeMap;
+							SizeMap sizes;
+							sizes[sqrt(ls.usage)] = _colour_gradient[COLOUR_GREY][1];
+							sizes[sqrt(ls.capacity)] = _colour_gradient[COLOUR_WHITE][7];
+							sizes[sqrt(flow.planned)] = _colour_gradient[COLOUR_BLUE][3];
+							sizes[sqrt(flow.sent)] = _colour_gradient[COLOUR_GREEN][4];
+
 							ptm.x = (pta.x + ptb.x) / 2;
-							if (pta.x > ptb.x) {
-								ptm.x +=5;
-							}
 							ptm.y = (pta.y + ptb.y) / 2;
-							GfxFillRect(ptm.x, ptm.y - usageDisplay, ptm.x + 3, ptm.y, _colour_gradient[COLOUR_GREY][1]);
-							GfxFillRect(ptm.x, ptm.y - capacityDisplay, ptm.x + 3, ptm.y - usageDisplay - 1, _colour_gradient[COLOUR_WHITE][7]);
+
+							for (SizeMap::iterator i = sizes.begin(); i != sizes.end(); ++i) {
+								if (pta.x > ptb.x) {
+									GfxFillRect(ptm.x - i->first / 2 - 1, ptm.y - i->first * 2, ptm.x - 1, ptm.y, i->second);
+								} else {
+									GfxFillRect(ptm.x + 1, ptm.y - i->first * 2, ptm.x + i->first / 2 + 1, ptm.y, i->second);
+								}
+							}
+
 						} else {
 							ptm.x = (2*pta.x + ptb.x) / 3;
 							ptm.y = (2*pta.y + ptb.y) / 3;
-							SetDParam(0, usage);
-							SetDParam(1, capacity);
+							SetDParam(0, ls.usage);
+							SetDParam(1, ls.capacity);
+							SetDParam(2, flow.planned);
+							SetDParam(3, flow.sent);
 							DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
 						}
 					}
