@@ -1475,7 +1475,8 @@ void VehiclePayment(Vehicle *front_v)
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 		CargoList & cargo_list = v->cargo;
 		const CargoList::List *cargos = cargo_list.Packets();
-		UnloadDescription ul(ge, last_visited, front_v->orders.list->GetNextUnloadingOrder(curr)->GetDestination(), order_flags);
+		StationID next_station = front_v->orders.list->GetNextUnloadingOrder(front_v->cur_order_index)->GetDestination();
+		UnloadDescription ul(ge, last_visited, next_station, order_flags);
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
 			CargoPacket *cp = *it;
@@ -1580,7 +1581,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	assert(v->current_order.IsType(OT_LOADING));
 
 	Vehicle *u = v;
-	const Order * next = u->orders.list->GetNextUnloadingOrder(&(u->current_order));
+	const Order * next = u->orders.list->GetNextUnloadingOrder(u->cur_order_index);
 	StationID last_visited = u->last_station_visited;
 	Station *st = GetStation(last_visited);
 

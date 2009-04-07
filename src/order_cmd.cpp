@@ -238,14 +238,20 @@ bool Order::IsUnloadingOrder() const
 	return (this->IsStoppingOrder() && this->GetUnloadType() != OUFB_NO_UNLOAD);
 }
 
-const Order * OrderList::GetNextUnloadingOrder(const Order * curr) const {
+const Order * OrderList::GetNextUnloadingOrder(VehicleOrderID curr_id) const {
+	const Order * curr = GetOrderAt(curr_id);
+	if (curr == NULL) {
+		curr = GetFirstOrder();
+	}
 	const Order * next = curr;
+
 	do {
 		next = next->next;
 		if (next == NULL) {
 			next = GetFirstOrder();
 		}
 	} while (next != curr && !next->IsUnloadingOrder());
+
 	return next;
 }
 
