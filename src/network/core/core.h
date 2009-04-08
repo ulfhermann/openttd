@@ -36,14 +36,10 @@ struct Packet;
  * SocketHandler for all network sockets in OpenTTD.
  */
 class NetworkSocketHandler {
-public:
-	/* TODO: make socket & has_quit protected once the TCP stuff
-	 *is in a real class too */
 	bool has_quit; ///< Whether the current client has quit/send a bad packet
-	SOCKET sock;   ///< The socket currently connected to
 public:
 	/** Create a new unbound socket */
-	NetworkSocketHandler(SOCKET s = INVALID_SOCKET) { this->sock = s; this->has_quit = false; }
+	NetworkSocketHandler() { this->has_quit = false; }
 
 	/** Close the socket when distructing the socket handler */
 	virtual ~NetworkSocketHandler() { this->Close(); }
@@ -59,18 +55,17 @@ public:
 	virtual NetworkRecvStatus CloseConnection() { this->has_quit = true; return NETWORK_RECV_STATUS_OKAY; }
 
 	/**
-	 * Whether this socket is currently bound to a socket.
-	 * @return true when the socket is bound, false otherwise
-	 */
-	bool IsConnected() const { return this->sock != INVALID_SOCKET; }
-
-	/**
 	 * Whether the current client connected to the socket has quit.
 	 * In the case of UDP, for example, once a client quits (send bad
 	 * data), the socket in not closed; only the packet is dropped.
 	 * @return true when the current client has quit, false otherwise
 	 */
 	bool HasClientQuit() const { return this->has_quit; }
+
+	/**
+	 * Reopen the socket so we can send/receive stuff again.
+	 */
+	void Reopen() { this->has_quit = false; }
 
 	void Send_GRFIdentifier(Packet *p, const GRFIdentifier *grf);
 	void Recv_GRFIdentifier(Packet *p, GRFIdentifier *grf);
