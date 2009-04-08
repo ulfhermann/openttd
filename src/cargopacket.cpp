@@ -257,8 +257,13 @@ uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPac
 				return UL_TRANSFER | UL_PLANNED;
 			}
 		} else if (ul.next_station == via) {
-			/* vehicle goes to the packet's next hop, keep the packet*/
-			return UL_KEEP | UL_PLANNED;
+			if (ul.flags & UL_TRANSFER) {
+				/* transfer forced by order */
+				return UL_TRANSFER;
+			} else {
+				/* vehicle goes to the packet's next hop, keep the packet*/
+				return UL_KEEP | UL_PLANNED;
+			}
 		} else {
 			/* vehicle goes somewhere else, transfer the packet*/
 			return UL_TRANSFER | UL_PLANNED;
@@ -374,10 +379,10 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 	if (HasBit(dest->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
 		flags |= UL_ACCEPTED;
 	}
-	if (HasBit(order_flags, OUFB_UNLOAD)) {
+	if (order_flags & OUFB_UNLOAD) { // TODO: HasBit doesn't work here for some reason
 		flags |= UL_DELIVER;
 	}
-	if (HasBit(order_flags, OUFB_TRANSFER)) {
+	if (order_flags & OUFB_TRANSFER) {
 		flags |= UL_TRANSFER;
 	}
 }
