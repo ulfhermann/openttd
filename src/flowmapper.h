@@ -11,9 +11,9 @@
 #include "linkgraph.h"
 
 class FlowMapper : public ComponentHandler {
-	typedef std::vector<float> ScaleFactorVector;
+	typedef std::vector<Number> ScaleFactorVector;
 public:
-	FlowMapper() : scale_factors(0), component(NULL) {}
+	FlowMapper() : component(NULL) {}
 	void Run(Component * c);
 private:
 	void CalcScaleFactors();
