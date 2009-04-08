@@ -95,8 +95,16 @@ struct GoodsEntry {
 	FlowStatMap flows;      ///< The planned flows through this station
 	LinkStatMap link_stats; ///< capacities and usage statistics for incoming links
 
+	/**
+	 * update the flow stats for count cargo from source sent to next
+	 */
 	void UpdateFlowStats(StationID source, uint count, StationID next);
-	StationID UpdateFlowStats(StationID source, uint count);
+
+	/**
+	 * update the flow stats for count cargo that cannot be delivered here
+	 * return the direction where it is sent
+	 */
+	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
 private:
 	void UpdateFlowStats(FlowStatSet & flow_stats, FlowStatSet::iterator flow_it, uint count);
 

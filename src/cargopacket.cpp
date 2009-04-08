@@ -195,7 +195,7 @@ CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unl
 	return p;
 }
 
-uint CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) const {
+UnloadType CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) const {
 	if (p->next != ul.curr_station || ul.dest->flows[p->source].empty()) {
 		/* there is no plan: use normal unloading */
 		return WillUnloadOld(ul, p);
@@ -205,7 +205,7 @@ uint CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) 
 	}
 }
 
-uint CargoList::WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const {
+UnloadType CargoList::WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const {
 	/* try to unload cargo */
 	bool move = ul.flags & (UL_DELIVER | UL_ACCEPTED | UL_TRANSFER);
 	/* try to deliver cargo if unloading */
@@ -228,7 +228,7 @@ uint CargoList::WillUnloadOld(const UnloadDescription & ul, const CargoPacket * 
 	}
 }
 
-uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const {
+UnloadType CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const {
 	StationID via = ul.dest->flows[p->source].begin()->via;
 	if (via == ul.curr_station) {
 		/* this is the final destination, deliver ... */
@@ -236,7 +236,7 @@ uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPac
 			/* .. except if explicitly told not to do so ... */
 			return UL_TRANSFER;
 		} else if (ul.flags & UL_ACCEPTED) {
-			return UL_DELIVER | UL_PLANNED;
+			return UL_DELIVER;
 		} else {
 			/* .. or if the station suddenly doesn't accept our cargo. */
 			return UL_KEEP;
@@ -252,22 +252,22 @@ uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPac
 			} else {
 				/* transfer cargo, as delivering didn't work */
 				/* plan might still be fulfilled as the packet can be picked up by another vehicle travelling to "via" */
-				return UL_TRANSFER | UL_PLANNED;
+				return UL_TRANSFER;
 			}
 		} else if (ul.flags & UL_TRANSFER) {
 			/* transfer forced, plan still fulfilled as above */
-			return UL_TRANSFER | UL_PLANNED;
+			return UL_TRANSFER;
 		} else if (ul.next_station == via) {
 			/* vehicle goes to the packet's next hop, keep the packet*/
-			return UL_KEEP | UL_PLANNED;
+			return UL_KEEP;
 		} else {
 			/* vehicle goes somewhere else, transfer the packet*/
-			return UL_TRANSFER | UL_PLANNED;
+			return UL_TRANSFER;
 		}
 	}
 }
 
-uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, StationID curr_station, StationID next_station) {
+uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station) {
 	uint remaining_unload = max_unload;
 	UnloadDescription ul(dest, curr_station, next_station, flags);
 
@@ -276,7 +276,7 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, St
 		CargoPacket * p = *c;
 		StationID source = p->source;
 		uint last_remaining = remaining_unload;
-		uint unload_flags = WillUnload(ul, p);
+		UnloadType unload_flags = WillUnload(ul, p);
 
 		if (unload_flags & UL_DELIVER) {
 			DeliverPacket(c, remaining_unload);
@@ -284,7 +284,7 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, St
 		} else if (unload_flags & UL_TRANSFER) {
 			/* TransferPacket may split the packet and return the transferred part */
 			p = TransferPacket(c, remaining_unload, dest);
-			p->next = dest->UpdateFlowStats(source, last_remaining - remaining_unload);
+			p->next = dest->UpdateFlowStatsTransfer(source, last_remaining - remaining_unload, curr_station);
 		} else /* UL_KEEP */ {
 			++c;
 			dest->UpdateFlowStats(source, last_remaining - remaining_unload, next_station);
@@ -353,13 +353,13 @@ void CargoList::InvalidateCache()
 	source = (*packets.begin())->source;
 }
 
-UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint order_flags) :
-	dest(d), curr_station(curr), next_station(next), flags(0)
+UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags order_flags) :
+	dest(d), curr_station(curr), next_station(next), flags(UL_KEEP)
 {
 	if (HasBit(dest->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
 		flags |= UL_ACCEPTED;
 	}
-	if (order_flags & OUFB_UNLOAD) { // TODO: HasBit doesn't work here for some reason
+	if (order_flags & OUFB_UNLOAD) {
 		flags |= UL_DELIVER;
 	}
 	if (order_flags & OUFB_TRANSFER) {

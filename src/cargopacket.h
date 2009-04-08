@@ -9,6 +9,7 @@
 #include "economy_type.h"
 #include "tile_type.h"
 #include "station_type.h"
+#include "order_type.h"
 #include <list>
 #include <map>
 
@@ -78,8 +79,15 @@ struct CargoPacket : PoolItem<CargoPacket, CargoPacketID, &_CargoPacket_pool> {
 
 extern void SaveLoad_STNS(Station *st);
 
+enum UnloadType {
+	UL_KEEP     = 0,      ///< keep cargo on vehicle
+	UL_DELIVER  = 1 << 0, ///< deliver cargo
+	UL_TRANSFER = 1 << 1, ///< transfer cargo
+	UL_ACCEPTED = 1 << 2, ///< cargo is accepted
+};
+
 struct UnloadDescription {
-	UnloadDescription(GoodsEntry * d, StationID curr, StationID next, uint f);
+	UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags f);
 	GoodsEntry * dest;
 	/**
 	 * station we are trying to unload at now
@@ -92,15 +100,7 @@ struct UnloadDescription {
 	/**
 	 * delivery flags
 	 */
-	uint flags;
-};
-
-enum UnloadFlags {
-	UL_KEEP     = 0,      ///< keep cargo on vehicle
-	UL_DELIVER  = 1 << 0, ///< deliver cargo
-	UL_TRANSFER = 1 << 1, ///< transfer cargo
-	UL_PLANNED  = 1 << 2, ///< transaction takes place as planned
-	UL_ACCEPTED = 1 << 3, ///< cargo is accepted
+	byte flags;
 };
 
 /**
@@ -123,8 +123,8 @@ private:
 
 	void DeliverPacket(List::iterator & c, uint & remaining_unload);
 	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
-	uint WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
-	uint WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
+	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
+	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
 	uint LoadPackets(List * dest, uint cap, StationID next_station, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
 
 public:
@@ -226,9 +226,9 @@ public:
 	 * @param next_station the next unloading station in the vehicle's order list
 	 * @return the number of cargo entities actually moved
 	 */
-	uint MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, StationID curr_station, StationID next_station);
+	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station);
 
-	uint WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
+	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
 
 	/**
 	 * Moves the given amount of cargo to a vehicle.
