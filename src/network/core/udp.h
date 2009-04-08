@@ -86,6 +86,7 @@ enum PacketUDPType {
 	PACKET_UDP_SERVER_UNREGISTER,    ///< Request to be removed from the server-list
 	PACKET_UDP_CLIENT_GET_NEWGRFS,   ///< Requests the name for a list of GRFs (GRF_ID and MD5)
 	PACKET_UDP_SERVER_NEWGRFS,       ///< Sends the list of NewGRF's requested.
+	PACKET_UDP_MASTER_SESSION_KEY,   ///< Sends a fresh session key to the client
 	PACKET_UDP_END                   ///< Must ALWAYS be on the end of this list!! (period)
 };
 
@@ -95,6 +96,11 @@ enum PacketUDPType {
 /** Base socket handler for all UDP sockets */
 class NetworkUDPSocketHandler : public NetworkSocketHandler {
 protected:
+	/** The address to bind to. */
+	NetworkAddressList bind;
+	/** The opened sockets. */
+	SocketList sockets;
+
 	NetworkRecvStatus CloseConnection();
 
 	/* Declare all possible packets here. If it can be received by the
@@ -110,6 +116,7 @@ protected:
 	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_UNREGISTER);
 	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_GET_NEWGRFS);
 	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_NEWGRFS);
+	DECLARE_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_SESSION_KEY);
 
 	void HandleUDPPacket(Packet *p, NetworkAddress *client_addr);
 
@@ -122,13 +129,15 @@ protected:
 	 */
 	virtual void HandleIncomingNetworkGameInfoGRFConfig(GRFConfig *config) { NOT_REACHED(); }
 public:
+	NetworkUDPSocketHandler(NetworkAddressList *bind = NULL);
+
 	/** On destructing of this class, the socket needs to be closed */
 	virtual ~NetworkUDPSocketHandler() { this->Close(); }
 
-	bool Listen(NetworkAddress address, bool broadcast);
+	bool Listen();
 	void Close();
 
-	void SendPacket(Packet *p, NetworkAddress *recv);
+	void SendPacket(Packet *p, NetworkAddress *recv, bool all = false, bool broadcast = false);
 	void ReceivePackets();
 
 	void Send_NetworkGameInfo(Packet *p, const NetworkGameInfo *info);

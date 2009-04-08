@@ -16,29 +16,38 @@
 #include "udp.h"
 
 /**
- * Start listening on the given host and port.
- * @param address the host to listen on
- * @param broadcast whether to allow broadcast sending/receiving
- * @return true if the listening succeeded
+ * Create an UDP socket but don't listen yet.
+ * @param bind the addresses to bind to.
  */
-bool NetworkUDPSocketHandler::Listen(NetworkAddress address, bool broadcast)
+NetworkUDPSocketHandler::NetworkUDPSocketHandler(NetworkAddressList *bind)
+{
+	if (bind != NULL) {
+		for (NetworkAddress *addr = bind->Begin(); addr != bind->End(); addr++) {
+			*this->bind.Append() = *addr;
+		}
+	} else {
+		/* As hostname NULL and port 0/NULL don't go well when
+		 * resolving it we need to add an address for each of
+		 * the address families we support. */
+		*this->bind.Append() = NetworkAddress(NULL, 0, AF_INET);
+	}
+}
+
+
+/**
+ * Start listening on the given host and port.
+ * @return true if at least one port is listening
+ */
+bool NetworkUDPSocketHandler::Listen()
 {
 	/* Make sure socket is closed */
 	this->Close();
 
-	this->sock = address.Listen(AF_INET, SOCK_DGRAM);
-
-	if (broadcast) {
-		/* Enable broadcast */
-		unsigned long val = 1;
-#ifndef BEOS_NET_SERVER /* will work around this, some day; maybe. */
-		setsockopt(this->sock, SOL_SOCKET, SO_BROADCAST, (char *) &val, sizeof(val));
-#endif
+	for (NetworkAddress *addr = this->bind.Begin(); addr != this->bind.End(); addr++) {
+		addr->Listen(SOCK_DGRAM, &this->sockets);
 	}
 
-	DEBUG(net, 1, "[udp] listening on port %s", address.GetAddressAsString());
-
-	return true;
+	return this->sockets.Length() != 0;
 }
 
 /**
@@ -46,15 +55,15 @@ bool NetworkUDPSocketHandler::Listen(NetworkAddress address, bool broadcast)
  */
 void NetworkUDPSocketHandler::Close()
 {
-	if (!this->IsConnected()) return;
-
-	closesocket(this->sock);
-	this->sock = INVALID_SOCKET;
+	for (SocketList::iterator s = this->sockets.Begin(); s != this->sockets.End(); s++) {
+		closesocket(s->second);
+	}
+	this->sockets.Clear();
 }
 
 NetworkRecvStatus NetworkUDPSocketHandler::CloseConnection()
 {
-	this->has_quit = true;
+	NetworkSocketHandler::CloseConnection();
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -62,18 +71,40 @@ NetworkRecvStatus NetworkUDPSocketHandler::CloseConnection()
  * Send a packet over UDP
  * @param p    the packet to send
  * @param recv the receiver (target) of the packet
+ * @param all  send the packet using all sockets that can send it
+ * @param broadcast whether to send a broadcast message
  */
-void NetworkUDPSocketHandler::SendPacket(Packet *p, NetworkAddress *recv)
+void NetworkUDPSocketHandler::SendPacket(Packet *p, NetworkAddress *recv, bool all, bool broadcast)
 {
-	int res;
+	if (this->sockets.Length() == 0) this->Listen();
 
-	p->PrepareToSend();
+	for (SocketList::iterator s = this->sockets.Begin(); s != this->sockets.End(); s++) {
+		/* Make a local copy because if we resolve it we cannot
+		 * easily unresolve it so we can resolve it later again. */
+		NetworkAddress send(*recv);
 
-	/* Send the buffer */
-	res = sendto(this->sock, (const char*)p->buffer, p->size, 0, (struct sockaddr *)recv->GetAddress(), recv->GetAddressLength());
+		/* Not the same type */
+		if (!send.IsFamily(s->first.GetAddress()->ss_family)) continue;
 
-	/* Check for any errors, but ignore it otherwise */
-	if (res == -1) DEBUG(net, 1, "[udp] sendto failed with: %i", GET_LAST_ERROR());
+		p->PrepareToSend();
+
+#ifndef BEOS_NET_SERVER /* will work around this, some day; maybe. */
+		if (broadcast) {
+			/* Enable broadcast */
+			unsigned long val = 1;
+			setsockopt(s->second, SOL_SOCKET, SO_BROADCAST, (char *) &val, sizeof(val));
+		}
+#endif
+
+		/* Send the buffer */
+		int res = sendto(s->second, (const char*)p->buffer, p->size, 0, (struct sockaddr *)send.GetAddress(), send.GetAddressLength());
+		DEBUG(net, 7, "[udp] sendto(%s)", send.GetAddressAsString());
+
+		/* Check for any errors, but ignore it otherwise */
+		if (res == -1) DEBUG(net, 1, "[udp] sendto(%s) failed with: %i", send.GetAddressAsString(), GET_LAST_ERROR());
+
+		if (!all) break;
+	}
 }
 
 /**
@@ -81,37 +112,33 @@ void NetworkUDPSocketHandler::SendPacket(Packet *p, NetworkAddress *recv)
  */
 void NetworkUDPSocketHandler::ReceivePackets()
 {
-	struct sockaddr_storage client_addr;
-	memset(&client_addr, 0, sizeof(client_addr));
+	for (SocketList::iterator s = this->sockets.Begin(); s != this->sockets.End(); s++) {
+		struct sockaddr_storage client_addr;
+		memset(&client_addr, 0, sizeof(client_addr));
 
-	socklen_t client_len;
-	int nbytes;
-	Packet p(this);
-	int packet_len;
+		Packet p(this);
+		int packet_len = sizeof(p.buffer);
+		socklen_t client_len = sizeof(client_addr);
 
-	if (!this->IsConnected()) return;
+		/* Try to receive anything */
+		SetNonBlocking(s->second); // Some OSes seem to lose the non-blocking status of the socket
+		int nbytes = recvfrom(s->second, (char*)p.buffer, packet_len, 0, (struct sockaddr *)&client_addr, &client_len);
 
-	packet_len = sizeof(p.buffer);
-	client_len = sizeof(client_addr);
+		/* We got some bytes for the base header of the packet. */
+		if (nbytes > 2) {
+			NetworkAddress address(client_addr, client_len);
+			p.PrepareToRead();
 
-	/* Try to receive anything */
-	SetNonBlocking(this->sock); // Some OSes seem to lose the non-blocking status of the socket
-	nbytes = recvfrom(this->sock, (char*)p.buffer, packet_len, 0, (struct sockaddr *)&client_addr, &client_len);
+			/* If the size does not match the packet must be corrupted.
+			* Otherwise it will be marked as corrupted later on. */
+			if (nbytes != p.size) {
+				DEBUG(net, 1, "received a packet with mismatching size from %s", address.GetAddressAsString());
+				return;
+			}
 
-	/* We got some bytes for the base header of the packet. */
-	if (nbytes > 2) {
-		NetworkAddress address(client_addr, client_len);
-		p.PrepareToRead();
-
-		/* If the size does not match the packet must be corrupted.
-		 * Otherwise it will be marked as corrupted later on. */
-		if (nbytes != p.size) {
-			DEBUG(net, 1, "received a packet with mismatching size from %s", address.GetAddressAsString());
-			return;
+			/* Handle the packet */
+			this->HandleUDPPacket(&p, &address);
 		}
-
-		/* Handle the packet */
-		this->HandleUDPPacket(&p, &address);
 	}
 }
 
@@ -264,7 +291,7 @@ void NetworkUDPSocketHandler::HandleUDPPacket(Packet *p, NetworkAddress *client_
 	PacketUDPType type;
 
 	/* New packet == new client, which has not quit yet */
-	this->has_quit = false;
+	this->Reopen();
 
 	type = (PacketUDPType)p->Recv_uint8();
 
@@ -280,6 +307,7 @@ void NetworkUDPSocketHandler::HandleUDPPacket(Packet *p, NetworkAddress *client_
 		UDP_COMMAND(PACKET_UDP_SERVER_UNREGISTER);
 		UDP_COMMAND(PACKET_UDP_CLIENT_GET_NEWGRFS);
 		UDP_COMMAND(PACKET_UDP_SERVER_NEWGRFS);
+		UDP_COMMAND(PACKET_UDP_MASTER_SESSION_KEY);
 
 		default:
 			if (this->HasClientQuit()) {
@@ -315,5 +343,6 @@ DEFINE_UNAVAILABLE_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_RESPONSE_LIST);
 DEFINE_UNAVAILABLE_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_UNREGISTER);
 DEFINE_UNAVAILABLE_UDP_RECEIVE_COMMAND(PACKET_UDP_CLIENT_GET_NEWGRFS);
 DEFINE_UNAVAILABLE_UDP_RECEIVE_COMMAND(PACKET_UDP_SERVER_NEWGRFS);
+DEFINE_UNAVAILABLE_UDP_RECEIVE_COMMAND(PACKET_UDP_MASTER_SESSION_KEY);
 
 #endif /* ENABLE_NETWORK */

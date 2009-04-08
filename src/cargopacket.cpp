@@ -207,7 +207,7 @@ uint CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) 
 
 uint CargoList::WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const {
 	/* try to unload cargo */
-	bool move = ul.flags & (UL_DELIVER | UL_ACCEPTED);
+	bool move = ul.flags & (UL_DELIVER | UL_ACCEPTED | UL_TRANSFER);
 	/* try to deliver cargo if unloading */
 	bool deliver = (ul.flags & UL_ACCEPTED) && !(ul.flags & UL_TRANSFER) && (p->source != ul.curr_station);
 	/* transfer cargo if delivery was unsuccessful */
@@ -250,12 +250,13 @@ uint CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const CargoPac
 			if ((ul.flags & UL_ACCEPTED) && !(ul.flags & UL_TRANSFER) && p->source != ul.curr_station) {
 				return UL_DELIVER;
 			} else {
-				/* transfer cargo, as unloading didn't work
-				 * transfer condition doesn't need to be checked as MTF_FORCE_MOVE is known to be set
-				 * the plan is still fulfilled as the packet can be picked up by another vehicle travelling to "via"
-				 */
+				/* transfer cargo, as delivering didn't work */
+				/* plan might still be fulfilled as the packet can be picked up by another vehicle travelling to "via" */
 				return UL_TRANSFER | UL_PLANNED;
 			}
+		} else if (ul.flags & UL_TRANSFER) {
+			/* transfer forced, plan still fulfilled as above */
+			return UL_TRANSFER | UL_PLANNED;
 		} else if (ul.next_station == via) {
 			/* vehicle goes to the packet's next hop, keep the packet*/
 			return UL_KEEP | UL_PLANNED;
@@ -374,10 +375,10 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 	if (HasBit(dest->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
 		flags |= UL_ACCEPTED;
 	}
-	if (HasBit(order_flags, OUFB_UNLOAD)) {
+	if (order_flags & OUFB_UNLOAD) { // TODO: HasBit doesn't work here for some reason
 		flags |= UL_DELIVER;
 	}
-	if (HasBit(order_flags, OUFB_TRANSFER)) {
+	if (order_flags & OUFB_TRANSFER) {
 		flags |= UL_TRANSFER;
 	}
 }
