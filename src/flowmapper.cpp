@@ -10,7 +10,7 @@
 void FlowMapper::CalcScaleFactors() {
 	scale_factors.resize(component->GetSize(), 0);
 	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {
-		float flow_sum = 0;
+		Number flow_sum = 0;
 		Node & node = component->GetNode(node_id);
 		PathSet & paths = node.paths;
 		for(PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
@@ -26,7 +26,6 @@ void FlowMapper::CalcScaleFactors() {
 void FlowMapper::Run(Component * c) {
 	component = c;
 	CalcScaleFactors();
-	scale_factors.resize(component->GetSize(), 0);
 	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {
 		Node & node = component->GetNode(node_id);
 		StationID via = node.station;
@@ -38,7 +37,7 @@ void FlowMapper::Run(Component * c) {
 			}
 			NodeID origin_node = path->GetOrigin();
 			StationID origin = component->GetNode(origin_node).station;
-			float flow = scale_factors[origin_node] * path->GetFlow();
+			Number flow = scale_factors[origin_node] * path->GetFlow();
 			NodeID prev = path->GetParent()->GetNode();
 			component->GetNode(prev).flows[origin][via] += flow;
 
