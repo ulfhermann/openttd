@@ -13,8 +13,9 @@
 #include "tcp.h"
 
 NetworkTCPSocketHandler::NetworkTCPSocketHandler(SOCKET s) :
-		NetworkSocketHandler(s),
-		packet_queue(NULL), packet_recv(NULL), writable(false)
+		NetworkSocketHandler(),
+		packet_queue(NULL), packet_recv(NULL),
+		sock(s), writable(false)
 {
 }
 
@@ -29,7 +30,7 @@ NetworkTCPSocketHandler::~NetworkTCPSocketHandler()
 NetworkRecvStatus NetworkTCPSocketHandler::CloseConnection()
 {
 	this->writable = false;
-	this->has_quit = true;
+	NetworkSocketHandler::CloseConnection();
 
 	/* Free all pending and partially received packets */
 	while (this->packet_queue != NULL) {
