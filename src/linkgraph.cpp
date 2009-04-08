@@ -215,10 +215,11 @@ void Node::ExportFlows(FlowStatMap & station_flows) {
 				via_set.erase(flowset_it++);
 			}
 			/* swap takes constant time, so we swap instead of adding all entries */
-			/* note: via_set is empty here */
 			via_set.swap(new_flows);
+			assert(new_flows.empty());
 			/* insert remaining flows for this source node */
 			ExportNewFlows(source_flows_it, via_set);
+			/* source_flows is dangling here */
 			++flowmap_it;
 		}
 	}
