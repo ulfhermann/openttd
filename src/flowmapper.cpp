@@ -35,15 +35,15 @@ void FlowMapper::Run(Component * c) {
 			if (path->GetParent() == NULL) {
 				continue;
 			}
-			NodeID origin_node = path->GetOrigin();
-			StationID origin = component->GetNode(origin_node).station;
-			Number flow = scale_factors[origin_node] * path->GetFlow();
-			NodeID prev = path->GetParent()->GetNode();
-			component->GetNode(prev).flows[origin][via] += flow;
-
-			if (path->GetNumChildren() == 0) {
-				node.flows[origin][via] += flow;
-			}
+			NodeID origin_node_id = path->GetOrigin();
+			StationID origin = component->GetNode(origin_node_id).station;
+			Number flow = scale_factors[origin_node_id] * path->GetFlow();
+			Node & prev_node = component->GetNode(path->GetParent()->GetNode());
+			/* mark all of the flow for local consumation at first */
+			node.flows[origin][via] += flow;
+			/* pass some of the flow marked for local consumation at prev on to this node */
+			prev_node.flows[origin][via] += flow;
+			prev_node.flows[origin][prev_node.station] -= flow;
 		}
 	}
 }
