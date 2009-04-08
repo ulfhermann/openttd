@@ -105,7 +105,12 @@ struct GoodsEntry {
 	uint supply;
 	FlowStatMap flows;      ///< The planned flows through this station
 	LinkStatMap link_stats; ///< capacities and usage statistics for incoming links
+
 	FlowStat GetSumFlowVia(StationID via) const;
+	void UpdateFlowStats(StationID source, uint count, StationID next);
+	StationID UpdateFlowStats(StationID source, uint count);
+private:
+	void UpdateFlowStats(FlowStatSet & flow_stats, FlowStatSet::iterator flow_it, uint count);
 };
 
 /** A Stop for a Road Vehicle */

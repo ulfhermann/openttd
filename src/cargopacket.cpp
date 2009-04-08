@@ -280,31 +280,15 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, uint flags, St
 
 		if (unload_flags & UL_DELIVER) {
 			DeliverPacket(c, remaining_unload);
+			dest->UpdateFlowStats(source, last_remaining - remaining_unload, curr_station);
 		} else if (unload_flags & UL_TRANSFER) {
 			/* TransferPacket may split the packet and return the transferred part */
 			p = TransferPacket(c, remaining_unload, dest);
+			p->next = dest->UpdateFlowStats(source, last_remaining - remaining_unload);
 		} else /* UL_KEEP */ {
 			++c;
-		}
-
-		if (unload_flags & UL_PLANNED) {
-			/*
-			 * cargodist has handled this packet as planned
-			 * update the flow mapping
-			 */
-			FlowStatSet & flow_stats = ul.dest->flows[source];
-			FlowStatSet::iterator flow_it = flow_stats.begin();
-			StationID via = flow_it->via;
-			uint planned = flow_it->planned;
-			uint sent = flow_it->sent + last_remaining - remaining_unload;
-
-			if (!(unload_flags & UL_DELIVER)) {
-				p->next = via;
-			}
-			flow_stats.erase(flow_it);
-			flow_stats.insert(FlowStat(via, planned, sent));
-		} else if (!(unload_flags & UL_DELIVER)) {
-			p->next = INVALID_STATION;
+			dest->UpdateFlowStats(source, last_remaining - remaining_unload, next_station);
+			p->next = next_station;
 		}
 	}
 
@@ -389,4 +373,12 @@ void CargoList::ReleaseStalePackets(StationID to) {
 		if (packet->next == to) packet->next = INVALID_STATION;
 	}
 	InvalidateCache();
+}
+
+void CargoList::UpdateFlows(StationID next, GoodsEntry * ge) {
+	for(List::iterator i = packets.begin(); i != packets.end(); ++i) {
+		CargoPacket * p = *i;
+		ge->UpdateFlowStats(p->source, p->count, next);
+		p->next = next;
+	}
 }
