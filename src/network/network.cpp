@@ -61,7 +61,7 @@ uint32 _frame_counter_server; // The frame_counter of the server, if in network-
 uint32 _frame_counter_max; // To where we may go with our clients
 uint32 _frame_counter;
 uint32 _last_sync_frame; // Used in the server to store the last time a sync packet was sent to clients.
-NetworkAddress _broadcast_list[MAX_INTERFACES + 1];
+NetworkAddressList _broadcast_list;
 uint32 _sync_seed_1, _sync_seed_2;
 uint32 _sync_frame;
 bool _network_first_time;
@@ -79,7 +79,7 @@ extern NetworkUDPSocketHandler *_udp_server_socket; ///< udp server socket
 extern NetworkUDPSocketHandler *_udp_master_socket; ///< udp master socket
 
 /* The listen socket for the server */
-static SOCKET _listensocket;
+static SocketList _listensockets;
 
 /* The amount of clients connected */
 static byte _network_clients_connected = 0;
@@ -274,7 +274,7 @@ static void NetworkClientError(NetworkRecvStatus res, NetworkClientSocket *cs)
 
 	/* We just want to close the connection.. */
 	if (res == NETWORK_RECV_STATUS_CLOSE_QUERY) {
-		cs->has_quit = true;
+		cs->NetworkSocketHandler::CloseConnection();
 		NetworkCloseClient(cs);
 		_networking = false;
 
@@ -374,14 +374,25 @@ static void CheckMinActiveClients()
  * occupied by connection_string. */
 void ParseConnectionString(const char **company, const char **port, char *connection_string)
 {
+	bool ipv6 = false;
 	char *p;
 	for (p = connection_string; *p != '\0'; p++) {
 		switch (*p) {
+			case '[':
+				ipv6 = true;
+				break;
+
+			case ']':
+				ipv6 = false;
+				break;
+
 			case '#':
 				*company = p + 1;
 				*p = '\0';
 				break;
+
 			case ':':
+				if (ipv6) break;
 				*port = p + 1;
 				*p = '\0';
 				break;
@@ -434,7 +445,7 @@ void NetworkCloseClient(NetworkClientSocket *cs)
 
 	DEBUG(net, 1, "Closed client connection %d", cs->client_id);
 
-	if (!cs->has_quit && _network_server && cs->status > STATUS_INACTIVE) {
+	if (!cs->HasClientQuit() && _network_server && cs->status > STATUS_INACTIVE) {
 		/* We did not receive a leave message from this client... */
 		char client_name[NETWORK_CLIENT_NAME_LENGTH];
 		NetworkClientSocket *new_cs;
@@ -470,19 +481,16 @@ void NetworkCloseClient(NetworkClientSocket *cs)
 }
 
 /* For the server, to accept new clients */
-static void NetworkAcceptClients()
+static void NetworkAcceptClients(SOCKET ls)
 {
 	NetworkClientSocket *cs;
 	bool banned;
-
-	/* Should never ever happen.. is it possible?? */
-	assert(_listensocket != INVALID_SOCKET);
 
 	for (;;) {
 		struct sockaddr_storage sin;
 		memset(&sin, 0, sizeof(sin));
 		socklen_t sin_len = sizeof(sin);
-		SOCKET s = accept(_listensocket, (struct sockaddr*)&sin, &sin_len);
+		SOCKET s = accept(ls, (struct sockaddr*)&sin, &sin_len);
 		if (s == INVALID_SOCKET) return;
 
 		SetNonBlocking(s); // XXX error handling?
@@ -535,17 +543,16 @@ static void NetworkAcceptClients()
 /* Set up the listen socket for the server */
 static bool NetworkListen()
 {
+	assert(_listensockets.Length() == 0);
+
 	NetworkAddress address(_settings_client.network.server_bind_ip, _settings_client.network.server_port);
 
-	DEBUG(net, 1, "Listening on %s", address.GetAddressAsString());
+	address.Listen(SOCK_STREAM, &_listensockets);
 
-	SOCKET ls = address.Listen(AF_INET, SOCK_STREAM);
-	if (ls == INVALID_SOCKET) {
+	if (_listensockets.Length() == 0) {
 		ServerStartError("Could not create listening socket");
 		return false;
 	}
-
-	_listensocket = ls;
 
 	return true;
 }
@@ -574,8 +581,10 @@ static void NetworkClose()
 
 	if (_network_server) {
 		/* We are a server, also close the listensocket */
-		closesocket(_listensocket);
-		_listensocket = INVALID_SOCKET;
+		for (SocketList::iterator s = _listensockets.Begin(); s != _listensockets.End(); s++) {
+			closesocket(s->second);
+		}
+		_listensockets.Clear();
 		DEBUG(net, 1, "Closed listener");
 	}
 	NetworkUDPCloseAll();
@@ -738,8 +747,7 @@ bool NetworkServerStart()
 	if (!NetworkListen()) return false;
 
 	/* Try to start UDP-server */
-	_network_udp_server = true;
-	_network_udp_server = _udp_server_socket->Listen(NetworkAddress(_settings_client.network.server_bind_ip, _settings_client.network.server_port), false);
+	_network_udp_server = _udp_server_socket->Listen();
 
 	_network_company_states = CallocT<NetworkCompanyState>(MAX_COMPANIES);
 	_network_server = true;
@@ -821,7 +829,9 @@ static bool NetworkReceive()
 	}
 
 	/* take care of listener port */
-	if (_network_server) FD_SET(_listensocket, &read_fd);
+	for (SocketList::iterator s = _listensockets.Begin(); s != _listensockets.End(); s++) {
+		FD_SET(s->second, &read_fd);
+	}
 
 	tv.tv_sec = tv.tv_usec = 0; // don't block at all.
 #if !defined(__MORPHOS__) && !defined(__AMIGA__)
@@ -832,7 +842,9 @@ static bool NetworkReceive()
 	if (n == -1 && !_network_server) NetworkError(STR_NETWORK_ERR_LOSTCONNECTION);
 
 	/* accept clients.. */
-	if (_network_server && FD_ISSET(_listensocket, &read_fd)) NetworkAcceptClients();
+	for (SocketList::iterator s = _listensockets.Begin(); s != _listensockets.End(); s++) {
+		if (FD_ISSET(s->second, &read_fd)) NetworkAcceptClients(s->second);
+	}
 
 	/* read stuff from clients */
 	FOR_ALL_CLIENT_SOCKETS(cs) {
@@ -844,7 +856,7 @@ static bool NetworkReceive()
 				NetworkRecvStatus res;
 
 				/* The client already was quiting! */
-				if (cs->has_quit) return false;
+				if (cs->HasClientQuit()) return false;
 
 				res = NetworkClient_ReadPackets(cs);
 				if (res != NETWORK_RECV_STATUS_OKAY) {
@@ -1060,11 +1072,6 @@ void NetworkStartUp()
 	_network_need_advertise = true;
 	_network_advertise_retries = 0;
 
-	/* Set an ip when the hostname is empty */
-	if (StrEmpty(_settings_client.network.server_bind_ip)) {
-		snprintf(_settings_client.network.server_bind_ip, sizeof(_settings_client.network.server_bind_ip), "%s", NetworkAddress().GetHostname());
-	}
-
 	/* Generate an unique id when there is none yet */
 	if (StrEmpty(_settings_client.network.network_id)) NetworkGenerateUniqueId();
 
@@ -1073,7 +1080,7 @@ void NetworkStartUp()
 	NetworkUDPInitialize();
 	NetworkInitialize();
 	DEBUG(net, 3, "[core] network online, multiplayer available");
-	NetworkFindBroadcastIPs(_broadcast_list, MAX_INTERFACES);
+	NetworkFindBroadcastIPs(&_broadcast_list);
 }
 
 /** This shuts the network down */
