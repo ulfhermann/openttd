@@ -43,7 +43,10 @@ void FlowMapper::Run(Component * c) {
 			node.flows[origin][via] += flow;
 			/* pass some of the flow marked for local consumation at prev on to this node */
 			prev_node.flows[origin][via] += flow;
-			prev_node.flows[origin][prev_node.station] -= flow;
+			StationID prev = prev_node.station;
+			if (origin != prev) {
+				prev_node.flows[origin][prev] -= flow;
+			}
 		}
 	}
 }
