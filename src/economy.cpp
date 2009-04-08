@@ -1431,6 +1431,8 @@ static void TriggerIndustryProduction(Industry *i)
 	StartStopIndustryTileAnimation(i, IAT_INDUSTRY_RECEIVED_CARGO);
 }
 
+
+
 /**
  * Performs the vehicle payment _and_ marks the vehicle to be unloaded.
  * @param front_v the vehicle to be unloaded
@@ -1631,7 +1633,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 
 		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (unload_flags & OUFB_NO_UNLOAD) == 0) {
-			// vehicle wants to unload something
+			/* vehicle wants to unload something */
 
 			uint cargo_count = v->cargo.Count();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
@@ -1651,6 +1653,9 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
 			continue;
+		} else {
+			/* vehicle will keep all its cargo */
+			v->cargo.UpdateFlows(next_station, ge);
 		}
 
 		/* Do not pick up goods when we have no-load set. */

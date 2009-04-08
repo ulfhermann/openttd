@@ -3365,6 +3365,49 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
+void GoodsEntry::UpdateFlowStats(FlowStatSet & flow_stats, FlowStatSet::iterator flow_it, uint count) {
+	uint planned = flow_it->planned;
+	uint sent = flow_it->sent + count;
+	StationID via = flow_it->via;
+	flow_stats.erase(flow_it);
+	flow_stats.insert(FlowStat(via, planned, sent));
+}
+
+void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next) {
+	if (source == INVALID_STATION || next == INVALID_STATION) return;
+	FlowStatSet & flow_stats = flows[source];
+	FlowStatSet::iterator flow_it = flow_stats.begin();
+	if (flow_it != flow_stats.end()) {
+		StationID via = flow_it->via;
+		if (via == next) {
+			UpdateFlowStats(flow_stats, flow_it, count);
+			return;
+		} else {
+			while(++flow_it != flow_stats.end()) {
+				via = flow_it->via;
+				if (via == next) {
+					UpdateFlowStats(flow_stats, flow_it, count);
+					return;
+				}
+			}
+		}
+	}
+
+	flow_stats.insert(FlowStat(next, 0, count));
+}
+
+StationID GoodsEntry::UpdateFlowStats(StationID source, uint count) {
+	if (source == INVALID_STATION) return INVALID_STATION;
+	FlowStatSet & flow_stats = flows[source];
+	FlowStatSet::iterator flow_it = flow_stats.begin();
+	if (flow_it != flow_stats.end()) {
+		StationID via = flow_it->via;
+		UpdateFlowStats(flow_stats, flow_it, count);
+		return via;
+	} else {
+		return INVALID_STATION;
+	}
+}
 
 extern const TileTypeProcs _tile_type_station_procs = {
 	DrawTile_Station,           // draw_tile_proc

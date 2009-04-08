@@ -246,6 +246,11 @@ public:
 	void ReservePacketsForLoading(List * reserved, uint cap, StationID next_station, List * rejected)
 		{LoadPackets(reserved, cap, next_station, rejected);}
 
+	/**
+	 * send all packets to the specified station and update the flow stats at the GoodsEntry accordingly
+	 */
+	void UpdateFlows(StationID next, GoodsEntry * ge);
+
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
