@@ -4,6 +4,7 @@
 ##winlangid 0x0407
 ##grflangid 0x02
 ##plural 0
+##textdir ltr
 ##gender m w n p
 
 #
@@ -2240,6 +2241,7 @@ STR_704A_SELECT_FEMALE_FACES                                    :{BLACK}Wähle w
 STR_704B_GENERATE_RANDOM_NEW_FACE                               :{BLACK}Wähle zufälliges neues Gesicht
 STR_704C_KEY                                                    :{BLACK}Legende
 STR_704D_SHOW_KEY_TO_GRAPHS                                     :{BLACK}Legende des Diagramms
+STR_SHOW_DETAILED_PERFORMANCE_RATINGS                           :{BLACK}Zeige detailierte Leistungsaufschlüsselung
 STR_704E_KEY_TO_COMPANY_GRAPHS                                  :{WHITE}Legende des Firmendiagramms
 STR_704F_CLICK_HERE_TO_TOGGLE_COMPANY                           :{BLACK}Graph der Firma ein-/ausblenden
 STR_7050_UNITS_OF_CARGO_DELIVERED                               :{WHITE}Beförderte Frachteinheiten
@@ -3171,6 +3173,7 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Zug '{VE
 
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' liefert falsche Informationen
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Fracht / Ersetzungs - Informationen für '{1:ENGINE}' weichen von der Einkaufsliste nach dem Kauf ab. Das kann dazu führen, dass das Umrüsten beim autmatisches Ersetzen oder Erneuern nicht korrekt funktioniert
+STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' verursachte eine Endlosschleife im 'Production callback'.
 
 STR_LOADGAME_REMOVED_TRAMS                                      :{WHITE}Spiel wurde in einer Version ohne Straßenbahnunterstützung gespeichert. Alle Straßenbahnen wurden entfernt.
 

@@ -14,12 +14,12 @@
 
 const char *NetworkAddress::GetHostname()
 {
-	if (this->hostname == NULL) {
+	if (StrEmpty(this->hostname)) {
 		assert(this->address_length != 0);
-
-		char buf[NETWORK_HOSTNAME_LENGTH] = { '\0' };
-		getnameinfo((struct sockaddr *)&this->address, this->address_length, buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
-		this->hostname = strdup(buf);
+		char *buf = this->hostname;
+		if (this->address.ss_family == AF_INET6) buf = strecpy(buf, "[", lastof(this->hostname));
+		getnameinfo((struct sockaddr *)&this->address, this->address_length, buf, lastof(this->hostname) - buf, NULL, 0, NI_NUMERICHOST);
+		if (this->address.ss_family == AF_INET6) strecat(buf, "]", lastof(this->hostname));
 	}
 	return this->hostname;
 }
@@ -59,9 +59,15 @@ void NetworkAddress::SetPort(uint16 port)
 const char *NetworkAddress::GetAddressAsString()
 {
 	/* 6 = for the : and 5 for the decimal port number */
-	static char buf[NETWORK_HOSTNAME_LENGTH + 6];
+	static char buf[NETWORK_HOSTNAME_LENGTH + 6 + 7];
 
-	seprintf(buf, lastof(buf), "%s:%d", this->GetHostname(), this->GetPort());
+	char family;
+	switch (this->address.ss_family) {
+		case AF_INET:  family = '4'; break;
+		case AF_INET6: family = '6'; break;
+		default:       family = '?'; break;
+	}
+	seprintf(buf, lastof(buf), "%s:%d (IPv%c)", this->GetHostname(), this->GetPort(), family);
 	return buf;
 }
 
@@ -84,9 +90,17 @@ const sockaddr_storage *NetworkAddress::GetAddress()
 		 * bothered to implement the specifications and allow '0' as value
 		 * that means "don't care whether it is SOCK_STREAM or SOCK_DGRAM".
 		 */
-		this->Resolve(this->address.ss_family, SOCK_STREAM, AI_ADDRCONFIG, ResolveLoopProc);
+		this->Resolve(this->address.ss_family, SOCK_STREAM, AI_ADDRCONFIG, NULL, ResolveLoopProc);
 	}
 	return &this->address;
+}
+
+bool NetworkAddress::IsFamily(int family)
+{
+	if (!this->IsResolved()) {
+		this->Resolve(family, SOCK_STREAM, AI_ADDRCONFIG, NULL, ResolveLoopProc);
+	}
+	return this->address.ss_family == family;
 }
 
 bool NetworkAddress::IsInNetmask(char *netmask)
@@ -143,7 +157,7 @@ bool NetworkAddress::IsInNetmask(char *netmask)
 	return true;
 }
 
-SOCKET NetworkAddress::Resolve(int family, int socktype, int flags, LoopProc func)
+SOCKET NetworkAddress::Resolve(int family, int socktype, int flags, SocketList *sockets, LoopProc func)
 {
 	struct addrinfo *ai;
 	struct addrinfo hints;
@@ -156,9 +170,18 @@ SOCKET NetworkAddress::Resolve(int family, int socktype, int flags, LoopProc fun
 	char port_name[6];
 	seprintf(port_name, lastof(port_name), "%u", this->GetPort());
 
-	int e = getaddrinfo(this->GetHostname(), port_name, &hints, &ai);
+	/* Setting both hostname to NULL and port to 0 is not allowed.
+	 * As port 0 means bind to any port, the other must mean that
+	 * we want to bind to 'all' IPs. */
+	if (this->address_length == 0 && this->GetPort() == 0) {
+		strecpy(this->hostname, this->address.ss_family == AF_INET ? "0.0.0.0" : "::", lastof(this->hostname));
+	}
+
+	int e = getaddrinfo(StrEmpty(this->hostname) ? NULL : this->hostname, port_name, &hints, &ai);
 	if (e != 0) {
-		DEBUG(net, 0, "getaddrinfo(%s, %s) failed: %s", this->GetHostname(), port_name, FS2OTTD(gai_strerror(e)));
+		if (func != ResolveLoopProc) {
+			DEBUG(net, 0, "getaddrinfo(%s, %s) failed: %s", this->hostname, port_name, FS2OTTD(gai_strerror(e)));
+		}
 		return INVALID_SOCKET;
 	}
 
@@ -167,10 +190,16 @@ SOCKET NetworkAddress::Resolve(int family, int socktype, int flags, LoopProc fun
 		sock = func(runp);
 		if (sock == INVALID_SOCKET) continue;
 
-		this->address_length = runp->ai_addrlen;
-		assert(sizeof(this->address) >= runp->ai_addrlen);
-		memcpy(&this->address, runp->ai_addr, runp->ai_addrlen);
-		break;
+		if (sockets == NULL) {
+			this->address_length = runp->ai_addrlen;
+			assert(sizeof(this->address) >= runp->ai_addrlen);
+			memcpy(&this->address, runp->ai_addr, runp->ai_addrlen);
+			break;
+		}
+
+		NetworkAddress addr(runp->ai_addr, runp->ai_addrlen);
+		(*sockets)[addr] = sock;
+		sock = INVALID_SOCKET;
 	}
 	freeaddrinfo (ai);
 
@@ -208,7 +237,7 @@ SOCKET NetworkAddress::Connect()
 {
 	DEBUG(net, 1, "Connecting to %s", this->GetAddressAsString());
 
-	return this->Resolve(0, SOCK_STREAM, AI_ADDRCONFIG, ConnectLoopProc);
+	return this->Resolve(0, SOCK_STREAM, AI_ADDRCONFIG, NULL, ConnectLoopProc);
 }
 
 /**
@@ -218,46 +247,52 @@ SOCKET NetworkAddress::Connect()
  */
 static SOCKET ListenLoopProc(addrinfo *runp)
 {
+	const char *type = runp->ai_socktype == SOCK_STREAM ? "tcp" : "udp";
+	const char *address = NetworkAddress(runp->ai_addr, runp->ai_addrlen).GetAddressAsString();
+
 	SOCKET sock = socket(runp->ai_family, runp->ai_socktype, runp->ai_protocol);
 	if (sock == INVALID_SOCKET) {
-		DEBUG(net, 1, "Could not create socket: %s", strerror(errno));
+		DEBUG(net, 0, "[%s] Could not create socket on port %s: %s", type, address, strerror(errno));
 		return INVALID_SOCKET;
 	}
 
-	if (!SetNoDelay(sock)) DEBUG(net, 1, "Setting TCP_NODELAY failed");
+	if (runp->ai_socktype == SOCK_STREAM && !SetNoDelay(sock)) {
+		DEBUG(net, 3, "[%s] Setting TCP_NODELAY failed for port %s", type, address);
+	}
 
 	int on = 1;
 	/* The (const char*) cast is needed for windows!! */
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on)) == -1) {
-		DEBUG(net, 1, "Could not set reusable sockets: %s", strerror(errno));
+		DEBUG(net, 3, "[%s] Could not set reusable sockets for port %s: %s", type, address, strerror(errno));
 	}
 
 	if (runp->ai_family == AF_INET6 &&
 			setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&on, sizeof(on)) == -1) {
-		DEBUG(net, 1, "Could not disable IPv4 over IPv6: %s", strerror(errno));
+		DEBUG(net, 3, "[%s] Could not disable IPv4 over IPv6 on port %s: %s", type, address, strerror(errno));
 	}
 
 	if (bind(sock, runp->ai_addr, runp->ai_addrlen) != 0) {
-		DEBUG(net, 1, "Could not bind: %s", strerror(errno));
+		DEBUG(net, 1, "[%s] Could not bind on port %s: %s", type, address, strerror(errno));
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
 
 	if (runp->ai_socktype != SOCK_DGRAM && listen(sock, 1) != 0) {
-		DEBUG(net, 1, "Could not listen: %s", strerror(errno));
+		DEBUG(net, 1, "[%s] Could not listen at port %s: %s", type, address, strerror(errno));
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
 
 	/* Connection succeeded */
-	if (!SetNonBlocking(sock)) DEBUG(net, 0, "Setting non-blocking mode failed");
+	if (!SetNonBlocking(sock)) DEBUG(net, 0, "[%s] Setting non-blocking mode failed for port %s", type, address);
 
+	DEBUG(net, 1, "[%s] Listening on port %s", type, address);
 	return sock;
 }
 
-SOCKET NetworkAddress::Listen(int family, int socktype)
+SOCKET NetworkAddress::Listen(int socktype, SocketList *sockets)
 {
-	return this->Resolve(family, socktype, AI_ADDRCONFIG | AI_PASSIVE, ListenLoopProc);
+	return this->Resolve(AF_UNSPEC, socktype, AI_ADDRCONFIG | AI_PASSIVE, sockets, ListenLoopProc);
 }
 
 #endif /* ENABLE_NETWORK */
