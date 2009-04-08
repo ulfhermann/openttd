@@ -734,15 +734,17 @@ struct StationViewWindow : public Window {
 
 	void BuildFlowList(CargoID i, const FlowStatMap & flows, CargoDataList & cargolist) {
 		CargoDataList tmp;
+		uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
 		uint sum = 0;
 		for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
 			StationID from = it->first;
 			const FlowStatSet & flow_set = it->second;
 			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
 				const FlowStat & stat = *flow_it;
-				sum += stat.planned;
-				if (HasBit(this->cargo, i)) {
-					tmp.push_back(CargoData(i, from, stat.via, stat.planned));
+				uint planned = stat.planned * 30 / scale;
+				sum += planned;
+				if (stat.planned > 0 && HasBit(this->cargo, i)) {
+					tmp.push_back(CargoData(i, from, stat.via, planned));
 				}
 			}
 		}
