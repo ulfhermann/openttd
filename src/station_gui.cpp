@@ -743,7 +743,7 @@ struct StationViewWindow : public Window {
 				const FlowStat & stat = *flow_it;
 				uint planned = stat.planned * 30 / scale;
 				sum += planned;
-				if (stat.planned > 0 && HasBit(this->cargo, i)) {
+				if (planned > 0 && HasBit(this->cargo, i)) {
 					tmp.push_back(CargoData(i, from, stat.via, planned));
 				}
 			}
