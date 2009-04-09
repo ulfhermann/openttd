@@ -47,21 +47,6 @@ private:
 public:
 	/**
 	 * Create a network address based on a resolved IP and port
-	 * @param ip the resolved ip
-	 * @param port the port
-	 */
-	NetworkAddress(in_addr_t ip, uint16 port) :
-		address_length(sizeof(sockaddr))
-	{
-		*this->hostname = '\0';
-		memset(&this->address, 0, sizeof(this->address));
-		this->address.ss_family = AF_INET;
-		((struct sockaddr_in*)&this->address)->sin_addr.s_addr = ip;
-		this->SetPort(port);
-	}
-
-	/**
-	 * Create a network address based on a resolved IP and port
 	 * @param address the IP address with port
 	 */
 	NetworkAddress(struct sockaddr_storage &address, size_t address_length) :
@@ -89,7 +74,7 @@ public:
 	 * @param port the port
 	 * @param family the address family
 	 */
-	NetworkAddress(const char *hostname = "0.0.0.0", uint16 port = 0, int family = AF_INET) :
+	NetworkAddress(const char *hostname = "", uint16 port = 0, int family = AF_UNSPEC) :
 		address_length(0)
 	{
 		/* Also handle IPv6 bracket enclosed hostnames */
@@ -122,9 +107,19 @@ public:
 
 	/**
 	 * Get the address as a string, e.g. 127.0.0.1:12345.
-	 * @return the address
+	 * @param buffer the buffer to write to
+	 * @param last the last element in the buffer
+	 * @param with_family whether to add the family (e.g. IPvX).
 	 */
-	const char *GetAddressAsString();
+	void GetAddressAsString(char *buffer, const char *last, bool with_family = true);
+
+	/**
+	 * Get the address as a string, e.g. 127.0.0.1:12345.
+	 * @param with_family whether to add the family (e.g. IPvX).
+	 * @return the address
+	 * @note NOT thread safe
+	 */
+	const char *GetAddressAsString(bool with_family = true);
 
 	/**
 	 * Get the address in it's internal representation.
