@@ -30,11 +30,20 @@ static const uint INVALID_DATAPOINT_POS = UINT_MAX;  // Used to determine if the
 /* GRAPH LEGEND */
 /****************/
 
+/** Widget numbers of the graph legend window. */
+enum GraphLegendWidgetNumbers {
+	GLW_CLOSEBOX,
+	GLW_CAPTION,
+	GLW_BACKGROUND,
+
+	GLW_FIRST_COMPANY,
+};
+
 struct GraphLegendWindow : Window {
 	GraphLegendWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
 	{
-		for (uint i = 3; i < this->widget_count; i++) {
-			if (!HasBit(_legend_excluded_companies, i - 3)) this->LowerWidget(i);
+		for (uint i = GLW_FIRST_COMPANY; i < this->widget_count; i++) {
+			if (!HasBit(_legend_excluded_companies, i - GLW_FIRST_COMPANY)) this->LowerWidget(i);
 		}
 
 		this->FindWindowPlacementAndResize(desc);
@@ -46,7 +55,7 @@ struct GraphLegendWindow : Window {
 			if (IsValidCompanyID(c)) continue;
 
 			SetBit(_legend_excluded_companies, c);
-			this->RaiseWidget(c + 3);
+			this->RaiseWidget(c + GLW_FIRST_COMPANY);
 		}
 
 		this->DrawWidgets();
@@ -63,9 +72,9 @@ struct GraphLegendWindow : Window {
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		if (!IsInsideMM(widget, 3, MAX_COMPANIES + 3)) return;
+		if (!IsInsideMM(widget, GLW_FIRST_COMPANY, MAX_COMPANIES + GLW_FIRST_COMPANY)) return;
 
-		ToggleBit(_legend_excluded_companies, widget - 3);
+		ToggleBit(_legend_excluded_companies, widget - GLW_FIRST_COMPANY);
 		this->ToggleWidgetLoweredState(widget);
 		this->SetDirty();
 		InvalidateWindow(WC_INCOME_GRAPH, 0);
@@ -759,6 +768,13 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 	}
 };
 
+/** Widget numbers of the cargo payment rates. */
+enum CargoPaymentRatesWidgets {
+	CPW_CLOSEBOX,
+	CPW_CAPTION,
+	CPW_BACKGROUND,
+};
+
 static const Widget _cargo_payment_rates_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                     STR_018B_CLOSE_WINDOW},
 {    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   567,     0,    13, STR_7061_CARGO_PAYMENT_RATES, STR_018C_WINDOW_TITLE_DRAG_THIS},
@@ -766,11 +782,19 @@ static const Widget _cargo_payment_rates_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_cargo_payment_rates_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CPW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, CPW_CAPTION), SetDataTip(STR_7061_CARGO_PAYMENT_RATES, STR_018C_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, CPW_BACKGROUND), SetMinimalSize(568, 32), SetResize(0, 1), EndContainer(),
+};
+
 static const WindowDesc _cargo_payment_rates_desc(
 	WDP_AUTO, WDP_AUTO, 568, 46, 568, 46,
 	WC_PAYMENT_RATES, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_cargo_payment_rates_widgets
+	_cargo_payment_rates_widgets, _nested_cargo_payment_rates_widgets, lengthof(_nested_cargo_payment_rates_widgets)
 );
 
 
@@ -880,6 +904,13 @@ public:
 	}
 };
 
+/** Widget numbers for the company league window. */
+enum CompanyLeagueWidgets {
+	CLW_CLOSEBOX,
+	CLW_CAPTION,
+	CLW_STICKYBOX,
+	CLW_BACKGROUND,
+};
 
 static const Widget _company_league_widgets[] = {
 {   WWT_CLOSEBOX, RESIZE_NONE,  COLOUR_GREY,   0,  10,  0,  13, STR_00C5,                      STR_018B_CLOSE_WINDOW},
@@ -889,11 +920,20 @@ static const Widget _company_league_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_company_league_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CLW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, CLW_CAPTION), SetDataTip(STR_7053_COMPANY_LEAGUE_TABLE, STR_018C_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY, CLW_STICKYBOX),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, CLW_BACKGROUND), SetMinimalSize(400, 153),
+};
+
 static const WindowDesc _company_league_desc(
 	WDP_AUTO, WDP_AUTO, 400, 167, 400, 167,
 	WC_COMPANY_LEAGUE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON,
-	_company_league_widgets
+	_company_league_widgets, _nested_company_league_widgets, lengthof(_nested_company_league_widgets)
 );
 
 void ShowCompanyLeagueTable()

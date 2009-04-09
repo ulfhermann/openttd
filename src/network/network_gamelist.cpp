@@ -65,7 +65,14 @@ static void NetworkGameListHandleDelayedInsert()
  * @return a point to the newly added or already existing item */
 NetworkGameList *NetworkGameListAddItem(NetworkAddress address)
 {
-	if (StrEmpty(address.GetHostname())) return NULL;
+	const char *hostname = address.GetHostname();
+
+	/* Do not query the 'any' address. */
+	if (StrEmpty(hostname) ||
+			strcmp(hostname, "0.0.0.0") == 0 ||
+			strcmp(hostname, "::") == 0) {
+		return NULL;
+	}
 
 	NetworkGameList *item, *prev_item;
 
@@ -95,10 +102,8 @@ NetworkGameList *NetworkGameListAddItem(NetworkAddress address)
  * @param remove pointer to the item to be removed */
 void NetworkGameListRemoveItem(NetworkGameList *remove)
 {
-	NetworkGameList *item, *prev_item;
-
-	prev_item = NULL;
-	for (item = _network_game_list; item != NULL; item = item->next) {
+	NetworkGameList *prev_item = NULL;
+	for (NetworkGameList *item = _network_game_list; item != NULL; item = item->next) {
 		if (remove == item) {
 			if (prev_item == NULL) {
 				_network_game_list = remove->next;
@@ -120,7 +125,7 @@ void NetworkGameListRemoveItem(NetworkGameList *remove)
 }
 
 enum {
-	MAX_GAME_LIST_REQUERY_COUNT  =  5, ///< How often do we requery in number of times per server?
+	MAX_GAME_LIST_REQUERY_COUNT  = 10, ///< How often do we requery in number of times per server?
 	REQUERY_EVERY_X_GAMELOOPS    = 60, ///< How often do we requery in time?
 	REFRESH_GAMEINFO_X_REQUERIES = 50, ///< Refresh the game info itself after REFRESH_GAMEINFO_X_REQUERIES * REQUERY_EVERY_X_GAMELOOPS game loops
 };
