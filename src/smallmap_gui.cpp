@@ -846,10 +846,10 @@ public:
 						if (!show_towns) {
 							typedef std::multimap<uint, byte, std::greater<uint> > SizeMap;
 							SizeMap sizes;
-							sizes.insert(std::make_pair(sqrt(ls.usage), _colour_gradient[COLOUR_GREY][1]));
-							sizes.insert(std::make_pair(sqrt(ls.capacity), _colour_gradient[COLOUR_WHITE][7]));
-							sizes.insert(std::make_pair(sqrt(flow.planned),  _colour_gradient[COLOUR_RED][5]));
-							sizes.insert(std::make_pair(sqrt(flow.sent), _colour_gradient[COLOUR_YELLOW][5]));
+							sizes.insert(std::make_pair(sqrt((float)ls.usage), _colour_gradient[COLOUR_GREY][1]));
+							sizes.insert(std::make_pair(sqrt((float)ls.capacity), _colour_gradient[COLOUR_WHITE][7]));
+							sizes.insert(std::make_pair(sqrt((float)flow.planned),  _colour_gradient[COLOUR_RED][5]));
+							sizes.insert(std::make_pair(sqrt((float)flow.sent), _colour_gradient[COLOUR_YELLOW][5]));
 
 							ptm.x = (pta.x + ptb.x) / 2;
 							ptm.y = (pta.y + ptb.y) / 2;

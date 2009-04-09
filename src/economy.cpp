@@ -1483,11 +1483,14 @@ void VehiclePayment(Vehicle *front_v)
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
 			CargoPacket *cp = *it;
 
-			uint unload_flags = cargo_list.WillUnload(ul, cp);
+			UnloadType unload_flags = cargo_list.WillUnload(ul, cp);
 
 			if (unload_flags & (UL_DELIVER | UL_TRANSFER)) {
 				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 				result = 2;
+			} else {
+				/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
+				v->cargo.UpdateFlows(next_station, ge);
 			}
 
 			if (!cp->paid_for) {
@@ -1594,7 +1597,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 		return;
 	}
 
-	uint unload_flags = u->current_order.GetUnloadType();
+	OrderUnloadFlags unload_flags = u->current_order.GetUnloadType();
 
 
 	if (v->type == VEH_TRAIN && (!IsTileType(v->tile, MP_STATION) || GetStationIndex(v->tile) != st->index)) {
@@ -1653,9 +1656,6 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
 			continue;
-		} else {
-			/* vehicle will keep all its cargo */
-			v->cargo.UpdateFlows(next_station, ge);
 		}
 
 		/* Do not pick up goods when we have no-load set. */

@@ -3389,7 +3389,7 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet & flow_stats, FlowStatSet::iterator
 }
 
 void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next) {
-	if (source == INVALID_STATION || next == INVALID_STATION) return;
+	if (source == INVALID_STATION || next == INVALID_STATION || flows.empty()) return;
 	FlowStatSet & flow_stats = flows[source];
 	FlowStatSet::iterator flow_it = flow_stats.begin();
 	if (flow_it != flow_stats.end()) {
@@ -3411,17 +3411,21 @@ void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next) {
 	flow_stats.insert(FlowStat(next, 0, count));
 }
 
-StationID GoodsEntry::UpdateFlowStats(StationID source, uint count) {
-	if (source == INVALID_STATION) return INVALID_STATION;
+StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
+	if (source == INVALID_STATION || flows.empty()) return INVALID_STATION;
 	FlowStatSet & flow_stats = flows[source];
 	FlowStatSet::iterator flow_it = flow_stats.begin();
-	if (flow_it != flow_stats.end()) {
+	while (flow_it != flow_stats.end()) {
 		StationID via = flow_it->via;
-		UpdateFlowStats(flow_stats, flow_it, count);
-		return via;
-	} else {
-		return INVALID_STATION;
+		if (via != curr) {
+			UpdateFlowStats(flow_stats, flow_it, count);
+			return via;
+		}
+		else {
+			++flow_it;
+		}
 	}
+	return INVALID_STATION;
 }
 
 extern const TileTypeProcs _tile_type_station_procs = {
