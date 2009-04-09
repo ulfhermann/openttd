@@ -175,8 +175,10 @@ void LinkGraph::Join() {
 
 	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
 		Node & node = comp->GetNode(node_id);
-		FlowStatMap & station_flows = GetStation(node.station)->goods[cargo].flows;
-		node.ExportFlows(station_flows);
+		if (IsValidStationID(node.station)) {
+			FlowStatMap & station_flows = GetStation(node.station)->goods[cargo].flows;
+			node.ExportFlows(station_flows);
+		}
 	}
 	delete job;
 	jobs.pop_front();
