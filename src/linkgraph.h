@@ -24,7 +24,7 @@ typedef uint16 colour;
 typedef uint NodeID;
 typedef double Number;
 typedef std::set<Path *> PathSet;
-typedef std::map<StationID, uint> FlowViaMap;
+typedef std::map<StationID, Number> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
 
 class Node {
