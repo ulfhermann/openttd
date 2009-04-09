@@ -207,11 +207,11 @@ UnloadType CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket
 
 UnloadType CargoList::WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const {
 	/* try to unload cargo */
-	bool move = ul.flags & (UL_DELIVER | UL_ACCEPTED | UL_TRANSFER);
+	bool move = (ul.flags & (UL_DELIVER | UL_ACCEPTED | UL_TRANSFER)) != 0;
 	/* try to deliver cargo if unloading */
 	bool deliver = (ul.flags & UL_ACCEPTED) && !(ul.flags & UL_TRANSFER) && (p->source != ul.curr_station);
 	/* transfer cargo if delivery was unsuccessful */
-	bool transfer = ul.flags & (UL_TRANSFER | UL_DELIVER);
+	bool transfer = (ul.flags & (UL_TRANSFER | UL_DELIVER)) != 0;
 	if (move) {
 		if(deliver) {
 			return UL_DELIVER;
