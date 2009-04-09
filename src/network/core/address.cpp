@@ -16,10 +16,7 @@ const char *NetworkAddress::GetHostname()
 {
 	if (StrEmpty(this->hostname)) {
 		assert(this->address_length != 0);
-		char *buf = this->hostname;
-		if (this->address.ss_family == AF_INET6) buf = strecpy(buf, "[", lastof(this->hostname));
-		getnameinfo((struct sockaddr *)&this->address, this->address_length, buf, lastof(this->hostname) - buf, NULL, 0, NI_NUMERICHOST);
-		if (this->address.ss_family == AF_INET6) strecat(buf, "]", lastof(this->hostname));
+		getnameinfo((struct sockaddr *)&this->address, this->address_length, this->hostname, sizeof(this->hostname), NULL, 0, NI_NUMERICHOST);
 	}
 	return this->hostname;
 }
@@ -56,18 +53,29 @@ void NetworkAddress::SetPort(uint16 port)
 	}
 }
 
-const char *NetworkAddress::GetAddressAsString()
+void NetworkAddress::GetAddressAsString(char *buffer, const char *last, bool with_family)
+{
+	if (this->GetAddress()->ss_family == AF_INET6) buffer = strecpy(buffer, "[", last);
+	buffer = strecpy(buffer, this->GetHostname(), last);
+	if (this->GetAddress()->ss_family == AF_INET6) buffer = strecpy(buffer, "]", last);
+	buffer += seprintf(buffer, last, ":%d", this->GetPort());
+
+	if (with_family) {
+		char family;
+		switch (this->address.ss_family) {
+			case AF_INET:  family = '4'; break;
+			case AF_INET6: family = '6'; break;
+			default:       family = '?'; break;
+		}
+		seprintf(buffer, last, " (IPv%c)", family);
+	}
+}
+
+const char *NetworkAddress::GetAddressAsString(bool with_family)
 {
 	/* 6 = for the : and 5 for the decimal port number */
 	static char buf[NETWORK_HOSTNAME_LENGTH + 6 + 7];
-
-	char family;
-	switch (this->address.ss_family) {
-		case AF_INET:  family = '4'; break;
-		case AF_INET6: family = '6'; break;
-		default:       family = '?'; break;
-	}
-	seprintf(buf, lastof(buf), "%s:%d (IPv%c)", this->GetHostname(), this->GetPort(), family);
+	this->GetAddressAsString(buf, lastof(buf), with_family);
 	return buf;
 }
 
@@ -187,6 +195,13 @@ SOCKET NetworkAddress::Resolve(int family, int socktype, int flags, SocketList *
 
 	SOCKET sock = INVALID_SOCKET;
 	for (struct addrinfo *runp = ai; runp != NULL; runp = runp->ai_next) {
+		/* When we are binding to multiple sockets, make sure we do not
+		 * connect to one with exactly the same address twice. That's
+		 * ofcourse totally unneeded ;) */
+		if (sockets != NULL) {
+			NetworkAddress address(runp->ai_addr, runp->ai_addrlen);
+			if (sockets->Find(address) != sockets->End()) continue;
+		}
 		sock = func(runp);
 		if (sock == INVALID_SOCKET) continue;
 
