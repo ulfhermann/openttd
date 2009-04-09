@@ -57,7 +57,7 @@ const SaveLoad * GetComponentDesc() {
 		saveloads.push_back(_component_desc[i++]);
 	} while (saveloads.back().cmd != SL_END);
 
-	return saveloads.data();
+	return &saveloads[0];
 }
 
 const SaveLoad * GetLinkGraphDesc(uint type) {
