@@ -14,7 +14,7 @@
 
 const char *NetworkAddress::GetHostname()
 {
-	if (StrEmpty(this->hostname)) {
+	if (StrEmpty(this->hostname) && this->address.ss_family != AF_UNSPEC) {
 		assert(this->address_length != 0);
 		getnameinfo((struct sockaddr *)&this->address, this->address_length, this->hostname, sizeof(this->hostname), NULL, 0, NI_NUMERICHOST);
 	}
@@ -178,14 +178,21 @@ SOCKET NetworkAddress::Resolve(int family, int socktype, int flags, SocketList *
 	char port_name[6];
 	seprintf(port_name, lastof(port_name), "%u", this->GetPort());
 
+	bool reset_hostname = false;
 	/* Setting both hostname to NULL and port to 0 is not allowed.
 	 * As port 0 means bind to any port, the other must mean that
 	 * we want to bind to 'all' IPs. */
-	if (this->address_length == 0 && this->GetPort() == 0) {
-		strecpy(this->hostname, this->address.ss_family == AF_INET ? "0.0.0.0" : "::", lastof(this->hostname));
+	if (StrEmpty(this->hostname) && this->address_length == 0 && this->GetPort() == 0) {
+		reset_hostname = true;
+		int fam = this->address.ss_family;
+		if (fam == AF_UNSPEC) fam = family;
+		strecpy(this->hostname, fam == AF_INET ? "0.0.0.0" : "::", lastof(this->hostname));
 	}
 
 	int e = getaddrinfo(StrEmpty(this->hostname) ? NULL : this->hostname, port_name, &hints, &ai);
+
+	if (reset_hostname) strecpy(this->hostname, "", lastof(this->hostname));
+
 	if (e != 0) {
 		if (func != ResolveLoopProc) {
 			DEBUG(net, 0, "getaddrinfo(%s, %s) failed: %s", this->hostname, port_name, FS2OTTD(gai_strerror(e)));
@@ -199,20 +206,20 @@ SOCKET NetworkAddress::Resolve(int family, int socktype, int flags, SocketList *
 		 * connect to one with exactly the same address twice. That's
 		 * ofcourse totally unneeded ;) */
 		if (sockets != NULL) {
-			NetworkAddress address(runp->ai_addr, runp->ai_addrlen);
+			NetworkAddress address(runp->ai_addr, (int)runp->ai_addrlen);
 			if (sockets->Find(address) != sockets->End()) continue;
 		}
 		sock = func(runp);
 		if (sock == INVALID_SOCKET) continue;
 
 		if (sockets == NULL) {
-			this->address_length = runp->ai_addrlen;
+			this->address_length = (int)runp->ai_addrlen;
 			assert(sizeof(this->address) >= runp->ai_addrlen);
 			memcpy(&this->address, runp->ai_addr, runp->ai_addrlen);
 			break;
 		}
 
-		NetworkAddress addr(runp->ai_addr, runp->ai_addrlen);
+		NetworkAddress addr(runp->ai_addr, (int)runp->ai_addrlen);
 		(*sockets)[addr] = sock;
 		sock = INVALID_SOCKET;
 	}
@@ -236,7 +243,7 @@ static SOCKET ConnectLoopProc(addrinfo *runp)
 
 	if (!SetNoDelay(sock)) DEBUG(net, 1, "Setting TCP_NODELAY failed");
 
-	if (connect(sock, runp->ai_addr, runp->ai_addrlen) != 0) {
+	if (connect(sock, runp->ai_addr, (int)runp->ai_addrlen) != 0) {
 		DEBUG(net, 1, "Could not connect socket: %s", strerror(errno));
 		closesocket(sock);
 		return INVALID_SOCKET;
@@ -263,7 +270,7 @@ SOCKET NetworkAddress::Connect()
 static SOCKET ListenLoopProc(addrinfo *runp)
 {
 	const char *type = runp->ai_socktype == SOCK_STREAM ? "tcp" : "udp";
-	const char *address = NetworkAddress(runp->ai_addr, runp->ai_addrlen).GetAddressAsString();
+	const char *address = NetworkAddress(runp->ai_addr, (int)runp->ai_addrlen).GetAddressAsString();
 
 	SOCKET sock = socket(runp->ai_family, runp->ai_socktype, runp->ai_protocol);
 	if (sock == INVALID_SOCKET) {
@@ -286,7 +293,7 @@ static SOCKET ListenLoopProc(addrinfo *runp)
 		DEBUG(net, 3, "[%s] Could not disable IPv4 over IPv6 on port %s: %s", type, address, strerror(errno));
 	}
 
-	if (bind(sock, runp->ai_addr, runp->ai_addrlen) != 0) {
+	if (bind(sock, runp->ai_addr, (int)runp->ai_addrlen) != 0) {
 		DEBUG(net, 1, "[%s] Could not bind on port %s: %s", type, address, strerror(errno));
 		closesocket(sock);
 		return INVALID_SOCKET;
@@ -305,9 +312,20 @@ static SOCKET ListenLoopProc(addrinfo *runp)
 	return sock;
 }
 
-SOCKET NetworkAddress::Listen(int socktype, SocketList *sockets)
+void NetworkAddress::Listen(int socktype, SocketList *sockets)
 {
-	return this->Resolve(AF_UNSPEC, socktype, AI_ADDRCONFIG | AI_PASSIVE, sockets, ListenLoopProc);
+	assert(sockets != NULL);
+
+	/* Setting both hostname to NULL and port to 0 is not allowed.
+	 * As port 0 means bind to any port, the other must mean that
+	 * we want to bind to 'all' IPs. */
+	if (this->address_length == 0 && this->address.ss_family == AF_UNSPEC &&
+			StrEmpty(this->hostname) && this->GetPort() == 0) {
+		this->Resolve(AF_INET,  socktype, AI_ADDRCONFIG | AI_PASSIVE, sockets, ListenLoopProc);
+		this->Resolve(AF_INET6, socktype, AI_ADDRCONFIG | AI_PASSIVE, sockets, ListenLoopProc);
+	} else {
+		this->Resolve(AF_UNSPEC, socktype, AI_ADDRCONFIG | AI_PASSIVE, sockets, ListenLoopProc);
+	}
 }
 
 #endif /* ENABLE_NETWORK */

@@ -342,7 +342,6 @@ STR_SORT_BY_LENGTH                                              :Lengde
 STR_SORT_BY_LIFE_TIME                                           :Tilovers livs tid
 STR_SORT_BY_FACILITY                                            :Stasjonstype
 STR_SORT_BY_WAITING                                             :Verdi av ventende last
-STR_SORT_BY_RATING_MAX                                          :Vurdering av last
 STR_ENGINE_SORT_ENGINE_ID                                       :MaskinID (klassisk type)
 STR_ENGINE_SORT_COST                                            :Kostnad
 STR_ENGINE_SORT_POWER                                           :Kraft
@@ -816,7 +815,7 @@ STR_CURR_ITL                                                    :Italiensk lire 
 STR_CURR_NLG                                                    :Hollandsk guilder (NLG)
 STR_CURR_NOK                                                    :Norsk krone (NOK)
 STR_CURR_PLN                                                    :Polsk zloty (PLN)
-STR_CURR_ROL                                                    :Rumensk leu (ROL)
+STR_CURR_RON                                                    :Rumensk leu (RON)
 STR_CURR_RUR                                                    :Russisk rubel (RUR)
 STR_CURR_SIT                                                    :Slovensk tolar (SIT)
 STR_CURR_SEK                                                    :Svensk krone (SEK)

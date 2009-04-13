@@ -343,7 +343,6 @@ STR_SORT_BY_LENGTH                                              :Tamanho
 STR_SORT_BY_LIFE_TIME                                           :Vida útil restante
 STR_SORT_BY_FACILITY                                            :Tipo de estação
 STR_SORT_BY_WAITING                                             :Valor da carga aguardando
-STR_SORT_BY_RATING_MAX                                          :Taxa de Carga
 STR_ENGINE_SORT_ENGINE_ID                                       :No de Reg (padrão)
 STR_ENGINE_SORT_COST                                            :Custo
 STR_ENGINE_SORT_POWER                                           :Potência
@@ -820,7 +819,7 @@ STR_CURR_ITL                                                    :Lira Italiana (
 STR_CURR_NLG                                                    :Guilda Holandesa (NLG)
 STR_CURR_NOK                                                    :Coroa Norueguesa (NOK)
 STR_CURR_PLN                                                    :Zloty Polaco (PLN)
-STR_CURR_ROL                                                    :Lei Romeno (ROL)
+STR_CURR_RON                                                    :Lei Romeno (RON)
 STR_CURR_RUR                                                    :Rublo Russo (RUR)
 STR_CURR_SIT                                                    :Tolar Eslovênio (SIT)
 STR_CURR_SEK                                                    :Coroa Sueca (SEK)

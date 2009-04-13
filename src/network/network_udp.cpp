@@ -58,7 +58,7 @@ DEF_UDP_RECEIVE_COMMAND(Master, PACKET_UDP_MASTER_ACK_REGISTER)
 	DEBUG(net, 2, "[udp] advertising on master server successful");
 
 	/* We are advertised, but we don't want to! */
-	if (!_settings_client.network.server_advertise) NetworkUDPRemoveAdvertise();
+	if (!_settings_client.network.server_advertise) NetworkUDPRemoveAdvertise(false);
 }
 
 DEF_UDP_RECEIVE_COMMAND(Master, PACKET_UDP_MASTER_SESSION_KEY)
@@ -474,13 +474,16 @@ void NetworkUDPRemoveAdvertiseThread(void *pntr)
 	_network_udp_mutex->EndCritical();
 }
 
-/* Remove our advertise from the master-server */
-void NetworkUDPRemoveAdvertise()
+/**
+ * Remove our advertise from the master-server.
+ * @param blocking whether to wait until the removal has finished.
+ */
+void NetworkUDPRemoveAdvertise(bool blocking)
 {
 	/* Check if we are advertising */
 	if (!_networking || !_network_server || !_network_udp_server) return;
 
-	if (!ThreadObject::New(NetworkUDPRemoveAdvertiseThread, NULL)) {
+	if (blocking || !ThreadObject::New(NetworkUDPRemoveAdvertiseThread, NULL)) {
 		NetworkUDPRemoveAdvertiseThread(NULL);
 	}
 }
@@ -546,15 +549,14 @@ void NetworkUDPInitialize()
 
 	_network_udp_mutex->BeginCritical();
 
-	NetworkAddressList server;
-	*server.Append() = NetworkAddress(_settings_client.network.server_bind_ip, _settings_client.network.server_port);
-
 	_udp_client_socket = new ClientNetworkUDPSocketHandler();
+
+	NetworkAddressList server;
+	GetBindAddresses(&server, _settings_client.network.server_port);
 	_udp_server_socket = new ServerNetworkUDPSocketHandler(&server);
 
-	for (NetworkAddress *iter = server.Begin(); iter != server.End(); iter++) {
-		iter->SetPort(0);
-	}
+	server.Clear();
+	GetBindAddresses(&server, 0);
 	_udp_master_socket = new MasterNetworkUDPSocketHandler(&server);
 
 	_network_udp_server = false;

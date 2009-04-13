@@ -344,7 +344,6 @@ STR_SORT_BY_LENGTH                                              :Дължина
 STR_SORT_BY_LIFE_TIME                                           :Оставащо време за експлоатация
 STR_SORT_BY_FACILITY                                            :Вид на гарата
 STR_SORT_BY_WAITING                                             :Цена на чакащият товар
-STR_SORT_BY_RATING_MAX                                          :Рейтинг на товара
 STR_ENGINE_SORT_ENGINE_ID                                       :Двигател № (класическо сортиране)
 STR_ENGINE_SORT_COST                                            :Цена
 STR_ENGINE_SORT_POWER                                           :Мощност
@@ -819,7 +818,7 @@ STR_CURR_ITL                                                    :италиан�
 STR_CURR_NLG                                                    :холандски гулден (NLG)
 STR_CURR_NOK                                                    :норвежка крона (NOK)
 STR_CURR_PLN                                                    :полска злота (PLN)
-STR_CURR_ROL                                                    :румънска лея (ROL)
+STR_CURR_RON                                                    :румънска лея (RON)
 STR_CURR_RUR                                                    :руска рубла (RUR)
 STR_CURR_SIT                                                    :словенски толар (SIT)
 STR_CURR_SEK                                                    :шведска крона (SEK)
