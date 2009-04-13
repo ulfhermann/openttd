@@ -48,7 +48,7 @@ typedef std::vector<Path *> PathVector;
 
 class MultiCommodityFlow : public ComponentHandler {
 public:
-	virtual void Run(Component * graph);
+	virtual void Run(LinkGraphComponent * graph);
 	MultiCommodityFlow();
 	virtual ~MultiCommodityFlow() {}
 private:
@@ -69,7 +69,7 @@ private:
 
 	Number epsilon;
 	McfGraph edges;
-	Component * graph;
+	LinkGraphComponent * graph;
 	Number delta;
 	Number k;
 	Number m;
