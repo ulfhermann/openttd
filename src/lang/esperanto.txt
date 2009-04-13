@@ -340,7 +340,6 @@ STR_SORT_BY_VALUE                                               :Valoro
 STR_SORT_BY_LENGTH                                              :Longo
 STR_SORT_BY_FACILITY                                            :Stacidoma tipo
 STR_SORT_BY_WAITING                                             :Valoro de atendanta ŝarĝo
-STR_SORT_BY_RATING_MAX                                          :Takso de ŝarĝo
 STR_ENGINE_SORT_ENGINE_ID                                       :Maŝina ID (klasika ordigo)
 STR_ENGINE_SORT_COST                                            :Kosto
 STR_ENGINE_SORT_POWER                                           :Potenco
@@ -794,7 +793,7 @@ STR_CURR_ITL                                                    :Italaj Liroj (I
 STR_CURR_NLG                                                    :Nederlandaj Guldenoj (NLG)
 STR_CURR_NOK                                                    :Norvegaj Kronoj (NOK)
 STR_CURR_PLN                                                    :Polaj Zlotoj (PLN)
-STR_CURR_ROL                                                    :Rumanaj Leŭoj (ROL)
+STR_CURR_RON                                                    :Rumanaj Leŭoj (RON)
 STR_CURR_RUR                                                    :Rusaj Rubloj (RUR)
 STR_CURR_SIT                                                    :Slovenaj Tolaroj (SIT)
 STR_CURR_SEK                                                    :Svedaj Kronoj (SEK)

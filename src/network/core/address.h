@@ -24,7 +24,7 @@ typedef SmallMap<NetworkAddress, SOCKET, 4> SocketList;
 class NetworkAddress {
 private:
 	char hostname[NETWORK_HOSTNAME_LENGTH]; ///< The hostname
-	size_t address_length;                  ///< The length of the resolved address
+	int address_length;                     ///< The length of the resolved address
 	sockaddr_storage address;               ///< The resolved address
 
 	/**
@@ -49,7 +49,7 @@ public:
 	 * Create a network address based on a resolved IP and port
 	 * @param address the IP address with port
 	 */
-	NetworkAddress(struct sockaddr_storage &address, size_t address_length) :
+	NetworkAddress(struct sockaddr_storage &address, int address_length) :
 		address_length(address_length),
 		address(address)
 	{
@@ -60,7 +60,7 @@ public:
 	 * Create a network address based on a resolved IP and port
 	 * @param address the IP address with port
 	 */
-	NetworkAddress(sockaddr *address, size_t address_length) :
+	NetworkAddress(sockaddr *address, int address_length) :
 		address_length(address_length)
 	{
 		*this->hostname = '\0';
@@ -131,7 +131,7 @@ public:
 	 * Get the (valid) length of the address.
 	 * @return the length
 	 */
-	size_t GetAddressLength()
+	int GetAddressLength()
 	{
 		/* Resolve it if we didn't do it already */
 		if (!this->IsResolved()) this->GetAddress();
@@ -227,9 +227,8 @@ public:
 	 * Make the given socket listen.
 	 * @param socktype the type of socket (TCP, UDP, etc)
 	 * @param sockets the list of sockets to add the sockets to
-	 * @return the socket (if sockets != NULL)
 	 */
-	SOCKET Listen(int socktype, SocketList *sockets = NULL);
+	void Listen(int socktype, SocketList *sockets);
 };
 
 #endif /* ENABLE_NETWORK */

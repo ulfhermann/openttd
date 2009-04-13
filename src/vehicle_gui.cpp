@@ -263,6 +263,18 @@ static RefitOption *DrawVehicleRefitWindow(const RefitList *list, int sel, uint 
 	return selected;
 }
 
+/** Widget numbers of the vehicle refit window. */
+enum VehicleRefitWidgets {
+	VRW_CLOSEBOX,
+	VRW_CAPTION,
+	VRW_SELECTHEADER,
+	VRW_MATRIX,
+	VRW_SCROLLBAR,
+	VRW_INFOPANEL,
+	VRW_REFITBUTTON,
+	VRW_RESIZEBOX,
+};
+
 struct RefitWindow : public Window {
 	int sel;
 	RefitOption *cargo;
@@ -284,27 +296,27 @@ struct RefitWindow : public Window {
 
 		switch (v->type) {
 			case VEH_TRAIN:
-				this->widget[3].tooltips = STR_RAIL_SELECT_TYPE_OF_CARGO_FOR;
-				this->widget[6].data     = STR_RAIL_REFIT_VEHICLE;
-				this->widget[6].tooltips = STR_RAIL_REFIT_TO_CARRY_HIGHLIGHTED;
+				this->widget[VRW_MATRIX].tooltips = STR_RAIL_SELECT_TYPE_OF_CARGO_FOR;
+				this->widget[VRW_REFITBUTTON].data = STR_RAIL_REFIT_VEHICLE;
+				this->widget[VRW_REFITBUTTON].tooltips = STR_RAIL_REFIT_TO_CARRY_HIGHLIGHTED;
 				break;
 
 			case VEH_ROAD:
-				this->widget[3].tooltips = STR_ROAD_SELECT_TYPE_OF_CARGO_FOR;
-				this->widget[6].data     = STR_REFIT_ROAD_VEHICLE;
-				this->widget[6].tooltips = STR_REFIT_ROAD_VEHICLE_TO_CARRY_HIGHLIGHTED;
+				this->widget[VRW_MATRIX].tooltips = STR_ROAD_SELECT_TYPE_OF_CARGO_FOR;
+				this->widget[VRW_REFITBUTTON].data = STR_REFIT_ROAD_VEHICLE;
+				this->widget[VRW_REFITBUTTON].tooltips = STR_REFIT_ROAD_VEHICLE_TO_CARRY_HIGHLIGHTED;
 				break;
 
 			case VEH_SHIP:
-				this->widget[3].tooltips = STR_983D_SELECT_TYPE_OF_CARGO_FOR;
-				this->widget[6].data     = STR_983C_REFIT_SHIP;
-				this->widget[6].tooltips = STR_983E_REFIT_SHIP_TO_CARRY_HIGHLIGHTED;
+				this->widget[VRW_MATRIX].tooltips = STR_983D_SELECT_TYPE_OF_CARGO_FOR;
+				this->widget[VRW_REFITBUTTON].data = STR_983C_REFIT_SHIP;
+				this->widget[VRW_REFITBUTTON].tooltips = STR_983E_REFIT_SHIP_TO_CARRY_HIGHLIGHTED;
 				break;
 
 			case VEH_AIRCRAFT:
-				this->widget[3].tooltips = STR_A03E_SELECT_TYPE_OF_CARGO_FOR;
-				this->widget[6].data     = STR_A03D_REFIT_AIRCRAFT;
-				this->widget[6].tooltips = STR_A03F_REFIT_AIRCRAFT_TO_CARRY;
+				this->widget[VRW_MATRIX].tooltips = STR_A03E_SELECT_TYPE_OF_CARGO_FOR;
+				this->widget[VRW_REFITBUTTON].data = STR_A03D_REFIT_AIRCRAFT;
+				this->widget[VRW_REFITBUTTON].tooltips = STR_A03F_REFIT_AIRCRAFT_TO_CARRY;
 				break;
 
 			default: NOT_REACHED();
@@ -352,7 +364,7 @@ struct RefitWindow : public Window {
 				SetDParam(0, this->cargo->cargo);
 				SetDParam(1, _returned_refit_capacity);
 				SetDParam(2, cost.GetCost());
-				DrawString(2, this->width - 2, this->widget[5].top + 1, STR_9840_NEW_CAPACITY_COST_OF_REFIT, TC_FROMSTRING);
+				DrawString(2, this->width - 2, this->widget[VRW_INFOPANEL].top + 1, STR_9840_NEW_CAPACITY_COST_OF_REFIT, TC_FROMSTRING);
 			}
 		}
 	}
@@ -360,8 +372,8 @@ struct RefitWindow : public Window {
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case 3: { // listbox
-				int y = pt.y - this->widget[3].top;
+			case VRW_MATRIX: { // listbox
+				int y = pt.y - this->widget[VRW_MATRIX].top;
 				if (y >= 0) {
 					this->sel = (y / (int)this->resize.step_height) + this->vscroll.pos;
 					this->SetDirty();
@@ -369,7 +381,7 @@ struct RefitWindow : public Window {
 				break;
 			}
 
-			case 6: // refit button
+			case VRW_REFITBUTTON: // refit button
 				if (this->cargo != NULL) {
 					const Vehicle *v = GetVehicle(this->window_number);
 
@@ -395,28 +407,45 @@ struct RefitWindow : public Window {
 	virtual void OnResize(Point delta)
 	{
 		this->vscroll.cap += delta.y / (int)this->resize.step_height;
-		this->widget[3].data = (this->vscroll.cap << 8) + 1;
+		this->widget[VRW_MATRIX].data = (this->vscroll.cap << 8) + 1;
 	}
 };
 
-
 static const Widget _vehicle_refit_widgets[] = {
-	{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                            STR_018B_CLOSE_WINDOW},
-	{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   239,     0,    13, STR_983B_REFIT,                      STR_018C_WINDOW_TITLE_DRAG_THIS},
-	{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   239,    14,    27, STR_983F_SELECT_CARGO_TYPE_TO_CARRY, STR_983D_SELECT_TYPE_OF_CARGO_FOR},
-	{     WWT_MATRIX, RESIZE_BOTTOM,  COLOUR_GREY,     0,   227,    28,   139, 0x801,                               STR_EMPTY},
-	{  WWT_SCROLLBAR, RESIZE_BOTTOM,  COLOUR_GREY,   228,   239,    28,   139, 0x0,                                 STR_0190_SCROLL_BAR_SCROLLS_LIST},
-	{      WWT_PANEL,     RESIZE_TB,  COLOUR_GREY,     0,   239,   140,   161, 0x0,                                 STR_NULL},
-	{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,   227,   162,   173, 0x0,                                 STR_NULL},
-	{  WWT_RESIZEBOX,     RESIZE_TB,  COLOUR_GREY,   228,   239,   162,   173, 0x0,                                 STR_RESIZE_BUTTON},
+	{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,                            STR_018B_CLOSE_WINDOW},             // VRW_CLOSEBOX
+	{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   239,     0,    13, STR_983B_REFIT,                      STR_018C_WINDOW_TITLE_DRAG_THIS},   // VRW_CAPTION
+	{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   239,    14,    27, STR_983F_SELECT_CARGO_TYPE_TO_CARRY, STR_983D_SELECT_TYPE_OF_CARGO_FOR}, // VRW_SELECTHEADER
+	{     WWT_MATRIX, RESIZE_BOTTOM,  COLOUR_GREY,     0,   227,    28,   139, 0x801,                               STR_EMPTY},                         // VRW_MATRIX
+	{  WWT_SCROLLBAR, RESIZE_BOTTOM,  COLOUR_GREY,   228,   239,    28,   139, 0x0,                                 STR_0190_SCROLL_BAR_SCROLLS_LIST},  // VRW_SCROLLBAR
+	{      WWT_PANEL,     RESIZE_TB,  COLOUR_GREY,     0,   239,   140,   161, 0x0,                                 STR_NULL},                          // VRW_INFOPANEL
+	{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,   227,   162,   173, 0x0,                                 STR_NULL},                          // VRW_REFITBUTTON
+	{  WWT_RESIZEBOX,     RESIZE_TB,  COLOUR_GREY,   228,   239,   162,   173, 0x0,                                 STR_RESIZE_BUTTON},                 // VRW_RESIZEBOX
 	{   WIDGETS_END},
+};
+
+static const NWidgetPart _nested_vehicle_refit_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, VRW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, VRW_CAPTION), SetDataTip(STR_983B_REFIT, STR_018C_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_TEXTBTN, COLOUR_GREY, VRW_SELECTHEADER), SetMinimalSize(240, 14), SetDataTip(STR_983F_SELECT_CARGO_TYPE_TO_CARRY, STR_983D_SELECT_TYPE_OF_CARGO_FOR),
+	/* Matrix + scrollbar. */
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VRW_MATRIX), SetMinimalSize(228, 112), SetResize(0, 14), SetDataTip(0x801, STR_EMPTY),
+		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VRW_SCROLLBAR),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, VRW_INFOPANEL), SetMinimalSize(240, 22), EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VRW_REFITBUTTON), SetMinimalSize(228, 12),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY, VRW_RESIZEBOX),
+	EndContainer(),
 };
 
 static const WindowDesc _vehicle_refit_desc(
 	WDP_AUTO, WDP_AUTO, 240, 174, 240, 174,
 	WC_VEHICLE_REFIT, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	_vehicle_refit_widgets
+	_vehicle_refit_widgets, _nested_vehicle_refit_widgets, lengthof(_nested_vehicle_refit_widgets)
 );
 
 /** Show the refit window for a vehicle
@@ -854,21 +883,6 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 		this->vehicle_type = (VehicleType)GB(this->window_number, 11, 5);
 		this->owner = company;
 
-		/* Hide the widgets that we will not use in this window
-		 * Some windows contains actions only fit for the owner */
-		if (company == _local_company) {
-			this->HideWidget(VLW_WIDGET_OTHER_COMPANY_FILLER);
-			this->SetWidgetDisabledState(VLW_WIDGET_AVAILABLE_VEHICLES, window_type != VLW_STANDARD);
-		} else {
-			this->SetWidgetsHiddenState(true,
-				VLW_WIDGET_AVAILABLE_VEHICLES,
-				VLW_WIDGET_MANAGE_VEHICLES_DROPDOWN,
-				VLW_WIDGET_STOP_ALL,
-				VLW_WIDGET_START_ALL,
-				VLW_WIDGET_EMPTY_BOTTOM_RIGHT,
-				WIDGET_LIST_END);
-		}
-
 		/* Set up the window widgets */
 		switch (this->vehicle_type) {
 			case VEH_TRAIN:
@@ -1035,11 +1049,25 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 			default: NOT_REACHED(); break;
 		}
 
-		this->SetWidgetsDisabledState(this->vehicles.Length() == 0,
+		/* Hide the widgets that we will not use in this window
+		 * Some windows contains actions only fit for the owner */
+		this->SetWidgetsHiddenState(this->owner != _local_company,
+			VLW_WIDGET_AVAILABLE_VEHICLES,
 			VLW_WIDGET_MANAGE_VEHICLES_DROPDOWN,
 			VLW_WIDGET_STOP_ALL,
 			VLW_WIDGET_START_ALL,
+			VLW_WIDGET_EMPTY_BOTTOM_RIGHT,
 			WIDGET_LIST_END);
+		this->SetWidgetHiddenState(VLW_WIDGET_OTHER_COMPANY_FILLER, this->owner == _local_company);
+		if (this->owner == _local_company) {
+			this->SetWidgetDisabledState(VLW_WIDGET_AVAILABLE_VEHICLES, window_type != VLW_STANDARD);
+			this->SetWidgetsDisabledState(this->vehicles.Length() == 0,
+				VLW_WIDGET_MANAGE_VEHICLES_DROPDOWN,
+				VLW_WIDGET_STOP_ALL,
+				VLW_WIDGET_START_ALL,
+				WIDGET_LIST_END);
+		}
+
 
 		/* Set text of sort by dropdown widget. */
 		this->widget[VLW_WIDGET_SORT_BY_PULLDOWN].data = this->vehicle_sorter_names[this->vehicles.SortType()];
@@ -1273,10 +1301,37 @@ static const Widget _vehicle_details_widgets[] = {
 	{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,  96, 194, 113, 124, STR_013D_INFORMATION, STR_8850_SHOW_DETAILS_OF_TRAIN_VEHICLES},// VLD_WIDGET_DETAILS_TRAIN_VEHICLES
 	{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY, 195, 293, 113, 124, STR_013E_CAPACITIES,  STR_8851_SHOW_CAPACITIES_OF_EACH},       // VLD_WIDGET_DETAILS_CAPACITY_OF_EACH
 	{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY, 294, 392, 113, 124, STR_TOTAL_CARGO,      STR_SHOW_TOTAL_CARGO},                   // VLD_WIDGET_DETAILS_TOTAL_CARGO
-	{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY, 393, 404, 113, 124, 0x0,                  STR_RESIZE_BUTTON},                      // VLD_RESIZE
+	{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY, 393, 404, 113, 124, 0x0,                  STR_RESIZE_BUTTON},                      // VLD_WIDGET_RESIZE
 	{   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_vehicle_details_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, VLD_WIDGET_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, VLD_WIDGET_CAPTION),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_RENAME_VEHICLE), SetMinimalSize(40, 14), SetDataTip(STR_01AA_NAME, STR_NULL /* filled in later */),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY, VLD_WIDGET_STICKY),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_TOP_DETAILS), SetResize(1, 0), SetMinimalSize(405, 42), EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VLD_WIDGET_MIDDLE_DETAILS), SetResize(1, 1), SetMinimalSize(393, 45), SetDataTip(0x701, STR_NULL),
+		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VLD_WIDGET_SCROLLBAR),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetMinimalSize(11, 6), SetDataTip(STR_0188, STR_884D_INCREASE_SERVICING_INTERVAL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetMinimalSize(11, 6), SetDataTip(STR_0189, STR_884E_DECREASE_SERVICING_INTERVAL),
+		EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_BOTTOM_RIGHT), SetFill(1, 1), SetResize(1, 0), EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_CARGO_CARRIED), SetMinimalSize(96, 12), SetDataTip(STR_013C_CARGO, STR_884F_SHOW_DETAILS_OF_CARGO_CARRIED),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_TRAIN_VEHICLES), SetMinimalSize(99, 12), SetDataTip(STR_013D_INFORMATION, STR_8850_SHOW_DETAILS_OF_TRAIN_VEHICLES),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_CAPACITY_OF_EACH), SetMinimalSize(99, 12), SetDataTip(STR_013E_CAPACITIES, STR_8851_SHOW_CAPACITIES_OF_EACH),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_TOTAL_CARGO), SetMinimalSize(99, 12), SetDataTip(STR_TOTAL_CARGO, STR_SHOW_TOTAL_CARGO), SetResize(1, 0),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY, VLD_WIDGET_RESIZE),
+	EndContainer(),
+};
 
 /** Command indices for the _vehicle_command_translation_table. */
 enum VehicleStringTranslation {
@@ -1590,7 +1645,7 @@ static const WindowDesc _vehicle_details_desc(
 	WDP_AUTO, WDP_AUTO, 405, 113, 405, 113,
 	WC_VEHICLE_DETAILS, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_vehicle_details_widgets
+	_vehicle_details_widgets, _nested_vehicle_details_widgets, lengthof(_nested_vehicle_details_widgets)
 );
 
 /** Shows the vehicle details window of the given vehicle. */

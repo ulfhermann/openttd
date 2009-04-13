@@ -342,7 +342,6 @@ STR_SORT_BY_LENGTH                                              :Lengte
 STR_SORT_BY_LIFE_TIME                                           :Resterende levensverwachting
 STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waarde van wachtende vracht
-STR_SORT_BY_RATING_MAX                                          :Vracht waardering
 STR_ENGINE_SORT_ENGINE_ID                                       :Motor ID (klassieke soort)
 STR_ENGINE_SORT_COST                                            :Kosten
 STR_ENGINE_SORT_POWER                                           :Kracht
@@ -819,7 +818,7 @@ STR_CURR_ITL                                                    :Italiaanse Lier
 STR_CURR_NLG                                                    :Nederlandse Gulden (NLG)
 STR_CURR_NOK                                                    :Noorse Kronen (NOK)
 STR_CURR_PLN                                                    :Poolse Zloty (PLN)
-STR_CURR_ROL                                                    :Roemeense Leu (ROL)
+STR_CURR_RON                                                    :Roemeense Leu (RON)
 STR_CURR_RUR                                                    :Russische Rubel (RUR)
 STR_CURR_SIT                                                    :Sloveense Tolar (SIT)
 STR_CURR_SEK                                                    :Zweedse Kronen (SEK)
