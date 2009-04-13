@@ -387,7 +387,6 @@ STR_SORT_BY_LENGTH                                              :Dlugosc
 STR_SORT_BY_LIFE_TIME                                           :Pozostaly czas zycia
 STR_SORT_BY_FACILITY                                            :Typ stacji
 STR_SORT_BY_WAITING                                             :Wartość czekającego ładunku
-STR_SORT_BY_RATING_MAX                                          :Ocena ładunku
 STR_ENGINE_SORT_ENGINE_ID                                       :ID pojazdu
 STR_ENGINE_SORT_COST                                            :Cena
 STR_ENGINE_SORT_POWER                                           :Moc
@@ -864,7 +863,7 @@ STR_CURR_ITL                                                    :Lira włoska (I
 STR_CURR_NLG                                                    :Gulden holenderski (NLG)
 STR_CURR_NOK                                                    :Korona norweska (NOK)
 STR_CURR_PLN                                                    :Złoty polski (PLN)
-STR_CURR_ROL                                                    :Lej rumuński (ROL)
+STR_CURR_RON                                                    :Lej rumuński (RON)
 STR_CURR_RUR                                                    :Rubel rosyjski (RUR)
 STR_CURR_SIT                                                    :Tolar słowenski (SIT)
 STR_CURR_SEK                                                    :Korona szwedzka (SEK)

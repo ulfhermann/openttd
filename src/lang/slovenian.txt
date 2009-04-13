@@ -384,7 +384,6 @@ STR_SORT_BY_LENGTH                                              :Dolžina
 STR_SORT_BY_LIFE_TIME                                           :Ostala življenjska doba
 STR_SORT_BY_FACILITY                                            :Tip postaje
 STR_SORT_BY_WAITING                                             :Čakanje vrednosti tovora
-STR_SORT_BY_RATING_MAX                                          :Ocene tovora
 STR_ENGINE_SORT_ENGINE_ID                                       :ID motorja (klasično urejanje)
 STR_ENGINE_SORT_COST                                            :Cena
 STR_ENGINE_SORT_POWER                                           :Moč
@@ -861,7 +860,7 @@ STR_CURR_ITL                                                    :Italijanska Lir
 STR_CURR_NLG                                                    :Nizozemski Gulden (NLG)
 STR_CURR_NOK                                                    :Norveška Krona (NOK)
 STR_CURR_PLN                                                    :Poljski Zlot (PLN)
-STR_CURR_ROL                                                    :Romunski Lej (ROL)
+STR_CURR_RON                                                    :Romunski Lej (RON)
 STR_CURR_RUR                                                    :Ruski Rubelj (RUR)
 STR_CURR_SIT                                                    :Slovenski tolar (SIT)
 STR_CURR_SEK                                                    :Švedska Krona (SEK)

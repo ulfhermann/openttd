@@ -341,7 +341,6 @@ STR_SORT_BY_LENGTH                                              :Lungime
 STR_SORT_BY_LIFE_TIME                                           :Durată de viaţă rămasă
 STR_SORT_BY_FACILITY                                            :Tipul de statie
 STR_SORT_BY_WAITING                                             :Valoarea mărfii în aşteptare
-STR_SORT_BY_RATING_MAX                                          :Evaluare încãrcãturã
 STR_ENGINE_SORT_ENGINE_ID                                       :IDMotor (model clasic)
 STR_ENGINE_SORT_COST                                            :Cost
 STR_ENGINE_SORT_POWER                                           :Putere
@@ -818,7 +817,7 @@ STR_CURR_ITL                                                    :Liră italiană
 STR_CURR_NLG                                                    :Gulden olandez (NLG)
 STR_CURR_NOK                                                    :Coroană norvegiană (NOK)
 STR_CURR_PLN                                                    :Zlot polonez (PLN)
-STR_CURR_ROL                                                    :Leu românesc (ROL)
+STR_CURR_RON                                                    :Leu românesc (RON)
 STR_CURR_RUR                                                    :Rublă rusească (RUR)
 STR_CURR_SIT                                                    :Tolar Sloven (SIT)
 STR_CURR_SEK                                                    :Coroană suedeză (SEK)
