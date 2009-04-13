@@ -148,8 +148,12 @@ static bool CMSAMine(TileIndex tile)
 	if ((GetIndustrySpec(ind->type)->life_type & INDUSTRYLIFE_EXTRACTIVE) == 0) return false;
 
 	for (uint i = 0; i < lengthof(ind->produced_cargo); i++) {
-		/* The industry extracts something non-liquid, i.e. no oil or plastic, so it is a mine */
-		if (ind->produced_cargo[i] != CT_INVALID && (GetCargo(ind->produced_cargo[i])->classes & CC_LIQUID) == 0) return true;
+		/* The industry extracts something non-liquid, i.e. no oil or plastic, so it is a mine.
+		 * Also the production of passengers and mail is ignored. */
+		if (ind->produced_cargo[i] != CT_INVALID &&
+				(GetCargo(ind->produced_cargo[i])->classes & (CC_LIQUID | CC_PASSENGERS | CC_MAIL)) == 0) {
+			return true;
+		}
 	}
 
 	return false;
@@ -922,6 +926,8 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 	}
 
 	StationID station_to_join = GB(p2, 16, 16);
+	bool reuse = (station_to_join != NEW_STATION);
+	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
 
 	if (distant_join && (!_settings_game.station.distant_join_stations || !IsValidStationID(station_to_join))) return CMD_ERROR;
@@ -975,7 +981,7 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 	if (st == NULL && distant_join) st = GetStation(station_to_join);
 
 	/* See if there is a deleted station close to us. */
-	if (st == NULL) st = GetClosestDeletedStation(tile_org);
+	if (st == NULL && reuse) st = GetClosestDeletedStation(tile_org);
 
 	if (st != NULL) {
 		/* Reuse an existing station. */
@@ -1403,6 +1409,8 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	bool build_over_road  = is_drive_through && IsNormalRoadTile(tile);
 	RoadTypes rts = (RoadTypes)GB(p2, 2, 2);
 	StationID station_to_join = GB(p2, 16, 16);
+	bool reuse = (station_to_join != NEW_STATION);
+	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
 	Owner tram_owner = _current_company;
 	Owner road_owner = _current_company;
@@ -1470,7 +1478,7 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (st == NULL && distant_join) st = GetStation(station_to_join);
 
 	/* Find a deleted station close to us */
-	if (st == NULL) st = GetClosestDeletedStation(tile);
+	if (st == NULL && reuse) st = GetClosestDeletedStation(tile);
 
 	/* give us a road stop in the list, and check if something went wrong */
 	if (!RoadStop::CanAllocateItem()) return_cmd_error(type ? STR_TOO_MANY_TRUCK_STOPS : STR_TOO_MANY_BUS_STOPS);
@@ -1855,6 +1863,8 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 {
 	bool airport_upgrade = true;
 	StationID station_to_join = GB(p2, 16, 16);
+	bool reuse = (station_to_join != NEW_STATION);
+	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
 
 	if (distant_join && (!_settings_game.station.distant_join_stations || !IsValidStationID(station_to_join))) return CMD_ERROR;
@@ -1919,7 +1929,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (st == NULL && distant_join) st = GetStation(station_to_join);
 
 	/* Find a deleted station close to us */
-	if (st == NULL) st = GetClosestDeletedStation(tile);
+	if (st == NULL && reuse) st = GetClosestDeletedStation(tile);
 
 	if (st != NULL) {
 		if (st->owner != _current_company) {
@@ -2175,6 +2185,8 @@ static const byte _dock_h_chk[4] = { 1, 2, 1, 2 };
 CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	StationID station_to_join = GB(p2, 16, 16);
+	bool reuse = (station_to_join != NEW_STATION);
+	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
 
 	if (distant_join && (!_settings_game.station.distant_join_stations || !IsValidStationID(station_to_join))) return CMD_ERROR;
@@ -2224,7 +2236,7 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	if (st == NULL && distant_join) st = GetStation(station_to_join);
 
 	/* Find a deleted station close to us */
-	if (st == NULL) st = GetClosestDeletedStation(tile);
+	if (st == NULL && reuse) st = GetClosestDeletedStation(tile);
 
 	if (st != NULL) {
 		if (st->owner != _current_company) {
@@ -2659,25 +2671,35 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
 
 	if (v->type == VEH_TRAIN) {
 		if (!v->current_order.ShouldStopAtStation(v, station_id)) return VETSB_CONTINUE;
-		if (IsRailwayStation(tile) && IsFrontEngine(v) &&
-				!IsCompatibleTrainStationTile(tile + TileOffsByDiagDir(DirToDiagDir(v->direction)), tile)) {
-			DiagDirection dir = DirToDiagDir(v->direction);
+		if (!IsRailwayStation(tile) || !IsFrontEngine(v)) return VETSB_CONTINUE;
 
-			x &= 0xF;
-			y &= 0xF;
+		int station_ahead;
+		int station_length;
+		int stop = GetTrainStopLocation(station_id, tile, v, &station_ahead, &station_length);
 
-			if (DiagDirToAxis(dir) != AXIS_X) Swap(x, y);
-			if (y == TILE_SIZE / 2) {
-				if (dir != DIAGDIR_SE && dir != DIAGDIR_SW) x = TILE_SIZE - 1 - x;
-				int stop = TILE_SIZE - (v->u.rail.cached_veh_length + 1) / 2;
-				if (x == stop) return VETSB_ENTERED_STATION | (VehicleEnterTileStatus)(station_id << VETS_STATION_ID_OFFSET); // enter station
-				if (x < stop) {
-					uint16 spd;
+		/* Stop whenever that amount of station ahead + the distance from the
+		 * begin of the platform to the stop location is longer than the length
+		 * of the platform. Station ahead 'includes' the current tile where the
+		 * vehicle is on, so we need to substract that. */
+		if (station_length <= stop + station_ahead - TILE_SIZE) return VETSB_CONTINUE;
 
-					v->vehstatus |= VS_TRAIN_SLOWING;
-					spd = max(0, (stop - x) * 20 - 15);
-					if (spd < v->cur_speed) v->cur_speed = spd;
-				}
+		DiagDirection dir = DirToDiagDir(v->direction);
+
+		x &= 0xF;
+		y &= 0xF;
+
+		if (DiagDirToAxis(dir) != AXIS_X) Swap(x, y);
+		if (y == TILE_SIZE / 2) {
+			if (dir != DIAGDIR_SE && dir != DIAGDIR_SW) x = TILE_SIZE - 1 - x;
+			stop &= TILE_SIZE - 1;
+
+			if (x == stop) return VETSB_ENTERED_STATION | (VehicleEnterTileStatus)(station_id << VETS_STATION_ID_OFFSET); // enter station
+			if (x < stop) {
+				uint16 spd;
+
+				v->vehstatus |= VS_TRAIN_SLOWING;
+				spd = max(0, (stop - x) * 20 - 15);
+				if (spd < v->cur_speed) v->cur_speed = spd;
 			}
 		}
 	} else if (v->type == VEH_ROAD) {

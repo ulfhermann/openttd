@@ -44,6 +44,7 @@ struct GUISettings {
 	bool   show_finances;                    ///< show finances at end of year
 	bool   sg_new_nonstop;                   ///< ttdpatch compatible nonstop handling read from pre v93 savegames
 	bool   new_nonstop;                      ///< ttdpatch compatible nonstop handling
+	uint8  stop_location;                    ///< what is the default stop location of trains?
 	bool   autoscroll;                       ///< scroll when moving mouse to the edge
 	byte   errmsg_duration;                  ///< duration of error message
 	bool   link_terraform_toolbar;           ///< display terraform toolbar when displaying rail, road, water and airport toolbars
@@ -113,7 +114,6 @@ struct NetworkSettings {
 	uint8  frame_freq;                                    ///< how often do we send commands to the clients
 	uint16 max_join_time;                                 ///< maximum amount of time, in game ticks, a client may take to join
 	bool   pause_on_join;                                 ///< pause the game when people join
-	char   server_bind_ip[NETWORK_HOSTNAME_LENGTH];       ///< IP address the server binds to
 	uint16 server_port;                                   ///< port the server listens on
 	char   server_name[NETWORK_NAME_LENGTH];              ///< name of the server
 	char   server_password[NETWORK_PASSWORD_LENGTH];      ///< passowrd for joining this server
