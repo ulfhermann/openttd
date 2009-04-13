@@ -52,12 +52,14 @@ public:
 	uint demand;
 };
 
-class Component {
+typedef uint16 colour;
+
+class LinkGraphComponent {
 	typedef std::vector<Node> NodeVector;
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	Component(CargoID cargo, colour c = 0);
+	LinkGraphComponent(CargoID cargo, colour c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -69,7 +71,7 @@ public:
 	CargoID GetCargo() const {return cargo;}
 	const LinkGraphSettings & GetSettings() const {return settings;}
 private:
-	friend const SaveLoad * GetComponentDesc();
+	friend const SaveLoad * GetLinkGraphComponentDesc();
 	LinkGraphSettings settings;
 	CargoID cargo;
 	uint num_nodes;
@@ -81,7 +83,7 @@ private:
 
 class ComponentHandler {
 public:
-	virtual void Run(Component * component) = 0;
+	virtual void Run(LinkGraphComponent * component) = 0;
 	virtual ~ComponentHandler() {}
 };
 
@@ -89,15 +91,15 @@ class LinkGraphJob {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
 	class Exception {};
-	LinkGraphJob(Component * c);
-	LinkGraphJob(Component * c, Date join);
+	LinkGraphJob(LinkGraphComponent * c);
+	LinkGraphJob(LinkGraphComponent * c, Date join);
 
 	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
 	void Run();
 	void SpawnThread(CargoID cargo);
 	void Join() {if (thread != NULL) thread->Join();}
 	Date GetJoinDate() {return join_date;}
-	Component * GetComponent() {return component;}
+	LinkGraphComponent * GetComponent() {return component;}
 	~LinkGraphJob();
 private:
 	/**
@@ -106,7 +108,7 @@ private:
 	LinkGraphJob(const LinkGraphJob & other) {NOT_REACHED();}
 	ThreadObject * thread;
 	Date join_date;
-	Component * component;
+	LinkGraphComponent * component;
 	HandlerList handlers;
 };
 
@@ -124,14 +126,13 @@ public:
 	void Join();
 	uint GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}
-	void AddComponent(Component * component, uint join);
+	void AddComponent(LinkGraphComponent * component, uint join);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;
 
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
-	void StartJob(Component * component);
 	colour current_colour;
 	StationID current_station;
 	CargoID cargo;
@@ -147,7 +148,7 @@ public:
 	Path * GetParent() {return parent;}
 	Number GetCapacity() const {return capacity;}
 	void Fork(Path * base, Number cap, Number dist);
-	void AddFlow(Number f, Component * graph);
+	void AddFlow(Number f, LinkGraphComponent * graph);
 	Number GetFlow() {return flow;}
 	uint GetNumChildren() {return num_children;}
 	void UnFork();

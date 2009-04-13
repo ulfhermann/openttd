@@ -14,11 +14,11 @@ class FlowMapper : public ComponentHandler {
 	typedef std::vector<Number> ScaleFactorVector;
 public:
 	FlowMapper() : component(NULL) {}
-	void Run(Component * c);
+	void Run(LinkGraphComponent * c);
 private:
 	void CalcScaleFactors();
 	ScaleFactorVector scale_factors;
-	Component * component;
+	LinkGraphComponent * component;
 };
 
 #endif /* FLOWMAPPER_H_ */
