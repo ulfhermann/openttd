@@ -80,10 +80,10 @@ static void DoSave_LGRP(void *)
 {
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
-		_num_components = graph.GetNumLinkGraphComponents();
+		_num_components = graph.GetNumComponents();
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
-		LinkGraphComponentList & comps = graph.GetLinkGraphComponents();
-		for (LinkGraphComponentList::iterator i = comps.begin(); i != comps.end(); ++i) {
+		ComponentList & comps = graph.GetComponents();
+		for (ComponentList::iterator i = comps.begin(); i != comps.end(); ++i) {
 			LinkGraphComponent * comp = *i;
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			SaveLoad_LinkGraphComponent(comp);
@@ -101,7 +101,7 @@ static void Load_LGRP()
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			comp->SetSize(comp->GetSize());
 			SaveLoad_LinkGraphComponent(comp);
-			graph.AddLinkGraphComponent(comp);
+			graph.AddComponent(comp);
 		}
 	}
 }

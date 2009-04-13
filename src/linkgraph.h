@@ -63,7 +63,7 @@ private:
 
 };
 
-typedef std::list<LinkGraphComponent *> LinkGraphComponentList;
+typedef std::list<LinkGraphComponent *> ComponentList;
 
 class LinkGraph {
 public:
@@ -71,13 +71,13 @@ public:
 	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
-	void NextLinkGraphComponent();
+	void NextComponent();
 	void InitColours();
 
 	void Join();
-	uint GetNumLinkGraphComponents() const {return components.size();}
-	LinkGraphComponentList & GetLinkGraphComponents() {return components;}
-	void AddLinkGraphComponent(LinkGraphComponent * component);
+	uint GetNumComponents() const {return components.size();}
+	ComponentList & GetComponents() {return components;}
+	void AddComponent(LinkGraphComponent * component);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;
@@ -88,7 +88,7 @@ private:
 	StationID current_station;
 	CargoID cargo;
 	colour station_colours[Station_POOL_MAX_BLOCKS];
-	LinkGraphComponentList components;
+	ComponentList components;
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
