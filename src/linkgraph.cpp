@@ -20,7 +20,7 @@ LinkGraph _link_graphs[NUM_CARGO];
 
 typedef std::map<StationID, NodeID> ReverseNodeIndex;
 
-void LinkGraph::NextLinkGraphComponent()
+void LinkGraph::NextComponent()
 {
 	StationID last_station = current_station;
 	ReverseNodeIndex index;
@@ -98,7 +98,7 @@ void OnTick_LinkGraph()
 			if ((_date + cargo) % _settings_game.linkgraph.recalc_interval == 0) {
 				LinkGraph & graph = _link_graphs[cargo];
 				if (spawn) {
-					graph.NextLinkGraphComponent();
+					graph.NextComponent();
 				} else {
 					graph.Join();
 				}
@@ -171,7 +171,7 @@ void LinkGraph::Join() {
 	jobs.pop_front();
 }
 
-void LinkGraph::AddLinkGraphComponent(LinkGraphComponent * component, uint join) {
+void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 	 colour component_colour = component->GetColour();
 	 for(NodeID i = 0; i < component->GetSize(); ++i) {
 		 station_colours[component->GetNode(i).station] = component_colour;

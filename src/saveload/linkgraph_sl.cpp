@@ -137,7 +137,7 @@ static void Load_LGRP()
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			comp->SetSize(comp->GetSize());
 			SaveLoad_LinkGraphComponent(comp);
-			graph.AddLinkGraphComponent(comp, _join_date);
+			graph.AddComponent(comp, _join_date);
 		}
 	}
 }

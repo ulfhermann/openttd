@@ -107,13 +107,13 @@ public:
 	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
-	void NextLinkGraphComponent();
+	void NextComponent();
 	void InitColours();
 
 	void Join();
 	uint GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}
-	void AddLinkGraphComponent(LinkGraphComponent * component, uint join);
+	void AddComponent(LinkGraphComponent * component, uint join);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;
