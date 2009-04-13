@@ -37,13 +37,13 @@ public:
 
 typedef uint16 colour;
 
-class Component {
+class LinkGraphComponent {
 	typedef std::vector<Node> NodeVector;
 
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	Component(CargoID cargo, colour c = 0);
+	LinkGraphComponent(CargoID cargo, colour c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -54,7 +54,7 @@ public:
 	colour GetColour() const {return component_colour;}
 	CargoID GetCargo() const {return cargo;}
 private:
-	friend const SaveLoad * GetComponentDesc();
+	friend const SaveLoad * GetLinkGraphComponentDesc();
 	CargoID cargo;
 	uint num_nodes;
 	colour component_colour;
@@ -63,7 +63,7 @@ private:
 
 };
 
-typedef std::list<Component *> ComponentList;
+typedef std::list<LinkGraphComponent *> LinkGraphComponentList;
 
 class LinkGraph {
 public:
@@ -71,13 +71,13 @@ public:
 	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
-	void NextComponent();
+	void NextLinkGraphComponent();
 	void InitColours();
 
 	void Join();
-	uint GetNumComponents() const {return components.size();}
-	ComponentList & GetComponents() {return components;}
-	void AddComponent(Component * component);
+	uint GetNumLinkGraphComponents() const {return components.size();}
+	LinkGraphComponentList & GetLinkGraphComponents() {return components;}
+	void AddLinkGraphComponent(LinkGraphComponent * component);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;
@@ -88,7 +88,7 @@ private:
 	StationID current_station;
 	CargoID cargo;
 	colour station_colours[Station_POOL_MAX_BLOCKS];
-	ComponentList components;
+	LinkGraphComponentList components;
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];

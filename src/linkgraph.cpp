@@ -19,13 +19,13 @@ LinkGraph _link_graphs[NUM_CARGO];
 
 typedef std::map<StationID, NodeID> ReverseNodeIndex;
 
-void LinkGraph::NextComponent()
+void LinkGraph::NextLinkGraphComponent()
 {
 	StationID last_station = current_station;
 	ReverseNodeIndex index;
 	NodeID node = 0;
 	std::queue<Station *> search_queue;
-	Component * component = NULL;
+	LinkGraphComponent * component = NULL;
 	while (true) {
 		// find first station of next component
 		if (station_colours[current_station] == 0 && IsValidStationID(current_station)) {
@@ -37,7 +37,7 @@ void LinkGraph::NextComponent()
 				}
 				search_queue.push(station);
 				station_colours[current_station] = current_colour;
-				component = new Component(cargo, current_colour);
+				component = new LinkGraphComponent(cargo, current_colour);
 				GoodsEntry & good = station->goods[cargo];
 				node = component->AddNode(current_station, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[current_station++] = node;
@@ -95,7 +95,7 @@ void OnTick_LinkGraph()
 			if ((_date + cargo) % _settings_game.linkgraph.recalc_interval == 0) {
 				LinkGraph & graph = _link_graphs[cargo];
 				if (spawn) {
-					graph.NextComponent();
+					graph.NextLinkGraphComponent();
 				} else {
 					graph.Join();
 				}
@@ -114,7 +114,7 @@ LinkGraph::LinkGraph()  : current_colour(1), current_station(0), cargo(CT_INVALI
 	InitColours();
 }
 
-uint Component::AddNode(StationID st, uint supply, uint demand) {
+uint LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
 	nodes.push_back(Node(st, supply, demand));
 	for(NodeID i = 0; i < num_nodes; ++i) {
 		edges[i].push_back(Edge());
@@ -123,11 +123,11 @@ uint Component::AddNode(StationID st, uint supply, uint demand) {
 	return num_nodes - 1;
 }
 
-void Component::AddEdge(NodeID from, NodeID to, uint capacity) {
+void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
 	edges[from][to].capacity = capacity;
 }
 
-void Component::CalculateDistances() {
+void LinkGraphComponent::CalculateDistances() {
 	for(NodeID i = 0; i < num_nodes; ++i) {
 		for(NodeID j = 0; j < i; ++j) {
 			Station * st1 = GetStation(nodes[i].station);
@@ -139,13 +139,13 @@ void Component::CalculateDistances() {
 	}
 }
 
-void Component::SetSize(uint size) {
+void LinkGraphComponent::SetSize(uint size) {
 	num_nodes = size;
 	nodes.resize(num_nodes);
 	edges.resize(num_nodes, std::vector<Edge>(num_nodes));
 }
 
-Component::Component(CargoID car, colour col) :
+LinkGraphComponent::LinkGraphComponent(CargoID car, colour col) :
 	cargo(car),
 	num_nodes(0),
 	component_colour(col)
@@ -156,14 +156,14 @@ void LinkGraph::Join() {
 	if (components.empty()) {
 		return;
 	}
-	Component * comp = components.front();
+	LinkGraphComponent * comp = components.front();
 
 	components.pop_front();
 
 	delete comp;
 }
 
-void LinkGraph::AddComponent(Component * component) {
+void LinkGraph::AddLinkGraphComponent(LinkGraphComponent * component) {
 	 components.push_back(component);
 	 colour component_colour = component->GetColour();
 	 for(NodeID i = 0; i < component->GetSize(); ++i) {
@@ -172,7 +172,7 @@ void LinkGraph::AddComponent(Component * component) {
 }
 
 void LinkGraph::Clear() {
-	for(ComponentList::iterator i = components.begin(); i != components.end(); ++i) {
+	for(LinkGraphComponentList::iterator i = components.begin(); i != components.end(); ++i) {
 		delete *i;
 	}
 	components.clear();
