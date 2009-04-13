@@ -342,7 +342,6 @@ STR_SORT_BY_LENGTH                                              :Longitud
 STR_SORT_BY_LIFE_TIME                                           :Tiempo de vida remanente
 STR_SORT_BY_FACILITY                                            :Tipo de estación
 STR_SORT_BY_WAITING                                             :Esperando valor de la carga
-STR_SORT_BY_RATING_MAX                                          :Clasificación de la carga
 STR_ENGINE_SORT_ENGINE_ID                                       :ID Locomotora (ordenación clásia)
 STR_ENGINE_SORT_COST                                            :Coste
 STR_ENGINE_SORT_POWER                                           :Potencia
@@ -819,7 +818,7 @@ STR_CURR_ITL                                                    :Lira Italiana (
 STR_CURR_NLG                                                    :Florín Holandés (NLG)
 STR_CURR_NOK                                                    :Corona Noruega(NOK)
 STR_CURR_PLN                                                    :Zloty Polaco (PLN)
-STR_CURR_ROL                                                    :Leu Rumano (ROL)
+STR_CURR_RON                                                    :Leu Rumano (RON)
 STR_CURR_RUR                                                    :Rublo Ruso (RUR)
 STR_CURR_SIT                                                    :Tolar Eslovenio (SIT)
 STR_CURR_SEK                                                    :Corona Sueca (SEK)

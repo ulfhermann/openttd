@@ -344,7 +344,6 @@ STR_SORT_BY_LENGTH                                              :Garuma
 STR_SORT_BY_LIFE_TIME                                           :Atlikušā ekspluatācijas laika
 STR_SORT_BY_FACILITY                                            :Stacijas veida
 STR_SORT_BY_WAITING                                             :Gaidošās kravas vērtības
-STR_SORT_BY_RATING_MAX                                          :Kravas reitinga
 STR_ENGINE_SORT_ENGINE_ID                                       :DzinējaID (klasiskais veids)
 STR_ENGINE_SORT_COST                                            :Izmaksas
 STR_ENGINE_SORT_POWER                                           :Jauda
@@ -820,7 +819,7 @@ STR_CURR_ITL                                                    :Itālijas liras
 STR_CURR_NLG                                                    :Nīderlandes guldeņi(NLG)
 STR_CURR_NOK                                                    :Norvēģijas kronas (NOK)
 STR_CURR_PLN                                                    :Polijas zloti (PLN)
-STR_CURR_ROL                                                    :Rumānijas lejas (ROL)
+STR_CURR_RON                                                    :Rumānijas lejas (RON)
 STR_CURR_RUR                                                    :Krievijas rubļii (RUR)
 STR_CURR_SIT                                                    :Slovēnijas tolārs (SIT)
 STR_CURR_SEK                                                    :Zviedrijas kronas (SEK)

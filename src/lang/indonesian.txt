@@ -342,7 +342,6 @@ STR_SORT_BY_LENGTH                                              :Panjang
 STR_SORT_BY_LIFE_TIME                                           :Sisa masa pakai
 STR_SORT_BY_FACILITY                                            :Tipe Stasiun
 STR_SORT_BY_WAITING                                             :Nilai tunggu kargo
-STR_SORT_BY_RATING_MAX                                          :Rating Cargo
 STR_ENGINE_SORT_ENGINE_ID                                       :IDMesin (klasik)
 STR_ENGINE_SORT_COST                                            :Biaya
 STR_ENGINE_SORT_POWER                                           :Daya
@@ -819,7 +818,7 @@ STR_CURR_ITL                                                    :Lira Italian (I
 STR_CURR_NLG                                                    :Dutch Guilder (NLG)
 STR_CURR_NOK                                                    :Krone Norwegia (NOK)
 STR_CURR_PLN                                                    :Zloty Polandia (PLN)
-STR_CURR_ROL                                                    :Leu Romania (ROL)
+STR_CURR_RON                                                    :Leu Romania (RON)
 STR_CURR_RUR                                                    :Rubles Rusia (RUR)
 STR_CURR_SIT                                                    :Tolar Slovenia (SIT)
 STR_CURR_SEK                                                    :Krona Swedia (SEK)
