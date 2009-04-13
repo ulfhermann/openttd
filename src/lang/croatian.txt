@@ -407,7 +407,6 @@ STR_SORT_BY_LENGTH                                              :Dužina
 STR_SORT_BY_LIFE_TIME                                           :Preostali životni vijek
 STR_SORT_BY_FACILITY                                            :Vrsta postaje
 STR_SORT_BY_WAITING                                             :Vrijednost tereta koji čeka
-STR_SORT_BY_RATING_MAX                                          :Ocjena tereta
 STR_ENGINE_SORT_ENGINE_ID                                       :MotorID(standardno sortiranje)
 STR_ENGINE_SORT_COST                                            :Cijena
 STR_ENGINE_SORT_POWER                                           :Snaga
@@ -884,7 +883,7 @@ STR_CURR_ITL                                                    :Talijanska lira
 STR_CURR_NLG                                                    :Nizozemski gulden (NLG)
 STR_CURR_NOK                                                    :Norveška kruna (NOK)
 STR_CURR_PLN                                                    :Poljski zloti (PLN)
-STR_CURR_ROL                                                    :Rumunjski lev (ROL)
+STR_CURR_RON                                                    :Rumunjski lev (RON)
 STR_CURR_RUR                                                    :Ruske rublje (RUR)
 STR_CURR_SIT                                                    :Slovenski tolar (SIT)
 STR_CURR_SEK                                                    :Švedska kruna (SEK)
