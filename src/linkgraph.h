@@ -43,6 +43,7 @@ public:
 	uint distance;
 	uint capacity;
 	uint demand;
+	uint flow;
 };
 
 typedef uint16 colour;

@@ -64,6 +64,7 @@ private:
 		void Dijkstra(NodeID from, PathVector & paths);
 	void IncreaseL(Path * path, Number f_cq);
 	void Karakostas();
+	void SimpleSolver();
 	void CleanupPaths(PathVector & paths);
 	void HandleInstability();
 

@@ -262,6 +262,53 @@ void MultiCommodityFlow::Karakostas() {
 	}
 }
 
+void MultiCommodityFlow::SimpleSolver() {
+	typedef std::list<std::pair<Edge *, StationID> > EdgeList;
+
+	EdgeList unsatisfied_demands;
+	PathVector paths;
+	uint demand_routed = 0;
+	uint old_routed = 0;
+	uint size = graph->GetSize();
+	uint accuracy = graph->GetSettings().mcf_accuracy;
+	do {
+		old_routed = demand_routed;
+		for (NodeID source = 0; source < size; ++source) {
+			for (NodeID dest = 0; dest < size; ++dest) {
+				Edge & edge = graph->GetEdge(source, dest);
+				if (edge.demand - edge.flow > 0) {
+					unsatisfied_demands.push_back(std::make_pair(&edge, dest));
+				}
+			}
+
+			Dijkstra<DistanceAnnotation>(source, paths);
+			uint max_flow = UINT_MAX;
+			for (EdgeList::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end(); ++i) {
+				Path * path = paths[i->second];
+				if (path->GetCapacity() > 0) {
+					max_flow = min(path->GetCapacity(), max_flow);
+				}
+			}
+
+			max_flow /= accuracy;
+			if (max_flow == 0) max_flow = 1;
+			if (accuracy > 1) --accuracy;
+
+			for (EdgeList::iterator i = unsatisfied_demands.begin(); i != unsatisfied_demands.end();) {
+				Edge * edge = i->first;
+				Path * path = paths[i->second];
+				uint flow = min(edge->demand - edge->flow, max_flow);
+				edge->flow += flow;
+				demand_routed += flow;
+				path->AddFlow(flow, graph);
+				unsatisfied_demands.erase(i++);
+			}
+
+			CleanupPaths(paths);
+		}
+	} while (demand_routed > old_routed);
+}
+
 /**
  * avoid accidentally deleting different paths of the same capacity/distance in a set.
  * When the annotation is the same the pointers themselves are compared, so there are no equal ranges.
