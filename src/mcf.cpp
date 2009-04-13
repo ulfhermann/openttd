@@ -282,5 +282,5 @@ bool CapacityAnnotation::comp::operator()(const CapacityAnnotation * x, const Ca
 }
 
 bool DistanceAnnotation::comp::operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const {
-	return !greater(x->GetAnnotation(), y->GetAnnotation(), x, y);
+	return x != y && !greater(x->GetAnnotation(), y->GetAnnotation(), x, y);
 }
