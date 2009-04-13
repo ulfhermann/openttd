@@ -410,7 +410,6 @@ STR_SORT_BY_LENGTH                                              :délky
 STR_SORT_BY_LIFE_TIME                                           :zbývající životnosti
 STR_SORT_BY_FACILITY                                            :druhu stanice
 STR_SORT_BY_WAITING                                             :množství čekajícího nákladu
-STR_SORT_BY_RATING_MAX                                          :hodnocení přepravy
 STR_ENGINE_SORT_ENGINE_ID                                       :ID vozu (klasické pořadí)
 STR_ENGINE_SORT_COST                                            :ceny
 STR_ENGINE_SORT_POWER                                           :výkonu
@@ -887,7 +886,7 @@ STR_CURR_ITL                                                    :Italská lira (
 STR_CURR_NLG                                                    :Holandský gulden (NLG)
 STR_CURR_NOK                                                    :Norská koruna (NOK)
 STR_CURR_PLN                                                    :Polský zlotý (PLN)
-STR_CURR_ROL                                                    :Rumunský lei (ROL)
+STR_CURR_RON                                                    :Rumunský lei (RON)
 STR_CURR_RUR                                                    :Ruský rubl (RUR)
 STR_CURR_SIT                                                    :Slovinský tolar (SIT)
 STR_CURR_SEK                                                    :Švédská koruna (SEK)
@@ -1554,7 +1553,7 @@ STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Hra pozastavena
 STR_NETWORK_CLIENT_LEAVING                                      :odpojování
 STR_NETWORK_CLIENT_JOINED                                       :*** {STRING} jde hrát
 STR_NETWORK_CLIENT_COMPANY_JOIN                                 :*** {STRING} se přidává ke společnosti č. {2:NUM}
-STR_NETWORK_CLIENT_COMPANY_SPECTATE                             :*** {STRING} má nové pozorovatele
+STR_NETWORK_CLIENT_COMPANY_SPECTATE                             :*** {STRING} se stává pozorovatelem
 STR_NETWORK_CLIENT_COMPANY_NEW                                  :*** {STRING} zakládá novou společnost (č. {2:NUM})
 STR_NETWORK_CLIENT_LEFT                                         :*** {STRING} opouští hru ({2:STRING})
 STR_NETWORK_NAME_CHANGE                                         :*** {STRING} si mění jméno na {STRING}

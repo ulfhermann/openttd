@@ -80,6 +80,7 @@ static const char *_list_group_names[] = {
 	"bans",
 	"newgrf",
 	"servers",
+	"server_bind_addresses",
 	NULL
 };
 
@@ -553,7 +554,7 @@ static void ini_save_settings(IniFile *ini, const SettingDesc *sd, const char *g
 			uint32 i = (uint32)ReadValue(ptr, sld->conv);
 
 			switch (sdb->cmd) {
-			case SDT_BOOLX:      strcpy(buf, (i != 0) ? "true" : "false"); break;
+			case SDT_BOOLX:      strecpy(buf, (i != 0) ? "true" : "false", lastof(buf)); break;
 			case SDT_NUMX:       seprintf(buf, lastof(buf), IsSignedVarMemType(sld->conv) ? "%d" : "%u", i); break;
 			case SDT_ONEOFMANY:  make_oneofmany(buf, lastof(buf), sdb->many, i); break;
 			case SDT_MANYOFMANY: make_manyofmany(buf, lastof(buf), sdb->many, i); break;
@@ -563,9 +564,9 @@ static void ini_save_settings(IniFile *ini, const SettingDesc *sd, const char *g
 
 		case SDT_STRING:
 			switch (GetVarMemType(sld->conv)) {
-			case SLE_VAR_STRB: strcpy(buf, (char*)ptr); break;
+			case SLE_VAR_STRB: strecpy(buf, (char*)ptr, lastof(buf)); break;
 			case SLE_VAR_STRBQ:seprintf(buf, lastof(buf), "\"%s\"", (char*)ptr); break;
-			case SLE_VAR_STR:  strcpy(buf, *(char**)ptr); break;
+			case SLE_VAR_STR:  strecpy(buf, *(char**)ptr, lastof(buf)); break;
 			case SLE_VAR_STRQ:
 				if (*(char**)ptr == NULL) {
 					buf[0] = '\0';
@@ -1277,6 +1278,7 @@ static void HandleSettingDescs(IniFile *ini, SettingDescProc *proc, SettingDescP
 	proc(ini, _currency_settings,"currency", &_custom_currency);
 
 #ifdef ENABLE_NETWORK
+	proc_list(ini, "server_bind_addresses", &_network_bind_list);
 	proc_list(ini, "servers", &_network_host_list);
 	proc_list(ini, "bans",    &_network_ban_list);
 #endif /* ENABLE_NETWORK */

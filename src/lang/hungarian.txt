@@ -376,7 +376,6 @@ STR_SORT_BY_LENGTH                                              :Hossz
 STR_SORT_BY_LIFE_TIME                                           :Élettartamból hátralévő idő
 STR_SORT_BY_FACILITY                                            :Állomás típus
 STR_SORT_BY_WAITING                                             :Várakozó rakomány értéke
-STR_SORT_BY_RATING_MAX                                          :Várakozó rakomány
 STR_ENGINE_SORT_ENGINE_ID                                       :JárműID
 STR_ENGINE_SORT_COST                                            :Ár
 STR_ENGINE_SORT_POWER                                           :Telj.
@@ -853,7 +852,7 @@ STR_CURR_ITL                                                    :Olasz Líra (IT
 STR_CURR_NLG                                                    :Holland Guilder (NLG)
 STR_CURR_NOK                                                    :Norvég Korona (NOK)
 STR_CURR_PLN                                                    :Legyel Zlotyi (PLN)
-STR_CURR_ROL                                                    :Román Lej (ROL)
+STR_CURR_RON                                                    :Román Lej (RON)
 STR_CURR_RUR                                                    :Orosz Rubel (RUR)
 STR_CURR_SIT                                                    :Szlovén Tolár (SIT)
 STR_CURR_SEK                                                    :Svéd Korona (SEK)
@@ -972,6 +971,10 @@ STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Mindig 
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Jelzők a menetirány szerinti oldalon legyenek: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Pénzügyi összesítés minden év végén: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Minden új utasítás alapból 'non-stop': {ORANGE}{STRING}
+STR_CONFIG_SETTING_STOP_LOCATION                                :{LTBLUE}A vonatok a platformok {ORANGE}{STRING}{LTBLUE} állnak meg
+STR_CONFIG_SETTING_STOP_LOCATION_NEAR_END                       :elején
+STR_CONFIG_SETTING_STOP_LOCATION_MIDDLE                         :közepén
+STR_CONFIG_SETTING_STOP_LOCATION_FAR_END                        :végén
 STR_CONFIG_SETTING_ROADVEH_QUEUE                                :{LTBLUE}Közúti járművek sorbanállása: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Ablakmozgatás, ha az egér a képernyő szélén van: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Önkormányzatok lefizethetősége: {ORANGE}{STRING}
