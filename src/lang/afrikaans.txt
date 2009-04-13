@@ -343,7 +343,6 @@ STR_SORT_BY_LENGTH                                              :Lengte
 STR_SORT_BY_LIFE_TIME                                           :Leeftyd oor
 STR_SORT_BY_FACILITY                                            :Stasie tipe
 STR_SORT_BY_WAITING                                             :Wagtend vrag waarde
-STR_SORT_BY_RATING_MAX                                          :Vrag gradering
 STR_ENGINE_SORT_ENGINE_ID                                       :EngineID (klassieke sorteer)
 STR_ENGINE_SORT_COST                                            :Koste
 STR_ENGINE_SORT_POWER                                           :Krag
@@ -807,7 +806,7 @@ STR_CURR_ITL                                                    :Italian Lira (I
 STR_CURR_NLG                                                    :Dutch Guilder (NLG)
 STR_CURR_NOK                                                    :Norwegian Krone (NOK)
 STR_CURR_PLN                                                    :Polish Zloty (PLN)
-STR_CURR_ROL                                                    :Romanian Leu (ROL)
+STR_CURR_RON                                                    :Romanian Leu (RON)
 STR_CURR_RUR                                                    :Russian Rubles (RUR)
 STR_CURR_SIT                                                    :Slovenian Tolar (SIT)
 STR_CURR_SEK                                                    :Swedish Krona (SEK)
