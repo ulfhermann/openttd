@@ -16,7 +16,7 @@
 
 typedef std::list<NodeID> NodeList;
 
-void DemandCalculator::PrintDemandMatrix(Component * graph) {
+void DemandCalculator::PrintDemandMatrix(LinkGraphComponent * graph) {
 	for (NodeID from = 0; from < graph->GetSize(); ++from) {
 		std::cout << graph->GetNode(from).station << "\t";
 		for(NodeID to = 0; to < graph->GetSize(); ++to) {
@@ -30,7 +30,7 @@ void DemandCalculator::PrintDemandMatrix(Component * graph) {
 	}
 }
 
-void DemandCalculator::CalcSymmetric(Component * graph) {
+void DemandCalculator::CalcSymmetric(LinkGraphComponent * graph) {
 	NodeList nodes;
 	uint supply_sum = 0;
 	for(NodeID node = 0; node < graph->GetSize(); node++) {
@@ -90,7 +90,7 @@ void DemandCalculator::CalcSymmetric(Component * graph) {
 }
 
 
-void DemandCalculator::CalcAntiSymmetric(Component * graph) {
+void DemandCalculator::CalcAntiSymmetric(LinkGraphComponent * graph) {
 	NodeList supplies;
 	NodeList demands;
 	uint supply_sum = 0;
@@ -141,7 +141,7 @@ void DemandCalculator::CalcAntiSymmetric(Component * graph) {
 	}
 }
 
-void DemandCalculator::Run(Component * graph) {
+void DemandCalculator::Run(LinkGraphComponent * graph) {
 	CargoID cargo = graph->GetCargo();
 	const LinkGraphSettings & settings = graph->GetSettings();
 	DistributionType type = settings.demand_default;

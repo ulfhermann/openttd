@@ -14,7 +14,7 @@ MultiCommodityFlow::MultiCommodityFlow() :
 	epsilon(0.5), graph(NULL), delta(0), k(0), m(0)
 {}
 
-void MultiCommodityFlow::Run(Component * g) {
+void MultiCommodityFlow::Run(LinkGraphComponent * g) {
 	assert(g->GetSettings().mcf_accuracy > 0);
 	epsilon = 1.0 / (Number)g->GetSettings().mcf_accuracy;
 	graph = g;
