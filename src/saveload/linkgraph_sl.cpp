@@ -67,11 +67,10 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 }
 
 static void SaveLoad_LinkGraphComponent(LinkGraphComponent * comp) {
-	for (uint from = 0; from < comp->GetSize(); ++from) {
+	for (NodeID from = 0; from < comp->GetSize(); ++from) {
 		SlObject(&comp->GetNode(from), GetLinkGraphDesc(LGRP_NODE));
-		for (uint to = 0; to < from; ++to) {
+		for (NodeID to = 0; to < comp->GetSize(); ++to) {
 			SlObject(&comp->GetEdge(from, to), GetLinkGraphDesc(LGRP_EDGE));
-			SlObject(&comp->GetEdge(to, from), GetLinkGraphDesc(LGRP_EDGE));
 		}
 	}
 }
