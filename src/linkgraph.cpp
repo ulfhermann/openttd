@@ -291,7 +291,6 @@ void Path::Fork(Path * base, uint cap, uint dist) {
 }
 
 uint Path::AddFlow(uint f, LinkGraphComponent * graph) {
-	graph->GetNode(node).paths.insert(this);
 	if (parent != NULL) {
 		Edge & edge = graph->GetEdge(parent->node, node);
 		assert(edge.capacity >= edge.flow);
@@ -299,7 +298,10 @@ uint Path::AddFlow(uint f, LinkGraphComponent * graph) {
 		f = parent->AddFlow(f, graph);
 		edge.flow += f;
 	}
-	flow +=f;
+	flow += f;
+	if (f > 0) {
+		graph->GetNode(node).paths.insert(this);
+	}
 	return f;
 }
 
