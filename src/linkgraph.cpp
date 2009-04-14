@@ -119,7 +119,7 @@ LinkGraph::LinkGraph()  : current_colour(1), current_station(0), cargo(CT_INVALI
 	InitColours();
 }
 
-uint LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
+NodeID LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
 	nodes.push_back(Node(st, supply, demand));
 	for(NodeID i = 0; i < num_nodes; ++i) {
 		edges[i].push_back(Edge());
