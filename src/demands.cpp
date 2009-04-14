@@ -61,7 +61,9 @@ void DemandCalculator::CalcSymmetric(LinkGraphComponent * graph) {
 			uint demand = from.undelivered_supply * to.undelivered_supply * (max_distance - forward.distance) / max_distance / supply_sum + 1;
 
 			forward.demand += demand;
+			forward.unsatisfied_demand += demand;
 			backward.demand += demand;
+			backward.unsatisfied_demand += demand;
 
 			assert(demand <= from.undelivered_supply);
 			assert(demand <= to.undelivered_supply);
@@ -129,6 +131,7 @@ void DemandCalculator::CalcAntiSymmetric(LinkGraphComponent * graph) {
 			Edge & edge = graph->GetEdge(node1, node2);
 			uint demand = from.undelivered_supply * demand_per_node * (max_distance - edge.distance) / max_distance / supply_sum + 1;
 			edge.demand += demand;
+			edge.unsatisfied_demand += demand;
 			assert(demand <= from.undelivered_supply);
 			from.undelivered_supply -= demand;
 			if (from.undelivered_supply == 0) {
