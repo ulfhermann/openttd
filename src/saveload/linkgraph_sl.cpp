@@ -82,8 +82,9 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 	};
 
 	static const SaveLoad _edge_desc[] = {
-		 SLE_CONDVAR(Edge, distance, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Edge, capacity, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Edge, distance,  SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Edge, capacity,  SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Edge, next_edge, SLE_UINT,         MCF_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 

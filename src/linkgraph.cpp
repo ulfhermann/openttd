@@ -16,7 +16,6 @@
 #include "mcf.h"
 #include "core/bitmath_func.hpp"
 #include "debug.h"
-#include <limits>
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -130,7 +129,11 @@ uint LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
 }
 
 void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
-	edges[from][to].capacity = capacity;
+	Edge & edge = edges[from][to];
+	Edge & first = edges[from][from];
+	edge.capacity = capacity;
+	edge.next_edge = first.next_edge;
+	first.next_edge = to;
 }
 
 void LinkGraphComponent::CalculateDistances() {
@@ -210,7 +213,7 @@ void RunLinkGraphJob(void * j) {
 	job->Run();
 }
 
-void Path::Fork(Path * base, Number cap, Number dist) {
+void Path::Fork(Path * base, uint cap, uint dist) {
 	capacity = min(base->capacity, cap);
 	distance = base->distance + dist;
 	assert(distance > 0);
@@ -223,12 +226,16 @@ void Path::Fork(Path * base, Number cap, Number dist) {
 	}
 }
 
-void Path::AddFlow(Number f, LinkGraphComponent * graph) {
-	flow +=f;
+uint Path::AddFlow(uint f, LinkGraphComponent * graph) {
 	graph->GetNode(node).paths.insert(this);
 	if (parent != NULL) {
-		parent->AddFlow(f, graph);
+		Edge & edge = graph->GetEdge(parent->node, node);
+		f = min(f, edge.capacity - edge.flow);
+		f = parent->AddFlow(f, graph);
+		edge.flow += f;
 	}
+	flow +=f;
+	return f;
 }
 
 void Path::UnFork() {
@@ -239,8 +246,8 @@ void Path::UnFork() {
 }
 
 Path::Path(NodeID n, bool source)  :
-	distance(source ? 0 : std::numeric_limits<Number>::max()),
-	capacity(source ? std::numeric_limits<Number>::max() : 0),
+	distance(source ? 0 : UINT_MAX),
+	capacity(source ? UINT_MAX : 0),
 	flow(0), node(n), num_children(0), parent(NULL)
 {}
 
