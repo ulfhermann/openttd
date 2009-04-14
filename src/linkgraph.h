@@ -22,7 +22,6 @@ class Path;
 
 typedef uint16 colour;
 typedef uint NodeID;
-typedef double Number;
 typedef std::set<Path *> PathSet;
 typedef std::map<StationID, Number> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
@@ -46,10 +45,13 @@ private:
 
 class Edge {
 public:
-	Edge() : distance(0), capacity(0), demand(0) {}
+	Edge() : distance(0), capacity(0), demand(0), unsatisfied_demand(0), flow(0), next_edge(Node::INVALID) {}
 	uint distance;
 	uint capacity;
 	uint demand;
+	uint unsatisfied_demand;
+	uint flow;
+	NodeID next_edge;
 };
 
 typedef uint16 colour;
@@ -70,6 +72,7 @@ public:
 	colour GetColour() const {return component_colour;}
 	CargoID GetCargo() const {return cargo;}
 	const LinkGraphSettings & GetSettings() const {return settings;}
+	NodeID GetFirstEdge(NodeID from) {return edges[from][from].next_edge;}
 private:
 	friend const SaveLoad * GetLinkGraphComponentDesc();
 	LinkGraphSettings settings;
@@ -146,16 +149,16 @@ public:
 	NodeID GetNode() const {return node;}
 	NodeID GetOrigin() const {return parent == NULL ? node : parent->GetOrigin();}
 	Path * GetParent() {return parent;}
-	Number GetCapacity() const {return capacity;}
-	void Fork(Path * base, Number cap, Number dist);
-	void AddFlow(Number f, LinkGraphComponent * graph);
-	Number GetFlow() {return flow;}
+	uint GetCapacity() const {return capacity;}
+	void Fork(Path * base, uint cap, uint dist);
+	uint AddFlow(uint f, LinkGraphComponent * graph);
+	uint GetFlow() {return flow;}
 	uint GetNumChildren() {return num_children;}
 	void UnFork();
 protected:
-	Number distance;
-	Number capacity;
-	Number flow;
+	uint distance;
+	uint capacity;
+	uint flow;
 	NodeID node;
 	uint num_children;
 	Path * parent;
