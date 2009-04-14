@@ -52,7 +52,7 @@ public:
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
-	uint AddNode(StationID st, uint supply, uint demand);
+	NodeID AddNode(StationID st, uint supply, uint demand);
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
 	colour GetColour() const {return component_colour;}
