@@ -69,6 +69,14 @@ Station::~Station()
 		}
 	}
 
+	Station * st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
+			CargoList & cl = st->goods[c].cargo;
+			cl.ReleaseStalePackets(index);
+		}
+	}
+
 	MarkDirty();
 	InvalidateWindowData(WC_STATION_LIST, this->owner, 0);
 

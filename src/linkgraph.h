@@ -32,7 +32,7 @@ public:
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
 	~Node();
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
-	void ExportFlows(FlowStatMap & station_flows);
+	void ExportFlows(FlowStatMap & station_flows, CargoID cargo);
 	uint supply;
 	uint undelivered_supply;
 	uint demand;
@@ -40,7 +40,7 @@ public:
 	PathSet paths;
 	FlowMap flows;
 private:
-	void ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set);
+	void ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set, CargoID cargo);
 };
 
 class Edge {
