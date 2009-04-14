@@ -11,13 +11,10 @@
 #include "linkgraph.h"
 
 class FlowMapper : public ComponentHandler {
-	typedef std::vector<Number> ScaleFactorVector;
 public:
 	FlowMapper() : component(NULL) {}
 	void Run(LinkGraphComponent * c);
 private:
-	void CalcScaleFactors();
-	ScaleFactorVector scale_factors;
 	LinkGraphComponent * component;
 };
 
