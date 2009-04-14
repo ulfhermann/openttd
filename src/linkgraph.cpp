@@ -193,7 +193,8 @@ void LinkGraph::Join() {
 void Node::ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set) {
 	FlowViaMap & source_flows = source_flows_it->second;
 	for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
-		if (update->second >= 1) {
+		assert(update->second >= 0);
+		if (update->second > 0) {
 			via_set.insert(FlowStat(update->first, update->second, 0));
 		}
 		source_flows.erase(update++);
@@ -216,7 +217,8 @@ void Node::ExportFlows(FlowStatMap & station_flows) {
 			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end();) {
 				FlowViaMap::iterator update = source_flows.find(flowset_it->via);
 				if (update != source_flows.end()) {
-					if (update->second >= 1) {
+					assert(update->second >= 0);
+					if (update->second > 0) {
 						new_flows.insert(FlowStat(flowset_it->via, update->second, flowset_it->sent));
 					}
 					source_flows.erase(update);
@@ -292,6 +294,7 @@ uint Path::AddFlow(uint f, LinkGraphComponent * graph) {
 	graph->GetNode(node).paths.insert(this);
 	if (parent != NULL) {
 		Edge & edge = graph->GetEdge(parent->node, node);
+		assert(edge.capacity >= edge.flow);
 		f = min(f, edge.capacity - edge.flow);
 		f = parent->AddFlow(f, graph);
 		edge.flow += f;
