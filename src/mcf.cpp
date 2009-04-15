@@ -47,6 +47,7 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
 		NodeID to = graph->GetFirstEdge(from);
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
+			assert(edge.capacity >= edge.flow);
 			uint capacity = edge.capacity - edge.flow;
 			uint distance = edge.distance;
 			ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
@@ -65,7 +66,7 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
 void MultiCommodityFlow::CleanupPaths(PathVector & paths) {
 	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Path * path = *i;
-		while (path != NULL && path->GetFlow() <= 0) {
+		while (path != NULL && path->GetFlow() == 0) {
 			Path * parent = path->GetParent();
 			path->UnFork();
 			if (path->GetNumChildren() == 0) {
