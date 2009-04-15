@@ -27,7 +27,7 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 	static const SaveLoad _component_desc[] = {
 		 SLE_CONDVAR(LinkGraphComponent, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraphComponent, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(                    _join_date,       SLE_INT32,    DEMANDS_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(                    _join_date,       SLE_INT32,  LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
@@ -75,9 +75,9 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 	// edges and nodes are saved in the correct order, so we don't need to save their ids.
 
 	static const SaveLoad _node_desc[] = {
-		 SLE_CONDVAR(Node, supply,   SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Node, demand,   SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Node, station,  SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, supply,    SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, demand,    SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, station,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 

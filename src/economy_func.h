@@ -14,6 +14,8 @@
 #include "industry_type.h"
 #include "company_type.h"
 #include "station_type.h"
+#include "cargopacket.h"
+#include <map>
 
 void ResetPriceBaseMultipliers();
 void SetPriceBaseMultiplier(uint price, byte factor);
@@ -28,6 +30,7 @@ extern Prices _price;
 extern uint16 _price_frac[NUM_PRICES];
 extern Money  _cargo_payment_rates[NUM_CARGO];
 extern uint16 _cargo_payment_rates_frac[NUM_CARGO];
+typedef std::map<CargoID, CargoList::List> CargoReservation;
 
 int UpdateCompanyRatingAndValue(Company *c, bool update);
 Pair SetupSubsidyDecodeParam(const Subsidy *s, bool mode);
