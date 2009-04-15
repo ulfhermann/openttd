@@ -24,7 +24,6 @@
 #include "openttd.h"
 #include "company_func.h"
 #include "station_base.h"
-#include "linkgraph.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -887,7 +886,6 @@ public:
 					CargoID c = tbl->type;
 					q += st->goods[c].supply * 30 / scale;
 					colour += tbl->colour;
-					colour += _link_graphs[c].GetColour(st->index);
 					numCargos++;
 				}
 				if (numCargos > 1)

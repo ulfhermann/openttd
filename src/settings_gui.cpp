@@ -1223,14 +1223,13 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.moving_average_unit"),
 	SettingEntry("economy.moving_average_length"),
 };
-
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};
 
 static SettingEntry _settings_linkgraph[] = {
 	SettingEntry("linkgraph.recalc_interval"),
 };
-
+/** Linkgraph sub-page */
 static SettingsPage _settings_linkgraph_page = {_settings_linkgraph, lengthof(_settings_linkgraph)};
 
 static SettingEntry _settings_ai_npc[] = {
