@@ -43,7 +43,6 @@ typedef uint16 colour;
 
 class LinkGraphComponent {
 	typedef std::vector<Node> NodeVector;
-
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
@@ -66,7 +65,6 @@ private:
 	colour component_colour;
 	NodeVector nodes;
 	EdgeMatrix edges;
-
 };
 
 class ComponentHandler {
