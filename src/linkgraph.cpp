@@ -77,7 +77,9 @@ void LinkGraph::NextComponent()
 	}
 	// here the list of nodes and edges for this component is complete.
 	component->CalculateDistances();
-	components.push_back(component);
+	LinkGraphJob * job = new LinkGraphJob(component);
+	job->SpawnThread(cargo);
+	jobs.push_back(job);
 }
 
 void LinkGraph::InitColours()
@@ -146,6 +148,7 @@ void LinkGraphComponent::SetSize(uint size) {
 }
 
 LinkGraphComponent::LinkGraphComponent(CargoID car, colour col) :
+	settings(_settings_game.linkgraph),
 	cargo(car),
 	num_nodes(0),
 	component_colour(col)
@@ -153,29 +156,86 @@ LinkGraphComponent::LinkGraphComponent(CargoID car, colour col) :
 }
 
 void LinkGraph::Join() {
-	if (components.empty()) {
+	if (jobs.empty()) {
 		return;
 	}
-	LinkGraphComponent * comp = components.front();
+	LinkGraphJob * job = jobs.front();
 
-	components.pop_front();
+	if (job->GetJoinDate() > _date) {
+		return;
+	}
+	job->Join();
 
-	delete comp;
+	delete job;
+	jobs.pop_front();
 }
 
-void LinkGraph::AddComponent(LinkGraphComponent * component) {
-	 components.push_back(component);
+void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 	 colour component_colour = component->GetColour();
 	 for(NodeID i = 0; i < component->GetSize(); ++i) {
 		 station_colours[component->GetNode(i).station] = component_colour;
 	 }
+	 LinkGraphJob * job = new LinkGraphJob(component, join);
+	 job->SpawnThread(cargo);
+	 jobs.push_back(job);
 }
 
-void LinkGraph::Clear() {
-	for(ComponentList::iterator i = components.begin(); i != components.end(); ++i) {
-		delete *i;
+void LinkGraphJob::Run() {
+	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+		ComponentHandler * handler = *i;
+		handler->Run(component);
 	}
-	components.clear();
+}
+
+LinkGraphJob::~LinkGraphJob() {
+	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+		ComponentHandler * handler = *i;
+		delete handler;
+	}
+	handlers.clear();
+	delete component;
+	delete thread;
+}
+
+void RunLinkGraphJob(void * j) {
+	LinkGraphJob * job = (LinkGraphJob *)j;
+	job->Run();
+}
+
+void LinkGraphJob::SpawnThread(CargoID cargo) {
+	join_date = _date + component->GetSettings().recalc_interval;
+	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
+		thread = NULL;
+		// Of course this will hang a bit.
+		// On the other hand, if you want to play games which make this hang noticably
+		// on a platform without threads then you'll probably get other problems first.
+		// OK:
+		// If someone comes and tells me that this hangs for him/her, I'll implement a
+		// smaller grained "Step" method for all handlers and add some more ticks where
+		// "Step" is called. No problem in principle.
+		RunLinkGraphJob(this);
+	}
+}
+
+LinkGraphJob::LinkGraphJob(LinkGraphComponent * c) :
+	thread(NULL),
+	join_date(0),
+	component(c)
+{}
+
+LinkGraphJob::LinkGraphJob(LinkGraphComponent * c, Date join) :
+	thread(NULL),
+	join_date(join),
+	component(c)
+{}
+
+void LinkGraph::Clear() {
+	for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
+		LinkGraphJob * job = *i;
+		job->Join();
+		delete job;
+	}
+	jobs.clear();
 	InitColours();
 	current_colour = 1;
 	current_station = 0;

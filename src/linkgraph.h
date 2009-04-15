@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "station_base.h"
 #include "cargo_type.h"
+#include "thread.h"
+#include "settings_type.h"
 #include <list>
 #include <vector>
 
@@ -53,8 +55,10 @@ public:
 	void CalculateDistances();
 	colour GetColour() const {return component_colour;}
 	CargoID GetCargo() const {return cargo;}
+	const LinkGraphSettings & GetSettings() const {return settings;}
 private:
 	friend const SaveLoad * GetLinkGraphComponentDesc();
+	LinkGraphSettings settings;
 	CargoID cargo;
 	uint num_nodes;
 	colour component_colour;
@@ -63,7 +67,37 @@ private:
 
 };
 
-typedef std::list<LinkGraphComponent *> ComponentList;
+class ComponentHandler {
+public:
+	virtual void Run(LinkGraphComponent * component) = 0;
+	virtual ~ComponentHandler() {}
+};
+
+class LinkGraphJob {
+	typedef std::list<ComponentHandler *> HandlerList;
+public:
+	LinkGraphJob(LinkGraphComponent * c);
+	LinkGraphJob(LinkGraphComponent * c, Date join);
+
+	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
+	void Run();
+	void SpawnThread(CargoID cargo);
+	void Join() {if (thread != NULL) thread->Join();}
+	Date GetJoinDate() {return join_date;}
+	LinkGraphComponent * GetComponent() {return component;}
+	~LinkGraphJob();
+private:
+	/**
+	 * there cannot be two identical LinkGraphJobs,
+	 */
+	LinkGraphJob(const LinkGraphJob & other) {NOT_REACHED();}
+	ThreadObject * thread;
+	Date join_date;
+	LinkGraphComponent * component;
+	HandlerList handlers;
+};
+
+typedef std::list<LinkGraphJob *> JobList;
 
 class LinkGraph {
 public:
@@ -75,9 +109,9 @@ public:
 	void InitColours();
 
 	void Join();
-	uint GetNumComponents() const {return components.size();}
-	ComponentList & GetComponents() {return components;}
-	void AddComponent(LinkGraphComponent * component);
+	uint GetNumJobs() const {return jobs.size();}
+	JobList & GetJobs() {return jobs;}
+	void AddComponent(LinkGraphComponent * component, uint join);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;
@@ -88,7 +122,7 @@ private:
 	StationID current_station;
 	CargoID cargo;
 	colour station_colours[Station_POOL_MAX_BLOCKS];
-	ComponentList components;
+	JobList jobs;
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
