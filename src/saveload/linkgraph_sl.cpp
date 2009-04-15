@@ -27,7 +27,7 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 	static const SaveLoad _component_desc[] = {
 		 SLE_CONDVAR(LinkGraphComponent, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraphComponent, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(                    _join_date,       SLE_INT32,    DEMANDS_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(                    _join_date,       SLE_INT32,  LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 

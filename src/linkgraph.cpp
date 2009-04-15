@@ -204,7 +204,7 @@ void RunLinkGraphJob(void * j) {
 }
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
-	join_date = _date + component->GetSettings().recalc_interval,
+	join_date = _date + component->GetSettings().recalc_interval;
 	AddHandler(new DemandCalculator);
 	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
