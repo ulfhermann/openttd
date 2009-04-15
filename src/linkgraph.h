@@ -73,7 +73,6 @@ private:
 	colour component_colour;
 	NodeVector nodes;
 	EdgeMatrix edges;
-
 };
 
 class ComponentHandler {
