@@ -179,7 +179,7 @@ void SaveLoad_STNS(Station *st)
 			}
 		}
 
-		if (stats.empty() && _num_links > 0) { // loading
+		if (stats.empty()) { // loading
 			LinkStat ls;
 			for (uint i = 0; i < _num_links; ++i) {
 				SlObject(&ls, _linkstat_desc);
