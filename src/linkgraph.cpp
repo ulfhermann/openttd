@@ -252,7 +252,7 @@ Path::Path(NodeID n, bool source)  :
 {}
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
-	join_date = _date + component->GetSettings().recalc_interval,
+	join_date = _date + component->GetSettings().recalc_interval;
 	AddHandler(new DemandCalculator);
 	AddHandler(new MultiCommodityFlow);
 	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
