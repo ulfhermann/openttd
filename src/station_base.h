@@ -94,7 +94,6 @@ struct GoodsEntry {
 	uint supply;
 	FlowStatMap flows;      ///< The planned flows through this station
 	LinkStatMap link_stats; ///< capacities and usage statistics for incoming links
-
 };
 
 /** A Stop for a Road Vehicle */

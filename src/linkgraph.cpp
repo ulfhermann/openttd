@@ -355,7 +355,7 @@ LinkGraphJob::LinkGraphJob(LinkGraphComponent * c, Date join) :
 
 Node::~Node() {
 	for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
-		 delete (*i);
+		delete (*i);
 	}
 }
 

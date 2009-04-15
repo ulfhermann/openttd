@@ -29,8 +29,8 @@ class Node {
 public:
 	static const NodeID INVALID = UINT_MAX;
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
-	~Node();
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
+	~Node();
 	void ExportFlows(FlowStatMap & station_flows, CargoID cargo);
 	uint supply;
 	uint undelivered_supply;
