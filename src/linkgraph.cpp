@@ -15,7 +15,6 @@
 #include "demands.h"
 #include "mcf.h"
 #include "core/bitmath_func.hpp"
-#include "debug.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -188,13 +187,9 @@ void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 }
 
 void LinkGraphJob::Run() {
-	try {
-		for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
-			ComponentHandler * handler = *i;
-			handler->Run(component);
-		}
-	} catch(Exception e) {
-		DEBUG(misc, 0, "link graph calculation aborted");
+	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+		ComponentHandler * handler = *i;
+		handler->Run(component);
 	}
 }
 

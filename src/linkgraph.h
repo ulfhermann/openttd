@@ -20,7 +20,6 @@
 struct SaveLoad;
 class Path;
 
-typedef uint16 colour;
 typedef uint NodeID;
 typedef std::set<Path *> PathSet;
 
@@ -86,7 +85,6 @@ public:
 class LinkGraphJob {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
-	class Exception {};
 	LinkGraphJob(LinkGraphComponent * c);
 	LinkGraphJob(LinkGraphComponent * c, Date join);
 
