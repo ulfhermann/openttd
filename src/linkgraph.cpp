@@ -16,7 +16,6 @@
 #include "mcf.h"
 #include "flowmapper.h"
 #include "core/bitmath_func.hpp"
-#include "debug.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -262,13 +261,9 @@ void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 }
 
 void LinkGraphJob::Run() {
-	try {
-		for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
-			ComponentHandler * handler = *i;
-			handler->Run(component);
-		}
-	} catch(Exception e) {
-		DEBUG(misc, 0, "link graph calculation aborted");
+	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+		ComponentHandler * handler = *i;
+		handler->Run(component);
 	}
 }
 
@@ -329,7 +324,7 @@ Path::Path(NodeID n, bool source)  :
 {}
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
-	join_date = _date + component->GetSettings().recalc_interval,
+	join_date = _date + component->GetSettings().recalc_interval;
 	AddHandler(new DemandCalculator);
 	AddHandler(new MultiCommodityFlow);
 	AddHandler(new FlowMapper);
@@ -360,7 +355,7 @@ LinkGraphJob::LinkGraphJob(LinkGraphComponent * c, Date join) :
 
 Node::~Node() {
 	for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
-		 delete (*i);
+		delete (*i);
 	}
 }
 

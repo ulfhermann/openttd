@@ -20,7 +20,6 @@
 struct SaveLoad;
 class Path;
 
-typedef uint16 colour;
 typedef uint NodeID;
 typedef std::set<Path *> PathSet;
 typedef std::map<StationID, int> FlowViaMap;
@@ -30,8 +29,8 @@ class Node {
 public:
 	static const NodeID INVALID = UINT_MAX;
 	Node() : supply(0), demand(0), station(INVALID_STATION) {}
-	~Node();
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
+	~Node();
 	void ExportFlows(FlowStatMap & station_flows, CargoID cargo);
 	uint supply;
 	uint undelivered_supply;
@@ -81,7 +80,6 @@ private:
 	colour component_colour;
 	NodeVector nodes;
 	EdgeMatrix edges;
-
 };
 
 class ComponentHandler {
@@ -93,7 +91,6 @@ public:
 class LinkGraphJob {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
-	class Exception {};
 	LinkGraphJob(LinkGraphComponent * c);
 	LinkGraphJob(LinkGraphComponent * c, Date join);
 

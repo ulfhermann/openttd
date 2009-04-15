@@ -107,7 +107,6 @@ struct GoodsEntry {
 	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
 private:
 	void UpdateFlowStats(FlowStatSet & flow_stats, FlowStatSet::iterator flow_it, uint count);
-
 };
 
 /** A Stop for a Road Vehicle */

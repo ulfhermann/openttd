@@ -11,7 +11,6 @@
 #include "station_type.h"
 #include "order_type.h"
 #include <list>
-#include <map>
 
 typedef uint32 CargoPacketID;
 struct CargoPacket;
@@ -254,7 +253,5 @@ public:
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
-
-typedef std::map<CargoID, CargoList::List> CargoReservation;
 
 #endif /* CARGOPACKET_H */
