@@ -1,21 +1,13 @@
-/*
- * graph.cpp
- *
- *  Created on: 28.02.2009
- *      Author: alve
- */
-
+/** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
 #include "linkgraph.h"
-#include "settings_type.h"
-#include "station_func.h"
-#include "date_func.h"
-#include "variables.h"
-#include "map_func.h"
 #include "demands.h"
 #include "mcf.h"
 #include "flowmapper.h"
-#include "core/bitmath_func.hpp"
+#include "../date_func.h"
+#include "../variables.h"
+#include "../map_func.h"
+#include "../core/bitmath_func.hpp"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -282,7 +274,7 @@ void RunLinkGraphJob(void * j) {
 	job->Run();
 }
 
-void Path::Fork(Path * base, uint cap, uint dist) {
+void Path::Fork(Path * base, int cap, uint dist) {
 	capacity = min(base->capacity, cap);
 	distance = base->distance + dist;
 	assert(distance > 0);
@@ -295,12 +287,14 @@ void Path::Fork(Path * base, uint cap, uint dist) {
 	}
 }
 
-uint Path::AddFlow(uint f, LinkGraphComponent * graph) {
+uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
 	if (parent != NULL) {
 		Edge & edge = graph->GetEdge(parent->node, node);
-		assert(edge.capacity >= edge.flow);
-		f = min(f, edge.capacity - edge.flow);
-		f = parent->AddFlow(f, graph);
+		if (only_positive) {
+			assert(edge.capacity >= edge.flow);
+			f = min(f, edge.capacity - edge.flow);
+		}
+		f = parent->AddFlow(f, graph, only_positive);
 		edge.flow += f;
 	}
 	flow += f;

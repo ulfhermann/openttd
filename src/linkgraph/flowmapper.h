@@ -1,9 +1,4 @@
-/*
- * flowmapper.h
- *
- *  Created on: 31.03.2009
- *      Author: alve
- */
+/** @file flowmapper.h Declaration of flow mapper; merges paths into flows at nodes */
 
 #ifndef FLOWMAPPER_H_
 #define FLOWMAPPER_H_

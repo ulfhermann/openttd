@@ -1,11 +1,7 @@
-/*
- * cargodist_sl.cpp
- *
- *  Created on: 13.03.2009
- *      Author: alve
- */
-#include "../linkgraph.h"
-#include "../demands.h"
+/** @file linkgraph_sl.cpp Code handling saving and loading of link graphs */
+
+#include "../linkgraph/linkgraph.h"
+#include "../linkgraph/demands.h"
 #include "../settings_internal.h"
 #include "saveload.h"
 #include <vector>
