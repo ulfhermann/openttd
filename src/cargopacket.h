@@ -240,7 +240,10 @@ public:
 	 */
 	uint MoveToVehicle(CargoList *dest, uint max_load, StationID next_station = INVALID_STATION, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
 
-	void ReleaseStalePackets(StationID to);
+	/**
+	 * route all packets with this station as next hop to a different place
+	 */
+	void RerouteStalePackets(StationID to, GoodsEntry * ge);
 
 	void ReservePacketsForLoading(List * reserved, uint cap, StationID next_station, List * rejected)
 		{LoadPackets(reserved, cap, next_station, rejected);}

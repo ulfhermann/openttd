@@ -72,8 +72,8 @@ Station::~Station()
 	Station * st;
 	FOR_ALL_STATIONS(st) {
 		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
-			CargoList & cl = st->goods[c].cargo;
-			cl.ReleaseStalePackets(index);
+			GoodsEntry & ge = st->goods[c];
+			ge.cargo.RerouteStalePackets(index, &ge);
 		}
 	}
 
