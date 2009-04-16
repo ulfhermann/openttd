@@ -6,11 +6,11 @@
  */
 
 #include "demands.h"
-#include "station_base.h"
-#include "settings_type.h"
-#include "newgrf_cargo.h"
-#include "cargotype.h"
-#include "core/math_func.hpp"
+#include "../station_base.h"
+#include "../settings_type.h"
+#include "../newgrf_cargo.h"
+#include "../cargotype.h"
+#include "../core/math_func.hpp"
 #include <list>
 #include <iostream>
 

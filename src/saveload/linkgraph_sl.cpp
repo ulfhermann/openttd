@@ -4,8 +4,8 @@
  *  Created on: 13.03.2009
  *      Author: alve
  */
-#include "../linkgraph.h"
-#include "../demands.h"
+#include "../linkgraph/linkgraph.h"
+#include "../linkgraph/demands.h"
 #include "../settings_internal.h"
 #include "saveload.h"
 #include <vector>

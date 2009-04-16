@@ -8,11 +8,11 @@
 #ifndef DEMANDS_H_
 #define DEMANDS_H_
 
-#include "stdafx.h"
-#include "cargo_type.h"
-#include "map_func.h"
 #include "linkgraph.h"
 #include "demand_settings.h"
+#include "../stdafx.h"
+#include "../cargo_type.h"
+#include "../map_func.h"
 
 class DemandCalculator : public ComponentHandler {
 public:

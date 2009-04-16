@@ -10,7 +10,7 @@
 #include "transport_type.h"
 #include "network/core/config.h"
 #include "company_type.h"
-#include "demand_settings.h"
+#include "linkgraph/demand_settings.h"
 
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {

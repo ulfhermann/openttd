@@ -1,9 +1,4 @@
-/*
- * demand_settings.h
- *
- *  Created on: 06.04.2009
- *      Author: alve
- */
+/** @file demand_settings.h Definition of distribution types. */
 
 #ifndef DEMAND_SETTINGS_H_
 #define DEMAND_SETTINGS_H_

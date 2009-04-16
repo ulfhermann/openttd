@@ -16,7 +16,6 @@ currency.cpp
 date.cpp
 debug.cpp
 dedicated.cpp
-demands.cpp
 depot.cpp
 driver.cpp
 economy.cpp
@@ -34,7 +33,8 @@ heightmap.cpp
 highscore.cpp
 ini.cpp
 landscape.cpp
-linkgraph.cpp
+linkgraph/demands.cpp
+linkgraph/linkgraph.cpp
 map.cpp
 md5.cpp
 minilzo.cpp
@@ -160,7 +160,6 @@ currency.h
 date_func.h
 date_type.h
 debug.h
-demands.h
 video/dedicated_v.h
 depot_base.h
 depot_func.h
@@ -201,7 +200,9 @@ industry_type.h
 ini_type.h
 landscape.h
 landscape_type.h
-linkgraph.h
+linkgraph/demands.h
+linkgraph/demand_settings.h
+linkgraph/linkgraph.h
 livery.h
 lzoconf.h
 map_func.h
