@@ -2,8 +2,6 @@
 
 #include "linkgraph.h"
 #include "demands.h"
-#include "../settings_type.h"
-#include "../station_func.h"
 #include "../date_func.h"
 #include "../variables.h"
 #include "../map_func.h"
