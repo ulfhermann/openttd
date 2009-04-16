@@ -1,15 +1,9 @@
-/*
- * mcf.h
- *
- *  Created on: 20.03.2009
- *      Author: alve
- */
+/** @file mcf.h Declaration of Multi-Commodity-Flow solver */
 
 #ifndef MCF_H_
 #define MCF_H_
 
 #include "linkgraph.h"
-#include "settings_type.h"
 #include <vector>
 
 class DistanceAnnotation : public Path {

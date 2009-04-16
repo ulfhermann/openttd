@@ -1,18 +1,13 @@
-/*
- * demands.h
- *
- *  Created on: 28.02.2009
- *      Author: alve
- */
+/** @file demands.h Declaration of demand calculating link graph handler. */
 
 #ifndef DEMANDS_H_
 #define DEMANDS_H_
 
-#include "stdafx.h"
-#include "cargo_type.h"
-#include "map_func.h"
 #include "linkgraph.h"
 #include "demand_settings.h"
+#include "../stdafx.h"
+#include "../cargo_type.h"
+#include "../map_func.h"
 
 class DemandCalculator : public ComponentHandler {
 public:

@@ -1,12 +1,6 @@
-/*
- * mcf.cpp
- *
- *  Created on: 20.03.2009
- *      Author: alve
- */
+/** @file mcf.cpp Definition of Multi-Commodity-Flow solver */
 
 #include "mcf.h"
-#include "debug.h"
 
 MultiCommodityFlow::MultiCommodityFlow() :
 	graph(NULL)
