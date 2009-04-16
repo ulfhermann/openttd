@@ -9,7 +9,7 @@
 class DistanceAnnotation : public Path {
 public:
 	DistanceAnnotation(NodeID n, bool source = false) : Path(n, source) {}
-	bool IsBetter(const DistanceAnnotation * base, uint cap, uint dist) const;
+	bool IsBetter(const DistanceAnnotation * base, int cap, uint dist) const;
 	uint GetAnnotation() const {return distance;}
 	struct comp {
 		bool operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const;
@@ -19,7 +19,7 @@ public:
 class CapacityAnnotation : public Path {
 public:
 	CapacityAnnotation(NodeID n, bool source = false) : Path(n, source) {}
-	bool IsBetter(const CapacityAnnotation * base, uint cap, uint dist) const;
+	bool IsBetter(const CapacityAnnotation * base, int cap, uint dist) const;
 	uint GetAnnotation() const {return capacity;}
 	struct comp {
 		bool operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const;

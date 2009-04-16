@@ -200,7 +200,7 @@ void RunLinkGraphJob(void * j) {
 	job->Run();
 }
 
-void Path::Fork(Path * base, uint cap, uint dist) {
+void Path::Fork(Path * base, int cap, uint dist) {
 	capacity = min(base->capacity, cap);
 	distance = base->distance + dist;
 	assert(distance > 0);
@@ -213,12 +213,14 @@ void Path::Fork(Path * base, uint cap, uint dist) {
 	}
 }
 
-uint Path::AddFlow(uint f, LinkGraphComponent * graph) {
+uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
 	if (parent != NULL) {
 		Edge & edge = graph->GetEdge(parent->node, node);
-		assert(edge.capacity >= edge.flow);
-		f = min(f, edge.capacity - edge.flow);
-		f = parent->AddFlow(f, graph);
+		if (only_positive) {
+			assert(edge.capacity >= edge.flow);
+			f = min(f, edge.capacity - edge.flow);
+		}
+		f = parent->AddFlow(f, graph, only_positive);
 		edge.flow += f;
 	}
 	flow += f;

@@ -111,10 +111,10 @@ public:
 	CargoID GetCargo() const {return cargo;}
 	/**
 	 * Starts calcluation of the next component of the link graph.
-	 * Uses a breadth first search on the graph spanned by the 
+	 * Uses a breadth first search on the graph spanned by the
 	 * stations' link stats.
 	 *
-	 * TODO: This method could be changed to only search a defined number 
+	 * TODO: This method could be changed to only search a defined number
 	 * of stations in each run, thus decreasing the delay. The state of
 	 * the search queue would have to be saved and loaded then.
 	 */
@@ -125,9 +125,9 @@ public:
 	 * Merges the results of the link graph calculation into the main
 	 * game state.
 	 *
-	 * TODO: This method could be changed to only merge a fixed number of 
-	 * nodes in each run. In order to do so, the ID of last node merged 
-	 * would have to be saved and loaded. Merging only a fixed  number 
+	 * TODO: This method could be changed to only merge a fixed number of
+	 * nodes in each run. In order to do so, the ID of last node merged
+	 * would have to be saved and loaded. Merging only a fixed  number
 	 * of nodes is faster than merging all nodes of the component.
 	 */
 	void Join();
@@ -152,16 +152,16 @@ public:
 	Path(NodeID n, bool source = false);
 	NodeID GetNode() const {return node;}
 	Path * GetParent() {return parent;}
-	uint GetCapacity() const {return capacity;}
-	void Fork(Path * base, uint cap, uint dist);
-	uint AddFlow(uint f, LinkGraphComponent * graph);
+	int GetCapacity() const {return capacity;}
+	void Fork(Path * base, int cap, uint dist);
+	uint AddFlow(uint f, LinkGraphComponent * graph, bool only_positive);
 	uint GetFlow() {return flow;}
 	uint GetNumChildren() {return num_children;}
 	void UnFork();
 protected:
 	uint distance;
-	uint capacity;
-	uint flow;
+	int capacity;      ///< this capacity is edge.capacity - edge.flow for the current run of dijkstra
+	uint flow;         ///< this is the flow the current run of the mcf solver assigns
 	NodeID node;
 	uint num_children;
 	Path * parent;

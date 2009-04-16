@@ -12,12 +12,17 @@ void MultiCommodityFlow::Run(LinkGraphComponent * g) {
 	SimpleSolver();
 }
 
-bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, uint cap, uint dist) const {
+bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint dist) const {
 	return (cap > 0 && base->distance + dist < distance);
 }
 
-bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, uint cap, uint dist) const {
-	return (dist < UINT_MAX && min(base->capacity, cap) > capacity);
+bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint dist) const {
+	int min_cap = min(base->capacity, cap);
+	if (min_cap == capacity) { // if the capacities are the same, choose the shorter path
+		return (base->distance + dist < distance);
+	} else {
+		return min_cap > capacity;
+	}
 }
 
 
@@ -41,14 +46,15 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
 		NodeID to = graph->GetFirstEdge(from);
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
-			assert(edge.capacity >= edge.flow);
-			uint capacity = edge.capacity - edge.flow;
-			uint distance = edge.distance;
-			ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
-			if (dest->IsBetter(source, capacity, distance)) {
-				annos.erase(dest);
-				dest->Fork(source, capacity, distance);
-				annos.insert(dest);
+			if (edge.capacity > 0) {
+				int capacity = edge.capacity - edge.flow;
+				uint distance = edge.distance;
+				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
+				if (dest->IsBetter(source, capacity, distance)) {
+					annos.erase(dest);
+					dest->Fork(source, capacity, distance);
+					annos.insert(dest);
+				}
 			}
 			to = edge.next_edge;
 		}
@@ -77,15 +83,20 @@ void MultiCommodityFlow::CleanupPaths(PathVector & paths) {
 
 void MultiCommodityFlow::SimpleSolver() {
 	PathVector paths;
-	uint demand_routed = 0;
-	uint old_routed = 0;
 	uint size = graph->GetSize();
 	uint accuracy = graph->GetSettings().mcf_accuracy;
-	do {
-		old_routed = demand_routed;
+	bool positive_cap = true;
+	bool demand_routed = true;
+	while (positive_cap || demand_routed) {
+		demand_routed = false;
 		for (NodeID source = 0; source < size; ++source) {
-
-			Dijkstra<CapacityAnnotation>(source, paths);
+			if (positive_cap) {
+				/* first saturate the shortest paths */
+				Dijkstra<DistanceAnnotation>(source, paths);
+			} else {
+				/* then overload all paths equally with the remaining demand */
+				Dijkstra<CapacityAnnotation>(source, paths);
+			}
 
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge & edge = graph->GetEdge(source, dest);
@@ -93,16 +104,19 @@ void MultiCommodityFlow::SimpleSolver() {
 					Path * path = paths[dest];
 					uint flow = edge.unsatisfied_demand / accuracy;
 					if (flow == 0) flow = 1;
-					flow = path->AddFlow(flow, graph);
+					flow = path->AddFlow(flow, graph, positive_cap);
 					edge.unsatisfied_demand -= flow;
-					demand_routed += flow;
+					demand_routed = true;
 				}
 			}
 
 			CleanupPaths(paths);
 		}
 		if (accuracy > 1) --accuracy;
-	} while (demand_routed > old_routed);
+		if (positive_cap && !demand_routed) {
+			positive_cap = false;
+		}
+	}
 }
 
 /**
