@@ -33,7 +33,7 @@ heightmap.cpp
 highscore.cpp
 ini.cpp
 landscape.cpp
-linkgraph.cpp
+linkgraph/linkgraph.cpp
 map.cpp
 md5.cpp
 minilzo.cpp
@@ -199,7 +199,7 @@ industry_type.h
 ini_type.h
 landscape.h
 landscape_type.h
-linkgraph.h
+linkgraph/linkgraph.h
 livery.h
 lzoconf.h
 map_func.h

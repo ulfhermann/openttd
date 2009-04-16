@@ -4,7 +4,7 @@
  *  Created on: 13.03.2009
  *      Author: alve
  */
-#include "../linkgraph.h"
+#include "../linkgraph/linkgraph.h"
 #include "../settings_internal.h"
 #include "saveload.h"
 #include <vector>

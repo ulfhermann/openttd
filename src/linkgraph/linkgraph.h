@@ -1,18 +1,13 @@
-/*
- * linkgraph.h
- *
- *  Created on: 28.02.2009
- *      Author: alve
- */
+/** @file linkgraph.h Declaration of link graph classes used for cargo distribution. */
 
 #ifndef LINKGRAPH_H_
 #define LINKGRAPH_H_
 
-#include "stdafx.h"
-#include "station_base.h"
-#include "cargo_type.h"
-#include "thread.h"
-#include "settings_type.h"
+#include "../stdafx.h"
+#include "../station_base.h"
+#include "../cargo_type.h"
+#include "../thread.h"
+#include "../settings_type.h"
 #include <list>
 #include <vector>
 
@@ -103,9 +98,27 @@ public:
 	void Clear();
 	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
+	/**
+	 * Starts calcluation of the next component of the link graph.
+	 * Uses a breadth first search on the graph spanned by the 
+	 * stations' link stats.
+	 *
+	 * TODO: This method could be changed to only search a defined number 
+	 * of stations in each run, thus decreasing the delay. The state of
+	 * the search queue would have to be saved and loaded then.
+	 */
 	void NextComponent();
 	void InitColours();
 
+	/**
+	 * Merges the results of the link graph calculation into the main
+	 * game state.
+	 *
+	 * TODO: This method could be changed to only merge a fixed number of 
+	 * nodes in each run. In order to do so, the ID of last node merged 
+	 * would have to be saved and loaded. Merging only a fixed  number 
+	 * of nodes is faster than merging all nodes of the component.
+	 */
 	void Join();
 	uint GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}

@@ -1,18 +1,12 @@
-/*
- * graph.cpp
- *
- *  Created on: 28.02.2009
- *      Author: alve
- */
-
+/** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
 #include "linkgraph.h"
-#include "settings_type.h"
-#include "station_func.h"
-#include "date_func.h"
-#include "variables.h"
-#include "map_func.h"
-#include "core/bitmath_func.hpp"
+#include "../settings_type.h"
+#include "../station_func.h"
+#include "../date_func.h"
+#include "../variables.h"
+#include "../map_func.h"
+#include "../core/bitmath_func.hpp"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
