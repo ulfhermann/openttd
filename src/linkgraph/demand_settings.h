@@ -1,4 +1,4 @@
-/** @file demand_settings.h Definition of distribution types. */
+/** @file demand_settings.h Declaration of distribution types for demand calculation. */
 
 #ifndef DEMAND_SETTINGS_H_
 #define DEMAND_SETTINGS_H_

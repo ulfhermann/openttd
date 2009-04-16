@@ -1,9 +1,4 @@
-/*
- * demands.cpp
- *
- *  Created on: 08.03.2009
- *      Author: alve
- */
+/** @file demands.h Definition of demand calculating link graph handler. */
 
 #include "demands.h"
 #include "../station_base.h"

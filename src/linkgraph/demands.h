@@ -1,9 +1,4 @@
-/*
- * demands.h
- *
- *  Created on: 28.02.2009
- *      Author: alve
- */
+/** @file demands.h Declaration of demand calculating link graph handler. */
 
 #ifndef DEMANDS_H_
 #define DEMANDS_H_
