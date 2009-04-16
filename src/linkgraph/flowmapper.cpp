@@ -1,9 +1,4 @@
-/*
- * flowmapper.cpp
- *
- *  Created on: 31.03.2009
- *      Author: alve
- */
+/** @file flowmapper.cpp Definition of flowmapper */
 
 #include "flowmapper.h"
 
