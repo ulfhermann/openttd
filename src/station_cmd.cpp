@@ -2913,9 +2913,9 @@ static void UpdateStationStats(Station * st) {
 				ls *= length;
 				ls /= (length + 1);
 				if (ls.capacity == 0) {
-					CargoList & cargo = GetStation(id)->goods[goods_index].cargo;
-					cargo.ReleaseStalePackets(st->index);
+					GoodsEntry & ge = GetStation(id)->goods[goods_index];
 					DeleteStaleFlows(id, goods_index, st->index);
+					ge.cargo.RerouteStalePackets(st->index, &ge);
 					links.erase(i++);
 				} else {
 					++i;

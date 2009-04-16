@@ -367,10 +367,12 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 	}
 }
 
-void CargoList::ReleaseStalePackets(StationID to) {
+void CargoList::RerouteStalePackets(StationID to, GoodsEntry * ge) {
 	for(List::iterator it = packets.begin(); it != packets.end(); ++it) {
 		CargoPacket * packet = *it;
-		if (packet->next == to) packet->next = INVALID_STATION;
+		if (packet->next == to) {
+			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, to);
+		}
 	}
 	InvalidateCache();
 }
