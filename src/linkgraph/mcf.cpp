@@ -13,7 +13,16 @@ void MultiCommodityFlow::Run(LinkGraphComponent * g) {
 }
 
 bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint dist) const {
-	return (cap > 0 && base->distance + dist < distance);
+	if (cap > 0 && base->capacity > 0) {
+		if (capacity <= 0) {
+			return true; // if the other path has capacity left and this one hasn't, the other one's better
+		} else {
+			return base->distance + dist < distance;
+		}
+	} else {
+		false; // if the other path doesn't have capacity left, this one is always better
+	}
+
 }
 
 bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint dist) const {
@@ -105,8 +114,10 @@ void MultiCommodityFlow::SimpleSolver() {
 					uint flow = edge.unsatisfied_demand / accuracy;
 					if (flow == 0) flow = 1;
 					flow = path->AddFlow(flow, graph, positive_cap);
-					edge.unsatisfied_demand -= flow;
-					demand_routed = true;
+					if (flow > 0) {
+						demand_routed = true;
+						edge.unsatisfied_demand -= flow;
+					}
 				}
 			}
 
