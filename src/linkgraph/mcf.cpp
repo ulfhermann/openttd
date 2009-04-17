@@ -20,9 +20,8 @@ bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint
 			return base->distance + dist < distance;
 		}
 	} else {
-		false; // if the other path doesn't have capacity left, this one is always better
+		return false; // if the other path doesn't have capacity left, this one is always better
 	}
-
 }
 
 bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint dist) const {
