@@ -6,6 +6,8 @@
 #define STATION_GUI_H
 
 #include "command_type.h"
+#include "station_type.h"
+#include <set>
 
 /** Enum for StationView, referring to _station_view_widgets and _station_view_expanded_widgets */
 enum StationViewWidgets {
@@ -36,5 +38,86 @@ int DrawStationCoverageAreaText(int sx, int sy, StationCoverageType sct, int rad
 void CheckRedrawStationCoverage(const Window *w);
 
 void ShowSelectStationIfNeeded(CommandContainer cmd, int w, int h);
+
+enum SortOrder {
+	SO_DESCENDING,
+	SO_ASCENDING
+};
+
+enum SortType {
+	ST_STATION,
+	ST_STATION_ID,
+	ST_CARGO_ID,
+	ST_COUNT,
+};
+
+class CargoDataEntry;
+
+class CargoSorter {
+public:
+	CargoSorter(SortType t = ST_STATION_ID, SortOrder o = SO_ASCENDING) : type(t), order(o) {}
+	SortType GetSortType() {return type;}
+	bool operator()(const CargoDataEntry & cd1, const CargoDataEntry & cd2) const;
+
+private:
+	SortType type;
+	SortOrder order;
+
+	template<class ID>
+	bool SortId(ID st1, ID st2) const;
+
+	bool SortCount(uint c1, uint c2) const;
+
+	bool SortStation (StationID st1, StationID st2) const;
+};
+
+typedef std::set<CargoDataEntry, CargoSorter> CargoDataSet;
+
+class CargoDataEntry {
+public:
+	CargoDataEntry();
+	~CargoDataEntry();
+
+	CargoDataEntry * Update(StationID s, uint c = 0) {return Update<StationID>(s, c);}
+	CargoDataEntry * Update(CargoID car, uint c = 0) {return Update<CargoID>(car, c);}
+
+	void Remove(StationID s) {subentries->erase(s);}
+	void Remove(CargoID c) {subentries->erase(c);}
+
+	CargoDataEntry * Retrieve(StationID s) const {return Retrieve(subentries->find(s));}
+	CargoDataEntry * Retrieve(CargoID c) const {return Retrieve(subentries->find(c));}
+
+	void Resort(SortType type, SortOrder order);
+
+	StationID GetStation() const {return station;}
+	CargoID GetCargo() const {return cargo;}
+	uint GetCount() const {return count;}
+	CargoDataEntry * GetParent() const {return parent;}
+	uint Size() const {return size;}
+
+	CargoDataSet::const_iterator Begin() const {return subentries->begin();}
+	CargoDataSet::const_iterator End() const {return subentries->end();}
+
+
+
+private:
+
+	CargoDataEntry(StationID st, uint c, CargoDataEntry * p);
+	CargoDataEntry(CargoID car, uint c, CargoDataEntry * p);
+	CargoDataEntry(StationID s);
+	CargoDataEntry(CargoID c);
+	CargoDataEntry * Retrieve(CargoDataSet::iterator i) const;
+	template<class ID>
+	CargoDataEntry * Update(ID s, uint c);
+	void IncrementSize();
+	CargoDataEntry * parent;
+	const union {
+		StationID station;
+		CargoID cargo;
+	};
+	uint size;
+	uint count;
+	CargoDataSet * subentries;
+};
 
 #endif /* STATION_GUI_H */

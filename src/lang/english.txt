@@ -19,7 +19,10 @@ STR_0007_FLAT_LAND_REQUIRED                                     :{WHITE}Flat lan
 STR_0008_WAITING                                                :{BLACK}Waiting: {WHITE}{STRING}
 STR_0009                                                        :{WHITE}{CARGO}
 STR_EN_ROUTE_FROM                                               :{YELLOW}({SHORTCARGO} en-route from {STATION})
-STR_EN_ROUTE_FROM_VIA                                           :{YELLOW}{SHORTCARGO} from {STATION} to {STATION}
+STR_STATION_CARGO                                               :{WHITE}{CARGO}
+STR_STATION_SOURCE                                              :{YELLOW}{COMMA} from {STATION}
+STR_STATION_NEXT                                                :{YELLOW}{COMMA} via {STATION}
+STR_STATION_DESTINATION                                         :{YELLOW}{COMMA} to {STATION}
 STR_000C_ACCEPTS                                                :{BLACK}Accepts: {WHITE}
 STR_000D_ACCEPTS                                                :{BLACK}Accepts: {GOLD}
 STR_SUPPLIES                                                    :{BLACK}Supplies: {GOLD}
