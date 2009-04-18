@@ -39,3 +39,31 @@ int GreatestCommonDivisor(int a, int b)
 	return a;
 
 }
+
+
+/**
+ * Deterministic approximate division.
+ * Cancels out division errors stemming from the integer nature of the division over multiple runs.
+ */
+int DivideApprox(int a, int b) {
+	static int remainder = 0;
+	static int base = 1;
+
+	int mult = LeastCommonMultiple(base, b);
+	a *= mult / b;
+	remainder *= mult / base;
+	base = mult;
+
+	remainder += a % base;
+
+	int ret = a / base;
+	if (remainder >= base) {
+		ret++;
+		remainder -= base;
+	}
+
+	int div = GreatestCommonDivisor(remainder, base);
+	remainder /= div;
+	base /= div;
+	return ret;
+}

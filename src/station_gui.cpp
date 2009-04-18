@@ -865,6 +865,7 @@ struct StationViewWindow : public Window {
 		};
 	};
 	typedef std::vector<RowDisplay> CargoDataVector;
+	typedef std::map<StationID, uint> DestinationMap;
 
 	static const int _spacing_side = 2;
 	static const int _spacing_symbol = 10;
@@ -970,7 +971,57 @@ struct StationViewWindow : public Window {
 		}
 	}
 
-	void BuildFlowList(CargoID i, const FlowStatMap & flows, CargoDataEntry * cargo) {
+
+
+	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, DestinationMap & dest, bool sent) {
+		if (IsValidStationID(next) && IsValidStationID(source)) {
+			DestinationMap tmp;
+			uint sum_flows = 0;
+			FlowStatMap & flowmap = GetStation(next)->goods[cargo].flows;
+			FlowStatMap::iterator map_it = flowmap.find(source);
+			if (map_it != flowmap.end()) {
+				FlowStatSet & flows = map_it->second;
+				for (FlowStatSet::iterator i = flows.begin(); i != flows.end(); ++i) {
+					uint flow = 0;
+					if (sent) {
+						flow =  i->sent;
+					} else {
+						flow =  i->planned;
+					}
+					sum_flows += flow;
+					tmp[i->via] = flow;
+				}
+			}
+
+			if (sum_flows == 0) {
+				dest[INVALID_STATION] += count;
+			} else {
+				uint sum_estimated = 0;
+				for(DestinationMap::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+					uint estimate = DivideApprox(i->second * count, sum_flows);
+					sum_estimated += estimate;
+
+					if (estimate > 0) {
+						if (i->first == next) {
+							dest[next] += estimate;
+						} else {
+							if (dest.find(next) == dest.end()) {
+								dest[next] += 0;
+								EstimateDestinations(cargo, source, i->first, estimate, dest, sent);
+							} else {
+								dest[INVALID_STATION] += estimate;
+							}
+						}
+					}
+				}
+				dest[INVALID_STATION] += count - sum_estimated;
+			}
+		} else {
+			dest[INVALID_STATION] += count;
+		}
+	}
+
+	void BuildFlowList(CargoID i, StationID curr, const FlowStatMap & flows, CargoDataEntry * cargo) {
 		uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
 		for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
 			StationID from = it->first;
@@ -978,13 +1029,23 @@ struct StationViewWindow : public Window {
 			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
 				const FlowStat & stat = *flow_it;
 				uint val = 0;
+				DestinationMap dest;
 				if (this->widget[SVW_FLOWS].data == _show_planned) {
-					val = stat.planned * 30 / scale;
+					val = DivideApprox(stat.planned * 30, scale);
 				} else {
-					val = stat.sent * 30 / scale;
+					val = DivideApprox(stat.sent * 30, scale);
 				}
-				if (val > 0) {
-					ShowCargo(cargo, i, from, stat.via, INVALID_STATION, val);
+
+				if (stat.via == curr) {
+					dest[curr] = val;
+				} else {
+					EstimateDestinations(i, from, stat.via, val, dest, this->widget[SVW_FLOWS].data == _show_sent);
+				}
+
+				for (DestinationMap::iterator dest_it = dest.begin(); dest_it != dest.end(); ++dest_it) {
+					if (dest_it->second > 0) {
+						ShowCargo(cargo, i, from, stat.via, dest_it->first, dest_it->second);
+					}
 				}
 			}
 		}
@@ -993,7 +1054,13 @@ struct StationViewWindow : public Window {
 	void BuildCargoList(CargoID i, const CargoList & packets, CargoDataEntry * cargo) {
 		for (CargoList::List::const_iterator it = packets.Packets()->begin(); it != packets.Packets()->end(); it++) {
 			const CargoPacket *cp = *it;
-			ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->count);
+			DestinationMap dest;
+			EstimateDestinations(i, cp->source, cp->next, cp->count, dest, false);
+			for (DestinationMap::iterator dest_it = dest.begin(); dest_it != dest.end(); ++dest_it) {
+				if (dest_it->second > 0) {
+					ShowCargo(cargo, i, cp->source, cp->next, dest_it->first, dest_it->second);
+				}
+			}
 		}
 	}
 
@@ -1002,7 +1069,7 @@ struct StationViewWindow : public Window {
 			if (this->widget[SVW_FLOWS].data == _show_waiting) {
 				BuildCargoList(i, st->goods[i].cargo, cargo);
 			} else {
-				BuildFlowList(i, st->goods[i].flows, cargo);
+				BuildFlowList(i, st->index, st->goods[i].flows, cargo);
 			}
 		}
 	}
