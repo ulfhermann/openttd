@@ -655,12 +655,15 @@ static const Widget _station_view_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,          STR_018B_CLOSE_WINDOW},                // SVW_CLOSEBOX
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   236,     0,    13, STR_300A_0,        STR_018C_WINDOW_TITLE_DRAG_THIS},
 {  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,               STR_STICKY_BUTTON},
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    14,    65, 0x0,               STR_NULL},                             // SVW_WAITING
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    14,    65, 0x0,               STR_0190_SCROLL_BAR_SCROLLS_LIST},
-{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    66,    97, 0x0,               STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    10,    14,    25, STR_EMPTY,         STR_SORT_ORDER_TIP},               // SLW_SORTBY
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    11,    70,    14,    25, 0x0,               STR_SORT_CRITERIA_TIP},            // SLW_SORTDROPBTN
+{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    71,   248,    14,    25, 0x0,               STR_GROUP_TIP},
+{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    26,    75, 0x0,               STR_NULL},                             // SVW_WAITING
+{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    26,    75, 0x0,               STR_0190_SCROLL_BAR_SCROLLS_LIST},
+{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    76,    97, 0x0,               STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
 { WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    44,    98,   109, STR_00E4_LOCATION, STR_3053_CENTER_MAIN_VIEW_ON_STATION}, // SVW_LOCATION
 { WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    45,    89,    98,   109, STR_3032_RATINGS,  STR_3054_SHOW_STATION_RATINGS},        // SVW_RATINGS / SVW_ACCEPTS
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    90,   134,    98,   109, STR_PLANNED_VIEW,  STR_REAL_FLOW_VIEW},
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    90,   134,    98,   109, STR_BUTTON_PLANNED,STR_TOGGLE_CARGO_VIEW},
 { WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   135,   180,    98,   109, STR_0130_RENAME,   STR_3055_CHANGE_NAME_OF_STATION},      // SVW_RENAME
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,    98,   109, STR_TRAIN,         STR_SCHEDULED_TRAINS_TIP },            // SVW_TRAINS
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,    98,   109, STR_LORRY,         STR_SCHEDULED_ROAD_VEHICLES_TIP },     // SVW_ROADVEHS
@@ -868,24 +871,31 @@ struct StationViewWindow : public Window {
 	static const int _spacing_column = 10;
 	static const int _spacing_row = 10;
 	static const int _spacing_icons = 4;
-	static const int _spacing_top = 5;
+	static const int _spacing_top = 20;
 	static const int _num_columns = 4;
 
+	static const StringID _show_waiting = STR_BUTTON_PLANNED;
+	static const StringID _show_planned = STR_BUTTON_SENT;
+	static const StringID _show_sent = STR_BUTTON_WAITING;
+
 	enum Grouping {
-		CARGO,
 		SOURCE,
 		NEXT,
-		DESTINATION
+		DESTINATION,
+		CARGO,
 	};
 
 	enum Sorting {
-		GROUPING,
-		COUNT
+		GROUPING = 0,
+		COUNT = 1
 	};
 
+	static const StringID _sort_names[];
+	static const StringID _group_names[];
 
 	Sorting sortings[_num_columns];
 	SortOrder sort_orders[_num_columns];
+	int grouping_index;
 	Grouping groupings[_num_columns];
 
 	CargoDataEntry expanded_rows;
@@ -912,10 +922,13 @@ struct StationViewWindow : public Window {
 
 		Owner owner = GetStation(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
-		this->vscroll.cap = 5;
+		this->vscroll.cap = 4;
 		this->resize.step_height = 10;
 
 		this->FindWindowPlacementAndResize(desc);
+		this->widget[SVW_SORT_BY].data = this->_sort_names[GROUPING];
+		this->widget[SVW_GROUP_BY].data = STR_GROUP_S_V_D;
+		grouping_index = 0;
 	}
 
 	~StationViewWindow()
@@ -964,9 +977,14 @@ struct StationViewWindow : public Window {
 			const FlowStatSet & flow_set = it->second;
 			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
 				const FlowStat & stat = *flow_it;
-				uint planned = stat.planned * 30 / scale;
-				if (planned > 0) {
-					ShowCargo(cargo, i, from, stat.via, INVALID_STATION, planned);
+				uint val = 0;
+				if (this->widget[SVW_FLOWS].data == _show_planned) {
+					val = stat.planned * 30 / scale;
+				} else {
+					val = stat.sent * 30 / scale;
+				}
+				if (val > 0) {
+					ShowCargo(cargo, i, from, stat.via, INVALID_STATION, val);
 				}
 			}
 		}
@@ -981,10 +999,10 @@ struct StationViewWindow : public Window {
 
 	void BuildCargoList(CargoDataEntry * cargo, const Station * st) {
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			if (this->widget[SVW_FLOWS].data == STR_REAL_FLOW_VIEW) {
-				BuildFlowList(i, st->goods[i].flows, cargo);
-			} else {
+			if (this->widget[SVW_FLOWS].data == _show_waiting) {
 				BuildCargoList(i, st->goods[i].cargo, cargo);
+			} else {
+				BuildFlowList(i, st->goods[i].flows, cargo);
 			}
 		}
 	}
@@ -1098,24 +1116,43 @@ struct StationViewWindow : public Window {
 		SetDParam(1, st->facilities);
 		this->DrawWidgets();
 
+		/* draw arrow pointing up/down for ascending/descending sorting */
+		this->DrawSortButtonState(SVW_SORT_ORDER, sort_orders[1] == SO_ASCENDING ? SBS_DOWN : SBS_UP);
+
 		int pos = this->vscroll.pos; ///< = this->vscroll.pos
 
 		int maxrows = this->vscroll.cap;
 
-		StringID str;
+
 
 		displayed_rows.clear();
 		if (--pos < 0) {
-			str = STR_00D0_NOTHING;
-			for (CargoID i = 0; i < NUM_CARGO; i++) {
-				if (!st->goods[i].cargo.Empty()) str = STR_EMPTY;
+			StringID str_nothing = STR_00D0_NOTHING;
+			for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
+				if (this->widget[SVW_FLOWS].data == _show_waiting) {
+					if (!st->goods[i].cargo.Empty()) str_nothing = STR_EMPTY;
+				} else {
+					if (!st->goods[i].flows.empty()) str_nothing = STR_EMPTY;
+				}
 			}
-			SetDParam(0, str);
+			StringID str_caption;
+			switch (this->widget[SVW_FLOWS].data) {
+			case _show_waiting:
+				str_caption = STR_0008_WAITING;
+				break;
+			case _show_planned:
+				str_caption = STR_PLANNED;
+				break;
+			case _show_sent:
+				str_caption = STR_SENT;
+				break;
+			}
+			SetDParam(0, str_nothing);
 			DrawString(
 					_spacing_side,
 					this->widget[SVW_WAITING].right - _spacing_side,
 					_spacing_top + _spacing_row,
-					STR_0008_WAITING,
+					str_caption,
 					TC_FROMSTRING
 			);
 			displayed_rows.push_back(RowDisplay(&expanded_rows, (CargoID)CT_INVALID));
@@ -1187,7 +1224,6 @@ struct StationViewWindow : public Window {
 
 	void HandleCargoWaitingClick(int row)
 	{
-		if (row == 0) return;
 		RowDisplay & display = displayed_rows[row];
 
 		if (display.filter == &expanded_rows) {
@@ -1202,7 +1238,7 @@ struct StationViewWindow : public Window {
 	{
 		switch (widget) {
 			case SVW_WAITING:
-				this->HandleCargoWaitingClick((pt.y - this->widget[SVW_WAITING].top) / 10);
+				this->HandleCargoWaitingClick((pt.y - this->widget[SVW_WAITING].top - 5) / 10);
 				break;
 
 			case SVW_LOCATION:
@@ -1266,14 +1302,98 @@ struct StationViewWindow : public Window {
 
 			case SVW_FLOWS: {
 				this->SetDirty();
-				if (this->widget[SVW_FLOWS].data == STR_PLANNED_VIEW) {
-					this->widget[SVW_FLOWS].data = STR_REAL_FLOW_VIEW;
+				if (this->widget[SVW_FLOWS].data == STR_BUTTON_PLANNED) {
+					this->widget[SVW_FLOWS].data = _show_planned;
+				} else if (this->widget[SVW_FLOWS].data == STR_BUTTON_SENT) {
+					this->widget[SVW_FLOWS].data = _show_sent;
 				} else {
-					this->widget[SVW_FLOWS].data = STR_PLANNED_VIEW;
+					this->widget[SVW_FLOWS].data = _show_waiting;
 				}
 				this->SetDirty();
 				break;
 			}
+
+			case SVW_SORT_BY: {
+				ShowDropDownMenu(this, _sort_names, sortings[1], SVW_SORT_BY, 0, 0);
+				break;
+			}
+
+			case SVW_GROUP_BY: {
+				ShowDropDownMenu(this, _group_names, grouping_index, SVW_GROUP_BY, 0, 0);
+				break;
+			}
+
+			case SVW_SORT_ORDER: { // flip sorting method asc/desc
+				ToggleSortOrder();
+				break;
+			}
+		}
+	}
+
+	void ToggleSortOrder() {
+		if (sort_orders[1] == SO_ASCENDING) {
+			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_DESCENDING;
+		} else {
+			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_ASCENDING;
+		}
+		this->flags4 |= WF_TIMEOUT_BEGIN;
+		this->LowerWidget(SVW_SORT_ORDER);
+		this->SetDirty();
+	}
+
+	void SelectSortBy(Sorting index) {
+		if (this->sortings[0] != index) {
+			sortings[1] = sortings[2] = sortings[3] = index;
+			/* Display the current sort variant */
+			this->widget[SVW_SORT_BY].data = this->_sort_names[index];
+			this->SetDirty();
+		}
+	}
+
+	void SelectGroupBy(int index) {
+		if (grouping_index != index) {
+			grouping_index = index;
+			this->widget[SVW_GROUP_BY].data = _group_names[index];
+			switch(_group_names[index]) {
+			case STR_GROUP_S_V_D:
+				groupings[1] = SOURCE;
+				groupings[2] = NEXT;
+				groupings[3] = DESTINATION;
+				break;
+			case STR_GROUP_S_D_V:
+				groupings[1] = SOURCE;
+				groupings[2] = DESTINATION;
+				groupings[3] = NEXT;
+				break;
+			case STR_GROUP_V_S_D:
+				groupings[1] = NEXT;
+				groupings[2] = SOURCE;
+				groupings[3] = DESTINATION;
+				break;
+			case STR_GROUP_V_D_S:
+				groupings[1] = NEXT;
+				groupings[2] = DESTINATION;
+				groupings[3] = SOURCE;
+				break;
+			case STR_GROUP_D_S_V:
+				groupings[1] = DESTINATION;
+				groupings[2] = SOURCE;
+				groupings[3] = NEXT;
+			case STR_GROUP_D_V_S:
+				groupings[1] = DESTINATION;
+				groupings[2] = NEXT;
+				groupings[3] = SOURCE;
+			}
+			this->SetDirty();
+		}
+	}
+
+	virtual void OnDropdownSelect(int widget, int index)
+	{
+		if (widget == SVW_SORT_BY) {
+			SelectSortBy((Sorting)index);
+		} else {
+			SelectGroupBy(index);
 		}
 	}
 
@@ -1289,6 +1409,23 @@ struct StationViewWindow : public Window {
 		if (delta.x != 0) ResizeButtons(this, SVW_LOCATION, SVW_RENAME);
 		this->vscroll.cap += delta.y / (int)this->resize.step_height;
 	}
+};
+
+
+const StringID StationViewWindow::_sort_names[] = {
+	STR_SORT_BY_STATION,
+	STR_SORT_BY_AMOUNT,
+	INVALID_STRING_ID
+};
+
+const StringID StationViewWindow::_group_names[] = {
+	STR_GROUP_S_V_D,
+	STR_GROUP_S_D_V,
+	STR_GROUP_V_S_D,
+	STR_GROUP_V_D_S,
+	STR_GROUP_D_S_V,
+	STR_GROUP_D_V_S,
+	INVALID_STRING_ID
 };
 
 

@@ -17,6 +17,12 @@ STR_0004                                                        :{WHITE}{CURRENC
 STR_EMPTY                                                       :
 STR_0007_FLAT_LAND_REQUIRED                                     :{WHITE}Flat land required
 STR_0008_WAITING                                                :{BLACK}Waiting: {WHITE}{STRING}
+STR_PLANNED                                                     :{BLACK}Planned: {WHITE}{STRING}
+STR_SENT                                                        :{BLACK}Sent: {WHITE}{STRING}
+STR_BUTTON_WAITING                                              :{BLACK}Waiting
+STR_BUTTON_PLANNED                                              :{BLACK}Planned
+STR_BUTTON_SENT                                                 :{BLACK}Sent
+STR_TOGGLE_CARGO_VIEW                                           :{BLACK}Toggle between waiting, planned and sent cargo
 STR_0009                                                        :{WHITE}{CARGO}
 STR_EN_ROUTE_FROM                                               :{YELLOW}({SHORTCARGO} en-route from {STATION})
 STR_STATION_CARGO                                               :{WHITE}{CARGO}
@@ -246,8 +252,6 @@ STR_DEFAULT                                                     :{BLACK}Default
 STR_012E_CANCEL                                                 :{BLACK}Cancel
 STR_012F_OK                                                     :{BLACK}OK
 STR_0130_RENAME                                                 :{BLACK}Rename
-STR_PLANNED_VIEW                                                :{BLACK}Planned Cargo
-STR_REAL_FLOW_VIEW                                              :{BLACK}Real Cargo
 
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
@@ -328,6 +332,13 @@ STR_SORT_ORDER_TIP                                              :{BLACK}Select s
 STR_SORT_CRITERIA_TIP                                           :{BLACK}Select sorting criteria
 STR_FILTER_CRITERIA_TIP                                         :{BLACK}Select filtering criteria
 STR_SORT_BY                                                     :{BLACK}Sort by
+STR_GROUP_TIP                                                   :Select grouping order
+STR_GROUP_S_V_D                                                 :Source-Via-Destination
+STR_GROUP_S_D_V                                                 :Source-Destination-Via
+STR_GROUP_V_S_D                                                 :Via-Source-Destination
+STR_GROUP_V_D_S                                                 :Via-Destination-Source
+STR_GROUP_D_S_V                                                 :Destination-Source-Via
+STR_GROUP_D_V_S                                                 :Destination-Via-Source
 
 STR_SORT_BY_POPULATION                                          :{BLACK}Population
 STR_SORT_BY_PRODUCTION                                          :Production
@@ -351,6 +362,8 @@ STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waiting cargo value
 STR_SORT_BY_RATING_MAX                                          :Highest cargo rating
 STR_SORT_BY_RATING_MIN                                          :Lowest cargo rating
+STR_SORT_BY_AMOUNT                                              :Amount
+STR_SORT_BY_STATION                                             :Station
 STR_ENGINE_SORT_ENGINE_ID                                       :EngineID (classic sort)
 STR_ENGINE_SORT_COST                                            :Cost
 STR_ENGINE_SORT_POWER                                           :Power

@@ -13,15 +13,18 @@
 enum StationViewWidgets {
 	SVW_CLOSEBOX   =  0, ///< Close 'X' button
 	SVW_CAPTION    =  1, ///< Caption of the window
-	SVW_WAITING    =  3, ///< List of waiting cargo
-	SVW_ACCEPTLIST =  5, ///< List of accepted cargos
-	SVW_RATINGLIST =  5, ///< Ratings of cargos
-	SVW_LOCATION   =  6, ///< 'Location' button
-	SVW_RATINGS    =  7, ///< 'Ratings' button
-	SVW_ACCEPTS    =  7, ///< 'Accepts' button
-	SVW_FLOWS      =  8, ///< button for toggling planned and real flows
-	SVW_RENAME     =  9, ///< 'Rename' button
-	SVW_TRAINS     = 10, ///< List of scheduled trains button
+	SVW_SORT_ORDER =  3, ///< 'Sort order' button
+	SVW_SORT_BY    =  4, ///< 'Sort by' button
+	SVW_GROUP_BY   =  5, ///< 'Group by' button
+	SVW_WAITING    =  6, ///< List of waiting cargo
+	SVW_ACCEPTLIST =  8, ///< List of accepted cargos
+	SVW_RATINGLIST =  8, ///< Ratings of cargos
+	SVW_LOCATION   =  9, ///< 'Location' button
+	SVW_RATINGS    = 10, ///< 'Ratings' button
+	SVW_ACCEPTS    = 10, ///< 'Accepts' button
+	SVW_FLOWS      = 11, ///< button for toggling planned and real flows
+	SVW_RENAME     = 12, ///< 'Rename' button
+	SVW_TRAINS     = 13, ///< List of scheduled trains button
 	SVW_ROADVEHS,        ///< List of scheduled road vehs button
 	SVW_PLANES,          ///< List of scheduled planes button
 	SVW_SHIPS,           ///< List of scheduled ships button
