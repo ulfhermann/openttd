@@ -57,7 +57,7 @@ class CargoSorter {
 public:
 	CargoSorter(SortType t = ST_STATION_ID, SortOrder o = SO_ASCENDING) : type(t), order(o) {}
 	SortType GetSortType() {return type;}
-	bool operator()(const CargoDataEntry & cd1, const CargoDataEntry & cd2) const;
+	bool operator()(const CargoDataEntry * cd1, const CargoDataEntry * cd2) const;
 
 private:
 	SortType type;
@@ -66,12 +66,10 @@ private:
 	template<class ID>
 	bool SortId(ID st1, ID st2) const;
 
-	bool SortCount(uint c1, uint c2) const;
-
 	bool SortStation (StationID st1, StationID st2) const;
 };
 
-typedef std::set<CargoDataEntry, CargoSorter> CargoDataSet;
+typedef std::set<CargoDataEntry *, CargoSorter> CargoDataSet;
 
 class CargoDataEntry {
 public:
@@ -81,11 +79,11 @@ public:
 	CargoDataEntry * Update(StationID s, uint c = 0) {return Update<StationID>(s, c);}
 	CargoDataEntry * Update(CargoID car, uint c = 0) {return Update<CargoID>(car, c);}
 
-	void Remove(StationID s) {subentries->erase(s);}
-	void Remove(CargoID c) {subentries->erase(c);}
+	void Remove(StationID s) {CargoDataEntry t(s); subentries->erase(&t);}
+	void Remove(CargoID c) {CargoDataEntry t(c); subentries->erase(&t);}
 
-	CargoDataEntry * Retrieve(StationID s) const {return Retrieve(subentries->find(s));}
-	CargoDataEntry * Retrieve(CargoID c) const {return Retrieve(subentries->find(c));}
+	CargoDataEntry * Retrieve(StationID s) const {CargoDataEntry t(s); return Retrieve(subentries->find(&t));}
+	CargoDataEntry * Retrieve(CargoID c) const {CargoDataEntry t(c);return Retrieve(subentries->find(&t));}
 
 	void Resort(SortType type, SortOrder order);
 

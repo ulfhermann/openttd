@@ -749,17 +749,23 @@ CargoDataEntry::CargoDataEntry(CargoID ca) :
 {}
 
 CargoDataEntry::~CargoDataEntry() {
-	delete subentries;
+	if (subentries != NULL) {
+		for (CargoDataSet::iterator i = subentries->begin(); i != subentries->end(); ++i) {
+			delete *i;
+		}
+		delete subentries;
+	}
 }
 
 template<class ID>
 CargoDataEntry * CargoDataEntry::Update(ID s, uint c) {
-	CargoDataSet::iterator i = subentries->find(s);
+	CargoDataEntry tmp(s);
+	CargoDataSet::iterator i = subentries->find(&tmp);
 	if (i == subentries->end()) {
 		IncrementSize();
-		return &const_cast<CargoDataEntry &>(*(subentries->insert(CargoDataEntry(s, c, this)).first));
+		return *(subentries->insert(new CargoDataEntry(s, c, this)).first);
 	} else {
-		CargoDataEntry * ret = &const_cast<CargoDataEntry &>(*i);
+		CargoDataEntry * ret = *i;
 		assert(subentries->value_comp().GetSortType() != ST_COUNT);
 		ret->count += c;
 		return ret;
@@ -782,23 +788,23 @@ CargoDataEntry * CargoDataEntry::Retrieve(CargoDataSet::iterator i) const {
 		return NULL;
 	} else {
 		assert(subentries->value_comp().GetSortType() != ST_COUNT);
-		return &const_cast<CargoDataEntry &>(*i);
+		return *i;
 	}
 }
 
-bool CargoSorter::operator()(const CargoDataEntry & cd1, const CargoDataEntry & cd2) const {
+bool CargoSorter::operator()(const CargoDataEntry * cd1, const CargoDataEntry * cd2) const {
 	switch (type) {
 	case ST_STATION_ID:
-		return SortId<StationID>(cd1.GetStation(), cd2.GetStation());
+		return SortId<StationID>(cd1->GetStation(), cd2->GetStation());
 		break;
 	case ST_CARGO_ID:
-		return SortId<CargoID>(cd1.GetCargo(), cd2.GetCargo());
+		return SortId<CargoID>(cd1->GetCargo(), cd2->GetCargo());
 		break;
 	case ST_COUNT:
-		return SortId<uint>(cd1.GetCount(), cd2.GetCount());
+		return SortId<uint>(cd1->GetCount(), cd2->GetCount());
 		break;
 	case ST_STATION:
-		return SortStation(cd1.GetStation(), cd2.GetStation());
+		return SortStation(cd1->GetStation(), cd2->GetStation());
 		break;
 	}
 	NOT_REACHED();
@@ -815,6 +821,9 @@ bool CargoSorter::SortId(ID st1, ID st2) const {
 }
 
 bool CargoSorter::SortStation(StationID st1, StationID st2) const {
+	static char buf1[64];
+	static char buf2[64];
+
 	if (!IsValidStationID(st1)) {
 		if (!IsValidStationID(st2)) {
 			return st1 < st2;
@@ -823,7 +832,13 @@ bool CargoSorter::SortStation(StationID st1, StationID st2) const {
 	} else if (!IsValidStationID(st2)) {
 		return order == SO_DESCENDING;
 	}
-	int res = strcmp(GetStation(st1)->name, GetStation(st2)->name);
+
+	SetDParam(0, st1);
+	GetString(buf1, STR_STATION, lastof(buf1));
+	SetDParam(0, st2);
+	GetString(buf2, STR_STATION, lastof(buf2));
+
+	int res = strcmp(buf1, buf2);
 	if (res == 0) {
 		return false;
 	} else if (res < 0) {
@@ -848,13 +863,13 @@ struct StationViewWindow : public Window {
 	};
 	typedef std::vector<RowDisplay> CargoDataVector;
 
-	static const int SPACING_TOP = 15;
-	static const int SPACING_SIDE = 2;
-	static const int SPACING_SYMBOL = 10;
-	static const int SPACING_COLUMN = 10;
-	static const int SPACING_ROW = 10;
-	static const int SPACING_ICONS = 4;
-
+	static const int _spacing_side = 2;
+	static const int _spacing_symbol = 10;
+	static const int _spacing_column = 10;
+	static const int _spacing_row = 10;
+	static const int _spacing_icons = 4;
+	static const int _spacing_top = 5;
+	static const int _num_columns = 4;
 
 	enum Grouping {
 		CARGO,
@@ -868,7 +883,7 @@ struct StationViewWindow : public Window {
 		COUNT
 	};
 
-	static const int _num_columns = 4;
+
 	Sorting sortings[_num_columns];
 	SortOrder sort_orders[_num_columns];
 	Grouping groupings[_num_columns];
@@ -881,15 +896,19 @@ struct StationViewWindow : public Window {
 	{
 		groupings[0] = CARGO;
 		sortings[0] = GROUPING;
+		sort_orders[0] = SO_ASCENDING;
 
 		groupings[1] = SOURCE;
 		sortings[1] = GROUPING;
+		sort_orders[1] = SO_ASCENDING;
 
 		groupings[2] = NEXT;
 		sortings[2] = GROUPING;
+		sort_orders[2] = SO_ASCENDING;
 
 		groupings[3] = DESTINATION;
 		sortings[3] = GROUPING;
+		sort_orders[3] = SO_ASCENDING;
 
 		Owner owner = GetStation(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
@@ -970,16 +989,16 @@ struct StationViewWindow : public Window {
 		}
 	}
 
-	void SetDisplayedRow(CargoDataEntry * data) {
+	void SetDisplayedRow(const CargoDataEntry * data) {
 		std::list<StationID> stations;
-		CargoDataEntry * parent = data->GetParent();
+		const CargoDataEntry * parent = data->GetParent();
 		if (parent->GetParent() == NULL) {
 			displayed_rows.push_back(RowDisplay(&expanded_rows, data->GetCargo()));
 			return;
 		}
 
 		StationID next = data->GetStation();
-		while(parent->GetParent() != NULL) {
+		while(parent->GetParent()->GetParent() != NULL) {
 			stations.push_back(parent->GetStation());
 			parent = parent->GetParent();
 		}
@@ -1003,62 +1022,58 @@ struct StationViewWindow : public Window {
 			entry->Resort(ST_COUNT, sort_orders[column]);
 		}
 		for (CargoDataSet::iterator i = entry->Begin(); i != entry->End(); ++i) {
-			if (--pos < 0) {
-				const CargoDataEntry *cd = &(*i);
+			CargoDataEntry *cd = *i;
+			if (pos > -maxrows && --pos < 0) {
 				StringID str;
+				SetDParam(0, cd->GetCount());
+				SetDParam(1, cd->GetStation());
 
 				switch(groupings[column]) {
 				case CARGO:
 					str = STR_STATION_CARGO;
 					SetDParam(0, cd->GetCargo());
+					SetDParam(1, cd->GetCount());
 					DrawCargoIcons(
 							cd->GetCargo(),
 							cd->GetCount(),
-							SPACING_SIDE + column * SPACING_COLUMN,
-							SPACING_TOP - pos * SPACING_ROW,
-							this->widget[SVW_WAITING].right - this->widget[SVW_WAITING].left - SPACING_ICONS
+							_spacing_side + column * _spacing_column,
+							_spacing_top - pos * _spacing_row,
+							this->widget[SVW_WAITING].right - this->widget[SVW_WAITING].left - _spacing_icons
 					);
 					break;
 				case SOURCE:
 					str = STR_STATION_SOURCE;
-					SetDParam(0, cd->GetStation());
 					break;
 				case NEXT:
 					str = STR_STATION_NEXT;
-					SetDParam(0, cd->GetStation());
 					break;
 				case DESTINATION:
 					str = STR_STATION_DESTINATION;
-					SetDParam(0, cd->GetStation());
 					break;
 				}
 
+				DrawString(
+						this->widget[SVW_WAITING].left + _spacing_side + column * _spacing_column,
+						this->widget[SVW_WAITING].right - _spacing_side - _spacing_symbol,
+						_spacing_top - pos * _spacing_row,
+						str,
+						TC_FROMSTRING
+				);
 
-				SetDParam(1, cd->GetCount());
-				if (column < _num_columns) {
-					const char *sym = entry->Size() > 1 ? "-" : "+";
+				if (column < _num_columns - 1) {
+					const char *sym = cd->Size() > 0 ? "-" : "+";
 					DrawString(
-							this->widget[SVW_WAITING].left + SPACING_SIDE + column * SPACING_COLUMN,
-							this->widget[SVW_WAITING].right - SPACING_SIDE - SPACING_SYMBOL,
-							SPACING_TOP - pos * SPACING_ROW,
-							str,
-							TC_FROMSTRING
-					);
-					DrawString(
-							this->widget[SVW_WAITING].right - SPACING_SYMBOL,
+							this->widget[SVW_WAITING].right - _spacing_symbol,
 							this->widget[SVW_WAITING].right,
-							SPACING_TOP - pos * SPACING_ROW,
+							_spacing_top - pos * _spacing_row,
 							sym,
 							TC_YELLOW
 					);
-					SetDisplayedRow(entry);
 				}
-
-				if (pos > -maxrows) {
-					pos = DrawEntries(entry, pos, maxrows, column + 1);
-				}
-
+				SetDisplayedRow(cd);
 			}
+			pos = DrawEntries(cd, pos, maxrows, column + 1);
+
 		}
 		return pos;
 	}
@@ -1069,7 +1084,6 @@ struct StationViewWindow : public Window {
 		const Station *st = GetStation(station_id);
 		CargoDataEntry cargo;
 		BuildCargoList(&cargo, st);
-
 
 		SetVScrollCount(this, cargo.Size() + 1); // update scrollbar
 
@@ -1090,6 +1104,7 @@ struct StationViewWindow : public Window {
 
 		StringID str;
 
+		displayed_rows.clear();
 		if (--pos < 0) {
 			str = STR_00D0_NOTHING;
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
@@ -1097,20 +1112,16 @@ struct StationViewWindow : public Window {
 			}
 			SetDParam(0, str);
 			DrawString(
-					SPACING_SIDE,
-					this->widget[SVW_WAITING].right - SPACING_SIDE,
-					SPACING_TOP,
+					_spacing_side,
+					this->widget[SVW_WAITING].right - _spacing_side,
+					_spacing_top + _spacing_row,
 					STR_0008_WAITING,
 					TC_FROMSTRING
 			);
-		} else {
-			++pos;
+			displayed_rows.push_back(RowDisplay(&expanded_rows, (CargoID)CT_INVALID));
 		}
 
-		displayed_rows.clear();
-		CargoDataEntry * entry = &cargo;
-
-		DrawEntries(entry, pos, maxrows, 0);
+		DrawEntries(&cargo, pos, maxrows, 0);
 
 		if (this->widget[SVW_ACCEPTS].data == STR_3032_RATINGS) { // small window with list of accepted cargo
 			char string[512];
@@ -1191,7 +1202,7 @@ struct StationViewWindow : public Window {
 	{
 		switch (widget) {
 			case SVW_WAITING:
-				this->HandleCargoWaitingClick((pt.y - this->widget[SVW_WAITING].top) / 10 + this->vscroll.pos);
+				this->HandleCargoWaitingClick((pt.y - this->widget[SVW_WAITING].top) / 10);
 				break;
 
 			case SVW_LOCATION:
