@@ -239,7 +239,7 @@ void Path::UnFork() {
 
 Path::Path(NodeID n, bool source)  :
 	distance(source ? 0 : UINT_MAX),
-	capacity(source ? UINT_MAX : 0),
+	capacity(source ? INT_MAX : 0),
 	flow(0), node(n), num_children(0), parent(NULL)
 {}
 
