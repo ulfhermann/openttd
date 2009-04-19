@@ -46,24 +46,14 @@ int GreatestCommonDivisor(int a, int b)
  * Cancels out division errors stemming from the integer nature of the division over multiple runs.
  */
 int DivideApprox(int a, int b) {
-	static int remainder = 0;
-	static int base = 1;
+	int random_like = (a + b * (a - b)) % b;
 
-	int mult = LeastCommonMultiple(base, b);
-	a *= mult / b;
-	remainder *= mult / base;
-	base = mult;
+	int remainder = a % b;
 
-	remainder += a % base;
-
-	int ret = a / base;
-	if (remainder >= base) {
-		ret++;
-		remainder -= base;
+	int ret = a / b;
+	if (abs(random_like) < abs(remainder)) {
+		ret += (a * b < 0) ? -1 : 1;
 	}
 
-	int div = GreatestCommonDivisor(remainder, base);
-	remainder /= div;
-	base /= div;
 	return ret;
 }
