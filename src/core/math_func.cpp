@@ -57,3 +57,10 @@ int DivideApprox(int a, int b) {
 
 	return ret;
 }
+
+int Power(int base, uint power) {
+	for (uint i = 0; i < power; ++i) {
+		base *= base;
+	}
+	return base;
+}
