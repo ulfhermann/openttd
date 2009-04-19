@@ -34,14 +34,22 @@ public:
 	virtual void Run(LinkGraphComponent * graph);
 	MultiCommodityFlow();
 	virtual ~MultiCommodityFlow() {}
-private:
-
+protected:
 	template<class ANNOTATION>
-		void Dijkstra(NodeID from, PathVector & paths);
-	void SimpleSolver();
+		void Dijkstra(NodeID from, PathVector & paths, uint max_hops, bool create_new_paths);
+	void PushFlow(Edge & edge, Path * path, uint accuracy, bool positive_cap);
 	void CleanupPaths(PathVector & paths);
-
 	LinkGraphComponent * graph;
+};
+
+class MCF1stPass : public MultiCommodityFlow {
+public:
+	virtual void Run(LinkGraphComponent * graph);
+};
+
+class MCF2ndPass : public MultiCommodityFlow {
+public:
+	virtual void Run(LinkGraphComponent * graph);
 };
 
 #endif /* MCF_H_ */
