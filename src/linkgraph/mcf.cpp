@@ -1,15 +1,15 @@
 /** @file mcf.cpp Definition of Multi-Commodity-Flow solver */
 
 #include "mcf.h"
+#include "../core/math_func.hpp"
 
 MultiCommodityFlow::MultiCommodityFlow() :
 	graph(NULL)
 {}
 
 void MultiCommodityFlow::Run(LinkGraphComponent * g) {
-	assert(g->GetSettings().mcf_accuracy > 1);
+	assert(g->GetSettings().mcf_accuracy >= 1);
 	graph = g;
-	SimpleSolver();
 }
 
 bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint dist) const {
@@ -35,7 +35,7 @@ bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint
 
 
 template<class ANNOTATION>
-void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
+void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths, uint max_hops, bool create_new_paths) {
 	typedef std::set<ANNOTATION *, typename ANNOTATION::comp> AnnoSet;
 	uint size = graph->GetSize();
 	AnnoSet annos;
@@ -45,16 +45,16 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths) {
 		annos.insert(anno);
 		paths[node] = anno;
 	}
-
 	while(!annos.empty()) {
 		typename AnnoSet::iterator i = annos.begin();
 		ANNOTATION * source = *i;
-		NodeID from = source->GetNode();
 		annos.erase(i);
+		if(source->GetHops() == max_hops) continue;
+		NodeID from = source->GetNode();
 		NodeID to = graph->GetFirstEdge(from);
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
-			if (edge.capacity > 0) {
+			if (edge.capacity > 0 && (create_new_paths || edge.flow > 0)) {
 				int capacity = edge.capacity - edge.flow;
 				uint distance = edge.distance;
 				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
@@ -88,44 +88,82 @@ void MultiCommodityFlow::CleanupPaths(PathVector & paths) {
 	paths.clear();
 }
 
+void MultiCommodityFlow::PushFlow(Edge & edge, Path * path, uint accuracy, bool positive_cap) {
+	uint flow = edge.unsatisfied_demand / accuracy;
+	if (flow == 0) flow = 1;
+	flow = path->AddFlow(flow, graph, positive_cap);
+	if (flow > 0) {
+		edge.unsatisfied_demand -= flow;
+	}
+}
 
-void MultiCommodityFlow::SimpleSolver() {
+
+void MCF1stPass::Run(LinkGraphComponent * graph) {
+	MultiCommodityFlow::Run(graph);
 	PathVector paths;
 	uint size = graph->GetSize();
 	uint accuracy = graph->GetSettings().mcf_accuracy;
-	bool positive_cap = true;
-	bool demand_routed = true;
-	while (positive_cap || demand_routed) {
-		demand_routed = false;
-		for (NodeID source = 0; source < size; ++source) {
-			if (positive_cap) {
-				/* first saturate the shortest paths */
-				Dijkstra<DistanceAnnotation>(source, paths);
+	bool demand_left = true;
+	bool decrease_accuracy = true;
+	uint hops = 0;
+	while (demand_left && hops < size) {
+		demand_left = false;
+		if (decrease_accuracy) {
+			accuracy = graph->GetSettings().mcf_accuracy;
+			uint tmp = Power(size, hops);
+			if (tmp < accuracy) {
+				accuracy = tmp;
 			} else {
-				/* then overload all paths equally with the remaining demand */
-				Dijkstra<CapacityAnnotation>(source, paths);
+				decrease_accuracy = false;
 			}
+		}
+		hops++;
+		for (NodeID source = 0; source < size; ++source) {
+			/* first saturate the shortest paths */
+			Dijkstra<DistanceAnnotation>(source, paths, hops, true);
 
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge & edge = graph->GetEdge(source, dest);
 				if (edge.unsatisfied_demand > 0) {
 					Path * path = paths[dest];
-					uint flow = edge.unsatisfied_demand / accuracy;
-					if (flow == 0) flow = 1;
-					flow = path->AddFlow(flow, graph, positive_cap);
-					if (flow > 0) {
-						demand_routed = true;
-						edge.unsatisfied_demand -= flow;
+					if (path->GetCapacity() > 0) {
+						PushFlow(edge, path, accuracy, true);
+					}
+					if (edge.unsatisfied_demand > 0) {
+						demand_left = true;
 					}
 				}
 			}
-
 			CleanupPaths(paths);
 		}
 		if (accuracy > 1) --accuracy;
-		if (positive_cap && !demand_routed) {
-			positive_cap = false;
+	}
+}
+
+void MCF2ndPass::Run(LinkGraphComponent * graph) {
+	MultiCommodityFlow::Run(graph);
+	PathVector paths;
+	uint size = graph->GetSize();
+	uint accuracy = graph->GetSettings().mcf_accuracy;
+	bool demand_left = true;
+	while (demand_left) {
+		demand_left = false;
+		for (NodeID source = 0; source < size; ++source) {
+			/* first saturate the shortest paths */
+			Dijkstra<CapacityAnnotation>(source, paths, size, false);
+			for (NodeID dest = 0; dest < size; ++dest) {
+				Edge & edge = graph->GetEdge(source, dest);
+				if (edge.unsatisfied_demand > 0) {
+					Path * path = paths[dest];
+					PushFlow(edge, path, accuracy, false);
+					if (edge.unsatisfied_demand > 0) {
+						demand_left = true;
+					}
+				}
+			}
+			CleanupPaths(paths);
 		}
+		if (accuracy > 1) --accuracy;
 	}
 }
 
