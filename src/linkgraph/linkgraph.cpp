@@ -211,6 +211,7 @@ void Path::Fork(Path * base, int cap, uint dist) {
 		parent = base;
 		parent->num_children++;
 	}
+	hops = parent->hops + 1;
 }
 
 uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
@@ -235,18 +236,21 @@ void Path::UnFork() {
 		parent->num_children--;
 		parent = NULL;
 	}
+	hops = 0;
 }
 
 Path::Path(NodeID n, bool source)  :
 	distance(source ? 0 : UINT_MAX),
 	capacity(source ? INT_MAX : 0),
-	flow(0), node(n), num_children(0), parent(NULL)
+	flow(0), node(n), num_children(0), parent(NULL),
+	hops(source ? 0 : 1)
 {}
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
 	join_date = _date + component->GetSettings().recalc_interval;
 	AddHandler(new DemandCalculator);
-	AddHandler(new MultiCommodityFlow);
+	AddHandler(new MCF1stPass);
+	AddHandler(new MCF2ndPass);
 	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
 		// Of course this will hang a bit.

@@ -158,6 +158,7 @@ public:
 	uint GetFlow() {return flow;}
 	uint GetNumChildren() {return num_children;}
 	void UnFork();
+	uint GetHops() {return hops;}
 protected:
 	uint distance;
 	int capacity;      ///< this capacity is edge.capacity - edge.flow for the current run of dijkstra
@@ -165,6 +166,7 @@ protected:
 	NodeID node;
 	uint num_children;
 	Path * parent;
+	uint hops;
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];
