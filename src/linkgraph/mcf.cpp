@@ -93,9 +93,7 @@ void MultiCommodityFlow::PushFlow(Edge & edge, Path * path, uint accuracy, bool 
 	uint flow = edge.unsatisfied_demand / accuracy;
 	if (flow == 0) flow = 1;
 	flow = path->AddFlow(flow, graph, positive_cap);
-	if (flow > 0) {
-		edge.unsatisfied_demand -= flow;
-	}
+	edge.unsatisfied_demand -= flow;
 }
 
 
@@ -131,8 +129,10 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 					 * but if no demand has been assigned yet, make an exception and allow
 					 * any valid path *once*.
 					 */
-					if (path->GetCapacity() > 0 || (edge.unsatisfied_demand == edge.demand && path->GetCapacity() > INT_MIN)) {
+					if (path->GetCapacity() > 0) {
 						PushFlow(edge, path, accuracy, true);
+					} else if (edge.unsatisfied_demand == edge.demand && path->GetCapacity() > INT_MIN) {
+						PushFlow(edge, path, accuracy, false);
 					}
 					if (edge.unsatisfied_demand > 0) {
 						demand_left = true;
