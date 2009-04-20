@@ -17,6 +17,8 @@ class Path;
 
 typedef uint NodeID;
 typedef std::set<Path *> PathSet;
+typedef std::map<StationID, int> FlowViaMap;
+typedef std::map<StationID, FlowViaMap> FlowMap;
 
 class Node {
 public:
@@ -29,6 +31,7 @@ public:
 	uint demand;
 	StationID station;
 	PathSet paths;
+	FlowMap flows;
 };
 
 class Edge {
@@ -153,6 +156,7 @@ public:
 	NodeID GetNode() const {return node;}
 	Path * GetParent() {return parent;}
 	int GetCapacity() const {return capacity;}
+	uint GetDistance() const {return distance;}
 	void Fork(Path * base, int cap, uint dist);
 	uint AddFlow(uint f, LinkGraphComponent * graph, bool only_positive);
 	uint GetFlow() {return flow;}
