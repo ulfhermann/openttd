@@ -15,7 +15,9 @@ void FlowMapper::Run(LinkGraphComponent * c) {
 			}
 			StationID origin = component->GetNode(path->GetOrigin()).station;
 			uint flow = path->GetFlow();
-			Node & prev_node = component->GetNode(path->GetParent()->GetNode());
+			Path * parent = path->GetParent();
+			assert(parent->GetFlow() >= flow);
+			Node & prev_node = component->GetNode(parent->GetNode());
 			/* mark all of the flow for local consumation at first */
 			node.flows[origin][via] += flow;
 			/* pass some of the flow marked for local consumation at prev on to this node */
