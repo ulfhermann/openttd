@@ -1412,7 +1412,7 @@ struct StationViewWindow : public Window {
 	}
 
 	void SelectSortBy(Sorting index) {
-		if (this->sortings[0] != index) {
+		if (this->sortings[1] != index) {
 			sortings[1] = sortings[2] = sortings[3] = index;
 			/* Display the current sort variant */
 			this->widget[SVW_SORT_BY].data = this->_sort_names[index];
