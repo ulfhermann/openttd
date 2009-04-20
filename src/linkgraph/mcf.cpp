@@ -150,7 +150,7 @@ void MCF2ndPass::Run(LinkGraphComponent * graph) {
 	while (demand_left) {
 		demand_left = false;
 		for (NodeID source = 0; source < size; ++source) {
-			/* first saturate the shortest paths */
+			/* Then assign all remaining demands */
 			Dijkstra<CapacityAnnotation>(source, paths, size, false);
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge & edge = graph->GetEdge(source, dest);
