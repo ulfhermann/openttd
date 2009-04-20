@@ -236,14 +236,14 @@ void Path::UnFork() {
 		parent->num_children--;
 		parent = NULL;
 	}
-	hops = 0;
+	hops = UINT_MAX;
 }
 
 Path::Path(NodeID n, bool source)  :
 	distance(source ? 0 : UINT_MAX),
 	capacity(source ? INT_MAX : 0),
 	flow(0), node(n), num_children(0), parent(NULL),
-	hops(source ? 0 : 1)
+	hops(source ? 0 : UINT_MAX)
 {}
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {

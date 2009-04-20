@@ -49,12 +49,13 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths, uint max_hops
 		typename AnnoSet::iterator i = annos.begin();
 		ANNOTATION * source = *i;
 		annos.erase(i);
-		if(source->GetHops() == max_hops) continue;
+		if(source->GetHops() >= max_hops) break;
 		NodeID from = source->GetNode();
 		NodeID to = graph->GetFirstEdge(from);
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
-			if (edge.capacity > 0 && (create_new_paths || edge.flow > 0)) {
+			assert(edge.capacity > 0 && edge.distance < UINT_MAX);
+			if (create_new_paths || edge.flow > 0) {
 				int capacity = edge.capacity - edge.flow;
 				uint distance = edge.distance;
 				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
