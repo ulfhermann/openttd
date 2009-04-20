@@ -35,13 +35,13 @@ bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint
 
 
 template<class ANNOTATION>
-void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths, uint max_hops, bool create_new_paths) {
+void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, uint max_hops, bool create_new_paths) {
 	typedef std::set<ANNOTATION *, typename ANNOTATION::comp> AnnoSet;
 	uint size = graph->GetSize();
 	AnnoSet annos;
 	paths.resize(size, NULL);
 	for (NodeID node = 0; node < size; ++node) {
-		ANNOTATION * anno = new ANNOTATION(node, node == from);
+		ANNOTATION * anno = new ANNOTATION(node, node == source_node);
 		annos.insert(anno);
 		paths[node] = anno;
 	}
@@ -55,7 +55,7 @@ void MultiCommodityFlow::Dijkstra(NodeID from, PathVector & paths, uint max_hops
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
 			assert(edge.capacity > 0 && edge.distance < UINT_MAX);
-			if (create_new_paths || edge.flow > 0) {
+			if (create_new_paths || graph->GetNode(from).flows[source_node][to] > 0) {
 				int capacity = edge.capacity - edge.flow;
 				uint distance = edge.distance;
 				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
@@ -127,7 +127,11 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 				Edge & edge = graph->GetEdge(source, dest);
 				if (edge.unsatisfied_demand > 0) {
 					Path * path = paths[dest];
-					if (path->GetCapacity() > 0) {
+					/* generally only allow paths that don't exceed the available capacity
+					 * but if no demand has been assigned yet, make an exception and allow
+					 * any valid path *once*.
+					 */
+					if (path->GetCapacity() > 0 || (edge.unsatisfied_demand == edge.demand && path->GetCapacity() > INT_MIN)) {
 						PushFlow(edge, path, accuracy, true);
 					}
 					if (edge.unsatisfied_demand > 0) {
