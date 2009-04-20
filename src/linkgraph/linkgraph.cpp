@@ -186,20 +186,25 @@ void Node::ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via
 	FlowViaMap & source_flows = source_flows_it->second;
 	if (!IsValidStationID(source)) {
 		source_flows.clear();
-		return;
-	}
-
-	for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
-		assert(update->second >= 0);
-		StationID next = update->first;
-		if (update->second > 0 && IsValidStationID(next)) {
-			LinkStatMap & next_ls = GetStation(next)->goods[cargo].link_stats;
-			if (next_ls.find(station) != next_ls.end()) {
-				via_set.insert(FlowStat(update->first, update->second, 0));
+	} else {
+		for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
+			assert(update->second >= 0);
+			StationID next = update->first;
+			if (update->second > 0 && IsValidStationID(next)) {
+				if (next != station) {
+					LinkStatMap & next_ls = GetStation(next)->goods[cargo].link_stats;
+					if (next_ls.find(station) != next_ls.end()) {
+						via_set.insert(FlowStat(update->first, update->second, 0));
+					}
+				} else {
+					via_set.insert(FlowStat(update->first, update->second, 0));
+				}
 			}
+			source_flows.erase(update++);
 		}
-		source_flows.erase(update++);
 	}
+	assert(source_flows.empty());
+
 	flows.erase(source_flows_it++);
 }
 
@@ -240,6 +245,7 @@ void Node::ExportFlows(FlowStatMap & station_flows, CargoID cargo) {
 		FlowStatSet & via_set = station_flows[source_flows_it->first];
 		ExportNewFlows(source_flows_it, via_set, cargo);
 	}
+	assert(flows.empty());
 }
 
 void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
