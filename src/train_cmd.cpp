@@ -3768,12 +3768,18 @@ static void TrainController(Vehicle *v, Vehicle *nomove)
 							chosen_track = prev->u.rail.track;
 						}
 					} else {
-						/* Choose the track that leads to the tile where prev is. */
+						/* Choose the track that leads to the tile where prev is.
+						 * This case is active if 'prev' is already on the second next tile, when 'v' just enters the next tile.
+						 * I.e. when the tile between them has only space for a single vehicle like
+						 *  1) horizontal/vertical track tiles and
+						 *  2) some orientations of tunnelentries, where the vehicle is already inside the wormhole at 8/16 from the tileedge.
+						 *     Is also the train just reversing, the wagon inside the tunnel is 'on' the tile of the opposite tunnelentry.
+						 */
 						static const TrackBits _connecting_track[DIAGDIR_END][DIAGDIR_END] = {
-							{TRACK_BIT_Y,     TRACK_BIT_LOWER, TRACK_BIT_NONE,  TRACK_BIT_LEFT },
-							{TRACK_BIT_UPPER, TRACK_BIT_X,     TRACK_BIT_LEFT,  TRACK_BIT_NONE },
-							{TRACK_BIT_NONE,  TRACK_BIT_RIGHT, TRACK_BIT_Y,     TRACK_BIT_UPPER},
-							{TRACK_BIT_RIGHT, TRACK_BIT_NONE,  TRACK_BIT_LOWER, TRACK_BIT_X    }
+							{TRACK_BIT_X,     TRACK_BIT_LOWER, TRACK_BIT_NONE,  TRACK_BIT_LEFT },
+							{TRACK_BIT_UPPER, TRACK_BIT_Y,     TRACK_BIT_LEFT,  TRACK_BIT_NONE },
+							{TRACK_BIT_NONE,  TRACK_BIT_RIGHT, TRACK_BIT_X,     TRACK_BIT_UPPER},
+							{TRACK_BIT_RIGHT, TRACK_BIT_NONE,  TRACK_BIT_LOWER, TRACK_BIT_Y    }
 						};
 						DiagDirection exitdir = DiagdirBetweenTiles(gp.new_tile, prev->tile);
 						assert(IsValidDiagDirection(exitdir));
@@ -4366,14 +4372,28 @@ static void TrainLocoHandler(Vehicle *v, bool mode)
 	} else {
 		TrainCheckIfLineEnds(v);
 		/* Loop until the train has finished moving. */
-		do {
+		for (;;) {
 			j -= adv_spd;
 			TrainController(v, NULL);
 			/* Don't continue to move if the train crashed. */
 			if (CheckTrainCollision(v)) break;
 			/* 192 spd used for going straight, 256 for going diagonally. */
 			adv_spd = (v->direction & 1) ? 192 : 256;
-		} while (j >= adv_spd);
+
+			/* No more moving this tick */
+			if (j < adv_spd || v->cur_speed == 0) break;
+
+			OrderType order_type = v->current_order.GetType();
+			/* Do not skip waypoints (incl. 'via' stations) when passing through at full speed. */
+			if ((order_type == OT_GOTO_WAYPOINT &&
+						v->dest_tile == v->tile) ||
+					(order_type == OT_GOTO_STATION &&
+						(v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) &&
+						IsTileType(v->tile, MP_STATION) &&
+						v->current_order.GetDestination() == GetStationIndex(v->tile))) {
+				ProcessOrders(v);
+			}
+		}
 		SetLastSpeed(v, v->cur_speed);
 	}
 
