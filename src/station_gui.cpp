@@ -997,24 +997,26 @@ struct StationViewWindow : public Window {
 				dest[INVALID_STATION] += count;
 			} else {
 				uint sum_estimated = 0;
-				for(DestinationMap::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-					uint estimate = DivideApprox(i->second * count, sum_flows);
-					sum_estimated += estimate;
+				while(sum_estimated < count) {
+					for(DestinationMap::iterator i = tmp.begin(); i != tmp.end() && sum_estimated < count; ++i) {
+						uint estimate = DivideApprox(i->second * count, sum_flows);
+						sum_estimated += estimate;
+						if (sum_estimated > count) {
+							sum_estimated = count;
+						}
 
-					if (estimate > 0) {
-						if (i->first == next) {
-							dest[next] += estimate;
-						} else {
-							if (dest.find(next) == dest.end()) {
-								dest[next] += 0;
-								EstimateDestinations(cargo, source, i->first, estimate, dest, sent);
+						if (estimate > 0) {
+							if (i->first == next) {
+								dest[next] += estimate;
 							} else {
-								dest[INVALID_STATION] += estimate;
+								EstimateDestinations(cargo, source, i->first, estimate, dest, sent);
 							}
 						}
 					}
+					if (sum_flows > 1) {
+						sum_flows--;
+					}
 				}
-				dest[INVALID_STATION] += count - sum_estimated;
 			}
 		} else {
 			dest[INVALID_STATION] += count;
@@ -1045,6 +1047,7 @@ struct StationViewWindow : public Window {
 				for (DestinationMap::iterator dest_it = dest.begin(); dest_it != dest.end(); ++dest_it) {
 					if (dest_it->second > 0) {
 						ShowCargo(cargo, i, from, stat.via, dest_it->first, dest_it->second);
+
 					}
 				}
 			}
@@ -1446,10 +1449,12 @@ struct StationViewWindow : public Window {
 				groupings[1] = DESTINATION;
 				groupings[2] = SOURCE;
 				groupings[3] = NEXT;
+				break;
 			case STR_GROUP_D_V_S:
 				groupings[1] = DESTINATION;
 				groupings[2] = NEXT;
 				groupings[3] = SOURCE;
+				break;
 			}
 			this->SetDirty();
 		}
