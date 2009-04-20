@@ -160,6 +160,7 @@ public:
 	NodeID GetOrigin() const {return parent == NULL ? node : parent->GetOrigin();}
 	Path * GetParent() {return parent;}
 	int GetCapacity() const {return capacity;}
+	uint GetDistance() const {return distance;}
 	void Fork(Path * base, int cap, uint dist);
 	uint AddFlow(uint f, LinkGraphComponent * graph, bool only_positive);
 	uint GetFlow() {return flow;}
