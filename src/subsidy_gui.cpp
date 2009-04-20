@@ -17,6 +17,16 @@
 
 #include "table/strings.h"
 
+/** Widget numbers for the subsidy list window. */
+enum SubsidyListWidgets {
+	SLW_CLOSEBOX,
+	SLW_CAPTION,
+	SLW_STICKYBOX,
+	SLW_PANEL,
+	SLW_SCROLLBAR,
+	SLW_RESIZEBOX,
+};
+
 struct SubsidyListWindow : Window {
 	SubsidyListWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
 	{
@@ -25,9 +35,9 @@ struct SubsidyListWindow : Window {
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		if (widget != 3) return;
+		if (widget != SLW_PANEL) return;
 
-		int y = pt.y - 25;
+		int y = pt.y - this->widget[SLW_PANEL].top - FONT_HEIGHT_NORMAL - 1; // Skip 'subsidies on offer' line
 
 		if (y < 0) return;
 
@@ -107,9 +117,9 @@ struct SubsidyListWindow : Window {
 
 		ConvertDateToYMD(_date, &ymd);
 
-		int right = this->width - 12;  // scroll bar = 11 + pixel each side
-		int y = 15;
-		int x = 1;
+		int right = this->widget[SLW_PANEL].right;
+		int y = this->widget[SLW_PANEL].top + 1;
+		int x = this->widget[SLW_PANEL].left + 1;
 
 		/* Section for drawing the offered subisidies */
 		DrawString(x, right, y, STR_2026_SUBSIDIES_ON_OFFER_FOR, TC_FROMSTRING);
@@ -157,21 +167,36 @@ struct SubsidyListWindow : Window {
 };
 
 static const Widget _subsidies_list_widgets[] = {
-{   WWT_CLOSEBOX, RESIZE_NONE,   COLOUR_BROWN,   0,  10,   0,  13, STR_00C5,           STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION, RESIZE_RIGHT,  COLOUR_BROWN,  11, 307,   0,  13, STR_2025_SUBSIDIES, STR_018C_WINDOW_TITLE_DRAG_THIS},
-{  WWT_STICKYBOX, RESIZE_LR,     COLOUR_BROWN, 308, 319,   0,  13, STR_NULL,           STR_STICKY_BUTTON},
-{      WWT_PANEL, RESIZE_RB,     COLOUR_BROWN,   0, 307,  14, 126, 0x0,                STR_01FD_CLICK_ON_SERVICE_TO_CENTER},
-{  WWT_SCROLLBAR, RESIZE_LRB,    COLOUR_BROWN, 308, 319,  14, 114, 0x0,                STR_0190_SCROLL_BAR_SCROLLS_LIST},
-{  WWT_RESIZEBOX, RESIZE_LRTB,   COLOUR_BROWN, 308, 319, 115, 126, 0x0,                STR_RESIZE_BUTTON},
+{   WWT_CLOSEBOX, RESIZE_NONE,   COLOUR_BROWN,   0,  10,   0,  13, STR_00C5,           STR_018B_CLOSE_WINDOW},               // SLW_CLOSEBOX
+{    WWT_CAPTION, RESIZE_RIGHT,  COLOUR_BROWN,  11, 307,   0,  13, STR_2025_SUBSIDIES, STR_018C_WINDOW_TITLE_DRAG_THIS},     // SLW_CAPTION
+{  WWT_STICKYBOX, RESIZE_LR,     COLOUR_BROWN, 308, 319,   0,  13, STR_NULL,           STR_STICKY_BUTTON},                   // SLW_STICKYBOX
+{      WWT_PANEL, RESIZE_RB,     COLOUR_BROWN,   0, 307,  14, 126, 0x0,                STR_01FD_CLICK_ON_SERVICE_TO_CENTER}, // SLW_PANEL
+{  WWT_SCROLLBAR, RESIZE_LRB,    COLOUR_BROWN, 308, 319,  14, 114, 0x0,                STR_0190_SCROLL_BAR_SCROLLS_LIST},    // SLW_SCROLLBAR
+{  WWT_RESIZEBOX, RESIZE_LRTB,   COLOUR_BROWN, 308, 319, 115, 126, 0x0,                STR_RESIZE_BUTTON},                   // SLW_RESIZEBOX
 
 {   WIDGETS_END},
+};
+
+static const NWidgetPart _nested_subsidies_list_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, SLW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_BROWN, SLW_CAPTION), SetDataTip(STR_2025_SUBSIDIES, STR_018C_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN, SLW_STICKYBOX),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_BROWN, SLW_PANEL), SetMinimalSize(308, 113), SetDataTip(0x0, STR_01FD_CLICK_ON_SERVICE_TO_CENTER), SetResize(1, 1), EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, SLW_SCROLLBAR),
+			NWidget(WWT_RESIZEBOX, COLOUR_BROWN, SLW_RESIZEBOX),
+		EndContainer(),
+	EndContainer(),
 };
 
 static const WindowDesc _subsidies_list_desc(
 	WDP_AUTO, WDP_AUTO, 320, 127, 320, 127,
 	WC_SUBSIDIES_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_subsidies_list_widgets
+	_subsidies_list_widgets, _nested_subsidies_list_widgets, lengthof(_nested_subsidies_list_widgets)
 );
 
 

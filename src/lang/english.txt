@@ -807,7 +807,7 @@ STR_TOWNNAME_SWEDISH                                            :Swedish
 STR_TOWNNAME_DUTCH                                              :Dutch
 STR_TOWNNAME_FINNISH                                            :Finnish
 STR_TOWNNAME_POLISH                                             :Polish
-STR_TOWNNAME_SLOVAKISH                                          :Slovakish
+STR_TOWNNAME_SLOVAK                                             :Slovak
 STR_TOWNNAME_NORWEGIAN                                          :Norwegian
 STR_TOWNNAME_HUNGARIAN                                          :Hungarian
 STR_TOWNNAME_AUSTRIAN                                           :Austrian
@@ -3639,6 +3639,7 @@ STR_AI_RANDOM_AI                                                :Random AI
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}AI Parameters
 STR_AI_AUTHOR                                                   :Author: {RAW_STRING}
 STR_AI_VERSION                                                  :Version: {NUM}
+STR_AI_URL                                                      :URL: {RAW_STRING}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}One of the running AIs crashed. Please report this to the AI author with a screenshot of the AI Debug Window.
 ########
 
