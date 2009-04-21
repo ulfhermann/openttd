@@ -1477,7 +1477,11 @@ void VehiclePayment(Vehicle *front_v)
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 		CargoList & cargo_list = v->cargo;
 		const CargoList::List *cargos = cargo_list.Packets();
-		StationID next_station = front_v->orders.list->GetNextUnloadingOrder(front_v->cur_order_index)->GetDestination();
+		StationID next_station = INVALID_STATION;
+		const Order * next_unloading = front_v->orders.list->GetNextUnloadingOrder(front_v->cur_order_index);
+		if (next_unloading != NULL) {
+			next_station = next_unloading->GetDestination();
+		}
 		UnloadDescription ul(ge, last_visited, next_station, order_flags);
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
@@ -1590,7 +1594,10 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	StationID last_visited = u->last_station_visited;
 	Station *st = GetStation(last_visited);
 
-	StationID next_station = next->GetDestination();
+	StationID next_station = INVALID_STATION;
+	if (next != NULL) {
+		next_station = next->GetDestination();
+	}
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--u->load_unload_time_rem != 0) {
 		ReserveAndUnreject(st, u, next_station, reserved, rejected);

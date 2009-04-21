@@ -242,7 +242,11 @@ const Order * OrderList::GetNextUnloadingOrder(VehicleOrderID curr_id) const {
 	const Order * curr = GetOrderAt(curr_id);
 	if (curr == NULL) {
 		curr = GetFirstOrder();
+		if (curr == NULL) {
+			return NULL;
+		}
 	}
+
 	const Order * next = curr;
 
 	do {
