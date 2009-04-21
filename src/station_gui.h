@@ -96,10 +96,8 @@ public:
 	CargoDataEntry * GetParent() const {return parent;}
 	uint Size() const {return size;}
 
-	CargoDataSet::const_iterator Begin() const {return subentries->begin();}
-	CargoDataSet::const_iterator End() const {return subentries->end();}
-
-
+	CargoDataSet::iterator Begin() const {return subentries->begin();}
+	CargoDataSet::iterator End() const {return subentries->end();}
 
 private:
 
