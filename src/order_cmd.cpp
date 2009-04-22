@@ -227,13 +227,13 @@ Order *OrderList::GetOrderAt(int index) const
 
 bool Order::IsStoppingOrder() const
 {
+	if (this->GetType() != OT_GOTO_STATION) return false;
+	if (GetStation(this->GetDestination())->IsBuoy()) return false;
 	return (this->GetNonStopType() == ONSF_STOP_EVERYWHERE || this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
 }
 
 bool Order::IsLoadingOrder() const
 {
-	if (this->GetType() != OT_GOTO_STATION) return false;
-	if (GetStation(this->GetDestination())->IsBuoy()) return false;
 	return (this->IsStoppingOrder() && this->GetLoadType() != OLFB_NO_LOAD);
 }
 
