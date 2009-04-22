@@ -1490,7 +1490,7 @@ void VehiclePayment(Vehicle *front_v)
 		if (v->cargo_cap == 0 || front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
 			continue;
 		} else {
-			if (last_station != INVALID_STATION) {
+			if (last_station != INVALID_STATION && last_station != last_visited) {
 				LinkStat & ls =	st->goods[v->cargo_type].link_stats[last_station];
 				ls.capacity += GetCapIncrease(ls.capacity, v->cargo_cap);
 				ls.usage += GetCapIncrease(ls.usage, v->cargo.Count());
