@@ -1434,6 +1434,25 @@ static void TriggerIndustryProduction(Industry *i)
 
 
 /**
+ * the moving average function for capacities and usages is inaccurate, but on purpose.
+ * It decreases the value linearly when it sinks below moving_average_length, so that
+ * stale links time out quickly.
+ * However, in order to maintain low capacity links that are regularly served, I boost
+ * the capacity increase for base values below moving_average_length.
+ * Note that the value returned here is a lower bound on the number of operations an accurate
+ * average function would need to decrease (base + add) to base again. It is also always
+ * at most moving_average_length - base.
+ */
+inline uint GetCapIncrease(uint base, uint add) {
+	uint new_base = base + add;
+	if (new_base > _settings_game.economy.moving_average_length || new_base == 0) {
+		return add;
+	} else {
+		return (_settings_game.economy.moving_average_length) / (new_base) * add;
+	}
+}
+
+/**
  * Performs the vehicle payment _and_ marks the vehicle to be unloaded.
  * @param front_v the vehicle to be unloaded
  */
@@ -1462,11 +1481,28 @@ void VehiclePayment(Vehicle *front_v)
 	static SmallIndustryList industry_set;
 	industry_set.Clear();
 
+	StationID last_station = INVALID_STATION;
+	const Order * last_loading = front_v->orders.list->GetLastLoadingOrder(front_v->cur_order_index);
+	if (last_loading != NULL) {
+		last_station = last_loading->GetDestination();
+	}
+
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
 		const Order * curr = &front_v->current_order;
 		OrderUnloadFlags order_flags = curr->GetUnloadType();
 		/* No cargo to unload */
-		if (v->cargo_cap == 0 || v->cargo.Empty() || order_flags & OUFB_NO_UNLOAD) continue;
+		if (v->cargo_cap == 0 || order_flags & OUFB_NO_UNLOAD) {
+			continue;
+		} else {
+			if (last_station != INVALID_STATION) {
+				LinkStat & ls =	st->goods[v->cargo_type].link_stats[last_station];
+				ls.capacity += GetCapIncrease(ls.capacity, v->cargo_cap);
+				ls.usage += GetCapIncrease(ls.usage, v->cargo.Count());
+			}
+			if (v->cargo.Empty()) {
+				continue;
+			}
+		}
 
 		/* All cargo has already been paid for, no need to pay again */
 		if (!v->cargo.UnpaidCargo()) {
@@ -1477,7 +1513,11 @@ void VehiclePayment(Vehicle *front_v)
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 		CargoList & cargo_list = v->cargo;
 		const CargoList::List *cargos = cargo_list.Packets();
-		StationID next_station = front_v->orders.list->GetNextUnloadingOrder(front_v->cur_order_index)->GetDestination();
+		StationID next_station = INVALID_STATION;
+		const Order * next_unloading = front_v->orders.list->GetNextUnloadingOrder(front_v->cur_order_index);
+		if (next_unloading != NULL) {
+			next_station = next_unloading->GetDestination();
+		}
 		UnloadDescription ul(ge, last_visited, next_station, order_flags);
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
@@ -1590,7 +1630,10 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	StationID last_visited = u->last_station_visited;
 	Station *st = GetStation(last_visited);
 
-	StationID next_station = next->GetDestination();
+	StationID next_station = INVALID_STATION;
+	if (next != NULL) {
+		next_station = next->GetDestination();
+	}
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--u->load_unload_time_rem != 0) {
 		ReserveAndUnreject(st, u, next_station, reserved, rejected);
