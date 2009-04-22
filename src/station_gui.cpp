@@ -368,7 +368,7 @@ public:
 		DrawString(71 + cg_ofst, 71 + cg_ofst + 12, y + cg_ofst, STR_ABBREV_ALL, TC_BLACK);
 
 		if (this->vscroll.count == 0) { // company has no stations
-			DrawString(xb, this->width, 40, STR_304A_NONE, TC_FROMSTRING);
+			DrawString(xb, this->width, 40, STR_STATION_LIST_NONE, TC_FROMSTRING);
 			return;
 		}
 
@@ -387,7 +387,7 @@ public:
 
 			SetDParam(0, st->index);
 			SetDParam(1, st->facilities);
-			x = DrawString(xb, this->widget[SLW_LIST].right, y, STR_3049_0, TC_FROMSTRING) + 5;
+			x = DrawString(xb, this->widget[SLW_LIST].right, y, STR_STATION_LIST_STATION, TC_FROMSTRING) + 5;
 
 			/* show cargo waiting and station ratings */
 			for (CargoID j = 0; j < NUM_CARGO; j++) {
@@ -607,11 +607,11 @@ const StringID CompanyStationsWindow::sorter_names[] = {
 
 
 static const Widget _company_stations_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,          STR_018B_CLOSE_WINDOW},            // SLW_CLOSEBOX
-{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   345,     0,    13, STR_3048_STATIONS, STR_018C_WINDOW_TITLE_DRAG_THIS},  // SLW_CAPTION
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,   STR_TOOLTIP_CLOSE_WINDOW},         // SLW_CLOSEBOX
+{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   345,     0,    13, STR_STATION_LIST_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},  // SLW_CAPTION
 {  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   346,   357,     0,    13, 0x0,               STR_STICKY_BUTTON},                // SLW_STICKY
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   345,    37,   161, 0x0,               STR_3057_STATION_NAMES_CLICK_ON},  // SLW_LIST
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   346,   357,    37,   149, 0x0,               STR_0190_SCROLL_BAR_SCROLLS_LIST}, // SLW_SCROLLBAR
+{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   345,    37,   161, 0x0,               STR_STATION_LIST_TOOLTIP},         // SLW_LIST
+{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   346,   357,    37,   149, 0x0,               STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // SLW_SCROLLBAR
 {  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   346,   357,   150,   161, 0x0,               STR_RESIZE_BUTTON},                // SLW_RESIZE
 
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    13,    14,    24, STR_TRAIN,         STR_USE_CTRL_TO_SELECT_MORE},      // SLW_TRAIN
@@ -652,24 +652,24 @@ void ShowCompanyStations(CompanyID company)
 }
 
 static const Widget _station_view_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_00C5,          STR_018B_CLOSE_WINDOW},                // SVW_CLOSEBOX
-{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   236,     0,    13, STR_300A_0,        STR_018C_WINDOW_TITLE_DRAG_THIS},
-{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,               STR_STICKY_BUTTON},
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    10,    14,    25, STR_EMPTY,         STR_SORT_ORDER_TIP},               // SLW_SORTBY
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    11,    70,    14,    25, 0x0,               STR_SORT_CRITERIA_TIP},            // SLW_SORTDROPBTN
-{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    71,   248,    14,    25, 0x0,               STR_GROUP_TIP},
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    26,    75, 0x0,               STR_NULL},                             // SVW_WAITING
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    26,    75, 0x0,               STR_0190_SCROLL_BAR_SCROLLS_LIST},
-{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    76,    97, 0x0,               STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    44,    98,   109, STR_00E4_LOCATION, STR_3053_CENTER_MAIN_VIEW_ON_STATION}, // SVW_LOCATION
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    45,    89,    98,   109, STR_3032_RATINGS,  STR_3054_SHOW_STATION_RATINGS},        // SVW_RATINGS / SVW_ACCEPTS
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    90,   134,    98,   109, STR_BUTTON_PLANNED,STR_TOGGLE_CARGO_VIEW},
-{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   135,   180,    98,   109, STR_0130_RENAME,   STR_3055_CHANGE_NAME_OF_STATION},      // SVW_RENAME
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,    98,   109, STR_TRAIN,         STR_SCHEDULED_TRAINS_TIP },            // SVW_TRAINS
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,    98,   109, STR_LORRY,         STR_SCHEDULED_ROAD_VEHICLES_TIP },     // SVW_ROADVEHS
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   209,   222,    98,   109, STR_PLANE,         STR_SCHEDULED_AIRCRAFT_TIP },          // SVW_PLANES
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   223,   236,    98,   109, STR_SHIP,          STR_SCHEDULED_SHIPS_TIP },             // SVW_SHIPS
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   237,   248,    98,   109, 0x0,               STR_RESIZE_BUTTON},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,                 STR_TOOLTIP_CLOSE_WINDOW},             // SVW_CLOSEBOX
+{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   236,     0,    13, STR_STATION_VIEW_CAPTION,        STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
+{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,                             STR_STICKY_BUTTON},
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    10,    14,    25, STR_EMPTY,                       STR_SORT_ORDER_TIP},                   // SLW_SORTBY
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    11,    70,    14,    25, 0x0,                             STR_SORT_CRITERIA_TIP},                // SLW_SORTDROPBTN
+{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    71,   248,    14,    25, 0x0,                             STR_GROUP_TIP},
+{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    26,    75, 0x0,                             STR_NULL},                             // SVW_WAITING
+{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    26,    75, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
+{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    76,    97, 0x0,                             STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    44,    98,   109, STR_BUTTON_LOCATION,             STR_STATION_VIEW_CENTER_TOOLTIP},      // SVW_LOCATION
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    45,    89,    98,   109, STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP},     // SVW_RATINGS / SVW_ACCEPTS
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    90,   134,    98,   109, STR_BUTTON_PLANNED,              STR_TOGGLE_CARGO_VIEW},
+{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   135,   180,    98,   109, STR_QUERY_RENAME,                STR_STATION_VIEW_RENAME_TOOLTIP},      // SVW_RENAME
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,    98,   109, STR_TRAIN,                       STR_SCHEDULED_TRAINS_TIP },            // SVW_TRAINS
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,    98,   109, STR_LORRY,                       STR_SCHEDULED_ROAD_VEHICLES_TIP },     // SVW_ROADVEHS
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   209,   222,    98,   109, STR_PLANE,                       STR_SCHEDULED_AIRCRAFT_TIP },          // SVW_PLANES
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   223,   236,    98,   109, STR_SHIP,                        STR_SCHEDULED_SHIPS_TIP },             // SVW_SHIPS
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   237,   248,    98,   109, 0x0,                             STR_RESIZE_BUTTON},
 {   WIDGETS_END},
 };
 
@@ -1118,7 +1118,7 @@ struct StationViewWindow : public Window {
 
 				switch(groupings[column]) {
 				case CARGO:
-					str = STR_STATION_CARGO;
+					str = STR_STATION_VIEW_WAITING_CARGO;
 					SetDParam(0, cd->GetCargo());
 					SetDParam(1, cd->GetCount());
 					DrawCargoIcons(
@@ -1193,11 +1193,9 @@ struct StationViewWindow : public Window {
 
 		int maxrows = this->vscroll.cap;
 
-
-
 		displayed_rows.clear();
 		if (--pos < 0) {
-			StringID str_nothing = STR_00D0_NOTHING;
+			StringID str_nothing = STR_JUST_NOTHING;
 			for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 				if (this->widget[SVW_FLOWS].data == _show_waiting) {
 					if (!st->goods[i].cargo.Empty()) str_nothing = STR_EMPTY;
@@ -1208,7 +1206,7 @@ struct StationViewWindow : public Window {
 			StringID str_caption;
 			switch (this->widget[SVW_FLOWS].data) {
 			case _show_waiting:
-				str_caption = STR_0008_WAITING;
+				str_caption = STR_STATION_VIEW_WAITING_TITLE;
 				break;
 			case _show_planned:
 				str_caption = STR_PLANNED;
@@ -1230,12 +1228,12 @@ struct StationViewWindow : public Window {
 
 		DrawEntries(&cargo, pos, maxrows, 0);
 
-		if (this->widget[SVW_ACCEPTS].data == STR_3032_RATINGS) { // small window with list of accepted cargo
+		if (this->widget[SVW_ACCEPTS].data == STR_STATION_VIEW_RATINGS_BUTTON) { // small window with list of accepted cargo
 			char string[512];
 			char *b = string;
 			bool first = true;
 
-			b = InlineString(b, STR_000C_ACCEPTS);
+			b = InlineString(b, STR_STATION_VIEW_ACCEPTS_CARGO);
 
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
 				if (b >= lastof(string) - (1 + 2 * 4)) break; // ',' or ' ' and two calls to Utf8Encode()
@@ -1252,7 +1250,7 @@ struct StationViewWindow : public Window {
 			}
 
 			/* If first is still true then no cargo is accepted */
-			if (first) b = InlineString(b, STR_00D0_NOTHING);
+			if (first) b = InlineString(b, STR_JUST_NOTHING);
 
 			*b = '\0';
 
@@ -1264,7 +1262,7 @@ struct StationViewWindow : public Window {
 		} else { // extended window with list of cargo ratings
 			int y = this->widget[SVW_RATINGLIST].top + 1;
 
-			DrawString(this->widget[SVW_ACCEPTLIST].left + 2, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_3034_LOCAL_RATING_OF_TRANSPORT, TC_FROMSTRING);
+			DrawString(this->widget[SVW_ACCEPTLIST].left + 2, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_STATION_VIEW_CARGO_RATINGS_TITLE, TC_FROMSTRING);
 			y += 10;
 
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
@@ -1276,8 +1274,8 @@ struct StationViewWindow : public Window {
 
 				SetDParam(0, cs->name);
 				SetDParam(2, ge->rating * 101 >> 8);
-				SetDParam(1, STR_3035_APPALLING + (ge->rating >> 5));
-				DrawString(this->widget[SVW_ACCEPTLIST].left + 8, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_303D, TC_FROMSTRING);
+				SetDParam(1, STR_CARGO_RATING_APPALLING + (ge->rating >> 5));
+				DrawString(this->widget[SVW_ACCEPTLIST].left + 8, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_STATION_VIEW_CARGO_RATING, TC_FROMSTRING);
 				y += 10;
 			}
 		}
@@ -1322,15 +1320,15 @@ struct StationViewWindow : public Window {
 			case SVW_RATINGS:
 				this->SetDirty();
 
-				if (this->widget[SVW_RATINGS].data == STR_3032_RATINGS) {
+				if (this->widget[SVW_RATINGS].data == STR_STATION_VIEW_RATINGS_BUTTON) {
 					/* Switch to ratings view */
-					this->widget[SVW_RATINGS].data = STR_3033_ACCEPTS;
-					this->widget[SVW_RATINGS].tooltips = STR_3056_SHOW_LIST_OF_ACCEPTED_CARGO;
+					this->widget[SVW_RATINGS].data = STR_STATION_VIEW_ACCEPTS_BUTTON;
+					this->widget[SVW_RATINGS].tooltips = STR_STATION_VIEW_ACCEPTS_TOOLTIP;
 					ResizeWindowForWidget(this, SVW_ACCEPTLIST, 0, 100);
 				} else {
 					/* Switch to accepts view */
-					this->widget[SVW_RATINGS].data = STR_3032_RATINGS;
-					this->widget[SVW_RATINGS].tooltips = STR_3054_SHOW_STATION_RATINGS;
+					this->widget[SVW_RATINGS].data = STR_STATION_VIEW_RATINGS_BUTTON;
+					this->widget[SVW_RATINGS].tooltips = STR_STATION_VIEW_RATINGS_TOOLTIP;
 					ResizeWindowForWidget(this, SVW_ACCEPTLIST, 0, -100);
 				}
 
@@ -1339,7 +1337,7 @@ struct StationViewWindow : public Window {
 
 			case SVW_RENAME:
 				SetDParam(0, this->window_number);
-				ShowQueryString(STR_STATION, STR_3030_RENAME_STATION_LOADING, MAX_LENGTH_STATION_NAME_BYTES, MAX_LENGTH_STATION_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
+				ShowQueryString(STR_STATION, STR_QUERY_RENAME_STATION_CAPTION, MAX_LENGTH_STATION_NAME_BYTES, MAX_LENGTH_STATION_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
 				break;
 
 			case SVW_TRAINS: { // Show a list of scheduled trains to this station
@@ -1473,7 +1471,7 @@ struct StationViewWindow : public Window {
 	{
 		if (str == NULL) return;
 
-		DoCommandP(0, this->window_number, 0, CMD_RENAME_STATION | CMD_MSG(STR_3031_CAN_T_RENAME_STATION), NULL, str);
+		DoCommandP(0, this->window_number, 0, CMD_RENAME_STATION | CMD_MSG(STR_ERROR_CAN_T_RENAME_STATION), NULL, str);
 	}
 
 	virtual void OnResize(Point delta)
@@ -1623,10 +1621,10 @@ enum JoinStationWidgets {
 };
 
 static const Widget _select_station_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE, COLOUR_DARK_GREEN,     0,    10,     0,    13, STR_00C5,                        STR_018B_CLOSE_WINDOW},
-{    WWT_CAPTION,  RESIZE_RIGHT, COLOUR_DARK_GREEN,    11,   199,     0,    13, STR_SELECT_STATION_TO_JOIN,      STR_018C_WINDOW_TITLE_DRAG_THIS},
+{   WWT_CLOSEBOX,   RESIZE_NONE, COLOUR_DARK_GREEN,     0,    10,     0,    13, STR_BLACK_CROSS,                 STR_TOOLTIP_CLOSE_WINDOW},
+{    WWT_CAPTION,  RESIZE_RIGHT, COLOUR_DARK_GREEN,    11,   199,     0,    13, STR_SELECT_STATION_TO_JOIN,      STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
 {      WWT_PANEL,     RESIZE_RB, COLOUR_DARK_GREEN,     0,   187,    14,    79, 0x0,                             STR_NULL},
-{  WWT_SCROLLBAR,    RESIZE_LRB, COLOUR_DARK_GREEN,   188,   199,    14,    79, 0x0,                             STR_0190_SCROLL_BAR_SCROLLS_LIST},
+{  WWT_SCROLLBAR,    RESIZE_LRB, COLOUR_DARK_GREEN,   188,   199,    14,    79, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
 {      WWT_PANEL,    RESIZE_RTB, COLOUR_DARK_GREEN,     0,   187,    80,    91, 0x0,                             STR_NULL},
 {  WWT_RESIZEBOX,   RESIZE_LRTB, COLOUR_DARK_GREEN,   188,   199,    80,    91, 0x0,                             STR_RESIZE_BUTTON},
 {   WIDGETS_END},
@@ -1672,7 +1670,7 @@ struct SelectStationWindow : Window {
 			const Station *st = GetStation(_stations_nearby_list[i - 1]);
 			SetDParam(0, st->index);
 			SetDParam(1, st->facilities);
-			DrawString(3, this->widget[JSW_PANEL].right - 2, y, STR_3049_0, TC_FROMSTRING);
+			DrawString(3, this->widget[JSW_PANEL].right - 2, y, STR_STATION_LIST_STATION, TC_FROMSTRING);
 		}
 	}
 
