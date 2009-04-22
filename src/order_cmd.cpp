@@ -263,31 +263,28 @@ const Order * OrderList::GetNextUnloadingOrder(VehicleOrderID curr_id) const {
 	return next;
 }
 
-const Order *OrderList::GetLastLoadingOrder(VehicleOrderID curr_id) const {
-	const Order * prev = NULL;
-	if (curr_id > 0) {
-		prev = GetOrderAt(curr_id - 1);
-	} else {
-		prev = GetLastOrder();
-	}
-	const Order * curr = GetOrderAt(curr_id);
-	if (curr == NULL || prev == NULL) {
+const Order *OrderList::GetPreviousLoadingOrder(VehicleOrderID curr_id) const {
+	if (curr_id >= this->num_orders) {
 		return NULL;
 	}
 
-	const Order * next = prev;
+	const Order * prev = NULL;
+	int order_id = curr_id;
 	do {
-		if ((prev->next == curr || (prev->next == NULL && curr == this->first)) &&
-				prev->IsLoadingOrder()) {
-			return prev;
+		if (order_id == 0) {
+			order_id = this->num_orders - 1;
+		} else {
+			--order_id;
 		}
-		prev = prev->next;
-		if (prev == NULL) {
-			prev = this->first;
-		}
-	} while (prev != next);
 
-	return NULL;
+		if (order_id == curr_id) {
+			prev = NULL;
+		} else {
+			prev = GetOrderAt(order_id);
+		}
+	} while(prev != NULL && !prev->IsLoadingOrder());
+
+	return prev;
 }
 
 void OrderList::InsertOrderAt(Order *new_order, int index)
