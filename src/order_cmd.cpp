@@ -225,6 +225,45 @@ Order *OrderList::GetOrderAt(int index) const
 	return order;
 }
 
+bool Order::IsStoppingOrder() const
+{
+	return (this->GetNonStopType() == ONSF_STOP_EVERYWHERE || this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
+}
+
+bool Order::IsLoadingOrder() const
+{
+	if (this->GetType() != OT_GOTO_STATION) return false;
+	if (GetStation(this->GetDestination())->IsBuoy()) return false;
+	return (this->IsStoppingOrder() && this->GetLoadType() != OLFB_NO_LOAD);
+}
+
+const Order *OrderList::GetLastLoadingOrder(VehicleOrderID curr_id) const {
+	const Order * prev = NULL;
+	if (curr_id > 0) {
+		prev = GetOrderAt(curr_id - 1);
+	} else {
+		prev = GetLastOrder();
+	}
+	const Order * curr = GetOrderAt(curr_id);
+	if (curr == NULL || prev == NULL) {
+		return NULL;
+	}
+
+	const Order * next = prev;
+	do {
+		if ((prev->next == curr || (prev->next == NULL && curr == this->first)) &&
+				prev->IsLoadingOrder()) {
+			return prev;
+		}
+		prev = prev->next;
+		if (prev == NULL) {
+			prev = this->first;
+		}
+	} while (prev != next);
+
+	return NULL;
+}
+
 void OrderList::InsertOrderAt(Order *new_order, int index)
 {
 	if (this->first == NULL) {
@@ -512,7 +551,8 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 			if (new_order.GetNonStopType() != ONSF_STOP_EVERYWHERE && v->type != VEH_TRAIN && v->type != VEH_ROAD) return CMD_ERROR;
 			if (new_order.GetDepotOrderType() & ~(ODTFB_PART_OF_ORDERS | ((new_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) != 0 ? ODTFB_SERVICE : 0))) return CMD_ERROR;
-			if (new_order.GetDepotActionType() & ~ODATFB_NEAREST_DEPOT) return CMD_ERROR;
+			if (new_order.GetDepotActionType() & ~(ODATFB_HALT | ODATFB_NEAREST_DEPOT)) return CMD_ERROR;
+			if ((new_order.GetDepotOrderType() & ODTFB_SERVICE) && (new_order.GetDepotActionType() & ODATFB_HALT)) return CMD_ERROR;
 			break;
 		}
 
