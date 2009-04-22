@@ -329,7 +329,7 @@ public:
 
 	const Order * GetNextUnloadingOrder(VehicleOrderID curr) const;
 
-	const Order * GetLastLoadingOrder(VehicleOrderID curr) const;
+	const Order * GetPreviousLoadingOrder(VehicleOrderID curr) const;
 
 	/**
 	 * Get number of orders in the order list.
