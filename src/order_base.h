@@ -321,7 +321,7 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	const Order * GetLastLoadingOrder(VehicleOrderID curr) const;
+	const Order * GetPreviousLoadingOrder(VehicleOrderID curr) const;
 
 	/**
 	 * Get number of orders in the order list.
