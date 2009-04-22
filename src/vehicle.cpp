@@ -614,25 +614,6 @@ void VehicleEnteredDepotThisTick(Vehicle *v)
 	v->vehstatus |= VS_STOPPED;
 }
 
-/**
- * the moving average function for capacities and usages is inaccurate, but on purpose.
- * It decreases the value linearly when it sinks below moving_average_length, so that
- * stale links time out quickly.
- * However, in order to maintain low capacity links that are regularly served, I boost
- * the capacity increase for base values below moving_average_length.
- * Note that the value returned here is a lower bound on the number of operations an accurate
- * average function would need to decrease (base + add) to base again. It is also always
- * at most moving_average_length - base.
- */
-inline uint GetCapIncrease(uint base, uint add) {
-	uint new_base = base + add;
-	if (new_base > _settings_game.economy.moving_average_length || new_base == 0) {
-		return add;
-	} else {
-		return (_settings_game.economy.moving_average_length) / (new_base) * add;
-	}
-}
-
 void CallVehicleTicks()
 {
 	_vehicles_to_autoreplace.Clear();
@@ -642,20 +623,7 @@ void CallVehicleTicks()
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
-		StationID old_station = v->last_station_visited;
 		v->Tick();
-		StationID new_station = v->last_station_visited;
-		if (old_station != INVALID_STATION &&
-				new_station != INVALID_STATION &&
-				old_station != new_station) {
-			Station * station = GetStation(new_station);
-			for (Vehicle * part = v; part != NULL; part = part->Next()) {
-				if (part->cargo_cap == 0) continue;
-				LinkStat & ls =	station->goods[part->cargo_type].link_stats[old_station];
-				ls.capacity += GetCapIncrease(ls.capacity, part->cargo_cap);
-				ls.usage += GetCapIncrease(ls.usage, part->cargo.Count());
-			}
-		}
 
 		switch (v->type) {
 			default: break;
