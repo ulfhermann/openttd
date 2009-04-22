@@ -234,8 +234,6 @@ bool Order::IsStoppingOrder() const
 
 bool Order::IsUnloadingOrder() const
 {
-	if (this->GetType() != OT_GOTO_STATION) return false;
-	if (GetStation(this->GetDestination())->IsBuoy()) return false;
 	return (this->IsStoppingOrder() && this->GetUnloadType() != OUFB_NO_UNLOAD);
 }
 
