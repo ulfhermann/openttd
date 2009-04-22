@@ -1480,7 +1480,7 @@ void VehiclePayment(Vehicle *front_v)
 	industry_set.Clear();
 
 	StationID last_station = INVALID_STATION;
-	const Order * last_loading = front_v->orders.list->GetLastLoadingOrder(front_v->cur_order_index);
+	const Order * last_loading = front_v->orders.list->GetPreviousLoadingOrder(front_v->cur_order_index);
 	if (last_loading != NULL) {
 		last_station = last_loading->GetDestination();
 	}
