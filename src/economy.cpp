@@ -1431,8 +1431,6 @@ static void TriggerIndustryProduction(Industry *i)
 	StartStopIndustryTileAnimation(i, IAT_INDUSTRY_RECEIVED_CARGO);
 }
 
-
-
 /**
  * the moving average function for capacities and usages is inaccurate, but on purpose.
  * It decreases the value linearly when it sinks below moving_average_length, so that
@@ -1491,40 +1489,41 @@ void VehiclePayment(Vehicle *front_v)
 	}
 
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
+
 		const Order * curr = &front_v->current_order;
 		OrderUnloadFlags order_flags = curr->GetUnloadType();
-		/* No cargo to unload */
-		if (last_station_id != INVALID_STATION && last_station_id != last_visited) {
-			LinkStat & in =	st->goods[v->cargo_type].link_stats[last_station_id];
-			in.capacity += GetCapIncrease(in.capacity, v->cargo_cap);
-			in.usage += GetCapIncrease(in.usage, v->cargo.Count());
-		}
-
-		if (next_station != NULL) {
-			LinkStat & out = next_station->goods[v->cargo_type].link_stats[last_visited];
-			out.frozen += v->cargo_cap;
-			out.capacity = max(out.capacity, out.frozen);
-		}
-
-		if (v->cargo_cap == 0 || front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
-			continue;
-		} else {
-			if (v->cargo.Empty()) {
-				continue;
+		GoodsEntry *ge = &st->goods[v->cargo_type];
+		CargoList & cargo_list = v->cargo;
+		if (v->cargo_cap > 0) {
+			if (last_station_id != INVALID_STATION && last_station_id != last_visited) {
+				LinkStat & in =	ge->link_stats[last_station_id];
+				in.capacity += GetCapIncrease(in.capacity, v->cargo_cap);
+				in.usage += GetCapIncrease(in.usage, v->cargo.Count());
 			}
+
+			if (next_station != NULL) {
+				LinkStat & out = next_station->goods[v->cargo_type].link_stats[last_visited];
+				out.frozen += v->cargo_cap;
+				out.capacity = max(out.capacity, out.frozen);
+			}
+		} else {
+			continue;
+		}
+
+		/* No cargo to unload */
+		if (cargo_list.Empty() || front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
+			continue;
 		}
 
 		/* All cargo has already been paid for, no need to pay again */
-		if (!v->cargo.UnpaidCargo()) {
+		if (!cargo_list.UnpaidCargo()) {
 			SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			continue;
 		}
 
-		GoodsEntry *ge = &st->goods[v->cargo_type];
-		CargoList & cargo_list = v->cargo;
+
 		const CargoList::List *cargos = cargo_list.Packets();
-		StationID next_station = front_v->orders.list->GetNextStoppingStation(front_v->cur_order_index);
-		UnloadDescription ul(ge, last_visited, next_station, order_flags);
+		UnloadDescription ul(ge, last_visited, next_station_id, order_flags);
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
 			CargoPacket *cp = *it;
@@ -1534,9 +1533,6 @@ void VehiclePayment(Vehicle *front_v)
 			if (unload_flags & (UL_DELIVER | UL_TRANSFER)) {
 				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 				result = 2;
-			} else {
-				/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
-				ge->UpdateFlowStats(cp->source, cp->count, next_station);
 			}
 
 			if (!cp->paid_for) {
@@ -1565,7 +1561,13 @@ void VehiclePayment(Vehicle *front_v)
 				}
 			}
 		}
-		v->cargo.InvalidateCache();
+
+		if (!HasBit(v->vehicle_flags, VF_CARGO_UNLOADING)) {
+			/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
+			cargo_list.UpdateFlows(next_station_id, ge);
+		}
+		/* TODO: is it necessary to invalidate the cache here? */
+		cargo_list.InvalidateCache();
 	}
 
 	/* Call the production machinery of industries only once for every vehicle chain */
