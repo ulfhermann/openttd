@@ -891,11 +891,16 @@ struct StationViewWindow : public Window {
 		COUNT = 1
 	};
 
+	static int _last_grouping;
+	static Sorting _last_sorting;
+	static SortOrder _last_sort_order;
+
 	static const StringID _sort_names[];
 	static const StringID _group_names[];
 
 	Sorting sortings[_num_columns];
 	SortOrder sort_orders[_num_columns];
+
 	int grouping_index;
 	Grouping groupings[_num_columns];
 
@@ -903,23 +908,15 @@ struct StationViewWindow : public Window {
 	CargoDataVector displayed_rows;
 
 	StationViewWindow(const WindowDesc *desc, WindowNumber window_number) :
-		Window(desc, window_number)
+		Window(desc, window_number), grouping_index(_num_columns)
 	{
-		groupings[0] = CARGO;
-		sortings[0] = GROUPING;
+		SelectGroupBy(_last_grouping);
+		SelectSortBy(_last_sorting);
+		SortOrder last_order = _last_sort_order;
 		sort_orders[0] = SO_ASCENDING;
-
-		groupings[1] = SOURCE;
-		sortings[1] = GROUPING;
-		sort_orders[1] = SO_ASCENDING;
-
-		groupings[2] = NEXT;
-		sortings[2] = GROUPING;
-		sort_orders[2] = SO_ASCENDING;
-
-		groupings[3] = DESTINATION;
-		sortings[3] = GROUPING;
-		sort_orders[3] = SO_ASCENDING;
+		do {
+			ToggleSortOrder();
+		} while (sort_orders[1] != last_order);
 
 		Owner owner = GetStation(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
@@ -929,7 +926,6 @@ struct StationViewWindow : public Window {
 		this->FindWindowPlacementAndResize(desc);
 		this->widget[SVW_SORT_BY].data = this->_sort_names[GROUPING];
 		this->widget[SVW_GROUP_BY].data = STR_GROUP_S_V_D;
-		grouping_index = 0;
 	}
 
 	~StationViewWindow()
@@ -1400,8 +1396,10 @@ struct StationViewWindow : public Window {
 	void ToggleSortOrder() {
 		if (sort_orders[1] == SO_ASCENDING) {
 			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_DESCENDING;
+			_last_sort_order = SO_DESCENDING;
 		} else {
 			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_ASCENDING;
+			_last_sort_order = SO_ASCENDING;
 		}
 		this->flags4 |= WF_TIMEOUT_BEGIN;
 		this->LowerWidget(SVW_SORT_ORDER);
@@ -1410,6 +1408,7 @@ struct StationViewWindow : public Window {
 
 	void SelectSortBy(Sorting index) {
 		if (this->sortings[1] != index) {
+			_last_sorting = index;
 			sortings[1] = sortings[2] = sortings[3] = index;
 			/* Display the current sort variant */
 			this->widget[SVW_SORT_BY].data = this->_sort_names[index];
@@ -1420,6 +1419,7 @@ struct StationViewWindow : public Window {
 	void SelectGroupBy(int index) {
 		if (grouping_index != index) {
 			grouping_index = index;
+			_last_grouping = index;
 			this->widget[SVW_GROUP_BY].data = _group_names[index];
 			switch(_group_names[index]) {
 			case STR_GROUP_S_V_D:
@@ -1496,6 +1496,11 @@ const StringID StationViewWindow::_group_names[] = {
 	STR_GROUP_D_V_S,
 	INVALID_STRING_ID
 };
+
+
+int StationViewWindow::_last_grouping = 0;
+StationViewWindow::Sorting StationViewWindow::_last_sorting = GROUPING;
+SortOrder StationViewWindow::_last_sort_order = SO_ASCENDING;
 
 
 static const WindowDesc _station_view_desc(
