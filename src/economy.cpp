@@ -1530,7 +1530,7 @@ void VehiclePayment(Vehicle *front_v)
 				result = 2;
 			} else {
 				/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
-				v->cargo.UpdateFlows(next_station, ge);
+				ge->UpdateFlowStats(cp->source, cp->count, next_station);
 			}
 
 			if (!cp->paid_for) {
