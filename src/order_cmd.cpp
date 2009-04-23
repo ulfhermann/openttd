@@ -232,17 +232,7 @@ bool Order::IsStoppingOrder() const
 	return (this->GetNonStopType() == ONSF_STOP_EVERYWHERE || this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
 }
 
-bool Order::IsUnloadingOrder() const
-{
-	return (this->IsStoppingOrder() && this->GetUnloadType() != OUFB_NO_UNLOAD);
-}
-
-bool Order::IsLoadingOrder() const
-{
-	return (this->IsStoppingOrder() && this->GetLoadType() != OLFB_NO_LOAD);
-}
-
-const Order * OrderList::GetNextUnloadingOrder(VehicleOrderID curr_id) const {
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
 	const Order * curr = GetOrderAt(curr_id);
 	if (curr == NULL) {
 		curr = GetFirstOrder();
@@ -258,12 +248,16 @@ const Order * OrderList::GetNextUnloadingOrder(VehicleOrderID curr_id) const {
 		if (next == NULL) {
 			next = GetFirstOrder();
 		}
-	} while (next != curr && !next->IsUnloadingOrder());
+	} while (next != curr && !next->IsStoppingOrder());
 
-	return next;
+	if (next == NULL) {
+		return INVALID_STATION;
+	} else {
+		return next->GetDestination();
+	}
 }
 
-const Order *OrderList::GetPreviousLoadingOrder(VehicleOrderID curr_id) const {
+StationID OrderList::GetPreviousStoppingStation(VehicleOrderID curr_id) const {
 	if (curr_id >= this->num_orders) {
 		return NULL;
 	}
@@ -282,9 +276,13 @@ const Order *OrderList::GetPreviousLoadingOrder(VehicleOrderID curr_id) const {
 		} else {
 			prev = GetOrderAt(order_id);
 		}
-	} while(prev != NULL && !prev->IsLoadingOrder());
+	} while(prev != NULL && !prev->IsStoppingOrder());
 
-	return prev;
+	if (prev == NULL) {
+		return INVALID_STATION;
+	} else {
+		return prev->GetDestination();
+	}
 }
 
 void OrderList::InsertOrderAt(Order *new_order, int index)
