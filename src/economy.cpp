@@ -1504,7 +1504,6 @@ void VehiclePayment(Vehicle *front_v)
 			if (next_station != NULL) {
 				LinkStat & out = next_station->goods[v->cargo_type].link_stats[last_visited];
 				out.frozen += v->cargo_cap;
-				out.capacity = max(out.capacity, out.frozen);
 			}
 		} else {
 			continue;
