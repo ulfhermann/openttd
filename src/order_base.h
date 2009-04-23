@@ -127,12 +127,6 @@ public:
 	inline DestinationID GetDestination() const { return this->dest; }
 
 	/**
-	 * Finds out whether cargo can be unloaded at this station
-	 * @return true if cargo can be loaded, false otherwise
-	 */
-	bool IsLoadingOrder() const;
-
-	/**
 	 * Finds out whether a train does stop at a station on its order list
 	 * @return true if the vehicle stops on this order, false otherwise
 	 */
@@ -321,7 +315,9 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	const Order * GetPreviousLoadingOrder(VehicleOrderID curr) const;
+	StationID GetPreviousStoppingStation(VehicleOrderID curr) const;
+
+	StationID GetNextStoppingStation(VehicleOrderID curr) const;
 
 	/**
 	 * Get number of orders in the order list.
