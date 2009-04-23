@@ -1431,8 +1431,6 @@ static void TriggerIndustryProduction(Industry *i)
 	StartStopIndustryTileAnimation(i, IAT_INDUSTRY_RECEIVED_CARGO);
 }
 
-
-
 /**
  * the moving average function for capacities and usages is inaccurate, but on purpose.
  * It decreases the value linearly when it sinks below moving_average_length, so that
@@ -1481,44 +1479,54 @@ void VehiclePayment(Vehicle *front_v)
 	static SmallIndustryList industry_set;
 	industry_set.Clear();
 
-	StationID last_station = INVALID_STATION;
-	const Order * last_loading = front_v->orders.list->GetPreviousLoadingOrder(front_v->cur_order_index);
-	if (last_loading != NULL) {
-		last_station = last_loading->GetDestination();
+	StationID last_station_id = front_v->orders.list->GetPreviousStoppingStation(front_v->cur_order_index);
+
+	StationID next_station_id = front_v->orders.list->GetNextStoppingStation(front_v->cur_order_index);
+
+	Station * next_station = NULL;
+	if (next_station_id != INVALID_STATION && next_station_id != last_visited) {
+		next_station = GetStation(next_station_id);
 	}
 
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
+
 		const Order * curr = &front_v->current_order;
 		OrderUnloadFlags order_flags = curr->GetUnloadType();
-		/* No cargo to unload */
-		if (v->cargo_cap == 0 || order_flags & OUFB_NO_UNLOAD) {
-			continue;
+		GoodsEntry *ge = &st->goods[v->cargo_type];
+		CargoList & cargo_list = v->cargo;
+		if (v->cargo_cap > 0) {
+			if (last_station_id != INVALID_STATION && last_station_id != last_visited) {
+				LinkStat & in =	ge->link_stats[last_station_id];
+				in.capacity += GetCapIncrease(in.capacity, v->cargo_cap);
+				in.usage += GetCapIncrease(in.usage, v->cargo.Count());
+			}
+
+			if (next_station != NULL) {
+				LinkStat & out = next_station->goods[v->cargo_type].link_stats[last_visited];
+				out.frozen += v->cargo_cap;
+			}
 		} else {
-			if (last_station != INVALID_STATION && last_station != last_visited) {
-				LinkStat & ls =	st->goods[v->cargo_type].link_stats[last_station];
-				ls.capacity += GetCapIncrease(ls.capacity, v->cargo_cap);
-				ls.usage += GetCapIncrease(ls.usage, v->cargo.Count());
-			}
-			if (v->cargo.Empty()) {
-				continue;
-			}
+			continue;
+		}
+
+		/* No cargo to unload */
+		if (cargo_list.Empty()) {
+			continue;
+		} else if (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
+			/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
+			cargo_list.UpdateFlows(next_station_id, ge);
+			continue;
 		}
 
 		/* All cargo has already been paid for, no need to pay again */
-		if (!v->cargo.UnpaidCargo()) {
+		if (!cargo_list.UnpaidCargo()) {
 			SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			continue;
 		}
 
-		GoodsEntry *ge = &st->goods[v->cargo_type];
-		CargoList & cargo_list = v->cargo;
+
 		const CargoList::List *cargos = cargo_list.Packets();
-		StationID next_station = INVALID_STATION;
-		const Order * next_unloading = front_v->orders.list->GetNextUnloadingOrder(front_v->cur_order_index);
-		if (next_unloading != NULL) {
-			next_station = next_unloading->GetDestination();
-		}
-		UnloadDescription ul(ge, last_visited, next_station, order_flags);
+		UnloadDescription ul(ge, last_visited, next_station_id, order_flags);
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
 			CargoPacket *cp = *it;
@@ -1528,9 +1536,6 @@ void VehiclePayment(Vehicle *front_v)
 			if (unload_flags & (UL_DELIVER | UL_TRANSFER)) {
 				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 				result = 2;
-			} else {
-				/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
-				ge->UpdateFlowStats(cp->source, cp->count, next_station);
 			}
 
 			if (!cp->paid_for) {
@@ -1559,7 +1564,13 @@ void VehiclePayment(Vehicle *front_v)
 				}
 			}
 		}
-		v->cargo.InvalidateCache();
+
+		if (!HasBit(v->vehicle_flags, VF_CARGO_UNLOADING)) {
+			/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
+			cargo_list.UpdateFlows(next_station_id, ge);
+		}
+		/* TODO: is it necessary to invalidate the cache here? */
+		cargo_list.InvalidateCache();
 	}
 
 	/* Call the production machinery of industries only once for every vehicle chain */
@@ -1626,14 +1637,11 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	assert(v->current_order.IsType(OT_LOADING));
 
 	Vehicle *u = v;
-	const Order * next = u->orders.list->GetNextUnloadingOrder(u->cur_order_index);
 	StationID last_visited = u->last_station_visited;
 	Station *st = GetStation(last_visited);
 
-	StationID next_station = INVALID_STATION;
-	if (next != NULL) {
-		next_station = next->GetDestination();
-	}
+	StationID next_station = u->orders.list->GetNextStoppingStation(u->cur_order_index);
+
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--u->load_unload_time_rem != 0) {
 		ReserveAndUnreject(st, u, next_station, reserved, rejected);
