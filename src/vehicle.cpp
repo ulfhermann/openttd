@@ -1528,6 +1528,13 @@ void Vehicle::LeaveStation()
 	current_order.MakeLeaveStation();
 	Station *st = GetStation(this->last_station_visited);
 	st->loading_vehicles.remove(this);
+	StationID next_station = this->orders.list->GetNextStoppingStation(this->cur_order_index);
+	if (next_station != INVALID_STATION && next_station != this->last_station_visited) {
+		Station * next = GetStation(next_station);
+		for(Vehicle * v = this; v != NULL; v = v->next) {
+			next->goods[v->cargo_type].link_stats[this->last_station_visited].frozen -= this->cargo_cap;
+		}
+	}
 
 	HideFillingPercent(&this->fill_percent_te_id);
 

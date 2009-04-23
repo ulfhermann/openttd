@@ -30,8 +30,9 @@ static const byte INITIAL_STATION_RATING = 175;
 class LinkStat {
 public:
 	uint capacity;
+	uint frozen;
 	uint usage;
-	LinkStat() : capacity(0), usage(0) {}
+	LinkStat() : capacity(0), frozen(0), usage(0) {}
 
 	inline LinkStat & operator*=(uint factor) {
 		capacity *= factor;
@@ -41,6 +42,9 @@ public:
 
 	inline LinkStat & operator/=(uint divident) {
 		capacity /= divident;
+		if (capacity < frozen) {
+			capacity = frozen;
+		}
 		usage /= divident;
 		return *this;
 	}
