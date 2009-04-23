@@ -1112,13 +1112,12 @@ struct StationViewWindow : public Window {
 		for (CargoDataSet::iterator i = entry->Begin(); i != entry->End(); ++i) {
 			CargoDataEntry *cd = *i;
 			if (pos > -maxrows && --pos < 0) {
-				StringID str;
+				StringID str = STR_STATION_VIEW_WAITING_CARGO;
 				SetDParam(0, cd->GetCount());
 				SetDParam(1, cd->GetStation());
 
 				switch(groupings[column]) {
 				case CARGO:
-					str = STR_STATION_VIEW_WAITING_CARGO;
 					SetDParam(0, cd->GetCargo());
 					SetDParam(1, cd->GetCount());
 					DrawCargoIcons(
@@ -1203,7 +1202,7 @@ struct StationViewWindow : public Window {
 					if (!st->goods[i].flows.empty()) str_nothing = STR_EMPTY;
 				}
 			}
-			StringID str_caption;
+			StringID str_caption = STR_EMPTY;
 			switch (this->widget[SVW_FLOWS].data) {
 			case _show_waiting:
 				str_caption = STR_STATION_VIEW_WAITING_TITLE;
