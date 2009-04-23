@@ -1510,7 +1510,11 @@ void VehiclePayment(Vehicle *front_v)
 		}
 
 		/* No cargo to unload */
-		if (cargo_list.Empty() || front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
+		if (cargo_list.Empty()) {
+			continue;
+		} else if (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
+			/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
+			cargo_list.UpdateFlows(next_station_id, ge);
 			continue;
 		}
 
