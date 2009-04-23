@@ -1479,22 +1479,32 @@ void VehiclePayment(Vehicle *front_v)
 	static SmallIndustryList industry_set;
 	industry_set.Clear();
 
-	StationID last_station = INVALID_STATION;
-	const Order * last_loading = front_v->orders.list->GetPreviousLoadingOrder(front_v->cur_order_index);
-	if (last_loading != NULL) {
-		last_station = last_loading->GetDestination();
+	StationID last_station_id = front_v->orders.list->GetPreviousStoppingStation(front_v->cur_order_index);
+
+	StationID next_station_id = front_v->orders.list->GetNextStoppingStation(front_v->cur_order_index);
+
+	Station * next_station = NULL;
+	if (next_station_id != INVALID_STATION && next_station_id != last_visited) {
+		next_station = GetStation(next_station_id);
 	}
 
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
 		/* No cargo to unload */
+		if (last_station_id != INVALID_STATION && last_station_id != last_visited) {
+			LinkStat & in =	st->goods[v->cargo_type].link_stats[last_station_id];
+			in.capacity += GetCapIncrease(in.capacity, v->cargo_cap);
+			in.usage += GetCapIncrease(in.usage, v->cargo.Count());
+		}
+
+		if (next_station != NULL) {
+			LinkStat & out = next_station->goods[v->cargo_type].link_stats[last_visited];
+			out.frozen += v->cargo_cap;
+			out.capacity = max(out.capacity, out.frozen);
+		}
+
 		if (v->cargo_cap == 0 || front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
 			continue;
 		} else {
-			if (last_station != INVALID_STATION && last_station != last_visited) {
-				LinkStat & ls =	st->goods[v->cargo_type].link_stats[last_station];
-				ls.capacity += GetCapIncrease(ls.capacity, v->cargo_cap);
-				ls.usage += GetCapIncrease(ls.usage, v->cargo.Count());
-			}
 			if (v->cargo.Empty()) {
 				continue;
 			}
