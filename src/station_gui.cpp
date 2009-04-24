@@ -891,10 +891,6 @@ struct StationViewWindow : public Window {
 		COUNT = 1
 	};
 
-	static int _last_grouping;
-	static Sorting _last_sorting;
-	static SortOrder _last_sort_order;
-
 	static const StringID _sort_names[];
 	static const StringID _group_names[];
 
@@ -908,11 +904,13 @@ struct StationViewWindow : public Window {
 	CargoDataVector displayed_rows;
 
 	StationViewWindow(const WindowDesc *desc, WindowNumber window_number) :
-		Window(desc, window_number), grouping_index(_num_columns)
+		Window(desc, window_number), grouping_index(0)
 	{
-		SelectGroupBy(_last_grouping);
-		SelectSortBy(_last_sorting);
-		SortOrder last_order = _last_sort_order;
+		this->groupings[0] = CARGO;
+		this->sortings[0] = GROUPING;
+		SelectGroupBy(_settings_client.gui.station_gui_group_order);
+		SelectSortBy((Sorting)_settings_client.gui.station_gui_sort_by);
+		SortOrder last_order = (SortOrder)_settings_client.gui.station_gui_sort_order;
 		sort_orders[0] = SO_ASCENDING;
 		do {
 			ToggleSortOrder();
@@ -924,8 +922,6 @@ struct StationViewWindow : public Window {
 		this->resize.step_height = 10;
 
 		this->FindWindowPlacementAndResize(desc);
-		this->widget[SVW_SORT_BY].data = this->_sort_names[GROUPING];
-		this->widget[SVW_GROUP_BY].data = STR_GROUP_S_V_D;
 	}
 
 	~StationViewWindow()
@@ -1108,12 +1104,13 @@ struct StationViewWindow : public Window {
 		for (CargoDataSet::iterator i = entry->Begin(); i != entry->End(); ++i) {
 			CargoDataEntry *cd = *i;
 			if (pos > -maxrows && --pos < 0) {
-				StringID str = STR_STATION_VIEW_WAITING_CARGO;
+				StringID str = STR_EMPTY;
 				SetDParam(0, cd->GetCount());
 				SetDParam(1, cd->GetStation());
 
 				switch(groupings[column]) {
 				case CARGO:
+					str = STR_STATION_VIEW_WAITING_CARGO;
 					SetDParam(0, cd->GetCargo());
 					SetDParam(1, cd->GetCount());
 					DrawCargoIcons(
@@ -1396,65 +1393,60 @@ struct StationViewWindow : public Window {
 	void ToggleSortOrder() {
 		if (sort_orders[1] == SO_ASCENDING) {
 			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_DESCENDING;
-			_last_sort_order = SO_DESCENDING;
 		} else {
 			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_ASCENDING;
-			_last_sort_order = SO_ASCENDING;
 		}
+		_settings_client.gui.station_gui_sort_order = sort_orders[1];
 		this->flags4 |= WF_TIMEOUT_BEGIN;
 		this->LowerWidget(SVW_SORT_ORDER);
 		this->SetDirty();
 	}
 
 	void SelectSortBy(Sorting index) {
-		if (this->sortings[1] != index) {
-			_last_sorting = index;
-			sortings[1] = sortings[2] = sortings[3] = index;
-			/* Display the current sort variant */
-			this->widget[SVW_SORT_BY].data = this->_sort_names[index];
-			this->SetDirty();
-		}
+		_settings_client.gui.station_gui_sort_by = index;
+		sortings[1] = sortings[2] = sortings[3] = index;
+		/* Display the current sort variant */
+		this->widget[SVW_SORT_BY].data = this->_sort_names[index];
+		this->SetDirty();
 	}
 
 	void SelectGroupBy(int index) {
-		if (grouping_index != index) {
-			grouping_index = index;
-			_last_grouping = index;
-			this->widget[SVW_GROUP_BY].data = _group_names[index];
-			switch(_group_names[index]) {
-			case STR_GROUP_S_V_D:
-				groupings[1] = SOURCE;
-				groupings[2] = NEXT;
-				groupings[3] = DESTINATION;
-				break;
-			case STR_GROUP_S_D_V:
-				groupings[1] = SOURCE;
-				groupings[2] = DESTINATION;
-				groupings[3] = NEXT;
-				break;
-			case STR_GROUP_V_S_D:
-				groupings[1] = NEXT;
-				groupings[2] = SOURCE;
-				groupings[3] = DESTINATION;
-				break;
-			case STR_GROUP_V_D_S:
-				groupings[1] = NEXT;
-				groupings[2] = DESTINATION;
-				groupings[3] = SOURCE;
-				break;
-			case STR_GROUP_D_S_V:
-				groupings[1] = DESTINATION;
-				groupings[2] = SOURCE;
-				groupings[3] = NEXT;
-				break;
-			case STR_GROUP_D_V_S:
-				groupings[1] = DESTINATION;
-				groupings[2] = NEXT;
-				groupings[3] = SOURCE;
-				break;
-			}
-			this->SetDirty();
+		this->grouping_index = index;
+		_settings_client.gui.station_gui_group_order = index;
+		this->widget[SVW_GROUP_BY].data = _group_names[index];
+		switch(_group_names[index]) {
+		case STR_GROUP_S_V_D:
+			groupings[1] = SOURCE;
+			groupings[2] = NEXT;
+			groupings[3] = DESTINATION;
+			break;
+		case STR_GROUP_S_D_V:
+			groupings[1] = SOURCE;
+			groupings[2] = DESTINATION;
+			groupings[3] = NEXT;
+			break;
+		case STR_GROUP_V_S_D:
+			groupings[1] = NEXT;
+			groupings[2] = SOURCE;
+			groupings[3] = DESTINATION;
+			break;
+		case STR_GROUP_V_D_S:
+			groupings[1] = NEXT;
+			groupings[2] = DESTINATION;
+			groupings[3] = SOURCE;
+			break;
+		case STR_GROUP_D_S_V:
+			groupings[1] = DESTINATION;
+			groupings[2] = SOURCE;
+			groupings[3] = NEXT;
+			break;
+		case STR_GROUP_D_V_S:
+			groupings[1] = DESTINATION;
+			groupings[2] = NEXT;
+			groupings[3] = SOURCE;
+			break;
 		}
+		this->SetDirty();
 	}
 
 	virtual void OnDropdownSelect(int widget, int index)
@@ -1496,12 +1488,6 @@ const StringID StationViewWindow::_group_names[] = {
 	STR_GROUP_D_V_S,
 	INVALID_STRING_ID
 };
-
-
-int StationViewWindow::_last_grouping = 0;
-StationViewWindow::Sorting StationViewWindow::_last_sorting = GROUPING;
-SortOrder StationViewWindow::_last_sort_order = SO_ASCENDING;
-
 
 static const WindowDesc _station_view_desc(
 	WDP_AUTO, WDP_AUTO, 249, 110, 249, 110,
