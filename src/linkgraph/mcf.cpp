@@ -20,22 +20,30 @@ bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint
 			return base->distance + dist < distance;
 		}
 	} else {
-		return false; // if the other path doesn't have capacity left, this one is always better
+		if (capacity > 0 || base->distance == UINT_MAX) {
+			return false; // if the other path doesn't have capacity left, but this one has, this one is always better
+		} else {
+			/* if both paths are out of capacity, do the regular distance comparison again */
+			return base->distance + dist < distance;
+		}
 	}
 }
 
 bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint dist) const {
 	int min_cap = min(base->capacity, cap);
-	if (min_cap == capacity) { // if the capacities are the same, choose the shorter path
-		return (base->distance + dist < distance);
+	if (min_cap == capacity) {
+		if (base->distance != UINT_MAX) { // if the capacities are the same, choose the shorter path
+			return (base->distance + dist < distance);
+		} else {
+			return false;
+		}
 	} else {
 		return min_cap > capacity;
 	}
 }
 
-
 template<class ANNOTATION>
-void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, uint max_hops, bool create_new_paths) {
+void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool create_new_paths) {
 	typedef std::set<ANNOTATION *, typename ANNOTATION::comp> AnnoSet;
 	uint size = graph->GetSize();
 	AnnoSet annos;
@@ -49,7 +57,6 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, uint m
 		typename AnnoSet::iterator i = annos.begin();
 		ANNOTATION * source = *i;
 		annos.erase(i);
-		if(source->GetHops() >= max_hops) break;
 		NodeID from = source->GetNode();
 		NodeID to = graph->GetFirstEdge(from);
 		while (to != Node::INVALID) {
@@ -60,9 +67,21 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, uint m
 				uint distance = edge.distance;
 				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
 				if (dest->IsBetter(source, capacity, distance)) {
-					annos.erase(dest);
-					dest->Fork(source, capacity, distance);
-					annos.insert(dest);
+					bool is_circle = false;
+					if (create_new_paths) {
+						for (Path * path = source; path->GetParent() != NULL; path = path->GetParent()) {
+							ViaSet &forbidden = graph->GetEdge(source_node, path->GetNode()).paths_via;
+							if (forbidden.find(dest->GetNode()) != forbidden.end()) {
+								is_circle = true;
+								break;
+							}
+						}
+					}
+					if (!is_circle) {
+						annos.erase(dest);
+						dest->Fork(source, capacity, distance);
+						annos.insert(dest);
+					}
 				}
 			}
 			to = edge.next_edge;
@@ -89,11 +108,26 @@ void MultiCommodityFlow::CleanupPaths(PathVector & paths) {
 	paths.clear();
 }
 
-void MultiCommodityFlow::PushFlow(Edge & edge, Path * path, uint accuracy, bool positive_cap) {
+uint MultiCommodityFlow::PushFlow(Edge &edge, Path * path, uint accuracy, bool positive_cap) {
 	uint flow = edge.unsatisfied_demand / accuracy;
 	if (flow == 0) flow = 1;
 	flow = path->AddFlow(flow, graph, positive_cap);
 	edge.unsatisfied_demand -= flow;
+	return flow;
+}
+
+void MultiCommodityFlow::SetVia(NodeID source, Path * path) {
+	Path * parent = path->GetParent();
+	if (parent == NULL) {
+		return;
+	}
+	SetVia(source, parent);
+	ViaSet &predecessors = graph->GetEdge(source, path->GetNode()).paths_via;
+	while(parent != NULL) {
+		predecessors.insert(parent->GetNode());
+		path = parent;
+		parent = path->GetParent();
+	}
 }
 
 
@@ -102,45 +136,39 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 	PathVector paths;
 	uint size = graph->GetSize();
 	uint accuracy = graph->GetSettings().mcf_accuracy;
-	bool demand_left = true;
-	bool decrease_accuracy = true;
-	uint hops = 0;
-	while (demand_left && hops < size) {
-		demand_left = false;
-		if (decrease_accuracy) {
-			accuracy = graph->GetSettings().mcf_accuracy;
-			uint tmp = Power(size, hops);
-			if (tmp < accuracy) {
-				accuracy = tmp;
-			} else {
-				decrease_accuracy = false;
-			}
-		}
-		hops++;
+	bool more_loops = true;
+
+	while (more_loops) {
+		more_loops = false;
+
 		for (NodeID source = 0; source < size; ++source) {
 			/* first saturate the shortest paths */
-			Dijkstra<DistanceAnnotation>(source, paths, hops, true);
+			Dijkstra<DistanceAnnotation>(source, paths, true);
 
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge & edge = graph->GetEdge(source, dest);
 				if (edge.unsatisfied_demand > 0) {
 					Path * path = paths[dest];
-					/* generally only allow paths that don't exceed the available capacity
+					/* generally only allow paths that don't exceed the available capacity.
 					 * but if no demand has been assigned yet, make an exception and allow
 					 * any valid path *once*.
 					 */
 					if (path->GetCapacity() > 0) {
 						PushFlow(edge, path, accuracy, true);
+						SetVia(source, path);
+						if (edge.unsatisfied_demand > 0) {
+							/* if a path has been found there is a chance we can find more */
+							more_loops = true;
+						}
 					} else if (edge.unsatisfied_demand == edge.demand && path->GetCapacity() > INT_MIN) {
 						PushFlow(edge, path, accuracy, false);
-					}
-					if (edge.unsatisfied_demand > 0) {
-						demand_left = true;
+						SetVia(source, path);
 					}
 				}
 			}
 			CleanupPaths(paths);
 		}
+
 		if (accuracy > 1) --accuracy;
 	}
 }
@@ -155,7 +183,7 @@ void MCF2ndPass::Run(LinkGraphComponent * graph) {
 		demand_left = false;
 		for (NodeID source = 0; source < size; ++source) {
 			/* Then assign all remaining demands */
-			Dijkstra<CapacityAnnotation>(source, paths, size, false);
+			Dijkstra<CapacityAnnotation>(source, paths, false);
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge & edge = graph->GetEdge(source, dest);
 				if (edge.unsatisfied_demand > 0) {
