@@ -1319,6 +1319,28 @@ bool AfterLoadGame()
 		}
 	}
 
+	if (CheckSavegameVersion(CAPACITIES_SV)) {
+		Station * st;
+		FOR_ALL_STATIONS(st) {
+			std::list<Vehicle *> &vehicles = st->loading_vehicles;
+				for(std::list<Vehicle *>::iterator i = vehicles.begin(); i != vehicles.end(); ++i) {
+				Vehicle *front = *i;
+				StationID next_station = front->orders.list->GetNextStoppingStation(front->cur_order_index);
+				if (next_station != INVALID_STATION && next_station != front->last_station_visited) {
+					Station * next = GetStation(next_station);
+					for(Vehicle *v = front; v != NULL; v = v->Next()) {
+						if (v->cargo_cap > 0) {
+							LinkStat & ls = next->goods[v->cargo_type].link_stats[front->last_station_visited];
+							ls.frozen += v->cargo_cap;
+							ls.capacity = max(ls.frozen, ls.capacity);
+							assert(ls.capacity > 0);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	if (CheckSavegameVersion(58)) {
 		/* Setting difficulty number_industries other than zero get bumped to +1
 		 * since a new option (very low at position1) has been added */
