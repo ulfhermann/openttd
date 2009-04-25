@@ -237,7 +237,7 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
 	if (curr == NULL) {
 		curr = GetFirstOrder();
 		if (curr == NULL) {
-			return NULL;
+			return INVALID_STATION;
 		}
 	}
 
@@ -259,7 +259,7 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
 
 StationID OrderList::GetPreviousStoppingStation(VehicleOrderID curr_id) const {
 	if (curr_id >= this->num_orders) {
-		return NULL;
+		return INVALID_STATION;
 	}
 
 	const Order * prev = NULL;
