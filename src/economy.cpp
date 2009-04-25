@@ -1495,12 +1495,14 @@ void VehiclePayment(Vehicle *front_v)
 				LinkStat & in =	st->goods[v->cargo_type].link_stats[last_station_id];
 				in.capacity += GetCapIncrease(in.capacity, v->cargo_cap);
 				in.usage += GetCapIncrease(in.usage, v->cargo.Count());
+				assert(in.capacity > 0);
 			}
 
 			if (next_station != NULL) {
 				LinkStat & out = next_station->goods[v->cargo_type].link_stats[last_visited];
 				out.frozen += v->cargo_cap;
 				out.capacity = max(out.capacity, out.frozen);
+				assert(out.capacity > 0);
 			}
 		} else {
 			continue;
