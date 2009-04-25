@@ -24,8 +24,17 @@ void FlowMapper::Run(LinkGraphComponent * c) {
 			prev_node.flows[origin][via] += flow;
 			StationID prev = prev_node.station;
 			if (origin != prev) {
+				/* find simple circular flows ... */
+				assert(node.flows[origin][prev] == 0);
 				prev_node.flows[origin][prev] -= flow;
 			}
 		}
+	}
+	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {
+		PathSet & paths = component->GetNode(node_id).paths;
+		for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+			delete (*i);
+		}
+		paths.clear();
 	}
 }
