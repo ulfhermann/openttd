@@ -36,8 +36,9 @@ public:
 	virtual ~MultiCommodityFlow() {}
 protected:
 	template<class ANNOTATION>
-		void Dijkstra(NodeID from, PathVector & paths, uint max_hops, bool create_new_paths);
-	void PushFlow(Edge & edge, Path * path, uint accuracy, bool positive_cap);
+		void Dijkstra(NodeID from, PathVector & paths, bool create_new_paths);
+	uint PushFlow(Edge & edge, Path * path, uint accuracy, bool positive_cap);
+	void SetVia(NodeID source, Path * path);
 	void CleanupPaths(PathVector & paths);
 	LinkGraphComponent * graph;
 };
