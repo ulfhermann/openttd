@@ -37,6 +37,8 @@ private:
 	void ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via_set, CargoID cargo);
 };
 
+typedef std::set<NodeID> ViaSet;
+
 class Edge {
 public:
 	Edge() : distance(0), capacity(0), demand(0), unsatisfied_demand(0), flow(0), next_edge(Node::INVALID) {}
@@ -46,6 +48,7 @@ public:
 	uint unsatisfied_demand;
 	uint flow;
 	NodeID next_edge;
+	ViaSet paths_via;
 };
 
 typedef uint16 colour;
