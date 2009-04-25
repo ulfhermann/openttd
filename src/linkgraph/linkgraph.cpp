@@ -298,8 +298,11 @@ uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
 	if (parent != NULL) {
 		Edge & edge = graph->GetEdge(parent->node, node);
 		if (only_positive) {
-			assert(edge.capacity >= edge.flow);
-			f = min(f, edge.capacity - edge.flow);
+			if(edge.capacity > edge.flow) {
+				f = min(f, edge.capacity - edge.flow);
+			} else {
+				return 0;
+			}
 		}
 		f = parent->AddFlow(f, graph, only_positive);
 		edge.flow += f;
