@@ -1532,7 +1532,12 @@ void Vehicle::LeaveStation()
 	if (next_station != INVALID_STATION && next_station != this->last_station_visited) {
 		Station * next = GetStation(next_station);
 		for(Vehicle * v = this; v != NULL; v = v->next) {
-			next->goods[v->cargo_type].link_stats[this->last_station_visited].frozen -= this->cargo_cap;
+			if (v->cargo_cap > 0) {
+				LinkStat & ls = next->goods[v->cargo_type].link_stats[this->last_station_visited];
+				assert(ls.frozen >= v->cargo_cap);
+				ls.frozen -= v->cargo_cap;
+				assert(ls.capacity > 0);
+			}
 		}
 	}
 
