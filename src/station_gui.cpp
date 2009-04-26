@@ -1292,6 +1292,7 @@ struct StationViewWindow : public Window {
 
 	void HandleCargoWaitingClick(int row)
 	{
+		if (row < 0 || (uint)row >= displayed_rows.size()) return;
 		RowDisplay & display = displayed_rows[row];
 
 		if (display.filter == &expanded_rows) {
