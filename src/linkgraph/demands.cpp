@@ -117,9 +117,16 @@ void DemandCalculator::CalcAntiSymmetric(LinkGraphComponent * graph) {
 		for(uint i = 0; i < num_demands; ++i) {
 			NodeID node2 = demands.front();
 			demands.pop_front();
-			demands.push_back(node2);
 			if (node1 == node2) {
-				continue;
+				if (demands.empty() && supplies.empty()) {
+					/* only one node with supply and demand left */
+					return;
+				} else {
+					demands.push_back(node2);
+					continue;
+				}
+			} else {
+				demands.push_back(node2);
 			}
 			Edge & edge = graph->GetEdge(node1, node2);
 			uint demand = from.undelivered_supply * demand_per_node * (max_distance - edge.distance) / max_distance / supply_sum + 1;
