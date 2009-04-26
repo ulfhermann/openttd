@@ -68,7 +68,7 @@ private:
 
 	template<class ID>
 	bool SortId(ID st1, ID st2) const;
-
+	bool SortCount(const CargoDataEntry *cd1, const CargoDataEntry *cd2) const;
 	bool SortStation (StationID st1, StationID st2) const;
 };
 

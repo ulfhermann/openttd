@@ -804,7 +804,7 @@ bool CargoSorter::operator()(const CargoDataEntry * cd1, const CargoDataEntry * 
 		return SortId<CargoID>(cd1->GetCargo(), cd2->GetCargo());
 		break;
 	case ST_COUNT:
-		return SortId<uint>(cd1->GetCount(), cd2->GetCount());
+		return SortCount(cd1, cd2);
 		break;
 	case ST_STATION:
 		return SortStation(cd1->GetStation(), cd2->GetStation());
@@ -820,6 +820,18 @@ bool CargoSorter::SortId(ID st1, ID st2) const {
 		return st1 < st2;
 	} else {
 		return st2 < st1;
+	}
+}
+
+bool CargoSorter::SortCount(const CargoDataEntry *cd1, const CargoDataEntry *cd2) const {
+	uint c1 = cd1->GetCount();
+	uint c2 = cd2->GetCount();
+	if (c1 == c2) {
+		return cd1 < cd2;
+	} else if (order == SO_ASCENDING) {
+		return c1 < c2;
+	} else {
+		return c2 < c1;
 	}
 }
 
@@ -937,7 +949,7 @@ struct StationViewWindow : public Window {
 
 	void ShowCargo(CargoDataEntry * data, CargoID cargo, StationID source, StationID next, StationID dest, uint count) {
 		const CargoDataEntry * expand = &expanded_rows;
-		for (int i = 0; i < _num_columns; ++i) {
+		for (int i = 0; i < _num_columns && expand != NULL; ++i) {
 			switch (groupings[i]) {
 			case CARGO:
 				assert(i == 0);
@@ -955,9 +967,6 @@ struct StationViewWindow : public Window {
 			case DESTINATION:
 				data = data->Update(dest, count);
 				expand = expand->Retrieve(dest);
-				break;
-			}
-			if (expand == NULL) {
 				break;
 			}
 		}
@@ -1015,7 +1024,7 @@ struct StationViewWindow : public Window {
 		}
 	}
 
-	void BuildFlowList(CargoID i, StationID curr, const FlowStatMap & flows, CargoDataEntry * cargo) {
+	void BuildFlowList(CargoID i, const FlowStatMap & flows, CargoDataEntry * cargo) {
 		uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
 		for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
 			StationID from = it->first;
@@ -1030,8 +1039,8 @@ struct StationViewWindow : public Window {
 					val = DivideApprox(stat.sent * 30, scale);
 				}
 
-				if (stat.via == curr) {
-					dest[curr] = val;
+				if (stat.via == this->window_number) {
+					dest[this->window_number] = val;
 				} else {
 					EstimateDestinations(i, from, stat.via, val, dest, this->widget[SVW_FLOWS].data == _show_sent);
 				}
@@ -1039,7 +1048,6 @@ struct StationViewWindow : public Window {
 				for (DestinationMap::iterator dest_it = dest.begin(); dest_it != dest.end(); ++dest_it) {
 					if (dest_it->second > 0) {
 						ShowCargo(cargo, i, from, stat.via, dest_it->first, dest_it->second);
-
 					}
 				}
 			}
@@ -1064,7 +1072,7 @@ struct StationViewWindow : public Window {
 			if (this->widget[SVW_FLOWS].data == _show_waiting) {
 				BuildCargoList(i, st->goods[i].cargo, cargo);
 			} else {
-				BuildFlowList(i, st->index, st->goods[i].flows, cargo);
+				BuildFlowList(i, st->goods[i].flows, cargo);
 			}
 		}
 	}
