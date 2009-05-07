@@ -12,8 +12,8 @@
 #include "table/sprites.h"
 #include "table/strings.h"
 
-static const char *UPARROW   = "\xEE\x8A\xA0";
-static const char *DOWNARROW = "\xEE\x8A\xAA";
+static const char *UPARROW   = "\xEE\x8A\xA0"; ///< String containing an upwards pointing arrow.
+static const char *DOWNARROW = "\xEE\x8A\xAA"; ///< String containing a downwards pointing arrow.
 
 /**
  * Compute the vertical position of the draggable part of scrollbar
@@ -267,7 +267,7 @@ void Window::DrawWidgets() const
 			const StringID str = wi->data;
 			DrawFrameRect(r.left, r.top, r.right, r.bottom, wi->colour, FR_LOWERED | FR_DARKENED);
 
-			if (str != STR_NULL) DrawString(r.left + 2, r.right - 2, r.top + 1, str, TC_FROMSTRING);
+			if (str != STR_NULL) DrawString(r.left + 2, r.right - 2, r.top + 1, str);
 			break;
 		}
 
@@ -411,7 +411,7 @@ void Window::DrawWidgets() const
 			const StringID str = wi->data;
 			int x2 = r.left; // by default the left side is the left side of the widget
 
-			if (str != STR_NULL) x2 = DrawString(r.left + 6, r.right - 6, r.top, str, TC_FROMSTRING);
+			if (str != STR_NULL) x2 = DrawString(r.left + 6, r.right - 6, r.top, str);
 
 			int c1 = _colour_gradient[wi->colour][3];
 			int c2 = _colour_gradient[wi->colour][7];
@@ -524,6 +524,13 @@ void Window::DrawWidgets() const
 
 }
 
+/**
+ * Evenly distribute the combined horizontal length of two consecutive widgets.
+ * @param w Window containing the widgets.
+ * @param a Left widget to resize.
+ * @param b Right widget to resize.
+ * @note Widgets are assumed to lie against each other.
+ */
 static void ResizeWidgets(Window *w, byte a, byte b)
 {
 	int16 offset = w->widget[a].left;
@@ -534,6 +541,14 @@ static void ResizeWidgets(Window *w, byte a, byte b)
 	w->widget[b].left  = w->widget[a].right + 1;
 }
 
+/**
+ * Evenly distribute the combined horizontal length of three consecutive widgets.
+ * @param w Window containing the widgets.
+ * @param a Left widget to resize.
+ * @param b Middle widget to resize.
+ * @param c Right widget to resize.
+ * @note Widgets are assumed to lie against each other.
+ */
 static void ResizeWidgets(Window *w, byte a, byte b, byte c)
 {
 	int16 offset = w->widget[a].left;
@@ -638,7 +653,26 @@ void Window::DrawSortButtonState(int widget, SortButtonState state) const
 }
 
 
-/* == Nested widgets == */
+/**
+ * @defgroup NestedWidgets Hierarchical widgets.
+ * Hierarchical widgets, also known as nested widgets, are widgets stored in a tree. At the leafs of the tree are (mostly) the 'real' widgets
+ * visible to the user. At higher levels, widgets get organized in container widgets, until all widgets of the window are merged.
+ *
+ * A leaf widget is one of
+ * - #NWidgetLeaf for widgets visible for the user, or
+ * - #NWidgetSpacer for creating (flexible) empty space between widgets.
+ *
+ * A container widget is one of
+ * - #NWidgetHorizontal for organizing child widgets in a (horizontal) row. The row switches order depending on the language setting (thus supporting
+ *   right-to-left languages),
+ * - #NWidgetHorizontalLTR for organizing child widgets in a (horizontal) row, always in the same order. All childs below this container will also
+ *   never swap order.
+ * - #NWidgetVertical for organizing child widgets underneath each other.
+ * - #NWidgetBackground for adding a background behind its child widget.
+ * - #NWidgetStacked for stacking child widgets on top of each other.
+ *
+ * @see NestedWidgetParts
+ */
 
 /**
  * Base class constructor.
@@ -863,6 +897,86 @@ void NWidgetContainer::Add(NWidgetBase *wid)
 }
 
 /**
+ * Widgets stacked on top of each other.
+ * @param tp Kind of stacking, must be either #NWID_SELECTION or #NWID_LAYERED.
+ */
+NWidgetStacked::NWidgetStacked(WidgetType tp) : NWidgetContainer(tp)
+{
+}
+
+int NWidgetStacked::ComputeMinimalSize()
+{
+	/* First sweep, recurse down and compute minimal size and filling. */
+	int biggest_index = -1;
+	this->min_x = 0;
+	this->min_y = 0;
+	this->fill_x = (this->head != NULL);
+	this->fill_y = (this->head != NULL);
+	this->resize_x = (this->head != NULL) ? 1 : 0;
+	this->resize_y = (this->head != NULL) ? 1 : 0;
+	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
+		int idx = child_wid->ComputeMinimalSize();
+		biggest_index = max(biggest_index, idx);
+
+		this->min_x = max(this->min_x, child_wid->min_x + child_wid->padding_left + child_wid->padding_right);
+		this->min_y = max(this->min_y, child_wid->min_y + child_wid->padding_top + child_wid->padding_bottom);
+		this->fill_x &= child_wid->fill_x;
+		this->fill_y &= child_wid->fill_y;
+		this->resize_x = LeastCommonMultiple(this->resize_x, child_wid->resize_x);
+		this->resize_y = LeastCommonMultiple(this->resize_y, child_wid->resize_y);
+	}
+	return biggest_index;
+}
+
+void NWidgetStacked::AssignMinimalPosition(uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl)
+{
+	assert(given_width >= this->min_x && given_height >= this->min_y);
+
+	this->pos_x = x;
+	this->pos_y = y;
+	this->min_x = given_width;
+	this->min_y = given_height;
+	if (!allow_resize_x) this->resize_x = 0;
+	if (!allow_resize_y) this->resize_y = 0;
+
+	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
+		/* Decide about horizontal position and filling of the child. */
+		uint child_width;
+		int child_pos_x;
+		if (child_wid->fill_x) {
+			child_width = given_width - child_wid->padding_left - child_wid->padding_right;
+			child_pos_x = (rtl ? child_wid->padding_right : child_wid->padding_left);
+		} else {
+			child_width = child_wid->min_x;
+			child_pos_x = (given_width - child_wid->padding_left - child_wid->padding_right - child_width) / 2 + (rtl ? child_wid->padding_right : child_wid->padding_left);
+		}
+
+		/* Decide about vertical position and filling of the child. */
+		uint child_height;
+		int child_pos_y;
+		if (child_wid->fill_y) {
+			child_height = given_height - child_wid->padding_top - child_wid->padding_bottom;
+			child_pos_y = 0;
+		} else {
+			child_height = child_wid->min_y;
+			child_pos_y = (given_height - child_wid->padding_top - child_wid->padding_bottom - child_height) / 2;
+		}
+		child_wid->AssignMinimalPosition(x + child_pos_x, y + child_pos_y, child_width, child_height, (this->resize_x > 0), (this->resize_y > 0), rtl);
+	}
+}
+
+void NWidgetStacked::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
+{
+	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
+		child_wid->StoreWidgets(widgets, length, left_moving, top_moving, rtl);
+	}
+}
+
+NWidgetPIPContainer::NWidgetPIPContainer(WidgetType tp) : NWidgetContainer(tp)
+{
+}
+
+/**
  * Set additional pre/inter/post space for the container.
  *
  * @param pip_pre   Additional space in front of the first child widget (above
@@ -871,14 +985,15 @@ void NWidgetContainer::Add(NWidgetBase *wid)
  * @param pip_post  Additional space after the last child widget (below for the
  *                  vertical container, at the right for the horizontal container).
  */
-void NWidgetContainer::SetPIP(uint8 pip_pre, uint8 pip_inter, uint8 pip_post)
+void NWidgetPIPContainer::SetPIP(uint8 pip_pre, uint8 pip_inter, uint8 pip_post)
 {
 	this->pip_pre = pip_pre;
 	this->pip_inter = pip_inter;
 	this->pip_post = pip_post;
 }
 
-NWidgetHorizontal::NWidgetHorizontal() : NWidgetContainer(NWID_HORIZONTAL)
+/** Horizontal container widget. */
+NWidgetHorizontal::NWidgetHorizontal() : NWidgetPIPContainer(NWID_HORIZONTAL)
 {
 }
 
@@ -986,6 +1101,7 @@ void NWidgetHorizontal::StoreWidgets(Widget *widgets, int length, bool left_movi
 	}
 }
 
+/** Horizontal left-to-right container widget. */
 NWidgetHorizontalLTR::NWidgetHorizontalLTR() : NWidgetHorizontal()
 {
 	this->type = NWID_HORIZONTAL_LTR;
@@ -1001,7 +1117,8 @@ void NWidgetHorizontalLTR::StoreWidgets(Widget *widgets, int length, bool left_m
 	NWidgetHorizontal::StoreWidgets(widgets, length, left_moving, top_moving, false);
 }
 
-NWidgetVertical::NWidgetVertical() : NWidgetContainer(NWID_VERTICAL)
+/** Vertical container widget. */
+NWidgetVertical::NWidgetVertical() : NWidgetPIPContainer(NWID_VERTICAL)
 {
 }
 
@@ -1133,7 +1250,7 @@ void NWidgetSpacer::StoreWidgets(Widget *widgets, int length, bool left_moving, 
  *               vertical container will be inserted while adding the first
  *               child widget.
  */
-NWidgetBackground::NWidgetBackground(WidgetType tp, Colours colour, int index, NWidgetContainer *child) : NWidgetCore(tp, colour, true, true, 0x0, STR_NULL)
+NWidgetBackground::NWidgetBackground(WidgetType tp, Colours colour, int index, NWidgetPIPContainer *child) : NWidgetCore(tp, colour, true, true, 0x0, STR_NULL)
 {
 	this->SetIndex(index);
 	assert(tp == WWT_PANEL || tp == WWT_INSET || tp == WWT_FRAME);
@@ -1223,10 +1340,11 @@ void NWidgetBackground::StoreWidgets(Widget *widgets, int length, bool left_movi
 
 /**
  * Nested leaf widget.
- * @param tp    Type of leaf widget.
- * @param index Index in the widget array used by the window system.
- * @param data  Data of the widget.
- * @param tip   Tooltip of the widget.
+ * @param tp     Type of leaf widget.
+ * @param colour Colour of the leaf widget.
+ * @param index  Index in the widget array used by the window system.
+ * @param data   Data of the widget.
+ * @param tip    Tooltip of the widget.
  */
 NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, StringID tip) : NWidgetCore(tp, colour, true, true, data, tip)
 {
@@ -1314,6 +1432,7 @@ NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, 
  * @param rtl  Direction of the language.
  * @return Widget array with the converted widgets.
  * @note Caller should release returned widget array with \c free(widgets).
+ * @ingroup NestedWidgets
  */
 Widget *InitializeNWidgets(NWidgetBase *nwid, bool rtl)
 {
@@ -1449,6 +1568,14 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				*fill_dest = false;
 				break;
 
+			case NWID_SELECTION:
+			case NWID_LAYERED:
+				if (*dest != NULL) return num_used;
+				*dest = new NWidgetStacked(parts->type);
+				*fill_dest = true;
+				break;
+
+
 			case WPT_RESIZE: {
 				NWidgetResizeBase *nwrb = dynamic_cast<NWidgetResizeBase *>(*dest);
 				if (nwrb != NULL) {
@@ -1509,19 +1636,12 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				break;
 			}
 
-			case WPT_PADDING: {
-				NWidgetBase *nwb = *dest;
-				if (nwb != NULL) {
-					nwb->padding_top = parts->u.padding.top;
-					nwb->padding_right = parts->u.padding.right;
-					nwb->padding_bottom = parts->u.padding.bottom;
-					nwb->padding_left = parts->u.padding.left;
-				}
+			case WPT_PADDING:
+				if (*dest != NULL) (*dest)->SetPadding(parts->u.padding.top, parts->u.padding.right, parts->u.padding.bottom, parts->u.padding.left);
 				break;
-			}
 
 			case WPT_PIPSPACE: {
-				NWidgetContainer *nwc = dynamic_cast<NWidgetContainer *>(*dest);
+				NWidgetPIPContainer *nwc = dynamic_cast<NWidgetPIPContainer *>(*dest);
 				if (nwc != NULL) nwc->SetPIP(parts->u.pip.pre,  parts->u.pip.inter, parts->u.pip.post);
 
 				NWidgetBackground *nwb = dynamic_cast<NWidgetBackground *>(*dest);
@@ -1576,7 +1696,8 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
 
 		/* If sub-widget is a container, recursively fill that container. */
 		WidgetType tp = sub_widget->type;
-		if (fill_sub && (tp == NWID_HORIZONTAL || tp == NWID_HORIZONTAL_LTR || tp == NWID_VERTICAL || tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET)) {
+		if (fill_sub && (tp == NWID_HORIZONTAL || tp == NWID_HORIZONTAL_LTR || tp == NWID_VERTICAL
+							|| tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET || tp == NWID_SELECTION || tp == NWID_LAYERED)) {
 			int num_used = MakeWidgetTree(parts, count - total_used, sub_widget);
 			parts += num_used;
 			total_used += num_used;
@@ -1595,10 +1716,51 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
  * @param parts Array with parts of the widgets.
  * @param count Length of the \a parts array.
  * @return Root of the nested widget tree, a vertical container containing the entire GUI.
+ * @ingroup NestedWidgetParts
  */
 NWidgetContainer *MakeNWidgets(const NWidgetPart *parts, int count)
 {
 	NWidgetContainer *cont = new NWidgetVertical();
 	MakeWidgetTree(parts, count, cont);
 	return cont;
+}
+
+/**
+ * Construct a #Widget array from a nested widget parts array, taking care of all the steps and checks.
+ * Also cache the result and use the cache if possible.
+ * @param[in] parts        Array with parts of the widgets.
+ * @param     parts_length Length of the \a parts array.
+ * @param[in] orig_wid     Pointer to original widget array.
+ * @param     wid_cache    Pointer to the cache for storing the generated widget array (use \c NULL to prevent caching).
+ * @return Cached value if available, otherwise the generated widget array. If \a wid_cache is \c NULL, the caller should free the returned array.
+ *
+ * @pre Before the first call, \c *wid_cache should be \c NULL.
+ * @post The widget array stored in the \c *wid_cache should be free-ed by the caller.
+ */
+const Widget *InitializeWidgetArrayFromNestedWidgets(const NWidgetPart *parts, int parts_length, const Widget *orig_wid, Widget **wid_cache)
+{
+	const bool rtl = false; // Direction of the language is left-to-right
+
+	if (wid_cache != NULL && *wid_cache != NULL) return *wid_cache;
+
+	assert(parts != NULL && parts_length > 0);
+	NWidgetContainer *nwid = MakeNWidgets(parts, parts_length);
+	Widget *gen_wid = InitializeNWidgets(nwid, rtl);
+
+	if (!rtl && orig_wid) {
+		/* There are two descriptions, compare them.
+		 * Comparing only makes sense when using a left-to-right language.
+		 */
+		bool ok = CompareWidgetArrays(orig_wid, gen_wid, false);
+		if (ok) {
+			DEBUG(misc, 1, "Nested widgets are equal, min-size(%u, %u)", nwid->min_x, nwid->min_y);
+		} else {
+			DEBUG(misc, 0, "Nested widgets give different results");
+			CompareWidgetArrays(orig_wid, gen_wid, true);
+		}
+	}
+	delete nwid;
+
+	if (wid_cache != NULL) *wid_cache = gen_wid;
+	return gen_wid;
 }

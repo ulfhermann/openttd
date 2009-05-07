@@ -569,7 +569,7 @@ STR_MESSAGE_SOUND                                               :{YELLOW}Soita �
 STR_ERROR_TOO_FAR_FROM_PREVIOUS_DESTINATION                     :{WHITE}...liian kaukana edellisestä määränpäästä
 STR_HIGHSCORE_TOP_COMPANIES_WHO_REACHED                         :{BIGFONT}{BLACK}Parhaat yhtiöt, jotka saavuttivat vuoden {NUM}{}(taso: {STRING})
 STR_HIGHSCORE_TOP_COMPANIES_NETWORK_GAME                        :{BIGFONT}{BLACK}Yhtiökilpailutaulukko vuonna {NUM}
-STR_HIGHSCORE_POSITION                                          :{BIGFONT}{COMMA}.
+STR_HIGHSCORE_POSITION                                          :{BLACK}{BIGFONT}{COMMA}.
 STR_HIGHSCORE_PERFORMANCE_TITLE_BUSINESSMAN                     :Liikemies
 STR_HIGHSCORE_PERFORMANCE_TITLE_ENTREPRENEUR                    :Yrittäjä
 STR_HIGHSCORE_PERFORMANCE_TITLE_INDUSTRIALIST                   :Teollisuusmies
@@ -2846,11 +2846,11 @@ STR_CAN_T_TIMETABLE_VEHICLE                                     :{WHITE}Ei voi a
 STR_TIMETABLE_ONLY_WAIT_AT_STATIONS                             :{WHITE}Kulkuneuvo voi odottaa vain asemalla.
 STR_TIMETABLE_NOT_STOPPING_HERE                                 :{WHITE}Tämä ajoneuvo ei pysähdy tällä asemalla.
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Muuta aikaa
-STR_TIMETABLE_STATUS_ON_TIME                                    :Ajoneuvo on aikataulussa
-STR_TIMETABLE_STATUS_LATE                                       :Ajoneuvo on {STRING} myöhässä
-STR_TIMETABLE_STATUS_EARLY                                      :Ajoneuvo on {STRING} etuajassa
-STR_TIMETABLE_TOTAL_TIME                                        :Aikataulun kesto on {STRING}
-STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :Aikataulun kesto on vähintään {STRING}
+STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Ajoneuvo on aikataulussa
+STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Ajoneuvo on {STRING} myöhässä
+STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Ajoneuvo on {STRING} etuajassa
+STR_TIMETABLE_TOTAL_TIME                                        :{BLACK}Aikataulun kesto on {STRING}
+STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Aikataulun kesto on vähintään {STRING}
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Automaattinen
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Täytä aikataulu automaattisesti seuraavan matkan arvoilla (CTRL-click: yritä säilyttää odotusajat)
 
@@ -3164,6 +3164,16 @@ STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Vaihda 
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Vaihda euroon: {ORANGE}ei koskaan
 STR_CURRENCY_PREVIEW                                            :{LTBLUE}Esikatselu: {ORANGE}{6:CURRENCY}
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Vaihda oman valuutan parametria.
+STR_TOOLTIP_DECREASE_EXCHANGE_RATE                              :{BLACK}Vähennä valuuttasi määrää yhdelle Punnalle (£)
+STR_TOOLTIP_INCREASE_EXCHANGE_RATE                              :{BLACK}Lisää valuuttasi määrää yhdelle Punnalle (£)
+STR_TOOLTIP_SET_EXCHANGE_RATE                                   :{BLACK}Aseta vaihtokurssi valuutallesi yhdelle Punnalle (£)
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_SEPARATOR                       :{BLACK}Valitse välimerkki valuutallesi
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_PREFIX                          :{BLACK}Valitse alkuliite valuutallesi
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_SUFFIX                          :{BLACK}Valitse jälkiliite valuutallesi
+STR_TOOLTIP_DECREASE_CUSTOM_CURRENCY_TO_EURO                    :{BLACK}Vaihda Euroon aikaisemmin
+STR_TOOLTIP_INCREASE_CUSTOM_CURRENCY_TO_EURO                    :{BLACK}Vaihda Euroon myöhemmin
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_TO_EURO                         :{BLACK}Valitse vuosi, jona vaihdetaan Euroon
+STR_TOOLTIP_CUSTOM_CURRENCY_PREVIEW                             :{BLACK}10000 Puntaa (£) valuutassasi
 
 STR_TRAIN                                                       :{BLACK}{TRAIN}
 STR_BUS                                                         :{BLACK}{BUS}
@@ -3561,9 +3571,9 @@ STR_AI_RESET                                                    :{BLACK}Palauta
 STR_AI_HUMAN_PLAYER                                             :Ihmispelaaja
 STR_AI_RANDOM_AI                                                :Sattumanvarainen tekoäly
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}Tekoälyn parametrit
-STR_AI_AUTHOR                                                   :Tekijä: {STRING}
-STR_AI_VERSION                                                  :Versio: {NUM}
-STR_AI_URL                                                      :URL: {STRING}
+STR_AI_AUTHOR                                                   :{BLACK}Tekijä: {STRING}
+STR_AI_VERSION                                                  :{BLACK}Versio: {NUM}
+STR_AI_URL                                                      :{BLACK}URL: {STRING}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Yksi käynnissä olevista tekoälyistä kaatui. Ole hyvä ja kerro tästä tekoälyn tekijälle, sekä ota kuvankaappaus Tekoalyn Virheenkorjaus ikkunasta.
 ########
 

@@ -96,18 +96,18 @@ struct AIListWindow : public Window {
 		if (selected_info != NULL) {
 			int y = this->widget[AIL_WIDGET_INFO_BG].top + 6;
 			SetDParamStr(0, selected_info->GetAuthor());
-			DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_AUTHOR, TC_BLACK);
+			DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_AUTHOR);
 			y += 13;
 			SetDParam(0, selected_info->GetVersion());
-			DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_VERSION, TC_BLACK);
+			DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_VERSION);
 			y += 13;
 			if (selected_info->GetURL() != NULL) {
 				SetDParamStr(0, selected_info->GetURL());
-				DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_URL, TC_BLACK);
+				DrawString(4, this->widget[AIL_WIDGET_INFO_BG].right - 4, y, STR_AI_URL);
 				y += 13;
 			}
 			SetDParamStr(0, selected_info->GetDescription());
-			DrawStringMultiLine(4, this->width - 8, y, this->widget[AIL_WIDGET_INFO_BG].bottom, STR_JUST_RAW_STRING);
+			DrawStringMultiLine(4, this->width - 8, y, this->widget[AIL_WIDGET_INFO_BG].bottom, STR_JUST_RAW_STRING, TC_BLACK);
 		}
 	}
 
@@ -523,7 +523,7 @@ struct AIConfigWindow : public Window {
 		byte max_competitors = _settings_newgame.difficulty.max_no_competitors;
 		DrawArrowButtons(10, 18, COLOUR_YELLOW, this->clicked_button ? 1 + !!this->clicked_increase : 0, max_competitors > 0, max_competitors < MAX_COMPANIES - 1);
 		SetDParam(0, _settings_newgame.difficulty.max_no_competitors);
-		DrawString(36, this->widget[AIC_WIDGET_BACKGROUND].right, 18, STR_DIFFICULTY_LEVEL_SETTING_MAXIMUM_NO_COMPETITORS, TC_FROMSTRING);
+		DrawString(36, this->widget[AIC_WIDGET_BACKGROUND].right, 18, STR_DIFFICULTY_LEVEL_SETTING_MAXIMUM_NO_COMPETITORS);
 
 		int y = this->widget[AIC_WIDGET_LIST].top;
 		for (int i = this->vscroll.pos; i < this->vscroll.pos + this->vscroll.cap && i < MAX_COMPANIES; i++) {
