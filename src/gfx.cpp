@@ -19,6 +19,7 @@
 #include "landscape_type.h"
 #include "network/network_func.h"
 #include "core/smallvec_type.hpp"
+#include "thread.h"
 
 #include "table/palettes.h"
 #include "table/sprites.h"
@@ -39,7 +40,7 @@ bool _screen_disable_anim = false;   ///< Disable palette animation (important f
 bool _exit_game;
 GameMode _game_mode;
 SwitchMode _switch_mode;  ///< The next mainloop command.
-int8 _pause_game;
+PauseModeByte _pause_mode;
 int _pal_first_dirty;
 int _pal_count_dirty;
 
@@ -363,6 +364,8 @@ static int TruncateString(char *str, int maxw)
 			} else if (c == SCC_BIGFONT) {
 				size = FS_LARGE;
 				ddd = GetCharacterWidth(size, '.') * 3;
+			} else if (c == '\n') {
+				DEBUG(misc, 0, "Drawing string using newlines with DrawString instead of DrawStringMultiLine. Please notify the developers of this: [%s]", str);
 			}
 		}
 
@@ -1273,7 +1276,18 @@ void DrawDirtyBlocks()
 	int x;
 	int y;
 
-	if (IsGeneratingWorld() && !IsGeneratingWorldReadyForPaint()) return;
+	if (IsGeneratingWorld()) {
+		/* We are generating the world, so release our rights to the map and
+		 * painting while we are waiting a bit. */
+		_genworld_paint_mutex->EndCritical();
+		_genworld_mapgen_mutex->EndCritical();
+
+		/* Wait a while and update _realtime_tick so we are given the rights */
+		CSleep(GENWORLD_REDRAW_TIMEOUT);
+		_realtime_tick += GENWORLD_REDRAW_TIMEOUT;
+		_genworld_paint_mutex->BeginCritical();
+		_genworld_mapgen_mutex->BeginCritical();
+	}
 
 	y = 0;
 	do {
@@ -1341,12 +1355,6 @@ void DrawDirtyBlocks()
 	_invalid_rect.top = h;
 	_invalid_rect.right = 0;
 	_invalid_rect.bottom = 0;
-
-	/* If we are generating a world, and waiting for a paint run, mark it here
-	 *  as done painting, so we can continue generating. */
-	if (IsGeneratingWorld() && IsGeneratingWorldReadyForPaint()) {
-		SetGeneratingWorldPaintStatus(false);
-	}
 }
 
 /*!

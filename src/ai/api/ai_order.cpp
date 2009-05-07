@@ -46,6 +46,47 @@ static OrderType GetOrderTypeByTile(TileIndex t)
 	return AIVehicle::IsValidVehicle(vehicle_id) && order_position >= 0 && (order_position < ::GetVehicle(vehicle_id)->GetNumOrders() || order_position == ORDER_CURRENT);
 }
 
+/**
+ * Get the current order the vehicle is executing. If the current order is in
+ *  the order list, return the order from the orderlist. If the current order
+ *  was a manual order, return the current order.
+ */
+static const Order *ResolveOrder(VehicleID vehicle_id, AIOrder::OrderPosition order_position)
+{
+	const Vehicle *v = ::GetVehicle(vehicle_id);
+	if (order_position == AIOrder::ORDER_CURRENT) {
+		const Order *order = &v->current_order;
+		if (order->GetType() == OT_GOTO_DEPOT && !(order->GetDepotOrderType() & ODTFB_PART_OF_ORDERS)) return order;
+		order_position = AIOrder::ResolveOrderPosition(vehicle_id, order_position);
+		if (order_position == AIOrder::ORDER_INVALID) return NULL;
+	}
+	return ::GetVehicleOrder(v, order_position);
+}
+
+/* static */ bool AIOrder::IsGotoStationOrder(VehicleID vehicle_id, OrderPosition order_position)
+{
+	if (!IsValidVehicleOrder(vehicle_id, order_position)) return false;
+
+	const Order *order = ::ResolveOrder(vehicle_id, order_position);
+	return order != NULL && order->GetType() == OT_GOTO_STATION;
+}
+
+/* static */ bool AIOrder::IsGotoDepotOrder(VehicleID vehicle_id, OrderPosition order_position)
+{
+	if (!IsValidVehicleOrder(vehicle_id, order_position)) return false;
+
+	const Order *order = ::ResolveOrder(vehicle_id, order_position);
+	return order != NULL && order->GetType() == OT_GOTO_DEPOT;
+}
+
+/* static */ bool AIOrder::IsGotoWaypointOrder(VehicleID vehicle_id, OrderPosition order_position)
+{
+	if (!IsValidVehicleOrder(vehicle_id, order_position)) return false;
+
+	const Order *order = ::ResolveOrder(vehicle_id, order_position);
+	return order != NULL && order->GetType() == OT_GOTO_WAYPOINT;
+}
+
 /* static */ bool AIOrder::IsConditionalOrder(VehicleID vehicle_id, OrderPosition order_position)
 {
 	if (order_position == ORDER_CURRENT) return false;
@@ -53,6 +94,16 @@ static OrderType GetOrderTypeByTile(TileIndex t)
 
 	const Order *order = ::GetVehicleOrder(GetVehicle(vehicle_id), order_position);
 	return order->GetType() == OT_CONDITIONAL;
+}
+
+/* static */ bool AIOrder::IsCurrentOrderPartOfOrderList(VehicleID vehicle_id)
+{
+	if (AIVehicle::IsValidVehicle(vehicle_id)) return false;
+	if (GetOrderCount(vehicle_id) == 0) return false;
+
+	const Order *order = &::GetVehicle(vehicle_id)->current_order;
+	if (order->GetType() != OT_GOTO_DEPOT) return true;
+	return (order->GetDepotOrderType() & ODTFB_PART_OF_ORDERS) != 0;
 }
 
 /* static */ AIOrder::OrderPosition AIOrder::ResolveOrderPosition(VehicleID vehicle_id, OrderPosition order_position)
@@ -114,14 +165,9 @@ static OrderType GetOrderTypeByTile(TileIndex t)
 {
 	if (!IsValidVehicleOrder(vehicle_id, order_position)) return INVALID_TILE;
 
-	const Order *order;
+	const Order *order = ::ResolveOrder(vehicle_id, order_position);
+	if (order == NULL || order->GetType() == OT_CONDITIONAL) return INVALID_TILE;
 	const Vehicle *v = ::GetVehicle(vehicle_id);
-	if (order_position == ORDER_CURRENT) {
-		order = &v->current_order;
-	} else {
-		order = ::GetVehicleOrder(GetVehicle(vehicle_id), order_position);
-		if (order->GetType() == OT_CONDITIONAL) return INVALID_TILE;
-	}
 
 	switch (order->GetType()) {
 		case OT_GOTO_DEPOT: {
@@ -163,13 +209,8 @@ static OrderType GetOrderTypeByTile(TileIndex t)
 {
 	if (!IsValidVehicleOrder(vehicle_id, order_position)) return AIOF_INVALID;
 
-	const Order *order;
-	if (order_position == ORDER_CURRENT) {
-		order = &::GetVehicle(vehicle_id)->current_order;
-	} else {
-		order = ::GetVehicleOrder(GetVehicle(vehicle_id), order_position);
-		if (order->GetType() == OT_CONDITIONAL) return AIOF_INVALID;
-	}
+	const Order *order = ::ResolveOrder(vehicle_id, order_position);
+	if (order == NULL || order->GetType() == OT_CONDITIONAL) return AIOF_INVALID;
 
 	AIOrderFlags order_flags = AIOF_NONE;
 	order_flags |= (AIOrderFlags)order->GetNonStopType();
@@ -295,14 +336,15 @@ static OrderType GetOrderTypeByTile(TileIndex t)
 		case OT_GOTO_DEPOT: {
 			OrderDepotTypeFlags odtf = (OrderDepotTypeFlags)(ODTFB_PART_OF_ORDERS | ((order_flags & AIOF_SERVICE_IF_NEEDED) ? ODTFB_SERVICE : 0));
 			OrderDepotActionFlags odaf = (OrderDepotActionFlags)(ODATF_SERVICE_ONLY | ((order_flags & AIOF_STOP_IN_DEPOT) ? ODATFB_HALT : 0));
+			OrderNonStopFlags onsf = (OrderNonStopFlags)((order_flags & AIOF_NON_STOP_INTERMEDIATE) ? ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS : ONSF_STOP_EVERYWHERE);
 			/* Check explicitly if the order is to a station (for aircraft) or
 			 * to a depot (other vehicle types). */
 			if (::GetVehicle(vehicle_id)->type == VEH_AIRCRAFT) {
 				if (!::IsTileType(destination, MP_STATION)) return false;
-				order.MakeGoToDepot(::GetStationIndex(destination), odtf, odaf);
+				order.MakeGoToDepot(::GetStationIndex(destination), odtf, onsf, odaf);
 			} else {
 				if (::IsTileType(destination, MP_STATION)) return false;
-				order.MakeGoToDepot(::GetDepotByTile(destination)->index, odtf, odaf);
+				order.MakeGoToDepot(::GetDepotByTile(destination)->index, odtf, onsf, odaf);
 			}
 			break;
 		}

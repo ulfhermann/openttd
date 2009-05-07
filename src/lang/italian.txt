@@ -5,10 +5,10 @@
 ##grflangid 0x27
 ##plural 0
 ##textdir ltr
-##case ms mp fs fp
-##gender m f
 ##digitsep .
 ##digitsepcur .
+##case ms mp fs fp
+##gender m f
 
 #
 
@@ -571,7 +571,7 @@ STR_MESSAGE_SOUND                                               :{YELLOW}Riprodu
 STR_ERROR_TOO_FAR_FROM_PREVIOUS_DESTINATION                     :{WHITE}...troppo lontano dalla destinazione precedente
 STR_HIGHSCORE_TOP_COMPANIES_WHO_REACHED                         :{BIGFONT}{BLACK}Le migliori compagnie che hanno raggiunto il {NUM}{}(Livello {STRING})
 STR_HIGHSCORE_TOP_COMPANIES_NETWORK_GAME                        :{BIGFONT}{BLACK}Classifica compagnie nel {NUM}
-STR_HIGHSCORE_POSITION                                          :{BIGFONT}{COMMA}.
+STR_HIGHSCORE_POSITION                                          :{BLACK}{BIGFONT}{COMMA}.
 STR_HIGHSCORE_PERFORMANCE_TITLE_BUSINESSMAN                     :Uomo d'affari
 STR_HIGHSCORE_PERFORMANCE_TITLE_ENTREPRENEUR                    :Imprenditore
 STR_HIGHSCORE_PERFORMANCE_TITLE_INDUSTRIALIST                   :Industriale
@@ -1214,7 +1214,7 @@ STR_RANDOM_INDUSTRIES_TIP                                       :{BLACK}Copre la
 STR_CAN_T_GENERATE_INDUSTRIES                                   :{WHITE}Impossibile generare industrie...
 
 STR_LANDSCAPING_TOOLBAR_TIP                                     :{BLACK}Apre la barra di modellazione del terreno per alzare/abbassare il terreno, piantare alberi, etc.
-STR_LANDSCAPING_TOOLBAR                                         :{WHITE}Modella terreno
+STR_LANDSCAPING_TOOLBAR                                         :{WHITE}Modellazione terreno
 STR_LEVEL_LAND_TOOLTIP                                          :{BLACK}Livella terreno
 
 
@@ -2848,11 +2848,11 @@ STR_CAN_T_TIMETABLE_VEHICLE                                     :{WHITE}Impossib
 STR_TIMETABLE_ONLY_WAIT_AT_STATIONS                             :{WHITE}I veicoli possono attendere solo alle stazioni.
 STR_TIMETABLE_NOT_STOPPING_HERE                                 :{WHITE}Il veicolo non ferma a questa stazione.
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Cambia tempo
-STR_TIMETABLE_STATUS_ON_TIME                                    :Il veicolo viaggia in orario
-STR_TIMETABLE_STATUS_LATE                                       :Il veicolo viaggia con un ritardo di {STRING}
-STR_TIMETABLE_STATUS_EARLY                                      :Il veicolo viaggia con un anticipo di {STRING}
-STR_TIMETABLE_TOTAL_TIME                                        :Questi ordini richiedono {STRING}
-STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :Questi ordini richiedono almeno {STRING} (non tutti i tempi specificati)
+STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Il veicolo viaggia in orario
+STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Il veicolo viaggia con un ritardo di {STRING}
+STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Il veicolo viaggia con un anticipo di {STRING}
+STR_TIMETABLE_TOTAL_TIME                                        :{BLACK}Questi ordini richiedono {STRING}
+STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Questi ordini richiedono almeno {STRING} (non tutti i tempi specificati)
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Auto
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Riempie automaticamente la tabella oraria con i tempi del prossimo viaggio (CTRL-clic per cercare di mantenere i tempi di attesa)
 
@@ -3166,6 +3166,16 @@ STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Passa a
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Passa all'Euro: {ORANGE}Mai
 STR_CURRENCY_PREVIEW                                            :{LTBLUE}Anteprima: {ORANGE}{6:CURRENCY}
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Cambia i parametri della valuta personalizzata
+STR_TOOLTIP_DECREASE_EXCHANGE_RATE                              :{BLACK}Riduce l'ammontare della valuta per una Sterlina (£)
+STR_TOOLTIP_INCREASE_EXCHANGE_RATE                              :{BLACK}Aumenta l'ammontare della valuta per una Sterlina (£)
+STR_TOOLTIP_SET_EXCHANGE_RATE                                   :{BLACK}Imposta il tasso di cambio della valuta per una Sterlina (£)
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_SEPARATOR                       :{BLACK}Imposta il separatore delle migliaia utilizzato dalla valuta
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_PREFIX                          :{BLACK}Imposta il prefisso per la valuta
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_SUFFIX                          :{BLACK}Imposta il suffisso per la valuta
+STR_TOOLTIP_DECREASE_CUSTOM_CURRENCY_TO_EURO                    :{BLACK}Anticipa l'anno di passaggio all'Euro
+STR_TOOLTIP_INCREASE_CUSTOM_CURRENCY_TO_EURO                    :{BLACK}Posticipa l'anno di passaggio all'Euro
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_TO_EURO                         :{BLACK}Imposta l'anno in cui passare all'Euro
+STR_TOOLTIP_CUSTOM_CURRENCY_PREVIEW                             :{BLACK}L'equivalente di 10.000 Sterline (£) nella valuta
 
 STR_TRAIN                                                       :{BLACK}{TRAIN}
 STR_BUS                                                         :{BLACK}{BUS}
@@ -3563,9 +3573,9 @@ STR_AI_RESET                                                    :{BLACK}Reimpost
 STR_AI_HUMAN_PLAYER                                             :Giocatore umano
 STR_AI_RANDOM_AI                                                :IA casuale
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}Parametri IA
-STR_AI_AUTHOR                                                   :Autore: {STRING}
-STR_AI_VERSION                                                  :Versione: {NUM}
-STR_AI_URL                                                      :URL: {STRING}
+STR_AI_AUTHOR                                                   :{BLACK}Autore: {STRING}
+STR_AI_VERSION                                                  :{BLACK}Versione: {NUM}
+STR_AI_URL                                                      :{BLACK}URL: {STRING}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Una delle IA in funzione è andata in crash. Si prega di inviare una segnalazione all'autore della IA con uno screenshot della finestra Debug IA.
 ########
 
