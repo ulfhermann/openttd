@@ -19,6 +19,13 @@
 #include "table/strings.h"
 #include "../table/sprites.h"
 
+/** Widgets used by this window */
+enum DownloadStatusWindowWidgets {
+	NCDSWW_CAPTION,    ///< Caption of the window
+	NCDSWW_BACKGROUND, ///< Background
+	NCDSWW_CANCELOK,   ///< Cancel/OK button
+};
+
 /** Widgets for the download window */
 static const Widget _network_content_download_status_window_widget[] = {
 {    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,      0,   349,     0,    13, STR_CONTENT_DOWNLOAD_TITLE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // NCDSWW_CAPTION
@@ -27,23 +34,30 @@ static const Widget _network_content_download_status_window_widget[] = {
 {   WIDGETS_END},
 };
 
+/** Nested widgets for the download window. */
+static const NWidgetPart _nested_network_content_download_status_window_widgets[] = {
+	NWidget(WWT_CAPTION, COLOUR_GREY, NCDSWW_CAPTION), SetDataTip(STR_CONTENT_DOWNLOAD_TITLE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	NWidget(WWT_PANEL, COLOUR_GREY, NCDSWW_BACKGROUND),
+		NWidget(NWID_SPACER), SetMinimalSize(350, 55),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(125, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCDSWW_CANCELOK), SetMinimalSize(101, 12), SetDataTip(STR_QUERY_CANCEL, STR_NULL),
+			NWidget(NWID_SPACER), SetFill(true, false),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 4),
+	EndContainer(),
+};
+
 /** Window description for the download window */
 static const WindowDesc _network_content_download_status_window_desc(
 	WDP_CENTER, WDP_CENTER, 350, 85, 350, 85,
 	WC_NETWORK_STATUS_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_MODAL,
-	_network_content_download_status_window_widget
+	_network_content_download_status_window_widget, _nested_network_content_download_status_window_widgets, lengthof(_nested_network_content_download_status_window_widgets)
 );
 
 /** Window for showing the download status of content */
 struct NetworkContentDownloadStatusWindow : public Window, ContentCallback {
-	/** Widgets used by this window */
-	enum Widgets {
-		NCDSWW_CAPTION,    ///< Caption of the window
-		NCDSWW_BACKGROUND, ///< Background
-		NCDSWW_CANCELOK,   ///< Cancel/OK button
-	};
-
 private:
 	ClientNetworkContentSocketHandler *connection; ///< Our connection with the content server
 	SmallVector<ContentType, 4> receivedTypes;     ///< Types we received so we can update their cache
@@ -128,17 +142,17 @@ public:
 		SetDParam(0, this->downloaded_bytes);
 		SetDParam(1, this->total_bytes);
 		SetDParam(2, this->downloaded_bytes * 100LL / this->total_bytes);
-		DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 35, STR_CONTENT_DOWNLOAD_PROGRESS_SIZE, TC_GREY, SA_CENTER);
+		DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 35, STR_CONTENT_DOWNLOAD_PROGRESS_SIZE, TC_FROMSTRING, SA_CENTER);
 
 		if  (this->downloaded_bytes == this->total_bytes) {
-			DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 50, STR_CONTENT_DOWNLOAD_COMPLETE, TC_GREY, SA_CENTER);
+			DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 50, STR_CONTENT_DOWNLOAD_COMPLETE, TC_FROMSTRING, SA_CENTER);
 		} else if (!StrEmpty(this->name)) {
 			SetDParamStr(0, this->name);
 			SetDParam(1, this->downloaded_files);
 			SetDParam(2, this->total_files);
 			DrawStringMultiLine(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 43, 67, STR_CONTENT_DOWNLOAD_FILE, TC_FROMSTRING, SA_CENTER);
 		} else {
-			DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 50, STR_CONTENT_DOWNLOAD_INITIALISE, TC_GREY, SA_CENTER);
+			DrawString(this->widget[NCDSWW_BACKGROUND].left + 2, this->widget[NCDSWW_BACKGROUND].right - 2, 50, STR_CONTENT_DOWNLOAD_INITIALISE, TC_FROMSTRING, SA_CENTER);
 		}
 	}
 
@@ -164,35 +178,35 @@ public:
 	}
 };
 
+/** Widgets of the content list window. */
+enum NetworkContentListWindowWidgets {
+	NCLWW_CLOSE,         ///< Close 'X' button
+	NCLWW_CAPTION,       ///< Caption of the window
+	NCLWW_BACKGROUND,    ///< Resize button
+
+	NCLWW_FILTER,        ///< Filter editbox
+
+	NCLWW_CHECKBOX,      ///< Button above checkboxes
+	NCLWW_TYPE,          ///< 'Type' button
+	NCLWW_NAME,          ///< 'Name' button
+
+	NCLWW_MATRIX,        ///< Panel with list of content
+	NCLWW_SCROLLBAR,     ///< Scrollbar of matrix
+
+	NCLWW_DETAILS,       ///< Panel with content details
+
+	NCLWW_SELECT_ALL,    ///< 'Select all' button
+	NCLWW_SELECT_UPDATE, ///< 'Select updates' button
+	NCLWW_UNSELECT,      ///< 'Unselect all' button
+	NCLWW_CANCEL,        ///< 'Cancel' button
+	NCLWW_DOWNLOAD,      ///< 'Download' button
+
+	NCLWW_RESIZE,        ///< Resize button
+};
+
 /** Window that lists the content that's at the content server */
 class NetworkContentListWindow : public QueryStringBaseWindow, ContentCallback {
 	typedef GUIList<const ContentInfo*> GUIContentList;
-
-	/** All widgets used */
-	enum Widgets {
-		NCLWW_CLOSE,         ///< Close 'X' button
-		NCLWW_CAPTION,       ///< Caption of the window
-		NCLWW_BACKGROUND,    ///< Resize button
-
-		NCLWW_FILTER,        ///< Filter editbox
-
-		NCLWW_CHECKBOX,      ///< Button above checkboxes
-		NCLWW_TYPE,          ///< 'Type' button
-		NCLWW_NAME,          ///< 'Name' button
-
-		NCLWW_MATRIX,        ///< Panel with list of content
-		NCLWW_SCROLLBAR,     ///< Scrollbar of matrix
-
-		NCLWW_DETAILS,       ///< Panel with content details
-
-		NCLWW_SELECT_ALL,    ///< 'Select all' button
-		NCLWW_SELECT_UPDATE, ///< 'Select updates' button
-		NCLWW_UNSELECT,      ///< 'Unselect all' button
-		NCLWW_CANCEL,        ///< 'Cancel' button
-		NCLWW_DOWNLOAD,      ///< 'Download' button
-
-		NCLWW_RESIZE,        ///< Resize button
-	};
 
 	enum {
 		EDITBOX_MAX_SIZE = 50,
@@ -423,8 +437,7 @@ public:
 			StringID str = STR_CONTENT_TYPE_BASE_GRAPHICS + ci->type - CONTENT_TYPE_BASE_GRAPHICS;
 			DrawString(this->widget[NCLWW_TYPE].left, this->widget[NCLWW_TYPE].right, y, str, TC_BLACK, SA_CENTER);
 
-			SetDParamStr(0, ci->name);
-			DrawString(this->widget[NCLWW_NAME].left + 5, this->widget[NCLWW_NAME].right, y, STR_JUST_RAW_STRING, TC_BLACK);
+			DrawString(this->widget[NCLWW_NAME].left + 5, this->widget[NCLWW_NAME].right, y, ci->name, TC_BLACK);
 			y += this->resize.step_height;
 		}
 
@@ -525,7 +538,7 @@ public:
 
 		/* Draw the total download size */
 		SetDParam(0, filesize);
-		DrawString(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, this->widget[NCLWW_DETAILS].bottom - 12, STR_CONTENT_TOTAL_DOWNLOAD_SIZE, TC_BLACK);
+		DrawString(this->widget[NCLWW_DETAILS].left + 5, this->widget[NCLWW_DETAILS].right - 5, this->widget[NCLWW_DETAILS].bottom - 12, STR_CONTENT_TOTAL_DOWNLOAD_SIZE);
 	}
 
 	virtual void OnDoubleClick(Point pt, int widget)
@@ -749,7 +762,7 @@ static const Widget _network_content_list_widgets[] = {
 
 /* BOTTOM */
 { WWT_PUSHTXTBTN,   RESIZE_TB,     COLOUR_WHITE,         10,   110,   252,   263, STR_CONTENT_SELECT_ALL_CAPTION,     STR_CONTENT_SELECT_ALL_CAPTION_TIP},     // NCLWW_SELECT_ALL
-{ WWT_PUSHTXTBTN,   RESIZE_TB,     COLOUR_WHITE,         10,   110,   252,   263, STR_CONTENT_SELECT_UPDATES_CAPTION, STR_CONTENT_SELECT_UPDATES_CAPTION_TIP}, // NCLWW_SELECT_UPDATES
+{ WWT_PUSHTXTBTN,   RESIZE_TB,     COLOUR_WHITE,         10,   110,   252,   263, STR_CONTENT_SELECT_UPDATES_CAPTION, STR_CONTENT_SELECT_UPDATES_CAPTION_TIP}, // NCLWW_SELECT_UPDATE
 { WWT_PUSHTXTBTN,   RESIZE_TB,     COLOUR_WHITE,        118,   218,   252,   263, STR_CONTENT_UNSELECT_ALL_CAPTION,   STR_CONTENT_UNSELECT_ALL_CAPTION_TIP},   // NCLWW_UNSELECT
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,   COLOUR_WHITE,        226,   326,   252,   263, STR_QUERY_CANCEL,                   STR_NULL},                               // NCLWW_CANCEL
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,   COLOUR_WHITE,        334,   434,   252,   263, STR_CONTENT_DOWNLOAD_CAPTION,       STR_CONTENT_DOWNLOAD_CAPTION_TIP},       // NCLWW_DOWNLOAD
@@ -759,12 +772,74 @@ static const Widget _network_content_list_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_network_content_list_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE, NCLWW_CLOSE),
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE, NCLWW_CAPTION), SetDataTip(STR_CONTENT_TITLE, STR_NULL),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NCLWW_BACKGROUND),
+		NWidget(NWID_HORIZONTAL), SetPIP(8, 7, 9),
+			/* Left side. */
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 22), SetResize(1, 0),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_VERTICAL),
+						NWidget(NWID_HORIZONTAL),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_CHECKBOX), SetMinimalSize(13, 12), SetDataTip(STR_EMPTY, STR_NULL),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_TYPE), SetMinimalSize(90, 12),
+											SetDataTip(STR_CONTENT_TYPE_CAPTION, STR_CONTENT_TYPE_CAPTION_TIP),
+							NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_NAME), SetMinimalSize(80, 12), SetResize(1, 0),
+											SetDataTip(STR_CONTENT_NAME_CAPTION, STR_CONTENT_NAME_CAPTION_TIP),
+						EndContainer(),
+						NWidget(WWT_MATRIX, COLOUR_LIGHT_BLUE, NCLWW_MATRIX), SetMinimalSize(183, 197), SetResize(2, 14),
+											SetDataTip((14 << 8) | 1, STR_CONTENT_MATRIX_TIP),
+					EndContainer(),
+					NWidget(WWT_SCROLLBAR, COLOUR_LIGHT_BLUE, NCLWW_SCROLLBAR),
+				EndContainer(),
+			EndContainer(),
+			/* Right side. */
+			NWidget(NWID_VERTICAL),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 6),
+				NWidget(WWT_EDITBOX, COLOUR_LIGHT_BLUE, NCLWW_FILTER), SetMinimalSize(231, 12), SetDataTip(STR_CONTENT_FILTER_OSKTITLE, STR_CONTENT_FILTER_TIP),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 4),
+				NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NCLWW_DETAILS), SetMinimalSize(231, 209), SetResize(0, 1), EndContainer(),
+			EndContainer(),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 7), SetResize(1, 0),
+		/* Bottom. */
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(10, 0),
+			NWidget(NWID_SELECTION),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_SELECT_ALL), SetMinimalSize(101, 12),
+										SetDataTip(STR_CONTENT_SELECT_ALL_CAPTION, STR_CONTENT_SELECT_ALL_CAPTION_TIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_SELECT_UPDATE), SetMinimalSize(101, 12),
+										SetDataTip(STR_CONTENT_SELECT_UPDATES_CAPTION, STR_CONTENT_SELECT_UPDATES_CAPTION_TIP),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(7, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_UNSELECT), SetMinimalSize(101, 12),
+										SetDataTip(STR_CONTENT_UNSELECT_ALL_CAPTION, STR_CONTENT_UNSELECT_ALL_CAPTION_TIP),
+			NWidget(NWID_SPACER), SetMinimalSize(7, 0), SetResize(1, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_CANCEL), SetMinimalSize(101, 12), SetDataTip(STR_QUERY_CANCEL, STR_NULL),
+			NWidget(NWID_SPACER), SetMinimalSize(7, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_DOWNLOAD), SetMinimalSize(101, 12),
+										SetDataTip(STR_CONTENT_DOWNLOAD_CAPTION, STR_CONTENT_DOWNLOAD_CAPTION_TIP),
+			NWidget(NWID_SPACER), SetMinimalSize(15, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2), SetResize(1, 0),
+		/* Resize button. */
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetFill(true, false), SetResize(1, 0),
+			NWidget(WWT_RESIZEBOX, COLOUR_LIGHT_BLUE, NCLWW_RESIZE),
+		EndContainer(),
+	EndContainer(),
+};
+
 /** Window description of the content list */
 static const WindowDesc _network_content_list_desc(
 	WDP_CENTER, WDP_CENTER, 450, 278, 630, 460,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_network_content_list_widgets
+	_network_content_list_widgets, _nested_network_content_list_widgets, lengthof(_nested_network_content_list_widgets)
 );
 
 /**

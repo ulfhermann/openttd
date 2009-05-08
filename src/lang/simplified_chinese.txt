@@ -258,9 +258,9 @@ STR_OSNAME_SUNOS                                                :SunOS
 STR_ERROR_OWNED_BY                                              :{WHITE}归 {STRING} 所有
 STR_VEHICLE_DETAIL_TAB_CARGO                                    :{BLACK}货物
 STR_VEHICLE_DETAIL_TAB_INFORMATION                              :{BLACK}信息
-STR_VEHICLE_DETAIL_TAB_CAPACITIES                               :{BLACK}装载能力
+STR_VEHICLE_DETAIL_TAB_CAPACITIES                               :{BLACK}运载能力
 STR_VEHICLE_DETAIL_TAB_TOTAL_CARGO                              :{BLACK}全部货物
-STR_TOTAL_CAPACITY_TEXT                                         :{BLACK}全车的装载能力为：
+STR_TOTAL_CAPACITY_TEXT                                         :{BLACK}全车的运载量为：
 STR_TOTAL_CAPACITY                                              :{LTBLUE}- {CARGO} ({SHORTCARGO})
 STR_TOTAL_CAPACITY_MULT                                         :{LTBLUE}- {CARGO} ({SHORTCARGO}) (x{NUM})
 STR_INTRO_NEW_GAME                                              :{BLACK}新游戏
@@ -275,7 +275,7 @@ STR_INTRO_GAME_OPTIONS                                          :{BLACK}游戏�
 STR_COMPANY_SOMEONE                                             :某人{SKIP}{SKIP}
 
 STR_UNITS_IMPERIAL                                              :英制
-STR_UNITS_METRIC                                                :度量
+STR_UNITS_METRIC                                                :公制
 STR_UNITS_SI                                                    :国际单位制
 
 STR_UNITS_VELOCITY_IMPERIAL                                     :{COMMA} 英里/时
@@ -351,7 +351,7 @@ STR_ENGINE_SORT_POWER                                           :功率
 STR_ENGINE_SORT_INTRO_DATE                                      :设计日期
 STR_ENGINE_SORT_RUNNING_COST                                    :运行费用
 STR_ENGINE_SORT_POWER_VS_RUNNING_COST                           :功率/运行费用 比值
-STR_ENGINE_SORT_CARGO_CAPACITY                                  :装载能力
+STR_ENGINE_SORT_CARGO_CAPACITY                                  :运载能力
 STR_NO_WAITING_CARGO                                            :{BLACK}选择无等待货物车站
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}选择全部运输工具种类
 STR_SELECT_ALL_TYPES                                            :{BLACK}选择所有货物类型{}（包括不在等待列表中的）
@@ -569,7 +569,7 @@ STR_MESSAGE_SOUND                                               :{YELLOW}为摘�
 STR_ERROR_TOO_FAR_FROM_PREVIOUS_DESTINATION                     :{WHITE}距离前一目的地太远……
 STR_HIGHSCORE_TOP_COMPANIES_WHO_REACHED                         :{BIGFONT}{BLACK}达到 {NUM} 的顶级公司！{}({STRING} 级别)
 STR_HIGHSCORE_TOP_COMPANIES_NETWORK_GAME                        :{BIGFONT}{BLACK}公司表现值为 {NUM}
-STR_HIGHSCORE_POSITION                                          :{BIGFONT}{COMMA}.
+STR_HIGHSCORE_POSITION                                          :{BLACK}{BIGFONT}{COMMA}.
 STR_HIGHSCORE_PERFORMANCE_TITLE_BUSINESSMAN                     :小商贩
 STR_HIGHSCORE_PERFORMANCE_TITLE_ENTREPRENEUR                    :批发商
 STR_HIGHSCORE_PERFORMANCE_TITLE_INDUSTRIALIST                   :企业主
@@ -731,6 +731,7 @@ STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}自动�
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN                              :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP                      :{BLACK}选择自动保存的周期
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :关闭
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :每月
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_3_MONTHS               :每 3 个月
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_6_MONTHS               :每 6 个月
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_12_MONTHS              :每 12 个月
@@ -851,7 +852,6 @@ STR_OPTIONS_BASE_GRF                                            :{BLACK}基础�
 STR_OPTIONS_BASE_GRF_CBO                                        :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_BASE_GRF_TIP                                        :{BLACK}选择要使用的基础图形组
 
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :每月
 STR_AUTOSAVE_FAILED                                             :{WHITE}自动保存失败
 
 STR_MONTH_JAN                                                   :1月
@@ -2743,7 +2743,7 @@ STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE
 STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}-- 调度计划结束 --
 STR_SERVICE                                                     :{BLACK}保养
 STR_ERROR_CAN_T_BUILD_RAILROAD_VEHICLE                          :{WHITE}不能购买列车……
-STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE                :{LTBLUE}{ENGINE}{BLACK}   建造时间：{LTBLUE}{NUM}{BLACK} 价值：{LTBLUE}{CURRENCY}
+STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE                :{LTBLUE}{ENGINE}{BLACK}   建造年份：{LTBLUE}{NUM}{BLACK} 价值：{LTBLUE}{CURRENCY}
 STR_VEHICLE_DETAILS_TRAIN_WAGON_VALUE                           :{LTBLUE}{ENGINE}{BLACK}   价值：{LTBLUE}{CURRENCY}
 STR_VEHICLE_VIEW_CAPTION                                        :{WHITE}{VEHICLE}
 STR_VEHICLE_STATUS_LOADING_UNLOADING                            :{LTBLUE}装载/卸货
@@ -2799,7 +2799,20 @@ STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}改变�
 STR_TIMETABLE_CLEAR_TIME_TOOLTIP                                :{BLACK}清除高亮选择的命令的执行时间
 STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}重置晚点计数器，从而使车辆准时到达
 STR_SERVICE_HINT                                                :{BLACK}除非需要在此处保养，否则跳过这一项目
-STR_VEHICLE_INFO_COST_WEIGHT_SPEED_POWER                        :{BLACK}售价：{CURRENCY} 重量：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}{}运行费用：{CURRENCY}/年{}装载量: {CARGO}
+STR_VEHICLE_INFO_COST_WEIGHT_SPEED_POWER                        :{BLACK}售价：{CURRENCY} 重量：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}{}运行费用：{CURRENCY}/年{}运载能力： {CARGO}
+STR_VEHICLE_INFO_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST       :{BLACK}售价：{CURRENCY} 最大速度：{VELOCITY}{}运载能力：{CARGO}, {CARGO}{}运行成本：{CURRENCY} /年
+STR_VEHICLE_INFO_COST_MAX_SPEED_CAPACITY_RUNCOST                :{BLACK}售价：{CURRENCY} 最大速度：{VELOCITY}{}运载能力：{CARGO}{}运行成本：{CURRENCY} /年
+STR_VEHICLE_INFO_AGE_RUNNING_COST_YR                            :{BLACK}年龄：{LTBLUE}{STRING}{BLACK}   运行成本：{LTBLUE}{CURRENCY} /年
+STR_VEHICLE_INFO_MAX_SPEED                                      :{BLACK}最大速度：{LTBLUE}{VELOCITY}
+STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED                         :{BLACK}重量：{LTBLUE}{WEIGHT_S} {BLACK}功率：{LTBLUE}{POWER}{BLACK} 最大速度：{LTBLUE}{VELOCITY}
+STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE                  :{BLACK}重量：{LTBLUE}{WEIGHT_S} {BLACK}功率：{LTBLUE}{POWER}{BLACK} 最大速度：{LTBLUE}{VELOCITY} {BLACK}最大牵引力：{LTBLUE}{FORCE}
+STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}今年利润：{LTBLUE}{CURRENCY} (去年利润：{CURRENCY})
+STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}可靠性：{LTBLUE}{COMMA}%  {BLACK}上次保养后抛锚的次数：{LTBLUE}{COMMA}
+STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}建造年份：{LTBLUE}{NUM}{BLACK} 价值：{LTBLUE}{CURRENCY}
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}运载能力：{LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}运载能力：{LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}运载能力：{LTBLUE}{CARGO}, {CARGO}{STRING}
+STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}抛锚
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}停运
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}不能让列车冒险通过信号...
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}撞毁!
@@ -2833,11 +2846,11 @@ STR_CAN_T_TIMETABLE_VEHICLE                                     :{WHITE}不能�
 STR_TIMETABLE_ONLY_WAIT_AT_STATIONS                             :{WHITE}车辆只能在站内等候。
 STR_TIMETABLE_NOT_STOPPING_HERE                                 :{WHITE}此车辆将不在本站停靠。
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}改变时间
-STR_TIMETABLE_STATUS_ON_TIME                                    :该车辆目前正点运行
-STR_TIMETABLE_STATUS_LATE                                       :该车辆目前晚点 {STRING}
-STR_TIMETABLE_STATUS_EARLY                                      :该车辆目前提前 {STRING}
-STR_TIMETABLE_TOTAL_TIME                                        :该时间表需要 {STRING} 完成
-STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :该时间表至少需要 {STRING} 完成（并非全部计划的时间）
+STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}该车辆目前正点运行
+STR_TIMETABLE_STATUS_LATE                                       :{BLACK}该车辆目前晚点 {STRING}
+STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}该车辆目前提前 {STRING}
+STR_TIMETABLE_TOTAL_TIME                                        :{BLACK}该时间表需要 {STRING} 完成
+STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}该时间表至少需要 {STRING} 完成（并非全部计划的时间）
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}自动填充
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}根据下一次运行的时间自动填充时间表{}(CRTL+单击 可保持等候时间)
 
@@ -2894,7 +2907,7 @@ STR_BUILD_VEHICLE_ROAD_RENAME_TOOLTIP                           :{BLACK}重命�
 STR_QUERY_RENAME_ROAD_TYPE_CAPTION                              :{WHITE}重命名汽车型号
 STR_ERROR_CAN_T_RENAME_ROAD_TYPE                                :{WHITE}不能重命名汽车型号……
 
-STR_REFIT_ROAD_VEHICLE_TO_CARRY                                 :{BLACK}改装汽车以装载其他货物
+STR_REFIT_ROAD_VEHICLE_TO_CARRY                                 :{BLACK}改装汽车以运载其他货物
 STR_REFIT_ROAD_VEHICLE                                          :{BLACK}改装汽车
 STR_REFIT_ROAD_VEHICLE_TO_CARRY_HIGHLIGHTED                     :{BLACK}改装汽车以运输选择的货物类型
 STR_REFIT_ROAD_VEHICLE_CAN_T                                    :{WHITE}不能改装汽车……
@@ -3136,18 +3149,30 @@ STR_NEWGRF_BROKEN                                               :{WHITE}NewGRF '
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}当车辆不在车库中时,这将改变 '{1:ENGINE}' 的车辆长度.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}列车 '{VEHICLE}' 属于 '{COMPANY}' 使长度无效化了. 这可能是NewGRF导致的. 有可能会发生崩溃或同步错误.
 
+STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}购买'{1:ENGINE}' 后，将造成货物/运费的参数与购买列表不符，这将有可能造成自动更新/购买不成功。
+STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' 产生了一个死循环
 
 STR_LOADGAME_REMOVED_TRAMS                                      :{WHITE}游戏保存为了无电车版. 所有电车都被去掉了。
 
 STR_CURRENCY_WINDOW                                             :{WHITE}自定义货币
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}兑换汇率： {ORANGE}{0:CURRENCY} = ￡ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}兑换汇率： {ORANGE}{0:CURRENCY} = {1:COMMA} 磅(£)
 STR_CURRENCY_SEPARATOR                                          :{LTBLUE}分隔符： {ORANGE}{2:STRING}
 STR_CURRENCY_PREFIX                                             :{LTBLUE}前缀： {ORANGE}{3:STRING}
 STR_CURRENCY_SUFFIX                                             :{LTBLUE}后缀： {ORANGE}{4:STRING}
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}转换为欧元： {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}转换为欧元： {ORANGE}{5:NUM} 年后
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}转换为欧元： {ORANGE}不转换
 STR_CURRENCY_PREVIEW                                            :{LTBLUE}预览：{ORANGE}{6:CURRENCY}
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}改变当前的货币参数
+STR_TOOLTIP_DECREASE_EXCHANGE_RATE                              :{BLACK}减少英磅(£)兑换自定义货币的数量
+STR_TOOLTIP_INCREASE_EXCHANGE_RATE                              :{BLACK}增加英磅(£)兑换自定义货币的数量
+STR_TOOLTIP_SET_EXCHANGE_RATE                                   :{BLACK}设置自定义货币与英磅(£)的兑换比率
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_SEPARATOR                       :{BLACK}设置千位分隔符
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_PREFIX                          :{BLACK}设置自定义货币的首字
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_SUFFIX                          :{BLACK}设置自定义货币的尾字
+STR_TOOLTIP_DECREASE_CUSTOM_CURRENCY_TO_EURO                    :{BLACK}提早转换为欧元货币的起始年份
+STR_TOOLTIP_INCREASE_CUSTOM_CURRENCY_TO_EURO                    :{BLACK}延后转换为欧元货币的起始年份
+STR_TOOLTIP_SET_CUSTOM_CURRENCY_TO_EURO                         :{BLACK}设置转换为欧元货币的起始年份
+STR_TOOLTIP_CUSTOM_CURRENCY_PREVIEW                             :{BLACK}10000 英磅(£) 兑换自定义货币的数量
 
 STR_TRAIN                                                       :{BLACK}{TRAIN}
 STR_BUS                                                         :{BLACK}{BUS}
@@ -3254,6 +3279,7 @@ STR_PURCHASE_INFO_RELIABILITY                                   :{BLACK}最大�
 STR_PURCHASE_INFO_COST                                          :{BLACK}售价：{GOLD}{CURRENCY}
 STR_PURCHASE_INFO_WEIGHT_CWEIGHT                                :{BLACK}重量：{GOLD}{WEIGHT_S}  ({WEIGHT_S})
 STR_PURCHASE_INFO_COST_SPEED                                    :{BLACK}售价：{GOLD}{CURRENCY}{BLACK}   速度：{GOLD}{VELOCITY}
+STR_PURCHASE_INFO_AIRCRAFT_CAPACITY                             :{BLACK}运载能力：{GOLD}{CARGO}, {CARGO}
 STR_PURCHASE_INFO_PWAGPOWER_PWAGWEIGHT                          :{BLACK}功率：{GOLD}+{POWER}{BLACK}     重量：{GOLD}+{WEIGHT_S}
 STR_PURCHASE_INFO_REFITTABLE_TO                                 :{BLACK}可改装为：{GOLD}
 STR_PURCHASE_INFO_ALL_TYPES                                     :所有类型
@@ -3544,8 +3570,10 @@ STR_AI_RESET                                                    :{BLACK}重设
 STR_AI_HUMAN_PLAYER                                             :玩家
 STR_AI_RANDOM_AI                                                :随机 AI
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}AI 特征
-STR_AI_AUTHOR                                                   :作者: {STRING}
-STR_AI_VERSION                                                  :版本: {NUM}
+STR_AI_AUTHOR                                                   :{BLACK}作者: {STRING}
+STR_AI_VERSION                                                  :{BLACK}版本: {NUM}
+STR_AI_URL                                                      :{BLACK}URL： {STRING}
+STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}一个运行中的 AI 崩溃了。请附上一张 AI 调试窗口的截图，将此错误通报 AI 作者。
 ########
 
 ############ town controlled noise level

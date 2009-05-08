@@ -1432,25 +1432,6 @@ static void TriggerIndustryProduction(Industry *i)
 }
 
 /**
- * the moving average function for capacities and usages is inaccurate, but on purpose.
- * It decreases the value linearly when it sinks below moving_average_length, so that
- * stale links time out quickly.
- * However, in order to maintain low capacity links that are regularly served, I boost
- * the capacity increase for base values below moving_average_length.
- * Note that the value returned here is a lower bound on the number of operations an accurate
- * average function would need to decrease (base + add) to base again. It is also always
- * at most moving_average_length - base.
- */
-inline uint GetCapIncrease(uint base, uint add) {
-	uint new_base = base + add;
-	if (new_base > _settings_game.economy.moving_average_length || new_base == 0) {
-		return add;
-	} else {
-		return (_settings_game.economy.moving_average_length) / (new_base) * add;
-	}
-}
-
-/**
  * Performs the vehicle payment _and_ marks the vehicle to be unloaded.
  * @param front_v the vehicle to be unloaded
  */
@@ -1462,8 +1443,8 @@ void VehiclePayment(Vehicle *front_v)
 	Money route_profit   = 0; // The grand total amount for the route. A-D of transfer chain A-B-C-D
 	Money virtual_profit = 0; // The virtual profit for entire vehicle chain
 
-	StationID last_visited = front_v->last_station_visited;
-	Station *st = GetStation(last_visited);
+	StationID curr_station_id = front_v->last_station_visited;
+	Station *curr_station = GetStation(curr_station_id);
 
 	/* The owner of the train wants to be paid */
 	CompanyID old_company = _current_company;
@@ -1479,32 +1460,9 @@ void VehiclePayment(Vehicle *front_v)
 	static SmallIndustryList industry_set;
 	industry_set.Clear();
 
-	StationID last_station_id = front_v->orders.list->GetPreviousStoppingStation(front_v->cur_order_index);
-
-	StationID next_station_id = front_v->orders.list->GetNextStoppingStation(front_v->cur_order_index);
-
-	Station * next_station = NULL;
-	if (next_station_id != INVALID_STATION && next_station_id != last_visited) {
-		next_station = GetStation(next_station_id);
-	}
-
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
 
-		if (v->cargo_cap > 0) {
-			if (last_station_id != INVALID_STATION && last_station_id != last_visited) {
-				LinkStat & in =	st->goods[v->cargo_type].link_stats[last_station_id];
-				in.capacity += GetCapIncrease(in.capacity, v->cargo_cap);
-				in.usage += GetCapIncrease(in.usage, v->cargo.Count());
-				assert(in.capacity > 0);
-			}
-
-			if (next_station != NULL) {
-				LinkStat & out = next_station->goods[v->cargo_type].link_stats[last_visited];
-				out.frozen += v->cargo_cap;
-				out.capacity = max(out.capacity, out.frozen);
-				assert(out.capacity > 0);
-			}
-		} else {
+		if (v->cargo_cap == 0) {
 			continue;
 		}
 
@@ -1519,20 +1477,20 @@ void VehiclePayment(Vehicle *front_v)
 			continue;
 		}
 
-		GoodsEntry *ge = &st->goods[v->cargo_type];
+		GoodsEntry *ge = &curr_station->goods[v->cargo_type];
 		const CargoList::List *cargos = v->cargo.Packets();
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
 			CargoPacket *cp = *it;
 			if (!cp->paid_for &&
-					cp->source != last_visited &&
+					cp->source != curr_station_id &&
 					HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) &&
 					(front_v->current_order.GetUnloadType() & OUFB_TRANSFER) == 0) {
 				/* Deliver goods to the station */
-				st->time_since_unload = 0;
+				curr_station->time_since_unload = 0;
 
 				/* handle end of route payment */
-				Money profit = DeliverGoods(cp->count, v->cargo_type, cp->source, last_visited, cp->source_xy, cp->days_in_transit, &industry_set);
+				Money profit = DeliverGoods(cp->count, v->cargo_type, cp->source, curr_station_id, cp->source_xy, cp->days_in_transit, &industry_set);
 				cp->paid_for = true;
 				route_profit   += profit; // display amount paid for final route delivery, A-D of a chain A-B-C-D
 				vehicle_profit += profit - cp->feeder_share;                    // whole vehicle is not payed for transfers picked up earlier
@@ -1545,7 +1503,7 @@ void VehiclePayment(Vehicle *front_v)
 					Money profit = GetTransportedGoodsIncome(
 						cp->count,
 						/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-						DistanceManhattan(cp->loaded_at_xy, GetStation(last_visited)->xy),
+						DistanceManhattan(cp->loaded_at_xy, GetStation(curr_station_id)->xy),
 						cp->days_in_transit,
 						v->cargo_type);
 
