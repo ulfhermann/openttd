@@ -50,6 +50,7 @@
 #include "elrail_func.h"
 #include "rev.h"
 #include "highscore.h"
+#include "thread.h"
 
 #include "newgrf_commons.h"
 
@@ -351,7 +352,7 @@ static void LoadIntroGame()
 		SetLocalCompany(COMPANY_FIRST);
 	}
 
-	_pause_game = 0;
+	_pause_mode = PM_UNPAUSED;
 	_cursor.fix_at = false;
 
 	CheckForMissingGlyphsInLoadedLanguagePack();
@@ -655,6 +656,10 @@ int ttd_main(int argc, char *argv[])
 	InitializeGUI();
 	IConsoleCmdExec("exec scripts/autoexec.scr 0");
 
+	/* Take our initial lock on whatever we might want to do! */
+	_genworld_paint_mutex->BeginCritical();
+	_genworld_mapgen_mutex->BeginCritical();
+
 	GenerateWorld(GW_EMPTY, 64, 64); // Make the viewport initialization happy
 	WaitTillGeneratedWorld();
 
@@ -956,7 +961,7 @@ void SwitchToMode(SwitchMode new_mode)
 				/* Execute the game-start script */
 				IConsoleCmdExec("exec scripts/game_start.scr 0");
 				/* Decrease pause counter (was increased from opening load dialog) */
-				DoCommandP(0, 0, 0, CMD_PAUSE);
+				DoCommandP(0, PM_PAUSED_SAVELOAD, 0, CMD_PAUSE);
 #ifdef ENABLE_NETWORK
 				if (_network_server) {
 					snprintf(_network_game_info.map_name, lengthof(_network_game_info.map_name), "%s (Loaded game)", _file_to_saveload.title);
@@ -999,14 +1004,12 @@ void SwitchToMode(SwitchMode new_mode)
 
 		case SM_SAVE: // Save game
 			/* Make network saved games on pause compatible to singleplayer */
-			if (_networking && _pause_game == 1) _pause_game = 2;
 			if (SaveOrLoad(_file_to_saveload.name, SL_SAVE, NO_DIRECTORY) != SL_OK) {
 				SetDParamStr(0, GetSaveLoadErrorString());
 				ShowErrorMessage(INVALID_STRING_ID, STR_JUST_RAW_STRING, 0, 0);
 			} else {
 				DeleteWindowById(WC_SAVELOAD, 0);
 			}
-			if (_networking && _pause_game == 2) _pause_game = 1;
 			break;
 
 		case SM_GENRANDLAND: // Generate random land within scenario editor
@@ -1033,7 +1036,7 @@ void SwitchToMode(SwitchMode new_mode)
 void StateGameLoop()
 {
 	/* dont execute the state loop during pause */
-	if (_pause_game) {
+	if (_pause_mode != PM_UNPAUSED) {
 		CallWindowTickEvent();
 		return;
 	}
@@ -1196,9 +1199,9 @@ void GameLoop()
 	StateGameLoop();
 #endif /* ENABLE_NETWORK */
 
-	if (!_pause_game && HasBit(_display_opt, DO_FULL_ANIMATION)) DoPaletteAnimations();
+	if (!_pause_mode && HasBit(_display_opt, DO_FULL_ANIMATION)) DoPaletteAnimations();
 
-	if (!_pause_game || _cheats.build_in_pause.value) MoveAllTextEffects();
+	if (!_pause_mode || _cheats.build_in_pause.value) MoveAllTextEffects();
 
 	InputLoop();
 

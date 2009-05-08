@@ -47,25 +47,25 @@ void LinkGraph::NextComponent()
 	}
 	// find all stations belonging to the current component
 	while(!search_queue.empty()) {
-		Station * target = search_queue.front();
-		StationID target_id = target->index;
+		Station * source = search_queue.front();
+		StationID source_id = source->index;
 		search_queue.pop();
-		GoodsEntry & good = target->goods[cargo];
+		GoodsEntry & good = source->goods[cargo];
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
-			StationID source_id = i->first;
-			Station * source = GetStation(i->first);
+			StationID target_id = i->first;
+			Station * target = GetStation(i->first);
 			LinkStat & link_stat = i->second;
-			if (station_colours[source_id] != current_colour) {
-				station_colours[source_id] = current_colour;
-				search_queue.push(source);
-				GoodsEntry & good = source->goods[cargo];
-				node = component->AddNode(source_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
-				index[source_id] = node;
+			if (station_colours[target_id] != current_colour) {
+				station_colours[target_id] = current_colour;
+				search_queue.push(target);
+				GoodsEntry & good = target->goods[cargo];
+				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+				index[target_id] = node;
 			} else {
-				node = index[source_id];
+				node = index[target_id];
 			}
-			component->AddEdge(node, index[target_id], link_stat.capacity);
+			component->AddEdge(index[source_id], node, link_stat.capacity);
 		}
 	}
 	// here the list of nodes and edges for this component is complete.
