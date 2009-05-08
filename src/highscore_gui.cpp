@@ -54,7 +54,7 @@ struct EndGameWindow : EndGameHighScoreBaseWindow {
 	EndGameWindow(const WindowDesc *desc) : EndGameHighScoreBaseWindow(desc)
 	{
 		/* Pause in single-player to have a look at the highscore at your own leisure */
-		if (!_networking) DoCommandP(0, 1, 0, CMD_PAUSE);
+		if (!_networking) DoCommandP(0, PM_PAUSED_NORMAL, 1, CMD_PAUSE);
 
 		this->background_img = SPR_TYCOON_IMG1_BEGIN;
 
@@ -82,7 +82,7 @@ struct EndGameWindow : EndGameHighScoreBaseWindow {
 
 	~EndGameWindow()
 	{
-		if (!_networking) DoCommandP(0, 0, 0, CMD_PAUSE); // unpause
+		if (!_networking) DoCommandP(0, PM_PAUSED_NORMAL, 0, CMD_PAUSE); // unpause
 		ShowHighscoreTable(this->window_number, this->rank);
 	}
 
@@ -115,7 +115,7 @@ struct HighScoreWindow : EndGameHighScoreBaseWindow {
 	HighScoreWindow(const WindowDesc *desc, int difficulty, int8 ranking) : EndGameHighScoreBaseWindow(desc)
 	{
 		/* pause game to show the chart */
-		if (!_networking) DoCommandP(0, 1, 0, CMD_PAUSE);
+		if (!_networking) DoCommandP(0, PM_PAUSED_NORMAL, 1, CMD_PAUSE);
 
 		/* Close all always on-top windows to get a clean screen */
 		if (_game_mode != GM_MENU) HideVitalWindows();
@@ -130,7 +130,7 @@ struct HighScoreWindow : EndGameHighScoreBaseWindow {
 	{
 		if (_game_mode != GM_MENU) ShowVitalWindows();
 
-		if (!_networking) DoCommandP(0, 0, 0, CMD_PAUSE); // unpause
+		if (!_networking) DoCommandP(0, PM_PAUSED_NORMAL, 0, CMD_PAUSE); // unpause
 	}
 
 	virtual void OnPaint()
@@ -147,7 +147,7 @@ struct HighScoreWindow : EndGameHighScoreBaseWindow {
 		/* Draw Highscore peepz */
 		for (uint8 i = 0; i < lengthof(_highscore_table[0]); i++) {
 			SetDParam(0, i + 1);
-			DrawString(x + 40, x + 600, y + 140 + (i * 55), STR_HIGHSCORE_POSITION, TC_BLACK);
+			DrawString(x + 40, x + 600, y + 140 + (i * 55), STR_HIGHSCORE_POSITION);
 
 			if (hs[i].company[0] != '\0') {
 				TextColour colour = (this->rank == i) ? TC_RED : TC_BLACK; // draw new highscore in red

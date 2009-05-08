@@ -228,16 +228,16 @@ struct TimetableWindow : Window {
 
 			if (total_time != 0) {
 				SetTimetableParams(0, 1, total_time);
-				DrawString(this->widget[TTV_SUMMARY_PANEL].left + 2, this->widget[TTV_SUMMARY_PANEL].right - 2, y, complete ? STR_TIMETABLE_TOTAL_TIME : STR_TIMETABLE_TOTAL_TIME_INCOMPLETE, TC_BLACK);
+				DrawString(this->widget[TTV_SUMMARY_PANEL].left + 2, this->widget[TTV_SUMMARY_PANEL].right - 2, y, complete ? STR_TIMETABLE_TOTAL_TIME : STR_TIMETABLE_TOTAL_TIME_INCOMPLETE);
 			}
 		}
 		y += 10;
 
 		if (v->lateness_counter == 0 || (!_settings_client.gui.timetable_in_ticks && v->lateness_counter / DAY_TICKS == 0)) {
-			DrawString(this->widget[TTV_SUMMARY_PANEL].left + 2, this->widget[TTV_SUMMARY_PANEL].right - 2, y, STR_TIMETABLE_STATUS_ON_TIME, TC_BLACK);
+			DrawString(this->widget[TTV_SUMMARY_PANEL].left + 2, this->widget[TTV_SUMMARY_PANEL].right - 2, y, STR_TIMETABLE_STATUS_ON_TIME);
 		} else {
 			SetTimetableParams(0, 1, abs(v->lateness_counter));
-			DrawString(this->widget[TTV_SUMMARY_PANEL].left + 2, this->widget[TTV_SUMMARY_PANEL].right - 2, y, v->lateness_counter < 0 ? STR_TIMETABLE_STATUS_EARLY : STR_TIMETABLE_STATUS_LATE, TC_BLACK);
+			DrawString(this->widget[TTV_SUMMARY_PANEL].left + 2, this->widget[TTV_SUMMARY_PANEL].right - 2, y, v->lateness_counter < 0 ? STR_TIMETABLE_STATUS_EARLY : STR_TIMETABLE_STATUS_LATE);
 		}
 	}
 
@@ -354,11 +354,33 @@ static const Widget _timetable_widgets[] = {
 	{    WIDGETS_END }
 };
 
+static const NWidgetPart _nested_timetable_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, TTV_WIDGET_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, TTV_CAPTION), SetDataTip(STR_TIMETABLE_TITLE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_ORDER_VIEW), SetMinimalSize(61, 14), SetDataTip( STR_ORDER_VIEW, STR_ORDER_VIEW_TOOLTIP),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY, TTV_STICKY),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_GREY, TTV_TIMETABLE_PANEL), SetMinimalSize(388, 82), SetResize(1, 10), SetDataTip(STR_NULL, STR_TIMETABLE_TOOLTIP), EndContainer(),
+		NWidget(WWT_SCROLLBAR, COLOUR_GREY, TTV_SCROLLBAR),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, TTV_SUMMARY_PANEL), SetMinimalSize(400, 22), SetResize(1, 0), EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_CHANGE_TIME), SetMinimalSize(110, 12), SetDataTip(STR_TIMETABLE_CHANGE_TIME, STR_TIMETABLE_WAIT_TIME_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_CLEAR_TIME), SetMinimalSize(110, 12), SetDataTip(STR_CLEAR_TIME, STR_TIMETABLE_CLEAR_TIME_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_RESET_LATENESS), SetMinimalSize(118, 12), SetDataTip(STR_RESET_LATENESS, STR_TIMETABLE_RESET_LATENESS_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_AUTOFILL), SetMinimalSize(50, 12), SetDataTip(STR_TIMETABLE_AUTOFILL, STR_TIMETABLE_AUTOFILL_TOOLTIP),
+		NWidget(WWT_PANEL, COLOUR_GREY, TTV_EMPTY), SetMinimalSize(0, 12), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_RESIZEBOX,COLOUR_GREY, TTV_RESIZE),
+	EndContainer(),
+};
+
 static const WindowDesc _timetable_desc(
 	WDP_AUTO, WDP_AUTO, 400, 130, 400, 130,
 	WC_VEHICLE_TIMETABLE, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	_timetable_widgets
+	_timetable_widgets, _nested_timetable_widgets, lengthof(_nested_timetable_widgets)
 );
 
 void ShowTimetableWindow(const Vehicle *v)

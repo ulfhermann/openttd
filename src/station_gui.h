@@ -13,10 +13,12 @@
 enum StationViewWidgets {
 	SVW_CLOSEBOX   =  0, ///< Close 'X' button
 	SVW_CAPTION    =  1, ///< Caption of the window
+	SVW_STICKYBOX  =  2, ///< Sticky button
 	SVW_SORT_ORDER =  3, ///< 'Sort order' button
 	SVW_SORT_BY    =  4, ///< 'Sort by' button
 	SVW_GROUP_BY   =  5, ///< 'Group by' button
 	SVW_WAITING    =  6, ///< List of waiting cargo
+	SVW_SCROLLBAR  =  7, ///< Scrollbar
 	SVW_ACCEPTLIST =  8, ///< List of accepted cargos
 	SVW_RATINGLIST =  8, ///< Ratings of cargos
 	SVW_LOCATION   =  9, ///< 'Location' button
