@@ -1511,7 +1511,21 @@ void Vehicle::BeginLoading()
 		current_order.MakeLoading(false);
 	}
 
-	GetStation(this->last_station_visited)->loading_vehicles.push_back(this);
+	StationID curr_station_id = this->last_station_visited;
+	Station * curr_station = GetStation(curr_station_id);
+	curr_station->loading_vehicles.push_back(this);
+
+	StationID last_station_id = this->orders.list->GetPreviousStoppingStation(this->cur_order_index);
+
+	StationID next_station_id = this->orders.list->GetNextStoppingStation(this->cur_order_index);
+
+	if (last_station_id != INVALID_STATION && last_station_id != curr_station_id) {
+		IncreaseStats(GetStation(last_station_id), this, curr_station_id);
+	}
+
+	if (next_station_id != INVALID_STATION && next_station_id != curr_station_id) {
+		IncreaseFrozen(curr_station, this, next_station_id);
+	}
 
 	VehiclePayment(this);
 
@@ -1537,15 +1551,7 @@ void Vehicle::LeaveStation()
 	st->loading_vehicles.remove(this);
 	StationID next_station = this->orders.list->GetNextStoppingStation(this->cur_order_index);
 	if (next_station != INVALID_STATION && next_station != this->last_station_visited) {
-		Station * next = GetStation(next_station);
-		for(Vehicle * v = this; v != NULL; v = v->next) {
-			if (v->cargo_cap > 0) {
-				LinkStat & ls = next->goods[v->cargo_type].link_stats[this->last_station_visited];
-				assert(ls.frozen >= v->cargo_cap);
-				ls.frozen -= v->cargo_cap;
-				assert(ls.capacity > 0);
-			}
-		}
+		DecreaseFrozen(st, this, next_station);
 	}
 
 	HideFillingPercent(&this->fill_percent_te_id);

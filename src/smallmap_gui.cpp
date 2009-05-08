@@ -868,15 +868,15 @@ public:
 				if (!tbl->show_on_map) continue;
 
 				CargoID c = tbl->type;
-				const Station * stb;
-				FOR_ALL_STATIONS(stb) {
-					const LinkStatMap & links = stb->goods[c].link_stats;
+				const Station * sta;
+				FOR_ALL_STATIONS(sta) {
+					const LinkStatMap & links = sta->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 						StationID id = i->first;
 						if (!IsValidStationID(id)) {
 							continue; // dead link
 						}
-						const Station *sta = GetStation(id);
+						const Station *stb = GetStation(id);
 
 
 						if (sta->owner != _local_company && IsValidCompanyID(sta->owner)) continue;
