@@ -47,4 +47,10 @@ bool IsStationTileElectrifiable(TileIndex tile);
 
 void UpdateAirportsNoise();
 
+void DecreaseFrozen(Station *st, Vehicle *v, StationID next_station_id);
+
+void IncreaseFrozen(Station *st, Vehicle *v, StationID next_station_id);
+
+void IncreaseStats(Station *st, Vehicle *v, StationID next_station_id);
+
 #endif /* STATION_FUNC_H */

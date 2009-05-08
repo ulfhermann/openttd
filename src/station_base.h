@@ -72,7 +72,7 @@ struct GoodsEntry {
 	byte last_age;
 	CargoList cargo;        ///< The cargo packets of cargo waiting in this station
 	uint supply;
-	LinkStatMap link_stats; ///< capacities and usage statistics for incoming links
+	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 };
 
 /** A Stop for a Road Vehicle */

@@ -336,6 +336,10 @@ bool AfterLoadGame()
 
 	if (CheckSavegameVersion(98)) GamelogGRFAddList(_grfconfig);
 
+	if (CheckSavegameVersion(119)) {
+		_pause_mode = (_pause_mode == 2) ? PM_PAUSED_NORMAL : PM_UNPAUSED;
+	}
+
 	/* in very old versions, size of train stations was stored differently */
 	if (CheckSavegameVersion(2)) {
 		Station *st;
@@ -440,7 +444,7 @@ bool AfterLoadGame()
 
 	switch (gcf_res) {
 		case GLC_COMPATIBLE: _switch_mode_errorstr = STR_NEWGRF_COMPATIBLE_LOAD_WARNING; break;
-		case GLC_NOT_FOUND: _switch_mode_errorstr = STR_NEWGRF_DISABLED_WARNING; _pause_game = -1; break;
+		case GLC_NOT_FOUND:  _switch_mode_errorstr = STR_NEWGRF_DISABLED_WARNING; _pause_mode = PM_PAUSED_ERROR; break;
 		default: break;
 	}
 
@@ -1315,28 +1319,6 @@ bool AfterLoadGame()
 				Vehicle *v = *iter;
 				iter++;
 				if (!v->current_order.IsType(OT_LOADING)) st->loading_vehicles.remove(v);
-			}
-		}
-	}
-
-	if (CheckSavegameVersion(CAPACITIES_SV)) {
-		Station * st;
-		FOR_ALL_STATIONS(st) {
-			std::list<Vehicle *> &vehicles = st->loading_vehicles;
-				for(std::list<Vehicle *>::iterator i = vehicles.begin(); i != vehicles.end(); ++i) {
-				Vehicle *front = *i;
-				StationID next_station = front->orders.list->GetNextStoppingStation(front->cur_order_index);
-				if (next_station != INVALID_STATION && next_station != front->last_station_visited) {
-					Station * next = GetStation(next_station);
-					for(Vehicle *v = front; v != NULL; v = v->Next()) {
-						if (v->cargo_cap > 0) {
-							LinkStat & ls = next->goods[v->cargo_type].link_stats[front->last_station_visited];
-							ls.frozen += v->cargo_cap;
-							ls.capacity = max(ls.frozen, ls.capacity);
-							assert(ls.capacity > 0);
-						}
-					}
-				}
 			}
 		}
 	}

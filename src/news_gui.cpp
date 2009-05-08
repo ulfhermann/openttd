@@ -133,22 +133,22 @@ assert_compile(lengthof(_news_subtype_data) == NS_END);
  * Per-NewsType data
  */
 NewsTypeData _news_type_data[] = {
-	/* name,              age, sound,           display */
-	{ "arrival_player",    60, SND_1D_APPLAUSE, ND_FULL },  ///< NT_ARRIVAL_COMPANY
-	{ "arrival_other",     60, SND_1D_APPLAUSE, ND_FULL },  ///< NT_ARRIVAL_OTHER
-	{ "accident",          90, SND_BEGIN,       ND_FULL },  ///< NT_ACCIDENT
-	{ "company_info",      60, SND_BEGIN,       ND_FULL },  ///< NT_COMPANY_INFO
-	{ "open",              90, SND_BEGIN,       ND_FULL },  ///< NT_INDUSTRY_OPEN
-	{ "close",             90, SND_BEGIN,       ND_FULL },  ///< NT_INDUSTRY_CLOSE
-	{ "economy",           30, SND_BEGIN,       ND_FULL },  ///< NT_ECONOMY
-	{ "production_player", 30, SND_BEGIN,       ND_FULL },  ///< NT_INDUSTRY_COMPANY
-	{ "production_other",  30, SND_BEGIN,       ND_FULL },  ///< NT_INDUSTRY_OTHER
-	{ "production_nobody", 30, SND_BEGIN,       ND_FULL },  ///< NT_INDUSTRY_NOBODY
-	{ "advice",           150, SND_BEGIN,       ND_FULL },  ///< NT_ADVICE
-	{ "new_vehicles",      30, SND_1E_OOOOH,    ND_FULL },  ///< NT_NEW_VEHICLES
-	{ "acceptance",        90, SND_BEGIN,       ND_FULL },  ///< NT_ACCEPTANCE
-	{ "subsidies",        180, SND_BEGIN,       ND_FULL },  ///< NT_SUBSIDIES
-	{ "general",           60, SND_BEGIN,       ND_FULL },  ///< NT_GENERAL
+	/* name,              age, sound,           display, description */
+	{ "arrival_player",    60, SND_1D_APPLAUSE, ND_FULL, STR_NEWS_MESSAGE_TYPE_ARRIVAL_OF_FIRST_VEHICLE_OWN       },  ///< NT_ARRIVAL_COMPANY
+	{ "arrival_other",     60, SND_1D_APPLAUSE, ND_FULL, STR_NEWS_MESSAGE_TYPE_ARRIVAL_OF_FIRST_VEHICLE_OTHER     },  ///< NT_ARRIVAL_OTHER
+	{ "accident",          90, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_ACCIDENTS_DISASTERS                },  ///< NT_ACCIDENT
+	{ "company_info",      60, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_COMPANY_INFORMATION                },  ///< NT_COMPANY_INFO
+	{ "open",              90, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_INDUSTRY_OPEN                      },  ///< NT_INDUSTRY_OPEN
+	{ "close",             90, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_INDUSTRY_CLOSE                     },  ///< NT_INDUSTRY_CLOSE
+	{ "economy",           30, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_ECONOMY_CHANGES                    },  ///< NT_ECONOMY
+	{ "production_player", 30, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_COMPANY },  ///< NT_INDUSTRY_COMPANY
+	{ "production_other",  30, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_OTHER   },  ///< NT_INDUSTRY_OTHER
+	{ "production_nobody", 30, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_UNSERVED          },  ///< NT_INDUSTRY_NOBODY
+	{ "advice",           150, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_ADVICE_INFORMATION_ON_COMPANY      },  ///< NT_ADVICE
+	{ "new_vehicles",      30, SND_1E_OOOOH,    ND_FULL, STR_NEWS_MESSAGE_TYPE_NEW_VEHICLES                       },  ///< NT_NEW_VEHICLES
+	{ "acceptance",        90, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_CHANGES_OF_CARGO_ACCEPTANCE        },  ///< NT_ACCEPTANCE
+	{ "subsidies",        180, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_SUBSIDIES                          },  ///< NT_SUBSIDIES
+	{ "general",           60, SND_BEGIN,       ND_FULL, STR_NEWS_MESSAGE_TYPE_GENERAL_INFORMATION                },  ///< NT_GENERAL
 };
 
 assert_compile(lengthof(_news_type_data) == NT_END);
@@ -184,7 +184,7 @@ struct NewsWindow : Window {
 		GfxFillRect(left,  top,    right, top,    0xD7);
 		GfxFillRect(left,  bottom, right, bottom, 0xD7);
 
-		DrawString(left + 2, right - 2, top + 1, STR_SILVER_CROSS, TC_FROMSTRING);
+		DrawString(left + 2, right - 2, top + 1, STR_SILVER_CROSS);
 	}
 
 	virtual void OnPaint()
@@ -201,7 +201,7 @@ struct NewsWindow : Window {
 					break;
 				}
 
-				DrawString(2, this->width - 1, 1, STR_SILVER_CROSS, TC_FROMSTRING);
+				DrawString(2, this->width - 1, 1, STR_SILVER_CROSS);
 
 				SetDParam(0, this->ni->date);
 				DrawString(2, this->width - 1, 1, STR_DATE_LONG_SMALL, TC_FROMSTRING, SA_RIGHT);
@@ -312,11 +312,21 @@ static const Widget _news_type13_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_news_type13_widgets[] = {
+	NWidget(WWT_PANEL, COLOUR_WHITE, 0),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_PANEL, COLOUR_WHITE, 1), SetMinimalSize(11, 12), EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(419, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 158),
+	EndContainer(),
+};
+
 static WindowDesc _news_type13_desc(
 	WDP_CENTER, 476, 430, 170, 430, 170,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type13_widgets
+	_news_type13_widgets, _nested_news_type13_widgets, lengthof(_nested_news_type13_widgets)
 );
 
 static const Widget _news_type2_widgets[] = {
@@ -325,11 +335,21 @@ static const Widget _news_type2_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_news_type2_widgets[] = {
+	NWidget(WWT_PANEL, COLOUR_WHITE, 0),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_PANEL, COLOUR_WHITE, 1), SetMinimalSize(11, 12), EndContainer(),
+			NWidget(NWID_SPACER), SetMinimalSize(419, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 118),
+	EndContainer(),
+};
+
 static WindowDesc _news_type2_desc(
 	WDP_CENTER, 476, 430, 130, 430, 130,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type2_widgets
+	_news_type2_widgets, _nested_news_type2_widgets, lengthof(_nested_news_type2_widgets)
 );
 
 static const Widget _news_type0_widgets[] = {
@@ -742,7 +762,7 @@ struct MessageHistoryWindow : Window {
 
 		for (int n = this->vscroll.cap; n > 0; n--) {
 			SetDParam(0, ni->date);
-			DrawString(4, 82, y, STR_SHORT_DATE, TC_WHITE);
+			DrawString(4, 82, y, STR_SHORT_DATE);
 
 			DrawNewsString(82, y, TC_WHITE, ni, this->width - 95);
 			y += 12;
@@ -817,10 +837,17 @@ void ShowMessageHistory()
 
 
 /** News settings window widget offset constants */
-enum {
-	WIDGET_NEWSOPT_DROP_SUMMARY = 4,  ///< Dropdown that adjusts at once the level for all settings
-	WIDGET_NEWSOPT_SOUNDTICKER  = 6,  ///< Button activating sound on events
-	WIDGET_NEWSOPT_START_OPTION = 8,  ///< First widget that is part of a group [<] .. [.]
+enum NewsSettingsWidgets {
+	WIDGET_NEWSOPT_CLOSEBOX,          ///< Close box.
+	WIDGET_NEWSOPT_CAPTION,           ///< Caption.
+	WIDGET_NEWSOPT_BACKGROUND,        ///< Background widget.
+	WIDGET_NEWSOPT_LABEL,             ///< Top label.
+	WIDGET_NEWSOPT_DROP_SUMMARY,      ///< Dropdown that adjusts at once the level for all settings.
+	WIDGET_NEWSOPT_LABEL_SUMMARY,     ///< Label of the summary drop down.
+	WIDGET_NEWSOPT_SOUNDTICKER,       ///< Button for (de)activating sound on events.
+	WIDGET_NEWSOPT_SOUNDTICKER_LABEL, ///< Label of the soundticker button,
+
+	WIDGET_NEWSOPT_START_OPTION,      ///< First widget that is part of a group [<] .. [.]
 };
 
 static const StringID _message_opt[] = {STR_OFF, STR_SUMMARY, STR_FULL, INVALID_STRING_ID};
@@ -869,8 +896,9 @@ struct MessageOptionsWindow : Window {
 		this->DrawWidgets();
 
 		/* Draw the string of each setting on each button. */
-		for (int i = 0, y = 26; i < NT_END; i++, y += 12) {
-			DrawString(this->widget[WIDGET_NEWSOPT_START_OPTION + 1].left, this->widget[WIDGET_NEWSOPT_START_OPTION + 1].right, y + 1, _message_opt[_news_type_data[i].display], TC_BLACK, SA_CENTER);
+		for (int i = 0; i < NT_END; i++) {
+			DrawString(this->widget[WIDGET_NEWSOPT_START_OPTION + 1].left, this->widget[WIDGET_NEWSOPT_START_OPTION + 1].right,
+					this->widget[WIDGET_NEWSOPT_START_OPTION + NB_WIDG_PER_SETTING * i + 1].top + 1, _message_opt[_news_type_data[i].display], TC_BLACK, SA_CENTER);
 		}
 	}
 
@@ -936,9 +964,8 @@ struct MessageOptionsWindow : Window {
  *
  * @param basey: Base Y coordinate
  * @param linenum: Count, news - setting is the \a linenum - th line
- * @param text: StringID for the text label to display
  */
-#define NEWS_SETTINGS_LINE(basey, linenum, text) \
+#define NEWS_SETTINGS_LINE(basey, linenum) \
 	{ WWT_PUSHIMGBTN, RESIZE_NONE, COLOUR_YELLOW, \
 	    4,  12,  basey     + linenum * NEWS_SETTING_BASELINE_SKIP,  basey + 11 + linenum * NEWS_SETTING_BASELINE_SKIP, \
 	  SPR_ARROW_LEFT, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST}, \
@@ -949,8 +976,8 @@ struct MessageOptionsWindow : Window {
 	   90,  98,  basey     + linenum * NEWS_SETTING_BASELINE_SKIP,  basey + 11 + linenum * NEWS_SETTING_BASELINE_SKIP, \
 	  SPR_ARROW_RIGHT, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST}, \
         { WWT_TEXT, RESIZE_NONE, COLOUR_YELLOW, \
-	  103, 409,  basey + 1 + linenum * NEWS_SETTING_BASELINE_SKIP,  basey + 13 + linenum * NEWS_SETTING_BASELINE_SKIP, \
-	  text, STR_NULL}
+	  103, 409,  basey + linenum * NEWS_SETTING_BASELINE_SKIP,  basey + 11 + linenum * NEWS_SETTING_BASELINE_SKIP, \
+	  _news_type_data[linenum].description, STR_NULL}
 
 static const int NEWS_SETTING_BASELINE_SKIP = 12; ///< Distance between two news-setting lines, should be at least 12
 
@@ -965,7 +992,7 @@ static const Widget _message_options_widgets[] = {
 
 /* Text at the top of the main panel, in black */
 {    WWT_LABEL, RESIZE_NONE, COLOUR_BROWN,
-	  0, 409, 13, 26,
+	  0, 409, 14, 27,
 	STR_NEWS_MESSAGE_TYPES,   STR_NULL},
 
 /* General drop down and sound button, widgets WIDGET_NEWSOPT_BTN_SUMMARY and WIDGET_NEWSOPT_DROP_SUMMARY */
@@ -974,7 +1001,7 @@ static const Widget _message_options_widgets[] = {
 	0x0, STR_NULL},
 
 {      WWT_TEXT, RESIZE_NONE, COLOUR_YELLOW,
-	103, 409,  35 + NT_END * NEWS_SETTING_BASELINE_SKIP,  47 + NT_END * NEWS_SETTING_BASELINE_SKIP,
+	103, 409,  34 + NT_END * NEWS_SETTING_BASELINE_SKIP,  45 + NT_END * NEWS_SETTING_BASELINE_SKIP,
 	STR_MESSAGES_ALL, STR_NULL},
 
 /* Below is widget WIDGET_NEWSOPT_SOUNDTICKER */
@@ -983,29 +1010,84 @@ static const Widget _message_options_widgets[] = {
 	STR_STATION_BUILD_COVERAGE_OFF,  STR_NULL},
 
 {      WWT_TEXT, RESIZE_NONE, COLOUR_YELLOW,
-	103, 409,  47 + NT_END * NEWS_SETTING_BASELINE_SKIP,  59 + NT_END * NEWS_SETTING_BASELINE_SKIP,
+	103, 409,  46 + NT_END * NEWS_SETTING_BASELINE_SKIP,  57 + NT_END * NEWS_SETTING_BASELINE_SKIP,
 	STR_MESSAGE_SOUND, STR_NULL},
 
 /* List of news-setting lines (4 widgets for each line).
  * First widget must be number WIDGET_NEWSOPT_START_OPTION
  */
-NEWS_SETTINGS_LINE(26, NT_ARRIVAL_COMPANY,  STR_NEWS_MESSAGE_TYPE_ARRIVAL_OF_FIRST_VEHICLE_OWN),
-NEWS_SETTINGS_LINE(26, NT_ARRIVAL_OTHER,    STR_NEWS_MESSAGE_TYPE_ARRIVAL_OF_FIRST_VEHICLE_OTHER),
-NEWS_SETTINGS_LINE(26, NT_ACCIDENT,         STR_NEWS_MESSAGE_TYPE_ACCIDENTS_DISASTERS),
-NEWS_SETTINGS_LINE(26, NT_COMPANY_INFO,     STR_NEWS_MESSAGE_TYPE_COMPANY_INFORMATION),
-NEWS_SETTINGS_LINE(26, NT_INDUSTRY_OPEN,    STR_NEWS_MESSAGE_TYPE_INDUSTRY_OPEN),
-NEWS_SETTINGS_LINE(26, NT_INDUSTRY_CLOSE,   STR_NEWS_MESSAGE_TYPE_INDUSTRY_CLOSE),
-NEWS_SETTINGS_LINE(26, NT_ECONOMY,          STR_NEWS_MESSAGE_TYPE_ECONOMY_CHANGES),
-NEWS_SETTINGS_LINE(26, NT_INDUSTRY_COMPANY, STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_COMPANY),
-NEWS_SETTINGS_LINE(26, NT_INDUSTRY_OTHER,   STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_OTHER),
-NEWS_SETTINGS_LINE(26, NT_INDUSTRY_NOBODY,  STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_UNSERVED),
-NEWS_SETTINGS_LINE(26, NT_ADVICE,           STR_NEWS_MESSAGE_TYPE_ADVICE_INFORMATION_ON_COMPANY),
-NEWS_SETTINGS_LINE(26, NT_NEW_VEHICLES,     STR_NEWS_MESSAGE_TYPE_NEW_VEHICLES),
-NEWS_SETTINGS_LINE(26, NT_ACCEPTANCE,       STR_NEWS_MESSAGE_TYPE_CHANGES_OF_CARGO_ACCEPTANCE),
-NEWS_SETTINGS_LINE(26, NT_SUBSIDIES,        STR_NEWS_MESSAGE_TYPE_SUBSIDIES),
-NEWS_SETTINGS_LINE(26, NT_GENERAL,          STR_NEWS_MESSAGE_TYPE_GENERAL_INFORMATION),
+NEWS_SETTINGS_LINE(28, NT_ARRIVAL_COMPANY),
+NEWS_SETTINGS_LINE(28, NT_ARRIVAL_OTHER),
+NEWS_SETTINGS_LINE(28, NT_ACCIDENT),
+NEWS_SETTINGS_LINE(28, NT_COMPANY_INFO),
+NEWS_SETTINGS_LINE(28, NT_INDUSTRY_OPEN),
+NEWS_SETTINGS_LINE(28, NT_INDUSTRY_CLOSE),
+NEWS_SETTINGS_LINE(28, NT_ECONOMY),
+NEWS_SETTINGS_LINE(28, NT_INDUSTRY_COMPANY),
+NEWS_SETTINGS_LINE(28, NT_INDUSTRY_OTHER),
+NEWS_SETTINGS_LINE(28, NT_INDUSTRY_NOBODY),
+NEWS_SETTINGS_LINE(28, NT_ADVICE),
+NEWS_SETTINGS_LINE(28, NT_NEW_VEHICLES),
+NEWS_SETTINGS_LINE(28, NT_ACCEPTANCE),
+NEWS_SETTINGS_LINE(28, NT_SUBSIDIES),
+NEWS_SETTINGS_LINE(28, NT_GENERAL),
 
 {   WIDGETS_END},
+};
+
+static NWidgetBase *MakeNewsSettingLines()
+{
+	const int NEWS_SETTING_HEIGHT = 12; // Height of one line.
+	NWidgetVertical *vert = new NWidgetVertical;
+
+	int widnum = WIDGET_NEWSOPT_START_OPTION;
+	for (int i = 0; i < NT_END; i++) {
+		NWidgetHorizontal *hor = new NWidgetHorizontal;
+		hor->SetPIP(4, 0, 0);
+		/* [<] button. */
+		NWidgetLeaf *leaf = new NWidgetLeaf(WWT_PUSHIMGBTN, COLOUR_YELLOW, widnum++, SPR_ARROW_LEFT, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		leaf->SetMinimalSize(9, NEWS_SETTING_HEIGHT);
+		hor->Add(leaf);
+		/* Label. */
+		leaf = new NWidgetLeaf(WWT_PUSHTXTBTN, COLOUR_YELLOW, widnum++, STR_EMPTY, STR_NULL);
+		leaf->SetMinimalSize(77, NEWS_SETTING_HEIGHT);
+		hor->Add(leaf);
+		/* [>] button. */
+		leaf = new NWidgetLeaf(WWT_PUSHIMGBTN, COLOUR_YELLOW, widnum++, SPR_ARROW_RIGHT, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		leaf->SetMinimalSize(9, NEWS_SETTING_HEIGHT);
+		hor->Add(leaf);
+		/* Descriptive text. */
+		leaf = new NWidgetLeaf(WWT_TEXT, COLOUR_YELLOW, widnum++, _news_type_data[i].description, STR_NULL);
+		leaf->SetMinimalSize(307, NEWS_SETTING_HEIGHT);
+		leaf->SetPadding(0, 0, 0, 4);
+		hor->Add(leaf);
+
+		vert->Add(hor);
+	}
+	return vert;
+}
+
+static const NWidgetPart _nested_message_options_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, WIDGET_NEWSOPT_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_BROWN, WIDGET_NEWSOPT_CAPTION), SetDataTip(STR_NEWS_MESSAGE_OPTIONS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_BROWN, WIDGET_NEWSOPT_BACKGROUND),
+		NWidget(WWT_LABEL, COLOUR_BROWN, WIDGET_NEWSOPT_LABEL), SetMinimalSize(410, 14), SetDataTip(STR_NEWS_MESSAGE_TYPES, STR_NULL),
+		NWidgetFunction(MakeNewsSettingLines),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 6),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_HORIZONTAL), SetPadding(0, 0, 0, 4),
+				NWidget(WWT_DROPDOWN, COLOUR_YELLOW, WIDGET_NEWSOPT_DROP_SUMMARY), SetMinimalSize(95, 12), SetDataTip(0x0, STR_NULL),
+				NWidget(WWT_TEXT, COLOUR_YELLOW, WIDGET_NEWSOPT_LABEL_SUMMARY), SetMinimalSize(307, 12), SetDataTip(STR_MESSAGES_ALL, STR_NULL), SetPadding(0, 0, 0, 4),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL), SetPadding(0, 0, 0, 4),
+				NWidget(WWT_TEXTBTN_2, COLOUR_YELLOW, WIDGET_NEWSOPT_SOUNDTICKER), SetMinimalSize(95, 12), SetDataTip(STR_STATION_BUILD_COVERAGE_OFF, STR_NULL),
+				NWidget(WWT_TEXT, COLOUR_YELLOW, WIDGET_NEWSOPT_SOUNDTICKER_LABEL), SetMinimalSize(307, 12), SetDataTip(STR_MESSAGE_SOUND, STR_NULL), SetPadding(0, 0, 0, 4),
+			EndContainer(),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 7),
+	EndContainer(),
 };
 
 static const WindowDesc _message_options_desc(
@@ -1013,7 +1095,7 @@ static const WindowDesc _message_options_desc(
 	           410,  65 + NT_END * NEWS_SETTING_BASELINE_SKIP,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_message_options_widgets
+	_message_options_widgets, _nested_message_options_widgets, lengthof(_nested_message_options_widgets)
 );
 
 void ShowMessageOptions()
