@@ -2867,6 +2867,61 @@ static void UpdateStationStats(Station * st) {
 	}
 }
 
+void IncreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
+	for (Vehicle *v = front; v != NULL; v = v->Next()) {
+		if (v->cargo_cap > 0) {
+			st->goods[v->cargo_type].link_stats[next_station_id].frozen += v->cargo_cap;
+		}
+	}
+}
+
+void RecalcFrozen(Station * st) {
+	if (st->loading_vehicles.empty()) {
+		/* if no vehicles are there the frozen values are always correct */
+		return;
+	}
+
+	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
+		GoodsEntry & good = st->goods[goods_index];
+		LinkStatMap & links = good.link_stats;
+		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
+			i->second.frozen = 0;
+		}
+	}
+
+	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
+	while(v_it != st->loading_vehicles.end()) {
+		Vehicle * front = *v_it;
+		StationID next_station_id = front->orders.list->GetNextStoppingStation(front->cur_order_index);
+		IncreaseFrozen(st, front, next_station_id);
+		++v_it;
+	}
+}
+
+void DecreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
+	for (Vehicle *v = front; v != NULL; v = v->Next()) {
+		if (v->cargo_cap > 0) {
+			LinkStat & link_stat = st->goods[v->cargo_type].link_stats[next_station_id];
+			if (link_stat.frozen < v->cargo_cap) {
+				RecalcFrozen(st);
+				return;
+			} else {
+				link_stat.frozen -= v->cargo_cap;
+			}
+		}
+	}
+}
+
+void IncreaseStats(Station *st, Vehicle *front, StationID next_station_id) {
+	for (Vehicle *v = front; v != NULL; v = v->Next()) {
+		if (v->cargo_cap > 0) {
+			LinkStat & link_stat = st->goods[v->cargo_type].link_stats[next_station_id];
+			link_stat.capacity += v->cargo_cap;
+			link_stat.usage += v->cargo_cap;
+		}
+	}
+}
+
 /* called for every station each tick */
 static void StationHandleSmallTick(Station *st)
 {
@@ -2894,6 +2949,11 @@ void OnTick_Station()
 		// update the station statistics every <unit> days
 		if ((_tick_counter + st->index) % (DAY_TICKS * _settings_game.economy.moving_average_unit) == 0) {
 			UpdateStationStats(st);
+		}
+
+		/* recalculate the frozen values every month */
+		if ((_tick_counter + st->index) % (DAY_TICKS * 30) == 0) {
+			RecalcFrozen(st);
 		}
 
 		/* Run 250 tick interval trigger for station animation.

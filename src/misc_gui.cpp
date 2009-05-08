@@ -430,18 +430,68 @@ void ShowAboutWindow()
 	new AboutWindow();
 }
 
+/** Widgets of the error message windows */
+enum ErrorMessageWidgets {
+	EMW_CLOSE = 0,
+	EMW_CAPTION,
+	EMW_PANEL,
+	EMW_FACE,
+	EMW_MESSAGE,
+};
+
 static const Widget _errmsg_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,    COLOUR_RED,     0,    10,     0,    13, STR_BLACK_CROSS,         STR_TOOLTIP_CLOSE_WINDOW},
+{   WWT_CLOSEBOX,   RESIZE_NONE,    COLOUR_RED,     0,    10,     0,    13, STR_BLACK_CROSS,           STR_TOOLTIP_CLOSE_WINDOW},
 {    WWT_CAPTION,   RESIZE_NONE,    COLOUR_RED,    11,   239,     0,    13, STR_ERROR_MESSAGE_CAPTION, STR_NULL},
-{      WWT_PANEL,   RESIZE_BOTTOM,  COLOUR_RED,     0,   239,    14,    45, 0x0,              STR_NULL},
+{      WWT_PANEL,   RESIZE_BOTTOM,  COLOUR_RED,     0,   239,    14,    45, 0x0,                       STR_NULL},
+{      WWT_EMPTY,   RESIZE_NONE,    COLOUR_RED,     0,     0,     0,     0, 0x0,                       STR_NULL},
+{      WWT_EMPTY,   RESIZE_NONE,    COLOUR_RED,     2,   237,    14,    45, 0x0,                       STR_NULL},
 {    WIDGETS_END},
 };
 
+static const NWidgetPart _nested_errmsg_widgets[] = {
+	NWidget(NWID_LAYERED),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_CLOSEBOX, COLOUR_RED, EMW_CLOSE),
+				NWidget(WWT_CAPTION, COLOUR_RED, EMW_CAPTION), SetDataTip(STR_ERROR_MESSAGE_CAPTION, STR_NULL),
+			EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_RED, EMW_PANEL),
+				NWidget(WWT_EMPTY, COLOUR_RED, EMW_MESSAGE), SetPadding(0, 2, 0, 2), SetMinimalSize(236, 32),
+				NWidget(NWID_SPACER), SetResize(0, 1),
+			EndContainer(),
+		EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_EMPTY, COLOUR_RED, EMW_FACE), SetMinimalSize(1, 1), SetFill(false, false),
+				NWidget(NWID_SPACER), SetFill(1, 0),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetFill(1, 1), SetResize(0, 1),
+		EndContainer(),
+	EndContainer(),
+};
+
 static const Widget _errmsg_face_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,    COLOUR_RED,     0,    10,     0,    13, STR_BLACK_CROSS,              STR_TOOLTIP_CLOSE_WINDOW},
+{   WWT_CLOSEBOX,   RESIZE_NONE,    COLOUR_RED,     0,    10,     0,    13, STR_BLACK_CROSS,                         STR_TOOLTIP_CLOSE_WINDOW},
 {    WWT_CAPTION,   RESIZE_NONE,    COLOUR_RED,    11,   333,     0,    13, STR_ERROR_MESSAGE_CAPTION_OTHER_COMPANY, STR_NULL},
-{      WWT_PANEL,   RESIZE_BOTTOM,  COLOUR_RED,     0,   333,    14,   136, 0x0,                   STR_NULL},
+{      WWT_PANEL,   RESIZE_BOTTOM,  COLOUR_RED,     0,   333,    14,   136, 0x0,                                     STR_NULL},
+{      WWT_EMPTY,   RESIZE_NONE,    COLOUR_RED,     2,    92,    16,   135, 0x0,                                     STR_NULL},
+{      WWT_EMPTY,   RESIZE_NONE,    COLOUR_RED,    94,   331,    14,   136, 0x0,                                     STR_NULL},
 {   WIDGETS_END},
+};
+
+static const NWidgetPart _nested_errmsg_face_widgets[] = {
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_CLOSEBOX, COLOUR_RED, EMW_CLOSE),
+			NWidget(WWT_CAPTION, COLOUR_RED, EMW_CAPTION), SetDataTip(STR_ERROR_MESSAGE_CAPTION_OTHER_COMPANY, STR_NULL),
+		EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_RED, EMW_PANEL),
+			NWidget(NWID_HORIZONTAL), SetPIP(2, 1, 2),
+				NWidget(WWT_EMPTY, COLOUR_RED, EMW_FACE), SetMinimalSize(91, 120), SetPadding(2, 0, 1, 0),
+				NWidget(WWT_EMPTY, COLOUR_RED, EMW_MESSAGE), SetMinimalSize(238, 123),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetResize(0, 1),
+		EndContainer(),
+	EndContainer(),
 };
 
 struct ErrmsgWindow : public Window {
@@ -470,8 +520,9 @@ public:
 
 		assert(msg2 != INVALID_STRING_ID);
 
-		int h2 = GetStringHeight(msg2, width - 2); // msg2 is printed first
-		int h1 = (msg1 == INVALID_STRING_ID) ? 0 : GetStringHeight(msg1, width - 2);
+		int text_width = this->widget[EMW_MESSAGE].right - this->widget[EMW_MESSAGE].left;
+		int h2 = GetStringHeight(msg2, text_width); // msg2 is printed first
+		int h1 = (msg1 == INVALID_STRING_ID) ? 0 : GetStringHeight(msg1, text_width);
 
 		SwitchToNormalRefStack();
 
@@ -506,11 +557,11 @@ public:
 
 		if (this->show_company_manager_face) {
 			const Company *c = GetCompany((CompanyID)GetDParamX(this->decode_params, 2));
-			DrawCompanyManagerFace(c->face, c->colour, 2, 16);
+			DrawCompanyManagerFace(c->face, c->colour, this->widget[EMW_FACE].left, this->widget[EMW_FACE].top);
 		}
 
-		DrawStringMultiLine(1, this->width - 1, y[2], y[3] , this->message_2, TC_FROMSTRING, SA_CENTER);
-		if (this->message_1 != INVALID_STRING_ID) DrawStringMultiLine(1, this->width - 1, y[0], y[1], this->message_1, TC_FROMSTRING, SA_CENTER);
+		DrawStringMultiLine(this->widget[EMW_MESSAGE].left, this->widget[EMW_MESSAGE].right, y[2], y[3], this->message_2, TC_FROMSTRING, SA_CENTER);
+		if (this->message_1 != INVALID_STRING_ID) DrawStringMultiLine(this->widget[EMW_MESSAGE].left, this->widget[EMW_MESSAGE].right, y[0], y[1], this->message_1, TC_FROMSTRING, SA_CENTER);
 
 		/* Switch back to the normal text ref. stack for NewGRF texts */
 		SwitchToNormalRefStack();
@@ -543,6 +594,9 @@ public:
 
 void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 {
+	static Widget *generated_errmsg_widgets = NULL;
+	static Widget *generated_errmsg_face_widgets = NULL;
+
 	DeleteWindowById(WC_ERRMSG, 0);
 
 	if (!_settings_client.gui.errmsg_duration) return;
@@ -552,7 +606,7 @@ void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 	Point pt;
 	const ViewPort *vp;
 
-	if (msg_1 != STR_ERROR_OWNED_BY || GetDParam(2) >= 8) {
+	if (msg_1 != STR_ERROR_OWNED_BY || GetDParam(2) >= MAX_COMPANIES) {
 		if ((x | y) != 0) {
 			pt = RemapCoords2(x, y);
 			vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
@@ -569,7 +623,10 @@ void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 			pt.x = (_screen.width - 240) >> 1;
 			pt.y = (_screen.height - 46) >> 1;
 		}
-		new ErrmsgWindow(pt, 240, 46, msg_1, msg_2, _errmsg_widgets, false);
+
+		const Widget *wid = InitializeWidgetArrayFromNestedWidgets(_nested_errmsg_widgets, lengthof(_nested_errmsg_widgets),
+													_errmsg_widgets, &generated_errmsg_widgets);
+		new ErrmsgWindow(pt, 240, 46, msg_1, msg_2, wid, false);
 	} else {
 		if ((x | y) != 0) {
 			pt = RemapCoords2(x, y);
@@ -580,7 +637,10 @@ void ShowErrorMessage(StringID msg_1, StringID msg_2, int x, int y)
 			pt.x = (_screen.width  - 334) >> 1;
 			pt.y = (_screen.height - 137) >> 1;
 		}
-		new ErrmsgWindow(pt, 334, 137, msg_1, msg_2, _errmsg_face_widgets, true);
+
+		const Widget *wid = InitializeWidgetArrayFromNestedWidgets(_nested_errmsg_face_widgets, lengthof(_nested_errmsg_face_widgets),
+													_errmsg_face_widgets, &generated_errmsg_face_widgets);
+		new ErrmsgWindow(pt, 334, 137, msg_1, msg_2, wid, true);
 	}
 }
 
@@ -648,6 +708,10 @@ static const Widget _tooltips_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_tooltips_widgets[] = {
+	NWidget(WWT_PANEL, COLOUR_GREY, 0), SetMinimalSize(200, 32), EndContainer(),
+};
+
 struct TooltipsWindow : public Window
 {
 	StringID string_id;
@@ -700,6 +764,8 @@ struct TooltipsWindow : public Window
  */
 void GuiShowTooltips(StringID str, uint paramcount, const uint64 params[], bool use_left_mouse_button)
 {
+	static Widget *generated_tooltips_widgets = NULL;
+
 	DeleteWindowById(WC_TOOLTIPS, 0);
 
 	if (str == STR_NULL) return;
@@ -724,7 +790,9 @@ void GuiShowTooltips(StringID str, uint paramcount, const uint64 params[], bool 
 	if (y + br.height > _screen.height - 12) y = _cursor.pos.y + _cursor.offs.y - br.height - 5;
 	int x = Clamp(_cursor.pos.x - (br.width >> 1), 0, _screen.width - br.width);
 
-	new TooltipsWindow(x, y, br.width, br.height, _tooltips_widgets, str, paramcount, params, use_left_mouse_button);
+	const Widget *wid = InitializeWidgetArrayFromNestedWidgets(_nested_tooltips_widgets, lengthof(_nested_tooltips_widgets),
+													_tooltips_widgets, &generated_tooltips_widgets);
+	new TooltipsWindow(x, y, br.width, br.height, wid, str, paramcount, params, use_left_mouse_button);
 }
 
 
@@ -1478,7 +1546,7 @@ static void DrawFiosTexts(int left, int right)
 	}
 
 	if (str != STR_ERROR_UNABLE_TO_READ_DRIVE) SetDParam(0, tot);
-	DrawString(left + 2, right - 2, 37, str, TC_FROMSTRING);
+	DrawString(left + 2, right - 2, 37, str);
 	DrawString(left + 2, right - 2, 27, path, TC_BLACK);
 }
 
@@ -1576,7 +1644,7 @@ public:
 		/* pause is only used in single-player, non-editor mode, non-menu mode. It
 		 * will be unpaused in the WE_DESTROY event handler. */
 		if (_game_mode != GM_MENU && !_networking && _game_mode != GM_EDITOR) {
-			if (_pause_game >= 0) DoCommandP(0, 1, 0, CMD_PAUSE);
+			DoCommandP(0, PM_PAUSED_SAVELOAD, 1, CMD_PAUSE);
 		}
 
 		BuildFileList();
@@ -1615,7 +1683,7 @@ public:
 	{
 		/* pause is only used in single-player, non-editor mode, non menu mode */
 		if (!_networking && _game_mode != GM_EDITOR && _game_mode != GM_MENU) {
-			if (_pause_game >= 0) DoCommandP(0, 0, 0, CMD_PAUSE);
+			DoCommandP(0, PM_PAUSED_SAVELOAD, 0, CMD_PAUSE);
 		}
 		FiosFreeSavegameList();
 	}

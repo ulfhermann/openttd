@@ -890,25 +890,23 @@ static void ShowRoadDepotPicker(Window *parent)
 	new BuildRoadDepotWindow(&_build_road_depot_desc, parent);
 }
 
-struct BuildRoadStationWindow : public PickerWindowBase {
-private:
-	/** Enum referring to the widgets of the build road station window */
-	enum BuildRoadStationWidgets {
-		BRSW_CLOSEBOX = 0,
-		BRSW_CAPTION,
-		BRSW_BACKGROUND,
-		BRSW_STATION_NE,
-		BRSW_STATION_SE,
-		BRSW_STATION_SW,
-		BRSW_STATION_NW,
-		BRSW_STATION_X,
-		BRSW_STATION_Y,
-		BRSW_LT_OFF,
-		BRSW_LT_ON,
-		BRSW_INFO,
-	};
+/** Enum referring to the widgets of the build road station window */
+enum BuildRoadStationWidgets {
+	BRSW_CLOSEBOX = 0,
+	BRSW_CAPTION,
+	BRSW_BACKGROUND,
+	BRSW_STATION_NE,
+	BRSW_STATION_SE,
+	BRSW_STATION_SW,
+	BRSW_STATION_NW,
+	BRSW_STATION_X,
+	BRSW_STATION_Y,
+	BRSW_LT_OFF,
+	BRSW_LT_ON,
+	BRSW_INFO,
+};
 
-public:
+struct BuildRoadStationWindow : public PickerWindowBase {
 	BuildRoadStationWindow(const WindowDesc *desc, Window *parent, RoadStopType rs) : PickerWindowBase(desc, parent)
 	{
 		/* Trams don't have non-drivethrough stations */
@@ -957,7 +955,7 @@ public:
 		StationPickerDrawSprite(171, 35, st, INVALID_RAILTYPE, _cur_roadtype, 4);
 		StationPickerDrawSprite(171, 85, st, INVALID_RAILTYPE, _cur_roadtype, 5);
 
-		int text_end = DrawStationCoverageAreaText(2, 146,
+		int text_end = DrawStationCoverageAreaText(2, 147,
 			(this->window_class == WC_BUS_STATION) ? SCT_PASSENGERS_ONLY : SCT_NON_PASSENGERS_ONLY,
 			3, false);
 		text_end = DrawStationCoverageAreaText(2, text_end + 4,
@@ -1007,11 +1005,11 @@ public:
 	}
 };
 
-/** Widget definition of the build raod station window */
+/** Widget definition of the build road station window */
 static const Widget _rv_station_picker_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_DARK_GREEN,   0,    10,     0,    13, STR_BLACK_CROSS,                       STR_TOOLTIP_CLOSE_WINDOW},                    // BRSW_CLOSEBOX
 {    WWT_CAPTION,   RESIZE_NONE,  COLOUR_DARK_GREEN,  11,   206,     0,    13, STR_NULL,                              STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},          // BRSW_CAPTION
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_DARK_GREEN,   0,   206,    14,   176, 0x0,                                   STR_NULL},                                    // BRSW_BACKGROUND
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_DARK_GREEN,   0,   206,    14,   177, 0x0,                                   STR_NULL},                                    // BRSW_BACKGROUND
 
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,        71,   136,    17,    66, 0x0,                                   STR_NULL},                                    // BRSW_STATION_NE
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,        71,   136,    69,   118, 0x0,                                   STR_NULL},                                    // BRSW_STATION_SE
@@ -1020,17 +1018,51 @@ static const Widget _rv_station_picker_widgets[] = {
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,       139,   204,    17,    66, 0x0,                                   STR_NULL},                                    // BRSW_STATION_X
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,       139,   204,    69,   118, 0x0,                                   STR_NULL},                                    // BRSW_STATION_Y
 
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,        10,    69,   133,   144, STR_STATION_BUILD_COVERAGE_OFF,        STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP}, // BRSW_LT_OFF
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,        70,   129,   133,   144, STR_STATION_BUILD_COVERAGE_ON,         STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP},  // BRSW_LT_ON
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,        10,    69,   134,   145, STR_STATION_BUILD_COVERAGE_OFF,        STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP}, // BRSW_LT_OFF
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,        70,   129,   134,   145, STR_STATION_BUILD_COVERAGE_ON,         STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP},  // BRSW_LT_ON
 {      WWT_LABEL,   RESIZE_NONE,  COLOUR_DARK_GREEN,   0,   139,   120,   133, STR_STATION_BUILD_COVERAGE_AREA_TITLE, STR_NULL},                                    // BRSW_INFO
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_rv_station_picker_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, BRSW_CLOSEBOX),
+		NWidget(WWT_CAPTION,  COLOUR_DARK_GREEN, BRSW_CAPTION),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BRSW_BACKGROUND),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
+		NWidget(NWID_HORIZONTAL), SetPIP(3, 2, 2),
+			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_STATION_NW), SetMinimalSize(66, 50), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_STATION_NE), SetMinimalSize(66, 50), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_STATION_X),  SetMinimalSize(66, 50), EndContainer(),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+		NWidget(NWID_HORIZONTAL), SetPIP(3, 2, 2),
+			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_STATION_SW), SetMinimalSize(66, 50), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_STATION_SE), SetMinimalSize(66, 50), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, BRSW_STATION_Y),  SetMinimalSize(66, 50), EndContainer(),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 1),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_LABEL, COLOUR_DARK_GREEN, BRSW_INFO), SetMinimalSize(140, 14), SetDataTip(STR_STATION_BUILD_COVERAGE_AREA_TITLE, STR_NULL),
+			NWidget(NWID_SPACER), SetFill(1, 0),
+		EndContainer(),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_LT_OFF), SetMinimalSize(60, 12), SetPadding(0, 0, 0, 10),
+											SetDataTip(STR_STATION_BUILD_COVERAGE_OFF, STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP),
+			NWidget(WWT_TEXTBTN, COLOUR_GREY, BRSW_LT_ON), SetMinimalSize(60, 12),
+											SetDataTip(STR_STATION_BUILD_COVERAGE_ON, STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP),
+			NWidget(NWID_SPACER), SetFill(1, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 32),
+	EndContainer(),
+};
+
 static const WindowDesc _rv_station_picker_desc(
-	WDP_AUTO, WDP_AUTO, 207, 177, 207, 177,
+	WDP_AUTO, WDP_AUTO, 207, 178, 207, 178,
 	WC_BUS_STATION, WC_BUILD_TOOLBAR,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION,
-	_rv_station_picker_widgets
+	_rv_station_picker_widgets, _nested_rv_station_picker_widgets, lengthof(_nested_rv_station_picker_widgets)
 );
 
 static void ShowRVStationPicker(Window *parent, RoadStopType rs)
