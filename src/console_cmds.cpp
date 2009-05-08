@@ -472,8 +472,15 @@ DEF_CONSOLE_CMD(ConPauseGame)
 		return true;
 	}
 
-	if (_pause_game == 0) {
-		DoCommandP(0, 1, 0, CMD_PAUSE);
+#ifdef ENABLE_NETWORK
+	if (_network_dedicated && _settings_client.network.min_active_clients != 0) {
+		IConsolePrint(CC_WARNING, "Manual pausing is disabled. Set network.min_active_clients to 0 (disable autopausing) to enable manual pausing.");
+		return true;
+	}
+#endif /* ENABLE_NETWORK */
+
+	if (_pause_mode == PM_UNPAUSED) {
+		DoCommandP(0, PM_PAUSED_NORMAL, 1, CMD_PAUSE);
 		IConsolePrint(CC_DEFAULT, "Game paused.");
 	} else {
 		IConsolePrint(CC_DEFAULT, "Game is already paused.");
@@ -489,8 +496,15 @@ DEF_CONSOLE_CMD(ConUnPauseGame)
 		return true;
 	}
 
-	if (_pause_game != 0) {
-		DoCommandP(0, 0, 0, CMD_PAUSE);
+#ifdef ENABLE_NETWORK
+	if (_network_dedicated && _settings_client.network.min_active_clients != 0) {
+		IConsolePrint(CC_WARNING, "Manual unpausing is disabled. Set network.min_active_clients to 0 (disable autopausing) to enable manual unpausing.");
+		return true;
+	}
+#endif /* ENABLE_NETWORK */
+
+	if (_pause_mode != PM_UNPAUSED) {
+		DoCommandP(0, PM_PAUSED_NORMAL, 0, CMD_PAUSE);
 		IConsolePrint(CC_DEFAULT, "Game unpaused.");
 	} else {
 		IConsolePrint(CC_DEFAULT, "Game is already unpaused.");
@@ -636,6 +650,11 @@ DEF_CONSOLE_CMD(ConJoinCompany)
 		return true;
 	}
 
+	if (company_id != COMPANY_SPECTATOR && GetCompany(company_id)->is_ai) {
+		IConsoleError("Cannot join AI company.");
+		return true;
+	}
+
 	/* Check if the company requires a password */
 	if (NetworkCompanyIsPassworded(company_id) && argc < 3) {
 		IConsolePrintF(CC_ERROR, "Company %d requires a password to join.", company_id + 1);
@@ -671,6 +690,11 @@ DEF_CONSOLE_CMD(ConMoveClient)
 
 	if (!IsValidCompanyID(company_id) && company_id != COMPANY_SPECTATOR) {
 		IConsolePrintF(CC_ERROR, "Company does not exist. Company-id must be between 1 and %d.", MAX_COMPANIES);
+		return true;
+	}
+
+	if (company_id != COMPANY_SPECTATOR && GetCompany(company_id)->is_ai) {
+		IConsoleError("You cannot move clients to AI companies.");
 		return true;
 	}
 

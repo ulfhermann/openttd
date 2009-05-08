@@ -28,7 +28,7 @@
 #include "table/strings.h"
 
 enum {
-	FIRST_GUI_CALL = INT_MAX,  ///< default value to specify thuis is the first call of the resizable gui
+	FIRST_GUI_CALL = INT_MAX,  ///< default value to specify this is the first call of the resizable gui
 };
 
 static void DoShowCompanyFinances(CompanyID company, bool show_small, bool show_stickied, int top = FIRST_GUI_CALL, int left = FIRST_GUI_CALL);
@@ -122,7 +122,7 @@ static void DrawCompanyEconomyStats(const Company *c, bool small, const Widget *
 				DrawString(w->left + 2, w->right - 2, y, STR_FINANCES_TOTAL_CAPTION, TC_FROMSTRING, SA_RIGHT);
 				y += 20;
 			} else {
-				DrawString(w->left + 2, w->right - 2, y, STR_FINANCES_SECTION_CONSTRUCTION + et, TC_FROMSTRING);
+				DrawString(w->left + 2, w->right - 2, y, STR_FINANCES_SECTION_CONSTRUCTION + et);
 				y += 10;
 			}
 		}
@@ -185,18 +185,18 @@ static void DrawCompanyEconomyStats(const Company *c, bool small, const Widget *
 
 		/* draw max loan aligned to loan below (y += 10) */
 		SetDParam(0, _economy.max_loan);
-		DrawString(widget[CFW_TOTAL_MAXLOAN].left, widget[CFW_TOTAL_MAXLOAN].right, y + 10, STR_MAX_LOAN, TC_FROMSTRING);
+		DrawString(widget[CFW_TOTAL_MAXLOAN].left, widget[CFW_TOTAL_MAXLOAN].right, y + 10, STR_MAX_LOAN);
 	} else {
 		y = 15;
 	}
 
-	DrawString(widget[CFW_TOTAL_LABELS].left, widget[CFW_TOTAL_LABELS].right, y, STR_FINANCES_BANK_BALANCE_TITLE, TC_FROMSTRING);
+	DrawString(widget[CFW_TOTAL_LABELS].left, widget[CFW_TOTAL_LABELS].right, y, STR_FINANCES_BANK_BALANCE_TITLE);
 	SetDParam(0, c->money);
 	DrawString(widget[CFW_TOTAL_VALUES].left, widget[CFW_TOTAL_VALUES].right, y, STR_FINANCES_TOTAL_CURRENCY, TC_FROMSTRING, SA_RIGHT);
 
 	y += 10;
 
-	DrawString(widget[CFW_TOTAL_LABELS].left, widget[CFW_TOTAL_LABELS].right, y, STR_FINANCES_LOAN_TITLE, TC_FROMSTRING);
+	DrawString(widget[CFW_TOTAL_LABELS].left, widget[CFW_TOTAL_LABELS].right, y, STR_FINANCES_LOAN_TITLE);
 	SetDParam(0, c->current_loan);
 	DrawString(widget[CFW_TOTAL_VALUES].left, widget[CFW_TOTAL_VALUES].right, y, STR_FINANCES_TOTAL_CURRENCY, TC_FROMSTRING, SA_RIGHT);
 
@@ -1381,7 +1381,7 @@ static void DoSelectCompanyManagerFace(Window *parent, bool adv, int top, int le
 }
 
 
-/* Names of the widgets. Keep them in the same order as in the widget array */
+/** Names of the widgets of the #CompanyWindow. Keep them in the same order as in the widget array */
 enum CompanyWindowWidgets {
 	CW_WIDGET_CLOSEBOX = 0,
 	CW_WIDGET_CAPTION,
@@ -1415,6 +1415,60 @@ static const Widget _company_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_company_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CW_WIDGET_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, CW_WIDGET_CAPTION), SetDataTip(STR_COMPANY_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, CW_WIDGET_FACE),
+		NWidget(NWID_SPACER), SetMinimalSize(360, 4),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetFill(1, 0),
+			NWidget(WWT_TEXTBTN, COLOUR_GREY, CW_WIDGET_BUILD_VIEW_HQ), SetMinimalSize(90, 12), SetPadding(0, 4, 0, 0),
+										SetDataTip(STR_COMPANY_VIEW_VIEW_HQ_BUTTON, STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetFill(1, 0),
+			NWidget(WWT_TEXTBTN, COLOUR_GREY, CW_WIDGET_RELOCATE_HQ), SetMinimalSize(90, 12), SetPadding(0, 4, 0, 0),
+										SetDataTip(STR_RELOCATE_HQ, STR_RELOCATE_COMPANY_HEADQUARTERS),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 94),
+		/* Multi player buttons. */
+		NWidget(NWID_SELECTION),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(NWID_SPACER), SetFill(1, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_COMPANY_PASSWORD), SetMinimalSize(90, 12), SetPadding(0, 4, 0, 0),
+										SetDataTip(STR_COMPANY_PASSWORD, STR_COMPANY_PASSWORD_TOOLTIP),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(NWID_SPACER), SetFill(1, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_COMPANY_JOIN), SetMinimalSize(90, 12), SetPadding(0, 4, 0, 0),
+										SetDataTip(STR_COMPANY_JOIN, STR_COMPANY_JOIN_TIP),
+			EndContainer(),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 8),
+	EndContainer(),
+	/* Button bars at the bottom. */
+	NWidget(NWID_SELECTION),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_NEW_FACE), SetMinimalSize(90, 12),
+										SetDataTip(STR_COMPANY_VIEW_NEW_FACE_BUTTON, STR_COMPANY_VIEW_NEW_FACE_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_COLOUR_SCHEME), SetMinimalSize(90, 12),
+										SetDataTip(STR_COMPANY_VIEW_COLOUR_SCHEME_BUTTON, STR_COMPANY_VIEW_COLOUR_SCHEME_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_PRESIDENT_NAME), SetMinimalSize(90, 12),
+										SetDataTip(STR_COMPANY_VIEW_PRESIDENT_NAME_BUTTON, STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_COMPANY_NAME), SetMinimalSize(90, 12),
+										SetDataTip(STR_COMPANY_VIEW_COMPANY_NAME_BUTTON, STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP),
+		EndContainer(),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_BUY_SHARE), SetMinimalSize(180, 12),
+										SetDataTip(STR_COMPANY_VIEW_BUY_SHARE_BUTTON, STR_COMPANY_VIEW_BUY_SHARE_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, CW_WIDGET_SELL_SHARE), SetMinimalSize(180, 12),
+										SetDataTip(STR_COMPANY_VIEW_SELL_SHARE_BUTTON, STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP),
+		EndContainer(),
+	EndContainer(),
+};
 
 /**
  * Draws text "Vehicles:" and number of all vehicle types, or "(none)"
@@ -1430,7 +1484,7 @@ static void DrawCompanyVehiclesAmount(CompanyID company, int right)
 	uint air   = 0;
 	uint ship  = 0;
 
-	DrawString(x, right, y, STR_COMPANY_VIEW_VEHICLES_TITLE, TC_FROMSTRING);
+	DrawString(x, right, y, STR_COMPANY_VIEW_VEHICLES_TITLE);
 
 	FOR_ALL_VEHICLES(v) {
 		if (v->owner == company) {
@@ -1445,29 +1499,29 @@ static void DrawCompanyVehiclesAmount(CompanyID company, int right)
 	}
 
 	if (train + road + air + ship == 0) {
-		DrawString(x + 70, right, y, STR_COMPANY_VIEW_VEHICLES_NONE, TC_FROMSTRING);
+		DrawString(x + 70, right, y, STR_COMPANY_VIEW_VEHICLES_NONE);
 	} else {
 		if (train != 0) {
 			SetDParam(0, train);
-			DrawString(x + 70, right, y, STR_TRAINS, TC_FROMSTRING);
+			DrawString(x + 70, right, y, STR_TRAINS);
 			y += 10;
 		}
 
 		if (road != 0) {
 			SetDParam(0, road);
-			DrawString(x + 70, right, y, STR_ROAD_VEHICLES, TC_FROMSTRING);
+			DrawString(x + 70, right, y, STR_ROAD_VEHICLES);
 			y += 10;
 		}
 
 		if (air != 0) {
 			SetDParam(0, air);
-			DrawString(x + 70, right, y, STR_AIRCRAFT, TC_FROMSTRING);
+			DrawString(x + 70, right, y, STR_AIRCRAFT);
 			y += 10;
 		}
 
 		if (ship != 0) {
 			SetDParam(0, ship);
-			DrawString(x + 70, right, y, STR_SHIPS, TC_FROMSTRING);
+			DrawString(x + 70, right, y, STR_SHIPS);
 		}
 	}
 }
@@ -1496,7 +1550,7 @@ static void DrawCompanyOwnerText(const Company *c)
 			SetDParam(0, amt * 25);
 			SetDParam(1, c2->index);
 
-			DrawString(120, 359, (num++) * height + 116, STR_COMPANY_VIEW_SHARES_OWNED_BY, TC_FROMSTRING);
+			DrawString(120, 359, (num++) * height + 116, STR_COMPANY_VIEW_SHARES_OWNED_BY);
 		}
 	}
 }
@@ -1572,10 +1626,10 @@ struct CompanyWindow : Window
 
 		/* "Inaugurated:" */
 		SetDParam(0, c->inaugurated_year);
-		DrawString(110, this->width, 23, STR_COMPANY_VIEW_INAUGURATED_TITLE, TC_FROMSTRING);
+		DrawString(110, this->width, 23, STR_COMPANY_VIEW_INAUGURATED_TITLE);
 
 		/* "Colour scheme:" */
-		DrawString(110, this->width, 43, STR_COMPANY_VIEW_COLOUR_SCHEME_TITLE, TC_FROMSTRING);
+		DrawString(110, this->width, 43, STR_COMPANY_VIEW_COLOUR_SCHEME_TITLE);
 		/* Draw company-colour bus */
 		DrawSprite(SPR_VEH_BUS_SW_VIEW, COMPANY_SPRITE_COLOUR(c->index), 215, 44);
 
@@ -1584,7 +1638,7 @@ struct CompanyWindow : Window
 
 		/* "Company value:" */
 		SetDParam(0, CalculateCompanyValue(c));
-		DrawString(110, this->width, 106, STR_COMPANY_VIEW_COMPANY_VALUE, TC_FROMSTRING);
+		DrawString(110, this->width, 106, STR_COMPANY_VIEW_COMPANY_VALUE);
 
 		/* Shares list */
 		DrawCompanyOwnerText(c);
@@ -1716,7 +1770,7 @@ static const WindowDesc _company_desc(
 	WDP_AUTO, WDP_AUTO, 360, 170, 360, 170,
 	WC_COMPANY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_company_widgets
+	_company_widgets, _nested_company_widgets,lengthof(_nested_company_widgets)
 );
 
 void ShowCompany(CompanyID company)
@@ -1726,7 +1780,14 @@ void ShowCompany(CompanyID company)
 	AllocateWindowDescFront<CompanyWindow>(&_company_desc, company);
 }
 
-
+/** widget numbers of the #BuyCompanyWindow. */
+enum BuyCompanyWidgets {
+	BCW_CLOSEBOX,
+	BCW_CAPTION,
+	BCW_BACKGROUND,
+	BCW_NO,
+	BCW_YES,
+};
 
 struct BuyCompanyWindow : Window {
 	BuyCompanyWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
@@ -1751,11 +1812,11 @@ struct BuyCompanyWindow : Window {
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case 3:
+			case BCW_NO:
 				delete this;
 				break;
 
-			case 4:
+			case BCW_YES:
 				DoCommandP(0, this->window_number, 0, CMD_BUY_COMPANY | CMD_MSG(STR_ERROR_CAN_T_BUY_COMPANY));
 				break;
 		}
@@ -1771,11 +1832,29 @@ static const Widget _buy_company_widgets[] = {
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_buy_company_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE, BCW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE, BCW_CAPTION), SetDataTip(STR_ERROR_MESSAGE_CAPTION_OTHER_COMPANY, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, BCW_BACKGROUND),
+		NWidget(NWID_SPACER), SetMinimalSize(334, 103), SetFill(1, 0),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_SPACER), SetMinimalSize(148, 0), SetFill(1, 0),
+			NWidget(WWT_TEXTBTN, COLOUR_LIGHT_BLUE, BCW_NO), SetMinimalSize(60, 12), SetDataTip(STR_NO, STR_NULL),
+			NWidget(NWID_SPACER), SetMinimalSize(10, 0), SetFill(1, 0),
+			NWidget(WWT_TEXTBTN, COLOUR_LIGHT_BLUE, BCW_YES), SetMinimalSize(60, 12), SetDataTip(STR_YES, STR_NULL),
+			NWidget(NWID_SPACER), SetMinimalSize(56, 0), SetFill(1, 0),
+		EndContainer(),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 8), SetFill(1, 0),
+	EndContainer(),
+};
+
 static const WindowDesc _buy_company_desc(
 	153, 171, 334, 137, 334, 137,
 	WC_BUY_COMPANY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION,
-	_buy_company_widgets
+	_buy_company_widgets, _nested_buy_company_widgets, lengthof(_nested_buy_company_widgets)
 );
 
 

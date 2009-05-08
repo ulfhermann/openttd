@@ -364,7 +364,7 @@ struct RefitWindow : public Window {
 				SetDParam(0, this->cargo->cargo);
 				SetDParam(1, _returned_refit_capacity);
 				SetDParam(2, cost.GetCost());
-				DrawStringMultiLine(2, this->width - 2, this->widget[VRW_INFOPANEL].top + 1, this->widget[VRW_INFOPANEL].bottom, STR_REFIT_NEW_CAPACITY_COST_OF_REFIT, TC_FROMSTRING);
+				DrawStringMultiLine(2, this->width - 2, this->widget[VRW_INFOPANEL].top + 1, this->widget[VRW_INFOPANEL].bottom, STR_REFIT_NEW_CAPACITY_COST_OF_REFIT);
 			}
 		}
 	}
@@ -799,7 +799,7 @@ static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y)
 			if (v->type == VEH_SHIP && GetStation(order->GetDestination())->IsBuoy()) continue;
 
 			SetDParam(0, order->GetDestination());
-			DrawString(left, right, y, STR_ORDER_STATION_SMALL, TC_FROMSTRING);
+			DrawString(left, right, y, STR_ORDER_STATION_SMALL);
 
 			y += 6;
 			if (++i == 4) break;
@@ -835,12 +835,12 @@ void BaseVehicleListWindow::DrawVehicleListItems(int x, VehicleID selected_vehic
 		SetDParam(1, v->GetDisplayProfitLastYear());
 
 		DrawVehicleImage(v, x + 19, y + 6, selected_vehicle, this->widget[VLW_WIDGET_LIST].right - this->widget[VLW_WIDGET_LIST].left - 20, 0);
-		DrawString(x + 19, this->widget[VLW_WIDGET_LIST].right, y + this->resize.step_height - 8, STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR, TC_FROMSTRING);
+		DrawString(x + 19, this->widget[VLW_WIDGET_LIST].right, y + this->resize.step_height - 8, STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR);
 
 		if (v->name != NULL) {
 			/* The vehicle got a name so we will print it */
 			SetDParam(0, v->index);
-			DrawString(x + 19, this->widget[VLW_WIDGET_LIST].right, y, STR_VEHICLE_NAME_SMALL, TC_FROMSTRING);
+			DrawString(x + 19, this->widget[VLW_WIDGET_LIST].right, y, STR_VEHICLE_NAME_SMALL);
 		} else if (v->group_id != DEFAULT_GROUP) {
 			/* The vehicle has no name, but is member of a group, so print group name */
 			SetDParam(0, v->group_id);
@@ -856,7 +856,7 @@ void BaseVehicleListWindow::DrawVehicleListItems(int x, VehicleID selected_vehic
 		}
 
 		SetDParam(0, v->unitnumber);
-		DrawString(x, this->widget[VLW_WIDGET_LIST].right, y + 2, str, TC_FROMSTRING);
+		DrawString(x, this->widget[VLW_WIDGET_LIST].right, y + 2, str);
 
 		DrawVehicleProfitButton(v, x, y + 13);
 
@@ -1171,7 +1171,7 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 
 	virtual void OnTick()
 	{
-		if (_pause_game != 0) return;
+		if (_pause_mode != PM_UNPAUSED) return;
 		if (this->vehicles.NeedResort()) {
 			StationID station = ((this->window_number & VLW_MASK) == VLW_STATION_LIST) ? GB(this->window_number, 16, 16) : INVALID_STATION;
 
@@ -1473,7 +1473,7 @@ struct VehicleDetailsWindow : Window {
 		SetDParam(0, (v->age + DAYS_IN_YEAR < v->max_age) ? STR_AGE : STR_AGE_RED);
 		SetDParam(2, v->max_age / DAYS_IN_LEAP_YEAR);
 		SetDParam(3, v->GetDisplayRunningCost());
-		DrawString(2, this->width - 2, 15, STR_VEHICLE_INFO_AGE_RUNNING_COST_YR, TC_FROMSTRING);
+		DrawString(2, this->width - 2, 15, STR_VEHICLE_INFO_AGE_RUNNING_COST_YR);
 
 		/* Draw max speed */
 		switch (v->type) {
@@ -1484,14 +1484,14 @@ struct VehicleDetailsWindow : Window {
 				SetDParam(3, v->u.rail.cached_max_te / 1000);
 				DrawString(2, this->width - 2, 25, (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && v->u.rail.railtype != RAILTYPE_MAGLEV) ?
 					STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE :
-					STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED, TC_FROMSTRING);
+					STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED);
 				break;
 
 			case VEH_ROAD:
 			case VEH_SHIP:
 			case VEH_AIRCRAFT:
 				SetDParam(0, v->GetDisplayMaxSpeed());
-				DrawString(2, this->width - 2, 25, STR_VEHICLE_INFO_MAX_SPEED, TC_FROMSTRING);
+				DrawString(2, this->width - 2, 25, STR_VEHICLE_INFO_MAX_SPEED);
 				break;
 
 			default: NOT_REACHED();
@@ -1500,17 +1500,17 @@ struct VehicleDetailsWindow : Window {
 		/* Draw profit */
 		SetDParam(0, v->GetDisplayProfitThisYear());
 		SetDParam(1, v->GetDisplayProfitLastYear());
-		DrawString(2, this->width - 2, 35, STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR, TC_FROMSTRING);
+		DrawString(2, this->width - 2, 35, STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR);
 
 		/* Draw breakdown & reliability */
 		SetDParam(0, v->reliability * 100 >> 16);
 		SetDParam(1, v->breakdowns_since_last_service);
-		DrawString(2, this->width - 2, 45, STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS, TC_FROMSTRING);
+		DrawString(2, this->width - 2, 45, STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS);
 
 		/* Draw service interval text */
 		SetDParam(0, v->service_interval);
 		SetDParam(1, v->date_of_last_service);
-		DrawString(13, this->width - 2, this->height - (v->type != VEH_TRAIN ? 11 : 23), _settings_game.vehicle.servint_ispercent ? STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT : STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS, TC_FROMSTRING);
+		DrawString(13, this->width - 2, this->height - (v->type != VEH_TRAIN ? 11 : 23), _settings_game.vehicle.servint_ispercent ? STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT : STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS);
 
 		switch (v->type) {
 			case VEH_TRAIN:
@@ -1634,19 +1634,53 @@ static const Widget _vehicle_view_widgets[] = {
 	{ WWT_PUSHIMGBTN,    RESIZE_LR,  COLOUR_GREY, 232, 249,  86, 103, SPR_SHOW_VEHICLE_DETAILS, 0x0 /* filled later */ },             // VVW_WIDGET_SHOW_DETAILS
 	{ WWT_PUSHIMGBTN,    RESIZE_LR,  COLOUR_GREY, 232, 249,  32,  49, 0x0 /* filled later */,   0x0 /* filled later */ },             // VVW_WIDGET_CLONE_VEH
 	{      WWT_PANEL,   RESIZE_LRB,  COLOUR_GREY, 232, 249, 104, 103, 0x0,                      STR_NULL },                           // VVW_WIDGET_EMPTY_BOTTOM_RIGHT
-	{  WWT_RESIZEBOX,  RESIZE_LRTB,  COLOUR_GREY, 238, 249, 104, 115, 0x0,                      STR_NULL },                           // VVW_WIDGET_RESIZE
+	{  WWT_RESIZEBOX,  RESIZE_LRTB,  COLOUR_GREY, 238, 249, 104, 115, 0x0,                      STR_RESIZE_BUTTON },                  // VVW_WIDGET_RESIZE
 	{ WWT_PUSHIMGBTN,    RESIZE_LR,  COLOUR_GREY, 232, 249,  50,  67, SPR_FORCE_VEHICLE_TURN,   STR_VEHICLE_VIEW_ROAD_REVERSE_TOOLTIP }, // VVW_WIDGET_TURN_AROUND
 	{ WWT_PUSHIMGBTN,    RESIZE_LR,  COLOUR_GREY, 232, 249,  50,  67, SPR_IGNORE_SIGNALS,       STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP }, // VVW_WIDGET_FORCE_PROCEED
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_vehicle_view_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, VVW_WIDGET_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_GREY, VVW_WIDGET_CAPTION), SetDataTip(STR_VEHICLE_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY, VVW_WIDGET_STICKY),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_GREY, VVW_WIDGET_PANEL),
+			NWidget(WWT_INSET, COLOUR_GREY, VVW_WIDGET_VIEWPORT), SetPadding(2, 2, 2, 2), SetMinimalSize(228, 86), SetResize(1, 1), EndContainer(),
+		EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_CENTER_MAIN_VIEH), SetMinimalSize(18, 18), SetDataTip(SPR_CENTRE_VIEW_VEHICLE, 0x0 /* filled later */),
+			NWidget(NWID_SELECTION),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_GOTO_DEPOT), SetMinimalSize(18, 18), SetDataTip(0x0 /* filled later */, 0x0 /* filled later */),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_CLONE_VEH), SetMinimalSize(18, 18), SetDataTip(0x0 /* filled later */, 0x0 /* filled later */),
+			EndContainer(),
+			NWidget(NWID_SELECTION),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_REFIT_VEH), SetMinimalSize(18, 18),
+												SetDataTip(SPR_REFIT_VEHICLE, 0x0 /* filled later */),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_TURN_AROUND), SetMinimalSize(18, 18),
+												SetDataTip(SPR_FORCE_VEHICLE_TURN, STR_VEHICLE_VIEW_ROAD_REVERSE_TOOLTIP),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_FORCE_PROCEED), SetMinimalSize(18, 18),
+												SetDataTip(SPR_IGNORE_SIGNALS, STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP),
+			EndContainer(),
+			NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_SHOW_ORDERS), SetMinimalSize(18, 18), SetDataTip(SPR_SHOW_ORDERS, 0x0 /* filled later */),
+			NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_SHOW_DETAILS), SetMinimalSize(18, 18), SetDataTip(SPR_SHOW_VEHICLE_DETAILS, 0x0 /* filled later */),
+			NWidget(WWT_PANEL, COLOUR_GREY, VVW_WIDGET_EMPTY_BOTTOM_RIGHT), SetMinimalSize(18, 0), SetResize(0, 1), EndContainer(),
+		EndContainer(),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PUSHBTN, COLOUR_GREY, VVW_WIDGET_START_STOP_VEH), SetMinimalSize(0, 12), SetResize(1, 0), SetFill(true, false),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY, VVW_WIDGET_RESIZE),
+	EndContainer(),
+};
 
 /** Vehicle view window descriptor for all vehicles but trains. */
 static const WindowDesc _vehicle_view_desc(
 	WDP_AUTO, WDP_AUTO, 250, 116, 250, 116,
 	WC_VEHICLE_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_vehicle_view_widgets
+	_vehicle_view_widgets, _nested_vehicle_view_widgets, lengthof(_nested_vehicle_view_widgets)
 );
 
 /** Vehicle view window descriptor for trains. Only minimum_height and
@@ -1656,7 +1690,7 @@ static const WindowDesc _train_view_desc(
 	WDP_AUTO, WDP_AUTO, 250, 134, 250, 134,
 	WC_VEHICLE_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_vehicle_view_widgets
+	_vehicle_view_widgets, _nested_vehicle_view_widgets, lengthof(_nested_vehicle_view_widgets)
 );
 
 
