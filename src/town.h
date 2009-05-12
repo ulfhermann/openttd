@@ -43,6 +43,7 @@ enum BuildingFlags {
 	BUILDING_IS_CHURCH   = 1U << 6,
 	BUILDING_IS_STADIUM  = 1U << 7,
 	BUILDING_HAS_1_TILE  = TILE_SIZE_1x1 | TILE_SIZE_2x1 | TILE_SIZE_1x2 | TILE_SIZE_2x2,
+	BUILDING_HAS_2_TILES = TILE_SIZE_2x1 | TILE_SIZE_1x2 | TILE_SIZE_2x2,
 	BUILDING_2_TILES_X   = TILE_SIZE_2x1 | TILE_SIZE_2x2,
 	BUILDING_2_TILES_Y   = TILE_SIZE_1x2 | TILE_SIZE_2x2,
 	BUILDING_HAS_4_TILES = TILE_SIZE_2x2,
@@ -257,11 +258,10 @@ void ShowTownViewWindow(TownID town);
 void ExpandTown(Town *t);
 Town *CreateRandomTown(uint attempts, TownSize size, bool city, TownLayout layout);
 
-enum {
+enum TownRatingCheckType {
 	ROAD_REMOVE         = 0,
-	UNMOVEABLE_REMOVE   = 1,
 	TUNNELBRIDGE_REMOVE = 1,
-	INDUSTRY_REMOVE     = 2
+	TOWN_RATING_CHECK_TYPE_COUNT,
 };
 
 /** This is the number of ticks between towns being processed for building new
@@ -285,7 +285,7 @@ enum {
 	TOWN_HAS_STADIUM    = 2    ///< There can be only one stadium by town.
 };
 
-bool CheckforTownRating(DoCommandFlag flags, Town *t, byte type);
+bool CheckforTownRating(DoCommandFlag flags, Town *t, TownRatingCheckType type);
 
 static inline HouseSpec *GetHouseSpecs(HouseID house_id)
 {
