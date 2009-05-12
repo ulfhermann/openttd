@@ -546,8 +546,8 @@ public:
 				ShowQueryString(
 					STR_JUST_RAW_STRING,
 					STR_NETWORK_ENTER_IP,
-					31,  // maximum number of characters
-					250, // characters up to this width pixels, whichever is satisfied first
+					NETWORK_HOSTNAME_LENGTH,  // maximum number of characters including '\0'
+					0,                        // no limit in pixels
 					this, CS_ALPHANUMERAL, QSF_ACCEPT_UNCHANGED);
 				break;
 
@@ -1717,7 +1717,7 @@ static const WindowDesc _client_list_desc(
 	WDP_AUTO, WDP_AUTO, 250, 1, 250, 1,
 	WC_CLIENT_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON,
-	_client_list_widgets, _nested_client_list_widgets, lengthof(_client_list_widgets)
+	_client_list_widgets, _nested_client_list_widgets, lengthof(_nested_client_list_widgets)
 );
 
 /* Finds the Xth client-info that is active */

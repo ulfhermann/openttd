@@ -1067,7 +1067,7 @@ void VehicleEnterDepot(Vehicle *v)
 		if (t.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) {
 			/* Part of orders */
 			UpdateVehicleTimetable(v, true);
-			v->cur_order_index++;
+			v->IncrementOrderIndex();
 		}
 		if (t.GetDepotActionType() & ODATFB_HALT) {
 			/* Vehicles are always stopped on entering depots. Do not restart this one. */
@@ -1595,8 +1595,7 @@ void Vehicle::HandleLoading(bool mode)
 		default: return;
 	}
 
-	this->cur_order_index++;
-	InvalidateVehicleOrder(this, 0);
+	this->IncrementOrderIndex();
 }
 
 CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
@@ -1623,7 +1622,7 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 		if (flags & DC_EXEC) {
 			/* If the orders to 'goto depot' are in the orders list (forced servicing),
 			 * then skip to the next order; effectively cancelling this forced service */
-			if (this->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) this->cur_order_index++;
+			if (this->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) this->IncrementOrderIndex();
 
 			this->current_order.MakeDummy();
 			InvalidateWindowWidget(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
