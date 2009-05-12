@@ -2850,7 +2850,9 @@ static void UpdateStationStats(Station * st) {
 void IncreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
 	for (Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
-			st->goods[v->cargo_type].link_stats[next_station_id].frozen += v->cargo_cap;
+			LinkStat & ls = st->goods[v->cargo_type].link_stats[next_station_id];
+			ls.frozen += v->cargo_cap;
+			ls.capacity = max(ls.capacity, ls.frozen);
 		}
 	}
 }
