@@ -150,7 +150,7 @@ void CDECL grfmsg(int severity, const char *str, ...)
 static inline bool check_length(size_t real, size_t wanted, const char *str)
 {
 	if (real >= wanted) return true;
-	grfmsg(0, "%s: Invalid pseudo sprite length %d (expected %d)!", str, real, wanted);
+	grfmsg(0, "%s: Invalid pseudo sprite length " PRINTF_SIZE " (expected " PRINTF_SIZE ")!", str, real, wanted);
 	return false;
 }
 
@@ -1356,9 +1356,12 @@ static ChangeInfoResult BridgeChangeInfo(uint brid, int numinfo, int prop, byte 
 		BridgeSpec *bridge = &_bridge[brid + i];
 
 		switch (prop) {
-			case 0x08: // Year of availability
-				bridge->avail_year = ORIGINAL_BASE_YEAR + grf_load_byte(&buf);
+			case 0x08: { // Year of availability
+				/* We treat '0' as always available */
+				byte year = grf_load_byte(&buf);
+				bridge->avail_year = (year > 0 ? ORIGINAL_BASE_YEAR + year : 0);
 				break;
+			}
 
 			case 0x09: // Minimum length
 				bridge->min_length = grf_load_byte(&buf);
@@ -4224,7 +4227,7 @@ static void GRFInfo(byte *buf, size_t len)
 	_cur_grfconfig->status = _cur_stage < GLS_RESERVE ? GCS_INITIALISED : GCS_ACTIVATED;
 
 	/* Do swap the GRFID for displaying purposes since people expect that */
-	DEBUG(grf, 1, "GRFInfo: Loaded GRFv%d set %08lX - %s (palette: %s)", version, BSWAP32(grfid), name, _cur_grfconfig->windows_paletted ? "Windows" : "DOS");
+	DEBUG(grf, 1, "GRFInfo: Loaded GRFv%d set %08X - %s (palette: %s)", version, BSWAP32(grfid), name, _cur_grfconfig->windows_paletted ? "Windows" : "DOS");
 }
 
 /* Action 0x0A */
@@ -4401,7 +4404,7 @@ static void GRFComment(byte *buf, size_t len)
 
 	size_t text_len = len - 1;
 	const char *text = (const char*)(buf + 1);
-	grfmsg(2, "GRFComment: %.*s", text_len, text);
+	grfmsg(2, "GRFComment: %.*s", (int)text_len, text);
 }
 
 /* Action 0x0D (GLS_SAFETYSCAN) */
@@ -4943,7 +4946,7 @@ static void FeatureTownName(byte *buf, size_t len)
 	if (!check_length(len, 1, "FeatureTownName: number of parts")) return;
 	byte nb = grf_load_byte(&buf);
 	len--;
-	grfmsg(6, "FeatureTownName: %d parts", nb, nb);
+	grfmsg(6, "FeatureTownName: %u parts", nb);
 
 	townname->nbparts[id] = nb;
 	townname->partlist[id] = CallocT<NamePartList>(nb);
@@ -5832,10 +5835,25 @@ static void FinaliseHouseArray()
 
 		for (int i = 0; i < HOUSE_MAX; i++) {
 			HouseSpec *hs = file->housespec[i];
-			if (hs != NULL) {
-				_house_mngr.SetEntitySpec(hs);
-				if (hs->min_year < min_year) min_year = hs->min_year;
+
+			if (hs == NULL) continue;
+
+			const HouseSpec *next1 = (i + 1 < HOUSE_MAX ? file->housespec[i + 1] : NULL);
+			const HouseSpec *next2 = (i + 2 < HOUSE_MAX ? file->housespec[i + 2] : NULL);
+			const HouseSpec *next3 = (i + 3 < HOUSE_MAX ? file->housespec[i + 3] : NULL);
+
+			if (((hs->building_flags & BUILDING_HAS_2_TILES) != 0 &&
+						(next1 == NULL || !next1->enabled || (next1->building_flags & BUILDING_HAS_1_TILE) != 0)) ||
+					((hs->building_flags & BUILDING_HAS_4_TILES) != 0 &&
+						(next2 == NULL || !next2->enabled || (next2->building_flags & BUILDING_HAS_1_TILE) != 0 ||
+						next3 == NULL || !next3->enabled || (next3->building_flags & BUILDING_HAS_1_TILE) != 0))) {
+				hs->enabled = false;
+				DEBUG(grf, 1, "FinaliseHouseArray: %s defines house %d as multitile, but no suitable tiles follow. Disabling house.", file->filename, hs->local_id);
+				continue;
 			}
+
+			_house_mngr.SetEntitySpec(hs);
+			if (hs->min_year < min_year) min_year = hs->min_year;
 		}
 	}
 

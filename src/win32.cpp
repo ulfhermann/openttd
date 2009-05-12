@@ -1082,13 +1082,13 @@ void DetermineBasePaths(const char *exe)
 	_searchpaths[SP_WORKING_DIR] = strdup(tmp);
 
 	if (!GetModuleFileName(NULL, path, lengthof(path))) {
-		DEBUG(misc, 0, "GetModuleFileName failed (%d)\n", GetLastError());
+		DEBUG(misc, 0, "GetModuleFileName failed (%lu)\n", GetLastError());
 		_searchpaths[SP_BINARY_DIR] = NULL;
 	} else {
 		TCHAR exec_dir[MAX_PATH];
 		_tcsncpy(path, MB_TO_WIDE_BUFFER(exe, path, lengthof(path)), lengthof(path));
 		if (!GetFullPathName(path, lengthof(exec_dir), exec_dir, NULL)) {
-			DEBUG(misc, 0, "GetFullPathName failed (%d)\n", GetLastError());
+			DEBUG(misc, 0, "GetFullPathName failed (%lu)\n", GetLastError());
 			_searchpaths[SP_BINARY_DIR] = NULL;
 		} else {
 			strecpy(tmp, WIDE_TO_MB_BUFFER(exec_dir, tmp, lengthof(tmp)), lastof(tmp));
@@ -1219,7 +1219,7 @@ const char *FS2OTTD(const TCHAR *name)
 		wchar_t w;
 		int len = MultiByteToWideChar(_codepage, 0, name, 1, &w, 1);
 		if (len != 1) {
-			DEBUG(misc, 0, "[utf8] M2W error converting '%c'. Errno %d", *name, GetLastError());
+			DEBUG(misc, 0, "[utf8] M2W error converting '%c'. Errno %lu", *name, GetLastError());
 			continue;
 		}
 
@@ -1258,7 +1258,7 @@ const TCHAR *OTTD2FS(const char *name)
 		char mb;
 		int len = WideCharToMultiByte(_codepage, 0, (wchar_t*)&c, 1, &mb, 1, NULL, NULL);
 		if (len != 1) {
-			DEBUG(misc, 0, "[utf8] W2M error converting '0x%X'. Errno %d", c, GetLastError());
+			DEBUG(misc, 0, "[utf8] W2M error converting '0x%X'. Errno %lu", c, GetLastError());
 			continue;
 		}
 
@@ -1281,7 +1281,7 @@ char *convert_from_fs(const wchar_t *name, char *utf8_buf, size_t buflen)
 {
 	int len = WideCharToMultiByte(CP_UTF8, 0, name, -1, utf8_buf, (int)buflen, NULL, NULL);
 	if (len == 0) {
-		DEBUG(misc, 0, "[utf8] W2M error converting wide-string. Errno %d", GetLastError());
+		DEBUG(misc, 0, "[utf8] W2M error converting wide-string. Errno %lu", GetLastError());
 		utf8_buf[0] = '\0';
 	}
 
@@ -1300,7 +1300,7 @@ wchar_t *convert_to_fs(const char *name, wchar_t *utf16_buf, size_t buflen)
 {
 	int len = MultiByteToWideChar(CP_UTF8, 0, name, -1, utf16_buf, (int)buflen);
 	if (len == 0) {
-		DEBUG(misc, 0, "[utf8] M2W error converting '%s'. Errno %d", name, GetLastError());
+		DEBUG(misc, 0, "[utf8] M2W error converting '%s'. Errno %lu", name, GetLastError());
 		utf16_buf[0] = '\0';
 	}
 
