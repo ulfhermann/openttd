@@ -687,9 +687,9 @@ static const Widget _station_view_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,                 STR_TOOLTIP_CLOSE_WINDOW},             // SVW_CLOSEBOX
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   236,     0,    13, STR_STATION_VIEW_CAPTION,        STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
 {  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,                             STR_STICKY_BUTTON},
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    10,    14,    25, STR_EMPTY,                       STR_SORT_ORDER_TIP},                   // SLW_SORTBY
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    11,    70,    14,    25, 0x0,                             STR_SORT_CRITERIA_TIP},                // SLW_SORTDROPBTN
-{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    71,   248,    14,    25, 0x0,                             STR_GROUP_TIP},
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    13,    14,    25, STR_EMPTY,                       STR_SORT_ORDER_TIP},                   // SLW_SORTBY
+{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    14,    80,    14,    25, 0x0,                             STR_SORT_CRITERIA_TIP},                // SLW_SORTDROPBTN
+{   WWT_DROPDOWN,   RESIZE_LEFT,  COLOUR_GREY,    81,   248,    14,    25, 0x0,                             STR_GROUP_TIP},
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    26,    75, 0x0,                             STR_NULL},                             // SVW_WAITING
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    26,    75, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
 {      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    76,    97, 0x0,                             STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
@@ -712,14 +712,20 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, SVW_STICKYBOX),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_GREY, SVW_WAITING), SetMinimalSize(237, 52), SetResize(1, 10), EndContainer(),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_ORDER), SetMinimalSize(14, 12), SetDataTip(STR_EMPTY, STR_SORT_ORDER_TIP),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(67, 12), SetDataTip(0x0, STR_SORT_CRITERIA_TIP),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_GROUP_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_GROUP_TIP),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_GREY, SVW_WAITING), SetMinimalSize(237, 50), SetResize(1, 10), EndContainer(),
 		NWidget(WWT_SCROLLBAR, COLOUR_GREY, SVW_SCROLLBAR),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, SVW_ACCEPTLIST), SetMinimalSize(249, 32), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, SVW_ACCEPTLIST), SetMinimalSize(249, 22), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_LOCATION), SetMinimalSize(60, 12), SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(61, 12), SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(60, 12), SetResize(1, 0), SetDataTip(STR_QUERY_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_LOCATION), SetMinimalSize(45, 12), SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(45, 12), SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_FLOWS), SetMinimalSize(45, 12), SetResize(1, 0), SetDataTip(STR_BUTTON_PLANNED, STR_TOGGLE_CARGO_VIEW),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(46, 12), SetResize(1, 0), SetDataTip(STR_QUERY_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_TRAINS), SetMinimalSize(14, 12), SetDataTip(STR_TRAIN, STR_SCHEDULED_TRAINS_TIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ROADVEHS), SetMinimalSize(14, 12), SetDataTip(STR_LORRY, STR_SCHEDULED_ROAD_VEHICLES_TIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_PLANES),  SetMinimalSize(14, 12), SetDataTip(STR_PLANE, STR_SCHEDULED_AIRCRAFT_TIP),
