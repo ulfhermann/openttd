@@ -1478,37 +1478,141 @@ void ShowQuery(StringID caption, StringID message, Window *parent, QueryCallback
 }
 
 
+enum SaveLoadWindowWidgets {
+	SLWW_CLOSE = 0,
+	SLWW_WINDOWTITLE,
+	SLWW_SORT_BYNAME,
+	SLWW_SORT_BYDATE,
+	SLWW_BACKGROUND,
+	SLWW_FILE_BACKGROUND,
+	SLWW_HOME_BUTTON,
+	SLWW_DRIVES_DIRECTORIES_LIST,
+	SLWW_SCROLLBAR,
+	SLWW_CONTENT_DOWNLOAD,     ///< only available for play scenario/heightmap (content download)
+	SLWW_SAVE_OSK_TITLE,       ///< only available for save operations
+	SLWW_DELETE_SELECTION,     ///< same in here
+	SLWW_SAVE_GAME,            ///< not to mention in here too
+	SLWW_RESIZE,
+};
+
 static const Widget _load_dialog_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},
-{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   256,     0,    13, STR_NULL,                 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_NAME,         STR_SORT_ORDER_TIP},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_DATE,         STR_SORT_ORDER_TIP},
-{      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,     0,   256,    26,    47, 0x0,                      STR_NULL},
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   256,    48,   153, 0x0,                      STR_NULL},
-{ WWT_PUSHIMGBTN,     RESIZE_LR,  COLOUR_GREY,   245,   256,    48,    59, SPR_HOUSE_ICON,           STR_SAVELOAD_HOME_BUTTON},
-{      WWT_INSET,     RESIZE_RB,  COLOUR_GREY,     2,   243,    50,   139, 0x0,                      STR_SAVELOAD_LIST_TOOLTIP},
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   245,   256,    60,   141, 0x0,                      STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
-{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,     0,   243,   142,   153, STR_CONTENT_INTRO_BUTTON, STR_CONTENT_INTRO_BUTTON_TIP},
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   142,   153, 0x0,                      STR_RESIZE_BUTTON},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},             // SLWW_CLOSE
+{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   256,     0,    13, STR_NULL,                 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},   // SLWW_WINDOWTITLE
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_NAME,         STR_SORT_ORDER_TIP},                   // SLWW_SORT_BYNAME
+{ WWT_PUSHTXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_DATE,         STR_SORT_ORDER_TIP},                   // SLWW_SORT_BYDATE
+{      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,     0,   256,    26,    47, 0x0,                      STR_NULL},                             // SLWW_BACKGROUND
+{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   256,    48,   153, 0x0,                      STR_NULL},                             // SLWW_FILE_BACKGROUND
+{ WWT_PUSHIMGBTN,     RESIZE_LR,  COLOUR_GREY,   245,   256,    48,    59, SPR_HOUSE_ICON,           STR_SAVELOAD_HOME_BUTTON},             // SLWW_HOME_BUTTON
+{      WWT_INSET,     RESIZE_RB,  COLOUR_GREY,     2,   243,    50,   139, 0x0,                      STR_SAVELOAD_LIST_TOOLTIP},            // SLWW_DRIVES_DIRECTORIES_LIST
+{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   245,   256,    60,   141, 0x0,                      STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // SLWW_SCROLLBAR
+{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,     0,   244,   142,   153, STR_CONTENT_INTRO_BUTTON, STR_CONTENT_INTRO_BUTTON_TIP},         // SLWW_CONTENT_DOWNLOAD
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                      STR_NULL},                             // SLWW_SAVE_OSK_TITLE
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                      STR_NULL},                             // SLWW_DELETE_SELECTION
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                      STR_NULL},                             // SLWW_SAVE_GAME
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   142,   153, 0x0,                      STR_RESIZE_BUTTON},                    // SLWW_RESIZE
 {   WIDGETS_END},
 };
 
+static const NWidgetPart _nested_load_dialog_widgets[] = {
+	NWidget(NWID_LAYERED),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_CLOSEBOX, COLOUR_GREY, SLWW_CLOSE),
+				NWidget(WWT_CAPTION, COLOUR_GREY, SLWW_WINDOWTITLE),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetMinimalSize(128, 12), SetDataTip(STR_SORT_BY_NAME, STR_SORT_ORDER_TIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetMinimalSize(129, 12), SetDataTip(STR_SORT_BY_DATE, STR_SORT_ORDER_TIP), SetResize(1, 0),
+			EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetMinimalSize(257, 22), SetResize(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(NWID_VERTICAL),
+						NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetMinimalSize(242, 90), SetPadding(2, 1, 2, 2),
+												SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(2, 10), EndContainer(),
+						NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_CONTENT_DOWNLOAD), SetMinimalSize(245, 12), SetResize(1, 0),
+												SetDataTip(STR_CONTENT_INTRO_BUTTON, STR_CONTENT_INTRO_BUTTON_TIP),
+					EndContainer(),
+					NWidget(NWID_VERTICAL),
+						NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SLWW_HOME_BUTTON), SetMinimalSize(12, 12), SetDataTip(SPR_HOUSE_ICON, STR_SAVELOAD_HOME_BUTTON),
+						NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
+						NWidget(WWT_RESIZEBOX, COLOUR_GREY, SLWW_RESIZE),
+					EndContainer(),
+				EndContainer(),
+			EndContainer(),
+		EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(NWID_LAYERED),
+					NWidget(WWT_EMPTY, COLOUR_GREY, SLWW_SAVE_OSK_TITLE), SetMinimalSize(1, 1), SetFill(false, false),
+					NWidget(WWT_EMPTY, COLOUR_GREY, SLWW_DELETE_SELECTION), SetMinimalSize(1, 1), SetFill(false, false),
+					NWidget(WWT_EMPTY, COLOUR_GREY, SLWW_SAVE_GAME), SetMinimalSize(1, 1), SetFill(false, false),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetFill(true, false), SetResize(1, 0),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetFill(true, true), SetResize(1, 1),
+		EndContainer(),
+	EndContainer(),
+};
+
 static const Widget _save_dialog_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,            STR_TOOLTIP_CLOSE_WINDOW},
-{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   256,     0,    13, STR_NULL,                   STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_NAME,           STR_SORT_ORDER_TIP},
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_DATE,           STR_SORT_ORDER_TIP},
-{      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,     0,   256,    26,    47, 0x0,                        STR_NULL},
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   256,    48,   167, 0x0,                        STR_NULL},
-{ WWT_PUSHIMGBTN,     RESIZE_LR,  COLOUR_GREY,   245,   256,    48,    59, SPR_HOUSE_ICON,             STR_SAVELOAD_HOME_BUTTON},
-{      WWT_INSET,     RESIZE_RB,  COLOUR_GREY,     2,   243,    50,   150, 0x0,                        STR_SAVELOAD_LIST_TOOLTIP},
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   245,   256,    60,   151, 0x0,                        STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
-{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   256,   152,     0, 0x0,                        STR_NULL},
-{    WWT_EDITBOX,    RESIZE_RTB,  COLOUR_GREY,     2,   254,   154,   165, STR_SAVE_OSKTITLE,          STR_SAVELOAD_EDITBOX_TOOLTIP},
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,   127,   168,   179, STR_SAVELOAD_DELETE_BUTTON, STR_SAVELOAD_DELETE_TOOLTIP},
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,   128,   244,   168,   179, STR_SAVELOAD_SAVE_BUTTON,   STR_SAVELOAD_SAVE_TOOLTIP},
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   168,   179, 0x0,                        STR_RESIZE_BUTTON},
+{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,            STR_TOOLTIP_CLOSE_WINDOW},             // SLWW_CLOSE
+{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   256,     0,    13, STR_NULL,                   STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},   // SLWW_WINDOWTITLE
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_NAME,           STR_SORT_ORDER_TIP},                   // SLWW_SORT_BYNAME
+{ WWT_PUSHTXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_DATE,           STR_SORT_ORDER_TIP},                   // SLWW_SORT_BYDATE
+{      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,     0,   256,    26,    47, 0x0,                        STR_NULL},                             // SLWW_BACKGROUND
+{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   256,    48,   167, 0x0,                        STR_NULL},                             // SLWW_FILE_BACKGROUND
+{ WWT_PUSHIMGBTN,     RESIZE_LR,  COLOUR_GREY,   245,   256,    48,    59, SPR_HOUSE_ICON,             STR_SAVELOAD_HOME_BUTTON},             // SLWW_HOME_BUTTON
+{      WWT_INSET,     RESIZE_RB,  COLOUR_GREY,     2,   243,    50,   150, 0x0,                        STR_SAVELOAD_LIST_TOOLTIP},            // SLWW_DRIVES_DIRECTORIES_LIST
+{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   245,   256,    60,   150, 0x0,                        STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // SLWW_SCROLLBAR
+{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                        STR_NULL},                             // SLWW_CONTENT_DOWNLOAD
+{    WWT_EDITBOX,    RESIZE_RTB,  COLOUR_GREY,     2,   254,   154,   165, STR_SAVE_OSKTITLE,          STR_SAVELOAD_EDITBOX_TOOLTIP},         // SLWW_SAVE_OSK_TITLE
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,   127,   168,   179, STR_SAVELOAD_DELETE_BUTTON, STR_SAVELOAD_DELETE_TOOLTIP},          // SLWW_DELETE_SELECTION
+{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   128,   244,   168,   179, STR_SAVELOAD_SAVE_BUTTON,   STR_SAVELOAD_SAVE_TOOLTIP},            // SLWW_SAVE_GAME
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   168,   179, 0x0,                        STR_RESIZE_BUTTON},                    // SLWW_RESIZE
 {   WIDGETS_END},
+};
+
+static const NWidgetPart _nested_save_dialog_widgets[] = {
+	NWidget(NWID_LAYERED),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_CLOSEBOX, COLOUR_GREY, SLWW_CLOSE),
+				NWidget(WWT_CAPTION, COLOUR_GREY, SLWW_WINDOWTITLE),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetMinimalSize(128, 12), SetDataTip(STR_SORT_BY_NAME, STR_SORT_ORDER_TIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetMinimalSize(129, 12), SetDataTip(STR_SORT_BY_DATE, STR_SORT_ORDER_TIP), SetResize(1, 0),
+			EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetMinimalSize(257, 22), SetResize(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
+				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetMinimalSize(242, 101), SetPadding(2, 1, 0, 2),
+												SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(2, 10), EndContainer(),
+					NWidget(NWID_VERTICAL),
+						NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SLWW_HOME_BUTTON), SetMinimalSize(12, 12), SetDataTip(SPR_HOUSE_ICON, STR_SAVELOAD_HOME_BUTTON),
+						NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
+					EndContainer(),
+				EndContainer(),
+				NWidget(WWT_EDITBOX, COLOUR_GREY, SLWW_SAVE_OSK_TITLE), SetMinimalSize(253, 12), SetPadding(3, 2, 2, 2), SetResize(1, 0),
+												SetDataTip(STR_SAVE_OSKTITLE, STR_SAVELOAD_EDITBOX_TOOLTIP),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_DELETE_SELECTION), SetMinimalSize(128, 12),
+												SetDataTip(STR_SAVELOAD_DELETE_BUTTON, STR_SAVELOAD_DELETE_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SAVE_GAME), SetMinimalSize(117, 12), SetResize(1, 0),
+												SetDataTip(STR_SAVELOAD_SAVE_BUTTON, STR_SAVELOAD_SAVE_TOOLTIP),
+				NWidget(WWT_RESIZEBOX, COLOUR_GREY, SLWW_RESIZE),
+			EndContainer(),
+		EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_EMPTY, COLOUR_GREY, SLWW_CONTENT_DOWNLOAD), SetMinimalSize(1, 1), SetFill(false, false),
+				NWidget(NWID_SPACER), SetFill(true, false), SetResize(1, 0),
+			EndContainer(),
+			NWidget(NWID_SPACER), SetFill(true, true), SetResize(1, 1),
+		EndContainer(),
+	EndContainer(),
 };
 
 /* Colours for fios types */
@@ -1578,20 +1682,6 @@ extern void StartupEngines();
 
 struct SaveLoadWindow : public QueryStringBaseWindow {
 private:
-	enum SaveLoadWindowWidgets {
-		SLWW_CLOSE = 0,
-		SLWW_WINDOWTITLE,
-		SLWW_SORT_BYNAME,
-		SLWW_SORT_BYDATE,
-		SLWW_BACKGROUND,
-		SLWW_HOME_BUTTON = 6,
-		SLWW_DRIVES_DIRECTORIES_LIST,
-		SLWW_CONTENT_DOWNLOAD = 9, ///< only available for play scenario/heightmap (content download)
-		SLWW_SAVE_OSK_TITLE,       ///< only available for save operations
-		SLWW_DELETE_SELECTION,     ///< same in here
-		SLWW_SAVE_GAME,            ///< not to mention in here too
-	};
-
 	FiosItem o_dir;
 public:
 
@@ -1876,14 +1966,14 @@ static const WindowDesc _load_dialog_desc(
 	WDP_CENTER, WDP_CENTER, 257, 154, 257, 294,
 	WC_SAVELOAD, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_load_dialog_widgets
+	_load_dialog_widgets, _nested_load_dialog_widgets, lengthof(_nested_load_dialog_widgets)
 );
 
 static const WindowDesc _save_dialog_desc(
 	WDP_CENTER, WDP_CENTER, 257, 180, 257, 320,
 	WC_SAVELOAD, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_save_dialog_widgets
+	_save_dialog_widgets, _nested_save_dialog_widgets, lengthof(_nested_save_dialog_widgets)
 );
 
 /** These values are used to convert the file/operations mode into a corresponding file type.
