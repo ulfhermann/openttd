@@ -118,6 +118,7 @@ NodeID LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
 }
 
 void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
+	assert(capacity > 0);
 	edges[from][to].capacity = capacity;
 }
 
