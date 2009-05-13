@@ -2868,7 +2868,7 @@ void RecalcFrozen(Station * st) {
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = st->goods[goods_index];
 		LinkStatMap & links = good.link_stats;
-		for (LinkStatMap::iterator i = links.begin(); i != links.end();++i) {
+		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			i->second.frozen = 0;
 		}
 	}
