@@ -184,11 +184,13 @@ void SaveLoad_STNS(Station *st)
 			LinkStat ls;
 			for (uint i = 0; i < _num_links; ++i) {
 				SlObject(&ls, _linkstat_desc);
+				assert(ls.capacity > 0);
 				stats[_station_id] = ls;
 			}
 		} else { // saving
 			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
 				_station_id = i->first;
+				assert(i->second.capacity > 0);
 				SlObject(&(i->second), _linkstat_desc);
 			}
 		}

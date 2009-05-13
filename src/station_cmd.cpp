@@ -2848,11 +2848,13 @@ static void UpdateStationStats(Station * st) {
 }
 
 void IncreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
+	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
 	for (Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
 			LinkStat & ls = st->goods[v->cargo_type].link_stats[next_station_id];
 			ls.frozen += v->cargo_cap;
 			ls.capacity = max(ls.capacity, ls.frozen);
+			assert(ls.capacity > 0);
 		}
 	}
 }
@@ -2875,31 +2877,44 @@ void RecalcFrozen(Station * st) {
 	while(v_it != st->loading_vehicles.end()) {
 		Vehicle * front = *v_it;
 		StationID next_station_id = front->orders.list->GetNextStoppingStation(front->cur_order_index);
-		IncreaseFrozen(st, front, next_station_id);
+		if (next_station_id != INVALID_STATION && next_station_id != st->index) {
+			IncreaseFrozen(st, front, next_station_id);
+		}
 		++v_it;
 	}
 }
 
 void DecreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
+	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
 	for (Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
-			LinkStat & link_stat = st->goods[v->cargo_type].link_stats[next_station_id];
-			if (link_stat.frozen < v->cargo_cap) {
+			LinkStatMap & link_stats = st->goods[v->cargo_type].link_stats;
+			LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
+			if (lstat_it == link_stats.end()) {
 				RecalcFrozen(st);
 				return;
 			} else {
-				link_stat.frozen -= v->cargo_cap;
+				LinkStat & link_stat = lstat_it->second;
+				if (link_stat.frozen < v->cargo_cap) {
+					RecalcFrozen(st);
+					return;
+				} else {
+					link_stat.frozen -= v->cargo_cap;
+				}
+				assert(link_stat.capacity > 0);
 			}
 		}
 	}
 }
 
 void IncreaseStats(Station *st, Vehicle *front, StationID next_station_id) {
+	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
 	for (Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
 			LinkStat & link_stat = st->goods[v->cargo_type].link_stats[next_station_id];
 			link_stat.capacity += v->cargo_cap;
-			link_stat.usage += v->cargo_cap;
+			link_stat.usage += v->cargo.Count();
+			assert(link_stat.capacity > 0);
 		}
 	}
 }
