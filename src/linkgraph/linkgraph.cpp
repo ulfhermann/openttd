@@ -9,6 +9,7 @@
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include <queue>
+#include <iostream>
 
 LinkGraph _link_graphs[NUM_CARGO];
 
@@ -60,6 +61,7 @@ void LinkGraph::NextComponent()
 			LinkStat & link_stat = i->second;
 			if (station_colours[target_id] != current_colour) {
 				station_colours[target_id] = current_colour;
+				assert(target_id != source_id);
 				search_queue.push(target);
 				GoodsEntry & good = target->goods[cargo];
 				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
@@ -193,8 +195,8 @@ void Node::ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via
 			StationID next = update->first;
 			if (update->second > 0 && IsValidStationID(next)) {
 				if (next != station) {
-					LinkStatMap & next_ls = GetStation(next)->goods[cargo].link_stats;
-					if (next_ls.find(station) != next_ls.end()) {
+					LinkStatMap & ls = GetStation(station)->goods[cargo].link_stats;
+					if (ls.find(next) != ls.end()) {
 						via_set.insert(FlowStat(update->first, update->second, 0));
 					}
 				} else {
