@@ -121,7 +121,7 @@ void ShowNewGrfVehicleError(EngineID engine, StringID part1, StringID part2, GRF
 		SetDParamStr(0, grfconfig->name);
 		SetDParam(1, engine);
 		ShowErrorMessage(part2, part1, 0, 0);
-		if (!_networking) DoCommandP(0, critical ? PM_PAUSED_ERROR : PM_PAUSED_NORMAL, 1, CMD_PAUSE);
+		if (!_networking) DoCommand(0, critical ? PM_PAUSED_ERROR : PM_PAUSED_NORMAL, 1, DC_EXEC, CMD_PAUSE);
 	}
 
 	/* debug output */
@@ -204,22 +204,6 @@ Vehicle::Vehicle()
 byte VehicleRandomBits()
 {
 	return GB(Random(), 0, 8);
-}
-
-
-/* static */ bool Vehicle::AllocateList(Vehicle **vl, int num)
-{
-	if (!Vehicle::CanAllocateItem(num)) return false;
-	if (vl == NULL) return true;
-
-	uint counter = _Vehicle_pool.first_free_index;
-
-	for (int i = 0; i != num; i++) {
-		vl[i] = new (AllocateRaw(counter)) InvalidVehicle();
-		counter++;
-	}
-
-	return true;
 }
 
 /* Size of the hash, 6 = 64 x 64, 7 = 128 x 128. Larger sizes will (in theory) reduce hash
@@ -1219,13 +1203,12 @@ Trackdir GetVehicleTrackdir(const Vehicle *v)
 			if (IsStandardRoadStopTile(v->tile)) // We'll assume the road vehicle is facing outwards
 				return DiagDirToDiagTrackdir(GetRoadStopDir(v->tile)); // Road vehicle in a station
 
-			if (IsDriveThroughStopTile(v->tile)) return DiagDirToDiagTrackdir(DirToDiagDir(v->direction));
+			/* Drive through road stops / wormholes (tunnels) */
+			if (v->u.road.state > RVSB_TRACKDIR_MASK) return DiagDirToDiagTrackdir(DirToDiagDir(v->direction));
 
-			/* If vehicle's state is a valid track direction (vehicle is not turning around) return it */
-			if (!IsReversingRoadTrackdir((Trackdir)v->u.road.state)) return (Trackdir)v->u.road.state;
-
-			/* Vehicle is turning around, get the direction from vehicle's direction */
-			return DiagDirToDiagTrackdir(DirToDiagDir(v->direction));
+			/* If vehicle's state is a valid track direction (vehicle is not turning around) return it,
+			 * otherwise transform it into a valid track direction */
+			return (Trackdir)((IsReversingRoadTrackdir((Trackdir)v->u.road.state)) ? (v->u.road.state - 6) : v->u.road.state);
 
 		/* case VEH_AIRCRAFT: case VEH_EFFECT: case VEH_DISASTER: */
 		default: return INVALID_TRACKDIR;
