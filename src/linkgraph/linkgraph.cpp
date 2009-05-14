@@ -54,11 +54,11 @@ void LinkGraph::NextComponent()
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID target_id = i->first;
+			assert(target_id != source_id);
 			Station * target = GetStation(i->first);
 			LinkStat & link_stat = i->second;
 			if (station_colours[target_id] != current_colour) {
 				station_colours[target_id] = current_colour;
-				assert(target_id != source_id);
 				search_queue.push(target);
 				GoodsEntry & good = target->goods[cargo];
 				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
