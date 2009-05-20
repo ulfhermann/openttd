@@ -128,7 +128,6 @@ public:
 	inline DestinationID GetDestination() const { return this->dest; }
 
 	/**
-<<<<<<< HEAD:src/order_base.h
 	 * Finds out whether cargo can be unloaded at this station
 	 * @return true if cargo can be unloaded, false otherwise
 	 */
@@ -141,8 +140,6 @@ public:
 	bool IsLoadingOrder() const;
 
 	/**
-=======
->>>>>>> flowmapping-core:src/order_base.h
 	 * Finds out whether a train does stop at a station on its order list
 	 * @return true if the vehicle stops on this order, false otherwise
 	 */
