@@ -1498,9 +1498,14 @@ void Vehicle::BeginLoading()
 	Station * curr_station = GetStation(curr_station_id);
 	curr_station->loading_vehicles.push_back(this);
 
-	StationID last_station_id = this->orders.list->GetPreviousStoppingStation(this->cur_order_index);
+	StationID last_station_id = INVALID_STATION;
+	StationID next_station_id = INVALID_STATION;
 
-	StationID next_station_id = this->orders.list->GetNextStoppingStation(this->cur_order_index);
+	OrderList * orders = this->orders.list;
+	if (orders != NULL) {
+		last_station_id = orders->GetPreviousStoppingStation(this->cur_order_index);
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index);
+	}
 
 	if (last_station_id != INVALID_STATION && last_station_id != curr_station_id) {
 		IncreaseStats(GetStation(last_station_id), this, curr_station_id);

@@ -1596,7 +1596,11 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	StationID last_visited = u->last_station_visited;
 	Station *st = GetStation(last_visited);
 
-	StationID next_station = u->orders.list->GetNextStoppingStation(u->cur_order_index);
+	StationID next_station = INVALID_STATION;
+	OrderList * orders = u->orders.list;
+	if (orders != NULL) {
+		next_station = orders->GetNextStoppingStation(u->cur_order_index);
+	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--u->load_unload_time_rem != 0) {
