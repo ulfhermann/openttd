@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "debug.h"
 #include "train.h"
+#include "roadveh.h"
 #include "company_func.h"
 #include "newgrf_engine.h"
 #include "newgrf_spritegroup.h"
@@ -174,15 +175,15 @@ enum {
  * Map OTTD aircraft movement states to TTDPatch style movement states
  * (VarAction 2 Variable 0xE2)
  */
-static byte MapAircraftMovementState(const Vehicle *v)
+static byte MapAircraftMovementState(const Aircraft *v)
 {
 	const Station *st = GetTargetAirportIfValid(v);
 	if (st == NULL) return AMS_TTDP_FLIGHT_TO_TOWER;
 
 	const AirportFTAClass *afc = st->Airport();
-	uint16 amdflag = afc->MovingData(v->u.air.pos)->flag;
+	uint16 amdflag = afc->MovingData(v->pos)->flag;
 
-	switch (v->u.air.state) {
+	switch (v->state) {
 		case HANGAR:
 			/* The international airport is a special case as helicopters can land in
 			 * front of the hanger. Helicopters also change their air.state to
@@ -301,9 +302,9 @@ enum {
  * (VarAction 2 Variable 0xE6)
  * This is not fully supported yet but it's enough for Planeset.
  */
-static byte MapAircraftMovementAction(const Vehicle *v)
+static byte MapAircraftMovementAction(const Aircraft *v)
 {
-	switch (v->u.air.state) {
+	switch (v->state) {
 		case HANGAR:
 			return (v->cur_speed > 0) ? AMA_TTDP_LANDING_TO_HANGAR : AMA_TTDP_IN_HANGAR;
 
@@ -435,7 +436,7 @@ static uint8 LiveryHelper(EngineID engine, const Vehicle *v)
 	} else if (v->type == VEH_TRAIN) {
 		l = GetEngineLivery(v->engine_type, v->owner, v->u.rail.first_engine, v);
 	} else if (v->type == VEH_ROAD) {
-		l = GetEngineLivery(v->engine_type, v->owner, v->u.road.first_engine, v);
+		l = GetEngineLivery(v->engine_type, v->owner, ((RoadVehicle *)v)->first_engine, v);
 	} else {
 		l = GetEngineLivery(v->engine_type, v->owner, INVALID_ENGINE, v);
 	}
@@ -589,7 +590,7 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 				uint16 altitude = v->z_pos - w->z_pos; // Aircraft height - shadow height
 				byte airporttype = ATP_TTDP_LARGE;
 
-				const Station *st = GetTargetAirportIfValid(v);
+				const Station *st = GetTargetAirportIfValid((Aircraft *)v);
 
 				if (st != NULL) {
 					switch (st->airport_type) {
@@ -780,25 +781,27 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 			}
 			break;
 
-		case VEH_ROAD:
+		case VEH_ROAD: {
+			RoadVehicle *rv = (RoadVehicle *)v;
 			switch (variable - 0x80) {
-				case 0x62: return v->u.road.state;
-				case 0x64: return v->u.road.blocked_ctr;
-				case 0x65: return GB(v->u.road.blocked_ctr, 8, 8);
-				case 0x66: return v->u.road.overtaking;
-				case 0x67: return v->u.road.overtaking_ctr;
-				case 0x68: return v->u.road.crashed_ctr;
-				case 0x69: return GB(v->u.road.crashed_ctr, 8, 8);
+				case 0x62: return rv->state;
+				case 0x64: return rv->blocked_ctr;
+				case 0x65: return GB(rv->blocked_ctr, 8, 8);
+				case 0x66: return rv->overtaking;
+				case 0x67: return rv->overtaking_ctr;
+				case 0x68: return rv->crashed_ctr;
+				case 0x69: return GB(rv->crashed_ctr, 8, 8);
 			}
-			break;
+		} break;
 
-		case VEH_AIRCRAFT:
+		case VEH_AIRCRAFT: {
+			Aircraft *a = (Aircraft *)v;
 			switch (variable - 0x80) {
-				case 0x62: return MapAircraftMovementState(v);  // Current movement state
-				case 0x63: return v->u.air.targetairport;       // Airport to which the action refers
-				case 0x66: return MapAircraftMovementAction(v); // Current movement action
+				case 0x62: return MapAircraftMovementState(a);  // Current movement state
+				case 0x63: return a->targetairport;             // Airport to which the action refers
+				case 0x66: return MapAircraftMovementAction(a); // Current movement action
 			}
-			break;
+		} break;
 
 		default: break;
 	}
@@ -884,7 +887,7 @@ static const SpriteGroup *GetVehicleSpriteGroup(EngineID engine, const Vehicle *
 			group = use_cache ? v->u.rail.cached_override : GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, v->u.rail.first_engine);
 			if (group != NULL) return group;
 		} else if (v->type == VEH_ROAD) {
-			group = GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, v->u.road.first_engine);
+			group = GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, ((RoadVehicle *)v)->first_engine);
 			if (group != NULL) return group;
 		}
 	}
@@ -914,7 +917,7 @@ SpriteID GetCustomEngineSprite(EngineID engine, const Vehicle *v, Direction dire
 }
 
 
-SpriteID GetRotorOverrideSprite(EngineID engine, const Vehicle *v, bool info_view)
+SpriteID GetRotorOverrideSprite(EngineID engine, const Aircraft *v, bool info_view)
 {
 	const Engine *e = Engine::Get(engine);
 
@@ -935,7 +938,7 @@ SpriteID GetRotorOverrideSprite(EngineID engine, const Vehicle *v, bool info_vie
 
 	if (v == NULL) return group->g.result.sprite;
 
-	return group->g.result.sprite + (info_view ? 0 : (v->Next()->Next()->u.air.state % group->g.result.num_sprites));
+	return group->g.result.sprite + (info_view ? 0 : (v->Next()->Next()->state % group->g.result.num_sprites));
 }
 
 

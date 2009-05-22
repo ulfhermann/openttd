@@ -524,12 +524,13 @@ void Vehicle::PreDestructor()
 		if (this->IsPrimaryVehicle()) DecreaseGroupNumVehicle(this->group_id);
 	}
 
-	if (this->type == VEH_ROAD) ClearSlot(this);
+	if (this->type == VEH_ROAD) ClearSlot((RoadVehicle *)this);
 	if (this->type == VEH_AIRCRAFT && this->IsPrimaryVehicle()) {
-		Station *st = GetTargetAirportIfValid(this);
+		Aircraft *a = (Aircraft *)this;
+		Station *st = GetTargetAirportIfValid(a);
 		if (st != NULL) {
 			const AirportFTA *layout = st->Airport()->layout;
-			CLRBITS(st->airport_flags, layout[this->u.air.previous_pos].block | layout[this->u.air.pos].block);
+			CLRBITS(st->airport_flags, layout[a->previous_pos].block | layout[a->pos].block);
 		}
 	}
 
@@ -992,13 +993,13 @@ void VehicleEnterDepot(Vehicle *v)
 
 		case VEH_SHIP:
 			InvalidateWindowClasses(WC_SHIPS_LIST);
-			v->u.ship.state = TRACK_BIT_DEPOT;
+			static_cast<Ship*>(v)->state = TRACK_BIT_DEPOT;
 			RecalcShipStuff(v);
 			break;
 
 		case VEH_AIRCRAFT:
 			InvalidateWindowClasses(WC_AIRCRAFT_LIST);
-			HandleAircraftEnterHangar(v);
+			HandleAircraftEnterHangar((Aircraft *)v);
 			break;
 		default: NOT_REACHED();
 	}
@@ -1171,49 +1172,6 @@ Direction GetDirectionTowards(const Vehicle *v, int x, int y)
 	DirDiff dirdiff = DirDifference(_new_direction_table[i], dir);
 	if (dirdiff == DIRDIFF_SAME) return dir;
 	return ChangeDir(dir, dirdiff > DIRDIFF_REVERSE ? DIRDIFF_45LEFT : DIRDIFF_45RIGHT);
-}
-
-Trackdir GetVehicleTrackdir(const Vehicle *v)
-{
-	if (v->vehstatus & VS_CRASHED) return INVALID_TRACKDIR;
-
-	switch (v->type) {
-		case VEH_TRAIN:
-			if (v->u.rail.track == TRACK_BIT_DEPOT) // We'll assume the train is facing outwards
-				return DiagDirToDiagTrackdir(GetRailDepotDirection(v->tile)); // Train in depot
-
-			if (v->u.rail.track == TRACK_BIT_WORMHOLE) // train in tunnel or on bridge, so just use his direction and assume a diagonal track
-				return DiagDirToDiagTrackdir(DirToDiagDir(v->direction));
-
-			return TrackDirectionToTrackdir(FindFirstTrack(v->u.rail.track), v->direction);
-
-		case VEH_SHIP:
-			if (v->IsInDepot())
-				/* We'll assume the ship is facing outwards */
-				return DiagDirToDiagTrackdir(GetShipDepotDirection(v->tile));
-
-			if (v->u.ship.state == TRACK_BIT_WORMHOLE) // ship on aqueduct, so just use his direction and assume a diagonal track
-				return DiagDirToDiagTrackdir(DirToDiagDir(v->direction));
-
-			return TrackDirectionToTrackdir(FindFirstTrack(v->u.ship.state), v->direction);
-
-		case VEH_ROAD:
-			if (v->IsInDepot()) // We'll assume the road vehicle is facing outwards
-				return DiagDirToDiagTrackdir(GetRoadDepotDirection(v->tile));
-
-			if (IsStandardRoadStopTile(v->tile)) // We'll assume the road vehicle is facing outwards
-				return DiagDirToDiagTrackdir(GetRoadStopDir(v->tile)); // Road vehicle in a station
-
-			/* Drive through road stops / wormholes (tunnels) */
-			if (v->u.road.state > RVSB_TRACKDIR_MASK) return DiagDirToDiagTrackdir(DirToDiagDir(v->direction));
-
-			/* If vehicle's state is a valid track direction (vehicle is not turning around) return it,
-			 * otherwise transform it into a valid track direction */
-			return (Trackdir)((IsReversingRoadTrackdir((Trackdir)v->u.road.state)) ? (v->u.road.state - 6) : v->u.road.state);
-
-		/* case VEH_AIRCRAFT: case VEH_EFFECT: case VEH_DISASTER: */
-		default: return INVALID_TRACKDIR;
-	}
 }
 
 /**
@@ -1468,7 +1426,7 @@ SpriteID GetVehiclePalette(const Vehicle *v)
 	if (v->type == VEH_TRAIN) {
 		return GetEngineColourMap(v->engine_type, v->owner, v->u.rail.first_engine, v);
 	} else if (v->type == VEH_ROAD) {
-		return GetEngineColourMap(v->engine_type, v->owner, v->u.road.first_engine, v);
+		return GetEngineColourMap(v->engine_type, v->owner, ((RoadVehicle *)v)->first_engine, v);
 	}
 
 	return GetEngineColourMap(v->engine_type, v->owner, INVALID_ENGINE, v);
@@ -1547,7 +1505,7 @@ void Vehicle::LeaveStation()
 		/* Try to reserve a path when leaving the station as we
 		 * might not be marked as wanting a reservation, e.g.
 		 * when an overlength train gets turned around in a station. */
-		if (UpdateSignalsOnSegment(this->tile, TrackdirToExitdir(GetVehicleTrackdir(this)), this->owner) == SIGSEG_PBS || _settings_game.pf.reserve_paths) {
+		if (UpdateSignalsOnSegment(this->tile, TrackdirToExitdir(this->GetVehicleTrackdir()), this->owner) == SIGSEG_PBS || _settings_game.pf.reserve_paths) {
 			TryPathReserve(this, true, true);
 		}
 	}
@@ -1631,10 +1589,13 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 		/* If there is no depot in front, reverse automatically (trains only) */
 		if (this->type == VEH_TRAIN && reverse) DoCommand(this->tile, this->index, 0, DC_EXEC, CMD_REVERSE_TRAIN_DIRECTION);
 
-		if (this->type == VEH_AIRCRAFT && this->u.air.state == FLYING && this->u.air.targetairport != destination) {
-			/* The aircraft is now heading for a different hangar than the next in the orders */
-			extern void AircraftNextAirportPos_and_Order(Vehicle *v);
-			AircraftNextAirportPos_and_Order(this);
+		if (this->type == VEH_AIRCRAFT) {
+			Aircraft *a = (Aircraft *)this;
+			if (a->state == FLYING && a->targetairport != destination) {
+				/* The aircraft is now heading for a different hangar than the next in the orders */
+				extern void AircraftNextAirportPos_and_Order(Aircraft *a);
+				AircraftNextAirportPos_and_Order(a);
+			}
 		}
 	}
 
@@ -1799,7 +1760,7 @@ bool CanVehicleUseStation(EngineID engine_type, const Station *st)
  */
 bool CanVehicleUseStation(const Vehicle *v, const Station *st)
 {
-	if (v->type == VEH_ROAD) return st->GetPrimaryRoadStop(v) != NULL;
+	if (v->type == VEH_ROAD) return st->GetPrimaryRoadStop((RoadVehicle *)v) != NULL;
 
 	return CanVehicleUseStation(v->engine_type, st);
 }

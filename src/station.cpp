@@ -70,9 +70,10 @@ Station::~Station()
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
-		if (v->type == VEH_AIRCRAFT && IsNormalAircraft(v) && v->u.air.targetairport == this->index) {
-			v->u.air.targetairport = INVALID_STATION;
-		}
+		if (v->type != VEH_AIRCRAFT || !IsNormalAircraft(v)) continue;
+
+		Aircraft *a = (Aircraft *)v;
+		if (a->targetairport == this->index) a->targetairport = INVALID_STATION;
 	}
 
 	MarkDirty();
@@ -107,13 +108,13 @@ Station::~Station()
  * @param v the vehicle to get the first road stop for
  * @return the first roadstop that this vehicle can load at
  */
-RoadStop *Station::GetPrimaryRoadStop(const Vehicle *v) const
+RoadStop *Station::GetPrimaryRoadStop(const RoadVehicle *v) const
 {
 	RoadStop *rs = this->GetPrimaryRoadStop(IsCargoInClass(v->cargo_type, CC_PASSENGERS) ? ROADSTOP_BUS : ROADSTOP_TRUCK);
 
 	for (; rs != NULL; rs = rs->next) {
 		/* The vehicle cannot go to this roadstop (different roadtype) */
-		if ((GetRoadTypes(rs->xy) & v->u.road.compatible_roadtypes) == ROADTYPES_NONE) continue;
+		if ((GetRoadTypes(rs->xy) & v->compatible_roadtypes) == ROADTYPES_NONE) continue;
 		/* The vehicle is articulated and can therefor not go the a standard road stop */
 		if (IsStandardRoadStopTile(rs->xy) && RoadVehHasArticPart(v)) continue;
 
@@ -458,7 +459,10 @@ RoadStop::~RoadStop()
 		Vehicle *v;
 
 		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_ROAD && v->u.road.slot == this) ClearSlot(v);
+			if (v->type != VEH_ROAD) continue;
+			RoadVehicle *rv = (RoadVehicle *)v;
+
+			if (rv->slot == this) ClearSlot(rv);
 		}
 	}
 	assert(num_vehicles == 0);
@@ -534,11 +538,11 @@ void RoadStop::SetEntranceBusy(bool busy)
  * @param v the vehicle to get the next road stop for.
  * @return the next road stop accessible.
  */
-RoadStop *RoadStop::GetNextRoadStop(const Vehicle *v) const
+RoadStop *RoadStop::GetNextRoadStop(const RoadVehicle *v) const
 {
 	for (RoadStop *rs = this->next; rs != NULL; rs = rs->next) {
 		/* The vehicle cannot go to this roadstop (different roadtype) */
-		if ((GetRoadTypes(rs->xy) & v->u.road.compatible_roadtypes) == ROADTYPES_NONE) continue;
+		if ((GetRoadTypes(rs->xy) & v->compatible_roadtypes) == ROADTYPES_NONE) continue;
 		/* The vehicle is articulated and can therefor not go the a standard road stop */
 		if (IsStandardRoadStopTile(rs->xy) && RoadVehHasArticPart(v)) continue;
 
