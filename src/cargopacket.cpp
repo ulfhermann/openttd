@@ -230,8 +230,11 @@ UnloadType CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const Ca
 			return UL_TRANSFER;
 		} else if (ul.flags & UL_ACCEPTED) {
 			return UL_DELIVER;
+		} else if (ul.flags & UL_DELIVER) {
+			/* .. or if the station suddenly doesn't accept our cargo, but we have an explicit deliver order... */
+			return UL_TRANSFER;
 		} else {
-			/* .. or if the station suddenly doesn't accept our cargo. */
+			/* .. or else if it doesn't accept. */
 			return UL_KEEP;
 		}
 	} else {
@@ -360,11 +363,11 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 	}
 }
 
-void CargoList::RerouteStalePackets(StationID to, GoodsEntry * ge) {
+void CargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
 	for(List::iterator it = packets.begin(); it != packets.end(); ++it) {
 		CargoPacket * packet = *it;
 		if (packet->next == to) {
-			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, to);
+			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
 		}
 	}
 	InvalidateCache();

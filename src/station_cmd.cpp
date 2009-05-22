@@ -2857,9 +2857,8 @@ static void UpdateStationStats(Station * st) {
 				ls *= length;
 				ls /= (length + 1);
 				if (ls.capacity == 0) {
-					GoodsEntry & ge = Station::Get(id)->goods[goods_index];
-					DeleteStaleFlows(id, goods_index, st->index);
-					ge.cargo.RerouteStalePackets(st->index, &ge);
+					DeleteStaleFlows(st->index, goods_index, id);
+					good.cargo.RerouteStalePackets(st->index, id, &good);
 					links.erase(i++);
 				} else {
 					++i;
@@ -3429,8 +3428,6 @@ void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next) {
 			}
 		}
 	}
-
-	flow_stats.insert(FlowStat(next, 0, count));
 }
 
 StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
