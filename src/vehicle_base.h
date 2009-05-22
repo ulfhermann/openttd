@@ -8,7 +8,6 @@
 #include "vehicle_type.h"
 #include "track_type.h"
 #include "rail_type.h"
-#include "road_type.h"
 #include "cargo_type.h"
 #include "direction_type.h"
 #include "gfx_type.h"
@@ -24,41 +23,6 @@
 #include "engine_type.h"
 #include "order_func.h"
 #include "transport_type.h"
-
-/** Road vehicle states */
-enum RoadVehicleStates {
-	/*
-	 * Lower 4 bits are used for vehicle track direction. (Trackdirs)
-	 * When in a road stop (bit 5 or bit 6 set) these bits give the
-	 * track direction of the entry to the road stop.
-	 * As the entry direction will always be a diagonal
-	 * direction (X_NE, Y_SE, X_SW or Y_NW) only bits 0 and 3
-	 * are needed to hold this direction. Bit 1 is then used to show
-	 * that the vehicle is using the second road stop bay.
-	 * Bit 2 is then used for drive-through stops to show the vehicle
-	 * is stopping at this road stop.
-	 */
-
-	/* Numeric values */
-	RVSB_IN_DEPOT                = 0xFE,                      ///< The vehicle is in a depot
-	RVSB_WORMHOLE                = 0xFF,                      ///< The vehicle is in a tunnel and/or bridge
-
-	/* Bit numbers */
-	RVS_USING_SECOND_BAY         =    1,                      ///< Only used while in a road stop
-	RVS_IS_STOPPING              =    2,                      ///< Only used for drive-through stops. Vehicle will stop here
-	RVS_DRIVE_SIDE               =    4,                      ///< Only used when retrieving move data
-	RVS_IN_ROAD_STOP             =    5,                      ///< The vehicle is in a road stop
-	RVS_IN_DT_ROAD_STOP          =    6,                      ///< The vehicle is in a drive-through road stop
-
-	/* Bit sets of the above specified bits */
-	RVSB_IN_ROAD_STOP            = 1 << RVS_IN_ROAD_STOP,     ///< The vehicle is in a road stop
-	RVSB_IN_ROAD_STOP_END        = RVSB_IN_ROAD_STOP + TRACKDIR_END,
-	RVSB_IN_DT_ROAD_STOP         = 1 << RVS_IN_DT_ROAD_STOP,  ///< The vehicle is in a drive-through road stop
-	RVSB_IN_DT_ROAD_STOP_END     = RVSB_IN_DT_ROAD_STOP + TRACKDIR_END,
-
-	RVSB_TRACKDIR_MASK           = 0x0F,                      ///< The mask used to extract track dirs
-	RVSB_ROAD_STOP_TRACKDIR_MASK = 0x09                       ///< Only bits 0 and 3 are used to encode the trackdir for road stops
-};
 
 enum VehStatus {
 	VS_HIDDEN          = 0x01,
@@ -81,14 +45,10 @@ enum VehicleFlags {
 };
 
 struct VehicleRail {
-	/* Link between the two ends of a multiheaded engine */
-	Vehicle *other_multiheaded_part;
-
 	/* Cached wagon override spritegroup */
 	const struct SpriteGroup *cached_override;
 
 	uint16 last_speed; // NOSAVE: only used in UI
-	uint16 crash_anim_pos;
 
 	/* cached values, recalculated on load and each time a vehicle is added to/removed from the consist. */
 	uint32 cached_power;        ///< total power of the consist.
@@ -115,78 +75,6 @@ struct VehicleRail {
 	/* NOSAVE: for wagon override - id of the first engine in train
 	 * 0xffff == not in train */
 	EngineID first_engine;
-
-	uint16 flags;
-	TrackBitsByte track;
-	byte force_proceed;
-	RailTypeByte railtype;
-	RailTypes compatible_railtypes;
-};
-
-enum VehicleRailFlags {
-	VRF_REVERSING         = 0,
-
-	/* used to calculate if train is going up or down */
-	VRF_GOINGUP           = 1,
-	VRF_GOINGDOWN         = 2,
-
-	/* used to store if a wagon is powered or not */
-	VRF_POWEREDWAGON      = 3,
-
-	/* used to reverse the visible direction of the vehicle */
-	VRF_REVERSE_DIRECTION = 4,
-
-	/* used to mark train as lost because PF can't find the route */
-	VRF_NO_PATH_TO_DESTINATION = 5,
-
-	/* used to mark that electric train engine is allowed to run on normal rail */
-	VRF_EL_ENGINE_ALLOWED_NORMAL_RAIL = 6,
-
-	/* used for vehicle var 0xFE bit 8 (toggled each time the train is reversed, accurate for first vehicle only) */
-	VRF_TOGGLE_REVERSE = 7,
-
-	/* used to mark a train that can't get a path reservation */
-	VRF_TRAIN_STUCK    = 8,
-};
-
-struct VehicleAir {
-	uint16 crashed_counter;
-	uint16 cached_max_speed;
-	byte pos;
-	byte previous_pos;
-	StationID targetairport;
-	byte state;
-};
-
-struct VehicleRoad {
-	byte state;             ///< @see RoadVehicleStates
-	byte frame;
-	uint16 blocked_ctr;
-	byte overtaking;
-	byte overtaking_ctr;
-	uint16 crashed_ctr;
-	byte reverse_ctr;
-	struct RoadStop *slot;
-	byte slot_age;
-	EngineID first_engine;
-	byte cached_veh_length;
-
-	RoadType roadtype;
-	RoadTypes compatible_roadtypes;
-};
-
-struct VehicleEffect {
-	uint16 animation_state;
-	byte animation_substate;
-};
-
-struct VehicleDisaster {
-	uint16 image_override;
-	VehicleID big_ufo_destroyer_target;
-};
-
-struct VehicleShip {
-	TrackBitsByte state;
 };
 
 typedef Pool<Vehicle, VehicleID, 512, 64000> VehiclePool;
@@ -318,11 +206,6 @@ public:
 
 	union {
 		VehicleRail rail;
-		VehicleAir air;
-		VehicleRoad road;
-		VehicleEffect effect;
-		VehicleDisaster disaster;
-		VehicleShip ship;
 	} u;
 
 	/* cached oftenly queried NewGRF values */
@@ -436,6 +319,20 @@ public:
 	 * Calls the new day handler of the vehicle
 	 */
 	virtual void OnNewDay() {};
+
+	/**
+	 * Returns the Trackdir on which the vehicle is currently located.
+	 * Works for trains and ships.
+	 * Currently works only sortof for road vehicles, since they have a fuzzy
+	 * concept of being "on" a trackdir. Dunno really what it returns for a road
+	 * vehicle that is halfway a tile, never really understood that part. For road
+	 * vehicles that are at the beginning or end of the tile, should just return
+	 * the diagonal trackdir on which they are driving. I _think_.
+	 * For other vehicles types, or vehicles with no clear trackdir (such as those
+	 * in depots), returns 0xFF.
+	 * @return the trackdir of the vehicle
+	 */
+	virtual Trackdir GetVehicleTrackdir() const { return INVALID_TRACKDIR; }
 
 	/**
 	 * Gets the running cost of a vehicle  that can be sent into SetDParam for string processing.
@@ -618,6 +515,9 @@ public:
  * As side-effect the vehicle type is set correctly.
  */
 struct DisasterVehicle : public Vehicle {
+	uint16 image_override;
+	VehicleID big_ufo_destroyer_target;
+
 	/** Initializes the Vehicle to a disaster vehicle */
 	DisasterVehicle() { this->type = VEH_DISASTER; }
 
@@ -627,6 +527,7 @@ struct DisasterVehicle : public Vehicle {
 	const char *GetTypeString() const { return "disaster vehicle"; }
 	void UpdateDeltaXY(Direction direction);
 	bool Tick();
+	DisasterVehicle *Next() { return (DisasterVehicle*)this->Vehicle::Next(); }
 };
 
 #define FOR_ALL_VEHICLES_FROM(var, start) FOR_ALL_ITEMS_FROM(Vehicle, vehicle_index, var, start)
@@ -662,19 +563,6 @@ static inline Order *GetVehicleOrder(const Vehicle *v, int index) { return (v->o
  * @return last order of a vehicle, if available
  */
 static inline Order *GetLastVehicleOrder(const Vehicle *v) { return (v->orders.list == NULL) ? NULL : v->orders.list->GetLastOrder(); }
-
-/**
- * Returns the Trackdir on which the vehicle is currently located.
- * Works for trains and ships.
- * Currently works only sortof for road vehicles, since they have a fuzzy
- * concept of being "on" a trackdir. Dunno really what it returns for a road
- * vehicle that is halfway a tile, never really understood that part. For road
- * vehicles that are at the beginning or end of the tile, should just return
- * the diagonal trackdir on which they are driving. I _think_.
- * For other vehicles types, or vehicles with no clear trackdir (such as those
- * in depots), returns 0xFF.
- */
-Trackdir GetVehicleTrackdir(const Vehicle *v);
 
 void CheckVehicle32Day(Vehicle *v);
 

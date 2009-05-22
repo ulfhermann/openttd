@@ -11,6 +11,8 @@
 #include "engine_func.h"
 #include "engine_base.h"
 
+struct Aircraft;
+
 /** An aircraft can be one ot those types */
 enum AircraftSubType {
 	AIR_HELICOPTER = 0, ///< an helicopter
@@ -55,7 +57,7 @@ void CcBuildAircraft(bool success, TileIndex tile, uint32 p1, uint32 p2);
 /** Handle Aircraft specific tasks when a an Aircraft enters a hangar
  * @param *v Vehicle that enters the hangar
  */
-void HandleAircraftEnterHangar(Vehicle *v);
+void HandleAircraftEnterHangar(Aircraft *v);
 
 /** Get the size of the sprite of an aircraft sprite heading west (used for lists)
  * @param engine The engine to get the sprite from
@@ -74,12 +76,12 @@ void UpdateAirplanesOnNewStation(const Station *st);
  * Currently caches callback 36 max speed.
  * @param v Vehicle
  */
-void UpdateAircraftCache(Vehicle *v);
+void UpdateAircraftCache(Aircraft *v);
 
-void AircraftLeaveHangar(Vehicle *v);
-void AircraftNextAirportPos_and_Order(Vehicle *v);
-void SetAircraftPosition(Vehicle *v, int x, int y, int z);
-byte GetAircraftFlyingAltitude(const Vehicle *v);
+void AircraftLeaveHangar(Aircraft *v);
+void AircraftNextAirportPos_and_Order(Aircraft *v);
+void SetAircraftPosition(Aircraft *v, int x, int y, int z);
+byte GetAircraftFlyingAltitude(const Aircraft *v);
 
 /**
  * This class 'wraps' Vehicle; you do not actually instantiate this class.
@@ -90,6 +92,13 @@ byte GetAircraftFlyingAltitude(const Vehicle *v);
  * As side-effect the vehicle type is set correctly.
  */
 struct Aircraft : public Vehicle {
+	uint16 crashed_counter;
+	uint16 cached_max_speed;
+	byte pos;
+	byte previous_pos;
+	StationID targetairport;
+	byte state;
+
 	/** Initializes the Vehicle to an aircraft */
 	Aircraft() { this->type = VEH_AIRCRAFT; }
 
@@ -110,8 +119,12 @@ struct Aircraft : public Vehicle {
 	void OnNewDay();
 	TileIndex GetOrderStationLocation(StationID station);
 	bool FindClosestDepot(TileIndex *location, DestinationID *destination, bool *reverse);
+	Aircraft *Next() { return (Aircraft *)this->Vehicle::Next(); }
+	const Aircraft *Next() const { return (const Aircraft *)this->Vehicle::Next(); }
 };
 
-Station *GetTargetAirportIfValid(const Vehicle *v);
+SpriteID GetRotorImage(const Aircraft *v);
+
+Station *GetTargetAirportIfValid(const Aircraft *v);
 
 #endif /* AIRCRAFT_H */
