@@ -24,7 +24,7 @@ void ConnectMultiheadedTrains()
 
 	FOR_ALL_VEHICLES(v) {
 		if (v->type == VEH_TRAIN) {
-			v->u.rail.other_multiheaded_part = NULL;
+			((Train *)v)->u.rail.other_multiheaded_part = NULL;
 		}
 	}
 
@@ -45,7 +45,7 @@ void ConnectMultiheadedTrains()
 
 			bool sequential_matching = IsFrontEngine(v);
 
-			for (Vehicle *u = v; u != NULL; u = GetNextVehicle(u)) {
+			for (Train *u = (Train *)v; u != NULL; u = (Train *)GetNextVehicle(u)) {
 				if (u->u.rail.other_multiheaded_part != NULL) continue; // we already linked this one
 
 				if (IsMultiheaded(u)) {
@@ -57,7 +57,7 @@ void ConnectMultiheadedTrains()
 
 					/* Find a matching back part */
 					EngineID eid = u->engine_type;
-					Vehicle *w;
+					Train *w;
 					if (sequential_matching) {
 						for (w = GetNextVehicle(u); w != NULL; w = GetNextVehicle(w)) {
 							if (w->engine_type != eid || w->u.rail.other_multiheaded_part != NULL || !IsMultiheaded(w)) continue;
@@ -167,34 +167,36 @@ void UpdateOldAircraft()
 		st->airport_flags = 0; // reset airport
 	}
 
-	Vehicle *v_oldstyle;
-	FOR_ALL_VEHICLES(v_oldstyle) {
+	Vehicle *v;
+	FOR_ALL_VEHICLES(v) {
 		/* airplane has another vehicle with subtype 4 (shadow), helicopter also has 3 (rotor)
 		 * skip those */
-		if (v_oldstyle->type == VEH_AIRCRAFT && IsNormalAircraft(v_oldstyle)) {
+		if (v->type == VEH_AIRCRAFT && IsNormalAircraft(v)) {
+			Aircraft *v_oldstyle = (Aircraft *)v;
+			Aircraft *a = (Aircraft *)v_oldstyle;
 			/* airplane in terminal stopped doesn't hurt anyone, so goto next */
-			if (v_oldstyle->vehstatus & VS_STOPPED && v_oldstyle->u.air.state == 0) {
-				v_oldstyle->u.air.state = HANGAR;
+			if (a->vehstatus & VS_STOPPED && a->state == 0) {
+				a->state = HANGAR;
 				continue;
 			}
 
-			AircraftLeaveHangar(v_oldstyle); // make airplane visible if it was in a depot for example
-			v_oldstyle->vehstatus &= ~VS_STOPPED; // make airplane moving
-			v_oldstyle->cur_speed = v_oldstyle->max_speed; // so aircraft don't have zero speed while in air
-			if (!v_oldstyle->current_order.IsType(OT_GOTO_STATION) && !v_oldstyle->current_order.IsType(OT_GOTO_DEPOT)) {
+			AircraftLeaveHangar(a); // make airplane visible if it was in a depot for example
+			a->vehstatus &= ~VS_STOPPED; // make airplane moving
+			a->cur_speed = v_oldstyle->max_speed; // so aircraft don't have zero speed while in air
+			if (!a->current_order.IsType(OT_GOTO_STATION) && !a->current_order.IsType(OT_GOTO_DEPOT)) {
 				/* reset current order so aircraft doesn't have invalid "station-only" order */
-				v_oldstyle->current_order.MakeDummy();
+				a->current_order.MakeDummy();
 			}
-			v_oldstyle->u.air.state = FLYING;
-			AircraftNextAirportPos_and_Order(v_oldstyle); // move it to the entry point of the airport
-			GetNewVehiclePosResult gp = GetNewVehiclePos(v_oldstyle);
-			v_oldstyle->tile = 0; // aircraft in air is tile=0
+			a->state = FLYING;
+			AircraftNextAirportPos_and_Order(a); // move it to the entry point of the airport
+			GetNewVehiclePosResult gp = GetNewVehiclePos(a);
+			a->tile = 0; // aircraft in air is tile=0
 
 			/* correct speed of helicopter-rotors */
-			if (v_oldstyle->subtype == AIR_HELICOPTER) v_oldstyle->Next()->Next()->cur_speed = 32;
+			if (a->subtype == AIR_HELICOPTER) a->Next()->Next()->cur_speed = 32;
 
 			/* set new position x,y,z */
-			SetAircraftPosition(v_oldstyle, gp.x, gp.y, GetAircraftFlyingAltitude(v_oldstyle));
+			SetAircraftPosition(a, gp.x, gp.y, GetAircraftFlyingAltitude(a));
 		}
 	}
 }
@@ -251,7 +253,7 @@ void AfterLoadVehicles(bool part_of_load)
 		if (part_of_load) v->fill_percent_te_id = INVALID_TE_ID;
 		v->first = NULL;
 		if (v->type == VEH_TRAIN) v->u.rail.first_engine = INVALID_ENGINE;
-		if (v->type == VEH_ROAD)  v->u.road.first_engine = INVALID_ENGINE;
+		if (v->type == VEH_ROAD)  ((RoadVehicle *)v)->first_engine = INVALID_ENGINE;
 
 		v->cargo.InvalidateCache();
 	}
@@ -316,10 +318,10 @@ void AfterLoadVehicles(bool part_of_load)
 		assert(v->first != NULL);
 
 		if (v->type == VEH_TRAIN && (IsFrontEngine(v) || IsFreeWagon(v))) {
-			if (IsFrontEngine(v)) v->u.rail.last_speed = v->cur_speed; // update displayed train speed
-			TrainConsistChanged(v, false);
+			if (IsFrontEngine(v)) ((Train *)v)->u.rail.last_speed = v->cur_speed; // update displayed train speed
+			TrainConsistChanged((Train *)v, false);
 		} else if (v->type == VEH_ROAD && IsRoadVehFront(v)) {
-			RoadVehUpdateCache(v);
+			RoadVehUpdateCache((RoadVehicle *)v);
 		}
 	}
 
@@ -342,9 +344,11 @@ void AfterLoadVehicles(bool part_of_load)
 
 	FOR_ALL_VEHICLES(v) {
 		switch (v->type) {
-			case VEH_ROAD:
-				v->u.road.roadtype = HasBit(EngInfo(v->First()->engine_type)->misc_flags, EF_ROAD_TRAM) ? ROADTYPE_TRAM : ROADTYPE_ROAD;
-				v->u.road.compatible_roadtypes = RoadTypeToRoadTypes(v->u.road.roadtype);
+			case VEH_ROAD: {
+				RoadVehicle *rv = (RoadVehicle *)v;
+				rv->roadtype = HasBit(EngInfo(v->First()->engine_type)->misc_flags, EF_ROAD_TRAM) ? ROADTYPE_TRAM : ROADTYPE_ROAD;
+				rv->compatible_roadtypes = RoadTypeToRoadTypes(rv->roadtype);
+			}
 				/* FALL THROUGH */
 			case VEH_TRAIN:
 			case VEH_SHIP:
@@ -362,10 +366,10 @@ void AfterLoadVehicles(bool part_of_load)
 					/* In the case of a helicopter we will update the rotor sprites */
 					if (v->subtype == AIR_HELICOPTER) {
 						Vehicle *rotor = shadow->Next();
-						rotor->cur_image = GetRotorImage(v);
+						rotor->cur_image = GetRotorImage((Aircraft *)v);
 					}
 
-					UpdateAircraftCache(v);
+					UpdateAircraftCache((Aircraft *)v);
 				}
 				break;
 			default: break;
@@ -540,19 +544,19 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 	static const SaveLoad _roadveh_desc[] = {
 		SLE_WRITEBYTE(Vehicle, type, VEH_ROAD),
 		SLE_VEH_INCLUDEX(),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, state),                SLE_UINT8),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, frame),                SLE_UINT8),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, blocked_ctr),          SLE_UINT16),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, overtaking),           SLE_UINT8),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, overtaking_ctr),       SLE_UINT8),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, crashed_ctr),          SLE_UINT16),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, reverse_ctr),          SLE_UINT8),
+		     SLE_VAR(RoadVehicle, state,                SLE_UINT8),
+		     SLE_VAR(RoadVehicle, frame,                SLE_UINT8),
+		     SLE_VAR(RoadVehicle, blocked_ctr,          SLE_UINT16),
+		     SLE_VAR(RoadVehicle, overtaking,           SLE_UINT8),
+		     SLE_VAR(RoadVehicle, overtaking_ctr,       SLE_UINT8),
+		     SLE_VAR(RoadVehicle, crashed_ctr,          SLE_UINT16),
+		     SLE_VAR(RoadVehicle, reverse_ctr,          SLE_UINT8),
 
-		SLE_CONDREFX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, slot),                 REF_ROADSTOPS,                6, SL_MAX_VERSION),
-		SLE_CONDNULL(1,                                                            6, SL_MAX_VERSION),
-		SLE_CONDVARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleRoad, slot_age),             SLE_UINT8,                    6, SL_MAX_VERSION),
+		 SLE_CONDREF(RoadVehicle, slot,                 REF_ROADSTOPS,                6, SL_MAX_VERSION),
+		SLE_CONDNULL(1,                                                               6, SL_MAX_VERSION),
+		 SLE_CONDVAR(RoadVehicle, slot_age,             SLE_UINT8,                    6, SL_MAX_VERSION),
 		/* reserve extra space in savegame here. (currently 16 bytes) */
-		SLE_CONDNULL(16,                                                           2, SL_MAX_VERSION),
+		SLE_CONDNULL(16,                                                              2, SL_MAX_VERSION),
 
 		     SLE_END()
 	};
@@ -560,7 +564,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 	static const SaveLoad _ship_desc[] = {
 		SLE_WRITEBYTE(Vehicle, type, VEH_SHIP),
 		SLE_VEH_INCLUDEX(),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleShip, state),  SLE_UINT8),
+		     SLE_VAR(Ship, state, SLE_UINT8),
 
 		/* reserve extra space in savegame here. (currently 16 bytes) */
 		SLE_CONDNULL(16, 2, SL_MAX_VERSION),
@@ -571,15 +575,15 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 	static const SaveLoad _aircraft_desc[] = {
 		SLE_WRITEBYTE(Vehicle, type, VEH_AIRCRAFT),
 		SLE_VEH_INCLUDEX(),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleAir, crashed_counter),       SLE_UINT16),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleAir, pos),                   SLE_UINT8),
+		     SLE_VAR(Aircraft, crashed_counter,       SLE_UINT16),
+		     SLE_VAR(Aircraft, pos,                   SLE_UINT8),
 
-		SLE_CONDVARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleAir, targetairport),         SLE_FILE_U8  | SLE_VAR_U16,   0, 4),
-		SLE_CONDVARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleAir, targetairport),         SLE_UINT16,                   5, SL_MAX_VERSION),
+		 SLE_CONDVAR(Aircraft, targetairport,         SLE_FILE_U8  | SLE_VAR_U16,   0, 4),
+		 SLE_CONDVAR(Aircraft, targetairport,         SLE_UINT16,                   5, SL_MAX_VERSION),
 
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleAir, state),                 SLE_UINT8),
+		     SLE_VAR(Aircraft, state,                 SLE_UINT8),
 
-		SLE_CONDVARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleAir, previous_pos),          SLE_UINT8,                    2, SL_MAX_VERSION),
+		 SLE_CONDVAR(Aircraft, previous_pos,          SLE_UINT8,                    2, SL_MAX_VERSION),
 
 		/* reserve extra space in savegame here. (currently 15 bytes) */
 		SLE_CONDNULL(15,                                                           2, SL_MAX_VERSION),
@@ -606,8 +610,8 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		     SLE_VAR(Vehicle, progress,              SLE_UINT8),
 		     SLE_VAR(Vehicle, vehstatus,             SLE_UINT8),
 
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleEffect, animation_state),    SLE_UINT16),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleEffect, animation_substate), SLE_UINT8),
+		     SLE_VAR(EffectVehicle, animation_state,    SLE_UINT16),
+		     SLE_VAR(EffectVehicle, animation_substate, SLE_UINT8),
 
 		 SLE_CONDVAR(Vehicle, spritenum,             SLE_UINT8,                    2, SL_MAX_VERSION),
 
@@ -646,8 +650,8 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		 SLE_CONDVAR(Vehicle, age,                   SLE_INT32,                   31, SL_MAX_VERSION),
 		     SLE_VAR(Vehicle, tick_counter,          SLE_UINT8),
 
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleDisaster, image_override),            SLE_UINT16),
-		    SLE_VARX(cpp_offsetof(Vehicle, u) + cpp_offsetof(VehicleDisaster, big_ufo_destroyer_target),  SLE_UINT16),
+		     SLE_VAR(DisasterVehicle, image_override,            SLE_UINT16),
+		     SLE_VAR(DisasterVehicle, big_ufo_destroyer_target,  SLE_UINT16),
 
 		/* reserve extra space in savegame here. (currently 16 bytes) */
 		SLE_CONDNULL(16,                                                           2, SL_MAX_VERSION),
