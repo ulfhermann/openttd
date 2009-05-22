@@ -100,7 +100,7 @@ public:
 	TownAuthorityWindow(const WindowDesc *desc, WindowNumber window_number) :
 			Window(desc, window_number), sel_index(-1)
 	{
-		this->town = GetTown(this->window_number);
+		this->town = Town::Get(this->window_number);
 		this->vscroll.cap = 5;
 
 		this->FindWindowPlacementAndResize(desc);
@@ -258,7 +258,7 @@ public:
 
 	TownViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
 	{
-		this->town = GetTown(this->window_number);
+		this->town = Town::Get(this->window_number);
 		bool ingame = _game_mode != GM_EDITOR;
 
 		this->flags4 |= WF_DISABLE_VP_SCROLL;
@@ -976,6 +976,6 @@ static const WindowDesc _found_town_desc(
 
 void ShowBuildTownWindow()
 {
-	if (_game_mode != GM_EDITOR && !IsValidCompanyID(_local_company)) return;
+	if (_game_mode != GM_EDITOR && !Company::IsValidID(_local_company)) return;
 	AllocateWindowDescFront<FoundTownWindow>(&_found_town_desc, 0);
 }

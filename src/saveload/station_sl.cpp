@@ -129,9 +129,9 @@ static const SaveLoad _linkstat_desc[] = {
 		 SLE_END()
 };
 
-void SaveLoad_STNS(Station *st)
+const SaveLoad *GetGoodsDesc()
 {
-	static const SaveLoad _goods_desc[] = {
+	static const SaveLoad goods_desc[] = {
 		SLEG_CONDVAR(            _waiting_acceptance, SLE_UINT16,                  0, 67),
 		 SLE_CONDVAR(GoodsEntry, acceptance_pickup,   SLE_UINT8,                  68, SL_MAX_VERSION),
 		SLE_CONDNULL(2,                                                           51, 67),
@@ -152,7 +152,12 @@ void SaveLoad_STNS(Station *st)
 		SLE_END()
 	};
 
+	return goods_desc;
+}
 
+
+static void SaveLoad_STNS(Station *st)
+{
 	SlObject(st, _station_desc);
 
 	_waiting_acceptance = 0;
@@ -162,7 +167,7 @@ void SaveLoad_STNS(Station *st)
 		GoodsEntry *ge = &st->goods[i];
 		LinkStatMap & stats = ge->link_stats;
 		_num_links = stats.size(); // for saving, is overwritten by next line when loading
-		SlObject(ge, _goods_desc);
+		SlObject(ge, GetGoodsDesc());
 		if (CheckSavegameVersion(68)) {
 			SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
 			if (GB(_waiting_acceptance, 0, 12) != 0) {
@@ -224,10 +229,22 @@ static void Load_STNS()
 
 		SaveLoad_STNS(st);
 	}
-
-	/* This is to ensure all pointers are within the limits of _stations_size */
-	if (_station_tick_ctr > GetMaxStationIndex()) _station_tick_ctr = 0;
 }
+
+void Ptrs_STNS()
+{
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		if (!CheckSavegameVersion(68)) {
+			for (CargoID i = 0; i < NUM_CARGO; i++) {
+				GoodsEntry *ge = &st->goods[i];
+				SlObject(ge, GetGoodsDesc());
+			}
+		}
+		SlObject(st, _station_desc);
+	}
+}
+
 
 static void Save_ROADSTOP()
 {
@@ -250,7 +267,15 @@ static void Load_ROADSTOP()
 	}
 }
 
+static void Ptrs_ROADSTOP()
+{
+	RoadStop *rs;
+	FOR_ALL_ROADSTOPS(rs) {
+		SlObject(rs, _roadstop_desc);
+	}
+}
+
 extern const ChunkHandler _station_chunk_handlers[] = {
-	{ 'STNS', Save_STNS,      Load_STNS,      CH_ARRAY },
-	{ 'ROAD', Save_ROADSTOP,  Load_ROADSTOP,  CH_ARRAY | CH_LAST},
+	{ 'STNS', Save_STNS,     Load_STNS,     Ptrs_STNS,     CH_ARRAY },
+	{ 'ROAD', Save_ROADSTOP, Load_ROADSTOP, Ptrs_ROADSTOP, CH_ARRAY | CH_LAST},
 };

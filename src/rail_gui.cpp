@@ -853,7 +853,7 @@ void ShowBuildRailToolbar(RailType railtype, int button)
 {
 	BuildRailToolbarWindow *w;
 
-	if (!IsValidCompanyID(_local_company)) return;
+	if (!Company::IsValidID(_local_company)) return;
 	if (!ValParamRailtype(railtype)) return;
 
 	/* don't recreate the window if we're clicking on a button and the window exists. */
@@ -1007,6 +1007,11 @@ public:
 			this->vscroll.count = _railstation.station_count;
 			this->vscroll.cap   = 5;
 			this->vscroll.pos   = Clamp(_railstation.station_type - 2, 0, this->vscroll.count - this->vscroll.cap);
+		} else {
+			/* New stations are not available, so ensure the default station
+			 * type is 'selected'. */
+			_railstation.station_class = STAT_CLASS_DFLT;
+			_railstation.station_type = 0;
 		}
 	}
 
@@ -1928,7 +1933,7 @@ void ReinitGuiAfterToggleElrail(bool disable)
 /** Set the initial (default) railtype to use */
 static void SetDefaultRailGui()
 {
-	if (_local_company == COMPANY_SPECTATOR || !IsValidCompanyID(_local_company)) return;
+	if (_local_company == COMPANY_SPECTATOR || !Company::IsValidID(_local_company)) return;
 
 	extern RailType _last_built_railtype;
 	RailType rt = (RailType)_settings_client.gui.default_rail_type;

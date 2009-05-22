@@ -669,7 +669,6 @@ STR_OFF                                                         :Aus
 STR_SUMMARY                                                     :Ticker
 STR_FULL                                                        :Zeitung
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
-STR_TOWN_MENU_TOWN_DIRECTORY                                    :Städteverzeichnis
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 
 STR_CHECKMARK                                                   :{CHECKMARK}
@@ -703,9 +702,14 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}aus
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}an
 STR_TOOLBAR_TOOLTIP_DISPLAY_SUBSIDIES                           :{BLACK}Subventionen anzeigen
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subventionen
+
+############ 'Display map' dropdown. In SE, there is one more item.
 STR_MAP_MENU_MAP_OF_WORLD                                       :Weltkarte
 STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Zusatzansicht
 STR_MAP_MENU_SIGN_LIST                                          :Schilderliste
+STR_TOWN_MENU_TOWN_DIRECTORY                                    :Städteverzeichnis
+############ end of the 'Display map' dropdown
+
 STR_TOWN_POPULATION                                             :{BLACK}Weltbevölkerung: {COMMA}
 STR_EXTRA_VIEW_PORT_TITLE                                       :{WHITE}Ansicht {COMMA}
 STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN                                :{BLACK}In Zusatzansicht
@@ -852,6 +856,8 @@ STR_OPTIONS_SCREENSHOT_FORMAT_TIP                               :{BLACK}Format a
 STR_OPTIONS_BASE_GRF                                            :{BLACK}Standard Grafik
 STR_OPTIONS_BASE_GRF_CBO                                        :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_BASE_GRF_TIP                                        :{BLACK}Zu benutzendes Set an Basisgrafiken auswählen
+STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{10:NUM} fehlende/ fehlerhafte Datei{P "" en}
+STR_OPTIONS_BASE_GRF_DESCRIPTION_TIP                            :{BLACK}Zusatzinformationen zu den Basisgrafiken
 
 STR_AUTOSAVE_FAILED                                             :{WHITE}Autosicherung fehlgeschlagen
 
@@ -1295,7 +1301,7 @@ STR_NETWORK_ENTER_IP                                            :{BLACK}IP Adres
 
 STR_NETWORK_GENERAL_ONLINE                                      :{BLACK}{COMMA}/{COMMA} - {COMMA}/{COMMA}
 STR_NETWORK_CLIENTS_CAPTION                                     :{BLACK}Teilnehmer
-STR_NETWORK_CLIENTS_CAPTION_TIP                                 :{BLACK}Teilnehmer anwesend / max.
+STR_NETWORK_CLIENTS_CAPTION_TIP                                 :{BLACK}Teilnehmer anwesend / max.{}Firmen anwesend / max.
 
 STR_NETWORK_MAP_SIZE_SHORT                                      :{BLACK}{COMMA}x{COMMA}
 STR_NETWORK_MAP_SIZE_CAPTION                                    :{BLACK}Spielfeldgröße

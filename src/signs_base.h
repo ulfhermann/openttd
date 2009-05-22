@@ -8,11 +8,12 @@
 #include "signs_type.h"
 #include "viewport_type.h"
 #include "tile_type.h"
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 
-DECLARE_OLD_POOL(Sign, Sign, 2, 16000)
+typedef Pool<Sign, SignID, 16, 64000> SignPool;
+extern SignPool _sign_pool;
 
-struct Sign : PoolItem<Sign, SignID, &_Sign_pool> {
+struct Sign : SignPool::PoolItem<&_sign_pool> {
 	char *name;
 	ViewportSign sign;
 	int32        x;
@@ -27,26 +28,9 @@ struct Sign : PoolItem<Sign, SignID, &_Sign_pool> {
 
 	/** Destroy the sign */
 	~Sign();
-
-	inline bool IsValid() const { return this->owner != INVALID_OWNER; }
 };
 
-static inline SignID GetMaxSignIndex()
-{
-	/* TODO - This isn't the real content of the function, but
-	 *  with the new pool-system this will be replaced with one that
-	 *  _really_ returns the highest index. Now it just returns
-	 *  the next safe value we are sure about everything is below.
-	 */
-	return GetSignPoolSize() - 1;
-}
-
-static inline bool IsValidSignID(uint index)
-{
-	return index < GetSignPoolSize() && GetSign(index)->IsValid();
-}
-
-#define FOR_ALL_SIGNS_FROM(ss, start) for (ss = GetSign(start); ss != NULL; ss = (ss->index + 1U < GetSignPoolSize()) ? GetSign(ss->index + 1U) : NULL) if (ss->IsValid())
-#define FOR_ALL_SIGNS(ss) FOR_ALL_SIGNS_FROM(ss, 0)
+#define FOR_ALL_SIGNS_FROM(var, start) FOR_ALL_ITEMS_FROM(Sign, sign_index, var, start)
+#define FOR_ALL_SIGNS(var) FOR_ALL_SIGNS_FROM(var, 0)
 
 #endif /* SIGNS_BASE_H */

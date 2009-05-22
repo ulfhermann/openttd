@@ -81,7 +81,7 @@ Order UnpackOldOrder(uint16 packed)
 	 * Sanity check
 	 * TTD stores invalid orders as OT_NOTHING with non-zero flags/station
 	 */
-	if (!order.IsValid() && packed != 0) order.MakeDummy();
+	if (order.IsType(OT_NOTHING) && packed != 0) order.MakeDummy();
 
 	return order;
 }
@@ -121,9 +121,8 @@ static void Load_ORDR()
 {
 	if (CheckSavegameVersionOldStyle(5, 2)) {
 		/* Version older than 5.2 did not have a ->next pointer. Convert them
-		    (in the old days, the orderlist was 5000 items big) */
+		 * (in the old days, the orderlist was 5000 items big) */
 		size_t len = SlGetFieldLength();
-		uint i;
 
 		if (CheckSavegameVersion(5)) {
 			/* Pre-version 5 had an other layout for orders
@@ -133,19 +132,19 @@ static void Load_ORDR()
 
 			SlArray(orders, len, SLE_UINT16);
 
-			for (i = 0; i < len; ++i) {
-				Order *order = new (i) Order();
-				order->AssignOrder(UnpackVersion4Order(orders[i]));
+			for (size_t i = 0; i < len; ++i) {
+				Order *o = new (i) Order();
+				o->AssignOrder(UnpackVersion4Order(orders[i]));
 			}
 
 			free(orders);
 		} else if (CheckSavegameVersionOldStyle(5, 2)) {
-			len /= sizeof(uint16);
-			uint16 *orders = MallocT<uint16>(len + 1);
+			len /= sizeof(uint32);
+			uint32 *orders = MallocT<uint32>(len + 1);
 
 			SlArray(orders, len, SLE_UINT32);
 
-			for (i = 0; i < len; ++i) {
+			for (size_t i = 0; i < len; ++i) {
 				new (i) Order(orders[i]);
 			}
 
@@ -153,12 +152,17 @@ static void Load_ORDR()
 		}
 
 		/* Update all the next pointer */
-		for (i = 1; i < len; ++i) {
+		Order *o;
+		FOR_ALL_ORDERS(o) {
+			/* Delete invalid orders */
+			if (o->IsType(OT_NOTHING)) {
+				delete o;
+				continue;
+			}
 			/* The orders were built like this:
-			 *   While the order is valid, set the previous will get it's next pointer set
-			 *   We start with index 1 because no order will have the first in it's next pointer */
-			if (GetOrder(i)->IsValid())
-				GetOrder(i - 1)->next = GetOrder(i);
+			 * While the order is valid, set the previous will get its next pointer set */
+			Order *prev = Order::GetIfValid(order_index - 1);
+			if (prev != NULL) prev->next = o;
 		}
 	} else {
 		int index;
@@ -167,6 +171,18 @@ static void Load_ORDR()
 			Order *order = new (index) Order();
 			SlObject(order, GetOrderDescription());
 		}
+	}
+}
+
+static void Ptrs_ORDR()
+{
+	/* Orders from old savegames have pointers corrected in Load_ORDR */
+	if (CheckSavegameVersionOldStyle(5, 2)) return;
+
+	Order *o;
+
+	FOR_ALL_ORDERS(o) {
+		SlObject(o, GetOrderDescription());
 	}
 }
 
@@ -195,12 +211,23 @@ static void Load_ORDL()
 	int index;
 
 	while ((index = SlIterateArray()) != -1) {
-		OrderList *list = new (index) OrderList();
+		/* set num_orders to 0 so it's a valid OrderList */
+		OrderList *list = new (index) OrderList(0);
+		SlObject(list, GetOrderListDescription());
+	}
+
+}
+
+static void Ptrs_ORDL()
+{
+	OrderList *list;
+
+	FOR_ALL_ORDER_LISTS(list) {
 		SlObject(list, GetOrderListDescription());
 	}
 }
 
 extern const ChunkHandler _order_chunk_handlers[] = {
-	{ 'ORDR', Save_ORDR, Load_ORDR, CH_ARRAY},
-	{ 'ORDL', Save_ORDL, Load_ORDL, CH_ARRAY | CH_LAST},
+	{ 'ORDR', Save_ORDR, Load_ORDR, Ptrs_ORDR, CH_ARRAY},
+	{ 'ORDL', Save_ORDL, Load_ORDL, Ptrs_ORDL, CH_ARRAY | CH_LAST},
 };
