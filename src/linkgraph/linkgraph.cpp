@@ -20,8 +20,8 @@ void LinkGraph::NextComponent()
 	LinkGraphComponent * component = NULL;
 	while (true) {
 		// find first station of next component
-		if (IsValidStationID(current_station_id)) {
-			Station * station = GetStation(current_station_id);
+		if (Station::IsValidID(current_station_id)) {
+			Station * station = Station::Get(current_station_id);
 			GoodsEntry & ge = station->goods[cargo];
 			if ((ge.last_component + current_component_id) % 2 != 0) {
 				// has not been seen in this run through the graph
@@ -40,7 +40,7 @@ void LinkGraph::NextComponent()
 			}
 		}
 
-		if (++current_station_id == GetMaxStationIndex()) {
+		if (++current_station_id == Station::GetPoolSize()) {
 			current_station_id = 0;
 			if (current_component_id % 2 == 0) {
 				current_component_id = 1;
@@ -61,11 +61,11 @@ void LinkGraph::NextComponent()
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID target_id = i->first;
-			if (!IsValidStationID(target_id)) {
+			if (!Station::IsValidID(target_id)) {
 				continue;
 			}
 			assert(target_id != source_id);
-			Station * target = GetStation(target_id);
+			Station * target = Station::Get(target_id);
 			LinkStat & link_stat = i->second;
 			GoodsEntry & good = target->goods[cargo];
 			if (good.last_component != current_component_id) {
@@ -131,8 +131,8 @@ void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
 void LinkGraphComponent::CalculateDistances() {
 	for(NodeID i = 0; i < num_nodes; ++i) {
 		for(NodeID j = 0; j < i; ++j) {
-			Station * st1 = GetStation(nodes[i].station);
-			Station * st2 = GetStation(nodes[j].station);
+			Station * st1 = Station::Get(nodes[i].station);
+			Station * st2 = Station::Get(nodes[j].station);
 			uint distance = DistanceManhattan(st1->xy, st2->xy);
 			edges[i][j].distance = distance;
 			edges[j][i].distance = distance;
@@ -174,8 +174,8 @@ void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 	LinkGraphComponentID index = component->GetIndex();
 	for(NodeID i = 0; i < component->GetSize(); ++i) {
 		StationID station_id = component->GetNode(i).station;
-		if (IsValidStationID(station_id)) {
-			GetStation(station_id)->goods[cargo].last_component = index;
+		if (Station::IsValidID(station_id)) {
+			Station::Get(station_id)->goods[cargo].last_component = index;
 		}
 	}
 	LinkGraphJob * job = new LinkGraphJob(component, join);
