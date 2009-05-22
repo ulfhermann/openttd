@@ -45,8 +45,6 @@ CommandCost GetRefitCost(EngineID engine_type);
 
 void ViewportAddVehicles(DrawPixelInfo *dpi);
 
-SpriteID GetRotorImage(const Vehicle *v);
-
 void ShowNewGrfVehicleError(EngineID engine, StringID part1, StringID part2, GRFBugs bug_type, bool critical);
 StringID VehicleInTheWayErrMsg(const Vehicle *v);
 bool HasVehicleOnTunnelBridge(TileIndex tile, TileIndex endtile, const Vehicle *ignore = NULL);
@@ -60,10 +58,6 @@ void VehicleMove(Vehicle *v, bool update_viewport);
 void MarkSingleVehicleDirty(const Vehicle *v);
 
 UnitID GetFreeUnitNumber(VehicleType type);
-
-void TrainConsistChanged(Vehicle *v, bool same_length);
-void TrainPowerChanged(Vehicle *v);
-Money GetTrainRunningCost(const Vehicle *v);
 
 CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool service, Owner owner, uint16 vlw_flag, uint32 id);
 void VehicleEnterDepot(Vehicle *v);
