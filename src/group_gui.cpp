@@ -76,7 +76,7 @@ static void ShowGroupActionDropdown(Window *w, GroupID gid)
 	list->push_back(new DropDownListStringItem(STR_SEND_FOR_SERVICING,  GALF_SERVICE, false));
 	list->push_back(new DropDownListStringItem(STR_SEND_TRAIN_TO_DEPOT, GALF_DEPOT,   false));
 
-	if (IsValidGroupID(gid)) {
+	if (Group::IsValidID(gid)) {
 		list->push_back(new DropDownListStringItem(STR_GROUP_ADD_SHARED_VEHICLE,  GALF_ADD_SHARED, false));
 		list->push_back(new DropDownListStringItem(STR_GROUP_REMOVE_ALL_VEHICLES, GALF_REMOVE_ALL, false));
 	}
@@ -321,7 +321,7 @@ public:
 			this->groups.ForceResort();
 		}
 
-		if (!(IsAllGroupID(this->group_sel) || IsDefaultGroupID(this->group_sel) || IsValidGroupID(this->group_sel))) {
+		if (!(IsAllGroupID(this->group_sel) || IsDefaultGroupID(this->group_sel) || Group::IsValidID(this->group_sel))) {
 			this->group_sel = ALL_GROUP;
 			HideDropDownMenu(this);
 		}
@@ -405,7 +405,7 @@ public:
 				default: NOT_REACHED();
 			}
 		} else {
-			const Group *g = GetGroup(this->group_sel);
+			const Group *g = Group::Get(this->group_sel);
 
 			SetDParam(0, g->index);
 			SetDParam(1, g->num_vehicle);
@@ -533,22 +533,18 @@ public:
 
 			case GRP_WIDGET_LIST_VEHICLE: { // Matrix Vehicle
 				uint32 id_v = (pt.y - PLY_WND_PRC__OFFSET_TOP_WIDGET) / (int)this->resize.step_height;
-				const Vehicle *v;
-
 				if (id_v >= this->vscroll.cap) return; // click out of bounds
 
 				id_v += this->vscroll.pos;
 
 				if (id_v >= this->vehicles.Length()) return; // click out of list bound
 
-				v = this->vehicles[id_v];
+				const Vehicle *v = this->vehicles[id_v];
 
 				this->vehicle_sel = v->index;
 
-				if (v->IsValid()) {
-					SetObjectToPlaceWnd(v->GetImage(DIR_W), GetVehiclePalette(v), HT_DRAG, this);
-					_cursor.vehchain = true;
-				}
+				SetObjectToPlaceWnd(v->GetImage(DIR_W), GetVehiclePalette(v), HT_DRAG, this);
+				_cursor.vehchain = true;
 
 				this->SetDirty();
 				break;
@@ -567,9 +563,9 @@ public:
 			}
 
 			case GRP_WIDGET_RENAME_GROUP: { // Rename the selected roup
-				assert(IsValidGroupID(this->group_sel));
+				assert(Group::IsValidID(this->group_sel));
 
-				const Group *g = GetGroup(this->group_sel);
+				const Group *g = Group::Get(this->group_sel);
 
 				SetDParam(0, g->index);
 				ShowQueryString(STR_GROUP_NAME, STR_GROUP_RENAME_CAPTION, MAX_LENGTH_GROUP_NAME_BYTES, MAX_LENGTH_GROUP_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
@@ -594,13 +590,13 @@ public:
 				break;
 			}
 
-			case GRP_WIDGET_REPLACE_PROTECTION:
-				if (IsValidGroupID(this->group_sel)) {
-					const Group *g = GetGroup(this->group_sel);
-
+			case GRP_WIDGET_REPLACE_PROTECTION: {
+				const Group *g = Group::GetIfValid(this->group_sel);
+				if (g != NULL) {
 					DoCommandP(0, this->group_sel, !g->replace_protection, CMD_SET_GROUP_REPLACE_PROTECTION);
 				}
 				break;
+			}
 		}
 	}
 
@@ -703,12 +699,12 @@ public:
 									| DEPOT_MASS_SEND, GetCmdSendToDepot(this->vehicle_type));
 						break;
 					case GALF_ADD_SHARED: // Add shared Vehicles
-						assert(IsValidGroupID(this->group_sel));
+						assert(Group::IsValidID(this->group_sel));
 
 						DoCommandP(0, this->group_sel, this->vehicle_type, CMD_ADD_SHARED_VEHICLE_GROUP | CMD_MSG(STR_GROUP_CAN_T_ADD_SHARED_VEHICLE));
 						break;
 					case GALF_REMOVE_ALL: // Remove all Vehicles from the selected group
-						assert(IsValidGroupID(this->group_sel));
+						assert(Group::IsValidID(this->group_sel));
 
 						DoCommandP(0, this->group_sel, this->vehicle_type, CMD_REMOVE_ALL_VEHICLES_GROUP | CMD_MSG(STR_GROUP_CAN_T_REMOVE_ALL_VEHICLES));
 						break;
@@ -758,7 +754,7 @@ static WindowDesc _group_desc(
 
 void ShowCompanyGroup(CompanyID company, VehicleType vehicle_type)
 {
-	if (!IsValidCompanyID(company)) return;
+	if (!Company::IsValidID(company)) return;
 
 	_group_desc.cls = GetWindowClassForVehicleType(vehicle_type);
 	WindowNumber num = (vehicle_type << 11) | VLW_GROUP_LIST | company;

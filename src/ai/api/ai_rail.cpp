@@ -203,6 +203,7 @@
 	if (IsRailWaypointTile(tile)) return ::GetRailWaypointBits(tile);
 	if (IsRailStationTile(tile)) return ::TrackToTrackBits(::GetRailStationTrack(tile));
 	if (IsLevelCrossingTile(tile)) return ::GetCrossingRailBits(tile);
+	if (IsRailDepotTile(tile)) return ::TRACK_BIT_NONE;
 	return ::GetTrackBits(tile);
 }
 
@@ -220,7 +221,7 @@
 /* static */ bool AIRail::RemoveRailTrack(TileIndex tile, RailTrack rail_track)
 {
 	EnforcePrecondition(false, ::IsValidTile(tile));
-	EnforcePrecondition(false, ::IsTileType(tile, MP_RAILWAY) && ::IsPlainRailTile(tile));
+	EnforcePrecondition(false, ::IsPlainRailTile(tile));
 	EnforcePrecondition(false, GetRailTracks(tile) & rail_track);
 	EnforcePrecondition(false, KillFirstBit((uint)rail_track) == 0);
 
@@ -403,7 +404,7 @@ static bool IsValidSignalType(int signal_type)
 /* static */ bool AIRail::BuildSignal(TileIndex tile, TileIndex front, SignalType signal)
 {
 	EnforcePrecondition(false, AIMap::DistanceManhattan(tile, front) == 1)
-	EnforcePrecondition(false, ::IsTileType(tile, MP_RAILWAY) && ::IsPlainRailTile(tile));
+	EnforcePrecondition(false, ::IsPlainRailTile(tile));
 	EnforcePrecondition(false, ::IsValidSignalType(signal));
 
 	Track track = INVALID_TRACK;

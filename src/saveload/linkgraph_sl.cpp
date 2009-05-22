@@ -22,7 +22,7 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 
 	static const SaveLoad _component_desc[] = {
 		 SLE_CONDVAR(LinkGraphComponent, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraphComponent, component_colour, SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraphComponent, index,            SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(                    _join_date,       SLE_INT32,  LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
@@ -59,10 +59,10 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 const SaveLoad * GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad _linkgraph_desc[] = {
-		SLEG_CONDVAR(           _num_components,  SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, current_colour,   SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, current_station,  SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, cargo,            SLE_UINT8,  LINKGRAPH_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(           _num_components,      SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, current_component_id, SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, current_station_id,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, cargo,                SLE_UINT8,  LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
@@ -142,5 +142,5 @@ static void Save_LGRP() {
 }
 
 extern const ChunkHandler _linkgraph_chunk_handlers[] = {
-	{ 'LGRP', Save_LGRP,      Load_LGRP,      CH_LAST},
+	{ 'LGRP', Save_LGRP,      Load_LGRP,	NULL,      CH_LAST},
 };

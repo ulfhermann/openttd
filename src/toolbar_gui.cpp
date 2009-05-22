@@ -222,7 +222,7 @@ static void PopupMainCompanyToolbMenu(Window *w, int widget, int grey = 0)
 #endif /* ENABLE_NETWORK */
 
 	for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
-		if (!IsValidCompanyID(c)) continue;
+		if (!Company::IsValidID(c)) continue;
 		list->push_back(new DropDownListCompanyItem(c, false, HasBit(grey, c)));
 	}
 
@@ -624,7 +624,7 @@ static void ToolbarZoomOutClick(Window *w)
 
 static void ToolbarBuildRailClick(Window *w)
 {
-	const Company *c = GetCompany(_local_company);
+	const Company *c = Company::Get(_local_company);
 	DropDownList *list = new DropDownList();
 	for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
 		const RailtypeInfo *rti = GetRailTypeInfo(rt);
@@ -646,7 +646,7 @@ static void MenuClickBuildRail(int index)
 
 static void ToolbarBuildRoadClick(Window *w)
 {
-	const Company *c = GetCompany(_local_company);
+	const Company *c = Company::Get(_local_company);
 	DropDownList *list = new DropDownList();
 	for (RoadType rt = ROADTYPE_BEGIN; rt != ROADTYPE_END; rt++) {
 		/* The standard road button is *always* available */
@@ -784,8 +784,8 @@ static void ToolbarScenDateBackward(Window *w)
 		w->HandleButtonClick(TBSE_DATEBACKWARD);
 		w->SetDirty();
 
-		_settings_newgame.game_creation.starting_year = Clamp(_settings_newgame.game_creation.starting_year - 1, MIN_YEAR, MAX_YEAR);
-		SetDate(ConvertYMDToDate(_settings_newgame.game_creation.starting_year, 0, 1));
+		_settings_game.game_creation.starting_year = Clamp(_settings_game.game_creation.starting_year - 1, MIN_YEAR, MAX_YEAR);
+		SetDate(ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1));
 	}
 	_left_button_clicked = false;
 }
@@ -797,8 +797,8 @@ static void ToolbarScenDateForward(Window *w)
 		w->HandleButtonClick(TBSE_DATEFORWARD);
 		w->SetDirty();
 
-		_settings_newgame.game_creation.starting_year = Clamp(_settings_newgame.game_creation.starting_year + 1, MIN_YEAR, MAX_YEAR);
-		SetDate(ConvertYMDToDate(_settings_newgame.game_creation.starting_year, 0, 1));
+		_settings_game.game_creation.starting_year = Clamp(_settings_game.game_creation.starting_year + 1, MIN_YEAR, MAX_YEAR);
+		SetDate(ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1));
 	}
 	_left_button_clicked = false;
 }
@@ -1036,7 +1036,7 @@ struct MainToolbarWindow : Window {
 		 * Since enabled state is the default, just disable when needed */
 		this->SetWidgetsDisabledState(_local_company == COMPANY_SPECTATOR, TBN_RAILS, TBN_ROADS, TBN_WATER, TBN_AIR, TBN_LANDSCAPE, WIDGET_LIST_END);
 		/* disable company list drop downs, if there are no companies */
-		this->SetWidgetsDisabledState(ActiveCompanyCount() == TBN_PAUSE, TBN_STATIONS, TBN_FINANCES, TBN_TRAINS, TBN_ROADVEHS, TBN_SHIPS, TBN_AIRCRAFTS, WIDGET_LIST_END);
+		this->SetWidgetsDisabledState(Company::GetNumItems() == TBN_PAUSE, TBN_STATIONS, TBN_FINANCES, TBN_TRAINS, TBN_ROADVEHS, TBN_SHIPS, TBN_AIRCRAFTS, WIDGET_LIST_END);
 
 		this->SetWidgetDisabledState(TBN_RAILS, !CanBuildVehicleInfrastructure(VEH_TRAIN));
 		this->SetWidgetDisabledState(TBN_AIR, !CanBuildVehicleInfrastructure(VEH_AIRCRAFT));
@@ -1233,8 +1233,8 @@ public:
 
 	virtual void OnPaint()
 	{
-		this->SetWidgetDisabledState(TBSE_DATEBACKWARD, _settings_newgame.game_creation.starting_year <= MIN_YEAR);
-		this->SetWidgetDisabledState(TBSE_DATEFORWARD, _settings_newgame.game_creation.starting_year >= MAX_YEAR);
+		this->SetWidgetDisabledState(TBSE_DATEBACKWARD, _settings_game.game_creation.starting_year <= MIN_YEAR);
+		this->SetWidgetDisabledState(TBSE_DATEFORWARD, _settings_game.game_creation.starting_year >= MAX_YEAR);
 
 		/* Draw brown-red toolbar bg. */
 		GfxFillRect(0, 0, this->width - 1, this->height - 1, 0xB2);
@@ -1242,7 +1242,7 @@ public:
 
 		this->DrawWidgets();
 
-		SetDParam(0, ConvertYMDToDate(_settings_newgame.game_creation.starting_year, 0, 1));
+		SetDParam(0, ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1));
 		DrawString(this->widget[TBSE_DATEBACKWARD].right, this->widget[TBSE_DATEFORWARD].left, 6, STR_DATE_LONG_WHITE, TC_FROMSTRING, SA_CENTER);
 
 		/* We hide this panel when the toolbar space gets too small */

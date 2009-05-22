@@ -32,16 +32,18 @@
 #include "../landscape_type.h"
 #include "../rev.h"
 #include "../core/alloc_func.hpp"
+#include "../core/pool_func.hpp"
 #ifdef DEBUG_DUMP_COMMANDS
 	#include "../fileio_func.h"
 #endif /* DEBUG_DUMP_COMMANDS */
 #include "table/strings.h"
-#include "../oldpool_func.h"
 
 DECLARE_POSTFIX_INCREMENT(ClientID);
 
-typedef ClientIndex NetworkClientInfoID;
-DEFINE_OLD_POOL_GENERIC(NetworkClientInfo, NetworkClientInfo);
+assert_compile(NetworkClientInfoPool::MAX_SIZE == NetworkClientSocketPool::MAX_SIZE);
+
+NetworkClientInfoPool _networkclientinfo_pool("NetworkClientInfo");
+INSTANTIATE_POOL_METHODS(NetworkClientInfo)
 
 bool _networking;         ///< are we in networking mode?
 bool _network_server;     ///< network-server is active
@@ -97,7 +99,7 @@ extern void StateGameLoop();
  */
 NetworkClientInfo *NetworkFindClientInfoFromIndex(ClientIndex index)
 {
-	return IsValidNetworkClientInfoIndex(index) ? GetNetworkClientInfo(index) : NULL;
+	return NetworkClientInfo::GetIfValid(index);
 }
 
 /**
@@ -339,7 +341,7 @@ static uint NetworkCountActiveClients()
 	uint count = 0;
 
 	FOR_ALL_CLIENT_INFOS(ci) {
-		if (IsValidCompanyID(ci->client_playas)) count++;
+		if (Company::IsValidID(ci->client_playas)) count++;
 	}
 
 	return count;
@@ -557,10 +559,8 @@ static bool NetworkListen()
 /** Resets both pools used for network clients */
 static void InitializeNetworkPools()
 {
-	_NetworkClientSocket_pool.CleanPool();
-	_NetworkClientSocket_pool.AddBlockToPool();
-	_NetworkClientInfo_pool.CleanPool();
-	_NetworkClientInfo_pool.AddBlockToPool();
+	_networkclientsocket_pool.CleanPool();
+	_networkclientinfo_pool.CleanPool();
 }
 
 /* Close all current connections */
@@ -714,7 +714,7 @@ public:
 
 
 /* Used by clients, to connect to a server */
-void NetworkClientConnectGame(NetworkAddress address)
+void NetworkClientConnectGame(NetworkAddress address, CompanyID join_as)
 {
 	if (!_network_available) return;
 
@@ -722,6 +722,7 @@ void NetworkClientConnectGame(NetworkAddress address)
 
 	strecpy(_settings_client.network.last_host, address.GetHostname(), lastof(_settings_client.network.last_host));
 	_settings_client.network.last_port = address.GetPort();
+	_network_join_as = join_as;
 
 	NetworkDisconnect();
 	NetworkInitialize();
@@ -777,9 +778,6 @@ bool NetworkServerStart()
 	_frame_counter_max = 0;
 	_last_sync_frame = 0;
 	_network_own_client_id = CLIENT_ID_SERVER;
-
-	/* Non-dedicated server will always be company #1 */
-	if (!_network_dedicated) _network_playas = COMPANY_FIRST;
 
 	_network_clients_connected = 0;
 
@@ -926,7 +924,7 @@ static bool NetworkDoClientLoop()
 				NetworkError(STR_NETWORK_ERR_DESYNC);
 				DEBUG(desync, 1, "sync_err: %d; %d\n", _date, _date_fract);
 				DEBUG(net, 0, "Sync error detected!");
-				NetworkClientError(NETWORK_RECV_STATUS_DESYNC, GetNetworkClientSocket(0));
+				NetworkClientError(NETWORK_RECV_STATUS_DESYNC, NetworkClientSocket::Get(0));
 				return false;
 			}
 
@@ -1126,6 +1124,3 @@ bool IsNetworkCompatibleVersion(const char *other)
 }
 
 #endif /* ENABLE_NETWORK */
-
-/* NOTE: this variable needs to be always available */
-CompanyID _network_playas;

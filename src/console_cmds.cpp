@@ -551,7 +551,7 @@ DEF_CONSOLE_CMD(ConServerInfo)
 	}
 
 	IConsolePrintF(CC_DEFAULT, "Current/maximum clients:    %2d/%2d", _network_game_info.clients_on, _settings_client.network.max_clients);
-	IConsolePrintF(CC_DEFAULT, "Current/maximum companies:  %2d/%2d", ActiveCompanyCount(), _settings_client.network.max_companies);
+	IConsolePrintF(CC_DEFAULT, "Current/maximum companies:  %2d/%2d", (int)Company::GetNumItems(), _settings_client.network.max_companies);
 	IConsolePrintF(CC_DEFAULT, "Current/maximum spectators: %2d/%2d", NetworkSpectatorCount(), _settings_client.network.max_spectators);
 
 	return true;
@@ -635,7 +635,7 @@ DEF_CONSOLE_CMD(ConJoinCompany)
 	CompanyID company_id = (CompanyID)(atoi(argv[1]) <= MAX_COMPANIES ? atoi(argv[1]) - 1 : atoi(argv[1]));
 
 	/* Check we have a valid company id! */
-	if (!IsValidCompanyID(company_id) && company_id != COMPANY_SPECTATOR) {
+	if (!Company::IsValidID(company_id) && company_id != COMPANY_SPECTATOR) {
 		IConsolePrintF(CC_ERROR, "Company does not exist. Company-id must be between 1 and %d.", MAX_COMPANIES);
 		return true;
 	}
@@ -650,7 +650,7 @@ DEF_CONSOLE_CMD(ConJoinCompany)
 		return true;
 	}
 
-	if (company_id != COMPANY_SPECTATOR && GetCompany(company_id)->is_ai) {
+	if (company_id != COMPANY_SPECTATOR && Company::Get(company_id)->is_ai) {
 		IConsoleError("Cannot join AI company.");
 		return true;
 	}
@@ -688,12 +688,12 @@ DEF_CONSOLE_CMD(ConMoveClient)
 		return true;
 	}
 
-	if (!IsValidCompanyID(company_id) && company_id != COMPANY_SPECTATOR) {
+	if (!Company::IsValidID(company_id) && company_id != COMPANY_SPECTATOR) {
 		IConsolePrintF(CC_ERROR, "Company does not exist. Company-id must be between 1 and %d.", MAX_COMPANIES);
 		return true;
 	}
 
-	if (company_id != COMPANY_SPECTATOR && GetCompany(company_id)->is_ai) {
+	if (company_id != COMPANY_SPECTATOR && Company::Get(company_id)->is_ai) {
 		IConsoleError("You cannot move clients to AI companies.");
 		return true;
 	}
@@ -716,8 +716,6 @@ DEF_CONSOLE_CMD(ConMoveClient)
 
 DEF_CONSOLE_CMD(ConResetCompany)
 {
-	CompanyID index;
-
 	if (argc == 0) {
 		IConsoleHelp("Remove an idle company from the game. Usage: 'reset_company <company-id>'");
 		IConsoleHelp("For company-id's, see the list of companies from the dropdown menu. Company 1 is 1, etc.");
@@ -726,15 +724,14 @@ DEF_CONSOLE_CMD(ConResetCompany)
 
 	if (argc != 2) return false;
 
-	index = (CompanyID)(atoi(argv[1]) - 1);
+	CompanyID index = (CompanyID)(atoi(argv[1]) - 1);
+	const Company *c = Company::GetIfValid(index);
 
 	/* Check valid range */
-	if (!IsValidCompanyID(index)) {
+	if (c == NULL) {
 		IConsolePrintF(CC_ERROR, "Company does not exist. Company-id must be between 1 and %d.", MAX_COMPANIES);
 		return true;
 	}
-
-	const Company *c = GetCompany(index);
 
 	if (c->is_ai) {
 		IConsoleError("Company is owned by an AI.");
@@ -772,11 +769,6 @@ DEF_CONSOLE_CMD(ConNetworkClients)
 
 DEF_CONSOLE_CMD(ConNetworkConnect)
 {
-	char *ip;
-	const char *port = NULL;
-	const char *company = NULL;
-	uint16 rport;
-
 	if (argc == 0) {
 		IConsoleHelp("Connect to a remote OTTD server and join the game. Usage: 'connect <ip>'");
 		IConsoleHelp("IP can contain port and company: 'IP[[#Company]:Port]', eg: 'server.ottd.org#2:443'");
@@ -787,23 +779,25 @@ DEF_CONSOLE_CMD(ConNetworkConnect)
 	if (argc < 2) return false;
 	if (_networking) NetworkDisconnect(); // we are in network-mode, first close it!
 
-	ip = argv[1];
+	const char *port = NULL;
+	const char *company = NULL;
+	char *ip = argv[1];
 	/* Default settings: default port and new company */
-	rport = NETWORK_DEFAULT_PORT;
-	_network_playas = COMPANY_NEW_COMPANY;
+	uint16 rport = NETWORK_DEFAULT_PORT;
+	CompanyID join_as = COMPANY_NEW_COMPANY;
 
 	ParseConnectionString(&company, &port, ip);
 
 	IConsolePrintF(CC_DEFAULT, "Connecting to %s...", ip);
 	if (company != NULL) {
-		_network_playas = (CompanyID)atoi(company);
-		IConsolePrintF(CC_DEFAULT, "    company-no: %d", _network_playas);
+		join_as = (CompanyID)atoi(company);
+		IConsolePrintF(CC_DEFAULT, "    company-no: %d", join_as);
 
 		/* From a user pov 0 is a new company, internally it's different and all
 		 * companies are offset by one to ease up on users (eg companies 1-8 not 0-7) */
-		if (_network_playas != COMPANY_SPECTATOR) {
-			if (_network_playas > MAX_COMPANIES) return false;
-			_network_playas--;
+		if (join_as != COMPANY_SPECTATOR) {
+			if (join_as > MAX_COMPANIES) return false;
+			join_as--;
 		}
 	}
 	if (port != NULL) {
@@ -811,7 +805,7 @@ DEF_CONSOLE_CMD(ConNetworkConnect)
 		IConsolePrintF(CC_DEFAULT, "    port: %s", port);
 	}
 
-	NetworkClientConnectGame(NetworkAddress(ip, rport));
+	NetworkClientConnectGame(NetworkAddress(ip, rport), join_as);
 
 	return true;
 }
@@ -986,7 +980,7 @@ DEF_CONSOLE_CMD(ConStartAI)
 		return true;
 	}
 
-	if (ActiveCompanyCount() == MAX_COMPANIES) {
+	if (Company::GetNumItems() == CompanyPool::MAX_SIZE) {
 		IConsoleWarning("Can't start a new AI (no more free slots).");
 		return true;
 	}
@@ -1049,7 +1043,7 @@ DEF_CONSOLE_CMD(ConReloadAI)
 	}
 
 	CompanyID company_id = (CompanyID)(atoi(argv[1]) - 1);
-	if (!IsValidCompanyID(company_id)) {
+	if (!Company::IsValidID(company_id)) {
 		IConsolePrintF(CC_DEFAULT, "Unknown company. Company range is between 1 and %d.", MAX_COMPANIES);
 		return true;
 	}
@@ -1086,7 +1080,7 @@ DEF_CONSOLE_CMD(ConStopAI)
 	}
 
 	CompanyID company_id = (CompanyID)(atoi(argv[1]) - 1);
-	if (!IsValidCompanyID(company_id)) {
+	if (!Company::IsValidID(company_id)) {
 		IConsolePrintF(CC_DEFAULT, "Unknown company. Company range is between 1 and %d.", MAX_COMPANIES);
 		return true;
 	}
@@ -1464,7 +1458,7 @@ DEF_CONSOLE_CMD(ConSayCompany)
 	if (argc != 3) return false;
 
 	CompanyID company_id = (CompanyID)(atoi(argv[1]) - 1);
-	if (!IsValidCompanyID(company_id)) {
+	if (!Company::IsValidID(company_id)) {
 		IConsolePrintF(CC_DEFAULT, "Unknown company. Company range is between 1 and %d.", MAX_COMPANIES);
 		return true;
 	}
@@ -1508,7 +1502,7 @@ bool NetworkChangeCompanyPassword(byte argc, char *argv[])
 		return true;
 	}
 
-	if (!IsValidCompanyID(_local_company)) {
+	if (!Company::IsValidID(_local_company)) {
 		IConsoleError("You have to own a company to make use of this command.");
 		return false;
 	}

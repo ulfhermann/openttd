@@ -23,6 +23,7 @@
 #include "../querystring_gui.h"
 #include "../sortlist_type.h"
 #include "../company_base.h"
+#include "../company_func.h"
 
 #include "table/strings.h"
 #include "../table/sprites.h"
@@ -1534,18 +1535,15 @@ struct NetworkLobbyWindow : public Window {
 
 			case NLWW_JOIN:     // Join company
 				/* Button can be clicked only when it is enabled */
-				_network_playas = this->company;
-				NetworkClientConnectGame(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port));
+				NetworkClientConnectGame(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port), this->company);
 				break;
 
 			case NLWW_NEW:      // New company
-				_network_playas = COMPANY_NEW_COMPANY;
-				NetworkClientConnectGame(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port));
+				NetworkClientConnectGame(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port), COMPANY_NEW_COMPANY);
 				break;
 
 			case NLWW_SPECTATE: // Spectate game
-				_network_playas = COMPANY_SPECTATOR;
-				NetworkClientConnectGame(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port));
+				NetworkClientConnectGame(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port), COMPANY_SPECTATOR);
 				break;
 
 			case NLWW_REFRESH:  // Refresh
@@ -1808,7 +1806,7 @@ struct NetworkClientListPopupWindow : Window {
 			this->proc[i++] = &ClientList_SpeakToClient;
 		}
 
-		if (IsValidCompanyID(ci->client_playas) || ci->client_playas == COMPANY_SPECTATOR) {
+		if (Company::IsValidID(ci->client_playas) || ci->client_playas == COMPANY_SPECTATOR) {
 			GetString(this->action[i], STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY, lastof(this->action[i]));
 			this->proc[i++] = &ClientList_SpeakToCompany;
 		}
@@ -1817,7 +1815,7 @@ struct NetworkClientListPopupWindow : Window {
 
 		if (_network_own_client_id != ci->client_id) {
 			/* We are no spectator and the company we want to give money to is no spectator and money gifts are allowed */
-			if (IsValidCompanyID(_network_playas) && IsValidCompanyID(ci->client_playas) && _settings_game.economy.give_money) {
+			if (Company::IsValidID(_local_company) && Company::IsValidID(ci->client_playas) && _settings_game.economy.give_money) {
 				GetString(this->action[i], STR_NETWORK_CLIENTLIST_GIVE_MONEY, lastof(this->action[i]));
 				this->proc[i++] = &ClientList_GiveMoney;
 			}
@@ -2013,7 +2011,7 @@ struct NetworkClientListWindow : Window
 			}
 
 			/* Filter out spectators */
-			if (IsValidCompanyID(ci->client_playas)) DrawCompanyIcon(ci->client_playas, 64, y + 1);
+			if (Company::IsValidID(ci->client_playas)) DrawCompanyIcon(ci->client_playas, 64, y + 1);
 
 			DrawString(81, this->width - 2, y, ci->client_name, colour);
 

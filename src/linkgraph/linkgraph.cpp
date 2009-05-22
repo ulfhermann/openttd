@@ -14,34 +14,42 @@ typedef std::map<StationID, NodeID> ReverseNodeIndex;
 
 void LinkGraph::NextComponent()
 {
-	StationID last_station = current_station;
+	StationID last_station_id = current_station_id;
 	ReverseNodeIndex index;
 	NodeID node = 0;
 	std::queue<Station *> search_queue;
 	LinkGraphComponent * component = NULL;
 	while (true) {
 		// find first station of next component
-		if (station_colours[current_station] == 0 && IsValidStationID(current_station)) {
-			Station * station = GetStation(current_station);
-			LinkStatMap & links = station->goods[cargo].link_stats;
-			if (!links.empty()) {
-				if (++current_colour == UINT16_MAX) {
-					current_colour = 1;
+		if (Station::IsValidID(current_station_id)) {
+			Station * station = Station::Get(current_station_id);
+			GoodsEntry & ge = station->goods[cargo];
+			if ((ge.last_component + current_component_id) % 2 != 0) {
+				// has not been seen in this run through the graph
+
+				LinkStatMap & links = station->goods[cargo].link_stats;
+				if (!links.empty()) {
+					current_component_id += 2;
+					search_queue.push(station);
+					station->goods[cargo].last_component = current_component_id;
+					component = new LinkGraphComponent(cargo, current_component_id);
+					GoodsEntry & good = station->goods[cargo];
+					node = component->AddNode(current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+					index[current_station_id++] = node;
+					break; // found a station
 				}
-				search_queue.push(station);
-				station_colours[current_station] = current_colour;
-				component = new LinkGraphComponent(cargo, current_colour);
-				GoodsEntry & good = station->goods[cargo];
-				node = component->AddNode(current_station, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
-				index[current_station++] = node;
-				break; // found a station
 			}
 		}
-		if (++current_station == GetMaxStationIndex()) {
-			current_station = 0;
-			InitColours();
+
+		if (++current_station_id == Station::GetPoolSize()) {
+			current_station_id = 0;
+			if (current_component_id % 2 == 0) {
+				current_component_id = 1;
+			} else {
+				current_component_id = 0;
+			}
 		}
-		if (current_station == last_station) {
+		if (current_station_id == last_station_id) {
 			return;
 		}
 	}
@@ -54,13 +62,16 @@ void LinkGraph::NextComponent()
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID target_id = i->first;
+			if (!Station::IsValidID(target_id)) {
+				continue;
+			}
 			assert(target_id != source_id);
-			Station * target = GetStation(i->first);
+			Station * target = Station::Get(target_id);
 			LinkStat & link_stat = i->second;
-			if (station_colours[target_id] != current_colour) {
-				station_colours[target_id] = current_colour;
+			GoodsEntry & good = target->goods[cargo];
+			if (good.last_component != current_component_id) {
+				good.last_component = current_component_id;
 				search_queue.push(target);
-				GoodsEntry & good = target->goods[cargo];
 				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[target_id] = node;
 			} else {
@@ -72,15 +83,10 @@ void LinkGraph::NextComponent()
 	// here the list of nodes and edges for this component is complete.
 	component->CalculateDistances();
 	LinkGraphJob * job = new LinkGraphJob(component);
+	assert(job != NULL);
 	job->SpawnThread(cargo);
 	jobs.push_back(job);
 }
-
-void LinkGraph::InitColours()
-{
-	memset(station_colours, 0, Station_POOL_MAX_BLOCKS * sizeof(uint16));
-}
-
 
 void OnTick_LinkGraph()
 {
@@ -100,14 +106,13 @@ void OnTick_LinkGraph()
 	}
 }
 
-LinkGraph::LinkGraph()  : current_colour(1), current_station(0), cargo(CT_INVALID)
+LinkGraph::LinkGraph()  : current_component_id(1), current_station_id(0), cargo(CT_INVALID)
 {
 	for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 		if (this == &(_link_graphs[i])) {
 			cargo = i;
 		}
 	}
-	InitColours();
 }
 
 NodeID LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
@@ -127,8 +132,8 @@ void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
 void LinkGraphComponent::CalculateDistances() {
 	for(NodeID i = 0; i < num_nodes; ++i) {
 		for(NodeID j = 0; j < i; ++j) {
-			Station * st1 = GetStation(nodes[i].station);
-			Station * st2 = GetStation(nodes[j].station);
+			Station * st1 = Station::Get(nodes[i].station);
+			Station * st2 = Station::Get(nodes[j].station);
 			uint distance = DistanceManhattan(st1->xy, st2->xy);
 			edges[i][j].distance = distance;
 			edges[j][i].distance = distance;
@@ -142,11 +147,11 @@ void LinkGraphComponent::SetSize(uint size) {
 	edges.resize(num_nodes, std::vector<Edge>(num_nodes));
 }
 
-LinkGraphComponent::LinkGraphComponent(CargoID car, colour col) :
+LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID col) :
 	settings(_settings_game.linkgraph),
 	cargo(car),
 	num_nodes(0),
-	component_colour(col)
+	index(col)
 {
 }
 
@@ -155,6 +160,7 @@ void LinkGraph::Join() {
 		return;
 	}
 	LinkGraphJob * job = jobs.front();
+	assert(job != NULL);
 
 	if (job->GetJoinDate() > _date) {
 		return;
@@ -166,13 +172,17 @@ void LinkGraph::Join() {
 }
 
 void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
-	 colour component_colour = component->GetColour();
-	 for(NodeID i = 0; i < component->GetSize(); ++i) {
-		 station_colours[component->GetNode(i).station] = component_colour;
-	 }
-	 LinkGraphJob * job = new LinkGraphJob(component, join);
-	 job->SpawnThread(cargo);
-	 jobs.push_back(job);
+	LinkGraphComponentID index = component->GetIndex();
+	for(NodeID i = 0; i < component->GetSize(); ++i) {
+		StationID station_id = component->GetNode(i).station;
+		if (Station::IsValidID(station_id)) {
+			Station::Get(station_id)->goods[cargo].last_component = index;
+		}
+	}
+	LinkGraphJob * job = new LinkGraphJob(component, join);
+	assert(job != NULL);
+	job->SpawnThread(cargo);
+	jobs.push_back(job);
 }
 
 void LinkGraphJob::Run() {
@@ -228,13 +238,13 @@ LinkGraphJob::LinkGraphJob(LinkGraphComponent * c, Date join) :
 void LinkGraph::Clear() {
 	for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
 		LinkGraphJob * job = *i;
+		assert(job != NULL);
 		job->Join();
 		delete job;
 	}
 	jobs.clear();
-	InitColours();
-	current_colour = 1;
-	current_station = 0;
+	current_component_id = 1;
+	current_station_id = 0;
 }
 
 void InitializeLinkGraphs() {
