@@ -46,6 +46,7 @@ template<class ANNOTATION>
 void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool create_new_paths) {
 	typedef std::set<ANNOTATION *, typename ANNOTATION::comp> AnnoSet;
 	uint size = graph->GetSize();
+	StationID source_station = graph->GetNode(source_node).station;
 	AnnoSet annos;
 	paths.resize(size, NULL);
 	for (NodeID node = 0; node < size; ++node) {
@@ -62,7 +63,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool c
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
 			assert(edge.capacity > 0 && edge.distance < UINT_MAX);
-			if (create_new_paths || graph->GetNode(from).flows[source_node][to] > 0) {
+			if (create_new_paths || graph->GetNode(from).flows[source_station][graph->GetNode(to).station] > 0) {
 				int capacity = edge.capacity - edge.flow;
 				uint distance = edge.distance;
 				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
