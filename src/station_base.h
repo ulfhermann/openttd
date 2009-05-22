@@ -7,7 +7,7 @@
 
 #include "station_type.h"
 #include "airport.h"
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 #include "cargopacket.h"
 #include "cargo_type.h"
 #include "town_type.h"
@@ -21,8 +21,10 @@
 #include <list>
 #include <map>
 
-DECLARE_OLD_POOL(Station, Station, 6, 1000)
-DECLARE_OLD_POOL(RoadStop, RoadStop, 5, 2000)
+typedef Pool<Station, StationID, 32, 64000> StationPool;
+typedef Pool<RoadStop, RoadStopID, 32, 64000> RoadStopPool;
+extern StationPool _station_pool;
+extern RoadStopPool _roadstop_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
 
@@ -76,7 +78,7 @@ struct GoodsEntry {
 };
 
 /** A Stop for a Road Vehicle */
-struct RoadStop : PoolItem<RoadStop, RoadStopID, &_RoadStop_pool> {
+struct RoadStop : RoadStopPool::PoolItem<&_roadstop_pool> {
 	static const int  cDebugCtorLevel =  5;  ///< Debug level on which Contructor / Destructor messages are printed
 	static const uint LIMIT           = 16;  ///< The maximum amount of roadstops that are allowed at a single station
 	static const uint MAX_BAY_COUNT   =  2;  ///< The maximum number of loading bays
@@ -88,13 +90,7 @@ struct RoadStop : PoolItem<RoadStop, RoadStopID, &_RoadStop_pool> {
 	struct RoadStop  *next;                 ///< Next stop of the given type at this station
 
 	RoadStop(TileIndex tile = INVALID_TILE);
-	virtual ~RoadStop();
-
-	/**
-	 * Determines whether a road stop exists
-	 * @return true if and only is the road stop exists
-	 */
-	inline bool IsValid() const { return this->xy != INVALID_TILE; }
+	~RoadStop();
 
 	/* For accessing status */
 	bool HasFreeBay() const;
@@ -138,7 +134,7 @@ struct StationRect : public Rect {
 };
 
 /** Station data structure */
-struct Station : PoolItem<Station, StationID, &_Station_pool> {
+struct Station : StationPool::PoolItem<&_station_pool> {
 public:
 	RoadStop *GetPrimaryRoadStop(RoadStopType type) const
 	{
@@ -201,7 +197,7 @@ public:
 	static const int cDebugCtorLevel = 5;
 
 	Station(TileIndex tile = INVALID_TILE);
-	virtual ~Station();
+	~Station();
 
 	void AddFacility(byte new_facility_bit, TileIndex facil_xy);
 
@@ -223,43 +219,17 @@ public:
 	uint GetPlatformLength(TileIndex tile) const;
 	bool IsBuoy() const;
 
-	/**
-	 * Determines whether a station exists
-	 * @return true if and only is the station exists
-	 */
-	inline bool IsValid() const { return this->xy != INVALID_TILE; }
-
 	uint GetCatchmentRadius() const;
 };
 
-static inline StationID GetMaxStationIndex()
-{
-	/* TODO - This isn't the real content of the function, but
-	 *  with the new pool-system this will be replaced with one that
-	 *  _really_ returns the highest index. Now it just returns
-	 *  the next safe value we are sure about everything is below.
-	 */
-	return GetStationPoolSize() - 1;
-}
-
-static inline uint GetNumStations()
-{
-	return GetStationPoolSize();
-}
-
-static inline bool IsValidStationID(StationID index)
-{
-	return index < GetStationPoolSize() && GetStation(index)->IsValid();
-}
-
-#define FOR_ALL_STATIONS_FROM(st, start) for (st = GetStation(start); st != NULL; st = (st->index + 1U < GetStationPoolSize()) ? GetStation(st->index + 1U) : NULL) if (st->IsValid())
-#define FOR_ALL_STATIONS(st) FOR_ALL_STATIONS_FROM(st, 0)
+#define FOR_ALL_STATIONS_FROM(var, start) FOR_ALL_ITEMS_FROM(Station, station_index, var, start)
+#define FOR_ALL_STATIONS(var) FOR_ALL_STATIONS_FROM(var, 0)
 
 
 /* Stuff for ROADSTOPS */
 
-#define FOR_ALL_ROADSTOPS_FROM(rs, start) for (rs = GetRoadStop(start); rs != NULL; rs = (rs->index + 1U < GetRoadStopPoolSize()) ? GetRoadStop(rs->index + 1U) : NULL) if (rs->IsValid())
-#define FOR_ALL_ROADSTOPS(rs) FOR_ALL_ROADSTOPS_FROM(rs, 0)
+#define FOR_ALL_ROADSTOPS_FROM(var, start) FOR_ALL_ITEMS_FROM(RoadStop, roadstop_index, var, start)
+#define FOR_ALL_ROADSTOPS(var) FOR_ALL_ROADSTOPS_FROM(var, 0)
 
 /* End of stuff for ROADSTOPS */
 

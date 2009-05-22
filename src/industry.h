@@ -5,7 +5,7 @@
 #ifndef INDUSTRY_H
 #define INDUSTRY_H
 
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 #include "core/random_func.hpp"
 #include "newgrf_storage.h"
 #include "cargo_type.h"
@@ -90,12 +90,13 @@ enum IndustryBehaviour {
 
 DECLARE_ENUM_AS_BIT_SET(IndustryBehaviour);
 
-DECLARE_OLD_POOL(Industry, Industry, 3, 8000)
+typedef Pool<Industry, IndustryID, 64, 64000> IndustryPool;
+extern IndustryPool _industry_pool;
 
 /**
  * Defines the internal data of a functionnal industry
  */
-struct Industry : PoolItem<Industry, IndustryID, &_Industry_pool> {
+struct Industry : IndustryPool::PoolItem<&_industry_pool> {
 	typedef PersistentStorageArray<uint32, 16> PersistentStorage;
 
 	TileIndex xy;                       ///< coordinates of the primary tile the industry is built one
@@ -134,8 +135,6 @@ struct Industry : PoolItem<Industry, IndustryID, &_Industry_pool> {
 
 	Industry(TileIndex tile = INVALID_TILE) : xy(tile) {}
 	~Industry();
-
-	inline bool IsValid() const { return this->xy != INVALID_TILE; }
 };
 
 struct IndustryTileTable {
@@ -265,34 +264,7 @@ void BuildIndustriesLegend();
 /* industry_cmd.cpp */
 void SetIndustryDailyChanges();
 
-/**
- * Check if an Industry exists whithin the pool of industries
- * @param index of the desired industry
- * @return true if it is inside the pool
- */
-static inline bool IsValidIndustryID(IndustryID index)
-{
-	return index < GetIndustryPoolSize() && GetIndustry(index)->IsValid();
-}
-
-
-static inline IndustryID GetMaxIndustryIndex()
-{
-	/* TODO - This isn't the real content of the function, but
-	 *  with the new pool-system this will be replaced with one that
-	 *  _really_ returns the highest index. Now it just returns
-	 *  the next safe value we are sure about everything is below.
-	 */
-	return GetIndustryPoolSize() - 1;
-}
-
-extern int _total_industries;  // general counter
 extern uint16 _industry_counts[NUM_INDUSTRYTYPES]; // Number of industries per type ingame
-
-static inline uint GetNumIndustries()
-{
-	return _total_industries;
-}
 
 /** Increment the count of industries for this type
  * @param type IndustryType to increment
@@ -301,7 +273,6 @@ static inline void IncIndustryTypeCount(IndustryType type)
 {
 	assert(type < INVALID_INDUSTRYTYPE);
 	_industry_counts[type]++;
-	_total_industries++;
 }
 
 /** Decrement the count of industries for this type
@@ -311,7 +282,6 @@ static inline void DecIndustryTypeCount(IndustryType type)
 {
 	assert(type < INVALID_INDUSTRYTYPE);
 	_industry_counts[type]--;
-	_total_industries--;
 }
 
 /** get the count of industries for this type
@@ -327,7 +297,6 @@ static inline uint8 GetIndustryTypeCount(IndustryType type)
  * This way, we centralize all counts activities */
 static inline void ResetIndustryCounts()
 {
-	_total_industries = 0;
 	memset(&_industry_counts, 0, sizeof(_industry_counts));
 }
 
@@ -336,27 +305,27 @@ static inline void ResetIndustryCounts()
  */
 static inline Industry *GetRandomIndustry()
 {
-	int num = RandomRange(GetNumIndustries());
-	IndustryID index = INVALID_INDUSTRY;
+	if (Industry::GetNumItems() == 0) return NULL;
 
-	if (GetNumIndustries() == 0) return NULL;
+	int num = RandomRange((uint16)Industry::GetNumItems());
+	IndustryID index = INVALID_INDUSTRY;
 
 	while (num >= 0) {
 		num--;
 		index++;
 
 		/* Make sure we have a valid industry */
-		while (!IsValidIndustryID(index)) {
+		while (!Industry::IsValidID(index)) {
 			index++;
-			assert(index <= GetMaxIndustryIndex());
+			assert(index < Industry::GetPoolSize());
 		}
 	}
 
-	return GetIndustry(index);
+	return Industry::Get(index);
 }
 
-#define FOR_ALL_INDUSTRIES_FROM(i, start) for (i = GetIndustry(start); i != NULL; i = (i->index + 1U < GetIndustryPoolSize()) ? GetIndustry(i->index + 1U) : NULL) if (i->IsValid())
-#define FOR_ALL_INDUSTRIES(i) FOR_ALL_INDUSTRIES_FROM(i, 0)
+#define FOR_ALL_INDUSTRIES_FROM(var, start) FOR_ALL_ITEMS_FROM(Industry, industry_index, var, start)
+#define FOR_ALL_INDUSTRIES(var) FOR_ALL_INDUSTRIES_FROM(var, 0)
 
 static const uint8 IT_INVALID = 255;
 

@@ -6,9 +6,10 @@
 #include "command_func.h"
 #include "group.h"
 #include "autoreplace_base.h"
-#include "oldpool_func.h"
+#include "core/pool_func.hpp"
 
-DEFINE_OLD_POOL_GENERIC(EngineRenew, EngineRenew)
+EngineRenewPool _enginerenew_pool("EngineRenew");
+INSTANTIATE_POOL_METHODS(EngineRenew)
 
 /**
  * Retrieves the EngineRenew that specifies the replacement of the given
@@ -40,7 +41,7 @@ void RemoveAllEngineReplacement(EngineRenewList *erl)
 EngineID EngineReplacement(EngineRenewList erl, EngineID engine, GroupID group)
 {
 	const EngineRenew *er = GetEngineReplacement(erl, engine, group);
-	if (er == NULL && (group == DEFAULT_GROUP || (IsValidGroupID(group) && !GetGroup(group)->replace_protection))) {
+	if (er == NULL && (group == DEFAULT_GROUP || (Group::IsValidID(group) && !Group::Get(group)->replace_protection))) {
 		/* We didn't find anything useful in the vehicle's own group so we will try ALL_GROUP */
 		er = GetEngineReplacement(erl, engine, ALL_GROUP);
 	}
@@ -101,7 +102,5 @@ CommandCost RemoveEngineReplacement(EngineRenewList *erl, EngineID engine, Group
 
 void InitializeEngineRenews()
 {
-	/* Clean the engine renew pool and create 1 block in it */
-	_EngineRenew_pool.CleanPool();
-	_EngineRenew_pool.AddBlockToPool();
+	_enginerenew_pool.CleanPool();
 }

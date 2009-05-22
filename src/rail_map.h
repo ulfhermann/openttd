@@ -42,11 +42,22 @@ static inline RailTileType GetRailTileType(TileIndex t)
  * @pre IsTileType(t, MP_RAILWAY)
  * @return true if and only if the tile is normal rail (with or without signals)
  */
-static inline bool IsPlainRailTile(TileIndex t)
+static inline bool IsPlainRail(TileIndex t)
 {
 	RailTileType rtt = GetRailTileType(t);
 	return rtt == RAIL_TILE_NORMAL || rtt == RAIL_TILE_SIGNALS;
 }
+
+/**
+ * Checks whether the tile is a rail tile or rail tile with signals.
+ * @param t the tile to get the information from
+ * @return true if and only if the tile is normal rail (with or without signals)
+ */
+static inline bool IsPlainRailTile(TileIndex t)
+{
+	return IsTileType(t, MP_RAILWAY) && IsPlainRail(t);
+}
+
 
 /**
  * Checks if a rail tile has signals.
@@ -141,6 +152,7 @@ static inline void SetRailType(TileIndex t, RailType r)
  */
 static inline TrackBits GetTrackBits(TileIndex tile)
 {
+	assert(IsPlainRailTile(tile));
 	return (TrackBits)GB(_m[tile].m5, 0, 6);
 }
 
@@ -151,6 +163,7 @@ static inline TrackBits GetTrackBits(TileIndex tile)
  */
 static inline void SetTrackBits(TileIndex t, TrackBits b)
 {
+	assert(IsPlainRailTile(t));
 	SB(_m[t].m5, 0, 6, b);
 }
 
