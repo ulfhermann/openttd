@@ -175,10 +175,11 @@ void FixOldVehicles()
 		v->name = CopyFromOldName(_old_vehicle_names[v->index]);
 
 		/* We haven't used this bit for stations for ages */
-		if (v->type == VEH_ROAD &&
-				v->u.road.state != RVSB_IN_DEPOT &&
-				v->u.road.state != RVSB_WORMHOLE) {
-			ClrBit(v->u.road.state, RVS_IS_STOPPING);
+		if (v->type == VEH_ROAD) {
+			RoadVehicle *rv = (RoadVehicle *)v;
+			if (rv->state != RVSB_IN_DEPOT && rv->state != RVSB_WORMHOLE) {
+				ClrBit(rv->state, RVS_IS_STOPPING);
+			}
 		}
 
 		/* The subtype should be 0, but it sometimes isn't :( */
@@ -1089,13 +1090,13 @@ static const OldChunks vehicle_train_chunk[] = {
 };
 
 static const OldChunks vehicle_road_chunk[] = {
-	OCL_SVAR(  OC_UINT8, VehicleRoad, state ),
-	OCL_SVAR(  OC_UINT8, VehicleRoad, frame ),
-	OCL_SVAR( OC_UINT16, VehicleRoad, blocked_ctr ),
-	OCL_SVAR(  OC_UINT8, VehicleRoad, overtaking ),
-	OCL_SVAR(  OC_UINT8, VehicleRoad, overtaking_ctr ),
-	OCL_SVAR( OC_UINT16, VehicleRoad, crashed_ctr ),
-	OCL_SVAR(  OC_UINT8, VehicleRoad, reverse_ctr ),
+	OCL_SVAR(  OC_UINT8, RoadVehicle, state ),
+	OCL_SVAR(  OC_UINT8, RoadVehicle, frame ),
+	OCL_SVAR( OC_UINT16, RoadVehicle, blocked_ctr ),
+	OCL_SVAR(  OC_UINT8, RoadVehicle, overtaking ),
+	OCL_SVAR(  OC_UINT8, RoadVehicle, overtaking_ctr ),
+	OCL_SVAR( OC_UINT16, RoadVehicle, crashed_ctr ),
+	OCL_SVAR(  OC_UINT8, RoadVehicle, reverse_ctr ),
 
 	OCL_NULL( 1 ), ///< Junk
 
@@ -1103,7 +1104,7 @@ static const OldChunks vehicle_road_chunk[] = {
 };
 
 static const OldChunks vehicle_ship_chunk[] = {
-	OCL_SVAR(  OC_UINT8, VehicleShip, state ),
+	OCL_SVAR(  OC_UINT8, Ship, state ),
 
 	OCL_NULL( 9 ), ///< Junk
 
@@ -1111,10 +1112,10 @@ static const OldChunks vehicle_ship_chunk[] = {
 };
 
 static const OldChunks vehicle_air_chunk[] = {
-	OCL_SVAR(  OC_UINT8, VehicleAir, pos ),
-	OCL_SVAR(  OC_FILE_U8 | OC_VAR_U16, VehicleAir, targetairport ),
-	OCL_SVAR( OC_UINT16, VehicleAir, crashed_counter ),
-	OCL_SVAR(  OC_UINT8, VehicleAir, state ),
+	OCL_SVAR(  OC_UINT8, Aircraft, pos ),
+	OCL_SVAR(  OC_FILE_U8 | OC_VAR_U16, Aircraft, targetairport ),
+	OCL_SVAR( OC_UINT16, Aircraft, crashed_counter ),
+	OCL_SVAR(  OC_UINT8, Aircraft, state ),
 
 	OCL_NULL( 5 ), ///< Junk
 
@@ -1122,8 +1123,8 @@ static const OldChunks vehicle_air_chunk[] = {
 };
 
 static const OldChunks vehicle_effect_chunk[] = {
-	OCL_SVAR( OC_UINT16, VehicleEffect, animation_state ),
-	OCL_SVAR(  OC_UINT8, VehicleEffect, animation_substate ),
+	OCL_SVAR( OC_UINT16, EffectVehicle, animation_state ),
+	OCL_SVAR(  OC_UINT8, EffectVehicle, animation_substate ),
 
 	OCL_NULL( 7 ), // Junk
 
@@ -1131,8 +1132,8 @@ static const OldChunks vehicle_effect_chunk[] = {
 };
 
 static const OldChunks vehicle_disaster_chunk[] = {
-	OCL_SVAR( OC_UINT16, VehicleDisaster, image_override ),
-	OCL_SVAR( OC_UINT16, VehicleDisaster, big_ufo_destroyer_target ),
+	OCL_SVAR( OC_UINT16, DisasterVehicle, image_override ),
+	OCL_SVAR( OC_UINT16, DisasterVehicle, big_ufo_destroyer_target ),
 
 	OCL_NULL( 6 ), ///< Junk
 
@@ -1157,11 +1158,11 @@ static bool LoadOldVehicleUnion(LoadgameState *ls, int num)
 		switch (v->type) {
 			default: NOT_REACHED();
 			case VEH_TRAIN   : res = LoadChunk(ls, &v->u.rail,     vehicle_train_chunk);    break;
-			case VEH_ROAD    : res = LoadChunk(ls, &v->u.road,     vehicle_road_chunk);     break;
-			case VEH_SHIP    : res = LoadChunk(ls, &v->u.ship,     vehicle_ship_chunk);     break;
-			case VEH_AIRCRAFT: res = LoadChunk(ls, &v->u.air,      vehicle_air_chunk);      break;
-			case VEH_EFFECT  : res = LoadChunk(ls, &v->u.effect,   vehicle_effect_chunk);   break;
-			case VEH_DISASTER: res = LoadChunk(ls, &v->u.disaster, vehicle_disaster_chunk); break;
+			case VEH_ROAD    : res = LoadChunk(ls, v, vehicle_road_chunk);     break;
+			case VEH_SHIP    : res = LoadChunk(ls, v, vehicle_ship_chunk);     break;
+			case VEH_AIRCRAFT: res = LoadChunk(ls, v, vehicle_air_chunk);      break;
+			case VEH_EFFECT  : res = LoadChunk(ls, v, vehicle_effect_chunk);   break;
+			case VEH_DISASTER: res = LoadChunk(ls, v, vehicle_disaster_chunk); break;
 		}
 	}
 
