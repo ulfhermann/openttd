@@ -875,13 +875,13 @@ public:
 					const LinkStatMap & links = sta->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 						StationID id = i->first;
-						if (!IsValidStationID(id)) {
+						if (!Station::IsValidID(id)) {
 							continue; // dead link
 						}
-						const Station *stb = GetStation(id);
+						const Station *stb = Station::Get(id);
 
-						if (sta->owner != _local_company && IsValidCompanyID(sta->owner)) continue;
-						if (stb->owner != _local_company && IsValidCompanyID(stb->owner)) continue;
+						if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
+						if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
 
 						TileIndex ta = sta->xy;
 						TileIndex tb = stb->xy;
@@ -958,7 +958,7 @@ public:
 			const Station *st;
 
 			FOR_ALL_STATIONS(st) {
-				if (st->owner != _local_company && IsValidCompanyID(st->owner)) continue;
+				if (st->owner != _local_company && Company::IsValidID(st->owner)) continue;
 
 				TileIndex t = st->xy;
 

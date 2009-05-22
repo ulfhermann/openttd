@@ -28,7 +28,7 @@
 #include "road_func.h"
 #include "rail.h"
 #include "sprite.h"
-#include "oldpool_func.h"
+#include "core/pool_func.hpp"
 
 #include "table/strings.h"
 
@@ -40,7 +40,8 @@ CompanyManagerFace _company_manager_face; ///< for company manager face storage 
 uint _next_competitor_start;              ///< the number of ticks before the next AI is started
 uint _cur_company_tick_index;             ///< used to generate a name for one company that doesn't have a name yet per tick
 
-DEFINE_OLD_POOL_GENERIC(Company, Company)
+CompanyPool _company_pool("Company");
+INSTANTIATE_POOL_METHODS(Company)
 
 Company::Company(uint16 name_1, bool is_ai) :
 	name_1(name_1),
@@ -59,28 +60,25 @@ Company::~Company()
 	if (CleaningPool()) return;
 
 	DeleteCompanyWindows(this->index);
-	this->name_1 = 0;
 }
 
 /**
  * Sets the local company and updates the settings that are set on a
  * per-company basis to reflect the core's state in the GUI.
  * @param new_company the new company
- * @pre IsValidCompanyID(new_company) || new_company == COMPANY_SPECTATOR || new_company == OWNER_NONE
+ * @pre Company::IsValidID(new_company) || new_company == COMPANY_SPECTATOR || new_company == OWNER_NONE
  */
 void SetLocalCompany(CompanyID new_company)
 {
 	/* company could also be COMPANY_SPECTATOR or OWNER_NONE */
-	assert(IsValidCompanyID(new_company) || new_company == COMPANY_SPECTATOR || new_company == OWNER_NONE);
+	assert(Company::IsValidID(new_company) || new_company == COMPANY_SPECTATOR || new_company == OWNER_NONE);
 
 	_local_company = new_company;
 
 	/* Do not update the settings if we are in the intro GUI */
-	if (IsValidCompanyID(new_company) && _game_mode != GM_MENU) {
-		const Company *c = GetCompany(new_company);
-		_settings_client.gui.autorenew        = c->engine_renew;
-		_settings_client.gui.autorenew_months = c->engine_renew_months;
-		_settings_client.gui.autorenew_money  = c->engine_renew_money;
+	const Company *c = Company::GetIfValid(new_company);
+	if (_game_mode != GM_MENU && c != NULL) {
+		_settings_client.company = c->settings;
 		InvalidateWindow(WC_GAME_OPTIONS, 0);
 	}
 
@@ -93,7 +91,7 @@ void SetLocalCompany(CompanyID new_company)
 
 bool IsHumanCompany(CompanyID company)
 {
-	return !GetCompany(company)->is_ai;
+	return !Company::Get(company)->is_ai;
 }
 
 
@@ -101,7 +99,7 @@ uint16 GetDrawStringCompanyColour(CompanyID company)
 {
 	/* Get the colour for DrawString-subroutines which matches the colour
 	 * of the company */
-	if (!IsValidCompanyID(company)) return _colour_gradient[COLOUR_WHITE][4] | IS_PALETTE_COLOUR;
+	if (!Company::IsValidID(company)) return _colour_gradient[COLOUR_WHITE][4] | IS_PALETTE_COLOUR;
 	return (_colour_gradient[_company_colours[company]][4]) | IS_PALETTE_COLOUR;
 }
 
@@ -152,8 +150,8 @@ void InvalidateCompanyWindows(const Company *company)
 bool CheckCompanyHasMoney(CommandCost cost)
 {
 	if (cost.GetCost() > 0) {
-		CompanyID company = _current_company;
-		if (IsValidCompanyID(company) && cost.GetCost() > GetCompany(company)->money) {
+		const Company *c = Company::GetIfValid(_current_company);
+		if (c != NULL && cost.GetCost() > c->money) {
 			SetDParam(0, cost.GetCost());
 			_error_message = STR_ERROR_NOT_ENOUGH_CASH_REQUIRES_CURRENCY;
 			return false;
@@ -189,14 +187,13 @@ static void SubtractMoneyFromAnyCompany(Company *c, CommandCost cost)
 
 void SubtractMoneyFromCompany(CommandCost cost)
 {
-	CompanyID cid = _current_company;
-
-	if (IsValidCompanyID(cid)) SubtractMoneyFromAnyCompany(GetCompany(cid), cost);
+	Company *c = Company::GetIfValid(_current_company);
+	if (c != NULL) SubtractMoneyFromAnyCompany(c, cost);
 }
 
 void SubtractMoneyFromCompanyFract(CompanyID company, CommandCost cst)
 {
-	Company *c = GetCompany(company);
+	Company *c = Company::Get(company);
 	byte m = c->money_fraction;
 	Money cost = cst.GetCost();
 
@@ -211,7 +208,7 @@ void GetNameOfOwner(Owner owner, TileIndex tile)
 	SetDParam(2, owner);
 
 	if (owner != OWNER_TOWN) {
-		if (!IsValidCompanyID(owner)) {
+		if (!Company::IsValidID(owner)) {
 			SetDParam(0, STR_COMPANY_SOMEONE);
 		} else {
 			SetDParam(0, STR_COMPANY_NAME);
@@ -424,7 +421,7 @@ void ResetCompanyLivery(Company *c)
  */
 Company *DoStartupNewCompany(bool is_ai)
 {
-	if (ActiveCompanyCount() == MAX_COMPANIES || !Company::CanAllocateItem()) return NULL;
+	if (!Company::CanAllocateItem()) return NULL;
 
 	/* we have to generate colour before this company is valid */
 	Colours colour = GenerateCompanyColour();
@@ -445,6 +442,12 @@ Company *DoStartupNewCompany(bool is_ai)
 	c->inaugurated_year = _cur_year;
 	RandomCompanyManagerFaceBits(c->face, (GenderEthnicity)Random(), false); // create a random company manager face
 
+	/* Settings for non-ai companies are copied from the client settings later. */
+	if (is_ai) {
+		c->settings.engine_renew_money = 100000;
+		c->settings.engine_renew_months = 6;
+	}
+
 	GeneratePresidentName(c);
 
 	InvalidateWindow(WC_GRAPH_LEGEND, 0);
@@ -453,7 +456,7 @@ Company *DoStartupNewCompany(bool is_ai)
 
 	if (is_ai && (!_networking || _network_server)) AI::StartNew(c->index);
 
-	c->num_engines = CallocT<uint16>(GetEnginePoolSize());
+	c->num_engines = CallocT<uint16>(Engine::GetPoolSize());
 
 	return c;
 }
@@ -466,7 +469,7 @@ void StartupCompanies()
 static void MaybeStartNewCompany()
 {
 #ifdef ENABLE_NETWORK
-	if (_networking && ActiveCompanyCount() >= _settings_client.network.max_companies) return;
+	if (_networking && Company::GetNumItems() >= _settings_client.network.max_companies) return;
 #endif /* ENABLE_NETWORK */
 
 	Company *c;
@@ -486,8 +489,7 @@ static void MaybeStartNewCompany()
 
 void InitializeCompanies()
 {
-	_Company_pool.CleanPool();
-	_Company_pool.AddBlockToPool();
+	_company_pool.CleanPool();
 	_cur_company_tick_index = 0;
 }
 
@@ -495,9 +497,9 @@ void OnTick_Companies()
 {
 	if (_game_mode == GM_EDITOR) return;
 
-	if (IsValidCompanyID((CompanyID)_cur_company_tick_index)) {
-		Company *c = GetCompany((CompanyID)_cur_company_tick_index);
-		if (c->name_1 != 0) GenerateCompanyName(c);
+	Company *c = Company::GetIfValid(_cur_company_tick_index);
+	if (c != NULL && c->name_1 != 0) {
+		GenerateCompanyName(c);
 	}
 
 	if (_next_competitor_start == 0) {
@@ -524,7 +526,7 @@ void CompaniesYearlyLoop()
 
 	if (_settings_client.gui.show_finances && _local_company != COMPANY_SPECTATOR) {
 		ShowCompanyFinances(_local_company);
-		c = GetCompany(_local_company);
+		c = Company::Get(_local_company);
 		if (c->num_valid_stat_ent > 5 && c->old_economy[0].performance_history < c->old_economy[4].performance_history) {
 			SndPlayFx(SND_01_BAD_YEAR);
 		} else {
@@ -563,17 +565,17 @@ void CompaniesYearlyLoop()
  */
 CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!IsValidCompanyID(_current_company)) return CMD_ERROR;
+	Company *c = Company::GetIfValid(_current_company);
+	if (c == NULL) return CMD_ERROR;
 
-	Company *c = GetCompany(_current_company);
 	switch (GB(p1, 0, 3)) {
 		case 0:
-			if (c->engine_renew == HasBit(p2, 0)) return CMD_ERROR;
+			if (c->settings.engine_renew == HasBit(p2, 0)) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
-				c->engine_renew = HasBit(p2, 0);
+				c->settings.engine_renew = HasBit(p2, 0);
 				if (IsLocalCompany()) {
-					_settings_client.gui.autorenew = c->engine_renew;
+					_settings_client.company.engine_renew = c->settings.engine_renew;
 					InvalidateWindow(WC_GAME_OPTIONS, 0);
 				}
 			}
@@ -581,12 +583,12 @@ CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 
 		case 1:
 			if (Clamp((int16)p2, -12, 12) != (int16)p2) return CMD_ERROR;
-			if (c->engine_renew_months == (int16)p2) return CMD_ERROR;
+			if (c->settings.engine_renew_months == (int16)p2) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
-				c->engine_renew_months = (int16)p2;
+				c->settings.engine_renew_months = (int16)p2;
 				if (IsLocalCompany()) {
-					_settings_client.gui.autorenew_months = c->engine_renew_months;
+					_settings_client.company.engine_renew_months = c->settings.engine_renew_months;
 					InvalidateWindow(WC_GAME_OPTIONS, 0);
 				}
 			}
@@ -594,12 +596,12 @@ CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 
 		case 2:
 			if (ClampU(p2, 0, 2000000) != p2) return CMD_ERROR;
-			if (c->engine_renew_money == p2) return CMD_ERROR;
+			if (c->settings.engine_renew_money == p2) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
-				c->engine_renew_money = p2;
+				c->settings.engine_renew_money = p2;
 				if (IsLocalCompany()) {
-					_settings_client.gui.autorenew_money = c->engine_renew_money;
+					_settings_client.company.engine_renew_money = c->settings.engine_renew_money;
 					InvalidateWindow(WC_GAME_OPTIONS, 0);
 				}
 			}
@@ -611,7 +613,7 @@ CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 			GroupID id_g = GB(p1, 16, 16);
 			CommandCost cost;
 
-			if (!IsValidGroupID(id_g) && !IsAllGroupID(id_g) && !IsDefaultGroupID(id_g)) return CMD_ERROR;
+			if (!Group::IsValidID(id_g) && !IsAllGroupID(id_g) && !IsDefaultGroupID(id_g)) return CMD_ERROR;
 			if (new_engine_type != INVALID_ENGINE) {
 				if (!CheckAutoreplaceValidity(old_engine_type, new_engine_type, _current_company)) return CMD_ERROR;
 
@@ -630,24 +632,24 @@ CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 			if (ClampU(p2, 0, 2000000) != p2) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
-				c->engine_renew = HasBit(p1, 15);
-				c->engine_renew_months = (int16)GB(p1, 16, 16);
-				c->engine_renew_money = p2;
+				c->settings.engine_renew = HasBit(p1, 15);
+				c->settings.engine_renew_months = (int16)GB(p1, 16, 16);
+				c->settings.engine_renew_money = p2;
 
 				if (IsLocalCompany()) {
-					_settings_client.gui.autorenew = c->engine_renew;
-					_settings_client.gui.autorenew_months = c->engine_renew_months;
-					_settings_client.gui.autorenew_money = c->engine_renew_money;
+					_settings_client.company.engine_renew = c->settings.engine_renew;
+					_settings_client.company.engine_renew_months = c->settings.engine_renew_months;
+					_settings_client.company.engine_renew_money = c->settings.engine_renew_money;
 					InvalidateWindow(WC_GAME_OPTIONS, 0);
 				}
 			}
 			break;
 
 		case 5:
-			if (c->renew_keep_length == HasBit(p2, 0)) return CMD_ERROR;
+			if (c->settings.renew_keep_length == HasBit(p2, 0)) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
-				c->renew_keep_length = HasBit(p2, 0);
+				c->settings.renew_keep_length = HasBit(p2, 0);
 				if (IsLocalCompany()) {
 					InvalidateWindow(WC_REPLACE_VEHICLE, VEH_TRAIN);
 				}
@@ -719,10 +721,10 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 			/* Joining Client:
 			 * _local_company: COMPANY_SPECTATOR
-			 * _network_playas/cid = requested company/clientid
+			 * cid = clientid
 			 *
 			 * Other client(s)/server:
-			 * _local_company/_network_playas: what they play as
+			 * _local_company: what they play as
 			 * cid = requested company/company of joining client */
 			ClientID cid = (ClientID)p2;
 
@@ -741,8 +743,6 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				if (_network_server) {
 					ci->client_playas = COMPANY_SPECTATOR;
 					NetworkUpdateClientInfo(ci->client_id);
-				} else if (_local_company == COMPANY_SPECTATOR) {
-					_network_playas = COMPANY_SPECTATOR;
 				}
 				break;
 			}
@@ -750,8 +750,8 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			/* This is the client (or non-dedicated server) who wants a new company */
 			if (cid == _network_own_client_id) {
 				/* Create p1 and p2 here because SetLocalCompany resets the gui.autorenew* settings. */
-				uint32 p1 = (_settings_client.gui.autorenew << 15 ) | (_settings_client.gui.autorenew_months << 16) | 4;
-				uint32 p2 = _settings_client.gui.autorenew_money;
+				uint32 p1 = (_settings_client.company.engine_renew << 15 ) | (_settings_client.company.engine_renew_months << 16) | 4;
+				uint32 p2 = _settings_client.company.engine_renew_money;
 				assert(_local_company == COMPANY_SPECTATOR);
 				SetLocalCompany(c->index);
 				if (!StrEmpty(_settings_client.network.default_company_pass)) {
@@ -776,7 +776,7 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				ci->client_playas = c->index;
 				NetworkUpdateClientInfo(ci->client_id);
 
-				if (IsValidCompanyID(ci->client_playas)) {
+				if (Company::IsValidID(ci->client_playas)) {
 					CompanyID company_backup = _local_company;
 					_network_company_states[c->index].months_empty = 0;
 					_network_company_states[c->index].password[0] = '\0';
@@ -813,13 +813,10 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			break;
 
 		case 2: { // Delete a company
-			Company *c;
-
-			if (!IsValidCompanyID((CompanyID)p2)) return CMD_ERROR;
+			Company *c = Company::GetIfValid(p2);
+			if (c == NULL) return CMD_ERROR;
 
 			if (!(flags & DC_EXEC)) return CommandCost();
-
-			c = GetCompany((CompanyID)p2);
 
 			/* Delete any open window of the company */
 			DeleteCompanyWindows(c->index);
@@ -845,12 +842,12 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			CompanyID cid_old = (CompanyID)GB(p2,  0, 16);
 			CompanyID cid_new = (CompanyID)GB(p2, 16, 16);
 
-			if (!IsValidCompanyID(cid_old) || !IsValidCompanyID(cid_new)) return CMD_ERROR;
+			if (!Company::IsValidID(cid_old) || !Company::IsValidID(cid_new)) return CMD_ERROR;
 
 			if (!(flags & DC_EXEC)) return CMD_ERROR;
 
 			ChangeOwnershipOfCompanyItems(cid_old, cid_new);
-			delete GetCompany(cid_old);
+			delete Company::Get(cid_old);
 		} break;
 
 		default: return CMD_ERROR;

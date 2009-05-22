@@ -16,7 +16,8 @@
 
 /* static */ bool AIGroup::IsValidGroup(GroupID group_id)
 {
-	return ::IsValidGroupID(group_id) && ::GetGroup(group_id)->owner == _current_company;
+	const Group *g = ::Group::GetIfValid(group_id);
+	return g != NULL && g->owner == _current_company;
 }
 
 /* static */ AIGroup::GroupID AIGroup::CreateGroup(AIVehicle::VehicleType vehicle_type)
@@ -38,7 +39,7 @@
 {
 	if (!IsValidGroup(group_id)) return AIVehicle::VT_INVALID;
 
-	return (AIVehicle::VehicleType)((::VehicleType)::GetGroup(group_id)->vehicle_type);
+	return (AIVehicle::VehicleType)((::VehicleType)::Group::Get(group_id)->vehicle_type);
 }
 
 /* static */ bool AIGroup::SetName(GroupID group_id, const char *name)
@@ -73,7 +74,7 @@
 {
 	if (!IsValidGroup(group_id)) return false;
 
-	return ::GetGroup(group_id)->replace_protection;
+	return ::Group::Get(group_id)->replace_protection;
 }
 
 /* static */ int32 AIGroup::GetNumEngines(GroupID group_id, EngineID engine_id)
@@ -100,7 +101,7 @@
 
 /* static */ bool AIGroup::HasWagonRemoval()
 {
-	return ::GetCompany(_current_company)->renew_keep_length;
+	return ::Company::Get(_current_company)->settings.renew_keep_length;
 }
 
 /* static */ bool AIGroup::SetAutoReplace(GroupID group_id, EngineID engine_id_old, EngineID engine_id_new)
@@ -115,7 +116,7 @@
 {
 	if (!IsValidGroup(group_id) && group_id != GROUP_ALL) return ::INVALID_ENGINE;
 
-	return ::EngineReplacementForCompany(GetCompany(_current_company), engine_id, group_id);
+	return ::EngineReplacementForCompany(Company::Get(_current_company), engine_id, group_id);
 }
 
 /* static */ bool AIGroup::StopAutoReplace(GroupID group_id, EngineID engine_id)

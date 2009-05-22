@@ -7,12 +7,13 @@
 
 #include "engine_type.h"
 #include "economy_type.h"
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 #include "core/smallvec_type.hpp"
 
-DECLARE_OLD_POOL(Engine, Engine, 6, 10000)
+typedef Pool<Engine, EngineID, 64, 64000> EnginePool;
+extern EnginePool _engine_pool;
 
-struct Engine : PoolItem<Engine, EngineID, &_Engine_pool> {
+struct Engine : EnginePool::PoolItem<&_engine_pool> {
 	char *name;         ///< Custom name of engine
 	Date intro_date;
 	Date age;
@@ -49,8 +50,6 @@ struct Engine : PoolItem<Engine, EngineID, &_Engine_pool> {
 	Engine(VehicleType type, EngineID base);
 	~Engine();
 
-	inline bool IsValid() const { return this->info.climates != 0; }
-
 	CargoID GetDefaultCargoType() const;
 	bool CanCarryCargo() const;
 	uint GetDisplayDefaultCapacity() const;
@@ -82,39 +81,34 @@ struct EngineOverrideManager : SmallVector<EngineIDMapping, 256> {
 
 extern EngineOverrideManager _engine_mngr;
 
-static inline bool IsEngineIndex(uint index)
-{
-	return index < GetEnginePoolSize();
-}
-
-#define FOR_ALL_ENGINES_FROM(e, start) for (e = GetEngine(start); e != NULL; e = (e->index + 1U < GetEnginePoolSize()) ? GetEngine(e->index + 1U) : NULL) if (e->IsValid())
-#define FOR_ALL_ENGINES(e) FOR_ALL_ENGINES_FROM(e, 0)
+#define FOR_ALL_ENGINES_FROM(var, start) FOR_ALL_ITEMS_FROM(Engine, engine_index, var, start)
+#define FOR_ALL_ENGINES(var) FOR_ALL_ENGINES_FROM(var, 0)
 
 #define FOR_ALL_ENGINES_OF_TYPE(e, engine_type) FOR_ALL_ENGINES(e) if (e->type == engine_type)
 
 static inline const EngineInfo *EngInfo(EngineID e)
 {
-	return &GetEngine(e)->info;
+	return &Engine::Get(e)->info;
 }
 
 static inline const RailVehicleInfo *RailVehInfo(EngineID e)
 {
-	return &GetEngine(e)->u.rail;
+	return &Engine::Get(e)->u.rail;
 }
 
 static inline const RoadVehicleInfo *RoadVehInfo(EngineID e)
 {
-	return &GetEngine(e)->u.road;
+	return &Engine::Get(e)->u.road;
 }
 
 static inline const ShipVehicleInfo *ShipVehInfo(EngineID e)
 {
-	return &GetEngine(e)->u.ship;
+	return &Engine::Get(e)->u.ship;
 }
 
 static inline const AircraftVehicleInfo *AircraftVehInfo(EngineID e)
 {
-	return &GetEngine(e)->u.air;
+	return &Engine::Get(e)->u.air;
 }
 
 #endif /* ENGINE_TYPE_H */

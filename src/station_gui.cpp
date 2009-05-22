@@ -678,7 +678,7 @@ static const WindowDesc _company_stations_desc(
  */
 void ShowCompanyStations(CompanyID company)
 {
-	if (!IsValidCompanyID(company)) return;
+	if (!Company::IsValidID(company)) return;
 
 	AllocateWindowDescFront<CompanyStationsWindow>(&_company_stations_desc, company);
 }
@@ -900,12 +900,12 @@ bool CargoSorter::SortStation(StationID st1, StationID st2) const {
 	static char buf1[64];
 	static char buf2[64];
 
-	if (!IsValidStationID(st1)) {
-		if (!IsValidStationID(st2)) {
+	if (!Station::IsValidID(st1)) {
+		if (!Station::IsValidID(st2)) {
 			return st1 < st2;
 		}
 		else return order == SO_ASCENDING;
-	} else if (!IsValidStationID(st2)) {
+	} else if (!Station::IsValidID(st2)) {
 		return order == SO_DESCENDING;
 	}
 
@@ -989,7 +989,7 @@ struct StationViewWindow : public Window {
 			ToggleSortOrder();
 		} while (sort_orders[1] != last_order);
 
-		Owner owner = GetStation(window_number)->owner;
+		Owner owner = Station::Get(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
 		this->vscroll.cap = 4;
 		this->resize.step_height = 10;
@@ -1000,7 +1000,7 @@ struct StationViewWindow : public Window {
 	~StationViewWindow()
 	{
 		WindowNumber wno =
-			(this->window_number << 16) | VLW_STATION_LIST | GetStation(this->window_number)->owner;
+			(this->window_number << 16) | VLW_STATION_LIST | Station::Get(this->window_number)->owner;
 
 		DeleteWindowById(WC_TRAINS_LIST, wno | (VEH_TRAIN << 11), false);
 		DeleteWindowById(WC_ROADVEH_LIST, wno | (VEH_ROAD << 11), false);
@@ -1033,13 +1033,11 @@ struct StationViewWindow : public Window {
 		}
 	}
 
-
-
 	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, DestinationMap & dest, bool sent) {
-		if (IsValidStationID(next) && IsValidStationID(source)) {
+		if (Station::IsValidID(next) && Station::IsValidID(source)) {
 			DestinationMap tmp;
 			uint sum_flows = 0;
-			FlowStatMap & flowmap = GetStation(next)->goods[cargo].flows;
+			FlowStatMap & flowmap = Station::Get(next)->goods[cargo].flows;
 			FlowStatMap::iterator map_it = flowmap.find(source);
 			if (map_it != flowmap.end()) {
 				FlowStatSet & flows = map_it->second;
@@ -1230,7 +1228,7 @@ struct StationViewWindow : public Window {
 	virtual void OnPaint()
 	{
 		StationID station_id = this->window_number;
-		const Station *st = GetStation(station_id);
+		const Station *st = Station::Get(station_id);
 		CargoDataEntry cargo;
 		BuildCargoList(&cargo, st);
 
@@ -1373,9 +1371,9 @@ struct StationViewWindow : public Window {
 
 			case SVW_LOCATION:
 				if (_ctrl_pressed) {
-					ShowExtraViewPortWindow(GetStation(this->window_number)->xy);
+					ShowExtraViewPortWindow(Station::Get(this->window_number)->xy);
 				} else {
-					ScrollMainWindowToTile(GetStation(this->window_number)->xy);
+					ScrollMainWindowToTile(Station::Get(this->window_number)->xy);
 				}
 				break;
 
@@ -1403,19 +1401,19 @@ struct StationViewWindow : public Window {
 				break;
 
 			case SVW_TRAINS: { // Show a list of scheduled trains to this station
-				const Station *st = GetStation(this->window_number);
+				const Station *st = Station::Get(this->window_number);
 				ShowVehicleListWindow(st->owner, VEH_TRAIN, (StationID)this->window_number);
 				break;
 			}
 
 			case SVW_ROADVEHS: { // Show a list of scheduled road-vehicles to this station
-				const Station *st = GetStation(this->window_number);
+				const Station *st = Station::Get(this->window_number);
 				ShowVehicleListWindow(st->owner, VEH_ROAD, (StationID)this->window_number);
 				break;
 			}
 
 			case SVW_PLANES: { // Show a list of scheduled aircraft to this station
-				const Station *st = GetStation(this->window_number);
+				const Station *st = Station::Get(this->window_number);
 				/* Since oilrigs have no owners, show the scheduled aircraft of local company */
 				Owner owner = (st->owner == OWNER_NONE) ? _local_company : st->owner;
 				ShowVehicleListWindow(owner, VEH_AIRCRAFT, (StationID)this->window_number);
@@ -1423,7 +1421,7 @@ struct StationViewWindow : public Window {
 			}
 
 			case SVW_SHIPS: { // Show a list of scheduled ships to this station
-				const Station *st = GetStation(this->window_number);
+				const Station *st = Station::Get(this->window_number);
 				/* Since oilrigs/bouys have no owners, show the scheduled ships of local company */
 				Owner owner = (st->owner == OWNER_NONE) ? _local_company : st->owner;
 				ShowVehicleListWindow(owner, VEH_SHIP, (StationID)this->window_number);
@@ -1607,7 +1605,7 @@ static bool AddNearbyStation(TileIndex tile, void *user_data)
 	if (!IsTileType(tile, MP_STATION)) return false;
 
 	StationID sid = GetStationIndex(tile);
-	Station *st = GetStation(sid);
+	Station *st = Station::Get(sid);
 	if (st->owner != _local_company || _stations_nearby_list.Contains(sid)) return false;
 
 	if (st->rect.BeforeAddRect(ctx->tile, ctx->w, ctx->h, StationRect::ADD_TEST)) {
@@ -1739,7 +1737,7 @@ struct SelectStationWindow : Window {
 			/* Don't draw anything if it extends past the end of the window. */
 			if (i - this->vscroll.pos >= this->vscroll.cap) break;
 
-			const Station *st = GetStation(_stations_nearby_list[i - 1]);
+			const Station *st = Station::Get(_stations_nearby_list[i - 1]);
 			SetDParam(0, st->index);
 			SetDParam(1, st->facilities);
 			DrawString(3, this->widget[JSW_PANEL].right - 2, y, STR_STATION_LIST_STATION);

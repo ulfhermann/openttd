@@ -18,15 +18,16 @@
 #include "date_func.h"
 #include "autoreplace_gui.h"
 #include "string_func.h"
-#include "oldpool_func.h"
 #include "ai/ai.hpp"
 #include "vehicle_func.h"
 #include "settings_type.h"
+#include "core/pool_func.hpp"
 
 #include "table/strings.h"
 #include "table/engines.h"
 
-DEFINE_OLD_POOL_GENERIC(Engine, Engine)
+EnginePool _engine_pool("Engine");
+INSTANTIATE_POOL_METHODS(Engine)
 
 EngineOverrideManager _engine_mngr;
 
@@ -356,7 +357,7 @@ EngineID EngineOverrideManager::GetID(VehicleType type, uint16 grf_local_id, uin
  */
 void SetCachedEngineCounts()
 {
-	uint engines = GetEnginePoolSize();
+	size_t engines = Engine::GetPoolSize();
 
 	/* Set up the engine count for all companies */
 	Company *c;
@@ -378,11 +379,11 @@ void SetCachedEngineCounts()
 
 		assert(v->engine_type < engines);
 
-		GetCompany(v->owner)->num_engines[v->engine_type]++;
+		Company::Get(v->owner)->num_engines[v->engine_type]++;
 
 		if (v->group_id == DEFAULT_GROUP) continue;
 
-		g = GetGroup(v->group_id);
+		g = Group::Get(v->group_id);
 		assert(v->type == g->vehicle_type);
 		assert(v->owner == g->owner);
 
@@ -392,8 +393,7 @@ void SetCachedEngineCounts()
 
 void SetupEngines()
 {
-	_Engine_pool.CleanPool();
-	_Engine_pool.AddBlockToPool();
+	_engine_pool.CleanPool();
 
 	assert(_engine_mngr.Length() >= _engine_mngr.NUM_DEFAULT_ENGINES);
 	const EngineIDMapping *end = _engine_mngr.End();
@@ -410,7 +410,7 @@ void ShowEnginePreviewWindow(EngineID engine);
 /* Determine if an engine type is a wagon (and not a loco) */
 static bool IsWagon(EngineID index)
 {
-	const Engine *e = GetEngine(index);
+	const Engine *e = Engine::Get(index);
 	return e->type == VEH_TRAIN && e->u.rail.railveh_type == RAILVEH_WAGON;
 }
 
@@ -535,8 +535,8 @@ void StartupEngines()
 
 static void AcceptEnginePreview(EngineID eid, CompanyID company)
 {
-	Engine *e = GetEngine(eid);
-	Company *c = GetCompany(company);
+	Engine *e = Engine::Get(eid);
+	Company *c = Company::Get(company);
 
 	SetBit(e->company_avail, company);
 	if (e->type == VEH_TRAIN) {
@@ -620,11 +620,8 @@ void EnginesDailyLoop()
  */
 CommandCost CmdWantEnginePreview(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Engine *e;
-
-	if (!IsEngineIndex(p1)) return CMD_ERROR;
-	e = GetEngine(p1);
-	if (GetBestCompany(e->preview_company_rank) != _current_company) return CMD_ERROR;
+	Engine *e = Engine::GetIfValid(p1);
+	if (e == NULL || GetBestCompany(e->preview_company_rank) != _current_company) return CMD_ERROR;
 
 	if (flags & DC_EXEC) AcceptEnginePreview(p1, _current_company);
 
@@ -734,7 +731,8 @@ static bool IsUniqueEngineName(const char *name)
  */
 CommandCost CmdRenameEngine(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!IsEngineIndex(p1)) return CMD_ERROR;
+	Engine *e = Engine::GetIfValid(p1);
+	if (e == NULL) return CMD_ERROR;
 
 	bool reset = StrEmpty(text);
 
@@ -744,7 +742,6 @@ CommandCost CmdRenameEngine(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	}
 
 	if (flags & DC_EXEC) {
-		Engine *e = GetEngine(p1);
 		free(e->name);
 
 		if (reset) {
@@ -769,10 +766,10 @@ CommandCost CmdRenameEngine(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
  */
 bool IsEngineBuildable(EngineID engine, VehicleType type, CompanyID company)
 {
-	/* check if it's an engine that is in the engine array */
-	if (!IsEngineIndex(engine)) return false;
+	const Engine *e = Engine::GetIfValid(engine);
 
-	const Engine *e = GetEngine(engine);
+	/* check if it's an engine that is in the engine array */
+	if (e == NULL) return false;
 
 	/* check if it's an engine of specified type */
 	if (e->type != type) return false;
@@ -782,7 +779,7 @@ bool IsEngineBuildable(EngineID engine, VehicleType type, CompanyID company)
 
 	if (type == VEH_TRAIN) {
 		/* Check if the rail type is available to this company */
-		const Company *c = GetCompany(company);
+		const Company *c = Company::Get(company);
 		if (!HasBit(c->avail_railtypes, RailVehInfo(engine)->railtype)) return false;
 	}
 
@@ -797,10 +794,10 @@ bool IsEngineBuildable(EngineID engine, VehicleType type, CompanyID company)
  */
 bool IsEngineRefittable(EngineID engine)
 {
-	/* check if it's an engine that is in the engine array */
-	if (!IsEngineIndex(engine)) return false;
+	const Engine *e = Engine::GetIfValid(engine);
 
-	const Engine *e = GetEngine(engine);
+	/* check if it's an engine that is in the engine array */
+	if (e == NULL) return false;
 
 	if (e->type == VEH_SHIP && !e->u.ship.refittable) return false;
 

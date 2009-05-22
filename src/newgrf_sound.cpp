@@ -8,42 +8,37 @@
 #include "newgrf_sound.h"
 #include "vehicle_base.h"
 #include "sound_func.h"
+#include "core/smallvec_type.hpp"
 
-static uint _sound_count = 0;
-STATIC_OLD_POOL(SoundInternal, FileEntry, 3, 1000, NULL, NULL)
+static SmallVector<SoundEntry, ORIGINAL_SAMPLE_COUNT> _sounds;
 
 
-/* Allocate a new FileEntry */
-FileEntry *AllocateFileEntry()
+/* Allocate a new Sound */
+SoundEntry *AllocateSound()
 {
-	if (_sound_count == GetSoundInternalPoolSize()) {
-		if (!_SoundInternal_pool.AddBlockToPool()) return NULL;
-	}
-
-	return GetSoundInternal(_sound_count++);
+	return _sounds.Append();
 }
 
 
 void InitializeSoundPool()
 {
-	_SoundInternal_pool.CleanPool();
-	_sound_count = 0;
+	_sounds.Clear();
 
 	/* Copy original sound data to the pool */
 	SndCopyToPool();
 }
 
 
-FileEntry *GetSound(uint index)
+SoundEntry *GetSound(SoundID index)
 {
-	if (index >= GetNumSounds()) return NULL;
-	return GetSoundInternal(index);
+	if (index >= _sounds.Length()) return NULL;
+	return &_sounds[index];
 }
 
 
 uint GetNumSounds()
 {
-	return _sound_count;
+	return _sounds.Length();
 }
 
 
@@ -60,18 +55,18 @@ bool PlayVehicleSound(const Vehicle *v, VehicleSoundEvent event)
 
 	callback = GetVehicleCallback(CBID_VEHICLE_SOUND_EFFECT, event, 0, v->engine_type, v);
 	if (callback == CALLBACK_FAILED) return false;
-	if (callback >= GetNumOriginalSounds()) callback += file->sound_offset - GetNumOriginalSounds();
+	if (callback >= ORIGINAL_SAMPLE_COUNT) callback += file->sound_offset - ORIGINAL_SAMPLE_COUNT;
 
-	if (callback < GetNumSounds()) SndPlayVehicleFx((SoundFx)callback, v);
+	if (callback < GetNumSounds()) SndPlayVehicleFx(callback, v);
 	return true;
 }
 
-bool PlayTileSound(const GRFFile *file, uint16 sound_id, TileIndex tile)
+bool PlayTileSound(const GRFFile *file, SoundID sound_id, TileIndex tile)
 {
-	if (sound_id >= GetNumOriginalSounds()) sound_id += file->sound_offset - GetNumOriginalSounds();
+	if (sound_id >= ORIGINAL_SAMPLE_COUNT) sound_id += file->sound_offset - ORIGINAL_SAMPLE_COUNT;
 
 	if (sound_id < GetNumSounds()) {
-		SndPlayTileFx((SoundFx)sound_id, tile);
+		SndPlayTileFx(sound_id, tile);
 		return true;
 	}
 	return false;

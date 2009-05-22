@@ -35,7 +35,7 @@ private:
 public:
 	WaypointWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
 	{
-		this->wp = GetWaypoint(this->window_number);
+		this->wp = Waypoint::Get(this->window_number);
 		if (this->wp->owner != OWNER_NONE) this->owner = this->wp->owner;
 
 		this->flags4 |= WF_DISABLE_VP_SCROLL;
@@ -144,6 +144,5 @@ static const WindowDesc _waypoint_view_desc(
 
 void ShowWaypointWindow(const Waypoint *wp)
 {
-	if (!wp->IsValid()) return;  // little safety
 	AllocateWindowDescFront<WaypointWindow>(&_waypoint_view_desc, wp->index);
 }
