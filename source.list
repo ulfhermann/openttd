@@ -202,6 +202,7 @@ landscape_type.h
 linkgraph/demands.h
 linkgraph/demand_settings.h
 linkgraph/linkgraph.h
+linkgraph/linkgraph_types.h
 livery.h
 lzoconf.h
 map_func.h
