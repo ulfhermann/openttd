@@ -184,13 +184,10 @@ static const Month _autosave_months[] = {
  */
 static void RunVehicleDayProc(uint daytick)
 {
-	uint total = GetMaxVehicleIndex() + 1;
-	uint i;
+	for (size_t i = daytick; i < Vehicle::GetPoolSize(); i += DAY_TICKS) {
+		Vehicle *v = Vehicle::Get(i);
 
-	for (i = daytick; i < total; i += DAY_TICKS) {
-		Vehicle *v = GetVehicle(i);
-
-		if (v->IsValid()) {
+		if (v != NULL) {
 			/* Call the 32-day callback if needed */
 			CheckVehicle32Day(v);
 			v->OnNewDay();

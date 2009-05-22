@@ -29,15 +29,10 @@
 #include "date_func.h"
 #include "vehicle_func.h"
 #include "string_func.h"
-#include "oldpool_func.h"
 #include "animated_tile_func.h"
 #include "elrail_func.h"
 
 #include "table/strings.h"
-
-DEFINE_OLD_POOL_GENERIC(Station, Station)
-DEFINE_OLD_POOL_GENERIC(RoadStop, RoadStop)
-
 
 /**
  * Check whether the given tile is a hangar.
@@ -100,7 +95,7 @@ static Station *GetStationAround(TileIndex tile, int w, int h, StationID closest
 			}
 		}
 	END_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
-	return (closest_station == INVALID_STATION) ? NULL : GetStation(closest_station);
+	return (closest_station == INVALID_STATION) ? NULL : Station::Get(closest_station);
 }
 
 /**
@@ -880,7 +875,7 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
 
-	if (distant_join && (!_settings_game.station.distant_join_stations || !IsValidStationID(station_to_join))) return CMD_ERROR;
+	if (distant_join && (!_settings_game.station.distant_join_stations || !Station::IsValidID(station_to_join))) return CMD_ERROR;
 
 	if (h_org > _settings_game.station.station_spread || w_org > _settings_game.station.station_spread) return CMD_ERROR;
 
@@ -911,7 +906,7 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 			} else {
 				/* Extend the current station, and don't check whether it will
 				 * be near any other stations. */
-				st = GetStation(est);
+				st = Station::Get(est);
 				check_surrounding = false;
 			}
 		} else {
@@ -928,7 +923,7 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 	}
 
 	/* Distant join */
-	if (st == NULL && distant_join) st = GetStation(station_to_join);
+	if (st == NULL && distant_join) st = Station::Get(station_to_join);
 
 	/* See if there is a deleted station close to us. */
 	if (st == NULL && reuse) st = GetClosestDeletedStation(tile_org);
@@ -958,7 +953,7 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 			st->town = ClosestTownFromTile(tile_org, UINT_MAX);
 			st->string_id = GenerateStationName(st, tile_org, STATIONNAMING_RAIL);
 
-			if (IsValidCompanyID(_current_company)) {
+			if (Company::IsValidID(_current_company)) {
 				SetBit(st->town->have_ratings, _current_company);
 			}
 		}
@@ -1365,7 +1360,7 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	Owner tram_owner = _current_company;
 	Owner road_owner = _current_company;
 
-	if (distant_join && (!_settings_game.station.distant_join_stations || !IsValidStationID(station_to_join))) return CMD_ERROR;
+	if (distant_join && (!_settings_game.station.distant_join_stations || !Station::IsValidID(station_to_join))) return CMD_ERROR;
 
 	if (!AreValidRoadTypes(rts) || !HasRoadTypesAvail(_current_company, rts)) return CMD_ERROR;
 
@@ -1425,7 +1420,7 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	}
 
 	/* Distant join */
-	if (st == NULL && distant_join) st = GetStation(station_to_join);
+	if (st == NULL && distant_join) st = Station::Get(station_to_join);
 
 	/* Find a deleted station close to us */
 	if (st == NULL && reuse) st = GetClosestDeletedStation(tile);
@@ -1454,7 +1449,7 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 			st->town = ClosestTownFromTile(tile, UINT_MAX);
 			st->string_id = GenerateStationName(st, tile, STATIONNAMING_ROAD);
 
-			if (IsValidCompanyID(_current_company)) {
+			if (Company::IsValidID(_current_company)) {
 				SetBit(st->town->have_ratings, _current_company);
 			}
 			st->sign.width_1 = 0;
@@ -1817,10 +1812,10 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
 
-	if (distant_join && (!_settings_game.station.distant_join_stations || !IsValidStationID(station_to_join))) return CMD_ERROR;
+	if (distant_join && (!_settings_game.station.distant_join_stations || !Station::IsValidID(station_to_join))) return CMD_ERROR;
 
 	/* Check if a valid, buildable airport was chosen for construction */
-	if (p1 > lengthof(_airport_sections) || !HasBit(GetValidAirports(), p1)) return CMD_ERROR;
+	if (p1 >= lengthof(_airport_sections) || !HasBit(GetValidAirports(), p1)) return CMD_ERROR;
 
 	if (!CheckIfAuthorityAllowsNewStation(tile, flags)) {
 		return CMD_ERROR;
@@ -1876,7 +1871,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	}
 
 	/* Distant join */
-	if (st == NULL && distant_join) st = GetStation(station_to_join);
+	if (st == NULL && distant_join) st = Station::Get(station_to_join);
 
 	/* Find a deleted station close to us */
 	if (st == NULL && reuse) st = GetClosestDeletedStation(tile);
@@ -1903,7 +1898,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			st->town = t;
 			st->string_id = GenerateStationName(st, tile, !(afc->flags & AirportFTAClass::AIRPLANES) ? STATIONNAMING_HELIPORT : STATIONNAMING_AIRPORT);
 
-			if (IsValidCompanyID(_current_company)) {
+			if (Company::IsValidID(_current_company)) {
 				SetBit(st->town->have_ratings, _current_company);
 			}
 			st->sign.width_1 = 0;
@@ -2038,7 +2033,7 @@ CommandCost CmdBuildBuoy(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		st->town = ClosestTownFromTile(tile, UINT_MAX);
 		st->string_id = GenerateStationName(st, tile, STATIONNAMING_BUOY);
 
-		if (IsValidCompanyID(_current_company)) {
+		if (Company::IsValidID(_current_company)) {
 			SetBit(st->town->have_ratings, _current_company);
 		}
 		st->sign.width_1 = 0;
@@ -2086,8 +2081,8 @@ bool HasStationInUse(StationID station, CompanyID company)
 
 static CommandCost RemoveBuoy(Station *st, DoCommandFlag flags)
 {
-	/* XXX: strange stuff */
-	if (!IsValidCompanyID(_current_company)) return_cmd_error(INVALID_STRING_ID);
+	/* XXX: strange stuff, allow clearing as invalid company when clearing landscape */
+	if (!Company::IsValidID(_current_company) && !(flags & DC_BANKRUPT)) return_cmd_error(INVALID_STRING_ID);
 
 	TileIndex tile = st->dock_tile;
 
@@ -2139,7 +2134,7 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
 
-	if (distant_join && (!_settings_game.station.distant_join_stations || !IsValidStationID(station_to_join))) return CMD_ERROR;
+	if (distant_join && (!_settings_game.station.distant_join_stations || !Station::IsValidID(station_to_join))) return CMD_ERROR;
 
 	DiagDirection direction = GetInclinedSlopeDirection(GetTileSlope(tile, NULL));
 	if (direction == INVALID_DIAGDIR) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
@@ -2183,7 +2178,7 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	}
 
 	/* Distant join */
-	if (st == NULL && distant_join) st = GetStation(station_to_join);
+	if (st == NULL && distant_join) st = Station::Get(station_to_join);
 
 	/* Find a deleted station close to us */
 	if (st == NULL && reuse) st = GetClosestDeletedStation(tile);
@@ -2208,7 +2203,7 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			st->town = ClosestTownFromTile(tile, UINT_MAX);
 			st->string_id = GenerateStationName(st, tile, STATIONNAMING_DOCK);
 
-			if (IsValidCompanyID(_current_company)) {
+			if (Company::IsValidID(_current_company)) {
 				SetBit(st->town->have_ratings, _current_company);
 			}
 		}
@@ -2294,7 +2289,7 @@ static void DrawTile_Station(TileInfo *ti)
 	Owner owner = GetTileOwner(ti->tile);
 
 	SpriteID palette;
-	if (IsValidCompanyID(owner)) {
+	if (Company::IsValidID(owner)) {
 		palette = COMPANY_SPRITE_COLOUR(owner);
 	} else {
 		/* Some stations are not owner by a company, namely oil rigs */
@@ -2699,7 +2694,11 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
 	return VETSB_CONTINUE;
 }
 
-/* this function is called for one station each tick */
+/**
+ * This function is called for each station once every 250 ticks.
+ * Not all stations will get the tick at the same time.
+ * @param st the station receiving the tick.
+ */
 static void StationHandleBigTick(Station *st)
 {
 	UpdateStationAcceptance(st, true);
@@ -2750,7 +2749,7 @@ static void UpdateStationRating(Station *st)
 				(rating += 13, true);
 			}
 
-			if (IsValidCompanyID(st->owner) && HasBit(st->town->statues, st->owner)) rating += 26;
+			if (Company::IsValidID(st->owner) && HasBit(st->town->statues, st->owner)) rating += 26;
 
 			{
 				byte days = ge->days_since_pickup;
@@ -2839,11 +2838,6 @@ void OnTick_Station()
 {
 	if (_game_mode == GM_EDITOR) return;
 
-	uint i = _station_tick_ctr;
-	if (++_station_tick_ctr > GetMaxStationIndex()) _station_tick_ctr = 0;
-
-	if (IsValidStationID(i)) StationHandleBigTick(GetStation(i));
-
 	Station *st;
 	FOR_ALL_STATIONS(st) {
 		StationHandleSmallTick(st);
@@ -2852,6 +2846,7 @@ void OnTick_Station()
 		 * Station index is included so that triggers are not all done
 		 * at the same time. */
 		if ((_tick_counter + st->index) % 250 == 0) {
+			StationHandleBigTick(st);
 			StationAnimationTrigger(st, st->xy, STAT_ANIM_250_TICKS);
 		}
 	}
@@ -2911,10 +2906,8 @@ static bool IsUniqueStationName(const char *name)
  */
 CommandCost CmdRenameStation(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!IsValidStationID(p1)) return CMD_ERROR;
-
-	Station *st = GetStation(p1);
-	if (!CheckOwnership(st->owner)) return CMD_ERROR;
+	Station *st = Station::GetIfValid(p1);
+	if (st == NULL || !CheckOwnership(st->owner)) return CMD_ERROR;
 
 	bool reset = StrEmpty(text);
 
@@ -3200,19 +3193,6 @@ static CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags)
 	}
 
 	return CMD_ERROR;
-}
-
-void InitializeStations()
-{
-	/* Clean the station pool and create 1 block in it */
-	_Station_pool.CleanPool();
-	_Station_pool.AddBlockToPool();
-
-	/* Clean the roadstop pool and create 1 block in it */
-	_RoadStop_pool.CleanPool();
-	_RoadStop_pool.AddBlockToPool();
-
-	_station_tick_ctr = 0;
 }
 
 static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)

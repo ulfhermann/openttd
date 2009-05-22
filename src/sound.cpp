@@ -13,21 +13,15 @@
 #include "vehicle_base.h"
 #include "debug.h"
 
-static uint _file_count;
-static FileEntry *_files;
+static SoundEntry _original_sounds[ORIGINAL_SAMPLE_COUNT];
 MusicFileSettings msf;
 
 /* Number of levels of panning per side */
 #define PANNING_LEVELS 16
 
-/** The number of sounds in the original sample.cat */
-static const uint ORIGINAL_SAMPLE_COUNT = 73;
-
 static void OpenBankFile(const char *filename)
 {
-	FileEntry *fe = CallocT<FileEntry>(ORIGINAL_SAMPLE_COUNT);
-	_file_count = ORIGINAL_SAMPLE_COUNT;
-	_files = fe;
+	memset(_original_sounds, 0, sizeof(_original_sounds));
 
 	FioOpenFile(SOUND_SLOT, filename);
 	size_t pos = FioGetPos();
@@ -45,15 +39,16 @@ static void OpenBankFile(const char *filename)
 	FioSeekTo(pos, SEEK_SET);
 
 	for (uint i = 0; i != ORIGINAL_SAMPLE_COUNT; i++) {
-		fe[i].file_slot = SOUND_SLOT;
-		fe[i].file_offset = FioReadDword() + pos;
-		fe[i].file_size = FioReadDword();
+		_original_sounds[i].file_slot = SOUND_SLOT;
+		_original_sounds[i].file_offset = FioReadDword() + pos;
+		_original_sounds[i].file_size = FioReadDword();
 	}
 
-	for (uint i = 0; i != ORIGINAL_SAMPLE_COUNT; i++, fe++) {
+	for (uint i = 0; i != ORIGINAL_SAMPLE_COUNT; i++) {
+		SoundEntry *sound = &_original_sounds[i];
 		char name[255];
 
-		FioSeekTo(fe->file_offset, SEEK_SET);
+		FioSeekTo(sound->file_offset, SEEK_SET);
 
 		/* Check for special case, see else case */
 		FioReadBlock(name, FioReadByte()); // Read the name of the sound
@@ -67,20 +62,20 @@ static void OpenBankFile(const char *filename)
 
 				if (tag == ' tmf') {
 					FioReadWord(); // wFormatTag
-					fe->channels = FioReadWord(); // wChannels
+					sound->channels = FioReadWord(); // wChannels
 					FioReadDword();   // samples per second
-					fe->rate = 11025; // seems like all samples should be played at this rate.
+					sound->rate = 11025; // seems like all samples should be played at this rate.
 					FioReadDword();   // avg bytes per second
 					FioReadWord();    // alignment
-					fe->bits_per_sample = FioReadByte(); // bits per sample
+					sound->bits_per_sample = FioReadByte(); // bits per sample
 					FioSeekTo(size - (2 + 2 + 4 + 4 + 2 + 1), SEEK_CUR);
 				} else if (tag == 'atad') {
-					fe->file_size = size;
-					fe->file_slot = SOUND_SLOT;
-					fe->file_offset = FioGetPos();
+					sound->file_size = size;
+					sound->file_slot = SOUND_SLOT;
+					sound->file_offset = FioGetPos();
 					break;
 				} else {
-					fe->file_size = 0;
+					sound->file_size = 0;
 					break;
 				}
 			}
@@ -90,38 +85,33 @@ static void OpenBankFile(const char *filename)
 			 * (name in sample.cat is "Corrupt sound")
 			 * It's no RIFF file, but raw PCM data
 			 */
-			fe->channels = 1;
-			fe->rate = 11025;
-			fe->bits_per_sample = 8;
-			fe->file_slot = SOUND_SLOT;
-			fe->file_offset = FioGetPos();
+			sound->channels = 1;
+			sound->rate = 11025;
+			sound->bits_per_sample = 8;
+			sound->file_slot = SOUND_SLOT;
+			sound->file_offset = FioGetPos();
 		}
 	}
 }
 
-uint GetNumOriginalSounds()
+static bool SetBankSource(MixerChannel *mc, const SoundEntry *sound)
 {
-	return _file_count;
-}
+	assert(sound != NULL);
 
-static bool SetBankSource(MixerChannel *mc, const FileEntry *fe)
-{
-	assert(fe != NULL);
+	if (sound->file_size == 0) return false;
 
-	if (fe->file_size == 0) return false;
+	int8 *mem = MallocT<int8>(sound->file_size);
 
-	int8 *mem = MallocT<int8>(fe->file_size);
+	FioSeekToFile(sound->file_slot, sound->file_offset);
+	FioReadBlock(mem, sound->file_size);
 
-	FioSeekToFile(fe->file_slot, fe->file_offset);
-	FioReadBlock(mem, fe->file_size);
-
-	for (uint i = 0; i != fe->file_size; i++) {
+	for (uint i = 0; i != sound->file_size; i++) {
 		mem[i] += -128; // Convert unsigned sound data to signed
 	}
 
-	assert(fe->bits_per_sample == 8 && fe->channels == 1 && fe->file_size != 0 && fe->rate != 0);
+	assert(sound->bits_per_sample == 8 && sound->channels == 1 && sound->file_size != 0 && sound->rate != 0);
 
-	MxSetChannelRawSrc(mc, mem, fe->file_size, fe->rate, MX_AUTOFREE);
+	MxSetChannelRawSrc(mc, mem, sound->file_size, sound->rate, MX_AUTOFREE);
 
 	return true;
 }
@@ -133,20 +123,20 @@ bool SoundInitialize(const char *filename)
 }
 
 /* Low level sound player */
-static void StartSound(uint sound, int panning, uint volume)
+static void StartSound(SoundID sound_id, int panning, uint volume)
 {
 	if (volume == 0) return;
 
-	const FileEntry *fe = GetSound(sound);
-	if (fe == NULL) return;
+	const SoundEntry *sound = GetSound(sound_id);
+	if (sound == NULL) return;
 
 	MixerChannel *mc = MxAllocateChannel();
 	if (mc == NULL) return;
 
-	if (!SetBankSource(mc, fe)) return;
+	if (!SetBankSource(mc, sound)) return;
 
 	/* Apply the sound effect's own volume. */
-	volume = (fe->volume * volume) / 128;
+	volume = (sound->volume * volume) / 128;
 
 	panning = Clamp(panning, -PANNING_LEVELS, PANNING_LEVELS);
 	uint left_vol = (volume * PANNING_LEVELS) - (volume * panning);
@@ -187,13 +177,11 @@ static const byte _sound_idx[] = {
 
 void SndCopyToPool()
 {
-	for (uint i = 0; i < _file_count; i++) {
-		FileEntry *orig = &_files[_sound_idx[i]];
-		FileEntry *fe = AllocateFileEntry();
-
-		*fe = *orig;
-		fe->volume = _sound_base_vol[i];
-		fe->priority = 0;
+	for (uint i = 0; i < ORIGINAL_SAMPLE_COUNT; i++) {
+		SoundEntry *sound = AllocateSound();
+		*sound = _original_sounds[_sound_idx[i]];
+		sound->volume = _sound_base_vol[i];
+		sound->priority = 0;
 	}
 }
 
@@ -205,7 +193,7 @@ void SndCopyToPool()
  * @param top    Top edge of virtual coordinates where the sound is produced
  * @param bottom Bottom edge of virtual coordinates where the sound is produced
  */
-static void SndPlayScreenCoordFx(SoundFx sound, int left, int right, int top, int bottom)
+static void SndPlayScreenCoordFx(SoundID sound, int left, int right, int top, int bottom)
 {
 	if (msf.effect_vol == 0) return;
 
@@ -230,7 +218,7 @@ static void SndPlayScreenCoordFx(SoundFx sound, int left, int right, int top, in
 	}
 }
 
-void SndPlayTileFx(SoundFx sound, TileIndex tile)
+void SndPlayTileFx(SoundID sound, TileIndex tile)
 {
 	/* emits sound from center of the tile */
 	int x = min(MapMaxX() - 1, TileX(tile)) * TILE_SIZE + TILE_SIZE / 2;
@@ -242,7 +230,7 @@ void SndPlayTileFx(SoundFx sound, TileIndex tile)
 	SndPlayScreenCoordFx(sound, pt.x, pt2.x, pt.y, pt2.y);
 }
 
-void SndPlayVehicleFx(SoundFx sound, const Vehicle *v)
+void SndPlayVehicleFx(SoundID sound, const Vehicle *v)
 {
 	SndPlayScreenCoordFx(sound,
 		v->coord.left, v->coord.right,
@@ -250,7 +238,7 @@ void SndPlayVehicleFx(SoundFx sound, const Vehicle *v)
 	);
 }
 
-void SndPlayFx(SoundFx sound)
+void SndPlayFx(SoundID sound)
 {
 	StartSound(sound, 0, msf.effect_vol);
 }
