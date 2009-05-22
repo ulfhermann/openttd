@@ -17,7 +17,7 @@ static const SaveLoad _group_desc[] = {
   SLE_END()
 };
 
-static void Save_GRPS(void)
+static void Save_GRPS()
 {
 	Group *g;
 
@@ -28,7 +28,7 @@ static void Save_GRPS(void)
 }
 
 
-static void Load_GRPS(void)
+static void Load_GRPS()
 {
 	int index;
 
@@ -39,5 +39,5 @@ static void Load_GRPS(void)
 }
 
 extern const ChunkHandler _group_chunk_handlers[] = {
-	{ 'GRPS', Save_GRPS, Load_GRPS, CH_ARRAY | CH_LAST},
+	{ 'GRPS', Save_GRPS, Load_GRPS, NULL, CH_ARRAY | CH_LAST},
 };

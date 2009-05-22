@@ -8,6 +8,7 @@
 #include "../cargo_type.h"
 #include "../thread.h"
 #include "../settings_type.h"
+#include "linkgraph_types.h"
 #include <list>
 #include <vector>
 #include <set>
@@ -15,7 +16,6 @@
 struct SaveLoad;
 class Path;
 
-typedef uint NodeID;
 typedef std::set<Path *> PathSet;
 typedef std::map<StationID, int> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
@@ -48,14 +48,12 @@ public:
 	ViaSet paths_via;
 };
 
-typedef uint16 colour;
-
 class LinkGraphComponent {
 	typedef std::vector<Node> NodeVector;
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	LinkGraphComponent(CargoID cargo, colour c = 0);
+	LinkGraphComponent(CargoID cargo, LinkGraphComponentID c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -63,7 +61,7 @@ public:
 	NodeID AddNode(StationID st, uint supply, uint demand);
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
-	colour GetColour() const {return component_colour;}
+	LinkGraphComponentID GetIndex() const {return index;}
 	CargoID GetCargo() const {return cargo;}
 	const LinkGraphSettings & GetSettings() const {return settings;}
 	NodeID GetFirstEdge(NodeID from) {return edges[from][from].next_edge;}
@@ -72,7 +70,7 @@ private:
 	LinkGraphSettings settings;
 	CargoID cargo;
 	uint num_nodes;
-	colour component_colour;
+	LinkGraphComponentID index;
 	NodeVector nodes;
 	EdgeMatrix edges;
 };
@@ -113,7 +111,6 @@ class LinkGraph {
 public:
 	LinkGraph();
 	void Clear();
-	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
 	/**
 	 * Starts calcluation of the next component of the link graph.
@@ -125,7 +122,6 @@ public:
 	 * the search queue would have to be saved and loaded then.
 	 */
 	void NextComponent();
-	void InitColours();
 
 	/**
 	 * Merges the results of the link graph calculation into the main
@@ -146,10 +142,9 @@ public:
 
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
-	colour current_colour;
-	StationID current_station;
+	LinkGraphComponentID current_component_id;
+	StationID current_station_id;
 	CargoID cargo;
-	colour station_colours[Station_POOL_MAX_BLOCKS];
 	JobList jobs;
 };
 

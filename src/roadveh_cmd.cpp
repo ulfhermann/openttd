@@ -90,7 +90,7 @@ static SpriteID GetRoadVehIcon(EngineID engine)
 		SpriteID sprite = GetCustomVehicleIcon(engine, DIR_W);
 		if (sprite != 0) return sprite;
 
-		spritenum = GetEngine(engine)->image_index;
+		spritenum = Engine::Get(engine)->image_index;
 	}
 
 	return 6 + _roadveh_images[spritenum];
@@ -105,7 +105,7 @@ SpriteID RoadVehicle::GetImage(Direction direction) const
 		sprite = GetCustomVehicleSprite(this, (Direction)(direction + 4 * IS_CUSTOM_SECONDHEAD_SPRITE(spritenum)));
 		if (sprite != 0) return sprite;
 
-		spritenum = GetEngine(this->engine_type)->image_index;
+		spritenum = Engine::Get(this->engine_type)->image_index;
 	}
 
 	sprite = direction + _roadveh_images[spritenum];
@@ -162,7 +162,7 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 {
 	if (!IsEngineBuildable(p1, VEH_ROAD, _current_company)) return_cmd_error(STR_ROAD_VEHICLE_NOT_AVAILABLE);
 
-	const Engine *e = GetEngine(p1);
+	const Engine *e = Engine::Get(p1);
 	/* Engines without valid cargo should not be available */
 	if (e->GetDefaultCargoType() == CT_INVALID) return CMD_ERROR;
 
@@ -269,7 +269,7 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			InvalidateAutoreplaceWindow(v->engine_type, v->group_id); // updates the replace Road window
 		}
 
-		GetCompany(_current_company)->num_engines[p1]++;
+		Company::Get(_current_company)->num_engines[p1]++;
 
 		CheckConsistencyOfArticulatedVehicle(v);
 	}
@@ -312,13 +312,8 @@ bool RoadVehicle::IsStoppedInDepot() const
  */
 CommandCost CmdSellRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v;
-
-	if (!IsValidVehicleID(p1)) return CMD_ERROR;
-
-	v = GetVehicle(p1);
-
-	if (v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(p1);
+	if (v == NULL || v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	if (HASBITS(v->vehstatus, VS_CRASHED)) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
 
@@ -423,11 +418,8 @@ CommandCost CmdSendRoadVehToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1
 		return SendAllVehiclesToDepot(VEH_ROAD, flags, p2 & DEPOT_SERVICE, _current_company, (p2 & VLW_MASK), p1);
 	}
 
-	if (!IsValidVehicleID(p1)) return CMD_ERROR;
-
-	Vehicle *v = GetVehicle(p1);
-
-	if (v->type != VEH_ROAD) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(p1);
+	if (v == NULL || v->type != VEH_ROAD) return CMD_ERROR;
 
 	return v->SendToDepot(flags, (DepotCommand)(p2 & DEPOT_COMMAND_MASK));
 }
@@ -440,13 +432,8 @@ CommandCost CmdSendRoadVehToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1
  */
 CommandCost CmdTurnRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v;
-
-	if (!IsValidVehicleID(p1)) return CMD_ERROR;
-
-	v = GetVehicle(p1);
-
-	if (v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(p1);
+	if (v == NULL || v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	if (v->vehstatus & VS_STOPPED ||
 			v->vehstatus & VS_CRASHED ||
@@ -553,7 +540,7 @@ static void RoadVehSetRandomDirection(Vehicle *v)
 	} while ((v = v->Next()) != NULL);
 }
 
-static void RoadVehIsCrashed(Vehicle *v)
+static bool RoadVehIsCrashed(Vehicle *v)
 {
 	v->u.road.crashed_ctr++;
 	if (v->u.road.crashed_ctr == 2) {
@@ -561,8 +548,12 @@ static void RoadVehIsCrashed(Vehicle *v)
 	} else if (v->u.road.crashed_ctr <= 45) {
 		if ((v->tick_counter & 7) == 0) RoadVehSetRandomDirection(v);
 	} else if (v->u.road.crashed_ctr >= 2220 && !(v->tick_counter & 0x1F)) {
+		bool ret = v->Next() != NULL;
 		DeleteLastRoadVeh(v);
+		return ret;
 	}
+
+	return true;
 }
 
 static Vehicle *EnumCheckRoadVehCrashTrain(Vehicle *v, void *data)
@@ -664,7 +655,7 @@ TileIndex RoadVehicle::GetOrderStationLocation(StationID station)
 	if (station == this->last_station_visited) this->last_station_visited = INVALID_STATION;
 
 	TileIndex dest = INVALID_TILE;
-	const RoadStop *rs = GetStation(station)->GetPrimaryRoadStop(this);
+	const RoadStop *rs = Station::Get(station)->GetPrimaryRoadStop(this);
 	if (rs != NULL) {
 		uint mindist = UINT_MAX;
 
@@ -690,7 +681,7 @@ TileIndex RoadVehicle::GetOrderStationLocation(StationID station)
 static void StartRoadVehSound(const Vehicle *v)
 {
 	if (!PlayVehicleSound(v, VSE_START)) {
-		SoundFx s = RoadVehInfo(v->engine_type)->sfx;
+		SoundID s = RoadVehInfo(v->engine_type)->sfx;
 		if (s == SND_19_BUS_START_PULL_AWAY && (v->tick_counter & 3) == 0)
 			s = SND_1A_BUS_START_PULL_AWAY_WITH_HORN;
 		SndPlayVehicleFx(s, v);
@@ -1748,7 +1739,7 @@ again:
 	return true;
 }
 
-static void RoadVehController(Vehicle *v)
+static bool RoadVehController(Vehicle *v)
 {
 	/* decrease counters */
 	v->tick_counter++;
@@ -1757,8 +1748,7 @@ static void RoadVehController(Vehicle *v)
 
 	/* handle crashed */
 	if (v->vehstatus & VS_CRASHED) {
-		RoadVehIsCrashed(v);
-		return;
+		return RoadVehIsCrashed(v);
 	}
 
 	RoadVehCheckTrainCrash(v);
@@ -1767,19 +1757,19 @@ static void RoadVehController(Vehicle *v)
 	if (v->breakdown_ctr != 0) {
 		if (v->breakdown_ctr <= 2) {
 			HandleBrokenRoadVeh(v);
-			return;
+			return true;
 		}
 		if (!v->current_order.IsType(OT_LOADING)) v->breakdown_ctr--;
 	}
 
-	if (v->vehstatus & VS_STOPPED) return;
+	if (v->vehstatus & VS_STOPPED) return true;
 
 	ProcessOrders(v);
 	v->HandleLoading();
 
-	if (v->current_order.IsType(OT_LOADING)) return;
+	if (v->current_order.IsType(OT_LOADING)) return true;
 
-	if (v->IsInDepot() && RoadVehLeaveDepot(v, true)) return;
+	if (v->IsInDepot() && RoadVehLeaveDepot(v, true)) return true;
 
 	/* Check how far the vehicle needs to proceed */
 	int j = RoadVehAccelerate(v);
@@ -1809,6 +1799,8 @@ static void RoadVehController(Vehicle *v)
 	}
 
 	if (v->progress == 0) v->progress = j;
+
+	return true;
 }
 
 static void AgeRoadVehCargo(Vehicle *v)
@@ -1817,14 +1809,16 @@ static void AgeRoadVehCargo(Vehicle *v)
 	v->cargo.AgeCargo();
 }
 
-void RoadVehicle::Tick()
+bool RoadVehicle::Tick()
 {
 	AgeRoadVehCargo(this);
 
 	if (IsRoadVehFront(this)) {
 		if (!(this->vehstatus & VS_STOPPED)) this->running_ticks++;
-		RoadVehController(this);
+		return RoadVehController(this);
 	}
+
+	return true;
 }
 
 static void CheckIfRoadVehNeedsService(Vehicle *v)
@@ -1882,7 +1876,7 @@ void RoadVehicle::OnNewDay()
 
 	/* update destination */
 	if (!(this->vehstatus & VS_STOPPED) && this->current_order.IsType(OT_GOTO_STATION) && !(this->current_order.GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) && this->u.road.slot == NULL && !(this->vehstatus & VS_CRASHED)) {
-		Station *st = GetStation(this->current_order.GetDestination());
+		Station *st = Station::Get(this->current_order.GetDestination());
 		RoadStop *rs = st->GetPrimaryRoadStop(this);
 		RoadStop *best = NULL;
 
@@ -1968,7 +1962,6 @@ void RoadVehicle::OnNewDay()
  */
 CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v;
 	CommandCost cost(EXPENSES_ROADVEH_RUN);
 	CargoID new_cid = GB(p2, 0, 8);
 	byte new_subtype = GB(p2, 8, 8);
@@ -1976,11 +1969,9 @@ CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	uint16 capacity = CALLBACK_FAILED;
 	uint total_capacity = 0;
 
-	if (!IsValidVehicleID(p1)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(p1);
 
-	v = GetVehicle(p1);
-
-	if (v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
+	if (v == NULL || v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_ROAD_MUST_BE_STOPPED_INSIDE_DEPOT);
 	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
@@ -1992,7 +1983,7 @@ CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		 * [Refit] button near each wagon. */
 		if (!CanRefitTo(v->engine_type, new_cid)) continue;
 
-		const Engine *e = GetEngine(v->engine_type);
+		const Engine *e = Engine::Get(v->engine_type);
 		if (!e->CanCarryCargo()) continue;
 
 		if (HasBit(EngInfo(v->engine_type)->callbackmask, CBM_VEHICLE_REFIT_CAPACITY)) {
@@ -2050,7 +2041,7 @@ CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		}
 	}
 
-	if (flags & DC_EXEC) RoadVehUpdateCache(GetVehicle(p1)->First());
+	if (flags & DC_EXEC) RoadVehUpdateCache(Vehicle::Get(p1)->First());
 
 	_returned_refit_capacity = total_capacity;
 

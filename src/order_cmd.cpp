@@ -17,9 +17,9 @@
 #include "newgrf_cargo.h"
 #include "timetable.h"
 #include "vehicle_func.h"
-#include "oldpool_func.h"
 #include "depot_base.h"
 #include "settings_type.h"
+#include "core/pool_func.hpp"
 
 #include "table/strings.h"
 
@@ -33,8 +33,10 @@ assert_compile(sizeof(DestinationID) >= sizeof(StationID));
 TileIndex _backup_orders_tile;
 BackuppedOrders _backup_orders_data;
 
-DEFINE_OLD_POOL_GENERIC(Order, Order);
-DEFINE_OLD_POOL_GENERIC(OrderList, OrderList);
+OrderPool _order_pool("Order");
+INSTANTIATE_POOL_METHODS(Order)
+OrderListPool _orderlist_pool("OrderList");
+INSTANTIATE_POOL_METHODS(OrderList)
 
 void Order::Free()
 {
@@ -176,17 +178,21 @@ void Order::AssignOrder(const Order &other)
 	this->travel_time = other.travel_time;
 }
 
-
-OrderList::OrderList(Order *chain, Vehicle *v) :
-		first(chain), num_orders(0), num_vehicles(1), first_shared(v),
-		timetable_duration(0)
+void OrderList::Initialize(Order *chain, Vehicle *v)
 {
+	this->first = chain;
+	this->first_shared = v;
+
+	this->num_orders = 0;
+	this->num_vehicles = 1;
+	this->timetable_duration = 0;
+
 	for (Order *o = this->first; o != NULL; o = o->next) {
 		++this->num_orders;
 		this->timetable_duration += o->wait_time + o->travel_time;
 	}
 
-	for (Vehicle *u = v->PreviousShared(); u != NULL; u = u->PreviousShared()) {
+	for (Vehicle *u = this->first_shared->PreviousShared(); u != NULL; u = u->PreviousShared()) {
 		++this->num_vehicles;
 		this->first_shared = u;
 	}
@@ -197,7 +203,7 @@ OrderList::OrderList(Order *chain, Vehicle *v) :
 void OrderList::FreeChain(bool keep_orderlist)
 {
 	Order *next;
-	for(Order *o = this->first; o != NULL; o = next) {
+	for (Order *o = this->first; o != NULL; o = next) {
 		next = o->next;
 		delete o;
 	}
@@ -226,7 +232,7 @@ Order *OrderList::GetOrderAt(int index) const
 bool Order::IsStoppingOrder() const
 {
 	if (this->GetType() != OT_GOTO_STATION) return false;
-	if (GetStation(this->GetDestination())->IsBuoy()) return false;
+	if (Station::Get(this->GetDestination())->IsBuoy()) return false;
 	return (this->GetNonStopType() == ONSF_STOP_EVERYWHERE || this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
 }
 
@@ -439,8 +445,8 @@ static TileIndex GetOrderLocation(const Order& o)
 {
 	switch (o.GetType()) {
 		default: NOT_REACHED();
-		case OT_GOTO_STATION: return GetStation(o.GetDestination())->xy;
-		case OT_GOTO_DEPOT:   return GetDepot(o.GetDestination())->xy;
+		case OT_GOTO_STATION: return Station::Get(o.GetDestination())->xy;
+		case OT_GOTO_DEPOT:   return Depot::Get(o.GetDestination())->xy;
 	}
 }
 
@@ -471,24 +477,19 @@ static uint GetOrderDistance(const Order *prev, const Order *cur, const Vehicle 
  */
 CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v;
 	VehicleID veh   = GB(p1,  0, 16);
 	VehicleOrderID sel_ord = GB(p1, 16, 16);
 	Order new_order(p2);
 
-	if (!IsValidVehicleID(veh)) return CMD_ERROR;
-
-	v = GetVehicle(veh);
-
-	if (!CheckOwnership(v->owner)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(veh);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	/* Check if the inserted order is to the correct destination (owner, type),
 	 * and has the correct flags if any */
 	switch (new_order.GetType()) {
 		case OT_GOTO_STATION: {
-			if (!IsValidStationID(new_order.GetDestination())) return CMD_ERROR;
-
-			const Station *st = GetStation(new_order.GetDestination());
+			const Station *st = Station::GetIfValid(new_order.GetDestination());
+			if (st == NULL) return CMD_ERROR;
 
 			if (st->owner != OWNER_NONE && !CheckOwnership(st->owner)) return CMD_ERROR;
 
@@ -532,21 +533,17 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		case OT_GOTO_DEPOT: {
 			if (new_order.GetDepotActionType() != ODATFB_NEAREST_DEPOT) {
 				if (v->type == VEH_AIRCRAFT) {
-					if (!IsValidStationID(new_order.GetDestination())) return CMD_ERROR;
+					const Station *st = Station::GetIfValid(new_order.GetDestination());
 
-					const Station *st = GetStation(new_order.GetDestination());
-
-					if (!CheckOwnership(st->owner) ||
+					if (st == NULL || !CheckOwnership(st->owner) ||
 							!CanVehicleUseStation(v, st) ||
 							st->Airport()->nof_depots == 0) {
 						return CMD_ERROR;
 					}
 				} else {
-					if (!IsValidDepotID(new_order.GetDestination())) return CMD_ERROR;
+					const Depot *dp = Depot::GetIfValid(new_order.GetDestination());
 
-					const Depot *dp = GetDepot(new_order.GetDestination());
-
-					if (!CheckOwnership(GetTileOwner(dp->xy))) return CMD_ERROR;
+					if (dp == NULL || !CheckOwnership(GetTileOwner(dp->xy))) return CMD_ERROR;
 
 					switch (v->type) {
 						case VEH_TRAIN:
@@ -578,10 +575,8 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		case OT_GOTO_WAYPOINT: {
 			if (v->type != VEH_TRAIN) return CMD_ERROR;
 
-			if (!IsValidWaypointID(new_order.GetDestination())) return CMD_ERROR;
-			const Waypoint *wp = GetWaypoint(new_order.GetDestination());
-
-			if (!CheckOwnership(wp->owner)) return CMD_ERROR;
+			const Waypoint *wp = Waypoint::GetIfValid(new_order.GetDestination());
+			if (wp == NULL || !CheckOwnership(wp->owner)) return CMD_ERROR;
 
 			/* Order flags can be any of the following for waypoints:
 			 * [non-stop]
@@ -720,16 +715,13 @@ static CommandCost DecloneOrder(Vehicle *dst, DoCommandFlag flags)
  */
 CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v;
 	VehicleID veh_id = p1;
 	VehicleOrderID sel_ord = p2;
 	Order *order;
 
-	if (!IsValidVehicleID(veh_id)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(veh_id);
 
-	v = GetVehicle(veh_id);
-
-	if (!CheckOwnership(v->owner)) return CMD_ERROR;
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	/* If we did not select an order, we maybe want to de-clone the orders */
 	if (sel_ord >= v->GetNumOrders())
@@ -788,16 +780,15 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
  */
 CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v;
 	VehicleID veh_id = p1;
 	VehicleOrderID sel_ord = p2;
 
-	if (!IsValidVehicleID(veh_id)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(veh_id);
 
-	v = GetVehicle(veh_id);
-
-	if (!CheckOwnership(v->owner) || sel_ord == v->cur_order_index ||
-			sel_ord >= v->GetNumOrders() || v->GetNumOrders() < 2) return CMD_ERROR;
+	if (v == NULL || !CheckOwnership(v->owner) || sel_ord == v->cur_order_index ||
+			sel_ord >= v->GetNumOrders() || v->GetNumOrders() < 2) {
+		return CMD_ERROR;
+	}
 
 	if (flags & DC_EXEC) {
 		v->cur_order_index = sel_ord;
@@ -832,10 +823,8 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	VehicleOrderID moving_order = GB(p2,  0, 16);
 	VehicleOrderID target_order = GB(p2, 16, 16);
 
-	if (!IsValidVehicleID(veh)) return CMD_ERROR;
-
-	Vehicle *v = GetVehicle(veh);
-	if (!CheckOwnership(v->owner)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(veh);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	/* Don't make senseless movements */
 	if (moving_order >= v->GetNumOrders() || target_order >= v->GetNumOrders() ||
@@ -912,10 +901,9 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	uint16 data             = GB(p2, 4, 11);
 
 	if (mof >= MOF_END) return CMD_ERROR;
-	if (!IsValidVehicleID(veh)) return CMD_ERROR;
 
-	Vehicle *v = GetVehicle(veh);
-	if (!CheckOwnership(v->owner)) return CMD_ERROR;
+	Vehicle *v = Vehicle::GetIfValid(veh);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	/* Is it a valid order? */
 	if (sel_ord >= v->GetNumOrders()) return CMD_ERROR;
@@ -923,7 +911,7 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	Order *order = GetVehicleOrder(v, sel_ord);
 	switch (order->GetType()) {
 		case OT_GOTO_STATION:
-			if (mof == MOF_COND_VARIABLE || mof == MOF_COND_COMPARATOR || mof == MOF_DEPOT_ACTION || mof == MOF_COND_VALUE || GetStation(order->GetDestination())->IsBuoy()) return CMD_ERROR;
+			if (mof == MOF_COND_VARIABLE || mof == MOF_COND_COMPARATOR || mof == MOF_DEPOT_ACTION || mof == MOF_COND_VALUE || Station::Get(order->GetDestination())->IsBuoy()) return CMD_ERROR;
 			break;
 
 		case OT_GOTO_DEPOT:
@@ -1132,27 +1120,21 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
  */
 CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *dst;
 	VehicleID veh_src = GB(p1, 16, 16);
 	VehicleID veh_dst = GB(p1,  0, 16);
 
-	if (!IsValidVehicleID(veh_dst)) return CMD_ERROR;
+	Vehicle *dst = Vehicle::GetIfValid(veh_dst);
 
-	dst = GetVehicle(veh_dst);
-
-	if (!CheckOwnership(dst->owner)) return CMD_ERROR;
+	if (dst == NULL || !CheckOwnership(dst->owner)) return CMD_ERROR;
 
 	switch (p2) {
 		case CO_SHARE: {
-			Vehicle *src;
-
-			if (!IsValidVehicleID(veh_src)) return CMD_ERROR;
-
-			src = GetVehicle(veh_src);
+			Vehicle *src = Vehicle::GetIfValid(veh_src);
 
 			/* Sanity checks */
-			if (!CheckOwnership(src->owner) || dst->type != src->type || dst == src)
+			if (src == NULL || !CheckOwnership(src->owner) || dst->type != src->type || dst == src) {
 				return CMD_ERROR;
+			}
 
 			/* Trucks can't share orders with busses (and visa versa) */
 			if (src->type == VEH_ROAD) {
@@ -1167,7 +1149,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 
 			FOR_VEHICLE_ORDERS(src, order) {
 				if (OrderGoesToStation(dst, order) &&
-						!CanVehicleUseStation(dst, GetStation(order->GetDestination()))) {
+						!CanVehicleUseStation(dst, Station::Get(order->GetDestination()))) {
 					return_cmd_error(STR_ERROR_CAN_T_COPY_SHARE_ORDER);
 				}
 			}
@@ -1189,29 +1171,25 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 		} break;
 
 		case CO_COPY: {
-			Vehicle *src;
-			int delta;
-
-			if (!IsValidVehicleID(veh_src)) return CMD_ERROR;
-
-			src = GetVehicle(veh_src);
+			Vehicle *src = Vehicle::GetIfValid(veh_src);
 
 			/* Sanity checks */
-			if (!CheckOwnership(src->owner) || dst->type != src->type || dst == src)
+			if (src == NULL || !CheckOwnership(src->owner) || dst->type != src->type || dst == src) {
 				return CMD_ERROR;
+			}
 
 			/* Trucks can't copy all the orders from busses (and visa versa),
 			 * and neither can helicopters and aircarft. */
 			const Order *order;
 			FOR_VEHICLE_ORDERS(src, order) {
 				if (OrderGoesToStation(dst, order) &&
-						!CanVehicleUseStation(dst, GetStation(order->GetDestination()))) {
+						!CanVehicleUseStation(dst, Station::Get(order->GetDestination()))) {
 					return_cmd_error(STR_ERROR_CAN_T_COPY_SHARE_ORDER);
 				}
 			}
 
 			/* make sure there are orders available */
-			delta = dst->IsOrderListShared() ? src->GetNumOrders() + 1 : src->GetNumOrders() - dst->GetNumOrders();
+			int delta = dst->IsOrderListShared() ? src->GetNumOrders() + 1 : src->GetNumOrders() - dst->GetNumOrders();
 			if (!Order::CanAllocateItem(delta) ||
 					((dst->orders.list == NULL || dst->IsOrderListShared()) && !OrderList::CanAllocateItem())) {
 				return_cmd_error(STR_ERROR_NO_MORE_SPACE_FOR_ORDERS);
@@ -1231,10 +1209,13 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 					(*order_dst)->AssignOrder(*order);
 					order_dst = &(*order_dst)->next;
 				}
-				if (dst->orders.list == NULL) dst->orders.list = new OrderList(first, dst);
-				else {
+				if (dst->orders.list == NULL) {
+					dst->orders.list = new OrderList(first, dst);
+				} else {
 					assert(dst->orders.list->GetFirstOrder() == NULL);
-					new (dst->orders.list) OrderList(first, dst);
+					assert(!dst->orders.list->IsShared());
+					delete dst->orders.list;
+					dst->orders.list = new OrderList(first, dst);
 				}
 
 				InvalidateVehicleOrder(dst, -1);
@@ -1261,20 +1242,15 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
  */
 CommandCost CmdOrderRefit(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	const Vehicle *v;
-	Order *order;
 	VehicleID veh = GB(p1, 0, 16);
 	VehicleOrderID order_number  = GB(p2, 16, 8);
 	CargoID cargo = GB(p2, 0, 8);
 	byte subtype  = GB(p2, 8, 8);
 
-	if (!IsValidVehicleID(veh)) return CMD_ERROR;
+	const Vehicle *v = Vehicle::GetIfValid(veh);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
-	v = GetVehicle(veh);
-
-	if (!CheckOwnership(v->owner)) return CMD_ERROR;
-
-	order = GetVehicleOrder(v, order_number);
+	Order *order = GetVehicleOrder(v, order_number);
 	if (order == NULL) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
@@ -1365,7 +1341,7 @@ void RestoreVehicleOrders(const Vehicle *v, const BackuppedOrders *bak)
 		 *  order number is one more than the current amount of orders, and because
 		 *  in network the commands are queued before send, the second insert always
 		 *  fails in test mode. By bypassing the test-mode, that no longer is a problem. */
-		for (uint i = 0; bak->order[i].IsValid(); i++) {
+		for (uint i = 0; !bak->order[i].IsType(OT_NOTHING); i++) {
 			Order o = bak->order[i];
 			/* Conditional orders need to have their destination to be valid on insertion. */
 			if (o.IsType(OT_CONDITIONAL)) o.SetConditionSkipToOrder(0);
@@ -1384,7 +1360,7 @@ void RestoreVehicleOrders(const Vehicle *v, const BackuppedOrders *bak)
 		}
 
 			/* Fix the conditional orders' destination. */
-		for (uint i = 0; bak->order[i].IsValid(); i++) {
+		for (uint i = 0; !bak->order[i].IsType(OT_NOTHING); i++) {
 			if (!bak->order[i].IsType(OT_CONDITIONAL)) continue;
 
 			if (!DoCommandP(0, v->index + (i << 16), MOF_LOAD | (bak->order[i].GetConditionSkipToOrder() << 4),
@@ -1417,16 +1393,12 @@ void RestoreVehicleOrders(const Vehicle *v, const BackuppedOrders *bak)
  */
 CommandCost CmdRestoreOrderIndex(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v;
 	VehicleOrderID cur_ord = GB(p2,  0, 16);
 	uint16 serv_int = GB(p2, 16, 16);
 
-	if (!IsValidVehicleID(p1)) return CMD_ERROR;
-
-	v = GetVehicle(p1);
-
+	Vehicle *v = Vehicle::GetIfValid(p1);
 	/* Check the vehicle type and ownership, and if the service interval and order are in range */
-	if (!CheckOwnership(v->owner)) return CMD_ERROR;
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (serv_int != GetServiceIntervalClamped(serv_int) || cur_ord >= v->GetNumOrders()) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
@@ -1489,7 +1461,7 @@ void CheckOrders(const Vehicle *v)
 			}
 			/* Does station have a load-bay for this vehicle? */
 			if (order->IsType(OT_GOTO_STATION)) {
-				const Station *st = GetStation(order->GetDestination());
+				const Station *st = Station::Get(order->GetDestination());
 				TileIndex required_tile = GetStationTileForVehicle(v, st);
 
 				n_st++;
@@ -1717,12 +1689,12 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 					v->IncrementOrderIndex();
 				}
 			} else if (v->type != VEH_AIRCRAFT) {
-				v->dest_tile = GetDepot(order->GetDestination())->xy;
+				v->dest_tile = Depot::Get(order->GetDestination())->xy;
 			}
 			break;
 
 		case OT_GOTO_WAYPOINT:
-			v->dest_tile = GetWaypoint(order->GetDestination())->xy;
+			v->dest_tile = Waypoint::Get(order->GetDestination())->xy;
 			break;
 
 		case OT_CONDITIONAL: {
@@ -1829,7 +1801,7 @@ bool ProcessOrders(Vehicle *v)
 
 	/* If it is unchanged, keep it. */
 	if (order->Equals(v->current_order) && (v->type == VEH_AIRCRAFT || v->dest_tile != 0) &&
-			(v->type != VEH_SHIP || !order->IsType(OT_GOTO_STATION) || GetStation(order->GetDestination())->dock_tile != INVALID_TILE)) {
+			(v->type != VEH_SHIP || !order->IsType(OT_GOTO_STATION) || Station::Get(order->GetDestination())->dock_tile != INVALID_TILE)) {
 		return false;
 	}
 
@@ -1873,11 +1845,9 @@ bool Order::ShouldStopAtStation(const Vehicle *v, StationID station) const
 
 void InitializeOrders()
 {
-	_Order_pool.CleanPool();
-	_Order_pool.AddBlockToPool();
+	_order_pool.CleanPool();
 
-	_OrderList_pool.CleanPool();
-	_OrderList_pool.AddBlockToPool();
+	_orderlist_pool.CleanPool();
 
 	_backup_orders_tile = 0;
 }

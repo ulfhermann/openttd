@@ -10,8 +10,6 @@
 
 #include "saveload.h"
 
-extern uint _total_towns;
-
 /**
  * Check and update town and house values.
  *
@@ -181,22 +179,13 @@ static void Load_TOWN()
 {
 	int index;
 
-	_total_towns = 0;
-
 	while ((index = SlIterateArray()) != -1) {
 		Town *t = new (index) Town();
 		SlObject(t, _town_desc);
-
-		_total_towns++;
 	}
-
-	/* This is to ensure all pointers are within the limits of
-	 *  the size of the TownPool */
-	if (_cur_town_ctr > GetMaxTownIndex())
-		_cur_town_ctr = 0;
 }
 
 extern const ChunkHandler _town_chunk_handlers[] = {
-	{ 'HIDS', Save_HOUSEIDS, Load_HOUSEIDS, CH_ARRAY },
-	{ 'CITY', Save_TOWN,     Load_TOWN,     CH_ARRAY | CH_LAST},
+	{ 'HIDS', Save_HOUSEIDS, Load_HOUSEIDS, NULL, CH_ARRAY },
+	{ 'CITY', Save_TOWN,     Load_TOWN,     NULL, CH_ARRAY | CH_LAST},
 };

@@ -16,7 +16,7 @@
 #include "date_type.h"
 #include "company_base.h"
 #include "company_type.h"
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 #include "order_base.h"
 #include "cargopacket.h"
 #include "texteff.hpp"
@@ -189,15 +189,18 @@ struct VehicleShip {
 	TrackBitsByte state;
 };
 
-DECLARE_OLD_POOL(Vehicle, Vehicle, 9, 125)
+typedef Pool<Vehicle, VehicleID, 512, 64000> VehiclePool;
+extern VehiclePool _vehicle_pool;
 
 /* Some declarations of functions, so we can make them friendly */
 struct SaveLoad;
 extern const SaveLoad *GetVehicleDescription(VehicleType vt);
 struct LoadgameState;
 extern bool LoadOldVehicle(LoadgameState *ls, int num);
+extern bool AfterLoadGame();
+extern void FixOldVehicles();
 
-struct Vehicle : PoolItem<Vehicle, VehicleID, &_Vehicle_pool>, BaseVehicle {
+struct Vehicle : VehiclePool::PoolItem<&_vehicle_pool>, BaseVehicle {
 private:
 	Vehicle *next;           ///< pointer to the next vehicle in the chain
 	Vehicle *previous;       ///< NOSAVE: pointer to the previous vehicle in the chain
@@ -207,6 +210,8 @@ private:
 	Vehicle *previous_shared; ///< NOSAVE: pointer to the previous vehicle in the shared order chain
 public:
 	friend const SaveLoad *GetVehicleDescription(VehicleType vt); ///< So we can use private/protected variables in the saveload code
+	friend bool AfterLoadGame();
+	friend void FixOldVehicles();
 	friend void AfterLoadVehicles(bool part_of_load);             ///< So we can set the previous and first pointers while loading
 	friend bool LoadOldVehicle(LoadgameState *ls, int num);       ///< So we can set the proper next pointer while loading
 
@@ -423,8 +428,9 @@ public:
 
 	/**
 	 * Calls the tick handler of the vehicle
+	 * @return is this vehicle still valid?
 	 */
-	virtual void Tick() {};
+	virtual bool Tick() { return true; };
 
 	/**
 	 * Calls the new day handler of the vehicle
@@ -620,56 +626,11 @@ struct DisasterVehicle : public Vehicle {
 
 	const char *GetTypeString() const { return "disaster vehicle"; }
 	void UpdateDeltaXY(Direction direction);
-	void Tick();
+	bool Tick();
 };
 
-/**
- * This class 'wraps' Vehicle; you do not actually instantiate this class.
- * You create a Vehicle using AllocateVehicle, so it is added to the pool
- * and you reinitialize that to a Train using:
- *   v = new (v) Train();
- *
- * As side-effect the vehicle type is set correctly.
- */
-struct InvalidVehicle : public Vehicle {
-	/** Initializes the Vehicle to a invalid vehicle */
-	InvalidVehicle() { this->type = VEH_INVALID; }
-
-	/** We want to 'destruct' the right class. */
-	virtual ~InvalidVehicle() {}
-
-	const char *GetTypeString() const { return "invalid vehicle"; }
-	void Tick() {}
-};
-
-static inline VehicleID GetMaxVehicleIndex()
-{
-	/* TODO - This isn't the real content of the function, but
-	 *  with the new pool-system this will be replaced with one that
-	 *  _really_ returns the highest index. Now it just returns
-	 *  the next safe value we are sure about everything is below.
-	 */
-	return GetVehiclePoolSize() - 1;
-}
-
-static inline uint GetNumVehicles()
-{
-	return GetVehiclePoolSize();
-}
-
-#define FOR_ALL_VEHICLES_FROM(v, start) for (v = GetVehicle(start); v != NULL; v = (v->index + 1U < GetVehiclePoolSize()) ? GetVehicle(v->index + 1) : NULL) if (v->IsValid())
-#define FOR_ALL_VEHICLES(v) FOR_ALL_VEHICLES_FROM(v, 0)
-
-/**
- * Check if an index is a vehicle-index (so between 0 and max-vehicles)
- * @param index of the vehicle to query
- * @return Returns true if the vehicle-id is in range
- */
-static inline bool IsValidVehicleID(uint index)
-{
-	return index < GetVehiclePoolSize() && GetVehicle(index)->IsValid();
-}
-
+#define FOR_ALL_VEHICLES_FROM(var, start) FOR_ALL_ITEMS_FROM(Vehicle, vehicle_index, var, start)
+#define FOR_ALL_VEHICLES(var) FOR_ALL_VEHICLES_FROM(var, 0)
 
 /** Generates sequence of free UnitID numbers */
 struct FreeUnitIDGenerator {

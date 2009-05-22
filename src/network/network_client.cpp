@@ -30,7 +30,7 @@
 
 
 /* So we don't make too much typos ;) */
-#define MY_CLIENT GetNetworkClientSocket(0)
+#define MY_CLIENT NetworkClientSocket::Get(0)
 
 static uint32 last_ack_frame;
 
@@ -43,6 +43,9 @@ static char _password_server_unique_id[NETWORK_UNIQUE_ID_LENGTH];
 static uint8 _network_server_max_companies;
 /** Maximum number of spectators of the currently joined server. */
 static uint8 _network_server_max_spectators;
+
+/** Who would we like to join as. */
+CompanyID _network_join_as;
 
 /** Make sure the unique ID length is the same as a md5 hash. */
 assert_compile(NETWORK_UNIQUE_ID_LENGTH == 16 * 2 + 1);
@@ -135,7 +138,7 @@ DEF_CLIENT_SEND_COMMAND(PACKET_CLIENT_JOIN)
 	p = NetworkSend_Init(PACKET_CLIENT_JOIN);
 	p->Send_string(_openttd_revision);
 	p->Send_string(_settings_client.network.client_name); // Client name
-	p->Send_uint8 (_network_playas);      // PlayAs
+	p->Send_uint8 (_network_join_as);     // PlayAs
 	p->Send_uint8 (NETLANG_ANY);          // Language
 	p->Send_string(_settings_client.network.network_id);
 	MY_CLIENT->Send_Packet(p);
@@ -406,9 +409,6 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_CLIENT_INFO)
 
 	if (MY_CLIENT->HasClientQuit()) return NETWORK_RECV_STATUS_CONN_LOST;
 
-	/* Do we receive a change of data? Most likely we changed playas */
-	if (client_id == _network_own_client_id) _network_playas = playas;
-
 	ci = NetworkFindClientInfoFromClientID(client_id);
 	if (ci != NULL) {
 		if (playas == ci->client_playas && strcmp(name, ci->client_name) != 0) {
@@ -620,10 +620,10 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP)
 
 		/* New company/spectator (invalid company) or company we want to join is not active
 		 * Switch local company to spectator and await the server's judgement */
-		if (_network_playas == COMPANY_NEW_COMPANY || !IsValidCompanyID(_network_playas)) {
+		if (_network_join_as == COMPANY_NEW_COMPANY || !Company::IsValidID(_network_join_as)) {
 			SetLocalCompany(COMPANY_SPECTATOR);
 
-			if (_network_playas != COMPANY_SPECTATOR) {
+			if (_network_join_as != COMPANY_SPECTATOR) {
 				/* We have arrived and ready to start playing; send a command to make a new company;
 				 * the server will give us a client-id and let us in */
 				_network_join_status = NETWORK_JOIN_STATUS_REGISTERING;
@@ -632,7 +632,7 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP)
 			}
 		} else {
 			/* take control over an existing company */
-			SetLocalCompany(_network_playas);
+			SetLocalCompany(_network_join_as);
 		}
 	}
 
@@ -723,10 +723,10 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_CHAT)
 
 			/* For speaking to company or giving money, we need the company-name */
 			case NETWORK_ACTION_GIVE_MONEY:
-				if (!IsValidCompanyID(ci_to->client_playas)) return NETWORK_RECV_STATUS_OKAY;
+				if (!Company::IsValidID(ci_to->client_playas)) return NETWORK_RECV_STATUS_OKAY;
 				/* fallthrough */
 			case NETWORK_ACTION_CHAT_COMPANY: {
-				StringID str = IsValidCompanyID(ci_to->client_playas) ? STR_COMPANY_NAME : STR_NETWORK_SPECTATORS;
+				StringID str = Company::IsValidID(ci_to->client_playas) ? STR_COMPANY_NAME : STR_NETWORK_SPECTATORS;
 				SetDParam(0, ci_to->client_playas);
 
 				GetString(name, str, lastof(name));
@@ -842,10 +842,9 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MOVE)
 	if (ci == NULL) return NETWORK_RECV_STATUS_OKAY;
 
 	/* if not valid player, force spectator, else check player exists */
-	if (!IsValidCompanyID(company_id)) company_id = COMPANY_SPECTATOR;
+	if (!Company::IsValidID(company_id)) company_id = COMPANY_SPECTATOR;
 
 	if (client_id == _network_own_client_id) {
-		_network_playas = company_id;
 		SetLocalCompany(company_id);
 	}
 
@@ -1006,7 +1005,7 @@ void NetworkClientSetPassword(const char *password)
 bool NetworkClientPreferTeamChat(const NetworkClientInfo *cio)
 {
 	/* Only companies actually playing can speak to team. Eg spectators cannot */
-	if (!_settings_client.gui.prefer_teamchat || !IsValidCompanyID(cio->client_playas)) return false;
+	if (!_settings_client.gui.prefer_teamchat || !Company::IsValidID(cio->client_playas)) return false;
 
 	const NetworkClientInfo *ci;
 	FOR_ALL_CLIENT_INFOS(ci) {
@@ -1022,7 +1021,7 @@ bool NetworkClientPreferTeamChat(const NetworkClientInfo *cio)
  */
 bool NetworkMaxCompaniesReached()
 {
-	return ActiveCompanyCount() >= (_network_server ? _settings_client.network.max_companies : _network_server_max_companies);
+	return Company::GetNumItems() >= (_network_server ? _settings_client.network.max_companies : _network_server_max_companies);
 }
 
 /**
@@ -1044,7 +1043,7 @@ void NetworkPrintClients()
 		IConsolePrintF(CC_INFO, "Client #%1d  name: '%s'  company: %1d  IP: %s",
 				ci->client_id,
 				ci->client_name,
-				ci->client_playas + (IsValidCompanyID(ci->client_playas) ? 1 : 0),
+				ci->client_playas + (Company::IsValidID(ci->client_playas) ? 1 : 0),
 				GetClientIP(ci));
 	}
 }

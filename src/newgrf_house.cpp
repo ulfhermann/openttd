@@ -255,7 +255,7 @@ static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte
 		case 0x40: return (IsTileType(tile, MP_HOUSE) ? GetHouseBuildingStage(tile) : 0) | TileHash2Bit(TileX(tile), TileY(tile)) << 2;
 
 		/* Building age. */
-		case 0x41: return GetHouseAge(tile);
+		case 0x41: return IsTileType(tile, MP_HOUSE) ? GetHouseAge(tile) : 0;
 
 		/* Town zone */
 		case 0x42: return GetTownRadiusGroup(town, tile);
@@ -518,7 +518,7 @@ bool CanDeleteHouse(TileIndex tile)
 
 	/* Humans are always allowed to remove buildings, as is water and
 	 * anyone using the scenario editor. */
-	if ((IsValidCompanyID(_current_company) && IsHumanCompany(_current_company))
+	if ((Company::IsValidID(_current_company) && IsHumanCompany(_current_company))
 			|| _current_company == OWNER_WATER || _current_company == OWNER_NONE) return true;
 
 	if (HasBit(hs->callback_mask, CBM_HOUSE_DENY_DESTRUCTION)) {

@@ -208,7 +208,7 @@ void UpdateOldAircraft()
  */
 static void CheckValidVehicles()
 {
-	uint total_engines = GetEnginePoolSize();
+	size_t total_engines = Engine::GetPoolSize();
 	EngineID first_engine[4] = { INVALID_ENGINE, INVALID_ENGINE, INVALID_ENGINE, INVALID_ENGINE };
 
 	Engine *e;
@@ -225,7 +225,7 @@ static void CheckValidVehicles()
 			case VEH_ROAD:
 			case VEH_SHIP:
 			case VEH_AIRCRAFT:
-				if (v->engine_type >= total_engines || v->type != GetEngine(v->engine_type)->type) {
+				if (v->engine_type >= total_engines || v->type != Engine::Get(v->engine_type)->type) {
 					v->engine_type = first_engine[v->type];
 				}
 				break;
@@ -282,7 +282,7 @@ void AfterLoadVehicles(bool part_of_load)
 					}
 				} else { // OrderList was saved as such, only recalculate not saved values
 					if (v->PreviousShared() == NULL) {
-						new (v->orders.list) OrderList(v->orders.list->GetFirstOrder(), v);
+						v->orders.list->Initialize(v->orders.list->first, v);
 					}
 				}
 			}
@@ -698,7 +698,7 @@ void Load_VEHS()
 			case VEH_AIRCRAFT: v = new (index) Aircraft();        break;
 			case VEH_EFFECT:   v = new (index) EffectVehicle();   break;
 			case VEH_DISASTER: v = new (index) DisasterVehicle(); break;
-			case VEH_INVALID:  v = new (index) InvalidVehicle();  break;
+			case VEH_INVALID: /* Savegame shouldn't contain invalid vehicles */
 			default: NOT_REACHED();
 		}
 
@@ -732,6 +732,14 @@ void Load_VEHS()
 	}
 }
 
+void Ptrs_VEHS()
+{
+	Vehicle *v;
+	FOR_ALL_VEHICLES(v) {
+		SlObject(v, GetVehicleDescription(v->type));
+	}
+}
+
 extern const ChunkHandler _veh_chunk_handlers[] = {
-	{ 'VEHS', Save_VEHS, Load_VEHS, CH_SPARSE_ARRAY | CH_LAST},
+	{ 'VEHS', Save_VEHS, Load_VEHS, Ptrs_VEHS, CH_SPARSE_ARRAY | CH_LAST},
 };

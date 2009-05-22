@@ -42,12 +42,12 @@ bool CheckAutoreplaceValidity(EngineID from, EngineID to, CompanyID company)
 {
 	/* First we make sure that it's a valid type the user requested
 	 * check that it's an engine that is in the engine array */
-	if (!IsEngineIndex(from) || !IsEngineIndex(to)) return false;
+	if (!Engine::IsValidID(from) || !Engine::IsValidID(to)) return false;
 
 	/* we can't replace an engine into itself (that would be autorenew) */
 	if (from == to) return false;
 
-	VehicleType type = GetEngine(from)->type;
+	VehicleType type = Engine::Get(from)->type;
 
 	/* check that the new vehicle type is available to the company and its type is the same as the original one */
 	if (!IsEngineBuildable(to, type, company)) return false;
@@ -247,7 +247,7 @@ static CommandCost BuildReplacementVehicle(Vehicle *old_veh, Vehicle **new_vehic
 	*new_vehicle = NULL;
 
 	/* Shall the vehicle be replaced? */
-	const Company *c = GetCompany(_current_company);
+	const Company *c = Company::Get(_current_company);
 	EngineID e = GetNewEngineType(old_veh, c);
 	if (e == INVALID_ENGINE) return CommandCost(); // neither autoreplace is set, nor autorenew is triggered
 
@@ -259,7 +259,7 @@ static CommandCost BuildReplacementVehicle(Vehicle *old_veh, Vehicle **new_vehic
 	CommandCost cost = DoCommand(old_veh->tile, e, 0, DC_EXEC | DC_AUTOREPLACE, GetCmdBuildVeh(old_veh));
 	if (cost.Failed()) return cost;
 
-	Vehicle *new_veh = GetVehicle(_new_vehicle_id);
+	Vehicle *new_veh = Vehicle::Get(_new_vehicle_id);
 	*new_vehicle = new_veh;
 
 	/* Refit the vehicle if needed */
@@ -608,8 +608,9 @@ CommandCost CmdAutoreplaceVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1
 	CommandCost cost = CommandCost(EXPENSES_NEW_VEHICLES, 0);
 	bool nothing_to_do = true;
 
-	if (!IsValidVehicleID(p1)) return CMD_ERROR;
-	Vehicle *v = GetVehicle(p1);
+	Vehicle *v = Vehicle::GetIfValid(p1);
+	if (v == NULL) return CMD_ERROR;
+
 	if (!CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsInDepot()) return CMD_ERROR;
 	if (HASBITS(v->vehstatus, VS_CRASHED)) return CMD_ERROR;
@@ -623,8 +624,8 @@ CommandCost CmdAutoreplaceVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1
 		if (!v->IsPrimaryVehicle()) return CMD_ERROR;
 	}
 
-	const Company *c = GetCompany(_current_company);
-	bool wagon_removal = c->renew_keep_length;
+	const Company *c = Company::Get(_current_company);
+	bool wagon_removal = c->settings.renew_keep_length;
 
 	/* Test whether any replacement is set, before issuing a whole lot of commands that would end in nothing changed */
 	Vehicle *w = v;
