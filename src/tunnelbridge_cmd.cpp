@@ -15,6 +15,8 @@
 #include "town.h"
 #include "variables.h"
 #include "train.h"
+#include "ship.h"
+#include "roadveh.h"
 #include "water_map.h"
 #include "yapf/yapf.h"
 #include "newgrf_sound.h"
@@ -645,7 +647,7 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlag flags)
 			Track track = DiagDirToDiagTrack(dir);
 			Owner owner = GetTileOwner(tile);
 
-			Vehicle *v = NULL;
+			Train *v = NULL;
 			if (GetTunnelBridgeReservation(tile)) {
 				v = GetTrainForReservation(tile, track);
 				if (v != NULL) FreeTrainTrackReservation(v);
@@ -709,7 +711,7 @@ static CommandCost DoClearBridge(TileIndex tile, DoCommandFlag flags)
 		bool rail = GetTunnelBridgeTransportType(tile) == TRANSPORT_RAIL;
 		Owner owner = GetTileOwner(tile);
 		uint height = GetBridgeHeight(tile);
-		Vehicle *v = NULL;
+		Train *v = NULL;
 
 		if (rail && GetTunnelBridgeReservation(tile)) {
 			v = GetTrainForReservation(tile, DiagDirToDiagTrack(direction));
@@ -1383,44 +1385,46 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 		DiagDirection vdir;
 
 		if (v->type == VEH_TRAIN) {
+			Train *t = (Train *)v;
 			fc = (x & 0xF) + (y << 4);
 
-			vdir = DirToDiagDir(v->direction);
+			vdir = DirToDiagDir(t->direction);
 
-			if (v->u.rail.track != TRACK_BIT_WORMHOLE && dir == vdir) {
-				if (IsFrontEngine(v) && fc == _tunnel_fractcoord_1[dir]) {
-					if (!PlayVehicleSound(v, VSE_TUNNEL) && RailVehInfo(v->engine_type)->engclass == 0) {
+			if (t->u.rail.track != TRACK_BIT_WORMHOLE && dir == vdir) {
+				if (IsFrontEngine(t) && fc == _tunnel_fractcoord_1[dir]) {
+					if (!PlayVehicleSound(t, VSE_TUNNEL) && RailVehInfo(t->engine_type)->engclass == 0) {
 						SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
 					}
 					return VETSB_CONTINUE;
 				}
 				if (fc == _tunnel_fractcoord_2[dir]) {
-					v->tile = tile;
-					v->u.rail.track = TRACK_BIT_WORMHOLE;
-					v->vehstatus |= VS_HIDDEN;
+					t->tile = tile;
+					t->u.rail.track = TRACK_BIT_WORMHOLE;
+					t->vehstatus |= VS_HIDDEN;
 					return VETSB_ENTERED_WORMHOLE;
 				}
 			}
 
 			if (dir == ReverseDiagDir(vdir) && fc == _tunnel_fractcoord_3[dir] && z == 0) {
 				/* We're at the tunnel exit ?? */
-				v->tile = tile;
-				v->u.rail.track = (TrackBits)_exit_tunnel_track[dir];
-				assert(v->u.rail.track);
-				v->vehstatus &= ~VS_HIDDEN;
+				t->tile = tile;
+				t->u.rail.track = (TrackBits)_exit_tunnel_track[dir];
+				assert(t->u.rail.track);
+				t->vehstatus &= ~VS_HIDDEN;
 				return VETSB_ENTERED_WORMHOLE;
 			}
 		} else if (v->type == VEH_ROAD) {
+			RoadVehicle *rv = (RoadVehicle *)v;
 			fc = (x & 0xF) + (y << 4);
 			vdir = DirToDiagDir(v->direction);
 
 			/* Enter tunnel? */
-			if (v->u.road.state != RVSB_WORMHOLE && dir == vdir) {
+			if (rv->state != RVSB_WORMHOLE && dir == vdir) {
 				if (fc == _tunnel_fractcoord_4[dir] ||
 						fc == _tunnel_fractcoord_5[dir]) {
-					v->tile = tile;
-					v->u.road.state = RVSB_WORMHOLE;
-					v->vehstatus |= VS_HIDDEN;
+					rv->tile = tile;
+					rv->state = RVSB_WORMHOLE;
+					rv->vehstatus |= VS_HIDDEN;
 					return VETSB_ENTERED_WORMHOLE;
 				} else {
 					return VETSB_CONTINUE;
@@ -1433,10 +1437,10 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 						fc == _tunnel_fractcoord_7[dir]
 					) &&
 					z == 0) {
-				v->tile = tile;
-				v->u.road.state = _road_exit_tunnel_state[dir];
-				v->u.road.frame = _road_exit_tunnel_frame[dir];
-				v->vehstatus &= ~VS_HIDDEN;
+				rv->tile = tile;
+				rv->state = _road_exit_tunnel_state[dir];
+				rv->frame = _road_exit_tunnel_frame[dir];
+				rv->vehstatus &= ~VS_HIDDEN;
 				return VETSB_ENTERED_WORMHOLE;
 			}
 		}
@@ -1459,18 +1463,19 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				case DIAGDIR_NW: if ((y & 0xF) != 0)             return VETSB_CONTINUE; break;
 			}
 			switch (v->type) {
-				case VEH_TRAIN:
-					v->u.rail.track = TRACK_BIT_WORMHOLE;
-					ClrBit(v->u.rail.flags, VRF_GOINGUP);
-					ClrBit(v->u.rail.flags, VRF_GOINGDOWN);
-					break;
+				case VEH_TRAIN: {
+					Train *t = (Train *)v;
+					t->u.rail.track = TRACK_BIT_WORMHOLE;
+					ClrBit(t->u.rail.flags, VRF_GOINGUP);
+					ClrBit(t->u.rail.flags, VRF_GOINGDOWN);
+				} break;
 
 				case VEH_ROAD:
-					v->u.road.state = RVSB_WORMHOLE;
+					((RoadVehicle *)v)->state = RVSB_WORMHOLE;
 					break;
 
 				case VEH_SHIP:
-					v->u.ship.state = TRACK_BIT_WORMHOLE;
+					((Ship *)v)->state = TRACK_BIT_WORMHOLE;
 					break;
 
 				default: NOT_REACHED();
@@ -1479,27 +1484,30 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 		} else if (DirToDiagDir(v->direction) == ReverseDiagDir(dir)) {
 			v->tile = tile;
 			switch (v->type) {
-				case VEH_TRAIN:
-					if (v->u.rail.track == TRACK_BIT_WORMHOLE) {
-						v->u.rail.track = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
+				case VEH_TRAIN: {
+					Train *t = (Train *)v;
+					if (t->u.rail.track == TRACK_BIT_WORMHOLE) {
+						t->u.rail.track = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
 						return VETSB_ENTERED_WORMHOLE;
 					}
-					break;
+				} break;
 
-				case VEH_ROAD:
-					if (v->u.road.state == RVSB_WORMHOLE) {
-						v->u.road.state = _road_exit_tunnel_state[dir];
-						v->u.road.frame = 0;
+				case VEH_ROAD: {
+					RoadVehicle *rv = (RoadVehicle *)v;
+					if (rv->state == RVSB_WORMHOLE) {
+						rv->state = _road_exit_tunnel_state[dir];
+						rv->frame = 0;
 						return VETSB_ENTERED_WORMHOLE;
 					}
-					break;
+				} break;
 
-				case VEH_SHIP:
-					if (v->u.ship.state == TRACK_BIT_WORMHOLE) {
-						v->u.ship.state = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
+				case VEH_SHIP: {
+					Ship *ship = (Ship *)v;
+					if (ship->state == TRACK_BIT_WORMHOLE) {
+						ship->state = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
 						return VETSB_ENTERED_WORMHOLE;
 					}
-					break;
+				} break;
 
 				default: NOT_REACHED();
 			}
