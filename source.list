@@ -199,6 +199,7 @@ ini_type.h
 landscape.h
 landscape_type.h
 linkgraph/linkgraph.h
+linkgraph/linkgraph_types.h
 livery.h
 lzoconf.h
 map_func.h
