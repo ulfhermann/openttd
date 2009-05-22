@@ -354,13 +354,13 @@ static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 intern
 
 		/* Check if the engine is registered in the override manager */
 		EngineID engine = _engine_mngr.GetID(type, internal_id, scope_grfid);
-		if (engine != INVALID_ENGINE) return GetEngine(engine);
+		if (engine != INVALID_ENGINE) return Engine::Get(engine);
 	}
 
 	/* Check if there is an unreserved slot */
 	EngineID engine = _engine_mngr.GetID(type, internal_id, INVALID_GRFID);
 	if (engine != INVALID_ENGINE) {
-		Engine *e = GetEngine(engine);
+		Engine *e = Engine::Get(engine);
 
 		if (e->grffile == NULL) {
 			e->grffile = file;
@@ -378,7 +378,7 @@ static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 intern
 
 	if (static_access) return NULL;
 
-	uint engine_pool_size = GetEnginePoolSize();
+	size_t engine_pool_size = Engine::GetPoolSize();
 
 	/* ... it's not, so create a new one based off an existing engine */
 	Engine *e = new Engine(type, internal_id);
@@ -392,12 +392,12 @@ static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 intern
 	eid->internal_id     = internal_id;
 	eid->substitute_id   = min(internal_id, _engine_counts[type]); // substitute_id == _engine_counts[subtype] means "no substitute"
 
-	if (engine_pool_size != GetEnginePoolSize()) {
+	if (engine_pool_size != Engine::GetPoolSize()) {
 		/* Resize temporary engine data ... */
-		_gted = ReallocT(_gted, GetEnginePoolSize());
+		_gted = ReallocT(_gted, Engine::GetPoolSize());
 
 		/* and blank the new block. */
-		size_t len = (GetEnginePoolSize() - engine_pool_size) * sizeof(*_gted);
+		size_t len = (Engine::GetPoolSize() - engine_pool_size) * sizeof(*_gted);
 		memset(_gted + engine_pool_size, 0, len);
 	}
 
@@ -811,7 +811,7 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 				break;
 
 			case 0x12: // SFX
-				rvi->sfx = (SoundFx)grf_load_byte(&buf);
+				rvi->sfx = grf_load_byte(&buf);
 				break;
 
 			case 0x13: // Power in 10hp
@@ -937,7 +937,7 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 				break;
 
 			case 0x10: // SFX
-				svi->sfx = (SoundFx)grf_load_byte(&buf);
+				svi->sfx = grf_load_byte(&buf);
 				break;
 
 			case 0x11: // Cargos available for refitting
@@ -1053,7 +1053,7 @@ static ChangeInfoResult AircraftVehicleChangeInfo(uint engine, int numinfo, int 
 				break;
 
 			case 0x12: // SFX
-				avi->sfx = (SoundFx)grf_load_byte(&buf);
+				avi->sfx = grf_load_byte(&buf);
 				break;
 
 			case 0x13: // Cargos available for refitting
@@ -2020,7 +2020,7 @@ static ChangeInfoResult SoundEffectChangeInfo(uint sid, int numinfo, int prop, b
 	}
 
 	for (int i = 0; i < numinfo; i++) {
-		uint sound = sid + i + _cur_grffile->sound_offset - GetNumOriginalSounds();
+		SoundID sound = sid + i + _cur_grffile->sound_offset - ORIGINAL_SAMPLE_COUNT;
 
 		if (sound >= GetNumSounds()) {
 			grfmsg(1, "SoundEffectChangeInfo: Sound %d not defined (max %d)", sound, GetNumSounds());
@@ -2037,16 +2037,16 @@ static ChangeInfoResult SoundEffectChangeInfo(uint sid, int numinfo, int prop, b
 				break;
 
 			case 0x0A: { // Override old sound
-				uint orig_sound = grf_load_byte(&buf);
+				SoundID orig_sound = grf_load_byte(&buf);
 
-				if (orig_sound >= GetNumSounds()) {
-					grfmsg(1, "SoundEffectChangeInfo: Original sound %d not defined (max %d)", orig_sound, GetNumSounds());
+				if (orig_sound >= ORIGINAL_SAMPLE_COUNT) {
+					grfmsg(1, "SoundEffectChangeInfo: Original sound %d not defined (max %d)", orig_sound, ORIGINAL_SAMPLE_COUNT);
 				} else {
-					FileEntry *newfe = GetSound(sound);
-					FileEntry *oldfe = GetSound(orig_sound);
+					SoundEntry *new_sound = GetSound(sound);
+					SoundEntry *old_sound = GetSound(orig_sound);
 
 					/* Literally copy the data of the new sound over the original */
-					*oldfe = *newfe;
+					*old_sound = *new_sound;
 				}
 			} break;
 
@@ -2595,9 +2595,7 @@ static void ReserveChangeInfo(byte *buf, size_t len)
  */
 static const SpriteGroup *NewCallBackResultSpriteGroup(uint16 value)
 {
-	SpriteGroup *group = AllocateSpriteGroup();
-
-	group->type = SGT_CALLBACK;
+	SpriteGroup *group = new SpriteGroup(SGT_CALLBACK);
 
 	/* Old style callback results have the highest byte 0xFF so signify it is a callback result
 	 * New style ones only have the highest bit set (allows 15-bit results, instead of just 8) */
@@ -2620,8 +2618,7 @@ static const SpriteGroup *NewCallBackResultSpriteGroup(uint16 value)
  */
 static const SpriteGroup *NewResultSpriteGroup(SpriteID sprite, byte num_sprites)
 {
-	SpriteGroup *group = AllocateSpriteGroup();
-	group->type = SGT_RESULT;
+	SpriteGroup *group = new SpriteGroup(SGT_RESULT);
 	group->g.result.sprite = sprite;
 	group->g.result.num_sprites = num_sprites;
 	return group;
@@ -2768,8 +2765,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 			/* Check we can load the var size parameter */
 			if (!check_length(bufend - buf, 1, "NewSpriteGroup (Deterministic) (1)")) return;
 
-			group = AllocateSpriteGroup();
-			group->type = SGT_DETERMINISTIC;
+			group = new SpriteGroup(SGT_DETERMINISTIC);
 			group->g.determ.var_scope = HasBit(type, 1) ? VSG_SCOPE_PARENT : VSG_SCOPE_SELF;
 
 			switch (GB(type, 2, 2)) {
@@ -2843,8 +2839,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 		{
 			if (!check_length(bufend - buf, HasBit(type, 2) ? 8 : 7, "NewSpriteGroup (Randomized) (1)")) return;
 
-			group = AllocateSpriteGroup();
-			group->type = SGT_RANDOMIZED;
+			group = new SpriteGroup(SGT_RANDOMIZED);
 			group->g.random.var_scope = HasBit(type, 1) ? VSG_SCOPE_PARENT : VSG_SCOPE_SELF;
 
 			if (HasBit(type, 2)) {
@@ -2893,8 +2888,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 
 					if (!check_length(bufend - buf, 2 * num_loaded + 2 * num_loading, "NewSpriteGroup (Real) (1)")) return;
 
-					group = AllocateSpriteGroup();
-					group->type = SGT_REAL;
+					group = new SpriteGroup(SGT_REAL);
 
 					group->g.real.num_loaded  = num_loaded;
 					group->g.real.num_loading = num_loading;
@@ -2925,8 +2919,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 					byte num_sprites = max((uint8)1, type);
 					uint i;
 
-					group = AllocateSpriteGroup();
-					group->type = SGT_TILELAYOUT;
+					group = new SpriteGroup(SGT_TILELAYOUT);
 					group->g.layout.num_sprites = sprites;
 					group->g.layout.dts = CallocT<DrawTileSprites>(1);
 
@@ -2987,8 +2980,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 						break;
 					}
 
-					group = AllocateSpriteGroup();
-					group->type = SGT_INDUSTRY_PRODUCTION;
+					group = new SpriteGroup(SGT_INDUSTRY_PRODUCTION);
 					group->g.indprod.version = type;
 					if (type == 0) {
 						for (uint i = 0; i < 3; i++) {
@@ -3479,7 +3471,7 @@ static void FeatureNewName(byte *buf, size_t len)
 					StringID string = AddGRFString(_cur_grffile->grfid, e->index, lang, new_scheme, name, e->info.string_id);
 					e->info.string_id = string;
 				} else {
-					AddGRFString(_cur_grffile->grfid, id, lang, new_scheme, name, id);
+					AddGRFString(_cur_grffile->grfid, id, lang, new_scheme, name, STR_UNDEFINED);
 				}
 				break;
 
@@ -5059,9 +5051,9 @@ static void SkipAct11(byte *buf, size_t len)
 static void ImportGRFSound(byte *buf, int len)
 {
 	const GRFFile *file;
-	FileEntry *se = AllocateFileEntry();
+	SoundEntry *sound = AllocateSound();
 	uint32 grfid = grf_load_dword(&buf);
-	uint16 sound = grf_load_word(&buf);
+	SoundID sound_id = grf_load_word(&buf);
 
 	file = GetFileByGRFID(grfid);
 	if (file == NULL || file->sound_offset == 0) {
@@ -5069,18 +5061,18 @@ static void ImportGRFSound(byte *buf, int len)
 		return;
 	}
 
-	if (file->sound_offset + sound >= GetNumSounds()) {
-		grfmsg(1, "ImportGRFSound: Sound effect %d is invalid", sound);
+	if (file->sound_offset + sound_id >= GetNumSounds()) {
+		grfmsg(1, "ImportGRFSound: Sound effect %d is invalid", sound_id);
 		return;
 	}
 
-	grfmsg(2, "ImportGRFSound: Copying sound %d (%d) from file %X", sound, file->sound_offset + sound, grfid);
+	grfmsg(2, "ImportGRFSound: Copying sound %d (%d) from file %X", sound_id, file->sound_offset + sound_id, grfid);
 
-	*se = *GetSound(file->sound_offset + sound);
+	*sound = *GetSound(file->sound_offset + sound_id);
 
 	/* Reset volume and priority, which TTDPatch doesn't copy */
-	se->volume   = 128;
-	se->priority = 0;
+	sound->volume   = 128;
+	sound->priority = 0;
 }
 
 /* 'Action 0xFE' */
@@ -5113,7 +5105,7 @@ static void LoadGRFSound(byte *buf, int len)
 
 	/* Allocate a sound entry. This is done even if the data is not loaded
 	 * so that the indices used elsewhere are still correct. */
-	FileEntry *se = AllocateFileEntry();
+	SoundEntry *sound = AllocateSound();
 
 	if (grf_load_dword(&buf) != BSWAP32('RIFF')) {
 		grfmsg(1, "LoadGRFSound: Missing RIFF header");
@@ -5139,30 +5131,30 @@ static void LoadGRFSound(byte *buf, int len)
 					grfmsg(1, "LoadGRFSound: Invalid audio format");
 					return;
 				}
-				se->channels = grf_load_word(&buf);
-				se->rate = grf_load_dword(&buf);
+				sound->channels = grf_load_word(&buf);
+				sound->rate = grf_load_dword(&buf);
 				grf_load_dword(&buf);
 				grf_load_word(&buf);
-				se->bits_per_sample = grf_load_word(&buf);
+				sound->bits_per_sample = grf_load_word(&buf);
 
 				/* Consume any extra bytes */
 				for (; size > 16; size--) grf_load_byte(&buf);
 				break;
 
 			case 'atad': // 'data'
-				se->file_size   = size;
-				se->file_offset = FioGetPos() - (len - (buf - buf_start)) + 1;
-				se->file_slot   = _file_index;
+				sound->file_size   = size;
+				sound->file_offset = FioGetPos() - (len - (buf - buf_start)) + 1;
+				sound->file_slot   = _file_index;
 
 				/* Set default volume and priority */
-				se->volume = 0x80;
-				se->priority = 0;
+				sound->volume = 0x80;
+				sound->priority = 0;
 
-				grfmsg(2, "LoadGRFSound: channels %u, sample rate %u, bits per sample %u, length %u", se->channels, se->rate, se->bits_per_sample, size);
+				grfmsg(2, "LoadGRFSound: channels %u, sample rate %u, bits per sample %u, length %u", sound->channels, sound->rate, sound->bits_per_sample, size);
 				return;
 
 			default:
-				se->file_size = 0;
+				sound->file_size = 0;
 				return;
 		}
 	}
@@ -5575,7 +5567,7 @@ static void ResetNewGRFData()
 	ResetRailTypes();
 
 	/* Allocate temporary refit/cargo class data */
-	_gted = CallocT<GRFTempEngineData>(GetEnginePoolSize());
+	_gted = CallocT<GRFTempEngineData>(Engine::GetPoolSize());
 
 	/* Reset GRM reservations */
 	memset(&_grm_engines, 0, sizeof(_grm_engines));
@@ -5631,7 +5623,7 @@ static void ResetNewGRFData()
 	_grf_id_overrides.clear();
 
 	InitializeSoundPool();
-	InitializeSpriteGroupPool();
+	_spritegroup_pool.CleanPool();
 }
 
 static void BuildCargoTranslationMap()

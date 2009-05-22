@@ -6,17 +6,18 @@
 #define WAYPOINT_H
 
 #include "waypoint_type.h"
-#include "oldpool.h"
 #include "rail_map.h"
 #include "command_type.h"
 #include "station_type.h"
 #include "town_type.h"
 #include "viewport_type.h"
 #include "date_type.h"
+#include "core/pool_type.hpp"
 
-DECLARE_OLD_POOL(Waypoint, Waypoint, 3, 8000)
+typedef Pool<Waypoint, WaypointID, 32, 64000> WaypointPool;
+extern WaypointPool _waypoint_pool;
 
-struct Waypoint : PoolItem<Waypoint, WaypointID, &_Waypoint_pool> {
+struct Waypoint : WaypointPool::PoolItem<&_waypoint_pool> {
 	TileIndex xy;      ///< Tile of waypoint
 
 	TownID town_index; ///< Town associated with the waypoint
@@ -34,19 +35,12 @@ struct Waypoint : PoolItem<Waypoint, WaypointID, &_Waypoint_pool> {
 
 	byte deleted;      ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the waypoint is then is deleted.
 
-	Waypoint(TileIndex tile = INVALID_TILE);
+	Waypoint(TileIndex tile = INVALID_TILE) : xy(tile) { }
 	~Waypoint();
-
-	inline bool IsValid() const { return this->xy != INVALID_TILE; }
 };
 
-static inline bool IsValidWaypointID(WaypointID index)
-{
-	return index < GetWaypointPoolSize() && GetWaypoint(index)->IsValid();
-}
-
-#define FOR_ALL_WAYPOINTS_FROM(wp, start) for (wp = GetWaypoint(start); wp != NULL; wp = (wp->index + 1U < GetWaypointPoolSize()) ? GetWaypoint(wp->index + 1U) : NULL) if (wp->IsValid())
-#define FOR_ALL_WAYPOINTS(wp) FOR_ALL_WAYPOINTS_FROM(wp, 0)
+#define FOR_ALL_WAYPOINTS_FROM(var, start) FOR_ALL_ITEMS_FROM(Waypoint, waypoint_index, var, start)
+#define FOR_ALL_WAYPOINTS(var) FOR_ALL_WAYPOINTS_FROM(var, 0)
 
 
 /**
@@ -57,7 +51,7 @@ static inline bool IsValidWaypointID(WaypointID index)
 static inline Waypoint *GetWaypointByTile(TileIndex tile)
 {
 	assert(IsRailWaypointTile(tile));
-	return GetWaypoint(GetWaypointIndex(tile));
+	return Waypoint::Get(GetWaypointIndex(tile));
 }
 
 CommandCost RemoveTrainWaypoint(TileIndex tile, DoCommandFlag flags, bool justremove);

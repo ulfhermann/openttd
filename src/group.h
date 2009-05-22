@@ -6,14 +6,15 @@
 #define GROUP_H
 
 #include "group_type.h"
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 #include "company_type.h"
 #include "vehicle_type.h"
 #include "engine_type.h"
 
-DECLARE_OLD_POOL(Group, Group, 5, 2047)
+typedef Pool<Group, GroupID, 16, 64000> GroupPool;
+extern GroupPool _group_pool;
 
-struct Group : PoolItem<Group, GroupID, &_Group_pool> {
+struct Group : GroupPool::PoolItem<&_group_pool> {
 	char *name;                             ///< Group Name
 
 	uint16 num_vehicle;                     ///< Number of vehicles wich belong to the group
@@ -24,16 +25,9 @@ struct Group : PoolItem<Group, GroupID, &_Group_pool> {
 	uint16 *num_engines;                    ///< Caches the number of engines of each type the company owns (no need to save this)
 
 	Group(CompanyID owner = INVALID_COMPANY);
-	virtual ~Group();
-
-	bool IsValid() const;
+	~Group();
 };
 
-
-static inline bool IsValidGroupID(GroupID index)
-{
-	return index < GetGroupPoolSize() && GetGroup(index)->IsValid();
-}
 
 static inline bool IsDefaultGroupID(GroupID index)
 {
@@ -50,13 +44,13 @@ static inline bool IsAllGroupID(GroupID id_g)
 	return id_g == ALL_GROUP;
 }
 
-#define FOR_ALL_GROUPS_FROM(g, start) for (g = GetGroup(start); g != NULL; g = (g->index + 1U < GetGroupPoolSize()) ? GetGroup(g->index + 1) : NULL) if (g->IsValid())
-#define FOR_ALL_GROUPS(g) FOR_ALL_GROUPS_FROM(g, 0)
+#define FOR_ALL_GROUPS_FROM(var, start) FOR_ALL_ITEMS_FROM(Group, group_index, var, start)
+#define FOR_ALL_GROUPS(var) FOR_ALL_GROUPS_FROM(var, 0)
 
 /**
  * Get the current size of the GroupPool
  */
-static inline uint GetGroupArraySize(void)
+static inline uint GetGroupArraySize()
 {
 	const Group *g;
 	uint num = 0;
@@ -77,12 +71,14 @@ uint GetGroupNumEngines(CompanyID company, GroupID id_g, EngineID id_e);
 
 static inline void IncreaseGroupNumVehicle(GroupID id_g)
 {
-	if (IsValidGroupID(id_g)) GetGroup(id_g)->num_vehicle++;
+	Group *g = Group::GetIfValid(id_g);
+	if (g != NULL) g->num_vehicle++;
 }
 
 static inline void DecreaseGroupNumVehicle(GroupID id_g)
 {
-	if (IsValidGroupID(id_g)) GetGroup(id_g)->num_vehicle--;
+	Group *g = Group::GetIfValid(id_g);
+	if (g != NULL) g->num_vehicle--;
 }
 
 

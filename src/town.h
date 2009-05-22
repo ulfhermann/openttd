@@ -5,7 +5,7 @@
 #ifndef TOWN_H
 #define TOWN_H
 
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 #include "core/bitmath_func.hpp"
 #include "core/random_func.hpp"
 #include "cargo_type.h"
@@ -100,9 +100,10 @@ struct BuildingCounts {
 static const uint CUSTOM_TOWN_NUMBER_DIFFICULTY  = 4; ///< value for custom town number in difficulty settings
 static const uint CUSTOM_TOWN_MAX_NUMBER = 5000;  ///< this is the maximum number of towns a user can specify in customisation
 
-DECLARE_OLD_POOL(Town, Town, 3, 8000)
+typedef Pool<Town, TownID, 64, 64000> TownPool;
+extern TownPool _town_pool;
 
-struct Town : PoolItem<Town, TownID, &_Town_pool> {
+struct Town : TownPool::PoolItem<&_town_pool> {
 	TileIndex xy;
 
 	/* Current population of people and amount of houses. */
@@ -183,12 +184,10 @@ struct Town : PoolItem<Town, TownID, &_Town_pool> {
 	/**
 	 * Creates a new town
 	 */
-	Town(TileIndex tile = INVALID_TILE);
+	Town(TileIndex tile = INVALID_TILE) : xy(tile) { }
 
 	/** Destroy the town */
 	~Town();
-
-	inline bool IsValid() const { return this->xy != INVALID_TILE; }
 
 	void InitializeLayout(TownLayout layout);
 
@@ -296,38 +295,11 @@ static inline HouseSpec *GetHouseSpecs(HouseID house_id)
 TileIndexDiff GetHouseNorthPart(HouseID &house);
 
 /**
- * Check if a TownID is valid.
- * @param index to inquiry in the pool of town
- * @return true if it exists
- */
-static inline bool IsValidTownID(TownID index)
-{
-	return index < GetTownPoolSize() && GetTown(index)->IsValid();
-}
-
-static inline TownID GetMaxTownIndex()
-{
-	/* TODO - This isn't the real content of the function, but
-	 *  with the new pool-system this will be replaced with one that
-	 *  _really_ returns the highest index. Now it just returns
-	 *  the next safe value we are sure about everything is below.
-	 */
-	return GetTownPoolSize() - 1;
-}
-
-static inline uint GetNumTowns()
-{
-	extern uint _total_towns;
-
-	return _total_towns;
-}
-
-/**
  * Return a random valid town.
  */
 static inline Town *GetRandomTown()
 {
-	int num = RandomRange(GetNumTowns());
+	int num = RandomRange((uint16)Town::GetNumItems());
 	TownID index = INVALID_TOWN;
 
 	while (num >= 0) {
@@ -335,24 +307,22 @@ static inline Town *GetRandomTown()
 
 		index++;
 		/* Make sure we have a valid town */
-		while (!IsValidTownID(index)) {
+		while (!Town::IsValidID(index)) {
 			index++;
-			assert(index <= GetMaxTownIndex());
+			assert(index < Town::GetPoolSize());
 		}
 	}
 
-	return GetTown(index);
+	return Town::Get(index);
 }
 
-Town *CalcClosestTownFromTile(TileIndex tile, uint threshold = UINT_MAX);
+Town *CalcClosestTownFromTile(TileIndex tile, uint threshold = UINT_MAX, const Town *ignore = NULL);
 
-#define FOR_ALL_TOWNS_FROM(t, start) for (t = GetTown(start); t != NULL; t = (t->index + 1U < GetTownPoolSize()) ? GetTown(t->index + 1U) : NULL) if (t->IsValid())
-#define FOR_ALL_TOWNS(t) FOR_ALL_TOWNS_FROM(t, 0)
+#define FOR_ALL_TOWNS_FROM(var, start) FOR_ALL_ITEMS_FROM(Town, town_index, var, start)
+#define FOR_ALL_TOWNS(var) FOR_ALL_TOWNS_FROM(var, 0)
 
 extern Town *_cleared_town;
 extern int _cleared_town_rating;
-extern uint32 _cur_town_ctr;
-extern uint32 _cur_town_iter;
 
 void ResetHouses();
 

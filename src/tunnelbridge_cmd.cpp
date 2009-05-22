@@ -394,7 +394,7 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 				break;
 
 			case MP_RAILWAY:
-				if (!IsPlainRailTile(tile)) goto not_valid_below;
+				if (!IsPlainRail(tile)) goto not_valid_below;
 				break;
 
 			case MP_ROAD:
@@ -440,11 +440,11 @@ not_valid_below:;
 	 * It's unnecessary to execute this command every time for every bridge. So it is done only
 	 * and cost is computed in "bridge_gui.c". For AI, Towns this has to be of course calculated
 	 */
-	if (!(flags & DC_QUERY_COST) || (IsValidCompanyID(_current_company) && GetCompany(_current_company)->is_ai)) {
+	Company *c = Company::GetIfValid(_current_company);
+	if (!(flags & DC_QUERY_COST) || (c != NULL && c->is_ai)) {
 		bridge_len += 2; // begin and end tiles/ramps
 
-		if (IsValidCompanyID(_current_company))
-			bridge_len = CalcBridgeLenCostFactor(bridge_len);
+		if (c != NULL) bridge_len = CalcBridgeLenCostFactor(bridge_len);
 
 		cost.AddCost((int64)bridge_len * _price.build_bridge * GetBridgeSpec(bridge_type)->price >> 8);
 

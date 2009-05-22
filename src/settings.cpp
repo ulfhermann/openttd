@@ -726,19 +726,19 @@ static bool CheckInterval(int32 p1)
 
 static bool EngineRenewUpdate(int32 p1)
 {
-	DoCommandP(0, 0, _settings_client.gui.autorenew, CMD_SET_AUTOREPLACE);
+	DoCommandP(0, 0, _settings_client.company.engine_renew, CMD_SET_AUTOREPLACE);
 	return true;
 }
 
 static bool EngineRenewMonthsUpdate(int32 p1)
 {
-	DoCommandP(0, 1, _settings_client.gui.autorenew_months, CMD_SET_AUTOREPLACE);
+	DoCommandP(0, 1, _settings_client.company.engine_renew_months, CMD_SET_AUTOREPLACE);
 	return true;
 }
 
 static bool EngineRenewMoneyUpdate(int32 p1)
 {
-	DoCommandP(0, 2, _settings_client.gui.autorenew_money, CMD_SET_AUTOREPLACE);
+	DoCommandP(0, 2, _settings_client.company.engine_renew_money, CMD_SET_AUTOREPLACE);
 	return true;
 }
 
@@ -1704,8 +1704,8 @@ void CheckConfig()
 }
 
 extern const ChunkHandler _setting_chunk_handlers[] = {
-	{ 'OPTS', NULL,      Load_OPTS, CH_RIFF},
-	{ 'PATS', Save_PATS, Load_PATS, CH_RIFF | CH_LAST},
+	{ 'OPTS', NULL,      Load_OPTS, NULL, CH_RIFF},
+	{ 'PATS', Save_PATS, Load_PATS, NULL, CH_RIFF | CH_LAST},
 };
 
 static bool IsSignedVarMemType(VarType vt)

@@ -235,14 +235,41 @@ static bool InitializeWindowsAndCaches()
 	return true;
 }
 
+typedef void (CDECL *SignalHandlerPointer)(int);
+static SignalHandlerPointer _prev_segfault = NULL;
+static SignalHandlerPointer _prev_abort = NULL;
+
+static void CDECL HandleSavegameLoadCrash(int signum);
+
+/**
+ * Replaces signal handlers of SIGSEGV and SIGABRT
+ * and stores pointers to original handlers in memory.
+ */
+static void SetSignalHandlers()
+{
+	_prev_segfault = signal(SIGSEGV, HandleSavegameLoadCrash);
+	_prev_abort = signal(SIGABRT, HandleSavegameLoadCrash);
+}
+
+/**
+ * Resets signal handlers back to original handlers.
+ */
+static void ResetSignalHandlers()
+{
+	signal(SIGSEGV, _prev_segfault);
+	signal(SIGABRT, _prev_abort);
+}
+
 /**
  * Signal handler used to give a user a more useful report for crashes during
  * the savegame loading process; especially when there's problems with the
  * NewGRFs that are required by the savegame.
- * @param unused well... unused
+ * @param signum received signal
  */
-void CDECL HandleSavegameLoadCrash(int unused)
+static void CDECL HandleSavegameLoadCrash(int signum)
 {
+	ResetSignalHandlers();
+
 	char buffer[8192];
 	char *p = buffer;
 	p += seprintf(p, lastof(buffer),
@@ -272,6 +299,9 @@ void CDECL HandleSavegameLoadCrash(int unused)
 	}
 
 	ShowInfo(buffer);
+
+	SignalHandlerPointer call = signum == SIGSEGV ? _prev_segfault : _prev_abort;
+	if (call != NULL) call(signum);
 }
 
 /**
@@ -281,7 +311,7 @@ void CDECL HandleSavegameLoadCrash(int unused)
  */
 static void FixOwnerOfRailTrack(TileIndex t)
 {
-	assert(!IsValidCompanyID(GetTileOwner(t)) && (IsLevelCrossingTile(t) || IsPlainRailTile(t)));
+	assert(!Company::IsValidID(GetTileOwner(t)) && (IsLevelCrossingTile(t) || IsPlainRailTile(t)));
 
 	/* remove leftover rail piece from crossing (from very old savegames) */
 	Vehicle *v = NULL, *w;
@@ -303,7 +333,7 @@ static void FixOwnerOfRailTrack(TileIndex t)
 		TileIndex tt = t + TileOffsByDiagDir(dd);
 		if (GetTileTrackStatus(t, TRANSPORT_RAIL, 0, dd) != 0 &&
 				GetTileTrackStatus(tt, TRANSPORT_RAIL, 0, ReverseDiagDir(dd)) != 0 &&
-				IsValidCompanyID(GetTileOwner(tt))) {
+				Company::IsValidID(GetTileOwner(tt))) {
 			SetTileOwner(t, GetTileOwner(tt));
 			return;
 		}
@@ -322,9 +352,7 @@ static void FixOwnerOfRailTrack(TileIndex t)
 
 bool AfterLoadGame()
 {
-	typedef void (CDECL *SignalHandlerPointer)(int);
-	SignalHandlerPointer prev_segfault = signal(SIGSEGV, HandleSavegameLoadCrash);
-	SignalHandlerPointer prev_abort = signal(SIGABRT, HandleSavegameLoadCrash);
+	SetSignalHandlers();
 
 	TileIndex map_size = MapSize();
 	Company *c;
@@ -437,8 +465,7 @@ bool AfterLoadGame()
 	if (_networking && gcf_res != GLC_ALL_GOOD) {
 		SetSaveLoadError(STR_NETWORK_ERR_CLIENT_NEWGRF_MISMATCH);
 		/* Restore the signals */
-		signal(SIGSEGV, prev_segfault);
-		signal(SIGABRT, prev_abort);
+		ResetSignalHandlers();
 		return false;
 	}
 
@@ -490,8 +517,7 @@ bool AfterLoadGame()
 	if (_game_mode == GM_NORMAL && !ClosestTownFromTile(0, UINT_MAX)) {
 		SetSaveLoadError(STR_NO_TOWN_IN_SCENARIO);
 		/* Restore the signals */
-		signal(SIGSEGV, prev_segfault);
-		signal(SIGABRT, prev_abort);
+		ResetSignalHandlers();
 		return false;
 	}
 
@@ -505,7 +531,7 @@ bool AfterLoadGame()
 	 *  a company does not exist yet. So create one here.
 	 * 1 exeption: network-games. Those can have 0 companies
 	 *   But this exeption is not true for non dedicated network_servers! */
-	if (!IsValidCompanyID(COMPANY_FIRST) && (!_networking || (_networking && _network_server && !_network_dedicated)))
+	if (!Company::IsValidID(COMPANY_FIRST) && (!_networking || (_networking && _network_server && !_network_dedicated)))
 		DoStartupNewCompany(false);
 
 	if (CheckSavegameVersion(72)) {
@@ -554,8 +580,7 @@ bool AfterLoadGame()
 						SetStationGfx(t, gfx - 170 + GFX_TRUCK_BUS_DRIVETHROUGH_OFFSET);
 					} else {
 						/* Restore the signals */
-						signal(SIGSEGV, prev_segfault);
-						signal(SIGABRT, prev_abort);
+						ResetSignalHandlers();
 						return false;
 					}
 					SB(_m[t].m6, 3, 3, st);
@@ -661,10 +686,10 @@ bool AfterLoadGame()
 	 *  of course, we do need to initialize them for older savegames. */
 	if (CheckSavegameVersion(16)) {
 		FOR_ALL_COMPANIES(c) {
-			c->engine_renew_list   = NULL;
-			c->engine_renew        = false;
-			c->engine_renew_months = -6;
-			c->engine_renew_money  = 100000;
+			c->engine_renew_list            = NULL;
+			c->settings.engine_renew        = false;
+			c->settings.engine_renew_months = 6;
+			c->settings.engine_renew_money  = 100000;
 		}
 
 		/* When loading a game, _local_company is not yet set to the correct value.
@@ -673,11 +698,9 @@ bool AfterLoadGame()
 		 * becomes company 0, unless we are in the scenario editor where all the
 		 * companies are 'invalid'.
 		 */
-		if (!_network_dedicated && IsValidCompanyID(COMPANY_FIRST)) {
-			c = GetCompany(COMPANY_FIRST);
-			c->engine_renew        = _settings_client.gui.autorenew;
-			c->engine_renew_months = _settings_client.gui.autorenew_months;
-			c->engine_renew_money  = _settings_client.gui.autorenew_money;
+		c = Company::GetIfValid(COMPANY_FIRST);
+		if (!_network_dedicated && c != NULL) {
+			c->settings = _settings_client.company;
 		}
 	}
 
@@ -685,7 +708,7 @@ bool AfterLoadGame()
 		for (TileIndex t = 0; t < map_size; t++) {
 			switch (GetTileType(t)) {
 				case MP_RAILWAY:
-					if (IsPlainRailTile(t)) {
+					if (IsPlainRail(t)) {
 						/* Swap ground type and signal type for plain rail tiles, so the
 						 * ground type uses the same bits as for depots and waypoints. */
 						uint tmp = GB(_m[t].m4, 0, 4);
@@ -950,7 +973,7 @@ bool AfterLoadGame()
 	 * replaced, shall keep their old length. In all prior versions, just default
 	 * to false */
 	if (CheckSavegameVersionOldStyle(16, 1)) {
-		FOR_ALL_COMPANIES(c) c->renew_keep_length = false;
+		FOR_ALL_COMPANIES(c) c->settings.renew_keep_length = false;
 	}
 
 	/* In version 17, ground type is moved from m2 to m4 for depots and
@@ -1205,7 +1228,7 @@ bool AfterLoadGame()
 			const CargoList::List *packets = v->cargo.Packets();
 			for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
 				CargoPacket *cp = *it;
-				cp->source_xy = IsValidStationID(cp->source) ? GetStation(cp->source)->xy : v->tile;
+				cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : v->tile;
 				cp->loaded_at_xy = cp->source_xy;
 			}
 			v->cargo.InvalidateCache();
@@ -1224,7 +1247,7 @@ bool AfterLoadGame()
 				const CargoList::List *packets = ge->cargo.Packets();
 				for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
 					CargoPacket *cp = *it;
-					cp->source_xy = IsValidStationID(cp->source) ? GetStation(cp->source)->xy : st->xy;
+					cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : st->xy;
 					cp->loaded_at_xy = cp->source_xy;
 				}
 			}
@@ -1302,7 +1325,7 @@ bool AfterLoadGame()
 			if ((v->type != VEH_TRAIN || IsFrontEngine(v)) &&  // for all locs
 					!(v->vehstatus & (VS_STOPPED | VS_CRASHED)) && // not stopped or crashed
 					v->current_order.IsType(OT_LOADING)) {         // loading
-				GetStation(v->last_station_visited)->loading_vehicles.push_back(v);
+				Station::Get(v->last_station_visited)->loading_vehicles.push_back(v);
 
 				/* The loading finished flag is *only* set when actually completely
 				 * finished. Because the vehicle is loading, it is not finished. */
@@ -1434,7 +1457,7 @@ bool AfterLoadGame()
 
 		Vehicle *v;
 		FOR_ALL_VEHICLES(v) {
-			if (v->orders.list != NULL && v->orders.list->GetFirstOrder() != NULL && !v->orders.list->GetFirstOrder()->IsValid()) {
+			if (v->orders.list != NULL && v->orders.list->GetFirstOrder() != NULL && v->orders.list->GetFirstOrder()->IsType(OT_NOTHING)) {
 				v->orders.list->FreeChain();
 				v->orders.list = NULL;
 			}
@@ -1467,7 +1490,7 @@ bool AfterLoadGame()
 		/* Update go to buoy orders because they are just waypoints */
 		Order *order;
 		FOR_ALL_ORDERS(order) {
-			if (order->IsType(OT_GOTO_STATION) && GetStation(order->GetDestination())->IsBuoy()) {
+			if (order->IsType(OT_GOTO_STATION) && Station::Get(order->GetDestination())->IsBuoy()) {
 				order->SetLoadType(OLF_LOAD_IF_POSSIBLE);
 				order->SetUnloadType(OUF_UNLOAD_IF_POSSIBLE);
 			}
@@ -1483,7 +1506,7 @@ bool AfterLoadGame()
 			for (uint i = 0; i < 4; i++) {
 				CompanyID company = c->share_owners[i];
 				if (company == INVALID_COMPANY) continue;
-				if (!IsValidCompanyID(company) || company == c->index) c->share_owners[i] = INVALID_COMPANY;
+				if (!Company::IsValidID(company) || company == c->index) c->share_owners[i] = INVALID_COMPANY;
 			}
 		}
 	}
@@ -1531,7 +1554,7 @@ bool AfterLoadGame()
 
 			if (IsBuoyTile(t) || IsDriveThroughStopTile(t) || IsTileType(t, MP_WATER)) {
 				Owner o = GetTileOwner(t);
-				if (o < MAX_COMPANIES && !IsValidCompanyID(o)) {
+				if (o < MAX_COMPANIES && !Company::IsValidID(o)) {
 					_current_company = o;
 					ChangeTileOwner(t, o, INVALID_OWNER);
 				}
@@ -1545,13 +1568,13 @@ bool AfterLoadGame()
 				for (RoadType rt = ROADTYPE_ROAD; rt < ROADTYPE_END; rt++) {
 					/* update even non-existing road types to update tile owner too */
 					Owner o = GetRoadOwner(t, rt);
-					if (o < MAX_COMPANIES && !IsValidCompanyID(o)) SetRoadOwner(t, rt, OWNER_NONE);
+					if (o < MAX_COMPANIES && !Company::IsValidID(o)) SetRoadOwner(t, rt, OWNER_NONE);
 				}
 				if (IsLevelCrossing(t)) {
-					if (!IsValidCompanyID(GetTileOwner(t))) FixOwnerOfRailTrack(t);
+					if (!Company::IsValidID(GetTileOwner(t))) FixOwnerOfRailTrack(t);
 				}
-			} else if (IsTileType(t, MP_RAILWAY) && IsPlainRailTile(t)) {
-				if (!IsValidCompanyID(GetTileOwner(t))) FixOwnerOfRailTrack(t);
+			} else if (IsPlainRailTile(t)) {
+				if (!Company::IsValidID(GetTileOwner(t))) FixOwnerOfRailTrack(t);
 			}
 		}
 
@@ -1698,7 +1721,7 @@ bool AfterLoadGame()
 		/* signs with invalid owner left from older savegames */
 		Sign *si;
 		FOR_ALL_SIGNS(si) {
-			if (si->owner != OWNER_NONE && !IsValidCompanyID(si->owner)) si->owner = OWNER_NONE;
+			if (si->owner != OWNER_NONE && !Company::IsValidID(si->owner)) si->owner = OWNER_NONE;
 		}
 
 		/* Station can get named based on an industry type, but the current ones
@@ -1787,7 +1810,7 @@ bool AfterLoadGame()
 		 * they have st->owner == OWNER_NONE already. */
 		Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (!IsValidCompanyID(st->owner)) st->owner = OWNER_NONE;
+			if (!Company::IsValidID(st->owner)) st->owner = OWNER_NONE;
 		}
 
 		/* Give owners to waypoints, based on rail tracks it is sitting on.
@@ -1797,7 +1820,7 @@ bool AfterLoadGame()
 		Waypoint *wp;
 		FOR_ALL_WAYPOINTS(wp) {
 			Owner owner = IsTileType(wp->xy, MP_RAILWAY) ? GetTileOwner(wp->xy) : OWNER_NONE;
-			wp->owner = IsValidCompanyID(owner) ? owner : OWNER_NONE;
+			wp->owner = Company::IsValidID(owner) ? owner : OWNER_NONE;
 		}
 	}
 
@@ -1815,8 +1838,7 @@ bool AfterLoadGame()
 
 	bool ret = InitializeWindowsAndCaches();
 	/* Restore the signals */
-	signal(SIGSEGV, prev_segfault);
-	signal(SIGABRT, prev_abort);
+	ResetSignalHandlers();
 	return ret;
 }
 

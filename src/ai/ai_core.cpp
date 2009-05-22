@@ -28,7 +28,7 @@
 
 /* static */ void AI::StartNew(CompanyID company)
 {
-	assert(IsValidCompanyID(company));
+	assert(Company::IsValidID(company));
 
 	/* Clients shouldn't start AIs */
 	if (_networking && !_network_server) return;
@@ -42,7 +42,7 @@
 	}
 
 	_current_company = company;
-	Company *c = GetCompany(company);
+	Company *c = Company::Get(company);
 
 	c->ai_info = info;
 	assert(c->ai_instance == NULL);
@@ -74,7 +74,8 @@
 	 * Effectively collecting garbage once every two months per AI. */
 	if ((AI::frame_counter & 255) == 0) {
 		CompanyID cid = (CompanyID)GB(AI::frame_counter, 8, 4);
-		if (IsValidCompanyID(cid) && !IsHumanCompany(cid)) GetCompany(cid)->ai_instance->CollectGarbage();
+		Company *com = Company::GetIfValid(cid);
+		if (com != NULL && !IsHumanCompany(cid)) com->ai_instance->CollectGarbage();
 	}
 
 	_current_company = OWNER_NONE;
@@ -91,7 +92,7 @@
 
 	CompanyID old_company = _current_company;
 	_current_company = company;
-	Company *c = GetCompany(company);
+	Company *c = Company::Get(company);
 
 	delete c->ai_instance;
 	c->ai_instance = NULL;
@@ -104,7 +105,7 @@
 /* static */ void AI::KillAll()
 {
 	/* It might happen there are no companies .. than we have nothing to loop */
-	if (GetCompanyPoolSize() == 0) return;
+	if (Company::GetPoolSize() == 0) return;
 
 	const Company *c;
 	FOR_ALL_COMPANIES(c) {
@@ -178,7 +179,7 @@
 	}
 
 	/* Only AIs can have an event-queue */
-	if (!IsValidCompanyID(company) || IsHumanCompany(company)) {
+	if (!Company::IsValidID(company) || IsHumanCompany(company)) {
 		event->Release();
 		return;
 	}
@@ -221,18 +222,18 @@ void CcAI(bool success, TileIndex tile, uint32 p1, uint32 p2)
 		AIObject::IncreaseDoCommandCosts(AIObject::GetLastCost());
 	}
 
-	GetCompany(_current_company)->ai_instance->Continue();
+	Company::Get(_current_company)->ai_instance->Continue();
 }
 
 /* static */ void AI::Save(CompanyID company)
 {
 	if (!_networking || _network_server) {
-		assert(IsValidCompanyID(company));
-		assert(GetCompany(company)->ai_instance != NULL);
+		Company *c = Company::GetIfValid(company);
+		assert(c != NULL && c->ai_instance != NULL);
 
 		CompanyID old_company = _current_company;
 		_current_company = company;
-		GetCompany(company)->ai_instance->Save();
+		c->ai_instance->Save();
 		_current_company = old_company;
 	} else {
 		AIInstance::SaveEmpty();
@@ -242,12 +243,12 @@ void CcAI(bool success, TileIndex tile, uint32 p1, uint32 p2)
 /* static */ void AI::Load(CompanyID company, int version)
 {
 	if (!_networking || _network_server) {
-		assert(IsValidCompanyID(company));
-		assert(GetCompany(company)->ai_instance != NULL);
+		Company *c = Company::GetIfValid(company);
+		assert(c != NULL && c->ai_instance != NULL);
 
 		CompanyID old_company = _current_company;
 		_current_company = company;
-		GetCompany(company)->ai_instance->Load(version);
+		c->ai_instance->Load(version);
 		_current_company = old_company;
 	} else {
 		/* Read, but ignore, the load data */
@@ -259,7 +260,7 @@ void CcAI(bool success, TileIndex tile, uint32 p1, uint32 p2)
 {
 	/* Find the first company which doesn't exist yet */
 	for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
-		if (!IsValidCompanyID(c)) return AIConfig::GetConfig(c)->GetSetting("start_date");
+		if (!Company::IsValidID(c)) return AIConfig::GetConfig(c)->GetSetting("start_date");
 	}
 
 	/* Currently no AI can be started, check again in a year. */
@@ -288,7 +289,7 @@ void CcAI(bool success, TileIndex tile, uint32 p1, uint32 p2)
 
 /* static */ bool AI::ImportLibrary(const char *library, const char *class_name, int version, HSQUIRRELVM vm)
 {
-	return AI::ai_scanner->ImportLibrary(library, class_name, version, vm, GetCompany(_current_company)->ai_instance->GetController());
+	return AI::ai_scanner->ImportLibrary(library, class_name, version, vm, Company::Get(_current_company)->ai_instance->GetController());
 }
 
 /* static */ void AI::Rescan()
