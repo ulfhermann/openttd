@@ -18,6 +18,7 @@
 #include "newgrf_text.h"
 #include "station_map.h"
 #include "roadveh.h"
+#include "train.h"
 #include "depot_base.h"
 #include "group_gui.h"
 #include "strings_func.h"
@@ -459,20 +460,6 @@ void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *pare
 	w->parent = parent;
 }
 
-/** Display additional text from NewGRF in the purchase information window */
-uint ShowAdditionalText(int left, int right, int y, EngineID engine)
-{
-	uint16 callback = GetVehicleCallback(CBID_VEHICLE_ADDITIONAL_TEXT, 0, 0, engine, NULL);
-	if (callback == CALLBACK_FAILED) return y;
-
-	/* STR_BLACK_STRING is used to start the string with {BLACK} */
-	SetDParam(0, GetGRFStringID(GetEngineGRFID(engine), 0xD000 + callback));
-	PrepareTextRefStackUsage(0);
-	uint result = DrawStringMultiLine(left, right, y, INT32_MAX, STR_BLACK_STRING);
-	StopTextRefStackUsage();
-	return result;
-}
-
 /** Display list of cargo types of the engine, for the purchase information window */
 uint ShowRefitOptionsList(int left, int right, int y, EngineID engine)
 {
@@ -653,9 +640,9 @@ static int CDECL VehicleLengthSorter(const Vehicle * const *a, const Vehicle * c
 			break;
 
 		case VEH_ROAD: {
-			const Vehicle *u;
-			for (u = *a; u != NULL; u = u->Next()) r += u->u.road.cached_veh_length;
-			for (u = *b; u != NULL; u = u->Next()) r -= u->u.road.cached_veh_length;
+			const RoadVehicle *u;
+			for (u = (RoadVehicle *)*a; u != NULL; u = u->Next()) r += u->cached_veh_length;
+			for (u = (RoadVehicle *)*b; u != NULL; u = u->Next()) r -= u->cached_veh_length;
 		} break;
 
 		default: NOT_REACHED();
@@ -1482,7 +1469,7 @@ struct VehicleDetailsWindow : Window {
 				SetDParam(1, v->u.rail.cached_power);
 				SetDParam(0, v->u.rail.cached_weight);
 				SetDParam(3, v->u.rail.cached_max_te / 1000);
-				DrawString(2, this->width - 2, 25, (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && v->u.rail.railtype != RAILTYPE_MAGLEV) ?
+				DrawString(2, this->width - 2, 25, (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && ((Train *)v)->railtype != RAILTYPE_MAGLEV) ?
 					STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE :
 					STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED);
 				break;
@@ -1962,7 +1949,7 @@ struct VehicleViewWindow : Window {
 			} else { // no train
 				str = STR_VEHICLE_STATUS_STOPPED;
 			}
-		} else if (v->type == VEH_TRAIN && HasBit(v->u.rail.flags, VRF_TRAIN_STUCK)) {
+		} else if (v->type == VEH_TRAIN && HasBit(((Train *)v)->flags, VRF_TRAIN_STUCK)) {
 			str = STR_TRAIN_STUCK;
 		} else { // vehicle is in a "normal" state, show current order
 			switch (v->current_order.GetType()) {

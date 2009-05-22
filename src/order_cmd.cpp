@@ -20,6 +20,7 @@
 #include "depot_base.h"
 #include "settings_type.h"
 #include "core/pool_func.hpp"
+#include "aircraft.h"
 
 #include "table/strings.h"
 
@@ -793,7 +794,7 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	if (flags & DC_EXEC) {
 		v->cur_order_index = sel_ord;
 
-		if (v->type == VEH_ROAD) ClearSlot(v);
+		if (v->type == VEH_ROAD) ClearSlot((RoadVehicle *)v);
 
 		if (v->current_order.IsType(OT_LOADING)) v->LeaveStation();
 
@@ -1419,7 +1420,7 @@ static TileIndex GetStationTileForVehicle(const Vehicle *v, const Station *st)
 		case VEH_TRAIN:     return st->train_tile;
 		case VEH_AIRCRAFT:  return st->airport_tile;
 		case VEH_SHIP:      return st->dock_tile;
-		case VEH_ROAD:      return st->GetPrimaryRoadStop(v)->xy;
+		case VEH_ROAD:      return st->GetPrimaryRoadStop((RoadVehicle *)v)->xy;
 	}
 }
 
@@ -1679,10 +1680,13 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 					/* If there is no depot in front, reverse automatically (trains only) */
 					if (v->type == VEH_TRAIN && reverse) DoCommand(v->tile, v->index, 0, DC_EXEC, CMD_REVERSE_TRAIN_DIRECTION);
 
-					if (v->type == VEH_AIRCRAFT && v->u.air.state == FLYING && v->u.air.targetairport != destination) {
-						/* The aircraft is now heading for a different hangar than the next in the orders */
-						extern void AircraftNextAirportPos_and_Order(Vehicle *v);
-						AircraftNextAirportPos_and_Order(v);
+					if (v->type == VEH_AIRCRAFT) {
+						Aircraft *a = (Aircraft *)v;
+						if (a->state == FLYING && a->targetairport != destination) {
+							/* The aircraft is now heading for a different hangar than the next in the orders */
+							extern void AircraftNextAirportPos_and_Order(Aircraft *a);
+							AircraftNextAirportPos_and_Order(a);
+						}
 					}
 				} else {
 					UpdateVehicleTimetable(v, true);
@@ -1788,14 +1792,14 @@ bool ProcessOrders(Vehicle *v)
 	if (order == NULL || (v->type == VEH_AIRCRAFT && order->IsType(OT_DUMMY) && !CheckForValidOrders(v))) {
 		if (v->type == VEH_AIRCRAFT) {
 			/* Aircraft do something vastly different here, so handle separately */
-			extern void HandleMissingAircraftOrders(Vehicle *v);
-			HandleMissingAircraftOrders(v);
+			extern void HandleMissingAircraftOrders(Aircraft *v);
+			HandleMissingAircraftOrders((Aircraft *)v);
 			return false;
 		}
 
 		v->current_order.Free();
 		v->dest_tile = 0;
-		if (v->type == VEH_ROAD) ClearSlot(v);
+		if (v->type == VEH_ROAD) ClearSlot((RoadVehicle *)v);
 		return false;
 	}
 

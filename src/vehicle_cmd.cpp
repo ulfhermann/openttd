@@ -10,6 +10,7 @@
 #include "company_func.h"
 #include "vehicle_gui.h"
 #include "train.h"
+#include "aircraft.h"
 #include "newgrf_engine.h"
 #include "newgrf_text.h"
 #include "functions.h"
@@ -73,10 +74,11 @@ CommandCost CmdStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		case VEH_ROAD:
 			break;
 
-		case VEH_AIRCRAFT:
+		case VEH_AIRCRAFT: {
+			Aircraft *a = (Aircraft *)v;
 			/* cannot stop airplane when in flight, or when taking off / landing */
-			if (v->u.air.state >= STARTTAKEOFF && v->u.air.state < TERM7) return_cmd_error(STR_ERROR_AIRCRAFT_IS_IN_FLIGHT);
-			break;
+			if (a->state >= STARTTAKEOFF && a->state < TERM7) return_cmd_error(STR_ERROR_AIRCRAFT_IS_IN_FLIGHT);
+		} break;
 
 		default: return CMD_ERROR;
 	}
@@ -150,7 +152,7 @@ CommandCost CmdMassStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 
 
 		if (!vehicle_list_window) {
 			if (vehicle_type == VEH_TRAIN) {
-				if (CheckTrainInDepot(v, false) == -1) continue;
+				if (CheckTrainInDepot((Train *)v, false) == -1) continue;
 			} else {
 				if (!(v->vehstatus & VS_HIDDEN)) continue;
 			}
@@ -347,7 +349,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 	if (!CheckOwnership(v->owner)) return CMD_ERROR;
 
-	if (v->type == VEH_TRAIN && (!IsFrontEngine(v) || v->u.rail.crash_anim_pos >= 4400)) return CMD_ERROR;
+	if (v->type == VEH_TRAIN && (!IsFrontEngine(v) || ((Train *)v)->crash_anim_pos >= 4400)) return CMD_ERROR;
 
 	/* check that we can allocate enough vehicles */
 	if (!(flags & DC_EXEC)) {
@@ -379,8 +381,8 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		if (flags & DC_EXEC) {
 			w = Vehicle::Get(_new_vehicle_id);
 
-			if (v->type == VEH_TRAIN && HasBit(v->u.rail.flags, VRF_REVERSE_DIRECTION)) {
-				SetBit(w->u.rail.flags, VRF_REVERSE_DIRECTION);
+			if (v->type == VEH_TRAIN && HasBit(((Train *)v)->flags, VRF_REVERSE_DIRECTION)) {
+				SetBit(((Train *)w)->flags, VRF_REVERSE_DIRECTION);
 			}
 
 			if (v->type == VEH_TRAIN && !IsFrontEngine(v)) {
@@ -401,7 +403,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			}
 			w_rear = w; // trains needs to know the last car in the train, so they can add more in next loop
 		}
-	} while (v->type == VEH_TRAIN && (v = GetNextVehicle(v)) != NULL);
+	} while (v->type == VEH_TRAIN && (v = GetNextVehicle((Train *)v)) != NULL);
 
 	if (flags & DC_EXEC && v_front->type == VEH_TRAIN) {
 		/* for trains this needs to be the front engine due to the callback function */
@@ -435,7 +437,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 				}
 
 				if (w->type == VEH_TRAIN && EngineHasArticPart(w)) {
-					w = GetNextArticPart(w);
+					w = GetNextArticPart((Train *)w);
 				} else if (w->type == VEH_ROAD && RoadVehHasArticPart(w)) {
 					w = w->Next();
 				} else {
@@ -451,7 +453,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			}
 
 			if (v->type == VEH_TRAIN && EngineHasArticPart(v)) {
-				v = GetNextArticPart(v);
+				v = GetNextArticPart((Train *)v);
 			} else if (v->type == VEH_ROAD && RoadVehHasArticPart(v)) {
 				v = v->Next();
 			} else {
@@ -459,8 +461,8 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			}
 		} while (v != NULL);
 
-		if ((flags & DC_EXEC) && v->type == VEH_TRAIN) w = GetNextVehicle(w);
-	} while (v->type == VEH_TRAIN && (v = GetNextVehicle(v)) != NULL);
+		if ((flags & DC_EXEC) && v->type == VEH_TRAIN) w = GetNextVehicle((Train *)w);
+	} while (v->type == VEH_TRAIN && (v = GetNextVehicle((Train *)v)) != NULL);
 
 	if (flags & DC_EXEC) {
 		/*

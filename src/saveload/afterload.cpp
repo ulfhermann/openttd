@@ -912,9 +912,9 @@ bool AfterLoadGame()
 				continue;
 			}
 			if (v->type == VEH_TRAIN) {
-				v->u.rail.track = TRACK_BIT_WORMHOLE;
+				((Train *)v)->track = TRACK_BIT_WORMHOLE;
 			} else {
-				v->u.road.state = RVSB_WORMHOLE;
+				((RoadVehicle *)v)->state = RVSB_WORMHOLE;
 			}
 		}
 	}
@@ -928,7 +928,7 @@ bool AfterLoadGame()
 			if (v->type == VEH_TRAIN) {
 				RailType rt = RailVehInfo(v->engine_type)->railtype;
 
-				v->u.rail.railtype = rt;
+				((Train *)v)->railtype = rt;
 				if (rt == RAILTYPE_ELECTRIC) min_rail = RAILTYPE_RAIL;
 			}
 		}
@@ -964,7 +964,7 @@ bool AfterLoadGame()
 		}
 
 		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_TRAIN && (IsFrontEngine(v) || IsFreeWagon(v))) TrainConsistChanged(v, true);
+			if (v->type == VEH_TRAIN && (IsFrontEngine(v) || IsFreeWagon(v))) TrainConsistChanged((Train *)v, true);
 		}
 
 	}
@@ -1049,15 +1049,18 @@ bool AfterLoadGame()
 		Vehicle *v;
 		FOR_ALL_VEHICLES(v) {
 			if (v->type == VEH_ROAD) {
-				v->vehstatus &= ~0x40;
-				v->u.road.slot = NULL;
-				v->u.road.slot_age = 0;
+				RoadVehicle *rv = (RoadVehicle *)v;
+				rv->vehstatus &= ~0x40;
+				rv->slot = NULL;
+				rv->slot_age = 0;
 			}
 		}
 	} else {
 		Vehicle *v;
 		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_ROAD && v->u.road.slot != NULL) v->u.road.slot->num_vehicles++;
+			if (v->type != VEH_ROAD) continue;
+			RoadVehicle *rv = (RoadVehicle *)v;
+			if (rv->slot != NULL) rv->slot->num_vehicles++;
 		}
 	}
 
@@ -1373,8 +1376,10 @@ bool AfterLoadGame()
 		/* In some old savegames a bit was cleared when it should not be cleared */
 		Vehicle *v;
 		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_ROAD && (v->u.road.state == 250 || v->u.road.state == 251)) {
-				SetBit(v->u.road.state, RVS_IS_STOPPING);
+			if (v->type != VEH_ROAD) continue;
+			RoadVehicle *rv = (RoadVehicle *)v;
+			if (rv->state == 250 || rv->state == 251) {
+				SetBit(rv->state, RVS_IS_STOPPING);
 			}
 		}
 	}
@@ -1695,13 +1700,14 @@ bool AfterLoadGame()
 
 	/* Reserve all tracks trains are currently on. */
 	if (CheckSavegameVersion(101)) {
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_TRAIN) {
-				if ((v->u.rail.track & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
+		Vehicle *u;
+		FOR_ALL_VEHICLES(u) {
+			if (u->type == VEH_TRAIN) {
+				Train *v = (Train *)u;
+				if ((v->track & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
 					TryReserveRailTrack(v->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(v->tile)));
-				} else if ((v->u.rail.track & TRACK_BIT_MASK) != TRACK_BIT_NONE) {
-					TryReserveRailTrack(v->tile, TrackBitsToTrack(v->u.rail.track));
+				} else if ((v->track & TRACK_BIT_MASK) != TRACK_BIT_NONE) {
+					TryReserveRailTrack(v->tile, TrackBitsToTrack(v->track));
 				}
 			}
 		}
