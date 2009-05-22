@@ -581,6 +581,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\linkgraph\demands.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\linkgraph\linkgraph.cpp"
 				>
 			</File>
@@ -1066,6 +1070,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\landscape_type.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\demands.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\linkgraph\demand_settings.h"
 				>
 			</File>
 			<File
