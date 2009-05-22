@@ -43,8 +43,8 @@ static int32 ClickMoneyCheat(int32 p1, int32 p2)
  */
 static int32 ClickChangeCompanyCheat(int32 p1, int32 p2)
 {
-	while ((uint)p1 < GetCompanyPoolSize()) {
-		if (IsValidCompanyID((CompanyID)p1)) {
+	while ((uint)p1 < Company::GetPoolSize()) {
+		if (Company::IsValidID((CompanyID)p1)) {
 			SetLocalCompany((CompanyID)p1);
 			return _local_company;
 		}

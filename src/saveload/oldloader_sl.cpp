@@ -96,6 +96,17 @@ static void FixTTDMapArray()
 	FixOldMapArray();
 }
 
+static void FixTTDDepots()
+{
+	const Depot *d;
+	FOR_ALL_DEPOTS_FROM(d, 252) {
+		if (!IsRoadDepotTile(d->xy) && !IsRailDepotTile(d->xy) && !IsShipDepotTile(d->xy) && !IsHangarTile(d->xy)) {
+			/** Workaround for SVXConverter bug, depots 252-255 could be invalid */
+			delete d;
+		}
+	}
+}
+
 #define FIXNUM(x, y, z) (((((x) << 16) / (y)) + 1) << z)
 
 static uint32 RemapOldTownName(uint32 townnameparts, byte old_town_name_type)
@@ -149,6 +160,8 @@ void FixOldVehicles()
 	Vehicle *v;
 
 	FOR_ALL_VEHICLES(v) {
+		if (v->next != NULL) v->next = Vehicle::Get((size_t)v->next);
+
 		/* For some reason we need to correct for this */
 		switch (v->spritenum) {
 			case 0xfd: break;
@@ -567,7 +580,7 @@ static bool LoadOldTown(LoadgameState *ls, int num)
 			t->townnametype = t->townnametype == 0x10B6 ? 0x20C1 : t->townnametype + 0x2A00;
 		}
 	} else {
-		t->xy = INVALID_TILE;
+		delete t;
 	}
 
 	return true;
@@ -583,12 +596,15 @@ static bool LoadOldOrder(LoadgameState *ls, int num)
 {
 	if (!LoadChunk(ls, NULL, order_chunk)) return false;
 
-	new (num) Order(UnpackOldOrder(_old_order));
+	Order *o = new (num) Order(UnpackOldOrder(_old_order));
 
-	/* Relink the orders to eachother (in the orders for one vehicle are behind eachother,
-	 * with an invalid order (OT_NOTHING) as indication that it is the last order */
-	if (num > 0 && GetOrder(num)->IsValid()) {
-		GetOrder(num - 1)->next = GetOrder(num);
+	if (o->IsType(OT_NOTHING)) {
+		delete o;
+	} else {
+		/* Relink the orders to eachother (in the orders for one vehicle are behind eachother,
+		 * with an invalid order (OT_NOTHING) as indication that it is the last order */
+		Order *prev = Order::GetIfValid(num - 1);
+		if (prev != NULL) prev->next = o;
 	}
 
 	return true;
@@ -631,7 +647,7 @@ static bool LoadOldDepot(LoadgameState *ls, int num)
 	if (d->xy != 0) {
 		d->town_index = RemapTownIndex(_old_town_index);
 	} else {
-		d->xy = INVALID_TILE;
+		delete d;
 	}
 
 	return true;
@@ -729,7 +745,7 @@ static bool LoadOldGood(LoadgameState *ls, int num)
 	/* for TTO games, 12th (num == 11) goods entry is created in the Station constructor */
 	if (_savegame_type == SGT_TTO && num == 11) return true;
 
-	Station *st = GetStation(_current_station_id);
+	Station *st = Station::Get(_current_station_id);
 	GoodsEntry *ge = &st->goods[num];
 
 	if (!LoadChunk(ls, ge, goods_chunk)) return false;
@@ -792,7 +808,7 @@ static bool LoadOldStation(LoadgameState *ls, int num)
 	if (!LoadChunk(ls, st, station_chunk)) return false;
 
 	if (st->xy != 0) {
-		st->town = GetTown(RemapTownIndex(_old_town_index));
+		st->town = Town::Get(RemapTownIndex(_old_town_index));
 
 		if (_savegame_type == SGT_TTO) {
 			if (IsInsideBS(_old_string_id, 0x180F, 32)) {
@@ -812,7 +828,7 @@ static bool LoadOldStation(LoadgameState *ls, int num)
 			st->string_id = RemapOldStringID(_old_string_id);
 		}
 	} else {
-		st->xy = INVALID_TILE;
+		delete st;
 	}
 
 	return true;
@@ -869,7 +885,7 @@ static bool LoadOldIndustry(LoadgameState *ls, int num)
 	if (!LoadChunk(ls, i, industry_chunk)) return false;
 
 	if (i->xy != 0) {
-		i->town = GetTown(RemapTownIndex(_old_town_index));
+		i->town = Town::Get(RemapTownIndex(_old_town_index));
 
 		if (_savegame_type == SGT_TTO) {
 			if (i->type > 0x06) i->type++; // Printing Works were added
@@ -884,7 +900,7 @@ static bool LoadOldIndustry(LoadgameState *ls, int num)
 
 		IncIndustryTypeCount(i->type);
 	} else {
-		i->xy = INVALID_TILE;
+		delete i;
 	}
 
 	return true;
@@ -900,7 +916,7 @@ static const OldChunks _company_yearly_chunk[] = {
 
 static bool LoadOldCompanyYearly(LoadgameState *ls, int num)
 {
-	Company *c = GetCompany(_current_company_id);
+	Company *c = Company::Get(_current_company_id);
 
 	for (uint i = 0; i < 13; i++) {
 		if (_savegame_type == SGT_TTO && i == 6) {
@@ -927,7 +943,7 @@ static const OldChunks _company_economy_chunk[] = {
 
 static bool LoadOldCompanyEconomy(LoadgameState *ls, int num)
 {
-	Company *c = GetCompany(_current_company_id);
+	Company *c = Company::Get(_current_company_id);
 
 	if (!LoadChunk(ls, &c->cur_economy, _company_economy_chunk)) return false;
 
@@ -1131,19 +1147,22 @@ static const OldChunks vehicle_empty_chunk[] = {
 
 static bool LoadOldVehicleUnion(LoadgameState *ls, int num)
 {
-	Vehicle *v = GetVehicle(_current_vehicle_id);
+	Vehicle *v = Vehicle::GetIfValid(_current_vehicle_id);
 	uint temp = ls->total_read;
 	bool res;
 
-	switch (v->type) {
-		default: NOT_REACHED();
-		case VEH_INVALID : res = LoadChunk(ls, NULL,           vehicle_empty_chunk);    break;
-		case VEH_TRAIN   : res = LoadChunk(ls, &v->u.rail,     vehicle_train_chunk);    break;
-		case VEH_ROAD    : res = LoadChunk(ls, &v->u.road,     vehicle_road_chunk);     break;
-		case VEH_SHIP    : res = LoadChunk(ls, &v->u.ship,     vehicle_ship_chunk);     break;
-		case VEH_AIRCRAFT: res = LoadChunk(ls, &v->u.air,      vehicle_air_chunk);      break;
-		case VEH_EFFECT  : res = LoadChunk(ls, &v->u.effect,   vehicle_effect_chunk);   break;
-		case VEH_DISASTER: res = LoadChunk(ls, &v->u.disaster, vehicle_disaster_chunk); break;
+	if (v == NULL) {
+		res = LoadChunk(ls, NULL, vehicle_empty_chunk);
+	} else {
+		switch (v->type) {
+			default: NOT_REACHED();
+			case VEH_TRAIN   : res = LoadChunk(ls, &v->u.rail,     vehicle_train_chunk);    break;
+			case VEH_ROAD    : res = LoadChunk(ls, &v->u.road,     vehicle_road_chunk);     break;
+			case VEH_SHIP    : res = LoadChunk(ls, &v->u.ship,     vehicle_ship_chunk);     break;
+			case VEH_AIRCRAFT: res = LoadChunk(ls, &v->u.air,      vehicle_air_chunk);      break;
+			case VEH_EFFECT  : res = LoadChunk(ls, &v->u.effect,   vehicle_effect_chunk);   break;
+			case VEH_DISASTER: res = LoadChunk(ls, &v->u.disaster, vehicle_disaster_chunk); break;
+		}
 	}
 
 	/* This chunk size should always be 10 bytes */
@@ -1260,7 +1279,7 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 			uint type = ReadByte(ls);
 			switch (type) {
 				default: return false;
-				case 0x00 /* VEH_INVALID */: v = new (_current_vehicle_id) InvalidVehicle();  break;
+				case 0x00 /* VEH_INVALID  */: v = NULL;                                        break;
 				case 0x25 /* MONORAIL     */:
 				case 0x20 /* VEH_TRAIN    */: v = new (_current_vehicle_id) Train();           break;
 				case 0x21 /* VEH_ROAD     */: v = new (_current_vehicle_id) RoadVehicle();     break;
@@ -1271,6 +1290,7 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 			}
 
 			if (!LoadChunk(ls, v, vehicle_chunk)) return false;
+			if (v == NULL) continue;
 
 			SpriteID sprite = v->cur_image;
 			/* no need to override other sprites */
@@ -1336,7 +1356,7 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 			/* Read the vehicle type and allocate the right vehicle */
 			switch (ReadByte(ls)) {
 				default: NOT_REACHED();
-				case 0x00 /* VEH_INVALID */: v = new (_current_vehicle_id) InvalidVehicle();  break;
+				case 0x00 /* VEH_INVALID */: v = NULL;                                        break;
 				case 0x10 /* VEH_TRAIN   */: v = new (_current_vehicle_id) Train();           break;
 				case 0x11 /* VEH_ROAD    */: v = new (_current_vehicle_id) RoadVehicle();     break;
 				case 0x12 /* VEH_SHIP    */: v = new (_current_vehicle_id) Ship();            break;
@@ -1344,7 +1364,9 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 				case 0x14 /* VEH_EFFECT  */: v = new (_current_vehicle_id) EffectVehicle();   break;
 				case 0x15 /* VEH_DISASTER*/: v = new (_current_vehicle_id) DisasterVehicle(); break;
 			}
+
 			if (!LoadChunk(ls, v, vehicle_chunk)) return false;
+			if (v == NULL) continue;
 
 			_old_vehicle_names[_current_vehicle_id] = RemapOldStringID(_old_string_id);
 
@@ -1358,11 +1380,11 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 		if (_old_order_ptr != 0 && _old_order_ptr != 0xFFFFFFFF) {
 			uint max = _savegame_type == SGT_TTO ? 3000 : 5000;
 			uint old_id = RemapOrderIndex(_old_order_ptr);
-			if (old_id < max) v->orders.old = GetOrder(old_id); // don't accept orders > max number of orders
+			if (old_id < max) v->orders.old = Order::Get(old_id); // don't accept orders > max number of orders
 		}
 		v->current_order.AssignOrder(UnpackOldOrder(_old_order));
 
-		if (_old_next_ptr != 0xFFFF) v->next = GetVehiclePoolSize() <= _old_next_ptr ? new (_old_next_ptr) InvalidVehicle() : GetVehicle(_old_next_ptr);
+		if (_old_next_ptr != 0xFFFF) v->next = (Vehicle *)_old_next_ptr;
 
 		if (_cargo_count != 0) {
 			CargoPacket *cp = new CargoPacket((_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source, INVALID_STATION, _cargo_count);
@@ -1583,7 +1605,6 @@ static bool LoadTTDPatchExtraChunks(LoadgameState *ls, int num)
 }
 
 extern TileIndex _cur_tileloop_tile;
-static uint32 _old_cur_town_ctr;
 static const OldChunks main_chunk[] = {
 	OCL_ASSERT( OC_TTD, 0 ),
 	OCL_ASSERT( OC_TTO, 0 ),
@@ -1618,7 +1639,7 @@ static const OldChunks main_chunk[] = {
 	OCL_ASSERT( OC_TTD, 0x4B26 ),
 	OCL_ASSERT( OC_TTO, 0x3A20 ),
 
-	OCL_VAR ( OC_UINT32,   1, &_old_cur_town_ctr ),
+	OCL_NULL( 4 ),              ///< town counter,  no longer in use
 	OCL_NULL( 2 ),              ///< timer_counter, no longer in use
 	OCL_NULL( 2 ),              ///< land_code,     no longer in use
 
@@ -1707,8 +1728,7 @@ static const OldChunks main_chunk[] = {
 
 	OCL_CNULL( OC_TTD, 144 ),             ///< AI cargo-stuff, calculated in InitializeLandscapeVariables
 	OCL_NULL( 2 ),               ///< Company indexes of companies, no longer in use
-
-	OCL_VAR ( OC_FILE_U8 | OC_VAR_U16,    1, &_station_tick_ctr ),
+	OCL_NULL( 1 ),               ///< Station tick counter, no longer in use
 
 	OCL_VAR (  OC_UINT8,    1, &_settings_game.locale.currency ),
 	OCL_VAR (  OC_UINT8,    1, &_settings_game.locale.units ),
@@ -1771,12 +1791,10 @@ bool LoadTTDMain(LoadgameState *ls)
 	DEBUG(oldloader, 3, "Done, converting game data...");
 
 	FixTTDMapArray();
+	FixTTDDepots();
 
 	/* Fix some general stuff */
 	_settings_game.game_creation.landscape = _settings_game.game_creation.landscape & 0xF;
-
-	/* Remap some pointers */
-	_cur_town_ctr      = RemapTownIndex(_old_cur_town_ctr);
 
 	/* Fix the game to be compatible with OpenTTD */
 	FixOldTowns();
@@ -1813,8 +1831,6 @@ bool LoadTTOMain(LoadgameState *ls)
 
 	_settings_game.game_creation.landscape = 0;
 	_trees_tick_ctr = 0xFF;
-
-	_cur_town_ctr = RemapTownIndex(_old_cur_town_ctr);
 
 	if (!FixTTOMapArray() || !FixTTOEngines()) {
 		DEBUG(oldloader, 0, "Conversion failed");

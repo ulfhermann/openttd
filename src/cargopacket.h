@@ -5,7 +5,7 @@
 #ifndef CARGOPACKET_H
 #define CARGOPACKET_H
 
-#include "oldpool.h"
+#include "core/pool_type.hpp"
 #include "economy_type.h"
 #include "tile_type.h"
 #include "station_type.h"
@@ -17,13 +17,13 @@ struct CargoPacket;
 struct GoodsEntry;
 
 /** We want to use a pool */
-DECLARE_OLD_POOL(CargoPacket, CargoPacket, 10, 1000)
-
+typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
+extern CargoPacketPool _cargopacket_pool;
 
 /**
  * Container for cargo from the same location and time
  */
-struct CargoPacket : PoolItem<CargoPacket, CargoPacketID, &_CargoPacket_pool> {
+struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 	Money feeder_share;     ///< Value of feeder pickup to be paid for on delivery of cargo
 	TileIndex source_xy;    ///< The origin of the cargo (first station in feeder chain)
 	TileIndex loaded_at_xy; ///< Location where this cargo has been loaded into the vehicle
@@ -43,14 +43,7 @@ struct CargoPacket : PoolItem<CargoPacket, CargoPacketID, &_CargoPacket_pool> {
 	CargoPacket(StationID source = INVALID_STATION, StationID next = INVALID_STATION, uint16 count = 0);
 
 	/** Destroy the packet */
-	virtual ~CargoPacket();
-
-
-	/**
-	 * Is this a valid cargo packet ?
-	 * @return true if and only it is valid
-	 */
-	inline bool IsValid() const { return this->count != 0; }
+	~CargoPacket() { }
 
 	/**
 	 * Checks whether the cargo packet is from (exactly) the same source
@@ -65,18 +58,18 @@ struct CargoPacket : PoolItem<CargoPacket, CargoPacketID, &_CargoPacket_pool> {
 
 /**
  * Iterate over all _valid_ cargo packets from the given start
- * @param cp    the variable used as "iterator"
+ * @param var   the variable used as "iterator"
  * @param start the cargo packet ID of the first packet to iterate over
  */
-#define FOR_ALL_CARGOPACKETS_FROM(cp, start) for (cp = GetCargoPacket(start); cp != NULL; cp = (cp->index + 1U < GetCargoPacketPoolSize()) ? GetCargoPacket(cp->index + 1U) : NULL) if (cp->IsValid())
+#define FOR_ALL_CARGOPACKETS_FROM(var, start) FOR_ALL_ITEMS_FROM(CargoPacket, cargopacket_index, var, start)
 
 /**
  * Iterate over all _valid_ cargo packets from the begin of the pool
- * @param cp    the variable used as "iterator"
+ * @param var   the variable used as "iterator"
  */
-#define FOR_ALL_CARGOPACKETS(cp) FOR_ALL_CARGOPACKETS_FROM(cp, 0)
+#define FOR_ALL_CARGOPACKETS(var) FOR_ALL_CARGOPACKETS_FROM(var, 0)
 
-extern void SaveLoad_STNS(Station *st);
+extern const struct SaveLoad *GetGoodsDesc();
 
 enum UnloadType {
 	UL_KEEP     = 0,      ///< keep cargo on vehicle
@@ -127,7 +120,7 @@ private:
 	uint LoadPackets(List * dest, uint cap, StationID next_station, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
 
 public:
-	friend void SaveLoad_STNS(Station *st);
+	friend const struct SaveLoad *GetGoodsDesc();
 
 	/** Create the cargo list */
 	CargoList() { this->InvalidateCache(); }

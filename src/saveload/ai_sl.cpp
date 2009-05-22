@@ -43,7 +43,7 @@ static void SaveReal_AIPL(int *index_ptr)
 
 	SlObject(NULL, _ai_company);
 	/* If the AI was active, store his data too */
-	if (IsValidCompanyID(index) && !IsHumanCompany(index)) AI::Save(index);
+	if (Company::IsValidID(index) && !IsHumanCompany(index)) AI::Save(index);
 }
 
 static void Load_AIPL()
@@ -59,7 +59,7 @@ static void Load_AIPL()
 		SlObject(NULL, _ai_company);
 
 		if (_networking && !_network_server) {
-			if (IsValidCompanyID(index) && !IsHumanCompany(index)) AIInstance::LoadEmpty();
+			if (Company::IsValidID(index) && !IsHumanCompany(index)) AIInstance::LoadEmpty();
 			continue;
 		}
 
@@ -86,7 +86,7 @@ static void Load_AIPL()
 		config->StringToSettings(_ai_saveload_settings);
 
 		/* Start the AI directly if it was active in the savegame */
-		if (IsValidCompanyID(index) && !IsHumanCompany(index)) {
+		if (Company::IsValidID(index) && !IsHumanCompany(index)) {
 			AI::StartNew(index);
 			AI::Load(index, _ai_saveload_version);
 		}
@@ -102,5 +102,5 @@ static void Save_AIPL()
 }
 
 extern const ChunkHandler _ai_chunk_handlers[] = {
-	{ 'AIPL', Save_AIPL, Load_AIPL, CH_ARRAY | CH_LAST},
+	{ 'AIPL', Save_AIPL, Load_AIPL, NULL, CH_ARRAY | CH_LAST},
 };

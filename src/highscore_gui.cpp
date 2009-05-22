@@ -59,7 +59,7 @@ struct EndGameWindow : EndGameHighScoreBaseWindow {
 		this->background_img = SPR_TYCOON_IMG1_BEGIN;
 
 		if (_local_company != COMPANY_SPECTATOR) {
-			const Company *c = GetCompany(_local_company);
+			const Company *c = Company::Get(_local_company);
 			if (c->old_economy[0].performance_history == SCORE_MAX) {
 				this->background_img = SPR_TYCOON_IMG2_BEGIN;
 			}
@@ -72,7 +72,7 @@ struct EndGameWindow : EndGameHighScoreBaseWindow {
 			this->rank = SaveHighScoreValueNetwork();
 		} else {
 			/* in single player _local company is always valid */
-			const Company *c = GetCompany(_local_company);
+			const Company *c = Company::Get(_local_company);
 			this->window_number = _settings_game.difficulty.diff_level;
 			this->rank = SaveHighScoreValue(c);
 		}
@@ -88,14 +88,13 @@ struct EndGameWindow : EndGameHighScoreBaseWindow {
 
 	virtual void OnPaint()
 	{
-		const Company *c;
 		uint x, y;
 
 		this->SetupHighScoreEndWindow(&x, &y);
 
-		if (!IsValidCompanyID(_local_company)) return;
+		const Company *c = Company::GetIfValid(_local_company);
+		if (c == NULL) return;
 
-		c = GetCompany(_local_company);
 		/* We need to get performance from last year because the image is shown
 		 * at the start of the new year when these things have already been copied */
 		if (this->background_img == SPR_TYCOON_IMG2_BEGIN) { // Tycoon of the century \o/
@@ -198,7 +197,7 @@ void ShowHighscoreTable(int difficulty, int8 ranking)
 void ShowEndGameChart()
 {
 	/* Dedicated server doesn't need the highscore window and neither does -v null. */
-	if (_network_dedicated || (!_networking && !IsValidCompanyID(_local_company))) return;
+	if (_network_dedicated || (!_networking && !Company::IsValidID(_local_company))) return;
 
 	HideVitalWindows();
 	DeleteWindowByClass(WC_ENDSCREEN);

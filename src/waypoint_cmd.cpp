@@ -69,12 +69,12 @@ static void MakeDefaultWaypointName(Waypoint *wp)
 	 * If it wasn't using 'used' and 'idx', it would just search for increasing 'next',
 	 * but this way it is faster */
 
-	WaypointID cid = 0; // current index, goes to GetWaypointPoolSize()-1, then wraps to 0
+	WaypointID cid = 0; // current index, goes to Waypoint::GetPoolSize()-1, then wraps to 0
 	do {
-		Waypoint *lwp = GetWaypoint(cid);
+		Waypoint *lwp = Waypoint::Get(cid);
 
 		/* check only valid waypoints... */
-		if (lwp->IsValid() && wp != lwp) {
+		if (lwp != NULL && wp != lwp) {
 			/* only waypoints with 'generic' name within the same city */
 			if (lwp->name == NULL && lwp->town_index == wp->town_index) {
 				/* if lwp->town_cn < next, uint will overflow to '+inf' */
@@ -99,7 +99,7 @@ static void MakeDefaultWaypointName(Waypoint *wp)
 		}
 
 		cid++;
-		if (cid == GetWaypointPoolSize()) cid = 0; // wrap to zero...
+		if (cid == Waypoint::GetPoolSize()) cid = 0; // wrap to zero...
 	} while (cid != idx);
 
 	wp->town_cn = (uint16)next; // set index...
@@ -314,10 +314,8 @@ static bool IsUniqueWaypointName(const char *name)
  */
 CommandCost CmdRenameWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!IsValidWaypointID(p1)) return CMD_ERROR;
-
-	Waypoint *wp = GetWaypoint(p1);
-	if (!CheckOwnership(wp->owner)) return CMD_ERROR;
+	Waypoint *wp = Waypoint::GetIfValid(p1);
+	if (wp == NULL || !CheckOwnership(wp->owner)) return CMD_ERROR;
 
 	bool reset = StrEmpty(text);
 

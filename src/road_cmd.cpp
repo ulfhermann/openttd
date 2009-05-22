@@ -119,7 +119,7 @@ bool CheckAllowRemoveRoad(TileIndex tile, RoadBits remove, Owner owner, RoadType
 	 * Towns are not be allowed to remove non "normal" road pieces, like tram
 	 * tracks as that would result in trams that cannot turn. */
 	if (_current_company == OWNER_WATER ||
-			(rt == ROADTYPE_ROAD && !IsValidCompanyID(_current_company))) return true;
+			(rt == ROADTYPE_ROAD && !Company::IsValidID(_current_company))) return true;
 
 	/* Only do the special processing if the road is owned
 	 * by a town */
@@ -321,6 +321,7 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 			if (rt == ROADTYPE_ROAD && HasTileRoadType(tile, ROADTYPE_TRAM) && (flags & DC_EXEC || crossing_check)) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
+				Track railtrack = GetCrossingRailTrack(tile);
 				RoadTypes rts = GetRoadTypes(tile) & ComplementRoadTypes(RoadTypeToRoadTypes(rt));
 				if (rts == ROADTYPES_NONE) {
 					TrackBits tracks = GetCrossingRailBits(tile);
@@ -332,7 +333,7 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 					/* If we ever get HWAY and it is possible without road then we will need to promote ownership and invalidate town index here, too */
 				}
 				MarkTileDirtyByTile(tile);
-				YapfNotifyTrackLayoutChange(tile, FindFirstTrack(GetTrackBits(tile)));
+				YapfNotifyTrackLayoutChange(tile, railtrack);
 			}
 			return CommandCost(EXPENSES_CONSTRUCTION, _price.remove_road * 2);
 		}
@@ -454,7 +455,7 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	/* Road pieces are max 4 bitset values (NE, NW, SE, SW) and town can only be non-zero
 	 * if a non-company is building the road */
-	if ((IsValidCompanyID(_current_company) && p2 != 0) || (_current_company == OWNER_TOWN && !IsValidTownID(p2))) return CMD_ERROR;
+	if ((Company::IsValidID(_current_company) && p2 != 0) || (_current_company == OWNER_TOWN && !Town::IsValidID(p2))) return CMD_ERROR;
 	if (_current_company != OWNER_TOWN) {
 		const Town *town = CalcClosestTownFromTile(tile);
 		p2 = (town != NULL) ? town->index : (TownID)INVALID_TOWN;
@@ -549,9 +550,10 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
 
 			if (flags & DC_EXEC) {
-				YapfNotifyTrackLayoutChange(tile, FindFirstTrack(GetTrackBits(tile)));
+				Track railtrack = AxisToTrack(OtherAxis(roaddir));
+				YapfNotifyTrackLayoutChange(tile, railtrack);
 				/* Always add road to the roadtypes (can't draw without it) */
-				bool reserved = HasBit(GetTrackReservation(tile), AxisToTrack(OtherAxis(roaddir)));
+				bool reserved = HasBit(GetTrackReservation(tile), railtrack);
 				MakeRoadCrossing(tile, _current_company, _current_company, GetTileOwner(tile), roaddir, GetRailType(tile), RoadTypeToRoadTypes(rt) | ROADTYPES_ROAD, p2);
 				SetCrossingReservation(tile, reserved);
 				UpdateLevelCrossing(tile, false);
@@ -1241,11 +1243,13 @@ void DrawRoadDepotSprite(int x, int y, DiagDirection dir, RoadType rt)
 	}
 }
 
-/** Updates cached nearest town for all road tiles
+/**
+ * Updates cached nearest town for all road tiles
  * @param invalidate are we just invalidating cached data?
+ * @param ignore town that should be ignored (because we are deleting it now)
  * @pre invalidate == true implies _generating_world == true
  */
-void UpdateNearestTownForRoadTiles(bool invalidate)
+void UpdateNearestTownForRoadTiles(bool invalidate, const Town *ignore)
 {
 	assert(!invalidate || _generating_world);
 
@@ -1253,7 +1257,7 @@ void UpdateNearestTownForRoadTiles(bool invalidate)
 		if (IsTileType(t, MP_ROAD) && !HasTownOwnedRoad(t)) {
 			TownID tid = (TownID)INVALID_TOWN;
 			if (!invalidate) {
-				const Town *town = CalcClosestTownFromTile(t);
+				const Town *town = CalcClosestTownFromTile(t, UINT_MAX, ignore);
 				if (town != NULL) tid = town->index;
 			}
 			SetTownIndex(t, tid);
