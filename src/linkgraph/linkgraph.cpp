@@ -66,16 +66,17 @@ void LinkGraph::NextComponent()
 				continue;
 			}
 			assert(target_id != source_id);
-			Station * target = Station::Get(target_id);
 			LinkStat & link_stat = i->second;
-			GoodsEntry & good = target->goods[cargo];
-			if (good.last_component != current_component_id) {
+			ReverseNodeIndex::iterator index_it = index.find(target_id);
+			if (index_it == index.end()) {
+				Station * target = Station::Get(target_id);
+				GoodsEntry & good = target->goods[cargo];
 				good.last_component = current_component_id;
 				search_queue.push(target);
 				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[target_id] = node;
 			} else {
-				node = index[target_id];
+				node = index_it->second;
 			}
 			component->AddEdge(index[source_id], node, link_stat.capacity);
 		}
@@ -126,6 +127,7 @@ NodeID LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
 
 void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
 	assert(capacity > 0);
+	assert(from != to);
 	edges[from][to].capacity = capacity;
 }
 
