@@ -148,6 +148,7 @@ void SaveLoad_STNS(Station *st)
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
 		SLE_END()
 	};
 

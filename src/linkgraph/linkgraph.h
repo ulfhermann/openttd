@@ -8,12 +8,11 @@
 #include "../cargo_type.h"
 #include "../thread.h"
 #include "../settings_type.h"
+#include "linkgraph_types.h"
 #include <list>
 #include <vector>
 
 struct SaveLoad;
-
-typedef uint NodeID;
 
 class Node {
 public:
@@ -32,14 +31,12 @@ public:
 	uint capacity;
 };
 
-typedef uint16 colour;
-
 class LinkGraphComponent {
 	typedef std::vector<Node> NodeVector;
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	LinkGraphComponent(CargoID cargo, colour c = 0);
+	LinkGraphComponent(CargoID cargo, LinkGraphComponentID c = 0);
 	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
 	Node & GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
@@ -47,7 +44,7 @@ public:
 	NodeID AddNode(StationID st, uint supply, uint demand);
 	void AddEdge(NodeID from, NodeID to, uint capacity);
 	void CalculateDistances();
-	colour GetColour() const {return component_colour;}
+	LinkGraphComponentID GetIndex() const {return index;}
 	CargoID GetCargo() const {return cargo;}
 	const LinkGraphSettings & GetSettings() const {return settings;}
 private:
@@ -55,7 +52,7 @@ private:
 	LinkGraphSettings settings;
 	CargoID cargo;
 	uint num_nodes;
-	colour component_colour;
+	LinkGraphComponentID index;
 	NodeVector nodes;
 	EdgeMatrix edges;
 };
@@ -96,27 +93,25 @@ class LinkGraph {
 public:
 	LinkGraph();
 	void Clear();
-	colour GetColour(StationID station) const {return station_colours[station];}
 	CargoID GetCargo() const {return cargo;}
 	/**
 	 * Starts calcluation of the next component of the link graph.
-	 * Uses a breadth first search on the graph spanned by the 
+	 * Uses a breadth first search on the graph spanned by the
 	 * stations' link stats.
 	 *
-	 * TODO: This method could be changed to only search a defined number 
+	 * TODO: This method could be changed to only search a defined number
 	 * of stations in each run, thus decreasing the delay. The state of
 	 * the search queue would have to be saved and loaded then.
 	 */
 	void NextComponent();
-	void InitColours();
 
 	/**
 	 * Merges the results of the link graph calculation into the main
 	 * game state.
 	 *
-	 * TODO: This method could be changed to only merge a fixed number of 
-	 * nodes in each run. In order to do so, the ID of last node merged 
-	 * would have to be saved and loaded. Merging only a fixed  number 
+	 * TODO: This method could be changed to only merge a fixed number of
+	 * nodes in each run. In order to do so, the ID of last node merged
+	 * would have to be saved and loaded. Merging only a fixed  number
 	 * of nodes is faster than merging all nodes of the component.
 	 */
 	void Join();
@@ -129,10 +124,9 @@ public:
 
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
-	colour current_colour;
-	StationID current_station;
+	LinkGraphComponentID current_component_id;
+	StationID current_station_id;
 	CargoID cargo;
-	colour station_colours[Station_POOL_MAX_BLOCKS];
 	JobList jobs;
 };
 

@@ -18,6 +18,7 @@
 #include "industry_type.h"
 #include "core/geometry_type.hpp"
 #include "viewport_type.h"
+#include "linkgraph/linkgraph_types.h"
 #include <list>
 #include <map>
 
@@ -73,6 +74,7 @@ struct GoodsEntry {
 	CargoList cargo;        ///< The cargo packets of cargo waiting in this station
 	uint supply;
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
+	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
 };
 
 /** A Stop for a Road Vehicle */
