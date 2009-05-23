@@ -20,6 +20,7 @@
 #include "aircraft.h"
 #include "vehicle_gui.h"
 #include "settings_type.h"
+#include "subsidy_func.h"
 #include "core/pool_func.hpp"
 
 #include "table/strings.h"
@@ -99,6 +100,12 @@ Station::~Station()
 
 	for (CargoID c = 0; c < NUM_CARGO; c++) {
 		goods[c].cargo.Truncate(0);
+	}
+
+	CargoPacket *cp;
+	FOR_ALL_CARGOPACKETS(cp) {
+		/* Don't allow cargo packets with invalid source station */
+		if (cp->source == this->index) cp->source = INVALID_STATION;
 	}
 }
 
