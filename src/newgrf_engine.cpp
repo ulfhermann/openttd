@@ -434,9 +434,9 @@ static uint8 LiveryHelper(EngineID engine, const Vehicle *v)
 		if (!Company::IsValidID(_current_company)) return 0;
 		l = GetEngineLivery(engine, _current_company, INVALID_ENGINE, NULL);
 	} else if (v->type == VEH_TRAIN) {
-		l = GetEngineLivery(v->engine_type, v->owner, v->u.rail.first_engine, v);
+		l = GetEngineLivery(v->engine_type, v->owner, ((Train *)v)->tcache.first_engine, v);
 	} else if (v->type == VEH_ROAD) {
-		l = GetEngineLivery(v->engine_type, v->owner, ((RoadVehicle *)v)->first_engine, v);
+		l = GetEngineLivery(v->engine_type, v->owner, ((RoadVehicle *)v)->rcache.first_engine, v);
 	} else {
 		l = GetEngineLivery(v->engine_type, v->owner, INVALID_ENGINE, v);
 	}
@@ -506,21 +506,21 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 			return GetEngineGRFID(v->engine_type);
 
 		case 0x40: // Get length of consist
-			if (!HasBit(v->cache_valid, 0)) {
-				v->cached_var40 = PositionHelper(v, false);
-				SetBit(v->cache_valid, 0);
+			if (!HasBit(v->vcache.cache_valid, 0)) {
+				v->vcache.cached_var40 = PositionHelper(v, false);
+				SetBit(v->vcache.cache_valid, 0);
 			}
-			return v->cached_var40;
+			return v->vcache.cached_var40;
 
 		case 0x41: // Get length of same consecutive wagons
-			if (!HasBit(v->cache_valid, 1)) {
-				v->cached_var41 = PositionHelper(v, true);
-				SetBit(v->cache_valid, 1);
+			if (!HasBit(v->vcache.cache_valid, 1)) {
+				v->vcache.cached_var41 = PositionHelper(v, true);
+				SetBit(v->vcache.cache_valid, 1);
 			}
-			return v->cached_var41;
+			return v->vcache.cached_var41;
 
 		case 0x42: // Consist cargo information
-			if (!HasBit(v->cache_valid, 2)) {
+			if (!HasBit(v->vcache.cache_valid, 2)) {
 				const Vehicle *u;
 				byte cargo_classes = 0;
 				CargoID common_cargo_best = CT_INVALID;
@@ -536,7 +536,7 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 				memset(common_subtypes, 0, sizeof(common_subtypes));
 
 				for (u = v; u != NULL; u = u->Next()) {
-					if (v->type == VEH_TRAIN) user_def_data |= u->u.rail.user_def_data;
+					if (v->type == VEH_TRAIN) user_def_data |= ((Train *)u)->tcache.user_def_data;
 
 					/* Skip empty engines */
 					if (u->cargo_cap == 0) continue;
@@ -570,17 +570,17 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 				}
 
 				uint8 common_bitnum = (common_cargo_type == CT_INVALID ? 0xFF : GetCargo(common_cargo_type)->bitnum);
-				v->cached_var42 = cargo_classes | (common_bitnum << 8) | (common_subtype << 16) | (user_def_data << 24);
-				SetBit(v->cache_valid, 2);
+				v->vcache.cached_var42 = cargo_classes | (common_bitnum << 8) | (common_subtype << 16) | (user_def_data << 24);
+				SetBit(v->vcache.cache_valid, 2);
 			}
-			return v->cached_var42;
+			return v->vcache.cached_var42;
 
 		case 0x43: // Company information
-			if (!HasBit(v->cache_valid, 3)) {
-				v->cached_var43 = v->owner | (Company::Get(v->owner)->is_ai ? 0x10000 : 0) | (LiveryHelper(v->engine_type, v) << 24);
-				SetBit(v->cache_valid, 3);
+			if (!HasBit(v->vcache.cache_valid, 3)) {
+				v->vcache.cached_var43 = v->owner | (Company::Get(v->owner)->is_ai ? 0x10000 : 0) | (LiveryHelper(v->engine_type, v) << 24);
+				SetBit(v->vcache.cache_valid, 3);
 			}
-			return v->cached_var43;
+			return v->vcache.cached_var43;
 
 		case 0x44: // Aircraft information
 			if (v->type != VEH_AIRCRAFT) return UINT_MAX;
@@ -772,11 +772,11 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 			switch (variable - 0x80) {
 				case 0x62: return t->track;
 				case 0x66: return t->railtype;
-				case 0x73: return t->u.rail.cached_veh_length;
-				case 0x74: return t->u.rail.cached_power;
-				case 0x75: return GB(t->u.rail.cached_power,  8, 24);
-				case 0x76: return GB(t->u.rail.cached_power, 16, 16);
-				case 0x77: return GB(t->u.rail.cached_power, 24,  8);
+				case 0x73: return t->tcache.cached_veh_length;
+				case 0x74: return t->tcache.cached_power;
+				case 0x75: return GB(t->tcache.cached_power,  8, 24);
+				case 0x76: return GB(t->tcache.cached_power, 16, 16);
+				case 0x77: return GB(t->tcache.cached_power, 24,  8);
 				case 0x7C: return t->First()->index;
 				case 0x7D: return GB(t->First()->index, 8, 8);
 				case 0x7F: return 0; // Used for vehicle reversing hack in TTDP
@@ -815,24 +815,24 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 }
 
 
-static const SpriteGroup *VehicleResolveReal(const ResolverObject *object, const SpriteGroup *group)
+static const SpriteGroup *VehicleResolveReal(const ResolverObject *object, const RealSpriteGroup *group)
 {
 	const Vehicle *v = object->u.vehicle.self;
 
 	if (v == NULL) {
-		if (group->g.real.num_loading > 0) return group->g.real.loading[0];
-		if (group->g.real.num_loaded  > 0) return group->g.real.loaded[0];
+		if (group->num_loading > 0) return group->loading[0];
+		if (group->num_loaded  > 0) return group->loaded[0];
 		return NULL;
 	}
 
 	bool in_motion = !v->First()->current_order.IsType(OT_LOADING);
 
-	uint totalsets = in_motion ? group->g.real.num_loaded : group->g.real.num_loading;
+	uint totalsets = in_motion ? group->num_loaded : group->num_loading;
 
 	uint set = (v->cargo.Count() * totalsets) / max((uint16)1, v->cargo_cap);
 	set = min(set, totalsets - 1);
 
-	return in_motion ? group->g.real.loaded[set] : group->g.real.loading[set];
+	return in_motion ? group->loaded[set] : group->loading[set];
 }
 
 
@@ -886,10 +886,10 @@ static const SpriteGroup *GetVehicleSpriteGroup(EngineID engine, const Vehicle *
 			/* We always use cached value, except for callbacks because the override spriteset
 			 * to use may be different than the one cached. It happens for callback 0x15 (refit engine),
 			 * as v->cargo_type is temporary changed to the new type */
-			group = use_cache ? v->u.rail.cached_override : GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, v->u.rail.first_engine);
+			group = use_cache ? ((Train *)v)->tcache.cached_override : GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, ((Train *)v)->tcache.first_engine);
 			if (group != NULL) return group;
 		} else if (v->type == VEH_ROAD) {
-			group = GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, ((RoadVehicle *)v)->first_engine);
+			group = GetWagonOverrideSpriteSet(v->engine_type, v->cargo_type, ((RoadVehicle *)v)->rcache.first_engine);
 			if (group != NULL) return group;
 		}
 	}
@@ -913,9 +913,9 @@ SpriteID GetCustomEngineSprite(EngineID engine, const Vehicle *v, Direction dire
 	NewVehicleResolver(&object, engine, v);
 
 	group = Resolve(GetVehicleSpriteGroup(engine, v), &object);
-	if (group == NULL || group->type != SGT_RESULT || group->g.result.num_sprites == 0) return 0;
+	if (group == NULL || group->GetNumResults() == 0) return 0;
 
-	return group->g.result.sprite + (direction % group->g.result.num_sprites);
+	return group->GetResult() + (direction % group->GetNumResults());
 }
 
 
@@ -936,11 +936,11 @@ SpriteID GetRotorOverrideSprite(EngineID engine, const Aircraft *v, bool info_vi
 	const SpriteGroup *group = GetWagonOverrideSpriteSet(engine, CT_DEFAULT, engine);
 	group = Resolve(group, &object);
 
-	if (group == NULL || group->type != SGT_RESULT || group->g.result.num_sprites == 0) return 0;
+	if (group == NULL || group->GetNumResults() == 0) return 0;
 
-	if (v == NULL) return group->g.result.sprite;
+	if (v == NULL) return group->GetResult();
 
-	return group->g.result.sprite + (info_view ? 0 : (v->Next()->Next()->state % group->g.result.num_sprites));
+	return group->GetResult() + (info_view ? 0 : (v->Next()->Next()->state % group->GetNumResults()));
 }
 
 
@@ -952,7 +952,7 @@ SpriteID GetRotorOverrideSprite(EngineID engine, const Aircraft *v, bool info_vi
 bool UsesWagonOverride(const Vehicle *v)
 {
 	assert(v->type == VEH_TRAIN);
-	return v->u.rail.cached_override != NULL;
+	return ((Train *)v)->tcache.cached_override != NULL;
 }
 
 /**
@@ -976,9 +976,9 @@ uint16 GetVehicleCallback(CallbackID callback, uint32 param1, uint32 param2, Eng
 	object.callback_param2 = param2;
 
 	group = Resolve(GetVehicleSpriteGroup(engine, v, false), &object);
-	if (group == NULL || group->type != SGT_CALLBACK) return CALLBACK_FAILED;
+	if (group == NULL) return CALLBACK_FAILED;
 
-	return group->g.callback.result;
+	return group->GetCallbackResult();
 }
 
 /**
@@ -1005,9 +1005,9 @@ uint16 GetVehicleCallbackParent(CallbackID callback, uint32 param1, uint32 param
 	object.u.vehicle.parent = parent;
 
 	group = Resolve(GetVehicleSpriteGroup(engine, v, false), &object);
-	if (group == NULL || group->type != SGT_CALLBACK) return CALLBACK_FAILED;
+	if (group == NULL) return CALLBACK_FAILED;
 
-	return group->g.callback.result;
+	return group->GetCallbackResult();
 }
 
 
