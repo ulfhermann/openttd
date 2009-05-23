@@ -1021,7 +1021,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		InvalidateWindow(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = GetVehicleOrder(v, v->cur_order_index);
+		const Order *real_order = v->GetOrder(v->cur_order_index);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -1424,16 +1424,16 @@ SpriteID GetEnginePalette(EngineID engine_type, CompanyID company)
 SpriteID GetVehiclePalette(const Vehicle *v)
 {
 	if (v->type == VEH_TRAIN) {
-		return GetEngineColourMap(v->engine_type, v->owner, v->u.rail.first_engine, v);
+		return GetEngineColourMap(v->engine_type, v->owner, ((Train *)v)->tcache.first_engine, v);
 	} else if (v->type == VEH_ROAD) {
-		return GetEngineColourMap(v->engine_type, v->owner, ((RoadVehicle *)v)->first_engine, v);
+		return GetEngineColourMap(v->engine_type, v->owner, ((RoadVehicle *)v)->rcache.first_engine, v);
 	}
 
 	return GetEngineColourMap(v->engine_type, v->owner, INVALID_ENGINE, v);
 }
 
 
-void Vehicle::BeginLoading()
+void Vehicle::BeginLoading(StationID last_station_id)
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
@@ -1456,8 +1456,6 @@ void Vehicle::BeginLoading()
 	StationID curr_station_id = this->last_station_visited;
 	Station * curr_station = Station::Get(curr_station_id);
 	curr_station->loading_vehicles.push_back(this);
-
-	StationID last_station_id = this->orders.list->GetPreviousStoppingStation(this->cur_order_index);
 
 	StationID next_station_id = this->orders.list->GetNextStoppingStation(this->cur_order_index);
 
