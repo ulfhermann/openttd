@@ -234,7 +234,38 @@ bool Order::IsStoppingOrder() const
 {
 	if (this->GetType() != OT_GOTO_STATION) return false;
 	if (Station::Get(this->GetDestination())->IsBuoy()) return false;
-	return (this->GetNonStopType() == ONSF_STOP_EVERYWHERE || this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
+	return (this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS || this->GetNonStopType() == ONSF_STOP_EVERYWHERE);
+}
+
+const Order * OrderList::GetNext(const Order * curr) const
+{
+	const Order * next = curr->next;
+	if (next == NULL) {
+		next = GetFirstOrder();
+	}
+	return next;
+}
+
+const Order * OrderList::GetNextStoppingOrder(const Order * next, uint hops) const
+{
+	if (next == NULL || hops > GetNumOrders()) {
+		return NULL;
+	} else if (next->GetType() == OT_CONDITIONAL) {
+		const Order * skip_to = GetNextStoppingOrder(GetOrderAt(next->GetConditionSkipToOrder()), hops + 1);
+		const Order * advance = GetNextStoppingOrder(next, hops + 1);
+		if (skip_to == advance) {
+			return skip_to;
+		} else {
+			return NULL; // nondeterministic
+		}
+	} else if (next->GetNonStopType() == ONSF_STOP_EVERYWHERE ||
+			next->GetNonStopType() == ONSF_NO_STOP_AT_DESTINATION_STATION) {
+		return NULL; // nondeterministic
+	} else if (next->IsStoppingOrder()) {
+		return next;
+	} else {
+		return GetNextStoppingOrder(GetNext(next), hops + 1);
+	}
 }
 
 StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
@@ -245,48 +276,11 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
 			return INVALID_STATION;
 		}
 	}
-
-	const Order * next = curr;
-
-	do {
-		next = next->next;
-		if (next == NULL) {
-			next = GetFirstOrder();
-		}
-	} while (next != curr && !next->IsStoppingOrder());
-
+	const Order * next = GetNextStoppingOrder(GetNext(curr), 1);
 	if (next == NULL) {
 		return INVALID_STATION;
 	} else {
 		return next->GetDestination();
-	}
-}
-
-StationID OrderList::GetPreviousStoppingStation(VehicleOrderID curr_id) const {
-	if (curr_id >= this->num_orders) {
-		return INVALID_STATION;
-	}
-
-	const Order * prev = NULL;
-	int order_id = curr_id;
-	do {
-		if (order_id == 0) {
-			order_id = this->num_orders - 1;
-		} else {
-			--order_id;
-		}
-
-		if (order_id == curr_id) {
-			prev = NULL;
-		} else {
-			prev = GetOrderAt(order_id);
-		}
-	} while(prev != NULL && !prev->IsStoppingOrder());
-
-	if (prev == NULL) {
-		return INVALID_STATION;
-	} else {
-		return prev->GetDestination();
 	}
 }
 
@@ -458,7 +452,7 @@ static uint GetOrderDistance(const Order *prev, const Order *cur, const Vehicle 
 
 		conditional_depth++;
 
-		int dist1 = GetOrderDistance(prev, GetVehicleOrder(v, cur->GetConditionSkipToOrder()), v, conditional_depth);
+		int dist1 = GetOrderDistance(prev, v->GetOrder(cur->GetConditionSkipToOrder()), v, conditional_depth);
 		int dist2 = GetOrderDistance(prev, cur->next == NULL ? v->orders.list->GetFirstOrder() : cur->next, v, conditional_depth);
 		return max(dist1, dist2);
 	}
@@ -728,7 +722,7 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	if (sel_ord >= v->GetNumOrders())
 		return DecloneOrder(v, flags);
 
-	order = GetVehicleOrder(v, sel_ord);
+	order = v->GetOrder(sel_ord);
 	if (order == NULL) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
@@ -832,7 +826,7 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			moving_order == target_order || v->GetNumOrders() <= 1)
 		return CMD_ERROR;
 
-	Order *moving_one = GetVehicleOrder(v, moving_order);
+	Order *moving_one = v->GetOrder(moving_order);
 	/* Don't move an empty order */
 	if (moving_one == NULL) return CMD_ERROR;
 
@@ -909,7 +903,7 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	/* Is it a valid order? */
 	if (sel_ord >= v->GetNumOrders()) return CMD_ERROR;
 
-	Order *order = GetVehicleOrder(v, sel_ord);
+	Order *order = v->GetOrder(sel_ord);
 	switch (order->GetType()) {
 		case OT_GOTO_STATION:
 			if (mof == MOF_COND_VARIABLE || mof == MOF_COND_COMPARATOR || mof == MOF_DEPOT_ACTION || mof == MOF_COND_VALUE || Station::Get(order->GetDestination())->IsBuoy()) return CMD_ERROR;
@@ -1251,7 +1245,7 @@ CommandCost CmdOrderRefit(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	const Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
-	Order *order = GetVehicleOrder(v, order_number);
+	Order *order = v->GetOrder(order_number);
 	if (order == NULL) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
@@ -1472,7 +1466,7 @@ void CheckOrders(const Vehicle *v)
 
 		/* Check if the last and the first order are the same */
 		if (v->GetNumOrders() > 1) {
-			const Order *last = GetLastVehicleOrder(v);
+			const Order *last = v->GetLastOrder();
 
 			if (v->orders.list->GetFirstOrder()->Equals(*last)) {
 				problem_type = 2;
@@ -1708,7 +1702,7 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 			if (next_order != INVALID_VEH_ORDER_ID) {
 				UpdateVehicleTimetable(v, false);
 				v->cur_order_index = next_order;
-				v->current_order_time += GetVehicleOrder(v, next_order)->travel_time;
+				v->current_order_time += v->GetOrder(next_order)->travel_time;
 			} else {
 				UpdateVehicleTimetable(v, true);
 				v->IncrementOrderIndex();
@@ -1717,7 +1711,7 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 			assert(v->cur_order_index < v->GetNumOrders());
 
 			/* Get the current order */
-			const Order *order = GetVehicleOrder(v, v->cur_order_index);
+			const Order *order = v->GetOrder(v->cur_order_index);
 			v->current_order = *order;
 			return UpdateOrderDest(v, order, conditional_depth + 1);
 		}
@@ -1786,7 +1780,7 @@ bool ProcessOrders(Vehicle *v)
 	/* Get the current order */
 	if (v->cur_order_index >= v->GetNumOrders()) v->cur_order_index = 0;
 
-	const Order *order = GetVehicleOrder(v, v->cur_order_index);
+	const Order *order = v->GetOrder(v->cur_order_index);
 
 	/* If no order, do nothing. */
 	if (order == NULL || (v->type == VEH_AIRCRAFT && order->IsType(OT_DUMMY) && !CheckForValidOrders(v))) {
