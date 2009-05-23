@@ -7,7 +7,6 @@
 
 #include "vehicle_type.h"
 #include "track_type.h"
-#include "rail_type.h"
 #include "cargo_type.h"
 #include "direction_type.h"
 #include "gfx_type.h"
@@ -44,37 +43,13 @@ enum VehicleFlags {
 	VF_AUTOFILL_PRES_WAIT_TIME, ///< Whether non-destructive auto-fill should preserve waiting times
 };
 
-struct VehicleRail {
-	/* Cached wagon override spritegroup */
-	const struct SpriteGroup *cached_override;
-
-	uint16 last_speed; // NOSAVE: only used in UI
-
-	/* cached values, recalculated on load and each time a vehicle is added to/removed from the consist. */
-	uint32 cached_power;        ///< total power of the consist.
-	uint16 cached_max_speed;    ///< max speed of the consist. (minimum of the max speed of all vehicles in the consist)
-	uint16 cached_total_length; ///< Length of the whole train, valid only for first engine.
-	uint8 cached_veh_length;    ///< length of this vehicle in units of 1/8 of normal length, cached because this can be set by a callback
-	bool cached_tilt;           ///< train can tilt; feature provides a bonus in curves
-
-	/* cached values, recalculated when the cargo on a train changes (in addition to the conditions above) */
-	uint32 cached_weight;     ///< total weight of the consist.
-	uint32 cached_veh_weight; ///< weight of the vehicle.
-	uint32 cached_max_te;     ///< max tractive effort of consist
-
-	/**
-	 * Position/type of visual effect.
-	 * bit 0 - 3 = position of effect relative to vehicle. (0 = front, 8 = centre, 15 = rear)
-	 * bit 4 - 5 = type of effect. (0 = default for engine class, 1 = steam, 2 = diesel, 3 = electric)
-	 * bit     6 = disable visual effect.
-	 * bit     7 = disable powered wagons.
-	 */
-	byte cached_vis_effect;
-	byte user_def_data;
-
-	/* NOSAVE: for wagon override - id of the first engine in train
-	 * 0xffff == not in train */
-	EngineID first_engine;
+/** Cached oftenly queried (NewGRF) values */
+struct VehicleCache {
+	uint8 cache_valid;   ///< Whether the caches are valid
+	uint32 cached_var40; ///< Cache for NewGRF var 40
+	uint32 cached_var41; ///< Cache for NewGRF var 41
+	uint32 cached_var42; ///< Cache for NewGRF var 42
+	uint32 cached_var43; ///< Cache for NewGRF var 43
 };
 
 typedef Pool<Vehicle, VehicleID, 512, 64000> VehiclePool;
@@ -204,16 +179,7 @@ public:
 
 	byte subtype;                   ///< subtype (Filled with values from EffectVehicles/TrainSubTypes/AircraftSubTypes)
 
-	union {
-		VehicleRail rail;
-	} u;
-
-	/* cached oftenly queried NewGRF values */
-	uint8 cache_valid;   ///< Whether the caches are valid
-	uint32 cached_var40; ///< Cache for NewGRF var 40
-	uint32 cached_var41; ///< Cache for NewGRF var 41
-	uint32 cached_var42; ///< Cache for NewGRF var 42
-	uint32 cached_var43; ///< Cache for NewGRF var 43
+	VehicleCache vcache;            ///< Cache of often used calculated values
 
 	/** Create a new vehicle */
 	Vehicle();
@@ -223,7 +189,7 @@ public:
 	/** We want to 'destruct' the right class. */
 	virtual ~Vehicle();
 
-	void BeginLoading();
+	void BeginLoading(StationID last_station_id);
 	void LeaveStation();
 
 	/**
@@ -504,6 +470,25 @@ public:
 		if (this->cur_order_index >= this->GetNumOrders()) this->cur_order_index = 0;
 		InvalidateVehicleOrder(this, 0);
 	}
+
+	/**
+	 * Returns order 'index' of a vehicle or NULL when it doesn't exists
+	 * @param index the order to fetch
+	 * @return the found (or not) order
+	 */
+	inline Order *GetOrder(int index) const
+	{
+		return (this->orders.list == NULL) ? NULL : this->orders.list->GetOrderAt(index);
+	}
+
+	/**
+	 * Returns the last order of a vehicle, or NULL if it doesn't exists
+	 * @return last order of a vehicle, if available
+	 */
+	inline Order *GetLastOrder() const
+	{
+		return (this->orders.list == NULL) ? NULL : this->orders.list->GetLastOrder();
+	}
 };
 
 /**
@@ -553,16 +538,6 @@ struct FreeUnitIDGenerator {
 	/** Releases allocated memory */
 	~FreeUnitIDGenerator() { free(this->cache); }
 };
-
-/* Returns order 'index' of a vehicle or NULL when it doesn't exists */
-static inline Order *GetVehicleOrder(const Vehicle *v, int index) { return (v->orders.list == NULL) ? NULL : v->orders.list->GetOrderAt(index); }
-
-/**
- * Returns the last order of a vehicle, or NULL if it doesn't exists
- * @param v Vehicle to query
- * @return last order of a vehicle, if available
- */
-static inline Order *GetLastVehicleOrder(const Vehicle *v) { return (v->orders.list == NULL) ? NULL : v->orders.list->GetLastOrder(); }
 
 void CheckVehicle32Day(Vehicle *v);
 
