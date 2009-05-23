@@ -2890,9 +2890,13 @@ static void UpdateStationStats(Station * st) {
 }
 
 void UpdateFlows(Station * st, Vehicle *front, StationID next_station_id) {
-	for (Vehicle *v = front; v != NULL; v = v->Next()) {
-		GoodsEntry *ge = &st->goods[v->cargo_type];
-		v->cargo.UpdateFlows(next_station_id, ge);
+	if (next_station_id == INVALID_STATION) {
+		return;
+	} else {
+		for (Vehicle *v = front; v != NULL; v = v->Next()) {
+			GoodsEntry *ge = &st->goods[v->cargo_type];
+			v->cargo.UpdateFlows(next_station_id, ge);
+		}
 	}
 }
 
