@@ -296,7 +296,7 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFla
 uint CargoList::LoadPackets(List * dest, uint cap, StationID next_station, List * rejected, TileIndex load_place) {
 	while(!packets.empty() && cap > 0) {
 		CargoPacket * p = packets.front();
-		if (rejected == NULL || p->next == next_station || p->next == INVALID_STATION) {
+		if (rejected == NULL || p->next == next_station || p->next == INVALID_STATION || next_station == INVALID_STATION) {
 			/* load the packet if possible */
 			if (p->count <= cap) {
 				/* load all of the packet */

@@ -1119,25 +1119,29 @@ void StateGameLoop()
 
 				switch (v->type) {
 					case VEH_ROAD: {
-						extern byte GetRoadVehLength(const RoadVehicle *v);
-						if (GetRoadVehLength((RoadVehicle *)v) != ((RoadVehicle *)v)->cached_veh_length) {
+						RoadVehicle *rv = (RoadVehicle *)v;
+						RoadVehicleCache cache = rv->rcache;
+						RoadVehUpdateCache(rv);
+
+						if (memcmp(&cache, &rv->rcache, sizeof(RoadVehicleCache)) != 0) {
 							DEBUG(desync, 2, "cache mismatch: vehicle %i, company %i, unit number %i\n", v->index, (int)v->owner, v->unitnumber);
 						}
 					} break;
 
 					case VEH_TRAIN: {
 						uint length = 0;
-						for (Vehicle *u = v; u != NULL; u = u->Next()) length++;
+						Train *t = (Train *)v;
+						for (Vehicle *u = t; u != NULL; u = u->Next()) length++;
 
-						VehicleRail *wagons = MallocT<VehicleRail>(length);
+						TrainCache *wagons = MallocT<TrainCache>(length);
 						length = 0;
-						for (Vehicle *u = v; u != NULL; u = u->Next()) wagons[length++] = u->u.rail;
+						for (Train *u = t; u != NULL; u = u->Next()) wagons[length++] = u->tcache;
 
-						TrainConsistChanged((Train *)v, true);
+						TrainConsistChanged(t, true);
 
 						length = 0;
-						for (Vehicle *u = v; u != NULL; u = u->Next()) {
-							if (memcmp(&wagons[length], &u->u.rail, sizeof(VehicleRail)) != 0) {
+						for (Train *u = t; u != NULL; u = u->Next()) {
+							if (memcmp(&wagons[length], &u->tcache, sizeof(TrainCache)) != 0) {
 								DEBUG(desync, 2, "cache mismatch: vehicle %i, company %i, unit number %i, wagon %i\n", v->index, (int)v->owner, v->unitnumber, length);
 							}
 							length++;
@@ -1148,9 +1152,10 @@ void StateGameLoop()
 
 					case VEH_AIRCRAFT: {
 						Aircraft *a = (Aircraft *)v;
-						uint speed = a->cached_max_speed;
+						AircraftCache cache = a->acache;
 						UpdateAircraftCache(a);
-						if (speed != a->cached_max_speed) {
+
+						if (memcmp(&cache, &a->acache, sizeof(AircraftCache)) != 0) {
 							DEBUG(desync, 2, "cache mismatch: vehicle %i, company %i, unit number %i\n", v->index, (int)v->owner, v->unitnumber);
 						}
 					} break;
