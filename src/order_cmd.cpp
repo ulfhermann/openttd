@@ -234,7 +234,38 @@ bool Order::IsStoppingOrder() const
 {
 	if (this->GetType() != OT_GOTO_STATION) return false;
 	if (Station::Get(this->GetDestination())->IsBuoy()) return false;
-	return (this->GetNonStopType() == ONSF_STOP_EVERYWHERE || this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
+	return (this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS || this->GetNonStopType() == ONSF_STOP_EVERYWHERE);
+}
+
+const Order * OrderList::GetNext(const Order * curr) const
+{
+	const Order * next = curr->next;
+	if (next == NULL) {
+		next = GetFirstOrder();
+	}
+	return next;
+}
+
+const Order * OrderList::GetNextStoppingOrder(const Order * next, uint hops) const
+{
+	if (next == NULL || hops > GetNumOrders()) {
+		return NULL;
+	} else if (next->GetType() == OT_CONDITIONAL) {
+		const Order * skip_to = GetNextStoppingOrder(GetOrderAt(next->GetConditionSkipToOrder()), hops + 1);
+		const Order * advance = GetNextStoppingOrder(next, hops + 1);
+		if (skip_to == advance) {
+			return skip_to;
+		} else {
+			return NULL; // nondeterministic
+		}
+	} else if (next->GetNonStopType() == ONSF_STOP_EVERYWHERE ||
+			next->GetNonStopType() == ONSF_NO_STOP_AT_DESTINATION_STATION) {
+		return NULL; // nondeterministic
+	} else if (next->IsStoppingOrder()) {
+		return next;
+	} else {
+		return GetNextStoppingOrder(GetNext(next), hops + 1);
+	}
 }
 
 StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
@@ -245,48 +276,11 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
 			return INVALID_STATION;
 		}
 	}
-
-	const Order * next = curr;
-
-	do {
-		next = next->next;
-		if (next == NULL) {
-			next = GetFirstOrder();
-		}
-	} while (next != curr && !next->IsStoppingOrder());
-
+	const Order * next = GetNextStoppingOrder(GetNext(curr), 1);
 	if (next == NULL) {
 		return INVALID_STATION;
 	} else {
 		return next->GetDestination();
-	}
-}
-
-StationID OrderList::GetPreviousStoppingStation(VehicleOrderID curr_id) const {
-	if (curr_id >= this->num_orders) {
-		return INVALID_STATION;
-	}
-
-	const Order * prev = NULL;
-	int order_id = curr_id;
-	do {
-		if (order_id == 0) {
-			order_id = this->num_orders - 1;
-		} else {
-			--order_id;
-		}
-
-		if (order_id == curr_id) {
-			prev = NULL;
-		} else {
-			prev = GetOrderAt(order_id);
-		}
-	} while(prev != NULL && !prev->IsStoppingOrder());
-
-	if (prev == NULL) {
-		return INVALID_STATION;
-	} else {
-		return prev->GetDestination();
 	}
 }
 

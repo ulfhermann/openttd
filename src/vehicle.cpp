@@ -1433,7 +1433,7 @@ SpriteID GetVehiclePalette(const Vehicle *v)
 }
 
 
-void Vehicle::BeginLoading()
+void Vehicle::BeginLoading(StationID last_station_id)
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
@@ -1456,8 +1456,6 @@ void Vehicle::BeginLoading()
 	StationID curr_station_id = this->last_station_visited;
 	Station * curr_station = Station::Get(curr_station_id);
 	curr_station->loading_vehicles.push_back(this);
-
-	StationID last_station_id = this->orders.list->GetPreviousStoppingStation(this->cur_order_index);
 
 	StationID next_station_id = this->orders.list->GetNextStoppingStation(this->cur_order_index);
 
