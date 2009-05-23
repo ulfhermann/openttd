@@ -45,11 +45,11 @@
 		case VEH_ROAD: {
 			uint total_length = 0;
 			for (const Vehicle *u = v; u != NULL; u = u->Next()) {
-				total_length += ((RoadVehicle*)u)->cached_veh_length;
+				total_length += ((RoadVehicle*)u)->rcache.cached_veh_length;
 			}
 			return total_length;
 		}
-		case VEH_TRAIN: return v->u.rail.cached_total_length;
+		case VEH_TRAIN: return ((Train *)v)->tcache.cached_total_length;
 		default: return -1;
 	}
 }
