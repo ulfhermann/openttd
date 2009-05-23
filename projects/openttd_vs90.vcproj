@@ -729,6 +729,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\subsidy.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\texteff.cpp"
 				>
 			</File>
@@ -1470,6 +1474,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\strings_type.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\subsidy_func.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\subsidy_type.h"
 				>
 			</File>
 			<File
@@ -2725,6 +2737,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\ai\api\ai_signlist.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\ai\api\ai_station.hpp"
 				>
 			</File>
@@ -2926,6 +2942,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\ai\api\ai_sign.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\ai\api\ai_signlist.cpp"
 				>
 			</File>
 			<File

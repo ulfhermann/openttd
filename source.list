@@ -77,6 +77,7 @@ spritecache.cpp
 station.cpp
 string.cpp
 strings.cpp
+subsidy.cpp
 texteff.cpp
 tgp.cpp
 #if HAVE_THREAD
@@ -299,6 +300,8 @@ string_func.h
 string_type.h
 strings_func.h
 strings_type.h
+subsidy_func.h
+subsidy_type.h
 tar_type.h
 terraform_gui.h
 textbuf_gui.h
@@ -637,6 +640,7 @@ ai/api/ai_rail.hpp
 ai/api/ai_railtypelist.hpp
 ai/api/ai_road.hpp
 ai/api/ai_sign.hpp
+ai/api/ai_signlist.hpp
 ai/api/ai_station.hpp
 ai/api/ai_stationlist.hpp
 ai/api/ai_subsidy.hpp
@@ -689,6 +693,7 @@ ai/api/ai_rail.cpp
 ai/api/ai_railtypelist.cpp
 ai/api/ai_road.cpp
 ai/api/ai_sign.cpp
+ai/api/ai_signlist.cpp
 ai/api/ai_station.cpp
 ai/api/ai_stationlist.cpp
 ai/api/ai_subsidy.cpp
