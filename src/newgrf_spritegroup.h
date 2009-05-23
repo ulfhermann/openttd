@@ -43,13 +43,19 @@ enum SpriteGroupType {
 
 struct SpriteGroup;
 typedef uint32 SpriteGroupID;
-typedef Pool<SpriteGroup, SpriteGroupID, 512, 64000> SpriteGroupPool;
+
+/* SPRITE_WIDTH is 24. ECS has roughly 30 sprite groups per real sprite.
+ * Adding an 'extra' margin would be assuming 64 sprite groups per real
+ * sprite. 64 = 2^6, so 2^30 should be enough (for now) */
+typedef Pool<SpriteGroup, SpriteGroupID, 1024, 1 << 30> SpriteGroupPool;
 extern SpriteGroupPool _spritegroup_pool;
 
 /* Common wrapper for all the different sprite group types */
 struct SpriteGroup : SpriteGroupPool::PoolItem<&_spritegroup_pool> {
 protected:
 	SpriteGroup(SpriteGroupType type) : type(type) {}
+	/** Base sprite group resolver */
+	virtual const SpriteGroup *Resolve(struct ResolverObject *object) const { return this; };
 
 public:
 	virtual ~SpriteGroup() {}
@@ -59,6 +65,20 @@ public:
 	virtual SpriteID GetResult() const { return 0; }
 	virtual byte GetNumResults() const { return 0; }
 	virtual uint16 GetCallbackResult() const { return CALLBACK_FAILED; }
+
+	/**
+	 * ResolverObject (re)entry point.
+	 * This cannot be made a call to a virtual function because virtual functions
+	 * do not like NULL and checking for NULL *everywhere* is more cumbersome than
+	 * this little helper function.
+	 * @param group the group to resolve for
+	 * @param object information needed to resolve the group
+	 * @return the resolved group
+	 */
+	static const SpriteGroup *Resolve(const SpriteGroup *group, ResolverObject *object)
+	{
+		return group == NULL ? NULL : group->Resolve(object);
+	}
 };
 
 
@@ -79,6 +99,9 @@ struct RealSpriteGroup : SpriteGroup {
 	byte num_loading;      ///< Number of loading groups
 	const SpriteGroup **loaded;  ///< List of loaded groups (can be SpriteIDs or Callback results)
 	const SpriteGroup **loading; ///< List of loading groups (can be SpriteIDs or Callback results)
+
+protected:
+	const SpriteGroup *Resolve(ResolverObject *object) const;
 };
 
 /* Shared by deterministic and random groups. */
@@ -159,6 +182,9 @@ struct DeterministicSpriteGroup : SpriteGroup {
 
 	/* Dynamically allocated, this is the sole owner */
 	const SpriteGroup *default_group;
+
+protected:
+	const SpriteGroup *Resolve(ResolverObject *object) const;
 };
 
 enum RandomizedSpriteGroupCompareMode {
@@ -180,6 +206,9 @@ struct RandomizedSpriteGroup : SpriteGroup {
 	byte num_groups; ///< must be power of 2
 
 	const SpriteGroup **groups; ///< Take the group with appropriate index:
+
+protected:
+	const SpriteGroup *Resolve(ResolverObject *object) const;
 };
 
 
@@ -315,10 +344,5 @@ struct ResolverObject {
 
 	ResolverObject() : procedure_call(false) { }
 };
-
-
-/* Base sprite group resolver */
-const SpriteGroup *Resolve(const SpriteGroup *group, ResolverObject *object);
-
 
 #endif /* NEWGRF_SPRITEGROUP_H */
