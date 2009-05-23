@@ -888,7 +888,7 @@ bool CargoSorter::SortCount(const CargoDataEntry *cd1, const CargoDataEntry *cd2
 	uint c1 = cd1->GetCount();
 	uint c2 = cd2->GetCount();
 	if (c1 == c2) {
-		return cd1 < cd2;
+		return SortStation(cd1->GetStation(), cd2->GetStation());
 	} else if (order == SO_ASCENDING) {
 		return c1 < c2;
 	} else {
@@ -902,9 +902,10 @@ bool CargoSorter::SortStation(StationID st1, StationID st2) const {
 
 	if (!Station::IsValidID(st1)) {
 		if (!Station::IsValidID(st2)) {
-			return st1 < st2;
+			return SortId(st1, st2);
+		} else {
+			return order == SO_ASCENDING;
 		}
-		else return order == SO_ASCENDING;
 	} else if (!Station::IsValidID(st2)) {
 		return order == SO_DESCENDING;
 	}
@@ -916,7 +917,7 @@ bool CargoSorter::SortStation(StationID st1, StationID st2) const {
 
 	int res = strcmp(buf1, buf2);
 	if (res == 0) {
-		return false;
+		return SortId(st1, st2);
 	} else if (res < 0) {
 		return order == SO_ASCENDING;
 	} else {
@@ -1062,6 +1063,7 @@ struct StationViewWindow : public Window {
 						uint estimate = DivideApprox(i->second * count, sum_flows);
 						sum_estimated += estimate;
 						if (sum_estimated > count) {
+							estimate -= sum_estimated - count;
 							sum_estimated = count;
 						}
 
