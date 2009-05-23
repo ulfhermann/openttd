@@ -1457,7 +1457,11 @@ void Vehicle::BeginLoading(StationID last_station_id)
 	Station * curr_station = Station::Get(curr_station_id);
 	curr_station->loading_vehicles.push_back(this);
 
-	StationID next_station_id = this->orders.list->GetNextStoppingStation(this->cur_order_index);
+	StationID next_station_id = INVALID_STATION;
+	OrderList * orders = this->orders.list;
+	if (orders != NULL) {
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index);
+	}
 
 	if (last_station_id != INVALID_STATION && last_station_id != curr_station_id) {
 		IncreaseStats(Station::Get(last_station_id), this, curr_station_id);
@@ -1489,9 +1493,15 @@ void Vehicle::LeaveStation()
 	current_order.MakeLeaveStation();
 	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
-	StationID next_station = this->orders.list->GetNextStoppingStation(this->cur_order_index);
-	if (next_station != INVALID_STATION && next_station != this->last_station_visited) {
-		DecreaseFrozen(st, this, next_station);
+
+	StationID next_station_id = INVALID_STATION;
+	OrderList * orders = this->orders.list;
+	if (orders != NULL) {
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index);
+	}
+
+	if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
+		DecreaseFrozen(st, this, next_station_id);
 	}
 
 	HideFillingPercent(&this->fill_percent_te_id);
