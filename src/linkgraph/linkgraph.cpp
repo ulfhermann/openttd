@@ -15,47 +15,19 @@ LinkGraph _link_graphs[NUM_CARGO];
 
 typedef std::map<StationID, NodeID> ReverseNodeIndex;
 
-void LinkGraph::NextComponent()
-{
-	StationID last_station_id = current_station_id;
+void LinkGraph::CreateComponent(Station * first) {
 	ReverseNodeIndex index;
 	NodeID node = 0;
 	std::queue<Station *> search_queue;
 	LinkGraphComponent * component = NULL;
-	while (true) {
-		// find first station of next component
-		if (Station::IsValidID(current_station_id)) {
-			Station * station = Station::Get(current_station_id);
-			GoodsEntry & ge = station->goods[cargo];
-			if ((ge.last_component + current_component_id) % 2 != 0) {
-				// has not been seen in this run through the graph
 
-				LinkStatMap & links = station->goods[cargo].link_stats;
-				if (!links.empty()) {
-					current_component_id += 2;
-					search_queue.push(station);
-					station->goods[cargo].last_component = current_component_id;
-					component = new LinkGraphComponent(cargo, current_component_id);
-					GoodsEntry & good = station->goods[cargo];
-					node = component->AddNode(current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
-					index[current_station_id++] = node;
-					break; // found a station
-				}
-			}
-		}
+	search_queue.push(first);
 
-		if (++current_station_id == Station::GetPoolSize()) {
-			current_station_id = 0;
-			if (current_component_id % 2 == 0) {
-				current_component_id = 1;
-			} else {
-				current_component_id = 0;
-			}
-		}
-		if (current_station_id == last_station_id) {
-			return;
-		}
-	}
+	first->goods[cargo].last_component = current_component_id;
+	component = new LinkGraphComponent(cargo, current_component_id);
+	GoodsEntry & good = first->goods[cargo];
+	node = component->AddNode(current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+	index[current_station_id++] = node;
 	// find all stations belonging to the current component
 	while(!search_queue.empty()) {
 		Station * source = search_queue.front();
@@ -90,6 +62,41 @@ void LinkGraph::NextComponent()
 	assert(job != NULL);
 	job->SpawnThread(cargo);
 	jobs.push_back(job);
+}
+
+void LinkGraph::NextComponent()
+{
+	while (!Station::IsValidID(current_station_id) && current_station_id > 0) {
+		--current_station_id;
+	}
+	StationID last_station_id = current_station_id;
+
+	do {
+		// find first station of next component
+		if (Station::IsValidID(current_station_id)) {
+			Station * station = Station::Get(current_station_id);
+			GoodsEntry & ge = station->goods[cargo];
+			if ((ge.last_component + current_component_id) % 2 != 0) {
+				// has not been seen in this run through the graph
+
+				LinkStatMap & links = station->goods[cargo].link_stats;
+				if (!links.empty()) {
+					current_component_id += 2;
+					CreateComponent(station);
+					return;
+				}
+			}
+		}
+
+		if (++current_station_id == Station::GetPoolSize()) {
+			current_station_id = 0;
+			if (current_component_id % 2 == 0) {
+				current_component_id = 1;
+			} else {
+				current_component_id = 0;
+			}
+		}
+	} while (current_station_id != last_station_id);
 }
 
 void OnTick_LinkGraph()
