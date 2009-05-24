@@ -121,7 +121,7 @@ void ShowNewGrfVehicleError(EngineID engine, StringID part1, StringID part2, GRF
 		SetBit(grfconfig->grf_bugs, bug_type);
 		SetDParamStr(0, grfconfig->name);
 		SetDParam(1, engine);
-		ShowErrorMessage(part2, part1, 0, 0);
+		ShowErrorMessage(part2, part1, 0, 0, true);
 		if (!_networking) DoCommand(0, critical ? PM_PAUSED_ERROR : PM_PAUSED_NORMAL, 1, DC_EXEC, CMD_PAUSE);
 	}
 
@@ -669,7 +669,7 @@ void CallVehicleTicks()
 
 		SetDParam(0, v->index);
 		SetDParam(1, error_message);
-		AddNewsItem(message, NS_ADVICE, v->index, 0);
+		AddVehicleNewsItem(message, NS_ADVICE, v->index);
 	}
 
 	_current_company = OWNER_NONE;
@@ -922,7 +922,7 @@ void AgeVehicle(Vehicle *v)
 	}
 
 	SetDParam(0, v->index);
-	AddNewsItem(str, NS_ADVICE, v->index, 0);
+	AddVehicleNewsItem(str, NS_ADVICE, v->index);
 }
 
 /**
@@ -1043,7 +1043,7 @@ void VehicleEnterDepot(Vehicle *v)
 				if (v->owner == _local_company) {
 					/* Notify the user that we stopped the vehicle */
 					SetDParam(0, v->index);
-					AddNewsItem(STR_ORDER_REFIT_FAILED, NS_ADVICE, v->index, 0);
+					AddVehicleNewsItem(STR_ORDER_REFIT_FAILED, NS_ADVICE, v->index);
 				}
 			} else if (v->owner == _local_company && cost.GetCost() != 0) {
 				ShowCostOrIncomeAnimation(v->x_pos, v->y_pos, v->z_pos, cost.GetCost());
@@ -1070,7 +1070,7 @@ void VehicleEnterDepot(Vehicle *v)
 				}
 
 				SetDParam(0, v->index);
-				AddNewsItem(string, NS_ADVICE, v->index, 0);
+				AddVehicleNewsItem(string, NS_ADVICE, v->index);
 			}
 			AI::NewEvent(v->owner, new AIEventVehicleWaitingInDepot(v->index));
 		}
@@ -1396,7 +1396,7 @@ static SpriteID GetEngineColourMap(EngineID engine_type, CompanyID company, Engi
 			 * map else it's returned as-is. */
 			if (!HasBit(callback, 14)) {
 				/* Update cache */
-				if (v != NULL) ((Vehicle*)v)->colourmap = map;
+				if (v != NULL) const_cast<Vehicle *>(v)->colourmap = map;
 				return map;
 			}
 		}
@@ -1412,7 +1412,7 @@ static SpriteID GetEngineColourMap(EngineID engine_type, CompanyID company, Engi
 	if (twocc) map += livery->colour2 * 16;
 
 	/* Update cache */
-	if (v != NULL) ((Vehicle*)v)->colourmap = map;
+	if (v != NULL) const_cast<Vehicle *>(v)->colourmap = map;
 	return map;
 }
 
@@ -1424,9 +1424,9 @@ SpriteID GetEnginePalette(EngineID engine_type, CompanyID company)
 SpriteID GetVehiclePalette(const Vehicle *v)
 {
 	if (v->type == VEH_TRAIN) {
-		return GetEngineColourMap(v->engine_type, v->owner, ((Train *)v)->tcache.first_engine, v);
+		return GetEngineColourMap(v->engine_type, v->owner, ((const Train *)v)->tcache.first_engine, v);
 	} else if (v->type == VEH_ROAD) {
-		return GetEngineColourMap(v->engine_type, v->owner, ((RoadVehicle *)v)->rcache.first_engine, v);
+		return GetEngineColourMap(v->engine_type, v->owner, ((const RoadVehicle *)v)->rcache.first_engine, v);
 	}
 
 	return GetEngineColourMap(v->engine_type, v->owner, INVALID_ENGINE, v);
@@ -1707,11 +1707,11 @@ void VehiclesYearlyLoop()
 				if (_settings_client.gui.vehicle_income_warn && v->owner == _local_company) {
 					SetDParam(0, v->index);
 					SetDParam(1, profit);
-					AddNewsItem(
+					AddVehicleNewsItem(
 						STR_VEHICLE_IS_UNPROFITABLE,
 						NS_ADVICE,
-						v->index,
-						0);
+						v->index
+					);
 				}
 				AI::NewEvent(v->owner, new AIEventVehicleUnprofitable(v->index));
 			}
@@ -1768,7 +1768,7 @@ bool CanVehicleUseStation(EngineID engine_type, const Station *st)
  */
 bool CanVehicleUseStation(const Vehicle *v, const Station *st)
 {
-	if (v->type == VEH_ROAD) return st->GetPrimaryRoadStop((RoadVehicle *)v) != NULL;
+	if (v->type == VEH_ROAD) return st->GetPrimaryRoadStop((const RoadVehicle *)v) != NULL;
 
 	return CanVehicleUseStation(v->engine_type, st);
 }
