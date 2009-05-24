@@ -189,14 +189,14 @@ void CheckTrainsLengths()
 
 	FOR_ALL_VEHICLES(v) {
 		if (v->type == VEH_TRAIN && v->First() == v && !(v->vehstatus & VS_CRASHED)) {
-			for (const Train *u = (Train *)v, *w = (Train *)v->Next(); w != NULL; u = w, w = w->Next()) {
+			for (const Train *u = (const Train *)v, *w = (const Train *)v->Next(); w != NULL; u = w, w = w->Next()) {
 				if (u->track != TRACK_BIT_DEPOT) {
 					if ((w->track != TRACK_BIT_DEPOT &&
 							max(abs(u->x_pos - w->x_pos), abs(u->y_pos - w->y_pos)) != u->tcache.cached_veh_length) ||
 							(w->track == TRACK_BIT_DEPOT && TicksToLeaveDepot(u) <= 0)) {
 						SetDParam(0, v->index);
 						SetDParam(1, v->owner);
-						ShowErrorMessage(INVALID_STRING_ID, STR_BROKEN_VEHICLE_LENGTH, 0, 0);
+						ShowErrorMessage(INVALID_STRING_ID, STR_BROKEN_VEHICLE_LENGTH, 0, 0, true);
 
 						if (!_networking) DoCommandP(0, PM_PAUSED_ERROR, 1, CMD_PAUSE);
 					}
@@ -732,7 +732,7 @@ static void NormalizeTrainVehInDepot(const Train *u)
 	FOR_ALL_VEHICLES(v) {
 		if (v->type == VEH_TRAIN && IsFreeWagon(v) &&
 				v->tile == u->tile &&
-				((Train *)v)->track == TRACK_BIT_DEPOT) {
+				((const Train *)v)->track == TRACK_BIT_DEPOT) {
 			if (CmdFailed(DoCommand(0, v->index | (u->index << 16), 1, DC_EXEC,
 					CMD_MOVE_RAIL_VEHICLE)))
 				break;
@@ -2987,11 +2987,11 @@ static Track ChooseTrainTrack(Train *v, TileIndex tile, DiagDirection enterdir, 
 				AI::NewEvent(v->owner, new AIEventVehicleLost(v->index));
 				if (_settings_client.gui.lost_train_warn && v->owner == _local_company) {
 					SetDParam(0, v->index);
-					AddNewsItem(
+					AddVehicleNewsItem(
 						STR_TRAIN_IS_LOST,
 						NS_ADVICE,
-						v->index,
-						0);
+						v->index
+					);
 				}
 			}
 		} else {
@@ -3358,7 +3358,7 @@ static void TrainEnterStation(Train *v, StationID station)
 	if (!(st->had_vehicle_of_type & HVOT_TRAIN)) {
 		st->had_vehicle_of_type |= HVOT_TRAIN;
 		SetDParam(0, st->index);
-		AddNewsItem(
+		AddVehicleNewsItem(
 			STR_NEWS_FIRST_TRAIN_ARRIVAL,
 			v->owner == _local_company ? NS_ARRIVAL_COMPANY : NS_ARRIVAL_OTHER,
 			v->index,
@@ -3573,8 +3573,8 @@ static Vehicle *FindTrainCollideEnum(Vehicle *v, void *data)
 		 * As there might be more than two trains involved, we have to do that for all vehicles */
 		const Vehicle *u;
 		FOR_ALL_VEHICLES(u) {
-			if (u->type == VEH_TRAIN && HASBITS(u->vehstatus, VS_CRASHED) && (((Train *)u)->track & TRACK_BIT_DEPOT) == TRACK_BIT_NONE) {
-				TrackBits trackbits = ((Train *)u)->track;
+			if (u->type == VEH_TRAIN && HASBITS(u->vehstatus, VS_CRASHED) && (((const Train *)u)->track & TRACK_BIT_DEPOT) == TRACK_BIT_NONE) {
+				TrackBits trackbits = ((const Train *)u)->track;
 				if ((trackbits & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
 					/* Vehicle is inside a wormhole, v->track contains no useful value then. */
 					trackbits |= DiagDirToDiagTrackBits(GetTunnelBridgeDirection(u->tile));
@@ -3616,10 +3616,9 @@ static bool CheckTrainCollision(Train *v)
 	if (tcc.num == 0) return false;
 
 	SetDParam(0, tcc.num);
-	AddNewsItem(STR_NEWS_TRAIN_CRASH,
-		NS_ACCIDENT_VEHICLE,
-		v->index,
-		0
+	AddVehicleNewsItem(STR_NEWS_TRAIN_CRASH,
+		NS_ACCIDENT,
+		v->index
 	);
 
 	ModifyStationRatingAround(v->tile, v->owner, -160, 30);
@@ -4329,11 +4328,11 @@ static bool TrainLocoHandler(Train *v, bool mode)
 				/* Show message to player. */
 				if (_settings_client.gui.lost_train_warn && v->owner == _local_company) {
 					SetDParam(0, v->index);
-					AddNewsItem(
+					AddVehicleNewsItem(
 						STR_TRAIN_IS_STUCK,
 						NS_ADVICE,
-						v->index,
-						0);
+						v->index
+					);
 				}
 				v->load_unload_time_rem = 0;
 			}

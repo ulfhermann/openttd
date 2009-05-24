@@ -306,8 +306,18 @@ void DupSprite(SpriteID old_spr, SpriteID new_spr)
 	scnew->warned = false;
 }
 
+/**
+ * S_FREE_MASK is used to mask-out lower bits of MemBlock::size
+ * If they are non-zero, the block is free.
+ * S_FREE_MASK has to ensure MemBlock is correctly aligned -
+ * it means 8B (S_FREE_MASK == 7) on 64bit systems!
+ */
+static const size_t S_FREE_MASK = sizeof(size_t) - 1;
 
-#define S_FREE_MASK 1
+/* to make sure nobody adds things to MemBlock without checking S_FREE_MASK first */
+assert_compile(sizeof(MemBlock) == sizeof(size_t));
+/* make sure it's a power of two */
+assert_compile((sizeof(size_t) & (sizeof(size_t) - 1)) == 0);
 
 static inline MemBlock *NextBlock(MemBlock *block)
 {
@@ -439,9 +449,9 @@ void *AllocSprite(size_t mem_req)
 {
 	mem_req += sizeof(MemBlock);
 
-	/* Align this to an uint32 boundary. This also makes sure that the 2 least
-	 * bits are not used, so we could use those for other things. */
-	mem_req = Align(mem_req, sizeof(uint32));
+	/* Align this to correct boundary. This also makes sure at least one
+	 * bit is not used, so we can use it for other things. */
+	mem_req = Align(mem_req, S_FREE_MASK + 1);
 
 	for (;;) {
 		MemBlock *s;
@@ -479,7 +489,7 @@ void *AllocSprite(size_t mem_req)
  * @param available available sprite type
  * @return fallback sprite
  * @note this function will do usererror() in the case the fallback sprite isn't available */
-static const void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, SpriteCache *sc)
+static void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, SpriteCache *sc)
 {
 	static const char *sprite_types[] = {
 		"normal",        // ST_NORMAL
@@ -515,7 +525,7 @@ static const void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType reques
 	}
 }
 
-const void *GetRawSprite(SpriteID sprite, SpriteType type)
+void *GetRawSprite(SpriteID sprite, SpriteType type)
 {
 	assert(IsMapgenSpriteID(sprite) == (type == ST_MAPGEN));
 	assert(type < ST_INVALID);

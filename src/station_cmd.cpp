@@ -439,7 +439,7 @@ static void ShowRejectOrAcceptNews(const Station *st, uint num_items, CargoID *c
 	}
 
 	SetDParam(0, st->index);
-	AddNewsItem(msg, NS_ACCEPTANCE, st->xy, st->index);
+	AddNewsItem(msg, NS_ACCEPTANCE, NR_STATION, st->index);
 }
 
 /**
@@ -1968,7 +1968,7 @@ static CommandCost RemoveAirport(Station *st, DoCommandFlag flags)
 	FOR_ALL_VEHICLES(v) {
 		if (!(v->type == VEH_AIRCRAFT && IsNormalAircraft(v))) continue;
 
-		Aircraft *a = (Aircraft *)v;
+		const Aircraft *a = (const Aircraft *)v;
 		if (a->targetairport == st->index && a->state != FLYING) return CMD_ERROR;
 	}
 
