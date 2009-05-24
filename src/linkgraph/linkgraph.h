@@ -124,6 +124,7 @@ public:
 
 private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
+	void CreateComponent(Station * first);
 	LinkGraphComponentID current_component_id;
 	StationID current_station_id;
 	CargoID cargo;
