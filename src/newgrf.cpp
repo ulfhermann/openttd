@@ -1158,11 +1158,9 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, byte
 					MapSpriteMappingRecolour(&dts->ground);
 
 					while (buf < *bufp + len) {
-						DrawTileSeqStruct *dtss;
-
 						/* no relative bounding box support */
-						dts->seq = ReallocT((DrawTileSeqStruct*)dts->seq, ++seq_count);
-						dtss = (DrawTileSeqStruct*) &dts->seq[seq_count - 1];
+						dts->seq = ReallocT(const_cast<DrawTileSeqStruct *>(dts->seq), ++seq_count);
+						DrawTileSeqStruct *dtss = const_cast<DrawTileSeqStruct *>(&dts->seq[seq_count - 1]);
 
 						dtss->delta_x = grf_load_byte(&buf);
 						if ((byte) dtss->delta_x == 0x80) break;
@@ -2247,7 +2245,7 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 				IndustryTileTable **tile_table = CallocT<IndustryTileTable*>(indsp->num_table); // Table with tiles to compose an industry
 				IndustryTileTable *itt = CallocT<IndustryTileTable>(defsize); // Temporary array to read the tile layouts from the GRF
 				int size;
-				IndustryTileTable *copy_from;
+				const IndustryTileTable *copy_from;
 
 				for (byte j = 0; j < indsp->num_table; j++) {
 					for (int k = 0;; k++) {
@@ -2258,7 +2256,7 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 							IndustryType type = grf_load_byte(&buf);  // industry holding required layout
 							byte laynbr = grf_load_byte(&buf);        // layout number to borrow
 
-							copy_from = (IndustryTileTable*)_origin_industry_specs[type].table[laynbr];
+							copy_from = _origin_industry_specs[type].table[laynbr];
 							for (size = 1;; size++) {
 								if (copy_from[size - 1].ti.x == -0x80 && copy_from[size - 1].ti.y == 0) break;
 							}
@@ -2503,7 +2501,7 @@ static void FeatureChangeInfo(byte *buf, size_t len)
 	               feature, numprops, engine, numinfo);
 
 	if (feature >= lengthof(handler) || handler[feature] == NULL) {
-		grfmsg(1, "FeatureChangeInfo: Unsupported feature %d, skipping", feature);
+		if (feature != GSF_CARGOS) grfmsg(1, "FeatureChangeInfo: Unsupported feature %d, skipping", feature);
 		return;
 	}
 
@@ -2907,7 +2905,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 					group->dts->seq = CallocT<DrawTileSeqStruct>(num_sprites + 1);
 
 					for (i = 0; i < num_sprites; i++) {
-						DrawTileSeqStruct *seq = (DrawTileSeqStruct*)&group->dts->seq[i];
+						DrawTileSeqStruct *seq = const_cast<DrawTileSeqStruct*>(&group->dts->seq[i]);
 
 						seq->image.sprite = grf_load_word(&buf);
 						seq->image.pal    = grf_load_word(&buf);
@@ -2935,7 +2933,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 					}
 
 					/* Set the terminator value. */
-					((DrawTileSeqStruct*)group->dts->seq)[i].delta_x = (int8)0x80;
+					const_cast<DrawTileSeqStruct *>(group->dts->seq)[i].delta_x = (int8)0x80;
 
 					break;
 				}
@@ -5455,11 +5453,11 @@ static void ResetCustomIndustries()
 						for (int j = 0; j < ind->num_table; j++) {
 							/* remove the individual layouts */
 							if (ind->table[j] != NULL) {
-								free((IndustryTileTable*)ind->table[j]);
+								free((void*)ind->table[j]);
 							}
 						}
 						/* remove the layouts pointers */
-						free((IndustryTileTable**)ind->table);
+						free((void*)ind->table);
 						ind->table = NULL;
 					}
 

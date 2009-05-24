@@ -807,7 +807,7 @@ void ChangeWorkingDirectory(const char *exe)
 
 	if (app_bundle != NULL) app_bundle[0] = '\0';
 #endif /* WITH_COCOA */
-	char *s = (char*)strrchr(exe, PATHSEPCHAR);
+	char *s = const_cast<char *>(strrchr(exe, PATHSEPCHAR));
 	if (s != NULL) {
 		*s = '\0';
 #if defined(__DJGPP__)
@@ -862,7 +862,7 @@ void DetermineBasePaths(const char *exe)
 #endif
 
 	/* Change the working directory to that one of the executable */
-	ChangeWorkingDirectory((char*)exe);
+	ChangeWorkingDirectory(exe);
 	if (getcwd(tmp, MAX_PATH) == NULL) *tmp = '\0';
 	AppendPathSeparator(tmp, MAX_PATH);
 	_searchpaths[SP_BINARY_DIR] = strdup(tmp);
