@@ -448,7 +448,8 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, linkgraph.demand_express,      SLE_UINT8,DEMANDS_SV,SL_MAX_VERSION,0,MS,DT_ANTISYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_EXPRESS, NULL),
 	 SDT_CONDVAR(GameSettings, linkgraph.demand_armoured,        SLE_UINT8,DEMANDS_SV,SL_MAX_VERSION,0,MS,DT_SYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_ARMOURED, NULL),
 	 SDT_CONDVAR(GameSettings, linkgraph.demand_default,      SLE_UINT8,DEMANDS_SV,SL_MAX_VERSION,0,MS,DT_ANTISYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_DEFAULT, NULL),
-	 SDT_CONDVAR(GameSettings, linkgraph.mcf_accuracy,                SLE_UINT8, MCF_SV, SL_MAX_VERSION, 0, 0,16,    2,     255, 1, STR_CONFIG_SETTING_MCF_ACCURACY,           NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.mcf_accuracy,               SLE_UINT8,  MCF_SV, SL_MAX_VERSION, 0, 0,16,    2,     255, 1, STR_CONFIG_SETTING_MCF_ACCURACY,           NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.short_path_saturation,      SLE_UINT8,  MCF_SV, SL_MAX_VERSION, 0, 0,90,    0,     100, 5, STR_CONFIG_SETTING_SHORT_PATH_SATURATION,  NULL),
 
 	 SDT_CONDVAR(GameSettings, pf.wait_for_pbs_path,                 SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    30,     2,     255, 0, STR_NULL,                                  NULL),
 	SDT_CONDBOOL(GameSettings, pf.reserve_paths,                               100, SL_MAX_VERSION, 0, 0, false,                    STR_NULL,                                  NULL),
