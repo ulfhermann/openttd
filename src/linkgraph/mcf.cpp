@@ -64,8 +64,16 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool c
 			Edge & edge = graph->GetEdge(from, to);
 			assert(edge.capacity > 0 && edge.distance < UINT_MAX);
 			if (create_new_paths || graph->GetNode(from).flows[source_station][graph->GetNode(to).station] > 0) {
-				int capacity = edge.capacity - edge.flow;
-				uint distance = edge.distance;
+				int capacity = edge.capacity;
+				if (create_new_paths) {
+					capacity *= graph->GetSettings().short_path_saturation;
+					capacity /= 100;
+					if (capacity == 0) {
+						capacity = 1;
+					}
+				}
+				capacity -= edge.flow;
+				uint distance = edge.distance + 1; // punish in-between stops a little
 				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
 				if (dest->IsBetter(source, capacity, distance)) {
 					bool is_circle = false;
