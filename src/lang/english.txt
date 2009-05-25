@@ -1166,6 +1166,7 @@ STR_CONFIG_SETTING_DEMAND_DEFAULT_SYMMETRIC                     :symmetric
 STR_CONFIG_SETTING_DEMAND_DEFAULT_ANTISYMMETRIC                 :antisymmetric
 STR_CONFIG_SETTING_DEMAND_DEFAULT_UNHANDLED                     :unhandled
 STR_CONFIG_SETTING_MCF_ACCURACY                                 :{LTBLUE}Accuracy when calculating the cargo distribution: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_SHORT_PATH_SATURATION                        :{LTBLUE}Saturation of short paths before using capacious paths: {ORANGE}{STRING1}%
 
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
