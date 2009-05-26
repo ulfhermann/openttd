@@ -90,7 +90,7 @@ bool Vehicle::NeedsServicing() const
 		return EngineHasReplacementForCompany(Company::Get(this->owner), this->engine_type, this->group_id);
 	}
 
-	return _settings_game.vehicle.servint_ispercent ?
+	return Company::Get(this->owner)->settings.vehicle.servint_ispercent ?
 		(this->reliability < Engine::Get(this->engine_type)->reliability * (100 - this->service_interval) / 100) :
 		(this->date_of_last_service + this->service_interval < _date);
 }
@@ -1066,7 +1066,7 @@ void VehicleEnterDepot(Vehicle *v)
 					case VEH_ROAD:     string = STR_NEWS_ROAD_VEHICLE_IS_WAITING;   break;
 					case VEH_SHIP:     string = STR_NEWS_SHIP_IS_WAITING;  break;
 					case VEH_AIRCRAFT: string = STR_NEWS_AIRCRAFT_IS_WAITING;    break;
-					default: NOT_REACHED(); string = STR_EMPTY; // Set the string to something to avoid a compiler warning
+					default: NOT_REACHED();
 				}
 
 				SetDParam(0, v->index);

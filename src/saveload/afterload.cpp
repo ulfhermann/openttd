@@ -314,9 +314,9 @@ static void FixOwnerOfRailTrack(TileIndex t)
 	assert(!Company::IsValidID(GetTileOwner(t)) && (IsLevelCrossingTile(t) || IsPlainRailTile(t)));
 
 	/* remove leftover rail piece from crossing (from very old savegames) */
-	Vehicle *v = NULL, *w;
-	FOR_ALL_VEHICLES(w) {
-		if (w->type == VEH_TRAIN && w->tile == t) {
+	Train *v = NULL, *w;
+	FOR_ALL_TRAINS(w) {
+		if (w->tile == t) {
 			v = w;
 			break;
 		}
@@ -921,16 +921,14 @@ bool AfterLoadGame()
 
 	/* Elrails got added in rev 24 */
 	if (CheckSavegameVersion(24)) {
-		Vehicle *v;
 		RailType min_rail = RAILTYPE_ELECTRIC;
 
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_TRAIN) {
-				RailType rt = RailVehInfo(v->engine_type)->railtype;
+		Train *v;
+		FOR_ALL_TRAINS(v) {
+			RailType rt = RailVehInfo(v->engine_type)->railtype;
 
-				((Train *)v)->railtype = rt;
-				if (rt == RAILTYPE_ELECTRIC) min_rail = RAILTYPE_RAIL;
-			}
+			v->railtype = rt;
+			if (rt == RAILTYPE_ELECTRIC) min_rail = RAILTYPE_RAIL;
 		}
 
 		/* .. so we convert the entire map from normal to elrail (so maintain "fairness") */
@@ -963,8 +961,8 @@ bool AfterLoadGame()
 			}
 		}
 
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_TRAIN && (IsFrontEngine(v) || IsFreeWagon(v))) TrainConsistChanged((Train *)v, true);
+		FOR_ALL_TRAINS(v) {
+			if (IsFrontEngine(v) || IsFreeWagon(v)) TrainConsistChanged(v, true);
 		}
 
 	}
@@ -1046,20 +1044,15 @@ bool AfterLoadGame()
 	}
 
 	if (CheckSavegameVersion(25)) {
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_ROAD) {
-				RoadVehicle *rv = (RoadVehicle *)v;
-				rv->vehstatus &= ~0x40;
-				rv->slot = NULL;
-				rv->slot_age = 0;
-			}
+		RoadVehicle *rv;
+		FOR_ALL_ROADVEHICLES(rv) {
+			rv->vehstatus &= ~0x40;
+			rv->slot = NULL;
+			rv->slot_age = 0;
 		}
 	} else {
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->type != VEH_ROAD) continue;
-			RoadVehicle *rv = (RoadVehicle *)v;
+		RoadVehicle *rv;
+		FOR_ALL_ROADVEHICLES(rv) {
 			if (rv->slot != NULL) rv->slot->num_vehicles++;
 		}
 	}
@@ -1293,10 +1286,10 @@ bool AfterLoadGame()
 	}
 
 	if (CheckSavegameVersion(50)) {
-		Vehicle *v;
+		Aircraft *v;
 		/* Aircraft units changed from 8 mph to 1 km/h */
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_AIRCRAFT && v->subtype <= AIR_AIRCRAFT) {
+		FOR_ALL_AIRCRAFT(v) {
+			if (v->subtype <= AIR_AIRCRAFT) {
 				const AircraftVehicleInfo *avi = AircraftVehInfo(v->engine_type);
 				v->cur_speed *= 129;
 				v->cur_speed /= 10;
@@ -1382,10 +1375,8 @@ bool AfterLoadGame()
 
 	if (CheckSavegameVersion(69)) {
 		/* In some old savegames a bit was cleared when it should not be cleared */
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->type != VEH_ROAD) continue;
-			RoadVehicle *rv = (RoadVehicle *)v;
+		RoadVehicle *rv;
+		FOR_ALL_ROADVEHICLES(rv) {
 			if (rv->state == 250 || rv->state == 251) {
 				SetBit(rv->state, RVS_IS_STOPPING);
 			}
@@ -1633,10 +1624,9 @@ bool AfterLoadGame()
 	if (CheckSavegameVersion(62)) {
 		/* Remove all trams from savegames without tram support.
 		 * There would be trams without tram track under causing crashes sooner or later. */
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_ROAD && v->First() == v &&
-					HasBit(EngInfo(v->engine_type)->misc_flags, EF_ROAD_TRAM)) {
+		RoadVehicle *v;
+		FOR_ALL_ROADVEHICLES(v) {
+			if (v->First() == v && HasBit(EngInfo(v->engine_type)->misc_flags, EF_ROAD_TRAM)) {
 				if (_switch_mode_errorstr == INVALID_STRING_ID || _switch_mode_errorstr == STR_NEWGRF_COMPATIBLE_LOAD_WARNING) {
 					_switch_mode_errorstr = STR_LOADGAME_REMOVED_TRAMS;
 				}
@@ -1708,15 +1698,12 @@ bool AfterLoadGame()
 
 	/* Reserve all tracks trains are currently on. */
 	if (CheckSavegameVersion(101)) {
-		Vehicle *u;
-		FOR_ALL_VEHICLES(u) {
-			if (u->type == VEH_TRAIN) {
-				Train *v = (Train *)u;
-				if ((v->track & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
-					TryReserveRailTrack(v->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(v->tile)));
-				} else if ((v->track & TRACK_BIT_MASK) != TRACK_BIT_NONE) {
-					TryReserveRailTrack(v->tile, TrackBitsToTrack(v->track));
-				}
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			if ((t->track & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
+				TryReserveRailTrack(t->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(t->tile)));
+			} else if ((t->track & TRACK_BIT_MASK) != TRACK_BIT_NONE) {
+				TryReserveRailTrack(t->tile, TrackBitsToTrack(t->track));
 			}
 		}
 	}
@@ -1747,11 +1734,11 @@ bool AfterLoadGame()
 	}
 
 	if (CheckSavegameVersion(104)) {
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
+		Aircraft *a;
+		FOR_ALL_AIRCRAFT(a) {
 			/* Set engine_type of shadow and rotor */
-			if (v->type == VEH_AIRCRAFT && !IsNormalAircraft(v)) {
-				v->engine_type = v->First()->engine_type;
+			if (!IsNormalAircraft(a)) {
+				a->engine_type = a->First()->engine_type;
 			}
 		}
 
@@ -1843,6 +1830,14 @@ bool AfterLoadGame()
 		Order *o;
 		FOR_ALL_ORDERS(o) {
 			if (o->IsType(OT_GOTO_STATION)) o->SetStopLocation(OSL_PLATFORM_FAR_END);
+		}
+	}
+
+	if (CheckSavegameVersion(120)) {
+		extern VehicleDefaultSettings _old_vds;
+		Company *c;
+		FOR_ALL_COMPANIES(c) {
+			c->settings.vehicle = _old_vds;
 		}
 	}
 
