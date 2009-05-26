@@ -29,6 +29,7 @@ STR_STATION_VIEW_WAITING_CARGO                                  :{WHITE}{CARGO}
 STR_STATION_SOURCE                                              :{YELLOW}{COMMA} from {STATION}
 STR_STATION_NEXT                                                :{YELLOW}{COMMA} via {STATION}
 STR_STATION_DESTINATION                                         :{YELLOW}{COMMA} to {STATION}
+STR_UNROUTED                                                    :{YELLOW}{COMMA} unrouted
 STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORTCARGO} en-route from {STATION})
 STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepts: {WHITE}
 STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepts: {GOLD}

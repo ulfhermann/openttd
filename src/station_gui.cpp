@@ -1174,11 +1174,8 @@ struct StationViewWindow : public Window {
 			CargoDataEntry *cd = *i;
 			if (pos > -maxrows && --pos < 0) {
 				StringID str = STR_EMPTY;
-				SetDParam(0, cd->GetCount());
-				SetDParam(1, cd->GetStation());
 
-				switch(groupings[column]) {
-				case CARGO:
+				if (groupings[column] == CARGO) {
 					str = STR_STATION_VIEW_WAITING_CARGO;
 					SetDParam(0, cd->GetCargo());
 					SetDParam(1, cd->GetCount());
@@ -1189,18 +1186,27 @@ struct StationViewWindow : public Window {
 							_spacing_top - pos * _spacing_row,
 							this->widget[SVW_WAITING].right - this->widget[SVW_WAITING].left - _spacing_icons
 					);
-					break;
-				case SOURCE:
-					str = STR_STATION_SOURCE;
-					break;
-				case NEXT:
-					str = STR_STATION_NEXT;
-					break;
-				case DESTINATION:
-					str = STR_STATION_DESTINATION;
-					break;
-				}
+				} else if (cd->GetStation() == INVALID_STATION) {
+					SetDParam(0, cd->GetCount());
+					str = STR_UNROUTED;
+				} else {
+					SetDParam(0, cd->GetCount());
+					SetDParam(1, cd->GetStation());
 
+					switch(groupings[column]) {
+					case SOURCE:
+						str = STR_STATION_SOURCE;
+						break;
+					case NEXT:
+						str = STR_STATION_NEXT;
+						break;
+					case DESTINATION:
+						str = STR_STATION_DESTINATION;
+						break;
+					default:
+						NOT_REACHED();
+					}
+				}
 				DrawString(
 						this->widget[SVW_WAITING].left + _spacing_side + column * _spacing_column,
 						this->widget[SVW_WAITING].right - _spacing_side - _spacing_symbol,
