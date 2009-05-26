@@ -1516,7 +1516,7 @@ void SetDefaultCompanySettings(CompanyID cid)
 	const SettingDesc *sd;
 	for (sd = _company_settings; sd->save.cmd != SL_END; sd++) {
 		void *var = GetVariableAddress(&c->settings, &sd->save);
-		Write_ValidateSetting(var, sd, (int32)sd->desc.def);
+		Write_ValidateSetting(var, sd, (unsigned long)sd->desc.def);
 	}
 }
 
