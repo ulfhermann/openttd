@@ -128,7 +128,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 				EndContainer(),
 			EndContainer(),
 			NWidget(NWID_VERTICAL),
-				NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BUTTONSPANEL), SetMinimalSize(100, 1), SetFill(0, 0), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BUTTONSPANEL), SetMinimalSize(110, 1), SetFill(0, 0), EndContainer(),
 				NWidget(NWID_SPACER), SetFill(0, 1),
 			EndContainer(),
 		EndContainer(),
