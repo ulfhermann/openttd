@@ -26,6 +26,8 @@
 #include "station_func.h"
 #include "highscore.h"
 #include "gfxinit.h"
+#include "company_base.h"
+#include "company_func.h"
 #include <map>
 
 #include "table/sprites.h"
@@ -981,6 +983,19 @@ uint SettingEntry::Draw(GameSettings *settings_ptr, int base_x, int base_y, int 
 	return cur_row;
 }
 
+const void *ResolveVariableAddress(const GameSettings *settings_ptr, const SettingDesc *sd)
+{
+	if ((sd->desc.flags & SGF_PER_COMPANY) != 0) {
+		if (Company::IsValidID(_local_company) && _game_mode != GM_MENU) {
+			return GetVariableAddress(&Company::Get(_local_company)->settings, &sd->save);
+		} else {
+			return GetVariableAddress(&_settings_client.company, &sd->save);
+		}
+	} else {
+		return GetVariableAddress(settings_ptr, &sd->save);
+	}
+}
+
 /**
  * Private function to draw setting value (button + text + current value)
  * @param settings_ptr Pointer to current values of all settings
@@ -993,12 +1008,12 @@ uint SettingEntry::Draw(GameSettings *settings_ptr, int base_x, int base_y, int 
 void SettingEntry::DrawSetting(GameSettings *settings_ptr, const SettingDesc *sd, int x, int y, int max_x, int state)
 {
 	const SettingDescBase *sdb = &sd->desc;
-	const void *var = GetVariableAddress(settings_ptr, &sd->save);
+	const void *var = ResolveVariableAddress(settings_ptr, sd);
 	bool editable = true;
 	bool disabled = false;
 
 	/* We do not allow changes of some items when we are a client in a networkgame */
-	if (!(sd->save.conv & SLF_NETWORK_NO) && _networking && !_network_server) editable = false;
+	if (!(sd->save.conv & SLF_NETWORK_NO) && _networking && !_network_server && !(sdb->flags & SGF_PER_COMPANY)) editable = false;
 	if ((sdb->flags & SGF_NETWORK_ONLY) && !_networking) editable = false;
 	if ((sdb->flags & SGF_NO_NETWORK) && _networking) editable = false;
 
@@ -1440,11 +1455,11 @@ struct GameSettingsWindow : Window {
 		const SettingDesc *sd = pe->d.entry.setting;
 
 		/* return if action is only active in network, or only settable by server */
-		if (!(sd->save.conv & SLF_NETWORK_NO) && _networking && !_network_server) return;
+		if (!(sd->save.conv & SLF_NETWORK_NO) && _networking && !_network_server && !(sd->desc.flags & SGF_PER_COMPANY)) return;
 		if ((sd->desc.flags & SGF_NETWORK_ONLY) && !_networking) return;
 		if ((sd->desc.flags & SGF_NO_NETWORK) && _networking) return;
 
-		void *var = GetVariableAddress(settings_ptr, &sd->save);
+		const void *var = ResolveVariableAddress(settings_ptr, sd);
 		int32 value = (int32)ReadValue(var, sd->save.conv);
 
 		/* clicked on the icon on the left side. Either scroller or bool on/off */
@@ -1495,7 +1510,11 @@ struct GameSettingsWindow : Window {
 			}
 
 			if (value != oldvalue) {
-				SetSettingValue(pe->d.entry.index, value);
+				if ((sd->desc.flags & SGF_PER_COMPANY) != 0) {
+					SetCompanySetting(pe->d.entry.index, value);
+				} else {
+					SetSettingValue(pe->d.entry.index, value);
+				}
 				this->SetDirty();
 			}
 		} else {

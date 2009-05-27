@@ -15,14 +15,9 @@ void RecalcShipStuff(Vehicle *v);
 void GetShipSpriteSize(EngineID engine, uint &width, uint &height);
 
 /**
- * This class 'wraps' Vehicle; you do not actually instantiate this class.
- * You create a Vehicle using AllocateVehicle, so it is added to the pool
- * and you reinitialize that to a Train using:
- *   v = new (v) Ship();
- *
- * As side-effect the vehicle type is set correctly.
+ * All ships have this type.
  */
-struct Ship: public Vehicle {
+struct Ship: public SpecializedVehicle<Ship, VEH_SHIP> {
 	TrackBitsByte state;
 
 	/** Initializes the Vehicle to a ship */
@@ -48,5 +43,7 @@ struct Ship: public Vehicle {
 	TileIndex GetOrderStationLocation(StationID station);
 	bool FindClosestDepot(TileIndex *location, DestinationID *destination, bool *reverse);
 };
+
+#define FOR_ALL_SHIPS(var) FOR_ALL_VEHICLES_OF_TYPE(Ship, var)
 
 #endif /* SHIP_H */

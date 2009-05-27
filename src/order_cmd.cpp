@@ -230,13 +230,6 @@ Order *OrderList::GetOrderAt(int index) const
 	return order;
 }
 
-bool Order::IsStoppingOrder() const
-{
-	if (this->GetType() != OT_GOTO_STATION) return false;
-	if (Station::Get(this->GetDestination())->IsBuoy()) return false;
-	return (this->GetNonStopType() == ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS || this->GetNonStopType() == ONSF_STOP_EVERYWHERE);
-}
-
 const Order * OrderList::GetNext(const Order * curr) const
 {
 	const Order * next = curr->next;
@@ -246,29 +239,43 @@ const Order * OrderList::GetNext(const Order * curr) const
 	return next;
 }
 
-const Order * OrderList::GetNextStoppingOrder(const Order * next, uint hops) const
+const Order * OrderList::GetNextStoppingOrder(const Order * next, uint hops, bool check_nonstop) const
 {
 	if (next == NULL || hops > GetNumOrders()) {
 		return NULL;
-	} else if (next->GetType() == OT_CONDITIONAL) {
-		const Order * skip_to = GetNextStoppingOrder(GetOrderAt(next->GetConditionSkipToOrder()), hops + 1);
-		const Order * advance = GetNextStoppingOrder(next, hops + 1);
+	}
+
+	if (next->GetType() == OT_CONDITIONAL) {
+		const Order * skip_to = GetNextStoppingOrder(GetOrderAt(next->GetConditionSkipToOrder()), hops + 1, check_nonstop);
+		const Order * advance = GetNextStoppingOrder(next, hops + 1, check_nonstop);
 		if (skip_to == advance) {
-			return skip_to;
+			return skip_to; // skipping over non-stopping orders
 		} else {
 			return NULL; // nondeterministic
 		}
-	} else if (next->GetNonStopType() == ONSF_STOP_EVERYWHERE ||
-			next->GetNonStopType() == ONSF_NO_STOP_AT_DESTINATION_STATION) {
-		return NULL; // nondeterministic
-	} else if (next->IsStoppingOrder()) {
-		return next;
+	}
+
+	bool is_station = (next->GetType() == OT_GOTO_STATION && !Station::Get(next->GetDestination())->IsBuoy());
+
+	if (check_nonstop) {
+		switch(next->GetNonStopType()) {
+		case ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS:
+			if (is_station) return next; // else fall through
+		case ONSF_NO_STOP_AT_ANY_STATION:
+			return GetNextStoppingOrder(GetNext(next), hops + 1, check_nonstop);
+		default: // nondeterministic
+			return NULL;
+		}
 	} else {
-		return GetNextStoppingOrder(GetNext(next), hops + 1);
+		if (is_station) {
+			return next;
+		} else {
+			return GetNextStoppingOrder(GetNext(next), hops + 1, check_nonstop);
+		}
 	}
 }
 
-StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id, bool check_nonstop) const {
 	const Order * curr = GetOrderAt(curr_id);
 	if (curr == NULL) {
 		curr = GetFirstOrder();
@@ -276,7 +283,7 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id) const {
 			return INVALID_STATION;
 		}
 	}
-	const Order * next = GetNextStoppingOrder(GetNext(curr), 1);
+	const Order * next = GetNextStoppingOrder(GetNext(curr), 1, check_nonstop);
 	if (next == NULL) {
 		return INVALID_STATION;
 	} else {
@@ -1394,7 +1401,7 @@ CommandCost CmdRestoreOrderIndex(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	Vehicle *v = Vehicle::GetIfValid(p1);
 	/* Check the vehicle type and ownership, and if the service interval and order are in range */
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
-	if (serv_int != GetServiceIntervalClamped(serv_int) || cur_ord >= v->GetNumOrders()) return CMD_ERROR;
+	if (serv_int != GetServiceIntervalClamped(serv_int, v->owner) || cur_ord >= v->GetNumOrders()) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
 		v->cur_order_index = cur_ord;
@@ -1581,9 +1588,9 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist)
 	}
 }
 
-Date GetServiceIntervalClamped(uint index)
+uint16 GetServiceIntervalClamped(uint interval, CompanyID company_id)
 {
-	return (_settings_game.vehicle.servint_ispercent) ? Clamp(index, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : Clamp(index, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
+	return (Company::Get(company_id)->settings.vehicle.servint_ispercent) ? Clamp(interval, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : Clamp(interval, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
 }
 
 /**
