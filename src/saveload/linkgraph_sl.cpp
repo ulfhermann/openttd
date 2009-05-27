@@ -38,7 +38,7 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 	int setting = 0;
 	const SettingDesc * desc = GetSettingDescription(setting);
 	while (desc->save.cmd != SL_END) {
-		if (strncmp(desc->desc.name, prefix, prefixlen) == 0) {
+		if (desc->desc.name != NULL && strncmp(desc->desc.name, prefix, prefixlen) == 0) {
 			SaveLoad sl = desc->save;
 			char *& address = reinterpret_cast<char *&>(sl.address);
 			address -= offset_gamesettings;
