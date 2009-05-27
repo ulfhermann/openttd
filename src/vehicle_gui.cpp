@@ -906,7 +906,7 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 					case VEH_ROAD:     this->widget[VLW_WIDGET_CAPTION].data = STR_VEHICLE_LIST_ROAD_CAPTION;     break;
 					case VEH_SHIP:     this->widget[VLW_WIDGET_CAPTION].data = STR_VEHICLE_LIST_SHIP_CAPTION;     break;
 					case VEH_AIRCRAFT: this->widget[VLW_WIDGET_CAPTION].data = STR_VEHICLE_LIST_AIRCRAFT_CAPTION; break;
-					default: NOT_REACHED(); break;
+					default: NOT_REACHED();
 				}
 				break;
 
@@ -920,7 +920,7 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 					case VEH_ROAD:     this->widget[VLW_WIDGET_CAPTION].data = STR_SCHEDULED_ROAD_VEHICLES; break;
 					case VEH_SHIP:     this->widget[VLW_WIDGET_CAPTION].data = STR_SCHEDULED_SHIPS;         break;
 					case VEH_AIRCRAFT: this->widget[VLW_WIDGET_CAPTION].data = STR_SCHEDULED_AIRCRAFT;      break;
-					default: NOT_REACHED(); break;
+					default: NOT_REACHED();
 				}
 				break;
 
@@ -930,10 +930,10 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 					case VEH_ROAD:     this->widget[VLW_WIDGET_CAPTION].data = STR_VEHICLE_LIST_ROADVEH_DEPOT;  break;
 					case VEH_SHIP:     this->widget[VLW_WIDGET_CAPTION].data = STR_VEHICLE_LIST_SHIP_DEPOT;     break;
 					case VEH_AIRCRAFT: this->widget[VLW_WIDGET_CAPTION].data = STR_VEHICLE_LIST_AIRCRAFT_DEPOT; break;
-					default: NOT_REACHED(); break;
+					default: NOT_REACHED();
 				}
 				break;
-			default: NOT_REACHED(); break;
+			default: NOT_REACHED();
 		}
 
 		switch (this->vehicle_type) {
@@ -963,7 +963,7 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 			case VEH_ROAD:     this->sorting = &_sorting.roadveh; break;
 			case VEH_SHIP:     this->sorting = &_sorting.ship; break;
 			case VEH_AIRCRAFT: this->sorting = &_sorting.aircraft; break;
-			default: NOT_REACHED(); break;
+			default: NOT_REACHED();
 		}
 
 		this->vehicles.SetListing(*this->sorting);
@@ -1024,7 +1024,7 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 					case VEH_ROAD:     SetDParam(0, STR_DEPOT_ROAD_CAPTION);     break;
 					case VEH_SHIP:     SetDParam(0, STR_DEPOT_SHIP_CAPTION);     break;
 					case VEH_AIRCRAFT: SetDParam(0, STR_DEPOT_AIRCRAFT_CAPTION); break;
-					default: NOT_REACHED(); break;
+					default: NOT_REACHED();
 				}
 				if (this->vehicle_type == VEH_AIRCRAFT) {
 					SetDParam(1, index); // Airport name
@@ -1033,7 +1033,7 @@ struct VehicleListWindow : public BaseVehicleListWindow {
 				}
 				SetDParam(2, this->vscroll.count);
 				break;
-			default: NOT_REACHED(); break;
+			default: NOT_REACHED();
 		}
 
 		/* Hide the widgets that we will not use in this window
@@ -1389,16 +1389,16 @@ struct VehicleDetailsWindow : Window {
 	}
 
 	/** Checks whether service interval is enabled for the vehicle. */
-	static bool IsVehicleServiceIntervalEnabled(const VehicleType vehicle_type)
+	static bool IsVehicleServiceIntervalEnabled(const VehicleType vehicle_type, CompanyID company_id)
 	{
+		const VehicleDefaultSettings *vds = &Company::Get(company_id)->settings.vehicle;
 		switch (vehicle_type) {
 			default: NOT_REACHED();
-			case VEH_TRAIN:    return _settings_game.vehicle.servint_trains   != 0; break;
-			case VEH_ROAD:     return _settings_game.vehicle.servint_roadveh  != 0; break;
-			case VEH_SHIP:     return _settings_game.vehicle.servint_ships    != 0; break;
-			case VEH_AIRCRAFT: return _settings_game.vehicle.servint_aircraft != 0; break;
+			case VEH_TRAIN:    return vds->servint_trains   != 0;
+			case VEH_ROAD:     return vds->servint_roadveh  != 0;
+			case VEH_SHIP:     return vds->servint_ships    != 0;
+			case VEH_AIRCRAFT: return vds->servint_aircraft != 0;
 		}
-		return false; // kill a compiler warning
 	}
 
 	/**
@@ -1446,7 +1446,7 @@ struct VehicleDetailsWindow : Window {
 			WIDGET_LIST_END);
 
 		/* Disable service-scroller when interval is set to disabled */
-		this->SetWidgetsDisabledState(!IsVehicleServiceIntervalEnabled(v->type),
+		this->SetWidgetsDisabledState(!IsVehicleServiceIntervalEnabled(v->type, v->owner),
 			VLD_WIDGET_INCREASE_SERVICING_INTERVAL,
 			VLD_WIDGET_DECREASE_SERVICING_INTERVAL,
 			WIDGET_LIST_END);
@@ -1497,7 +1497,7 @@ struct VehicleDetailsWindow : Window {
 		/* Draw service interval text */
 		SetDParam(0, v->service_interval);
 		SetDParam(1, v->date_of_last_service);
-		DrawString(13, this->width - 2, this->height - (v->type != VEH_TRAIN ? 11 : 23), _settings_game.vehicle.servint_ispercent ? STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT : STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS);
+		DrawString(13, this->width - 2, this->height - (v->type != VEH_TRAIN ? 11 : 23), Company::Get(v->owner)->settings.vehicle.servint_ispercent ? STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT : STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS);
 
 		switch (v->type) {
 			case VEH_TRAIN:
@@ -1538,7 +1538,7 @@ struct VehicleDetailsWindow : Window {
 				const Vehicle *v = Vehicle::Get(this->window_number);
 
 				mod = (widget == VLD_WIDGET_DECREASE_SERVICING_INTERVAL) ? -mod : mod;
-				mod = GetServiceIntervalClamped(mod + v->service_interval);
+				mod = GetServiceIntervalClamped(mod + v->service_interval, v->owner);
 				if (mod == v->service_interval) return;
 
 				DoCommandP(v->tile, v->index, mod, CMD_CHANGE_SERVICE_INT | CMD_MSG(STR_ERROR_CAN_T_CHANGE_SERVICING));
