@@ -8,13 +8,6 @@
 #include "vehicle_base.h"
 
 /**
- * This class 'wraps' Vehicle; you do not actually instantiate this class.
- * You create a Vehicle using AllocateVehicle, so it is added to the pool
- * and you reinitialize that to a Train using:
- *   v = new (v) Train();
- *
- * As side-effect the vehicle type is set correctly.
- *
  * A special vehicle is one of the following:
  *  - smoke
  *  - electric sparks for trains
@@ -22,7 +15,7 @@
  *  - bulldozer (road works)
  *  - bubbles (industry)
  */
-struct EffectVehicle : public Vehicle {
+struct EffectVehicle : public SpecializedVehicle<EffectVehicle, VEH_EFFECT> {
 	uint16 animation_state;
 	byte animation_substate;
 
@@ -36,5 +29,7 @@ struct EffectVehicle : public Vehicle {
 	void UpdateDeltaXY(Direction direction);
 	bool Tick();
 };
+
+#define FOR_ALL_EFFECTVEHICLES(var) FOR_ALL_VEHICLES_OF_TYPE(EffectVehicle, var)
 
 #endif /* EFFECTVEHICLE_BASE_H */

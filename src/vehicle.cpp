@@ -90,7 +90,7 @@ bool Vehicle::NeedsServicing() const
 		return EngineHasReplacementForCompany(Company::Get(this->owner), this->engine_type, this->group_id);
 	}
 
-	return _settings_game.vehicle.servint_ispercent ?
+	return Company::Get(this->owner)->settings.vehicle.servint_ispercent ?
 		(this->reliability < Engine::Get(this->engine_type)->reliability * (100 - this->service_interval) / 100) :
 		(this->date_of_last_service + this->service_interval < _date);
 }
@@ -1066,7 +1066,7 @@ void VehicleEnterDepot(Vehicle *v)
 					case VEH_ROAD:     string = STR_NEWS_ROAD_VEHICLE_IS_WAITING;   break;
 					case VEH_SHIP:     string = STR_NEWS_SHIP_IS_WAITING;  break;
 					case VEH_AIRCRAFT: string = STR_NEWS_AIRCRAFT_IS_WAITING;    break;
-					default: NOT_REACHED(); string = STR_EMPTY; // Set the string to something to avoid a compiler warning
+					default: NOT_REACHED();
 				}
 
 				SetDParam(0, v->index);
@@ -1460,7 +1460,7 @@ void Vehicle::BeginLoading(StationID last_station_id)
 	StationID next_station_id = INVALID_STATION;
 	OrderList * orders = this->orders.list;
 	if (orders != NULL) {
-		next_station_id = orders->GetNextStoppingStation(this->cur_order_index);
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->type == VEH_ROAD || this->type == VEH_TRAIN);
 	}
 
 	if (last_station_id != INVALID_STATION && last_station_id != curr_station_id) {
@@ -1494,14 +1494,14 @@ void Vehicle::LeaveStation()
 	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
 
-	StationID next_station_id = INVALID_STATION;
 	OrderList * orders = this->orders.list;
 	if (orders != NULL) {
-		next_station_id = orders->GetNextStoppingStation(this->cur_order_index);
-	}
-
-	if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
-		DecreaseFrozen(st, this, next_station_id);
+		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->type == VEH_ROAD || this->type == VEH_TRAIN);
+		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
+			DecreaseFrozen(st, this, next_station_id);
+		}
+	} else {
+		RecalcFrozen(st);
 	}
 
 	HideFillingPercent(&this->fill_percent_te_id);

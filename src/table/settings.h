@@ -14,9 +14,6 @@ static bool InvalidateTownViewWindow(int32 p1);
 static bool DeleteSelectStationWindow(int32 p1);
 static bool UpdateConsists(int32 p1);
 static bool CheckInterval(int32 p1);
-static bool EngineRenewUpdate(int32 p1);
-static bool EngineRenewMonthsUpdate(int32 p1);
-static bool EngineRenewMoneyUpdate(int32 p1);
 static bool TrainAccelerationModelChanged(int32 p1);
 static bool DragSignalsDensityChanged(int32);
 static bool DifficultyReset(int32 level);
@@ -208,6 +205,7 @@ static bool UpdateClientConfigValues(int32 p1);
 #define CR SGF_CURRENCY
 #define NN SGF_NO_NETWORK
 #define NG SGF_NEWGAME_ONLY
+#define PC SGF_PER_COMPANY
 
 static const SettingDesc _music_settings[] = {
 	 SDT_VAR(MusicFileSettings, playlist,   SLE_UINT8, S, 0,   0, 0,   5, 1,  STR_NULL, NULL),
@@ -379,11 +377,11 @@ const SettingDesc _settings[] = {
 	     SDT_VAR(GameSettings, vehicle.max_roadveh,                 SLE_UINT16,                     0, 0,   500,     0,    5000, 0, STR_CONFIG_SETTING_MAX_ROADVEH,            RedrawScreen),
 	     SDT_VAR(GameSettings, vehicle.max_aircraft,                SLE_UINT16,                     0, 0,   200,     0,    5000, 0, STR_CONFIG_SETTING_MAX_AIRCRAFT,           RedrawScreen),
 	     SDT_VAR(GameSettings, vehicle.max_ships,                   SLE_UINT16,                     0, 0,   300,     0,    5000, 0, STR_CONFIG_SETTING_MAX_SHIPS,              RedrawScreen),
-	    SDT_BOOL(GameSettings, vehicle.servint_ispercent,                                           0,NN, false,                    STR_CONFIG_SETTING_SERVINT_ISPERCENT,      CheckInterval),
-	     SDT_VAR(GameSettings, vehicle.servint_trains,              SLE_UINT16,                     0,D0,   150,     5,     800, 0, STR_CONFIG_SETTING_SERVINT_TRAINS,         InvalidateDetailsWindow),
-	     SDT_VAR(GameSettings, vehicle.servint_roadveh,             SLE_UINT16,                     0,D0,   150,     5,     800, 0, STR_CONFIG_SETTING_SERVINT_ROADVEH,        InvalidateDetailsWindow),
-	     SDT_VAR(GameSettings, vehicle.servint_ships,               SLE_UINT16,                     0,D0,   360,     5,     800, 0, STR_CONFIG_SETTING_SERVINT_SHIPS,          InvalidateDetailsWindow),
-	     SDT_VAR(GameSettings, vehicle.servint_aircraft,            SLE_UINT16,                     0,D0,   100,     5,     800, 0, STR_CONFIG_SETTING_SERVINT_AIRCRAFT,       InvalidateDetailsWindow),
+	SDTG_CONDBOOL(NULL,             0, NN, _old_vds.servint_ispercent, false,            STR_NULL, NULL, 0, 119),
+	SDTG_CONDVAR(NULL,  SLE_UINT16, 0, D0, _old_vds.servint_trains,      150, 5, 800, 0, STR_NULL, NULL, 0, 119),
+	SDTG_CONDVAR(NULL,  SLE_UINT16, 0, D0, _old_vds.servint_roadveh,     150, 5, 800, 0, STR_NULL, NULL, 0, 119),
+	SDTG_CONDVAR(NULL,  SLE_UINT16, 0, D0, _old_vds.servint_ships,       360, 5, 800, 0, STR_NULL, NULL, 0, 119),
+	SDTG_CONDVAR(NULL,  SLE_UINT16, 0, D0, _old_vds.servint_aircraft,    150, 5, 800, 0, STR_NULL, NULL, 0, 119),
 	    SDT_BOOL(GameSettings, order.no_servicing_if_no_breakdowns,                                 0, 0, false,                    STR_CONFIG_SETTING_NOSERVICE,              NULL),
 	    SDT_BOOL(GameSettings, vehicle.wagon_speed_limits,                                          0,NN,  true,                    STR_CONFIG_SETTING_WAGONSPEEDLIMITS,       UpdateConsists),
 	SDT_CONDBOOL(GameSettings, vehicle.disable_elrails,                         38, SL_MAX_VERSION, 0,NN, false,                    STR_CONFIG_SETTING_DISABLE_ELRAILS,        SettingsDisableElrail),
@@ -556,9 +554,6 @@ const SettingDesc _settings[] = {
 	 SDTC_BOOL(gui.vehicle_income_warn,                  S,  0,  true,                        STR_CONFIG_SETTING_WARN_INCOME_LESS,            NULL),
 	  SDTC_VAR(gui.order_review_system,       SLE_UINT8, S, MS,     2,        0,        2, 0, STR_CONFIG_SETTING_ORDER_REVIEW,                NULL),
 	 SDTC_BOOL(gui.lost_train_warn,                      S,  0,  true,                        STR_CONFIG_SETTING_WARN_LOST_TRAIN,             NULL),
-	 SDTC_BOOL(company.engine_renew,                     S,  0, false,                        STR_CONFIG_SETTING_AUTORENEW_VEHICLE,           EngineRenewUpdate),
-	  SDTC_VAR(company.engine_renew_months,   SLE_INT16, S,  0,     6,      -12,       12, 0, STR_CONFIG_SETTING_AUTORENEW_MONTHS,            EngineRenewMonthsUpdate),
-	  SDTC_VAR(company.engine_renew_money,     SLE_UINT, S, CR,100000,        0,  2000000, 0, STR_CONFIG_SETTING_AUTORENEW_MONEY,             EngineRenewMoneyUpdate),
 	 SDTC_BOOL(gui.always_build_infrastructure,          S,  0, false,                        STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE, RedrawScreen),
 	 SDTC_BOOL(gui.new_nonstop,                          S,  0, false,                        STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT,          NULL),
 	  SDTC_VAR(gui.stop_location,             SLE_UINT8, S, MS,     2,        0,        2, 1, STR_CONFIG_SETTING_STOP_LOCATION,               NULL),
@@ -625,6 +620,19 @@ const SettingDesc _settings[] = {
 	 SDTC_VAR(gui.right_mouse_btn_emulation, SLE_UINT8, S, MS, 0, 0, 2, 0, STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU, NULL),
 #endif
 
+	SDT_END()
+};
+
+static const SettingDesc _company_settings[] = {
+	SDT_BOOL(CompanySettings, engine_renew,                          0, PC,     false,                  STR_CONFIG_SETTING_AUTORENEW_VEHICLE, NULL),
+	 SDT_VAR(CompanySettings, engine_renew_months,        SLE_INT16, 0, PC,         6, -12,      12, 0, STR_CONFIG_SETTING_AUTORENEW_MONTHS,  NULL),
+	 SDT_VAR(CompanySettings, engine_renew_money,          SLE_UINT, 0, PC|CR, 100000,   0, 2000000, 0, STR_CONFIG_SETTING_AUTORENEW_MONEY,   NULL),
+	SDT_BOOL(CompanySettings, renew_keep_length,                     0, PC,     false,                  STR_NULL,                             NULL),
+	SDT_BOOL(CompanySettings, vehicle.servint_ispercent,             0, PC,     false,                  STR_CONFIG_SETTING_SERVINT_ISPERCENT, CheckInterval),
+	 SDT_VAR(CompanySettings, vehicle.servint_trains,    SLE_UINT16, 0, PC|D0,    150,   5,     800, 0, STR_CONFIG_SETTING_SERVINT_TRAINS,    InvalidateDetailsWindow),
+	 SDT_VAR(CompanySettings, vehicle.servint_roadveh,   SLE_UINT16, 0, PC|D0,    150,   5,     800, 0, STR_CONFIG_SETTING_SERVINT_ROADVEH,   InvalidateDetailsWindow),
+	 SDT_VAR(CompanySettings, vehicle.servint_ships,     SLE_UINT16, 0, PC|D0,    360,   5,     800, 0, STR_CONFIG_SETTING_SERVINT_SHIPS,     InvalidateDetailsWindow),
+	 SDT_VAR(CompanySettings, vehicle.servint_aircraft,  SLE_UINT16, 0, PC|D0,    100,   5,     800, 0, STR_CONFIG_SETTING_SERVINT_AIRCRAFT,  InvalidateDetailsWindow),
 	SDT_END()
 };
 

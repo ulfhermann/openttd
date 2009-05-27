@@ -187,7 +187,7 @@ static SpriteID GetAircraftIcon(EngineID engine)
 		spritenum = Engine::Get(engine)->image_index;
 	}
 
-	return 6 + _aircraft_sprite[spritenum];
+	return DIR_W + _aircraft_sprite[spritenum];
 }
 
 void DrawAircraftEngine(int x, int y, EngineID engine, SpriteID pal)
@@ -378,7 +378,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		v->targetairport = GetStationIndex(tile);
 		v->SetNext(u);
 
-		v->service_interval = _settings_game.vehicle.servint_aircraft;
+		v->service_interval = Company::Get(_current_company)->settings.vehicle.servint_aircraft;
 
 		v->date_of_last_service = _date;
 		v->build_year = u->build_year = _cur_year;
@@ -440,10 +440,9 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
  */
 CommandCost CmdSellAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v = Vehicle::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
+	Aircraft *v = Aircraft::GetIfValid(p1);
 
-	if (v->type != VEH_AIRCRAFT || !CheckOwnership(v->owner)) return CMD_ERROR;
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_AIRCRAFT_MUST_BE_STOPPED);
 
 	if (HASBITS(v->vehstatus, VS_CRASHED)) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
@@ -493,10 +492,8 @@ CommandCost CmdSendAircraftToHangar(TileIndex tile, DoCommandFlag flags, uint32 
 		return SendAllVehiclesToDepot(VEH_AIRCRAFT, flags, p2 & DEPOT_SERVICE, _current_company, (p2 & VLW_MASK), p1);
 	}
 
-	Vehicle *v = Vehicle::GetIfValid(p1);
+	Aircraft *v = Aircraft::GetIfValid(p1);
 	if (v == NULL) return CMD_ERROR;
-
-	if (v->type != VEH_AIRCRAFT) return CMD_ERROR;
 
 	return v->SendToDepot(flags, (DepotCommand)(p2 & DEPOT_COMMAND_MASK));
 }
@@ -516,10 +513,8 @@ CommandCost CmdRefitAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 {
 	byte new_subtype = GB(p2, 8, 8);
 
-	Vehicle *v = Vehicle::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
-
-	if (v->type != VEH_AIRCRAFT || !CheckOwnership(v->owner)) return CMD_ERROR;
+	Aircraft *v = Aircraft::GetIfValid(p1);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_AIRCRAFT_MUST_BE_STOPPED);
 	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
@@ -582,7 +577,7 @@ CommandCost CmdRefitAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 static void CheckIfAircraftNeedsService(Aircraft *v)
 {
-	if (_settings_game.vehicle.servint_aircraft == 0 || !v->NeedsAutomaticServicing()) return;
+	if (Company::Get(v->owner)->settings.vehicle.servint_aircraft == 0 || !v->NeedsAutomaticServicing()) return;
 	if (v->IsInDepot()) {
 		VehicleServiceInDepot(v);
 		return;
@@ -2074,10 +2069,9 @@ void UpdateAirplanesOnNewStation(const Station *st)
 	/* only 1 station is updated per function call, so it is enough to get entry_point once */
 	const AirportFTAClass *ap = st->Airport();
 
-	Vehicle *u;
-	FOR_ALL_VEHICLES(u) {
-		if (u->type == VEH_AIRCRAFT && IsNormalAircraft(u)) {
-			Aircraft *v = (Aircraft *)u;
+	Aircraft *v;
+	FOR_ALL_AIRCRAFT(v) {
+		if (IsNormalAircraft(v)) {
 			if (v->targetairport == st->index) { // if heading to this airport
 				/* update position of airplane. If plane is not flying, landing, or taking off
 				 * you cannot delete airport, so it doesn't matter */

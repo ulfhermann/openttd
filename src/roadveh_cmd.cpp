@@ -93,7 +93,7 @@ static SpriteID GetRoadVehIcon(EngineID engine)
 		spritenum = Engine::Get(engine)->image_index;
 	}
 
-	return 6 + _roadveh_images[spritenum];
+	return DIR_W + _roadveh_images[spritenum];
 }
 
 SpriteID RoadVehicle::GetImage(Direction direction) const
@@ -233,7 +233,7 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 		v->name = NULL;
 
-		v->service_interval = _settings_game.vehicle.servint_roadveh;
+		v->service_interval = Company::Get(v->owner)->settings.vehicle.servint_roadveh;
 
 		v->date_of_last_service = _date;
 		v->build_year = _cur_year;
@@ -312,8 +312,8 @@ bool RoadVehicle::IsStoppedInDepot() const
  */
 CommandCost CmdSellRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v = Vehicle::GetIfValid(p1);
-	if (v == NULL || v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
+	RoadVehicle *v = RoadVehicle::GetIfValid(p1);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	if (HASBITS(v->vehstatus, VS_CRASHED)) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
 
@@ -418,8 +418,8 @@ CommandCost CmdSendRoadVehToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1
 		return SendAllVehiclesToDepot(VEH_ROAD, flags, p2 & DEPOT_SERVICE, _current_company, (p2 & VLW_MASK), p1);
 	}
 
-	Vehicle *v = Vehicle::GetIfValid(p1);
-	if (v == NULL || v->type != VEH_ROAD) return CMD_ERROR;
+	RoadVehicle *v = RoadVehicle::GetIfValid(p1);
+	if (v == NULL) return CMD_ERROR;
 
 	return v->SendToDepot(flags, (DepotCommand)(p2 & DEPOT_COMMAND_MASK));
 }
@@ -432,10 +432,8 @@ CommandCost CmdSendRoadVehToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1
  */
 CommandCost CmdTurnRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *u = Vehicle::GetIfValid(p1);
-	if (u == NULL || u->type != VEH_ROAD || !CheckOwnership(u->owner)) return CMD_ERROR;
-
-	RoadVehicle *v = (RoadVehicle *)u;
+	RoadVehicle *v = RoadVehicle::GetIfValid(p1);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	if (v->vehstatus & VS_STOPPED ||
 			v->vehstatus & VS_CRASHED ||
@@ -1825,7 +1823,7 @@ bool RoadVehicle::Tick()
 static void CheckIfRoadVehNeedsService(RoadVehicle *v)
 {
 	/* If we already got a slot at a stop, use that FIRST, and go to a depot later */
-	if (v->slot != NULL || _settings_game.vehicle.servint_roadveh == 0 || !v->NeedsAutomaticServicing()) return;
+	if (v->slot != NULL || Company::Get(v->owner)->settings.vehicle.servint_roadveh == 0 || !v->NeedsAutomaticServicing()) return;
 	if (v->IsInDepot()) {
 		VehicleServiceInDepot(v);
 		return;
@@ -1993,9 +1991,9 @@ CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	uint16 capacity = CALLBACK_FAILED;
 	uint total_capacity = 0;
 
-	Vehicle *v = Vehicle::GetIfValid(p1);
+	RoadVehicle *v = RoadVehicle::GetIfValid(p1);
 
-	if (v == NULL || v->type != VEH_ROAD || !CheckOwnership(v->owner)) return CMD_ERROR;
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_ROAD_MUST_BE_STOPPED_INSIDE_DEPOT);
 	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
@@ -2065,7 +2063,7 @@ CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		}
 	}
 
-	if (flags & DC_EXEC) RoadVehUpdateCache((RoadVehicle *)Vehicle::Get(p1)->First());
+	if (flags & DC_EXEC) RoadVehUpdateCache(RoadVehicle::Get(p1)->First());
 
 	_returned_refit_capacity = total_capacity;
 
