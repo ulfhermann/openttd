@@ -2893,9 +2893,12 @@ void RecalcFrozen(Station * st) {
 	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
 	while(v_it != st->loading_vehicles.end()) {
 		Vehicle * front = *v_it;
-		StationID next_station_id = front->orders.list->GetNextStoppingStation(front->cur_order_index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
-		if (next_station_id != INVALID_STATION && next_station_id != st->index) {
-			IncreaseFrozen(st, front, next_station_id);
+		OrderList * orders = front->orders.list;
+		if (orders != NULL) {
+			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
+			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
+				IncreaseFrozen(st, front, next_station_id);
+			}
 		}
 		++v_it;
 	}
