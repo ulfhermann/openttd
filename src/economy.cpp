@@ -1263,7 +1263,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	StationID next_station = INVALID_STATION;
 	OrderList * orders = u->orders.list;
 	if (orders != NULL) {
-		next_station = orders->GetNextStoppingStation(u->cur_order_index);
+		next_station = orders->GetNextStoppingStation(u->cur_order_index, v->type == VEH_TRAIN || v->type == VEH_ROAD);
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */

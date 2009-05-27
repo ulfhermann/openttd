@@ -57,6 +57,7 @@
 #include "ai/ai_config.hpp"
 #include "newgrf.h"
 #include "engine_base.h"
+#include "ship.h"
 
 #include "void_map.h"
 #include "station_base.h"
@@ -67,6 +68,7 @@
 ClientSettings _settings_client;
 GameSettings _settings_game;
 GameSettings _settings_newgame;
+VehicleDefaultSettings _old_vds; ///< Used for loading default vehicles settings from old savegames
 
 typedef void SettingDescProc(IniFile *ini, const SettingDesc *desc, const char *grpname, void *object);
 typedef void SettingDescProcList(IniFile *ini, const char *grpname, StringList *list);
@@ -378,7 +380,7 @@ static void Write_ValidateSetting(void *ptr, const SettingDesc *sd, int32 val)
 			}
 			case SLE_VAR_I64:
 			case SLE_VAR_U64:
-			default: NOT_REACHED(); break;
+			default: NOT_REACHED();
 		}
 	}
 
@@ -437,7 +439,7 @@ static void ini_load_settings(IniFile *ini, const SettingDesc *sd, const char *g
 		case SDT_NUMX:
 		case SDT_ONEOFMANY:
 		case SDT_MANYOFMANY:
-			Write_ValidateSetting(ptr, sd, (unsigned long)p); break;
+			Write_ValidateSetting(ptr, sd, (size_t)p); break;
 
 		case SDT_STRING:
 			switch (GetVarMemType(sld->conv)) {
@@ -451,7 +453,7 @@ static void ini_load_settings(IniFile *ini, const SettingDesc *sd, const char *g
 					*(char**)ptr = p == NULL ? NULL : strdup((const char*)p);
 					break;
 				case SLE_VAR_CHAR: if (p != NULL) *(char*)ptr = *(char*)p; break;
-				default: NOT_REACHED(); break;
+				default: NOT_REACHED();
 			}
 			break;
 
@@ -463,7 +465,7 @@ static void ini_load_settings(IniFile *ini, const SettingDesc *sd, const char *g
 			}
 			break;
 		}
-		default: NOT_REACHED(); break;
+		default: NOT_REACHED();
 		}
 	}
 }
@@ -694,10 +696,10 @@ static bool DeleteSelectStationWindow(int32 p1)
 
 static bool UpdateConsists(int32 p1)
 {
-	Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
+	Train *t;
+	FOR_ALL_TRAINS(t) {
 		/* Update the consist of all trains so the maximum speed is set correctly. */
-		if (v->type == VEH_TRAIN && (IsFrontEngine(v) || IsFreeWagon(v))) TrainConsistChanged((Train *)v, true);
+		if (IsFrontEngine(t) || IsFreeWagon(t)) TrainConsistChanged(t, true);
 	}
 	return true;
 }
@@ -705,18 +707,23 @@ static bool UpdateConsists(int32 p1)
 /* Check service intervals of vehicles, p1 is value of % or day based servicing */
 static bool CheckInterval(int32 p1)
 {
-	VehicleSettings *ptc = (_game_mode == GM_MENU) ? &_settings_newgame.vehicle : &_settings_game.vehicle;
+	VehicleDefaultSettings *vds;
+	if (_game_mode == GM_MENU || !Company::IsValidID(_current_company)) {
+		vds = &_settings_client.company.vehicle;
+	} else {
+		vds = &Company::Get(_current_company)->settings.vehicle;
+	}
 
 	if (p1) {
-		ptc->servint_trains   = 50;
-		ptc->servint_roadveh  = 50;
-		ptc->servint_aircraft = 50;
-		ptc->servint_ships    = 50;
+		vds->servint_trains   = 50;
+		vds->servint_roadveh  = 50;
+		vds->servint_aircraft = 50;
+		vds->servint_ships    = 50;
 	} else {
-		ptc->servint_trains   = 150;
-		ptc->servint_roadveh  = 150;
-		ptc->servint_aircraft = 360;
-		ptc->servint_ships    = 100;
+		vds->servint_trains   = 150;
+		vds->servint_roadveh  = 150;
+		vds->servint_aircraft = 360;
+		vds->servint_ships    = 100;
 	}
 
 	InvalidateDetailsWindow(0);
@@ -724,30 +731,11 @@ static bool CheckInterval(int32 p1)
 	return true;
 }
 
-static bool EngineRenewUpdate(int32 p1)
-{
-	DoCommandP(0, 0, _settings_client.company.engine_renew, CMD_SET_AUTOREPLACE);
-	return true;
-}
-
-static bool EngineRenewMonthsUpdate(int32 p1)
-{
-	DoCommandP(0, 1, _settings_client.company.engine_renew_months, CMD_SET_AUTOREPLACE);
-	return true;
-}
-
-static bool EngineRenewMoneyUpdate(int32 p1)
-{
-	DoCommandP(0, 2, _settings_client.company.engine_renew_money, CMD_SET_AUTOREPLACE);
-	return true;
-}
-
 static bool TrainAccelerationModelChanged(int32 p1)
 {
-	Vehicle *v;
-
-	FOR_ALL_VEHICLES(v) {
-		if (v->type == VEH_TRAIN && IsFrontEngine(v)) UpdateTrainAcceleration((Train *)v);
+	Train *t;
+	FOR_ALL_TRAINS(t) {
+		if (IsFrontEngine(t)) UpdateTrainAcceleration(t);
 	}
 
 	return true;
@@ -891,9 +879,9 @@ static bool CheckFreeformEdges(int32 p1)
 {
 	if (_game_mode == GM_MENU) return true;
 	if (p1 != 0) {
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_SHIP && (TileX(v->tile) == 0 || TileY(v->tile) == 0)) {
+		Ship *s;
+		FOR_ALL_SHIPS(s) {
+			if (TileX(s->tile) == 0 || TileY(s->tile) == 0) {
 				ShowErrorMessage(INVALID_STRING_ID, STR_CONFIG_SETTING_EDGES_NOT_EMPTY, 0, 0);
 				return false;
 			}
@@ -1275,6 +1263,7 @@ static void HandleSettingDescs(IniFile *ini, SettingDescProc *proc, SettingDescP
 
 	proc(ini, _settings,         "patches",  &_settings_newgame);
 	proc(ini, _currency_settings,"currency", &_custom_currency);
+	proc(ini, _company_settings, "company",  &_settings_client.company);
 
 #ifdef ENABLE_NETWORK
 	proc_list(ini, "server_bind_addresses", &_network_bind_list);
@@ -1433,6 +1422,40 @@ CommandCost CmdChangeSetting(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	return CommandCost();
 }
 
+/** Change one of the per-company settings.
+ * @param tile unused
+ * @param flags operation to perform
+ * @param p1 the index of the setting in the _company_settings array which identifies it
+ * @param p2 the new value for the setting
+ * The new value is properly clamped to its minimum/maximum when setting
+ */
+CommandCost CmdChangeCompanySetting(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	if (p1 >= lengthof(_company_settings)) return CMD_ERROR;
+	const SettingDesc *sd = &_company_settings[p1];
+
+	if (flags & DC_EXEC) {
+		void *var = GetVariableAddress(&Company::Get(_current_company)->settings, &sd->save);
+
+		int32 oldval = (int32)ReadValue(var, sd->save.conv);
+		int32 newval = (int32)p2;
+
+		Write_ValidateSetting(var, sd, newval);
+		newval = (int32)ReadValue(var, sd->save.conv);
+
+		if (oldval == newval) return CommandCost();
+
+		if (sd->desc.proc != NULL && !sd->desc.proc(newval)) {
+			WriteValue(var, sd->save.conv, (int64)oldval);
+			return CommandCost();
+		}
+
+		InvalidateWindow(WC_GAME_OPTIONS, 0);
+	}
+
+	return CommandCost();
+}
+
 /** Top function to save the new value of an element of the Settings struct
  * @param index offset in the SettingDesc array of the Settings struct which
  * identifies the setting member we want to change
@@ -1465,6 +1488,65 @@ bool SetSettingValue(uint index, int32 value)
 		return DoCommandP(0, index, value, CMD_CHANGE_SETTING);
 	}
 	return false;
+}
+
+/** Top function to save the new value of an element of the Settings struct
+ * @param index offset in the SettingDesc array of the CompanySettings struct
+ * which identifies the setting member we want to change
+ * @param object pointer to a valid CompanySettings struct that has its settings changed.
+ * @param value new value of the setting */
+void SetCompanySetting(uint index, int32 value)
+{
+	const SettingDesc *sd = &_company_settings[index];
+	if (Company::IsValidID(_local_company) && _game_mode != GM_MENU) {
+		DoCommandP(0, index, value, CMD_CHANGE_COMPANY_SETTING);
+	} else {
+		void *var = GetVariableAddress(&_settings_client.company, &sd->save);
+		Write_ValidateSetting(var, sd, value);
+		if (sd->desc.proc != NULL) sd->desc.proc((int32)ReadValue(var, sd->save.conv));
+	}
+}
+
+/**
+ * Set the company settings for a new company to their default values.
+ */
+void SetDefaultCompanySettings(CompanyID cid)
+{
+	Company *c = Company::Get(cid);
+	const SettingDesc *sd;
+	for (sd = _company_settings; sd->save.cmd != SL_END; sd++) {
+		void *var = GetVariableAddress(&c->settings, &sd->save);
+		Write_ValidateSetting(var, sd, (size_t)sd->desc.def);
+	}
+}
+
+/**
+ * Sync all company settings in a multiplayer game.
+ */
+void SyncCompanySettings()
+{
+	const SettingDesc *sd;
+	uint i = 0;
+	for (sd = _company_settings; sd->save.cmd != SL_END; sd++, i++) {
+		const void *old_var = GetVariableAddress(&Company::Get(_current_company)->settings, &sd->save);
+		const void *new_var = GetVariableAddress(&_settings_client.company, &sd->save);
+		uint32 old_value = (uint32)ReadValue(old_var, sd->save.conv);
+		uint32 new_value = (uint32)ReadValue(new_var, sd->save.conv);
+		if (old_value != new_value) NetworkSend_Command(0, i, new_value, CMD_CHANGE_COMPANY_SETTING, NULL, NULL);
+	}
+}
+
+/**
+ * Get the index in the _company_settings array of a setting
+ * @param name The name of the setting
+ * @return The index in the _company_settings array
+ */
+uint GetCompanySettingIndex(const char *name)
+{
+	uint i;
+	const SettingDesc *sd = GetSettingFromName(name, &i);
+	assert(sd != NULL && (sd->desc.flags & SGF_PER_COMPANY) != 0);
+	return i;
 }
 
 /**
@@ -1510,6 +1592,13 @@ const SettingDesc *GetSettingFromName(const char *name, uint *i)
 			short_name++;
 			if (strcmp(short_name, name) == 0) return sd;
 		}
+	}
+
+	if (strncmp(name, "company.", 8) == 0) name += 8;
+	/* And finally the company-based settings */
+	for (*i = 0, sd = _company_settings; sd->save.cmd != SL_END; sd++, (*i)++) {
+		if (!SlIsObjectCurrentlyValid(sd->save.version_from, sd->save.version_to)) continue;
+		if (strcmp(sd->desc.name, name) == 0) return sd;
 	}
 
 	return NULL;
