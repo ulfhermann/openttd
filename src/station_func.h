@@ -50,6 +50,8 @@ void DecreaseFrozen(Station *st, Vehicle *v, StationID next_station_id);
 
 void IncreaseFrozen(Station *st, Vehicle *v, StationID next_station_id);
 
+void RecalcFrozen(Station * st);
+
 void IncreaseStats(Station *st, Vehicle *v, StationID next_station_id);
 
 void UpdateFlows(Station * st, Vehicle *v, StationID next_station_id);

@@ -1547,11 +1547,9 @@ static CommandCost RemoveRoadStop(Station *st, DoCommandFlag flags, TileIndex ti
 		delete cur_stop;
 
 		/* Make sure no vehicle is going to the old roadstop */
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_ROAD &&
-					v->First() == v &&
-					v->current_order.IsType(OT_GOTO_STATION) &&
+		RoadVehicle *v;
+		FOR_ALL_ROADVEHICLES(v) {
+			if (v->First() == v && v->current_order.IsType(OT_GOTO_STATION) &&
 					v->dest_tile == tile) {
 				v->dest_tile = v->GetOrderStationLocation(st->index);
 			}
@@ -1964,11 +1962,9 @@ static CommandCost RemoveAirport(Station *st, DoCommandFlag flags)
 
 	CommandCost cost(EXPENSES_CONSTRUCTION, w * h * _price.remove_airport);
 
-	const Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
-		if (!(v->type == VEH_AIRCRAFT && IsNormalAircraft(v))) continue;
-
-		const Aircraft *a = (const Aircraft *)v;
+	const Aircraft *a;
+	FOR_ALL_AIRCRAFT(a) {
+		if (!IsNormalAircraft(a)) continue;
 		if (a->targetairport == st->index && a->state != FLYING) return CMD_ERROR;
 	}
 
@@ -2931,7 +2927,7 @@ void RecalcFrozen(Station * st) {
 		Vehicle * front = *v_it;
 		OrderList * orders = front->orders.list;
 		if (orders != NULL) {
-			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index);
+			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
 			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
 				IncreaseFrozen(st, front, next_station_id);
 			}

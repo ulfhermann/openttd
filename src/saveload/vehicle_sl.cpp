@@ -20,16 +20,14 @@
  */
 void ConnectMultiheadedTrains()
 {
-	Vehicle *v;
+	Train *v;
 
-	FOR_ALL_VEHICLES(v) {
-		if (v->type == VEH_TRAIN) {
-			((Train *)v)->other_multiheaded_part = NULL;
-		}
+	FOR_ALL_TRAINS(v) {
+		v->other_multiheaded_part = NULL;
 	}
 
-	FOR_ALL_VEHICLES(v) {
-		if (v->type == VEH_TRAIN && (IsFrontEngine(v) || IsFreeWagon(v))) {
+	FOR_ALL_TRAINS(v) {
+		if (IsFrontEngine(v) || IsFreeWagon(v)) {
 			/* Two ways to associate multiheaded parts to each other:
 			 * sequential-matching: Trains shall be arranged to look like <..>..<..>..<..>..
 			 * bracket-matching:    Free vehicle chains shall be arranged to look like ..<..<..>..<..>..>..
@@ -45,7 +43,7 @@ void ConnectMultiheadedTrains()
 
 			bool sequential_matching = IsFrontEngine(v);
 
-			for (Train *u = (Train *)v; u != NULL; u = (Train *)GetNextVehicle(u)) {
+			for (Train *u = v; u != NULL; u = GetNextVehicle(u)) {
 				if (u->other_multiheaded_part != NULL) continue; // we already linked this one
 
 				if (IsMultiheaded(u)) {
@@ -102,55 +100,49 @@ void ConnectMultiheadedTrains()
  */
 void ConvertOldMultiheadToNew()
 {
-	Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
-		if (v->type == VEH_TRAIN) {
-			SetBit(v->subtype, 7); // indicates that it's the old format and needs to be converted in the next loop
-		}
-	}
+	Train *t;
+	FOR_ALL_TRAINS(t) SetBit(t->subtype, 7); // indicates that it's the old format and needs to be converted in the next loop
 
-	FOR_ALL_VEHICLES(v) {
-		if (v->type == VEH_TRAIN) {
-			if (HasBit(v->subtype, 7) && ((v->subtype & ~0x80) == 0 || (v->subtype & ~0x80) == 4)) {
-				for (Vehicle *u = v; u != NULL; u = u->Next()) {
-					const RailVehicleInfo *rvi = RailVehInfo(u->engine_type);
+	FOR_ALL_TRAINS(t) {
+		if (HasBit(t->subtype, 7) && ((t->subtype & ~0x80) == 0 || (t->subtype & ~0x80) == 4)) {
+			for (Vehicle *u = t; u != NULL; u = u->Next()) {
+				const RailVehicleInfo *rvi = RailVehInfo(u->engine_type);
 
-					ClrBit(u->subtype, 7);
-					switch (u->subtype) {
-						case 0: // TS_Front_Engine
-							if (rvi->railveh_type == RAILVEH_MULTIHEAD) SetMultiheaded(u);
-							SetFrontEngine(u);
-							SetTrainEngine(u);
-							break;
+				ClrBit(u->subtype, 7);
+				switch (u->subtype) {
+					case 0: // TS_Front_Engine
+						if (rvi->railveh_type == RAILVEH_MULTIHEAD) SetMultiheaded(u);
+						SetFrontEngine(u);
+						SetTrainEngine(u);
+						break;
 
-						case 1: // TS_Artic_Part
-							u->subtype = 0;
-							SetArticulatedPart(u);
-							break;
+					case 1: // TS_Artic_Part
+						u->subtype = 0;
+						SetArticulatedPart(u);
+						break;
 
-						case 2: // TS_Not_First
-							u->subtype = 0;
-							if (rvi->railveh_type == RAILVEH_WAGON) {
-								/* normal wagon */
-								SetTrainWagon(u);
-								break;
-							}
-							if (rvi->railveh_type == RAILVEH_MULTIHEAD && rvi->image_index == u->spritenum - 1) {
-								/* rear end of a multiheaded engine */
-								SetMultiheaded(u);
-								break;
-							}
-							if (rvi->railveh_type == RAILVEH_MULTIHEAD) SetMultiheaded(u);
-							SetTrainEngine(u);
-							break;
-
-						case 4: // TS_Free_Car
-							u->subtype = 0;
+					case 2: // TS_Not_First
+						u->subtype = 0;
+						if (rvi->railveh_type == RAILVEH_WAGON) {
+							/* normal wagon */
 							SetTrainWagon(u);
-							SetFreeWagon(u);
 							break;
-						default: NOT_REACHED(); break;
-					}
+						}
+						if (rvi->railveh_type == RAILVEH_MULTIHEAD && rvi->image_index == u->spritenum - 1) {
+							/* rear end of a multiheaded engine */
+							SetMultiheaded(u);
+							break;
+						}
+						if (rvi->railveh_type == RAILVEH_MULTIHEAD) SetMultiheaded(u);
+						SetTrainEngine(u);
+						break;
+
+					case 4: // TS_Free_Car
+						u->subtype = 0;
+						SetTrainWagon(u);
+						SetFreeWagon(u);
+						break;
+					default: NOT_REACHED();
 				}
 			}
 		}
@@ -167,13 +159,11 @@ void UpdateOldAircraft()
 		st->airport_flags = 0; // reset airport
 	}
 
-	Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
+	Aircraft *a;
+	FOR_ALL_AIRCRAFT(a) {
 		/* airplane has another vehicle with subtype 4 (shadow), helicopter also has 3 (rotor)
 		 * skip those */
-		if (v->type == VEH_AIRCRAFT && IsNormalAircraft(v)) {
-			Aircraft *v_oldstyle = (Aircraft *)v;
-			Aircraft *a = (Aircraft *)v_oldstyle;
+		if (IsNormalAircraft(a)) {
 			/* airplane in terminal stopped doesn't hurt anyone, so goto next */
 			if (a->vehstatus & VS_STOPPED && a->state == 0) {
 				a->state = HANGAR;
@@ -182,7 +172,7 @@ void UpdateOldAircraft()
 
 			AircraftLeaveHangar(a); // make airplane visible if it was in a depot for example
 			a->vehstatus &= ~VS_STOPPED; // make airplane moving
-			a->cur_speed = v_oldstyle->max_speed; // so aircraft don't have zero speed while in air
+			a->cur_speed = a->max_speed; // so aircraft don't have zero speed while in air
 			if (!a->current_order.IsType(OT_GOTO_STATION) && !a->current_order.IsType(OT_GOTO_DEPOT)) {
 				/* reset current order so aircraft doesn't have invalid "station-only" order */
 				a->current_order.MakeDummy();

@@ -25,4 +25,8 @@ struct GRFConfig *LoadGRFPresetFromConfig(const char *config_name);
 void SaveGRFPresetToConfig(const char *config_name, struct GRFConfig *config);
 void DeleteGRFPresetFromConfig(const char *config_name);
 
+uint GetCompanySettingIndex(const char *name);
+void SyncCompanySettings();
+void SetDefaultCompanySettings(CompanyID cid);
+
 #endif /* SETTINGS_FUNC_H */
