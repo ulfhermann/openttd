@@ -59,7 +59,7 @@ static SpriteID GetShipIcon(EngineID engine)
 		spritenum = Engine::Get(engine)->image_index;
 	}
 
-	return 6 + _ship_sprites[spritenum];
+	return DIR_W + _ship_sprites[spritenum];
 }
 
 void DrawShipEngine(int x, int y, EngineID engine, SpriteID pal)
@@ -127,7 +127,7 @@ static const Depot *FindClosestShipDepot(const Vehicle *v)
 
 static void CheckIfShipNeedsService(Vehicle *v)
 {
-	if (_settings_game.vehicle.servint_ships == 0 || !v->NeedsAutomaticServicing()) return;
+	if (Company::Get(v->owner)->settings.vehicle.servint_ships == 0 || !v->NeedsAutomaticServicing()) return;
 	if (v->IsInDepot()) {
 		VehicleServiceInDepot(v);
 		return;
@@ -806,7 +806,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		v->name = NULL;
 		v->state = TRACK_BIT_DEPOT;
 
-		v->service_interval = _settings_game.vehicle.servint_ships;
+		v->service_interval = Company::Get(_current_company)->settings.vehicle.servint_ships;
 		v->date_of_last_service = _date;
 		v->build_year = _cur_year;
 		v->cur_image = SPR_IMG_QUERY;
@@ -839,8 +839,8 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
  */
 CommandCost CmdSellShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Vehicle *v = Vehicle::GetIfValid(p1);
-	if (v == NULL || v->type != VEH_SHIP || !CheckOwnership(v->owner)) return CMD_ERROR;
+	Ship *v = Ship::GetIfValid(p1);
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	if (HASBITS(v->vehstatus, VS_CRASHED)) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
 
@@ -885,8 +885,8 @@ CommandCost CmdSendShipToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		return SendAllVehiclesToDepot(VEH_SHIP, flags, p2 & DEPOT_SERVICE, _current_company, (p2 & VLW_MASK), p1);
 	}
 
-	Vehicle *v = Vehicle::GetIfValid(p1);
-	if (v == NULL || v->type != VEH_SHIP) return CMD_ERROR;
+	Ship *v = Ship::GetIfValid(p1);
+	if (v == NULL) return CMD_ERROR;
 
 	return v->SendToDepot(flags, (DepotCommand)(p2 & DEPOT_COMMAND_MASK));
 }
@@ -909,9 +909,9 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	byte new_subtype = GB(p2, 8, 8);
 	uint16 capacity = CALLBACK_FAILED;
 
-	Vehicle *v = Vehicle::GetIfValid(p1);
+	Ship *v = Ship::GetIfValid(p1);
 
-	if (v == NULL || v->type != VEH_SHIP || !CheckOwnership(v->owner)) return CMD_ERROR;
+	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT);
 	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
