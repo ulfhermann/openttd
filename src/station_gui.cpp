@@ -687,16 +687,16 @@ static const Widget _station_view_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,                 STR_TOOLTIP_CLOSE_WINDOW},             // SVW_CLOSEBOX
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   236,     0,    13, STR_STATION_VIEW_CAPTION,        STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
 {  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,                             STR_STICKY_BUTTON},
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    13,    14,    25, STR_EMPTY,                       STR_SORT_ORDER_TIP},                   // SLW_SORTBY
-{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    14,    80,    14,    25, 0x0,                             STR_SORT_CRITERIA_TIP},                // SLW_SORTDROPBTN
-{   WWT_DROPDOWN,   RESIZE_LEFT,  COLOUR_GREY,    81,   248,    14,    25, 0x0,                             STR_GROUP_TIP},
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    26,    75, 0x0,                             STR_NULL},                             // SVW_WAITING
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    26,    75, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    14,    25, STR_SORT_BY,                     STR_SORT_ORDER_TIP},                   // SVW_SORT_ORDER
+{    WWT_TEXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   248,    14,    25, 0x0,                             STR_SORT_CRITERIA_TIP},                // SVW_SORT_BY
+{   WWT_DROPDOWN,     RESIZE_TB,  COLOUR_GREY,     0,    80,    26,    37, 0x0,                             STR_TOGGLE_CARGO_VIEW},                // SVW_MODE
+{   WWT_DROPDOWN,   RESIZE_LEFT,  COLOUR_GREY,    81,   248,    26,    37, 0x0,                             STR_GROUP_TIP},                        // SVW_GROUP_BY
+{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    37,    75, 0x0,                             STR_NULL},                             // SVW_WAITING
+{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    37,    75, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
 {      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    76,    97, 0x0,                             STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    44,    98,   109, STR_BUTTON_LOCATION,             STR_STATION_VIEW_CENTER_TOOLTIP},      // SVW_LOCATION
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    45,    89,    98,   109, STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP},     // SVW_RATINGS / SVW_ACCEPTS
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    90,   134,    98,   109, STR_BUTTON_PLANNED,              STR_TOGGLE_CARGO_VIEW},
-{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   135,   180,    98,   109, STR_QUERY_RENAME,                STR_STATION_VIEW_RENAME_TOOLTIP},      // SVW_RENAME
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    60,    98,   109, STR_BUTTON_LOCATION,             STR_STATION_VIEW_CENTER_TOOLTIP},      // SVW_LOCATION
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    61,   120,    98,   109, STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP},     // SVW_RATINGS / SVW_ACCEPTS
+{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   121,   180,    98,   109, STR_QUERY_RENAME,                STR_STATION_VIEW_RENAME_TOOLTIP},      // SVW_RENAME
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,    98,   109, STR_TRAIN,                       STR_SCHEDULED_TRAINS_TIP },            // SVW_TRAINS
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,    98,   109, STR_LORRY,                       STR_SCHEDULED_ROAD_VEHICLES_TIP },     // SVW_ROADVEHS
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   209,   222,    98,   109, STR_PLANE,                       STR_SCHEDULED_AIRCRAFT_TIP },          // SVW_PLANES
@@ -712,20 +712,22 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, SVW_STICKYBOX),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_ORDER), SetMinimalSize(14, 12), SetDataTip(STR_EMPTY, STR_SORT_ORDER_TIP),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(67, 12), SetDataTip(0x0, STR_SORT_CRITERIA_TIP),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_ORDER), SetMinimalSize(81, 12), SetDataTip(STR_SORT_BY, STR_SORT_ORDER_TIP),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_SORT_CRITERIA_TIP),
+	EndContainer(),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_MODE), SetMinimalSize(81, 12), SetDataTip(STR_STATION_VIEW_WAITING, STR_TOGGLE_CARGO_VIEW),
 		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_GROUP_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_GROUP_TIP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_GREY, SVW_WAITING), SetMinimalSize(237, 50), SetResize(1, 10), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_GREY, SVW_WAITING), SetMinimalSize(237, 39), SetResize(1, 10), EndContainer(),
 		NWidget(WWT_SCROLLBAR, COLOUR_GREY, SVW_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, SVW_ACCEPTLIST), SetMinimalSize(249, 22), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_LOCATION), SetMinimalSize(45, 12), SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(45, 12), SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_FLOWS), SetMinimalSize(45, 12), SetResize(1, 0), SetDataTip(STR_BUTTON_PLANNED, STR_TOGGLE_CARGO_VIEW),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(46, 12), SetResize(1, 0), SetDataTip(STR_QUERY_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_LOCATION), SetMinimalSize(61, 12), SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(60, 12), SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(60, 12), SetResize(1, 0), SetDataTip(STR_QUERY_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_TRAINS), SetMinimalSize(14, 12), SetDataTip(STR_TRAIN, STR_SCHEDULED_TRAINS_TIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ROADVEHS), SetMinimalSize(14, 12), SetDataTip(STR_LORRY, STR_SCHEDULED_ROAD_VEHICLES_TIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_PLANES),  SetMinimalSize(14, 12), SetDataTip(STR_PLANE, STR_SCHEDULED_AIRCRAFT_TIP),
@@ -946,12 +948,8 @@ struct StationViewWindow : public Window {
 	static const int _spacing_column = 10;
 	static const int _spacing_row = 10;
 	static const int _spacing_icons = 4;
-	static const int _spacing_top = 20;
+	static const int _spacing_top = 30;
 	static const int _num_columns = 4;
-
-	static const StringID _show_waiting = STR_BUTTON_PLANNED;
-	static const StringID _show_planned = STR_BUTTON_SENT;
-	static const StringID _show_sent = STR_BUTTON_WAITING;
 
 	enum Grouping {
 		SOURCE,
@@ -965,13 +963,21 @@ struct StationViewWindow : public Window {
 		COUNT = 1
 	};
 
+	enum Mode {
+		WAITING,
+		PLANNED,
+		SENT
+	};
+
 	static const StringID _sort_names[];
 	static const StringID _group_names[];
+	static const StringID _mode_names[];
 
 	Sorting sortings[_num_columns];
 	SortOrder sort_orders[_num_columns];
 
 	int grouping_index;
+	Mode current_mode;
 	Grouping groupings[_num_columns];
 
 	CargoDataEntry expanded_rows;
@@ -984,15 +990,12 @@ struct StationViewWindow : public Window {
 		this->sortings[0] = GROUPING;
 		SelectGroupBy(_settings_client.gui.station_gui_group_order);
 		SelectSortBy((Sorting)_settings_client.gui.station_gui_sort_by);
-		SortOrder last_order = (SortOrder)_settings_client.gui.station_gui_sort_order;
 		sort_orders[0] = SO_ASCENDING;
-		do {
-			ToggleSortOrder();
-		} while (sort_orders[1] != last_order);
-
+		SelectSortOrder((SortOrder)_settings_client.gui.station_gui_sort_order);
+		SelectMode(WAITING);
 		Owner owner = Station::Get(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
-		this->vscroll.cap = 4;
+		this->vscroll.cap = 3;
 		this->resize.step_height = 10;
 
 		this->FindWindowPlacementAndResize(desc);
@@ -1094,7 +1097,7 @@ struct StationViewWindow : public Window {
 				const FlowStat & stat = *flow_it;
 				uint val = 0;
 				DestinationMap dest;
-				if (this->widget[SVW_FLOWS].data == _show_planned) {
+				if (this->current_mode == PLANNED) {
 					val = DivideApprox(stat.planned * 30, scale);
 				} else {
 					val = DivideApprox(stat.sent * 30, scale);
@@ -1103,7 +1106,7 @@ struct StationViewWindow : public Window {
 				if (stat.via == this->window_number) {
 					dest[this->window_number] = val;
 				} else {
-					EstimateDestinations(i, from, stat.via, val, dest, this->widget[SVW_FLOWS].data == _show_sent);
+					EstimateDestinations(i, from, stat.via, val, dest, this->current_mode == SENT);
 				}
 
 				for (DestinationMap::iterator dest_it = dest.begin(); dest_it != dest.end(); ++dest_it) {
@@ -1130,7 +1133,7 @@ struct StationViewWindow : public Window {
 
 	void BuildCargoList(CargoDataEntry * cargo, const Station * st) {
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			if (this->widget[SVW_FLOWS].data == _show_waiting) {
+			if (this->current_mode == WAITING) {
 				BuildCargoList(i, st->goods[i].cargo, cargo);
 			} else {
 				BuildFlowList(i, st->goods[i].flows, cargo);
@@ -1261,37 +1264,6 @@ struct StationViewWindow : public Window {
 		int maxrows = this->vscroll.cap;
 
 		displayed_rows.clear();
-		if (--pos < 0) {
-			StringID str_nothing = STR_JUST_NOTHING;
-			for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
-				if (this->widget[SVW_FLOWS].data == _show_waiting) {
-					if (!st->goods[i].cargo.Empty()) str_nothing = STR_EMPTY;
-				} else {
-					if (!st->goods[i].flows.empty()) str_nothing = STR_EMPTY;
-				}
-			}
-			StringID str_caption = STR_EMPTY;
-			switch (this->widget[SVW_FLOWS].data) {
-			case _show_waiting:
-				str_caption = STR_STATION_VIEW_WAITING_TITLE;
-				break;
-			case _show_planned:
-				str_caption = STR_PLANNED;
-				break;
-			case _show_sent:
-				str_caption = STR_SENT;
-				break;
-			}
-			SetDParam(0, str_nothing);
-			DrawString(
-					_spacing_side,
-					this->widget[SVW_WAITING].right - _spacing_side,
-					_spacing_top + _spacing_row,
-					str_caption,
-					TC_FROMSTRING
-			);
-			displayed_rows.push_back(RowDisplay(&expanded_rows, (CargoID)CT_INVALID));
-		}
 
 		DrawEntries(&cargo, pos, maxrows, 0);
 
@@ -1374,7 +1346,7 @@ struct StationViewWindow : public Window {
 	{
 		switch (widget) {
 			case SVW_WAITING:
-				this->HandleCargoWaitingClick((pt.y - this->widget[SVW_WAITING].top - 5) / 10);
+				this->HandleCargoWaitingClick((pt.y - this->widget[SVW_WAITING].top) / 10);
 				break;
 
 			case SVW_LOCATION:
@@ -1436,53 +1408,51 @@ struct StationViewWindow : public Window {
 				break;
 			}
 
-			case SVW_FLOWS: {
-				this->SetDirty();
-				if (this->widget[SVW_FLOWS].data == STR_BUTTON_PLANNED) {
-					this->widget[SVW_FLOWS].data = _show_planned;
-				} else if (this->widget[SVW_FLOWS].data == STR_BUTTON_SENT) {
-					this->widget[SVW_FLOWS].data = _show_sent;
-				} else {
-					this->widget[SVW_FLOWS].data = _show_waiting;
-				}
-				this->SetDirty();
+			case SVW_MODE: {
+				ShowDropDownMenu(this, _mode_names, this->current_mode, SVW_MODE, 0, 0);
 				break;
 			}
 
 			case SVW_SORT_BY: {
-				ShowDropDownMenu(this, _sort_names, sortings[1], SVW_SORT_BY, 0, 0);
+				Sorting sorting = (sortings[1] == GROUPING ? COUNT : GROUPING);
+				SelectSortBy(sorting);
+				this->flags4 |= WF_TIMEOUT_BEGIN;
+				this->LowerWidget(SVW_SORT_BY);
 				break;
 			}
 
 			case SVW_GROUP_BY: {
-				ShowDropDownMenu(this, _group_names, grouping_index, SVW_GROUP_BY, 0, 0);
+				ShowDropDownMenu(this, _group_names, this->grouping_index, SVW_GROUP_BY, 0, 0);
 				break;
 			}
 
 			case SVW_SORT_ORDER: { // flip sorting method asc/desc
-				ToggleSortOrder();
+				SortOrder order = (sort_orders[1] == SO_ASCENDING ? SO_DESCENDING : SO_ASCENDING);
+				SelectSortOrder(order);
+				this->flags4 |= WF_TIMEOUT_BEGIN;
+				this->LowerWidget(SVW_SORT_ORDER);
 				break;
 			}
 		}
 	}
 
-	void ToggleSortOrder() {
-		if (sort_orders[1] == SO_ASCENDING) {
-			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_DESCENDING;
-		} else {
-			sort_orders[1] = sort_orders[2] = sort_orders[3] = SO_ASCENDING;
-		}
-		_settings_client.gui.station_gui_sort_order = sort_orders[1];
-		this->flags4 |= WF_TIMEOUT_BEGIN;
-		this->LowerWidget(SVW_SORT_ORDER);
+	void SelectSortBy(Sorting sorting) {
+		_settings_client.gui.station_gui_sort_by = sorting;
+		sortings[1] = sortings[2] = sortings[3] = sorting;
+		/* Display the current sort variant */
+		this->widget[SVW_SORT_BY].data = this->_sort_names[sorting];
 		this->SetDirty();
 	}
 
-	void SelectSortBy(Sorting index) {
-		_settings_client.gui.station_gui_sort_by = index;
-		sortings[1] = sortings[2] = sortings[3] = index;
-		/* Display the current sort variant */
-		this->widget[SVW_SORT_BY].data = this->_sort_names[index];
+	void SelectSortOrder(SortOrder order) {
+		sort_orders[1] = sort_orders[2] = sort_orders[3] = order;
+		_settings_client.gui.station_gui_sort_order = sort_orders[1];
+		this->SetDirty();
+	}
+
+	void SelectMode(int index) {
+		this->current_mode = (Mode)index;
+		this->widget[SVW_MODE].data = _mode_names[index];
 		this->SetDirty();
 	}
 
@@ -1527,8 +1497,8 @@ struct StationViewWindow : public Window {
 
 	virtual void OnDropdownSelect(int widget, int index)
 	{
-		if (widget == SVW_SORT_BY) {
-			SelectSortBy((Sorting)index);
+		if (widget == SVW_MODE) {
+			SelectMode(index);
 		} else {
 			SelectGroupBy(index);
 		}
@@ -1552,6 +1522,13 @@ struct StationViewWindow : public Window {
 const StringID StationViewWindow::_sort_names[] = {
 	STR_SORT_BY_STATION,
 	STR_SORT_BY_AMOUNT,
+	INVALID_STRING_ID
+};
+
+const StringID StationViewWindow::_mode_names[] = {
+	STR_STATION_VIEW_WAITING,
+	STR_STATION_VIEW_PLANNED,
+	STR_STATION_VIEW_SENT,
 	INVALID_STRING_ID
 };
 

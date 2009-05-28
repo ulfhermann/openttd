@@ -19,11 +19,9 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_EMPTY                                                       :
 STR_ERROR_FLAT_LAND_REQUIRED                                    :{WHITE}Flat land required
 STR_STATION_VIEW_WAITING_TITLE                                  :{BLACK}Waiting: {WHITE}{STRING}
-STR_PLANNED                                                     :{BLACK}Planned: {WHITE}{STRING}
-STR_SENT                                                        :{BLACK}Sent: {WHITE}{STRING}
-STR_BUTTON_WAITING                                              :{BLACK}Waiting
-STR_BUTTON_PLANNED                                              :{BLACK}Planned
-STR_BUTTON_SENT                                                 :{BLACK}Sent
+STR_STATION_VIEW_WAITING                                        :Waiting
+STR_STATION_VIEW_PLANNED                                        :Planned
+STR_STATION_VIEW_SENT                                           :Sent
 STR_TOGGLE_CARGO_VIEW                                           :{BLACK}Toggle between waiting, planned and sent cargo
 STR_STATION_VIEW_WAITING_CARGO                                  :{WHITE}{CARGO}
 STR_STATION_SOURCE                                              :{YELLOW}{COMMA} from {STATION}
@@ -362,8 +360,8 @@ STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waiting cargo value
 STR_SORT_BY_RATING_MAX                                          :Highest cargo rating
 STR_SORT_BY_RATING_MIN                                          :Lowest cargo rating
-STR_SORT_BY_AMOUNT                                              :Amount
-STR_SORT_BY_STATION                                             :Station
+STR_SORT_BY_AMOUNT                                              :{BLACK}Amount
+STR_SORT_BY_STATION                                             :{BLACK}Station
 STR_ENGINE_SORT_ENGINE_ID                                       :EngineID (classic sort)
 STR_ENGINE_SORT_COST                                            :Cost
 STR_ENGINE_SORT_POWER                                           :Power
