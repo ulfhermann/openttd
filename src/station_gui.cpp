@@ -976,6 +976,7 @@ struct StationViewWindow : public Window {
 	Sorting sortings[_num_columns];
 	SortOrder sort_orders[_num_columns];
 
+	int scroll_to_row;
 	int grouping_index;
 	Mode current_mode;
 	Grouping groupings[_num_columns];
@@ -984,7 +985,7 @@ struct StationViewWindow : public Window {
 	CargoDataVector displayed_rows;
 
 	StationViewWindow(const WindowDesc *desc, WindowNumber window_number) :
-		Window(desc, window_number), grouping_index(0)
+		Window(desc, window_number), scroll_to_row(INT_MAX), grouping_index(0), current_mode(WAITING)
 	{
 		this->groupings[0] = CARGO;
 		this->sortings[0] = GROUPING;
@@ -997,7 +998,6 @@ struct StationViewWindow : public Window {
 		if (owner != OWNER_NONE) this->owner = owner;
 		this->vscroll.cap = 3;
 		this->resize.step_height = 10;
-
 		this->FindWindowPlacementAndResize(desc);
 	}
 
@@ -1165,6 +1165,17 @@ struct StationViewWindow : public Window {
 		displayed_rows.push_back(RowDisplay(filter, next));
 	}
 
+	StringID GetEntryString(StationID station, StringID here, StringID other_station, StringID any) {
+		if (station == this->window_number) {
+			return here;
+		} else if (station != INVALID_STATION) {
+			SetDParam(1, station);
+			return other_station;
+		} else {
+			return any;
+		}
+	}
+
 	int DrawEntries(CargoDataEntry * entry, int pos, int maxrows, int column) {
 		if (sortings[column] == GROUPING) {
 			if (groupings[column] != CARGO) {
@@ -1189,25 +1200,25 @@ struct StationViewWindow : public Window {
 							_spacing_top - pos * _spacing_row,
 							this->widget[SVW_WAITING].right - this->widget[SVW_WAITING].left - _spacing_icons
 					);
-				} else if (cd->GetStation() == INVALID_STATION) {
-					SetDParam(0, cd->GetCount());
-					str = STR_UNROUTED;
 				} else {
 					SetDParam(0, cd->GetCount());
-					SetDParam(1, cd->GetStation());
+					StationID station = cd->GetStation();
 
 					switch(groupings[column]) {
 					case SOURCE:
-						str = STR_STATION_SOURCE;
+						str = GetEntryString(station, STR_STATION_FROM_HERE, STR_STATION_FROM, STR_STATION_FROM_ANY);
 						break;
 					case NEXT:
-						str = STR_STATION_NEXT;
+						str = GetEntryString(station, STR_STATION_VIA_HERE, STR_STATION_VIA, STR_STATION_VIA_ANY);
 						break;
 					case DESTINATION:
-						str = STR_STATION_DESTINATION;
+						str = GetEntryString(station, STR_STATION_TO_HERE, STR_STATION_TO, STR_STATION_TO_ANY);
 						break;
 					default:
 						NOT_REACHED();
+					}
+					if (pos == -scroll_to_row - 1 && Station::IsValidID(station)) {
+						ScrollMainWindowToTile(Station::Get(station)->xy);
 					}
 				}
 				DrawString(
@@ -1266,6 +1277,7 @@ struct StationViewWindow : public Window {
 		displayed_rows.clear();
 
 		DrawEntries(&cargo, pos, maxrows, 0);
+		scroll_to_row = INT_MAX;
 
 		if (this->widget[SVW_ACCEPTS].data == STR_STATION_VIEW_RATINGS_BUTTON) { // small window with list of accepted cargo
 			char string[512];
@@ -1332,12 +1344,15 @@ struct StationViewWindow : public Window {
 	void HandleCargoWaitingClick(int row)
 	{
 		if (row < 0 || (uint)row >= displayed_rows.size()) return;
-		RowDisplay & display = displayed_rows[row];
-
-		if (display.filter == &expanded_rows) {
-			HandleCargoWaitingClick<CargoID>(display.filter, display.next_cargo);
+		if (_ctrl_pressed) {
+			scroll_to_row = row;
 		} else {
-			HandleCargoWaitingClick<StationID>(display.filter, display.next_station);
+			RowDisplay & display = displayed_rows[row];
+			if (display.filter == &expanded_rows) {
+				HandleCargoWaitingClick<CargoID>(display.filter, display.next_cargo);
+			} else {
+				HandleCargoWaitingClick<StationID>(display.filter, display.next_station);
+			}
 		}
 		this->InvalidateWidget(SVW_WAITING);
 	}
