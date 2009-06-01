@@ -1122,14 +1122,9 @@ void VehiclePayment(Station * curr_station, Vehicle *front_v, StationID next_sta
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
 
 		CargoList & cargo_list = v->cargo;
-		if (v->cargo_cap == 0) {
-			continue;
-		}
 
 		/* No cargo to unload */
-		if (cargo_list.Empty()) {
-			continue;
-		}
+		if (v->cargo_cap == 0 || cargo_list.Empty()) continue;
 
 		/* All cargo has already been paid for, no need to pay again */
 		if (!cargo_list.UnpaidCargo()) {

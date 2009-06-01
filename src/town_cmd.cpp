@@ -487,7 +487,7 @@ static void TileLoop_Town(TileIndex tile)
 
 	_current_company = OWNER_TOWN;
 
-	if (hs->building_flags & BUILDING_HAS_1_TILE &&
+	if ((hs->building_flags & BUILDING_HAS_1_TILE) &&
 			HasBit(t->flags12, TOWN_IS_FUNDED) &&
 			CanDeleteHouse(tile) &&
 			GetHouseAge(tile) >= hs->minimum_life &&
@@ -959,7 +959,7 @@ static bool GrowTownWithBridge(const Town *t, const TileIndex tile, const DiagDi
 	/* Make sure the direction is compatible with the slope.
 	 * Well we check if the slope has an up bit set in the
 	 * reverse direction. */
-	if (HASBITS(slope, InclinedSlope(bridge_dir))) return false;
+	if (slope & InclinedSlope(bridge_dir)) return false;
 
 	/* Assure that the bridge is connectable to the start side */
 	if (!(GetTownRoadBits(TileAddByDiagDir(tile, ReverseDiagDir(bridge_dir))) & DiagDirToRoadBits(bridge_dir))) return false;
@@ -2121,7 +2121,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 			SetBit(oneof, TOWN_HAS_STADIUM);
 		}
 
-		if (HASBITS(t->flags12, oneof)) continue;
+		if (t->flags12 & oneof) continue;
 
 		/* Make sure there is no slope? */
 		bool noslope = (hs->building_flags & TILE_NOT_SLOPED) != 0;

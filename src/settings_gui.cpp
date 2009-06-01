@@ -1557,7 +1557,11 @@ struct GameSettingsWindow : Window {
 			/* Save the correct currency-translated value */
 			if (sd->desc.flags & SGF_CURRENCY) value /= _currency->rate;
 
-			SetSettingValue(this->valuewindow_entry->d.entry.index, value);
+			if ((sd->desc.flags & SGF_PER_COMPANY) != 0) {
+				SetCompanySetting(this->valuewindow_entry->d.entry.index, value);
+			} else {
+				SetSettingValue(this->valuewindow_entry->d.entry.index, value);
+			}
 			this->SetDirty();
 		}
 	}
