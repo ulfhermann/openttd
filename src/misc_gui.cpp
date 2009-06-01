@@ -1072,11 +1072,11 @@ bool HandleCaret(Textbuf *tb)
 
 bool QueryString::HasEditBoxFocus(const Window *w, int wid) const
 {
-	return ((w->window_class == WC_OSK &&
+	return (w->window_class == WC_OSK &&
 			_focused_window == w->parent &&
-			w->parent->focused_widget &&
+			w->parent->focused_widget != NULL &&
 			w->parent->focused_widget->type == WWT_EDITBOX) ||
-			w->IsWidgetGloballyFocused(wid));
+		w->IsWidgetGloballyFocused(wid);
 }
 
 HandleEditBoxResult QueryString::HandleEditBoxKey(Window *w, int wid, uint16 key, uint16 keycode, Window::EventState &state)
@@ -1958,13 +1958,11 @@ public:
 		uint diff = delta.x / 2;
 		this->widget[SLWW_SORT_BYNAME].right += diff;
 		this->widget[SLWW_SORT_BYDATE].left  += diff;
-		this->widget[SLWW_SORT_BYDATE].right += delta.x;
 
 		/* Same for widget 11 and 12 in save-dialog */
 		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
 			this->widget[SLWW_DELETE_SELECTION].right += diff;
 			this->widget[SLWW_SAVE_GAME].left  += diff;
-			this->widget[SLWW_SAVE_GAME].right += delta.x;
 		}
 
 		this->vscroll.cap += delta.y / 10;
