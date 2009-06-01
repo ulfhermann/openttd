@@ -1112,12 +1112,6 @@ void VehiclePayment(Station * curr_station, Vehicle *front_v, StationID next_sta
 	CompanyID old_company = _current_company;
 	_current_company = front_v->owner;
 
-	/* At this moment loading cannot be finished */
-	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
-
-	/* Start unloading in at the first possible moment */
-	front_v->load_unload_time_rem = 1;
-
 	/* Collect delivered industries */
 	static SmallIndustryList industry_set;
 	industry_set.Clear();
@@ -1325,6 +1319,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 				/* done delivering */
 				if (!v->cargo.Empty()) {
 					completely_emptied = false;
+					v->cargo.UpdateFlows(next_station, ge);
 				}
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
