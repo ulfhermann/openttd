@@ -815,7 +815,11 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		v->vehicle_flags = 0;
 		if (e->flags & ENGINE_EXCLUSIVE_PREVIEW) SetBit(v->vehicle_flags, VF_BUILT_AS_PROTOTYPE);
 
+		v->InvalidateNewGRFCacheOfChain();
+
 		v->cargo_cap = GetVehicleProperty(v, 0x0D, svi->capacity);
+
+		v->InvalidateNewGRFCacheOfChain();
 
 		VehicleMove(v, false);
 
@@ -842,7 +846,7 @@ CommandCost CmdSellShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p
 	Ship *v = Ship::GetIfValid(p1);
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
-	if (HASBITS(v->vehstatus, VS_CRASHED)) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
 
 	if (!v->IsStoppedInDepot()) {
 		return_cmd_error(STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT);
@@ -949,6 +953,7 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		v->cargo_type = new_cid;
 		v->cargo_subtype = new_subtype;
 		v->colourmap = PAL_NONE; // invalidate vehicle colour map
+		v->InvalidateNewGRFCacheOfChain();
 		InvalidateWindow(WC_VEHICLE_DETAILS, v->index);
 		InvalidateWindow(WC_VEHICLE_DEPOT, v->tile);
 		InvalidateWindowClassesData(WC_SHIPS_LIST, 0);
