@@ -283,8 +283,6 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFla
 			p->next = dest->UpdateFlowStatsTransfer(source, last_remaining - remaining_unload, curr_station);
 		} else /* UL_KEEP */ {
 			++c;
-			dest->UpdateFlowStats(source, last_remaining - remaining_unload, next_station);
-			p->next = next_station;
 		}
 	}
 

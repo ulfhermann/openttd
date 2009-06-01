@@ -1474,6 +1474,12 @@ void Vehicle::BeginLoading(StationID last_station_id)
 		IncreaseFrozen(curr_station, this, next_station_id);
 	}
 
+	/* At this moment loading cannot be finished */
+	ClrBit(this->vehicle_flags, VF_LOADING_FINISHED);
+
+	/* Start unloading in at the first possible moment */
+	this->load_unload_time_rem = 1;
+
 	if (this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
 		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
 		UpdateFlows(curr_station, this, next_station_id);
