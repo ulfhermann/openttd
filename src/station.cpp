@@ -82,6 +82,14 @@ Station::~Station()
 			ge.cargo.RerouteStalePackets(st->index, this->index, &ge);
 		}
 	}
+	
+	Vehicle *v;
+	FOR_ALL_VEHICLES(v) {
+		/* Forget about this station if this station is removed */
+		if (v->last_station_visited == this->index) {
+			v->last_station_visited = INVALID_STATION;
+		}
+	}
 
 	MarkDirty();
 	InvalidateWindowData(WC_STATION_LIST, this->owner, 0);

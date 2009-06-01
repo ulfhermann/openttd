@@ -188,9 +188,9 @@ bool HasVehicleOnTunnelBridge(TileIndex tile, TileIndex endtile, const Vehicle *
 }
 
 
-Vehicle::Vehicle()
+Vehicle::Vehicle(VehicleType type)
 {
-	this->type               = VEH_INVALID;
+	this->type               = type;
 	this->coord.left         = INVALID_COORD;
 	this->group_id           = DEFAULT_GROUP;
 	this->fill_percent_te_id = INVALID_TE_ID;
@@ -864,7 +864,7 @@ void CheckVehicleBreakdown(Vehicle *v)
 	v->reliability = rel = max((rel_old = v->reliability) - v->reliability_spd_dec, 0);
 	if ((rel_old >> 8) != (rel >> 8)) InvalidateWindow(WC_VEHICLE_DETAILS, v->index);
 
-	if (v->breakdown_ctr != 0 || v->vehstatus & VS_STOPPED ||
+	if (v->breakdown_ctr != 0 || (v->vehstatus & VS_STOPPED) ||
 			_settings_game.difficulty.vehicle_breakdowns < 1 ||
 			v->cur_speed < 5 || _game_mode == GM_MENU) {
 		return;
@@ -948,7 +948,7 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 		max += v->cargo_cap;
 		if (v->cargo_cap != 0 && colour != NULL) {
 			unloading += HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) ? 1 : 0;
-			loading |= !(u->current_order.GetUnloadType() & OUFB_UNLOAD) && st->goods[v->cargo_type].days_since_pickup != 255;
+			loading |= !(u->current_order.GetLoadType() & OLFB_NO_LOAD) && st->goods[v->cargo_type].days_since_pickup != 255;
 			cars++;
 		}
 	}
