@@ -110,10 +110,9 @@ static StationID FindNearestHangar(const Aircraft *v)
 		const AirportFTAClass *afc = st->Airport();
 		if (afc->nof_depots == 0 || (
 					/* don't crash the plane if we know it can't land at the airport */
-					afc->flags & AirportFTAClass::SHORT_STRIP &&
-					AircraftVehInfo(v->engine_type)->subtype & AIR_FAST &&
-					!_cheats.no_jetcrash.value
-				)) {
+					(afc->flags & AirportFTAClass::SHORT_STRIP) &&
+					(AircraftVehInfo(v->engine_type)->subtype & AIR_FAST) &&
+					!_cheats.no_jetcrash.value)) {
 			continue;
 		}
 
@@ -137,7 +136,7 @@ static bool HaveHangarInOrderList(Aircraft *v)
 
 	FOR_VEHICLE_ORDERS(v, order) {
 		const Station *st = Station::Get(order->station);
-		if (st->owner == v->owner && st->facilities & FACIL_AIRPORT) {
+		if (st->owner == v->owner && (st->facilities & FACIL_AIRPORT)) {
 			/* If an airport doesn't have a hangar, skip it */
 			if (st->Airport()->nof_depots != 0)
 				return true;
@@ -333,24 +332,6 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		u->subtype = AIR_SHADOW;
 		u->UpdateDeltaXY(INVALID_DIR);
 
-		if (v->cargo_type != CT_PASSENGERS) {
-			uint16 callback = CALLBACK_FAILED;
-
-			if (HasBit(EngInfo(p1)->callbackmask, CBM_VEHICLE_REFIT_CAPACITY)) {
-				callback = GetVehicleCallback(CBID_VEHICLE_REFIT_CAPACITY, 0, 0, v->engine_type, v);
-			}
-
-			if (callback == CALLBACK_FAILED) {
-				/* Callback failed, or not executed; use the default cargo capacity */
-				v->cargo_cap = AircraftDefaultCargoCapacity(v->cargo_type, avi);
-			} else {
-				v->cargo_cap = callback;
-			}
-
-			/* Set the 'second compartent' capacity to none */
-			u->cargo_cap = 0;
-		}
-
 		v->reliability = e->reliability;
 		v->reliability_spd_dec = e->reliability_spd_dec;
 		v->max_age = e->lifelength * DAYS_IN_LEAP_YEAR;
@@ -390,6 +371,28 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 		v->vehicle_flags = 0;
 		if (e->flags & ENGINE_EXCLUSIVE_PREVIEW) SetBit(v->vehicle_flags, VF_BUILT_AS_PROTOTYPE);
+
+		v->InvalidateNewGRFCacheOfChain();
+
+		if (v->cargo_type != CT_PASSENGERS) {
+			uint16 callback = CALLBACK_FAILED;
+
+			if (HasBit(EngInfo(p1)->callbackmask, CBM_VEHICLE_REFIT_CAPACITY)) {
+				callback = GetVehicleCallback(CBID_VEHICLE_REFIT_CAPACITY, 0, 0, v->engine_type, v);
+			}
+
+			if (callback == CALLBACK_FAILED) {
+				/* Callback failed, or not executed; use the default cargo capacity */
+				v->cargo_cap = AircraftDefaultCargoCapacity(v->cargo_type, avi);
+			} else {
+				v->cargo_cap = callback;
+			}
+
+			/* Set the 'second compartent' capacity to none */
+			u->cargo_cap = 0;
+		}
+
+		v->InvalidateNewGRFCacheOfChain();
 
 		UpdateAircraftCache(v);
 
@@ -445,7 +448,7 @@ CommandCost CmdSellAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_AIRCRAFT_MUST_BE_STOPPED);
 
-	if (HASBITS(v->vehstatus, VS_CRASHED)) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
 
 	CommandCost ret(EXPENSES_NEW_VEHICLES, -v->value);
 
@@ -566,6 +569,7 @@ CommandCost CmdRefitAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		v->cargo_type = new_cid;
 		v->cargo_subtype = new_subtype;
 		v->colourmap = PAL_NONE; // invalidate vehicle colour map
+		v->InvalidateNewGRFCacheOfChain();
 		InvalidateWindow(WC_VEHICLE_DETAILS, v->index);
 		InvalidateWindow(WC_VEHICLE_DEPOT, v->tile);
 		InvalidateWindowClassesData(WC_AIRCRAFT_LIST, 0);
@@ -1052,7 +1056,7 @@ static bool AircraftController(Aircraft *v)
 
 		GetNewVehiclePosResult gp;
 
-		if (dist < 4 || amd->flag & AMED_LAND) {
+		if (dist < 4 || (amd->flag & AMED_LAND)) {
 			/* move vehicle one pixel towards target */
 			gp.x = (v->x_pos != (x + amd->x)) ?
 					v->x_pos + ((x + amd->x > v->x_pos) ? 1 : -1) :
@@ -1329,8 +1333,8 @@ static void MaybeCrashAirplane(Aircraft *v)
 
 	/* FIXME -- MaybeCrashAirplane -> increase crashing chances of very modern airplanes on smaller than AT_METROPOLITAN airports */
 	uint16 prob = 0x10000 / 1500;
-	if (st->Airport()->flags & AirportFTAClass::SHORT_STRIP &&
-			AircraftVehInfo(v->engine_type)->subtype & AIR_FAST &&
+	if ((st->Airport()->flags & AirportFTAClass::SHORT_STRIP) &&
+			(AircraftVehInfo(v->engine_type)->subtype & AIR_FAST) &&
 			!_cheats.no_jetcrash.value) {
 		prob = 0x10000 / 20;
 	}
@@ -1612,7 +1616,7 @@ static void AircraftEventHandler_Flying(Aircraft *v, const AirportFTAClass *apc)
 	Station *st = Station::Get(v->targetairport);
 
 	/* runway busy or not allowed to use this airstation, circle */
-	if (apc->flags & (v->subtype == AIR_HELICOPTER ? AirportFTAClass::HELICOPTERS : AirportFTAClass::AIRPLANES) &&
+	if ((apc->flags & (v->subtype == AIR_HELICOPTER ? AirportFTAClass::HELICOPTERS : AirportFTAClass::AIRPLANES)) &&
 			st->airport_tile != INVALID_TILE &&
 			(st->owner == OWNER_NONE || st->owner == v->owner)) {
 		/* {32,FLYING,NOTHING_block,37}, {32,LANDING,N,33}, {32,HELILANDING,N,41},
@@ -1812,7 +1816,7 @@ static bool AirportHasBlock(Aircraft *v, const AirportFTA *current_pos, const Ai
 			airport_flags |= current_pos->block;
 		}
 
-		if (HASBITS(st->airport_flags, airport_flags)) {
+		if (st->airport_flags & airport_flags) {
 			v->cur_speed = 0;
 			v->subspeed = 0;
 			return true;
@@ -1853,7 +1857,7 @@ static bool AirportSetBlocks(Aircraft *v, const AirportFTA *current_pos, const A
 		if (current_pos->block == next->block) airport_flags ^= next->block;
 
 		Station *st = Station::Get(v->targetairport);
-		if (HASBITS(st->airport_flags, airport_flags)) {
+		if (st->airport_flags & airport_flags) {
 			v->cur_speed = 0;
 			v->subspeed = 0;
 			return false;
@@ -1907,7 +1911,7 @@ static bool AirportFindFreeTerminal(Aircraft *v, const AirportFTAClass *apc)
 
 		while (temp != NULL) {
 			if (temp->heading == 255) {
-				if (!HASBITS(st->airport_flags, temp->block)) {
+				if (!(st->airport_flags & temp->block)) {
 					/* read which group do we want to go to?
 					 * (the first free group) */
 					uint target_group = temp->next_position + 1;
@@ -1958,7 +1962,7 @@ static bool AirportFindFreeHelipad(Aircraft *v, const AirportFTAClass *apc)
 
 		while (temp != NULL) {
 			if (temp->heading == 255) {
-				if (!HASBITS(st->airport_flags, temp->block)) {
+				if (!(st->airport_flags & temp->block)) {
 
 					/* read which group do we want to go to?
 					 * (the first free group) */

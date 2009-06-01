@@ -241,13 +241,15 @@ void TrainConsistChanged(Train *v, bool same_length)
 
 		/* Set user defined data to its default value */
 		u->tcache.user_def_data = rvi_u->user_def_data;
-		u->vcache.cache_valid = 0;
+		v->InvalidateNewGRFCache();
+		u->InvalidateNewGRFCache();
 	}
 
 	for (Train *u = v; u != NULL; u = u->Next()) {
 		/* Update user defined data (must be done before other properties) */
 		u->tcache.user_def_data = GetVehicleProperty(u, 0x25, u->tcache.user_def_data);
-		u->vcache.cache_valid = 0;
+		v->InvalidateNewGRFCache();
+		u->InvalidateNewGRFCache();
 	}
 
 	for (Train *u = v; u != NULL; u = u->Next()) {
@@ -333,12 +335,14 @@ void TrainConsistChanged(Train *v, bool same_length)
 		if (!same_length) u->tcache.cached_veh_length = veh_len;
 
 		v->tcache.cached_total_length += u->tcache.cached_veh_length;
-		u->vcache.cache_valid = 0;
+		v->InvalidateNewGRFCache();
+		u->InvalidateNewGRFCache();
 	}
 
 	/* store consist weight/max speed in cache */
 	v->tcache.cached_max_speed = max_speed;
 	v->tcache.cached_tilt = train_can_tilt;
+	v->tcache.cached_max_curve_speed = GetTrainCurveSpeedLimit(v);
 
 	/* recalculate cached weights and power too (we do this *after* the rest, so it is known which wagons are powered and need extra weight added) */
 	TrainCargoChanged(v);
@@ -403,12 +407,19 @@ int GetTrainStopLocation(StationID station_id, TileIndex tile, const Train *v, i
 	return stop - (v->tcache.cached_veh_length + 1) / 2;
 }
 
-/** new acceleration*/
-static int GetTrainAcceleration(Train *v, bool mode)
+
+/**
+ * Computes train speed limit caused by curves
+ * @param v first vehicle of consist
+ * @return imposed speed limit
+ */
+int GetTrainCurveSpeedLimit(Train *v)
 {
 	static const int absolute_max_speed = UINT16_MAX;
 	int max_speed = absolute_max_speed;
-	int speed = v->cur_speed * 10 / 16; // km-ish/h -> mp/h
+
+	if (_settings_game.vehicle.train_acceleration_model == TAM_ORIGINAL) return max_speed;
+
 	int curvecount[2] = {0, 0};
 
 	/* first find the curve speed limit */
@@ -442,13 +453,11 @@ static int GetTrainAcceleration(Train *v, bool mode)
 		}
 	}
 
-	if ((curvecount[0] != 0 || curvecount[1] != 0) && max_speed > 88) {
-		int total = curvecount[0] + curvecount[1];
-
+	if (numcurve > 0 && max_speed > 88) {
 		if (curvecount[0] == 1 && curvecount[1] == 1) {
 			max_speed = absolute_max_speed;
-		} else if (total > 1) {
-			if (numcurve > 0) sum /= numcurve;
+		} else {
+			sum /= numcurve;
 			max_speed = 232 - (13 - Clamp(sum, 1, 12)) * (13 - Clamp(sum, 1, 12));
 		}
 	}
@@ -463,6 +472,16 @@ static int GetTrainAcceleration(Train *v, bool mode)
 			max_speed += max_speed / 5;
 		}
 	}
+
+	return max_speed;
+}
+
+/** new acceleration*/
+static int GetTrainAcceleration(Train *v, bool mode)
+{
+	int max_speed = v->tcache.cached_max_curve_speed;
+	assert(max_speed == GetTrainCurveSpeedLimit(v)); // safety check, will be removed later
+	int speed = v->cur_speed * 10 / 16; // km-ish/h -> mp/h
 
 	if (IsTileType(v->tile, MP_STATION) && IsFrontEngine(v)) {
 		StationID sid = GetStationIndex(v->tile);
@@ -659,7 +678,7 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 			/* do not connect new wagon with crashed/flooded consists */
 			if (w->tile == tile && IsFreeWagon(w) &&
 					w->engine_type == engine &&
-					!HASBITS(w->vehstatus, VS_CRASHED)) {
+					!(w->vehstatus & VS_CRASHED)) {
 				u = GetLastVehicleInChain(w);
 				break;
 			}
@@ -976,7 +995,7 @@ static Train *FindGoodVehiclePos(const Train *src)
 
 	Train *dst;
 	FOR_ALL_TRAINS(dst) {
-		if (IsFreeWagon(dst) && dst->tile == tile && !HASBITS(dst->vehstatus, VS_CRASHED)) {
+		if (IsFreeWagon(dst) && dst->tile == tile && !(dst->vehstatus & VS_CRASHED)) {
 			/* check so all vehicles in the line have the same engine. */
 			Train *t = dst;
 			while (t->engine_type == eng) {
@@ -1046,7 +1065,7 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	if (src == NULL || !CheckOwnership(src->owner)) return CMD_ERROR;
 
 	/* Do not allow moving crashed vehicles inside the depot, it is likely to cause asserts later */
-	if (HASBITS(src->vehstatus, VS_CRASHED)) return CMD_ERROR;
+	if (src->vehstatus & VS_CRASHED) return CMD_ERROR;
 
 	/* if nothing is selected as destination, try and find a matching vehicle to drag to. */
 	Train *dst;
@@ -1057,7 +1076,7 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		if (dst == NULL || !CheckOwnership(dst->owner)) return CMD_ERROR;
 
 		/* Do not allow appending to crashed vehicles, too */
-		if (HASBITS(dst->vehstatus, VS_CRASHED)) return CMD_ERROR;
+		if (dst->vehstatus & VS_CRASHED) return CMD_ERROR;
 	}
 
 	/* if an articulated part is being handled, deal with its parent vehicle */
@@ -1397,7 +1416,7 @@ CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (p2 > 1) return CMD_ERROR;
 
-	if (HASBITS(v->vehstatus, VS_CRASHED)) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
 
 	while (IsArticulatedPart(v)) v = v->Previous();
 	Train *first = v->First();
@@ -1540,7 +1559,7 @@ CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 			}
 
 			/* 3. If it is still a valid train after selling, update its acceleration and cached values */
-			if (flags & DC_EXEC && first != NULL) {
+			if ((flags & DC_EXEC) && first != NULL) {
 				NormaliseTrainConsist(first);
 				TrainConsistChanged(first, false);
 				UpdateTrainGroupID(first);
@@ -1702,7 +1721,7 @@ static Vehicle *TrainOnTileEnum(Vehicle *v, void *)
 static Vehicle *TrainApproachingCrossingEnum(Vehicle *v, void *data)
 {
 	/* not a train || not front engine || crashed */
-	if (v->type != VEH_TRAIN || !IsFrontEngine(v) || v->vehstatus & VS_CRASHED) return NULL;
+	if (v->type != VEH_TRAIN || !IsFrontEngine(v) || (v->vehstatus & VS_CRASHED)) return NULL;
 
 	TileIndex tile = *(TileIndex*)data;
 
@@ -1971,7 +1990,7 @@ CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32
 		}
 	} else {
 		/* turn the whole train around */
-		if (v->vehstatus & VS_CRASHED || v->breakdown_ctr != 0) return CMD_ERROR;
+		if ((v->vehstatus & VS_CRASHED) || v->breakdown_ctr != 0) return CMD_ERROR;
 
 		if (flags & DC_EXEC) {
 			/* Properly leave the station if we are loading and won't be loading anymore */
@@ -2254,7 +2273,7 @@ static void HandleLocomotiveSmokeCloud(const Train *v)
 {
 	bool sound = false;
 
-	if (v->vehstatus & VS_TRAIN_SLOWING || v->load_unload_time_rem != 0 || v->cur_speed < 2) {
+	if ((v->vehstatus & VS_TRAIN_SLOWING) || v->load_unload_time_rem != 0 || v->cur_speed < 2) {
 		return;
 	}
 
@@ -2350,7 +2369,7 @@ static void CheckNextTrainTile(Train *v)
 	if (_settings_game.pf.path_backoff_interval == 255) return;
 
 	/* Exit if we reached our destination depot or are inside a depot. */
-	if ((v->tile == v->dest_tile && v->current_order.IsType(OT_GOTO_DEPOT)) || v->track & TRACK_BIT_DEPOT) return;
+	if ((v->tile == v->dest_tile && v->current_order.IsType(OT_GOTO_DEPOT)) || (v->track & TRACK_BIT_DEPOT)) return;
 	/* Exit if we are on a station tile and are going to stop. */
 	if (IsRailwayStationTile(v->tile) && v->current_order.ShouldStopAtStation(v, GetStationIndex(v->tile))) return;
 	/* Exit if the current order doesn't have a destination, but the train has orders. */
@@ -3302,7 +3321,7 @@ static int UpdateTrainSpeed(Train *v)
 {
 	uint accel;
 
-	if (v->vehstatus & VS_STOPPED || HasBit(v->flags, VRF_REVERSING) || HasBit(v->flags, VRF_TRAIN_STUCK)) {
+	if ((v->vehstatus & VS_STOPPED) || HasBit(v->flags, VRF_REVERSING) || HasBit(v->flags, VRF_TRAIN_STUCK)) {
 		switch (_settings_game.vehicle.train_acceleration_model) {
 			default: NOT_REACHED();
 			case TAM_ORIGINAL:  accel = v->acceleration * -4; break;
@@ -3421,18 +3440,6 @@ static const RailtypeSlowdownParams _railtype_slowdown[] = {
 	{256 / 4, 256 / 2, 256 / 4, 2}, ///< monorail
 	{0,       256 / 2, 256 / 4, 2}, ///< maglev
 };
-
-/** Modify the speed of the vehicle due to a turn */
-static inline void AffectSpeedByDirChange(Train *v, Direction new_dir)
-{
-	if (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL) return;
-
-	DirDiff diff = DirDifference(v->direction, new_dir);
-	if (diff == DIRDIFF_SAME) return;
-
-	const RailtypeSlowdownParams *rsp = &_railtype_slowdown[v->railtype];
-	v->cur_speed -= (diff == DIRDIFF_45RIGHT || diff == DIRDIFF_45LEFT ? rsp->small_turn : rsp->large_turn) * v->cur_speed >> 8;
-}
 
 /** Modify the speed of the vehicle due to a change in altitude */
 static inline void AffectSpeedByZChange(Train *v, byte old_z)
@@ -3567,7 +3574,7 @@ static Vehicle *FindTrainCollideEnum(Vehicle *v, void *data)
 		 * As there might be more than two trains involved, we have to do that for all vehicles */
 		const Train *u;
 		FOR_ALL_TRAINS(u) {
-			if (HASBITS(u->vehstatus, VS_CRASHED) && (u->track & TRACK_BIT_DEPOT) == TRACK_BIT_NONE) {
+			if ((u->vehstatus & VS_CRASHED) && (u->track & TRACK_BIT_DEPOT) == TRACK_BIT_NONE) {
 				TrackBits trackbits = u->track;
 				if ((trackbits & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
 					/* Vehicle is inside a wormhole, v->track contains no useful value then. */
@@ -3634,7 +3641,9 @@ static Vehicle *CheckVehicleAtSignal(Vehicle *v, void *data)
 
 static void TrainController(Train *v, Vehicle *nomove)
 {
+	Train *first = v->First();
 	Train *prev;
+	bool direction_changed = false; // has direction of any part changed?
 
 	/* For every vehicle after and including the given vehicle */
 	for (prev = v->Previous(); v != nomove; prev = v, v = v->Next()) {
@@ -3701,7 +3710,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 					assert(chosen_track & (bits | GetReservedTrackbits(gp.new_tile)));
 
 					/* Check if it's a red signal and that force proceed is not clicked. */
-					if (red_signals & chosen_track && v->force_proceed == 0) {
+					if ((red_signals & chosen_track) && v->force_proceed == 0) {
 						/* In front of a red signal */
 						Trackdir i = FindFirstTrackdir(trackdirbits);
 
@@ -3814,9 +3823,15 @@ static void TrainController(Train *v, Vehicle *nomove)
 				 * has been updated by AfterSetTrainPos() */
 				update_signals_crossing = true;
 
-				if (prev == NULL) AffectSpeedByDirChange(v, chosen_dir);
-
-				v->direction = chosen_dir;
+				if (chosen_dir != v->direction) {
+					if (prev == NULL && _settings_game.vehicle.train_acceleration_model == TAM_ORIGINAL) {
+						const RailtypeSlowdownParams *rsp = &_railtype_slowdown[v->railtype];
+						DirDiff diff = DirDifference(v->direction, chosen_dir);
+						v->cur_speed -= (diff == DIRDIFF_45RIGHT || diff == DIRDIFF_45LEFT ? rsp->small_turn : rsp->large_turn) * v->cur_speed >> 8;
+					}
+					direction_changed = true;
+					v->direction = chosen_dir;
+				}
 
 				if (IsFrontEngine(v)) {
 					v->load_unload_time_rem = 0;
@@ -3901,6 +3916,9 @@ static void TrainController(Train *v, Vehicle *nomove)
 		/* Do not check on every tick to save some computing time. */
 		if (IsFrontEngine(v) && v->tick_counter % _settings_game.pf.path_backoff_interval == 0) CheckNextTrainTile(v);
 	}
+
+	if (direction_changed) first->tcache.cached_max_curve_speed = GetTrainCurveSpeedLimit(first);
+
 	return;
 
 invalid_rail:
@@ -4282,7 +4300,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 	}
 
 	/* exit if train is stopped */
-	if (v->vehstatus & VS_STOPPED && v->cur_speed == 0) return true;
+	if ((v->vehstatus & VS_STOPPED) && v->cur_speed == 0) return true;
 
 	bool valid_order = !v->current_order.IsType(OT_NOTHING) && v->current_order.GetType() != OT_CONDITIONAL;
 	if (ProcessOrders(v) && CheckReverseTrain(v)) {
@@ -4347,7 +4365,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 	int j = UpdateTrainSpeed(v);
 
 	/* we need to invalidate the widget if we are stopping from 'Stopping 0 km/h' to 'Stopped' */
-	if (v->cur_speed == 0 && v->tcache.last_speed == 0 && v->vehstatus & VS_STOPPED) {
+	if (v->cur_speed == 0 && v->tcache.last_speed == 0 && (v->vehstatus & VS_STOPPED)) {
 		InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
 
@@ -4439,7 +4457,7 @@ bool Train::Tick()
 		assert(IsFrontEngine(this));
 
 		return TrainLocoHandler(this, true);
-	} else if (IsFreeWagon(this) && HASBITS(this->vehstatus, VS_CRASHED)) {
+	} else if (IsFreeWagon(this) && (this->vehstatus & VS_CRASHED)) {
 		/* Delete flooded standalone wagon chain */
 		if (++this->crash_anim_pos >= 4400) {
 			delete this;
