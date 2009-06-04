@@ -151,6 +151,10 @@ enum SizingType {
 	ST_RESIZE,   ///< Resize the nested widget tree.
 };
 
+/* Forward declarations. */
+class NWidgetCore;
+struct Scrollbar;
+
 /**
  * Baseclass for nested widgets.
  * @invariant After initialization, \f$current\_x = smallest\_x + n * resize\_x, for n \geq 0\f$.
@@ -165,6 +169,10 @@ public:
 	virtual void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl) = 0;
 
 	virtual void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl) = 0;
+	virtual void FillNestedArray(NWidgetCore **array, uint length) = 0;
+
+	virtual NWidgetCore *GetWidgetFromPos(int x, int y) = 0;
+	virtual NWidgetBase *GetWidgetOfType(WidgetType tp) = 0;
 
 	/**
 	 * Set additional space (padding) around the widget.
@@ -183,6 +191,9 @@ public:
 
 	inline uint GetHorizontalStepSize(SizingType sizing) const;
 	inline uint GetVerticalStepSize(SizingType sizing) const;
+
+	virtual void Draw(const Window *w) = 0;
+	virtual void Invalidate(const Window *w) const;
 
 	WidgetType type;      ///< Type of the widget / nested widget.
 	bool fill_x;          ///< Allow horizontal filling from initial size.
@@ -249,6 +260,16 @@ public:
 	uint min_y; ///< Minimal vertical size of only this widget.
 };
 
+/** Nested widget flags that affect display and interaction withe 'real' widgets. */
+enum NWidgetDisplay {
+	NDB_LOWERED  = 0, ///< Widget is lowered (pressed down) bit.
+	NDB_DISABLED = 1, ///< Widget is disabled (greyed out) bit.
+
+	ND_LOWERED  = 1 << NDB_LOWERED,  ///< Bit value of the lowered flag.
+	ND_DISABLED = 1 << NDB_DISABLED, ///< Bit value of the disabled flag.
+};
+DECLARE_ENUM_AS_BIT_SET(NWidgetDisplay);
+
 /** Base class for a 'real' widget.
  * @ingroup NestedWidgets */
 class NWidgetCore : public NWidgetResizeBase {
@@ -258,14 +279,54 @@ public:
 	void SetIndex(int index);
 	void SetDataTip(uint16 widget_data, StringID tool_tip);
 
+	inline void SetLowered(bool lowered);
+	inline bool IsLowered();
+	inline void SetDisabled(bool disabled);
+	inline bool IsDisabled();
+
 	int SetupSmallestSize();
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
+	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
 
-	Colours colour;     ///< Colour of this widget.
-	int index;          ///< Index of the nested widget in the widget array of the window (\c -1 means 'not used').
-	uint16 widget_data; ///< Data of the widget. @see Widget::data
-	StringID tool_tip;  ///< Tooltip of the widget. @see Widget::tootips
+	virtual Scrollbar *FindScrollbar(Window *w, bool allow_next = true) = 0;
+
+	NWidgetDisplay disp_flags; ///< Flags that affect display and interaction with the widget.
+	Colours colour;            ///< Colour of this widget.
+	int index;                 ///< Index of the nested widget in the widget array of the window (\c -1 means 'not used').
+	uint16 widget_data;        ///< Data of the widget. @see Widget::data
+	StringID tool_tip;         ///< Tooltip of the widget. @see Widget::tootips
 };
+
+/**
+ * Lower or raise the widget.
+ * @param lowered Widget must be lowered (drawn pressed down).
+ */
+inline void NWidgetCore::SetLowered(bool lowered)
+{
+	this->disp_flags = lowered ? SETBITS(this->disp_flags, ND_LOWERED) : CLRBITS(this->disp_flags, ND_LOWERED);
+}
+
+/** Return whether the widget is lowered. */
+inline bool NWidgetCore::IsLowered()
+{
+	return HasBit(this->disp_flags, NDB_LOWERED);
+}
+
+/**
+ * Disable (grey-out) or enable the widget.
+ * @param disabled Widget must be disabled.
+ */
+inline void NWidgetCore::SetDisabled(bool disabled)
+{
+	this->disp_flags = disabled ? SETBITS(this->disp_flags, ND_DISABLED) : CLRBITS(this->disp_flags, ND_DISABLED);
+}
+
+/** Return whether the widget is disabled. */
+inline bool NWidgetCore::IsDisabled()
+{
+	return HasBit(this->disp_flags, NDB_DISABLED);
+}
+
 
 /** Baseclass for container widgets.
  * @ingroup NestedWidgets */
@@ -275,9 +336,12 @@ public:
 	~NWidgetContainer();
 
 	void Add(NWidgetBase *wid);
+	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
 
 	/** Return whether the container is empty. */
 	inline bool IsEmpty() { return head == NULL; };
+
+	/* virtual */ NWidgetBase *GetWidgetOfType(WidgetType tp);
 
 protected:
 	NWidgetBase *head; ///< Pointer to first widget in container.
@@ -294,6 +358,9 @@ public:
 	int SetupSmallestSize();
 	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl);
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
+
+	/* virtual */ void Draw(const Window *w);
+	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
 };
 
 /** Container with pre/inter/post child space. */
@@ -302,6 +369,9 @@ public:
 	NWidgetPIPContainer(WidgetType tp);
 
 	void SetPIP(uint8 pip_pre, uint8 pip_inter, uint8 pip_post);
+
+	/* virtual */ void Draw(const Window *w);
+	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
 
 protected:
 	uint8 pip_pre;     ///< Amount of space before first widget.
@@ -353,6 +423,12 @@ public:
 
 	int SetupSmallestSize();
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
+	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
+
+	/* virtual */ void Draw(const Window *w);
+	/* virtual */ void Invalidate(const Window *w) const;
+	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
+	/* virtual */ NWidgetBase *GetWidgetOfType(WidgetType tp);
 };
 
 /** Nested widget with a child.
@@ -369,6 +445,13 @@ public:
 	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl);
 
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
+	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
+
+	/* virtual */ void Draw(const Window *w);
+	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
+	/* virtual */ NWidgetBase *GetWidgetOfType(WidgetType tp);
+	/* virtual */ Scrollbar *FindScrollbar(Window *w, bool allow_next = true);
+
 private:
 	NWidgetPIPContainer *child; ///< Child widget.
 };
@@ -378,6 +461,12 @@ private:
 class NWidgetLeaf : public NWidgetCore {
 public:
 	NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, StringID tip);
+
+	/* virtual */ void Draw(const Window *w);
+	/* virtual */ void Invalidate(const Window *w) const;
+	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
+	/* virtual */ NWidgetBase *GetWidgetOfType(WidgetType tp);
+	/* virtual */ Scrollbar *FindScrollbar(Window *w, bool allow_next = true);
 };
 
 Widget *InitializeNWidgets(NWidgetBase *nwid, bool rtl = false);
