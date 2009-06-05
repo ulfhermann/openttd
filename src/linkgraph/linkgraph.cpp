@@ -8,8 +8,8 @@
 #include "../variables.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
+#include "../debug.h"
 #include <queue>
-#include <iostream>
 
 LinkGraph _link_graphs[NUM_CARGO];
 
@@ -173,28 +173,27 @@ LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID col) :
 }
 
 void LinkGraph::Join() {
-	if (jobs.empty()) {
-		return;
-	}
-	LinkGraphJob * job = jobs.front();
-	assert(job != NULL);
+	while (!jobs.empty()) {
+		LinkGraphJob * job = jobs.front();
+		assert(job != NULL);
 
-	if (job->GetJoinDate() > _date) {
-		return;
-	}
-	job->Join();
-
-	LinkGraphComponent * comp = job->GetComponent();
-
-	for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
-		Node & node = comp->GetNode(node_id);
-		if (Station::IsValidID(node.station)) {
-			FlowStatMap & station_flows = Station::Get(node.station)->goods[cargo].flows;
-			node.ExportFlows(station_flows, cargo);
+		if (job->GetJoinDate() > _date) {
+			return;
 		}
+		job->Join();
+
+		LinkGraphComponent * comp = job->GetComponent();
+
+		for(NodeID node_id = 0; node_id < comp->GetSize(); ++node_id) {
+			Node & node = comp->GetNode(node_id);
+			if (Station::IsValidID(node.station)) {
+				FlowStatMap & station_flows = Station::Get(node.station)->goods[cargo].flows;
+				node.ExportFlows(station_flows, cargo);
+			}
+		}
+		delete job;
+		jobs.pop_front();
 	}
-	delete job;
-	jobs.pop_front();
 }
 
 /**
@@ -294,6 +293,7 @@ LinkGraphJob::~LinkGraphJob() {
 		delete handler;
 	}
 	handlers.clear();
+	DEBUG(misc, 2, "removing job for cargo %d with index %d and join date %d at %d", component->GetCargo(), component->GetIndex(), join_date, _date);
 	delete component;
 	delete thread;
 }
@@ -353,7 +353,6 @@ Path::Path(NodeID n, bool source)  :
 {}
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
-	join_date = _date + component->GetSettings().recalc_interval;
 	AddHandler(new DemandCalculator);
 	AddHandler(new MCF1stPass);
 	AddHandler(new FlowMapper);
@@ -374,15 +373,19 @@ void LinkGraphJob::SpawnThread(CargoID cargo) {
 
 LinkGraphJob::LinkGraphJob(LinkGraphComponent * c) :
 	thread(NULL),
-	join_date(0),
+	join_date(_date + c->GetSettings().recalc_interval),
 	component(c)
-{}
+{
+	DEBUG(misc, 2, "new job for cargo %d with index %d and join date %d at %d", c->GetCargo(), c->GetIndex(), join_date, _date);
+}
 
 LinkGraphJob::LinkGraphJob(LinkGraphComponent * c, Date join) :
 	thread(NULL),
 	join_date(join),
 	component(c)
-{}
+{
+	DEBUG(misc, 2, "new job for cargo %d with index %d and join date %d at %d", c->GetCargo(), c->GetIndex(), join_date, _date);
+}
 
 Node::~Node() {
 	for (PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
