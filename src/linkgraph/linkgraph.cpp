@@ -6,6 +6,7 @@
 #include "../variables.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
+#include "../debug.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -165,19 +166,18 @@ LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID col) :
 }
 
 void LinkGraph::Join() {
-	if (jobs.empty()) {
-		return;
-	}
-	LinkGraphJob * job = jobs.front();
-	assert(job != NULL);
+	while (!jobs.empty()) {
+		LinkGraphJob * job = jobs.front();
+		assert(job != NULL);
 
-	if (job->GetJoinDate() > _date) {
-		return;
-	}
-	job->Join();
+		if (job->GetJoinDate() > _date) {
+			return;
+		}
+		job->Join();
 
-	delete job;
-	jobs.pop_front();
+		delete job;
+		jobs.pop_front();
+	}
 }
 
 void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
@@ -207,6 +207,7 @@ LinkGraphJob::~LinkGraphJob() {
 		delete handler;
 	}
 	handlers.clear();
+	DEBUG(misc, 2, "removing job for cargo %d with index %d and join date %d at %d", component->GetCargo(), component->GetIndex(), join_date, _date);
 	delete component;
 	delete thread;
 }
@@ -217,7 +218,6 @@ void RunLinkGraphJob(void * j) {
 }
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
-	join_date = _date + component->GetSettings().recalc_interval;
 	AddHandler(new DemandCalculator);
 	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
@@ -234,15 +234,19 @@ void LinkGraphJob::SpawnThread(CargoID cargo) {
 
 LinkGraphJob::LinkGraphJob(LinkGraphComponent * c) :
 	thread(NULL),
-	join_date(0),
+	join_date(_date + c->GetSettings().recalc_interval),
 	component(c)
-{}
+{
+	DEBUG(misc, 2, "new job for cargo %d with index %d and join date %d at %d", c->GetCargo(), c->GetIndex(), join_date, _date);
+}
 
 LinkGraphJob::LinkGraphJob(LinkGraphComponent * c, Date join) :
 	thread(NULL),
 	join_date(join),
 	component(c)
-{}
+{
+	DEBUG(misc, 2, "new job for cargo %d with index %d and join date %d at %d", c->GetCargo(), c->GetIndex(), join_date, _date);
+}
 
 void LinkGraph::Clear() {
 	for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
