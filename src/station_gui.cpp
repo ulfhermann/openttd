@@ -1254,7 +1254,7 @@ struct StationViewWindow : public Window {
 		CargoDataEntry cargo;
 		BuildCargoList(&cargo, st);
 
-		SetVScrollCount(this, cargo.Size() + 1); // update scrollbar
+		SetVScrollCount(this, cargo.Size()); // update scrollbar
 
 		/* disable some buttons */
 		this->SetWidgetDisabledState(SVW_RENAME,   st->owner != _local_company);
