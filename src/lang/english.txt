@@ -24,15 +24,16 @@ STR_STATION_VIEW_PLANNED                                        :Planned
 STR_STATION_VIEW_SENT                                           :Sent
 STR_TOGGLE_CARGO_VIEW                                           :{BLACK}Toggle between waiting, planned and sent cargo
 STR_STATION_VIEW_WAITING_CARGO                                  :{WHITE}{CARGO}
-STR_STATION_FROM                                                :{YELLOW}{COMMA} from {STATION}
-STR_STATION_VIA                                                 :{YELLOW}{COMMA} via {STATION}
-STR_STATION_TO                                                  :{YELLOW}{COMMA} to {STATION}
-STR_STATION_FROM_ANY                                            :{RED}{COMMA} from unknown station
-STR_STATION_TO_ANY                                              :{RED}{COMMA} to any station
-STR_STATION_VIA_ANY                                             :{RED}{COMMA} via any station
-STR_STATION_FROM_HERE                                           :{GREEN}{COMMA} from this station
-STR_STATION_VIA_HERE                                            :{GREEN}{COMMA} stopping at this station
-STR_STATION_TO_HERE                                             :{GREEN}{COMMA} to this station
+STR_STATION_FROM                                                :{YELLOW}{SHORTCARGO} from {STATION}
+STR_STATION_VIA                                                 :{YELLOW}{SHORTCARGO} via {STATION}
+STR_STATION_TO                                                  :{YELLOW}{SHORTCARGO} to {STATION}
+STR_STATION_FROM_ANY                                            :{RED}{SHORTCARGO} from unknown station
+STR_STATION_TO_ANY                                              :{RED}{SHORTCARGO} to any station
+STR_STATION_VIA_ANY                                             :{RED}{SHORTCARGO} via any station
+STR_STATION_FROM_HERE                                           :{GREEN}{SHORTCARGO} from this station
+STR_STATION_VIA_HERE                                            :{GREEN}{SHORTCARGO} stopping at this station
+STR_STATION_TO_HERE                                             :{GREEN}{SHORTCARGO} to this station
+STR_NONSTOP                                                     :{YELLOW}{SHORTCARGO} non-stop
 STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORTCARGO} en-route from {STATION})
 STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepts: {WHITE}
 STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepts: {GOLD}

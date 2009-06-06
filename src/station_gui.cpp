@@ -1169,14 +1169,40 @@ struct StationViewWindow : public Window {
 		if (station == this->window_number) {
 			return here;
 		} else if (station != INVALID_STATION) {
-			SetDParam(1, station);
+			SetDParam(2, station);
 			return other_station;
 		} else {
 			return any;
 		}
 	}
 
-	int DrawEntries(CargoDataEntry * entry, int pos, int maxrows, int column) {
+	StringID SearchNonStop(CargoDataEntry * cd, StationID station, int column) {
+		CargoDataEntry * parent = cd->GetParent();
+		for (int i = column - 1; i > 0; --i) {
+			if (groupings[i] == DESTINATION) {
+				if (parent->GetStation() == station) {
+					return STR_NONSTOP;
+				} else {
+					return STR_STATION_VIA;
+				}
+			}
+			parent = parent->GetParent();
+		}
+
+		if (groupings[column + 1] == DESTINATION) {
+			CargoDataSet::iterator begin = cd->Begin();
+			CargoDataSet::iterator end = cd->End();
+			if (begin != end && ++(cd->Begin()) == end && (*(begin))->GetStation() == station) {
+				return STR_NONSTOP;
+			} else {
+				return STR_STATION_VIA;
+			}
+		}
+
+		return STR_STATION_VIA;
+	}
+
+	int DrawEntries(CargoDataEntry * entry, int pos, int maxrows, int column, CargoID cargo = CT_INVALID) {
 		if (sortings[column] == GROUPING) {
 			if (groupings[column] != CARGO) {
 				entry->Resort(ST_STATION, sort_orders[column]);
@@ -1186,13 +1212,19 @@ struct StationViewWindow : public Window {
 		}
 		for (CargoDataSet::iterator i = entry->Begin(); i != entry->End(); ++i) {
 			CargoDataEntry *cd = *i;
+
+			if (groupings[column] == CARGO) {
+				cargo = cd->GetCargo();
+			}
+
 			if (pos > -maxrows && --pos < 0) {
 				StringID str = STR_EMPTY;
 
+				SetDParam(0, cargo);
+				SetDParam(1, cd->GetCount());
+
 				if (groupings[column] == CARGO) {
 					str = STR_STATION_VIEW_WAITING_CARGO;
-					SetDParam(0, cd->GetCargo());
-					SetDParam(1, cd->GetCount());
 					DrawCargoIcons(
 							cd->GetCargo(),
 							cd->GetCount(),
@@ -1201,7 +1233,6 @@ struct StationViewWindow : public Window {
 							this->widget[SVW_WAITING].right - this->widget[SVW_WAITING].left - _spacing_icons
 					);
 				} else {
-					SetDParam(0, cd->GetCount());
 					StationID station = cd->GetStation();
 
 					switch(groupings[column]) {
@@ -1210,6 +1241,9 @@ struct StationViewWindow : public Window {
 						break;
 					case NEXT:
 						str = GetEntryString(station, STR_STATION_VIA_HERE, STR_STATION_VIA, STR_STATION_VIA_ANY);
+						if (str == STR_STATION_VIA) {
+							str = SearchNonStop(cd, station, column);
+						}
 						break;
 					case DESTINATION:
 						str = GetEntryString(station, STR_STATION_TO_HERE, STR_STATION_TO, STR_STATION_TO_ANY);
@@ -1241,7 +1275,7 @@ struct StationViewWindow : public Window {
 				}
 				SetDisplayedRow(cd);
 			}
-			pos = DrawEntries(cd, pos, maxrows, column + 1);
+			pos = DrawEntries(cd, pos, maxrows, column + 1, cargo);
 
 		}
 		return pos;
