@@ -1120,7 +1120,6 @@ void VehiclePayment(Station * curr_station, Vehicle *front_v, StationID next_sta
 	OrderUnloadFlags order_flags = curr->GetUnloadType();
 
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
-
 		CargoList & cargo_list = v->cargo;
 
 		/* No cargo to unload */
