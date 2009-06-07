@@ -1124,7 +1124,6 @@ void VehiclePayment(Vehicle *front_v)
 	industry_set.Clear();
 
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
-
 		/* No cargo to unload */
 		if (v->cargo_cap == 0 || v->cargo.Empty() || (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD)) continue;
 
