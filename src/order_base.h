@@ -124,12 +124,6 @@ public:
 	inline DestinationID GetDestination() const { return this->dest; }
 
 	/**
-	 * Finds out whether a train does stop at a station on its order list
-	 * @return true if the vehicle stops on this order, false otherwise
-	 */
-	bool IsStoppingOrder() const;
-
-	/**
 	 * Sets the destination of this order.
 	 * @param destination the new destination of the order.
 	 * @pre IsType(OT_GOTO_WAYPOINT) || IsType(OT_GOTO_DEPOT) || IsType(OT_GOTO_STATION).
