@@ -643,14 +643,18 @@ class SmallMapWindow : public Window
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
 
 private:
+	inline int ZoomScale(int coord) {
+		return coord * this->zoom / SMALLMAP_BASE_ZOOM;
+	}
+
 	inline int RemapX(int tile_x) {
 		/* divide each one separately because (a-b)/c != a/c-b/c in integer world */
-		return tile_x * this->zoom / SMALLMAP_BASE_ZOOM / TILE_SIZE - this->scroll_x / TILE_SIZE;
+		return ZoomScale(tile_x) / TILE_SIZE - this->scroll_x / TILE_SIZE;
 	}
 
 	inline int RemapY(int tile_y) {
 		/* divide each one separately because (a-b)/c != a/c-b/c in integer world */
-		return tile_y * this->zoom / SMALLMAP_BASE_ZOOM / TILE_SIZE - this->scroll_y / TILE_SIZE;
+		return ZoomScale(tile_y) / TILE_SIZE - this->scroll_y / TILE_SIZE;
 	}
 
 public:
@@ -821,8 +825,8 @@ public:
 			FOR_ALL_TOWNS(t) {
 				/* Remap the town coordinate */
 				Point pt = RemapCoords(
-					RemapX(TileX(t->xy)),
-					RemapY(TileY(t->xy)),
+					RemapX(TileX(t->xy) * TILE_SIZE),
+					RemapY(TileY(t->xy) * TILE_SIZE),
 					0);
 				x = pt.x - this->subscroll + 3 - (t->sign.width_2 >> 1);
 				y = pt.y;
@@ -848,10 +852,10 @@ public:
 
 			pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 
-			x = vp->virtual_left * this->zoom / SMALLMAP_BASE_ZOOM  - pt.x;
-			y = vp->virtual_top * this->zoom / SMALLMAP_BASE_ZOOM  - pt.y;
-			x2 = (x + vp->virtual_width * this->zoom / SMALLMAP_BASE_ZOOM ) / TILE_SIZE;
-			y2 = (y + vp->virtual_height * this->zoom / SMALLMAP_BASE_ZOOM ) / TILE_SIZE;
+			x = ZoomScale(vp->virtual_left) - pt.x;
+			y = ZoomScale(vp->virtual_top) - pt.y;
+			x2 = (x + ZoomScale(vp->virtual_width)) / TILE_SIZE;
+			y2 = (y + ZoomScale(vp->virtual_height)) / TILE_SIZE;
 			x /= TILE_SIZE;
 			y /= TILE_SIZE;
 
@@ -1136,7 +1140,7 @@ public:
 			x = -hvx;
 			sub = 0;
 		}
-		int maxx = (int)MapMaxX() * TILE_SIZE  * zoom / SMALLMAP_BASE_ZOOM - hvx;
+		int maxx = ZoomScale((int)MapMaxX() * TILE_SIZE) - hvx;
 		if (x > maxx) {
 			x = maxx;
 			sub = 0;
@@ -1145,7 +1149,7 @@ public:
 			y = -hvy;
 			sub = 0;
 		}
-		int maxy = (int)MapMaxY() * TILE_SIZE  * zoom / SMALLMAP_BASE_ZOOM - hvy;
+		int maxy = ZoomScale((int)MapMaxY() * TILE_SIZE) - hvy;
 			if (y > maxy) {
 			y = maxy;
 			sub = 0;
