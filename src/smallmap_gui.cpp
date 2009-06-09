@@ -990,7 +990,6 @@ public:
 
 			case SM_WIDGET_ZOOM_IN:
 				if (this->zoom < ZOOM_LVL_OUT_MAX) {
-					Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 					this->zoom++;
 					SndPlayFx(SND_15_BEEP);
 					this->SetDirty();
