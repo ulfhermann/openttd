@@ -10,7 +10,10 @@
 enum ZoomLevel {
 	/* Our possible zoom-levels */
 	ZOOM_LVL_BEGIN  = 0,
-	ZOOM_LVL_NORMAL = 0,
+	ZOOM_LVL_IN_8X  = 0,
+	ZOOM_LVL_IN_4X,
+	ZOOM_LVL_IN_2X,
+	ZOOM_LVL_NORMAL,
 	ZOOM_LVL_OUT_2X,
 	ZOOM_LVL_OUT_4X,
 	ZOOM_LVL_OUT_8X,
@@ -32,8 +35,11 @@ enum ZoomLevel {
 
 	ZOOM_LVL_DETAIL   = ZOOM_LVL_OUT_2X, ///< All zoomlevels below or equal to this, will result in details on the screen, like road-work, ...
 
-	ZOOM_LVL_MIN      = ZOOM_LVL_NORMAL,
+	ZOOM_LVL_MIN      = ZOOM_LVL_IN_8X,
 	ZOOM_LVL_MAX      = ZOOM_LVL_OUT_8X,
+
+	ZOOM_LVL_SPRITES_BEGIN = ZOOM_LVL_NORMAL, ///< lowest zoom level for which sprites should be generated
+	ZOOM_LVL_SPRITES_END   = ZOOM_LVL_END,
 };
 DECLARE_POSTFIX_INCREMENT(ZoomLevel)
 

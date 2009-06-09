@@ -266,7 +266,7 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::Al
 	/* lengths of streams */
 	uint32 lengths[ZOOM_LVL_COUNT][2];
 
-	for (ZoomLevel z = ZOOM_LVL_BEGIN; z < ZOOM_LVL_END; z++) {
+	for (ZoomLevel z = ZOOM_LVL_SPRITES_BEGIN; z < ZOOM_LVL_SPRITES_END; z++) {
 		const SpriteLoader::Sprite *src_orig = ResizeSprite(sprite, z);
 
 		uint size = src_orig->height * src_orig->width;
@@ -350,7 +350,7 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::Al
 	}
 
 	uint len = 0; // total length of data
-	for (ZoomLevel z = ZOOM_LVL_BEGIN; z < ZOOM_LVL_END; z++) {
+	for (ZoomLevel z = ZOOM_LVL_SPRITES_BEGIN; z < ZOOM_LVL_SPRITES_END; z++) {
 		len += lengths[z][0] + lengths[z][1];
 	}
 
@@ -363,8 +363,8 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::Al
 
 	SpriteData *dst = (SpriteData *)dest_sprite->data;
 
-	for (ZoomLevel z = ZOOM_LVL_BEGIN; z < ZOOM_LVL_END; z++) {
-		dst->offset[z][0] = z == ZOOM_LVL_BEGIN ? 0 : lengths[z - 1][1] + dst->offset[z - 1][1];
+	for (ZoomLevel z = ZOOM_LVL_SPRITES_BEGIN; z < ZOOM_LVL_SPRITES_END; z++) {
+		dst->offset[z][0] = z == ZOOM_LVL_SPRITES_BEGIN ? 0 : lengths[z - 1][1] + dst->offset[z - 1][1];
 		dst->offset[z][1] = lengths[z][0] + dst->offset[z][0];
 
 		memcpy(dst->data + dst->offset[z][0], dst_px_orig[z], lengths[z][0]);
