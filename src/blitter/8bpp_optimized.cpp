@@ -107,7 +107,7 @@ Sprite *Blitter_8bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::All
 	/* Make memory for all zoom-levels */
 	uint memory = sizeof(SpriteData);
 
-	for (ZoomLevel i = ZOOM_LVL_SPRITES_BEGIN; i < ZOOM_LVL_SPRITES_END; i++) {
+	for (ZoomLevel i = ZOOM_LVL_BEGIN; i < ZOOM_LVL_END; i++) {
 		memory += UnScaleByZoom(sprite->height, i) * UnScaleByZoom(sprite->width, i);
 	}
 
@@ -122,7 +122,7 @@ Sprite *Blitter_8bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::All
 	byte *dst = temp_dst->data;
 
 	/* Make the sprites per zoom-level */
-	for (ZoomLevel i = ZOOM_LVL_SPRITES_BEGIN; i < ZOOM_LVL_SPRITES_END; i++) {
+	for (ZoomLevel i = ZOOM_LVL_BEGIN; i < ZOOM_LVL_END; i++) {
 		/* Store the index table */
 		uint offset = dst - temp_dst->data;
 		temp_dst->offset[i] = offset;

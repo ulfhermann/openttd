@@ -146,7 +146,7 @@ static void StartSound(SoundID sound_id, int panning, uint volume)
 }
 
 
-static const byte _vol_factor_by_zoom[] = {255, 255, 255, 255, 190, 134, 87};
+static const byte _vol_factor_by_zoom[] = {255, 190, 134, 87};
 assert_compile(lengthof(_vol_factor_by_zoom) == ZOOM_LVL_COUNT);
 
 static const byte _sound_base_vol[] = {
