@@ -1725,7 +1725,7 @@ static Vehicle *TrainApproachingCrossingEnum(Vehicle *v, void *data)
 
 	TileIndex tile = *(TileIndex*)data;
 
-	if (TrainApproachingCrossingTile((Train *)v) != tile) return NULL;
+	if (TrainApproachingCrossingTile(Train::From(v)) != tile) return NULL;
 
 	return v;
 }
@@ -1800,7 +1800,7 @@ static void AdvanceWagonsBeforeSwap(Train *v)
 {
 	Train *base = v;
 	Train *first = base; // first vehicle to move
-	Train *last = (Train *)GetLastVehicleInChain(v); // last vehicle to move
+	Train *last = Train::From(GetLastVehicleInChain(v)); // last vehicle to move
 	uint length = CountVehiclesInChain(v);
 
 	while (length > 2) {
@@ -1849,7 +1849,7 @@ static void AdvanceWagonsAfterSwap(Train *v)
 
 	Train *base = v;
 	Train *first = base; // first vehicle to move
-	Train *last = (Train *)GetLastVehicleInChain(v); // last vehicle to move
+	Train *last = Train::From(GetLastVehicleInChain(v)); // last vehicle to move
 	uint length = CountVehiclesInChain(v);
 
 	/* we have to make sure all wagons that leave a depot because of train reversing are moved coorectly
@@ -1925,7 +1925,7 @@ static void ReverseTrainDirection(Train *v)
 	if (crossing != INVALID_TILE) MaybeBarCrossingWithSound(crossing);
 
 	/* If we are inside a depot after reversing, don't bother with path reserving. */
-	if (v->track & TRACK_BIT_DEPOT) {
+	if (v->track == TRACK_BIT_DEPOT) {
 		/* Can't be stuck here as inside a depot is always a safe tile. */
 		if (HasBit(v->flags, VRF_TRAIN_STUCK)) InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 		ClrBit(v->flags, VRF_TRAIN_STUCK);
@@ -2369,7 +2369,7 @@ static void CheckNextTrainTile(Train *v)
 	if (_settings_game.pf.path_backoff_interval == 255) return;
 
 	/* Exit if we reached our destination depot or are inside a depot. */
-	if ((v->tile == v->dest_tile && v->current_order.IsType(OT_GOTO_DEPOT)) || (v->track & TRACK_BIT_DEPOT)) return;
+	if ((v->tile == v->dest_tile && v->current_order.IsType(OT_GOTO_DEPOT)) || v->track == TRACK_BIT_DEPOT) return;
 	/* Exit if we are on a station tile and are going to stop. */
 	if (IsRailwayStationTile(v->tile) && v->current_order.ShouldStopAtStation(v, GetStationIndex(v->tile))) return;
 	/* Exit if the current order doesn't have a destination, but the train has orders. */
@@ -3104,7 +3104,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 	/* We have to handle depots specially as the track follower won't look
 	 * at the depot tile itself but starts from the next tile. If we are still
 	 * inside the depot, a depot reservation can never be ours. */
-	if (v->track & TRACK_BIT_DEPOT) {
+	if (v->track == TRACK_BIT_DEPOT) {
 		if (GetDepotWaypointReservation(v->tile)) {
 			if (mark_as_stuck) MarkTrainAsStuck(v);
 			return false;
@@ -3148,7 +3148,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 	}
 
 	/* If we are in a depot, tentativly reserve the depot. */
-	if (v->track & TRACK_BIT_DEPOT) {
+	if (v->track == TRACK_BIT_DEPOT) {
 		SetDepotWaypointReservation(v->tile, true);
 		if (_settings_client.gui.show_track_reservation) MarkTileDirtyByTile(v->tile);
 	}
@@ -3164,7 +3164,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 
 	if (!res_made) {
 		/* Free the depot reservation as well. */
-		if (v->track & TRACK_BIT_DEPOT) SetDepotWaypointReservation(v->tile, false);
+		if (v->track == TRACK_BIT_DEPOT) SetDepotWaypointReservation(v->tile, false);
 		return false;
 	}
 
@@ -3406,9 +3406,7 @@ static byte AfterSetTrainPos(Train *v, bool new_tile)
 
 			byte middle_z = GetSlopeZ((v->x_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE, (v->y_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE);
 
-			/* For some reason tunnel tiles are always given as sloped :(
-			 * But they are not sloped... */
-			if (middle_z != v->z_pos && !IsTunnelTile(TileVirtXY(v->x_pos, v->y_pos))) {
+			if (middle_z != v->z_pos) {
 				SetBit(v->flags, (middle_z > old_z) ? VRF_GOINGUP : VRF_GOINGDOWN);
 			}
 		}
@@ -3560,7 +3558,7 @@ static Vehicle *FindTrainCollideEnum(Vehicle *v, void *data)
 	Vehicle *coll = v->First();
 
 	/* can't collide with own wagons && can't crash in depot && the same height level */
-	if (coll != tcc->v && ((Train *)v)->track != TRACK_BIT_DEPOT && abs(v->z_pos - tcc->v->z_pos) < 6) {
+	if (coll != tcc->v && Train::From(v)->track != TRACK_BIT_DEPOT && abs(v->z_pos - tcc->v->z_pos) < 6) {
 		int x_diff = v->x_pos - tcc->v->x_pos;
 		int y_diff = v->y_pos - tcc->v->y_pos;
 
@@ -3568,18 +3566,18 @@ static Vehicle *FindTrainCollideEnum(Vehicle *v, void *data)
 		if (x_diff * x_diff + y_diff * y_diff > 25) return NULL;
 
 		/* crash both trains */
-		tcc->num += TrainCrashed((Train *)tcc->v);
-		tcc->num += TrainCrashed((Train *)coll);
+		tcc->num += TrainCrashed(Train::From(tcc->v));
+		tcc->num += TrainCrashed(Train::From(coll));
 
 		/* Try to reserve all tiles directly under the crashed trains.
 		 * As there might be more than two trains involved, we have to do that for all vehicles */
 		const Train *u;
 		FOR_ALL_TRAINS(u) {
-			if ((u->vehstatus & VS_CRASHED) && (u->track & TRACK_BIT_DEPOT) == TRACK_BIT_NONE) {
+			if ((u->vehstatus & VS_CRASHED) && u->track != TRACK_BIT_DEPOT) {
 				TrackBits trackbits = u->track;
-				if ((trackbits & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
+				if (trackbits == TRACK_BIT_WORMHOLE) {
 					/* Vehicle is inside a wormhole, v->track contains no useful value then. */
-					trackbits |= DiagDirToDiagTrackBits(GetTunnelBridgeDirection(u->tile));
+					trackbits = DiagDirToDiagTrackBits(GetTunnelBridgeDirection(u->tile));
 				}
 				TryReserveRailTrack(u->tile, TrackBitsToTrack(trackbits));
 			}
@@ -3633,8 +3631,8 @@ static Vehicle *CheckVehicleAtSignal(Vehicle *v, void *data)
 	DiagDirection exitdir = *(DiagDirection *)data;
 
 	/* front engine of a train, not inside wormhole or depot, not crashed */
-	if (v->type == VEH_TRAIN && IsFrontEngine(v) && (((Train *)v)->track & TRACK_BIT_MASK) != 0 && !(v->vehstatus & VS_CRASHED)) {
-		if (v->cur_speed <= 5 && TrainExitDir(v->direction, ((Train *)v)->track) == exitdir) return v;
+	if (v->type == VEH_TRAIN && IsFrontEngine(v) && (Train::From(v)->track & TRACK_BIT_MASK) && !(v->vehstatus & VS_CRASHED)) {
+		if (v->cur_speed <= 5 && TrainExitDir(v->direction, Train::From(v)->track) == exitdir) return v;
 	}
 
 	return NULL;
@@ -3943,11 +3941,11 @@ static Vehicle *CollectTrackbitsFromCrashedVehiclesEnum(Vehicle *v, void *data)
 	TrackBits *trackbits = (TrackBits *)data;
 
 	if (v->type == VEH_TRAIN && (v->vehstatus & VS_CRASHED) != 0) {
-		if ((((Train *)v)->track & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
+		if (Train::From(v)->track == TRACK_BIT_WORMHOLE) {
 			/* Vehicle is inside a wormhole, v->track contains no useful value then. */
 			*trackbits |= DiagDirToDiagTrackBits(GetTunnelBridgeDirection(v->tile));
 		} else {
-			*trackbits |= ((Train *)v)->track;
+			*trackbits |= Train::From(v)->track;
 		}
 	}
 
@@ -3990,9 +3988,9 @@ static void DeleteLastWagon(Train *v)
 	delete v;
 	v = NULL; // make sure nobody will try to read 'v' anymore
 
-	if ((trackbits & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
+	if (trackbits == TRACK_BIT_WORMHOLE) {
 		/* Vehicle is inside a wormhole, v->track contains no useful value then. */
-		trackbits |= DiagDirToDiagTrackBits(GetTunnelBridgeDirection(tile));
+		trackbits = DiagDirToDiagTrackBits(GetTunnelBridgeDirection(tile));
 	}
 
 	Track track = TrackBitsToTrack(trackbits);

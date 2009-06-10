@@ -912,9 +912,9 @@ bool AfterLoadGame()
 				continue;
 			}
 			if (v->type == VEH_TRAIN) {
-				((Train *)v)->track = TRACK_BIT_WORMHOLE;
+				Train::From(v)->track = TRACK_BIT_WORMHOLE;
 			} else {
-				((RoadVehicle *)v)->state = RVSB_WORMHOLE;
+				RoadVehicle::From(v)->state = RVSB_WORMHOLE;
 			}
 		}
 	}
@@ -1700,10 +1700,15 @@ bool AfterLoadGame()
 	if (CheckSavegameVersion(101)) {
 		Train *t;
 		FOR_ALL_TRAINS(t) {
-			if ((t->track & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
-				TryReserveRailTrack(t->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(t->tile)));
-			} else if ((t->track & TRACK_BIT_MASK) != TRACK_BIT_NONE) {
-				TryReserveRailTrack(t->tile, TrackBitsToTrack(t->track));
+			switch (t->track) {
+				case TRACK_BIT_WORMHOLE:
+					TryReserveRailTrack(t->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(t->tile)));
+					break;
+				case TRACK_BIT_DEPOT:
+					break;
+				default:
+					TryReserveRailTrack(t->tile, TrackBitsToTrack(t->track));
+					break;
 			}
 		}
 	}
@@ -1838,6 +1843,19 @@ bool AfterLoadGame()
 		Company *c;
 		FOR_ALL_COMPANIES(c) {
 			c->settings.vehicle = _old_vds;
+		}
+	}
+
+	if (CheckSavegameVersion(121)) {
+		/* Delete small ufos heading for non-existing vehicles */
+		Vehicle *v;
+		FOR_ALL_DISASTERVEHICLES(v) {
+			if (v->subtype == 2/*ST_SMALL_UFO*/ && v->current_order.GetDestination() != 0) {
+				const Vehicle *u = Vehicle::GetIfValid(v->dest_tile);
+				if (u == NULL || u->type != VEH_ROAD || !IsRoadVehFront(u)) {
+					delete v;
+				}
+			}
 		}
 	}
 
