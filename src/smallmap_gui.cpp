@@ -587,12 +587,12 @@ private:
 
 	inline int RemapX(int tile_x) {
 		/* divide each one separately because (a-b)/c != a/c-b/c in integer world */
-		return ScaleByZoom(tile_x, this->zoom) - this->scroll_x / TILE_SIZE;
+		return ScaleByZoom(tile_x - this->scroll_x / TILE_SIZE, this->zoom);
 	}
 
 	inline int RemapY(int tile_y) {
 		/* divide each one separately because (a-b)/c != a/c-b/c in integer world */
-		return ScaleByZoom(tile_y, this->zoom) - this->scroll_y / TILE_SIZE;
+		return ScaleByZoom(tile_y - this->scroll_y / TILE_SIZE, this->zoom);
 	}
 
 	/**
@@ -692,8 +692,8 @@ public:
 			}
 		}
 
-		tile_x = this->scroll_x / TILE_SIZE;
-		tile_y = this->scroll_y / TILE_SIZE;
+		tile_x = ScaleByZoom(this->scroll_x / TILE_SIZE, this->zoom);
+		tile_y = ScaleByZoom(this->scroll_y / TILE_SIZE, this->zoom);
 
 		dx = dpi->left + this->subscroll;
 		tile_x -= dx / 4;
@@ -839,8 +839,8 @@ public:
 
 			pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 
-			x = ScaleByZoom(vp->virtual_left, this->zoom) - pt.x;
-			y = ScaleByZoom(vp->virtual_top, this->zoom) - pt.y;
+			x = ScaleByZoom(vp->virtual_left - pt.x, this->zoom);
+			y = ScaleByZoom(vp->virtual_top - pt.y, this->zoom);
 			x2 = (x + ScaleByZoom(vp->virtual_width, this->zoom)) / TILE_SIZE;
 			y2 = (y + ScaleByZoom(vp->virtual_height, this->zoom)) / TILE_SIZE;
 			x /= TILE_SIZE;
@@ -863,11 +863,14 @@ public:
 		int x, y;
 		ViewPort *vp;
 		vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
-
-		x  = ((vp->virtual_width  - (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE) / 2 + vp->virtual_left) / 4;
-		y  = ((vp->virtual_height - (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) * TILE_SIZE) / 2 + vp->virtual_top ) / 2 - TILE_SIZE * 2;
-		this->scroll_x = (y - x) & ~0xF;
-		this->scroll_y = (x + y) & ~0xF;
+		int vwidth = ScaleByZoom(vp->virtual_width, this->zoom);
+		int vheight = ScaleByZoom(vp->virtual_height, this->zoom);
+		int vleft = ScaleByZoom(vp->virtual_left, this->zoom);
+		int vtop = ScaleByZoom(vp->virtual_top, this->zoom);
+		x  = ((vwidth  - (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE) / 2 + vleft) / 4;
+		y  = ((vheight - (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) * TILE_SIZE) / 2 + vtop ) / 2 - TILE_SIZE * 2;
+		this->scroll_x = UnScaleByZoom((y - x) & ~0xF, this->zoom);
+		this->scroll_y = UnScaleByZoom((x + y) & ~0xF, this->zoom);
 		this->SetDirty();
 	}
 
@@ -982,8 +985,8 @@ public:
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				w->viewport->dest_scrollpos_x = UnScaleByZoom(pt.x + ((_cursor.pos.x - this->left + 2) << 4), this->zoom) - (w->viewport->virtual_width >> 1);
-				w->viewport->dest_scrollpos_y = UnScaleByZoom(pt.y + ((_cursor.pos.y - this->top - 16) << 4), this->zoom) - (w->viewport->virtual_height >> 1);
+				w->viewport->dest_scrollpos_x = pt.x + UnScaleByZoom(((_cursor.pos.x - this->left + 2) << 4), this->zoom) - (w->viewport->virtual_width >> 1);
+				w->viewport->dest_scrollpos_y = pt.y + UnScaleByZoom(((_cursor.pos.y - this->top - 16) << 4), this->zoom) - (w->viewport->virtual_height >> 1);
 
 				this->SetDirty();
 			} break;
@@ -991,6 +994,10 @@ public:
 			case SM_WIDGET_ZOOM_IN:
 				if (this->zoom < ZOOM_LVL_OUT_MAX) {
 					this->zoom++;
+					DoScroll(
+							(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 2,
+							(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 2
+					);
 					SndPlayFx(SND_15_BEEP);
 					this->SetDirty();
 				}
@@ -998,6 +1005,10 @@ public:
 			case SM_WIDGET_ZOOM_OUT:
 				if (this->zoom > ZOOM_LVL_IN_MIN) {
 					this->zoom--;
+					DoScroll(
+							-(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 4,
+							-(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 4
+					);
 					SndPlayFx(SND_15_BEEP);
 					this->SetDirty();
 				}
@@ -1096,20 +1107,26 @@ public:
 	virtual void OnScroll(Point delta)
 	{
 		_cursor.fix_at = true;
+		DoScroll(delta.x, delta.y);
+		this->SetDirty();
+	}
 
+	void DoScroll(int dx, int dy) {
+		dx = UnScaleByZoom(dx, this->zoom);
+		dy = UnScaleByZoom(dy, this->zoom);
 		int x = this->scroll_x;
 		int y = this->scroll_y;
 
-		int sub = this->subscroll + delta.x;
+		int sub = this->subscroll + dx;
 
 		x -= (sub >> 2) << 4;
 		y += (sub >> 2) << 4;
 		sub &= 3;
 
-		x += (delta.y >> 1) << 4;
-		y += (delta.y >> 1) << 4;
+		x += (dy >> 1) << 4;
+		y += (dy >> 1) << 4;
 
-		if (delta.y & 1) {
+		if (dy & 1) {
 			x += TILE_SIZE;
 			sub += 2;
 			if (sub > 3) {
@@ -1119,34 +1136,30 @@ public:
 			}
 		}
 
-		int hx = (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 2;
-		int hy = (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) / 2;
+		int hx = UnScaleByZoom(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left, this->zoom) / 2;
+		int hy = UnScaleByZoom(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top, this->zoom) / 2;
 		int hvx = hx * -4 + hy * 8;
 		int hvy = hx *  4 + hy * 8;
 		if (x < -hvx) {
 			x = -hvx;
 			sub = 0;
 		}
-		int maxx = ScaleByZoom((int)MapMaxX() * TILE_SIZE, this->zoom) - hvx;
-		if (x > maxx) {
-			x = maxx;
+		if (x > (int)MapMaxX() * TILE_SIZE - hvx) {
+			x = MapMaxX() * TILE_SIZE - hvx;
 			sub = 0;
 		}
 		if (y < -hvy) {
 			y = -hvy;
 			sub = 0;
 		}
-		int maxy = ScaleByZoom((int)MapMaxY() * TILE_SIZE, this->zoom) - hvy;
-			if (y > maxy) {
-			y = maxy;
+		if (y > (int)MapMaxY() * TILE_SIZE - hvy) {
+			y = MapMaxY() * TILE_SIZE - hvy;
 			sub = 0;
 		}
 
 		this->scroll_x = x;
 		this->scroll_y = y;
 		this->subscroll = sub;
-
-		this->SetDirty();
 	}
 
 	virtual void OnResize(Point delta)
