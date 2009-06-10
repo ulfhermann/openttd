@@ -139,6 +139,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 	EndContainer(),
 };
 
+
 /* number of used industries */
 static int _smallmap_industry_count;
 
