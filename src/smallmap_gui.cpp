@@ -38,6 +38,8 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_LEGEND,
 	SM_WIDGET_BUTTONSPANEL,
 	SM_WIDGET_BLANK,
+	SM_WIDGET_ZOOM_IN,
+	SM_WIDGET_ZOOM_OUT,
 	SM_WIDGET_CONTOUR,
 	SM_WIDGET_VEHICLES,
 	SM_WIDGET_INDUSTRIES,
@@ -59,9 +61,11 @@ static const Widget _smallmap_widgets[] = {
 { WWT_STICKYBOX,     RESIZE_LR,  COLOUR_BROWN,   338,   349,     0,    13, 0x0,                      STR_STICKY_BUTTON},                              // SM_WIDGET_STICKYBOX
 {     WWT_PANEL,     RESIZE_RB,  COLOUR_BROWN,     0,   349,    14,   157, 0x0,                      STR_NULL},                                       // SM_WIDGET_MAP_BORDER
 {     WWT_INSET,     RESIZE_RB,  COLOUR_BROWN,     2,   347,    16,   155, 0x0,                      STR_NULL},                                       // SM_WIDGET_MAP
-{     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   239,   158,   201, 0x0,                      STR_NULL},                                       // SM_WIDGET_LEGEND
-{     WWT_PANEL,   RESIZE_LRTB,  COLOUR_BROWN,   240,   349,   158,   158, 0x0,                      STR_NULL},                                       // SM_WIDGET_BUTTONSPANEL
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   158,   179, SPR_DOT_SMALL,            STR_EMPTY},                                       // SM_WIDGET_BLANK
+{     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   217,   158,   201, 0x0,                      STR_NULL},                                       // SM_WIDGET_LEGEND
+{     WWT_PANEL,   RESIZE_LRTB,  COLOUR_BROWN,   218,   349,   158,   158, 0x0,                      STR_NULL},                                       // SM_WIDGET_BUTTONSPANEL
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   158,   179, SPR_DOT_SMALL,            STR_EMPTY},                                      // SM_WIDGET_BLANK
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   218,   239,   158,   179, SPR_IMG_ZOOMIN,           STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN},           // SM_WIDGET_ZOOM_IN
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   218,   239,   180,   201, SPR_IMG_ZOOMOUT,          STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT},          // SM_WIDGET_ZOOM_OUT
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   158,   179, SPR_IMG_SHOW_COUNTOURS,   STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP}, // SM_WIDGET_CONTOUR
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   158,   179, SPR_IMG_SHOW_VEHICLES,    STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP},      // SM_WIDGET_VEHICLES
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   158,   179, SPR_IMG_INDUSTRY,         STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP},    // SM_WIDGET_INDUSTRIES
@@ -94,11 +98,13 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 	EndContainer(),
 	/* Panel. */
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_LEGEND), SetMinimalSize(240, 44), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_LEGEND), SetMinimalSize(218, 44), SetResize(1, 0), EndContainer(),
 		NWidget(NWID_LAYERED),
 			NWidget(NWID_VERTICAL),
 				/* Top button row. */
 				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_IN), SetMinimalSize(22, 22),
+												SetDataTip(SPR_IMG_ZOOMIN, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_CENTERMAP), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_SMALLMAP, STR_SMALLMAP_CENTER),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_BLANK), SetMinimalSize(22, 22),
@@ -112,6 +118,8 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 				EndContainer(),
 				/* Bottom button row. */
 				NWidget(NWID_HORIZONTAL),
+					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_OUT), SetMinimalSize(22, 22),
+												SetDataTip(SPR_IMG_ZOOMOUT, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_TOGGLETOWNNAME), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_TOWN, STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ROUTEMAP), SetMinimalSize(22, 22),
@@ -125,7 +133,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 				EndContainer(),
 			EndContainer(),
 			NWidget(NWID_VERTICAL),
-				NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BUTTONSPANEL), SetMinimalSize(110, 1), SetFill(0, 0), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BUTTONSPANEL), SetMinimalSize(132, 1), SetFill(0, 0), EndContainer(),
 				NWidget(NWID_SPACER), SetFill(0, 1),
 			EndContainer(),
 		EndContainer(),
@@ -362,54 +370,6 @@ static const AndOr _smallmap_vegetation_andor[] = {
 };
 
 typedef uint32 GetSmallMapPixels(TileIndex tile); // typedef callthrough function
-
-/**
- * Draws one column of the small map in a certain mode onto the screen buffer. This
- * function looks exactly the same for all types
- *
- * @param dst Pointer to a part of the screen buffer to write to.
- * @param xc The X coordinate of the first tile in the column.
- * @param yc The Y coordinate of the first tile in the column
- * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
- * @param reps Number of lines to draw
- * @param mask ?
- * @param proc Pointer to the colour function
- * @see GetSmallMapPixels(TileIndex)
- */
-static void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, uint32 mask, GetSmallMapPixels *proc)
-{
-	Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
-	void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
-	void *dst_ptr_end = blitter->MoveTo(dst_ptr_abs_end, -4, 0);
-
-	do {
-		/* check if the tile (xc,yc) is within the map range */
-		uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-		if (IsInsideMM(xc, min_xy, MapMaxX()) && IsInsideMM(yc, min_xy, MapMaxY())) {
-			/* check if the dst pointer points to a pixel inside the screen buffer */
-			if (dst < _screen.dst_ptr) continue;
-			if (dst >= dst_ptr_abs_end) continue;
-
-			uint32 val = proc(TileXY(xc, yc)) & mask;
-			uint8 *val8 = (uint8 *)&val;
-
-			if (dst <= dst_ptr_end) {
-				blitter->SetPixelIfEmpty(dst, 0, 0, val8[0]);
-				blitter->SetPixelIfEmpty(dst, 1, 0, val8[1]);
-				blitter->SetPixelIfEmpty(dst, 2, 0, val8[2]);
-				blitter->SetPixelIfEmpty(dst, 3, 0, val8[3]);
-			} else {
-				/* It happens that there are only 1, 2 or 3 pixels left to fill, so in that special case, write till the end of the video-buffer */
-				int i = 0;
-				do {
-					blitter->SetPixelIfEmpty(dst, 0, 0, val8[i]);
-				} while (i++, dst = blitter->MoveTo(dst, 1, 0), dst < dst_ptr_abs_end);
-			}
-		}
-	/* switch to next tile in the column */
-	} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
-}
-
 
 static inline TileType GetEffectiveTileType(TileIndex tile)
 {
@@ -656,12 +616,14 @@ class SmallMapWindow : public Window
 	int32 scroll_y;
 	int32 subscroll;
 	uint8 refresh;
+	ZoomLevel zoom;
 
 	static const int COLUMN_WIDTH = 119;
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
 
 	int routemap_count;
 
+private:
 	/**
 	 * Populate legend table for the route map view.
 	 */
@@ -697,6 +659,65 @@ class SmallMapWindow : public Window
 	bool HasButtons()
 	{
 		return this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP;
+	}
+
+	inline int RemapX(int tile_x) {
+		/* divide each one separately because (a-b)/c != a/c-b/c in integer world */
+		return ScaleByZoom(tile_x - this->scroll_x / TILE_SIZE, this->zoom);
+	}
+
+	inline int RemapY(int tile_y) {
+		/* divide each one separately because (a-b)/c != a/c-b/c in integer world */
+		return ScaleByZoom(tile_y - this->scroll_y / TILE_SIZE, this->zoom);
+	}
+
+	/**
+	 * Draws one column of the small map in a certain mode onto the screen buffer. This
+	 * function looks exactly the same for all types
+	 *
+	 * @param dst Pointer to a part of the screen buffer to write to.
+	 * @param xc The X coordinate of the first tile in the column.
+	 * @param yc The Y coordinate of the first tile in the column
+	 * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
+	 * @param reps Number of lines to draw
+	 * @param mask ?
+	 * @param proc Pointer to the colour function
+	 * @see GetSmallMapPixels(TileIndex)
+	 */
+	void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, uint32 mask, GetSmallMapPixels *proc)
+	{
+		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
+		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
+		void *dst_ptr_end = blitter->MoveTo(dst_ptr_abs_end, -4, 0);
+
+		do {
+			/* check if the tile (xc,yc) is within the map range */
+			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
+			uint x = UnScaleByZoom(xc, this->zoom);
+			uint y = UnScaleByZoom(yc, this->zoom);
+			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
+				/* check if the dst pointer points to a pixel inside the screen buffer */
+				if (dst < _screen.dst_ptr) continue;
+				if (dst >= dst_ptr_abs_end) continue;
+
+				uint32 val = proc(TileXY(x, y)) & mask;
+				uint8 *val8 = (uint8 *)&val;
+
+				if (dst <= dst_ptr_end) {
+					blitter->SetPixelIfEmpty(dst, 0, 0, val8[0]);
+					blitter->SetPixelIfEmpty(dst, 1, 0, val8[1]);
+					blitter->SetPixelIfEmpty(dst, 2, 0, val8[2]);
+					blitter->SetPixelIfEmpty(dst, 3, 0, val8[3]);
+				} else {
+					/* It happens that there are only 1, 2 or 3 pixels left to fill, so in that special case, write till the end of the video-buffer */
+					int i = 0;
+					do {
+						blitter->SetPixelIfEmpty(dst, 0, 0, val8[i]);
+					} while (i++, dst = blitter->MoveTo(dst, 1, 0), dst < dst_ptr_abs_end);
+				}
+			}
+		/* switch to next tile in the column */
+		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
 public:
@@ -747,8 +768,8 @@ public:
 			}
 		}
 
-		tile_x = this->scroll_x / TILE_SIZE;
-		tile_y = this->scroll_y / TILE_SIZE;
+		tile_x = ScaleByZoom(this->scroll_x / TILE_SIZE, this->zoom);
+		tile_y = ScaleByZoom(this->scroll_y / TILE_SIZE, this->zoom);
 
 		dx = dpi->left + this->subscroll;
 		tile_x -= dx / 4;
@@ -824,8 +845,8 @@ public:
 						(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
 					/* Remap into flat coordinates. */
 					Point pt = RemapCoords(
-						v->x_pos / TILE_SIZE - this->scroll_x / TILE_SIZE, // divide each one separately because (a-b)/c != a/c-b/c in integer world
-						v->y_pos / TILE_SIZE - this->scroll_y / TILE_SIZE, //    dtto
+						RemapX(v->x_pos / TILE_SIZE),
+						RemapY(v->y_pos / TILE_SIZE),
 						0);
 					x = pt.x;
 					y = pt.y;
@@ -886,14 +907,15 @@ public:
 						TileIndex tb = stb->xy;
 
 						Point pta = RemapCoords(
-								(int)(TileX(ta) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
-								(int)(TileY(ta) * TILE_SIZE - this->scroll_y) / TILE_SIZE,
+								RemapX(TileX(ta)),
+								RemapY(TileY(ta)),
 								0);
 						pta.x -= this->subscroll + 3;
 
 						Point ptb = RemapCoords(
-								(int)(TileX(tb) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
-								(int)(TileY(tb) * TILE_SIZE - this->scroll_y) / TILE_SIZE,
+								RemapX(TileX(tb)),
+								RemapY(TileY(tb)),
+								//(int)(TileX(tb) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
 								0);
 						ptb.x -= this->subscroll + 3;
 
@@ -943,8 +965,8 @@ public:
 				TileIndex t = st->xy;
 
 				Point pt = RemapCoords(
-					(int)(TileX(t) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
-					(int)(TileY(t) * TILE_SIZE - this->scroll_y) / TILE_SIZE,
+					RemapX(TileX(t)),
+					RemapY(TileY(t)),
 					0);
 				pt.x -= this->subscroll + 3;
 
@@ -978,8 +1000,8 @@ public:
 			FOR_ALL_TOWNS(t) {
 				/* Remap the town coordinate */
 				Point pt = RemapCoords(
-					(int)(TileX(t->xy) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
-					(int)(TileY(t->xy) * TILE_SIZE - this->scroll_y) / TILE_SIZE,
+					RemapX(TileX(t->xy)),
+					RemapY(TileY(t->xy)),
 					0);
 				x = pt.x - this->subscroll + 3 - (t->sign.width_2 >> 1);
 				y = pt.y;
@@ -1005,10 +1027,10 @@ public:
 
 			pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 
-			x = vp->virtual_left - pt.x;
-			y = vp->virtual_top - pt.y;
-			x2 = (x + vp->virtual_width) / TILE_SIZE;
-			y2 = (y + vp->virtual_height) / TILE_SIZE;
+			x = ScaleByZoom(vp->virtual_left - pt.x, this->zoom);
+			y = ScaleByZoom(vp->virtual_top - pt.y, this->zoom);
+			x2 = (x + ScaleByZoom(vp->virtual_width, this->zoom)) / TILE_SIZE;
+			y2 = (y + ScaleByZoom(vp->virtual_height, this->zoom)) / TILE_SIZE;
 			x /= TILE_SIZE;
 			y /= TILE_SIZE;
 
@@ -1029,11 +1051,14 @@ public:
 		int x, y;
 		ViewPort *vp;
 		vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
-
-		x  = ((vp->virtual_width  - (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE) / 2 + vp->virtual_left) / 4;
-		y  = ((vp->virtual_height - (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) * TILE_SIZE) / 2 + vp->virtual_top ) / 2 - TILE_SIZE * 2;
-		this->scroll_x = (y - x) & ~0xF;
-		this->scroll_y = (x + y) & ~0xF;
+		int vwidth = ScaleByZoom(vp->virtual_width, this->zoom);
+		int vheight = ScaleByZoom(vp->virtual_height, this->zoom);
+		int vleft = ScaleByZoom(vp->virtual_left, this->zoom);
+		int vtop = ScaleByZoom(vp->virtual_top, this->zoom);
+		x  = ((vwidth  - (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE) / 2 + vleft) / 4;
+		y  = ((vheight - (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) * TILE_SIZE) / 2 + vtop ) / 2 - TILE_SIZE * 2;
+		this->scroll_x = UnScaleByZoom((y - x) & ~0xF, this->zoom);
+		this->scroll_y = UnScaleByZoom((x + y) & ~0xF, this->zoom);
 		this->SetDirty();
 	}
 
@@ -1072,7 +1097,7 @@ public:
 		}
 	}
 
-	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number)
+	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number), zoom(ZOOM_LVL_NORMAL)
 	{
 		this->BuildRouteMapLegend();
 
@@ -1166,12 +1191,34 @@ public:
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				w->viewport->dest_scrollpos_x = pt.x + ((_cursor.pos.x - this->left + 2) << 4) - (w->viewport->virtual_width >> 1);
-				w->viewport->dest_scrollpos_y = pt.y + ((_cursor.pos.y - this->top - 16) << 4) - (w->viewport->virtual_height >> 1);
+				w->viewport->dest_scrollpos_x = pt.x + UnScaleByZoom(((_cursor.pos.x - this->left + 2) << 4), this->zoom) - (w->viewport->virtual_width >> 1);
+				w->viewport->dest_scrollpos_y = pt.y + UnScaleByZoom(((_cursor.pos.y - this->top - 16) << 4), this->zoom) - (w->viewport->virtual_height >> 1);
 
 				this->SetDirty();
 			} break;
 
+			case SM_WIDGET_ZOOM_IN:
+				if (this->zoom < ZOOM_LVL_OUT_MAX) {
+					this->zoom++;
+					DoScroll(
+							(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 2,
+							(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 2
+					);
+					SndPlayFx(SND_15_BEEP);
+					this->SetDirty();
+				}
+				break;
+			case SM_WIDGET_ZOOM_OUT:
+				if (this->zoom > ZOOM_LVL_IN_MIN) {
+					this->zoom--;
+					DoScroll(
+							-(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 4,
+							-(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 4
+					);
+					SndPlayFx(SND_15_BEEP);
+					this->SetDirty();
+				}
+				break;
 			case SM_WIDGET_CONTOUR:    // Show land contours
 			case SM_WIDGET_VEHICLES:   // Show vehicles
 			case SM_WIDGET_INDUSTRIES: // Show industries
@@ -1280,20 +1327,26 @@ public:
 	virtual void OnScroll(Point delta)
 	{
 		_cursor.fix_at = true;
+		DoScroll(delta.x, delta.y);
+		this->SetDirty();
+	}
 
+	void DoScroll(int dx, int dy) {
+		dx = UnScaleByZoom(dx, this->zoom);
+		dy = UnScaleByZoom(dy, this->zoom);
 		int x = this->scroll_x;
 		int y = this->scroll_y;
 
-		int sub = this->subscroll + delta.x;
+		int sub = this->subscroll + dx;
 
 		x -= (sub >> 2) << 4;
 		y += (sub >> 2) << 4;
 		sub &= 3;
 
-		x += (delta.y >> 1) << 4;
-		y += (delta.y >> 1) << 4;
+		x += (dy >> 1) << 4;
+		y += (dy >> 1) << 4;
 
-		if (delta.y & 1) {
+		if (dy & 1) {
 			x += TILE_SIZE;
 			sub += 2;
 			if (sub > 3) {
@@ -1303,8 +1356,8 @@ public:
 			}
 		}
 
-		int hx = (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 2;
-		int hy = (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) / 2;
+		int hx = UnScaleByZoom(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left, this->zoom) / 2;
+		int hy = UnScaleByZoom(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top, this->zoom) / 2;
 		int hvx = hx * -4 + hy * 8;
 		int hvy = hx *  4 + hy * 8;
 		if (x < -hvx) {
@@ -1327,8 +1380,6 @@ public:
 		this->scroll_x = x;
 		this->scroll_y = y;
 		this->subscroll = sub;
-
-		this->SetDirty();
 	}
 
 	virtual void OnResize(Point delta)
