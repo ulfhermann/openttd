@@ -313,8 +313,8 @@ void Path::Fork(Path * base, int cap, uint dist) {
 		}
 		parent = base;
 		parent->num_children++;
+		origin = base->origin;
 	}
-	hops = parent->hops + 1;
 }
 
 uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
@@ -328,12 +328,12 @@ uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
 			}
 		}
 		f = parent->AddFlow(f, graph, only_positive);
+		if (f > 0) {
+			graph->GetNode(parent->node).paths.insert(this);
+		}
 		edge.flow += f;
 	}
 	flow += f;
-	if (f > 0) {
-		graph->GetNode(node).paths.insert(this);
-	}
 	return f;
 }
 
@@ -342,14 +342,13 @@ void Path::UnFork() {
 		parent->num_children--;
 		parent = NULL;
 	}
-	hops = UINT_MAX;
 }
 
 Path::Path(NodeID n, bool source)  :
 	distance(source ? 0 : UINT_MAX),
 	capacity(source ? INT_MAX : INT_MIN),
-	flow(0), node(n), num_children(0), parent(NULL),
-	hops(source ? 0 : UINT_MAX)
+	flow(0), node(n), origin(source ? n : Node::INVALID),
+	num_children(0), parent(NULL)
 {}
 
 void LinkGraphJob::SpawnThread(CargoID cargo) {
