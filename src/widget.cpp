@@ -507,7 +507,7 @@ static inline void DrawResizeBox(const Rect &r, Colours colour, bool at_left, bo
 	assert(r.right - r.left == 11); // To ensure the same sizes are used everywhere!
 	DrawFrameRect(r.left, r.top, r.right, r.bottom, colour, (clicked) ? FR_LOWERED : FR_NONE);
 	if (at_left) {
-		DrawSprite(SPR_WINDOW_RESIZE_LEFT, PAL_NONE, r.left + 2, r.top + 3 + clicked);
+		DrawSprite(SPR_WINDOW_RESIZE_LEFT, PAL_NONE, r.left + 2 + clicked, r.top + 3 + clicked);
 	} else {
 		DrawSprite(SPR_WINDOW_RESIZE_RIGHT, PAL_NONE, r.left + 3 + clicked, r.top + 3 + clicked);
 	}
@@ -1428,6 +1428,7 @@ void NWidgetHorizontal::AssignSizePosition(SizingType sizing, uint x, uint y, ui
 				num_changing_childs--;
 				if (hor_step > 1) increment -= increment % hor_step;
 				child_wid->current_x = child_wid->smallest_x + increment;
+				additional_length -= increment;
 				continue;
 			}
 			next_biggest_stepsize = max(next_biggest_stepsize, hor_step);
@@ -1560,6 +1561,7 @@ void NWidgetVertical::AssignSizePosition(SizingType sizing, uint x, uint y, uint
 				num_changing_childs--;
 				if (vert_step > 1) increment -= increment % vert_step;
 				child_wid->current_y = child_wid->smallest_y + increment;
+				additional_length -= increment;
 				continue;
 			}
 			next_biggest_stepsize = max(next_biggest_stepsize, vert_step);
