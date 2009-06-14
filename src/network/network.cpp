@@ -720,7 +720,7 @@ public:
 
 
 /* Used by clients, to connect to a server */
-void NetworkClientConnectGame(NetworkAddress address, CompanyID join_as)
+void NetworkClientConnectGame(NetworkAddress address, CompanyID join_as, const char *join_server_password, const char *join_company_password)
 {
 	if (!_network_available) return;
 
@@ -729,6 +729,8 @@ void NetworkClientConnectGame(NetworkAddress address, CompanyID join_as)
 	strecpy(_settings_client.network.last_host, address.GetHostname(), lastof(_settings_client.network.last_host));
 	_settings_client.network.last_port = address.GetPort();
 	_network_join_as = join_as;
+	_network_join_server_password = join_server_password;
+	_network_join_company_password = join_company_password;
 
 	NetworkDisconnect();
 	NetworkInitialize();
@@ -747,7 +749,6 @@ static void NetworkInitGameInfo()
 
 	/* The server is a client too */
 	_network_game_info.clients_on = _network_dedicated ? 0 : 1;
-	_network_game_info.start_date = ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1);
 
 	NetworkClientInfo *ci = new NetworkClientInfo(CLIENT_ID_SERVER);
 	ci->client_playas = _network_dedicated ? COMPANY_SPECTATOR : _local_company;
