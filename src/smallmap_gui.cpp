@@ -28,6 +28,8 @@
 #include "table/strings.h"
 #include "table/sprites.h"
 
+#include <cmath>
+
 /** Widget numbers of the small map window. */
 enum SmallMapWindowWidgets {
 	SM_WIDGET_CLOSEBOX,
@@ -899,7 +901,6 @@ public:
 						}
 						const Station *stb = Station::Get(id);
 
-
 						if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
 						if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
 
@@ -915,7 +916,6 @@ public:
 						Point ptb = RemapCoords(
 								RemapX(TileX(tb)),
 								RemapY(TileY(tb)),
-								//(int)(TileX(tb) * TILE_SIZE - this->scroll_x) / TILE_SIZE,
 								0);
 						ptb.x -= this->subscroll + 3;
 
@@ -925,27 +925,39 @@ public:
 						GfxDrawLine(pta.x, pta.y + 1, ptb.x, ptb.y + 1, _colour_gradient[COLOUR_GREY][1]);
 						GfxDrawLine(pta.x, pta.y, ptb.x, ptb.y, tbl->colour);
 
-						const LinkStat & ls = i->second;
-						uint usage = ls.usage * 30 / scale;
-						uint usageDisplay = usage / 10;
-						uint capacity = ls.capacity * 30 / scale;
-						uint capacityDisplay = capacity / 10;
+						LinkStat ls = i->second;
+						ls *= 30;
+						ls /= scale;
 
 						Point ptm;
 
 						if (!show_towns) {
+							typedef std::multimap<uint, byte, std::greater<uint> > SizeMap;
+							SizeMap sizes;
+							/* these floats only serve to calculate the size of the coloured boxes for capacity, usage, planned, sent
+							 * they are not reused anywhere, so it's network safe.
+							 */
+							sizes.insert(std::make_pair((uint)sqrt((float)ls.usage), _colour_gradient[COLOUR_GREY][1]));
+							sizes.insert(std::make_pair((uint)sqrt((float)ls.capacity), _colour_gradient[COLOUR_WHITE][7]));
+
 							ptm.x = (pta.x + ptb.x) / 2;
-							if (pta.x > ptb.x) {
-								ptm.x +=5;
-							}
 							ptm.y = (pta.y + ptb.y) / 2;
-							GfxFillRect(ptm.x, ptm.y - usageDisplay, ptm.x + 3, ptm.y, _colour_gradient[COLOUR_GREY][1]);
-							GfxFillRect(ptm.x, ptm.y - capacityDisplay, ptm.x + 3, ptm.y - usageDisplay - 1, _colour_gradient[COLOUR_WHITE][7]);
+
+							for (SizeMap::iterator i = sizes.begin(); i != sizes.end(); ++i) {
+								if (pta.x > ptb.x) {
+									ptm.x -= 1;
+									GfxFillRect(ptm.x - i->first / 2, ptm.y - i->first * 2, ptm.x, ptm.y, i->second);
+								} else {
+									ptm.x += 1;
+									GfxFillRect(ptm.x, ptm.y - i->first * 2, ptm.x + i->first / 2, ptm.y, i->second);
+								}
+							}
+
 						} else {
 							ptm.x = (2*pta.x + ptb.x) / 3;
 							ptm.y = (2*pta.y + ptb.y) / 3;
-							SetDParam(0, usage);
-							SetDParam(1, capacity);
+							SetDParam(0, ls.usage);
+							SetDParam(1, ls.capacity);
 							DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
 						}
 					}
