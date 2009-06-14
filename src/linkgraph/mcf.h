@@ -39,11 +39,17 @@ protected:
 		void Dijkstra(NodeID from, PathVector & paths, bool create_new_paths);
 	uint PushFlow(Edge & edge, Path * path, uint accuracy, bool positive_cap);
 	void SetVia(NodeID source, Path * path);
-	void CleanupPaths(PathVector & paths);
+	void CleanupPaths(NodeID source, PathVector & paths);
 	LinkGraphComponent * graph;
 };
 
 class MCF1stPass : public MultiCommodityFlow {
+private:
+	bool EliminateCycles();
+	bool EliminateCycles(PathVector & path, NodeID origin, Path * next);
+	bool EliminateCycles(PathVector & path, NodeID origin_id, NodeID next_id);
+	void EliminateCycle(PathVector & path, Path * cycle_begin, uint flow);
+	uint FindCycleFlow(const PathVector & path, const Path * cycle_begin);
 public:
 	virtual void Run(LinkGraphComponent * graph);
 };
