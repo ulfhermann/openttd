@@ -111,14 +111,34 @@ static inline uint MapMaxY()
 }
 
 /**
- * Scales relative to the number of tiles.
+ * Scales the given value by the map size, where the given value is
+ * for a 256 by 256 map.
+ * @param n the value to scale
+ * @return the scaled size
  */
-uint ScaleByMapSize(uint);
+static inline uint ScaleByMapSize(uint n)
+{
+	/* Subtract 12 from shift in order to prevent integer overflow
+	 * for large values of n. It's safe since the min mapsize is 64x64.
+	 * Add (1<<4)-1 to round upwards. */
+	return ((n << (MapLogX() + MapLogY() - 12)) + (1 << 4) - 1) >> 4;
+}
+
 
 /**
- * Scale relative to the circumference of the map.
+ * Scales the given value by the maps circumference, where the given
+ * value is for a 256 by 256 map
+ * @param n the value to scale
+ * @return the scaled size
  */
-uint ScaleByMapSize1D(uint);
+static inline uint ScaleByMapSize1D(uint n)
+{
+	/* Normal circumference for the X+Y is 256+256 = 1<<9
+	 * Note, not actually taking the full circumference into account,
+	 * just half of it.
+	 * (1<<9) - 1 is there to scale upwards. */
+	return ((n << MapLogX()) + (n << MapLogY()) + (1 << 9) - 1) >> 9;
+}
 
 /**
  * An offset value between to tiles.
@@ -141,7 +161,7 @@ typedef int32 TileIndexDiff;
  */
 static inline TileIndex TileXY(uint x, uint y)
 {
-	return (y * MapSizeX()) + x;
+	return (y << MapLogX()) + x;
 }
 
 /**
@@ -277,10 +297,9 @@ static inline TileIndex AddTileIndexDiffCWrap(TileIndex tile, TileIndexDiffC dif
 {
 	int x = TileX(tile) + diff.x;
 	int y = TileY(tile) + diff.y;
-	if (x < 0 || y < 0 || x > (int)MapMaxX() || y > (int)MapMaxY())
-		return INVALID_TILE;
-	else
-		return TileXY(x, y);
+	/* Negative value will become big positive value after cast */
+	if ((uint)x >= MapSizeX() || (uint)y >= MapSizeY()) return INVALID_TILE;
+	return TileXY(x, y);
 }
 
 /**

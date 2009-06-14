@@ -487,7 +487,7 @@ static void CompanyCheckBankrupt(Company *c)
 		case 3: {
 			/* XXX - In multiplayer, should we ask other companies if it wants to take
 		          over when it is a human company? -- TrueLight */
-			if (IsHumanCompany(c->index)) {
+			if (!c->is_ai) {
 				SetDParam(0, STR_NEWS_COMPANY_IN_TROUBLE_TITLE);
 				SetDParam(1, STR_NEWS_COMPANY_IN_TROUBLE_DESCRIPTION);
 				SetDParamStr(2, cni->company_name);
@@ -532,7 +532,7 @@ static void CompanyCheckBankrupt(Company *c)
 			ChangeNetworkOwner(c->index, COMPANY_SPECTATOR);
 			ChangeOwnershipOfCompanyItems(c->index, INVALID_OWNER);
 
-			if (!IsHumanCompany(c->index)) AI::Stop(c->index);
+			if (c->is_ai) AI::Stop(c->index);
 
 			CompanyID c_index = c->index;
 			delete c;
@@ -1326,7 +1326,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 		/* update stats */
 		int t;
 		switch (u->type) {
-			case VEH_TRAIN: t = ((Train *)u)->tcache.cached_max_speed; break;
+			case VEH_TRAIN: t = Train::From(u)->tcache.cached_max_speed; break;
 			case VEH_ROAD:  t = u->max_speed / 2;           break;
 			default:        t = u->max_speed;               break;
 		}
@@ -1429,7 +1429,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 
 	if (v->type == VEH_TRAIN) {
 		/* Each platform tile is worth 2 rail vehicles. */
-		int overhang = ((Train *)v)->tcache.cached_total_length - st->GetPlatformLength(v->tile) * TILE_SIZE;
+		int overhang = Train::From(v)->tcache.cached_total_length - st->GetPlatformLength(v->tile) * TILE_SIZE;
 		if (overhang > 0) {
 			unloading_time <<= 1;
 			unloading_time += (overhang * unloading_time) / 8;
@@ -1534,7 +1534,7 @@ static void DoAcquireCompany(Company *c)
 	}
 	_current_company = old_company;
 
-	if (!IsHumanCompany(c->index)) AI::Stop(c->index);
+	if (c->is_ai) AI::Stop(c->index);
 
 	DeleteCompanyWindows(ci);
 	InvalidateWindowClassesData(WC_TRAINS_LIST, 0);
