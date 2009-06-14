@@ -3327,6 +3327,7 @@ STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Max. Tra
 STR_NUM_1                                                       :{BLACK}{SKIP}{NUM}
 STR_NUM_2                                                       :{BLACK}{SKIP}{SKIP}{NUM}
 STR_NUM_3                                                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM}
+STR_NUM_RELATION                                                :{COMMA}/{COMMA}:{COMMA}/{COMMA}
 
 ########### String for New Landscape Generator
 
@@ -3382,6 +3383,7 @@ STR_FLAT_WORLD_HEIGHT                                           :{BLACK}Height o
 
 STR_SMALLMAP_CENTER                                             :{BLACK}Center the smallmap on the current position
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_ROUTEMAP_LEGEND                                    :{TINYFONT}{STRING}
 
 # Strings for map borders at game generation
 STR_BORDER_TYPE                                                 :{BLACK}Map edges:
