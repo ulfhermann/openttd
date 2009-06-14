@@ -995,8 +995,8 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 
 		/* draw ramp */
 
-		/* Draw Trambits as SpriteCombine */
-		if (transport_type == TRANSPORT_ROAD) StartSpriteCombine();
+		/* Draw Trambits and PBS Reservation as SpriteCombine */
+		if (transport_type == TRANSPORT_ROAD || transport_type == TRANSPORT_RAIL) StartSpriteCombine();
 
 		/* HACK set the height of the BB of a sloped ramp to 1 so a vehicle on
 		 * it doesn't disappear behind it
@@ -1030,6 +1030,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 			}
 			EndSpriteCombine();
 		} else if (transport_type == TRANSPORT_RAIL) {
+			EndSpriteCombine();
 			if (HasCatenaryDrawn(GetRailType(ti->tile))) {
 				DrawCatenary(ti);
 			}
@@ -1385,7 +1386,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 		DiagDirection vdir;
 
 		if (v->type == VEH_TRAIN) {
-			Train *t = (Train *)v;
+			Train *t = Train::From(v);
 			fc = (x & 0xF) + (y << 4);
 
 			vdir = DirToDiagDir(t->direction);
@@ -1414,7 +1415,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				return VETSB_ENTERED_WORMHOLE;
 			}
 		} else if (v->type == VEH_ROAD) {
-			RoadVehicle *rv = (RoadVehicle *)v;
+			RoadVehicle *rv = RoadVehicle::From(v);
 			fc = (x & 0xF) + (y << 4);
 			vdir = DirToDiagDir(v->direction);
 
@@ -1464,18 +1465,18 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 			}
 			switch (v->type) {
 				case VEH_TRAIN: {
-					Train *t = (Train *)v;
+					Train *t = Train::From(v);
 					t->track = TRACK_BIT_WORMHOLE;
 					ClrBit(t->flags, VRF_GOINGUP);
 					ClrBit(t->flags, VRF_GOINGDOWN);
 				} break;
 
 				case VEH_ROAD:
-					((RoadVehicle *)v)->state = RVSB_WORMHOLE;
+					RoadVehicle::From(v)->state = RVSB_WORMHOLE;
 					break;
 
 				case VEH_SHIP:
-					((Ship *)v)->state = TRACK_BIT_WORMHOLE;
+					Ship::From(v)->state = TRACK_BIT_WORMHOLE;
 					break;
 
 				default: NOT_REACHED();
@@ -1485,7 +1486,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 			v->tile = tile;
 			switch (v->type) {
 				case VEH_TRAIN: {
-					Train *t = (Train *)v;
+					Train *t = Train::From(v);
 					if (t->track == TRACK_BIT_WORMHOLE) {
 						t->track = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
 						return VETSB_ENTERED_WORMHOLE;
@@ -1493,7 +1494,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				} break;
 
 				case VEH_ROAD: {
-					RoadVehicle *rv = (RoadVehicle *)v;
+					RoadVehicle *rv = RoadVehicle::From(v);
 					if (rv->state == RVSB_WORMHOLE) {
 						rv->state = _road_exit_tunnel_state[dir];
 						rv->frame = 0;
@@ -1502,7 +1503,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				} break;
 
 				case VEH_SHIP: {
-					Ship *ship = (Ship *)v;
+					Ship *ship = Ship::From(v);
 					if (ship->state == TRACK_BIT_WORMHOLE) {
 						ship->state = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
 						return VETSB_ENTERED_WORMHOLE;

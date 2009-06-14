@@ -237,7 +237,8 @@ static bool InitializeWindowsAndCaches()
 
 typedef void (CDECL *SignalHandlerPointer)(int);
 static SignalHandlerPointer _prev_segfault = NULL;
-static SignalHandlerPointer _prev_abort = NULL;
+static SignalHandlerPointer _prev_abort    = NULL;
+static SignalHandlerPointer _prev_fpe      = NULL;
 
 static void CDECL HandleSavegameLoadCrash(int signum);
 
@@ -248,7 +249,8 @@ static void CDECL HandleSavegameLoadCrash(int signum);
 static void SetSignalHandlers()
 {
 	_prev_segfault = signal(SIGSEGV, HandleSavegameLoadCrash);
-	_prev_abort = signal(SIGABRT, HandleSavegameLoadCrash);
+	_prev_abort    = signal(SIGABRT, HandleSavegameLoadCrash);
+	_prev_fpe      = signal(SIGFPE,  HandleSavegameLoadCrash);
 }
 
 /**
@@ -258,6 +260,7 @@ static void ResetSignalHandlers()
 {
 	signal(SIGSEGV, _prev_segfault);
 	signal(SIGABRT, _prev_abort);
+	signal(SIGFPE,  _prev_fpe);
 }
 
 /**
@@ -300,7 +303,13 @@ static void CDECL HandleSavegameLoadCrash(int signum)
 
 	ShowInfo(buffer);
 
-	SignalHandlerPointer call = signum == SIGSEGV ? _prev_segfault : _prev_abort;
+	SignalHandlerPointer call = NULL;
+	switch (signum) {
+		case SIGSEGV: call = _prev_segfault; break;
+		case SIGABRT: call = _prev_abort; break;
+		case SIGFPE:  call = _prev_fpe; break;
+		default: NOT_REACHED();
+	}
 	if (call != NULL) call(signum);
 }
 
@@ -912,9 +921,9 @@ bool AfterLoadGame()
 				continue;
 			}
 			if (v->type == VEH_TRAIN) {
-				((Train *)v)->track = TRACK_BIT_WORMHOLE;
+				Train::From(v)->track = TRACK_BIT_WORMHOLE;
 			} else {
-				((RoadVehicle *)v)->state = RVSB_WORMHOLE;
+				RoadVehicle::From(v)->state = RVSB_WORMHOLE;
 			}
 		}
 	}
@@ -1700,10 +1709,15 @@ bool AfterLoadGame()
 	if (CheckSavegameVersion(101)) {
 		Train *t;
 		FOR_ALL_TRAINS(t) {
-			if ((t->track & TRACK_BIT_WORMHOLE) == TRACK_BIT_WORMHOLE) {
-				TryReserveRailTrack(t->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(t->tile)));
-			} else if ((t->track & TRACK_BIT_MASK) != TRACK_BIT_NONE) {
-				TryReserveRailTrack(t->tile, TrackBitsToTrack(t->track));
+			switch (t->track) {
+				case TRACK_BIT_WORMHOLE:
+					TryReserveRailTrack(t->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(t->tile)));
+					break;
+				case TRACK_BIT_DEPOT:
+					break;
+				default:
+					TryReserveRailTrack(t->tile, TrackBitsToTrack(t->track));
+					break;
 			}
 		}
 	}
@@ -1838,6 +1852,19 @@ bool AfterLoadGame()
 		Company *c;
 		FOR_ALL_COMPANIES(c) {
 			c->settings.vehicle = _old_vds;
+		}
+	}
+
+	if (CheckSavegameVersion(121)) {
+		/* Delete small ufos heading for non-existing vehicles */
+		Vehicle *v;
+		FOR_ALL_DISASTERVEHICLES(v) {
+			if (v->subtype == 2/*ST_SMALL_UFO*/ && v->current_order.GetDestination() != 0) {
+				const Vehicle *u = Vehicle::GetIfValid(v->dest_tile);
+				if (u == NULL || u->type != VEH_ROAD || !IsRoadVehFront(u)) {
+					delete v;
+				}
+			}
 		}
 	}
 
