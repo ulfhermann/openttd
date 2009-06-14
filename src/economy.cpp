@@ -1339,46 +1339,48 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 		/* If there's goods waiting at the station, and the vehicle
 		 * has capacity for it, load it on the vehicle. */
 		int cap_left = v->cargo_cap - v->cargo.Count();
-		if (!ge->cargo.Empty() && cap_left > 0) {
-			uint cap = cap_left;
-			uint count = ge->cargo.Count();
+		if (cap_left > 0) {
+			if (!ge->cargo.Empty()) {
+				uint cap = cap_left;
+				uint count = ge->cargo.Count();
 
-			if (cap > count) cap = count;
-			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
+				if (cap > count) cap = count;
+				if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
 
-			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
+				if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 
-			/* The full load order could be seen as interference by the user.
-			 * In that case force_load should be set and all cargo available
-			 * be moved onto the vehicle.
-			 */
-			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, next_station, &rejected[v->cargo_type], st->xy);
+				/* The full load order could be seen as interference by the user.
+				 * In that case force_load should be set and all cargo available
+				 * be moved onto the vehicle.
+				 */
+				uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, next_station, &rejected[v->cargo_type], st->xy);
 
-			/* TODO: Regarding this, when we do gradual loading, we
-			 * should first unload all vehicles and then start
-			 * loading them. Since this will cause
-			 * VEHICLE_TRIGGER_EMPTY to be called at the time when
-			 * the whole vehicle chain is really totally empty, the
-			 * completely_emptied assignment can then be safely
-			 * removed; that's how TTDPatch behaves too. --pasky */
-			if (loaded > 0) {
-				completely_emptied = false;
-				anything_loaded = true;
+				/* TODO: Regarding this, when we do gradual loading, we
+				 * should first unload all vehicles and then start
+				 * loading them. Since this will cause
+				 * VEHICLE_TRIGGER_EMPTY to be called at the time when
+				 * the whole vehicle chain is really totally empty, the
+				 * completely_emptied assignment can then be safely
+				 * removed; that's how TTDPatch behaves too. --pasky */
+				if (loaded > 0) {
+					completely_emptied = false;
+					anything_loaded = true;
+				}
+
+				st->time_since_load = 0;
+				st->last_vehicle_type = v->type;
+
+				StationAnimationTrigger(st, st->xy, STAT_ANIM_CARGO_TAKEN, v->cargo_type);
+
+				unloading_time += loaded;
+
+				result |= 2;
+			} else if (_settings_game.order.improved_load && !reserved[v->cargo_type].empty()) {
+				/* Skip loading this vehicle if another train/vehicle is already handling
+				 * the same cargo type at this station */
+				SetBit(cargo_not_full, v->cargo_type);
+				continue;
 			}
-
-			st->time_since_load = 0;
-			st->last_vehicle_type = v->type;
-
-			StationAnimationTrigger(st, st->xy, STAT_ANIM_CARGO_TAKEN, v->cargo_type);
-
-			unloading_time += loaded;
-
-			result |= 2;
-		} else if (_settings_game.order.improved_load && ge->cargo.Empty()) {
-			/* Skip loading this vehicle if another train/vehicle is already handling
-			 * the same cargo type at this station */
-			SetBit(cargo_not_full, v->cargo_type);
-			continue;
 		}
 
 
