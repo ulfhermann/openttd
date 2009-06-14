@@ -10,7 +10,6 @@
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
 #include <queue>
-#include <iostream>
 
 LinkGraph _link_graphs[NUM_CARGO];
 
