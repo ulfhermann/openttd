@@ -117,9 +117,6 @@ struct GoodsEntry {
 	
 	FlowStat GetSumFlowVia(StationID via) const;
 
-
-	FlowStat GetSumFlowVia(StationID via) const;
-
 	/**
 	 * update the flow stats for count cargo from source sent to next
 	 */
