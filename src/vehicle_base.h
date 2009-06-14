@@ -100,8 +100,8 @@ public:
 	/* Boundaries for the current position in the world and a next hash link.
 	 * NOSAVE: All of those can be updated with VehiclePositionChanged() */
 	Rect coord;
-	Vehicle *next_hash;
-	Vehicle *next_new_hash;
+	Vehicle *next_hash, **prev_hash;
+	Vehicle *next_new_hash, **prev_new_hash;
 	Vehicle **old_new_hash;
 
 	SpriteID colourmap; // NOSAVE: cached colour mapping
@@ -572,6 +572,28 @@ struct SpecializedVehicle : public Vehicle {
 	static FORCEINLINE T *GetIfValid(size_t index)
 	{
 		return IsValidID(index) ? Get(index) : NULL ;
+	}
+
+	/**
+	 * Converts a Vehicle to SpecializedVehicle with type checking.
+	 * @param v Vehicle pointer
+	 * @return pointer to SpecializedVehicle
+	 */
+	static FORCEINLINE T *From(Vehicle *v)
+	{
+		assert(v->type == Type);
+		return (T *)v;
+	}
+
+	/**
+	 * Converts a const Vehicle to const SpecializedVehicle with type checking.
+	 * @param v Vehicle pointer
+	 * @return pointer to SpecializedVehicle
+	 */
+	static FORCEINLINE const T *From(const Vehicle *v)
+	{
+		assert(v->type == Type);
+		return (const T *)v;
 	}
 };
 
