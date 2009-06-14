@@ -72,6 +72,17 @@ public:
 		}
 	};
 
+	inline FlowStat & operator*=(uint factor) {
+		planned *= factor;
+		sent *= factor;
+		return *this;
+	}
+
+	inline FlowStat & operator/=(uint divident) {
+		planned /= divident;
+		sent /= divident;
+		return *this;
+	}
 };
 
 typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow to be sent via specified station (or consumed locally)
@@ -103,6 +114,7 @@ struct GoodsEntry {
 	FlowStatMap flows;      ///< The planned flows through this station
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
+	FlowStat GetSumFlowVia(StationID via) const;
 };
 
 /** A Stop for a Road Vehicle */
