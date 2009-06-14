@@ -114,6 +114,8 @@ struct GoodsEntry {
 	FlowStatMap flows;      ///< The planned flows through this station
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
+	
+	FlowStat GetSumFlowVia(StationID via) const;
 
 
 	FlowStat GetSumFlowVia(StationID via) const;
