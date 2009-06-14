@@ -928,6 +928,9 @@ public:
 						LinkStat ls = i->second;
 						ls *= 30;
 						ls /= scale;
+						FlowStat flow = sta->goods[c].GetSumFlowVia(stb->index);
+						flow *= 30;
+						flow /= scale;
 
 						Point ptm;
 
@@ -939,6 +942,8 @@ public:
 							 */
 							sizes.insert(std::make_pair((uint)sqrt((float)ls.usage), _colour_gradient[COLOUR_GREY][1]));
 							sizes.insert(std::make_pair((uint)sqrt((float)ls.capacity), _colour_gradient[COLOUR_WHITE][7]));
+							sizes.insert(std::make_pair((uint)sqrt((float)flow.planned),  _colour_gradient[COLOUR_RED][5]));
+							sizes.insert(std::make_pair((uint)sqrt((float)flow.sent), _colour_gradient[COLOUR_YELLOW][5]));
 
 							ptm.x = (pta.x + ptb.x) / 2;
 							ptm.y = (pta.y + ptb.y) / 2;
@@ -958,6 +963,8 @@ public:
 							ptm.y = (2*pta.y + ptb.y) / 3;
 							SetDParam(0, ls.usage);
 							SetDParam(1, ls.capacity);
+							SetDParam(2, flow.planned);
+							SetDParam(3, flow.sent);
 							DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
 						}
 					}
