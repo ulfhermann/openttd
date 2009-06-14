@@ -190,9 +190,10 @@ bool MCF1stPass::EliminateCycles(PathVector & path, NodeID origin_id, NodeID nex
 bool MCF1stPass::EliminateCycles()
 {
 	bool cycles_found = false;
-	PathVector path;
-	for (NodeID node = 0; node < this->graph->GetSize(); ++node) {
-		path.resize(this->graph->GetSize(), NULL);
+	uint size = this->graph->GetSize();
+	PathVector path(size, NULL);
+	for (NodeID node = 0; node < size; ++node) {
+		std::fill(path.begin(), path.end(), (Path *)NULL);
 		cycles_found = EliminateCycles(path, node, node) || cycles_found;
 	}
 	return cycles_found;
