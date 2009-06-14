@@ -9,10 +9,12 @@
 #include "economy_type.h"
 #include "tile_type.h"
 #include "station_type.h"
+#include "order_type.h"
 #include <list>
 
 typedef uint32 CargoPacketID;
 struct CargoPacket;
+struct GoodsEntry;
 
 /** We want to use a pool */
 typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
@@ -26,6 +28,7 @@ struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 	TileIndex source_xy;    ///< The origin of the cargo (first station in feeder chain)
 	TileIndex loaded_at_xy; ///< Location where this cargo has been loaded into the vehicle
 	StationID source;       ///< The station where the cargo came from first
+	StationID next;         ///< The next hop where this cargo is trying to go
 
 	uint16 count;           ///< The amount of cargo in this packet
 	byte days_in_transit;   ///< Amount of days this packet has been in transit
@@ -37,7 +40,7 @@ struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 	 * @param count  the number of cargo entities to put in this packet
 	 * @pre count != 0 || source == INVALID_STATION
 	 */
-	CargoPacket(StationID source = INVALID_STATION, uint16 count = 0);
+	CargoPacket(StationID source = INVALID_STATION, StationID next = INVALID_STATION, uint16 count = 0);
 
 	/** Destroy the packet */
 	~CargoPacket() { }
@@ -50,8 +53,10 @@ struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 	 */
 	FORCEINLINE bool SameSource(const CargoPacket *cp) const
 	{
-		return this->source_xy == cp->source_xy && this->days_in_transit == cp->days_in_transit && this->paid_for == cp->paid_for;
+		return this->source_xy == cp->source_xy && this->days_in_transit == cp->days_in_transit && this->paid_for == cp->paid_for && this->next == cp->next;
 	}
+	
+	CargoPacket * Split(uint new_size);
 };
 
 /**
@@ -69,6 +74,30 @@ struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 
 extern const struct SaveLoad *GetGoodsDesc();
 
+enum UnloadType {
+	UL_KEEP     = 0,      ///< keep cargo on vehicle
+	UL_DELIVER  = 1 << 0, ///< deliver cargo
+	UL_TRANSFER = 1 << 1, ///< transfer cargo
+	UL_ACCEPTED = 1 << 2, ///< cargo is accepted
+};
+
+struct UnloadDescription {
+	UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags f);
+	GoodsEntry * dest;
+	/**
+	 * station we are trying to unload at now
+	 */
+	StationID curr_station;
+	/**
+	 * station the vehicle will unload at next
+	 */
+	StationID next_station;
+	/**
+	 * delivery flags
+	 */
+	byte flags;
+};
+
 /**
  * Simple collection class for a list of cargo packets
  */
@@ -76,13 +105,6 @@ class CargoList {
 public:
 	/** List of cargo packets */
 	typedef std::list<CargoPacket *> List;
-
-	/** Kind of actions that could be done with packets on move */
-	enum MoveToAction {
-		MTA_FINAL_DELIVERY, ///< "Deliver" the packet to the final destination, i.e. destroy the packet
-		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID
-		MTA_OTHER           ///< "Just" move the packet to another cargo list
-	};
 
 private:
 	List packets;         ///< The cargo packets in this list
@@ -93,6 +115,12 @@ private:
 	Money feeder_share;   ///< Cache for the feeder share
 	StationID source;     ///< Cache for the source of the packet
 	uint days_in_transit; ///< Cache for the number of days in transit
+
+	void DeliverPacket(List::iterator & c, uint & remaining_unload);
+	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
+	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
+	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
+	uint LoadPackets(List * dest, uint cap, StationID next_station, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
 
 public:
 	friend const struct SaveLoad *GetGoodsDesc();
@@ -160,6 +188,12 @@ public:
 	void Append(CargoPacket *cp);
 
 	/**
+	 * imports a complete CargoList by splicing its elements into this one
+	 * runs in constant time.
+	 */
+	void Import(List & list);
+
+	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
 	 * @param count the maximum amount of entities to be in the list after the command
@@ -167,22 +201,53 @@ public:
 	void Truncate(uint count);
 
 	/**
-	 * Moves the given amount of cargo to another list.
-	 * Depending on the value of mta the side effects of this function differ:
-	 *  - MTA_FINAL_DELIVERY: destroys the packets that do not originate from a specific station
-	 *  - MTA_CARGO_LOAD:     sets the loaded_at_xy value of the moved packets
-	 *  - MTA_OTHER:          just move without side effects
-	 * @param dest  the destination to move the cargo to
-	 * @param count the amount of cargo entities to move
-	 * @param mta   how to handle the moving (side effects)
-	 * @param data  Depending on mta the data of this variable differs:
-	 *              - MTA_FINAL_DELIVERY - station ID of packet's origin not to remove
-	 *              - MTA_CARGO_LOAD     - station's tile index of load
-	 *              - MTA_OTHER          - unused
-	 * @param mta == MTA_FINAL_DELIVERY || dest != NULL
-	 * @return true if there are still packets that might be moved from this cargo list
+	 * Moves the given amount of cargo from a vehicle to a station.
+	 * Depending on the value of flags and dest the side effects of this function differ:
+	 *  - dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
+	 *                        => MoveToStation sets OUF_UNLOAD_IF_POSSIBLE in the flags
+	 *                        packets are accepted here and may be unloaded and/or delivered (=destroyed);
+	 *                        if not using cargodist: all packets are unloaded and delivered
+	 *                        if using cargodist: only packets which have this station as final destination are unloaded and delivered
+	 *                        if using cargodist: other packets may or may not be unloaded, depending on next_station
+	 *                        if not set and using cargodist: packets may still be unloaded, but not delivered.
+	 *  - OUFB_UNLOAD: unload all packets unconditionally;
+	 *                        if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist)
+	 *  - OUFB_TRANSFER: don't deliver any packets;
+	 *                        overrides delivering aspect of OUF_UNLOAD_IF_POSSIBLE
+	 * @param dest         the destination to move the cargo to
+	 * @param max_unload   the maximum amount of cargo entities to move
+	 * @param flags        how to handle the moving (side effects)
+	 * @param curr_station the station where the cargo currently resides
+	 * @param next_station the next unloading station in the vehicle's order list
+	 * @return the number of cargo entities actually moved
 	 */
-	bool MoveTo(CargoList *dest, uint count, CargoList::MoveToAction mta = MTA_OTHER, uint data = 0);
+	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station);
+
+	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
+
+	/**
+	 * Moves the given amount of cargo to a vehicle.
+	 * @param dest         the destination to move the cargo to
+	 * @param max_load     the maximum amount of cargo entities to move
+	 * @param force_load   if set, move cargo unconditionally,
+	 *                     else only move if CargoPacket::next==next_station or CargoPacket::next==INVALID_STATION
+	 * @param load_place   The place where the loading takes/took place;
+	 *                     if load_place != INVALID_TILE CargoPacket::loaded_at_xy will be set accordingly
+	 */
+	uint MoveToVehicle(CargoList *dest, uint max_load, StationID next_station = INVALID_STATION, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
+
+	/**
+	 * route all packets with station "to" as next hop to a different place, except "curr"
+	 */
+	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge);
+
+	void ReservePacketsForLoading(List * reserved, uint cap, StationID next_station, List * rejected)
+		{LoadPackets(reserved, cap, next_station, rejected);}
+
+	/**
+	 * send all packets to the specified station and update the flow stats at the GoodsEntry accordingly
+	 */
+	void UpdateFlows(StationID next, GoodsEntry * ge);
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();

@@ -107,6 +107,7 @@ static const SaveLoad _station_desc[] = {
 
 static uint16 _waiting_acceptance;
 static uint16 _num_links;
+static uint16 _num_flows;
 static uint16 _cargo_source;
 static uint32 _cargo_source_xy;
 static uint16 _cargo_days;
@@ -129,6 +130,21 @@ static const SaveLoad _linkstat_desc[] = {
 		 SLE_END()
 };
 
+static const SaveLoad _flowstat_desc[] = {
+		SLEG_CONDVAR(             _station_id,         SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    via,                 SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    planned,             SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    sent,                SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_END()
+};
+
+void CountFlows(FlowStatMap & flows) {
+	_num_flows = 0;
+	for(FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
+		_num_flows += i->second.size();
+	}
+}
+
 const SaveLoad *GetGoodsDesc()
 {
 	static const SaveLoad goods_desc[] = {
@@ -148,6 +164,8 @@ const SaveLoad *GetGoodsDesc()
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_flows,          SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
 		SLE_END()
 	};
 
@@ -165,7 +183,9 @@ static void SaveLoad_STNS(Station *st)
 	for (CargoID i = 0; i < num_cargo; i++) {
 		GoodsEntry *ge = &st->goods[i];
 		LinkStatMap & stats = ge->link_stats;
+		FlowStatMap & flows = ge->flows;
 		_num_links = stats.size(); // for saving, is overwritten by next line when loading
+		CountFlows(flows);
 		SlObject(ge, GetGoodsDesc());
 		if (CheckSavegameVersion(68)) {
 			SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
@@ -185,18 +205,31 @@ static void SaveLoad_STNS(Station *st)
 			}
 		}
 
-		if (stats.empty()) { // loading
+		FlowStat fs;
+		if (stats.empty() && flows.empty()) { // loading
 			LinkStat ls;
 			for (uint i = 0; i < _num_links; ++i) {
 				SlObject(&ls, _linkstat_desc);
 				assert(ls.capacity > 0);
 				stats[_station_id] = ls;
 			}
+			for (uint i = 0; i < _num_flows; ++i) {
+				SlObject(&fs, _flowstat_desc);
+				flows[_station_id].insert(fs);
+			}
 		} else { // saving
 			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
 				_station_id = i->first;
 				assert(i->second.capacity > 0);
 				SlObject(&(i->second), _linkstat_desc);
+			}
+			for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
+				_station_id = i->first;
+				FlowStatSet & flow_set = i->second;
+				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+					fs = *j;
+					SlObject(&fs, _flowstat_desc);
+				}
 			}
 		}
 	}

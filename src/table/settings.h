@@ -440,6 +440,15 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, economy.moving_average_unit,         SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 1, 1, 4096, 1,	STR_CONFIG_SETTING_AVERAGE_UNIT,           NULL),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_length,       SLE_UINT16, CAPACITIES_SV, SL_MAX_VERSION, 0, 0, 128, 1, 4096, 4, STR_CONFIG_SETTING_AVERAGE_LENGTH,       NULL),
 
+	 SDT_CONDVAR(GameSettings, linkgraph.recalc_interval,           SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION,  0, 0,16, 1, 4096, 1, STR_CONFIG_SETTING_LINKGRAPH_INTERVAL,     NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.demand_pax,                 SLE_UINT8,DEMANDS_SV, SL_MAX_VERSION,0,MS,DT_SYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_PAX, NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.demand_mail,                SLE_UINT8,DEMANDS_SV,SL_MAX_VERSION,0,MS,DT_SYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_MAIL, NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.demand_express,      SLE_UINT8,DEMANDS_SV,SL_MAX_VERSION,0,MS,DT_ANTISYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_EXPRESS, NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.demand_armoured,        SLE_UINT8,DEMANDS_SV,SL_MAX_VERSION,0,MS,DT_SYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_ARMOURED, NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.demand_default,      SLE_UINT8,DEMANDS_SV,SL_MAX_VERSION,0,MS,DT_ANTISYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DEMAND_DEFAULT, NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.mcf_accuracy,               SLE_UINT8,  MCF_SV, SL_MAX_VERSION, 0, 0,16,    2,     255, 1, STR_CONFIG_SETTING_MCF_ACCURACY,           NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.short_path_saturation,      SLE_UINT8,  MCF_SV, SL_MAX_VERSION, 0, 0,90,    0,     100, 5, STR_CONFIG_SETTING_SHORT_PATH_SATURATION,  NULL),
+
 	 SDT_CONDVAR(GameSettings, pf.wait_for_pbs_path,                 SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    30,     2,     255, 0, STR_NULL,                                  NULL),
 	SDT_CONDBOOL(GameSettings, pf.reserve_paths,                               100, SL_MAX_VERSION, 0, 0, false,                    STR_NULL,                                  NULL),
 	 SDT_CONDVAR(GameSettings, pf.path_backoff_interval,             SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    20,     1,     255, 0, STR_NULL,                                  NULL),

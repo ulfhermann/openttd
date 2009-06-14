@@ -14,6 +14,8 @@
 #include "industry_type.h"
 #include "company_type.h"
 #include "station_type.h"
+#include "cargopacket.h"
+#include <map>
 
 void ResetPriceBaseMultipliers();
 void SetPriceBaseMultiplier(uint price, byte factor);
@@ -27,6 +29,7 @@ extern Prices _price;
 extern uint16 _price_frac[NUM_PRICES];
 extern Money  _cargo_payment_rates[NUM_CARGO];
 extern uint16 _cargo_payment_rates_frac[NUM_CARGO];
+typedef std::map<CargoID, CargoList::List> CargoReservation;
 
 int UpdateCompanyRatingAndValue(Company *c, bool update);
 void StartupIndustryDailyChanges(bool init_counter);
@@ -34,7 +37,7 @@ void StartupIndustryDailyChanges(bool init_counter);
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, CargoID cargo_type);
 uint MoveGoodsToStation(TileIndex tile, int w, int h, CargoID type, uint amount);
 
-void VehiclePayment(Vehicle *front_v);
+void VehiclePayment(Station * curr_station, Vehicle *front_v, StationID next_station_id);
 void LoadUnloadStation(Station *st);
 
 Money GetPriceByIndex(uint8 index);

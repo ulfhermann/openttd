@@ -1389,7 +1389,7 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 		if (_old_next_ptr != 0xFFFF) v->next = (Vehicle *)(size_t)_old_next_ptr;
 
 		if (_cargo_count != 0) {
-			CargoPacket *cp = new CargoPacket((_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source, _cargo_count);
+			CargoPacket *cp = new CargoPacket((_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source, INVALID_STATION, _cargo_count);
 			cp->days_in_transit = _cargo_days;
 			v->cargo.Append(cp);
 		}

@@ -1098,7 +1098,7 @@ static void TriggerIndustryProduction(Industry *i)
  * Performs the vehicle payment _and_ marks the vehicle to be unloaded.
  * @param front_v the vehicle to be unloaded
  */
-void VehiclePayment(Vehicle *front_v)
+void VehiclePayment(Station * curr_station, Vehicle *front_v, StationID next_station_id)
 {
 	int result = 0;
 
@@ -1106,56 +1106,57 @@ void VehiclePayment(Vehicle *front_v)
 	Money route_profit   = 0; // The grand total amount for the route. A-D of transfer chain A-B-C-D
 	Money virtual_profit = 0; // The virtual profit for entire vehicle chain
 
-	StationID curr_station_id = front_v->last_station_visited;
-	Station *curr_station = Station::Get(curr_station_id);
+	StationID curr_station_id = curr_station->index;
 
 	/* The owner of the train wants to be paid */
 	CompanyID old_company = _current_company;
 	_current_company = front_v->owner;
 
-	/* At this moment loading cannot be finished */
-	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
-
-	/* Start unloading in at the first possible moment */
-	front_v->load_unload_time_rem = 1;
-
 	/* Collect delivered industries */
 	static SmallIndustryList industry_set;
 	industry_set.Clear();
 
+	const Order * curr = &front_v->current_order;
+	OrderUnloadFlags order_flags = curr->GetUnloadType();
+
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
+		CargoList & cargo_list = v->cargo;
+
 		/* No cargo to unload */
-		if (v->cargo_cap == 0 || v->cargo.Empty() || (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD)) continue;
+		if (v->cargo_cap == 0 || cargo_list.Empty()) continue;
 
 		/* All cargo has already been paid for, no need to pay again */
-		if (!v->cargo.UnpaidCargo()) {
+		if (!cargo_list.UnpaidCargo()) {
 			SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			continue;
 		}
 
 		GoodsEntry *ge = &curr_station->goods[v->cargo_type];
 		const CargoList::List *cargos = v->cargo.Packets();
+		UnloadDescription ul(ge, curr_station_id, next_station_id, order_flags);
 
 		for (CargoList::List::const_iterator it = cargos->begin(); it != cargos->end(); it++) {
 			CargoPacket *cp = *it;
-			if (!cp->paid_for &&
-					cp->source != curr_station_id &&
-					HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) &&
-					(front_v->current_order.GetUnloadType() & OUFB_TRANSFER) == 0) {
-				/* Deliver goods to the station */
-				curr_station->time_since_unload = 0;
 
-				/* handle end of route payment */
-				Money profit = DeliverGoods(cp->count, v->cargo_type, cp->source, curr_station_id, cp->source_xy, cp->days_in_transit, &industry_set);
-				cp->paid_for = true;
-				route_profit   += profit; // display amount paid for final route delivery, A-D of a chain A-B-C-D
-				vehicle_profit += profit - cp->feeder_share;                    // whole vehicle is not payed for transfers picked up earlier
+			UnloadType unload_flags = cargo_list.WillUnload(ul, cp);
 
-				result |= 1;
-
+			if (unload_flags & (UL_DELIVER | UL_TRANSFER)) {
 				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
-			} else if (front_v->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) {
-				if (!cp->paid_for && (front_v->current_order.GetUnloadType() & OUFB_TRANSFER) != 0) {
+				result = 2;
+			}
+
+			if (!cp->paid_for) {
+				if (unload_flags & UL_DELIVER) {
+					/* Deliver goods to the station */
+					curr_station->time_since_unload = 0;
+
+					/* handle end of route payment */
+					Money profit = DeliverGoods(cp->count, v->cargo_type, cp->source, curr_station_id, cp->source_xy, cp->days_in_transit, &industry_set);
+					cp->paid_for = true;
+					route_profit   += profit; // display amount paid for final route delivery, A-D of a chain A-B-C-D
+					vehicle_profit += profit - cp->feeder_share;                    // whole vehicle is not payed for transfers picked up earlier
+					result = 1;
+				} else if (unload_flags & UL_TRANSFER) {
 					Money profit = GetTransportedGoodsIncome(
 						cp->count,
 						/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
@@ -1168,12 +1169,15 @@ void VehiclePayment(Vehicle *front_v)
 					cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
 					cp->paid_for      = true;   // record that the cargo has been paid for to eliminate double counting
 				}
-				result |= 2;
-
-				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
 		}
-		v->cargo.InvalidateCache();
+
+		if (!HasBit(v->vehicle_flags, VF_CARGO_UNLOADING)) {
+			/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
+			cargo_list.UpdateFlows(next_station_id, ge);
+		}
+		/* TODO: is it necessary to invalidate the cache here? */
+		cargo_list.InvalidateCache();
 	}
 
 	/* Call the production machinery of industries only once for every vehicle chain */
@@ -1201,6 +1205,32 @@ void VehiclePayment(Vehicle *front_v)
 }
 
 /**
+ * Moves packets from the reservation list back into the station
+ */
+static void ReimportReserved(Station * st, CargoReservation & reserved) {
+	for (CargoReservation::iterator i = reserved.begin(); i != reserved.end(); ++i) {
+		st->goods[i->first].cargo.Import(i->second);
+	}
+}
+
+/**
+ * reserves cargo if the full load order and improved_load is set. Moves rejected packets from the rejection list
+ * back into the station
+ */
+static void ReserveAndUnreject(Station * st, Vehicle * u, StationID next_station, CargoReservation & reserved, CargoReservation & rejected)
+{
+	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
+		/* Update reserved cargo */
+		for (Vehicle * v = u; v != NULL; v = v->Next()) {
+			CargoID cargo = v->cargo_type;
+			CargoList & list = st->goods[cargo].cargo;
+			list.ReservePacketsForLoading(&reserved[cargo], v->cargo_cap - v->cargo.Count(), next_station, &rejected[cargo]);
+		}
+	}
+	ReimportReserved(st, rejected);
+}
+
+/**
  * Loads/unload the vehicle if possible.
  * @param v the vehicle to be (un)loaded
  * @param cargo_left the amount of each cargo type that is
@@ -1208,24 +1238,28 @@ void VehiclePayment(Vehicle *front_v)
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
  */
-static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
+static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 {
+	CargoReservation rejected;
 	assert(v->current_order.IsType(OT_LOADING));
 
+	Vehicle *u = v;
+	StationID last_visited = u->last_station_visited;
+	Station *st = Station::Get(last_visited);
+
+	StationID next_station = INVALID_STATION;
+	OrderList * orders = u->orders.list;
+	if (orders != NULL) {
+		next_station = orders->GetNextStoppingStation(u->cur_order_index, v->type == VEH_TRAIN || v->type == VEH_ROAD);
+	}
+
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--v->load_unload_time_rem != 0) {
-		if (_settings_game.order.improved_load && (v->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
-			/* 'Reserve' this cargo for this vehicle, because we were first. */
-			for (; v != NULL; v = v->Next()) {
-				int cap_left = v->cargo_cap - v->cargo.Count();
-				if (cap_left > 0) cargo_left[v->cargo_type] -= cap_left;
-			}
-		}
+	if (--u->load_unload_time_rem != 0) {
+		ReserveAndUnreject(st, u, next_station, reserved, rejected);
 		return;
 	}
 
-	StationID last_visited = v->last_station_visited;
-	Station *st = Station::Get(last_visited);
+	OrderUnloadFlags unload_flags = u->current_order.GetUnloadType();
 
 	if (v->type == VEH_TRAIN && (!IsTileType(v->tile, MP_STATION) || GetStationIndex(v->tile) != st->index)) {
 		/* The train reversed in the station. Take the "easy" way
@@ -1235,7 +1269,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	}
 
 	int unloading_time = 0;
-	Vehicle *u = v;
+
 	int result = 0;
 
 	bool completely_emptied = true;
@@ -1246,6 +1280,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 	v->cur_speed = 0;
 
+	/* loop over all vehicles in the current consist */
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
@@ -1261,50 +1296,27 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 
-		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (u->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
+		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (unload_flags & OUFB_NO_UNLOAD) == 0) {
+			/* vehicle wants to unload something */
+
 			uint cargo_count = v->cargo.Count();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
-			bool remaining = false; // Are there cargo entities in this vehicle that can still be unloaded here?
-			bool accepted  = false; // Is the cargo accepted by the station?
 
-			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
-				/* The cargo has reached it's final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo(NULL, amount_unloaded, CargoList::MTA_FINAL_DELIVERY, last_visited);
+			uint delivered = v->cargo.MoveToStation(ge, amount_unloaded, unload_flags, last_visited, next_station);
 
-				result |= 1;
-				accepted = true;
-			}
-
-			/* The !accepted || v->cargo.Count == cargo_count clause is there
-			 * to make it possible to force unload vehicles at the station where
-			 * they were loaded, but to not force unload the vehicle when the
-			 * station is still accepting the cargo in the vehicle. It doesn't
-			 * accept cargo that was loaded at the same station. */
-			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
-				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded);
-				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
-
-				result |= 2;
-			} else if (!accepted) {
-				/* The order changed while unloading (unset unload/transfer) or the
-				 * station does not accept goods anymore. */
-				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
-				continue;
-			}
-
-			/* Deliver goods to the station */
 			st->time_since_unload = 0;
-
-			unloading_time += amount_unloaded;
-
+			unloading_time += delivered;
 			anything_unloaded = true;
-			if (_settings_game.order.gradual_loading && remaining) {
-				completely_emptied = false;
-			} else {
-				/* We have finished unloading (cargo count == 0) */
+			result |= 1;
+
+			if (!_settings_game.order.gradual_loading || delivered < amount_unloaded || delivered == 0){
+				/* done delivering */
+				if (!v->cargo.Empty()) {
+					completely_emptied = false;
+					v->cargo.UpdateFlows(next_station, ge);
+				}
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
-
 			continue;
 		}
 
@@ -1331,22 +1343,16 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			uint cap = cap_left;
 			uint count = ge->cargo.Count();
 
-			/* Skip loading this vehicle if another train/vehicle is already handling
-			 * the same cargo type at this station */
-			if (_settings_game.order.improved_load && cargo_left[v->cargo_type] <= 0) {
-				SetBit(cargo_not_full, v->cargo_type);
-				continue;
-			}
-
 			if (cap > count) cap = count;
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
-			if (_settings_game.order.improved_load) {
-				/* Don't load stuff that is already 'reserved' for other vehicles */
-				cap = min((uint)cargo_left[v->cargo_type], cap);
-				cargo_left[v->cargo_type] -= cap;
-			}
 
 			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
+
+			/* The full load order could be seen as interference by the user.
+			 * In that case force_load should be set and all cargo available
+			 * be moved onto the vehicle.
+			 */
+			uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, next_station, &rejected[v->cargo_type], st->xy);
 
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
@@ -1355,20 +1361,26 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			 * the whole vehicle chain is really totally empty, the
 			 * completely_emptied assignment can then be safely
 			 * removed; that's how TTDPatch behaves too. --pasky */
-			completely_emptied = false;
-			anything_loaded = true;
-
-			ge->cargo.MoveTo(&v->cargo, cap, CargoList::MTA_CARGO_LOAD, st->xy);
+			if (loaded > 0) {
+				completely_emptied = false;
+				anything_loaded = true;
+			}
 
 			st->time_since_load = 0;
 			st->last_vehicle_type = v->type;
 
 			StationAnimationTrigger(st, st->xy, STAT_ANIM_CARGO_TAKEN, v->cargo_type);
 
-			unloading_time += cap;
+			unloading_time += loaded;
 
 			result |= 2;
+		} else if (_settings_game.order.improved_load && ge->cargo.Empty()) {
+			/* Skip loading this vehicle if another train/vehicle is already handling
+			 * the same cargo type at this station */
+			SetBit(cargo_not_full, v->cargo_type);
+			continue;
 		}
+
 
 		if (v->cargo.Count() >= v->cargo_cap) {
 			SetBit(cargo_full, v->cargo_type);
@@ -1384,13 +1396,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	 * all wagons at the same time instead of using the same 'improved'
 	 * loading algorithm for the wagons (only fill wagon when there is
 	 * enough to fill the previous wagons) */
-	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
-		/* Update left cargo */
-		for (v = u; v != NULL; v = v->Next()) {
-			int cap_left = v->cargo_cap - v->cargo.Count();
-			if (cap_left > 0) cargo_left[v->cargo_type] -= cap_left;
-		}
-	}
+	ReserveAndUnreject(st, u, next_station, reserved, rejected);
 
 	v = u;
 
@@ -1470,15 +1476,15 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
  */
 void LoadUnloadStation(Station *st)
 {
-	int cargo_left[NUM_CARGO];
-
-	for (uint i = 0; i < NUM_CARGO; i++) cargo_left[i] = st->goods[i].cargo.Count();
+	CargoReservation reserved;
 
 	std::list<Vehicle *>::iterator iter;
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
-		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, cargo_left);
+		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, reserved);
 	}
+
+	ReimportReserved(st, reserved);
 }
 
 void CompaniesMonthlyLoop()

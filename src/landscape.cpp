@@ -941,6 +941,7 @@ void OnTick_Industry();
 
 void OnTick_Companies();
 void OnTick_Train();
+void OnTick_LinkGraph();
 
 void CallLandscapeTick()
 {
@@ -951,4 +952,5 @@ void CallLandscapeTick()
 
 	OnTick_Companies();
 	OnTick_Train();
+	OnTick_LinkGraph();
 }

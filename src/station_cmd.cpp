@@ -2731,8 +2731,28 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
+static void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+	FlowStatMap & flows = Station::Get(at)->goods[c_id].flows;
+	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
+		FlowStatSet & s_flows = f_it->second;
+		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
+			if (s_it->via == to) {
+				s_flows.erase(s_it++);
+			} else {
+				++s_it;
+			}
+		}
+		if (s_flows.empty()) {
+			flows.erase(f_it++);
+		} else {
+			++f_it;
+		}
+	}
+}
+
 static void UpdateStationStats(Station * st) {
 	uint length = _settings_game.economy.moving_average_length;
+	FlowStatSet new_flows;
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = st->goods[goods_index];
 		good.supply = DivideApprox(good.supply * length, length + 1);
@@ -2746,11 +2766,43 @@ static void UpdateStationStats(Station * st) {
 				ls *= length;
 				ls /= (length + 1);
 				if (ls.capacity == 0) {
+					DeleteStaleFlows(st->index, goods_index, id);
+					good.cargo.RerouteStalePackets(st->index, id, &good);
 					links.erase(i++);
 				} else {
 					++i;
 				}
 			}
+		}
+
+		FlowStatMap & flows = good.flows;
+		for (FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
+			StationID source = i->first;
+			if (!Station::IsValidID(source)) {
+				flows.erase(i++);
+			} else {
+				FlowStatSet & flow_set = i->second;
+				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+					StationID via = j->via;
+					if (Station::IsValidID(via)) {
+						new_flows.insert(FlowStat(via, j->planned, (j->sent * length) / (length + 1)));
+					}
+				}
+				flow_set.swap(new_flows);
+				new_flows.clear();
+				++i;
+			}
+		}
+	}
+}
+
+void UpdateFlows(Station * st, Vehicle *front, StationID next_station_id) {
+	if (next_station_id == INVALID_STATION) {
+		return;
+	} else {
+		for (Vehicle *v = front; v != NULL; v = v->Next()) {
+			GoodsEntry *ge = &st->goods[v->cargo_type];
+			v->cargo.UpdateFlows(next_station_id, ge);
 		}
 	}
 }
@@ -2897,7 +2949,20 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 static void UpdateStationWaiting(Station *st, CargoID type, uint amount)
 {
 	GoodsEntry & good = st->goods[type];
-	good.cargo.Append(new CargoPacket(st->index, amount));
+	StationID id = st->index;
+	StationID next = INVALID_STATION;
+	FlowStatSet & flow_stats = good.flows[id];
+	FlowStatSet::iterator i = flow_stats.begin();
+	if (i != flow_stats.end()) {
+		StationID via = i->via;
+		uint planned = i->planned;
+		uint sent = i->sent + amount;
+		flow_stats.erase(i);
+		flow_stats.insert(FlowStat(via, planned, sent));
+		next = via;
+	}
+	CargoPacket * packet = new CargoPacket(id, next, amount);
+	good.cargo.Append(packet);
 	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
 	good.supply += amount;
 
@@ -3250,6 +3315,51 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
+void GoodsEntry::UpdateFlowStats(FlowStatSet & flow_stats, FlowStatSet::iterator flow_it, uint count) {
+	uint planned = flow_it->planned;
+	uint sent = flow_it->sent + count;
+	StationID via = flow_it->via;
+	flow_stats.erase(flow_it);
+	flow_stats.insert(FlowStat(via, planned, sent));
+}
+
+void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next) {
+	if (source == INVALID_STATION || next == INVALID_STATION || flows.empty()) return;
+	FlowStatSet & flow_stats = flows[source];
+	FlowStatSet::iterator flow_it = flow_stats.begin();
+	if (flow_it != flow_stats.end()) {
+		StationID via = flow_it->via;
+		if (via == next) {
+			UpdateFlowStats(flow_stats, flow_it, count);
+			return;
+		} else {
+			while(++flow_it != flow_stats.end()) {
+				via = flow_it->via;
+				if (via == next) {
+					UpdateFlowStats(flow_stats, flow_it, count);
+					return;
+				}
+			}
+		}
+	}
+}
+
+StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
+	if (source == INVALID_STATION || flows.empty()) return INVALID_STATION;
+	FlowStatSet & flow_stats = flows[source];
+	FlowStatSet::iterator flow_it = flow_stats.begin();
+	while (flow_it != flow_stats.end()) {
+		StationID via = flow_it->via;
+		if (via != curr) {
+			UpdateFlowStats(flow_stats, flow_it, count);
+			return via;
+		}
+		else {
+			++flow_it;
+		}
+	}
+	return INVALID_STATION;
+}
 
 extern const TileTypeProcs _tile_type_station_procs = {
 	DrawTile_Station,           // draw_tile_proc
