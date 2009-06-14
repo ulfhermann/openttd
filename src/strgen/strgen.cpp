@@ -790,6 +790,10 @@ static void HandleString(char *str, bool master)
 				ent->translated_case = c;
 			} else {
 				ent->translated = strdup(s);
+				/* If the string was translated, use the line from the
+				 * translated language so errors in the translated file
+				 * are properly referenced to. */
+				ent->line = _cur_line;
 			}
 		}
 	}
@@ -1255,7 +1259,7 @@ int CDECL main(int argc, char *argv[])
 
 		if (strcmp(argv[1], "-export-pragmas") == 0) {
 			printf("name\tflags\tdefault\tdescription\n");
-			for (int i = 0; i < lengthof(_pragmas); i++) {
+			for (size_t i = 0; i < lengthof(_pragmas); i++) {
 				printf("\"%s\"\t%s\t\"%s\"\t\"%s\"\n",
 						_pragmas[i][0], _pragmas[i][1], _pragmas[i][2], _pragmas[i][3]);
 			}

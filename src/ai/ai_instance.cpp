@@ -272,7 +272,7 @@ void AIInstance::Died()
 
 void AIInstance::GameLoop()
 {
-	if (this->is_dead) return;
+	if (this->IsDead()) return;
 	if (this->engine->HasScriptCrashed()) {
 		/* The script crashed during saving, kill it here. */
 		this->Died();
@@ -338,7 +338,7 @@ void AIInstance::GameLoop()
 
 void AIInstance::CollectGarbage()
 {
-	if (this->is_started && !this->is_dead) this->engine->CollectGarbage();
+	if (this->is_started && !this->IsDead()) this->engine->CollectGarbage();
 }
 
 /* static */ void AIInstance::DoCommandReturn(AIInstance *instance)
@@ -363,7 +363,7 @@ void AIInstance::CollectGarbage()
 
 /* static */ AIStorage *AIInstance::GetStorage()
 {
-	assert(Company::IsValidID(_current_company) && !IsHumanCompany(_current_company));
+	assert(Company::IsValidAiID(_current_company));
 	return Company::Get(_current_company)->ai_instance->storage;
 }
 
