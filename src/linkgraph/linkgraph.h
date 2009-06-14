@@ -17,6 +17,7 @@ struct SaveLoad;
 class Path;
 
 typedef std::set<Path *> PathSet;
+typedef std::map<NodeID, Path *> PathViaMap;
 typedef std::map<StationID, int> FlowViaMap;
 typedef std::map<StationID, FlowViaMap> FlowMap;
 
@@ -48,7 +49,6 @@ public:
 	uint unsatisfied_demand;
 	uint flow;
 	NodeID next_edge;
-	ViaSet paths_via;
 };
 
 class LinkGraphComponent {
@@ -156,24 +156,25 @@ class Path {
 public:
 	Path(NodeID n, bool source = false);
 	NodeID GetNode() const {return node;}
-	NodeID GetOrigin() const {return parent == NULL ? node : parent->GetOrigin();}
+	NodeID GetOrigin() const {return origin;}
 	Path * GetParent() {return parent;}
 	int GetCapacity() const {return capacity;}
 	uint GetDistance() const {return distance;}
 	void Fork(Path * base, int cap, uint dist);
+	void ReduceFlow(uint f) {flow -= f;}
+	void AddFlow(uint f) {flow += f;}
 	uint AddFlow(uint f, LinkGraphComponent * graph, bool only_positive);
-	uint GetFlow() {return flow;}
-	uint GetNumChildren() {return num_children;}
+	uint GetFlow() const {return flow;}
+	uint GetNumChildren() const {return num_children;}
 	void UnFork();
-	uint GetHops() {return hops;}
 protected:
 	uint distance;
 	int capacity;      ///< this capacity is edge.capacity - edge.flow for the current run of dijkstra
 	uint flow;         ///< this is the flow the current run of the mcf solver assigns
 	NodeID node;
+	NodeID origin;
 	uint num_children;
 	Path * parent;
-	uint hops;
 };
 
 extern LinkGraph _link_graphs[NUM_CARGO];

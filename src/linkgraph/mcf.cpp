@@ -76,21 +76,9 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool c
 				uint distance = edge.distance + 1; // punish in-between stops a little
 				ANNOTATION * dest = static_cast<ANNOTATION *>(paths[to]);
 				if (dest->IsBetter(source, capacity, distance)) {
-					bool is_circle = false;
-					if (create_new_paths) {
-						for (Path * path = source; path->GetParent() != NULL; path = path->GetParent()) {
-							ViaSet &forbidden = graph->GetEdge(source_node, path->GetNode()).paths_via;
-							if (forbidden.find(dest->GetNode()) != forbidden.end()) {
-								is_circle = true;
-								break;
-							}
-						}
-					}
-					if (!is_circle) {
-						annos.erase(dest);
-						dest->Fork(source, capacity, distance);
-						annos.insert(dest);
-					}
+					annos.erase(dest);
+					dest->Fork(source, capacity, distance);
+					annos.insert(dest);
 				}
 			}
 			to = edge.next_edge;
@@ -100,20 +88,27 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool c
 
 
 
-void MultiCommodityFlow::CleanupPaths(PathVector & paths) {
+void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector & paths) {
+	Path * source = paths[source_id];
+	paths[source_id] = NULL;
 	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Path * path = *i;
-		while (path != NULL && path->GetFlow() == 0) {
-			Path * parent = path->GetParent();
-			path->UnFork();
-			if (path->GetNumChildren() == 0) {
-				NodeID node = path->GetNode();
-				delete path;
-				paths[node] = NULL;
+		if (path != NULL) {
+			if (path->GetParent() == source) {
+				path->UnFork();
 			}
-			path = parent;
+			while (path != source && path != NULL && path->GetFlow() == 0) {
+				Path * parent = path->GetParent();
+				path->UnFork();
+				if (path->GetNumChildren() == 0) {
+					paths[path->GetNode()] = NULL;
+					delete path;
+				}
+				path = parent;
+			}
 		}
 	}
+	delete source;
 	paths.clear();
 }
 
@@ -125,20 +120,83 @@ uint MultiCommodityFlow::PushFlow(Edge &edge, Path * path, uint accuracy, bool p
 	return flow;
 }
 
-void MultiCommodityFlow::SetVia(NodeID source, Path * path) {
-	Path * parent = path->GetParent();
-	if (parent == NULL) {
-		return;
-	}
-	SetVia(source, parent);
-	ViaSet &predecessors = graph->GetEdge(source, path->GetNode()).paths_via;
-	while(parent != NULL) {
-		predecessors.insert(parent->GetNode());
-		path = parent;
-		parent = path->GetParent();
+uint MCF1stPass::FindCycleFlow(const PathVector & path, const Path * cycle_begin)
+{
+	uint flow = UINT_MAX;
+	const Path * cycle_end = cycle_begin;
+	do {
+		flow = min(flow, cycle_begin->GetFlow());
+		cycle_begin = path[cycle_begin->GetNode()];
+	} while(cycle_begin != cycle_end);
+	return flow;
+}
+
+void MCF1stPass::EliminateCycle(PathVector & path, Path * cycle_begin, uint flow)
+{
+	Path * cycle_end = cycle_begin;
+	do {
+		NodeID prev = cycle_begin->GetNode();
+		cycle_begin->ReduceFlow(flow);
+		cycle_begin = path[cycle_begin->GetNode()];
+		Edge & edge = this->graph->GetEdge(prev, cycle_begin->GetNode());
+		edge.flow -= flow;
+	} while(cycle_begin != cycle_end);
+}
+
+bool MCF1stPass::EliminateCycles(PathVector & path, NodeID origin_id, NodeID next_id)
+{
+	static Path * invalid_path = new Path(Node::INVALID, true);
+	Path * at_next_pos = path[next_id];
+	if (at_next_pos == invalid_path) {
+		return false;
+	} else if (at_next_pos == NULL) {
+		PathSet & paths = this->graph->GetNode(next_id).paths;
+		PathViaMap next_hops;
+		for(PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
+			Path * new_child = *i;
+			if (new_child->GetOrigin() == origin_id) {
+				PathViaMap::iterator via_it = next_hops.find(new_child->GetNode());
+				if (via_it == next_hops.end()) {
+					next_hops[new_child->GetNode()] = new_child;
+				} else {
+					Path * child = via_it->second;
+					uint new_flow = new_child->GetFlow();
+					child->AddFlow(new_flow);
+					new_child->ReduceFlow(new_flow);
+				}
+			}
+		}
+		bool found = false;
+		for (PathViaMap::iterator via_it = next_hops.begin(); via_it != next_hops.end(); ++via_it) {
+			Path * child = via_it->second;
+			if (child->GetFlow() > 0) {
+				path[next_id] = child;
+				found = EliminateCycles(path, origin_id, child->GetNode()) || found;
+			}
+		}
+		path[next_id] = invalid_path;
+		return found;
+	} else {
+		uint flow = FindCycleFlow(path, at_next_pos);
+		if (flow > 0) {
+			EliminateCycle(path, at_next_pos, flow);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 
+bool MCF1stPass::EliminateCycles()
+{
+	bool cycles_found = false;
+	PathVector path;
+	for (NodeID node = 0; node < this->graph->GetSize(); ++node) {
+		path.resize(this->graph->GetSize(), NULL);
+		cycles_found = EliminateCycles(path, node, node) || cycles_found;
+	}
+	return cycles_found;
+}
 
 void MCF1stPass::Run(LinkGraphComponent * graph) {
 	MultiCommodityFlow::Run(graph);
@@ -164,20 +222,20 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 					 */
 					if (path->GetCapacity() > 0) {
 						PushFlow(edge, path, accuracy, true);
-						SetVia(source, path);
 						if (edge.unsatisfied_demand > 0) {
 							/* if a path has been found there is a chance we can find more */
 							more_loops = true;
 						}
 					} else if (edge.unsatisfied_demand == edge.demand && path->GetCapacity() > INT_MIN) {
 						PushFlow(edge, path, accuracy, false);
-						SetVia(source, path);
 					}
 				}
 			}
-			CleanupPaths(paths);
+			CleanupPaths(source, paths);
 		}
-
+		if (!more_loops) {
+			more_loops = EliminateCycles();
+		}
 		if (accuracy > 1) --accuracy;
 	}
 }
@@ -203,7 +261,7 @@ void MCF2ndPass::Run(LinkGraphComponent * graph) {
 					}
 				}
 			}
-			CleanupPaths(paths);
+			CleanupPaths(source, paths);
 		}
 		if (accuracy > 1) --accuracy;
 	}
