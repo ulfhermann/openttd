@@ -603,7 +603,7 @@ SpriteID Train::GetImage(Direction direction) const
 		sprite = GetCustomVehicleSprite(this, (Direction)(direction + 4 * IS_CUSTOM_SECONDHEAD_SPRITE(spritenum)));
 		if (sprite != 0) return sprite;
 
-		spritenum = Engine::Get(this->engine_type)->image_index;
+		spritenum = Engine::Get(this->engine_type)->original_image_index;
 	}
 
 	sprite = GetDefaultTrainSprite(spritenum, direction);
@@ -625,7 +625,7 @@ static SpriteID GetRailIcon(EngineID engine, bool rear_head, int &y)
 			return sprite;
 		}
 
-		spritenum = Engine::Get(engine)->image_index;
+		spritenum = Engine::Get(engine)->original_image_index;
 	}
 
 	if (rear_head) spritenum++;
@@ -869,7 +869,7 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 
 		v->reliability = e->reliability;
 		v->reliability_spd_dec = e->reliability_spd_dec;
-		v->max_age = e->lifelength * DAYS_IN_LEAP_YEAR;
+		v->max_age = e->GetLifeLengthInDays();
 
 		v->name = NULL;
 		v->railtype = rvi->railtype;

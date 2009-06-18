@@ -56,7 +56,7 @@ static SpriteID GetShipIcon(EngineID engine)
 		SpriteID sprite = GetCustomVehicleIcon(engine, DIR_W);
 		if (sprite != 0) return sprite;
 
-		spritenum = Engine::Get(engine)->image_index;
+		spritenum = Engine::Get(engine)->original_image_index;
 	}
 
 	return DIR_W + _ship_sprites[spritenum];
@@ -88,7 +88,7 @@ SpriteID Ship::GetImage(Direction direction) const
 		SpriteID sprite = GetCustomVehicleSprite(this, direction);
 		if (sprite != 0) return sprite;
 
-		spritenum = Engine::Get(this->engine_type)->image_index;
+		spritenum = Engine::Get(this->engine_type)->original_image_index;
 	}
 
 	return _ship_sprites[spritenum] + direction;
@@ -799,7 +799,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 		v->reliability = e->reliability;
 		v->reliability_spd_dec = e->reliability_spd_dec;
-		v->max_age = e->lifelength * DAYS_IN_LEAP_YEAR;
+		v->max_age = e->GetLifeLengthInDays();
 		_new_vehicle_id = v->index;
 
 		v->name = NULL;
