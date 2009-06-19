@@ -51,6 +51,7 @@
 	extern int _debug_gamelog_level;
 	extern int _debug_desync_level;
 	extern int _debug_console_level;
+	extern int _debug_cargodest_level;
 
 	void CDECL debug(const char *dbg, const char *format, ...) WARN_FORMAT(2, 3);
 #endif /* NO_DEBUG_MESSAGES */
