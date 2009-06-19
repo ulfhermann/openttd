@@ -39,6 +39,7 @@ int _debug_sl_level;
 int _debug_gamelog_level;
 int _debug_desync_level;
 int _debug_console_level;
+int _debug_cargodest_level;
 #ifdef RANDOM_DEBUG
 int _debug_random_level;
 #endif
@@ -67,6 +68,7 @@ struct DebugLevel {
 	DEBUG_LEVEL(gamelog),
 	DEBUG_LEVEL(desync),
 	DEBUG_LEVEL(console),
+	DEBUG_LEVEL(cargodest),
 #ifdef RANDOM_DEBUG
 	DEBUG_LEVEL(random),
 #endif
