@@ -355,6 +355,7 @@ static const AndOr _smallmap_vegetation_andor[] = {
 
 typedef uint32 GetSmallMapPixels(TileIndex tile); // typedef callthrough function
 
+
 static inline TileType GetEffectiveTileType(TileIndex tile)
 {
 	TileType t = GetTileType(tile);
@@ -568,8 +569,6 @@ class SmallMapWindow : public Window
 	static const int COLUMN_WIDTH = 119;
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
 
-private:
-
 	/**
 	 * Remap a map's tile X coordinate (TileX(TileIndex)) to
 	 * a location on this smallmap.
@@ -578,7 +577,7 @@ private:
 	 */
 	inline int RemapX(int tile_x)
 	{
-		return ScaleByZoom(tile_x - this->scroll_x / TILE_SIZE, this->zoom);
+		return UnScaleByZoom(tile_x - this->scroll_x / TILE_SIZE, this->zoom);
 	}
 
 	/**
@@ -589,7 +588,7 @@ private:
 	 */
 	inline int RemapY(int tile_y)
 	{
-		return ScaleByZoom(tile_y - this->scroll_y / TILE_SIZE, this->zoom);
+		return UnScaleByZoom(tile_y - this->scroll_y / TILE_SIZE, this->zoom);
 	}
 
 	/**
@@ -614,8 +613,8 @@ private:
 		do {
 			/* check if the tile (xc,yc) is within the map range */
 			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-			uint x = UnScaleByZoom(xc, this->zoom);
-			uint y = UnScaleByZoom(yc, this->zoom);
+			uint x = ScaleByZoom(xc, this->zoom);
+			uint y = ScaleByZoom(yc, this->zoom);
 			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
 				/* check if the dst pointer points to a pixel inside the screen buffer */
 				if (dst < _screen.dst_ptr) continue;
@@ -684,8 +683,8 @@ public:
 			}
 		}
 
-		int tile_x = ScaleByZoom(this->scroll_x / TILE_SIZE, this->zoom);
-		int tile_y = ScaleByZoom(this->scroll_y / TILE_SIZE, this->zoom);
+		int tile_x = UnScaleByZoom(this->scroll_x / TILE_SIZE, this->zoom);
+		int tile_y = UnScaleByZoom(this->scroll_y / TILE_SIZE, this->zoom);
 
 		int dx = dpi->left + this->subscroll;
 		tile_x -= dx / 4;
@@ -824,10 +823,10 @@ public:
 		/* Draw map indicators */
 		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 
-		x = ScaleByZoom(vp->virtual_left - pt.x, this->zoom);
-		y = ScaleByZoom(vp->virtual_top - pt.y, this->zoom);
-		int x2 = (x + ScaleByZoom(vp->virtual_width, this->zoom)) / TILE_SIZE;
-		int y2 = (y + ScaleByZoom(vp->virtual_height, this->zoom)) / TILE_SIZE;
+		x = UnScaleByZoom(vp->virtual_left - pt.x, this->zoom);
+		y = UnScaleByZoom(vp->virtual_top - pt.y, this->zoom);
+		int x2 = (x + UnScaleByZoom(vp->virtual_width, this->zoom)) / TILE_SIZE;
+		int y2 = (y + UnScaleByZoom(vp->virtual_height, this->zoom)) / TILE_SIZE;
 		x /= TILE_SIZE;
 		y /= TILE_SIZE;
 
@@ -844,16 +843,16 @@ public:
 
 	void SmallMapCenterOnCurrentPos()
 	{
-		ViewPort * vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
+		ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
 
-		int vwidth = ScaleByZoom(vp->virtual_width, this->zoom);
-		int vheight = ScaleByZoom(vp->virtual_height, this->zoom);
-		int vleft = ScaleByZoom(vp->virtual_left, this->zoom);
-		int vtop = ScaleByZoom(vp->virtual_top, this->zoom);
+		int vwidth = UnScaleByZoom(vp->virtual_width, this->zoom);
+		int vheight = UnScaleByZoom(vp->virtual_height, this->zoom);
+		int vleft = UnScaleByZoom(vp->virtual_left, this->zoom);
+		int vtop = UnScaleByZoom(vp->virtual_top, this->zoom);
 		int x  = ((vwidth  - (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE) / 2 + vleft) / 4;
 		int y  = ((vheight - (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) * TILE_SIZE) / 2 + vtop ) / 2 - TILE_SIZE * 2;
-		this->scroll_x = UnScaleByZoom((y - x) & ~0xF, this->zoom);
-		this->scroll_y = UnScaleByZoom((x + y) & ~0xF, this->zoom);
+		this->scroll_x = ScaleByZoom((y - x) & ~0xF, this->zoom);
+		this->scroll_y = ScaleByZoom((x + y) & ~0xF, this->zoom);
 		this->SetDirty();
 	}
 
@@ -974,23 +973,23 @@ public:
 				this->SetDirty();
 			} break;
 
-			case SM_WIDGET_ZOOM_IN:
-				if (this->zoom < ZOOM_LVL_OUT_MAX) {
+			case SM_WIDGET_ZOOM_OUT:
+				if (this->zoom < ZOOM_LVL_MAX) {
 					this->zoom++;
 					DoScroll(
-							(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 2,
-							(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 2
+							-(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 4,
+							-(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 4
 					);
 					SndPlayFx(SND_15_BEEP);
 					this->SetDirty();
 				}
 				break;
-			case SM_WIDGET_ZOOM_OUT:
-				if (this->zoom > ZOOM_LVL_IN_MIN) {
+			case SM_WIDGET_ZOOM_IN:
+				if (this->zoom > -ZOOM_LVL_MAX) {
 					this->zoom--;
 					DoScroll(
-							-(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 4,
-							-(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 4
+							(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 2,
+							(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 2
 					);
 					SndPlayFx(SND_15_BEEP);
 					this->SetDirty();
@@ -1095,8 +1094,8 @@ public:
 	}
 
 	void DoScroll(int dx, int dy) {
-		dx = UnScaleByZoom(dx, this->zoom);
-		dy = UnScaleByZoom(dy, this->zoom);
+		dx = ScaleByZoom(dx, this->zoom);
+		dy = ScaleByZoom(dy, this->zoom);
 		int x = this->scroll_x;
 		int y = this->scroll_y;
 
@@ -1119,8 +1118,8 @@ public:
 			}
 		}
 
-		int hx = UnScaleByZoom(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left, this->zoom) / 2;
-		int hy = UnScaleByZoom(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top, this->zoom) / 2;
+		int hx = ScaleByZoom(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left, this->zoom) / 2;
+		int hy = ScaleByZoom(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top, this->zoom) / 2;
 		int hvx = hx * -4 + hy * 8;
 		int hvy = hx *  4 + hy * 8;
 		if (x < -hvx) {
