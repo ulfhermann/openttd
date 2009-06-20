@@ -21,12 +21,11 @@ struct Engine : EnginePool::PoolItem<&_engine_pool> {
 	uint16 reliability_spd_dec;
 	uint16 reliability_start, reliability_max, reliability_final;
 	uint16 duration_phase_1, duration_phase_2, duration_phase_3;
-	byte lifelength;
 	byte flags;
 	uint8 preview_company_rank;
 	byte preview_wait;
 	CompanyMask company_avail;
-	uint8 image_index; ///< Original vehicle image index
+	uint8 original_image_index; ///< Original vehicle image index, thus the image index of the overridden vehicle
 	VehicleType type; ///< type, ie VEH_ROAD, VEH_TRAIN, etc.
 
 	EngineInfo info;
@@ -59,6 +58,7 @@ struct Engine : EnginePool::PoolItem<&_engine_pool> {
 	uint GetPower() const;
 	uint GetDisplayWeight() const;
 	uint GetDisplayMaxTractiveEffort() const;
+	Date GetLifeLengthInDays() const;
 };
 
 struct EngineIDMapping {

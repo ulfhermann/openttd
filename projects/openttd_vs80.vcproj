@@ -103,6 +103,8 @@
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				StackReserveSize="1048576"
+				StackCommitSize="1048576"
 				OptimizeReferences="2"
 				OptimizeForWindows98="1"
 				TargetMachine="1"
@@ -201,6 +203,8 @@
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				StackReserveSize="1048576"
+				StackCommitSize="1048576"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -312,6 +316,8 @@
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				StackReserveSize="1048576"
+				StackCommitSize="1048576"
 				OptimizeReferences="2"
 				OptimizeForWindows98="1"
 				TargetMachine="17"
@@ -413,6 +419,8 @@
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				StackReserveSize="1048576"
+				StackCommitSize="1048576"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -2604,6 +2612,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\ai\api\ai_buoylist.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\ai\api\ai_cargo.hpp"
 				>
 			</File>
@@ -2809,6 +2821,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\ai\api\ai_bridgelist.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\ai\api\ai_buoylist.cpp"
 				>
 			</File>
 			<File
