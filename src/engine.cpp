@@ -84,7 +84,7 @@ Engine::Engine(VehicleType type, EngineID base)
 
 		case VEH_TRAIN:
 			this->u.rail = _orig_rail_vehicle_info[base];
-			this->image_index = this->u.rail.image_index;
+			this->original_image_index = this->u.rail.image_index;
 			this->info.string_id = STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_KIRBY_PAUL_TANK_STEAM + base;
 
 			/* Set the default model life of original wagons to "infinite" */
@@ -94,19 +94,19 @@ Engine::Engine(VehicleType type, EngineID base)
 
 		case VEH_ROAD:
 			this->u.road = _orig_road_vehicle_info[base];
-			this->image_index = this->u.road.image_index;
+			this->original_image_index = this->u.road.image_index;
 			this->info.string_id = STR_VEHICLE_NAME_ROAD_MPS_REGAL_BUS + base;
 			break;
 
 		case VEH_SHIP:
 			this->u.ship = _orig_ship_vehicle_info[base];
-			this->image_index = this->u.ship.image_index;
+			this->original_image_index = this->u.ship.image_index;
 			this->info.string_id = STR_VEHICLE_NAME_SHIP_MPS_OIL_TANKER + base;
 			break;
 
 		case VEH_AIRCRAFT:
 			this->u.air = _orig_aircraft_vehicle_info[base];
-			this->image_index = this->u.air.image_index;
+			this->original_image_index = this->u.air.image_index;
 			this->info.string_id = STR_VEHICLE_NAME_AIRCRAFT_SAMPSON_U52 + base;
 			break;
 	}
@@ -316,6 +316,16 @@ uint Engine::GetDisplayMaxTractiveEffort() const
 }
 
 /**
+ * Returns the vehicle's life length in days.
+ * @return the life length
+ */
+Date Engine::GetLifeLengthInDays() const
+{
+	/* Assume leap years; this gives the player a bit more than the given amount of years, but never less. */
+	return (this->info.lifelength + _settings_game.vehicle.extend_vehicle_life) * DAYS_IN_LEAP_YEAR;
+}
+
+/**
  * Initializes the EngineOverrideManager with the default engines.
  */
 void EngineOverrideManager::ResetToDefaultMapping()
@@ -505,8 +515,6 @@ void StartupOneEngine(Engine *e, Date aging_date)
 	e->reliability_spd_dec = ei->decay_speed << 2;
 
 	CalcEngineReliability(e);
-
-	e->lifelength = ei->lifelength + _settings_game.vehicle.extend_vehicle_life;
 
 	/* prevent certain engines from ever appearing. */
 	if (!HasBit(ei->climates, _settings_game.game_creation.landscape)) {
