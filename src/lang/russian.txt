@@ -123,66 +123,97 @@ STR_CARGO_PLURAL_FIZZY_DRINKS.gen                               :газиров�
 STR_CARGO_SINGULAR_NOTHING                                      :
 STR_CARGO_SINGULAR_PASSENGER                                    :Пассажиры
 STR_CARGO_SINGULAR_PASSENGER.acc                                :пассажиров
+STR_CARGO_SINGULAR_PASSENGER.gen                                :пассажиров
 STR_CARGO_SINGULAR_COAL                                         :Уголь
 STR_CARGO_SINGULAR_COAL.acc                                     :уголь
+STR_CARGO_SINGULAR_COAL.gen                                     :угля
 STR_CARGO_SINGULAR_MAIL                                         :Почта
 STR_CARGO_SINGULAR_MAIL.acc                                     :почту
+STR_CARGO_SINGULAR_MAIL.gen                                     :почты
 STR_CARGO_SINGULAR_OIL                                          :Нефть
 STR_CARGO_SINGULAR_OIL.acc                                      :нефть
+STR_CARGO_SINGULAR_OIL.gen                                      :нефти
 STR_CARGO_SINGULAR_LIVESTOCK                                    :Скот
 STR_CARGO_SINGULAR_LIVESTOCK.acc                                :скот
+STR_CARGO_SINGULAR_LIVESTOCK.gen                                :скота
 STR_CARGO_SINGULAR_GOODS                                        :Товары
 STR_CARGO_SINGULAR_GOODS.acc                                    :товары
+STR_CARGO_SINGULAR_GOODS.gen                                    :товаров
 STR_CARGO_SINGULAR_GRAIN                                        :Зерно
 STR_CARGO_SINGULAR_GRAIN.acc                                    :зерно
+STR_CARGO_SINGULAR_GRAIN.gen                                    :зерна
 STR_CARGO_SINGULAR_WOOD                                         :Дерево
 STR_CARGO_SINGULAR_WOOD.acc                                     :дерево
+STR_CARGO_SINGULAR_WOOD.gen                                     :дерева
 STR_CARGO_SINGULAR_IRON_ORE                                     :Железная руда
 STR_CARGO_SINGULAR_IRON_ORE.acc                                 :железную руду
+STR_CARGO_SINGULAR_IRON_ORE.gen                                 :железной руды
 STR_CARGO_SINGULAR_STEEL                                        :Сталь
 STR_CARGO_SINGULAR_STEEL.acc                                    :сталь
+STR_CARGO_SINGULAR_STEEL.gen                                    :стали
 STR_CARGO_SINGULAR_VALUABLES                                    :Драгоценности
 STR_CARGO_SINGULAR_VALUABLES.acc                                :драгоценности
+STR_CARGO_SINGULAR_VALUABLES.gen                                :драгоценностей
 STR_CARGO_SINGULAR_COPPER_ORE                                   :Медная руда
 STR_CARGO_SINGULAR_COPPER_ORE.acc                               :медную руду
+STR_CARGO_SINGULAR_COPPER_ORE.gen                               :медной руды
 STR_CARGO_SINGULAR_MAIZE                                        :Кукуруза
 STR_CARGO_SINGULAR_MAIZE.acc                                    :кукурузу
+STR_CARGO_SINGULAR_MAIZE.gen                                    :кукурузы
 STR_CARGO_SINGULAR_FRUIT                                        :Фрукты
 STR_CARGO_SINGULAR_FRUIT.acc                                    :фрукты
+STR_CARGO_SINGULAR_FRUIT.gen                                    :фруктов
 STR_CARGO_SINGULAR_DIAMOND                                      :Алмазы
 STR_CARGO_SINGULAR_DIAMOND.acc                                  :алмазы
+STR_CARGO_SINGULAR_DIAMOND.gen                                  :алмазов
 STR_CARGO_SINGULAR_FOOD                                         :Продукты
 STR_CARGO_SINGULAR_FOOD.acc                                     :продукты
+STR_CARGO_SINGULAR_FOOD.gen                                     :продуктов
 STR_CARGO_SINGULAR_PAPER                                        :Бумага
 STR_CARGO_SINGULAR_PAPER.acc                                    :бумагу
+STR_CARGO_SINGULAR_PAPER.gen                                    :бумаги
 STR_CARGO_SINGULAR_GOLD                                         :Золото
 STR_CARGO_SINGULAR_GOLD.acc                                     :золото
+STR_CARGO_SINGULAR_GOLD.gen                                     :золота
 STR_CARGO_SINGULAR_WATER                                        :Вода
 STR_CARGO_SINGULAR_WATER.acc                                    :воду
+STR_CARGO_SINGULAR_WATER.gen                                    :воды
 STR_CARGO_SINGULAR_WHEAT                                        :Пшеница
 STR_CARGO_SINGULAR_WHEAT.acc                                    :пшеницу
+STR_CARGO_SINGULAR_WHEAT.gen                                    :пшеницы
 STR_CARGO_SINGULAR_RUBBER                                       :Каучук
 STR_CARGO_SINGULAR_RUBBER.acc                                   :каучук
+STR_CARGO_SINGULAR_RUBBER.gen                                   :каучука
 STR_CARGO_SINGULAR_SUGAR                                        :Сахар
 STR_CARGO_SINGULAR_SUGAR.acc                                    :сахар
+STR_CARGO_SINGULAR_SUGAR.gen                                    :сахара
 STR_CARGO_SINGULAR_TOY                                          :Игрушки
 STR_CARGO_SINGULAR_TOY.acc                                      :игрушки
+STR_CARGO_SINGULAR_TOY.gen                                      :игрушек
 STR_CARGO_SINGULAR_CANDY                                        :Конфеты
 STR_CARGO_SINGULAR_CANDY.acc                                    :конфеты
+STR_CARGO_SINGULAR_CANDY.gen                                    :конфет
 STR_CARGO_SINGULAR_COLA                                         :Кола
 STR_CARGO_SINGULAR_COLA.acc                                     :колу
+STR_CARGO_SINGULAR_COLA.gen                                     :колы
 STR_CARGO_SINGULAR_COTTON_CANDY                                 :Сахарная вата
 STR_CARGO_SINGULAR_COTTON_CANDY.acc                             :сахарную вату
+STR_CARGO_SINGULAR_COTTON_CANDY.gen                             :сахарной ваты
 STR_CARGO_SINGULAR_BUBBLE                                       :Пузырьки
 STR_CARGO_SINGULAR_BUBBLE.acc                                   :пузырьки
+STR_CARGO_SINGULAR_BUBBLE.gen                                   :пузырьков
 STR_CARGO_SINGULAR_TOFFEE                                       :Ириски
 STR_CARGO_SINGULAR_TOFFEE.acc                                   :ириски
+STR_CARGO_SINGULAR_TOFFEE.gen                                   :ирисок
 STR_CARGO_SINGULAR_BATTERY                                      :Батарейки
 STR_CARGO_SINGULAR_BATTERY.acc                                  :батарейки
+STR_CARGO_SINGULAR_BATTERY.gen                                  :батареек
 STR_CARGO_SINGULAR_PLASTIC                                      :Пластик
 STR_CARGO_SINGULAR_PLASTIC.acc                                  :пластик
+STR_CARGO_SINGULAR_PLASTIC.gen                                  :пластика
 STR_CARGO_SINGULAR_FIZZY_DRINK                                  :Газировка
 STR_CARGO_SINGULAR_FIZZY_DRINK.acc                              :газировку
+STR_CARGO_SINGULAR_FIZZY_DRINK.gen                              :газировки
 STR_QUANTITY_NOTHING                                            :
 STR_QUANTITY_PASSENGERS                                         :{COMMA} пассажир{P "" а ов}
 STR_QUANTITY_COAL                                               :{WEIGHT} угля
@@ -214,7 +245,7 @@ STR_QUANTITY_BUBBLES                                            :{COMMA} пуз�
 STR_QUANTITY_TOFFEE                                             :{WEIGHT} ирисок
 STR_QUANTITY_BATTERIES                                          :{COMMA} батаре{P йка йки ек}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} пластика
-STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} бутыл{P ка ки ок} газировки
+STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} бан{P ка ки ок} газировки
 STR_ABBREV_NOTHING                                              :
 STR_ABBREV_PASSENGERS                                           :{TINYFONT}ПС
 STR_ABBREV_COAL                                                 :{TINYFONT}УГ
@@ -533,9 +564,13 @@ STR_AGE_RED                                                     :{RED}{COMMA} {P
 ############ range for service numbers ends
 
 STR_VEHICLE_TRAIN                                               :Поезд
+STR_VEHICLE_TRAIN.gen                                           :ж/д транспорта
 STR_VEHICLE_ROAD_VEHICLE                                        :Автотранспорт
+STR_VEHICLE_ROAD_VEHICLE.gen                                    :автотранспорта
 STR_VEHICLE_SHIP                                                :Корабль
+STR_VEHICLE_SHIP.gen                                            :кораблей
 STR_VEHICLE_AIRCRAFT                                            :Воздушный транспорт
+STR_VEHICLE_AIRCRAFT.gen                                        :воздушного транспорта
 STR_VEHICLE_IS_GETTING_OLD                                      :{WHITE}Транспортное средство «{VEHICLE}» устарело
 STR_VEHICLE_IS_GETTING_VERY_OLD                                 :{WHITE}Транспортное средство «{VEHICLE}» сильно устарело
 STR_VEHICLE_IS_GETTING_VERY_OLD_AND                             :{WHITE}Транспортное средство «{VEHICLE}» очень сильно устарело и требует срочной замены
@@ -681,7 +716,7 @@ STR_HIGHSCORE_PERFORMANCE_TITLE_TYCOON_OF_THE_CENTURY           :Магнат В
 STR_HIGHSCORE_PERFORMANCE_TITLE_TYCOON_OF_THE_CENTURY.abl       :Магнатом Века
 STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESIDENTNAME}, {COMPANY}
 STR_HIGHSCORE_STATS                                             :{BIGFONT}«{STRING}»   ({COMMA})
-STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}Директора «{COMPANY}» называют {STRING.abl}!
+STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}Директора компании «{COMPANY}» называют {STRING.abl}!
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME}, президент компании «{COMPANY}», заслужил титул «{STRING}»!
 STR_BLUE_NUMBER                                                 :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
@@ -997,19 +1032,19 @@ STR_END_OF_SHARED_ORDERS                                        :{SETX 10}- - К
 
 STR_TRAIN_IS_STUCK                                              :{WHITE}{VEHICLE} не может найти путь для продолжения движения.
 STR_TRAIN_IS_LOST                                               :{WHITE}Транспортное средство {VEHICLE} заблудилось.
-STR_VEHICLE_IS_UNPROFITABLE                                     :{WHITE}Доход ТС {VEHICLE} в прошлом году составил {CURRENCY}
+STR_VEHICLE_IS_UNPROFITABLE                                     :{WHITE}Доход ТС «{VEHICLE}» в прошлом году составил {CURRENCY}
 STR_EURO_INTRODUCE                                              :{BLACK}{BIGFONT}Создана зона евро!{}{}Теперь в вашей стране в качестве единой валюты используется евро!
 
 # Start of order review system.
 # DON'T ADD OR REMOVE LINES HERE
-STR_VEHICLE_HAS_TOO_FEW_ORDERS                                  :{WHITE}У ТС {VEHICLE} не хватает заданий
-STR_VEHICLE_HAS_VOID_ORDER                                      :{WHITE}У ТС {VEHICLE} нет заданий
-STR_VEHICLE_HAS_DUPLICATE_ENTRY                                 :{WHITE}У ТС {VEHICLE} повторяющиеся задания
-STR_VEHICLE_HAS_INVALID_ENTRY                                   :{WHITE}У ТС {VEHICLE} неправильное место назначения
+STR_VEHICLE_HAS_TOO_FEW_ORDERS                                  :{WHITE}У ТС «{VEHICLE}» не хватает заданий
+STR_VEHICLE_HAS_VOID_ORDER                                      :{WHITE}У ТС «{VEHICLE}» нет заданий
+STR_VEHICLE_HAS_DUPLICATE_ENTRY                                 :{WHITE}У ТС «{VEHICLE}» повторяющиеся задания
+STR_VEHICLE_HAS_INVALID_ENTRY                                   :{WHITE}У ТС «{VEHICLE}» неправильное место назначения
 # end of order system
 
 STR_VEHICLE_AUTORENEW_FAILED                                    :{WHITE}Ошибка автообновления для {VEHICLE}{}{STRING}
-STR_TRAIN_TOO_LONG_AFTER_REPLACEMENT                            :{WHITE}ТС {VEHICLE} слишком длинное после замены
+STR_TRAIN_TOO_LONG_AFTER_REPLACEMENT                            :{WHITE}ТС «{VEHICLE}» слишком длинное после замены
 STR_AUTOREPLACE_NOTHING_TO_DO                                   :{WHITE}Нельзя применить правила автозамены/обновления.
 STR_AUTOREPLACE_MONEY_LIMIT                                     :(денег мало)
 
@@ -1065,7 +1100,7 @@ STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Раз�
 STR_CONFIG_SETTING_DYNAMIC_ENGINES                              :{LTBLUE}Включить поддержку нескольких наборов NewGRF с транспортом: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Изменение этого параметра невозможно, если в игре есть транспортные средства.
 
-STR_CONFIG_SETTING_SMALL_AIRPORTS                               :{LTBLUE}Малые аэропорты всегда доступны: {ORANGE}{STRING}
+STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Аэропорты не устаревают: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_WARN_LOST_TRAIN                              :{LTBLUE}Предупреждать, если поезд заблудился: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW                                 :{LTBLUE}Проверять маршруты на правильность: {ORANGE}{STRING}
@@ -1856,9 +1891,9 @@ STR_LOCAL_AUTHORITY_DO_IT_BUTTON                                :{BLACK}Прим
 STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP                             :{BLACK}То, что можно сделать в этом городе - кликните для получения доп. сведений
 STR_LOCAL_AUTHORITY_DO_IT_TOOLTIP                               :{BLACK}Выполнить выделенное действие в списке выше
 STR_LOCAL_AUTHORITY_ACTIONS_TITLE                               :{BLACK}Доступные действия:
-STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN           :Малая рекламная компания
-STR_LOCAL_AUTHORITY_ACTION_MEDIUM_ADVERTISING_CAMPAIGN          :Средняя рекламная компания
-STR_LOCAL_AUTHORITY_ACTION_LARGE_ADVERTISING_CAMPAIGN           :Большая рекламная компания
+STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN           :Малая рекламная кампания
+STR_LOCAL_AUTHORITY_ACTION_MEDIUM_ADVERTISING_CAMPAIGN          :Средняя рекламная кампания
+STR_LOCAL_AUTHORITY_ACTION_LARGE_ADVERTISING_CAMPAIGN           :Большая рекламная кампания
 STR_LOCAL_AUTHORITY_ACTION_ROAD_RECONSTRUCTION                  :Профинансировать ремонт городских дорог
 STR_LOCAL_AUTHORITY_ACTION_STATUE_OF_COMPANY                    :Установить статую владельца компании
 STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Профинансировать строительство новых зданий
@@ -2034,43 +2069,43 @@ STR_SAVE_OSKTITLE                                               :{BLACK}Введ
 ##id 0x4800
 STR_OBJECT_IN_THE_WAY                                           :{WHITE}{STRING} на пути
 STR_INDUSTRY_VIEW_CAPTION                                       :{WHITE}{INDUSTRY}
-STR_INDUSTRY_NAME_COAL_MINE                                     :Угольная шахта
-STR_INDUSTRY_NAME_POWER_STATION                                 :Электростанция
-STR_INDUSTRY_NAME_SAWMILL                                       :Лесопилка
-STR_INDUSTRY_NAME_FOREST                                        :Лес
-STR_INDUSTRY_NAME_OIL_REFINERY                                  :Нефтезавод
-STR_INDUSTRY_NAME_OIL_RIG                                       :Нефтяная вышка
-STR_INDUSTRY_NAME_FACTORY                                       :Завод
-STR_INDUSTRY_NAME_PRINTING_WORKS                                :Типография
-STR_INDUSTRY_NAME_STEEL_MILL                                    :Сталелитейный завод
-STR_INDUSTRY_NAME_FARM                                          :Ферма
-STR_INDUSTRY_NAME_COPPER_ORE_MINE                               :Шахта медной руды
-STR_INDUSTRY_NAME_OIL_WELLS                                     :Нефтяная скважина
-STR_INDUSTRY_NAME_BANK                                          :Банк
-STR_INDUSTRY_NAME_FOOD_PROCESSING_PLANT                         :Пищевая фабрика
-STR_INDUSTRY_NAME_PAPER_MILL                                    :Бумажная фабрика
-STR_INDUSTRY_NAME_GOLD_MINE                                     :Золотая шахта
-STR_INDUSTRY_NAME_BANK_TROPIC_ARCTIC                            :Банк
-STR_INDUSTRY_NAME_DIAMOND_MINE                                  :Алмазные копи
-STR_INDUSTRY_NAME_IRON_ORE_MINE                                 :Шахта железной руды
-STR_INDUSTRY_NAME_FRUIT_PLANTATION                              :Фруктовая плантация
-STR_INDUSTRY_NAME_RUBBER_PLANTATION                             :Плантация гевеи
-STR_INDUSTRY_NAME_WATER_SUPPLY                                  :Водная скважина
-STR_INDUSTRY_NAME_WATER_TOWER                                   :Водонапорная башня
-STR_INDUSTRY_NAME_FACTORY_2                                     :Завод
-STR_INDUSTRY_NAME_FARM_2                                        :Ферма
-STR_INDUSTRY_NAME_LUMBER_MILL                                   :Лесопилка
-STR_INDUSTRY_NAME_COTTON_CANDY_FOREST                           :Лес сахарной ваты
-STR_INDUSTRY_NAME_CANDY_FACTORY                                 :Конфетная фабрика
-STR_INDUSTRY_NAME_BATTERY_FARM                                  :Поле батареек
-STR_INDUSTRY_NAME_COLA_WELLS                                    :Колодцы колы
-STR_INDUSTRY_NAME_TOY_SHOP                                      :Магазин игрушек
-STR_INDUSTRY_NAME_TOY_FACTORY                                   :Завод игрушек
-STR_INDUSTRY_NAME_PLASTIC_FOUNTAINS                             :Фонтаны пластика
-STR_INDUSTRY_NAME_FIZZY_DRINK_FACTORY                           :Завод газировки
-STR_INDUSTRY_NAME_BUBBLE_GENERATOR                              :Генератор пузырьков
-STR_INDUSTRY_NAME_TOFFEE_QUARRY                                 :Ирисовый карьер
-STR_INDUSTRY_NAME_SUGAR_MINE                                    :Сахарная шахта
+STR_INDUSTRY_NAME_COAL_MINE                                     :{G=f}Угольная шахта
+STR_INDUSTRY_NAME_POWER_STATION                                 :{G=f}Электростанция
+STR_INDUSTRY_NAME_SAWMILL                                       :{G=f}Лесопилка
+STR_INDUSTRY_NAME_FOREST                                        :{G=m}Лес
+STR_INDUSTRY_NAME_OIL_REFINERY                                  :{G=m}Нефтезавод
+STR_INDUSTRY_NAME_OIL_RIG                                       :{G=f}Нефтяная вышка
+STR_INDUSTRY_NAME_FACTORY                                       :{G=m}Завод
+STR_INDUSTRY_NAME_PRINTING_WORKS                                :{G=f}Типография
+STR_INDUSTRY_NAME_STEEL_MILL                                    :{G=m}Сталелитейный завод
+STR_INDUSTRY_NAME_FARM                                          :{G=f}Ферма
+STR_INDUSTRY_NAME_COPPER_ORE_MINE                               :{G=f}Шахта медной руды
+STR_INDUSTRY_NAME_OIL_WELLS                                     :{G=f}Нефтяная скважина
+STR_INDUSTRY_NAME_BANK                                          :{G=m}Банк
+STR_INDUSTRY_NAME_FOOD_PROCESSING_PLANT                         :{G=f}Пищевая фабрика
+STR_INDUSTRY_NAME_PAPER_MILL                                    :{G=f}Бумажная фабрика
+STR_INDUSTRY_NAME_GOLD_MINE                                     :{G=f}Золотая шахта
+STR_INDUSTRY_NAME_BANK_TROPIC_ARCTIC                            :{G=m}Банк
+STR_INDUSTRY_NAME_DIAMOND_MINE                                  :{G=p}Алмазные копи
+STR_INDUSTRY_NAME_IRON_ORE_MINE                                 :{G=f}Шахта железной руды
+STR_INDUSTRY_NAME_FRUIT_PLANTATION                              :{G=f}Фруктовая плантация
+STR_INDUSTRY_NAME_RUBBER_PLANTATION                             :{G=f}Плантация гевеи
+STR_INDUSTRY_NAME_WATER_SUPPLY                                  :{G=f}Водная скважина
+STR_INDUSTRY_NAME_WATER_TOWER                                   :{G=f}Водонапорная башня
+STR_INDUSTRY_NAME_FACTORY_2                                     :{G=m}Завод
+STR_INDUSTRY_NAME_FARM_2                                        :{G=f}Ферма
+STR_INDUSTRY_NAME_LUMBER_MILL                                   :{G=f}Лесопилка
+STR_INDUSTRY_NAME_COTTON_CANDY_FOREST                           :{G=m}Лес сахарной ваты
+STR_INDUSTRY_NAME_CANDY_FACTORY                                 :{G=f}Конфетная фабрика
+STR_INDUSTRY_NAME_BATTERY_FARM                                  :{G=n}Поле батареек
+STR_INDUSTRY_NAME_COLA_WELLS                                    :{G=p}Колодцы колы
+STR_INDUSTRY_NAME_TOY_SHOP                                      :{G=m}Магазин игрушек
+STR_INDUSTRY_NAME_TOY_FACTORY                                   :{G=m}Завод игрушек
+STR_INDUSTRY_NAME_PLASTIC_FOUNTAINS                             :{G=p}Фонтаны пластика
+STR_INDUSTRY_NAME_FIZZY_DRINK_FACTORY                           :{G=m}Завод газировки
+STR_INDUSTRY_NAME_BUBBLE_GENERATOR                              :{G=m}Генератор пузырьков
+STR_INDUSTRY_NAME_TOFFEE_QUARRY                                 :{G=m}Ирисовый карьер
+STR_INDUSTRY_NAME_SUGAR_MINE                                    :{G=f}Сахарная шахта
 
 ############ range for requires starts
 STR_INDUSTRY_VIEW_REQUIRES_CARGO                                :{BLACK}Требуется: {YELLOW}{STRING}{STRING}
@@ -2088,8 +2123,8 @@ STR_INDUSTRY_VIEW_PRODUCES_CARGO_CARGO                          :{BLACK}Прои
 STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE                   :{BLACK}Произведено за прошлый месяц:
 STR_INDUSTRY_VIEW_TRANSPORTED                                   :{YELLOW}{CARGO}{STRING}{BLACK} ({COMMA}% перевезено)
 STR_INDUSTRY_VIEW_LOCATION_TOOLTIP                              :{BLACK}Показать предприятие в основном окне
-STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BLACK}{BIGFONT}Новое предприятие! {STRING} строится возле г.{NBSP}{TOWN}!
-STR_NEWS_INDUSTRY_PLANTED                                       :{BLACK}{BIGFONT}Новое предприятие! {STRING} заложен возле г.{NBSP}{TOWN}!
+STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BLACK}{BIGFONT}Новое предприятие! {STRING} стро{G 0 и и и я}тся возле г.{NBSP}{TOWN}!
+STR_NEWS_INDUSTRY_PLANTED                                       :{BLACK}{BIGFONT}Новое предприятие! {STRING} заложен{G 0 "" а о ы} возле г.{NBSP}{TOWN}!
 STR_INDUSTRY_BUILD_COST                                         :{BLACK}Цена: {YELLOW}{CURRENCY}
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Построить здесь это предприятие невозможно...
 STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED                            :{WHITE}...лес можно сажать только выше линии снега
@@ -2372,7 +2407,7 @@ STR_BUY_COMPANY_MESSAGE                                         :{WHITE}Мы и�
 STR_NEWS_COMPANY_BANKRUPT_TITLE                                 :{BLACK}{BIGFONT}Банкрот!
 STR_NEWS_COMPANY_BANKRUPT_DESCRIPTION                           :{BLACK}{BIGFONT}{STRING} была закрыта кредиторами! Все активы распроданы!
 STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BLACK}{BIGFONT}Основана новая транспортная компания!
-STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BLACK}{BIGFONT}{STRING} начинает строительство около {TOWN}!
+STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BLACK}{BIGFONT}{STRING} начинает строительство около г.{NBSP}{TOWN}!
 STR_ERROR_CAN_T_BUY_COMPANY                                     :{WHITE}Невозможно приобрести компанию...
 STR_GRAPH_CARGO_PAYMENT_RATES_CAPTION                           :{WHITE}Оплата за перевозку грузов
 STR_GRAPH_CARGO_PAYMENT_RATES_X_LABEL                           :{BLACK}{TINYFONT}Дней в транзите
@@ -2883,7 +2918,7 @@ STR_CARGO_N_A                                                   :отсутст�
 STR_ERROR_CAN_T_SELL_RAILROAD_VEHICLE                           :{WHITE}Невозможно продать рельсовый транспорт...
 STR_ERROR_UNABLE_TO_FIND_ROUTE_TO                               :{WHITE}Невозможно найти дорогу к депо
 STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Невозможно остановить/запустить поезд...
-STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Осмотр каждые: {LTBLUE}{COMMA}дней{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
+STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Осмотр каждые {LTBLUE}{COMMA}дней{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Интервал обслуж.: {LTBLUE}{COMMA}%{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Поезда - нажмите для получения справки
 STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Поезда - кликните для получения информации, используйте перетаскивание для изменения состава
@@ -3334,7 +3369,7 @@ STR_VEHICLE_LIST_ROADVEH_DEPOT                                  :{BLACK}{STRING}
 STR_VEHICLE_LIST_SHIP_DEPOT                                     :{BLACK}{STRING} - {COMMA} корабл{P ь я ей}
 STR_VEHICLE_LIST_AIRCRAFT_DEPOT                                 :{BLACK}{STRING} - {COMMA} ед. авиатранспорта
 
-STR_REPLACE_VEHICLES_WHITE                                      :{WHITE}Замена {STRING}
+STR_REPLACE_VEHICLES_WHITE                                      :{WHITE}Замена {STRING.gen}
 STR_REPLACE_VEHICLES_START                                      :{BLACK}Начать замену
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Прекратить замену
 STR_NOT_REPLACING                                               :{BLACK}Нет замены

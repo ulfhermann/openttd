@@ -534,7 +534,7 @@ static void HandlePragma(char *str)
 	} else if (!memcmp(str, "winlangid ", 10)) {
 		const char *buf = str + 10;
 		long langid = strtol(buf, NULL, 16);
-		if (langid > UINT16_MAX || langid < 0) {
+		if (langid > (long)UINT16_MAX || langid < 0) {
 			error("Invalid winlangid %s", buf);
 		}
 		_lang_winlangid = (uint16)langid;
@@ -1063,7 +1063,7 @@ static void WriteLangfile(const char *filename)
 	fwrite(&hdr, sizeof(hdr), 1, f);
 
 	for (int i = 0; i != 32; i++) {
-		for (int j = 0; j != in_use[i]; j++) {
+		for (uint j = 0; j != in_use[i]; j++) {
 			const LangString *ls = _strings[(i << 11) + j];
 			const Case *casep;
 			const char *cmdp;
