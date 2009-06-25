@@ -34,6 +34,7 @@
 #include "company_gui.h"
 #include "signs_base.h"
 #include "subsidy_func.h"
+#include "economy_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -928,6 +929,7 @@ static bool FindIndustryToDeliver(TileIndex ind_tile, void *user_data)
 	if (x < rect->left || x > rect->right || y < rect->top || y > rect->bottom) return false;
 
 	Industry *ind = GetIndustryByTile(ind_tile);
+
 	const IndustrySpec *indspec = GetIndustrySpec(ind->type);
 
 	uint cargo_index;
@@ -1120,6 +1122,42 @@ void VehiclePayment(Vehicle *front_v)
 }
 
 
+void Payment::PayTransfer(CargoPacket *cp, uint count)
+{
+	Money profit = GetTransportedGoodsIncome(
+		count,
+		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
+		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
+		cp->days_in_transit,
+		this->cargo_type);
+
+	cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
+	this->transfer_pay += profit; // accumulate transfer profits for whole vehicle
+}
+
+void Payment::PayFinal(CargoPacket * cp, uint count)
+{
+	Money profit = DeliverGoods(
+			count, this->cargo_type, cp->source, this->current_station,
+			cp->source_xy, cp->days_in_transit, industries);
+
+	this->final_pay += profit;
+}
+
+void Payment::TriggerIndustries() {
+	std::set<CargoID> vehicle_cargos;
+	for(Vehicle * v = front_v; v != NULL; v = v->next) {
+		if (v->cargo_cap > 0) {
+			vehicle_cargos.insert(v->cargo_type);
+		}
+	}
+
+	for(Industry * ind = industries->Begin(); ind != industries->End(); ++ind) {
+
+	}
+
+}
+
 void OldPayment() {
 	// into loadunload ...
 	Money vehicle_profit = 0; // Money paid to the train
@@ -1218,7 +1256,7 @@ void OldPayment() {
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
  */
-static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
+static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustrySet &industry_set)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
@@ -1255,6 +1293,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	uint32 cargo_full      = 0;
 
 	v->cur_speed = 0;
+	Payment payment(v, last_visited, industry_set);
 
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
@@ -1279,7 +1318,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
 				/* The cargo has reached it's final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo(NULL, amount_unloaded, CargoList::MTA_FINAL_DELIVERY, last_visited);
+				remaining = v->cargo.MoveTo(NULL, amount_unloaded, payment, CargoList::MTA_FINAL_DELIVERY);
 
 				result |= 1;
 				accepted = true;
@@ -1291,7 +1330,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			 * station is still accepting the cargo in the vehicle. It doesn't
 			 * accept cargo that was loaded at the same station. */
 			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
-				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded);
+				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, payment);
 				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 
 				result |= 2;
@@ -1368,7 +1407,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			completely_emptied = false;
 			anything_loaded = true;
 
-			ge->cargo.MoveTo(&v->cargo, cap, CargoList::MTA_CARGO_LOAD, st->xy);
+			ge->cargo.MoveTo(&v->cargo, cap, NULL, CargoList::MTA_CARGO_LOAD, st->xy);
 
 			st->time_since_load = 0;
 			st->last_vehicle_type = v->type;
@@ -1452,7 +1491,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		if (v->fill_percent_te_id == INVALID_TE_ID) {
 			v->fill_percent_te_id = ShowFillingPercent(v->x_pos, v->y_pos, v->z_pos + 20, percent, percent_up_down);
 		} else {
-			UpdateFillingPercent(v->fill_percent_te_id, percent, percent_up_down);
+			UpdateFillingPercent(v->fill_percent_te_id, percent, payment.GetSumFinal() + payment.GetSumTransfer(), percent_up_down);
 		}
 	}
 
@@ -1460,6 +1499,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 	if (completely_emptied) {
 		TriggerVehicle(v, VEHICLE_TRIGGER_EMPTY);
+		payment.TriggerIndustries();
 	}
 
 	if (result != 0) {
@@ -1485,9 +1525,11 @@ void LoadUnloadStation(Station *st)
 	for (uint i = 0; i < NUM_CARGO; i++) cargo_left[i] = st->goods[i].cargo.Count();
 
 	std::list<Vehicle *>::iterator iter;
+	static SmallIndustryList industry_set;
+	industry_set.clear();
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
-		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, cargo_left);
+		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, cargo_left, industry_set);
 	}
 }
 

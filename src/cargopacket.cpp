@@ -99,7 +99,7 @@ void CargoList::Truncate(uint count)
 	InvalidateCache();
 }
 
-bool CargoList::MoveTo(CargoList *dest, uint count, CargoList::MoveToAction mta, uint data)
+bool CargoList::MoveTo(CargoList *dest, uint count, Payment * payment, CargoList::MoveToAction mta, uint data)
 {
 	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
 	CargoList tmp;
@@ -115,6 +115,7 @@ bool CargoList::MoveTo(CargoList *dest, uint count, CargoList::MoveToAction mta,
 						tmp.Append(cp);
 					} else {
 						count -= cp->count;
+						payment->PayFinal(cp, cp->count);
 						delete cp;
 					}
 					break;
@@ -124,6 +125,7 @@ bool CargoList::MoveTo(CargoList *dest, uint count, CargoList::MoveToAction mta,
 					cp->paid_for     = false;
 					/* FALL THROUGH */
 				case MTA_OTHER:
+					payment->PayTransfer(cp, cp->count);
 					count -= cp->count;
 					dest->packets.push_back(cp);
 					break;
@@ -146,7 +148,12 @@ bool CargoList::MoveTo(CargoList *dest, uint count, CargoList::MoveToAction mta,
 				cp_new->paid_for        = (mta == MTA_CARGO_LOAD) ? false : cp->paid_for;
 
 				cp_new->count = count;
+				if (mta == MTA_OTHER) {
+					payment->PayTransfer(cp_new, cp_new->count);
+				}
 				dest->packets.push_back(cp_new);
+			} else {
+				payment->PayFinal(cp, count);
 			}
 			cp->count -= count;
 
