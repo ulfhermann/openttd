@@ -1102,6 +1102,26 @@ void VehiclePayment(Vehicle *front_v)
 {
 	int result = 0;
 
+	/* At this moment loading cannot be finished */
+	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
+
+	/* Start unloading in at the first possible moment */
+	front_v->load_unload_time_rem = 1;
+
+	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
+		/* No cargo to unload */
+		if (v->cargo_cap == 0 || v->cargo.Empty() || (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD)) continue;
+
+		/* All cargo has already been paid for, no need to pay again */
+		if (!v->cargo.UnpaidCargo()) {
+			SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
+		}
+	}
+}
+
+
+void OldPayment() {
+	// into loadunload ...
 	Money vehicle_profit = 0; // Money paid to the train
 	Money route_profit   = 0; // The grand total amount for the route. A-D of transfer chain A-B-C-D
 	Money virtual_profit = 0; // The virtual profit for entire vehicle chain
@@ -1113,25 +1133,11 @@ void VehiclePayment(Vehicle *front_v)
 	CompanyID old_company = _current_company;
 	_current_company = front_v->owner;
 
-	/* At this moment loading cannot be finished */
-	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
-
-	/* Start unloading in at the first possible moment */
-	front_v->load_unload_time_rem = 1;
-
 	/* Collect delivered industries */
 	static SmallIndustryList industry_set;
 	industry_set.Clear();
 
 	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
-		/* No cargo to unload */
-		if (v->cargo_cap == 0 || v->cargo.Empty() || (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD)) continue;
-
-		/* All cargo has already been paid for, no need to pay again */
-		if (!v->cargo.UnpaidCargo()) {
-			SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
-			continue;
-		}
 
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 		const CargoList::List *cargos = v->cargo.Packets();
@@ -1175,13 +1181,9 @@ void VehiclePayment(Vehicle *front_v)
 		}
 		v->cargo.InvalidateCache();
 	}
+	// ... until here
 
-	/* Call the production machinery of industries only once for every vehicle chain */
-	const Industry * const *isend = industry_set.End();
-	for (Industry **iid = industry_set.Begin(); iid != isend; iid++) {
-		TriggerIndustryProduction(*iid);
-	}
-
+	// into LeaveStation ...
 	if (virtual_profit > 0) {
 		ShowFeederIncomeAnimation(front_v->x_pos, front_v->y_pos, front_v->z_pos, virtual_profit);
 	}
@@ -1196,6 +1198,14 @@ void VehiclePayment(Vehicle *front_v)
 
 		ShowCostOrIncomeAnimation(front_v->x_pos, front_v->y_pos, front_v->z_pos, -vehicle_profit);
 	}
+
+	/* Call the production machinery of industries only once for every vehicle chain */
+	const Industry * const *isend = industry_set.End();
+	for (Industry **iid = industry_set.Begin(); iid != isend; iid++) {
+		TriggerIndustryProduction(*iid);
+	}
+
+	// ... until here
 
 	_current_company = old_company;
 }
