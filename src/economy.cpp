@@ -71,8 +71,6 @@ static inline uint32 BigMulSU(const uint32 a, const uint32 b, const uint8 shift)
 	return (uint32)((uint64)a * (uint64)b >> shift);
 }
 
-typedef SmallVector<Industry *, 16> SmallIndustryList;
-
 /* Score info */
 const ScoreInfo _score_info[] = {
 	{ SCORE_VEHICLES,        120, 100 },
@@ -1102,8 +1100,6 @@ static void TriggerIndustryProduction(Industry *i)
  */
 void VehiclePayment(Vehicle *front_v)
 {
-	int result = 0;
-
 	/* At this moment loading cannot be finished */
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
 
@@ -1129,7 +1125,7 @@ void Payment::PayTransfer(CargoPacket *cp, uint count)
 		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
 		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
 		cp->days_in_transit,
-		this->cargo_type);
+		this->current_cargo);
 
 	cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
 	this->transfer_pay += profit; // accumulate transfer profits for whole vehicle
@@ -1138,28 +1134,34 @@ void Payment::PayTransfer(CargoPacket *cp, uint count)
 void Payment::PayFinal(CargoPacket * cp, uint count)
 {
 	Money profit = DeliverGoods(
-			count, this->cargo_type, cp->source, this->current_station,
+			count, this->current_cargo, cp->source, this->current_station,
 			cp->source_xy, cp->days_in_transit, industries);
 
 	this->final_pay += profit;
 }
 
-void Payment::TriggerIndustries() {
-	std::set<CargoID> vehicle_cargos;
-	for(Vehicle * v = front_v; v != NULL; v = v->next) {
-		if (v->cargo_cap > 0) {
-			vehicle_cargos.insert(v->cargo_type);
+void Payment::PlaySoundIfFirst() {
+	if (this->final_pay == 0 && this->transfer_pay == 0) {
+		if (this->front->owner == _local_company && !PlayVehicleSound(front, VSE_LOAD_UNLOAD)) {
+			SndPlayVehicleFx(SND_14_CASHTILL, this->front);
 		}
 	}
-
-	for(Industry * ind = industries->Begin(); ind != industries->End(); ++ind) {
-
-	}
-
 }
 
-void OldPayment() {
+Payment::~Payment() {
+	/* The owner of the train wants to be paid */
+	CompanyID old_company = _current_company;
+	_current_company = this->front->owner;
+	if (this->final_pay != 0) {
+		this->front->profit_this_year += this->final_pay << 8;
+		SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->final_pay));
+	}
+	_current_company = old_company;
+}
+
+void OldPayment(Vehicle * front_v) {
 	// into loadunload ...
+	int result = 0;
 	Money vehicle_profit = 0; // Money paid to the train
 	Money route_profit   = 0; // The grand total amount for the route. A-D of transfer chain A-B-C-D
 	Money virtual_profit = 0; // The virtual profit for entire vehicle chain
@@ -1256,7 +1258,7 @@ void OldPayment() {
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
  */
-static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustrySet &industry_set)
+static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustryList &industry_set)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
@@ -1311,6 +1313,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustrySet &ind
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 
 		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (u->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
+			payment.SetCargo(v->cargo_type);
 			uint cargo_count = v->cargo.Count();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 			bool remaining = false; // Are there cargo entities in this vehicle that can still be unloaded here?
@@ -1318,7 +1321,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustrySet &ind
 
 			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
 				/* The cargo has reached it's final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo(NULL, amount_unloaded, payment, CargoList::MTA_FINAL_DELIVERY);
+				remaining = v->cargo.MoveTo(NULL, amount_unloaded, &payment, CargoList::MTA_FINAL_DELIVERY);
 
 				result |= 1;
 				accepted = true;
@@ -1330,7 +1333,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustrySet &ind
 			 * station is still accepting the cargo in the vehicle. It doesn't
 			 * accept cargo that was loaded at the same station. */
 			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
-				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, payment);
+				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, &payment);
 				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 
 				result |= 2;
@@ -1489,7 +1492,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustrySet &ind
 		StringID percent_up_down = STR_NULL;
 		int percent = CalcPercentVehicleFilled(v, &percent_up_down);
 		if (v->fill_percent_te_id == INVALID_TE_ID) {
-			v->fill_percent_te_id = ShowFillingPercent(v->x_pos, v->y_pos, v->z_pos + 20, percent, percent_up_down);
+			v->fill_percent_te_id = ShowFillingPercent(v->x_pos, v->y_pos, v->z_pos + 20, percent, payment.GetSumFinal() + payment.GetSumTransfer(), percent_up_down);
 		} else {
 			UpdateFillingPercent(v->fill_percent_te_id, percent, payment.GetSumFinal() + payment.GetSumTransfer(), percent_up_down);
 		}
@@ -1499,7 +1502,6 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left, SmallIndustrySet &ind
 
 	if (completely_emptied) {
 		TriggerVehicle(v, VEHICLE_TRIGGER_EMPTY);
-		payment.TriggerIndustries();
 	}
 
 	if (result != 0) {
@@ -1526,11 +1528,18 @@ void LoadUnloadStation(Station *st)
 
 	std::list<Vehicle *>::iterator iter;
 	static SmallIndustryList industry_set;
-	industry_set.clear();
+
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
 		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, cargo_left, industry_set);
 	}
+
+	/* Call the production machinery of industries only once for every vehicle chain */
+	const Industry * const *isend = industry_set.End();
+	for (Industry **iid = industry_set.Begin(); iid != isend; iid++) {
+		TriggerIndustryProduction(*iid);
+	}
+	industry_set.Clear();
 }
 
 void CompaniesMonthlyLoop()

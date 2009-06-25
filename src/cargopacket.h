@@ -13,6 +13,7 @@
 
 typedef uint32 CargoPacketID;
 struct CargoPacket;
+class Payment;
 
 /** We want to use a pool */
 typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
@@ -182,7 +183,7 @@ public:
 	 * @param mta == MTA_FINAL_DELIVERY || dest != NULL
 	 * @return true if there are still packets that might be moved from this cargo list
 	 */
-	bool MoveTo(CargoList *dest, uint count, Payment *payment, CargoList::MoveToAction mta = MTA_OTHER, uint data = 0);
+	bool MoveTo(CargoList *dest, uint count, Payment *payment = NULL, CargoList::MoveToAction mta = MTA_OTHER, uint data = 0);
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();

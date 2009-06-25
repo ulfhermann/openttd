@@ -708,7 +708,7 @@ void UpdateFillingPercent(TextEffectID te_id, uint8 percent, Money payment, Stri
 
 	SetDParam(0, percent);
 	TextEffect *te = &_text_effect_list[te_id];
-	SetDParam(4, te->params_2 + payment);
+	SetDParam(4, (Money)te->params_2 + payment);
 
 	/* Update details */
 	UpdateTextEffect(te_id, string);
