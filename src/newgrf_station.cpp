@@ -6,7 +6,8 @@
 #include "variables.h"
 #include "landscape.h"
 #include "debug.h"
-#include "station_map.h"
+#include "station_base.h"
+#include "roadstop_base.h"
 #include "newgrf_commons.h"
 #include "newgrf_station.h"
 #include "newgrf_spritegroup.h"
@@ -468,7 +469,7 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 			uint32 res = GB(GetStationGfx(nearby_tile), 1, 2) << 12 | !!perpendicular << 11 | !!same_station << 10;
 
 			if (IsCustomStationSpecIndex(nearby_tile)) {
-				const StationSpecList ssl = GetStationByTile(nearby_tile)->speclist[GetCustomStationSpecIndex(nearby_tile)];
+				const StationSpecList ssl = Station::GetByTile(nearby_tile)->speclist[GetCustomStationSpecIndex(nearby_tile)];
 				res |= 1 << (ssl.grfid != grfid ? 9 : 8) | ssl.localidx;
 			}
 			return res;
@@ -746,7 +747,7 @@ void DeallocateSpecFromStation(Station *st, byte specindex)
 
 	/* Check all tiles over the station to check if the specindex is still in use */
 	BEGIN_TILE_LOOP(tile, st->trainst_w, st->trainst_h, st->train_tile) {
-		if (IsTileType(tile, MP_STATION) && GetStationIndex(tile) == st->index && IsRailwayStation(tile) && GetCustomStationSpecIndex(tile) == specindex) {
+		if (IsRailwayStationTile(tile) && GetStationIndex(tile) == st->index && GetCustomStationSpecIndex(tile) == specindex) {
 			return;
 		}
 	} END_TILE_LOOP(tile, st->trainst_w, st->trainst_h, st->train_tile)
@@ -857,7 +858,7 @@ const StationSpec *GetStationSpec(TileIndex t)
 
 	if (!IsCustomStationSpecIndex(t)) return NULL;
 
-	st = GetStationByTile(t);
+	st = Station::GetByTile(t);
 	specindex = GetCustomStationSpecIndex(t);
 	return specindex < st->num_specs ? st->speclist[specindex].spec : NULL;
 }
@@ -889,7 +890,7 @@ void AnimateStationTile(TileIndex tile)
 	const StationSpec *ss = GetStationSpec(tile);
 	if (ss == NULL) return;
 
-	const Station *st = GetStationByTile(tile);
+	const Station *st = Station::GetByTile(tile);
 
 	uint8 animation_speed = ss->anim_speed;
 
@@ -1022,7 +1023,7 @@ void StationAnimationTrigger(const Station *st, TileIndex tile, StatAnimTrigger 
 	};
 
 	/* Get Station if it wasn't supplied */
-	if (st == NULL) st = GetStationByTile(tile);
+	if (st == NULL) st = Station::GetByTile(tile);
 
 	/* Check the cached animation trigger bitmask to see if we need
 	 * to bother with any further processing. */

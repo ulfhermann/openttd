@@ -22,32 +22,26 @@
 #include "settings_type.h"
 #include "subsidy_func.h"
 #include "core/pool_func.hpp"
+#include "station_base.h"
+#include "roadstop_base.h"
+#include "industry_map.h"
 
 #include "table/strings.h"
 
 StationPool _station_pool("Station");
 INSTANTIATE_POOL_METHODS(Station)
-RoadStopPool _roadstop_pool("RoadStop");
-INSTANTIATE_POOL_METHODS(RoadStop)
 
-Station::Station(TileIndex tile)
+Station::Station(TileIndex tile) :
+	xy(tile),
+	train_tile(INVALID_TILE),
+	airport_tile(INVALID_TILE),
+	dock_tile(INVALID_TILE),
+	indtype(IT_INVALID),
+	time_since_load(255),
+	time_since_unload(255),
+	last_vehicle_type(VEH_INVALID)
 {
-	DEBUG(station, cDebugCtorLevel, "I+%3d", index);
-
-	xy = tile;
-	airport_tile = dock_tile = train_tile = INVALID_TILE;
-	bus_stops = truck_stops = NULL;
-	had_vehicle_of_type = 0;
-	time_since_load = 255;
-	time_since_unload = 255;
-	delete_ctr = 0;
-	facilities = 0;
-
-	last_vehicle_type = VEH_INVALID;
-	indtype = IT_INVALID;
-
-	random_bits = 0; // Random() must be called when station is really built (DC_EXEC)
-	waiting_triggers = 0;
+	/* this->random_bits is set in Station::AddFacility() */
 }
 
 /**
@@ -58,8 +52,6 @@ Station::Station(TileIndex tile)
  */
 Station::~Station()
 {
-	DEBUG(station, cDebugCtorLevel, "I-%3d", index);
-
 	free(this->name);
 	free(this->speclist);
 
@@ -194,11 +186,6 @@ void Station::MarkTilesDirty(bool cargo_change) const
 	}
 }
 
-bool Station::TileBelongsToRailStation(TileIndex tile) const
-{
-	return IsTileType(tile, MP_STATION) && GetStationIndex(tile) == index && IsRailwayStation(tile);
-}
-
 /** Obtain the length of a platform
  * @pre tile must be a railway station tile
  * @param tile A tile that contains the platform in question
@@ -249,14 +236,6 @@ uint Station::GetPlatformLength(TileIndex tile, DiagDirection dir) const
 	return length;
 }
 
-/** Determines whether a station is a buoy only.
- * @todo Ditch this encoding of buoys
- */
-bool Station::IsBuoy() const
-{
-	return (had_vehicle_of_type & HVOT_BUOY) != 0;
-}
-
 /** Determines the catchment radius of the station
  * @return The radius
  */
@@ -279,6 +258,88 @@ uint Station::GetCatchmentRadius() const
 	return ret;
 }
 
+/** Rect and pointer to IndustryVector */
+struct RectAndIndustryVector {
+	Rect rect;
+	IndustryVector *industries_near;
+};
+
+/**
+ * Callback function for  Station::RecomputeIndustriesNear()
+ * Tests whether tile is an industry and possibly adds
+ * the industry to station's industries_near list.
+ * @param ind_tile tile to check
+ * @param user_data pointer to RectAndIndustryVector
+ * @return always false, we want to search all tiles
+ */
+static bool FindIndustryToDeliver(TileIndex ind_tile, void *user_data)
+{
+	/* Only process industry tiles */
+	if (!IsTileType(ind_tile, MP_INDUSTRY)) return false;
+
+	RectAndIndustryVector *riv = (RectAndIndustryVector *)user_data;
+	Industry *ind = GetIndustryByTile(ind_tile);
+
+	/* Don't check further if this industry is already in the list */
+	if (riv->industries_near->Contains(ind)) return false;
+
+	/* Only process tiles in the station acceptance rectangle */
+	int x = TileX(ind_tile);
+	int y = TileY(ind_tile);
+	if (x < riv->rect.left || x > riv->rect.right || y < riv->rect.top || y > riv->rect.bottom) return false;
+
+	/* Include only industries that can accept cargo */
+	uint cargo_index;
+	for (cargo_index = 0; cargo_index < lengthof(ind->accepts_cargo); cargo_index++) {
+		if (ind->accepts_cargo[cargo_index] != CT_INVALID) break;
+	}
+	if (cargo_index >= lengthof(ind->accepts_cargo)) return false;
+
+	*riv->industries_near->Append() = ind;
+
+	return false;
+}
+
+/**
+ * Recomputes Station::industries_near, list of industries possibly
+ * accepting cargo in station's catchment radius
+ */
+void Station::RecomputeIndustriesNear()
+{
+	this->industries_near.Reset();
+	if (this->rect.IsEmpty()) return;
+
+	/* Compute acceptance rectangle */
+	int catchment_radius = this->GetCatchmentRadius();
+
+	RectAndIndustryVector riv = {
+		{
+			max<int>(this->rect.left   - catchment_radius, 0),
+			max<int>(this->rect.top    - catchment_radius, 0),
+			min<int>(this->rect.right  + catchment_radius, MapMaxX()),
+			min<int>(this->rect.bottom + catchment_radius, MapMaxY())
+		},
+		&this->industries_near
+	};
+
+	/* Compute maximum extent of acceptance rectangle wrt. station sign */
+	TileIndex start_tile = this->xy;
+	uint max_radius = max(
+		max(DistanceManhattan(start_tile, TileXY(riv.rect.left , riv.rect.top)), DistanceManhattan(start_tile, TileXY(riv.rect.left , riv.rect.bottom))),
+		max(DistanceManhattan(start_tile, TileXY(riv.rect.right, riv.rect.top)), DistanceManhattan(start_tile, TileXY(riv.rect.right, riv.rect.bottom)))
+	);
+
+	CircularTileSearch(&start_tile, 2 * max_radius + 1, &FindIndustryToDeliver, &riv);
+}
+
+/**
+ * Recomputes Station::industries_near for all stations
+ */
+/* static */ void Station::RecomputeIndustriesNearForAll()
+{
+	Station *st;
+	FOR_ALL_STATIONS(st) st->RecomputeIndustriesNear();
+}
 
 /************************************************************************/
 /*                     StationRect implementation                       */
@@ -446,124 +507,7 @@ StationRect& StationRect::operator = (Rect src)
 }
 
 
-/************************************************************************/
-/*                     RoadStop implementation                          */
-/************************************************************************/
-
-/** Initializes a RoadStop */
-RoadStop::RoadStop(TileIndex tile) :
-	xy(tile),
-	status(3), // stop is free
-	num_vehicles(0),
-	next(NULL)
-{
-	DEBUG(ms, cDebugCtorLevel,  "I+ at %d[0x%x]", tile, tile);
-}
-
-/** De-Initializes a RoadStops. This includes clearing all slots that vehicles might
-  * have and unlinks it from the linked list of road stops at the given station
-  */
-RoadStop::~RoadStop()
-{
-	if (CleaningPool()) return;
-
-	/* Clear the slot assignment of all vehicles heading for this road stop */
-	if (num_vehicles != 0) {
-		RoadVehicle *rv;
-		FOR_ALL_ROADVEHICLES(rv) {
-			if (rv->slot == this) ClearSlot(rv);
-		}
-	}
-	assert(num_vehicles == 0);
-
-	DEBUG(ms, cDebugCtorLevel , "I- at %d[0x%x]", xy, xy);
-}
-
-/** Checks whether there is a free bay in this road stop */
-bool RoadStop::HasFreeBay() const
-{
-	return GB(status, 0, MAX_BAY_COUNT) != 0;
-}
-
-/** Checks whether the given bay is free in this road stop */
-bool RoadStop::IsFreeBay(uint nr) const
-{
-	assert(nr < MAX_BAY_COUNT);
-	return HasBit(status, nr);
-}
-
-/**
- * Allocates a bay
- * @return the allocated bay number
- * @pre this->HasFreeBay()
- */
-uint RoadStop::AllocateBay()
-{
-	assert(HasFreeBay());
-
-	/* Find the first free bay. If the bit is set, the bay is free. */
-	uint bay_nr = 0;
-	while (!HasBit(status, bay_nr)) bay_nr++;
-
-	ClrBit(status, bay_nr);
-	return bay_nr;
-}
-
-/**
- * Allocates a bay in a drive-through road stop
- * @param nr the number of the bay to allocate
- */
-void RoadStop::AllocateDriveThroughBay(uint nr)
-{
-	assert(nr < MAX_BAY_COUNT);
-	ClrBit(status, nr);
-}
-
-/**
- * Frees the given bay
- * @param nr the number of the bay to free
- */
-void RoadStop::FreeBay(uint nr)
-{
-	assert(nr < MAX_BAY_COUNT);
-	SetBit(status, nr);
-}
-
-
-/** Checks whether the entrance of the road stop is occupied by a vehicle */
-bool RoadStop::IsEntranceBusy() const
-{
-	return HasBit(status, 7);
-}
-
-/** Makes an entrance occupied or free */
-void RoadStop::SetEntranceBusy(bool busy)
-{
-	SB(status, 7, 1, busy);
-}
-
-/**
- * Get the next road stop accessible by this vehicle.
- * @param v the vehicle to get the next road stop for.
- * @return the next road stop accessible.
- */
-RoadStop *RoadStop::GetNextRoadStop(const RoadVehicle *v) const
-{
-	for (RoadStop *rs = this->next; rs != NULL; rs = rs->next) {
-		/* The vehicle cannot go to this roadstop (different roadtype) */
-		if ((GetRoadTypes(rs->xy) & v->compatible_roadtypes) == ROADTYPES_NONE) continue;
-		/* The vehicle is articulated and can therefor not go the a standard road stop */
-		if (IsStandardRoadStopTile(rs->xy) && RoadVehHasArticPart(v)) continue;
-
-		/* The vehicle can actually go to this road stop. So, return it! */
-		return rs;
-	}
-
-	return NULL;
-}
-
 void InitializeStations()
 {
 	_station_pool.CleanPool();
-	_roadstop_pool.CleanPool();
 }

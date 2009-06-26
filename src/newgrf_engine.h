@@ -5,9 +5,8 @@
 #ifndef NEWGRF_ENGINE_H
 #define NEWGRF_ENGINE_H
 
-#include "newgrf.h"
 #include "direction_type.h"
-#include "newgrf_cargo.h"
+#include "newgrf_callbacks.h"
 
 extern int _traininfo_vehicle_pitch;
 extern int _traininfo_vehicle_width;

@@ -8,8 +8,9 @@
 #include "../ai_instance.hpp"
 #include "../../debug.h"
 #include "../../vehicle_base.h"
+#include "../../roadstop_base.h"
 #include "../../depot_base.h"
-#include "../../station_map.h"
+#include "../../station_base.h"
 #include "../../waypoint.h"
 
 /**
@@ -344,7 +345,7 @@ static const Order *ResolveOrder(VehicleID vehicle_id, AIOrder::OrderPosition or
 				order.MakeGoToDepot(::GetStationIndex(destination), odtf, onsf, odaf);
 			} else {
 				if (::IsTileType(destination, MP_STATION)) return false;
-				order.MakeGoToDepot(::GetDepotByTile(destination)->index, odtf, onsf, odaf);
+				order.MakeGoToDepot(::Depot::GetByTile(destination)->index, odtf, onsf, odaf);
 			}
 			break;
 		}
