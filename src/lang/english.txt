@@ -3445,10 +3445,13 @@ STR_TRANSPARENT_INVISIBLE_DESC                                  :{BLACK}Set obje
 
 STR_PERCENT_UP_SMALL                                            :{TINYFONT}{WHITE}{NUM}%{UPARROW}
 STR_PERCENT_UP                                                  :{WHITE}{NUM}%{UPARROW}
+STR_INCOME_PERCENT_UP                                           :{WHITE}{NUM}%{UPARROW}{GREEN}{CURRENCY}
 STR_PERCENT_DOWN_SMALL                                          :{TINYFONT}{WHITE}{NUM}%{DOWNARROW}
 STR_PERCENT_DOWN                                                :{WHITE}{NUM}%{DOWNARROW}
+STR_INCOME_PERCENT_DOWN                                         :{WHITE}{NUM}%{DOWNARROW}{GREEN}{CURRENCY}
 STR_PERCENT_UP_DOWN_SMALL                                       :{TINYFONT}{WHITE}{NUM}%{UPARROW}{DOWNARROW}
 STR_PERCENT_UP_DOWN                                             :{WHITE}{NUM}%{UPARROW}{DOWNARROW}
+STR_INCOME_PERCENT_UP_DOWN                                      :{WHITE}{NUM}%{UPARROW}{DOWNARROW}{GREEN}{CURRENCY}
 
 ##### Mass Order
 STR_GROUP_NAME_FORMAT                                           :Group {COMMA}
