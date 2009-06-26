@@ -488,7 +488,7 @@ static void TileLoop_Town(TileIndex tile)
 	_current_company = OWNER_TOWN;
 
 	if ((hs->building_flags & BUILDING_HAS_1_TILE) &&
-			HasBit(t->flags12, TOWN_IS_FUNDED) &&
+			HasBit(t->flags, TOWN_IS_FUNDED) &&
 			CanDeleteHouse(tile) &&
 			GetHouseAge(tile) >= hs->minimum_life &&
 			--t->time_until_rebuild == 0) {
@@ -501,16 +501,6 @@ static void TileLoop_Town(TileIndex tile)
 	}
 
 	_current_company = OWNER_NONE;
-}
-
-/**
- * Dummy tile callback function for handling tile clicks in towns
- * @param tile unused
- */
-static bool ClickTile_Town(TileIndex tile)
-{
-	/* not used */
-	return false;
 }
 
 static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlag flags)
@@ -569,7 +559,7 @@ static void GetProducedCargo_Town(TileIndex tile, CargoID *b)
 	}
 }
 
-static void GetAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
+static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 {
 	const HouseSpec *hs = GetHouseSpecs(GetHouseType(tile));
 	CargoID accepts[3];
@@ -594,13 +584,13 @@ static void GetAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 	if (HasBit(hs->callback_mask, CBM_HOUSE_CARGO_ACCEPTANCE)) {
 		uint16 callback = GetHouseCallback(CBID_HOUSE_CARGO_ACCEPTANCE, 0, 0, GetHouseType(tile), GetTownByTile(tile), tile);
 		if (callback != CALLBACK_FAILED) {
-			if (accepts[0] != CT_INVALID) ac[accepts[0]] = GB(callback, 0, 4);
-			if (accepts[1] != CT_INVALID) ac[accepts[1]] = GB(callback, 4, 4);
+			if (accepts[0] != CT_INVALID) ac[accepts[0]] += GB(callback, 0, 4);
+			if (accepts[1] != CT_INVALID) ac[accepts[1]] += GB(callback, 4, 4);
 			if (_settings_game.game_creation.landscape != LT_TEMPERATE && HasBit(callback, 12)) {
 				/* The 'S' bit indicates food instead of goods */
-				ac[CT_FOOD] = GB(callback, 8, 4);
+				ac[CT_FOOD] += GB(callback, 8, 4);
 			} else {
-				if (accepts[2] != CT_INVALID) ac[accepts[2]] = GB(callback, 8, 4);
+				if (accepts[2] != CT_INVALID) ac[accepts[2]] += GB(callback, 8, 4);
 			}
 			return;
 		}
@@ -608,7 +598,7 @@ static void GetAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 
 	/* No custom acceptance, so fill in with the default values */
 	for (uint8 i = 0; i < lengthof(accepts); i++) {
-		if (accepts[i] != CT_INVALID) ac[accepts[i]] = hs->cargo_acceptance[i];
+		if (accepts[i] != CT_INVALID) ac[accepts[i]] += hs->cargo_acceptance[i];
 	}
 }
 
@@ -656,7 +646,7 @@ static bool GrowTown(Town *t);
 
 static void TownTickHandler(Town *t)
 {
-	if (HasBit(t->flags12, TOWN_IS_FUNDED)) {
+	if (HasBit(t->flags, TOWN_IS_FUNDED)) {
 		int i = t->grow_counter - 1;
 		if (i < 0) {
 			if (GrowTown(t)) {
@@ -1460,7 +1450,7 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 	t->num_houses = 0;
 	t->time_until_rebuild = 10;
 	UpdateTownRadius(t);
-	t->flags12 = 0;
+	t->flags = 0;
 	t->population = 0;
 	t->grow_counter = 0;
 	t->growth_rate = 250;
@@ -2121,7 +2111,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 			SetBit(oneof, TOWN_HAS_STADIUM);
 		}
 
-		if (t->flags12 & oneof) continue;
+		if (t->flags & oneof) continue;
 
 		/* Make sure there is no slope? */
 		bool noslope = (hs->building_flags & TILE_NOT_SLOPED) != 0;
@@ -2146,7 +2136,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 		t->num_houses++;
 
 		/* Special houses that there can be only one of. */
-		t->flags12 |= oneof;
+		t->flags |= oneof;
 
 		byte construction_counter = 0;
 		byte construction_stage = 0;
@@ -2233,9 +2223,9 @@ void ClearTownHouse(Town *t, TileIndex tile)
 
 	/* Clear flags for houses that only may exist once/town. */
 	if (hs->building_flags & BUILDING_IS_CHURCH) {
-		ClrBit(t->flags12, TOWN_HAS_CHURCH);
+		ClrBit(t->flags, TOWN_HAS_CHURCH);
 	} else if (hs->building_flags & BUILDING_IS_STADIUM) {
-		ClrBit(t->flags12, TOWN_HAS_STADIUM);
+		ClrBit(t->flags, TOWN_HAS_STADIUM);
 	}
 
 	/* Do the actual clearing of tiles */
@@ -2404,7 +2394,7 @@ static void TownActionFundBuildings(Town *t)
 	/* Build next tick */
 	t->grow_counter = 1;
 	/* If we were not already growing */
-	SetBit(t->flags12, TOWN_IS_FUNDED);
+	SetBit(t->flags, TOWN_IS_FUNDED);
 	/* And grow for 3 months */
 	t->fund_buildings_months = 3;
 }
@@ -2591,7 +2581,7 @@ static void UpdateTownGrowRate(Town *t)
 
 	InvalidateWindow(WC_TOWN_AUTHORITY, t->index);
 
-	ClrBit(t->flags12, TOWN_IS_FUNDED);
+	ClrBit(t->flags, TOWN_IS_FUNDED);
 	if (_settings_game.economy.town_growth_rate == 0 && t->fund_buildings_months == 0) return;
 
 	/** Towns are processed every TOWN_GROWTH_FREQUENCY ticks, and this is the
@@ -2630,7 +2620,7 @@ static void UpdateTownGrowRate(Town *t)
 	if (m <= t->grow_counter)
 		t->grow_counter = m;
 
-	SetBit(t->flags12, TOWN_IS_FUNDED);
+	SetBit(t->flags, TOWN_IS_FUNDED);
 }
 
 static void UpdateTownAmounts(Town *t)
@@ -2883,10 +2873,10 @@ extern const TileTypeProcs _tile_type_town_procs = {
 	DrawTile_Town,           // draw_tile_proc
 	GetSlopeZ_Town,          // get_slope_z_proc
 	ClearTile_Town,          // clear_tile_proc
-	GetAcceptedCargo_Town,   // get_accepted_cargo_proc
+	AddAcceptedCargo_Town,   // add_accepted_cargo_proc
 	GetTileDesc_Town,        // get_tile_desc_proc
 	GetTileTrackStatus_Town, // get_tile_track_status_proc
-	ClickTile_Town,          // click_tile_proc
+	NULL,                    // click_tile_proc
 	AnimateTile_Town,        // animate_tile_proc
 	TileLoop_Town,           // tile_loop_clear
 	ChangeTileOwner_Town,    // change_tile_owner_clear

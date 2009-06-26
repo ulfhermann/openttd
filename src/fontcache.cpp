@@ -13,6 +13,8 @@
 #include "table/sprites.h"
 #include "table/control_codes.h"
 
+static const int ASCII_LETTERSTART = 32; ///< First printable ASCII letter.
+
 /** Semi-constant for the height of the different sizes of fonts. */
 int _font_height[FS_END];
 
@@ -631,14 +633,13 @@ static GlyphEntry **_glyph_ptr[FS_END];
 /** Clear the complete cache */
 static void ResetGlyphCache()
 {
-	for (int i = 0; i < FS_END; i++) {
+	for (FontSize i = FS_BEGIN; i < FS_END; i++) {
 		if (_glyph_ptr[i] == NULL) continue;
 
 		for (int j = 0; j < 256; j++) {
 			if (_glyph_ptr[i][j] == NULL) continue;
 
 			for (int k = 0; k < 256; k++) {
-				if (_glyph_ptr[i][j][k].sprite == NULL) continue;
 				free(_glyph_ptr[i][j][k].sprite);
 			}
 
@@ -730,7 +731,7 @@ const Sprite *GetGlyph(FontSize size, WChar key)
 	FT_Render_Glyph(face->glyph, aa ? FT_RENDER_MODE_NORMAL : FT_RENDER_MODE_MONO);
 
 	/* Despite requesting a normal glyph, FreeType may have returned a bitmap */
-	aa = (slot->bitmap.palette_mode == FT_PIXEL_MODE_GRAY);
+	aa = (slot->bitmap.pixel_mode == FT_PIXEL_MODE_GRAY);
 
 	/* Add 1 pixel for the shadow on the medium font. Our sprite must be at least 1x1 pixel */
 	width  = max(1, slot->bitmap.width + (size == FS_NORMAL));
@@ -842,11 +843,11 @@ void SetUnicodeGlyph(FontSize size, uint32 key, SpriteID sprite)
 
 void InitializeUnicodeGlyphMap()
 {
-	for (FontSize size = FS_NORMAL; size != FS_END; size++) {
+	for (FontSize size = FS_BEGIN; size != FS_END; size++) {
 		/* Clear out existing glyph map if it exists */
 		if (_unicode_glyph_map[size] != NULL) {
 			for (uint i = 0; i < 256; i++) {
-				if (_unicode_glyph_map[size][i] != NULL) free(_unicode_glyph_map[size][i]);
+				free(_unicode_glyph_map[size][i]);
 			}
 			free(_unicode_glyph_map[size]);
 			_unicode_glyph_map[size] = NULL;

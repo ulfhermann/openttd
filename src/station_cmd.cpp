@@ -31,6 +31,8 @@
 #include "string_func.h"
 #include "animated_tile_func.h"
 #include "elrail_func.h"
+#include "station_base.h"
+#include "roadstop_base.h"
 
 #include "table/strings.h"
 
@@ -44,7 +46,7 @@ bool IsHangar(TileIndex t)
 {
 	assert(IsTileType(t, MP_STATION));
 
-	const Station *st = GetStationByTile(t);
+	const Station *st = Station::GetByTile(t);
 	const AirportFTAClass *apc = st->Airport();
 
 	for (uint i = 0; i < apc->nof_depots; i++) {
@@ -53,17 +55,6 @@ bool IsHangar(TileIndex t)
 
 	return false;
 }
-
-RoadStop *GetRoadStopByTile(TileIndex tile, RoadStopType type)
-{
-	const Station *st = GetStationByTile(tile);
-
-	for (RoadStop *rs = st->GetPrimaryRoadStop(type);; rs = rs->next) {
-		if (rs->xy == tile) return rs;
-		assert(rs->next != NULL);
-	}
-}
-
 
 static uint GetNumRoadStopsInStation(const Station *st, RoadStopType type)
 {
@@ -522,13 +513,7 @@ void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile,
 	for (int yc = y1; yc != y2; yc++) {
 		for (int xc = x1; xc != x2; xc++) {
 			TileIndex tile = TileXY(xc, yc);
-
-			if (!IsTileType(tile, MP_STATION)) {
-				AcceptedCargo ac;
-
-				GetAcceptedCargo(tile, ac);
-				for (uint i = 0; i < lengthof(ac); ++i) accepts[i] += ac[i];
-			}
+			AddAcceptedCargo(tile, accepts);
 		}
 	}
 }
@@ -1073,6 +1058,7 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 		st->MarkTilesDirty(false);
 		UpdateStationVirtCoordDirty(st);
 		UpdateStationAcceptance(st, false);
+		st->RecomputeIndustriesNear();
 		InvalidateWindowData(WC_SELECT_STATION, 0, 0);
 		InvalidateWindowData(WC_STATION_LIST, st->owner, 0);
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_TRAINS);
@@ -1168,7 +1154,7 @@ CommandCost CmdRemoveFromRailroadStation(TileIndex tile, DoCommandFlag flags, ui
 	/* Do the action for every tile into the area */
 	BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) {
 		/* Make sure the specified tile is a railroad station */
-		if (!IsTileType(tile2, MP_STATION) || !IsRailwayStation(tile2)) {
+		if (!IsRailwayStationTile(tile2)) {
 			continue;
 		}
 
@@ -1178,7 +1164,7 @@ CommandCost CmdRemoveFromRailroadStation(TileIndex tile, DoCommandFlag flags, ui
 		}
 
 		/* Check ownership of station */
-		Station *st = GetStationByTile(tile2);
+		Station *st = Station::GetByTile(tile2);
 		if (_current_company != OWNER_WATER && !CheckOwnership(st->owner)) {
 			continue;
 		}
@@ -1239,6 +1225,8 @@ CommandCost CmdRemoveFromRailroadStation(TileIndex tile, DoCommandFlag flags, ui
 				UpdateStationVirtCoordDirty(st);
 				DeleteStationIfEmpty(st);
 			}
+
+			st->RecomputeIndustriesNear();
 		}
 	} END_TILE_LOOP(tile2, size_x, size_y, tile)
 
@@ -1311,6 +1299,7 @@ static CommandCost RemoveRailroadStation(Station *st, TileIndex tile, DoCommandF
 
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_TRAINS);
 		UpdateStationVirtCoordDirty(st);
+		st->RecomputeIndustriesNear();
 		DeleteStationIfEmpty(st);
 	}
 
@@ -1478,6 +1467,7 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 		UpdateStationVirtCoordDirty(st);
 		UpdateStationAcceptance(st, false);
+		st->RecomputeIndustriesNear();
 		InvalidateWindowData(WC_SELECT_STATION, 0, 0);
 		InvalidateWindowData(WC_STATION_LIST, st->owner, 0);
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_ROADVEHS);
@@ -1512,10 +1502,10 @@ static CommandCost RemoveRoadStop(Station *st, DoCommandFlag flags, TileIndex ti
 	RoadStop *cur_stop;
 	if (is_truck) { // truck stop
 		primary_stop = &st->truck_stops;
-		cur_stop = GetRoadStopByTile(tile, ROADSTOP_TRUCK);
+		cur_stop = RoadStop::GetByTile(tile, ROADSTOP_TRUCK);
 	} else {
 		primary_stop = &st->bus_stops;
-		cur_stop = GetRoadStopByTile(tile, ROADSTOP_BUS);
+		cur_stop = RoadStop::GetByTile(tile, ROADSTOP_BUS);
 	}
 
 	assert(cur_stop != NULL);
@@ -1559,6 +1549,7 @@ static CommandCost RemoveRoadStop(Station *st, DoCommandFlag flags, TileIndex ti
 		st->rect.AfterRemoveTile(st, tile);
 
 		UpdateStationVirtCoordDirty(st);
+		st->RecomputeIndustriesNear();
 		DeleteStationIfEmpty(st);
 	}
 
@@ -1575,7 +1566,7 @@ CommandCost CmdRemoveRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 {
 	/* Make sure the specified tile is a road stop of the correct type */
 	if (!IsTileType(tile, MP_STATION) || !IsRoadStop(tile) || (uint32)GetRoadStopType(tile) != GB(p2, 0, 1)) return CMD_ERROR;
-	Station *st = GetStationByTile(tile);
+	Station *st = Station::GetByTile(tile);
 	/* Save the stop info before it is removed */
 	bool is_drive_through = IsDriveThroughStopTile(tile);
 	RoadTypes rts = GetRoadTypes(tile);
@@ -1718,15 +1709,17 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 	if (distant_join && (!_settings_game.station.distant_join_stations || !Station::IsValidID(station_to_join))) return CMD_ERROR;
 
-	/* Check if a valid, buildable airport was chosen for construction */
-	if (p1 >= NUM_AIRPORTS || !HasBit(GetValidAirports(), p1)) return CMD_ERROR;
+	if (p1 >= NUM_AIRPORTS) return CMD_ERROR;
 
 	if (!CheckIfAuthorityAllowsNewStation(tile, flags)) {
 		return CMD_ERROR;
 	}
 
-	Town *t = ClosestTownFromTile(tile, UINT_MAX);
+	/* Check if a valid, buildable airport was chosen for construction */
 	const AirportFTAClass *afc = GetAirport(p1);
+	if (!afc->IsAvailable()) return CMD_ERROR;
+
+	Town *t = ClosestTownFromTile(tile, UINT_MAX);
 	int w = afc->size_x;
 	int h = afc->size_y;
 	Station *st = NULL;
@@ -1842,6 +1835,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 		UpdateStationVirtCoordDirty(st);
 		UpdateStationAcceptance(st, false);
+		st->RecomputeIndustriesNear();
 		InvalidateWindowData(WC_SELECT_STATION, 0, 0);
 		InvalidateWindowData(WC_STATION_LIST, st->owner, 0);
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_PLANES);
@@ -1908,6 +1902,7 @@ static CommandCost RemoveAirport(Station *st, DoCommandFlag flags)
 		}
 
 		UpdateStationVirtCoordDirty(st);
+		st->RecomputeIndustriesNear();
 		DeleteStationIfEmpty(st);
 	}
 
@@ -1953,6 +1948,7 @@ CommandCost CmdBuildBuoy(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 		UpdateStationVirtCoordDirty(st);
 		UpdateStationAcceptance(st, false);
+		st->RecomputeIndustriesNear();
 		InvalidateWindowData(WC_STATION_LIST, st->owner, 0);
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_SHIPS);
 	}
@@ -2009,6 +2005,7 @@ static CommandCost RemoveBuoy(Station *st, DoCommandFlag flags)
 		MarkTileDirtyByTile(tile);
 
 		UpdateStationVirtCoordDirty(st);
+		st->RecomputeIndustriesNear();
 		DeleteStationIfEmpty(st);
 	}
 
@@ -2124,6 +2121,7 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 		UpdateStationVirtCoordDirty(st);
 		UpdateStationAcceptance(st, false);
+		st->RecomputeIndustriesNear();
 		InvalidateWindowData(WC_SELECT_STATION, 0, 0);
 		InvalidateWindowData(WC_STATION_LIST, st->owner, 0);
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_SHIPS);
@@ -2156,6 +2154,7 @@ static CommandCost RemoveDock(Station *st, DoCommandFlag flags)
 
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_SHIPS);
 		UpdateStationVirtCoordDirty(st);
+		st->RecomputeIndustriesNear();
 		DeleteStationIfEmpty(st);
 	}
 
@@ -2205,7 +2204,7 @@ static void DrawTile_Station(TileInfo *ti)
 
 	if (IsCustomStationSpecIndex(ti->tile)) {
 		/* look for customization */
-		st = GetStationByTile(ti->tile);
+		st = Station::GetByTile(ti->tile);
 		statspec = st->speclist[GetCustomStationSpecIndex(ti->tile)].spec;
 
 		if (statspec != NULL) {
@@ -2332,11 +2331,6 @@ static Foundation GetFoundation_Station(TileIndex tile, Slope tileh)
 	return FlatteningFoundation(tileh);
 }
 
-static void GetAcceptedCargo_Station(TileIndex tile, AcceptedCargo ac)
-{
-	/* not used */
-}
-
 static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 {
 	td->owner[0] = GetTileOwner(tile);
@@ -2362,7 +2356,7 @@ static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 			}
 		}
 	}
-	td->build_date = GetStationByTile(tile)->build_date;
+	td->build_date = Station::GetByTile(tile)->build_date;
 
 	const StationSpec *spec = GetStationSpec(tile);
 
@@ -2555,7 +2549,7 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
 		if (rv->state < RVSB_IN_ROAD_STOP && !IsReversingRoadTrackdir((Trackdir)rv->state) && rv->frame == 0) {
 			if (IsRoadStop(tile) && IsRoadVehFront(v)) {
 				/* Attempt to allocate a parking bay in a road stop */
-				RoadStop *rs = GetRoadStopByTile(tile, GetRoadStopType(tile));
+				RoadStop *rs = RoadStop::GetByTile(tile, GetRoadStopType(tile));
 
 				if (IsDriveThroughStopTile(tile)) {
 					if (!rv->current_order.ShouldStopAtStation(v, station_id)) return VETSB_CONTINUE;
@@ -2857,7 +2851,7 @@ void FindStationsAroundTiles(TileIndex tile, int w_prod, int h_prod, StationList
 			TileIndex cur_tile = TileAddWrap(tile, dx, dy);
 			if (cur_tile == INVALID_TILE || !IsTileType(cur_tile, MP_STATION)) continue;
 
-			Station *st = GetStationByTile(cur_tile);
+			Station *st = Station::GetByTile(cur_tile);
 
 			if (st->IsBuoy()) continue; // bouys don't accept cargo
 
@@ -2992,11 +2986,12 @@ void BuildOilRig(TileIndex tile)
 
 	UpdateStationVirtCoordDirty(st);
 	UpdateStationAcceptance(st, false);
+	st->RecomputeIndustriesNear();
 }
 
 void DeleteOilRig(TileIndex tile)
 {
-	Station *st = GetStationByTile(tile);
+	Station *st = Station::GetByTile(tile);
 
 	MakeWaterKeepingClass(tile, OWNER_NONE);
 	MarkTileDirtyByTile(tile);
@@ -3009,6 +3004,7 @@ void DeleteOilRig(TileIndex tile)
 	st->rect.AfterRemoveTile(st, tile);
 
 	UpdateStationVirtCoordDirty(st);
+	st->RecomputeIndustriesNear();
 	if (st->facilities == 0) delete st;
 }
 
@@ -3084,7 +3080,7 @@ static CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags)
 		}
 	}
 
-	Station *st = GetStationByTile(tile);
+	Station *st = Station::GetByTile(tile);
 
 	switch (GetStationType(tile)) {
 		case STATION_RAIL:    return RemoveRailroadStation(st, tile, flags);
@@ -3145,7 +3141,7 @@ extern const TileTypeProcs _tile_type_station_procs = {
 	DrawTile_Station,           // draw_tile_proc
 	GetSlopeZ_Station,          // get_slope_z_proc
 	ClearTile_Station,          // clear_tile_proc
-	GetAcceptedCargo_Station,   // get_accepted_cargo_proc
+	NULL,                       // add_accepted_cargo_proc
 	GetTileDesc_Station,        // get_tile_desc_proc
 	GetTileTrackStatus_Station, // get_tile_track_status_proc
 	ClickTile_Station,          // click_tile_proc

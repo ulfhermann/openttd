@@ -32,6 +32,7 @@
 #include "newgrf_cargo.h"
 #include "effectvehicle_func.h"
 #include "tunnelbridge_map.h"
+#include "station_base.h"
 #include "ai/ai.hpp"
 
 #include "table/sprites.h"
@@ -176,7 +177,7 @@ static CommandCost RemoveShipDepot(TileIndex tile, DoCommandFlag flags)
 
 	if (flags & DC_EXEC) {
 		/* Kill the depot, which is registered at the northernmost tile. Use that one */
-		delete GetDepotByTile(tile2 < tile ? tile2 : tile);
+		delete Depot::GetByTile(tile2 < tile ? tile2 : tile);
 
 		MakeWaterKeepingClass(tile,  GetTileOwner(tile));
 		MakeWaterKeepingClass(tile2, GetTileOwner(tile2));
@@ -681,11 +682,6 @@ static Foundation GetFoundation_Water(TileIndex tile, Slope tileh)
 	return FOUNDATION_NONE;
 }
 
-static void GetAcceptedCargo_Water(TileIndex tile, AcceptedCargo ac)
-{
-	/* not used */
-}
-
 static void GetTileDesc_Water(TileIndex tile, TileDesc *td)
 {
 	switch (GetWaterTileType(tile)) {
@@ -704,11 +700,6 @@ static void GetTileDesc_Water(TileIndex tile, TileDesc *td)
 	}
 
 	td->owner[0] = GetTileOwner(tile);
-}
-
-static void AnimateTile_Water(TileIndex tile)
-{
-	/* not used */
 }
 
 static void FloodVehicle(Vehicle *v);
@@ -740,7 +731,7 @@ static void FloodVehicles(TileIndex tile)
 	byte z = 0;
 
 	if (IsTileType(tile, MP_STATION) && IsAirport(tile)) {
-		const Station *st = GetStationByTile(tile);
+		const Station *st = Station::GetByTile(tile);
 		const AirportFTAClass *airport = st->Airport();
 		z = 1 + airport->delta_z;
 		for (uint x = 0; x < airport->size_x; x++) {
@@ -756,7 +747,7 @@ static void FloodVehicles(TileIndex tile)
 
 	/* if non-uniform stations are disabled, flood some train in this train station (if there is any) */
 	if (!_settings_game.station.nonuniform_stations && IsTileType(tile, MP_STATION) && GetStationType(tile) == STATION_RAIL) {
-		const Station *st = GetStationByTile(tile);
+		const Station *st = Station::GetByTile(tile);
 
 		BEGIN_TILE_LOOP(t, st->trainst_w, st->trainst_h, st->train_tile)
 			if (st->TileBelongsToRailStation(t)) {
@@ -790,7 +781,7 @@ static void FloodVehicle(Vehicle *v)
 				 * because that's always the shadow. Except for the heliport, because
 				 * that station has a big z_offset for the aircraft. */
 				if (!IsTileType(v->tile, MP_STATION) || !IsAirport(v->tile) || GetTileMaxZ(v->tile) != 0) return;
-				const Station *st = GetStationByTile(v->tile);
+				const Station *st = Station::GetByTile(v->tile);
 				const AirportFTAClass *airport = st->Airport();
 
 				if (v->z_pos != airport->delta_z + 1) return;
@@ -1159,11 +1150,11 @@ extern const TileTypeProcs _tile_type_water_procs = {
 	DrawTile_Water,           // draw_tile_proc
 	GetSlopeZ_Water,          // get_slope_z_proc
 	ClearTile_Water,          // clear_tile_proc
-	GetAcceptedCargo_Water,   // get_accepted_cargo_proc
+	NULL,                     // add_accepted_cargo_proc
 	GetTileDesc_Water,        // get_tile_desc_proc
 	GetTileTrackStatus_Water, // get_tile_track_status_proc
 	ClickTile_Water,          // click_tile_proc
-	AnimateTile_Water,        // animate_tile_proc
+	NULL,                     // animate_tile_proc
 	TileLoop_Water,           // tile_loop_clear
 	ChangeTileOwner_Water,    // change_tile_owner_clear
 	NULL,                     // get_produced_cargo_proc
