@@ -28,6 +28,9 @@
 #include "company_func.h"
 #include "effectvehicle_func.h"
 #include "settings_type.h"
+#include "station_base.h"
+#include "cargotype.h"
+#include "newgrf_cargo.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -262,7 +265,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (!IsHangarTile(tile) || !IsTileOwner(tile, _current_company)) return CMD_ERROR;
 
 	/* Prevent building aircraft types at places which can't handle them */
-	if (!CanVehicleUseStation(p1, GetStationByTile(tile))) return CMD_ERROR;
+	if (!CanVehicleUseStation(p1, Station::GetByTile(tile))) return CMD_ERROR;
 
 	/* We will need to allocate 2 or 3 vehicle structs, depending on type */
 	if (!Vehicle::CanAllocateItem(avi->subtype & AIR_CTOL ? 2 : 3)) {
@@ -343,7 +346,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		 * layout for #th position of depot. Since layout must start with a listing
 		 * of all depots, it is simple */
 		for (uint i = 0;; i++) {
-			const Station *st = GetStationByTile(tile);
+			const Station *st = Station::GetByTile(tile);
 			const AirportFTAClass *apc = st->Airport();
 
 			assert(i != apc->nof_depots);
@@ -2039,10 +2042,7 @@ bool Aircraft::Tick()
 
 	for (uint i = 0; i != 2; i++) {
 		/* stop if the aircraft was deleted */
-		VehicleID index = this->index;
 		if (!AircraftEventHandler(this, i)) return false;
-		assert(Vehicle::Get(index) == this);
-		assert(IsNormalAircraft(this));
 	}
 
 	return true;
