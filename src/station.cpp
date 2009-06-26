@@ -71,7 +71,8 @@ Station::~Station()
 	FOR_ALL_STATIONS(st) {
 		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
 			GoodsEntry & ge = st->goods[c];
-			ge.cargo.RerouteStalePackets(st->index, this->index, &ge);
+			DeleteStaleFlows(st->index, c, this->index);
+			ge.cargo.RerouteStalePackets(this->index, this->index, &ge);
 		}
 	}
 	

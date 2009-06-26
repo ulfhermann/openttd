@@ -2725,7 +2725,7 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
-static void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
 	FlowStatMap & flows = Station::Get(at)->goods[c_id].flows;
 	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
 		FlowStatSet & s_flows = f_it->second;
