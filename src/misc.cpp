@@ -45,6 +45,7 @@ void InitializeTowns();
 void InitializeTrees();
 void InitializeSigns();
 void InitializeStations();
+void InitializeRoadStops();
 void InitializeCargoPackets();
 void InitializeCompanies();
 void InitializeCheats();
@@ -94,6 +95,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date)
 	InitializeTrees();
 	InitializeSigns();
 	InitializeStations();
+	InitializeRoadStops();
 	InitializeCargoPackets();
 	InitializeIndustries();
 	InitializeBuildingCounts();

@@ -8,6 +8,7 @@
 #include "direction_type.h"
 #include "map_type.h"
 #include "tile_type.h"
+#include "date_type.h"
 
 /** Current limits for airports */
 enum {
@@ -101,7 +102,7 @@ static const uint64
 	TERM_GROUP2_EXIT2_block  = 1ULL << 20,
 	PRE_HELIPAD_block        = 1ULL << 21,
 
-/* blocks for new airports */
+	/* blocks for new airports */
 	TERM7_block              = 1ULL << 22,
 	TERM8_block              = 1ULL << 23,
 	TERM9_block              = 1ULL << 24,
@@ -115,7 +116,7 @@ static const uint64
 	RUNWAY_OUT2_block        = 1ULL << 10,   ///< note re-uses TAXIWAY_BUSY
 	HELIPAD_GROUP_block      = 1ULL << 13,   ///< note re-uses AIRPORT_ENTRANCE
 	OUT_WAY_block2           = 1ULL << 31,
-/* end of new blocks */
+	/* end of new blocks */
 
 	NOTHING_block            = 1ULL << 30;
 
@@ -130,37 +131,42 @@ struct AirportFTAbuildup;
 
 /** Finite sTate mAchine --> FTA */
 struct AirportFTAClass {
-	public:
-		enum Flags {
-			AIRPLANES   = 0x1,
-			HELICOPTERS = 0x2,
-			ALL         = AIRPLANES | HELICOPTERS,
-			SHORT_STRIP = 0x4
-		};
+public:
+	enum Flags {
+		AIRPLANES   = 0x1,
+		HELICOPTERS = 0x2,
+		ALL         = AIRPLANES | HELICOPTERS,
+		SHORT_STRIP = 0x4
+	};
 
-		AirportFTAClass(
-			const AirportMovingData *moving_data,
-			const byte *terminals,
-			const byte *helipads,
-			const byte *entry_points,
-			Flags flags,
-			const AirportFTAbuildup *apFA,
-			const TileIndexDiffC *depots,
-			byte nof_depots,
-			uint size_x,
-			uint size_y,
-			uint8 noise_level,
-			byte delta_z,
-			byte catchment
-		);
+	AirportFTAClass(
+		const AirportMovingData *moving_data,
+		const byte *terminals,
+		const byte *helipads,
+		const byte *entry_points,
+		Flags flags,
+		const AirportFTAbuildup *apFA,
+		const TileIndexDiffC *depots,
+		byte nof_depots,
+		uint size_x,
+		uint size_y,
+		uint8 noise_level,
+		byte delta_z,
+		byte catchment,
+		Year first_available,
+		Year last_available
+	);
 
-		~AirportFTAClass();
+	~AirportFTAClass();
 
-		const AirportMovingData *MovingData(byte position) const
-		{
-			assert(position < nofelements);
-			return &moving_data[position];
-		}
+	const AirportMovingData *MovingData(byte position) const
+	{
+		assert(position < nofelements);
+		return &moving_data[position];
+	}
+
+	/** Is this airport available at this date? */
+	bool IsAvailable() const;
 
 	const AirportMovingData *moving_data;
 	struct AirportFTA *layout;            ///< state machine for airport
@@ -176,12 +182,14 @@ struct AirportFTAClass {
 	uint8 noise_level;                    ///< noise that this airport generates
 	byte delta_z;                         ///< Z adjustment for helicopter pads
 	byte catchment;
+	Year first_available;                 ///< the year this airport becomes available
+	Year last_available;                  ///< the year this airport expires
 };
 
 DECLARE_ENUM_AS_BIT_SET(AirportFTAClass::Flags)
 
 
-/** internal structure used in openttd - Finite sTate mAchine --> FTA */
+/** Internal structure used in openttd - Finite sTate mAchine --> FTA */
 struct AirportFTA {
 	AirportFTA *next;        ///< possible extra movement choices from this position
 	uint64 block;            ///< 64 bit blocks (st->airport_flags), should be enough for the most complex airports
@@ -193,13 +201,6 @@ struct AirportFTA {
 void InitializeAirports();
 void UnInitializeAirports();
 const AirportFTAClass *GetAirport(const byte airport_type);
-
-/** Get buildable airport bitmask.
- * @return get all buildable airports at this given time, bitmasked.
- * Bit 0 means the small airport is buildable, etc.
- * @todo set availability of airports by year, instead of airplane
- */
-uint32 GetValidAirports();
 
 extern const byte * const _airport_sections[];
 

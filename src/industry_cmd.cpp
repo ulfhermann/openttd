@@ -6,7 +6,7 @@
 #include "openttd.h"
 #include "clear_map.h"
 #include "industry_map.h"
-#include "station_map.h"
+#include "station_base.h"
 #include "train.h"
 #include "landscape.h"
 #include "viewport_func.h"
@@ -167,6 +167,8 @@ Industry::~Industry()
 	DeleteIndustryNews(this->index);
 	DeleteWindowById(WC_INDUSTRY_VIEW, this->index);
 	InvalidateWindowData(WC_INDUSTRY_DIRECTORY, 0, 0);
+
+	Station::RecomputeIndustriesNearForAll();
 }
 
 static void IndustryDrawSugarMine(const TileInfo *ti)
@@ -352,7 +354,7 @@ static Foundation GetFoundation_Industry(TileIndex tile, Slope tileh)
 	return FlatteningFoundation(tileh);
 }
 
-static void GetAcceptedCargo_Industry(TileIndex tile, AcceptedCargo ac)
+static void AddAcceptedCargo_Industry(TileIndex tile, AcceptedCargo ac)
 {
 	IndustryGfx gfx = GetIndustryGfx(tile);
 	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
@@ -383,8 +385,7 @@ static void GetAcceptedCargo_Industry(TileIndex tile, AcceptedCargo ac)
 
 	for (byte i = 0; i < lengthof(itspec->accepts_cargo); i++) {
 		CargoID a = accepts_cargo[i];
-		/* Only set the value once. */
-		if (a != CT_INVALID && ac[a] == 0) ac[a] = acceptance[i];
+		if (a != CT_INVALID) ac[a] += acceptance[i];
 	}
 }
 
@@ -1576,6 +1577,8 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const Ind
 		for (j = 0; j != 50; j++) PlantRandomFarmField(i);
 	}
 	InvalidateWindowData(WC_INDUSTRY_DIRECTORY, 0, 0);
+
+	Station::RecomputeIndustriesNearForAll();
 }
 
 /** Helper function for Build/Fund an industry
@@ -2381,7 +2384,7 @@ extern const TileTypeProcs _tile_type_industry_procs = {
 	DrawTile_Industry,           // draw_tile_proc
 	GetSlopeZ_Industry,          // get_slope_z_proc
 	ClearTile_Industry,          // clear_tile_proc
-	GetAcceptedCargo_Industry,   // get_accepted_cargo_proc
+	AddAcceptedCargo_Industry,   // add_accepted_cargo_proc
 	GetTileDesc_Industry,        // get_tile_desc_proc
 	GetTileTrackStatus_Industry, // get_tile_track_status_proc
 	ClickTile_Industry,          // click_tile_proc

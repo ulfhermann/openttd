@@ -19,14 +19,13 @@
 #include "core/geometry_type.hpp"
 #include "viewport_type.h"
 #include "linkgraph/linkgraph_types.h"
+#include "station_map.h"
 #include <list>
 #include <map>
 #include <set>
 
 typedef Pool<Station, StationID, 32, 64000> StationPool;
-typedef Pool<RoadStop, RoadStopID, 32, 64000> RoadStopPool;
 extern StationPool _station_pool;
-extern RoadStopPool _roadstop_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
 
@@ -117,33 +116,6 @@ struct GoodsEntry {
 	FlowStat GetSumFlowVia(StationID via) const;
 };
 
-/** A Stop for a Road Vehicle */
-struct RoadStop : RoadStopPool::PoolItem<&_roadstop_pool> {
-	static const int  cDebugCtorLevel =  5;  ///< Debug level on which Contructor / Destructor messages are printed
-	static const uint LIMIT           = 16;  ///< The maximum amount of roadstops that are allowed at a single station
-	static const uint MAX_BAY_COUNT   =  2;  ///< The maximum number of loading bays
-	static const uint MAX_VEHICLES    = 64;  ///< The maximum number of vehicles that can allocate a slot to this roadstop
-
-	TileIndex        xy;                    ///< Position on the map
-	byte             status;                ///< Current status of the Stop. Like which spot is taken. Access using *Bay and *Busy functions.
-	byte             num_vehicles;          ///< Number of vehicles currently slotted to this stop
-	struct RoadStop  *next;                 ///< Next stop of the given type at this station
-
-	RoadStop(TileIndex tile = INVALID_TILE);
-	~RoadStop();
-
-	/* For accessing status */
-	bool HasFreeBay() const;
-	bool IsFreeBay(uint nr) const;
-	uint AllocateBay();
-	void AllocateDriveThroughBay(uint nr);
-	void FreeBay(uint nr);
-	bool IsEntranceBusy() const;
-	void SetEntranceBusy(bool busy);
-
-	RoadStop *GetNextRoadStop(const struct RoadVehicle *v) const;
-};
-
 struct StationSpecList {
 	const StationSpec *spec;
 	uint32 grfid;      ///< GRF ID of this custom station
@@ -172,6 +144,8 @@ struct StationRect : public Rect {
 
 	StationRect& operator = (Rect src);
 };
+
+typedef SmallVector<Industry *, 2> IndustryVector;
 
 /** Station data structure */
 struct Station : StationPool::PoolItem<&_station_pool> {
@@ -228,13 +202,13 @@ public:
 	std::list<Vehicle *> loading_vehicles;
 	GoodsEntry goods[NUM_CARGO];  ///< Goods at this station
 
+	IndustryVector industries_near; ///< Cached list of industries near the station that can accept cargo, @see DeliverGoodsToIndustry()
+
 	uint16 random_bits;
 	byte waiting_triggers;
 	uint8 cached_anim_triggers; ///< Combined animation trigger bitmask, used to determine if trigger processing should happen.
 
 	StationRect rect; ///< Station spread out rectangle (not saved) maintained by StationRect_xxx() functions
-
-	static const int cDebugCtorLevel = 5;
 
 	Station(TileIndex tile = INVALID_TILE);
 	~Station();
@@ -254,23 +228,35 @@ public:
 	 * @ingroup dirty
 	 */
 	void MarkTilesDirty(bool cargo_change) const;
-	bool TileBelongsToRailStation(TileIndex tile) const;
+
 	uint GetPlatformLength(TileIndex tile, DiagDirection dir) const;
 	uint GetPlatformLength(TileIndex tile) const;
-	bool IsBuoy() const;
+	void RecomputeIndustriesNear();
+	static void RecomputeIndustriesNearForAll();
 
 	uint GetCatchmentRadius() const;
+
+	FORCEINLINE bool TileBelongsToRailStation(TileIndex tile) const
+	{
+		return IsRailwayStationTile(tile) && GetStationIndex(tile) == this->index;
+	}
+
+	/**
+	 * Determines whether a station is a buoy only.
+	 * @todo Ditch this encoding of buoys
+	 */
+	FORCEINLINE bool IsBuoy() const
+	{
+		return (this->had_vehicle_of_type & HVOT_BUOY) != 0;
+	}
+
+	static FORCEINLINE Station *GetByTile(TileIndex tile)
+	{
+		return Station::Get(GetStationIndex(tile));
+	}
 };
 
 #define FOR_ALL_STATIONS_FROM(var, start) FOR_ALL_ITEMS_FROM(Station, station_index, var, start)
 #define FOR_ALL_STATIONS(var) FOR_ALL_STATIONS_FROM(var, 0)
-
-
-/* Stuff for ROADSTOPS */
-
-#define FOR_ALL_ROADSTOPS_FROM(var, start) FOR_ALL_ITEMS_FROM(RoadStop, roadstop_index, var, start)
-#define FOR_ALL_ROADSTOPS(var) FOR_ALL_ROADSTOPS_FROM(var, 0)
-
-/* End of stuff for ROADSTOPS */
 
 #endif /* STATION_BASE_H */

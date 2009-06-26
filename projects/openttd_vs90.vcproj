@@ -701,6 +701,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\roadstop.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\screenshot.cpp"
 				>
 			</File>
@@ -1362,6 +1366,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\road_type.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\roadstop_base.h"
 				>
 			</File>
 			<File
