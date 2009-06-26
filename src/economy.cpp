@@ -1155,9 +1155,14 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 	/* Start unloading in at the first possible moment */
 	front_v->load_unload_time_rem = 1;
 
-	for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
-		if (v->cargo_cap > 0 && !v->cargo.Empty()) {
-			SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
+	if (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
+		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
+		UpdateFlows(curr_station, front_v, next_station_id);
+	} else {
+		for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
+			if (v->cargo_cap > 0 && !v->cargo.Empty()) {
+				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
+			}
 		}
 	}
 }
