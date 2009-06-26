@@ -6,6 +6,7 @@
 #include "roadveh.h"
 #include "ship.h"
 #include "aircraft.h"
+#include "station_base.h"
 #include "articulated_vehicles.h"
 #include "textbuf_gui.h"
 #include "command_func.h"
@@ -23,6 +24,8 @@
 #include "window_gui.h"
 #include "engine_gui.h"
 #include "settings_type.h"
+#include "cargotype.h"
+#include "newgrf_cargo.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -843,7 +846,7 @@ struct BuildVehicleWindow : Window {
 				break;
 			case VEH_AIRCRAFT:
 				this->filter.flags =
-					tile == INVALID_TILE ? AirportFTAClass::ALL : GetStationByTile(tile)->Airport()->flags;
+					tile == INVALID_TILE ? AirportFTAClass::ALL : Station::GetByTile(tile)->Airport()->flags;
 				break;
 		}
 		this->SetupWindowStrings(type);
@@ -1023,7 +1026,7 @@ struct BuildVehicleWindow : Window {
 
 		this->eng_list.Clear();
 
-		const Station *st = this->listview_mode ? NULL : GetStationByTile(this->window_number);
+		const Station *st = this->listview_mode ? NULL : Station::GetByTile(this->window_number);
 
 		/* Make list of all available planes.
 		 * Also check to see if the previously selected plane is still available,
