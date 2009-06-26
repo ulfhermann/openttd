@@ -7,6 +7,7 @@
 #include "train.h"
 #include "roadveh.h"
 #include "company_func.h"
+#include "newgrf.h"
 #include "newgrf_engine.h"
 #include "newgrf_spritegroup.h"
 #include "date_func.h"
@@ -15,6 +16,7 @@
 #include "aircraft.h"
 #include "core/smallmap_type.hpp"
 #include "settings_type.h"
+#include "station_base.h"
 
 int _traininfo_vehicle_pitch = 0;
 int _traininfo_vehicle_width = 29;
@@ -130,10 +132,18 @@ uint32 GetEngineGRFID(EngineID engine)
 
 static int MapOldSubType(const Vehicle *v)
 {
-	if (v->type != VEH_TRAIN) return v->subtype;
-	if (IsTrainEngine(v)) return 0;
-	if (IsFreeWagon(v)) return 4;
-	return 2;
+	switch (v->type) {
+		case VEH_TRAIN:
+			if (IsTrainEngine(v)) return 0;
+			if (IsFreeWagon(v)) return 4;
+			return 2;
+		case VEH_ROAD:
+		case VEH_SHIP:     return 0;
+		case VEH_AIRCRAFT:
+		case VEH_DISASTER: return v->subtype;
+		case VEH_EFFECT:   return v->subtype << 1;
+		default: NOT_REACHED();
+	}
 }
 
 
@@ -577,7 +587,7 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 
 		case 0x43: // Company information
 			if (!HasBit(v->vcache.cache_valid, 3)) {
-				v->vcache.cached_var43 = v->owner | (Company::Get(v->owner)->is_ai ? 0x10000 : 0) | (LiveryHelper(v->engine_type, v) << 24);
+				v->vcache.cached_var43 = v->owner | (Company::IsHumanID(v->owner) ? 0 : 0x10000) | (LiveryHelper(v->engine_type, v) << 24);
 				SetBit(v->vcache.cache_valid, 3);
 			}
 			return v->vcache.cached_var43;
@@ -687,12 +697,12 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 
 	/* General vehicle properties */
 	switch (variable - 0x80) {
-		case 0x00: return v->type;
+		case 0x00: return v->type + 0x10;
 		case 0x01: return MapOldSubType(v);
 		case 0x04: return v->index;
 		case 0x05: return GB(v->index, 8, 8);
-		case 0x0A: return v->current_order.Pack();
-		case 0x0B: return GB(v->current_order.Pack(), 8, 8);
+		case 0x0A: return v->current_order.MapOldOrder();
+		case 0x0B: return v->current_order.GetDestination();
 		case 0x0C: return v->GetNumOrders();
 		case 0x0D: return v->cur_order_index;
 		case 0x10: return v->load_unload_time_rem;

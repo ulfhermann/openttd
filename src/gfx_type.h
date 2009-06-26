@@ -129,6 +129,7 @@ struct CursorVars {
 	bool vehchain;   ///< vehicle chain is dragged
 };
 
+/** Data about how and where to blit pixels. */
 struct DrawPixelInfo {
 	void *dst_ptr;
 	int left, top, width, height;
@@ -136,22 +137,26 @@ struct DrawPixelInfo {
 	ZoomLevel zoom;
 };
 
-struct Colour {
+/** Structure to access the alpha, red, green, and blue channels from a 32 bit number. */
+union Colour {
+	uint32 data; ///< Conversion of the channel information to a 32 bit number.
+	struct {
 #if TTD_ENDIAN == TTD_BIG_ENDIAN
-	uint8 a, r, g, b; ///< colour channels in BE order
+		uint8 a, r, g, b; ///< colour channels in BE order
 #else
-	uint8 b, g, r, a; ///< colour channels in LE order
+		uint8 b, g, r, a; ///< colour channels in LE order
 #endif /* TTD_ENDIAN == TTD_BIG_ENDIAN */
-
-	operator uint32 () const { return *(uint32 *)this; }
+	};
 };
 
 /** Available font sizes */
 enum FontSize {
-	FS_NORMAL,
-	FS_SMALL,
-	FS_LARGE,
+	FS_NORMAL, ///< Index of the normal font in the font tables.
+	FS_SMALL,  ///< Index of the small font in the font tables.
+	FS_LARGE,  ///< Index of the large font in the font tables.
 	FS_END,
+
+	FS_BEGIN = FS_NORMAL, ///< First font.
 };
 DECLARE_POSTFIX_INCREMENT(FontSize);
 
