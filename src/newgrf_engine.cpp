@@ -7,6 +7,7 @@
 #include "train.h"
 #include "roadveh.h"
 #include "company_func.h"
+#include "newgrf.h"
 #include "newgrf_engine.h"
 #include "newgrf_spritegroup.h"
 #include "date_func.h"
@@ -15,6 +16,7 @@
 #include "aircraft.h"
 #include "core/smallmap_type.hpp"
 #include "settings_type.h"
+#include "station_base.h"
 
 int _traininfo_vehicle_pitch = 0;
 int _traininfo_vehicle_width = 29;
