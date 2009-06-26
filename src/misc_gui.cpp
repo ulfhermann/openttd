@@ -108,7 +108,6 @@ public:
 
 		/* Because build_date is not set yet in every TileDesc, we make sure it is empty */
 		TileDesc td;
-		AcceptedCargo ac;
 
 		td.build_date = INVALID_DATE;
 
@@ -130,7 +129,9 @@ public:
 
 		td.grf = NULL;
 
-		GetAcceptedCargo(tile, ac);
+		AcceptedCargo ac;
+		memset(ac, 0, sizeof(AcceptedCargo));
+		AddAcceptedCargo(tile, ac);
 		GetTileDesc(tile, &td);
 
 		uint line_nr = 0;
@@ -691,21 +692,26 @@ void ShowFeederIncomeAnimation(int x, int y, int z, Money cost)
 	AddTextEffect(STR_FEEDER, pt.x, pt.y, 0x250, TE_RISING);
 }
 
-TextEffectID ShowFillingPercent(int x, int y, int z, uint8 percent, StringID string)
+TextEffectID ShowFillingPercent(int x, int y, int z, uint8 percent, Money payment, StringID string)
 {
 	Point pt = RemapCoords(x, y, z);
 
 	assert(string != STR_NULL);
 
 	SetDParam(0, percent);
+	SetDParam(4, payment);
 	return AddTextEffect(string, pt.x, pt.y, 0xFFFF, TE_STATIC);
 }
 
-void UpdateFillingPercent(TextEffectID te_id, uint8 percent, StringID string)
+void UpdateFillingPercent(TextEffectID te_id, uint8 percent, Money payment, StringID string)
 {
 	assert(string != STR_NULL);
 
 	SetDParam(0, percent);
+	TextEffect *te = &_text_effect_list[te_id];
+	SetDParam(4, (Money)te->params_2 + payment);
+
+	/* Update details */
 	UpdateTextEffect(te_id, string);
 }
 

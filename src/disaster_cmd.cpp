@@ -20,7 +20,7 @@
 #include "landscape.h"
 
 #include "industry_map.h"
-#include "station_map.h"
+#include "station_base.h"
 #include "command_func.h"
 #include "news_func.h"
 #include "town.h"
@@ -62,7 +62,7 @@ static void DisasterClearSquare(TileIndex tile)
 
 	switch (GetTileType(tile)) {
 		case MP_RAILWAY:
-			if (IsHumanCompany(GetTileOwner(tile)) && !IsRailWaypoint(tile)) {
+			if (Company::IsHumanID(GetTileOwner(tile)) && !IsRailWaypoint(tile)) {
 				CompanyID old_company = _current_company;
 				_current_company = OWNER_WATER;
 				DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
@@ -228,7 +228,7 @@ static bool DisasterTick_Zeppeliner(DisasterVehicle *v)
 		if (IsValidTile(v->tile) &&
 				IsTileType(v->tile, MP_STATION) &&
 				IsAirport(v->tile)) {
-			Station *st = GetStationByTile(v->tile);
+			Station *st = Station::GetByTile(v->tile);
 			CLRBITS(st->airport_flags, RUNWAY_IN_block);
 			AI::NewEvent(GetTileOwner(v->tile), new AIEventDisasterZeppelinerCleared(st->index));
 		}
@@ -268,7 +268,7 @@ static bool DisasterTick_Zeppeliner(DisasterVehicle *v)
 	if (IsValidTile(v->tile) &&
 			IsTileType(v->tile, MP_STATION) &&
 			IsAirport(v->tile)) {
-		SETBITS(GetStationByTile(v->tile)->airport_flags, RUNWAY_IN_block);
+		SETBITS(Station::GetByTile(v->tile)->airport_flags, RUNWAY_IN_block);
 	}
 
 	return true;
@@ -555,7 +555,7 @@ static bool DisasterTick_Big_Ufo(DisasterVehicle *v)
 		TileIndex tile = tile_org;
 		do {
 			if (IsPlainRailTile(tile) &&
-					IsHumanCompany(GetTileOwner(tile))) {
+					Company::IsHumanID(GetTileOwner(tile))) {
 				break;
 			}
 			tile = TILE_MASK(tile + 1);

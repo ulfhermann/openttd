@@ -18,21 +18,9 @@ enum {
 	INIT_NUM_TEXT_EFFECTS  =  20,
 };
 
-struct TextEffect {
-	StringID string_id;
-	int32 x;
-	int32 y;
-	int32 right;
-	int32 bottom;
-	uint16 duration;
-	uint64 params_1;
-	uint64 params_2;
-	TextEffectMode mode;
-};
-
 /* used for text effects */
-static TextEffect *_text_effect_list = NULL;
-static uint16 _num_text_effects = INIT_NUM_TEXT_EFFECTS;
+TextEffect *_text_effect_list = NULL;
+uint16 _num_text_effects = INIT_NUM_TEXT_EFFECTS;
 
 /* Text Effects */
 /**
