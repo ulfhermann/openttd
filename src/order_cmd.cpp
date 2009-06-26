@@ -19,9 +19,11 @@
 #include "vehicle_func.h"
 #include "depot_base.h"
 #include "settings_type.h"
+#include "roadstop_base.h"
 #include "core/pool_func.hpp"
 #include "aircraft.h"
 #include "roadveh.h"
+#include "station_base.h"
 
 #include "table/strings.h"
 

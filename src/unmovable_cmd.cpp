@@ -291,7 +291,7 @@ static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 	return CommandCost();
 }
 
-static void GetAcceptedCargo_Unmovable(TileIndex tile, AcceptedCargo ac)
+static void AddAcceptedCargo_Unmovable(TileIndex tile, AcceptedCargo ac)
 {
 	if (!IsCompanyHQ(tile)) return;
 
@@ -303,13 +303,13 @@ static void GetAcceptedCargo_Unmovable(TileIndex tile, AcceptedCargo ac)
 
 	/* Top town building generates 10, so to make HQ interesting, the top
 	 * type makes 20. */
-	ac[CT_PASSENGERS] = max(1U, level);
+	ac[CT_PASSENGERS] += max(1U, level);
 
 	/* Top town building generates 4, HQ can make up to 8. The
 	 * proportion passengers:mail is different because such a huge
 	 * commercial building generates unusually high amount of mail
 	 * correspondence per physical visitor. */
-	ac[CT_MAIL] = max(1U, level / 2);
+	ac[CT_MAIL] += max(1U, level / 2);
 }
 
 
@@ -317,11 +317,6 @@ static void GetTileDesc_Unmovable(TileIndex tile, TileDesc *td)
 {
 	td->str = GetUnmovableSpec(GetUnmovableType(tile))->name;
 	td->owner[0] = GetTileOwner(tile);
-}
-
-static void AnimateTile_Unmovable(TileIndex tile)
-{
-	/* not used */
 }
 
 static void TileLoop_Unmovable(TileIndex tile)
@@ -501,11 +496,11 @@ extern const TileTypeProcs _tile_type_unmovable_procs = {
 	DrawTile_Unmovable,             // draw_tile_proc
 	GetSlopeZ_Unmovable,            // get_slope_z_proc
 	ClearTile_Unmovable,            // clear_tile_proc
-	GetAcceptedCargo_Unmovable,     // get_accepted_cargo_proc
+	AddAcceptedCargo_Unmovable,     // add_accepted_cargo_proc
 	GetTileDesc_Unmovable,          // get_tile_desc_proc
 	GetTileTrackStatus_Unmovable,   // get_tile_track_status_proc
 	ClickTile_Unmovable,            // click_tile_proc
-	AnimateTile_Unmovable,          // animate_tile_proc
+	NULL,                           // animate_tile_proc
 	TileLoop_Unmovable,             // tile_loop_clear
 	ChangeTileOwner_Unmovable,      // change_tile_owner_clear
 	NULL,                           // get_produced_cargo_proc

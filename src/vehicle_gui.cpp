@@ -16,7 +16,7 @@
 #include "gfx_func.h"
 #include "newgrf_engine.h"
 #include "newgrf_text.h"
-#include "station_map.h"
+#include "station_base.h"
 #include "roadveh.h"
 #include "train.h"
 #include "depot_base.h"
@@ -31,6 +31,7 @@
 #include "vehiclelist.h"
 #include "settings_type.h"
 #include "articulated_vehicles.h"
+#include "cargotype.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -1243,7 +1244,7 @@ void ShowVehicleListWindow(CompanyID company, VehicleType vehicle_type, TileInde
 	if (vehicle_type == VEH_AIRCRAFT) {
 		depot_airport_index = GetStationIndex(depot_tile);
 	} else {
-		Depot *depot = GetDepotByTile(depot_tile);
+		Depot *depot = Depot::GetByTile(depot_tile);
 		if (depot == NULL) return; // no depot to show
 		depot_airport_index = depot->index;
 	}
