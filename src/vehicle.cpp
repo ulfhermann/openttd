@@ -914,7 +914,7 @@ void AgeVehicle(Vehicle *v)
  * @param colour The string to show depending on if we are unloading or loading
  * @return A percentage of how full the Vehicle is.
  */
-uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
+uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour, Money income)
 {
 	int count = 0;
 	int max = 0;
@@ -938,7 +938,12 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 
 	if (colour != NULL) {
 		if (unloading == 0 && loading) {
-			*colour = STR_INCOME_PERCENT_UP;
+			/* while loading only show income if there was any change */
+			if (income != 0) {
+				*colour = STR_INCOME_PERCENT_UP;
+			} else {
+				*colour = STR_PERCENT_UP;
+			}
 		} else if (cars == unloading || !loading) {
 			*colour = STR_INCOME_PERCENT_DOWN;
 		} else {
@@ -1441,7 +1446,7 @@ void Vehicle::BeginLoading()
 
 	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
 
-	VehiclePayment(this);
+	PrepareUnload(this);
 
 	InvalidateWindow(GetWindowClassForVehicleType(this->type), this->owner);
 	InvalidateWindowWidget(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);

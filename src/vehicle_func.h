@@ -32,7 +32,7 @@ void FindVehicleOnPosXY(int x, int y, void *data, VehicleFromPosProc *proc);
 bool HasVehicleOnPos(TileIndex tile, void *data, VehicleFromPosProc *proc);
 bool HasVehicleOnPosXY(int x, int y, void *data, VehicleFromPosProc *proc);
 void CallVehicleTicks();
-uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour);
+uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour, Money income = 0);
 
 void InitializeTrains();
 byte VehicleRandomBits();

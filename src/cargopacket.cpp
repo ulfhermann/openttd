@@ -126,7 +126,9 @@ bool CargoList::MoveTo(CargoList *dest, uint count, Payment * payment, CargoList
 					cp->paid_for     = false;
 					/* FALL THROUGH */
 				case MTA_OTHER:
-					payment->PayTransfer(cp, cp->count);
+					if (payment != NULL) {
+						payment->PayTransfer(cp, cp->count);
+					}
 					count -= cp->count;
 					dest->packets.push_back(cp);
 					break;
@@ -149,7 +151,7 @@ bool CargoList::MoveTo(CargoList *dest, uint count, Payment * payment, CargoList
 				cp_new->paid_for        = (mta == MTA_CARGO_LOAD) ? false : cp->paid_for;
 
 				cp_new->count = count;
-				if (mta == MTA_OTHER) {
+				if (mta == MTA_OTHER && payment != NULL) {
 					payment->PayTransfer(cp_new, cp_new->count);
 				}
 				dest->packets.push_back(cp_new);
