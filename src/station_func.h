@@ -55,4 +55,6 @@ void IncreaseStats(Station *st, Vehicle *v, StationID next_station_id);
 
 void UpdateFlows(Station * st, Vehicle *v, StationID next_station_id);
 
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
+
 #endif /* STATION_FUNC_H */
