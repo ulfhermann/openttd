@@ -915,7 +915,7 @@ void AgeVehicle(Vehicle *v)
  * @param colour The string to show depending on if we are unloading or loading
  * @return A percentage of how full the Vehicle is.
  */
-uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
+uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour, Money income)
 {
 	int count = 0;
 	int max = 0;
@@ -939,11 +939,16 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 
 	if (colour != NULL) {
 		if (unloading == 0 && loading) {
-			*colour = STR_PERCENT_UP;
+			/* while loading only show income if there was any change */
+			if (income != 0) {
+				*colour = STR_INCOME_PERCENT_UP;
+			} else {
+				*colour = STR_PERCENT_UP;
+			}
 		} else if (cars == unloading || !loading) {
-			*colour = STR_PERCENT_DOWN;
+			*colour = STR_INCOME_PERCENT_DOWN;
 		} else {
-			*colour = STR_PERCENT_UP_DOWN;
+			*colour = STR_INCOME_PERCENT_UP_DOWN;
 		}
 	}
 
@@ -1458,18 +1463,7 @@ void Vehicle::BeginLoading(StationID last_station_id)
 		IncreaseFrozen(curr_station, this, next_station_id);
 	}
 
-	/* At this moment loading cannot be finished */
-	ClrBit(this->vehicle_flags, VF_LOADING_FINISHED);
-
-	/* Start unloading in at the first possible moment */
-	this->load_unload_time_rem = 1;
-
-	if (this->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
-		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
-		UpdateFlows(curr_station, this, next_station_id);
-	} else {
-		VehiclePayment(curr_station, this, next_station_id);
-	}
+	PrepareUnload(curr_station, this, next_station_id);
 
 	InvalidateWindow(GetWindowClassForVehicleType(this->type), this->owner);
 	InvalidateWindowWidget(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
