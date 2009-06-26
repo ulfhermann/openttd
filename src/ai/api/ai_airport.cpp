@@ -4,7 +4,7 @@
 
 #include "ai_airport.hpp"
 #include "ai_station.hpp"
-#include "../../station_map.h"
+#include "../../station_base.h"
 #include "../../company_func.h"
 #include "../../command_type.h"
 #include "../../town.h"
@@ -12,7 +12,7 @@
 
 /* static */ bool AIAirport::IsValidAirportType(AirportType type)
 {
-	return type >= AT_SMALL && type <= AT_HELISTATION && HasBit(::GetValidAirports(), type);
+	return type >= 0 && type < (AirportType)NUM_AIRPORTS && ::GetAirport(type)->IsAvailable();
 }
 
 /* static */ Money AIAirport::GetPrice(AirportType type)
@@ -82,7 +82,7 @@
 	if (!::IsValidTile(tile)) return -1;
 	if (!::IsTileType(tile, MP_STATION)) return -1;
 
-	const Station *st = ::GetStationByTile(tile);
+	const Station *st = ::Station::GetByTile(tile);
 	if (st->owner != _current_company) return -1;
 	if ((st->facilities & FACIL_AIRPORT) == 0) return -1;
 
@@ -95,7 +95,7 @@
 	if (!::IsTileType(tile, MP_STATION)) return INVALID_TILE;
 	if (GetNumHangars(tile) < 1) return INVALID_TILE;
 
-	const Station *st = ::GetStationByTile(tile);
+	const Station *st = ::Station::GetByTile(tile);
 	if (st->owner != _current_company) return INVALID_TILE;
 	if ((st->facilities & FACIL_AIRPORT) == 0) return INVALID_TILE;
 

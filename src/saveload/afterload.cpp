@@ -5,6 +5,7 @@
 #include "../stdafx.h"
 #include "../void_map.h"
 #include "../signs_base.h"
+#include "../roadstop_base.h"
 #include "../window_func.h"
 #include "../fios.h"
 #include "../train.h"
@@ -224,6 +225,8 @@ static bool InitializeWindowsAndCaches()
 	}
 
 	SetCachedEngineCounts();
+
+	Station::RecomputeIndustriesNearForAll();
 
 	/* Towns have a noise controlled number of airports system
 	 * So each airport's noise value must be added to the town->noise_reached value
@@ -601,7 +604,7 @@ bool AfterLoadGame()
 	for (TileIndex t = 0; t < map_size; t++) {
 		switch (GetTileType(t)) {
 			case MP_STATION: {
-				Station *st = GetStationByTile(t);
+				Station *st = Station::GetByTile(t);
 
 				/* Set up station spread; buoys do not have one */
 				if (!IsBuoy(t)) st->rect.BeforeAddTile(t, StationRect::ADD_FORCE);
@@ -634,7 +637,7 @@ bool AfterLoadGame()
 							 * It was 3 (till 2.2) and later 5 (till 5.1).
 							 * Setting it unconditionally does not hurt.
 							 */
-							GetStationByTile(t)->airport_type = AT_OILRIG;
+							Station::GetByTile(t)->airport_type = AT_OILRIG;
 						} else {
 							DeleteOilRig(t);
 						}
@@ -1574,7 +1577,7 @@ bool AfterLoadGame()
 				if (IsBuoyTile(t)) {
 					/* reset buoy owner to OWNER_NONE in the station struct
 					 * (even if it is owned by active company) */
-					GetStationByTile(t)->owner = OWNER_NONE;
+					Station::GetByTile(t)->owner = OWNER_NONE;
 				}
 			} else if (IsTileType(t, MP_ROAD)) {
 				/* works for all RoadTileType */

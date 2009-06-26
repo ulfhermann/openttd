@@ -65,6 +65,7 @@ queue.cpp
 rail.cpp
 rev.cpp
 road.cpp
+roadstop.cpp
 screenshot.cpp
 #if SDL
 	sdl.cpp
@@ -268,6 +269,7 @@ road_func.h
 road_gui.h
 road_internal.h
 road_type.h
+roadstop_base.h
 roadveh.h
 screenshot.h
 sdl.h
