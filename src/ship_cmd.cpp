@@ -7,7 +7,7 @@
 #include "landscape.h"
 #include "timetable.h"
 #include "command_func.h"
-#include "station_map.h"
+#include "station_base.h"
 #include "news_func.h"
 #include "company_func.h"
 #include "npf.h"
@@ -30,6 +30,7 @@
 #include "settings_type.h"
 #include "ai/ai.hpp"
 #include "pathfind.h"
+#include "landscape_type.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -100,7 +101,7 @@ static const Depot *FindClosestShipDepot(const Vehicle *v)
 		Trackdir trackdir = v->GetVehicleTrackdir();
 		NPFFoundTargetData ftd = NPFRouteToDepotTrialError(v->tile, trackdir, false, TRANSPORT_WATER, 0, v->owner, INVALID_RAILTYPES);
 
-		if (ftd.best_bird_dist == 0) return GetDepotByTile(ftd.node.tile); // Found target
+		if (ftd.best_bird_dist == 0) return Depot::GetByTile(ftd.node.tile); // Found target
 
 		return NULL; // Did not find target
 	}
