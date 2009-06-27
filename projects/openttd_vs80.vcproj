@@ -1076,6 +1076,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\house.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\house_type.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\industry.h"
 				>
 			</File>
