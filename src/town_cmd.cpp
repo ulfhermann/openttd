@@ -43,11 +43,10 @@
 #include "subsidy_func.h"
 #include "core/smallmap_type.hpp"
 #include "core/pool_func.hpp"
+#include "town.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
-
-HouseSpec _house_specs[HOUSE_MAX];
 
 Town *_cleared_town;
 int _cleared_town_rating;
@@ -79,7 +78,7 @@ Town::~Town()
 	for (TileIndex tile = 0; tile < MapSize(); ++tile) {
 		switch (GetTileType(tile)) {
 			case MP_HOUSE:
-				if (GetTownByTile(tile) == this) DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
+				if (Town::GetByTile(tile) == this) DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
 				break;
 
 			case MP_ROAD:
@@ -118,6 +117,30 @@ void Town::InitializeLayout(TownLayout layout)
 	}
 
 	this->layout = TileHash(TileX(this->xy), TileY(this->xy)) % (NUM_TLS - 1);
+}
+
+/**
+ * Return a random valid town.
+ * @return random town, NULL if there are no towns
+ */
+/* static */ Town *Town::GetRandom()
+{
+	if (Town::GetNumItems() == 0) return NULL;
+	int num = RandomRange((uint16)Town::GetNumItems());
+	size_t index = MAX_UVALUE(size_t);
+
+	while (num >= 0) {
+		num--;
+		index++;
+
+		/* Make sure we have a valid town */
+		while (!Town::IsValidID(index)) {
+			index++;
+			assert(index < Town::GetPoolSize());
+		}
+	}
+
+	return Town::Get(index);
 }
 
 Money HouseSpec::GetRemovalCost() const
@@ -170,11 +193,11 @@ static void DrawTile_Town(TileInfo *ti)
 		/* Houses don't necessarily need new graphics. If they don't have a
 		 * spritegroup associated with them, then the sprite for the substitute
 		 * house id is drawn instead. */
-		if (GetHouseSpecs(house_id)->spritegroup != NULL) {
+		if (HouseSpec::Get(house_id)->spritegroup != NULL) {
 			DrawNewHouseTile(ti, house_id);
 			return;
 		} else {
-			house_id = GetHouseSpecs(house_id)->substitute_id;
+			house_id = HouseSpec::Get(house_id)->substitute_id;
 		}
 	}
 
@@ -241,7 +264,7 @@ static void AnimateTile_Town(TileIndex tile)
 	 * Not exactly sure when this happens, but probably when a house changes.
 	 * Before this was just a return...so it'd leak animated tiles..
 	 * That bug seems to have been here since day 1?? */
-	if (!(GetHouseSpecs(GetHouseType(tile))->building_flags & BUILDING_IS_ANIMATED)) {
+	if (!(HouseSpec::Get(GetHouseType(tile))->building_flags & BUILDING_IS_ANIMATED)) {
 		DeleteAnimatedTile(tile);
 		return;
 	}
@@ -375,18 +398,18 @@ static void MakeSingleHouseBigger(TileIndex tile)
 	IncHouseConstructionTick(tile);
 	if (GetHouseConstructionTick(tile) != 0) return;
 
-	const HouseSpec *hs = GetHouseSpecs(GetHouseType(tile));
+	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
 
 	/* Check and/or  */
 	if (HasBit(hs->callback_mask, CBM_HOUSE_CONSTRUCTION_STATE_CHANGE)) {
-		uint16 callback_res = GetHouseCallback(CBID_HOUSE_CONSTRUCTION_STATE_CHANGE, 0, 0, GetHouseType(tile), GetTownByTile(tile), tile);
+		uint16 callback_res = GetHouseCallback(CBID_HOUSE_CONSTRUCTION_STATE_CHANGE, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
 		if (callback_res != CALLBACK_FAILED) ChangeHouseAnimationFrame(hs->grffile, tile, callback_res);
 	}
 
 	if (IsHouseCompleted(tile)) {
 		/* Now that construction is complete, we can add the population of the
 		 * building to the town. */
-		ChangePopulation(GetTownByTile(tile), hs->population);
+		ChangePopulation(Town::GetByTile(tile), hs->population);
 		ResetHouseAge(tile);
 	}
 	MarkTileDirtyByTile(tile);
@@ -397,7 +420,7 @@ static void MakeSingleHouseBigger(TileIndex tile)
  */
 static void MakeTownHouseBigger(TileIndex tile)
 {
-	uint flags = GetHouseSpecs(GetHouseType(tile))->building_flags;
+	uint flags = HouseSpec::Get(GetHouseType(tile))->building_flags;
 	if (flags & BUILDING_HAS_1_TILE)  MakeSingleHouseBigger(TILE_ADDXY(tile, 0, 0));
 	if (flags & BUILDING_2_TILES_Y)   MakeSingleHouseBigger(TILE_ADDXY(tile, 0, 1));
 	if (flags & BUILDING_2_TILES_X)   MakeSingleHouseBigger(TILE_ADDXY(tile, 1, 0));
@@ -424,7 +447,7 @@ static void TileLoop_Town(TileIndex tile)
 		return;
 	}
 
-	const HouseSpec *hs = GetHouseSpecs(house_id);
+	const HouseSpec *hs = HouseSpec::Get(house_id);
 
 	/* If the lift has a destination, it is already an animated tile. */
 	if ((hs->building_flags & BUILDING_IS_ANIMATED) &&
@@ -434,7 +457,7 @@ static void TileLoop_Town(TileIndex tile)
 		AddAnimatedTile(tile);
 	}
 
-	Town *t = GetTownByTile(tile);
+	Town *t = Town::GetByTile(tile);
 	uint32 r = Random();
 
 	if (HasBit(hs->callback_mask, CBM_HOUSE_PRODUCE_CARGO)) {
@@ -508,14 +531,14 @@ static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlag flags)
 	if (flags & DC_AUTO) return_cmd_error(STR_ERROR_BUILDING_MUST_BE_DEMOLISHED);
 	if (!CanDeleteHouse(tile)) return CMD_ERROR;
 
-	const HouseSpec *hs = GetHouseSpecs(GetHouseType(tile));
+	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
 
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	cost.AddCost(hs->GetRemovalCost());
 
 	int rating = hs->remove_rating_decrease;
 	_cleared_town_rating += rating;
-	Town *t = _cleared_town = GetTownByTile(tile);
+	Town *t = _cleared_town = Town::GetByTile(tile);
 
 	if (Company::IsValidID(_current_company)) {
 		if (rating > t->ratings[_current_company] && !(flags & DC_NO_TEST_TOWN_RATING) && !_cheats.magic_bulldozer.value) {
@@ -535,8 +558,8 @@ static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlag flags)
 static void GetProducedCargo_Town(TileIndex tile, CargoID *b)
 {
 	HouseID house_id = GetHouseType(tile);
-	const HouseSpec *hs = GetHouseSpecs(house_id);
-	Town *t = GetTownByTile(tile);
+	const HouseSpec *hs = HouseSpec::Get(house_id);
+	Town *t = Town::GetByTile(tile);
 
 	if (HasBit(hs->callback_mask, CBM_HOUSE_PRODUCE_CARGO)) {
 		for (uint i = 0; i < 256; i++) {
@@ -561,7 +584,7 @@ static void GetProducedCargo_Town(TileIndex tile, CargoID *b)
 
 static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 {
-	const HouseSpec *hs = GetHouseSpecs(GetHouseType(tile));
+	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
 	CargoID accepts[3];
 
 	/* Set the initial accepted cargo types */
@@ -571,7 +594,7 @@ static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 
 	/* Check for custom accepted cargo types */
 	if (HasBit(hs->callback_mask, CBM_HOUSE_ACCEPT_CARGO)) {
-		uint16 callback = GetHouseCallback(CBID_HOUSE_ACCEPT_CARGO, 0, 0, GetHouseType(tile), GetTownByTile(tile), tile);
+		uint16 callback = GetHouseCallback(CBID_HOUSE_ACCEPT_CARGO, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
 		if (callback != CALLBACK_FAILED) {
 			/* Replace accepted cargo types with translated values from callback */
 			accepts[0] = GetCargoTranslation(GB(callback,  0, 5), hs->grffile);
@@ -582,7 +605,7 @@ static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 
 	/* Check for custom cargo acceptance */
 	if (HasBit(hs->callback_mask, CBM_HOUSE_CARGO_ACCEPTANCE)) {
-		uint16 callback = GetHouseCallback(CBID_HOUSE_CARGO_ACCEPTANCE, 0, 0, GetHouseType(tile), GetTownByTile(tile), tile);
+		uint16 callback = GetHouseCallback(CBID_HOUSE_CARGO_ACCEPTANCE, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
 		if (callback != CALLBACK_FAILED) {
 			if (accepts[0] != CT_INVALID) ac[accepts[0]] += GB(callback, 0, 4);
 			if (accepts[1] != CT_INVALID) ac[accepts[1]] += GB(callback, 4, 4);
@@ -605,12 +628,12 @@ static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 static void GetTileDesc_Town(TileIndex tile, TileDesc *td)
 {
 	const HouseID house = GetHouseType(tile);
-	const HouseSpec *hs = GetHouseSpecs(house);
+	const HouseSpec *hs = HouseSpec::Get(house);
 	bool house_completed = IsHouseCompleted(tile);
 
 	td->str = hs->building_name;
 
-	uint16 callback_res = GetHouseCallback(CBID_HOUSE_CUSTOM_NAME, house_completed ? 1 : 0, 0, house, GetTownByTile(tile), tile);
+	uint16 callback_res = GetHouseCallback(CBID_HOUSE_CUSTOM_NAME, house_completed ? 1 : 0, 0, house, Town::GetByTile(tile), tile);
 	if (callback_res != CALLBACK_FAILED) {
 		StringID new_name = GetGRFStringID(hs->grffile->grfid, 0xD000 + callback_res);
 		if (new_name != STR_NULL && new_name != STR_UNDEFINED) {
@@ -1213,7 +1236,7 @@ static int GrowTownAtRoad(Town *t, TileIndex tile)
 
 		if (IsTileType(tile, MP_ROAD) && !IsRoadDepot(tile) && HasTileRoadType(tile, ROADTYPE_ROAD)) {
 			/* Don't allow building over roads of other cities */
-			if (IsRoadOwner(tile, ROADTYPE_ROAD, OWNER_TOWN) && GetTownByTile(tile) != t) {
+			if (IsRoadOwner(tile, ROADTYPE_ROAD, OWNER_TOWN) && Town::GetByTile(tile) != t) {
 				_grow_town_result = GROWTH_SUCCEED;
 			} else if (IsRoadOwner(tile, ROADTYPE_ROAD, OWNER_NONE) && _game_mode == GM_EDITOR) {
 				/* If we are in the SE, and this road-piece has no town owner yet, it just found an
@@ -1802,7 +1825,7 @@ static inline void ClearMakeHouseTile(TileIndex tile, Town *t, byte counter, byt
 
 	IncreaseBuildingCount(t, type);
 	MakeHouseTile(tile, t->index, counter, stage, type, random_bits);
-	if (GetHouseSpecs(type)->building_flags & BUILDING_IS_ANIMATED) AddAnimatedTile(tile);
+	if (HouseSpec::Get(type)->building_flags & BUILDING_IS_ANIMATED) AddAnimatedTile(tile);
 
 	MarkTileDirtyByTile(tile);
 }
@@ -1820,7 +1843,7 @@ static inline void ClearMakeHouseTile(TileIndex tile, Town *t, byte counter, byt
  */
 static void MakeTownHouse(TileIndex t, Town *town, byte counter, byte stage, HouseID type, byte random_bits)
 {
-	BuildingFlags size = GetHouseSpecs(type)->building_flags;
+	BuildingFlags size = HouseSpec::Get(type)->building_flags;
 
 	ClearMakeHouseTile(t, town, counter, stage, type, random_bits);
 	if (size & BUILDING_2_TILES_Y)   ClearMakeHouseTile(t + TileDiffXY(0, 1), town, counter, stage, ++type, random_bits);
@@ -2050,7 +2073,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 
 	/* Generate a list of all possible houses that can be built. */
 	for (uint i = 0; i < HOUSE_MAX; i++) {
-		const HouseSpec *hs = GetHouseSpecs(i);
+		const HouseSpec *hs = HouseSpec::Get(i);
 
 		/* Verify that the candidate house spec matches the current tile status */
 		if ((~hs->building_availability & bitmask) != 0 || !hs->enabled) continue;
@@ -2089,12 +2112,12 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 		houses[i] = houses[num];
 		probs[i] = probs[num];
 
-		const HouseSpec *hs = GetHouseSpecs(house);
+		const HouseSpec *hs = HouseSpec::Get(house);
 
 		if (_loaded_newgrf_features.has_newhouses) {
 			if (hs->override != 0) {
 				house = hs->override;
-				hs = GetHouseSpecs(house);
+				hs = HouseSpec::Get(house);
 			}
 
 			if ((hs->extra_flags & BUILDING_IS_HISTORICAL) && !_generating_world && _game_mode != GM_EDITOR) continue;
@@ -2186,16 +2209,16 @@ static void DoClearTownHouseHelper(TileIndex tile, Town *t, HouseID house)
 TileIndexDiff GetHouseNorthPart(HouseID &house)
 {
 	if (house >= 3) { // house id 0,1,2 MUST be single tile houses, or this code breaks.
-		if (GetHouseSpecs(house - 1)->building_flags & TILE_SIZE_2x1) {
+		if (HouseSpec::Get(house - 1)->building_flags & TILE_SIZE_2x1) {
 			house--;
 			return TileDiffXY(-1, 0);
-		} else if (GetHouseSpecs(house - 1)->building_flags & BUILDING_2_TILES_Y) {
+		} else if (HouseSpec::Get(house - 1)->building_flags & BUILDING_2_TILES_Y) {
 			house--;
 			return TileDiffXY(0, -1);
-		} else if (GetHouseSpecs(house - 2)->building_flags & BUILDING_HAS_4_TILES) {
+		} else if (HouseSpec::Get(house - 2)->building_flags & BUILDING_HAS_4_TILES) {
 			house -= 2;
 			return TileDiffXY(-1, 0);
-		} else if (GetHouseSpecs(house - 3)->building_flags & BUILDING_HAS_4_TILES) {
+		} else if (HouseSpec::Get(house - 3)->building_flags & BUILDING_HAS_4_TILES) {
 			house -= 3;
 			return TileDiffXY(-1, -1);
 		}
@@ -2212,7 +2235,7 @@ void ClearTownHouse(Town *t, TileIndex tile)
 	/* need to align the tile to point to the upper left corner of the house */
 	tile += GetHouseNorthPart(house); // modifies house to the ID of the north tile
 
-	const HouseSpec *hs = GetHouseSpecs(house);
+	const HouseSpec *hs = HouseSpec::Get(house);
 
 	/* Remove population from the town if the house is finished. */
 	if (IsHouseCompleted(tile)) {
@@ -2714,7 +2737,7 @@ Town *ClosestTownFromTile(TileIndex tile, uint threshold)
 			/* FALL THROUGH */
 
 		case MP_HOUSE:
-			return GetTownByTile(tile);
+			return Town::GetByTile(tile);
 
 		default:
 			return CalcClosestTownFromTile(tile, threshold);
@@ -2858,7 +2881,7 @@ static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, uint 
 	if (AutoslopeEnabled()) {
 		HouseID house = GetHouseType(tile);
 		GetHouseNorthPart(house); // modifies house to the ID of the north tile
-		const HouseSpec *hs = GetHouseSpecs(house);
+		const HouseSpec *hs = HouseSpec::Get(house);
 
 		/* Here we differ from TTDP by checking TILE_NOT_SLOPED */
 		if (((hs->building_flags & TILE_NOT_SLOPED) == 0) && !IsSteepSlope(tileh_new) &&
@@ -2885,6 +2908,9 @@ extern const TileTypeProcs _tile_type_town_procs = {
 	GetFoundation_Town,      // get_foundation_proc
 	TerraformTile_Town,      // terraform_tile_proc
 };
+
+
+HouseSpec _house_specs[HOUSE_MAX];
 
 void ResetHouses()
 {
