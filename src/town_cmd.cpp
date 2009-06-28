@@ -555,7 +555,7 @@ static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlag flags)
 	return cost;
 }
 
-static void GetProducedCargo_Town(TileIndex tile, CargoID *b)
+static void AddProducedCargo_Town(TileIndex tile, CargoArray &produced)
 {
 	HouseID house_id = GetHouseType(tile);
 	const HouseSpec *hs = HouseSpec::Get(house_id);
@@ -570,19 +570,19 @@ static void GetProducedCargo_Town(TileIndex tile, CargoID *b)
 			CargoID cargo = GetCargoTranslation(GB(callback, 8, 7), hs->grffile);
 
 			if (cargo == CT_INVALID) continue;
-			*(b++) = cargo;
+			produced[cargo]++;
 		}
 	} else {
 		if (hs->population > 0) {
-			*(b++) = CT_PASSENGERS;
+			produced[CT_PASSENGERS]++;
 		}
 		if (hs->mail_generation > 0) {
-			*(b++) = CT_MAIL;
+			produced[CT_MAIL]++;
 		}
 	}
 }
 
-static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
+static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance)
 {
 	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
 	CargoID accepts[3];
@@ -607,13 +607,13 @@ static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 	if (HasBit(hs->callback_mask, CBM_HOUSE_CARGO_ACCEPTANCE)) {
 		uint16 callback = GetHouseCallback(CBID_HOUSE_CARGO_ACCEPTANCE, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
 		if (callback != CALLBACK_FAILED) {
-			if (accepts[0] != CT_INVALID) ac[accepts[0]] += GB(callback, 0, 4);
-			if (accepts[1] != CT_INVALID) ac[accepts[1]] += GB(callback, 4, 4);
+			if (accepts[0] != CT_INVALID) acceptance[accepts[0]] += GB(callback, 0, 4);
+			if (accepts[1] != CT_INVALID) acceptance[accepts[1]] += GB(callback, 4, 4);
 			if (_settings_game.game_creation.landscape != LT_TEMPERATE && HasBit(callback, 12)) {
 				/* The 'S' bit indicates food instead of goods */
-				ac[CT_FOOD] += GB(callback, 8, 4);
+				acceptance[CT_FOOD] += GB(callback, 8, 4);
 			} else {
-				if (accepts[2] != CT_INVALID) ac[accepts[2]] += GB(callback, 8, 4);
+				if (accepts[2] != CT_INVALID) acceptance[accepts[2]] += GB(callback, 8, 4);
 			}
 			return;
 		}
@@ -621,7 +621,7 @@ static void AddAcceptedCargo_Town(TileIndex tile, AcceptedCargo ac)
 
 	/* No custom acceptance, so fill in with the default values */
 	for (uint8 i = 0; i < lengthof(accepts); i++) {
-		if (accepts[i] != CT_INVALID) ac[accepts[i]] += hs->cargo_acceptance[i];
+		if (accepts[i] != CT_INVALID) acceptance[accepts[i]] += hs->cargo_acceptance[i];
 	}
 }
 
@@ -2903,7 +2903,7 @@ extern const TileTypeProcs _tile_type_town_procs = {
 	AnimateTile_Town,        // animate_tile_proc
 	TileLoop_Town,           // tile_loop_clear
 	ChangeTileOwner_Town,    // change_tile_owner_clear
-	GetProducedCargo_Town,   // get_produced_cargo_proc
+	AddProducedCargo_Town,   // add_produced_cargo_proc
 	NULL,                    // vehicle_enter_tile_proc
 	GetFoundation_Town,      // get_foundation_proc
 	TerraformTile_Town,      // terraform_tile_proc
