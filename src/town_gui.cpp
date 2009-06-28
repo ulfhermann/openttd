@@ -524,11 +524,13 @@ static const NWidgetPart _nested_town_directory_widgets[] = {
 	EndContainer(),
 };
 
+/** Town directory window class. */
 struct TownDirectoryWindow : public Window {
 private:
 	/* Runtime saved values */
 	static Listing last_sorting;
 	static const Town *last_town;
+	int townline_height; ///< Height of a single town line in the town directory window.
 
 	/* Constants for sorting towns */
 	static GUITownList::SortFunction * const sorter_funcs[];
@@ -588,6 +590,7 @@ private:
 public:
 	TownDirectoryWindow(const WindowDesc *desc) : Window()
 	{
+		this->townline_height = FONT_HEIGHT_NORMAL;
 		this->InitNested(desc, 0);
 
 		this->vscroll.cap = this->nested_array[TDW_CENTERTOWN]->current_y / this->resize.step_height;
@@ -610,29 +613,40 @@ public:
 		SetVScrollCount(this, this->towns.Length());
 
 		this->DrawWidgets();
-		this->DrawSortButtonState(this->towns.SortType() == 0 ? TDW_SORTNAME : TDW_SORTPOPULATION, this->towns.IsDescSortOrder() ? SBS_DOWN : SBS_UP);
+	}
 
-		{
-			int n = 0;
-			uint16 i = this->vscroll.pos;
-			int y = 28;
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		switch(widget) {
+			case TDW_SORTNAME:
+				if (this->towns.SortType() == 0) this->DrawSortButtonState(widget, this->towns.IsDescSortOrder() ? SBS_DOWN : SBS_UP);
+				break;
 
-			while (i < this->towns.Length()) {
-				const Town *t = this->towns[i];
+			case TDW_SORTPOPULATION:
+				if (this->towns.SortType() != 0) this->DrawSortButtonState(widget, this->towns.IsDescSortOrder() ? SBS_DOWN : SBS_UP);
+				break;
 
-				assert(t->xy != INVALID_TILE);
+			case TDW_CENTERTOWN: {
+				int n = 0;
+				int y = r.top + 2;
+				for (uint i = this->vscroll.pos; i < this->towns.Length(); i++) {
+					const Town *t = this->towns[i];
 
-				SetDParam(0, t->index);
-				SetDParam(1, t->population);
-				DrawString(2, this->width - 2, y, STR_TOWN_DIRECTORY_TOWN);
+					assert(t->xy != INVALID_TILE);
 
-				y += 10;
-				i++;
-				if (++n == this->vscroll.cap) break; // max number of towns in 1 window
-			}
+					SetDParam(0, t->index);
+					SetDParam(1, t->population);
+					DrawString(r.left + 2, r.right - 2, y, STR_TOWN_DIRECTORY_TOWN);
 
-			SetDParam(0, GetWorldPopulation());
-			DrawString(3, this->width - 3, this->height - 12 + 2, STR_TOWN_POPULATION);
+					y += this->townline_height;
+					if (++n == this->vscroll.cap) break; // max number of towns in 1 window
+				}
+			} break;
+
+			case TDW_EMPTYBOTTOM:
+				SetDParam(0, GetWorldPopulation());
+				DrawString(r.left + 3, r.right - 3, r.top + 2, STR_TOWN_POPULATION);
+				break;
 		}
 	}
 
@@ -658,7 +672,7 @@ public:
 				break;
 
 			case TDW_CENTERTOWN: { // Click on Town Matrix
-				uint16 id_v = (pt.y - 28) / 10;
+				uint16 id_v = (pt.y - this->nested_array[widget]->pos_y - 2) / this->townline_height;
 
 				if (id_v >= this->vscroll.cap) return; // click out of bounds
 
@@ -685,7 +699,7 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.cap += delta.y / 10;
+		this->vscroll.cap += delta.y / this->townline_height;
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -802,6 +816,7 @@ static const NWidgetPart _nested_found_town_widgets[] = {
 	EndContainer(),
 };
 
+/** Found a town window class. */
 struct FoundTownWindow : Window
 {
 private:
