@@ -695,7 +695,7 @@ static const Widget _station_view_widgets[] = {
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    38,    81, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
 {      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    82,   104, 0x0,                             STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
 { WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    59,   105,   116, STR_BUTTON_LOCATION,             STR_STATION_VIEW_CENTER_TOOLTIP},      // SVW_LOCATION
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    60,   120,   105,   116, STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP},     // SVW_RATINGS / SVW_ACCEPTS
+{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    60,   120,   105,   116, STR_STATION_VIEW_ACCEPTS_BUTTON, STR_STATION_VIEW_ACCEPTS_TOOLTIP},     // SVW_RATINGS / SVW_ACCEPTS
 { WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   121,   180,   105,   116, STR_QUERY_RENAME,                STR_STATION_VIEW_RENAME_TOOLTIP},      // SVW_RENAME
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,   105,   116, STR_TRAIN,                       STR_SCHEDULED_TRAINS_TIP },            // SVW_TRAINS
 { WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,   105,   116, STR_LORRY,                       STR_SCHEDULED_ROAD_VEHICLES_TIP },     // SVW_ROADVEHS
@@ -726,7 +726,7 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_GREY, SVW_ACCEPTLIST), SetMinimalSize(249, 23), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_LOCATION), SetMinimalSize(60, 12), SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(61, 12), SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(61, 12), SetDataTip(STR_STATION_VIEW_ACCEPTS_BUTTON, STR_STATION_VIEW_ACCEPTS_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(60, 12), SetResize(1, 0), SetDataTip(STR_QUERY_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_TRAINS), SetMinimalSize(14, 12), SetDataTip(STR_TRAIN, STR_SCHEDULED_TRAINS_TIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ROADVEHS), SetMinimalSize(14, 12), SetDataTip(STR_LORRY, STR_SCHEDULED_ROAD_VEHICLES_TIP),
@@ -1302,7 +1302,7 @@ struct StationViewWindow : public Window {
 		this->DrawWidgets();
 
 		/* draw arrow pointing up/down for ascending/descending sorting */
-		this->DrawSortButtonState(SVW_SORT_ORDER, sort_orders[1] == SO_ASCENDING ? SBS_DOWN : SBS_UP);
+		this->DrawSortButtonState(SVW_SORT_ORDER, sort_orders[1] == SO_ASCENDING ? SBS_UP : SBS_DOWN);
 
 		int pos = this->vscroll.pos; ///< = this->vscroll.pos
 
@@ -1313,7 +1313,7 @@ struct StationViewWindow : public Window {
 		DrawEntries(&cargo, pos, maxrows, 0);
 		scroll_to_row = INT_MAX;
 
-		if (this->widget[SVW_ACCEPTS].data == STR_STATION_VIEW_RATINGS_BUTTON) { // small window with list of accepted cargo
+		if (this->widget[SVW_ACCEPTS].data == STR_STATION_VIEW_ACCEPTS_BUTTON) { // small window with list of accepted cargo
 			char string[512];
 			char *b = string;
 			bool first = true;
@@ -1413,12 +1413,12 @@ struct StationViewWindow : public Window {
 					/* Switch to ratings view */
 					this->widget[SVW_RATINGS].data = STR_STATION_VIEW_ACCEPTS_BUTTON;
 					this->widget[SVW_RATINGS].tooltips = STR_STATION_VIEW_ACCEPTS_TOOLTIP;
-					ResizeWindowForWidget(this, SVW_ACCEPTLIST, 0, 100);
+					ResizeWindowForWidget(this, SVW_ACCEPTLIST, 0, -100);
 				} else {
 					/* Switch to accepts view */
 					this->widget[SVW_RATINGS].data = STR_STATION_VIEW_RATINGS_BUTTON;
 					this->widget[SVW_RATINGS].tooltips = STR_STATION_VIEW_RATINGS_TOOLTIP;
-					ResizeWindowForWidget(this, SVW_ACCEPTLIST, 0, -100);
+					ResizeWindowForWidget(this, SVW_ACCEPTLIST, 0, 100);
 				}
 
 				this->SetDirty();
