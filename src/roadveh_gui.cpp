@@ -34,11 +34,10 @@ void DrawRoadVehDetails(const Vehicle *v, int left, int right, int y)
 	DrawString(left, right, y + y_offset, STR_VEHICLE_INFO_BUILT_VALUE);
 
 	if (RoadVehHasArticPart(v)) {
-		AcceptedCargo max_cargo;
+		CargoArray max_cargo;
 		StringID subtype_text[NUM_CARGO];
 		char capacity[512];
 
-		memset(max_cargo, 0, sizeof(max_cargo));
 		memset(subtype_text, 0, sizeof(subtype_text));
 
 		for (const Vehicle *u = v; u != NULL; u = u->Next()) {

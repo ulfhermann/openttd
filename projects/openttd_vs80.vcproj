@@ -964,6 +964,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\economy_base.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\economy_func.h"
 				>
 			</File>
@@ -1701,6 +1705,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\core\enum_type.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\core\geometry_func.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\core\geometry_func.hpp"
 				>
 			</File>
 			<File
