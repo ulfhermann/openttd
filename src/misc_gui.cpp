@@ -129,9 +129,8 @@ public:
 
 		td.grf = NULL;
 
-		AcceptedCargo ac;
-		memset(ac, 0, sizeof(AcceptedCargo));
-		AddAcceptedCargo(tile, ac);
+		CargoArray acceptance;
+		AddAcceptedCargo(tile, acceptance);
 		GetTileDesc(tile, &td);
 
 		uint line_nr = 0;
@@ -230,7 +229,7 @@ public:
 		bool found = false;
 
 		for (CargoID i = 0; i < NUM_CARGO; ++i) {
-			if (ac[i] > 0) {
+			if (acceptance[i] > 0) {
 				/* Add a comma between each item. */
 				if (found) {
 					*strp++ = ',';
@@ -239,8 +238,8 @@ public:
 				found = true;
 
 				/* If the accepted value is less than 8, show it in 1/8:ths */
-				if (ac[i] < 8) {
-					SetDParam(0, ac[i]);
+				if (acceptance[i] < 8) {
+					SetDParam(0, acceptance[i]);
 					SetDParam(1, GetCargo(i)->name);
 					strp = GetString(strp, STR_LAND_AREA_INFORMATION_CARGO_EIGHTS, lastof(this->landinfo_data[LAND_INFO_MULTICENTER_LINE]));
 				} else {
@@ -802,8 +801,8 @@ void GuiShowTooltips(StringID str, uint paramcount, const uint64 params[], bool 
 	 * Clamp value to below main toolbar and above statusbar. If tooltip would
 	 * go below window, flip it so it is shown above the cursor */
 	int y = Clamp(_cursor.pos.y + _cursor.size.y + _cursor.offs.y + 5, 22, _screen.height - 12);
-	if (y + br.height > _screen.height - 12) y = _cursor.pos.y + _cursor.offs.y - br.height - 5;
-	int x = Clamp(_cursor.pos.x - (br.width >> 1), 0, _screen.width - br.width);
+	if (y + (int)br.height > _screen.height - 12) y = _cursor.pos.y + _cursor.offs.y - (int)br.height - 5;
+	int x = Clamp(_cursor.pos.x - (int)(br.width >> 1), 0, _screen.width - (int)br.width);
 
 	const Widget *wid = InitializeWidgetArrayFromNestedWidgets(_nested_tooltips_widgets, lengthof(_nested_tooltips_widgets),
 													_tooltips_widgets, &generated_tooltips_widgets);
@@ -811,7 +810,7 @@ void GuiShowTooltips(StringID str, uint paramcount, const uint64 params[], bool 
 }
 
 
-static int DrawStationCoverageText(const AcceptedCargo cargo,
+static int DrawStationCoverageText(const CargoArray &cargos,
 	int str_x, int str_y, StationCoverageType sct, bool supplies)
 {
 	bool first = true;
@@ -827,7 +826,7 @@ static int DrawStationCoverageText(const AcceptedCargo cargo,
 			case SCT_ALL: break;
 			default: NOT_REACHED();
 		}
-		if (cargo[i] >= (supplies ? 1U : 8U)) {
+		if (cargos[i] >= (supplies ? 1U : 8U)) {
 			if (first) {
 				first = false;
 			} else {
@@ -863,14 +862,14 @@ static int DrawStationCoverageText(const AcceptedCargo cargo,
 int DrawStationCoverageAreaText(int sx, int sy, StationCoverageType sct, int rad, bool supplies)
 {
 	TileIndex tile = TileVirtXY(_thd.pos.x, _thd.pos.y);
-	AcceptedCargo cargo;
 	if (tile < MapSize()) {
+		CargoArray cargos;
 		if (supplies) {
-			GetProductionAroundTiles(cargo, tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE , rad);
+			cargos = GetProductionAroundTiles(tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE, rad);
 		} else {
-			GetAcceptanceAroundTiles(cargo, tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE , rad);
+			cargos = GetAcceptanceAroundTiles(tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE, rad);
 		}
-		return DrawStationCoverageText(cargo, sx, sy, sct, supplies);
+		return DrawStationCoverageText(cargos, sx, sy, sct, supplies);
 	}
 
 	return sy;
