@@ -847,9 +847,7 @@ struct DepotWindow : Window {
 		if (this->type == VEH_TRAIN) v = gdvp.wagon;
 
 		if (v != NULL && mode == MODE_DRAG_VEHICLE) {
-			AcceptedCargo capacity, loaded;
-			memset(capacity, 0, sizeof(capacity));
-			memset(loaded, 0, sizeof(loaded));
+			CargoArray capacity, loaded;
 
 			/* Display info for single (articulated) vehicle, or for whole chain starting with selected vehicle */
 			bool whole_chain = (this->type == VEH_TRAIN && _ctrl_pressed);
