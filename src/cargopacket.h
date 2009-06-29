@@ -33,7 +33,6 @@ struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 
 	uint16 count;           ///< The amount of cargo in this packet
 	byte days_in_transit;   ///< Amount of days this packet has been in transit
-	bool paid_for;          ///< Have we been paid for this cargo packet?
 
 	/**
 	 * Creates a new cargo packet
@@ -54,7 +53,7 @@ struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 	 */
 	FORCEINLINE bool SameSource(const CargoPacket *cp) const
 	{
-		return this->source_xy == cp->source_xy && this->days_in_transit == cp->days_in_transit && this->paid_for == cp->paid_for && this->next == cp->next;
+		return this->source_xy == cp->source_xy && this->days_in_transit == cp->days_in_transit && this->next == cp->next;
 	}
 	
 	CargoPacket * Split(uint new_size);
@@ -112,13 +111,12 @@ private:
 
 	bool empty;           ///< Cache for whether this list is empty or not
 	uint count;           ///< Cache for the number of cargo entities
-	bool unpaid_cargo;    ///< Cache for the unpaid cargo
 	Money feeder_share;   ///< Cache for the feeder share
 	StationID source;     ///< Cache for the source of the packet
 	uint days_in_transit; ///< Cache for the number of days in transit
 
-	void DeliverPacket(List::iterator & c, uint & remaining_unload);
-	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
+	void DeliverPacket(List::iterator & c, uint & remaining_unload, CargoPayment *payment);
+	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest, CargoPayment *payment);
 	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
 	uint LoadPackets(List * dest, uint cap, StationID next_station, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
@@ -153,12 +151,6 @@ public:
 	 * @return the before mentioned number
 	 */
 	FORCEINLINE uint Count() const { return this->count; }
-
-	/**
-	 * Is there some cargo that has not been paid for?
-	 * @return true if and only if there is such a cargo
-	 */
-	FORCEINLINE bool UnpaidCargo() const { return this->unpaid_cargo; }
 
 	/**
 	 * Returns total sum of the feeder share for all packets
@@ -222,7 +214,7 @@ public:
 	 * @param next_station the next unloading station in the vehicle's order list
 	 * @return the number of cargo entities actually moved
 	 */
-	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station);
+	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment);
 
 	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
 
