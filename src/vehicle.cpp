@@ -38,6 +38,7 @@
 #include "settings_type.h"
 #include "network/network.h"
 #include "core/pool_func.hpp"
+#include "economy_base.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -446,6 +447,7 @@ static AutoreplaceMap _vehicles_to_autoreplace;
 void InitializeVehicles()
 {
 	_vehicle_pool.CleanPool();
+	_cargo_payment_pool.CleanPool();
 
 	_vehicles_to_autoreplace.Reset();
 	ResetVehiclePosHash();
@@ -915,7 +917,7 @@ void AgeVehicle(Vehicle *v)
  * @param colour The string to show depending on if we are unloading or loading
  * @return A percentage of how full the Vehicle is.
  */
-uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour, Money income)
+uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 {
 	int count = 0;
 	int max = 0;
@@ -939,16 +941,11 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour, Money income)
 
 	if (colour != NULL) {
 		if (unloading == 0 && loading) {
-			/* while loading only show income if there was any change */
-			if (income != 0) {
-				*colour = STR_INCOME_PERCENT_UP;
-			} else {
-				*colour = STR_PERCENT_UP;
-			}
+			*colour = STR_PERCENT_UP;
 		} else if (cars == unloading || !loading) {
-			*colour = STR_INCOME_PERCENT_DOWN;
+			*colour = STR_PERCENT_DOWN;
 		} else {
-			*colour = STR_INCOME_PERCENT_UP_DOWN;
+			*colour = STR_PERCENT_UP_DOWN;
 		}
 	}
 
@@ -1478,6 +1475,8 @@ void Vehicle::BeginLoading(StationID last_station_id)
 void Vehicle::LeaveStation()
 {
 	assert(current_order.IsType(OT_LOADING));
+
+	delete this->cargo_payment;
 
 	/* Only update the timetable if the vehicle was supposed to stop here. */
 	if (current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);

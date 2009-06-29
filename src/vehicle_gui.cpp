@@ -576,8 +576,7 @@ static int CDECL VehicleProfitLastYearSorter(const Vehicle * const *a, const Veh
 static int CDECL VehicleCargoSorter(const Vehicle * const *a, const Vehicle * const *b)
 {
 	const Vehicle *v;
-	AcceptedCargo diff;
-	memset(diff, 0, sizeof(diff));
+	CargoArray diff;
 
 	/* Append the cargo of the connected weagons */
 	for (v = *a; v != NULL; v = v->Next()) diff[v->cargo_type] += v->cargo_cap;

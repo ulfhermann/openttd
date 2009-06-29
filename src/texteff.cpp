@@ -18,9 +18,20 @@ enum {
 	INIT_NUM_TEXT_EFFECTS  =  20,
 };
 
+struct TextEffect {
+	StringID string_id;
+	int32 x;
+	int32 y;
+	int32 right;
+	int32 bottom;
+	uint16 duration;
+	uint64 params_1;
+	TextEffectMode mode;
+};
+
 /* used for text effects */
-TextEffect *_text_effect_list = NULL;
-uint16 _num_text_effects = INIT_NUM_TEXT_EFFECTS;
+static TextEffect *_text_effect_list = NULL;
+static uint16 _num_text_effects = INIT_NUM_TEXT_EFFECTS;
 
 /* Text Effects */
 /**
@@ -72,7 +83,6 @@ TextEffectID AddTextEffect(StringID msg, int x, int y, uint16 duration, TextEffe
 	te->y = y - 5;
 	te->bottom = y + 5;
 	te->params_1 = GetDParam(0);
-	te->params_2 = GetDParam(4);
 	te->mode = mode;
 
 	GetString(buffer, msg, lastof(buffer));
@@ -94,7 +104,6 @@ void UpdateTextEffect(TextEffectID te_id, StringID msg)
 	te = &_text_effect_list[te_id];
 	te->string_id = msg;
 	te->params_1 = GetDParam(0);
-	te->params_2 = GetDParam(4);
 
 	/* Update width of text effect */
 	char buffer[100];
@@ -159,7 +168,7 @@ void DrawTextEffects(DrawPixelInfo *dpi)
 						dpi->left + dpi->width  > te->x &&
 						dpi->top  + dpi->height > te->y) {
 					if (te->mode == TE_RISING || (_settings_client.gui.loading_indicators && !IsTransparencySet(TO_LOADING))) {
-						AddStringToDraw(te->x, te->y, te->string_id, te->params_1, te->params_2);
+						AddStringToDraw(te->x, te->y, te->string_id, te->params_1, INVALID_STRING_ID);
 					}
 				}
 			}
@@ -174,7 +183,7 @@ void DrawTextEffects(DrawPixelInfo *dpi)
 						dpi->left + dpi->width  > te->x &&
 						dpi->top  + dpi->height > te->y) {
 					if (te->mode == TE_RISING || (_settings_client.gui.loading_indicators && !IsTransparencySet(TO_LOADING))) {
-						AddStringToDraw(te->x, te->y, (StringID)(te->string_id - 1), te->params_1, te->params_2);
+						AddStringToDraw(te->x, te->y, (StringID)(te->string_id - 1), te->params_1, INVALID_STRING_ID);
 					}
 				}
 			}
