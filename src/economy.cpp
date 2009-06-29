@@ -34,11 +34,17 @@
 #include "company_gui.h"
 #include "signs_base.h"
 #include "subsidy_func.h"
-#include "economy_base.h"
 #include "station_base.h"
+#include "economy_base.h"
+#include "core/pool_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
+
+
+/* Initialize the cargo payment-pool */
+CargoPaymentPool _cargo_payment_pool("CargoPayment");
+INSTANTIATE_POOL_METHODS(CargoPayment)
 
 /**
  * Multiply two integer values and shift the results to right.
@@ -71,6 +77,8 @@ static inline uint32 BigMulSU(const uint32 a, const uint32 b, const uint8 shift)
 {
 	return (uint32)((uint64)a * (uint64)b >> shift);
 }
+
+typedef SmallVector<Industry *, 16> SmallIndustryList;
 
 /* Score info */
 const ScoreInfo _score_info[] = {
@@ -962,7 +970,6 @@ static bool FindIndustryToDeliver(TileIndex ind_tile, void *user_data)
  * @param st The station that accepted the cargo
  * @param cargo_type Type of cargo delivered
  * @param nun_pieces Amount of cargo delivered
- * @param industry_set The destination industry will be inserted into this set
  * @note THIS FUNCTION WILL BE REMOVED SOON!
  */
 static Industry *DeliverGoodsToIndustryCheckOldStyle(const Station *st, CargoID cargo_type, int num_pieces)
@@ -1003,6 +1010,8 @@ static Industry *DeliverGoodsToIndustryCheckOldStyle(const Station *st, CargoID 
 	return NULL;
 }
 
+/** The industries we've currently brought cargo to. */
+static SmallIndustryList _cargo_delivery_destinations;
 
 /**
  * Transfer goods from station to industry.
@@ -1010,9 +1019,8 @@ static Industry *DeliverGoodsToIndustryCheckOldStyle(const Station *st, CargoID 
  * @param st The station that accepted the cargo
  * @param cargo_type Type of cargo delivered
  * @param nun_pieces Amount of cargo delivered
- * @param industry_set The destination industry will be inserted into this set
  */
-static void DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, int num_pieces, SmallIndustryList *industry_set)
+static void DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, int num_pieces)
 {
 	/* Find the nearest industrytile to the station sign inside the catchment area, whose industry accepts the cargo.
 	 * This fails in three cases:
@@ -1038,8 +1046,8 @@ static void DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, int nu
 			if (res == 0) continue;
 		}
 
-		/* Insert the industry into industry_set, if not yet contained */
-		if (industry_set != NULL) industry_set->Include(ind);
+		/* Insert the industry into _cargo_delivery_destinations, if not yet contained */
+		_cargo_delivery_destinations.Include(ind);
 
 		assert(DeliverGoodsToIndustryCheckOldStyle(st, cargo_type, num_pieces) == ind); // safety check, will be removed soon
 
@@ -1058,21 +1066,18 @@ static void DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, int nu
  * @param dest Station the cargo has been unloaded
  * @param source_tile The origin of the cargo for distance calculation
  * @param days_in_transit Travel time
- * @param industry_set The delivered industry will be inserted into this set, if not yet contained
+ * @param company The company delivering the cargo
  * The cargo is just added to the stockpile of the industry. It is due to the caller to trigger the industry's production machinery
  */
-static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID source, StationID dest, TileIndex source_tile, byte days_in_transit, SmallIndustryList *industry_set)
+static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID source, StationID dest, TileIndex source_tile, byte days_in_transit, Company *company)
 {
 	bool subsidised = false;
 
 	assert(num_pieces > 0);
 
 	/* Update company statistics */
-	{
-		Company *c = Company::Get(_current_company);
-		c->cur_economy.delivered_cargo += num_pieces;
-		SetBit(c->cargo_types, cargo_type);
-	}
+	company->cur_economy.delivered_cargo += num_pieces;
+	SetBit(company->cargo_types, cargo_type);
 
 	const Station *s_to = Station::Get(dest);
 
@@ -1089,7 +1094,7 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID source, 
 	if (cs->town_effect == TE_WATER) s_to->town->new_act_water += num_pieces;
 
 	/* Give the goods to the industry. */
-	DeliverGoodsToIndustry(s_to, cargo_type, num_pieces, industry_set);
+	DeliverGoodsToIndustry(s_to, cargo_type, num_pieces);
 
 	/* Determine profit */
 	Money profit = GetTransportedGoodsIncome(num_pieces, DistanceManhattan(source_tile, s_to->xy), days_in_transit, cargo_type);
@@ -1143,10 +1148,84 @@ static void TriggerIndustryProduction(Industry *i)
 }
 
 /**
- * Marks the vehicle to be unloaded if appropriate.
+ * Makes us a new cargo payment helper.
+ * @param front The front of the train
+ * @param destinations List to add the destinations of 'our' cargo to
+ */
+CargoPayment::CargoPayment(Vehicle *front) :
+	front(front),
+	current_station(front->last_station_visited)
+{
+}
+
+CargoPayment::~CargoPayment()
+{
+	if (this->CleaningPool()) return;
+
+	this->front->cargo_payment = NULL;
+
+	if (this->visual_profit == 0) return;
+
+	CompanyID old_company = _current_company;
+	_current_company = this->front->owner;
+
+	SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->route_profit));
+	this->front->profit_this_year += this->visual_profit << 8;
+
+	if (this->route_profit != 0) {
+		if (IsLocalCompany() && !PlayVehicleSound(this->front, VSE_LOAD_UNLOAD)) {
+			SndPlayVehicleFx(SND_14_CASHTILL, this->front);
+		}
+
+		ShowCostOrIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, -this->visual_profit);
+	} else {
+		ShowFeederIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, this->visual_profit);
+	}
+
+	_current_company = old_company;
+}
+
+/**
+ * Handle payment for final delivery of the given cargo packet.
+ * @param cp The cargo packet to pay for.
+ * @param count The number of packets to pay for.
+ */
+void CargoPayment::PayFinalDelivery(CargoPacket *cp, uint count)
+{
+	if (this->owner == NULL) {
+		this->owner = Company::Get(this->front->owner);
+	}
+
+	/* Handle end of route payment */
+	Money profit = DeliverGoods(count, this->ct, cp->source, this->current_station, cp->source_xy, cp->days_in_transit, this->owner);
+	this->route_profit += profit;
+
+	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
+	this->visual_profit += profit - cp->feeder_share;
+}
+
+/**
+ * Handle payment for transfer of the given cargo packet.
+ * @param cp The cargo packet to pay for.
+ * @param count The number of packets to pay for.
+ */
+void CargoPayment::PayTransfer(CargoPacket *cp, uint count)
+{
+	Money profit = GetTransportedGoodsIncome(
+		count,
+		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
+		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
+		cp->days_in_transit,
+		this->ct);
+
+	this->visual_profit += profit; // accumulate transfer profits for whole vehicle
+	cp->feeder_share    += profit; // account for the (virtual) profit already made for the cargo packet
+}
+
+/**
+ * Prepare the vehicle to be unloaded.
  * @param front_v the vehicle to be unloaded
  */
-
 void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_station_id)
 {
 	/* At this moment loading cannot be finished */
@@ -1163,75 +1242,12 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 			if (v->cargo_cap > 0 && !v->cargo.Empty()) {
 				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
+			v->cargo.InvalidateCache();
 		}
 	}
-}
 
-/**
- * Constructor. Sets the _current_company to the vehicle's owner.
- */
-Payment::Payment(Vehicle * v, StationID station, SmallIndustryList &ind) :
-		front(v), transfer_pay(0), final_pay(0), vehicle_profit(0), industries(&ind),
-		current_cargo(CT_INVALID), current_station(station)
-{
-	/* The owner of the train wants to be paid */
-	_current_company = front->owner;
-}
-
-/**
- * records transfer credits
- */
-void Payment::PayTransfer(CargoPacket *cp, uint count)
-{
-	Money profit = GetTransportedGoodsIncome(
-		count,
-		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
-		cp->days_in_transit,
-		this->current_cargo);
-
-	cp->feeder_share += profit; // account for the (virtual) profit already made for the cargo packet
-	this->transfer_pay += profit; // accumulate transfer profits for whole vehicle
-	this->vehicle_profit += profit;
-}
-
-/**
- * records a final delivery payment
- */
-void Payment::PayFinal(CargoPacket * cp, uint count)
-{
-	Money profit = DeliverGoods(
-			count, this->current_cargo, cp->source, this->current_station,
-			cp->source_xy, cp->days_in_transit, industries);
-
-	Station::Get(this->current_station)->time_since_unload = 0;
-	this->final_pay += profit;
-	this->vehicle_profit += profit - cp->feeder_share;
-}
-
-/**
- * plays a sound if there has been any profit
- */
-void Payment::PlaySoundIfProfit()
-{
-	if (this->vehicle_profit != 0) {
-		if (this->front->owner == _local_company && !PlayVehicleSound(front, VSE_LOAD_UNLOAD)) {
-			SndPlayVehicleFx(SND_14_CASHTILL, this->front);
-		}
-	}
-}
-
-/**
- * performs the payment for this unloading cycle and resets _current_company
- */
-Payment::~Payment()
-{
-	if (this->vehicle_profit != 0) {
-		this->front->profit_this_year += this->vehicle_profit << 8;
-	}
-	SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->final_pay));
-
-	_current_company = this->old_company;
+	assert(front_v->cargo_payment == NULL);
+	front_v->cargo_payment = new CargoPayment(front_v);
 }
 
 /**
@@ -1267,9 +1283,8 @@ static void ReserveAndUnreject(Station * st, Vehicle * u, StationID next_station
  *                   left on the platform to be
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
- * @param industry_set the industries to be triggered after this loading cycle
  */
-static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved, SmallIndustryList &industry_set)
+static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 {
 	CargoReservation rejected;
 	assert(v->current_order.IsType(OT_LOADING));
@@ -1310,9 +1325,9 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved, SmallIndu
 	uint32 cargo_full      = 0;
 
 	v->cur_speed = 0;
-	Payment payment(v, last_visited, industry_set);
 
-	/* loop over all vehicles in the current consist */
+	CargoPayment *payment = v->cargo_payment;
+
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
@@ -1330,12 +1345,12 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved, SmallIndu
 
 		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (unload_flags & OUFB_NO_UNLOAD) == 0) {
 			/* vehicle wants to unload something */
-			payment.SetCargo(v->cargo_type);
 
 			uint cargo_count = v->cargo.Count();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 
-			uint delivered = v->cargo.MoveToStation(ge, amount_unloaded, unload_flags, last_visited, next_station, &payment);
+			payment->SetCargo(v->cargo_type);
+			uint delivered = v->cargo.MoveToStation(ge, amount_unloaded, unload_flags, last_visited, next_station, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
@@ -1435,6 +1450,8 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved, SmallIndu
 
 	v = u;
 
+	if (!anything_unloaded) delete payment;
+
 	if (anything_loaded || anything_unloaded) {
 		if (_settings_game.order.gradual_loading) {
 			/* The time it takes to load one 'slice' of cargo or passengers depends
@@ -1479,12 +1496,11 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved, SmallIndu
 	 */
 	if (_game_mode != GM_MENU && (_settings_client.gui.loading_indicators > (uint)(v->owner != _local_company && _local_company != COMPANY_SPECTATOR))) {
 		StringID percent_up_down = STR_NULL;
-		int percent = CalcPercentVehicleFilled(v, &percent_up_down, payment.GetVehicleProfit());
+		int percent = CalcPercentVehicleFilled(v, &percent_up_down);
 		if (v->fill_percent_te_id == INVALID_TE_ID) {
-			payment.PlaySoundIfProfit();
-			v->fill_percent_te_id = ShowFillingPercent(v->x_pos, v->y_pos, v->z_pos + 20, percent, payment.GetVehicleProfit(), percent_up_down);
+			v->fill_percent_te_id = ShowFillingPercent(v->x_pos, v->y_pos, v->z_pos + 20, percent, percent_up_down);
 		} else {
-			UpdateFillingPercent(v->fill_percent_te_id, percent, payment.GetVehicleProfit(), percent_up_down);
+			UpdateFillingPercent(v->fill_percent_te_id, percent, percent_up_down);
 		}
 	}
 
@@ -1512,24 +1528,25 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved, SmallIndu
  */
 void LoadUnloadStation(Station *st)
 {
+	/* No vehicle is here... */
+	if (st->loading_vehicles.empty()) return;
+
 	CargoReservation reserved;
 
 	std::list<Vehicle *>::iterator iter;
-	static SmallIndustryList industry_set;
-
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
-		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, reserved, industry_set);
+		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, reserved);
 	}
 
 	ReimportReserved(st, reserved);
 
 	/* Call the production machinery of industries */
-	const Industry * const *isend = industry_set.End();
-	for (Industry **iid = industry_set.Begin(); iid != isend; iid++) {
+	const Industry * const *isend = _cargo_delivery_destinations.End();
+	for (Industry **iid = _cargo_delivery_destinations.Begin(); iid != isend; iid++) {
 		TriggerIndustryProduction(*iid);
 	}
-	industry_set.Clear();
+	_cargo_delivery_destinations.Clear();
 }
 
 void CompaniesMonthlyLoop()

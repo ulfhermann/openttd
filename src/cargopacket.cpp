@@ -30,7 +30,6 @@ CargoPacket::CargoPacket(StationID source, StationID next, uint16 count)
 	this->count           = count;
 	this->days_in_transit = 0;
 	this->feeder_share    = 0;
-	this->paid_for        = false;
 }
 
 /*
@@ -115,28 +114,27 @@ CargoPacket * CargoPacket::Split(uint new_size) {
 	cp_new->source_xy       = source_xy;
 	cp_new->loaded_at_xy    = loaded_at_xy;
 	cp_new->days_in_transit = days_in_transit;
-	cp_new->paid_for        = paid_for;
 	cp_new->feeder_share    = fs;
 	count -= new_size;
 	return cp_new;
 }
 
-void CargoList::DeliverPacket(List::iterator & c, uint & remaining_unload, Payment *payment) {
+void CargoList::DeliverPacket(List::iterator & c, uint & remaining_unload, CargoPayment *payment) {
 	CargoPacket * p = *c;
 	if (p->count <= remaining_unload) {
 		remaining_unload -= p->count;
-		payment->PayFinal(p, p->count);
+		payment->PayFinalDelivery(p, p->count);
 		delete p;
 		packets.erase(c++);
 	} else {
-		payment->PayFinal(p, remaining_unload);
+		payment->PayFinalDelivery(p, remaining_unload);
 		p->count -= remaining_unload;
 		remaining_unload = 0;
 		++c;
 	}
 }
 
-CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest, Payment *payment) {
+CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry *dest, CargoPayment *payment) {
 	CargoPacket * p = *c;
 	if (p->count <= remaining_unload) {
 		packets.erase(c++);
@@ -226,7 +224,7 @@ UnloadType CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const Ca
 	}
 }
 
-uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, Payment *payment) {
+uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment) {
 	uint remaining_unload = max_unload;
 	UnloadDescription ul(dest, curr_station, next_station, flags);
 
@@ -271,7 +269,6 @@ uint CargoList::LoadPackets(List * dest, uint cap, StationID next_station, List 
 			dest->push_back(p);
 			if (load_place != INVALID_TILE) {
 				p->loaded_at_xy = load_place;
-				p->paid_for = false;
 			}
 		} else {
 			packets.pop_front();
@@ -292,7 +289,6 @@ void CargoList::InvalidateCache()
 {
 	empty = packets.empty();
 	count = 0;
-	unpaid_cargo = false;
 	feeder_share = 0;
 	source = INVALID_STATION;
 	days_in_transit = 0;
@@ -302,7 +298,6 @@ void CargoList::InvalidateCache()
 	uint dit = 0;
 	for (List::const_iterator it = packets.begin(); it != packets.end(); it++) {
 		count        += (*it)->count;
-		unpaid_cargo |= !(*it)->paid_for;
 		dit          += (*it)->days_in_transit * (*it)->count;
 		feeder_share += (*it)->feeder_share;
 	}

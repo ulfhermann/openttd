@@ -380,18 +380,18 @@ static Foundation GetFoundation_Industry(TileIndex tile, Slope tileh)
 	return FlatteningFoundation(tileh);
 }
 
-static void AddAcceptedCargo_Industry(TileIndex tile, AcceptedCargo ac)
+static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance)
 {
 	IndustryGfx gfx = GetIndustryGfx(tile);
 	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
 
 	/* When we have to use a callback, we put our data in the next two variables */
 	CargoID raw_accepts_cargo[lengthof(itspec->accepts_cargo)];
-	uint8 raw_acceptance[lengthof(itspec->acceptance)];
+	uint8 raw_cargo_acceptance[lengthof(itspec->acceptance)];
 
 	/* And then these will always point to a same sized array with the required data */
 	const CargoID *accepts_cargo = itspec->accepts_cargo;
-	const uint8 *acceptance = itspec->acceptance;
+	const uint8 *cargo_acceptance = itspec->acceptance;
 
 	if (HasBit(itspec->callback_flags, CBM_INDT_ACCEPT_CARGO)) {
 		uint16 res = GetIndustryTileCallback(CBID_INDTILE_ACCEPT_CARGO, 0, 0, gfx, GetIndustryByTile(tile), tile);
@@ -404,14 +404,14 @@ static void AddAcceptedCargo_Industry(TileIndex tile, AcceptedCargo ac)
 	if (HasBit(itspec->callback_flags, CBM_INDT_CARGO_ACCEPTANCE)) {
 		uint16 res = GetIndustryTileCallback(CBID_INDTILE_CARGO_ACCEPTANCE, 0, 0, gfx, GetIndustryByTile(tile), tile);
 		if (res != CALLBACK_FAILED) {
-			acceptance = raw_acceptance;
-			for (uint i = 0; i < lengthof(itspec->accepts_cargo); i++) raw_acceptance[i] = GB(res, i * 4, 4);
+			cargo_acceptance = raw_cargo_acceptance;
+			for (uint i = 0; i < lengthof(itspec->accepts_cargo); i++) raw_cargo_acceptance[i] = GB(res, i * 4, 4);
 		}
 	}
 
 	for (byte i = 0; i < lengthof(itspec->accepts_cargo); i++) {
 		CargoID a = accepts_cargo[i];
-		if (a != CT_INVALID) ac[a] += acceptance[i];
+		if (a != CT_INVALID) acceptance[a] += cargo_acceptance[i];
 	}
 }
 
@@ -868,12 +868,14 @@ static TrackStatus GetTileTrackStatus_Industry(TileIndex tile, TransportType mod
 	return 0;
 }
 
-static void GetProducedCargo_Industry(TileIndex tile, CargoID *b)
+static void AddProducedCargo_Industry(TileIndex tile, CargoArray &produced)
 {
 	const Industry *i = GetIndustryByTile(tile);
 
-	b[0] = i->produced_cargo[0];
-	b[1] = i->produced_cargo[1];
+	for (uint j = 0; j < lengthof(i->produced_cargo); j++) {
+		CargoID cargo = i->produced_cargo[j];
+		if (cargo != CT_INVALID) produced[cargo]++;
+	}
 }
 
 static void ChangeTileOwner_Industry(TileIndex tile, Owner old_owner, Owner new_owner)
@@ -2417,7 +2419,7 @@ extern const TileTypeProcs _tile_type_industry_procs = {
 	AnimateTile_Industry,        // animate_tile_proc
 	TileLoop_Industry,           // tile_loop_proc
 	ChangeTileOwner_Industry,    // change_tile_owner_proc
-	GetProducedCargo_Industry,   // get_produced_cargo_proc
+	AddProducedCargo_Industry,   // add_produced_cargo_proc
 	NULL,                        // vehicle_enter_tile_proc
 	GetFoundation_Industry,      // get_foundation_proc
 	TerraformTile_Industry,      // terraform_tile_proc
