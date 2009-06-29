@@ -1170,6 +1170,7 @@ CargoPayment::~CargoPayment()
 	_current_company = this->front->owner;
 
 	SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->route_profit));
+	this->front->profit_this_year += this->visual_profit << 8;
 
 	if (this->route_profit != 0) {
 		if (IsLocalCompany() && !PlayVehicleSound(this->front, VSE_LOAD_UNLOAD)) {
@@ -1327,7 +1328,6 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 
 	CargoPayment *payment = v->cargo_payment;
 
-	/* loop over all vehicles in the current consist */
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
