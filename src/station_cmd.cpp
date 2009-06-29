@@ -434,17 +434,15 @@ static void ShowRejectOrAcceptNews(const Station *st, uint num_items, CargoID *c
 }
 
 /**
- * Get a list of the cargo types being produced around the tile (in a rectangle).
- * @param produced Destination array of produced cargo
+ * Get the cargo types being produced around the tile (in a rectangle).
  * @param tile Northtile of area
  * @param w X extent of the area
  * @param h Y extent of the area
  * @param rad Search radius in addition to the given area
  */
-void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile,
-	int w, int h, int rad)
+CargoArray GetProductionAroundTiles(TileIndex tile, int w, int h, int rad)
 {
-	memset(produced, 0, sizeof(AcceptedCargo)); // sizeof(AcceptedCargo) != sizeof(produced) (== sizeof(uint *))
+	CargoArray produced;
 
 	int x = TileX(tile);
 	int y = TileY(tile);
@@ -465,35 +463,23 @@ void GetProductionAroundTiles(AcceptedCargo produced, TileIndex tile,
 	for (int yc = y1; yc != y2; yc++) {
 		for (int xc = x1; xc != x2; xc++) {
 			TileIndex tile = TileXY(xc, yc);
-
-			if (!IsTileType(tile, MP_STATION)) {
-				GetProducedCargoProc *gpc = _tile_type_procs[GetTileType(tile)]->get_produced_cargo_proc;
-				if (gpc != NULL) {
-					CargoID cargos[256]; // Required for CBID_HOUSE_PRODUCE_CARGO.
-					memset(cargos, CT_INVALID, sizeof(cargos));
-
-					gpc(tile, cargos);
-					for (uint i = 0; i < lengthof(cargos); ++i) {
-						if (cargos[i] != CT_INVALID) produced[cargos[i]]++;
-					}
-				}
-			}
+			AddProducedCargo(tile, produced);
 		}
 	}
+
+	return produced;
 }
 
 /**
- * Get a list of the cargo types that are accepted around the tile.
- * @param accepts Destination array of accepted cargo
+ * Get the acceptance of cargos around the tile in 1/8.
  * @param tile Center of the search area
  * @param w X extent of area
  * @param h Y extent of area
  * @param rad Search radius in addition to given area
  */
-void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile,
-	int w, int h, int rad)
+CargoArray GetAcceptanceAroundTiles(TileIndex tile, int w, int h, int rad)
 {
-	memset(accepts, 0, sizeof(AcceptedCargo)); // sizeof(AcceptedCargo) != sizeof(accepts) (== sizeof(uint *))
+	CargoArray acceptance;
 
 	int x = TileX(tile);
 	int y = TileY(tile);
@@ -513,9 +499,11 @@ void GetAcceptanceAroundTiles(AcceptedCargo accepts, TileIndex tile,
 	for (int yc = y1; yc != y2; yc++) {
 		for (int xc = x1; xc != x2; xc++) {
 			TileIndex tile = TileXY(xc, yc);
-			AddAcceptedCargo(tile, accepts);
+			AddAcceptedCargo(tile, acceptance);
 		}
 	}
+
+	return acceptance;
 }
 
 /** Update the acceptance for a station.
@@ -531,22 +519,19 @@ static void UpdateStationAcceptance(Station *st, bool show_msg)
 	uint old_acc = GetAcceptanceMask(st);
 
 	/* And retrieve the acceptance. */
-	AcceptedCargo accepts;
+	CargoArray acceptance;
 	if (!st->rect.IsEmpty()) {
-		GetAcceptanceAroundTiles(
-			accepts,
+		acceptance = GetAcceptanceAroundTiles(
 			TileXY(st->rect.left, st->rect.top),
 			st->rect.right  - st->rect.left + 1,
 			st->rect.bottom - st->rect.top  + 1,
 			st->GetCatchmentRadius()
 		);
-	} else {
-		memset(accepts, 0, sizeof(accepts));
 	}
 
 	/* Adjust in case our station only accepts fewer kinds of goods */
 	for (CargoID i = 0; i < NUM_CARGO; i++) {
-		uint amt = min(accepts[i], 15);
+		uint amt = min(acceptance[i], 15);
 
 		/* Make sure the station can accept the goods type. */
 		bool is_passengers = IsCargoInClass(i, CC_PASSENGERS);
@@ -3391,7 +3376,7 @@ extern const TileTypeProcs _tile_type_station_procs = {
 	AnimateTile_Station,        // animate_tile_proc
 	TileLoop_Station,           // tile_loop_clear
 	ChangeTileOwner_Station,    // change_tile_owner_clear
-	NULL,                       // get_produced_cargo_proc
+	NULL,                       // add_produced_cargo_proc
 	VehicleEnter_Station,       // vehicle_enter_tile_proc
 	GetFoundation_Station,      // get_foundation_proc
 	TerraformTile_Station,      // terraform_tile_proc

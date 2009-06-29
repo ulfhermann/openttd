@@ -1463,7 +1463,7 @@ void Vehicle::BeginLoading(StationID last_station_id)
 		IncreaseFrozen(curr_station, this, next_station_id);
 	}
 
-	PrepareUnload(curr_station, this, next_station_id);
+	VehiclePayment(curr_station, this, next_station_id);
 
 	InvalidateWindow(GetWindowClassForVehicleType(this->type), this->owner);
 	InvalidateWindowWidget(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);

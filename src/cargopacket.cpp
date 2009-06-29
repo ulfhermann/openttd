@@ -121,22 +121,22 @@ CargoPacket * CargoPacket::Split(uint new_size) {
 	return cp_new;
 }
 
-void CargoList::DeliverPacket(List::iterator & c, uint & remaining_unload, Payment *payment) {
+void CargoList::DeliverPacket(List::iterator & c, uint & remaining_unload) {
 	CargoPacket * p = *c;
 	if (p->count <= remaining_unload) {
 		remaining_unload -= p->count;
-		payment->PayFinal(p, p->count);
+//		payment->PayFinal(p, p->count);
 		delete p;
 		packets.erase(c++);
 	} else {
-		payment->PayFinal(p, remaining_unload);
+//		payment->PayFinal(p, remaining_unload);
 		p->count -= remaining_unload;
 		remaining_unload = 0;
 		++c;
 	}
 }
 
-CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest, Payment *payment) {
+CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest) {
 	CargoPacket * p = *c;
 	if (p->count <= remaining_unload) {
 		packets.erase(c++);
@@ -144,7 +144,7 @@ CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unl
 		p = p->Split(remaining_unload);
 		++c;
 	}
-	payment->PayTransfer(p, p->count);
+//	payment->PayTransfer(p, p->count);
 	dest->cargo.packets.push_back(p);
 	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
 	remaining_unload -= p->count;
@@ -226,7 +226,7 @@ UnloadType CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const Ca
 	}
 }
 
-uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, Payment *payment) {
+uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station) {
 	uint remaining_unload = max_unload;
 	UnloadDescription ul(dest, curr_station, next_station, flags);
 
@@ -238,11 +238,11 @@ uint CargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFla
 		UnloadType unload_flags = WillUnload(ul, p);
 
 		if (unload_flags & UL_DELIVER) {
-			DeliverPacket(c, remaining_unload, payment);
+			DeliverPacket(c, remaining_unload);
 			dest->UpdateFlowStats(source, last_remaining - remaining_unload, curr_station);
 		} else if (unload_flags & UL_TRANSFER) {
 			/* TransferPacket may split the packet and return the transferred part */
-			p = TransferPacket(c, remaining_unload, dest, payment);
+			p = TransferPacket(c, remaining_unload, dest);
 			p->next = dest->UpdateFlowStatsTransfer(source, last_remaining - remaining_unload, curr_station);
 		} else /* UL_KEEP */ {
 			++c;

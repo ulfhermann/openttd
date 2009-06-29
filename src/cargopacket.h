@@ -117,8 +117,8 @@ private:
 	StationID source;     ///< Cache for the source of the packet
 	uint days_in_transit; ///< Cache for the number of days in transit
 
-	void DeliverPacket(List::iterator & c, uint & remaining_unload, Payment *payment);
-	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest, Payment *payment);
+	void DeliverPacket(List::iterator & c, uint & remaining_unload);
+	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest);
 	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
 	uint LoadPackets(List * dest, uint cap, StationID next_station, List * rejected = NULL, TileIndex load_place = INVALID_TILE);
@@ -222,7 +222,7 @@ public:
 	 * @param next_station the next unloading station in the vehicle's order list
 	 * @return the number of cargo entities actually moved
 	 */
-	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, Payment *payment);
+	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station);
 
 	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
 
