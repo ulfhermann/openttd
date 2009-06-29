@@ -917,7 +917,7 @@ void AgeVehicle(Vehicle *v)
  * @param colour The string to show depending on if we are unloading or loading
  * @return A percentage of how full the Vehicle is.
  */
-uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour, Money income)
+uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 {
 	int count = 0;
 	int max = 0;
@@ -941,16 +941,11 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour, Money income)
 
 	if (colour != NULL) {
 		if (unloading == 0 && loading) {
-			/* while loading only show income if there was any change */
-			if (income != 0) {
-				*colour = STR_INCOME_PERCENT_UP;
-			} else {
-				*colour = STR_PERCENT_UP;
-			}
+			*colour = STR_PERCENT_UP;
 		} else if (cars == unloading || !loading) {
-			*colour = STR_INCOME_PERCENT_DOWN;
+			*colour = STR_PERCENT_DOWN;
 		} else {
-			*colour = STR_INCOME_PERCENT_UP_DOWN;
+			*colour = STR_PERCENT_UP_DOWN;
 		}
 	}
 

@@ -1327,6 +1327,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 
 	CargoPayment *payment = v->cargo_payment;
 
+	/* loop over all vehicles in the current consist */
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
@@ -1527,12 +1528,12 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
  */
 void LoadUnloadStation(Station *st)
 {
-	CargoReservation reserved;
 	/* No vehicle is here... */
 	if (st->loading_vehicles.empty()) return;
 
-	std::list<Vehicle *>::iterator iter;
+	CargoReservation reserved;
 
+	std::list<Vehicle *>::iterator iter;
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
 		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, reserved);
