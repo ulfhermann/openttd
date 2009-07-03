@@ -30,6 +30,8 @@
 #include "../ai/ai.hpp"
 #include "../town.h"
 #include "../economy_base.h"
+#include "../animated_tile_func.h"
+#include "../subsidy_base.h"
 
 #include "table/strings.h"
 
@@ -983,7 +985,7 @@ bool AfterLoadGame()
 		}
 
 		FOR_ALL_TRAINS(v) {
-			if (IsFrontEngine(v) || IsFreeWagon(v)) TrainConsistChanged(v, true);
+			if (v->IsFrontEngine() || v->IsFreeWagon()) TrainConsistChanged(v, true);
 		}
 
 	}
@@ -1342,7 +1344,7 @@ bool AfterLoadGame()
 		Vehicle *v;
 		/* Added a FIFO queue of vehicles loading at stations */
 		FOR_ALL_VEHICLES(v) {
-			if ((v->type != VEH_TRAIN || IsFrontEngine(v)) &&  // for all locs
+			if ((v->type != VEH_TRAIN || Train::From(v)->IsFrontEngine()) &&  // for all locs
 					!(v->vehstatus & (VS_STOPPED | VS_CRASHED)) && // not stopped or crashed
 					v->current_order.IsType(OT_LOADING)) {         // loading
 				Station::Get(v->last_station_visited)->loading_vehicles.push_back(v);
@@ -1868,7 +1870,7 @@ bool AfterLoadGame()
 		FOR_ALL_DISASTERVEHICLES(v) {
 			if (v->subtype == 2/*ST_SMALL_UFO*/ && v->current_order.GetDestination() != 0) {
 				const Vehicle *u = Vehicle::GetIfValid(v->dest_tile);
-				if (u == NULL || u->type != VEH_ROAD || !IsRoadVehFront(u)) {
+				if (u == NULL || u->type != VEH_ROAD || !RoadVehicle::From(u)->IsRoadVehFront()) {
 					delete v;
 				}
 			}
@@ -1887,6 +1889,60 @@ bool AfterLoadGame()
 				Vehicle *v = *iter;
 				if (v->cargo_payment == NULL) v->cargo_payment = new CargoPayment(v);
 			}
+		}
+	}
+
+	if (CheckSavegameVersion(122)) {
+		/* Animated tiles would sometimes not be actually animated or
+		 * in case of old savegames duplicate. */
+
+		extern TileIndex *_animated_tile_list;
+		extern uint _animated_tile_count;
+
+		for (uint i = 0; i < _animated_tile_count; /* Nothing */) {
+			/* Remove if tile is not animated */
+			bool remove = _tile_type_procs[GetTileType(_animated_tile_list[i])]->animate_tile_proc == NULL;
+
+			/* and remove if duplicate */
+			for (uint j = 0; !remove && j < i; j++) {
+				remove = _animated_tile_list[i] == _animated_tile_list[j];
+			}
+
+			if (remove) {
+				DeleteAnimatedTile(_animated_tile_list[i]);
+			} else {
+				i++;
+			}
+		}
+
+		/* Delete invalid subsidies possibly present in old versions (but converted to new savegame) */
+		Subsidy *s;
+		FOR_ALL_SUBSIDIES(s) {
+			if (s->age >= 12) {
+				/* Station -> Station */
+				const Station *from = Station::GetIfValid(s->from);
+				const Station *to = Station::GetIfValid(s->to);
+				if (from != NULL && to != NULL && from->owner == to->owner && Company::IsValidID(from->owner)) continue;
+			} else {
+				const CargoSpec *cs = GetCargo(s->cargo_type);
+				switch (cs->town_effect) {
+					case TE_PASSENGERS:
+					case TE_MAIL:
+						/* Town -> Town */
+						if (Town::IsValidID(s->from) && Town::IsValidID(s->to)) continue;
+						break;
+					case TE_GOODS:
+					case TE_FOOD:
+						/* Industry -> Town */
+						if (Industry::IsValidID(s->from) && Town::IsValidID(s->to)) continue;
+						break;
+					default:
+						/* Industry -> Industry */
+						if (Industry::IsValidID(s->from) && Industry::IsValidID(s->to)) continue;
+						break;
+				}
+			}
+			s->cargo_type = CT_INVALID;
 		}
 	}
 

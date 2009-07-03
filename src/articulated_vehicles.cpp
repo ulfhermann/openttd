@@ -207,11 +207,11 @@ bool IsArticulatedVehicleCarryingDifferentCargos(const Vehicle *v, CargoID *carg
 
 		switch (v->type) {
 			case VEH_TRAIN:
-				v = (EngineHasArticPart(Train::From(v)) ? GetNextArticPart(Train::From(v)) : NULL);
+				v = Train::From(v)->HasArticulatedPart() ? Train::From(v)->GetNextArticPart() : NULL;
 				break;
 
 			case VEH_ROAD:
-				v = (RoadVehHasArticPart(v) ? v->Next() : NULL);
+				v = RoadVehicle::From(v)->HasArticulatedPart() ? v->Next() : NULL;
 				break;
 
 			default:
@@ -254,11 +254,11 @@ void CheckConsistencyOfArticulatedVehicle(const Vehicle *v)
 
 		switch (v->type) {
 			case VEH_TRAIN:
-				v = (EngineHasArticPart(Train::From(v)) ? GetNextArticPart(Train::From(v)) : NULL);
+				v = Train::From(v)->HasArticulatedPart() ? Train::From(v)->GetNextArticPart() : NULL;
 				break;
 
 			case VEH_ROAD:
-				v = (RoadVehHasArticPart(v) ? v->Next() : NULL);
+				v = RoadVehicle::From(v)->HasArticulatedPart() ? v->Next() : NULL;
 				break;
 
 			default:
@@ -322,7 +322,7 @@ void AddArticulatedParts(Vehicle *first, VehicleType type)
 					t->cargo_cap = 0;
 				}
 
-				SetArticulatedPart(t);
+				t->SetArticulatedPart();
 			} break;
 
 			case VEH_ROAD: {
@@ -348,7 +348,7 @@ void AddArticulatedParts(Vehicle *first, VehicleType type)
 					rv->cargo_cap = 0;
 				}
 
-				SetRoadVehArticPart(rv);
+				rv->SetArticulatedPart();
 			} break;
 		}
 
