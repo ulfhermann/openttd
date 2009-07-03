@@ -13,11 +13,43 @@
 #include "cargotype.h"
 #include "strings_func.h"
 #include "window_func.h"
-#include "subsidy_type.h"
+#include "subsidy_base.h"
 
 #include "table/strings.h"
 
-Subsidy _subsidies[MAX_COMPANIES];
+/* static */ Subsidy Subsidy::array[MAX_COMPANIES];
+
+/**
+ * Allocates one subsidy
+ * @return pointer to first invalid subsidy, NULL if there is none
+ */
+/* static */ Subsidy *Subsidy::AllocateItem()
+{
+	for (Subsidy *s = Subsidy::array; s < endof(Subsidy::array); s++) {
+		if (!s->IsValid()) return s;
+	}
+
+	return NULL;
+}
+
+/**
+ * Resets the array of subsidies marking all invalid
+ */
+/* static */ void Subsidy::Clean()
+{
+	memset(Subsidy::array, 0, sizeof(Subsidy::array));
+	for (Subsidy *s = Subsidy::array; s < endof(Subsidy::array); s++) {
+		s->cargo_type = CT_INVALID;
+	}
+}
+
+/**
+ * Initializes subsidies, files don't have to include subsidy_base,h this way
+ */
+void InitializeSubsidies()
+{
+	Subsidy::Clean();
+}
 
 Pair SetupSubsidyDecodeParam(const Subsidy *s, bool mode)
 {
@@ -69,9 +101,8 @@ Pair SetupSubsidyDecodeParam(const Subsidy *s, bool mode)
 void DeleteSubsidyWithTown(TownID index)
 {
 	Subsidy *s;
-
-	for (s = _subsidies; s != endof(_subsidies); s++) {
-		if (s->cargo_type != CT_INVALID && s->age < 12) {
+	FOR_ALL_SUBSIDIES(s) {
+		if (s->age < 12) {
 			const CargoSpec *cs = GetCargo(s->cargo_type);
 			if (((cs->town_effect == TE_PASSENGERS || cs->town_effect == TE_MAIL) && (index == s->from || index == s->to)) ||
 				((cs->town_effect == TE_GOODS || cs->town_effect == TE_FOOD) && index == s->to)) {
@@ -84,9 +115,8 @@ void DeleteSubsidyWithTown(TownID index)
 void DeleteSubsidyWithIndustry(IndustryID index)
 {
 	Subsidy *s;
-
-	for (s = _subsidies; s != endof(_subsidies); s++) {
-		if (s->cargo_type != CT_INVALID && s->age < 12) {
+	FOR_ALL_SUBSIDIES(s) {
+		if (s->age < 12) {
 			const CargoSpec *cs = GetCargo(s->cargo_type);
 			if (cs->town_effect != TE_PASSENGERS && cs->town_effect != TE_MAIL &&
 				(index == s->from || (cs->town_effect != TE_GOODS && cs->town_effect != TE_FOOD && index == s->to))) {
@@ -98,12 +128,11 @@ void DeleteSubsidyWithIndustry(IndustryID index)
 
 void DeleteSubsidyWithStation(StationID index)
 {
-	Subsidy *s;
 	bool dirty = false;
 
-	for (s = _subsidies; s != endof(_subsidies); s++) {
-		if (s->cargo_type != CT_INVALID && s->age >= 12 &&
-				(s->from == index || s->to == index)) {
+	Subsidy *s;
+	FOR_ALL_SUBSIDIES(s) {
+		if (s->age >= 12 && (s->from == index || s->to == index)) {
 			s->cargo_type = CT_INVALID;
 			dirty = true;
 		}
@@ -196,8 +225,7 @@ static void FindSubsidyCargoRoute(FoundRoute *fr)
 static bool CheckSubsidyDuplicate(Subsidy *s)
 {
 	const Subsidy *ss;
-
-	for (ss = _subsidies; ss != endof(_subsidies); ss++) {
+	FOR_ALL_SUBSIDIES(ss) {
 		if (s != ss &&
 				ss->from == s->from &&
 				ss->to == s->to &&
@@ -212,21 +240,19 @@ static bool CheckSubsidyDuplicate(Subsidy *s)
 
 void SubsidyMonthlyLoop()
 {
-	Subsidy *s;
 	Station *st;
 	uint n;
 	FoundRoute fr;
 	bool modified = false;
 
-	for (s = _subsidies; s != endof(_subsidies); s++) {
-		if (s->cargo_type == CT_INVALID) continue;
-
+	Subsidy *s;
+	FOR_ALL_SUBSIDIES(s) {
 		if (s->age == 12 - 1) {
 			Pair reftype = SetupSubsidyDecodeParam(s, 1);
 			AddNewsItem(STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED, NS_SUBSIDIES, (NewsReferenceType)reftype.a, s->from, (NewsReferenceType)reftype.b, s->to);
 			s->cargo_type = CT_INVALID;
 			modified = true;
-			AI::BroadcastNewEvent(new AIEventSubsidyOfferExpired(s - _subsidies));
+			AI::BroadcastNewEvent(new AIEventSubsidyOfferExpired(s->Index()));
 		} else if (s->age == 2 * 12 - 1) {
 			st = Station::Get(s->to);
 			if (st->owner == _local_company) {
@@ -235,7 +261,7 @@ void SubsidyMonthlyLoop()
 			}
 			s->cargo_type = CT_INVALID;
 			modified = true;
-			AI::BroadcastNewEvent(new AIEventSubsidyExpired(s - _subsidies));
+			AI::BroadcastNewEvent(new AIEventSubsidyExpired(s->Index()));
 		} else {
 			s->age++;
 		}
@@ -244,11 +270,8 @@ void SubsidyMonthlyLoop()
 	/* 25% chance to go on */
 	if (Chance16(1, 4)) {
 		/*  Find a free slot*/
-		s = _subsidies;
-		while (s->cargo_type != CT_INVALID) {
-			if (++s == endof(_subsidies))
-				goto no_add;
-		}
+		s = Subsidy::AllocateItem();
+		if (s == NULL) goto no_add;
 
 		n = 1000;
 		do {
@@ -272,7 +295,7 @@ void SubsidyMonthlyLoop()
 					s->age = 0;
 					Pair reftype = SetupSubsidyDecodeParam(s, 0);
 					AddNewsItem(STR_NEWS_SERVICE_SUBSIDY_OFFERED, NS_SUBSIDIES, (NewsReferenceType)reftype.a, s->from, (NewsReferenceType)reftype.b, s->to);
-					AI::BroadcastNewEvent(new AIEventSubsidyOffer(s - _subsidies));
+					AI::BroadcastNewEvent(new AIEventSubsidyOffer(s->Index()));
 					modified = true;
 					break;
 				}
@@ -284,13 +307,13 @@ no_add:;
 		InvalidateWindow(WC_SUBSIDIES_LIST, 0);
 }
 
-bool CheckSubsidised(const Station *from, const Station *to, CargoID cargo_type)
+bool CheckSubsidised(const Station *from, const Station *to, CargoID cargo_type, CompanyID company)
 {
 	Subsidy *s;
 	TileIndex xy;
 
 	/* check if there is an already existing subsidy that applies to us */
-	for (s = _subsidies; s != endof(_subsidies); s++) {
+	FOR_ALL_SUBSIDIES(s) {
 		if (s->cargo_type == cargo_type &&
 				s->age >= 12 &&
 				s->from == from->index &&
@@ -300,7 +323,7 @@ bool CheckSubsidised(const Station *from, const Station *to, CargoID cargo_type)
 	}
 
 	/* check if there's a new subsidy that applies.. */
-	for (s = _subsidies; s != endof(_subsidies); s++) {
+	FOR_ALL_SUBSIDIES(s) {
 		if (s->cargo_type == cargo_type && s->age < 12) {
 			/* Check distance from source */
 			const CargoSpec *cs = GetCargo(cargo_type);
@@ -336,7 +359,7 @@ bool CheckSubsidised(const Station *from, const Station *to, CargoID cargo_type)
 			InjectDParam(1);
 
 			char *company_name = MallocT<char>(MAX_LENGTH_COMPANY_NAME_BYTES);
-			SetDParam(0, _current_company);
+			SetDParam(0, company);
 			GetString(company_name, STR_COMPANY_NAME, company_name + MAX_LENGTH_COMPANY_NAME_BYTES - 1);
 
 			SetDParamStr(0, company_name);
@@ -346,7 +369,7 @@ bool CheckSubsidised(const Station *from, const Station *to, CargoID cargo_type)
 				(NewsReferenceType)reftype.a, s->from, (NewsReferenceType)reftype.b, s->to,
 				company_name
 			);
-			AI::BroadcastNewEvent(new AIEventSubsidyAwarded(s - _subsidies));
+			AI::BroadcastNewEvent(new AIEventSubsidyAwarded(s->Index()));
 
 			InvalidateWindow(WC_SUBSIDIES_LIST, 0);
 			return true;
