@@ -4,11 +4,12 @@
 
 #include "ai_subsidylist.hpp"
 #include "ai_subsidy.hpp"
-#include "../../subsidy_type.h"
+#include "../../subsidy_base.h"
 
 AISubsidyList::AISubsidyList()
 {
-	for (uint i = 0; i < lengthof(_subsidies); i++) {
-		if (AISubsidy::IsValidSubsidy(i)) this->AddItem(i);
+	const Subsidy *s;
+	FOR_ALL_SUBSIDIES(s) {
+		this->AddItem(s->Index());
 	}
 }
