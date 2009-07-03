@@ -640,6 +640,48 @@ class SmallMapWindow : public Window
 		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
+	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v)
+	{
+		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
+		int scale = 1;
+		if (this->zoom < 0) {
+			scale = 1 << (-this->zoom);
+		}
+		/* Remap into flat coordinates. */
+		Point pt = RemapCoords(
+				this->RemapX(v->x_pos / TILE_SIZE),
+				this->RemapY(v->y_pos / TILE_SIZE),
+				0);
+
+        int x = pt.x - (this->subscroll + 3 + dpi->left);
+        int y = pt.y - dpi->top;
+
+		/* Check if rhombus is inside bounds */
+		if ((x + 2 * scale < 0) || //left
+				(y + 2 * scale < 0) || //top
+				(x - 2 * scale >= dpi->width) || //right
+				(y - 2 * scale >= dpi->height)) { //bottom
+			return;
+		}
+
+		byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
+
+		/* Draw rhombus */
+		for (int dy = 0; dy < scale; dy++) {
+			for (int dx = 0; dx < scale; dx++) {
+				pt = RemapCoords(-dx, -dy, 0);
+				if (IsInsideMM(y + pt.y, 0, dpi->height)) {
+					if (IsInsideMM(x + pt.x, 0, dpi->width)) {
+						blitter->SetPixel(dpi->dst_ptr, x + pt.x, y + pt.y, colour);
+					}
+					if (IsInsideMM(x + pt.x + 1, 0, dpi->width)) {
+						blitter->SetPixel(dpi->dst_ptr, x + pt.x + 1, y + pt.y, colour);
+					}
+				}
+			}
+		}
+	}
+
 public:
 	/**
 	 * Draws the small map.
@@ -754,41 +796,7 @@ public:
 			FOR_ALL_VEHICLES(v) {
 				if (v->type != VEH_EFFECT &&
 						(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
-					/* Remap into flat coordinates. */
-					Point pt = RemapCoords(
-							this->RemapX(v->x_pos / TILE_SIZE),
-							this->RemapY(v->y_pos / TILE_SIZE),
-							0);
-					x = pt.x;
-					y = pt.y;
-
-					/* Check if y is out of bounds? */
-					y -= dpi->top;
-					if (!IsInsideMM(y, 0, dpi->height)) continue;
-
-					/* Default is to draw both pixels. */
-					bool skip = false;
-
-					/* Offset X coordinate */
-					x -= this->subscroll + 3 + dpi->left;
-
-					if (x < 0) {
-						/* if x+1 is 0, that means we're on the very left edge,
-						 *  and should thus only draw a single pixel */
-						if (++x != 0) continue;
-						skip = true;
-					} else if (x >= dpi->width - 1) {
-						/* Check if we're at the very right edge, and if so draw only a single pixel */
-						if (x != dpi->width - 1) continue;
-						skip = true;
-					}
-
-					/* Calculate pointer to pixel and the colour */
-					byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type] : 0xF;
-
-					/* And draw either one or two pixels depending on clipping */
-					blitter->SetPixel(dpi->dst_ptr, x, y, colour);
-					if (!skip) blitter->SetPixel(dpi->dst_ptr, x + 1, y, colour);
+					DrawVehicle(dpi, v);
 				}
 			}
 		}
