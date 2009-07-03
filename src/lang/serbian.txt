@@ -1,14 +1,14 @@
 ##name Serbian
 ##ownname Srpski
 ##isocode srp
-##winlangid 0x7c1a
-##grflangid 0x0d
 ##plural 6
 ##textdir ltr
 ##digitsep .
 ##digitsepcur .
-##case nom big gen dat aku vok lok ins
+##winlangid 0x7c1a
+##grflangid 0x0d
 ##gender muški ženski srednji
+##case nom big gen dat aku vok lok ins
 
 #
 
@@ -28,25 +28,25 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Prihvata
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Zalihe : {GOLD}
 STR_CARGO_PLURAL_NOTHING                                        :
 STR_CARGO_PLURAL_PASSENGERS                                     :putnici
-STR_CARGO_PLURAL_PASSENGERS.aku                                 :putnike
 STR_CARGO_PLURAL_PASSENGERS.big                                 :Putnici
 STR_CARGO_PLURAL_PASSENGERS.gen                                 :putnika
+STR_CARGO_PLURAL_PASSENGERS.aku                                 :putnike
 STR_CARGO_PLURAL_COAL                                           :ugalj
-STR_CARGO_PLURAL_COAL.aku                                       :ugalj
 STR_CARGO_PLURAL_COAL.big                                       :Ugalj
 STR_CARGO_PLURAL_COAL.gen                                       :uglja
+STR_CARGO_PLURAL_COAL.aku                                       :ugalj
 STR_CARGO_PLURAL_MAIL                                           :pošta
-STR_CARGO_PLURAL_MAIL.aku                                       :poštu
 STR_CARGO_PLURAL_MAIL.big                                       :Pošta
 STR_CARGO_PLURAL_MAIL.gen                                       :pošte
+STR_CARGO_PLURAL_MAIL.aku                                       :poštu
 STR_CARGO_PLURAL_OIL                                            :nafta
-STR_CARGO_PLURAL_OIL.aku                                        :naftu
 STR_CARGO_PLURAL_OIL.big                                        :Nafta
 STR_CARGO_PLURAL_OIL.gen                                        :nafte
+STR_CARGO_PLURAL_OIL.aku                                        :naftu
 STR_CARGO_PLURAL_LIVESTOCK                                      :stoka
-STR_CARGO_PLURAL_LIVESTOCK.aku                                  :stoku
 STR_CARGO_PLURAL_LIVESTOCK.big                                  :Stoka
 STR_CARGO_PLURAL_LIVESTOCK.gen                                  :stoke
+STR_CARGO_PLURAL_LIVESTOCK.aku                                  :stoku
 STR_CARGO_PLURAL_GOODS                                          :roba
 STR_CARGO_PLURAL_GOODS.aku                                      :robu
 STR_CARGO_PLURAL_GRAIN                                          :žito
@@ -58,210 +58,210 @@ STR_CARGO_PLURAL_IRON_ORE.aku                                   :rudu gvožđa
 STR_CARGO_PLURAL_STEEL                                          :čelik
 STR_CARGO_PLURAL_STEEL.aku                                      :čelik
 STR_CARGO_PLURAL_VALUABLES                                      :dragocenosti
-STR_CARGO_PLURAL_VALUABLES.aku                                  :dragocenosti
 STR_CARGO_PLURAL_VALUABLES.big                                  :Dragocenosti
 STR_CARGO_PLURAL_VALUABLES.gen                                  :dragocenosti
+STR_CARGO_PLURAL_VALUABLES.aku                                  :dragocenosti
 STR_CARGO_PLURAL_COPPER_ORE                                     :ruda bakra
-STR_CARGO_PLURAL_COPPER_ORE.aku                                 :rudu bakra
 STR_CARGO_PLURAL_COPPER_ORE.big                                 :Ruda bakra
 STR_CARGO_PLURAL_COPPER_ORE.gen                                 :rude bakra
+STR_CARGO_PLURAL_COPPER_ORE.aku                                 :rudu bakra
 STR_CARGO_PLURAL_MAIZE                                          :kukuruz
-STR_CARGO_PLURAL_MAIZE.aku                                      :kukuruz
 STR_CARGO_PLURAL_MAIZE.big                                      :Kukuruz
 STR_CARGO_PLURAL_MAIZE.gen                                      :kukuruza
+STR_CARGO_PLURAL_MAIZE.aku                                      :kukuruz
 STR_CARGO_PLURAL_FRUIT                                          :voće
-STR_CARGO_PLURAL_FRUIT.aku                                      :voće
 STR_CARGO_PLURAL_FRUIT.big                                      :Voće
 STR_CARGO_PLURAL_FRUIT.gen                                      :voća
+STR_CARGO_PLURAL_FRUIT.aku                                      :voće
 STR_CARGO_PLURAL_DIAMONDS                                       :dijamanti
-STR_CARGO_PLURAL_DIAMONDS.aku                                   :dijamante
 STR_CARGO_PLURAL_DIAMONDS.big                                   :Dijamanti
 STR_CARGO_PLURAL_DIAMONDS.gen                                   :dijamanata
+STR_CARGO_PLURAL_DIAMONDS.aku                                   :dijamante
 STR_CARGO_PLURAL_FOOD                                           :hrana
-STR_CARGO_PLURAL_FOOD.aku                                       :hranu
 STR_CARGO_PLURAL_FOOD.big                                       :Hrana
 STR_CARGO_PLURAL_FOOD.gen                                       :hrane
+STR_CARGO_PLURAL_FOOD.aku                                       :hranu
 STR_CARGO_PLURAL_PAPER                                          :papir
-STR_CARGO_PLURAL_PAPER.aku                                      :papir
 STR_CARGO_PLURAL_PAPER.big                                      :Papir
 STR_CARGO_PLURAL_PAPER.gen                                      :papira
+STR_CARGO_PLURAL_PAPER.aku                                      :papir
 STR_CARGO_PLURAL_GOLD                                           :zlato
-STR_CARGO_PLURAL_GOLD.aku                                       :zlato
 STR_CARGO_PLURAL_GOLD.big                                       :Zlato
 STR_CARGO_PLURAL_GOLD.gen                                       :zlata
+STR_CARGO_PLURAL_GOLD.aku                                       :zlato
 STR_CARGO_PLURAL_WATER                                          :voda
-STR_CARGO_PLURAL_WATER.aku                                      :vodu
 STR_CARGO_PLURAL_WATER.big                                      :Voda
 STR_CARGO_PLURAL_WATER.gen                                      :vode
+STR_CARGO_PLURAL_WATER.aku                                      :vodu
 STR_CARGO_PLURAL_WHEAT                                          :pšenica
-STR_CARGO_PLURAL_WHEAT.aku                                      :pšenicu
 STR_CARGO_PLURAL_WHEAT.big                                      :Pšenica
 STR_CARGO_PLURAL_WHEAT.gen                                      :pšenice
+STR_CARGO_PLURAL_WHEAT.aku                                      :pšenicu
 STR_CARGO_PLURAL_RUBBER                                         :kaučuk
-STR_CARGO_PLURAL_RUBBER.aku                                     :kaučuk
 STR_CARGO_PLURAL_RUBBER.big                                     :Kaučuk
 STR_CARGO_PLURAL_RUBBER.gen                                     :kaučuka
+STR_CARGO_PLURAL_RUBBER.aku                                     :kaučuk
 STR_CARGO_PLURAL_SUGAR                                          :šećer
-STR_CARGO_PLURAL_SUGAR.aku                                      :šećer
 STR_CARGO_PLURAL_SUGAR.big                                      :Šećer
 STR_CARGO_PLURAL_SUGAR.gen                                      :šećera
+STR_CARGO_PLURAL_SUGAR.aku                                      :šećer
 STR_CARGO_PLURAL_TOYS                                           :igračke
-STR_CARGO_PLURAL_TOYS.aku                                       :igračke
 STR_CARGO_PLURAL_TOYS.big                                       :Igračke
 STR_CARGO_PLURAL_TOYS.gen                                       :igračaka
+STR_CARGO_PLURAL_TOYS.aku                                       :igračke
 STR_CARGO_PLURAL_CANDY                                          :slatkiši
-STR_CARGO_PLURAL_CANDY.aku                                      :slatkiše
 STR_CARGO_PLURAL_CANDY.big                                      :Slatkiši
 STR_CARGO_PLURAL_CANDY.gen                                      :slatkiša
+STR_CARGO_PLURAL_CANDY.aku                                      :slatkiše
 STR_CARGO_PLURAL_COLA                                           :kola
-STR_CARGO_PLURAL_COLA.aku                                       :kolu
 STR_CARGO_PLURAL_COLA.big                                       :Kola
 STR_CARGO_PLURAL_COLA.gen                                       :kole
+STR_CARGO_PLURAL_COLA.aku                                       :kolu
 STR_CARGO_PLURAL_COTTON_CANDY                                   :šećerna vuna
-STR_CARGO_PLURAL_COTTON_CANDY.aku                               :šećernu vunu
 STR_CARGO_PLURAL_COTTON_CANDY.big                               :Šećerna vuna
 STR_CARGO_PLURAL_COTTON_CANDY.gen                               :šećerne vune
+STR_CARGO_PLURAL_COTTON_CANDY.aku                               :šećernu vunu
 STR_CARGO_PLURAL_BUBBLES                                        :mehurići
-STR_CARGO_PLURAL_BUBBLES.aku                                    :mehuriće
 STR_CARGO_PLURAL_BUBBLES.big                                    :Mehurići
 STR_CARGO_PLURAL_BUBBLES.gen                                    :mehurića
+STR_CARGO_PLURAL_BUBBLES.aku                                    :mehuriće
 STR_CARGO_PLURAL_TOFFEE                                         :karamele
-STR_CARGO_PLURAL_TOFFEE.aku                                     :karamele
 STR_CARGO_PLURAL_TOFFEE.big                                     :Karamele
 STR_CARGO_PLURAL_TOFFEE.gen                                     :karamela
+STR_CARGO_PLURAL_TOFFEE.aku                                     :karamele
 STR_CARGO_PLURAL_BATTERIES                                      :baterije
-STR_CARGO_PLURAL_BATTERIES.aku                                  :baterije
 STR_CARGO_PLURAL_BATTERIES.big                                  :Baterije
 STR_CARGO_PLURAL_BATTERIES.gen                                  :baterija
+STR_CARGO_PLURAL_BATTERIES.aku                                  :baterije
 STR_CARGO_PLURAL_PLASTIC                                        :plastika
-STR_CARGO_PLURAL_PLASTIC.aku                                    :plastiku
 STR_CARGO_PLURAL_PLASTIC.big                                    :Plastika
 STR_CARGO_PLURAL_PLASTIC.gen                                    :plastike
+STR_CARGO_PLURAL_PLASTIC.aku                                    :plastiku
 STR_CARGO_PLURAL_FIZZY_DRINKS                                   :Gazirana PiÄa
 STR_CARGO_PLURAL_FIZZY_DRINKS.aku                               :gazirana pića
 STR_CARGO_SINGULAR_NOTHING                                      :
 STR_CARGO_SINGULAR_PASSENGER                                    :putnik
-STR_CARGO_SINGULAR_PASSENGER.aku                                :putnika
 STR_CARGO_SINGULAR_PASSENGER.big                                :Putnik
 STR_CARGO_SINGULAR_PASSENGER.gen                                :putnika
+STR_CARGO_SINGULAR_PASSENGER.aku                                :putnika
 STR_CARGO_SINGULAR_COAL                                         :ugalj
-STR_CARGO_SINGULAR_COAL.aku                                     :ugalj
 STR_CARGO_SINGULAR_COAL.big                                     :Ugalj
 STR_CARGO_SINGULAR_COAL.gen                                     :uglja
+STR_CARGO_SINGULAR_COAL.aku                                     :ugalj
 STR_CARGO_SINGULAR_MAIL                                         :pošta
-STR_CARGO_SINGULAR_MAIL.aku                                     :poštu
 STR_CARGO_SINGULAR_MAIL.big                                     :Pošta
 STR_CARGO_SINGULAR_MAIL.gen                                     :pošte
+STR_CARGO_SINGULAR_MAIL.aku                                     :poštu
 STR_CARGO_SINGULAR_OIL                                          :nafta
-STR_CARGO_SINGULAR_OIL.aku                                      :naftu
 STR_CARGO_SINGULAR_OIL.big                                      :Nafta
 STR_CARGO_SINGULAR_OIL.gen                                      :nafte
+STR_CARGO_SINGULAR_OIL.aku                                      :naftu
 STR_CARGO_SINGULAR_LIVESTOCK                                    :stoka
-STR_CARGO_SINGULAR_LIVESTOCK.aku                                :stoku
 STR_CARGO_SINGULAR_LIVESTOCK.big                                :Stoka
 STR_CARGO_SINGULAR_LIVESTOCK.gen                                :stoke
+STR_CARGO_SINGULAR_LIVESTOCK.aku                                :stoku
 STR_CARGO_SINGULAR_GOODS                                        :roba
-STR_CARGO_SINGULAR_GOODS.aku                                    :robu
 STR_CARGO_SINGULAR_GOODS.big                                    :Roba
 STR_CARGO_SINGULAR_GOODS.gen                                    :robe
+STR_CARGO_SINGULAR_GOODS.aku                                    :robu
 STR_CARGO_SINGULAR_GRAIN                                        :žito
-STR_CARGO_SINGULAR_GRAIN.aku                                    :žito
 STR_CARGO_SINGULAR_GRAIN.big                                    :Žito
 STR_CARGO_SINGULAR_GRAIN.gen                                    :žita
+STR_CARGO_SINGULAR_GRAIN.aku                                    :žito
 STR_CARGO_SINGULAR_WOOD                                         :drvna građa
-STR_CARGO_SINGULAR_WOOD.aku                                     :drvnu građu
 STR_CARGO_SINGULAR_WOOD.big                                     :Drvna građa
 STR_CARGO_SINGULAR_WOOD.gen                                     :drvne građe
+STR_CARGO_SINGULAR_WOOD.aku                                     :drvnu građu
 STR_CARGO_SINGULAR_IRON_ORE                                     :ruda gvožđa
-STR_CARGO_SINGULAR_IRON_ORE.aku                                 :rudu gvožđa
 STR_CARGO_SINGULAR_IRON_ORE.big                                 :Ruda gvožđa
 STR_CARGO_SINGULAR_IRON_ORE.gen                                 :rude gvožđa
+STR_CARGO_SINGULAR_IRON_ORE.aku                                 :rudu gvožđa
 STR_CARGO_SINGULAR_STEEL                                        :čelik
-STR_CARGO_SINGULAR_STEEL.aku                                    :čelik
 STR_CARGO_SINGULAR_STEEL.big                                    :Čelik
 STR_CARGO_SINGULAR_STEEL.gen                                    :čelika
+STR_CARGO_SINGULAR_STEEL.aku                                    :čelik
 STR_CARGO_SINGULAR_VALUABLES                                    :dragocenosti
-STR_CARGO_SINGULAR_VALUABLES.aku                                :dragocenosti
 STR_CARGO_SINGULAR_VALUABLES.big                                :Dragocenosti
 STR_CARGO_SINGULAR_VALUABLES.gen                                :dragocenosti
+STR_CARGO_SINGULAR_VALUABLES.aku                                :dragocenosti
 STR_CARGO_SINGULAR_COPPER_ORE                                   :ruda bakra
-STR_CARGO_SINGULAR_COPPER_ORE.aku                               :rudu bakra
 STR_CARGO_SINGULAR_COPPER_ORE.big                               :Ruda bakra
 STR_CARGO_SINGULAR_COPPER_ORE.gen                               :rude bakra
+STR_CARGO_SINGULAR_COPPER_ORE.aku                               :rudu bakra
 STR_CARGO_SINGULAR_MAIZE                                        :kukuruz
-STR_CARGO_SINGULAR_MAIZE.aku                                    :kukuruz
 STR_CARGO_SINGULAR_MAIZE.big                                    :Kukuruz
 STR_CARGO_SINGULAR_MAIZE.gen                                    :kukuruza
+STR_CARGO_SINGULAR_MAIZE.aku                                    :kukuruz
 STR_CARGO_SINGULAR_FRUIT                                        :VoÄe
 STR_CARGO_SINGULAR_FRUIT.aku                                    :voće
 STR_CARGO_SINGULAR_DIAMOND                                      :dijamant
-STR_CARGO_SINGULAR_DIAMOND.aku                                  :dijamant
 STR_CARGO_SINGULAR_DIAMOND.big                                  :Dijamant
 STR_CARGO_SINGULAR_DIAMOND.gen                                  :dijamanta
+STR_CARGO_SINGULAR_DIAMOND.aku                                  :dijamant
 STR_CARGO_SINGULAR_FOOD                                         :hrana
-STR_CARGO_SINGULAR_FOOD.aku                                     :hranu
 STR_CARGO_SINGULAR_FOOD.big                                     :Hrana
 STR_CARGO_SINGULAR_FOOD.gen                                     :hrane
+STR_CARGO_SINGULAR_FOOD.aku                                     :hranu
 STR_CARGO_SINGULAR_PAPER                                        :papir
-STR_CARGO_SINGULAR_PAPER.aku                                    :papir
 STR_CARGO_SINGULAR_PAPER.big                                    :Papir
 STR_CARGO_SINGULAR_PAPER.gen                                    :papira
+STR_CARGO_SINGULAR_PAPER.aku                                    :papir
 STR_CARGO_SINGULAR_GOLD                                         :zlato
-STR_CARGO_SINGULAR_GOLD.aku                                     :zlato
 STR_CARGO_SINGULAR_GOLD.big                                     :Zlato
 STR_CARGO_SINGULAR_GOLD.gen                                     :zlata
+STR_CARGO_SINGULAR_GOLD.aku                                     :zlato
 STR_CARGO_SINGULAR_WATER                                        :voda
-STR_CARGO_SINGULAR_WATER.aku                                    :vodu
 STR_CARGO_SINGULAR_WATER.big                                    :Voda
 STR_CARGO_SINGULAR_WATER.gen                                    :vode
+STR_CARGO_SINGULAR_WATER.aku                                    :vodu
 STR_CARGO_SINGULAR_WHEAT                                        :pšenica
-STR_CARGO_SINGULAR_WHEAT.aku                                    :pšenicu
 STR_CARGO_SINGULAR_WHEAT.big                                    :Pšenica
 STR_CARGO_SINGULAR_WHEAT.gen                                    :pšenice
+STR_CARGO_SINGULAR_WHEAT.aku                                    :pšenicu
 STR_CARGO_SINGULAR_RUBBER                                       :kaučuk
-STR_CARGO_SINGULAR_RUBBER.aku                                   :kaučuk
 STR_CARGO_SINGULAR_RUBBER.big                                   :Kaučuk
 STR_CARGO_SINGULAR_RUBBER.gen                                   :kaučuka
+STR_CARGO_SINGULAR_RUBBER.aku                                   :kaučuk
 STR_CARGO_SINGULAR_SUGAR                                        :šećer
-STR_CARGO_SINGULAR_SUGAR.aku                                    :šećer
 STR_CARGO_SINGULAR_SUGAR.big                                    :Šećer
 STR_CARGO_SINGULAR_SUGAR.gen                                    :šećera
+STR_CARGO_SINGULAR_SUGAR.aku                                    :šećer
 STR_CARGO_SINGULAR_TOY                                          :igračka
-STR_CARGO_SINGULAR_TOY.aku                                      :igračku
 STR_CARGO_SINGULAR_TOY.big                                      :Igračka
 STR_CARGO_SINGULAR_TOY.gen                                      :igračke
+STR_CARGO_SINGULAR_TOY.aku                                      :igračku
 STR_CARGO_SINGULAR_CANDY                                        :slatkiš
-STR_CARGO_SINGULAR_CANDY.aku                                    :slatkiš
 STR_CARGO_SINGULAR_CANDY.big                                    :Slatkiš
 STR_CARGO_SINGULAR_CANDY.gen                                    :slatkiša
+STR_CARGO_SINGULAR_CANDY.aku                                    :slatkiš
 STR_CARGO_SINGULAR_COLA                                         :kola
-STR_CARGO_SINGULAR_COLA.aku                                     :kolu
 STR_CARGO_SINGULAR_COLA.big                                     :Kola
 STR_CARGO_SINGULAR_COLA.gen                                     :kole
+STR_CARGO_SINGULAR_COLA.aku                                     :kolu
 STR_CARGO_SINGULAR_COTTON_CANDY                                 :šećerna vuna
-STR_CARGO_SINGULAR_COTTON_CANDY.aku                             :šećernu vunu
 STR_CARGO_SINGULAR_COTTON_CANDY.big                             :Šećerna vuna
 STR_CARGO_SINGULAR_COTTON_CANDY.gen                             :šećerne vune
+STR_CARGO_SINGULAR_COTTON_CANDY.aku                             :šećernu vunu
 STR_CARGO_SINGULAR_BUBBLE                                       :mehurić
-STR_CARGO_SINGULAR_BUBBLE.aku                                   :mehurić
 STR_CARGO_SINGULAR_BUBBLE.big                                   :Mehurić
 STR_CARGO_SINGULAR_BUBBLE.gen                                   :mehurića
+STR_CARGO_SINGULAR_BUBBLE.aku                                   :mehurić
 STR_CARGO_SINGULAR_TOFFEE                                       :karamela
-STR_CARGO_SINGULAR_TOFFEE.aku                                   :karamelu
 STR_CARGO_SINGULAR_TOFFEE.big                                   :Karamela
 STR_CARGO_SINGULAR_TOFFEE.gen                                   :karamele
+STR_CARGO_SINGULAR_TOFFEE.aku                                   :karamelu
 STR_CARGO_SINGULAR_BATTERY                                      :baterija
-STR_CARGO_SINGULAR_BATTERY.aku                                  :bateriju
 STR_CARGO_SINGULAR_BATTERY.big                                  :Baterija
 STR_CARGO_SINGULAR_BATTERY.gen                                  :baterije
+STR_CARGO_SINGULAR_BATTERY.aku                                  :bateriju
 STR_CARGO_SINGULAR_PLASTIC                                      :plastika
-STR_CARGO_SINGULAR_PLASTIC.aku                                  :plastiku
 STR_CARGO_SINGULAR_PLASTIC.big                                  :Plastika
 STR_CARGO_SINGULAR_PLASTIC.gen                                  :plastike
+STR_CARGO_SINGULAR_PLASTIC.aku                                  :plastiku
 STR_CARGO_SINGULAR_FIZZY_DRINK                                  :gazirano piće
-STR_CARGO_SINGULAR_FIZZY_DRINK.aku                              :gazirano piće
 STR_CARGO_SINGULAR_FIZZY_DRINK.big                              :Gazirano piće
 STR_CARGO_SINGULAR_FIZZY_DRINK.gen                              :gaziranog pića
+STR_CARGO_SINGULAR_FIZZY_DRINK.aku                              :gazirano piće
 STR_QUANTITY_PASSENGERS                                         :{COMMA} putnik{P "" a a}
 STR_QUANTITY_COAL                                               :{WEIGHT} nad ugalj
 STR_QUANTITY_MAIL                                               :{COMMA} džak{P "" a ova} pošte
@@ -578,17 +578,17 @@ STR_AGE_RED                                                     :{RED}{COMMA} go
 ############ range for service numbers ends
 
 STR_VEHICLE_TRAIN                                               :voz
-STR_VEHICLE_TRAIN.aku                                           :voz
 STR_VEHICLE_TRAIN.big                                           :Voz
 STR_VEHICLE_TRAIN.gen                                           :voza
+STR_VEHICLE_TRAIN.aku                                           :voz
 STR_VEHICLE_ROAD_VEHICLE                                        :drumsko vozilo
-STR_VEHICLE_ROAD_VEHICLE.aku                                    :drumsko vozilo
 STR_VEHICLE_ROAD_VEHICLE.big                                    :Drumsko vozilo
 STR_VEHICLE_ROAD_VEHICLE.gen                                    :drumskog vozila
+STR_VEHICLE_ROAD_VEHICLE.aku                                    :drumsko vozilo
 STR_VEHICLE_SHIP                                                :brod
-STR_VEHICLE_SHIP.aku                                            :brod
 STR_VEHICLE_SHIP.big                                            :Brod
 STR_VEHICLE_SHIP.gen                                            :broda
+STR_VEHICLE_SHIP.aku                                            :brod
 STR_VEHICLE_AIRCRAFT                                            :letelica
 STR_VEHICLE_AIRCRAFT.aku                                        :letelicu
 STR_VEHICLE_IS_GETTING_OLD                                      :{WHITE}{VEHICLE} zastareva
@@ -1650,6 +1650,7 @@ STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Nemoguć
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Nemoguće je ukloniti signalizaciju odatle...
 STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION                       :{WHITE}Orijentacija železničkog depoa
 STR_RAIL_MENU_RAILROAD_CONSTRUCTION                             :Izgradnja železničke pruge
+STR_RAIL_MENU_ELRAIL_CONSTRUCTION                               :Izgradnja elektrifikovane železničke pruge
 STR_RAIL_MENU_MONORAIL_CONSTRUCTION                             :Izgradnja jednošinske pruge (Monorail)
 STR_RAIL_MENU_MAGLEV_CONSTRUCTION                               :Izgradnja magnetne pruge (MagLev)
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Izgradnja železničke pruge
@@ -1664,11 +1665,36 @@ STR_BUILD_DEPOT_TRAIN_ORIENTATION                               :{BLACK}Izbor or
 STR_RAILROAD_TRACK                                              :Železnička pruga
 STR_RAILROAD_TRAIN_DEPOT                                        :Železnički depo
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}...zemljište je u vlasništvu druge kompanije
+STR_RAILROAD_TRACK_WITH_NORMAL_SIGNALS                          :Pruga sa blok signalizacijom
+STR_RAILROAD_TRACK_WITH_PRESIGNALS                              :Pruga sa predsignalizacijom
+STR_RAILROAD_TRACK_WITH_EXITSIGNALS                             :Pruga sa izlaznom signalizacijom
+STR_RAILROAD_TRACK_WITH_COMBOSIGNALS                            :Pruga sa ulzno-izlaznom signalizacijom
+STR_RAILROAD_TRACK_WITH_PBSSIGNALS                              :Pruga sa putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_NOENTRYSIGNALS                          :Pruga sa jednosmernom putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_NORMAL_PRESIGNALS                       :Pruga sa predsignalizacijom i blok signalizacijom
+STR_RAILROAD_TRACK_WITH_NORMAL_EXITSIGNALS                      :Pruga sa blok i izlaznom signalizacijom
+STR_RAILROAD_TRACK_WITH_NORMAL_COMBOSIGNALS                     :Pruga sa blok i ulazno-izlaznom signalizacijom
+STR_RAILROAD_TRACK_WITH_NORMAL_PBSSIGNALS                       :Pruga sa blok i putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_NORMAL_NOENTRYSIGNALS                   :Pruga sa blok i jednosmernom putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_PRE_EXITSIGNALS                         :Pruga sa predsignalizacijom i izlaznom signalizacijom
+STR_RAILROAD_TRACK_WITH_PRE_COMBOSIGNALS                        :Pruga sa predsignalizacijom i ulazno-izlaznom signalizacijom
+STR_RAILROAD_TRACK_WITH_PRE_PBSSIGNALS                          :Pruga sa predsignalizacijom i putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_PRE_NOENTRYSIGNALS                      :Pruga sa predsignalizacijom i jednosmernom putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_EXIT_COMBOSIGNALS                       :Pruga sa izlaznom i ulazno-izlaznom signalizacijom
+STR_RAILROAD_TRACK_WITH_EXIT_PBSSIGNALS                         :Pruga sa izlaznom i putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_EXIT_NOENTRYSIGNALS                     :Pruga sa izlaznom i jednosmernom putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_COMBO_PBSSIGNALS                        :Pruga sa ulazno-izlaznom i putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_COMBO_NOENTRYSIGNALS                    :Pruga sa ulazno-izlaznom i jednosmernom putnom signalizacijom
+STR_RAILROAD_TRACK_WITH_PBS_NOENTRYSIGNALS                      :Pruga sa putnom i jednosmernom putnom signalizacijom
+STR_MUST_REMOVE_RAILWAY_STATION_FIRST                           :{WHITE}Mora se prvo ukloniti železnička stanica
+STR_CREATE_SPLITTED_STATION                                     :{YELLOW}Izgradi zasebnu stanicu
+STR_SELECT_STATION_TO_JOIN                                      :{BLACK}Pridruži stanicu
 
 
 
 ##id 0x1800
 STR_ERROR_MUST_REMOVE_ROAD_FIRST                                :{WHITE}Neophodno je prvo ukloniti put
+STR_ROAD_WORKS_IN_PROGRESS                                      :{WHITE}Putni radovi u toku
 STR_ROAD_TOOLBAR_ROAD_CONSTRUCTION_CAPTION                      :{WHITE}Izgradnja puta
 STR_ROAD_TOOLBAR_TRAM_CONSTRUCTION_CAPTION                      :{WHITE}Tramvaj Konstrukcija
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Izbor drumskog mosta
@@ -2492,11 +2518,96 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_TOY_VAN                     :Vagon za Igrač
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_BATTERY_TRUCK               :Vagon za Baterije
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FIZZY_DRINK_TRUCK           :Vagon za Bezalkoholna Pića
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PLASTIC_TRUCK               :Vagon za Plastiku
+STR_ENGINE_PREVIEW_CAPTION                                      :{WHITE}Poruka od proizvođača vozila
+STR_ENGINE_PREVIEW_MESSAGE                                      :{GOLD}Upravo smo završili projektovanje novog vozila {STRING} - da li ste zainteresovani za jednogodišnja eksluzivna prava upotrebe ovog vozila, kako bi smo proverili radne osobine pre puštanja u masovnu proizvodnju?
+STR_ENGINE_PREVIEW_RAILROAD_LOCOMOTIVE                          :železničko vučno vozilo
+STR_ENGINE_PREVIEW_ROAD_VEHICLE                                 :drumsko vozilo
+STR_ENGINE_PREVIEW_AIRCRAFT                                     :letilica
+STR_ENGINE_PREVIEW_SHIP                                         :brod
+STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :jednopružno žel. vučno vozilo
+STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :megnetno žel. vučno vozilo
 
 ##id 0x8800
+STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}{TOWN} Železnički Depo
+STR_NEWS_FIRST_TRAIN_ARRIVAL                                    :{BLACK}{BIGFONT}Narod slavi . . .{}Prvi voz stiže na stanicu {STATION}!
+STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Opširnije)
+STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Voz se tu upravo nalazi
+STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
+STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
+STR_ORDER_NON_STOP                                              :{BLACK}Direktno
+STR_ORDER_GO_TO                                                 :Idi do
+STR_ORDER_GO_NON_STOP_TO                                        :Idi direktno do
+STR_ORDER_GO_VIA                                                :Idi preko
+STR_ORDER_GO_NON_STOP_VIA                                       :Idi direktno preko
+STR_ORDER_STOP_LOCATION_NEAR_END                                :[pri početku]
+STR_ORDER_STOP_LOCATION_MIDDLE                                  :[na sredini]
+STR_ORDER_STOP_LOCATION_FAR_END                                 :[pri kraju]
+STR_ORDER_TOGGLE_FULL_LOAD                                      :{BLACK}Pun utovar bilo kog
+STR_ORDER_DROP_LOAD_IF_POSSIBLE                                 :Utovar ako ima
+STR_ORDER_DROP_FULL_LOAD_ALL                                    :Pun utovar svega
+STR_ORDER_DROP_FULL_LOAD_ANY                                    :Pun utovar bilo kog
+STR_ORDER_DROP_NO_LOADING                                       :Bez utovara
+STR_ORDER_TOGGLE_UNLOAD                                         :{BLACK}Iztovar svega
+STR_ORDER_DROP_UNLOAD_IF_ACCEPTED                               :Iztovar ako prihvata
+STR_ORDER_DROP_UNLOAD                                           :Iztovar svega
+STR_ORDER_DROP_TRANSFER                                         :Prevoz
+STR_ORDER_DROP_NO_UNLOADING                                     :Bez iztovara
+STR_ORDER_FULL_LOAD                                             :(Pun utovar)
+STR_ORDER_FULL_LOAD_ANY                                         :(Pun utovar bilo kog)
+STR_ORDER_NO_LOAD                                               :(Bez utovara)
+STR_ORDER_UNLOAD                                                :(Iztovar i utovar)
+STR_ORDER_UNLOAD_FULL_LOAD                                      :(Iztovar i pun utovar svega)
+STR_ORDER_UNLOAD_FULL_LOAD_ANY                                  :(Iztovar i pun utovar bilo kog)
+STR_ORDER_UNLOAD_NO_LOAD                                        :(Iztovar bez utovara)
+STR_ORDER_TRANSFER                                              :(Prevoz i utovar)
+STR_ORDER_TRANSFER_FULL_LOAD                                    :(Prevoz i pun utovar svega)
+STR_ORDER_TRANSFER_FULL_LOAD_ANY                                :(Prevoz i pun utovar bilo kog)
+STR_ORDER_TRANSFER_NO_LOAD                                      :(Prevoz bez utovara)
+STR_ORDER_NO_UNLOAD                                             :(Bez iztovara i utovar)
+STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Bez iztovara i pun utovar svega)
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Bez iztovara i pun utovar bilo kog)
+STR_ORDER_TOOLTIP_NON_STOP                                      :{BLACK}Promena načina zaustavljnja u označenoj naredbi
+STR_ORDER_TOOLTIP_FULL_LOAD                                     :{BLACK}Promena načina utovara u označenoj naredbi
+STR_ORDER_TOOLTIP_UNLOAD                                        :{BLACK}Promena načina iztovara u označenoj naredbi
+STR_GO_TO_STATION                                               :{STRING} {STATION} {STRING}
 
+STR_ORDER_GO_TO_DROPDOWN_TOOLTIP                                :{BLACK}Dodavanje složene naredbe
+STR_ORDER_GO_TO_NEAREST_DEPOT                                   :Idi do najbližeg depoa
+STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Idi do najbližeg hangara
+STR_ORDER_NEAREST_DEPOT                                         :najbliži
+STR_ORDER_NEAREST_HANGAR                                        :najbliži Hangar
+STR_ORDER_SERVICE_AT                                            :Servisiranje u
+STR_ORDER_SERVICE_NON_STOP_AT                                   :Diektno na servisiranje u
+STR_ORDER_TRAIN_DEPOT                                           :Železnički Depo
+STR_ORDER_ROAD_DEPOT                                            :Drumski Depo
+STR_ORDER_SHIP_DEPOT                                            :Brodogradilište
+STR_GO_TO_DEPOT                                                 :{STRING} {TOWN} {STRING}
+STR_GO_TO_NEAREST_DEPOT                                         :{STRING} {STRING} {STRING}
+STR_GO_TO_HANGAR                                                :{STRING} {STATION} Hangar
 
+STR_ORDER_DROP_GO_ALWAYS_DEPOT                                  :Uvek
+STR_ORDER_DROP_SERVICE_DEPOT                                    :Servis po potrebi
+STR_ORDER_DROP_HALT_DEPOT                                       :Zaustavljanje
 
+STR_ORDER_CONDITIONAL                                           :Uslovna naredba skoka
+STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}Skok na osnovu podatka o vozilu
+STR_ORDER_CONDITIONAL_COMPARATOR_TOOLTIP                        :{BLACK}Kako se upoređuje podatak o vozilu sa unetom vrednošću
+STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Vrednost za poređenje sa podatkom o vozilu
+STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Unos vrednosti za poređenje
+STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Procenat natovarenog
+STR_ORDER_CONDITIONAL_RELIABILITY                               :Pouzdanost
+STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Najveća brzina
+STR_ORDER_CONDITIONAL_AGE                                       :Starost vozila (godine)
+STR_ORDER_CONDITIONAL_REQUIRES_SERVICE                          :Servis
+STR_ORDER_CONDITIONAL_UNCONDITIONALLY                           :Uvek
+STR_ORDER_CONDITIONAL_COMPARATOR_EQUALS                         :jednako
+STR_ORDER_CONDITIONAL_COMPARATOR_NOT_EQUALS                     :različito od
+STR_ORDER_CONDITIONAL_COMPARATOR_LESS_THAN                      :manje od
+STR_ORDER_CONDITIONAL_COMPARATOR_LESS_EQUALS                    :manje ili jednako
+STR_ORDER_CONDITIONAL_COMPARATOR_MORE_THAN                      :veće od
+STR_ORDER_CONDITIONAL_COMPARATOR_MORE_EQUALS                    :veće ili jednako
+STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :potreban
+STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :nepotreban
 STR_CONDITIONAL_VALUE                                           :{SKIP}{BLACK}{COMMA}
 STR_CONDITIONAL_UNCONDITIONAL                                   :Pređi na naredbu {COMMA}
 STR_CONDITIONAL_NUM                                             :Pređi na naredbu {COMMA} kada je {STRING} {STRING} {COMMA}
