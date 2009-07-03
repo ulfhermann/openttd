@@ -33,6 +33,7 @@
 #include "autoreplace_func.h"
 #include "company_gui.h"
 #include "signs_base.h"
+#include "subsidy_base.h"
 #include "subsidy_func.h"
 #include "station_base.h"
 #include "economy_base.h"
@@ -327,10 +328,9 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 
 	if (new_owner == INVALID_OWNER) {
 		Subsidy *s;
-
-		for (s = _subsidies; s != endof(_subsidies); s++) {
-			if (s->cargo_type != CT_INVALID && s->age >= 12) {
-				if (Station::Get(s->to)->owner == old_owner) s->cargo_type = CT_INVALID;
+		FOR_ALL_SUBSIDIES(s) {
+			if (s->age >= 12 && Station::Get(s->to)->owner == old_owner) {
+				s->cargo_type = CT_INVALID;
 			}
 		}
 	}
@@ -1085,7 +1085,7 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID source, 
 		const Station *s_from = Station::Get(source);
 
 		/* Check if a subsidy applies. */
-		subsidised = CheckSubsidised(s_from, s_to, cargo_type);
+		subsidised = CheckSubsidised(s_from, s_to, cargo_type, company->index);
 	}
 
 	/* Increase town's counter for some special goods types */
