@@ -28,7 +28,7 @@ void ConnectMultiheadedTrains()
 	}
 
 	FOR_ALL_TRAINS(v) {
-		if (IsFrontEngine(v) || IsFreeWagon(v)) {
+		if (v->IsFrontEngine() || v->IsFreeWagon()) {
 			/* Two ways to associate multiheaded parts to each other:
 			 * sequential-matching: Trains shall be arranged to look like <..>..<..>..<..>..
 			 * bracket-matching:    Free vehicle chains shall be arranged to look like ..<..<..>..<..>..>..
@@ -42,15 +42,15 @@ void ConnectMultiheadedTrains()
 			 *   This is why two matching strategies are needed.
 			 */
 
-			bool sequential_matching = IsFrontEngine(v);
+			bool sequential_matching = v->IsFrontEngine();
 
-			for (Train *u = v; u != NULL; u = GetNextVehicle(u)) {
+			for (Train *u = v; u != NULL; u = u->GetNextVehicle()) {
 				if (u->other_multiheaded_part != NULL) continue; // we already linked this one
 
-				if (IsMultiheaded(u)) {
-					if (!IsTrainEngine(u)) {
+				if (u->IsMultiheaded()) {
+					if (!u->IsEngine()) {
 						/* we got a rear car without a front car. We will convert it to a front one */
-						SetTrainEngine(u);
+						u->SetEngine();
 						u->spritenum--;
 					}
 
@@ -58,22 +58,22 @@ void ConnectMultiheadedTrains()
 					EngineID eid = u->engine_type;
 					Train *w;
 					if (sequential_matching) {
-						for (w = GetNextVehicle(u); w != NULL; w = GetNextVehicle(w)) {
-							if (w->engine_type != eid || w->other_multiheaded_part != NULL || !IsMultiheaded(w)) continue;
+						for (w = u->GetNextVehicle(); w != NULL; w = w->GetNextVehicle()) {
+							if (w->engine_type != eid || w->other_multiheaded_part != NULL || !w->IsMultiheaded()) continue;
 
 							/* we found a car to partner with this engine. Now we will make sure it face the right way */
-							if (IsTrainEngine(w)) {
-								ClearTrainEngine(w);
+							if (w->IsEngine()) {
+								w->ClearEngine();
 								w->spritenum++;
 							}
 							break;
 						}
 					} else {
 						uint stack_pos = 0;
-						for (w = GetNextVehicle(u); w != NULL; w = GetNextVehicle(w)) {
-							if (w->engine_type != eid || w->other_multiheaded_part != NULL || !IsMultiheaded(w)) continue;
+						for (w = u->GetNextVehicle(); w != NULL; w = w->GetNextVehicle()) {
+							if (w->engine_type != eid || w->other_multiheaded_part != NULL || !w->IsMultiheaded()) continue;
 
-							if (IsTrainEngine(w)) {
+							if (w->IsEngine()) {
 								stack_pos++;
 							} else {
 								if (stack_pos == 0) break;
@@ -87,7 +87,7 @@ void ConnectMultiheadedTrains()
 						u->other_multiheaded_part = w;
 					} else {
 						/* we got a front car and no rear cars. We will fake this one for forget that it should have been multiheaded */
-						ClearMultiheaded(u);
+						u->ClearMultiheaded();
 					}
 				}
 			}
@@ -106,42 +106,42 @@ void ConvertOldMultiheadToNew()
 
 	FOR_ALL_TRAINS(t) {
 		if (HasBit(t->subtype, 7) && ((t->subtype & ~0x80) == 0 || (t->subtype & ~0x80) == 4)) {
-			for (Vehicle *u = t; u != NULL; u = u->Next()) {
+			for (Train *u = t; u != NULL; u = u->Next()) {
 				const RailVehicleInfo *rvi = RailVehInfo(u->engine_type);
 
 				ClrBit(u->subtype, 7);
 				switch (u->subtype) {
 					case 0: // TS_Front_Engine
-						if (rvi->railveh_type == RAILVEH_MULTIHEAD) SetMultiheaded(u);
-						SetFrontEngine(u);
-						SetTrainEngine(u);
+						if (rvi->railveh_type == RAILVEH_MULTIHEAD) u->SetMultiheaded();
+						u->SetFrontEngine();
+						u->SetEngine();
 						break;
 
 					case 1: // TS_Artic_Part
 						u->subtype = 0;
-						SetArticulatedPart(u);
+						u->SetArticulatedPart();
 						break;
 
 					case 2: // TS_Not_First
 						u->subtype = 0;
 						if (rvi->railveh_type == RAILVEH_WAGON) {
 							/* normal wagon */
-							SetTrainWagon(u);
+							u->SetWagon();
 							break;
 						}
 						if (rvi->railveh_type == RAILVEH_MULTIHEAD && rvi->image_index == u->spritenum - 1) {
 							/* rear end of a multiheaded engine */
-							SetMultiheaded(u);
+							u->SetMultiheaded();
 							break;
 						}
-						if (rvi->railveh_type == RAILVEH_MULTIHEAD) SetMultiheaded(u);
-						SetTrainEngine(u);
+						if (rvi->railveh_type == RAILVEH_MULTIHEAD) u->SetMultiheaded();
+						u->SetEngine();
 						break;
 
 					case 4: // TS_Free_Car
 						u->subtype = 0;
-						SetTrainWagon(u);
-						SetFreeWagon(u);
+						u->SetWagon();
+						u->SetFreeWagon();
 						break;
 					default: NOT_REACHED();
 				}
@@ -308,22 +308,31 @@ void AfterLoadVehicles(bool part_of_load)
 	FOR_ALL_VEHICLES(v) {
 		assert(v->first != NULL);
 
-		if (v->type == VEH_TRAIN && (IsFrontEngine(v) || IsFreeWagon(v))) {
-			if (IsFrontEngine(v)) Train::From(v)->tcache.last_speed = v->cur_speed; // update displayed train speed
-			TrainConsistChanged(Train::From(v), false);
-		} else if (v->type == VEH_ROAD && IsRoadVehFront(v)) {
-			RoadVehUpdateCache(RoadVehicle::From(v));
+		if (v->type == VEH_TRAIN) {
+			Train *t = Train::From(v);
+			if (t->IsFrontEngine() || t->IsFreeWagon()) {
+				t->tcache.last_speed = t->cur_speed; // update displayed train speed
+				TrainConsistChanged(t, false);
+			}
+		} else if (v->type == VEH_ROAD) {
+			RoadVehicle *rv = RoadVehicle::From(v);
+			if (rv->IsRoadVehFront()) {
+				RoadVehUpdateCache(rv);
+			}
 		}
 	}
 
 	/* Stop non-front engines */
 	if (CheckSavegameVersion(112)) {
 		FOR_ALL_VEHICLES(v) {
-			if (v->type == VEH_TRAIN && !IsFrontEngine(v)) {
-				if (IsTrainEngine(v)) v->vehstatus |= VS_STOPPED;
-				/* cur_speed is now relevant for non-front parts - nonzero breaks
-				 * moving-wagons-inside-depot- and autoreplace- code */
-				v->cur_speed = 0;
+			if (v->type == VEH_TRAIN) {
+				Train *t = Train::From(v);
+ 				if (!t->IsFrontEngine()) {
+					if (t->IsEngine()) t->vehstatus |= VS_STOPPED;
+					/* cur_speed is now relevant for non-front parts - nonzero breaks
+					 * moving-wagons-inside-depot- and autoreplace- code */
+					t->cur_speed = 0;
+				}
 			}
 			/* trains weren't stopping gradually in old OTTD versions (and TTO/TTD)
 			 * other vehicle types didn't have zero speed while stopped (even in 'recent' OTTD versions) */

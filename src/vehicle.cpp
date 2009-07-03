@@ -481,9 +481,9 @@ bool IsEngineCountable(const Vehicle *v)
 	switch (v->type) {
 		case VEH_AIRCRAFT: return IsNormalAircraft(v); // don't count plane shadows and helicopter rotors
 		case VEH_TRAIN:
-			return !IsArticulatedPart(v) && // tenders and other articulated parts
-			!IsRearDualheaded(v); // rear parts of multiheaded engines
-		case VEH_ROAD: return IsRoadVehFront(v);
+			return !Train::From(v)->IsArticulatedPart() && // tenders and other articulated parts
+					!Train::From(v)->IsRearDualheaded(); // rear parts of multiheaded engines
+		case VEH_ROAD: return RoadVehicle::From(v)->IsRoadVehFront();
 		case VEH_SHIP: return true;
 		default: return false; // Only count company buildable vehicles
 	}
@@ -518,7 +518,7 @@ void Vehicle::PreDestructor()
 		}
 	}
 
-	if (this->type != VEH_TRAIN || (this->type == VEH_TRAIN && (IsFrontEngine(this) || IsFreeWagon(this)))) {
+	if (this->Previous() == NULL) {
 		InvalidateWindowData(WC_VEHICLE_DEPOT, this->tile);
 	}
 
@@ -601,9 +601,9 @@ void CallVehicleTicks()
 			case VEH_ROAD:
 			case VEH_AIRCRAFT:
 			case VEH_SHIP:
-				if (v->type == VEH_TRAIN && IsTrainWagon(v)) continue;
+				if (v->type == VEH_TRAIN && Train::From(v)->IsWagon()) continue;
 				if (v->type == VEH_AIRCRAFT && v->subtype != AIR_HELICOPTER) continue;
-				if (v->type == VEH_ROAD && !IsRoadVehFront(v)) continue;
+				if (v->type == VEH_ROAD && !RoadVehicle::From(v)->IsRoadVehFront()) continue;
 
 				v->motion_counter += (v->direction & 1) ? (v->cur_speed * 3) / 4 : v->cur_speed;
 				/* Play a running sound if the motion counter passes 256 (Do we not skip sounds?) */
@@ -959,22 +959,24 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 void VehicleEnterDepot(Vehicle *v)
 {
 	switch (v->type) {
-		case VEH_TRAIN:
+		case VEH_TRAIN: {
+			Train *t = Train::From(v);
 			InvalidateWindowClasses(WC_TRAINS_LIST);
 			/* Clear path reservation */
-			SetDepotWaypointReservation(v->tile, false);
-			if (_settings_client.gui.show_track_reservation) MarkTileDirtyByTile(v->tile);
+			SetDepotWaypointReservation(t->tile, false);
+			if (_settings_client.gui.show_track_reservation) MarkTileDirtyByTile(t->tile);
 
-			if (!IsFrontEngine(v)) v = v->First();
-			UpdateSignalsOnSegment(v->tile, INVALID_DIAGDIR, v->owner);
-			v->load_unload_time_rem = 0;
-			ClrBit(Train::From(v)->flags, VRF_TOGGLE_REVERSE);
-			TrainConsistChanged(Train::From(v), true);
+			if (!t->IsFrontEngine()) t = t->First();
+			UpdateSignalsOnSegment(t->tile, INVALID_DIAGDIR, t->owner);
+			t->load_unload_time_rem = 0;
+			ClrBit(t->flags, VRF_TOGGLE_REVERSE);
+			TrainConsistChanged(t, true);
 			break;
+		}
 
 		case VEH_ROAD:
 			InvalidateWindowClasses(WC_ROADVEH_LIST);
-			if (!IsRoadVehFront(v)) v = v->First();
+			if (!RoadVehicle::From(v)->IsRoadVehFront()) v = v->First();
 			break;
 
 		case VEH_SHIP:
@@ -1275,7 +1277,7 @@ const Livery *GetEngineLivery(EngineID engine_type, CompanyID company, EngineID 
 			default: NOT_REACHED();
 			case VEH_TRAIN: {
 				const RailVehicleInfo *rvi = RailVehInfo(engine_type);
-				if (v != NULL && parent_engine_type != INVALID_ENGINE && (UsesWagonOverride(v) || (IsArticulatedPart(v) && rvi->railveh_type != RAILVEH_WAGON))) {
+				if (v != NULL && parent_engine_type != INVALID_ENGINE && (UsesWagonOverride(v) || (Train::From(v)->IsArticulatedPart() && rvi->railveh_type != RAILVEH_WAGON))) {
 					/* Wagonoverrides use the coloir scheme of the front engine.
 					 * Articulated parts use the colour scheme of the first part. (Not supported for articulated wagons) */
 					engine_type = parent_engine_type;
