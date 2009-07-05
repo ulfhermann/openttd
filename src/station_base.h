@@ -192,13 +192,13 @@ public:
 
 	ViewportSign sign;
 
-	uint16 had_vehicle_of_type;
+	StationHadVehicleOfTypeByte had_vehicle_of_type;
 
 	byte time_since_load;
 	byte time_since_unload;
 	byte delete_ctr;
 	OwnerByte owner;
-	byte facilities;
+	StationFacilityByte facilities;
 	byte airport_type;
 
 	/* trainstation width/height */
@@ -227,7 +227,7 @@ public:
 	Station(TileIndex tile = INVALID_TILE);
 	~Station();
 
-	void AddFacility(byte new_facility_bit, TileIndex facil_xy);
+	void AddFacility(StationFacility new_facility_bit, TileIndex facil_xy);
 
 	/**
 	 * Mark the sign of a station dirty for repaint.
@@ -268,6 +268,8 @@ public:
 	{
 		return Station::Get(GetStationIndex(tile));
 	}
+
+	static void PostDestructor(size_t index);
 };
 
 #define FOR_ALL_STATIONS_FROM(var, start) FOR_ALL_ITEMS_FROM(Station, station_index, var, start)
