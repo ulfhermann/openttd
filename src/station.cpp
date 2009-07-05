@@ -94,8 +94,6 @@ Station::~Station()
 	/* Remove all news items */
 	DeleteStationNews(this->index);
 
-	InvalidateWindowData(WC_SELECT_STATION, 0, 0);
-
 	for (CargoID c = 0; c < NUM_CARGO; c++) {
 		goods[c].cargo.Truncate(0);
 	}
@@ -107,6 +105,16 @@ Station::~Station()
 	}
 }
 
+
+/**
+ * Invalidating of the JoinStation window has to be done
+ * after removing item from the pool.
+ * @param index index of deleted item
+ */
+void Station::PostDestructor(size_t index)
+{
+	InvalidateWindowData(WC_SELECT_STATION, 0, 0);
+}
 
 /**
  * Get the primary road stop (the first road stop) that the given vehicle can load/unload.
@@ -132,7 +140,7 @@ RoadStop *Station::GetPrimaryRoadStop(const RoadVehicle *v) const
 
 /** Called when new facility is built on the station. If it is the first facility
  * it initializes also 'xy' and 'random_bits' members */
-void Station::AddFacility(byte new_facility_bit, TileIndex facil_xy)
+void Station::AddFacility(StationFacility new_facility_bit, TileIndex facil_xy)
 {
 	if (facilities == 0) {
 		xy = facil_xy;
