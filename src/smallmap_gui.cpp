@@ -20,6 +20,7 @@
 #include "vehicle_base.h"
 #include "sound_func.h"
 #include "window_func.h"
+#include <cmath>
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -579,7 +580,7 @@ class SmallMapWindow : public Window
 	 */
 	inline int RemapX(int tile_x)
 	{
-		return UnScaleByZoom(tile_x - this->scroll_x / TILE_SIZE, this->zoom);
+		return UnScaleByZoom(tile_x * TILE_SIZE - this->scroll_x, this->zoom) / TILE_SIZE;
 	}
 
 	/**
@@ -590,7 +591,7 @@ class SmallMapWindow : public Window
 	 */
 	inline int RemapY(int tile_y)
 	{
-		return UnScaleByZoom(tile_y - this->scroll_y / TILE_SIZE, this->zoom);
+		return UnScaleByZoom(tile_y * TILE_SIZE - this->scroll_y, this->zoom) / TILE_SIZE;
 	}
 
 	/**
@@ -606,7 +607,7 @@ class SmallMapWindow : public Window
 	 * @param proc Pointer to the colour function
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	inline void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, uint32 mask, GetSmallMapPixels *proc)
+	inline void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, GetSmallMapPixels *proc)
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
 		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
@@ -622,7 +623,7 @@ class SmallMapWindow : public Window
 				if (dst < _screen.dst_ptr) continue;
 				if (dst >= dst_ptr_abs_end) continue;
 
-				uint32 val = proc(TileXY(x, y)) & mask;
+				uint32 val = proc(TileXY(x, y));
 				uint8 *val8 = (uint8 *)&val;
 
 				if (dst <= dst_ptr_end) {
@@ -655,7 +656,7 @@ class SmallMapWindow : public Window
 				this->RemapY(v->y_pos / TILE_SIZE),
 				0);
 
-        int x = pt.x - (3 + dpi->left);
+        int x = pt.x - dpi->left;
         int y = pt.y - dpi->top;
 
 		/* Check if rhombus is inside bounds */
@@ -727,31 +728,16 @@ public:
 			}
 		}
 
-		int tile_x = UnScaleByZoom(this->scroll_x / TILE_SIZE, this->zoom);
-		int tile_y = UnScaleByZoom(this->scroll_y / TILE_SIZE, this->zoom);
 
-		int dx = dpi->left;
-		tile_x -= dx / 4;
-		tile_y += dx / 4;
-		dx &= 3;
+		int tile_x = UnScaleByZoom(this->scroll_x, this->zoom) / TILE_SIZE;
+		int tile_y = UnScaleByZoom(this->scroll_y, this->zoom) / TILE_SIZE;
 
-		int dy = dpi->top;
-		tile_x += dy / 2;
-		tile_y += dy / 2;
+		int dx = 0;
+		int dy = 0;
 
-		if (dy & 1) {
-			tile_x++;
-			dx += 2;
-			if (dx > 3) {
-				dx -= 4;
-				tile_x--;
-				tile_y++;
-			}
-		}
-
-		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
-		int x = - dx - 4;
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, dx, dy);
 		int y = 0;
+		int x = dx;
 
 		for (;;) {
 			uint32 mask = 0xFFFFFFFF;
@@ -765,16 +751,16 @@ public:
 
 				/* distance from right edge */
 				int t = dpi->width - x;
-				if (t < 4) {
+				if (t < 8) {
 					if (t <= 0) break; // exit loop
 					/* mask to use at the right edge */
 					mask &= _smallmap_mask_right[t - 1];
 				}
 
 				/* number of lines */
-				int reps = (dpi->height - y + 1) / 2;
+				int reps = (dpi->height - y) / 2;
 				if (reps > 0) {
-					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, mask, _smallmap_draw_procs[this->map_type]);
+					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
 				}
 			}
 
@@ -812,7 +798,7 @@ public:
 						this->RemapX(TileX(t->xy)),
 						this->RemapY(TileY(t->xy)),
 						0);
-				x = pt.x + 3 - (t->sign.width_2 >> 1);
+				x = pt.x - (t->sign.width_2 >> 1);
 				y = pt.y;
 
 				/* Check if the town sign is within bounds */
