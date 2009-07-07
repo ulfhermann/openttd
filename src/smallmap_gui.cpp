@@ -1099,53 +1099,17 @@ public:
 	}
 
 	void DoScroll(int dx, int dy) {
-		dx = ScaleByZoom(dx, this->zoom);
-		dy = ScaleByZoom(dy, this->zoom);
-		int x = this->scroll_x;
-		int y = this->scroll_y;
-
-		int sub = dx;
-
-		x -= (sub >> 2) << 4;
-		y += (sub >> 2) << 4;
-		sub &= 3;
-
-		x += (dy >> 1) << 4;
-		y += (dy >> 1) << 4;
-
-		if (dy & 1) {
-			x += TILE_SIZE;
-			sub += 2;
-			if (sub > 3) {
-				sub -= 4;
-				x -= TILE_SIZE;
-				y += TILE_SIZE;
-			}
-		}
-
-		int hx = ScaleByZoom(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left, this->zoom) / 2;
-		int hy = ScaleByZoom(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top, this->zoom) / 2;
-		int hvx = hx * -4 + hy * 8;
-		int hvy = hx *  4 + hy * 8;
-		if (x < -hvx) {
-			x = -hvx;
-			sub = 0;
-		}
-		if (x > (int)MapMaxX() * TILE_SIZE - hvx) {
-			x = MapMaxX() * TILE_SIZE - hvx;
-			sub = 0;
-		}
-		if (y < -hvy) {
-			y = -hvy;
-			sub = 0;
-		}
-		if (y > (int)MapMaxY() * TILE_SIZE - hvy) {
-			y = MapMaxY() * TILE_SIZE - hvy;
-			sub = 0;
-		}
-
-		this->scroll_x = x;
-		this->scroll_y = y;
+		/* divide as late as possible to avoid premature reduction to 0, which causes "jumpy" behaviour */
+		this->scroll_x += ScaleByZoom(dy * TILE_SIZE * 2 - dx * TILE_SIZE, this->zoom) / 4;
+		this->scroll_y += ScaleByZoom(dx * TILE_SIZE + dy * TILE_SIZE * 2, this->zoom) / 4;
+		int hx = this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left;
+		int hy = this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top;
+		int hvx = ScaleByZoom(hy * 4 - hx * 2, this->zoom);
+		int hvy = ScaleByZoom(hx * 2 + hy * 4, this->zoom);
+		this->scroll_x = max(-hvx, this->scroll_x);
+		this->scroll_y = max(-hvy, this->scroll_y);
+		this->scroll_x = min(MapMaxX() * TILE_SIZE, this->scroll_x);
+		this->scroll_y = min(MapMaxY() * TILE_SIZE - hvy, this->scroll_y);
 	}
 
 	virtual void OnResize(Point delta)
