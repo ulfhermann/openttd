@@ -908,13 +908,13 @@ public:
 								RemapX(TileX(ta)),
 								RemapY(TileY(ta)),
 								0);
-						pta.x -= this->subscroll + 3;
+						pta.x -= 3;
 
 						Point ptb = RemapCoords(
 								RemapX(TileX(tb)),
 								RemapY(TileY(tb)),
 								0);
-						ptb.x -= this->subscroll + 3;
+						ptb.x -= 3;
 
 						GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
 						GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
@@ -984,7 +984,7 @@ public:
 					RemapX(TileX(t)),
 					RemapY(TileY(t)),
 					0);
-				pt.x -= this->subscroll + 3;
+				pt.x -= 3;
 
 				/* Add up cargo supplied for each selected cargo type */
 				uint q = 0;
