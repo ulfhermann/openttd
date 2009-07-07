@@ -601,12 +601,14 @@ class SmallMapWindow : public Window
 
 	int32 scroll_x;
 	int32 scroll_y;
-	int32 subscroll;
+
 	uint8 refresh;
 	ZoomLevel zoom;
 
 	static const int COLUMN_WIDTH = 119;
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
+	static const int _spacing_side = 2;
+	static const int _spacing_top = 16;
 
 	int routemap_count;
 
@@ -731,7 +733,7 @@ class SmallMapWindow : public Window
 				this->RemapY(v->y_pos / TILE_SIZE),
 				0);
 
-        int x = pt.x - (this->subscroll + 3 + dpi->left);
+        int x = pt.x - (3 + dpi->left);
         int y = pt.y - dpi->top;
 
 		/* Check if rhombus is inside bounds */
@@ -806,7 +808,7 @@ public:
 		int tile_x = UnScaleByZoom(this->scroll_x / TILE_SIZE, this->zoom);
 		int tile_y = UnScaleByZoom(this->scroll_y / TILE_SIZE, this->zoom);
 
-		int dx = dpi->left + this->subscroll;
+		int dx = dpi->left;
 		tile_x -= dx / 4;
 		tile_y += dx / 4;
 		dx &= 3;
@@ -1017,7 +1019,7 @@ public:
 						this->RemapX(TileX(t->xy)),
 						this->RemapY(TileY(t->xy)),
 						0);
-				x = pt.x - this->subscroll + 3 - (t->sign.width_2 >> 1);
+				x = pt.x + 3 - (t->sign.width_2 >> 1);
 				y = pt.y;
 
 				/* Check if the town sign is within bounds */
@@ -1038,15 +1040,10 @@ public:
 		/* Draw map indicators */
 		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 
-		x = UnScaleByZoom(vp->virtual_left - pt.x, this->zoom);
-		y = UnScaleByZoom(vp->virtual_top - pt.y, this->zoom);
-		int x2 = (x + UnScaleByZoom(vp->virtual_width, this->zoom)) / TILE_SIZE;
-		int y2 = (y + UnScaleByZoom(vp->virtual_height, this->zoom)) / TILE_SIZE;
-		x /= TILE_SIZE;
-		y /= TILE_SIZE;
-
-		x -= this->subscroll;
-		x2 -= this->subscroll;
+		x = UnScaleByZoom(vp->virtual_left - pt.x, this->zoom) / TILE_SIZE;
+		y = UnScaleByZoom(vp->virtual_top - pt.y, this->zoom) / TILE_SIZE;
+		int x2 = x + UnScaleByZoom(vp->virtual_width, this->zoom) / TILE_SIZE;
+		int y2 = y + UnScaleByZoom(vp->virtual_height, this->zoom) / TILE_SIZE;
 
 		DrawVertMapIndicator(x, y, x, y2);
 		DrawVertMapIndicator(x2, y, x2, y2);
@@ -1200,8 +1197,8 @@ public:
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				w->viewport->dest_scrollpos_x = pt.x + UnScaleByZoom(((_cursor.pos.x - this->left + 2) << 4), this->zoom) - (w->viewport->virtual_width >> 1);
-				w->viewport->dest_scrollpos_y = pt.y + UnScaleByZoom(((_cursor.pos.y - this->top - 16) << 4), this->zoom) - (w->viewport->virtual_height >> 1);
+				w->viewport->dest_scrollpos_x = pt.x + ScaleByZoom(_cursor.pos.x - this->left - this->_spacing_side, this->zoom) * TILE_SIZE - w->viewport->virtual_width / 2;
+				w->viewport->dest_scrollpos_y = pt.y + ScaleByZoom(_cursor.pos.y - this->top - this->_spacing_top, this->zoom) * TILE_SIZE - w->viewport->virtual_height / 2;
 
 				this->SetDirty();
 			} break;
@@ -1346,7 +1343,7 @@ public:
 		int x = this->scroll_x;
 		int y = this->scroll_y;
 
-		int sub = this->subscroll + dx;
+		int sub = dx;
 
 		x -= (sub >> 2) << 4;
 		y += (sub >> 2) << 4;
@@ -1388,7 +1385,6 @@ public:
 
 		this->scroll_x = x;
 		this->scroll_y = y;
-		this->subscroll = sub;
 	}
 
 	virtual void OnResize(Point delta)
