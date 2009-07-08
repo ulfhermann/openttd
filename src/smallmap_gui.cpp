@@ -602,8 +602,8 @@ class SmallMapWindow : public Window
 		do {
 			/* check if the tile (xc,yc) is within the map range */
 			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-			uint x = ScaleByZoom(xc, this->zoom) / TILE_SIZE;
-			uint y = ScaleByZoom(yc, this->zoom) / TILE_SIZE;
+			uint x = ScaleByZoomLower(xc, this->zoom) / TILE_SIZE;
+			uint y = ScaleByZoomLower(yc, this->zoom) / TILE_SIZE;
 			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
 				/* check if the dst pointer points to a pixel inside the screen buffer */
 				if (dst < _screen.dst_ptr) continue;
@@ -645,8 +645,6 @@ class SmallMapWindow : public Window
         int x = UnScaleByZoom(pt.x, this->zoom) / TILE_SIZE - dpi->left;
         int y = UnScaleByZoom(pt.y, this->zoom) / TILE_SIZE - dpi->top;
 
-
-
 		/* Check if rhombus is inside bounds */
 		if ((x + 2 * scale < 0) || //left
 				(y + 2 * scale < 0) || //top
@@ -674,7 +672,6 @@ class SmallMapWindow : public Window
 	}
 
 public:
-
 	/**
 	 * Draws the small map.
 	 *
@@ -717,11 +714,8 @@ public:
 			}
 		}
 
-		DEBUG(misc, 0, "scroll_x: %d, scroll_y: %d", scroll_x, scroll_y);
-		//DrawSurface();
-
-		int tile_x = UnScaleByZoom(this->scroll_x, this->zoom);
-		int tile_y = UnScaleByZoom(this->scroll_y, this->zoom);
+		int tile_x = UnScaleByZoomLower(this->scroll_x, this->zoom);
+		int tile_y = UnScaleByZoomLower(this->scroll_y, this->zoom);
 
 		int dx = dpi->left;
 		tile_x -= dx * TILE_SIZE / 4;
@@ -732,9 +726,7 @@ public:
 		tile_x += dy * TILE_SIZE / 2;
 		tile_y += dy * TILE_SIZE / 2;
 
-		//Point start = RemapCoords(scroll_x / TILE_SIZE * TILE_SIZE - scroll_x, scroll_y / TILE_SIZE * TILE_SIZE - scroll_y, 0);
-
-		/*if (dy & 1) {
+		if (dy & 1) {
 			tile_x += TILE_SIZE;
 			dx += 2;
 			if (dx > 3) {
@@ -742,29 +734,14 @@ public:
 				tile_x -= TILE_SIZE;
 				tile_y += TILE_SIZE;
 			}
-		}*/
+		}
 
 
 		//DEBUG(misc, 0, "start point: %d, %d, dx: %d, tile_x: %d, tile_y: %d, scroll_x: %d, scroll_y: %d, dpi->left: %d, dpi->top: %d, dpi->width: %d, dpi->height: %d",
 		//		start.x, start.y, dx, tile_x, tile_y, scroll_x, scroll_y, dpi->left, dpi->top, dpi->width, dpi->height);
 
-		/* round x coordinate */
-		//start.x -= TILE_SIZE / 2;
-		//start.x /= TILE_SIZE;
-
-		//start.y -= TILE_SIZE / 2;
-		//start.y /= TILE_SIZE;
-
-		//while (start.x < 4) {
-		//	tile_x++;
-		//	tile_y--;
-		//	start.x += 4;
-		//}
-
-
-
-		void *ptr = blitter->MoveTo(dpi->dst_ptr, -4/*- start.x, start.y*/, -UnScaleByZoom(2, this->zoom));
-		int x = -4; // start.x;
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx -4, -UnScaleByZoom(2, this->zoom));
+		int x = -dx -4;
 		int y = 0;
 
 		for (;;) {
