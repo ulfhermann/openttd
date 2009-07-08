@@ -714,8 +714,8 @@ public:
 			}
 		}
 
-		int tile_x = UnScaleByZoom(this->scroll_x, this->zoom) / TILE_SIZE;
-		int tile_y = UnScaleByZoom(this->scroll_y, this->zoom) / TILE_SIZE;
+		int tile_x = UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
+		int tile_y = UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
 
 		int dx = dpi->left;
 		tile_x -= dx / 4;
@@ -725,6 +725,9 @@ public:
 		int dy = dpi->top;
 		tile_x += dy / 2;
 		tile_y += dy / 2;
+
+		Point start = RemapCoords(scroll_x / TILE_SIZE * TILE_SIZE - scroll_x, scroll_y / TILE_SIZE * TILE_SIZE - scroll_y, 0);
+
 
 		if (dy & 1) {
 			tile_x++;
@@ -736,8 +739,25 @@ public:
 			}
 		}
 
-		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
-		int x = - dx - 4;
+
+		DEBUG(misc, 0, "start point: %d, %d, dx: %d, tile_x: %d, tile_y: %d, scroll_x: %d, scroll_y: %d, dpi->left: %d, dpi->top: %d, dpi->width: %d, dpi->height: %d",
+				start.x, start.y, dx, tile_x, tile_y, scroll_x, scroll_y, dpi->left, dpi->top, dpi->width, dpi->height);
+
+		/* round x coordinate */
+		//start.x -= TILE_SIZE / 2;
+		start.x /= TILE_SIZE;
+
+		//start.y -= TILE_SIZE / 2;
+		start.y /= TILE_SIZE;
+
+		while (start.x < 4) {
+			tile_x++;
+			tile_y--;
+			start.x += 4;
+		}
+
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - start.x, start.y);
+		int x = - dx - start.x;
 		int y = 0;
 
 		for (;;) {
@@ -751,7 +771,7 @@ public:
 				}
 
 				/* number of lines */
-				int reps = (dpi->height - y + 1) / 2;
+				int reps = (dpi->height - y + 1 - start.y) / 2;
 				if (reps > 0) {
 					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
 				}
