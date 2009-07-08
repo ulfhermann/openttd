@@ -20,7 +20,6 @@
 #include "vehicle_base.h"
 #include "sound_func.h"
 #include "window_func.h"
-#include <cmath>
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -506,19 +505,6 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile)
 	return _owner_colours[o];
 }
 
-
-static const uint32 _smallmap_mask_left[3] = {
-	MKCOLOUR(0xFF000000),
-	MKCOLOUR(0xFFFF0000),
-	MKCOLOUR(0xFFFFFF00),
-};
-
-static const uint32 _smallmap_mask_right[] = {
-	MKCOLOUR(0x000000FF),
-	MKCOLOUR(0x0000FFFF),
-	MKCOLOUR(0x00FFFFFF),
-};
-
 /* each tile has 4 x pixels and 1 y pixel */
 
 static GetSmallMapPixels *_smallmap_draw_procs[] = {
@@ -728,37 +714,44 @@ public:
 			}
 		}
 
-
 		int tile_x = UnScaleByZoom(this->scroll_x, this->zoom) / TILE_SIZE;
 		int tile_y = UnScaleByZoom(this->scroll_y, this->zoom) / TILE_SIZE;
 
-		int dx = 0;
-		int dy = 0;
+		int dx = dpi->left;
+		tile_x -= dx / 4;
+		tile_y += dx / 4;
+		dx &= 3;
 
-		void *ptr = blitter->MoveTo(dpi->dst_ptr, dx, dy);
+		int dy = dpi->top;
+		tile_x += dy / 2;
+		tile_y += dy / 2;
+
+		if (dy & 1) {
+			tile_x++;
+			dx += 2;
+			if (dx > 3) {
+				dx -= 4;
+				tile_x--;
+				tile_y++;
+			}
+		}
+
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
+		int x = - dx - 4;
 		int y = 0;
-		int x = dx;
 
 		for (;;) {
-			uint32 mask = 0xFFFFFFFF;
-
 			/* distance from left edge */
 			if (x >= -3) {
-				if (x < 0) {
-					/* mask to use at the left edge */
-					mask = _smallmap_mask_left[x + 3];
-				}
 
 				/* distance from right edge */
 				int t = dpi->width - x;
-				if (t < 8) {
+				if (t < 4) {
 					if (t <= 0) break; // exit loop
-					/* mask to use at the right edge */
-					mask &= _smallmap_mask_right[t - 1];
 				}
 
 				/* number of lines */
-				int reps = (dpi->height - y) / 2;
+				int reps = (dpi->height - y + 1) / 2;
 				if (reps > 0) {
 					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
 				}
