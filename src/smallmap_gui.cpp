@@ -602,8 +602,8 @@ class SmallMapWindow : public Window
 		do {
 			/* check if the tile (xc,yc) is within the map range */
 			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-			uint x = ScaleByZoom(xc, this->zoom);
-			uint y = ScaleByZoom(yc, this->zoom);
+			uint x = ScaleByZoom(xc, this->zoom) / TILE_SIZE;
+			uint y = ScaleByZoom(yc, this->zoom) / TILE_SIZE;
 			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
 				/* check if the dst pointer points to a pixel inside the screen buffer */
 				if (dst < _screen.dst_ptr) continue;
@@ -626,7 +626,7 @@ class SmallMapWindow : public Window
 				}
 			}
 		/* switch to next tile in the column */
-		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
+		} while (xc += TILE_SIZE, yc += TILE_SIZE, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
 	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v)
@@ -638,12 +638,14 @@ class SmallMapWindow : public Window
 		}
 		/* Remap into flat coordinates. */
 		Point pt = RemapCoords(
-				this->RemapX(v->x_pos / TILE_SIZE),
-				this->RemapY(v->y_pos / TILE_SIZE),
+				TileX(v->tile) * TILE_SIZE - this->scroll_x,
+				TileY(v->tile) * TILE_SIZE - this->scroll_y,
 				0);
 
-        int x = pt.x - dpi->left;
-        int y = pt.y - dpi->top;
+        int x = UnScaleByZoom(pt.x, this->zoom) / TILE_SIZE - dpi->left;
+        int y = UnScaleByZoom(pt.y, this->zoom) / TILE_SIZE - dpi->top;
+
+
 
 		/* Check if rhombus is inside bounds */
 		if ((x + 2 * scale < 0) || //left
@@ -671,292 +673,7 @@ class SmallMapWindow : public Window
 		}
 	}
 
-	/**
-	 * Converts tile coordinates into smallmap "pips". See SmallMapDrawSurface for
-	 * more information.
-	 *
-	 * @param tx Tile X-coordinate to be converted
-	 * @param ty Tile Y-coordinate to be converted
-	 * @return A Point struct containing the converted coordinates.
-	 */
-	inline Point TileToPip(int tx, int ty)
-	{
-		Point pt;
-		pt.x = ((int)MapMaxX() + ty - tx) * 2;
-		pt.y = ty + tx;
-		return pt;
-	}
-
-	/**
-	 * Converts main map coordinates into smallmap "pips". See SmallMapDrawSurface
-	 * for more information.
-	 *
-	 * @param mmx Main map X-coordinate to be converted
-	 * @param mmy Main map Y-coordinate to be converted
-	 * @return A Point struct containing the converted coordinates.
-	 */
-	inline Point MainMapToPip(int mmx, int mmy)
-	{
-		Point pt;
-		pt.x = mmx/TILE_SIZE + 2 * MapMaxX();
-		pt.y = mmy/TILE_SIZE - 1;
-		return pt;
-	}
-
-	/**
-	 * The inverse function of SmallMapToPip.
-	 */
-	inline Point PipToSmallMap(int px, int py)
-	{
-		Point remap = RemapCoords(this->scroll_x / TILE_SIZE - MapMaxX() / 2, this->scroll_y / TILE_SIZE + MapMaxY() / 2, 0);
-		Point pt;
-		pt.x =
-				UnScaleByZoom(px, this->zoom) -
-				UnScaleByZoom(remap.x, this->zoom);
-		pt.y =
-				UnScaleByZoom(py, this->zoom) -
-				UnScaleByZoom(remap.y, this->zoom);
-		return pt;
-	}
-
-	/**
-	 * The inverse function of SmallMapToTile.
-	 */
-	inline Point TileToSmallMap(int tx, int ty)
-	{
-		Point pt = TileToPip(tx, ty);
-		return PipToSmallMap(pt.x, pt.y);
-	}
-
-	/**
-	 * If defined, a new dithering algorithm will be used, in which pixel colors
-	 * alternate both vertically and horizontally.
-	 *
-	 * If not defined, smallmap dithering will be done using the standard method,
-	 * which results in vertical lines of alternating colors.
-	 *
-	 * The idea is to let people try both and only keep one if/when merging into
-	 * trunk.
-	 */
-	//#define SMALLMAP_DITHER_STANDARD
-
-	#if defined(SMALLMAP_DITHER_STANDARD)
-
-	static inline uint8 MakeDitheredColor1px(uint32 color, int smx, int smy)
-	{
-		uint8 *clr8 = (uint8*)&color;
-		return clr8[1 + (smx & 1)];
-	}
-
-	static inline uint32 MakeDitheredColor4px(uint32 color, int smx, int smy)
-	{
-		return color;
-	}
-
-	#else
-
-	static inline uint8 MakeDitheredColor1px(uint32 color, int smx, int smy)
-	{
-		uint8 *clr8 = (uint8*)&color;
-		return clr8[1 + ((smx & 1) ^ (smy & 1))];
-	}
-
-	static inline uint32 MakeDitheredColor4px(uint32 color, int smx, int smy)
-	{
-		if ((smx & 1) ^ (smy & 1))
-			return color;
-		else {
-			uint32 clr;
-			uint8 *fr = (uint8*)&color;
-			uint8 *to = (uint8*)&clr;
-			to[0] = fr[3];
-			to[1] = fr[2];
-			to[2] = fr[1];
-			to[3] = fr[0];
-			return clr;
-		}
-	}
-
-	#endif
-
 public:
-
-	/**
-	 * Draws the surface of the small map.
-
-	   The algorithm iterates over the tiles starting at tile 0, 0. The main loop
-	   variables are specified in the units of "pips", which are best understood
-	   with a diagram.
-
-	   Here is a diagram of the original TTD small map. Each point is a pixel; the
-	   "o" shows the pixels where the centre of the tile is located logically:
-
-	   <pre>
-	   . . . . . P . . . . . . . X . . . . . . . . . . . . . . . . . . . . .
-	   . . . . . . . . . . . o . . . o . . . . . . . . . . . . . . . . . . .
-	   . . . . . . . . . o . . . o . . . o . . . . . . . . . . . . . . . . .
-	   . . . . . . . o . . . o . . . o . . . o . . . . . . . . . . . . . . .
-	   . . . . . o . . . o . . . o . . . o . . . o . . . . . . . . . . . . .
-	   . . . . . . . o . . . o . . . o . . . o . . . o . . . . . . . . . . .
-	   . . . . . . . . . o . . . o . . . o . . . o . . . o . . . . . . . . .
-	   . . . . . . . . . . . o . . . o . . . o . . . o . . . . . . . . . . .
-	   . . . . . . . . . . . . . o . . . o . . . o . . . . . . . . . . . . .
-	   . . . . . . . . . . . . . . . o . . . o . . . . . . . . . . . . . . .
-	   . . . . . . . . . . . . . . . . . o . . . . . . . . . . . . . . . . .
-	   </pre>
-
-	   A "pip" is nothing more than a single "pixel" in the above diagram, except
-	   that with zooming, a pixel can cover more than a single pip. In fact, the
-	   current implementation is such that a single pixel always covers a square
-	   of an integer number of pips, where the side of the square is equal to
-	   WP(w, smallmap_d).zoom.
-
-	   So, for example, at zoom level = 1, each pixel covers exactly one pip, and
-	   we get the original TTD small map. At zoom level = 2, a pixel covers 2x2
-	   pips; at zoom = 3 it covers 3x3 pips.
-
-	   The point mapped with X is the tile 0,0. The pip marked with P is at pip
-	   coordinates 0,0. Pip axes are the same as pixel axes - X going to the right
-	   and Y going towards the bottom.
-
-	   With this introduction in mind, the actual algorithm is described within the
-	   code.
-
-	 * @param w Pointer to the Window containing the small map.
-	 * @pre _cur_dpi must be set to point to the first pixel of the smallmap region
-	 * to be drawn. Its width and height must be the size of the region, and its
-	 * left and top coordinates must be relative to the top left corner of the
-	 * smallmap drawing area.
-	 */
-	void DrawSurface()
-	{
-		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
-		DrawPixelInfo *dpi = _cur_dpi;
-		GetSmallMapPixels *draw_proc = _smallmap_draw_procs[this->map_type];
-
-		/* Calculate the coordinates, in smallmap pixels, of the tile 0,0. This is
-		   the starting point for the algorithm. */
-		Point pt = TileToSmallMap(0, 0);
-		pt.x -= dpi->left;
-		pt.y -= dpi->top;
-
-		/* The algorithm draws one row of pixels per iteration of the outer loop
-		   below. For each iteration, it keeps track of the X and Y coordinates of
-		   the leftmost pixel in the smallmap row (which may be off the screen).
-		   fr_ stands for "from"; see inner loop. */
-		int smy    = pt.y;
-		int fr_smx = pt.x;
-		/* The algorithm also keeps track of the tile coordinates corresponding to
-		   the leftmost pixel in the smallmap row, multiplied by 4 (or you can
-		   think of it as 2 bits for the fractional part) */
-		int fr_tilex4 = 0;
-		int fr_tiley4 = 0;
-		/* These are increments of the above, per loop. These get updated once the
-		   algorithm reaches the left corner of the map. */
-		int inc_smx = -2;
-		int inc_tilex4 = ScaleByZoom(4, this->zoom);
-		int inc_tiley4 = 0;
-		/* Map sizes with the void tiles subtracted. */
-		int MapSizeY_novoid = (int)MapSizeY() - 1;
-		int MapSizeX4_novoid = (int)MapSizeX() * 4 - 4;
-		int MapSizeY4_novoid = (int)MapSizeY() * 4 - 4;
-
-		/* Dither is based on the parity of pixel coodinates; this variable is used
-		   to compensate for the map being moved around, to maintain the exact same
-		   picture at all times. */
-	#ifdef SMALLMAP_DITHER_STANDARD
-		int dither_comp = fr_smx & 1;
-	#else
-		int dither_comp = (fr_smx & 1) ^ (smy & 1);
-	#endif
-
-		for (;;) {
-			if (smy >= 0) {
-				/* Draw the row of pixels at y = smy. */
-
-				int tilex4 = fr_tilex4;
-				int tiley4 = fr_tiley4;
-				int smx = fr_smx;
-
-				/* Use different code for max zoom-in and all other zoom levels
-				   because the latter have >= 1 tile per pixel. */
-				if (this->zoom > ZOOM_LVL_NORMAL) {
-					if (smx < 0) {
-						tilex4 += ScaleByZoom(smx, this->zoom);
-						tiley4 -= ScaleByZoom(smx, this->zoom);  /* Note that smx is negative */
-						smx = 0;
-					}
-
-					/* The actual drawing loop. */
-					void *ptr = blitter->MoveTo(dpi->dst_ptr, smx, smy);
-					while (tilex4 >= 0 && tiley4 < MapSizeY4_novoid && smx < dpi->width) {
-						uint8 clr8 = MakeDitheredColor1px(
-						                    draw_proc(TileXY(tilex4>>2, tiley4>>2)),
-						                    smx + dither_comp, smy);
-						blitter->SetPixel(ptr, 0, 0, clr8);
-						ptr = blitter->MoveTo(ptr, 1, 0);
-						smx++;
-						tilex4 -= ScaleByZoom(1, this->zoom);
-						tiley4 += ScaleByZoom(1, this->zoom);
-					}
-				} else {
-					/* The special algorithm doesn't need fractional tiles. */
-					int tilex = tilex4 >> 2;
-					int tiley = tiley4 >> 2;
-
-					if (smx < -3) {
-						int diff = smx - (smx % 4);
-						tilex += diff>>2;
-						tiley -= diff>>2;
-						smx -= diff;
-					}
-
-					/* The actual drawing loop for zoom = 1. */
-					void *ptr = blitter->MoveTo(dpi->dst_ptr, smx, smy);
-					while (tilex >= 0 && tiley < MapSizeY_novoid && smx < dpi->width) {
-						uint32 color = MakeDitheredColor4px(
-						                      draw_proc(TileXY(tilex, tiley)),
-						                      smx + dither_comp, smy);
-						uint8 *clr8 = (uint8*)&color;
-						blitter->SetPixelIfEmpty(ptr, 0, 0, clr8[0]);
-						blitter->SetPixelIfEmpty(ptr, 1, 0, clr8[1]);
-						blitter->SetPixelIfEmpty(ptr, 2, 0, clr8[2]);
-						blitter->SetPixelIfEmpty(ptr, 3, 0, clr8[3]);
-						ptr = blitter->MoveTo(ptr, 4, 0);
-						smx += 4;
-						tilex--;
-						tiley++;
-					}
-				}
-			}
-
-			/* Proceed to the next row */
-			smy++;
-			if (smy >= dpi->height)
-				break;
-			fr_smx += inc_smx;
-			fr_tilex4 += inc_tilex4;
-			fr_tiley4 += inc_tiley4;
-
-			/* Have we gone too far? */
-			if (fr_tilex4 >= MapSizeX4_novoid - 4) { /* -4 to make it MapMaxX */
-				/* Reached the left corner. Change the direction! */
-				inc_smx = 2;
-				inc_tilex4 = 0;
-				inc_tiley4 = ScaleByZoom(4, this->zoom);
-
-				/* Might be outside the map now, so move right until back inside */
-				while (fr_tilex4 >= MapSizeX4_novoid) {
-					fr_smx++;
-					fr_tilex4 -= ScaleByZoom(1, this->zoom);
-					fr_tiley4 += ScaleByZoom(1, this->zoom);
-				}
-			}
-
-			if (fr_tiley4 >= MapSizeY4_novoid)
-				break;
-		}
-	}
 
 	/**
 	 * Draws the small map.
@@ -1001,84 +718,84 @@ public:
 		}
 
 		DEBUG(misc, 0, "scroll_x: %d, scroll_y: %d", scroll_x, scroll_y);
-		DrawSurface();
+		//DrawSurface();
 
-//		int tile_x = UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
-//		int tile_y = UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
-//
-//		int dx = dpi->left;
-//		tile_x -= dx / 4;
-//		tile_y += dx / 4;
-//		dx &= 3;
-//
-//		int dy = dpi->top;
-//		tile_x += dy / 2;
-//		tile_y += dy / 2;
-//
-//		Point start = RemapCoords(scroll_x / TILE_SIZE * TILE_SIZE - scroll_x, scroll_y / TILE_SIZE * TILE_SIZE - scroll_y, 0);
-//
-//
-//		if (dy & 1) {
-//			tile_x++;
-//			dx += 2;
-//			if (dx > 3) {
-//				dx -= 4;
-//				tile_x--;
-//				tile_y++;
-//			}
-//		}
-//
-//
-//		DEBUG(misc, 0, "start point: %d, %d, dx: %d, tile_x: %d, tile_y: %d, scroll_x: %d, scroll_y: %d, dpi->left: %d, dpi->top: %d, dpi->width: %d, dpi->height: %d",
-//				start.x, start.y, dx, tile_x, tile_y, scroll_x, scroll_y, dpi->left, dpi->top, dpi->width, dpi->height);
-//
-//		/* round x coordinate */
-//		//start.x -= TILE_SIZE / 2;
-//		start.x /= TILE_SIZE;
-//
-//		//start.y -= TILE_SIZE / 2;
-//		start.y /= TILE_SIZE;
-//
-//		while (start.x < 4) {
-//			tile_x++;
-//			tile_y--;
-//			start.x += 4;
-//		}
-//
-//		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - start.x, start.y);
-//		int x = - dx - start.x;
-		int x = 0;
+		int tile_x = UnScaleByZoom(this->scroll_x, this->zoom);
+		int tile_y = UnScaleByZoom(this->scroll_y, this->zoom);
+
+		int dx = dpi->left;
+		tile_x -= dx * TILE_SIZE / 4;
+		tile_y += dx * TILE_SIZE / 4;
+		dx &= 3;
+
+		int dy = dpi->top;
+		tile_x += dy * TILE_SIZE / 2;
+		tile_y += dy * TILE_SIZE / 2;
+
+		//Point start = RemapCoords(scroll_x / TILE_SIZE * TILE_SIZE - scroll_x, scroll_y / TILE_SIZE * TILE_SIZE - scroll_y, 0);
+
+		/*if (dy & 1) {
+			tile_x += TILE_SIZE;
+			dx += 2;
+			if (dx > 3) {
+				dx -= 4;
+				tile_x -= TILE_SIZE;
+				tile_y += TILE_SIZE;
+			}
+		}*/
+
+
+		//DEBUG(misc, 0, "start point: %d, %d, dx: %d, tile_x: %d, tile_y: %d, scroll_x: %d, scroll_y: %d, dpi->left: %d, dpi->top: %d, dpi->width: %d, dpi->height: %d",
+		//		start.x, start.y, dx, tile_x, tile_y, scroll_x, scroll_y, dpi->left, dpi->top, dpi->width, dpi->height);
+
+		/* round x coordinate */
+		//start.x -= TILE_SIZE / 2;
+		//start.x /= TILE_SIZE;
+
+		//start.y -= TILE_SIZE / 2;
+		//start.y /= TILE_SIZE;
+
+		//while (start.x < 4) {
+		//	tile_x++;
+		//	tile_y--;
+		//	start.x += 4;
+		//}
+
+
+
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, -4/*- start.x, start.y*/, -UnScaleByZoom(2, this->zoom));
+		int x = -4; // start.x;
 		int y = 0;
-//
-//		for (;;) {
-//			/* distance from left edge */
-//			if (x >= -3) {
-//
-//				/* distance from right edge */
-//				int t = dpi->width - x;
-//				if (t < 4) {
-//					if (t <= 0) break; // exit loop
-//				}
-//
-//				/* number of lines */
-//				int reps = (dpi->height - y + 1 - start.y) / 2;
-//				if (reps > 0) {
-//					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
-//				}
-//			}
-//
-//			if (y == 0) {
-//				tile_y++;
-//				y++;
-//				ptr = blitter->MoveTo(ptr, 0, 1);
-//			} else {
-//				tile_x--;
-//				y--;
-//				ptr = blitter->MoveTo(ptr, 0, -1);
-//			}
-//			ptr = blitter->MoveTo(ptr, 2, 0);
-//			x += 2;
-//		}
+
+		for (;;) {
+			/* distance from left edge */
+			if (x >= -3) {
+
+				/* distance from right edge */
+				int t = dpi->width - x;
+				if (t < 4) {
+					if (t <= 0) break; // exit loop
+				}
+
+				/* number of lines */
+				int reps = (dpi->height - y + 1 + UnScaleByZoom(2, this->zoom)) / 2;
+				if (reps > 0) {
+					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
+				}
+			}
+
+			if (y == 0) {
+				tile_y += TILE_SIZE;
+				y++;
+				ptr = blitter->MoveTo(ptr, 0, 1);
+			} else {
+				tile_x -= TILE_SIZE;
+				y--;
+				ptr = blitter->MoveTo(ptr, 0, -1);
+			}
+			ptr = blitter->MoveTo(ptr, 2, 0);
+			x += 2;
+		}
 
 		/* draw vehicles? */
 		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) {
