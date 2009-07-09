@@ -822,17 +822,17 @@ public:
 			FOR_ALL_TOWNS(t) {
 				/* Remap the town coordinate */
 				Point pt = RemapTileCoords(t->xy);
-				x = pt.x - (t->sign.width_2 >> 1);
+				x = pt.x - (t->sign.width_small >> 1);
 				y = pt.y;
 
 				/* Check if the town sign is within bounds */
-				if (x + t->sign.width_2 > dpi->left &&
+				if (x + t->sign.width_small > dpi->left &&
 						x < dpi->left + dpi->width &&
 						y + 6 > dpi->top &&
 						y < dpi->top + dpi->height) {
 					/* And draw it. */
 					SetDParam(0, t->index);
-					DrawString(x, x + t->sign.width_2, y, STR_SMALLMAP_TOWN);
+					DrawString(x, x + t->sign.width_small, y, STR_SMALLMAP_TOWN);
 				}
 			}
 		}
