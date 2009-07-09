@@ -917,17 +917,9 @@ public:
 						TileIndex ta = sta->xy;
 						TileIndex tb = stb->xy;
 
-						Point pta = RemapCoords(
-								RemapX(TileX(ta)),
-								RemapY(TileY(ta)),
-								0);
-						pta.x -= 3;
+						Point pta = RemapTileCoords(ta);
 
-						Point ptb = RemapCoords(
-								RemapX(TileX(tb)),
-								RemapY(TileY(tb)),
-								0);
-						ptb.x -= 3;
+						Point ptb = RemapTileCoords(tb);
 
 						GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
 						GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
@@ -993,11 +985,7 @@ public:
 
 				TileIndex t = st->xy;
 
-				Point pt = RemapCoords(
-					RemapX(TileX(t)),
-					RemapY(TileY(t)),
-					0);
-				pt.x -= 3;
+				Point pt = RemapTileCoords(t);
 
 				/* Add up cargo supplied for each selected cargo type */
 				uint q = 0;
