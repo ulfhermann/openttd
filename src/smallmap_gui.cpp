@@ -558,28 +558,46 @@ class SmallMapWindow : public Window
 	static const int _spacing_side = 2;
 	static const int _spacing_top = 16;
 
-	/**
-	 * Remap a map's tile X coordinate (TileX(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_x the tile's X coordinate.
-	 * @return the X coordinate to draw on.
+	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
+	 * Everything has to be done just like when drawing the background otherwise the rounding errors are
+	 * different on the background and on the overlay which creates "jumping" behaviour. This means:
+	 * 1. UnScaleByZoom
+	 * 2. divide by TILE_SIZE
+	 * 3. subtract or add things or RemapCoords
+	 * Note:
+	 * We can't divide scroll_{x|y} by TILE_SIZE before scaling as that would mean we can only scroll full tiles.
 	 */
-	inline int RemapX(int tile_x)
-	{
-		return UnScaleByZoomLower(tile_x, this->zoom) - UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
-		//return UnScaleByZoom(tile_x * TILE_SIZE - this->scroll_x, this->zoom) / TILE_SIZE;
+
+	inline Point RemapPlainCoords(int pos_x, int pos_y) {
+		return RemapCoords(
+				RemapX(pos_x),
+				RemapY(pos_y),
+				0
+				);
+	}
+
+	inline Point RemapTileCoords(TileIndex tile) {
+		return RemapPlainCoords(TileX(tile) * TILE_SIZE, TileY(tile) * TILE_SIZE);
 	}
 
 	/**
-	 * Remap a map's tile Y coordinate (TileY(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_y the tile's Y coordinate.
+	 * Remap a map X coordinate to a location on this smallmap.
+	 * @param pos_x the tile's X coordinate.
+	 * @return the X coordinate to draw on.
+	 */
+	inline int RemapX(int pos_x)
+	{
+		return UnScaleByZoomLower(pos_x, this->zoom) / TILE_SIZE - UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
+	}
+
+	/**
+	 * Remap a map Y coordinate to a location on this smallmap.
+	 * @param pos_y the tile's Y coordinate.
 	 * @return the Y coordinate to draw on.
 	 */
-	inline int RemapY(int tile_y)
+	inline int RemapY(int pos_y)
 	{
-		return UnScaleByZoomLower(tile_y, this->zoom) - UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
-		//return UnScaleByZoom(tile_y * TILE_SIZE - this->scroll_y, this->zoom) / TILE_SIZE;
+		return UnScaleByZoomLower(pos_y, this->zoom) / TILE_SIZE - UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
 	}
 
 	/**
@@ -639,10 +657,7 @@ class SmallMapWindow : public Window
 			scale = 1 << (-this->zoom);
 		}
 		/* Remap into flat coordinates. */
-		Point pt = RemapCoords(
-				RemapX(TileX(v->tile)),
-				RemapY(TileY(v->tile)),
-				0);
+		Point pt = RemapTileCoords(v->tile);
 
         int x = pt.x - dpi->left;
         int y = pt.y - dpi->top;
@@ -731,6 +746,7 @@ public:
 		 * I have no idea how this works.
 		 */
 		dx &= 3;
+		dx += 1;
 		if (dy & 1) {
 			tile_x++;
 			dx += 2;
@@ -753,7 +769,7 @@ public:
 		 */
 		dy = 0;
 		if (this->zoom < ZOOM_LVL_NORMAL) {
-			dy = UnScaleByZoomLower(7, this->zoom) / 4;
+			dy = UnScaleByZoomLower(2, this->zoom) - 2;
 		}
 
 		/* correct the various problems mentioned above by moving the initial drawing pointer a little */
@@ -805,10 +821,7 @@ public:
 
 			FOR_ALL_TOWNS(t) {
 				/* Remap the town coordinate */
-				Point pt = RemapCoords(
-						this->RemapX(TileX(t->xy)),
-						this->RemapY(TileY(t->xy)),
-						0);
+				Point pt = RemapTileCoords(t->xy);
 				x = pt.x - (t->sign.width_2 >> 1);
 				y = pt.y;
 
