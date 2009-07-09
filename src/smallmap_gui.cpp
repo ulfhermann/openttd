@@ -566,7 +566,8 @@ class SmallMapWindow : public Window
 	 */
 	inline int RemapX(int tile_x)
 	{
-		return UnScaleByZoom(tile_x * TILE_SIZE - this->scroll_x, this->zoom) / TILE_SIZE;
+		return UnScaleByZoomLower(tile_x, this->zoom) - UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
+		//return UnScaleByZoom(tile_x * TILE_SIZE - this->scroll_x, this->zoom) / TILE_SIZE;
 	}
 
 	/**
@@ -577,7 +578,8 @@ class SmallMapWindow : public Window
 	 */
 	inline int RemapY(int tile_y)
 	{
-		return UnScaleByZoom(tile_y * TILE_SIZE - this->scroll_y, this->zoom) / TILE_SIZE;
+		return UnScaleByZoomLower(tile_y, this->zoom) - UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
+		//return UnScaleByZoom(tile_y * TILE_SIZE - this->scroll_y, this->zoom) / TILE_SIZE;
 	}
 
 	/**
@@ -602,8 +604,8 @@ class SmallMapWindow : public Window
 		do {
 			/* check if the tile (xc,yc) is within the map range */
 			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-			uint x = ScaleByZoomLower(xc, this->zoom) / TILE_SIZE;
-			uint y = ScaleByZoomLower(yc, this->zoom) / TILE_SIZE;
+			uint x = ScaleByZoomLower(xc, this->zoom);
+			uint y = ScaleByZoomLower(yc, this->zoom);
 			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
 				/* check if the dst pointer points to a pixel inside the screen buffer */
 				if (dst < _screen.dst_ptr) continue;
@@ -626,7 +628,7 @@ class SmallMapWindow : public Window
 				}
 			}
 		/* switch to next tile in the column */
-		} while (xc += TILE_SIZE, yc += TILE_SIZE, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
+		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
 	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v)
@@ -638,12 +640,12 @@ class SmallMapWindow : public Window
 		}
 		/* Remap into flat coordinates. */
 		Point pt = RemapCoords(
-				TileX(v->tile) * TILE_SIZE - this->scroll_x,
-				TileY(v->tile) * TILE_SIZE - this->scroll_y,
+				RemapX(TileX(v->tile)),
+				RemapY(TileY(v->tile)),
 				0);
 
-        int x = UnScaleByZoom(pt.x, this->zoom) / TILE_SIZE - dpi->left;
-        int y = UnScaleByZoom(pt.y, this->zoom) / TILE_SIZE - dpi->top;
+        int x = pt.x - dpi->left;
+        int y = pt.y - dpi->top;
 
 		/* Check if rhombus is inside bounds */
 		if ((x + 2 * scale < 0) || //left
@@ -714,34 +716,49 @@ public:
 			}
 		}
 
-		int tile_x = UnScaleByZoomLower(this->scroll_x, this->zoom);
-		int tile_y = UnScaleByZoomLower(this->scroll_y, this->zoom);
+		int tile_x = UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
+		int tile_y = UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
 
 		int dx = dpi->left;
-		tile_x -= dx * TILE_SIZE / 4;
-		tile_y += dx * TILE_SIZE / 4;
-		dx &= 3;
+		tile_x -= dx / 4;
+		tile_y += dx / 4;
 
 		int dy = dpi->top;
-		tile_x += dy * TILE_SIZE / 2;
-		tile_y += dy * TILE_SIZE / 2;
+		tile_x += dy / 2;
+		tile_y += dy / 2;
 
+		/* prevent some artifacts when partially redrawing.
+		 * I have no idea how this works.
+		 */
+		dx &= 3;
 		if (dy & 1) {
-			tile_x += TILE_SIZE;
+			tile_x++;
 			dx += 2;
-			if (dx > 3) {
-				dx -= 4;
-				tile_x -= TILE_SIZE;
-				tile_y += TILE_SIZE;
-			}
 		}
 
+		/**
+		 * for some reason we have to start drawing at an X position <= -4
+		 * otherwise we get artifacts when partially redrawing.
+		 * Make sure dx provides for that and update tile_x and tile_y accordingly.
+		 */
+		while(dx < 4) {
+			dx += 4;
+			tile_x++;
+			tile_y--;
+		}
 
-		//DEBUG(misc, 0, "start point: %d, %d, dx: %d, tile_x: %d, tile_y: %d, scroll_x: %d, scroll_y: %d, dpi->left: %d, dpi->top: %d, dpi->width: %d, dpi->height: %d",
-		//		start.x, start.y, dx, tile_x, tile_y, scroll_x, scroll_y, dpi->left, dpi->top, dpi->width, dpi->height);
+		/* The map background is off by a little less than one tile in y direction compared to vehicles and signs.
+		 * I have no idea why this is the case.
+		 * on zoom levels >= ZOOM_LVL_NORMAL this isn't visible as only full tiles can be shown
+		 */
+		dy = 0;
+		if (this->zoom < ZOOM_LVL_NORMAL) {
+			dy = UnScaleByZoomLower(7, this->zoom) / 4;
+		}
 
-		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx -4, -UnScaleByZoom(2, this->zoom));
-		int x = -dx -4;
+		/* correct the various problems mentioned above by moving the initial drawing pointer a little */
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx, -dy);
+		int x = -dx;
 		int y = 0;
 
 		for (;;) {
@@ -749,24 +766,21 @@ public:
 			if (x >= -3) {
 
 				/* distance from right edge */
-				int t = dpi->width - x;
-				if (t < 4) {
-					if (t <= 0) break; // exit loop
-				}
+				if (dpi->width - x <= 0) break;
 
 				/* number of lines */
-				int reps = (dpi->height - y + 1 + UnScaleByZoom(2, this->zoom)) / 2;
+				int reps = (dpi->height + 1) / 2 + dy;
 				if (reps > 0) {
 					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
 				}
 			}
 
 			if (y == 0) {
-				tile_y += TILE_SIZE;
+				tile_y++;
 				y++;
 				ptr = blitter->MoveTo(ptr, 0, 1);
 			} else {
-				tile_x -= TILE_SIZE;
+				tile_x--;
 				y--;
 				ptr = blitter->MoveTo(ptr, 0, -1);
 			}
