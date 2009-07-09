@@ -179,18 +179,13 @@ public:
 	void AddFacility(StationFacility new_facility_bit, TileIndex facil_xy);
 
 	/**
-	 * Mark the sign of a station dirty for repaint.
-	 *
-	 * @ingroup dirty
-	 */
-	void MarkDirty() const;
-
-	/**
 	 * Marks the tiles of the station as dirty.
 	 *
 	 * @ingroup dirty
 	 */
 	void MarkTilesDirty(bool cargo_change) const;
+
+	void UpdateVirtCoord();
 
 	uint GetPlatformLength(TileIndex tile, DiagDirection dir) const;
 	uint GetPlatformLength(TileIndex tile) const;
