@@ -11,19 +11,24 @@
 #
 
 ##id 0x0000
+STR_NULL                                                        :
 STR_ERROR_OFF_EDGE_OF_MAP                                       :{WHITE}خارج از نقشه
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP                              :{WHITE}بسیار نزدیک به حاشیه ی نقشه
 STR_ERROR_NOT_ENOUGH_CASH_REQUIRES_CURRENCY                     :{WHITE}پول به اندازه ی کافی موجود نیست- به {CURRENCY} نیاز است
 STR_COMPANY_MONEY                                               :{WHITE}{CURRENCY}
+STR_EMPTY                                                       :
 STR_ERROR_FLAT_LAND_REQUIRED                                    :{WHITE}زمین باید مسطح باشد
 STR_STATION_VIEW_WAITING_TITLE                                  :{BLACK}در انتظار: {WHITE}{STRING}
 STR_STATION_VIEW_WAITING_CARGO                                  :{WHITE}{CARGO}
 STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}قبول می کند: {WHITE}
 STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}قبول می کند: {GOLD}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}تدارکات: {GOLD}
+STR_CARGO_PLURAL_NOTHING                                        :
 STR_CARGO_PLURAL_PASSENGERS                                     :مسافر
 STR_CARGO_PLURAL_COAL                                           :ذغال
 STR_CARGO_PLURAL_MAIL                                           :پاکت پستی
 STR_CARGO_PLURAL_OIL                                            :نفت
+STR_CARGO_PLURAL_LIVESTOCK                                      :چارپایان
 STR_CARGO_PLURAL_GOODS                                          :محصولات مصرفی
 STR_CARGO_PLURAL_GRAIN                                          :غله
 STR_CARGO_PLURAL_WOOD                                           :چوب
@@ -31,6 +36,7 @@ STR_CARGO_PLURAL_IRON_ORE                                       :سنگ آهن
 STR_CARGO_PLURAL_STEEL                                          :فولاد
 STR_CARGO_PLURAL_VALUABLES                                      :جواهرات
 STR_CARGO_PLURAL_COPPER_ORE                                     :سنگ مس
+STR_CARGO_PLURAL_MAIZE                                          :ذرت
 STR_CARGO_PLURAL_FRUIT                                          :میوه
 STR_CARGO_PLURAL_DIAMONDS                                       :الماس
 STR_CARGO_PLURAL_FOOD                                           :مواد خوراکی
@@ -38,6 +44,7 @@ STR_CARGO_PLURAL_PAPER                                          :کاغذ
 STR_CARGO_PLURAL_GOLD                                           :طلا
 STR_CARGO_PLURAL_WATER                                          :آب
 STR_CARGO_PLURAL_WHEAT                                          :گندم
+STR_CARGO_PLURAL_RUBBER                                         :کائوچو
 STR_CARGO_PLURAL_SUGAR                                          :شکر
 STR_CARGO_PLURAL_TOYS                                           :اسباب بازی
 STR_CARGO_PLURAL_CANDY                                          :شیرینی
@@ -48,16 +55,20 @@ STR_CARGO_PLURAL_TOFFEE                                         :تافی
 STR_CARGO_PLURAL_BATTERIES                                      :باتری
 STR_CARGO_PLURAL_PLASTIC                                        :پلاستیک
 STR_CARGO_PLURAL_FIZZY_DRINKS                                   :نوشابه گازدار
+STR_CARGO_SINGULAR_NOTHING                                      :
 STR_CARGO_SINGULAR_PASSENGER                                    :مسافر
 STR_CARGO_SINGULAR_COAL                                         :ذغال
 STR_CARGO_SINGULAR_MAIL                                         :نامه
 STR_CARGO_SINGULAR_OIL                                          :نفت
+STR_CARGO_SINGULAR_LIVESTOCK                                    :چارپایان
 STR_CARGO_SINGULAR_GOODS                                        :محصولات مصرفی
 STR_CARGO_SINGULAR_GRAIN                                        :غله
 STR_CARGO_SINGULAR_WOOD                                         :چوب
 STR_CARGO_SINGULAR_IRON_ORE                                     :سنگ آهن
 STR_CARGO_SINGULAR_STEEL                                        :فولاد
+STR_CARGO_SINGULAR_VALUABLES                                    :اجناس قیمتی
 STR_CARGO_SINGULAR_COPPER_ORE                                   :سنگ مس
+STR_CARGO_SINGULAR_MAIZE                                        :ذرت
 STR_CARGO_SINGULAR_FRUIT                                        :میوه
 STR_CARGO_SINGULAR_DIAMOND                                      :الماس
 STR_CARGO_SINGULAR_FOOD                                         :مواد خوراکی
@@ -65,6 +76,7 @@ STR_CARGO_SINGULAR_PAPER                                        :کاغذ
 STR_CARGO_SINGULAR_GOLD                                         :طلا
 STR_CARGO_SINGULAR_WATER                                        :آب
 STR_CARGO_SINGULAR_WHEAT                                        :گندم
+STR_CARGO_SINGULAR_RUBBER                                       :کائوچو
 STR_CARGO_SINGULAR_SUGAR                                        :شکر
 STR_CARGO_SINGULAR_TOY                                          :اسباب بازی
 STR_CARGO_SINGULAR_CANDY                                        :شیرینی
@@ -75,6 +87,29 @@ STR_CARGO_SINGULAR_TOFFEE                                       :تافی
 STR_CARGO_SINGULAR_BATTERY                                      :باتری
 STR_CARGO_SINGULAR_PLASTIC                                      :پلاستیک
 STR_CARGO_SINGULAR_FIZZY_DRINK                                  :نوشابه گازدار
+STR_QUANTITY_NOTHING                                            :
+STR_QUANTITY_PASSENGERS                                         :{COMMA} مسافر{P "" s}
+STR_QUANTITY_COAL                                               :{WEIGHT} از زغال سنگ
+STR_QUANTITY_MAIL                                               :{COMMA}بسته{P "" s} از نامه
+STR_QUANTITY_OIL                                                :{VOLUME} نفت
+STR_QUANTITY_LIVESTOCK                                          :{COMMA} فقره{P "" s} از جارپایان
+STR_QUANTITY_GOODS                                              :{COMMA} جعبه{P "" s} محموله تجاری
+STR_QUANTITY_GRAIN                                              :{WEIGHT}حبوبات
+STR_QUANTITY_WOOD                                               :{WEIGHT} چوب
+STR_QUANTITY_IRON_ORE                                           :{WEIGHT} سنگ آهن
+STR_QUANTITY_STEEL                                              :{WEIGHT} فولادl
+STR_QUANTITY_VALUABLES                                          :{COMMA} بسته{P "" s} اشیای قیمتی
+STR_QUANTITY_COPPER_ORE                                         :{WEIGHT} سنگ مس
+STR_QUANTITY_MAIZE                                              :{WEIGHT} ذرت
+STR_QUANTITY_FRUIT                                              :{WEIGHT} میوه
+STR_QUANTITY_DIAMONDS                                           :{COMMA} بسته{P "" s} الماس
+STR_QUANTITY_FOOD                                               :{WEIGHT} غذا
+STR_QUANTITY_PAPER                                              :{WEIGHT} کاغذ
+STR_QUANTITY_GOLD                                               :{COMMA} بسته{P "" s} طلا
+STR_QUANTITY_WATER                                              :{VOLUME} آب
+STR_QUANTITY_WHEAT                                              :{WEIGHT} گندم
+STR_QUANTITY_RUBBER                                             :{VOLUME} کائوچو
+STR_QUANTITY_SUGAR                                              :{WEIGHT} شکر
 STR_ABBREV_PASSENGERS                                           :{TINYFONT}PS
 STR_ABBREV_COAL                                                 :{TINYFONT}CL
 STR_ABBREV_MAIL                                                 :{TINYFONT}ML
@@ -1322,7 +1357,7 @@ STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}نام �
 STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}نمیتوان برای قطار نام انتخاب کرد...
 STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}نام گذاری قطار
 STR_NEWS_TRAIN_CRASH                                            :{BLACK}{BIGFONT}تصادف قطار!{}{COMMA} مرگ در انفجار حاصل از برخورد
-STR_ERROR_CAN_T_REVERSE_DIRECTION                               :{WHITE}جهت قطار را نمی شود تغییر داد...
+STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}جهت قطار را نمی شود تغییر داد...
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}تغییر نام انواع قطار ها
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}نمی شود انواع قطار ها را تغییر نام داد...
 
@@ -1344,7 +1379,6 @@ STR_NEWS_FIRST_ROAD_BUS_ARRIVAL                                 :{BLACK}{BIGFONT
 STR_NEWS_FIRST_ROAD_TRUCK_ARRIVAL                               :{BLACK}{BIGFONT}شهروندان ورود اولین کامیون را به . . .{}{STATION} تبریک گفتند!
 STR_NEWS_ROAD_CRASH_DRIVER                                      :{BLACK}{BIGFONT}تصادف ماشین!{}راننده پس از تصادف با قطار در آتش سوخت
 STR_NEWS_ROAD_CRASH                                             :{BLACK}{BIGFONT}تصادف ماشین!{}راننده پس از تصادف با قطار{COMMA} در آتش سوخت
-STR_ERROR_CAN_T_MAKE_VEHICLE_TURN                               :{WHITE}ماشین نمی تواند دور بزند...
 STR_BUILD_VEHICLE_ROAD_RENAME_BUTTON                            :{BLACK}تغییر نام
 STR_BUILD_VEHICLE_ROAD_RENAME_TOOLTIP                           :{BLACK}تغییر نام انواع ماشین ها
 STR_QUERY_RENAME_ROAD_TYPE_CAPTION                              :{WHITE}تغییر نام انواع ماشین ها
@@ -1558,4 +1592,7 @@ STR_AI_SETTINGS_CAPTION                                         :{WHITE}پارا
 
 
 
+STR_CONTENT_INTRO_BUTTON_TIP                                    :{BLACK}بررسی وجود مجموعه ها و به روز رسانی های جدید در اینترنت
+STR_CONTENT_INTRO_MISSING_BUTTON                                :{BLACK}یافتن مجموعه ای که کم است در اینترنت
+STR_CONTENT_INTRO_MISSING_BUTTON_TIP                            :{BLACK} بررسی اینکه آیا مجموعه ای که کم است در اینترنت یافت می شود یا نه
 ########
