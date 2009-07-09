@@ -522,19 +522,6 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile)
 	return _owner_colours[o];
 }
 
-
-static const uint32 _smallmap_mask_left[3] = {
-	MKCOLOUR(0xFF000000),
-	MKCOLOUR(0xFFFF0000),
-	MKCOLOUR(0xFFFFFF00),
-};
-
-static const uint32 _smallmap_mask_right[] = {
-	MKCOLOUR(0x000000FF),
-	MKCOLOUR(0x0000FFFF),
-	MKCOLOUR(0x00FFFFFF),
-};
-
 /* each tile has 4 x pixels and 1 y pixel */
 
 static GetSmallMapPixels *_smallmap_draw_procs[] = {
@@ -649,26 +636,46 @@ class SmallMapWindow : public Window
 		return this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP;
 	}
 
-	/**
-	 * Remap a map's tile X coordinate (TileX(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_x the tile's X coordinate.
-	 * @return the X coordinate to draw on.
+	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
+	 * Everything has to be done just like when drawing the background otherwise the rounding errors are
+	 * different on the background and on the overlay which creates "jumping" behaviour. This means:
+	 * 1. UnScaleByZoom
+	 * 2. divide by TILE_SIZE
+	 * 3. subtract or add things or RemapCoords
+	 * Note:
+	 * We can't divide scroll_{x|y} by TILE_SIZE before scaling as that would mean we can only scroll full tiles.
 	 */
-	inline int RemapX(int tile_x)
-	{
-		return UnScaleByZoom(tile_x - this->scroll_x / TILE_SIZE, this->zoom);
+
+	inline Point RemapPlainCoords(int pos_x, int pos_y) {
+		return RemapCoords(
+				RemapX(pos_x),
+				RemapY(pos_y),
+				0
+				);
+	}
+
+	inline Point RemapTileCoords(TileIndex tile) {
+		return RemapPlainCoords(TileX(tile) * TILE_SIZE, TileY(tile) * TILE_SIZE);
 	}
 
 	/**
-	 * Remap a map's tile Y coordinate (TileY(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_y the tile's Y coordinate.
+	 * Remap a map X coordinate to a location on this smallmap.
+	 * @param pos_x the tile's X coordinate.
+	 * @return the X coordinate to draw on.
+	 */
+	inline int RemapX(int pos_x)
+	{
+		return UnScaleByZoomLower(pos_x, this->zoom) / TILE_SIZE - UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
+	}
+
+	/**
+	 * Remap a map Y coordinate to a location on this smallmap.
+	 * @param pos_y the tile's Y coordinate.
 	 * @return the Y coordinate to draw on.
 	 */
-	inline int RemapY(int tile_y)
+	inline int RemapY(int pos_y)
 	{
-		return UnScaleByZoom(tile_y - this->scroll_y / TILE_SIZE, this->zoom);
+		return UnScaleByZoomLower(pos_y, this->zoom) / TILE_SIZE - UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
 	}
 
 	/**
@@ -684,7 +691,7 @@ class SmallMapWindow : public Window
 	 * @param proc Pointer to the colour function
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	inline void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, uint32 mask, GetSmallMapPixels *proc)
+	inline void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, GetSmallMapPixels *proc)
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
 		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
@@ -693,14 +700,14 @@ class SmallMapWindow : public Window
 		do {
 			/* check if the tile (xc,yc) is within the map range */
 			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-			uint x = ScaleByZoom(xc, this->zoom);
-			uint y = ScaleByZoom(yc, this->zoom);
+			uint x = ScaleByZoomLower(xc, this->zoom);
+			uint y = ScaleByZoomLower(yc, this->zoom);
 			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
 				/* check if the dst pointer points to a pixel inside the screen buffer */
 				if (dst < _screen.dst_ptr) continue;
 				if (dst >= dst_ptr_abs_end) continue;
 
-				uint32 val = proc(TileXY(x, y)) & mask;
+				uint32 val = proc(TileXY(x, y));
 				uint8 *val8 = (uint8 *)&val;
 
 				if (dst <= dst_ptr_end) {
@@ -728,12 +735,9 @@ class SmallMapWindow : public Window
 			scale = 1 << (-this->zoom);
 		}
 		/* Remap into flat coordinates. */
-		Point pt = RemapCoords(
-				this->RemapX(v->x_pos / TILE_SIZE),
-				this->RemapY(v->y_pos / TILE_SIZE),
-				0);
+		Point pt = RemapTileCoords(v->tile);
 
-        int x = pt.x - (3 + dpi->left);
+        int x = pt.x - dpi->left;
         int y = pt.y - dpi->top;
 
 		/* Check if rhombus is inside bounds */
@@ -805,54 +809,63 @@ public:
 			}
 		}
 
-		int tile_x = UnScaleByZoom(this->scroll_x / TILE_SIZE, this->zoom);
-		int tile_y = UnScaleByZoom(this->scroll_y / TILE_SIZE, this->zoom);
+		int tile_x = UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
+		int tile_y = UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
 
 		int dx = dpi->left;
 		tile_x -= dx / 4;
 		tile_y += dx / 4;
-		dx &= 3;
 
 		int dy = dpi->top;
 		tile_x += dy / 2;
 		tile_y += dy / 2;
 
+		/* prevent some artifacts when partially redrawing.
+		 * I have no idea how this works.
+		 */
+		dx &= 3;
+		dx += 1;
 		if (dy & 1) {
 			tile_x++;
 			dx += 2;
-			if (dx > 3) {
-				dx -= 4;
-				tile_x--;
-				tile_y++;
-			}
 		}
 
-		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
-		int x = - dx - 4;
+		/**
+		 * for some reason we have to start drawing at an X position <= -4
+		 * otherwise we get artifacts when partially redrawing.
+		 * Make sure dx provides for that and update tile_x and tile_y accordingly.
+		 */
+		while(dx < 4) {
+			dx += 4;
+			tile_x++;
+			tile_y--;
+		}
+
+		/* The map background is off by a little less than one tile in y direction compared to vehicles and signs.
+		 * I have no idea why this is the case.
+		 * on zoom levels >= ZOOM_LVL_NORMAL this isn't visible as only full tiles can be shown
+		 */
+		dy = 0;
+		if (this->zoom < ZOOM_LVL_NORMAL) {
+			dy = UnScaleByZoomLower(2, this->zoom) - 2;
+		}
+
+		/* correct the various problems mentioned above by moving the initial drawing pointer a little */
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx, -dy);
+		int x = -dx;
 		int y = 0;
 
 		for (;;) {
-			uint32 mask = 0xFFFFFFFF;
-
 			/* distance from left edge */
 			if (x >= -3) {
-				if (x < 0) {
-					/* mask to use at the left edge */
-					mask = _smallmap_mask_left[x + 3];
-				}
 
 				/* distance from right edge */
-				int t = dpi->width - x;
-				if (t < 4) {
-					if (t <= 0) break; // exit loop
-					/* mask to use at the right edge */
-					mask &= _smallmap_mask_right[t - 1];
-				}
+				if (dpi->width - x <= 0) break;
 
 				/* number of lines */
-				int reps = (dpi->height - y + 1) / 2;
+				int reps = (dpi->height + 1) / 2 + dy;
 				if (reps > 0) {
-					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, mask, _smallmap_draw_procs[this->map_type]);
+					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
 				}
 			}
 
@@ -1015,21 +1028,18 @@ public:
 
 			FOR_ALL_TOWNS(t) {
 				/* Remap the town coordinate */
-				Point pt = RemapCoords(
-						this->RemapX(TileX(t->xy)),
-						this->RemapY(TileY(t->xy)),
-						0);
-				x = pt.x + 3 - (t->sign.width_2 >> 1);
+				Point pt = RemapTileCoords(t->xy);
+				x = pt.x - (t->sign.width_small >> 1);
 				y = pt.y;
 
 				/* Check if the town sign is within bounds */
-				if (x + t->sign.width_2 > dpi->left &&
+				if (x + t->sign.width_small > dpi->left &&
 						x < dpi->left + dpi->width &&
 						y + 6 > dpi->top &&
 						y < dpi->top + dpi->height) {
 					/* And draw it. */
 					SetDParam(0, t->index);
-					DrawString(x, x + t->sign.width_2, y, STR_SMALLMAP_TOWN);
+					DrawString(x, x + t->sign.width_small, y, STR_SMALLMAP_TOWN);
 				}
 			}
 		}
