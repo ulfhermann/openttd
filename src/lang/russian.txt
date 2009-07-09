@@ -1508,7 +1508,7 @@ STR_NETWORK_LANG_BULGARIAN                                      :Болгарс�
 STR_NETWORK_LANG_CHINESE                                        :Китайский
 STR_NETWORK_LANG_CZECH                                          :Чешский
 STR_NETWORK_LANG_DANISH                                         :Датский
-STR_NETWORK_LANG_DUTCH                                          :Голландский
+STR_NETWORK_LANG_DUTCH                                          :Нидерландский
 STR_NETWORK_LANG_ESPERANTO                                      :Эсперанто
 STR_NETWORK_LANG_FINNISH                                        :Финский
 STR_NETWORK_LANG_HUNGARIAN                                      :Венгерский
@@ -2872,11 +2872,11 @@ STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Поез
 
 STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Построить
 STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Копировать
-STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Создает копию автомобиля. Control+щелчок копирует задания
-STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Создает копию автомобиля. Щелкнуть на кнопке и затем на машине внутри или снаружи гаража. Control+щелчок копирует и задания
+STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Создаёт копию автомобиля. Control+щелчок копирует задания
+STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Создаёт копию автомобиля. Щёлкнуть на кнопке и затем на машине внутри или снаружи гаража. Control+щелчок копирует и задания
 STR_CLONE_TRAIN                                                 :{BLACK}Копировать состав
-STR_CLONE_TRAIN_INFO                                            :{BLACK}Создает копию поезда, включая все вагоны. Control+клик копирует задания
-STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Создает копию поезда, включая все вагоны. Щёлкнуть на кнопке и затем на поезде внутри или снаружи депо. Control+клик копирует задания
+STR_CLONE_TRAIN_INFO                                            :{BLACK}Создаёт копию поезда, включая все вагоны. Control+клик копирует задания
+STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Создаёт копию поезда, включая все вагоны. Щёлкнуть на кнопке и затем на поезде внутри или снаружи депо. Control+клик копирует задания
 STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Переимен.
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Пропуск
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Удалить
@@ -2972,7 +2972,9 @@ STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Назв
 STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Невозможно назвать поезд...
 STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Назвать поезд
 STR_NEWS_TRAIN_CRASH                                            :{BLACK}{BIGFONT}Столкновение поездов!{}{COMMA} человек{P "" а ""} погиб{P "" ло ло} в огне!
-STR_ERROR_CAN_T_REVERSE_DIRECTION                               :{WHITE}Невозможно развернуть поезд...
+STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Невозможно развернуть поезд...
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Нельзя развернуть поезд...
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Невозможно развернуть многосоставной транспорт
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Переименовать тип вагона
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Невозможно переименовать...
 STR_CLEAR_TIME                                                  :{BLACK}Сбросить время
@@ -3051,8 +3053,7 @@ STR_NEWS_FIRST_ROAD_PASSENGER_TRAM_ARRIVAL                      :{BLACK}{BIGFONT
 STR_NEWS_FIRST_ROAD_CARGO_TRAM_ARRIVAL                          :{BLACK}{BIGFONT}Жители празднуют . . .{}Первый грузовой трамвай прибыл на {STATION}!
 STR_NEWS_ROAD_CRASH_DRIVER                                      :{BLACK}{BIGFONT}АВАРИЯ!{}Водитель погиб при столкновении с поездом
 STR_NEWS_ROAD_CRASH                                             :{BLACK}{BIGFONT}АВАРИЯ!{}{COMMA} человек{P "" а ""} погиб{P "" ло ло} при столкновении с поездом!
-STR_ERROR_CAN_T_MAKE_VEHICLE_TURN                               :{WHITE}Невозможно развернуть автомобиль...
-STR_ONLY_TURN_SINGLE_UNIT                                       :{WHITE}Невозможно развернуть многосоставной транспорт
+STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Нельзя развернуть машину...
 STR_BUILD_VEHICLE_ROAD_RENAME_BUTTON                            :{BLACK}Переимен.
 STR_BUILD_VEHICLE_ROAD_RENAME_TOOLTIP                           :{BLACK}Переименовать автомобиль
 STR_QUERY_RENAME_ROAD_TYPE_CAPTION                              :{WHITE}Переименовать автомобиль
@@ -3131,7 +3132,7 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Здес
 STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}Ангар {STATION}
 STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}Новое судно
 STR_CLONE_AIRCRAFT                                              :{BLACK}Копировать
-STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Создает копию самолёта. Control-клик - копирует задания
+STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Создаёт копию самолёта. Control+клик - копирует задания
 STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Построить копию возд. судна. Нажмите на кнопку, а потом на возд. судно в/вне ангара. Ctrl+click - также скопирует и задание.
 STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Новый
 STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Построить
