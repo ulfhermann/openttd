@@ -658,6 +658,10 @@ class SmallMapWindow : public Window
 		return RemapPlainCoords(TileX(tile) * TILE_SIZE, TileY(tile) * TILE_SIZE);
 	}
 
+	inline int UnScalePlainCoord(int pos) {
+		return UnScaleByZoomLower(pos, this->zoom) / TILE_SIZE;
+	}
+
 	/**
 	 * Remap a map X coordinate to a location on this smallmap.
 	 * @param pos_x the tile's X coordinate.
@@ -665,7 +669,7 @@ class SmallMapWindow : public Window
 	 */
 	inline int RemapX(int pos_x)
 	{
-		return UnScaleByZoomLower(pos_x, this->zoom) / TILE_SIZE - UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
+		return UnScalePlainCoord(pos_x) - UnScalePlainCoord(this->scroll_x);
 	}
 
 	/**
@@ -675,7 +679,7 @@ class SmallMapWindow : public Window
 	 */
 	inline int RemapY(int pos_y)
 	{
-		return UnScaleByZoomLower(pos_y, this->zoom) / TILE_SIZE - UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
+		return UnScalePlainCoord(pos_y) - UnScalePlainCoord(this->scroll_y);
 	}
 
 	/**
@@ -809,8 +813,8 @@ public:
 			}
 		}
 
-		int tile_x = UnScaleByZoomLower(this->scroll_x, this->zoom) / TILE_SIZE;
-		int tile_y = UnScaleByZoomLower(this->scroll_y, this->zoom) / TILE_SIZE;
+		int tile_x = UnScalePlainCoord(this->scroll_x);
+		int tile_y = UnScalePlainCoord(this->scroll_y);
 
 		int dx = dpi->left;
 		tile_x -= dx / 4;
@@ -1038,10 +1042,10 @@ public:
 		/* Draw map indicators */
 		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 
-		x = UnScaleByZoom(vp->virtual_left - pt.x, this->zoom) / TILE_SIZE;
-		y = UnScaleByZoom(vp->virtual_top - pt.y, this->zoom) / TILE_SIZE;
-		int x2 = x + UnScaleByZoom(vp->virtual_width, this->zoom) / TILE_SIZE;
-		int y2 = y + UnScaleByZoom(vp->virtual_height, this->zoom) / TILE_SIZE;
+		x = UnScalePlainCoord(vp->virtual_left) - UnScalePlainCoord(pt.x);
+		y = UnScalePlainCoord(vp->virtual_top) - UnScalePlainCoord(pt.y);
+		int x2 = x + UnScalePlainCoord(vp->virtual_width);
+		int y2 = y + UnScalePlainCoord(vp->virtual_height);
 
 		DrawVertMapIndicator(x, y, x, y2);
 		DrawVertMapIndicator(x2, y, x2, y2);
@@ -1381,13 +1385,21 @@ public:
 	}
 
 	void DoScroll(int dx, int dy) {
-		/* divide as late as possible to avoid premature reduction to 0, which causes "jumpy" behaviour */
-		this->scroll_x += ScaleByZoom(dy * TILE_SIZE * 2 - dx * TILE_SIZE, this->zoom) / 4;
-		this->scroll_y += ScaleByZoom(dx * TILE_SIZE + dy * TILE_SIZE * 2, this->zoom) / 4;
+		/* divide as late as possible to avoid premature reduction to 0, which causes "jumpy" behaviour
+		 * at the same time make sure this is the exact reverse function of the drawing methods in order to
+		 * avoid map indicators shifting around:
+		 * 1. add/subtract
+		 * 2. * TILE_SIZE
+		 * 3. scale
+		 */
+		this->scroll_x += ScaleByZoomLower((dy * 2 - dx) / 4 * TILE_SIZE, this->zoom);
+		this->scroll_y += ScaleByZoomLower((dx + dy * 2) / 4 * TILE_SIZE, this->zoom);
+
+		/* enforce the screen limits */
 		int hx = this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left;
 		int hy = this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top;
-		int hvx = ScaleByZoom(hy * 4 - hx * 2, this->zoom);
-		int hvy = ScaleByZoom(hx * 2 + hy * 4, this->zoom);
+		int hvx = ScaleByZoomLower(hy * 4 - hx * 2, this->zoom);
+		int hvy = ScaleByZoomLower(hx * 2 + hy * 4, this->zoom);
 		this->scroll_x = max(-hvx, this->scroll_x);
 		this->scroll_y = max(-hvy, this->scroll_y);
 		this->scroll_x = min(MapMaxX() * TILE_SIZE, this->scroll_x);
