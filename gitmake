@@ -1,0 +1,52 @@
+
+VPATH=.:./.git/refs/heads/
+
+gitmake-all: cargodist diaglvl
+	touch gitmake-all
+
+check: clean gitmake-origin
+	echo "check OK"
+
+clean:
+	rm -f gitmake-origin
+
+%:
+	git checkout $@
+	git merge $(^F)
+#	make -j2
+
+gitmake-origin: 
+	git fetch origin
+	git diff --numstat origin/master master | grep -v .gitignore && touch gitmake-origin || touch -t 197001010100 gitmake-origin
+
+master: gitmake-origin
+	git checkout $@
+	git pull
+	make -j2
+
+cargodist: station-gui smallmap-stats
+
+station-gui: flowmapping-vehload
+
+smallmap-stats: flowmapping-vehload smallmap-zoom
+
+flowmapping-vehload: flowmapping-core
+
+flowmapping-core: mcf
+
+mcf: demands
+
+demands: components
+
+components: capacities
+
+capacities: master
+
+smallmap-zoom: master
+
+diaglvl: tileiter
+
+tileiter: master
+
+push: master cargodist station-gui smallmap-stats flowmapping-vehload flowmapping-core mcf demands components capacities smallmap-zoom diaglvl tileiter
+	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
