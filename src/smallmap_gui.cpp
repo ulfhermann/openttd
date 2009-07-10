@@ -785,7 +785,7 @@ public:
 				if (dpi->width - x <= 0) break;
 
 				/* number of lines */
-				int reps = (dpi->height + 1) / 2 + dy;
+				int reps = (dpi->height + 1 + dy) / 2;
 				if (reps > 0) {
 					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
 				}
