@@ -863,7 +863,7 @@ public:
 				if (dpi->width - x <= 0) break;
 
 				/* number of lines */
-				int reps = (dpi->height + 1) / 2 + dy;
+				int reps = (dpi->height + 1 + dy) / 2;
 				if (reps > 0) {
 					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
 				}
@@ -1066,6 +1066,38 @@ public:
 		this->SetDirty();
 	}
 
+	/**
+	 * Zoom in the map by one level.
+	 * @param cx horizontal coordinate of center point, relative to SM_WIDGET_MAP widget
+	 * @param cy vertical coordinate of center point, relative to SM_WIDGET_MAP widget
+	 */
+	void ZoomIn(int cx, int cy)
+	{
+	        if (this->zoom > -ZOOM_LVL_MAX) {
+	                this->zoom--;
+	                this->DoScroll(cx, cy);
+	                this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN, this->zoom == -ZOOM_LVL_MAX);
+	                this->EnableWidget(SM_WIDGET_ZOOM_OUT);
+	                this->SetDirty();
+	        }
+	}
+
+	/**
+	 * Zoom out the map by one level.
+	 * @param cx horizontal coordinate of center point, relative to SM_WIDGET_MAP widget
+	 * @param cy vertical coordinate of center point, relative to SM_WIDGET_MAP widget
+	 */
+	void ZoomOut(int cx, int cy)
+	{
+	        if (this->zoom < ZOOM_LVL_MAX) {
+	                this->zoom++;
+	                this->DoScroll(cx / -2, cy / -2);
+	                this->EnableWidget(SM_WIDGET_ZOOM_IN);
+	                this->SetWidgetDisabledState(SM_WIDGET_ZOOM_OUT, this->zoom == ZOOM_LVL_MAX);
+	                this->SetDirty();
+	        }
+	}
+
 	void ResizeLegend()
 	{
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
@@ -1202,26 +1234,18 @@ public:
 			} break;
 
 			case SM_WIDGET_ZOOM_OUT:
-				if (this->zoom < ZOOM_LVL_MAX) {
-					this->zoom++;
-					DoScroll(
-							-(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 4,
-							-(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 4
-					);
-					SndPlayFx(SND_15_BEEP);
-					this->SetDirty();
-				}
+				this->ZoomOut(
+						(this->widget[SM_WIDGET_MAP].right - this->widget[SM_WIDGET_MAP].left) / 2,
+						(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top) / 2
+				);
+				SndPlayFx(SND_15_BEEP);
 				break;
 			case SM_WIDGET_ZOOM_IN:
-				if (this->zoom > -ZOOM_LVL_MAX) {
-					this->zoom--;
-					DoScroll(
-							(this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) / 2,
-							(this->widget[SM_WIDGET_MAP].bottom  - this->widget[SM_WIDGET_MAP].top) / 2
-					);
-					SndPlayFx(SND_15_BEEP);
-					this->SetDirty();
-				}
+				this->ZoomIn(
+						(this->widget[SM_WIDGET_MAP].right - this->widget[SM_WIDGET_MAP].left) / 2,
+						(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top) / 2
+				);
+				SndPlayFx(SND_15_BEEP);
 				break;
 			case SM_WIDGET_CONTOUR:    // Show land contours
 			case SM_WIDGET_VEHICLES:   // Show vehicles
@@ -1311,6 +1335,27 @@ public:
 			}
 		}
 	}
+
+	virtual void OnMouseWheel(int wheel)
+	{
+	        /* Cursor position relative to window */
+	        int cx = _cursor.pos.x - this->left;
+	        int cy = _cursor.pos.y - this->top;
+
+	        /* Is cursor over the map ? */
+	        if (IsInsideMM(cx, this->widget[SM_WIDGET_MAP].left, this->widget[SM_WIDGET_MAP].right + 1) &&
+	                                                IsInsideMM(cy, this->widget[SM_WIDGET_MAP].top, this->widget[SM_WIDGET_MAP].bottom + 1)) {
+	                /* Cursor position relative to map */
+	                cx -= this->widget[SM_WIDGET_MAP].left;
+	                cy -= this->widget[SM_WIDGET_MAP].top;
+
+	                if (wheel < 0) {
+	                        this->ZoomIn(cx, cy);
+	                } else {
+	                        this->ZoomOut(cx, cy);
+	                }
+	        }
+	};
 
 	virtual void OnRightClick(Point pt, int widget)
 	{
