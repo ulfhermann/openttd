@@ -22,7 +22,7 @@ gitmake-origin:
 master: gitmake-origin
 	git checkout $@
 	git pull
-	make -j2
+#	make -j2
 
 cargodist: station-gui smallmap-stats
 
