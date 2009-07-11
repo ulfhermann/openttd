@@ -55,6 +55,7 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 		Node & from = graph->GetNode(node1);
 
 		for(uint i = 0; i < num_demands; ++i) {
+			assert(!demands.empty());
 			NodeID node2 = demands.front();
 			demands.pop_front();
 			if (node1 == node2) {
@@ -65,8 +66,6 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 					demands.push_back(node2);
 					continue;
 				}
-			} else {
-				demands.push_back(node2);
 			}
 			Node & to = graph->GetNode(node2);
 			Edge & forward = graph->GetEdge(node1, node2);
@@ -89,16 +88,24 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 			demand_forw = max(demand_forw, (uint)1);
 			demand_forw = min(demand_forw, from.undelivered_supply);
 
-			forward.demand += demand_forw;
-			from.undelivered_supply -= demand_forw;
-
-			if (from.demand > 0) {
+			if (this->mod_size > 0 && from.demand > 0) {
 				uint demand_back = demand_forw * this->mod_size / 100;
-				demand_back = min(demand_back, to.undelivered_supply);
+				if (demand_back > to.undelivered_supply) {
+					demand_back = to.undelivered_supply;
+					demand_forw = demand_back * 100 / this->mod_size;
+				}
 				backward.demand += demand_back;
 				to.undelivered_supply -= demand_back;
 			}
 
+			forward.demand += demand_forw;
+			from.undelivered_supply -= demand_forw;
+
+			if (this->mod_size == 0 || to.undelivered_supply > 0) {
+				demands.push_back(node2);
+			} else {
+				num_demands--;
+			}
 
 			if (from.undelivered_supply == 0) {
 				break;
