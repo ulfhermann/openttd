@@ -1272,7 +1272,9 @@ static SettingEntry _settings_linkgraph[] = {
 	SettingEntry("linkgraph.demand_express"),
 	SettingEntry("linkgraph.demand_armoured"),
 	SettingEntry("linkgraph.demand_default"),
-	SettingEntry("linkgraph.mcf_accuracy"),
+	SettingEntry("linkgraph.accuracy"),
+	SettingEntry("linkgraph.demand_distance"),
+	SettingEntry("linkgraph.demand_size"),
 	SettingEntry("linkgraph.short_path_saturation"),
 };
 /** Linkgraph sub-page */
