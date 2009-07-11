@@ -25,69 +25,7 @@ void DemandCalculator::PrintDemandMatrix(LinkGraphComponent * graph) {
 	}
 }
 
-void DemandCalculator::CalcSymmetric(LinkGraphComponent * graph) {
-	NodeList nodes;
-	uint supply_sum = 0;
-	for(NodeID node = 0; node < graph->GetSize(); node++) {
-		Node & n = graph->GetNode(node);
-		if (n.demand > 0 && n.supply > 0) {
-			nodes.push_back(node);
-			supply_sum += n.supply;
-		}
-	}
-
-	if (supply_sum == 0) {
-		return;
-	}
-
-	while(!nodes.empty()) {
-		NodeID node1 = nodes.front();
-		nodes.pop_front();
-
-		Node & from = graph->GetNode(node1);
-
-		for(NodeList::iterator i = nodes.begin(); i != nodes.end();) {
-			NodeID node2 = *i;
-			Edge & forward = graph->GetEdge(node1, node2);
-			Edge & backward = graph->GetEdge(node2, node1);
-
-			Node & to = graph->GetNode(node2);
-
-			uint demand = from.undelivered_supply * to.undelivered_supply * (max_distance - forward.distance) / max_distance / supply_sum + 1;
-
-			forward.demand += demand;
-			forward.unsatisfied_demand += demand;
-			backward.demand += demand;
-			backward.unsatisfied_demand += demand;
-
-			assert(demand <= from.undelivered_supply);
-			assert(demand <= to.undelivered_supply);
-
-			from.undelivered_supply -= demand;
-			to.undelivered_supply -= demand;
-
-			if (to.undelivered_supply == 0) {
-				nodes.erase(i++);
-			} else {
-				++i;
-			}
-			if (from.undelivered_supply == 0) {
-				break;
-			}
-		}
-		if (from.undelivered_supply != 0) {
-			if (nodes.empty()) {
-				// only one node left
-				return;
-			} else {
-				nodes.push_back(node1);
-			}
-		}
-	}
-}
-
-
-void DemandCalculator::CalcAntiSymmetric(LinkGraphComponent * graph) {
+void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 	NodeList supplies;
 	NodeList demands;
 	uint supply_sum = 0;
@@ -130,12 +68,40 @@ void DemandCalculator::CalcAntiSymmetric(LinkGraphComponent * graph) {
 			} else {
 				demands.push_back(node2);
 			}
-			Edge & edge = graph->GetEdge(node1, node2);
-			uint demand = from.undelivered_supply * demand_per_node * (max_distance - edge.distance) / max_distance / supply_sum + 1;
-			edge.demand += demand;
-			edge.unsatisfied_demand += demand;
-			assert(demand <= from.undelivered_supply);
-			from.undelivered_supply -= demand;
+			Node & to = graph->GetNode(node2);
+			Edge & forward = graph->GetEdge(node1, node2);
+			Edge & backward = graph->GetEdge(node2, node1);
+
+			uint supply = from.supply;
+			assert(supply > 0);
+			if (this->mod_size > 0) {
+				supply = supply * to.supply * this->mod_size / 100 / demand_per_node;
+			}
+
+			uint distance = 1;
+			if (this->mod_dist > 0) {
+				distance = this->max_distance * 100 / (this->max_distance - forward.distance) / this->mod_dist;
+			}
+			assert(distance > 0);
+
+			uint demand_forw = supply / distance / this->accuracy;
+
+			demand_forw = max(demand_forw, (uint)1);
+			demand_forw = min(demand_forw, from.undelivered_supply);
+
+			forward.demand += demand_forw;
+			forward.unsatisfied_demand += demand_forw;
+			from.undelivered_supply -= demand_forw;
+
+			if (from.demand > 0) {
+				uint demand_back = demand_forw * this->mod_size / 100;
+				demand_back = min(demand_back, to.undelivered_supply);
+				backward.demand += demand_back;
+				backward.unsatisfied_demand += demand_back;
+				to.undelivered_supply -= demand_back;
+			}
+
+
 			if (from.undelivered_supply == 0) {
 				break;
 			}
@@ -160,12 +126,17 @@ void DemandCalculator::Run(LinkGraphComponent * graph) {
 		type = settings.demand_armoured;
 	}
 
+	this->accuracy = settings.accuracy;
+	this->mod_size = settings.demand_size;
+	this->mod_dist = settings.demand_distance;
+
 	switch (type) {
 	case DT_SYMMETRIC:
-		CalcSymmetric(graph);
+		CalcDemand(graph);
 		break;
 	case DT_ANTISYMMETRIC:
-		CalcAntiSymmetric(graph);
+		this->mod_size = 0;
+		CalcDemand(graph);
 		break;
 	default:
 		/* ignore */
