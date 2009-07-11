@@ -332,6 +332,9 @@ struct LinkGraphSettings {
 	DistributionTypeByte demand_express;     ///< demand calculation for express cargo class
 	DistributionTypeByte demand_armoured;    ///< demand calculation for armoured cargo class
 	DistributionTypeByte demand_default;     ///< demand calculation for all other goods
+	uint8 accuracy;                          ///< accuracy when calculating things on the link graph. low accuracy => low running time
+	uint8 demand_size;                       ///< influence of supply ("station size") on the demand function
+	uint8 demand_distance;                   ///< influence of distance between stations on the demand function
 };
 
 /** Settings related to stations. */
