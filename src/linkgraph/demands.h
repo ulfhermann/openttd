@@ -11,14 +11,16 @@
 
 class DemandCalculator : public ComponentHandler {
 public:
-	DemandCalculator() : max_distance(MapSizeX() + MapSizeY()) {}
+	DemandCalculator() : max_distance(MapSizeX() + MapSizeY() + 1) {}
 	virtual void Run(LinkGraphComponent * graph);
 	void PrintDemandMatrix(LinkGraphComponent * graph);
 	virtual ~DemandCalculator() {}
 private:
 	uint max_distance;
-	void CalcSymmetric(LinkGraphComponent * graph);
-	void CalcAntiSymmetric(LinkGraphComponent * graph);
+	uint mod_size;
+	uint mod_dist;
+	uint accuracy;
+	void CalcDemand(LinkGraphComponent * graph);
 };
 
 #endif /* DEMANDS_H_ */
