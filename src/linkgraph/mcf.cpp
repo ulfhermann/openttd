@@ -8,7 +8,7 @@ MultiCommodityFlow::MultiCommodityFlow() :
 {}
 
 void MultiCommodityFlow::Run(LinkGraphComponent * g) {
-	assert(g->GetSettings().mcf_accuracy >= 1);
+	assert(g->GetSettings().accuracy >= 1);
 	graph = g;
 }
 
@@ -203,7 +203,7 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 	MultiCommodityFlow::Run(graph);
 	PathVector paths;
 	uint size = graph->GetSize();
-	uint accuracy = graph->GetSettings().mcf_accuracy;
+	uint accuracy = graph->GetSettings().accuracy;
 	bool more_loops = true;
 
 	while (more_loops) {
@@ -245,7 +245,7 @@ void MCF2ndPass::Run(LinkGraphComponent * graph) {
 	MultiCommodityFlow::Run(graph);
 	PathVector paths;
 	uint size = graph->GetSize();
-	uint accuracy = graph->GetSettings().mcf_accuracy;
+	uint accuracy = graph->GetSettings().accuracy;
 	bool demand_left = true;
 	while (demand_left) {
 		demand_left = false;

@@ -1392,8 +1392,21 @@ public:
 		 * 2. * TILE_SIZE
 		 * 3. scale
 		 */
-		this->scroll_x += ScaleByZoomLower((dy * 2 - dx) / 4 * TILE_SIZE, this->zoom);
-		this->scroll_y += ScaleByZoomLower((dx + dy * 2) / 4 * TILE_SIZE, this->zoom);
+		int x = dy * 2 - dx;
+		int y = dx + dy * 2;
+
+		/* round to next divisible by 4 to allow for smoother scrolling */
+		int rem_x = abs(x % 4);
+		int rem_y = abs(y % 4);
+		if (rem_x != 0) {
+			x += x > 0 ? 4 - rem_x : rem_x - 4;
+		}
+		if (rem_y != 0) {
+			y += y > 0 ? 4 - rem_y : rem_y - 4;
+		}
+
+		this->scroll_x += ScaleByZoomLower(x / 4 * TILE_SIZE, this->zoom);
+		this->scroll_y += ScaleByZoomLower(y / 4 * TILE_SIZE, this->zoom);
 
 		/* enforce the screen limits */
 		int hx = this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left;
