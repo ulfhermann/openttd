@@ -590,12 +590,21 @@ class SmallMapWindow : public Window
 	int32 scroll_y;
 
 	uint8 refresh;
+
+	/**
+	 * zoom level of the smallmap.
+	 * May be something between -ZOOM_LVL_MAX and +ZOOM_LVL_MAX. Negative zoom levels are zoom in.
+	 */
 	ZoomLevel zoom;
 
 	static const int COLUMN_WIDTH = 119;
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
-	static const int _spacing_side = 2;
-	static const int _spacing_top = 16;
+
+	/** size of left and right borders of the smallmap window */
+	static const int SPACING_SIDE = 2;
+
+	/** size of top border (and title bar) of the smallmap window */
+	static const int SPACING_TOP = 16;
 
 	int routemap_count;
 
@@ -646,7 +655,14 @@ class SmallMapWindow : public Window
 	 * We can't divide scroll_{x|y} by TILE_SIZE before scaling as that would mean we can only scroll full tiles.
 	 */
 
-	inline Point RemapPlainCoords(int pos_x, int pos_y) {
+	/**
+	 * remap coordinates on the main map into coordinates on the smallmap
+	 * @param pos_x X position on the main map
+	 * @param pos_y Y position on the main map
+	 * @return Point in the smallmap
+	 */
+	inline Point RemapPlainCoords(int pos_x, int pos_y)
+	{
 		return RemapCoords(
 				RemapX(pos_x),
 				RemapY(pos_y),
@@ -654,11 +670,23 @@ class SmallMapWindow : public Window
 				);
 	}
 
-	inline Point RemapTileCoords(TileIndex tile) {
+	/**
+	 * remap a tile coordinate into coordinates on the smallmap
+	 * @param tile the tile to be remapped
+	 * @return Point with coordinates of the tile's upper left corner in the smallmap
+	 */
+	inline Point RemapTileCoords(TileIndex tile)
+	{
 		return RemapPlainCoords(TileX(tile) * TILE_SIZE, TileY(tile) * TILE_SIZE);
 	}
 
-	inline int UnScalePlainCoord(int pos) {
+	/**
+	 * scale a coordinate from the main map into the smallmap dimension
+	 * @param pos coordinate to be scaled
+	 * @return scaled coordinate
+	 */
+	inline int UnScalePlainCoord(int pos)
+	{
 		return UnScaleByZoomLower(pos, this->zoom) / TILE_SIZE;
 	}
 
@@ -691,7 +719,6 @@ class SmallMapWindow : public Window
 	 * @param yc The Y coordinate of the first tile in the column
 	 * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
 	 * @param reps Number of lines to draw
-	 * @param mask ?
 	 * @param proc Pointer to the colour function
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
@@ -731,6 +758,11 @@ class SmallMapWindow : public Window
 		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
+	/**
+	 * draws a vehivle in the smallmap if it's in the selected drawing area.
+	 * @param dpi the part of the smallmap to be drawn into
+	 * @param v the vehicle to be drawn
+	 */
 	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v)
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
@@ -738,11 +770,12 @@ class SmallMapWindow : public Window
 		if (this->zoom < 0) {
 			scale = 1 << (-this->zoom);
 		}
+
 		/* Remap into flat coordinates. */
 		Point pt = RemapTileCoords(v->tile);
 
-        int x = pt.x - dpi->left;
-        int y = pt.y - dpi->top;
+		int x = pt.x - dpi->left;
+		int y = pt.y - dpi->top;
 
 		/* Check if rhombus is inside bounds */
 		if ((x + 2 * scale < 0) || //left
@@ -1042,6 +1075,7 @@ public:
 		/* Draw map indicators */
 		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 
+		/* UnScale everything separately to produce the same rounding errors as when drawing the background */
 		x = UnScalePlainCoord(vp->virtual_left) - UnScalePlainCoord(pt.x);
 		y = UnScalePlainCoord(vp->virtual_top) - UnScalePlainCoord(pt.y);
 		int x2 = x + UnScalePlainCoord(vp->virtual_width);
@@ -1059,14 +1093,12 @@ public:
 	{
 		ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
 
-		int vwidth = UnScaleByZoom(vp->virtual_width, this->zoom);
-		int vheight = UnScaleByZoom(vp->virtual_height, this->zoom);
-		int vleft = UnScaleByZoom(vp->virtual_left, this->zoom);
-		int vtop = UnScaleByZoom(vp->virtual_top, this->zoom);
-		int x  = ((vwidth  - (this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE) / 2 + vleft) / 4;
-		int y  = ((vheight - (this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top ) * TILE_SIZE) / 2 + vtop ) / 2 - TILE_SIZE * 2;
-		this->scroll_x = ScaleByZoom((y - x) & ~0xF, this->zoom);
-		this->scroll_y = ScaleByZoom((x + y) & ~0xF, this->zoom);
+		int zoomed_width = ScaleByZoom((this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE, this->zoom);
+		int zoomed_height = ScaleByZoom((this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top) * TILE_SIZE, this->zoom);
+		int x  = ((vp->virtual_width - zoomed_width) / 2 + vp->virtual_left);
+		int y  = ((vp->virtual_height - zoomed_height) / 2 + vp->virtual_top);
+		this->scroll_x = (y * 2 - x) / 4;
+		this->scroll_y = (x + y * 2) / 4;
 		this->SetDirty();
 	}
 
@@ -1231,8 +1263,10 @@ public:
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				w->viewport->dest_scrollpos_x = pt.x + ScaleByZoom(_cursor.pos.x - this->left - this->_spacing_side, this->zoom) * TILE_SIZE - w->viewport->virtual_width / 2;
-				w->viewport->dest_scrollpos_y = pt.y + ScaleByZoom(_cursor.pos.y - this->top - this->_spacing_top, this->zoom) * TILE_SIZE - w->viewport->virtual_height / 2;
+				int scaled_x_off = ScaleByZoom((_cursor.pos.x - this->left - this->SPACING_SIDE) * TILE_SIZE, this->zoom);
+				int scaled_y_off = ScaleByZoom((_cursor.pos.y - this->top - this->SPACING_TOP) * TILE_SIZE, this->zoom);
+				w->viewport->dest_scrollpos_x = pt.x + scaled_x_off - w->viewport->virtual_width / 2;
+				w->viewport->dest_scrollpos_y = pt.y + scaled_y_off - w->viewport->virtual_height / 2;
 
 				this->SetDirty();
 			} break;
@@ -1384,7 +1418,13 @@ public:
 		this->SetDirty();
 	}
 
-	void DoScroll(int dx, int dy) {
+	/**
+	 * Do the actual scrolling, but don't fix the cursor or set the window dirty.
+	 * @param dx x offset to scroll in screen dimension
+	 * @param dy y offset to scroll in screen dimension
+	 */
+	void DoScroll(int dx, int dy)
+	{
 		/* divide as late as possible to avoid premature reduction to 0, which causes "jumpy" behaviour
 		 * at the same time make sure this is the exact reverse function of the drawing methods in order to
 		 * avoid map indicators shifting around:
