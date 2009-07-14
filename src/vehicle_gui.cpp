@@ -19,6 +19,7 @@
 #include "station_base.h"
 #include "roadveh.h"
 #include "train.h"
+#include "aircraft.h"
 #include "depot_base.h"
 #include "group_gui.h"
 #include "strings_func.h"
@@ -810,7 +811,7 @@ static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y)
 static void DrawVehicleImage(const Vehicle *v, int x, int y, VehicleID selection, int max_width, int skip)
 {
 	switch (v->type) {
-		case VEH_TRAIN:    DrawTrainImage(v, x, y, selection, max_width, skip); break;
+		case VEH_TRAIN:    DrawTrainImage(Train::From(v), x, y, selection, max_width, skip); break;
 		case VEH_ROAD:     DrawRoadVehImage(v, x, y, selection, max_width);     break;
 		case VEH_SHIP:     DrawShipImage(v, x, y, selection);                   break;
 		case VEH_AIRCRAFT: DrawAircraftImage(v, x, y, selection);               break;
@@ -1343,7 +1344,7 @@ extern int GetTrainDetailsWndVScroll(VehicleID veh_id, TrainDetailsWindowTabs de
 extern void DrawTrainDetails(const Train *v, int left, int right, int y, int vscroll_pos, uint16 vscroll_cap, TrainDetailsWindowTabs det_tab);
 extern void DrawRoadVehDetails(const Vehicle *v, int left, int right, int y);
 extern void DrawShipDetails(const Vehicle *v, int left, int right, int y);
-extern void DrawAircraftDetails(const Vehicle *v, int left, int right, int y);
+extern void DrawAircraftDetails(const Aircraft *v, int left, int right, int y);
 
 struct VehicleDetailsWindow : Window {
 	TrainDetailsWindowTabs tab;
@@ -1436,7 +1437,7 @@ struct VehicleDetailsWindow : Window {
 			case VEH_TRAIN:    DrawTrainDetails(Train::From(v), left, right, y, vscroll_pos, vscroll_cap, det_tab);  break;
 			case VEH_ROAD:     DrawRoadVehDetails(v, left, right, y);  break;
 			case VEH_SHIP:     DrawShipDetails(v, left, right, y);     break;
-			case VEH_AIRCRAFT: DrawAircraftDetails(v, left, right, y); break;
+			case VEH_AIRCRAFT: DrawAircraftDetails(Aircraft::From(v), left, right, y); break;
 			default: NOT_REACHED();
 		}
 	}
