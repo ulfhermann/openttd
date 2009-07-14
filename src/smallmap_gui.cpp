@@ -803,6 +803,12 @@ class SmallMapWindow : public Window
 		}
 	}
 
+	inline Point GetStationMiddle(const Station * st) {
+		int x = (st->rect.right + st->rect.left - 1) * TILE_SIZE / 2;
+		int y = (st->rect.bottom + st->rect.top - 1) * TILE_SIZE / 2;
+		return RemapPlainCoords(x, y);
+	}
+
 public:
 	/**
 	 * Draws the small map.
@@ -951,12 +957,9 @@ public:
 						if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
 						if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
 
-						TileIndex ta = sta->xy;
-						TileIndex tb = stb->xy;
+						Point pta = GetStationMiddle(sta);
 
-						Point pta = RemapTileCoords(ta);
-
-						Point ptb = RemapTileCoords(tb);
+						Point ptb = GetStationMiddle(stb);
 
 						GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
 						GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
@@ -1020,9 +1023,7 @@ public:
 			FOR_ALL_STATIONS(st) {
 				if (st->owner != _local_company && Company::IsValidID(st->owner)) continue;
 
-				TileIndex t = st->xy;
-
-				Point pt = RemapTileCoords(t);
+				Point pt = GetStationMiddle(st);
 
 				/* Add up cargo supplied for each selected cargo type */
 				uint q = 0;
@@ -1031,9 +1032,12 @@ public:
 				for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
 					if (!tbl->show_on_map) continue;
 					CargoID c = tbl->type;
-					q += st->goods[c].supply * 30 / scale;
-					colour += tbl->colour;
-					numCargos++;
+					int add = st->goods[c].supply;
+					if (add > 0) {
+						q += add * 30 / scale;
+						colour += tbl->colour;
+						numCargos++;
+					}
 				}
 				if (numCargos > 1)
 					colour /= numCargos;
