@@ -26,13 +26,13 @@
 #include "table/strings.h"
 
 /**
- * Update the sign for the waypoint
- * @param wp Waypoint to update sign */
-void UpdateWaypointSign(Waypoint *wp)
+ * Update the virtual coords needed to draw the waypoint sign.
+ */
+void Waypoint::UpdateVirtCoord()
 {
-	Point pt = RemapCoords2(TileX(wp->xy) * TILE_SIZE, TileY(wp->xy) * TILE_SIZE);
-	SetDParam(0, wp->index);
-	wp->sign.UpdatePosition(pt.x, pt.y - 0x20, STR_WAYPOINT_VIEWPORT);
+	Point pt = RemapCoords2(TileX(this->xy) * TILE_SIZE, TileY(this->xy) * TILE_SIZE);
+	SetDParam(0, this->index);
+	this->sign.UpdatePosition(pt.x, pt.y - 0x20, STR_WAYPOINT_VIEWPORT);
 }
 
 /**
@@ -180,7 +180,6 @@ CommandCost CmdBuildTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1
 				}
 			}
 
-			wp->sign.MarkDirty();
 			wp->xy = tile;
 			InvalidateWindowData(WC_WAYPOINT_VIEW, wp->index);
 		}
@@ -211,8 +210,7 @@ CommandCost CmdBuildTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1
 
 		if (wp->town_index == INVALID_TOWN) MakeDefaultWaypointName(wp);
 
-		UpdateWaypointSign(wp);
-		wp->sign.MarkDirty();
+		wp->UpdateVirtCoord();
 		YapfNotifyTrackLayoutChange(tile, AxisToTrack(axis));
 	}
 
@@ -319,8 +317,7 @@ CommandCost CmdRenameWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 			wp->name = strdup(text);
 		}
 
-		UpdateWaypointSign(wp);
-		MarkWholeScreenDirty();
+		wp->UpdateVirtCoord();
 	}
 	return CommandCost();
 }

@@ -123,7 +123,7 @@ Money CalculateCompanyValue(const Company *c)
 
 		if (v->type == VEH_TRAIN ||
 				v->type == VEH_ROAD ||
-				(v->type == VEH_AIRCRAFT && IsNormalAircraft(v)) ||
+				(v->type == VEH_AIRCRAFT && Aircraft::From(v)->IsNormalAircraft()) ||
 				v->type == VEH_SHIP) {
 			value += v->value * 3 >> 1;
 		}
@@ -369,7 +369,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 				} else {
 					v->owner = new_owner;
 					v->colourmap = PAL_NONE;
-					if (IsEngineCountable(v)) Company::Get(new_owner)->num_engines[v->engine_type]++;
+					if (v->IsEngineCountable()) Company::Get(new_owner)->num_engines[v->engine_type]++;
 					if (v->IsPrimaryVehicle()) v->unitnumber = unitidgen[v->type].NextID();
 				}
 			}
@@ -1334,7 +1334,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 		byte load_amount = EngInfo(v->engine_type)->load_amount;
 
 		/* The default loadamount for mail is 1/4 of the load amount for passengers */
-		if (v->type == VEH_AIRCRAFT && !IsNormalAircraft(v)) load_amount = (load_amount + 3) / 4;
+		if (v->type == VEH_AIRCRAFT && !Aircraft::From(v)->IsNormalAircraft()) load_amount = (load_amount + 3) / 4;
 
 		if (_settings_game.order.gradual_loading && HasBit(EngInfo(v->engine_type)->callbackmask, CBM_VEHICLE_LOAD_AMOUNT)) {
 			uint16 cb_load_amount = GetVehicleCallback(CBID_VEHICLE_LOAD_AMOUNT, 0, 0, v->engine_type, v);
