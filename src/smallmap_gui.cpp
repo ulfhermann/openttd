@@ -1153,10 +1153,10 @@ public:
 		}
 
 		if (this->map_type == SMT_ROUTEMAP && _game_mode == GM_NORMAL) {
-			DrawStationDots();
-
 			LinkLineDrawer lines;
 			lines.DrawLinks(this);
+
+			DrawStationDots();
 
 			if (this->show_towns) {
 				LinkTextDrawer text;
