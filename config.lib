@@ -1613,7 +1613,7 @@ check_strip() {
 	elif [ "$os" = "OSX" ]; then
 		# Most targets have -V in strip, to see if they exists... OSX doesn't.. so execute something
 		echo "int main(int argc, char *argv[]) { }" > strip.test.c
-		$cc_host strip.test.c -o strip.test
+		$cxx_host strip.test.c -o strip.test
 		check_compiler "host strip" "strip" "$host" "$strip" "$STRIP" "strip" "strip" "3" "strip.test"
 		rm -f strip.test.c strip.test
 	else
@@ -1624,7 +1624,7 @@ check_strip() {
 check_lipo() {
 	if [ "$os" = "OSX" ] && [ "$enable_universal" != "0" ]; then
 		echo "int main(int argc, char *argv[]) { }" > lipo.test.c
-		$cc_host lipo.test.c -o lipo.test
+		$cxx_host lipo.test.c -o lipo.test
 		check_compiler "host lipo" "lipo" "$host" "$lipo" "$LIPO" "lipo" "lipo" "4" "-info lipo.test"
 		rm -f lipo.test.c lipo.test
 	fi
@@ -1651,24 +1651,22 @@ set_universal_binary_flags() {
 }
 
 check_osx_sdk() {
-cat > tmp.osx.cpp << EOF
-#include <AvailabilityMacros.h>
-#if !defined(MAC_OS_X_VERSION_10_5)
-# error "Need newer SDK"
-#endif
+cat > tmp.osx.mm << EOF
+#include <Cocoa/Cocoa.h>
 int main() {
+	kCGBitmapByteOrder32Host;
 	return 0;
 }
 EOF
-	execute="$cxx_host $CFLAGS -E tmp.osx.cpp -o - 2>&1"
+	execute="$cxx_host $CFLAGS tmp.osx.mm -framework Cocoa -o tmp.osx 2>&1"
 	eval $execute > /dev/null
 	ret=$?
 	log 2 "executing $execute"
 	log 2 "  exit code $ret"
-	rm -f tmp.osx.cpp
+	rm -f tmp.osx.mm tmp.osx
 	if [ "$ret" != "0" ]; then
-		log 1 "I couldn't detect any XCode >= 2.5 on your system"
-		log 1 "please install/upgrade your XCode"
+		log 1 "Your system SDK is probably too old"
+		log 1 "Please install/upgrade your Xcode to >= 2.5"
 
 		exit 1
 	fi
@@ -2585,17 +2583,6 @@ detect_cputype() {
 make_sed() {
 	T_CFLAGS="$CFLAGS"
 	T_LDFLAGS="$LDFLAGS"
-
-	# We check here if we are PPC, because then we need to enable FOUR_BYTE_BOOL
-	#  We do this here, and not sooner, so universal builds also have this
-	#  automatically correct
-	# FOUR_BYTE_BOOL is needed, because C++ uses 4byte for a bool on PPC, where
-	#  we use 1 byte per bool normally in C part. So convert that last one to 4
-	#  bytes too, but only for PPC.
-	ppc=`$cc_host -dumpmachine | egrep "powerpc|ppc"`
-	if [ -n "$ppc" ]; then
-		T_CFLAGS="$T_CFLAGS -DFOUR_BYTE_BOOL"
-	fi
 
 	SRC_OBJS_DIR="$BASE_SRC_OBJS_DIR/$OBJS_SUBDIR"
 

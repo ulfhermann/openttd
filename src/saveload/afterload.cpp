@@ -213,10 +213,10 @@ static bool InitializeWindowsAndCaches()
 	ResetViewportAfterLoadGame();
 
 	/* Update coordinates of the signs. */
-	UpdateAllStationVirtCoord();
+	UpdateAllStationVirtCoords();
 	UpdateAllSignVirtCoords();
 	UpdateAllTownVirtCoords();
-	UpdateAllWaypointSigns();
+	UpdateAllWaypointVirtCoords();
 
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
@@ -1760,7 +1760,7 @@ bool AfterLoadGame()
 		Aircraft *a;
 		FOR_ALL_AIRCRAFT(a) {
 			/* Set engine_type of shadow and rotor */
-			if (!IsNormalAircraft(a)) {
+			if (!a->IsNormalAircraft()) {
 				a->engine_type = a->First()->engine_type;
 			}
 		}
