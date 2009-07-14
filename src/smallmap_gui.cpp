@@ -809,6 +809,221 @@ class SmallMapWindow : public Window
 		return RemapPlainCoords(x, y);
 	}
 
+	void DrawStationDots() {
+		/* Colour for player owned stations */
+		//int p_colour = _colour_gradient[GetCompany(_local_company)->colour][6];
+		/* Colour for non-player owned stations */
+		//int o_colour = _colour_gradient[COLOUR_GREY][4];
+
+		const Station *st;
+
+		FOR_ALL_STATIONS(st) {
+			if (st->owner != _local_company && Company::IsValidID(st->owner)) continue;
+
+			Point pt = GetStationMiddle(st);
+
+			/* Add up cargo supplied for each selected cargo type */
+			uint q = 0;
+			int colour = 0;
+			int numCargos = 0;
+			for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
+				if (!tbl->show_on_map) continue;
+				CargoID c = tbl->type;
+				int add = st->goods[c].supply;
+				if (add > 0) {
+					q += add * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;
+					colour += tbl->colour;
+					numCargos++;
+				}
+			}
+			if (numCargos > 1)
+				colour /= numCargos;
+
+			uint r = 2;
+			if (q >= 10) r++;
+			if (q >= 20) r++;
+			if (q >= 40) r++;
+			if (q >= 80) r++;
+			if (q >= 160) r++;
+			DrawVertex(pt.x, pt.y, r, colour);
+		}
+	}
+
+	class LinkDrawer {
+		typedef std::set<StationID> StationIDSet;
+
+	protected:
+		virtual void DrawContent(Point & pta, Point & ptb) = 0;
+		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour *cargo_entry) = 0;
+
+		StationIDSet seen_stations;
+
+	public:
+		virtual ~LinkDrawer() {}
+
+		void DrawLinks(SmallMapWindow * window)
+		{
+			const Station * sta;
+			FOR_ALL_STATIONS(sta) {
+				for (const LegendAndColour *tbl = _legend_table[window->map_type]; !tbl->end; ++tbl) {
+					if (!tbl->show_on_map) continue;
+
+					CargoID c = tbl->type;
+					const LinkStatMap & links = sta->goods[c].link_stats;
+					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
+						StationID to = i->first;
+						if (Station::IsValidID(to) && seen_stations.find(to) == seen_stations.end()) {
+							const Station *stb = Station::Get(to);
+							if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
+							if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
+
+							for (const LegendAndColour *cargo_entry = _legend_table[window->map_type]; !cargo_entry->end; ++cargo_entry) {
+								CargoID cargo = cargo_entry->type;
+								if (cargo_entry->show_on_map) {
+									FlowStat sum_flows = sta->goods[cargo].GetSumFlowVia(stb->index);
+									const LinkStatMap ls_map = sta->goods[cargo].link_stats;
+									LinkStatMap::const_iterator i = ls_map.find(stb->index);
+									if (i != ls_map.end()) {
+										AddLink(i->second, sum_flows, cargo_entry);
+									}
+								}
+							}
+							Point pta = window->GetStationMiddle(sta);
+							Point ptb = window->GetStationMiddle(stb);
+
+							DrawContent(pta, ptb);
+
+							seen_stations.insert(to);
+						}
+					}
+				}
+				seen_stations.clear();
+			}
+		}
+	};
+
+	class LinkLineDrawer : public LinkDrawer {
+	protected:
+		uint16 colour;
+		int num_colours;
+		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour *cargo_entry) {
+			this->colour += cargo_entry->colour;
+			num_colours++;
+		}
+
+		virtual void DrawContent(Point & pta, Point & ptb) {
+			GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
+			GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
+			GfxDrawLine(pta.x, pta.y - 1, ptb.x, ptb.y - 1, _colour_gradient[COLOUR_GREY][1]);
+			GfxDrawLine(pta.x, pta.y + 1, ptb.x, ptb.y + 1, _colour_gradient[COLOUR_GREY][1]);
+			GfxDrawLine(pta.x, pta.y, ptb.x, ptb.y, this->colour / this->num_colours);
+			this->colour = 0;
+			this->num_colours = 0;
+		}
+	};
+
+	class LinkValueDrawer : public LinkDrawer {
+	protected:
+		LinkStat link;
+		FlowStat flow;
+		uint scale;
+
+		LinkValueDrawer() :
+			scale(_settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit)
+		{}
+
+		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour *cargo_entry)
+		{
+			this->link += orig_link;
+			this->flow += orig_flow;
+		}
+
+		void Scale()
+		{
+			this->link *= 30;
+			this->link /= this->scale;
+			this->flow *= 30;
+			this->flow /= this->scale;
+		}
+	};
+
+	class LinkTextDrawer : public LinkValueDrawer {
+	protected:
+		virtual void DrawContent(Point & pta, Point & ptb) {
+			Scale();
+			Point ptm;
+			ptm.x = (2*pta.x + ptb.x) / 3;
+			ptm.y = (2*pta.y + ptb.y) / 3;
+			SetDParam(0, this->link.usage);
+			SetDParam(1, this->link.capacity);
+			SetDParam(2, this->flow.planned);
+			SetDParam(3, this->flow.sent);
+			DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
+			this->flow.Clear();
+			this->link.Clear();
+		}
+	};
+
+	class LinkGraphDrawer : public LinkValueDrawer {
+		typedef std::multimap<uint, byte, std::greater<uint> > SizeMap;
+	protected:
+		virtual void DrawContent(Point & pta, Point & ptb) {
+			Scale();
+			Point ptm;
+			SizeMap sizes;
+			/* these floats only serve to calculate the size of the coloured boxes for capacity, usage, planned, sent
+			 * they are not reused anywhere, so it's network safe.
+			 */
+			sizes.insert(std::make_pair((uint)sqrt((float)this->link.usage), _colour_gradient[COLOUR_GREY][1]));
+			sizes.insert(std::make_pair((uint)sqrt((float)this->link.capacity), _colour_gradient[COLOUR_WHITE][7]));
+			sizes.insert(std::make_pair((uint)sqrt((float)this->flow.planned),  _colour_gradient[COLOUR_RED][5]));
+			sizes.insert(std::make_pair((uint)sqrt((float)this->flow.sent), _colour_gradient[COLOUR_YELLOW][5]));
+
+			ptm.x = (pta.x + ptb.x) / 2;
+			ptm.y = (pta.y + ptb.y) / 2;
+
+			for (SizeMap::iterator i = sizes.begin(); i != sizes.end(); ++i) {
+				if (pta.x > ptb.x) {
+					ptm.x -= 1;
+					GfxFillRect(ptm.x - i->first / 2, ptm.y - i->first * 2, ptm.x, ptm.y, i->second);
+				} else {
+					ptm.x += 1;
+					GfxFillRect(ptm.x, ptm.y - i->first * 2, ptm.x + i->first / 2, ptm.y, i->second);
+				}
+			}
+			this->flow.Clear();
+			this->link.Clear();
+		}
+	};
+
+	void DrawLinks() {
+		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
+			if (!tbl->show_on_map) continue;
+
+			CargoID c = tbl->type;
+			const Station * sta;
+			FOR_ALL_STATIONS(sta) {
+				const LinkStatMap & links = sta->goods[c].link_stats;
+				for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
+					StationID id = i->first;
+					if (!Station::IsValidID(id)) {
+						continue; // dead link
+					}
+					const Station *stb = Station::Get(id);
+
+					if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
+					if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
+
+					Point pta = GetStationMiddle(sta);
+
+					Point ptb = GetStationMiddle(stb);
+
+
+				}
+			}
+		}
+	}
+
 public:
 	/**
 	 * Draws the small map.
@@ -937,118 +1152,18 @@ public:
 			}
 		}
 
-
 		if (this->map_type == SMT_ROUTEMAP && _game_mode == GM_NORMAL) {
-			uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
-			for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-				if (!tbl->show_on_map) continue;
+			DrawStationDots();
 
-				CargoID c = tbl->type;
-				const Station * sta;
-				FOR_ALL_STATIONS(sta) {
-					const LinkStatMap & links = sta->goods[c].link_stats;
-					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
-						StationID id = i->first;
-						if (!Station::IsValidID(id)) {
-							continue; // dead link
-						}
-						const Station *stb = Station::Get(id);
+			LinkLineDrawer lines;
+			lines.DrawLinks(this);
 
-						if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
-						if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
-
-						Point pta = GetStationMiddle(sta);
-
-						Point ptb = GetStationMiddle(stb);
-
-						GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
-						GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
-						GfxDrawLine(pta.x, pta.y - 1, ptb.x, ptb.y - 1, _colour_gradient[COLOUR_GREY][1]);
-						GfxDrawLine(pta.x, pta.y + 1, ptb.x, ptb.y + 1, _colour_gradient[COLOUR_GREY][1]);
-						GfxDrawLine(pta.x, pta.y, ptb.x, ptb.y, tbl->colour);
-
-						LinkStat ls = i->second;
-						ls *= 30;
-						ls /= scale;
-						FlowStat flow = sta->goods[c].GetSumFlowVia(stb->index);
-						flow *= 30;
-						flow /= scale;
-
-						Point ptm;
-
-						if (!show_towns) {
-							typedef std::multimap<uint, byte, std::greater<uint> > SizeMap;
-							SizeMap sizes;
-							/* these floats only serve to calculate the size of the coloured boxes for capacity, usage, planned, sent
-							 * they are not reused anywhere, so it's network safe.
-							 */
-							sizes.insert(std::make_pair((uint)sqrt((float)ls.usage), _colour_gradient[COLOUR_GREY][1]));
-							sizes.insert(std::make_pair((uint)sqrt((float)ls.capacity), _colour_gradient[COLOUR_WHITE][7]));
-							sizes.insert(std::make_pair((uint)sqrt((float)flow.planned),  _colour_gradient[COLOUR_RED][5]));
-							sizes.insert(std::make_pair((uint)sqrt((float)flow.sent), _colour_gradient[COLOUR_YELLOW][5]));
-
-							ptm.x = (pta.x + ptb.x) / 2;
-							ptm.y = (pta.y + ptb.y) / 2;
-
-							for (SizeMap::iterator i = sizes.begin(); i != sizes.end(); ++i) {
-								if (pta.x > ptb.x) {
-									ptm.x -= 1;
-									GfxFillRect(ptm.x - i->first / 2, ptm.y - i->first * 2, ptm.x, ptm.y, i->second);
-								} else {
-									ptm.x += 1;
-									GfxFillRect(ptm.x, ptm.y - i->first * 2, ptm.x + i->first / 2, ptm.y, i->second);
-								}
-							}
-
-						} else {
-							ptm.x = (2*pta.x + ptb.x) / 3;
-							ptm.y = (2*pta.y + ptb.y) / 3;
-							SetDParam(0, ls.usage);
-							SetDParam(1, ls.capacity);
-							SetDParam(2, flow.planned);
-							SetDParam(3, flow.sent);
-							DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
-						}
-					}
-				}
-			}
-
-			/* Colour for player owned stations */
-			//int p_colour = _colour_gradient[GetCompany(_local_company)->colour][6];
-			/* Colour for non-player owned stations */
-			//int o_colour = _colour_gradient[COLOUR_GREY][4];
-
-			const Station *st;
-
-			FOR_ALL_STATIONS(st) {
-				if (st->owner != _local_company && Company::IsValidID(st->owner)) continue;
-
-				Point pt = GetStationMiddle(st);
-
-				/* Add up cargo supplied for each selected cargo type */
-				uint q = 0;
-				int colour = 0;
-				int numCargos = 0;
-				for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-					if (!tbl->show_on_map) continue;
-					CargoID c = tbl->type;
-					int add = st->goods[c].supply;
-					if (add > 0) {
-						q += add * 30 / scale;
-						colour += tbl->colour;
-						numCargos++;
-					}
-				}
-				if (numCargos > 1)
-					colour /= numCargos;
-
-				uint r = 2;
-				if (q >= 10) r++;
-				if (q >= 20) r++;
-				if (q >= 40) r++;
-				if (q >= 80) r++;
-				if (q >= 160) r++;
-				DrawVertex(pt.x, pt.y, r, colour);
+			if (this->show_towns) {
+				LinkTextDrawer text;
+				text.DrawLinks(this);
+			} else {
+				LinkGraphDrawer graph;
+				graph.DrawLinks(this);
 			}
 		}
 
