@@ -5,6 +5,9 @@
 #ifndef MACOS_STDAFX_H
 #define MACOS_STDAFX_H
 
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 /* We need to include this first as that "depends" on the compiler's setting
  * of __LP64__. So before we define __LP64__ so it can be used. */
 #include <sys/cdefs.h>
@@ -20,7 +23,19 @@
 #	error "Compiling 64 bits without _SQ64 set! (or vice versa)"
 #endif
 
+#define MAC_OS_X_VERSION_MIN_REQUIRED MAC_OS_X_VERSION_10_3
+#include <AvailabilityMacros.h>
+
+/* Name conflict */
+#define Rect        OTTDRect
+#define Point       OTTDPoint
+#define WindowClass OTTDWindowClass
+
 #include <CoreServices/CoreServices.h>
+
+#undef Rect
+#undef Point
+#undef WindowClass
 
 /* remove the variables that CoreServices defines, but we define ourselves too */
 #undef bool
@@ -28,7 +43,7 @@
 #undef true
 
 /* Name conflict */
-#define GetTime		OTTD_GetTime
+#define GetTime OTTD_GetTime
 
 #define SL_ERROR OSX_SL_ERROR
 
