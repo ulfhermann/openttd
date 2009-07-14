@@ -50,6 +50,21 @@ public:
 		usage /= divident;
 		return *this;
 	}
+
+	inline LinkStat & operator+=(const LinkStat & other)
+	{
+		this->capacity += other.capacity;
+		this->usage += other.usage;
+		this->frozen += other.frozen;
+		return *this;
+	}
+
+	inline void Clear()
+	{
+		this->capacity = 0;
+		this->usage = 0;
+		this->frozen = 0;
+	}
 };
 
 class FlowStat {
@@ -81,6 +96,22 @@ public:
 		planned /= divident;
 		sent /= divident;
 		return *this;
+	}
+
+	inline FlowStat & operator+=(const FlowStat & other)
+	{
+		assert(this->via == INVALID_STATION || other.via == INVALID_STATION || this->via == other.via);
+		this->via = other.via;
+		this->planned += other.planned;
+		this->sent += other.sent;
+		return *this;
+	}
+
+	inline void Clear()
+	{
+		this->planned = 0;
+		this->sent = 0;
+		this->via = INVALID_STATION;
 	}
 };
 
