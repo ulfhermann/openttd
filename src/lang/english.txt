@@ -239,6 +239,12 @@ STR_SMALLMAP_LEGENDA_TOWNS                                      :{BLACK}{TINYFON
 STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{BLACK}{TINYFONT}Industries
 STR_SMALLMAP_LEGENDA_DESERT                                     :{BLACK}{TINYFONT}Desert
 STR_SMALLMAP_LEGENDA_SNOW                                       :{BLACK}{TINYFONT}Snow
+STR_SMALLMAP_LEGEND_CAPACITY                                    :{BLACK}{TINYFONT}Capacity
+STR_SMALLMAP_LEGEND_USAGE                                       :{BLACK}{TINYFONT}Usage
+STR_SMALLMAP_LEGEND_PLANNED                                     :{BLACK}{TINYFONT}Planned Flow
+STR_SMALLMAP_LEGEND_SENT                                        :{BLACK}{TINYFONT}Sent Cargo
+STR_SMALLMAP_LEGEND_SHOW_TEXT                                   :{BLACK}{TINYFONT}As Text
+STR_SMALLMAP_LEGEND_SHOW_GRAPH                                  :{BLACK}{TINYFONT}As Graphs
 STR_NEWS_MESSAGE_CAPTION                                        :{WHITE}Message
 STR_QUERY_CAPTION                                               :{WHITE}{STRING}
 STR_DEFAULT                                                     :{BLACK}Default
