@@ -647,14 +647,9 @@ public:
 	{
 		Dimension d = {0, 0};
 		switch (widget) {
-			case TDW_SORTNAME: {
-				d = GetStringBoundingBox(STR_SORT_BY_NAME);
-				d.width += WD_SORTBUTTON_ARROW_WIDTH * 2; // Doubled since the word is centered, also looks nice.
-				break;
-			}
-
+			case TDW_SORTNAME:
 			case TDW_SORTPOPULATION: {
-				d = GetStringBoundingBox(STR_SORT_BY_POPULATION);
+				d = GetStringBoundingBox(this->nested_array[widget]->widget_data);
 				d.width += WD_SORTBUTTON_ARROW_WIDTH * 2; // Doubled since the word is centered, also looks nice.
 				break;
 			}
@@ -852,7 +847,7 @@ static const NWidgetPart _nested_found_town_widgets[] = {
 			NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_LAYOUT_GRID3), SetMinimalSize(78, 12), SetFill(1, 0), SetDataTip(STR_SELECT_LAYOUT_3X3_GRID, STR_SELECT_TOWN_ROAD_LAYOUT),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 1),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_LAYOUT_RANDOM), SetPadding(0, 2, 0, 2), SetMinimalSize(0,12), SetFill(1, 0),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_LAYOUT_RANDOM), SetPadding(0, 2, 0, 2), SetMinimalSize(0, 12), SetFill(1, 0),
 										SetDataTip(STR_SELECT_LAYOUT_RANDOM, STR_SELECT_TOWN_ROAD_LAYOUT), SetFill(1, 0),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
 	EndContainer(),
