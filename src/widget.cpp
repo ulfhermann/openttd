@@ -330,43 +330,43 @@ static inline void DrawInset(const Rect &r, Colours colour, StringID str)
  * @param r       Rectangle of the matrix background.
  * @param colour  Colour of the background.
  * @param clicked Matrix is rendered lowered.
- * @param data    Data of the widget.
+ * @param data    Data of the widget, number of rows and columns of the widget.
  */
 static inline void DrawMatrix(const Rect &r, Colours colour, bool clicked, uint16 data)
 {
 	DrawFrameRect(r.left, r.top, r.right, r.bottom, colour, (clicked) ? FR_LOWERED : FR_NONE);
 
-	int c = GB(data, 0, 8);
-	int amt1 = (r.right - r.left + 1) / c;
+	int num_columns = GB(data, MAT_COL_START, MAT_COL_BITS);  // Lower 8 bits of the widget data: Number of columns in the matrix.
+	int column_width = (r.right - r.left + 1) / num_columns; // Width of a single column in the matrix.
 
-	int d = GB(data, 8, 8);
-	int amt2 = (r.bottom - r.top + 1) / d;
+	int num_rows = GB(data, MAT_ROW_START, MAT_ROW_BITS); // Upper 8 bits of the widget data: Number of rows in the matrix.
+	int row_height = (r.bottom - r.top + 1) / num_rows; // Height of a single row in the matrix.
 
 	int col = _colour_gradient[colour & 0xF][6];
 
 	int x = r.left;
-	for (int ctr = c; ctr > 1; ctr--) {
-		x += amt1;
+	for (int ctr = num_columns; ctr > 1; ctr--) {
+		x += column_width;
 		GfxFillRect(x, r.top + 1, x, r.bottom - 1, col);
 	}
 
 	x = r.top;
-	for (int ctr = d; ctr > 1; ctr--) {
-		x += amt2;
+	for (int ctr = num_rows; ctr > 1; ctr--) {
+		x += row_height;
 		GfxFillRect(r.left + 1, x, r.right - 1, x, col);
 	}
 
 	col = _colour_gradient[colour & 0xF][4];
 
 	x = r.left - 1;
-	for (int ctr = c; ctr > 1; ctr--) {
-		x += amt1;
+	for (int ctr = num_columns; ctr > 1; ctr--) {
+		x += column_width;
 		GfxFillRect(x, r.top + 1, x, r.bottom - 1, col);
 	}
 
 	x = r.top - 1;
-	for (int ctr = d; ctr > 1; ctr--) {
-		x += amt2;
+	for (int ctr = num_rows; ctr > 1; ctr--) {
+		x += row_height;
 		GfxFillRect(r.left + 1, x, r.right - 1, x, col);
 	}
 }
@@ -590,7 +590,7 @@ void Window::DrawWidgets() const
 		switch (wi->type & WWT_MASK) {
 		case WWT_IMGBTN:
 		case WWT_IMGBTN_2:
-			DrawImageButtons(r, wi->type,wi->colour, clicked, wi->data);
+			DrawImageButtons(r, wi->type, wi->colour, clicked, wi->data);
 			break;
 
 		case WWT_PANEL:
@@ -887,7 +887,7 @@ NWidgetBase::NWidgetBase(WidgetType tp) : ZeroedMemoryAllocator()
 /* ~NWidgetContainer() takes care of #next and #prev data members. */
 
 /**
- * @fn int NWidgetBase::SetupSmallestSize(Window *w)
+ * @fn void NWidgetBase::SetupSmallestSize(Window *w, bool init_array)
  * Compute smallest size needed by the widget.
  *
  * The smallest size of a widget is the smallest size that a widget needs to
@@ -896,7 +896,7 @@ NWidgetBase::NWidgetBase(WidgetType tp) : ZeroedMemoryAllocator()
  * background widget without child with a non-negative index.
  *
  * @param w Optional window owning the widget.
- * @return Biggest index in the widget array of all child widgets (\c -1 if no index is used).
+ * @param init_array Initialize the \c w->nested_array as well. Should only be set if \a w != NULL.
  *
  * @note After the computation, the results can be queried by accessing the #smallest_x and #smallest_y data members of the widget.
  */
@@ -915,13 +915,6 @@ NWidgetBase::NWidgetBase(WidgetType tp) : ZeroedMemoryAllocator()
  *
  * Afterwards, \e pos_x and \e pos_y contain the top-left position of the widget, \e smallest_x and \e smallest_y contain
  * the smallest size such that all widgets of the window are consistent, and \e current_x and \e current_y contain the current size.
- */
-
-/**
- * @fn void FillNestedArray(NWidgetCore **array, uint length)
- * Fill the Window::nested_array array with pointers to nested widgets in the tree.
- * @param array Base pointer of the array.
- * @param length Length of the array.
  */
 
 /**
@@ -1082,11 +1075,6 @@ void NWidgetCore::SetDataTip(uint16 widget_data, StringID tool_tip)
 	this->tool_tip = tool_tip;
 }
 
-void NWidgetCore::FillNestedArray(NWidgetCore **array, uint length)
-{
-	if (this->index >= 0 && (uint)(this->index) < length) array[this->index] = this;
-}
-
 void NWidgetCore::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
 {
 	if (this->index < 0) return;
@@ -1184,13 +1172,6 @@ void NWidgetContainer::Add(NWidgetBase *wid)
 	}
 }
 
-void NWidgetContainer::FillNestedArray(NWidgetCore **array, uint length)
-{
-	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
-		child_wid->FillNestedArray(array, length);
-	}
-}
-
 /**
  * Return the biggest possible size of a nested widget.
  * @param base      Base size of the widget.
@@ -1228,10 +1209,9 @@ NWidgetStacked::NWidgetStacked(WidgetType tp) : NWidgetContainer(tp)
 {
 }
 
-int NWidgetStacked::SetupSmallestSize(Window *w)
+void NWidgetStacked::SetupSmallestSize(Window *w, bool init_array)
 {
 	/* First sweep, recurse down and compute minimal size and filling. */
-	int biggest_index = -1;
 	this->smallest_x = 0;
 	this->smallest_y = 0;
 	this->fill_x = (this->head != NULL);
@@ -1239,8 +1219,7 @@ int NWidgetStacked::SetupSmallestSize(Window *w)
 	this->resize_x = (this->head != NULL) ? 1 : 0;
 	this->resize_y = (this->head != NULL) ? 1 : 0;
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
-		int idx = child_wid->SetupSmallestSize(w);
-		biggest_index = max(biggest_index, idx);
+		child_wid->SetupSmallestSize(w, init_array);
 
 		this->smallest_x = max(this->smallest_x, child_wid->smallest_x + child_wid->padding_left + child_wid->padding_right);
 		this->smallest_y = max(this->smallest_y, child_wid->smallest_y + child_wid->padding_top + child_wid->padding_bottom);
@@ -1249,7 +1228,6 @@ int NWidgetStacked::SetupSmallestSize(Window *w)
 		this->resize_x = LeastCommonMultiple(this->resize_x, child_wid->resize_x);
 		this->resize_y = LeastCommonMultiple(this->resize_y, child_wid->resize_y);
 	}
-	return biggest_index;
 }
 
 void NWidgetStacked::AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl)
@@ -1340,9 +1318,8 @@ NWidgetHorizontal::NWidgetHorizontal(NWidContainerFlags flags) : NWidgetPIPConta
 {
 }
 
-int NWidgetHorizontal::SetupSmallestSize(Window *w)
+void NWidgetHorizontal::SetupSmallestSize(Window *w, bool init_array)
 {
-	int biggest_index = -1;
 	this->smallest_x = 0;   // Sum of minimal size of all childs.
 	this->smallest_y = 0;   // Biggest child.
 	this->fill_x = false;   // true if at least one child allows fill_x.
@@ -1353,8 +1330,7 @@ int NWidgetHorizontal::SetupSmallestSize(Window *w)
 	/* 1. Forward call, collect biggest nested array index, and longest child length. */
 	uint longest = 0; // Longest child found.
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
-		int idx = child_wid->SetupSmallestSize(w);
-		biggest_index = max(biggest_index, idx);
+		child_wid->SetupSmallestSize(w, init_array);
 		longest = max(longest, child_wid->smallest_x);
 	}
 	/* 2. For containers that must maintain equal width, extend child minimal size. */
@@ -1384,8 +1360,6 @@ int NWidgetHorizontal::SetupSmallestSize(Window *w)
 	}
 	/* We need to zero the PIP settings so we can re-initialize the tree. */
 	this->pip_pre = this->pip_inter = this->pip_post = 0;
-
-	return biggest_index;
 }
 
 void NWidgetHorizontal::AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl)
@@ -1491,9 +1465,8 @@ NWidgetVertical::NWidgetVertical(NWidContainerFlags flags) : NWidgetPIPContainer
 {
 }
 
-int NWidgetVertical::SetupSmallestSize(Window *w)
+void NWidgetVertical::SetupSmallestSize(Window *w, bool init_array)
 {
-	int biggest_index = -1;
 	this->smallest_x = 0;   // Biggest child.
 	this->smallest_y = 0;   // Sum of minimal size of all childs.
 	this->fill_x = true;    // true if all childs allow fill_x.
@@ -1504,8 +1477,7 @@ int NWidgetVertical::SetupSmallestSize(Window *w)
 	/* 1. Forward call, collect biggest nested array index, and longest child length. */
 	uint highest = 0; // Highest child found.
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
-		int idx = child_wid->SetupSmallestSize(w);
-		biggest_index = max(biggest_index, idx);
+		child_wid->SetupSmallestSize(w, init_array);
 		highest = max(highest, child_wid->smallest_y);
 	}
 	/* 2. For containers that must maintain equal width, extend child minimal size. */
@@ -1535,8 +1507,6 @@ int NWidgetVertical::SetupSmallestSize(Window *w)
 	}
 	/* We need to zero the PIP settings so we can re-initialize the tree. */
 	this->pip_pre = this->pip_inter = this->pip_post = 0;
-
-	return biggest_index;
 }
 
 void NWidgetVertical::AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl)
@@ -1619,15 +1589,10 @@ NWidgetSpacer::NWidgetSpacer(int length, int height) : NWidgetResizeBase(NWID_SP
 	this->SetResize(0, 0);
 }
 
-int NWidgetSpacer::SetupSmallestSize(Window *w)
+void NWidgetSpacer::SetupSmallestSize(Window *w, bool init_array)
 {
 	this->smallest_x = this->min_x;
 	this->smallest_y = this->min_y;
-	return -1;
-}
-
-void NWidgetSpacer::FillNestedArray(NWidgetCore **array, uint length)
-{
 }
 
 void NWidgetSpacer::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
@@ -1710,12 +1675,14 @@ void NWidgetBackground::SetPIP(uint8 pip_pre, uint8 pip_inter, uint8 pip_post)
 	this->child->SetPIP(pip_pre, pip_inter, pip_post);
 }
 
-int NWidgetBackground::SetupSmallestSize(Window *w)
+void NWidgetBackground::SetupSmallestSize(Window *w, bool init_array)
 {
-	int biggest_index = this->index;
+	if (init_array && this->index >= 0) {
+		assert(w->nested_array_size > (uint)this->index);
+		w->nested_array[this->index] = this;
+	}
 	if (this->child != NULL) {
-		int idx = this->child->SetupSmallestSize(w);
-		biggest_index = max(biggest_index, idx);
+		this->child->SetupSmallestSize(w, init_array);
 
 		this->smallest_x = this->child->smallest_x;
 		this->smallest_y = this->child->smallest_y;
@@ -1732,8 +1699,6 @@ int NWidgetBackground::SetupSmallestSize(Window *w)
 		this->smallest_x = d.width;
 		this->smallest_y = d.height;
 	}
-
-	return biggest_index;
 }
 
 void NWidgetBackground::AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl)
@@ -1752,12 +1717,6 @@ void NWidgetBackground::StoreWidgets(Widget *widgets, int length, bool left_movi
 {
 	NWidgetCore::StoreWidgets(widgets, length, left_moving, top_moving, rtl);
 	if (this->child != NULL) this->child->StoreWidgets(widgets, length, left_moving, top_moving, rtl);
-}
-
-void NWidgetBackground::FillNestedArray(NWidgetCore **array, uint length)
-{
-	if (this->index >= 0 && (uint)(this->index) < length) array[this->index] = this;
-	if (this->child != NULL) this->child->FillNestedArray(array, length);
 }
 
 void NWidgetBackground::Draw(const Window *w)
@@ -1926,13 +1885,19 @@ NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, 
 	}
 }
 
-int NWidgetLeaf::SetupSmallestSize(Window *w)
+void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 {
 	Dimension d = {this->min_x, this->min_y}; // At least minimal size is needed.
 
 	if (w != NULL) { // A non-NULL window pointer acts as switch to turn dynamic widget sizing on.
 		Dimension d2 = {0, 0};
-		if (this->index >= 0) d2 = maxdim(d2, w->GetWidgetContentSize(this->index)); // If appropriate, ask window for smallest size.
+		if (this->index >= 0) {
+			if (init_array) {
+				assert(w->nested_array_size > (uint)this->index);
+				w->nested_array[this->index] = this;
+			}
+			d2 = maxdim(d2, w->GetWidgetContentSize(this->index)); // If appropriate, ask window for smallest size.
+		}
 
 		/* Check size requirements of the widget itself too.
 		 * Also, add the offset used for rendering.
@@ -2025,7 +1990,6 @@ int NWidgetLeaf::SetupSmallestSize(Window *w)
 	this->smallest_x = d.width;
 	this->smallest_y = d.height;
 	/* All other data is already at the right place. */
-	return this->index;
 }
 
 void NWidgetLeaf::Draw(const Window *w)
@@ -2054,7 +2018,7 @@ void NWidgetLeaf::Draw(const Window *w)
 		case WWT_IMGBTN:
 		case WWT_PUSHIMGBTN:
 		case WWT_IMGBTN_2:
-			DrawImageButtons(r, this->type,this->colour, clicked, this->widget_data);
+			DrawImageButtons(r, this->type, this->colour, clicked, this->widget_data);
 			break;
 
 		case WWT_TEXTBTN:
@@ -2165,14 +2129,15 @@ NWidgetBase *NWidgetLeaf::GetWidgetOfType(WidgetType tp)
  * Intialize nested widget tree and convert to widget array.
  * @param nwid Nested widget tree.
  * @param rtl  Direction of the language.
+ * @param biggest_index Biggest index used in the nested widget tree.
  * @return Widget array with the converted widgets.
  * @note Caller should release returned widget array with \c free(widgets).
  * @ingroup NestedWidgets
  */
-Widget *InitializeNWidgets(NWidgetBase *nwid, bool rtl)
+Widget *InitializeNWidgets(NWidgetBase *nwid, bool rtl, int biggest_index)
 {
 	/* Initialize nested widgets. */
-	int biggest_index = nwid->SetupSmallestSize(NULL);
+	nwid->SetupSmallestSize(NULL, false);
 	nwid->AssignSizePosition(ST_ARRAY, 0, 0, nwid->smallest_x, nwid->smallest_y, (nwid->resize_x > 0), (nwid->resize_y > 0), rtl);
 
 	/* Construct a local widget array and initialize all its types to #WWT_LAST. */
@@ -2255,9 +2220,11 @@ bool CompareWidgetArrays(const Widget *orig, const Widget *gen, bool report)
  * @param count Length of the \a parts array.
  * @param dest  Address of pointer to use for returning the composed widget.
  * @param fill_dest Fill the composed widget with child widgets.
+ * @param biggest_index Pointer to biggest nested widget index in the tree encountered so far.
  * @return Number of widget part elements used to compose the widget.
+ * @precond \c biggest_index != NULL.
  */
-static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, bool *fill_dest)
+static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, bool *fill_dest, int *biggest_index)
 {
 	int num_used = 0;
 
@@ -2288,6 +2255,7 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 			case WWT_FRAME:
 				if (*dest != NULL) return num_used;
 				*dest = new NWidgetBackground(parts->type, parts->u.widget.colour, parts->u.widget.index);
+				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
 				*fill_dest = true;
 				break;
 
@@ -2297,11 +2265,15 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				*fill_dest = true;
 				break;
 
-			case WPT_FUNCTION:
+			case WPT_FUNCTION: {
 				if (*dest != NULL) return num_used;
-				*dest = parts->u.func_ptr();
+				/* Ensure proper functioning even when the called code simply writes its largest index. */
+				int biggest = -1;
+				*dest = parts->u.func_ptr(&biggest);
+				*biggest_index = max(*biggest_index, biggest);
 				*fill_dest = false;
 				break;
+			}
 
 			case NWID_SELECTION:
 			case NWID_LAYERED:
@@ -2391,6 +2363,7 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				if (*dest != NULL) return num_used;
 				assert((parts->type & WWT_MASK) < NWID_HORIZONTAL);
 				*dest = new NWidgetLeaf(parts->type, parts->u.widget.colour, parts->u.widget.index, 0x0, STR_NULL);
+				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
 				break;
 		}
 		num_used++;
@@ -2405,9 +2378,11 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
  * @param parts  Array with parts of the nested widgets.
  * @param count  Length of the \a parts array.
  * @param parent Container to use for storing the child widgets.
+ * @param biggest_index Pointer to biggest nested widget index in the tree.
  * @return Number of widget part elements used to fill the container.
+ * @postcond \c *biggest_index contains the largest widget index of the tree and \c -1 if no index is used.
  */
-static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *parent)
+static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *parent, int *biggest_index)
 {
 	/* Given parent must be either a #NWidgetContainer or a #NWidgetBackground object. */
 	NWidgetContainer *nwid_cont = dynamic_cast<NWidgetContainer *>(parent);
@@ -2418,7 +2393,7 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
 	while (true) {
 		NWidgetBase *sub_widget = NULL;
 		bool fill_sub = false;
-		int num_used = MakeNWidget(parts, count - total_used, &sub_widget, &fill_sub);
+		int num_used = MakeNWidget(parts, count - total_used, &sub_widget, &fill_sub, biggest_index);
 		parts += num_used;
 		total_used += num_used;
 
@@ -2433,7 +2408,7 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
 		WidgetType tp = sub_widget->type;
 		if (fill_sub && (tp == NWID_HORIZONTAL || tp == NWID_HORIZONTAL_LTR || tp == NWID_VERTICAL
 							|| tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET || tp == NWID_SELECTION || tp == NWID_LAYERED)) {
-			int num_used = MakeWidgetTree(parts, count - total_used, sub_widget);
+			int num_used = MakeWidgetTree(parts, count - total_used, sub_widget, biggest_index);
 			parts += num_used;
 			total_used += num_used;
 		}
@@ -2450,13 +2425,17 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
  * Construct a nested widget tree from an array of parts.
  * @param parts Array with parts of the widgets.
  * @param count Length of the \a parts array.
+ * @param biggest_index Pointer to biggest nested widget index collected in the tree.
  * @return Root of the nested widget tree, a vertical container containing the entire GUI.
  * @ingroup NestedWidgetParts
+ * @precond \c biggest_index != NULL
+ * @postcond \c *biggest_index contains the largest widget index of the tree and \c -1 if no index is used.
  */
-NWidgetContainer *MakeNWidgets(const NWidgetPart *parts, int count)
+NWidgetContainer *MakeNWidgets(const NWidgetPart *parts, int count, int *biggest_index)
 {
+	*biggest_index = -1;
 	NWidgetContainer *cont = new NWidgetVertical();
-	MakeWidgetTree(parts, count, cont);
+	MakeWidgetTree(parts, count, cont, biggest_index);
 	return cont;
 }
 
@@ -2479,8 +2458,9 @@ const Widget *InitializeWidgetArrayFromNestedWidgets(const NWidgetPart *parts, i
 	if (wid_cache != NULL && *wid_cache != NULL) return *wid_cache;
 
 	assert(parts != NULL && parts_length > 0);
-	NWidgetContainer *nwid = MakeNWidgets(parts, parts_length);
-	Widget *gen_wid = InitializeNWidgets(nwid, rtl);
+	int biggest_index = -1;
+	NWidgetContainer *nwid = MakeNWidgets(parts, parts_length, &biggest_index);
+	Widget *gen_wid = InitializeNWidgets(nwid, rtl, biggest_index);
 
 	if (!rtl && orig_wid) {
 		/* There are two descriptions, compare them.
