@@ -158,7 +158,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 static int _smallmap_industry_count;
 
 /** number of stats options - capacity, usage, planned, sent, show text, show graphs */
-static const int _smallmap_num_stats = 6;
+static const uint _smallmap_num_stats = 6;
 
 
 /** Macro for ordinary entry of LegendAndColour */
@@ -667,7 +667,7 @@ class SmallMapWindow : public Window
 
 		this->routemap_count = i;
 
-		for (int st = 0; st < _smallmap_num_stats; ++st) {
+		for (uint st = 0; st < _smallmap_num_stats; ++st) {
 			LegendAndColour & legend_entry = _legend_routemap[i + st];
 			legend_entry.legend = _stats_strings[st];
 			legend_entry.colour = _stats_colours[st];
@@ -871,13 +871,14 @@ class SmallMapWindow : public Window
 			uint q = 0;
 			int colour = 0;
 			int numCargos = 0;
-			for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-				if (!tbl->show_on_map) continue;
-				CargoID c = tbl->type;
+			for (int i = 0; i < this->routemap_count; ++i) {
+				const LegendAndColour &tbl = _legend_table[this->map_type][i];
+				if (!tbl.show_on_map) continue;
+				CargoID c = tbl.type;
 				int add = st->goods[c].supply;
 				if (add > 0) {
 					q += add * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;
-					colour += tbl->colour;
+					colour += tbl.colour;
 					numCargos++;
 				}
 			}
@@ -899,7 +900,7 @@ class SmallMapWindow : public Window
 
 	protected:
 		virtual void DrawContent(Point & pta, Point & ptb) = 0;
-		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour *cargo_entry) = 0;
+		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) = 0;
 
 		SmallMapWindow * window;
 		StationIDSet seen_stations;
@@ -912,10 +913,11 @@ class SmallMapWindow : public Window
 			this->window = window;
 			const Station * sta;
 			FOR_ALL_STATIONS(sta) {
-				for (const LegendAndColour *tbl = _legend_table[window->map_type]; !tbl->end; ++tbl) {
-					if (!tbl->show_on_map) continue;
+				for (int i = 0; i < window->routemap_count; ++i) {
+					const LegendAndColour &tbl = _legend_table[window->map_type][i];
+					if (!tbl.show_on_map) continue;
 
-					CargoID c = tbl->type;
+					CargoID c = tbl.type;
 					const LinkStatMap & links = sta->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 						StationID to = i->first;
@@ -923,10 +925,10 @@ class SmallMapWindow : public Window
 							const Station *stb = Station::Get(to);
 							if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
 							if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
-
-							for (const LegendAndColour *cargo_entry = _legend_table[window->map_type]; !cargo_entry->end; ++cargo_entry) {
-								CargoID cargo = cargo_entry->type;
-								if (cargo_entry->show_on_map) {
+							for (int i = 0; i < window->routemap_count; ++i) {
+								const LegendAndColour &cargo_entry = _legend_table[window->map_type][i];
+								CargoID cargo = cargo_entry.type;
+								if (cargo_entry.show_on_map) {
 									FlowStat sum_flows = sta->goods[cargo].GetSumFlowVia(stb->index);
 									const LinkStatMap ls_map = sta->goods[cargo].link_stats;
 									LinkStatMap::const_iterator i = ls_map.find(stb->index);
@@ -953,8 +955,8 @@ class SmallMapWindow : public Window
 	protected:
 		uint16 colour;
 		int num_colours;
-		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour *cargo_entry) {
-			this->colour += cargo_entry->colour;
+		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) {
+			this->colour += cargo_entry.colour;
 			num_colours++;
 		}
 
@@ -979,7 +981,7 @@ class SmallMapWindow : public Window
 			scale(_settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit)
 		{}
 
-		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour *cargo_entry)
+		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry)
 		{
 			this->link += orig_link;
 			this->flow += orig_flow;
@@ -1051,34 +1053,6 @@ class SmallMapWindow : public Window
 			this->link.Clear();
 		}
 	};
-
-	void DrawLinks() {
-		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (!tbl->show_on_map) continue;
-
-			CargoID c = tbl->type;
-			const Station * sta;
-			FOR_ALL_STATIONS(sta) {
-				const LinkStatMap & links = sta->goods[c].link_stats;
-				for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
-					StationID id = i->first;
-					if (!Station::IsValidID(id)) {
-						continue; // dead link
-					}
-					const Station *stb = Station::Get(id);
-
-					if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
-					if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
-
-					Point pta = GetStationMiddle(sta);
-
-					Point ptb = GetStationMiddle(stb);
-
-
-				}
-			}
-		}
-	}
 
 public:
 	/**
@@ -1512,9 +1486,15 @@ public:
 						if (click_pos < this->routemap_count) {
 							_legend_routemap[click_pos].show_on_map = !_legend_routemap[click_pos].show_on_map;
 							ToggleBit(this->cargo_types, click_pos);
-						} else if (click_pos < this->routemap_count + _smallmap_num_stats) {
-							_legend_routemap[click_pos].show_on_map = !_legend_routemap[click_pos].show_on_map;
-							ToggleBit(this->show_stats, click_pos - this->routemap_count);
+						} else {
+							uint stats_column = this->routemap_count / rows_per_column;
+							if (this->routemap_count % rows_per_column != 0) stats_column++;
+
+							if (column == stats_column && line < _smallmap_num_stats) {
+								click_pos = this->routemap_count + line;
+								_legend_routemap[click_pos].show_on_map = !_legend_routemap[click_pos].show_on_map;
+								ToggleBit(this->show_stats, line);
+							}
 						}
 					}
 
