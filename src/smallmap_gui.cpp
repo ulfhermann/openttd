@@ -1024,16 +1024,16 @@ class SmallMapWindow : public Window
 			 * they are not reused anywhere, so it's network safe.
 			 */
 
-			if (HasBit(this->window->show_stats, STAT_USAGE)) {
+			if (HasBit(this->window->show_stats, STAT_USAGE) && this->link.usage > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->link.usage), _stats_colours[STAT_USAGE]));
 			}
-			if (HasBit(this->window->show_stats, STAT_CAPACITY)) {
+			if (HasBit(this->window->show_stats, STAT_CAPACITY) && this->link.capacity > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->link.capacity), _stats_colours[STAT_CAPACITY]));
 			}
-			if (HasBit(this->window->show_stats, STAT_PLANNED)) {
+			if (HasBit(this->window->show_stats, STAT_PLANNED) && this->flow.planned > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->flow.planned),  _stats_colours[STAT_PLANNED]));
 			}
-			if (HasBit(this->window->show_stats, STAT_SENT)) {
+			if (HasBit(this->window->show_stats, STAT_SENT) && this->flow.sent > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->flow.sent), _stats_colours[STAT_SENT]));
 			}
 
