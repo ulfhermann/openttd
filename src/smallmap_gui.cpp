@@ -1006,8 +1006,8 @@ class SmallMapWindow : public Window
 		virtual void DrawContent(Point & pta, Point & ptb) {
 			Scale();
 			Point ptm;
-			ptm.x = (2*pta.x + ptb.x) / 3;
-			ptm.y = (2*pta.y + ptb.y) / 3;
+			ptm.x = (pta.x + 2*ptb.x) / 3;
+			ptm.y = (pta.y + 2*ptb.y) / 3;
 			int nums = 0;
 			if (_legend_routemap[_smallmap_cargo_count + STAT_CAPACITY].show_on_map) {
 				SetDParam(nums++, this->link.capacity);
