@@ -76,7 +76,7 @@ static inline DiagDirection TrainExitDir(Direction direction, TrackBits track)
  */
 byte FreightWagonMult(CargoID cargo)
 {
-	if (!GetCargo(cargo)->is_freight) return 1;
+	if (!CargoSpec::Get(cargo)->is_freight) return 1;
 	return _settings_game.vehicle.freight_trains;
 }
 
@@ -139,7 +139,7 @@ static void TrainCargoChanged(Train *v)
 	uint32 weight = 0;
 
 	for (Train *u = v; u != NULL; u = u->Next()) {
-		uint32 vweight = GetCargo(u->cargo_type)->weight * u->cargo.Count() * FreightWagonMult(u->cargo_type) / 16;
+		uint32 vweight = CargoSpec::Get(u->cargo_type)->weight * u->cargo.Count() * FreightWagonMult(u->cargo_type) / 16;
 
 		/* Vehicle weight is not added for articulated parts. */
 		if (!u->IsArticulatedPart()) {
@@ -3471,6 +3471,24 @@ static bool TrainMovedChangeSignals(TileIndex tile, DiagDirection dir)
 	return false;
 }
 
+/**
+ * Tries to reserve track under whole train consist
+ */
+void Train::ReserveTrackUnderConsist() const
+{
+	for (const Train *u = this; u != NULL; u = u->Next()) {
+		switch (u->track) {
+			case TRACK_BIT_WORMHOLE:
+				TryReserveRailTrack(u->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(u->tile)));
+				break;
+			case TRACK_BIT_DEPOT:
+				break;
+			default:
+				TryReserveRailTrack(u->tile, TrackBitsToTrack(u->track));
+				break;
+		}
+	}
+}
 
 static void SetVehicleCrashed(Train *v)
 {
@@ -3533,24 +3551,20 @@ static uint CountPassengersInTrain(const Train *v)
  */
 static uint TrainCrashed(Train *v)
 {
-	/* Try to re-reserve track under already crashed train too */
-	for (const Train *u = v; u != NULL; u = u->Next()) {
-		TrackBits trackbits = u->track;
-		if (trackbits == TRACK_BIT_WORMHOLE) {
-			/* Vehicle is inside a wormhole, v->track contains no useful value then. */
-			trackbits = DiagDirToDiagTrackBits(GetTunnelBridgeDirection(u->tile));
-		}
-		TryReserveRailTrack(u->tile, TrackBitsToTrack(trackbits));
-	}
+	uint num = 0;
 
 	/* do not crash train twice */
-	if (v->vehstatus & VS_CRASHED) return 0;
+	if (!(v->vehstatus & VS_CRASHED)) {
+		/* two drivers + passengers */
+		num = 2 + CountPassengersInTrain(v);
 
-	/* two drivers + passengers */
-	uint num = 2 + CountPassengersInTrain(v);
+		SetVehicleCrashed(v);
+		AI::NewEvent(v->owner, new AIEventVehicleCrashed(v->index, v->tile, AIEventVehicleCrashed::CRASH_TRAIN));
+	}
 
-	SetVehicleCrashed(v);
-	AI::NewEvent(v->owner, new AIEventVehicleCrashed(v->index, v->tile, AIEventVehicleCrashed::CRASH_TRAIN));
+	/* Try to re-reserve track under already crashed train too.
+	 * SetVehicleCrashed() clears the reservation! */
+	v->ReserveTrackUnderConsist();
 
 	return num;
 }

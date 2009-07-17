@@ -51,7 +51,7 @@ static void StationsWndShowStationRating(int left, int right, int y, CargoID typ
 	static const uint units_full  = 576; ///< number of units to show station as 'full'
 	static const uint rating_full = 224; ///< rating needed so it is shown as 'full'
 
-	const CargoSpec *cs = GetCargo(type);
+	const CargoSpec *cs = CargoSpec::Get(type);
 	if (!cs->IsValid()) return;
 
 	int colour = cs->rating_colour;
@@ -259,8 +259,9 @@ public:
 
 		/* Add cargo filter buttons */
 		uint num_active = 0;
-		for (CargoID c = 0; c < NUM_CARGO; c++) {
-			if (GetCargo(c)->IsValid()) num_active++;
+		const CargoSpec *cs;
+		FOR_ALL_CARGOSPECS(cs) {
+			num_active++;
 		}
 
 		this->widget_count += num_active;
@@ -268,9 +269,7 @@ public:
 		this->widget[this->widget_count].type = WWT_LAST;
 
 		uint i = 0;
-		for (CargoID c = 0; c < NUM_CARGO; c++) {
-			if (!GetCargo(c)->IsValid()) continue;
-
+		FOR_ALL_CARGOSPECS(cs) {
 			Widget *wi = &this->widget[SLW_CARGOSTART + i];
 			wi->type     = WWT_PANEL;
 			wi->display_flags = RESIZE_NONE;
@@ -282,7 +281,7 @@ public:
 			wi->data     = 0;
 			wi->tooltips = STR_USE_CTRL_TO_SELECT_MORE;
 
-			if (HasBit(this->cargo_filter, c)) this->LowerWidget(SLW_CARGOSTART + i);
+			if (HasBit(this->cargo_filter, cs->Index())) this->LowerWidget(SLW_CARGOSTART + i);
 			i++;
 		}
 
@@ -347,11 +346,9 @@ public:
 		int xb = 2; ///< offset from left of widget
 
 		uint i = 0;
-		for (CargoID c = 0; c < NUM_CARGO; c++) {
-			const CargoSpec *cs = GetCargo(c);
-			if (!cs->IsValid()) continue;
-
-			cg_ofst = HasBit(this->cargo_filter, c) ? 2 : 1;
+		const CargoSpec *cs;
+		FOR_ALL_CARGOSPECS(cs) {
+			cg_ofst = HasBit(this->cargo_filter, cs->Index()) ? 2 : 1;
 			GfxFillRect(x + cg_ofst, y + cg_ofst, x + cg_ofst + 10 , y + cg_ofst + 7, cs->rating_colour);
 			DrawString(x + cg_ofst, x + 12 + cg_ofst, y + cg_ofst, cs->abbrev, TC_BLACK, SA_CENTER);
 			x += 14;
@@ -458,8 +455,8 @@ public:
 
 			case SLW_CARGOALL: {
 				uint i = 0;
-				for (CargoID c = 0; c < NUM_CARGO; c++) {
-					if (!GetCargo(c)->IsValid()) continue;
+				const CargoSpec *cs;
+				FOR_ALL_CARGOSPECS(cs) {
 					this->LowerWidget(i + SLW_CARGOSTART);
 					i++;
 				}
@@ -506,16 +503,15 @@ public:
 			default:
 				if (widget >= SLW_CARGOSTART) { // change cargo_filter
 					/* Determine the selected cargo type */
-					CargoID c;
 					int i = 0;
-					for (c = 0; c < NUM_CARGO; c++) {
-						if (!GetCargo(c)->IsValid()) continue;
+					const CargoSpec *cs;
+					FOR_ALL_CARGOSPECS(cs) {
 						if (widget - SLW_CARGOSTART == i) break;
 						i++;
 					}
 
 					if (_ctrl_pressed) {
-						ToggleBit(this->cargo_filter, c);
+						ToggleBit(this->cargo_filter, cs->Index());
 						this->ToggleWidgetLoweredState(widget);
 					} else {
 						for (uint i = SLW_CARGOSTART; i < this->widget_count; i++) {
@@ -526,7 +522,7 @@ public:
 						this->cargo_filter = 0;
 						this->include_empty = false;
 
-						SetBit(this->cargo_filter, c);
+						SetBit(this->cargo_filter, cs->Index());
 						this->LowerWidget(widget);
 					}
 					this->SetWidgetLoweredState(SLW_CARGOALL, this->cargo_filter == _cargo_mask && this->include_empty);
@@ -738,7 +734,7 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 
 SpriteID GetCargoSprite(CargoID i)
 {
-	const CargoSpec *cs = GetCargo(i);
+	const CargoSpec *cs = CargoSpec::Get(i);
 	SpriteID sprite;
 
 	if (cs->sprite == 0xFFFF) {
@@ -1330,7 +1326,7 @@ struct StationViewWindow : public Window {
 						*b++ = ',';
 						*b++ = ' ';
 					}
-					b = InlineString(b, GetCargo(i)->name);
+					b = InlineString(b, CargoSpec::Get(i)->name);
 				}
 			}
 
@@ -1350,11 +1346,9 @@ struct StationViewWindow : public Window {
 			DrawString(this->widget[SVW_ACCEPTLIST].left + 2, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_STATION_VIEW_CARGO_RATINGS_TITLE);
 			y += 10;
 
-			for (CargoID i = 0; i < NUM_CARGO; i++) {
-				const CargoSpec *cs = GetCargo(i);
-				if (!cs->IsValid()) continue;
-
-				const GoodsEntry *ge = &st->goods[i];
+			const CargoSpec *cs;
+			FOR_ALL_CARGOSPECS(cs) {
+				const GoodsEntry *ge = &st->goods[cs->Index()];
 				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) continue;
 
 				SetDParam(0, cs->name);
