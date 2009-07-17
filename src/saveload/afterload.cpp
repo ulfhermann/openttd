@@ -444,12 +444,6 @@ bool AfterLoadGame()
 			t->name = CopyFromOldName(t->townnametype);
 			if (t->name != NULL) t->townnametype = SPECSTR_TOWNNAME_START + _settings_game.game_creation.town_name;
 		}
-
-		Waypoint *wp;
-		FOR_ALL_WAYPOINTS(wp) {
-			wp->name = CopyFromOldName(wp->string);
-			wp->string = STR_EMPTY;
-		}
 	}
 
 	/* From this point the old names array is cleared. */
@@ -525,9 +519,6 @@ bool AfterLoadGame()
 			if (c->is_ai && c->ai_instance == NULL) AI::StartNew(c->index);
 		}
 	}
-
-	/* Update all waypoints */
-	if (CheckSavegameVersion(12)) FixOldWaypoints();
 
 	/* make sure there is a town in the game */
 	if (_game_mode == GM_NORMAL && !ClosestTownFromTile(0, UINT_MAX)) {
@@ -1005,21 +996,22 @@ bool AfterLoadGame()
 		Waypoint *wp;
 
 		FOR_ALL_WAYPOINTS(wp) {
-			if (wp->deleted == 0) {
+			if (wp->delete_ctr == 0) {
 				const StationSpec *statspec = NULL;
 
-				if (HasBit(_m[wp->xy].m3, 4))
+				if (HasBit(_m[wp->xy].m3, 4)) {
 					statspec = GetCustomStationSpec(STAT_CLASS_WAYP, _m[wp->xy].m4 + 1);
+				}
 
 				if (statspec != NULL) {
-					wp->stat_id = _m[wp->xy].m4 + 1;
-					wp->grfid = statspec->grffile->grfid;
-					wp->localidx = statspec->localidx;
+					wp->spec.spec = statspec;
+					wp->spec.grfid = statspec->grffile->grfid;
+					wp->spec.localidx = statspec->localidx;
 				} else {
 					/* No custom graphics set, so set to default. */
-					wp->stat_id = 0;
-					wp->grfid = 0;
-					wp->localidx = 0;
+					wp->spec.spec = NULL;
+					wp->spec.grfid = 0;
+					wp->spec.localidx = 0;
 				}
 
 				/* Move ground type bits from m2 to m4. */
@@ -1716,18 +1708,9 @@ bool AfterLoadGame()
 
 	/* Reserve all tracks trains are currently on. */
 	if (CheckSavegameVersion(101)) {
-		Train *t;
+		const Train *t;
 		FOR_ALL_TRAINS(t) {
-			switch (t->track) {
-				case TRACK_BIT_WORMHOLE:
-					TryReserveRailTrack(t->tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(t->tile)));
-					break;
-				case TRACK_BIT_DEPOT:
-					break;
-				default:
-					TryReserveRailTrack(t->tile, TrackBitsToTrack(t->track));
-					break;
-			}
+			if (t->First() == t) t->ReserveTrackUnderConsist();
 		}
 	}
 
@@ -1924,7 +1907,7 @@ bool AfterLoadGame()
 				const Station *to = Station::GetIfValid(s->to);
 				if (from != NULL && to != NULL && from->owner == to->owner && Company::IsValidID(from->owner)) continue;
 			} else {
-				const CargoSpec *cs = GetCargo(s->cargo_type);
+				const CargoSpec *cs = CargoSpec::Get(s->cargo_type);
 				switch (cs->town_effect) {
 					case TE_PASSENGERS:
 					case TE_MAIL:
