@@ -668,7 +668,7 @@ class SmallMapWindow : public Window
 					uint8 *val8 = (uint8 *)&val;
 
 					for (int i = col_start; i < col_end; ++i ) {
-						blitter->SetPixelIfEmpty(dst, i, 0, val8[i]);
+						blitter->SetPixel(dst, i, 0, val8[i]);
 					}
 				}
 			}
@@ -747,9 +747,6 @@ public:
 
 		old_dpi = _cur_dpi;
 		_cur_dpi = dpi;
-
-		/* clear it */
-		GfxFillRect(dpi->left, dpi->top, dpi->left + dpi->width - 1, dpi->top + dpi->height - 1, 0);
 
 		/* setup owner table */
 		if (this->map_type == SMT_OWNER) {
