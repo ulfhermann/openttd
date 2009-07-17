@@ -787,13 +787,13 @@ class SmallMapWindow : public Window
 				uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
 				uint x = ScaleByZoomLower(xc, this->zoom);
 				uint y = ScaleByZoomLower(yc, this->zoom);
+				uint32 val = 0;
 				if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
-					uint32 val = proc(TileXY(x, y));
-					uint8 *val8 = (uint8 *)&val;
-
-					for (int i = col_start; i < col_end; ++i ) {
-						blitter->SetPixel(dst, i, 0, val8[i]);
-					}
+					val = proc(TileXY(x, y));
+				}
+				uint8 *val8 = (uint8 *)&val;
+				for (int i = col_start; i < col_end; ++i ) {
+					blitter->SetPixel(dst, i, 0, val8[i]);
 				}
 			}
 
