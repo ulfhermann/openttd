@@ -558,8 +558,10 @@ class SmallMapWindow : public Window
 	 */
 	ZoomLevel zoom;
 
-	static const int COLUMN_WIDTH = 119;
+	static const int LEGEND_COLUMN_WIDTH = 119;
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
+	static const int MAP_COLUMN_WIDTH = 4;
+	static const int MAP_ROW_OFFSET = 2;
 
 	/** size of left and right borders of the smallmap window */
 	static const int SPACING_SIDE = 2;
@@ -633,51 +635,49 @@ class SmallMapWindow : public Window
 	}
 
 	/**
-	 * Draws one column of the small map in a certain mode onto the screen buffer. This
-	 * function looks exactly the same for all types
+	 * Draws at most MAP_COLUMN_WIDTH columns (of one pixel each) of the small map in a certain
+	 * mode onto the screen buffer. This function looks exactly the same for all types. Due to
+	 * the constraints that no less than MAP_COLUMN_WIDTH pixels can be resolved at once via a
+	 * GetSmallMapPixels function and that a single tile may be mapped onto more than one pixel
+	 * in the smallmap dst, xc and yc may point to a place outside the area to be drawn.
+	 *
+	 * col_start, col_end, row_start and row_end give a more precise description of that area which
+	 * is respected when drawing.
 	 *
 	 * @param dst Pointer to a part of the screen buffer to write to.
-	 * @param xc The X coordinate of the first tile in the column.
-	 * @param yc The Y coordinate of the first tile in the column
-	 * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
-	 * @param reps Number of lines to draw
-	 * @param proc Pointer to the colour function
+	 * @param xc First unscaled X coordinate of the first tile in the column.
+	 * @param yc First unscaled Y coordinate of the first tile in the column
+	 * @param col_start the first column in the buffer to be actually drawn
+	 * @param col_end the last column to be actually drawn
+	 * @param row_start the first row to be actually drawn
+	 * @param row_end the last row to be actually drawn
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	inline void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, GetSmallMapPixels *proc)
+	inline void DrawSmallMapStuff(void *dst, uint xc, uint yc, int col_start, int col_end, int row_start, int row_end)
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
-		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
-		void *dst_ptr_end = blitter->MoveTo(dst_ptr_abs_end, -4, 0);
+		GetSmallMapPixels *proc = _smallmap_draw_procs[this->map_type];
+		for (int row = 0; row < row_end; row += MAP_ROW_OFFSET) {
+			if (row >= row_start) {
+				/* check if the tile (xc,yc) is within the map range */
+				uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
+				uint x = ScaleByZoomLower(xc, this->zoom);
+				uint y = ScaleByZoomLower(yc, this->zoom);
+				if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
+					uint32 val = proc(TileXY(x, y));
+					uint8 *val8 = (uint8 *)&val;
 
-		do {
-			/* check if the tile (xc,yc) is within the map range */
-			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-			uint x = ScaleByZoomLower(xc, this->zoom);
-			uint y = ScaleByZoomLower(yc, this->zoom);
-			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
-				/* check if the dst pointer points to a pixel inside the screen buffer */
-				if (dst < _screen.dst_ptr) continue;
-				if (dst >= dst_ptr_abs_end) continue;
-
-				uint32 val = proc(TileXY(x, y));
-				uint8 *val8 = (uint8 *)&val;
-
-				if (dst <= dst_ptr_end) {
-					blitter->SetPixelIfEmpty(dst, 0, 0, val8[0]);
-					blitter->SetPixelIfEmpty(dst, 1, 0, val8[1]);
-					blitter->SetPixelIfEmpty(dst, 2, 0, val8[2]);
-					blitter->SetPixelIfEmpty(dst, 3, 0, val8[3]);
-				} else {
-					/* It happens that there are only 1, 2 or 3 pixels left to fill, so in that special case, write till the end of the video-buffer */
-					int i = 0;
-					do {
-						blitter->SetPixelIfEmpty(dst, 0, 0, val8[i]);
-					} while (i++, dst = blitter->MoveTo(dst, 1, 0), dst < dst_ptr_abs_end);
+					for (int i = col_start; i < col_end; ++i ) {
+						blitter->SetPixelIfEmpty(dst, i, 0, val8[i]);
+					}
 				}
 			}
-		/* switch to next tile in the column */
-		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
+
+			/* switch to next row in the column */
+			xc++;
+			yc++;
+			dst = blitter->MoveTo(dst, 0, MAP_ROW_OFFSET);
+		}
 	}
 
 	/**
@@ -790,12 +790,12 @@ public:
 		}
 
 		/**
-		 * for some reason we have to start drawing at an X position <= -4
+		 * As we can resolve no less than 4 pixels of the smallmap at once we have to start drawing at an X position <= -4
 		 * otherwise we get artifacts when partially redrawing.
 		 * Make sure dx provides for that and update tile_x and tile_y accordingly.
 		 */
-		while(dx < 4) {
-			dx += 4;
+		while(dx < MAP_COLUMN_WIDTH) {
+			dx += MAP_COLUMN_WIDTH;
 			tile_x++;
 			tile_y--;
 		}
@@ -816,29 +816,29 @@ public:
 
 		for (;;) {
 			/* distance from left edge */
-			if (x >= -3) {
+			if (x > -MAP_COLUMN_WIDTH) {
 
 				/* distance from right edge */
 				if (dpi->width - x <= 0) break;
 
-				/* number of lines */
-				int reps = (dpi->height + 1 + dy) / 2;
-				if (reps > 0) {
-					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, _smallmap_draw_procs[this->map_type]);
-				}
+				int col_start = x < 0 ? -x : 0;
+				int col_end = x + MAP_COLUMN_WIDTH > dpi->width ? dpi->width - x : MAP_COLUMN_WIDTH;
+				int row_start = dy - y;
+				int row_end = dy + dpi->height - y;
+				this->DrawSmallMapStuff(ptr, tile_x, tile_y, col_start, col_end, row_start, row_end);
 			}
 
 			if (y == 0) {
 				tile_y++;
 				y++;
-				ptr = blitter->MoveTo(ptr, 0, 1);
+				ptr = blitter->MoveTo(ptr, 0, MAP_ROW_OFFSET / 2);
 			} else {
 				tile_x--;
 				y--;
-				ptr = blitter->MoveTo(ptr, 0, -1);
+				ptr = blitter->MoveTo(ptr, 0, -MAP_ROW_OFFSET / 2);
 			}
-			ptr = blitter->MoveTo(ptr, 2, 0);
-			x += 2;
+			ptr = blitter->MoveTo(ptr, MAP_COLUMN_WIDTH / 2, 0);
+			x += MAP_COLUMN_WIDTH / 2;
 		}
 
 		/* draw vehicles? */
@@ -943,7 +943,7 @@ public:
 	{
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 		int rows = (legend->bottom - legend->top) - 1;
-		int columns = (legend->right - legend->left) / COLUMN_WIDTH;
+		int columns = (legend->right - legend->left) / LEGEND_COLUMN_WIDTH;
 		int new_rows = (this->map_type == SMT_INDUSTRY) ? ((_smallmap_industry_count + columns - 1) / columns) * 6 : MIN_LEGEND_HEIGHT;
 
 		new_rows = max(new_rows, MIN_LEGEND_HEIGHT);
@@ -999,7 +999,7 @@ public:
 			if (tbl->col_break || y >= legend->bottom) {
 				/* Column break needed, continue at top, COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
-				x += COLUMN_WIDTH;
+				x += LEGEND_COLUMN_WIDTH;
 				y = y_org;
 			}
 
@@ -1012,15 +1012,15 @@ public:
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
+					DrawString(x + 11, x + LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
 				} else {
-					DrawString(x + 11, x + COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
+					DrawString(x + 11, x + LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
 			} else {
 				/* Anything that is not an industry is using normal process */
 				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
-				DrawString(x + 11, x + COLUMN_WIDTH - 1, y, tbl->legend);
+				DrawString(x + 11, x + LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
 			}
 			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
 
@@ -1108,7 +1108,7 @@ public:
 				if (this->map_type == SMT_INDUSTRY) {
 					/* if click on industries label, find right industry type and enable/disable it */
 					Widget *wi = &this->widget[SM_WIDGET_LEGEND]; // label panel
-					uint column = (pt.x - 4) / COLUMN_WIDTH;
+					uint column = (pt.x - 4) / LEGEND_COLUMN_WIDTH;
 					uint line = (pt.y - wi->top - 2) / 6;
 					int rows_per_column = (wi->bottom - wi->top) / 6;
 
