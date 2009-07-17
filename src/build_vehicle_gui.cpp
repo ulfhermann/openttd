@@ -445,7 +445,7 @@ static int DrawRailWagonPurchaseInfo(int left, int right, int y, EngineID engine
 	/* Wagon weight - (including cargo) */
 	uint weight = e->GetDisplayWeight();
 	SetDParam(0, weight);
-	uint cargo_weight = (e->CanCarryCargo() ? GetCargo(e->GetDefaultCargoType())->weight * e->GetDisplayDefaultCapacity() >> 4 : 0);
+	uint cargo_weight = (e->CanCarryCargo() ? CargoSpec::Get(e->GetDefaultCargoType())->weight * e->GetDisplayDefaultCapacity() >> 4 : 0);
 	SetDParam(1, cargo_weight + weight);
 	DrawString(left, right, y, STR_PURCHASE_INFO_WEIGHT_CWEIGHT);
 	y += FONT_HEIGHT_NORMAL;
@@ -820,11 +820,10 @@ struct BuildVehicleWindow : Window {
 		}
 
 		/* Collect available cargo types for filtering */
-		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
-			const CargoSpec *cargo = GetCargo(cid);
-			if (!cargo->IsValid()) continue;
-			if (IsCargoInClass(cid, CC_SPECIAL)) continue; // exclude fake cargo types
-			this->cargo_filter[filter_items] = cid;
+		const CargoSpec *cargo;
+		FOR_ALL_CARGOSPECS(cargo) {
+			if (IsCargoInClass(cargo->Index(), CC_SPECIAL)) continue; // exclude fake cargo types
+			this->cargo_filter[filter_items] = cargo->Index();
 			this->cargo_filter_texts[filter_items] = cargo->name;
 			filter_items++;
 		}

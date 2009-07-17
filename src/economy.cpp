@@ -832,10 +832,9 @@ void ResetEconomy()
 	/* Test if resetting the economy is needed. */
 	bool needed = false;
 
-	for (CargoID c = 0; c < NUM_CARGO; c++) {
-		const CargoSpec *cs = GetCargo(c);
-		if (!cs->IsValid()) continue;
-		if (_cargo_payment_rates[c] == 0) {
+	const CargoSpec *cs;
+	FOR_ALL_CARGOSPECS(cs) {
+		if (_cargo_payment_rates[cs->Index()] == 0) {
 			needed = true;
 			break;
 		}
@@ -866,7 +865,7 @@ Money GetPriceByIndex(uint8 index)
 
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, CargoID cargo_type)
 {
-	const CargoSpec *cs = GetCargo(cargo_type);
+	const CargoSpec *cs = CargoSpec::Get(cargo_type);
 
 	/* Use callback to calculate cargo profit, if available */
 	if (HasBit(cs->callback_mask, CBM_CARGO_PROFIT_CALC)) {
@@ -1089,7 +1088,7 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID source, 
 	}
 
 	/* Increase town's counter for some special goods types */
-	const CargoSpec *cs = GetCargo(cargo_type);
+	const CargoSpec *cs = CargoSpec::Get(cargo_type);
 	if (cs->town_effect == TE_FOOD) s_to->town->new_act_food += num_pieces;
 	if (cs->town_effect == TE_WATER) s_to->town->new_act_water += num_pieces;
 
