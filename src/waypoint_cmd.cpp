@@ -45,7 +45,7 @@ static void MakeDefaultWaypointName(Waypoint *wp)
 	uint32 next = 0; // first waypoint number in the bitmap
 	WaypointID idx = 0; // index where we will stop
 
-	wp->town_index = ClosestTownFromTile(wp->xy, UINT_MAX)->index;
+	wp->town = ClosestTownFromTile(wp->xy, UINT_MAX);
 
 	/* Find first unused waypoint number belonging to this town. This can never fail,
 	 * as long as there can be at most 65535 waypoints in total.
@@ -64,7 +64,7 @@ static void MakeDefaultWaypointName(Waypoint *wp)
 		/* check only valid waypoints... */
 		if (lwp != NULL && wp != lwp) {
 			/* only waypoints with 'generic' name within the same city */
-			if (lwp->name == NULL && lwp->town_index == wp->town_index) {
+			if (lwp->name == NULL && lwp->town == wp->town) {
 				/* if lwp->town_cn < next, uint will overflow to '+inf' */
 				uint i = (uint)lwp->town_cn - next;
 
@@ -104,7 +104,7 @@ static Waypoint *FindDeletedWaypointCloseTo(TileIndex tile)
 	uint thres = 8;
 
 	FOR_ALL_WAYPOINTS(wp) {
-		if (wp->deleted && wp->owner == _current_company) {
+		if (wp->delete_ctr != 0 && wp->owner == _current_company) {
 			uint cur_dist = DistanceManhattan(tile, wp->xy);
 
 			if (cur_dist < thres) {
@@ -164,7 +164,7 @@ CommandCost CmdBuildTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1
 		if (wp == NULL) {
 			wp = new Waypoint(tile);
 
-			wp->town_index = INVALID_TOWN;
+			wp->town = NULL;
 			wp->name = NULL;
 			wp->town_cn = 0;
 		} else {
@@ -185,30 +185,28 @@ CommandCost CmdBuildTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1
 		}
 		wp->owner = owner;
 
-		const StationSpec *statspec;
-
 		bool reserved = HasBit(GetTrackReservation(tile), AxisToTrack(axis));
 		MakeRailWaypoint(tile, owner, axis, GetRailType(tile), wp->index);
 		SetDepotWaypointReservation(tile, reserved);
 		MarkTileDirtyByTile(tile);
 
-		statspec = GetCustomStationSpec(STAT_CLASS_WAYP, p1);
+		const StationSpec *statspec = GetCustomStationSpec(STAT_CLASS_WAYP, p1);
 
 		if (statspec != NULL) {
-			wp->stat_id = p1;
-			wp->grfid = statspec->grffile->grfid;
-			wp->localidx = statspec->localidx;
+			wp->spec.spec = statspec;
+			wp->spec.grfid = statspec->grffile->grfid;
+			wp->spec.localidx = statspec->localidx;
 		} else {
 			/* Specified custom graphics do not exist, so use default. */
-			wp->stat_id = 0;
-			wp->grfid = 0;
-			wp->localidx = 0;
+			wp->spec.spec = NULL;
+			wp->spec.grfid = 0;
+			wp->spec.localidx = 0;
 		}
 
-		wp->deleted = 0;
+		wp->delete_ctr = 0;
 		wp->build_date = _date;
 
-		if (wp->town_index == INVALID_TOWN) MakeDefaultWaypointName(wp);
+		if (wp->town == NULL) MakeDefaultWaypointName(wp);
 
 		wp->UpdateVirtCoord();
 		YapfNotifyTrackLayoutChange(tile, AxisToTrack(axis));
@@ -239,7 +237,7 @@ CommandCost RemoveTrainWaypoint(TileIndex tile, DoCommandFlag flags, bool justre
 		Track track = GetRailWaypointTrack(tile);
 		wp = GetWaypointByTile(tile);
 
-		wp->deleted = 30; // let it live for this many days before we do the actual deletion.
+		wp->delete_ctr = 30; // let it live for this many days before we do the actual deletion.
 		wp->sign.MarkDirty();
 
 		Train *v = NULL;
