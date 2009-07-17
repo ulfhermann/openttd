@@ -6125,6 +6125,9 @@ static void AfterLoadGRFs()
 	/* Create dynamic list of industry legends for smallmap_gui.cpp */
 	BuildIndustriesLegend();
 
+	/* build the routemap legend, based on the available cargos */
+	BuildRouteMapLegend();
+
 	/* Update the townname generators list */
 	InitGRFTownGeneratorNames();
 

@@ -68,6 +68,9 @@ SpriteID GetCargoSprite(CargoID i);
 CargoID GetCargoIDByLabel(CargoLabel cl);
 CargoID GetCargoIDByBitnum(uint8 bitnum);
 
+/* set up the cargos to be displayed in the smallmap's route legend */
+void BuildRouteMapLegend();
+
 /* Retrieve cargo details for the given cargo ID */
 static inline const CargoSpec *GetCargo(CargoID c)
 {
