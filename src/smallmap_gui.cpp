@@ -305,7 +305,7 @@ void BuildRouteMapLegend()
 	uint i = 0;
 
 	for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
-		const CargoSpec *cs = GetCargo(c);
+		const CargoSpec *cs = CargoSpec::Get(c);
 		if (!cs->IsValid()) continue;
 
 		_legend_routemap[i].legend = cs->name;

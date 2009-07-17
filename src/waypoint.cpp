@@ -38,7 +38,7 @@ void WaypointsDailyLoop()
 
 	/* Check if we need to delete a waypoint */
 	FOR_ALL_WAYPOINTS(wp) {
-		if (wp->deleted != 0 && --wp->deleted == 0) delete wp;
+		if (wp->delete_ctr != 0 && --wp->delete_ctr == 0) delete wp;
 	}
 }
 
@@ -57,7 +57,7 @@ Station *ComposeWaypointStation(TileIndex tile)
 	static Station &stat = *(Station*)stat_raw;
 
 	stat.train_tile = stat.xy = wp->xy;
-	stat.town = Town::Get(wp->town_index);
+	stat.town = wp->town;
 	stat.build_date = wp->build_date;
 
 	return &stat;

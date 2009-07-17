@@ -1506,7 +1506,7 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, byt
 				 * climate. This can cause problems when copying the properties
 				 * of a house that accepts food, where the new house is valid
 				 * in the temperate climate. */
-				if (!GetCargo(housespec->accepts_cargo[2])->IsValid()) {
+				if (!CargoSpec::Get(housespec->accepts_cargo[2])->IsValid()) {
 					housespec->cargo_acceptance[2] = 0;
 				}
 
@@ -1552,7 +1552,7 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, byt
 						((_settings_game.game_creation.landscape == LT_TOYLAND) ? CT_FIZZY_DRINKS : CT_FOOD);
 
 				/* Make sure the cargo type is valid in this climate. */
-				if (!GetCargo(cid)->IsValid()) goods = 0;
+				if (!CargoSpec::Get(cid)->IsValid()) goods = 0;
 
 				housespec->accepts_cargo[2] = cid;
 				housespec->cargo_acceptance[2] = abs(goods); // but we do need positive value here
@@ -1897,7 +1897,7 @@ static ChangeInfoResult CargoChangeInfo(uint cid, int numinfo, int prop, byte **
 	}
 
 	for (int i = 0; i < numinfo; i++) {
-		CargoSpec *cs = &_cargo[cid + i];
+		CargoSpec *cs = CargoSpec::Get(cid + i);
 
 		switch (prop) {
 			case 0x08: // Bit number of cargo
@@ -2994,13 +2994,11 @@ static CargoID TranslateCargo(uint8 feature, uint8 ctype)
 			return CT_INVALID;
 		}
 
-		for (CargoID c = 0; c < NUM_CARGO; c++) {
-			const CargoSpec *cs = GetCargo(c);
-			if (!cs->IsValid()) continue;
-
+		const CargoSpec *cs;
+		FOR_ALL_CARGOSPECS(cs) {
 			if (cs->bitnum == ctype) {
-				grfmsg(6, "TranslateCargo: Cargo bitnum %d mapped to cargo type %d.", ctype, c);
-				return c;
+				grfmsg(6, "TranslateCargo: Cargo bitnum %d mapped to cargo type %d.", ctype, cs->Index());
+				return cs->Index();
 			}
 		}
 
@@ -3290,7 +3288,7 @@ static void CargoMapSpriteGroup(byte *buf, uint8 idcount)
 			continue;
 		}
 
-		CargoSpec *cs = &_cargo[cid];
+		CargoSpec *cs = CargoSpec::Get(cid);
 		cs->grffile = _cur_grffile;
 		cs->group = _cur_grffile->spritegroups[groupid];
 	}
@@ -5587,7 +5585,7 @@ static void BuildCargoTranslationMap()
 	memset(_cur_grffile->cargo_map, 0xFF, sizeof(_cur_grffile->cargo_map));
 
 	for (CargoID c = 0; c < NUM_CARGO; c++) {
-		const CargoSpec *cs = GetCargo(c);
+		const CargoSpec *cs = CargoSpec::Get(c);
 		if (!cs->IsValid()) continue;
 
 		if (_cur_grffile->cargo_max == 0) {
@@ -5698,21 +5696,19 @@ static void CalculateRefitMasks()
 				}
 			} else {
 				/* No cargo table, so use the cargo bitnum values */
-				for (CargoID c = 0; c < NUM_CARGO; c++) {
-					const CargoSpec *cs = GetCargo(c);
-					if (!cs->IsValid()) continue;
-
-					if (HasBit(ei->refit_mask, cs->bitnum)) SetBit(xor_mask, c);
+				const CargoSpec *cs;
+				FOR_ALL_CARGOSPECS(cs) {
+					if (HasBit(ei->refit_mask, cs->bitnum)) SetBit(xor_mask, cs->Index());
 				}
 			}
 		}
 
 		if (_gted[engine].cargo_allowed != 0) {
 			/* Build up the list of cargo types from the set cargo classes. */
-			for (CargoID i = 0; i < NUM_CARGO; i++) {
-				const CargoSpec *cs = GetCargo(i);
-				if (_gted[engine].cargo_allowed    & cs->classes) SetBit(mask,     i);
-				if (_gted[engine].cargo_disallowed & cs->classes) SetBit(not_mask, i);
+			const CargoSpec *cs;
+			FOR_ALL_CARGOSPECS(cs) {
+				if (_gted[engine].cargo_allowed    & cs->classes) SetBit(mask,     cs->Index());
+				if (_gted[engine].cargo_disallowed & cs->classes) SetBit(not_mask, cs->Index());
 			}
 		} else if (xor_mask == 0) {
 			/* Don't apply default refit mask to wagons or engines with no capacity */

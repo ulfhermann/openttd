@@ -50,15 +50,52 @@ struct CargoSpec {
 	const struct GRFFile *grffile;   ///< NewGRF where 'group' belongs to
 	const struct SpriteGroup *group;
 
-	bool IsValid() const
+	/**
+	 * Determines index of this cargospec
+	 * @return index (in the CargoSpec::array array)
+	 */
+	FORCEINLINE CargoID Index() const
+	{
+		return this - CargoSpec::array;
+	}
+
+	/**
+	 * Tests for validity of this cargospec
+	 * @return is this cargospec valid?
+	 * @note assert(cs->IsValid()) can be triggered when GRF config is modified
+	 */
+	FORCEINLINE bool IsValid() const
 	{
 		return this->bitnum != INVALID_CARGO;
 	}
+
+	/**
+	 * Total number of cargospecs, both valid and invalid
+	 * @return length of CargoSpec::array
+	 */
+	static FORCEINLINE size_t GetArraySize()
+	{
+		return lengthof(CargoSpec::array);
+	}
+
+	/**
+	 * Retrieve cargo details for the given cargo ID
+	 * @param index ID of cargo
+	 * @pre index is a valid cargo ID
+	 */
+	static FORCEINLINE CargoSpec *Get(size_t index)
+	{
+		assert(index < lengthof(CargoSpec::array));
+		return &CargoSpec::array[index];
+	}
+
+private:
+	static CargoSpec array[NUM_CARGO]; ///< Array holding all CargoSpecs
+
+	friend void SetupCargoForClimate(LandscapeID l);
 };
 
 extern uint32 _cargo_mask;
-extern CargoSpec _cargo[NUM_CARGO];
-
 
 /* Set up the default cargo types for the given landscape type */
 void SetupCargoForClimate(LandscapeID l);
@@ -71,18 +108,13 @@ CargoID GetCargoIDByBitnum(uint8 bitnum);
 /* set up the cargos to be displayed in the smallmap's route legend */
 void BuildRouteMapLegend();
 
-/* Retrieve cargo details for the given cargo ID */
-static inline const CargoSpec *GetCargo(CargoID c)
-{
-	assert(c < lengthof(_cargo));
-	return &_cargo[c];
-}
-
-
 static inline bool IsCargoInClass(CargoID c, uint16 cc)
 {
-	return (GetCargo(c)->classes & cc) != 0;
+	return (CargoSpec::Get(c)->classes & cc) != 0;
 }
 
+#define FOR_ALL_CARGOSPECS_FROM(var, start) for (size_t cargospec_index = start; var = NULL, cargospec_index < CargoSpec::GetArraySize(); cargospec_index++) \
+		if ((var = CargoSpec::Get(cargospec_index))->IsValid())
+#define FOR_ALL_CARGOSPECS(var) FOR_ALL_CARGOSPECS_FROM(var, 0)
 
 #endif /* CARGOTYPE_H */
