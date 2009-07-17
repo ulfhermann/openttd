@@ -635,15 +635,13 @@ static void DrawHorizMapIndicator(int x, int y, int x2, int y2)
 }
 
 
-void DrawVertex(int x, int y, int size, int color)
+void DrawVertex(int x, int y, int size, int colour)
 {
 	size--;
 	int w1 = size / 2;
 	int w2 = size / 2 + size % 2;
 
-	for (int i = y - w1; i <= y + w2; ++i) {
-		GfxDrawLine(x - w1, i, x + w2, i, color);
-	}
+	GfxFillRect(x - w1, y - w1, x + w2, y + w2, colour);
 
 	w1++;
 	w2++;
@@ -894,6 +892,7 @@ class SmallMapWindow : public Window
 			if (q >= 40) r++;
 			if (q >= 80) r++;
 			if (q >= 160) r++;
+
 			DrawVertex(pt.x, pt.y, r, colour);
 		}
 	}
@@ -955,6 +954,9 @@ class SmallMapWindow : public Window
 	};
 
 	class LinkLineDrawer : public LinkDrawer {
+	public:
+		LinkLineDrawer() : colour(0), num_colours(0) {}
+
 	protected:
 		uint16 colour;
 		int num_colours;
@@ -1006,11 +1008,35 @@ class SmallMapWindow : public Window
 			Point ptm;
 			ptm.x = (2*pta.x + ptb.x) / 3;
 			ptm.y = (2*pta.y + ptb.y) / 3;
-			SetDParam(0, this->link.usage);
-			SetDParam(1, this->link.capacity);
-			SetDParam(2, this->flow.planned);
-			SetDParam(3, this->flow.sent);
-			DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, STR_NUM_RELATION , TC_BLACK);
+			int nums = 0;
+			if (_legend_routemap[_smallmap_cargo_count + STAT_CAPACITY].show_on_map) {
+				SetDParam(nums++, this->link.capacity);
+			}
+			if (_legend_routemap[_smallmap_cargo_count + STAT_USAGE].show_on_map) {
+				SetDParam(nums++, this->link.usage);
+			}
+			if (_legend_routemap[_smallmap_cargo_count + STAT_PLANNED].show_on_map) {
+				SetDParam(nums++, this->flow.planned);
+			}
+			if (_legend_routemap[_smallmap_cargo_count + STAT_SENT].show_on_map) {
+				SetDParam(nums++, this->flow.sent);
+			}
+			StringID str;
+			switch (nums) {
+			case 0:
+				str = STR_EMPTY; break;
+			case 1:
+				str = STR_NUM; break;
+			case 2:
+				str = STR_NUM_RELATION_2; break;
+			case 3:
+				str = STR_NUM_RELATION_3; break;
+			case 4:
+				str = STR_NUM_RELATION_4; break;
+			default:
+				NOT_REACHED();
+			}
+			DrawString(ptm.x, ptm.x + COLUMN_WIDTH, ptm.y, str , TC_BLACK);
 			this->flow.Clear();
 			this->link.Clear();
 		}
@@ -1327,12 +1353,6 @@ public:
 
 	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number), zoom(ZOOM_LVL_NORMAL)
 	{
-		static bool route_legend_initialized = false;
-		if (!route_legend_initialized) {
-			BuildRouteMapLegend();
-			route_legend_initialized = true;
-		}
-
 		this->SetWidgetDisabledState(SM_WIDGET_ROUTEMAP, _smallmap_cargo_count == 0);
 		if (_smallmap_cargo_count == 0 && this->map_type == SMT_ROUTEMAP) {
 			this->map_type = SMT_CONTOUR;

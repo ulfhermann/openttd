@@ -3333,10 +3333,13 @@ STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Max. Tra
 
 ########### For showing numbers in widgets
 
+STR_NUM                                                         :{BLACK}{NUM}
 STR_NUM_1                                                       :{BLACK}{SKIP}{NUM}
 STR_NUM_2                                                       :{BLACK}{SKIP}{SKIP}{NUM}
 STR_NUM_3                                                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM}
-STR_NUM_RELATION                                                :{COMMA}/{COMMA}:{COMMA}/{COMMA}
+STR_NUM_RELATION_2                                              :{BLACK}{NUM}/{NUM}
+STR_NUM_RELATION_3                                              :{BLACK}{NUM}/{NUM}/{NUM}
+STR_NUM_RELATION_4                                              :{BLACK}{NUM}/{NUM}/{NUM}/{NUM}
 
 ########### String for New Landscape Generator
 
