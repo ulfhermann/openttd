@@ -10,6 +10,7 @@
 typedef uint16 StationID;
 typedef uint16 RoadStopID;
 
+struct BaseStation;
 struct Station;
 struct RoadStop;
 struct StationSpec;
@@ -25,7 +26,8 @@ enum StationType {
 	STATION_BUS,
 	STATION_OILRIG,
 	STATION_DOCK,
-	STATION_BUOY
+	STATION_BUOY,
+	STATION_WAYPOINT,
 };
 
 /** Types of RoadStops */
