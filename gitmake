@@ -17,7 +17,7 @@ clean:
 
 gitmake-origin: 
 	git fetch origin
-	git diff --numstat origin/master master | grep -v .gitignore && touch gitmake-origin || touch -t 197001010100 gitmake-origin
+	git diff --numstat origin/master master | grep -v .gitignore | grep -v gitmake && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 master: gitmake-origin
 	git checkout $@
