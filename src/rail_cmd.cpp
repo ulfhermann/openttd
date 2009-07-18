@@ -1938,11 +1938,10 @@ static void DrawTile_Track(TileInfo *ti)
 			}
 		} else {
 			/* look for customization */
-			const StationSpec *statspec = GetWaypointByTile(ti->tile)->spec.spec;
+			const StationSpec *statspec = GetStationSpec(ti->tile);
 
 			if (statspec != NULL) {
-				/* emulate station tile - open with building */
-				const Station *st = ComposeWaypointStation(ti->tile);
+				const BaseStation *st = BaseStation::GetByTile(ti->tile);
 				uint gfx = 2;
 
 				if (HasBit(statspec->callbackmask, CBM_STATION_SPRITE_LAYOUT)) {
@@ -1974,7 +1973,7 @@ static void DrawTile_Track(TileInfo *ti)
 			} else {
 default_waypoint:
 				/* There is no custom layout, fall back to the default graphics */
-				dts = &_waypoint_gfx_table[GetWaypointAxis(ti->tile)];
+				dts = GetStationTileLayout(STATION_WAYPOINT, GetWaypointAxis(ti->tile));
 				relocation = 0;
 				image = dts->ground.sprite + rti->total_offset;
 				if (IsSnowRailGround(ti->tile)) image += rti->snow_offset;
@@ -2048,14 +2047,6 @@ void DrawTrainDepotSprite(int x, int y, int dir, RailType railtype)
 
 	if (image != SPR_FLAT_GRASS_TILE) image += offset;
 	DrawTileSequence(x + 33, y + 17, image, dts->seq, offset);
-}
-
-void DrawDefaultWaypointSprite(int x, int y, RailType railtype)
-{
-	uint32 offset = GetRailTypeInfo(railtype)->total_offset;
-	const DrawTileSprites *dts = &_waypoint_gfx_table[AXIS_X];
-
-	DrawTileSequence(x, y, dts->ground.sprite + offset, dts->seq, 0);
 }
 
 static uint GetSlopeZ_Track(TileIndex tile, uint x, uint y)
@@ -2313,8 +2304,8 @@ static TrackStatus GetTileTrackStatus_Track(TileIndex tile, TransportType mode, 
 static bool ClickTile_Track(TileIndex tile)
 {
 	switch (GetRailTileType(tile)) {
-		case RAIL_TILE_DEPOT:    ShowDepotWindow(tile, VEH_TRAIN);            return true;
-		case RAIL_TILE_WAYPOINT: ShowWaypointWindow(GetWaypointByTile(tile)); return true;
+		case RAIL_TILE_DEPOT:    ShowDepotWindow(tile, VEH_TRAIN);              return true;
+		case RAIL_TILE_WAYPOINT: ShowWaypointWindow(Waypoint::GetByTile(tile)); return true;
 		default: return false;
 	}
 }
