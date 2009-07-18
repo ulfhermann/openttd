@@ -685,8 +685,30 @@ class SmallMapWindow : public Window
 		}
 	}
 
+	void DrawVehicles(DrawPixelInfo *dpi) {
+		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) {
+			VehiclePositionMap new_vehicles;
+			Vehicle *v;
+
+			FOR_ALL_VEHICLES(v) {
+				if (v->type != VEH_EFFECT &&
+						(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
+					DrawVehicle(dpi, v, new_vehicles);
+				}
+			}
+
+			if (this->zoom < ZOOM_LVL_NORMAL) {
+				if(this->refresh != FORCE_REFRESH && new_vehicles.size() != this->vehicles_on_map.size()) {
+					/* redraw the whole map if the vehicles have changed. This prevents artifacts. */
+					this->refresh = FORCE_REFRESH;
+				}
+				std::swap(new_vehicles, this->vehicles_on_map);
+			}
+		}
+	}
+
 	/**
-	 * draws a vehivle in the smallmap if it's in the selected drawing area.
+	 * draws a vehicle in the smallmap if it's in the selected drawing area.
 	 * @param dpi the part of the smallmap to be drawn into
 	 * @param v the vehicle to be drawn
 	 */
@@ -739,6 +761,31 @@ class SmallMapWindow : public Window
 				}
 			}
 		}
+	}
+
+	void DrawIndustries(DrawPixelInfo *dpi) {
+		/* Emphasize all industries if current view is zoomed out "Industreis" */
+		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
+		if ((this->map_type == SMT_INDUSTRY) && (this->zoom > ZOOM_LVL_NORMAL)) {
+			const Industry *i;
+			FOR_ALL_INDUSTRIES(i) {
+				if (_legend_from_industries[_industry_to_list_pos[i->type]].show_on_map) {
+					Point pt = RemapTileCoords(i->xy);
+
+					int y = pt.y - dpi->top;
+					if (!IsInsideMM(y, 0, dpi->height)) continue;
+
+					int x = pt.x - dpi->left;
+					if (!IsInsideMM(x, 0, dpi->width)) continue;
+
+					byte colour = GetIndustrySpec(i->type)->map_colour;
+					blitter->SetPixel(dpi->dst_ptr, x, y, colour);
+					blitter->SetPixel(dpi->dst_ptr, x + 1, y, colour);
+					blitter->SetPixel(dpi->dst_ptr, x + 2, y, colour);
+				}
+			}
+		}
+
 	}
 
 public:
@@ -815,11 +862,14 @@ public:
 
 		/* The map background is off by a little less than one tile in y direction compared to vehicles and signs.
 		 * I have no idea why this is the case.
-		 * on zoom levels >= ZOOM_LVL_NORMAL this isn't visible as only full tiles can be shown
+		 * on zoom levels >= ZOOM_LVL_NORMAL this isn't visible as only full tiles can be shown. However, beginning
+		 * at ZOOM_LVL_OUT_4X it's again off by 1 or 2 pixels
 		 */
 		dy = 0;
 		if (this->zoom < ZOOM_LVL_NORMAL) {
 			dy = UnScaleByZoomLower(2, this->zoom) - 2;
+		} else if (this->zoom > ZOOM_LVL_NORMAL) {
+			dy = this->zoom - 1;
 		}
 
 		/* correct the various problems mentioned above by moving the initial drawing pointer a little */
@@ -854,26 +904,9 @@ public:
 			x += MAP_COLUMN_WIDTH / 2;
 		}
 
-		/* draw vehicles? */
-		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) {
-			VehiclePositionMap new_vehicles;
-			Vehicle *v;
+		DrawVehicles(dpi);
 
-			FOR_ALL_VEHICLES(v) {
-				if (v->type != VEH_EFFECT &&
-						(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
-					DrawVehicle(dpi, v, new_vehicles);
-				}
-			}
-
-			if (this->zoom < ZOOM_LVL_NORMAL) {
-				if(this->refresh != FORCE_REFRESH && new_vehicles.size() != this->vehicles_on_map.size()) {
-					/* redraw the whole map if the vehicles have changed. This prevents artifacts. */
-					this->refresh = FORCE_REFRESH;
-				}
-				std::swap(new_vehicles, vehicles_on_map);
-			}
-		}
+		DrawIndustries(dpi);
 
 		if (this->show_towns) {
 			const Town *t;
