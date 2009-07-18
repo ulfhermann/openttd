@@ -190,18 +190,7 @@ CommandCost CmdBuildTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1
 		SetDepotWaypointReservation(tile, reserved);
 		MarkTileDirtyByTile(tile);
 
-		const StationSpec *statspec = GetCustomStationSpec(STAT_CLASS_WAYP, p1);
-
-		if (statspec != NULL) {
-			wp->spec.spec = statspec;
-			wp->spec.grfid = statspec->grffile->grfid;
-			wp->spec.localidx = statspec->localidx;
-		} else {
-			/* Specified custom graphics do not exist, so use default. */
-			wp->spec.spec = NULL;
-			wp->spec.grfid = 0;
-			wp->spec.localidx = 0;
-		}
+		wp->AssignStationSpec(p1);
 
 		wp->delete_ctr = 0;
 		wp->build_date = _date;
@@ -235,7 +224,7 @@ CommandCost RemoveTrainWaypoint(TileIndex tile, DoCommandFlag flags, bool justre
 
 	if (flags & DC_EXEC) {
 		Track track = GetRailWaypointTrack(tile);
-		wp = GetWaypointByTile(tile);
+		wp = Waypoint::GetByTile(tile);
 
 		wp->delete_ctr = 30; // let it live for this many days before we do the actual deletion.
 		wp->sign.MarkDirty();
