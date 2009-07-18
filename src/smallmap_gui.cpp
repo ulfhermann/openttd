@@ -663,6 +663,10 @@ class SmallMapWindow : public Window
 		SMT_OWNER,
 	};
 
+	typedef std::map<VehicleID, TileIndex> VehiclePositionMap;
+
+	VehiclePositionMap vehicles_on_map;
+
 	static SmallMapType map_type;
 	static bool show_towns;
 
@@ -670,6 +674,7 @@ class SmallMapWindow : public Window
 	int32 scroll_y;
 
 	uint8 refresh;
+	static const int FORCE_REFRESH = 0x1F;
 
 	/**
 	 * zoom level of the smallmap.
@@ -809,7 +814,7 @@ class SmallMapWindow : public Window
 	 * @param dpi the part of the smallmap to be drawn into
 	 * @param v the vehicle to be drawn
 	 */
-	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v)
+	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v, VehiclePositionMap &new_vehicles)
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
 		int scale = 1;
@@ -829,6 +834,17 @@ class SmallMapWindow : public Window
 				(x - 2 * scale >= dpi->width) || //right
 				(y - 2 * scale >= dpi->height)) { //bottom
 			return;
+		}
+
+		if (this->zoom < ZOOM_LVL_NORMAL) {
+			if (this->refresh != FORCE_REFRESH) {
+				VehiclePositionMap::iterator i = this->vehicles_on_map.find(v->index);
+				if (i == vehicles_on_map.end() || i->second != v->tile) {
+					/* redraw the whole map if the vehicles have changed. This prevents artifacts. */
+					this->refresh = FORCE_REFRESH;
+				}
+			}
+			new_vehicles[v->index] = v->tile;
 		}
 
 		byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
@@ -1201,13 +1217,22 @@ public:
 
 		/* draw vehicles? */
 		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) {
+			VehiclePositionMap new_vehicles;
 			Vehicle *v;
 
 			FOR_ALL_VEHICLES(v) {
 				if (v->type != VEH_EFFECT &&
 						(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
-					DrawVehicle(dpi, v);
+					DrawVehicle(dpi, v, new_vehicles);
 				}
+			}
+
+			if (this->zoom < ZOOM_LVL_NORMAL) {
+				if(this->refresh != FORCE_REFRESH && new_vehicles.size() != this->vehicles_on_map.size()) {
+					/* redraw the whole map if the vehicles have changed. This prevents artifacts. */
+					this->refresh = FORCE_REFRESH;
+				}
+				std::swap(new_vehicles, vehicles_on_map);
 			}
 		}
 
@@ -1595,7 +1620,10 @@ public:
 	virtual void OnTick()
 	{
 		/* update the window every now and then */
-		if ((++this->refresh & 0x1F) == 0) this->SetDirty();
+		if (this->refresh++ == FORCE_REFRESH) {
+			this->refresh = 0;
+			this->SetDirty();
+		}
 	}
 
 	virtual void OnScroll(Point delta)
