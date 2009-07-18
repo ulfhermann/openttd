@@ -17,46 +17,39 @@
 typedef Pool<Waypoint, WaypointID, 32, 64000> WaypointPool;
 extern WaypointPool _waypoint_pool;
 
-struct Waypoint : WaypointPool::PoolItem<&_waypoint_pool> {
-	TileIndex xy;      ///< Tile of waypoint
-
-	Town *town;        ///< Town associated with the waypoint
+struct Waypoint : WaypointPool::PoolItem<&_waypoint_pool>, BaseStation {
 	uint16 town_cn;    ///< The Nth waypoint for this town (consecutive number)
-	char *name;        ///< Custom name. If not set, town + town_cn is used for naming
 
-	ViewportSign sign; ///< Dimensions of sign (not saved)
-	Date build_date;   ///< Date of construction
-	OwnerByte owner;   ///< Whom this waypoint belongs to
-
-	StationSpecList spec; ///< NewGRF specification of the station
-
-	byte delete_ctr;   ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the waypoint is then is deleted.
-
-	Waypoint(TileIndex tile = INVALID_TILE) : xy(tile) { }
+	Waypoint(TileIndex tile = INVALID_TILE) : BaseStation(tile) { }
 	~Waypoint();
 
 	void UpdateVirtCoord();
+
+	/* virtual */ FORCEINLINE bool TileBelongsToRailStation(TileIndex tile) const
+	{
+		return this->delete_ctr == 0 && this->xy == tile;
+	}
+
+	/* virtual */ uint32 GetNewGRFVariable(const struct ResolverObject *object, byte variable, byte parameter, bool *available) const;
+
+	void AssignStationSpec(uint index);
+
+	/**
+	 * Fetch a waypoint by tile
+	 * @param tile Tile of waypoint
+	 * @return Waypoint
+	 */
+	static FORCEINLINE Waypoint *GetByTile(TileIndex tile)
+	{
+		return Waypoint::Get(GetWaypointIndex(tile));
+	}
 };
 
 #define FOR_ALL_WAYPOINTS_FROM(var, start) FOR_ALL_ITEMS_FROM(Waypoint, waypoint_index, var, start)
 #define FOR_ALL_WAYPOINTS(var) FOR_ALL_WAYPOINTS_FROM(var, 0)
 
-
-/**
- * Fetch a waypoint by tile
- * @param tile Tile of waypoint
- * @return Waypoint
- */
-static inline Waypoint *GetWaypointByTile(TileIndex tile)
-{
-	assert(IsRailWaypointTile(tile));
-	return Waypoint::Get(GetWaypointIndex(tile));
-}
-
 CommandCost RemoveTrainWaypoint(TileIndex tile, DoCommandFlag flags, bool justremove);
-Station *ComposeWaypointStation(TileIndex tile);
 void ShowWaypointWindow(const Waypoint *wp);
 void DrawWaypointSprite(int x, int y, int stat_id, RailType railtype);
-void UpdateAllWaypointVirtCoords();
 
 #endif /* WAYPOINT_H */
