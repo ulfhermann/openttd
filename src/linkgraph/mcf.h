@@ -20,7 +20,7 @@ class CapacityAnnotation : public Path {
 public:
 	CapacityAnnotation(NodeID n, bool source = false) : Path(n, source) {}
 	bool IsBetter(const CapacityAnnotation * base, int cap, uint dist) const;
-	uint GetAnnotation() const {return capacity;}
+	int GetAnnotation() const {return capacity;}
 	struct comp {
 		bool operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const;
 	};

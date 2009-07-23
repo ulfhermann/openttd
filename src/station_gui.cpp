@@ -143,7 +143,7 @@ protected:
 
 		const Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (st->owner == owner || (st->owner == OWNER_NONE && !st->IsBuoy() && HasStationInUse(st->index, owner))) {
+			if (st->owner == owner || (st->owner == OWNER_NONE && HasStationInUse(st->index, owner))) {
 				if (this->facilities & st->facilities) { // only stations with selected facilities
 					int num_waiting_cargo = 0;
 					for (CargoID j = 0; j < NUM_CARGO; j++) {
@@ -174,12 +174,12 @@ protected:
 		char buf[64];
 
 		SetDParam(0, (*a)->index);
-		GetString(buf, STR_STATION, lastof(buf));
+		GetString(buf, STR_STATION_NAME, lastof(buf));
 
 		if (*b != last_station) {
 			last_station = *b;
 			SetDParam(0, (*b)->index);
-			GetString(buf_cache, STR_STATION, lastof(buf_cache));
+			GetString(buf_cache, STR_STATION_NAME, lastof(buf_cache));
 		}
 
 		return strcmp(buf, buf_cache);
@@ -378,7 +378,7 @@ public:
 
 			/* Do not do the complex check HasStationInUse here, it may be even false
 			 * when the order had been removed and the station list hasn't been removed yet */
-			assert(st->owner == owner || (st->owner == OWNER_NONE && !st->IsBuoy()));
+			assert(st->owner == owner || st->owner == OWNER_NONE);
 
 			SetDParam(0, st->index);
 			SetDParam(1, st->facilities);
@@ -409,7 +409,7 @@ public:
 
 				const Station *st = this->stations[id_v];
 				/* do not check HasStationInUse - it is slow and may be invalid */
-				assert(st->owner == (Owner)this->window_number || (st->owner == OWNER_NONE && !st->IsBuoy()));
+				assert(st->owner == (Owner)this->window_number || st->owner == OWNER_NONE);
 
 				if (_ctrl_pressed) {
 					ShowExtraViewPortWindow(st->xy);
@@ -591,7 +591,7 @@ GUIStationList::SortFunction * const CompanyStationsWindow::sorter_funcs[] = {
 
 /* Names of the sorting functions */
 const StringID CompanyStationsWindow::sorter_names[] = {
-	STR_SORT_BY_DROPDOWN_NAME,
+	STR_SORT_BY_NAME,
 	STR_SORT_BY_FACILITY,
 	STR_SORT_BY_WAITING,
 	STR_SORT_BY_RATING_MAX,
@@ -1002,7 +1002,7 @@ struct StationViewWindow : public Window {
 
 			case SVW_RENAME:
 				SetDParam(0, this->window_number);
-				ShowQueryString(STR_STATION, STR_QUERY_RENAME_STATION_CAPTION, MAX_LENGTH_STATION_NAME_BYTES, MAX_LENGTH_STATION_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
+				ShowQueryString(STR_STATION_NAME, STR_QUERY_RENAME_STATION_CAPTION, MAX_LENGTH_STATION_NAME_BYTES, MAX_LENGTH_STATION_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
 				break;
 
 			case SVW_TRAINS: { // Show a list of scheduled trains to this station
