@@ -36,6 +36,7 @@
 #include "subsidy_base.h"
 #include "subsidy_func.h"
 #include "station_base.h"
+#include "waypoint_base.h"
 #include "economy_base.h"
 #include "core/pool_func.hpp"
 
@@ -1287,6 +1288,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 {
 	CargoReservation rejected;
 	assert(v->current_order.IsType(OT_LOADING));
+	assert(v->load_unload_time_rem != 0);
 
 	Vehicle *u = v;
 	StationID last_visited = u->last_station_visited;

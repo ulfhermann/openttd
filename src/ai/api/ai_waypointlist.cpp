@@ -7,13 +7,13 @@
 #include "ai_waypoint.hpp"
 #include "../../company_func.h"
 #include "../../vehicle_base.h"
-#include "../../waypoint.h"
+#include "../../waypoint_base.h"
 
 AIWaypointList::AIWaypointList()
 {
 	const Waypoint *wp;
 	FOR_ALL_WAYPOINTS(wp) {
-		if (wp->owner == _current_company) this->AddItem(wp->index);
+		if (wp->facilities & FACIL_TRAIN && wp->owner == _current_company) this->AddItem(wp->index);
 	}
 }
 

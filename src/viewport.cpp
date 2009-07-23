@@ -23,6 +23,7 @@
 #include "landscape.h"
 #include "viewport_func.h"
 #include "station_base.h"
+#include "waypoint_base.h"
 #include "town.h"
 #include "signs_base.h"
 #include "signs_func.h"
@@ -36,6 +37,7 @@
 #include "vehicle_func.h"
 #include "company_func.h"
 #include "station_func.h"
+#include "waypoint_func.h"
 #include "window_func.h"
 #include "tilehighlight_func.h"
 #include "window_gui.h"
@@ -1218,7 +1220,7 @@ static void ViewportAddSigns(DrawPixelInfo *dpi)
 
 static void AddWaypoint(const Waypoint *wp, StringID str, uint16 width)
 {
-	AddStringToDraw(wp->sign.left + 1, wp->sign.top + 1, str, wp->index, 0, (wp->delete_ctr != 0 ? 0xE : _company_colours[wp->owner]), width);
+	AddStringToDraw(wp->sign.left + 1, wp->sign.top + 1, str, wp->index, 0, (wp->owner == OWNER_NONE || (wp->facilities & ~FACIL_WAYPOINT) == 0) ? 0xE : _company_colours[wp->owner], width);
 }
 
 

@@ -153,7 +153,7 @@ public:
 	{
 		TileIndexDiff diff = TileOffsByDiagDir(TrackdirToExitdir(ReverseTrackdir(trackdir)));
 		for (; skipped >= 0; skipped--, tile += diff) {
-			if (GetRailwayStationReservation(tile)) return true;
+			if (HasStationReservation(tile)) return true;
 		}
 		return false;
 	}
@@ -406,7 +406,7 @@ no_entry_cost: // jump here at the beginning if the node has no parent (it is th
 				/* We will end in this pass (station is possible target) */
 				end_segment_reason |= ESRB_STATION;
 
-			} else if (cur.tile_type == MP_RAILWAY && IsRailWaypoint(cur.tile)) {
+			} else if (cur.tile_type == MP_STATION && IsRailWaypoint(cur.tile)) {
 				/* Waypoint is also a good reason to finish. */
 				end_segment_reason |= ESRB_WAYPOINT;
 			} else if (TrackFollower::DoTrackMasking() && cur.tile_type == MP_RAILWAY) {

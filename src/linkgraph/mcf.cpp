@@ -21,7 +21,7 @@ bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint
 		}
 	} else {
 		if (capacity > 0 || base->distance == UINT_MAX) {
-			return false; // if the other path doesn't have capacity left, but this one has, this one is always better
+			return false; // if the other path doesn't have capacity left or is disconnected, but this one has, this one is always better
 		} else {
 			/* if both paths are out of capacity, do the regular distance comparison again */
 			return base->distance + dist < distance;
@@ -254,8 +254,8 @@ void MCF2ndPass::Run(LinkGraphComponent * graph) {
 			Dijkstra<CapacityAnnotation>(source, paths, false);
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge & edge = graph->GetEdge(source, dest);
-				if (edge.unsatisfied_demand > 0) {
-					Path * path = paths[dest];
+				Path * path = paths[dest];
+				if (edge.unsatisfied_demand > 0 && path->GetCapacity() > INT_MIN) {
 					PushFlow(edge, path, accuracy, false);
 					if (edge.unsatisfied_demand > 0) {
 						demand_left = true;
@@ -270,23 +270,23 @@ void MCF2ndPass::Run(LinkGraphComponent * graph) {
 
 /**
  * avoid accidentally deleting different paths of the same capacity/distance in a set.
- * When the annotation is the same the pointers themselves are compared, so there are no equal ranges.
- * (The problem might have been something else ... but this isn't expensive I guess)
+ * When the annotation is the same node IDs are compared, so there are no equal ranges.
  */
-bool greater(uint x_anno, uint y_anno, const Path * x, const Path * y) {
+template <typename T>
+bool greater(T x_anno, T y_anno, const Path * x, const Path * y) {
 	if (x_anno > y_anno) {
 		return true;
 	} else if (x_anno < y_anno) {
 		return false;
 	} else {
-		return x > y;
+		return x->GetNode() > y->GetNode();
 	}
 }
 
 bool CapacityAnnotation::comp::operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const {
-	return greater(x->GetAnnotation(), y->GetAnnotation(), x, y);
+	return greater<int>(x->GetAnnotation(), y->GetAnnotation(), x, y);
 }
 
 bool DistanceAnnotation::comp::operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const {
-	return x != y && !greater(x->GetAnnotation(), y->GetAnnotation(), x, y);
+	return x != y && !greater<uint>(x->GetAnnotation(), y->GetAnnotation(), x, y);
 }
