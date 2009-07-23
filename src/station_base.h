@@ -5,26 +5,19 @@
 #ifndef STATION_BASE_H
 #define STATION_BASE_H
 
-#include "station_type.h"
+#include "base_station_base.h"
 #include "airport.h"
-#include "core/pool_type.hpp"
 #include "cargopacket.h"
 #include "cargo_type.h"
-#include "town_type.h"
-#include "strings_type.h"
-#include "date_type.h"
 #include "vehicle_type.h"
-#include "company_type.h"
 #include "industry_type.h"
 #include "core/geometry_type.hpp"
-#include "viewport_type.h"
 #include "linkgraph/linkgraph_types.h"
-#include "station_map.h"
 #include <list>
 #include <map>
 #include <set>
 
-typedef Pool<Station, StationID, 32, 64000> StationPool;
+typedef Pool<BaseStation, StationID, 32, 64000> StationPool;
 extern StationPool _station_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
@@ -147,12 +140,6 @@ struct GoodsEntry {
 	FlowStat GetSumFlowVia(StationID via) const;
 };
 
-struct StationSpecList {
-	const StationSpec *spec;
-	uint32 grfid;      ///< GRF ID of this custom station
-	uint8  localidx;   ///< Station ID within GRF of station
-};
-
 /** StationRect - used to track station spread out rectangle - cheaper than scanning whole map */
 struct StationRect : public Rect {
 	enum StationRectMode
@@ -176,118 +163,11 @@ struct StationRect : public Rect {
 	StationRect& operator = (Rect src);
 };
 
-/** Base class for all station-ish types */
-struct BaseStation {
-	TileIndex xy;                   ///< Base tile of the station
-	ViewportSign sign;              ///< NOSAVE: Dimensions of sign
-	byte delete_ctr;                ///< Delete counter. If greater than 0 then it is decremented until it reaches 0; the waypoint is then is deleted.
-
-	char *name;                     ///< Custom name
-	StringID string_id;             ///< Default name (town area) of station
-
-	Town *town;                     ///< The town this station is associated with
-	OwnerByte owner;                ///< The owner of this station
-	StationFacilityByte facilities; ///< The facilities that this station has
-
-	uint8 num_specs;                ///< Number of specs in the speclist
-	StationSpecList *speclist;      ///< List of station specs of this station
-
-	Date build_date;                ///< Date of construction
-
-	uint16 random_bits;             ///< Random bits assigned to this station
-	byte waiting_triggers;          ///< Waiting triggers (NewGRF) for this station
-	uint8 cached_anim_triggers;     ///< NOSAVE: Combined animation trigger bitmask, used to determine if trigger processing should happen.
-
-	BaseStation(TileIndex tile) : xy(tile) { }
-
-	virtual ~BaseStation();
-
-	/**
-	 * Check whether a specific tile belongs to this station.
-	 * @param tile the tile to check
-	 * @return true if the tile belongs to this station
-	 */
-	virtual bool TileBelongsToRailStation(TileIndex tile) const = 0;
-
-	/**
-	 * Helper function to get a NewGRF variable that isn't implemented by the base class.
-	 * @param object the resolver object related to this query
-	 * @param variable that is queried
-	 * @param parameter parameter for that variable
-	 * @param available will return false if ever the variable asked for does not exist
-	 * @return the value stored in the corresponding variable
-	 */
-	virtual uint32 GetNewGRFVariable(const struct ResolverObject *object, byte variable, byte parameter, bool *available) const = 0;
-
-	/**
-	 * Update the coordinated of the sign (as shown in the viewport).
-	 */
-	virtual void UpdateVirtCoord() = 0;
-
-	/**
-	 * Get the base station belonging to a specific tile.
-	 * @param tile The tile to get the base station from.
-	 * @return the station associated with that tile.
-	 */
-	static BaseStation *GetByTile(TileIndex tile);
-};
-
-/**
- * Class defining several overloaded accessors so we don't
- * have to cast base stations that often
- */
-template <class T, bool Tis_waypoint>
-struct SpecializedStation : public BaseStation {
-	static const StationFacility EXPECTED_FACIL = Tis_waypoint ? FACIL_WAYPOINT : FACIL_NONE; ///< Specialized type
-
-	/**
-	 * Set station type correctly
-	 * @param tile The base tile of the station.
-	 */
-	FORCEINLINE SpecializedStation<T, Tis_waypoint>(TileIndex tile) :
-			BaseStation(tile)
-	{
-		this->facilities = EXPECTED_FACIL;
-	}
-
-	/**
-	 * Helper for checking whether the given station is of this type.
-	 * @param st the station to check.
-	 * @return true if the station is the type we expect it to be.
-	 */
-	static FORCEINLINE bool IsExpected(const BaseStation *st)
-	{
-		return (st->facilities & FACIL_WAYPOINT) == EXPECTED_FACIL;
-	}
-
-	/**
-	 * Converts a BaseStation to SpecializedStation with type checking.
-	 * @param st BaseStation pointer
-	 * @return pointer to SpecializedStation
-	 */
-	static FORCEINLINE T *From(BaseStation *st)
-	{
-		assert(IsExpected(st));
-		return (T *)st;
-	}
-
-	/**
-	 * Converts a const BaseStation to const SpecializedStation with type checking.
-	 * @param st BaseStation pointer
-	 * @return pointer to SpecializedStation
-	 */
-	static FORCEINLINE const T *From(const BaseStation *st)
-	{
-		assert(IsExpected(st));
-		return (const T *)st;
-	}
-};
-
 
 typedef SmallVector<Industry *, 2> IndustryVector;
 
 /** Station data structure */
-struct Station : StationPool::PoolItem<&_station_pool>, SpecializedStation<Station, false> {
+struct Station : SpecializedStation<Station, false> {
 public:
 	RoadStop *GetPrimaryRoadStop(RoadStopType type) const
 	{
@@ -357,24 +237,11 @@ public:
 
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;
 
-	/**
-	 * Determines whether a station is a buoy only.
-	 * @todo Ditch this encoding of buoys
-	 */
-	FORCEINLINE bool IsBuoy() const
-	{
-		return (this->had_vehicle_of_type & HVOT_BUOY) != 0;
-	}
-
-	static FORCEINLINE Station *GetByTile(TileIndex tile)
-	{
-		return Station::Get(GetStationIndex(tile));
-	}
+	/* virtual */ void GetTileArea(TileArea *ta, StationType type) const;
 
 	static void PostDestructor(size_t index);
 };
 
-#define FOR_ALL_STATIONS_FROM(var, start) FOR_ALL_ITEMS_FROM(Station, station_index, var, start)
-#define FOR_ALL_STATIONS(var) FOR_ALL_STATIONS_FROM(var, 0)
+#define FOR_ALL_STATIONS(var) FOR_ALL_BASE_STATIONS_OF_TYPE(Station, var)
 
 #endif /* STATION_BASE_H */

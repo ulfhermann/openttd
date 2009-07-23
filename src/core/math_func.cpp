@@ -46,7 +46,7 @@ int GreatestCommonDivisor(int a, int b)
  * Cancels out division errors stemming from the integer nature of the division over multiple runs.
  */
 int DivideApprox(int a, int b) {
-	int random_like = (a + b * (a - b)) % b;
+	int random_like = ((a + b) * (a - b)) % b;
 
 	int remainder = a % b;
 

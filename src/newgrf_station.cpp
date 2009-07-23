@@ -7,7 +7,7 @@
 #include "landscape.h"
 #include "debug.h"
 #include "station_base.h"
-#include "waypoint.h"
+#include "waypoint_base.h"
 #include "roadstop_base.h"
 #include "newgrf_commons.h"
 #include "newgrf_station.h"
@@ -30,6 +30,48 @@ static StationClass _station_classes[STAT_CLASS_MAX];
 enum {
 	MAX_SPECLIST = 255,
 };
+
+enum TriggerArea {
+	TA_TILE,
+	TA_PLATFORM,
+	TA_WHOLE,
+};
+
+struct ETileArea : TileArea {
+	ETileArea(const BaseStation *st, TileIndex tile, TriggerArea ta)
+	{
+		switch (ta) {
+			default: NOT_REACHED();
+
+			case TA_TILE:
+				this->tile = tile;
+				this->w    = 1;
+				this->h    = 1;
+				break;
+
+			case TA_PLATFORM: {
+				TileIndex start, end;
+				Axis axis = GetRailStationAxis(tile);
+				TileIndexDiff delta = TileOffsByDiagDir(AxisToDiagDir(axis));
+
+				for (end = tile; IsRailwayStationTile(end + delta) && IsCompatibleTrainStationTile(tile, end + delta); end += delta) { /* Nothing */ }
+				for (start = tile; IsRailwayStationTile(start - delta) && IsCompatibleTrainStationTile(tile, start - delta); start -= delta) { /* Nothing */ }
+
+				this->tile = start;
+				this->w = TileX(end) - TileX(start) + 1;
+				this->h = TileY(end) - TileY(start) + 1;
+				break;
+			}
+
+			case TA_WHOLE:
+				st->GetTileArea(this, Station::IsExpected(st) ? STATION_RAIL : STATION_WAYPOINT);
+				this->w++;
+				this->h++;
+				break;
+		}
+	}
+};
+
 
 /**
  * Reset station classes to their default state.
@@ -230,30 +272,20 @@ uint32 GetPlatformInfo(Axis axis, byte tile, int platforms, int length, int x, i
  */
 static TileIndex FindRailStationEnd(TileIndex tile, TileIndexDiff delta, bool check_type, bool check_axis)
 {
-	bool waypoint;
 	byte orig_type = 0;
 	Axis orig_axis = AXIS_X;
+	StationID sid = GetStationIndex(tile);
 
-	waypoint = IsTileType(tile, MP_RAILWAY);
-
-	if (waypoint) {
-		if (check_axis) orig_axis = GetWaypointAxis(tile);
-	} else {
-		if (check_type) orig_type = GetCustomStationSpecIndex(tile);
-		if (check_axis) orig_axis = GetRailStationAxis(tile);
-	}
+	if (check_type) orig_type = GetCustomStationSpecIndex(tile);
+	if (check_axis) orig_axis = GetRailStationAxis(tile);
 
 	while (true) {
 		TileIndex new_tile = TILE_ADD(tile, delta);
 
-		if (waypoint) {
-			if (!IsRailWaypointTile(new_tile)) break;
-			if (check_axis && GetWaypointAxis(new_tile) != orig_axis) break;
-		} else {
-			if (!IsRailwayStationTile(new_tile)) break;
-			if (check_type && GetCustomStationSpecIndex(new_tile) != orig_type) break;
-			if (check_axis && GetRailStationAxis(new_tile) != orig_axis) break;
-		}
+		if (!IsTileType(new_tile, MP_STATION) || GetStationIndex(new_tile) != sid) break;
+		if (!IsRailwayStation(new_tile) && !IsRailWaypoint(new_tile)) break;
+		if (check_type && GetCustomStationSpecIndex(new_tile) != orig_type) break;
+		if (check_axis && GetRailStationAxis(new_tile) != orig_axis) break;
 
 		tile = new_tile;
 	}
@@ -269,12 +301,11 @@ static uint32 GetPlatformInfoHelper(TileIndex tile, bool check_type, bool check_
 	int sy = TileY(FindRailStationEnd(tile, TileDiffXY( 0, -1), check_type, check_axis));
 	int ex = TileX(FindRailStationEnd(tile, TileDiffXY( 1,  0), check_type, check_axis)) + 1;
 	int ey = TileY(FindRailStationEnd(tile, TileDiffXY( 0,  1), check_type, check_axis)) + 1;
-	Axis axis = IsTileType(tile, MP_RAILWAY) ? GetWaypointAxis(tile) : GetRailStationAxis(tile);
 
 	tx -= sx; ex -= sx;
 	ty -= sy; ey -= sy;
 
-	return GetPlatformInfo(axis, IsTileType(tile, MP_RAILWAY) ? 2 : GetStationGfx(tile), ex, ey, tx, ty, centred);
+	return GetPlatformInfo(GetRailStationAxis(tile), GetStationGfx(tile), ex, ey, tx, ty, centred);
 }
 
 
@@ -288,7 +319,7 @@ static uint32 GetRailContinuationInfo(TileIndex tile)
 	static const Direction y_dir[8] = { DIR_SE, DIR_NW, DIR_SW, DIR_NE, DIR_S, DIR_W, DIR_E, DIR_N };
 	static const DiagDirection y_exits[8] = { DIAGDIR_SE, DIAGDIR_NW, DIAGDIR_SW, DIAGDIR_NE, DIAGDIR_SE, DIAGDIR_NW, DIAGDIR_SE, DIAGDIR_NW };
 
-	Axis axis = IsTileType(tile, MP_RAILWAY) ? GetWaypointAxis(tile) : GetRailStationAxis(tile);
+	Axis axis = GetRailStationAxis(tile);
 
 	/* Choose appropriate lookup table to use */
 	const Direction *dir = axis == AXIS_X ? x_dir : y_dir;
@@ -408,12 +439,7 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 
 		case 0x42: return GetTerrainType(tile) | (GetRailType(tile) << 8);
 		case 0x43: return st->owner; // Station owner
-		case 0x44:
-			if (IsRailWaypointTile(tile)) {
-				return GetDepotWaypointReservation(tile) ? 7 : 4;
-			} else {
-				return GetRailwayStationReservation(tile) ? 7 : 4; // PBS status
-			}
+		case 0x44: return HasStationReservation(tile) ? 7 : 4; // PBS status
 		case 0x45:
 			if (!HasBit(_svc.valid, 2)) { _svc.v45 = GetRailContinuationInfo(tile); SetBit(_svc.valid, 2); }
 			return _svc.v45;
@@ -541,7 +567,7 @@ uint32 Waypoint::GetNewGRFVariable(const ResolverObject *object, byte variable, 
 {
 	switch (variable) {
 		case 0x48: return 0; // Accepted cargo types
-		case 0x8A: return HVOT_TRAIN;
+		case 0x8A: return HVOT_WAYPOINT;
 		case 0xF1: return 0; // airport type
 		case 0xF2: return 0; // truck stop status
 		case 0xF3: return 0; // bus stop status
@@ -651,7 +677,7 @@ static const SpriteGroup *ResolveStation(ResolverObject *object)
 	if (object->u.station.st == NULL) {
 		/* No station, so we are in a purchase list */
 		ctype = CT_PURCHASE;
-	} else {
+	} else if (Station::IsExpected(object->u.station.st)) {
 		const Station *st = Station::From(object->u.station.st);
 		/* Pick the first cargo that we have waiting */
 		const CargoSpec *cs;
@@ -734,7 +760,7 @@ uint16 GetStationCallback(CallbackID callback, uint32 param1, uint32 param2, con
  * @param exec Whether to actually allocate the spec.
  * @return Index within the Station's spec list, or -1 if the allocation failed.
  */
-int AllocateSpecToStation(const StationSpec *statspec, Station *st, bool exec)
+int AllocateSpecToStation(const StationSpec *statspec, BaseStation *st, bool exec)
 {
 	uint i;
 
@@ -784,17 +810,22 @@ int AllocateSpecToStation(const StationSpec *statspec, Station *st, bool exec)
  * @param specindex Index of the custom station within the Station's spec list.
  * @return Indicates whether the StationSpec was deallocated.
  */
-void DeallocateSpecFromStation(Station *st, byte specindex)
+void DeallocateSpecFromStation(BaseStation *st, byte specindex)
 {
 	/* specindex of 0 (default) is never freeable */
 	if (specindex == 0) return;
 
+	ETileArea area = ETileArea(st, INVALID_TILE, TA_WHOLE);
 	/* Check all tiles over the station to check if the specindex is still in use */
-	BEGIN_TILE_LOOP(tile, st->trainst_w, st->trainst_h, st->train_tile) {
-		if (IsRailwayStationTile(tile) && GetStationIndex(tile) == st->index && GetCustomStationSpecIndex(tile) == specindex) {
-			return;
+	for (uint y = 0; y < area.h; y++) {
+		for (uint x = 0; x < area.w; x++) {
+			if (st->TileBelongsToRailStation(area.tile) && GetCustomStationSpecIndex(area.tile) == specindex) {
+				return;
+			}
+			area.tile += TileDiffXY(1, 0);
 		}
-	} END_TILE_LOOP(tile, st->trainst_w, st->trainst_h, st->train_tile)
+		area.tile += TileDiffXY(-area.w, 1);
+	}
 
 	/* This specindex is no longer in use, so deallocate it */
 	st->speclist[specindex].spec     = NULL;
@@ -897,20 +928,11 @@ bool DrawStationTile(int x, int y, RailType railtype, Axis axis, StationClassID 
 
 const StationSpec *GetStationSpec(TileIndex t)
 {
-	if (IsRailwayStationTile(t)) {
-		if (!IsCustomStationSpecIndex(t)) return NULL;
+	if (!IsCustomStationSpecIndex(t)) return NULL;
 
-		const BaseStation *st = BaseStation::GetByTile(t);
-		uint specindex = GetCustomStationSpecIndex(t);
-		return specindex < st->num_specs ? st->speclist[specindex].spec : NULL;
-	}
-
-	if (IsRailWaypointTile(t)) {
-		const BaseStation *st = BaseStation::GetByTile(t);
-		return st->num_specs != 0 ? st->speclist[0].spec : NULL;
-	}
-
-	return NULL;
+	const BaseStation *st = BaseStation::GetByTile(t);
+	uint specindex = GetCustomStationSpecIndex(t);
+	return specindex < st->num_specs ? st->speclist[specindex].spec : NULL;
 }
 
 
@@ -1020,51 +1042,6 @@ static void ChangeStationAnimationFrame(const StationSpec *ss, const BaseStation
 	if (GB(callback, 8, 7) != 0) PlayTileSound(ss->grffile, GB(callback, 8, 7), tile);
 }
 
-enum TriggerArea {
-	TA_TILE,
-	TA_PLATFORM,
-	TA_WHOLE,
-};
-
-struct TileArea {
-	TileIndex tile;
-	uint8 w;
-	uint8 h;
-
-	TileArea(const Station *st, TileIndex tile, TriggerArea ta)
-	{
-		switch (ta) {
-			default: NOT_REACHED();
-
-			case TA_TILE:
-				this->tile = tile;
-				this->w    = 1;
-				this->h    = 1;
-				break;
-
-			case TA_PLATFORM: {
-				TileIndex start, end;
-				Axis axis = GetRailStationAxis(tile);
-				TileIndexDiff delta = TileOffsByDiagDir(AxisToDiagDir(axis));
-
-				for (end = tile; IsRailwayStationTile(end + delta) && IsCompatibleTrainStationTile(tile, end + delta); end += delta) { /* Nothing */ }
-				for (start = tile; IsRailwayStationTile(start - delta) && IsCompatibleTrainStationTile(tile, start - delta); start -= delta) { /* Nothing */ }
-
-				this->tile = start;
-				this->w = TileX(end) - TileX(start) + 1;
-				this->h = TileY(end) - TileY(start) + 1;
-				break;
-			}
-
-			case TA_WHOLE:
-				this->tile = st->train_tile;
-				this->w    = st->trainst_w + 1;
-				this->h    = st->trainst_h + 1;
-				break;
-		}
-	}
-};
-
 void StationAnimationTrigger(const BaseStation *st, TileIndex tile, StatAnimTrigger trigger, CargoID cargo_type)
 {
 	/* List of coverage areas for each animation trigger */
@@ -1080,8 +1057,9 @@ void StationAnimationTrigger(const BaseStation *st, TileIndex tile, StatAnimTrig
 	if (!HasBit(st->cached_anim_triggers, trigger)) return;
 
 	uint16 random_bits = Random();
-	TileArea area = TileArea(Station::From(st), tile, tas[trigger]);
+	ETileArea area = ETileArea(st, tile, tas[trigger]);
 
+	/* Check all tiles over the station to check if the specindex is still in use */
 	for (uint y = 0; y < area.h; y++) {
 		for (uint x = 0; x < area.w; x++) {
 			if (st->TileBelongsToRailStation(area.tile)) {

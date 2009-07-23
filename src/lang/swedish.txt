@@ -154,8 +154,8 @@ STR_ABBREV_PLASTIC                                              :{TINYFONT}PL
 STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}LÄ
 STR_ABBREV_NONE                                                 :{TINYFONT}NEJ
 STR_ABBREV_ALL                                                  :{TINYFONT}ALLA
-STR_DATE_SHORT_WHITE                                            :{WHITE}{DATE_SHORT}
-STR_DATE_LONG_WHITE                                             :{WHITE}{DATE_LONG}
+STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
+STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SMALLMAP_CAPTION                                            :{WHITE}Karta - {STRING}
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Spelinställningar
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Meddelande
@@ -328,7 +328,6 @@ STR_SORT_BY_PRODUCTION                                          :Produktion
 STR_SORT_BY_TYPE                                                :Typ
 STR_SORT_BY_TRANSPORTED                                         :Transporterat
 STR_SORT_BY_NAME                                                :{BLACK}Namn
-STR_SORT_BY_DROPDOWN_NAME                                       :Namn
 STR_SORT_BY_DATE                                                :{BLACK}Datum
 STR_SORT_BY_NUMBER                                              :Nummer
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Vinst förra året
@@ -345,29 +344,31 @@ STR_SORT_BY_FACILITY                                            :Stationstyp
 STR_SORT_BY_WAITING                                             :Väntande last-värde
 STR_SORT_BY_RATING_MAX                                          :Högsta rating för last
 STR_SORT_BY_RATING_MIN                                          :Lägsta rating för last
-STR_ENGINE_SORT_ENGINE_ID                                       :MotorID (Klassisk Sort)
-STR_ENGINE_SORT_COST                                            :Kostnad
-STR_ENGINE_SORT_POWER                                           :Elektriskt
-STR_ENGINE_SORT_INTRO_DATE                                      :Introduktionsdatum
-STR_ENGINE_SORT_RUNNING_COST                                    :Driftkostnad
-STR_ENGINE_SORT_POWER_VS_RUNNING_COST                           :Kraft/Driftkostnad
-STR_ENGINE_SORT_CARGO_CAPACITY                                  :Lastkapacitet
+STR_SORT_BY_ENGINE_ID                                           :MotorID (Klassisk Sort)
+STR_SORT_BY_COST                                                :Kostnad
+STR_SORT_BY_POWER                                               :Elektriskt
+STR_SORT_BY_INTRO_DATE                                          :Introduktionsdatum
+STR_SORT_BY_RUNNING_COST                                        :Driftkostnad
+STR_SORT_BY_POWER_VS_RUNNING_COST                               :Kraft/Driftkostnad
+STR_SORT_BY_CARGO_CAPACITY                                      :Lastkapacitet
 STR_NO_WAITING_CARGO                                            :{BLACK}Ingen sorts last väntar
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}Markera alla inrättningar
 STR_SELECT_ALL_TYPES                                            :{BLACK}Välj alla last-typer (inklusive icke väntande last)
-STR_AVAILABLE_TRAINS                                            :{BLACK}Tillgängliga tåg
-STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Tillgängliga fordon
-STR_AVAILABLE_SHIPS                                             :{BLACK}Tillgängliga skepp
-STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Tillgängliga flyplan
 STR_AVAILABLE_ENGINES_TIP                                       :{BLACK}Se lista med tillgängliga motordesigner för denna fordonstyp
 STR_MANAGE_LIST                                                 :{BLACK}Behandlingslista
 STR_MANAGE_LIST_TIP                                             :{BLACK}Skicka instruktioner till alla fordon på denna lista
 STR_REPLACE_VEHICLES                                            :Byt ut fordon
+STR_SEND_FOR_SERVICING                                          :Skicka till Service
+
+STR_AVAILABLE_TRAINS                                            :{BLACK}Tillgängliga tåg
+STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Tillgängliga fordon
+STR_AVAILABLE_SHIPS                                             :{BLACK}Tillgängliga skepp
+STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Tillgängliga flyplan
+
 STR_SEND_TRAIN_TO_DEPOT                                         :Skicka till Depå
 STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Skicka till Depå
 STR_SEND_SHIP_TO_DEPOT                                          :Skicka till Depå
 STR_SEND_AIRCRAFT_TO_HANGAR                                     :Skicka till Hangar
-STR_SEND_FOR_SERVICING                                          :Skicka till Service
 
 ############ range for months starts
 STR_MONTH_ABBREV_JAN                                            :jan
@@ -410,8 +411,8 @@ STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Bygg fly
 STR_TOOLBAR_TOOLTIP_PLANT_TREES_PLACE_SIGNS                     :{BLACK}Plantera träd, placera skyltar etc.
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Markinformation
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Inställningar
-STR_SMALL_ARROW_UP                                              :{BLACK}{SMALLUPARROW}
-STR_SMALL_ARROW_DOWN                                            :{BLACK}{SMALLDOWNARROW}
+STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
+STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}Kan inte ändra service-intervall...
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Stäng fönster
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Fönstertitel - dra för att flytta fönstret
@@ -581,12 +582,12 @@ STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESI
 STR_HIGHSCORE_STATS                                             :{BIGFONT}'{STRING}'   ({COMMA})
 STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}{COMPANY} uppnår '{STRING}' status!
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME} från {COMPANY} uppnår '{STRING}' status!
-STR_BLUE_NUMBER                                                 :{BLUE}{COMMA}
+STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Scenario-editor
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Skapa mark
-STR_ARROW_UP                                                    :{BLACK}{UPARROW}
-STR_ARROW_DOWN                                                  :{BLACK}{DOWNARROW}
+STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
+STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Öka storlek av yta att höja/sänka
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Minska storlek av yta att höja/sänka
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Generera slumpmässig mark
@@ -670,7 +671,7 @@ STR_FULL                                                        :Full
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 
-STR_CHECKMARK                                                   :{CHECKMARK}
+STR_JUST_CHECKMARK                                              :{CHECKMARK}
 ############ range for menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Spelinställningar
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Svårighetsgrad
@@ -762,9 +763,6 @@ STR_INDUSTRY_MENU_FUND_NEW_INDUSTRY                             :Bekosta ny indu
 ############ range ends here
 
 STR_FUND_INDUSTRY_CAPTION                                       :{WHITE}Bekosta ny industri
-STR_JUST_STRING                                                 :{STRING}
-STR_JUST_RAW_STRING                                             :{STRING}
-STR_JUST_INT                                                    :{NUM}
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...kan bara byggas i regnskog
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}...kan bara byggas i öken
 STR_STATUSBAR_PAUSED                                            :{YELLOW}* *  PAUSAD  *  *
@@ -778,8 +776,8 @@ STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  SPAR
 STR_SAVE_STILL_IN_PROGRESS                                      :{WHITE}Sparar fortfarande,{}vänta tills det är slutfört!
 STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}Välj 'Ezy Street style music'-program
 
-STR_6                                                           :{BLACK}6
-STR_7                                                           :{BLACK}7
+STR_BLACK_6                                                     :{BLACK}6
+STR_BLACK_7                                                     :{BLACK}7
 
 ############ start of townname region
 STR_TOWNNAME_ORIGINAL_ENGLISH                                   :Engelska
@@ -887,7 +885,7 @@ STR_CRATES                                                      :lådor
 STR_RES_OTHER                                                   :annan
 STR_NOTHING                                                     :
 
-STR_SMALL_RIGHT_ARROW                                           :{TINYFONT}{RIGHTARROW}
+STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_CANT_SHARE_ORDER_LIST                                       :{WHITE}Kan inte dela orderlistan...
 STR_CANT_COPY_ORDER_LIST                                        :{WHITE}Kan inte kopiera orderlistan...
@@ -949,7 +947,7 @@ STR_CONFIG_SETTING_STOP_LOCATION                                :{LTBLUE}Nya tå
 STR_CONFIG_SETTING_STOP_LOCATION_NEAR_END                       :början
 STR_CONFIG_SETTING_STOP_LOCATION_MIDDLE                         :mitten
 STR_CONFIG_SETTING_STOP_LOCATION_FAR_END                        :slutet
-STR_CONFIG_SETTING_ROADVEH_QUEUE                                :{LTBLUE}Vägfordonsköer (med kvanteffekter): {ORANGE}{STRING}
+STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Vägfordonsköer (med kvanteffekter): {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Scrolla vyn när musen är vid kanten: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Tillåt mutning av de lokala myndigheterna: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Tillåt köp av exklusiva transporträttigheter: {ORANGE}{STRING}
@@ -1055,12 +1053,12 @@ STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Grupper
 
 STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Visa byggnationsverktygen när det ej finns några passande fordon tillgängligt: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Max antal tåg per spelare: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAX_ROADVEH                                  :{LTBLUE}Max antal vägfordon per spelare: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Max antal vägfordon per spelare: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Max antal flygplan per spelare: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_SHIPS                                    :{LTBLUE}Max antal skepp per spelare: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_AI_BUILDS_TRAINS                             :{LTBLUE}Förbjud tåg för datorn: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AI_BUILDS_ROADVEH                            :{LTBLUE}Förbjud vägfordon för datorn: {ORANGE}{STRING}
+STR_CONFIG_SETTING_AI_BUILDS_ROAD_VEHICLES                      :{LTBLUE}Förbjud vägfordon för datorn: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_AIRCRAFT                           :{LTBLUE}Förbjud flygplan för datorn: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_SHIPS                              :{LTBLUE}Förbjud skepp för datorn: {ORANGE}{STRING}
 
@@ -1070,8 +1068,8 @@ STR_CONFIG_SETTING_AI_MAX_OPCODES                               :{LTBLUE}#opcode
 STR_CONFIG_SETTING_SERVINT_ISPERCENT                            :{LTBLUE}Visa serviceintervall i procent: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SERVINT_TRAINS                               :{LTBLUE}Standard serviceintervall för tåg: {ORANGE}{STRING} dagar/%
 STR_CONFIG_SETTING_SERVINT_TRAINS_DISABLED                      :{LTBLUE}Standard serviceintervall för tåg: {ORANGE}av
-STR_CONFIG_SETTING_SERVINT_ROADVEH                              :{LTBLUE}Standard serviceintervall för vägfordon: {ORANGE}{STRING} dagar/%
-STR_CONFIG_SETTING_SERVINT_ROADVEH_DISABLED                     :{LTBLUE}Standard serviceintervall för vägfordon: {ORANGE}av
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES                        :{LTBLUE}Standard serviceintervall för vägfordon: {ORANGE}{STRING} dagar/%
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES_DISABLED               :{LTBLUE}Standard serviceintervall för vägfordon: {ORANGE}av
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT                             :{LTBLUE}Standard serviceintervall för flygplan: {ORANGE}{STRING} dagar/%
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT_DISABLED                    :{LTBLUE}Standard serviceintervall för flygplan: {ORANGE}av
 STR_CONFIG_SETTING_SERVINT_SHIPS                                :{LTBLUE}Standard serviceintervall för skepp: {ORANGE}{STRING} dagar/%
@@ -1146,10 +1144,10 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Vägfin
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Ej rekommenderad)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Rekommenderad)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH                       :{LTBLUE}Vägfinnare för vägfordon: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_OPF                   :Original {RED}(Ej rekommenderad)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_NPF                   :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_YAPF                  :YAPF {BLUE}(Rekommenderad)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Vägfinnare för vägfordon: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(Ej rekommenderad)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Rekommenderad)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Vägfinnare för skepp: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}(Rekommenderad)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
@@ -1160,8 +1158,7 @@ STR_CONFIG_SETTING_MAP_Y                                        :{LTBLUE}Y-storl
 
 ############ generic strings for settings
 STR_CONFIG_SETTING_DISABLED                                     :Avaktiverat
-STR_CONFIG_SETTING_INT32                                        :{NUM}
-STR_CONFIG_SETTING_CURRENCY                                     :{CURRENCY}
+STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_CONFIG_SETTING_QUERY_CAPT                                   :{WHITE}Ändra inställningsvärde
 
 STR_TEMPERATE_LANDSCAPE                                         :Tempererat landskap
@@ -1190,15 +1187,15 @@ STR_GO_NON_STOP_TO_WAYPOINT                                     :Gå via {WAYPOI
 
 STR_WAYPOINTNAME_CITY                                           :Kontrollstation {TOWN}
 STR_WAYPOINTNAME_CITY_SERIAL                                    :Kontrollstation {TOWN} #{COMMA}
+STR_BUOYNAME_CITY                                               :{TOWN} Boj
+STR_BUOYNAME_CITY_SERIAL                                        :{TOWN} Boj #{COMMA}
 STR_LANDINFO_WAYPOINT                                           :Kontrollpunkt
 
 STR_WAYPOINT                                                    :{WHITE}Kontrollstation
 STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Välj kontrollstationstyp
 
 STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_LIST                                      :{WHITE}{WAYPOINT} - {COMMA} Tåg{P "" s}
 STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
-STR_WAYPOINT_RAW                                                :{WAYPOINT}
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Ändra namn på kontrollstation
 
 STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Kan inte ändra kontrollstationens namn...
@@ -1265,11 +1262,6 @@ STR_INDUSTRYDIR_LIST_CAPTION                                    :{BLACK}Industri
 
 STR_INDUSTRY_TOO_CLOSE                                          :{WHITE}... för nära en annan industri
 
-STR_RAIL_REFIT_VEHICLE_TO_CARRY                                 :{BLACK}Anpassa tåg för att bära annan godstyp
-STR_RAIL_REFIT_VEHICLE                                          :{BLACK}Anpassa tåg
-STR_RAIL_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Välj godstyp för tåget att bära
-STR_RAIL_REFIT_TO_CARRY_HIGHLIGHTED                             :{BLACK}Anpassa tåg för att bära vald godstyp
-STR_RAIL_CAN_T_REFIT_VEHICLE                                    :{WHITE}Kan ej anpassa tåg...
 STR_CONFIG_GAME_PRODUCTION                                      :{WHITE}Ändra produktion
 
 ############ network gui strings
@@ -1779,11 +1771,6 @@ STR_TOWN_BUILDING_NAME_TEPEES_1                                 :Kåtor
 STR_TOWN_BUILDING_NAME_TEAPOT_HOUSE_1                           :Tekanne-Hus
 STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Spargris
 
-STR_INDUSTRY                                                    :{INDUSTRY}
-STR_TOWN                                                        :{TOWN}
-STR_INDUSTRY_FORMAT                                             :{TOWN} {STRING}
-STR_STATION                                                     :{STATION}
-
 ##id 0x2800
 STR_LANDSCAPING_MENU_LANDSCAPING                                :Landskapsarkitektur
 STR_LANDSCAPING_MENU_PLANT_TREES                                :Plantera träd
@@ -1837,6 +1824,12 @@ STR_CARGO_RATING_VERY_GOOD                                      :Väldigt bra
 STR_CARGO_RATING_EXCELLENT                                      :Utmärkt
 STR_CARGO_RATING_OUTSTANDING                                    :Enastående
 ############ range for rating ends
+
+### station view strings
+STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Visa alla tåg där denna station finns med i rutten
+STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Visa alla vägfordon där denna station finns med i rutten
+STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Visa alla flygplan där denna station finns med i rutten
+STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Visa alla skepp där denna station finns med i rutten
 
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
 STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} tar inte längre emot {STRING}
@@ -2060,7 +2053,7 @@ STR_ERROR_YOU_ALREADY_OWN_IT                                    :{WHITE}...du ä
 STR_SV_EMPTY                                                    :
 STR_SV_UNNAMED                                                  :Inget namn
 STR_SV_TRAIN_NAME                                               :Tåg {COMMA}
-STR_SV_ROADVEH_NAME                                             :Vägfordon {COMMA}
+STR_SV_ROAD_VEHICLE_NAME                                        :Vägfordon {COMMA}
 STR_SV_SHIP_NAME                                                :Skepp {COMMA}
 STR_SV_AIRCRAFT_NAME                                            :Flygplan {COMMA}
 
@@ -2081,15 +2074,7 @@ STR_SV_STNAME_AIRPORT                                           :{STRING} flygpl
 STR_SV_STNAME_OILFIELD                                          :{STRING} oljefält
 STR_SV_STNAME_MINES                                             :{STRING} gruva
 STR_SV_STNAME_DOCKS                                             :{STRING} Kaj
-STR_SV_STNAME_BUOY_1                                            :{STRING} boj 1
-STR_SV_STNAME_BUOY_2                                            :{STRING} boj 2
-STR_SV_STNAME_BUOY_3                                            :{STRING} boj 3
-STR_SV_STNAME_BUOY_4                                            :{STRING} boj 4
-STR_SV_STNAME_BUOY_5                                            :{STRING} boj 5
-STR_SV_STNAME_BUOY_6                                            :{STRING} boj 6
-STR_SV_STNAME_BUOY_7                                            :{STRING} boj 7
-STR_SV_STNAME_BUOY_8                                            :{STRING} boj 8
-STR_SV_STNAME_BUOY_9                                            :{STRING} boj 9
+##id 0x6020
 STR_SV_STNAME_ANNEXE                                            :{STRING} annex
 STR_SV_STNAME_SIDINGS                                           :{STRING} förort
 STR_SV_STNAME_BRANCH                                            :{STRING} förgrening
@@ -2137,8 +2122,8 @@ STR_NUM_LOW                                                     :Låg
 STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :Hög
 STR_NUM_CUSTOM                                                  :Egna
-STR_ARROW_LEFT_SMALL                                            :{BLACK}{SMALLLEFTARROW}
-STR_ARROW_RIGHT_SMALL                                           :{BLACK}{SMALLRIGHTARROW}
+STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
+STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 STR_AI_SPEED_VERY_SLOW                                          :Väldigt långsam
 STR_AI_SPEED_SLOW                                               :Långsam
 STR_AI_SPEED_MEDIUM                                             :Mellan
@@ -2172,7 +2157,6 @@ STR_CITY_APPROVAL_HOSTILE                                       :Fientlig
 
 ##id 0x7000
 STR_COMPANY_VIEW_CAPTION                                        :{WHITE}{COMPANY} {BLACK}{COMPANYNUM}
-STR_COMPANY_NUM                                                 :(Företag {COMMA})
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}Nytt ansikte
 STR_COMPANY_VIEW_COLOUR_SCHEME_BUTTON                           :{BLACK}Färgval
 STR_COMPANY_VIEW_COLOUR_SCHEME_TITLE                            :{GOLD}Färgval:
@@ -2189,12 +2173,12 @@ STR_FINANCES_YEAR                                               :{WHITE}{NUM}
 STR_FINANCES_SECTION_CONSTRUCTION                               :{GOLD}Konstruktioner
 STR_FINANCES_SECTION_NEW_VEHICLES                               :{GOLD}Nya fordon
 STR_FINANCES_SECTION_TRAIN_RUNNING_COSTS                        :{GOLD}Kostnad för tåg
-STR_FINANCES_SECTION_ROAD_VEH_RUNNING_COSTS                     :{GOLD}Kostnad för vägfordon
+STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD}Kostnad för vägfordon
 STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD}Kostnad för flygplan
 STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD}Kostnad för skepp
 STR_FINANCES_SECTION_PROPERTY_MAINTENANCE                       :{GOLD}Underhåll av egendomar
 STR_FINANCES_SECTION_TRAIN_INCOME                               :{GOLD}Inkomst från tåg
-STR_FINANCES_SECTION_ROAD_VEHICLES_INCOME                       :{GOLD}Inkomst från vägfordon
+STR_FINANCES_SECTION_ROAD_VEHICLE_INCOME                        :{GOLD}Inkomst från vägfordon
 STR_FINANCES_SECTION_AIRCRAFT_INCOME                            :{GOLD}Inkomst från flygplan
 STR_FINANCES_SECTION_SHIP_INCOME                                :{GOLD}Inkomst från skepp
 STR_FINANCES_SECTION_LOAN_INTEREST                              :{GOLD}Ränta på lån
@@ -2205,7 +2189,6 @@ STR_FINANCES_TOTAL_CAPTION                                      :{WHITE}Totalt:
 STR_COMPANY_NAME_COMPANY_NUM                                    :{COMPANY} {COMPANYNUM}
 STR_GRAPH_INCOME_CAPTION                                        :{WHITE}Graf över inkomster
 STR_CURRCOMPACT                                                 :{CURRCOMPACT}
-STR_JUST_COMMA                                                  :{COMMA}
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Graf över vinst
 STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Banksaldo
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Lån
@@ -2334,7 +2317,7 @@ STR_LIVERY_FREIGHT_TRAM                                         :Fraktspårvagn
 
 STR_LIVERY_GENERAL_TIP                                          :{BLACK}Visa generellt färgschema
 STR_LIVERY_TRAIN_TIP                                            :{BLACK}Visa färgscheman för tåg
-STR_LIVERY_ROADVEH_TIP                                          :{BLACK}Visa färgscheman för vägfordon
+STR_LIVERY_ROAD_VEHICLE_TIP                                     :{BLACK}Visa färgscheman för vägfordon
 STR_LIVERY_SHIP_TIP                                             :{BLACK}Visa färgscheman för skepp
 STR_LIVERY_AIRCRAFT_TIP                                         :{BLACK}Visa färgschema för flygplan
 STR_LIVERY_PRIMARY_TIP                                          :{BLACK}Välj huvudfärg för det aktuella schemat
@@ -2458,94 +2441,94 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_TOY_VAN                     :Leksaksvagn
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_BATTERY_TRUCK               :Batterivagn
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FIZZY_DRINK_TRUCK           :Läskvagn
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PLASTIC_TRUCK               :Plastvagn
-STR_VEHICLE_NAME_ROAD_MPS_REGAL_BUS                             :MPS Regal Buss
-STR_VEHICLE_NAME_ROAD_HEREFORD_LEOPARD_BUS                      :Hereford Leopard Buss
-STR_VEHICLE_NAME_ROAD_FOSTER_BUS                                :Foster Buss
-STR_VEHICLE_NAME_ROAD_FOSTER_MKII_SUPERBUS                      :Foster MkII Super Buss
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKI_BUS                        :Ploddyphut MkI Buss
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKII_BUS                       :Ploddyphut MkII Buss
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKIII_BUS                      :Ploddyphut MkIII Buss
-STR_VEHICLE_NAME_ROAD_BALOGH_COAL_TRUCK                         :Balogh Koldumper
-STR_VEHICLE_NAME_ROAD_UHL_COAL_TRUCK                            :Uhl Koldumper
-STR_VEHICLE_NAME_ROAD_DW_COAL_TRUCK                             :DW Koldumper
-STR_VEHICLE_NAME_ROAD_MPS_MAIL_TRUCK                            :MPS Postbil
-STR_VEHICLE_NAME_ROAD_REYNARD_MAIL_TRUCK                        :Reynard Postbil
-STR_VEHICLE_NAME_ROAD_PERRY_MAIL_TRUCK                          :Perry Postbil
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_MAIL_TRUCK                    :MightyMover Postbil
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_MAIL_TRUCK                    :Powernaught Postbil
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_MAIL_TRUCK                       :Wizzowow Postbil
-STR_VEHICLE_NAME_ROAD_WITCOMBE_OIL_TANKER                       :Witcombe Oljetanker
-STR_VEHICLE_NAME_ROAD_FOSTER_OIL_TANKER                         :Foster Oljetanker
-STR_VEHICLE_NAME_ROAD_PERRY_OIL_TANKER                          :Perry Oljetanker
-STR_VEHICLE_NAME_ROAD_TALBOTT_LIVESTOCK_VAN                     :Talbott Boskapsbil
-STR_VEHICLE_NAME_ROAD_UHL_LIVESTOCK_VAN                         :Uhl Boskapsbil
-STR_VEHICLE_NAME_ROAD_FOSTER_LIVESTOCK_VAN                      :Foster Boskapsbil
-STR_VEHICLE_NAME_ROAD_BALOGH_GOODS_TRUCK                        :Balogh Godslastbil
-STR_VEHICLE_NAME_ROAD_CRAIGHEAD_GOODS_TRUCK                     :Craighead Godslastbil
-STR_VEHICLE_NAME_ROAD_GOSS_GOODS_TRUCK                          :Goss Godslastbil
-STR_VEHICLE_NAME_ROAD_HEREFORD_GRAIN_TRUCK                      :Hereford Spannmålslastare
-STR_VEHICLE_NAME_ROAD_THOMAS_GRAIN_TRUCK                        :Thomas Spannmålslastare
-STR_VEHICLE_NAME_ROAD_GOSS_GRAIN_TRUCK                          :Goss Spannmålslastare
-STR_VEHICLE_NAME_ROAD_WITCOMBE_WOOD_TRUCK                       :Witcombe Timmerlastare
-STR_VEHICLE_NAME_ROAD_FOSTER_WOOD_TRUCK                         :Foster Timmerlastare
-STR_VEHICLE_NAME_ROAD_MORELAND_WOOD_TRUCK                       :Moreland Timmerlastare
-STR_VEHICLE_NAME_ROAD_MPS_IRON_ORE_TRUCK                        :MPS Järnmalmsdumper
-STR_VEHICLE_NAME_ROAD_UHL_IRON_ORE_TRUCK                        :Uhl Järnmalmsdumper
-STR_VEHICLE_NAME_ROAD_CHIPPY_IRON_ORE_TRUCK                     :Chippy Järnmalmsdumper
-STR_VEHICLE_NAME_ROAD_BALOGH_STEEL_TRUCK                        :Balogh Ståldumper
-STR_VEHICLE_NAME_ROAD_UHL_STEEL_TRUCK                           :Uhl Ståldumper
-STR_VEHICLE_NAME_ROAD_KELLING_STEEL_TRUCK                       :Kelling Ståldumper
-STR_VEHICLE_NAME_ROAD_BALOGH_ARMORED_TRUCK                      :Balogh Bepansrad lastbil
-STR_VEHICLE_NAME_ROAD_UHL_ARMORED_TRUCK                         :Uhl Bepansrad lastbil
-STR_VEHICLE_NAME_ROAD_FOSTER_ARMORED_TRUCK                      :Foster Bepansrad lastbil
-STR_VEHICLE_NAME_ROAD_FOSTER_FOOD_VAN                           :Foster Matbil
-STR_VEHICLE_NAME_ROAD_PERRY_FOOD_VAN                            :Perry Matbil
-STR_VEHICLE_NAME_ROAD_CHIPPY_FOOD_VAN                           :Chippy Matbil
-STR_VEHICLE_NAME_ROAD_UHL_PAPER_TRUCK                           :Uhl Papperlastare
-STR_VEHICLE_NAME_ROAD_BALOGH_PAPER_TRUCK                        :Balogh Papperslastare
-STR_VEHICLE_NAME_ROAD_MPS_PAPER_TRUCK                           :MPS Papperslastare
-STR_VEHICLE_NAME_ROAD_MPS_COPPER_ORE_TRUCK                      :MPS Kopparmalmsdumper
-STR_VEHICLE_NAME_ROAD_UHL_COPPER_ORE_TRUCK                      :Uhl Kopparmalmsdumper
-STR_VEHICLE_NAME_ROAD_GOSS_COPPER_ORE_TRUCK                     :Goss Kopparmalmsdumper
-STR_VEHICLE_NAME_ROAD_UHL_WATER_TANKER                          :Uhl Vattentanker
-STR_VEHICLE_NAME_ROAD_BALOGH_WATER_TANKER                       :Balogh Vattentanker
-STR_VEHICLE_NAME_ROAD_MPS_WATER_TANKER                          :MPS Vattentanker
-STR_VEHICLE_NAME_ROAD_BALOGH_FRUIT_TRUCK                        :Balogh Fruktlastare
-STR_VEHICLE_NAME_ROAD_UHL_FRUIT_TRUCK                           :Uhl Fruktlastare
-STR_VEHICLE_NAME_ROAD_KELLING_FRUIT_TRUCK                       :Kelling Fruktlastare
-STR_VEHICLE_NAME_ROAD_BALOGH_RUBBER_TRUCK                       :Balogh Gummidumper
-STR_VEHICLE_NAME_ROAD_UHL_RUBBER_TRUCK                          :Uhl Gummidumper
-STR_VEHICLE_NAME_ROAD_RMT_RUBBER_TRUCK                          :RMT Gummidumper
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_SUGAR_TRUCK                   :MightyMover Sockerlastare
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_SUGAR_TRUCK                   :Powernaught Sockerlastare
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_SUGAR_TRUCK                      :Wizzowow Sockerlastare
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COLA_TRUCK                    :MightyMover Kolalastare
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COLA_TRUCK                    :Powernaught Kolalastare
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COLA_TRUCK                       :Wizzowow Kolalastare
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COTTON_CANDY                  :MightyMover Sockervaddslastare
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COTTON_CANDY                  :Powernaught Sockervaddslastare
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COTTON_CANDY_TRUCK               :Wizzowow Sockervaddslastare
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOFFEE_TRUCK                  :MightyMover Knäcklastare
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOFFEE_TRUCK                  :Powernaught Knäcklastare
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOFFEE_TRUCK                     :Wizzowow Knäcklastare
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOY_VAN                       :MightyMover Leksaksbil
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOY_VAN                       :Powernaught Leksaksbil
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOY_VAN                          :Wizzowow Leksaksbil
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_CANDY_TRUCK                   :MightyMover Godislastare
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_CANDY_TRUCK                   :Powernaught Godislastare
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_CANDY_TRUCK                      :Wizzowow Godislastare
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BATTERY_TRUCK                 :MightyMover Batterilastare
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BATTERY_TRUCK                 :Powernaught Batterilastare
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BATTERY_TRUCK                    :Wizzowow Batterilastare
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_FIZZY_DRINK                   :MightyMover Läsklastbil
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_FIZZY_DRINK                   :Powernaught Läsklastbil
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_FIZZY_DRINK_TRUCK                :Wizzowow Läsklastbil
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_PLASTIC_TRUCK                 :MightyMover Plastlastare
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_PLASTIC_TRUCK                 :Powernaught Plastlastare
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_PLASTIC_TRUCK                    :Wizzowow Plastlastbil
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BUBBLE_TRUCK                  :MightyMover Bubbellastbil
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BUBBLE_TRUCK                  :Powernaught Bubbellastbil
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BUBBLE_TRUCK                     :Wizzowow Bubbellastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_REGAL_BUS                     :MPS Regal Buss
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_LEOPARD_BUS              :Hereford Leopard Buss
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_BUS                        :Foster Buss
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_MKII_SUPERBUS              :Foster MkII Super Buss
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKI_BUS                :Ploddyphut MkI Buss
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKII_BUS               :Ploddyphut MkII Buss
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKIII_BUS              :Ploddyphut MkIII Buss
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_COAL_TRUCK                 :Balogh Koldumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COAL_TRUCK                    :Uhl Koldumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_DW_COAL_TRUCK                     :DW Koldumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_MAIL_TRUCK                    :MPS Postbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_REYNARD_MAIL_TRUCK                :Reynard Postbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_MAIL_TRUCK                  :Perry Postbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_MAIL_TRUCK            :MightyMover Postbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_MAIL_TRUCK            :Powernaught Postbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_MAIL_TRUCK               :Wizzowow Postbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_OIL_TANKER               :Witcombe Oljetanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_OIL_TANKER                 :Foster Oljetanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_OIL_TANKER                  :Perry Oljetanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_TALBOTT_LIVESTOCK_VAN             :Talbott Boskapsbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_LIVESTOCK_VAN                 :Uhl Boskapsbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_LIVESTOCK_VAN              :Foster Boskapsbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_GOODS_TRUCK                :Balogh Godslastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_CRAIGHEAD_GOODS_TRUCK             :Craighead Godslastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GOODS_TRUCK                  :Goss Godslastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_GRAIN_TRUCK              :Hereford Spannmålslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_THOMAS_GRAIN_TRUCK                :Thomas Spannmålslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GRAIN_TRUCK                  :Goss Spannmålslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_WOOD_TRUCK               :Witcombe Timmerlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_WOOD_TRUCK                 :Foster Timmerlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MORELAND_WOOD_TRUCK               :Moreland Timmerlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_IRON_ORE_TRUCK                :MPS Järnmalmsdumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_IRON_ORE_TRUCK                :Uhl Järnmalmsdumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_IRON_ORE_TRUCK             :Chippy Järnmalmsdumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_STEEL_TRUCK                :Balogh Ståldumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_STEEL_TRUCK                   :Uhl Ståldumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_STEEL_TRUCK               :Kelling Ståldumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_ARMORED_TRUCK              :Balogh Bepansrad lastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_ARMORED_TRUCK                 :Uhl Bepansrad lastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_ARMORED_TRUCK              :Foster Bepansrad lastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_FOOD_VAN                   :Foster Matbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_FOOD_VAN                    :Perry Matbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_FOOD_VAN                   :Chippy Matbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_PAPER_TRUCK                   :Uhl Papperlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_PAPER_TRUCK                :Balogh Papperslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_PAPER_TRUCK                   :MPS Papperslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_COPPER_ORE_TRUCK              :MPS Kopparmalmsdumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COPPER_ORE_TRUCK              :Uhl Kopparmalmsdumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_COPPER_ORE_TRUCK             :Goss Kopparmalmsdumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_WATER_TANKER                  :Uhl Vattentanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_WATER_TANKER               :Balogh Vattentanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_WATER_TANKER                  :MPS Vattentanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_FRUIT_TRUCK                :Balogh Fruktlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_FRUIT_TRUCK                   :Uhl Fruktlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_FRUIT_TRUCK               :Kelling Fruktlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_RUBBER_TRUCK               :Balogh Gummidumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_RUBBER_TRUCK                  :Uhl Gummidumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_RMT_RUBBER_TRUCK                  :RMT Gummidumper
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_SUGAR_TRUCK           :MightyMover Sockerlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_SUGAR_TRUCK           :Powernaught Sockerlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_SUGAR_TRUCK              :Wizzowow Sockerlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COLA_TRUCK            :MightyMover Kolalastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COLA_TRUCK            :Powernaught Kolalastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COLA_TRUCK               :Wizzowow Kolalastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COTTON_CANDY          :MightyMover Sockervaddslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COTTON_CANDY          :Powernaught Sockervaddslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COTTON_CANDY_TRUCK       :Wizzowow Sockervaddslastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOFFEE_TRUCK          :MightyMover Knäcklastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOFFEE_TRUCK          :Powernaught Knäcklastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOFFEE_TRUCK             :Wizzowow Knäcklastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOY_VAN               :MightyMover Leksaksbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOY_VAN               :Powernaught Leksaksbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOY_VAN                  :Wizzowow Leksaksbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_CANDY_TRUCK           :MightyMover Godislastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_CANDY_TRUCK           :Powernaught Godislastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_CANDY_TRUCK              :Wizzowow Godislastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BATTERY_TRUCK         :MightyMover Batterilastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BATTERY_TRUCK         :Powernaught Batterilastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BATTERY_TRUCK            :Wizzowow Batterilastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_FIZZY_DRINK           :MightyMover Läsklastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_FIZZY_DRINK           :Powernaught Läsklastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_FIZZY_DRINK_TRUCK        :Wizzowow Läsklastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_PLASTIC_TRUCK         :MightyMover Plastlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_PLASTIC_TRUCK         :Powernaught Plastlastare
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_PLASTIC_TRUCK            :Wizzowow Plastlastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BUBBLE_TRUCK          :MightyMover Bubbellastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BUBBLE_TRUCK          :Powernaught Bubbellastbil
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BUBBLE_TRUCK             :Wizzowow Bubbellastbil
 STR_VEHICLE_NAME_SHIP_MPS_OIL_TANKER                            :MPS Oljetanker
 STR_VEHICLE_NAME_SHIP_CS_INC_OIL_TANKER                         :CS-Inc. Oljetanker
 STR_VEHICLE_NAME_SHIP_MPS_PASSENGER_FERRY                       :MPS Passagerarfärja
@@ -2608,10 +2591,8 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :monorail-lokomo
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :maglev-lokomotiv
 
 ##id 0x8800
-STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}{TOWN} tågdepå
 STR_NEWS_FIRST_TRAIN_ARRIVAL                                    :{BLACK}{BIGFONT}Invånarna firar . . .{}Första tåget ankommer till {STATION}!
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Details)
-STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Tåg i vägen
 STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_NON_STOP                                              :{BLACK}Utan uppehåll
@@ -2659,7 +2640,7 @@ STR_ORDER_NEAREST_HANGAR                                        :närmaste hanga
 STR_ORDER_SERVICE_AT                                            :Service vid
 STR_ORDER_SERVICE_NON_STOP_AT                                   :Service non-stop vid
 STR_ORDER_TRAIN_DEPOT                                           :Tågdepå
-STR_ORDER_ROAD_DEPOT                                            :Vägfordonsdepå
+STR_ORDER_ROAD_VEHICLE_DEPOT                                    :Vägfordonsdepå
 STR_ORDER_SHIP_DEPOT                                            :Skeppsdepå
 STR_GO_TO_DEPOT                                                 :{STRING} {TOWN} {STRING}
 STR_GO_TO_NEAREST_DEPOT                                         :{STRING} {STRING} {STRING}
@@ -2701,38 +2682,16 @@ STR_TIMETABLE_AND_TRAVEL_FOR                                    :och resa för {
 STR_TIMETABLE_DAYS                                              :{COMMA} dag{P "" ar}
 STR_TIMETABLE_TICKS                                             :{COMMA} tick{P "" s}
 
-STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}På väg mot {TOWN}s tågdepå
-STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}På väg mot {TOWN}s tågdepå, {VELOCITY}
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Service vid {TOWN}s tågdepå
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Service vid {TOWN}s tågdepå, {VELOCITY}
-
 STR_INVALID_ORDER                                               :{RED} (Ogiltig order)
 
 STR_UNKNOWN_STATION                                             :okänd station
 STR_VEHICLE_DETAILS_CARGO_EMPTY                                 :{LTBLUE}Tom
 STR_VEHICLE_DETAILS_CARGO_FROM                                  :{LTBLUE}{CARGO} från {STATION}
 STR_VEHICLE_DETAILS_CARGO_FROM_MULT                             :{LTBLUE}{CARGO} från {STATION} (x{NUM})
-STR_VEHICLE_STATUS_WAITING_IN_DEPOT                             :{WHITE}{VEHICLE} väntar i depån
-STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}Nytt fordon
 STR_DEPOT_NO_ENGINE                                             :{BLACK}-
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Tåg för långt
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Tåg kan bara ändras när det står still inuti en depå
-STR_VEHICLE_LIST_CAPTION_TRAINS                                 :{WHITE}{COMPANY} - {COMMA} Tåg
 
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Nytt tågfordon
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nya elektriska järnvägsfordon
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nytt monorailfordon
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nytt maglevfordon
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Rälsfordon
-
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Bygg fordon
-STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Klona fordon
-STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Det här bygger en kopia av fordonet. Ctrl-klick gör så att de delar order
-STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Det här bygger en kopia av ett fordon. Tryck på den här knappen och sen på ett vägfordon inuti eller utanför depån. Ctrl-klick gör så att de delar order
-STR_CLONE_TRAIN                                                 :{BLACK}Klona tåg
-STR_CLONE_TRAIN_INFO                                            :{BLACK}Det här bygger en kopia av tåget inklusive alla vagnar. Ctrl-klick gör så att de delar order
-STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Det här bygger en kopia av ett tåg inklusive alla vagnar. Tryck på den här knappen och sen på ett tåg inuti eller utanför depån. Ctrl-klick gör så att de delar order
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Byt namn på
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Skippa
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Ta bort
 STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Gå Till
@@ -2748,14 +2707,12 @@ STR_ORDER_VIEW_TOOLTIP                                          :{BLACK}Byt till
 STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE} (Order)
 STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Slut på order - -
 STR_SERVICE                                                     :{BLACK}Servning
-STR_ERROR_CAN_T_BUILD_RAILROAD_VEHICLE                          :{WHITE}Kan inte bygga järnvägfordon...
 STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE                :{LTBLUE}{ENGINE}{BLACK}   Byggt: {LTBLUE}{NUM}{BLACK} Värde: {LTBLUE}{CURRENCY}
 STR_VEHICLE_DETAILS_TRAIN_WAGON_VALUE                           :{LTBLUE}{ENGINE}{BLACK}   Värde: {LTBLUE}{CURRENCY}
 STR_VEHICLE_VIEW_CAPTION                                        :{WHITE}{VEHICLE}
 STR_VEHICLE_STATUS_LOADING_UNLOADING                            :{LTBLUE}Lastar / lastar av
 STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Lämnar
 STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Tåget måste stoppas inne i depån
-STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Kan inte skicka tåg till depå...
 STR_ERROR_NO_MORE_SPACE_FOR_ORDERS                              :{WHITE}Ingen mer plats för order
 STR_ERROR_TOO_MANY_ORDERS                                       :{WHITE}För många order
 STR_ERROR_CAN_T_INSERT_NEW_ORDER                                :{WHITE}Kan inte sätta in ny order...
@@ -2770,26 +2727,11 @@ STR_ERROR_CAN_T_ADD_ORDER_SHARED                                :{WHITE}ett ford
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Kan inte flytta fordon...
 STR_ERROR_REAR_ENGINE_FOLLOW_FRONT                              :{WHITE}Det bakre loket kommer alltid följa med det tillhörande främre loket
 STR_CARGO_N_A                                                   :N/A{SKIP}
-STR_ERROR_CAN_T_SELL_RAILROAD_VEHICLE                           :{WHITE}Kan inte sälja järnvägfordon...
 STR_ERROR_UNABLE_TO_FIND_ROUTE_TO                               :{WHITE}Kan inte hitta vägen till närmaste depå
-STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Kan inte stoppa/starta tåg...
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Serviceintervall: {LTBLUE}{COMMA}dagar{BLACK}   Senaste service: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Serviceintervall: {LTBLUE}{COMMA}%{BLACK}   Senaste service: {LTBLUE}{DATE_LONG}
-STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Tåg - klicka på tåg för information
-STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Tåg - klicka på tåg för info, drag vagn för att lägga till/ta bort från tåg
-STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Bygg ny tågvagn
-STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Dra tågvagn hit för att sälja den
-STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Centrera vyn på depån
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Lista av tågvagnar - klicka på tågvagn för information
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Bygg markerad tågvagn
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Byt namn på tågvagn
-STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Aktuell tågorder - klicka här för att stoppa/starta tåg
-STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Visa tågets order
-STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Centrera vyn ovanför tåget
-STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Skicka tåg till depå
 STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP                    :{BLACK}Tvinga tåg att fortsätta utan att vänta på signal
 STR_VEHICLE_VIEW_TRAIN_REVERSE_TOOLTIP                          :{BLACK}Byt tågets riktning
-STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Visa tågdetaljer
 STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Öka serviceintervall
 STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Minska serviceintervall
 STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP                         :{BLACK}Visa detaljer för lastat gods
@@ -2823,14 +2765,10 @@ STR_VEHICLE_STATUS_STOPPED                                      :{RED}Stoppat
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Kan inte tillåta tåg att passera signal under fara...
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Kraschad!
 
-STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Byt namn på tåg
-STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Kan inte byta namn på tåg...
-STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Byt namn på tåg
 STR_NEWS_TRAIN_CRASH                                            :{BLACK}{BIGFONT}Tågkrash!{}{COMMA} dog i eldklot efter kollision
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Kan inte byta tågets riktning...
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Kan inte byta fordonets riktning...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Kan inte vända fordon bestående av flera delar
-STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Byt namn på tågets fordonstyp
-STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Kan inte byta namn på tågets fordonstyp...
 STR_CLEAR_TIME                                                  :{BLACK}Rensa tid
 STR_RESET_LATENESS                                              :{BLACK}Rensa räknaren för sen ankomst
 STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Ändra namn på kontrollstation
@@ -2862,178 +2800,55 @@ STR_TIMETABLE_AUTOFILL                                          :{BLACK}Autofyll
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Fyll i tidtabellen automatiskt med värden från nästa resa (Ctrl+klick för att försöka behålla väntetiderna)
 
 ##id 0x9000
-STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Vägfordon i vägen
-STR_VEHICLE_LIST_ROAD_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} Vägfordon
-STR_DEPOT_ROAD_CAPTION                                          :{WHITE}{TOWN} Vägfordon Depå
-STR_DEPOT_ROAD_NEW_VEHICLES_BUTTON                              :{BLACK}Nytt Fordon
-STR_BUILD_VEHICLE_ROAD_CAPTION                                  :{WHITE}Nytt Vägfordon
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_BUTTON                     :{BLACK}Bygg Fordon
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Kan inte bygga vägfordon...
-STR_ERROR_ROAD_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}...måste stoppas inuti ett bussgarage
-STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Kan inte sälja vägfordon...
-STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Kan inte stoppa/starta vägfordon...
-STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} väntar i depån
-STR_HEADING_FOR_ROAD_DEPOT                                      :{ORANGE}På väg mot {TOWN}s vägdepå
-STR_HEADING_FOR_ROAD_DEPOT_VEL                                  :{ORANGE}På väg mot {TOWN}s vägdepå i {VELOCITY}
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE                              :{LTBLUE}Service vid {TOWN}s vägdepå
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE_VEL                          :{LTBLUE}Service vid {TOWN}s vägdepå i {VELOCITY}
-STR_ERROR_CAN_T_SEND_VEHICLE_TO_DEPOT                           :{WHITE}Kan inte skicka fordon till depå...
+STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...måste stoppas inuti ett bussgarage
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}Kan inte hitta till lokal depå
-STR_VEHICLE_LIST_ROAD_TOOLTIP                                   :{BLACK}Vägfordon - klicka på fordon för information
-STR_VEHICLE_VIEW_ROAD_STATE_START_STOP_TOOLTIP                  :{BLACK}Nuvarande fordonsaktivitet - Klicka här till stoppa/starta fordon
-STR_VEHICLE_VIEW_ROAD_ORDERS_TOOLTIP                            :{BLACK}Visa fordonets order
-STR_VEHICLE_VIEW_ROAD_LOCATION_TOOLTIP                          :{BLACK}Centrera vyn ovanför fordonet
-STR_VEHICLE_VIEW_ROAD_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Skicka fordon till depå. CTRL + klick servar endast
-STR_VEHICLE_VIEW_ROAD_REVERSE_TOOLTIP                           :{BLACK}Tvinga fordonet att vända om
-STR_VEHICLE_VIEW_ROAD_SHOW_DETAILS_TOOLTIP                      :{BLACK}Visa vägfordonsdetaljer
-STR_DEPOT_ROAD_LIST_TOOLTIP                                     :{BLACK}Fordon - klicka på fordon för information
-STR_DEPOT_ROAD_NEW_VEHICLES_TOOLTIP                             :{BLACK}Bygg nytt vägfordon
-STR_DEPOT_ROAD_SELL_TOOLTIP                                     :{BLACK}Dra vägfordon hit för att sälja det
-STR_DEPOT_ROAD_LOCATION_TOOLTIP                                 :{BLACK}Centrera vyn ovanför bussgaraget
-STR_BUILD_VEHICLE_ROAD_LIST_TOOLTIP                             :{BLACK}Vägfordonslista - klicka på fordon för information
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Bygg markerat vägfordon
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Tvinga fordonet att vända om
 STR_ARTICULATED_RV_CAPACITY                                     :{BLACK}Kapacitet: {LTBLUE}
-STR_BARE_CARGO                                                  :{CARGO}
+STR_JUST_CARGO                                                  :{CARGO}
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} fordon{P "" s}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
-STR_QUERY_ROAD_RENAME                                           :{WHITE}Byt namn på vägfordon
-STR_ERROR_CAN_T_RENAME_ROAD                                     :{WHITE}Kan inte byta namn på vägfordon...
-STR_QUERY_RENAME_ROAD_CAPTION                                   :{BLACK}Byt namn på vägfordon
-STR_NEWS_FIRST_ROAD_BUS_ARRIVAL                                 :{BLACK}{BIGFONT}Invånarna firar . . .{}Första bussen ankommer till {STATION}!
-STR_NEWS_FIRST_ROAD_TRUCK_ARRIVAL                               :{BLACK}{BIGFONT}Invånarna firar . . .{}Första lastbilen ankommer till {STATION}!
-STR_NEWS_FIRST_ROAD_PASSENGER_TRAM_ARRIVAL                      :{BLACK}{BIGFONT}Invånarna firar . . .{}Första passagerar-spårvagnen anländer på {STATION}!
-STR_NEWS_FIRST_ROAD_CARGO_TRAM_ARRIVAL                          :{BLACK}{BIGFONT}Invånarna firar . . .{}Första frakt-spårvagnen anländer på {STATION}!
-STR_NEWS_ROAD_CRASH_DRIVER                                      :{BLACK}{BIGFONT}Vägfordonskrash!{}förare dör i eldklot efter kollision med tåg
-STR_NEWS_ROAD_CRASH                                             :{BLACK}{BIGFONT}Vägfordonskrash!{}{COMMA} dör i eldklot efter kollision med tåg
+STR_NEWS_FIRST_BUS_ARRIVAL                                      :{BLACK}{BIGFONT}Invånarna firar . . .{}Första bussen ankommer till {STATION}!
+STR_NEWS_FIRST_TRUCK_ARRIVAL                                    :{BLACK}{BIGFONT}Invånarna firar . . .{}Första lastbilen ankommer till {STATION}!
+STR_NEWS_FIRST_PASSENGER_TRAM_ARRIVAL                           :{BLACK}{BIGFONT}Invånarna firar . . .{}Första passagerar-spårvagnen anländer på {STATION}!
+STR_NEWS_FIRST_CARGO_TRAM_ARRIVAL                               :{BLACK}{BIGFONT}Invånarna firar . . .{}Första frakt-spårvagnen anländer på {STATION}!
+STR_NEWS_ROAD_VEHICLE_CRASH_DRIVER                              :{BLACK}{BIGFONT}Vägfordonskrash!{}förare dör i eldklot efter kollision med tåg
+STR_NEWS_ROAD_VEHICLE_CRASH                                     :{BLACK}{BIGFONT}Vägfordonskrash!{}{COMMA} dör i eldklot efter kollision med tåg
 STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Fordon kan inte vända...
-STR_BUILD_VEHICLE_ROAD_RENAME_BUTTON                            :{BLACK}Byt namn på
-STR_BUILD_VEHICLE_ROAD_RENAME_TOOLTIP                           :{BLACK}Byt namn på vägfordon typ
-STR_QUERY_RENAME_ROAD_TYPE_CAPTION                              :{WHITE}Byt namn på vägfordon typ
-STR_ERROR_CAN_T_RENAME_ROAD_TYPE                                :{WHITE}Kan inte byta namn på vägfordon typ...
 
-STR_REFIT_ROAD_VEHICLE_TO_CARRY                                 :{BLACK}Anpassa vägfordon till att bära en annan sorts last
-STR_REFIT_ROAD_VEHICLE                                          :{BLACK}Anpassa Vägfordon
-STR_REFIT_ROAD_VEHICLE_TO_CARRY_HIGHLIGHTED                     :{BLACK}Anpassa vägfordon till att bära markerad last
-STR_REFIT_ROAD_VEHICLE_CAN_T                                    :{WHITE}Kan inte anpassa vägfordon...
-STR_ROAD_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Välj lasttyp för fordon
 
 ##id 0x9800
 STR_WATERWAYS_MENU_WATERWAYS_CONSTRUCTION                       :Farledskonstruktion
 STR_WATERWAYS_TOOLBAR_CAPTION                                   :{WHITE}Farledskonstruktion
 STR_WATERWAYS_TOOLBAR_CAPTION_SE                                :{WHITE}Farled
 STR_ERROR_CAN_T_BUILD_DOCK_HERE                                 :{WHITE}Kan inte bygga hamn här...
-STR_DEPOT_SHIP_CAPTION                                          :{WHITE}{TOWN} skeppsdepå
-STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}Nytt skepp
-STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} skepp
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nytt skepp
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Bygg skepp
-STR_CLONE_SHIP                                                  :{BLACK}Klona skepp
-STR_CLONE_SHIP_INFO                                             :{BLACK}Det här bygger en kopia av skeppet. Ctrl-klick gör så att de delar order
-STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}Det här bygger en kopia av ett skepp. Tryck på den här och sedan på ett skepp inuti eller utanför depån. Ctrl-klick gör så att de delar order
 STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Skepp måste vara stoppat i depå
-STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Kan inte sälja skepp...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Kan inte bygga skepp...
-STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Skepp i vägen
-STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Kan inte stoppa/starta skepp...
-STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Kan inte skicka skepp till depå...
-STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}På väg mot {TOWN}s Skeppsdepå
-STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}På väg mot {TOWN}s Skeppsdepå i {VELOCITY}
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Service vid {TOWN}s skeppsdepå
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Service vid {TOWN}s skeppsdepå, i{VELOCITY}
-STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} väntar i depån
 STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Bygg hamn
 STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Bygg skeppsdepå (för byggnad och lagning av skepp)
-STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Skepp - klicka på skepp för information
-STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Bygg nytt skepp
-STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Dra skepp hit för att sälja det
-STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Centrera vyn ovanför skeppets depot
-STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Skepp - klicka på skepp för information
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Skeppslista - klicka på skepp för information
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Bygg markerat skepp
-STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Nuvarande skeppsaktion - Klicka här till stoppa/starta skepp
-STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Visa skeppets order
-STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Centrera vyn ovanför skeppet
-STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Skicka skepp till depå. CTRL + klick servar endast
-STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Visa skeppdetaljer
-STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Byt namn på skepp
 
-STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Byt namn på skepp
-STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Kan inte byta namn på skepp...
 STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BLACK}{BIGFONT}Invånarna firar . . .{}Första skeppet ankommer till {STATION}!
 STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Positionsboj, som kan som kan användas för ytterligare vägpunkter
 STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Kan inte placera boj här...
 STR_BUILD_AQUEDUCT                                              :{BLACK}Bygg akvedukt
 STR_CAN_T_BUILD_AQUEDUCT_HERE                                   :{WHITE}Kan inte bygga akvedukt här...
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Byt namn på
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Byt namn på skeppstyp
-STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Byt namn på skeppstyp
-STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Kan inte byta namn på skeppstyp...
-STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Anpassa godsskepp att frakta en annan godstyp
 STR_REFIT_CAPTION                                               :{WHITE}{VEHICLE} (Anpassa)
-STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Anpassa skepp
-STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Välj typ av gods för skepp att frakta
-STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Anpassa skepp att frakta markerad godstyp
 STR_REFIT_TITLE                                                 :{GOLD}Välj godstyp att frakta:
 STR_REFIT_NEW_CAPACITY_COST_OF_REFIT                            :{BLACK}Ny kapacitet: {GOLD}{CARGO}{}{BLACK}Anpassningens kostnad: {GOLD}{CURRENCY}
-STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Kan inte anpassa skepp...
 STR_REFITTABLE                                                  :(anpassningsbart)
 
 ##id 0xA000
 STR_TOOLBAR_AIRCRAFT_CAPTION                                    :{WHITE}Flygplatser
 STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Kan inte bygga flygplats här...
-STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}{STATION} flygplanshangar
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}Nytt flygplan
-STR_CLONE_AIRCRAFT                                              :{BLACK}Klona flygplan
-STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Det här bygger en kopia av flygplanet. Ctrl-klick gör så att de delar order
-STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Det här bygger en kopia av ett flygplan. Tryck på den här knappen och sedan på ett flygplan inuti eller utanför hangaren. Ctrl-klick gör så att de delar order
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Nytt flygplan
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Bygg flygplan
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Kan inte bygga flygplan...
-STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{COMPANY} - {COMMA} flygplan
-STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Kan inte skicka flygplan till hangar...
-STR_HEADING_FOR_HANGAR                                          :{ORANGE}På väg mot {STATION}s hangar
-STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}På väg mot {STATION}s hangar, {VELOCITY}
-STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Service vid {STATION}s hangar
-STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Service vid {STATION}s hangar i {VELOCITY}
-STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} väntar i flygplatshangaren
-STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}Flygplan i vägen
-STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Kan inte stoppa/starta flygplan...
 STR_ERROR_AIRCRAFT_IS_IN_FLIGHT                                 :{WHITE}Flygplan är i luften
 STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Flygplan måste stoppas i hangar
-STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Kan inte sälja flygplan...
 STR_AIRCRAFT_MENU_AIRPORT_CONSTRUCTION                          :Flygplatsbyggnation
 STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Bygg flygplats
-STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Flygplan - Klicka på flygplan för information
-STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Flygplan - Klicka på flygplan för information
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Bygg nytt flygplan
-STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Dra flygplan hit för att sälja det
-STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Centrera vyn ovanför hangaren
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Flygplanslista - Klicka på flygplan för information
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Bygg markerat flygplan
-STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Nuvarande flygplansaktion - Klicka här till stoppa/starta flygplan
-STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Visa flygplanets order
-STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Centrera vyn ovanför flygplanet
-STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Skicka flygplan till hangar. CTRL + klick servar endast
-STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Visa flygplan detaljer
 
-STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Byt namn på flygplan
-STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Kan inte byta namn på flygplan...
-STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Byt namn på flygplan
 STR_NEWS_FIRST_AIRCRAFT_ARRIVAL                                 :{BLACK}{BIGFONT}Invånarna firar . . .{}Första flygplanet ankommer till {STATION}!
 STR_NEWS_AIRCRAFT_CRASH                                         :{BLACK}{BIGFONT}Flygplanskrasch!{}{COMMA} dör i eldklot på {STATION}
 STR_PLANE_CRASH_OUT_OF_FUEL                                     :{BLACK}{BIGFONT}Flygplanskrasch!{}Flygplanet fick slut på bränsle, {COMMA} dör i eldklot!
 STR_ORDER_STATION_SMALL                                         :{TINYFONT}{BLACK}{STATION}
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Byt namn på
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Byt namn på flygplanstyp
-STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Byt namn på flygplanstyp
-STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Kan inte byta namn på flygplanstyp...
-STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Anpassa flygplan att frakta en annan godstyp
-STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Anpassa flygplan
-STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Välj godstyp för flygplan att frakta
-STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Anpassa flygplan att frakta markerad godstyp
-STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Kan inte anpassa flygplan...
 
 STR_TIMETABLE_TITLE                                             :{WHITE}{VEHICLE} (Tidtabell)
 
@@ -3187,42 +3002,243 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
-STR_SCHEDULED_TRAINS                                            :{WHITE}{STATION} - {COMMA} Tåg
-STR_SCHEDULED_ROAD_VEHICLES                                     :{WHITE}{STATION} - {COMMA} Vägfordon
-STR_SCHEDULED_AIRCRAFT                                          :{WHITE}{STATION} - {COMMA} Flygplan
-STR_SCHEDULED_SHIPS                                             :{WHITE}{STATION} - {COMMA} Skepp
+############ Vehicle lists
+STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Tåg - klicka på tåg för information
+STR_VEHICLE_LIST_ROAD_VEHICLE_TOOLTIP                           :{BLACK}Vägfordon - klicka på fordon för information
+STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Skepp - klicka på skepp för information
+STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Flygplan - Klicka på flygplan för information
 
-STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Visa alla tåg där denna station finns med i rutten
-STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Visa alla vägfordon där denna station finns med i rutten
-STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Visa alla flygplan där denna station finns med i rutten
-STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Visa alla skepp där denna station finns med i rutten
+STR_VEHICLE_LIST_TRAIN_CAPTION                                  :{WHITE}{STRING} - {COMMA} Tåg
+STR_VEHICLE_LIST_ROAD_VEHICLE_CAPTION                           :{WHITE}{STRING} - {COMMA} Vägfordon
+STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{STRING} - {COMMA} skepp
+STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{STRING} - {COMMA} flygplan
 
 STR_VEH_WITH_SHARED_ORDERS_LIST                                 :{WHITE}Delade instruktioner med {COMMA} Fordon{P "" s}
 STR_VEH_WITH_SHARED_ORDERS_LIST_TIP                             :{BLACK}Visa alla fordon som har samma schema
+
+STR_NEWS_TRAIN_IS_WAITING                                       :{WHITE}{VEHICLE} väntar i depån
+STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} väntar i depån
+STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} väntar i depån
+STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} väntar i flygplatshangaren
+
+STR_REFIT_TRAIN_REFIT_BUTTON                                    :{BLACK}Anpassa tåg
+STR_REFIT_ROAD_VEHICLE_REFIT_BUTTON                             :{BLACK}Anpassa Vägfordon
+STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Anpassa skepp
+STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Anpassa flygplan
+
+STR_REFIT_TRAIN_REFIT_TOOLTIP                                   :{BLACK}Anpassa tåg för att bära vald godstyp
+STR_REFIT_ROAD_VEHICLE_REFIT_TOOLTIP                            :{BLACK}Anpassa vägfordon till att bära markerad last
+STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Anpassa skepp att frakta markerad godstyp
+STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Anpassa flygplan att frakta markerad godstyp
+
+STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Välj godstyp för tåget att bära
+STR_REFIT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Välj lasttyp för fordon
+STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Välj typ av gods för skepp att frakta
+STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Välj godstyp för flygplan att frakta
+
+STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}{TOWN} tågdepå
+STR_DEPOT_ROAD_VEHICLE_CAPTION                                  :{WHITE}{TOWN} Vägfordon Depå
+STR_DEPOT_SHIP_CAPTION                                          :{WHITE}{TOWN} skeppsdepå
+STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}{STATION} flygplanshangar
+
+STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Byt namn på tåg
+STR_VEHICLE_DETAILS_ROAD_VEHICLE_RENAME                         :{BLACK}Byt namn på vägfordon
+STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Byt namn på skepp
+STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Byt namn på flygplan
+
+STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Byt namn på tåg
+STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Byt namn på vägfordon
+STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Byt namn på skepp
+STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Byt namn på flygplan
+
+STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Tåg i vägen
+STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Vägfordon i vägen
+STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Skepp i vägen
+STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}Flygplan i vägen
+
+STR_ERROR_CAN_T_REFIT_TRAIN                                     :{WHITE}Kan ej anpassa tåg...
+STR_ERROR_CAN_T_REFIT_ROAD_VEHICLE                              :{WHITE}Kan inte anpassa vägfordon...
+STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Kan inte anpassa skepp...
+STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Kan inte anpassa flygplan...
+
+STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Kan inte byta namn på tåg...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE                             :{WHITE}Kan inte byta namn på vägfordon...
+STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Kan inte byta namn på skepp...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Kan inte byta namn på flygplan...
+
+STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Kan inte stoppa/starta tåg...
+STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Kan inte stoppa/starta vägfordon...
+STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Kan inte stoppa/starta skepp...
+STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Kan inte stoppa/starta flygplan...
+
+STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Kan inte skicka tåg till depå...
+STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Kan inte skicka fordon till depå...
+STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Kan inte skicka skepp till depå...
+STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Kan inte skicka flygplan till hangar...
+
+STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Kan inte bygga järnvägfordon...
+STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Kan inte bygga vägfordon...
+STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Kan inte bygga skepp...
+STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Kan inte bygga flygplan...
+
+STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Kan inte byta namn på tågets fordonstyp...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Kan inte byta namn på vägfordon typ...
+STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Kan inte byta namn på skeppstyp...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Kan inte byta namn på flygplanstyp...
+
+STR_ERROR_CAN_T_SELL_TRAIN                                      :{WHITE}Kan inte sälja järnvägfordon...
+STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Kan inte sälja vägfordon...
+STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Kan inte sälja skepp...
+STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Kan inte sälja flygplan...
+
+STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Aktuell tågorder - klicka här för att stoppa/starta tåg
+STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Nuvarande fordonsaktivitet - Klicka här till stoppa/starta fordon
+STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Nuvarande skeppsaktion - Klicka här till stoppa/starta skepp
+STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Nuvarande flygplansaktion - Klicka här till stoppa/starta flygplan
+
+STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Visa tågets order
+STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Visa fordonets order
+STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Visa skeppets order
+STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Visa flygplanets order
+
+STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Centrera vyn ovanför tåget
+STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Centrera vyn ovanför fordonet
+STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Centrera vyn ovanför skeppet
+STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Centrera vyn ovanför flygplanet
+
+STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Skicka tåg till depå
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Skicka fordon till depå. CTRL + klick servar endast
+STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Skicka skepp till depå. CTRL + klick servar endast
+STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Skicka flygplan till hangar. CTRL + klick servar endast
+
+STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Visa tågdetaljer
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Visa vägfordonsdetaljer
+STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Visa skeppdetaljer
+STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Visa flygplan detaljer
+
+STR_VEHICLE_VIEW_TRAIN_REFIT_TOOLTIP                            :{BLACK}Anpassa tåg för att bära annan godstyp
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REFIT_TOOLTIP                     :{BLACK}Anpassa vägfordon till att bära en annan sorts last
+STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Anpassa godsskepp att frakta en annan godstyp
+STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Anpassa flygplan att frakta en annan godstyp
+
+STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}På väg mot {TOWN}s tågdepå
+STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}På väg mot {TOWN}s tågdepå, {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT                              :{ORANGE}På väg mot {TOWN}s vägdepå
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_VEL                          :{ORANGE}På väg mot {TOWN}s vägdepå i {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}På väg mot {TOWN}s Skeppsdepå
+STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}På väg mot {TOWN}s Skeppsdepå i {VELOCITY}
+STR_HEADING_FOR_HANGAR                                          :{ORANGE}På väg mot {STATION}s hangar
+STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}På väg mot {STATION}s hangar, {VELOCITY}
+
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Service vid {TOWN}s tågdepå
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Service vid {TOWN}s tågdepå, {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE                      :{LTBLUE}Service vid {TOWN}s vägdepå
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE_VEL                  :{LTBLUE}Service vid {TOWN}s vägdepå i {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Service vid {TOWN}s skeppsdepå
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Service vid {TOWN}s skeppsdepå, i{VELOCITY}
+STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Service vid {STATION}s hangar
+STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Service vid {STATION}s hangar i {VELOCITY}
+
+
+STR_CLONE_TRAIN                                                 :{BLACK}Klona tåg
+STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Klona fordon
+STR_CLONE_SHIP                                                  :{BLACK}Klona skepp
+STR_CLONE_AIRCRAFT                                              :{BLACK}Klona flygplan
+
+STR_CLONE_TRAIN_INFO                                            :{BLACK}Det här bygger en kopia av tåget inklusive alla vagnar. Ctrl-klick gör så att de delar order
+STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Det här bygger en kopia av fordonet. Ctrl-klick gör så att de delar order
+STR_CLONE_SHIP_INFO                                             :{BLACK}Det här bygger en kopia av skeppet. Ctrl-klick gör så att de delar order
+STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Det här bygger en kopia av flygplanet. Ctrl-klick gör så att de delar order
+
+STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Det här bygger en kopia av ett tåg inklusive alla vagnar. Tryck på den här knappen och sen på ett tåg inuti eller utanför depån. Ctrl-klick gör så att de delar order
+STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Det här bygger en kopia av ett fordon. Tryck på den här knappen och sen på ett vägfordon inuti eller utanför depån. Ctrl-klick gör så att de delar order
+STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}Det här bygger en kopia av ett skepp. Tryck på den här och sedan på ett skepp inuti eller utanför depån. Ctrl-klick gör så att de delar order
+STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Det här bygger en kopia av ett flygplan. Tryck på den här knappen och sedan på ett flygplan inuti eller utanför hangaren. Ctrl-klick gör så att de delar order
+
+STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Nytt tågfordon
+STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nya elektriska järnvägsfordon
+STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nytt monorailfordon
+STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nytt maglevfordon
+
+STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Rälsfordon
+STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Nytt Vägfordon
+STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nytt skepp
+STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Nytt flygplan
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Bygg fordon
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Bygg Fordon
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Bygg skepp
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Bygg flygplan
+
+STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Lista av tågvagnar - klicka på tågvagn för information
+STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Vägfordonslista - klicka på fordon för information
+STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Skeppslista - klicka på skepp för information
+STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Flygplanslista - Klicka på flygplan för information
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Bygg markerad tågvagn
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Bygg markerat vägfordon
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Bygg markerat skepp
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Bygg markerat flygplan
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Byt namn på
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Byt namn på
+STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Byt namn på
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Byt namn på
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Byt namn på tågvagn
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Byt namn på vägfordon typ
+STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Byt namn på skeppstyp
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Byt namn på flygplanstyp
+
+STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Byt namn på tågets fordonstyp
+STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Byt namn på vägfordon typ
+STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Byt namn på skeppstyp
+STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Byt namn på flygplanstyp
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}Nytt fordon
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_BUTTON                      :{BLACK}Nytt Fordon
+STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}Nytt skepp
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}Nytt flygplan
+
+STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Tåg - klicka på tåg för info, drag vagn för att lägga till/ta bort från tåg
+STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Fordon - klicka på fordon för information
+STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Skepp - klicka på skepp för information
+STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Flygplan - Klicka på flygplan för information
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Bygg ny tågvagn
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_TOOLTIP                     :{BLACK}Bygg nytt vägfordon
+STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Bygg nytt skepp
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Bygg nytt flygplan
+
+STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Dra tågvagn hit för att sälja den
+STR_DEPOT_ROAD_VEHICLE_SELL_TOOLTIP                             :{BLACK}Dra vägfordon hit för att sälja det
+STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Dra skepp hit för att sälja det
+STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Dra flygplan hit för att sälja det
+
+STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Centrera vyn på depån
+STR_DEPOT_ROAD_VEHICLE_LOCATION_TOOLTIP                         :{BLACK}Centrera vyn ovanför bussgaraget
+STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Centrera vyn ovanför skeppets depot
+STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Centrera vyn ovanför hangaren
+
 
 ### depot strings
 STR_DEPOT_SELL_CONFIRMATION_TEXT                                :{YELLOW}Du är på väg att sälja alla fordon i depån. Är du säker?
 STR_DEPOT_WRONG_DEPOT_TYPE                                      :Felaktig depå-typ
 
 STR_DEPOT_SELL_ALL_BUTTON_TRAIN_TIP                             :{BLACK}Sälj alla tåg i depån
-STR_DEPOT_SELL_ALL_BUTTON_ROADVEH_TIP                           :{BLACK}Sälj alla vägfordon i depån
+STR_DEPOT_SELL_ALL_BUTTON_ROAD_VEHICLE_TIP                      :{BLACK}Sälj alla vägfordon i depån
 STR_DEPOT_SELL_ALL_BUTTON_SHIP_TIP                              :{BLACK}Sälj alla skepp i depån
 STR_DEPOT_SELL_ALL_BUTTON_AIRCRAFT_TIP                          :{BLACK}Sälj alla flygplan i hangaren
 
 STR_DEPOT_VEHICLE_ORDER_LIST_TRAIN_TIP                          :{BLACK}Ge en lista av alla tåg som har denna depå i dess körschema
-STR_DEPOT_VEHICLE_ORDER_LIST_ROADVEH_TIP                        :{BLACK}Ge en lista av alla fordon som har denna depå i dess körschema
+STR_DEPOT_VEHICLE_ORDER_LIST_ROAD_VEHICLE_TIP                   :{BLACK}Ge en lista av alla fordon som har denna depå i dess körschema
 STR_DEPOT_VEHICLE_ORDER_LIST_SHIP_TIP                           :{BLACK}Ge en lista av alla fartyg som har denna depå i dess körschema
 STR_DEPOT_VEHICLE_ORDER_LIST_AIRCRAFT_TIP                       :{BLACK}Ge en lista av alla flygplan som har denna flygplats-hangar i dess körschema
 
 STR_DEPOT_AUTOREPLACE_TRAIN_TIP                                 :{BLACK}Byt ut alla tåg i depån
-STR_DEPOT_AUTOREPLACE_ROADVEH_TIP                               :{BLACK}Byt ut alla vägfordon i depån
+STR_DEPOT_AUTOREPLACE_ROAD_VEHICLE_TIP                          :{BLACK}Byt ut alla vägfordon i depån
 STR_DEPOT_AUTOREPLACE_SHIP_TIP                                  :{BLACK}Byt ut alla skepp i depån
 STR_DEPOT_AUTOREPLACE_AIRCRAFT_TIP                              :{BLACK}Byt ut alla flygplan i hangaren
-
-STR_VEHICLE_LIST_TRAIN_DEPOT                                    :{BLACK}{STRING} - {COMMA} Tåg
-STR_VEHICLE_LIST_ROADVEH_DEPOT                                  :{BLACK}{STRING} - {COMMA} Vägfordon
-STR_VEHICLE_LIST_SHIP_DEPOT                                     :{BLACK}{STRING} - {COMMA} Skepp
-STR_VEHICLE_LIST_AIRCRAFT_DEPOT                                 :{BLACK}{STRING} - {COMMA} Flygplan
 
 STR_REPLACE_VEHICLES_WHITE                                      :{WHITE}Byt ut {STRING}
 STR_REPLACE_VEHICLES_START                                      :{BLACK}Börja byta ut fordon
@@ -3239,6 +3255,7 @@ STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Vagnbort
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Gör så att automatiskt utbytning behåller ett tågs längd genom att ta bort vagnar (med början längst fram) om utbytandet av loket skulle göra tåget längre.
 STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Ersätter: {ORANGE}{SKIP}{SKIP}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Välj mellan lok och vagn ersättnings-fönster
+
 STR_RAIL_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Fordonet är ej tillgängligt
 STR_ROAD_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Fordonet är ej tillgängligt
 STR_SHIP_NOT_AVAILABLE                                          :{WHITE}Fartyget är ej tillgängligt
@@ -3248,12 +3265,12 @@ STR_ENGINES                                                     :Lok
 STR_WAGONS                                                      :Vagnar
 
 STR_MASS_STOP_DEPOT_TRAIN_TIP                                   :{BLACK}Klicka för att stanna alla tåg i depån
-STR_MASS_STOP_DEPOT_ROADVEH_TIP                                 :{BLACK}Klicka för att stanna alla fordon i depån
+STR_MASS_STOP_DEPOT_ROAD_VEHICLE_TIP                            :{BLACK}Klicka för att stanna alla fordon i depån
 STR_MASS_STOP_DEPOT_SHIP_TIP                                    :{BLACK}Klicka för att stanna alla skepp i depån
 STR_MASS_STOP_HANGAR_TIP                                        :{BLACK}Klicka för att stanna alla flygplan i hangaren
 
 STR_MASS_START_DEPOT_TRAIN_TIP                                  :{BLACK}Klicka för att starta alla tåg i depån
-STR_MASS_START_DEPOT_ROADVEH_TIP                                :{BLACK}Klicka för att starta alla fordon i depån
+STR_MASS_START_DEPOT_ROAD_VEHICLE_TIP                           :{BLACK}Klicka för att starta alla fordon i depån
 STR_MASS_START_DEPOT_SHIP_TIP                                   :{BLACK}Klicka för att starta alla skepp i depån
 STR_MASS_START_HANGAR_TIP                                       :{BLACK}Klicka för att starta alla skepp i depån
 
@@ -3389,17 +3406,6 @@ STR_MEASURE_AREA                                                :{BLACK}Yta: {NU
 STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Längd: {NUM}{}Höjdskillnad: {NUM} m
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Yta: {NUM} x {NUM}{}Höjdskillnad: {NUM} m
 
-############ Date formatting
-STR_DATE_TINY                                                   :{STRING}-{STRING}-{NUM}
-STR_DATE_SHORT                                                  :{STRING} {NUM}
-STR_DATE_LONG                                                   :{STRING} {STRING} {NUM}
-STR_DATE_ISO                                                    :{2:NUM}-{1:STRING}-{0:STRING}
-
-STR_JUST_DATE_TINY                                              :{DATE_TINY}
-STR_JUST_DATE_LONG                                              :{DATE_LONG}
-STR_JUST_DATE_ISO                                               :{DATE_ISO}
-########
-
 STR_FEEDER_CARGO_VALUE                                          :{BLACK} Överför kredit: {LTBLUE}{CURRENCY}
 STR_DRIVE_THROUGH_ERROR_ON_TOWN_ROAD                            :{WHITE}...detta är en stadsägd väg
 STR_DRIVE_THROUGH_ERROR_DIRECTION                               :{WHITE}...vägen pekar i fel riktning
@@ -3424,24 +3430,19 @@ STR_PERCENT_UP_DOWN_SMALL                                       :{TINYFONT}{WHIT
 STR_PERCENT_UP_DOWN                                             :{WHITE}{NUM}%{UPARROW}{DOWNARROW}
 
 ##### Mass Order
-STR_GROUP_NAME_FORMAT                                           :Grupp {COMMA}
 STR_GROUP_TINY_NAME                                             :{TINYFONT}{GROUP}
 STR_GROUP_ALL_TRAINS                                            :Alla tåg
-STR_GROUP_ALL_ROADS                                             :Alla vägfordon
+STR_GROUP_ALL_ROAD_VEHICLES                                     :Alla vägfordon
 STR_GROUP_ALL_SHIPS                                             :Alla skepp
 STR_GROUP_ALL_AIRCRAFTS                                         :Alla flygplan
 STR_GROUP_DEFAULT_TRAINS                                        :Ogrupperade tåg
-STR_GROUP_DEFAULT_ROADS                                         :Ogrupperade vägfordon
+STR_GROUP_DEFAULT_ROAD_VEHICLES                                 :Ogrupperade vägfordon
 STR_GROUP_DEFAULT_SHIPS                                         :Ogrupperade skepp
 STR_GROUP_DEFAULT_AIRCRAFTS                                     :Ogrupperade flygmaskiner
 STR_GROUP_TINY_NUM                                              :{TINYFONT}{COMMA}
 STR_GROUP_ADD_SHARED_VEHICLE                                    :Lägg till delade fordon
 STR_GROUP_REMOVE_ALL_VEHICLES                                   :Ta bort alla fordon
 
-STR_GROUP_TRAINS_CAPTION                                        :{WHITE}{GROUP} - {COMMA} Tåg{P "" s}
-STR_GROUP_ROADVEH_CAPTION                                       :{WHITE}{GROUP} - {COMMA} Vägfordon{P "" s}
-STR_GROUP_SHIPS_CAPTION                                         :{WHITE}{GROUP} - {COMMA} Skepp{P "" s}
-STR_GROUP_AIRCRAFTS_CAPTION                                     :{WHITE}{GROUP} - {COMMA} Flygplan
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Döp om en grupp
 
 STR_GROUP_CAN_T_CREATE                                          :{WHITE}Kan inte skapa grupp...
@@ -3457,12 +3458,34 @@ STR_GROUP_DELETE_TIP                                            :{BLACK}Ta bort 
 STR_GROUP_RENAME_TIP                                            :{BLACK}Byt namn på vald grupp
 STR_GROUP_REPLACE_PROTECTION_TIP                                :{BLACK}Klicka för att skydda denna grupp mot allmän autoreplace
 
+#### String control codes and their formatting
 STR_COMPANY_NAME                                                :{COMPANY}
 STR_ENGINE_NAME                                                 :{ENGINE}
 STR_GROUP_NAME                                                  :{GROUP}
+STR_INDUSTRY_NAME                                               :{INDUSTRY}
 STR_PRESIDENT_NAME                                              :{PRESIDENTNAME}
 STR_SIGN_NAME                                                   :{SIGN}
+STR_STATION_NAME                                                :{STATION}
+STR_TOWN_NAME                                                   :{TOWN}
 STR_VEHICLE_NAME                                                :{VEHICLE}
+STR_WAYPOINT_NAME                                               :{WAYPOINT}
+
+STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_INT                                                    :{NUM}
+STR_JUST_DATE_TINY                                              :{DATE_TINY}
+STR_JUST_DATE_LONG                                              :{DATE_LONG}
+STR_JUST_DATE_ISO                                               :{DATE_ISO}
+STR_JUST_STRING                                                 :{STRING}
+STR_JUST_RAW_STRING                                             :{STRING}
+
+STR_FORMAT_DATE_TINY                                            :{STRING}-{STRING}-{NUM}
+STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
+STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
+STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
+
+STR_FORMAT_COMPANY_NUM                                          :(Företag {COMMA})
+STR_FORMAT_GROUP_NAME                                           :Grupp {COMMA}
+STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
 
 STR_NAME_MUST_BE_UNIQUE                                         :{WHITE}Namnet måste vara unikt
 

@@ -5,10 +5,10 @@
 #include "ai_rail.hpp"
 #include "ai_map.hpp"
 #include "ai_station.hpp"
+#include "../../command_type.h"
 #include "../../debug.h"
 #include "../../station_base.h"
 #include "../../company_func.h"
-#include "../../waypoint.h"
 #include "../../newgrf_generic.h"
 #include "../../newgrf_station.h"
 
@@ -45,7 +45,7 @@
 {
 	if (!::IsValidTile(tile)) return false;
 
-	return ::IsTileType(tile, MP_RAILWAY) && ::IsRailWaypointTile(tile);
+	return ::IsRailWaypointTile(tile);
 }
 
 /* static */ bool AIRail::IsRailTypeAvailable(RailType rail_type)
@@ -200,8 +200,7 @@
 {
 	if (!IsRailTile(tile)) return RAILTRACK_INVALID;
 
-	if (IsRailWaypointTile(tile)) return ::GetRailWaypointBits(tile);
-	if (IsRailStationTile(tile)) return ::TrackToTrackBits(::GetRailStationTrack(tile));
+	if (IsRailStationTile(tile) || IsRailWaypointTile(tile)) return ::TrackToTrackBits(::GetRailStationTrack(tile));
 	if (IsLevelCrossingTile(tile)) return ::GetCrossingRailBits(tile);
 	if (IsRailDepotTile(tile)) return ::TRACK_BIT_NONE;
 	return ::GetTrackBits(tile);
