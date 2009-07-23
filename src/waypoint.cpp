@@ -5,30 +5,10 @@
 #include "stdafx.h"
 
 #include "strings_type.h"
-#include "rail.h"
-#include "station_base.h"
-#include "town.h"
-#include "waypoint.h"
+#include "order_func.h"
 #include "window_func.h"
 #include "newgrf_station.h"
-#include "order_func.h"
-#include "core/pool_func.hpp"
-
-WaypointPool _waypoint_pool("Waypoint");
-INSTANTIATE_POOL_METHODS(Waypoint)
-
-/**
- * Daily loop for waypoints
- */
-void WaypointsDailyLoop()
-{
-	Waypoint *wp;
-
-	/* Check if we need to delete a waypoint */
-	FOR_ALL_WAYPOINTS(wp) {
-		if (wp->delete_ctr != 0 && --wp->delete_ctr == 0) delete wp;
-	}
-}
+#include "waypoint_base.h"
 
 /**
  * Draw a waypoint
@@ -44,6 +24,21 @@ void DrawWaypointSprite(int x, int y, int stat_id, RailType railtype)
 	}
 }
 
+void Waypoint::GetTileArea(TileArea *ta, StationType type) const
+{
+	switch (type) {
+		case STATION_BUOY:
+		case STATION_WAYPOINT:
+			break;
+
+		default: NOT_REACHED();
+	}
+
+	ta->tile = this->xy;
+	ta->w    = 1;
+	ta->h    = 1;
+}
+
 Waypoint::~Waypoint()
 {
 	if (CleaningPool()) return;
@@ -51,31 +46,4 @@ Waypoint::~Waypoint()
 	RemoveOrderFromAllVehicles(OT_GOTO_WAYPOINT, this->index);
 
 	this->sign.MarkDirty();
-}
-
-/**
- * Assign a station spec to this waypoint.
- * @param index the index of the spec from the waypoint specs
- */
-void Waypoint::AssignStationSpec(uint index)
-{
-	free(this->speclist);
-
-	const StationSpec *statspec = GetCustomStationSpec(STAT_CLASS_WAYP, index);
-
-	if (statspec != NULL) {
-		this->speclist = MallocT<StationSpecList>(1);
-		this->speclist->spec = statspec;
-		this->speclist->grfid = statspec->grffile->grfid;
-		this->speclist->localidx = statspec->localidx;
-		this->num_specs = 1;
-	} else {
-		this->speclist = NULL;
-		this->num_specs = 0;
-	}
-}
-
-void InitializeWaypoints()
-{
-	_waypoint_pool.CleanPool();
 }
