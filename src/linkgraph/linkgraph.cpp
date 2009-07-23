@@ -233,8 +233,8 @@ void Path::Fork(Path * base, int cap, uint dist) {
 		}
 		parent = base;
 		parent->num_children++;
-		origin = base->origin;
 	}
+	origin = base->origin;
 }
 
 uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
