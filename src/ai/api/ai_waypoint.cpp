@@ -8,7 +8,7 @@
 #include "../../string_func.h"
 #include "../../strings_func.h"
 #include "../../company_func.h"
-#include "../../waypoint.h"
+#include "../../waypoint_base.h"
 #include "../../core/alloc_func.hpp"
 #include "table/strings.h"
 
@@ -22,7 +22,7 @@
 {
 	if (!AIRail::IsRailWaypointTile(tile)) return WAYPOINT_INVALID;
 
-	return ::GetWaypointIndex(tile);
+	return ::GetStationIndex(tile);
 }
 
 /* static */ char *AIWaypoint::GetName(WaypointID waypoint_id)
@@ -33,7 +33,7 @@
 	char *waypoint_name = MallocT<char>(len);
 
 	::SetDParam(0, waypoint_id);
-	::GetString(waypoint_name, STR_WAYPOINT_RAW, &waypoint_name[len - 1]);
+	::GetString(waypoint_name, STR_WAYPOINT_NAME, &waypoint_name[len - 1]);
 	return waypoint_name;
 }
 

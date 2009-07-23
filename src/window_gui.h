@@ -274,7 +274,7 @@ public:
 		}
 		if (this->nested_array != NULL) {
 			assert(widget_index < this->nested_array_size);
-			this->nested_array[widget_index]->SetDisabled(disab_stat);
+			if (this->nested_array[widget_index] != NULL) this->nested_array[widget_index]->SetDisabled(disab_stat);
 		}
 	}
 
@@ -704,12 +704,17 @@ public:
 };
 
 /**
- * Data structure for a window opened from a toolbar
+ * Base class for windows opened from a toolbar.
  */
 class PickerWindowBase : public Window {
 
 public:
-	PickerWindowBase(const WindowDesc *desc, Window *parent) : Window(desc)
+	PickerWindowBase(const WindowDesc *desc, Window *parent, WindowNumber number = 0) : Window(desc, number)
+	{
+		this->parent = parent;
+	};
+
+	PickerWindowBase(Window *parent) : Window()
 	{
 		this->parent = parent;
 	};

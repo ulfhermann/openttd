@@ -825,6 +825,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\base_station_base.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\bmp.h"
 				>
 			</File>
@@ -1609,7 +1613,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\waypoint.h"
+				RelativePath=".\..\src\waypoint_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\waypoint_func.h"
 				>
 			</File>
 			<File

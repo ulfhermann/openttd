@@ -280,8 +280,8 @@ STR_ABBREV_PLASTIC                                              :{TINYFONT}ПЛ
 STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}ГЗ
 STR_ABBREV_NONE                                                 :{TINYFONT}НЕТ
 STR_ABBREV_ALL                                                  :{TINYFONT}Все
-STR_DATE_SHORT_WHITE                                            :{WHITE}{DATE_SHORT} г.
-STR_DATE_LONG_WHITE                                             :{WHITE}{DATE_LONG} г.
+STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
+STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SMALLMAP_CAPTION                                            :{WHITE}Карта - {STRING}
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Настройки игры
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Сообщение
@@ -308,7 +308,7 @@ STR_JUST_NOTHING                                                :Ничего
 STR_COLOUR_DARK_BLUE                                            :Тёмно-синий
 STR_COLOUR_PALE_GREEN                                           :Светло-зелёный
 STR_COLOUR_PINK                                                 :Розовый
-STR_COLOUR_YELLOW                                               :Желтый
+STR_COLOUR_YELLOW                                               :Жёлтый
 STR_COLOUR_RED                                                  :Красный
 STR_COLOUR_LIGHT_BLUE                                           :Светло-синий
 STR_COLOUR_GREEN                                                :Зелёный
@@ -454,7 +454,6 @@ STR_SORT_BY_PRODUCTION                                          :Продукц�
 STR_SORT_BY_TYPE                                                :Тип
 STR_SORT_BY_TRANSPORTED                                         :Вывоз
 STR_SORT_BY_NAME                                                :{BLACK}Имя
-STR_SORT_BY_DROPDOWN_NAME                                       :Название
 STR_SORT_BY_DATE                                                :{BLACK}Дата
 STR_SORT_BY_NUMBER                                              :Номер
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Прибыль в прошлом году
@@ -471,29 +470,31 @@ STR_SORT_BY_FACILITY                                            :Тип стан
 STR_SORT_BY_WAITING                                             :Кол-во товара на станции
 STR_SORT_BY_RATING_MAX                                          :Наивысший рейтинг
 STR_SORT_BY_RATING_MIN                                          :Низший рейтинг
-STR_ENGINE_SORT_ENGINE_ID                                       :Название
-STR_ENGINE_SORT_COST                                            :Цена
-STR_ENGINE_SORT_POWER                                           :Мощность
-STR_ENGINE_SORT_INTRO_DATE                                      :Время начала производства
-STR_ENGINE_SORT_RUNNING_COST                                    :Стоимость обслуживания
-STR_ENGINE_SORT_POWER_VS_RUNNING_COST                           :Мощность/стоимость обслуж.
-STR_ENGINE_SORT_CARGO_CAPACITY                                  :Вместимость
+STR_SORT_BY_ENGINE_ID                                           :Название
+STR_SORT_BY_COST                                                :Цена
+STR_SORT_BY_POWER                                               :Мощность
+STR_SORT_BY_INTRO_DATE                                          :Время начала производства
+STR_SORT_BY_RUNNING_COST                                        :Стоимость обслуживания
+STR_SORT_BY_POWER_VS_RUNNING_COST                               :Мощность/стоимость обслуж.
+STR_SORT_BY_CARGO_CAPACITY                                      :Вместимость
 STR_NO_WAITING_CARGO                                            :{BLACK}На станции нет грузов, ожидающих погрузки
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}Показать все станции
 STR_SELECT_ALL_TYPES                                            :{BLACK}Выбрать все типы грузов
-STR_AVAILABLE_TRAINS                                            :{BLACK}Доступные поезда
-STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Доступные автомобили
-STR_AVAILABLE_SHIPS                                             :{BLACK}Доступные суда
-STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Доступные самолёты
 STR_AVAILABLE_ENGINES_TIP                                       :{BLACK}Список доступного транспорта
 STR_MANAGE_LIST                                                 :{BLACK}Организация
 STR_MANAGE_LIST_TIP                                             :{BLACK}Управление транспортом, находящимся в этом списке
 STR_REPLACE_VEHICLES                                            :Замена транспорта
+STR_SEND_FOR_SERVICING                                          :Послать обслужить
+
+STR_AVAILABLE_TRAINS                                            :{BLACK}Доступные поезда
+STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Доступные автомобили
+STR_AVAILABLE_SHIPS                                             :{BLACK}Доступные суда
+STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Доступные самолёты
+
 STR_SEND_TRAIN_TO_DEPOT                                         :Послать в депо
 STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Послать в гараж
 STR_SEND_SHIP_TO_DEPOT                                          :Послать в док
 STR_SEND_AIRCRAFT_TO_HANGAR                                     :Послать в ангар
-STR_SEND_FOR_SERVICING                                          :Послать обслужить
 
 ############ range for months starts
 STR_MONTH_ABBREV_JAN                                            :Янв
@@ -548,8 +549,8 @@ STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Стро
 STR_TOOLBAR_TOOLTIP_PLANT_TREES_PLACE_SIGNS                     :{BLACK}Высадка деревьев
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Информация о земле
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Настройки
-STR_SMALL_ARROW_UP                                              :{BLACK}{SMALLUPARROW}
-STR_SMALL_ARROW_DOWN                                            :{BLACK}{SMALLDOWNARROW}
+STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
+STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}Невозможно изменить сервисный интервал...
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Закрыть окно
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Заголовок окна - для перемещения окна тащить за него
@@ -730,12 +731,12 @@ STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESI
 STR_HIGHSCORE_STATS                                             :{BIGFONT}«{STRING}»   ({COMMA})
 STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}Директора компании «{COMPANY}» называют {STRING.abl}!
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME}, президент компании «{COMPANY}», заслужил титул «{STRING}»!
-STR_BLUE_NUMBER                                                 :{BLUE}{COMMA}
+STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Редактор сценариев
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Генератор карты
-STR_ARROW_UP                                                    :{BLACK}{UPARROW}
-STR_ARROW_DOWN                                                  :{BLACK}{DOWNARROW}
+STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
+STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Увеличить площадь изменения рельефа
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Уменьшить площадь изменения рельефа
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Создать случайную карту
@@ -819,7 +820,7 @@ STR_FULL                                                        :Полно
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 
-STR_CHECKMARK                                                   :{CHECKMARK}
+STR_JUST_CHECKMARK                                              :{CHECKMARK}
 ############ range for menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Настройки игры
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Настройки сложности
@@ -911,9 +912,6 @@ STR_INDUSTRY_MENU_FUND_NEW_INDUSTRY                             :Создать 
 ############ range ends here
 
 STR_FUND_INDUSTRY_CAPTION                                       :{WHITE}Создать новое предприятие
-STR_JUST_STRING                                                 :{STRING}
-STR_JUST_RAW_STRING                                             :{STRING}
-STR_JUST_INT                                                    :{NUM}
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...можно строить только в тропиках
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}...можно строить только в пустыне
 STR_STATUSBAR_PAUSED                                            :{YELLOW}*  *  ПАУЗА  *  *
@@ -927,8 +925,8 @@ STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  СО
 STR_SAVE_STILL_IN_PROGRESS                                      :{WHITE}Идёт сохранение,{}пожалуйста, дождитесь завершения!
 STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}Выбрать музыкальную программу
 
-STR_6                                                           :{BLACK}6
-STR_7                                                           :{BLACK}7
+STR_BLACK_6                                                     :{BLACK}6
+STR_BLACK_7                                                     :{BLACK}7
 
 ############ start of townname region
 STR_TOWNNAME_ORIGINAL_ENGLISH                                   :Английские
@@ -1036,7 +1034,7 @@ STR_CRATES                                                      :мешков
 STR_RES_OTHER                                                   :Другое
 STR_NOTHING                                                     :
 
-STR_SMALL_RIGHT_ARROW                                           :{TINYFONT}{RIGHTARROW}
+STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_CANT_SHARE_ORDER_LIST                                       :{WHITE}Невозможно использовать общий список заданий
 STR_CANT_COPY_ORDER_LIST                                        :{WHITE}Невозможно скопировать список заданий
@@ -1098,7 +1096,7 @@ STR_CONFIG_SETTING_STOP_LOCATION                                :{LTBLUE}По у
 STR_CONFIG_SETTING_STOP_LOCATION_NEAR_END                       :в начале
 STR_CONFIG_SETTING_STOP_LOCATION_MIDDLE                         :в середине
 STR_CONFIG_SETTING_STOP_LOCATION_FAR_END                        :в конце
-STR_CONFIG_SETTING_ROADVEH_QUEUE                                :{LTBLUE}Автотранспорт строится в очередь у станции: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Автотранспорт строится в очередь у станции: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Смещать обзор, когда курсор находится у края экрана: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Разрешить подкупать муниципальную власть: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Разрешить покупать эксклюзивные трансп. права: {ORANGE}{STRING}
@@ -1174,7 +1172,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :Выкл.
 STR_CONFIG_SETTING_LEFT_MOUSE_BTN_SCROLLING                     :{LTBLUE}Скроллинг по клику левой кнопкой мыши: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :{LTBLUE}Использовать {ORANGE}{STRING}{LTBLUE} формат даты для имён сохранений
-STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_LONG               :длинный (31-е дек 2008)
+STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_LONG               :длинный (31-е дек 2008 г.)
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_SHORT              :короткий (31.12.2008)
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_ISO                :ISO (2008-12-31)
 
@@ -1204,12 +1202,12 @@ STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Рас�
 
 STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Показывать окно строительства, когда нет доступного соотв. транспорта: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Максимальное количество поездов на игрока: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAX_ROADVEH                                  :{LTBLUE}Максимальное количество автотранспорта на игрока: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Максимальное количество автотранспорта на игрока: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Максимальное количество авиатранспорта на игрока: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_SHIPS                                    :{LTBLUE}Максимальное количество кораблей на игрока: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_AI_BUILDS_TRAINS                             :{LTBLUE}Не допускать постройки поездов компьютером: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AI_BUILDS_ROADVEH                            :{LTBLUE}Не допускать постройки автомобилей компьютером: {ORANGE}{STRING}
+STR_CONFIG_SETTING_AI_BUILDS_ROAD_VEHICLES                      :{LTBLUE}Не допускать постройки автомобилей компьютером: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_AIRCRAFT                           :{LTBLUE}Не допускать постройки авиатранспорта компьютером: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_SHIPS                              :{LTBLUE}Не допускать постройки кораблей компьютером: {ORANGE}{STRING}
 
@@ -1219,8 +1217,8 @@ STR_CONFIG_SETTING_AI_MAX_OPCODES                               :{LTBLUE}Чис�
 STR_CONFIG_SETTING_SERVINT_ISPERCENT                            :{LTBLUE}Интервал обслуживания в процентах: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SERVINT_TRAINS                               :{LTBLUE}Интервал обслуживания поездов: {ORANGE}{STRING} дней/%
 STR_CONFIG_SETTING_SERVINT_TRAINS_DISABLED                      :{LTBLUE}Обслуживание поездов по умолчанию: {ORANGE}не обслуживаются
-STR_CONFIG_SETTING_SERVINT_ROADVEH                              :{LTBLUE}Интервал обслуживания автотранспорта: {ORANGE}{STRING} дней/%
-STR_CONFIG_SETTING_SERVINT_ROADVEH_DISABLED                     :{LTBLUE}Обслуживание автотранспорта: {ORANGE}отключено
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES                        :{LTBLUE}Интервал обслуживания автотранспорта: {ORANGE}{STRING} дней/%
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES_DISABLED               :{LTBLUE}Обслуживание автотранспорта: {ORANGE}отключено
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT                             :{LTBLUE}Интервал обслуживания авиатранспорта: {ORANGE}{STRING} дней/%
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT_DISABLED                    :{LTBLUE}Обслуживание авиатранспорта: {ORANGE}отключено
 STR_CONFIG_SETTING_SERVINT_SHIPS                                :{LTBLUE}Интервал обслуживания кораблей: {ORANGE}{STRING} дней/%
@@ -1295,10 +1293,10 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Алг�
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Не рекоменд.)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Рекоменд.)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH                       :{LTBLUE}Алгоритм поиска пути для автотранспорта: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_OPF                   :Оригин. {RED}(Не рекоменд.)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_NPF                   :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_YAPF                  :YAPF {BLUE}(Рекоменд.)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Алгоритм поиска пути для автотранспорта: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Оригин. {RED}(Не рекоменд.)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Рекоменд.)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Алгоритм поиска путей для кораблей: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Оригин. {BLUE}(Рекоменд.)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
@@ -1309,8 +1307,7 @@ STR_CONFIG_SETTING_MAP_Y                                        :{LTBLUE}Вер�
 
 ############ generic strings for settings
 STR_CONFIG_SETTING_DISABLED                                     :отключено
-STR_CONFIG_SETTING_INT32                                        :{NUM}
-STR_CONFIG_SETTING_CURRENCY                                     :{CURRENCY}
+STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_CONFIG_SETTING_QUERY_CAPT                                   :{WHITE}Изменить значение
 
 STR_TEMPERATE_LANDSCAPE                                         :Умеренный ландшафт
@@ -1339,15 +1336,15 @@ STR_GO_NON_STOP_TO_WAYPOINT                                     :Ехать че
 
 STR_WAYPOINTNAME_CITY                                           :Точка пути {TOWN}
 STR_WAYPOINTNAME_CITY_SERIAL                                    :Точка пути {TOWN} #{COMMA}
+STR_BUOYNAME_CITY                                               :Буй {TOWN}
+STR_BUOYNAME_CITY_SERIAL                                        :Буй {TOWN} #{COMMA}
 STR_LANDINFO_WAYPOINT                                           :Точка пути
 
 STR_WAYPOINT                                                    :{WHITE}Точка пути
 STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Выбор типа точки пути
 
 STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_LIST                                      :{WHITE}{WAYPOINT} - {COMMA} Поезд{P "" а ов}
 STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
-STR_WAYPOINT_RAW                                                :{WAYPOINT}
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Переименовать точку пути
 
 STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Невозможно переименовать точку пути...
@@ -1414,11 +1411,6 @@ STR_INDUSTRYDIR_LIST_CAPTION                                    :{BLACK}Назв
 
 STR_INDUSTRY_TOO_CLOSE                                          :{WHITE}...слишком близко к другому предприятию
 
-STR_RAIL_REFIT_VEHICLE_TO_CARRY                                 :{BLACK}Переоборудование поезда для иного типа груза
-STR_RAIL_REFIT_VEHICLE                                          :{BLACK}Переоборудовать поезда
-STR_RAIL_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Выбор типа груза для перевозки
-STR_RAIL_REFIT_TO_CARRY_HIGHLIGHTED                             :{BLACK}Переоборудование поезда под выбранный тип груза
-STR_RAIL_CAN_T_REFIT_VEHICLE                                    :{WHITE}Невозможно переоборудовать поезд...
 STR_CONFIG_GAME_PRODUCTION                                      :{WHITE}Изменить производительность
 
 ############ network gui strings
@@ -1885,7 +1877,7 @@ STR_NEWS_SERVICE_SUBSIDY_AWARDED_HALF                           :{BLACK}{BIGFONT
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_DOUBLE                         :{BLACK}{BIGFONT}Компания «{STRING}» получает субсидию!{}{}Перевозка {STRING.gen} по маршруту {STATION} - {STATION} будет оплачиваться в двойном размере в течение года!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_TRIPLE                         :{BLACK}{BIGFONT}Компания «{STRING}» получает субсидию!{}{}Перевозка {STRING.gen} по маршруту {STATION} - {STATION} будет оплачиваться в тройном размере в течение года!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_QUADRUPLE                      :{BLACK}{BIGFONT}Компания «{STRING}» получает субсидию!{}{}Перевозка {STRING.gen} по маршруту {STATION} - {STATION} будет оплачиваться в четырёхкратном размере в течение года!
-STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}{TOWN} местная власть запрещает постройку другого аэропорта в городе
+STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}Администрация г.{NBSP}{TOWN} запрещает постройку ещё одного аэропорта в городе
 STR_LOCAL_AUTHORITY_REFUSES_NOISE                               :{WHITE}Администрация г.{NBSP}{TOWN} не разрешает строительство аэропорта из-за высокого уровня шума.
 STR_TOWN_BUILDING_NAME_COTTAGES_1                               :Коттеджи
 STR_TOWN_BUILDING_NAME_HOUSES_1                                 :Дома
@@ -1927,11 +1919,6 @@ STR_TOWN_BUILDING_NAME_IGLOO_1                                  :Иглу
 STR_TOWN_BUILDING_NAME_TEPEES_1                                 :Хижины
 STR_TOWN_BUILDING_NAME_TEAPOT_HOUSE_1                           :Домик-Чайник
 STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Хрюшка-Копилка
-
-STR_INDUSTRY                                                    :{INDUSTRY}
-STR_TOWN                                                        :{TOWN}
-STR_INDUSTRY_FORMAT                                             :{TOWN} {STRING}
-STR_STATION                                                     :{STATION}
 
 ##id 0x2800
 STR_LANDSCAPING_MENU_LANDSCAPING                                :Ландшафт
@@ -1986,6 +1973,12 @@ STR_CARGO_RATING_VERY_GOOD                                      :Очень хо
 STR_CARGO_RATING_EXCELLENT                                      :Великолепный
 STR_CARGO_RATING_OUTSTANDING                                    :Отличный
 ############ range for rating ends
+
+### station view strings
+STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Показать все поезда, в расписании которых есть эта станция
+STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Показать все автомобили, в расписании которых есть эта станция/остановка
+STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Показать весь авиатранспорт, в расписании которого есть этот аэропорт
+STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Показать все корабли, в расписании которых есть эта пристань
 
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
 STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} больше не принимает {STRING.acc}
@@ -2070,9 +2063,9 @@ STR_GAME_SAVELOAD_ERROR_TOO_NEW_SAVEGAME                        :Сохране�
 STR_GAME_SAVELOAD_ERROR_FILE_NOT_READABLE                       :Файл не читается
 STR_GAME_SAVELOAD_ERROR_FILE_NOT_WRITEABLE                      :Незаписываемый файл
 STR_GAME_SAVELOAD_ERROR_DATA_INTEGRITY_CHECK_FAILED             :Нарушена целостность
-STR_SAVELOAD_LIST_TOOLTIP                                       :{BLACK}Список дисков, папок и сохраненных игр
+STR_SAVELOAD_LIST_TOOLTIP                                       :{BLACK}Список дисков, папок и сохранённых игр
 STR_SAVELOAD_EDITBOX_TOOLTIP                                    :{BLACK}Выбранное имя для сохранения игры
-STR_SAVELOAD_DELETE_TOOLTIP                                     :{BLACK}Удалить выбранную сохраненную игру
+STR_SAVELOAD_DELETE_TOOLTIP                                     :{BLACK}Удалить выбранную сохранённую игру
 STR_SAVELOAD_SAVE_TOOLTIP                                       :{BLACK}Сохранить игру, используя выбранное имя
 STR_NETWORK_SERVER_RANDOM_GAME                                  :Сгенерировать случайную карту
 STR_LOAD_HEIGHTMAP                                              :{WHITE}Загрузить карту
@@ -2209,7 +2202,7 @@ STR_ERROR_YOU_ALREADY_OWN_IT                                    :{WHITE}...вы 
 STR_SV_EMPTY                                                    :
 STR_SV_UNNAMED                                                  :Без имени
 STR_SV_TRAIN_NAME                                               :Поезд {COMMA}
-STR_SV_ROADVEH_NAME                                             :Машина {COMMA}
+STR_SV_ROAD_VEHICLE_NAME                                        :Машина {COMMA}
 STR_SV_SHIP_NAME                                                :Корабль {COMMA}
 STR_SV_AIRCRAFT_NAME                                            :Самолёт {COMMA}
 
@@ -2230,15 +2223,9 @@ STR_SV_STNAME_AIRPORT                                           :Аэропор�
 STR_SV_STNAME_OILFIELD                                          :Нефтяная вышка {STRING}
 STR_SV_STNAME_MINES                                             :Шахты {STRING}
 STR_SV_STNAME_DOCKS                                             :Пристань {STRING}
-STR_SV_STNAME_BUOY_1                                            :{STRING} Буй 1
-STR_SV_STNAME_BUOY_2                                            :{STRING} Буй 2
-STR_SV_STNAME_BUOY_3                                            :{STRING} Буй 3
-STR_SV_STNAME_BUOY_4                                            :{STRING} Буй 4
-STR_SV_STNAME_BUOY_5                                            :{STRING} Буй 5
-STR_SV_STNAME_BUOY_6                                            :{STRING} Буй 6
-STR_SV_STNAME_BUOY_7                                            :{STRING} Буй 7
-STR_SV_STNAME_BUOY_8                                            :{STRING} Буй 8
-STR_SV_STNAME_BUOY_9                                            :{STRING} Буй 9
+STR_SV_STNAME_BUOY                                              :{STRING}
+STR_SV_STNAME_WAYPOINT                                          :{STRING}
+##id 0x6020
 STR_SV_STNAME_ANNEXE                                            :{STRING}-дополнительная
 STR_SV_STNAME_SIDINGS                                           :{STRING}-запасная
 STR_SV_STNAME_BRANCH                                            :{STRING}-ветка
@@ -2290,8 +2277,8 @@ STR_NUM_LOW                                                     :Малое
 STR_NUM_NORMAL                                                  :Среднее
 STR_NUM_HIGH                                                    :Большое
 STR_NUM_CUSTOM                                                  :Указанное
-STR_ARROW_LEFT_SMALL                                            :{BLACK}{SMALLLEFTARROW}
-STR_ARROW_RIGHT_SMALL                                           :{BLACK}{SMALLRIGHTARROW}
+STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
+STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 STR_AI_SPEED_VERY_SLOW                                          :Очень медленная
 STR_AI_SPEED_SLOW                                               :Медленная
 STR_AI_SPEED_MEDIUM                                             :Средняя
@@ -2329,7 +2316,6 @@ STR_CITY_APPROVAL_HOSTILE                                       :Враждеб�
 
 ##id 0x7000
 STR_COMPANY_VIEW_CAPTION                                        :{WHITE}{COMPANY} {BLACK}{COMPANYNUM}
-STR_COMPANY_NUM                                                 :(Компания {COMMA})
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}Внешность
 STR_COMPANY_VIEW_COLOUR_SCHEME_BUTTON                           :{BLACK}Цвет
 STR_COMPANY_VIEW_COLOUR_SCHEME_TITLE                            :{GOLD}Цвет:
@@ -2340,20 +2326,20 @@ STR_QUERY_COMPANY_NAME_CAPTION                                  :Компани�
 STR_QUERY_PRESIDENT_S_NAME_CAPTION                              :Имя директора
 STR_ERROR_CAN_T_CHANGE_COMPANY_NAME                             :{WHITE}Невозможно изменить название компании...
 STR_ERROR_CAN_T_CHANGE_PRESIDENT                                :{WHITE}Невозможно изменить имя директора...
-STR_FINANCES_CAPTION                                            :{WHITE}{COMPANY} Денежные средства {BLACK}{COMPANYNUM}
+STR_FINANCES_CAPTION                                            :{WHITE}Финансы - {COMPANY} {BLACK}{COMPANYNUM}
 STR_FINANCES_EXPENDITURE_INCOME_TITLE                           :{WHITE}Расход/доход
 STR_FINANCES_YEAR                                               :{WHITE}{NUM}
 STR_FINANCES_SECTION_CONSTRUCTION                               :{GOLD}Строительство
 STR_FINANCES_SECTION_NEW_VEHICLES                               :{GOLD}Новая техника
 STR_FINANCES_SECTION_TRAIN_RUNNING_COSTS                        :{GOLD}Обслуживание ж/д
-STR_FINANCES_SECTION_ROAD_VEH_RUNNING_COSTS                     :{GOLD}Обслуживание авто
-STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD}Обслуживание авиа
-STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD}Обслуживание кораблей
+STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD}Обслуживание авто
+STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD}Обслуж. авиатранспорта
+STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD}Обслуж. кораблей
 STR_FINANCES_SECTION_PROPERTY_MAINTENANCE                       :{GOLD}Обслуж. собственности
 STR_FINANCES_SECTION_TRAIN_INCOME                               :{GOLD}Доход от ж/д
-STR_FINANCES_SECTION_ROAD_VEHICLES_INCOME                       :{GOLD}Доход от автотранспорта
+STR_FINANCES_SECTION_ROAD_VEHICLE_INCOME                        :{GOLD}Доход от авто
 STR_FINANCES_SECTION_AIRCRAFT_INCOME                            :{GOLD}Доход от авиации
-STR_FINANCES_SECTION_SHIP_INCOME                                :{GOLD}Доход от водного транспорта
+STR_FINANCES_SECTION_SHIP_INCOME                                :{GOLD}Доход от кораблей
 STR_FINANCES_SECTION_LOAN_INTEREST                              :{GOLD}Проценты по займу
 STR_FINANCES_SECTION_OTHER                                      :{GOLD}Прочие расходы
 STR_FINANCES_NEGATIVE_INCOME                                    :{BLACK}-{CURRENCY}
@@ -2362,7 +2348,6 @@ STR_FINANCES_TOTAL_CAPTION                                      :{WHITE}ИТОГ
 STR_COMPANY_NAME_COMPANY_NUM                                    :{COMPANY} {COMPANYNUM}
 STR_GRAPH_INCOME_CAPTION                                        :{WHITE}График доходов
 STR_CURRCOMPACT                                                 :{CURRCOMPACT}
-STR_JUST_COMMA                                                  :{COMMA}
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}График прибыли от основной деятельности
 STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Баланс
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Ссуда
@@ -2491,7 +2476,7 @@ STR_LIVERY_FREIGHT_TRAM                                         :Грузово�
 
 STR_LIVERY_GENERAL_TIP                                          :{BLACK}Настройка основной цветовой схемы
 STR_LIVERY_TRAIN_TIP                                            :{BLACK}Настройка цветовой схемы поездов
-STR_LIVERY_ROADVEH_TIP                                          :{BLACK}Настройка цветовой схемы автотранспорта
+STR_LIVERY_ROAD_VEHICLE_TIP                                     :{BLACK}Настройка цветовой схемы автотранспорта
 STR_LIVERY_SHIP_TIP                                             :{BLACK}Настройка цветовой схемы судов
 STR_LIVERY_AIRCRAFT_TIP                                         :{BLACK}Настройка цветовой схемы авиатранспорта
 STR_LIVERY_PRIMARY_TIP                                          :{BLACK}Настройка основного цвета
@@ -2615,94 +2600,94 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_TOY_VAN                     :Вагон дл
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_BATTERY_TRUCK               :Вагон для батареек
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FIZZY_DRINK_TRUCK           :Вагон для газировки
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PLASTIC_TRUCK               :Вагон для пластика
-STR_VEHICLE_NAME_ROAD_MPS_REGAL_BUS                             :Автобус MPS Regal
-STR_VEHICLE_NAME_ROAD_HEREFORD_LEOPARD_BUS                      :Автобус Hereford Leopard
-STR_VEHICLE_NAME_ROAD_FOSTER_BUS                                :Автобус Foster
-STR_VEHICLE_NAME_ROAD_FOSTER_MKII_SUPERBUS                      :Автобус Foster MkII
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKI_BUS                        :Автобус Ploddyphut MkI
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKII_BUS                       :Автобус Ploddyphut MkII
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKIII_BUS                      :Автобус Ploddyphut MkIII
-STR_VEHICLE_NAME_ROAD_BALOGH_COAL_TRUCK                         :Грузовик Balogh (уголь)
-STR_VEHICLE_NAME_ROAD_UHL_COAL_TRUCK                            :Грузовик Uhl (уголь)
-STR_VEHICLE_NAME_ROAD_DW_COAL_TRUCK                             :Грузовик DW (уголь)
-STR_VEHICLE_NAME_ROAD_MPS_MAIL_TRUCK                            :Почтовый фургон MPS
-STR_VEHICLE_NAME_ROAD_REYNARD_MAIL_TRUCK                        :Почтовый фургон Reynard
-STR_VEHICLE_NAME_ROAD_PERRY_MAIL_TRUCK                          :Почтовый фургон Perry
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_MAIL_TRUCK                    :Почтовый фургон MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_MAIL_TRUCK                    :Почтовый фургон Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_MAIL_TRUCK                       :Почтовый фургон Wizzowow
-STR_VEHICLE_NAME_ROAD_WITCOMBE_OIL_TANKER                       :Цистерна Witcombe (нефть)
-STR_VEHICLE_NAME_ROAD_FOSTER_OIL_TANKER                         :Цистерна Foster (нефть)
-STR_VEHICLE_NAME_ROAD_PERRY_OIL_TANKER                          :Цистерна Perry (нефть)
-STR_VEHICLE_NAME_ROAD_TALBOTT_LIVESTOCK_VAN                     :Скотовозка Talbott
-STR_VEHICLE_NAME_ROAD_UHL_LIVESTOCK_VAN                         :Скотовозка Uhl
-STR_VEHICLE_NAME_ROAD_FOSTER_LIVESTOCK_VAN                      :Скотовозка Foster
-STR_VEHICLE_NAME_ROAD_BALOGH_GOODS_TRUCK                        :Грузовик Balogh (товары)
-STR_VEHICLE_NAME_ROAD_CRAIGHEAD_GOODS_TRUCK                     :Грузовик Craighead (товары)
-STR_VEHICLE_NAME_ROAD_GOSS_GOODS_TRUCK                          :Грузовик Goss (товары)
-STR_VEHICLE_NAME_ROAD_HEREFORD_GRAIN_TRUCK                      :Зерновозка Hereford
-STR_VEHICLE_NAME_ROAD_THOMAS_GRAIN_TRUCK                        :Зерновозка Thomas
-STR_VEHICLE_NAME_ROAD_GOSS_GRAIN_TRUCK                          :Зерновозка Goss
-STR_VEHICLE_NAME_ROAD_WITCOMBE_WOOD_TRUCK                       :Грузовик Witcombe (дерево)
-STR_VEHICLE_NAME_ROAD_FOSTER_WOOD_TRUCK                         :Грузовик Foster (дерево)
-STR_VEHICLE_NAME_ROAD_MORELAND_WOOD_TRUCK                       :Грузовик Moreland (дерево)
-STR_VEHICLE_NAME_ROAD_MPS_IRON_ORE_TRUCK                        :Грузовик MPS (жел. руда)
-STR_VEHICLE_NAME_ROAD_UHL_IRON_ORE_TRUCK                        :Грузовик Uhl (жел. руда)
-STR_VEHICLE_NAME_ROAD_CHIPPY_IRON_ORE_TRUCK                     :Грузовик Chippy (жел. руда)
-STR_VEHICLE_NAME_ROAD_BALOGH_STEEL_TRUCK                        :Грузовик Balogh (сталь)
-STR_VEHICLE_NAME_ROAD_UHL_STEEL_TRUCK                           :Грузовик Uhl (сталь)
-STR_VEHICLE_NAME_ROAD_KELLING_STEEL_TRUCK                       :Грузовик Kelling (сталь)
-STR_VEHICLE_NAME_ROAD_BALOGH_ARMORED_TRUCK                      :Броневик Balogh
-STR_VEHICLE_NAME_ROAD_UHL_ARMORED_TRUCK                         :Броневик Uhl
-STR_VEHICLE_NAME_ROAD_FOSTER_ARMORED_TRUCK                      :Броневик Foster
-STR_VEHICLE_NAME_ROAD_FOSTER_FOOD_VAN                           :Рефрижератор Foster (еда)
-STR_VEHICLE_NAME_ROAD_PERRY_FOOD_VAN                            :Рефрижератор Perry (еда)
-STR_VEHICLE_NAME_ROAD_CHIPPY_FOOD_VAN                           :Рефрижератор Chippy (еда)
-STR_VEHICLE_NAME_ROAD_UHL_PAPER_TRUCK                           :Грузовик Uhl (бумага)
-STR_VEHICLE_NAME_ROAD_BALOGH_PAPER_TRUCK                        :Грузовик Balogh (бумага)
-STR_VEHICLE_NAME_ROAD_MPS_PAPER_TRUCK                           :Грузовик MPS (бумага)
-STR_VEHICLE_NAME_ROAD_MPS_COPPER_ORE_TRUCK                      :Грузовик MPS (медн. руда)
-STR_VEHICLE_NAME_ROAD_UHL_COPPER_ORE_TRUCK                      :Грузовик Uhl (медн. руда)
-STR_VEHICLE_NAME_ROAD_GOSS_COPPER_ORE_TRUCK                     :Грузовик Goss (медн. руда)
-STR_VEHICLE_NAME_ROAD_UHL_WATER_TANKER                          :Водная цистерна Uhl
-STR_VEHICLE_NAME_ROAD_BALOGH_WATER_TANKER                       :Водная цистерна Balogh
-STR_VEHICLE_NAME_ROAD_MPS_WATER_TANKER                          :Водная цистерна MPS
-STR_VEHICLE_NAME_ROAD_BALOGH_FRUIT_TRUCK                        :Рефрижератор Balogh (фрукты)
-STR_VEHICLE_NAME_ROAD_UHL_FRUIT_TRUCK                           :Рефрижератор Uhl (фрукты)
-STR_VEHICLE_NAME_ROAD_KELLING_FRUIT_TRUCK                       :Рефрижератор Kelling (фрукты)
-STR_VEHICLE_NAME_ROAD_BALOGH_RUBBER_TRUCK                       :Грузовик Balogh (каучук)
-STR_VEHICLE_NAME_ROAD_UHL_RUBBER_TRUCK                          :Грузовик Uhl (каучук)
-STR_VEHICLE_NAME_ROAD_RMT_RUBBER_TRUCK                          :Грузовик RMT (каучук)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_SUGAR_TRUCK                   :Грузовик MightyMover (сахар)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_SUGAR_TRUCK                   :Грузовик Powernaught (сахар)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_SUGAR_TRUCK                      :Грузовик Wizzowow (сахар)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COLA_TRUCK                    :Грузовик MightyMover (кола)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COLA_TRUCK                    :Грузовик Powernaught (кола)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COLA_TRUCK                       :Грузовик Wizzowow (кола)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COTTON_CANDY                  :Грузовик MightyMover (сах. вата)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COTTON_CANDY                  :Грузовик Powernaught (сах. вата)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COTTON_CANDY_TRUCK               :Грузовик Wizzowow (сах. вата)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOFFEE_TRUCK                  :Грузовик MightyMover (ириски)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOFFEE_TRUCK                  :Грузовик Powernaught (ириски)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOFFEE_TRUCK                     :Грузовик Wizzowow (ириски)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOY_VAN                       :Грузовик MightyMover (игрушки)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOY_VAN                       :Грузовик Powernaught (игрушки)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOY_VAN                          :Грузовик Wizzowow (игрушки)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_CANDY_TRUCK                   :Грузовик MightyMover (конфеты)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_CANDY_TRUCK                   :Powernaught Грузовик (конфеты)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_CANDY_TRUCK                      :Грузовик Wizzowow (конфеты)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BATTERY_TRUCK                 :Грузовик MightyMover (батарейки)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BATTERY_TRUCK                 :Грузовик Powernaught (батарейки)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BATTERY_TRUCK                    :Грузовик Wizzowow (батарейки)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_FIZZY_DRINK                   :Грузовик MightyMover (газировка)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_FIZZY_DRINK                   :Грузовик Powernaught (газировка)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_FIZZY_DRINK_TRUCK                :Грузовик Wizzowow (газировка)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_PLASTIC_TRUCK                 :Грузовик MightyMover (пластик)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_PLASTIC_TRUCK                 :Грузовик Powernaught (пластик)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_PLASTIC_TRUCK                    :Грузовик Wizzowow (пластик)
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BUBBLE_TRUCK                  :Грузовик MightyMover (пузырьки)
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BUBBLE_TRUCK                  :Грузовик Powernaught (пузырьки)
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BUBBLE_TRUCK                     :Грузовик Wizzowow (пузырьки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_REGAL_BUS                     :Автобус MPS Regal
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_LEOPARD_BUS              :Автобус Hereford Leopard
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_BUS                        :Автобус Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_MKII_SUPERBUS              :Автобус Foster MkII
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKI_BUS                :Автобус Ploddyphut MkI
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKII_BUS               :Автобус Ploddyphut MkII
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKIII_BUS              :Автобус Ploddyphut MkIII
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_COAL_TRUCK                 :Грузовик Balogh (уголь)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COAL_TRUCK                    :Грузовик Uhl (уголь)
+STR_VEHICLE_NAME_ROAD_VEHICLE_DW_COAL_TRUCK                     :Грузовик DW (уголь)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_MAIL_TRUCK                    :Почтовый фургон MPS
+STR_VEHICLE_NAME_ROAD_VEHICLE_REYNARD_MAIL_TRUCK                :Почтовый фургон Reynard
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_MAIL_TRUCK                  :Почтовый фургон Perry
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_MAIL_TRUCK            :Почтовый фургон MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_MAIL_TRUCK            :Почтовый фургон Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_MAIL_TRUCK               :Почтовый фургон Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_OIL_TANKER               :Цистерна Witcombe (нефть)
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_OIL_TANKER                 :Цистерна Foster (нефть)
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_OIL_TANKER                  :Цистерна Perry (нефть)
+STR_VEHICLE_NAME_ROAD_VEHICLE_TALBOTT_LIVESTOCK_VAN             :Скотовозка Talbott
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_LIVESTOCK_VAN                 :Скотовозка Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_LIVESTOCK_VAN              :Скотовозка Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_GOODS_TRUCK                :Грузовик Balogh (товары)
+STR_VEHICLE_NAME_ROAD_VEHICLE_CRAIGHEAD_GOODS_TRUCK             :Грузовик Craighead (товары)
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GOODS_TRUCK                  :Грузовик Goss (товары)
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_GRAIN_TRUCK              :Зерновозка Hereford
+STR_VEHICLE_NAME_ROAD_VEHICLE_THOMAS_GRAIN_TRUCK                :Зерновозка Thomas
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GRAIN_TRUCK                  :Зерновозка Goss
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_WOOD_TRUCK               :Грузовик Witcombe (дерево)
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_WOOD_TRUCK                 :Грузовик Foster (дерево)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MORELAND_WOOD_TRUCK               :Грузовик Moreland (дерево)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_IRON_ORE_TRUCK                :Грузовик MPS (жел. руда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_IRON_ORE_TRUCK                :Грузовик Uhl (жел. руда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_IRON_ORE_TRUCK             :Грузовик Chippy (жел. руда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_STEEL_TRUCK                :Грузовик Balogh (сталь)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_STEEL_TRUCK                   :Грузовик Uhl (сталь)
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_STEEL_TRUCK               :Грузовик Kelling (сталь)
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_ARMORED_TRUCK              :Броневик Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_ARMORED_TRUCK                 :Броневик Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_ARMORED_TRUCK              :Броневик Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_FOOD_VAN                   :Рефрижератор Foster (еда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_FOOD_VAN                    :Рефрижератор Perry (еда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_FOOD_VAN                   :Рефрижератор Chippy (еда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_PAPER_TRUCK                   :Грузовик Uhl (бумага)
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_PAPER_TRUCK                :Грузовик Balogh (бумага)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_PAPER_TRUCK                   :Грузовик MPS (бумага)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_COPPER_ORE_TRUCK              :Грузовик MPS (медн. руда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COPPER_ORE_TRUCK              :Грузовик Uhl (медн. руда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_COPPER_ORE_TRUCK             :Грузовик Goss (медн. руда)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_WATER_TANKER                  :Водная цистерна Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_WATER_TANKER               :Водная цистерна Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_WATER_TANKER                  :Водная цистерна MPS
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_FRUIT_TRUCK                :Рефрижератор Balogh (фрукты)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_FRUIT_TRUCK                   :Рефрижератор Uhl (фрукты)
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_FRUIT_TRUCK               :Рефрижератор Kelling (фрукты)
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_RUBBER_TRUCK               :Грузовик Balogh (каучук)
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_RUBBER_TRUCK                  :Грузовик Uhl (каучук)
+STR_VEHICLE_NAME_ROAD_VEHICLE_RMT_RUBBER_TRUCK                  :Грузовик RMT (каучук)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_SUGAR_TRUCK           :Грузовик MightyMover (сахар)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_SUGAR_TRUCK           :Грузовик Powernaught (сахар)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_SUGAR_TRUCK              :Грузовик Wizzowow (сахар)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COLA_TRUCK            :Цистерна MightyMover (кола)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COLA_TRUCK            :Цистерна Powernaught (кола)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COLA_TRUCK               :Цистерна Wizzowow (кола)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COTTON_CANDY          :Грузовик MightyMover (сах. вата)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COTTON_CANDY          :Грузовик Powernaught (сах. вата)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COTTON_CANDY_TRUCK       :Грузовик Wizzowow (сах. вата)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOFFEE_TRUCK          :Грузовик MightyMover (ириски)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOFFEE_TRUCK          :Грузовик Powernaught (ириски)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOFFEE_TRUCK             :Грузовик Wizzowow (ириски)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOY_VAN               :Грузовик MightyMover (игрушки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOY_VAN               :Грузовик Powernaught (игрушки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOY_VAN                  :Грузовик Wizzowow (игрушки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_CANDY_TRUCK           :Грузовик MightyMover (конфеты)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_CANDY_TRUCK           :Грузовик Powernaught (конфеты)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_CANDY_TRUCK              :Грузовик Wizzowow (конфеты)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BATTERY_TRUCK         :Грузовик MightyMover (батарейки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BATTERY_TRUCK         :Грузовик Powernaught (батарейки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BATTERY_TRUCK            :Грузовик Wizzowow (батарейки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_FIZZY_DRINK           :Грузовик MightyMover (газировка)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_FIZZY_DRINK           :Грузовик Powernaught (газировка)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_FIZZY_DRINK_TRUCK        :Грузовик Wizzowow (газировка)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_PLASTIC_TRUCK         :Грузовик MightyMover (пластик)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_PLASTIC_TRUCK         :Грузовик Powernaught (пластик)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_PLASTIC_TRUCK            :Грузовик Wizzowow (пластик)
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BUBBLE_TRUCK          :Грузовик MightyMover (пузырьки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BUBBLE_TRUCK          :Грузовик Powernaught (пузырьки)
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BUBBLE_TRUCK             :Грузовик Wizzowow (пузырьки)
 STR_VEHICLE_NAME_SHIP_MPS_OIL_TANKER                            :Нефт. танкер MPS
 STR_VEHICLE_NAME_SHIP_CS_INC_OIL_TANKER                         :Нефт. танкер CS-Inc.
 STR_VEHICLE_NAME_SHIP_MPS_PASSENGER_FERRY                       :Пассажир. судно MPS
@@ -2756,19 +2741,23 @@ STR_VEHICLE_NAME_AIRCRAFT_TRICARIO_HELICOPTER                   :Вертолё�
 STR_VEHICLE_NAME_AIRCRAFT_GURU_X2_HELICOPTER                    :Вертолёт Guru X2
 STR_VEHICLE_NAME_AIRCRAFT_POWERNAUT_HELICOPTER                  :Вертолёт Powernaut
 STR_ENGINE_PREVIEW_CAPTION                                      :{WHITE}Сообщение от производителя транспорта
-STR_ENGINE_PREVIEW_MESSAGE                                      :{GOLD}Мы создали новый {STRING}. Заинтересованы ли вы в его годовом эксклюзивном использовании для проверки перед запуском в серийное производство?
+STR_ENGINE_PREVIEW_MESSAGE                                      :{GOLD}Мы создали новую модель {STRING.gen}. Заинтересованы ли вы в его годовом эксклюзивном использовании для проверки перед запуском в серийное производство?
 STR_ENGINE_PREVIEW_RAILROAD_LOCOMOTIVE                          :ж/д локомотив
+STR_ENGINE_PREVIEW_RAILROAD_LOCOMOTIVE.gen                      :ж/д локомотива
 STR_ENGINE_PREVIEW_ROAD_VEHICLE                                 :автомобиль
+STR_ENGINE_PREVIEW_ROAD_VEHICLE.gen                             :автомобиля
 STR_ENGINE_PREVIEW_AIRCRAFT                                     :авиатранспорт
+STR_ENGINE_PREVIEW_AIRCRAFT.gen                                 :авиатранспорта
 STR_ENGINE_PREVIEW_SHIP                                         :корабль
+STR_ENGINE_PREVIEW_SHIP.gen                                     :корабля
 STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :монорельсовый локомотив
+STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE.gen                      :монорельсового локомотива
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :магниторельсовый локомотив
+STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE.gen                        :магниторельсового локомотива
 
 ##id 0x8800
-STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}Депо {TOWN}
 STR_NEWS_FIRST_TRAIN_ARRIVAL                                    :{BLACK}{BIGFONT}Жители празднуют!{}Первый поезд прибыл на станцию {STATION}!
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Детали)
-STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Поезд мешает
 STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_NON_STOP                                              :{BLACK}Без остановки
@@ -2816,7 +2805,7 @@ STR_ORDER_NEAREST_HANGAR                                        :ближайш�
 STR_ORDER_SERVICE_AT                                            :Обслуживание в
 STR_ORDER_SERVICE_NON_STOP_AT                                   :Обслуживание без остановки в
 STR_ORDER_TRAIN_DEPOT                                           :депо
-STR_ORDER_ROAD_DEPOT                                            :гараж
+STR_ORDER_ROAD_VEHICLE_DEPOT                                    :гараж
 STR_ORDER_SHIP_DEPOT                                            :док
 STR_GO_TO_DEPOT                                                 :{STRING} {TOWN} {STRING}
 STR_GO_TO_NEAREST_DEPOT                                         :{STRING} {STRING} {STRING}
@@ -2858,38 +2847,16 @@ STR_TIMETABLE_AND_TRAVEL_FOR                                    :и идти д�
 STR_TIMETABLE_DAYS                                              :{COMMA} д{P ень ня ней}
 STR_TIMETABLE_TICKS                                             :{COMMA} тик{P "" а ов}
 
-STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}Идёт в депо {TOWN}
-STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}Идёт в депо {TOWN}; {VELOCITY}
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Обслуж. в депо {TOWN}
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Обслуж. в депо {TOWN}; {VELOCITY}
-
 STR_INVALID_ORDER                                               :{RED} (Неверный Маршрут)
 
 STR_UNKNOWN_STATION                                             :неизвестная странция
 STR_VEHICLE_DETAILS_CARGO_EMPTY                                 :{LTBLUE}Пусто
 STR_VEHICLE_DETAILS_CARGO_FROM                                  :{LTBLUE}{CARGO} из {STATION}
 STR_VEHICLE_DETAILS_CARGO_FROM_MULT                             :{LTBLUE}{CARGO} из {STATION} (x{NUM})
-STR_VEHICLE_STATUS_WAITING_IN_DEPOT                             :{WHITE}{VEHICLE} ждёт в депо
-STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}Новый транспорт
 STR_DEPOT_NO_ENGINE                                             :{BLACK}-
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Поезд слишком длинный
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Структуру поезда можно менять только в депо
-STR_VEHICLE_LIST_CAPTION_TRAINS                                 :{WHITE}{COMPANY} - {COMMA} поезд{P "" а ов}
 
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Новый поезд
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Новый электропоезд
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Новый монорельс
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Новый магниторельс
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Поезда
-
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Купить
-STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Копировать
-STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Создаёт копию автомобиля. Control+щелчок копирует задания
-STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Создаёт копию автомобиля. Щёлкнуть на кнопке и затем на машине внутри или снаружи гаража. Control+щелчок копирует и задания
-STR_CLONE_TRAIN                                                 :{BLACK}Копировать состав
-STR_CLONE_TRAIN_INFO                                            :{BLACK}Создаёт копию поезда, включая все вагоны. Control+клик копирует задания
-STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Создаёт копию поезда, включая все вагоны. Щёлкнуть на кнопке и затем на поезде внутри или снаружи депо. Control+клик копирует задания
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Переимен.
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Пропуск
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Удалить
 STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Ехать
@@ -2905,14 +2872,12 @@ STR_ORDER_VIEW_TOOLTIP                                          :{BLACK}Пере
 STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE} (Задания)
 STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Конец заданий - -
 STR_SERVICE                                                     :{BLACK}Обслуж.
-STR_ERROR_CAN_T_BUILD_RAILROAD_VEHICLE                          :{WHITE}Невозможно купить ж/д транспорт...
 STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE                :{LTBLUE}{ENGINE}{BLACK}  Построен в {LTBLUE}{NUM} г.{BLACK} Стоимость: {LTBLUE}{CURRENCY}
 STR_VEHICLE_DETAILS_TRAIN_WAGON_VALUE                           :{LTBLUE}{ENGINE}{BLACK}   Стоимость: {LTBLUE}{CURRENCY}
 STR_VEHICLE_VIEW_CAPTION                                        :{WHITE}{VEHICLE}
 STR_VEHICLE_STATUS_LOADING_UNLOADING                            :{LTBLUE}Разгрузка/Погрузка
 STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Отъезжает
 STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Поезд должен быть остановлен в депо
-STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Невозможно отправить поезд в депо...
 STR_ERROR_NO_MORE_SPACE_FOR_ORDERS                              :{WHITE}Нет больше места для заданий
 STR_ERROR_TOO_MANY_ORDERS                                       :{WHITE}Слишком много заданий
 STR_ERROR_CAN_T_INSERT_NEW_ORDER                                :{WHITE}Невозможно вставить новое задание...
@@ -2927,26 +2892,11 @@ STR_ERROR_CAN_T_ADD_ORDER_SHARED                                :{WHITE}ТС н�
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Невозможно переместить трансп. средство...
 STR_ERROR_REAR_ENGINE_FOLLOW_FRONT                              :{WHITE}Тыловой локомотив всегда следует за его передней частью
 STR_CARGO_N_A                                                   :отсутствует{SKIP}
-STR_ERROR_CAN_T_SELL_RAILROAD_VEHICLE                           :{WHITE}Невозможно продать рельсовый транспорт...
 STR_ERROR_UNABLE_TO_FIND_ROUTE_TO                               :{WHITE}Невозможно найти дорогу к депо
-STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Невозможно остановить/запустить поезд...
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Осмотр каждые {LTBLUE}{COMMA}дней{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Интервал обслуж.: {LTBLUE}{COMMA}%{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
-STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Поезда - нажмите для получения справки
-STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Поезда - кликните для получения информации, используйте перетаскивание для изменения состава
-STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Купить новый поезд
-STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Перетащите сюда транспорт, чтобы продать его
-STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Показать депо в основном окне
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Выбор вагонов - кликните для справки
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Купить выбранный локомотив/вагон
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Переименовать тип вагона
-STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Текущее действие поезда; кликните для его остановки/запуска
-STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Показать задания
-STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Показать поезд в основном окне
-STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Отправить поезд в депо. Ctrl+клик - только для обслуживания.
 STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP                    :{BLACK}Заставить поезд проехать на красный сигнал светофора
 STR_VEHICLE_VIEW_TRAIN_REVERSE_TOOLTIP                          :{BLACK}Развернуть поезд
-STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Показать информацию о поезде
 STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Увеличить интервал обслуживания
 STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Уменьшить интервал обслуживания
 STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP                         :{BLACK}Показать сведения о перевозимых грузах
@@ -2980,15 +2930,10 @@ STR_VEHICLE_STATUS_STOPPED                                      :{RED}Остан
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Невозможно игнорировать сигнал. Опасно...
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Потерпел крушение!
 
-STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Назвать поезд
-STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Невозможно назвать поезд...
-STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Назвать поезд
 STR_NEWS_TRAIN_CRASH                                            :{BLACK}{BIGFONT}Столкновение поездов!{}{COMMA} человек{P "" а ""} погиб{P "" ло ло} в огне!
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Невозможно развернуть поезд...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Нельзя развернуть поезд...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Невозможно развернуть многосоставной транспорт
-STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Переименовать тип вагона
-STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Невозможно переименовать...
 STR_CLEAR_TIME                                                  :{BLACK}Сбросить время
 STR_RESET_LATENESS                                              :{BLACK}Сброс счётчика
 STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Переименовать точку пути
@@ -3020,185 +2965,62 @@ STR_TIMETABLE_AUTOFILL                                          :{BLACK}Авто
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Заполнить график автоматически по мере движения. Ctrl+клик, чтобы не менять время ожидания.
 
 ##id 0x9000
-STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Машина на пути
-STR_VEHICLE_LIST_ROAD_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} автомобил{P ь я ей}
-STR_DEPOT_ROAD_CAPTION                                          :{WHITE}Гараж {TOWN}
-STR_DEPOT_ROAD_NEW_VEHICLES_BUTTON                              :{BLACK}Новая машина
-STR_BUILD_VEHICLE_ROAD_CAPTION                                  :{WHITE}Новая машина
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_BUTTON                     :{BLACK}Купить
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Невозможно купить машину...
-STR_ERROR_ROAD_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}...должен быть остановлен в гараже
-STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Невозможно продать автомобиль...
-STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Невозможно остановить/запустить автомобиль...
-STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} ждёт в гараже
-STR_HEADING_FOR_ROAD_DEPOT                                      :{ORANGE}Идёт в гараж {TOWN}
-STR_HEADING_FOR_ROAD_DEPOT_VEL                                  :{ORANGE}Идёт в гараж {TOWN}; {VELOCITY}
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE                              :{LTBLUE}Обслуж. в гараже {TOWN}
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE_VEL                          :{LTBLUE}Обслуж. в гараже {TOWN}; {VELOCITY}
-STR_ERROR_CAN_T_SEND_VEHICLE_TO_DEPOT                           :{WHITE}Невозможно отправить машину в гараж...
+STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...должен быть остановлен в гараже
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}Невозможно найти гараж
-STR_VEHICLE_LIST_ROAD_TOOLTIP                                   :{BLACK}Автомобили - кликните для получения подробной информации
-STR_VEHICLE_VIEW_ROAD_STATE_START_STOP_TOOLTIP                  :{BLACK}Текущее действие автомобиля; кликните для его остановки/запуска
-STR_VEHICLE_VIEW_ROAD_ORDERS_TOOLTIP                            :{BLACK}Показать задания
-STR_VEHICLE_VIEW_ROAD_LOCATION_TOOLTIP                          :{BLACK}Показать автомобиль в главном окне
-STR_VEHICLE_VIEW_ROAD_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Отправить автомобиль в гараж. Ctrl+клик - только для обслуживания.
-STR_VEHICLE_VIEW_ROAD_REVERSE_TOOLTIP                           :{BLACK}Принудительно развернуть автомобиль
-STR_VEHICLE_VIEW_ROAD_SHOW_DETAILS_TOOLTIP                      :{BLACK}Показать информацию об автомобиле
-STR_DEPOT_ROAD_LIST_TOOLTIP                                     :{BLACK}Автомобили - кликните для получения справки
-STR_DEPOT_ROAD_NEW_VEHICLES_TOOLTIP                             :{BLACK}Купить новый автомобиль
-STR_DEPOT_ROAD_SELL_TOOLTIP                                     :{BLACK}Перетащите сюда автомобиль, чтобы продать его
-STR_DEPOT_ROAD_LOCATION_TOOLTIP                                 :{BLACK}Показать гараж в главном окне
-STR_BUILD_VEHICLE_ROAD_LIST_TOOLTIP                             :{BLACK}Список автотранспорта - кликните для получения информации
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Купить выбранный автомобиль
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Принудительно развернуть автомобиль
 STR_ARTICULATED_RV_CAPACITY                                     :{BLACK}Ёмкость: {LTBLUE}
-STR_BARE_CARGO                                                  :{CARGO}
+STR_JUST_CARGO                                                  :{CARGO}
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} единиц{P а "" ""}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
-STR_QUERY_ROAD_RENAME                                           :{WHITE}Назвать автотранспорт
-STR_ERROR_CAN_T_RENAME_ROAD                                     :{WHITE}Невозможно переименовать автомобиль...
-STR_QUERY_RENAME_ROAD_CAPTION                                   :{BLACK}Назвать автотранспорт
-STR_NEWS_FIRST_ROAD_BUS_ARRIVAL                                 :{BLACK}{BIGFONT}Жители празднуют!{}Первый автобус прибыл на остановку {STATION}!
-STR_NEWS_FIRST_ROAD_TRUCK_ARRIVAL                               :{BLACK}{BIGFONT}Жители празднуют!{}Первый грузовик прибыл на станцию {STATION}!
-STR_NEWS_FIRST_ROAD_PASSENGER_TRAM_ARRIVAL                      :{BLACK}{BIGFONT}Жители празднуют . . .{}Первый трамвай прибыл на {STATION}!
-STR_NEWS_FIRST_ROAD_CARGO_TRAM_ARRIVAL                          :{BLACK}{BIGFONT}Жители празднуют . . .{}Первый грузовой трамвай прибыл на {STATION}!
-STR_NEWS_ROAD_CRASH_DRIVER                                      :{BLACK}{BIGFONT}АВАРИЯ!{}Водитель погиб при столкновении с поездом
-STR_NEWS_ROAD_CRASH                                             :{BLACK}{BIGFONT}АВАРИЯ!{}{COMMA} человек{P "" а ""} погиб{P "" ло ло} при столкновении с поездом!
+STR_NEWS_FIRST_BUS_ARRIVAL                                      :{BLACK}{BIGFONT}Жители празднуют!{}Первый автобус прибыл на остановку {STATION}!
+STR_NEWS_FIRST_TRUCK_ARRIVAL                                    :{BLACK}{BIGFONT}Жители празднуют!{}Первый грузовик прибыл на станцию {STATION}!
+STR_NEWS_FIRST_PASSENGER_TRAM_ARRIVAL                           :{BLACK}{BIGFONT}Жители празднуют . . .{}Первый трамвай прибыл на {STATION}!
+STR_NEWS_FIRST_CARGO_TRAM_ARRIVAL                               :{BLACK}{BIGFONT}Жители празднуют . . .{}Первый грузовой трамвай прибыл на {STATION}!
+STR_NEWS_ROAD_VEHICLE_CRASH_DRIVER                              :{BLACK}{BIGFONT}АВАРИЯ!{}Водитель погиб при столкновении с поездом
+STR_NEWS_ROAD_VEHICLE_CRASH                                     :{BLACK}{BIGFONT}АВАРИЯ!{}{COMMA} человек{P "" а ""} погиб{P "" ло ло} при столкновении с поездом!
 STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Нельзя развернуть машину...
-STR_BUILD_VEHICLE_ROAD_RENAME_BUTTON                            :{BLACK}Переимен.
-STR_BUILD_VEHICLE_ROAD_RENAME_TOOLTIP                           :{BLACK}Переименовать автомобиль
-STR_QUERY_RENAME_ROAD_TYPE_CAPTION                              :{WHITE}Переименовать автомобиль
-STR_ERROR_CAN_T_RENAME_ROAD_TYPE                                :{WHITE}Невозможно переименовать...
 
-STR_REFIT_ROAD_VEHICLE_TO_CARRY                                 :{BLACK}Переоборуд. авто для доставки разных видов грузов.
-STR_REFIT_ROAD_VEHICLE                                          :{BLACK}Переоборуд. авто
-STR_REFIT_ROAD_VEHICLE_TO_CARRY_HIGHLIGHTED                     :{BLACK}Переоборуд авто для перевозки доступных видов грузов
-STR_REFIT_ROAD_VEHICLE_CAN_T                                    :{WHITE}Невозможно переоборудовать автомобиль...
-STR_ROAD_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Выберите тип грузов для перевозки
 
 ##id 0x9800
 STR_WATERWAYS_MENU_WATERWAYS_CONSTRUCTION                       :Строительство водных путей
 STR_WATERWAYS_TOOLBAR_CAPTION                                   :{WHITE}Строительство водных путей
 STR_WATERWAYS_TOOLBAR_CAPTION_SE                                :{WHITE}Водные пути
 STR_ERROR_CAN_T_BUILD_DOCK_HERE                                 :{WHITE}Здесь невозможно построить пристань...
-STR_DEPOT_SHIP_CAPTION                                          :{WHITE}Док {TOWN}
-STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}Новое судно
-STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} корабл{P ь я ей}
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Покупка кораблей
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Купить
-STR_CLONE_SHIP                                                  :{BLACK}Копировать
-STR_CLONE_SHIP_INFO                                             :{BLACK}Создаёт копию корабля. Control+клик копирует задания
-STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}Создаёт копию корабля. Щёлкнуть на кнопке и затем на корабле внутри или снаружи дока. Control+клик копирует задания
 STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Корабль должен быть остановлен в доке
-STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Невозможно продать корабль...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Невозможно купить корабль...
-STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Корабль на пути
-STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Не могу остановить/запустить корабль...
-STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Не могу отправить корабль в док...
-STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}Идёт в док {TOWN}
-STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}Идёт в док {TOWN}; {VELOCITY}
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Обслуж. в доке {TOWN}
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Обслуж. в доке {TOWN}; {VELOCITY}
-STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} ждёт в доке
 STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Строительство пристаней
 STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Строительство доков (для строительства и обслуживания кораблей)
-STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Корабли - нажмите для получения справки
-STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Купить новый корабль
-STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Перетащите сюда корабль, чтобы продать его
-STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Показать док в основном окне
-STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Корабли - нажмите для получения справки
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Список кораблей - нажмите для получения справки
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Купить выбранный корабль
-STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Текущее действие корабля; кликните для его остановки/запуска
-STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Показать задания
-STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Показать корабль в главном окне
-STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Отправить корабль в док. Ctrl+клик - только для обслуживания
-STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Показать информацию о корабле
-STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Название корабля
 
-STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Название корабля
-STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Не могу назвать корабль...
 STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BLACK}{BIGFONT}Жители празднуют!{}Первый корабль причалил к {STATION}!
 STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Буи помогают в навигации на больших расстояниях; используйте их как маршрутные точки
 STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Не могу установить здесь буй...
 STR_BUILD_AQUEDUCT                                              :{BLACK}Строительство акведуков
 STR_CAN_T_BUILD_AQUEDUCT_HERE                                   :{WHITE}Здесь невозможно построить акведук...
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Переимен.
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Переименовать
-STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Переименовать
-STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Невозможно переименовать судно...
-STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Переоборудовать корабль для перевозки других грузов
 STR_REFIT_CAPTION                                               :{WHITE}{VEHICLE} (Переоборудование)
-STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Переоборудовать корабль
-STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Выберите тип груза для перевозки
-STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Переоборудовать корабль для перевозки выбранного груза
 STR_REFIT_TITLE                                                 :{GOLD}Выберите тип груза для перевозки:
 STR_REFIT_NEW_CAPACITY_COST_OF_REFIT                            :{BLACK}Новая ёмкость: {GOLD}{CARGO}{}{BLACK}Стоимость переоборудования: {GOLD}{CURRENCY}
-STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Не могу переоборудовать корабль...
 STR_REFITTABLE                                                  :(переоб.)
 
 ##id 0xA000
 STR_TOOLBAR_AIRCRAFT_CAPTION                                    :{WHITE}Аэропорты
 STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Здесь невозможно построить аэропорт...
-STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}Ангар {STATION}
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}Новое судно
-STR_CLONE_AIRCRAFT                                              :{BLACK}Копировать
-STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Создаёт копию самолёта. Control+клик - копирует задания
-STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Создаёт копию самолёта. Нажмите на кнопку, а потом на возд. судно в/вне ангара. Ctrl+click - также скопирует и задание.
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Новый
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Купить
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Невозможно купить возд. транспорт...
-STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{COMPANY} - {COMMA} единиц{P а ы ""} авиатранспорта
-STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Невозможно отправить его в ангар...
-STR_HEADING_FOR_HANGAR                                          :{ORANGE}Летит в Ангар {STATION}
-STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}Идёт в ангар {STATION}; {VELOCITY}
-STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Обслуж. в ангаре {STATION}
-STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Обслуж. в ангаре {STATION}; {VELOCITY}
-STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} ждёт в ангаре
-STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}ОН ЛЕТИТ!
-STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Невозможно остановить/запустить авиатранспорт...
 STR_ERROR_AIRCRAFT_IS_IN_FLIGHT                                 :{WHITE}Самолёт в полёте
 STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Самолёт должен быть остановлен в ангаре
-STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Не могу продать авиатранспорт...
 STR_AIRCRAFT_MENU_AIRPORT_CONSTRUCTION                          :Строительство аэропортов
 STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Строительство аэропортов
-STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Авиатранспорт - нажмите для получения справки
-STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Авиатранспорт - нажмите для получения справки
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Купить новый авиатранспорт
-STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Перетащите сюда транспорт, чтобы продать его
-STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Показать ангар в главном окне
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Авиатранспорт - нажмите для получения справки
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Купить выбранный авиатранспорт
-STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Текущее действие воздушного судна; кликните для его остановки/запуска
-STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Показать задания
-STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Показать транспорт в главном окне
-STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Послать авиатранспорт в ангар. Ctrl+клик - только для обслуживания.
-STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Показать сведения об авиатранспорте.
 
-STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Название самолёта
-STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Не могу назвать самолёт...
-STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Название самолёта
 STR_NEWS_FIRST_AIRCRAFT_ARRIVAL                                 :{BLACK}{BIGFONT}Жители празднуют!{}Первый самолёт прибыл в {STATION}!
 STR_NEWS_AIRCRAFT_CRASH                                         :{BLACK}{BIGFONT}Авиакатастрофа!{}{COMMA} человек{P "" а ""} погиб{P "" ло ло} в огне в {STATION}!
 STR_PLANE_CRASH_OUT_OF_FUEL                                     :{BLACK}{BIGFONT}Авиакатастрофа!{}В самолёте закончилось топливо, {COMMA} человек{P "" а ""} погиб{P "" ло ло} при столкновении с землёй!
 STR_ORDER_STATION_SMALL                                         :{TINYFONT}{BLACK}{STATION}
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Переимен.
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Переименовать
-STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Переименовать
-STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Невозможно переименовать...
-STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Переоборудовать транспорт для других грузов
-STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Переоборудовать
-STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Выберите тип грузов для перевозки
-STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Переоборудовать авиатранспорт для перевозки выбранного типа груза
-STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Невозможно переоборудовать...
 
 STR_TIMETABLE_TITLE                                             :{WHITE}{VEHICLE} (Расписание)
 
 ##id 0xB000
 STR_NEWS_DISASTER_ZEPPELIN                                      :{BLACK}{BIGFONT}Крушение дирижабля в {STATION}!
 STR_NEWS_DISASTER_SMALL_UFO                                     :{BLACK}{BIGFONT}Автомобиль уничтожен при столкновении с НЛО!
-STR_NEWS_DISASTER_AIRPLANE_OIL_REFINERY                         :{BLACK}{BIGFONT}Взрыв нефтеперегонного завода вблизи {TOWN}!
+STR_NEWS_DISASTER_AIRPLANE_OIL_REFINERY                         :{BLACK}{BIGFONT}Взрыв нефтеперегонного завода вблизи г.{NBSP}{TOWN}!
 STR_NEWS_DISASTER_HELICOPTER_FACTORY                            :{BLACK}{BIGFONT}Взрыв завода при подозрительных обстоятельствах вблизи {TOWN}!
 STR_NEWS_DISASTER_BIG_UFO                                       :{BLACK}{BIGFONT}НЛО приземлилось возле г.{NBSP}{TOWN}!
 STR_NEWS_DISASTER_COAL_MINE_SUBSIDENCE                          :{BLACK}{BIGFONT}Обвал на угольной шахте вызывает оползень около {TOWN}!
@@ -3266,7 +3088,7 @@ STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} 
 STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} должен быть загружен после {STRING}.
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} требует OpenTTD версии {STRING} или выше.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :файл GRF, который им переводится.
-STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Слишком много загружено новой графики
+STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Загружено слишком много новой графики
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Загрузка {STRING} в качестве статического NewGRF с {STRING} Может вызвать ошибку синхронизации.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Неверный спрайт.
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Неизвестное свойство для Action 0.
@@ -3345,42 +3167,243 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
-STR_SCHEDULED_TRAINS                                            :{WHITE}{STATION} - {COMMA} поезд{P "" а ов}
-STR_SCHEDULED_ROAD_VEHICLES                                     :{WHITE}{STATION} - {COMMA} автомобил{P ь я ей}
-STR_SCHEDULED_AIRCRAFT                                          :{WHITE}{STATION} - {COMMA} самолёт{P "" а ов}
-STR_SCHEDULED_SHIPS                                             :{WHITE}{STATION} - {COMMA} корабл{P ь я ей}
+############ Vehicle lists
+STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Поезда - нажмите для получения справки
+STR_VEHICLE_LIST_ROAD_VEHICLE_TOOLTIP                           :{BLACK}Автомобили - кликните для получения подробной информации
+STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Корабли - нажмите для получения справки
+STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Авиатранспорт - нажмите для получения справки
 
-STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Показать все поезда, в расписании которых есть эта станция
-STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Показать все автомобили, в расписании которых есть эта станция/остановка
-STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Показать весь авиатранспорт, в расписании которого есть этот аэропорт
-STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Показать все корабли, в расписании которых есть эта пристань
+STR_VEHICLE_LIST_TRAIN_CAPTION                                  :{WHITE}{STRING} - {COMMA} поезд{P "" а ов}
+STR_VEHICLE_LIST_ROAD_VEHICLE_CAPTION                           :{WHITE}{STRING} - {COMMA} автомобил{P ь я ей}
+STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{STRING} - {COMMA} корабл{P ь я ей}
+STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{STRING} - {COMMA} единиц{P а ы ""} авиатранспорта
 
 STR_VEH_WITH_SHARED_ORDERS_LIST                                 :{WHITE}Общие задания для {COMMA} ед. транспорта
 STR_VEH_WITH_SHARED_ORDERS_LIST_TIP                             :{BLACK}Показать весь транспорт с общими заданиями
+
+STR_NEWS_TRAIN_IS_WAITING                                       :{WHITE}{VEHICLE} ждёт в депо
+STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} ждёт в гараже
+STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} ждёт в доке
+STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} ждёт в ангаре
+
+STR_REFIT_TRAIN_REFIT_BUTTON                                    :{BLACK}Переоборудовать поезда
+STR_REFIT_ROAD_VEHICLE_REFIT_BUTTON                             :{BLACK}Переоборуд. авто
+STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Переоборудовать корабль
+STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Переоборудовать
+
+STR_REFIT_TRAIN_REFIT_TOOLTIP                                   :{BLACK}Переоборудование поезда под выбранный тип груза
+STR_REFIT_ROAD_VEHICLE_REFIT_TOOLTIP                            :{BLACK}Переоборуд авто для перевозки доступных видов грузов
+STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Переоборудовать корабль для перевозки выбранного груза
+STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Переоборудовать авиатранспорт для перевозки выбранного типа груза
+
+STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Выбор типа груза для перевозки
+STR_REFIT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Выберите тип грузов для перевозки
+STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Выберите тип груза для перевозки
+STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Выберите тип грузов для перевозки
+
+STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}Депо {TOWN}
+STR_DEPOT_ROAD_VEHICLE_CAPTION                                  :{WHITE}Гараж {TOWN}
+STR_DEPOT_SHIP_CAPTION                                          :{WHITE}Док {TOWN}
+STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}Ангар {STATION}
+
+STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Назвать поезд
+STR_VEHICLE_DETAILS_ROAD_VEHICLE_RENAME                         :{BLACK}Назвать автотранспорт
+STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Название корабля
+STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Название самолёта
+
+STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Назвать поезд
+STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Назвать автотранспорт
+STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Название корабля
+STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Название самолёта
+
+STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Поезд мешает
+STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Машина на пути
+STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Корабль на пути
+STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}ОН ЛЕТИТ!
+
+STR_ERROR_CAN_T_REFIT_TRAIN                                     :{WHITE}Невозможно переоборудовать поезд...
+STR_ERROR_CAN_T_REFIT_ROAD_VEHICLE                              :{WHITE}Невозможно переоборудовать автомобиль...
+STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Не могу переоборудовать корабль...
+STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Невозможно переоборудовать...
+
+STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Невозможно назвать поезд...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE                             :{WHITE}Невозможно переименовать автомобиль...
+STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Не могу назвать корабль...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Не могу назвать самолёт...
+
+STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Невозможно остановить/запустить поезд...
+STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Невозможно остановить/запустить автомобиль...
+STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Не могу остановить/запустить корабль...
+STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Невозможно остановить/запустить авиатранспорт...
+
+STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Невозможно отправить поезд в депо...
+STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Невозможно отправить машину в гараж...
+STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Не могу отправить корабль в док...
+STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Невозможно отправить его в ангар...
+
+STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Невозможно купить ж/д транспорт...
+STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Невозможно купить машину...
+STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Невозможно купить корабль...
+STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Невозможно купить возд. транспорт...
+
+STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Невозможно переименовать...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Невозможно переименовать...
+STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Невозможно переименовать судно...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Невозможно переименовать...
+
+STR_ERROR_CAN_T_SELL_TRAIN                                      :{WHITE}Невозможно продать рельсовый транспорт...
+STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Невозможно продать автомобиль...
+STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Невозможно продать корабль...
+STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Не могу продать авиатранспорт...
+
+STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Текущее действие поезда; кликните для его остановки/запуска
+STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Текущее действие автомобиля; кликните для его остановки/запуска
+STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Текущее действие корабля; кликните для его остановки/запуска
+STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Текущее действие воздушного судна; кликните для его остановки/запуска
+
+STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Показать задания
+STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Показать задания
+STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Показать задания
+STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Показать задания
+
+STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Показать поезд в основном окне
+STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Показать автомобиль в главном окне
+STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Показать корабль в главном окне
+STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Показать транспорт в главном окне
+
+STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Отправить поезд в депо. Ctrl+клик - только для обслуживания.
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Отправить автомобиль в гараж. Ctrl+клик - только для обслуживания.
+STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Отправить корабль в док. Ctrl+клик - только для обслуживания
+STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Послать авиатранспорт в ангар. Ctrl+клик - только для обслуживания.
+
+STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Показать информацию о поезде
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Показать информацию об автомобиле
+STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Показать информацию о корабле
+STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Показать сведения об авиатранспорте.
+
+STR_VEHICLE_VIEW_TRAIN_REFIT_TOOLTIP                            :{BLACK}Переоборудование поезда для иного типа груза
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REFIT_TOOLTIP                     :{BLACK}Переоборуд. авто для доставки разных видов грузов.
+STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Переоборудовать корабль для перевозки других грузов
+STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Переоборудовать транспорт для других грузов
+
+STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}Идёт в депо {TOWN}
+STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}Идёт в депо {TOWN}; {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT                              :{ORANGE}Идёт в гараж {TOWN}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_VEL                          :{ORANGE}Идёт в гараж {TOWN}; {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}Идёт в док {TOWN}
+STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}Идёт в док {TOWN}; {VELOCITY}
+STR_HEADING_FOR_HANGAR                                          :{ORANGE}Летит в Ангар {STATION}
+STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}Идёт в ангар {STATION}; {VELOCITY}
+
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Обслуж. в депо {TOWN}
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Обслуж. в депо {TOWN}; {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE                      :{LTBLUE}Обслуж. в гараже {TOWN}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE_VEL                  :{LTBLUE}Обслуж. в гараже {TOWN}; {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Обслуж. в доке {TOWN}
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Обслуж. в доке {TOWN}; {VELOCITY}
+STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Обслуж. в ангаре {STATION}
+STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Обслуж. в ангаре {STATION}; {VELOCITY}
+
+
+STR_CLONE_TRAIN                                                 :{BLACK}Копировать состав
+STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Копировать
+STR_CLONE_SHIP                                                  :{BLACK}Копировать
+STR_CLONE_AIRCRAFT                                              :{BLACK}Копировать
+
+STR_CLONE_TRAIN_INFO                                            :{BLACK}Создаёт копию поезда, включая все вагоны. Control+клик копирует задания
+STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Создаёт копию автомобиля. Control+щелчок копирует задания
+STR_CLONE_SHIP_INFO                                             :{BLACK}Создаёт копию корабля. Control+клик копирует задания
+STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Создаёт копию самолёта. Control+клик - копирует задания
+
+STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Создаёт копию поезда, включая все вагоны. Нажмите на кнопку, а затем на поезд внутри или снаружи депо. Ctrl+клик копирует поезд вместе с заданием.
+STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Позволяет построить копию уже существующего автомобиля. Нажмите на кнопку, а затем на машину внутри или снаружи гаража. Ctrl+щелчок также копирует задания
+STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}Создаёт копию корабля. Щёлкнуть на кнопке и затем на корабле внутри или снаружи дока. Control+клик копирует задания
+STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Создаёт копию самолёта. Нажмите на кнопку, а потом на возд. судно в/вне ангара. Ctrl+click - также скопирует и задание.
+
+STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Новый поезд
+STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Новый электропоезд
+STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Новый монорельс
+STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Новый магниторельс
+
+STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Поезда
+STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Новая машина
+STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Покупка кораблей
+STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Новый
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Купить
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Купить
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Купить
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Купить
+
+STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Выбор вагонов - кликните для справки
+STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Список автотранспорта - кликните для получения информации
+STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Список кораблей - нажмите для получения справки
+STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Авиатранспорт - нажмите для получения справки
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Купить выбранный локомотив/вагон
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Купить выбранный автомобиль
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Купить выбранный корабль
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Купить выбранный авиатранспорт
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Переимен.
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Переимен.
+STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Переимен.
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Переимен.
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Переименовать тип вагона
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Переименовать автомобиль
+STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Переименовать
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Переименовать
+
+STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Переименовать тип вагона
+STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Переименовать автомобиль
+STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Переименовать
+STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Переименовать
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}Новый транспорт
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_BUTTON                      :{BLACK}Новая машина
+STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}Новое судно
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}Новое судно
+
+STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Поезда - кликните для получения информации, используйте перетаскивание для изменения состава
+STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Автомобили - кликните для получения справки
+STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Корабли - нажмите для получения справки
+STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Авиатранспорт - нажмите для получения справки
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Купить новый поезд
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_TOOLTIP                     :{BLACK}Купить новый автомобиль
+STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Купить новый корабль
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Купить новый авиатранспорт
+
+STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Перетащите сюда транспорт, чтобы продать его
+STR_DEPOT_ROAD_VEHICLE_SELL_TOOLTIP                             :{BLACK}Перетащите сюда автомобиль, чтобы продать его
+STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Перетащите сюда корабль, чтобы продать его
+STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Перетащите сюда транспорт, чтобы продать его
+
+STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Показать депо в основном окне
+STR_DEPOT_ROAD_VEHICLE_LOCATION_TOOLTIP                         :{BLACK}Показать гараж в главном окне
+STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Показать док в основном окне
+STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Показать ангар в главном окне
+
 
 ### depot strings
 STR_DEPOT_SELL_CONFIRMATION_TEXT                                :{YELLOW}Весь транспорт в депо будет продан. Вы уверены?
 STR_DEPOT_WRONG_DEPOT_TYPE                                      :Неверный тип депо
 
 STR_DEPOT_SELL_ALL_BUTTON_TRAIN_TIP                             :{BLACK}Продать все поезда в депо
-STR_DEPOT_SELL_ALL_BUTTON_ROADVEH_TIP                           :{BLACK}Продать все авто в гараже
+STR_DEPOT_SELL_ALL_BUTTON_ROAD_VEHICLE_TIP                      :{BLACK}Продать все авто в гараже
 STR_DEPOT_SELL_ALL_BUTTON_SHIP_TIP                              :{BLACK}Продать все суда в доке
 STR_DEPOT_SELL_ALL_BUTTON_AIRCRAFT_TIP                          :{BLACK}Продать весь авиатранспорт в ангаре
 
 STR_DEPOT_VEHICLE_ORDER_LIST_TRAIN_TIP                          :{BLACK}Получить список поездов, у которых в заданиях есть это депо
-STR_DEPOT_VEHICLE_ORDER_LIST_ROADVEH_TIP                        :{BLACK}Получить список автомобилей, у которых в заданиях есть этот гараж
+STR_DEPOT_VEHICLE_ORDER_LIST_ROAD_VEHICLE_TIP                   :{BLACK}Получить список автомобилей, у которых в заданиях есть этот гараж
 STR_DEPOT_VEHICLE_ORDER_LIST_SHIP_TIP                           :{BLACK}Получить список судов, у которых в заданиях есть этот док
 STR_DEPOT_VEHICLE_ORDER_LIST_AIRCRAFT_TIP                       :{BLACK}Получить список авиатранспорта, у которого в заданиях есть этот ангар
 
 STR_DEPOT_AUTOREPLACE_TRAIN_TIP                                 :{BLACK}Автозамена всех поездов в депо
-STR_DEPOT_AUTOREPLACE_ROADVEH_TIP                               :{BLACK}Автозамена всех авто в гараже
+STR_DEPOT_AUTOREPLACE_ROAD_VEHICLE_TIP                          :{BLACK}Автозамена всех авто в гараже
 STR_DEPOT_AUTOREPLACE_SHIP_TIP                                  :{BLACK}Автозамена всех судов в доке
 STR_DEPOT_AUTOREPLACE_AIRCRAFT_TIP                              :{BLACK}Автозамена всего авиатранспорта в ангаре
-
-STR_VEHICLE_LIST_TRAIN_DEPOT                                    :{BLACK}{STRING} - {COMMA} поезд{P "" а ов}
-STR_VEHICLE_LIST_ROADVEH_DEPOT                                  :{BLACK}{STRING} - {COMMA} автомобил{P ь я ей}
-STR_VEHICLE_LIST_SHIP_DEPOT                                     :{BLACK}{STRING} - {COMMA} корабл{P ь я ей}
-STR_VEHICLE_LIST_AIRCRAFT_DEPOT                                 :{BLACK}{STRING} - {COMMA} ед. авиатранспорта
 
 STR_REPLACE_VEHICLES_WHITE                                      :{WHITE}Замена {STRING.gen}
 STR_REPLACE_VEHICLES_START                                      :{BLACK}Начать замену
@@ -3397,6 +3420,7 @@ STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Удал
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Разрешить при автозамене сохранять длину поездов путём удаления вагонов (начиная с головы поезда), если при автозамене локомотива увеличится длина поезда.
 STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Заменяем: {ORANGE}{SKIP}{SKIP}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Переключение между окнами замены локомотивов и вагонов
+
 STR_RAIL_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Локомотив недоступен
 STR_ROAD_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Автотранспорт недоступен
 STR_SHIP_NOT_AVAILABLE                                          :{WHITE}Корабль недоступен
@@ -3406,12 +3430,12 @@ STR_ENGINES                                                     :Локомот�
 STR_WAGONS                                                      :Вагоны
 
 STR_MASS_STOP_DEPOT_TRAIN_TIP                                   :{BLACK}Нажмите для остановки всех поездов в депо
-STR_MASS_STOP_DEPOT_ROADVEH_TIP                                 :{BLACK}Нажмите для остановки всех авто в гараже
+STR_MASS_STOP_DEPOT_ROAD_VEHICLE_TIP                            :{BLACK}Нажмите для остановки всех авто в гараже
 STR_MASS_STOP_DEPOT_SHIP_TIP                                    :{BLACK}Нажмите для остановки всех кораблей в доке
 STR_MASS_STOP_HANGAR_TIP                                        :{BLACK}Нажмите для остановки всего авиатранспорта в ангаре
 
 STR_MASS_START_DEPOT_TRAIN_TIP                                  :{BLACK}Нажмите для запуска всех поездов в депо
-STR_MASS_START_DEPOT_ROADVEH_TIP                                :{BLACK}Нажмите для запуска всех авто в гараже
+STR_MASS_START_DEPOT_ROAD_VEHICLE_TIP                           :{BLACK}Нажмите для запуска всех авто в гараже
 STR_MASS_START_DEPOT_SHIP_TIP                                   :{BLACK}Нажмите для запуска всех судов в доке
 STR_MASS_START_HANGAR_TIP                                       :{BLACK}Нажмите для запуска всего авиатранспорта в ангаре
 
@@ -3536,8 +3560,8 @@ STR_HELIDEPOT                                                   :{BLACK}Верт
 STR_HELISTATION                                                 :{BLACK}Вертолётная станция
 
 STR_SMALL_AIRPORTS                                              :{BLACK}Малые аэропорты
-STR_LARGE_AIRPORTS                                              :{BLACK}Большие аэропорты
-STR_HUB_AIRPORTS                                                :{BLACK}Базовые аэропорты
+STR_LARGE_AIRPORTS                                              :{BLACK}Средние аэропорты
+STR_HUB_AIRPORTS                                                :{BLACK}Большие аэропорты
 STR_HELIPORTS                                                   :{BLACK}Вертолётные площадки
 
 ############ Tooltip measurment
@@ -3546,17 +3570,6 @@ STR_MEASURE_LENGTH                                              :{BLACK}Длин
 STR_MEASURE_AREA                                                :{BLACK}Площадь: {NUM} x {NUM}
 STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Длина: {NUM}{}Разница высоты: {NUM} м
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Площадь: {NUM} x {NUM}{}Разница высот: {NUM} м
-
-############ Date formatting
-STR_DATE_TINY                                                   :{STRING}.{STRING}.{NUM}
-STR_DATE_SHORT                                                  :{STRING} {NUM}
-STR_DATE_LONG                                                   :{STRING} {STRING.gen} {NUM}
-STR_DATE_ISO                                                    :{2:NUM}-{1:STRING}-{0:STRING}
-
-STR_JUST_DATE_TINY                                              :{DATE_TINY}
-STR_JUST_DATE_LONG                                              :{DATE_LONG}
-STR_JUST_DATE_ISO                                               :{DATE_ISO}
-########
 
 STR_FEEDER_CARGO_VALUE                                          :{BLACK}Выручка перевозки: {LTBLUE}{CURRENCY}
 STR_DRIVE_THROUGH_ERROR_ON_TOWN_ROAD                            :{WHITE}...эта дорога принадлежит городу
@@ -3582,24 +3595,19 @@ STR_PERCENT_UP_DOWN_SMALL                                       :{TINYFONT}{WHIT
 STR_PERCENT_UP_DOWN                                             :{WHITE}{NUM}%{UPARROW}{DOWNARROW}
 
 ##### Mass Order
-STR_GROUP_NAME_FORMAT                                           :Группа {COMMA}
 STR_GROUP_TINY_NAME                                             :{TINYFONT}{GROUP}
 STR_GROUP_ALL_TRAINS                                            :Все поезда
-STR_GROUP_ALL_ROADS                                             :Весь автотранспорт
+STR_GROUP_ALL_ROAD_VEHICLES                                     :Весь автотранспорт
 STR_GROUP_ALL_SHIPS                                             :Все корабли
 STR_GROUP_ALL_AIRCRAFTS                                         :Все самолёты
 STR_GROUP_DEFAULT_TRAINS                                        :Без группы
-STR_GROUP_DEFAULT_ROADS                                         :Без группы
+STR_GROUP_DEFAULT_ROAD_VEHICLES                                 :Без группы
 STR_GROUP_DEFAULT_SHIPS                                         :Без группы
 STR_GROUP_DEFAULT_AIRCRAFTS                                     :Без группы
 STR_GROUP_TINY_NUM                                              :{TINYFONT}{COMMA}
 STR_GROUP_ADD_SHARED_VEHICLE                                    :Добавить с общими заданиями
 STR_GROUP_REMOVE_ALL_VEHICLES                                   :Удалить всех
 
-STR_GROUP_TRAINS_CAPTION                                        :{WHITE}Группа «{GROUP}» - {COMMA} поезд{P "" а ов}
-STR_GROUP_ROADVEH_CAPTION                                       :{WHITE}Группа «{GROUP}» - {COMMA} автомобил{P ь я ей}
-STR_GROUP_SHIPS_CAPTION                                         :{WHITE}Группа «{GROUP}» - {COMMA} корабл{P ь я ей}
-STR_GROUP_AIRCRAFTS_CAPTION                                     :{WHITE}Группа «{GROUP}» - {COMMA} единиц{P а ы ""} авиатранспорта
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Переименовать группу
 
 STR_GROUP_CAN_T_CREATE                                          :{WHITE}Не могу создать группу...
@@ -3615,12 +3623,35 @@ STR_GROUP_DELETE_TIP                                            :{BLACK}Удал
 STR_GROUP_RENAME_TIP                                            :{BLACK}Переименовать выбранную группу
 STR_GROUP_REPLACE_PROTECTION_TIP                                :{BLACK}Защита транспорта в группе от глобальной автозамены
 
+#### String control codes and their formatting
 STR_COMPANY_NAME                                                :{COMPANY}
 STR_ENGINE_NAME                                                 :{ENGINE}
 STR_GROUP_NAME                                                  :{GROUP}
+STR_INDUSTRY_NAME                                               :{INDUSTRY}
 STR_PRESIDENT_NAME                                              :{PRESIDENTNAME}
 STR_SIGN_NAME                                                   :{SIGN}
+STR_STATION_NAME                                                :{STATION}
+STR_TOWN_NAME                                                   :{TOWN}
 STR_VEHICLE_NAME                                                :{VEHICLE}
+STR_WAYPOINT_NAME                                               :{WAYPOINT}
+
+STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_INT                                                    :{NUM}
+STR_JUST_DATE_TINY                                              :{DATE_TINY}
+STR_JUST_DATE_SHORT                                             :{DATE_SHORT}
+STR_JUST_DATE_LONG                                              :{DATE_LONG}
+STR_JUST_DATE_ISO                                               :{DATE_ISO}
+STR_JUST_STRING                                                 :{STRING}
+STR_JUST_RAW_STRING                                             :{STRING}
+
+STR_FORMAT_DATE_TINY                                            :{STRING}.{STRING}.{NUM}
+STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM} г.
+STR_FORMAT_DATE_LONG                                            :{STRING} {STRING.gen} {NUM} г.
+STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
+
+STR_FORMAT_COMPANY_NUM                                          :(Компания {COMMA})
+STR_FORMAT_GROUP_NAME                                           :Группа {COMMA}
+STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
 
 STR_NAME_MUST_BE_UNIQUE                                         :{WHITE}Имя должно быть уникальным
 
@@ -3739,6 +3770,7 @@ STR_AI_AUTHOR                                                   :{BLACK}Авто
 STR_AI_VERSION                                                  :{BLACK}Версия: {NUM}
 STR_AI_URL                                                      :{BLACK}URL: {STRING}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Один из запущенных ИИ выполнил недопустимую операцию и был закрыт. Пожалуйста, сообщите об этом автору ИИ, приложив скриншот окна отладки.
+STR_AI_NO_AI_FOUND                                              :Не найдено подходящих модулей ИИ,{}поэтому конкуренты ничего делать не будут.{}Модули ИИ можно скачать через систему онлайн-контента.
 ########
 
 ############ town controlled noise level
@@ -3749,12 +3781,18 @@ STR_STATION_NOISE                                               :{BLACK}Прои
 ############ Downloading of content from the central server
 STR_CONTENT_NO_ZLIB                                             :{WHITE}OpenTTD собрана без поддержки библиотеки «zlib»...
 STR_CONTENT_NO_ZLIB_SUB                                         :{WHITE}...загрузка контента невозможна!
-STR_CONTENT_TYPE_BASE_GRAPHICS                                  :Основная графика
-STR_CONTENT_TYPE_NEWGRF                                         :NewGRF
-STR_CONTENT_TYPE_AI                                             :ИИ
-STR_CONTENT_TYPE_AI_LIBRARY                                     :Библиотека ИИ
-STR_CONTENT_TYPE_SCENARIO                                       :Сценарии
-STR_CONTENT_TYPE_HEIGHTMAP                                      :Высотные карты
+STR_CONTENT_TYPE_BASE_GRAPHICS                                  :{G=f}Базовая графика
+STR_CONTENT_TYPE_BASE_GRAPHICS.acc                              :{G=m}набор базовой графики
+STR_CONTENT_TYPE_NEWGRF                                         :{G=m}NewGRF
+STR_CONTENT_TYPE_NEWGRF.acc                                     :{G=m}NewGRF
+STR_CONTENT_TYPE_AI                                             :{G=m}ИИ
+STR_CONTENT_TYPE_AI.acc                                         :{G=m}ИИ
+STR_CONTENT_TYPE_AI_LIBRARY                                     :{G=f}Библиотека ИИ
+STR_CONTENT_TYPE_AI_LIBRARY.acc                                 :{G=f}библиотеку ИИ
+STR_CONTENT_TYPE_SCENARIO                                       :{G=m}Сценарий
+STR_CONTENT_TYPE_SCENARIO.acc                                   :{G=m}сценарий
+STR_CONTENT_TYPE_HEIGHTMAP                                      :{G=f}Карта высот
+STR_CONTENT_TYPE_HEIGHTMAP.acc                                  :{G=f}карту высот
 STR_CONTENT_TITLE                                               :{WHITE}Загрузка контента
 STR_CONTENT_TYPE_CAPTION                                        :{BLACK}Тип
 STR_CONTENT_TYPE_CAPTION_TIP                                    :{BLACK}Тип контента
@@ -3779,7 +3817,7 @@ STR_CONTENT_DETAIL_SUBTITLE_SELECTED                            :{SILVER}Буд�
 STR_CONTENT_DETAIL_SUBTITLE_AUTOSELECTED                        :{SILVER}Этот модуль зависит от другого и будет загружен
 STR_CONTENT_DETAIL_SUBTITLE_ALREADY_HERE                        :{SILVER}Уже установлен
 STR_CONTENT_DETAIL_SUBTITLE_DOES_NOT_EXIST                      :{SILVER}Этот модуль неизвестен и не может быть загружен для OpenTTD
-STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}Он заменит уже имеющийся {STRING}
+STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}Он заменит уже имеющ{G ий ую ее ие}ся {STRING.acc}
 STR_CONTENT_DETAIL_NAME                                         :{SILVER}Наименование: {WHITE}{STRING}
 STR_CONTENT_DETAIL_VERSION                                      :{SILVER}Версия: {WHITE}{STRING}
 STR_CONTENT_DETAIL_DESCRIPTION                                  :{SILVER}Описание: {WHITE}{STRING}
