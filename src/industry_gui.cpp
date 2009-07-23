@@ -622,7 +622,7 @@ public:
 						/* clicked the text */
 						this->editbox_line = line;
 						SetDParam(0, i->production_rate[line] * 8);
-						ShowQueryString(STR_CONFIG_SETTING_INT32, STR_CONFIG_GAME_PRODUCTION, 10, 100, this, CS_ALPHANUMERAL, QSF_NONE);
+						ShowQueryString(STR_JUST_INT, STR_CONFIG_GAME_PRODUCTION, 10, 100, this, CS_ALPHANUMERAL, QSF_NONE);
 					}
 				}
 			} break;
@@ -852,12 +852,12 @@ protected:
 		static char buf[96];
 
 		SetDParam(0, (*a)->town->index);
-		GetString(buf, STR_TOWN, lastof(buf));
+		GetString(buf, STR_TOWN_NAME, lastof(buf));
 
 		if (*b != last_industry) {
 			last_industry = *b;
 			SetDParam(0, (*b)->town->index);
-			GetString(buf_cache, STR_TOWN, lastof(buf_cache));
+			GetString(buf_cache, STR_TOWN_NAME, lastof(buf_cache));
 		}
 
 		return strcmp(buf, buf_cache);
@@ -1039,7 +1039,7 @@ GUIIndustryList::SortFunction * const IndustryDirectoryWindow::sorter_funcs[] = 
 
 /* Names of the sorting functions */
 const StringID IndustryDirectoryWindow::sorter_names[] = {
-	STR_SORT_BY_DROPDOWN_NAME,
+	STR_SORT_BY_NAME,
 	STR_SORT_BY_TYPE,
 	STR_SORT_BY_PRODUCTION,
 	STR_SORT_BY_TRANSPORTED,

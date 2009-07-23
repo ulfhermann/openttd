@@ -154,8 +154,8 @@ STR_ABBREV_PLASTIC                                              :{TINYFONT}PL
 STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}SC
 STR_ABBREV_NONE                                                 :{TINYFONT}NU
 STR_ABBREV_ALL                                                  :{TINYFONT}TOT
-STR_DATE_SHORT_WHITE                                            :{WHITE}{DATE_SHORT}
-STR_DATE_LONG_WHITE                                             :{WHITE}{DATE_LONG}
+STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
+STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SMALLMAP_CAPTION                                            :{WHITE}Harta - {STRING}
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Opţiuni
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Mesaj
@@ -328,7 +328,6 @@ STR_SORT_BY_PRODUCTION                                          :Productie
 STR_SORT_BY_TYPE                                                :Tip
 STR_SORT_BY_TRANSPORTED                                         :Transportat
 STR_SORT_BY_NAME                                                :{BLACK}Nume
-STR_SORT_BY_DROPDOWN_NAME                                       :Nume
 STR_SORT_BY_DATE                                                :{BLACK}Datã
 STR_SORT_BY_NUMBER                                              :Numar
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Profit anul trecut
@@ -345,29 +344,31 @@ STR_SORT_BY_FACILITY                                            :Tipul de statie
 STR_SORT_BY_WAITING                                             :Valoarea mărfii în aşteptare
 STR_SORT_BY_RATING_MAX                                          :Cel mai mare rating
 STR_SORT_BY_RATING_MIN                                          :Cel mai mic rating
-STR_ENGINE_SORT_ENGINE_ID                                       :IDMotor (model clasic)
-STR_ENGINE_SORT_COST                                            :Cost
-STR_ENGINE_SORT_POWER                                           :Putere
-STR_ENGINE_SORT_INTRO_DATE                                      :Data lansarii
-STR_ENGINE_SORT_RUNNING_COST                                    :Cost exploatare
-STR_ENGINE_SORT_POWER_VS_RUNNING_COST                           :Cost exploatare/putere
-STR_ENGINE_SORT_CARGO_CAPACITY                                  :Capacitate incarcatura
+STR_SORT_BY_ENGINE_ID                                           :IDMotor (model clasic)
+STR_SORT_BY_COST                                                :Cost
+STR_SORT_BY_POWER                                               :Putere
+STR_SORT_BY_INTRO_DATE                                          :Data lansarii
+STR_SORT_BY_RUNNING_COST                                        :Cost exploatare
+STR_SORT_BY_POWER_VS_RUNNING_COST                               :Cost exploatare/putere
+STR_SORT_BY_CARGO_CAPACITY                                      :Capacitate incarcatura
 STR_NO_WAITING_CARGO                                            :{BLACK}Nu este nici un fel de încărcătură în aşteptare
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}Alege toate facilităţile
 STR_SELECT_ALL_TYPES                                            :{BLACK}Alege toate tipurile de încãrcãturi (inclusiv încãrcãturile care nu sunt în asteptare)
-STR_AVAILABLE_TRAINS                                            :{BLACK}Trenuri disponibile
-STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Vehicule disponibile
-STR_AVAILABLE_SHIPS                                             :{BLACK}Nave disponibile
-STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Aeronave disponibile
 STR_AVAILABLE_ENGINES_TIP                                       :{BLACK}Vezi o lista de proiecte disponibile de motoare pentru acest tip de vehicul.
 STR_MANAGE_LIST                                                 :{BLACK}Gestioneaza lista
 STR_MANAGE_LIST_TIP                                             :{BLACK}Trimite instructiunile tuturor vehiculelor din aceasta lista
 STR_REPLACE_VEHICLES                                            :Inlocuieste vehiculele
+STR_SEND_FOR_SERVICING                                          :Trimite in service
+
+STR_AVAILABLE_TRAINS                                            :{BLACK}Trenuri disponibile
+STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Vehicule disponibile
+STR_AVAILABLE_SHIPS                                             :{BLACK}Nave disponibile
+STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Aeronave disponibile
+
 STR_SEND_TRAIN_TO_DEPOT                                         :Trimite la depou
 STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Trimite la depou
 STR_SEND_SHIP_TO_DEPOT                                          :Trimite la depou
 STR_SEND_AIRCRAFT_TO_HANGAR                                     :Trimite la hangar
-STR_SEND_FOR_SERVICING                                          :Trimite in service
 
 ############ range for months starts
 STR_MONTH_ABBREV_JAN                                            :Ian
@@ -410,8 +411,8 @@ STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Construi
 STR_TOOLBAR_TOOLTIP_PLANT_TREES_PLACE_SIGNS                     :{BLACK}Plantează arbori
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Informatii despre teren
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Optiuni
-STR_SMALL_ARROW_UP                                              :{BLACK}{SMALLUPARROW}
-STR_SMALL_ARROW_DOWN                                            :{BLACK}{SMALLDOWNARROW}
+STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
+STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}Nu se poate schimba intervalul de întreţinere...
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Închide fereastra
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Titlul ferestrei - trage de aici pentru a muta fereastra
@@ -581,12 +582,12 @@ STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESI
 STR_HIGHSCORE_STATS                                             :{BIGFONT}'{STRING}'   ({COMMA})
 STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}{COMPANY} a dobandit titlul de '{STRING}'!
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME} al {COMPANY} dobandeste titlul de '{STRING}'!
-STR_BLUE_NUMBER                                                 :{BLUE}{COMMA}
+STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Editor de scenarii
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Generator suprafaţă uscat
-STR_ARROW_UP                                                    :{BLACK}{UPARROW}
-STR_ARROW_DOWN                                                  :{BLACK}{DOWNARROW}
+STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
+STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Măreşte aria de editare a terenului
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Micşorează aria de editare a terenului
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Generează teren aleator
@@ -670,7 +671,7 @@ STR_FULL                                                        :Pe larg
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 
-STR_CHECKMARK                                                   :{CHECKMARK}
+STR_JUST_CHECKMARK                                              :{CHECKMARK}
 ############ range for menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Opţiunile jocului (F2)
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Setări dificultate
@@ -762,9 +763,6 @@ STR_INDUSTRY_MENU_FUND_NEW_INDUSTRY                             :Obiectiv indust
 ############ range ends here
 
 STR_FUND_INDUSTRY_CAPTION                                       :{WHITE}Construieşte un nou obiectiv industrial
-STR_JUST_STRING                                                 :{STRING}
-STR_JUST_RAW_STRING                                             :{STRING}
-STR_JUST_INT                                                    :{NUM}
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...se poate construi doar in padurile ecuatoriale
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}...se poate construi doar în zonele de deşert
 STR_STATUSBAR_PAUSED                                            :{YELLOW}* *  PAUZĂ  (F1) *  *
@@ -778,8 +776,8 @@ STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  SALV
 STR_SAVE_STILL_IN_PROGRESS                                      :{WHITE}Salvarea se efectueaza încã,{}vã rugãm asteptati pânã se încheie!
 STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}Selectează programul muzical 'Ezy Street'
 
-STR_6                                                           :{BLACK}6
-STR_7                                                           :{BLACK}7
+STR_BLACK_6                                                     :{BLACK}6
+STR_BLACK_7                                                     :{BLACK}7
 
 ############ start of townname region
 STR_TOWNNAME_ORIGINAL_ENGLISH                                   :Engleza (Original)
@@ -887,7 +885,7 @@ STR_CRATES                                                      :pachete
 STR_RES_OTHER                                                   :(alta/nespecificată)
 STR_NOTHING                                                     :
 
-STR_SMALL_RIGHT_ARROW                                           :{TINYFONT}{RIGHTARROW}
+STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_CANT_SHARE_ORDER_LIST                                       :{WHITE}Nu se poate trece la comenzi sincronizate...
 STR_CANT_COPY_ORDER_LIST                                        :{WHITE}Nu pot copia lista de comenzi...
@@ -949,7 +947,7 @@ STR_CONFIG_SETTING_STOP_LOCATION                                :{LTBLUE}Noile o
 STR_CONFIG_SETTING_STOP_LOCATION_NEAR_END                       :la capătul apropiat al
 STR_CONFIG_SETTING_STOP_LOCATION_MIDDLE                         :la mijlocul
 STR_CONFIG_SETTING_STOP_LOCATION_FAR_END                        :la capătul îndepartat al
-STR_CONFIG_SETTING_ROADVEH_QUEUE                                :{LTBLUE}Autovehiculele pot forma cozi (cu efecte cuantice): {ORANGE}{STRING}
+STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Autovehiculele pot forma cozi (cu efecte cuantice): {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Mută imaginea când mouse-ul este la marginea ecranului: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Permite mituirea autorităţilor locale: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Permite cumpararea de drepturi exclusive de transport: {ORANGE}{STRING}
@@ -1055,12 +1053,12 @@ STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Cheltui
 
 STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Arata uneltele de constructie cand nu sunt disponibile vehiculele potrivite: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Nr. max. de trenuri pentru un jucător: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAX_ROADVEH                                  :{LTBLUE}Nr. max. de autovehicule pentru un jucător: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Nr. max. de autovehicule pentru un jucător: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Nr. max. de aeronave pentru un jucător: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_SHIPS                                    :{LTBLUE}Nr. max. de nave pentru un jucător: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_AI_BUILDS_TRAINS                             :{LTBLUE}Dezactivează trenurile pentru jucătorii controlaţi de PC: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AI_BUILDS_ROADVEH                            :{LTBLUE}Dezactivează autovehiculele pentru jucătorii controlaţi de PC: {ORANGE}{STRING}
+STR_CONFIG_SETTING_AI_BUILDS_ROAD_VEHICLES                      :{LTBLUE}Dezactivează autovehiculele pentru jucătorii controlaţi de PC: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_AIRCRAFT                           :{LTBLUE}Dezactivează aeronavele pentru jucătorii controlaţi de PC: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_SHIPS                              :{LTBLUE}Dezactivează navele pentru jucătorii controlaţi de PC: {ORANGE}{STRING}
 
@@ -1070,8 +1068,8 @@ STR_CONFIG_SETTING_AI_MAX_OPCODES                               :{LTBLUE}# de op
 STR_CONFIG_SETTING_SERVINT_ISPERCENT                            :{LTBLUE}Intervaluri de service in procente: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SERVINT_TRAINS                               :{LTBLUE}Intervalul de service presetat pentru trenuri: {ORANGE}{STRING} zile
 STR_CONFIG_SETTING_SERVINT_TRAINS_DISABLED                      :{LTBLUE}Intervalul de service presetat pentru trenuri: {ORANGE}dezactivat
-STR_CONFIG_SETTING_SERVINT_ROADVEH                              :{LTBLUE}Intervalul de service presetat pentru autovehicule: {ORANGE}{STRING} zile
-STR_CONFIG_SETTING_SERVINT_ROADVEH_DISABLED                     :{LTBLUE}Intervalul de service presetat pentru autovehicule: {ORANGE}dezactivat
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES                        :{LTBLUE}Intervalul de service presetat pentru autovehicule: {ORANGE}{STRING} zile
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES_DISABLED               :{LTBLUE}Intervalul de service presetat pentru autovehicule: {ORANGE}dezactivat
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT                             :{LTBLUE}Intervalul de service presetat pentru aeronave: {ORANGE}{STRING} zile
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT_DISABLED                    :{LTBLUE}Intervalul de service presetat pentru aeronave: {ORANGE}dezactivat
 STR_CONFIG_SETTING_SERVINT_SHIPS                                :{LTBLUE}Intervalul de service presetat pentru nave: {ORANGE}{STRING} zile
@@ -1146,10 +1144,10 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Algorit
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Nerecomandat)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Recomandat)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH                       :{LTBLUE}Algoritm de rutare pentru vehicule rutiere: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_OPF                   :Original {RED}(Nerecomandat)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_NPF                   :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_YAPF                  :YAPF {BLUE}(Recomandat)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Algoritm de rutare pentru vehicule rutiere: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(Nerecomandat)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Recomandat)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Algoritm de rutare pentru nave: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}(Recomandat)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
@@ -1160,8 +1158,7 @@ STR_CONFIG_SETTING_MAP_Y                                        :{LTBLUE}Marimea
 
 ############ generic strings for settings
 STR_CONFIG_SETTING_DISABLED                                     :dezactivat
-STR_CONFIG_SETTING_INT32                                        :{NUM}
-STR_CONFIG_SETTING_CURRENCY                                     :{CURRENCY}
+STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_CONFIG_SETTING_QUERY_CAPT                                   :{WHITE}Schimbă valoarea setării
 
 STR_TEMPERATE_LANDSCAPE                                         :peisajul temperat
@@ -1190,15 +1187,15 @@ STR_GO_NON_STOP_TO_WAYPOINT                                     :Mergi fără op
 
 STR_WAYPOINTNAME_CITY                                           :Halta {TOWN}
 STR_WAYPOINTNAME_CITY_SERIAL                                    :Halta {TOWN} #{COMMA}
+STR_BUOYNAME_CITY                                               :{TOWN} Baliza
+STR_BUOYNAME_CITY_SERIAL                                        :{TOWN} Baliza #{COMMA}
 STR_LANDINFO_WAYPOINT                                           :Haltă de mişcare
 
 STR_WAYPOINT                                                    :{WHITE}Punct de tranzit
 STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Alege tipul de punct de tranzit
 
 STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_LIST                                      :{WHITE}{WAYPOINT} - {COMMA} Tren{P "" uri}
 STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
-STR_WAYPOINT_RAW                                                :{WAYPOINT}
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Editează numele haltei
 
 STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Nu pot schimba numele haltei...
@@ -1265,11 +1262,6 @@ STR_INDUSTRYDIR_LIST_CAPTION                                    :{BLACK}Numele i
 
 STR_INDUSTRY_TOO_CLOSE                                          :{WHITE}...prea aproape de altă industrie
 
-STR_RAIL_REFIT_VEHICLE_TO_CARRY                                 :{BLACK}Schimba tipul încãrcãturii cãratã de acest tren
-STR_RAIL_REFIT_VEHICLE                                          :{BLACK}Modificã încãrcãturã
-STR_RAIL_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Alege tipul de marfă transportat de tren
-STR_RAIL_REFIT_TO_CARRY_HIGHLIGHTED                             :{BLACK}Modificã trenul pentru a transporta marfa aleasã
-STR_RAIL_CAN_T_REFIT_VEHICLE                                    :{WHITE}Nu pot modifica trenul...
 STR_CONFIG_GAME_PRODUCTION                                      :{WHITE}Schimba productia
 
 ############ network gui strings
@@ -1779,11 +1771,6 @@ STR_TOWN_BUILDING_NAME_TEPEES_1                                 :Corturi
 STR_TOWN_BUILDING_NAME_TEAPOT_HOUSE_1                           :Casă-ceainic
 STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Puşculiţă
 
-STR_INDUSTRY                                                    :{INDUSTRY}
-STR_TOWN                                                        :{TOWN}
-STR_INDUSTRY_FORMAT                                             :{TOWN} {STRING}
-STR_STATION                                                     :{STATION}
-
 ##id 0x2800
 STR_LANDSCAPING_MENU_LANDSCAPING                                :Modificare peisaj
 STR_LANDSCAPING_MENU_PLANT_TREES                                :Plantează arbori
@@ -1837,6 +1824,12 @@ STR_CARGO_RATING_VERY_GOOD                                      :Foarte bun
 STR_CARGO_RATING_EXCELLENT                                      :Excelent
 STR_CARGO_RATING_OUTSTANDING                                    :Fantastic
 ############ range for rating ends
+
+### station view strings
+STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Afiseaza toate trenurile care opresc in aceasta statie
+STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Afiseaza toate autovehiculele care opresc in aceasta statie
+STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Afiseaza toate aeronavele care opresc in aceasta statie
+STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Afiseaza toate navele care opresc in aceasta statie
 
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
 STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} nu mai acceptă {STRING}
@@ -2060,7 +2053,7 @@ STR_ERROR_YOU_ALREADY_OWN_IT                                    :{WHITE}...este 
 STR_SV_EMPTY                                                    :
 STR_SV_UNNAMED                                                  :NoName
 STR_SV_TRAIN_NAME                                               :Trenul {COMMA}
-STR_SV_ROADVEH_NAME                                             :Autovehiculul {COMMA}
+STR_SV_ROAD_VEHICLE_NAME                                        :Autovehiculul {COMMA}
 STR_SV_SHIP_NAME                                                :Nava {COMMA}
 STR_SV_AIRCRAFT_NAME                                            :Aeronava {COMMA}
 
@@ -2081,15 +2074,9 @@ STR_SV_STNAME_AIRPORT                                           :Aeroportul {STR
 STR_SV_STNAME_OILFIELD                                          :Platforma {STRING}
 STR_SV_STNAME_MINES                                             :Minele {STRING}
 STR_SV_STNAME_DOCKS                                             :Portul {STRING}
-STR_SV_STNAME_BUOY_1                                            :{STRING} Balizã 1
-STR_SV_STNAME_BUOY_2                                            :{STRING} Balizã 2
-STR_SV_STNAME_BUOY_3                                            :{STRING} Balizã 3
-STR_SV_STNAME_BUOY_4                                            :{STRING} Balizã 4
-STR_SV_STNAME_BUOY_5                                            :{STRING} Balizã 5
-STR_SV_STNAME_BUOY_6                                            :{STRING} Balizã 6
-STR_SV_STNAME_BUOY_7                                            :{STRING} Balizã 7
-STR_SV_STNAME_BUOY_8                                            :{STRING} Balizã 8
-STR_SV_STNAME_BUOY_9                                            :{STRING} Balizã 9
+STR_SV_STNAME_BUOY                                              :{STRING}
+STR_SV_STNAME_WAYPOINT                                          :{STRING}
+##id 0x6020
 STR_SV_STNAME_ANNEXE                                            :Anexa {STRING}
 STR_SV_STNAME_SIDINGS                                           :{STRING} Belvedere
 STR_SV_STNAME_BRANCH                                            :Ramura {STRING}
@@ -2137,8 +2124,8 @@ STR_NUM_LOW                                                     :scăzut
 STR_NUM_NORMAL                                                  :normal
 STR_NUM_HIGH                                                    :ridicat
 STR_NUM_CUSTOM                                                  :Propriu
-STR_ARROW_LEFT_SMALL                                            :{BLACK}{SMALLLEFTARROW}
-STR_ARROW_RIGHT_SMALL                                           :{BLACK}{SMALLRIGHTARROW}
+STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
+STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 STR_AI_SPEED_VERY_SLOW                                          :foarte încet
 STR_AI_SPEED_SLOW                                               :încet
 STR_AI_SPEED_MEDIUM                                             :mediu
@@ -2172,7 +2159,6 @@ STR_CITY_APPROVAL_HOSTILE                                       :ostilă
 
 ##id 0x7000
 STR_COMPANY_VIEW_CAPTION                                        :{WHITE}{COMPANY} {BLACK}{COMPANYNUM}
-STR_COMPANY_NUM                                                 :(Companie {COMMA})
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}Schimbă poza
 STR_COMPANY_VIEW_COLOUR_SCHEME_BUTTON                           :{BLACK}Schemă culori
 STR_COMPANY_VIEW_COLOUR_SCHEME_TITLE                            :{GOLD}Schemă culori:
@@ -2189,12 +2175,12 @@ STR_FINANCES_YEAR                                               :{WHITE}{NUM}
 STR_FINANCES_SECTION_CONSTRUCTION                               :{GOLD}Construcţii
 STR_FINANCES_SECTION_NEW_VEHICLES                               :{GOLD}Vehicule noi
 STR_FINANCES_SECTION_TRAIN_RUNNING_COSTS                        :{GOLD}Costuri trenuri
-STR_FINANCES_SECTION_ROAD_VEH_RUNNING_COSTS                     :{GOLD}Costuri autovehicule
+STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD}Costuri autovehicule
 STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD}Costuri aeronave
 STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD}Costuri nave
 STR_FINANCES_SECTION_PROPERTY_MAINTENANCE                       :{GOLD}Întreţinere proprietăţi
 STR_FINANCES_SECTION_TRAIN_INCOME                               :{GOLD}Venituri trenuri
-STR_FINANCES_SECTION_ROAD_VEHICLES_INCOME                       :{GOLD}Venituri autovehicule
+STR_FINANCES_SECTION_ROAD_VEHICLE_INCOME                        :{GOLD}Venituri autovehicule
 STR_FINANCES_SECTION_AIRCRAFT_INCOME                            :{GOLD}Venituri aeronave
 STR_FINANCES_SECTION_SHIP_INCOME                                :{GOLD}Venituri nave
 STR_FINANCES_SECTION_LOAN_INTEREST                              :{GOLD}Dobânda la credit
@@ -2205,7 +2191,6 @@ STR_FINANCES_TOTAL_CAPTION                                      :{WHITE}Total:
 STR_COMPANY_NAME_COMPANY_NUM                                    :{COMPANY} {COMPANYNUM}
 STR_GRAPH_INCOME_CAPTION                                        :{WHITE}Graficul veniturilor
 STR_CURRCOMPACT                                                 :{CURRCOMPACT}
-STR_JUST_COMMA                                                  :{COMMA}
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Graficul profitului din operare
 STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Balanţă curentă
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Credite
@@ -2334,7 +2319,7 @@ STR_LIVERY_FREIGHT_TRAM                                         :Tramvai marfa
 
 STR_LIVERY_GENERAL_TIP                                          :{BLACK}Afiseaza schemele generale de culori
 STR_LIVERY_TRAIN_TIP                                            :{BLACK}Arata schemele de culori pentru trenuri
-STR_LIVERY_ROADVEH_TIP                                          :{BLACK}Arata schemele de culori pentru autovehiculele rutiere
+STR_LIVERY_ROAD_VEHICLE_TIP                                     :{BLACK}Arata schemele de culori pentru autovehiculele rutiere
 STR_LIVERY_SHIP_TIP                                             :{BLACK}Arata schemele de culori pentru vase
 STR_LIVERY_AIRCRAFT_TIP                                         :{BLACK}Arata schemele de culori pentru avioane
 STR_LIVERY_PRIMARY_TIP                                          :{BLACK}Alege culoarea primară pentru schema selectată
@@ -2458,94 +2443,94 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_TOY_VAN                     :Vagon pentru ju
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_BATTERY_TRUCK               :Vagon pentru baterii
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FIZZY_DRINK_TRUCK           :Vagon pentru sucuri
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PLASTIC_TRUCK               :Vagon pentru plastic
-STR_VEHICLE_NAME_ROAD_MPS_REGAL_BUS                             :Autobuz MPS Regal
-STR_VEHICLE_NAME_ROAD_HEREFORD_LEOPARD_BUS                      :Autobuz Hereford Leopard
-STR_VEHICLE_NAME_ROAD_FOSTER_BUS                                :Autobuz Foster
-STR_VEHICLE_NAME_ROAD_FOSTER_MKII_SUPERBUS                      :Autobuz Foster MkII Superbus
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKI_BUS                        :Autobuz Ploddyphut MkI
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKII_BUS                       :Autobuz Ploddyphut MkII
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKIII_BUS                      :Autobuz Ploddyphut MkIII
-STR_VEHICLE_NAME_ROAD_BALOGH_COAL_TRUCK                         :Camion pentru cărbuni Balogh
-STR_VEHICLE_NAME_ROAD_UHL_COAL_TRUCK                            :Camion pentru cărbuni Uhl
-STR_VEHICLE_NAME_ROAD_DW_COAL_TRUCK                             :Camion pentru cărbuni DW
-STR_VEHICLE_NAME_ROAD_MPS_MAIL_TRUCK                            :Camion poştal MPS
-STR_VEHICLE_NAME_ROAD_REYNARD_MAIL_TRUCK                        :Camion poştal Reynard
-STR_VEHICLE_NAME_ROAD_PERRY_MAIL_TRUCK                          :Camion poştal Perry
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_MAIL_TRUCK                    :Camion poştal MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_MAIL_TRUCK                    :Camion poştal Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_MAIL_TRUCK                       :Camion poştal Wizzowow
-STR_VEHICLE_NAME_ROAD_WITCOMBE_OIL_TANKER                       :Cisternă pentru petrol Witcombe
-STR_VEHICLE_NAME_ROAD_FOSTER_OIL_TANKER                         :Cisternă pentru petrol Foster
-STR_VEHICLE_NAME_ROAD_PERRY_OIL_TANKER                          :Cisternă pentru petrol Perry
-STR_VEHICLE_NAME_ROAD_TALBOTT_LIVESTOCK_VAN                     :Camion pentru animale Talbott
-STR_VEHICLE_NAME_ROAD_UHL_LIVESTOCK_VAN                         :Camion pentru animale Uhl
-STR_VEHICLE_NAME_ROAD_FOSTER_LIVESTOCK_VAN                      :Camion pentru animale Foster
-STR_VEHICLE_NAME_ROAD_BALOGH_GOODS_TRUCK                        :Camion pentru bunuri Balogh
-STR_VEHICLE_NAME_ROAD_CRAIGHEAD_GOODS_TRUCK                     :Camion pentru bunuri Craighead
-STR_VEHICLE_NAME_ROAD_GOSS_GOODS_TRUCK                          :Camion pentru bunuri Goss
-STR_VEHICLE_NAME_ROAD_HEREFORD_GRAIN_TRUCK                      :Camion pentru cereale Hereford
-STR_VEHICLE_NAME_ROAD_THOMAS_GRAIN_TRUCK                        :Camion pentru cereale Thomas
-STR_VEHICLE_NAME_ROAD_GOSS_GRAIN_TRUCK                          :Camion pentru cereale Goss
-STR_VEHICLE_NAME_ROAD_WITCOMBE_WOOD_TRUCK                       :Camion pentru lemne Witcombe
-STR_VEHICLE_NAME_ROAD_FOSTER_WOOD_TRUCK                         :Camion pentru lemne Foster
-STR_VEHICLE_NAME_ROAD_MORELAND_WOOD_TRUCK                       :Camion pentru lemne Moreland
-STR_VEHICLE_NAME_ROAD_MPS_IRON_ORE_TRUCK                        :Camion pentru fier MPS
-STR_VEHICLE_NAME_ROAD_UHL_IRON_ORE_TRUCK                        :Camion pentru fier Uhl
-STR_VEHICLE_NAME_ROAD_CHIPPY_IRON_ORE_TRUCK                     :Camion pentru fier Chippy
-STR_VEHICLE_NAME_ROAD_BALOGH_STEEL_TRUCK                        :Camion pentru oţel Balogh
-STR_VEHICLE_NAME_ROAD_UHL_STEEL_TRUCK                           :Camion pentru oţel Uhl
-STR_VEHICLE_NAME_ROAD_KELLING_STEEL_TRUCK                       :Camion pentru oţel Kelling
-STR_VEHICLE_NAME_ROAD_BALOGH_ARMORED_TRUCK                      :Camion blindat Balogh
-STR_VEHICLE_NAME_ROAD_UHL_ARMORED_TRUCK                         :Camion blindat Uhl
-STR_VEHICLE_NAME_ROAD_FOSTER_ARMORED_TRUCK                      :Camion blindat Foster
-STR_VEHICLE_NAME_ROAD_FOSTER_FOOD_VAN                           :Camion pentru alimente Foster
-STR_VEHICLE_NAME_ROAD_PERRY_FOOD_VAN                            :Camion pentru alimente Perry
-STR_VEHICLE_NAME_ROAD_CHIPPY_FOOD_VAN                           :Camion pentru alimente Chippy
-STR_VEHICLE_NAME_ROAD_UHL_PAPER_TRUCK                           :Camion pentru hârtie Uhl
-STR_VEHICLE_NAME_ROAD_BALOGH_PAPER_TRUCK                        :Camion pentru hârtie Balogh
-STR_VEHICLE_NAME_ROAD_MPS_PAPER_TRUCK                           :Camion pentru hârtie MPS
-STR_VEHICLE_NAME_ROAD_MPS_COPPER_ORE_TRUCK                      :Camion pentru cupru MPS
-STR_VEHICLE_NAME_ROAD_UHL_COPPER_ORE_TRUCK                      :Camion pentru cupru Uhl
-STR_VEHICLE_NAME_ROAD_GOSS_COPPER_ORE_TRUCK                     :Camion pentru cupru Goss
-STR_VEHICLE_NAME_ROAD_UHL_WATER_TANKER                          :Cisternă pentru apă Uhl
-STR_VEHICLE_NAME_ROAD_BALOGH_WATER_TANKER                       :Cisternă pentru apă Balogh
-STR_VEHICLE_NAME_ROAD_MPS_WATER_TANKER                          :Cisternă pentru apă MPS
-STR_VEHICLE_NAME_ROAD_BALOGH_FRUIT_TRUCK                        :Camion pentru fructe Balogh
-STR_VEHICLE_NAME_ROAD_UHL_FRUIT_TRUCK                           :Camion pentru fructe Uhl
-STR_VEHICLE_NAME_ROAD_KELLING_FRUIT_TRUCK                       :Camion pentru fructe Kelling
-STR_VEHICLE_NAME_ROAD_BALOGH_RUBBER_TRUCK                       :Camion pentru cauciuc Balogh
-STR_VEHICLE_NAME_ROAD_UHL_RUBBER_TRUCK                          :Camion pentru cauciuc Uhl
-STR_VEHICLE_NAME_ROAD_RMT_RUBBER_TRUCK                          :Camion pentru cauciuc RMT
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_SUGAR_TRUCK                   :Camion pentru zahăr MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_SUGAR_TRUCK                   :Camion pentru zahăr Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_SUGAR_TRUCK                      :Camion pentru zahăr Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COLA_TRUCK                    :Camion pentru cola MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COLA_TRUCK                    :Camion pentru cola Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COLA_TRUCK                       :Camion pentru cola Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COTTON_CANDY                  :Camion pentru vată de zahăr MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COTTON_CANDY                  :Camion pentru vată de zahăr Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COTTON_CANDY_TRUCK               :Camion pentru vată de zahăr Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOFFEE_TRUCK                  :Camion pentru caramel MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOFFEE_TRUCK                  :Camion pentru caramel Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOFFEE_TRUCK                     :Camion pentru caramel Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOY_VAN                       :Camion pentru jucării MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOY_VAN                       :Camion pentru jucării Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOY_VAN                          :Camion pentru jucării Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_CANDY_TRUCK                   :Camion pentru bomboane MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_CANDY_TRUCK                   :Camion pentru bomboane Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_CANDY_TRUCK                      :Camion pentru bomboane Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BATTERY_TRUCK                 :Camion pentru baterii MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BATTERY_TRUCK                 :Camion pentru baterii Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BATTERY_TRUCK                    :Camion pentru baterii Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_FIZZY_DRINK                   :Camion pentru sucuri MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_FIZZY_DRINK                   :Camion pentru sucuri Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_FIZZY_DRINK_TRUCK                :Camion pentru sucuri Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_PLASTIC_TRUCK                 :Camion pentru plastic MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_PLASTIC_TRUCK                 :Camion pentru plastic Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_PLASTIC_TRUCK                    :Camion pentru plastic Wizzowow
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BUBBLE_TRUCK                  :Camion pentru balonaşe MightyMover
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BUBBLE_TRUCK                  :Camion pentru balonaşe Powernaught
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BUBBLE_TRUCK                     :Camion pentru balonaşe Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_REGAL_BUS                     :Autobuz MPS Regal
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_LEOPARD_BUS              :Autobuz Hereford Leopard
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_BUS                        :Autobuz Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_MKII_SUPERBUS              :Autobuz Foster MkII Superbus
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKI_BUS                :Autobuz Ploddyphut MkI
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKII_BUS               :Autobuz Ploddyphut MkII
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKIII_BUS              :Autobuz Ploddyphut MkIII
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_COAL_TRUCK                 :Camion pentru cărbuni Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COAL_TRUCK                    :Camion pentru cărbuni Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_DW_COAL_TRUCK                     :Camion pentru cărbuni DW
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_MAIL_TRUCK                    :Camion poştal MPS
+STR_VEHICLE_NAME_ROAD_VEHICLE_REYNARD_MAIL_TRUCK                :Camion poştal Reynard
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_MAIL_TRUCK                  :Camion poştal Perry
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_MAIL_TRUCK            :Camion poştal MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_MAIL_TRUCK            :Camion poştal Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_MAIL_TRUCK               :Camion poştal Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_OIL_TANKER               :Cisternă pentru petrol Witcombe
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_OIL_TANKER                 :Cisternă pentru petrol Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_OIL_TANKER                  :Cisternă pentru petrol Perry
+STR_VEHICLE_NAME_ROAD_VEHICLE_TALBOTT_LIVESTOCK_VAN             :Camion pentru animale Talbott
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_LIVESTOCK_VAN                 :Camion pentru animale Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_LIVESTOCK_VAN              :Camion pentru animale Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_GOODS_TRUCK                :Camion pentru bunuri Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_CRAIGHEAD_GOODS_TRUCK             :Camion pentru bunuri Craighead
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GOODS_TRUCK                  :Camion pentru bunuri Goss
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_GRAIN_TRUCK              :Camion pentru cereale Hereford
+STR_VEHICLE_NAME_ROAD_VEHICLE_THOMAS_GRAIN_TRUCK                :Camion pentru cereale Thomas
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GRAIN_TRUCK                  :Camion pentru cereale Goss
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_WOOD_TRUCK               :Camion pentru lemne Witcombe
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_WOOD_TRUCK                 :Camion pentru lemne Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_MORELAND_WOOD_TRUCK               :Camion pentru lemne Moreland
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_IRON_ORE_TRUCK                :Camion pentru fier MPS
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_IRON_ORE_TRUCK                :Camion pentru fier Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_IRON_ORE_TRUCK             :Camion pentru fier Chippy
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_STEEL_TRUCK                :Camion pentru oţel Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_STEEL_TRUCK                   :Camion pentru oţel Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_STEEL_TRUCK               :Camion pentru oţel Kelling
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_ARMORED_TRUCK              :Camion blindat Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_ARMORED_TRUCK                 :Camion blindat Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_ARMORED_TRUCK              :Camion blindat Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_FOOD_VAN                   :Camion pentru alimente Foster
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_FOOD_VAN                    :Camion pentru alimente Perry
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_FOOD_VAN                   :Camion pentru alimente Chippy
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_PAPER_TRUCK                   :Camion pentru hârtie Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_PAPER_TRUCK                :Camion pentru hârtie Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_PAPER_TRUCK                   :Camion pentru hârtie MPS
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_COPPER_ORE_TRUCK              :Camion pentru cupru MPS
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COPPER_ORE_TRUCK              :Camion pentru cupru Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_COPPER_ORE_TRUCK             :Camion pentru cupru Goss
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_WATER_TANKER                  :Cisternă pentru apă Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_WATER_TANKER               :Cisternă pentru apă Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_WATER_TANKER                  :Cisternă pentru apă MPS
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_FRUIT_TRUCK                :Camion pentru fructe Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_FRUIT_TRUCK                   :Camion pentru fructe Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_FRUIT_TRUCK               :Camion pentru fructe Kelling
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_RUBBER_TRUCK               :Camion pentru cauciuc Balogh
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_RUBBER_TRUCK                  :Camion pentru cauciuc Uhl
+STR_VEHICLE_NAME_ROAD_VEHICLE_RMT_RUBBER_TRUCK                  :Camion pentru cauciuc RMT
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_SUGAR_TRUCK           :Camion pentru zahăr MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_SUGAR_TRUCK           :Camion pentru zahăr Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_SUGAR_TRUCK              :Camion pentru zahăr Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COLA_TRUCK            :Camion pentru cola MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COLA_TRUCK            :Camion pentru cola Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COLA_TRUCK               :Camion pentru cola Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COTTON_CANDY          :Camion pentru vată de zahăr MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COTTON_CANDY          :Camion pentru vată de zahăr Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COTTON_CANDY_TRUCK       :Camion pentru vată de zahăr Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOFFEE_TRUCK          :Camion pentru caramel MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOFFEE_TRUCK          :Camion pentru caramel Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOFFEE_TRUCK             :Camion pentru caramel Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOY_VAN               :Camion pentru jucării MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOY_VAN               :Camion pentru jucării Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOY_VAN                  :Camion pentru jucării Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_CANDY_TRUCK           :Camion pentru bomboane MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_CANDY_TRUCK           :Camion pentru bomboane Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_CANDY_TRUCK              :Camion pentru bomboane Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BATTERY_TRUCK         :Camion pentru baterii MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BATTERY_TRUCK         :Camion pentru baterii Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BATTERY_TRUCK            :Camion pentru baterii Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_FIZZY_DRINK           :Camion pentru sucuri MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_FIZZY_DRINK           :Camion pentru sucuri Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_FIZZY_DRINK_TRUCK        :Camion pentru sucuri Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_PLASTIC_TRUCK         :Camion pentru plastic MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_PLASTIC_TRUCK         :Camion pentru plastic Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_PLASTIC_TRUCK            :Camion pentru plastic Wizzowow
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BUBBLE_TRUCK          :Camion pentru balonaşe MightyMover
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BUBBLE_TRUCK          :Camion pentru balonaşe Powernaught
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BUBBLE_TRUCK             :Camion pentru balonaşe Wizzowow
 STR_VEHICLE_NAME_SHIP_MPS_OIL_TANKER                            :Tanc petrolier MPS
 STR_VEHICLE_NAME_SHIP_CS_INC_OIL_TANKER                         :Tanc petrolier CS-Inc.
 STR_VEHICLE_NAME_SHIP_MPS_PASSENGER_FERRY                       :Feribot de călători MPS
@@ -2608,10 +2593,8 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :locomotivă mon
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :locomotivă pernă magnetică
 
 ##id 0x8800
-STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}Depoul {TOWN}
 STR_NEWS_FIRST_TRAIN_ARRIVAL                                    :{BLACK}{BIGFONT}Cetăţenii sărbătoresc {}sosirea primului tren la {STATION}!
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Detalii)
-STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Tren în drum
 STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_NON_STOP                                              :{BLACK}Non-stop
@@ -2659,7 +2642,7 @@ STR_ORDER_NEAREST_HANGAR                                        :cel mai apropia
 STR_ORDER_SERVICE_AT                                            :Service la
 STR_ORDER_SERVICE_NON_STOP_AT                                   :Service non-stop la
 STR_ORDER_TRAIN_DEPOT                                           :Depou de Trenuri
-STR_ORDER_ROAD_DEPOT                                            :Autobază
+STR_ORDER_ROAD_VEHICLE_DEPOT                                    :Autobază
 STR_ORDER_SHIP_DEPOT                                            :Şantier Naval
 STR_GO_TO_DEPOT                                                 :{STRING} {TOWN} {STRING}
 STR_GO_TO_NEAREST_DEPOT                                         :{STRING} {STRING} {STRING}
@@ -2701,38 +2684,16 @@ STR_TIMETABLE_AND_TRAVEL_FOR                                    :si calatoreste 
 STR_TIMETABLE_DAYS                                              :{COMMA} zi{P "" le}
 STR_TIMETABLE_TICKS                                             :{COMMA} programare{P "" s}
 
-STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}Merge la Depoul {TOWN}
-STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}Merge la Depoul {TOWN}, {VELOCITY}
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Service la Depoul {TOWN}
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Service la Depoul {TOWN}, {VELOCITY}
-
 STR_INVALID_ORDER                                               :{RED} (Comenzi eronate)
 
 STR_UNKNOWN_STATION                                             :statie necunoscuta
 STR_VEHICLE_DETAILS_CARGO_EMPTY                                 :{LTBLUE}Gol
 STR_VEHICLE_DETAILS_CARGO_FROM                                  :{LTBLUE}{CARGO} de la {STATION}
 STR_VEHICLE_DETAILS_CARGO_FROM_MULT                             :{LTBLUE}{CARGO} de la {STATION} (x{NUM})
-STR_VEHICLE_STATUS_WAITING_IN_DEPOT                             :{WHITE}{VEHICLE} aşteaptă în depou
-STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}Vehicule noi
 STR_DEPOT_NO_ENGINE                                             :{BLACK}-
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Tren prea lung
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Trenurile pot fi modificate doar când staţionează într-un depou
-STR_VEHICLE_LIST_CAPTION_TRAINS                                 :{WHITE}{COMPANY} - {COMMA} Tren{P "" uri}
 
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Noi vehicule feroviare
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Noi Vehicule Electrice pe Sine
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Noi vehicule monoşină
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Noi vehicule pe Pernă Magnetică
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Vehicule pe şine
-
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Cumpără vehicul
-STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Clonare vehicul
-STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Acest buton va crea o copie a autovehiculului. Ctrl+clic va împărţi comenzile
-STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Acest buton va crea o copie a autovehiculului. Apasă acest buton, apoi dă clic pe un autovehicul din interiorul sau afara depoului. Ctrl+clic va împărţi comenzile
-STR_CLONE_TRAIN                                                 :{BLACK}Clonare tren
-STR_CLONE_TRAIN_INFO                                            :{BLACK}Acest buton va crea o copie a întregului tren. Ctrl+clic a împărţi comenzile
-STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Acest buton va crea o copie a trenului, cu tot cu vagoane. Apasă acest buton, apoi dă clic pe un tren din interiorul sau exteriorul depoului. Ctrl+clic va împărţi comenzile
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Nume nou
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Treci la următoarea
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Şterge
 STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Mergi la
@@ -2748,14 +2709,12 @@ STR_ORDER_VIEW_TOOLTIP                                          :{BLACK}Schimba 
 STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE} (Comenzi)
 STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Sfârşitul comenzilor - -
 STR_SERVICE                                                     :{BLACK}Service
-STR_ERROR_CAN_T_BUILD_RAILROAD_VEHICLE                          :{WHITE}Nu se poate construi vehiculul...
 STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE                :{LTBLUE}{ENGINE}{BLACK}   Cumpărat: {LTBLUE}{NUM}{BLACK} Valoare: {LTBLUE}{CURRENCY}
 STR_VEHICLE_DETAILS_TRAIN_WAGON_VALUE                           :{LTBLUE}{ENGINE}{BLACK}   Valoare: {LTBLUE}{CURRENCY}
 STR_VEHICLE_VIEW_CAPTION                                        :{WHITE}{VEHICLE}
 STR_VEHICLE_STATUS_LOADING_UNLOADING                            :{LTBLUE}Încărcare / Descărcare
 STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Pleaca
 STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Trenul trebuie oprit intr-un depou
-STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Nu se poate trimite trenul la depou...
 STR_ERROR_NO_MORE_SPACE_FOR_ORDERS                              :{WHITE}Nu mai este loc pentru comenzi
 STR_ERROR_TOO_MANY_ORDERS                                       :{WHITE}Prea multe comenzi
 STR_ERROR_CAN_T_INSERT_NEW_ORDER                                :{WHITE}Nu se poate adăuga o comandă nouă...
@@ -2770,26 +2729,11 @@ STR_ERROR_CAN_T_ADD_ORDER_SHARED                                :{WHITE}un vehic
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Nu se poate muta vehiculul...
 STR_ERROR_REAR_ENGINE_FOLLOW_FRONT                              :{WHITE}Al doilea vagon+motor va avea mereu aceeasi destinatie ca si primul
 STR_CARGO_N_A                                                   :N/A{SKIP}
-STR_ERROR_CAN_T_SELL_RAILROAD_VEHICLE                           :{WHITE}Nu se poate vinde vehiculul...
 STR_ERROR_UNABLE_TO_FIND_ROUTE_TO                               :{WHITE}Nu se poate găsi un drum spre un depou apropiat
-STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Nu se poate opri/porni trenul...
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Intervalul pentru întreţinere: {LTBLUE}{COMMA}zile{BLACK}   Ultima întreţinere: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Intervalul de service: {LTBLUE}{COMMA}%{BLACK}   Ultimul service: {LTBLUE}{DATE_LONG}
-STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Trenuri - apasă aici pentru informaţii despre trenuri
-STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Trenuri - clic pe tren pentru informaţii, mută vehiculele pentru adăugare-scoatere din tren
-STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Construieşte un nou vehicul feroviar
-STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Mută un vehicul aici pentru a-l vinde
-STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Centrează imaginea pe locaţia depoului
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Lista de selectie a componentelor trenului - clic pe vehicule pt. informatii
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Cumpără vehiculul selectat
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Redenumeste modelul vehiculului
-STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Comanda curentă a trenului - clic aici pentru a opri/porni trenul
-STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Afişează comenzile trenului
-STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Centrează imaginea pe locaţia curentă a trenului
-STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Trimite trenul într-un depou
 STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP                    :{BLACK}Forţează trenul să ignore semnalizarea de oprire
 STR_VEHICLE_VIEW_TRAIN_REVERSE_TOOLTIP                          :{BLACK}Schimbă sensul de circulaţie al trenului
-STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Afişează detaliile trenului
 STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Măreşte intervalul de service
 STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Micşorează intervalul de service
 STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP                         :{BLACK}Afişează detalii despre încărcătura transportată
@@ -2823,15 +2767,10 @@ STR_VEHICLE_STATUS_STOPPED                                      :{RED}Oprit
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Nu se poate permite trenului să treacă în caz de pericol...
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Accident!
 
-STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Numele trenului
-STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Nu se poate denumi trenul...
-STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Numele trenului
 STR_NEWS_TRAIN_CRASH                                            :{BLACK}{BIGFONT}Accident feroviar!{}{COMMA} victime în urma unei coliziuni
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Nu se poate schimba sensul de mers al trenului...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Nu se poate inversa direcţia vehiculului...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Nu se pot întoarce vehiculele alcătuite din mai multe unităţi
-STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Redenumeste modelul vehiculului feroviar
-STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Nu se poate redenumi modelul de vehicul...
 STR_CLEAR_TIME                                                  :{BLACK}Curata timp
 STR_RESET_LATENESS                                              :{BLACK}Reinitializeaza contorul de intarziere
 STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Schimba numele haltei
@@ -2863,178 +2802,55 @@ STR_TIMETABLE_AUTOFILL                                          :{BLACK}Auto-com
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Completează automat tabela cu timpi cu valorile pentru urmatoarea călătorie (CTRL-clic pentru a încerca să păstraţi timpii de aşteptare)
 
 ##id 0x9000
-STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Autovehicul in cale
-STR_VEHICLE_LIST_ROAD_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} Autovehicule{P "" s}
-STR_DEPOT_ROAD_CAPTION                                          :{WHITE}Autobaza {TOWN}
-STR_DEPOT_ROAD_NEW_VEHICLES_BUTTON                              :{BLACK}Autovehicule noi
-STR_BUILD_VEHICLE_ROAD_CAPTION                                  :{WHITE}Autovehicule noi
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_BUTTON                     :{BLACK}Cumpără vehicul
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Nu pot cumpăra autovehicul...
-STR_ERROR_ROAD_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}...trebuie oprit într-o autobază
-STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Nu se poate vinde autovehiculul...
-STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Nu se poate opri/porni autovehiculul...
-STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} aşteaptă în depou
-STR_HEADING_FOR_ROAD_DEPOT                                      :{ORANGE}Merge la Autobaza {TOWN}
-STR_HEADING_FOR_ROAD_DEPOT_VEL                                  :{ORANGE}Merge la Autobaza {TOWN}, {VELOCITY}
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE                              :{LTBLUE}Service la Autobaza {TOWN}
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE_VEL                          :{LTBLUE}Service la Autobaza {TOWN}, {VELOCITY}
-STR_ERROR_CAN_T_SEND_VEHICLE_TO_DEPOT                           :{WHITE}Nu pot trimite autovehiculul la autobază...
+STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...trebuie oprit într-o autobază
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}Nu pot găsi o autobază apropiată
-STR_VEHICLE_LIST_ROAD_TOOLTIP                                   :{BLACK}Autovehicule - clic pe vehicul pentru informatii
-STR_VEHICLE_VIEW_ROAD_STATE_START_STOP_TOOLTIP                  :{BLACK}Comanda curentă a autovehiculului - clic aici pentru a opri/porni autovehiculul
-STR_VEHICLE_VIEW_ROAD_ORDERS_TOOLTIP                            :{BLACK}Afişează comenzile autovehiculului
-STR_VEHICLE_VIEW_ROAD_LOCATION_TOOLTIP                          :{BLACK}Centrează imaginea pe locaţia curentă a autovehiculului
-STR_VEHICLE_VIEW_ROAD_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Trimite autovehiculul la autobază. Ctrl+clic pentru service
-STR_VEHICLE_VIEW_ROAD_REVERSE_TOOLTIP                           :{BLACK}Forţează vehiculul să întoarcă
-STR_VEHICLE_VIEW_ROAD_SHOW_DETAILS_TOOLTIP                      :{BLACK}Afişează detaliile autovehiculului
-STR_DEPOT_ROAD_LIST_TOOLTIP                                     :{BLACK}Autovehicule - clic pe vehicul pentru informatii
-STR_DEPOT_ROAD_NEW_VEHICLES_TOOLTIP                             :{BLACK}Cumpără un autovehicul nou
-STR_DEPOT_ROAD_SELL_TOOLTIP                                     :{BLACK}Mută un autovehicul aici pentru a-l vinde
-STR_DEPOT_ROAD_LOCATION_TOOLTIP                                 :{BLACK}Centrează imaginea pe locaţia acestei autobaze
-STR_BUILD_VEHICLE_ROAD_LIST_TOOLTIP                             :{BLACK}Listă selecţie vehicule rutiere - apasă pe vehicul pentru informaţii
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Cumpără autovehiculul selectat
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Forţează vehiculul să întoarcă
 STR_ARTICULATED_RV_CAPACITY                                     :{BLACK}Capacitate: {LTBLUE}
-STR_BARE_CARGO                                                  :{CARGO}
+STR_JUST_CARGO                                                  :{CARGO}
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} vehicul{P "" e}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
-STR_QUERY_ROAD_RENAME                                           :{WHITE}Numele autovehiculului
-STR_ERROR_CAN_T_RENAME_ROAD                                     :{WHITE}Nu se poate denumi autovehiculul...
-STR_QUERY_RENAME_ROAD_CAPTION                                   :{BLACK}Numele autovehiculului
-STR_NEWS_FIRST_ROAD_BUS_ARRIVAL                                 :{BLACK}{BIGFONT}Cetăţenii sărbătoresc{}Sosirea primului autobuz la {STATION}!
-STR_NEWS_FIRST_ROAD_TRUCK_ARRIVAL                               :{BLACK}{BIGFONT}Cetăţenii sărbătoresc{}Sosirea primului camion la {STATION}!
-STR_NEWS_FIRST_ROAD_PASSENGER_TRAM_ARRIVAL                      :{BLACK}{BIGFONT}Cetăţenii sărbătoresc . . .{}sosirea primului primul tramvai pentru călători la {STATION}!
-STR_NEWS_FIRST_ROAD_CARGO_TRAM_ARRIVAL                          :{BLACK}{BIGFONT}Cetăţenii sărbătoresc . . .{}sosirea primului primul tramvai pentru marfă la {STATION}!
-STR_NEWS_ROAD_CRASH_DRIVER                                      :{BLACK}{BIGFONT}Accident rutier!{}Şoferul decedat în urma coliziunii cu un tren
-STR_NEWS_ROAD_CRASH                                             :{BLACK}{BIGFONT}Accident rutier!{}{COMMA} victime în urma coliziunii cu un tren
+STR_NEWS_FIRST_BUS_ARRIVAL                                      :{BLACK}{BIGFONT}Cetăţenii sărbătoresc{}Sosirea primului autobuz la {STATION}!
+STR_NEWS_FIRST_TRUCK_ARRIVAL                                    :{BLACK}{BIGFONT}Cetăţenii sărbătoresc{}Sosirea primului camion la {STATION}!
+STR_NEWS_FIRST_PASSENGER_TRAM_ARRIVAL                           :{BLACK}{BIGFONT}Cetăţenii sărbătoresc . . .{}sosirea primului primul tramvai pentru călători la {STATION}!
+STR_NEWS_FIRST_CARGO_TRAM_ARRIVAL                               :{BLACK}{BIGFONT}Cetăţenii sărbătoresc . . .{}sosirea primului primul tramvai pentru marfă la {STATION}!
+STR_NEWS_ROAD_VEHICLE_CRASH_DRIVER                              :{BLACK}{BIGFONT}Accident rutier!{}Şoferul decedat în urma coliziunii cu un tren
+STR_NEWS_ROAD_VEHICLE_CRASH                                     :{BLACK}{BIGFONT}Accident rutier!{}{COMMA} victime în urma coliziunii cu un tren
 STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Vehicolul nu poate întoarce la 180 de grade...
-STR_BUILD_VEHICLE_ROAD_RENAME_BUTTON                            :{BLACK}Nume nou
-STR_BUILD_VEHICLE_ROAD_RENAME_TOOLTIP                           :{BLACK}Redenumeşte modelul de autovehicul
-STR_QUERY_RENAME_ROAD_TYPE_CAPTION                              :{WHITE}Redenumeşte modelul de autovehicul
-STR_ERROR_CAN_T_RENAME_ROAD_TYPE                                :{WHITE}Nu pot redenumi modelul de autovehicul...
 
-STR_REFIT_ROAD_VEHICLE_TO_CARRY                                 :{BLACK}Adapteaza autovehiculul pentru o incarcatura diferita
-STR_REFIT_ROAD_VEHICLE                                          :{BLACK}Adaptare autovehicul
-STR_REFIT_ROAD_VEHICLE_TO_CARRY_HIGHLIGHTED                     :{BLACK}Adapteaza autovehiculul pentru transportul incarcaturii evidentiate
-STR_REFIT_ROAD_VEHICLE_CAN_T                                    :{WHITE}Nu pot adapta autovehiculul...
-STR_ROAD_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Alege tipul de marfă pe care o transportă autovehiculul
 
 ##id 0x9800
 STR_WATERWAYS_MENU_WATERWAYS_CONSTRUCTION                       :Constructie rute acvatice
 STR_WATERWAYS_TOOLBAR_CAPTION                                   :{WHITE}Constructie rute acvatice
 STR_WATERWAYS_TOOLBAR_CAPTION_SE                                :{WHITE}Rute acvatice
 STR_ERROR_CAN_T_BUILD_DOCK_HERE                                 :{WHITE}Nu pot construi port aici...
-STR_DEPOT_SHIP_CAPTION                                          :{WHITE}Şantierul Naval {TOWN}
-STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}Nave noi
-STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} Nav{P ă e}
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nave noi
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Construieşte navă
-STR_CLONE_SHIP                                                  :{BLACK}Clonare navă
-STR_CLONE_SHIP_INFO                                             :{BLACK}Acest buton va crea o copie a navei. Ctrl+clic va împărţi comenzile
-STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}Acest buton va crea o copie a navei. Apasă acest buton, apoi dă clic pe o navă din interiorul sau exteriorul depoului. Ctrl+clic va împărţi comenzile
 STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Nava trebuie să fie staţionată într-un şantier
-STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Nu pot vinde nava...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Nu pot construi nava...
-STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Navă în cale
-STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Nu pot opri/porni nava...
-STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Nu pot trimite nava în şantier...
-STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}Merge la Santierul {TOWN}
-STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}Merge la Santierul {TOWN}, {VELOCITY}
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Service la Santierul Naval {TOWN}
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Service la Santierul Naval {TOWN}, {VELOCITY}
-STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} aşteaptă în depou
 STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Construieşte port
 STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Construieşte şantier naval (pentru construcţie si service nave)
-STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Nave - clic pe o navă pentru informaţii
-STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Construieşte o navă nouă
-STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Trage nava aici pentru a o vinde
-STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Centrează imaginea pe locaţia şantierului
-STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Nave - click pe navă pentru informaţii
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Listă de selecţie a navelor - click pe o navă pentru informaţii
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Construieşte nava selectată
-STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Comanda curentă a navei - clic aici pentru a opri/porni nava
-STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Afişează comenzile navei
-STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Centrează imaginea pe locaţia curentă a navei
-STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Trimite nava în şantier. Ctrl+clic pentru întreţinere
-STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Afişează detaliile navei
-STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Denumeşte această navă
 
-STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Denumeşte această navă
-STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Nu pot denumi nava...
 STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BLACK}{BIGFONT}Cetăţenii sărbătoresc{}Sosirea primei nave la {STATION}!
 STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Amplasează o baliză ce poate fi utilizată pentru direcţionare
 STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Nu se poate amplasa baliză aici...
 STR_BUILD_AQUEDUCT                                              :{BLACK}Construieste apeduct
 STR_CAN_T_BUILD_AQUEDUCT_HERE                                   :{WHITE}Nu pot construi apeductul aici...
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Nume nou
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Redenumeşte modelul de navă
-STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Redenumeşte modelul de navă
-STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Nu se poate redenumi modelul de navă...
-STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Schimbă tipul de marfă transportat de navă
 STR_REFIT_CAPTION                                               :{WHITE}{VEHICLE} (Schimbă marfa)
-STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Schimbă marfa transportată de navă
-STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Alege tipul de încărcătură ce va fi transportat de navă
-STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Schimbă tipul de încărcătură al navei cu cel selectat
 STR_REFIT_TITLE                                                 :{GOLD}Alege tipul încărcăturii:
 STR_REFIT_NEW_CAPACITY_COST_OF_REFIT                            :{BLACK}Noua capacitate: {GOLD}{CARGO}{}{BLACK}Costul transformării: {GOLD}{CURRENCY}
-STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Nu se poate schimba tipul navei...
 STR_REFITTABLE                                                  :(suportă alte mărfuri)
 
 ##id 0xA000
 STR_TOOLBAR_AIRCRAFT_CAPTION                                    :{WHITE}Aeroporturi
 STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Nu se poate construi un aeroport aici...
-STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}{STATION} Hangar
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}Aeronavă nouă
-STR_CLONE_AIRCRAFT                                              :{BLACK}Clonare aeronavă
-STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Acest buton va crea o copie a aeronavei. Ctrl+clic va împărţi comenzile
-STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Acest buton va crea o copie a aeronavei. Apasă acest buton, apoi dă clic pe o aeronavă din interiorul sau exteriorul hangarului. Ctrl+clic va împărţi comenzile
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Aeronavă nouă
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Cumpără aeronavă
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Nu se poate cumpăra aeronava...
-STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{COMPANY} - {COMMA} Aeronave
-STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Nu se poate trimite aeronava la hangar...
-STR_HEADING_FOR_HANGAR                                          :{ORANGE}Merge la Hangarul {STATION}
-STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}Merge la Hangarul {STATION}, {VELOCITY}
-STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Service la Hangarul {STATION}
-STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Service la Hangarul {STATION}, {VELOCITY}
-STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} aşteaptă în hangar
-STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}Aeronavă în cale
-STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Nu se poate opri/porni aeronava...
 STR_ERROR_AIRCRAFT_IS_IN_FLIGHT                                 :{WHITE}Aeronava se află în zbor
 STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Aeronava trebuie să staţioneze într-un hangar
-STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Nu se poate vinde aeronava...
 STR_AIRCRAFT_MENU_AIRPORT_CONSTRUCTION                          :Construire aeroport
 STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Construieşte aeroport
-STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Aeronavă - clic pe aeronavă pentru informaţii
-STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Aeronavă - clic pe aeronavă pentru informaţii
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Cumpără o aeronavă
-STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Trage aeronava aici pentru a o vinde
-STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Centrează imaginea pe locaţia hangarului
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Lista de selecţie a aeronavelor - clic pe o aeronavă pentru informaţii
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Cumpără aeronava selectată
-STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Comanda curentă a aeronavei - clic aici pentru a opri/porni aeronava
-STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Afişează comenzile aeronavei
-STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Centrează imaginea pe locaţia curentă a aeronavei
-STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Trimite aeronava la hangar. Ctrl+clic pentru întreţinere
-STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Afişează detaliile aeronavei
 
-STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Denumeşte aeronava
-STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Nu pot denumi aeronava...
-STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Denumeşte aeronava
 STR_NEWS_FIRST_AIRCRAFT_ARRIVAL                                 :{BLACK}{BIGFONT}Cetăţenii sărbătoresc {}Sosirea primei aeronave la {STATION}!
 STR_NEWS_AIRCRAFT_CRASH                                         :{BLACK}{BIGFONT}Accident aviatic!{}{COMMA} victime în urma prăbuşirii de la {STATION}
 STR_PLANE_CRASH_OUT_OF_FUEL                                     :{BLACK}{BIGFONT}Accident aerian!{}Aeronava in pana de combustibil, {COMMA} victime in urma dezastrulu!
 STR_ORDER_STATION_SMALL                                         :{TINYFONT}{BLACK}{STATION}
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Redenumire
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Redenumeşte modelul de aeronavă
-STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Redenumeşte modelul de aeronavă
-STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Nu se poate redenumi modelul de aeronavă...
-STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Schimbă tipul de marfă transportat de aeronavă
-STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Schimbă marfa transportată de aeronavă
-STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Alege tipul de încărcătură ce va fi transportat de aeronavă
-STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Schimbă tipul de încărcătură al aeronavei cu cel selectat
-STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Nu se poate schimba tipul aeronavei...
 
 STR_TIMETABLE_TITLE                                             :{WHITE}{VEHICLE} (Orar)
 
@@ -3188,42 +3004,243 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
-STR_SCHEDULED_TRAINS                                            :{WHITE}{STATION} - {COMMA} Trenuri
-STR_SCHEDULED_ROAD_VEHICLES                                     :{WHITE}{STATION} - {COMMA} Autovehicule
-STR_SCHEDULED_AIRCRAFT                                          :{WHITE}{STATION} - {COMMA} Aeronave
-STR_SCHEDULED_SHIPS                                             :{WHITE}{STATION} - {COMMA} Nave
+############ Vehicle lists
+STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Trenuri - apasă aici pentru informaţii despre trenuri
+STR_VEHICLE_LIST_ROAD_VEHICLE_TOOLTIP                           :{BLACK}Autovehicule - clic pe vehicul pentru informatii
+STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Nave - click pe navă pentru informaţii
+STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Aeronavă - clic pe aeronavă pentru informaţii
 
-STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Afiseaza toate trenurile care opresc in aceasta statie
-STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Afiseaza toate autovehiculele care opresc in aceasta statie
-STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Afiseaza toate aeronavele care opresc in aceasta statie
-STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Afiseaza toate navele care opresc in aceasta statie
+STR_VEHICLE_LIST_TRAIN_CAPTION                                  :{WHITE}{STRING} - {COMMA} Tren{P "" uri}
+STR_VEHICLE_LIST_ROAD_VEHICLE_CAPTION                           :{WHITE}{STRING} - {COMMA} Autovehicule{P "" s}
+STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{STRING} - {COMMA} Nav{P ă e}
+STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{STRING} - {COMMA} Aeronave
 
 STR_VEH_WITH_SHARED_ORDERS_LIST                                 :{WHITE}Comenzi sincronizate pentru {COMMA} vehicul{P "" e}
 STR_VEH_WITH_SHARED_ORDERS_LIST_TIP                             :{BLACK}Arata toate vehiculele care se incadreaza in acest program
+
+STR_NEWS_TRAIN_IS_WAITING                                       :{WHITE}{VEHICLE} aşteaptă în depou
+STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} aşteaptă în depou
+STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} aşteaptă în depou
+STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} aşteaptă în hangar
+
+STR_REFIT_TRAIN_REFIT_BUTTON                                    :{BLACK}Modificã încãrcãturã
+STR_REFIT_ROAD_VEHICLE_REFIT_BUTTON                             :{BLACK}Adaptare autovehicul
+STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Schimbă marfa transportată de navă
+STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Schimbă marfa transportată de aeronavă
+
+STR_REFIT_TRAIN_REFIT_TOOLTIP                                   :{BLACK}Modificã trenul pentru a transporta marfa aleasã
+STR_REFIT_ROAD_VEHICLE_REFIT_TOOLTIP                            :{BLACK}Adapteaza autovehiculul pentru transportul incarcaturii evidentiate
+STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Schimbă tipul de încărcătură al navei cu cel selectat
+STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Schimbă tipul de încărcătură al aeronavei cu cel selectat
+
+STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Alege tipul de marfă transportat de tren
+STR_REFIT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Alege tipul de marfă pe care o transportă autovehiculul
+STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Alege tipul de încărcătură ce va fi transportat de navă
+STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Alege tipul de încărcătură ce va fi transportat de aeronavă
+
+STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}Depoul {TOWN}
+STR_DEPOT_ROAD_VEHICLE_CAPTION                                  :{WHITE}Autobaza {TOWN}
+STR_DEPOT_SHIP_CAPTION                                          :{WHITE}Şantierul Naval {TOWN}
+STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}{STATION} Hangar
+
+STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Numele trenului
+STR_VEHICLE_DETAILS_ROAD_VEHICLE_RENAME                         :{BLACK}Numele autovehiculului
+STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Denumeşte această navă
+STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Denumeşte aeronava
+
+STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Numele trenului
+STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Numele autovehiculului
+STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Denumeşte această navă
+STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Denumeşte aeronava
+
+STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Tren în drum
+STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Autovehicul in cale
+STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Navă în cale
+STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}Aeronavă în cale
+
+STR_ERROR_CAN_T_REFIT_TRAIN                                     :{WHITE}Nu pot modifica trenul...
+STR_ERROR_CAN_T_REFIT_ROAD_VEHICLE                              :{WHITE}Nu pot adapta autovehiculul...
+STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Nu se poate schimba tipul navei...
+STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Nu se poate schimba tipul aeronavei...
+
+STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Nu se poate denumi trenul...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE                             :{WHITE}Nu se poate denumi autovehiculul...
+STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Nu pot denumi nava...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Nu pot denumi aeronava...
+
+STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Nu se poate opri/porni trenul...
+STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Nu se poate opri/porni autovehiculul...
+STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Nu pot opri/porni nava...
+STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Nu se poate opri/porni aeronava...
+
+STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Nu se poate trimite trenul la depou...
+STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Nu pot trimite autovehiculul la autobază...
+STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Nu pot trimite nava în şantier...
+STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Nu se poate trimite aeronava la hangar...
+
+STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Nu se poate construi vehiculul...
+STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Nu pot cumpăra autovehicul...
+STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Nu pot construi nava...
+STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Nu se poate cumpăra aeronava...
+
+STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Nu se poate redenumi modelul de vehicul...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Nu pot redenumi modelul de autovehicul...
+STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Nu se poate redenumi modelul de navă...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Nu se poate redenumi modelul de aeronavă...
+
+STR_ERROR_CAN_T_SELL_TRAIN                                      :{WHITE}Nu se poate vinde vehiculul...
+STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Nu se poate vinde autovehiculul...
+STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Nu pot vinde nava...
+STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Nu se poate vinde aeronava...
+
+STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Comanda curentă a trenului - clic aici pentru a opri/porni trenul
+STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Comanda curentă a autovehiculului - clic aici pentru a opri/porni autovehiculul
+STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Comanda curentă a navei - clic aici pentru a opri/porni nava
+STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Comanda curentă a aeronavei - clic aici pentru a opri/porni aeronava
+
+STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Afişează comenzile trenului
+STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Afişează comenzile autovehiculului
+STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Afişează comenzile navei
+STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Afişează comenzile aeronavei
+
+STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Centrează imaginea pe locaţia curentă a trenului
+STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Centrează imaginea pe locaţia curentă a autovehiculului
+STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Centrează imaginea pe locaţia curentă a navei
+STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Centrează imaginea pe locaţia curentă a aeronavei
+
+STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Trimite trenul într-un depou
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Trimite autovehiculul la autobază. Ctrl+clic pentru service
+STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Trimite nava în şantier. Ctrl+clic pentru întreţinere
+STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Trimite aeronava la hangar. Ctrl+clic pentru întreţinere
+
+STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Afişează detaliile trenului
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Afişează detaliile autovehiculului
+STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Afişează detaliile navei
+STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Afişează detaliile aeronavei
+
+STR_VEHICLE_VIEW_TRAIN_REFIT_TOOLTIP                            :{BLACK}Schimba tipul încãrcãturii cãratã de acest tren
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REFIT_TOOLTIP                     :{BLACK}Adapteaza autovehiculul pentru o incarcatura diferita
+STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Schimbă tipul de marfă transportat de navă
+STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Schimbă tipul de marfă transportat de aeronavă
+
+STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}Merge la Depoul {TOWN}
+STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}Merge la Depoul {TOWN}, {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT                              :{ORANGE}Merge la Autobaza {TOWN}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_VEL                          :{ORANGE}Merge la Autobaza {TOWN}, {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}Merge la Santierul {TOWN}
+STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}Merge la Santierul {TOWN}, {VELOCITY}
+STR_HEADING_FOR_HANGAR                                          :{ORANGE}Merge la Hangarul {STATION}
+STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}Merge la Hangarul {STATION}, {VELOCITY}
+
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Service la Depoul {TOWN}
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Service la Depoul {TOWN}, {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE                      :{LTBLUE}Service la Autobaza {TOWN}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE_VEL                  :{LTBLUE}Service la Autobaza {TOWN}, {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Service la Santierul Naval {TOWN}
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Service la Santierul Naval {TOWN}, {VELOCITY}
+STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Service la Hangarul {STATION}
+STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Service la Hangarul {STATION}, {VELOCITY}
+
+
+STR_CLONE_TRAIN                                                 :{BLACK}Clonare tren
+STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Clonare vehicul
+STR_CLONE_SHIP                                                  :{BLACK}Clonare navă
+STR_CLONE_AIRCRAFT                                              :{BLACK}Clonare aeronavă
+
+STR_CLONE_TRAIN_INFO                                            :{BLACK}Acest buton va crea o copie a întregului tren. Ctrl+clic a împărţi comenzile
+STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}Acest buton va crea o copie a autovehiculului. Ctrl+clic va împărţi comenzile
+STR_CLONE_SHIP_INFO                                             :{BLACK}Acest buton va crea o copie a navei. Ctrl+clic va împărţi comenzile
+STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}Acest buton va crea o copie a aeronavei. Ctrl+clic va împărţi comenzile
+
+STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}Acest buton va crea o copie a trenului, cu tot cu vagoane. Apasă acest buton, apoi dă clic pe un tren din interiorul sau exteriorul depoului. Ctrl+clic va împărţi comenzile
+STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}Acest buton va crea o copie a autovehiculului. Apasă acest buton, apoi dă clic pe un autovehicul din interiorul sau afara depoului. Ctrl+clic va împărţi comenzile
+STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}Acest buton va crea o copie a navei. Apasă acest buton, apoi dă clic pe o navă din interiorul sau exteriorul depoului. Ctrl+clic va împărţi comenzile
+STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Acest buton va crea o copie a aeronavei. Apasă acest buton, apoi dă clic pe o aeronavă din interiorul sau exteriorul hangarului. Ctrl+clic va împărţi comenzile
+
+STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Noi vehicule feroviare
+STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Noi Vehicule Electrice pe Sine
+STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Noi vehicule monoşină
+STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Noi vehicule pe Pernă Magnetică
+
+STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Vehicule pe şine
+STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Autovehicule noi
+STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nave noi
+STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Aeronavă nouă
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Cumpără vehicul
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Cumpără vehicul
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Construieşte navă
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Cumpără aeronavă
+
+STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Lista de selectie a componentelor trenului - clic pe vehicule pt. informatii
+STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Listă selecţie vehicule rutiere - apasă pe vehicul pentru informaţii
+STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Listă de selecţie a navelor - click pe o navă pentru informaţii
+STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Lista de selecţie a aeronavelor - clic pe o aeronavă pentru informaţii
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Cumpără vehiculul selectat
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Cumpără autovehiculul selectat
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Construieşte nava selectată
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Cumpără aeronava selectată
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Nume nou
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Nume nou
+STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Nume nou
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Redenumire
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Redenumeste modelul vehiculului
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Redenumeşte modelul de autovehicul
+STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Redenumeşte modelul de navă
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Redenumeşte modelul de aeronavă
+
+STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Redenumeste modelul vehiculului feroviar
+STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Redenumeşte modelul de autovehicul
+STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Redenumeşte modelul de navă
+STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Redenumeşte modelul de aeronavă
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}Vehicule noi
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_BUTTON                      :{BLACK}Autovehicule noi
+STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}Nave noi
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}Aeronavă nouă
+
+STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Trenuri - clic pe tren pentru informaţii, mută vehiculele pentru adăugare-scoatere din tren
+STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Autovehicule - clic pe vehicul pentru informatii
+STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Nave - clic pe o navă pentru informaţii
+STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Aeronavă - clic pe aeronavă pentru informaţii
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Construieşte un nou vehicul feroviar
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_TOOLTIP                     :{BLACK}Cumpără un autovehicul nou
+STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Construieşte o navă nouă
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Cumpără o aeronavă
+
+STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Mută un vehicul aici pentru a-l vinde
+STR_DEPOT_ROAD_VEHICLE_SELL_TOOLTIP                             :{BLACK}Mută un autovehicul aici pentru a-l vinde
+STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Trage nava aici pentru a o vinde
+STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Trage aeronava aici pentru a o vinde
+
+STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Centrează imaginea pe locaţia depoului
+STR_DEPOT_ROAD_VEHICLE_LOCATION_TOOLTIP                         :{BLACK}Centrează imaginea pe locaţia acestei autobaze
+STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Centrează imaginea pe locaţia şantierului
+STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Centrează imaginea pe locaţia hangarului
+
 
 ### depot strings
 STR_DEPOT_SELL_CONFIRMATION_TEXT                                :{YELLOW}Esti pe cale sa vinzi toate vehiculele din depou. Esti sigur?
 STR_DEPOT_WRONG_DEPOT_TYPE                                      :Tip incorect de depou
 
 STR_DEPOT_SELL_ALL_BUTTON_TRAIN_TIP                             :{BLACK}Vinde toate trenurile din the depou
-STR_DEPOT_SELL_ALL_BUTTON_ROADVEH_TIP                           :{BLACK}Vinde toate autovehiculele din depou
+STR_DEPOT_SELL_ALL_BUTTON_ROAD_VEHICLE_TIP                      :{BLACK}Vinde toate autovehiculele din depou
 STR_DEPOT_SELL_ALL_BUTTON_SHIP_TIP                              :{BLACK}Vinde toate vasele din depou
 STR_DEPOT_SELL_ALL_BUTTON_AIRCRAFT_TIP                          :{BLACK}Vinde toate aeronavele din hangar
 
 STR_DEPOT_VEHICLE_ORDER_LIST_TRAIN_TIP                          :{BLACK}Obtine o lista ordonata a tuturor trenurilor din depoul actual
-STR_DEPOT_VEHICLE_ORDER_LIST_ROADVEH_TIP                        :{BLACK}Obtine o lista ordonata a tuturor autovehiculelor din depoul actual
+STR_DEPOT_VEHICLE_ORDER_LIST_ROAD_VEHICLE_TIP                   :{BLACK}Obtine o lista ordonata a tuturor autovehiculelor din depoul actual
 STR_DEPOT_VEHICLE_ORDER_LIST_SHIP_TIP                           :{BLACK}Obtine o lista ordonata a tuturor vaselor din depoul actual
 STR_DEPOT_VEHICLE_ORDER_LIST_AIRCRAFT_TIP                       :{BLACK}Obtine o lista ordonata a tuturor aeronavelor din orice hangar al acestui aeroport
 
 STR_DEPOT_AUTOREPLACE_TRAIN_TIP                                 :{BLACK}înlocuieşte automat toate din depou
-STR_DEPOT_AUTOREPLACE_ROADVEH_TIP                               :{BLACK}înlocuieşte automat toate autovehiculele din depou
+STR_DEPOT_AUTOREPLACE_ROAD_VEHICLE_TIP                          :{BLACK}înlocuieşte automat toate autovehiculele din depou
 STR_DEPOT_AUTOREPLACE_SHIP_TIP                                  :{BLACK}înlocuieşte automat toate vasele din depou
 STR_DEPOT_AUTOREPLACE_AIRCRAFT_TIP                              :{BLACK}înlocuieşte automat toate aeronavele din hangar
-
-STR_VEHICLE_LIST_TRAIN_DEPOT                                    :{BLACK}{STRING} - {COMMA} Tren{P "" s}
-STR_VEHICLE_LIST_ROADVEH_DEPOT                                  :{BLACK}{STRING} - {COMMA} Autovehicul{P "" s}
-STR_VEHICLE_LIST_SHIP_DEPOT                                     :{BLACK}{STRING} - {COMMA} Vas{P "" s}
-STR_VEHICLE_LIST_AIRCRAFT_DEPOT                                 :{BLACK}{STRING} - {COMMA} Aeronava
 
 STR_REPLACE_VEHICLES_WHITE                                      :{WHITE}Înlocuieste {STRING}
 STR_REPLACE_VEHICLES_START                                      :{BLACK}Incepere inlocuire vehicule
@@ -3240,6 +3257,7 @@ STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Retrager
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Fã optiunea de autoînlocuire sã pãstreze identicã lungimea unui tren prin eliminarea vagoanelor (începând din fatã), dacã înlocuirea motorului ar face trenul mai lung.
 STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Înlocuire: {ORANGE}{SKIP}{SKIP}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Comutã între ferestrele de înlocuire motoare si vagoane
+
 STR_RAIL_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Vehiculul nu este disponibil
 STR_ROAD_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Vehiculul nu este disponibil
 STR_SHIP_NOT_AVAILABLE                                          :{WHITE}Vasul nu este disponibil
@@ -3249,12 +3267,12 @@ STR_ENGINES                                                     :Motoare
 STR_WAGONS                                                      :Vagoane
 
 STR_MASS_STOP_DEPOT_TRAIN_TIP                                   :{BLACK}Click pt oprirea tuturor trenurilor din depou
-STR_MASS_STOP_DEPOT_ROADVEH_TIP                                 :{BLACK}Click pt oprirea tuturor autovehiculelor din depou
+STR_MASS_STOP_DEPOT_ROAD_VEHICLE_TIP                            :{BLACK}Click pt oprirea tuturor autovehiculelor din depou
 STR_MASS_STOP_DEPOT_SHIP_TIP                                    :{BLACK}Click pt oprirea tuturor vaselor din depou
 STR_MASS_STOP_HANGAR_TIP                                        :{BLACK}Click pt oprirea tuturor aeronavelor din hangar
 
 STR_MASS_START_DEPOT_TRAIN_TIP                                  :{BLACK}Click pt pornirea tuturor trenurilor din depou
-STR_MASS_START_DEPOT_ROADVEH_TIP                                :{BLACK}Click pt pornirea tuturor autovehiculelor din depou
+STR_MASS_START_DEPOT_ROAD_VEHICLE_TIP                           :{BLACK}Click pt pornirea tuturor autovehiculelor din depou
 STR_MASS_START_DEPOT_SHIP_TIP                                   :{BLACK}Click pt pornirea tuturor vaselor din depou
 STR_MASS_START_HANGAR_TIP                                       :{BLACK}Click pt pornirea tuturor aeronavelor din hangar
 
@@ -3390,17 +3408,6 @@ STR_MEASURE_AREA                                                :{BLACK}Suprafa�
 STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Lungime: {NUM}{}Diferenţa de înălţime: {NUM} m
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Suprafaţa: {NUM} x {NUM}{}Diferenţa de înălţime: {NUM} m
 
-############ Date formatting
-STR_DATE_TINY                                                   :{STRING}-{STRING}-{NUM}
-STR_DATE_SHORT                                                  :{STRING} {NUM}
-STR_DATE_LONG                                                   :{STRING} {STRING} {NUM}
-STR_DATE_ISO                                                    :{2:NUM}-{1:STRING}-{0:STRING}
-
-STR_JUST_DATE_TINY                                              :{DATE_TINY}
-STR_JUST_DATE_LONG                                              :{DATE_LONG}
-STR_JUST_DATE_ISO                                               :{DATE_ISO}
-########
-
 STR_FEEDER_CARGO_VALUE                                          :{BLACK}Transfera Credit: {LTBLUE}{CURRENCY}
 STR_DRIVE_THROUGH_ERROR_ON_TOWN_ROAD                            :{WHITE}...drum in proprietatea orasului
 STR_DRIVE_THROUGH_ERROR_DIRECTION                               :{WHITE}...drum orientat in directia gresita
@@ -3425,24 +3432,19 @@ STR_PERCENT_UP_DOWN_SMALL                                       :{TINYFONT}{WHIT
 STR_PERCENT_UP_DOWN                                             :{WHITE}{NUM}%{UPARROW}{DOWNARROW}
 
 ##### Mass Order
-STR_GROUP_NAME_FORMAT                                           :Grup {COMMA}
 STR_GROUP_TINY_NAME                                             :{TINYFONT}{GROUP}
 STR_GROUP_ALL_TRAINS                                            :Toate trenurile
-STR_GROUP_ALL_ROADS                                             :Toate autovehiculele
+STR_GROUP_ALL_ROAD_VEHICLES                                     :Toate autovehiculele
 STR_GROUP_ALL_SHIPS                                             :Toate navele
 STR_GROUP_ALL_AIRCRAFTS                                         :Toate aeronavele
 STR_GROUP_DEFAULT_TRAINS                                        :Trenuri negrupate
-STR_GROUP_DEFAULT_ROADS                                         :Vehicule rutiere negrupate
+STR_GROUP_DEFAULT_ROAD_VEHICLES                                 :Vehicule rutiere negrupate
 STR_GROUP_DEFAULT_SHIPS                                         :Nave negrupate
 STR_GROUP_DEFAULT_AIRCRAFTS                                     :Aeronave negrupate
 STR_GROUP_TINY_NUM                                              :{TINYFONT}{COMMA}
 STR_GROUP_ADD_SHARED_VEHICLE                                    :Adauga vehiculele partajate
 STR_GROUP_REMOVE_ALL_VEHICLES                                   :Elimina toate vehiculele
 
-STR_GROUP_TRAINS_CAPTION                                        :{WHITE}{GROUP} - {COMMA} Tren{P "" uri}
-STR_GROUP_ROADVEH_CAPTION                                       :{WHITE}{GROUP} - {COMMA} Autovehicul{P "" e}
-STR_GROUP_SHIPS_CAPTION                                         :{WHITE}{GROUP} - {COMMA} Nav{P a e}
-STR_GROUP_AIRCRAFTS_CAPTION                                     :{WHITE}{GROUP} - {COMMA} Aeronav{P a e}
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Redenumeste un grup
 
 STR_GROUP_CAN_T_CREATE                                          :{WHITE}Nu pot crea grup...
@@ -3458,12 +3460,35 @@ STR_GROUP_DELETE_TIP                                            :{BLACK}Şterge 
 STR_GROUP_RENAME_TIP                                            :{BLACK}Redenumeste grupul selectat
 STR_GROUP_REPLACE_PROTECTION_TIP                                :{BLACK}Click aici pentru a proteja acest grup de la inlocuirile automate globale
 
+#### String control codes and their formatting
 STR_COMPANY_NAME                                                :{COMPANY}
 STR_ENGINE_NAME                                                 :{ENGINE}
 STR_GROUP_NAME                                                  :{GROUP}
+STR_INDUSTRY_NAME                                               :{INDUSTRY}
 STR_PRESIDENT_NAME                                              :{PRESIDENTNAME}
 STR_SIGN_NAME                                                   :{SIGN}
+STR_STATION_NAME                                                :{STATION}
+STR_TOWN_NAME                                                   :{TOWN}
 STR_VEHICLE_NAME                                                :{VEHICLE}
+STR_WAYPOINT_NAME                                               :{WAYPOINT}
+
+STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_INT                                                    :{NUM}
+STR_JUST_DATE_TINY                                              :{DATE_TINY}
+STR_JUST_DATE_SHORT                                             :{DATE_SHORT}
+STR_JUST_DATE_LONG                                              :{DATE_LONG}
+STR_JUST_DATE_ISO                                               :{DATE_ISO}
+STR_JUST_STRING                                                 :{STRING}
+STR_JUST_RAW_STRING                                             :{STRING}
+
+STR_FORMAT_DATE_TINY                                            :{STRING}-{STRING}-{NUM}
+STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
+STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
+STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
+
+STR_FORMAT_COMPANY_NUM                                          :(Companie {COMMA})
+STR_FORMAT_GROUP_NAME                                           :Grup {COMMA}
+STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
 
 STR_NAME_MUST_BE_UNIQUE                                         :{WHITE}Numele trebuie să fie unic
 

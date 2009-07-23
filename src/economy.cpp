@@ -36,6 +36,7 @@
 #include "subsidy_base.h"
 #include "subsidy_func.h"
 #include "station_base.h"
+#include "waypoint_base.h"
 #include "economy_base.h"
 #include "core/pool_func.hpp"
 
@@ -1256,6 +1257,7 @@ void PrepareUnload(Vehicle *front_v)
 static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 {
 	assert(v->current_order.IsType(OT_LOADING));
+	assert(v->load_unload_time_rem != 0);
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--v->load_unload_time_rem != 0) {

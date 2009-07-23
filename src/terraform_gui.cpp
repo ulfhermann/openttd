@@ -17,7 +17,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "sound_func.h"
-#include "station_base.h"
+#include "base_station_base.h"
 #include "unmovable_map.h"
 #include "textbuf_gui.h"
 #include "genworld.h"
@@ -26,7 +26,6 @@
 #include "landscape_type.h"
 #include "tilehighlight_func.h"
 #include "settings_type.h"
-#include "waypoint.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -635,17 +634,11 @@ static void ResetLandscapeConfirmationCallback(Window *w, bool confirmed)
 		_generating_world = false;
 
 		/* Delete all station signs */
-		Station *st;
-		FOR_ALL_STATIONS(st) {
+		BaseStation *st;
+		FOR_ALL_BASE_STATIONS(st) {
 			/* There can be buoys, remove them */
-			if (st->IsBuoy() && IsBuoyTile(st->xy)) DoCommand(st->xy, 0, 0, DC_EXEC | DC_BANKRUPT, CMD_LANDSCAPE_CLEAR);
-			if (st->facilities == 0) delete st;
-		}
-
-		/* The same for waypoints */
-		Waypoint *wp;
-		FOR_ALL_WAYPOINTS(wp) {
-			delete wp;
+			if (IsBuoyTile(st->xy)) DoCommand(st->xy, 0, 0, DC_EXEC | DC_BANKRUPT, CMD_LANDSCAPE_CLEAR);
+			if ((st->facilities & ~FACIL_WAYPOINT) == 0) delete st;
 		}
 
 		MarkWholeScreenDirty();
