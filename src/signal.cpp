@@ -288,14 +288,6 @@ static SigFlags ExploreSegment(Owner owner)
 					}
 				}
 
-				if (GetRailTileType(tile) == RAIL_TILE_WAYPOINT) {
-					if (GetWaypointAxis(tile) != DiagDirToAxis(enterdir)) continue;
-					if (!(flags & SF_TRAIN) && HasVehicleOnPos(tile, NULL, &TrainOnTileEnum)) flags |= SF_TRAIN;
-					tile += TileOffsByDiagDir(exitdir);
-					/* enterdir and exitdir stay the same */
-					break;
-				}
-
 				TrackBits tracks = GetTrackBits(tile); // trackbits of tile
 				TrackBits tracks_masked = (TrackBits)(tracks & _enterdir_to_trackbits[enterdir]); // only incidating trackbits
 
@@ -351,7 +343,7 @@ static SigFlags ExploreSegment(Owner owner)
 				}
 
 			case MP_STATION:
-				if (!IsRailwayStation(tile)) continue;
+				if (!IsRailwayStation(tile) && !IsRailWaypoint(tile)) continue;
 				if (GetTileOwner(tile) != owner) continue;
 				if (DiagDirToAxis(enterdir) != GetRailStationAxis(tile)) continue; // different axis
 				if (IsStationTileBlocked(tile)) continue; // 'eye-candy' station tile

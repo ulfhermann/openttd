@@ -138,6 +138,7 @@ autoreplace_gui.h
 autoreplace_type.h
 autoslope.h
 aystar.h
+base_station_base.h
 bmp.h
 bridge.h
 callback_table.h
@@ -339,7 +340,8 @@ vehiclelist.h
 viewport_func.h
 viewport_type.h
 water.h
-waypoint.h
+waypoint_base.h
+waypoint_func.h
 waypoint_type.h
 widget_type.h
 win32.h
