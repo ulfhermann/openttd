@@ -2865,7 +2865,7 @@ void OnTick_Station()
 	BaseStation *st;
 	FOR_ALL_BASE_STATIONS(st) {
 		StationHandleSmallTick(st);
-		if ((st->facilities & FACIL_WAYPOINT) == 0) {
+		if (Station::IsExpected(st)) {
 			Station * real_st = Station::From(st);
 			// update the station statistics every <unit> days
 			if ((_tick_counter + real_st->index) % (DAY_TICKS * _settings_game.economy.moving_average_unit) == 0) {
