@@ -154,8 +154,8 @@ STR_ABBREV_PLASTIC                                              :{TINYFONT}PL
 STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}FZ
 STR_ABBREV_NONE                                                 :{TINYFONT}NO
 STR_ABBREV_ALL                                                  :{TINYFONT}ALL
-STR_DATE_SHORT_WHITE                                            :{WHITE}{DATE_SHORT}
-STR_DATE_LONG_WHITE                                             :{WHITE}{DATE_LONG}
+STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
+STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SMALLMAP_CAPTION                                            :{WHITE}Map - {STRING}
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Game Options
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Message
@@ -328,7 +328,6 @@ STR_SORT_BY_PRODUCTION                                          :Production
 STR_SORT_BY_TYPE                                                :Type
 STR_SORT_BY_TRANSPORTED                                         :Transported
 STR_SORT_BY_NAME                                                :{BLACK}Name
-STR_SORT_BY_DROPDOWN_NAME                                       :Name
 STR_SORT_BY_DATE                                                :{BLACK}Date
 STR_SORT_BY_NUMBER                                              :Number
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Profit last year
@@ -345,29 +344,31 @@ STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waiting cargo value
 STR_SORT_BY_RATING_MAX                                          :Highest cargo rating
 STR_SORT_BY_RATING_MIN                                          :Lowest cargo rating
-STR_ENGINE_SORT_ENGINE_ID                                       :EngineID (classic sort)
-STR_ENGINE_SORT_COST                                            :Cost
-STR_ENGINE_SORT_POWER                                           :Power
-STR_ENGINE_SORT_INTRO_DATE                                      :Introduction Date
-STR_ENGINE_SORT_RUNNING_COST                                    :Running Cost
-STR_ENGINE_SORT_POWER_VS_RUNNING_COST                           :Power/Running Cost
-STR_ENGINE_SORT_CARGO_CAPACITY                                  :Cargo Capacity
+STR_SORT_BY_ENGINE_ID                                           :EngineID (classic sort)
+STR_SORT_BY_COST                                                :Cost
+STR_SORT_BY_POWER                                               :Power
+STR_SORT_BY_INTRO_DATE                                          :Introduction Date
+STR_SORT_BY_RUNNING_COST                                        :Running Cost
+STR_SORT_BY_POWER_VS_RUNNING_COST                               :Power/Running Cost
+STR_SORT_BY_CARGO_CAPACITY                                      :Cargo Capacity
 STR_NO_WAITING_CARGO                                            :{BLACK}No cargo of any type is waiting
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}Select all facilities
 STR_SELECT_ALL_TYPES                                            :{BLACK}Select all cargo types (including no waiting cargo)
-STR_AVAILABLE_TRAINS                                            :{BLACK}Available Trains
-STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Available Road Vehicles
-STR_AVAILABLE_SHIPS                                             :{BLACK}Available Ships
-STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Available Aircraft
 STR_AVAILABLE_ENGINES_TIP                                       :{BLACK}See a list of available engine designs for this vehicle type.
 STR_MANAGE_LIST                                                 :{BLACK}Manage list
 STR_MANAGE_LIST_TIP                                             :{BLACK}Send instructions to all vehicles in this list
 STR_REPLACE_VEHICLES                                            :Replace vehicles
+STR_SEND_FOR_SERVICING                                          :Send for Servicing
+
+STR_AVAILABLE_TRAINS                                            :{BLACK}Available Trains
+STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Available Road Vehicles
+STR_AVAILABLE_SHIPS                                             :{BLACK}Available Ships
+STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Available Aircraft
+
 STR_SEND_TRAIN_TO_DEPOT                                         :Send to Depot
 STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Send to Depot
 STR_SEND_SHIP_TO_DEPOT                                          :Send to Depot
 STR_SEND_AIRCRAFT_TO_HANGAR                                     :Send to Hangar
-STR_SEND_FOR_SERVICING                                          :Send for Servicing
 
 ############ range for months starts
 STR_MONTH_ABBREV_JAN                                            :Jan
@@ -410,8 +411,8 @@ STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Build ai
 STR_TOOLBAR_TOOLTIP_PLANT_TREES_PLACE_SIGNS                     :{BLACK}Plant trees, place signs etc.
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Land area information
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Options
-STR_SMALL_ARROW_UP                                              :{BLACK}{SMALLUPARROW}
-STR_SMALL_ARROW_DOWN                                            :{BLACK}{SMALLDOWNARROW}
+STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
+STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}Can't change servicing interval...
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Close window
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Window title - drag this to move window
@@ -581,12 +582,12 @@ STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESI
 STR_HIGHSCORE_STATS                                             :{BIGFONT}'{STRING}'   ({COMMA})
 STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}{COMPANY} achieves '{STRING}' status!
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME} of {COMPANY} achieves '{STRING}' status!
-STR_BLUE_NUMBER                                                 :{BLUE}{COMMA}
+STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Scenario Editor
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Land Generation
-STR_ARROW_UP                                                    :{BLACK}{UPARROW}
-STR_ARROW_DOWN                                                  :{BLACK}{DOWNARROW}
+STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
+STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Increase area of land to lower/raise
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Decrease area of land to lower/raise
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Generate random land
@@ -670,7 +671,7 @@ STR_FULL                                                        :Full
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 
-STR_CHECKMARK                                                   :{CHECKMARK}
+STR_JUST_CHECKMARK                                              :{CHECKMARK}
 ############ range for menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Game options
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Difficulty settings
@@ -762,9 +763,6 @@ STR_INDUSTRY_MENU_FUND_NEW_INDUSTRY                             :Fund new indust
 ############ range ends here
 
 STR_FUND_INDUSTRY_CAPTION                                       :{WHITE}Fund new industry
-STR_JUST_STRING                                                 :{STRING}
-STR_JUST_RAW_STRING                                             :{STRING}
-STR_JUST_INT                                                    :{NUM}
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...can only be built in rainforest areas
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}...can only be built in desert areas
 STR_STATUSBAR_PAUSED                                            :{YELLOW}* *  PAUSED  *  *
@@ -778,8 +776,8 @@ STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  SAVI
 STR_SAVE_STILL_IN_PROGRESS                                      :{WHITE}Saving still in progress,{}please wait until it is finished!
 STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}Select 'Ezy Street style music' program
 
-STR_6                                                           :{BLACK}6
-STR_7                                                           :{BLACK}7
+STR_BLACK_6                                                     :{BLACK}6
+STR_BLACK_7                                                     :{BLACK}7
 
 ############ start of townname region
 STR_TOWNNAME_ORIGINAL_ENGLISH                                   :English (Original)
@@ -887,7 +885,7 @@ STR_CRATES                                                      :crates
 STR_RES_OTHER                                                   :other
 STR_NOTHING                                                     :
 
-STR_SMALL_RIGHT_ARROW                                           :{TINYFONT}{RIGHTARROW}
+STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_CANT_SHARE_ORDER_LIST                                       :{WHITE}Can't share order list...
 STR_CANT_COPY_ORDER_LIST                                        :{WHITE}Can't copy order list...
@@ -949,7 +947,7 @@ STR_CONFIG_SETTING_STOP_LOCATION                                :{LTBLUE}New tra
 STR_CONFIG_SETTING_STOP_LOCATION_NEAR_END                       :near end
 STR_CONFIG_SETTING_STOP_LOCATION_MIDDLE                         :middle
 STR_CONFIG_SETTING_STOP_LOCATION_FAR_END                        :far end
-STR_CONFIG_SETTING_ROADVEH_QUEUE                                :{LTBLUE}Road vehicle queueing (with quantum effects): {ORANGE}{STRING}
+STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Road vehicle queueing (with quantum effects): {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Pan window when mouse is at the edge: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Allow bribing of the local authority: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Allow buying exclusive transport rights: {ORANGE}{STRING}
@@ -963,6 +961,7 @@ STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Allow b
 STR_CONFIG_SETTING_DYNAMIC_ENGINES                              :{LTBLUE}Enable multiple NewGRF engine sets: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Changing this setting is not possible when there are vehicles.
 
+STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Airports never expire: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_WARN_LOST_TRAIN                              :{LTBLUE}Warn if train is lost: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW                                 :{LTBLUE}Review vehicles' orders: {ORANGE}{STRING}
@@ -1054,12 +1053,12 @@ STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Group e
 
 STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Show building tools when no suitable vehicles are available: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Max trains per player: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAX_ROADVEH                                  :{LTBLUE}Max road vehicles per player: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Max road vehicles per player: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Max aircraft per player: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_SHIPS                                    :{LTBLUE}Max ships per player: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_AI_BUILDS_TRAINS                             :{LTBLUE}Disable trains for computer: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AI_BUILDS_ROADVEH                            :{LTBLUE}Disable road vehicles for computer: {ORANGE}{STRING}
+STR_CONFIG_SETTING_AI_BUILDS_ROAD_VEHICLES                      :{LTBLUE}Disable road vehicles for computer: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_AIRCRAFT                           :{LTBLUE}Disable aircraft for computer: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AI_BUILDS_SHIPS                              :{LTBLUE}Disable ships for computer: {ORANGE}{STRING}
 
@@ -1069,8 +1068,8 @@ STR_CONFIG_SETTING_AI_MAX_OPCODES                               :{LTBLUE}#opcode
 STR_CONFIG_SETTING_SERVINT_ISPERCENT                            :{LTBLUE}Service intervals are in percents: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SERVINT_TRAINS                               :{LTBLUE}Default service interval for trains: {ORANGE}{STRING} days/%
 STR_CONFIG_SETTING_SERVINT_TRAINS_DISABLED                      :{LTBLUE}Default service interval for trains: {ORANGE}disabled
-STR_CONFIG_SETTING_SERVINT_ROADVEH                              :{LTBLUE}Default service interval for road vehicles: {ORANGE}{STRING} days/%
-STR_CONFIG_SETTING_SERVINT_ROADVEH_DISABLED                     :{LTBLUE}Default service interval for road vehicles: {ORANGE}disabled
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES                        :{LTBLUE}Default service interval for road vehicles: {ORANGE}{STRING} days/%
+STR_CONFIG_SETTING_SERVINT_ROAD_VEHICLES_DISABLED               :{LTBLUE}Default service interval for road vehicles: {ORANGE}disabled
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT                             :{LTBLUE}Default service interval for aircraft: {ORANGE}{STRING} days/%
 STR_CONFIG_SETTING_SERVINT_AIRCRAFT_DISABLED                    :{LTBLUE}Default service interval for aircraft: {ORANGE}disabled
 STR_CONFIG_SETTING_SERVINT_SHIPS                                :{LTBLUE}Default service interval for ships: {ORANGE}{STRING} days/%
@@ -1145,10 +1144,10 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Pathfin
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Not recommended)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Recommended)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH                       :{LTBLUE}Pathfinder for road vehicles: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_OPF                   :Original {RED}(Not recommended)
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_NPF                   :NPF
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROADVEH_YAPF                  :YAPF {BLUE}(Recommended)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Pathfinder for road vehicles: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(Not recommended)
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
+STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Recommended)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Pathfinder for ships: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}(Recommended)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
@@ -1159,8 +1158,7 @@ STR_CONFIG_SETTING_MAP_Y                                        :{LTBLUE}Y-size 
 
 ############ generic strings for settings
 STR_CONFIG_SETTING_DISABLED                                     :disabled
-STR_CONFIG_SETTING_INT32                                        :{NUM}
-STR_CONFIG_SETTING_CURRENCY                                     :{CURRENCY}
+STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_CONFIG_SETTING_QUERY_CAPT                                   :{WHITE}Change setting value
 
 STR_TEMPERATE_LANDSCAPE                                         :Temperate landscape
@@ -1189,15 +1187,15 @@ STR_GO_NON_STOP_TO_WAYPOINT                                     :Go non-stop via
 
 STR_WAYPOINTNAME_CITY                                           :Waypoint {TOWN}
 STR_WAYPOINTNAME_CITY_SERIAL                                    :Waypoint {TOWN} #{COMMA}
+STR_BUOYNAME_CITY                                               :{TOWN} Buoy
+STR_BUOYNAME_CITY_SERIAL                                        :{TOWN} Buoy #{COMMA}
 STR_LANDINFO_WAYPOINT                                           :Waypoint
 
 STR_WAYPOINT                                                    :{WHITE}Waypoint
 STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Select waypoint type
 
 STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_LIST                                      :{WHITE}{WAYPOINT} - {COMMA} Train{P "" s}
 STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
-STR_WAYPOINT_RAW                                                :{WAYPOINT}
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Edit waypoint name
 
 STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Can't change waypoint name...
@@ -1264,11 +1262,6 @@ STR_INDUSTRYDIR_LIST_CAPTION                                    :{BLACK}Industry
 
 STR_INDUSTRY_TOO_CLOSE                                          :{WHITE}...too close to another industry
 
-STR_RAIL_REFIT_VEHICLE_TO_CARRY                                 :{BLACK}Refit train to carry a different cargo type
-STR_RAIL_REFIT_VEHICLE                                          :{BLACK}Refit train
-STR_RAIL_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Select type of cargo for train to carry
-STR_RAIL_REFIT_TO_CARRY_HIGHLIGHTED                             :{BLACK}Refit train to carry highlighted cargo type
-STR_RAIL_CAN_T_REFIT_VEHICLE                                    :{WHITE}Can't refit train...
 STR_CONFIG_GAME_PRODUCTION                                      :{WHITE}Change production
 
 ############ network gui strings
@@ -1344,7 +1337,7 @@ STR_NETWORK_INTERNET                                            :Internet
 STR_NETWORK_LAN_INTERNET                                        :LAN / Internet
 STR_NETWORK_INTERNET_ADVERTISE                                  :Internet (advertize)
 STR_NETWORK_CLIENTS_SELECT                                      :{BLACK}{SKIP}{SKIP}{NUM} client{P "" s}
-STR_NETWORK_NUMBER_OF_CLIENTS                                   :{BLACK}Maximum allowed clients:
+STR_NETWORK_NUMBER_OF_CLIENTS                                   :{BLACK}Max clients:
 STR_NETWORK_NUMBER_OF_CLIENTS_TIP                               :{BLACK}Choose a maximum number of clients. Not all slots need to be filled.
 STR_NETWORK_COMPANIES_SELECT                                    :{BLACK}{SKIP}{SKIP}{SKIP}{NUM} compan{P y ies}
 STR_NETWORK_NUMBER_OF_COMPANIES                                 :{BLACK}Max companies:
@@ -1778,11 +1771,6 @@ STR_TOWN_BUILDING_NAME_TEPEES_1                                 :Tepees
 STR_TOWN_BUILDING_NAME_TEAPOT_HOUSE_1                           :Teapot-House
 STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Piggy-Bank
 
-STR_INDUSTRY                                                    :{INDUSTRY}
-STR_TOWN                                                        :{TOWN}
-STR_INDUSTRY_FORMAT                                             :{TOWN} {STRING}
-STR_STATION                                                     :{STATION}
-
 ##id 0x2800
 STR_LANDSCAPING_MENU_LANDSCAPING                                :Landscaping
 STR_LANDSCAPING_MENU_PLANT_TREES                                :Plant trees
@@ -1836,6 +1824,12 @@ STR_CARGO_RATING_VERY_GOOD                                      :Very Good
 STR_CARGO_RATING_EXCELLENT                                      :Excellent
 STR_CARGO_RATING_OUTSTANDING                                    :Outstanding
 ############ range for rating ends
+
+### station view strings
+STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Show all trains which have this station on their schedule
+STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Show all road vehicles which have this station on their schedule
+STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Show all aircraft which have this station on their schedule
+STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Show all ships which have this station on their schedule
 
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
 STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} no longer accepts {STRING}
@@ -2059,7 +2053,7 @@ STR_ERROR_YOU_ALREADY_OWN_IT                                    :{WHITE}...you a
 STR_SV_EMPTY                                                    :
 STR_SV_UNNAMED                                                  :Unnamed
 STR_SV_TRAIN_NAME                                               :Train {COMMA}
-STR_SV_ROADVEH_NAME                                             :Road Vehicle {COMMA}
+STR_SV_ROAD_VEHICLE_NAME                                        :Road Vehicle {COMMA}
 STR_SV_SHIP_NAME                                                :Ship {COMMA}
 STR_SV_AIRCRAFT_NAME                                            :Aircraft {COMMA}
 
@@ -2080,15 +2074,9 @@ STR_SV_STNAME_AIRPORT                                           :{STRING} Airpor
 STR_SV_STNAME_OILFIELD                                          :{STRING} Oilfield
 STR_SV_STNAME_MINES                                             :{STRING} Mines
 STR_SV_STNAME_DOCKS                                             :{STRING} Docks
-STR_SV_STNAME_BUOY_1                                            :{STRING} Buoy 1
-STR_SV_STNAME_BUOY_2                                            :{STRING} Buoy 2
-STR_SV_STNAME_BUOY_3                                            :{STRING} Buoy 3
-STR_SV_STNAME_BUOY_4                                            :{STRING} Buoy 4
-STR_SV_STNAME_BUOY_5                                            :{STRING} Buoy 5
-STR_SV_STNAME_BUOY_6                                            :{STRING} Buoy 6
-STR_SV_STNAME_BUOY_7                                            :{STRING} Buoy 7
-STR_SV_STNAME_BUOY_8                                            :{STRING} Buoy 8
-STR_SV_STNAME_BUOY_9                                            :{STRING} Buoy 9
+STR_SV_STNAME_BUOY                                              :{STRING}
+STR_SV_STNAME_WAYPOINT                                          :{STRING}
+##id 0x6020
 STR_SV_STNAME_ANNEXE                                            :{STRING} Annexe
 STR_SV_STNAME_SIDINGS                                           :{STRING} Sidings
 STR_SV_STNAME_BRANCH                                            :{STRING} Branch
@@ -2136,8 +2124,8 @@ STR_NUM_LOW                                                     :Low
 STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :High
 STR_NUM_CUSTOM                                                  :Custom
-STR_ARROW_LEFT_SMALL                                            :{BLACK}{SMALLLEFTARROW}
-STR_ARROW_RIGHT_SMALL                                           :{BLACK}{SMALLRIGHTARROW}
+STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
+STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 STR_AI_SPEED_VERY_SLOW                                          :Very Slow
 STR_AI_SPEED_SLOW                                               :Slow
 STR_AI_SPEED_MEDIUM                                             :Medium
@@ -2171,7 +2159,6 @@ STR_CITY_APPROVAL_HOSTILE                                       :Hostile
 
 ##id 0x7000
 STR_COMPANY_VIEW_CAPTION                                        :{WHITE}{COMPANY} {BLACK}{COMPANYNUM}
-STR_COMPANY_NUM                                                 :(Company {COMMA})
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}New Face
 STR_COMPANY_VIEW_COLOUR_SCHEME_BUTTON                           :{BLACK}Color Scheme
 STR_COMPANY_VIEW_COLOUR_SCHEME_TITLE                            :{GOLD}Color Scheme:
@@ -2188,12 +2175,12 @@ STR_FINANCES_YEAR                                               :{WHITE}{NUM}
 STR_FINANCES_SECTION_CONSTRUCTION                               :{GOLD}Construction
 STR_FINANCES_SECTION_NEW_VEHICLES                               :{GOLD}New Vehicles
 STR_FINANCES_SECTION_TRAIN_RUNNING_COSTS                        :{GOLD}Train Running Costs
-STR_FINANCES_SECTION_ROAD_VEH_RUNNING_COSTS                     :{GOLD}Road Veh. Running Costs
+STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD}Road Veh. Running Costs
 STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD}Aircraft Running Costs
 STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD}Ship Running Costs
 STR_FINANCES_SECTION_PROPERTY_MAINTENANCE                       :{GOLD}Property Maintenance
 STR_FINANCES_SECTION_TRAIN_INCOME                               :{GOLD}Train Income
-STR_FINANCES_SECTION_ROAD_VEHICLES_INCOME                       :{GOLD}Road Vehicle Income
+STR_FINANCES_SECTION_ROAD_VEHICLE_INCOME                        :{GOLD}Road Vehicle Income
 STR_FINANCES_SECTION_AIRCRAFT_INCOME                            :{GOLD}Aircraft Income
 STR_FINANCES_SECTION_SHIP_INCOME                                :{GOLD}Ship Income
 STR_FINANCES_SECTION_LOAN_INTEREST                              :{GOLD}Loan Interest
@@ -2204,7 +2191,6 @@ STR_FINANCES_TOTAL_CAPTION                                      :{WHITE}Total:
 STR_COMPANY_NAME_COMPANY_NUM                                    :{COMPANY} {COMPANYNUM}
 STR_GRAPH_INCOME_CAPTION                                        :{WHITE}Income Graph
 STR_CURRCOMPACT                                                 :{CURRCOMPACT}
-STR_JUST_COMMA                                                  :{COMMA}
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Operating Profit Graph
 STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Bank Balance
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Loan
@@ -2333,7 +2319,7 @@ STR_LIVERY_FREIGHT_TRAM                                         :Freight Streetc
 
 STR_LIVERY_GENERAL_TIP                                          :{BLACK}Show general color schemes
 STR_LIVERY_TRAIN_TIP                                            :{BLACK}Show train color schemes
-STR_LIVERY_ROADVEH_TIP                                          :{BLACK}Show road vehicle color schemes
+STR_LIVERY_ROAD_VEHICLE_TIP                                     :{BLACK}Show road vehicle color schemes
 STR_LIVERY_SHIP_TIP                                             :{BLACK}Show ship color schemes
 STR_LIVERY_AIRCRAFT_TIP                                         :{BLACK}Show aircraft color schemes
 STR_LIVERY_PRIMARY_TIP                                          :{BLACK}Choose the primary color for the selected scheme
@@ -2457,94 +2443,94 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_TOY_VAN                     :Toy Boxcar
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_BATTERY_TRUCK               :Battery Flatcar
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FIZZY_DRINK_TRUCK           :Fizzy Drink Flatcar
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PLASTIC_TRUCK               :Plastic Flatcar
-STR_VEHICLE_NAME_ROAD_MPS_REGAL_BUS                             :MPS Regal Bus
-STR_VEHICLE_NAME_ROAD_HEREFORD_LEOPARD_BUS                      :Hereford Leopard Bus
-STR_VEHICLE_NAME_ROAD_FOSTER_BUS                                :Foster Bus
-STR_VEHICLE_NAME_ROAD_FOSTER_MKII_SUPERBUS                      :Foster MkII Superbus
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKI_BUS                        :Ploddyphut MkI Bus
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKII_BUS                       :Ploddyphut MkII Bus
-STR_VEHICLE_NAME_ROAD_PLODDYPHUT_MKIII_BUS                      :Ploddyphut MkIII Bus
-STR_VEHICLE_NAME_ROAD_BALOGH_COAL_TRUCK                         :Balogh Coal Truck
-STR_VEHICLE_NAME_ROAD_UHL_COAL_TRUCK                            :Uhl Coal Truck
-STR_VEHICLE_NAME_ROAD_DW_COAL_TRUCK                             :DW Coal Truck
-STR_VEHICLE_NAME_ROAD_MPS_MAIL_TRUCK                            :MPS Mail Truck
-STR_VEHICLE_NAME_ROAD_REYNARD_MAIL_TRUCK                        :Reynard Mail Truck
-STR_VEHICLE_NAME_ROAD_PERRY_MAIL_TRUCK                          :Perry Mail Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_MAIL_TRUCK                    :MightyMover Mail Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_MAIL_TRUCK                    :Powernaught Mail Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_MAIL_TRUCK                       :Wizzowow Mail Truck
-STR_VEHICLE_NAME_ROAD_WITCOMBE_OIL_TANKER                       :Witcombe Oil Tanker
-STR_VEHICLE_NAME_ROAD_FOSTER_OIL_TANKER                         :Foster Oil Tanker
-STR_VEHICLE_NAME_ROAD_PERRY_OIL_TANKER                          :Perry Oil Tanker
-STR_VEHICLE_NAME_ROAD_TALBOTT_LIVESTOCK_VAN                     :Talbott Livestock Van
-STR_VEHICLE_NAME_ROAD_UHL_LIVESTOCK_VAN                         :Uhl Livestock Van
-STR_VEHICLE_NAME_ROAD_FOSTER_LIVESTOCK_VAN                      :Foster Livestock Van
-STR_VEHICLE_NAME_ROAD_BALOGH_GOODS_TRUCK                        :Balogh Goods Truck
-STR_VEHICLE_NAME_ROAD_CRAIGHEAD_GOODS_TRUCK                     :Craighead Goods Truck
-STR_VEHICLE_NAME_ROAD_GOSS_GOODS_TRUCK                          :Goss Goods Truck
-STR_VEHICLE_NAME_ROAD_HEREFORD_GRAIN_TRUCK                      :Hereford Grain Truck
-STR_VEHICLE_NAME_ROAD_THOMAS_GRAIN_TRUCK                        :Thomas Grain Truck
-STR_VEHICLE_NAME_ROAD_GOSS_GRAIN_TRUCK                          :Goss Grain Truck
-STR_VEHICLE_NAME_ROAD_WITCOMBE_WOOD_TRUCK                       :Witcombe Wood Truck
-STR_VEHICLE_NAME_ROAD_FOSTER_WOOD_TRUCK                         :Foster Wood Truck
-STR_VEHICLE_NAME_ROAD_MORELAND_WOOD_TRUCK                       :Moreland Wood Truck
-STR_VEHICLE_NAME_ROAD_MPS_IRON_ORE_TRUCK                        :MPS Iron Ore Truck
-STR_VEHICLE_NAME_ROAD_UHL_IRON_ORE_TRUCK                        :Uhl Iron Ore Truck
-STR_VEHICLE_NAME_ROAD_CHIPPY_IRON_ORE_TRUCK                     :Chippy Iron Ore Truck
-STR_VEHICLE_NAME_ROAD_BALOGH_STEEL_TRUCK                        :Balogh Steel Truck
-STR_VEHICLE_NAME_ROAD_UHL_STEEL_TRUCK                           :Uhl Steel Truck
-STR_VEHICLE_NAME_ROAD_KELLING_STEEL_TRUCK                       :Kelling Steel Truck
-STR_VEHICLE_NAME_ROAD_BALOGH_ARMORED_TRUCK                      :Balogh Armored Truck
-STR_VEHICLE_NAME_ROAD_UHL_ARMORED_TRUCK                         :Uhl Armored Truck
-STR_VEHICLE_NAME_ROAD_FOSTER_ARMORED_TRUCK                      :Foster Armored Truck
-STR_VEHICLE_NAME_ROAD_FOSTER_FOOD_VAN                           :Foster Food Van
-STR_VEHICLE_NAME_ROAD_PERRY_FOOD_VAN                            :Perry Food Van
-STR_VEHICLE_NAME_ROAD_CHIPPY_FOOD_VAN                           :Chippy Food Van
-STR_VEHICLE_NAME_ROAD_UHL_PAPER_TRUCK                           :Uhl Paper Truck
-STR_VEHICLE_NAME_ROAD_BALOGH_PAPER_TRUCK                        :Balogh Paper Truck
-STR_VEHICLE_NAME_ROAD_MPS_PAPER_TRUCK                           :MPS Paper Truck
-STR_VEHICLE_NAME_ROAD_MPS_COPPER_ORE_TRUCK                      :MPS Copper Ore Truck
-STR_VEHICLE_NAME_ROAD_UHL_COPPER_ORE_TRUCK                      :Uhl Copper Ore Truck
-STR_VEHICLE_NAME_ROAD_GOSS_COPPER_ORE_TRUCK                     :Goss Copper Ore Truck
-STR_VEHICLE_NAME_ROAD_UHL_WATER_TANKER                          :Uhl Water Tanker
-STR_VEHICLE_NAME_ROAD_BALOGH_WATER_TANKER                       :Balogh Water Tanker
-STR_VEHICLE_NAME_ROAD_MPS_WATER_TANKER                          :MPS Water Tanker
-STR_VEHICLE_NAME_ROAD_BALOGH_FRUIT_TRUCK                        :Balogh Fruit Truck
-STR_VEHICLE_NAME_ROAD_UHL_FRUIT_TRUCK                           :Uhl Fruit Truck
-STR_VEHICLE_NAME_ROAD_KELLING_FRUIT_TRUCK                       :Kelling Fruit Truck
-STR_VEHICLE_NAME_ROAD_BALOGH_RUBBER_TRUCK                       :Balogh Rubber Truck
-STR_VEHICLE_NAME_ROAD_UHL_RUBBER_TRUCK                          :Uhl Rubber Truck
-STR_VEHICLE_NAME_ROAD_RMT_RUBBER_TRUCK                          :RMT Rubber Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_SUGAR_TRUCK                   :MightyMover Sugar Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_SUGAR_TRUCK                   :Powernaught Sugar Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_SUGAR_TRUCK                      :Wizzowow Sugar Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COLA_TRUCK                    :MightyMover Cola Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COLA_TRUCK                    :Powernaught Cola Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COLA_TRUCK                       :Wizzowow Cola Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_COTTON_CANDY                  :MightyMover Cotton Candy Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_COTTON_CANDY                  :Powernaught Cotton Candy Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_COTTON_CANDY_TRUCK               :Wizzowow Cotton Candy Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOFFEE_TRUCK                  :MightyMover Toffee Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOFFEE_TRUCK                  :Powernaught Toffee Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOFFEE_TRUCK                     :Wizzowow Toffee Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_TOY_VAN                       :MightyMover Toy Van
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_TOY_VAN                       :Powernaught Toy Van
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_TOY_VAN                          :Wizzowow Toy Van
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_CANDY_TRUCK                   :MightyMover Candy Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_CANDY_TRUCK                   :Powernaught Candy Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_CANDY_TRUCK                      :Wizzowow Candy Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BATTERY_TRUCK                 :MightyMover Battery Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BATTERY_TRUCK                 :Powernaught Battery Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BATTERY_TRUCK                    :Wizzowow Battery Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_FIZZY_DRINK                   :MightyMover Fizzy Drink Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_FIZZY_DRINK                   :Powernaught Fizzy Drink Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_FIZZY_DRINK_TRUCK                :Wizzowow Fizzy Drink Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_PLASTIC_TRUCK                 :MightyMover Plastic Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_PLASTIC_TRUCK                 :Powernaught Plastic Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_PLASTIC_TRUCK                    :Wizzowow Plastic Truck
-STR_VEHICLE_NAME_ROAD_MIGHTYMOVER_BUBBLE_TRUCK                  :MightyMover Bubble Truck
-STR_VEHICLE_NAME_ROAD_POWERNAUGHT_BUBBLE_TRUCK                  :Powernaught Bubble Truck
-STR_VEHICLE_NAME_ROAD_WIZZOWOW_BUBBLE_TRUCK                     :Wizzowow Bubble Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_REGAL_BUS                     :MPS Regal Bus
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_LEOPARD_BUS              :Hereford Leopard Bus
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_BUS                        :Foster Bus
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_MKII_SUPERBUS              :Foster MkII Superbus
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKI_BUS                :Ploddyphut MkI Bus
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKII_BUS               :Ploddyphut MkII Bus
+STR_VEHICLE_NAME_ROAD_VEHICLE_PLODDYPHUT_MKIII_BUS              :Ploddyphut MkIII Bus
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_COAL_TRUCK                 :Balogh Coal Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COAL_TRUCK                    :Uhl Coal Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_DW_COAL_TRUCK                     :DW Coal Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_MAIL_TRUCK                    :MPS Mail Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_REYNARD_MAIL_TRUCK                :Reynard Mail Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_MAIL_TRUCK                  :Perry Mail Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_MAIL_TRUCK            :MightyMover Mail Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_MAIL_TRUCK            :Powernaught Mail Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_MAIL_TRUCK               :Wizzowow Mail Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_OIL_TANKER               :Witcombe Oil Tanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_OIL_TANKER                 :Foster Oil Tanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_OIL_TANKER                  :Perry Oil Tanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_TALBOTT_LIVESTOCK_VAN             :Talbott Livestock Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_LIVESTOCK_VAN                 :Uhl Livestock Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_LIVESTOCK_VAN              :Foster Livestock Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_GOODS_TRUCK                :Balogh Goods Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_CRAIGHEAD_GOODS_TRUCK             :Craighead Goods Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GOODS_TRUCK                  :Goss Goods Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_HEREFORD_GRAIN_TRUCK              :Hereford Grain Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_THOMAS_GRAIN_TRUCK                :Thomas Grain Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_GRAIN_TRUCK                  :Goss Grain Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WITCOMBE_WOOD_TRUCK               :Witcombe Wood Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_WOOD_TRUCK                 :Foster Wood Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MORELAND_WOOD_TRUCK               :Moreland Wood Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_IRON_ORE_TRUCK                :MPS Iron Ore Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_IRON_ORE_TRUCK                :Uhl Iron Ore Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_IRON_ORE_TRUCK             :Chippy Iron Ore Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_STEEL_TRUCK                :Balogh Steel Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_STEEL_TRUCK                   :Uhl Steel Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_STEEL_TRUCK               :Kelling Steel Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_ARMORED_TRUCK              :Balogh Armored Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_ARMORED_TRUCK                 :Uhl Armored Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_ARMORED_TRUCK              :Foster Armored Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_FOSTER_FOOD_VAN                   :Foster Food Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_PERRY_FOOD_VAN                    :Perry Food Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_CHIPPY_FOOD_VAN                   :Chippy Food Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_PAPER_TRUCK                   :Uhl Paper Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_PAPER_TRUCK                :Balogh Paper Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_PAPER_TRUCK                   :MPS Paper Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_COPPER_ORE_TRUCK              :MPS Copper Ore Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_COPPER_ORE_TRUCK              :Uhl Copper Ore Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_GOSS_COPPER_ORE_TRUCK             :Goss Copper Ore Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_WATER_TANKER                  :Uhl Water Tanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_WATER_TANKER               :Balogh Water Tanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_MPS_WATER_TANKER                  :MPS Water Tanker
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_FRUIT_TRUCK                :Balogh Fruit Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_FRUIT_TRUCK                   :Uhl Fruit Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_KELLING_FRUIT_TRUCK               :Kelling Fruit Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_BALOGH_RUBBER_TRUCK               :Balogh Rubber Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_UHL_RUBBER_TRUCK                  :Uhl Rubber Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_RMT_RUBBER_TRUCK                  :RMT Rubber Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_SUGAR_TRUCK           :MightyMover Sugar Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_SUGAR_TRUCK           :Powernaught Sugar Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_SUGAR_TRUCK              :Wizzowow Sugar Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COLA_TRUCK            :MightyMover Cola Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COLA_TRUCK            :Powernaught Cola Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COLA_TRUCK               :Wizzowow Cola Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_COTTON_CANDY          :MightyMover Cotton Candy Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_COTTON_CANDY          :Powernaught Cotton Candy Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_COTTON_CANDY_TRUCK       :Wizzowow Cotton Candy Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOFFEE_TRUCK          :MightyMover Toffee Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOFFEE_TRUCK          :Powernaught Toffee Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOFFEE_TRUCK             :Wizzowow Toffee Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_TOY_VAN               :MightyMover Toy Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_TOY_VAN               :Powernaught Toy Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_TOY_VAN                  :Wizzowow Toy Van
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_CANDY_TRUCK           :MightyMover Candy Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_CANDY_TRUCK           :Powernaught Candy Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_CANDY_TRUCK              :Wizzowow Candy Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BATTERY_TRUCK         :MightyMover Battery Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BATTERY_TRUCK         :Powernaught Battery Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BATTERY_TRUCK            :Wizzowow Battery Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_FIZZY_DRINK           :MightyMover Fizzy Drink Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_FIZZY_DRINK           :Powernaught Fizzy Drink Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_FIZZY_DRINK_TRUCK        :Wizzowow Fizzy Drink Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_PLASTIC_TRUCK         :MightyMover Plastic Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_PLASTIC_TRUCK         :Powernaught Plastic Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_PLASTIC_TRUCK            :Wizzowow Plastic Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_MIGHTYMOVER_BUBBLE_TRUCK          :MightyMover Bubble Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_POWERNAUGHT_BUBBLE_TRUCK          :Powernaught Bubble Truck
+STR_VEHICLE_NAME_ROAD_VEHICLE_WIZZOWOW_BUBBLE_TRUCK             :Wizzowow Bubble Truck
 STR_VEHICLE_NAME_SHIP_MPS_OIL_TANKER                            :MPS Oil Tanker
 STR_VEHICLE_NAME_SHIP_CS_INC_OIL_TANKER                         :CS-Inc. Oil Tanker
 STR_VEHICLE_NAME_SHIP_MPS_PASSENGER_FERRY                       :MPS Passenger Ferry
@@ -2607,10 +2593,8 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :monorail locomo
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :maglev locomotive
 
 ##id 0x8800
-STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}{TOWN} Train Depot
 STR_NEWS_FIRST_TRAIN_ARRIVAL                                    :{BLACK}{BIGFONT}Citizens celebrate . . .{}First train arrives at {STATION}!
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Details)
-STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Train in the way
 STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 STR_ORDER_NON_STOP                                              :{BLACK}Non-stop
@@ -2658,7 +2642,7 @@ STR_ORDER_NEAREST_HANGAR                                        :the nearest Han
 STR_ORDER_SERVICE_AT                                            :Service at
 STR_ORDER_SERVICE_NON_STOP_AT                                   :Service non-stop at
 STR_ORDER_TRAIN_DEPOT                                           :Train Depot
-STR_ORDER_ROAD_DEPOT                                            :Road Vehicle Depot
+STR_ORDER_ROAD_VEHICLE_DEPOT                                    :Road Vehicle Depot
 STR_ORDER_SHIP_DEPOT                                            :Ship Depot
 STR_GO_TO_DEPOT                                                 :{STRING} {TOWN} {STRING}
 STR_GO_TO_NEAREST_DEPOT                                         :{STRING} {STRING} {STRING}
@@ -2700,38 +2684,16 @@ STR_TIMETABLE_AND_TRAVEL_FOR                                    :and travel for 
 STR_TIMETABLE_DAYS                                              :{COMMA} day{P "" s}
 STR_TIMETABLE_TICKS                                             :{COMMA} tick{P "" s}
 
-STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}Heading for {TOWN} Train Depot
-STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}Heading for {TOWN} Train Depot, {VELOCITY}
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Service at {TOWN} Train Depot
-STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Service at {TOWN} Train Depot, {VELOCITY}
-
 STR_INVALID_ORDER                                               :{RED} (Invalid Order)
 
 STR_UNKNOWN_STATION                                             :unknown station
 STR_VEHICLE_DETAILS_CARGO_EMPTY                                 :{LTBLUE}Empty
 STR_VEHICLE_DETAILS_CARGO_FROM                                  :{LTBLUE}{CARGO} from {STATION}
 STR_VEHICLE_DETAILS_CARGO_FROM_MULT                             :{LTBLUE}{CARGO} from {STATION} (x{NUM})
-STR_VEHICLE_STATUS_WAITING_IN_DEPOT                             :{WHITE}{VEHICLE} is waiting in depot
-STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}New Vehicles
 STR_DEPOT_NO_ENGINE                                             :{BLACK}-
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Train too long
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Trains can only be altered when stopped inside a depot
-STR_VEHICLE_LIST_CAPTION_TRAINS                                 :{WHITE}{COMPANY} - {COMMA} Train{P "" s}
 
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}New Rail Vehicles
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}New Electric Rail Vehicles
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}New Monorail Vehicles
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}New Maglev Vehicles
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Rail Vehicles
-
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Build Vehicle
-STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Clone Vehicle
-STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}This will build a copy of the road vehicle. Control-click will share the orders
-STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}This will build a copy of a road vehicle. Click this button and then on a road vehicle inside or outside the depot. Control-click will share the orders
-STR_CLONE_TRAIN                                                 :{BLACK}Clone Train
-STR_CLONE_TRAIN_INFO                                            :{BLACK}This will build a copy of the train including all cars. Control-click will share the orders
-STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}This will build a copy of a train including all cars. Click this button and then on a train inside or outside the depot. Control-click will share the orders
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Rename
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Skip
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Delete
 STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Go To
@@ -2747,14 +2709,12 @@ STR_ORDER_VIEW_TOOLTIP                                          :{BLACK}Switch t
 STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE} (Orders)
 STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - End of Orders - -
 STR_SERVICE                                                     :{BLACK}Service
-STR_ERROR_CAN_T_BUILD_RAILROAD_VEHICLE                          :{WHITE}Can't build railroad vehicle...
 STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE                :{LTBLUE}{ENGINE}{BLACK}   Built: {LTBLUE}{NUM}{BLACK} Value: {LTBLUE}{CURRENCY}
 STR_VEHICLE_DETAILS_TRAIN_WAGON_VALUE                           :{LTBLUE}{ENGINE}{BLACK}   Value: {LTBLUE}{CURRENCY}
 STR_VEHICLE_VIEW_CAPTION                                        :{WHITE}{VEHICLE}
 STR_VEHICLE_STATUS_LOADING_UNLOADING                            :{LTBLUE}Loading / Unloading
 STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Leaving
 STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Train must be stopped inside a depot
-STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Can't send train to depot...
 STR_ERROR_NO_MORE_SPACE_FOR_ORDERS                              :{WHITE}No more space for orders
 STR_ERROR_TOO_MANY_ORDERS                                       :{WHITE}Too many orders
 STR_ERROR_CAN_T_INSERT_NEW_ORDER                                :{WHITE}Can't insert new order...
@@ -2769,26 +2729,11 @@ STR_ERROR_CAN_T_ADD_ORDER_SHARED                                :{WHITE}a vehicl
 STR_ERROR_CAN_T_MOVE_VEHICLE                                    :{WHITE}Can't move vehicle...
 STR_ERROR_REAR_ENGINE_FOLLOW_FRONT                              :{WHITE}The rear engine will always follow its front counterpart
 STR_CARGO_N_A                                                   :N/A{SKIP}
-STR_ERROR_CAN_T_SELL_RAILROAD_VEHICLE                           :{WHITE}Can't sell railroad vehicle...
 STR_ERROR_UNABLE_TO_FIND_ROUTE_TO                               :{WHITE}Unable to find route to local depot
-STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Can't stop/start train...
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Servicing interval: {LTBLUE}{COMMA}days{BLACK}   Last service: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Servicing interval: {LTBLUE}{COMMA}%{BLACK}   Last service: {LTBLUE}{DATE_LONG}
-STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Trains - click on train for information
-STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Trains - click on train for info., drag vehicle to add/remove from train
-STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Build new train vehicle
-STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Drag train vehicle to here to sell it
-STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Center main view on train depot location
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Train vehicle selection list - click on vehicle for information
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Build the highlighted train vehicle
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Rename train vehicle type
-STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Current train action - click here to stop/start train
-STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Show train's orders
-STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Center main view on train's location
-STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Send train to depot
 STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP                    :{BLACK}Force train to proceed without waiting for signal to clear
 STR_VEHICLE_VIEW_TRAIN_REVERSE_TOOLTIP                          :{BLACK}Reverse direction of train
-STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Show train details
 STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Increase servicing interval
 STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Decrease servicing interval
 STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP                         :{BLACK}Show details of cargo carried
@@ -2822,13 +2767,10 @@ STR_VEHICLE_STATUS_STOPPED                                      :{RED}Stopped
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Can't make train pass signal at danger...
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Crashed!
 
-STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Name train
-STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Can't name train...
-STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Name train
 STR_NEWS_TRAIN_CRASH                                            :{BLACK}{BIGFONT}Train Crash!{}{COMMA} die in fireball after collision
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Can't reverse direction of train...
-STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Rename train vehicle type
-STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Can't rename train vehicle type...
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Can't reverse direction of vehicle...
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Can't turn vehicles consisting of multiple units
 STR_CLEAR_TIME                                                  :{BLACK}Clear Time
 STR_RESET_LATENESS                                              :{BLACK}Reset Late Counter
 STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Change waypoint name
@@ -2860,178 +2802,55 @@ STR_TIMETABLE_AUTOFILL                                          :{BLACK}Autofill
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Fill the timetable automatically with the values from the next journey (CTRL-click to try to keep waiting times)
 
 ##id 0x9000
-STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Road vehicle in the way
-STR_VEHICLE_LIST_ROAD_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} Road Vehicle{P "" s}
-STR_DEPOT_ROAD_CAPTION                                          :{WHITE}{TOWN} Road Vehicle Depot
-STR_DEPOT_ROAD_NEW_VEHICLES_BUTTON                              :{BLACK}New Vehicles
-STR_BUILD_VEHICLE_ROAD_CAPTION                                  :{WHITE}New Road Vehicles
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_BUTTON                     :{BLACK}Build Vehicle
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Can't build road vehicle...
-STR_ERROR_ROAD_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}...must be stopped inside a road vehicle depot
-STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Can't sell road vehicle...
-STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Can't stop/start road vehicle...
-STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} is waiting in depot
-STR_HEADING_FOR_ROAD_DEPOT                                      :{ORANGE}Heading for {TOWN} Road Depot
-STR_HEADING_FOR_ROAD_DEPOT_VEL                                  :{ORANGE}Heading for {TOWN} Road Depot, {VELOCITY}
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE                              :{LTBLUE}Service at {TOWN} Road Depot
-STR_HEADING_FOR_ROAD_DEPOT_SERVICE_VEL                          :{LTBLUE}Service at {TOWN} Road Depot, {VELOCITY}
-STR_ERROR_CAN_T_SEND_VEHICLE_TO_DEPOT                           :{WHITE}Can't send vehicle to depot...
+STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...must be stopped inside a road vehicle depot
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}Unable to find local depot
-STR_VEHICLE_LIST_ROAD_TOOLTIP                                   :{BLACK}Road vehicles - click on vehicle for information
-STR_VEHICLE_VIEW_ROAD_STATE_START_STOP_TOOLTIP                  :{BLACK}Current vehicle action - click here to stop/start vehicle
-STR_VEHICLE_VIEW_ROAD_ORDERS_TOOLTIP                            :{BLACK}Show vehicle's orders
-STR_VEHICLE_VIEW_ROAD_LOCATION_TOOLTIP                          :{BLACK}Center main view on vehicle's location
-STR_VEHICLE_VIEW_ROAD_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Send vehicle to depot
-STR_VEHICLE_VIEW_ROAD_REVERSE_TOOLTIP                           :{BLACK}Force vehicle to turn around
-STR_VEHICLE_VIEW_ROAD_SHOW_DETAILS_TOOLTIP                      :{BLACK}Show road vehicle details
-STR_DEPOT_ROAD_LIST_TOOLTIP                                     :{BLACK}Vehicles - click on vehicle for information
-STR_DEPOT_ROAD_NEW_VEHICLES_TOOLTIP                             :{BLACK}Build new road vehicle
-STR_DEPOT_ROAD_SELL_TOOLTIP                                     :{BLACK}Drag road vehicle to here to sell it
-STR_DEPOT_ROAD_LOCATION_TOOLTIP                                 :{BLACK}Center main view on road vehicle depot location
-STR_BUILD_VEHICLE_ROAD_LIST_TOOLTIP                             :{BLACK}Road vehicle selection list - click on vehicle for information
-STR_BUILD_VEHICLE_ROAD_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Build the highlighted road vehicle
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Force vehicle to turn around
 STR_ARTICULATED_RV_CAPACITY                                     :{BLACK}Capacity: {LTBLUE}
-STR_BARE_CARGO                                                  :{CARGO}
+STR_JUST_CARGO                                                  :{CARGO}
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} vehicle{P "" s}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
-STR_QUERY_ROAD_RENAME                                           :{WHITE}Name road vehicle
-STR_ERROR_CAN_T_RENAME_ROAD                                     :{WHITE}Can't name road vehicle...
-STR_QUERY_RENAME_ROAD_CAPTION                                   :{BLACK}Name road vehicle
-STR_NEWS_FIRST_ROAD_BUS_ARRIVAL                                 :{BLACK}{BIGFONT}Citizens celebrate . . .{}First bus arrives at {STATION}!
-STR_NEWS_FIRST_ROAD_TRUCK_ARRIVAL                               :{BLACK}{BIGFONT}Citizens celebrate . . .{}First truck arrives at {STATION}!
-STR_NEWS_FIRST_ROAD_PASSENGER_TRAM_ARRIVAL                      :{BLACK}{BIGFONT}Citizens celebrate . . .{}First passenger streetcar arrives at {STATION}!
-STR_NEWS_FIRST_ROAD_CARGO_TRAM_ARRIVAL                          :{BLACK}{BIGFONT}Citizens celebrate . . .{}First freight streetcar arrives at {STATION}!
-STR_NEWS_ROAD_CRASH_DRIVER                                      :{BLACK}{BIGFONT}Road Vehicle Crash!{}Driver dies in fireball after collision with train
-STR_NEWS_ROAD_CRASH                                             :{BLACK}{BIGFONT}Road Vehicle Crash!{}{COMMA} die in fireball after collision with train
-STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Can't turn vehicles consisting of multiple units
-STR_BUILD_VEHICLE_ROAD_RENAME_BUTTON                            :{BLACK}Rename
-STR_BUILD_VEHICLE_ROAD_RENAME_TOOLTIP                           :{BLACK}Rename road vehicle type
-STR_QUERY_RENAME_ROAD_TYPE_CAPTION                              :{WHITE}Rename road vehicle type
-STR_ERROR_CAN_T_RENAME_ROAD_TYPE                                :{WHITE}Can't rename road vehicle type...
+STR_NEWS_FIRST_BUS_ARRIVAL                                      :{BLACK}{BIGFONT}Citizens celebrate . . .{}First bus arrives at {STATION}!
+STR_NEWS_FIRST_TRUCK_ARRIVAL                                    :{BLACK}{BIGFONT}Citizens celebrate . . .{}First truck arrives at {STATION}!
+STR_NEWS_FIRST_PASSENGER_TRAM_ARRIVAL                           :{BLACK}{BIGFONT}Citizens celebrate . . .{}First passenger streetcar arrives at {STATION}!
+STR_NEWS_FIRST_CARGO_TRAM_ARRIVAL                               :{BLACK}{BIGFONT}Citizens celebrate . . .{}First freight streetcar arrives at {STATION}!
+STR_NEWS_ROAD_VEHICLE_CRASH_DRIVER                              :{BLACK}{BIGFONT}Road Vehicle Crash!{}Driver dies in fireball after collision with train
+STR_NEWS_ROAD_VEHICLE_CRASH                                     :{BLACK}{BIGFONT}Road Vehicle Crash!{}{COMMA} die in fireball after collision with train
+STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Can't make road vehicle turn around...
 
-STR_REFIT_ROAD_VEHICLE_TO_CARRY                                 :{BLACK}Refit road vehicle to carry a different cargo type
-STR_REFIT_ROAD_VEHICLE                                          :{BLACK}Refit road vehicle
-STR_REFIT_ROAD_VEHICLE_TO_CARRY_HIGHLIGHTED                     :{BLACK}Refit road vehicle to carry highlighted cargo type
-STR_REFIT_ROAD_VEHICLE_CAN_T                                    :{WHITE}Can't refit road vehicle...
-STR_ROAD_SELECT_TYPE_OF_CARGO_FOR                               :{BLACK}Select type of cargo for road vehicle to carry
 
 ##id 0x9800
 STR_WATERWAYS_MENU_WATERWAYS_CONSTRUCTION                       :Waterways construction
 STR_WATERWAYS_TOOLBAR_CAPTION                                   :{WHITE}Waterways construction
 STR_WATERWAYS_TOOLBAR_CAPTION_SE                                :{WHITE}Waterways
 STR_ERROR_CAN_T_BUILD_DOCK_HERE                                 :{WHITE}Can't build dock here...
-STR_DEPOT_SHIP_CAPTION                                          :{WHITE}{TOWN} Ship Depot
-STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}New Ships
-STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{COMPANY} - {COMMA} Ship{P "" s}
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}New Ships
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Build Ship
-STR_CLONE_SHIP                                                  :{BLACK}Clone Ship
-STR_CLONE_SHIP_INFO                                             :{BLACK}This will build a copy of the ship. Control-click will share the orders
-STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}This will build a copy of a ship. Click this button and then on a ship inside or outside the depot. Control-click will share the orders
 STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Ship must be stopped in depot
-STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Can't sell ship...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Can't build ship...
-STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Ship in the way
-STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Can't stop/start ship...
-STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Can't send ship to depot...
-STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}Heading for {TOWN} Ship Depot
-STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}Heading for {TOWN} Ship Depot, {VELOCITY}
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Service at {TOWN} Ship Depot
-STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Service at {TOWN} Ship Depot, {VELOCITY}
-STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} is waiting in depot
 STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Build ship dock
 STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Build ship depot (for building and servicing ships)
-STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Ships - click on ship for information
-STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Build new ship
-STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Drag ship to here to sell it
-STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Center main view on ship depot location
-STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Ships - click on ship for information
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Ship selection list - click on ship for information
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Build the highlighted ship
-STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Current ship action - click here to stop/start ship
-STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Show ship's orders
-STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Center main view on ship's location
-STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Send ship to depot
-STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Show ship details
-STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Name ship
 
-STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Name ship
-STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Can't name ship...
 STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BLACK}{BIGFONT}Citizens celebrate . . .{}First ship arrives at {STATION}!
 STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Place a buoy which can be used as a waypoint
 STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Can't place buoy here...
 STR_BUILD_AQUEDUCT                                              :{BLACK}Build aqueduct
 STR_CAN_T_BUILD_AQUEDUCT_HERE                                   :{WHITE}Can't build aqueduct here...
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Rename
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Rename ship type
-STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Rename ship type
-STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Can't rename ship type...
-STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Refit cargo ship to carry a different cargo type
 STR_REFIT_CAPTION                                               :{WHITE}{VEHICLE} (Refit)
-STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Refit ship
-STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Select type of cargo for ship to carry
-STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Refit ship to carry highlighted cargo type
 STR_REFIT_TITLE                                                 :{GOLD}Select cargo type to carry:
 STR_REFIT_NEW_CAPACITY_COST_OF_REFIT                            :{BLACK}New capacity: {GOLD}{CARGO}{}{BLACK}Cost of refit: {GOLD}{CURRENCY}
-STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Can't refit ship...
 STR_REFITTABLE                                                  :(refittable)
 
 ##id 0xA000
 STR_TOOLBAR_AIRCRAFT_CAPTION                                    :{WHITE}Airports
 STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Can't build airport here...
-STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}{STATION} Aircraft Hangar
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}New Aircraft
-STR_CLONE_AIRCRAFT                                              :{BLACK}Clone Aircraft
-STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}This will build a copy of the aircraft. Control-click will share the orders
-STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}This will build a copy of an aircraft. Click this button and then on an aircraft inside or outside the hangar. Control-click will share the orders
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}New Aircraft
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Build Aircraft
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Can't build aircraft...
-STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{COMPANY} - {COMMA} Aircraft
-STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Can't send aircraft to hangar...
-STR_HEADING_FOR_HANGAR                                          :{ORANGE}Heading for {STATION} Hangar
-STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}Heading for {STATION} Hangar, {VELOCITY}
-STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Service at {STATION} Hangar
-STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Service at {STATION} Hangar, {VELOCITY}
-STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} is waiting in the aircraft hangar
-STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}Aircraft in the way
-STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Can't stop/start aircraft...
 STR_ERROR_AIRCRAFT_IS_IN_FLIGHT                                 :{WHITE}Aircraft is in flight
 STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Aircraft must be stopped in hangar
-STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Can't sell aircraft...
 STR_AIRCRAFT_MENU_AIRPORT_CONSTRUCTION                          :Airport construction
 STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Build airport
-STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Aircraft - click on aircraft for information
-STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Aircraft - click on aircraft for information
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Build new aircraft
-STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Drag aircraft to here to sell it
-STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Center main view on hangar location
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Aircraft selection list - click on aircraft for information
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Build the highlighted aircraft
-STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Current aircraft action - click here to stop/start aircraft
-STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Show aircraft's orders
-STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Center main view on aircraft's location
-STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Send aircraft to hangar
-STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Show aircraft details
 
-STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Name aircraft
-STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Can't name aircraft...
-STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Name aircraft
 STR_NEWS_FIRST_AIRCRAFT_ARRIVAL                                 :{BLACK}{BIGFONT}Citizens celebrate . . .{}First aircraft arrives at {STATION}!
 STR_NEWS_AIRCRAFT_CRASH                                         :{BLACK}{BIGFONT}Plane Crash!{}{COMMA} die in fireball at {STATION}
 STR_PLANE_CRASH_OUT_OF_FUEL                                     :{BLACK}{BIGFONT}Plane Crash!{}Aircraft ran out of fuel, {COMMA} die in fireball!
 STR_ORDER_STATION_SMALL                                         :{TINYFONT}{BLACK}{STATION}
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Rename
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Rename aircraft type
-STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Rename aircraft type
-STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Can't rename aircraft type...
-STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Refit aircraft to carry a different cargo type
-STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Refit aircraft
-STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Select type of cargo for aircraft to carry
-STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Refit aircraft to carry highlighted cargo type
-STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Can't refit aircraft...
 
 STR_TIMETABLE_TITLE                                             :{WHITE}{VEHICLE} (Timetable)
 
@@ -3185,42 +3004,243 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
-STR_SCHEDULED_TRAINS                                            :{WHITE}{STATION} - {COMMA} Train{P "" s}
-STR_SCHEDULED_ROAD_VEHICLES                                     :{WHITE}{STATION} - {COMMA} Road Vehicle{P "" s}
-STR_SCHEDULED_AIRCRAFT                                          :{WHITE}{STATION} - {COMMA} Aircraft
-STR_SCHEDULED_SHIPS                                             :{WHITE}{STATION} - {COMMA} Ship{P "" s}
+############ Vehicle lists
+STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP                             :{BLACK}Trains - click on train for information
+STR_VEHICLE_LIST_ROAD_VEHICLE_TOOLTIP                           :{BLACK}Road vehicles - click on vehicle for information
+STR_VEHICLE_LIST_SHIP_TOOLTIP                                   :{BLACK}Ships - click on ship for information
+STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Aircraft - click on aircraft for information
 
-STR_SCHEDULED_TRAINS_TIP                                        :{BLACK}Show all trains which have this station on their schedule
-STR_SCHEDULED_ROAD_VEHICLES_TIP                                 :{BLACK}Show all road vehicles which have this station on their schedule
-STR_SCHEDULED_AIRCRAFT_TIP                                      :{BLACK}Show all aircraft which have this station on their schedule
-STR_SCHEDULED_SHIPS_TIP                                         :{BLACK}Show all ships which have this station on their schedule
+STR_VEHICLE_LIST_TRAIN_CAPTION                                  :{WHITE}{STRING} - {COMMA} Train{P "" s}
+STR_VEHICLE_LIST_ROAD_VEHICLE_CAPTION                           :{WHITE}{STRING} - {COMMA} Road Vehicle{P "" s}
+STR_VEHICLE_LIST_SHIP_CAPTION                                   :{WHITE}{STRING} - {COMMA} Ship{P "" s}
+STR_VEHICLE_LIST_AIRCRAFT_CAPTION                               :{WHITE}{STRING} - {COMMA} Aircraft
 
 STR_VEH_WITH_SHARED_ORDERS_LIST                                 :{WHITE}Shared orders of {COMMA} Vehicle{P "" s}
 STR_VEH_WITH_SHARED_ORDERS_LIST_TIP                             :{BLACK}Show all vehicles which have the same schedule
+
+STR_NEWS_TRAIN_IS_WAITING                                       :{WHITE}{VEHICLE} is waiting in depot
+STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} is waiting in depot
+STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} is waiting in depot
+STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} is waiting in the aircraft hangar
+
+STR_REFIT_TRAIN_REFIT_BUTTON                                    :{BLACK}Refit train
+STR_REFIT_ROAD_VEHICLE_REFIT_BUTTON                             :{BLACK}Refit road vehicle
+STR_REFIT_SHIP_REFIT_BUTTON                                     :{BLACK}Refit ship
+STR_REFIT_AIRCRAFT_REFIT_BUTTON                                 :{BLACK}Refit aircraft
+
+STR_REFIT_TRAIN_REFIT_TOOLTIP                                   :{BLACK}Refit train to carry highlighted cargo type
+STR_REFIT_ROAD_VEHICLE_REFIT_TOOLTIP                            :{BLACK}Refit road vehicle to carry highlighted cargo type
+STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Refit ship to carry highlighted cargo type
+STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Refit aircraft to carry highlighted cargo type
+
+STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Select type of cargo for train to carry
+STR_REFIT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Select type of cargo for road vehicle to carry
+STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Select type of cargo for ship to carry
+STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Select type of cargo for aircraft to carry
+
+STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}{TOWN} Train Depot
+STR_DEPOT_ROAD_VEHICLE_CAPTION                                  :{WHITE}{TOWN} Road Vehicle Depot
+STR_DEPOT_SHIP_CAPTION                                          :{WHITE}{TOWN} Ship Depot
+STR_DEPOT_AIRCRAFT_CAPTION                                      :{WHITE}{STATION} Aircraft Hangar
+
+STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Name train
+STR_VEHICLE_DETAILS_ROAD_VEHICLE_RENAME                         :{BLACK}Name road vehicle
+STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Name ship
+STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Name aircraft
+
+STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Name train
+STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Name road vehicle
+STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Name ship
+STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Name aircraft
+
+STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Train in the way
+STR_ERROR_ROAD_VEHICLE_IN_THE_WAY                               :{WHITE}Road vehicle in the way
+STR_ERROR_SHIP_IN_THE_WAY                                       :{WHITE}Ship in the way
+STR_ERROR_AIRCRAFT_IN_THE_WAY                                   :{WHITE}Aircraft in the way
+
+STR_ERROR_CAN_T_REFIT_TRAIN                                     :{WHITE}Can't refit train...
+STR_ERROR_CAN_T_REFIT_ROAD_VEHICLE                              :{WHITE}Can't refit road vehicle...
+STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Can't refit ship...
+STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Can't refit aircraft...
+
+STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Can't name train...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE                             :{WHITE}Can't name road vehicle...
+STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Can't name ship...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Can't name aircraft...
+
+STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Can't stop/start train...
+STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Can't stop/start road vehicle...
+STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Can't stop/start ship...
+STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Can't stop/start aircraft...
+
+STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Can't send train to depot...
+STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Can't send vehicle to depot...
+STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Can't send ship to depot...
+STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Can't send aircraft to hangar...
+
+STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Can't build railroad vehicle...
+STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Can't build road vehicle...
+STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Can't build ship...
+STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Can't build aircraft...
+
+STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Can't rename train vehicle type...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Can't rename road vehicle type...
+STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Can't rename ship type...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Can't rename aircraft type...
+
+STR_ERROR_CAN_T_SELL_TRAIN                                      :{WHITE}Can't sell railroad vehicle...
+STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Can't sell road vehicle...
+STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}Can't sell ship...
+STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}Can't sell aircraft...
+
+STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Current train action - click here to stop/start train
+STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Current vehicle action - click here to stop/start vehicle
+STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Current ship action - click here to stop/start ship
+STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Current aircraft action - click here to stop/start aircraft
+
+STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Show train's orders
+STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Show vehicle's orders
+STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Show ship's orders
+STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Show aircraft's orders
+
+STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Center main view on train's location
+STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Center main view on vehicle's location
+STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Center main view on ship's location
+STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Center main view on aircraft's location
+
+STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Send train to depot
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Send vehicle to depot
+STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Send ship to depot
+STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Send aircraft to hangar
+
+STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Show train details
+STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Show road vehicle details
+STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Show ship details
+STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Show aircraft details
+
+STR_VEHICLE_VIEW_TRAIN_REFIT_TOOLTIP                            :{BLACK}Refit train to carry a different cargo type
+STR_VEHICLE_VIEW_ROAD_VEHICLE_REFIT_TOOLTIP                     :{BLACK}Refit road vehicle to carry a different cargo type
+STR_VEHICLE_VIEW_SHIP_REFIT_TOOLTIP                             :{BLACK}Refit cargo ship to carry a different cargo type
+STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Refit aircraft to carry a different cargo type
+
+STR_HEADING_FOR_TRAIN_DEPOT                                     :{ORANGE}Heading for {TOWN} Train Depot
+STR_HEADING_FOR_TRAIN_DEPOT_VEL                                 :{ORANGE}Heading for {TOWN} Train Depot, {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT                              :{ORANGE}Heading for {TOWN} Road Depot
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_VEL                          :{ORANGE}Heading for {TOWN} Road Depot, {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT                                      :{ORANGE}Heading for {TOWN} Ship Depot
+STR_HEADING_FOR_SHIP_DEPOT_VEL                                  :{ORANGE}Heading for {TOWN} Ship Depot, {VELOCITY}
+STR_HEADING_FOR_HANGAR                                          :{ORANGE}Heading for {STATION} Hangar
+STR_HEADING_FOR_HANGAR_VEL                                      :{ORANGE}Heading for {STATION} Hangar, {VELOCITY}
+
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE                             :{LTBLUE}Service at {TOWN} Train Depot
+STR_HEADING_FOR_TRAIN_DEPOT_SERVICE_VEL                         :{LTBLUE}Service at {TOWN} Train Depot, {VELOCITY}
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE                      :{LTBLUE}Service at {TOWN} Road Depot
+STR_HEADING_FOR_ROAD_VEHICLE_DEPOT_SERVICE_VEL                  :{LTBLUE}Service at {TOWN} Road Depot, {VELOCITY}
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE                              :{LTBLUE}Service at {TOWN} Ship Depot
+STR_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL                          :{LTBLUE}Service at {TOWN} Ship Depot, {VELOCITY}
+STR_HEADING_FOR_HANGAR_SERVICE                                  :{LTBLUE}Service at {STATION} Hangar
+STR_HEADING_FOR_HANGAR_SERVICE_VEL                              :{LTBLUE}Service at {STATION} Hangar, {VELOCITY}
+
+
+STR_CLONE_TRAIN                                                 :{BLACK}Clone Train
+STR_CLONE_ROAD_VEHICLE                                          :{BLACK}Clone Vehicle
+STR_CLONE_SHIP                                                  :{BLACK}Clone Ship
+STR_CLONE_AIRCRAFT                                              :{BLACK}Clone Aircraft
+
+STR_CLONE_TRAIN_INFO                                            :{BLACK}This will build a copy of the train including all cars. Control-click will share the orders
+STR_CLONE_ROAD_VEHICLE_INFO                                     :{BLACK}This will build a copy of the road vehicle. Control-click will share the orders
+STR_CLONE_SHIP_INFO                                             :{BLACK}This will build a copy of the ship. Control-click will share the orders
+STR_CLONE_AIRCRAFT_INFO                                         :{BLACK}This will build a copy of the aircraft. Control-click will share the orders
+
+STR_CLONE_TRAIN_DEPOT_INFO                                      :{BLACK}This will build a copy of a train including all cars. Click this button and then on a train inside or outside the depot. Control-click will share the orders
+STR_CLONE_ROAD_VEHICLE_DEPOT_INFO                               :{BLACK}This will build a copy of a road vehicle. Click this button and then on a road vehicle inside or outside the depot. Control-click will share the orders
+STR_CLONE_SHIP_DEPOT_INFO                                       :{BLACK}This will build a copy of a ship. Click this button and then on a ship inside or outside the depot. Control-click will share the orders
+STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}This will build a copy of an aircraft. Click this button and then on an aircraft inside or outside the hangar. Control-click will share the orders
+
+STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}New Rail Vehicles
+STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}New Electric Rail Vehicles
+STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}New Monorail Vehicles
+STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}New Maglev Vehicles
+
+STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Rail Vehicles
+STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}New Road Vehicles
+STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}New Ships
+STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}New Aircraft
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Build Vehicle
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Build Vehicle
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Build Ship
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Build Aircraft
+
+STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Train vehicle selection list - click on vehicle for information
+STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Road vehicle selection list - click on vehicle for information
+STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Ship selection list - click on ship for information
+STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Aircraft selection list - click on aircraft for information
+
+STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Build the highlighted train vehicle
+STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Build the highlighted road vehicle
+STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Build the highlighted ship
+STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Build the highlighted aircraft
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Rename
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Rename
+STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Rename
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Rename
+
+STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Rename train vehicle type
+STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Rename road vehicle type
+STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Rename ship type
+STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Rename aircraft type
+
+STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Rename train vehicle type
+STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Rename road vehicle type
+STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Rename ship type
+STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Rename aircraft type
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_BUTTON                             :{BLACK}New Vehicles
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_BUTTON                      :{BLACK}New Vehicles
+STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}New Ships
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}New Aircraft
+
+STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Trains - click on train for info., drag vehicle to add/remove from train
+STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Vehicles - click on vehicle for information
+STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Ships - click on ship for information
+STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Aircraft - click on aircraft for information
+
+STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Build new train vehicle
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_TOOLTIP                     :{BLACK}Build new road vehicle
+STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Build new ship
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Build new aircraft
+
+STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Drag train vehicle to here to sell it
+STR_DEPOT_ROAD_VEHICLE_SELL_TOOLTIP                             :{BLACK}Drag road vehicle to here to sell it
+STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Drag ship to here to sell it
+STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Drag aircraft to here to sell it
+
+STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Center main view on train depot location
+STR_DEPOT_ROAD_VEHICLE_LOCATION_TOOLTIP                         :{BLACK}Center main view on road vehicle depot location
+STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Center main view on ship depot location
+STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Center main view on hangar location
+
 
 ### depot strings
 STR_DEPOT_SELL_CONFIRMATION_TEXT                                :{YELLOW}You are about to sell all the vehicles in the depot. Are you sure?
 STR_DEPOT_WRONG_DEPOT_TYPE                                      :Wrong depot type
 
 STR_DEPOT_SELL_ALL_BUTTON_TRAIN_TIP                             :{BLACK}Sell all trains in the depot
-STR_DEPOT_SELL_ALL_BUTTON_ROADVEH_TIP                           :{BLACK}Sell all road vehicles in the depot
+STR_DEPOT_SELL_ALL_BUTTON_ROAD_VEHICLE_TIP                      :{BLACK}Sell all road vehicles in the depot
 STR_DEPOT_SELL_ALL_BUTTON_SHIP_TIP                              :{BLACK}Sell all ships in the depot
 STR_DEPOT_SELL_ALL_BUTTON_AIRCRAFT_TIP                          :{BLACK}Sell all aircraft in the hangar
 
 STR_DEPOT_VEHICLE_ORDER_LIST_TRAIN_TIP                          :{BLACK}Get a list of all trains with the current depot in their orders
-STR_DEPOT_VEHICLE_ORDER_LIST_ROADVEH_TIP                        :{BLACK}Get a list of all road vehicles with the current depot in their orders
+STR_DEPOT_VEHICLE_ORDER_LIST_ROAD_VEHICLE_TIP                   :{BLACK}Get a list of all road vehicles with the current depot in their orders
 STR_DEPOT_VEHICLE_ORDER_LIST_SHIP_TIP                           :{BLACK}Get a list of all ships with the current depot in their orders
 STR_DEPOT_VEHICLE_ORDER_LIST_AIRCRAFT_TIP                       :{BLACK}Get a list of all aircraft with any hangar at this airport in their orders
 
 STR_DEPOT_AUTOREPLACE_TRAIN_TIP                                 :{BLACK}Autoreplace all trains in the depot
-STR_DEPOT_AUTOREPLACE_ROADVEH_TIP                               :{BLACK}Autoreplace all road vehicles in the depot
+STR_DEPOT_AUTOREPLACE_ROAD_VEHICLE_TIP                          :{BLACK}Autoreplace all road vehicles in the depot
 STR_DEPOT_AUTOREPLACE_SHIP_TIP                                  :{BLACK}Autoreplace all ships in the depot
 STR_DEPOT_AUTOREPLACE_AIRCRAFT_TIP                              :{BLACK}Autoreplace all aircraft in the hangar
-
-STR_VEHICLE_LIST_TRAIN_DEPOT                                    :{BLACK}{STRING} - {COMMA} Train{P "" s}
-STR_VEHICLE_LIST_ROADVEH_DEPOT                                  :{BLACK}{STRING} - {COMMA} Road Vehicle{P "" s}
-STR_VEHICLE_LIST_SHIP_DEPOT                                     :{BLACK}{STRING} - {COMMA} Ship{P "" s}
-STR_VEHICLE_LIST_AIRCRAFT_DEPOT                                 :{BLACK}{STRING} - {COMMA} Aircraft
 
 STR_REPLACE_VEHICLES_WHITE                                      :{WHITE}Replace {STRING}
 STR_REPLACE_VEHICLES_START                                      :{BLACK}Start Replacing Vehicles
@@ -3237,6 +3257,7 @@ STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Car remo
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Make autoreplace keep the length of a train the same by removing cars (starting at the front), if replacing the engine would make the train longer.
 STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Replacing: {ORANGE}{SKIP}{SKIP}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Switch between engine and car replacement windows
+
 STR_RAIL_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Vehicle is not available
 STR_ROAD_VEHICLE_NOT_AVAILABLE                                  :{WHITE}Vehicle is not available
 STR_SHIP_NOT_AVAILABLE                                          :{WHITE}Ship is not available
@@ -3246,12 +3267,12 @@ STR_ENGINES                                                     :Engines
 STR_WAGONS                                                      :Cars
 
 STR_MASS_STOP_DEPOT_TRAIN_TIP                                   :{BLACK}Click to stop all trains inside the depot
-STR_MASS_STOP_DEPOT_ROADVEH_TIP                                 :{BLACK}Click to stop all road vehicles inside the depot
+STR_MASS_STOP_DEPOT_ROAD_VEHICLE_TIP                            :{BLACK}Click to stop all road vehicles inside the depot
 STR_MASS_STOP_DEPOT_SHIP_TIP                                    :{BLACK}Click to stop all ships inside the depot
 STR_MASS_STOP_HANGAR_TIP                                        :{BLACK}Click to stop all aircraft inside the hangar
 
 STR_MASS_START_DEPOT_TRAIN_TIP                                  :{BLACK}Click to start all trains inside the depot
-STR_MASS_START_DEPOT_ROADVEH_TIP                                :{BLACK}Click to start all the road vehicles inside the depot
+STR_MASS_START_DEPOT_ROAD_VEHICLE_TIP                           :{BLACK}Click to start all the road vehicles inside the depot
 STR_MASS_START_DEPOT_SHIP_TIP                                   :{BLACK}Click to start all ships inside the depot
 STR_MASS_START_HANGAR_TIP                                       :{BLACK}Click to start all aircraft inside the hangar
 
@@ -3387,17 +3408,6 @@ STR_MEASURE_AREA                                                :{BLACK}Area: {N
 STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Length: {NUM}{}Height difference: {NUM} m
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Area: {NUM} x {NUM}{}Height difference: {NUM} m
 
-############ Date formatting
-STR_DATE_TINY                                                   :{STRING}-{STRING}-{NUM}
-STR_DATE_SHORT                                                  :{STRING} {NUM}
-STR_DATE_LONG                                                   :{STRING} {STRING} {NUM}
-STR_DATE_ISO                                                    :{2:NUM}-{1:STRING}-{0:STRING}
-
-STR_JUST_DATE_TINY                                              :{DATE_TINY}
-STR_JUST_DATE_LONG                                              :{DATE_LONG}
-STR_JUST_DATE_ISO                                               :{DATE_ISO}
-########
-
 STR_FEEDER_CARGO_VALUE                                          :{BLACK}Transfer Credits: {LTBLUE}{CURRENCY}
 STR_DRIVE_THROUGH_ERROR_ON_TOWN_ROAD                            :{WHITE}...this is a town owned road
 STR_DRIVE_THROUGH_ERROR_DIRECTION                               :{WHITE}...road facing in the wrong direction
@@ -3422,24 +3432,19 @@ STR_PERCENT_UP_DOWN_SMALL                                       :{TINYFONT}{WHIT
 STR_PERCENT_UP_DOWN                                             :{WHITE}{NUM}%{UPARROW}{DOWNARROW}
 
 ##### Mass Order
-STR_GROUP_NAME_FORMAT                                           :Group {COMMA}
 STR_GROUP_TINY_NAME                                             :{TINYFONT}{GROUP}
 STR_GROUP_ALL_TRAINS                                            :All trains
-STR_GROUP_ALL_ROADS                                             :All road vehicles
+STR_GROUP_ALL_ROAD_VEHICLES                                     :All road vehicles
 STR_GROUP_ALL_SHIPS                                             :All ships
 STR_GROUP_ALL_AIRCRAFTS                                         :All aircraft
 STR_GROUP_DEFAULT_TRAINS                                        :Ungrouped trains
-STR_GROUP_DEFAULT_ROADS                                         :Ungrouped road vehicles
+STR_GROUP_DEFAULT_ROAD_VEHICLES                                 :Ungrouped road vehicles
 STR_GROUP_DEFAULT_SHIPS                                         :Ungrouped ships
 STR_GROUP_DEFAULT_AIRCRAFTS                                     :Ungrouped aircraft
 STR_GROUP_TINY_NUM                                              :{TINYFONT}{COMMA}
 STR_GROUP_ADD_SHARED_VEHICLE                                    :Add shared vehicles
 STR_GROUP_REMOVE_ALL_VEHICLES                                   :Remove all vehicles
 
-STR_GROUP_TRAINS_CAPTION                                        :{WHITE}{GROUP} - {COMMA} Train{P "" s}
-STR_GROUP_ROADVEH_CAPTION                                       :{WHITE}{GROUP} - {COMMA} Road Vehicle{P "" s}
-STR_GROUP_SHIPS_CAPTION                                         :{WHITE}{GROUP} - {COMMA} Ship{P "" s}
-STR_GROUP_AIRCRAFTS_CAPTION                                     :{WHITE}{GROUP} - {COMMA} Aircraft
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Rename a group
 
 STR_GROUP_CAN_T_CREATE                                          :{WHITE}Can't create group...
@@ -3455,12 +3460,35 @@ STR_GROUP_DELETE_TIP                                            :{BLACK}Delete t
 STR_GROUP_RENAME_TIP                                            :{BLACK}Rename the selected group
 STR_GROUP_REPLACE_PROTECTION_TIP                                :{BLACK}Click to protect this group from global autoreplace
 
+#### String control codes and their formatting
 STR_COMPANY_NAME                                                :{COMPANY}
 STR_ENGINE_NAME                                                 :{ENGINE}
 STR_GROUP_NAME                                                  :{GROUP}
+STR_INDUSTRY_NAME                                               :{INDUSTRY}
 STR_PRESIDENT_NAME                                              :{PRESIDENTNAME}
 STR_SIGN_NAME                                                   :{SIGN}
+STR_STATION_NAME                                                :{STATION}
+STR_TOWN_NAME                                                   :{TOWN}
 STR_VEHICLE_NAME                                                :{VEHICLE}
+STR_WAYPOINT_NAME                                               :{WAYPOINT}
+
+STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_INT                                                    :{NUM}
+STR_JUST_DATE_TINY                                              :{DATE_TINY}
+STR_JUST_DATE_SHORT                                             :{DATE_SHORT}
+STR_JUST_DATE_LONG                                              :{DATE_LONG}
+STR_JUST_DATE_ISO                                               :{DATE_ISO}
+STR_JUST_STRING                                                 :{STRING}
+STR_JUST_RAW_STRING                                             :{STRING}
+
+STR_FORMAT_DATE_TINY                                            :{STRING}-{STRING}-{NUM}
+STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
+STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
+STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
+
+STR_FORMAT_COMPANY_NUM                                          :(Company {COMMA})
+STR_FORMAT_GROUP_NAME                                           :Group {COMMA}
+STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
 
 STR_NAME_MUST_BE_UNIQUE                                         :{WHITE}Name must be unique
 
@@ -3551,7 +3579,7 @@ STR_OSK_KEYBOARD_LAYOUT_CAPS                                    :~!@#$%^&*()_+|Q
 ########
 
 ############ AI GUI
-STR_AI_SETTINGS_BUTTON                                          :{BLACK}AI settings
+STR_AI_SETTINGS_BUTTON                                          :{BLACK}AI Settings
 STR_AI_SETTINGS_BUTTON_TIP                                      :{BLACK}Display AI settings
 STR_AI_DEBUG                                                    :{WHITE}AI Debug
 STR_AI_DEBUG_NAME_TIP                                           :{BLACK}Name of the AI
@@ -3642,7 +3670,7 @@ STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... conn
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... file not writable
 STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Could not decompress the downloaded file
 
-STR_CONTENT_INTRO_BUTTON                                        :{BLACK}Check online content
+STR_CONTENT_INTRO_BUTTON                                        :{BLACK}Check Online Content
 STR_CONTENT_INTRO_BUTTON_TIP                                    :{BLACK}Check for new and updated content to download
 STR_CONTENT_INTRO_MISSING_BUTTON                                :{BLACK}Find missing content online
 STR_CONTENT_INTRO_MISSING_BUTTON_TIP                            :{BLACK}Check whether the missing content can be found online

@@ -482,7 +482,7 @@ static int GetTrainAcceleration(Train *v, bool mode)
 	assert(max_speed == GetTrainCurveSpeedLimit(v)); // safety check, will be removed later
 	int speed = v->cur_speed * 10 / 16; // km-ish/h -> mp/h
 
-	if (IsTileType(v->tile, MP_STATION) && v->IsFrontEngine()) {
+	if (IsRailwayStationTile(v->tile) && v->IsFrontEngine()) {
 		StationID sid = GetStationIndex(v->tile);
 		if (v->current_order.ShouldStopAtStation(v, sid)) {
 			int station_ahead;
@@ -704,7 +704,7 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 			if (w->tile == tile && w->IsFreeWagon() &&
 					w->engine_type == engine &&
 					!(w->vehstatus & VS_CRASHED)) {
-				u = GetLastVehicleInChain(w);
+				u = w->Last();
 				break;
 			}
 		}
@@ -1105,9 +1105,9 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	}
 
 	/* if an articulated part is being handled, deal with its parent vehicle */
-	while (src->IsArticulatedPart()) src = src->Previous();
+	src = src->GetFirstEnginePart();
 	if (dst != NULL) {
-		while (dst->IsArticulatedPart()) dst = dst->Previous();
+		dst = dst->GetFirstEnginePart();
 	}
 
 	/* don't move the same vehicle.. */
@@ -1445,7 +1445,7 @@ CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
 
-	while (v->IsArticulatedPart()) v = v->Previous();
+	v = v->GetFirstEnginePart();
 	Train *first = v->First();
 
 	/* make sure the vehicle is stopped in the depot */
@@ -1644,6 +1644,10 @@ static void MarkTrainAsStuck(Train *v)
 	if (!HasBit(v->flags, VRF_TRAIN_STUCK)) {
 		/* It is the first time the problem occured, set the "train stuck" flag. */
 		SetBit(v->flags, VRF_TRAIN_STUCK);
+
+		/* When loading the vehicle is already stopped. No need to change that. */
+		if (v->current_order.IsType(OT_LOADING)) return;
+
 		v->load_unload_time_rem = 0;
 
 		/* Stop train */
@@ -1793,7 +1797,7 @@ void UpdateLevelCrossing(TileIndex tile, bool sound)
 	assert(IsLevelCrossingTile(tile));
 
 	/* train on crossing || train approaching crossing || reserved */
-	bool new_state = HasVehicleOnPos(tile, NULL, &TrainOnTileEnum) || TrainApproachingCrossing(tile) || GetCrossingReservation(tile);
+	bool new_state = HasVehicleOnPos(tile, NULL, &TrainOnTileEnum) || TrainApproachingCrossing(tile) || HasCrossingReservation(tile);
 
 	if (new_state != IsCrossingBarred(tile)) {
 		if (new_state && sound) {
@@ -1829,7 +1833,7 @@ static void AdvanceWagonsBeforeSwap(Train *v)
 {
 	Train *base = v;
 	Train *first = base; // first vehicle to move
-	Train *last = Train::From(GetLastVehicleInChain(v)); // last vehicle to move
+	Train *last = v->Last(); // last vehicle to move
 	uint length = CountVehiclesInChain(v);
 
 	while (length > 2) {
@@ -1878,7 +1882,7 @@ static void AdvanceWagonsAfterSwap(Train *v)
 
 	Train *base = v;
 	Train *first = base; // first vehicle to move
-	Train *last = Train::From(GetLastVehicleInChain(v)); // last vehicle to move
+	Train *last = v->Last(); // last vehicle to move
 	uint length = CountVehiclesInChain(v);
 
 	/* we have to make sure all wagons that leave a depot because of train reversing are moved coorectly
@@ -2219,7 +2223,7 @@ static TrainFindDepotData FindClosestTrainDepot(Train *v, int max_distance)
 		} break;
 
 		case VPF_NPF: { // NPF
-			const Vehicle *last = GetLastVehicleInChain(v);
+			const Vehicle *last = v->Last();
 			Trackdir trackdir = v->GetVehicleTrackdir();
 			Trackdir trackdir_rev = ReverseTrackdir(last->GetVehicleTrackdir());
 
@@ -2455,7 +2459,7 @@ static bool CheckTrainStayInDepot(Train *v)
 		v->load_unload_time_rem = 0;
 
 		seg_state = _settings_game.pf.reserve_paths ? SIGSEG_PBS : UpdateSignalsOnSegment(v->tile, INVALID_DIAGDIR, v->owner);
-		if (seg_state == SIGSEG_FULL || GetDepotWaypointReservation(v->tile)) {
+		if (seg_state == SIGSEG_FULL || HasDepotReservation(v->tile)) {
 			/* Full and no PBS signal in block or depot reserved, can't exit. */
 			InvalidateWindowClasses(WC_TRAINS_LIST);
 			return true;
@@ -2467,8 +2471,8 @@ static bool CheckTrainStayInDepot(Train *v)
 	/* We are leaving a depot, but have to go to the exact same one; re-enter */
 	if (v->current_order.IsType(OT_GOTO_DEPOT) && v->tile == v->dest_tile) {
 		/* We need to have a reservation for this to work. */
-		if (GetDepotWaypointReservation(v->tile)) return true;
-		SetDepotWaypointReservation(v->tile, true);
+		if (HasDepotReservation(v->tile)) return true;
+		SetDepotReservation(v->tile, true);
 		VehicleEnterDepot(v);
 		return true;
 	}
@@ -2481,7 +2485,7 @@ static bool CheckTrainStayInDepot(Train *v)
 		return true;
 	}
 
-	SetDepotWaypointReservation(v->tile, true);
+	SetDepotReservation(v->tile, true);
 	if (_settings_client.gui.show_track_reservation) MarkTileDirtyByTile(v->tile);
 
 	VehicleServiceInDepot(v);
@@ -3133,7 +3137,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 	 * at the depot tile itself but starts from the next tile. If we are still
 	 * inside the depot, a depot reservation can never be ours. */
 	if (v->track == TRACK_BIT_DEPOT) {
-		if (GetDepotWaypointReservation(v->tile)) {
+		if (HasDepotReservation(v->tile)) {
 			if (mark_as_stuck) MarkTrainAsStuck(v);
 			return false;
 		} else {
@@ -3177,7 +3181,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 
 	/* If we are in a depot, tentativly reserve the depot. */
 	if (v->track == TRACK_BIT_DEPOT) {
-		SetDepotWaypointReservation(v->tile, true);
+		SetDepotReservation(v->tile, true);
 		if (_settings_client.gui.show_track_reservation) MarkTileDirtyByTile(v->tile);
 	}
 
@@ -3192,7 +3196,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 
 	if (!res_made) {
 		/* Free the depot reservation as well. */
-		if (v->track == TRACK_BIT_DEPOT) SetDepotWaypointReservation(v->tile, false);
+		if (v->track == TRACK_BIT_DEPOT) SetDepotReservation(v->tile, false);
 		return false;
 	}
 
@@ -3225,7 +3229,7 @@ static bool CheckReverseTrain(Train *v)
 		case VPF_NPF: { // NPF
 			NPFFindStationOrTileData fstd;
 			NPFFoundTargetData ftd;
-			Vehicle *last = GetLastVehicleInChain(v);
+			Vehicle *last = v->Last();
 
 			NPFFillWithOrderData(&fstd, v);
 
@@ -3889,7 +3893,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 
 					/* If we are approching a crossing that is reserved, play the sound now. */
 					TileIndex crossing = TrainApproachingCrossingTile(v);
-					if (crossing != INVALID_TILE && GetCrossingReservation(crossing)) SndPlayTileFx(SND_0E_LEVEL_CROSSING, crossing);
+					if (crossing != INVALID_TILE && HasCrossingReservation(crossing)) SndPlayTileFx(SND_0E_LEVEL_CROSSING, crossing);
 
 					/* Always try to extend the reservation when entering a tile. */
 					CheckNextTrainTile(v);
@@ -4440,12 +4444,10 @@ static bool TrainLocoHandler(Train *v, bool mode)
 
 			OrderType order_type = v->current_order.GetType();
 			/* Do not skip waypoints (incl. 'via' stations) when passing through at full speed. */
-			if ((order_type == OT_GOTO_WAYPOINT &&
-						v->dest_tile == v->tile) ||
-					(order_type == OT_GOTO_STATION &&
+			if ((order_type == OT_GOTO_WAYPOINT || order_type == OT_GOTO_STATION) &&
 						(v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) &&
 						IsTileType(v->tile, MP_STATION) &&
-						v->current_order.GetDestination() == GetStationIndex(v->tile))) {
+						v->current_order.GetDestination() == GetStationIndex(v->tile)) {
 				ProcessOrders(v);
 			}
 		}

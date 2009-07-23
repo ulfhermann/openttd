@@ -25,6 +25,7 @@
 #include "network/network.h"
 #include "settings_type.h"
 #include "station_base.h"
+#include "waypoint_base.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -228,12 +229,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 					SetDParam(3, Depot::Get(order->GetDestination())->town_index);
 				}
 
-				switch (v->type) {
-					case VEH_TRAIN: SetDParam(4, STR_ORDER_TRAIN_DEPOT); break;
-					case VEH_ROAD:  SetDParam(4, STR_ORDER_ROAD_DEPOT); break;
-					case VEH_SHIP:  SetDParam(4, STR_ORDER_SHIP_DEPOT); break;
-					default: NOT_REACHED();
-				}
+				SetDParam(4, STR_ORDER_TRAIN_DEPOT + v->type);
 			}
 
 			if (order->GetDepotOrderType() & ODTFB_SERVICE) {
@@ -253,15 +249,8 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 			break;
 
 		case OT_GOTO_WAYPOINT:
-			if (v->type == VEH_TRAIN) {
-				SetDParam(1, (order->GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS) ? STR_GO_NON_STOP_TO_WAYPOINT : STR_GO_TO_WAYPOINT);
-				SetDParam(2, order->GetDestination());
-			} else {
-				SetDParam(1, STR_GO_TO_STATION);
-				SetDParam(2, STR_ORDER_GO_VIA);
-				SetDParam(3, order->GetDestination());
-				SetDParam(4, STR_EMPTY);
-			}
+			SetDParam(1, (order->GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS) ? STR_GO_NON_STOP_TO_WAYPOINT : STR_GO_TO_WAYPOINT);
+			SetDParam(2, order->GetDestination());
 			break;
 
 		case OT_CONDITIONAL:
@@ -357,7 +346,7 @@ static Order GetOrderCmdFromTile(const Vehicle *v, TileIndex tile)
 		return order;
 	}
 
-	if (IsBuoyTile(tile) && v->type == VEH_SHIP) {
+	if ((IsBuoyTile(tile) && v->type == VEH_SHIP) || (IsRailWaypointTile(tile) && v->type == VEH_TRAIN)) {
 		order.MakeGoToWaypoint(GetStationIndex(tile));
 		return order;
 	}
@@ -775,12 +764,9 @@ public:
 			this->SetWidgetLoweredState(ORDER_WIDGET_NON_STOP, order->GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS);
 			switch (order->GetType()) {
 				case OT_GOTO_STATION:
-					if (!Station::Get(order->GetDestination())->IsBuoy()) {
-						this->SetWidgetLoweredState(ORDER_WIDGET_FULL_LOAD, order->GetLoadType() == OLF_FULL_LOAD_ANY);
-						this->SetWidgetLoweredState(ORDER_WIDGET_UNLOAD, order->GetUnloadType() == OUFB_UNLOAD);
-						break;
-					}
-					/* Fall-through */
+					this->SetWidgetLoweredState(ORDER_WIDGET_FULL_LOAD, order->GetLoadType() == OLF_FULL_LOAD_ANY);
+					this->SetWidgetLoweredState(ORDER_WIDGET_UNLOAD, order->GetUnloadType() == OUFB_UNLOAD);
+					break;
 
 				case OT_GOTO_WAYPOINT:
 					this->DisableWidget(ORDER_WIDGET_FULL_LOAD_DROPDOWN);
@@ -988,7 +974,7 @@ public:
 				uint value = order->GetConditionValue();
 				if (order->GetConditionVariable() == OCV_MAX_SPEED) value = ConvertSpeedToDisplaySpeed(value);
 				SetDParam(0, value);
-				ShowQueryString(STR_CONFIG_SETTING_INT32, STR_ORDER_CONDITIONAL_VALUE_CAPT, 5, 100, this, CS_NUMERAL, QSF_NONE);
+				ShowQueryString(STR_JUST_INT, STR_ORDER_CONDITIONAL_VALUE_CAPT, 5, 100, this, CS_NUMERAL, QSF_NONE);
 			} break;
 
 			case ORDER_WIDGET_SHARED_ORDER_LIST:
