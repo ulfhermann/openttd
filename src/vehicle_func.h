@@ -23,8 +23,6 @@
 typedef Vehicle *VehicleFromPosProc(Vehicle *v, void *data);
 
 void VehicleServiceInDepot(Vehicle *v);
-Vehicle *GetLastVehicleInChain(Vehicle *v);
-const Vehicle *GetLastVehicleInChain(const Vehicle *v);
 uint CountVehiclesInChain(const Vehicle *v);
 void FindVehicleOnPos(TileIndex tile, void *data, VehicleFromPosProc *proc);
 void FindVehicleOnPosXY(int x, int y, void *data, VehicleFromPosProc *proc);
@@ -45,7 +43,6 @@ CommandCost GetRefitCost(EngineID engine_type);
 void ViewportAddVehicles(DrawPixelInfo *dpi);
 
 void ShowNewGrfVehicleError(EngineID engine, StringID part1, StringID part2, GRFBugs bug_type, bool critical);
-StringID VehicleInTheWayErrMsg(const Vehicle *v);
 bool HasVehicleOnTunnelBridge(TileIndex tile, TileIndex endtile, const Vehicle *ignore = NULL);
 
 void DecreaseVehicleValue(Vehicle *v);
