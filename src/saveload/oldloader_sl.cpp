@@ -204,18 +204,20 @@ static bool FixTTOMapArray()
 {
 	for (TileIndex t = 0; t < OLD_MAP_SIZE; t++) {
 		TileType tt = GetTileType(t);
+		if (tt == 11) {
+			/* TTO has a different way of storing monorail.
+			 * Instead of using bits in m3 it uses a different tile type. */
+			_m[t].m3 = 1; // rail type = monorail (in TTD)
+			SetTileType(t, MP_RAILWAY);
+			_m[t].m2 = 1; // set monorail ground to RAIL_GROUND_GRASS
+			tt = MP_RAILWAY;
+		}
 
 		switch (tt) {
 			case MP_CLEAR:
 				break;
 
 			case MP_RAILWAY:
-			case 11: // monorail
-				if (tt == 11) {
-					_m[t].m3 = 1; // rail type = monorail
-					_m[t].type_height &= 0x1F; // -> MP_RAILWAY
-					_m[t].m2 = 1; // set monorail ground to RAIL_GROUND_GRASS
-				}
 				switch (GB(_m[t].m5, 6, 2)) {
 					case 0: // RAIL_TILE_NORMAL
 						break;
@@ -1345,12 +1347,12 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 
 			switch (_old_string_id) {
 				case 0x0000: break; // empty (invalid vehicles)
-				case 0x0006: _old_string_id  = STR_SV_EMPTY;         break; // empty (special vehicles)
-				case 0x8495: _old_string_id  = STR_SV_TRAIN_NAME;    break; // "Train X"
-				case 0x8842: _old_string_id  = STR_SV_ROADVEH_NAME;  break; // "Road Vehicle X"
-				case 0x8C3B: _old_string_id  = STR_SV_SHIP_NAME;     break; // "Ship X"
-				case 0x9047: _old_string_id  = STR_SV_AIRCRAFT_NAME; break; // "Aircraft X"
-				default:     _old_string_id += 0x2A00;               break; // custom name
+				case 0x0006: _old_string_id  = STR_SV_EMPTY;              break; // empty (special vehicles)
+				case 0x8495: _old_string_id  = STR_SV_TRAIN_NAME;         break; // "Train X"
+				case 0x8842: _old_string_id  = STR_SV_ROAD_VEHICLE_NAME;  break; // "Road Vehicle X"
+				case 0x8C3B: _old_string_id  = STR_SV_SHIP_NAME;          break; // "Ship X"
+				case 0x9047: _old_string_id  = STR_SV_AIRCRAFT_NAME;      break; // "Aircraft X"
+				default:     _old_string_id += 0x2A00;                    break; // custom name
 			}
 
 			_old_vehicle_names[_current_vehicle_id] = _old_string_id;
