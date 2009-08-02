@@ -387,17 +387,17 @@ bool AfterLoadGame()
 	if (CheckSavegameVersion(2)) {
 		Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (st->train_tile != 0 && st->trainst_h == 0) {
+			if (st->train_station.tile != 0 && st->train_station.h == 0) {
 				uint n = _savegame_type == SGT_OTTD ? 4 : 3; // OTTD uses 4 bits per dimensions, TTD 3 bits
-				uint w = GB(st->trainst_w, n, n);
-				uint h = GB(st->trainst_w, 0, n);
+				uint w = GB(st->train_station.w, n, n);
+				uint h = GB(st->train_station.w, 0, n);
 
-				if (GetRailStationAxis(st->train_tile) != AXIS_X) Swap(w, h);
+				if (GetRailStationAxis(st->train_station.tile) != AXIS_X) Swap(w, h);
 
-				st->trainst_w = w;
-				st->trainst_h = h;
+				st->train_station.w = w;
+				st->train_station.h = h;
 
-				assert(GetStationIndex(st->train_tile + TileDiffXY(w - 1, h - 1)) == st->index);
+				assert(GetStationIndex(st->train_station.tile + TileDiffXY(w - 1, h - 1)) == st->index);
 			}
 		}
 	}
@@ -452,9 +452,9 @@ bool AfterLoadGame()
 		/* no station is determined by 'tile == INVALID_TILE' now (instead of '0') */
 		Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (st->airport_tile == 0) st->airport_tile = INVALID_TILE;
-			if (st->dock_tile    == 0) st->dock_tile    = INVALID_TILE;
-			if (st->train_tile   == 0) st->train_tile   = INVALID_TILE;
+			if (st->airport_tile       == 0) st->airport_tile = INVALID_TILE;
+			if (st->dock_tile          == 0) st->dock_tile    = INVALID_TILE;
+			if (st->train_station.tile == 0) st->train_station.tile   = INVALID_TILE;
 		}
 
 		/* the same applies to Company::location_of_HQ */
@@ -561,7 +561,7 @@ bool AfterLoadGame()
 					if (HasBit(_m[t].m6, 3)) SetBit(_m[t].m6, 2);
 					StationGfx gfx = GetStationGfx(t);
 					StationType st;
-					if (       IsInsideMM(gfx,   0,   8)) { // Railway station
+					if (       IsInsideMM(gfx,   0,   8)) { // Rail station
 						st = STATION_RAIL;
 						SetStationGfx(t, gfx - 0);
 					} else if (IsInsideMM(gfx,   8,  67)) { // Airport
@@ -573,13 +573,13 @@ bool AfterLoadGame()
 					} else if (IsInsideMM(gfx,  71,  75)) { // Bus
 						st = STATION_BUS;
 						SetStationGfx(t, gfx - 71);
-					} else if (gfx == 75) {                    // Oil rig
+					} else if (gfx == 75) {                 // Oil rig
 						st = STATION_OILRIG;
 						SetStationGfx(t, gfx - 75);
 					} else if (IsInsideMM(gfx,  76,  82)) { // Dock
 						st = STATION_DOCK;
 						SetStationGfx(t, gfx - 76);
-					} else if (gfx == 82) {                    // Buoy
+					} else if (gfx == 82) {                 // Buoy
 						st = STATION_BUOY;
 						SetStationGfx(t, gfx - 82);
 					} else if (IsInsideMM(gfx,  83, 168)) { // Extended airport
@@ -605,11 +605,14 @@ bool AfterLoadGame()
 	for (TileIndex t = 0; t < map_size; t++) {
 		switch (GetTileType(t)) {
 			case MP_STATION: {
-				Station *st = Station::GetByTile(t);
-				if (st == NULL) break;
+				BaseStation *bst = BaseStation::GetByTile(t);
 
-				/* Set up station spread; waypoints do not have one */
-				st->rect.BeforeAddTile(t, StationRect::ADD_FORCE);
+				/* Set up station spread */
+				bst->rect.BeforeAddTile(t, StationRect::ADD_FORCE);
+
+				/* Waypoints don't have road stops/oil rigs in the old format */
+				if (!Station::IsExpected(bst)) break;
+				Station *st = Station::From(bst);
 
 				switch (GetStationType(t)) {
 					case STATION_TRUCK:
@@ -959,7 +962,7 @@ bool AfterLoadGame()
 					break;
 
 				case MP_STATION:
-					if (IsRailwayStation(t)) {
+					if (HasStationRail(t)) {
 						SetRailType(t, UpdateRailType(GetRailType(t), min_rail));
 					}
 					break;
@@ -1654,7 +1657,7 @@ bool AfterLoadGame()
 					break;
 
 				case MP_STATION: // Clear PBS reservation on station
-					if (IsRailwayStation(t)) SetRailwayStationReservation(t, false);
+					if (HasStationRail(t)) SetRailStationReservation(t, false);
 					break;
 
 				case MP_TUNNELBRIDGE: // Clear PBS reservation on tunnels/birdges
@@ -1876,6 +1879,22 @@ bool AfterLoadGame()
 				}
 			}
 			s->cargo_type = CT_INVALID;
+		}
+	}
+
+	if (CheckSavegameVersion(124)) {
+		/* The train station tile area was added */
+		Waypoint *wp;
+		FOR_ALL_WAYPOINTS(wp) {
+			if (wp->facilities & FACIL_TRAIN) {
+				wp->train_station.tile = wp->xy;
+				wp->train_station.w = 1;
+				wp->train_station.h = 1;
+			} else {;
+				wp->train_station.tile = INVALID_TILE;
+				wp->train_station.w = 0;
+				wp->train_station.h = 0;
+			}
 		}
 	}
 

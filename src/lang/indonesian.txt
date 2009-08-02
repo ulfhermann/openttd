@@ -154,8 +154,6 @@ STR_ABBREV_PLASTIC                                              :{TINYFONT}PL
 STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}MB
 STR_ABBREV_NONE                                                 :{TINYFONT}TANPA
 STR_ABBREV_ALL                                                  :{TINYFONT}SMA
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
-STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SMALLMAP_CAPTION                                            :{WHITE}Peta - {STRING}
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Pengaturan permainan
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Pesan
@@ -167,17 +165,11 @@ STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Hak Cipt
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD versi {REV}
 STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 Tim OpenTTD
 
-STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
-STR_SILVER_CROSS                                                :{SILVER}{CROSS}
 STR_QUIT_CAPTION                                                :{WHITE}Keluar
 STR_YES                                                         :{BLACK}Ya
 STR_NO                                                          :{BLACK}Tidak
 STR_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD                       :{YELLOW}Anda yakin ingin keluar dari OpenTTD dan kembali ke {STRING}?
-STR_BLACK_1                                                     :{BLACK}1
-STR_BLACK_2                                                     :{BLACK}2
-STR_BLACK_3                                                     :{BLACK}3
-STR_BLACK_4                                                     :{BLACK}4
-STR_BLACK_5                                                     :{BLACK}5
+
 STR_JUST_NOTHING                                                :Tidak ada
 STR_COLOUR_DARK_BLUE                                            :Biru tua
 STR_COLOUR_PALE_GREEN                                           :Hijau pucat
@@ -196,8 +188,6 @@ STR_COLOUR_BROWN                                                :Coklat
 STR_COLOUR_GREY                                                 :Abu-abu
 STR_COLOUR_WHITE                                                :Putih
 STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}Terlalu banyak kendaraan dalam permainan
-STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
-STR_RED_COMMA                                                   :{RED}{COMMA}
 STR_BUTTON_LOCATION                                             :{BLACK}Lokasi
 STR_SMALLMAP_TYPE_CONTOURS                                      :Kontur
 STR_SMALLMAP_TYPE_VEHICLES                                      :Kendaraan
@@ -323,12 +313,13 @@ STR_SORT_CRITERIA_TIP                                           :{BLACK}Pilih kr
 STR_FILTER_CRITERIA_TIP                                         :{BLACK}Pilih kriteria
 STR_SORT_BY                                                     :{BLACK}Urutkan
 
+### The first three are also used as 'Sort by' buttons, the rest only in dropdowns
 STR_SORT_BY_POPULATION                                          :{BLACK}Populasi
+STR_SORT_BY_NAME                                                :{BLACK}Nama
+STR_SORT_BY_DATE                                                :{BLACK}Tanggal
 STR_SORT_BY_PRODUCTION                                          :Produksi
 STR_SORT_BY_TYPE                                                :Jenis
 STR_SORT_BY_TRANSPORTED                                         :Terkirim
-STR_SORT_BY_NAME                                                :{BLACK}Nama
-STR_SORT_BY_DATE                                                :{BLACK}Tanggal
 STR_SORT_BY_NUMBER                                              :Nomer
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Keuntungan tahun lalu
 STR_SORT_BY_PROFIT_THIS_YEAR                                    :Keuntungan Tahun Ini
@@ -351,6 +342,7 @@ STR_SORT_BY_INTRO_DATE                                          :Tanggal Peluncu
 STR_SORT_BY_RUNNING_COST                                        :Biaya Operasional
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Daya/Biaya Ops.
 STR_SORT_BY_CARGO_CAPACITY                                      :Kapasitas kargo
+
 STR_NO_WAITING_CARGO                                            :{BLACK}Tidak ada barang yang sedang menunggu
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}Pilih semua fasilitas
 STR_SELECT_ALL_TYPES                                            :{BLACK}Pilih semua jenis kargo (termasuk kargo tanpa jeda)
@@ -369,21 +361,6 @@ STR_SEND_TRAIN_TO_DEPOT                                         :Kirim ke depo
 STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Kirim ke depo
 STR_SEND_SHIP_TO_DEPOT                                          :Kirim ke Galangan
 STR_SEND_AIRCRAFT_TO_HANGAR                                     :Kirim ke Hangar
-
-############ range for months starts
-STR_MONTH_ABBREV_JAN                                            :Jan
-STR_MONTH_ABBREV_FEB                                            :Feb
-STR_MONTH_ABBREV_MAR                                            :Mar
-STR_MONTH_ABBREV_APR                                            :Apr
-STR_MONTH_ABBREV_MAY                                            :Mei
-STR_MONTH_ABBREV_JUN                                            :Jun
-STR_MONTH_ABBREV_JUL                                            :Jul
-STR_MONTH_ABBREV_AUG                                            :Agt
-STR_MONTH_ABBREV_SEP                                            :Sep
-STR_MONTH_ABBREV_OCT                                            :Okt
-STR_MONTH_ABBREV_NOV                                            :Nop
-STR_MONTH_ABBREV_DEC                                            :Des
-############ range for months ends
 
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
@@ -411,8 +388,6 @@ STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Membangu
 STR_TOOLBAR_TOOLTIP_PLANT_TREES_PLACE_SIGNS                     :{BLACK}Menanam pohon, meletakkan papan nama, dll
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Informasi area daratan
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Pilihan
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}Tidak dapat mengubah waktu servis
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Tutup window
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Judul Jendela - klik dan tahan disini untuk memindahkan jendela
@@ -459,7 +434,7 @@ STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Kosong
 STR_VEHICLE_NAME_BUTTON                                         :{BLACK}Nama
 STR_VEHICLE_NAME_SMALL                                          :{BLACK}{TINYFONT}{VEHICLE}
 
-############ range for days starts
+############ range for days starts (also used for the place in the highscore window)
 STR_ORDINAL_NUMBER_1ST                                          :1
 STR_ORDINAL_NUMBER_2ND                                          :2
 STR_ORDINAL_NUMBER_3RD                                          :3
@@ -492,6 +467,34 @@ STR_ORDINAL_NUMBER_29TH                                         :29
 STR_ORDINAL_NUMBER_30TH                                         :30
 STR_ORDINAL_NUMBER_31ST                                         :31
 ############ range for days ends
+
+############ range for months starts
+STR_MONTH_ABBREV_JAN                                            :Jan
+STR_MONTH_ABBREV_FEB                                            :Feb
+STR_MONTH_ABBREV_MAR                                            :Mar
+STR_MONTH_ABBREV_APR                                            :Apr
+STR_MONTH_ABBREV_MAY                                            :Mei
+STR_MONTH_ABBREV_JUN                                            :Jun
+STR_MONTH_ABBREV_JUL                                            :Jul
+STR_MONTH_ABBREV_AUG                                            :Agt
+STR_MONTH_ABBREV_SEP                                            :Sep
+STR_MONTH_ABBREV_OCT                                            :Okt
+STR_MONTH_ABBREV_NOV                                            :Nop
+STR_MONTH_ABBREV_DEC                                            :Des
+
+STR_MONTH_JAN                                                   :Januari
+STR_MONTH_FEB                                                   :Februari
+STR_MONTH_MAR                                                   :Maret
+STR_MONTH_APR                                                   :April
+STR_MONTH_MAY                                                   :Mei
+STR_MONTH_JUN                                                   :Juni
+STR_MONTH_JUL                                                   :Juli
+STR_MONTH_AUG                                                   :Agustus
+STR_MONTH_SEP                                                   :September
+STR_MONTH_OCT                                                   :Oktober
+STR_MONTH_NOV                                                   :November
+STR_MONTH_DEC                                                   :Desember
+############ range for months ends
 
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
@@ -582,12 +585,9 @@ STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESI
 STR_HIGHSCORE_STATS                                             :{BIGFONT}'{STRING}'   ({COMMA})
 STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}{COMPANY} mencapai status '{STRING}' !
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME} dari {COMPANY} mencapai status '{STRING}' !
-STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Editor Skenario
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Pertumbuhan Wilayah
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Tambah ukuran area untuk menurunkan/menaikkan
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Kurangi ukuran area untuk menurunkan/menaikkan
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Buat wilayah secara acak
@@ -669,9 +669,7 @@ STR_OFF                                                         :Mati
 STR_SUMMARY                                                     :Ringkasan
 STR_FULL                                                        :Penuh
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
-STR_BLACK_STRING                                                :{BLACK}{STRING}
 
-STR_JUST_CHECKMARK                                              :{CHECKMARK}
 ############ range for menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Pengaturan permainan
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Pengaturan tingkat kesulitan
@@ -680,8 +678,8 @@ STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Pengaturan NewG
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Pengaturan Transparansi
 STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Nama kota ditampilkan
 STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Nama stasiun ditampilkan
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Tampilkan daftar waypoint
 STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Tanda ditampilkan
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Tampilkan Penunjuk Arah
 STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animasi penuh
 STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Detail penuh
 STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Bangunan tembus pandang
@@ -718,22 +716,17 @@ STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW                                :{BLACK}Tampilan
 STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT                             :{BLACK}Perlihatkan di peta lokasi yang terlihat di viewport
 
 STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Mata uang
-STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN                        :{BLACK}{SKIP}{STRING}
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Pilih mata uang
 STR_GAME_OPTIONS_MEASURING_UNITS_FRAME                          :{BLACK}Satuan pengukuran
-STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN                       :{BLACK}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN_TOOLTIP               :{BLACK}Pilihan satuan pengukuran
 STR_GAME_OPTIONS_ROAD_VEHICLES_FRAME                            :{BLACK}Bus/truk
-STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN                         :{BLACK}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_TOOLTIP                 :{BLACK}Pilih lajur yang dilalui bus/truk
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_LEFT                    :Berkendara di lajur kiri
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_RIGHT                   :Berkendara di lajur kanan
 STR_GAME_OPTIONS_TOWN_NAMES_FRAME                               :{BLACK}Nama kota
-STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN_TOOLTIP                    :{BLACK}Pilih model nama kota
 
 STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}Simpan Otomatis
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN                              :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP                      :{BLACK}Pilih selang waktu permainan otomatis disimpan
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :Mati
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :Setiap bulan
@@ -775,9 +768,6 @@ STR_STATUSBAR_AUTOSAVE                                          :{RED}SIMPAN OTO
 STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  MENYIMPAN PERMAINAN  *  *
 STR_SAVE_STILL_IN_PROGRESS                                      :{WHITE}Penyimpanan sedang berlangsung,{}mohon tunggu hingga selesai
 STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}Pilih program 'gaya music Ezy Street'
-
-STR_BLACK_6                                                     :{BLACK}6
-STR_BLACK_7                                                     :{BLACK}7
 
 ############ start of townname region
 STR_TOWNNAME_ORIGINAL_ENGLISH                                   :Inggris (Orisinil)
@@ -835,7 +825,6 @@ STR_CURR_EEK                                                    :Krooni Estonia 
 STR_CURR_CUSTOM                                                 :Atur sendiri...
 
 STR_OPTIONS_LANG                                                :{BLACK}Bahasa
-STR_OPTIONS_LANG_CBO                                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_LANG_TIP                                            :{BLACK}Pilih antar muka bahasa yang akan dipergunakan
 
 STR_OPTIONS_FULLSCREEN                                          :{BLACK}Layar Penuh
@@ -843,33 +832,17 @@ STR_OPTIONS_FULLSCREEN_TIP                                      :{BLACK}Klik cek
 STR_FULLSCREEN_FAILED                                           :{WHITE}Modus layar penuh gagal
 
 STR_OPTIONS_RES                                                 :{BLACK}Resolusi Layar
-STR_OPTIONS_RES_CBO                                             :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_RES_TIP                                             :{BLACK}Pilih resolusi layar yang diinginkan
 
 STR_OPTIONS_SCREENSHOT_FORMAT                                   :{BLACK}Format tangkapan layar
-STR_OPTIONS_SCREENSHOT_FORMAT_CBO                               :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_SCREENSHOT_FORMAT_TIP                               :{BLACK}Pilih format hasil tangkapan layar
 
 STR_OPTIONS_BASE_GRF                                            :{BLACK}Set Grafik Dasar
-STR_OPTIONS_BASE_GRF_CBO                                        :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_BASE_GRF_TIP                                        :{BLACK}Pilih grafik dasar yang digunakan
-STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{10:NUM} berkas hilang atau rusak
+STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{NUM} berkas hilang atau rusak
 STR_OPTIONS_BASE_GRF_DESCRIPTION_TIP                            :{BLACK}Informasi tambahan tentang set grafik dasar
 
 STR_AUTOSAVE_FAILED                                             :{WHITE}Simpan otomatis gagal
-
-STR_MONTH_JAN                                                   :Januari
-STR_MONTH_FEB                                                   :Februari
-STR_MONTH_MAR                                                   :Maret
-STR_MONTH_APR                                                   :April
-STR_MONTH_MAY                                                   :Mei
-STR_MONTH_JUN                                                   :Juni
-STR_MONTH_JUL                                                   :Juli
-STR_MONTH_AUG                                                   :Agustus
-STR_MONTH_SEP                                                   :September
-STR_MONTH_OCT                                                   :Oktober
-STR_MONTH_NOV                                                   :November
-STR_MONTH_DEC                                                   :Desember
 
 STR_HEADING_FOR_STATION                                         :{LTBLUE}Menuju ke {STATION}
 STR_HEADING_FOR_STATION_VEL                                     :{LTBLUE}Menuju ke {STATION}, {VELOCITY}
@@ -884,8 +857,6 @@ STR_ITEMS                                                       :unit
 STR_CRATES                                                      :peti
 STR_RES_OTHER                                                   :lainnya
 STR_NOTHING                                                     :
-
-STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_CANT_SHARE_ORDER_LIST                                       :{WHITE}Tidak dapat berbagi perintah...
 STR_CANT_COPY_ORDER_LIST                                        :{WHITE}Tidak dapat meniru perintah...
@@ -1158,7 +1129,6 @@ STR_CONFIG_SETTING_MAP_Y                                        :{LTBLUE}Ukuran 
 
 ############ generic strings for settings
 STR_CONFIG_SETTING_DISABLED                                     :Non-aktifkan
-STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_CONFIG_SETTING_QUERY_CAPT                                   :{WHITE}Ganti nilai tetapan
 
 STR_TEMPERATE_LANDSCAPE                                         :Lansekap 'sederhana'
@@ -1185,23 +1155,23 @@ STR_HEADING_FOR_WAYPOINT_VEL                                    :{LTBLUE}Menuju 
 STR_GO_TO_WAYPOINT                                              :Pergi lewat {WAYPOINT}
 STR_GO_NON_STOP_TO_WAYPOINT                                     :Pergi non stop lewat {WAYPOINT}
 
-STR_WAYPOINTNAME_CITY                                           :Titik penunjuk arah {TOWN}
-STR_WAYPOINTNAME_CITY_SERIAL                                    :Titik penunjuk arah {TOWN} #{COMMA}
+STR_WAYPOINTNAME_CITY                                           :Waypoint {TOWN}
+STR_WAYPOINTNAME_CITY_SERIAL                                    :Waypoint {TOWN} #{COMMA}
 STR_BUOYNAME_CITY                                               :Pelampung {TOWN}
 STR_BUOYNAME_CITY_SERIAL                                        :Pelampung {TOWN} #{COMMA}
-STR_LANDINFO_WAYPOINT                                           :Titik penunjuk arah
+STR_LANDINFO_WAYPOINT                                           :Waypoint
 
-STR_WAYPOINT                                                    :{WHITE}Titik Penunjuk arah
-STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Pilih jenis titik penunjuk arah
+STR_WAYPOINT                                                    :{WHITE}Waypoint
+STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Pilih jenis waypoint
 
-STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
-STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Edit nama titik penunjuk arah
+STR_WAYPOINT_VIEWPORT                                           :{WAYPOINT}
+STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WAYPOINT}
+STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Ubah nama waypoint
 
-STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Tidak dapat mengganti nama sinyal jalur...
-STR_CONVERT_RAIL_TO_WAYPOINT_TIP                                :{BLACK}Rubah rel ke titik penunjuk arah
-STR_CANT_BUILD_TRAIN_WAYPOINT                                   :{WHITE}Tidak dapat membuat sinyal jalur kereta disini...
-STR_CANT_REMOVE_TRAIN_WAYPOINT                                  :{WHITE}Tidak dapat menghapus sinyal jalur kereta disini...
+STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Tidak dapat mengganti nama waypoint...
+STR_CONVERT_RAIL_TO_WAYPOINT_TIP                                :{BLACK}Ubah rel menjadi waypoint
+STR_CANT_BUILD_TRAIN_WAYPOINT                                   :{WHITE}Tidak dapat membuat waypoint kereta disini...
+STR_CANT_REMOVE_TRAIN_WAYPOINT                                  :{WHITE}Tidak dapat menghapus waypoint kereta disini...
 
 STR_BUILD_AUTORAIL_TIP                                          :{BLACK}Membangun rel kereta menggunakan mode Rel Otomatis
 
@@ -1233,7 +1203,7 @@ STR_LANDINFO_LOCK                                               :Kunci
 STR_CANT_PLACE_RIVERS                                           :{WHITE}Tidak dapat menempatkan sungai disini...
 STR_LANDINFO_RIVER                                              :Sungai
 
-STR_BUOY_IS_IN_USE                                              :{WHITE}...Rambu pelampung sedang digunakan!
+STR_BUOY_IS_IN_USE                                              :{WHITE}...Pelampung sedang digunakan!
 
 STR_LANDINFO_COORDS                                             :{BLACK}Koordinat: {LTBLUE}{NUM}x{NUM}x{NUM} ({STRING})
 
@@ -1614,8 +1584,11 @@ STR_RAILROAD_TRACK_WITH_COMBO_PBSSIGNALS                        :Jalur rel keret
 STR_RAILROAD_TRACK_WITH_COMBO_NOENTRYSIGNALS                    :Rel dengan sinyal campuran dan jalan satu arah
 STR_RAILROAD_TRACK_WITH_PBS_NOENTRYSIGNALS                      :Rel dengan sinyal jalan dan sinyal jalan satu arah
 STR_MUST_REMOVE_RAILWAY_STATION_FIRST                           :{WHITE}Harus menghapus stasiun dulu
+STR_MUST_REMOVE_RAILWAYPOINT_FIRST                              :{WHITE}Harus membongkar rel waypoint terlebih dahulu
 STR_CREATE_SPLITTED_STATION                                     :{YELLOW}Pisahkan stasiun
+STR_CREATE_SPLITTED_WAYPOINT                                    :{YELLOW}Pisahkan waypoint
 STR_SELECT_STATION_TO_JOIN                                      :{BLACK}Gabung stasiun
+STR_SELECT_WAYPOINT_TO_JOIN                                     :{BLACK}Gabungkan waypoint
 
 
 
@@ -1797,12 +1770,14 @@ STR_STATION_BUILD_ORIENTATION                                   :{BLACK}Arah
 STR_STATION_BUILD_NUMBER_OF_TRACKS                              :{BLACK}Jumlah jalur
 STR_STATION_BUILD_PLATFORM_LENGTH                               :{BLACK}Panjang peron
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Terlalu dekat dengan stasion kereta lainnya
-STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}bergandengan dengan lebih dari satu stasiun yang telah ada
+STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}berdempetan dengan lebih dari satu stasiun yang telah ada
+STR_ERROR_WAYPOINT_ADJOINS_MORE_THAN_ONE_EXISTING               :{WHITE}Berdempetan dengan lebih dari satu waypoint yang ada
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Terlalu banyak stasiun/area bongkar muat
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Terlalu banyak bag. stasiun
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Terlalu banyak pemberhentian Bus
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Terlalu banyak terminal truk
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Terlalu dekat dengan stasiun/area bongkar muat lainnya
+STR_ERROR_TOO_CLOSE_TO_ANOTHER_WAYPOINT                         :{WHITE}Terlalu dekat dengan waypoint yang lain
 STR_STATION_VIEW_CAPTION                                        :{WHITE}{STATION} {STATIONFEATURES}
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Harus menghancurkan jalur rel stasiun terlebih dahul
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Terlalu dekat dengan bandara lainnya
@@ -1846,6 +1821,7 @@ STR_ERROR_MUST_DEMOLISH_PASSENGER_TRAM_STATION_FIRST            :{WHITE}Harus me
 STR_ERROR_MUST_DEMOLISH_CARGO_TRAM_STATION_FIRST                :{WHITE}Harus menghancurkan terminal kargo trem terlebih dahulu
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} Stasiun
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
+STR_STATION_LIST_WAYPOINT                                       :{YELLOW}{WAYPOINT}
 STR_STATION_LIST_NONE                                           :{YELLOW}- Tidak ada -
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Terlalu dekat dengan dok/galangan kapal lainnya
 STR_ERROR_MUST_DEMOLISH_DOCK_FIRST                              :{WHITE}Harus menghancurkan pelabuhan terlebih dahulu
@@ -1857,6 +1833,8 @@ STR_STATION_BUILD_TRUCK_ORIENTATION_TOOLTIP                     :{BLACK}Pilih ar
 STR_STATION_BUILD_PASSENGER_TRAM_ORIENTATION_TOOLTIP            :{BLACK}Pilih arah stasiun trem penumpang
 STR_STATION_BUILD_CARGO_TRAM_ORIENTATION_TOOLTIP                :{BLACK}Pilih arah stasiun trem angkutan barang
 STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Arahkan pandangan pada lokasi stasiun
+STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Arahkan pandangan pada lokasi waypoint
+STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Arahkan pandangan pada lokasi pelampung
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Tampilkna peringkat dari stasiun
 STR_STATION_VIEW_RENAME_TOOLTIP                                 :{BLACK}Ganti nama stasiun
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Tampilkan daftar kargo yang bisa diterima
@@ -1875,14 +1853,14 @@ STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Jangan s
 STR_STATION_BUILD_COVERAGE_AREA_TITLE                           :{BLACK}Jangkauan layanan
 STR_STATION_BUILD_DOCK_CAPTION                                  :{WHITE}Pelabuhan
 STR_STATION_DESCRIPTION_BUOY                                    :Pelampung
-STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}...Rambu pelampung ada di jalan
+STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}...pelampung ada di jalan
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}...Stasiun terlalu membentang/melebar
 STR_NONUNIFORM_STATIONS_DISALLOWED                              :{WHITE}...Stasiun tidak seragam tidak aktif
 STR_USE_CTRL_TO_SELECT_MORE                                     :{BLACK}Tekan CTRL untuk memilih lebih dari satu item
 
 STR_UNDEFINED                                                   :(belum terdefinisi)
 STR_STAT_CLASS_DFLT                                             :Stasiun asli/"default"
-STR_STAT_CLASS_WAYP                                             :Penunjuk Arah
+STR_STAT_CLASS_WAYP                                             :Waypoint
 
 ##id 0x3800
 STR_DEPOT_BUILD_SHIP_CAPTION                                    :{WHITE}Orientasi Galangan
@@ -2124,8 +2102,6 @@ STR_NUM_LOW                                                     :Sedikit
 STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :Padat
 STR_NUM_CUSTOM                                                  :Bebas
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 STR_AI_SPEED_VERY_SLOW                                          :Sangat lambat
 STR_AI_SPEED_SLOW                                               :Lambat
 STR_AI_SPEED_MEDIUM                                             :Sedang
@@ -2208,8 +2184,8 @@ STR_COMPANY_VIEW_NEW_FACE_TOOLTIP                               :{BLACK}Pilih wa
 STR_COMPANY_VIEW_COLOUR_SCHEME_TOOLTIP                          :{BLACK}Ubah warna kendaraan perusahaan
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}Ubah nama pimpinan
 STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}Ubah nama perusahaan
-STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Tambah jumlah pinjaman
-STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Bayar sebagian pinjaman
+STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Tambah jumlah pinjaman. Tekan Ctrl+Click untuk meminjam sebanyak mungkin.
+STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Bayar cicilan pinjaman. Tekan Ctrl+Click untuk membayar cicilan sebanyak mungkin.
 STR_COMPANY_VIEW_PRESIDENT_MANAGER_TITLE                        :{WHITE}{PRESIDENTNAME}{}{GOLD}(Pimpinan)
 STR_COMPANY_VIEW_INAUGURATED_TITLE                              :{GOLD}Dilantik : {WHITE}{NUM}
 STR_COMPANY_VIEW_VEHICLES_TITLE                                 :{GOLD}Kendaraan:
@@ -2773,7 +2749,8 @@ STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Tidak da
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Tidak dapat membalik arah kendaraan yang terdiri dari beberapa unit
 STR_CLEAR_TIME                                                  :{BLACK}Hapus waktu
 STR_RESET_LATENESS                                              :{BLACK}Reset
-STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Ganti nama penunjuk arah
+STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Ubah nama waypoint
+STR_CHANGE_BUOY_NAME                                            :{BLACK}Ubah nama pelampung
 
 STR_TRAIN_STOPPING                                              :{RED}Berhenti
 STR_TRAIN_STOPPING_VEL                                          :{RED}Akan berhenti, {VELOCITY}
@@ -2806,7 +2783,6 @@ STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...harus
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}Tidak dapat menemukan garasi terdekat
 STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Paksa kendaraan untuk berbalik arah
 STR_ARTICULATED_RV_CAPACITY                                     :{BLACK}Kapasitas: {LTBLUE}
-STR_JUST_CARGO                                                  :{CARGO}
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} kendaraan{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
@@ -2830,8 +2806,8 @@ STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Membangu
 STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Membangun Galangan Kapal (untuk membuat dan memperbaiki kapal)
 
 STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BLACK}{BIGFONT}Masyarakat bergembira . . .{}Kapal pertama tiba di {STATION}!
-STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Menempatkan rambu yang dapat digunakan sebagai petunjuk jalan
-STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Tidak dapat menempatkan rambu disini...
+STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Tempatkan pelampung yang dapat digunakan sebagai petunjuk arah
+STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Tidak dapat menempatkan pelampung disini...
 STR_BUILD_AQUEDUCT                                              :{BLACK}Membangun jembatan air
 STR_CAN_T_BUILD_AQUEDUCT_HERE                                   :{WHITE}Tidak dapat membangun jembatan air disini...
 STR_REFIT_CAPTION                                               :{WHITE}{VEHICLE} (Renovasi)
@@ -3103,7 +3079,7 @@ STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Tampilka
 STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Tampilkan perintah kapal
 STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Tampilkan order pesawat
 
-STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Arahkan tampilan pada lokasi kereta
+STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Arahkan pandangan pada lokasi kereta
 STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Arahkan pandangan pada lokasi kendaraan
 STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Arahkan pandangan pada lokasi kapal
 STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Arahkan pandangan pada lokasi pesawat
@@ -3417,7 +3393,7 @@ STR_TRANSPARENT_SIGNS_DESC                                      :{BLACK}Hidup/ma
 STR_TRANSPARENT_TREES_DESC                                      :{BLACK}Hidup/matikan transparansi pepohonan. CTRL+klik untuk mengunci.
 STR_TRANSPARENT_HOUSES_DESC                                     :{BLACK}Hidup/matikan transparansi perumahan. CTRL+klik untuk mengunci.
 STR_TRANSPARENT_INDUSTRIES_DESC                                 :{BLACK}Hidup/matikan transparansi industri. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_BUILDINGS_DESC                                  :{BLACK}Hidup/matikan transparansi bangunan semacam stasiun, depo dan waypoints. CTRL+klik untuk mengunci.
+STR_TRANSPARENT_BUILDINGS_DESC                                  :{BLACK}Hidup/matikan transparansi bangunan seperti stasiun, depo dan waypoint. CTRL+klik untuk mengunci.
 STR_TRANSPARENT_BRIDGES_DESC                                    :{BLACK}Hidup/matikan transparansi jembatan. CTRL+klik untuk mengunci.
 STR_TRANSPARENT_STRUCTURES_DESC                                 :{BLACK}Hidup/matikan transparansi struktur bangunan semacam mercusuar dan antena. CTRL+klik untuk mengunci.
 STR_TRANSPARENT_CATENARY_DESC                                   :{BLACK}Hidup/matikan transparansi katenari CTRL+klik untuk mengunci.
@@ -3472,7 +3448,10 @@ STR_TOWN_NAME                                                   :{TOWN}
 STR_VEHICLE_NAME                                                :{VEHICLE}
 STR_WAYPOINT_NAME                                               :{WAYPOINT}
 
+STR_JUST_CARGO                                                  :{CARGO}
+STR_JUST_CHECKMARK                                              :{CHECKMARK}
 STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_JUST_INT                                                    :{NUM}
 STR_JUST_DATE_TINY                                              :{DATE_TINY}
 STR_JUST_DATE_SHORT                                             :{DATE_SHORT}
@@ -3489,6 +3468,32 @@ STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRI
 STR_FORMAT_COMPANY_NUM                                          :(Perusahaan {COMMA})
 STR_FORMAT_GROUP_NAME                                           :Kelompok {COMMA}
 STR_FORMAT_INDUSTRY_NAME                                        :{1:STRING} {0:TOWN}
+
+STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
+STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
+STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
+STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
+STR_RED_COMMA                                                   :{RED}{COMMA}
+STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
+STR_SILVER_CROSS                                                :{SILVER}{CROSS}
+STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
+STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
+STR_BLACK_STRING                                                :{BLACK}{STRING}
+STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+
+STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
+STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
+STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
+STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
+STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
+
+STR_BLACK_1                                                     :{BLACK}1
+STR_BLACK_2                                                     :{BLACK}2
+STR_BLACK_3                                                     :{BLACK}3
+STR_BLACK_4                                                     :{BLACK}4
+STR_BLACK_5                                                     :{BLACK}5
+STR_BLACK_6                                                     :{BLACK}6
+STR_BLACK_7                                                     :{BLACK}7
 
 STR_NAME_MUST_BE_UNIQUE                                         :{WHITE}Nama haruslah unik
 
@@ -3607,6 +3612,7 @@ STR_AI_AUTHOR                                                   :{BLACK}Pembuat:
 STR_AI_VERSION                                                  :{BLACK}Versi: {NUM}
 STR_AI_URL                                                      :{BLACK}URL: {STRING}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Salah satu AI gagal. Laporkan ini kepada AI Author dengan potongan layar dari Jendela Debug AI.
+STR_AI_NO_AI_FOUND                                              :Tidak ada AI yang cocok untuk digunakan.{}Ini adalah dummy AI yang tidak akan melakukan apapun.{}Anda dapat download beberapa AI melalui sistem 'Konten Online'.
 ########
 
 ############ town controlled noise level

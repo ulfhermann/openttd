@@ -70,25 +70,31 @@ static uint GetNumRoadStopsInStation(const Station *st, RoadStopType type)
 	return num;
 }
 
-
-#define CHECK_STATIONS_ERR ((Station*)-1)
-
-static Station *GetStationAround(TileIndex tile, int w, int h, StationID closest_station)
+/**
+ * Look for a station around the given tile area.
+ * @param ta the area to search over
+ * @param closest_station the closest station found so far
+ * @param st to 'return' the found station
+ * @return false if more than one stations are found. True when zero or one are found.
+ */
+template <class T>
+bool GetStationAround(TileArea ta, StationID closest_station, T **st)
 {
 	/* check around to see if there's any stations there */
-	BEGIN_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
+	TILE_LOOP(tile_cur, ta.w + 2, ta.h + 2, ta.tile - TileDiffXY(1, 1)) {
 		if (IsTileType(tile_cur, MP_STATION)) {
 			StationID t = GetStationIndex(tile_cur);
 
 			if (closest_station == INVALID_STATION) {
-				if (Station::IsValidID(t)) closest_station = t;
+				if (T::IsValidID(t)) closest_station = t;
 			} else if (closest_station != t) {
 				_error_message = STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING;
-				return CHECK_STATIONS_ERR;
+				return false;
 			}
 		}
-	END_TILE_LOOP(tile_cur, w + 2, h + 2, tile - TileDiffXY(1, 1))
-	return (closest_station == INVALID_STATION) ? NULL : Station::Get(closest_station);
+	}
+	*st = (closest_station == INVALID_STATION) ? NULL : T::Get(closest_station);
+	return true;
 }
 
 /**
@@ -352,7 +358,7 @@ static Station *GetClosestDeletedStation(TileIndex tile)
 	Station *st;
 
 	FOR_ALL_STATIONS(st) {
-		if (st->facilities == 0 && st->owner == _current_company) {
+		if (!st->IsInUse() && st->owner == _current_company) {
 			uint cur_dist = DistanceManhattan(tile, st->xy);
 
 			if (cur_dist < threshold) {
@@ -370,9 +376,7 @@ void Station::GetTileArea(TileArea *ta, StationType type) const
 {
 	switch (type) {
 		case STATION_RAIL:
-			ta->tile = this->train_tile;
-			ta->w    = this->trainst_w;
-			ta->h    = this->trainst_h;
+			*ta = this->train_station;
 			return;
 
 		case STATION_AIRPORT:
@@ -422,11 +426,7 @@ void UpdateAllStationVirtCoords()
 {
 	BaseStation *st;
 
-	FOR_ALL_STATIONS(st) {
-		st->UpdateVirtCoord();
-	}
-
-	FOR_ALL_WAYPOINTS(st) {
+	FOR_ALL_BASE_STATIONS(st) {
 		st->UpdateVirtCoord();
 	}
 }
@@ -557,8 +557,8 @@ static void UpdateStationAcceptance(Station *st, bool show_msg)
 
 		/* Make sure the station can accept the goods type. */
 		bool is_passengers = IsCargoInClass(i, CC_PASSENGERS);
-		if ((!is_passengers && !(st->facilities & (byte)~FACIL_BUS_STOP)) ||
-				(is_passengers && !(st->facilities & (byte)~FACIL_TRUCK_STOP))) {
+		if ((!is_passengers && !(st->facilities & ~FACIL_BUS_STOP)) ||
+				(is_passengers && !(st->facilities & ~FACIL_TRUCK_STOP))) {
 			amt = 0;
 		}
 
@@ -570,7 +570,7 @@ static void UpdateStationAcceptance(Station *st, bool show_msg)
 	if (old_acc == new_acc) return;
 
 	/* show a message to report that the acceptance was changed? */
-	if (show_msg && st->owner == _local_company && st->facilities) {
+	if (show_msg && st->owner == _local_company && st->IsInUse()) {
 		/* List of accept and reject strings for different number of
 		 * cargo types */
 		static const StringID accept_msg[] = {
@@ -612,7 +612,7 @@ static void UpdateStationAcceptance(Station *st, bool show_msg)
 	InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_ACCEPTLIST);
 }
 
-static void UpdateStationSignCoord(Station *st)
+static void UpdateStationSignCoord(BaseStation *st)
 {
 	const StationRect *r = &st->rect;
 
@@ -628,9 +628,9 @@ static void UpdateStationSignCoord(Station *st)
  * deleted after a little while.
  * @param st Station
  */
-static void DeleteStationIfEmpty(Station *st)
+static void DeleteStationIfEmpty(BaseStation *st)
 {
-	if (st->facilities == 0) {
+	if (!st->IsInUse()) {
 		st->delete_ctr = 0;
 		InvalidateWindowData(WC_STATION_LIST, st->owner, 0);
 	}
@@ -638,7 +638,7 @@ static void DeleteStationIfEmpty(Station *st)
 	UpdateStationSignCoord(st);
 }
 
-static CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
+CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
 
 /** Tries to clear the given area.
  * @param tile TileIndex to start check
@@ -655,7 +655,7 @@ CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandFlag fla
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	int allowed_z = -1;
 
-	BEGIN_TILE_LOOP(tile_cur, w, h, tile) {
+	TILE_LOOP(tile_cur, w, h, tile) {
 		if (MayHaveBridgeAbove(tile_cur) && IsBridgeAbove(tile_cur)) {
 			return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 		}
@@ -700,7 +700,7 @@ CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandFlag fla
 		 * so station points to INVALID_STATION if we can build on any station.
 		 * Or it points to a station if we're only allowed to build on exactly that station. */
 		if (station != NULL && IsTileType(tile_cur, MP_STATION)) {
-			if (!IsRailwayStation(tile_cur)) {
+			if (!IsRailStation(tile_cur)) {
 				return ClearTile_Station(tile_cur, DC_AUTO); // get error message
 			} else {
 				StationID st = GetStationIndex(tile_cur);
@@ -715,73 +715,71 @@ CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandFlag fla
 			if (CmdFailed(ret)) return ret;
 			cost.AddCost(ret);
 		}
-	} END_TILE_LOOP(tile_cur, w, h, tile)
+	}
 
 	return cost;
 }
 
-static bool CanExpandRailroadStation(const Station *st, uint *fin, Axis axis)
+/**
+ * Check whether we can expand the rail part of the given station.
+ * @param st the station to expand
+ * @param new_ta the current (and if all is fine new) tile area of the rail part of the station
+ * @param axis the axis of the newly build rail
+ * @return true if we are allowed to extend
+ */
+bool CanExpandRailStation(const BaseStation *st, TileArea &new_ta, Axis axis)
 {
-	uint curw = st->trainst_w;
-	uint curh = st->trainst_h;
-	TileIndex tile = fin[0];
-	uint w = fin[1];
-	uint h = fin[2];
+	TileArea cur_ta = st->train_station;
 
 	if (_settings_game.station.nonuniform_stations) {
 		/* determine new size of train station region.. */
-		int x = min(TileX(st->train_tile), TileX(tile));
-		int y = min(TileY(st->train_tile), TileY(tile));
-		curw = max(TileX(st->train_tile) + curw, TileX(tile) + w) - x;
-		curh = max(TileY(st->train_tile) + curh, TileY(tile) + h) - y;
-		tile = TileXY(x, y);
+		int x = min(TileX(cur_ta.tile), TileX(new_ta.tile));
+		int y = min(TileY(cur_ta.tile), TileY(new_ta.tile));
+		new_ta.w = max(TileX(cur_ta.tile) + cur_ta.w, TileX(new_ta.tile) + new_ta.w) - x;
+		new_ta.h = max(TileY(cur_ta.tile) + cur_ta.h, TileY(new_ta.tile) + new_ta.h) - y;
+		new_ta.tile = TileXY(x, y);
 	} else {
 		/* do not allow modifying non-uniform stations,
 		 * the uniform-stations code wouldn't handle it well */
-		BEGIN_TILE_LOOP(t, st->trainst_w, st->trainst_h, st->train_tile)
+		TILE_LOOP(t, cur_ta.w, cur_ta.h, cur_ta.tile) {
 			if (!st->TileBelongsToRailStation(t)) { // there may be adjoined station
 				_error_message = STR_NONUNIFORM_STATIONS_DISALLOWED;
 				return false;
 			}
-		END_TILE_LOOP(t, st->trainst_w, st->trainst_h, st->train_tile)
+		}
 
 		/* check so the orientation is the same */
-		if (GetRailStationAxis(st->train_tile) != axis) {
+		if (GetRailStationAxis(cur_ta.tile) != axis) {
 			_error_message = STR_NONUNIFORM_STATIONS_DISALLOWED;
 			return false;
 		}
 
 		/* check if the new station adjoins the old station in either direction */
-		if (curw == w && st->train_tile == tile + TileDiffXY(0, h)) {
+		if (cur_ta.w == new_ta.w && cur_ta.tile == new_ta.tile + TileDiffXY(0, new_ta.h)) {
 			/* above */
-			curh += h;
-		} else if (curw == w && st->train_tile == tile - TileDiffXY(0, curh)) {
+			new_ta.h += cur_ta.h;
+		} else if (cur_ta.w == new_ta.w && cur_ta.tile == new_ta.tile - TileDiffXY(0, cur_ta.h)) {
 			/* below */
-			tile -= TileDiffXY(0, curh);
-			curh += h;
-		} else if (curh == h && st->train_tile == tile + TileDiffXY(w, 0)) {
+			new_ta.tile = cur_ta.tile;
+			new_ta.h += new_ta.h;
+		} else if (cur_ta.h == new_ta.h && cur_ta.tile == new_ta.tile + TileDiffXY(new_ta.w, 0)) {
 			/* to the left */
-			curw += w;
-		} else if (curh == h && st->train_tile == tile - TileDiffXY(curw, 0)) {
+			new_ta.w += cur_ta.w;
+		} else if (cur_ta.h == new_ta.h && cur_ta.tile == new_ta.tile - TileDiffXY(cur_ta.w, 0)) {
 			/* to the right */
-			tile -= TileDiffXY(curw, 0);
-			curw += w;
+			new_ta.tile = cur_ta.tile;
+			new_ta.w += cur_ta.w;
 		} else {
 			_error_message = STR_NONUNIFORM_STATIONS_DISALLOWED;
 			return false;
 		}
 	}
 	/* make sure the final size is not too big. */
-	if (curw > _settings_game.station.station_spread || curh > _settings_game.station.station_spread) {
+	if (new_ta.w > _settings_game.station.station_spread || new_ta.h > _settings_game.station.station_spread) {
 		_error_message = STR_ERROR_STATION_TOO_SPREAD_OUT;
 		return false;
 	}
 
-	/* now tile contains the new value for st->train_tile
-	 * curw, curh contain the new value for width and height */
-	fin[0] = tile;
-	fin[1] = curw;
-	fin[2] = curh;
 	return true;
 }
 
@@ -804,7 +802,7 @@ static inline byte *CreateMulti(byte *layout, int n, byte b)
 	return layout;
 }
 
-static void GetStationLayout(byte *layout, int numtracks, int plat_len, const StationSpec *statspec)
+void GetStationLayout(byte *layout, int numtracks, int plat_len, const StationSpec *statspec)
 {
 	if (statspec != NULL && statspec->lengths >= plat_len &&
 			statspec->platforms[plat_len - 1] >= numtracks &&
@@ -828,11 +826,87 @@ static void GetStationLayout(byte *layout, int numtracks, int plat_len, const St
 	}
 }
 
-/** Build railroad station
- * @param tile_org starting position of station dragging/placement
+/**
+ * Find a nearby station that joins this station.
+ * @tparam T the class to find a station for
+ * @param error_message the error message when building a station on top of others
+ * @param existing_station an existing station we build over
+ * @param station_to_join the station to join to
+ * @param adjacent whether adjacent stations are allowed
+ * @param ta the area of the newly build station
+ * @param st 'return' pointer for the found station
+ * @return command cost with the error or 'okay'
+ */
+template <class T, StringID error_message>
+CommandCost FindJoiningBaseStation(StationID existing_station, StationID station_to_join, bool adjacent, TileArea ta, T **st)
+{
+	assert(*st == NULL);
+	bool check_surrounding = true;
+
+	if (_settings_game.station.adjacent_stations) {
+		if (existing_station != INVALID_STATION) {
+			if (adjacent && existing_station != station_to_join) {
+				/* You can't build an adjacent station over the top of one that
+				 * already exists. */
+				return_cmd_error(error_message);
+			} else {
+				/* Extend the current station, and don't check whether it will
+				 * be near any other stations. */
+				*st = T::GetIfValid(existing_station);
+				check_surrounding = (*st == NULL);
+			}
+		} else {
+			/* There's no station here. Don't check the tiles surrounding this
+			 * one if the company wanted to build an adjacent station. */
+			if (adjacent) check_surrounding = false;
+		}
+	}
+
+	if (check_surrounding) {
+		/* Make sure there are no similar stations around us. */
+		if (!GetStationAround(ta, existing_station, st)) return CMD_ERROR;
+	}
+
+	/* Distant join */
+	if (*st == NULL && station_to_join != INVALID_STATION) *st = T::GetIfValid(station_to_join);
+
+	return CommandCost();;
+}
+
+/**
+ * Find a nearby station that joins this station.
+ * @param existing_station an existing station we build over
+ * @param station_to_join the station to join to
+ * @param adjacent whether adjacent stations are allowed
+ * @param ta the area of the newly build station
+ * @param st 'return' pointer for the found station
+ * @return command cost with the error or 'okay'
+ */
+CommandCost FindJoiningStation(StationID existing_station, StationID station_to_join, bool adjacent, TileArea ta, Station **st)
+{
+	return FindJoiningBaseStation<Station, STR_MUST_REMOVE_RAILWAY_STATION_FIRST>(existing_station, station_to_join, adjacent, ta, st);
+}
+
+/**
+ * Find a nearby waypoint that joins this waypoint.
+ * @param existing_waypoint an existing waypoint we build over
+ * @param waypoint_to_join the waypoint to join to
+ * @param adjacent whether adjacent waypoints are allowed
+ * @param ta the area of the newly build waypoint
+ * @param st 'return' pointer for the found waypoint
+ * @return command cost with the error or 'okay'
+ */
+CommandCost FindJoiningWaypoint(StationID existing_waypoint, StationID waypoint_to_join, bool adjacent, TileArea ta, Waypoint **wp)
+{
+	return FindJoiningBaseStation<Waypoint, STR_MUST_REMOVE_RAILWAYPOINT_FIRST>(existing_waypoint, waypoint_to_join, adjacent, ta, wp);
+}
+
+/**
+ * Build rail station
+ * @param tile_org northern most position of station dragging/placement
  * @param flags operation to perform
  * @param p1 various bitstuffed elements
- * - p1 = (bit  0- 3) - railtype (p1 & 0xF)
+ * - p1 = (bit  0- 3) - railtype
  * - p1 = (bit  4)    - orientation (Axis)
  * - p1 = (bit  8-15) - number of tracks
  * - p1 = (bit 16-23) - platform length
@@ -840,18 +914,29 @@ static void GetStationLayout(byte *layout, int numtracks, int plat_len, const St
  * @param p2 various bitstuffed elements
  * - p2 = (bit  0- 7) - custom station class
  * - p2 = (bit  8-15) - custom station id
- * - p2 = (bit 16-31) - station ID to join (INVALID_STATION if build new one)
+ * - p2 = (bit 16-31) - station ID to join (NEW_STATION if build new one)
  */
-CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
+	/* Unpack parameters */
+	RailType rt    = (RailType)GB(p1, 0, 4);
+	Axis axis      = Extract<Axis, 4>(p1);
+	byte numtracks = GB(p1,  8, 8);
+	byte plat_len  = GB(p1, 16, 8);
+	bool adjacent  = HasBit(p1, 24);
+
+	StationClassID spec_class = (StationClassID)GB(p2, 0, 8);
+	byte spec_index           = GB(p2, 8, 8);
+	StationID station_to_join = GB(p2, 16, 16);
+
 	/* Does the authority allow this? */
 	if (!CheckIfAuthorityAllowsNewStation(tile_org, flags)) return CMD_ERROR;
-	if (!ValParamRailtype((RailType)(p1 & 0xF))) return CMD_ERROR;
+	if (!ValParamRailtype(rt)) return CMD_ERROR;
 
-	/* unpack parameters */
-	Axis axis = Extract<Axis, 4>(p1);
-	uint numtracks = GB(p1,  8, 8);
-	uint plat_len  = GB(p1, 16, 8);
+	/* Check if the given station class is valid */
+	if ((uint)spec_class >= GetNumStationClasses()) return CMD_ERROR;
+	if (spec_index >= GetNumCustomStations(spec_class)) return CMD_ERROR;
+	if (plat_len == 0 || numtracks == 0) return CMD_ERROR;
 
 	int w_org, h_org;
 	if (axis == AXIS_X) {
@@ -862,7 +947,6 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 		w_org = numtracks;
 	}
 
-	StationID station_to_join = GB(p2, 16, 16);
 	bool reuse = (station_to_join != NEW_STATION);
 	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
@@ -872,10 +956,7 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 	if (h_org > _settings_game.station.station_spread || w_org > _settings_game.station.station_spread) return CMD_ERROR;
 
 	/* these values are those that will be stored in train_tile and station_platforms */
-	uint finalvalues[3];
-	finalvalues[0] = tile_org;
-	finalvalues[1] = w_org;
-	finalvalues[2] = h_org;
+	TileArea new_location(tile_org, w_org, h_org);
 
 	/* Make sure the area below consists of clear tiles. (OR tiles belonging to a certain rail station) */
 	StationID est = INVALID_STATION;
@@ -887,35 +968,8 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 	CommandCost cost(EXPENSES_CONSTRUCTION, ret.GetCost() + (numtracks * _price.train_station_track + _price.train_station_length) * plat_len);
 
 	Station *st = NULL;
-	bool check_surrounding = true;
-
-	if (_settings_game.station.adjacent_stations) {
-		if (est != INVALID_STATION) {
-			if (HasBit(p1, 24) && est != station_to_join) {
-				/* You can't build an adjacent station over the top of one that
-				 * already exists. */
-				return_cmd_error(STR_MUST_REMOVE_RAILWAY_STATION_FIRST);
-			} else {
-				/* Extend the current station, and don't check whether it will
-				 * be near any other stations. */
-				st = Station::GetIfValid(est);
-				check_surrounding = (st == NULL);
-			}
-		} else {
-			/* There's no station here. Don't check the tiles surrounding this
-			 * one if the company wanted to build an adjacent station. */
-			if (HasBit(p1, 24)) check_surrounding = false;
-		}
-	}
-
-	if (check_surrounding) {
-		/* Make sure there are no similar stations around us. */
-		st = GetStationAround(tile_org, w_org, h_org, est);
-		if (st == CHECK_STATIONS_ERR) return CMD_ERROR;
-	}
-
-	/* Distant join */
-	if (st == NULL && distant_join) st = Station::GetIfValid(station_to_join);
+	ret = FindJoiningStation(est, station_to_join, adjacent, new_location, &st);
+	if (CmdFailed(ret)) return ret;
 
 	/* See if there is a deleted station close to us. */
 	if (st == NULL && reuse) st = GetClosestDeletedStation(tile_org);
@@ -925,11 +979,11 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 		if (st->owner != _current_company)
 			return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION);
 
-		if (st->train_tile != INVALID_TILE) {
+		if (st->train_station.tile != INVALID_TILE) {
 			/* check if we want to expanding an already existing station? */
 			if (!_settings_game.station.join_stations)
 				return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD);
-			if (!CanExpandRailroadStation(st, finalvalues, axis))
+			if (!CanExpandRailStation(st, new_location, axis))
 				return CMD_ERROR;
 		}
 
@@ -951,11 +1005,8 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 		}
 	}
 
-	/* Check if the given station class is valid */
-	if (GB(p2, 0, 8) >= GetNumStationClasses()) return CMD_ERROR;
-
 	/* Check if we can allocate a custom stationspec to this station */
-	const StationSpec *statspec = GetCustomStationSpec((StationClassID)GB(p2, 0, 8), GB(p2, 8, 8));
+	const StationSpec *statspec = GetCustomStationSpec(spec_class, spec_index);
 	int specindex = AllocateSpecToStation(statspec, st, (flags & DC_EXEC) != 0);
 	if (specindex == -1) return_cmd_error(STR_ERROR_TOO_MANY_STATION_SPECS);
 
@@ -985,11 +1036,8 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 		ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags, 5 << axis, _settings_game.station.nonuniform_stations ? &est : NULL);
 		if (CmdFailed(ret)) return ret;
 
-		st->train_tile = finalvalues[0];
-		st->AddFacility(FACIL_TRAIN, finalvalues[0]);
-
-		st->trainst_w = finalvalues[1];
-		st->trainst_h = finalvalues[2];
+		st->train_station = new_location;
+		st->AddFacility(FACIL_TRAIN, new_location.tile);
 
 		st->rect.BeforeAddRect(tile_org, w_org, h_org, StationRect::ADD_TRY);
 
@@ -1013,22 +1061,22 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 			int w = plat_len;
 			do {
 				byte layout = *layout_ptr++;
-				if (IsRailwayStationTile(tile) && HasStationReservation(tile)) {
+				if (IsRailStationTile(tile) && HasStationReservation(tile)) {
 					/* Check for trains having a reservation for this tile. */
 					Train *v = GetTrainForReservation(tile, AxisToTrack(GetRailStationAxis(tile)));
 					if (v != NULL) {
 						FreeTrainTrackReservation(v);
 						*affected_vehicles.Append() = v;
-						if (IsRailwayStationTile(v->tile)) SetRailwayStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), false);
+						if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), false);
 						for (; v->Next() != NULL; v = v->Next()) ;
-						if (IsRailwayStationTile(v->tile)) SetRailwayStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), false);
+						if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), false);
 					}
 				}
 
 				/* Remove animation if overbuilding */
 				DeleteAnimatedTile(tile);
 				byte old_specindex = IsTileType(tile, MP_STATION) ? GetCustomStationSpecIndex(tile) : 0;
-				MakeRailStation(tile, st->owner, st->index, axis, layout & ~1, (RailType)GB(p1, 0, 4));
+				MakeRailStation(tile, st->owner, st->index, axis, layout & ~1, rt);
 				/* Free the spec if we overbuild something */
 				DeallocateSpecFromStation(st, old_specindex);
 
@@ -1058,10 +1106,10 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 		for (uint i = 0; i < affected_vehicles.Length(); ++i) {
 			/* Restore reservations of trains. */
 			Train *v = affected_vehicles[i];
-			if (IsRailwayStationTile(v->tile)) SetRailwayStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), true);
+			if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), true);
 			TryPathReserve(v, true, true);
 			for (; v->Next() != NULL; v = v->Next()) ;
-			if (IsRailwayStationTile(v->tile)) SetRailwayStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
+			if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
 		}
 
 		st->MarkTilesDirty(false);
@@ -1076,109 +1124,85 @@ CommandCost CmdBuildRailroadStation(TileIndex tile_org, DoCommandFlag flags, uin
 	return cost;
 }
 
-static void MakeRailwayStationAreaSmaller(Station *st)
+static void MakeRailStationAreaSmaller(BaseStation *st)
 {
-	uint w = st->trainst_w;
-	uint h = st->trainst_h;
-	TileIndex tile = st->train_tile;
+	TileArea ta = st->train_station;
 
 restart:
 
 	/* too small? */
-	if (w != 0 && h != 0) {
+	if (ta.w != 0 && ta.h != 0) {
 		/* check the left side, x = constant, y changes */
-		for (uint i = 0; !st->TileBelongsToRailStation(tile + TileDiffXY(0, i));) {
+		for (uint i = 0; !st->TileBelongsToRailStation(ta.tile + TileDiffXY(0, i));) {
 			/* the left side is unused? */
-			if (++i == h) {
-				tile += TileDiffXY(1, 0);
-				w--;
+			if (++i == ta.h) {
+				ta.tile += TileDiffXY(1, 0);
+				ta.w--;
 				goto restart;
 			}
 		}
 
 		/* check the right side, x = constant, y changes */
-		for (uint i = 0; !st->TileBelongsToRailStation(tile + TileDiffXY(w - 1, i));) {
+		for (uint i = 0; !st->TileBelongsToRailStation(ta.tile + TileDiffXY(ta.w - 1, i));) {
 			/* the right side is unused? */
-			if (++i == h) {
-				w--;
+			if (++i == ta.h) {
+				ta.w--;
 				goto restart;
 			}
 		}
 
 		/* check the upper side, y = constant, x changes */
-		for (uint i = 0; !st->TileBelongsToRailStation(tile + TileDiffXY(i, 0));) {
+		for (uint i = 0; !st->TileBelongsToRailStation(ta.tile + TileDiffXY(i, 0));) {
 			/* the left side is unused? */
-			if (++i == w) {
-				tile += TileDiffXY(0, 1);
-				h--;
+			if (++i == ta.w) {
+				ta.tile += TileDiffXY(0, 1);
+				ta.h--;
 				goto restart;
 			}
 		}
 
 		/* check the lower side, y = constant, x changes */
-		for (uint i = 0; !st->TileBelongsToRailStation(tile + TileDiffXY(i, h - 1));) {
+		for (uint i = 0; !st->TileBelongsToRailStation(ta.tile + TileDiffXY(i, ta.h - 1));) {
 			/* the left side is unused? */
-			if (++i == w) {
-				h--;
+			if (++i == ta.w) {
+				ta.h--;
 				goto restart;
 			}
 		}
 	} else {
-		tile = INVALID_TILE;
+		ta.tile = INVALID_TILE;
 	}
 
-	st->trainst_w = w;
-	st->trainst_h = h;
-	st->train_tile = tile;
+	st->train_station = ta;
 }
 
-/** Remove a single tile from a railroad station.
- * This allows for custom-built station with holes and weird layouts
- * @param tile tile of station piece to remove
- * @param flags operation to perform
- * @param p1 start_tile
- * @param p2 unused
+/**
+ * Remove a number of tiles from any rail station within the area.
+ * @param ta the area to clear station tile from
+ * @param affected_stations the stations affected
+ * @param flags the command flags
+ * @param removal_cost the cost for removing the tile
+ * @tparam T the type of station to remove
+ * @return the number of cleared tiles or an error
  */
-CommandCost CmdRemoveFromRailroadStation(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+template <class T>
+CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected_stations, DoCommandFlag flags, Money removal_cost)
 {
-	TileIndex start = p1 == 0 ? tile : p1;
-
 	/* Count of the number of tiles removed */
 	int quantity = 0;
 
-	if (tile >= MapSize() || start >= MapSize()) return CMD_ERROR;
-
-	/* make sure sx,sy are smaller than ex,ey */
-	int ex = TileX(tile);
-	int ey = TileY(tile);
-	int sx = TileX(start);
-	int sy = TileY(start);
-	if (ex < sx) Swap(ex, sx);
-	if (ey < sy) Swap(ey, sy);
-	tile = TileXY(sx, sy);
-
-	int size_x = ex - sx + 1;
-	int size_y = ey - sy + 1;
-
-	SmallVector<Station *, 4> affected_stations;
-
 	/* Do the action for every tile into the area */
-	BEGIN_TILE_LOOP(tile2, size_x, size_y, tile) {
-		/* Make sure the specified tile is a railroad station */
-		if (!IsRailwayStationTile(tile2)) {
-			continue;
-		}
+	TILE_LOOP(tile, ta.w, ta.h, ta.tile) {
+		/* Make sure the specified tile is a rail station */
+		if (!HasStationTileRail(tile)) continue;
 
 		/* If there is a vehicle on ground, do not allow to remove (flood) the tile */
-		if (!EnsureNoVehicleOnGround(tile2)) {
-			continue;
-		}
+		if (!EnsureNoVehicleOnGround(tile)) continue;
 
 		/* Check ownership of station */
-		Station *st = Station::GetByTile(tile2);
-		if (_current_company != OWNER_WATER && !CheckOwnership(st->owner)) {
-			continue;
-		}
+		T *st = T::GetByTile(tile);
+		if (st == NULL) continue;
+		if (_current_company != OWNER_WATER && !CheckOwnership(st->owner)) continue;
 
 		/* Do not allow removing from stations if non-uniform stations are not enabled
 		 * The check must be here to give correct error message
@@ -1190,27 +1214,32 @@ CommandCost CmdRemoveFromRailroadStation(TileIndex tile, DoCommandFlag flags, ui
 
 		if (flags & DC_EXEC) {
 			/* read variables before the station tile is removed */
-			uint specindex = GetCustomStationSpecIndex(tile2);
-			Track track = GetRailStationTrack(tile2);
-			Owner owner = GetTileOwner(tile2);
+			uint specindex = GetCustomStationSpecIndex(tile);
+			Track track = GetRailStationTrack(tile);
+			Owner owner = GetTileOwner(tile);
+			RailType rt = GetRailType(tile);
 			Train *v = NULL;
 
-			if (HasStationReservation(tile2)) {
-				v = GetTrainForReservation(tile2, track);
+			if (HasStationReservation(tile)) {
+				v = GetTrainForReservation(tile, track);
 				if (v != NULL) {
 					/* Free train reservation. */
 					FreeTrainTrackReservation(v);
-					if (IsRailwayStationTile(v->tile)) SetRailwayStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), false);
+					if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), false);
 					Vehicle *temp = v;
 					for (; temp->Next() != NULL; temp = temp->Next()) ;
-					if (IsRailwayStationTile(temp->tile)) SetRailwayStationPlatformReservation(temp->tile, TrackdirToExitdir(ReverseTrackdir(temp->GetVehicleTrackdir())), false);
+					if (IsRailStationTile(temp->tile)) SetRailStationPlatformReservation(temp->tile, TrackdirToExitdir(ReverseTrackdir(temp->GetVehicleTrackdir())), false);
 				}
 			}
 
-			DoClearSquare(tile2);
-			st->rect.AfterRemoveTile(st, tile2);
-			AddTrackToSignalBuffer(tile2, track, owner);
-			YapfNotifyTrackLayoutChange(tile2, track);
+			if (st->facilities & FACIL_WAYPOINT) {
+				MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
+			} else {
+				DoClearSquare(tile);
+			}
+			st->rect.AfterRemoveTile(st, tile);
+			AddTrackToSignalBuffer(tile, track, owner);
+			YapfNotifyTrackLayoutChange(tile, track);
 
 			DeallocateSpecFromStation(st, specindex);
 
@@ -1218,104 +1247,141 @@ CommandCost CmdRemoveFromRailroadStation(TileIndex tile, DoCommandFlag flags, ui
 
 			if (v != NULL) {
 				/* Restore station reservation. */
-				if (IsRailwayStationTile(v->tile)) SetRailwayStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), true);
+				if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), true);
 				TryPathReserve(v, true, true);
 				for (; v->Next() != NULL; v = v->Next()) ;
-				if (IsRailwayStationTile(v->tile)) SetRailwayStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
+				if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
 			}
 		}
-	} END_TILE_LOOP(tile2, size_x, size_y, tile)
+	}
 
-	for (Station **stp = affected_stations.Begin(); stp != affected_stations.End(); stp++) {
-		Station *st = *stp;
+	if (quantity == 0) return CMD_ERROR;
+
+	for (T **stp = affected_stations.Begin(); stp != affected_stations.End(); stp++) {
+		T *st = *stp;
 
 		/* now we need to make the "spanned" area of the railway station smaller
 		 * if we deleted something at the edges.
 		 * we also need to adjust train_tile. */
-		MakeRailwayStationAreaSmaller(st);
-		st->MarkTilesDirty(false);
+		MakeRailStationAreaSmaller(st);
 		UpdateStationSignCoord(st);
 
 		/* if we deleted the whole station, delete the train facility. */
-		if (st->train_tile == INVALID_TILE) {
+		if (st->train_station.tile == INVALID_TILE) {
 			st->facilities &= ~FACIL_TRAIN;
 			InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_TRAINS);
 			st->UpdateVirtCoord();
 			DeleteStationIfEmpty(st);
 		}
+	}
 
+	return CommandCost(EXPENSES_CONSTRUCTION, quantity * removal_cost);
+}
+
+/** Remove a single tile from a rail station.
+ * This allows for custom-built station with holes and weird layouts
+ * @param start tile of station piece to remove
+ * @param flags operation to perform
+ * @param p1 start_tile
+ * @param p2 unused
+ * @param text unused
+ * @return cost of operation or error
+ */
+CommandCost CmdRemoveFromRailStation(TileIndex start, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	TileIndex end = p1 == 0 ? start : p1;
+	if (start >= MapSize() || end >= MapSize()) return CMD_ERROR;
+
+	TileArea ta(start, end);
+	SmallVector<Station *, 4> affected_stations;
+
+	CommandCost ret = RemoveFromRailBaseStation(ta, affected_stations, flags, _price.remove_rail_station);
+	if (ret.Failed()) return ret;
+
+	/* Do all station specific functions here. */
+	for (Station **stp = affected_stations.Begin(); stp != affected_stations.End(); stp++) {
+		Station *st = *stp;
+
+		if (st->train_station.tile == INVALID_TILE) InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_TRAINS);
+		st->MarkTilesDirty(false);
 		st->RecomputeIndustriesNear();
 	}
 
-	/* If we've not removed any tiles, give an error */
-	if (quantity == 0) return CMD_ERROR;
+	/* Now apply the rail cost to the number that we deleted */
+	return ret;
+}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, _price.remove_rail_station * quantity);
+/** Remove a single tile from a waypoint.
+ * This allows for custom-built waypoint with holes and weird layouts
+ * @param start tile of waypoint piece to remove
+ * @param flags operation to perform
+ * @param p1 start_tile
+ * @param p2 unused
+ * @param text unused
+ * @return cost of operation or error
+ */
+CommandCost CmdRemoveFromRailWaypoint(TileIndex start, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	TileIndex end = p1 == 0 ? start : p1;
+	if (start >= MapSize() || end >= MapSize()) return CMD_ERROR;
+
+	TileArea ta(start, end);
+	SmallVector<Waypoint *, 4> affected_stations;
+
+	return RemoveFromRailBaseStation(ta, affected_stations, flags, _price.remove_train_depot);
 }
 
 
 /**
- * Remove a rail road station
- * @param tile TileIndex been queried
+ * Remove a rail road station/waypoint
+ * @param st The station/waypoint to remove the rail part from
  * @param flags operation to perform
+ * @tparam T the type of station to remove
  * @return cost or failure of operation
  */
-static CommandCost RemoveRailroadStation(TileIndex tile, DoCommandFlag flags)
+template <class T>
+CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 {
-	/* if there is flooding and non-uniform stations are enabled, remove platforms tile by tile */
-	if (_current_company == OWNER_WATER && _settings_game.station.nonuniform_stations) {
-		return DoCommand(tile, 0, 0, DC_EXEC, CMD_REMOVE_FROM_RAILROAD_STATION);
-	}
-
-	Station *st = Station::GetByTile(tile);
-
 	/* Current company owns the station? */
 	if (_current_company != OWNER_WATER && !CheckOwnership(st->owner)) return CMD_ERROR;
 
 	/* determine width and height of platforms */
-	tile = st->train_tile;
-	int w = st->trainst_w;
-	int h = st->trainst_h;
+	TileArea ta = st->train_station;
 
-	assert(w != 0 && h != 0);
+	assert(ta.w != 0 && ta.h != 0);
 
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	/* clear all areas of the station */
-	do {
-		int w_bak = w;
-		do {
-			/* for nonuniform stations, only remove tiles that are actually train station tiles */
-			if (st->TileBelongsToRailStation(tile)) {
-				if (!EnsureNoVehicleOnGround(tile)) {
-					return CMD_ERROR;
-				}
-				cost.AddCost(_price.remove_rail_station);
-				if (flags & DC_EXEC) {
-					/* read variables before the station tile is removed */
-					Track track = GetRailStationTrack(tile);
-					Owner owner = GetTileOwner(tile); // _current_company can be OWNER_WATER
-					Train *v = NULL;
-					if (HasStationReservation(tile)) {
-						v = GetTrainForReservation(tile, track);
-						if (v != NULL) FreeTrainTrackReservation(v);
-					}
-					DoClearSquare(tile);
-					AddTrackToSignalBuffer(tile, track, owner);
-					YapfNotifyTrackLayoutChange(tile, track);
-					if (v != NULL) TryPathReserve(v, true);
-				}
+	TILE_LOOP(tile, ta.w, ta.h, ta.tile) {
+		/* for nonuniform stations, only remove tiles that are actually train station tiles */
+		if (!st->TileBelongsToRailStation(tile)) continue;
+
+		if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
+
+		cost.AddCost(_price.remove_rail_station);
+		if (flags & DC_EXEC) {
+			/* read variables before the station tile is removed */
+			Track track = GetRailStationTrack(tile);
+			Owner owner = GetTileOwner(tile); // _current_company can be OWNER_WATER
+			Train *v = NULL;
+			if (HasStationReservation(tile)) {
+				v = GetTrainForReservation(tile, track);
+				if (v != NULL) FreeTrainTrackReservation(v);
 			}
-			tile += TileDiffXY(1, 0);
-		} while (--w);
-		w = w_bak;
-		tile += TileDiffXY(-w, 1);
-	} while (--h);
+			DoClearSquare(tile);
+			AddTrackToSignalBuffer(tile, track, owner);
+			YapfNotifyTrackLayoutChange(tile, track);
+			if (v != NULL) TryPathReserve(v, true);
+		}
+	}
 
 	if (flags & DC_EXEC) {
-		st->rect.AfterRemoveRect(st, st->train_tile, st->trainst_w, st->trainst_h);
+		st->rect.AfterRemoveRect(st, st->train_station.tile, st->train_station.w, st->train_station.h);
 
-		st->train_tile = INVALID_TILE;
-		st->trainst_w = st->trainst_h = 0;
+		st->train_station.tile = INVALID_TILE;
+		st->train_station.w = 0;
+		st->train_station.h = 0;
+
 		st->facilities &= ~FACIL_TRAIN;
 
 		free(st->speclist);
@@ -1325,12 +1391,49 @@ static CommandCost RemoveRailroadStation(TileIndex tile, DoCommandFlag flags)
 
 		InvalidateWindowWidget(WC_STATION_VIEW, st->index, SVW_TRAINS);
 		st->UpdateVirtCoord();
-		st->RecomputeIndustriesNear();
 		DeleteStationIfEmpty(st);
 	}
 
 	return cost;
 }
+
+/**
+ * Remove a rail road station
+ * @param tile TileIndex been queried
+ * @param flags operation to perform
+ * @return cost or failure of operation
+ */
+static CommandCost RemoveRailStation(TileIndex tile, DoCommandFlag flags)
+{
+	/* if there is flooding and non-uniform stations are enabled, remove platforms tile by tile */
+	if (_current_company == OWNER_WATER && _settings_game.station.nonuniform_stations) {
+		return DoCommand(tile, 0, 0, DC_EXEC, CMD_REMOVE_FROM_RAIL_STATION);
+	}
+
+	Station *st = Station::GetByTile(tile);
+	CommandCost cost = RemoveRailStation(st, flags);
+
+	if (flags & DC_EXEC) st->RecomputeIndustriesNear();
+
+	return cost;
+}
+
+/**
+ * Remove a rail waypoint
+ * @param tile TileIndex been queried
+ * @param flags operation to perform
+ * @return cost or failure of operation
+ */
+static CommandCost RemoveRailWaypoint(TileIndex tile, DoCommandFlag flags)
+{
+	/* if there is flooding and non-uniform stations are enabled, remove waypoints tile by tile */
+	if (_current_company == OWNER_WATER && _settings_game.station.nonuniform_stations) {
+		return DoCommand(tile, 0, 0, DC_EXEC, CMD_REMOVE_FROM_RAIL_WAYPOINT);
+	}
+
+	return RemoveRailStation(Waypoint::GetByTile(tile), flags);
+}
+
 
 /**
  * @param truck_station Determines whether a stop is ROADSTOP_BUS or ROADSTOP_TRUCK
@@ -1360,7 +1463,7 @@ static RoadStop **FindRoadStopSpot(bool truck_station, Station *st)
  *           bit 1: 0 for normal, 1 for drive-through
  *           bit 2..3: the roadtypes
  *           bit 5: allow stations directly adjacent to other stations.
- *           bit 16..31: station ID to join (INVALID_STATION if build new one)
+ *           bit 16..31: station ID to join (NEW_STATION if build new one)
  */
 CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1428,14 +1531,8 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	cost.AddCost(_price.build_road * roadbits_to_build);
 
 	Station *st = NULL;
-
-	if (!_settings_game.station.adjacent_stations || !HasBit(p2, 5)) {
-		st = GetStationAround(tile, 1, 1, INVALID_STATION);
-		if (st == CHECK_STATIONS_ERR) return CMD_ERROR;
-	}
-
-	/* Distant join */
-	if (st == NULL && distant_join) st = Station::GetIfValid(station_to_join);
+	CommandCost ret = FindJoiningStation(INVALID_STATION, station_to_join, HasBit(p2, 5), TileArea(tile, 1, 1), &st);
+	if (CmdFailed(ret)) return ret;
 
 	/* Find a deleted station close to us */
 	if (st == NULL && reuse) st = GetClosestDeletedStation(tile);
@@ -1724,7 +1821,7 @@ void UpdateAirportsNoise()
  * @param p1 airport type, @see airport.h
  * @param p2 various bitstuffed elements
  * - p2 = (bit     0) - allow airports directly adjacent to other airports.
- * - p2 = (bit 16-31) - station ID to join (INVALID_STATION if build new one)
+ * - p2 = (bit 16-31) - station ID to join (NEW_STATION if build new one)
  */
 CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1749,7 +1846,6 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	Town *t = ClosestTownFromTile(tile, UINT_MAX);
 	int w = afc->size_x;
 	int h = afc->size_y;
-	Station *st = NULL;
 
 	if (w > _settings_game.station.station_spread || h > _settings_game.station.station_spread) {
 		_error_message = STR_ERROR_STATION_TOO_SPREAD_OUT;
@@ -1787,12 +1883,9 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		return_cmd_error(authority_refuse_message);
 	}
 
-	if (!_settings_game.station.adjacent_stations || !HasBit(p2, 0)) {
-		st = GetStationAround(tile, w, h, INVALID_STATION);
-		if (st == CHECK_STATIONS_ERR) return CMD_ERROR;
-	} else {
-		st = NULL;
-	}
+	Station *st = NULL;
+	CommandCost ret = FindJoiningStation(INVALID_STATION, station_to_join, HasBit(p2, 0), TileArea(tile, 1, 1), &st);
+	if (CmdFailed(ret)) return ret;
 
 	/* Distant join */
 	if (st == NULL && distant_join) st = Station::GetIfValid(station_to_join);
@@ -1853,10 +1946,10 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		{
 			const byte *b = _airport_sections[p1];
 
-			BEGIN_TILE_LOOP(tile_cur, w, h, tile) {
+			TILE_LOOP(tile_cur, w, h, tile) {
 				MakeAirport(tile_cur, st->owner, st->index, *b);
 				b++;
-			} END_TILE_LOOP(tile_cur, w, h, tile)
+			}
 		}
 
 		st->UpdateVirtCoord();
@@ -1902,14 +1995,14 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 		if (a->targetairport == st->index && a->state != FLYING) return CMD_ERROR;
 	}
 
-	BEGIN_TILE_LOOP(tile_cur, w, h, tile) {
+	TILE_LOOP(tile_cur, w, h, tile) {
 		if (!EnsureNoVehicleOnGround(tile_cur)) return CMD_ERROR;
 
 		if (flags & DC_EXEC) {
 			DeleteAnimatedTile(tile_cur);
 			DoClearSquare(tile_cur);
 		}
-	} END_TILE_LOOP(tile_cur, w, h, tile)
+	}
 
 	if (flags & DC_EXEC) {
 		for (uint i = 0; i < afc->nof_depots; ++i) {
@@ -1978,7 +2071,7 @@ static const byte _dock_h_chk[4] = { 1, 2, 1, 2 };
  * @param tile tile where dock will be built
  * @param flags operation to perform
  * @param p1 (bit 0) - allow docks directly adjacent to other docks.
- * @param p2 bit 16-31: station ID to join (INVALID_STATION if build new one)
+ * @param p2 bit 16-31: station ID to join (NEW_STATION if build new one)
  */
 CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2022,13 +2115,10 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	/* middle */
 	Station *st = NULL;
-
-	if (!_settings_game.station.adjacent_stations || !HasBit(p1, 0)) {
-		st = GetStationAround(
-				tile + ToTileIndexDiff(_dock_tileoffs_chkaround[direction]),
-				_dock_w_chk[direction], _dock_h_chk[direction], INVALID_STATION);
-		if (st == CHECK_STATIONS_ERR) return CMD_ERROR;
-	}
+	CommandCost ret = FindJoiningStation(INVALID_STATION, station_to_join, HasBit(p1, 0),
+			TileArea(tile + ToTileIndexDiff(_dock_tileoffs_chkaround[direction]),
+					_dock_w_chk[direction], _dock_h_chk[direction]), &st);
+	if (CmdFailed(ret)) return ret;
 
 	/* Distant join */
 	if (st == NULL && distant_join) st = Station::GetIfValid(station_to_join);
@@ -2135,7 +2225,7 @@ static void DrawTile_Station(TileInfo *ti)
 	int32 total_offset;
 	int32 custom_ground_offset;
 
-	if (IsRailwayStation(ti->tile) || IsRailWaypoint(ti->tile)) {
+	if (HasStationRail(ti->tile)) {
 		const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
 		roadtypes = ROADTYPES_NONE;
 		total_offset = rti->total_offset;
@@ -2212,13 +2302,13 @@ static void DrawTile_Station(TileInfo *ti)
 		DrawGroundSprite(image, GroundSpritePaletteTransform(image, pal, palette));
 
 		/* PBS debugging, draw reserved tracks darker */
-		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && (IsRailwayStation(ti->tile) || IsRailWaypoint(ti->tile)) && HasStationReservation(ti->tile)) {
+		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && HasStationRail(ti->tile) && HasStationReservation(ti->tile)) {
 			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
 			DrawGroundSprite(GetRailStationAxis(ti->tile) == AXIS_X ? rti->base_sprites.single_y : rti->base_sprites.single_x, PALETTE_CRASH);
 		}
 	}
 
-	if ((IsRailwayStation(ti->tile) || IsRailWaypoint(ti->tile)) && HasCatenaryDrawn(GetRailType(ti->tile)) && IsStationTileElectrifiable(ti->tile)) DrawCatenary(ti);
+	if (HasStationRail(ti->tile) && HasCatenaryDrawn(GetRailType(ti->tile)) && IsStationTileElectrifiable(ti->tile)) DrawCatenary(ti);
 
 	if (HasBit(roadtypes, ROADTYPE_TRAM)) {
 		Axis axis = GetRoadStopDir(ti->tile) == DIAGDIR_NE ? AXIS_X : AXIS_Y;
@@ -2359,7 +2449,7 @@ static TrackStatus GetTileTrackStatus_Station(TileIndex tile, TransportType mode
 
 	switch (mode) {
 		case TRANSPORT_RAIL:
-			if ((IsRailwayStation(tile) || IsRailWaypoint(tile)) && !IsStationTileBlocked(tile)) {
+			if (HasStationRail(tile) && !IsStationTileBlocked(tile)) {
 				trackbits = TrackToTrackBits(GetRailStationTrack(tile));
 			}
 			break;
@@ -2444,7 +2534,7 @@ static void AnimateTile_Station(TileIndex tile)
 		{ GFX_WINDSACK_INTERCON_FIRST,   GFX_WINDSACK_INTERCON_LAST,   1 }
 	};
 
-	if (IsRailwayStation(tile)) {
+	if (HasStationRail(tile)) {
 		AnimateStationTile(tile);
 		return;
 	}
@@ -2483,7 +2573,7 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
 
 	if (v->type == VEH_TRAIN) {
 		if (!v->current_order.ShouldStopAtStation(v, station_id)) return VETSB_CONTINUE;
-		if (!IsRailwayStation(tile) || !Train::From(v)->IsFrontEngine()) return VETSB_CONTINUE;
+		if (!IsRailStation(tile) || !Train::From(v)->IsFrontEngine()) return VETSB_CONTINUE;
 
 		int station_ahead;
 		int station_length;
@@ -2570,7 +2660,7 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
  */
 static bool StationHandleBigTick(BaseStation *st)
 {
-	if ((st->facilities & ~FACIL_WAYPOINT) == 0 && ++st->delete_ctr >= 8) {
+	if (!st->IsInUse() && ++st->delete_ctr >= 8) {
 		delete st;
 		return false;
 	}
@@ -2698,7 +2788,7 @@ static void UpdateStationRating(Station *st)
 /* called for every station each tick */
 static void StationHandleSmallTick(BaseStation *st)
 {
-	if ((st->facilities & FACIL_WAYPOINT) != 0 || st->facilities == 0) return;
+	if ((st->facilities & FACIL_WAYPOINT) != 0 || !st->IsInUse()) return;
 
 	byte b = st->delete_ctr + 1;
 	if (b >= 185) b = 0;
@@ -2926,19 +3016,9 @@ void BuildOilRig(TileIndex tile)
 	MakeOilrig(tile, st->index, GetWaterClass(tile));
 
 	st->owner = OWNER_NONE;
-	st->airport_flags = 0;
 	st->airport_type = AT_OILRIG;
-	st->xy = tile;
-	st->bus_stops = NULL;
-	st->truck_stops = NULL;
 	st->airport_tile = tile;
 	st->dock_tile = tile;
-	st->train_tile = INVALID_TILE;
-	st->had_vehicle_of_type = 0;
-	st->time_since_load = 255;
-	st->time_since_unload = 255;
-	st->delete_ctr = 0;
-	st->last_vehicle_type = VEH_INVALID;
 	st->facilities = FACIL_AIRPORT | FACIL_DOCK;
 	st->build_date = _date;
 
@@ -2973,7 +3053,7 @@ void DeleteOilRig(TileIndex tile)
 
 	st->UpdateVirtCoord();
 	st->RecomputeIndustriesNear();
-	if (st->facilities == 0) delete st;
+	if (!st->IsInUse()) delete st;
 }
 
 static void ChangeTileOwner_Station(TileIndex tile, Owner old_owner, Owner new_owner)
@@ -3032,7 +3112,7 @@ static bool CanRemoveRoadWithStop(TileIndex tile, DoCommandFlag flags)
 	return road_owner != OWNER_TOWN || CheckAllowRemoveRoad(tile, GetAnyRoadBits(tile, ROADTYPE_ROAD), OWNER_TOWN, ROADTYPE_ROAD, flags);
 }
 
-static CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags)
+CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags)
 {
 	if (flags & DC_AUTO) {
 		switch (GetStationType(tile)) {
@@ -3051,8 +3131,8 @@ static CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags)
 	}
 
 	switch (GetStationType(tile)) {
-		case STATION_RAIL:     return RemoveRailroadStation(tile, flags);
-		case STATION_WAYPOINT: return RemoveTrainWaypoint(tile, flags, false);
+		case STATION_RAIL:     return RemoveRailStation(tile, flags);
+		case STATION_WAYPOINT: return RemoveRailWaypoint(tile, flags);
 		case STATION_AIRPORT:  return RemoveAirport(tile, flags);
 		case STATION_TRUCK:
 			if (IsDriveThroughStopTile(tile) && !CanRemoveRoadWithStop(tile, flags))
