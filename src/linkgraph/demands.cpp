@@ -42,13 +42,9 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 		}
 	}
 
-	if (supply_sum == 0 || num_demands == 0) {
-		return;
-	}
-
 	uint demand_per_node = max(supply_sum / num_demands, (uint)1);
 
-	while(!supplies.empty()) {
+	while(!supplies.empty() && !demands.empty()) {
 		NodeID node1 = supplies.front();
 		supplies.pop_front();
 
