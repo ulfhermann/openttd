@@ -1633,10 +1633,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\waypoint_type.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\widget_type.h"
 				>
 			</File>
@@ -2285,6 +2281,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\table\pricebase.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\table\railtypes.h"
 				>
 			</File>
@@ -2637,6 +2637,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\ai\api\ai_basestation.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\ai\api\ai_bridge.hpp"
 				>
 			</File>
@@ -2654,6 +2658,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\ai\api\ai_cargolist.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\ai\api\ai_changelog.hpp"
 				>
 			</File>
 			<File
@@ -2846,6 +2854,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\ai\api\ai_base.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\ai\api\ai_basestation.cpp"
 				>
 			</File>
 			<File

@@ -6,6 +6,8 @@
 #include "company_func.h"
 #include "gfx_func.h"
 #include "window_gui.h"
+#include "viewport_func.h"
+#include "zoom_func.h"
 #include "debug.h"
 #include "strings_func.h"
 
@@ -918,6 +920,13 @@ NWidgetBase::NWidgetBase(WidgetType tp) : ZeroedMemoryAllocator()
  */
 
 /**
+ * @fn void FillNestedArray(NWidgetCore **array, uint length)
+ * Fill the Window::nested_array array with pointers to nested widgets in the tree.
+ * @param array Base pointer of the array.
+ * @param length Length of the array.
+ */
+
+/**
  * Store size and position.
  * @param sizing         Type of resizing to perform.
  * @param x              Horizontal offset of the widget relative to the left edge of the window.
@@ -973,7 +982,7 @@ void NWidgetBase::Invalidate(const Window *w) const
 }
 
 /**
- * @fn NWidgetCore *GetWidgetFromPos(int x, int y)
+ * @fn NWidgetCore *NWidgetBase::GetWidgetFromPos(int x, int y)
  * Retrieve a widget by its position.
  * @param x Horizontal position relative to the left edge of the window.
  * @param y Vertical position relative to the top edge of the window.
@@ -981,11 +990,14 @@ void NWidgetBase::Invalidate(const Window *w) const
  */
 
 /**
- * @fn NWidgetBase *GetWidgetOfType(WidgetType tp)
  * Retrieve a widget by its type.
  * @param tp Widget type to search for.
  * @return Returns the first widget of the specified type, or \c NULL if no widget can be found.
  */
+NWidgetBase *NWidgetBase::GetWidgetOfType(WidgetType tp)
+{
+	return (this->type == tp) ? this : NULL;
+}
 
 /**
  * Constructor for resizable nested widgets.
@@ -1075,6 +1087,11 @@ void NWidgetCore::SetDataTip(uint16 widget_data, StringID tool_tip)
 	this->tool_tip = tool_tip;
 }
 
+void NWidgetCore::FillNestedArray(NWidgetCore **array, uint length)
+{
+	if (this->index >= 0 && (uint)(this->index) < length) array[this->index] = this;
+}
+
 void NWidgetCore::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
 {
 	if (this->index < 0) return;
@@ -1107,6 +1124,11 @@ void NWidgetCore::StoreWidgets(Widget *widgets, int length, bool left_moving, bo
 	w->bottom = this->pos_y + this->smallest_y - 1;
 	w->data = this->widget_data;
 	w->tooltips = this->tool_tip;
+}
+
+NWidgetCore *NWidgetCore::GetWidgetFromPos(int x, int y)
+{
+	return (IsInsideBS(x, this->pos_x, this->current_x) && IsInsideBS(y, this->pos_y, this->current_y)) ? this : NULL;
 }
 
 /**
@@ -1172,6 +1194,13 @@ void NWidgetContainer::Add(NWidgetBase *wid)
 	}
 }
 
+void NWidgetContainer::FillNestedArray(NWidgetCore **array, uint length)
+{
+	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
+		child_wid->FillNestedArray(array, length);
+	}
+}
+
 /**
  * Return the biggest possible size of a nested widget.
  * @param base      Base size of the widget.
@@ -1199,7 +1228,6 @@ static inline uint ComputeOffset(uint space, uint max_space)
 	if (space >= max_space) return 0;
 	return (max_space - space) / 2;
 }
-
 
 /**
  * Widgets stacked on top of each other.
@@ -1595,6 +1623,10 @@ void NWidgetSpacer::SetupSmallestSize(Window *w, bool init_array)
 	this->smallest_y = this->min_y;
 }
 
+void NWidgetSpacer::FillNestedArray(NWidgetCore **array, uint length)
+{
+}
+
 void NWidgetSpacer::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
 {
 	/* Spacer widgets are never stored in the widget array. */
@@ -1613,11 +1645,6 @@ void NWidgetSpacer::Invalidate(const Window *w) const
 NWidgetCore *NWidgetSpacer::GetWidgetFromPos(int x, int y)
 {
 	return NULL;
-}
-
-NWidgetBase *NWidgetSpacer::GetWidgetOfType(WidgetType tp)
-{
-	return (this->type == tp) ? this : NULL;
 }
 
 /**
@@ -1694,7 +1721,10 @@ void NWidgetBackground::SetupSmallestSize(Window *w, bool init_array)
 		Dimension d = {this->min_x, this->min_y};
 		Dimension resize  = {this->resize_x, this->resize_y};
 		if (w != NULL) { // A non-NULL window pointer acts as switch to turn dynamic widget size on.
-			if (this->type == WWT_FRAME || this->type == WWT_INSET) d = maxdim(d, GetStringBoundingBox(this->widget_data));
+			if (this->type == WWT_FRAME || this->type == WWT_INSET) {
+				if (this->index >= 0) w->SetStringParameters(this->index);
+				d = maxdim(d, GetStringBoundingBox(this->widget_data));
+			}
 			if (this->index >= 0) {
 				static const Dimension padding = {0, 0};
 				w->UpdateWidgetSize(this->index, &d, padding, &resize);
@@ -1725,6 +1755,12 @@ void NWidgetBackground::StoreWidgets(Widget *widgets, int length, bool left_movi
 	if (this->child != NULL) this->child->StoreWidgets(widgets, length, left_moving, top_moving, rtl);
 }
 
+void NWidgetBackground::FillNestedArray(NWidgetCore **array, uint length)
+{
+	if (this->index >= 0 && (uint)(this->index) < length) array[this->index] = this;
+	if (this->child != NULL) this->child->FillNestedArray(array, length);
+}
+
 void NWidgetBackground::Draw(const Window *w)
 {
 	if (this->current_x == 0 || this->current_y == 0) return;
@@ -1745,10 +1781,12 @@ void NWidgetBackground::Draw(const Window *w)
 			break;
 
 		case WWT_FRAME:
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawFrame(r, this->colour, this->widget_data);
 			break;
 
 		case WWT_INSET:
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawInset(r, this->colour, this->widget_data);
 			break;
 
@@ -1789,6 +1827,65 @@ NWidgetBase *NWidgetBackground::GetWidgetOfType(WidgetType tp)
 	if (this->child != NULL) nwid = this->child->GetWidgetOfType(tp);
 	if (nwid == NULL && this->type == tp) nwid = this;
 	return nwid;
+}
+
+NWidgetViewport::NWidgetViewport(int index) : NWidgetCore(NWID_VIEWPORT, INVALID_COLOUR, true, true, 0x0, STR_NULL)
+{
+	this->SetIndex(index);
+}
+
+void NWidgetViewport::SetupSmallestSize(Window *w, bool init_array)
+{
+	if (init_array && this->index >= 0) {
+		assert(w->nested_array_size > (uint)this->index);
+		w->nested_array[this->index] = this;
+	}
+	this->smallest_x = this->min_x;
+	this->smallest_y = this->min_y;
+}
+
+void NWidgetViewport::StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
+{
+	NOT_REACHED();
+}
+
+void NWidgetViewport::Draw(const Window *w)
+{
+	w->DrawViewport();
+}
+
+Scrollbar *NWidgetViewport::FindScrollbar(Window *w, bool allow_next)
+{
+	return NULL;
+}
+
+/**
+ * Initialize the viewport of the window.
+ * @param w            Window owning the viewport.
+ * @param follow_flags Type of viewport, see #InitializeViewport().
+ * @param zoom         Zoom level.
+ */
+void NWidgetViewport::InitializeViewport(Window *w, uint32 follow_flags, ZoomLevel zoom)
+{
+	InitializeWindowViewport(w, this->pos_x, this->pos_y, this->current_x, this->current_y, follow_flags, zoom);
+}
+
+/**
+ * Update the position and size of the viewport (after eg a resize).
+ * @param w Window owning the viewport.
+ */
+void NWidgetViewport::UpdateViewportCoordinates(Window *w)
+{
+	ViewPort *vp = w->viewport;
+	if (vp != NULL) {
+		vp->left = w->left + this->pos_x;
+		vp->top  = w->top + this->pos_y;
+		vp->width  = this->current_x;
+		vp->height = this->current_y;
+
+		vp->virtual_width  = ScaleByZoom(vp->width, vp->zoom);
+		vp->virtual_height = ScaleByZoom(vp->height, vp->zoom);
+	}
 }
 
 /** Reset the cached dimensions. */
@@ -1912,11 +2009,15 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 	const Dimension *padding = NULL;
 	switch (this->type) {
 		case WWT_EMPTY:
-		case WWT_MATRIX:
 		case WWT_SCROLLBAR:
 		case WWT_SCROLL2BAR:
 		case WWT_HSCROLLBAR: {
 			static const Dimension extra = {0, 0};
+			padding = &extra;
+			break;
+		}
+		case WWT_MATRIX: {
+			static const Dimension extra = {WD_MATRIX_LEFT + WD_MATRIX_RIGHT, WD_MATRIX_TOP + WD_MATRIX_BOTTOM};
 			padding = &extra;
 			break;
 		}
@@ -1983,6 +2084,7 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 		case WWT_TEXTBTN_2: {
 			static const Dimension extra = {WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT,  WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM};
 			padding = &extra;
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			Dimension d2 = GetStringBoundingBox(this->widget_data);
 			d2.width += extra.width;
 			d2.height += extra.height;
@@ -1993,12 +2095,14 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 		case WWT_TEXT: {
 			static const Dimension extra = {0, 0};
 			padding = &extra;
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			size = maxdim(size, GetStringBoundingBox(this->widget_data));
 			break;
 		}
 		case WWT_CAPTION: {
 			static const Dimension extra = {WD_CAPTIONTEXT_LEFT + WD_CAPTIONTEXT_RIGHT, WD_CAPTIONTEXT_TOP + WD_CAPTIONTEXT_BOTTOM};
 			padding = &extra;
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			Dimension d2 = GetStringBoundingBox(this->widget_data);
 			d2.width += extra.width;
 			d2.height += extra.height;
@@ -2008,6 +2112,7 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 		case WWT_DROPDOWN: {
 			static const Dimension extra = {WD_DROPDOWNTEXT_LEFT + WD_DROPDOWNTEXT_RIGHT, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM};
 			padding = &extra;
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			Dimension d2 = GetStringBoundingBox(this->widget_data);
 			d2.width += extra.width;
 			d2.height += extra.height;
@@ -2059,15 +2164,18 @@ void NWidgetLeaf::Draw(const Window *w)
 		case WWT_TEXTBTN:
 		case WWT_PUSHTXTBTN:
 		case WWT_TEXTBTN_2:
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawFrameRect(r.left, r.top, r.right, r.bottom, this->colour, (clicked) ? FR_LOWERED : FR_NONE);
 			DrawLabel(r, this->type, clicked, this->widget_data);
 			break;
 
 		case WWT_LABEL:
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawLabel(r, this->type, clicked, this->widget_data);
 			break;
 
 		case WWT_TEXT:
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawText(r, (TextColour)this->colour, this->widget_data);
 			break;
 
@@ -2094,6 +2202,7 @@ void NWidgetLeaf::Draw(const Window *w)
 			break;
 
 		case WWT_CAPTION:
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawCaption(r, this->colour, w->owner, this->widget_data);
 			break;
 
@@ -2119,6 +2228,7 @@ void NWidgetLeaf::Draw(const Window *w)
 			break;
 
 		case WWT_DROPDOWN:
+			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawDropdown(r, this->colour, clicked, this->widget_data);
 			break;
 
@@ -2138,10 +2248,6 @@ void NWidgetLeaf::Invalidate(const Window *w) const
 	NWidgetBase::Invalidate(w);
 }
 
-NWidgetCore *NWidgetLeaf::GetWidgetFromPos(int x, int y)
-{
-	return (IsInsideBS(x, this->pos_x, this->current_x) && IsInsideBS(y, this->pos_y, this->current_y)) ? this : NULL;
-}
 
 Scrollbar *NWidgetLeaf::FindScrollbar(Window *w, bool allow_next)
 {
@@ -2153,11 +2259,6 @@ Scrollbar *NWidgetLeaf::FindScrollbar(Window *w, bool allow_next)
 		if (next_wid != NULL) return next_wid->FindScrollbar(w, false);
 	}
 	return NULL;
-}
-
-NWidgetBase *NWidgetLeaf::GetWidgetOfType(WidgetType tp)
-{
-	return (this->type == tp) ? this : NULL;
 }
 
 /**
@@ -2394,9 +2495,15 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 			case WPT_ENDCONTAINER:
 				return num_used;
 
+			case NWID_VIEWPORT:
+				if (*dest != NULL) return num_used;
+				*dest = new NWidgetViewport(parts->u.widget.index);
+				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
+				break;
+
 			default:
 				if (*dest != NULL) return num_used;
-				assert((parts->type & WWT_MASK) < NWID_HORIZONTAL);
+				assert((parts->type & WWT_MASK) < WWT_LAST);
 				*dest = new NWidgetLeaf(parts->type, parts->u.widget.colour, parts->u.widget.index, 0x0, STR_NULL);
 				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
 				break;

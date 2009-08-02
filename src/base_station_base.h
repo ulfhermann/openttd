@@ -23,11 +23,28 @@ struct StationSpecList {
 	uint8  localidx;   ///< Station ID within GRF of station
 };
 
-/** Represents the covered area */
-struct TileArea {
-	TileIndex tile; ///< The base tile of the area
-	uint8 w;        ///< The width of the area
-	uint8 h;        ///< The height of the area
+
+/** StationRect - used to track station spread out rectangle - cheaper than scanning whole map */
+struct StationRect : public Rect {
+	enum StationRectMode
+	{
+		ADD_TEST = 0,
+		ADD_TRY,
+		ADD_FORCE
+	};
+
+	StationRect();
+	void MakeEmpty();
+	bool PtInExtendedRect(int x, int y, int distance = 0) const;
+	bool IsEmpty() const;
+	bool BeforeAddTile(TileIndex tile, StationRectMode mode);
+	bool BeforeAddRect(TileIndex tile, int w, int h, StationRectMode mode);
+	bool AfterRemoveTile(BaseStation *st, TileIndex tile);
+	bool AfterRemoveRect(BaseStation *st, TileIndex tile, int w, int h);
+
+	static bool ScanForStationTiles(StationID st_id, int left_a, int top_a, int right_a, int bottom_a);
+
+	StationRect& operator = (Rect src);
 };
 
 /** Base class for all station-ish types */
@@ -52,7 +69,18 @@ struct BaseStation : StationPool::PoolItem<&_station_pool> {
 	byte waiting_triggers;          ///< Waiting triggers (NewGRF) for this station
 	uint8 cached_anim_triggers;     ///< NOSAVE: Combined animation trigger bitmask, used to determine if trigger processing should happen.
 
-	BaseStation(TileIndex tile) : xy(tile) { }
+	TileArea train_station;         ///< Tile area the train 'station' part covers
+	StationRect rect;               ///< NOSAVE: Station spread out rectangle maintained by StationRect::xxx() functions
+
+	/**
+	 * Initialize the base station.
+	 * @param tile The location of the station sign
+	 */
+	BaseStation(TileIndex tile) :
+		xy(tile),
+		train_station(INVALID_TILE, 0, 0)
+	{
+	}
 
 	virtual ~BaseStation();
 
@@ -85,6 +113,24 @@ struct BaseStation : StationPool::PoolItem<&_station_pool> {
 	 */
 	virtual void GetTileArea(TileArea *ta, StationType type) const = 0;
 
+
+	/**
+	 * Obtain the length of a platform
+	 * @pre tile must be a rail station tile
+	 * @param tile A tile that contains the platform in question
+	 * @return The length of the platform
+	 */
+	virtual uint GetPlatformLength(TileIndex tile) const = 0;
+
+	/**
+	 * Determines the REMAINING length of a platform, starting at (and including)
+	 * the given tile.
+	 * @param tile the tile from which to start searching. Must be a rail station tile
+	 * @param dir The direction in which to search.
+	 * @return The platform length
+	 */
+	virtual uint GetPlatformLength(TileIndex tile, DiagDirection dir) const = 0;
+
 	/**
 	 * Get the base station belonging to a specific tile.
 	 * @param tile The tile to get the base station from.
@@ -93,6 +139,17 @@ struct BaseStation : StationPool::PoolItem<&_station_pool> {
 	static FORCEINLINE BaseStation *GetByTile(TileIndex tile)
 	{
 		return BaseStation::Get(GetStationIndex(tile));
+	}
+
+	/**
+	 * Check whether the base station currently is in use; in use means
+	 * that it is not scheduled for deletion and that it still has some
+	 * facilities left.
+	 * @return true if still in use
+	 */
+	FORCEINLINE bool IsInUse() const
+	{
+		return (this->facilities & ~FACIL_WAYPOINT) != 0;
 	}
 };
 

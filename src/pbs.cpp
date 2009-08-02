@@ -26,7 +26,7 @@ TrackBits GetReservedTrackbits(TileIndex t)
 			break;
 
 		case MP_STATION:
-			if (IsRailwayStation(t) || IsRailWaypoint(t)) return GetStationReservationTrackBits(t);
+			if (HasStationRail(t)) return GetStationReservationTrackBits(t);
 			break;
 
 		case MP_TUNNELBRIDGE:
@@ -41,21 +41,21 @@ TrackBits GetReservedTrackbits(TileIndex t)
 
 /**
  * Set the reservation for a complete station platform.
- * @pre IsRailwayStationTile(start)
+ * @pre IsRailStationTile(start)
  * @param start starting tile of the platform
  * @param dir the direction in which to follow the platform
  * @param b the state the reservation should be set to
  */
-void SetRailwayStationPlatformReservation(TileIndex start, DiagDirection dir, bool b)
+void SetRailStationPlatformReservation(TileIndex start, DiagDirection dir, bool b)
 {
 	TileIndex     tile = start;
 	TileIndexDiff diff = TileOffsByDiagDir(dir);
 
-	assert(IsRailwayStationTile(start));
+	assert(IsRailStationTile(start));
 	assert(GetRailStationAxis(start) == DiagDirToAxis(dir));
 
 	do {
-		SetRailwayStationReservation(tile, b);
+		SetRailStationReservation(tile, b);
 		MarkTileDirtyByTile(tile);
 		tile = TILE_ADD(tile, diff);
 	} while (IsCompatibleTrainStationTile(tile, start));
@@ -99,8 +99,8 @@ bool TryReserveRailTrack(TileIndex tile, Track t)
 			break;
 
 		case MP_STATION:
-			if ((IsRailwayStation(tile) || IsRailWaypoint(tile)) && !HasStationReservation(tile)) {
-				SetRailwayStationReservation(tile, true);
+			if (HasStationRail(tile) && !HasStationReservation(tile)) {
+				SetRailStationReservation(tile, true);
 				MarkTileDirtyByTile(tile); // some GRFs need redraw after reserving track
 				return true;
 			}
@@ -150,8 +150,8 @@ bool TryReserveRailTrack(TileIndex tile, Track t)
 			break;
 
 		case MP_STATION:
-			if (IsRailwayStation(tile) || IsRailWaypoint(tile)) {
-				SetRailwayStationReservation(tile, false);
+			if (HasStationRail(tile)) {
+				SetRailStationReservation(tile, false);
 				MarkTileDirtyByTile(tile);
 			}
 			break;
@@ -295,7 +295,7 @@ Train *GetTrainForReservation(TileIndex tile, Track track)
 		if (ftoti.best != NULL) return ftoti.best;
 
 		/* Special case for stations: check the whole platform for a vehicle. */
-		if (IsRailwayStationTile(ftoti.res.tile)) {
+		if (IsRailStationTile(ftoti.res.tile)) {
 			TileIndexDiff diff = TileOffsByDiagDir(TrackdirToExitdir(ReverseTrackdir(ftoti.res.trackdir)));
 			for (TileIndex st_tile = ftoti.res.tile + diff; IsCompatibleTrainStationTile(st_tile, ftoti.res.tile); st_tile += diff) {
 				FindVehicleOnPos(st_tile, &ftoti, FindTrainOnTrackEnum);
