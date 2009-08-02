@@ -54,8 +54,8 @@ struct ETileArea : TileArea {
 				Axis axis = GetRailStationAxis(tile);
 				TileIndexDiff delta = TileOffsByDiagDir(AxisToDiagDir(axis));
 
-				for (end = tile; IsRailwayStationTile(end + delta) && IsCompatibleTrainStationTile(tile, end + delta); end += delta) { /* Nothing */ }
-				for (start = tile; IsRailwayStationTile(start - delta) && IsCompatibleTrainStationTile(tile, start - delta); start -= delta) { /* Nothing */ }
+				for (end = tile; IsRailStationTile(end + delta) && IsCompatibleTrainStationTile(tile, end + delta); end += delta) { /* Nothing */ }
+				for (start = tile; IsRailStationTile(start - delta) && IsCompatibleTrainStationTile(tile, start - delta); start -= delta) { /* Nothing */ }
 
 				this->tile = start;
 				this->w = TileX(end) - TileX(start) + 1;
@@ -283,7 +283,7 @@ static TileIndex FindRailStationEnd(TileIndex tile, TileIndexDiff delta, bool ch
 		TileIndex new_tile = TILE_ADD(tile, delta);
 
 		if (!IsTileType(new_tile, MP_STATION) || GetStationIndex(new_tile) != sid) break;
-		if (!IsRailwayStation(new_tile) && !IsRailWaypoint(new_tile)) break;
+		if (!HasStationRail(new_tile)) break;
 		if (check_type && GetCustomStationSpecIndex(new_tile) != orig_type) break;
 		if (check_axis && GetRailStationAxis(new_tile) != orig_axis) break;
 
@@ -479,7 +479,7 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 		case 0x68: { // Station info of nearby tiles
 			TileIndex nearby_tile = GetNearbyTile(parameter, tile);
 
-			if (!IsRailwayStationTile(nearby_tile)) return 0xFFFFFFFF;
+			if (!HasStationTileRail(nearby_tile)) return 0xFFFFFFFF;
 
 			uint32 grfid = st->speclist[GetCustomStationSpecIndex(tile)].grfid;
 			bool perpendicular = GetRailStationAxis(tile) != GetRailStationAxis(nearby_tile);
@@ -628,7 +628,7 @@ static const SpriteGroup *StationResolveReal(const ResolverObject *object, const
 			break;
 	}
 
-	if (HasBit(statspec->flags, SSF_DIV_BY_STATION_SIZE)) cargo /= (st->trainst_w + st->trainst_h);
+	if (HasBit(statspec->flags, SSF_DIV_BY_STATION_SIZE)) cargo /= (st->train_station.w + st->train_station.h);
 	cargo = min(0xfff, cargo);
 
 	if (cargo > statspec->cargo_threshold) {
