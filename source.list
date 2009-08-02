@@ -334,7 +334,6 @@ viewport_type.h
 water.h
 waypoint_base.h
 waypoint_func.h
-waypoint_type.h
 widget_type.h
 win32.h
 music/win32_m.h
@@ -516,6 +515,7 @@ table/landscape_sprite.h
 table/namegen.h
 table/palette_convert.h
 table/palettes.h
+table/pricebase.h
 table/railtypes.h
 table/road_land.h
 table/roadveh_movement.h
@@ -609,11 +609,13 @@ ai/api/ai_abstractlist.hpp
 ai/api/ai_accounting.hpp
 ai/api/ai_airport.hpp
 ai/api/ai_base.hpp
+ai/api/ai_basestation.hpp
 ai/api/ai_bridge.hpp
 ai/api/ai_bridgelist.hpp
 ai/api/ai_buoylist.hpp
 ai/api/ai_cargo.hpp
 ai/api/ai_cargolist.hpp
+ai/api/ai_changelog.hpp
 ai/api/ai_company.hpp
 ai/api/ai_controller.hpp
 ai/api/ai_date.hpp
@@ -663,6 +665,7 @@ ai/api/ai_abstractlist.cpp
 ai/api/ai_accounting.cpp
 ai/api/ai_airport.cpp
 ai/api/ai_base.cpp
+ai/api/ai_basestation.cpp
 ai/api/ai_bridge.cpp
 ai/api/ai_bridgelist.cpp
 ai/api/ai_buoylist.cpp

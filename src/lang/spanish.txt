@@ -54,7 +54,7 @@ STR_CARGO_PLURAL_COLA                                           :Cola
 STR_CARGO_PLURAL_COTTON_CANDY                                   :Algodón de azúcar
 STR_CARGO_PLURAL_BUBBLES                                        :Burbujas
 STR_CARGO_PLURAL_TOFFEE                                         :Caramelo
-STR_CARGO_PLURAL_BATTERIES                                      :Baterías
+STR_CARGO_PLURAL_BATTERIES                                      :Pilas
 STR_CARGO_PLURAL_PLASTIC                                        :Plástico
 STR_CARGO_PLURAL_FIZZY_DRINKS                                   :Refrescos
 STR_CARGO_SINGULAR_NOTHING                                      :
@@ -122,41 +122,39 @@ STR_QUANTITY_BATTERIES                                          :{COMMA} pila{P 
 STR_QUANTITY_PLASTIC                                            :{VOLUME} de plástico
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} refresco{P "" s}
 STR_ABBREV_NOTHING                                              :
-STR_ABBREV_PASSENGERS                                           :{TINYFONT}PS
-STR_ABBREV_COAL                                                 :{TINYFONT}CL
-STR_ABBREV_MAIL                                                 :{TINYFONT}ML
-STR_ABBREV_OIL                                                  :{TINYFONT}OL
-STR_ABBREV_LIVESTOCK                                            :{TINYFONT}LV
-STR_ABBREV_GOODS                                                :{TINYFONT}GD
+STR_ABBREV_PASSENGERS                                           :{TINYFONT}PJ
+STR_ABBREV_COAL                                                 :{TINYFONT}CB
+STR_ABBREV_MAIL                                                 :{TINYFONT}CR
+STR_ABBREV_OIL                                                  :{TINYFONT}PT
+STR_ABBREV_LIVESTOCK                                            :{TINYFONT}GN
+STR_ABBREV_GOODS                                                :{TINYFONT}MC
 STR_ABBREV_GRAIN                                                :{TINYFONT}GR
-STR_ABBREV_WOOD                                                 :{TINYFONT}WD
-STR_ABBREV_IRON_ORE                                             :{TINYFONT}OR
-STR_ABBREV_STEEL                                                :{TINYFONT}ST
-STR_ABBREV_VALUABLES                                            :{TINYFONT}VL
-STR_ABBREV_COPPER_ORE                                           :{TINYFONT}CO
+STR_ABBREV_WOOD                                                 :{TINYFONT}MD
+STR_ABBREV_IRON_ORE                                             :{TINYFONT}MH
+STR_ABBREV_STEEL                                                :{TINYFONT}AC
+STR_ABBREV_VALUABLES                                            :{TINYFONT}OV
+STR_ABBREV_COPPER_ORE                                           :{TINYFONT}MC
 STR_ABBREV_MAIZE                                                :{TINYFONT}MZ
 STR_ABBREV_FRUIT                                                :{TINYFONT}FT
 STR_ABBREV_DIAMONDS                                             :{TINYFONT}DM
-STR_ABBREV_FOOD                                                 :{TINYFONT}FD
-STR_ABBREV_PAPER                                                :{TINYFONT}PR
-STR_ABBREV_GOLD                                                 :{TINYFONT}GD
-STR_ABBREV_WATER                                                :{TINYFONT}WR
-STR_ABBREV_WHEAT                                                :{TINYFONT}WH
-STR_ABBREV_RUBBER                                               :{TINYFONT}RB
-STR_ABBREV_SUGAR                                                :{TINYFONT}SG
-STR_ABBREV_TOYS                                                 :{TINYFONT}TY
-STR_ABBREV_SWEETS                                               :{TINYFONT}SW
+STR_ABBREV_FOOD                                                 :{TINYFONT}CM
+STR_ABBREV_PAPER                                                :{TINYFONT}PP
+STR_ABBREV_GOLD                                                 :{TINYFONT}OR
+STR_ABBREV_WATER                                                :{TINYFONT}AG
+STR_ABBREV_WHEAT                                                :{TINYFONT}TG
+STR_ABBREV_RUBBER                                               :{TINYFONT}GM
+STR_ABBREV_SUGAR                                                :{TINYFONT}AZ
+STR_ABBREV_TOYS                                                 :{TINYFONT}JG
+STR_ABBREV_SWEETS                                               :{TINYFONT}DC
 STR_ABBREV_COLA                                                 :{TINYFONT}CL
-STR_ABBREV_CANDYFLOSS                                           :{TINYFONT}CF
+STR_ABBREV_CANDYFLOSS                                           :{TINYFONT}AA
 STR_ABBREV_BUBBLES                                              :{TINYFONT}BU
-STR_ABBREV_TOFFEE                                               :{TINYFONT}TF
-STR_ABBREV_BATTERIES                                            :{TINYFONT}BA
+STR_ABBREV_TOFFEE                                               :{TINYFONT}CM
+STR_ABBREV_BATTERIES                                            :{TINYFONT}PI
 STR_ABBREV_PLASTIC                                              :{TINYFONT}PL
-STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}FZ
+STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}RF
 STR_ABBREV_NONE                                                 :{TINYFONT}NO
-STR_ABBREV_ALL                                                  :{TINYFONT}TODOS
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
-STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
+STR_ABBREV_ALL                                                  :{TINYFONT}TOD
 STR_SMALLMAP_CAPTION                                            :{WHITE}Mapa - {STRING}
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Opciones del juego
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Mensaje
@@ -168,17 +166,11 @@ STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Copyrigh
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD versión {REV}
 STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 El equipo OpenTTD
 
-STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
-STR_SILVER_CROSS                                                :{SILVER}{CROSS}
 STR_QUIT_CAPTION                                                :{WHITE}Salir
 STR_YES                                                         :{BLACK}Si
 STR_NO                                                          :{BLACK}No
 STR_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD                       :{YELLOW}¿Está seguro de abandonar y regresar a {STRING}?
-STR_BLACK_1                                                     :{BLACK}1
-STR_BLACK_2                                                     :{BLACK}2
-STR_BLACK_3                                                     :{BLACK}3
-STR_BLACK_4                                                     :{BLACK}4
-STR_BLACK_5                                                     :{BLACK}5
+
 STR_JUST_NOTHING                                                :Nada
 STR_COLOUR_DARK_BLUE                                            :Azul oscuro
 STR_COLOUR_PALE_GREEN                                           :Verde pálido
@@ -197,8 +189,6 @@ STR_COLOUR_BROWN                                                :Marrón
 STR_COLOUR_GREY                                                 :Gris
 STR_COLOUR_WHITE                                                :Blanco
 STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}Demasiados vehículos en juego
-STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
-STR_RED_COMMA                                                   :{RED}{COMMA}
 STR_BUTTON_LOCATION                                             :{BLACK}Sitio
 STR_SMALLMAP_TYPE_CONTOURS                                      :Contornos
 STR_SMALLMAP_TYPE_VEHICLES                                      :Vehículos
@@ -235,7 +225,7 @@ STR_SMALLMAP_LEGENDA_TREES                                      :{BLACK}{TINYFON
 STR_SMALLMAP_LEGENDA_ROCKS                                      :{BLACK}{TINYFONT}Rocas
 STR_SMALLMAP_LEGENDA_WATER                                      :{BLACK}{TINYFONT}Agua
 STR_SMALLMAP_LEGENDA_NO_OWNER                                   :{BLACK}{TINYFONT}Sin propietario
-STR_SMALLMAP_LEGENDA_TOWNS                                      :{BLACK}{TINYFONT}Poblaciones
+STR_SMALLMAP_LEGENDA_TOWNS                                      :{BLACK}{TINYFONT}Pueblos
 STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{BLACK}{TINYFONT}Industrias
 STR_SMALLMAP_LEGENDA_DESERT                                     :{BLACK}{TINYFONT}Desierto
 STR_SMALLMAP_LEGENDA_SNOW                                       :{BLACK}{TINYFONT}Nieve
@@ -302,7 +292,7 @@ STR_UNITS_VOLUME_LONG_SI                                        :{COMMA} m³
 STR_UNITS_FORCE_SI                                              :{COMMA} kN
 
 ############ range for menu starts
-STR_GRAPH_MENU_OPERATING_PROFIT_GRAPH                           :Gráfico de benefício operativo
+STR_GRAPH_MENU_OPERATING_PROFIT_GRAPH                           :Gráfico de beneficio operativo
 STR_GRAPH_MENU_INCOME_GRAPH                                     :Gráfico de ingresos
 STR_GRAPH_MENU_DELIVERED_CARGO_GRAPH                            :Gráfico de carga entregada
 STR_GRAPH_MENU_PERFORMANCE_HISTORY_GRAPH                        :Gráfico de rendimiento
@@ -324,12 +314,13 @@ STR_SORT_CRITERIA_TIP                                           :{BLACK}Seleccio
 STR_FILTER_CRITERIA_TIP                                         :{BLACK}Selecciona criterio de filtro
 STR_SORT_BY                                                     :{BLACK}Ordenar por
 
+### The first three are also used as 'Sort by' buttons, the rest only in dropdowns
 STR_SORT_BY_POPULATION                                          :{BLACK}Población
+STR_SORT_BY_NAME                                                :{BLACK}Nombre
+STR_SORT_BY_DATE                                                :{BLACK}Fecha
 STR_SORT_BY_PRODUCTION                                          :Producción
 STR_SORT_BY_TYPE                                                :Tipo
 STR_SORT_BY_TRANSPORTED                                         :Transportado
-STR_SORT_BY_NAME                                                :{BLACK}Nombre
-STR_SORT_BY_DATE                                                :{BLACK}Fecha
 STR_SORT_BY_NUMBER                                              :Número
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Beneficio año pasado
 STR_SORT_BY_PROFIT_THIS_YEAR                                    :Beneficio año actual
@@ -352,6 +343,7 @@ STR_SORT_BY_INTRO_DATE                                          :Fecha Introducc
 STR_SORT_BY_RUNNING_COST                                        :Coste Operación
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Potencia/Coste Operación
 STR_SORT_BY_CARGO_CAPACITY                                      :Capacidad de carga
+
 STR_NO_WAITING_CARGO                                            :{BLACK}Ningún tipo de carga está esperando
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}Seleccionar todas las facilidades
 STR_SELECT_ALL_TYPES                                            :{BLACK}Seleccionar todos los tipos de carga (incluidas las que no están en espera)
@@ -371,21 +363,6 @@ STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Enviar a Depós
 STR_SEND_SHIP_TO_DEPOT                                          :Enviar a Depósito
 STR_SEND_AIRCRAFT_TO_HANGAR                                     :Enviar al Hangar
 
-############ range for months starts
-STR_MONTH_ABBREV_JAN                                            :Ene
-STR_MONTH_ABBREV_FEB                                            :Feb
-STR_MONTH_ABBREV_MAR                                            :Mar
-STR_MONTH_ABBREV_APR                                            :Abr
-STR_MONTH_ABBREV_MAY                                            :May
-STR_MONTH_ABBREV_JUN                                            :Jun
-STR_MONTH_ABBREV_JUL                                            :Jul
-STR_MONTH_ABBREV_AUG                                            :Ago
-STR_MONTH_ABBREV_SEP                                            :Sep
-STR_MONTH_ABBREV_OCT                                            :Oct
-STR_MONTH_ABBREV_NOV                                            :Nov
-STR_MONTH_ABBREV_DEC                                            :Dic
-############ range for months ends
-
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
 STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
@@ -393,8 +370,8 @@ STR_TOOLBAR_TOOLTIP_PAUSE_GAME                                  :{BLACK}Pausar j
 STR_TOOLBAR_TOOLTIP_SAVE_GAME_ABANDON_GAME                      :{BLACK}Guardar juego, abandonar juego, salir
 STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_STATIONS            :{BLACK}Mostrar lista de estaciones
 STR_TOOLBAR_TOOLTIP_DISPLAY_MAP                                 :{BLACK}Mostrar mapa
-STR_TOOLBAR_TOOLTIP_DISPLAY_MAP_TOWN_DIRECTORY                  :{BLACK}Mostrar mapa, guía de poblaciones
-STR_TOOLBAR_TOOLTIP_DISPLAY_TOWN_DIRECTORY                      :{BLACK}Mostrar guía de ciudades
+STR_TOOLBAR_TOOLTIP_DISPLAY_MAP_TOWN_DIRECTORY                  :{BLACK}Mostrar mapa, guía de pueblos
+STR_TOOLBAR_TOOLTIP_DISPLAY_TOWN_DIRECTORY                      :{BLACK}Mostrar guía de pueblos
 STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_FINANCES                    :{BLACK}Mostrar información financiera de la empresa
 STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_GENERAL                     :{BLACK}Mostrar información general de la empresa
 STR_TOOLBAR_TOOLTIP_DISPLAY_GRAPHS                              :{BLACK}Mostrar gráficos
@@ -412,8 +389,6 @@ STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Construi
 STR_TOOLBAR_TOOLTIP_PLANT_TREES_PLACE_SIGNS                     :{BLACK}Plantar árboles, señales, etc.
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Consultar bloque de terreno
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Opciones
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}No se puede cambiar el intervalo de mantenimiento
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Cerrar ventana
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Título de la ventana - arrastrelo para moverla
@@ -431,8 +406,8 @@ STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP                     :{BLACK}Mostrar 
 STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON                   :{BLACK}Mostrar rutas de transporte en el mapa
 STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP                     :{BLACK}Mostrar vegetación en el mapa
 STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP                    :{BLACK}Mostrar propietarios de terrenos en el mapa
-STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Poner/quitar nombres de poblaciones en el mapa
-STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Benefício este año: {CURRENCY} (año anterior: {CURRENCY})
+STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Poner/quitar nombres de pueblos en el mapa
+STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Beneficio este año: {CURRENCY} (año anterior: {CURRENCY})
 
 ############ range for service numbers starts
 STR_AGE                                                         :{COMMA} año{P "" s} ({COMMA})
@@ -460,7 +435,7 @@ STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Ninguna
 STR_VEHICLE_NAME_BUTTON                                         :{BLACK}Nombre
 STR_VEHICLE_NAME_SMALL                                          :{BLACK}{TINYFONT}{VEHICLE}
 
-############ range for days starts
+############ range for days starts (also used for the place in the highscore window)
 STR_ORDINAL_NUMBER_1ST                                          :1º
 STR_ORDINAL_NUMBER_2ND                                          :2º
 STR_ORDINAL_NUMBER_3RD                                          :3º
@@ -493,6 +468,34 @@ STR_ORDINAL_NUMBER_29TH                                         :29º
 STR_ORDINAL_NUMBER_30TH                                         :30º
 STR_ORDINAL_NUMBER_31ST                                         :31º
 ############ range for days ends
+
+############ range for months starts
+STR_MONTH_ABBREV_JAN                                            :Ene
+STR_MONTH_ABBREV_FEB                                            :Feb
+STR_MONTH_ABBREV_MAR                                            :Mar
+STR_MONTH_ABBREV_APR                                            :Abr
+STR_MONTH_ABBREV_MAY                                            :May
+STR_MONTH_ABBREV_JUN                                            :Jun
+STR_MONTH_ABBREV_JUL                                            :Jul
+STR_MONTH_ABBREV_AUG                                            :Ago
+STR_MONTH_ABBREV_SEP                                            :Sep
+STR_MONTH_ABBREV_OCT                                            :Oct
+STR_MONTH_ABBREV_NOV                                            :Nov
+STR_MONTH_ABBREV_DEC                                            :Dic
+
+STR_MONTH_JAN                                                   :Enero
+STR_MONTH_FEB                                                   :Febrero
+STR_MONTH_MAR                                                   :Marzo
+STR_MONTH_APR                                                   :Abril
+STR_MONTH_MAY                                                   :Mayo
+STR_MONTH_JUN                                                   :Junio
+STR_MONTH_JUL                                                   :Julio
+STR_MONTH_AUG                                                   :Agosto
+STR_MONTH_SEP                                                   :Septiembre
+STR_MONTH_OCT                                                   :Octubre
+STR_MONTH_NOV                                                   :Noviembre
+STR_MONTH_DEC                                                   :Diciembre
+############ range for months ends
 
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
@@ -542,7 +545,7 @@ STR_MUSIC_TOOLTIP_CLICK_ON_MUSIC_TRACK_TO                       :{BLACK}Pulse en
 STR_CLICK_ON_TRACK_TO_REMOVE                                    :{BLACK}Pulsa sobre la canción para quitarla del programa actual (Solo Personalizado1 y Personalizado2)
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Encender/apagar mezclador
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Mostrar ventana de selección de pistas musicales
-STR_SUBSIDY_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                  :{BLACK}Haga click sobre el servicio para centrar la vista en la industria/población
+STR_SUBSIDY_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                  :{BLACK}Haga click sobre el servicio para centrar la vista en la industria/pueblo
 STR_INTRO_DIFFICULTY                                            :{BLACK}Dificultad ({STRING})
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
 STR_NEWS_MENU_LAST_MESSAGE_NEWS_REPORT                          :Último mensaje/noticia
@@ -583,53 +586,50 @@ STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESI
 STR_HIGHSCORE_STATS                                             :{BIGFONT}'{STRING}'   ({COMMA})
 STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}{COMPANY} logra el estado '{STRING}'!
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME} de {COMPANY} logra el estado '{STRING}'!
-STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Editor de escenarios
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Generación de terrenos
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Aumentar el tamaño del bloque de terreno a bajar/subir
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Reducir tamaño del bloque de terreno a bajar/subir
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Generar terreno al azar
 STR_TERRAFORM_RESET_LANDSCAPE                                   :{BLACK}Hacer reset del paisaje
 STR_QUERY_RESET_LANDSCAPE_CAPTION                               :{WHITE}Hacer reset del paisaje
-STR_RESET_LANDSCAPE_TOOLTIP                                     :{BLACK}Quitar todas las propiedades del jugador del mapa
-STR_RESET_LANDSCAPE_CONFIRMATION_TEXT                           :{WHITE}¿Estás seguro de quitar todas las propiedades del jugador?
+STR_RESET_LANDSCAPE_TOOLTIP                                     :{BLACK}Eliminar todas las propiedades de jugadores del mapa
+STR_RESET_LANDSCAPE_CONFIRMATION_TEXT                           :{WHITE}¿Estás seguro de querer eliminar todas las propiedades de jugadores?
 STR_SCENEDIT_TOOLBAR_LANDSCAPE_GENERATION                       :{BLACK}Generación de paisaje
-STR_SCENEDIT_TOOLBAR_TOWN_GENERATION                            :{BLACK}Generación de poblaciones
+STR_SCENEDIT_TOOLBAR_TOWN_GENERATION                            :{BLACK}Creación de pueblos
 STR_SCENEDIT_TOOLBAR_INDUSTRY_GENERATION                        :{BLACK}Generación de industria
 STR_SCENEDIT_TOOLBAR_ROAD_CONSTRUCTION                          :{BLACK}Construcción de carreteras
-STR_FOUND_TOWN_CAPTION                                          :{WHITE}Generación de poblaciones
-STR_FOUND_TOWN_NEW_TOWN_BUTTON                                  :{BLACK}Nueva población
-STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Construir nueva población
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}No se puede construir una población aquí...
+STR_FOUND_TOWN_CAPTION                                          :{WHITE}Creación de Pueblos
+STR_FOUND_TOWN_NEW_TOWN_BUTTON                                  :{BLACK}Nuevo Pueblo
+STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Construir nuevo pueblo
+STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}No se puede construir pueblo aquí...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...demasiado cercano al borde del mapa
-STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...demasiado cercano a otra población
+STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...demasiado cercano a otro pueblo
 STR_ERROR_SITE_UNSUITABLE                                       :{WHITE}...lugar no apropiado
-STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...demasiadas poblaciones
-STR_CANNOT_GENERATE_TOWN                                        :{WHITE}No se puede construir ninguna ciudad
+STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...demasiados pueblos
+STR_CANNOT_GENERATE_TOWN                                        :{WHITE}No se puede construir ningún pueblo
 STR_NO_SPACE_FOR_TOWN                                           :{WHITE}...no hay más espacio en el mapa
-STR_TOWN_VIEW_EXPAND_TOOLTIP                                    :{BLACK}Aumentar tamaño de la población
+STR_TOWN_VIEW_EXPAND_TOOLTIP                                    :{BLACK}Aumentar tamaño del pueblo
 STR_TOWN_VIEW_EXPAND_BUTTON                                     :{BLACK}Aumentar
-STR_TOWN_EXPAND_WARN_NO_ROADS                                   :{WHITE}La ciudad no construirá carreteras. Puedes activar la función de construcción de carreteras en Opciones Avanzadas->Economía->Cuidades.
-STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Población al azar
-STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Construir población en sitio al azar
+STR_TOWN_EXPAND_WARN_NO_ROADS                                   :{WHITE}El pueblo no construirá carreteras. Puedes activar la función de construcción de carreteras en Opciones Avanzadas->Economía->Pueblos.
+STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Pueblo al Azar
+STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Construir pueblo en sitio aleatorio
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}No se puede construir {STRING} aquí...
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...debe constuirse la población primero
-STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...solo se permite uno por población
+STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...debe construirse el pueblo primero
+STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...solo se permite uno por pueblo
 STR_SCENEDIT_TOOLBAR_PLANT_TREES                                :{BLACK}Plantar árboles
-STR_SCENEDIT_TOOLBAR_PLACE_SIGN                                 :{BLACK}Colocar señal
+STR_SCENEDIT_TOOLBAR_PLACE_SIGN                                 :{BLACK}Colocar cartel
 STR_TREES_RANDOM_TREES_BUTTON                                   :{BLACK}Árboles al azar
 STR_TREES_RANDOM_TREES_TOOLTIP                                  :{BLACK}Planta árboles al azar sobre el paisaje
 STR_TERRAFORM_TOOLTIP_PLACE_ROCKY_AREAS_ON_LANDSCAPE            :{BLACK}Coloca zonas rocosas sobre el paisaje
 STR_TERRAFORM_TOOLTIP_PLACE_LIGHTHOUSE                          :{BLACK}Colocar faro
 STR_TERRAFORM_TOOLTIP_PLACE_TRANSMITTER                         :{BLACK}Colocar transmisor
-STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA                        :{BLACK}Define área desertica.{}Pulsa y mantén CTRL para quitarla
+STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA                        :{BLACK}Define área desertica.{}Pulsa y mantén Ctrl para quitarla
 STR_CREATE_LAKE                                                 :{BLACK}Definir área de agua.{}Crea un canal, a menos que se pulse Ctrl al nivel del mar, en cuyo caso se inundarán los alrededores
 STR_CREATE_RIVER                                                :{BLACK}Colocar rios.
 STR_TOWN_VIEW_DELETE_BUTTON                                     :{BLACK}Borrar
-STR_TOWN_VIEW_DELETE_TOOLTIP                                    :{BLACK}Borrar esta población completamente
+STR_TOWN_VIEW_DELETE_TOOLTIP                                    :{BLACK}Borrar este pueblo completamente
 STR_SCENEDIT_FILE_MENU_SAVE_SCENARIO                            :Guardar escenario
 STR_SCENEDIT_FILE_MENU_LOAD_SCENARIO                            :Cargar escenario
 STR_MENU_LOAD_HEIGHTMAP                                         :Cargar mapa de alturas
@@ -643,7 +643,7 @@ STR_INTRO_PLAY_SCENARIO                                         :{BLACK}Jugar Es
 STR_INTRO_PLAY_HEIGHTMAP                                        :{BLACK}Jugar Mapa de alturas
 STR_INTRO_PLAY_HEIGHTMAP_TOOLTIP                                :{BLACK}Empezar juego nuevo, usando mapa de altura como terreno
 STR_QUIT_SCENARIO_QUERY                                         :{YELLOW}¿Está seguro de que desea salir de este escenario?
-STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...solo puede ser construido en poblaciones con una población superior a 1200
+STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...solo puede ser construido en pueblos con una población superior a 1200
 STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD    :{BLACK}Retrocede la fecha de inicio en 1 año
 STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD     :{BLACK}Avanza la fecha de inicio en 1 año
 STR_ERROR_ENDS_OF_BRIDGE_MUST_BOTH                              :{WHITE}...los dos extremos de un puente han de estar sobre tierra
@@ -652,14 +652,14 @@ STR_FOUND_TOWN_INITIAL_SIZE_MEDIUM_BUTTON                       :{BLACK}Mediana
 STR_FOUND_TOWN_INITIAL_SIZE_LARGE_BUTTON                        :{BLACK}Grande
 STR_SELECT_TOWN_SIZE_RANDOM                                     :{BLACK}Aleatorio
 STR_FOUND_TOWN_CITY                                             :{BLACK}Ciudad
-STR_FOUND_TOWN_CITY_TOOLTIP                                     :{BLACK}Las ciudades crecen más rápido que las villas normales{}Dependiendo de los ajustes, son mayores al ser fundadas
-STR_FOUND_TOWN_INITIAL_SIZE_TOOLTIP                             :{BLACK}Selecciona el tamaño de la población
-STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Tamaño población:
+STR_FOUND_TOWN_CITY_TOOLTIP                                     :{BLACK}Las ciudades crecen más rápido que los pueblos{}Dependiendo de los ajustes, son mayores al ser fundadas
+STR_FOUND_TOWN_INITIAL_SIZE_TOOLTIP                             :{BLACK}Selecciona el tamaño del pueblo
+STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Tamaño pueblo:
 
-STR_TOWN_ROAD_LAYOUT                                            :{YELLOW}Patrón de carreteras en ciudades:
-STR_SELECT_TOWN_ROAD_LAYOUT                                     :{BLACK}Seleccionar patrón de carreteras para esta ciudad
+STR_TOWN_ROAD_LAYOUT                                            :{YELLOW}Patrón de carretera:
+STR_SELECT_TOWN_ROAD_LAYOUT                                     :{BLACK}Seleccionar patrón de carreteras para este pueblo
 STR_SELECT_LAYOUT_ORIGINAL                                      :{BLACK}Original
-STR_SELECT_LAYOUT_BETTER_ROADS                                  :{BLACK}Mejores carreteras
+STR_SELECT_LAYOUT_BETTER_ROADS                                  :{BLACK}Mejorado
 STR_SELECT_LAYOUT_2X2_GRID                                      :{BLACK}Rejilla de 2x2
 STR_SELECT_LAYOUT_3X3_GRID                                      :{BLACK}Rejilla 3x3
 STR_SELECT_LAYOUT_RANDOM                                        :{BLACK}Aleatorio
@@ -670,23 +670,21 @@ STR_OFF                                                         :Apagado
 STR_SUMMARY                                                     :Resumen
 STR_FULL                                                        :Completo
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
-STR_BLACK_STRING                                                :{BLACK}{STRING}
 
-STR_JUST_CHECKMARK                                              :{CHECKMARK}
 ############ range for menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Opciones de juego
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Configuración de dificultad
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Opciones avanzadas
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Configuración Newgrf
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Opciones de transparencia
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Ver nombres de poblaciones
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Ver nombres de pueblos
 STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Ver nombres de estaciones
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Ver señales
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Ver puntos de comprobación
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Ver puntos de ruta
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Ver carteles
 STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animación completa
 STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Detalle completo
 STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Edificios transparentes
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Señales transparentes
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Carteles transparentes
 ############ range ends here
 
 ############ range for menu starts
@@ -707,8 +705,8 @@ STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subvenciones
 ############ 'Display map' dropdown. In SE, there is one more item.
 STR_MAP_MENU_MAP_OF_WORLD                                       :Mapa del mundo
 STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Punto de vista extra
-STR_MAP_MENU_SIGN_LIST                                          :Lista de señales
-STR_TOWN_MENU_TOWN_DIRECTORY                                    :Directorio de poblaciones
+STR_MAP_MENU_SIGN_LIST                                          :Lista de carteles
+STR_TOWN_MENU_TOWN_DIRECTORY                                    :Directorio de pueblos
 ############ end of the 'Display map' dropdown
 
 STR_TOWN_POPULATION                                             :{BLACK}Población mundial: {COMMA}
@@ -719,22 +717,17 @@ STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW                                :{BLACK}Pegar pu
 STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT                             :{BLACK}Pega la localización de este punto de vista a la global
 
 STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Unidades de moneda
-STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN                        :{BLACK}{SKIP}{STRING}
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Selección de unidades de moneda
 STR_GAME_OPTIONS_MEASURING_UNITS_FRAME                          :{BLACK}Medir unidades
-STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN                       :{BLACK}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN_TOOLTIP               :{BLACK}Medir unidades seleccionadas
 STR_GAME_OPTIONS_ROAD_VEHICLES_FRAME                            :{BLACK}Vehículos de carretera
-STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN                         :{BLACK}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_TOOLTIP                 :{BLACK}Selecciona a qué lado de la carretera se debe conducir
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_LEFT                    :Conducir por la izquierda
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_RIGHT                   :Conducir por la derecha
-STR_GAME_OPTIONS_TOWN_NAMES_FRAME                               :{BLACK}Nombres de las poblaciones
-STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
+STR_GAME_OPTIONS_TOWN_NAMES_FRAME                               :{BLACK}Nombres de pueblos
 STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN_TOOLTIP                    :{BLACK}Selección del estilo del nombre de las poblaciones
 
 STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}Autoguardado
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN                              :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP                      :{BLACK}Selección del intervalo entre grabados automáticos del juego
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :Apagado
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :Cada mes
@@ -751,10 +744,10 @@ STR_INTRO_TOOLTIP_PLAY_SCENARIO                                 :{BLACK}Comienza
 STR_INTRO_QUIT                                                  :{BLACK}Salir
 STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Salir de 'OpenTTD'
 STR_INTRO_CAPTION                                               :{WHITE}OpenTTD {REV}
-STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}...solo puede ser construido en poblaciones
+STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}...solo puede ser construido en pueblos
 STR_INTRO_TOOLTIP_TEMPERATE                                     :{BLACK}Elegir estilo de escenario 'templado'
-STR_INTRO_TOOLTIP_SUB_ARCTIC_LANDSCAPE                          :{BLACK}Elegir estilo de escenario 'sub-ártico'
-STR_INTRO_TOOLTIP_SUB_TROPICAL_LANDSCAPE                        :{BLACK}Elegir estilo de escenario 'sub-tropical'
+STR_INTRO_TOOLTIP_SUB_ARCTIC_LANDSCAPE                          :{BLACK}Elegir estilo de escenario 'subártico'
+STR_INTRO_TOOLTIP_SUB_TROPICAL_LANDSCAPE                        :{BLACK}Elegir estilo de escenario 'subtropical'
 STR_INTRO_TOOLTIP_TOYLAND_LANDSCAPE                             :{BLACK}Elegir estilo de escenario 'fantasía'
 STR_TOOLBAR_TOOLTIP_FUND_CONSTRUCTION_OF_NEW                    :{BLACK}Aportar fondos para construir una nueva industria
 
@@ -776,9 +769,6 @@ STR_STATUSBAR_AUTOSAVE                                          :{RED}AUTOGUARDA
 STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  GUARDANDO JUEGO  *  *
 STR_SAVE_STILL_IN_PROGRESS                                      :{WHITE}El grabado está en progreso,{}por favor espere hasta que termine!
 STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}Elegir el programa musical de estilo 'Ezy Street'
-
-STR_BLACK_6                                                     :{BLACK}6
-STR_BLACK_7                                                     :{BLACK}7
 
 ############ start of townname region
 STR_TOWNNAME_ORIGINAL_ENGLISH                                   :Inglés
@@ -836,7 +826,6 @@ STR_CURR_EEK                                                    :Krooni Estonio 
 STR_CURR_CUSTOM                                                 :Personalizado...
 
 STR_OPTIONS_LANG                                                :{BLACK}Idioma
-STR_OPTIONS_LANG_CBO                                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_LANG_TIP                                            :{BLACK}Seleccione el idioma para el interfaz del juego
 
 STR_OPTIONS_FULLSCREEN                                          :{BLACK}Pantalla completa
@@ -844,33 +833,17 @@ STR_OPTIONS_FULLSCREEN_TIP                                      :{BLACK}Marca es
 STR_FULLSCREEN_FAILED                                           :{WHITE}El modo de pantalla completa ha fallado
 
 STR_OPTIONS_RES                                                 :{BLACK}Resolución de pantalla
-STR_OPTIONS_RES_CBO                                             :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_RES_TIP                                             :{BLACK}Seleccine la resolución de pantalla a utilizar
 
 STR_OPTIONS_SCREENSHOT_FORMAT                                   :{BLACK}Formato de captura de pantalla
-STR_OPTIONS_SCREENSHOT_FORMAT_CBO                               :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_SCREENSHOT_FORMAT_TIP                               :{BLACK}Seleccione el formato de captura de pantalla a utilizar
 
 STR_OPTIONS_BASE_GRF                                            :{BLACK}Conjunto de gráficos base
-STR_OPTIONS_BASE_GRF_CBO                                        :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_BASE_GRF_TIP                                        :{BLACK}Selecciona el conjunto de gráficos base a usar
-STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{10:NUM} fichero perdido/corrupto{P "" s}
+STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{NUM} fichero perdido/corrupto{P "" s}
 STR_OPTIONS_BASE_GRF_DESCRIPTION_TIP                            :{BLACK}Información adicional acerca de este fichero de gráficos
 
 STR_AUTOSAVE_FAILED                                             :{WHITE}Error en Autoguardado
-
-STR_MONTH_JAN                                                   :Enero
-STR_MONTH_FEB                                                   :Febrero
-STR_MONTH_MAR                                                   :Marzo
-STR_MONTH_APR                                                   :Abril
-STR_MONTH_MAY                                                   :Mayo
-STR_MONTH_JUN                                                   :Junio
-STR_MONTH_JUL                                                   :Julio
-STR_MONTH_AUG                                                   :Agosto
-STR_MONTH_SEP                                                   :Septiembre
-STR_MONTH_OCT                                                   :Octubre
-STR_MONTH_NOV                                                   :Noviembre
-STR_MONTH_DEC                                                   :Diciembre
 
 STR_HEADING_FOR_STATION                                         :{LTBLUE}Hacia {STATION}
 STR_HEADING_FOR_STATION_VEL                                     :{LTBLUE}Hacia {STATION}, {VELOCITY}
@@ -885,8 +858,6 @@ STR_ITEMS                                                       :artículos
 STR_CRATES                                                      :cajones
 STR_RES_OTHER                                                   :Otras
 STR_NOTHING                                                     :
-
-STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_CANT_SHARE_ORDER_LIST                                       :{WHITE}No se puede compartir la lista de órdenes...
 STR_CANT_COPY_ORDER_LIST                                        :{WHITE}No se puede copiar la lista de órdenes...
@@ -920,7 +891,7 @@ STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Mostrar
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Permitir la construcción en cuestas y orillas: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Permitir pendientes bajo carreteras, etc. (autopendiente): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Permitir tamaño del área de captación más realista: {ORANGE}{STRING}
-STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Permitir demoler más propiedades de poblaciones: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Permitir demoler más propiedades de pueblos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Permitir la construcción de trenes muy largos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Modelo de aceleración de trenes: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
@@ -938,7 +909,7 @@ STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Método
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :ninguno
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :como las otras industrias
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :prospección
-STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Construcción de más de una industria similar por población: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Construcción de más de una industria similar por pueblo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SAMEINDCLOSE                                 :{LTBLUE}Industrias mismo tipo pueden construirse unas junto a otras: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Mostrar siempre fecha larga en la barra de estado: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Mostrar señales en el lado de conducción: {ORANGE}{STRING}
@@ -956,7 +927,7 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Permiti
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Estaciones no uniformes: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Carga el multiplicador de peso para simular trenes pesados: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Factor velocidad avión: {ORANGE}1 / {STRING}
-STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Permite conducir en paradas sobre carreteras de ciudades: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Permite construir paradas sobre carreteras de pueblo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Permitir pasar por los stops de carreteras de los competidores: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Permitir construcción en estaciones contiguas : {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES                              :{LTBLUE}Activar motor  de multiples NewGRF: {ORANGE}{STRING}
@@ -975,7 +946,7 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Renovac
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Renovación aut. si tiene {ORANGE}{STRING}{LTBLUE} meses antes/después edad máx.
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Renovar auto. usando la menor cantidad de dinero: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Duración del mensaje de error: {ORANGE}{STRING}
-STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Muestra la población de esta población en esta etiqueta: {ORANGE}{STRING}
+STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Muestra la población de un pueblo en su etiqueta: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Generador terreno: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LAND_GENERATOR_ORIGINAL                      :Original
@@ -1087,22 +1058,22 @@ STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}Cuando 
 STR_CONFIG_SETTING_SEMAPHORE_BUILD_BEFORE_DATE                  :{LTBLUE}Coloca automáticamente semáforos antes de: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_SIGNAL_GUI                            :{LTBLUE}Activar la GUI de señales: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_SIGNAL_TYPE                          :{LTBLUE}Tipo de señal a construir por defecto: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_SIGNAL_NORMAL                        :Normal
-STR_CONFIG_SETTING_DEFAULT_SIGNAL_PBS                           :Avanzada
-STR_CONFIG_SETTING_DEFAULT_SIGNAL_PBSOWAY                       :Un sentido avanzada
+STR_CONFIG_SETTING_DEFAULT_SIGNAL_NORMAL                        :Señales de bloque
+STR_CONFIG_SETTING_DEFAULT_SIGNAL_PBS                           :Señales de ruta
+STR_CONFIG_SETTING_DEFAULT_SIGNAL_PBSOWAY                       :Señales de ruta de un sentido
 STR_CONFIG_SETTING_CYCLE_SIGNAL_TYPES                           :{LTBLUE}Cambiar entre tipos de señales: {ORANGE}{STRING}
-STR_CONFIG_SETTING_CYCLE_SIGNAL_NORMAL                          :Solo normales
-STR_CONFIG_SETTING_CYCLE_SIGNAL_PBS                             :Solo avanzada
+STR_CONFIG_SETTING_CYCLE_SIGNAL_NORMAL                          :Solo señales de bloque
+STR_CONFIG_SETTING_CYCLE_SIGNAL_PBS                             :Solo señales de ruta
 STR_CONFIG_SETTING_CYCLE_SIGNAL_ALL                             :Todas
 
-STR_CONFIG_SETTING_TOWN_LAYOUT                                  :{LTBLUE}Patrón de construcción de carreteras para las nuevas ciudades: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_LAYOUT                                  :{LTBLUE}Patrón de carreteras para los nuevos pueblos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_LAYOUT_DEFAULT                          :por defecto
-STR_CONFIG_SETTING_TOWN_LAYOUT_BETTER_ROADS                     :mejores carreteras
+STR_CONFIG_SETTING_TOWN_LAYOUT_BETTER_ROADS                     :mejorado
 STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :rejilla 2x2
 STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :rejilla 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :aleatorio
-STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Permitir que las ciudades construyan carreteras: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Permitir a la ciudad controlar el nivel de ruidos de los aeropuertos: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Permitir que los pueblos construyan carreteras: {ORANGE}{STRING}
+STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Permitir al pueblo controlar el nivel de ruido de los aeropuertos: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Posición de la barra de herramientas principal: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Izquierda
@@ -1112,14 +1083,14 @@ STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Radio d
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Radio de snap de ventana: {ORANGE}desactivado
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Límite de ventanas abiertas (no-ancladas): {ORANGE}{STRING}
 STR_CONFIG_SETTING_SOFT_LIMIT_DISABLED                          :{LTBLUE}Límite de ventanas abiertas (no-ancladas): {ORANGE}desactivado
-STR_CONFIG_SETTING_TOWN_GROWTH                                  :{LTBLUE}Velocidad crecimiento ciudad: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_GROWTH                                  :{LTBLUE}Velocidad crecimiento pueblo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_GROWTH_NONE                             :Ninguna
 STR_CONFIG_SETTING_TOWN_GROWTH_SLOW                             :Lenta
 STR_CONFIG_SETTING_TOWN_GROWTH_NORMAL                           :Normal
 STR_CONFIG_SETTING_TOWN_GROWTH_FAST                             :Rápida
 STR_CONFIG_SETTING_TOWN_GROWTH_VERY_FAST                        :Muy rápida
-STR_CONFIG_SETTING_LARGER_TOWNS                                 :{LTBLUE}Proporción de ciudades que crecerán el doble de rápido: {ORANGE}1 de {STRING}
-STR_CONFIG_SETTING_LARGER_TOWNS_DISABLED                        :{LTBLUE}Proporción de ciudades que crecerán el doble de rápido: {ORANGE}Ninguna
+STR_CONFIG_SETTING_LARGER_TOWNS                                 :{LTBLUE}Proporción de pueblos que serán ciudades: {ORANGE}1 de {STRING}
+STR_CONFIG_SETTING_LARGER_TOWNS_DISABLED                        :{LTBLUE}Proporción de pueblos que serán ciudades: {ORANGE}Ninguna
 STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Multiplicador inicial tamaño de ciudad: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Quitar absurdos de la carretera durante su construcción: {ORANGE}{STRING}
 
@@ -1159,12 +1130,11 @@ STR_CONFIG_SETTING_MAP_Y                                        :{LTBLUE}Tamaño
 
 ############ generic strings for settings
 STR_CONFIG_SETTING_DISABLED                                     :desactivado
-STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_CONFIG_SETTING_QUERY_CAPT                                   :{WHITE}Cambiar valor de la opción
 
 STR_TEMPERATE_LANDSCAPE                                         :Paisaje templado
-STR_SUB_ARCTIC_LANDSCAPE                                        :Paisaje sub-ártico
-STR_SUB_TROPICAL_LANDSCAPE                                      :Paisaje sub-tropical
+STR_SUB_ARCTIC_LANDSCAPE                                        :Paisaje subártico
+STR_SUB_TROPICAL_LANDSCAPE                                      :Paisaje subtropical
 STR_TOYLAND_LANDSCAPE                                           :Paisaje fantasía
 
 STR_CHEATS                                                      :{WHITE}Trucos
@@ -1175,7 +1145,7 @@ STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Jugando
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Bulldozer mágico (elimina industrias, etc.): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Los túneles pueden cruzarse: {ORANGE}{STRING}
 STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Construir mientras se está en pausa: {ORANGE}{STRING}
-STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Los Jets no se estrellarán (frecuentemente) en aeropuertos pequeños: {ORANGE} {STRING}
+STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Jets se estrellan menos en aeropuertos pequeños: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Cambiar clima: {ORANGE} {STRING}
 STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Cambiar fecha: {ORANGE} {DATE_SHORT}
 STR_CHEAT_SETUP_PROD                                            :{LTBLUE}Activar modificación de los valores de producción: {ORANGE}{STRING}
@@ -1184,33 +1154,33 @@ STR_HEADING_FOR_WAYPOINT                                        :{LTBLUE}Hacia {
 STR_HEADING_FOR_WAYPOINT_VEL                                    :{LTBLUE}Hacia {WAYPOINT}, {VELOCITY}
 
 STR_GO_TO_WAYPOINT                                              :Ir vía {WAYPOINT}
-STR_GO_NON_STOP_TO_WAYPOINT                                     :Ir directo via {WAYPOINT}
+STR_GO_NON_STOP_TO_WAYPOINT                                     :Ir sin paradas via {WAYPOINT}
 
-STR_WAYPOINTNAME_CITY                                           :Punto de paso {TOWN}
-STR_WAYPOINTNAME_CITY_SERIAL                                    :Punto de paso {TOWN} #{COMMA}
+STR_WAYPOINTNAME_CITY                                           :Punto de ruta {TOWN}
+STR_WAYPOINTNAME_CITY_SERIAL                                    :Punto de ruta {TOWN} #{COMMA}
 STR_BUOYNAME_CITY                                               :Boya {TOWN}
 STR_BUOYNAME_CITY_SERIAL                                        :Boya {TOWN} #{COMMA}
-STR_LANDINFO_WAYPOINT                                           :Punto de paso
+STR_LANDINFO_WAYPOINT                                           :Punto de ruta
 
-STR_WAYPOINT                                                    :{WHITE}Punto de paso
-STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Seleccione tipo de punto de paso
+STR_WAYPOINT                                                    :{WHITE}Punto de ruta
+STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Seleccione tipo de punto de ruta
 
-STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
-STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Editar nombre del punto de paso
+STR_WAYPOINT_VIEWPORT                                           :{WAYPOINT}
+STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WAYPOINT}
+STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Editar nombre del punto de ruta
 
-STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}No se puede cambiar el nombre del punto de paso...
-STR_CONVERT_RAIL_TO_WAYPOINT_TIP                                :{BLACK}Convertir raíl a punto de paso
-STR_CANT_BUILD_TRAIN_WAYPOINT                                   :{WHITE}No se puede construir punto de paso para trenes aquí...
-STR_CANT_REMOVE_TRAIN_WAYPOINT                                  :{WHITE}No se puede retirar punto de paso aquí...
+STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}No se puede cambiar el nombre del punto de ruta...
+STR_CONVERT_RAIL_TO_WAYPOINT_TIP                                :{BLACK}Convertir raíl a punto de ruta
+STR_CANT_BUILD_TRAIN_WAYPOINT                                   :{WHITE}No se puede construir punto de ruta para trenes aquí...
+STR_CANT_REMOVE_TRAIN_WAYPOINT                                  :{WHITE}No se puede retirar punto de ruta aquí...
 
 STR_BUILD_AUTORAIL_TIP                                          :{BLACK}Construir tramos de ferrocarril usando modo Autorraíl
 
-STR_NO_TOWN_IN_SCENARIO                                         :{WHITE}...no hay poblaciones en este escenario
-STR_COULD_NOT_CREATE_TOWN                                       :{WHITE}Generación de mapa abortada...{}...localización para ciudades no adecuada
+STR_NO_TOWN_IN_SCENARIO                                         :{WHITE}...no hay pueblos en el escenario
+STR_COULD_NOT_CREATE_TOWN                                       :{WHITE}Generación de mapa abortada...{}...no hay localizaciones apropiadas para pueblos
 
-STR_MANY_RANDOM_TOWNS                                           :{BLACK}Varias poblaciones al azar
-STR_RANDOM_TOWNS_TIP                                            :{BLACK}Cubre el mapa con poblaciones colocadas al azar
+STR_MANY_RANDOM_TOWNS                                           :{BLACK}Varios pueblos al azar
+STR_RANDOM_TOWNS_TIP                                            :{BLACK}Cubre el mapa con pueblos colocados al azar
 STR_MANY_RANDOM_INDUSTRIES                                      :Varias industrias al azar
 STR_RANDOM_INDUSTRIES_TIP                                       :{BLACK}Cubre el mapa con industrias colocadas al azar
 STR_CAN_T_GENERATE_INDUSTRIES                                   :{WHITE}No se pueden crear industrias...
@@ -1228,7 +1198,7 @@ STR_BUILD_CANALS_TIP                                            :{BLACK}Construi
 STR_LANDINFO_CANAL                                              :Canal
 
 STR_CANT_BUILD_LOCKS                                            :{WHITE}No se pueden construir dársenas aquí...
-STR_BUILD_LOCKS_TIP                                             :{BLACK}Constuir dársenas
+STR_BUILD_LOCKS_TIP                                             :{BLACK}Construir dársenas
 STR_LANDINFO_LOCK                                               :Dársena
 
 STR_CANT_PLACE_RIVERS                                           :{WHITE}No se pueden situar ríos aquí...
@@ -1244,7 +1214,7 @@ STR_CONVERT_RAIL_TIP                                            :{BLACK}Converti
 
 STR_DRAG_WHOLE_TRAIN_TO_SELL_TIP                                :{BLACK}Arrastrar la locomotora aquí para vender el tren entero
 
-STR_DRAG_DROP                                                   :{BLACK}Drag & Drop
+STR_DRAG_DROP                                                   :{BLACK}Arrastrar y soltar
 STR_STATION_DRAG_DROP                                           :{BLACK}Construir una estación con arrastrar & soltar
 STR_SELECT_STATION_CLASS_TIP                                    :{BLACK}Selecciona el tipo de estación a mostrar
 STR_SELECT_STATION_TYPE_TIP                                     :{BLACK}Selecciona el tipo de estación a construir
@@ -1314,7 +1284,7 @@ STR_NETWORK_SERVER_VERSION                                      :{SILVER}Versió
 STR_NETWORK_SERVER_ADDRESS                                      :{SILVER}Dirección servidor: {WHITE}{STRING}
 STR_NETWORK_START_DATE                                          :{SILVER}Fecha inicio: {WHITE}{DATE_SHORT}
 STR_NETWORK_CURRENT_DATE                                        :{SILVER}Fecha actual: {WHITE}{DATE_SHORT}
-STR_NETWORK_PASSWORD                                            :{SILVER}Protegido por contraseña!
+STR_NETWORK_PASSWORD                                            :{SILVER}¡Protegido por contraseña!
 STR_NETWORK_SERVER_OFFLINE                                      :{SILVER}SERVIDOR APAGADO
 STR_NETWORK_SERVER_FULL                                         :{SILVER}SERVIDOR LLENO
 STR_NETWORK_VERSION_MISMATCH                                    :{SILVER}INCOMPATIBILIDAD DE VERSIONES
@@ -1398,7 +1368,7 @@ STR_NETWORK_GAME_LOBBY                                          :{WHITE}Sala de 
 STR_NETWORK_PREPARE_TO_JOIN                                     :{BLACK}Preparándose para unirse: {ORANGE}{STRING}
 STR_NETWORK_COMPANY_LIST_TIP                                    :{BLACK}Un listado de empresas actualmente en el juego. Puede unirse a una o emprezarla.
 STR_NETWORK_NEW_COMPANY                                         :{BLACK}Nueva empresa
-STR_NETWORK_NEW_COMPANY_TIP                                     :{BLACK}Abre una nueva empresa
+STR_NETWORK_NEW_COMPANY_TIP                                     :{BLACK}Crear nueva empresa
 STR_NETWORK_SPECTATE_GAME                                       :{BLACK}Observar juego
 STR_NETWORK_SPECTATE_GAME_TIP                                   :{BLACK}Observar un juego como espectador
 STR_NETWORK_JOIN_COMPANY                                        :{BLACK}Unirse a empresa
@@ -1476,7 +1446,7 @@ STR_NETWORK_ERR_CLIENT_NAME_IN_USE                              :este nombre ya 
 STR_NETWORK_ERR_CLIENT_WRONG_PASSWORD                           :contraseña incorrecta
 STR_NETWORK_ERR_CLIENT_COMPANY_MISMATCH                         :error en el id de la empresa en el DoCommand
 STR_NETWORK_ERR_CLIENT_KICKED                                   :expulsado por el servidor
-STR_NETWORK_ERR_CLIENT_CHEATER                                  :ha intentado usar un cheat (truco)
+STR_NETWORK_ERR_CLIENT_CHEATER                                  :ha intentado usar un truco
 STR_NETWORK_ERR_CLIENT_SERVER_FULL                              :servidor lleno
 ############ End of leave-in-this-order
 STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
@@ -1593,30 +1563,33 @@ STR_BUILD_DEPOT_TRAIN_ORIENTATION                               :{BLACK}Seleccio
 STR_RAILROAD_TRACK                                              :Vía del tren
 STR_RAILROAD_TRAIN_DEPOT                                        :Depósito de trenes
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}...otra compañía posee el área
-STR_RAILROAD_TRACK_WITH_NORMAL_SIGNALS                          :Vía del tren con señales normales
-STR_RAILROAD_TRACK_WITH_PRESIGNALS                              :Vía del tren con pre-señales
+STR_RAILROAD_TRACK_WITH_NORMAL_SIGNALS                          :Vía del tren con señales de bloque
+STR_RAILROAD_TRACK_WITH_PRESIGNALS                              :Vía del tren con señales de entrada
 STR_RAILROAD_TRACK_WITH_EXITSIGNALS                             :Vía del tren con señales de salida
 STR_RAILROAD_TRACK_WITH_COMBOSIGNALS                            :Vía del tren con señales combo
-STR_RAILROAD_TRACK_WITH_PBSSIGNALS                              :Via del tren con señales pbs
-STR_RAILROAD_TRACK_WITH_NOENTRYSIGNALS                          :Vía de tren con señales avanzadas de un sentido
-STR_RAILROAD_TRACK_WITH_NORMAL_PRESIGNALS                       :Vía de tren con señales normales y preseñalización
-STR_RAILROAD_TRACK_WITH_NORMAL_EXITSIGNALS                      :Vía de tren con señales normales y señales de salida
-STR_RAILROAD_TRACK_WITH_NORMAL_COMBOSIGNALS                     :Vía de tren con señales combo y normales
+STR_RAILROAD_TRACK_WITH_PBSSIGNALS                              :Vía del tren con señales de ruta
+STR_RAILROAD_TRACK_WITH_NOENTRYSIGNALS                          :Vía de tren con señales de ruta de un sentido
+STR_RAILROAD_TRACK_WITH_NORMAL_PRESIGNALS                       :Vía de tren con señales de bloque y señales de entrada
+STR_RAILROAD_TRACK_WITH_NORMAL_EXITSIGNALS                      :Vía de tren con señales de bloque y de salida
+STR_RAILROAD_TRACK_WITH_NORMAL_COMBOSIGNALS                     :Vía de tren con señales combo y de bloque
 STR_RAILROAD_TRACK_WITH_NORMAL_PBSSIGNALS                       :Vía de tren con señales de bloque y de ruta
 STR_RAILROAD_TRACK_WITH_NORMAL_NOENTRYSIGNALS                   :Vía de tren con señales de bloque y de ruta de un sentido
-STR_RAILROAD_TRACK_WITH_PRE_EXITSIGNALS                         :Vía de tren con preseñalización y señales de salida
-STR_RAILROAD_TRACK_WITH_PRE_COMBOSIGNALS                        :Vía de tren con preseñalización y señales combo
-STR_RAILROAD_TRACK_WITH_PRE_PBSSIGNALS                          :Vía de tren con preseñales y señales de ruta
-STR_RAILROAD_TRACK_WITH_PRE_NOENTRYSIGNALS                      :Vía de tren con preseñales y señales de ruta de un sentido
+STR_RAILROAD_TRACK_WITH_PRE_EXITSIGNALS                         :Vía de tren con señales de entrada y señales de salida
+STR_RAILROAD_TRACK_WITH_PRE_COMBOSIGNALS                        :Vía de tren con señales de entrada y señales combo
+STR_RAILROAD_TRACK_WITH_PRE_PBSSIGNALS                          :Vía de tren con señales de entrada y señales de ruta
+STR_RAILROAD_TRACK_WITH_PRE_NOENTRYSIGNALS                      :Vía de tren con señales de entrada y señales de ruta de un sentido
 STR_RAILROAD_TRACK_WITH_EXIT_COMBOSIGNALS                       :Vía de tren con señales de salida y señales combo
 STR_RAILROAD_TRACK_WITH_EXIT_PBSSIGNALS                         :Vía de tren con señales de salida y de ruta
 STR_RAILROAD_TRACK_WITH_EXIT_NOENTRYSIGNALS                     :Vía de tren con señales de salida y de ruta de un sentido
 STR_RAILROAD_TRACK_WITH_COMBO_PBSSIGNALS                        :Vía de tren con señales combo y de ruta
 STR_RAILROAD_TRACK_WITH_COMBO_NOENTRYSIGNALS                    :Vía de tren con señales combo y de ruta de un sentido
 STR_RAILROAD_TRACK_WITH_PBS_NOENTRYSIGNALS                      :Vía de tren con señales de ruta y señales de ruta de un sentido
-STR_MUST_REMOVE_RAILWAY_STATION_FIRST                           :{WHITE}Debes quitar la estación de tren primero
+STR_MUST_REMOVE_RAILWAY_STATION_FIRST                           :{WHITE}Debes retirar la estación de tren primero
+STR_MUST_REMOVE_RAILWAYPOINT_FIRST                              :{WHITE}Primero se debe retirar punto de ruta para trenes
 STR_CREATE_SPLITTED_STATION                                     :{YELLOW}Construir una estación separada
+STR_CREATE_SPLITTED_WAYPOINT                                    :{YELLOW}Construir un punto de ruta separado
 STR_SELECT_STATION_TO_JOIN                                      :{BLACK}Unir estación
+STR_SELECT_WAYPOINT_TO_JOIN                                     :{BLACK}Unir punto de ruta
 
 
 
@@ -1644,7 +1617,7 @@ STR_ROAD_MENU_TRAM_CONSTRUCTION                                 :Construcción d
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_SECTION                     :{BLACK}Construir sección de carretera
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOROAD                         :{BLACK}Construir carretera usando el modo de Autocarretera
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_SECTION                  :{BLACK}Construir sección de tranvía
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOTRAM                         :{BLACK}Construir metro usando el modo de Autometro
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOTRAM                         :{BLACK}Construir tranvías usando el modo de Autotranvías
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_VEHICLE_DEPOT               :{BLACK}Construir depósito de carretera (para construir y despachar vehículos)
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAM_VEHICLE_DEPOT               :{BLACK}Construir depósito de tranvías (para vehículos de contrucción y servicio)
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_BUS_STATION                      :{BLACK}Construir estación de autobús
@@ -1666,13 +1639,13 @@ STR_ROAD_DESCRIPTION_TREE_LINED_ROAD                            :Carretera arbol
 STR_ROAD_DESCRIPTION_ROAD_VEHICLE_DEPOT                         :Depósito de carretera
 STR_ROAD_DESCRIPTION_ROAD_RAIL_LEVEL_CROSSING                   :Paso a nivel
 STR_ROAD_DESCRIPTION_TRAMWAY                                    :Tranvía
-STR_ERROR_CAN_T_REMOVE_BUS_STATION                              :{WHITE}No se puede quitar la estación de bus...
+STR_ERROR_CAN_T_REMOVE_BUS_STATION                              :{WHITE}No se puede retirar estación de bus...
 STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}No se puede quitar la estación de camiones...
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}No se puede quitar estación de tranvía de pasajeros...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}No se puede quitar estación de tranvía de carga...
 
 ##id 0x2000
-STR_TOWN_DIRECTORY_CAPTION                                      :{WHITE}Poblaciones
+STR_TOWN_DIRECTORY_CAPTION                                      :{WHITE}Pueblos
 STR_TOWN_LABEL_POP                                              :{WHITE}{TOWN} ({COMMA})
 STR_TOWN_LABEL                                                  :{WHITE}{TOWN}
 STR_TOWN_LABEL_TINY_BLACK                                       :{TINYFONT}{BLACK}{TOWN}
@@ -1681,17 +1654,17 @@ STR_SIGN_SMALL_BLACK                                            :{TINYFONT}{BLAC
 STR_SIGN_SMALL_WHITE                                            :{TINYFONT}{WHITE}{SIGN}
 STR_ERROR_BUILDING_MUST_BE_DEMOLISHED                           :{WHITE}El edificio debe demolerse primero
 STR_TOWN_VIEW_TOWN_CAPTION                                      :{WHITE}{TOWN}
-STR_TOWN_VIEW_CITY_CAPTION                                      :{WHITE}{TOWN} (City)
+STR_TOWN_VIEW_CITY_CAPTION                                      :{WHITE}{TOWN} (Ciudad)
 STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Habitantes: {ORANGE}{COMMA}{BLACK}  Casas: {ORANGE}{COMMA}
-STR_TOWN_VIEW_RENAME_TOWN_BUTTON                                :Renombrar población
-STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}No se puede renombrar población...
-STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN} las autoridades locales rechazan esto
-STR_TOWN_DIRECTORY_LIST_TOOLTIP                                 :{BLACK}Nombres de población - haga click sobre el nombre para centrar la vista en la población
-STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centrar la vista sobre la población
-STR_TOWN_VIEW_RENAME_TOOLTIP                                    :{BLACK}Cambiar nombre de la población
+STR_TOWN_VIEW_RENAME_TOWN_BUTTON                                :Renombrar pueblo
+STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}No se puede renombrar pueblo...
+STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Las autoridades locales de {TOWN} rechazan esto
+STR_TOWN_DIRECTORY_LIST_TOOLTIP                                 :{BLACK}Nombres de pueblo - click sobre el nombre para centrar la vista en el pueblo
+STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centrar vista sobre el pueblo
+STR_TOWN_VIEW_RENAME_TOOLTIP                                    :{BLACK}Cambiar nombre del pueblo
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Pasajeros último mes: {ORANGE}{COMMA}{BLACK}  máx: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Correo último mes: {ORANGE}{COMMA}{BLACK}  máx: {ORANGE}{COMMA}
-STR_CARGO_FOR_TOWNGROWTH                                        :{BLACK}Carga necesaria para crecimiento de la ciudad:
+STR_CARGO_FOR_TOWNGROWTH                                        :{BLACK}Carga necesaria para crecimiento del pueblo:
 STR_CARGO_FOR_TOWNGROWTH_REQUIRED                               :{SETX 20}{ORANGE}{STRING}{BLACK} requeridos
 STR_CARGO_FOR_TOWNGROWTH_LAST_MONTH                             :{SETX 20}{ORANGE}{CARGO}{BLACK} entregados último mes
 STR_TOWN_BUILDING_NAME_TALL_OFFICE_BLOCK_1                      :Bloque alto de oficinas
@@ -1699,7 +1672,7 @@ STR_TOWN_BUILDING_NAME_OFFICE_BLOCK_1                           :Bloque de ofici
 STR_TOWN_BUILDING_NAME_SMALL_BLOCK_OF_FLATS_1                   :Bloque de viviendas pequeño
 STR_TOWN_BUILDING_NAME_CHURCH_1                                 :Iglesia
 STR_TOWN_BUILDING_NAME_LARGE_OFFICE_BLOCK_1                     :Gran bloque de oficinas
-STR_TOWN_BUILDING_NAME_TOWN_HOUSES_1                            :Casas de la población
+STR_TOWN_BUILDING_NAME_TOWN_HOUSES_1                            :Casas del pueblo
 STR_TOWN_BUILDING_NAME_HOTEL_1                                  :Hotel
 STR_TOWN_BUILDING_NAME_STATUE_1                                 :Estatua
 STR_TOWN_BUILDING_NAME_FOUNTAIN_1                               :Fuente
@@ -1722,14 +1695,14 @@ STR_SUBSIDIES_OFFERED_FROM_TO                                   :{ORANGE}{STRING
 STR_SUBSIDIES_NONE                                              :{ORANGE}Ninguna
 STR_SUBSIDIES_SUBSIDISED_TITLE                                  :{BLACK}Líneas ya subvencionadas:
 STR_SUBSIDIES_SUBSIDISED_FROM_TO                                :{ORANGE}{STRING} desde {STATION} a {STATION}{YELLOW} ({COMPANY}{YELLOW}, hasta {DATE_SHORT})
-STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BLACK}{BIGFONT}Oferta de subsidio caducada:{}{}{STRING} de {STRING} a {STRING} ya no conlleva una subvención.
+STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BLACK}{BIGFONT}Oferta de subvención terminada:{}{}{STRING} de {STRING} a {STRING} ya no conlleva una subvención.
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BLACK}{BIGFONT}Subvención retirada:{}{}Servicio de {STRING} desde {STATION} a {STATION} ya no está subvencionado.
 STR_NEWS_SERVICE_SUBSIDY_OFFERED                                :{BLACK}{BIGFONT}Se ofrece subvención en la línea:{}{}El primer {STRING} que cubra la línea desde {STRING} a {STRING} recibirá una subvención durante un año por parte de las autoridades locales!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_HALF                           :{BLACK}{BIGFONT}¡Subvención otorgada a {STRING}!{}{}¡Servicio de {STRING} desde {STATION} a {STATION} pagará el 50% más durante un año!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_DOUBLE                         :{BLACK}{BIGFONT}¡Subvención otorgada a {STRING}!{}{}¡Servicio de {STRING} desde {STATION} a {STATION} pagará tasa doble durante un año!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_TRIPLE                         :{BLACK}{BIGFONT}¡Subvención otorgada a {STRING}!{}{}¡Servicio de {STRING} desde {STATION} a {STATION} pagará tasa triple durante un año!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_QUADRUPLE                      :{BLACK}{BIGFONT}¡Subvención otorgada a {STRING}!{}{}¡Servicio de {STRING} desde {STATION} a {STATION} pagará tasa cuádruple durante un año!
-STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}{TOWN} la autoridad local rechaza la construcción de otro aeropuerto en esta población
+STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}{TOWN} la autoridad local rechaza la construcción de otro aeropuerto en este pueblo
 STR_LOCAL_AUTHORITY_REFUSES_NOISE                               :{WHITE}Las autoridades locales de {TOWN} rechazan el permiso para el aeropuerto debido al ruido
 STR_TOWN_BUILDING_NAME_COTTAGES_1                               :Cabañas
 STR_TOWN_BUILDING_NAME_HOUSES_1                                 :Casas
@@ -1744,7 +1717,7 @@ STR_TOWN_BUILDING_NAME_HOUSES_2                                 :Casas
 STR_TOWN_BUILDING_NAME_CINEMA_1                                 :Cine
 STR_TOWN_BUILDING_NAME_SHOPPING_MALL_1                          :Centro comercial
 STR_LOCAL_AUTHORITY_DO_IT_BUTTON                                :{BLACK}Hágalo
-STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP                             :{BLACK}Lista de cosas a hacer en esta población - pulse sobre cada línea para obtener más detalles
+STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP                             :{BLACK}Lista de acciones posibles en este pueblo - click sobre cada línea para obtener más detalles
 STR_LOCAL_AUTHORITY_DO_IT_TOOLTIP                               :{BLACK}Hacer lo que se ha marcado en la opción anterior
 STR_LOCAL_AUTHORITY_ACTIONS_TITLE                               :{BLACK}Acciones disponibles:
 STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN           :Pequeña campaña publicitaria
@@ -1760,8 +1733,8 @@ STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Iniciar una gran campaña publicitaria local para atraer más pasajeros y carga a sus servicios de transporte.{}Coste: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Pagar la reconstrucción de las carreteras locales. Provoca considerables complicaciones del tráfico durante 6 meses.{}Coste: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Construye una estatua en honor a su empresa.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Pagar la construcción de nuevos edificios comerciales en la población.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Comprar en exclusiva los derechos de transporte en esta población durante un año. Las autoridades solo permitirán el uso de las estaciones de su empresa.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Pagar la construcción de nuevos edificios comerciales en el pueblo.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Comprar en exclusiva los derechos de transporte en este pueblo durante un año. Las autoridades solo permitirán el uso de las estaciones de su empresa.{}Coste: {CURRENCY}
 STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Sobornar a las autoridades locales para aumentar su ranking, con el riesgo de una severa penalización si es descubierto.{}Coste: {CURRENCY}
 STR_NEWS_ROAD_REBUILDING                                        :{BIGFONT}{BLACK}Colapso circulatorio en {TOWN}!{}{}¡Programa de reconstrucción de carreteras patrocinado por {STRING} causa 6 meses de problemas a los conductores!
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
@@ -1775,17 +1748,17 @@ STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Banco Cerdito
 ##id 0x2800
 STR_LANDSCAPING_MENU_LANDSCAPING                                :Paisaje
 STR_LANDSCAPING_MENU_PLANT_TREES                                :Plantar árboles
-STR_LANDSCAPING_MENU_PLACE_SIGN                                 :Colocar señal
+STR_LANDSCAPING_MENU_PLACE_SIGN                                 :Colocar cartel
 STR_PLANT_TREE_CAPTION                                          :{WHITE}Árboles
 STR_ERROR_TREE_ALREADY_HERE                                     :{WHITE}...ya hay árboles aquí
 STR_ERROR_CAN_T_PLANT_TREE_HERE                                 :{WHITE}No se pueden plantar árboles aquí...
 STR_SIGN_WHITE                                                  :{WHITE}{SIGN}
-STR_ERROR_TOO_MANY_SIGNS                                        :{WHITE}...demasiadas señales
-STR_ERROR_CAN_T_PLACE_SIGN_HERE                                 :{WHITE}No se puede colocar una señal aquí...
-STR_SIGN_DEFAULT                                                :Señal
-STR_EDIT_SIGN_CAPTION                                           :{WHITE}Editar texto de la señal
-STR_ERROR_CAN_T_CHANGE_SIGN_NAME                                :{WHITE}No se puede cambiar el nombre de la señal...
-STR_ERROR_CAN_T_DELETE_SIGN                                     :{WHITE}No se puede borrar la señal...
+STR_ERROR_TOO_MANY_SIGNS                                        :{WHITE}...demasiados carteles
+STR_ERROR_CAN_T_PLACE_SIGN_HERE                                 :{WHITE}No se puede colocar un cartel aqui...
+STR_SIGN_DEFAULT                                                :Cartel
+STR_EDIT_SIGN_CAPTION                                           :{WHITE}Editar texto del cartel
+STR_ERROR_CAN_T_CHANGE_SIGN_NAME                                :{WHITE}No se puede cambiar el nombre del cartel...
+STR_ERROR_CAN_T_DELETE_SIGN                                     :{WHITE}No se puede borrar el cartel...
 STR_PLANT_TREE_TOOLTIP                                          :{BLACK}Seleccione el tipo de árboles a plantar
 STR_TREE_NAME_TREES                                             :Árboles
 STR_TREE_NAME_RAINFOREST                                        :Selváticos
@@ -1799,11 +1772,13 @@ STR_STATION_BUILD_NUMBER_OF_TRACKS                              :{BLACK}Número 
 STR_STATION_BUILD_PLATFORM_LENGTH                               :{BLACK}Longitud de andén
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Demasiado cerca de otra estación de tren
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Adjunta más de una estación/zona de carga existente
+STR_ERROR_WAYPOINT_ADJOINS_MORE_THAN_ONE_EXISTING               :{WHITE}Une más de un punto de ruta existente
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Demasiadas estaciones/zonas de carga
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Demasiadas partes de estación de tren
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Demasiadas paradas de Autobús
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Demasiadas zonas de carga
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Demasiado cerca de otra estación/zona de carga
+STR_ERROR_TOO_CLOSE_TO_ANOTHER_WAYPOINT                         :{WHITE}Demasiado cerca de otro punto de ruta
 STR_STATION_VIEW_CAPTION                                        :{WHITE}{STATION} {STATIONFEATURES}
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Primero debe demolerse estación de tren
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Demasiado cerca de otro aeropuerto
@@ -1847,6 +1822,7 @@ STR_ERROR_MUST_DEMOLISH_PASSENGER_TRAM_STATION_FIRST            :{WHITE}Debe dem
 STR_ERROR_MUST_DEMOLISH_CARGO_TRAM_STATION_FIRST                :{WHITE}Debe demoler la estación del tranvía de carga primero
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} Estaciones
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
+STR_STATION_LIST_WAYPOINT                                       :{YELLOW}{WAYPOINT}
 STR_STATION_LIST_NONE                                           :{YELLOW}- Ninguna -
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Demasiado cerca de otro muelle
 STR_ERROR_MUST_DEMOLISH_DOCK_FIRST                              :{WHITE}Primero debe demolerse el muelle
@@ -1858,6 +1834,8 @@ STR_STATION_BUILD_TRUCK_ORIENTATION_TOOLTIP                     :{BLACK}Elige la
 STR_STATION_BUILD_PASSENGER_TRAM_ORIENTATION_TOOLTIP            :{BLACK}Seleccione la orientación de la estación del tranvía de pasajeros
 STR_STATION_BUILD_CARGO_TRAM_ORIENTATION_TOOLTIP                :{BLACK}Seleccione la orientación de la estación del tranvía de carga
 STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Centrar vista en la posición de la estación
+STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Centrar vista en posición del punto de ruta
+STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centrar vista en posición de la boya
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Ver calificación de la estación
 STR_STATION_VIEW_RENAME_TOOLTIP                                 :{BLACK}Cambiar nombre de la estación
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Mostrar lista de carga aceptada
@@ -1879,11 +1857,11 @@ STR_STATION_DESCRIPTION_BUOY                                    :Boya
 STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}...boya en medio
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}...estación demasiado extendida
 STR_NONUNIFORM_STATIONS_DISALLOWED                              :{WHITE}...desactivada estaciones no uniformes
-STR_USE_CTRL_TO_SELECT_MORE                                     :{BLACK}Manten pulsado CTRL para seleccionar varios elementos
+STR_USE_CTRL_TO_SELECT_MORE                                     :{BLACK}Mantén pulsado Ctrl para seleccionar varios elementos
 
 STR_UNDEFINED                                                   :(cadena sin determinar)
 STR_STAT_CLASS_DFLT                                             :Estación por defecto
-STR_STAT_CLASS_WAYP                                             :Puntos de paso
+STR_STAT_CLASS_WAYP                                             :Puntos de ruta
 
 ##id 0x3800
 STR_DEPOT_BUILD_SHIP_CAPTION                                    :{WHITE}Orientación del astillero
@@ -2102,7 +2080,7 @@ STR_DIFFICULTY_LEVEL_CUSTOM                                     :{BLACK}Personal
 
 ############ range for difficulty settings starts
 STR_DIFFICULTY_LEVEL_SETTING_MAXIMUM_NO_COMPETITORS             :{LTBLUE}Nº Máximo de jugadores: {ORANGE}{COMMA}
-STR_DIFFICULTY_LEVEL_SETTING_NO_OF_TOWNS                        :{LTBLUE}Nº. de poblaciones: {ORANGE}{STRING}
+STR_DIFFICULTY_LEVEL_SETTING_NO_OF_TOWNS                        :{LTBLUE}Nº. de pueblos: {ORANGE}{STRING}
 STR_DIFFICULTY_LEVEL_SETTING_NO_OF_INDUSTRIES                   :{LTBLUE}Nº. de industrias: {ORANGE}{STRING}
 STR_DIFFICULTY_LEVEL_SETTING_MAXIMUM_INITIAL_LOAN_000           :{LTBLUE}Préstamo inicial máximo: {ORANGE}{CURRENCY}
 STR_DIFFICULTY_LEVEL_SETTING_INITIAL_INTEREST_RATE              :{LTBLUE}Tasa de interés inicial: {ORANGE}{COMMA}%
@@ -2125,8 +2103,6 @@ STR_NUM_LOW                                                     :Baja
 STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :Alta
 STR_NUM_CUSTOM                                                  :Personalizado
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 STR_AI_SPEED_VERY_SLOW                                          :Muy lenta
 STR_AI_SPEED_SLOW                                               :Lenta
 STR_AI_SPEED_MEDIUM                                             :Media
@@ -2209,8 +2185,8 @@ STR_COMPANY_VIEW_NEW_FACE_TOOLTIP                               :{BLACK}Seleccio
 STR_COMPANY_VIEW_COLOUR_SCHEME_TOOLTIP                          :{BLACK}Cambiar los colores de la empresa
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}Cambiar el nombre del presidente
 STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}Cambiar el nombre de la empresa
-STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Incrementar préstamo
-STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Pagar parte del préstamo
+STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Incrementar préstamo. Ctrl+Click solicita todo el préstamo posible
+STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Pagar parte del préstamo. Ctrl+Click paga todo el préstamo posible
 STR_COMPANY_VIEW_PRESIDENT_MANAGER_TITLE                        :{WHITE}{PRESIDENTNAME}{}{GOLD}(Presidente)
 STR_COMPANY_VIEW_INAUGURATED_TITLE                              :{GOLD}Inaugurado: {WHITE}{NUM}
 STR_COMPANY_VIEW_VEHICLES_TITLE                                 :{GOLD}Vehiculos:
@@ -2273,7 +2249,7 @@ STR_RELOCATE_HQ                                                 :{BLACK}Reubicar
 STR_COMPANY_JOIN                                                :{BLACK}Unirse
 STR_COMPANY_JOIN_TIP                                            :{BLACK}Unirse y jugar como esta compañía
 STR_COMPANY_PASSWORD                                            :{BLACK}Contraseña
-STR_COMPANY_PASSWORD_TOOLTIP                                    :{BLACK}Protege por contraseña tu empresa para prevenir que usuarios no autorizados se unan a ella.
+STR_COMPANY_PASSWORD_TOOLTIP                                    :{BLACK}Protege por contraseña tu compañía para prevenir que usuarios no autorizados se unan a ella.
 STR_SET_COMPANY_PASSWORD                                        :{BLACK}Configurar contraseña de empresa
 STR_COMPANY_PASSWORD_CANCEL                                     :{BLACK}No grabar la contraseña introducida
 STR_COMPANY_PASSWORD_OK                                         :{BLACK}Asignar a la empresa una nueva contraseña
@@ -2403,8 +2379,8 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_WATER_TANKER              :Cisterna de Agu
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_FRUIT_TRUCK               :Vagón de Fruta
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_RUBBER_TRUCK              :Vagón de Caucho
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_SUGAR_TRUCK               :Vagón de Azúcar
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COTTON_CANDY_HOPPER       :Vagoneta de Algodón de azúcar
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_TOFFEE_HOPPER             :Vagoneta de caramelos
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COTTON_CANDY_HOPPER       :Vagoneta de Algodón de Azúcar
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_TOFFEE_HOPPER             :Vagoneta de Caramelos
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_BUBBLE_VAN                :Vagón de Burbujas
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COLA_TANKER               :Cisterna de Cola
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_CANDY_VAN                 :Vagón de Dulces
@@ -2436,7 +2412,7 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FRUIT_TRUCK                 :Vagón de Fruta
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_RUBBER_TRUCK                :Vagón de Caucho
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_SUGAR_TRUCK                 :Vagón de Azúcar
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COTTON_CANDY_HOPPER         :Vagoneta de Algodón de azúcar
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_TOFFEE_HOPPER               :Vagoneta de caramelos
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_TOFFEE_HOPPER               :Vagoneta de Caramelos
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_BUBBLE_VAN                  :Vagón de Burbujas
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COLA_TANKER                 :Cisterna de Cola
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_CANDY_VAN                   :Vagón de Dulces
@@ -2585,7 +2561,7 @@ STR_VEHICLE_NAME_AIRCRAFT_TRICARIO_HELICOPTER                   :Tricario Helic�
 STR_VEHICLE_NAME_AIRCRAFT_GURU_X2_HELICOPTER                    :Guru X2 Helicóptero
 STR_VEHICLE_NAME_AIRCRAFT_POWERNAUT_HELICOPTER                  :Powernaut Helicóptero
 STR_ENGINE_PREVIEW_CAPTION                                      :{WHITE}Mensaje del fabricante de vehículos
-STR_ENGINE_PREVIEW_MESSAGE                                      :{GOLD}WHemos diseñado un nuevo vehículo: {STRING} - ¿estás interesado en el uso exclusivo por un año de este vehículo, para que podamos ver cómo rinde antes de ponerlo universalmente disponible?
+STR_ENGINE_PREVIEW_MESSAGE                                      :{GOLD}Hemos diseñado un nuevo vehículo: {STRING} - ¿estás interesado en el uso exclusivo por un año de este vehículo, para que podamos ver cómo rinde antes de ponerlo universalmente disponible?
 STR_ENGINE_PREVIEW_RAILROAD_LOCOMOTIVE                          :locomotora
 STR_ENGINE_PREVIEW_ROAD_VEHICLE                                 :vehículo de carretera
 STR_ENGINE_PREVIEW_AIRCRAFT                                     :aeronave
@@ -2610,7 +2586,7 @@ STR_ORDER_TOGGLE_FULL_LOAD                                      :{BLACK}Carga co
 STR_ORDER_DROP_LOAD_IF_POSSIBLE                                 :Cargar si está disponible
 STR_ORDER_DROP_FULL_LOAD_ALL                                    :Carga completa de todas las cargas
 STR_ORDER_DROP_FULL_LOAD_ANY                                    :Carga completa de cualquier carga
-STR_ORDER_DROP_NO_LOADING                                       :Sin carga
+STR_ORDER_DROP_NO_LOADING                                       :Sin cargar
 STR_ORDER_TOGGLE_UNLOAD                                         :{BLACK}Descargar todo
 STR_ORDER_DROP_UNLOAD_IF_ACCEPTED                               :Descargar si es aceptado
 STR_ORDER_DROP_UNLOAD                                           :Descargar todo
@@ -2699,7 +2675,7 @@ STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Saltarse
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Borrar
 STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Ir a
 STR_REFIT                                                       :{BLACK}Reformar
-STR_REFIT_TIP                                                   :{BLACK}Selecciona el tipo de carga a reformar en esta orden. Ctrl+Click para quitar la orden de reforma
+STR_REFIT_TIP                                                   :{BLACK}Selecciona el tipo de carga a reformar en esta orden. Ctrl+Click para eliminar la orden de reforma
 STR_REFIT_ORDER                                                 :(Reformar en {STRING})
 STR_REFIT_STOP_ORDER                                            :(Reformar en {STRING} y parar)
 STR_STOP_ORDER                                                  :(Parar)
@@ -2774,7 +2750,8 @@ STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}No se pu
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}No se pude dar la vuelta a un vehículo compuesto por múltiples unidades
 STR_CLEAR_TIME                                                  :{BLACK}Limpiar Horario
 STR_RESET_LATENESS                                              :{BLACK}Resetear Retrasos
-STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Cambiar nombre del punto de paso
+STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Cambiar nombre del punto de ruta
+STR_CHANGE_BUOY_NAME                                            :{BLACK}Cambiar nombre de boya
 
 STR_TRAIN_STOPPING                                              :{RED}Parándose
 STR_TRAIN_STOPPING_VEL                                          :{RED}Parándose, {VELOCITY}
@@ -2783,7 +2760,7 @@ STR_TRAIN_NO_POWER                                              :{RED}Sin potenc
 STR_TRAIN_START_NO_CATENARY                                     :Esta vía carece la catenaria, así que el tren no puede comenzar
 STR_TRAIN_STUCK                                                 :{ORANGE}Esperando vía libre
 
-STR_NEW_VEHICLE_NOW_AVAILABLE                                   :{BLACK}{BIGFONT}Nuevo{STRING} ahora disponible!
+STR_NEW_VEHICLE_NOW_AVAILABLE                                   :{BLACK}{BIGFONT}Nuevo {STRING} ahora disponible!
 STR_NEW_VEHICLE_TYPE                                            :{BLACK}{BIGFONT}{ENGINE}
 STR_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                         :{BLACK}Nuevo {STRING} ahora disponible!  -  {ENGINE}
 
@@ -2807,15 +2784,14 @@ STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...debe 
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}No se puede encontrar ruta al depósito
 STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Forzar vehículo a girar
 STR_ARTICULATED_RV_CAPACITY                                     :{BLACK}Capacidad: {LTBLUE}
-STR_JUST_CARGO                                                  :{CARGO}
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} vehículo {P "" s}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
 STR_NEWS_FIRST_BUS_ARRIVAL                                      :{BLACK}{BIGFONT}Los ciudadanos celebran . . .{}¡Primer autobús llega a {STATION}!
 STR_NEWS_FIRST_TRUCK_ARRIVAL                                    :{BLACK}{BIGFONT}Los ciudadanos celebran . . .{}¡Primer camión llega a {STATION}!
-STR_NEWS_FIRST_PASSENGER_TRAM_ARRIVAL                           :{BLACK}{BIGFONT}Ciudadanos celebran . . .{}Llega primer tranvía de pasajeros a {STATION}!
-STR_NEWS_FIRST_CARGO_TRAM_ARRIVAL                               :{BLACK}{BIGFONT}Ciudadanos celebran . . .{}Llega primer tranvía de carga a {STATION}!
+STR_NEWS_FIRST_PASSENGER_TRAM_ARRIVAL                           :{BLACK}{BIGFONT}Los ciudadanos celebran . . .{}Llega primer tranvía de pasajeros a {STATION}!
+STR_NEWS_FIRST_CARGO_TRAM_ARRIVAL                               :{BLACK}{BIGFONT}Los ciudadanos celebran . . .{}Llega primer tranvía de carga a {STATION}!
 STR_NEWS_ROAD_VEHICLE_CRASH_DRIVER                              :{BLACK}{BIGFONT}¡Accidente de tráfico!{}El conductor fallece en la explosión tras la colisión con el tren
 STR_NEWS_ROAD_VEHICLE_CRASH                                     :{BLACK}{BIGFONT}Accidente de tráfico!{}{COMMA} fallecidos en la explosión tras la colisión con el tren
 STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}No se puede girar vehículo de carretera...
@@ -2830,8 +2806,8 @@ STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Barco de
 STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Construir muelles
 STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Construir astillero (para construir y despachar barcos)
 
-STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BLACK}{BIGFONT}os ciudadanos celebran . . .{}¡Primer barco llega a {STATION}!
-STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Boya de posición, que puede usarse como itinerarios adicionales
+STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BLACK}{BIGFONT}Los ciudadanos celebran . . .{}¡Primer barco llega a {STATION}!
+STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Colocar boya que puede ser usada como punto de ruta
 STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}No se puede colocar boya aquí...
 STR_BUILD_AQUEDUCT                                              :{BLACK}Construir acueducto
 STR_CAN_T_BUILD_AQUEDUCT_HERE                                   :{WHITE}No se puede construir un acueducto aquí
@@ -2881,7 +2857,7 @@ STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vehículos:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Estaciones:
-STR_PERFORMANCE_DETAIL_MIN_PROFIT                               :{BLACK}Benefício Min.:
+STR_PERFORMANCE_DETAIL_MIN_PROFIT                               :{BLACK}Beneficio Min.:
 STR_PERFORMANCE_DETAIL_MIN_INCOME                               :{BLACK}Ingreso Min.:
 STR_PERFORMANCE_DETAIL_MAX_INCOME                               :{BLACK}Ingreso Máx.:
 STR_PERFORMANCE_DETAIL_DELIVERED                                :{BLACK}Entregado:
@@ -2898,7 +2874,7 @@ STR_PERFORMANCE_DETAIL_MAX_INCOME_TIP                           :{BLACK}Cantidad
 STR_PERFORMANCE_DETAIL_DELIVERED_TIP                            :{BLACK}Unidades de carga entregadas en los pasados cuatro cuartos.
 STR_PERFORMANCE_DETAIL_CARGO_TIP                                :{BLACK}Tipos de carga entregada en el último cuarto.
 STR_PERFORMANCE_DETAIL_MONEY_TIP                                :{BLACK}Cantidad de dinero en mano
-STR_PERFORMANCE_DETAIL_LOAN_TIP                                 :{BLACK}¿Tienes un préstamo muy elevado?
+STR_PERFORMANCE_DETAIL_LOAN_TIP                                 :{BLACK}Cantidad de dinero que esta compañía ha recibido como préstamo
 STR_PERFORMANCE_DETAIL_TOTAL_TIP                                :{BLACK}Total de puntos ganados del máximo posible
 
 STR_NEWGRF_SETTINGS_BUTTON                                      :{BLACK}Configuración NewGRF
@@ -2942,8 +2918,8 @@ STR_NEWGRF_PRESET_DELETE                                        :{BLACK}Borrar p
 STR_NEWGRF_PRESET_DELETE_TIP                                    :{BLACK}Borrar la programación seleccionada
 STR_NEWGRF_ADD                                                  :{BLACK}Añadir
 STR_NEWGRF_ADD_TIP                                              :{BLACK}Añadir un NewGRF a la lista
-STR_NEWGRF_REMOVE                                               :{BLACK}Quitar
-STR_NEWGRF_REMOVE_TIP                                           :{BLACK}Quitar el NewGRF seleccionado de la lista
+STR_NEWGRF_REMOVE                                               :{BLACK}Retirar
+STR_NEWGRF_REMOVE_TIP                                           :{BLACK}Retirar el NewGRF seleccionado de la lista
 STR_NEWGRF_MOVEUP                                               :{BLACK}Mover Arriba
 STR_NEWGRF_MOVEUP_TIP                                           :{BLACK}Mueve el NewGRF seleccionado arriba en la lista
 STR_NEWGRF_MOVEDOWN                                             :{BLACK}Mover Abajo
@@ -2977,7 +2953,7 @@ STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Información de carga/recarga para '{1:ENGINE}' difiere de la lista de compra después de la construcción. Esto puede causar que la autorenovación/cambio falle.
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' ha causado un bucle sin fin en la llamada de producción.
 
-STR_LOADGAME_REMOVED_TRAMS                                      :{WHITE}El juego ha sido grabado en una versión sin soporte de tranvía. Todos los tranvías serán eliminados.
+STR_LOADGAME_REMOVED_TRAMS                                      :{WHITE}El juego ha sido guardado en una versión sin soporte para tranvías. Todos los tranvías serán eliminados.
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Moneda personalizada
 STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Tasa de cambio: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
@@ -3034,7 +3010,7 @@ STR_REFIT_ROAD_VEHICLE_REFIT_TOOLTIP                            :{BLACK}Reformar
 STR_REFIT_SHIP_REFIT_TOOLTIP                                    :{BLACK}Reformar barco para que transporte el tipo de carga resaltado
 STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Reformar aeronave para que lleve el tipo de carga resaltado
 
-STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Elegir tipo de carga para que el tren lleve
+STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Elegir tipo de carga transportable para el tren
 STR_REFIT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Selecciona tipo de carga que transportará el vehículo de carretera
 STR_REFIT_SHIP_LIST_TOOLTIP                                     :{BLACK}Seleccione tipo de carga para que el barco la lleve
 STR_REFIT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Seleccione tipo de carga para que la aeronave la lleve
@@ -3161,7 +3137,7 @@ STR_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                           :{BLACK}Esto con
 STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Nuevos vehículos de raíl
 STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nuevo Vehículo Eléctrico de Railes
 STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nuevos vehículos de monorraíl
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nuevos vehículos de levitación magnética
+STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nuevos Vehículos Maglev
 
 STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Vehículos de Rail
 STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Nuevos vehículos
@@ -3254,7 +3230,7 @@ STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Presiona
 STR_REPLACE_HELP_START_BUTTON                                   :{BLACK}Presiona este botón si quieres reemplazar la locomotora seleccionada a la izquierda por la seleccionada en la derecha
 STR_REPLACE_HELP_RAILTYPE                                       :{BLACK}Seleccione tipo de rail para seleccionar locomotoras para ese tipo
 STR_REPLACE_HELP_REPLACE_INFO_TAB                               :{BLACK}Muestra que locomotora será reemplazada
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Quitar vagón: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Retirar vagón: {ORANGE}{SKIP}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Hacer que el cambio automático mantenga la longitud del tren quitando vagones (empezando por adelante), si el cambio de locomotora produce un tren más largo.
 STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Reemplazando: {ORANGE}{SKIP}{SKIP}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Cambia entre las ventanas de cambio de vagón y locomotora
@@ -3281,7 +3257,7 @@ STR_MASS_STOP_LIST_TIP                                          :{BLACK}Pulsa pa
 STR_MASS_START_LIST_TIP                                         :{BLACK}Pulsa para arrancar todos los vehículos de la lista
 
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
-STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista de señales - {COMMA} Señales
+STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista de carteles - {COMMA} Carteles
 
 STR_ORDER_REFIT_FAILED                                          :{WHITE}Orden de fallo en recarga ha parado {VEHICLE}
 
@@ -3290,7 +3266,7 @@ STR_ORDER_REFIT_FAILED                                          :{WHITE}Orden de
 STR_RAIL_VEHICLES                                               :Vehículos de rail
 STR_ELRAIL_VEHICLES                                             :Vehículos de Rail Eléctrico
 STR_MONORAIL_VEHICLES                                           :Vehículos monorail
-STR_MAGLEV_VEHICLES                                             :Vehículos de Lev. Mag.
+STR_MAGLEV_VEHICLES                                             :Vehículos Maglev
 
 ############ End of list of rail types
 
@@ -3336,7 +3312,7 @@ STR_QUANTITY_OF_SEA_LAKES                                       :{BLACK}Nivel de
 STR_SMOOTHNESS                                                  :{BLACK}Suavidad:
 STR_SNOW_LINE_HEIGHT                                            :{BLACK}Altura línea nieve:
 STR_DATE                                                        :{BLACK}Fecha:
-STR_NUMBER_OF_TOWNS                                             :{BLACK}No. de ciudades:
+STR_NUMBER_OF_TOWNS                                             :{BLACK}No. de pueblos:
 STR_NUMBER_OF_INDUSTRIES                                        :{BLACK}No. de industrias:
 STR_GENERATE_DATE                                               :{BLACK}{DATE_LONG}
 STR_SNOW_LINE_UP                                                :{BLACK}Mover la línea de nieve una arriba
@@ -3410,7 +3386,7 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Longitud
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Área: {NUM} x {NUM}{}Diferencia altura: {NUM} m
 
 STR_FEEDER_CARGO_VALUE                                          :{BLACK}Transferir Créditos: {LTBLUE}{CURRENCY}
-STR_DRIVE_THROUGH_ERROR_ON_TOWN_ROAD                            :{WHITE}...esta es una carretera propiedad de una ciudad
+STR_DRIVE_THROUGH_ERROR_ON_TOWN_ROAD                            :{WHITE}...esta es una carretera propiedad de un pueblo
 STR_DRIVE_THROUGH_ERROR_DIRECTION                               :{WHITE}...revestimientos del camino en la dirección incorrecta
 
 STR_TRANSPARENCY_TOOLB                                          :{WHITE}Opciones de Transparencia
@@ -3418,7 +3394,7 @@ STR_TRANSPARENT_SIGNS_DESC                                      :{BLACK}Ajustar 
 STR_TRANSPARENT_TREES_DESC                                      :{BLACK}Ajustar transparencia para árboles. Ctrl+Click para bloquear.
 STR_TRANSPARENT_HOUSES_DESC                                     :{BLACK}Ajustar transparencia para casas. Ctrl+Click para bloquear.
 STR_TRANSPARENT_INDUSTRIES_DESC                                 :{BLACK}Ajustar transparencia para industrias. Ctrl+Click para bloquear.
-STR_TRANSPARENT_BUILDINGS_DESC                                  :{BLACK}Ajustar transparencia para construcciones como estaciones, depósitos o puntos de paso. Ctrl+Click para bloquear.
+STR_TRANSPARENT_BUILDINGS_DESC                                  :{BLACK}Ajustar transparencia para construcciones como estaciones, depósitos o puntos de ruta. Ctrl+Click para bloquear.
 STR_TRANSPARENT_BRIDGES_DESC                                    :{BLACK}Ajustar transparencia para puentes. Ctrl+Click para bloquear.
 STR_TRANSPARENT_STRUCTURES_DESC                                 :{BLACK}Ajustar transparencia para estructuras como faros, antenas, etc. Ctrl+Click para bloquear.
 STR_TRANSPARENT_CATENARY_DESC                                   :{BLACK}Ajustar transparencia para catenaria. Ctrl+Click para bloquear.
@@ -3473,7 +3449,10 @@ STR_TOWN_NAME                                                   :{TOWN}
 STR_VEHICLE_NAME                                                :{VEHICLE}
 STR_WAYPOINT_NAME                                               :{WAYPOINT}
 
+STR_JUST_CARGO                                                  :{CARGO}
+STR_JUST_CHECKMARK                                              :{CHECKMARK}
 STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_JUST_INT                                                    :{NUM}
 STR_JUST_DATE_TINY                                              :{DATE_TINY}
 STR_JUST_DATE_SHORT                                             :{DATE_SHORT}
@@ -3491,12 +3470,38 @@ STR_FORMAT_COMPANY_NUM                                          :(Empresa {COMMA
 STR_FORMAT_GROUP_NAME                                           :Grupo {COMMA}
 STR_FORMAT_INDUSTRY_NAME                                        :{TOWN}, {STRING}
 
+STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
+STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
+STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
+STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
+STR_RED_COMMA                                                   :{RED}{COMMA}
+STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
+STR_SILVER_CROSS                                                :{SILVER}{CROSS}
+STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
+STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
+STR_BLACK_STRING                                                :{BLACK}{STRING}
+STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+
+STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
+STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
+STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
+STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
+STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
+
+STR_BLACK_1                                                     :{BLACK}1
+STR_BLACK_2                                                     :{BLACK}2
+STR_BLACK_3                                                     :{BLACK}3
+STR_BLACK_4                                                     :{BLACK}4
+STR_BLACK_5                                                     :{BLACK}5
+STR_BLACK_6                                                     :{BLACK}6
+STR_BLACK_7                                                     :{BLACK}7
+
 STR_NAME_MUST_BE_UNIQUE                                         :{WHITE}El nombre debe ser único
 
 #### Improved sign GUI
-STR_NEXT_SIGN_TOOLTIP                                           :{BLACK}Ir a la siguiente señal
-STR_PREVIOUS_SIGN_TOOLTIP                                       :{BLACK}Ir a la señal anterior
-STR_SIGN_OSKTITLE                                               :{BLACK}Introduce un nombre para la señal
+STR_NEXT_SIGN_TOOLTIP                                           :{BLACK}Ir al siguiente cartel
+STR_PREVIOUS_SIGN_TOOLTIP                                       :{BLACK}Ir al anterior cartel
+STR_SIGN_OSKTITLE                                               :{BLACK}Introduce un nombre para el cartel
 
 ########
 
@@ -3556,16 +3561,16 @@ STR_FACE_TIE_EARRING_TIP                                        :{BLACK}Cambiar 
 ############ signal GUI
 STR_SIGNAL_SELECTION                                            :{WHITE}Selección de Señales
 STR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                           :{WHITE}No se pueden convertir las señales aquí...
-STR_BUILD_SIGNAL_SEMAPHORE_NORM_TIP                             :{BLACK}Señal de bloque(semáforo){}Este es el tipo de señal mas básico, que permite a un único tren estar a la vez en el mismo bloque.
-STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TIP                            :{BLACK}Señal de entrada (semáforo){}Verde si existe una o más señales de salida en el tramo en verde, de lo contrario estará en rojo
-STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TIP                             :{BLACK}Señal de salida (semáforo){}Se comporta de la misma manera que una señal de bloque, pero es necesaria para activar el color correcto en las preseñales de entrada y combo.
-STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TIP                            :{BLACK}Señales combo (semáforos){}Las señales combo simplemente actúan como una preseñal de entrada y de salida. Esto permite construir "árboles" de preseñales.
+STR_BUILD_SIGNAL_SEMAPHORE_NORM_TIP                             :{BLACK}Señal de bloque (semáforo){}Este es el tipo de señal mas básico, que permite a un único tren estar a la vez en el mismo bloque.
+STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TIP                            :{BLACK}Señal de entrada (semáforo){}Verde si existen una o más señales de salida en el tramo en verde, de lo contrario estará en rojo
+STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TIP                             :{BLACK}Señal de salida (semáforo){}Se comporta de la misma manera que una señal de bloque, pero es necesaria para activar el color correcto en las señales de entrada y combo.
+STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TIP                            :{BLACK}Señal combo (semáforo){}La señal combo actua como señal de entrada y salida a la vez. Esto permite construir grandes "árboles" de señales condicionales.
 STR_BUILD_SIGNAL_SEMAPHORE_PBS_TIP                              :{BLACK}Señal de ruta (semáforo){}Una señal de ruta permite a más de un tren entrar a un bloque de señales a la vez, si el tren puede reservar una ruta hasta un lugar seguro. Pueden ser traspasadas desde atrás.
 STR_BUILD_SIGNAL_SEMAPHORE_PBS_OWAY_TIP                         :{BLACK}Señal de ruta de un sentido (semáforo){}Una señal de ruta permite a más de un tren entrar a un bloque de señales a la vez, si el tren puede reservar una ruta hasta un lugar seguro. No pueden ser traspasadas desde atrás.
 STR_BUILD_SIGNAL_ELECTRIC_NORM_TIP                              :{BLACK}Señal de bloque (eléctrica){}Es el tipo de señal mas básico, que permite a un único tren estar a la vez en el mismo bloque.
-STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TIP                             :{BLACK}Señal de entrada (eléctrica){}Verde si existe una o más señales verdes en el siguiente segmento de vía. Si no, mostrará el rojo.
-STR_BUILD_SIGNAL_ELECTRIC_EXIT_TIP                              :{BLACK}Señal de salida (eléctrica){}Se comporta de la misma manera que una señal de bloque, pero es necesaria para activar el color correcto en las preseñales de entrada y combo.
-STR_BUILD_SIGNAL_ELECTRIC_COMBO_TIP                             :{BLACK}Combo señal (eléctrica){}La señal combo actua como señal de entrada y salida. Esto permite construir grandes "árboles" de preseñales.
+STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TIP                             :{BLACK}Señal de entrada (eléctrica){}Verde si existen una o más señales verdes en el siguiente segmento de vía, de lo contrario estará en rojo
+STR_BUILD_SIGNAL_ELECTRIC_EXIT_TIP                              :{BLACK}Señal de salida (eléctrica){}Se comporta de la misma manera que una señal de bloque, pero es necesaria para activar el color correcto en las señales de entrada y combo.
+STR_BUILD_SIGNAL_ELECTRIC_COMBO_TIP                             :{BLACK}Señal combo (eléctrica){}La señal combo actua como señal de entrada y salida a la vez. Esto permite construir grandes "árboles" de señales condicionales.
 STR_BUILD_SIGNAL_ELECTRIC_PBS_TIP                               :{BLACK}Señal de ruta (eléctrica){}Una señal de ruta permite a más de un tren entrar a un bloque de señales a la vez, si el tren puede reservar una ruta hasta un lugar seguro. Pueden ser traspasadas desde atrás.
 STR_BUILD_SIGNAL_ELECTRIC_PBS_OWAY_TIP                          :{BLACK}Señal de ruta de un sentido (eléctrica){}Una señal de ruta permite a más de un tren entrar a un bloque de señales a la vez, si el tren puede reservar una ruta hasta un lugar seguro. No pueden ser traspasadas desde atrás.
 STR_SIGNAL_CONVERT_TIP                                          :{BLACK}Convertir señal{}Cuando es seleccionado, pulsar sobre una señal existente la convierte en el tipo y variante indicados. Pulsar Ctrl+Click permite cambiar de variante
@@ -3608,10 +3613,11 @@ STR_AI_AUTHOR                                                   :{BLACK}Autor: {
 STR_AI_VERSION                                                  :{BLACK}Versión: {NUM}
 STR_AI_URL                                                      :{BLACK}URL: {STRING}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Una de las AI ejecutadas ha fallado. Por favor, reporte el fallo al autor de la misma desde la ventana AI Debug.
+STR_AI_NO_AI_FOUND                                              :No se encontró IA para cargar.{}Esta IA por defecto no hará nada.{}Puedes descargar nuevas IAs mediante el sistema de Contenido Online.
 ########
 
 ############ town controlled noise level
-STR_NOISE_IN_TOWN                                               :{BLACK}Nivel de ruido en ciudad: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
+STR_NOISE_IN_TOWN                                               :{BLACK}Nivel de ruido en pueblo: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_STATION_NOISE                                               :{BLACK}Ruido generado: {GOLD}{COMMA}
 ########
 
@@ -3655,7 +3661,7 @@ STR_CONTENT_DETAIL_DESCRIPTION                                  :{SILVER}Descrip
 STR_CONTENT_DETAIL_URL                                          :{SILVER}URL: {WHITE}{STRING}
 STR_CONTENT_DETAIL_TYPE                                         :{SILVER}Tipo: {WHITE}{STRING}
 STR_CONTENT_DETAIL_FILESIZE                                     :{SILVER}Tamaño descarga: {WHITE}{BYTES}
-STR_CONTENT_DETAIL_SELECTED_BECAUSE_OF                          :{SILVER}Seleccionado por: {WHITE}{STRING}
+STR_CONTENT_DETAIL_SELECTED_BECAUSE_OF                          :{SILVER}Seleccionado debido a: {WHITE}{STRING}
 STR_CONTENT_DETAIL_DEPENDENCIES                                 :{SILVER}Dependencias: {WHITE}{STRING}
 STR_CONTENT_DETAIL_TAGS                                         :{SILVER}Etiquetas: {WHITE}{STRING}
 
@@ -3673,6 +3679,6 @@ STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}No ha si
 
 STR_CONTENT_INTRO_BUTTON                                        :{BLACK}Consultar contenido online
 STR_CONTENT_INTRO_BUTTON_TIP                                    :{BLACK}Comprobar si hay nuevos contenidos actualizados para descargar
-STR_CONTENT_INTRO_MISSING_BUTTON                                :{BLACK}Encontrar contenido perdido en línea
+STR_CONTENT_INTRO_MISSING_BUTTON                                :{BLACK}Encontrar contenido que falta en línea
 STR_CONTENT_INTRO_MISSING_BUTTON_TIP                            :{BLACK}Comprobar si el contenido que falta puede ser encontrado en línea
 ########
