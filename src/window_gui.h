@@ -60,6 +60,12 @@ enum WidgetDrawDistances {
 	WD_FRAMETEXT_LEFT  = 6,     ///< Left offset of the text of the frame.
 	WD_FRAMETEXT_RIGHT = 6,     ///< Right offset of the text of the frame.
 
+	/* WWT_MATRIX */
+	WD_MATRIX_LEFT   = 2,       ///< Offset at left of a matrix cell.
+	WD_MATRIX_RIGHT  = 2,       ///< Offset at right of a matrix cell.
+	WD_MATRIX_TOP    = 3,       ///< Offset at top of a matrix cell.
+	WD_MATRIX_BOTTOM = 1,       ///< Offset at bottom of a matrix cell.
+
 	/* WWT_STICKYBOX */
 	WD_STICKYBOX_WIDTH  = 12,   ///< Width of a standard sticky box widget.
 	WD_STICKYBOX_LEFT   = 2,    ///< Left offset of sticky sprite.
@@ -189,14 +195,18 @@ enum SortButtonState {
 };
 
 /**
- * Data structure for a window viewport
+ * Data structure for a window viewport.
+ * A viewport is either following a vehicle (its id in then in #follow_vehicle), or it aims to display a specific
+ * location #dest_scrollpos_x, #dest_scrollpos_y (#follow_vehicle is then #INVALID_VEHICLE).
+ * The actual location being shown is #scrollpos_x, #scrollpos_y.
+ * @see InitializeViewport(), UpdateViewportPosition(), UpdateViewportCoordinates().
  */
 struct ViewportData : ViewPort {
-	VehicleID follow_vehicle;
-	int32 scrollpos_x;
-	int32 scrollpos_y;
-	int32 dest_scrollpos_x;
-	int32 dest_scrollpos_y;
+	VehicleID follow_vehicle; ///< VehicleID to follow if following a vehicle, #INVALID_VEHICLE otherwise.
+	int32 scrollpos_x;        ///< Currently shown x coordinate (virtual screen coordinate of topleft corner of the viewport).
+	int32 scrollpos_y;        ///< Currently shown y coordinate (virtual screen coordinate of topleft corner of the viewport).
+	int32 dest_scrollpos_x;   ///< Current destination x coordinate to display (virtual screen coordinate of topleft corner of the viewport).
+	int32 dest_scrollpos_y;   ///< Current destination y coordinate to display (virtual screen coordinate of topleft corner of the viewport).
 };
 
 /**
@@ -210,7 +220,7 @@ struct Window : ZeroedMemoryAllocator {
 	};
 
 protected:
-	void InitializeData(WindowClass cls, const Widget *widget, NWidgetBase *nwid, int window_number, int biggest_index);
+	void InitializeData(WindowClass cls, const Widget *widget, int window_number);
 	void InitializePositionSize(int x, int y, int min_width, int min_height);
 	void FindWindowPlacementAndResize(int def_width, int def_height);
 	void FindWindowPlacementAndResize(const WindowDesc *desc);
@@ -258,6 +268,8 @@ public:
 	Window *z_back;                  ///< The window behind us in z-order.
 
 	void InitNested(const WindowDesc *desc, WindowNumber number = 0);
+	void CreateNestedTree(const WindowDesc *desc, bool fill_nested = true);
+	void FinishInitNested(const WindowDesc *desc, WindowNumber window_number);
 
 	/**
 	 * Sets the enabled/disabled status of a widget.
@@ -534,6 +546,14 @@ public:
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize) {}
 
 	/**
+	 * Initialize string parameters for a widget.
+	 * Calls to this function are made during initialization to measure the size (that is as part of #InitNested()), during drawing,
+	 * and while re-initializing the window. Only for widgets that render text initializing is requested.
+	 * @param widget  Widget number.
+	 */
+	virtual void SetStringParameters(int widget) const {}
+
+	/**
 	 * Called when window gains focus
 	 */
 	virtual void OnFocus() {}
@@ -632,6 +652,7 @@ public:
 
 	/**
 	 * Called after the window got resized.
+	 * For nested windows with a viewport, call NWidgetViewport::UpdateViewportCoordinates.
 	 * @param delta The amount of which the window size changed.
 	 */
 	virtual void OnResize(Point delta) {}

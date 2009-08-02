@@ -39,7 +39,6 @@ BaseStation::~BaseStation()
 
 Station::Station(TileIndex tile) :
 	SpecializedStation<Station, false>(tile),
-	train_tile(INVALID_TILE),
 	airport_tile(INVALID_TILE),
 	dock_tile(INVALID_TILE),
 	indtype(IT_INVALID),
@@ -156,7 +155,7 @@ void Station::AddFacility(StationFacility new_facility_bit, TileIndex facil_xy)
 
 void Station::MarkTilesDirty(bool cargo_change) const
 {
-	TileIndex tile = this->train_tile;
+	TileIndex tile = this->train_station.tile;
 	int w, h;
 
 	if (tile == INVALID_TILE) return;
@@ -170,8 +169,8 @@ void Station::MarkTilesDirty(bool cargo_change) const
 		if (this->num_specs == 0) return;
 	}
 
-	for (h = 0; h < trainst_h; h++) {
-		for (w = 0; w < trainst_w; w++) {
+	for (h = 0; h < train_station.h; h++) {
+		for (w = 0; w < train_station.w; w++) {
 			if (this->TileBelongsToRailStation(tile)) {
 				MarkTileDirtyByTile(tile);
 			}
@@ -181,12 +180,7 @@ void Station::MarkTilesDirty(bool cargo_change) const
 	}
 }
 
-/** Obtain the length of a platform
- * @pre tile must be a railway station tile
- * @param tile A tile that contains the platform in question
- * @return The length of the platform
- */
-uint Station::GetPlatformLength(TileIndex tile) const
+/* virtual */ uint Station::GetPlatformLength(TileIndex tile) const
 {
 	assert(this->TileBelongsToRailStation(tile));
 
@@ -208,21 +202,15 @@ uint Station::GetPlatformLength(TileIndex tile) const
 	return len - 1;
 }
 
-/** Determines the REMAINING length of a platform, starting at (and including)
- * the given tile.
- * @param tile the tile from which to start searching. Must be a railway station tile
- * @param dir The direction in which to search.
- * @return The platform length
- */
-uint Station::GetPlatformLength(TileIndex tile, DiagDirection dir) const
+/* virtual */ uint Station::GetPlatformLength(TileIndex tile, DiagDirection dir) const
 {
 	TileIndex start_tile = tile;
 	uint length = 0;
-	assert(IsRailwayStationTile(tile));
+	assert(IsRailStationTile(tile));
 	assert(dir < DIAGDIR_END);
 
 	do {
-		length ++;
+		length++;
 		tile += TileOffsByDiagDir(dir);
 	} while (IsCompatibleTrainStationTile(tile, start_tile));
 
@@ -237,13 +225,13 @@ uint Station::GetCatchmentRadius() const
 	uint ret = CA_NONE;
 
 	if (_settings_game.station.modified_catchment) {
-		if (this->bus_stops    != NULL)         ret = max<uint>(ret, CA_BUS);
-		if (this->truck_stops  != NULL)         ret = max<uint>(ret, CA_TRUCK);
-		if (this->train_tile   != INVALID_TILE) ret = max<uint>(ret, CA_TRAIN);
-		if (this->dock_tile    != INVALID_TILE) ret = max<uint>(ret, CA_DOCK);
-		if (this->airport_tile != INVALID_TILE) ret = max<uint>(ret, this->Airport()->catchment);
+		if (this->bus_stops          != NULL)         ret = max<uint>(ret, CA_BUS);
+		if (this->truck_stops        != NULL)         ret = max<uint>(ret, CA_TRUCK);
+		if (this->train_station.tile != INVALID_TILE) ret = max<uint>(ret, CA_TRAIN);
+		if (this->dock_tile          != INVALID_TILE) ret = max<uint>(ret, CA_DOCK);
+		if (this->airport_tile       != INVALID_TILE) ret = max<uint>(ret, this->Airport()->catchment);
 	} else {
-		if (this->bus_stops != NULL || this->truck_stops != NULL || this->train_tile != INVALID_TILE || this->dock_tile != INVALID_TILE || this->airport_tile != INVALID_TILE) {
+		if (this->bus_stops != NULL || this->truck_stops != NULL || this->train_station.tile != INVALID_TILE || this->dock_tile != INVALID_TILE || this->airport_tile != INVALID_TILE) {
 			ret = CA_UNMODIFIED;
 		}
 	}
@@ -427,14 +415,14 @@ bool StationRect::BeforeAddRect(TileIndex tile, int w, int h, StationRectMode mo
 	int width = right_a - left_a + 1;
 	int height = bottom_a - top_a + 1;
 
-	BEGIN_TILE_LOOP(tile, width, height, top_left)
+	TILE_LOOP(tile, width, height, top_left) {
 		if (IsTileType(tile, MP_STATION) && GetStationIndex(tile) == st_id) return true;
-	END_TILE_LOOP(tile, width, height, top_left);
+	}
 
 	return false;
 }
 
-bool StationRect::AfterRemoveTile(Station *st, TileIndex tile)
+bool StationRect::AfterRemoveTile(BaseStation *st, TileIndex tile)
 {
 	int x = TileX(tile);
 	int y = TileY(tile);
@@ -484,7 +472,7 @@ bool StationRect::AfterRemoveTile(Station *st, TileIndex tile)
 	return false; // non-empty remaining rect
 }
 
-bool StationRect::AfterRemoveRect(Station *st, TileIndex tile, int w, int h)
+bool StationRect::AfterRemoveRect(BaseStation *st, TileIndex tile, int w, int h)
 {
 	assert(PtInExtendedRect(TileX(tile), TileY(tile)));
 	assert(PtInExtendedRect(TileX(tile) + w - 1, TileY(tile) + h - 1));
@@ -501,6 +489,21 @@ StationRect& StationRect::operator = (Rect src)
 	this->right = src.right;
 	this->bottom = src.bottom;
 	return *this;
+}
+
+TileArea::TileArea(TileIndex start, TileIndex end)
+{
+	uint sx = TileX(start);
+	uint sy = TileY(start);
+	uint ex = TileX(end);
+	uint ey = TileY(end);
+
+	if (sx > ex) Swap(sx, ex);
+	if (sy > ey) Swap(sy, ey);
+
+	this->tile = TileXY(sx, sy);
+	this->w    = ex - sx + 1;
+	this->h    = ey - sy + 1;
 }
 
 

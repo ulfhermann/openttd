@@ -497,7 +497,8 @@ enum TownDirectoryWidgets {
 	TDW_SORTPOPULATION,
 	TDW_CENTERTOWN,
 	TDW_SCROLLBAR,
-	TDW_EMPTYBOTTOM,
+	TDW_BOTTOM_PANEL,
+	TDW_BOTTOM_TEXT,
 	TDW_RESIZEBOX,
 };
 
@@ -515,12 +516,14 @@ static const NWidgetPart _nested_town_directory_widgets[] = {
 			EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_BROWN, TDW_CENTERTOWN), SetMinimalSize(196, 164), SetDataTip(0x0, STR_TOWN_DIRECTORY_LIST_TOOLTIP),
 							SetFill(1, 0), SetResize(0, 10), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_BROWN, TDW_BOTTOM_PANEL),
+				NWidget(WWT_TEXT, COLOUR_BROWN, TDW_BOTTOM_TEXT), SetPadding(2, 0, 0, 2), SetMinimalSize(196, 12), SetFill(1, 0), SetDataTip(STR_TOWN_POPULATION, STR_NULL),
+			EndContainer(),
 		EndContainer(),
-		NWidget(WWT_SCROLLBAR, COLOUR_BROWN, TDW_SCROLLBAR),
-	EndContainer(),
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, TDW_EMPTYBOTTOM), SetMinimalSize(196, 12), SetFill(1, 0), EndContainer(),
-		NWidget(WWT_RESIZEBOX, COLOUR_BROWN, TDW_RESIZEBOX),
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, TDW_SCROLLBAR),
+			NWidget(WWT_RESIZEBOX, COLOUR_BROWN, TDW_RESIZEBOX),
+		EndContainer(),
 	EndContainer(),
 };
 
@@ -608,6 +611,11 @@ public:
 		this->DrawWidgets();
 	}
 
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget == TDW_BOTTOM_TEXT) SetDParam(0, GetWorldPopulation());
+	}
+
 	virtual void DrawWidget(const Rect &r, int widget) const
 	{
 		switch(widget) {
@@ -635,11 +643,6 @@ public:
 					if (++n == this->vscroll.cap) break; // max number of towns in 1 window
 				}
 			} break;
-
-			case TDW_EMPTYBOTTOM:
-				SetDParam(0, GetWorldPopulation());
-				DrawString(r.left + 3, r.right - 3, r.top + 2, STR_TOWN_POPULATION);
-				break;
 		}
 	}
 
@@ -671,7 +674,7 @@ public:
 				resize->height = d.height;
 				break;
 			}
-			case TDW_EMPTYBOTTOM: {
+			case TDW_BOTTOM_TEXT: {
 				SetDParam(0, 1000000000); // 10^9
 				Dimension d = GetStringBoundingBox(STR_TOWN_POPULATION);
 				d.width += padding.width;
