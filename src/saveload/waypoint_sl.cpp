@@ -104,11 +104,12 @@ void MoveWaypointsToBaseStations()
 			new_wp->facilities |= FACIL_TRAIN;
 			new_wp->owner = GetTileOwner(t);
 
-			SetRailwayStationReservation(t, reserved);
+			SetRailStationReservation(t, reserved);
 
 			if (wp->spec != NULL) {
 				SetCustomStationSpecIndex(t, AllocateSpecToStation(wp->spec, new_wp, true));
 			}
+			new_wp->rect.BeforeAddTile(t, StationRect::ADD_FORCE);
 		}
 
 		wp->new_index = new_wp->index;
