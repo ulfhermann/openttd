@@ -163,7 +163,7 @@ public:
 	{
 		if (n.m_num_signals_passed >= m_sig_look_ahead_costs.Size() / 2) return 0;
 
-		if (IsRailwayStationTile(tile) && IsAnyStationTileReserved(tile, trackdir, skipped)) {
+		if (IsRailStationTile(tile) && IsAnyStationTileReserved(tile, trackdir, skipped)) {
 			return Yapf().PfGetSettings().rail_pbs_station_penalty * (skipped + 1);
 		} else if (TrackOverlapsTracks(GetReservedTrackbits(tile), TrackdirToTrack(trackdir))) {
 			int cost = Yapf().PfGetSettings().rail_pbs_cross_penalty;
@@ -543,7 +543,7 @@ no_entry_cost: // jump here at the beginning if the node has no parent (it is th
 
 			/* Station platform-length penalty. */
 			if ((end_segment_reason & ESRB_STATION) != ESRB_NONE) {
-				Station *st = Station::GetByTile(n.GetLastTile());
+				const BaseStation *st = BaseStation::GetByTile(n.GetLastTile());
 				assert(st != NULL);
 				uint platform_length = st->GetPlatformLength(n.GetLastTile(), ReverseDiagDir(TrackdirToExitdir(n.GetLastTrackdir())));
 				/* Reduce the extra cost caused by passing-station penalty (each station receives it in the segment cost). */
