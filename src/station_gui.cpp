@@ -20,6 +20,7 @@
 #include "widgets/dropdown_func.h"
 #include "newgrf_cargo.h"
 #include "station_base.h"
+#include "waypoint_base.h"
 #include "tilehighlight_func.h"
 #include "core/smallmap_type.hpp"
 #include "company_base.h"
@@ -1611,22 +1612,17 @@ struct TileAndStation {
 static SmallVector<TileAndStation, 8> _deleted_stations_nearby;
 static SmallVector<StationID, 8> _stations_nearby_list;
 
-/** Context for FindStationsNearby */
-struct FindNearbyStationContext {
-	TileIndex tile; ///< Base tile of station to be built
-	uint      w;    ///< Width of station to be built
-	uint      h;    ///< Height of station to be built
-};
-
 /**
  * Add station on this tile to _stations_nearby_list if it's fully within the
  * station spread.
  * @param tile Tile just being checked
- * @param user_data Pointer to FindNearbyStationContext context
+ * @param user_data Pointer to TileArea context
+ * @tparam T the type of station to look for
  */
+template <class T>
 static bool AddNearbyStation(TileIndex tile, void *user_data)
 {
-	FindNearbyStationContext *ctx = (FindNearbyStationContext *)user_data;
+	TileArea *ctx = (TileArea *)user_data;
 
 	/* First check if there were deleted stations here */
 	for (uint i = 0; i < _deleted_stations_nearby.Length(); i++) {
@@ -1642,7 +1638,11 @@ static bool AddNearbyStation(TileIndex tile, void *user_data)
 	if (!IsTileType(tile, MP_STATION)) return false;
 
 	StationID sid = GetStationIndex(tile);
-	Station *st = Station::Get(sid);
+
+	/* This station is (likely) a waypoint */
+	if (!T::IsValidID(sid)) return false;
+
+	T *st = T::Get(sid);
 	if (st->owner != _local_company || _stations_nearby_list.Contains(sid)) return false;
 
 	if (st->rect.BeforeAddRect(ctx->tile, ctx->w, ctx->h, StationRect::ADD_TEST)) {
@@ -1661,28 +1661,27 @@ static bool AddNearbyStation(TileIndex tile, void *user_data)
  * @param h Height of the to-be-built station
  * @param distant_join Search for adjacent stations (false) or stations fully
  *                     within station spread
+ * @tparam T the type of station to look for
  **/
-static const Station *FindStationsNearby(TileIndex tile, int w, int h, bool distant_join)
+template <class T>
+static const T *FindStationsNearby(TileArea ta, bool distant_join)
 {
-	FindNearbyStationContext ctx;
-	ctx.tile = tile;
-	ctx.w = w;
-	ctx.h = h;
+	TileArea ctx = ta;
 
 	_stations_nearby_list.Clear();
 	_deleted_stations_nearby.Clear();
 
 	/* Check the inside, to return, if we sit on another station */
-	BEGIN_TILE_LOOP(t, w, h, tile)
-		if (t < MapSize() && IsTileType(t, MP_STATION)) return Station::GetByTile(t);
-	END_TILE_LOOP(t, w, h, tile)
+	TILE_LOOP(t, ta.w, ta.h, ta.tile) {
+		if (t < MapSize() && IsTileType(t, MP_STATION) && T::IsValidID(GetStationIndex(t))) return T::GetByTile(t);
+	}
 
 	/* Look for deleted stations */
-	const Station *st;
-	FOR_ALL_STATIONS(st) {
-		if (st->facilities == 0 && st->owner == _local_company) {
+	const BaseStation *st;
+	FOR_ALL_BASE_STATIONS(st) {
+		if (T::IsExpected(st) && !st->IsInUse() && st->owner == _local_company) {
 			/* Include only within station spread (yes, it is strictly less than) */
-			if (max(DistanceMax(tile, st->xy), DistanceMax(TILE_ADDXY(tile, w - 1, h - 1), st->xy)) < _settings_game.station.station_spread) {
+			if (max(DistanceMax(ta.tile, st->xy), DistanceMax(TILE_ADDXY(ta.tile, ta.w - 1, ta.h - 1), st->xy)) < _settings_game.station.station_spread) {
 				TileAndStation *ts = _deleted_stations_nearby.Append();
 				ts->tile = st->xy;
 				ts->station = st->index;
@@ -1690,7 +1689,7 @@ static const Station *FindStationsNearby(TileIndex tile, int w, int h, bool dist
 				/* Add the station when it's within where we're going to build */
 				if (IsInsideBS(TileX(st->xy), TileX(ctx.tile), ctx.w) &&
 						IsInsideBS(TileY(st->xy), TileY(ctx.tile), ctx.h)) {
-					AddNearbyStation(st->xy, &ctx);
+					AddNearbyStation<T>(st->xy, &ctx);
 				}
 			}
 		}
@@ -1699,11 +1698,11 @@ static const Station *FindStationsNearby(TileIndex tile, int w, int h, bool dist
 	/* Only search tiles where we have a chance to stay within the station spread.
 	 * The complete check needs to be done in the callback as we don't know the
 	 * extent of the found station, yet. */
-	if (distant_join && min(w, h) >= _settings_game.station.station_spread) return NULL;
-	uint max_dist = distant_join ? _settings_game.station.station_spread - min(w, h) : 1;
+	if (distant_join && min(ta.w, ta.h) >= _settings_game.station.station_spread) return NULL;
+	uint max_dist = distant_join ? _settings_game.station.station_spread - min(ta.w, ta.h) : 1;
 
-	tile = TILE_ADD(ctx.tile, TileOffsByDir(DIR_N));
-	CircularTileSearch(&tile, max_dist, w, h, AddNearbyStation, &ctx);
+	TileIndex tile = TILE_ADD(ctx.tile, TileOffsByDir(DIR_N));
+	CircularTileSearch(&tile, max_dist, ta.w, ta.h, AddNearbyStation<T>, &ctx);
 
 	return NULL;
 }
@@ -1739,24 +1738,26 @@ static const NWidgetPart _nested_select_station_widgets[] = {
 	EndContainer(),
 };
 
+/**
+ * Window for selecting stations/waypoints to (distant) join to.
+ * @tparam T The type of station to join with
+ */
+template <class T>
 struct SelectStationWindow : Window {
 	CommandContainer select_station_cmd; ///< Command to build new station
-	TileIndex tile; ///< Base tile of new station
-	int size_x;     ///< Size in x direction of new station
-	int size_y;     ///< Size in y direction of new station
+	TileArea area; ///< Location of new station
 
-	SelectStationWindow(const WindowDesc *desc, CommandContainer cmd, int w, int h) :
+	SelectStationWindow(const WindowDesc *desc, CommandContainer cmd, TileArea ta) :
 		Window(desc, 0),
 		select_station_cmd(cmd),
-		tile(cmd.tile),
-		size_x(w),
-		size_y(h)
+		area(ta)
 	{
 		this->vscroll.cap = 6;
 		this->resize.step_height = 10;
 
-		FindStationsNearby(this->tile, this->size_x, this->size_y, true);
+		FindStationsNearby<T>(this->area, true);
 
+		this->widget[JSW_WIDGET_CAPTION].data = T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_SELECT_WAYPOINT_TO_JOIN : STR_SELECT_STATION_TO_JOIN;
 		this->FindWindowPlacementAndResize(desc);
 	}
 
@@ -1768,7 +1769,7 @@ struct SelectStationWindow : Window {
 
 		uint y = 17;
 		if (this->vscroll.pos == 0) {
-			DrawString(3, this->widget[JSW_PANEL].right - 2, y, STR_CREATE_SPLITTED_STATION);
+			DrawString(3, this->widget[JSW_PANEL].right - 2, y, T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_CREATE_SPLITTED_WAYPOINT : STR_CREATE_SPLITTED_STATION);
 			y += 10;
 		}
 
@@ -1776,10 +1777,10 @@ struct SelectStationWindow : Window {
 			/* Don't draw anything if it extends past the end of the window. */
 			if (i - this->vscroll.pos >= this->vscroll.cap) break;
 
-			const Station *st = Station::Get(_stations_nearby_list[i - 1]);
+			const T *st = T::Get(_stations_nearby_list[i - 1]);
 			SetDParam(0, st->index);
 			SetDParam(1, st->facilities);
-			DrawString(3, this->widget[JSW_PANEL].right - 2, y, STR_STATION_LIST_STATION);
+			DrawString(3, this->widget[JSW_PANEL].right - 2, y, T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_STATION_LIST_WAYPOINT : STR_STATION_LIST_STATION);
 		}
 	}
 
@@ -1819,7 +1820,7 @@ struct SelectStationWindow : Window {
 
 	virtual void OnInvalidateData(int data)
 	{
-		FindStationsNearby(this->tile, this->size_x, this->size_y, true);
+		FindStationsNearby<T>(this->area, true);
 		this->SetDirty();
 	}
 };
@@ -1837,9 +1838,11 @@ static const WindowDesc _select_station_desc(
  * @param cmd Command to build the station.
  * @param w Width of the to-be-built station
  * @param h Height of the to-be-built station
+ * @tparam T the type of station
  * @return whether we need to show the station selection window.
  */
-static bool StationJoinerNeeded(CommandContainer cmd, int w, int h)
+template <class T>
+static bool StationJoinerNeeded(CommandContainer cmd, TileArea ta)
 {
 	/* Only show selection if distant join is enabled in the settings */
 	if (!_settings_game.station.distant_join_stations) return false;
@@ -1864,23 +1867,44 @@ static bool StationJoinerNeeded(CommandContainer cmd, int w, int h)
 	/* Test for adjacent station or station below selection.
 	 * If adjacent-stations is disabled and we are building next to a station, do not show the selection window.
 	 * but join the other station immediatelly. */
-	const Station *st = FindStationsNearby(cmd.tile, w, h, false);
+	const T *st = FindStationsNearby<T>(ta, false);
 	return st == NULL && (_settings_game.station.adjacent_stations || _stations_nearby_list.Length() == 0);
 }
 
 /**
  * Show the station selection window when needed. If not, build the station.
  * @param cmd Command to build the station.
- * @param w Width of the to-be-built station
- * @param h Height of the to-be-built station
+ * @param ta Area to build the station in
+ * @tparam the class to find stations for
  */
-void ShowSelectStationIfNeeded(CommandContainer cmd, int w, int h)
+template <class T>
+void ShowSelectBaseStationIfNeeded(CommandContainer cmd, TileArea ta)
 {
-	if (StationJoinerNeeded(cmd, w, h)) {
+	if (StationJoinerNeeded<T>(cmd, ta)) {
 		if (!_settings_client.gui.persistent_buildingtools) ResetObjectToPlace();
 		if (BringWindowToFrontById(WC_SELECT_STATION, 0)) return;
-		new SelectStationWindow(&_select_station_desc, cmd, w, h);
+		new SelectStationWindow<T>(&_select_station_desc, cmd, ta);
 	} else {
 		DoCommandP(&cmd);
 	}
+}
+
+/**
+ * Show the station selection window when needed. If not, build the station.
+ * @param cmd Command to build the station.
+ * @param ta Area to build the station in
+ */
+void ShowSelectStationIfNeeded(CommandContainer cmd, TileArea ta)
+{
+	ShowSelectBaseStationIfNeeded<Station>(cmd, ta);
+}
+
+/**
+ * Show the waypoint selection window when needed. If not, build the waypoint.
+ * @param cmd Command to build the waypoint.
+ * @param ta Area to build the waypoint in
+ */
+void ShowSelectWaypointIfNeeded(CommandContainer cmd, TileArea ta)
+{
+	ShowSelectBaseStationIfNeeded<Waypoint>(cmd, ta);
 }

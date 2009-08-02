@@ -35,8 +35,8 @@
 #include "table/strings.h"
 #include "table/control_codes.h"
 
-DynamicLanguages _dynlang;
-uint64 _decode_parameters[20];
+DynamicLanguages _dynlang;     ///< Language information of the program.
+uint64 _decode_parameters[20]; ///< Global array of string parameters. To access, use #SetDParam.
 
 static char *StationGetSpecialString(char *buff, int x, const char *last);
 static char *GetSpecialTownNameString(char *buff, int ind, uint32 seed, const char *last);
@@ -142,10 +142,7 @@ static char *GetStringWithArgs(char *buffr, uint string, int64 *argv, const char
 	}
 
 	if (index >= _langtab_num[tab]) {
-		error(
-			"String 0x%X is invalid. "
-			"Probably because an old version of the .lng file.\n", string
-		);
+		error("String 0x%X is invalid. You are probably using an old version of the .lng file.\n", string);
 	}
 
 	return FormatString(buffr, GetStringPtr(GB(string, 0, 16)), argv, GB(string, 24, 8), last);
@@ -174,6 +171,10 @@ void SetDParamStr(uint n, const char *str)
 	SetDParam(n, (uint64)(size_t)str);
 }
 
+/**
+ * Shift the string parameters in the global string parameter array by \a amount positions, making room at the beginning.
+ * @param amount Number of positions to shift.
+ */
 void InjectDParam(uint amount)
 {
 	assert((uint)amount < lengthof(_decode_parameters));
@@ -1247,8 +1248,7 @@ static char *GetSpecialNameString(char *buff, int ind, int64 *argv, const char *
 		return strecpy(buff, GetScreenshotFormatDesc(i), last);
 	}
 
-	assert(0);
-	return NULL;
+	NOT_REACHED();
 }
 
 #ifdef ENABLE_NETWORK
