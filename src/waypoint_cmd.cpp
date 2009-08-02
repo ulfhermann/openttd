@@ -34,6 +34,8 @@ void Waypoint::UpdateVirtCoord()
 	Point pt = RemapCoords2(TileX(this->xy) * TILE_SIZE, TileY(this->xy) * TILE_SIZE);
 	SetDParam(0, this->index);
 	this->sign.UpdatePosition(pt.x, pt.y - 0x20, STR_WAYPOINT_VIEWPORT);
+	/* Recenter viewport */
+	InvalidateWindowData(WC_WAYPOINT_VIEW, this->index);
 }
 
 /**
@@ -44,7 +46,7 @@ void MakeDefaultWaypointName(Waypoint *wp)
 {
 	uint32 used = 0; // bitmap of used waypoint numbers, sliding window with 'next' as base
 	uint32 next = 0; // first waypoint number in the bitmap
-	WaypointID idx = 0; // index where we will stop
+	StationID idx = 0; // index where we will stop
 
 	wp->town = ClosestTownFromTile(wp->xy, UINT_MAX);
 
@@ -58,7 +60,7 @@ void MakeDefaultWaypointName(Waypoint *wp)
 	 * If it wasn't using 'used' and 'idx', it would just search for increasing 'next',
 	 * but this way it is faster */
 
-	WaypointID cid = 0; // current index, goes to Waypoint::GetPoolSize()-1, then wraps to 0
+	StationID cid = 0; // current index, goes to Waypoint::GetPoolSize()-1, then wraps to 0
 	do {
 		Waypoint *lwp = Waypoint::GetIfValid(cid);
 
@@ -107,7 +109,7 @@ static Waypoint *FindDeletedWaypointCloseTo(TileIndex tile, StringID str)
 	uint thres = 8;
 
 	FOR_ALL_WAYPOINTS(wp) {
-		if ((wp->facilities & ~FACIL_WAYPOINT) == 0 && wp->string_id == str && (wp->owner == _current_company || wp->owner == OWNER_NONE)) {
+		if (!wp->IsInUse() && wp->string_id == str && (wp->owner == _current_company || wp->owner == OWNER_NONE)) {
 			uint cur_dist = DistanceManhattan(tile, wp->xy);
 
 			if (cur_dist < thres) {
@@ -120,32 +122,54 @@ static Waypoint *FindDeletedWaypointCloseTo(TileIndex tile, StringID str)
 	return best;
 }
 
-/** Convert existing rail to waypoint. Eg build a waypoint station over
- * piece of rail
- * @param tile tile where waypoint will be built
- * @param flags type of operation
- * @param p1 graphics for waypoint type, 0 indicates standard graphics
- * @param p2 unused
- * @param text unused
- * @return cost of operation or error
- *
- * @todo When checking for the tile slope,
- * distingush between "Flat land required" and "land sloped in wrong direction"
+/**
+ * Get the axis for a new waypoint. This means that if it is a valid
+ * tile to build a waypoint on it returns a valid Axis, otherwise an
+ * invalid one.
+ * @param tile the tile to look at.
+ * @return the axis for the to-be-build waypoint.
  */
-CommandCost CmdBuildTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+Axis GetAxisForNewWaypoint(TileIndex tile)
 {
-	Axis axis;
+	/* The axis for rail waypoints is easy. */
+	if (IsRailWaypointTile(tile)) return GetRailStationAxis(tile);
 
-	/* if custom gfx are used, make sure it is within bounds */
-	if (p1 >= GetNumCustomStations(STAT_CLASS_WAYP)) return CMD_ERROR;
+	/* Non-plain rail type, no valid axis for waypoints. */
+	if (!IsTileType(tile, MP_RAILWAY) || GetRailTileType(tile) != RAIL_TILE_NORMAL) return INVALID_AXIS;
 
-	if (!IsTileType(tile, MP_RAILWAY) ||
-			GetRailTileType(tile) != RAIL_TILE_NORMAL || (
-				(axis = AXIS_X, GetTrackBits(tile) != TRACK_BIT_X) &&
-				(axis = AXIS_Y, GetTrackBits(tile) != TRACK_BIT_Y)
-			)) {
-		return_cmd_error(STR_ERROR_NO_SUITABLE_RAILROAD_TRACK);
+	switch (GetTrackBits(tile)) {
+		case TRACK_BIT_X: return AXIS_X;
+		case TRACK_BIT_Y: return AXIS_Y;
+		default:          return INVALID_AXIS;
 	}
+}
+
+CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
+
+/**
+ * Check whether the given tile is suitable for a waypoint.
+ * @param tile the tile to check for suitability
+ * @param axis the axis of the waypoint
+ */
+static CommandCost IsValidTileForWaypoint(TileIndex tile, Axis axis, StationID *waypoint)
+{
+	/* if waypoint is set, then we have special handling to allow building on top of already existing waypoints.
+	 * so waypoint points to INVALID_STATION if we can build on any waypoint.
+	 * Or it points to a waypoint if we're only allowed to build on exactly that waypoint. */
+	if (waypoint != NULL && IsTileType(tile, MP_STATION)) {
+		if (!IsRailWaypoint(tile)) {
+			return ClearTile_Station(tile, DC_AUTO); // get error message
+		} else {
+			StationID wp = GetStationIndex(tile);
+			if (*waypoint == INVALID_STATION) {
+				*waypoint = wp;
+			} else if (*waypoint != wp) {
+				return_cmd_error(STR_ERROR_WAYPOINT_ADJOINS_MORE_THAN_ONE_EXISTING);
+			}
+		}
+	}
+
+	if (GetAxisForNewWaypoint(tile) != axis) return_cmd_error(STR_ERROR_NO_SUITABLE_RAILROAD_TRACK);
 
 	Owner owner = GetTileOwner(tile);
 	if (!CheckOwnership(owner)) return CMD_ERROR;
@@ -159,115 +183,139 @@ CommandCost CmdBuildTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1
 
 	if (MayHaveBridgeAbove(tile) && IsBridgeAbove(tile)) return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 
+	return CommandCost();
+}
+
+extern void GetStationLayout(byte *layout, int numtracks, int plat_len, const StationSpec *statspec);
+extern CommandCost FindJoiningWaypoint(StationID existing_station, StationID station_to_join, bool adjacent, TileArea ta, Waypoint **wp);
+extern bool CanExpandRailStation(const BaseStation *st, TileArea &new_ta, Axis axis);
+
+/** Convert existing rail to waypoint. Eg build a waypoint station over
+ * piece of rail
+ * @param start_tile northern most tile where waypoint will be built
+ * @param flags type of operation
+ * @param p1 various bitstuffed elements
+ * - p1 = (bit  4)    - orientation (Axis)
+ * - p1 = (bit  8-15) - width of waypoint
+ * - p1 = (bit 16-23) - height of waypoint
+ * - p1 = (bit 24)    - allow waypoints directly adjacent to other waypoints.
+ * @param p2 various bitstuffed elements
+ * - p2 = (bit  0- 7) - custom station class
+ * - p2 = (bit  8-15) - custom station id
+ * @param text unused
+ * @return cost of operation or error
+ */
+CommandCost CmdBuildRailWaypoint(TileIndex start_tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	/* Unpack parameters */
+	Axis axis      = (Axis)GB(p1,  4, 1);
+	byte width     = GB(p1,  8, 8);
+	byte height    = GB(p1, 16, 8);
+	bool adjacent  = HasBit(p1, 24);
+
+	StationClassID spec_class = (StationClassID)GB(p2, 0, 8);
+	byte spec_index           = GB(p2, 8, 8);
+	StationID station_to_join = GB(p2, 16, 16);
+
+	/* Check if the given station class is valid */
+	if (spec_class != STAT_CLASS_WAYP) return CMD_ERROR;
+	if (spec_index >= GetNumCustomStations(spec_class)) return CMD_ERROR;
+
+	/* The number of parts to build */
+	byte count = axis == AXIS_X ? height : width;
+
+	if ((axis == AXIS_X ? width : height) != 1) return CMD_ERROR;
+	if (count == 0 || count > _settings_game.station.station_spread) return CMD_ERROR;
+
+	bool reuse = (station_to_join != NEW_STATION);
+	if (!reuse) station_to_join = INVALID_STATION;
+	bool distant_join = (station_to_join != INVALID_STATION);
+
+	if (distant_join && (!_settings_game.station.distant_join_stations || !Waypoint::IsValidID(station_to_join))) return CMD_ERROR;
+
+	/* Make sure the area below consists of clear tiles. (OR tiles belonging to a certain rail station) */
+	StationID est = INVALID_STATION;
+
+	/* Check whether the tiles we're building on are valid rail or not. */
+	TileIndexDiff offset = TileOffsByDiagDir(AxisToDiagDir(OtherAxis(axis)));
+	for (int i = 0; i < count; i++) {
+		TileIndex tile = start_tile + i * offset;
+		CommandCost ret = IsValidTileForWaypoint(tile, axis, _settings_game.station.nonuniform_stations ? &est : NULL);
+		if (ret.Failed()) return ret;
+	}
+
+	Waypoint *wp = NULL;
+	TileArea new_location(TileArea(start_tile, width, height));
+	CommandCost ret = FindJoiningWaypoint(est, station_to_join, adjacent, new_location, &wp);
+	if (ret.Failed()) return ret;
+
 	/* Check if there is an already existing, deleted, waypoint close to us that we can reuse. */
-	Waypoint *wp = FindDeletedWaypointCloseTo(tile, STR_SV_STNAME_WAYPOINT);
-	if (wp == NULL && !Waypoint::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_STATIONS_LOADING);
+	TileIndex center_tile = start_tile + (count / 2) * offset;
+	if (wp == NULL && reuse) wp = FindDeletedWaypointCloseTo(center_tile, STR_SV_STNAME_WAYPOINT);
+
+	if (wp != NULL) {
+		/* Reuse an existing station. */
+		if (wp->owner != _current_company) return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_WAYPOINT);
+
+		/* check if we want to expanding an already existing station? */
+		if (wp->train_station.tile != INVALID_TILE && !CanExpandRailStation(wp, new_location, axis)) return CMD_ERROR;
+
+		if (!wp->rect.BeforeAddRect(start_tile, width, height, StationRect::ADD_TEST)) return CMD_ERROR;
+	} else {
+		/* allocate and initialize new station */
+		if (!Waypoint::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_STATIONS_LOADING);
+	}
 
 	if (flags & DC_EXEC) {
 		if (wp == NULL) {
-			wp = new Waypoint(tile);
-		} else {
+			wp = new Waypoint(start_tile);
+		} else if (!wp->IsInUse()) {
 			/* Move existing (recently deleted) waypoint to the new location */
-
-			/* First we update the destination for all vehicles that
-			 * have the old waypoint in their orders. */
-			Vehicle *v;
-			FOR_ALL_TRAINS(v) {
-				if (v->First() == v && v->current_order.IsType(OT_GOTO_WAYPOINT) &&
-						v->dest_tile == wp->xy) {
-					v->dest_tile = tile;
-				}
-			}
-
-			wp->xy = tile;
-			InvalidateWindowData(WC_WAYPOINT_VIEW, wp->index);
+			wp->xy = start_tile;
 		}
-		wp->owner = owner;
+		wp->owner = GetTileOwner(start_tile);
 
-		bool reserved = HasBit(GetRailReservationTrackBits(tile), AxisToTrack(axis));
-		MakeRailWaypoint(tile, owner, wp->index, axis, 0, GetRailType(tile));
-		SetRailwayStationReservation(tile, reserved);
-		MarkTileDirtyByTile(tile);
-
-		SetCustomStationSpecIndex(tile, AllocateSpecToStation(GetCustomStationSpec(STAT_CLASS_WAYP, p1), wp, true));
+		wp->rect.BeforeAddRect(start_tile, width, height, StationRect::ADD_TRY);
 
 		wp->delete_ctr = 0;
 		wp->facilities |= FACIL_TRAIN;
 		wp->build_date = _date;
 		wp->string_id = STR_SV_STNAME_WAYPOINT;
+		wp->train_station = new_location;
 
 		if (wp->town == NULL) MakeDefaultWaypointName(wp);
 
 		wp->UpdateVirtCoord();
-		YapfNotifyTrackLayoutChange(tile, AxisToTrack(axis));
-	}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, _price.build_train_depot);
-}
-
-/**
- * Remove a waypoint
- * @param tile from which to remove waypoint
- * @param flags type of operation
- * @param justremove will indicate if it is removed from rail or if rails are removed too
- * @pre IsRailWaypointTile(tile)
- * @return cost of operation or error
- */
-CommandCost RemoveTrainWaypoint(TileIndex tile, DoCommandFlag flags, bool justremove)
-{
-	/* Make sure it's a waypoint */
-	if (!IsRailWaypointTile(tile) ||
-			(!CheckTileOwnership(tile) && _current_company != OWNER_WATER) ||
-			!EnsureNoVehicleOnGround(tile)) {
-		return CMD_ERROR;
-	}
-
-	if (flags & DC_EXEC) {
-		Track track = GetRailStationTrack(tile);
-		Waypoint *wp = Waypoint::GetByTile(tile);
-
-		wp->sign.MarkDirty();
-		wp->facilities &= ~FACIL_TRAIN;
-
-		Train *v = NULL;
-		uint specindex = GetCustomStationSpecIndex(tile);
-		if (justremove) {
-			TrackBits tracks = GetRailStationTrackBits(tile);
-			bool reserved = HasStationReservation(tile);
-			MakeRailNormal(tile, wp->owner, tracks, GetRailType(tile));
-			if (reserved) SetTrackReservation(tile, tracks);
-			MarkTileDirtyByTile(tile);
+		const StationSpec *spec = GetCustomStationSpec(spec_class, spec_index);
+		byte *layout_ptr = AllocaM(byte, count);
+		if (spec == NULL) {
+			/* The layout must be 0 for the 'normal' waypoints by design. */
+			memset(layout_ptr, 0, count);
 		} else {
-			if (HasStationReservation(tile)) {
-				v = GetTrainForReservation(tile, track);
-				if (v != NULL) FreeTrainTrackReservation(v);
-			}
-			DoClearSquare(tile);
-			AddTrackToSignalBuffer(tile, track, wp->owner);
+			/* But for NewGRF waypoints we like to have their style. */
+			GetStationLayout(layout_ptr, count, 1, spec);
 		}
-		YapfNotifyTrackLayoutChange(tile, track);
-		if (v != NULL) TryPathReserve(v, true);
+		byte map_spec_index = AllocateSpecToStation(spec, wp, true);
 
-		DeallocateSpecFromStation(wp, specindex);
+		for (int i = 0; i < count; i++) {
+			TileIndex tile = start_tile + i * offset;
+			byte old_specindex = IsTileType(tile, MP_STATION) ? GetCustomStationSpecIndex(tile) : 0;
+			bool reserved = IsTileType(tile, MP_RAILWAY) ?
+					HasBit(GetRailReservationTrackBits(tile), AxisToTrack(axis)) :
+					HasStationReservation(tile);
+			MakeRailWaypoint(tile, wp->owner, wp->index, axis, layout_ptr[i], GetRailType(tile));
+			SetCustomStationSpecIndex(tile, map_spec_index);
+			SetRailStationReservation(tile, reserved);
+			MarkTileDirtyByTile(tile);
+
+			DeallocateSpecFromStation(wp, old_specindex);
+			YapfNotifyTrackLayoutChange(tile, AxisToTrack(axis));
+		}
 	}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, _price.remove_train_depot);
+	return CommandCost(EXPENSES_CONSTRUCTION, count * _price.build_train_depot);
 }
-
-/**
- * Delete a waypoint
- * @param tile tile where waypoint is to be deleted
- * @param flags type of operation
- * @param p1 unused
- * @param p2 unused
- * @param text unused
- * @return cost of operation or error
- */
-CommandCost CmdRemoveTrainWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	return RemoveTrainWaypoint(tile, flags, true);
-}
-
 
 /** Build a buoy.
  * @param tile tile where to place the bouy
@@ -296,6 +344,7 @@ CommandCost CmdBuildBuoy(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			wp->xy = tile;
 			InvalidateWindowData(WC_WAYPOINT_VIEW, wp->index);
 		}
+		wp->rect.BeforeAddTile(tile, StationRect::ADD_TRY);
 
 		wp->string_id = STR_SV_STNAME_BUOY;
 
@@ -344,6 +393,8 @@ CommandCost RemoveBuoy(TileIndex tile, DoCommandFlag flags)
 		MakeWaterKeepingClass(tile, GetTileOwner(tile));
 		MarkTileDirtyByTile(tile);
 
+		wp->rect.AfterRemoveTile(wp, tile);
+
 		wp->UpdateVirtCoord();
 		wp->delete_ctr = 0;
 	}
@@ -380,7 +431,7 @@ CommandCost CmdRenameWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 	bool reset = StrEmpty(text);
 
 	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_WAYPOINT_NAME_BYTES) return CMD_ERROR;
+		if (strlen(text) >= MAX_LENGTH_STATION_NAME_BYTES) return CMD_ERROR;
 		if (!IsUniqueWaypointName(text)) return_cmd_error(STR_NAME_MUST_BE_UNIQUE);
 	}
 

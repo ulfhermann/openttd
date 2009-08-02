@@ -140,29 +140,6 @@ struct GoodsEntry {
 	FlowStat GetSumFlowVia(StationID via) const;
 };
 
-/** StationRect - used to track station spread out rectangle - cheaper than scanning whole map */
-struct StationRect : public Rect {
-	enum StationRectMode
-	{
-		ADD_TEST = 0,
-		ADD_TRY,
-		ADD_FORCE
-	};
-
-	StationRect();
-	void MakeEmpty();
-	bool PtInExtendedRect(int x, int y, int distance = 0) const;
-	bool IsEmpty() const;
-	bool BeforeAddTile(TileIndex tile, StationRectMode mode);
-	bool BeforeAddRect(TileIndex tile, int w, int h, StationRectMode mode);
-	bool AfterRemoveTile(Station *st, TileIndex tile);
-	bool AfterRemoveRect(Station *st, TileIndex tile, int w, int h);
-
-	static bool ScanForStationTiles(StationID st_id, int left_a, int top_a, int right_a, int bottom_a);
-
-	StationRect& operator = (Rect src);
-};
-
 
 typedef SmallVector<Industry *, 2> IndustryVector;
 
@@ -182,11 +159,10 @@ public:
 		return GetAirport(airport_type);
 	}
 
-	RoadStop *bus_stops;
-	RoadStop *truck_stops;
-	TileIndex train_tile;
-	TileIndex airport_tile;
-	TileIndex dock_tile;
+	RoadStop *bus_stops;    ///< All the road stops
+	RoadStop *truck_stops;  ///< All the truck stops
+	TileIndex airport_tile; ///< The location of the airport
+	TileIndex dock_tile;    ///< The location of the dock
 
 	IndustryType indtype;   ///< Industry type to get the name from
 
@@ -196,9 +172,6 @@ public:
 	byte time_since_unload;
 	byte airport_type;
 
-	/* trainstation width/height */
-	byte trainst_w, trainst_h;
-
 	uint64 airport_flags;   ///< stores which blocks on the airport are taken. was 16 bit earlier on, then 32
 
 	byte last_vehicle_type;
@@ -206,8 +179,6 @@ public:
 	GoodsEntry goods[NUM_CARGO];  ///< Goods at this station
 
 	IndustryVector industries_near; ///< Cached list of industries near the station that can accept cargo, @see DeliverGoodsToIndustry()
-
-	StationRect rect; ///< Station spread out rectangle (not saved) maintained by StationRect_xxx() functions
 
 	Station(TileIndex tile = INVALID_TILE);
 	~Station();
@@ -223,8 +194,8 @@ public:
 
 	void UpdateVirtCoord();
 
-	uint GetPlatformLength(TileIndex tile, DiagDirection dir) const;
-	uint GetPlatformLength(TileIndex tile) const;
+	/* virtual */ uint GetPlatformLength(TileIndex tile, DiagDirection dir) const;
+	/* virtual */ uint GetPlatformLength(TileIndex tile) const;
 	void RecomputeIndustriesNear();
 	static void RecomputeIndustriesNearForAll();
 
@@ -232,7 +203,7 @@ public:
 
 	/* virtual */ FORCEINLINE bool TileBelongsToRailStation(TileIndex tile) const
 	{
-		return IsRailwayStationTile(tile) && GetStationIndex(tile) == this->index;
+		return IsRailStationTile(tile) && GetStationIndex(tile) == this->index;
 	}
 
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;

@@ -7,6 +7,7 @@
 ##digitsepcur .
 ##winlangid 0x041f
 ##grflangid 0x3e
+##case tamlanan
 
 #
 
@@ -154,8 +155,6 @@ STR_ABBREV_PLASTIC                                              :{TINYFONT}PL
 STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}İÇ
 STR_ABBREV_NONE                                                 :{TINYFONT}YOK
 STR_ABBREV_ALL                                                  :{TINYFONT}HEPSI
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
-STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SMALLMAP_CAPTION                                            :{WHITE}Harita - {STRING}
 STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Seçenekler
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Mesaj
@@ -167,17 +166,11 @@ STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Orijinal
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD sürüm {REV}
 STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 OpenTTD takımı
 
-STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
-STR_SILVER_CROSS                                                :{SILVER}{CROSS}
 STR_QUIT_CAPTION                                                :{WHITE}Çıkış
 STR_YES                                                         :{BLACK}Evet
 STR_NO                                                          :{BLACK}Hayır
 STR_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD                       :{YELLOW}Oyundan çıkıp {STRING} sisteminize dönmek istediğinizden emin misiniz?
-STR_BLACK_1                                                     :{BLACK}1
-STR_BLACK_2                                                     :{BLACK}2
-STR_BLACK_3                                                     :{BLACK}3
-STR_BLACK_4                                                     :{BLACK}4
-STR_BLACK_5                                                     :{BLACK}5
+
 STR_JUST_NOTHING                                                :Hiçbir şey
 STR_COLOUR_DARK_BLUE                                            :Koyu Mavi
 STR_COLOUR_PALE_GREEN                                           :Soluk Yeşil
@@ -196,8 +189,6 @@ STR_COLOUR_BROWN                                                :Kahverengi
 STR_COLOUR_GREY                                                 :Gri
 STR_COLOUR_WHITE                                                :Beyaz
 STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}Oyunda çok fazla araç var
-STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
-STR_RED_COMMA                                                   :{RED}{COMMA}
 STR_BUTTON_LOCATION                                             :{BLACK}Göster
 STR_SMALLMAP_TYPE_CONTOURS                                      :Dış Hatlar
 STR_SMALLMAP_TYPE_VEHICLES                                      :Araçlar
@@ -323,12 +314,13 @@ STR_SORT_CRITERIA_TIP                                           :{BLACK}Sıralam
 STR_FILTER_CRITERIA_TIP                                         :{BLACK}Süzme kriterini seçin
 STR_SORT_BY                                                     :{BLACK}Sırala
 
+### The first three are also used as 'Sort by' buttons, the rest only in dropdowns
 STR_SORT_BY_POPULATION                                          :{BLACK}Nüfus
+STR_SORT_BY_NAME                                                :{BLACK}İsim
+STR_SORT_BY_DATE                                                :{BLACK}Tarih
 STR_SORT_BY_PRODUCTION                                          :Üretim
 STR_SORT_BY_TYPE                                                :Tür
 STR_SORT_BY_TRANSPORTED                                         :Taşınan
-STR_SORT_BY_NAME                                                :{BLACK}İsim
-STR_SORT_BY_DATE                                                :{BLACK}Tarih
 STR_SORT_BY_NUMBER                                              :Numara
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Geçen seneki kâr
 STR_SORT_BY_PROFIT_THIS_YEAR                                    :Bu seneki kâr
@@ -351,6 +343,7 @@ STR_SORT_BY_INTRO_DATE                                          :Piyasaya Giriş
 STR_SORT_BY_RUNNING_COST                                        :Bakım Gideri
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Güç/Bakım Gideri
 STR_SORT_BY_CARGO_CAPACITY                                      :Kapasite
+
 STR_NO_WAITING_CARGO                                            :{BLACK}Hiç kargo yok
 STR_SELECT_ALL_FACILITIES                                       :{BLACK}Tüm türleri seç
 STR_SELECT_ALL_TYPES                                            :{BLACK}Tüm kargo türlerini seç (hiç beklemeyenler dahil)
@@ -369,21 +362,6 @@ STR_SEND_TRAIN_TO_DEPOT                                         :Gara Gönder
 STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Garaja Gönder
 STR_SEND_SHIP_TO_DEPOT                                          :Tersaneye Gönder
 STR_SEND_AIRCRAFT_TO_HANGAR                                     :Hangara Gönder
-
-############ range for months starts
-STR_MONTH_ABBREV_JAN                                            :Oca
-STR_MONTH_ABBREV_FEB                                            :Şub
-STR_MONTH_ABBREV_MAR                                            :Mar
-STR_MONTH_ABBREV_APR                                            :Nis
-STR_MONTH_ABBREV_MAY                                            :May
-STR_MONTH_ABBREV_JUN                                            :Haz
-STR_MONTH_ABBREV_JUL                                            :Tem
-STR_MONTH_ABBREV_AUG                                            :Ağu
-STR_MONTH_ABBREV_SEP                                            :Eyl
-STR_MONTH_ABBREV_OCT                                            :Eki
-STR_MONTH_ABBREV_NOV                                            :Kas
-STR_MONTH_ABBREV_DEC                                            :Ara
-############ range for months ends
 
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
@@ -411,8 +389,6 @@ STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Havalima
 STR_TOOLBAR_TOOLTIP_PLANT_TREES_PLACE_SIGNS                     :{BLACK}Ağaç dik, tabela koy vs.
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Arazi bilgisi
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Seçenekler
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}Servis aralığı değiştirilemiyor...
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Pencereyi kapat
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Pencere başlığı - pencereyi hareket ettirmek için sürükle
@@ -459,7 +435,7 @@ STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Hiçbiri
 STR_VEHICLE_NAME_BUTTON                                         :{BLACK}İsim
 STR_VEHICLE_NAME_SMALL                                          :{BLACK}{TINYFONT}{VEHICLE}
 
-############ range for days starts
+############ range for days starts (also used for the place in the highscore window)
 STR_ORDINAL_NUMBER_1ST                                          :1
 STR_ORDINAL_NUMBER_2ND                                          :2
 STR_ORDINAL_NUMBER_3RD                                          :3
@@ -492,6 +468,34 @@ STR_ORDINAL_NUMBER_29TH                                         :29
 STR_ORDINAL_NUMBER_30TH                                         :30
 STR_ORDINAL_NUMBER_31ST                                         :31
 ############ range for days ends
+
+############ range for months starts
+STR_MONTH_ABBREV_JAN                                            :Oca
+STR_MONTH_ABBREV_FEB                                            :Şub
+STR_MONTH_ABBREV_MAR                                            :Mar
+STR_MONTH_ABBREV_APR                                            :Nis
+STR_MONTH_ABBREV_MAY                                            :May
+STR_MONTH_ABBREV_JUN                                            :Haz
+STR_MONTH_ABBREV_JUL                                            :Tem
+STR_MONTH_ABBREV_AUG                                            :Ağu
+STR_MONTH_ABBREV_SEP                                            :Eyl
+STR_MONTH_ABBREV_OCT                                            :Eki
+STR_MONTH_ABBREV_NOV                                            :Kas
+STR_MONTH_ABBREV_DEC                                            :Ara
+
+STR_MONTH_JAN                                                   :Ocak
+STR_MONTH_FEB                                                   :Subat
+STR_MONTH_MAR                                                   :Mart
+STR_MONTH_APR                                                   :Nisan
+STR_MONTH_MAY                                                   :Mayis
+STR_MONTH_JUN                                                   :Haziran
+STR_MONTH_JUL                                                   :Temmuz
+STR_MONTH_AUG                                                   :Ağustos
+STR_MONTH_SEP                                                   :Eylül
+STR_MONTH_OCT                                                   :Ekim
+STR_MONTH_NOV                                                   :Kasım
+STR_MONTH_DEC                                                   :Aralik
+############ range for months ends
 
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
@@ -582,12 +586,9 @@ STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESI
 STR_HIGHSCORE_STATS                                             :{BIGFONT}'{STRING}'   ({COMMA})
 STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS                           :{BLACK}{BIGFONT}{COMPANY} '{STRING}' ünvanını kazandı!
 STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS              :{WHITE}{BIGFONT}{PRESIDENTNAME} - {COMPANY} '{STRING}' ünvanını kazandı!
-STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Senaryo Düzenleyicisi
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Arazi Yapımı
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}yükseltme/alçaltma alanını arttır
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Yükseltme/alçaltma alanını arttır
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Rastgele harita yarat
@@ -669,9 +670,7 @@ STR_OFF                                                         :Kapalı
 STR_SUMMARY                                                     :Özet
 STR_FULL                                                        :Tam
 STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
-STR_BLACK_STRING                                                :{BLACK}{STRING}
 
-STR_JUST_CHECKMARK                                              :{CHECKMARK}
 ############ range for menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Seçenekler
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Zorluk Ayarları
@@ -680,8 +679,8 @@ STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Newgrf ayarlar�
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Şeffaflık seçenekleri
 STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Şehir isimlerini göster
 STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}İstasyon isimlerini göster
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Tabelaları göster
 STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Yolimlerini göster
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Tabelaları göster
 STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Tüm animasyonlar
 STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Tam detay
 STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Şeffaf binalar
@@ -718,22 +717,17 @@ STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW                                :{BLACK}Görün�
 STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT                             :{BLACK}Bu görünümü küresel görünüme yapıştır
 
 STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Para birimleri
-STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN                        :{BLACK}{SKIP}{STRING}
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Para birimi seçimi
 STR_GAME_OPTIONS_MEASURING_UNITS_FRAME                          :{BLACK}Ölçü Birimleri
-STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN                       :{BLACK}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN_TOOLTIP               :{BLACK}Ölçü birimi seçimi
 STR_GAME_OPTIONS_ROAD_VEHICLES_FRAME                            :{BLACK}Karayolu taşıtları
-STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN                         :{BLACK}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_TOOLTIP                 :{BLACK}Trafik akış yönünü seçin
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_LEFT                    :Soldan gidişli
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_RIGHT                   :Sağdan gidişli
 STR_GAME_OPTIONS_TOWN_NAMES_FRAME                               :{BLACK}Şehir isimleri
-STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN_TOOLTIP                    :{BLACK}Şehir isimleri stilini seçin
 
 STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}Otokaydet
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN                              :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP                      :{BLACK}Otokaydetme aralığını seçin
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :Kapalı
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :Her ay
@@ -775,9 +769,6 @@ STR_STATUSBAR_AUTOSAVE                                          :{RED}OTOKAYDET
 STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  KAYDEDiYOR  *  *
 STR_SAVE_STILL_IN_PROGRESS                                      :{WHITE}Kayıt işlemi sürüyor,{}lütfen bitene kadar bekleyin!
 STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}'Ezy Sokagi stili müzik' programını seç
-
-STR_BLACK_6                                                     :{BLACK}6
-STR_BLACK_7                                                     :{BLACK}7
 
 ############ start of townname region
 STR_TOWNNAME_ORIGINAL_ENGLISH                                   :İngilizce (Orjinal)
@@ -835,7 +826,6 @@ STR_CURR_EEK                                                    :Estonya Kronu (
 STR_CURR_CUSTOM                                                 :Özel...
 
 STR_OPTIONS_LANG                                                :{BLACK}Dil
-STR_OPTIONS_LANG_CBO                                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_LANG_TIP                                            :{BLACK}Görünen dili seçin
 
 STR_OPTIONS_FULLSCREEN                                          :{BLACK}Tam ekran
@@ -843,33 +833,17 @@ STR_OPTIONS_FULLSCREEN_TIP                                      :{BLACK}Tam ekra
 STR_FULLSCREEN_FAILED                                           :{WHITE}Tam ekran modu başarısız
 
 STR_OPTIONS_RES                                                 :{BLACK}Ekran Çözünürlüğü
-STR_OPTIONS_RES_CBO                                             :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_RES_TIP                                             :{BLACK}Kullanılacak ekran çözünürlüğünü seçin
 
 STR_OPTIONS_SCREENSHOT_FORMAT                                   :{BLACK}Ekran görüntüsü biçimi
-STR_OPTIONS_SCREENSHOT_FORMAT_CBO                               :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_SCREENSHOT_FORMAT_TIP                               :{BLACK}Kullanılacak ekran görüntüsü biçimini seçin
 
 STR_OPTIONS_BASE_GRF                                            :{BLACK}Temel grafik seti
-STR_OPTIONS_BASE_GRF_CBO                                        :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_BASE_GRF_TIP                                        :{BLACK}Kullanılacak temel grafik setini seçin
-STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{10:NUM} kayıp/bozuk dosya
+STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{NUM} kayıp/bozuk dosya
 STR_OPTIONS_BASE_GRF_DESCRIPTION_TIP                            :{BLACK}Temel grafik setiyle ilgili ilave bilgiler
 
 STR_AUTOSAVE_FAILED                                             :{WHITE}Otokayıt başarısız
-
-STR_MONTH_JAN                                                   :Ocak
-STR_MONTH_FEB                                                   :Subat
-STR_MONTH_MAR                                                   :Mart
-STR_MONTH_APR                                                   :Nisan
-STR_MONTH_MAY                                                   :Mayis
-STR_MONTH_JUN                                                   :Haziran
-STR_MONTH_JUL                                                   :Temmuz
-STR_MONTH_AUG                                                   :Ağustos
-STR_MONTH_SEP                                                   :Eylül
-STR_MONTH_OCT                                                   :Ekim
-STR_MONTH_NOV                                                   :Kasım
-STR_MONTH_DEC                                                   :Aralik
 
 STR_HEADING_FOR_STATION                                         :{LTBLUE}Gidiyor {STATION}
 STR_HEADING_FOR_STATION_VEL                                     :{LTBLUE}Gidiyor {STATION}, {VELOCITY}
@@ -884,8 +858,6 @@ STR_ITEMS                                                       :tane
 STR_CRATES                                                      :kasa
 STR_RES_OTHER                                                   :diğer
 STR_NOTHING                                                     :
-
-STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_CANT_SHARE_ORDER_LIST                                       :{WHITE}Talimat listesi paylasilamiyor...
 STR_CANT_COPY_ORDER_LIST                                        :{WHITE}Talimat listesi kopyalanamiyor...
@@ -1158,7 +1130,6 @@ STR_CONFIG_SETTING_MAP_Y                                        :{LTBLUE}Haritan
 
 ############ generic strings for settings
 STR_CONFIG_SETTING_DISABLED                                     :kapalı
-STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_CONFIG_SETTING_QUERY_CAPT                                   :{WHITE}Ayar değerini değiştir
 
 STR_TEMPERATE_LANDSCAPE                                         :Ilıman iklim
@@ -1194,8 +1165,8 @@ STR_LANDINFO_WAYPOINT                                           :Yerimi
 STR_WAYPOINT                                                    :{WHITE}Yerimi
 STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Yerimi türü seç
 
-STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
+STR_WAYPOINT_VIEWPORT                                           :{WAYPOINT}
+STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WAYPOINT}
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Yerimi adını değiştir
 
 STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Yerimi adı değiştirilemedi...
@@ -1614,8 +1585,11 @@ STR_RAILROAD_TRACK_WITH_COMBO_PBSSIGNALS                        :Karışık- ve 
 STR_RAILROAD_TRACK_WITH_COMBO_NOENTRYSIGNALS                    :Karışık- ve tek yön sinyalleri olan demiryolu
 STR_RAILROAD_TRACK_WITH_PBS_NOENTRYSIGNALS                      :Ön ve tek yön sinyalli ray
 STR_MUST_REMOVE_RAILWAY_STATION_FIRST                           :{WHITE}Önce tren istasyonu kaldırılmalı
+STR_MUST_REMOVE_RAILWAYPOINT_FIRST                              :{WHITE}Önce demiryolu yerimi kaldırılmalı
 STR_CREATE_SPLITTED_STATION                                     :{YELLOW}Ayrı bir istasyon inşa et
+STR_CREATE_SPLITTED_WAYPOINT                                    :{YELLOW}Ayrı bir yerimi yap
 STR_SELECT_STATION_TO_JOIN                                      :{BLACK}İstasyonu birleştir
+STR_SELECT_WAYPOINT_TO_JOIN                                     :{BLACK}Yerimini birleştir
 
 
 
@@ -1769,7 +1743,7 @@ STR_TOWN_DESCRIPTION_UNDER_CONSTRUCTION                         :{STRING} (inşa
 STR_TOWN_BUILDING_NAME_IGLOO_1                                  :Eskimo Evi
 STR_TOWN_BUILDING_NAME_TEPEES_1                                 :Çadır
 STR_TOWN_BUILDING_NAME_TEAPOT_HOUSE_1                           :Çaydanlık ev
-STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Domuz bankası
+STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :Kumbara
 
 ##id 0x2800
 STR_LANDSCAPING_MENU_LANDSCAPING                                :Arazi
@@ -1798,11 +1772,13 @@ STR_STATION_BUILD_NUMBER_OF_TRACKS                              :{BLACK}Ray say�
 STR_STATION_BUILD_PLATFORM_LENGTH                               :{BLACK}Platform uzunluğu
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Başka tren istasyonuna çok yakın
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Birden fazla istasyona bitişik
+STR_ERROR_WAYPOINT_ADJOINS_MORE_THAN_ONE_EXISTING               :{WHITE}Birden fazla mevcut yerimini birleştirir
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Haritada çok fazla istasyon var
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Çok fazla demiryolu istasyon parçası var
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Çok fazla durak var
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Çok fazla kamyon yükleme yeri var
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Başka bir istasyona çok yakın
+STR_ERROR_TOO_CLOSE_TO_ANOTHER_WAYPOINT                         :{WHITE}Diğer yerimine çok yakın
 STR_STATION_VIEW_CAPTION                                        :{WHITE}{STATION} {STATIONFEATURES}
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Önce tren istasyonu yıkılmalı
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Başka bir havalimanına çok yakın
@@ -1846,6 +1822,7 @@ STR_ERROR_MUST_DEMOLISH_PASSENGER_TRAM_STATION_FIRST            :{WHITE}Önce yo
 STR_ERROR_MUST_DEMOLISH_CARGO_TRAM_STATION_FIRST                :{WHITE}Önce yük tramvayı istasyonu kaldırılmalı
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} istasyonları
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
+STR_STATION_LIST_WAYPOINT                                       :{YELLOW}{WAYPOINT}
 STR_STATION_LIST_NONE                                           :{YELLOW}- Yok -
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Başka bir limana çok yakın
 STR_ERROR_MUST_DEMOLISH_DOCK_FIRST                              :{WHITE}Önce liman yıkılmalı
@@ -1857,6 +1834,8 @@ STR_STATION_BUILD_TRUCK_ORIENTATION_TOOLTIP                     :{BLACK}Kamyon d
 STR_STATION_BUILD_PASSENGER_TRAM_ORIENTATION_TOOLTIP            :{BLACK}Yolcu tramvayı istasyonu yönünü seçin
 STR_STATION_BUILD_CARGO_TRAM_ORIENTATION_TOOLTIP                :{BLACK}Yük tramvayı istasyonu yönünü seçin
 STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Durağın oldugu yere git
+STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Ana görünümü yerimi konumuna ortala
+STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Ana görünümü şamandıra konumuna ortala
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}İstasyonun reytinglerini göster
 STR_STATION_VIEW_RENAME_TOOLTIP                                 :{BLACK}İstasyonun ismini değiştir
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}İstenen kargoların listesini göster
@@ -1927,35 +1906,45 @@ STR_OBJECT_IN_THE_WAY                                           :{WHITE}yolda {S
 STR_INDUSTRY_VIEW_CAPTION                                       :{WHITE}{INDUSTRY}
 STR_INDUSTRY_NAME_COAL_MINE                                     :Kömür Madeni
 STR_INDUSTRY_NAME_POWER_STATION                                 :Elektrik Santrali
-STR_INDUSTRY_NAME_SAWMILL                                       :Kerestecisi
-STR_INDUSTRY_NAME_FOREST                                        :Ormanı
+STR_INDUSTRY_NAME_SAWMILL                                       :Keresteci
+STR_INDUSTRY_NAME_SAWMILL.tamlanan                              :Kerestecisi
+STR_INDUSTRY_NAME_FOREST                                        :Orman
+STR_INDUSTRY_NAME_FOREST.tamlanan                               :Ormanı
 STR_INDUSTRY_NAME_OIL_REFINERY                                  :Petrol Rafinerisi
 STR_INDUSTRY_NAME_OIL_RIG                                       :Petrol Platformu
-STR_INDUSTRY_NAME_FACTORY                                       :Fabrikası
+STR_INDUSTRY_NAME_FACTORY                                       :Fabrika
+STR_INDUSTRY_NAME_FACTORY.tamlanan                              :Fabrikası
 STR_INDUSTRY_NAME_PRINTING_WORKS                                :Basımevi
 STR_INDUSTRY_NAME_STEEL_MILL                                    :Çelik Fabrikası
-STR_INDUSTRY_NAME_FARM                                          :Çiftliği
+STR_INDUSTRY_NAME_FARM                                          :Çiftlik
+STR_INDUSTRY_NAME_FARM.tamlanan                                 :Çiftliği
 STR_INDUSTRY_NAME_COPPER_ORE_MINE                               :Bakır Madeni
 STR_INDUSTRY_NAME_OIL_WELLS                                     :Petrol Kuyuları
 STR_INDUSTRY_NAME_BANK                                          :Banka
+STR_INDUSTRY_NAME_BANK.tamlanan                                 :Bankası
 STR_INDUSTRY_NAME_FOOD_PROCESSING_PLANT                         :Yemek Fabrikası
 STR_INDUSTRY_NAME_PAPER_MILL                                    :Kağıt Fabrikası
 STR_INDUSTRY_NAME_GOLD_MINE                                     :Altın Madeni
-STR_INDUSTRY_NAME_BANK_TROPIC_ARCTIC                            :Bankası
+STR_INDUSTRY_NAME_BANK_TROPIC_ARCTIC                            :Banka
+STR_INDUSTRY_NAME_BANK_TROPIC_ARCTIC.tamlanan                   :Bankası
 STR_INDUSTRY_NAME_DIAMOND_MINE                                  :Elmas Madeni
 STR_INDUSTRY_NAME_IRON_ORE_MINE                                 :Demir Madeni
 STR_INDUSTRY_NAME_FRUIT_PLANTATION                              :Meyve Bahçesi
 STR_INDUSTRY_NAME_RUBBER_PLANTATION                             :Kauçuk Bahçesi
 STR_INDUSTRY_NAME_WATER_SUPPLY                                  :Su Kaynağı
 STR_INDUSTRY_NAME_WATER_TOWER                                   :Su Kulesi
-STR_INDUSTRY_NAME_FACTORY_2                                     :Fabrikası
-STR_INDUSTRY_NAME_FARM_2                                        :Çiftliği
-STR_INDUSTRY_NAME_LUMBER_MILL                                   :Oduncusu
+STR_INDUSTRY_NAME_FACTORY_2                                     :Fabrika
+STR_INDUSTRY_NAME_FACTORY_2.tamlanan                            :Fabrikası
+STR_INDUSTRY_NAME_FARM_2                                        :Çiftlik
+STR_INDUSTRY_NAME_FARM_2.tamlanan                               :Çiftliği
+STR_INDUSTRY_NAME_LUMBER_MILL                                   :Oduncu
+STR_INDUSTRY_NAME_LUMBER_MILL.tamlanan                          :Oduncusu
 STR_INDUSTRY_NAME_COTTON_CANDY_FOREST                           :Pamukhelva Ormanı
 STR_INDUSTRY_NAME_CANDY_FACTORY                                 :Tatlı Fabrikası
 STR_INDUSTRY_NAME_BATTERY_FARM                                  :Pil Çiftliği
 STR_INDUSTRY_NAME_COLA_WELLS                                    :Kola Kuyuları
-STR_INDUSTRY_NAME_TOY_SHOP                                      :Oyuncakçısı
+STR_INDUSTRY_NAME_TOY_SHOP                                      :Oyuncakçı
+STR_INDUSTRY_NAME_TOY_SHOP.tamlanan                             :Oyuncakçısı
 STR_INDUSTRY_NAME_TOY_FACTORY                                   :Oyuncak Fabrikası
 STR_INDUSTRY_NAME_PLASTIC_FOUNTAINS                             :Plastik Fıskiyesi
 STR_INDUSTRY_NAME_FIZZY_DRINK_FACTORY                           :İçecek Fabrikası
@@ -2124,8 +2113,6 @@ STR_NUM_LOW                                                     :Düşük
 STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :Yüksek
 STR_NUM_CUSTOM                                                  :Özel
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 STR_AI_SPEED_VERY_SLOW                                          :Çok Yavas
 STR_AI_SPEED_SLOW                                               :Yavas
 STR_AI_SPEED_MEDIUM                                             :Orta
@@ -2605,7 +2592,7 @@ STR_ORDER_GO_NON_STOP_VIA                                       :Durmadan üzeri
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[yakın uç]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[orta]
 STR_ORDER_STOP_LOCATION_FAR_END                                 :[uzak uç]
-STR_ORDER_TOGGLE_FULL_LOAD                                      :{BLACK}Herhangi bir kargoyu tam doldur
+STR_ORDER_TOGGLE_FULL_LOAD                                      :{BLACK}Bir kargoyu tam yükle
 STR_ORDER_DROP_LOAD_IF_POSSIBLE                                 :Mümkünse yükle
 STR_ORDER_DROP_FULL_LOAD_ALL                                    :Tüm kargoyu yükle
 STR_ORDER_DROP_FULL_LOAD_ANY                                    :Her kargoyu yükle
@@ -2616,7 +2603,7 @@ STR_ORDER_DROP_UNLOAD                                           :Tümünü boşa
 STR_ORDER_DROP_TRANSFER                                         :Aktar
 STR_ORDER_DROP_NO_UNLOADING                                     :Boşaltma yapma
 STR_ORDER_FULL_LOAD                                             :(Tam yükle)
-STR_ORDER_FULL_LOAD_ANY                                         :(Her kargoyu tam yükle)
+STR_ORDER_FULL_LOAD_ANY                                         :(Bir kargoyu tam yükle)
 STR_ORDER_NO_LOAD                                               :(Yükleme yapma)
 STR_ORDER_UNLOAD                                                :(Kargoyu boşalt ve al)
 STR_ORDER_UNLOAD_FULL_LOAD                                      :(Boşalt ve tam yüklemeyi bekle)
@@ -2774,6 +2761,7 @@ STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Birden f
 STR_CLEAR_TIME                                                  :{BLACK}Zamanı Temizle
 STR_RESET_LATENESS                                              :{BLACK}Gecikme sayacını sıfırla
 STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Yolimi adını değiştir
+STR_CHANGE_BUOY_NAME                                            :{BLACK}Şamandıra adını değiştir
 
 STR_TRAIN_STOPPING                                              :{RED}Frenliyor
 STR_TRAIN_STOPPING_VEL                                          :{RED}Frenliyor, {VELOCITY}
@@ -2806,7 +2794,6 @@ STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...bir a
 STR_ERROR_UNABLE_TO_FIND_LOCAL_DEPOT                            :{WHITE}Yerel garaj bulunamadı
 STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Aracı etrafta dolaşmaya zorla
 STR_ARTICULATED_RV_CAPACITY                                     :{BLACK}Kapasite: {LTBLUE}
-STR_JUST_CARGO                                                  :{CARGO}
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} araç{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
@@ -3472,7 +3459,10 @@ STR_TOWN_NAME                                                   :{TOWN}
 STR_VEHICLE_NAME                                                :{VEHICLE}
 STR_WAYPOINT_NAME                                               :{WAYPOINT}
 
+STR_JUST_CARGO                                                  :{CARGO}
+STR_JUST_CHECKMARK                                              :{CHECKMARK}
 STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_JUST_INT                                                    :{NUM}
 STR_JUST_DATE_TINY                                              :{DATE_TINY}
 STR_JUST_DATE_SHORT                                             :{DATE_SHORT}
@@ -3488,7 +3478,33 @@ STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRI
 
 STR_FORMAT_COMPANY_NUM                                          :(Company {COMMA})
 STR_FORMAT_GROUP_NAME                                           :Grup {COMMA}
-STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
+STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING.tamlanan}
+
+STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
+STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
+STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
+STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
+STR_RED_COMMA                                                   :{RED}{COMMA}
+STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
+STR_SILVER_CROSS                                                :{SILVER}{CROSS}
+STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
+STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
+STR_BLACK_STRING                                                :{BLACK}{STRING}
+STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+
+STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
+STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
+STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
+STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
+STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
+
+STR_BLACK_1                                                     :{BLACK}1
+STR_BLACK_2                                                     :{BLACK}2
+STR_BLACK_3                                                     :{BLACK}3
+STR_BLACK_4                                                     :{BLACK}4
+STR_BLACK_5                                                     :{BLACK}5
+STR_BLACK_6                                                     :{BLACK}6
+STR_BLACK_7                                                     :{BLACK}7
 
 STR_NAME_MUST_BE_UNIQUE                                         :{WHITE}İsim daha önce kullanılmamış olmalı
 
@@ -3607,6 +3623,7 @@ STR_AI_AUTHOR                                                   :{BLACK}Yazar: {
 STR_AI_VERSION                                                  :{BLACK}Sürüm: {NUM}
 STR_AI_URL                                                      :{BLACK}URL: {STRING}
 STR_AI_PLEASE_REPORT_CRASH                                      :{WHITE}Çalışan YZ'lerden biri çakıldı. Lütfen bu durumu AI Hata Ayıklama Penceresi görüntüsüyle birlikte YZ'nin yazarına bildirin.
+STR_AI_NO_AI_FOUND                                              :Yüklenecek uygun bir YZ bulunamadı.{}Bu YZ boş bir YZ'dir ve hiçbir şey yapmaz.{}'Çevrimiçi İçerik" sistemiyle pekçok YZ'yi indirebilirsiniz.
 ########
 
 ############ town controlled noise level

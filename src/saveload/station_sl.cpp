@@ -79,6 +79,8 @@ void MoveBuoysToWaypoints()
 		if (IsBuoyTile(xy) && GetStationIndex(xy) == index) {
 			wp->facilities |= FACIL_DOCK;
 		}
+
+		wp->rect.BeforeAddTile(st->xy, StationRect::ADD_FORCE);
 	}
 }
 
@@ -123,15 +125,15 @@ static const SaveLoad _old_station_desc[] = {
 	SLE_CONDVAR(Station, xy,                         SLE_FILE_U16 | SLE_VAR_U32,  0, 5),
 	SLE_CONDVAR(Station, xy,                         SLE_UINT32,                  6, SL_MAX_VERSION),
 	SLE_CONDNULL(4, 0, 5),  ///< bus/lorry tile
-	SLE_CONDVAR(Station, train_tile,                 SLE_FILE_U16 | SLE_VAR_U32,  0, 5),
-	SLE_CONDVAR(Station, train_tile,                 SLE_UINT32,                  6, SL_MAX_VERSION),
+	SLE_CONDVAR(Station, train_station.tile,         SLE_FILE_U16 | SLE_VAR_U32,  0, 5),
+	SLE_CONDVAR(Station, train_station.tile,         SLE_UINT32,                  6, SL_MAX_VERSION),
 	SLE_CONDVAR(Station, airport_tile,               SLE_FILE_U16 | SLE_VAR_U32,  0, 5),
 	SLE_CONDVAR(Station, airport_tile,               SLE_UINT32,                  6, SL_MAX_VERSION),
 	SLE_CONDVAR(Station, dock_tile,                  SLE_FILE_U16 | SLE_VAR_U32,  0, 5),
 	SLE_CONDVAR(Station, dock_tile,                  SLE_UINT32,                  6, SL_MAX_VERSION),
 	    SLE_REF(Station, town,                       REF_TOWN),
-	    SLE_VAR(Station, trainst_w,                  SLE_UINT8),
-	SLE_CONDVAR(Station, trainst_h,                  SLE_UINT8,                   2, SL_MAX_VERSION),
+	    SLE_VAR(Station, train_station.w,            SLE_UINT8),
+	SLE_CONDVAR(Station, train_station.h,            SLE_UINT8,                   2, SL_MAX_VERSION),
 
 	SLE_CONDNULL(1, 0, 3),  ///< alpha_order
 
@@ -358,11 +360,11 @@ static const SaveLoad _base_station_desc[] = {
 
 static const SaveLoad _station_desc[] = {
 	SLE_WRITEBYTE(Station, facilities,                 FACIL_NONE),
-	SLE_ST_INCLUDEX(),
+	SLE_ST_INCLUDE(),
 
-	      SLE_VAR(Station, train_tile,                 SLE_UINT32),
-	      SLE_VAR(Station, trainst_w,                  SLE_UINT8),
-	      SLE_VAR(Station, trainst_h,                  SLE_UINT8),
+	      SLE_VAR(Station, train_station.tile,         SLE_UINT32),
+	      SLE_VAR(Station, train_station.w,            SLE_UINT8),
+	      SLE_VAR(Station, train_station.h,            SLE_UINT8),
 
 	      SLE_REF(Station, bus_stops,                  REF_ROADSTOPS),
 	      SLE_REF(Station, truck_stops,                REF_ROADSTOPS),
@@ -384,9 +386,13 @@ static const SaveLoad _station_desc[] = {
 
 static const SaveLoad _waypoint_desc[] = {
 	SLE_WRITEBYTE(Waypoint, facilities,                FACIL_WAYPOINT),
-	SLE_ST_INCLUDEX(),
+	SLE_ST_INCLUDE(),
 
 	      SLE_VAR(Waypoint, town_cn,                   SLE_UINT16),
+
+	  SLE_CONDVAR(Waypoint, train_station.tile,        SLE_UINT32,                  124, SL_MAX_VERSION),
+	  SLE_CONDVAR(Waypoint, train_station.w,           SLE_UINT8,                   124, SL_MAX_VERSION),
+	  SLE_CONDVAR(Waypoint, train_station.h,           SLE_UINT8,                   124, SL_MAX_VERSION),
 
 	      SLE_END()
 };
