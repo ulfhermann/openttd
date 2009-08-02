@@ -686,8 +686,8 @@ STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF settings
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Transparency options
 STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Town names displayed
 STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Station names displayed
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Waypoint names displayed
 STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Signs displayed
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Waypoints displayed
 STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Full animation
 STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Full detail
 STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Transparent buildings
@@ -724,22 +724,17 @@ STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW                                :{BLACK}Paste fr
 STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT                             :{BLACK}Paste the location of this viewport to the global view
 
 STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Currency units
-STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN                        :{BLACK}{SKIP}{STRING}
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Currency units selection
 STR_GAME_OPTIONS_MEASURING_UNITS_FRAME                          :{BLACK}Measuring units
-STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN                       :{BLACK}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN_TOOLTIP               :{BLACK}Measuring units selection
 STR_GAME_OPTIONS_ROAD_VEHICLES_FRAME                            :{BLACK}Road vehicles
-STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN                         :{BLACK}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_TOOLTIP                 :{BLACK}Select side of road for vehicles to drive on
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_LEFT                    :Drive on left
 STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_RIGHT                   :Drive on right
 STR_GAME_OPTIONS_TOWN_NAMES_FRAME                               :{BLACK}Town names
-STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN_TOOLTIP                    :{BLACK}Select style of town names
 
 STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}Autosave
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN                              :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP                      :{BLACK}Select interval between automatic game saves
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :Off
 STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :Every month
@@ -838,7 +833,6 @@ STR_CURR_EEK                                                    :Estonian Krooni
 STR_CURR_CUSTOM                                                 :Custom...
 
 STR_OPTIONS_LANG                                                :{BLACK}Language
-STR_OPTIONS_LANG_CBO                                            :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_LANG_TIP                                            :{BLACK}Select the interface language to use
 
 STR_OPTIONS_FULLSCREEN                                          :{BLACK}Fullscreen
@@ -846,17 +840,14 @@ STR_OPTIONS_FULLSCREEN_TIP                                      :{BLACK}Check th
 STR_FULLSCREEN_FAILED                                           :{WHITE}Fullscreen mode failed
 
 STR_OPTIONS_RES                                                 :{BLACK}Screen resolution
-STR_OPTIONS_RES_CBO                                             :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_RES_TIP                                             :{BLACK}Select the screen resolution to use
 
 STR_OPTIONS_SCREENSHOT_FORMAT                                   :{BLACK}Screenshot format
-STR_OPTIONS_SCREENSHOT_FORMAT_CBO                               :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
 STR_OPTIONS_SCREENSHOT_FORMAT_TIP                               :{BLACK}Select the screenshot format to use
 
 STR_OPTIONS_BASE_GRF                                            :{BLACK}Base graphics set
-STR_OPTIONS_BASE_GRF_CBO                                        :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{RAW_STRING}
 STR_OPTIONS_BASE_GRF_TIP                                        :{BLACK}Select the base graphics set to use
-STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{10:NUM} missing/corrupted file{P "" s}
+STR_OPTIONS_BASE_GRF_STATUS                                     :{RED}{NUM} missing/corrupted file{P "" s}
 STR_OPTIONS_BASE_GRF_DESCRIPTION_TIP                            :{BLACK}Additional information about the base graphics set
 
 STR_AUTOSAVE_FAILED                                             :{WHITE}Autosave failed
@@ -1210,8 +1201,8 @@ STR_LANDINFO_WAYPOINT                                           :Waypoint
 STR_WAYPOINT                                                    :{WHITE}Waypoint
 STR_WAYPOINT_GRAPHICS_TIP                                       :{BLACK}Select waypoint type
 
-STR_WAYPOINT_VIEWPORT                                           :{WHITE}{WAYPOINT}
-STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WHITE}{WAYPOINT}
+STR_WAYPOINT_VIEWPORT                                           :{WAYPOINT}
+STR_WAYPOINT_VIEWPORT_TINY                                      :{TINYFONT}{WAYPOINT}
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Edit waypoint name
 
 STR_CANT_CHANGE_WAYPOINT_NAME                                   :{WHITE}Can't change waypoint name...
@@ -1630,8 +1621,11 @@ STR_RAILROAD_TRACK_WITH_COMBO_PBSSIGNALS                        :Railway track w
 STR_RAILROAD_TRACK_WITH_COMBO_NOENTRYSIGNALS                    :Railway track with combo- and one-way path signals
 STR_RAILROAD_TRACK_WITH_PBS_NOENTRYSIGNALS                      :Railway track with path and one-way path signals
 STR_MUST_REMOVE_RAILWAY_STATION_FIRST                           :{WHITE}Must remove railway station first
+STR_MUST_REMOVE_RAILWAYPOINT_FIRST                              :{WHITE}Must remove rail waypoint first
 STR_CREATE_SPLITTED_STATION                                     :{YELLOW}Build a separate station
+STR_CREATE_SPLITTED_WAYPOINT                                    :{YELLOW}Build a separate waypoint
 STR_SELECT_STATION_TO_JOIN                                      :{BLACK}Join station
+STR_SELECT_WAYPOINT_TO_JOIN                                     :{BLACK}Join waypoint
 
 
 
@@ -1814,11 +1808,13 @@ STR_STATION_BUILD_NUMBER_OF_TRACKS                              :{BLACK}Number o
 STR_STATION_BUILD_PLATFORM_LENGTH                               :{BLACK}Platform length
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Too close to another railway station
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Adjoins more than one existing station/loading area
+STR_ERROR_WAYPOINT_ADJOINS_MORE_THAN_ONE_EXISTING               :{WHITE}Adjoins more than one existing waypoint
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Too many stations/loading areas
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Too many railway station parts
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Too many bus stops
 STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Too many lorry stations
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Too close to another station/loading area
+STR_ERROR_TOO_CLOSE_TO_ANOTHER_WAYPOINT                         :{WHITE}Too close to another waypoint
 STR_STATION_VIEW_CAPTION                                        :{WHITE}{STATION} {STATIONFEATURES}
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Must demolish railway station first
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Too close to another airport
@@ -1862,6 +1858,7 @@ STR_ERROR_MUST_DEMOLISH_PASSENGER_TRAM_STATION_FIRST            :{WHITE}Must dem
 STR_ERROR_MUST_DEMOLISH_CARGO_TRAM_STATION_FIRST                :{WHITE}Must demolish freight tram station first
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} Station{P "" s}
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
+STR_STATION_LIST_WAYPOINT                                       :{YELLOW}{WAYPOINT}
 STR_STATION_LIST_NONE                                           :{YELLOW}- None -
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Too close to another dock
 STR_ERROR_MUST_DEMOLISH_DOCK_FIRST                              :{WHITE}Must demolish dock first
@@ -1873,6 +1870,8 @@ STR_STATION_BUILD_TRUCK_ORIENTATION_TOOLTIP                     :{BLACK}Select l
 STR_STATION_BUILD_PASSENGER_TRAM_ORIENTATION_TOOLTIP            :{BLACK}Select passenger tram station orientation
 STR_STATION_BUILD_CARGO_TRAM_ORIENTATION_TOOLTIP                :{BLACK}Select freight tram station orientation
 STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Centre main view on station location
+STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Centre main view on waypoint location
+STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centre main view on buoy location
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Show station ratings
 STR_STATION_VIEW_RENAME_TOOLTIP                                 :{BLACK}Change name of station
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Show list of accepted cargo
@@ -2222,8 +2221,8 @@ STR_COMPANY_VIEW_NEW_FACE_TOOLTIP                               :{BLACK}Select n
 STR_COMPANY_VIEW_COLOUR_SCHEME_TOOLTIP                          :{BLACK}Change the company vehicle livery
 STR_COMPANY_VIEW_PRESIDENT_NAME_TOOLTIP                         :{BLACK}Change the manager's name
 STR_COMPANY_VIEW_COMPANY_NAME_TOOLTIP                           :{BLACK}Change the company name
-STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Increase size of loan
-STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Repay part of loan
+STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Increase size of loan. Ctrl+Click borrows as much as possible
+STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Repay part of loan. Ctrl+Click repays as much loan as possible
 STR_COMPANY_VIEW_PRESIDENT_MANAGER_TITLE                        :{WHITE}{PRESIDENTNAME}{}{GOLD}(Manager)
 STR_COMPANY_VIEW_INAUGURATED_TITLE                              :{GOLD}Inaugurated: {WHITE}{NUM}
 STR_COMPANY_VIEW_VEHICLES_TITLE                                 :{GOLD}Vehicles:
@@ -2788,6 +2787,7 @@ STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Can't re
 STR_CLEAR_TIME                                                  :{BLACK}Clear Time
 STR_RESET_LATENESS                                              :{BLACK}Reset Late Counter
 STR_CHANGE_WAYPOINT_NAME                                        :{BLACK}Change waypoint name
+STR_CHANGE_BUOY_NAME                                            :{BLACK}Change buoy name
 
 STR_TRAIN_STOPPING                                              :{RED}Stopping
 STR_TRAIN_STOPPING_VEL                                          :{RED}Stopping, {VELOCITY}
@@ -3521,6 +3521,7 @@ STR_SILVER_CROSS                                                :{SILVER}{CROSS}
 STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
+STR_BLACK_RAW_STRING                                            :{BLACK}{RAW_STRING}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
 STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}

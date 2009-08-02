@@ -480,8 +480,8 @@ static void ClearPathReservation(const PathNode *start, const PathNode *end)
 {
 	bool first_run = true;
 	for (; start != end; start = start->parent) {
-		if (IsRailwayStationTile(start->node.tile) && first_run) {
-			SetRailwayStationPlatformReservation(start->node.tile, TrackdirToExitdir(start->node.direction), false);
+		if (IsRailStationTile(start->node.tile) && first_run) {
+			SetRailStationPlatformReservation(start->node.tile, TrackdirToExitdir(start->node.direction), false);
 		} else {
 			UnreserveRailTrack(start->node.tile, TrackdirToTrack(start->node.direction));
 		}
@@ -512,7 +512,7 @@ static void NPFSaveTargetData(AyStar *as, OpenListNode *current)
 		ftd->node = target->node;
 
 		/* If the target is a station skip to platform end. */
-		if (IsRailwayStationTile(target->node.tile)) {
+		if (IsRailStationTile(target->node.tile)) {
 			DiagDirection dir = TrackdirToExitdir(target->node.direction);
 			uint len = Station::GetByTile(target->node.tile)->GetPlatformLength(target->node.tile, dir);
 			TileIndex end_tile = TILE_ADD(target->node.tile, (len - 1) * TileOffsByDiagDir(dir));
@@ -520,8 +520,8 @@ static void NPFSaveTargetData(AyStar *as, OpenListNode *current)
 			/* Update only end tile, trackdir of a station stays the same. */
 			ftd->node.tile = end_tile;
 			if (!IsWaitingPositionFree(v, end_tile, target->node.direction, _settings_game.pf.forbid_90_deg)) return;
-			SetRailwayStationPlatformReservation(target->node.tile, dir, true);
-			SetRailwayStationReservation(target->node.tile, false);
+			SetRailStationPlatformReservation(target->node.tile, dir, true);
+			SetRailStationReservation(target->node.tile, false);
 		} else {
 			if (!IsWaitingPositionFree(v, target->node.tile, target->node.direction, _settings_game.pf.forbid_90_deg)) return;
 		}
@@ -550,7 +550,7 @@ static void NPFSaveTargetData(AyStar *as, OpenListNode *current)
 static bool CanEnterTileOwnerCheck(Owner owner, TileIndex tile, DiagDirection enterdir)
 {
 	if (IsTileType(tile, MP_RAILWAY) || // Rail tile (also rail depot)
-			IsRailwayStationTile(tile) ||   // Rail station tile
+			HasStationTileRail(tile) ||     // Rail station tile/waypoint
 			IsRoadDepotTile(tile) ||        // Road depot tile
 			IsStandardRoadStopTile(tile)) { // Road station tile (but not drive-through stops)
 		return IsTileOwner(tile, owner);  // You need to own these tiles entirely to use them
@@ -1103,7 +1103,7 @@ void NPFFillWithOrderData(NPFFindStationOrTileData *fstd, Vehicle *v, bool reser
 	 * dest_tile, not just any stop of that station.
 	 * So only for train orders to stations we fill fstd->station_index, for all
 	 * others only dest_coords */
-	if (v->current_order.IsType(OT_GOTO_STATION) && v->type == VEH_TRAIN) {
+	if (v->type == VEH_TRAIN && (v->current_order.IsType(OT_GOTO_STATION) || v->current_order.IsType(OT_GOTO_WAYPOINT))) {
 		fstd->station_index = v->current_order.GetDestination();
 		/* Let's take the closest tile of the station as our target for trains */
 		fstd->dest_coords = CalcClosestStationTile(fstd->station_index, v->tile);
