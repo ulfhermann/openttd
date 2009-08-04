@@ -53,7 +53,7 @@ public:
 
 		this->flags4 |= WF_DISABLE_VP_SCROLL;
 		NWidgetViewport *nvp = (NWidgetViewport *)this->nested_array[WAYPVW_VIEWPORT];
-		nvp->InitializeViewport(this, this->wp->xy, ZOOM_LVL_MIN);
+		nvp->InitializeViewport(this, this->wp->xy, ZOOM_LVL_BLITTER_MIN);
 
 		this->OnInvalidateData(0);
 	}
