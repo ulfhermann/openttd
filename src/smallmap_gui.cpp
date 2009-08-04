@@ -544,10 +544,6 @@ class SmallMapWindow : public Window
 		SMT_OWNER,
 	};
 
-	typedef std::map<VehicleID, TileIndex> VehiclePositionMap;
-
-	VehiclePositionMap vehicles_on_map;
-
 	static SmallMapType map_type;
 	static bool show_towns;
 
@@ -559,7 +555,7 @@ class SmallMapWindow : public Window
 
 	/**
 	 * zoom level of the smallmap.
-	 * May be something between -ZOOM_LVL_MAX and +ZOOM_LVL_MAX. Negative zoom levels are zoom in.
+	 * May be something between ZOOM_LVL_NORMAL and ZOOM_LVL_MAX.
 	 */
 	ZoomLevel zoom;
 
@@ -687,22 +683,13 @@ class SmallMapWindow : public Window
 
 	void DrawVehicles(DrawPixelInfo *dpi) {
 		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) {
-			VehiclePositionMap new_vehicles;
 			Vehicle *v;
 
 			FOR_ALL_VEHICLES(v) {
 				if (v->type != VEH_EFFECT &&
 						(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
-					DrawVehicle(dpi, v, new_vehicles);
+					DrawVehicle(dpi, v);
 				}
-			}
-
-			if (this->zoom < ZOOM_LVL_NORMAL) {
-				if(this->refresh != FORCE_REFRESH && new_vehicles.size() != this->vehicles_on_map.size()) {
-					/* redraw the whole map if the vehicles have changed. This prevents artifacts. */
-					this->refresh = FORCE_REFRESH;
-				}
-				std::swap(new_vehicles, this->vehicles_on_map);
 			}
 		}
 	}
@@ -712,13 +699,9 @@ class SmallMapWindow : public Window
 	 * @param dpi the part of the smallmap to be drawn into
 	 * @param v the vehicle to be drawn
 	 */
-	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v, VehiclePositionMap &new_vehicles)
+	void DrawVehicle(DrawPixelInfo *dpi, Vehicle *v)
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
-		int scale = 1;
-		if (this->zoom < 0) {
-			scale = 1 << (-this->zoom);
-		}
 
 		/* Remap into flat coordinates. */
 		Point pt = RemapTileCoords(v->tile);
@@ -726,39 +709,15 @@ class SmallMapWindow : public Window
 		int x = pt.x - dpi->left;
 		int y = pt.y - dpi->top;
 
-		/* Check if rhombus is inside bounds */
-		if ((x + 2 * scale < 0) || //left
-				(y + 2 * scale < 0) || //top
-				(x - 2 * scale >= dpi->width) || //right
-				(y - 2 * scale >= dpi->height)) { //bottom
-			return;
-		}
-
-		if (this->zoom < ZOOM_LVL_NORMAL) {
-			if (this->refresh != FORCE_REFRESH) {
-				VehiclePositionMap::iterator i = this->vehicles_on_map.find(v->index);
-				if (i == vehicles_on_map.end() || i->second != v->tile) {
-					/* redraw the whole map if the vehicles have changed. This prevents artifacts. */
-					this->refresh = FORCE_REFRESH;
-				}
-			}
-			new_vehicles[v->index] = v->tile;
-		}
-
 		byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
 
-		/* Draw rhombus */
-		for (int dy = 0; dy < scale; dy++) {
-			for (int dx = 0; dx < scale; dx++) {
-				pt = RemapCoords(-dx, -dy, 0);
-				if (IsInsideMM(y + pt.y, 0, dpi->height)) {
-					if (IsInsideMM(x + pt.x, 0, dpi->width)) {
-						blitter->SetPixel(dpi->dst_ptr, x + pt.x, y + pt.y, colour);
-					}
-					if (IsInsideMM(x + pt.x + 1, 0, dpi->width)) {
-						blitter->SetPixel(dpi->dst_ptr, x + pt.x + 1, y + pt.y, colour);
-					}
-				}
+		/* Draw vehicle */
+		if (IsInsideMM(y, 0, dpi->height)) {
+			if (IsInsideMM(x, 0, dpi->width)) {
+				blitter->SetPixel(dpi->dst_ptr, x, y, colour);
+			}
+			if (IsInsideMM(x + 1, 0, dpi->width)) {
+				blitter->SetPixel(dpi->dst_ptr, x + 1, y, colour);
 			}
 		}
 	}
@@ -785,7 +744,6 @@ class SmallMapWindow : public Window
 				}
 			}
 		}
-
 	}
 
 public:
@@ -860,15 +818,10 @@ public:
 			tile_y--;
 		}
 
-		/* The map background is off by a little less than one tile in y direction compared to vehicles and signs.
-		 * I have no idea why this is the case.
-		 * on zoom levels >= ZOOM_LVL_NORMAL this isn't visible as only full tiles can be shown. However, beginning
-		 * at ZOOM_LVL_OUT_4X it's again off by 1 or 2 pixels
+		/* Beginning at ZOOM_LVL_OUT_4X the background is off by 1 or 2 pixels
 		 */
 		dy = 0;
-		if (this->zoom < ZOOM_LVL_NORMAL) {
-			dy = UnScaleByZoomLower(2, this->zoom) - 2;
-		} else if (this->zoom > ZOOM_LVL_NORMAL) {
+		if (this->zoom > ZOOM_LVL_NORMAL) {
 			dy = this->zoom - 1;
 		}
 
@@ -969,13 +922,13 @@ public:
 	 */
 	void ZoomIn(int cx, int cy)
 	{
-	        if (this->zoom > -ZOOM_LVL_MAX) {
-	                this->zoom--;
-	                this->DoScroll(cx, cy);
-	                this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN, this->zoom == -ZOOM_LVL_MAX);
-	                this->EnableWidget(SM_WIDGET_ZOOM_OUT);
-	                this->SetDirty();
-	        }
+		if (this->zoom > ZOOM_LVL_MIN) {
+			this->zoom--;
+			this->DoScroll(cx, cy);
+			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN, this->zoom == ZOOM_LVL_MIN);
+			this->EnableWidget(SM_WIDGET_ZOOM_OUT);
+			this->SetDirty();
+		}
 	}
 
 	/**
@@ -985,13 +938,13 @@ public:
 	 */
 	void ZoomOut(int cx, int cy)
 	{
-	        if (this->zoom < ZOOM_LVL_MAX) {
-	                this->zoom++;
-	                this->DoScroll(cx / -2, cy / -2);
-	                this->EnableWidget(SM_WIDGET_ZOOM_IN);
-	                this->SetWidgetDisabledState(SM_WIDGET_ZOOM_OUT, this->zoom == ZOOM_LVL_MAX);
-	                this->SetDirty();
-	        }
+		if (this->zoom < ZOOM_LVL_MAX) {
+			this->zoom++;
+			this->DoScroll(cx / -2, cy / -2);
+			this->EnableWidget(SM_WIDGET_ZOOM_IN);
+			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_OUT, this->zoom == ZOOM_LVL_MAX);
+			this->SetDirty();
+		}
 	}
 
 	void ResizeLegend()
