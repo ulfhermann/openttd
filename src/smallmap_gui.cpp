@@ -841,8 +841,8 @@ class SmallMapWindow : public Window
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
 		int scale = 1;
-		if (this->zoom < 0) {
-			scale = 1 << (-this->zoom);
+		if (this->zoom < ZOOM_LVL_NORMAL) {
+			scale = 1 << (ZOOM_LVL_NORMAL - this->zoom);
 		}
 
 		/* Remap into flat coordinates. */
