@@ -41,34 +41,35 @@ enum GraphLegendWidgetNumbers {
 };
 
 struct GraphLegendWindow : Window {
-	GraphLegendWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
+	GraphLegendWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
-		for (uint i = GLW_FIRST_COMPANY; i < this->widget_count; i++) {
-			if (!HasBit(_legend_excluded_companies, i - GLW_FIRST_COMPANY)) this->LowerWidget(i);
-		}
+		this->InitNested(desc, window_number);
 
-		this->FindWindowPlacementAndResize(desc);
+		for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
+			if (!HasBit(_legend_excluded_companies, c)) this->LowerWidget(c + GLW_FIRST_COMPANY);
+
+			this->OnInvalidateData(c);
+		}
 	}
 
 	virtual void OnPaint()
 	{
-		for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
-			if (Company::IsValidID(c)) continue;
-
-			SetBit(_legend_excluded_companies, c);
-			this->RaiseWidget(c + GLW_FIRST_COMPANY);
-		}
-
 		this->DrawWidgets();
+	}
 
-		const Company *c;
-		FOR_ALL_COMPANIES(c) {
-			DrawCompanyIcon(c->index, 4, 18 + c->index * 12);
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (!IsInsideMM(widget, GLW_FIRST_COMPANY, MAX_COMPANIES + GLW_FIRST_COMPANY)) return;
 
-			SetDParam(0, c->index);
-			SetDParam(1, c->index);
-			DrawString(21, this->width - 4, 17 + c->index * 12, STR_COMPANY_NAME_COMPANY_NUM, HasBit(_legend_excluded_companies, c->index) ? TC_BLACK : TC_WHITE);
-		}
+		CompanyID cid = (CompanyID)(widget - GLW_FIRST_COMPANY);
+
+		if (!Company::IsValidID(cid)) return;
+
+		DrawCompanyIcon(cid, r.left + 2, r.top + 2);
+
+		SetDParam(0, cid);
+		SetDParam(1, cid);
+		DrawString(r.left + 19, r.right - 2, r.top + 1, STR_COMPANY_NAME_COMPANY_NUM, HasBit(_legend_excluded_companies, cid) ? TC_BLACK : TC_WHITE);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -83,6 +84,14 @@ struct GraphLegendWindow : Window {
 		InvalidateWindow(WC_DELIVERED_CARGO, 0);
 		InvalidateWindow(WC_PERFORMANCE_HISTORY, 0);
 		InvalidateWindow(WC_COMPANY_VALUE, 0);
+	}
+
+	virtual void OnInvalidateData(int data)
+	{
+		if (Company::IsValidID(data)) return;
+
+		SetBit(_legend_excluded_companies, data);
+		this->RaiseWidget(data + GLW_FIRST_COMPANY);
 	}
 };
 
@@ -107,28 +116,6 @@ static NWidgetBase *MakeNWidgetCompanyLines(int *biggest_index)
 	return vert;
 }
 
-static const Widget _graph_legend_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,       STR_TOOLTIP_CLOSE_WINDOW},           // GLW_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   249,     0,    13, STR_GRAPH_KEY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // GLW_CAPTION
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   249,    14,   195, 0x0,                   STR_NULL},                           // GLW_BACKGROUND
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,    16,    27, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},    // GLW_FIRST_COMPANY
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,    28,    39, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,    40,    51, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,    52,    63, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,    64,    75, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,    76,    87, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,    88,    99, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   100,   111, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   112,   123, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   124,   135, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   136,   147, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   148,   159, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   160,   171, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   172,   183, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     2,   247,   184,   195, 0x0,                   STR_GRAPH_KEY_COMPANY_SELECTION},    // GLW_LAST_COMPANY
-{   WIDGETS_END},
-};
-
 static const NWidgetPart _nested_graph_legend_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, GLW_CLOSEBOX),
@@ -148,7 +135,7 @@ static const WindowDesc _graph_legend_desc(
 	WDP_AUTO, WDP_AUTO, 250, 196, 250, 196,
 	WC_GRAPH_LEGEND, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_graph_legend_widgets, _nested_graph_legend_widgets, lengthof(_nested_graph_legend_widgets)
+	NULL, _nested_graph_legend_widgets, lengthof(_nested_graph_legend_widgets)
 );
 
 static void ShowGraphLegend()
@@ -173,6 +160,7 @@ protected:
 	enum {
 		GRAPH_MAX_DATASETS = 32,
 		GRAPH_AXIS_LINE_COLOUR  = 215,
+		GRAPH_NUM_MONTHS = 24, ///< Number of months displayed in the graph.
 
 		GRAPH_X_POSITION_BEGINNING  = 44,  ///< Start the graph 44 pixels from gd_left
 		GRAPH_X_POSITION_SEPARATION = 22,  ///< There are 22 pixels between each X value
@@ -200,13 +188,16 @@ protected:
 	uint16 x_values_start;
 	uint16 x_values_increment;
 
-	int gd_left, gd_top;  ///< Where to start drawing the graph, in pixels.
-	uint gd_height;    ///< The height of the graph in pixels.
+	Rect graph_location;
 	StringID format_str_y_axis;
 	byte colours[GRAPH_MAX_DATASETS];
-	OverflowSafeInt64 cost[GRAPH_MAX_DATASETS][24]; ///< last 2 years
+	OverflowSafeInt64 cost[GRAPH_MAX_DATASETS][GRAPH_NUM_MONTHS]; ///< Stored costs for the last #GRAPH_NUM_MONTHS months
 
-	void DrawGraph() const
+	/**
+	 * Actually draw the graph.
+	 * @param r the rectangle of the data field of the graph
+	 */
+	void DrawGraph(Rect &r) const
 	{
 		uint x, y;                       ///< Reused whenever x and y coordinates are needed.
 		OverflowSafeInt64 highest_value; ///< Highest value to be drawn.
@@ -220,40 +211,40 @@ protected:
 		byte grid_colour = _colour_gradient[COLOUR_GREY][4];
 
 		/* The coordinates of the opposite edges of the graph. */
-		int bottom = this->gd_top + this->gd_height - 1;
-		int right  = this->gd_left + GRAPH_X_POSITION_BEGINNING + this->num_vert_lines * GRAPH_X_POSITION_SEPARATION - 1;
+		assert(r.left + GRAPH_X_POSITION_BEGINNING + this->num_vert_lines * GRAPH_X_POSITION_SEPARATION - 1 == r.right);
+		int height = r.bottom - r.top + 1;
 
 		/* Draw the vertical grid lines. */
 
 		/* Don't draw the first line, as that's where the axis will be. */
-		x = this->gd_left + GRAPH_X_POSITION_BEGINNING + GRAPH_X_POSITION_SEPARATION;
+		x = r.left + GRAPH_X_POSITION_BEGINNING + GRAPH_X_POSITION_SEPARATION;
 
 		for (int i = 0; i < this->num_vert_lines; i++) {
-			GfxFillRect(x, this->gd_top, x, bottom, grid_colour);
+			GfxFillRect(x, r.top, x, r.bottom, grid_colour);
 			x += GRAPH_X_POSITION_SEPARATION;
 		}
 
 		/* Draw the horizontal grid lines. */
-		x = this->gd_left + GRAPH_X_POSITION_BEGINNING;
-		y = this->gd_height + this->gd_top;
+		x = r.left + GRAPH_X_POSITION_BEGINNING;
+		y = r.bottom;
 
 		for (int i = 0; i < GRAPH_NUM_LINES_Y; i++) {
-			GfxFillRect(x, y, right, y, grid_colour);
-			y -= (this->gd_height / (GRAPH_NUM_LINES_Y - 1));
+			GfxFillRect(x, y, r.right, y, grid_colour);
+			y -= height / (GRAPH_NUM_LINES_Y - 1);
 		}
 
 		/* Draw the y axis. */
-		GfxFillRect(x, this->gd_top, x, bottom, GRAPH_AXIS_LINE_COLOUR);
+		GfxFillRect(x, r.top, x, r.bottom, GRAPH_AXIS_LINE_COLOUR);
 
 		/* Find the distance from the gd_top of the graph to the x axis. */
-		x_axis_offset = this->gd_height;
+		x_axis_offset = height;
 
 		/* The graph is currently symmetrical about the x axis. */
 		if (this->has_negative_values) x_axis_offset /= 2;
 
 		/* Draw the x axis. */
-		y = x_axis_offset + this->gd_top;
-		GfxFillRect(x, y, right, y, GRAPH_AXIS_LINE_COLOUR);
+		y = x_axis_offset + r.top;
+		GfxFillRect(x, y, r.right, y, GRAPH_AXIS_LINE_COLOUR);
 
 		/* Find the largest value that will be drawn. */
 		if (this->num_on_x_axis == 0)
@@ -296,8 +287,8 @@ protected:
 		 * -highest_value, not highest_value to 0. */
 		if (this->has_negative_values) y_label_separation *= 2;
 
-		x = this->gd_left + GRAPH_X_POSITION_BEGINNING + 1;
-		y = this->gd_top - 3;
+		x = r.left + GRAPH_X_POSITION_BEGINNING + 1;
+		y = r.top - 3;
 
 		for (int i = 0; i < GRAPH_NUM_LINES_Y; i++) {
 			SetDParam(0, this->format_str_y_axis);
@@ -305,13 +296,13 @@ protected:
 			DrawString(x - GRAPH_X_POSITION_BEGINNING, x, y, STR_GRAPH_Y_LABEL, graph_axis_label_colour, SA_RIGHT);
 
 			y_label -= y_label_separation;
-			y += (this->gd_height / (GRAPH_NUM_LINES_Y - 1));
+			y += height / (GRAPH_NUM_LINES_Y - 1);
 		}
 
 		/* draw strings on the x axis */
 		if (this->month != 0xFF) {
-			x = this->gd_left + GRAPH_X_POSITION_BEGINNING;
-			y = this->gd_top + this->gd_height + 1;
+			x = r.left + GRAPH_X_POSITION_BEGINNING;
+			y = r.bottom + 2;
 			byte month = this->month;
 			Year year  = this->year;
 			for (int i = 0; i < this->num_on_x_axis; i++) {
@@ -329,8 +320,8 @@ protected:
 			}
 		} else {
 			/* Draw the label under the data point rather than on the grid line. */
-			x = this->gd_left + GRAPH_X_POSITION_BEGINNING;
-			y = this->gd_top + this->gd_height + 1;
+			x = r.left + GRAPH_X_POSITION_BEGINNING;
+			y = r.bottom + 2;
 			uint16 label = this->x_values_start;
 
 			for (int i = 0; i < this->num_on_x_axis; i++) {
@@ -346,7 +337,7 @@ protected:
 		for (int i = 0; i < this->num_dataset; i++) {
 			if (!HasBit(this->excluded_data, i)) {
 				/* Centre the dot between the grid lines. */
-				x = this->gd_left + GRAPH_X_POSITION_BEGINNING + (GRAPH_X_POSITION_SEPARATION / 2);
+				x = r.left + GRAPH_X_POSITION_BEGINNING + (GRAPH_X_POSITION_SEPARATION / 2);
 
 				byte colour  = this->colours[i];
 				uint prev_x = INVALID_DATAPOINT_POS;
@@ -377,7 +368,7 @@ protected:
 							datapoint >>= reduce_range;
 						}
 
-						y = this->gd_top + x_axis_offset - (x_axis_offset * datapoint) / (highest_value >> reduce_range);
+						y = r.top + x_axis_offset - (x_axis_offset * datapoint) / (highest_value >> reduce_range);
 
 						/* Draw the point. */
 						GfxFillRect(x - 1, y - 1, x + 1, y + 1, colour);
@@ -402,9 +393,19 @@ protected:
 	BaseGraphWindow(const WindowDesc *desc, WindowNumber window_number, int left,
 									int top, int height, bool has_negative_values, StringID format_str_y_axis) :
 			Window(desc, window_number), has_negative_values(has_negative_values),
-			gd_left(left), gd_top(top), gd_height(height), format_str_y_axis(format_str_y_axis)
+			format_str_y_axis(format_str_y_axis)
 	{
 		InvalidateWindow(WC_GRAPH_LEGEND, 0);
+		this->num_vert_lines = 24;
+
+		/* Initialise the dataset */
+		this->OnTick();
+
+		this->graph_location.left   = left;
+		this->graph_location.right  = left + GRAPH_X_POSITION_BEGINNING + this->num_vert_lines * GRAPH_X_POSITION_SEPARATION - 1;
+
+		this->graph_location.top    = top;
+		this->graph_location.bottom = top + height - 1;
 	}
 
 public:
@@ -412,21 +413,34 @@ public:
 	{
 		this->DrawWidgets();
 
+		this->DrawGraph(this->graph_location);
+	}
+
+	virtual OverflowSafeInt64 GetGraphData(const Company *c, int j)
+	{
+		return INVALID_DATAPOINT;
+	}
+
+	virtual void OnClick(Point pt, int widget)
+	{
+		/* Clicked on legend? */
+		if (widget == BGW_KEY_BUTTON) ShowGraphLegend();
+	}
+
+	virtual void OnTick()
+	{
 		uint excluded_companies = _legend_excluded_companies;
 
 		/* Exclude the companies which aren't valid */
 		for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
 			if (!Company::IsValidID(c)) SetBit(excluded_companies, c);
 		}
-		this->excluded_data = excluded_companies;
-		this->num_vert_lines = 24;
 
 		byte nums = 0;
 		const Company *c;
 		FOR_ALL_COMPANIES(c) {
-			nums = max(nums, c->num_valid_stat_ent);
+			nums = min(this->num_vert_lines, max(nums, c->num_valid_stat_ent));
 		}
-		this->num_on_x_axis = min(nums, 24);
 
 		int mo = (_cur_month / 3 - nums) * 3;
 		int yr = _cur_year;
@@ -435,6 +449,14 @@ public:
 			mo += 12;
 		}
 
+		if (this->excluded_data == excluded_companies && this->num_on_x_axis == nums &&
+				this->year == yr && this->month == mo) {
+			/* There's no reason to get new stats */
+			return;
+		}
+
+		this->excluded_data = excluded_companies;
+		this->num_on_x_axis = nums;
 		this->year = yr;
 		this->month = mo;
 
@@ -452,19 +474,6 @@ public:
 		}
 
 		this->num_dataset = numd;
-
-		this->DrawGraph();
-	}
-
-	virtual OverflowSafeInt64 GetGraphData(const Company *c, int j)
-	{
-		return INVALID_DATAPOINT;
-	}
-
-	virtual void OnClick(Point pt, int widget)
-	{
-		/* Clicked on legend? */
-		if (widget == BGW_KEY_BUTTON) ShowGraphLegend();
 	}
 };
 
@@ -767,12 +776,17 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 
 		this->SetDirty();
 
-		this->gd_height = this->height - 38;
 		this->num_on_x_axis = 20;
 		this->num_vert_lines = 20;
 		this->month = 0xFF;
 		this->x_values_start     = 10;
 		this->x_values_increment = 10;
+
+		this->graph_location.right  = this->graph_location.left + GRAPH_X_POSITION_BEGINNING + this->num_vert_lines * GRAPH_X_POSITION_SEPARATION - 1;
+		this->graph_location.bottom = this->graph_location.top + (this->height - 38) - 1;
+
+		/* Initialise the dataset */
+		this->OnHundredthTick();
 
 		this->FindWindowPlacementAndResize(desc);
 	}
@@ -780,8 +794,6 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
-
-		this->excluded_data = _legend_excluded_cargo;
 
 		int x = 495;
 		int y = 24;
@@ -806,7 +818,37 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 				DrawString(x + 14 + clk_dif, this->width, y + clk_dif, STR_GRAPH_CARGO_PAYMENT_CARGO);
 				y += 8;
 			}
+			i++;
+		}
 
+		this->DrawGraph(this->graph_location);
+
+		DrawString(2 + 46, this->width, this->graph_location.bottom + 8, STR_GRAPH_CARGO_PAYMENT_RATES_X_LABEL);
+		DrawString(2 + 84, this->width, this->graph_location.top - 9, STR_GRAPH_CARGO_PAYMENT_RATES_TITLE);
+	}
+
+	virtual void OnClick(Point pt, int widget)
+	{
+		if (widget >= CPW_CARGO_FIRST) {
+			ToggleBit(_legend_excluded_cargo, widget - CPW_CARGO_FIRST);
+			this->ToggleWidgetLoweredState(widget);
+			this->excluded_data = _legend_excluded_cargo;
+			this->SetDirty();
+		}
+	}
+
+	virtual void OnTick()
+	{
+		/* Override default OnTick */
+	}
+
+	virtual void OnHundredthTick()
+	{
+		this->excluded_data = _legend_excluded_cargo;
+
+		int i = 0;
+		const CargoSpec *cs;
+		FOR_ALL_CARGOSPECS(cs) {
 			this->colours[i] = cs->legend_colour;
 			for (uint j = 0; j != 20; j++) {
 				this->cost[i][j] = GetTransportedGoodsIncome(10, 20, j * 4 + 4, cs->Index());
@@ -815,20 +857,6 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 			i++;
 		}
 		this->num_dataset = i;
-
-		this->DrawGraph();
-
-		DrawString(2 + 46, this->width, 24 + this->gd_height + 7, STR_GRAPH_CARGO_PAYMENT_RATES_X_LABEL);
-		DrawString(2 + 84, this->width, 24 - 9, STR_GRAPH_CARGO_PAYMENT_RATES_TITLE);
-	}
-
-	virtual void OnClick(Point pt, int widget)
-	{
-		if (widget >= CPW_CARGO_FIRST) {
-			ToggleBit(_legend_excluded_cargo, widget - CPW_CARGO_FIRST);
-			this->ToggleWidgetLoweredState(widget);
-			this->SetDirty();
-		}
 	}
 };
 
