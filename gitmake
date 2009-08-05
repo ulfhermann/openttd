@@ -31,10 +31,23 @@ master: gitmake-origin
 	test -e gitmake-build && make -j`cat gitmake-build` || true
 
 smallmap-zoom-out: master
+<<<<<<< HEAD:gitmake
+=======
 
 zoomlevels: master
 
+smallmap-zoom-in: zoomlevels smallmap-zoom-out
+
+cargodist: station-gui smallmap-stats
+>>>>>>> register new branches for smallmap:gitmake
+
+zoomlevels: master
+
+<<<<<<< HEAD:gitmake
 smallmap-zoom-in: smallmap-zoom-out zoomlevels 
+=======
+smallmap-stats: flowmapping-vehload smallmap-zoom-in
+>>>>>>> register new branches for smallmap:gitmake
 
 cargodist: station-gui smallmap-stats warning-sign
 
