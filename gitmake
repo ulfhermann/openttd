@@ -24,11 +24,17 @@ master: gitmake-origin
 	git pull
 #	make -j2
 
+smallmap-zoom-out: master
+
+zoomlevels: master
+
+smallmap-zoom-in: zoomlevels smallmap-zoom-out
+
 cargodist: station-gui smallmap-stats
 
 station-gui: flowmapping-vehload
 
-smallmap-stats: flowmapping-vehload smallmap-zoom
+smallmap-stats: flowmapping-vehload smallmap-zoom-in
 
 flowmapping-vehload: flowmapping-core
 
@@ -42,11 +48,9 @@ components: capacities
 
 capacities: master
 
-smallmap-zoom: master
-
 diaglvl: tileiter
 
 tileiter: master
 
-push: master cargodist station-gui smallmap-stats flowmapping-vehload flowmapping-core mcf demands components capacities smallmap-zoom diaglvl tileiter
+push: master cargodist station-gui smallmap-stats flowmapping-vehload flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter 
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
