@@ -9,6 +9,9 @@
 
 enum ZoomLevel {
 	/* Our possible zoom-levels */
+	ZOOM_LVL_IN_8X,
+	ZOOM_LVL_IN_4X,
+	ZOOM_LVL_IN_2X,
 	ZOOM_LVL_NORMAL,
 	ZOOM_LVL_OUT_2X,
 	ZOOM_LVL_OUT_4X,
@@ -28,7 +31,7 @@ enum ZoomLevel {
 	ZOOM_LVL_DETAIL   = ZOOM_LVL_OUT_2X, ///< All zoomlevels with higher resolution or equal to this, will result in details on the screen, like road-work, ...
 
 	/* min/max for all zoom levels */
-	ZOOM_LVL_MIN      = ZOOM_LVL_NORMAL,
+	ZOOM_LVL_MIN      = ZOOM_LVL_IN_8X,
 	ZOOM_LVL_MAX      = ZOOM_LVL_OUT_8X,
 	ZOOM_LVL_COUNT    = ZOOM_LVL_MAX + 1 - ZOOM_LVL_MIN,
 
