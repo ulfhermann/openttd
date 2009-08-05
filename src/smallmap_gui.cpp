@@ -567,6 +567,7 @@ class SmallMapWindow : public Window
 	static const int MIN_LEGEND_HEIGHT = 6 * 7;
 	static const int MAP_COLUMN_WIDTH = 4;
 	static const int MAP_ROW_OFFSET = 2;
+	static const int MIN_INDUSTRY_PIXELS = 3;
 
 	/** size of left and right borders of the smallmap window */
 	static const int SPACING_SIDE = 2;
@@ -776,12 +777,13 @@ class SmallMapWindow : public Window
 					if (!IsInsideMM(y, 0, dpi->height)) continue;
 
 					int x = pt.x - dpi->left;
-					if (!IsInsideMM(x, 0, dpi->width)) continue;
-
 					byte colour = GetIndustrySpec(i->type)->map_colour;
-					blitter->SetPixel(dpi->dst_ptr, x, y, colour);
-					blitter->SetPixel(dpi->dst_ptr, x + 1, y, colour);
-					blitter->SetPixel(dpi->dst_ptr, x + 2, y, colour);
+
+					for (int offset = 0; offset < MIN_INDUSTRY_PIXELS; ++offset) {
+						if (IsInsideMM(x + offset, 0, dpi->width)) {
+							blitter->SetPixel(dpi->dst_ptr, x + offset, y, colour);
+						}
+					}
 				}
 			}
 		}
@@ -863,13 +865,13 @@ public:
 		/* The map background is off by a little less than one tile in y direction compared to vehicles and signs.
 		 * I have no idea why this is the case.
 		 * on zoom levels >= ZOOM_LVL_NORMAL this isn't visible as only full tiles can be shown. However, beginning
-		 * at ZOOM_LVL_OUT_4X it's again off by 1 or 2 pixels
+		 * at ZOOM_LVL_OUT_2X it's again off by 1 pixel
 		 */
 		dy = 0;
 		if (this->zoom < ZOOM_LVL_NORMAL) {
 			dy = UnScaleByZoomLower(2, this->zoom) - 2;
 		} else if (this->zoom > ZOOM_LVL_NORMAL) {
-			dy = this->zoom - 1;
+			dy = 1;
 		}
 
 		/* correct the various problems mentioned above by moving the initial drawing pointer a little */
