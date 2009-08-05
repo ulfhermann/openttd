@@ -34,7 +34,11 @@ smallmap-zoom-out: master
 
 zoomlevels: master
 
-smallmap-zoom-in: smallmap-zoom-out zoomlevels 
+smallmap-zoom-in: zoomlevels smallmap-zoom-out
+
+cargodist: station-gui smallmap-stats
+
+zoomlevels: master
 
 cargodist: station-gui smallmap-stats warning-sign
 
