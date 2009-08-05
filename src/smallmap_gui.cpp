@@ -820,7 +820,7 @@ public:
 			tile_y--;
 		}
 
-		/* Beginning at ZOOM_LVL_OUT_4X the background is off by 1 or 2 pixels
+		/* Beginning at ZOOM_LVL_OUT_2X the background is off by 1 pixel
 		 */
 		dy = 0;
 		if (this->zoom > ZOOM_LVL_NORMAL) {
