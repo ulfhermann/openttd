@@ -812,26 +812,49 @@ CargoDataEntry::CargoDataEntry(CargoID ca) :
 {}
 
 CargoDataEntry::~CargoDataEntry() {
+	this->Clear();
+}
+
+void CargoDataEntry::Clear() {
 	if (subentries != NULL) {
 		for (CargoDataSet::iterator i = subentries->begin(); i != subentries->end(); ++i) {
 			delete *i;
 		}
 		delete subentries;
 	}
+	if (parent != NULL) {
+		parent->count -= this->count;
+	}
+	this->count = 0;
+	this->size = 0;
+}
+
+void CargoDataEntry::Remove(CargoDataEntry * comp) {
+	CargoDataSet::iterator i = subentries->find(comp);
+	if (i != subentries->end()) {
+		delete(*i);
+		subentries->erase(i);
+	}
 }
 
 template<class ID>
-CargoDataEntry * CargoDataEntry::Update(ID s, uint c) {
+CargoDataEntry * CargoDataEntry::InsertOrRetrieve(ID s) {
 	CargoDataEntry tmp(s);
 	CargoDataSet::iterator i = subentries->find(&tmp);
 	if (i == subentries->end()) {
 		IncrementSize();
-		return *(subentries->insert(new CargoDataEntry(s, c, this)).first);
+		return *(subentries->insert(new CargoDataEntry(s, 0, this)).first);
 	} else {
 		CargoDataEntry * ret = *i;
 		assert(subentries->value_comp().GetSortType() != ST_COUNT);
-		ret->count += c;
 		return ret;
+	}
+}
+
+void CargoDataEntry::Update(uint count) {
+	this->count += count;
+	if (parent != NULL) {
+		parent->Update(count);
 	}
 }
 
@@ -937,8 +960,8 @@ struct StationViewWindow : public Window {
 			CargoID next_cargo;
 		};
 	};
+
 	typedef std::vector<RowDisplay> CargoDataVector;
-	typedef std::map<StationID, uint> DestinationMap;
 
 	static const int _spacing_side = 2;
 	static const int _spacing_symbol = 10;
@@ -979,6 +1002,7 @@ struct StationViewWindow : public Window {
 	Grouping groupings[_num_columns];
 
 	CargoDataEntry expanded_rows;
+	CargoDataEntry cached_destinations;
 	CargoDataVector displayed_rows;
 
 	StationViewWindow(const WindowDesc *desc, WindowNumber window_number) :
@@ -996,6 +1020,9 @@ struct StationViewWindow : public Window {
 		this->vscroll.cap = 4;
 		this->resize.step_height = 10;
 		this->FindWindowPlacementAndResize(desc);
+		for (CargoID i = 0; i < NUM_CARGO; i++) {
+			this->RecalcDestinations(i);
+		}
 	}
 
 	~StationViewWindow()
@@ -1015,52 +1042,67 @@ struct StationViewWindow : public Window {
 			switch (groupings[i]) {
 			case CARGO:
 				assert(i == 0);
-				data = data->Update(cargo, count);
+				data = data->InsertOrRetrieve(cargo);
 				expand = expand->Retrieve(cargo);
 				break;
 			case SOURCE:
-				data = data->Update(source, count);
+				data = data->InsertOrRetrieve(source);
 				expand = expand->Retrieve(source);
 				break;
 			case NEXT:
-				data = data->Update(next, count);
+				data = data->InsertOrRetrieve(next);
 				expand = expand->Retrieve(next);
 				break;
 			case DESTINATION:
-				data = data->Update(dest, count);
+				data = data->InsertOrRetrieve(dest);
 				expand = expand->Retrieve(dest);
 				break;
 			}
 		}
+		data->Update(count);
 	}
 
-	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, DestinationMap & dest, bool sent) {
+	void RecalcDestinations(CargoID i) {
+		const Station *st = Station::Get(this->window_number);
+		CargoDataEntry *cargo_entry = cached_destinations.InsertOrRetrieve(i);
+		cargo_entry->Clear();
+
+			const FlowStatMap & flows = st->goods[i].flows;
+			for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
+				StationID from = it->first;
+				CargoDataEntry *source_entry = cargo_entry->InsertOrRetrieve(from);
+				const FlowStatSet & flow_set = it->second;
+				for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
+					const FlowStat & stat = *flow_it;
+					CargoDataEntry * via_entry = source_entry->InsertOrRetrieve(stat.via);
+					EstimateDestinations(i, from, stat.via, stat.planned, via_entry);
+				}
+			}
+
+	}
+
+	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, CargoDataEntry *dest) {
 		if (Station::IsValidID(next) && Station::IsValidID(source)) {
-			DestinationMap tmp;
-			uint sum_flows = 0;
+			CargoDataEntry tmp;
 			FlowStatMap & flowmap = Station::Get(next)->goods[cargo].flows;
 			FlowStatMap::iterator map_it = flowmap.find(source);
 			if (map_it != flowmap.end()) {
 				FlowStatSet & flows = map_it->second;
 				for (FlowStatSet::iterator i = flows.begin(); i != flows.end(); ++i) {
-					uint flow = 0;
-					if (sent) {
-						flow =  i->sent;
-					} else {
-						flow =  i->planned;
-					}
-					sum_flows += flow;
-					tmp[i->via] = flow;
+					tmp.InsertOrRetrieve(i->via)->Update(i->planned);
 				}
 			}
 
-			if (sum_flows == 0) {
-				dest[INVALID_STATION] += count;
+			if (tmp.GetCount() == 0) {
+				dest->InsertOrRetrieve(INVALID_STATION)->Update(count);
 			} else {
 				uint sum_estimated = 0;
 				while(sum_estimated < count) {
-					for(DestinationMap::iterator i = tmp.begin(); i != tmp.end() && sum_estimated < count; ++i) {
-						uint estimate = DivideApprox(i->second * count, sum_flows);
+					for(CargoDataSet::iterator i = tmp.Begin(); i != tmp.End() && sum_estimated < count; ++i) {
+						CargoDataEntry *child = *i;
+						uint estimate = DivideApprox(child->GetCount() * count, tmp.GetCount());
+						if (estimate == 0) estimate = 1;
+
 						sum_estimated += estimate;
 						if (sum_estimated > count) {
 							estimate -= sum_estimated - count;
@@ -1068,62 +1110,66 @@ struct StationViewWindow : public Window {
 						}
 
 						if (estimate > 0) {
-							if (i->first == next) {
-								dest[next] += estimate;
+							if (child->GetStation() == next) {
+								dest->InsertOrRetrieve(next)->Update(estimate);
 							} else {
-								EstimateDestinations(cargo, source, i->first, estimate, dest, sent);
+								EstimateDestinations(cargo, source, child->GetStation(), estimate, dest);
 							}
 						}
 					}
-					if (sum_flows > 1) {
-						sum_flows--;
-					}
+
 				}
 			}
 		} else {
-			dest[INVALID_STATION] += count;
+			dest->InsertOrRetrieve(INVALID_STATION)->Update(count);
 		}
 	}
 
 	void BuildFlowList(CargoID i, const FlowStatMap & flows, CargoDataEntry * cargo) {
 		uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
+		const CargoDataEntry *source_dest = cached_destinations.Retrieve(i);
 		for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
 			StationID from = it->first;
+			const CargoDataEntry *source_entry = source_dest->Retrieve(from);
 			const FlowStatSet & flow_set = it->second;
 			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
 				const FlowStat & stat = *flow_it;
-				uint val = 0;
-				DestinationMap dest;
-				if (this->current_mode == PLANNED) {
-					val = DivideApprox(stat.planned * 30, scale);
-				} else {
-					val = DivideApprox(stat.sent * 30, scale);
-				}
-
-				if (stat.via == this->window_number) {
-					dest[this->window_number] = val;
-				} else {
-					EstimateDestinations(i, from, stat.via, val, dest, this->current_mode == SENT);
-				}
-
-				for (DestinationMap::iterator dest_it = dest.begin(); dest_it != dest.end(); ++dest_it) {
-					if (dest_it->second > 0) {
-						ShowCargo(cargo, i, from, stat.via, dest_it->first, dest_it->second);
+				const CargoDataEntry *via_entry = source_entry->Retrieve(stat.via);
+				for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
+					CargoDataEntry *dest_entry = *dest_it;
+					uint val = dest_entry->GetCount() * 30;
+					if (this->current_mode == SENT) {
+						val *= stat.sent;
+						val = DivideApprox(val, via_entry->GetCount());
 					}
+					val = DivideApprox(val, scale);
+					ShowCargo(cargo, i, from, stat.via, dest_entry->GetStation(), val);
 				}
 			}
 		}
 	}
 
 	void BuildCargoList(CargoID i, const CargoList & packets, CargoDataEntry * cargo) {
+		const CargoDataEntry *source_dest = cached_destinations.Retrieve(i);
 		for (CargoList::List::const_iterator it = packets.Packets()->begin(); it != packets.Packets()->end(); it++) {
 			const CargoPacket *cp = *it;
-			DestinationMap dest;
-			EstimateDestinations(i, cp->source, cp->next, cp->count, dest, false);
-			for (DestinationMap::iterator dest_it = dest.begin(); dest_it != dest.end(); ++dest_it) {
-				if (dest_it->second > 0) {
-					ShowCargo(cargo, i, cp->source, cp->next, dest_it->first, dest_it->second);
-				}
+
+			const CargoDataEntry *source_entry = source_dest->Retrieve(cp->source);
+			if (source_entry == NULL) {
+				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->count);
+				continue;
+			}
+
+			const CargoDataEntry *via_entry = source_entry->Retrieve(cp->next);
+			if (via_entry == NULL) {
+				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->count);
+				continue;
+			}
+
+			for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
+				CargoDataEntry * dest_entry = *dest_it;
+				uint val = DivideApprox(cp->count * dest_entry->GetCount(), via_entry->GetCount());
+				ShowCargo(cargo, i, cp->source, cp->next, dest_entry->GetStation(), val);
 			}
 		}
 	}
@@ -1276,6 +1322,11 @@ struct StationViewWindow : public Window {
 
 		}
 		return pos;
+	}
+
+	virtual void OnInvalidateData(int cargo) {
+		RecalcDestinations((CargoID)cargo);
+		this->SetDirty();
 	}
 
 	virtual void OnPaint()

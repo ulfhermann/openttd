@@ -82,11 +82,12 @@ public:
 	CargoDataEntry();
 	~CargoDataEntry();
 
-	CargoDataEntry * Update(StationID s, uint c = 0) {return Update<StationID>(s, c);}
-	CargoDataEntry * Update(CargoID car, uint c = 0) {return Update<CargoID>(car, c);}
+	CargoDataEntry * InsertOrRetrieve(StationID s) {return InsertOrRetrieve<StationID>(s);}
+	CargoDataEntry * InsertOrRetrieve(CargoID car) {return InsertOrRetrieve<CargoID>(car);}
+	void Update(uint count);
 
-	void Remove(StationID s) {CargoDataEntry t(s); subentries->erase(&t);}
-	void Remove(CargoID c) {CargoDataEntry t(c); subentries->erase(&t);}
+	void Remove(StationID s) {CargoDataEntry t(s); Remove(&t);}
+	void Remove(CargoID c) {CargoDataEntry t(c); Remove(&t);}
 
 	CargoDataEntry * Retrieve(StationID s) const {CargoDataEntry t(s); return Retrieve(subentries->find(&t));}
 	CargoDataEntry * Retrieve(CargoID c) const {CargoDataEntry t(c);return Retrieve(subentries->find(&t));}
@@ -102,6 +103,7 @@ public:
 	CargoDataSet::iterator Begin() const {return subentries->begin();}
 	CargoDataSet::iterator End() const {return subentries->end();}
 
+	void Clear();
 private:
 
 	CargoDataEntry(StationID st, uint c, CargoDataEntry * p);
@@ -110,7 +112,8 @@ private:
 	CargoDataEntry(CargoID c);
 	CargoDataEntry * Retrieve(CargoDataSet::iterator i) const;
 	template<class ID>
-	CargoDataEntry * Update(ID s, uint c);
+	CargoDataEntry * InsertOrRetrieve(ID s);
+	void Remove(CargoDataEntry * comp);
 	void IncrementSize();
 	CargoDataEntry * parent;
 	const union {

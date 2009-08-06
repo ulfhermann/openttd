@@ -9,6 +9,8 @@
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
+#include "../window_func.h"
+#include "../window_gui.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -189,6 +191,7 @@ void LinkGraph::Join() {
 			if (Station::IsValidID(node.station)) {
 				FlowStatMap & station_flows = Station::Get(node.station)->goods[cargo].flows;
 				node.ExportFlows(station_flows, cargo);
+				FindWindowById(WC_STATION_VIEW, node.station)->OnInvalidateData(comp->GetCargo());
 			}
 		}
 		delete job;
