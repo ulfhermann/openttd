@@ -191,7 +191,10 @@ void LinkGraph::Join() {
 			if (Station::IsValidID(node.station)) {
 				FlowStatMap & station_flows = Station::Get(node.station)->goods[cargo].flows;
 				node.ExportFlows(station_flows, cargo);
-				FindWindowById(WC_STATION_VIEW, node.station)->OnInvalidateData(comp->GetCargo());
+				Window *station_gui = FindWindowById(WC_STATION_VIEW, node.station);
+				if (station_gui != NULL) {
+					station_gui->OnInvalidateData(comp->GetCargo());
+				}
 			}
 		}
 		delete job;

@@ -50,23 +50,24 @@ enum SortOrder {
 	SO_ASCENDING
 };
 
-enum SortType {
-	ST_STATION,
-	ST_STATION_ID,
-	ST_CARGO_ID,
-	ST_COUNT,
-};
-
 class CargoDataEntry;
+
+enum CargoSortType {
+	ST_AS_GROUPING,    ///< by the same principle the entries are being grouped
+	ST_COUNT,          ///< by amount of cargo
+	ST_STATION_STRING, ///< by station name
+	ST_STATION_ID,     ///< by station id
+	ST_CARGO_ID,       ///< by cargo id
+};
 
 class CargoSorter {
 public:
-	CargoSorter(SortType t = ST_STATION_ID, SortOrder o = SO_ASCENDING) : type(t), order(o) {}
-	SortType GetSortType() {return type;}
+	CargoSorter(CargoSortType t = ST_STATION_ID, SortOrder o = SO_ASCENDING) : type(t), order(o) {}
+	CargoSortType GetSortType() {return type;}
 	bool operator()(const CargoDataEntry * cd1, const CargoDataEntry * cd2) const;
 
 private:
-	SortType type;
+	CargoSortType type;
 	SortOrder order;
 
 	template<class ID>
@@ -92,7 +93,7 @@ public:
 	CargoDataEntry * Retrieve(StationID s) const {CargoDataEntry t(s); return Retrieve(subentries->find(&t));}
 	CargoDataEntry * Retrieve(CargoID c) const {CargoDataEntry t(c);return Retrieve(subentries->find(&t));}
 
-	void Resort(SortType type, SortOrder order);
+	void Resort(CargoSortType type, SortOrder order);
 
 	StationID GetStation() const {return station;}
 	CargoID GetCargo() const {return cargo;}

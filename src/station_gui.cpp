@@ -813,14 +813,16 @@ CargoDataEntry::CargoDataEntry(CargoID ca) :
 
 CargoDataEntry::~CargoDataEntry() {
 	this->Clear();
+	delete subentries;
 }
 
 void CargoDataEntry::Clear() {
 	if (subentries != NULL) {
 		for (CargoDataSet::iterator i = subentries->begin(); i != subentries->end(); ++i) {
+			assert(*i != this);
 			delete *i;
 		}
-		delete subentries;
+		subentries->clear();
 	}
 	if (parent != NULL) {
 		parent->count -= this->count;
@@ -863,7 +865,7 @@ void CargoDataEntry::IncrementSize() {
 	 if (parent != NULL) parent->IncrementSize();
 }
 
-void CargoDataEntry::Resort(SortType type, SortOrder order) {
+void CargoDataEntry::Resort(CargoSortType type, SortOrder order) {
 	CargoDataSet * new_subs = new CargoDataSet(subentries->begin(), subentries->end(), CargoSorter(type, order));
 	delete subentries;
 	subentries = new_subs;
@@ -889,11 +891,12 @@ bool CargoSorter::operator()(const CargoDataEntry * cd1, const CargoDataEntry * 
 	case ST_COUNT:
 		return SortCount(cd1, cd2);
 		break;
-	case ST_STATION:
+	case ST_STATION_STRING:
 		return SortStation(cd1->GetStation(), cd2->GetStation());
 		break;
+	default:
+		NOT_REACHED();
 	}
-	NOT_REACHED();
 	return false;
 }
 
@@ -971,16 +974,16 @@ struct StationViewWindow : public Window {
 	static const int _spacing_top = 30;
 	static const int _num_columns = 4;
 
-	enum Grouping {
-		SOURCE,
-		NEXT,
-		DESTINATION,
-		CARGO,
+	enum Invalidation {
+		INV_FLOWS = 0x100,
+		INV_CARGO = 0x200
 	};
 
-	enum Sorting {
-		GROUPING = 0,
-		COUNT = 1
+	enum Grouping {
+		GR_SOURCE,
+		GR_NEXT,
+		GR_DESTINATION,
+		GR_CARGO,
 	};
 
 	enum Mode {
@@ -993,7 +996,7 @@ struct StationViewWindow : public Window {
 	static const StringID _group_names[];
 	static const StringID _mode_names[];
 
-	Sorting sortings[_num_columns];
+	CargoSortType sortings[_num_columns];
 	SortOrder sort_orders[_num_columns];
 
 	int scroll_to_row;
@@ -1008,10 +1011,10 @@ struct StationViewWindow : public Window {
 	StationViewWindow(const WindowDesc *desc, WindowNumber window_number) :
 		Window(desc, window_number), scroll_to_row(INT_MAX), grouping_index(0), current_mode(WAITING)
 	{
-		this->groupings[0] = CARGO;
-		this->sortings[0] = GROUPING;
+		this->groupings[0] = GR_CARGO;
+		this->sortings[0] = ST_AS_GROUPING;
 		SelectGroupBy(_settings_client.gui.station_gui_group_order);
-		SelectSortBy((Sorting)_settings_client.gui.station_gui_sort_by);
+		SelectSortBy((CargoSortType)_settings_client.gui.station_gui_sort_by);
 		sort_orders[0] = SO_ASCENDING;
 		SelectSortOrder((SortOrder)_settings_client.gui.station_gui_sort_order);
 		SelectMode(WAITING);
@@ -1020,9 +1023,6 @@ struct StationViewWindow : public Window {
 		this->vscroll.cap = 4;
 		this->resize.step_height = 10;
 		this->FindWindowPlacementAndResize(desc);
-		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			this->RecalcDestinations(i);
-		}
 	}
 
 	~StationViewWindow()
@@ -1040,20 +1040,20 @@ struct StationViewWindow : public Window {
 		const CargoDataEntry * expand = &expanded_rows;
 		for (int i = 0; i < _num_columns && expand != NULL; ++i) {
 			switch (groupings[i]) {
-			case CARGO:
+			case GR_CARGO:
 				assert(i == 0);
 				data = data->InsertOrRetrieve(cargo);
 				expand = expand->Retrieve(cargo);
 				break;
-			case SOURCE:
+			case GR_SOURCE:
 				data = data->InsertOrRetrieve(source);
 				expand = expand->Retrieve(source);
 				break;
-			case NEXT:
+			case GR_NEXT:
 				data = data->InsertOrRetrieve(next);
 				expand = expand->Retrieve(next);
 				break;
-			case DESTINATION:
+			case GR_DESTINATION:
 				data = data->InsertOrRetrieve(dest);
 				expand = expand->Retrieve(dest);
 				break;
@@ -1067,18 +1067,17 @@ struct StationViewWindow : public Window {
 		CargoDataEntry *cargo_entry = cached_destinations.InsertOrRetrieve(i);
 		cargo_entry->Clear();
 
-			const FlowStatMap & flows = st->goods[i].flows;
-			for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
-				StationID from = it->first;
-				CargoDataEntry *source_entry = cargo_entry->InsertOrRetrieve(from);
-				const FlowStatSet & flow_set = it->second;
-				for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
-					const FlowStat & stat = *flow_it;
-					CargoDataEntry * via_entry = source_entry->InsertOrRetrieve(stat.via);
-					EstimateDestinations(i, from, stat.via, stat.planned, via_entry);
-				}
+		const FlowStatMap & flows = st->goods[i].flows;
+		for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
+			StationID from = it->first;
+			CargoDataEntry *source_entry = cargo_entry->InsertOrRetrieve(from);
+			const FlowStatSet & flow_set = it->second;
+			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
+				const FlowStat & stat = *flow_it;
+				CargoDataEntry * via_entry = source_entry->InsertOrRetrieve(stat.via);
+				EstimateDestinations(i, from, stat.via, stat.planned, via_entry);
 			}
-
+		}
 	}
 
 	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, CargoDataEntry *dest) {
@@ -1176,6 +1175,11 @@ struct StationViewWindow : public Window {
 
 	void BuildCargoList(CargoDataEntry * cargo, const Station * st) {
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
+
+			if (this->cached_destinations.Retrieve(i) == NULL) {
+				this->RecalcDestinations(i);
+			}
+
 			if (this->current_mode == WAITING) {
 				BuildCargoList(i, st->goods[i].cargo, cargo);
 			} else {
@@ -1222,7 +1226,7 @@ struct StationViewWindow : public Window {
 	StringID SearchNonStop(CargoDataEntry * cd, StationID station, int column) {
 		CargoDataEntry * parent = cd->GetParent();
 		for (int i = column - 1; i > 0; --i) {
-			if (groupings[i] == DESTINATION) {
+			if (groupings[i] == GR_DESTINATION) {
 				if (parent->GetStation() == station) {
 					return STR_NONSTOP;
 				} else {
@@ -1232,7 +1236,7 @@ struct StationViewWindow : public Window {
 			parent = parent->GetParent();
 		}
 
-		if (groupings[column + 1] == DESTINATION) {
+		if (groupings[column + 1] == GR_DESTINATION) {
 			CargoDataSet::iterator begin = cd->Begin();
 			CargoDataSet::iterator end = cd->End();
 			if (begin != end && ++(cd->Begin()) == end && (*(begin))->GetStation() == station) {
@@ -1246,9 +1250,9 @@ struct StationViewWindow : public Window {
 	}
 
 	int DrawEntries(CargoDataEntry * entry, int pos, int maxrows, int column, CargoID cargo = CT_INVALID) {
-		if (sortings[column] == GROUPING) {
-			if (groupings[column] != CARGO) {
-				entry->Resort(ST_STATION, sort_orders[column]);
+		if (sortings[column] == ST_AS_GROUPING) {
+			if (groupings[column] != GR_CARGO) {
+				entry->Resort(ST_STATION_STRING, sort_orders[column]);
 			}
 		} else {
 			entry->Resort(ST_COUNT, sort_orders[column]);
@@ -1256,7 +1260,7 @@ struct StationViewWindow : public Window {
 		for (CargoDataSet::iterator i = entry->Begin(); i != entry->End(); ++i) {
 			CargoDataEntry *cd = *i;
 
-			if (groupings[column] == CARGO) {
+			if (groupings[column] == GR_CARGO) {
 				cargo = cd->GetCargo();
 			}
 
@@ -1266,7 +1270,7 @@ struct StationViewWindow : public Window {
 				SetDParam(0, cargo);
 				SetDParam(1, cd->GetCount());
 
-				if (groupings[column] == CARGO) {
+				if (groupings[column] == GR_CARGO) {
 					str = STR_STATION_VIEW_WAITING_CARGO;
 					DrawCargoIcons(
 							cd->GetCargo(),
@@ -1279,16 +1283,16 @@ struct StationViewWindow : public Window {
 					StationID station = cd->GetStation();
 
 					switch(groupings[column]) {
-					case SOURCE:
+					case GR_SOURCE:
 						str = GetEntryString(station, STR_STATION_FROM_HERE, STR_STATION_FROM, STR_STATION_FROM_ANY);
 						break;
-					case NEXT:
+					case GR_NEXT:
 						str = GetEntryString(station, STR_STATION_VIA_HERE, STR_STATION_VIA, STR_STATION_VIA_ANY);
 						if (str == STR_STATION_VIA) {
 							str = SearchNonStop(cd, station, column);
 						}
 						break;
-					case DESTINATION:
+					case GR_DESTINATION:
 						str = GetEntryString(station, STR_STATION_TO_HERE, STR_STATION_TO, STR_STATION_TO_ANY);
 						break;
 					default:
@@ -1325,7 +1329,7 @@ struct StationViewWindow : public Window {
 	}
 
 	virtual void OnInvalidateData(int cargo) {
-		RecalcDestinations((CargoID)cargo);
+		this->cached_destinations.Remove((CargoID)cargo);
 		this->SetDirty();
 	}
 
@@ -1417,7 +1421,7 @@ struct StationViewWindow : public Window {
 		if (filter->Retrieve(next) != NULL) {
 			filter->Remove(next);
 		} else {
-			filter->Update(next);
+			filter->InsertOrRetrieve(next);
 		}
 	}
 
@@ -1509,7 +1513,7 @@ struct StationViewWindow : public Window {
 			}
 
 			case SVW_SORT_BY: {
-				Sorting sorting = (sortings[1] == GROUPING ? COUNT : GROUPING);
+				CargoSortType sorting = (sortings[1] == ST_AS_GROUPING ? ST_COUNT : ST_AS_GROUPING);
 				SelectSortBy(sorting);
 				this->flags4 |= WF_TIMEOUT_BEGIN;
 				this->LowerWidget(SVW_SORT_BY);
@@ -1531,7 +1535,7 @@ struct StationViewWindow : public Window {
 		}
 	}
 
-	void SelectSortBy(Sorting sorting) {
+	void SelectSortBy(CargoSortType sorting) {
 		_settings_client.gui.station_gui_sort_by = sorting;
 		sortings[1] = sortings[2] = sortings[3] = sorting;
 		/* Display the current sort variant */
@@ -1557,34 +1561,34 @@ struct StationViewWindow : public Window {
 		this->widget[SVW_GROUP_BY].data = _group_names[index];
 		switch(_group_names[index]) {
 		case STR_GROUP_S_V_D:
-			groupings[1] = SOURCE;
-			groupings[2] = NEXT;
-			groupings[3] = DESTINATION;
+			groupings[1] = GR_SOURCE;
+			groupings[2] = GR_NEXT;
+			groupings[3] = GR_DESTINATION;
 			break;
 		case STR_GROUP_S_D_V:
-			groupings[1] = SOURCE;
-			groupings[2] = DESTINATION;
-			groupings[3] = NEXT;
+			groupings[1] = GR_SOURCE;
+			groupings[2] = GR_DESTINATION;
+			groupings[3] = GR_NEXT;
 			break;
 		case STR_GROUP_V_S_D:
-			groupings[1] = NEXT;
-			groupings[2] = SOURCE;
-			groupings[3] = DESTINATION;
+			groupings[1] = GR_NEXT;
+			groupings[2] = GR_SOURCE;
+			groupings[3] = GR_DESTINATION;
 			break;
 		case STR_GROUP_V_D_S:
-			groupings[1] = NEXT;
-			groupings[2] = DESTINATION;
-			groupings[3] = SOURCE;
+			groupings[1] = GR_NEXT;
+			groupings[2] = GR_DESTINATION;
+			groupings[3] = GR_SOURCE;
 			break;
 		case STR_GROUP_D_S_V:
-			groupings[1] = DESTINATION;
-			groupings[2] = SOURCE;
-			groupings[3] = NEXT;
+			groupings[1] = GR_DESTINATION;
+			groupings[2] = GR_SOURCE;
+			groupings[3] = GR_NEXT;
 			break;
 		case STR_GROUP_D_V_S:
-			groupings[1] = DESTINATION;
-			groupings[2] = NEXT;
-			groupings[3] = SOURCE;
+			groupings[1] = GR_DESTINATION;
+			groupings[2] = GR_NEXT;
+			groupings[3] = GR_SOURCE;
 			break;
 		}
 		this->SetDirty();
