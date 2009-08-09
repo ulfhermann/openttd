@@ -1037,6 +1037,7 @@ struct StationViewWindow : public Window {
 	}
 
 	void ShowCargo(CargoDataEntry * data, CargoID cargo, StationID source, StationID next, StationID dest, uint count) {
+		if (count == 0) return;
 		const CargoDataEntry * expand = &expanded_rows;
 		for (int i = 0; i < _num_columns && expand != NULL; ++i) {
 			switch (groupings[i]) {
@@ -1075,7 +1076,11 @@ struct StationViewWindow : public Window {
 			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
 				const FlowStat & stat = *flow_it;
 				CargoDataEntry * via_entry = source_entry->InsertOrRetrieve(stat.via);
-				EstimateDestinations(i, from, stat.via, stat.planned, via_entry);
+				if (stat.via == this->window_number) {
+					via_entry->InsertOrRetrieve(stat.via)->Update(stat.planned);
+				} else {
+					EstimateDestinations(i, from, stat.via, stat.planned, via_entry);
+				}
 			}
 		}
 	}
