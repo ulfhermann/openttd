@@ -41,7 +41,7 @@
 
 #include "saveload_internal.h"
 
-extern const uint16 SAVEGAME_VERSION = 124;
+extern const uint16 SAVEGAME_VERSION = 125;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -1633,7 +1633,7 @@ static const SaveLoadFormat *GetSavegameFormat(const char *s)
 }
 
 /* actual loader/saver function */
-void InitializeGame(uint size_x, uint size_y, bool reset_date);
+void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settings);
 extern bool AfterLoadGame();
 extern bool LoadOldSaveGame(const char *file);
 
@@ -1783,7 +1783,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb)
 	/* An instance of saving is already active, so don't go saving again */
 	if (_ts.saveinprogress && mode == SL_SAVE) {
 		/* if not an autosave, but a user action, show error message */
-		if (!_do_autosave) ShowErrorMessage(INVALID_STRING_ID, STR_SAVE_STILL_IN_PROGRESS, 0, 0);
+		if (!_do_autosave) ShowErrorMessage(INVALID_STRING_ID, STR_ERROR_SAVE_STILL_IN_PROGRESS, 0, 0);
 		return SL_OK;
 	}
 	WaitTillSaved();
@@ -1793,7 +1793,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb)
 	/* Load a TTDLX or TTDPatch game */
 	if (mode == SL_OLD_LOAD) {
 		_engine_mngr.ResetToDefaultMapping();
-		InitializeGame(256, 256, true); // set a mapsize of 256x256 for TTDPatch games or it might get confused
+		InitializeGame(256, 256, true, true); // set a mapsize of 256x256 for TTDPatch games or it might get confused
 		GamelogReset();
 		if (!LoadOldSaveGame(filename)) return SL_REINIT;
 		_sl_version = 0;
@@ -1912,7 +1912,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb)
 			/* Old maps were hardcoded to 256x256 and thus did not contain
 			 * any mapsize information. Pre-initialize to 256x256 to not to
 			 * confuse old games */
-			InitializeGame(256, 256, true);
+			InitializeGame(256, 256, true, true);
 
 			GamelogReset();
 
@@ -1988,7 +1988,7 @@ void GenerateDefaultSaveName(char *buf, const char *last)
 	SetDParam(2, _date);
 
 	/* Get the correct string (special string for when there's not company) */
-	GetString(buf, !Company::IsValidID(cid) ? STR_GAME_SAVELOAD_SPECTATOR_SAVEGAME : STR_DEFAULT_SAVEGAME_NAME, last);
+	GetString(buf, !Company::IsValidID(cid) ? STR_SAVEGAME_NAME_SPECTATOR : STR_SAVEGAME_NAME_DEFAULT, last);
 	SanitizeFilename(buf);
 }
 

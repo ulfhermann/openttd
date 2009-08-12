@@ -24,7 +24,7 @@
 #include "widgets/dropdown_func.h"
 #include "station_func.h"
 #include "highscore.h"
-#include "gfxinit.h"
+#include "base_media_base.h"
 #include "company_base.h"
 #include "company_func.h"
 #include <map>
@@ -123,6 +123,9 @@ enum GameOptionsWidgets {
 	GOW_BASE_GRF_DROPDOWN,   ///< Use to select a base GRF
 	GOW_BASE_GRF_STATUS,     ///< Info about missing files etc.
 	GOW_BASE_GRF_DESCRIPTION,///< Description of selected base GRF
+	GOW_BASE_SFX_FRAME,      ///< Base SFX selection frame
+	GOW_BASE_SFX_DROPDOWN,   ///< Use to select a base SFX
+	GOW_BASE_SFX_DESCRIPTION,///< Description of selected base SFX
 };
 
 /**
@@ -151,17 +154,18 @@ static void ShowTownnameDropdown(Window *w, int sel)
 
 static void ShowCustCurrency();
 
-static void ShowGraphicsSetMenu(Window *w)
+template <class T>
+static void ShowSetMenu(Window *w, int widget)
 {
-	int n = GetNumGraphicsSets();
-	int current = GetIndexOfCurrentGraphicsSet();
+	int n = T::GetNumSets();
+	int current = T::GetIndexOfUsedSet();
 
 	DropDownList *list = new DropDownList();
 	for (int i = 0; i < n; i++) {
-		list->push_back(new DropDownListCharStringItem(GetGraphicsSetName(i), i, (_game_mode == GM_MENU) ? false : (current != i)));
+		list->push_back(new DropDownListCharStringItem(T::GetSet(i)->name, i, (_game_mode == GM_MENU) ? false : (current != i)));
 	}
 
-	ShowDropDownList(w, list, current, GOW_BASE_GRF_DROPDOWN);
+	ShowDropDownList(w, list, current, widget);
 }
 
 struct GameOptionsWindow : Window {
@@ -194,8 +198,9 @@ struct GameOptionsWindow : Window {
 			case GOW_LANG_DROPDOWN:       SetDParam(0, SPECSTR_LANGUAGE_START + _dynlang.curr); break;
 			case GOW_RESOLUTION_DROPDOWN: SetDParam(0, GetCurRes() == _num_resolutions ? STR_RES_OTHER : SPECSTR_RESOLUTION_START + GetCurRes()); break;
 			case GOW_SCREENSHOT_DROPDOWN: SetDParam(0, SPECSTR_SCREENSHOT_START + _cur_screenshot_format); break;
-			case GOW_BASE_GRF_DROPDOWN:   SetDParamStr(0, GetGraphicsSetName(GetIndexOfCurrentGraphicsSet())); break;
-			case GOW_BASE_GRF_STATUS:     SetDParam(0, GetGraphicsSetNumMissingFiles(GetIndexOfCurrentGraphicsSet())); break;
+			case GOW_BASE_GRF_DROPDOWN:   SetDParamStr(0, BaseGraphics::GetUsedSet()->name); break;
+			case GOW_BASE_GRF_STATUS:     SetDParam(0, BaseGraphics::GetUsedSet()->GetNumMissing()); break;
+			case GOW_BASE_SFX_DROPDOWN:   SetDParamStr(0, BaseSounds::GetUsedSet()->name); break;
 		}
 	}
 
@@ -206,20 +211,37 @@ struct GameOptionsWindow : Window {
 
 	virtual void DrawWidget(const Rect &r, int widget) const
 	{
-		if (widget != GOW_BASE_GRF_DESCRIPTION) return;
+		switch (widget) {
+			case GOW_BASE_GRF_DESCRIPTION:
+				SetDParamStr(0, BaseGraphics::GetUsedSet()->description);
+				DrawStringMultiLine(r.left, r.right, r.top, UINT16_MAX, STR_BLACK_RAW_STRING);
+				break;
 
-		SetDParamStr(0, GetGraphicsSetDescription(GetIndexOfCurrentGraphicsSet()));
-		DrawStringMultiLine(r.left, r.right, r.top, UINT16_MAX, STR_BLACK_RAW_STRING);
+			case GOW_BASE_SFX_DESCRIPTION:
+				SetDParamStr(0, BaseSounds::GetUsedSet()->description);
+				DrawStringMultiLine(r.left, r.right, r.top, UINT16_MAX, STR_BLACK_RAW_STRING);
+				break;
+		}
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
 	{
-		if (widget != GOW_BASE_GRF_DESCRIPTION) return;
+		switch (widget) {
+			case GOW_BASE_GRF_DESCRIPTION:
+				/* Find the biggest description for the default size. */
+				for (int i = 0; i < BaseGraphics::GetNumSets(); i++) {
+					SetDParamStr(0, BaseGraphics::GetSet(i)->description);
+					size->height = max(size->height, (uint)GetStringHeight(STR_BLACK_RAW_STRING, size->width));
+				}
+				break;
 
-		/* Find the biggest description for the default size. */
-		for (int i = 0; i < GetNumGraphicsSets(); i++) {
-			SetDParamStr(0, GetGraphicsSetDescription(i));
-			size->height = max(size->height, (uint)GetStringHeight(STR_BLACK_RAW_STRING, size->width));
+			case GOW_BASE_SFX_DESCRIPTION:
+				/* Find the biggest description for the default size. */
+				for (int i = 0; i < BaseSounds::GetNumSets(); i++) {
+					SetDParamStr(0, BaseSounds::GetSet(i)->description);
+					size->height = max(size->height, (uint)GetStringHeight(STR_BLACK_RAW_STRING, size->width));
+				}
+				break;
 		}
 	}
 
@@ -277,7 +299,7 @@ struct GameOptionsWindow : Window {
 			case GOW_FULLSCREEN_BUTTON: // Click fullscreen on/off
 				/* try to toggle full-screen on/off */
 				if (!ToggleFullScreen(!_fullscreen)) {
-					ShowErrorMessage(INVALID_STRING_ID, STR_FULLSCREEN_FAILED, 0, 0);
+					ShowErrorMessage(INVALID_STRING_ID, STR_ERROR_FULLSCREEN_FAILED, 0, 0);
 				}
 				this->SetWidgetLoweredState(GOW_FULLSCREEN_BUTTON, _fullscreen);
 				this->SetDirty();
@@ -288,8 +310,33 @@ struct GameOptionsWindow : Window {
 				break;
 
 			case GOW_BASE_GRF_DROPDOWN:
-				ShowGraphicsSetMenu(this);
+				ShowSetMenu<BaseGraphics>(this, GOW_BASE_GRF_DROPDOWN);
 				break;
+
+			case GOW_BASE_SFX_DROPDOWN:
+				ShowSetMenu<BaseSounds>(this, GOW_BASE_SFX_DROPDOWN);
+				break;
+		}
+	}
+
+	/**
+	 * Set the base media set.
+	 * @param index the index of the media set
+	 * @tparam T class of media set
+	 */
+	template <class T>
+	void SetMediaSet(int index)
+	{
+		if (_game_mode == GM_MENU) {
+			const char *name = T::GetSet(index)->name;
+
+			free(const_cast<char *>(T::ini_set));
+			T::ini_set = strdup(name);
+
+			T::SetSet(name);
+			this->reload = true;
+			this->SetDirty();
+			this->OnInvalidateData(0);
 		}
 	}
 
@@ -347,17 +394,11 @@ struct GameOptionsWindow : Window {
 				break;
 
 			case GOW_BASE_GRF_DROPDOWN:
-				if (_game_mode == GM_MENU) {
-					const char *name = GetGraphicsSetName(index);
+				this->SetMediaSet<BaseGraphics>(index);
+				break;
 
-					free(_ini_graphics_set);
-					_ini_graphics_set = strdup(name);
-
-					SetGraphicsSet(name);
-					this->reload = true;
-					this->SetDirty();
-					this->OnInvalidateData(0);
-				}
+			case GOW_BASE_SFX_DROPDOWN:
+				this->SetMediaSet<BaseSounds>(index);
 				break;
 		}
 	}
@@ -366,7 +407,7 @@ struct GameOptionsWindow : Window {
 	{
 		this->SetWidgetLoweredState(GOW_FULLSCREEN_BUTTON, _fullscreen);
 
-		bool missing_files = GetGraphicsSetNumMissingFiles(GetIndexOfCurrentGraphicsSet()) == 0;
+		bool missing_files = BaseGraphics::GetUsedSet()->GetNumMissing() == 0;
 		this->nested_array[GOW_BASE_GRF_STATUS]->SetDataTip(missing_files ? STR_EMPTY : STR_GAME_OPTIONS_BASE_GRF_STATUS, STR_NULL);
 	}
 };
@@ -421,6 +462,14 @@ static const NWidgetPart _nested_game_options_widgets[] = {
 			EndContainer(),
 			NWidget(WWT_TEXT, COLOUR_GREY, GOW_BASE_GRF_DESCRIPTION), SetMinimalSize(330, 0), SetDataTip(STR_EMPTY, STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP), SetPadding(6, 10, 10, 10),
 		EndContainer(),
+
+		NWidget(WWT_FRAME, COLOUR_GREY, GOW_BASE_SFX_FRAME), SetDataTip(STR_GAME_OPTIONS_BASE_SFX, STR_NULL),
+			NWidget(NWID_HORIZONTAL), SetPIP(10, 30, 10),
+				NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_BASE_SFX_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_BLACK_RAW_STRING, STR_GAME_OPTIONS_BASE_SFX_TOOLTIP), SetPadding(14, 0, 0, 0),
+				NWidget(NWID_SPACER), SetFill(true, false),
+			EndContainer(),
+			NWidget(WWT_TEXT, COLOUR_GREY, GOW_BASE_SFX_DESCRIPTION), SetMinimalSize(330, 0), SetDataTip(STR_EMPTY, STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP), SetPadding(6, 10, 10, 10),
+		EndContainer(),
 	EndContainer(),
 };
 
@@ -467,8 +516,8 @@ static const Widget _game_difficulty_widgets[] = {
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREEN,     10,   357,    28,    39, STR_DIFFICULTY_LEVEL_HIGH_SCORE_BUTTON, STR_NULL},                           // GDW_HIGHSCORE
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,    42,   262, 0x0,                                    STR_NULL},                           // GDW_SETTING_BG
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,   263,   278, 0x0,                                    STR_NULL},                           // GDW_LOWER_BG
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   105,   185,   265,   276, STR_OPTIONS_SAVE_CHANGES,               STR_NULL},                           // GDW_ACCEPT
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   186,   266,   265,   276, STR_QUERY_CANCEL,                       STR_NULL},                           // GDW_CANCEL
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   105,   185,   265,   276, STR_DIFFICULTY_LEVEL_SAVE,               STR_NULL},                           // GDW_ACCEPT
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   186,   266,   265,   276, STR_BUTTON_CANCEL,                       STR_NULL},                           // GDW_CANCEL
 {   WIDGETS_END},
 };
 
@@ -497,8 +546,8 @@ static const NWidgetPart _nested_game_difficulty_widgets[] = {
 		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_SPACER), SetMinimalSize(105, 0),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_ACCEPT), SetMinimalSize(81, 12), SetDataTip(STR_OPTIONS_SAVE_CHANGES, STR_NULL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_CANCEL), SetMinimalSize(81, 12), SetDataTip(STR_QUERY_CANCEL, STR_NULL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_ACCEPT), SetMinimalSize(81, 12), SetDataTip(STR_DIFFICULTY_LEVEL_SAVE, STR_NULL),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_CANCEL), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_CANCEL, STR_NULL),
 			NWidget(NWID_SPACER), SetMinimalSize(103, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
@@ -615,7 +664,7 @@ public:
 
 				if (x >= 10) {
 					/* Increase button clicked */
-					val = min(val + sdb->interval, sdb->max);
+					val = min(val + sdb->interval, (int32)sdb->max);
 					this->clicked_increase = true;
 				} else {
 					/* Decrease button clicked */
@@ -824,7 +873,7 @@ void SettingEntry::Init(byte level, bool last_field)
 /** Recursively close all folds of sub-pages */
 void SettingEntry::FoldAll()
 {
-	switch(this->flags & SEF_KIND_MASK) {
+	switch (this->flags & SEF_KIND_MASK) {
 		case SEF_SETTING_KIND:
 			break;
 
@@ -940,7 +989,7 @@ uint SettingEntry::Draw(GameSettings *settings_ptr, int base_x, int base_y, int 
 		x += LEVEL_WIDTH;
 	}
 
-	switch(this->flags & SEF_KIND_MASK) {
+	switch (this->flags & SEF_KIND_MASK) {
 		case SEF_SETTING_KIND:
 			if (cur_row >= first_row) {
 				DrawSetting(settings_ptr, this->d.entry.setting, x, y, max_x, this->flags & SEF_BUTTONS_MASK);
@@ -1505,7 +1554,7 @@ struct GameSettingsWindow : Window {
 
 				this->valuewindow_entry = pe;
 				SetDParam(0, value);
-				ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPT, 10, 100, this, CS_NUMERAL, QSF_NONE);
+				ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPTION, 10, 100, this, CS_NUMERAL, QSF_NONE);
 			}
 		}
 	}
@@ -1555,7 +1604,7 @@ static const Widget _settings_selection_widgets[] = {
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_MAUVE,    11,   411,     0,    13, STR_CONFIG_SETTING_CAPTION,      STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},   // SETTINGSEL_CAPTION
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_MAUVE,     0,   399,    14,   187, 0x0,                             STR_NULL},                             // SETTINGSEL_OPTIONSPANEL
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_MAUVE,   400,   411,    14,   175, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // SETTINGSEL_SCROLLBAR
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_MAUVE,   400,   411,   176,   187, 0x0,                             STR_RESIZE_BUTTON},                    // SETTINGSEL_RESIZE
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_MAUVE,   400,   411,   176,   187, 0x0,                             STR_TOOLTIP_RESIZE},                    // SETTINGSEL_RESIZE
 {   WIDGETS_END},
 };
 
@@ -1791,24 +1840,24 @@ static const Widget _cust_currency_widgets[] = {
 {    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,      11,   229,     0,    13, STR_CURRENCY_WINDOW,         STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},           // CUSTCURR_CAPTION
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,       0,   229,    14,   119, 0x0,                         STR_NULL},                                     // CUSTCURR_BACKGROUND
 
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    19,    21,    29, STR_BLACK_SMALL_ARROW_LEFT,  STR_TOOLTIP_DECREASE_EXCHANGE_RATE},           // CUSTCURR_RATE_DOWN
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    20,    29,    21,    29, STR_BLACK_SMALL_ARROW_RIGHT, STR_TOOLTIP_INCREASE_EXCHANGE_RATE},           // CUSTCURR_RATE_UP
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    21,    29, STR_CURRENCY_EXCHANGE_RATE,  STR_TOOLTIP_SET_EXCHANGE_RATE},                // CUSTCURR_RATE
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    19,    21,    29, STR_BLACK_SMALL_ARROW_LEFT,  STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP},           // CUSTCURR_RATE_DOWN
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    20,    29,    21,    29, STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP},           // CUSTCURR_RATE_UP
+{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    21,    29, STR_CURRENCY_EXCHANGE_RATE,  STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP},                // CUSTCURR_RATE
 
-{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    33,    41, 0x0,                         STR_TOOLTIP_SET_CUSTOM_CURRENCY_SEPARATOR},    // CUSTCURR_SEPARATOR_EDIT
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    33,    41, STR_CURRENCY_SEPARATOR,      STR_TOOLTIP_SET_CUSTOM_CURRENCY_SEPARATOR},    // CUSTCURR_SEPARATOR
+{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    33,    41, 0x0,                         STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP},    // CUSTCURR_SEPARATOR_EDIT
+{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    33,    41, STR_CURRENCY_SEPARATOR,      STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP},    // CUSTCURR_SEPARATOR
 
-{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    45,    53, 0x0,                         STR_TOOLTIP_SET_CUSTOM_CURRENCY_PREFIX},       // CUSTCURR_PREFIX_EDIT
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    45,    53, STR_CURRENCY_PREFIX,         STR_TOOLTIP_SET_CUSTOM_CURRENCY_PREFIX},       // CUSTCURR_PREFIX
+{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    45,    53, 0x0,                         STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP},       // CUSTCURR_PREFIX_EDIT
+{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    45,    53, STR_CURRENCY_PREFIX,         STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP},       // CUSTCURR_PREFIX
 
-{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    57,    65, 0x0,                         STR_TOOLTIP_SET_CUSTOM_CURRENCY_SUFFIX},       // CUSTCURR_SUFFIX_EDIT
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    57,    65, STR_CURRENCY_SUFFIX,         STR_TOOLTIP_SET_CUSTOM_CURRENCY_SUFFIX},       // CUSTCURR_SUFFIX
+{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    57,    65, 0x0,                         STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP},       // CUSTCURR_SUFFIX_EDIT
+{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    57,    65, STR_CURRENCY_SUFFIX,         STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP},       // CUSTCURR_SUFFIX
 
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    19,    69,    77, STR_BLACK_SMALL_ARROW_LEFT,  STR_TOOLTIP_DECREASE_CUSTOM_CURRENCY_TO_EURO}, // CUSTCURR_YEAR_DOWN
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    20,    29,    69,    77, STR_BLACK_SMALL_ARROW_RIGHT, STR_TOOLTIP_INCREASE_CUSTOM_CURRENCY_TO_EURO}, // CUSTCURR_YEAR_UP
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    69,    77, STR_CURRENCY_SWITCH_TO_EURO, STR_TOOLTIP_SET_CUSTOM_CURRENCY_TO_EURO},      // CUSTCURR_YEAR
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    19,    69,    77, STR_BLACK_SMALL_ARROW_LEFT,  STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP}, // CUSTCURR_YEAR_DOWN
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    20,    29,    69,    77, STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP}, // CUSTCURR_YEAR_UP
+{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    69,    77, STR_CURRENCY_SWITCH_TO_EURO, STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP},      // CUSTCURR_YEAR
 
-{      WWT_LABEL,   RESIZE_NONE,  COLOUR_BLUE,       2,   227,    93,   101, STR_CURRENCY_PREVIEW,        STR_TOOLTIP_CUSTOM_CURRENCY_PREVIEW},          // CUSTCURR_PREVIEW
+{      WWT_LABEL,   RESIZE_NONE,  COLOUR_BLUE,       2,   227,    93,   101, STR_CURRENCY_PREVIEW,        STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP},          // CUSTCURR_PREVIEW
 
 {   WIDGETS_END},
 };
@@ -1821,43 +1870,43 @@ static const NWidgetPart _nested_cust_currency_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_GREY, CUSTCURR_BACKGROUND),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 7),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_DOWN), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_TOOLTIP_DECREASE_EXCHANGE_RATE),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_UP), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_TOOLTIP_INCREASE_EXCHANGE_RATE),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_DOWN), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_UP), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP),
 			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_RATE), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_EXCHANGE_RATE, STR_TOOLTIP_SET_EXCHANGE_RATE),
+			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_RATE), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_EXCHANGE_RATE, STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP),
 			NWidget(NWID_SPACER), SetFill(1, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SEPARATOR_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_TOOLTIP_SET_CUSTOM_CURRENCY_SEPARATOR),
+			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SEPARATOR_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP),
 			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SEPARATOR), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SEPARATOR, STR_TOOLTIP_SET_CUSTOM_CURRENCY_SEPARATOR),
+			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SEPARATOR), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SEPARATOR, STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP),
 			NWidget(NWID_SPACER), SetFill(1, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_PREFIX_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_TOOLTIP_SET_CUSTOM_CURRENCY_PREFIX),
+			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_PREFIX_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP),
 			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_PREFIX), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_PREFIX, STR_TOOLTIP_SET_CUSTOM_CURRENCY_PREFIX),
+			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_PREFIX), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_PREFIX, STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP),
 			NWidget(NWID_SPACER), SetFill(1, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SUFFIX_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_TOOLTIP_SET_CUSTOM_CURRENCY_SUFFIX),
+			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SUFFIX_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP),
 			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SUFFIX), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SUFFIX, STR_TOOLTIP_SET_CUSTOM_CURRENCY_SUFFIX),
+			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SUFFIX), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SUFFIX, STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP),
 			NWidget(NWID_SPACER), SetFill(1, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_DOWN), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_TOOLTIP_DECREASE_CUSTOM_CURRENCY_TO_EURO),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_UP), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_TOOLTIP_INCREASE_CUSTOM_CURRENCY_TO_EURO),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_DOWN), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_UP), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
 			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_YEAR), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SWITCH_TO_EURO, STR_TOOLTIP_SET_CUSTOM_CURRENCY_TO_EURO),
+			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_YEAR), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SWITCH_TO_EURO, STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
 			NWidget(NWID_SPACER), SetFill(1, 0),
 		EndContainer(),
 		NWidget(WWT_LABEL, COLOUR_BLUE, CUSTCURR_PREVIEW), SetMinimalSize(226, 9),
-								SetDataTip(STR_CURRENCY_PREVIEW, STR_TOOLTIP_CUSTOM_CURRENCY_PREVIEW), SetPadding(15, 1, 18, 2),
+								SetDataTip(STR_CURRENCY_PREVIEW, STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP), SetPadding(15, 1, 18, 2),
 	EndContainer(),
 };
 

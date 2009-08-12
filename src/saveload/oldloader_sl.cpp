@@ -1468,16 +1468,19 @@ static bool LoadOldEngineName(LoadgameState *ls, int num)
 
 static const OldChunks subsidy_chunk[] = {
 	OCL_SVAR(  OC_UINT8, Subsidy, cargo_type ),
-	OCL_SVAR(  OC_UINT8, Subsidy, age ),
-	OCL_SVAR(  OC_FILE_U8 | OC_VAR_U16, Subsidy, from ),
-	OCL_SVAR(  OC_FILE_U8 | OC_VAR_U16, Subsidy, to ),
+	OCL_SVAR(  OC_UINT8, Subsidy, remaining ),
+	OCL_SVAR(  OC_FILE_U8 | OC_VAR_U16, Subsidy, src ),
+	OCL_SVAR(  OC_FILE_U8 | OC_VAR_U16, Subsidy, dst ),
 
 	OCL_END()
 };
 
 static bool LoadOldSubsidy(LoadgameState *ls, int num)
 {
-	return LoadChunk(ls, &Subsidy::array[num], subsidy_chunk);
+	Subsidy *s = new (num) Subsidy();
+	bool ret = LoadChunk(ls, s, subsidy_chunk);
+	if (s->cargo_type == CT_INVALID) delete s;
+	return ret;
 }
 
 static const OldChunks game_difficulty_chunk[] = {
