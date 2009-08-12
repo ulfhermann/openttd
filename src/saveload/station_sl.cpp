@@ -261,10 +261,6 @@ static void Load_STNS()
 		uint num_cargo = CheckSavegameVersion(55) ? 12 : NUM_CARGO;
 		for (CargoID i = 0; i < num_cargo; i++) {
 			GoodsEntry *ge = &st->goods[i];
-			LinkStatMap & stats = ge->link_stats;
-			FlowStatMap & flows = ge->flows;
-			_num_links = stats.size(); // for saving, is overwritten by next line when loading
-			CountFlows(flows);
 			SlObject(ge, GetGoodsDesc());
 			if (CheckSavegameVersion(68)) {
 				SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
@@ -281,33 +277,6 @@ static void Load_STNS()
 					cp->feeder_share    = _cargo_feeder_share;
 					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
 					ge->cargo.Append(cp);
-				}
-			}
-			FlowStat fs;
-			if (stats.empty() && flows.empty()) { // loading
-				LinkStat ls;
-				for (uint i = 0; i < _num_links; ++i) {
-					SlObject(&ls, _linkstat_desc);
-					assert(ls.capacity > 0);
-					stats[_station_id] = ls;
-				}
-				for (uint i = 0; i < _num_flows; ++i) {
-					SlObject(&fs, _flowstat_desc);
-					flows[_station_id].insert(fs);
-				}
-			} else { // saving
-				for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
-					_station_id = i->first;
-					assert(i->second.capacity > 0);
-					SlObject(&(i->second), _linkstat_desc);
-				}
-				for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
-					_station_id = i->first;
-					FlowStatSet & flow_set = i->second;
-					for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
-						fs = *j;
-						SlObject(&fs, _flowstat_desc);
-					}
 				}
 			}
 		}
@@ -414,7 +383,25 @@ static void RealSave_STNN(BaseStation *bst)
 	if (!waypoint) {
 		Station *st = Station::From(bst);
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			SlObject(&st->goods[i], GetGoodsDesc());
+			GoodsEntry *ge = &st->goods[i];
+			LinkStatMap &stats = ge->link_stats;
+			_num_links = stats.size();
+			FlowStatMap & flows = ge->flows;
+			CountFlows(flows);
+			SlObject(ge, GetGoodsDesc());
+			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
+				_station_id = i->first;
+				assert(i->second.capacity > 0);
+				SlObject(&(i->second), _linkstat_desc);
+			}
+			for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
+				_station_id = i->first;
+				FlowStatSet & flow_set = i->second;
+				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+					FlowStat fs = *j;
+					SlObject(&fs, _flowstat_desc);
+				}
+			}
 		}
 	}
 
@@ -446,7 +433,21 @@ static void Load_STNN()
 		if (!waypoint) {
 			Station *st = Station::From(bst);
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
-				SlObject(&st->goods[i], GetGoodsDesc());
+				GoodsEntry *ge = &st->goods[i];
+				LinkStatMap &stats = ge->link_stats;
+				FlowStatMap & flows = ge->flows;
+				SlObject(ge, GetGoodsDesc());
+				LinkStat ls;
+				for (uint i = 0; i < _num_links; ++i) {
+					SlObject(&ls, _linkstat_desc);
+					assert(ls.capacity > 0);
+					stats[_station_id] = ls;
+				}
+				FlowStat fs;
+				for (uint i = 0; i < _num_flows; ++i) {
+					SlObject(&fs, _flowstat_desc);
+					flows[_station_id].insert(fs);
+				}
 			}
 		}
 
@@ -470,6 +471,7 @@ static void Ptrs_STNN()
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
 			SlObject(ge, GetGoodsDesc());
+			// as there are no pointers in the link stats we don't have to consider them
 		}
 		SlObject(st, _station_desc);
 	}
