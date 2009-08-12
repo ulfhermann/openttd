@@ -60,7 +60,7 @@ enum SmallMapWindowWidgets {
 static const Widget _smallmap_widgets[] = {
 {  WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_BROWN,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},                       // SM_WIDGET_CLOSEBOX
 {   WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_BROWN,    11,   337,     0,    13, STR_SMALLMAP_CAPTION,     STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},             // SM_WIDGET_CAPTION
-{ WWT_STICKYBOX,     RESIZE_LR,  COLOUR_BROWN,   338,   349,     0,    13, 0x0,                      STR_STICKY_BUTTON},                              // SM_WIDGET_STICKYBOX
+{ WWT_STICKYBOX,     RESIZE_LR,  COLOUR_BROWN,   338,   349,     0,    13, 0x0,                      STR_TOOLTIP_STICKY},                              // SM_WIDGET_STICKYBOX
 {     WWT_PANEL,     RESIZE_RB,  COLOUR_BROWN,     0,   349,    14,   157, 0x0,                      STR_NULL},                                       // SM_WIDGET_MAP_BORDER
 {     WWT_INSET,     RESIZE_RB,  COLOUR_BROWN,     2,   347,    16,   155, 0x0,                      STR_NULL},                                       // SM_WIDGET_MAP
 {     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   217,   158,   201, 0x0,                      STR_NULL},                                       // SM_WIDGET_LEGEND
@@ -78,9 +78,9 @@ static const Widget _smallmap_widgets[] = {
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   158,   179, SPR_IMG_SMALLMAP,         STR_SMALLMAP_CENTER},                            // SM_WIDGET_CENTERMAP
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   180,   201, SPR_IMG_TOWN,             STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF},  // SM_WIDGET_TOGGLETOWNNAME
 {     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   337,   202,   213, 0x0,                      STR_NULL},                                       // SM_WIDGET_BOTTOMPANEL
-{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,     0,    99,   202,   213, STR_MESSAGES_ENABLE_ALL,  STR_NULL},                                       // SM_WIDGET_ENABLE_ALL
-{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,   100,   201,   202,   213, STR_MESSAGES_DISABLE_ALL, STR_NULL},                                       // SM_WIDGET_DISABLE_ALL
-{ WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_BROWN,   338,   349,   202,   213, 0x0,                      STR_RESIZE_BUTTON},                              // SM_WIDGET_RESIZEBOX
+{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,     0,    99,   202,   213, STR_SMALLMAP_ENABLE_ALL,  STR_NULL},                                       // SM_WIDGET_ENABLE_ALL
+{   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,   100,   201,   202,   213, STR_SMALLMAP_DISABLE_ALL, STR_NULL},                                       // SM_WIDGET_DISABLE_ALL
+{ WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_BROWN,   338,   349,   202,   213, 0x0,                      STR_TOOLTIP_RESIZE},                             // SM_WIDGET_RESIZEBOX
 {  WIDGETS_END},
 };
 
@@ -144,8 +144,8 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BOTTOMPANEL),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_ENABLE_ALL), SetMinimalSize(100, 12), SetDataTip(STR_MESSAGES_ENABLE_ALL, STR_NULL),
-				NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_DISABLE_ALL), SetMinimalSize(102, 12), SetDataTip(STR_MESSAGES_DISABLE_ALL, STR_NULL),
+				NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_ENABLE_ALL), SetMinimalSize(100, 12), SetDataTip(STR_SMALLMAP_ENABLE_ALL, STR_NULL),
+				NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_DISABLE_ALL), SetMinimalSize(102, 12), SetDataTip(STR_SMALLMAP_DISABLE_ALL, STR_NULL),
 				NWidget(NWID_SPACER), SetFill(1, 0), SetResize(1, 0),
 			EndContainer(),
 		EndContainer(),
@@ -328,32 +328,32 @@ void BuildRouteMapLegend()
 		switch(st) {
 		case STAT_CAPACITY:
 			legend_entry.colour = _colour_gradient[COLOUR_WHITE][7];
-			legend_entry.legend = STR_SMALLMAP_LEGEND_CAPACITY;
+			legend_entry.legend = STR_SMALLMAP_LEGENDA_CAPACITY;
 			legend_entry.show_on_map = true;
 			break;
 		case STAT_USAGE:
 			legend_entry.colour = _colour_gradient[COLOUR_GREY][1];
-			legend_entry.legend = STR_SMALLMAP_LEGEND_USAGE;
+			legend_entry.legend = STR_SMALLMAP_LEGENDA_USAGE;
 			legend_entry.show_on_map = false;
 			break;
 		case STAT_PLANNED:
 			legend_entry.colour = _colour_gradient[COLOUR_RED][5];
-			legend_entry.legend = STR_SMALLMAP_LEGEND_PLANNED;
+			legend_entry.legend = STR_SMALLMAP_LEGENDA_PLANNED;
 			legend_entry.show_on_map = true;
 			break;
 		case STAT_SENT:
 			legend_entry.colour = _colour_gradient[COLOUR_YELLOW][5];
-			legend_entry.legend = STR_SMALLMAP_LEGEND_SENT;
+			legend_entry.legend = STR_SMALLMAP_LEGENDA_SENT;
 			legend_entry.show_on_map = false;
 			break;
 		case STAT_TEXT:
 			legend_entry.colour = _colour_gradient[COLOUR_GREY][7];
-			legend_entry.legend = STR_SMALLMAP_LEGEND_SHOW_TEXT;
+			legend_entry.legend = STR_SMALLMAP_LEGENDA_SHOW_TEXT;
 			legend_entry.show_on_map = false;
 			break;
 		case STAT_GRAPH:
 			legend_entry.colour = _colour_gradient[COLOUR_GREY][7];
-			legend_entry.legend = STR_SMALLMAP_LEGEND_SHOW_GRAPH;
+			legend_entry.legend = STR_SMALLMAP_LEGENDA_SHOW_GRAPH;
 			legend_entry.show_on_map = true;
 			break;
 		}
@@ -1750,7 +1750,7 @@ enum ExtraViewportWindowWidgets {
 static const Widget _extra_view_port_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,    0,   13, STR_BLACK_CROSS,                  STR_TOOLTIP_CLOSE_WINDOW},
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   287,    0,   13, STR_EXTRA_VIEW_PORT_TITLE,        STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
-{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   288,   299,    0,   13, 0x0,                              STR_STICKY_BUTTON},
+{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   288,   299,    0,   13, 0x0,                              STR_TOOLTIP_STICKY},
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   299,   14,   33, 0x0,                              STR_NULL},
 {      WWT_INSET,     RESIZE_RB,  COLOUR_GREY,     2,   297,   16,   31, 0x0,                              STR_NULL},
 { WWT_PUSHIMGBTN,     RESIZE_TB,  COLOUR_GREY,     0,    21,   34,   55, SPR_IMG_ZOOMIN,                   STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN},
@@ -1759,7 +1759,7 @@ static const Widget _extra_view_port_widgets[] = {
 { WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,   172,   298,   34,   55, STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN, STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT},
 {      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,   299,   299,   34,   55, 0x0,                              STR_NULL},
 {      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   287,   56,   67, 0x0,                              STR_NULL},
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   288,   299,   56,   67, 0x0,                              STR_RESIZE_BUTTON},
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   288,   299,   56,   67, 0x0,                              STR_TOOLTIP_RESIZE},
 {   WIDGETS_END},
 };
 

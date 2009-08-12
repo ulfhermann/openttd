@@ -844,6 +844,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\base_media_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\base_media_func.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\base_station_base.h"
 				>
 			</File>
@@ -1525,6 +1533,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\subsidy_func.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\subsidy_type.h"
 				>
 			</File>
 			<File
@@ -2281,10 +2293,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\table\engines.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\table\files.h"
 				>
 			</File>
 			<File

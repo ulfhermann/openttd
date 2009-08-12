@@ -278,7 +278,7 @@ set_name:;
 			SetDParam(1, STR_NEWS_COMPANY_LAUNCH_DESCRIPTION);
 			SetDParamStr(2, cni->company_name);
 			SetDParam(3, t->index);
-			AddNewsItem(STR_NEWS_MESSAGE, NS_COMPANY_NEW, NR_TILE, c->last_build_coordinate, NR_NONE, UINT32_MAX, cni);
+			AddNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_NEW, NR_TILE, c->last_build_coordinate, NR_NONE, UINT32_MAX, cni);
 		}
 		AI::BroadcastNewEvent(new AIEventCompanyNew(c->index), c->index);
 		return;
@@ -523,10 +523,12 @@ void CompaniesYearlyLoop()
 /** Change engine renewal parameters
  * @param tile unused
  * @param flags operation to perform
- * @param
- * - p1 bits 16-31 = engine group
- * - p2 bits  0-15 = old engine type
- * - p2 bits 16-31 = new engine type
+ * @param p1 packed data
+ *   - bits 16-31 = engine group
+ * @param p2 packed data
+ *   - bits  0-15 = old engine type
+ *   - bits 16-31 = new engine type
+ * @param text unused
  */
 CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -554,7 +556,7 @@ CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 
 /**
  * Fill the CompanyNewsInformation struct with the required data.
- * @param p the current company.
+ * @param c the current company.
  * @param other the other company.
  */
 void CompanyNewsInformation::FillData(const Company *c, const Company *other)
@@ -716,7 +718,7 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			SetDParam(0, STR_NEWS_COMPANY_BANKRUPT_TITLE);
 			SetDParam(1, STR_NEWS_COMPANY_BANKRUPT_DESCRIPTION);
 			SetDParamStr(2, cni->company_name);
-			AddCompanyNewsItem(STR_NEWS_MESSAGE, NS_COMPANY_BANKRUPT, cni);
+			AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_BANKRUPT, cni);
 
 			/* Remove the company */
 			ChangeOwnershipOfCompanyItems(c->index, INVALID_OWNER);

@@ -3,6 +3,7 @@
 /** @file ai_sign.cpp Implementation of AISign. */
 
 #include "ai_sign.hpp"
+#include "ai_log.hpp"
 #include "table/strings.h"
 #include "../ai_instance.hpp"
 #include "../../command_func.h"
@@ -15,6 +16,7 @@
 
 /* static */ SignID AISign::GetMaxSignID()
 {
+	AILog::Warning("AISign::GetMaxSignID is deprecated and will be removed soon, please use AISignList instead.");
 	return (SignID)::Sign::GetPoolSize();
 }
 

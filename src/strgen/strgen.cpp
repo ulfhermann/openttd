@@ -44,6 +44,7 @@ struct Case {
 
 static bool _masterlang;
 static bool _translated;
+static bool _translation; ///< Is the current file actually a translation or not
 static const char *_file = "(unknown file)";
 static int _cur_line;
 static int _errors, _warnings, _show_todo;
@@ -73,6 +74,7 @@ static uint32 _hash;
 static char _lang_name[32], _lang_ownname[32], _lang_isocode[16];
 static char _lang_digit_group_separator[8];
 static char _lang_digit_group_separator_currency[8];
+static char _lang_digit_decimal_separator[8];
 static byte _lang_pluralform;
 static byte _lang_textdir;
 static uint16 _lang_winlangid;
@@ -327,9 +329,10 @@ static int TranslateArgumentIdx(int arg);
 static void EmitWordList(const char * const *words, uint nw)
 {
 	PutByte(nw);
-	for (uint i = 0; i < nw; i++) PutByte(strlen(words[i]));
+	for (uint i = 0; i < nw; i++) PutByte(strlen(words[i]) + 1);
 	for (uint i = 0; i < nw; i++) {
 		for (uint j = 0; words[i][j] != '\0'; j++) PutByte(words[i][j]);
+		PutByte(0);
 	}
 }
 
@@ -531,6 +534,9 @@ static void HandlePragma(char *str)
 	} else if (!memcmp(str, "digitsepcur ", 12)) {
 		str += 12;
 		strecpy(_lang_digit_group_separator_currency, strcmp(str, "{NBSP}") == 0 ? "\xC2\xA0" : str, lastof(_lang_digit_group_separator_currency));
+	} else if (!memcmp(str, "decimalsep ", 11)) {
+		str += 11;
+		strecpy(_lang_digit_decimal_separator, strcmp(str, "{NBSP}") == 0 ? "\xC2\xA0" : str, lastof(_lang_digit_decimal_separator));
 	} else if (!memcmp(str, "winlangid ", 10)) {
 		const char *buf = str + 10;
 		long langid = strtol(buf, NULL, 16);
@@ -619,14 +625,18 @@ static const CmdStruct *TranslateCmdForCompare(const CmdStruct *a)
 		return FindCmd("STRING", 6);
 	}
 
-	if (strcmp(a->cmd, "SKIP") == 0) return NULL;
-
 	return a;
 }
 
 
 static bool CheckCommandsMatch(char *a, char *b, const char *name)
 {
+	/* If we're not translating, i.e. we're compiling the base language,
+	 * it is pointless to do all these checks as it'll always be correct.
+	 * After all, all checks are based on the base language.
+	 */
+	if (!_translation) return true;
+
 	ParsedCommandStruct templ;
 	ParsedCommandStruct lang;
 	bool result = true;
@@ -662,9 +672,9 @@ static bool CheckCommandsMatch(char *a, char *b, const char *name)
 	/* if we reach here, all non consumer commands match up.
 	 * Check if the non consumer commands match up also. */
 	for (uint i = 0; i < lengthof(templ.cmd); i++) {
-		if (TranslateCmdForCompare(templ.cmd[i]) != TranslateCmdForCompare(lang.cmd[i])) {
+		if (TranslateCmdForCompare(templ.cmd[i]) != lang.cmd[i]) {
 			strgen_warning("%s: Param idx #%d '%s' doesn't match with template command '%s'", name, i,
-				lang.cmd[i]  == NULL ? "<empty>" : lang.cmd[i]->cmd,
+				lang.cmd[i]  == NULL ? "<empty>" : TranslateCmdForCompare(lang.cmd[i])->cmd,
 				templ.cmd[i] == NULL ? "<empty>" : templ.cmd[i]->cmd);
 			result = false;
 		}
@@ -800,6 +810,10 @@ static void ParseFile(const char *file, bool english)
 	FILE *in;
 	char buf[2048];
 
+	/* Only look at the final filename to determine whether it's be base language or not */
+	const char *cur_file = strrchr(_file, PATHSEPCHAR);
+	const char *next_file = strrchr(file, PATHSEPCHAR);
+	_translation = next_file != NULL && cur_file != NULL && strcmp(cur_file, next_file) != 0;
 	_file = file;
 
 	/* For each new file we parse, reset the genders, and language codes */
@@ -807,6 +821,7 @@ static void ParseFile(const char *file, bool english)
 	_lang_name[0] = _lang_ownname[0] = _lang_isocode[0] = '\0';
 	strecpy(_lang_digit_group_separator, ",", lastof(_lang_digit_group_separator));
 	strecpy(_lang_digit_group_separator_currency, ",", lastof(_lang_digit_group_separator_currency));
+	strecpy(_lang_digit_decimal_separator, ".", lastof(_lang_digit_decimal_separator));
 	_lang_textdir = TD_LTR;
 	_lang_winlangid = 0x0000; // neutral language code
 	_lang_newgrflangid = 0; // standard english
@@ -1059,6 +1074,7 @@ static void WriteLangfile(const char *filename)
 	strecpy(hdr.isocode, _lang_isocode, lastof(hdr.isocode));
 	strecpy(hdr.digit_group_separator, _lang_digit_group_separator, lastof(hdr.digit_group_separator));
 	strecpy(hdr.digit_group_separator_currency, _lang_digit_group_separator_currency, lastof(hdr.digit_group_separator_currency));
+	strecpy(hdr.digit_decimal_separator, _lang_digit_decimal_separator, lastof(hdr.digit_decimal_separator));
 
 	fwrite(&hdr, sizeof(hdr), 1, f);
 

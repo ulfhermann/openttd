@@ -229,8 +229,7 @@ static void HandleBrokenShip(Vehicle *v)
 
 void Ship::MarkDirty()
 {
-	this->cur_image = this->GetImage(this->direction);
-	MarkSingleVehicleDirty(this);
+	this->UpdateViewport(false, false);
 }
 
 static void PlayShipSound(const Vehicle *v)
@@ -283,9 +282,7 @@ void Ship::UpdateDeltaXY(Direction direction)
 
 void RecalcShipStuff(Vehicle *v)
 {
-	v->UpdateDeltaXY(v->direction);
-	v->cur_image = v->GetImage(v->direction);
-	v->MarkDirty();
+	v->UpdateViewport(false, true);
 	InvalidateWindow(WC_VEHICLE_DEPOT, v->tile);
 }
 
@@ -709,9 +706,7 @@ static void ShipController(Ship *v)
 	v->z_pos = GetSlopeZ(gp.x, gp.y);
 
 getout:
-	v->UpdateDeltaXY(dir);
-	v->cur_image = v->GetImage(dir);
-	VehicleMove(v, true);
+	v->UpdateViewport(true, true);
 	return;
 
 reverse_direction:
@@ -720,17 +715,10 @@ reverse_direction:
 	goto getout;
 }
 
-static void AgeShipCargo(Vehicle *v)
-{
-	if (_age_cargo_skip_counter != 0) return;
-	v->cargo.AgeCargo();
-}
-
 bool Ship::Tick()
 {
 	if (!(this->vehstatus & VS_STOPPED)) this->running_ticks++;
 
-	AgeShipCargo(this);
 	ShipController(this);
 
 	return true;
@@ -746,7 +734,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 {
 	UnitID unit_num;
 
-	if (!IsEngineBuildable(p1, VEH_SHIP, _current_company)) return_cmd_error(STR_SHIP_NOT_AVAILABLE);
+	if (!IsEngineBuildable(p1, VEH_SHIP, _current_company)) return_cmd_error(STR_ERROR_SHIP_NOT_AVAILABLE);
 
 	const Engine *e = Engine::Get(p1);
 	CommandCost value(EXPENSES_NEW_VEHICLES, e->GetCost());
@@ -846,7 +834,7 @@ CommandCost CmdSellShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p
 	Ship *v = Ship::GetIfValid(p1);
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_SELL_DESTROYED_VEHICLE);
 
 	if (!v->IsStoppedInDepot()) {
 		return_cmd_error(STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT);
@@ -917,7 +905,7 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT);
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
 	/* Check cargo */
 	if (!ShipVehInfo(v->engine_type)->refittable) return CMD_ERROR;

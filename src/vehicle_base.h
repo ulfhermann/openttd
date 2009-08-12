@@ -309,6 +309,21 @@ public:
 	virtual void OnNewDay() {};
 
 	/**
+	 * Update vehicle sprite- and position caches
+	 * @param moved Was the vehicle moved?
+	 * @param turned Did the vehicle direction change?
+	 */
+	inline void UpdateViewport(bool moved, bool turned)
+	{
+		extern void VehicleMove(Vehicle *v, bool update_viewport);
+
+		if (turned) this->UpdateDeltaXY(this->direction);
+		SpriteID old_image = this->cur_image;
+		this->cur_image = this->GetImage(this->direction);
+		if (moved || this->cur_image != old_image) VehicleMove(this, true);
+	}
+
+	/**
 	 * Returns the Trackdir on which the vehicle is currently located.
 	 * Works for trains and ships.
 	 * Currently works only sortof for road vehicles, since they have a fuzzy
@@ -675,8 +690,6 @@ struct FreeUnitIDGenerator {
 	/** Releases allocated memory */
 	~FreeUnitIDGenerator() { free(this->cache); }
 };
-
-void CheckVehicle32Day(Vehicle *v);
 
 static const int32 INVALID_COORD = 0x7fffffff;
 
