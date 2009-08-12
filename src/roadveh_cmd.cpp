@@ -181,7 +181,7 @@ void RoadVehUpdateCache(RoadVehicle *v)
  */
 CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!IsEngineBuildable(p1, VEH_ROAD, _current_company)) return_cmd_error(STR_ROAD_VEHICLE_NOT_AVAILABLE);
+	if (!IsEngineBuildable(p1, VEH_ROAD, _current_company)) return_cmd_error(STR_ERROR_ROAD_VEHICLE_NOT_AVAILABLE);
 
 	const Engine *e = Engine::Get(p1);
 	/* Engines without valid cargo should not be available */
@@ -195,7 +195,7 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (!IsRoadDepotTile(tile)) return CMD_ERROR;
 	if (!IsTileOwner(tile, _current_company)) return CMD_ERROR;
 
-	if (HasTileRoadType(tile, ROADTYPE_TRAM) != HasBit(EngInfo(p1)->misc_flags, EF_ROAD_TRAM)) return_cmd_error(STR_DEPOT_WRONG_DEPOT_TYPE);
+	if (HasTileRoadType(tile, ROADTYPE_TRAM) != HasBit(EngInfo(p1)->misc_flags, EF_ROAD_TRAM)) return_cmd_error(STR_ERROR_DEPOT_WRONG_DEPOT_TYPE);
 
 	uint num_vehicles = 1 + CountArticulatedParts(p1, false);
 
@@ -339,7 +339,7 @@ CommandCost CmdSellRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	RoadVehicle *v = RoadVehicle::GetIfValid(p1);
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_SELL_DESTROYED_VEHICLE);
 
 	if (!v->IsStoppedInDepot()) {
 		return_cmd_error(STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT);
@@ -482,8 +482,7 @@ CommandCost CmdTurnRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 void RoadVehicle::MarkDirty()
 {
 	for (Vehicle *v = this; v != NULL; v = v->Next()) {
-		v->cur_image = v->GetImage(v->direction);
-		MarkSingleVehicleDirty(v);
+		v->UpdateViewport(false, false);
 	}
 }
 
@@ -532,7 +531,7 @@ static void DeleteLastRoadVeh(RoadVehicle *v)
 	delete v;
 }
 
-static byte SetRoadVehPosition(RoadVehicle *v, int x, int y)
+static byte SetRoadVehPosition(RoadVehicle *v, int x, int y, bool turned)
 {
 	byte new_z, old_z;
 
@@ -544,7 +543,7 @@ static byte SetRoadVehPosition(RoadVehicle *v, int x, int y)
 	old_z = v->z_pos;
 	v->z_pos = new_z;
 
-	VehicleMove(v, true);
+	v->UpdateViewport(true, turned);
 	return old_z;
 }
 
@@ -558,9 +557,7 @@ static void RoadVehSetRandomDirection(RoadVehicle *v)
 		uint32 r = Random();
 
 		v->direction = ChangeDir(v->direction, delta[r & 3]);
-		v->UpdateDeltaXY(v->direction);
-		v->cur_image = v->GetImage(v->direction);
-		SetRoadVehPosition(v, v->x_pos, v->y_pos);
+		SetRoadVehPosition(v, v->x_pos, v->y_pos, true);
 	} while ((v = v->Next()) != NULL);
 }
 
@@ -1255,8 +1252,7 @@ static bool RoadVehLeaveDepot(RoadVehicle *v, bool first)
 	v->state = tdir;
 	v->frame = RVC_DEPOT_START_FRAME;
 
-	v->UpdateDeltaXY(v->direction);
-	SetRoadVehPosition(v, x, y);
+	SetRoadVehPosition(v, x, y, true);
 
 	InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
 
@@ -1383,8 +1379,7 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 
 		if (IsTileType(gp.new_tile, MP_TUNNELBRIDGE) && HasBit(VehicleEnterTile(v, gp.new_tile, gp.x, gp.y), VETS_ENTERED_WORMHOLE)) {
 			/* Vehicle has just entered a bridge or tunnel */
-			v->UpdateDeltaXY(v->direction);
-			SetRoadVehPosition(v, gp.x, gp.y);
+			SetRoadVehPosition(v, gp.x, gp.y, true);
 			return true;
 		}
 
@@ -1529,8 +1524,7 @@ again:
 			v->cur_speed -= v->cur_speed >> 2;
 		}
 
-		v->UpdateDeltaXY(v->direction);
-		RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y));
+		RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y, true));
 		return true;
 	}
 
@@ -1594,8 +1588,7 @@ again:
 			v->cur_speed -= v->cur_speed >> 2;
 		}
 
-		v->UpdateDeltaXY(v->direction);
-		RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y));
+		RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y, true));
 		return true;
 	}
 
@@ -1634,8 +1627,7 @@ again:
 		v->cur_speed -= (v->cur_speed >> 2);
 		if (old_dir != v->state) {
 			/* The vehicle is in a road stop */
-			v->UpdateDeltaXY(v->direction);
-			SetRoadVehPosition(v, v->x_pos, v->y_pos);
+			SetRoadVehPosition(v, v->x_pos, v->y_pos, true);
 			/* Note, return here means that the frame counter is not incremented
 			 * for vehicles changing direction in a road stop. This causes frames to
 			 * be repeated. (XXX) Is this intended? */
@@ -1682,7 +1674,7 @@ again:
 						v->slot_age = 14;
 
 						v->frame++;
-						RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y));
+						RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y, false));
 						return true;
 					}
 				}
@@ -1757,8 +1749,7 @@ again:
 	 * in a depot or entered a tunnel/bridge */
 	if (!HasBit(r, VETS_ENTERED_WORMHOLE)) v->frame++;
 
-	v->UpdateDeltaXY(v->direction);
-	RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y));
+	RoadZPosAffectSpeed(v, SetRoadVehPosition(v, x, y, true));
 	return true;
 }
 
@@ -1816,9 +1807,7 @@ static bool RoadVehController(RoadVehicle *v)
 	for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
 		if ((u->vehstatus & VS_HIDDEN) != 0) continue;
 
-		uint16 old_image = u->cur_image;
-		u->cur_image = u->GetImage(u->direction);
-		if (old_image != u->cur_image) VehicleMove(u, true);
+		u->UpdateViewport(false, false);
 	}
 
 	if (v->progress == 0) v->progress = j;
@@ -1826,16 +1815,8 @@ static bool RoadVehController(RoadVehicle *v)
 	return true;
 }
 
-static void AgeRoadVehCargo(RoadVehicle *v)
-{
-	if (_age_cargo_skip_counter != 0) return;
-	v->cargo.AgeCargo();
-}
-
 bool RoadVehicle::Tick()
 {
-	AgeRoadVehCargo(this);
-
 	if (this->IsRoadVehFront()) {
 		if (!(this->vehstatus & VS_STOPPED)) this->running_ticks++;
 		return RoadVehController(this);
@@ -2019,7 +2000,7 @@ CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT);
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
 	if (new_cid >= NUM_CARGO) return CMD_ERROR;
 

@@ -167,11 +167,12 @@ Industry::~Industry()
 
 	DecIndustryTypeCount(this->type);
 
-	DeleteSubsidyWithIndustry(this->index);
 	DeleteIndustryNews(this->index);
 	DeleteWindowById(WC_INDUSTRY_VIEW, this->index);
 	InvalidateWindowData(WC_INDUSTRY_DIRECTORY, 0, 0);
 
+	DeleteSubsidyWith(ST_INDUSTRY, this->index);
+	CargoPacket::InvalidateAllFrom(ST_INDUSTRY, this->index);
 	Station::RecomputeIndustriesNearForAll();
 }
 
@@ -428,7 +429,7 @@ static void GetTileDesc_Industry(TileIndex tile, TileDesc *td)
 	td->str = is->name;
 	if (!IsIndustryCompleted(tile)) {
 		SetDParamX(td->dparam, 0, td->str);
-		td->str = STR_TOWN_DESCRIPTION_UNDER_CONSTRUCTION;
+		td->str = STR_LAI_TOWN_INDUSTRY_DESCRIPTION_UNDER_CONSTRUCTION;
 	}
 
 	if (is->grf_prop.grffile != NULL) {
@@ -453,7 +454,7 @@ static CommandCost ClearTile_Industry(TileIndex tile, DoCommandFlag flags)
 				((indspec->behaviour & INDUSTRYBEH_BUILT_ONWATER) ||
 				HasBit(GetIndustryTileSpec(GetIndustryGfx(tile))->slopes_refused, 5)))) {
 		SetDParam(0, indspec->name);
-		return_cmd_error(flags & DC_AUTO ? STR_OBJECT_IN_THE_WAY : INVALID_STRING_ID);
+		return_cmd_error(flags & DC_AUTO ? STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY : INVALID_STRING_ID);
 	}
 
 	if (flags & DC_EXEC) {
@@ -479,7 +480,7 @@ static void TransportIndustryGoods(TileIndex tile)
 
 			i->this_month_production[j] += cw;
 
-			uint am = MoveGoodsToStation(i->xy, i->width, i->height, i->produced_cargo[j], cw);
+			uint am = MoveGoodsToStation(i->xy, i->width, i->height, i->produced_cargo[j], cw, ST_INDUSTRY, i->index);
 			i->this_month_transported[j] += am;
 
 			moved_cargo |= (am != 0);
@@ -1457,7 +1458,7 @@ static bool CheckIfFarEnoughFromIndustry(TileIndex tile, int type)
 				_game_mode != GM_EDITOR || // editor must not be stopped
 				!_settings_game.economy.same_industry_close ||
 				!_settings_game.economy.multiple_industry_per_town)) {
-			_error_message = STR_INDUSTRY_TOO_CLOSE;
+			_error_message = STR_ERROR_INDUSTRY_TOO_CLOSE;
 			return false;
 		}
 
@@ -1466,7 +1467,7 @@ static bool CheckIfFarEnoughFromIndustry(TileIndex tile, int type)
 				i->type == indspec->conflicting[1] ||
 				i->type == indspec->conflicting[2]) &&
 				in_low_distance) {
-			_error_message = STR_INDUSTRY_TOO_CLOSE;
+			_error_message = STR_ERROR_INDUSTRY_TOO_CLOSE;
 			return false;
 		}
 	}
@@ -2118,7 +2119,7 @@ static void ChangeIndustryProduction(Industry *i, bool monthly)
 			/* Get the custom message if any */
 			if (HasBit(res, 8)) str = MapGRFStringID(indspec->grf_prop.grffile->grfid, GB(GetRegister(0x100), 0, 16));
 			res = GB(res, 0, 4);
-			switch(res) {
+			switch (res) {
 				default: NOT_REACHED();
 				case 0x0: break;                  // Do nothing, but show the custom message if any
 				case 0x1: div = 1; break;         // Halve industry production. If production reaches the quarter of the default, the industry is closed instead.
