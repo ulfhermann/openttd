@@ -280,7 +280,7 @@ public:
 			wi->top      = 14;
 			wi->bottom   = 24;
 			wi->data     = 0;
-			wi->tooltips = STR_USE_CTRL_TO_SELECT_MORE;
+			wi->tooltips = STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE;
 
 			if (HasBit(this->cargo_filter, cs->Index())) this->LowerWidget(SLW_CARGOSTART + i);
 			i++;
@@ -606,25 +606,25 @@ const StringID CompanyStationsWindow::sorter_names[] = {
 static const Widget _company_stations_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,   STR_TOOLTIP_CLOSE_WINDOW},         // SLW_CLOSEBOX
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   345,     0,    13, STR_STATION_LIST_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},  // SLW_CAPTION
-{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   346,   357,     0,    13, 0x0,               STR_STICKY_BUTTON},                // SLW_STICKY
+{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   346,   357,     0,    13, 0x0,               STR_TOOLTIP_STICKY},                // SLW_STICKY
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   345,    37,   161, 0x0,               STR_STATION_LIST_TOOLTIP},         // SLW_LIST
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   346,   357,    37,   149, 0x0,               STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // SLW_SCROLLBAR
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   346,   357,   150,   161, 0x0,               STR_RESIZE_BUTTON},                // SLW_RESIZE
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   346,   357,   150,   161, 0x0,               STR_TOOLTIP_RESIZE},                // SLW_RESIZE
 
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    13,    14,    24, STR_TRAIN,         STR_USE_CTRL_TO_SELECT_MORE},      // SLW_TRAIN
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    14,    27,    14,    24, STR_LORRY,         STR_USE_CTRL_TO_SELECT_MORE},      // SLW_TRUCK
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    28,    41,    14,    24, STR_BUS,           STR_USE_CTRL_TO_SELECT_MORE},      // SLW_BUS
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    42,    55,    14,    24, STR_PLANE,         STR_USE_CTRL_TO_SELECT_MORE},      // SLW_AIRPLANE
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    56,    69,    14,    24, STR_SHIP,          STR_USE_CTRL_TO_SELECT_MORE},      // SLW_SHIP
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,    70,    83,    14,    24, 0x0,               STR_SELECT_ALL_FACILITIES},        // SLW_FACILALL
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    13,    14,    24, STR_TRAIN,         STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE},      // SLW_TRAIN
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    14,    27,    14,    24, STR_LORRY,         STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE},      // SLW_TRUCK
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    28,    41,    14,    24, STR_BUS,           STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE},      // SLW_BUS
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    42,    55,    14,    24, STR_PLANE,         STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE},      // SLW_AIRPLANE
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    56,    69,    14,    24, STR_SHIP,          STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE},      // SLW_SHIP
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,    70,    83,    14,    24, 0x0,               STR_STATION_LIST_SELECT_ALL_FACILITIES},        // SLW_FACILALL
 
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,    84,    88,    14,    24, 0x0,               STR_NULL},                         // SLW_PAN_BETWEEN
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,    89,   102,    14,    24, 0x0,               STR_NO_WAITING_CARGO},             // SLW_NOCARGOWAITING
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,   103,   116,    14,    24, 0x0,               STR_SELECT_ALL_TYPES},             // SLW_CARGOALL
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,    89,   102,    14,    24, 0x0,               STR_STATION_LIST_NO_WAITING_CARGO},             // SLW_NOCARGOWAITING
+{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,   103,   116,    14,    24, 0x0,               STR_STATION_LIST_SELECT_ALL_TYPES},             // SLW_CARGOALL
 {      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,   117,   357,    14,    24, 0x0,               STR_NULL},                         // SLW_PAN_RIGHT
 
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    25,    36, STR_SORT_BY,       STR_SORT_ORDER_TIP},               // SLW_SORTBY
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    81,   243,    25,    36, 0x0,               STR_SORT_CRITERIA_TIP},            // SLW_SORTDROPBTN
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    25,    36, STR_BUTTON_SORT_BY,       STR_TOOLTIP_SORT_ORDER},               // SLW_SORTBY
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,    81,   243,    25,    36, 0x0,               STR_TOOLTIP_SORT_CRITERIAP},            // SLW_SORTDROPBTN
 {      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,   244,   357,    25,    36, 0x0,               STR_NULL},                         // SLW_PAN_SORT_RIGHT
 {   WIDGETS_END},
 };
@@ -636,20 +636,20 @@ static const NWidgetPart _nested_company_stations_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, SLW_STICKY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_TRAIN), SetMinimalSize(14, 11), SetDataTip(STR_TRAIN, STR_USE_CTRL_TO_SELECT_MORE),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_TRUCK), SetMinimalSize(14, 11), SetDataTip(STR_LORRY, STR_USE_CTRL_TO_SELECT_MORE),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_BUS), SetMinimalSize(14, 11), SetDataTip(STR_BUS, STR_USE_CTRL_TO_SELECT_MORE),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_AIRPLANE), SetMinimalSize(14, 11), SetDataTip(STR_PLANE, STR_USE_CTRL_TO_SELECT_MORE),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_SHIP), SetMinimalSize(14, 11), SetDataTip(STR_SHIP, STR_USE_CTRL_TO_SELECT_MORE),
-		NWidget(WWT_PANEL, COLOUR_GREY, SLW_FACILALL), SetMinimalSize(14, 11), SetDataTip(0x0, STR_SELECT_ALL_FACILITIES), SetFill(false, false), EndContainer(),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_TRAIN), SetMinimalSize(14, 11), SetDataTip(STR_TRAIN, STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_TRUCK), SetMinimalSize(14, 11), SetDataTip(STR_LORRY, STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_BUS), SetMinimalSize(14, 11), SetDataTip(STR_BUS, STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_AIRPLANE), SetMinimalSize(14, 11), SetDataTip(STR_PLANE, STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_SHIP), SetMinimalSize(14, 11), SetDataTip(STR_SHIP, STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE),
+		NWidget(WWT_PANEL, COLOUR_GREY, SLW_FACILALL), SetMinimalSize(14, 11), SetDataTip(0x0, STR_STATION_LIST_SELECT_ALL_FACILITIES), SetFill(false, false), EndContainer(),
 		NWidget(WWT_PANEL, COLOUR_GREY, SLW_PAN_BETWEEN), SetMinimalSize(5, 11), SetDataTip(0x0, STR_NULL), SetFill(false, false), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_GREY, SLW_NOCARGOWAITING), SetMinimalSize(14, 11), SetDataTip(0x0, STR_NO_WAITING_CARGO), SetFill(false, false), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_GREY, SLW_CARGOALL), SetMinimalSize(14, 11), SetDataTip(0x0, STR_SELECT_ALL_TYPES), SetFill(false, false), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_GREY, SLW_NOCARGOWAITING), SetMinimalSize(14, 11), SetDataTip(0x0, STR_STATION_LIST_NO_WAITING_CARGO), SetFill(false, false), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_GREY, SLW_CARGOALL), SetMinimalSize(14, 11), SetDataTip(0x0, STR_STATION_LIST_SELECT_ALL_TYPES), SetFill(false, false), EndContainer(),
 		NWidget(WWT_PANEL, COLOUR_GREY, SLW_PAN_RIGHT), SetDataTip(0x0, STR_NULL), SetResize(1, 0), SetFill(true, true), EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_SORTBY), SetMinimalSize(81, 12), SetDataTip(STR_SORT_BY, STR_SORT_ORDER_TIP),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SLW_SORTDROPBTN), SetMinimalSize(163, 12), SetDataTip(0x0, STR_SORT_CRITERIA_TIP),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_SORTBY), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SLW_SORTDROPBTN), SetMinimalSize(163, 12), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
 		NWidget(WWT_PANEL, COLOUR_GREY, SLW_PAN_SORT_RIGHT), SetDataTip(0x0, STR_NULL), SetResize(1, 0), SetFill(true, true), EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -683,22 +683,22 @@ void ShowCompanyStations(CompanyID company)
 static const Widget _station_view_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,                 STR_TOOLTIP_CLOSE_WINDOW},             // SVW_CLOSEBOX
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   236,     0,    13, STR_STATION_VIEW_CAPTION,        STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
-{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,                             STR_STICKY_BUTTON},
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    14,    25, STR_SORT_BY,                     STR_SORT_ORDER_TIP},                   // SVW_SORT_ORDER
-{    WWT_TEXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   248,    14,    25, 0x0,                             STR_SORT_CRITERIA_TIP},                // SVW_SORT_BY
+{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,                             STR_TOOLTIP_STICKY},
+{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    14,    25, STR_BUTTON_SORT_BY,              STR_TOOLTIP_SORT_ORDER},               // SVW_SORT_ORDER
+{    WWT_TEXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   248,    14,    25, 0x0,                             STR_TOOLTIP_SORT_CRITERIAP},           // SVW_SORT_BY
 {   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    26,    37, STR_STATION_VIEW_WAITING,        STR_TOGGLE_CARGO_VIEW},                // SVW_MODE
-{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   248,    26,    37, 0x0,                             STR_GROUP_TIP},                        // SVW_GROUP_BY
+{   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   248,    26,    37, 0x0,                             STR_TOOLTIP_GROUP_ORDER},              // SVW_GROUP_BY
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    38,    81, 0x0,                             STR_NULL},                             // SVW_WAITING
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    38,    81, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
 {      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,     0,   248,    82,   104, 0x0,                             STR_NULL},                             // SVW_ACCEPTLIST / SVW_RATINGLIST
 { WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,    59,   105,   116, STR_BUTTON_LOCATION,             STR_STATION_VIEW_CENTER_TOOLTIP},      // SVW_LOCATION
 { WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,    60,   120,   105,   116, STR_STATION_VIEW_ACCEPTS_BUTTON, STR_STATION_VIEW_ACCEPTS_TOOLTIP},     // SVW_RATINGS / SVW_ACCEPTS
-{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   121,   180,   105,   116, STR_QUERY_RENAME,                STR_STATION_VIEW_RENAME_TOOLTIP},      // SVW_RENAME
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,   105,   116, STR_TRAIN,                       STR_SCHEDULED_TRAINS_TIP },            // SVW_TRAINS
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,   105,   116, STR_LORRY,                       STR_SCHEDULED_ROAD_VEHICLES_TIP },     // SVW_ROADVEHS
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   209,   222,   105,   116, STR_PLANE,                       STR_SCHEDULED_AIRCRAFT_TIP },          // SVW_PLANES
-{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   223,   236,   105,   116, STR_SHIP,                        STR_SCHEDULED_SHIPS_TIP },             // SVW_SHIPS
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   237,   248,   105,   116, 0x0,                             STR_RESIZE_BUTTON},
+{ WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   121,   180,   105,   116, STR_BUTTON_RENAME,               STR_STATION_VIEW_RENAME_TOOLTIP},      // SVW_RENAME
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   181,   194,   105,   116, STR_TRAIN,                       STR_STATION_VIEW_SCHEDULED_TRAINS_TOOLTIP},            // SVW_TRAINS
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   195,   208,   105,   116, STR_LORRY,                       STR_STATION_VIEW_SCHEDULED_ROAD_VEHICLES_TOOLTIP},     // SVW_ROADVEHS
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   209,   222,   105,   116, STR_PLANE,                       STR_STATION_VIEW_SCHEDULED_AIRCRAFT_TOOLTIP},          // SVW_PLANES
+{ WWT_PUSHTXTBTN,   RESIZE_LRTB,  COLOUR_GREY,   223,   236,   105,   116, STR_SHIP,                        STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP},             // SVW_SHIPS
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   237,   248,   105,   116, 0x0,                             STR_TOOLTIP_RESIZE},
 {   WIDGETS_END},
 };
 
@@ -709,12 +709,12 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, SVW_STICKYBOX),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_ORDER), SetMinimalSize(81, 12), SetDataTip(STR_SORT_BY, STR_SORT_ORDER_TIP),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_SORT_CRITERIA_TIP),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_ORDER), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_MODE), SetMinimalSize(81, 12), SetDataTip(STR_STATION_VIEW_WAITING, STR_TOGGLE_CARGO_VIEW),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_GROUP_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_GROUP_TIP),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_GROUP_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_TOOLTIP_GROUP_ORDER),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_GREY, SVW_WAITING), SetMinimalSize(237, 44), SetResize(1, 10), EndContainer(),
@@ -724,11 +724,11 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_LOCATION), SetMinimalSize(60, 12), SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ACCEPTS), SetMinimalSize(61, 12), SetDataTip(STR_STATION_VIEW_ACCEPTS_BUTTON, STR_STATION_VIEW_ACCEPTS_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(60, 12), SetResize(1, 0), SetDataTip(STR_QUERY_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_TRAINS), SetMinimalSize(14, 12), SetDataTip(STR_TRAIN, STR_SCHEDULED_TRAINS_TIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ROADVEHS), SetMinimalSize(14, 12), SetDataTip(STR_LORRY, STR_SCHEDULED_ROAD_VEHICLES_TIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_PLANES),  SetMinimalSize(14, 12), SetDataTip(STR_PLANE, STR_SCHEDULED_AIRCRAFT_TIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_SHIPS), SetMinimalSize(14, 12), SetDataTip(STR_SHIP, STR_SCHEDULED_SHIPS_TIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_RENAME), SetMinimalSize(60, 12), SetResize(1, 0), SetDataTip(STR_BUTTON_RENAME, STR_STATION_VIEW_RENAME_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_TRAINS), SetMinimalSize(14, 12), SetDataTip(STR_TRAIN, STR_STATION_VIEW_SCHEDULED_TRAINS_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_ROADVEHS), SetMinimalSize(14, 12), SetDataTip(STR_LORRY, STR_STATION_VIEW_SCHEDULED_ROAD_VEHICLES_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_PLANES),  SetMinimalSize(14, 12), SetDataTip(STR_PLANE, STR_STATION_VIEW_SCHEDULED_AIRCRAFT_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_SHIPS), SetMinimalSize(14, 12), SetDataTip(STR_SHIP, STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP),
 		NWidget(WWT_RESIZEBOX, COLOUR_GREY, SVW_RESIZE),
 	EndContainer(),
 };
@@ -1481,7 +1481,7 @@ struct StationViewWindow : public Window {
 
 			case SVW_RENAME:
 				SetDParam(0, this->window_number);
-				ShowQueryString(STR_STATION_NAME, STR_QUERY_RENAME_STATION_CAPTION, MAX_LENGTH_STATION_NAME_BYTES, MAX_LENGTH_STATION_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
+				ShowQueryString(STR_STATION_NAME, STR_STATION_VIEW_RENAME_STATION_CAPTION, MAX_LENGTH_STATION_NAME_BYTES, MAX_LENGTH_STATION_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
 				break;
 
 			case SVW_TRAINS: { // Show a list of scheduled trains to this station
@@ -1565,32 +1565,32 @@ struct StationViewWindow : public Window {
 		_settings_client.gui.station_gui_group_order = index;
 		this->widget[SVW_GROUP_BY].data = _group_names[index];
 		switch(_group_names[index]) {
-		case STR_GROUP_S_V_D:
+		case STR_STATION_VIEW_GROUP_S_V_D:
 			groupings[1] = GR_SOURCE;
 			groupings[2] = GR_NEXT;
 			groupings[3] = GR_DESTINATION;
 			break;
-		case STR_GROUP_S_D_V:
+		case STR_STATION_VIEW_GROUP_S_D_V:
 			groupings[1] = GR_SOURCE;
 			groupings[2] = GR_DESTINATION;
 			groupings[3] = GR_NEXT;
 			break;
-		case STR_GROUP_V_S_D:
+		case STR_STATION_VIEW_GROUP_V_S_D:
 			groupings[1] = GR_NEXT;
 			groupings[2] = GR_SOURCE;
 			groupings[3] = GR_DESTINATION;
 			break;
-		case STR_GROUP_V_D_S:
+		case STR_STATION_VIEW_GROUP_V_D_S:
 			groupings[1] = GR_NEXT;
 			groupings[2] = GR_DESTINATION;
 			groupings[3] = GR_SOURCE;
 			break;
-		case STR_GROUP_D_S_V:
+		case STR_STATION_VIEW_GROUP_D_S_V:
 			groupings[1] = GR_DESTINATION;
 			groupings[2] = GR_SOURCE;
 			groupings[3] = GR_NEXT;
 			break;
-		case STR_GROUP_D_V_S:
+		case STR_STATION_VIEW_GROUP_D_V_S:
 			groupings[1] = GR_DESTINATION;
 			groupings[2] = GR_NEXT;
 			groupings[3] = GR_SOURCE;
@@ -1637,12 +1637,12 @@ const StringID StationViewWindow::_mode_names[] = {
 };
 
 const StringID StationViewWindow::_group_names[] = {
-	STR_GROUP_S_V_D,
-	STR_GROUP_S_D_V,
-	STR_GROUP_V_S_D,
-	STR_GROUP_V_D_S,
-	STR_GROUP_D_S_V,
-	STR_GROUP_D_V_S,
+	STR_STATION_VIEW_GROUP_S_V_D,
+	STR_STATION_VIEW_GROUP_S_D_V,
+	STR_STATION_VIEW_GROUP_V_S_D,
+	STR_STATION_VIEW_GROUP_V_D_S,
+	STR_STATION_VIEW_GROUP_D_S_V,
+	STR_STATION_VIEW_GROUP_D_V_S,
 	INVALID_STRING_ID
 };
 
@@ -1777,17 +1777,17 @@ enum JoinStationWidgets {
 
 static const Widget _select_station_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE, COLOUR_DARK_GREEN,     0,    10,     0,    13, STR_BLACK_CROSS,                 STR_TOOLTIP_CLOSE_WINDOW},
-{    WWT_CAPTION,  RESIZE_RIGHT, COLOUR_DARK_GREEN,    11,   199,     0,    13, STR_SELECT_STATION_TO_JOIN,      STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
+{    WWT_CAPTION,  RESIZE_RIGHT, COLOUR_DARK_GREEN,    11,   199,     0,    13, STR_JOIN_STATION_CAPTION,      STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
 {      WWT_PANEL,     RESIZE_RB, COLOUR_DARK_GREEN,     0,   187,    14,    79, 0x0,                             STR_NULL},
 {  WWT_SCROLLBAR,    RESIZE_LRB, COLOUR_DARK_GREEN,   188,   199,    14,    67, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
-{  WWT_RESIZEBOX,   RESIZE_LRTB, COLOUR_DARK_GREEN,   188,   199,    68,    79, 0x0,                             STR_RESIZE_BUTTON},
+{  WWT_RESIZEBOX,   RESIZE_LRTB, COLOUR_DARK_GREEN,   188,   199,    68,    79, 0x0,                             STR_TOOLTIP_RESIZE},
 {   WIDGETS_END},
 };
 
 static const NWidgetPart _nested_select_station_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, JSW_WIDGET_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, JSW_WIDGET_CAPTION), SetDataTip(STR_SELECT_STATION_TO_JOIN, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, JSW_WIDGET_CAPTION), SetDataTip(STR_JOIN_STATION_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, JSW_PANEL), SetMinimalSize(188, 66), SetResize(1, 10), EndContainer(),
@@ -1817,7 +1817,7 @@ struct SelectStationWindow : Window {
 
 		FindStationsNearby<T>(this->area, true);
 
-		this->widget[JSW_WIDGET_CAPTION].data = T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_SELECT_WAYPOINT_TO_JOIN : STR_SELECT_STATION_TO_JOIN;
+		this->widget[JSW_WIDGET_CAPTION].data = T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_JOIN_WAYPOINT_CAPTION : STR_JOIN_STATION_CAPTION;
 		this->FindWindowPlacementAndResize(desc);
 	}
 
@@ -1829,7 +1829,7 @@ struct SelectStationWindow : Window {
 
 		uint y = 17;
 		if (this->vscroll.pos == 0) {
-			DrawString(3, this->widget[JSW_PANEL].right - 2, y, T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_CREATE_SPLITTED_WAYPOINT : STR_CREATE_SPLITTED_STATION);
+			DrawString(3, this->widget[JSW_PANEL].right - 2, y, T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT : STR_JOIN_STATION_CREATE_SPLITTED_STATION);
 			y += 10;
 		}
 
