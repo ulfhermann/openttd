@@ -829,7 +829,7 @@ static void AddRearEngineToMultiheadedTrain(Train *v)
 CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	/* Check if the engine-type is valid (for the company) */
-	if (!IsEngineBuildable(p1, VEH_TRAIN, _current_company)) return_cmd_error(STR_RAIL_VEHICLE_NOT_AVAILABLE);
+	if (!IsEngineBuildable(p1, VEH_TRAIN, _current_company)) return_cmd_error(STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE);
 
 	const Engine *e = Engine::Get(p1);
 	CommandCost value(EXPENSES_NEW_VEHICLES, e->GetCost());
@@ -1241,7 +1241,7 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 				if (callback != CALLBACK_FAILED) {
 					StringID error = STR_NULL;
 
-					if (callback == 0xFD) error = STR_INCOMPATIBLE_RAIL_TYPES;
+					if (callback == 0xFD) error = STR_ERROR_INCOMPATIBLE_RAIL_TYPES;
 					if (callback < 0xFD) error = GetGRFStringID(GetEngineGRFID(dst_head->engine_type), 0xD000 + callback);
 
 					if (error != STR_NULL) {
@@ -1443,7 +1443,7 @@ CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (p2 > 1) return CMD_ERROR;
 
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_SELL_DESTROYED_VEHICLE);
 
 	v = v->GetFirstEnginePart();
 	Train *first = v->First();
@@ -1620,13 +1620,6 @@ void Train::UpdateDeltaXY(Direction direction)
 	this->z_extent      = 6;
 }
 
-static void UpdateVarsAfterSwap(Train *v)
-{
-	v->UpdateDeltaXY(v->direction);
-	v->cur_image = v->GetImage(v->direction);
-	VehicleMove(v, true);
-}
-
 static inline void SetLastSpeed(Train *v, int spd)
 {
 	int old = v->tcache.last_speed;
@@ -1714,15 +1707,15 @@ static void ReverseTrainSwapVeh(Train *v, int l, int r)
 		SwapTrainFlags(&a->flags, &b->flags);
 
 		/* update other vars */
-		UpdateVarsAfterSwap(a);
-		UpdateVarsAfterSwap(b);
+		a->UpdateViewport(true, true);
+		b->UpdateViewport(true, true);
 
 		/* call the proper EnterTile function unless we are in a wormhole */
 		if (a->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(a, a->tile, a->x_pos, a->y_pos);
 		if (b->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(b, b->tile, b->x_pos, b->y_pos);
 	} else {
 		if (a->track != TRACK_BIT_DEPOT) a->direction = ReverseDir(a->direction);
-		UpdateVarsAfterSwap(a);
+		a->UpdateViewport(true, true);
 
 		if (a->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(a, a->tile, a->x_pos, a->y_pos);
 	}
@@ -1917,8 +1910,8 @@ static void ReverseTrainDirection(Train *v)
 		InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
 	}
 
-	/* Clear path reservation in front. */
-	FreeTrainTrackReservation(v);
+	/* Clear path reservation in front if train is not stuck. */
+	if (!HasBit(v->flags, VRF_TRAIN_STUCK)) FreeTrainTrackReservation(v);
 
 	/* Check if we were approaching a rail/road-crossing */
 	TileIndex crossing = TrainApproachingCrossingTile(v);
@@ -1948,7 +1941,7 @@ static void ReverseTrainDirection(Train *v)
 	TrainConsistChanged(v, true);
 
 	/* update all images */
-	for (Vehicle *u = v; u != NULL; u = u->Next()) u->cur_image = u->GetImage(u->direction);
+	for (Vehicle *u = v; u != NULL; u = u->Next()) u->UpdateViewport(false, false);
 
 	/* update crossing we were approaching */
 	if (crossing != INVALID_TILE) UpdateLevelCrossing(crossing);
@@ -2086,7 +2079,7 @@ CommandCost CmdRefitRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 
 	if (CheckTrainStoppedInDepot(v) < 0) return_cmd_error(STR_TRAIN_MUST_BE_STOPPED);
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
 	/* Check cargo */
 	if (new_cid >= NUM_CARGO) return CMD_ERROR;
@@ -2290,12 +2283,6 @@ CommandCost CmdSendTrainToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	if (v == NULL) return CMD_ERROR;
 
 	return v->SendToDepot(flags, (DepotCommand)(p2 & DEPOT_COMMAND_MASK));
-}
-
-
-void OnTick_Train()
-{
-	_age_cargo_skip_counter = (_age_cargo_skip_counter == 0) ? 184 : (_age_cargo_skip_counter - 1);
 }
 
 static const int8 _vehicle_smoke_pos[8] = {
@@ -3163,20 +3150,21 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 
 	bool other_train = false;
 	PBSTileInfo origin = FollowTrainReservation(v, &other_train);
+	/* The path we are driving on is alread blocked by some other train.
+	 * This can only happen in certain situations when mixing path and
+	 * block signals or when changing tracks and/or signals.
+	 * Exit here as doing any further reservations will probably just
+	 * make matters worse. */
+	if (other_train && v->tile != origin.tile) {
+		if (mark_as_stuck) MarkTrainAsStuck(v);
+		return false;
+	}
 	/* If we have a reserved path and the path ends at a safe tile, we are finished already. */
 	if (origin.okay && (v->tile != origin.tile || first_tile_okay)) {
 		/* Can't be stuck then. */
 		if (HasBit(v->flags, VRF_TRAIN_STUCK)) InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 		ClrBit(v->flags, VRF_TRAIN_STUCK);
 		return true;
-	}
-	/* The path we are driving on is alread blocked by some other train.
-	 * This can only happen when tracks and signals are changed. A crash
-	 * is probably imminent, don't do any further reservation because
-	 * it might cause stale reservations. */
-	if (other_train && v->tile != origin.tile) {
-		if (mark_as_stuck) MarkTrainAsStuck(v);
-		return false;
 	}
 
 	/* If we are in a depot, tentativly reserve the depot. */
@@ -3330,8 +3318,7 @@ void Train::MarkDirty()
 {
 	Vehicle *v = this;
 	do {
-		v->cur_image = v->GetImage(v->direction);
-		MarkSingleVehicleDirty(v);
+		v->UpdateViewport(false, false);
 	} while ((v = v->Next()) != NULL);
 
 	/* need to update acceleration and cached values since the goods on the train changed. */
@@ -3523,11 +3510,10 @@ static void SetVehicleCrashed(Train *v)
 {
 	if (v->crash_anim_pos != 0) return;
 
-	/* Free a possible path reservation and try to mark all tiles occupied by the train reserved. */
 	if (v->IsFrontEngine()) {
-		/* Remove all reservations, also the ones currently under the train
-		 * and any railway station paltform reservation. */
-		FreeTrainTrackReservation(v);
+		/* Remove the reserved path in front of the train if it is not stuck.
+		 * Also clear all reserved tracks the train is currently on. */
+		if (!HasBit(v->flags, VRF_TRAIN_STUCK)) FreeTrainTrackReservation(v);
 		for (const Train *u = v; u != NULL; u = u->Next()) {
 			ClearPathReservation(u, u->tile, u->GetVehicleTrackdir());
 			if (IsTileType(u->tile, MP_TUNNELBRIDGE)) {
@@ -4456,9 +4442,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 	for (Train *u = v; u != NULL; u = u->Next()) {
 		if ((u->vehstatus & VS_HIDDEN) != 0) continue;
 
-		uint16 old_image = u->cur_image;
-		u->cur_image = u->GetImage(u->direction);
-		if (old_image != u->cur_image) VehicleMove(u, true);
+		u->UpdateViewport(false, false);
 	}
 
 	if (v->progress == 0) v->progress = j; // Save unused spd for next time, if TrainController didn't set progress
@@ -4491,8 +4475,6 @@ Money Train::GetRunningCost() const
 
 bool Train::Tick()
 {
-	if (_age_cargo_skip_counter == 0) this->cargo.AgeCargo();
-
 	this->tick_counter++;
 
 	if (this->IsFrontEngine()) {
@@ -4601,9 +4583,4 @@ Trackdir Train::GetVehicleTrackdir() const
 	}
 
 	return TrackDirectionToTrackdir(FindFirstTrack(this->track), this->direction);
-}
-
-void InitializeTrains()
-{
-	_age_cargo_skip_counter = 1;
 }
