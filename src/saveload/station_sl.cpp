@@ -243,8 +243,6 @@ static void Load_STNS()
 		uint num_cargo = CheckSavegameVersion(55) ? 12 : NUM_CARGO;
 		for (CargoID i = 0; i < num_cargo; i++) {
 			GoodsEntry *ge = &st->goods[i];
-			LinkStatMap & stats = ge->link_stats;
-			_num_links = stats.size(); // for saving, is overwritten by next line when loading
 			SlObject(ge, GetGoodsDesc());
 			if (CheckSavegameVersion(68)) {
 				SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
@@ -261,20 +259,6 @@ static void Load_STNS()
 					cp->feeder_share    = _cargo_feeder_share;
 					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
 					ge->cargo.Append(cp);
-				}
-			}
-			if (stats.empty()) { // loading
-				LinkStat ls;
-				for (uint i = 0; i < _num_links; ++i) {
-					SlObject(&ls, _linkstat_desc);
-					assert(ls.capacity > 0);
-					stats[_station_id] = ls;
-				}
-			} else { // saving
-				for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
-					_station_id = i->first;
-					assert(i->second.capacity > 0);
-					SlObject(&(i->second), _linkstat_desc);
 				}
 			}
 		}
@@ -381,7 +365,15 @@ static void RealSave_STNN(BaseStation *bst)
 	if (!waypoint) {
 		Station *st = Station::From(bst);
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			SlObject(&st->goods[i], GetGoodsDesc());
+			GoodsEntry *ge = &st->goods[i];
+			LinkStatMap &stats = ge->link_stats;
+			_num_links = stats.size();
+			SlObject(ge, GetGoodsDesc());
+			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
+				_station_id = i->first;
+				assert(i->second.capacity > 0);
+				SlObject(&(i->second), _linkstat_desc);
+			}
 		}
 	}
 
@@ -413,7 +405,15 @@ static void Load_STNN()
 		if (!waypoint) {
 			Station *st = Station::From(bst);
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
-				SlObject(&st->goods[i], GetGoodsDesc());
+				GoodsEntry *ge = &st->goods[i];
+				LinkStatMap &stats = ge->link_stats;
+				SlObject(ge, GetGoodsDesc());
+				LinkStat ls;
+				for (uint i = 0; i < _num_links; ++i) {
+					SlObject(&ls, _linkstat_desc);
+					assert(ls.capacity > 0);
+					stats[_station_id] = ls;
+				}
 			}
 		}
 
@@ -437,6 +437,7 @@ static void Ptrs_STNN()
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
 			SlObject(ge, GetGoodsDesc());
+			// as there are no pointers in the link stats we don't have to consider them
 		}
 		SlObject(st, _station_desc);
 	}
