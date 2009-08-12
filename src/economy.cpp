@@ -328,14 +328,17 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 		Company::Get(old_owner)->money = UINT64_MAX >> 2; // jackpot ;p
 	}
 
-	if (new_owner == INVALID_OWNER) {
-		Subsidy *s;
-		FOR_ALL_SUBSIDIES(s) {
-			if (s->IsAwarded() && Station::Get(s->to)->owner == old_owner) {
-				s->cargo_type = CT_INVALID;
+	Subsidy *s;
+	FOR_ALL_SUBSIDIES(s) {
+		if (s->awarded == old_owner) {
+			if (new_owner == INVALID_OWNER) {
+				delete s;
+			} else {
+				s->awarded = new_owner;
 			}
 		}
 	}
+	if (new_owner == INVALID_OWNER) RebuildSubsidisedSourceAndDestinationCache();
 
 	/* Take care of rating in towns */
 	FOR_ALL_TOWNS(t) {
@@ -491,7 +494,7 @@ static void CompanyCheckBankrupt(Company *c)
 			SetDParam(0, STR_NEWS_COMPANY_IN_TROUBLE_TITLE);
 			SetDParam(1, STR_NEWS_COMPANY_IN_TROUBLE_DESCRIPTION);
 			SetDParamStr(2, cni->company_name);
-			AddCompanyNewsItem(STR_NEWS_MESSAGE, NS_COMPANY_TROUBLE, cni);
+			AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_TROUBLE, cni);
 			AI::BroadcastNewEvent(new AIEventCompanyInTrouble(c->index));
 			break;
 		case 3: {
@@ -501,7 +504,7 @@ static void CompanyCheckBankrupt(Company *c)
 				SetDParam(0, STR_NEWS_COMPANY_IN_TROUBLE_TITLE);
 				SetDParam(1, STR_NEWS_COMPANY_IN_TROUBLE_DESCRIPTION);
 				SetDParamStr(2, cni->company_name);
-				AddCompanyNewsItem(STR_NEWS_MESSAGE, NS_COMPANY_TROUBLE, cni);
+				AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_TROUBLE, cni);
 				break;
 			}
 
@@ -536,7 +539,7 @@ static void CompanyCheckBankrupt(Company *c)
 			SetDParam(0, STR_NEWS_COMPANY_BANKRUPT_TITLE);
 			SetDParam(1, STR_NEWS_COMPANY_BANKRUPT_DESCRIPTION);
 			SetDParamStr(2, cni->company_name);
-			AddCompanyNewsItem(STR_NEWS_MESSAGE, NS_COMPANY_BANKRUPT, cni);
+			AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_BANKRUPT, cni);
 
 			/* Remove the company */
 			ChangeNetworkOwner(c->index, COMPANY_SPECTATOR);
@@ -868,104 +871,6 @@ Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, C
 	return BigMulS(dist * time_factor * num_pieces, _cargo_payment_rates[cargo_type], 21);
 }
 
-/**
- * @note THIS STRUCTURE WILL BE REMOVED SOON!
- */
-struct FindIndustryToDeliverData {
-	const Rect *rect;            ///< Station acceptance rectangle
-	CargoID cargo_type;          ///< Cargo type that was delivered
-
-	Industry *ind;               ///< Returns found industry
-	const IndustrySpec *indspec; ///< Spec of ind
-	uint cargo_index;            ///< Index of cargo_type in acceptance list of ind
-};
-
-/**
- * @note THIS FUNCTION WILL BE REMOVED SOON!
- */
-static bool FindIndustryToDeliver(TileIndex ind_tile, void *user_data)
-{
-	FindIndustryToDeliverData *callback_data = (FindIndustryToDeliverData *)user_data;
-	const Rect *rect = callback_data->rect;
-	CargoID cargo_type = callback_data->cargo_type;
-
-	/* Only process industry tiles */
-	if (!IsTileType(ind_tile, MP_INDUSTRY)) return false;
-
-	/* Only process tiles in the station acceptance rectangle */
-	int x = TileX(ind_tile);
-	int y = TileY(ind_tile);
-	if (x < rect->left || x > rect->right || y < rect->top || y > rect->bottom) return false;
-
-	Industry *ind = GetIndustryByTile(ind_tile);
-	const IndustrySpec *indspec = GetIndustrySpec(ind->type);
-
-	uint cargo_index;
-	for (cargo_index = 0; cargo_index < lengthof(ind->accepts_cargo); cargo_index++) {
-		if (cargo_type == ind->accepts_cargo[cargo_index]) break;
-	}
-	/* Check if matching cargo has been found */
-	if (cargo_index >= lengthof(ind->accepts_cargo)) return false;
-
-	/* Check if industry temporarly refuses acceptance */
-	if (HasBit(indspec->callback_flags, CBM_IND_REFUSE_CARGO)) {
-		uint16 res = GetIndustryCallback(CBID_INDUSTRY_REFUSE_CARGO, 0, GetReverseCargoTranslation(cargo_type, indspec->grf_prop.grffile), ind, ind->type, ind->xy);
-		if (res == 0) return false;
-	}
-
-	/* Found industry accepting the cargo */
-	callback_data->ind = ind;
-	callback_data->indspec = indspec;
-	callback_data->cargo_index = cargo_index;
-	return true;
-}
-
-/**
- * Transfer goods from station to industry.
- * All cargo is delivered to the nearest (Manhattan) industry to the station sign, which is inside the acceptance rectangle and actually accepts the cargo.
- * @param st The station that accepted the cargo
- * @param cargo_type Type of cargo delivered
- * @param nun_pieces Amount of cargo delivered
- * @note THIS FUNCTION WILL BE REMOVED SOON!
- */
-static Industry *DeliverGoodsToIndustryCheckOldStyle(const Station *st, CargoID cargo_type, int num_pieces)
-{
-	if (st->rect.IsEmpty()) return NULL;
-
-	/* Compute acceptance rectangle */
-	int catchment_radius = st->GetCatchmentRadius();
-	Rect rect = {
-		max<int>(st->rect.left   - catchment_radius, 0),
-		max<int>(st->rect.top    - catchment_radius, 0),
-		min<int>(st->rect.right  + catchment_radius, MapMaxX()),
-		min<int>(st->rect.bottom + catchment_radius, MapMaxY())
-	};
-
-	/* Compute maximum extent of acceptance rectangle wrt. station sign */
-	TileIndex start_tile = st->xy;
-	uint max_radius = max(
-		max(DistanceManhattan(start_tile, TileXY(rect.left , rect.top)), DistanceManhattan(start_tile, TileXY(rect.left , rect.bottom))),
-		max(DistanceManhattan(start_tile, TileXY(rect.right, rect.top)), DistanceManhattan(start_tile, TileXY(rect.right, rect.bottom)))
-	);
-
-	FindIndustryToDeliverData callback_data;
-	callback_data.rect = &rect;
-	callback_data.cargo_type = cargo_type;
-	callback_data.ind = NULL;
-	callback_data.indspec = NULL;
-	callback_data.cargo_index = 0;
-
-	/* Find the nearest industrytile to the station sign inside the catchment area, whose industry accepts the cargo.
-	 * This fails in three cases:
-	 *  1) The station accepts the cargo because there are enough houses around it accepting the cargo.
-	 *  2) The industries in the catchment area temporarily reject the cargo, and the daily station loop has not yet updated station acceptance.
-	 *  3) The results of callbacks CBID_INDUSTRY_REFUSE_CARGO and CBID_INDTILE_CARGO_ACCEPTANCE are inconsistent. (documented behaviour)
-	 */
-	if (CircularTileSearch(&start_tile, 2 * max_radius + 1, FindIndustryToDeliver, &callback_data)) return callback_data.ind;
-
-	return NULL;
-}
-
 /** The industries we've currently brought cargo to. */
 static SmallIndustryList _cargo_delivery_destinations;
 
@@ -1005,58 +910,47 @@ static void DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, int nu
 		/* Insert the industry into _cargo_delivery_destinations, if not yet contained */
 		_cargo_delivery_destinations.Include(ind);
 
-		assert(DeliverGoodsToIndustryCheckOldStyle(st, cargo_type, num_pieces) == ind); // safety check, will be removed soon
-
 		ind->incoming_cargo_waiting[cargo_index] = min(num_pieces + ind->incoming_cargo_waiting[cargo_index], 0xFFFF);
 
 		return;
 	}
-
-	assert(DeliverGoodsToIndustryCheckOldStyle(st, cargo_type, num_pieces) == NULL); // safety check, will be removed soon
 }
 
 /**
  * Delivers goods to industries/towns and calculates the payment
  * @param num_pieces amount of cargo delivered
- * @param source Originstation of the cargo
  * @param dest Station the cargo has been unloaded
  * @param source_tile The origin of the cargo for distance calculation
  * @param days_in_transit Travel time
  * @param company The company delivering the cargo
- * The cargo is just added to the stockpile of the industry. It is due to the caller to trigger the industry's production machinery
+ * @param src_type Type of source of cargo (industry, town, headquarters)
+ * @param src Index of source of cargo
+ * @return Revenue for delivering cargo
+ * @note The cargo is just added to the stockpile of the industry. It is due to the caller to trigger the industry's production machinery
  */
-static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID source, StationID dest, TileIndex source_tile, byte days_in_transit, Company *company)
+static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, TileIndex source_tile, byte days_in_transit, Company *company, SourceType src_type, SourceID src)
 {
-	bool subsidised = false;
-
 	assert(num_pieces > 0);
 
 	/* Update company statistics */
 	company->cur_economy.delivered_cargo += num_pieces;
 	SetBit(company->cargo_types, cargo_type);
 
-	const Station *s_to = Station::Get(dest);
-
-	if (source != INVALID_STATION) {
-		const Station *s_from = Station::Get(source);
-
-		/* Check if a subsidy applies. */
-		subsidised = CheckSubsidised(s_from, s_to, cargo_type, company->index);
-	}
+	const Station *st = Station::Get(dest);
 
 	/* Increase town's counter for some special goods types */
 	const CargoSpec *cs = CargoSpec::Get(cargo_type);
-	if (cs->town_effect == TE_FOOD) s_to->town->new_act_food += num_pieces;
-	if (cs->town_effect == TE_WATER) s_to->town->new_act_water += num_pieces;
+	if (cs->town_effect == TE_FOOD) st->town->new_act_food += num_pieces;
+	if (cs->town_effect == TE_WATER) st->town->new_act_water += num_pieces;
 
 	/* Give the goods to the industry. */
-	DeliverGoodsToIndustry(s_to, cargo_type, num_pieces);
+	DeliverGoodsToIndustry(st, cargo_type, num_pieces);
 
 	/* Determine profit */
-	Money profit = GetTransportedGoodsIncome(num_pieces, DistanceManhattan(source_tile, s_to->xy), days_in_transit, cargo_type);
+	Money profit = GetTransportedGoodsIncome(num_pieces, DistanceManhattan(source_tile, st->xy), days_in_transit, cargo_type);
 
 	/* Modify profit if a subsidy is in effect */
-	if (subsidised) {
+	if (CheckSubsidised(cargo_type, company->index, src_type, src, st))  {
 		switch (_settings_game.difficulty.subsidy_multiplier) {
 			case 0:  profit += profit >> 1; break;
 			case 1:  profit *= 2; break;
@@ -1153,7 +1047,7 @@ void CargoPayment::PayFinalDelivery(CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, cp->source, this->current_station, cp->source_xy, cp->days_in_transit, this->owner);
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->days_in_transit, this->owner, cp->source_type, cp->source_id);
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
@@ -1532,7 +1426,7 @@ static void DoAcquireCompany(Company *c)
 	SetDParamStr(2, cni->company_name);
 	SetDParamStr(3, cni->other_company_name);
 	SetDParam(4, c->bankrupt_value);
-	AddCompanyNewsItem(STR_NEWS_MESSAGE, NS_COMPANY_MERGER, cni);
+	AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_MERGER, cni);
 	AI::BroadcastNewEvent(new AIEventCompanyMerger(ci, _current_company));
 
 	/* original code does this a little bit differently */
@@ -1584,7 +1478,7 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	if (c == NULL || !_settings_game.economy.allow_shares || _current_company == (CompanyID)p1) return CMD_ERROR;
 
 	/* Protect new companies from hostile takeovers */
-	if (_cur_year - c->inaugurated_year < 6) return_cmd_error(STR_PROTECTED);
+	if (_cur_year - c->inaugurated_year < 6) return_cmd_error(STR_ERROR_PROTECTED);
 
 	/* Those lines are here for network-protection (clients can be slow) */
 	if (GetAmountOwnedBy(c, COMPANY_SPECTATOR) == 0) return cost;

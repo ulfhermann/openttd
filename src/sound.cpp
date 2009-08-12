@@ -13,6 +13,10 @@
 #include "vehicle_base.h"
 #include "debug.h"
 
+/* The type of set we're replacing */
+#define SET_TYPE "sounds"
+#include "base_media_func.h"
+
 static SoundEntry _original_sounds[ORIGINAL_SAMPLE_COUNT];
 MusicFileSettings msf;
 
@@ -25,7 +29,12 @@ static void OpenBankFile(const char *filename)
 
 	FioOpenFile(SOUND_SLOT, filename);
 	size_t pos = FioGetPos();
-	uint count = FioReadDword() / 8;
+	uint count = FioReadDword();
+
+	/* The new format has the highest bit always set */
+	bool new_format = HasBit(count, 31);
+	ClrBit(count, 31);
+	count /= 8;
 
 	/* Simple check for the correct number of original sounds. */
 	if (count != ORIGINAL_SAMPLE_COUNT) {
@@ -40,7 +49,7 @@ static void OpenBankFile(const char *filename)
 
 	for (uint i = 0; i != ORIGINAL_SAMPLE_COUNT; i++) {
 		_original_sounds[i].file_slot = SOUND_SLOT;
-		_original_sounds[i].file_offset = FioReadDword() + pos;
+		_original_sounds[i].file_offset = GB(FioReadDword(), 0, 31) + pos;
 		_original_sounds[i].file_size = FioReadDword();
 	}
 
@@ -52,7 +61,7 @@ static void OpenBankFile(const char *filename)
 
 		/* Check for special case, see else case */
 		FioReadBlock(name, FioReadByte()); // Read the name of the sound
-		if (strcmp(name, "Corrupt sound") != 0) {
+		if (new_format || strcmp(name, "Corrupt sound") != 0) {
 			FioSeekTo(12, SEEK_CUR); // Skip past RIFF header
 
 			/* Read riff tags */
@@ -62,11 +71,11 @@ static void OpenBankFile(const char *filename)
 
 				if (tag == ' tmf') {
 					FioReadWord(); // wFormatTag
-					sound->channels = FioReadWord(); // wChannels
-					FioReadDword();   // samples per second
-					sound->rate = 11025; // seems like all samples should be played at this rate.
-					FioReadDword();   // avg bytes per second
-					FioReadWord();    // alignment
+					sound->channels = FioReadWord();        // wChannels
+					sound->rate     = FioReadDword();       // samples per second
+					if (!new_format) sound->rate = 11025;   // seems like all old samples should be played at this rate.
+					FioReadDword();                         // avg bytes per second
+					FioReadWord();                          // alignment
 					sound->bits_per_sample = FioReadByte(); // bits per sample
 					FioSeekTo(size - (2 + 2 + 4 + 4 + 2 + 1), SEEK_CUR);
 				} else if (tag == 'atad') {
@@ -100,26 +109,35 @@ static bool SetBankSource(MixerChannel *mc, const SoundEntry *sound)
 
 	if (sound->file_size == 0) return false;
 
-	int8 *mem = MallocT<int8>(sound->file_size);
+	int8 *mem = MallocT<int8>(sound->file_size + 2);
+	/* Add two extra bytes so rate conversion can read these
+	 * without reading out of it's input buffer. */
+	mem[sound->file_size    ] = 0;
+	mem[sound->file_size + 1] = 0;
 
 	FioSeekToFile(sound->file_slot, sound->file_offset);
 	FioReadBlock(mem, sound->file_size);
 
-	for (uint i = 0; i != sound->file_size; i++) {
-		mem[i] += -128; // Convert unsigned sound data to signed
+	/* 16-bit PCM WAV files should be signed by default */
+	if (sound->bits_per_sample == 8) {
+		for (uint i = 0; i != sound->file_size; i++) {
+			mem[i] += -128; // Convert unsigned sound data to signed
+		}
 	}
 
-	assert(sound->bits_per_sample == 8 && sound->channels == 1 && sound->file_size != 0 && sound->rate != 0);
+	assert(sound->bits_per_sample == 8 || sound->bits_per_sample == 16);
+	assert(sound->channels == 1);
+	assert(sound->file_size != 0 && sound->rate != 0);
 
-	MxSetChannelRawSrc(mc, mem, sound->file_size, sound->rate);
+	MxSetChannelRawSrc(mc, mem, sound->file_size, sound->rate, sound->bits_per_sample == 16);
 
 	return true;
 }
 
-bool SoundInitialize(const char *filename)
+void InitializeSound()
 {
-	OpenBankFile(filename);
-	return true;
+	DEBUG(misc, 1, "Loading sound effects...");
+	OpenBankFile(BaseSounds::GetUsedSet()->files->filename);
 }
 
 /* Low level sound player */
@@ -242,3 +260,37 @@ void SndPlayFx(SoundID sound)
 {
 	StartSound(sound, 0, msf.effect_vol);
 }
+
+INSTANTIATE_BASE_MEDIA_METHODS(BaseMedia<SoundsSet>, SoundsSet)
+
+/** Names corresponding to the sound set's files */
+const char *_sound_file_names[] = { "samples" };
+
+
+template <class T, size_t Tnum_files>
+/* static */ const char **BaseSet<T, Tnum_files>::file_names = _sound_file_names;
+
+template <class Tbase_set>
+/* static */ const char *BaseMedia<Tbase_set>::GetExtension()
+{
+	return ".obs"; // OpenTTD Base Sounds
+}
+
+template <class Tbase_set>
+/* static */ bool BaseMedia<Tbase_set>::DetermineBestSet()
+{
+	if (BaseMedia<Tbase_set>::used_set != NULL) return true;
+
+	const Tbase_set *best = BaseMedia<Tbase_set>::available_sets;
+	for (const Tbase_set *c = BaseMedia<Tbase_set>::available_sets; c != NULL; c = c->next) {
+		if (best->found_files < c->found_files ||
+				(best->found_files == c->found_files &&
+					(best->shortname == c->shortname && best->version < c->version))) {
+			best = c;
+		}
+	}
+
+	BaseMedia<Tbase_set>::used_set = best;
+	return BaseMedia<Tbase_set>::used_set != NULL;
+}
+

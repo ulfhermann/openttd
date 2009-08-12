@@ -250,7 +250,7 @@ uint16 AircraftDefaultCargoCapacity(CargoID cid, const AircraftVehicleInfo *avi)
  */
 CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!IsEngineBuildable(p1, VEH_AIRCRAFT, _current_company)) return_cmd_error(STR_AIRCRAFT_NOT_AVAILABLE);
+	if (!IsEngineBuildable(p1, VEH_AIRCRAFT, _current_company)) return_cmd_error(STR_ERROR_AIRCRAFT_NOT_AVAILABLE);
 
 	const AircraftVehicleInfo *avi = AircraftVehInfo(p1);
 	const Engine *e = Engine::Get(p1);
@@ -451,7 +451,7 @@ CommandCost CmdSellAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_AIRCRAFT_MUST_BE_STOPPED);
 
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_SELL_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_SELL_DESTROYED_VEHICLE);
 
 	CommandCost ret(EXPENSES_NEW_VEHICLES, -v->value);
 
@@ -522,7 +522,7 @@ CommandCost CmdRefitAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	Aircraft *v = Aircraft::GetIfValid(p1);
 	if (v == NULL || !CheckOwnership(v->owner)) return CMD_ERROR;
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_AIRCRAFT_MUST_BE_STOPPED);
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_CAN_T_REFIT_DESTROYED_VEHICLE);
+	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
 	/* Check cargo */
 	CargoID new_cid = GB(p2, 0, 8);
@@ -636,16 +636,6 @@ void Aircraft::OnNewDay()
 	InvalidateWindowClasses(WC_AIRCRAFT_LIST);
 }
 
-static void AgeAircraftCargo(Aircraft *v)
-{
-	if (_age_cargo_skip_counter != 0) return;
-
-	do {
-		v->cargo.AgeCargo();
-		v = v->Next();
-	} while (v != NULL);
-}
-
 static void HelicopterTickHandler(Aircraft *v)
 {
 	Aircraft *u = v->Next()->Next();
@@ -697,10 +687,8 @@ void SetAircraftPosition(Aircraft *v, int x, int y, int z)
 	v->y_pos = y;
 	v->z_pos = z;
 
-	v->cur_image = v->GetImage(v->direction);
+	v->UpdateViewport(true, false);
 	if (v->subtype == AIR_HELICOPTER) v->Next()->Next()->cur_image = GetRotorImage(v);
-
-	VehicleMove(v, true);
 
 	Aircraft *u = v->Next();
 
@@ -1288,9 +1276,8 @@ TileIndex Aircraft::GetOrderStationLocation(StationID station)
 
 void Aircraft::MarkDirty()
 {
-	this->cur_image = this->GetImage(this->direction);
+	this->UpdateViewport(false, false);
 	if (this->subtype == AIR_HELICOPTER) this->Next()->Next()->cur_image = GetRotorImage(this);
-	MarkSingleVehicleDirty(this);
 }
 
 static void CrashAirplane(Aircraft *v)
@@ -2033,8 +2020,6 @@ bool Aircraft::Tick()
 	if (!(this->vehstatus & VS_STOPPED)) this->running_ticks++;
 
 	if (this->subtype == AIR_HELICOPTER) HelicopterTickHandler(this);
-
-	AgeAircraftCargo(this);
 
 	this->current_order_time++;
 
