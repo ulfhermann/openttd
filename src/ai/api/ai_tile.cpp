@@ -5,6 +5,7 @@
 #include "ai_tile.hpp"
 #include "ai_map.hpp"
 #include "ai_town.hpp"
+#include "ai_log.hpp"
 #include "../../station_func.h"
 #include "../../company_func.h"
 #include "../../road_map.h"
@@ -131,6 +132,7 @@
 
 /* static */ int32 AITile::GetHeight(TileIndex tile)
 {
+	AILog::Warning("AITile::GetHeight is deprecated and will be removed soon, please use GetMinHeight/GetMaxHeight/GetCornerHeight instead.");
 	if (!::IsValidTile(tile)) return -1;
 
 	return ::TileHeight(tile);

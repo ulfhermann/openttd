@@ -190,7 +190,7 @@ static char *FormatNumber(char *buff, int64 number, const char *last, const char
 	uint64 num;
 
 	if (number < 0) {
-		*buff++ = '-';
+		buff += seprintf(buff, last, "-");
 		number = -number;
 	}
 
@@ -244,28 +244,31 @@ static char *FormatBytes(char *buff, int64 number, const char *last)
 {
 	assert(number >= 0);
 
-	/*                         0    2^10   2^20   2^30   2^40   2^50   2^60 */
-	const char *siUnits[] = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
+	/*                                    1   2^10  2^20  2^30  2^40  2^50  2^60 */
+	const char * const iec_prefixes[] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
 	uint id = 1;
 	while (number >= 1024 * 1024) {
 		number /= 1024;
 		id++;
 	}
 
+	const char *decimal_separator = _settings_game.locale.digit_decimal_separator;
+	if (decimal_separator == NULL) decimal_separator = _langpack->digit_decimal_separator;
+
 	if (number < 1024) {
 		id = 0;
 		buff += seprintf(buff, last, "%i", (int)number);
 	} else if (number < 1024 * 10) {
-		buff += seprintf(buff, last, "%i.%02i", (int)number / 1024, (int)(number % 1024) * 100 / 1024);
+		buff += seprintf(buff, last, "%i%s%02i", (int)number / 1024, decimal_separator, (int)(number % 1024) * 100 / 1024);
 	} else if (number < 1024 * 100) {
-		buff += seprintf(buff, last, "%i.%01i", (int)number / 1024, (int)(number % 1024) * 10 / 1024);
+		buff += seprintf(buff, last, "%i%s%01i", (int)number / 1024, decimal_separator, (int)(number % 1024) * 10 / 1024);
 	} else {
 		assert(number < 1024 * 1024);
 		buff += seprintf(buff, last, "%i", (int)number / 1024);
 	}
 
-	assert(id < lengthof(siUnits));
-	buff += seprintf(buff, last, " %s", siUnits[id]);
+	assert(id < lengthof(iec_prefixes));
+	buff += seprintf(buff, last, " %sB", iec_prefixes[id]);
 
 	return buff;
 }
@@ -460,22 +463,19 @@ static int DeterminePluralForm(int64 count)
 	}
 }
 
-static const char *ParseStringChoice(const char *b, uint form, char *dst, int *dstlen)
+static const char *ParseStringChoice(const char *b, uint form, char **dst, const char *last)
 {
 	/* <NUM> {Length of each string} {each string} */
 	uint n = (byte)*b++;
-	uint pos, i, mylen = 0, mypos = 0;
+	uint pos, i, mypos = 0;
 
 	for (i = pos = 0; i != n; i++) {
 		uint len = (byte)*b++;
-		if (i == form) {
-			mypos = pos;
-			mylen = len;
-		}
+		if (i == form) mypos = pos;
 		pos += len;
 	}
-	*dstlen = mylen;
-	memcpy(dst, b + mypos, mylen);
+
+	*dst += seprintf(*dst, last, "%s", b + mypos);
 	return b + pos;
 }
 
@@ -717,7 +717,6 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 
 			case SCC_GENDER_LIST: { // {G 0 Der Die Das}
 				const char *s = GetStringPtr(argv_orig[(byte)*str++]); // contains the string that determines gender.
-				int len;
 				int gender = 0;
 				if (s != NULL) {
 					wchar_t c = Utf8Consume(&s);
@@ -731,8 +730,7 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 					/* Does this string have a gender, if so, set it */
 					if (c == SCC_GENDER_INDEX) gender = (byte)s[0];
 				}
-				str = ParseStringChoice(str, gender, buff, &len);
-				buff += len;
+				str = ParseStringChoice(str, gender, &buff, last);
 				break;
 			}
 
@@ -751,7 +749,7 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 				 *   8bit   - cargo type
 				 *   16-bit - cargo count */
 				CargoID cargo = GetInt32(&argv);
-				StringID cargo_str = (cargo == CT_INVALID) ? STR_CARGO_N_A : CargoSpec::Get(cargo)->quantifier;
+				StringID cargo_str = (cargo == CT_INVALID) ? STR_QUANTITY_N_A : CargoSpec::Get(cargo)->quantifier;
 				buff = GetStringWithArgs(buff, cargo_str, argv++, last);
 				break;
 			}
@@ -831,9 +829,7 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 
 			case SCC_PLURAL_LIST: { // {P}
 				int64 v = argv_orig[(byte)*str++]; // contains the number that determines plural
-				int len;
-				str = ParseStringChoice(str, DeterminePluralForm(v), buff, &len);
-				buff += len;
+				str = ParseStringChoice(str, DeterminePluralForm(v), &buff, last);
 				break;
 			}
 
@@ -864,7 +860,7 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 					int64 temp[2];
 					temp[0] = wp->town->index;
 					temp[1] = wp->town_cn + 1;
-					StringID str = ((wp->string_id == STR_SV_STNAME_BUOY) ? STR_BUOYNAME_CITY : STR_WAYPOINTNAME_CITY);
+					StringID str = ((wp->string_id == STR_SV_STNAME_BUOY) ? STR_FORMAT_BUOY_NAME : STR_FORMAT_WAYPOINT_NAME);
 					if (wp->town_cn != 0) str++;
 					buff = GetStringWithArgs(buff, str, temp, last);
 				}
@@ -995,7 +991,7 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 				if (si->name != NULL) {
 					buff = strecpy(buff, si->name, last);
 				} else {
-					buff = GetStringWithArgs(buff, STR_SIGN_DEFAULT, NULL, last);
+					buff = GetStringWithArgs(buff, STR_DEFAULT_SIGN_NAME, NULL, last);
 				}
 				break;
 			}

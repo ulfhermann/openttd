@@ -17,18 +17,34 @@ void InitializeCargoPackets()
 	_cargopacket_pool.CleanPool();
 }
 
-CargoPacket::CargoPacket(StationID source, StationID next, uint16 count)
+CargoPacket::CargoPacket(StationID source, StationID next, uint16 count, SourceType source_type, SourceID source_id)
 {
 	if (source != INVALID_STATION) assert(count != 0);
 
-	this->source          = source;
-	this->next            = next;
+//	this->feeder_share    = 0; // no need to zero already zeroed data (by operator new)
 	this->source_xy       = (source != INVALID_STATION) ? Station::Get(source)->xy : 0;
 	this->loaded_at_xy    = this->source_xy;
+	this->source          = source;
+	this->next            = next;
 
 	this->count           = count;
-	this->days_in_transit = 0;
-	this->feeder_share    = 0;
+//	this->days_in_transit = 0;
+
+	this->source_type     = source_type;
+	this->source_id       = source_id;
+}
+
+/**
+ * Invalidates (sets source_id to INVALID_SOURCE) all cargo packets from given source
+ * @param src_type type of source
+ * @param src index of source
+ */
+/* static */ void CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
+{
+	CargoPacket *cp;
+	FOR_ALL_CARGOPACKETS(cp) {
+		if (cp->source_type == src_type && cp->source_id == src) cp->source_id = INVALID_SOURCE;
+	}
 }
 
 /*
@@ -107,14 +123,14 @@ void CargoList::Truncate(uint count)
 }
 
 CargoPacket * CargoPacket::Split(uint new_size) {
-	CargoPacket *cp_new = new CargoPacket(source, next, new_size);
+	CargoPacket *cp_new = new CargoPacket(this->source, this->next, new_size, this->source_type, this->source_id);
 	Money fs = feeder_share * new_size / static_cast<uint>(count);
 	feeder_share -= fs;
-	cp_new->source_xy       = source_xy;
-	cp_new->loaded_at_xy    = loaded_at_xy;
-	cp_new->days_in_transit = days_in_transit;
+	cp_new->source_xy       = this->source_xy;
+	cp_new->loaded_at_xy    = this->loaded_at_xy;
+	cp_new->days_in_transit = this->days_in_transit;
 	cp_new->feeder_share    = fs;
-	count -= new_size;
+	this->count -= new_size;
 	return cp_new;
 }
 

@@ -12,10 +12,10 @@
 #include "company_type.h"
 
 Pair SetupSubsidyDecodeParam(const struct Subsidy *s, bool mode);
-void DeleteSubsidyWithTown(TownID index);
-void DeleteSubsidyWithIndustry(IndustryID index);
-void DeleteSubsidyWithStation(StationID index);
-bool CheckSubsidised(const Station *from, const Station *to, CargoID cargo_type, CompanyID company);
+void DeleteSubsidyWith(SourceType type, SourceID index);
+bool CheckSubsidised(CargoID cargo_type, CompanyID company, SourceType src_type, SourceID src, const Station *st);
 void SubsidyMonthlyHandler();
+void RebuildSubsidisedSourceAndDestinationCache();
+void DeleteSubsidy(struct Subsidy *s);
 
 #endif /* SUBSIDY_FUNC_H */
