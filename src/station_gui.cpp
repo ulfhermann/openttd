@@ -686,7 +686,7 @@ static const Widget _station_view_widgets[] = {
 {  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   237,   248,     0,    13, 0x0,                             STR_TOOLTIP_STICKY},
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    14,    25, STR_BUTTON_SORT_BY,              STR_TOOLTIP_SORT_ORDER},               // SVW_SORT_ORDER
 {    WWT_TEXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   248,    14,    25, 0x0,                             STR_TOOLTIP_SORT_CRITERIAP},           // SVW_SORT_BY
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    26,    37, STR_STATION_VIEW_WAITING,        STR_TOGGLE_CARGO_VIEW},                // SVW_MODE
+{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,     0,    80,    26,    37, STR_STATION_VIEW_WAITING,        STR_STATION_VIEW_TOGGLE_CARGO_VIEW},   // SVW_MODE
 {   WWT_DROPDOWN,  RESIZE_RIGHT,  COLOUR_GREY,    81,   248,    26,    37, 0x0,                             STR_TOOLTIP_GROUP_ORDER},              // SVW_GROUP_BY
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   236,    38,    81, 0x0,                             STR_NULL},                             // SVW_WAITING
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   237,   248,    38,    81, 0x0,                             STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
@@ -713,7 +713,7 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 		NWidget(WWT_TEXTBTN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_MODE), SetMinimalSize(81, 12), SetDataTip(STR_STATION_VIEW_WAITING, STR_TOGGLE_CARGO_VIEW),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_MODE), SetMinimalSize(81, 12), SetDataTip(STR_STATION_VIEW_WAITING, STR_STATION_VIEW_TOGGLE_CARGO_VIEW),
 		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_GROUP_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetDataTip(0x0, STR_TOOLTIP_GROUP_ORDER),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -1233,9 +1233,9 @@ struct StationViewWindow : public Window {
 		for (int i = column - 1; i > 0; --i) {
 			if (groupings[i] == GR_DESTINATION) {
 				if (parent->GetStation() == station) {
-					return STR_NONSTOP;
+					return STR_STATION_VIEW_NONSTOP;
 				} else {
-					return STR_STATION_VIA;
+					return STR_STATION_VIEW_VIA;
 				}
 			}
 			parent = parent->GetParent();
@@ -1245,13 +1245,13 @@ struct StationViewWindow : public Window {
 			CargoDataSet::iterator begin = cd->Begin();
 			CargoDataSet::iterator end = cd->End();
 			if (begin != end && ++(cd->Begin()) == end && (*(begin))->GetStation() == station) {
-				return STR_NONSTOP;
+				return STR_STATION_VIEW_NONSTOP;
 			} else {
-				return STR_STATION_VIA;
+				return STR_STATION_VIEW_VIA;
 			}
 		}
 
-		return STR_STATION_VIA;
+		return STR_STATION_VIEW_VIA;
 	}
 
 	int DrawEntries(CargoDataEntry * entry, int pos, int maxrows, int column, CargoID cargo = CT_INVALID) {
@@ -1289,16 +1289,16 @@ struct StationViewWindow : public Window {
 
 					switch(groupings[column]) {
 					case GR_SOURCE:
-						str = GetEntryString(station, STR_STATION_FROM_HERE, STR_STATION_FROM, STR_STATION_FROM_ANY);
+						str = GetEntryString(station, STR_STATION_VIEW_FROM_HERE, STR_STATION_VIEW_FROM, STR_STATION_VIEW_FROM_ANY);
 						break;
 					case GR_NEXT:
-						str = GetEntryString(station, STR_STATION_VIA_HERE, STR_STATION_VIA, STR_STATION_VIA_ANY);
-						if (str == STR_STATION_VIA) {
+						str = GetEntryString(station, STR_STATION_VIEW_VIA_HERE, STR_STATION_VIEW_VIA, STR_STATION_VIEW_VIA_ANY);
+						if (str == STR_STATION_VIEW_VIA) {
 							str = SearchNonStop(cd, station, column);
 						}
 						break;
 					case GR_DESTINATION:
-						str = GetEntryString(station, STR_STATION_TO_HERE, STR_STATION_TO, STR_STATION_TO_ANY);
+						str = GetEntryString(station, STR_STATION_VIEW_TO_HERE, STR_STATION_VIEW_TO, STR_STATION_VIEW_TO_ANY);
 						break;
 					default:
 						NOT_REACHED();

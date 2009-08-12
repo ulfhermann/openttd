@@ -14,20 +14,6 @@
 ##id 0x0000
 STR_NULL                                                        :
 STR_EMPTY                                                       :
-STR_STATION_VIEW_WAITING                                        :Waiting
-STR_STATION_VIEW_PLANNED                                        :Planned
-STR_STATION_VIEW_SENT                                           :Sent
-STR_TOGGLE_CARGO_VIEW                                           :{BLACK}Toggle between waiting, planned and sent cargo
-STR_STATION_FROM                                                :{YELLOW}{SHORTCARGO} from {STATION}
-STR_STATION_VIA                                                 :{YELLOW}{SHORTCARGO} via {STATION}
-STR_STATION_TO                                                  :{YELLOW}{SHORTCARGO} to {STATION}
-STR_STATION_FROM_ANY                                            :{RED}{SHORTCARGO} from unknown station
-STR_STATION_TO_ANY                                              :{RED}{SHORTCARGO} to any station
-STR_STATION_VIA_ANY                                             :{RED}{SHORTCARGO} via any station
-STR_STATION_FROM_HERE                                           :{GREEN}{SHORTCARGO} from this station
-STR_STATION_VIA_HERE                                            :{GREEN}{SHORTCARGO} stopping at this station
-STR_STATION_TO_HERE                                             :{GREEN}{SHORTCARGO} to this station
-STR_NONSTOP                                                     :{YELLOW}{SHORTCARGO} non-stop
 STR_UNDEFINED                                                   :(undefined string)
 STR_JUST_NOTHING                                                :Nothing
 
@@ -2477,6 +2463,21 @@ STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Ratings
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Show station ratings
 STR_STATION_VIEW_CARGO_RATINGS_TITLE                            :{BLACK}Local rating of transport service:
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
+
+STR_STATION_VIEW_WAITING                                        :Waiting
+STR_STATION_VIEW_PLANNED                                        :Planned
+STR_STATION_VIEW_SENT                                           :Sent
+STR_STATION_VIEW_TOGGLE_CARGO_VIEW                              :{BLACK}Toggle between waiting, planned and sent cargo
+STR_STATION_VIEW_FROM                                           :{YELLOW}{SHORTCARGO} from {STATION}
+STR_STATION_VIEW_VIA                                            :{YELLOW}{SHORTCARGO} via {STATION}
+STR_STATION_VIEW_TO                                             :{YELLOW}{SHORTCARGO} to {STATION}
+STR_STATION_VIEW_FROM_ANY                                       :{RED}{SHORTCARGO} from unknown station
+STR_STATION_VIEW_TO_ANY                                         :{RED}{SHORTCARGO} to any station
+STR_STATION_VIEW_VIA_ANY                                        :{RED}{SHORTCARGO} via any station
+STR_STATION_VIEW_FROM_HERE                                      :{GREEN}{SHORTCARGO} from this station
+STR_STATION_VIEW_VIA_HERE                                       :{GREEN}{SHORTCARGO} stopping at this station
+STR_STATION_VIEW_TO_HERE                                        :{GREEN}{SHORTCARGO} to this station
+STR_STATION_VIEW_NONSTOP                                        :{YELLOW}{SHORTCARGO} non-stop
 
 STR_STATION_VIEW_GROUP_S_V_D                                    :Source-Via-Destination
 STR_STATION_VIEW_GROUP_S_D_V                                    :Source-Destination-Via
