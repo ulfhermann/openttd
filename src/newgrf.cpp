@@ -288,28 +288,41 @@ StringID MapGRFStringID(uint32 grfid, StringID str)
 		default: break;
 	}
 
-#define TEXID_TO_STRINGID(begin, end, stringid) if (str >= begin && str <= end) return str + (stringid - begin)
+#define TEXTID_TO_STRINGID(begin, end, stringid) if (str >= begin && str <= end) return str + (stringid - begin)
 	/* We have some changes in our cargo strings, resulting in some missing. */
-	TEXID_TO_STRINGID(0x000E, 0x002D, STR_CARGO_PLURAL_NOTHING);
-	TEXID_TO_STRINGID(0x002E, 0x004D, STR_CARGO_SINGULAR_NOTHING);
-	if (str >= 0x004E && str <= 0x006D) str = units_volume[str - 0x004E];
-	TEXID_TO_STRINGID(0x006E, 0x008D, STR_QUANTITY_NOTHING);
-	TEXID_TO_STRINGID(0x008E, 0x00AD, STR_ABBREV_NOTHING);
+	TEXTID_TO_STRINGID(0x000E, 0x002D, STR_CARGO_PLURAL_NOTHING);
+	TEXTID_TO_STRINGID(0x002E, 0x004D, STR_CARGO_SINGULAR_NOTHING);
+	if (str >= 0x004E && str <= 0x006D) return units_volume[str - 0x004E];
+	TEXTID_TO_STRINGID(0x006E, 0x008D, STR_QUANTITY_NOTHING);
+	TEXTID_TO_STRINGID(0x008E, 0x00AD, STR_ABBREV_NOTHING);
 
 	/* Map building names according to our lang file changes. There are several
 	 * ranges of house ids, all of which need to be remapped to allow newgrfs
 	 * to use original house names. */
-	TEXID_TO_STRINGID(0x200F, 0x201F, STR_TOWN_BUILDING_NAME_TALL_OFFICE_BLOCK_1);
-	TEXID_TO_STRINGID(0x2036, 0x2041, STR_TOWN_BUILDING_NAME_COTTAGES_1);
-	TEXID_TO_STRINGID(0x2059, 0x205C, STR_TOWN_BUILDING_NAME_IGLOO_1);
+	TEXTID_TO_STRINGID(0x200F, 0x201F, STR_TOWN_BUILDING_NAME_TALL_OFFICE_BLOCK_1);
+	TEXTID_TO_STRINGID(0x2036, 0x2041, STR_TOWN_BUILDING_NAME_COTTAGES_1);
+	TEXTID_TO_STRINGID(0x2059, 0x205C, STR_TOWN_BUILDING_NAME_IGLOO_1);
 
-	/* Same thing for industries, since the introduction of 4 new strings above STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE */
-	TEXID_TO_STRINGID(0x482A, 0x483B, STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE);
+	/* Same thing for industries */
+	TEXTID_TO_STRINGID(0x4802, 0x4826, STR_INDUSTRY_NAME_COAL_MINE);
+	TEXTID_TO_STRINGID(0x4827, 0x4829, STR_INDUSTRY_VIEW_REQUIRES_CARGO);
+	TEXTID_TO_STRINGID(0x482D, 0x482E, STR_NEWS_INDUSTRY_CONSTRUCTION);
+	TEXTID_TO_STRINGID(0x4832, 0x4834, STR_NEWS_INDUSTRY_CLOSURE_GENERAL);
+	TEXTID_TO_STRINGID(0x4835, 0x4838, STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_GENERAL);
+	TEXTID_TO_STRINGID(0x4839, 0x483A, STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_GENERAL);
+
+	switch (str) {
+		case 0x4830: return STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY;
+		case 0x4831: return STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED;
+		case 0x483B: return STR_ERROR_CAN_ONLY_BE_POSITIONED;
+	}
 #undef TEXTID_TO_STRINGID
 
 	if (str == STR_NULL) return STR_EMPTY;
 
-	return str;
+	DEBUG(grf, 0, "Unknown StringID 0x%04X remapped to STR_EMPTY. Please open a Feature Request if you need it", str);
+
+	return STR_EMPTY;
 }
 
 static inline uint8 MapDOSColour(uint8 colour)
