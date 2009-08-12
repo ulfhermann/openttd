@@ -5,6 +5,7 @@
 ##textdir ltr
 ##digitsep ,
 ##digitsepcur ,
+##decimalsep .
 ##winlangid 0x042a
 ##grflangid 0x54
 
@@ -12,14 +13,10 @@
 
 ##id 0x0000
 STR_NULL                                                        :
-STR_ERROR_OFF_EDGE_OF_MAP                                       :{WHITE}Vượt qua giới hạn bản đồ
-STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP                              :{WHITE}Quá gần mép bản đồ
-STR_ERROR_FLAT_LAND_REQUIRED                                    :{WHITE}Yêu cầu nền đất phẳng
-STR_STATION_VIEW_WAITING_TITLE                                  :{BLACK}Đang chờ: {WHITE}{STRING}
-STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORTCARGO} đang trên đường từ {STATION})
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Chấp nhận: {WHITE}
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Chấp nhận: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Cung cấp: {GOLD}
+STR_JUST_NOTHING                                                :Không màu
+
+# Cargo related strings
+# Plural cargo name
 STR_CARGO_PLURAL_PASSENGERS                                     :Hành khách
 STR_CARGO_PLURAL_COAL                                           :Than
 STR_CARGO_PLURAL_MAIL                                           :Thư
@@ -50,6 +47,8 @@ STR_CARGO_PLURAL_TOFFEE                                         :Kẹo bơ cứn
 STR_CARGO_PLURAL_BATTERIES                                      :Pin
 STR_CARGO_PLURAL_PLASTIC                                        :Chất dẻo
 STR_CARGO_PLURAL_FIZZY_DRINKS                                   :Đồ uống có ga
+
+# Singular cargo name
 STR_CARGO_SINGULAR_PASSENGER                                    :Hành khách
 STR_CARGO_SINGULAR_COAL                                         :Than
 STR_CARGO_SINGULAR_MAIL                                         :Thư
@@ -80,6 +79,8 @@ STR_CARGO_SINGULAR_TOFFEE                                       :Kẹo bơ cứn
 STR_CARGO_SINGULAR_BATTERY                                      :Pin
 STR_CARGO_SINGULAR_PLASTIC                                      :Chất dẻo
 STR_CARGO_SINGULAR_FIZZY_DRINK                                  :Đồ uống có ga
+
+# Quantity of cargo
 STR_QUANTITY_PASSENGERS                                         :{COMMA} hành khách{P "" s}
 STR_QUANTITY_COAL                                               :{WEIGHT} than
 STR_QUANTITY_MAIL                                               :{COMMA} túi{P "" s} thư
@@ -110,6 +111,8 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} kẹo 
 STR_QUANTITY_BATTERIES                                          :{COMMA} pin{P y ies}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} chất dẻo
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} đồ uống có ga{P "" s}
+
+# Two letter abbreviation of cargo name
 STR_ABBREV_PASSENGERS                                           :{TINYFONT}HK
 STR_ABBREV_COAL                                                 :{TINYFONT}Th
 STR_ABBREV_MAIL                                                 :{TINYFONT}Th
@@ -141,21 +144,17 @@ STR_ABBREV_PLASTIC                                              :{TINYFONT}Cd
 STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}Ug
 STR_ABBREV_NONE                                                 :{TINYFONT}K0
 STR_ABBREV_ALL                                                  :{TINYFONT}Tất
-STR_SMALLMAP_CAPTION                                            :{WHITE}Bản đồ - {STRING}
-STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Tùy chọn Trò chơi
-STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Thông điệp
-STR_ERROR_MESSAGE_CAPTION_OTHER_COMPANY                         :{YELLOW}Tin nhắn từ {STRING}
-STR_POPUP_CAUTION_CAPTION                                       :{WHITE}Chú ý!
-STR_ERROR_CAN_T_DO_THIS                                         :{WHITE}Không thể làm việc này....
-STR_ERROR_CAN_T_CLEAR_THIS_AREA                                 :{WHITE}Không thể dọn dẹp khu vực này....
-STR_ABOUT_VERSION                                               :{BLACK}OpenTTD phiên bản {REV}
 
-STR_QUIT_CAPTION                                                :{WHITE}Thoát
-STR_YES                                                         :{BLACK}Đồng ý
-STR_NO                                                          :{BLACK}Không đồng ý
-STR_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD                       :{YELLOW}Bạn có chắc chắn muốn thoát khỏi OpenTTD và trở lại {STRING}?
+# 'Mode' of transport for cargoes
+STR_PASSENGERS                                                  :hành khách
+STR_BAGS                                                        :túi
+STR_TONS                                                        :tấn
+STR_LITERS                                                      :lít
+STR_ITEMS                                                       :mặt hàng
+STR_CRATES                                                      :thùng
+STR_RES_OTHER                                                   :khác
 
-STR_JUST_NOTHING                                                :Không màu
+# Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Xanh da trời đậm
 STR_COLOUR_PALE_GREEN                                           :Xanh lá cây nhạt
 STR_COLOUR_PINK                                                 :Hồng
@@ -172,87 +171,8 @@ STR_COLOUR_ORANGE                                               :Cam
 STR_COLOUR_BROWN                                                :Nâu
 STR_COLOUR_GREY                                                 :Xám
 STR_COLOUR_WHITE                                                :Trắng
-STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}Quá nhiều phương tiện trong trò chơi
-STR_BUTTON_LOCATION                                             :{BLACK}Vị trí
-STR_SMALLMAP_TYPE_CONTOURS                                      :Địa hình
-STR_SMALLMAP_TYPE_VEHICLES                                      :Phương tiện
-STR_SMALLMAP_TYPE_INDUSTRIES                                    :Ngành kinh doanh
-STR_SMALLMAP_TYPE_ROUTES                                        :Tuyến
-STR_SMALLMAP_TYPE_VEGETATION                                    :Cây cối
-STR_SMALLMAP_TYPE_OWNERS                                        :Chủ sở hữu
-STR_SMALLMAP_LEGENDA_ROADS                                      :{BLACK}{TINYFONT}Đường bộ
-STR_SMALLMAP_LEGENDA_RAILROADS                                  :{BLACK}{TINYFONT}Đường ray
-STR_SMALLMAP_LEGENDA_STATIONS_AIRPORTS_DOCKS                    :{BLACK}{TINYFONT}Ga tàu/Sân bay/Bến cảng
-STR_SMALLMAP_LEGENDA_BUILDINGS_INDUSTRIES                       :{BLACK}{TINYFONT}Tòa nhà/Ngành nghề
-STR_SMALLMAP_LEGENDA_VEHICLES                                   :{BLACK}{TINYFONT}Phương tiện
-STR_SMALLMAP_LEGENDA_100M                                       :{BLACK}{TINYFONT}100m
-STR_SMALLMAP_LEGENDA_200M                                       :{BLACK}{TINYFONT}200m
-STR_SMALLMAP_LEGENDA_300M                                       :{BLACK}{TINYFONT}300m
-STR_SMALLMAP_LEGENDA_400M                                       :{BLACK}{TINYFONT}400m
-STR_SMALLMAP_LEGENDA_500M                                       :{BLACK}{TINYFONT}500m
-STR_SMALLMAP_LEGENDA_TRAINS                                     :{BLACK}{TINYFONT}Tàu hỏa
-STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{BLACK}{TINYFONT}Xe cộ
-STR_SMALLMAP_LEGENDA_SHIPS                                      :{BLACK}{TINYFONT}Tàu thủy
-STR_SMALLMAP_LEGENDA_AIRCRAFT                                   :{BLACK}{TINYFONT}Máy bay
-STR_SMALLMAP_LEGENDA_TRANSPORT_ROUTES                           :{BLACK}{TINYFONT}Tuyến vận tải
-STR_SMALLMAP_LEGENDA_FOREST                                     :{BLACK}{TINYFONT}Rừng
-STR_SMALLMAP_LEGENDA_RAILROAD_STATION                           :{BLACK}{TINYFONT}Ga tàu hỏa
-STR_SMALLMAP_LEGENDA_TRUCK_LOADING_BAY                          :{BLACK}{TINYFONT}Truck Loading Bay
-STR_SMALLMAP_LEGENDA_BUS_STATION                                :{BLACK}{TINYFONT}Bến xe buýt
-STR_SMALLMAP_LEGENDA_AIRPORT_HELIPORT                           :{BLACK}{TINYFONT}Sân bay/Bãi đỗ trực thăng
-STR_SMALLMAP_LEGENDA_DOCK                                       :{BLACK}{TINYFONT}Cảng biển
-STR_SMALLMAP_LEGENDA_ROUGH_LAND                                 :{BLACK}{TINYFONT}Đất gồ ghề
-STR_SMALLMAP_LEGENDA_GRASS_LAND                                 :{BLACK}{TINYFONT}Đất cỏ
-STR_SMALLMAP_LEGENDA_BARE_LAND                                  :{BLACK}{TINYFONT}Đất trơ trụi
-STR_SMALLMAP_LEGENDA_FIELDS                                     :{BLACK}{TINYFONT}Cánh đồng
-STR_SMALLMAP_LEGENDA_TREES                                      :{BLACK}{TINYFONT}Cây cối
-STR_SMALLMAP_LEGENDA_ROCKS                                      :{BLACK}{TINYFONT}Đá
-STR_SMALLMAP_LEGENDA_WATER                                      :{BLACK}{TINYFONT}Nước
-STR_SMALLMAP_LEGENDA_NO_OWNER                                   :{BLACK}{TINYFONT}Không có chủ sở hữu
-STR_SMALLMAP_LEGENDA_TOWNS                                      :{BLACK}{TINYFONT}Thị trấn
-STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{BLACK}{TINYFONT}Ngành công nghiệp
-STR_SMALLMAP_LEGENDA_DESERT                                     :{BLACK}{TINYFONT}Sa mạc
-STR_SMALLMAP_LEGENDA_SNOW                                       :{BLACK}{TINYFONT}Tuyết
-STR_NEWS_MESSAGE_CAPTION                                        :{WHITE}Thông điệp
-STR_QUERY_CAPTION                                               :{WHITE}{STRING}
-STR_DEFAULT                                                     :{BLACK}Mặc định
-STR_QUERY_CANCEL                                                :{BLACK}Thôi
-STR_QUERY_OK                                                    :{BLACK}Đồng ý
-STR_QUERY_RENAME                                                :{BLACK}Đổi tên
 
-STR_OSNAME_WINDOWS                                              :Windows
-STR_OSNAME_DOS                                                  :DOS
-STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
-STR_OSNAME_BEOS                                                 :BeOS
-STR_OSNAME_MORPHOS                                              :MorphOS
-STR_OSNAME_AMIGAOS                                              :AmigaOS
-STR_OSNAME_OS2                                                  :OS/2
-STR_OSNAME_SUNOS                                                :SunOS
-
-STR_ERROR_OWNED_BY                                              :{WHITE}...sở hữu bởi {STRING}
-STR_VEHICLE_DETAIL_TAB_CARGO                                    :{BLACK}Toa xe
-STR_VEHICLE_DETAIL_TAB_INFORMATION                              :{BLACK}Thông tin
-STR_VEHICLE_DETAIL_TAB_CAPACITIES                               :{BLACK}Sức chứa
-STR_VEHICLE_DETAIL_TAB_TOTAL_CARGO                              :{BLACK}Tổng số toa xe
-STR_TOTAL_CAPACITY_TEXT                                         :{BLACK}Tổng số toa xe (sức chứa) của đoàn tàu:
-STR_TOTAL_CAPACITY                                              :{LTBLUE}- {CARGO} ({SHORTCARGO})
-STR_TOTAL_CAPACITY_MULT                                         :{LTBLUE}- {CARGO} ({SHORTCARGO}) (x{NUM})
-STR_INTRO_NEW_GAME                                              :{BLACK}Chơi mới
-STR_INTRO_LOAD_GAME                                             :{BLACK}Tải
-STR_INTRO_MULTIPLAYER                                           :{BLACK}Nhiều người chơi
-STR_INTRO_SCENARIO_EDITOR                                       :{BLACK}Trình biên tập kịch bản
-
-STR_MAPSIZE                                                     :{BLACK}Kích thước bản đồ:
-STR_BY                                                          :{BLACK}*
-STR_INTRO_GAME_OPTIONS                                          :{BLACK}Tùy chọn trò chơi
-
-STR_COMPANY_SOMEONE                                             :ai đó{SKIP}{SKIP}
-
-STR_GAME_OPTIONS_MEASURING_UNITS_IMPERIAL                       :Hệ Anh-Mỹ
-STR_GAME_OPTIONS_MEASURING_UNITS_METRIC                         :Hệ Mét
-STR_GAME_OPTIONS_MEASURING_UNITS_SI                             :Hệ SI
-
+# Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{COMMA} dặm/giờ
 STR_UNITS_VELOCITY_METRIC                                       :{COMMA} km/h
 
@@ -265,26 +185,25 @@ STR_UNITS_WEIGHT_LONG_METRIC                                    :{COMMA} tấn{P
 STR_UNITS_VOLUME_LONG_METRIC                                    :{COMMA} lít{P "" s}
 
 
-############ range for menu starts
-STR_GRAPH_MENU_OPERATING_PROFIT_GRAPH                           :Biều đồ lợi nhuận hoạt động
-STR_GRAPH_MENU_INCOME_GRAPH                                     :Biểu đồ thu nhập
-STR_GRAPH_MENU_DELIVERED_CARGO_GRAPH                            :Biểu đồ toa xe phân phối
-STR_GRAPH_MENU_PERFORMANCE_HISTORY_GRAPH                        :Biểu đồ lịch sử năng suất
-STR_GRAPH_MENU_COMPANY_VALUE_GRAPH                              :Biểu đồ giá trị công ty
-############ range for menu ends
+# Common window strings
+STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Chọn thứ tự sắp xếp (giảm dần/tăng dần)
+STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Chọn tiêu chí sắp xếp
+STR_BUTTON_SORT_BY                                              :{BLACK}Sắp xếp bởi
+STR_BUTTON_LOCATION                                             :{BLACK}Vị trí
+STR_BUTTON_RENAME                                               :{BLACK}Đổi tên
 
-STR_ABOUT_OPENTTD                                               :{WHITE}OpenTTD
-STR_FILE_MENU_SAVE_GAME                                         :Lưu trò chơi
-STR_FILE_MENU_LOAD_GAME                                         :Tải trò chơi
-STR_FILE_MENU_QUIT_GAME                                         :Thoát trò chơi
-STR_FILE_MENU_EXIT                                              :Thoát
-STR_ABANDON_GAME_QUERY                                          :{YELLOW}Bạn có chắc chắn muốn thoát khỏi trò chơi không?
-STR_ABANDON_GAME_CAPTION                                        :{WHITE}Thoát
-STR_SORT_ORDER_TIP                                              :{BLACK}Chọn thứ tự sắp xếp (giảm dần/tăng dần)
-STR_SORT_CRITERIA_TIP                                           :{BLACK}Chọn tiêu chí sắp xếp
-STR_SORT_BY                                                     :{BLACK}Sắp xếp bởi
 
-### The first three are also used as 'Sort by' buttons, the rest only in dropdowns
+# Query window
+STR_BUTTON_DEFAULT                                              :{BLACK}Mặc định
+STR_BUTTON_CANCEL                                               :{BLACK}Thôi
+STR_BUTTON_OK                                                   :{BLACK}Đồng ý
+
+# On screen keyboard window
+
+# Measurement tooltip
+
+
+# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
 STR_SORT_BY_POPULATION                                          :{BLACK}Dân số
 STR_SORT_BY_NAME                                                :{BLACK}Tên
 STR_SORT_BY_DATE                                                :{BLACK}Ngày tháng
@@ -310,43 +229,84 @@ STR_SORT_BY_RUNNING_COST                                        :Chi phí chạy
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Năng lượng/Chi phí chạy
 STR_SORT_BY_CARGO_CAPACITY                                      :Dung lượng toa xe
 
-STR_NO_WAITING_CARGO                                            :{BLACK}Không có bất kỳ loại toa xe nào đang chờ
-STR_SELECT_ALL_TYPES                                            :{BLACK}Chọn tất cả loại toa xe (including no waiting cargo)
-STR_AVAILABLE_ENGINES_TIP                                       :{BLACK}Xam danh sách các động cơ thiết kế cho loại toa xe này.
-STR_MANAGE_LIST                                                 :{BLACK}Quản lý danh sách
-STR_MANAGE_LIST_TIP                                             :{BLACK}Gửi chỉ dẫn tới toàn bộ phương tiện trong danh sách
-STR_REPLACE_VEHICLES                                            :Thay phương tiện
-STR_SEND_FOR_SERVICING                                          :Gửi tới dịch vụ sửa chữa
-
-STR_AVAILABLE_TRAINS                                            :{BLACK}Tàu sẵn có
-STR_AVAILABLE_ROAD_VEHICLES                                     :{BLACK}Xe sẵn có
-STR_AVAILABLE_AIRCRAFT                                          :{BLACK}Máy bay sẵn có
-
-STR_SEND_TRAIN_TO_DEPOT                                         :Gửi về xưởng
-STR_SEND_ROAD_VEHICLE_TO_DEPOT                                  :Gửi về xưởng
-STR_SEND_SHIP_TO_DEPOT                                          :Gửi về xưởng
-STR_SEND_AIRCRAFT_TO_HANGAR                                     :Gửi về Hangar
-
+# Tooltips for the main toolbar
 STR_TOOLBAR_TOOLTIP_PAUSE_GAME                                  :{BLACK}Tạm dừng trò chơi
 STR_TOOLBAR_TOOLTIP_SAVE_GAME_ABANDON_GAME                      :{BLACK}Lưu, thoat trò chơi, thoát
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_STATIONS            :{BLACK}Hiển thị danh sách công ty
 STR_TOOLBAR_TOOLTIP_DISPLAY_MAP                                 :{BLACK}Hiển thị bản đồ
-STR_SCENEDIT_TOOLBAR_TOOLTIP_DISPLAY_MAP_TOWN_DIRECTORY         :{BLACK}Hiển thị bản đồ, thư mục thành phố
 STR_TOOLBAR_TOOLTIP_DISPLAY_TOWN_DIRECTORY                      :{BLACK}Hiển thị thư mục thành phố
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_STATIONS            :{BLACK}Hiển thị danh sách công ty
 
-############ range for service numbers starts
-STR_AGE                                                         :{COMMA} năm{P "" s} ({COMMA})
-STR_AGE_RED                                                     :{RED}{COMMA} năm{P "" s} ({COMMA})
-############ range for service numbers ends
+# Extra tooltips for the scenario editor toolbar
+STR_SCENEDIT_TOOLBAR_TOOLTIP_DISPLAY_MAP_TOWN_DIRECTORY         :{BLACK}Hiển thị bản đồ, thư mục thành phố
 
-STR_VEHICLE_TRAIN                                               :Tàu
-STR_VEHICLE_ROAD_VEHICLE                                        :Xe cộ
-STR_VEHICLE_SHIP                                                :Tàu thủy
-STR_VEHICLE_AIRCRAFT                                            :Máy bay
-STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE} đang cũ đi
-STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} đang xuống cấp
-STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} đang xuống cấp trầm trọng và cần được thay thế ngay lập tức
-STR_VEHICLE_NAME_BUTTON                                         :{BLACK}Tên
+############ range for SE file menu starts
+STR_SCENEDIT_FILE_MENU_LOAD_HEIGHTMAP                           :Tải bản đồ độ cao
+STR_SCENEDIT_FILE_MENU_QUIT_EDITOR                              :Thoat khỏi trình biên tập
+STR_SCENEDIT_FILE_MENU_QUIT                                     :Thoát
+############ range for SE file menu starts
+
+############ range for settings menu starts
+STR_SETTINGS_MENU_GAME_OPTIONS                                  :Tùy chọn trò chơi
+STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Thiết lập độ khó
+STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Thiết lập cao cấp
+STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Thiết lập độ trong suốt
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Hiển thị địa danh
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Hiển thị tên nhà ga
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Hiển thị ký hiệu
+############ range ends here
+
+############ range for file menu starts
+STR_FILE_MENU_SAVE_GAME                                         :Lưu trò chơi
+STR_FILE_MENU_LOAD_GAME                                         :Tải trò chơi
+STR_FILE_MENU_QUIT_GAME                                         :Thoát trò chơi
+STR_FILE_MENU_EXIT                                              :Thoát
+############ range ends here
+
+############ range for map menu starts
+############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
+############ both ranges ends here
+
+############ range for subsidies menu starts
+############ range ends here
+
+############ range for graph menu starts
+STR_GRAPH_MENU_OPERATING_PROFIT_GRAPH                           :Biều đồ lợi nhuận hoạt động
+STR_GRAPH_MENU_INCOME_GRAPH                                     :Biểu đồ thu nhập
+STR_GRAPH_MENU_DELIVERED_CARGO_GRAPH                            :Biểu đồ toa xe phân phối
+STR_GRAPH_MENU_PERFORMANCE_HISTORY_GRAPH                        :Biểu đồ lịch sử năng suất
+STR_GRAPH_MENU_COMPANY_VALUE_GRAPH                              :Biểu đồ giá trị công ty
+############ range ends here
+
+############ range for company league menu starts
+############ range ends here
+
+############ range for industry menu starts
+############ range ends here
+
+############ range for railway construction menu starts
+############ range ends here
+
+############ range for road construction menu starts
+############ range ends here
+
+############ range for waterways construction menu starts
+############ range ends here
+
+############ range for airport construction menu starts
+############ range ends here
+
+############ range for landscaping menu starts
+############ range ends here
+
+############ range for music menu starts
+STR_TOOLBAR_SOUND_MUSIC                                         :Âm thanh/aamm nhạc
+############ range ends here
+
+############ range for message menu starts
+############ range ends here
+
+############ range for about menu starts
+############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
 ############ range for days ends
@@ -379,75 +339,147 @@ STR_MONTH_NOV                                                   :Tháng Mười 
 STR_MONTH_DEC                                                   :Tháng Mười Hai
 ############ range for months ends
 
-
-
-STR_TOOLBAR_SOUND_MUSIC                                         :Âm thanh/aamm nhạc
-STR_MENU_LOAD_HEIGHTMAP                                         :Tải bản đồ độ cao
-STR_SCENEDIT_FILE_MENU_QUIT_EDITOR                              :Thoat khỏi trình biên tập
-STR_SCENEDIT_FILE_MENU_QUIT                                     :Thoát
+# Graph window
 
 
 
-############ range for menu starts
-STR_SETTINGS_MENU_GAME_OPTIONS                                  :Tùy chọn trò chơi
-STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Thiết lập độ khó
-STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Thiết lập cao cấp
-STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Thiết lập độ trong suốt
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Hiển thị địa danh
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Hiển thị tên nhà ga
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Hiển thị ký hiệu
-############ range ends here
 
-############ range for menu starts
-############ range ends here
+# Graph key window
+
+# Company league window
+
+# Performance detail window
+############ Those following lines need to be in this order!!
+############ End of order list
+
+# Music window
+
+# Playlist window
+
+# Highscore window
+
+# Smallmap window
+STR_SMALLMAP_CAPTION                                            :{WHITE}Bản đồ - {STRING}
+
+STR_SMALLMAP_TYPE_CONTOURS                                      :Địa hình
+STR_SMALLMAP_TYPE_VEHICLES                                      :Phương tiện
+STR_SMALLMAP_TYPE_INDUSTRIES                                    :Ngành kinh doanh
+STR_SMALLMAP_TYPE_ROUTES                                        :Tuyến
+STR_SMALLMAP_TYPE_VEGETATION                                    :Cây cối
+STR_SMALLMAP_TYPE_OWNERS                                        :Chủ sở hữu
+
+STR_SMALLMAP_LEGENDA_ROADS                                      :{TINYFONT}{BLACK}Đường bộ
+STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLACK}Đường ray
+STR_SMALLMAP_LEGENDA_STATIONS_AIRPORTS_DOCKS                    :{TINYFONT}{BLACK}Ga tàu/Sân bay/Bến cảng
+STR_SMALLMAP_LEGENDA_BUILDINGS_INDUSTRIES                       :{TINYFONT}{BLACK}Tòa nhà/Ngành nghề
+STR_SMALLMAP_LEGENDA_VEHICLES                                   :{TINYFONT}{BLACK}Phương tiện
+STR_SMALLMAP_LEGENDA_100M                                       :{TINYFONT}{BLACK}100m
+STR_SMALLMAP_LEGENDA_200M                                       :{TINYFONT}{BLACK}200m
+STR_SMALLMAP_LEGENDA_300M                                       :{TINYFONT}{BLACK}300m
+STR_SMALLMAP_LEGENDA_400M                                       :{TINYFONT}{BLACK}400m
+STR_SMALLMAP_LEGENDA_500M                                       :{TINYFONT}{BLACK}500m
+STR_SMALLMAP_LEGENDA_TRAINS                                     :{TINYFONT}{BLACK}Tàu hỏa
+STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{TINYFONT}{BLACK}Xe cộ
+STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLACK}Tàu thủy
+STR_SMALLMAP_LEGENDA_AIRCRAFT                                   :{TINYFONT}{BLACK}Máy bay
+STR_SMALLMAP_LEGENDA_TRANSPORT_ROUTES                           :{TINYFONT}{BLACK}Tuyến vận tải
+STR_SMALLMAP_LEGENDA_FOREST                                     :{TINYFONT}{BLACK}Rừng
+STR_SMALLMAP_LEGENDA_RAILROAD_STATION                           :{TINYFONT}{BLACK}Ga tàu hỏa
+STR_SMALLMAP_LEGENDA_TRUCK_LOADING_BAY                          :{TINYFONT}{BLACK}Truck Loading Bay
+STR_SMALLMAP_LEGENDA_BUS_STATION                                :{TINYFONT}{BLACK}Bến xe buýt
+STR_SMALLMAP_LEGENDA_AIRPORT_HELIPORT                           :{TINYFONT}{BLACK}Sân bay/Bãi đỗ trực thăng
+STR_SMALLMAP_LEGENDA_DOCK                                       :{TINYFONT}{BLACK}Cảng biển
+STR_SMALLMAP_LEGENDA_ROUGH_LAND                                 :{TINYFONT}{BLACK}Đất gồ ghề
+STR_SMALLMAP_LEGENDA_GRASS_LAND                                 :{TINYFONT}{BLACK}Đất cỏ
+STR_SMALLMAP_LEGENDA_BARE_LAND                                  :{TINYFONT}{BLACK}Đất trơ trụi
+STR_SMALLMAP_LEGENDA_FIELDS                                     :{TINYFONT}{BLACK}Cánh đồng
+STR_SMALLMAP_LEGENDA_TREES                                      :{TINYFONT}{BLACK}Cây cối
+STR_SMALLMAP_LEGENDA_ROCKS                                      :{TINYFONT}{BLACK}Đá
+STR_SMALLMAP_LEGENDA_WATER                                      :{TINYFONT}{BLACK}Nước
+STR_SMALLMAP_LEGENDA_NO_OWNER                                   :{TINYFONT}{BLACK}Không có chủ sở hữu
+STR_SMALLMAP_LEGENDA_TOWNS                                      :{TINYFONT}{BLACK}Thị trấn
+STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{TINYFONT}{BLACK}Ngành công nghiệp
+STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLACK}Sa mạc
+STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}Tuyết
 
 
-############ 'Display map' dropdown. In SE, there is one more item.
-############ end of the 'Display map' dropdown
+# Status bar messages
+
+# News message history
+
+# Message settings window
+STR_NEWS_MESSAGE_CAPTION                                        :{WHITE}Thông điệp
 
 
+
+
+
+
+
+
+
+STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_GENERAL                   :{BIGFONT}{BLACK}{INDUSTRY} tăng sản lượng!
+STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_GENERAL                   :{BIGFONT}{BLACK}{INDUSTRY} sản lượng giảm 50%
+
+
+# Start of order review system.
+# DON'T ADD OR REMOVE LINES HERE
+# end of order system
+
+STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE} đang cũ đi
+STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} đang xuống cấp
+STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} đang xuống cấp trầm trọng và cần được thay thế ngay lập tức
+
+
+
+
+
+
+# Extra view window
+
+# Game options window
+STR_GAME_OPTIONS_CAPTION                                        :{WHITE}Tùy chọn Trò chơi
 STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME                           :{BLACK}Đơn vị tiền tệ
 STR_GAME_OPTIONS_CURRENCY_UNITS_DROPDOWN_TOOLTIP                :{BLACK}Lựa chọn đơn vị tiền tệ
-STR_GAME_OPTIONS_MEASURING_UNITS_FRAME                          :{BLACK}Đơn vị đo lường
-STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN_TOOLTIP               :{BLACK}Lựa chọn đơn vị đo lường
-STR_GAME_OPTIONS_ROAD_VEHICLES_FRAME                            :{BLACK}Xe cộ
-STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_TOOLTIP                 :{BLACK}Chọn phía đường lái xe
-STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_LEFT                    :Lái bên trái
-STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_RIGHT                   :Lái bên phải
-STR_GAME_OPTIONS_TOWN_NAMES_FRAME                               :{BLACK}Tên thành phố
-STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN_TOOLTIP                    :{BLACK}Lựa chọn kiểu tên thành phố
 
-STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}Lưu tự động
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP                      :{BLACK}Lựa chọn khoảng thời gian tự động lưu
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :Tắt
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :Hàng tháng
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_3_MONTHS               :Mỗi 3 tháng
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_6_MONTHS               :Mỗi 6 tháng
-STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_12_MONTHS              :Mỗi 12 tháng
-STR_INTRO_TOOLTIP_NEW_GAME                                      :{BLACK}Chơi mới
-STR_INTRO_TOOLTIP_LOAD_GAME                                     :{BLACK}Tải trò chơi
-STR_INTRO_TOOLTIP_GAME_OPTIONS                                  :{BLACK}Hiển thị tùy chọn trò chơi
-STR_INTRO_QUIT                                                  :{BLACK}Thoát
-STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Thoát 'OpenTTD'
-STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}...chỉ có thể được xây trong thành phố
-
-############ range for menu starts
-############ range ends here
-
-
-
-
-############ start of townname region
-############ end of townname region
-
+############ start of currency region
 STR_GAME_OPTIONS_CURRENCY_GBP                                   :Bảng Anh (£)
 STR_GAME_OPTIONS_CURRENCY_USD                                   :Đô-la Mỹ ($)
 STR_GAME_OPTIONS_CURRENCY_YEN                                   :Yên (¥)
 STR_GAME_OPTIONS_CURRENCY_ATS                                   :Shilling Úc (ATS)
 STR_GAME_OPTIONS_CURRENCY_BEF                                   :Phơ-răng Bỉ (BEF)
 STR_GAME_OPTIONS_CURRENCY_CHF                                   :Phơ-răng Thụy Sỹ (CHF)
-
 STR_GAME_OPTIONS_CURRENCY_CUSTOM                                :Tùy chọn...
+############ end of currency region
+
+STR_GAME_OPTIONS_MEASURING_UNITS_FRAME                          :{BLACK}Đơn vị đo lường
+STR_GAME_OPTIONS_MEASURING_UNITS_DROPDOWN_TOOLTIP               :{BLACK}Lựa chọn đơn vị đo lường
+
+############ start of measuring units region
+STR_GAME_OPTIONS_MEASURING_UNITS_IMPERIAL                       :Hệ Anh-Mỹ
+STR_GAME_OPTIONS_MEASURING_UNITS_METRIC                         :Hệ Mét
+STR_GAME_OPTIONS_MEASURING_UNITS_SI                             :Hệ SI
+############ end of measuring units region
+
+STR_GAME_OPTIONS_ROAD_VEHICLES_FRAME                            :{BLACK}Xe cộ
+STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_TOOLTIP                 :{BLACK}Chọn phía đường lái xe
+STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_LEFT                    :Lái bên trái
+STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_RIGHT                   :Lái bên phải
+
+STR_GAME_OPTIONS_TOWN_NAMES_FRAME                               :{BLACK}Tên thành phố
+STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN_TOOLTIP                    :{BLACK}Lựa chọn kiểu tên thành phố
+
+############ start of townname region
+############ end of townname region
+
+STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}Lưu tự động
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP                      :{BLACK}Lựa chọn khoảng thời gian tự động lưu
+
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :Tắt
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH                :Hàng tháng
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_3_MONTHS               :Mỗi 3 tháng
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_6_MONTHS               :Mỗi 6 tháng
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_12_MONTHS              :Mỗi 12 tháng
 
 STR_GAME_OPTIONS_LANGUAGE                                       :{BLACK}Ngôn ngữ
 STR_GAME_OPTIONS_LANGUAGE_TOOLTIP                               :{BLACK}Lựa chọn sử dụng ngôn ngữ giao diện
@@ -458,25 +490,21 @@ STR_GAME_OPTIONS_FULLSCREEN                                     :{BLACK}Toàn m�
 
 
 
+# Custom currency window
 
-STR_PASSENGERS                                                  :hành khách
-STR_BAGS                                                        :túi
-STR_TONS                                                        :tấn
-STR_LITERS                                                      :lít
-STR_ITEMS                                                       :mặt hàng
-STR_CRATES                                                      :thùng
-STR_RES_OTHER                                                   :khác
 
 
 
-# Start of order review system.
-# DON'T ADD OR REMOVE LINES HERE
-# end of order system
 
 
+# Difficulty level window
 
+############ range for difficulty levels starts
+############ range for difficulty levels ends
 
 
+############ range for difficulty settings starts
+############ range for difficulty settings ends
 
 
 
@@ -489,12 +517,12 @@ STR_RES_OTHER                                                   :khác
 
 
 
+# Advanced settings window
 
 
 
 
 
-############ generic strings for settings
 
 
 
@@ -511,22 +539,54 @@ STR_RES_OTHER                                                   :khác
 
 
 
+# Intro window
 
+STR_INTRO_NEW_GAME                                              :{BLACK}Chơi mới
+STR_INTRO_LOAD_GAME                                             :{BLACK}Tải
+STR_INTRO_SCENARIO_EDITOR                                       :{BLACK}Trình biên tập kịch bản
+STR_INTRO_MULTIPLAYER                                           :{BLACK}Nhiều người chơi
 
+STR_INTRO_GAME_OPTIONS                                          :{BLACK}Tùy chọn trò chơi
+STR_INTRO_QUIT                                                  :{BLACK}Thoát
 
+STR_INTRO_TOOLTIP_NEW_GAME                                      :{BLACK}Chơi mới
+STR_INTRO_TOOLTIP_LOAD_GAME                                     :{BLACK}Tải trò chơi
 
 
+STR_INTRO_TOOLTIP_GAME_OPTIONS                                  :{BLACK}Hiển thị tùy chọn trò chơi
+STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Thoát 'OpenTTD'
 
+# Quit window
+STR_QUIT_CAPTION                                                :{WHITE}Thoát
+STR_QUIT_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD                  :{YELLOW}Bạn có chắc chắn muốn thoát khỏi OpenTTD và trở lại {STRING}?
+STR_QUIT_YES                                                    :{BLACK}Đồng ý
+STR_QUIT_NO                                                     :{BLACK}Không đồng ý
 
+# Supported OSes
+STR_OSNAME_WINDOWS                                              :Windows
+STR_OSNAME_DOS                                                  :DOS
+STR_OSNAME_UNIX                                                 :Unix
+STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_MORPHOS                                              :MorphOS
+STR_OSNAME_AMIGAOS                                              :AmigaOS
+STR_OSNAME_OS2                                                  :OS/2
+STR_OSNAME_SUNOS                                                :SunOS
 
+# Abandon game
+STR_ABANDON_GAME_CAPTION                                        :{WHITE}Thoát
+STR_ABANDON_GAME_QUERY                                          :{YELLOW}Bạn có chắc chắn muốn thoát khỏi trò chơi không?
 
+# Cheat window
 
+# Livery window
 
-############ network gui strings
 
 
+# Face selection window
 
 
+# Network server list
 
 
 
@@ -534,68 +594,502 @@ STR_RES_OTHER                                                   :khác
 
 
 
+# Start new multiplayer server
 
 
 
+
+
+# Network game languages
+############ Leave those lines in this order!!
+############ End of leave-in-this-order
+
+# Network game lobby
+
+
+
+
+
+# Network connecting window
 
 ############ Leave those lines in this order!!
+
 ############ End of leave-in-this-order
 
 
 
+# Network company list added strings
+
+# Network client list
 
 
 
+# Network set password
+
+# Network company info join/password
+
+# Network chat
+
+
+# Network messages
 
 ############ Leave those lines in this order!!
-
 ############ End of leave-in-this-order
 
-
-
-
-############ Leave those lines in this order!!
-############ End of leave-in-this-order
+# Network related errors
 ############ Leave those lines in this order!!
 ############ End of leave-in-this-order
 
+# Content downloading window
+
+# Order of these is important!
+
+# Content downloading progress window
+
+# Content downloading error messages
+
+# Transparency settings window
+
+# Base for station construction window(s)
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Chấp nhận: {GOLD}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Cung cấp: {GOLD}
+
+# Join station window
+
+
+# Rail construction toolbar
+
+
+# Rail depot construction window
+
+# Rail waypoint construction window
+
+# Rail station construction window
+
+
+
+# Signal window
+
+# Bridge selection window
+
+
+# Road construction toolbar
+
+# Road depot construction window
+
+# Road vehicle station construction window
+
+# Waterways toolbar (last two for SE only)
+
+# Ship depot construction window
+
+# Dock construction window
+
+# Airport toolbar
+
+# Airport construction window
 
 
 
 
-############ end network gui strings
+# Landscaping toolbar
 
-##### PNG-MAP-Loader
+# Tree planting window (last two for SE only)
 
-
-
-##id 0x0800
-
-##id 0x1000
+# Land generation window (SE)
 
 
+# Town generation window (SE)
 
-##id 0x1800
 
-##id 0x2000
 
-##id 0x2800
+# Fund new industry window
 
-##id 0x3000
+# Land area window
+
+# Description of land area of different tiles
+
+
+
+# Houses come directly from their building names
+
+
+
+
+# Industries come directly from their industry names
+
+
+
+
+
+
+# About OpenTTD window
+STR_ABOUT_OPENTTD                                               :{WHITE}OpenTTD
+STR_ABOUT_VERSION                                               :{BLACK}OpenTTD phiên bản {REV}
+
+# Save/load game/scenario
+
+
+# World generation
+STR_MAPGEN_MAPSIZE                                              :{BLACK}Kích thước bản đồ:
+STR_MAPGEN_BY                                                   :{BLACK}*
+
+# Strings for map borders at game generation
+
+
+
+# SE Map generation
+
+
+# Map generation progress
+
+# NewGRF settings
+
+
+
+
+
+
+# NewGRF add window
+
+# NewGRF (self) generated warnings/errors
+
+# NewGRF related 'general' warnings
+STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Chú ý!
+
+
+
+# NewGRF 'it's broken' warnings
+
+
+# Sign list window
+
+# Sign window
+
+
+# Town directory window
+
+# Town view window
+
+
+
+# Town local authority window
+
+
+
+# Subsidies window
+
+# Station list window
+STR_STATION_LIST_SELECT_ALL_TYPES                               :{BLACK}Chọn tất cả loại toa xe (including no waiting cargo)
+STR_STATION_LIST_NO_WAITING_CARGO                               :{BLACK}Không có bất kỳ loại toa xe nào đang chờ
+
+# Station view window
+STR_STATION_VIEW_WAITING_TITLE                                  :{BLACK}Đang chờ: {WHITE}{STRING}
+STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORTCARGO} đang trên đường từ {STATION})
+
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Chấp nhận: {WHITE}
 
 
 ############ range for rating starts
 ############ range for rating ends
 
-### station view strings
 
 
 
-##id 0x3800
+# Waypoint/buoy view window
 
-##id 0x4000
+
+# Finances window
+
+# Company view
+
+
+
+
+
+
+
+# Industry directory
+
+# Industry view
+STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE                   :{BLACK}Sản lượng tháng trước:
+
+############ range for requires starts
+############ range for requires ends
+
+############ range for produces starts
+STR_INDUSTRY_VIEW_WAITING_FOR_PROCESSING                        :{BLACK}Toa xe đợi để xử lý:
+############ range for produces ends
+
+
+# Vehicle lists
+
+
+
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Tàu sẵn có
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Xe sẵn có
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Máy bay sẵn có
+STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Xam danh sách các động cơ thiết kế cho loại toa xe này.
+
+STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Quản lý danh sách
+STR_VEHICLE_LIST_MANAGE_LIST_TOOLTIP                            :{BLACK}Gửi chỉ dẫn tới toàn bộ phương tiện trong danh sách
+STR_VEHICLE_LIST_REPLACE_VEHICLES                               :Thay phương tiện
+STR_VEHICLE_LIST_SEND_FOR_SERVICING                             :Gửi tới dịch vụ sửa chữa
+
+STR_VEHICLE_LIST_SEND_TRAIN_TO_DEPOT                            :Gửi về xưởng
+STR_VEHICLE_LIST_SEND_ROAD_VEHICLE_TO_DEPOT                     :Gửi về xưởng
+STR_VEHICLE_LIST_SEND_SHIP_TO_DEPOT                             :Gửi về xưởng
+STR_VEHICLE_LIST_SEND_AIRCRAFT_TO_HANGAR                        :Gửi về Hangar
+
+
+
+# Group window
+
+
+
+
+
+# Build vehicle window
+
+
+
+
+
+
+
+
+
+# Depot window
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Engine preview window
+
+
+# Autoreplace window
+STR_REPLACE_VEHICLE_TRAIN                                       :Tàu
+STR_REPLACE_VEHICLE_ROAD_VEHICLE                                :Xe cộ
+STR_REPLACE_VEHICLE_SHIP                                        :Tàu thủy
+STR_REPLACE_VEHICLE_AIRCRAFT                                    :Máy bay
+
+
+
+
+
+
+# Vehicle view
+
+
+
+
+
+
+
+
+
+
+# Messages in the start stop button in the vehicle view
+
+
+
+
+
+# Vehicle details
+STR_VEHICLE_NAME_BUTTON                                         :{BLACK}Tên
+
+
+# The next two need to stay in this order
+STR_VEHICLE_INFO_AGE                                            :{COMMA} năm{P "" s} ({COMMA})
+STR_VEHICLE_INFO_AGE_RED                                        :{RED}{COMMA} năm{P "" s} ({COMMA})
+
+
+
+
+
+
+
+# Extra buttons for train details windows
+
+STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_TEXT                   :{BLACK}Tổng số toa xe (sức chứa) của đoàn tàu:
+STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY                        :{LTBLUE}- {CARGO} ({SHORTCARGO})
+STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_MULT                   :{LTBLUE}- {CARGO} ({SHORTCARGO}) (x{NUM})
+
+
+STR_VEHICLE_DETAIL_TAB_CARGO                                    :{BLACK}Toa xe
+STR_VEHICLE_DETAIL_TAB_INFORMATION                              :{BLACK}Thông tin
+STR_VEHICLE_DETAIL_TAB_CAPACITIES                               :{BLACK}Sức chứa
+STR_VEHICLE_DETAIL_TAB_TOTAL_CARGO                              :{BLACK}Tổng số toa xe
+
+
+# Vehicle refit
+
+
+
+
+# Order view
+
+
+
+# Order bottom buttons
+
+
+
+
+
+
+
+
+
+
+
+
+# String parts to build the order string
+
+
+
+
+
+
+
+
+
+# Time table window
+
+
+
+
+
+
+
+
+
+# AI debug window
+
+
+# AI configuration window
+
+
+# Available AIs window
+
+
+
+# AI Parameters
+
+# Vehicle loading indicators
+
+# Income 'floats'
+
+# Saveload messages
+
+# Map generation messages
+
+
+
+
+# Screenshot related messages
+
+# Error message titles
+STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Thông điệp
+STR_ERROR_MESSAGE_CAPTION_OTHER_COMPANY                         :{YELLOW}Tin nhắn từ {STRING}
+
+# Generic construction errors
+STR_ERROR_OFF_EDGE_OF_MAP                                       :{WHITE}Vượt qua giới hạn bản đồ
+STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP                              :{WHITE}Quá gần mép bản đồ
+STR_ERROR_FLAT_LAND_REQUIRED                                    :{WHITE}Yêu cầu nền đất phẳng
+STR_ERROR_CAN_T_DO_THIS                                         :{WHITE}Không thể làm việc này....
+STR_ERROR_CAN_T_CLEAR_THIS_AREA                                 :{WHITE}Không thể dọn dẹp khu vực này....
+STR_ERROR_OWNED_BY                                              :{WHITE}...sở hữu bởi {STRING}
+
+# Local authority errors
+
+# Leveling errors
+
+# Company related errors
+
+
+# Town related errors
+
+# Industry related errors
+STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}...chỉ có thể được xây trong thành phố
+
+# Station construction related errors
+
+
+# Station destruction related errors
+
+
+# Waypoint related errors
+
+
+
+# Depot related errors
+
+
+
+
+
+# Autoreplace related errors
+
+# Rail construction errors
+
+
+# Road construction errors
+
+# Waterway construction errors
+
+# Tree related errors
+
+# Bridge related errors
+
+# Tunnel related errors
+
+# Unmovable related errors
+
+# Group related errors
+
+# Generic vehicle errors
+
+
+
+
+
+
+
+
+
+STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}Quá nhiều phương tiện trong trò chơi
+
+
+# Specific vehicle errors
+
+STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Không thể làm xe quay lại được...
+
+
+# Order related errors
+
+
+# Timetable related errors
+
+# Sign related errors
+
+##id 0x2000
+# Town building names
 
 ##id 0x4800
+# industry names
 STR_INDUSTRY_NAME_COAL_MINE                                     :Mỏ than
 STR_INDUSTRY_NAME_POWER_STATION                                 :Nhà máy điện
 STR_INDUSTRY_NAME_SAWMILL                                       :Nhà máy cưa
@@ -632,179 +1126,45 @@ STR_INDUSTRY_NAME_PLASTIC_FOUNTAINS                             :Nhà máy chế
 STR_INDUSTRY_NAME_FIZZY_DRINK_FACTORY                           :Nhà máy chế biến nước uống có ga
 STR_INDUSTRY_NAME_SUGAR_MINE                                    :Mỏ đường
 
-############ range for requires starts
-############ range for requires ends
-
-############ range for produces starts
-STR_INDUSTRY_VIEW_WAITING_FOR_PROCESSING                        :{BLACK}Toa xe đợi để xử lý:
-############ range for produces ends
-
-STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE                   :{BLACK}Sản lượng tháng trước:
-STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_GENERAL                   :{BLACK}{BIGFONT}{INDUSTRY} tăng sản lượng!
-STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_GENERAL                   :{BLACK}{BIGFONT}{INDUSTRY} sản lượng giảm 50%
-
-##id 0x5000
-
-##id 0x5800
-
-
 ############ WARNING, using range 0x6000 for strings that are stored in the savegame
 ############ These strings may never get a new id, or savegames will break!
 ##id 0x6000
 
 ##id 0x6020
-
 ############ end of savegame specific region!
 
-##id 0x6800
-
-############ range for difficulty levels starts
-############ range for difficulty levels ends
-
-############ range for difficulty settings starts
-############ range for difficulty settings ends
-
-
-##id 0x7000
-
-
-
 ##id 0x8000
+# Vehicle names
 
 ##id 0x8800
+# Formatting of some strings
+STR_FORMAT_DATE_TINY                                            :{STRING}-{STRING}-{NUM}
+STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
+STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
+STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
 
 
+STR_COMPANY_SOMEONE                                             :ai đó{SKIP}{SKIP}
 
 
+# Viewport strings
+STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
+STR_VIEWPORT_TOWN                                               :{WHITE}{TOWN}
+STR_VIEWPORT_TOWN_TINY_BLACK                                    :{TINYFONT}{BLACK}{TOWN}
+STR_VIEWPORT_TOWN_TINY_WHITE                                    :{TINYFONT}{WHITE}{TOWN}
 
+STR_VIEWPORT_SIGN_SMALL_BLACK                                   :{TINYFONT}{BLACK}{SIGN}
+STR_VIEWPORT_SIGN_SMALL_WHITE                                   :{TINYFONT}{WHITE}{SIGN}
 
+STR_VIEWPORT_STATION                                            :{STATION} {STATIONFEATURES}
+STR_VIEWPORT_STATION_TINY                                       :{TINYFONT}{STATION}
 
+STR_VIEWPORT_WAYPOINT                                           :{WAYPOINT}
+STR_VIEWPORT_WAYPOINT_TINY                                      :{TINYFONT}{WAYPOINT}
 
-
-
-
-
-
-##id 0x9000
-
-STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Không thể làm xe quay lại được...
-
-
-##id 0x9800
-
-
-##id 0xA000
-
-
-
-##id 0xB000
-
-
-
-############ Those following lines need to be in this order!!
-############ End of order list
-
-
-
-
-
-
-
-
-
-
-
-
-############ Vehicle lists
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### depot strings
-
-
-
-
-
-
-
-
-
-
-
-
-############ Lists rail types
-
-
-############ End of list of rail types
-
-
-
-########### For showing numbers in widgets
-
-
-########### String for New Landscape Generator
-
-
-
-# Strings for map borders at game generation
-
-########### String for new airports
-
-
-############ Tooltip measurment
-
-
-
-
-
-##### Mass Order
-
-
-
-
-#### String control codes and their formatting
+# Simple strings to get specific types of data
 STR_COMPANY_NAME                                                :{COMPANY}
+STR_COMPANY_NAME_COMPANY_NUM                                    :{COMPANY} {COMPANYNUM}
 STR_ENGINE_NAME                                                 :{ENGINE}
 STR_GROUP_NAME                                                  :{GROUP}
 STR_INDUSTRY_NAME                                               :{INDUSTRY}
@@ -818,6 +1178,7 @@ STR_WAYPOINT_NAME                                               :{WAYPOINT}
 STR_JUST_CARGO                                                  :{CARGO}
 STR_JUST_CHECKMARK                                              :{CHECKMARK}
 STR_JUST_COMMA                                                  :{COMMA}
+STR_JUST_CURRCOMPACT                                            :{CURRCOMPACT}
 STR_JUST_CURRENCY                                               :{CURRENCY}
 STR_JUST_INT                                                    :{NUM}
 STR_JUST_DATE_TINY                                              :{DATE_TINY}
@@ -827,22 +1188,29 @@ STR_JUST_DATE_ISO                                               :{DATE_ISO}
 STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
-STR_FORMAT_DATE_TINY                                            :{STRING}-{STRING}-{NUM}
-STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
-STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
-STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
-
+# Slightly 'raw' stringcodes with colour or size
 STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
 STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
+STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
+STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
 STR_BLUE_COMMA                                                  :{BLUE}{COMMA}
 STR_RED_COMMA                                                   :{RED}{COMMA}
+STR_COMPANY_MONEY                                               :{WHITE}{CURRENCY}
+STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
 STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
+STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
+STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
+STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
+STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
 STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
@@ -858,29 +1226,12 @@ STR_BLACK_5                                                     :{BLACK}5
 STR_BLACK_6                                                     :{BLACK}6
 STR_BLACK_7                                                     :{BLACK}7
 
+STR_TRAIN                                                       :{BLACK}{TRAIN}
+STR_BUS                                                         :{BLACK}{BUS}
+STR_LORRY                                                       :{BLACK}{LORRY}
+STR_PLANE                                                       :{BLACK}{PLANE}
+STR_SHIP                                                        :{BLACK}{SHIP}
 
-#### Improved sign GUI
-
-########
-
-
-############ Face formatting
-########
-
-############ signal GUI
-########
-
-############ on screen keyboard
-########
-
-############ AI GUI
-########
-
-############ town controlled noise level
-########
-
-############ Downloading of content from the central server
-
-
-
-########
+STR_NUM_1                                                       :{BLACK}{SKIP}{NUM}
+STR_NUM_2                                                       :{BLACK}{SKIP}{SKIP}{NUM}
+STR_NUM_3                                                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM}
