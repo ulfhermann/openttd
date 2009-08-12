@@ -7,15 +7,31 @@
 
 #include "cargo_type.h"
 #include "company_type.h"
+#include "subsidy_type.h"
+#include "core/pool_type.hpp"
 
-typedef uint16 SubsidyID; ///< ID of a subsidy
+typedef Pool<Subsidy, SubsidyID, 1, MAX_COMPANIES> SubsidyPool;
+extern SubsidyPool _subsidy_pool;
 
 /** Struct about subsidies, offered and awarded */
-struct Subsidy {
-	CargoID cargo_type; ///< Cargo type involved in this subsidy, CT_INVALID for invalid subsidy
-	byte age;           ///< Subsidy age; < 12 is unawarded, >= 12 is awarded
-	uint16 from;        ///< Index of source. Either TownID, IndustryID or StationID, when awarded
-	uint16 to;          ///< Index of destination. Either TownID, IndustryID or StationID, when awarded
+struct Subsidy : SubsidyPool::PoolItem<&_subsidy_pool> {
+	CargoID cargo_type;      ///< Cargo type involved in this subsidy, CT_INVALID for invalid subsidy
+	byte remaining;          ///< Remaining months when this subsidy is valid
+	CompanyByte awarded;     ///< Subsidy is awarded to this company; INVALID_COMPANY if it's not awarded to anyone
+	SourceTypeByte src_type; ///< Source of subsidised path (ST_INDUSTRY or ST_TOWN)
+	SourceTypeByte dst_type; ///< Destination of subsidised path (ST_INDUSTRY or ST_TOWN)
+	SourceID src;            ///< Index of source. Either TownID or IndustryID
+	SourceID dst;            ///< Index of destination. Either TownID or IndustryID
+
+	/**
+	 * We need an (empty) constructor so struct isn't zeroed (as C++ standard states)
+	 */
+	FORCEINLINE Subsidy() { }
+
+	/**
+	 * (Empty) destructor has to be defined else operator delete might be called with NULL parameter
+	 */
+	FORCEINLINE ~Subsidy() { }
 
 	/**
 	 * Tests whether this subsidy has been awarded to someone
@@ -23,66 +39,23 @@ struct Subsidy {
 	 */
 	FORCEINLINE bool IsAwarded() const
 	{
-		return this->age >= 12;
+		return this->awarded != INVALID_COMPANY;
 	}
 
-	/**
-	 * Determines index of this subsidy
-	 * @return index (in the Subsidy::array array)
-	 */
-	FORCEINLINE SubsidyID Index() const
-	{
-		return this - Subsidy::array;
-	}
-
-	/**
-	 * Tests for validity of this subsidy
-	 * @return is this subsidy valid?
-	 */
-	FORCEINLINE bool IsValid() const
-	{
-		return this->cargo_type != CT_INVALID;
-	}
-
-
-	static Subsidy array[MAX_COMPANIES]; ///< Array holding all subsidies
-
-	/**
-	 * Total number of subsidies, both valid and invalid
-	 * @return length of Subsidy::array
-	 */
-	static FORCEINLINE size_t GetArraySize()
-	{
-		return lengthof(Subsidy::array);
-	}
-
-	/**
-	 * Tests whether given index is an index of valid subsidy
-	 * @param index index to check
-	 * @return can this index be used to access a valid subsidy?
-	 */
-	static FORCEINLINE bool IsValidID(size_t index)
-	{
-		return index < Subsidy::GetArraySize() && Subsidy::Get(index)->IsValid();
-	}
-
-	/**
-	 * Returns pointer to subsidy with given index
-	 * @param index index of subsidy
-	 * @return pointer to subsidy with given index
-	 */
-	static FORCEINLINE Subsidy *Get(size_t index)
-	{
-		assert(index < Subsidy::GetArraySize());
-		return &Subsidy::array[index];
-	}
-
-	static Subsidy *AllocateItem();
-	static void Clean();
+	void AwardTo(CompanyID company);
 };
 
-#define FOR_ALL_SUBSIDIES_FROM(var, start) for (size_t subsidy_index = start; var = NULL, subsidy_index < Subsidy::GetArraySize(); subsidy_index++) \
-		if ((var = Subsidy::Get(subsidy_index))->IsValid())
+/** Constants related to subsidies */
+enum {
+	SUBSIDY_OFFER_MONTHS         =  12, ///< Duration of subsidy offer
+	SUBSIDY_CONTRACT_MONTHS      =  12, ///< Duration of subsidy after awarding
+	SUBSIDY_PAX_MIN_POPULATION   = 400, ///< Min. population of towns for subsidised pax route
+	SUBSIDY_CARGO_MIN_POPULATION = 900, ///< Min. population of destination town for cargo route
+	SUBSIDY_MAX_PCT_TRANSPORTED  =  42, ///< Subsidy will be created only for towns/industries with less % transported
+	SUBSIDY_MAX_DISTANCE         =  70, ///< Max. length of subsidised route (DistanceManhattan)
+};
+
+#define FOR_ALL_SUBSIDIES_FROM(var, start) FOR_ALL_ITEMS_FROM(Subsidy, subsidy_index, var, start)
 #define FOR_ALL_SUBSIDIES(var) FOR_ALL_SUBSIDIES_FROM(var, 0)
 
 #endif /* SUBSIDY_BASE_H */

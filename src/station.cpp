@@ -88,10 +88,7 @@ Station::~Station()
 	DeleteWindowById(WC_AIRCRAFT_LIST, wno | (VEH_AIRCRAFT << 11));
 
 	/* Now delete all orders that go to the station */
-	RemoveOrderFromAllVehicles(OT_GOTO_STATION, index);
-
-	/* Subsidies need removal as well */
-	DeleteSubsidyWithStation(index);
+	RemoveOrderFromAllVehicles(OT_GOTO_STATION, this->index);
 
 	/* Remove all news items */
 	DeleteStationNews(this->index);
@@ -239,6 +236,27 @@ uint Station::GetCatchmentRadius() const
 	return ret;
 }
 
+/**
+ * Determines catchment rectangle of this station
+ * @return clamped catchment rectangle
+ */
+Rect Station::GetCatchmentRect() const
+{
+	assert(!this->rect.IsEmpty());
+
+	/* Compute acceptance rectangle */
+	int catchment_radius = this->GetCatchmentRadius();
+
+	Rect ret = {
+		max<int>(this->rect.left   - catchment_radius, 0),
+		max<int>(this->rect.top    - catchment_radius, 0),
+		min<int>(this->rect.right  + catchment_radius, MapMaxX()),
+		min<int>(this->rect.bottom + catchment_radius, MapMaxY())
+	};
+
+	return ret;
+}
+
 /** Rect and pointer to IndustryVector */
 struct RectAndIndustryVector {
 	Rect rect;
@@ -287,19 +305,11 @@ static bool FindIndustryToDeliver(TileIndex ind_tile, void *user_data)
  */
 void Station::RecomputeIndustriesNear()
 {
-	this->industries_near.Reset();
+	this->industries_near.Clear();
 	if (this->rect.IsEmpty()) return;
 
-	/* Compute acceptance rectangle */
-	int catchment_radius = this->GetCatchmentRadius();
-
 	RectAndIndustryVector riv = {
-		{
-			max<int>(this->rect.left   - catchment_radius, 0),
-			max<int>(this->rect.top    - catchment_radius, 0),
-			min<int>(this->rect.right  + catchment_radius, MapMaxX()),
-			min<int>(this->rect.bottom + catchment_radius, MapMaxY())
-		},
+		this->GetCatchmentRect(),
 		&this->industries_near
 	};
 

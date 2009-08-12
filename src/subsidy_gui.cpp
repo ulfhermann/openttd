@@ -78,30 +78,22 @@ struct SubsidyListWindow : Window {
 
 	void HandleClick(const Subsidy *s)
 	{
-		TownEffect te = CargoSpec::Get(s->cargo_type)->town_effect;
+		/* determine src coordinate for subsidy and try to scroll to it */
 		TileIndex xy;
-
-		/* determine from coordinate for subsidy and try to scroll to it */
-		uint offs = s->from;
-		if (s->IsAwarded()) {
-			xy = Station::Get(offs)->xy;
-		} else if (te == TE_PASSENGERS || te == TE_MAIL) {
-			xy = Town::Get(offs)->xy;
-		} else {
-			xy = Industry::Get(offs)->xy;
+		switch (s->src_type) {
+			case ST_INDUSTRY: xy = Industry::Get(s->src)->xy; break;
+			case ST_TOWN:     xy =     Town::Get(s->src)->xy; break;
+			default: NOT_REACHED();
 		}
 
 		if (_ctrl_pressed || !ScrollMainWindowToTile(xy)) {
 			if (_ctrl_pressed) ShowExtraViewPortWindow(xy);
 
-			/* otherwise determine to coordinate for subsidy and scroll to it */
-			offs = s->to;
-			if (s->IsAwarded()) {
-				xy = Station::Get(offs)->xy;
-			} else if (te == TE_PASSENGERS || te == TE_MAIL || te == TE_GOODS || te == TE_FOOD) {
-				xy = Town::Get(offs)->xy;
-			} else {
-				xy = Industry::Get(offs)->xy;
+			/* otherwise determine dst coordinate for subsidy and scroll to it */
+			switch (s->dst_type) {
+				case ST_INDUSTRY: xy = Industry::Get(s->dst)->xy; break;
+				case ST_TOWN:     xy =     Town::Get(s->dst)->xy; break;
+				default: NOT_REACHED();
 			}
 
 			if (_ctrl_pressed) {
@@ -134,7 +126,7 @@ struct SubsidyListWindow : Window {
 			if (!s->IsAwarded()) {
 				/* Displays the two offered towns */
 				SetupSubsidyDecodeParam(s, 1);
-				SetDParam(7, _date - ymd.day + 384 - s->age * 32);
+				SetDParam(7, _date - ymd.day + s->remaining * 32);
 				DrawString(x + 2, right - 2, y, STR_SUBSIDIES_OFFERED_FROM_TO);
 
 				y += FONT_HEIGHT_NORMAL;
@@ -155,8 +147,8 @@ struct SubsidyListWindow : Window {
 		FOR_ALL_SUBSIDIES(s) {
 			if (s->IsAwarded()) {
 				SetupSubsidyDecodeParam(s, 1);
-				SetDParam(3, Station::Get(s->to)->owner);
-				SetDParam(4, _date - ymd.day + 768 - s->age * 32);
+				SetDParam(7, s->awarded);
+				SetDParam(8, _date - ymd.day + s->remaining * 32);
 
 				/* Displays the two connected stations */
 				DrawString(x + 2, right - 2, y, STR_SUBSIDIES_SUBSIDISED_FROM_TO);
@@ -173,10 +165,10 @@ struct SubsidyListWindow : Window {
 static const Widget _subsidies_list_widgets[] = {
 {   WWT_CLOSEBOX, RESIZE_NONE,   COLOUR_BROWN,   0,  10,   0,  13, STR_BLACK_CROSS,       STR_TOOLTIP_CLOSE_WINDOW},                       // SLW_CLOSEBOX
 {    WWT_CAPTION, RESIZE_RIGHT,  COLOUR_BROWN,  11, 307,   0,  13, STR_SUBSIDIES_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},             // SLW_CAPTION
-{  WWT_STICKYBOX, RESIZE_LR,     COLOUR_BROWN, 308, 319,   0,  13, STR_NULL,              STR_STICKY_BUTTON},                              // SLW_STICKYBOX
-{      WWT_PANEL, RESIZE_RB,     COLOUR_BROWN,   0, 307,  14, 126, 0x0,                   STR_SUBSIDY_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER}, // SLW_PANEL
+{  WWT_STICKYBOX, RESIZE_LR,     COLOUR_BROWN, 308, 319,   0,  13, STR_NULL,              STR_TOOLTIP_STICKY},                              // SLW_STICKYBOX
+{      WWT_PANEL, RESIZE_RB,     COLOUR_BROWN,   0, 307,  14, 126, 0x0,                   STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER}, // SLW_PANEL
 {  WWT_SCROLLBAR, RESIZE_LRB,    COLOUR_BROWN, 308, 319,  14, 114, 0x0,                   STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},           // SLW_SCROLLBAR
-{  WWT_RESIZEBOX, RESIZE_LRTB,   COLOUR_BROWN, 308, 319, 115, 126, 0x0,                   STR_RESIZE_BUTTON},                              // SLW_RESIZEBOX
+{  WWT_RESIZEBOX, RESIZE_LRTB,   COLOUR_BROWN, 308, 319, 115, 126, 0x0,                   STR_TOOLTIP_RESIZE},                              // SLW_RESIZEBOX
 
 {   WIDGETS_END},
 };
@@ -188,7 +180,7 @@ static const NWidgetPart _nested_subsidies_list_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN, SLW_STICKYBOX),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, SLW_PANEL), SetMinimalSize(308, 113), SetDataTip(0x0, STR_SUBSIDY_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER), SetResize(1, 1), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_BROWN, SLW_PANEL), SetMinimalSize(308, 113), SetDataTip(0x0, STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER), SetResize(1, 1), EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, SLW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_BROWN, SLW_RESIZEBOX),
