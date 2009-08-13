@@ -544,6 +544,19 @@ class SmallMapWindow : public Window
 		SMT_OWNER,
 	};
 
+	/** minimum number of rows in the legend */
+	static const int LEGEND_MIN_ROWS = 7;
+
+	enum SmallmapWindowDistances {
+		SD_MAP_EXTRA_PADDING = 2,     ///< size of borders of the smallmap
+		SD_MAP_COLUMN_WIDTH = 4,
+		SD_MAP_ROW_OFFSET = 2,
+		SD_MAP_MIN_INDUSTRY_WIDTH = 3,
+		SD_LEGEND_COLUMN_WIDTH = 119,
+		SD_LEGEND_ROW_HEIGHT = 6,
+		SD_LEGEND_MIN_HEIGHT = SD_LEGEND_ROW_HEIGHT * LEGEND_MIN_ROWS,
+	};
+
 	static SmallMapType map_type;
 	static bool show_towns;
 
@@ -558,20 +571,6 @@ class SmallMapWindow : public Window
 	 * May be something between ZOOM_LVL_NORMAL and ZOOM_LVL_MAX.
 	 */
 	ZoomLevel zoom;
-
-	enum SmallmapDimensions {
-		SD_LEGEND_COLUMN_WIDTH = 119,
-		SD_MIN_LEGEND_HEIGHT = 6 * 7,
-		SD_MAP_COLUMN_WIDTH = 4,
-		SD_MAP_ROW_OFFSET = 2,
-		SD_MIN_INDUSTRY_WIDTH = 3,
-	};
-
-	/** size of left and right borders of the smallmap window */
-	static const int SPACING_SIDE = 2;
-
-	/** size of top border (and title bar) of the smallmap window */
-	static const int SPACING_TOP = 16;
 
 	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
 	 * Everything has to be done just like when drawing the background otherwise the rounding errors are
@@ -740,7 +739,7 @@ class SmallMapWindow : public Window
 					int x = pt.x - dpi->left;
 					byte colour = GetIndustrySpec(i->type)->map_colour;
 
-					for (int offset = 0; offset < SD_MIN_INDUSTRY_WIDTH; ++offset) {
+					for (int offset = 0; offset < SD_MAP_MIN_INDUSTRY_WIDTH; ++offset) {
 						if (IsInsideMM(x + offset, 0, dpi->width)) {
 							blitter->SetPixel(dpi->dst_ptr, x + offset, y, colour);
 						}
@@ -917,6 +916,7 @@ public:
 		this->scroll_x = (y * 2 - x) / 4;
 		this->scroll_y = (x + y * 2) / 4;
 		this->SetDirty();
+		this->HandleButtonClick(SM_WIDGET_CENTERMAP);
 	}
 
 	/**
@@ -932,7 +932,6 @@ public:
 			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN, this->zoom == ZOOM_LVL_MIN);
 			this->EnableWidget(SM_WIDGET_ZOOM_OUT);
 			this->SetDirty();
-			this->HandleButtonClick(SM_WIDGET_ZOOM_IN);
 		}
 	}
 
@@ -949,44 +948,40 @@ public:
 			this->EnableWidget(SM_WIDGET_ZOOM_IN);
 			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_OUT, this->zoom == ZOOM_LVL_MAX);
 			this->SetDirty();
-			this->HandleButtonClick(SM_WIDGET_ZOOM_OUT);
 		}
 	}
 
 	virtual void OnTimeout()
 	{
-		for (uint i = SM_WIDGET_ZOOM_IN; i <= SM_WIDGET_ZOOM_OUT; i++) {
-			if (this->IsWidgetLowered(i)) {
-				this->RaiseWidget(i);
-				this->InvalidateWidget(i);
-			}
-		}
+		/* raise any pressed buttons */
+		this->SetWidgetsLoweredState(false, SM_WIDGET_ZOOM_OUT, SM_WIDGET_ZOOM_IN, SM_WIDGET_CENTERMAP, WIDGET_LIST_END);
+		this->InvalidateWidget(SM_WIDGET_ZOOM_OUT);
+		this->InvalidateWidget(SM_WIDGET_ZOOM_IN);
+		this->InvalidateWidget(SM_WIDGET_CENTERMAP);
 	}
 
 	void ResizeLegend()
 	{
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
-		int rows = (legend->bottom - legend->top) - 1;
+		int legend_height = (legend->bottom - legend->top) - 1;
 		int columns = (legend->right - legend->left) / SD_LEGEND_COLUMN_WIDTH;
-		int new_rows = (this->map_type == SMT_INDUSTRY) ? ((_smallmap_industry_count + columns - 1) / columns) * 6 : SD_MIN_LEGEND_HEIGHT;
+		int new_legend_height = (this->map_type == SMT_INDUSTRY) ? ((_smallmap_industry_count + columns - 1) / columns) * SD_LEGEND_ROW_HEIGHT : SD_LEGEND_MIN_HEIGHT;
 
-		new_rows = max(new_rows, (int)SD_MIN_LEGEND_HEIGHT);
+		new_legend_height = max(new_legend_height, (int)SD_LEGEND_MIN_HEIGHT);
 
-		if (new_rows != rows) {
-			this->SetDirty();
-
+		if (new_legend_height != legend_height) {
 			/* The legend widget needs manual adjustment as by default
 			 * it lays outside the filler widget's bounds. */
 			legend->top--;
 			/* Resize the filler widget, and move widgets below it. */
-			ResizeWindowForWidget(this, SM_WIDGET_BUTTONSPANEL, 0, new_rows - rows);
+			ResizeWindowForWidget(this, SM_WIDGET_BUTTONSPANEL, 0, new_legend_height - legend_height);
 			legend->top++;
 
 			/* Resize map border widget so the window stays the same size */
-			ResizeWindowForWidget(this, SM_WIDGET_MAP_BORDER, 0, rows - new_rows);
+			ResizeWindowForWidget(this, SM_WIDGET_MAP_BORDER, 0, legend_height - new_legend_height);
 			/* Manually adjust the map widget as it lies completely within
 			 * the map border widget */
-			this->widget[SM_WIDGET_MAP].bottom += rows - new_rows;
+			this->widget[SM_WIDGET_MAP].bottom += legend_height - new_legend_height;
 
 			this->SetDirty();
 		}
@@ -1048,7 +1043,7 @@ public:
 			}
 			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
 
-			y += 6;
+			y += SD_LEGEND_ROW_HEIGHT;
 		}
 
 		const Widget *wi = &this->widget[SM_WIDGET_MAP];
@@ -1074,8 +1069,8 @@ public:
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				int scaled_x_off = ScaleByZoom((_cursor.pos.x - this->left - this->SPACING_SIDE) * TILE_SIZE, this->zoom);
-				int scaled_y_off = ScaleByZoom((_cursor.pos.y - this->top - this->SPACING_TOP) * TILE_SIZE, this->zoom);
+				int scaled_x_off = ScaleByZoom((_cursor.pos.x - this->left - SD_MAP_EXTRA_PADDING) * TILE_SIZE, this->zoom);
+				int scaled_y_off = ScaleByZoom((_cursor.pos.y - this->top - SD_MAP_EXTRA_PADDING - WD_CAPTION_HEIGHT) * TILE_SIZE, this->zoom);
 				w->viewport->dest_scrollpos_x = pt.x + scaled_x_off - w->viewport->virtual_width / 2;
 				w->viewport->dest_scrollpos_y = pt.y + scaled_y_off - w->viewport->virtual_height / 2;
 
@@ -1087,6 +1082,7 @@ public:
 						(this->widget[SM_WIDGET_MAP].right - this->widget[SM_WIDGET_MAP].left) / 2,
 						(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top) / 2
 				);
+				this->HandleButtonClick(SM_WIDGET_ZOOM_OUT);
 				SndPlayFx(SND_15_BEEP);
 				break;
 			case SM_WIDGET_ZOOM_IN:
@@ -1094,6 +1090,7 @@ public:
 						(this->widget[SM_WIDGET_MAP].right - this->widget[SM_WIDGET_MAP].left) / 2,
 						(this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top) / 2
 				);
+				this->HandleButtonClick(SM_WIDGET_ZOOM_IN);
 				SndPlayFx(SND_15_BEEP);
 				break;
 			case SM_WIDGET_CONTOUR:    // Show land contours
@@ -1173,23 +1170,23 @@ public:
 
 	virtual void OnMouseWheel(int wheel)
 	{
-	        /* Cursor position relative to window */
-	        int cx = _cursor.pos.x - this->left;
-	        int cy = _cursor.pos.y - this->top;
+		/* Cursor position relative to window */
+		int cx = _cursor.pos.x - this->left;
+		int cy = _cursor.pos.y - this->top;
 
-	        /* Is cursor over the map ? */
-	        if (IsInsideMM(cx, this->widget[SM_WIDGET_MAP].left, this->widget[SM_WIDGET_MAP].right + 1) &&
-	                                                IsInsideMM(cy, this->widget[SM_WIDGET_MAP].top, this->widget[SM_WIDGET_MAP].bottom + 1)) {
-	                /* Cursor position relative to map */
-	                cx -= this->widget[SM_WIDGET_MAP].left;
-	                cy -= this->widget[SM_WIDGET_MAP].top;
+		/* Is cursor over the map ? */
+		if (IsInsideMM(cx, this->widget[SM_WIDGET_MAP].left, this->widget[SM_WIDGET_MAP].right + 1) &&
+				IsInsideMM(cy, this->widget[SM_WIDGET_MAP].top, this->widget[SM_WIDGET_MAP].bottom + 1)) {
+			/* Cursor position relative to map */
+			cx -= this->widget[SM_WIDGET_MAP].left;
+			cy -= this->widget[SM_WIDGET_MAP].top;
 
-	                if (wheel < 0) {
-	                        this->ZoomIn(cx, cy);
-	                } else {
-	                        this->ZoomOut(cx, cy);
-	                }
-	        }
+			if (wheel < 0) {
+				this->ZoomIn(cx, cy);
+			} else {
+				this->ZoomOut(cx, cy);
+			}
+		}
 	};
 
 	virtual void OnRightClick(Point pt, int widget)
