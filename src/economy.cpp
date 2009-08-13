@@ -1031,7 +1031,7 @@ CargoPayment::~CargoPayment()
 	}
 
 	if (this->visual_transfer != 0){
-		ShowFeederIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, this->visual_profit);
+		ShowFeederIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, this->visual_transfer);
 	}
 
 	_current_company = old_company;
