@@ -559,11 +559,13 @@ class SmallMapWindow : public Window
 	 */
 	ZoomLevel zoom;
 
-	static const int LEGEND_COLUMN_WIDTH = 119;
-	static const int MIN_LEGEND_HEIGHT = 6 * 7;
-	static const int MAP_COLUMN_WIDTH = 4;
-	static const int MAP_ROW_OFFSET = 2;
-	static const int MIN_INDUSTRY_PIXELS = 3;
+	enum SmallmapDimensions {
+		SD_LEGEND_COLUMN_WIDTH = 119,
+		SD_MIN_LEGEND_HEIGHT = 6 * 7,
+		SD_MAP_COLUMN_WIDTH = 4,
+		SD_MAP_ROW_OFFSET = 2,
+		SD_MIN_INDUSTRY_WIDTH = 3,
+	};
 
 	/** size of left and right borders of the smallmap window */
 	static const int SPACING_SIDE = 2;
@@ -659,7 +661,7 @@ class SmallMapWindow : public Window
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
 		GetSmallMapPixels *proc = _smallmap_draw_procs[this->map_type];
-		for (int row = 0; row < row_end; row += MAP_ROW_OFFSET) {
+		for (int row = 0; row < row_end; row += SD_MAP_ROW_OFFSET) {
 			if (row >= row_start) {
 				/* check if the tile (xc,yc) is within the map range */
 				uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
@@ -678,7 +680,7 @@ class SmallMapWindow : public Window
 			/* switch to next row in the column */
 			xc++;
 			yc++;
-			dst = blitter->MoveTo(dst, 0, MAP_ROW_OFFSET);
+			dst = blitter->MoveTo(dst, 0, SD_MAP_ROW_OFFSET);
 		}
 	}
 
@@ -738,7 +740,7 @@ class SmallMapWindow : public Window
 					int x = pt.x - dpi->left;
 					byte colour = GetIndustrySpec(i->type)->map_colour;
 
-					for (int offset = 0; offset < MIN_INDUSTRY_PIXELS; ++offset) {
+					for (int offset = 0; offset < SD_MIN_INDUSTRY_WIDTH; ++offset) {
 						if (IsInsideMM(x + offset, 0, dpi->width)) {
 							blitter->SetPixel(dpi->dst_ptr, x + offset, y, colour);
 						}
@@ -814,8 +816,8 @@ public:
 		 * otherwise we get artifacts when partially redrawing.
 		 * Make sure dx provides for that and update tile_x and tile_y accordingly.
 		 */
-		while(dx < MAP_COLUMN_WIDTH) {
-			dx += MAP_COLUMN_WIDTH;
+		while(dx < SD_MAP_COLUMN_WIDTH) {
+			dx += SD_MAP_COLUMN_WIDTH;
 			tile_x++;
 			tile_y--;
 		}
@@ -834,13 +836,13 @@ public:
 
 		for (;;) {
 			/* distance from left edge */
-			if (x > -MAP_COLUMN_WIDTH) {
+			if (x > -SD_MAP_COLUMN_WIDTH) {
 
 				/* distance from right edge */
 				if (dpi->width - x <= 0) break;
 
 				int col_start = x < 0 ? -x : 0;
-				int col_end = x + MAP_COLUMN_WIDTH > dpi->width ? dpi->width - x : MAP_COLUMN_WIDTH;
+				int col_end = x + SD_MAP_COLUMN_WIDTH > dpi->width ? dpi->width - x : SD_MAP_COLUMN_WIDTH;
 				int row_start = dy - y;
 				int row_end = dy + dpi->height - y;
 				this->DrawSmallMapStuff(ptr, tile_x, tile_y, col_start, col_end, row_start, row_end);
@@ -849,14 +851,14 @@ public:
 			if (y == 0) {
 				tile_y++;
 				y++;
-				ptr = blitter->MoveTo(ptr, 0, MAP_ROW_OFFSET / 2);
+				ptr = blitter->MoveTo(ptr, 0, SD_MAP_ROW_OFFSET / 2);
 			} else {
 				tile_x--;
 				y--;
-				ptr = blitter->MoveTo(ptr, 0, -MAP_ROW_OFFSET / 2);
+				ptr = blitter->MoveTo(ptr, 0, -SD_MAP_ROW_OFFSET / 2);
 			}
-			ptr = blitter->MoveTo(ptr, MAP_COLUMN_WIDTH / 2, 0);
-			x += MAP_COLUMN_WIDTH / 2;
+			ptr = blitter->MoveTo(ptr, SD_MAP_COLUMN_WIDTH / 2, 0);
+			x += SD_MAP_COLUMN_WIDTH / 2;
 		}
 
 		DrawVehicles(dpi);
@@ -930,6 +932,7 @@ public:
 			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN, this->zoom == ZOOM_LVL_MIN);
 			this->EnableWidget(SM_WIDGET_ZOOM_OUT);
 			this->SetDirty();
+			this->HandleButtonClick(SM_WIDGET_ZOOM_IN);
 		}
 	}
 
@@ -946,6 +949,17 @@ public:
 			this->EnableWidget(SM_WIDGET_ZOOM_IN);
 			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_OUT, this->zoom == ZOOM_LVL_MAX);
 			this->SetDirty();
+			this->HandleButtonClick(SM_WIDGET_ZOOM_OUT);
+		}
+	}
+
+	virtual void OnTimeout()
+	{
+		for (uint i = SM_WIDGET_ZOOM_IN; i <= SM_WIDGET_ZOOM_OUT; i++) {
+			if (this->IsWidgetLowered(i)) {
+				this->RaiseWidget(i);
+				this->InvalidateWidget(i);
+			}
 		}
 	}
 
@@ -953,10 +967,10 @@ public:
 	{
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 		int rows = (legend->bottom - legend->top) - 1;
-		int columns = (legend->right - legend->left) / LEGEND_COLUMN_WIDTH;
-		int new_rows = (this->map_type == SMT_INDUSTRY) ? ((_smallmap_industry_count + columns - 1) / columns) * 6 : MIN_LEGEND_HEIGHT;
+		int columns = (legend->right - legend->left) / SD_LEGEND_COLUMN_WIDTH;
+		int new_rows = (this->map_type == SMT_INDUSTRY) ? ((_smallmap_industry_count + columns - 1) / columns) * 6 : SD_MIN_LEGEND_HEIGHT;
 
-		new_rows = max(new_rows, MIN_LEGEND_HEIGHT);
+		new_rows = max(new_rows, (int)SD_MIN_LEGEND_HEIGHT);
 
 		if (new_rows != rows) {
 			this->SetDirty();
@@ -1009,7 +1023,7 @@ public:
 			if (tbl->col_break || y >= legend->bottom) {
 				/* Column break needed, continue at top, COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
-				x += LEGEND_COLUMN_WIDTH;
+				x += SD_LEGEND_COLUMN_WIDTH;
 				y = y_org;
 			}
 
@@ -1022,15 +1036,15 @@ public:
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, x + LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
+					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
 				} else {
-					DrawString(x + 11, x + LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
+					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
 			} else {
 				/* Anything that is not an industry is using normal process */
 				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
-				DrawString(x + 11, x + LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
+				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
 			}
 			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
 
@@ -1118,7 +1132,7 @@ public:
 				if (this->map_type == SMT_INDUSTRY) {
 					/* if click on industries label, find right industry type and enable/disable it */
 					Widget *wi = &this->widget[SM_WIDGET_LEGEND]; // label panel
-					uint column = (pt.x - 4) / LEGEND_COLUMN_WIDTH;
+					uint column = (pt.x - 4) / SD_LEGEND_COLUMN_WIDTH;
 					uint line = (pt.y - wi->top - 2) / 6;
 					int rows_per_column = (wi->bottom - wi->top) / 6;
 
