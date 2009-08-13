@@ -1014,7 +1014,7 @@ CargoPayment::~CargoPayment()
 
 	this->front->cargo_payment = NULL;
 
-	if (this->visual_profit == 0) return;
+	if (this->visual_profit == 0 && this->visual_transfer == 0) return;
 
 	CompanyID old_company = _current_company;
 	_current_company = this->front->owner;
@@ -1028,7 +1028,9 @@ CargoPayment::~CargoPayment()
 		}
 
 		ShowCostOrIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, -this->visual_profit);
-	} else {
+	}
+
+	if (this->visual_transfer != 0){
 		ShowFeederIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, this->visual_profit);
 	}
 
@@ -1068,8 +1070,8 @@ void CargoPayment::PayTransfer(CargoPacket *cp, uint count)
 		cp->days_in_transit,
 		this->ct);
 
-	this->visual_profit += profit; // accumulate transfer profits for whole vehicle
-	cp->feeder_share    += profit; // account for the (virtual) profit already made for the cargo packet
+	this->visual_transfer += profit; // accumulate transfer profits for whole vehicle
+	cp->feeder_share      += profit; // account for the (virtual) profit already made for the cargo packet
 }
 
 /**
