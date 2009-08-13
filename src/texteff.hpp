@@ -11,9 +11,8 @@
  * Text effect modes.
  */
 enum TextEffectMode {
-	TE_RISING,   ///< Make the text effect slowly go upwards
-	TE_LOWERING, ///< Make the text effect slowly go downwards
-	TE_STATIC,   ///< Keep the text effect static
+	TE_RISING, ///< Make the text effect slowly go upwards
+	TE_STATIC, ///< Keep the text effect static
 
 	INVALID_TE_ID = 0xFFFF,
 };

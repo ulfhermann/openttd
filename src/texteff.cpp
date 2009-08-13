@@ -129,15 +129,14 @@ void RemoveTextEffect(TextEffectID te_id)
 
 static void MoveTextEffect(TextEffect *te)
 {
-	int dir = te->mode == TE_RISING ? -1 : 1;
 	/* Never expire for duration of 0xFFFF */
 	if (te->duration == 0xFFFF) return;
 	if (te->duration < 8) {
 		te->string_id = INVALID_STRING_ID;
 	} else {
-		te->duration += dir * 8;
-		te->y += dir;
-		te->bottom += dir;
+		te->duration -= 8;
+		te->y--;
+		te->bottom--;
 	}
 	MarkTextEffectAreaDirty(te);
 }
@@ -146,7 +145,7 @@ void MoveAllTextEffects()
 {
 	for (TextEffectID i = 0; i < _num_text_effects; i++) {
 		TextEffect *te = &_text_effect_list[i];
-		if (te->string_id != INVALID_STRING_ID && te->mode != TE_STATIC) MoveTextEffect(te);
+		if (te->string_id != INVALID_STRING_ID && te->mode == TE_RISING) MoveTextEffect(te);
 	}
 }
 

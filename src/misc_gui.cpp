@@ -688,7 +688,7 @@ void ShowFeederIncomeAnimation(int x, int y, int z, Money cost)
 	Point pt = RemapCoords(x, y, z);
 
 	SetDParam(0, cost);
-	AddTextEffect(STR_FEEDER, pt.x, pt.y, 0x250, TE_LOWERING);
+	AddTextEffect(STR_FEEDER, pt.x, pt.y, 0x250, TE_RISING);
 }
 
 TextEffectID ShowFillingPercent(int x, int y, int z, uint8 percent, StringID string)
