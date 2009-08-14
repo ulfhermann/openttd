@@ -916,7 +916,6 @@ public:
 		this->scroll_x = (y * 2 - x) / 4;
 		this->scroll_y = (x + y * 2) / 4;
 		this->SetDirty();
-		this->HandleButtonClick(SM_WIDGET_CENTERMAP);
 	}
 
 	/**
@@ -994,15 +993,14 @@ public:
 
 		this->SmallMapCenterOnCurrentPos();
 		this->FindWindowPlacementAndResize(desc);
+		this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN, true);
+
+		this->SetWidgetsHiddenState(this->map_type != SMT_INDUSTRY, SM_WIDGET_ENABLEINDUSTRIES, SM_WIDGET_DISABLEINDUSTRIES, WIDGET_LIST_END);
 	}
 
 	virtual void OnPaint()
 	{
 		DrawPixelInfo new_dpi;
-
-		/* Hide Enable all/Disable all buttons if is not industry type small map*/
-		this->SetWidgetHiddenState(SM_WIDGET_ENABLEINDUSTRIES, this->map_type != SMT_INDUSTRY);
-		this->SetWidgetHiddenState(SM_WIDGET_DISABLEINDUSTRIES, this->map_type != SMT_INDUSTRY);
 
 		/* draw the window */
 		SetDParam(0, STR_SMALLMAP_TYPE_CONTOURS + this->map_type);
@@ -1101,6 +1099,10 @@ public:
 			case SM_WIDGET_OWNERS:     // Show land owners
 				this->RaiseWidget(this->map_type + SM_WIDGET_CONTOUR);
 				this->map_type = (SmallMapType)(widget - SM_WIDGET_CONTOUR);
+
+				/* Hide Enable all/Disable all buttons if is not industry type small map*/
+				this->SetWidgetsHiddenState(this->map_type != SMT_INDUSTRY, SM_WIDGET_ENABLEINDUSTRIES, SM_WIDGET_DISABLEINDUSTRIES, WIDGET_LIST_END);
+
 				this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
 
 				this->ResizeLegend();
@@ -1111,8 +1113,7 @@ public:
 
 			case SM_WIDGET_CENTERMAP: // Center the smallmap again
 				this->SmallMapCenterOnCurrentPos();
-
-				this->SetDirty();
+				this->HandleButtonClick(SM_WIDGET_CENTERMAP);
 				SndPlayFx(SND_15_BEEP);
 				break;
 
