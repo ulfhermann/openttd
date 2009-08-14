@@ -1490,6 +1490,7 @@ void Vehicle::LeaveStation()
 			DecreaseFrozen(st, this, next_station_id);
 		}
 	} else {
+		DEBUG(misc, 0, "orders are NULL");
 		RecalcFrozen(st);
 	}
 
