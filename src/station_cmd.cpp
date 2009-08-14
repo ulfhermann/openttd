@@ -2861,6 +2861,7 @@ void DecreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
 			} else {
 				LinkStat & link_stat = lstat_it->second;
 				if (link_stat.frozen < v->cargo_cap) {
+					DEBUG(misc, 0, "frozen is smaller than cargo cap.");
 					RecalcFrozen(st);
 					return;
 				} else {
@@ -2908,11 +2909,6 @@ void OnTick_Station()
 			// update the station statistics every <unit> days
 			if ((_tick_counter + real_st->index) % (DAY_TICKS * _settings_game.economy.moving_average_unit) == 0) {
 				UpdateStationStats(real_st);
-			}
-
-			/* recalculate the frozen values every month */
-			if ((_tick_counter + real_st->index) % (DAY_TICKS * 30) == 0) {
-				RecalcFrozen(real_st);
 			}
 		}
 		/* Run 250 tick interval trigger for station animation.
