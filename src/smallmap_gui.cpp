@@ -1039,7 +1039,6 @@ public:
 
 		this->SmallMapCenterOnCurrentPos();
 		this->FindWindowPlacementAndResize(desc);
-		this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN, true);
 
 		this->SetWidgetsHiddenState(this->map_type != SMT_INDUSTRY, SM_WIDGET_ENABLEINDUSTRIES, SM_WIDGET_DISABLEINDUSTRIES, WIDGET_LIST_END);
 	}
