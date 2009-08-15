@@ -254,7 +254,7 @@ struct NewsWindow : Window {
 				break;
 			}
 
-			default:
+			case NM_SMALL:
 				this->DrawWidgets();
 				if (!(this->ni->flags & NF_VIEWPORT)) {
 					CopyInDParam(0, this->ni->params, lengthof(this->ni->params));
@@ -265,6 +265,8 @@ struct NewsWindow : Window {
 					DrawStringMultiLine(2, this->width - 2, 64, this->height, this->ni->string_id, TC_FROMSTRING, SA_CENTER);
 				}
 				break;
+
+			default: NOT_REACHED();
 		}
 	}
 
@@ -331,13 +333,13 @@ struct NewsWindow : Window {
 /* static */ uint NewsWindow::duration; ///< Remaining time for showing current news message
 
 
-static const Widget _news_type13_widgets[] = {
+static const Widget _normal_news_widgets[] = {
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_WHITE,     0,   429,     0,   169, 0x0, STR_NULL},
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_WHITE,     0,    10,     0,    11, 0x0, STR_NULL},
 {   WIDGETS_END},
 };
 
-static const NWidgetPart _nested_news_type13_widgets[] = {
+static const NWidgetPart _nested_normal_news_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_WHITE, NTW_HEADLINE),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(WWT_PANEL, COLOUR_WHITE, NTW_CLOSEBOX), SetMinimalSize(11, 12), EndContainer(),
@@ -347,20 +349,20 @@ static const NWidgetPart _nested_news_type13_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _news_type13_desc(
+static WindowDesc _normal_news_desc(
 	WDP_CENTER, 476, 430, 170, 430, 170,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type13_widgets, _nested_news_type13_widgets, lengthof(_nested_news_type13_widgets)
+	_normal_news_widgets, _nested_normal_news_widgets, lengthof(_nested_normal_news_widgets)
 );
 
-static const Widget _news_type2_widgets[] = {
+static const Widget _thin_news_widgets[] = {
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_WHITE,     0,   429,     0,   129, 0x0, STR_NULL},
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_WHITE,     0,    10,     0,    11, 0x0, STR_NULL},
 {   WIDGETS_END},
 };
 
-static const NWidgetPart _nested_news_type2_widgets[] = {
+static const NWidgetPart _nested_thin_news_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_WHITE, NTW_HEADLINE),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(WWT_PANEL, COLOUR_WHITE, NTW_CLOSEBOX), SetMinimalSize(11, 12), EndContainer(),
@@ -370,14 +372,14 @@ static const NWidgetPart _nested_news_type2_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _news_type2_desc(
+static WindowDesc _thin_news_desc(
 	WDP_CENTER, 476, 430, 130, 430, 130,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type2_widgets, _nested_news_type2_widgets, lengthof(_nested_news_type2_widgets)
+	_thin_news_widgets, _nested_thin_news_widgets, lengthof(_nested_thin_news_widgets)
 );
 
-static const Widget _news_type0_widgets[] = {
+static const Widget _smalll_news_widgets[] = {
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_LIGHT_BLUE,     0,   279,    14,    86, 0x0,                      STR_NULL},
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_LIGHT_BLUE,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},
 {    WWT_CAPTION,   RESIZE_NONE,  COLOUR_LIGHT_BLUE,    11,   279,     0,    13, STR_NEWS_MESSAGE_CAPTION, STR_NULL},
@@ -385,7 +387,7 @@ static const Widget _news_type0_widgets[] = {
 {   WIDGETS_END},
 };
 
-static NWidgetPart _nested_news_type0_widgets[] = {
+static NWidgetPart _nested_smalll_news_widgets[] = {
 	/* Caption + close box */
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE, NTW_CLOSEBOX), SetMinimalSize(11, 14), SetDataTip(STR_BLACK_CROSS, STR_TOOLTIP_CLOSE_WINDOW),
@@ -407,12 +409,12 @@ static NWidgetPart _nested_news_type0_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _news_type0_desc(
+static WindowDesc _smalll_news_desc(
 	WDP_CENTER, 476, 280, 87, 280, 87,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
-	_news_type0_widgets,
-	_nested_news_type0_widgets, lengthof(_nested_news_type0_widgets)
+	_smalll_news_widgets,
+	_nested_smalll_news_widgets, lengthof(_nested_smalll_news_widgets)
 );
 
 
@@ -426,8 +428,8 @@ static void ShowNewspaper(NewsItem *ni)
 	Window *w;
 	switch (_news_subtype_data[ni->subtype].display_mode) {
 		case NM_NORMAL:
-			_news_type13_desc.top = top;
-			w = new NewsWindow(&_news_type13_desc, ni);
+			_normal_news_desc.top = top;
+			w = new NewsWindow(&_normal_news_desc, ni);
 			if (ni->flags & NF_VIEWPORT) {
 				InitializeWindowViewport(w, 2, 58, 426, 110,
 					ni->reftype1 == NR_VEHICLE ? 0x80000000 | ni->ref1 : GetReferenceTile(ni->reftype1, ni->ref1), ZOOM_LVL_NEWS);
@@ -435,22 +437,24 @@ static void ShowNewspaper(NewsItem *ni)
 			break;
 
 		case NM_THIN:
-			_news_type2_desc.top = top;
-			w = new NewsWindow(&_news_type2_desc, ni);
+			_thin_news_desc.top = top;
+			w = new NewsWindow(&_thin_news_desc, ni);
 			if (ni->flags & NF_VIEWPORT) {
 				InitializeWindowViewport(w, 2, 58, 426, 70,
 					ni->reftype1 == NR_VEHICLE ? 0x80000000 | ni->ref1 : GetReferenceTile(ni->reftype1, ni->ref1), ZOOM_LVL_NEWS);
 			}
 			break;
 
-		default:
-			_news_type0_desc.top = top;
-			w = new NewsWindow(&_news_type0_desc, ni);
+		case NM_SMALL:
+			_smalll_news_desc.top = top;
+			w = new NewsWindow(&_smalll_news_desc, ni);
 			if (ni->flags & NF_VIEWPORT) {
 				InitializeWindowViewport(w, 3, 17, 274, 47,
 					ni->reftype1 == NR_VEHICLE ? 0x80000000 | ni->ref1 : GetReferenceTile(ni->reftype1, ni->ref1), ZOOM_LVL_NEWS);
 			}
 			break;
+
+		default: NOT_REACHED();
 	}
 }
 
