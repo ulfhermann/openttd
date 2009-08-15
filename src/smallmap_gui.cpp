@@ -701,20 +701,6 @@ class SmallMapWindow : public Window
 
 	Point cursor;
 
-	void OnMouseOver(Point pt, int widget) {
-		static Point invalid = {-1, -1};
-		if (pt.x != cursor.x || pt.y != cursor.y) {
-			this->refresh = FORCE_REFRESH;
-			if (widget == SM_WIDGET_MAP) {
-				cursor = pt;
-				cursor.x -= SD_MAP_EXTRA_PADDING;
-				cursor.y -= SD_MAP_EXTRA_PADDING + WD_CAPTION_HEIGHT;
-			} else {
-				cursor = invalid;
-			}
-		}
-	}
-
 	const Station * supply_details;
 
 	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
@@ -1167,7 +1153,81 @@ class SmallMapWindow : public Window
 				}
 			}
 		}
+	}
 
+	void DrawLegend(const Widget * legend, int x, int y_org) {
+		int y = y_org;
+
+		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
+			if (tbl->col_break || y + 5 >= legend->bottom) {
+				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
+				 * (one "row") to the right. */
+				x += SD_LEGEND_COLUMN_WIDTH;
+				y = y_org;
+			}
+
+			StringID string = STR_SMALLMAP_LINKSTATS_LEGEND;
+			switch (this->map_type) {
+			case SMT_INDUSTRY:
+				/* Industry name must be formated, since it's not in tiny font in the specs.
+				 * So, draw with a parameter and use the STR_SMALLMAP_INDUSTRY string, which is tiny font.*/
+				string = STR_SMALLMAP_INDUSTRY;
+				assert(tbl->type < NUM_INDUSTRYTYPES);
+				SetDParam(1, _industry_counts[tbl->type]);
+				/* fall through */
+			case SMT_LINKSTATS:
+				SetDParam(0, tbl->legend);
+				if (!tbl->show_on_map) {
+					/* Simply draw the string, not the black border of the legend colour.
+					 * This will enforce the idea of the disabled item */
+					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_GREY);
+				} else {
+					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_BLACK);
+					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
+				}
+				break;
+			default:
+				/* Anything that is not an industry or link stat is using normal process */
+				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
+				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
+			}
+			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
+
+			y += SD_LEGEND_ROW_HEIGHT;
+		}
+	}
+
+	void DrawSupplyDetails(const Widget * legend, int x, int y_org) {
+		SetDParam(0, supply_details->index);
+		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y_org, STR_SMALLMAP_SUPPLY_CAPTION, TC_BLACK);
+		y_org += 2 * SD_LEGEND_ROW_HEIGHT;
+		int y = y_org;
+		for (int i = 0; i < _smallmap_cargo_count; ++i) {
+			if (y + 5 >= legend->bottom) {
+				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
+				 * (one "row") to the right. */
+				x += SD_LEGEND_COLUMN_WIDTH;
+				y = y_org;
+			}
+
+			const LegendAndColour &tbl = _legend_table[this->map_type][i];
+
+			CargoID c = tbl.type;
+			int supply = supply_details->goods[c].supply * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;;
+			if (supply > 0) {
+				TextColour textcol = TC_BLACK;
+				if (tbl.show_on_map) {
+					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
+				} else {
+					textcol = TC_GREY;
+				}
+				SetDParam(0, c);
+				SetDParam(1, supply);
+				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_SUPPLY, textcol);
+				GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl.colour); // legend colour
+				y += SD_LEGEND_ROW_HEIGHT;
+			}
+		}
 	}
 
 public:
@@ -1450,81 +1510,6 @@ public:
 		this->SetWidgetsHiddenState(!this->HasButtons(), SM_WIDGET_ENABLE_ALL, SM_WIDGET_DISABLE_ALL, WIDGET_LIST_END);
 	}
 
-	void DrawLegend(const Widget * legend, int x, int y_org) {
-		int y = y_org;
-
-		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (tbl->col_break || y + 5 >= legend->bottom) {
-				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
-				 * (one "row") to the right. */
-				x += SD_LEGEND_COLUMN_WIDTH;
-				y = y_org;
-			}
-
-			StringID string = STR_SMALLMAP_LINKSTATS_LEGEND;
-			switch (this->map_type) {
-			case SMT_INDUSTRY:
-				/* Industry name must be formated, since it's not in tiny font in the specs.
-				 * So, draw with a parameter and use the STR_SMALLMAP_INDUSTRY string, which is tiny font.*/
-				string = STR_SMALLMAP_INDUSTRY;
-				assert(tbl->type < NUM_INDUSTRYTYPES);
-				SetDParam(1, _industry_counts[tbl->type]);
-				/* fall through */
-			case SMT_LINKSTATS:
-				SetDParam(0, tbl->legend);
-				if (!tbl->show_on_map) {
-					/* Simply draw the string, not the black border of the legend colour.
-					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_GREY);
-				} else {
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_BLACK);
-					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
-				}
-				break;
-			default:
-				/* Anything that is not an industry or link stat is using normal process */
-				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
-				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
-			}
-			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
-
-			y += SD_LEGEND_ROW_HEIGHT;
-		}
-	}
-
-	void DrawSupplyDetails(const Widget * legend, int x, int y_org) {
-		SetDParam(0, supply_details->index);
-		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y_org, STR_SMALLMAP_SUPPLY_CAPTION, TC_BLACK);
-		y_org += 2 * SD_LEGEND_ROW_HEIGHT;
-		int y = y_org;
-		for (int i = 0; i < _smallmap_cargo_count; ++i) {
-			if (y + 5 >= legend->bottom) {
-				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
-				 * (one "row") to the right. */
-				x += SD_LEGEND_COLUMN_WIDTH;
-				y = y_org;
-			}
-
-			const LegendAndColour &tbl = _legend_table[this->map_type][i];
-
-			CargoID c = tbl.type;
-			int supply = supply_details->goods[c].supply * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;;
-			if (supply > 0) {
-				TextColour textcol = TC_BLACK;
-				if (tbl.show_on_map) {
-					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
-				} else {
-					textcol = TC_GREY;
-				}
-				SetDParam(0, c);
-				SetDParam(1, supply);
-				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_SUPPLY, textcol);
-				GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl.colour); // legend colour
-				y += SD_LEGEND_ROW_HEIGHT;
-			}
-		}
-	}
-
 	virtual void OnPaint()
 	{
 		DrawPixelInfo new_dpi;
@@ -1536,9 +1521,9 @@ public:
 
 
 		const Widget *wi = &this->widget[SM_WIDGET_MAP];
-		if (!FillDrawPixelInfo(&new_dpi, wi->left + 1, wi->top + 1, wi->right - wi->left - 1, wi->bottom - wi->top - 1)) return;
-
-		this->DrawSmallMap(&new_dpi);
+		if (FillDrawPixelInfo(&new_dpi, wi->left + 1, wi->top + 1, wi->right - wi->left - 1, wi->bottom - wi->top - 1)) {
+			this->DrawSmallMap(&new_dpi);
+		}
 
 		const Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 
@@ -1547,9 +1532,9 @@ public:
 
 
 		if (supply_details == NULL) {
-			DrawLegend(legend, x, y_org);
+			this->DrawLegend(legend, x, y_org);
 		} else {
-			DrawSupplyDetails(legend, x, y_org);
+			this->DrawSupplyDetails(legend, x, y_org);
 		}
 		supply_details = NULL;
 	}
@@ -1712,6 +1697,21 @@ public:
 			}
 		}
 	};
+
+	virtual void OnMouseOver(Point pt, int widget) {
+		static Point invalid = {-1, -1};
+		if (pt.x != cursor.x || pt.y != cursor.y) {
+			this->refresh = FORCE_REFRESH;
+			if (widget == SM_WIDGET_MAP) {
+				cursor = pt;
+				cursor.x -= SD_MAP_EXTRA_PADDING;
+				cursor.y -= SD_MAP_EXTRA_PADDING + WD_CAPTION_HEIGHT;
+			} else {
+				cursor = invalid;
+			}
+		}
+	}
+
 
 	virtual void OnRightClick(Point pt, int widget)
 	{
