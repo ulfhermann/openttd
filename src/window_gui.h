@@ -188,10 +188,11 @@ struct ResizeInfo {
 	uint step_height; ///< Step-size of height resize changes
 };
 
+/** State of a sort direction button. */
 enum SortButtonState {
-	SBS_OFF,
-	SBS_DOWN,
-	SBS_UP,
+	SBS_OFF,  ///< Do not sort (with this button).
+	SBS_DOWN, ///< Sort ascending.
+	SBS_UP,   ///< Sort descending.
 };
 
 /**
@@ -501,7 +502,7 @@ public:
 	void HandleButtonClick(byte widget);
 	const Widget *GetWidgetOfType(WidgetType widget_type) const;
 
-	void RaiseButtons();
+	void RaiseButtons(bool autoraise = false);
 	void CDECL SetWidgetsDisabledState(bool disab_stat, int widgets, ...);
 	void CDECL SetWidgetsHiddenState(bool hidden_stat, int widgets, ...);
 	void CDECL SetWidgetsLoweredState(bool lowered_stat, int widgets, ...);
