@@ -672,6 +672,9 @@ class SmallMapWindow : public Window
 		SD_MAP_ROW_OFFSET = 2,
 		SD_MAP_MIN_INDUSTRY_WIDTH = 3,
 		SD_LEGEND_COLUMN_WIDTH = 119,
+		SD_LEGEND_PADDING_LEFT = 4,
+		SD_LEGEND_ENTRY_SPACING = 3,
+		SD_LEGEND_SYMBOL_WIDTH = 8,
 		SD_LEGEND_ROW_HEIGHT = 6,
 		SD_LEGEND_MIN_HEIGHT = SD_LEGEND_ROW_HEIGHT * LEGEND_MIN_ROWS,
 	};
@@ -1159,7 +1162,7 @@ class SmallMapWindow : public Window
 		int y = y_org;
 
 		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (tbl->col_break || y + 5 >= legend->bottom) {
+			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT - 1 >= legend->bottom) {
 				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
@@ -1180,18 +1183,18 @@ class SmallMapWindow : public Window
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_GREY);
+					DrawString(x + SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_GREY);
 				} else {
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_BLACK);
-					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
+					DrawString(x + SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_BLACK);
+					GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0); // outer border of the legend colour
 				}
 				break;
 			default:
 				/* Anything that is not an industry or link stat is using normal process */
-				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
-				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
+				GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0);
+				DrawString(x + SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
 			}
-			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
+			GfxFillRect(x + 1, y + 2, x + SD_LEGEND_SYMBOL_WIDTH - 1, y + SD_LEGEND_ROW_HEIGHT - 2, tbl->colour); // legend colour
 
 			y += SD_LEGEND_ROW_HEIGHT;
 		}
@@ -1203,7 +1206,7 @@ class SmallMapWindow : public Window
 		y_org += 2 * SD_LEGEND_ROW_HEIGHT;
 		int y = y_org;
 		for (int i = 0; i < _smallmap_cargo_count; ++i) {
-			if (y + 5 >= legend->bottom) {
+			if (y + SD_LEGEND_ROW_HEIGHT - 1 >= legend->bottom) {
 				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
@@ -1217,14 +1220,14 @@ class SmallMapWindow : public Window
 			if (supply > 0) {
 				TextColour textcol = TC_BLACK;
 				if (tbl.show_on_map) {
-					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
+					GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0); // outer border of the legend colour
 				} else {
 					textcol = TC_GREY;
 				}
 				SetDParam(0, c);
 				SetDParam(1, supply);
-				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_SUPPLY, textcol);
-				GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl.colour); // legend colour
+				DrawString(x + SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_SUPPLY, textcol);
+				GfxFillRect(x + 1, y + 2, x + SD_LEGEND_SYMBOL_WIDTH - 1, y + SD_LEGEND_ROW_HEIGHT - 2, tbl.colour); // legend colour
 				y += SD_LEGEND_ROW_HEIGHT;
 			}
 		}
@@ -1518,8 +1521,6 @@ public:
 		SetDParam(0, STR_SMALLMAP_TYPE_CONTOURS + this->map_type);
 		this->DrawWidgets();
 
-
-
 		const Widget *wi = &this->widget[SM_WIDGET_MAP];
 		if (FillDrawPixelInfo(&new_dpi, wi->left + 1, wi->top + 1, wi->right - wi->left - 1, wi->bottom - wi->top - 1)) {
 			this->DrawSmallMap(&new_dpi);
@@ -1527,14 +1528,10 @@ public:
 
 		const Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 
-		int y_org = legend->top + 1;
-		int x = 4;
-
-
 		if (supply_details == NULL) {
-			this->DrawLegend(legend, x, y_org);
+			this->DrawLegend(legend, SD_LEGEND_PADDING_LEFT, legend->top + 1);
 		} else {
-			this->DrawSupplyDetails(legend, x, y_org);
+			this->DrawSupplyDetails(legend, SD_LEGEND_PADDING_LEFT, legend->top + 1);
 		}
 		supply_details = NULL;
 	}
@@ -1696,7 +1693,7 @@ public:
 				this->ZoomOut(cx, cy);
 			}
 		}
-	};
+	}
 
 	virtual void OnMouseOver(Point pt, int widget) {
 		static Point invalid = {-1, -1};
