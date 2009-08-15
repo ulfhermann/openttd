@@ -553,6 +553,9 @@ class SmallMapWindow : public Window
 		SD_MAP_ROW_OFFSET = 2,
 		SD_MAP_MIN_INDUSTRY_WIDTH = 3,
 		SD_LEGEND_COLUMN_WIDTH = 119,
+		SD_LEGEND_PADDING_LEFT = 4,
+		SD_LEGEND_ENTRY_SPACING = 3,
+		SD_LEGEND_SYMBOL_WIDTH = 8,
 		SD_LEGEND_ROW_HEIGHT = 6,
 		SD_LEGEND_MIN_HEIGHT = SD_LEGEND_ROW_HEIGHT * LEGEND_MIN_ROWS,
 	};
@@ -1009,11 +1012,11 @@ public:
 		const Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 
 		int y_org = legend->top + 1;
-		int x = 4;
+		int x = SD_LEGEND_PADDING_LEFT;
 		int y = y_org;
 
 		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (tbl->col_break || y >= legend->bottom) {
+			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT - 1 >= legend->bottom) {
 				/* Column break needed, continue at top, COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
@@ -1029,17 +1032,17 @@ public:
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
+					DrawString(x + SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
 				} else {
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
-					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
+					DrawString(x + SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
+					GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0); // outer border of the legend colour
 				}
 			} else {
 				/* Anything that is not an industry is using normal process */
-				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
-				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
+				GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0);
+				DrawString(x + SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
 			}
-			GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl->colour); // legend colour
+			GfxFillRect(x + 1, y + 2, x + SD_LEGEND_SYMBOL_WIDTH - 1, y + SD_LEGEND_ROW_HEIGHT - 2, tbl->colour); // legend colour
 
 			y += SD_LEGEND_ROW_HEIGHT;
 		}
@@ -1188,7 +1191,7 @@ public:
 				this->ZoomOut(cx, cy);
 			}
 		}
-	};
+	}
 
 	virtual void OnRightClick(Point pt, int widget)
 	{
