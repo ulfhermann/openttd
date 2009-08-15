@@ -675,10 +675,13 @@ STR_SMALLMAP_LEGENDA_SENT                                       :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_SHOW_TEXT                                  :{TINYFONT}{BLACK}As Text
 STR_SMALLMAP_LEGENDA_SHOW_GRAPH                                 :{TINYFONT}{BLACK}As Graphs
 
+STR_SMALLMAP_SUPPLY_CAPTION                                     :{BLACK}Monthly supply at {STATION}:
+STR_SMALLMAP_SUPPLY                                             :{TINYFONT}{CARGO}
+
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Toggle town names on/off on map
 STR_SMALLMAP_CENTER                                             :{BLACK}Center the smallmap on the current position
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
-STR_SMALLMAP_ROUTEMAP_LEGEND                                    :{TINYFONT}{STRING}
+STR_SMALLMAP_LINKSTATS_LEGEND                                   :{TINYFONT}{STRING}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Disable all
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Enable all

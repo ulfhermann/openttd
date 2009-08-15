@@ -6145,7 +6145,7 @@ static void AfterLoadGRFs()
 	BuildIndustriesLegend();
 
 	/* build the routemap legend, based on the available cargos */
-	BuildRouteMapLegend();
+	BuildLinkStatsLegend();
 
 	/* Update the townname generators list */
 	InitGRFTownGeneratorNames();

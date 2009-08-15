@@ -45,7 +45,7 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_CONTOUR,
 	SM_WIDGET_VEHICLES,
 	SM_WIDGET_INDUSTRIES,
-	SM_WIDGET_ROUTEMAP,
+	SM_WIDGET_LINKSTATS,
 	SM_WIDGET_ROUTES,
 	SM_WIDGET_VEGETATION,
 	SM_WIDGET_OWNERS,
@@ -71,7 +71,7 @@ static const Widget _smallmap_widgets[] = {
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   158,   179, SPR_IMG_SHOW_COUNTOURS,   STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP}, // SM_WIDGET_CONTOUR
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   158,   179, SPR_IMG_SHOW_VEHICLES,    STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP},      // SM_WIDGET_VEHICLES
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   158,   179, SPR_IMG_INDUSTRY,         STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP},    // SM_WIDGET_INDUSTRIES
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   180,   201, SPR_IMG_GRAPHS,           STR_SMALLMAP_TOOLTIP_SHOW_LINK_STATS_ON_MAP},    // SM_WIDGET_ROUTEMAP
+{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   180,   201, SPR_IMG_GRAPHS,           STR_SMALLMAP_TOOLTIP_SHOW_LINK_STATS_ON_MAP},    // SM_WIDGET_LINKSTATS
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   180,   201, SPR_IMG_SHOW_ROUTES,      STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON},  // SM_WIDGET_ROUTES
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   180,   201, SPR_IMG_PLANTTREES,       STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP},    // SM_WIDGET_VEGETATION
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   180,   201, SPR_IMG_COMPANY_GENERAL,  STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP},   // SM_WIDGET_OWNERS
@@ -124,7 +124,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 												SetDataTip(SPR_IMG_ZOOMOUT, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_TOGGLETOWNNAME), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_TOWN, STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF),
-					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ROUTEMAP), SetMinimalSize(22, 22),
+					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_LINKSTATS), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_GRAPHS, STR_SMALLMAP_TOOLTIP_SHOW_LINK_STATS_ON_MAP),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ROUTES), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_SHOW_ROUTES, STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON),
@@ -157,7 +157,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 /* number of used industries */
 static int _smallmap_industry_count;
 
-/* number of cargos in the routemap legend */
+/* number of cargos in the link stats legend */
 static int _smallmap_cargo_count;
 
 enum SmallMapStats {
@@ -292,15 +292,15 @@ void BuildIndustriesLegend()
 	_smallmap_industry_count = j;
 }
 
-static LegendAndColour _legend_routemap[NUM_CARGO + NUM_STATS + 1];
+static LegendAndColour _legend_linkstats[NUM_CARGO + NUM_STATS + 1];
 
 /**
  * Populate legend table for the route map view.
  */
-void BuildRouteMapLegend()
+void BuildLinkStatsLegend()
 {
 	/* Clear the legend */
-	memset(_legend_routemap, 0, sizeof(_legend_routemap));
+	memset(_legend_linkstats, 0, sizeof(_legend_linkstats));
 
 	uint i = 0;
 
@@ -308,15 +308,15 @@ void BuildRouteMapLegend()
 		const CargoSpec *cs = CargoSpec::Get(c);
 		if (!cs->IsValid()) continue;
 
-		_legend_routemap[i].legend = cs->name;
-		_legend_routemap[i].colour = cs->legend_colour;
-		_legend_routemap[i].type = c;
-		_legend_routemap[i].show_on_map = true;
+		_legend_linkstats[i].legend = cs->name;
+		_legend_linkstats[i].colour = cs->legend_colour;
+		_legend_linkstats[i].type = c;
+		_legend_linkstats[i].show_on_map = true;
 
 		i++;
 	}
 
-	_legend_routemap[i].col_break = true;
+	_legend_linkstats[i].col_break = true;
 
 	_smallmap_cargo_count = i;
 
@@ -324,7 +324,7 @@ void BuildRouteMapLegend()
 	 * So we have to build the legend when creating the window.
 	 */
 	for (uint st = 0; st < NUM_STATS; ++st) {
-		LegendAndColour & legend_entry = _legend_routemap[i + st];
+		LegendAndColour & legend_entry = _legend_linkstats[i + st];
 		switch(st) {
 		case STAT_CAPACITY:
 			legend_entry.colour = _colour_gradient[COLOUR_WHITE][7];
@@ -359,14 +359,14 @@ void BuildRouteMapLegend()
 		}
 	}
 
-	_legend_routemap[i + NUM_STATS].end = true;
+	_legend_linkstats[i + NUM_STATS].end = true;
 }
 
 static const LegendAndColour * const _legend_table[] = {
 	_legend_land_contours,
 	_legend_vehicles,
 	_legend_from_industries,
-	_legend_routemap,
+	_legend_linkstats,
 	_legend_routes,
 	_legend_vegetation,
 	_legend_land_owners,
@@ -699,6 +699,24 @@ class SmallMapWindow : public Window
 		return this->map_type == SMT_INDUSTRY || this->map_type == SMT_LINKSTATS;
 	}
 
+	Point cursor;
+
+	void OnMouseOver(Point pt, int widget) {
+		static Point invalid = {-1, -1};
+		if (pt.x != cursor.x || pt.y != cursor.y) {
+			this->refresh = FORCE_REFRESH;
+			if (widget == SM_WIDGET_MAP) {
+				cursor = pt;
+				cursor.x -= SD_MAP_EXTRA_PADDING;
+				cursor.y -= SD_MAP_EXTRA_PADDING + WD_CAPTION_HEIGHT;
+			} else {
+				cursor = invalid;
+			}
+		}
+	}
+
+	const Station * supply_details;
+
 	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
 	 * Everything has to be done just like when drawing the background otherwise the rounding errors are
 	 * different on the background and on the overlay which creates "jumping" behaviour. This means:
@@ -895,13 +913,9 @@ class SmallMapWindow : public Window
 	}
 
 	void DrawStationDots() {
-		/* Colour for player owned stations */
-		//int p_colour = _colour_gradient[GetCompany(_local_company)->colour][6];
-		/* Colour for non-player owned stations */
-		//int o_colour = _colour_gradient[COLOUR_GREY][4];
+		supply_details = NULL;
 
 		const Station *st;
-
 		FOR_ALL_STATIONS(st) {
 			if (st->owner != _local_company && Company::IsValidID(st->owner)) continue;
 
@@ -926,6 +940,11 @@ class SmallMapWindow : public Window
 				colour /= numCargos;
 
 			uint r = 2;
+			if (abs(this->cursor.x - pt.x) < 7 && abs(this->cursor.y - pt.y) < 7) {
+				supply_details = st;
+				r += 3;
+			}
+
 			if (q >= 10) r++;
 			if (q >= 20) r++;
 			if (q >= 40) r++;
@@ -1048,16 +1067,16 @@ class SmallMapWindow : public Window
 			ptm.x = (pta.x + 2*ptb.x) / 3;
 			ptm.y = (pta.y + 2*ptb.y) / 3;
 			int nums = 0;
-			if (_legend_routemap[_smallmap_cargo_count + STAT_CAPACITY].show_on_map) {
+			if (_legend_linkstats[_smallmap_cargo_count + STAT_CAPACITY].show_on_map) {
 				SetDParam(nums++, this->link.capacity);
 			}
-			if (_legend_routemap[_smallmap_cargo_count + STAT_USAGE].show_on_map) {
+			if (_legend_linkstats[_smallmap_cargo_count + STAT_USAGE].show_on_map) {
 				SetDParam(nums++, this->link.usage);
 			}
-			if (_legend_routemap[_smallmap_cargo_count + STAT_PLANNED].show_on_map) {
+			if (_legend_linkstats[_smallmap_cargo_count + STAT_PLANNED].show_on_map) {
 				SetDParam(nums++, this->flow.planned);
 			}
-			if (_legend_routemap[_smallmap_cargo_count + STAT_SENT].show_on_map) {
+			if (_legend_linkstats[_smallmap_cargo_count + STAT_SENT].show_on_map) {
 				SetDParam(nums++, this->flow.sent);
 			}
 			StringID str;
@@ -1091,19 +1110,19 @@ class SmallMapWindow : public Window
 			/* these floats only serve to calculate the size of the coloured boxes for capacity, usage, planned, sent
 			 * they are not reused anywhere, so it's network safe.
 			 */
-			const LegendAndColour *legend_entry = _legend_routemap + _smallmap_cargo_count + STAT_USAGE;
+			const LegendAndColour *legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_USAGE;
 			if (legend_entry->show_on_map && this->link.usage > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->link.usage), legend_entry->colour));
 			}
-			legend_entry = _legend_routemap + _smallmap_cargo_count + STAT_CAPACITY;
+			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_CAPACITY;
 			if (legend_entry->show_on_map && this->link.capacity > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->link.capacity), legend_entry->colour));
 			}
-			legend_entry = _legend_routemap + _smallmap_cargo_count + STAT_PLANNED;
+			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_PLANNED;
 			if (legend_entry->show_on_map && this->flow.planned > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->flow.planned),  legend_entry->colour));
 			}
-			legend_entry = _legend_routemap + _smallmap_cargo_count + STAT_SENT;
+			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_SENT;
 			if (legend_entry->show_on_map && this->flow.sent > 0) {
 				sizes.insert(std::make_pair((uint)sqrt((float)this->flow.sent), legend_entry->colour));
 			}
@@ -1277,11 +1296,11 @@ public:
 
 			DrawStationDots();
 
-			if (_legend_routemap[_smallmap_cargo_count + STAT_TEXT].show_on_map) {
+			if (_legend_linkstats[_smallmap_cargo_count + STAT_TEXT].show_on_map) {
 				LinkTextDrawer text;
 				text.DrawLinks(this);
 			}
-			if (_legend_routemap[_smallmap_cargo_count + STAT_GRAPH].show_on_map) {
+			if (_legend_linkstats[_smallmap_cargo_count + STAT_GRAPH].show_on_map) {
 				LinkGraphDrawer graph;
 				graph.DrawLinks(this);
 			}
@@ -1417,7 +1436,7 @@ public:
 
 	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number), zoom(ZOOM_LVL_NORMAL)
 	{
-		this->SetWidgetDisabledState(SM_WIDGET_ROUTEMAP, _smallmap_cargo_count == 0);
+		this->SetWidgetDisabledState(SM_WIDGET_LINKSTATS, _smallmap_cargo_count == 0);
 		if (_smallmap_cargo_count == 0 && this->map_type == SMT_LINKSTATS) {
 			this->map_type = SMT_CONTOUR;
 		}
@@ -1431,53 +1450,38 @@ public:
 		this->SetWidgetsHiddenState(!this->HasButtons(), SM_WIDGET_ENABLE_ALL, SM_WIDGET_DISABLE_ALL, WIDGET_LIST_END);
 	}
 
-	virtual void OnPaint()
-	{
-		DrawPixelInfo new_dpi;
-
-		/* draw the window */
-		SetDParam(0, STR_SMALLMAP_TYPE_CONTOURS + this->map_type);
-		this->DrawWidgets();
-
-		const Widget *legend = &this->widget[SM_WIDGET_LEGEND];
-
-		int y_org = legend->top + 1;
-		int x = 4;
+	void DrawLegend(const Widget * legend, int x, int y_org) {
 		int y = y_org;
 
 		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (tbl->col_break || y >= legend->bottom) {
-				/* Column break needed, continue at top, COLUMN_WIDTH pixels
+			if (tbl->col_break || y + 5 >= legend->bottom) {
+				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
 				y = y_org;
 			}
 
-			if (this->map_type == SMT_INDUSTRY) {
+			StringID string = STR_SMALLMAP_LINKSTATS_LEGEND;
+			switch (this->map_type) {
+			case SMT_INDUSTRY:
 				/* Industry name must be formated, since it's not in tiny font in the specs.
 				 * So, draw with a parameter and use the STR_SMALLMAP_INDUSTRY string, which is tiny font.*/
-				SetDParam(0, tbl->legend);
+				string = STR_SMALLMAP_INDUSTRY;
 				assert(tbl->type < NUM_INDUSTRYTYPES);
 				SetDParam(1, _industry_counts[tbl->type]);
-				if (!tbl->show_on_map) {
-					/* Simply draw the string, not the black border of the legend colour.
-					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_GREY);
-				} else {
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
-					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
-				}
-			} else if (this->map_type == SMT_LINKSTATS) {
+				/* fall through */
+			case SMT_LINKSTATS:
 				SetDParam(0, tbl->legend);
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
 					 * This will enforce the idea of the disabled item */
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_GREY);
+					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_GREY);
 				} else {
-					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_ROUTEMAP_LEGEND, TC_BLACK);
+					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, string, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
-			} else {
+				break;
+			default:
 				/* Anything that is not an industry or link stat is using normal process */
 				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
 				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
@@ -1486,11 +1490,68 @@ public:
 
 			y += SD_LEGEND_ROW_HEIGHT;
 		}
+	}
+
+	void DrawSupplyDetails(const Widget * legend, int x, int y_org) {
+		SetDParam(0, supply_details->index);
+		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y_org, STR_SMALLMAP_SUPPLY_CAPTION, TC_BLACK);
+		y_org += 2 * SD_LEGEND_ROW_HEIGHT;
+		int y = y_org;
+		for (int i = 0; i < _smallmap_cargo_count; ++i) {
+			if (y + 5 >= legend->bottom) {
+				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
+				 * (one "row") to the right. */
+				x += SD_LEGEND_COLUMN_WIDTH;
+				y = y_org;
+			}
+
+			const LegendAndColour &tbl = _legend_table[this->map_type][i];
+
+			CargoID c = tbl.type;
+			int supply = supply_details->goods[c].supply * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;;
+			if (supply > 0) {
+				TextColour textcol = TC_BLACK;
+				if (tbl.show_on_map) {
+					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
+				} else {
+					textcol = TC_GREY;
+				}
+				SetDParam(0, c);
+				SetDParam(1, supply);
+				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_SUPPLY, textcol);
+				GfxFillRect(x + 1, y + 2, x + 7, y + 4, tbl.colour); // legend colour
+				y += SD_LEGEND_ROW_HEIGHT;
+			}
+		}
+	}
+
+	virtual void OnPaint()
+	{
+		DrawPixelInfo new_dpi;
+
+		/* draw the window */
+		SetDParam(0, STR_SMALLMAP_TYPE_CONTOURS + this->map_type);
+		this->DrawWidgets();
+
+
 
 		const Widget *wi = &this->widget[SM_WIDGET_MAP];
 		if (!FillDrawPixelInfo(&new_dpi, wi->left + 1, wi->top + 1, wi->right - wi->left - 1, wi->bottom - wi->top - 1)) return;
 
 		this->DrawSmallMap(&new_dpi);
+
+		const Widget *legend = &this->widget[SM_WIDGET_LEGEND];
+
+		int y_org = legend->top + 1;
+		int x = 4;
+
+
+		if (supply_details == NULL) {
+			DrawLegend(legend, x, y_org);
+		} else {
+			DrawSupplyDetails(legend, x, y_org);
+		}
+		supply_details = NULL;
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -1537,7 +1598,7 @@ public:
 			case SM_WIDGET_CONTOUR:    // Show land contours
 			case SM_WIDGET_VEHICLES:   // Show vehicles
 			case SM_WIDGET_INDUSTRIES: // Show industries
-			case SM_WIDGET_ROUTEMAP:   // Show route map
+			case SM_WIDGET_LINKSTATS:   // Show route map
 			case SM_WIDGET_ROUTES:     // Show transport routes
 			case SM_WIDGET_VEGETATION: // Show vegetation
 			case SM_WIDGET_OWNERS:     // Show land owners
@@ -1586,14 +1647,14 @@ public:
 						}
 					} else if (this->map_type == SMT_LINKSTATS) {
 						if (click_pos < _smallmap_cargo_count) {
-							_legend_routemap[click_pos].show_on_map = !_legend_routemap[click_pos].show_on_map;
+							_legend_linkstats[click_pos].show_on_map = !_legend_linkstats[click_pos].show_on_map;
 						} else {
 							uint stats_column = _smallmap_cargo_count / rows_per_column;
 							if (_smallmap_cargo_count % rows_per_column != 0) stats_column++;
 
 							if (column == stats_column && line < NUM_STATS) {
 								click_pos = _smallmap_cargo_count + line;
-								_legend_routemap[click_pos].show_on_map = !_legend_routemap[click_pos].show_on_map;
+								_legend_linkstats[click_pos].show_on_map = !_legend_linkstats[click_pos].show_on_map;
 							}
 						}
 					}
@@ -1606,7 +1667,7 @@ public:
 				break;
 
 			case SM_WIDGET_ENABLE_ALL: { // Enable all items
-				LegendAndColour *tbl = (this->map_type == SMT_INDUSTRY) ? _legend_from_industries : _legend_routemap;
+				LegendAndColour *tbl = (this->map_type == SMT_INDUSTRY) ? _legend_from_industries : _legend_linkstats;
 				for (; !tbl->end; ++tbl) {
 					tbl->show_on_map = true;
 				}
@@ -1618,7 +1679,7 @@ public:
 			}
 
 			case SM_WIDGET_DISABLE_ALL: { // Disable all items
-				LegendAndColour *tbl = (this->map_type == SMT_INDUSTRY) ? _legend_from_industries : _legend_routemap;
+				LegendAndColour *tbl = (this->map_type == SMT_INDUSTRY) ? _legend_from_industries : _legend_linkstats;
 				for (; !tbl->end; ++tbl) {
 					tbl->show_on_map = false;
 				}

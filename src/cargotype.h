@@ -106,7 +106,7 @@ CargoID GetCargoIDByLabel(CargoLabel cl);
 CargoID GetCargoIDByBitnum(uint8 bitnum);
 
 /* set up the cargos to be displayed in the smallmap's route legend */
-void BuildRouteMapLegend();
+void BuildLinkStatsLegend();
 
 static inline bool IsCargoInClass(CargoID c, uint16 cc)
 {
