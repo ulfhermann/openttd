@@ -611,7 +611,7 @@ static GetSmallMapPixels *_smallmap_draw_procs[] = {
 	GetSmallMapContoursPixels,
 	GetSmallMapVehiclesPixels,
 	GetSmallMapIndustriesPixels,
-	GetSmallMapRoutesPixels,
+	GetSmallMapContoursPixels,
 	GetSmallMapRoutesPixels,
 	GetSmallMapVegetationPixels,
 	GetSmallMapOwnerPixels,
@@ -657,7 +657,7 @@ class SmallMapWindow : public Window
 		SMT_CONTOUR,
 		SMT_VEHICLES,
 		SMT_INDUSTRY,
-		SMT_ROUTEMAP,
+		SMT_LINKSTATS,
 		SMT_ROUTES,
 		SMT_VEGETATION,
 		SMT_OWNER,
@@ -696,7 +696,7 @@ class SmallMapWindow : public Window
 
 	bool HasButtons()
 	{
-		return this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP;
+		return this->map_type == SMT_INDUSTRY || this->map_type == SMT_LINKSTATS;
 	}
 
 	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
@@ -1271,7 +1271,7 @@ public:
 
 		DrawIndustries(dpi);
 
-		if (this->map_type == SMT_ROUTEMAP && _game_mode == GM_NORMAL) {
+		if (this->map_type == SMT_LINKSTATS && _game_mode == GM_NORMAL) {
 			LinkLineDrawer lines;
 			lines.DrawLinks(this);
 
@@ -1391,7 +1391,7 @@ public:
 
 		if (this->map_type == SMT_INDUSTRY) {
 			new_legend_height = ((_smallmap_industry_count + columns - 1) / columns) * SD_LEGEND_ROW_HEIGHT;
-		} else if (this->map_type == SMT_ROUTEMAP) {
+		} else if (this->map_type == SMT_LINKSTATS) {
 			new_legend_height = ((_smallmap_cargo_count + columns - 1) / columns) * SD_LEGEND_ROW_HEIGHT;
 		}
 
@@ -1418,7 +1418,7 @@ public:
 	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number), zoom(ZOOM_LVL_NORMAL)
 	{
 		this->SetWidgetDisabledState(SM_WIDGET_ROUTEMAP, _smallmap_cargo_count == 0);
-		if (_smallmap_cargo_count == 0 && this->map_type == SMT_ROUTEMAP) {
+		if (_smallmap_cargo_count == 0 && this->map_type == SMT_LINKSTATS) {
 			this->map_type = SMT_CONTOUR;
 		}
 
@@ -1467,7 +1467,7 @@ public:
 					DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_INDUSTRY, TC_BLACK);
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
-			} else if (this->map_type == SMT_ROUTEMAP) {
+			} else if (this->map_type == SMT_LINKSTATS) {
 				SetDParam(0, tbl->legend);
 				if (!tbl->show_on_map) {
 					/* Simply draw the string, not the black border of the legend colour.
@@ -1478,7 +1478,7 @@ public:
 					GfxFillRect(x, y + 1, x + 8, y + 5, 0); // outer border of the legend colour
 				}
 			} else {
-				/* Anything that is not an industry is using normal process */
+				/* Anything that is not an industry or link stat is using normal process */
 				GfxFillRect(x, y + 1, x + 8, y + 5, 0);
 				DrawString(x + 11, x + SD_LEGEND_COLUMN_WIDTH - 1, y, tbl->legend);
 			}
@@ -1571,7 +1571,7 @@ public:
 
 			case SM_WIDGET_LEGEND: // Legend
 				/* if industry type small map*/
-				if (this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP) {
+				if (this->map_type == SMT_INDUSTRY || this->map_type == SMT_LINKSTATS) {
 					/* if click on industries label, find right industry type and enable/disable it */
 					Widget *wi = &this->widget[SM_WIDGET_LEGEND]; // label panel
 					uint column = (pt.x - 4) / SD_LEGEND_COLUMN_WIDTH;
@@ -1584,7 +1584,7 @@ public:
 						if (click_pos < _smallmap_industry_count) {
 							_legend_from_industries[click_pos].show_on_map = !_legend_from_industries[click_pos].show_on_map;
 						}
-					} else if (this->map_type == SMT_ROUTEMAP) {
+					} else if (this->map_type == SMT_LINKSTATS) {
 						if (click_pos < _smallmap_cargo_count) {
 							_legend_routemap[click_pos].show_on_map = !_legend_routemap[click_pos].show_on_map;
 						} else {
@@ -1721,7 +1721,7 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		if (delta.x != 0 && (this->map_type == SMT_INDUSTRY || this->map_type == SMT_ROUTEMAP)) this->ResizeLegend();
+		if (delta.x != 0 && (this->map_type == SMT_INDUSTRY || this->map_type == SMT_LINKSTATS)) this->ResizeLegend();
 	}
 };
 
