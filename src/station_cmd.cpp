@@ -2809,15 +2809,21 @@ static void UpdateStationStats(Station * st) {
 	}
 }
 
-void IncreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
+void IncreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id) {
 	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
-	for (Vehicle *v = front; v != NULL; v = v->Next()) {
+	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
 			LinkStat & ls = st->goods[v->cargo_type].link_stats[next_station_id];
 			ls.frozen += v->cargo_cap;
 			ls.capacity = max(ls.capacity, ls.frozen);
 			assert(ls.capacity > 0);
 		}
+	}
+}
+
+void RecalcFrozenIfLoading(const Vehicle * v) {
+	if (v->current_order.IsType(OT_LOADING)) {
+		RecalcFrozen(Station::Get(v->last_station_visited));
 	}
 }
 
@@ -2837,7 +2843,7 @@ void RecalcFrozen(Station * st) {
 
 	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
 	while(v_it != st->loading_vehicles.end()) {
-		Vehicle * front = *v_it;
+		const Vehicle * front = *v_it;
 		OrderList * orders = front->orders.list;
 		if (orders != NULL) {
 			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
@@ -2849,9 +2855,9 @@ void RecalcFrozen(Station * st) {
 	}
 }
 
-void DecreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
+void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id) {
 	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
-	for (Vehicle *v = front; v != NULL; v = v->Next()) {
+	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
 			LinkStatMap & link_stats = st->goods[v->cargo_type].link_stats;
 			LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
@@ -2874,9 +2880,9 @@ void DecreaseFrozen(Station *st, Vehicle *front, StationID next_station_id) {
 	}
 }
 
-void IncreaseStats(Station *st, Vehicle *front, StationID next_station_id) {
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id) {
 	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
-	for (Vehicle *v = front; v != NULL; v = v->Next()) {
+	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
 			LinkStat & link_stat = st->goods[v->cargo_type].link_stats[next_station_id];
 			link_stat.capacity += v->cargo_cap;
