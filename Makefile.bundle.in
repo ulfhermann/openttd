@@ -96,6 +96,11 @@ bundle_zip: bundle
 	$(Q)mkdir -p "$(BUNDLES_DIR)"
 	$(Q)cd "$(BUNDLE_DIR)" && zip -r $(shell if test -z "$(VERBOSE)"; then echo '-q'; fi) "$(BUNDLES_DIR)/$(BUNDLE_NAME).zip" .
 
+bundle_7z: bundle
+	@echo '[BUNDLE] Creating $(BUNDLE_NAME).7z'
+	$(Q)mkdir -p "$(BUNDLES_DIR)"
+	$(Q)cd "$(BUNDLE_DIR)" && 7z a "$(BUNDLES_DIR)/$(BUNDLE_NAME).7z" .
+
 bundle_gzip: bundle
 	@echo '[BUNDLE] Creating $(BUNDLE_NAME).tar.gz'
 	$(Q)mkdir -p "$(BUNDLES_DIR)/.gzip/$(BUNDLE_NAME)"
@@ -109,6 +114,13 @@ bundle_bzip2: bundle
 	$(Q)cp -R    "$(BUNDLE_DIR)/"* "$(BUNDLES_DIR)/.bzip2/$(BUNDLE_NAME)/"
 	$(Q)cd "$(BUNDLES_DIR)/.bzip2" && tar -jc$(shell if test -n "$(VERBOSE)"; then echo 'v'; fi)f "$(BUNDLES_DIR)/$(BUNDLE_NAME).tar.bz2" "$(BUNDLE_NAME)"
 	$(Q)rm -rf   "$(BUNDLES_DIR)/.bzip2"
+
+bundle_lzma: bundle
+	@echo '[BUNDLE] Creating $(BUNDLE_NAME).tar.lzma'
+	$(Q)mkdir -p "$(BUNDLES_DIR)/.lzma/$(BUNDLE_NAME)"
+	$(Q)cp -R    "$(BUNDLE_DIR)/"* "$(BUNDLES_DIR)/.lzma/$(BUNDLE_NAME)/"
+	$(Q)cd "$(BUNDLES_DIR)/.lzma" && tar --lzma -c$(shell if test -n "$(VERBOSE)"; then echo 'v'; fi)f "$(BUNDLES_DIR)/$(BUNDLE_NAME).tar.lzma" "$(BUNDLE_NAME)"
+	$(Q)rm -rf   "$(BUNDLES_DIR)/.lzma"
 
 bundle_lha: bundle
 	@echo '[BUNDLE] Creating $(BUNDLE_NAME).lha'
