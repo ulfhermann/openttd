@@ -717,9 +717,7 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
 
-			if  (u->current_order.IsType(OT_LOADING)) {
-				RecalcFrozen(Station::Get(u->last_station_visited));
-			}
+			RecalcFrozenIfLoading(u);
 		}
 
 		/* As we insert an order, the order to skip to will be 'wrong'. */
@@ -755,9 +753,7 @@ static CommandCost DecloneOrder(Vehicle *dst, DoCommandFlag flags)
 		DeleteVehicleOrders(dst);
 		InvalidateVehicleOrder(dst, -1);
 
-		if  (dst->current_order.IsType(OT_LOADING)) {
-			RecalcFrozen(Station::Get(dst->last_station_visited));
-		}
+		RecalcFrozenIfLoading(dst);
 
 		InvalidateWindowClassesData(GetWindowClassForVehicleType(dst->type), 0);
 	}
@@ -807,9 +803,7 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
 
-			if  (u->current_order.IsType(OT_LOADING)) {
-				RecalcFrozen(Station::Get(u->last_station_visited));
-			}
+			RecalcFrozenIfLoading(u);
 		}
 
 		/* As we delete an order, the order to skip to will be 'wrong'. */
@@ -918,9 +912,7 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, moving_order | (target_order << 8));
 
-			if  (u->current_order.IsType(OT_LOADING)) {
-				RecalcFrozen(Station::Get(u->last_station_visited));
-			}
+			RecalcFrozenIfLoading(u);
 		}
 
 		/* As we move an order, the order to skip to will be 'wrong'. */
@@ -1170,9 +1162,7 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			}
 			InvalidateVehicleOrder(u, 0);
 
-			if  (u->current_order.IsType(OT_LOADING)) {
-				RecalcFrozen(Station::Get(u->last_station_visited));
-			}
+			RecalcFrozenIfLoading(u);
 		}
 	}
 
@@ -1297,9 +1287,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 		default: return CMD_ERROR;
 	}
 
-	if  (dst->vehstatus == OT_LOADING) {
-		RecalcFrozen(Station::Get(dst->last_station_visited));
-	}
+	RecalcFrozenIfLoading(dst);
 
 	return CommandCost();
 }
@@ -1610,9 +1598,7 @@ void RemoveOrderFromAllVehicles(OrderType type, DestinationID destination)
 					InvalidateVehicleOrder(w, id | (INVALID_VEH_ORDER_ID << 8));
 					InvalidateVehicleOrder(w, (INVALID_VEH_ORDER_ID << 8) | id);
 
-					if  (w->current_order.IsType(OT_LOADING)) {
-						RecalcFrozen(Station::Get(w->last_station_visited));
-					}
+					RecalcFrozenIfLoading(w);
 				}
 			}
 		}
@@ -1657,9 +1643,7 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist)
 		if (!keep_orderlist) v->orders.list = NULL;
 	}
 
-	if  (v->current_order.IsType(OT_LOADING)) {
-		RecalcFrozen(Station::Get(v->last_station_visited));
-	}
+	RecalcFrozenIfLoading(v);
 }
 
 uint16 GetServiceIntervalClamped(uint interval, CompanyID company_id)
