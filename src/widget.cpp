@@ -301,7 +301,9 @@ static inline void DrawLabel(const Rect &r, WidgetType type, bool clicked, Strin
 {
 	if (str == STR_NULL) return;
 	if ((type & WWT_MASK) == WWT_TEXTBTN_2 && clicked) str++;
-	DrawString(r.left + clicked, r.right + clicked, ((r.top + r.bottom + 1) >> 1) - (FONT_HEIGHT_NORMAL / 2) + clicked, str, TC_FROMSTRING, SA_CENTER);
+	Dimension d = GetStringBoundingBox(str);
+	int offset = max(0, ((int)(r.bottom - r.top + 1) - (int)d.height) / 2); // Offset for rendering the text vertically centered
+	DrawString(r.left + clicked, r.right + clicked, r.top + offset + clicked, str, TC_FROMSTRING, SA_CENTER);
 }
 
 /**
@@ -312,7 +314,9 @@ static inline void DrawLabel(const Rect &r, WidgetType type, bool clicked, Strin
  */
 static inline void DrawText(const Rect &r, TextColour colour, StringID str)
 {
-	if (str != STR_NULL) DrawString(r.left, r.right, r.top, str, colour);
+	Dimension d = GetStringBoundingBox(str);
+	int offset = max(0, ((int)(r.bottom - r.top + 1) - (int)d.height) / 2); // Offset for rendering the text vertically centered
+	if (str != STR_NULL) DrawString(r.left, r.right, r.top + offset, str, colour);
 }
 
 /**
@@ -825,7 +829,7 @@ void Window::DrawSortButtonState(int widget, SortButtonState state) const
 
 
 /**
- * @defgroup NestedWidgets Hierarchical widgets.
+ * @defgroup NestedWidgets Hierarchical widgets
  * Hierarchical widgets, also known as nested widgets, are widgets stored in a tree. At the leafs of the tree are (mostly) the 'real' widgets
  * visible to the user. At higher levels, widgets get organized in container widgets, until all widgets of the window are merged.
  *
