@@ -678,7 +678,12 @@ STR_SMALLMAP_LEGENDA_SHOW_GRAPH                                 :{TINYFONT}{BLAC
 
 STR_SMALLMAP_SUPPLY_CAPTION                                     :{BLACK}Monthly supply at {STATION}
 STR_SMALLMAP_SUPPLY                                             :{TINYFONT}{CARGO}
-STR_SMALLMAP_LINK_CAPTION                                       :{BLACK}Monthly traffic from {STATION} to {STATION}
+STR_SMALLMAP_LINK_CAPTION                                       :{TINYFONT}{BLACK}-- Monthly traffic from {STATION} to {STATION} --
+STR_SMALLMAP_LINK                                               :{TINYFONT}{STRING} -
+STR_SMALLMAP_LINK_CAPACITY                                      :{TINYFONT} capacity: {NUM}
+STR_SMALLMAP_LINK_USAGE                                         :{TINYFONT} usage: {NUM}
+STR_SMALLMAP_LINK_PLANNED                                       :{TINYFONT} planned: {NUM}
+STR_SMALLMAP_LINK_SENT                                          :{TINYFONT} sent: {NUM}
 
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Toggle town names on/off on map
 STR_SMALLMAP_CENTER                                             :{BLACK}Center the smallmap on the current position

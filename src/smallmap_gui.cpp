@@ -29,6 +29,7 @@
 #include "table/sprites.h"
 
 #include <cmath>
+#include <vector>
 
 /** Widget numbers of the small map window. */
 enum SmallMapWindowWidgets {
@@ -706,7 +707,36 @@ class SmallMapWindow : public Window
 
 	const Station * supply_details;
 
-	const Station * link_details[2];
+	struct CargoDetail {
+		CargoDetail(const LegendAndColour * c, const LinkStat &ls, const FlowStat &fs) :
+			legend(c), capacity(ls.capacity), usage(ls.usage), planned(fs.planned), sent(fs.sent) {}
+		const LegendAndColour *legend;
+		uint capacity;
+		uint usage;
+		uint planned;
+		uint sent;
+	};
+
+	typedef std::vector<CargoDetail> StatVector;
+
+	struct LinkDetails {
+		LinkDetails() {Clear();}
+
+		const Station * sta;
+		const Station * stb;
+		StatVector a_to_b;
+		StatVector b_to_a;
+
+		void Clear()
+		{
+			sta = NULL;
+			stb = NULL;
+			a_to_b.clear();
+			b_to_a.clear();
+		}
+	};
+
+	LinkDetails link_details;
 
 	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
 	 * Everything has to be done just like when drawing the background otherwise the rounding errors are
@@ -976,28 +1006,37 @@ class SmallMapWindow : public Window
 							const Station *stb = Station::Get(to);
 							if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
 							if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
+
+							Point pta = window->GetStationMiddle(sta);
+							Point ptb = window->GetStationMiddle(stb);
+
+							bool highlight = window->supply_details == NULL && window->link_details.sta == NULL && window->CheckLinkSelected(&pta, &ptb);
+							bool reverse_highlight = window->link_details.b_to_a.empty() && sta == window->link_details.stb && stb == window->link_details.sta;
+							if (highlight) {
+								window->link_details.sta = sta;
+								window->link_details.stb = stb;
+							}
+
 							for (int i = 0; i < _smallmap_cargo_count; ++i) {
 								const LegendAndColour &cargo_entry = _legend_table[window->map_type][i];
 								CargoID cargo = cargo_entry.type;
 								if (cargo_entry.show_on_map) {
 									FlowStat sum_flows = sta->goods[cargo].GetSumFlowVia(stb->index);
-									const LinkStatMap ls_map = sta->goods[cargo].link_stats;
+									const LinkStatMap &ls_map = sta->goods[cargo].link_stats;
 									LinkStatMap::const_iterator i = ls_map.find(stb->index);
 									if (i != ls_map.end()) {
-										AddLink(i->second, sum_flows, cargo_entry);
+										const LinkStat &link_stat = i->second;
+										AddLink(link_stat, sum_flows, cargo_entry);
+										if (highlight) {
+											window->link_details.a_to_b.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
+										} else if (reverse_highlight) {
+											window->link_details.b_to_a.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
+										}
 									}
 								}
 							}
-							Point pta = window->GetStationMiddle(sta);
-							Point ptb = window->GetStationMiddle(stb);
-
-							if (window->supply_details == NULL && window->link_details[0] == NULL && window->CheckLinkSelected(&pta, &ptb)) {
-								window->link_details[0] = sta;
-								window->link_details[1] = stb;
-							}
 
 							DrawContent(pta, ptb);
-
 
 							seen_stations.insert(to);
 						}
@@ -1139,7 +1178,6 @@ class SmallMapWindow : public Window
 			this->flow.Clear();
 			this->link.Clear();
 		}
-
 	};
 
 	void DrawIndustries(DrawPixelInfo *dpi) {
@@ -1209,22 +1247,47 @@ class SmallMapWindow : public Window
 		}
 	}
 
-	int DrawLinkDetails(const Station * from, const Station * to, int x, int y, int bottom) {
-		SetDParam(0, link_details[0]->index);
-		SetDParam(1, link_details[1]->index);
-		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_CAPTION, TC_BLACK);
-		y += 2 * SD_LEGEND_ROW_HEIGHT;
-		for (int i = 0; i < _smallmap_cargo_count; ++i) {
-			const LegendAndColour &tbl = _legend_table[this->map_type][i];
-			CargoID c = tbl.type;
-			const GoodsEntry &good = link_details[0]->goods[c];
+	int DrawLinkDetails(StatVector &details, int x, int y) {
+		int x_orig = x;
+		for (StatVector::iterator i = details.begin(); i != details.end(); ++i) {
+			CargoDetail &detail = *i;
+			GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0); // outer border of the legend colour
+			GfxFillRect(x + 1, y + 2, x + SD_LEGEND_SYMBOL_WIDTH - 1, y + SD_LEGEND_ROW_HEIGHT - 2, detail.legend->colour); // legend colour
+			x += SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING;
+			TextColour textcol[4];
+			for (int stat = STAT_CAPACITY; stat <= STAT_SENT; ++stat) {
+				textcol[stat] = _legend_linkstats[_smallmap_cargo_count + stat].show_on_map ? TC_BLACK : TC_GREY;
+			}
+			SetDParam(0, STR_CARGO_PLURAL_PASSENGERS + detail.legend->type);
+			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK, TC_BLACK);
+			SetDParam(0, detail.capacity);
+			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_CAPACITY, textcol[STAT_CAPACITY]);
+			SetDParam(0, detail.usage);
+			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_USAGE, textcol[STAT_USAGE]);
+			SetDParam(0, detail.planned);
+			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_PLANNED, textcol[STAT_PLANNED]);
+			SetDParam(0, detail.sent);
+			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_SENT, textcol[STAT_SENT]);
 
+			x = x_orig;
+			y += SD_LEGEND_ROW_HEIGHT;
 		}
 		return y;
 	}
 
+	int DrawLinkDetailCaption(int x, int y, StationID sta, StationID stb) {
+		SetDParam(0, sta);
+		SetDParam(1, stb);
+		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_CAPTION, TC_BLACK);
+		y += SD_LEGEND_ROW_HEIGHT;
+		return y;
+	}
+
 	void DrawLinkDetails(int x, int y, int bottom) {
-		y = DrawLinkDetails(link_details[0], link_details[1], x, y, bottom);
+		y = DrawLinkDetailCaption(x, y, link_details.sta->index, link_details.stb->index);
+		y = DrawLinkDetails(link_details.a_to_b, x, y);
+		y = DrawLinkDetailCaption(x, y, link_details.stb->index, link_details.sta->index);
+		y = DrawLinkDetails(link_details.b_to_a, x, y);
 	}
 
 	void DrawSupplyDetails(int x, int y_org, int bottom) {
@@ -1583,14 +1646,13 @@ public:
 
 		if (supply_details != NULL) {
 			this->DrawSupplyDetails(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
-		} else if (link_details[0] != NULL) {
+		} else if (link_details.sta != NULL) {
 			this->DrawLinkDetails(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
 		} else {
 			this->DrawLegend(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
 		}
 		supply_details = NULL;
-		link_details[0] = NULL;
-		link_details[1] = NULL;
+		link_details.Clear();
 	}
 
 	virtual void OnClick(Point pt, int widget)
