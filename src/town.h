@@ -69,14 +69,8 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	int16 ratings[MAX_COMPANIES];  ///< Ratings of each company for this town.
 
 	/* Maximum amount of passengers and mail that can be transported. */
-	uint32 max_pass;
-	uint32 max_mail;
-	uint32 new_max_pass;
-	uint32 new_max_mail;
-	uint32 act_pass;
-	uint32 act_mail;
-	uint32 new_act_pass;
-	uint32 new_act_mail;
+	TransportedCargoStat pass;
+	TransportedCargoStat mail;
 
 	/* Amount of passengers that were transported. */
 	byte pct_pass_transported;
