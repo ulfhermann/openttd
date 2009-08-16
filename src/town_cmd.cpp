@@ -484,13 +484,13 @@ static void TileLoop_Town(TileIndex tile)
 			const CargoSpec *cs = CargoSpec::Get(cargo);
 			switch (cs->town_effect) {
 				case TE_PASSENGERS:
-					t->new_max_pass += amt;
-					t->new_act_pass += moved;
+					t->pass.new_max += amt;
+					t->pass.new_act += moved;
 					break;
 
 				case TE_MAIL:
-					t->new_max_mail += amt;
-					t->new_act_mail += moved;
+					t->mail.new_max += amt;
+					t->mail.new_act += moved;
 					break;
 
 				default:
@@ -502,16 +502,16 @@ static void TileLoop_Town(TileIndex tile)
 			uint amt = GB(r, 0, 8) / 8 + 1;
 
 			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
-			t->new_max_pass += amt;
-			t->new_act_pass += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
+			t->pass.new_max += amt;
+			t->pass.new_act += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 
 		if (GB(r, 8, 8) < hs->mail_generation) {
 			uint amt = GB(r, 8, 8) / 8 + 1;
 
 			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
-			t->new_max_mail += amt;
-			t->new_act_mail += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
+			t->mail.new_max += amt;
+			t->mail.new_act += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 	}
 
@@ -1380,8 +1380,8 @@ void UpdateTownRadius(Town *t)
 
 void UpdateTownMaxPass(Town *t)
 {
-	t->max_pass = t->population >> 3;
-	t->max_mail = t->population >> 4;
+	t->pass.old_max = t->population >> 3;
+	t->mail.old_max = t->population >> 4;
 }
 
 /**
@@ -1405,14 +1405,14 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 	t->population = 0;
 	t->grow_counter = 0;
 	t->growth_rate = 250;
-	t->new_max_pass = 0;
-	t->new_max_mail = 0;
-	t->new_act_pass = 0;
-	t->new_act_mail = 0;
-	t->max_pass = 0;
-	t->max_mail = 0;
-	t->act_pass = 0;
-	t->act_mail = 0;
+	t->pass.new_max = 0;
+	t->mail.new_max = 0;
+	t->pass.new_act = 0;
+	t->mail.new_act = 0;
+	t->pass.old_max = 0;
+	t->mail.old_max = 0;
+	t->pass.old_act = 0;
+	t->mail.old_act = 0;
 
 	t->pct_pass_transported = 0;
 	t->pct_mail_transported = 0;
@@ -2780,17 +2780,15 @@ static void UpdateTownGrowRate(Town *t)
 static void UpdateTownAmounts(Town *t)
 {
 	/* Using +1 here to prevent overflow and division by zero */
-	t->pct_pass_transported = t->new_act_pass * 256 / (t->new_max_pass + 1);
+	t->pct_pass_transported = t->pass.new_act * 256 / (t->pass.new_max + 1);
 
-	t->max_pass = t->new_max_pass; t->new_max_pass = 0;
-	t->act_pass = t->new_act_pass; t->new_act_pass = 0;
+	t->pass.NewMonth();
 	t->act_food = t->new_act_food; t->new_act_food = 0;
 	t->act_water = t->new_act_water; t->new_act_water = 0;
 
 	/* Using +1 here to prevent overflow and division by zero */
-	t->pct_mail_transported = t->new_act_mail * 256 / (t->new_max_mail + 1);
-	t->max_mail = t->new_max_mail; t->new_max_mail = 0;
-	t->act_mail = t->new_act_mail; t->new_act_mail = 0;
+	t->pct_mail_transported = t->mail.new_act * 256 / (t->mail.new_max + 1);
+	t->mail.NewMonth();
 
 	SetWindowDirty(WC_TOWN_VIEW, t->index);
 }
