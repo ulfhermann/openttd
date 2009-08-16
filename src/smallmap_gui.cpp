@@ -706,6 +706,8 @@ class SmallMapWindow : public Window
 
 	const Station * supply_details;
 
+	const Station * link_details[2];
+
 	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
 	 * Everything has to be done just like when drawing the background otherwise the rounding errors are
 	 * different on the background and on the overlay which creates "jumping" behaviour. This means:
@@ -989,7 +991,13 @@ class SmallMapWindow : public Window
 							Point pta = window->GetStationMiddle(sta);
 							Point ptb = window->GetStationMiddle(stb);
 
+							if (window->supply_details == NULL && window->link_details[0] == NULL && window->CheckLinkSelected(&pta, &ptb)) {
+								window->link_details[0] = sta;
+								window->link_details[1] = stb;
+							}
+
 							DrawContent(pta, ptb);
+
 
 							seen_stations.insert(to);
 						}
@@ -1131,6 +1139,7 @@ class SmallMapWindow : public Window
 			this->flow.Clear();
 			this->link.Clear();
 		}
+
 	};
 
 	void DrawIndustries(DrawPixelInfo *dpi) {
@@ -1158,11 +1167,11 @@ class SmallMapWindow : public Window
 		}
 	}
 
-	void DrawLegend(const Widget * legend, int x, int y_org) {
+	void DrawLegend(int x, int y_org, int bottom) {
 		int y = y_org;
 
 		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT - 1 >= legend->bottom) {
+			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT - 1 >= bottom) {
 				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
@@ -1200,13 +1209,31 @@ class SmallMapWindow : public Window
 		}
 	}
 
-	void DrawSupplyDetails(const Widget * legend, int x, int y_org) {
+	int DrawLinkDetails(const Station * from, const Station * to, int x, int y, int bottom) {
+		SetDParam(0, link_details[0]->index);
+		SetDParam(1, link_details[1]->index);
+		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_CAPTION, TC_BLACK);
+		y += 2 * SD_LEGEND_ROW_HEIGHT;
+		for (int i = 0; i < _smallmap_cargo_count; ++i) {
+			const LegendAndColour &tbl = _legend_table[this->map_type][i];
+			CargoID c = tbl.type;
+			const GoodsEntry &good = link_details[0]->goods[c];
+
+		}
+		return y;
+	}
+
+	void DrawLinkDetails(int x, int y, int bottom) {
+		y = DrawLinkDetails(link_details[0], link_details[1], x, y, bottom);
+	}
+
+	void DrawSupplyDetails(int x, int y_org, int bottom) {
 		SetDParam(0, supply_details->index);
 		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y_org, STR_SMALLMAP_SUPPLY_CAPTION, TC_BLACK);
 		y_org += 2 * SD_LEGEND_ROW_HEIGHT;
 		int y = y_org;
 		for (int i = 0; i < _smallmap_cargo_count; ++i) {
-			if (y + SD_LEGEND_ROW_HEIGHT - 1 >= legend->bottom) {
+			if (y + SD_LEGEND_ROW_HEIGHT - 1 >= bottom) {
 				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
@@ -1410,6 +1437,30 @@ public:
 		_cur_dpi = old_dpi;
 	}
 
+	bool CheckLinkSelected(Point * pta, Point * ptb) {
+		if (this->cursor.x == -1 && this->cursor.y == -1) return false;
+		if (pta->x > ptb->x) Swap(pta, ptb);
+		int minx = min(pta->x, ptb->x);
+		int maxx = max(pta->x, ptb->x);
+		int miny = min(pta->y, ptb->y);
+		int maxy = max(pta->y, ptb->y);
+		if (!IsInsideMM(cursor.x, minx - 3, maxx + 3) || !IsInsideMM(cursor.y, miny - 3, maxy + 3)) {
+			return false;
+		}
+
+		if (pta->x == ptb->x || ptb->y == pta->y) {
+			return true;
+		} else {
+			int incliney = (ptb->y - pta->y);
+			int inclinex = (ptb->x - pta->x);
+			int diff = (cursor.x - minx) * incliney / inclinex - (cursor.y - miny);
+			if (incliney < 0) {
+				diff += maxy - miny;
+			}
+			return abs(diff) < 4;
+		}
+	}
+
 	void SmallMapCenterOnCurrentPos()
 	{
 		ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
@@ -1499,6 +1550,8 @@ public:
 
 	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number), zoom(ZOOM_LVL_NORMAL)
 	{
+		this->cursor.x = -1;
+		this->cursor.y = -1;
 		this->SetWidgetDisabledState(SM_WIDGET_LINKSTATS, _smallmap_cargo_count == 0);
 		if (_smallmap_cargo_count == 0 && this->map_type == SMT_LINKSTATS) {
 			this->map_type = SMT_CONTOUR;
@@ -1528,12 +1581,16 @@ public:
 
 		const Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 
-		if (supply_details == NULL) {
-			this->DrawLegend(legend, SD_LEGEND_PADDING_LEFT, legend->top + 1);
+		if (supply_details != NULL) {
+			this->DrawSupplyDetails(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
+		} else if (link_details[0] != NULL) {
+			this->DrawLinkDetails(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
 		} else {
-			this->DrawSupplyDetails(legend, SD_LEGEND_PADDING_LEFT, legend->top + 1);
+			this->DrawLegend(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
 		}
 		supply_details = NULL;
+		link_details[0] = NULL;
+		link_details[1] = NULL;
 	}
 
 	virtual void OnClick(Point pt, int widget)
