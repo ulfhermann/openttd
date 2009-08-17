@@ -636,7 +636,7 @@ static void DrawHorizMapIndicator(int x, int y, int x2, int y2)
 }
 
 
-void DrawVertex(int x, int y, int size, int colour)
+void DrawVertex(int x, int y, int size, int colour, int boder_colour)
 {
 	size--;
 	int w1 = size / 2;
@@ -646,10 +646,10 @@ void DrawVertex(int x, int y, int size, int colour)
 
 	w1++;
 	w2++;
-	GfxDrawLine(x - w1, y - w1, x + w2, y - w1, 0x0);
-	GfxDrawLine(x - w1, y + w2, x + w2, y + w2, 0x0);
-	GfxDrawLine(x - w1, y - w1, x - w1, y + w2, 0x0);
-	GfxDrawLine(x + w2, y - w1, x + w2, y + w2, 0x0);
+	GfxDrawLine(x - w1, y - w1, x + w2, y - w1, boder_colour);
+	GfxDrawLine(x - w1, y + w2, x + w2, y + w2, boder_colour);
+	GfxDrawLine(x - w1, y - w1, x - w1, y + w2, boder_colour);
+	GfxDrawLine(x + w2, y - w1, x + w2, y + w2, boder_colour);
 }
 
 class SmallMapWindow : public Window
@@ -672,7 +672,7 @@ class SmallMapWindow : public Window
 		SD_MAP_COLUMN_WIDTH = 4,
 		SD_MAP_ROW_OFFSET = 2,
 		SD_MAP_MIN_INDUSTRY_WIDTH = 3,
-		SD_LEGEND_COLUMN_WIDTH = 119,
+		SD_LEGEND_COLUMN_WIDTH = 109,
 		SD_LEGEND_PADDING_LEFT = 4,
 		SD_LEGEND_ENTRY_SPACING = 3,
 		SD_LEGEND_SYMBOL_WIDTH = 8,
@@ -942,13 +942,17 @@ class SmallMapWindow : public Window
 
 			Point pt = GetStationMiddle(st);
 
+			if (CheckStationSelected(&pt)) {
+				this->supply_details = st;
+			}
+
 			/* Add up cargo supplied for each selected cargo type */
 			uint q = 0;
 			int colour = 0;
 			int numCargos = 0;
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
 				const LegendAndColour &tbl = _legend_table[this->map_type][i];
-				if (!tbl.show_on_map) continue;
+				if (!tbl.show_on_map && this->supply_details != st) continue;
 				CargoID c = tbl.type;
 				int add = st->goods[c].supply;
 				if (add > 0) {
@@ -961,18 +965,13 @@ class SmallMapWindow : public Window
 				colour /= numCargos;
 
 			uint r = 2;
-			if (abs(this->cursor.x - pt.x) < 7 && abs(this->cursor.y - pt.y) < 7) {
-				supply_details = st;
-				r += 3;
-			}
-
 			if (q >= 10) r++;
 			if (q >= 20) r++;
 			if (q >= 40) r++;
 			if (q >= 80) r++;
 			if (q >= 160) r++;
 
-			DrawVertex(pt.x, pt.y, r, colour);
+			DrawVertex(pt.x, pt.y, r, colour, _colour_gradient[COLOUR_GREY][this->supply_details == st ? 3 : 1]);
 		}
 	}
 
@@ -981,6 +980,7 @@ class SmallMapWindow : public Window
 
 	protected:
 		virtual void DrawContent(Point & pta, Point & ptb) = 0;
+		virtual void Highlight() {}
 		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) = 0;
 
 		SmallMapWindow * window;
@@ -1010,26 +1010,34 @@ class SmallMapWindow : public Window
 							Point pta = window->GetStationMiddle(sta);
 							Point ptb = window->GetStationMiddle(stb);
 
-							bool highlight = window->supply_details == NULL && window->link_details.sta == NULL && window->CheckLinkSelected(&pta, &ptb);
-							bool reverse_highlight = window->link_details.b_to_a.empty() && sta == window->link_details.stb && stb == window->link_details.sta;
-							if (highlight) {
+							bool highlight_empty = window->supply_details == NULL && window->link_details.sta == NULL;
+							bool highlight =
+									(sta == window->link_details.sta && stb == window->link_details.stb) ||
+									(highlight_empty && window->CheckLinkSelected(&pta, &ptb));
+							bool reverse_empty = window->link_details.b_to_a.empty();
+							bool reverse_highlight = (sta == window->link_details.stb && stb == window->link_details.sta);
+							if (highlight_empty && highlight) {
 								window->link_details.sta = sta;
 								window->link_details.stb = stb;
+							}
+
+							if (highlight || reverse_highlight) {
+								this->Highlight();
 							}
 
 							for (int i = 0; i < _smallmap_cargo_count; ++i) {
 								const LegendAndColour &cargo_entry = _legend_table[window->map_type][i];
 								CargoID cargo = cargo_entry.type;
-								if (cargo_entry.show_on_map) {
+								if (cargo_entry.show_on_map || highlight || reverse_highlight) {
 									FlowStat sum_flows = sta->goods[cargo].GetSumFlowVia(stb->index);
 									const LinkStatMap &ls_map = sta->goods[cargo].link_stats;
 									LinkStatMap::const_iterator i = ls_map.find(stb->index);
 									if (i != ls_map.end()) {
 										const LinkStat &link_stat = i->second;
 										AddLink(link_stat, sum_flows, cargo_entry);
-										if (highlight) {
+										if (highlight_empty && highlight) {
 											window->link_details.a_to_b.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
-										} else if (reverse_highlight) {
+										} else if (reverse_empty && reverse_highlight) {
 											window->link_details.b_to_a.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
 										}
 									}
@@ -1049,24 +1057,31 @@ class SmallMapWindow : public Window
 
 	class LinkLineDrawer : public LinkDrawer {
 	public:
-		LinkLineDrawer() : colour(0), num_colours(0) {}
+		LinkLineDrawer() : colour(0), highlight(false), num_colours(0) {}
 
 	protected:
 		uint16 colour;
+		bool highlight;
 		int num_colours;
 		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) {
 			this->colour += cargo_entry.colour;
-			num_colours++;
+			this->num_colours++;
+		}
+
+		virtual void Highlight() {
+			this->highlight = true;
 		}
 
 		virtual void DrawContent(Point & pta, Point & ptb) {
-			GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
-			GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, _colour_gradient[COLOUR_GREY][1]);
-			GfxDrawLine(pta.x, pta.y - 1, ptb.x, ptb.y - 1, _colour_gradient[COLOUR_GREY][1]);
-			GfxDrawLine(pta.x, pta.y + 1, ptb.x, ptb.y + 1, _colour_gradient[COLOUR_GREY][1]);
+			byte border_colour = _colour_gradient[COLOUR_GREY][highlight ? 3 : 1];
+			GfxDrawLine(pta.x - 1, pta.y, ptb.x - 1, ptb.y, border_colour);
+			GfxDrawLine(pta.x + 1, pta.y, ptb.x + 1, ptb.y, border_colour);
+			GfxDrawLine(pta.x, pta.y - 1, ptb.x, ptb.y - 1, border_colour);
+			GfxDrawLine(pta.x, pta.y + 1, ptb.x, ptb.y + 1, border_colour);
 			GfxDrawLine(pta.x, pta.y, ptb.x, ptb.y, this->colour / this->num_colours);
 			this->colour = 0;
 			this->num_colours = 0;
+			this->highlight = false;
 		}
 	};
 
@@ -1205,11 +1220,11 @@ class SmallMapWindow : public Window
 		}
 	}
 
-	void DrawLegend(int x, int y_org, int bottom) {
-		int y = y_org;
+	void DrawLegend(uint x, uint y_org, uint bottom) {
+		uint y = y_org;
 
 		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT - 1 >= bottom) {
+			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT > bottom) {
 				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
@@ -1247,54 +1262,95 @@ class SmallMapWindow : public Window
 		}
 	}
 
-	int DrawLinkDetails(StatVector &details, int x, int y) {
-		int x_orig = x;
+	static const uint MORE_SPACE_NEEDED = 0x1000;
+
+	uint DrawLinkDetails(StatVector &details, uint x, uint y, uint right, uint bottom) {
+		uint x_orig = x;
+		SetDParam(0, 9999);
+		static uint entry_width = SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING +
+				GetStringBoundingBox(STR_ABBREV_PASSENGERS).width +
+				GetStringBoundingBox(STR_SMALLMAP_LINK_CAPACITY).width +
+				GetStringBoundingBox(STR_SMALLMAP_LINK_USAGE).width +
+				GetStringBoundingBox(STR_SMALLMAP_LINK_PLANNED).width +
+				GetStringBoundingBox(STR_SMALLMAP_LINK_SENT).width;
+		if (details.empty()) {
+			DrawString(x, x + entry_width, y, STR_TINY_NOTHING, TC_BLACK);
+			return y + SD_LEGEND_ROW_HEIGHT;
+		}
 		for (StatVector::iterator i = details.begin(); i != details.end(); ++i) {
 			CargoDetail &detail = *i;
+			if (x + entry_width >= right) {
+				x = x_orig;
+				y += SD_LEGEND_ROW_HEIGHT;
+				if (y + 2 * SD_LEGEND_ROW_HEIGHT > bottom) {
+					return y | MORE_SPACE_NEEDED;
+				}
+			}
+			uint x_next = x + entry_width;
 			GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0); // outer border of the legend colour
 			GfxFillRect(x + 1, y + 2, x + SD_LEGEND_SYMBOL_WIDTH - 1, y + SD_LEGEND_ROW_HEIGHT - 2, detail.legend->colour); // legend colour
 			x += SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING;
 			TextColour textcol[4];
 			for (int stat = STAT_CAPACITY; stat <= STAT_SENT; ++stat) {
-				textcol[stat] = _legend_linkstats[_smallmap_cargo_count + stat].show_on_map ? TC_BLACK : TC_GREY;
+				textcol[stat] = (detail.legend->show_on_map && _legend_linkstats[_smallmap_cargo_count + stat].show_on_map) ?
+						TC_BLACK : TC_GREY;
 			}
-			SetDParam(0, STR_CARGO_PLURAL_PASSENGERS + detail.legend->type);
-			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK, TC_BLACK);
-			SetDParam(0, detail.capacity);
-			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_CAPACITY, textcol[STAT_CAPACITY]);
-			SetDParam(0, detail.usage);
-			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_USAGE, textcol[STAT_USAGE]);
-			SetDParam(0, detail.planned);
-			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_PLANNED, textcol[STAT_PLANNED]);
-			SetDParam(0, detail.sent);
-			x = DrawString(x, x_orig + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_SENT, textcol[STAT_SENT]);
 
-			x = x_orig;
-			y += SD_LEGEND_ROW_HEIGHT;
+			SetDParam(0, STR_ABBREV_PASSENGERS + detail.legend->type);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK, detail.legend->show_on_map ? TC_BLACK : TC_GREY);
+			SetDParam(0, detail.capacity);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_CAPACITY, textcol[STAT_CAPACITY]);
+			SetDParam(0, detail.usage);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_USAGE, textcol[STAT_USAGE]);
+			SetDParam(0, detail.planned);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_PLANNED, textcol[STAT_PLANNED]);
+			SetDParam(0, detail.sent);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_SENT, textcol[STAT_SENT]);
+			x = x_next;
 		}
-		return y;
+		return y + SD_LEGEND_ROW_HEIGHT;
 	}
 
-	int DrawLinkDetailCaption(int x, int y, StationID sta, StationID stb) {
+	uint DrawLinkDetailCaption(uint x, uint y, uint right, StationID sta, StationID stb) {
 		SetDParam(0, sta);
 		SetDParam(1, stb);
-		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y, STR_SMALLMAP_LINK_CAPTION, TC_BLACK);
-		y += SD_LEGEND_ROW_HEIGHT;
+		static uint height = GetStringBoundingBox(STR_SMALLMAP_LINK_CAPTION).height;
+		DrawString(x, right - 1, y, STR_SMALLMAP_LINK_CAPTION, TC_BLACK);
+		y += height;
 		return y;
 	}
 
-	void DrawLinkDetails(int x, int y, int bottom) {
-		y = DrawLinkDetailCaption(x, y, link_details.sta->index, link_details.stb->index);
-		y = DrawLinkDetails(link_details.a_to_b, x, y);
-		y = DrawLinkDetailCaption(x, y, link_details.stb->index, link_details.sta->index);
-		y = DrawLinkDetails(link_details.b_to_a, x, y);
+	void DrawLinkDetails(uint x, uint y, uint right, uint bottom) {
+		y = DrawLinkDetailCaption(x, y, right, link_details.sta->index, link_details.stb->index);
+		if (y + 2 * SD_LEGEND_ROW_HEIGHT > bottom) {
+			DrawString(x, right, y, "...", TC_BLACK);
+			return;
+		}
+		y = DrawLinkDetails(link_details.a_to_b, x, y, right, bottom);
+		if (y + 3 * SD_LEGEND_ROW_HEIGHT > bottom) {
+			/* caption takes more space -> 3 * row height */
+			DrawString(x, right, y, "...", TC_BLACK);
+			return;
+		}
+		y = DrawLinkDetailCaption(x, y + 2, right, link_details.stb->index, link_details.sta->index);
+		if (y + 2 * SD_LEGEND_ROW_HEIGHT > bottom) {
+			DrawString(x, right, y, "...", TC_BLACK);
+			return;
+		}
+		y = DrawLinkDetails(link_details.b_to_a, x, y, right, bottom);
+		if (y & MORE_SPACE_NEEDED) {
+			/* only draw "..." if more entries would have been drawn */
+			DrawString(x, right, y ^ MORE_SPACE_NEEDED, "...", TC_BLACK);
+			return;
+		}
 	}
 
-	void DrawSupplyDetails(int x, int y_org, int bottom) {
+	void DrawSupplyDetails(uint x, uint y_org, uint bottom) {
 		SetDParam(0, supply_details->index);
+		static uint height = GetStringBoundingBox(STR_SMALLMAP_SUPPLY_CAPTION).height;
 		DrawString(x, x + 2 * SD_LEGEND_COLUMN_WIDTH - 1, y_org, STR_SMALLMAP_SUPPLY_CAPTION, TC_BLACK);
-		y_org += 2 * SD_LEGEND_ROW_HEIGHT;
-		int y = y_org;
+		y_org += height;
+		uint y = y_org;
 		for (int i = 0; i < _smallmap_cargo_count; ++i) {
 			if (y + SD_LEGEND_ROW_HEIGHT - 1 >= bottom) {
 				/* Column break needed, continue at top, SD_LEGEND_COLUMN_WIDTH pixels
@@ -1500,8 +1556,13 @@ public:
 		_cur_dpi = old_dpi;
 	}
 
+	bool CheckStationSelected(Point *pt) {
+		return abs(this->cursor.x - pt->x) < 7 && abs(this->cursor.y - pt->y) < 7;
+	}
+
 	bool CheckLinkSelected(Point * pta, Point * ptb) {
 		if (this->cursor.x == -1 && this->cursor.y == -1) return false;
+		if (CheckStationSelected(pta) || CheckStationSelected(ptb)) return false;
 		if (pta->x > ptb->x) Swap(pta, ptb);
 		int minx = min(pta->x, ptb->x);
 		int maxx = max(pta->x, ptb->x);
@@ -1582,13 +1643,13 @@ public:
 	{
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 		int legend_height = (legend->bottom - legend->top) - 1;
-		int columns = (legend->right - legend->left) / SD_LEGEND_COLUMN_WIDTH;
+		int columns = (legend->right - legend->left + 1) / SD_LEGEND_COLUMN_WIDTH;
 		int new_legend_height = 0;
 
 		if (this->map_type == SMT_INDUSTRY) {
 			new_legend_height = ((_smallmap_industry_count + columns - 1) / columns) * SD_LEGEND_ROW_HEIGHT;
 		} else if (this->map_type == SMT_LINKSTATS) {
-			new_legend_height = ((_smallmap_cargo_count + columns - 1) / columns) * SD_LEGEND_ROW_HEIGHT;
+			new_legend_height = ((_smallmap_cargo_count + columns - 1) / (columns - 1)) * SD_LEGEND_ROW_HEIGHT;
 		}
 
 		new_legend_height = max(new_legend_height, (int)SD_LEGEND_MIN_HEIGHT);
@@ -1647,7 +1708,7 @@ public:
 		if (supply_details != NULL) {
 			this->DrawSupplyDetails(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
 		} else if (link_details.sta != NULL) {
-			this->DrawLinkDetails(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
+			this->DrawLinkDetails(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->right, legend->bottom);
 		} else {
 			this->DrawLegend(SD_LEGEND_PADDING_LEFT, legend->top + 1, legend->bottom);
 		}
@@ -1906,7 +1967,7 @@ SmallMapWindow::SmallMapType SmallMapWindow::map_type = SMT_CONTOUR;
 bool SmallMapWindow::show_towns = true;
 
 static const WindowDesc _smallmap_desc(
-	WDP_AUTO, WDP_AUTO, 350, 214, 446, 314,
+	WDP_AUTO, WDP_AUTO, 350, 214, 460, 314,
 	WC_SMALLMAP, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_smallmap_widgets, _nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)
