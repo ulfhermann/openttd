@@ -552,7 +552,7 @@ class SmallMapWindow : public Window
 		SD_MAP_COLUMN_WIDTH = 4,
 		SD_MAP_ROW_OFFSET = 2,
 		SD_MAP_MIN_INDUSTRY_WIDTH = 3,
-		SD_LEGEND_COLUMN_WIDTH = 119,
+		SD_LEGEND_COLUMN_WIDTH = 109,
 		SD_LEGEND_PADDING_LEFT = 4,
 		SD_LEGEND_ENTRY_SPACING = 3,
 		SD_LEGEND_SYMBOL_WIDTH = 8,
@@ -966,7 +966,7 @@ public:
 	{
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
 		int legend_height = (legend->bottom - legend->top) - 1;
-		int columns = (legend->right - legend->left) / SD_LEGEND_COLUMN_WIDTH;
+		int columns = (legend->right - legend->left + 1) / SD_LEGEND_COLUMN_WIDTH;
 		int new_legend_height = (this->map_type == SMT_INDUSTRY) ? ((_smallmap_industry_count + columns - 1) / columns) * SD_LEGEND_ROW_HEIGHT : SD_LEGEND_MIN_HEIGHT;
 
 		new_legend_height = max(new_legend_height, (int)SD_LEGEND_MIN_HEIGHT);
@@ -1016,7 +1016,7 @@ public:
 		int y = y_org;
 
 		for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT - 1 >= legend->bottom) {
+			if (tbl->col_break || y + SD_LEGEND_ROW_HEIGHT > legend->bottom) {
 				/* Column break needed, continue at top, COLUMN_WIDTH pixels
 				 * (one "row") to the right. */
 				x += SD_LEGEND_COLUMN_WIDTH;
@@ -1270,7 +1270,7 @@ SmallMapWindow::SmallMapType SmallMapWindow::map_type = SMT_CONTOUR;
 bool SmallMapWindow::show_towns = true;
 
 static const WindowDesc _smallmap_desc(
-	WDP_AUTO, WDP_AUTO, 350, 214, 446, 314,
+	WDP_AUTO, WDP_AUTO, 350, 214, 460, 314,
 	WC_SMALLMAP, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_smallmap_widgets, _nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)
