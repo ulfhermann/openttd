@@ -1287,7 +1287,9 @@ class SmallMapWindow : public Window
 				}
 			}
 			uint x_next = x + entry_width;
-			GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0); // outer border of the legend colour
+			if (detail.legend->show_on_map) {
+				GfxFillRect(x, y + 1, x + SD_LEGEND_SYMBOL_WIDTH, y + SD_LEGEND_ROW_HEIGHT - 1, 0); // outer border of the legend colour
+			}
 			GfxFillRect(x + 1, y + 2, x + SD_LEGEND_SYMBOL_WIDTH - 1, y + SD_LEGEND_ROW_HEIGHT - 2, detail.legend->colour); // legend colour
 			x += SD_LEGEND_SYMBOL_WIDTH + SD_LEGEND_ENTRY_SPACING;
 			TextColour textcol[4];
