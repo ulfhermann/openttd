@@ -1088,7 +1088,7 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 	/* Start unloading in at the first possible moment */
 	front_v->load_unload_time_rem = 1;
 
-	if (front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) {
+	if ((front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) != 0) {
 		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
 		UpdateFlows(curr_station, front_v, next_station_id);
 	} else {
@@ -1096,7 +1096,6 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 			if (v->cargo_cap > 0 && !v->cargo.Empty()) {
 				SetBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
-			v->cargo.InvalidateCache();
 		}
 	}
 
@@ -1144,23 +1143,22 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	assert(v->current_order.IsType(OT_LOADING));
 	assert(v->load_unload_time_rem != 0);
 
-	Vehicle *u = v;
-	StationID last_visited = u->last_station_visited;
+	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
 
 	StationID next_station = INVALID_STATION;
-	OrderList * orders = u->orders.list;
+	OrderList * orders = v->orders.list;
 	if (orders != NULL) {
-		next_station = orders->GetNextStoppingStation(u->cur_order_index, v->type == VEH_TRAIN || v->type == VEH_ROAD);
+		next_station = orders->GetNextStoppingStation(v->cur_order_index, v->type == VEH_TRAIN || v->type == VEH_ROAD);
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--u->load_unload_time_rem != 0) {
-		ReserveAndUnreject(st, u, next_station, reserved, rejected);
+	if (--v->load_unload_time_rem != 0) {
+		ReserveAndUnreject(st, v, next_station, reserved, rejected);
 		return;
 	}
 
-	OrderUnloadFlags unload_flags = u->current_order.GetUnloadType();
+	OrderUnloadFlags unload_flags = v->current_order.GetUnloadType();
 
 	if (v->type == VEH_TRAIN && (!IsTileType(v->tile, MP_STATION) || GetStationIndex(v->tile) != st->index)) {
 		/* The train reversed in the station. Take the "easy" way
@@ -1170,7 +1168,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	}
 
 	int unloading_time = 0;
-
+	Vehicle *u = v;
 	int result = 0;
 
 	bool completely_emptied = true;
@@ -1220,6 +1218,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 				}
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
+
 			continue;
 		}
 
@@ -1285,7 +1284,6 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 				continue;
 			}
 		}
-
 
 		if (v->cargo.Count() >= v->cargo_cap) {
 			SetBit(cargo_full, v->cargo_type);
