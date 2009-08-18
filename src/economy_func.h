@@ -29,7 +29,6 @@ extern Prices _price;
 extern uint16 _price_frac[NUM_PRICES];
 extern Money  _cargo_payment_rates[NUM_CARGO];
 extern uint16 _cargo_payment_rates_frac[NUM_CARGO];
-typedef std::map<CargoID, CargoList::List> CargoReservation;
 
 int UpdateCompanyRatingAndValue(Company *c, bool update);
 void StartupIndustryDailyChanges(bool init_counter);

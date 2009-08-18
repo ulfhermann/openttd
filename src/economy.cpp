@@ -1104,29 +1104,19 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 }
 
 /**
- * Moves packets from the reservation list back into the station
- */
-static void ReimportReserved(Station * st, CargoReservation & reserved) {
-	for (CargoReservation::iterator i = reserved.begin(); i != reserved.end(); ++i) {
-		st->goods[i->first].cargo.Import(i->second);
-	}
-}
-
-/**
  * reserves cargo if the full load order and improved_load is set. Moves rejected packets from the rejection list
  * back into the station
  */
-static void ReserveAndUnreject(Station * st, Vehicle * u, StationID next_station, CargoReservation & reserved, CargoReservation & rejected)
+static void Reserve(Station * st, Vehicle * u, StationID next_station)
 {
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
 			CargoID cargo = v->cargo_type;
-			CargoList & list = st->goods[cargo].cargo;
-			list.ReservePacketsForLoading(&reserved[cargo], v->cargo_cap - v->cargo.Count(), next_station, &rejected[cargo]);
+			StationCargoList & list = st->goods[cargo].cargo;
+			list.ReservePacketsForLoading(u->index, v->cargo_cap - v->cargo.Count(), next_station);
 		}
 	}
-	ReimportReserved(st, rejected);
 }
 
 /**
@@ -1137,9 +1127,8 @@ static void ReserveAndUnreject(Station * st, Vehicle * u, StationID next_station
  *                   picked up by another vehicle when all
  *                   previous vehicles have loaded.
  */
-static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
+static void LoadUnloadVehicle(Vehicle *v)
 {
-	CargoReservation rejected;
 	assert(v->current_order.IsType(OT_LOADING));
 	assert(v->load_unload_time_rem != 0);
 
@@ -1154,7 +1143,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--v->load_unload_time_rem != 0) {
-		ReserveAndUnreject(st, v, next_station, reserved, rejected);
+		Reserve(st, v, next_station);
 		return;
 	}
 
@@ -1255,7 +1244,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 				 * In that case force_load should be set and all cargo available
 				 * be moved onto the vehicle.
 				 */
-				uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, next_station, &rejected[v->cargo_type], st->xy);
+				uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, next_station, st->xy);
 
 				/* TODO: Regarding this, when we do gradual loading, we
 				 * should first unload all vehicles and then start
@@ -1277,7 +1266,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 				unloading_time += loaded;
 
 				result |= 2;
-			} else if (_settings_game.order.improved_load && !reserved[v->cargo_type].empty()) {
+			} else if (_settings_game.order.improved_load && ge->cargo.HasReserved(v->index)) {
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
 				SetBit(cargo_not_full, v->cargo_type);
@@ -1299,7 +1288,7 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 	 * all wagons at the same time instead of using the same 'improved'
 	 * loading algorithm for the wagons (only fill wagon when there is
 	 * enough to fill the previous wagons) */
-	ReserveAndUnreject(st, u, next_station, reserved, rejected);
+	Reserve(st, u, next_station);
 
 	v = u;
 
@@ -1385,15 +1374,11 @@ void LoadUnloadStation(Station *st)
 	/* No vehicle is here... */
 	if (st->loading_vehicles.empty()) return;
 
-	CargoReservation reserved;
-
 	std::list<Vehicle *>::iterator iter;
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
-		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v, reserved);
+		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v);
 	}
-
-	ReimportReserved(st, reserved);
 
 	/* Call the production machinery of industries */
 	const Industry * const *isend = _cargo_delivery_destinations.End();

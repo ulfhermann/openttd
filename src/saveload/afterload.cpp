@@ -1212,7 +1212,7 @@ bool AfterLoadGame()
 		FOR_ALL_VEHICLES(v) {
 			const CargoList::List *packets = v->cargo.Packets();
 			for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
-				CargoPacket *cp = *it;
+				CargoPacket *cp = it->second;
 				cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : v->tile;
 				cp->loaded_at_xy = cp->source_xy;
 			}
@@ -1231,7 +1231,7 @@ bool AfterLoadGame()
 
 				const CargoList::List *packets = ge->cargo.Packets();
 				for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
-					CargoPacket *cp = *it;
+					CargoPacket *cp = it->second;
 					cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : st->xy;
 					cp->loaded_at_xy = cp->source_xy;
 				}
