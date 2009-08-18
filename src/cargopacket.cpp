@@ -52,23 +52,22 @@ CargoPacket::CargoPacket(StationID source, StationID next, uint16 count, SourceT
  * Cargo list implementation
  *
  */
-
-CargoList::~CargoList()
+template<class LIST>
+CargoList<LIST>::~CargoList()
 {
-	List::iterator i = packets.begin();
-	while (i != packets.end()) {
-		delete i->second;
-		packets.erase(i++);
+	for (Iterator i = packets.begin(); i != packets.end(); ++i) {
+		delete Deref(i);
 	}
 }
 
-void CargoList::AgeCargo()
+template<class LIST>
+void CargoList<LIST>::AgeCargo()
 {
 	if (empty) return;
 
 	uint dit = 0;
-	for (List::const_iterator it = packets.begin(); it != packets.end(); it++) {
-		CargoPacket *p = it->second;
+	for (ConstIterator it = packets.begin(); it != packets.end(); it++) {
+		CargoPacket *p = Deref(it);
 		if (p->days_in_transit != 0xFF) p->days_in_transit++;
 		dit += p->days_in_transit * p->count;
 	}
@@ -81,13 +80,13 @@ void CargoPacket::Merge(CargoPacket * other) {
 	delete other;
 }
 
-void CargoList::Append(CargoPacket *cp)
+template<class LIST>
+void CargoList<LIST>::Append(CargoPacket *cp)
 {
 	assert(cp != NULL);
 
-	StationID cp_id = GetSortBy(cp);
-	for (List::iterator it = packets.lower_bound(cp_id); it != packets.upper_bound(cp_id); it++) {
-		CargoPacket *mine = it->second;
+	for (Iterator it = LowerBound(cp); it != UpperBound(cp); it++) {
+		CargoPacket *mine = Deref(it);
 		if (mine->SameSource(cp) && mine->count + cp->count <= 65535) {
 			mine->Merge(cp);
 			InvalidateCache();
@@ -100,10 +99,11 @@ void CargoList::Append(CargoPacket *cp)
 	InvalidateCache();
 }
 
-void CargoList::Truncate(uint count)
+template<class LIST>
+void CargoList<LIST>::Truncate(uint count)
 {
-	for (List::iterator it = packets.begin(); it != packets.end();) {
-		CargoPacket * cp = it->second;
+	for (Iterator it = packets.begin(); it != packets.end();) {
+		CargoPacket * cp = Deref(it);
 		uint local_count = cp->count;
 		if (local_count <= count) {
 			count -= local_count;
@@ -131,8 +131,8 @@ CargoPacket * CargoPacket::Split(uint new_size) {
 	return cp_new;
 }
 
-void VehicleCargoList::DeliverPacket(List::iterator & c, uint & remaining_unload, CargoPayment *payment) {
-	CargoPacket * p = c->second;
+void VehicleCargoList::DeliverPacket(Iterator & c, uint & remaining_unload, CargoPayment *payment) {
+	CargoPacket * p = *c;
 	if (p->count <= remaining_unload) {
 		remaining_unload -= p->count;
 		payment->PayFinalDelivery(p, p->count);
@@ -146,8 +146,8 @@ void VehicleCargoList::DeliverPacket(List::iterator & c, uint & remaining_unload
 	}
 }
 
-CargoPacket * VehicleCargoList::TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry *dest, CargoPayment *payment) {
-	CargoPacket * p = c->second;
+CargoPacket * VehicleCargoList::TransferPacket(Iterator & c, uint & remaining_unload, GoodsEntry *dest, CargoPayment *payment) {
+	CargoPacket * p = *c;
 	if (p->count <= remaining_unload) {
 		packets.erase(c++);
 	} else {
@@ -240,9 +240,8 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 	uint remaining_unload = max_unload;
 	UnloadDescription ul(dest, curr_station, next_station, flags);
 
-	for(List::iterator c = packets.begin(); c != packets.end() && remaining_unload > 0;) {
-
-		CargoPacket * p = c->second;
+	for(Iterator c = packets.begin(); c != packets.end() && remaining_unload > 0;) {
+		CargoPacket * p = *c;
 		StationID source = p->source;
 		uint last_remaining = remaining_unload;
 		UnloadType unload_flags = this->WillUnload(ul, p);
@@ -264,65 +263,66 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 	return max_unload - remaining_unload;
 }
 
-uint CargoList::LoadPackets(CargoList * dest, uint cap, List::iterator begin, List::iterator end, TileIndex load_place)
+template<class LIST>
+bool CargoList<LIST>::LoadPacket(CargoPacket * packet, uint &cap, TileIndex load_place)
 {
-	while(begin != end && cap > 0) {
-		CargoPacket * p = begin->second;
-		/* load the packet if possible */
-		if (p->count <= cap) {
-			/* load all of the packet */
-			packets.erase(begin++);
-		} else {
-			/* packet needs to be split */
-			p = p->Split(cap);
-			assert(p->count == cap);
-		}
-		cap -= p->count;
-		dest->Insert(p);
-		if (load_place != INVALID_TILE) {
-			p->loaded_at_xy = load_place;
-		}
+	bool ret = true;
+	/* load the packet if possible */
+	if (packet->count > cap) {
+		/* packet needs to be split */
+		packet = packet->Split(cap);
+		assert(packet->count == cap);
+		ret = false;
 	}
-	return cap;
+	cap -= packet->count;
+	this->Insert(packet);
+	if (load_place != INVALID_TILE) {
+		packet->loaded_at_xy = load_place;
+	}
+	return ret;
 }
 
-uint CargoList::LoadPackets(CargoList * dest, uint cap, StationID selected_station, TileIndex load_place)
+uint VehicleCargoList::MoveToOtherVehicle(VehicleCargoList *dest, uint cap)
 {
-	List::iterator begin;
-	List::iterator end;
-	if (selected_station != INVALID_STATION) {
-		begin = this->packets.lower_bound(selected_station);
-		end = this->packets.upper_bound(selected_station);
-		cap = LoadPackets(dest, cap, begin, end, load_place);
-		if (cap > 0) {
-			begin = this->packets.lower_bound(INVALID_STATION);
-			end = this->packets.upper_bound(INVALID_STATION);
-			cap = LoadPackets(dest, cap, begin, end, load_place);
-		}
-	} else {
-		begin = this->packets.begin();
-		end = this->packets.end();
-		cap = LoadPackets(dest, cap, begin, end, load_place);
+	uint orig_cap = cap;
+	Iterator begin = this->packets.begin();
+	Iterator end = this->packets.begin();
+	while(begin != end && dest->LoadPacket(Deref(begin), cap)) {
+		this->packets.erase(begin++);
 	}
-
-	InvalidateCache();
-	return cap;
+	if (cap != orig_cap) {
+		dest->InvalidateCache();
+		this->InvalidateCache();
+	}
+	return orig_cap - cap;
 }
 
-uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, StationID selected_station, TileIndex load_place) {
-	uint space_remaining = LoadPackets(dest, max_load, selected_station, load_place);
-	dest->InvalidateCache();
-	return max_load - space_remaining;
+uint StationCargoList::LoadReserved(VehicleCargoList *dest, VehicleID v, uint cap, TileIndex load_place)
+{
+	uint orig_cap = cap;
+	CargoReservation::iterator begin = this->reserved.lower_bound(v);
+	CargoReservation::iterator end = this->reserved.upper_bound(v);
+	while(begin != end && dest->LoadPacket(Deref(begin), cap, load_place)) {
+		this->reserved.erase(begin++);
+	}
+	uint loaded = orig_cap - cap;
+	if (loaded > 0) {
+		reserved_amounts[v] -= loaded;
+		dest->InvalidateCache();
+	}
+	return loaded;
 }
 
-void CargoList::CachePacket(CargoPacket *cp, uint &dit)
+template<class LIST>
+void CargoList<LIST>::CachePacket(CargoPacket *cp, uint &dit)
 {
 	count        += cp->count;
 	dit          += cp->days_in_transit * cp->count;
 	feeder_share += cp->feeder_share;
 }
 
-void CargoList::InvalidateCache()
+template<class LIST>
+void CargoList<LIST>::InvalidateCache()
 {
 	empty = packets.empty();
 	count = 0;
@@ -333,21 +333,11 @@ void CargoList::InvalidateCache()
 	if (empty) return;
 
 	uint dit = 0;
-	for (List::const_iterator it = packets.begin(); it != packets.end(); it++) {
-		CachePacket(it->second, dit);
+	for (ConstIterator it = packets.begin(); it != packets.end(); it++) {
+		CachePacket(Deref(it), dit);
 	}
 	days_in_transit = dit / count;
-	source = (packets.begin()->second)->source;
-}
-
-void StationCargoList::InvalidateCache()
-{
-	CargoList::InvalidateCache();
-	uint dit = days_in_transit * count;
-	for (CargoReservation::const_iterator it = packets.begin(); it != packets.end(); it++) {
-		CachePacket(it->second, dit);
-	}
-	days_in_transit = dit / count;
+	source = Deref(packets.begin())->source;
 }
 
 UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags order_flags) :
@@ -365,7 +355,7 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 }
 
 void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
-	for(List::iterator it = packets.begin(); it != packets.end(); ++it) {
+	for(Iterator it = packets.begin(); it != packets.end(); ++it) {
 		CargoPacket * packet = it->second;
 		if (packet->next == to) {
 			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
@@ -374,15 +364,17 @@ void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEn
 	InvalidateCache();
 }
 
-void CargoList::UpdateFlows(StationID next, GoodsEntry * ge) {
-	for(List::iterator i = packets.begin(); i != packets.end(); ++i) {
-		CargoPacket * p = i->second;
+template<class LIST>
+void CargoList<LIST>::UpdateFlows(StationID next, GoodsEntry * ge) {
+	for(Iterator i = packets.begin(); i != packets.end(); ++i) {
+		CargoPacket * p = Deref(i);
 		ge->UpdateFlowStats(p->source, p->count, next);
 		p->next = next;
 	}
 }
 
-uint StationCargoList::ReservePackets(VehicleID v, uint cap, List::iterator begin, List::iterator end) {
+uint StationCargoList::ReservePackets(VehicleID v, uint cap, Iterator begin, Iterator end) {
+	uint &amount = reserved_amounts[v];
 	while(begin != end && cap > 0) {
 		CargoPacket * cp = begin->second;
 		if (cp->count <= cap) {
@@ -392,13 +384,15 @@ uint StationCargoList::ReservePackets(VehicleID v, uint cap, List::iterator begi
 		}
 		cap -= cp->count;
 		reserved.insert(std::make_pair(v, cp));
+		amount += cp->count;
 	}
 	return cap;
 }
 
 void StationCargoList::ReservePacketsForLoading(VehicleID v, uint cap, StationID selected_station) {
-	List::iterator begin;
-	List::iterator end;
+	Iterator begin;
+	Iterator end;
+	uint orig_cap = cap;
 	if (selected_station != INVALID_STATION) {
 		begin = this->packets.lower_bound(selected_station);
 		end = this->packets.upper_bound(selected_station);
@@ -413,6 +407,26 @@ void StationCargoList::ReservePacketsForLoading(VehicleID v, uint cap, StationID
 		end = this->packets.end();
 		cap = ReservePackets(v, cap, begin, end);
 	}
-	// InvalidateCache is not necessary as the sums haven't changed
-	this->source = (packets.begin()->second)->source;
+	if (cap != orig_cap) {
+		InvalidateCache();
+	}
 }
+
+StationCargoList::~StationCargoList() {
+	for (CargoReservation::iterator i = reserved.begin(); i != reserved.end(); ++i) {
+		delete i->second;
+	}
+}
+
+void StationCargoList::Unreserve(VehicleID v) {
+	CargoReservation::iterator begin = reserved.lower_bound(v);
+	CargoReservation::iterator end = reserved.upper_bound(v);
+	while(begin != end) {
+		Insert(begin->second);
+		reserved.erase(begin++);
+	}
+}
+
+/* stupid workaround to make the compile recognize the template instances */
+template class CargoList<CargoPacketList>;
+template class CargoList<StationCargoPacketMap>;

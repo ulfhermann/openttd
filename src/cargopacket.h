@@ -13,6 +13,7 @@
 #include "cargo_type.h"
 #include "vehicle_type.h"
 #include <map>
+#include <list>
 
 typedef uint32 CargoPacketID;
 struct CargoPacket;
@@ -107,16 +108,24 @@ struct UnloadDescription {
 	byte flags;
 };
 
+typedef std::list<CargoPacket *> CargoPacketList;
+typedef std::multimap<StationID, CargoPacket *> StationCargoPacketMap;
+
+inline CargoPacket *Deref(StationCargoPacketMap::iterator iter) {return iter->second;}
+inline CargoPacket *Deref(StationCargoPacketMap::const_iterator iter) {return iter->second;}
+inline CargoPacket *Deref(CargoPacketList::iterator iter) {return *iter;}
+inline CargoPacket *Deref(CargoPacketList::const_iterator iter) {return *iter;}
+
 /**
  * Simple collection class for a list of cargo packets
  */
+template<class LIST>
 class CargoList {
-public:
-	/** List of cargo packets, sorted by either source station or next hop */
-	typedef std::multimap<StationID, CargoPacket *> List;
-
 protected:
-	List packets;         ///< The cargo packets in this list
+	typedef typename LIST::iterator Iterator;
+	typedef typename LIST::const_iterator ConstIterator;
+
+	LIST packets;         ///< The cargo packets in this list
 
 	bool empty;           ///< Cache for whether this list is empty or not
 	uint count;           ///< Cache for the number of cargo entities
@@ -124,24 +133,27 @@ protected:
 	StationID source;     ///< Cache for the source of the packet
 	uint days_in_transit; ///< Cache for the number of days in transit
 
-	virtual StationID GetSortBy(const CargoPacket *cp) = 0;
-	uint LoadPackets(CargoList * dest, uint cap, StationID selected_station, TileIndex load_place = INVALID_TILE);
-	uint LoadPackets(CargoList * dest, uint cap, List::iterator begin, List::iterator end, TileIndex load_place);
 	void CachePacket(CargoPacket *cp, uint &dit);
 
+	virtual Iterator LowerBound(const CargoPacket *cp) = 0;
+	virtual Iterator UpperBound(const CargoPacket *cp) = 0;
+
 public:
+
 	friend const struct SaveLoad *GetGoodsDesc();
+
+	bool LoadPacket(CargoPacket *packet, uint &cap, TileIndex load_place = INVALID_TILE);
 
 	/** Create the cargo list */
 	FORCEINLINE CargoList() { this->InvalidateCache(); }
 	/** And destroy it ("frees" all cargo packets) */
-	~CargoList();
+	virtual ~CargoList();
 
 	/**
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
 	 * @return pointer to the packet list
 	 */
-	FORCEINLINE const CargoList::List *Packets() const { return &this->packets; }
+	FORCEINLINE const LIST *Packets() const { return &this->packets; }
 
 	/**
 	 * Ages the all cargo in this list
@@ -201,33 +213,25 @@ public:
 	void UpdateFlows(StationID next, GoodsEntry * ge);
 
 	/** Invalidates the cached data and rebuild it */
-	virtual void InvalidateCache();
+	void InvalidateCache();
 
-	/**
-	 * Moves the given amount of cargo to a vehicle.
-	 * @param dest         the destination to move the cargo to
-	 * @param max_load     the maximum amount of cargo entities to move
-	 * @param force_load   if set, move cargo unconditionally,
-	 *                     else only move if CargoPacket::next==next_station or CargoPacket::next==INVALID_STATION
-	 * @param load_place   The place where the loading takes/took place;
-	 *                     if load_place != INVALID_TILE CargoPacket::loaded_at_xy will be set accordingly
-	 */
-	uint MoveToVehicle(CargoList *dest, uint max_load, StationID selected_station = INVALID_STATION, TileIndex load_place = INVALID_TILE);
-
-	void Insert(CargoPacket *cp) {packets.insert(std::make_pair(GetSortBy(cp), cp));}
+	virtual void Insert(CargoPacket *cp) = 0;
 };
 
 /**
- * CargoList sorted by source station
+ * unsorted CargoList
  */
-class VehicleCargoList : public CargoList {
+class VehicleCargoList : public CargoList<CargoPacketList> {
 protected:
-	virtual StationID GetSortBy(const CargoPacket *cp) {return cp->source;}
-	void DeliverPacket(List::iterator & c, uint & remaining_unload, CargoPayment *payment);
-	CargoPacket * TransferPacket(List::iterator & c, uint & remaining_unload, GoodsEntry * dest, CargoPayment *payment);
+	void DeliverPacket(Iterator & c, uint & remaining_unload, CargoPayment *payment);
+	CargoPacket * TransferPacket(Iterator & c, uint & remaining_unload, GoodsEntry * dest, CargoPayment *payment);
 
 	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
+
+	virtual Iterator LowerBound(const CargoPacket *cp) {return packets.begin();}
+	virtual Iterator UpperBound(const CargoPacket *cp) {return packets.end();}
+
 public:
 	/**
 	 * Moves the given amount of cargo from a vehicle to a station.
@@ -253,31 +257,49 @@ public:
 	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment);
 
 	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
+
+	/**
+	 * Moves the given amount of cargo to a vehicle.
+	 * @param dest         the destination to move the cargo to
+	 * @param max_load     the maximum amount of cargo entities to move
+	 */
+	uint MoveToOtherVehicle(VehicleCargoList *dest, uint max_load);
+
+	virtual void Insert(CargoPacket * cp) {packets.push_back(cp);}
 };
 
 /**
  * CargoList sorted by next hop
  */
-class StationCargoList : public CargoList {
+class StationCargoList : public CargoList<StationCargoPacketMap> {
 public:
 	typedef std::multimap<VehicleID, CargoPacket *> CargoReservation;
+	typedef std::map<VehicleID, uint> ReservationAmounts;
 
 	void ReservePacketsForLoading(VehicleID v, uint cap, StationID next_station);
+
+	void Unreserve(VehicleID v);
 
 	/**
 	 * route all packets with station "to" as next hop to a different place, except "curr"
 	 */
 	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge);
 
-	virtual void InvalidateCache();
+	uint AmountReserved(VehicleID v) {return reserved_amounts[v];}
 
-	bool HasReserved(VehicleID v) {return reserved.lower_bound(v) != reserved.upper_bound(v);}
+	uint LoadReserved(VehicleCargoList *dest, VehicleID v, uint max_load, TileIndex load_place);
 
+	bool HasReservations() {return !reserved.empty();}
+
+	virtual ~StationCargoList();
+
+	virtual void Insert(CargoPacket * cp) {packets.insert(std::make_pair(cp->next, cp));}
 protected:
-
-	uint ReservePackets(VehicleID v, uint cap, List::iterator begin, List::iterator end);
-	virtual StationID GetSortBy(const CargoPacket *cp) {return cp->next;}
+	virtual Iterator LowerBound(const CargoPacket *cp) {return packets.lower_bound(cp->next);}
+	virtual Iterator UpperBound(const CargoPacket *cp) {return packets.upper_bound(cp->next);}
+	uint ReservePackets(VehicleID v, uint cap, Iterator begin, Iterator end);
 	CargoReservation reserved;
+	ReservationAmounts reserved_amounts;
 };
 
 

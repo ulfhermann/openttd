@@ -1104,28 +1104,24 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 }
 
 /**
- * reserves cargo if the full load order and improved_load is set. Moves rejected packets from the rejection list
- * back into the station
+ * reserves cargo if the full load order and improved_load is set.
  */
-static void Reserve(Station * st, Vehicle * u, StationID next_station)
+static void ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 {
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
-			CargoID cargo = v->cargo_type;
-			StationCargoList & list = st->goods[cargo].cargo;
-			list.ReservePacketsForLoading(u->index, v->cargo_cap - v->cargo.Count(), next_station);
+			uint cap = v->cargo_cap - v->cargo.Count() - st->goods[v->cargo_type].cargo.AmountReserved(v->index);
+			StationCargoList & list = st->goods[v->cargo_type].cargo;
+			list.ReservePacketsForLoading(v->index, cap, next_station);
 		}
 	}
 }
 
+
 /**
  * Loads/unload the vehicle if possible.
  * @param v the vehicle to be (un)loaded
- * @param reserved   the amount of each cargo type that is
- *                   left on the platform to be
- *                   picked up by another vehicle when all
- *                   previous vehicles have loaded.
  */
 static void LoadUnloadVehicle(Vehicle *v)
 {
@@ -1141,9 +1137,9 @@ static void LoadUnloadVehicle(Vehicle *v)
 		next_station = orders->GetNextStoppingStation(v->cur_order_index, v->type == VEH_TRAIN || v->type == VEH_ROAD);
 	}
 
+	ReserveConsist(st, v, next_station);
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--v->load_unload_time_rem != 0) {
-		Reserve(st, v, next_station);
 		return;
 	}
 
@@ -1208,6 +1204,9 @@ static void LoadUnloadVehicle(Vehicle *v)
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
 
+			if (_settings_game.order.improved_load) {
+				ge->cargo.ReservePacketsForLoading(v->index, delivered, next_station);
+			}
 			continue;
 		}
 
@@ -1231,33 +1230,28 @@ static void LoadUnloadVehicle(Vehicle *v)
 		 * has capacity for it, load it on the vehicle. */
 		int cap_left = v->cargo_cap - v->cargo.Count();
 		if (cap_left > 0) {
-			if (!ge->cargo.Empty()) {
-				uint cap = cap_left;
-				uint count = ge->cargo.Count();
+			uint cap = cap_left;
 
-				if (cap > count) cap = count;
-				if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
+			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
 
-				if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
+			if (v->cargo.Empty() && ge->cargo.AmountReserved(v->index) > 0) {
+				TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
+			}
 
-				/* The full load order could be seen as interference by the user.
-				 * In that case force_load should be set and all cargo available
-				 * be moved onto the vehicle.
-				 */
-				uint loaded = ge->cargo.MoveToVehicle(&v->cargo, cap, next_station, st->xy);
-
-				/* TODO: Regarding this, when we do gradual loading, we
-				 * should first unload all vehicles and then start
-				 * loading them. Since this will cause
-				 * VEHICLE_TRIGGER_EMPTY to be called at the time when
-				 * the whole vehicle chain is really totally empty, the
-				 * completely_emptied assignment can then be safely
-				 * removed; that's how TTDPatch behaves too. --pasky */
-				if (loaded > 0) {
-					completely_emptied = false;
-					anything_loaded = true;
-				}
-
+			if (!_settings_game.order.improved_load) {
+				ge->cargo.ReservePacketsForLoading(v->index, cap, next_station);
+			}
+			uint loaded = ge->cargo.LoadReserved(&v->cargo, v->index, cap, st->xy);
+			/* TODO: Regarding this, when we do gradual loading, we
+			 * should first unload all vehicles and then start
+			 * loading them. Since this will cause
+			 * VEHICLE_TRIGGER_EMPTY to be called at the time when
+			 * the whole vehicle chain is really totally empty, the
+			 * completely_emptied assignment can then be safely
+			 * removed; that's how TTDPatch behaves too. --pasky */
+			if (loaded > 0) {
+				completely_emptied = false;
+				anything_loaded = true;
 				st->time_since_load = 0;
 				st->last_vehicle_type = v->type;
 
@@ -1266,7 +1260,7 @@ static void LoadUnloadVehicle(Vehicle *v)
 				unloading_time += loaded;
 
 				result |= 2;
-			} else if (_settings_game.order.improved_load && ge->cargo.HasReserved(v->index)) {
+			} else if (_settings_game.order.improved_load && ge->cargo.HasReservations()) {
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
 				SetBit(cargo_not_full, v->cargo_type);
@@ -1283,12 +1277,6 @@ static void LoadUnloadVehicle(Vehicle *v)
 
 	/* Only set completly_emptied, if we just unloaded all remaining cargo */
 	completely_emptied &= anything_unloaded;
-
-	/* We update these variables here, so gradual loading still fills
-	 * all wagons at the same time instead of using the same 'improved'
-	 * loading algorithm for the wagons (only fill wagon when there is
-	 * enough to fill the previous wagons) */
-	Reserve(st, u, next_station);
 
 	v = u;
 
