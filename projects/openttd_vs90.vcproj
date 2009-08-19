@@ -609,10 +609,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\minilzo.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\misc.cpp"
 				>
 			</File>
@@ -1141,10 +1137,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\lzoconf.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\map_func.h"
 				>
 			</File>
@@ -1154,10 +1146,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\md5.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\minilzo.h"
 				>
 			</File>
 			<File
@@ -2370,6 +2358,26 @@
 			</File>
 			<File
 				RelativePath=".\..\src\table\water_land.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="MiniLZO"
+			>
+			<File
+				RelativePath=".\..\src\3rdparty\minilzo\lzoconf.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\3rdparty\minilzo\lzodefs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\3rdparty\minilzo\minilzo.c"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\3rdparty\minilzo\minilzo.h"
 				>
 			</File>
 		</Filter>
