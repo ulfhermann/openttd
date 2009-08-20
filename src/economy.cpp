@@ -1141,6 +1141,10 @@ static void LoadUnloadVehicle(Vehicle *v, CargoReservation & reserved)
 {
 	CargoReservation rejected;
 	assert(v->current_order.IsType(OT_LOADING));
+
+	/* When we've finished loading we're just staying here till the timetable 'runs' out */
+	if (HasBit(v->vehicle_flags, VF_LOADING_FINISHED)) return;
+
 	assert(v->load_unload_time_rem != 0);
 
 	StationID last_visited = v->last_station_visited;
