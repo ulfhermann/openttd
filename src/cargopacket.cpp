@@ -28,7 +28,7 @@ CargoPacket::CargoPacket(StationID in_source, uint16 in_count, SourceType in_sou
 	loaded_at_xy(in_loaded_at_xy)
 {
 	this->source_type = in_source_type;
-	if (source != INVALID_STATION) {
+	if (Station::IsValidID(source)) {
 		assert(count != 0);
 		if(in_source_xy == 0) {
 			this->source_xy = Station::Get(source)->xy;
@@ -100,12 +100,25 @@ CargoList::~CargoList()
 void CargoList::AgeCargo()
 {
 	if (packets.empty()) return;
-	append_positions.clear();
+
+	/*
+	 * the append_positions cache isn't invalidated as long as all < and > relations
+	 * between days_in_transit stay the same. This is the case as long as no packet
+	 * reaches 0xFF
+	 */
+	bool invalid_append = false;
+
 	days_in_transit = 0;
 	for (List::const_iterator it = packets.begin(); it != packets.end(); it++) {
-		if ((*it)->days_in_transit != 0xFF) (*it)->days_in_transit++;
-		days_in_transit += (*it)->days_in_transit * (*it)->count;
+		CargoPacket *cp = *it;
+		if (cp->days_in_transit != 0xFF) {
+			if (++(cp->days_in_transit) == 0xFF) invalid_append = true;
+		} else {
+			invalid_append = true;
+		}
+		days_in_transit += cp->days_in_transit * cp->count;
 	}
+	if (invalid_append) append_positions.clear();
 }
 
 void CargoList::Merge(CargoPacket *in_list, CargoPacket *insert) {
@@ -124,12 +137,12 @@ void CargoList::Merge(CargoPacket *in_list, CargoPacket *insert) {
 	delete insert;
 }
 
-void CargoList::RemoveFromCache(CargoPacket *cp) {
+void CargoList::RemoveFromCache(CargoPacket *cp, bool remove_append) {
 	assert(this->count >= cp->count);
 	this->count -= cp->count;
 	this->feeder_share -= cp->feeder_share;
 	this->days_in_transit -= cp->days_in_transit * cp->count;
-	append_positions.erase(cp);
+	if (remove_append) append_positions.erase(cp);
 }
 
 void CargoList::Append(CargoPacket *cp)
@@ -239,7 +252,7 @@ bool CargoList::MoveTo(CargoList *dest, uint max_move, CargoList::MoveToAction m
 
 				cp_new->count = max_move;
 
-				RemoveFromCache(cp_new);
+				RemoveFromCache(cp_new, false);
 
 				if (mta == MTA_TRANSFER) payment->PayTransfer(cp_new, max_move);
 				dest->Append(cp_new);

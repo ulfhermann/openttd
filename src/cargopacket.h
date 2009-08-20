@@ -151,10 +151,11 @@ private:
 
 	/*
 	 * update the cached values to reflect the removal of this packet. Decreases cound, feeder share and days_in_transit
-	 * and erases the packet from append_positions
-	 * @param cp Packet to be removed from cache
+	 * and erases the packet from append_positions if specified
+	 * @param cp            Packet to be removed from cache
+	 * @param remove_append if the packet should also be removed from append_positions
 	 */
-	void RemoveFromCache(CargoPacket *cp);
+	void RemoveFromCache(CargoPacket *cp, bool remove_append = true);
 
 public:
 	friend const struct SaveLoad *GetGoodsDesc();
