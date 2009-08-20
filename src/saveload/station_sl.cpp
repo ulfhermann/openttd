@@ -243,8 +243,8 @@ static void Load_STNS()
 							ST_INDUSTRY,
 							INVALID_SOURCE,
 							_cargo_days,
-							_cargo_feeder_share,
-							_cargo_source_xy);
+							_cargo_feeder_share);
+					cp->source_xy = _cargo_source_xy;
 					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
 					ge->cargo.Append(cp);
 				}

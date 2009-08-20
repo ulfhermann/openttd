@@ -27,15 +27,11 @@ class CargoList;
  */
 struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 private:
-	/* These fields are all involved in the cargo list's cache or in the append positions set.
-	 * They can only be modified by CargoList which knows about both.
+	/* These fields are all involved in the cargo list's cache.
+	 * They can only be modified by CargoList which knows about that.
 	 */
-	SourceTypeByte source_type; ///< Type of #source_id
-	SourceID source_id;         ///< Index of source, INVALID_SOURCE if unknown/invalid
-	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain)
-
-	Money feeder_share;         ///< Value of feeder pickup to be paid for on delivery of cargo
 	uint16 count;               ///< The amount of cargo in this packet
+	Money feeder_share;         ///< Value of feeder pickup to be paid for on delivery of cargo
 	byte days_in_transit;       ///< Amount of days this packet has been in transit
 public:
 	friend class CargoList;
@@ -44,11 +40,15 @@ public:
 	static const uint16 MAX_COUNT = 65535;
 
 	/*
-	 * source and loaded_at_xy neither mess with the cargo list's cache nor with the append positions set
+	 * source and loaded_at_xy don't mess with the cargo list's cache
 	 * so it's OK to modify them.
 	 */
-	StationID source;       ///< The station where the cargo came from first
-	TileIndex loaded_at_xy; ///< Location where this cargo has been loaded into the vehicle
+	StationID source;           ///< The station where the cargo came from first
+	SourceTypeByte source_type; ///< Type of #source_id
+	SourceID source_id;         ///< Index of source, INVALID_SOURCE if unknown/invalid
+	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain)
+	TileIndex loaded_at_xy;     ///< Location where this cargo has been loaded into the vehicle
+
 	/**
 	 * Creates a new cargo packet
 	 * @param source          the source station of the packet
@@ -62,7 +62,7 @@ public:
 	 * @pre count != 0 || source == INVALID_STATION
 	 */
 	CargoPacket(StationID source = INVALID_STATION, uint16 count = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE,
-			byte days_in_transit = 0, Money feeder_share = 0, TileIndex source_xy = 0, TileIndex loaded_at_xy = 0);
+			byte days_in_transit = 0, Money feeder_share = 0);
 
 	/** Destroy the packet */
 	~CargoPacket() { }
@@ -82,12 +82,9 @@ public:
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
 	/* read-only accessors for the private fields */
-	FORCEINLINE uint16 GetCount() const {return count;}
-	FORCEINLINE TileIndex GetSourceXY() const {return source_xy;}
-	FORCEINLINE byte GetDaysInTransit() const {return days_in_transit;}
-	FORCEINLINE SourceTypeByte GetSourceType() const {return source_type;}
-	FORCEINLINE SourceID GetSourceID() const {return source_id;}
-	FORCEINLINE uint GetFeederShare() const {return feeder_share;}
+	FORCEINLINE uint16 Count() const {return count;}
+	FORCEINLINE Money FeederShare() const {return feeder_share;}
+	FORCEINLINE byte DaysInTransit() const {return days_in_transit;}
 };
 
 /**
@@ -104,11 +101,6 @@ public:
 #define FOR_ALL_CARGOPACKETS(var) FOR_ALL_CARGOPACKETS_FROM(var, 0)
 
 extern const struct SaveLoad *GetGoodsDesc();
-
-class CargoSorter {
-public:
-	bool operator()(const CargoPacket *cp1, const CargoPacket *cp2) const;
-};
 
 /**
  * Simple collection class for a list of cargo packets
@@ -127,15 +119,9 @@ public:
 	};
 
 private:
-	typedef std::set<CargoPacket *, CargoSorter> AppendMap;
 
 	List packets;               ///< The cargo packets in this list
 
-	/* cache for the packets last appended to.
-	 * Using this packets to be appended to can be found in O(log n) instead of O(n) time.
-	 * Thus Append() can be used whenever there is cargo to insert, reducing the number of packets.
-	 */
-	AppendMap append_positions; ///< Cached positions of last Appends
 	uint count;                 ///< Cache for the number of cargo entities
 	Money feeder_share;         ///< Cache for the feeder share
 	uint days_in_transit;       ///< Cache for the added number of days in transit of all packets
@@ -155,12 +141,10 @@ private:
 	 * @param cp            Packet to be removed from cache
 	 * @param remove_append if the packet should also be removed from append_positions
 	 */
-	void RemoveFromCache(CargoPacket *cp, bool remove_append = true);
+	void RemoveFromCache(CargoPacket *cp);
 
 public:
 	friend const struct SaveLoad *GetGoodsDesc();
-
-	void InvalidateAppend() {append_positions.clear();}
 
 	/** Create the cargo list */
 	FORCEINLINE CargoList() { this->InvalidateCache(); }
@@ -214,9 +198,10 @@ public:
 	 * @warning After appending this packet may not exist anymore!
 	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
 	 * @param cp the cargo packet to add
+	 * @param merge if the list should be searched for a packet with SameSource as cp for merging
 	 * @pre cp != NULL
 	 */
-	void Append(CargoPacket *cp);
+	void Append(CargoPacket *cp, bool merge = true);
 
 	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the

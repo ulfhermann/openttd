@@ -716,9 +716,9 @@ void Load_VEHS()
 					ST_INDUSTRY,
 					INVALID_SOURCE,
 					_cargo_days,
-					_cargo_feeder_share,
-					_cargo_source_xy,
-					_cargo_loaded_at_xy);
+					_cargo_feeder_share);
+			cp->source_xy = _cargo_source_xy;
+			cp->loaded_at_xy = _cargo_loaded_at_xy;
 			v->cargo.Append(cp);
 		}
 
