@@ -3395,10 +3395,6 @@
 				RelativePath=".\..\src\misc\str.hpp"
 				>
 			</File>
-			<File
-				RelativePath=".\..\src\misc\strapi.hpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Network Core"
