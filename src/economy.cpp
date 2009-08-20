@@ -1047,8 +1047,7 @@ void CargoPayment::PayFinalDelivery(CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy,
-			cp->DaysInTransit(), this->owner, cp->source_type, cp->source_id);
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->DaysInTransit(), this->owner, cp->source_type, cp->source_id);
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */

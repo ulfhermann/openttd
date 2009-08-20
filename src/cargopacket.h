@@ -11,7 +11,6 @@
 #include "station_type.h"
 #include "cargo_type.h"
 #include <list>
-#include <set>
 
 typedef uint32 CargoPacketID;
 struct CargoPacket;
@@ -21,6 +20,7 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
 extern CargoPacketPool _cargopacket_pool;
 
 class CargoList;
+extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
  * Container for cargo from the same location and time
@@ -30,9 +30,9 @@ private:
 	/* These fields are all involved in the cargo list's cache.
 	 * They can only be modified by CargoList which knows about that.
 	 */
-	uint16 count;               ///< The amount of cargo in this packet
-	Money feeder_share;         ///< Value of feeder pickup to be paid for on delivery of cargo
-	byte days_in_transit;       ///< Amount of days this packet has been in transit
+	Money feeder_share;     ///< Value of feeder pickup to be paid for on delivery of cargo
+	uint16 count;           ///< The amount of cargo in this packet
+	byte days_in_transit;   ///< Amount of days this packet has been in transit
 public:
 	friend class CargoList;
 	friend const struct SaveLoad *GetCargoPacketDesc();
@@ -51,18 +51,22 @@ public:
 
 	/**
 	 * Creates a new cargo packet
-	 * @param source          the source station of the packet
-	 * @param count           the number of cargo entities to put in this packet
-	 * @param source_type     the type of the packet's source
-	 * @param source_id       the number of the packet's source
-	 * @param days_in_transit the time the packet has already travelled
-	 * @param feeder_share    the packet's feeder share
-	 * @param source_xy       the place where the packet was generated
-	 * @param loaded_at_xy    the place where the packet was loaded
+	 * @param source      the source station of the packet
+	 * @param count       the number of cargo entities to put in this packet
+	 * @param source_type the type of the packet's source (see @SourceType)
+	 * @param source_id   the number of the packet's source {town|industry|headquarter}
 	 * @pre count != 0 || source == INVALID_STATION
 	 */
-	CargoPacket(StationID source = INVALID_STATION, uint16 count = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE,
-			byte days_in_transit = 0, Money feeder_share = 0);
+	CargoPacket(StationID source = INVALID_STATION, uint16 count = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
+
+	/*
+	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
+	 * Used when loading or splitting packets.
+	 * @param cnt the number of cargo entities to put in this packet
+	 * @param dit number of days the cargo has been in transit
+	 * @param fs  feeder share the packet has already accumulated
+	 */
+	CargoPacket(uint16 cnt, byte dit, Money fs = 0) : feeder_share(fs), count(cnt), days_in_transit(dit) {}
 
 	/** Destroy the packet */
 	~CargoPacket() { }
@@ -119,27 +123,23 @@ public:
 	};
 
 private:
+	List packets;         ///< The cargo packets in this list
 
-	List packets;               ///< The cargo packets in this list
-
-	uint count;                 ///< Cache for the number of cargo entities
-	Money feeder_share;         ///< Cache for the feeder share
-	uint days_in_transit;       ///< Cache for the added number of days in transit of all packets
+	uint count;           ///< Cache for the number of cargo entities
+	Money feeder_share;   ///< Cache for the feeder share
+	uint days_in_transit; ///< Cache for the added number of days in transit of all packets
 
 	/*
-	 * Merge packet "insert" into packet "in_list" and updates the cached values.
-	 * This doesn't invalidate the append_positions as those don't refer to the fields changed.
-	 *
-	 * @param in_list a packet from this cargolist
-	 * @param a new packet to be inserted
+	 * Update the cache to reflect adding of this packet.
+	 * Increases count, feeder share and days_in_transit
+	 * @param cp a new packet to be inserted
 	 */
-	void Merge(CargoPacket *in_list, CargoPacket *insert);
+	void AddToCache(CargoPacket *cp);
 
 	/*
-	 * update the cached values to reflect the removal of this packet. Decreases cound, feeder share and days_in_transit
-	 * and erases the packet from append_positions if specified
-	 * @param cp            Packet to be removed from cache
-	 * @param remove_append if the packet should also be removed from append_positions
+	 * Update the cached values to reflect the removal of this packet.
+	 * Decreases count, feeder share and days_in_transit
+	 * @param cp Packet to be removed from cache
 	 */
 	void RemoveFromCache(CargoPacket *cp);
 
@@ -147,7 +147,7 @@ public:
 	friend const struct SaveLoad *GetGoodsDesc();
 
 	/** Create the cargo list */
-	FORCEINLINE CargoList() { this->InvalidateCache(); }
+	FORCEINLINE CargoList() : count(0), feeder_share(0), days_in_transit(0) {}
 	/** And destroy it ("frees" all cargo packets) */
 	~CargoList();
 

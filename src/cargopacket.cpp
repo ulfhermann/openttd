@@ -6,7 +6,6 @@
 #include "core/pool_func.hpp"
 #include "economy_base.h"
 #include "station_base.h"
-#include "vehicle_base.h"
 
 /* Initialize the cargopacket-pool */
 CargoPacketPool _cargopacket_pool("CargoPacket");
@@ -17,21 +16,19 @@ void InitializeCargoPackets()
 	_cargopacket_pool.CleanPool();
 }
 
-CargoPacket::CargoPacket(StationID in_source, uint16 in_count, SourceType in_source_type, SourceID in_source_id,
-		byte in_days_in_transit, Money in_feeder_share) :
+CargoPacket::CargoPacket(StationID in_source, uint16 in_count, SourceType source_type, SourceID in_source_id) :
 	count(in_count),
-	feeder_share(in_feeder_share),
-	days_in_transit(in_days_in_transit),
 	source(in_source),
 	source_id(in_source_id)
 {
-	this->source_type = in_source_type;
 	if (Station::IsValidID(source)) {
 		assert(count != 0);
 		this->source_xy = Station::Get(source)->xy;
 	}
 
 	this->loaded_at_xy    = this->source_xy;
+
+	this->source_type     = source_type;
 }
 
 /**
@@ -73,26 +70,16 @@ void CargoList::AgeCargo()
 	}
 }
 
-void CargoList::Merge(CargoPacket *in_list, CargoPacket *insert) {
-	if (in_list->count + insert->count <= CargoPacket::MAX_COUNT) {
-		in_list->count += insert->count;
-		this->count += insert->count;
-		this->days_in_transit += insert->count * insert->days_in_transit;
-	} else {
-		int diff = CargoPacket::MAX_COUNT - in_list->count;
-		this->count += diff;
-		this->days_in_transit += diff * insert->days_in_transit;
-		in_list->count = CargoPacket::MAX_COUNT;
-	}
-	this->feeder_share += insert->feeder_share;
-	in_list->feeder_share += insert->feeder_share;
-	delete insert;
-}
-
 void CargoList::RemoveFromCache(CargoPacket *cp) {
 	this->count -= cp->count;
 	this->feeder_share -= cp->feeder_share;
 	this->days_in_transit -= cp->days_in_transit * cp->count;
+}
+
+void CargoList::AddToCache(CargoPacket *cp) {
+	this->count += cp->count;
+	this->feeder_share += cp->feeder_share;
+	this->days_in_transit += cp->count * cp->days_in_transit;
 }
 
 void CargoList::Append(CargoPacket *cp, bool merge)
@@ -102,8 +89,11 @@ void CargoList::Append(CargoPacket *cp, bool merge)
 	if (merge) {
 		for (List::iterator it = packets.begin(); it != packets.end(); it++) {
 			CargoPacket *in_list = *it;
-			if (in_list->SameSource(cp)) {
-				Merge(in_list, cp);
+			if (in_list->SameSource(cp) && in_list->count + cp->count <= CargoPacket::MAX_COUNT) {
+				in_list->count += cp->count;
+				in_list->feeder_share += cp->feeder_share;
+				AddToCache(cp);
+				delete cp;
 				return;
 			}
 		}
@@ -111,9 +101,7 @@ void CargoList::Append(CargoPacket *cp, bool merge)
 
 	/* The packet could or should not be merged with another one */
 	packets.push_back(cp);
-	this->count += cp->count;
-	this->feeder_share += cp->feeder_share;
-	this->days_in_transit += cp->count * cp->days_in_transit;
+	AddToCache(cp);
 }
 
 
@@ -158,47 +146,46 @@ bool CargoList::MoveTo(CargoList *dest, uint max_move, CargoList::MoveToAction m
 				packets.erase(it++);
 				RemoveFromCache(cp);
 				switch(mta) {
-				case MTA_FINAL_DELIVERY:
-					payment->PayFinalDelivery(cp, cp->count);
-					delete cp;
-					continue; // of the loop
+					case MTA_FINAL_DELIVERY:
+						payment->PayFinalDelivery(cp, cp->count);
+						delete cp;
+						continue; // of the loop
 
-				case MTA_CARGO_LOAD:
-					cp->loaded_at_xy = data;
-					break;
+					case MTA_CARGO_LOAD:
+						cp->loaded_at_xy = data;
+						break;
 
-				case MTA_TRANSFER:
-					cp->feeder_share += payment->PayTransfer(cp, cp->count);
-					break;
+					case MTA_TRANSFER:
+						/* here the packet isn't in either list, so we can change it */
+						cp->feeder_share += payment->PayTransfer(cp, cp->count);
+						break;
 
-				case MTA_UNLOAD:
-					break;
+					case MTA_UNLOAD:
+						break;
 				}
 				dest->Append(cp, false);
 			}
 		} else {
 			/* Can move only part of the packet, so split it into two pieces */
 			if (mta != MTA_FINAL_DELIVERY) {
-				CargoPacket *cp_new = new CargoPacket();
-
 				Money fs = cp->feeder_share * max_move / static_cast<uint>(cp->count);
 				cp->feeder_share -= fs;
+				CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, fs);
 
 				cp_new->source          = cp->source;
 				cp_new->source_xy       = cp->source_xy;
 				cp_new->loaded_at_xy    = (mta == MTA_CARGO_LOAD) ? data : cp->loaded_at_xy;
 
-				cp_new->days_in_transit = cp->days_in_transit;
-				cp_new->feeder_share    = fs;
-
 				cp_new->source_type     = cp->source_type;
 				cp_new->source_id       = cp->source_id;
 
-				cp_new->count = max_move;
+				RemoveFromCache(cp_new); // this reflects the changes in cp
 
-				RemoveFromCache(cp_new);
+				if (mta == MTA_TRANSFER) {
+					/* add the feeder share before inserting in dest */
+					cp_new->feeder_share += payment->PayTransfer(cp_new, max_move);
+				}
 
-				if (mta == MTA_TRANSFER) payment->PayTransfer(cp_new, max_move);
 				dest->Append(cp_new, false);
 			} else if (cp->source == data) {
 				++it;
@@ -209,6 +196,7 @@ bool CargoList::MoveTo(CargoList *dest, uint max_move, CargoList::MoveToAction m
 				this->days_in_transit -= max_move * cp->days_in_transit;
 			}
 			cp->count -= max_move;
+
 			max_move = 0;
 		}
 	}
@@ -225,9 +213,10 @@ void CargoList::InvalidateCache()
 	if (packets.empty()) return;
 
 	for (List::const_iterator it = packets.begin(); it != packets.end(); it++) {
-		count           += (*it)->count;
-		days_in_transit += (*it)->days_in_transit * (*it)->count;
-		feeder_share    += (*it)->feeder_share;
+		CargoPacket *cp = *it;
+		count           += cp->count;
+		days_in_transit += cp->days_in_transit * cp->count;
+		feeder_share    += cp->feeder_share;
 	}
 }
 

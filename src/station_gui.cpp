@@ -821,7 +821,7 @@ struct StationViewWindow : public Window {
 				const CargoList::List *packets = st->goods[i].cargo.Packets();
 				for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
 					const CargoPacket *cp = *it;
-					if (cp->source_id != station_id) {
+					if (cp->source != station_id) {
 						bool added = false;
 
 						/* Enable the expand/hide button for this cargo type */
