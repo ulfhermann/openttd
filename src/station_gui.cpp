@@ -821,7 +821,7 @@ struct StationViewWindow : public Window {
 				const CargoList::List *packets = st->goods[i].cargo.Packets();
 				for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
 					const CargoPacket *cp = *it;
-					if (cp->source != station_id) {
+					if (cp->GetSourceID() != station_id) {
 						bool added = false;
 
 						/* Enable the expand/hide button for this cargo type */
@@ -834,13 +834,13 @@ struct StationViewWindow : public Window {
 						for (CargoDataList::iterator jt = cargolist.begin(); jt != cargolist.end(); jt++) {
 							CargoData *cd = &(*jt);
 							if (cd->cargo == i && cd->source == cp->source) {
-								cd->count += cp->count;
+								cd->count += cp->GetCount();
 								added = true;
 								break;
 							}
 						}
 
-						if (!added) cargolist.push_back(CargoData(i, cp->source, cp->count));
+						if (!added) cargolist.push_back(CargoData(i, cp->source, cp->GetCount()));
 					}
 				}
 			}

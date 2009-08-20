@@ -32,7 +32,7 @@ struct CargoPayment : CargoPaymentPool::PoolItem<&_cargo_payment_pool> {
 	CargoPayment(Vehicle *front);
 	~CargoPayment();
 
-	void PayTransfer(CargoPacket *cp, uint count);
+	Money PayTransfer(CargoPacket *cp, uint count);
 	void PayFinalDelivery(CargoPacket *cp, uint count);
 
 	/**
