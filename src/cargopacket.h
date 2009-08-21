@@ -152,44 +152,8 @@ inline CargoPacket *Deref(CargoPacketList::const_iterator iter) {return *iter;}
  */
 template<class LIST>
 class CargoList {
-	/** Kind of actions that could be done with packets on move */
-	enum MoveToAction {
-		MTA_FINAL_DELIVERY, ///< "Deliver" the packet to the final destination, i.e. destroy the packet
-		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID
-		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer
-		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload
-	};
-protected:
-	LIST packets;         ///< The cargo packets in this list
-
-	uint count;           ///< Cache for the number of cargo entities
-	Money feeder_share;   ///< Cache for the feeder share
-	uint days_in_transit; ///< Cache for the added number of days in transit of all packets
-
-	/*
-	 * Update the cache to reflect adding of this packet.
-	 * Increases count, feeder share and days_in_transit
-	 * @param cp a new packet to be inserted
-	 */
-	void AddToCache(CargoPacket *cp);
-
-	/*
-	 * Update the cached values to reflect the removal of this packet.
-	 * Decreases count, feeder share and days_in_transit
-	 * @param cp Packet to be removed from cache
-	 */
-	void RemoveFromCache(CargoPacket *cp);
-
-	void Transfer(CargoPacket *cp, CargoPayment *payment);
-
-	void DeliverPart(CargoPacket *cp, CargoPayment *payment, uint deliver);
 public:
-	typedef typename LIST::iterator Iterator;
-	typedef typename LIST::const_iterator ConstIterator;
-
 	friend const struct SaveLoad *GetGoodsDesc();
-
-	uint MovePacket(CargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
 	/** Create the cargo list */
 	FORCEINLINE CargoList() : count(0), feeder_share(0), days_in_transit(0) {}
@@ -265,7 +229,36 @@ public:
 
 	virtual void Insert(CargoPacket *cp) = 0;
 
-	bool MoveTo(CargoList *dest, uint max_move, CargoList::MoveToAction mta, CargoPayment *payment, uint data);
+protected:
+	typedef typename LIST::iterator Iterator;
+	typedef typename LIST::const_iterator ConstIterator;
+
+	LIST packets;         ///< The cargo packets in this list
+
+	uint count;           ///< Cache for the number of cargo entities
+	Money feeder_share;   ///< Cache for the feeder share
+	uint days_in_transit; ///< Cache for the added number of days in transit of all packets
+
+	uint MovePacket(CargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
+
+	/*
+	 * Update the cache to reflect adding of this packet.
+	 * Increases count, feeder share and days_in_transit
+	 * @param cp a new packet to be inserted
+	 */
+	void AddToCache(CargoPacket *cp);
+
+	/*
+	 * Update the cached values to reflect the removal of this packet.
+	 * Decreases count, feeder share and days_in_transit
+	 * @param cp Packet to be removed from cache
+	 */
+	void RemoveFromCache(CargoPacket *cp);
+
+	uint TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station);
+	uint DeliverPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station);
+
+	virtual std::pair<Iterator, Iterator> EqualRange(CargoPacket *cp) = 0;
 };
 
 /**
@@ -273,11 +266,12 @@ public:
  */
 class VehicleCargoList : public CargoList<CargoPacketList> {
 protected:
-	void DeliverPacket(Iterator & c, uint & remaining_unload, CargoPayment *payment);
-	CargoPacket * TransferPacket(Iterator & c, uint & remaining_unload, GoodsEntry * dest, CargoPayment *payment);
-
 	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
+
+	virtual std::pair<Iterator, Iterator> EqualRange(CargoPacket *cp)
+		{return std::make_pair(packets.begin(), packets.end());}
+
 public:
 	/**
 	 * Moves the given amount of cargo from a vehicle to a station.
@@ -333,6 +327,9 @@ public:
 	virtual void Insert(CargoPacket * cp) {packets.insert(std::make_pair(cp->next, cp));}
 protected:
 	uint ReservePackets(Vehicle *v, uint cap, Iterator begin, Iterator end);
+
+	virtual std::pair<Iterator, Iterator> EqualRange(CargoPacket *cp)
+		{return packets.equal_range(cp->next);}
 };
 
 

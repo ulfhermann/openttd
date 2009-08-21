@@ -105,7 +105,8 @@ void CargoList<LIST>::Append(CargoPacket *cp, bool merge)
 	assert(cp != NULL);
 
 	if (merge) {
-		for (Iterator it = packets.begin(); it != packets.end(); it++) {
+		std::pair<Iterator, Iterator> range = EqualRange(cp);
+		for (Iterator it = range.first; it != range.second; it++) {
 			CargoPacket *in_list = Deref(it);
 			if (in_list->SameSource(cp) && in_list->count + cp->count <= CargoPacket::MAX_COUNT) {
 				in_list->count += cp->count;
@@ -148,119 +149,43 @@ void CargoList<LIST>::Truncate(uint max_remain)
 }
 
 template<class LIST>
-void CargoList<LIST>::Transfer(CargoPacket *cp, CargoPayment *payment)
-{
-	RemoveFromCache(cp);
-	cp->feeder_share += payment->PayTransfer(cp, cp->count);
-}
-
-template<class LIST>
-void CargoList<LIST>::DeliverPart(CargoPacket *cp, CargoPayment *payment, uint deliver)
-{
-	payment->PayFinalDelivery(cp, deliver);
-	this->count -= deliver;
-	this->days_in_transit -= deliver * cp->days_in_transit;
-	cp->count -= deliver;
-}
-
-template<class LIST>
-bool CargoList<LIST>::MoveTo(CargoList *dest, uint max_move, CargoList::MoveToAction mta, CargoPayment *payment, uint data)
-{
-	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
-	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
-
-	Iterator it = packets.begin();
-	while(it != packets.end() && max_move > 0) {
-		CargoPacket *cp = Deref(it);
-		if (cp->count <= max_move) {
-			/* Can move the complete packet */
-			if (cp->source == data && mta == MTA_FINAL_DELIVERY) {
-				++it;
-			} else {
-				max_move -= cp->count;
-				packets.erase(it++);
-				RemoveFromCache(cp);
-				switch(mta) {
-					case MTA_FINAL_DELIVERY:
-						payment->PayFinalDelivery(cp, cp->count);
-						delete cp;
-						continue; // of the loop
-
-					case MTA_CARGO_LOAD:
-						cp->loaded_at_xy = data;
-						break;
-
-					case MTA_TRANSFER:
-						/* here the packet isn't in either list, so we can change it */
-						cp->feeder_share += payment->PayTransfer(cp, cp->count);
-						break;
-
-					case MTA_UNLOAD:
-						break;
-				}
-				dest->Append(cp, false);
-			}
-		} else {
-			/* Can move only part of the packet, so split it into two pieces */
-			if (mta != MTA_FINAL_DELIVERY) {
-				Money fs = cp->feeder_share * max_move / static_cast<uint>(cp->count);
-				cp->feeder_share -= fs;
-				CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, fs);
-				cp_new->source_type     = cp->source_type;
-				cp_new->source_id       = cp->source_id;
-
-				RemoveFromCache(cp_new); // this reflects the changes in cp
-
-				if (mta == MTA_TRANSFER) {
-					/* add the feeder share before inserting in dest */
-					cp_new->feeder_share += payment->PayTransfer(cp_new, max_move);
-				}
-
-				dest->Append(cp_new, false);
-				cp->count -= max_move;
-			} else if (cp->source == data) {
-				++it;
-				continue;
-			} else {
-				DeliverPart(cp, payment, max_move);
-			}
-
-			max_move = 0;
-		}
-	}
-
-	return it != packets.end();
-}
-
-
-void VehicleCargoList::DeliverPacket(Iterator & c, uint & remaining_unload, CargoPayment *payment) {
-	CargoPacket * p = *c;
-	if (p->Count() <= remaining_unload) {
-		remaining_unload -= p->Count();
+uint CargoList<LIST>::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
+	CargoPacket * p = Deref(c);
+	uint loaded = 0;
+	StationID source = p->source;
+	if (p->count <= remaining_unload) {
 		payment->PayFinalDelivery(p, p->Count());
-		delete p;
 		RemoveFromCache(p);
+		loaded = p->count;
+		delete p;
 		packets.erase(c++);
 	} else {
-		DeliverPart(p, payment, remaining_unload);
-		remaining_unload = 0;
+		payment->PayFinalDelivery(p, remaining_unload);
+		this->count -= remaining_unload;
+		this->days_in_transit -= remaining_unload * p->days_in_transit;
+		p->count -= remaining_unload;
+		loaded = remaining_unload;
 		++c;
 	}
+	dest->UpdateFlowStats(source, loaded, curr_station);
+	return loaded;
 }
 
-CargoPacket * VehicleCargoList::TransferPacket(Iterator & c, uint & remaining_unload, GoodsEntry *dest, CargoPayment *payment) {
-	CargoPacket *p = *c;
+template<class LIST>
+uint CargoList<LIST>::TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
+	CargoPacket *p = Deref(c);
 	if (p->Count() <= remaining_unload) {
 		packets.erase(c++);
 	} else {
 		p = p->Split(remaining_unload);
 		++c;
 	}
-	Transfer(p, payment);
+	RemoveFromCache(p);
+	p->feeder_share += payment->PayTransfer(p, p->count);
+	p->next = dest->UpdateFlowStatsTransfer(p->source, p->count, curr_station);
 	dest->cargo.Append(p);
 	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
-	remaining_unload -= p->Count();
-	return p;
+	return p->count;
 }
 
 UnloadType VehicleCargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) const {
@@ -343,22 +268,20 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 	UnloadDescription ul(dest, curr_station, next_station, flags);
 
 	for(Iterator c = packets.begin(); c != packets.end() && remaining_unload > 0;) {
-		CargoPacket * p = *c;
-		StationID source = p->source;
-		uint last_remaining = remaining_unload;
-		UnloadType action = this->WillUnload(ul, p);
+		UnloadType action = this->WillUnload(ul, *c);
 
 		switch(action) {
 			case UL_DELIVER:
-				this->DeliverPacket(c, remaining_unload, payment);
-				dest->UpdateFlowStats(source, last_remaining - remaining_unload, curr_station);
+				remaining_unload -= this->DeliverPacket(c, remaining_unload, dest, payment, curr_station);
 				break;
 			case UL_TRANSFER:
 				/* TransferPacket may split the packet and return the transferred part */
-				p = this->TransferPacket(c, remaining_unload, dest, payment);
-				p->next = dest->UpdateFlowStatsTransfer(source, last_remaining - remaining_unload, curr_station);
+				remaining_unload -= this->TransferPacket(c, remaining_unload, dest, payment, curr_station);
 				break;
 			case UL_KEEP:
+				/* don't update the flow stats here as those packets can be kept multiple times
+				 * the flow stats are updated from LoadUnloadVehicle when all loading is done
+				 */
 				++c;
 				break;
 			default:

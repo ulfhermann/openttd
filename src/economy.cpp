@@ -1208,6 +1208,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				/* done delivering */
 				if (!v->cargo.Empty()) {
 					completely_emptied = false;
+					/* update stats for kept cargo */
 					v->cargo.UpdateFlows(next_station, ge);
 				}
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
