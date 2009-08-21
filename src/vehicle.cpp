@@ -477,7 +477,7 @@ void Vehicle::PreDestructor()
 		Station *st = Station::Get(this->last_station_visited);
 		st->loading_vehicles.remove(this);
 		for(Vehicle *v = this; v != NULL; v = v->next) {
-			st->goods[v->cargo_type].cargo.Unreserve(v->index);
+			v->reserved.Unreserve(&st->goods[v->cargo_type].cargo);
 		}
 
 		HideFillingPercent(&this->fill_percent_te_id);
@@ -1470,7 +1470,7 @@ void Vehicle::LeaveStation()
 	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
 	for(Vehicle *v = this; v != NULL; v = v->next) {
-		st->goods[v->cargo_type].cargo.Unreserve(v->index);
+		v->reserved.Unreserve(&st->goods[v->cargo_type].cargo);
 	}
 
 	OrderList * orders = this->orders.list;

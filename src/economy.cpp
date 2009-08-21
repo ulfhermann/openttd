@@ -1107,16 +1107,20 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 /**
  * reserves cargo if the full load order and improved_load is set.
  */
-static void ReserveConsist(Station * st, Vehicle * u, StationID next_station)
+uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 {
+	uint32 ret = 0;
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
-			uint cap = v->cargo_cap - v->cargo.Count() - st->goods[v->cargo_type].cargo.AmountReserved(v->index);
+			uint cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
 			StationCargoList & list = st->goods[v->cargo_type].cargo;
-			list.ReservePacketsForLoading(v->index, cap, next_station);
+			if (list.ReservePacketsForLoading(v, cap, next_station) > 0) {
+				ret |= 1 << v->cargo_type;
+			}
 		}
 	}
+	return ret;
 }
 
 
@@ -1124,12 +1128,12 @@ static void ReserveConsist(Station * st, Vehicle * u, StationID next_station)
  * Loads/unload the vehicle if possible.
  * @param v the vehicle to be (un)loaded
  */
-static void LoadUnloadVehicle(Vehicle *v)
+static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
 	/* When we've finished loading we're just staying here till the timetable 'runs' out */
-	if (HasBit(v->vehicle_flags, VF_LOADING_FINISHED)) return;
+	if (HasBit(v->vehicle_flags, VF_LOADING_FINISHED)) return cargos_reserved;;
 
 	assert(v->load_unload_time_rem != 0);
 
@@ -1142,10 +1146,10 @@ static void LoadUnloadVehicle(Vehicle *v)
 		next_station = orders->GetNextStoppingStation(v->cur_order_index, v->type == VEH_TRAIN || v->type == VEH_ROAD);
 	}
 
-	ReserveConsist(st, v, next_station);
+	cargos_reserved |= ReserveConsist(st, v, next_station);
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--v->load_unload_time_rem != 0) {
-		return;
+		return cargos_reserved;
 	}
 
 	OrderUnloadFlags unload_flags = v->current_order.GetUnloadType();
@@ -1154,7 +1158,7 @@ static void LoadUnloadVehicle(Vehicle *v)
 		/* The train reversed in the station. Take the "easy" way
 		 * out and let the train just leave as it always did. */
 		SetBit(v->vehicle_flags, VF_LOADING_FINISHED);
-		return;
+		return cargos_reserved;
 	}
 
 	int unloading_time = 0;
@@ -1210,7 +1214,9 @@ static void LoadUnloadVehicle(Vehicle *v)
 			}
 
 			if (_settings_game.order.improved_load) {
-				ge->cargo.ReservePacketsForLoading(v->index, delivered, next_station);
+				if (ge->cargo.ReservePacketsForLoading(v, delivered, next_station) > 0) {
+					cargos_reserved |= 1 << v->cargo_type;
+				}
 			}
 			continue;
 		}
@@ -1239,14 +1245,14 @@ static void LoadUnloadVehicle(Vehicle *v)
 
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
 
-			if (v->cargo.Empty() && ge->cargo.AmountReserved(v->index) > 0) {
+			if (v->cargo.Empty() && v->reserved.Count() > 0) {
 				TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 			}
 
 			if (!_settings_game.order.improved_load) {
-				ge->cargo.ReservePacketsForLoading(v->index, cap, next_station);
+				ge->cargo.ReservePacketsForLoading(v, cap, next_station);
 			}
-			uint loaded = ge->cargo.LoadReserved(&v->cargo, v->index, cap, st->xy);
+			uint loaded = v->reserved.MoveToOtherVehicle(&v->cargo, cap, st->xy);
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
 			 * loading them. Since this will cause
@@ -1265,7 +1271,7 @@ static void LoadUnloadVehicle(Vehicle *v)
 				unloading_time += loaded;
 
 				result |= 2;
-			} else if (_settings_game.order.improved_load && ge->cargo.HasReservations()) {
+			} else if (_settings_game.order.improved_load && (cargos_reserved & 1 << v->cargo_type) != 0) {
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
 				SetBit(cargo_not_full, v->cargo_type);
@@ -1355,6 +1361,8 @@ static void LoadUnloadVehicle(Vehicle *v)
 
 		if (result & 2) InvalidateWindow(WC_STATION_VIEW, last_visited);
 	}
+
+	return cargos_reserved;
 }
 
 /**
@@ -1367,10 +1375,13 @@ void LoadUnloadStation(Station *st)
 	/* No vehicle is here... */
 	if (st->loading_vehicles.empty()) return;
 
+	uint32 cargos_reserved = 0;
 	std::list<Vehicle *>::iterator iter;
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
-		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) LoadUnloadVehicle(v);
+		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) {
+			cargos_reserved = LoadUnloadVehicle(v, cargos_reserved);
+		}
 	}
 
 	/* Call the production machinery of industries */

@@ -24,6 +24,7 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
 extern CargoPacketPool _cargopacket_pool;
 
 template <class LIST> class CargoList;
+class StationCargoList;
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -158,11 +159,7 @@ class CargoList {
 		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer
 		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload
 	};
-
 protected:
-	typedef typename LIST::iterator Iterator;
-	typedef typename LIST::const_iterator ConstIterator;
-
 	LIST packets;         ///< The cargo packets in this list
 
 	uint count;           ///< Cache for the number of cargo entities
@@ -183,19 +180,16 @@ protected:
 	 */
 	void RemoveFromCache(CargoPacket *cp);
 
-
 	void Transfer(CargoPacket *cp, CargoPayment *payment);
 
 	void DeliverPart(CargoPacket *cp, CargoPayment *payment, uint deliver);
-
-	virtual Iterator LowerBound(const CargoPacket *cp) = 0;
-	virtual Iterator UpperBound(const CargoPacket *cp) = 0;
-
 public:
+	typedef typename LIST::iterator Iterator;
+	typedef typename LIST::const_iterator ConstIterator;
 
 	friend const struct SaveLoad *GetGoodsDesc();
 
-	bool LoadPacket(CargoPacket *packet, uint &cap, TileIndex load_place = INVALID_TILE);
+	uint MovePacket(CargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
 	/** Create the cargo list */
 	FORCEINLINE CargoList() : count(0), feeder_share(0), days_in_transit(0) {}
@@ -284,10 +278,6 @@ protected:
 
 	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
-
-	virtual Iterator LowerBound(const CargoPacket *cp) {return packets.begin();}
-	virtual Iterator UpperBound(const CargoPacket *cp) {return packets.end();}
-
 public:
 	/**
 	 * Moves the given amount of cargo from a vehicle to a station.
@@ -319,9 +309,11 @@ public:
 	 * @param dest         the destination to move the cargo to
 	 * @param max_load     the maximum amount of cargo entities to move
 	 */
-	uint MoveToOtherVehicle(VehicleCargoList *dest, uint max_load);
+	uint MoveToOtherVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place = INVALID_TILE);
 
 	virtual void Insert(CargoPacket * cp) {packets.push_back(cp);}
+
+	void Unreserve(StationCargoList *dest);
 };
 
 /**
@@ -329,33 +321,18 @@ public:
  */
 class StationCargoList : public CargoList<StationCargoPacketMap> {
 public:
-	typedef std::multimap<VehicleID, CargoPacket *> CargoReservation;
-	typedef std::map<VehicleID, uint> ReservationAmounts;
-
-	void ReservePacketsForLoading(VehicleID v, uint cap, StationID next_station);
-
-	void Unreserve(VehicleID v);
+	uint ReservePacketsForLoading(Vehicle *v, uint cap, StationID next_station);
 
 	/**
 	 * route all packets with station "to" as next hop to a different place, except "curr"
 	 */
 	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge);
 
-	uint AmountReserved(VehicleID v) {return reserved_amounts[v];}
-
-	uint LoadReserved(VehicleCargoList *dest, VehicleID v, uint max_load, TileIndex load_place);
-
-	bool HasReservations() {return !reserved.empty();}
-
-	virtual ~StationCargoList();
+	uint LoadReserved(VehicleCargoList *dest, Vehicle *v, uint max_load, TileIndex load_place);
 
 	virtual void Insert(CargoPacket * cp) {packets.insert(std::make_pair(cp->next, cp));}
 protected:
-	virtual Iterator LowerBound(const CargoPacket *cp) {return packets.lower_bound(cp->next);}
-	virtual Iterator UpperBound(const CargoPacket *cp) {return packets.upper_bound(cp->next);}
-	uint ReservePackets(VehicleID v, uint cap, Iterator begin, Iterator end);
-	CargoReservation reserved;
-	ReservationAmounts reserved_amounts;
+	uint ReservePackets(Vehicle *v, uint cap, Iterator begin, Iterator end);
 };
 
 
