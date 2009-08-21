@@ -491,16 +491,16 @@ static void ReadTTDPatchFlags()
 	/* TTDPatch misuses _old_map3 for flags.. read them! */
 	_old_vehicle_multiplier = _old_map3[0];
 	/* Somehow.... there was an error in some savegames, so 0 becomes 1
-	and 1 becomes 2. The rest of the values are okay */
+	 * and 1 becomes 2. The rest of the values are okay */
 	if (_old_vehicle_multiplier < 2) _old_vehicle_multiplier++;
 
 	_old_vehicle_names = MallocT<StringID>(_old_vehicle_multiplier * 850);
 
 	/* TTDPatch increases the Vehicle-part in the middle of the game,
-	so if the multipler is anything else but 1, the assert fails..
-	bump the assert value so it doesn't!
-	(1 multipler == 850 vehicles
-	1 vehicle   == 128 bytes */
+	 * so if the multipler is anything else but 1, the assert fails..
+	 * bump the assert value so it doesn't!
+	 * (1 multipler == 850 vehicles
+	 * 1 vehicle   == 128 bytes */
 	_bump_assert_value = (_old_vehicle_multiplier - 1) * 850 * 128;
 
 	for (uint i = 0; i < 17; i++) { // check tile 0, too
@@ -757,10 +757,8 @@ static bool LoadOldGood(LoadgameState *ls, int num)
 	SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
 	SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, _cargo_source != 0xFF);
 	if (GB(_waiting_acceptance, 0, 12) != 0) {
-		CargoPacket *cp = new CargoPacket();
-		cp->source          = (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
-		cp->count           = GB(_waiting_acceptance, 0, 12);
-		cp->days_in_transit = _cargo_days;
+		CargoPacket *cp = new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days);
+		cp->source = (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source,
 		ge->cargo.Append(cp);
 	}
 
@@ -1391,8 +1389,8 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 		if (_old_next_ptr != 0xFFFF) v->next = (Vehicle *)(size_t)_old_next_ptr;
 
 		if (_cargo_count != 0) {
-			CargoPacket *cp = new CargoPacket((_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source, INVALID_STATION, _cargo_count);
-			cp->days_in_transit = _cargo_days;
+			CargoPacket *cp = new CargoPacket(_cargo_count, _cargo_days);
+			cp->source = (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
 			v->cargo.Append(cp);
 		}
 	}

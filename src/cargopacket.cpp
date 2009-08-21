@@ -17,21 +17,20 @@ void InitializeCargoPackets()
 	_cargopacket_pool.CleanPool();
 }
 
-CargoPacket::CargoPacket(StationID source, StationID next, uint16 count, SourceType source_type, SourceID source_id)
+CargoPacket::CargoPacket(StationID in_source, StationID in_next, uint16 in_count, SourceType source_type, SourceID in_source_id) :
+	count(in_count),
+	source(in_source),
+	source_id(in_source_id),
+	next(in_next)
 {
-	if (source != INVALID_STATION) assert(count != 0);
+	if (Station::IsValidID(source)) {
+		assert(count != 0);
+		this->source_xy = Station::Get(source)->xy;
+	}
 
-//	this->feeder_share    = 0; // no need to zero already zeroed data (by operator new)
-	this->source_xy       = (source != INVALID_STATION) ? Station::Get(source)->xy : 0;
 	this->loaded_at_xy    = this->source_xy;
-	this->source          = source;
-	this->next            = next;
-
-	this->count           = count;
-//	this->days_in_transit = 0;
 
 	this->source_type     = source_type;
-	this->source_id       = source_id;
 }
 
 /**
@@ -63,60 +62,14 @@ CargoList<LIST>::~CargoList()
 template<class LIST>
 void CargoList<LIST>::AgeCargo()
 {
-	if (empty) return;
+	if (packets.empty()) return;
 
-	uint dit = 0;
-	for (ConstIterator it = packets.begin(); it != packets.end(); it++) {
-		CargoPacket *p = Deref(it);
-		if (p->days_in_transit != 0xFF) p->days_in_transit++;
-		dit += p->days_in_transit * p->count;
+	days_in_transit = 0;
+	for (Iterator it = packets.begin(); it != packets.end(); it++) {
+		CargoPacket *cp = Deref(it);
+		if (cp->days_in_transit != 0xFF) ++(cp->days_in_transit);
+		days_in_transit += cp->days_in_transit * cp->count;
 	}
-	days_in_transit = dit / count;
-}
-
-void CargoPacket::Merge(CargoPacket * other) {
-	this->count        += other->count;
-	this->feeder_share += other->feeder_share;
-	delete other;
-}
-
-template<class LIST>
-void CargoList<LIST>::Append(CargoPacket *cp)
-{
-	assert(cp != NULL);
-
-	for (Iterator it = LowerBound(cp); it != UpperBound(cp); it++) {
-		CargoPacket *mine = Deref(it);
-		if (mine->SameSource(cp) && mine->count + cp->count <= 65535) {
-			mine->Merge(cp);
-			InvalidateCache();
-			return;
-		}
-	}
-
-	/* The packet could not be merged with another one */
-	Insert(cp);
-	InvalidateCache();
-}
-
-template<class LIST>
-void CargoList<LIST>::Truncate(uint count)
-{
-	for (Iterator it = packets.begin(); it != packets.end();) {
-		CargoPacket * cp = Deref(it);
-		uint local_count = cp->count;
-		if (local_count <= count) {
-			count -= local_count;
-			++it;
-		} else if (count > 0){
-			cp->count = count;
-			++it;
-		} else {
-			delete cp;
-			packets.erase(it++);
-		}
-	}
-	InvalidateCache();
 }
 
 CargoPacket * CargoPacket::Split(uint new_size) {
@@ -131,33 +84,181 @@ CargoPacket * CargoPacket::Split(uint new_size) {
 	return cp_new;
 }
 
+template<class LIST>
+void CargoList<LIST>::RemoveFromCache(CargoPacket *cp) {
+	this->count -= cp->count;
+	this->feeder_share -= cp->feeder_share;
+	this->days_in_transit -= cp->days_in_transit * cp->count;
+}
+
+template<class LIST>
+void CargoList<LIST>::AddToCache(CargoPacket *cp) {
+	this->count += cp->count;
+	this->feeder_share += cp->feeder_share;
+	this->days_in_transit += cp->count * cp->days_in_transit;
+}
+
+template<class LIST>
+void CargoList<LIST>::Append(CargoPacket *cp, bool merge)
+{
+	assert(cp != NULL);
+
+	if (merge) {
+		for (Iterator it = packets.begin(); it != packets.end(); it++) {
+			CargoPacket *in_list = Deref(it);
+			if (in_list->SameSource(cp) && in_list->count + cp->count <= CargoPacket::MAX_COUNT) {
+				in_list->count += cp->count;
+				in_list->feeder_share += cp->feeder_share;
+				AddToCache(cp);
+				delete cp;
+				return;
+			}
+		}
+	}
+
+	/* The packet could or should not be merged with another one */
+	Insert(cp);
+	AddToCache(cp);
+}
+
+template<class LIST>
+void CargoList<LIST>::Truncate(uint max_remain)
+{
+	for (Iterator it = packets.begin(); it != packets.end();) {
+		CargoPacket * cp = Deref(it);
+		uint local_count = cp->count;
+		if (max_remain == 0) {
+			RemoveFromCache(cp);
+			delete cp;
+			packets.erase(it++);
+		} else {
+			if (local_count > max_remain) {
+				uint diff = local_count - max_remain;
+				this->count -= diff;
+				this->days_in_transit -= cp->days_in_transit * diff;
+				cp->count = max_remain;
+				max_remain = 0;
+			} else {
+				max_remain -= local_count;
+			}
+			++it;
+		}
+	}
+}
+
+template<class LIST>
+void CargoList<LIST>::Transfer(CargoPacket *cp, CargoPayment *payment)
+{
+	RemoveFromCache(cp);
+	cp->feeder_share += payment->PayTransfer(cp, cp->count);
+}
+
+template<class LIST>
+void CargoList<LIST>::DeliverPart(CargoPacket *cp, CargoPayment *payment, uint deliver)
+{
+	payment->PayFinalDelivery(cp, deliver);
+	this->count -= deliver;
+	this->days_in_transit -= deliver * cp->days_in_transit;
+	cp->count -= deliver;
+}
+
+template<class LIST>
+bool CargoList<LIST>::MoveTo(CargoList *dest, uint max_move, CargoList::MoveToAction mta, CargoPayment *payment, uint data)
+{
+	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
+	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
+
+	Iterator it = packets.begin();
+	while(it != packets.end() && max_move > 0) {
+		CargoPacket *cp = Deref(it);
+		if (cp->count <= max_move) {
+			/* Can move the complete packet */
+			if (cp->source == data && mta == MTA_FINAL_DELIVERY) {
+				++it;
+			} else {
+				max_move -= cp->count;
+				packets.erase(it++);
+				RemoveFromCache(cp);
+				switch(mta) {
+					case MTA_FINAL_DELIVERY:
+						payment->PayFinalDelivery(cp, cp->count);
+						delete cp;
+						continue; // of the loop
+
+					case MTA_CARGO_LOAD:
+						cp->loaded_at_xy = data;
+						break;
+
+					case MTA_TRANSFER:
+						/* here the packet isn't in either list, so we can change it */
+						cp->feeder_share += payment->PayTransfer(cp, cp->count);
+						break;
+
+					case MTA_UNLOAD:
+						break;
+				}
+				dest->Append(cp, false);
+			}
+		} else {
+			/* Can move only part of the packet, so split it into two pieces */
+			if (mta != MTA_FINAL_DELIVERY) {
+				Money fs = cp->feeder_share * max_move / static_cast<uint>(cp->count);
+				cp->feeder_share -= fs;
+				CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, fs);
+				cp_new->source_type     = cp->source_type;
+				cp_new->source_id       = cp->source_id;
+
+				RemoveFromCache(cp_new); // this reflects the changes in cp
+
+				if (mta == MTA_TRANSFER) {
+					/* add the feeder share before inserting in dest */
+					cp_new->feeder_share += payment->PayTransfer(cp_new, max_move);
+				}
+
+				dest->Append(cp_new, false);
+				cp->count -= max_move;
+			} else if (cp->source == data) {
+				++it;
+				continue;
+			} else {
+				DeliverPart(cp, payment, max_move);
+			}
+
+			max_move = 0;
+		}
+	}
+
+	return it != packets.end();
+}
+
+
 void VehicleCargoList::DeliverPacket(Iterator & c, uint & remaining_unload, CargoPayment *payment) {
 	CargoPacket * p = *c;
-	if (p->count <= remaining_unload) {
-		remaining_unload -= p->count;
-		payment->PayFinalDelivery(p, p->count);
+	if (p->Count() <= remaining_unload) {
+		remaining_unload -= p->Count();
+		payment->PayFinalDelivery(p, p->Count());
 		delete p;
+		RemoveFromCache(p);
 		packets.erase(c++);
 	} else {
-		payment->PayFinalDelivery(p, remaining_unload);
-		p->count -= remaining_unload;
+		DeliverPart(p, payment, remaining_unload);
 		remaining_unload = 0;
 		++c;
 	}
 }
 
 CargoPacket * VehicleCargoList::TransferPacket(Iterator & c, uint & remaining_unload, GoodsEntry *dest, CargoPayment *payment) {
-	CargoPacket * p = *c;
-	if (p->count <= remaining_unload) {
+	CargoPacket *p = *c;
+	if (p->Count() <= remaining_unload) {
 		packets.erase(c++);
 	} else {
 		p = p->Split(remaining_unload);
 		++c;
 	}
-	payment->PayTransfer(p, p->count);
-	dest->cargo.Insert(p);
+	Transfer(p, payment);
+	dest->cargo.Append(p);
 	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
-	remaining_unload -= p->count;
+	remaining_unload -= p->Count();
 	return p;
 }
 
@@ -313,33 +414,6 @@ uint StationCargoList::LoadReserved(VehicleCargoList *dest, VehicleID v, uint ca
 	return loaded;
 }
 
-template<class LIST>
-void CargoList<LIST>::CachePacket(CargoPacket *cp, uint &dit)
-{
-	count        += cp->count;
-	dit          += cp->days_in_transit * cp->count;
-	feeder_share += cp->feeder_share;
-}
-
-template<class LIST>
-void CargoList<LIST>::InvalidateCache()
-{
-	empty = packets.empty();
-	count = 0;
-	feeder_share = 0;
-	source = INVALID_STATION;
-	days_in_transit = 0;
-
-	if (empty) return;
-
-	uint dit = 0;
-	for (ConstIterator it = packets.begin(); it != packets.end(); it++) {
-		CachePacket(Deref(it), dit);
-	}
-	days_in_transit = dit / count;
-	source = Deref(packets.begin())->source;
-}
-
 UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags order_flags) :
 	dest(d), curr_station(curr), next_station(next), flags(UL_KEEP)
 {
@@ -358,7 +432,7 @@ void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEn
 	for(Iterator it = packets.begin(); it != packets.end(); ++it) {
 		CargoPacket * packet = it->second;
 		if (packet->next == to) {
-			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
+			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->Count(), curr);
 		}
 	}
 	InvalidateCache();
@@ -377,14 +451,14 @@ uint StationCargoList::ReservePackets(VehicleID v, uint cap, Iterator begin, Ite
 	uint &amount = reserved_amounts[v];
 	while(begin != end && cap > 0) {
 		CargoPacket * cp = begin->second;
-		if (cp->count <= cap) {
+		if (cp->Count() <= cap) {
 			packets.erase(begin++);
 		} else {
 			cp = cp->Split(cap);
 		}
-		cap -= cp->count;
+		cap -= cp->Count();
 		reserved.insert(std::make_pair(v, cp));
-		amount += cp->count;
+		amount += cp->Count();
 	}
 	return cap;
 }
@@ -424,6 +498,23 @@ void StationCargoList::Unreserve(VehicleID v) {
 	while(begin != end) {
 		Insert(begin->second);
 		reserved.erase(begin++);
+	}
+}
+
+template<class LIST>
+void CargoList<LIST>::InvalidateCache()
+{
+	count = 0;
+	feeder_share = 0;
+	days_in_transit = 0;
+
+	if (packets.empty()) return;
+
+	for (ConstIterator it = packets.begin(); it != packets.end(); it++) {
+		CargoPacket *cp = Deref(it);
+		count           += cp->count;
+		days_in_transit += cp->days_in_transit * cp->count;
+		feeder_share    += cp->feeder_share;
 	}
 }
 

@@ -1051,29 +1051,30 @@ void CargoPayment::PayFinalDelivery(CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->days_in_transit, this->owner, cp->source_type, cp->source_id);
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->DaysInTransit(), this->owner, cp->source_type, cp->source_id);
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
-	this->visual_profit += profit - cp->feeder_share;
+	this->visual_profit += profit - cp->FeederShare();
 }
 
 /**
  * Handle payment for transfer of the given cargo packet.
  * @param cp The cargo packet to pay for.
  * @param count The number of packets to pay for.
+ * @return the feeder share received for this transfer
  */
-void CargoPayment::PayTransfer(CargoPacket *cp, uint count)
+Money CargoPayment::PayTransfer(CargoPacket *cp, uint count)
 {
 	Money profit = GetTransportedGoodsIncome(
 		count,
 		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
 		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
-		cp->days_in_transit,
+		cp->DaysInTransit(),
 		this->ct);
 
 	this->visual_transfer += profit; // accumulate transfer profits for whole vehicle
-	cp->feeder_share      += profit; // account for the (virtual) profit already made for the cargo packet
+	return profit;                   // account for the (virtual) profit already made for the cargo packet
 }
 
 /**
@@ -1126,6 +1127,10 @@ static void ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 static void LoadUnloadVehicle(Vehicle *v)
 {
 	assert(v->current_order.IsType(OT_LOADING));
+
+	/* When we've finished loading we're just staying here till the timetable 'runs' out */
+	if (HasBit(v->vehicle_flags, VF_LOADING_FINISHED)) return;
+
 	assert(v->load_unload_time_rem != 0);
 
 	StationID last_visited = v->last_station_visited;

@@ -80,6 +80,8 @@
 
 #undef DEFINE_SCRIPT_FILES
 
+#include "../fileio_func.h"
+
 AIStorage::~AIStorage()
 {
 	/* Free our pointers */
@@ -120,6 +122,11 @@ AIInstance::AIInstance(AIInfo *info) :
 
 	/* Register the API functions and classes */
 	this->RegisterAPI();
+
+	if (!this->LoadCompatibilityScripts(info->GetAPIVersion())) {
+		this->Died();
+		return;
+	}
 
 	/* Load and execute the script for this AI */
 	const char *main_script = info->GetMainScript();
@@ -239,6 +246,28 @@ void AIInstance::RegisterAPI()
 	this->engine->SetGlobalPointer(this->engine);
 }
 
+bool AIInstance::LoadCompatibilityScripts(const char *api_version)
+{
+	char script_name[32];
+	seprintf(script_name, lastof(script_name), "compat_%s.nut", api_version);
+	char buf[MAX_PATH];
+	Searchpath sp;
+	FOR_ALL_SEARCHPATHS(sp) {
+		FioAppendDirectory(buf, MAX_PATH, sp, AI_DIR);
+		ttd_strlcat(buf, script_name, MAX_PATH);
+		if (!FileExists(buf)) continue;
+
+		if (this->engine->LoadScript(buf)) return true;
+
+		AILog::Error("Failed to load API compatibility script");
+		DEBUG(ai, 0, "Error compiling / running API compatibility script: %s", buf);
+		return false;
+	}
+
+	AILog::Warning("API compatibility script not found");
+	return true;
+}
+
 void AIInstance::Continue()
 {
 	assert(this->suspend < 0);
@@ -323,6 +352,11 @@ void AIInstance::GameLoop()
 		} catch (AI_VMSuspend e) {
 			this->suspend  = e.GetSuspendTime();
 			this->callback = e.GetSuspendCallback();
+		} catch (AI_FatalError e) {
+			this->is_dead = true;
+			this->engine->ThrowError(e.GetErrorMessage());
+			this->engine->ResumeError();
+			this->Died();
 		}
 
 		this->is_started = true;
@@ -339,6 +373,11 @@ void AIInstance::GameLoop()
 	} catch (AI_VMSuspend e) {
 		this->suspend  = e.GetSuspendTime();
 		this->callback = e.GetSuspendCallback();
+	} catch (AI_FatalError e) {
+		this->is_dead = true;
+		this->engine->ThrowError(e.GetErrorMessage());
+		this->engine->ResumeError();
+		this->Died();
 	}
 }
 
@@ -563,10 +602,25 @@ void AIInstance::Save()
 		/* We don't want to be interrupted during the save function. */
 		bool backup_allow = AIObject::GetAllowDoCommand();
 		AIObject::SetAllowDoCommand(false);
-		if (!this->engine->CallMethod(*this->instance, "Save", &savedata)) {
-			/* The script crashed in the Save function. We can't kill
-			 * it here, but do so in the next AI tick. */
+		try {
+			if (!this->engine->CallMethod(*this->instance, "Save", &savedata)) {
+				/* The script crashed in the Save function. We can't kill
+				 * it here, but do so in the next AI tick. */
+				SaveEmpty();
+				this->engine->CrashOccurred();
+				return;
+			}
+		} catch (AI_FatalError e) {
+			/* If we don't mark the AI as dead here cleaning up the squirrel
+			 * stack could throw AI_FatalError again. */
+			this->is_dead = true;
+			this->engine->ThrowError(e.GetErrorMessage());
+			this->engine->ResumeError();
 			SaveEmpty();
+			/* We can't kill the AI here, so mark it as crashed (not dead) and
+			 * kill it in the next AI tick. */
+			this->is_dead = false;
+			this->engine->CrashOccurred();
 			return;
 		}
 		AIObject::SetAllowDoCommand(backup_allow);
