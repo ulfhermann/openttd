@@ -1,5 +1,12 @@
 /* $Id$ */
 
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file rail_gui.cpp File for dealing with rail construction user interface */
 
 #include "stdafx.h"
@@ -799,7 +806,7 @@ struct BuildRailToolbarWindow : Window {
 
 	virtual void OnPlacePresize(Point pt, TileIndex tile)
 	{
-		DoCommand(tile, 0, 0, DC_AUTO, CMD_BUILD_TUNNEL);
+		DoCommand(tile, _cur_railtype, 0, DC_AUTO, CMD_BUILD_TUNNEL);
 		VpSetPresizeRange(tile, _build_tunnel_endtile == 0 ? tile : _build_tunnel_endtile);
 	}
 
