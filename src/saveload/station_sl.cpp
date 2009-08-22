@@ -236,7 +236,7 @@ const SaveLoad *GetGoodsDesc()
 		     SLE_VAR(GoodsEntry, last_age,            SLE_UINT8),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
-		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
+		 SLE_CONDMAP(GoodsEntry, cargo.packets,       REF_STATION_CARGO,          68, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_flows,          SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),

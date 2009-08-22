@@ -114,6 +114,7 @@ public:
 #define FOR_ALL_CARGOPACKETS(var) FOR_ALL_CARGOPACKETS_FROM(var, 0)
 
 extern const struct SaveLoad *GetGoodsDesc();
+extern const struct SaveLoad *GetVehicleDescription(VehicleType vt);
 
 enum UnloadType {
 	UL_KEEP     = 0,      ///< keep cargo on vehicle
@@ -273,6 +274,7 @@ protected:
 		{return std::make_pair(packets.begin(), packets.end());}
 
 public:
+	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
 	/**
 	 * Moves the given amount of cargo from a vehicle to a station.
 	 * Depending on the value of flags and dest the side effects of this function differ:

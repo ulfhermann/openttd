@@ -440,7 +440,8 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		SLEG_CONDVAR(         _cargo_source_xy,      SLE_UINT32,                  44,  67),
 		     SLE_VAR(Vehicle, cargo_cap,             SLE_UINT16),
 		SLEG_CONDVAR(         _cargo_count,          SLE_UINT16,                   0,  67),
-		 SLE_CONDLST(Vehicle, cargo,                 REF_CARGO_PACKET,            68, SL_MAX_VERSION),
+		 SLE_CONDLST(Vehicle, cargo.packets,         REF_CARGO_PACKET,            68, SL_MAX_VERSION),
+		 SLE_CONDLST(Vehicle, reserved.packets,      REF_CARGO_PACKET,    FLOWMAP_SV, SL_MAX_VERSION),
 
 		     SLE_VAR(Vehicle, day_counter,           SLE_UINT8),
 		     SLE_VAR(Vehicle, tick_counter,          SLE_UINT8),
