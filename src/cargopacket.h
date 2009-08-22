@@ -154,6 +154,8 @@ inline CargoPacket *Deref(CargoPacketList::const_iterator iter) {return *iter;}
 template<class LIST>
 class CargoList {
 public:
+	typedef typename LIST::iterator Iterator;
+	typedef typename LIST::const_iterator ConstIterator;
 	friend const struct SaveLoad *GetGoodsDesc();
 
 	/** Create the cargo list */
@@ -231,8 +233,6 @@ public:
 	virtual void Insert(CargoPacket *cp) = 0;
 
 protected:
-	typedef typename LIST::iterator Iterator;
-	typedef typename LIST::const_iterator ConstIterator;
 
 	LIST packets;         ///< The cargo packets in this list
 
