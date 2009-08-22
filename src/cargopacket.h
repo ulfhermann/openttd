@@ -240,7 +240,8 @@ protected:
 	Money feeder_share;   ///< Cache for the feeder share
 	uint days_in_transit; ///< Cache for the added number of days in transit of all packets
 
-	uint MovePacket(CargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
+	template<class OTHERLIST>
+	uint MovePacket(CargoList<OTHERLIST> *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
 	/*
 	 * Update the cache to reflect adding of this packet.
@@ -305,7 +306,7 @@ public:
 	 * @param dest         the destination to move the cargo to
 	 * @param max_load     the maximum amount of cargo entities to move
 	 */
-	uint MoveToOtherVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place = INVALID_TILE);
+	uint MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place = INVALID_TILE);
 
 	virtual void Insert(CargoPacket * cp) {packets.push_back(cp);}
 
@@ -317,18 +318,16 @@ public:
  */
 class StationCargoList : public CargoList<StationCargoPacketMap> {
 public:
-	uint ReservePacketsForLoading(Vehicle *v, uint cap, StationID next_station);
+	uint MoveToVehicle(VehicleCargoList *dest, uint cap, StationID next_station, TileIndex load_place);
 
 	/**
 	 * route all packets with station "to" as next hop to a different place, except "curr"
 	 */
 	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge);
 
-	uint LoadReserved(VehicleCargoList *dest, Vehicle *v, uint max_load, TileIndex load_place);
-
 	virtual void Insert(CargoPacket * cp) {packets.insert(std::make_pair(cp->next, cp));}
 protected:
-	uint ReservePackets(Vehicle *v, uint cap, Iterator begin, Iterator end);
+	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
 
 	virtual std::pair<Iterator, Iterator> EqualRange(CargoPacket *cp)
 		{return packets.equal_range(cp->next);}
