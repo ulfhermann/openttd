@@ -35,7 +35,6 @@ ini.cpp
 landscape.cpp
 linkgraph/linkgraph.cpp
 map.cpp
-md5.cpp
 misc.cpp
 mixer.cpp
 music.cpp
@@ -210,7 +209,6 @@ linkgraph/linkgraph_types.h
 livery.h
 map_func.h
 map_type.h
-md5.h
 mixer.h
 music.h
 namegen_func.h
@@ -534,6 +532,10 @@ table/tree_land.h
 table/unicode.h
 table/unmovable_land.h
 table/water_land.h
+
+# MD5
+3rdparty/md5/md5.cpp
+3rdparty/md5/md5.h
 
 # MiniLZO
 3rdparty/minilzo/lzoconf.h
