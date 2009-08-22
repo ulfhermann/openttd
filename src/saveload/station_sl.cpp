@@ -185,7 +185,7 @@ static uint16 _num_links;
 static uint16 _num_flows;
 static uint16 _cargo_source;
 static uint32 _cargo_source_xy;
-static uint16 _cargo_days;
+static uint8  _cargo_days;
 static Money  _cargo_feeder_share;
 
 static const SaveLoad _station_speclist_desc[] = {
@@ -236,7 +236,7 @@ const SaveLoad *GetGoodsDesc()
 		     SLE_VAR(GoodsEntry, last_age,            SLE_UINT8),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
-		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
+		 SLE_CONDMAP(GoodsEntry, cargo.packets,       REF_STATION_CARGO,          68, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_flows,          SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
@@ -266,15 +266,10 @@ static void Load_STNS()
 				SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
 				if (GB(_waiting_acceptance, 0, 12) != 0) {
 					/* Don't construct the packet with station here, because that'll fail with old savegames */
-					CargoPacket *cp = new CargoPacket();
+					CargoPacket *cp = new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days, _cargo_feeder_share);
 					/* In old versions, enroute_from used 0xFF as INVALID_STATION */
-					cp->source          = (CheckSavegameVersion(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
-					cp->count           = GB(_waiting_acceptance, 0, 12);
-					cp->days_in_transit = _cargo_days;
-					cp->feeder_share    = _cargo_feeder_share;
-					cp->source_xy       = _cargo_source_xy;
-					cp->days_in_transit = _cargo_days;
-					cp->feeder_share    = _cargo_feeder_share;
+					cp->source      = (CheckSavegameVersion(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
+					cp->source_xy   = _cargo_source_xy;
 					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
 					ge->cargo.Append(cp);
 				}

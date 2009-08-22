@@ -755,6 +755,27 @@ static inline size_t SlCalcListLen(const void *list)
 	return l->size() * type_size + type_size;
 }
 
+/**
+ * Return the size in bytes of a map
+ * @param map The std::multimap to find the size of
+ */
+static inline size_t SlCalcMapLen(const void *map, VarType conv)
+{
+	int size = 0;
+	if (conv == REF_STATION_CARGO) {
+		std::multimap<StationID, CargoPacket *> *l = (std::multimap<StationID, CargoPacket *> *) map;
+		size = l->size();
+	} else {
+		NOT_REACHED(); // define more types and add clauses here
+	}
+
+	int type_size = CheckSavegameVersion(69) ? 2 : 4;
+	/* Each entry is saved as type_size bytes, plus type_size bytes are used for the length
+	 * of the list */
+	return size * type_size + type_size;
+}
+
+
 
 /**
  * Save/Load a list.
@@ -809,6 +830,78 @@ void SlList(void *list, SLRefType conv)
 	}
 }
 
+static int ReferenceToKey(void *ptr, SLRefType rt) {
+	switch (rt) {
+		case REF_STATION_CARGO:
+			return ((CargoPacket *)ptr)->next;
+			break;
+		default:
+			NOT_REACHED();
+			break;
+	}
+}
+
+template<class MAP>
+void DoSlMap(MAP *l, SLRefType conv)
+{
+	switch (_sl.action) {
+		case SLA_SAVE: {
+			SlWriteUint32((uint32)l->size());
+
+			typename MAP::iterator iter;
+			for (iter = l->begin(); iter != l->end(); ++iter) {
+				void *ptr = iter->second;
+				SlWriteUint32((uint32)ReferenceToInt(ptr, conv));
+			}
+			break;
+		}
+		case SLA_LOAD: {
+			size_t length = CheckSavegameVersion(69) ? SlReadUint16() : SlReadUint32();
+
+			/* Load each reference and push to the end of the list */
+			for (size_t i = 0; i < length; i++) {
+				size_t data = CheckSavegameVersion(69) ? SlReadUint16() : SlReadUint32();
+				l->insert(std::make_pair(
+						static_cast<const typename MAP::key_type>(data),
+						reinterpret_cast<typename MAP::mapped_type>(data)));
+			}
+			break;
+		}
+		case SLA_PTRS: {
+			MAP temp = *l;
+
+			l->clear();
+			typename MAP::iterator iter;
+			for (iter = temp.begin(); iter != temp.end(); ++iter) {
+				void *ptr = IntToReference(reinterpret_cast<size_t>(iter->second), conv);
+				l->insert(std::make_pair(ReferenceToKey(ptr, conv), static_cast<typename MAP::mapped_type>(ptr)));
+			}
+			break;
+		}
+		default: NOT_REACHED();
+	}
+}
+
+/**
+ * Save/Load a map.
+ * @param map The map being manipulated
+ * @param conv SLRefType type of the map (<StationID, CargoPacket *> probably)
+ */
+void SlMap(void *map, SLRefType conv)
+{
+	/* Automatically calculate the length? */
+	if (_sl.need_length != NL_NONE) {
+		SlSetLength(SlCalcMapLen(map, conv));
+		/* Determine length only? */
+		if (_sl.need_length == NL_CALCLENGTH) return;
+	}
+
+	typedef std::multimap<StationID, CargoPacket *> StationCargoMap;
+	if (conv == REF_STATION_CARGO) {
+		StationCargoMap *l = (StationCargoMap *)map;
+		DoSlMap<StationCargoMap>(l, conv);
+	}
+}
 
 /** Are we going to save this object or not? */
 static inline bool SlIsObjectValidInSavegame(const SaveLoad *sld)
@@ -859,6 +952,7 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad *sld)
 		case SL_ARR:
 		case SL_STR:
 		case SL_LST:
+		case SL_MAP:
 			/* CONDITIONAL saveload types depend on the savegame version */
 			if (!SlIsObjectValidInSavegame(sld)) break;
 
@@ -868,6 +962,7 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad *sld)
 				case SL_ARR: return SlCalcArrayLen(sld->length, sld->conv);
 				case SL_STR: return SlCalcStringLen(GetVariableAddress(object, sld), sld->length, sld->conv);
 				case SL_LST: return SlCalcListLen(GetVariableAddress(object, sld));
+				case SL_MAP: return SlCalcMapLen(GetVariableAddress(object, sld), sld->conv);
 				default: NOT_REACHED();
 			}
 			break;
@@ -889,6 +984,7 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 		case SL_ARR:
 		case SL_STR:
 		case SL_LST:
+		case SL_MAP:
 			/* CONDITIONAL saveload types depend on the savegame version */
 			if (!SlIsObjectValidInSavegame(sld)) return false;
 			if (SlSkipVariableOnLoad(sld)) return false;
@@ -912,6 +1008,7 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 				case SL_ARR: SlArray(ptr, sld->length, conv); break;
 				case SL_STR: SlString(ptr, sld->length, conv); break;
 				case SL_LST: SlList(ptr, (SLRefType)conv); break;
+				case SL_MAP: SlMap(ptr, (SLRefType)conv); break;
 				default: NOT_REACHED();
 			}
 			break;
@@ -1495,6 +1592,7 @@ static size_t ReferenceToInt(const void *obj, SLRefType rt)
 		case REF_ORDER:     return ((const    Order*)obj)->index + 1;
 		case REF_ROADSTOPS: return ((const RoadStop*)obj)->index + 1;
 		case REF_ENGINE_RENEWS: return ((const EngineRenew*)obj)->index + 1;
+		case REF_STATION_CARGO:
 		case REF_CARGO_PACKET:  return ((const CargoPacket*)obj)->index + 1;
 		case REF_ORDERLIST:     return ((const   OrderList*)obj)->index + 1;
 		default: NOT_REACHED();
@@ -1569,6 +1667,7 @@ static void *IntToReference(size_t index, SLRefType rt)
 			_sl_ptrs_error = "Referencing invalid EngineRenew";
 			break;
 
+		case REF_STATION_CARGO:
 		case REF_CARGO_PACKET:
 			if (CargoPacket::IsValidID(index)) return CargoPacket::Get(index);
 			_sl_ptrs_error = "Referencing invalid CargoPacket";

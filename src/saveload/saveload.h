@@ -70,6 +70,7 @@ enum SLRefType {
 	REF_ENGINE_RENEWS = 6,
 	REF_CARGO_PACKET  = 7,
 	REF_ORDERLIST     = 8,
+	REF_STATION_CARGO = 9,
 };
 
 #define SL_MAX_VERSION 255
@@ -179,6 +180,7 @@ enum SaveLoadTypes {
 	SL_ARR         =  2,
 	SL_STR         =  3,
 	SL_LST         =  4,
+	SL_MAP         =  5,
 	/* non-normal save-load types */
 	SL_WRITEBYTE   =  8,
 	SL_VEH_INCLUDE =  9,
@@ -213,6 +215,7 @@ typedef SaveLoad SaveLoadGlobVarList;
 #define SLE_CONDARR(base, variable, type, length, from, to) SLE_GENERAL(SL_ARR, base, variable, type, length, from, to)
 #define SLE_CONDSTR(base, variable, type, length, from, to) SLE_GENERAL(SL_STR, base, variable, type, length, from, to)
 #define SLE_CONDLST(base, variable, type, from, to) SLE_GENERAL(SL_LST, base, variable, type, 0, from, to)
+#define SLE_CONDMAP(base, variable, type, from, to) SLE_GENERAL(SL_MAP, base, variable, type, 0, from, to)
 
 #define SLE_VAR(base, variable, type) SLE_CONDVAR(base, variable, type, 0, SL_MAX_VERSION)
 #define SLE_REF(base, variable, type) SLE_CONDREF(base, variable, type, 0, SL_MAX_VERSION)

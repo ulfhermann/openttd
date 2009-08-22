@@ -1153,26 +1153,26 @@ struct StationViewWindow : public Window {
 		}
 	}
 
-	void BuildCargoList(CargoID i, const CargoList & packets, CargoDataEntry * cargo) {
+	void BuildCargoList(CargoID i, const StationCargoList &packets, CargoDataEntry *cargo) {
 		const CargoDataEntry *source_dest = cached_destinations.Retrieve(i);
-		for (CargoList::List::const_iterator it = packets.Packets()->begin(); it != packets.Packets()->end(); it++) {
-			const CargoPacket *cp = *it;
+		for (StationCargoList::ConstIterator it = packets.Packets()->begin(); it != packets.Packets()->end(); it++) {
+			const CargoPacket *cp = it->second;
 
 			const CargoDataEntry *source_entry = source_dest->Retrieve(cp->source);
 			if (source_entry == NULL) {
-				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->count);
+				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->Count());
 				continue;
 			}
 
 			const CargoDataEntry *via_entry = source_entry->Retrieve(cp->next);
 			if (via_entry == NULL) {
-				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->count);
+				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->Count());
 				continue;
 			}
 
 			for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
 				CargoDataEntry * dest_entry = *dest_it;
-				uint val = DivideApprox(cp->count * dest_entry->GetCount(), via_entry->GetCount());
+				uint val = DivideApprox(cp->Count() * dest_entry->GetCount(), via_entry->GetCount());
 				ShowCargo(cargo, i, cp->source, cp->next, dest_entry->GetStation(), val);
 			}
 		}
