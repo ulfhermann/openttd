@@ -1,5 +1,12 @@
 /* $Id$ */
 
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file economy.cpp Handling of the economy. */
 
 #include "stdafx.h"
@@ -1115,8 +1122,8 @@ uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
 			uint cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
 			StationCargoList & list = st->goods[v->cargo_type].cargo;
-			if (list.ReservePacketsForLoading(v, cap, next_station) > 0) {
-				ret |= 1 << v->cargo_type;
+			if (list.MoveToVehicle(&v->reserved, cap, next_station, st->xy) > 0) {
+				SetBit(ret, v->cargo_type);
 			}
 		}
 	}
@@ -1146,9 +1153,9 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		next_station = orders->GetNextStoppingStation(v->cur_order_index, v->type == VEH_TRAIN || v->type == VEH_ROAD);
 	}
 
-	cargos_reserved |= ReserveConsist(st, v, next_station);
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--v->load_unload_time_rem != 0) {
+		cargos_reserved |= ReserveConsist(st, v, next_station);
 		return cargos_reserved;
 	}
 
@@ -1214,11 +1221,6 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
 			}
 
-			if (_settings_game.order.improved_load) {
-				if (ge->cargo.ReservePacketsForLoading(v, delivered, next_station) > 0) {
-					cargos_reserved |= 1 << v->cargo_type;
-				}
-			}
 			continue;
 		}
 
@@ -1246,14 +1248,15 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
 
-			if (v->cargo.Empty() && v->reserved.Count() > 0) {
-				TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
-			}
+			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 
-			if (!_settings_game.order.improved_load) {
-				ge->cargo.ReservePacketsForLoading(v, cap, next_station);
+			uint loaded = 0;
+			if (_settings_game.order.improved_load) {
+				loaded += v->reserved.MoveToVehicle(&v->cargo, cap, st->xy);
 			}
-			uint loaded = v->reserved.MoveToOtherVehicle(&v->cargo, cap, st->xy);
+			if (loaded < cap) {
+				loaded += ge->cargo.MoveToVehicle(&v->cargo, cap - loaded, next_station, st->xy);
+			}
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
 			 * loading them. Since this will cause
@@ -1272,7 +1275,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				unloading_time += loaded;
 
 				result |= 2;
-			} else if (_settings_game.order.improved_load && (cargos_reserved & 1 << v->cargo_type) != 0) {
+			} else if (_settings_game.order.improved_load && HasBit(cargos_reserved, v->cargo_type)) {
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
 				SetBit(cargo_not_full, v->cargo_type);

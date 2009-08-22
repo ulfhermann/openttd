@@ -1,5 +1,12 @@
 /* $Id$ */
 
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file autoreplace_cmd.cpp Deals with autoreplace execution but not the setup */
 
 #include "stdafx.h"
@@ -114,7 +121,7 @@ static void TransferCargo(Vehicle *old_veh, Vehicle *new_head, bool part_of_chai
 			uint amount = min(src->cargo.Count(), dest->cargo_cap - dest->cargo.Count());
 			if (amount <= 0) continue;
 
-			src->cargo.MoveToOtherVehicle(&dest->cargo, amount);
+			src->cargo.MoveToVehicle(&dest->cargo, amount);
 		}
 	}
 

@@ -1,5 +1,12 @@
 /* $Id$ */
 
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file cargopacket.cpp Implementation of the cargo packets */
 
 #include "stdafx.h"
@@ -291,8 +298,8 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 	return max_unload - remaining_unload;
 }
 
-template<class LIST>
-uint CargoList<LIST>::MovePacket(CargoList *dest, Iterator &it, uint cap, TileIndex load_place)
+template<class LIST> template <class OTHERLIST>
+uint CargoList<LIST>::MovePacket(CargoList<OTHERLIST> *dest, Iterator &it, uint cap, TileIndex load_place)
 {
 	CargoPacket *packet = Deref(it);
 	/* load the packet if possible */
@@ -313,7 +320,7 @@ uint CargoList<LIST>::MovePacket(CargoList *dest, Iterator &it, uint cap, TileIn
 	return ret;
 }
 
-uint VehicleCargoList::MoveToOtherVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place)
+uint VehicleCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place)
 {
 	uint orig_cap = cap;
 	Iterator it = packets.begin();
@@ -355,39 +362,31 @@ void CargoList<LIST>::UpdateFlows(StationID next, GoodsEntry * ge) {
 	}
 }
 
-uint StationCargoList::ReservePackets(Vehicle *v, uint cap, Iterator begin, Iterator end) {
+uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place) {
 	uint orig_cap = cap;
 	while(begin != end && cap > 0) {
-		CargoPacket * cp = begin->second;
-		if (cp->Count() <= cap) {
-			packets.erase(begin++);
-		} else {
-			cp = cp->Split(cap);
-		}
-		RemoveFromCache(cp);
-		cap -= cp->Count();
-		v->reserved.Append(cp);
+		cap -= MovePacket(dest, begin, cap, load_place);
 	}
 	return orig_cap - cap;
 }
 
-uint StationCargoList::ReservePacketsForLoading(Vehicle *v, uint cap, StationID selected_station) {
+uint StationCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, StationID selected_station, TileIndex load_place) {
 	uint orig_cap = cap;
 	Iterator begin;
 	Iterator end;
 	if (selected_station != INVALID_STATION) {
 		begin = this->packets.lower_bound(selected_station);
 		end = this->packets.upper_bound(selected_station);
-		cap -= ReservePackets(v, cap, begin, end);
+		cap -= MovePackets(dest, cap, begin, end, load_place);
 		if (cap > 0) {
 			begin = this->packets.lower_bound(INVALID_STATION);
 			end = this->packets.upper_bound(INVALID_STATION);
-			cap -= ReservePackets(v, cap, begin, end);
+			cap -= MovePackets(dest, cap, begin, end, load_place);
 		}
 	} else {
 		begin = this->packets.begin();
 		end = this->packets.end();
-		cap -= ReservePackets(v, cap, begin, end);
+		cap -= MovePackets(dest, cap, begin, end, load_place);
 	}
 	return orig_cap - cap;
 }
