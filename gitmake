@@ -32,7 +32,7 @@ smallmap-zoom-in: zoomlevels smallmap-zoom-out
 
 cargodist: station-gui smallmap-stats
 
-station-gui: flowmapping-vehload
+station-gui: cargomap
 
 smallmap-stats: flowmapping-vehload smallmap-zoom-in
 
@@ -54,5 +54,9 @@ diaglvl: tileiter
 
 tileiter: master
 
-push: master cargodist station-gui smallmap-stats flowmapping-vehload flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff
+cargolist: master
+
+cargomap: cargolist flowmapping-vehload
+
+push: master cargodist station-gui smallmap-stats flowmapping-vehload flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargolist cargomap
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
