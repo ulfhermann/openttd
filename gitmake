@@ -13,7 +13,7 @@ clean:
 %:
 	git checkout $@
 	git merge $(^F)
-#	make -j2
+	make -j4
 
 gitmake-origin: 
 	git fetch origin
@@ -22,7 +22,7 @@ gitmake-origin:
 master: gitmake-origin
 	git checkout $@
 	git pull
-#	make -j2
+	make -j4
 
 smallmap-zoom-out: master
 
