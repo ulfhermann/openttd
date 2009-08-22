@@ -1,5 +1,12 @@
 /* $Id$ */
 
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file misc_gui.cpp GUIs for a number of misc windows. */
 
 #include "stdafx.h"
@@ -381,6 +388,7 @@ struct AboutWindow : public Window {
 			"",
 			"  Alberto Demichelis - Squirrel scripting language © 2003-2008",
 			"  Markus F.X.J. Oberhumer - (Mini)LZO for loading old savegames © 1996-2008",
+			"  L. Peter Deutsch - MD5 implementation © 1999, 2000, 2002",
 			"  Michael Blunck - Pre-Signals and Semaphores © 2003",
 			"  George - Canal/Lock graphics © 2003-2004",
 			"  David Dallaston - Tram tracks",
