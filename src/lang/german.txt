@@ -1,5 +1,3 @@
-# $Id$
-
 ##name German
 ##ownname Deutsch
 ##isocode de_DE
@@ -12,7 +10,14 @@
 ##grflangid 0x02
 ##gender m w n p
 
-#
+
+# $Id$
+
+# This file is part of OpenTTD.
+# OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+# OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+
 
 ##id 0x0000
 STR_NULL                                                        :
@@ -2560,7 +2565,7 @@ STR_INDUSTRY_VIEW_PRODUCES_CARGO                                :{BLACK}Produzie
 STR_INDUSTRY_VIEW_PRODUCES_CARGO_CARGO                          :{BLACK}Produziert: {YELLOW}{STRING}{STRING}, {STRING}{STRING}
 ############ range for produces ends
 
-STR_CONFIG_GAME_PRODUCTION                                      :{WHITE}Produktion ändern
+STR_CONFIG_GAME_PRODUCTION                                      :{WHITE}Produktion ändern (vielfache von 8, bis 2040)
 
 # Vehicle lists
 STR_VEHICLE_LIST_TRAIN_CAPTION                                  :{WHITE}{STRING} - {COMMA} Z{P ug üge}
