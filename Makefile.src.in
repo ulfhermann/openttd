@@ -1,3 +1,10 @@
+# $Id$
+
+# This file is part of OpenTTD.
+# OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+# OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+
 CC_HOST      = !!CC_HOST!!
 CXX_HOST     = !!CXX_HOST!!
 CC_BUILD     = !!CC_BUILD!!
@@ -8,6 +15,7 @@ CFLAGS       = !!CFLAGS!!
 CFLAGS_BUILD = !!CFLAGS_BUILD!!
 LIBS         = !!LIBS!!
 LDFLAGS      = !!LDFLAGS!!
+LDFLAGS_BUILD= !!LDFLAGS_BUILD!!
 ROOT_DIR     = !!ROOT_DIR!!
 BIN_DIR      = !!BIN_DIR!!
 LANG_DIR     = !!LANG_DIR!!
@@ -156,7 +164,7 @@ ifeq ("$(SRC_OBJS_DIR)/$(DEPEND)","$(MAKEDEPEND)")
 DEP := $(MAKEDEPEND)
 $(SRC_OBJS_DIR)/$(DEPEND): $(SRC_DIR)/depend/depend.cpp
 	$(E) '$(STAGE) Compiling and linking $(DEPEND)'
-	$(Q)$(CXX_BUILD) $(CFLAGS_BUILD) -o $@ $<
+	$(Q)$(CXX_BUILD) $(CFLAGS_BUILD) $(LDFLAGS_BUILD) -o $@ $<
 endif
 
 # Make sure that only 'make depend' ALWAYS triggers a recheck
