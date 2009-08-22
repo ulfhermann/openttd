@@ -1,5 +1,12 @@
 /* $Id$ */
 
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file fios.cpp
  * This file contains functions for building file lists for the save/load dialogs.
  */
@@ -523,7 +530,7 @@ void FiosGetHeightmapList(SaveLoadDialogMode mode)
 #if defined(ENABLE_NETWORK)
 #include "core/smallvec_type.hpp"
 #include "network/network_content.h"
-#include "md5.h"
+#include "3rdparty/md5/md5.h"
 
 /** Basic data to distinguish a scenario. Used in the server list window */
 struct ScenarioIdentifier {
