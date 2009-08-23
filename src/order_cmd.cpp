@@ -853,11 +853,11 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	}
 
 	if (flags & DC_EXEC) {
-		v->cur_order_index = sel_ord;
-
 		if (v->type == VEH_ROAD) ClearSlot(RoadVehicle::From(v));
 
 		if (v->current_order.IsType(OT_LOADING)) v->LeaveStation();
+
+		v->cur_order_index = sel_ord;
 
 		InvalidateVehicleOrder(v, 0);
 	}
