@@ -840,7 +840,7 @@ void SlList(void *list, SLRefType conv)
 static int ReferenceToKey(void *ptr, SLRefType rt) {
 	switch (rt) {
 		case REF_STATION_CARGO:
-			return ((CargoPacket *)ptr)->next;
+			return ((CargoPacket *)ptr)->Next();
 			break;
 		default:
 			NOT_REACHED();

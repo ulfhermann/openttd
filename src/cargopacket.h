@@ -45,6 +45,7 @@ private:
 	Money feeder_share;     ///< Value of feeder pickup to be paid for on delivery of cargo
 	uint16 count;           ///< The amount of cargo in this packet
 	byte days_in_transit;   ///< Amount of days this packet has been in transit
+	StationID next;         ///< The station where the cargo is going right now
 public:
 	template<class LIST> friend class CargoList;
 	friend const struct SaveLoad *GetCargoPacketDesc();
@@ -60,7 +61,6 @@ public:
 	SourceID source_id;         ///< Index of source, INVALID_SOURCE if unknown/invalid
 	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain)
 	TileIndex loaded_at_xy;     ///< Location where this cargo has been loaded into the vehicle
-	StationID next;             ///< The station where the cargo is going right now
 
 	/**
 	 * Creates a new cargo packet
@@ -79,7 +79,7 @@ public:
 	 * @param dit number of days the cargo has been in transit
 	 * @param fs  feeder share the packet has already accumulated
 	 */
-	CargoPacket(uint16 cnt, byte dit, Money fs = 0) : feeder_share(fs), count(cnt), days_in_transit(dit) {}
+	CargoPacket(uint16 cnt, byte dit, Money fs = 0, StationID nxt = INVALID_STATION) : feeder_share(fs), count(cnt), days_in_transit(dit), next(nxt) {}
 
 	/** Destroy the packet */
 	~CargoPacket() { }
@@ -105,6 +105,7 @@ public:
 	FORCEINLINE uint16 Count() const {return count;}
 	FORCEINLINE Money FeederShare() const {return feeder_share;}
 	FORCEINLINE byte DaysInTransit() const {return days_in_transit;}
+	FORCEINLINE StationID Next() const {return next;}
 };
 
 /**
@@ -239,6 +240,12 @@ public:
 
 	virtual void Insert(CargoPacket *cp) = 0;
 
+	/**
+	 * route all packets with station "to" as next hop to a different place, except "curr"
+	 */
+	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge);
+
+
 protected:
 
 	LIST packets;         ///< The cargo packets in this list
@@ -267,7 +274,7 @@ protected:
 	uint TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station);
 	uint DeliverPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station);
 
-	virtual std::pair<Iterator, Iterator> EqualRange(CargoPacket *cp) = 0;
+	virtual std::pair<Iterator, Iterator> FindByNext(StationID to) = 0;
 };
 
 /**
@@ -278,7 +285,7 @@ protected:
 	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
 	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
 
-	virtual std::pair<Iterator, Iterator> EqualRange(CargoPacket *cp)
+	virtual std::pair<Iterator, Iterator> FindByNext(StationID to)
 		{return std::make_pair(packets.begin(), packets.end());}
 
 public:
@@ -316,8 +323,6 @@ public:
 	uint MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place = INVALID_TILE);
 
 	virtual void Insert(CargoPacket * cp) {packets.push_back(cp);}
-
-	void Unreserve(StationCargoList *dest);
 };
 
 /**
@@ -327,17 +332,12 @@ class StationCargoList : public CargoList<StationCargoPacketMap> {
 public:
 	uint MoveToVehicle(VehicleCargoList *dest, uint cap, StationID next_station, TileIndex load_place);
 
-	/**
-	 * route all packets with station "to" as next hop to a different place, except "curr"
-	 */
-	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge);
-
-	virtual void Insert(CargoPacket * cp) {packets.insert(std::make_pair(cp->next, cp));}
+	virtual void Insert(CargoPacket * cp) {packets.insert(std::make_pair(cp->Next(), cp));}
 protected:
 	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
 
-	virtual std::pair<Iterator, Iterator> EqualRange(CargoPacket *cp)
-		{return packets.equal_range(cp->next);}
+	virtual std::pair<Iterator, Iterator> FindByNext(StationID to)
+		{return packets.equal_range(to);}
 };
 
 
