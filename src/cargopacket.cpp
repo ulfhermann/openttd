@@ -27,9 +27,9 @@ void InitializeCargoPackets()
 
 CargoPacket::CargoPacket(StationID in_source, StationID in_next, uint16 in_count, SourceType source_type, SourceID in_source_id) :
 	count(in_count),
+	next(in_next),
 	source(in_source),
-	source_id(in_source_id),
-	next(in_next)
+	source_id(in_source_id)
 {
 	if (Station::IsValidID(source)) {
 		assert(count != 0);
@@ -112,7 +112,7 @@ void CargoList<LIST>::Append(CargoPacket *cp, bool merge)
 	assert(cp != NULL);
 
 	if (merge) {
-		std::pair<Iterator, Iterator> range = EqualRange(cp);
+		std::pair<Iterator, Iterator> range = FindByNext(cp->next);
 		for (Iterator it = range.first; it != range.second; it++) {
 			CargoPacket *in_list = Deref(it);
 			if (in_list->SameSource(cp) && in_list->count + cp->count <= CargoPacket::MAX_COUNT) {
@@ -181,18 +181,10 @@ uint CargoList<LIST>::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEnt
 template<class LIST>
 uint CargoList<LIST>::TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
 	CargoPacket *p = Deref(c);
-	if (p->Count() <= remaining_unload) {
-		packets.erase(c++);
-	} else {
-		p = p->Split(remaining_unload);
-		++c;
-	}
-	RemoveFromCache(p);
 	p->feeder_share += payment->PayTransfer(p, p->count);
 	p->next = dest->UpdateFlowStatsTransfer(p->source, p->count, curr_station);
-	dest->cargo.Append(p);
 	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
-	return p->count;
+	return MovePacket(&dest->cargo, c, remaining_unload);
 }
 
 UnloadType VehicleCargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) const {
@@ -312,10 +304,10 @@ uint CargoList<LIST>::MovePacket(CargoList<OTHERLIST> *dest, Iterator &it, uint 
 		this->packets.erase(it++);
 	}
 	RemoveFromCache(packet);
-	uint ret = packet->count;
 	if (load_place != INVALID_TILE) {
 		packet->loaded_at_xy = load_place;
 	}
+	uint ret = packet->count;
 	dest->Append(packet);
 	return ret;
 }
@@ -344,11 +336,18 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 	}
 }
 
-void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
-	for(Iterator it = packets.begin(); it != packets.end(); ++it) {
-		CargoPacket * packet = it->second;
-		if (packet->next == to) {
-			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->Count(), curr);
+template<class LIST>
+void CargoList<LIST>::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
+	std::pair<Iterator, Iterator> range = FindByNext(to);
+	for(Iterator it = range.first; it != range.second;) {
+		CargoPacket * packet = Deref(it);
+		if(packet->next == to) {
+			packets.erase(it++);
+			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
+			assert(packet->next != to);
+			Insert(packet); // legal, as insert doesn't invalidate iterators in (multi)maps
+		} else {
+			++it;
 		}
 	}
 }
@@ -389,14 +388,6 @@ uint StationCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, StationID
 		cap -= MovePackets(dest, cap, begin, end, load_place);
 	}
 	return orig_cap - cap;
-}
-
-void VehicleCargoList::Unreserve(StationCargoList *dest) {
-	for(Iterator it = packets.begin(); it != packets.end();) {
-		dest->Append(*it);
-		packets.erase(it++);
-	}
-	InvalidateCache();
 }
 
 template<class LIST>
