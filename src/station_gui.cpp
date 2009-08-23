@@ -1167,20 +1167,20 @@ struct StationViewWindow : public Window {
 
 			const CargoDataEntry *source_entry = source_dest->Retrieve(cp->source);
 			if (source_entry == NULL) {
-				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->Count());
+				ShowCargo(cargo, i, cp->source, cp->Next(), INVALID_STATION, cp->Count());
 				continue;
 			}
 
-			const CargoDataEntry *via_entry = source_entry->Retrieve(cp->next);
+			const CargoDataEntry *via_entry = source_entry->Retrieve(cp->Next());
 			if (via_entry == NULL) {
-				ShowCargo(cargo, i, cp->source, cp->next, INVALID_STATION, cp->Count());
+				ShowCargo(cargo, i, cp->source, cp->Next(), INVALID_STATION, cp->Count());
 				continue;
 			}
 
 			for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
 				CargoDataEntry * dest_entry = *dest_it;
 				uint val = DivideApprox(cp->Count() * dest_entry->GetCount(), via_entry->GetCount());
-				ShowCargo(cargo, i, cp->source, cp->next, dest_entry->GetStation(), val);
+				ShowCargo(cargo, i, cp->source, cp->Next(), dest_entry->GetStation(), val);
 			}
 		}
 	}
