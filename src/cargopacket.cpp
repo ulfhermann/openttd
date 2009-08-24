@@ -172,7 +172,7 @@ CargoPacket * CargoList::TransferPacket(List::iterator & c, uint & remaining_unl
 }
 
 UnloadType CargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) const {
-	if (ul.dest->flows[p->source].empty()) {
+	if (ul.dest->flows[p->source].empty() || ul.next_station == INVALID_STATION) {
 		/* there is no plan: use normal unloading */
 		return WillUnloadOld(ul, p);
 	} else {
@@ -236,7 +236,7 @@ UnloadType CargoList::WillUnloadCargoDist(const UnloadDescription & ul, const Ca
 		} else if (ul.flags & UL_TRANSFER) {
 			/* transfer forced, plan still fulfilled as above */
 			return UL_TRANSFER;
-		} else if (ul.next_station == via || ul.next_station == INVALID_STATION) {
+		} else if (ul.next_station == via) {
 			/* vehicle goes to the packet's next hop or has nondeterministic order: keep the packet*/
 			return UL_KEEP;
 		} else {

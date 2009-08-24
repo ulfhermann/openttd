@@ -3387,19 +3387,13 @@ void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next) {
 	if (source == INVALID_STATION || next == INVALID_STATION || flows.empty()) return;
 	FlowStatSet & flow_stats = flows[source];
 	FlowStatSet::iterator flow_it = flow_stats.begin();
-	if (flow_it != flow_stats.end()) {
+	while (flow_it != flow_stats.end()) {
 		StationID via = flow_it->via;
-		if (via == next) {
+		if (via == next) { //usually the first one is the correct one
 			UpdateFlowStats(flow_stats, flow_it, count);
 			return;
 		} else {
-			while(++flow_it != flow_stats.end()) {
-				via = flow_it->via;
-				if (via == next) {
-					UpdateFlowStats(flow_stats, flow_it, count);
-					return;
-				}
-			}
+			++flow_it;
 		}
 	}
 }
