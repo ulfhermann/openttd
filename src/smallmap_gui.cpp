@@ -1261,10 +1261,8 @@ public:
 		int hy = this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top;
 		int hvx = ScaleByZoomLower(hy * 4 - hx * 2, this->zoom);
 		int hvy = ScaleByZoomLower(hx * 2 + hy * 4, this->zoom);
-		this->scroll_x = max(-hvx, this->scroll_x);
-		this->scroll_y = max(-hvy, this->scroll_y);
-		this->scroll_x = min(MapMaxX() * TILE_SIZE, this->scroll_x);
-		this->scroll_y = min(MapMaxY() * TILE_SIZE - hvy, this->scroll_y);
+		this->scroll_x = Clamp(this->scroll_x, -hvx, MapMaxX() * TILE_SIZE);
+		this->scroll_y = Clamp(this->scroll_y, -hvy, MapMaxY() * TILE_SIZE - hvy);
 	}
 
 	virtual void OnResize(Point delta)
