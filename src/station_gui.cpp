@@ -1414,15 +1414,17 @@ struct StationViewWindow : public Window {
 			DrawString(this->widget[SVW_ACCEPTLIST].left + 2, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_STATION_VIEW_CARGO_RATINGS_TITLE);
 			y += 10;
 
+			uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
 			const CargoSpec *cs;
 			FOR_ALL_CARGOSPECS(cs) {
 				const GoodsEntry *ge = &st->goods[cs->Index()];
 				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) continue;
 
 				SetDParam(0, cs->name);
-				SetDParam(2, ToPercent8(ge->rating));
-				SetDParam(1, STR_CARGO_RATING_APPALLING + (ge->rating >> 5));
-				DrawString(this->widget[SVW_ACCEPTLIST].left + 8, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_STATION_VIEW_CARGO_RATING);
+				SetDParam(1, DivideApprox(ge->supply * 30, scale));
+				SetDParam(3, ToPercent8(ge->rating));
+				SetDParam(2, STR_CARGO_RATING_APPALLING + (ge->rating >> 5));
+				DrawString(this->widget[SVW_ACCEPTLIST].left + 8, this->widget[SVW_ACCEPTLIST].right - 2, y, STR_STATION_VIEW_CARGO_SUPPLY_RATING);
 				y += 10;
 			}
 		}
