@@ -25,6 +25,8 @@
  * \li AISubsidy::GetSourceIndex
  * \li AISubsidy::GetDestinationType
  * \li AISubsidy::GetDestinationIndex
+ * \li AITown::GetLastMonthTransportedPercentage
+ * \li AIIndustry::GetLastMonthTransportedPercentage
  *
  * API removals:
  * \li AIOrder::ChangeOrder
@@ -35,6 +37,7 @@
  * \li AISubsidy::GetSource
  * \li AISubsidy::DestinationIsTown
  * \li AISubsidy::GetDestination
+ * \li AITown::GetMaxProduction
  * \li AIWaypoint::WAYPOINT_INVALID
  *
  * Other changes:
