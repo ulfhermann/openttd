@@ -144,7 +144,7 @@ static const NWidgetPart _nested_group_widgets[] = {
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_CREATE_GROUP), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_CREATE_TOOLTIP),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_DELETE_GROUP), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_DELETE_TOOLTIP),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_RENAME_GROUP), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_RENAME_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY1), SetMinimalSize(92, 25), SetFill(1, 0), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY1), SetMinimalSize(92, 25), SetFill(true, false), EndContainer(),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_REPLACE_PROTECTION), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_REPLACE_PROTECTION_TOOLTIP),
 				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY2), SetMinimalSize(12, 25), EndContainer(),
 			EndContainer(),
@@ -174,9 +174,10 @@ static const NWidgetPart _nested_group_widgets[] = {
 
 class VehicleGroupWindow : public BaseVehicleListWindow {
 private:
-	GroupID group_sel;
-	VehicleID vehicle_sel;
-	GUIGroupList groups;
+	GroupID group_sel;     ///< Selected group
+	VehicleID vehicle_sel; ///< Selected vehicle
+	GroupID group_rename;  ///< Group being renamed, INVALID_GROUP if none
+	GUIGroupList groups;   ///< List of groups
 
 	/**
 	 * (Re)Build the group list.
@@ -268,6 +269,7 @@ public:
 
 		this->group_sel = ALL_GROUP;
 		this->vehicle_sel = INVALID_VEHICLE;
+		this->group_rename = INVALID_GROUP;
 
 		this->widget[GRP_WIDGET_LIST_VEHICLE].tooltips   = STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP + this->vehicle_type;
 		this->widget[GRP_WIDGET_AVAILABLE_VEHICLES].data = STR_VEHICLE_LIST_AVAILABLE_TRAINS + this->vehicle_type;
@@ -317,6 +319,11 @@ public:
 		} else {
 			this->vehicles.ForceResort();
 			this->groups.ForceResort();
+		}
+
+		if (this->group_rename != INVALID_GROUP && !Group::IsValidID(this->group_rename)) {
+			DeleteWindowByClass(WC_QUERY_STRING);
+			this->group_rename = INVALID_GROUP;
 		}
 
 		if (!(IsAllGroupID(this->group_sel) || IsDefaultGroupID(this->group_sel) || Group::IsValidID(this->group_sel))) {
@@ -494,9 +501,11 @@ public:
 				break;
 			}
 
-			case GRP_WIDGET_CREATE_GROUP: // Create a new group
-				DoCommandP(0, this->vehicle_type, 0, CMD_CREATE_GROUP | CMD_MSG(STR_ERROR_GROUP_CAN_T_CREATE));
+			case GRP_WIDGET_CREATE_GROUP: { // Create a new group
+				extern void CcCreateGroup(bool success, TileIndex tile, uint32 p1, uint32 p2);
+				DoCommandP(0, this->vehicle_type, 0, CMD_CREATE_GROUP | CMD_MSG(STR_ERROR_GROUP_CAN_T_CREATE), CcCreateGroup);
 				break;
+			}
 
 			case GRP_WIDGET_DELETE_GROUP: { // Delete the selected group
 				GroupID group = this->group_sel;
@@ -506,15 +515,9 @@ public:
 				break;
 			}
 
-			case GRP_WIDGET_RENAME_GROUP: { // Rename the selected roup
-				assert(Group::IsValidID(this->group_sel));
-
-				const Group *g = Group::Get(this->group_sel);
-
-				SetDParam(0, g->index);
-				ShowQueryString(STR_GROUP_NAME, STR_GROUP_RENAME_CAPTION, MAX_LENGTH_GROUP_NAME_BYTES, MAX_LENGTH_GROUP_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
-			} break;
-
+			case GRP_WIDGET_RENAME_GROUP: // Rename the selected roup
+				this->ShowRenameGroupWindow(this->group_sel);
+				break;
 
 			case GRP_WIDGET_AVAILABLE_VEHICLES:
 				ShowBuildVehicleWindow(INVALID_TILE, this->vehicle_type);
@@ -605,9 +608,8 @@ public:
 
 	virtual void OnQueryTextFinished(char *str)
 	{
-		if (str == NULL) return;
-
-		DoCommandP(0, this->group_sel, 0, CMD_RENAME_GROUP | CMD_MSG(STR_ERROR_GROUP_CAN_T_RENAME), NULL, str);
+		if (str != NULL) DoCommandP(0, this->group_rename, 0, CMD_RENAME_GROUP | CMD_MSG(STR_ERROR_GROUP_CAN_T_RENAME), NULL, str);
+		this->group_rename = INVALID_GROUP;
 	}
 
 	virtual void OnResize(Point delta)
@@ -677,6 +679,14 @@ public:
 		this->InvalidateWidget(GRP_WIDGET_LIST_VEHICLE);
 	}
 
+	void ShowRenameGroupWindow(GroupID group)
+	{
+		assert(Group::IsValidID(group));
+		this->group_rename = group;
+		SetDParam(0, group);
+		ShowQueryString(STR_GROUP_NAME, STR_GROUP_RENAME_CAPTION, MAX_LENGTH_GROUP_NAME_BYTES, MAX_LENGTH_GROUP_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
+	}
+
 	/**
 	 * Tests whether a given vehicle is selected in the window, and unselects it if necessary.
 	 * Called when the vehicle is deleted.
@@ -706,20 +716,44 @@ void ShowCompanyGroup(CompanyID company, VehicleType vehicle_type)
 }
 
 /**
+ * Finds a group list window determined by vehicle type and owner
+ * @param vt vehicle type
+ * @param owner owner of groups
+ * @return pointer to VehicleGroupWindow, NULL if not found
+ */
+static inline VehicleGroupWindow *FindVehicleGroupWindow(VehicleType vt, Owner owner)
+{
+	return (VehicleGroupWindow *)FindWindowById(GetWindowClassForVehicleType(vt), (vt << 11) | VLW_GROUP_LIST | owner);
+}
+
+/**
+ * Opens a 'Rename group' window for newly created group
+ * @param success did command succeed?
+ * @param tile unused
+ * @param p1 vehicle type
+ * @param p2 unused
+ * @see CmdCreateGroup
+ */
+void CcCreateGroup(bool success, TileIndex tile, uint32 p1, uint32 p2)
+{
+	if (!success) return;
+	assert(p1 <= VEH_AIRCRAFT);
+
+	VehicleGroupWindow *w = FindVehicleGroupWindow((VehicleType)p1, _current_company);
+	if (w != NULL) w->ShowRenameGroupWindow(_new_group_id);
+}
+
+/**
  * Removes the highlight of a vehicle in a group window
  * @param *v Vehicle to remove all highlights from
  */
 void DeleteGroupHighlightOfVehicle(const Vehicle *v)
 {
-	VehicleGroupWindow *w;
-
 	/* If we haven't got any vehicles on the mouse pointer, we haven't got any highlighted in any group windows either
 	 * If that is the case, we can skip looping though the windows and save time
 	 */
 	if (_special_mouse_mode != WSM_DRAGDROP) return;
 
-	VehicleType vehicle_type = v->type;
-	w = dynamic_cast<VehicleGroupWindow *>(FindWindowById(GetWindowClassForVehicleType(vehicle_type), (vehicle_type << 11) | VLW_GROUP_LIST | v->owner));
+	VehicleGroupWindow *w = FindVehicleGroupWindow(v->type, v->owner);
 	if (w != NULL) w->UnselectVehicle(v->index);
 }
-
