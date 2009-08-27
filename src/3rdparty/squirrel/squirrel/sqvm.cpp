@@ -336,6 +336,10 @@ bool SQVM::StartCall(SQClosure *closure,SQInteger target,SQInteger args,SQIntege
 		SQInteger ndef = func->_ndefaultparams;
 		if(ndef && nargs < paramssize) {
 			SQInteger diff = paramssize - nargs;
+			if (diff > ndef) {
+				Raise_Error(_SC("wrong number of parameters"));
+				return false;
+			}
 			for(SQInteger n = ndef - diff; n < ndef; n++) {
 				_stack._vals[stackbase + (nargs++)] = closure->_defaultparams[n];
 			}
@@ -770,9 +774,8 @@ common_call:
 							_GUARD(gen->Yield(this));
 							Return(1, ct_target, clo);
 							STK(ct_target) = gen;
-							CLEARSTACK(last_top);
-							continue;
 						}
+						CLEARSTACK(last_top);
 						}
 						continue;
 					case OT_NATIVECLOSURE: {
