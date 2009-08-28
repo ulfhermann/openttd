@@ -988,7 +988,6 @@ class SmallMapWindow : public Window
 	}
 
 	class LinkDrawer {
-		typedef std::set<StationID> StationIDSet;
 
 	protected:
 		virtual void DrawContent() = 0;
@@ -997,7 +996,6 @@ class SmallMapWindow : public Window
 
 		Point pta, ptb;
 		SmallMapWindow * window;
-		StationIDSet seen_stations;
 
 		void DrawLink(const Station *sta, const Station *stb) {
 			this->pta = window->GetStationMiddle(sta);
@@ -1051,6 +1049,10 @@ class SmallMapWindow : public Window
 		void DrawLinks(SmallMapWindow * window)
 		{
 			this->window = window;
+
+			std::set<StationID> seen_stations;
+			std::set<std::pair<StationID, StationID> > seen_links;
+
 			const Station * sta;
 			FOR_ALL_STATIONS(sta) {
 				if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
@@ -1061,15 +1063,18 @@ class SmallMapWindow : public Window
 					CargoID c = tbl.type;
 					const LinkStatMap & links = sta->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
+						StationID from = sta->index;
 						StationID to = i->first;
-						if (to > sta->index) continue;
 						if (Station::IsValidID(to) && seen_stations.find(to) == seen_stations.end()) {
 							const Station *stb = Station::Get(to);
+
 							if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
+							if (seen_links.find(std::make_pair(to, from)) != seen_links.end()) continue;
 
 							DrawForwBackLinks(sta, stb);
 							seen_stations.insert(to);
 						}
+						seen_links.insert(std::make_pair(from, to));
 					}
 				}
 				seen_stations.clear();
