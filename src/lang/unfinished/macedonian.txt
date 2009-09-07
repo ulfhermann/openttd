@@ -229,9 +229,9 @@ STR_BUTTON_OK                                                   :{BLACK}Во р�
 
 
 # The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Населеност
-STR_SORT_BY_NAME                                                :{BLACK}Име
-STR_SORT_BY_DATE                                                :{BLACK}Датум
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Населеност
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Име
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Датум
 STR_SORT_BY_PRODUCTION                                          :Производство
 STR_SORT_BY_TYPE                                                :Тип
 STR_SORT_BY_TRANSPORTED                                         :Транспортирано
@@ -424,12 +424,12 @@ STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Џез Џубокс
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Сите
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Стар Стил
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Нов Стил
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Свое 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Свое 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Сите
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Стар Стил
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Нов Стил
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Свое 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Свое 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Гласност на музка
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Гласност на ефекти
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}МИН  '  '  ' '  '  '  МАКС
@@ -438,8 +438,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Песна{SETX 88}{BLACK}{TINYFONT}Наслов
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Измешај
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Песна
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Наслов
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Измешај
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Програм
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Прескокни на претходна избрана песна
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Прескокни на следна избрана песна
@@ -1015,19 +1016,19 @@ STR_VEHICLE_LIST_SEND_SHIP_TO_DEPOT                             :Испрати 
 
 # Build vehicle window
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Шински возила
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Нов авион
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Шински возила
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Нов авион
 
 
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Листа за селекција од авиони - кликни на авионот за информации
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Листа за селекција од авиони - кликни на авионот за информации
 
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Направи авион
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Направи авион
 
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Направи авион од селектираниот тип
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Направи авион од селектираниот тип
 
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Преименувај
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Преименувај
 
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Преименувај го типот на авиони
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Преименувај го типот на авиони
 
 STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Преименувај го типот на авиони
 
@@ -1286,7 +1287,7 @@ STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Не м�
 
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Не може да се прати авионот во гаража...
 
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Не може да се направи авионот...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Не може да се направи авионот...
 
 STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Не може да се преименува типот на авиони...
 
@@ -1400,7 +1401,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

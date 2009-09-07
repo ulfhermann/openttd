@@ -59,19 +59,19 @@ public:
 	 * Get the VehicleID of the crashed vehicle.
 	 * @return The crashed vehicle.
 	 */
-	VehicleID GetVehicleID() { return vehicle; }
+	VehicleID GetVehicleID() { return this->vehicle; }
 
 	/**
 	 * Find the tile the vehicle crashed.
 	 * @return The crash site.
 	 */
-	TileIndex GetCrashSite() { return crash_site; }
+	TileIndex GetCrashSite() { return this->crash_site; }
 
 	/**
 	 * Get the reason for crashing
 	 * @return The reason for crashing
 	 */
-	CrashReason GetCrashReason() { return crash_reason; }
+	CrashReason GetCrashReason() { return this->crash_reason; }
 
 private:
 	TileIndex crash_site;
@@ -105,7 +105,7 @@ public:
 	 * Get the SubsidyID of the subsidy.
 	 * @return The subsidy id.
 	 */
-	SubsidyID GetSubsidyID() { return subsidy_id; }
+	SubsidyID GetSubsidyID() { return this->subsidy_id; }
 
 private:
 	SubsidyID subsidy_id;
@@ -137,7 +137,7 @@ public:
 	 * Get the SubsidyID of the subsidy.
 	 * @return The subsidy id.
 	 */
-	SubsidyID GetSubsidyID() { return subsidy_id; }
+	SubsidyID GetSubsidyID() { return this->subsidy_id; }
 
 private:
 	SubsidyID subsidy_id;
@@ -169,7 +169,7 @@ public:
 	 * Get the SubsidyID of the subsidy.
 	 * @return The subsidy id.
 	 */
-	SubsidyID GetSubsidyID() { return subsidy_id; }
+	SubsidyID GetSubsidyID() { return this->subsidy_id; }
 
 private:
 	SubsidyID subsidy_id;
@@ -201,7 +201,7 @@ public:
 	 * Get the SubsidyID of the subsidy.
 	 * @return The subsidy id.
 	 */
-	 SubsidyID GetSubsidyID() { return subsidy_id; }
+	 SubsidyID GetSubsidyID() { return this->subsidy_id; }
 
 private:
 	SubsidyID subsidy_id;
@@ -305,7 +305,7 @@ public:
 	 */
 	AIEventCompanyNew(Owner owner) :
 		AIEvent(AI_ET_COMPANY_NEW),
-		owner((AICompany::CompanyID)(byte)owner)
+		owner((AICompany::CompanyID)owner)
 	{}
 
 	/**
@@ -319,7 +319,7 @@ public:
 	 * Get the CompanyID of the company that has been created.
 	 * @return The CompanyID of the company.
 	 */
-	AICompany::CompanyID GetCompanyID() { return owner; }
+	AICompany::CompanyID GetCompanyID() { return this->owner; }
 
 private:
 	AICompany::CompanyID owner;
@@ -338,7 +338,7 @@ public:
 	 */
 	AIEventCompanyInTrouble(Owner owner) :
 		AIEvent(AI_ET_COMPANY_IN_TROUBLE),
-		owner((AICompany::CompanyID)(byte)owner)
+		owner((AICompany::CompanyID)owner)
 	{}
 
 	/**
@@ -352,10 +352,58 @@ public:
 	 * Get the CompanyID of the company that is in trouble.
 	 * @return The CompanyID of the company in trouble.
 	 */
-	AICompany::CompanyID GetCompanyID() { return owner; }
+	AICompany::CompanyID GetCompanyID() { return this->owner; }
 
 private:
 	AICompany::CompanyID owner;
+};
+
+/**
+ * Event Company Ask Merger, indicating a company can be bought (cheaply) by you.
+ */
+class AIEventCompanyAskMerger : public AIEvent {
+public:
+	static const char *GetClassName() { return "AIEventCompanyAskMerger"; }
+
+	/**
+	 * @param owner The company that can be bough.
+	 * @param value The value/costs of buying the company.
+	 */
+	AIEventCompanyAskMerger(Owner owner, int32 value) :
+		AIEvent(AI_ET_COMPANY_MERGER),
+		owner((AICompany::CompanyID)owner),
+		value(value)
+	{}
+
+	/**
+	 * Convert an AIEvent to the real instance.
+	 * @param instance The instance to convert.
+	 * @return The converted instance.
+	 */
+	static AIEventCompanyAskMerger *Convert(AIEvent *instance) { return (AIEventCompanyAskMerger *)instance; }
+
+	/**
+	 * Get the CompanyID of the company that can be bought.
+	 * @return The CompanyID of the company that can be bought.
+	 * @note If the company is bought this will become invalid.
+	 */
+	AICompany::CompanyID GetCompanyID() { return this->owner; }
+
+	/**
+	 * Get the value of the new company.
+	 * @return The value of the new company.
+	 */
+	int32 GetValue() { return this->value; }
+
+	/**
+	 * Take over the company for this merger.
+	 * @return true if the merger was a success.
+	 */
+	bool AcceptMerger();
+
+private:
+	AICompany::CompanyID owner;
+	int32 value;
 };
 
 /**
@@ -372,8 +420,8 @@ public:
 	 */
 	AIEventCompanyMerger(Owner old_owner, Owner new_owner) :
 		AIEvent(AI_ET_COMPANY_MERGER),
-		old_owner((AICompany::CompanyID)(byte)old_owner),
-		new_owner((AICompany::CompanyID)(byte)new_owner)
+		old_owner((AICompany::CompanyID)old_owner),
+		new_owner((AICompany::CompanyID)new_owner)
 	{}
 
 	/**
@@ -390,13 +438,13 @@ public:
 	 *  AICompany::ResolveCompanyID will return COMPANY_COMPANY. It's
 	 *  only usefull if you're keeping track of company's yourself.
 	 */
-	AICompany::CompanyID GetOldCompanyID() { return old_owner; }
+	AICompany::CompanyID GetOldCompanyID() { return this->old_owner; }
 
 	/**
 	 * Get the CompanyID of the new owner.
 	 * @return The CompanyID of the new owner.
 	 */
-	AICompany::CompanyID GetNewCompanyID() { return new_owner; }
+	AICompany::CompanyID GetNewCompanyID() { return this->new_owner; }
 
 private:
 	AICompany::CompanyID old_owner;
@@ -415,7 +463,7 @@ public:
 	 */
 	AIEventCompanyBankrupt(Owner owner) :
 		AIEvent(AI_ET_COMPANY_BANKRUPT),
-		owner((AICompany::CompanyID)(byte)owner)
+		owner((AICompany::CompanyID)owner)
 	{}
 
 	/**
@@ -429,7 +477,7 @@ public:
 	 * Get the CompanyID of the company that has gone bankrupt.
 	 * @return The CompanyID of the company that has gone bankrupt.
 	 */
-	AICompany::CompanyID GetCompanyID() { return owner; }
+	AICompany::CompanyID GetCompanyID() { return this->owner; }
 
 private:
 	AICompany::CompanyID owner;
@@ -461,7 +509,7 @@ public:
 	 * Get the VehicleID of the vehicle that is lost.
 	 * @return The VehicleID of the vehicle that is lost.
 	 */
-	VehicleID GetVehicleID() { return vehicle_id; }
+	VehicleID GetVehicleID() { return this->vehicle_id; }
 
 private:
 	VehicleID vehicle_id;
@@ -493,7 +541,7 @@ public:
 	 * Get the VehicleID of the vehicle that is waiting in a depot.
 	 * @return The VehicleID of the vehicle that is waiting in a depot.
 	 */
-	VehicleID GetVehicleID() { return vehicle_id; }
+	VehicleID GetVehicleID() { return this->vehicle_id; }
 
 private:
 	VehicleID vehicle_id;
@@ -525,7 +573,7 @@ public:
 	 * Get the VehicleID of the vehicle that lost money.
 	 * @return The VehicleID of the vehicle that lost money.
 	 */
-	VehicleID GetVehicleID() { return vehicle_id; }
+	VehicleID GetVehicleID() { return this->vehicle_id; }
 
 private:
 	VehicleID vehicle_id;
@@ -557,7 +605,7 @@ public:
 	 * Get the IndustryID of the new industry.
 	 * @return The IndustryID of the industry.
 	 */
-	IndustryID GetIndustryID() { return industry_id; }
+	IndustryID GetIndustryID() { return this->industry_id; }
 
 private:
 	IndustryID industry_id;
@@ -589,7 +637,7 @@ public:
 	 * Get the IndustryID of the closing industry.
 	 * @return The IndustryID of the industry.
 	 */
-	IndustryID GetIndustryID() { return industry_id; }
+	IndustryID GetIndustryID() { return this->industry_id; }
 
 private:
 	IndustryID industry_id;
@@ -621,7 +669,7 @@ public:
 	 * Get the EngineID of the new engine.
 	 * @return The EngineID of the new engine.
 	 */
-	EngineID GetEngineID() { return engine; }
+	EngineID GetEngineID() { return this->engine; }
 
 private:
 	EngineID engine;
@@ -655,13 +703,13 @@ public:
 	 * Get the StationID of the visited station.
 	 * @return The StationID of the visited station.
 	 */
-	StationID GetStationID() { return station; }
+	StationID GetStationID() { return this->station; }
 
 	/**
 	 * Get the VehicleID of the first vehicle.
 	 * @return The VehicleID of the first vehicle.
 	 */
-	VehicleID GetVehicleID() { return vehicle; }
+	VehicleID GetVehicleID() { return this->vehicle; }
 
 private:
 	StationID station;
@@ -694,7 +742,7 @@ public:
 	 * Get the StationID of the station containing the affected airport.
 	 * @return The StationID of the station containing the affected airport.
 	 */
-	StationID GetStationID() { return station; }
+	StationID GetStationID() { return this->station; }
 
 private:
 	StationID station;
@@ -726,7 +774,7 @@ public:
 	 * Get the StationID of the station containing the affected airport.
 	 * @return The StationID of the station containing the affected airport.
 	 */
-	StationID GetStationID() { return station; }
+	StationID GetStationID() { return this->station; }
 
 private:
 	StationID station;

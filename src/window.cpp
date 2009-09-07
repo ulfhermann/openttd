@@ -452,12 +452,9 @@ static void DispatchMouseWheelEvent(Window *w, int widget, int wheel)
 
 	if (w->nested_array != NULL && (uint)widget < w->nested_array_size) sb = w->nested_array[widget]->FindScrollbar(w);
 
-	if (sb != NULL && sb->count > sb->cap) {
-		int pos = Clamp(sb->pos + wheel, 0, sb->count - sb->cap);
-		if (pos != sb->pos) {
-			sb->pos = pos;
-			w->SetDirty();
-		}
+	if (sb != NULL && sb->GetCount() > sb->GetCapacity()) {
+		sb->UpdatePosition(wheel);
+		w->SetDirty();
 	}
 }
 
@@ -1886,9 +1883,9 @@ static bool HandleScrollbarScrolling()
 			}
 
 			/* Find the item we want to move to and make sure it's inside bounds. */
-			int pos = min(max(0, i + _scrollbar_start_pos) * sb->count / _scrollbar_size, max(0, sb->count - sb->cap));
-			if (pos != sb->pos) {
-				sb->pos = pos;
+			int pos = min(max(0, i + _scrollbar_start_pos) * sb->GetCount() / _scrollbar_size, max(0, sb->GetCount() - sb->GetCapacity()));
+			if (pos != sb->GetPosition()) {
+				sb->SetPosition(pos);
 				w->SetDirty();
 			}
 			return false;
@@ -2624,51 +2621,6 @@ int PositionMainToolbar(Window *w)
 	}
 	SetDirtyBlocks(0, 0, _screen.width, w->height); // invalidate the whole top part
 	return w->left;
-}
-
-/**
- * Set the number of items of the vertical scrollbar.
- *
- * Function also updates the position of the scrollbar if necessary.
- * @param w   Window containing the vertical scrollbar
- * @param num New number of items
- */
-void SetVScrollCount(Window *w, int num)
-{
-	w->vscroll.count = num;
-	num -= w->vscroll.cap;
-	if (num < 0) num = 0;
-	if (num < w->vscroll.pos) w->vscroll.pos = num;
-}
-
-/**
- * Set the number of items of the second vertical scrollbar.
- *
- * Function also updates the position of the scrollbar if necessary.
- * @param w   Window containing the second vertical scrollbar
- * @param num New number of items
- */
-void SetVScroll2Count(Window *w, int num)
-{
-	w->vscroll2.count = num;
-	num -= w->vscroll2.cap;
-	if (num < 0) num = 0;
-	if (num < w->vscroll2.pos) w->vscroll2.pos = num;
-}
-
-/**
- * Set the number of items of the horizontal scrollbar.
- *
- * Function also updates the position of the scrollbar if necessary.
- * @param w   Window containing the horizontal scrollbar
- * @param num New number of items
- */
-void SetHScrollCount(Window *w, int num)
-{
-	w->hscroll.count = num;
-	num -= w->hscroll.cap;
-	if (num < 0) num = 0;
-	if (num < w->hscroll.pos) w->hscroll.pos = num;
 }
 
 

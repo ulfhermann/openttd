@@ -248,10 +248,13 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Lengte: 
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Gebied: {NUM} x {NUM}{}Hoogteverschil: {NUM} m
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Inwoners
-STR_SORT_BY_NAME                                                :{BLACK}Naam
-STR_SORT_BY_DATE                                                :{BLACK}Datum
+# These are used in buttons
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Inwoners
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Naam
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datum
+# These are used in dropdowns
+STR_SORT_BY_POPULATION                                          :Inwoners
+STR_SORT_BY_NAME                                                :Naam
 STR_SORT_BY_PRODUCTION                                          :Productie
 STR_SORT_BY_TYPE                                                :Soort
 STR_SORT_BY_TRANSPORTED                                         :Vervoerd
@@ -293,7 +296,7 @@ STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_GENERAL                     :{BLACK}Toon alg
 STR_TOOLBAR_TOOLTIP_DISPLAY_GRAPHS                              :{BLACK}Toon grafieken
 STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_LEAGUE                      :{BLACK}Toon bedrijfscompetitietabel
 STR_TOOLBAR_TOOLTIP_FUND_CONSTRUCTION_OF_NEW                    :{BLACK}Betaal plaatsing van nieuwe industrie
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}Toon lijst met treinen van het bedrijf
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}Toon lijst met treinen van het bedrijf. Ctrl+klik schakelt het openen van de normale/geavanceerde voertuigenlijst
 STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_ROAD_VEHICLES       :{BLACK}Toon lijst met wegvoertuigen van het bedrijf
 STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_SHIPS               :{BLACK}Toon lijst met schepen van het bedrijf
 STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_AIRCRAFT            :{BLACK}Toon lijst met vliegtuigen van het bedrijf
@@ -565,12 +568,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Totaal a
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jazz-jukebox
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Alle
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Oude Stijl
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Nieuwe Stijl
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Aangepast 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Aangepast 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Alle
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Oude Stijl
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Nieuwe Stijl
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Aangepast 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Aangepast 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Muziekvolume
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Geluidsvolume
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
@@ -579,8 +582,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Nummer{SETX 88}{BLACK}{TINYFONT}Titel
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Shuffle
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Nummer
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Titel
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Shuffle
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Programma
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Vorige nummer in selectie
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Volgende nummer in selectie
@@ -1640,7 +1644,7 @@ STR_NETWORK_COMPANY_LIST_SPECTATE                               :{WHITE}Kijk toe
 STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}Nieuw bedrijf
 
 # Network client list
-STR_NETWORK_CLIENTLIST_NONE                                     :(geen)
+STR_NETWORK_CLIENTLIST_NONE                                     :Geen
 STR_NETWORK_CLIENTLIST_KICK                                     :Schop uit het spel
 STR_NETWORK_CLIENTLIST_GIVE_MONEY                               :Geef geld
 STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL                             :Praat met iedereen
@@ -2352,6 +2356,7 @@ STR_EDIT_SIGN_SIGN_OSKTITLE                                     :{BLACK}Geef een
 
 # Town directory window
 STR_TOWN_DIRECTORY_CAPTION                                      :{WHITE}Steden
+STR_TOWN_DIRECTORY_NONE                                         :{ORANGE} Geen
 STR_TOWN_DIRECTORY_TOWN                                         :{ORANGE}{TOWN}{BLACK} ({COMMA})
 STR_TOWN_DIRECTORY_LIST_TOOLTIP                                 :{BLACK}Plaatsnamen - klik op naam om het scherm te centreren op de plaats
 STR_TOWN_POPULATION                                             :{BLACK}Wereldbevolking: {COMMA}
@@ -2409,7 +2414,7 @@ STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsidies
 STR_SUBSIDIES_OFFERED_TITLE                                     :{BLACK}Beschikbare subsidies:
 STR_SUBSIDIES_OFFERED_FROM_TO                                   :{ORANGE}{STRING} van {STRING} naar {STRING}{YELLOW} (voor {DATE_SHORT})
-STR_SUBSIDIES_NONE                                              :{ORANGE}Geen
+STR_SUBSIDIES_NONE                                              :{ORANGE} Geen
 STR_SUBSIDIES_SUBSIDISED_TITLE                                  :{BLACK}Bestaande subsidies:
 STR_SUBSIDIES_SUBSIDISED_FROM_TO                                :{ORANGE}{STRING} van {STRING} naar {STRING}{YELLOW} ({COMPANY}{YELLOW}, tot {DATE_SHORT})
 STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                :{BLACK}Klik op de dienst om de plaats/industrie te centreren
@@ -2540,6 +2545,7 @@ STR_BUY_COMPANY_MESSAGE                                         :{WHITE}We zoeke
 
 # Industry directory
 STR_INDUSTRY_DIRECTORY_CAPTION                                  :{WHITE}Industrielijst
+STR_INDUSTRY_DIRECTORY_NONE                                     :{ORANGE} Geen
 STR_INDUSTRY_DIRECTORY_ITEM                                     :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}){YELLOW} ({COMMA}% vervoerd)
 STR_INDUSTRY_DIRECTORY_ITEM_TWO                                 :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}/{CARGO}{STRING}){YELLOW} ({COMMA}%/{COMMA}% vervoerd)
 STR_INDUSTRY_DIRECTORY_ITEM_NOPROD                              :{ORANGE}{INDUSTRY}
@@ -2623,15 +2629,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Verwijder alle 
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Hernoem een groep
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Nieuwe railvoertuigen
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nieuwe elektrische railvoertuigen
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nieuwe monorailrailvoertuigen
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nieuwe zweefrailvoertuigen
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Nieuwe railvoertuigen
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Nieuwe elektrische railvoertuigen
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Nieuwe monorailrailvoertuigen
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Nieuwe zweefrailvoertuigen
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Railvoertuigen
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Nieuwe wegvoertuigen
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nieuwe schepen
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Nieuwe vliegtuigen
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Railvoertuigen
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Nieuwe wegvoertuigen
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Nieuwe schepen
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Nieuwe vliegtuigen
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Kosten: {GOLD}{CURRENCY}{BLACK} Gewicht: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Snelheid: {GOLD}{VELOCITY}{BLACK} Kracht: {GOLD}{POWER}
@@ -2651,30 +2657,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Alle vrachttype
 STR_PURCHASE_INFO_ALL_BUT                                       :Alles behalve {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Max. Trekkracht: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Railvoertuigkeuzelijst - klik op een railvoertuig voor informatie
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Wegvoertuigkeuzelijst - klik op een wegvoertuig voor informatie
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Schipkeuzelijst - klik op een schip voor informatie
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Vliegtuigkeuzelijst - klik op een vliegtuig voor informatie
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Railvoertuigkeuzelijst - klik op een railvoertuig voor informatie
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Wegvoertuigkeuzelijst - klik op een wegvoertuig voor informatie
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Schipkeuzelijst - klik op een schip voor informatie
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Vliegtuigkeuzelijst - klik op een vliegtuig voor informatie
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Bouw railvoertuig
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Bouw wegvoertuig
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Bouw schip
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Bouw vliegtuig
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Bouw railvoertuig
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Bouw wegvoertuig
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Bouw schip
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Bouw vliegtuig
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Bouw het geselecteerde railvoertuig
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Bouw het geselecteerde wegvoertuig
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Bouw het geselecteerde schip
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Bouw het geselecteerde vliegtuig
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Bouw het geselecteerde railvoertuig
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Bouw het geselecteerde wegvoertuig
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Bouw het geselecteerde schip
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Bouw het geselecteerde vliegtuig
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Hernoem
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Hernoem
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Hernoem
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Hernoem
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Hernoem
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Hernoem
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Hernoem
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Hernoem
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Hernoem type van railvoertuig
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Hernoem type van wegvoertuig
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Hernoem type van schip
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Hernoem type van vliegtuig
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Hernoem type van railvoertuig
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Hernoem type van wegvoertuig
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Hernoem type van schip
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Hernoem type van vliegtuig
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Hernoem type van railvoertuig
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Hernoem type van wegvoertuig
@@ -3038,7 +3044,7 @@ STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Ga naar
 STR_ORDER_GO_TO_NEAREST_DEPOT                                   :Ga naar dichtstbijzijnde depot
 STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Ga naar dichtstbijzijnde hangar
 STR_ORDER_CONDITIONAL                                           :Conditionele order sprong
-STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Voeg een nieuwe order in voor de geselecteerde order, of voeg het toe aan de eind van de lijst
+STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Voeg een nieuwe order in voor de geselecteerde order, of voeg het toe aan het eind van de lijst. Ctrl-klik maakt stationsorders "Volledig één soort vracht laden", controlepost-orders "Ga non-stop via" en depot-orders "Onderhoud bij".
 STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Voeg een geavanceerde order toe
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Toon alle voertuigen met dezelfde gedeelde orders
@@ -3465,10 +3471,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Kan wegv
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Kan schip niet naar dok sturen...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Kan vliegtuig niet naar hangar sturen...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Kan railvoertuig niet bouwen...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Kan wegvoertuig niet bouwen...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Kan schip niet kopen...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Kan vliegtuig niet bouwen...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Kan railvoertuig niet bouwen...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Kan wegvoertuig niet bouwen...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Kan schip niet kopen...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Kan vliegtuig niet bouwen...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Kan type van railvoertuig niet hernoemen...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Kan type van wegvoertuig niet hernoemen...
@@ -3987,7 +3993,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

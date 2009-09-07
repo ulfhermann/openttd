@@ -26,7 +26,7 @@
 #include "landscape_type.h"
 #include "network/network_func.h"
 #include "core/smallvec_type.hpp"
-#include "thread.h"
+#include "thread/thread.h"
 #include "window_func.h"
 
 #include "table/palettes.h"
@@ -729,6 +729,16 @@ int GetStringHeight(StringID str, int maxw)
 	return GetMultilineStringHeight(buffer, GB(tmp, 0, 16));
 }
 
+/** Calculate string bounding box for multi-line strings.
+ * @param str        String to check.
+ * @param suggestion Suggested bounding box.
+ * @return Bounding box for the multi-line string, may be bigger than \a suggestion.
+ */
+Dimension GetStringMultiLineBoundingBox(StringID str, const Dimension &suggestion)
+{
+	Dimension box = {suggestion.width, GetStringHeight(str, suggestion.width)};
+	return box;
+}
 
 /**
  * Draw string, possibly over multiple lines.
@@ -748,8 +758,8 @@ int GetStringHeight(StringID str, int maxw)
  */
 int DrawStringMultiLine(int left, int right, int top, int bottom, StringID str, TextColour colour, StringAlignment align, bool underline)
 {
-	int maxw = right - left;
-	int maxh = bottom - top;
+	int maxw = right - left + 1;
+	int maxh = bottom - top + 1;
 
 	char buffer[DRAW_STRING_BUFFER];
 	GetString(buffer, str, lastof(buffer));
@@ -760,7 +770,7 @@ int DrawStringMultiLine(int left, int right, int top, int bottom, StringID str, 
 	int mt = GetCharacterHeight((FontSize)GB(tmp, 16, 16));
 	int total_height = (num + 1) * mt;
 
-	if (maxh != -1 && (int)total_height > maxh) {
+	if (maxh != 0 && total_height > maxh) {
 		/* Check there's room enough for at least one line. */
 		if (maxh < mt) return top;
 
