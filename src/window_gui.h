@@ -13,6 +13,7 @@
 #define WINDOW_GUI_H
 
 #include "core/geometry_func.hpp"
+#include "core/math_func.hpp"
 #include "vehicle_type.h"
 #include "viewport_type.h"
 #include "company_type.h"
@@ -62,6 +63,10 @@ enum WidgetDrawDistances {
 	WD_FRAMERECT_RIGHT  = 2,    ///< Offset at right to draw the frame rectangular area
 	WD_FRAMERECT_TOP    = 1,    ///< Offset at top to draw the frame rectangular area
 	WD_FRAMERECT_BOTTOM = 1,    ///< Offset at bottom to draw the frame rectangular area
+
+	/* Extra space at top/bottom of text panels */
+	WD_TEXTPANEL_TOP    = 6,    ///< Offset at top to draw above the text
+	WD_TEXTPANEL_BOTTOM = 6,   ///< Offset at bottom to draw below the text
 
 	/* WWT_FRAME */
 	WD_FRAMETEXT_LEFT  = 6,     ///< Left offset of the text of the frame.
@@ -179,10 +184,128 @@ enum WindowDefaultPosition {
 /**
  * Scrollbar data structure
  */
-struct Scrollbar {
+class Scrollbar {
+private:
 	uint16 count;  ///< Number of elements in the list
 	uint16 cap;    ///< Number of visible elements of the scroll bar
 	uint16 pos;    ///< Index of first visible item of the list
+public:
+	/**
+	 * Gets the number of elements in the list
+	 * @return the number of elements
+	 */
+	FORCEINLINE uint16 GetCount() const
+	{
+		return this->count;
+	}
+
+	/**
+	 * Gets the number of visible elements of the scrollbar
+	 * @return the number of visible elements
+	 */
+	FORCEINLINE uint16 GetCapacity() const
+	{
+		return this->cap;
+	}
+
+	/**
+	 * Gets the position of the first visible element in the list
+	 * @return the position of the element
+	 */
+	FORCEINLINE uint16 GetPosition() const
+	{
+		return this->pos;
+	}
+
+	/**
+	 * Checks whether given current item is visible in the list
+	 * @param item to check
+	 * @return true iff the item is visible
+	 */
+	FORCEINLINE bool IsVisible(uint16 item) const
+	{
+		return IsInsideBS(item, this->GetPosition(), this->GetCapacity());
+	}
+
+	/**
+	 * Sets the number of elements in the list
+	 * @param num the number of elements in the list
+	 * @note updates the position if needed
+	 */
+	void SetCount(int num)
+	{
+		assert(num >= 0);
+		assert(num <= MAX_UVALUE(uint16));
+
+		this->count = num;
+		num -= this->cap;
+		if (num < 0) num = 0;
+		if (num < this->pos) this->pos = num;
+	}
+
+	/**
+	 * Set the capacity of visible elements.
+	 * @param capacity the new capacity
+	 * @note updates the position if needed
+	 */
+	void SetCapacity(int capacity)
+	{
+		assert(capacity > 0);
+		assert(capacity <= MAX_UVALUE(uint16));
+
+		this->cap = capacity;
+		if (this->cap + this->pos > this->count) this->pos = max(0, this->count - this->cap);
+	}
+
+	/**
+	 * Updates the capacity by adding/removing a number of (visible) elements.
+	 * @param difference the difference in capacity
+	 * @note updates the position if needed
+	 */
+	void UpdateCapacity(int difference)
+	{
+		if (difference == 0) return;
+		this->SetCapacity(this->cap + difference);
+	}
+
+	/**
+	 * Sets the position of the first visible element
+	 * @param position the position of the element
+	 */
+	void SetPosition(int position)
+	{
+		assert(position >= 0);
+		assert(this->count <= this->cap ? (position == 0) : (position + this->cap <= this->count));
+		this->pos = position;
+	}
+
+	/**
+	 * Updates the position of the first visible element by the given amount.
+	 * If the position would be too low or high it will be clamped appropriately
+	 * @param difference the amount of change requested
+	 */
+	void UpdatePosition(int difference)
+	{
+		if (difference == 0) return;
+		this->SetPosition(Clamp(this->pos + difference, 0, max(this->count - this->cap, 0)));
+	}
+
+	/**
+	 * Scroll towards the given position; if the item is visible nothing
+	 * happens, otherwise it will be shown either at the bottom or top of
+	 * the window depending on where in the list it was.
+	 * @param position the position to scroll towards.
+	 */
+	void ScrollTowards(int position)
+	{
+		if (position < this->GetPosition()) {
+			/* scroll up to the item */
+			this->SetPosition(position);
+		} else if (position >= this->GetPosition() + this->GetCapacity()) {
+			/* scroll down so that the item is at the bottom */
+			this->SetPosition(position - this->GetCapacity() + 1);
+		}
+	}
 };
 
 /**
@@ -833,9 +956,5 @@ void ScrollbarClickHandler(Window *w, const NWidgetCore *nw, int x, int y);
 void ResizeButtons(Window *w, byte left, byte right);
 
 void ResizeWindowForWidget(Window *w, uint widget, int delta_x, int delta_y);
-
-void SetVScrollCount(Window *w, int num);
-void SetVScroll2Count(Window *w, int num);
-void SetHScrollCount(Window *w, int num);
 
 #endif /* WINDOW_GUI_H */

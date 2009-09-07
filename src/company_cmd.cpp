@@ -57,6 +57,7 @@ Company::Company(uint16 name_1, bool is_ai) :
 	is_ai(is_ai)
 {
 	for (uint j = 0; j < 4; j++) this->share_owners[j] = COMPANY_SPECTATOR;
+	InvalidateWindowData(WC_PERFORMANCE_DETAIL, 0, INVALID_COMPANY);
 }
 
 Company::~Company()
@@ -69,6 +70,7 @@ Company::~Company()
 
 	DeleteCompanyWindows(this->index);
 	InvalidateWindowData(WC_GRAPH_LEGEND, 0, this->index);
+	InvalidateWindowData(WC_PERFORMANCE_DETAIL, 0, this->index);
 }
 
 /**
@@ -413,16 +415,23 @@ void ResetCompanyLivery(Company *c)
  * Create a new company and sets all company variables default values
  *
  * @param is_ai is a ai company?
+ * @param company CompanyID to use for the new company
  * @return the company struct
  */
-Company *DoStartupNewCompany(bool is_ai)
+Company *DoStartupNewCompany(bool is_ai, CompanyID company = INVALID_COMPANY)
 {
 	if (!Company::CanAllocateItem()) return NULL;
 
 	/* we have to generate colour before this company is valid */
 	Colours colour = GenerateCompanyColour();
 
-	Company *c = new Company(STR_SV_UNNAMED, is_ai);
+	Company *c;
+	if (company == INVALID_COMPANY) {
+		c = new Company(STR_SV_UNNAMED, is_ai);
+	} else {
+		if (Company::IsValidID(company)) return NULL;
+		c = new (company) Company(STR_SV_UNNAMED, is_ai);
+	}
 
 	c->colour = colour;
 
@@ -475,7 +484,7 @@ static void MaybeStartNewCompany()
 	if (n < (uint)_settings_game.difficulty.max_no_competitors) {
 		/* Send a command to all clients to start up a new AI.
 		 * Works fine for Multiplayer and Singleplayer */
-		DoCommandP(0, 1, 0, CMD_COMPANY_CTRL);
+		DoCommandP(0, 1, INVALID_COMPANY, CMD_COMPANY_CTRL);
 	}
 }
 
@@ -485,13 +494,78 @@ void InitializeCompanies()
 	_cur_company_tick_index = 0;
 }
 
+/**
+ * Handle the bankruptcy take over of a company.
+ * Companies going bankrupt will ask the other companies in order of their
+ * performance rating, so better performing companies get the 'do you want to
+ * merge with Y' question earlier. The question will then stay till either the
+ * company has gone bankrupt or got merged with a company.
+ *
+ * @param c the company that is going bankrupt.
+ */
+static void HandleBankruptcyTakeover(Company *c)
+{
+	/* Amount of time out for each company to take over a company;
+	 * Timeout is a quarter (3 months of 30 days) divided over the
+	 * number of companies. The minimum number of days in a quarter
+	 * is 90: 31 in January, 28 in February and 31 in March.
+	 * Note that the company going bankrupt can't buy itself. */
+	static const int TAKE_OVER_TIMEOUT = 3 * 30 * DAY_TICKS / (MAX_COMPANIES - 1);
+
+	assert(c->bankrupt_asked != 0);
+
+	/* We're currently asking some company to buy 'us' */
+	if (c->bankrupt_timeout != 0) {
+		c->bankrupt_timeout -= MAX_COMPANIES;
+		if (c->bankrupt_timeout > 0) return;
+		c->bankrupt_timeout = 0;
+
+		return;
+	}
+
+	/* Did we ask everyone for bankruptcy? If so, bail out. */
+	if (c->bankrupt_asked == MAX_UVALUE(CompanyMask)) return;
+
+	Company *c2, *best = NULL;
+	int32 best_performance = -1;
+
+	/* Ask the company with the highest performance history first */
+	FOR_ALL_COMPANIES(c2) {
+		if (c2->bankrupt_asked == 0 && // Don't ask companies going bankrupt themselves
+				!HasBit(c->bankrupt_asked, c2->index) &&
+				best_performance < c2->old_economy[1].performance_history) {
+			best_performance = c2->old_economy[1].performance_history;
+			best = c2;
+		}
+	}
+
+	/* Asked all companies? */
+	if (best_performance == -1) {
+		c->bankrupt_asked = MAX_UVALUE(CompanyMask);
+		return;
+	}
+
+	SetBit(c->bankrupt_asked, best->index);
+
+	if (IsInteractiveCompany(best->index)) {
+		c->bankrupt_timeout = TAKE_OVER_TIMEOUT;
+		ShowBuyCompanyDialog(c->index);
+		return;
+	}
+
+	if (best->is_ai) {
+		AI::NewEvent(best->index, new AIEventCompanyAskMerger(c->index, ClampToI32(c->bankrupt_value)));
+	}
+}
+
 void OnTick_Companies()
 {
 	if (_game_mode == GM_EDITOR) return;
 
 	Company *c = Company::GetIfValid(_cur_company_tick_index);
-	if (c != NULL && c->name_1 != 0) {
-		GenerateCompanyName(c);
+	if (c != NULL) {
+		if (c->name_1 != 0) GenerateCompanyName(c);
+		if (c->bankrupt_asked != 0) HandleBankruptcyTakeover(c);
 	}
 
 	if (_next_competitor_start == 0) {
@@ -597,6 +671,7 @@ void CompanyNewsInformation::FillData(const Company *c, const Company *other)
  * - p1 = 3 - merge two companies together. merge #1 with #2. Identified by p2
  * @param p2 various functionality, dictated by p1
  * - p1 = 0 - ClientID of the newly created client
+ * - p1 = 1 - CompanyID to start AI (INVALID_COMPANY for first available)
  * - p1 = 2 - CompanyID of the that is getting deleted
  * - p1 = 3 - #1 p2 = (bit  0-15) - company to merge (p2 & 0xFFFF)
  *          - #2 p2 = (bit 16-31) - company to be merged into ((p2>>16)&0xFFFF)
@@ -707,7 +782,8 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		case 1: // Make a new AI company
 			if (!(flags & DC_EXEC)) return CommandCost();
 
-			DoStartupNewCompany(true);
+			if (p2 != INVALID_COMPANY && (p2 >= MAX_COMPANIES || Company::IsValidID(p2))) return CMD_ERROR;
+			DoStartupNewCompany(true, (CompanyID)p2);
 			break;
 
 		case 2: { // Delete a company

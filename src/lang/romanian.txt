@@ -249,9 +249,9 @@ STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Suprafa�
 
 
 # The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Populatia
-STR_SORT_BY_NAME                                                :{BLACK}Nume
-STR_SORT_BY_DATE                                                :{BLACK}Datã
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Populatia
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nume
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datã
 STR_SORT_BY_PRODUCTION                                          :Productie
 STR_SORT_BY_TYPE                                                :Tip
 STR_SORT_BY_TRANSPORTED                                         :Transportat
@@ -565,12 +565,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Punctaju
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Tonomatul cu jazz
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Tot
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Oldies
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Moderne
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Personale 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Personale 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Tot
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Oldies
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Moderne
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Personale 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Personale 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Volumul muzicii
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Volumul efectelor sonore
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  '  '  '  '  MAX
@@ -579,8 +579,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Piesa nr: {SETX 88}{BLACK}{TINYFONT}Titlul
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Aleator
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Piesa nr:
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Titlul
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Aleator
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Program
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Sări la piesa precedentă din selecţie
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Sări la piesa următoare din selecţie
@@ -2623,15 +2624,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Elimina toate v
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Redenumeste un grup
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Noi vehicule feroviare
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Noi Vehicule Electrice pe Sine
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Noi vehicule monoşină
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Noi vehicule pe Pernă Magnetică
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Noi vehicule feroviare
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Noi Vehicule Electrice pe Sine
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Noi vehicule monoşină
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Noi vehicule pe Pernă Magnetică
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Vehicule pe şine
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Autovehicule noi
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nave noi
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Aeronavă nouă
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Vehicule pe şine
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Autovehicule noi
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Nave noi
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Aeronavă nouă
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Cost: {GOLD}{CURRENCY}{BLACK} Greutate: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Viteză: {GOLD}{VELOCITY}{BLACK} Putere: {GOLD}{POWER}
@@ -2651,30 +2652,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Toate tipurile 
 STR_PURCHASE_INFO_ALL_BUT                                       :Toate, cu exceptia {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Efort tractor max.: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Lista de selectie a componentelor trenului - clic pe vehicule pt. informatii
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Listă selecţie vehicule rutiere - apasă pe vehicul pentru informaţii
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Listă de selecţie a navelor - click pe o navă pentru informaţii
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Lista de selecţie a aeronavelor - clic pe o aeronavă pentru informaţii
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Lista de selectie a componentelor trenului - clic pe vehicule pt. informatii
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Listă selecţie vehicule rutiere - apasă pe vehicul pentru informaţii
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Listă de selecţie a navelor - click pe o navă pentru informaţii
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Lista de selecţie a aeronavelor - clic pe o aeronavă pentru informaţii
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Cumpără vehicul
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Cumpără vehicul
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Construieşte navă
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Cumpără aeronavă
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Cumpără vehicul
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Cumpără vehicul
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Construieşte navă
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Cumpără aeronavă
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Cumpără vehiculul selectat
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Cumpără autovehiculul selectat
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Construieşte nava selectată
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Cumpără aeronava selectată
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Cumpără vehiculul selectat
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Cumpără autovehiculul selectat
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Construieşte nava selectată
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Cumpără aeronava selectată
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Nume nou
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Nume nou
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Nume nou
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Redenumire
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Nume nou
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Nume nou
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Nume nou
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Redenumire
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Redenumeste modelul vehiculului
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Redenumeşte modelul de autovehicul
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Redenumeşte modelul de navă
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Redenumeşte modelul de aeronavă
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Redenumeste modelul vehiculului
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Redenumeşte modelul de autovehicul
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Redenumeşte modelul de navă
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Redenumeşte modelul de aeronavă
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Redenumeste modelul vehiculului feroviar
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Redenumeşte modelul de autovehicul
@@ -3465,10 +3466,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Nu pot t
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Nu pot trimite nava în şantier...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Nu se poate trimite aeronava la hangar...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Nu se poate construi vehiculul...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Nu pot cumpăra autovehicul...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Nu pot construi nava...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Nu se poate cumpăra aeronava...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Nu se poate construi vehiculul...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Nu pot cumpăra autovehicul...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Nu pot construi nava...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Nu se poate cumpăra aeronava...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Nu se poate redenumi modelul de vehicul...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Nu pot redenumi modelul de autovehicul...
@@ -3987,7 +3988,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
