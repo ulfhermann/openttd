@@ -267,7 +267,7 @@ struct DepotWindow : Window {
 	 * @param x Left side of the box to draw in
 	 * @param y Top of the box to draw in
 	 */
-	void DrawVehicleInDepot(Window *w, const Vehicle *v, int x, int y)
+	void DrawVehicleInDepot(const Vehicle *v, int x, int y)
 	{
 		bool free_wagon = false;
 		int sprite_y = y + this->resize.step_height - GetVehicleListHeight(v->type);
@@ -278,7 +278,7 @@ struct DepotWindow : Window {
 				free_wagon = u->IsFreeWagon();
 
 				uint x_space = free_wagon ? TRAININFO_DEFAULT_VEHICLE_WIDTH : 0;
-				DrawTrainImage(u, x + 24 + x_space, sprite_y - 1, this->sel, this->hscroll.cap - x_space, this->hscroll.pos);
+				DrawTrainImage(u, x + 24 + x_space, sprite_y - 1, this->sel, this->hscroll.GetCapacity() - x_space, this->hscroll.GetPosition());
 
 				/* Number of wagons relative to a standard length wagon (rounded up) */
 				SetDParam(0, (u->tcache.cached_total_length + 7) / 8);
@@ -317,7 +317,7 @@ struct DepotWindow : Window {
 		}
 	}
 
-	void DrawDepotWindow(Window *w)
+	void DrawDepotWindow()
 	{
 		TileIndex tile = this->window_number;
 		int x, y, maxval;
@@ -349,10 +349,10 @@ struct DepotWindow : Window {
 				max_width = max(max_width, width);
 			}
 			/* Always have 1 empty row, so people can change the setting of the train */
-			SetVScrollCount(w, this->vehicle_list.Length() + this->wagon_list.Length() + 1);
-			SetHScrollCount(w, max_width);
+			this->vscroll.SetCount(this->vehicle_list.Length() + this->wagon_list.Length() + 1);
+			this->hscroll.SetCount(max_width);
 		} else {
-			SetVScrollCount(w, (this->vehicle_list.Length() + this->hscroll.cap - 1) / this->hscroll.cap);
+			this->vscroll.SetCount((this->vehicle_list.Length() + this->hscroll.GetCapacity() - 1) / this->hscroll.GetCapacity());
 		}
 
 		/* locate the depot struct */
@@ -365,9 +365,9 @@ struct DepotWindow : Window {
 			SetDParam(0, depot->town_index);
 		}
 
-		w->DrawWidgets();
+		this->DrawWidgets();
 
-		uint16 num = this->vscroll.pos * boxes_in_each_row;
+		uint16 num = this->vscroll.GetPosition() * boxes_in_each_row;
 		maxval = min(this->vehicle_list.Length(), num + (rows_in_display * boxes_in_each_row));
 
 		for (x = 2, y = 15; num < maxval; y += this->resize.step_height, x = 2) { // Draw the rows
@@ -376,16 +376,16 @@ struct DepotWindow : Window {
 			for (i = 0; i < boxes_in_each_row && num < maxval; i++, num++, x += this->resize.step_width) {
 				/* Draw all vehicles in the current row */
 				const Vehicle *v = this->vehicle_list[num];
-				DrawVehicleInDepot(w, v, x, y);
+				this->DrawVehicleInDepot(v, x, y);
 			}
 		}
 
-		maxval = min(this->vehicle_list.Length() + this->wagon_list.Length(), (this->vscroll.pos * boxes_in_each_row) + (rows_in_display * boxes_in_each_row));
+		maxval = min(this->vehicle_list.Length() + this->wagon_list.Length(), (this->vscroll.GetPosition() * boxes_in_each_row) + (rows_in_display * boxes_in_each_row));
 
 		/* draw the train wagons, that do not have an engine in front */
 		for (; num < maxval; num++, y += 14) {
 			const Vehicle *v = this->wagon_list[num - this->vehicle_list.Length()];
-			DrawVehicleInDepot(w, v, x, y);
+			this->DrawVehicleInDepot(v, x, y);
 		}
 	}
 
@@ -413,15 +413,15 @@ struct DepotWindow : Window {
 		} else {
 			xt = x / this->resize.step_width;
 			xm = x % this->resize.step_width;
-			if (xt >= this->hscroll.cap) return MODE_ERROR;
+			if (xt >= this->hscroll.GetCapacity()) return MODE_ERROR;
 
 			ym = (y - 14) % this->resize.step_height;
 		}
 
 		row = (y - 14) / this->resize.step_height;
-		if (row >= this->vscroll.cap) return MODE_ERROR;
+		if (row >= this->vscroll.GetCapacity()) return MODE_ERROR;
 
-		pos = ((row + this->vscroll.pos) * boxes_in_each_row) + xt;
+		pos = ((row + this->vscroll.GetPosition()) * boxes_in_each_row) + xt;
 
 		if ((int)(this->vehicle_list.Length() + this->wagon_list.Length()) <= pos) {
 			if (this->type == VEH_TRAIN) {
@@ -435,7 +435,7 @@ struct DepotWindow : Window {
 
 		if ((int)this->vehicle_list.Length() > pos) {
 			*veh = this->vehicle_list[pos];
-			skip = this->hscroll.pos;
+			skip = this->hscroll.GetPosition();
 		} else {
 			pos -= this->vehicle_list.Length();
 			*veh = this->wagon_list[pos];
@@ -568,14 +568,14 @@ struct DepotWindow : Window {
 			if (v->type == VEH_TRAIN && !Train::From(v)->IsFrontEngine()) return;
 		}
 
-		DoCommandP(this->window_number, v->index, _ctrl_pressed ? 1 : 0, CMD_CLONE_VEHICLE | CMD_MSG(STR_ERROR_CAN_T_BUILD_TRAIN + v->type), CcCloneVehicle);
+		DoCommandP(this->window_number, v->index, _ctrl_pressed ? 1 : 0, CMD_CLONE_VEHICLE | CMD_MSG(STR_ERROR_CAN_T_BUY_TRAIN + v->type), CcCloneVehicle);
 
 		ResetObjectToPlace();
 	}
 
-	void ResizeDepotButtons(Window *w)
+	void ResizeDepotButtons()
 	{
-		ResizeButtons(w, DEPOT_WIDGET_BUILD, DEPOT_WIDGET_LOCATION);
+		ResizeButtons(this, DEPOT_WIDGET_BUILD, DEPOT_WIDGET_LOCATION);
 
 		if (this->type == VEH_TRAIN) {
 			/* Divide the size of DEPOT_WIDGET_SELL into two equally big buttons so DEPOT_WIDGET_SELL and DEPOT_WIDGET_SELL_CHAIN will get the same size.
@@ -657,8 +657,8 @@ struct DepotWindow : Window {
 		/* Resize the window according to the vehicle type */
 
 		/* Set the number of blocks in each direction */
-		this->vscroll.cap = _resize_cap[type][0];
-		this->hscroll.cap = _resize_cap[type][1];
+		this->vscroll.SetCapacity(_resize_cap[type][0]);
+		this->hscroll.SetCapacity(_resize_cap[type][1]);
 
 		/* Set the block size */
 		this->resize.step_width  = _block_sizes[type][0];
@@ -666,8 +666,8 @@ struct DepotWindow : Window {
 
 		/* Enlarge the window to fit with the selected number of blocks of the selected size */
 		ResizeWindow(this,
-					_block_sizes[type][0] * this->hscroll.cap,
-					_block_sizes[type][1] * this->vscroll.cap);
+					_block_sizes[type][0] * this->hscroll.GetCapacity(),
+					_block_sizes[type][1] * this->vscroll.GetCapacity());
 
 		if (type == VEH_TRAIN) {
 			/* Make space for the horizontal scrollbar vertically, and the unit
@@ -684,8 +684,8 @@ struct DepotWindow : Window {
 		this->SetupStringsForDepotWindow(type);
 
 		this->widget[DEPOT_WIDGET_MATRIX].data =
-			(this->vscroll.cap << MAT_ROW_START) // number of rows to draw on the background
-			+ ((type == VEH_TRAIN ? 1 : this->hscroll.cap) << MAT_COL_START); // number of boxes in each row. Trains always have just one
+			(this->vscroll.GetCapacity() << MAT_ROW_START) // number of rows to draw on the background
+			+ ((type == VEH_TRAIN ? 1 : this->hscroll.GetCapacity()) << MAT_COL_START); // number of boxes in each row. Trains always have just one
 
 
 		this->SetWidgetsHiddenState(type != VEH_TRAIN,
@@ -693,7 +693,7 @@ struct DepotWindow : Window {
 			DEPOT_WIDGET_SELL_CHAIN,
 			WIDGET_LIST_END);
 
-		ResizeDepotButtons(this);
+		this->ResizeDepotButtons();
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -710,7 +710,7 @@ struct DepotWindow : Window {
 			this->generate_list = false;
 			DepotSortList(&this->vehicle_list);
 		}
-		DrawDepotWindow(this);
+		this->DrawDepotWindow();
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -945,10 +945,10 @@ struct DepotWindow : Window {
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.cap += delta.y / (int)this->resize.step_height;
-		this->hscroll.cap += delta.x / (int)this->resize.step_width;
-		this->widget[DEPOT_WIDGET_MATRIX].data = (this->vscroll.cap << MAT_ROW_START) + ((this->type == VEH_TRAIN ? 1 : this->hscroll.cap) << MAT_COL_START);
-		ResizeDepotButtons(this);
+		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+		this->hscroll.UpdateCapacity(delta.x / (int)this->resize.step_width);
+		this->widget[DEPOT_WIDGET_MATRIX].data = (this->vscroll.GetCapacity() << MAT_ROW_START) + ((this->type == VEH_TRAIN ? 1 : this->hscroll.GetCapacity()) << MAT_COL_START);
+		this->ResizeDepotButtons();
 	}
 
 	virtual EventState OnCTRLStateChange()

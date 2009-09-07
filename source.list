@@ -9,6 +9,7 @@ callback_table.cpp
 cargopacket.cpp
 cargotype.cpp
 cheat.cpp
+crashlog.cpp
 command.cpp
 console.cpp
 console_cmds.cpp
@@ -48,12 +49,6 @@ network/network_udp.cpp
 npf.cpp
 openttd.cpp
 os_timer.cpp
-#if WIN32
-	ottdres.rc
-#end
-#if WINCE
-	ottdres.rc
-#end
 pathfind.cpp
 pbs.cpp
 queue.cpp
@@ -76,33 +71,16 @@ strings.cpp
 subsidy.cpp
 texteff.cpp
 tgp.cpp
-#if HAVE_THREAD
-	#if WIN32
-		thread_win32.cpp
-	#else
-		#if OS2
-			thread_os2.cpp
-		#else
-			#if MORPHOS
-				thread_morphos.cpp
-			#else
-				thread_pthread.cpp
-			#end
-		#end
-	#end
-#else
-	thread_none.cpp
-#end
 tile_map.cpp
 #if WIN32
 #else
 	#if WINCE
-		win32.cpp
 	#else
 		#if OS2
-			os2.cpp
+			os/os2/os2.cpp
 		#else
-			unix.cpp
+			os/unix/crashlog_unix.cpp
+			os/unix/unix.cpp
 		#end
 	#end
 #end
@@ -111,9 +89,6 @@ vehiclelist.cpp
 viewport.cpp
 waypoint.cpp
 widget.cpp
-#if WIN32
-	win32.cpp
-#end
 window.cpp
 
 # Header Files
@@ -145,6 +120,7 @@ cargotype.h
 cheat_func.h
 cheat_type.h
 cmd_helper.h
+crashlog.h
 command_func.h
 command_type.h
 company_base.h
@@ -200,6 +176,7 @@ house.h
 house_type.h
 industry.h
 industry_type.h
+industrytype.h
 ini_type.h
 landscape.h
 landscape_type.h
@@ -303,7 +280,6 @@ terraform_gui.h
 textbuf_gui.h
 texteff.hpp
 tgp.h
-thread.h
 tile_cmd.h
 tile_type.h
 tilehighlight_func.h
@@ -333,7 +309,7 @@ water.h
 waypoint_base.h
 waypoint_func.h
 widget_type.h
-win32.h
+os/windows/win32.h
 music/win32_m.h
 sound/win32_s.h
 video/win32_v.h
@@ -938,4 +914,35 @@ sound/null_s.cpp
 		sound/cocoa_s.cpp
 		os/macosx/splash.cpp
 	#end
+#end
+
+# Windows files
+#if WIN32
+	os/windows/crashlog_win.cpp
+	os/windows/ottdres.rc
+	os/windows/win32.cpp
+#end
+#if WINCE
+	os/windows/ottdres.rc
+	os/windows/win32.cpp
+#end
+
+# Threading
+thread/thread.h
+#if HAVE_THREAD
+	#if WIN32
+		thread/thread_win32.cpp
+	#else
+		#if OS2
+			thread/thread_os2.cpp
+		#else
+			#if MORPHOS
+				thread/thread_morphos.cpp
+			#else
+				thread/thread_pthread.cpp
+			#end
+		#end
+	#end
+#else
+	thread/thread_none.cpp
 #end
