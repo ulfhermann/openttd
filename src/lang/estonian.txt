@@ -305,10 +305,13 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Pikkus: 
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Pindala: {NUM} x {NUM}{}Kõrguste erinevus: {NUM} m
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Rahvaarv
-STR_SORT_BY_NAME                                                :{BLACK}Nimi
-STR_SORT_BY_DATE                                                :{BLACK}Daatum
+# These are used in buttons
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Rahvaarv
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nimi
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Daatum
+# These are used in dropdowns
+STR_SORT_BY_POPULATION                                          :Rahvaarv
+STR_SORT_BY_NAME                                                :Nimi
 STR_SORT_BY_PRODUCTION                                          :Toodang
 STR_SORT_BY_TYPE                                                :Tüüp
 STR_SORT_BY_TRANSPORTED                                         :Veetud
@@ -323,6 +326,7 @@ STR_SORT_BY_MODEL                                               :Mudel
 STR_SORT_BY_VALUE                                               :Väärtus
 STR_SORT_BY_LENGTH                                              :Pikkus
 STR_SORT_BY_LIFE_TIME                                           :Allesjäänud eluaeg
+STR_SORT_BY_TIMETABLE_DELAY                                     :Hilinemine sõiduplaanis
 STR_SORT_BY_FACILITY                                            :Jaama tüüp
 STR_SORT_BY_WAITING                                             :Ootava kauba väärtus
 STR_SORT_BY_RATING_MAX                                          :Kõrgeim kaubahinnang
@@ -621,12 +625,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Kokku pu
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Muusikakeskus
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Kõik
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Vana stiil
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Uus stiil
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Omatehtud 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Omatehtud 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Kõik
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Vana stiil
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Uus stiil
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Omatehtud 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Omatehtud 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Muusika helitugevus
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Efektide helitugevus
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}Vähim  '  '  ' '  '  '  Suurim
@@ -635,8 +639,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Lugu{SETX 88}{BLACK}{TINYFONT}Pealkiri
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Sega
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Lugu
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Pealkiri
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Sega
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Programm
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Eelmine lugu
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Järgmine lugu
@@ -982,6 +987,9 @@ STR_GAME_OPTIONS_BASE_GRF_TOOLTIP                               :{BLACK}Valige k
 STR_GAME_OPTIONS_BASE_GRF_STATUS                                :{RED}{NUM} puuduv{P "" ad}/viga{P ne sed} fail{P "" id}
 STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP                   :{BLACK}Lisaandmed põhigraafikakomplekti kohta
 
+STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Põhihelikomplekt
+STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Vali kasutatavad põhihelid
+STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Täiendav teave põhihelikomplekti kohta
 
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Täisekraanrežiim ebaõnnestus
 
@@ -1836,6 +1844,7 @@ STR_CONTENT_TYPE_AI                                             :Tehismõistus
 STR_CONTENT_TYPE_AI_LIBRARY                                     :Tehismõistuse teek
 STR_CONTENT_TYPE_SCENARIO                                       :Stsenaarium
 STR_CONTENT_TYPE_HEIGHTMAP                                      :Kõrguskaart
+STR_CONTENT_TYPE_BASE_SOUNDS                                    :Põhihelid
 
 # Content downloading progress window
 STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Sisu allalaadimine...
@@ -1877,6 +1886,8 @@ STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Tarnib: 
 STR_JOIN_STATION_CAPTION                                        :{BLACK}Liida jaamale
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Ehita eraldi jaam
 
+STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Liida teemärgis
+STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Ehita eraldi teemärgis
 
 # Rail construction toolbar
 STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Rööbasteede ehitamine
@@ -2469,6 +2480,7 @@ STR_STATION_LIST_TOOLTIP                                        :{BLACK}Jaamanim
 STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE                        :{BLACK}Enam kui ühe eseme valimiseks hoia all CTRL klahvi
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} jaam{P "" a}
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
+STR_STATION_LIST_WAYPOINT                                       :{YELLOW}{WAYPOINT}
 STR_STATION_LIST_NONE                                           :{YELLOW}- Puudub -
 STR_STATION_LIST_SELECT_ALL_FACILITIES                          :{BLACK}Vali kõik tööstused
 STR_STATION_LIST_SELECT_ALL_TYPES                               :{BLACK}Vali kõik kaubatüüpid (ka mitteoodatav kaup)
@@ -2511,7 +2523,10 @@ STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP                        :{BLACK}Näita k
 STR_STATION_VIEW_RENAME_STATION_CAPTION                         :Jaama nime vahetamine
 
 # Waypoint/buoy view window
+STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Keskenda vaade teemärgisel. Ctrl+klikk avab teemärgisel uue vaate
 STR_WAYPOINT_VIEW_CHANGE_WAYPOINT_NAME                          :{BLACK}Muuda meldepunkti nime
+STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Keskenda vaade poile. Ctrl+klikk avab poil uue vaate
+STR_BUOY_VIEW_CHANGE_BUOY_NAME                                  :{BLACK}Muuda poi nime
 
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Muuda meldepunkti nime
 
@@ -2669,15 +2684,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Eemalda kõik s
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Rühma nime vahetamine
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Uued rööbassõidukid
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Uus elektriraudteesõiduk
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Uus monorelsssõiduk
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Uus magnethõljuksõiduk
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Uued rööbassõidukid
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Uus elektriraudteesõiduk
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Uus monorelsssõiduk
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Uus magnethõljuksõiduk
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Rööbassõidukid
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Uued mootorsõidukid
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Uued laevad
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Uus lennuk
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Rööbassõidukid
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Uued mootorsõidukid
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Uued laevad
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Uus lennuk
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Hind: {GOLD}{CURRENCY}{BLACK} Tühimass: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Tippkiirus: {GOLD}{VELOCITY}{BLACK}   Võimsus: {GOLD}{POWER}
@@ -2697,30 +2712,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Kõik kaubatü�
 STR_PURCHASE_INFO_ALL_BUT                                       :Kõik, välja arvatud {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Suurim veojõud: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Nimekiri raudteesõidukitest - andmete saamiseks klõpsa raudteesõidukile
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Mootorsõidukite nimekiri - andmete saamiseks klõpsa sõidukile
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Laevade nimekiri - info saamiseks klõps laevale
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Lennukite nimekiri - info saamiseks vajuta lennukile
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Nimekiri raudteesõidukitest - andmete saamiseks klõpsa raudteesõidukile
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Mootorsõidukite nimekiri - andmete saamiseks klõpsa sõidukile
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Laevade nimekiri - info saamiseks klõps laevale
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Lennukite nimekiri - info saamiseks vajuta lennukile
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Ehita sõiduk
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Ehita veovahend
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Ehita laev
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Ehita lennuk
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Ehita sõiduk
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Ehita veovahend
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Ehita laev
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Ehita lennuk
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Ehita valitud raudteesõiduk
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Ehita valitud mootorsõiduk
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Ehita valitud laev
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Ehita valitud lennuk
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Ehita valitud raudteesõiduk
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Ehita valitud mootorsõiduk
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Ehita valitud laev
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Ehita valitud lennuk
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Nimevahetus
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Nimevahetus
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Nimevahetus
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Nimevahetus
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Nimevahetus
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Nimevahetus
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Nimevahetus
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Nimevahetus
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Muuda raudteesõiduki tüübinime
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Muuda mootorsõiduki tüübinime
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Laeva tüübinime muutmine
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Lennuki tüübinime muutmine
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Muuda raudteesõiduki tüübinime
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Muuda mootorsõiduki tüübinime
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Laeva tüübinime muutmine
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Lennuki tüübinime muutmine
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Vaheta rongivaguni tüübinime
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Vaheta mootorsõiduki tüübinime
@@ -3176,6 +3191,7 @@ STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Tehismõ
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Laadi tehismõistus uuesti
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Sulge tehismõistus, laadi skript uuesti ning taaskäivita tehismõistus
 
+STR_ERROR_AI_NO_AI_FOUND                                        :Laadimiseks sobivat tehismõistust ei leitud.{}See on asendustehismõistus, ning ei tee midagi.{}Tehismõistuseid saab laadida kasutades 'Internetisisu' süsteemi.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Tõrge ühe töötava tehismõistusega. Palun teavitage sellest tehismõistuse autorit koos ekraanitõmmisega tehismõistuse tõrkeotsingu aknast.
 STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}Tehismõistuse debugi akent saab vaadata ainult server
 
@@ -3378,12 +3394,15 @@ STR_ERROR_MUST_DEMOLISH_DOCK_FIRST                              :{WHITE}Dokk tul
 STR_ERROR_MUST_DEMOLISH_AIRPORT_FIRST                           :{WHITE}Lennuväli tuleb enne lammutada
 
 # Waypoint related errors
+STR_ERROR_WAYPOINT_ADJOINS_MORE_THAN_ONE_EXISTING               :{WHITE}Liidab teemärgised
+STR_ERROR_TOO_CLOSE_TO_ANOTHER_WAYPOINT                         :{WHITE}Liiga lähedal teisele teemärgisele
 
 STR_ERROR_CAN_T_BUILD_TRAIN_WAYPOINT                            :{WHITE}Meldepunkti ei saa siia rajada...
 STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Poid ei saa siia asetada...
 STR_ERROR_CAN_T_CHANGE_WAYPOINT_NAME                            :{WHITE}Meldepunkti nime ei saa muuta...
 
 STR_ERROR_CAN_T_REMOVE_TRAIN_WAYPOINT                           :{WHITE}Meldepunkti ei saa siit eemaldada...
+STR_ERROR_MUST_REMOVE_RAILWAYPOINT_FIRST                        :{WHITE}Enne peab rööbastelt kõik teemärgid eemaldama
 STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}...poi on ees
 STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}...poi on kasutusel!
 
@@ -3400,6 +3419,7 @@ STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Lennuk p
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Ainult depoos peatunud ronge saab muuta
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Rong on liiga pikk
+STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE                  :{WHITE}Sõidusuunda ei saa pöörata...
 STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS   :{WHITE}Mitmest osast koosnevaid veovahendeid ei saa ümber pöörata
 STR_ERROR_INCOMPATIBLE_RAIL_TYPES                               :Ühildamatud rööbasteetüübid
 
@@ -3506,10 +3526,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Ei saa v
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Ei saa laeva angaari saata...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Ei saa lennukit angaari saata...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Rööbassõidukit ei saa ehitada...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Mootorsõidukit ei saa ehitada...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Ei saa laeva ehitada...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Ei saa ehitada lennukit...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Rööbassõidukit ei saa ehitada...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Mootorsõidukit ei saa ehitada...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Ei saa laeva ehitada...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Ei saa ehitada lennukit...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Raudteesõiduki tüübinime ei saa vahetada...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Mootorsõiduki tüübinime ei saa vahetada...
@@ -3537,6 +3557,7 @@ STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Rongi ei
 STR_ERROR_CAN_T_REVERSE_DIRECTION_TRAIN                         :{WHITE}Ei saa rongi ümber pöörata.
 STR_ERROR_TRAIN_START_NO_CATENARY                               :Selle raja ahel puudub, rong ei saa sõitu alustada
 
+STR_ERROR_CAN_T_MAKE_ROAD_VEHICLE_TURN                          :{WHITE}Maanteesõiduk ei saa ümber pöörata...
 
 STR_ERROR_AIRCRAFT_IS_IN_FLIGHT                                 :{WHITE}Lennuk on õhus
 
@@ -3671,6 +3692,8 @@ STR_SV_STNAME_AIRPORT                                           :{STRING} lennuv
 STR_SV_STNAME_OILFIELD                                          :{STRING} naftaväli
 STR_SV_STNAME_MINES                                             :{STRING} kaevandused
 STR_SV_STNAME_DOCKS                                             :{STRING} dokid
+STR_SV_STNAME_BUOY                                              :{STRING}
+STR_SV_STNAME_WAYPOINT                                          :{STRING}
 ##id 0x6020
 STR_SV_STNAME_ANNEXE                                            :{STRING} juurdeehitis
 STR_SV_STNAME_SIDINGS                                           :{STRING} hargnemine
@@ -3948,6 +3971,8 @@ STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
 STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
 STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
 
+STR_FORMAT_BUOY_NAME                                            :{TOWN} Poi
+STR_FORMAT_BUOY_NAME_SERIAL                                     :{TOWN} Poi nr. {COMMA}
 STR_FORMAT_COMPANY_NUM                                          :(Ettevõte {COMMA})
 STR_FORMAT_GROUP_NAME                                           :Rühm {COMMA}
 STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
@@ -4023,7 +4048,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
