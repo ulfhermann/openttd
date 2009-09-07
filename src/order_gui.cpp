@@ -423,9 +423,9 @@ private:
 	{
 		int sel = (y - this->widget[ORDER_WIDGET_ORDER_LIST].top - 1) / ORDER_LIST_LINE_HEIGHT; // Selected line in the ORDER_WIDGET_ORDER_LIST panel.
 
-		if ((uint)sel >= this->vscroll.cap) return INVALID_ORDER;
+		if ((uint)sel >= this->vscroll.GetCapacity()) return INVALID_ORDER;
 
-		sel += this->vscroll.pos;
+		sel += this->vscroll.GetPosition();
 
 		return (sel <= vehicle->GetNumOrders() && sel >= 0) ? sel : INVALID_ORDER;
 	}
@@ -606,6 +606,7 @@ private:
 
 		if (DoCommandP(w->vehicle->tile, w->vehicle->index, w->OrderGetSel(), CMD_DELETE_ORDER | CMD_MSG(STR_ERROR_CAN_T_DELETE_THIS_ORDER))) {
 			w->selected_order = selected >= w->vehicle->GetNumOrders() ? -1 : selected;
+			w->UpdateButtonState();
 		}
 	}
 
@@ -639,7 +640,7 @@ public:
 		assert(this->widget[ORDER_WIDGET_ORDER_LIST].top + 1 + num_lines * ORDER_LIST_LINE_HEIGHT == this->widget[ORDER_WIDGET_ORDER_LIST].bottom);
 
 		this->owner = v->owner;
-		this->vscroll.cap = num_lines;
+		this->vscroll.SetCapacity(num_lines);
 		this->resize.step_height = ORDER_LIST_LINE_HEIGHT;
 		this->selected_order = -1;
 		this->vehicle = v;
@@ -661,6 +662,8 @@ public:
 			this->HideWidget(ORDER_WIDGET_TIMETABLE_VIEW);
 		}
 		this->FindWindowPlacementAndResize(desc);
+
+		this->OnInvalidateData(-2);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -678,6 +681,10 @@ public:
 				this->DeleteChildWindows();
 				HideDropDownMenu(this);
 				this->selected_order = -1;
+				break;
+
+			case -2:
+				/* Some other order changes */
 				break;
 
 			default: {
@@ -711,15 +718,15 @@ public:
 				this->selected_order = to;
 			} break;
 		}
+
+		this->vscroll.SetCount(this->vehicle->GetNumOrders() + 1);
+		this->UpdateButtonState();
 	}
 
-	virtual void OnPaint()
+	void UpdateButtonState()
 	{
 		bool shared_orders = this->vehicle->IsOrderListShared();
-
-		SetVScrollCount(this, this->vehicle->GetNumOrders() + 1);
-
-		int sel = OrderGetSel();
+		int sel = this->OrderGetSel();
 		const Order *order = this->vehicle->GetOrder(sel);
 
 		if (this->vehicle->owner == _local_company) {
@@ -808,10 +815,6 @@ public:
 					OrderConditionVariable ocv = order->GetConditionVariable();
 					this->SetWidgetDisabledState(ORDER_WIDGET_COND_COMPARATOR, ocv == OCV_UNCONDITIONALLY);
 					this->SetWidgetDisabledState(ORDER_WIDGET_COND_VALUE, ocv == OCV_REQUIRES_SERVICE || ocv == OCV_UNCONDITIONALLY);
-
-					uint value = order->GetConditionValue();
-					if (order->GetConditionVariable() == OCV_MAX_SPEED) value = ConvertSpeedToDisplaySpeed(value);
-					SetDParam(1, value);
 				} break;
 
 				default: // every other orders
@@ -821,20 +824,41 @@ public:
 					this->DisableWidget(ORDER_WIDGET_FULL_LOAD);
 					this->DisableWidget(ORDER_WIDGET_UNLOAD_DROPDOWN);
 					this->DisableWidget(ORDER_WIDGET_UNLOAD);
+					break;
 			}
 		}
 
+		this->SetDirty();
+	}
+
+	virtual void OnPaint()
+	{
+		bool shared_orders = this->vehicle->IsOrderListShared();
+		int sel = this->OrderGetSel();
+		const Order *order = this->vehicle->GetOrder(sel);
+
+		if (this->vehicle->owner == _local_company) {
+			/* Set the strings for the dropdown boxes. */
+			this->widget[ORDER_WIDGET_COND_VARIABLE].data   = _order_conditional_variable[order == NULL ? 0 : order->GetConditionVariable()];
+			this->widget[ORDER_WIDGET_COND_COMPARATOR].data = _order_conditional_condition[order == NULL ? 0 : order->GetConditionComparator()];
+		}
+
 		SetDParam(0, this->vehicle->index);
+		if (order != NULL && order->IsType(OT_CONDITIONAL)) {
+			uint value = order->GetConditionValue();
+			if (order->GetConditionVariable() == OCV_MAX_SPEED) value = ConvertSpeedToDisplaySpeed(value);
+			SetDParam(1, value);
+		}
 		this->DrawWidgets();
 
 		int y = 15;
 
-		int i = this->vscroll.pos;
+		int i = this->vscroll.GetPosition();
 		order = this->vehicle->GetOrder(i);
 		StringID str;
 		while (order != NULL) {
 			/* Don't draw anything if it extends past the end of the window. */
-			if (i - this->vscroll.pos >= this->vscroll.cap) break;
+			if (!this->vscroll.IsVisible(i)) break;
 
 			DrawOrderString(this->vehicle, order, i, y, i == this->selected_order, false, this->widget[ORDER_WIDGET_ORDER_LIST].right - 4);
 			y += ORDER_LIST_LINE_HEIGHT;
@@ -843,7 +867,7 @@ public:
 			order = order->next;
 		}
 
-		if (i - this->vscroll.pos < this->vscroll.cap) {
+		if (this->vscroll.IsVisible(i)) {
 			str = shared_orders ? STR_ORDERS_END_OF_SHARED_ORDERS : STR_ORDERS_END_OF_ORDERS;
 			DrawString(this->widget[ORDER_WIDGET_ORDER_LIST].left + 2, this->widget[ORDER_WIDGET_ORDER_LIST].right - 2, y, str, (i == this->selected_order) ? TC_WHITE : TC_BLACK);
 		}
@@ -907,7 +931,7 @@ public:
 					}
 				}
 
-				this->SetDirty();
+				this->UpdateButtonState();
 			} break;
 
 			case ORDER_WIDGET_SKIP:
@@ -1060,6 +1084,7 @@ public:
 				if (!(from_order == to_order || from_order == INVALID_ORDER || from_order > this->vehicle->GetNumOrders() || to_order == INVALID_ORDER || to_order > this->vehicle->GetNumOrders()) &&
 						DoCommandP(this->vehicle->tile, this->vehicle->index, from_order | (to_order << 16), CMD_MOVE_ORDER | CMD_MSG(STR_ERROR_CAN_T_MOVE_THIS_ORDER))) {
 					this->selected_order = -1;
+					this->UpdateButtonState();
 				}
 			} break;
 
@@ -1167,7 +1192,7 @@ public:
 	virtual void OnResize(Point delta)
 	{
 		/* Update the scroll + matrix */
-		this->vscroll.cap = (this->widget[ORDER_WIDGET_ORDER_LIST].bottom - this->widget[ORDER_WIDGET_ORDER_LIST].top - 1) / ORDER_LIST_LINE_HEIGHT;
+		this->vscroll.UpdateCapacity(delta.y / ORDER_LIST_LINE_HEIGHT);
 
 		/* Update the button bars. */
 		if (this->vehicle->owner == _local_company) {
