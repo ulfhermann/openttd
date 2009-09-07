@@ -124,12 +124,9 @@ enum WidgetType {
 
 	/* Nested widget part types. */
 	WPT_RESIZE,       ///< Widget part for specifying resizing.
-	WPT_RESIZE_PTR,   ///< Widget part for specifying resizing via a pointer.
 	WPT_MINSIZE,      ///< Widget part for specifying minimal size.
-	WPT_MINSIZE_PTR,  ///< Widget part for specifying minimal size via a pointer.
 	WPT_FILL,         ///< Widget part for specifying fill.
 	WPT_DATATIP,      ///< Widget part for specifying data and tooltip.
-	WPT_DATATIP_PTR,  ///< Widget part for specifying data and tooltip via a pointer.
 	WPT_PADDING,      ///< Widget part for specifying a padding.
 	WPT_PIPSPACE,     ///< Widget part for specifying pre/inter/post space for containers.
 	WPT_ENDCONTAINER, ///< Widget part to denote end of a container.
@@ -172,7 +169,7 @@ enum SizingType {
 
 /* Forward declarations. */
 class NWidgetCore;
-struct Scrollbar;
+class Scrollbar;
 
 /**
  * Baseclass for nested widgets.
@@ -281,11 +278,17 @@ public:
 
 /** Nested widget flags that affect display and interaction withe 'real' widgets. */
 enum NWidgetDisplay {
-	NDB_LOWERED  = 0, ///< Widget is lowered (pressed down) bit.
-	NDB_DISABLED = 1, ///< Widget is disabled (greyed out) bit.
+	NDB_LOWERED         = 0, ///< Widget is lowered (pressed down) bit.
+	NDB_DISABLED        = 1, ///< Widget is disabled (greyed out) bit.
+	NDB_NO_TRANSPARENCY = 2, ///< Viewport is never transparent.
+	NDB_SHADE_GREY      = 3, ///< Shade viewport to grey-scale.
+	NDB_SHADE_DIMMED    = 4, ///< Display dimmed colours in the viewport.
 
-	ND_LOWERED  = 1 << NDB_LOWERED,  ///< Bit value of the lowered flag.
-	ND_DISABLED = 1 << NDB_DISABLED, ///< Bit value of the disabled flag.
+	ND_LOWERED  = 1 << NDB_LOWERED,                ///< Bit value of the lowered flag.
+	ND_DISABLED = 1 << NDB_DISABLED,               ///< Bit value of the disabled flag.
+	ND_NO_TRANSPARENCY = 1 << NDB_NO_TRANSPARENCY, ///< Bit value of the 'no transparency' flag.
+	ND_SHADE_GREY      = 1 << NDB_SHADE_GREY,      ///< Bit value of the 'shade to grey' flag.
+	ND_SHADE_DIMMED    = 1 << NDB_SHADE_DIMMED,    ///< Bit value of the 'dimmed colours' flag.
 };
 DECLARE_ENUM_AS_BIT_SET(NWidgetDisplay);
 
@@ -488,6 +491,8 @@ private:
  * Nested widget to display a viewport in a window.
  * After initializing the nested widget tree, call #InitializeViewport(). After changing the window size,
  * call #UpdateViewportCoordinates() eg from Window::OnResize().
+ * If the #display_flags field contains the #ND_NO_TRANSPARENCY bit, the viewport will disable transparency.
+ * Shading to grey-scale is controlled with the #ND_SHADE_GREY bit (used for B&W news papers), the #ND_SHADE_DIMMED gives dimmed colours (for colour news papers).
  * @todo Class derives from #NWidgetCore, but does not use #colour, #widget_data, or #tool_tip.
  * @ingroup NestedWidgets */
 class NWidgetViewport : public NWidgetCore {
@@ -610,9 +615,7 @@ struct NWidgetPart {
 	WidgetType type;                         ///< Type of the part. @see NWidgetPartType.
 	union {
 		Point xy;                        ///< Part with an x/y size.
-		Point *xy_ptr;                   ///< Part with a pointer to an x/y size.
 		NWidgetPartDataTip data_tip;     ///< Part with a data/tooltip.
-		NWidgetPartDataTip *datatip_ptr; ///< Part with a pointer to data/tooltip.
 		NWidgetPartWidget widget;        ///< Part with a start of a widget.
 		NWidgetPartPaddings padding;     ///< Part with paddings.
 		NWidgetPartPIP pip;              ///< Part with pre/inter/post spaces.
@@ -639,21 +642,6 @@ static inline NWidgetPart SetResize(int16 dx, int16 dy)
 }
 
 /**
- * Widget part function for using a pointer to set the resize step.
- * @param ptr Pointer to horizontal and vertical resize step.
- * @ingroup NestedWidgetParts
- */
-static inline NWidgetPart SetResize(Point *ptr)
-{
-	NWidgetPart part;
-
-	part.type = WPT_RESIZE_PTR;
-	part.u.xy_ptr = ptr;
-
-	return part;
-}
-
-/**
  * Widget part function for setting the minimal size.
  * @param dx Horizontal minimal size.
  * @param dy Vertical minimal size.
@@ -666,21 +654,6 @@ static inline NWidgetPart SetMinimalSize(int16 x, int16 y)
 	part.type = WPT_MINSIZE;
 	part.u.xy.x = x;
 	part.u.xy.y = y;
-
-	return part;
-}
-
-/**
- * Widget part function for using a pointer to set the minimal size.
- * @param ptr Pointer to horizontal and vertical minimal size.
- * @ingroup NestedWidgetParts
- */
-static inline NWidgetPart SetMinimalSize(Point *ptr)
-{
-	NWidgetPart part;
-
-	part.type = WPT_MINSIZE_PTR;
-	part.u.xy_ptr = ptr;
 
 	return part;
 }
@@ -728,21 +701,6 @@ static inline NWidgetPart SetDataTip(uint16 data, StringID tip)
 	part.type = WPT_DATATIP;
 	part.u.data_tip.data = data;
 	part.u.data_tip.tooltip = tip;
-
-	return part;
-}
-
-/**
- * Widget part function for setting the data and tooltip via a pointer.
- * @param ptr Pointer to the data and tooltip of the widget.
- * @ingroup NestedWidgetParts
- */
-static inline NWidgetPart SetDataTip(NWidgetPartDataTip *ptr)
-{
-	NWidgetPart part;
-
-	part.type = WPT_DATATIP_PTR;
-	part.u.datatip_ptr = ptr;
 
 	return part;
 }

@@ -16,7 +16,7 @@
 	</Platforms>
 	<ToolFiles>
 		<ToolFile
-			RelativePath="..\src\masm64.rules"
+			RelativePath="..\src\os\windows\masm64.rules"
 		/>
 	</ToolFiles>
 	<Configurations>
@@ -496,6 +496,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\crashlog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\command.cpp"
 				>
 			</File>
@@ -664,10 +668,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\ottdres.rc"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\pathfind.cpp"
 				>
 			</File>
@@ -748,10 +748,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\thread_win32.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\tile_map.cpp"
 				>
 			</File>
@@ -773,10 +769,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\widget.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\win32.cpp"
 				>
 			</File>
 			<File
@@ -877,6 +869,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\cmd_helper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\crashlog.h"
 				>
 			</File>
 			<File
@@ -1097,6 +1093,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\industry_type.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\industrytype.h"
 				>
 			</File>
 			<File
@@ -1532,10 +1532,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\thread.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\tile_cmd.h"
 				>
 			</File>
@@ -1652,7 +1648,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\win32.h"
+				RelativePath=".\..\src\os\windows\win32.h"
 				>
 			</File>
 			<File
@@ -3613,11 +3609,39 @@
 			</File>
 		</Filter>
 		<Filter
+			Name="Windows files"
+			>
+			<File
+				RelativePath=".\..\src\os\windows\crashlog_win.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\os\windows\ottdres.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\os\windows\win32.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Threading"
+			>
+			<File
+				RelativePath=".\..\src\thread\thread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\thread\thread_win32.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
 			Name="64-bit Specific Files"
 			Filter="asm"
 			>
 			<File
-				RelativePath=".\..\src\win64.asm"
+				RelativePath=".\..\src\os\windows\win64.asm"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
