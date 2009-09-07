@@ -282,10 +282,11 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Atstumas
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Sritis: {NUM} x {NUM}{}Aukščių skirtumas: {NUM} m
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Populiaciją
-STR_SORT_BY_NAME                                                :{BLACK}Vardą
-STR_SORT_BY_DATE                                                :{BLACK}Datą
+# These are used in buttons
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Populiaciją
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Vardą
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datą
+# These are used in dropdowns
 STR_SORT_BY_PRODUCTION                                          :Produkciją
 STR_SORT_BY_TYPE                                                :Tipą
 STR_SORT_BY_TRANSPORTED                                         :Pervežimus
@@ -599,12 +600,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Viso ta�
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jazz Jukebox
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Visi
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Senas stilius
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Naujas stilius
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Speciali 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Speciali 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Visi
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Senas stilius
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Naujas stilius
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Speciali 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Speciali 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Muzikos garsas
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Efektų garsas
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}TYLU  '  '  ' '  '  '  GARSU
@@ -613,8 +614,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}„{STRING}“
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Takelis{SETX 88}{BLACK}{TINYFONT}Pavadinimas
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Atsitiktinis
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Takelis
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Pavadinimas
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Atsitiktinis
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Programa
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Pereiti prie buvusio garso takelio
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Pereiti prie kito pažymėto takelio
@@ -1255,6 +1257,7 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :2x2 laukeliai
 STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :3x3 laukeliai
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :atsitiktinis
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Miestams leidžiama tiesti kelius: {ORANGE}{STRING}
+STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Leisti miestams kontroliuoti oro uostų triukšmo lygį: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Pagrindinės įrankių juostos pozicija: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Kairėje
@@ -1284,6 +1287,7 @@ STR_CONFIG_SETTING_INTERACTION                                  :{ORANGE}Sąveik
 STR_CONFIG_SETTING_CONSTRUCTION_SIGNALS                         :{ORANGE}Signalai
 STR_CONFIG_SETTING_STATIONS_CARGOHANDLING                       :{ORANGE}Krovinų valdymas
 STR_CONFIG_SETTING_AI_NPC                                       :{ORANGE}Kompiuterio žaidėjai
+STR_CONFIG_SETTING_VEHICLES_AUTORENEW                           :{ORANGE}Automatiškai atnaujinti
 STR_CONFIG_SETTING_VEHICLES_SERVICING                           :{ORANGE}Techninė apžiūra
 STR_CONFIG_SETTING_VEHICLES_ROUTING                             :{ORANGE}Maršrutas
 STR_CONFIG_SETTING_VEHICLES_TRAINS                              :{ORANGE}Traukiniai
@@ -1733,6 +1737,7 @@ STR_NETWORK_ERROR_CLIENT_NOT_EXPECTED                           :gautas neteisin
 STR_NETWORK_ERROR_CLIENT_WRONG_REVISION                         :bloga versija
 STR_NETWORK_ERROR_CLIENT_NAME_IN_USE                            :toks vardas jau naudojamas
 STR_NETWORK_ERROR_CLIENT_WRONG_PASSWORD                         :blogas žaidimo slaptažodis
+STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :neteisinga kompanija DoCommand
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :išmestas serverio
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :bandė sukčiauti
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :serveris pilnas
@@ -1749,10 +1754,13 @@ STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Žaidimas tęsi
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :išeinama
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} prisijungė prie žaidimo
+STR_NETWORK_MESSAGE_CLIENT_COMPANY_JOIN                         :*** {STRING} prisijungė prie #{2:NUM}
 STR_NETWORK_MESSAGE_CLIENT_COMPANY_SPECTATE                     :*** {STRING} prisijungė prie stebėtojų
+STR_NETWORK_MESSAGE_CLIENT_COMPANY_NEW                          :*** {STRING} pradėjo naują kompaniją (#{2:NUM})
 STR_NETWORK_MESSAGE_CLIENT_LEFT                                 :*** {STRING} paliko žaidimą ({2:STRING})
 STR_NETWORK_MESSAGE_NAME_CHANGE                                 :*** {STRING} pasikeitė vardą į {STRING}
 STR_NETWORK_MESSAGE_GIVE_MONEY                                  :*** {STRING} turi savo kompaniją {2:CURRENCY}
+STR_NETWORK_MESSAGE_GAVE_MONEY_AWAY                             :*** Jūs gavote {1:STRING} {2:CURRENCY}
 STR_NETWORK_MESSAGE_SERVER_SHUTDOWN                             :{WHITE} Serveris užsidarė
 STR_NETWORK_MESSAGE_SERVER_REBOOT                               :{WHITE} Serveris persikrauna...{}Prašau palaukti...
 
@@ -1762,6 +1770,7 @@ STR_CONTENT_TYPE_CAPTION                                        :{BLACK}Tipas
 STR_CONTENT_TYPE_CAPTION_TOOLTIP                                :{BLACK}Turinio tipas
 STR_CONTENT_NAME_CAPTION                                        :{BLACK}Vardas
 STR_CONTENT_NAME_CAPTION_TOOLTIP                                :{BLACK}Turinio vardas
+STR_CONTENT_MATRIX_TOOLTIP                                      :{BLACK}Paspauskite kad pamatyti smulkmenas{}Pažymėkite checkbox atsisiųntimui
 STR_CONTENT_SELECT_ALL_CAPTION                                  :{BLACK}Pažymėti viską
 STR_CONTENT_SELECT_ALL_CAPTION_TOOLTIP                          :{BLACK}Pažymėti visą turinį atsisiuntimui
 STR_CONTENT_SELECT_UPDATES_CAPTION                              :{BLACK}Pažymėti atnaujinimus
@@ -2604,15 +2613,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Iškelti visas 
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Pervadinti grupę
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Nauji Traukiniai
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nauji Elektriniai Traukiniai
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nauji Vienbegiai Traukiniai
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nauji „Maglev“ traukiniai
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Nauji Traukiniai
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Nauji Elektriniai Traukiniai
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Nauji Vienbegiai Traukiniai
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Nauji „Maglev“ traukiniai
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Traukiniai
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Nauji automobiliai
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nauji laivai
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Naujas lektuvas
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Traukiniai
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Nauji automobiliai
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Nauji laivai
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Naujas lektuvas
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Kaina: {GOLD}{CURRENCY}{BLACK} Svoris: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Greitis: {GOLD}{VELOCITY}{BLACK}   Galia: {GOLD}{POWER}
@@ -2631,30 +2640,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Visus krovinių
 STR_PURCHASE_INFO_ALL_BUT                                       :Visus, išskyrus {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Did. traukiamoji galia: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Transporto priemoniu pasirinkimo sarasas - paspausk ant priemones, kad gautum daugiau informacijos
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Automobiliu pasirinkimo sarasas - paspausk ant automobilio jei nori detalesnes informacijos
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Laivu sarasas - paspausk ant laivo, jei nori detalesnes informacijos
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Lektuvu sarasas - paspausk ant lektuvo, jei nori daugiau informacijos
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Transporto priemoniu pasirinkimo sarasas - paspausk ant priemones, kad gautum daugiau informacijos
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Automobiliu pasirinkimo sarasas - paspausk ant automobilio jei nori detalesnes informacijos
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Laivu sarasas - paspausk ant laivo, jei nori detalesnes informacijos
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Lektuvu sarasas - paspausk ant lektuvo, jei nori daugiau informacijos
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Pirkti
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Isigyti priemone
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Nupirkti Laiva
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Isigyti lektuva
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Pirkti
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Isigyti priemone
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Nupirkti Laiva
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Isigyti lektuva
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Isigyti pazymeta transporto priemone
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Isigyti pazymeta automobili
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Statyti pazymeta laiva
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Statyti pazymeta lektuva
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Isigyti pazymeta transporto priemone
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Isigyti pazymeta automobili
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Statyti pazymeta laiva
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Statyti pazymeta lektuva
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Pervardinti
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Pervardinti
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Pervardinti
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Pervardinti
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Pervardinti
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Pervardinti
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Pervardinti
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Pervardinti
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Pervardinti traukinio tipa
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Pervardinti automobiliu tipa
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Pakeisti laivo tipa
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Pakeisti lektuvo varda
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Pervardinti traukinio tipa
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Pervardinti automobiliu tipa
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Pakeisti laivo tipa
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Pakeisti lektuvo varda
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Pervardinti traukinio tipa
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Pervardinti automobiliu tipa
@@ -3399,10 +3408,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Negalima
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Nusiusti i laivu depa negalima...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Negalima lektuvo nusiusti i angara...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Gelezinkelio transporto priemones nupirkti negalima...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Automobilio isigyti negalima...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Laivo isigyti negalima...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Negalima isigyti lektuvo...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Gelezinkelio transporto priemones nupirkti negalima...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Automobilio isigyti negalima...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Laivo isigyti negalima...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Negalima isigyti lektuvo...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Neimanoma pervardinti traukinio tipo...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Negali pervardinti automobliu tipo...
@@ -3916,7 +3925,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

@@ -58,26 +58,19 @@ enum LandInfoWidgets {
 	LIW_BACKGROUND, ///< Background to draw on
 };
 
-static const Widget _land_info_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,                   STR_TOOLTIP_CLOSE_WINDOW},           // LIW_CLOSE
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   299,     0,    13, STR_LAND_AREA_INFORMATION_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // LIW_CAPTION
-{      WWT_PANEL, RESIZE_BOTTOM,  COLOUR_GREY,     0,   299,    14,    99, 0x0,                               STR_NULL},                           // LIW_BACKGROUND
-{    WIDGETS_END},
-};
-
 static const NWidgetPart _nested_land_info_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, LIW_CLOSE),
 		NWidget(WWT_CAPTION, COLOUR_GREY, LIW_CAPTION), SetDataTip(STR_LAND_AREA_INFORMATION_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, LIW_BACKGROUND), SetMinimalSize(300, 86), SetResize(0, 1), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, LIW_BACKGROUND), EndContainer(),
 };
 
 static const WindowDesc _land_info_desc(
-	WDP_AUTO, WDP_AUTO, 300, 100, 300, 100,
+	WDP_AUTO, WDP_AUTO, 0, 0, 0, 0,
 	WC_LAND_INFO, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_land_info_widgets, _nested_land_info_widgets, lengthof(_nested_land_info_widgets)
+	NULL, _nested_land_info_widgets, lengthof(_nested_land_info_widgets)
 );
 
 class LandInfoWindow : public Window {
@@ -95,22 +88,51 @@ public:
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
+	}
 
-		uint y = 21;
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != LIW_BACKGROUND) return;
+
+		uint y = r.top + WD_TEXTPANEL_TOP;
 		for (uint i = 0; i < LAND_INFO_CENTERED_LINES; i++) {
 			if (StrEmpty(this->landinfo_data[i])) break;
 
-			DrawString(this->widget[LIW_BACKGROUND].left + 2, this->widget[LIW_BACKGROUND].right - 2, y, this->landinfo_data[i], i == 0 ? TC_LIGHT_BLUE : TC_FROMSTRING, SA_CENTER);
-			y += i == 0 ? 16 : 12;
+			DrawString(r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMETEXT_RIGHT, y, this->landinfo_data[i], i == 0 ? TC_LIGHT_BLUE : TC_FROMSTRING, SA_CENTER);
+			y += FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL;
+			if (i == 0) y += 4;
 		}
 
 		if (!StrEmpty(this->landinfo_data[LAND_INFO_MULTICENTER_LINE])) {
 			SetDParamStr(0, this->landinfo_data[LAND_INFO_MULTICENTER_LINE]);
-			DrawStringMultiLine(this->widget[LIW_BACKGROUND].left + 2, this->widget[LIW_BACKGROUND].right - 2, y, y + 22, STR_JUST_RAW_STRING, TC_FROMSTRING, SA_CENTER);
+			DrawStringMultiLine(r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMETEXT_RIGHT, y, r.bottom - WD_TEXTPANEL_BOTTOM, STR_JUST_RAW_STRING, TC_FROMSTRING, SA_CENTER);
 		}
 	}
 
-	LandInfoWindow(TileIndex tile) : Window(&_land_info_desc) {
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		if (widget != LIW_BACKGROUND) return;
+
+		size->height = WD_TEXTPANEL_TOP + WD_TEXTPANEL_BOTTOM;
+		for (uint i = 0; i < LAND_INFO_CENTERED_LINES; i++) {
+			if (StrEmpty(this->landinfo_data[i])) break;
+
+			uint width = GetStringBoundingBox(this->landinfo_data[i]).width + WD_FRAMETEXT_LEFT + WD_FRAMETEXT_RIGHT;
+			size->width = max(size->width, width);
+
+			size->height += FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL;
+			if (i == 0) size->height += 4;
+		}
+
+		if (!StrEmpty(this->landinfo_data[LAND_INFO_MULTICENTER_LINE])) {
+			uint width = GetStringBoundingBox(this->landinfo_data[LAND_INFO_MULTICENTER_LINE]).width + WD_FRAMETEXT_LEFT + WD_FRAMETEXT_RIGHT;
+			size->width = max(size->width, min(300u, width));
+			SetDParamStr(0, this->landinfo_data[LAND_INFO_MULTICENTER_LINE]);
+			size->height += GetStringHeight(STR_JUST_RAW_STRING, size->width - WD_FRAMERECT_LEFT - WD_FRAMERECT_RIGHT);
+		}
+	}
+
+	LandInfoWindow(TileIndex tile) : Window() {
 		Town *t = ClosestTownFromTile(tile, _settings_game.economy.dist_local_authority);
 
 		/* Because build_date is not set yet in every TileDesc, we make sure it is empty */
@@ -137,7 +159,7 @@ public:
 		td.grf = NULL;
 
 		CargoArray acceptance;
-		AddAcceptedCargo(tile, acceptance);
+		AddAcceptedCargo(tile, acceptance, NULL);
 		GetTileDesc(tile, &td);
 
 		uint line_nr = 0;
@@ -256,11 +278,7 @@ public:
 		}
 		if (!found) this->landinfo_data[LAND_INFO_MULTICENTER_LINE][0] = '\0';
 
-		if (found) line_nr += 2;
-
-		if (line_nr > 6) ResizeWindow(this, 0, 12 * (line_nr - 6));
-
-		this->FindWindowPlacementAndResize(&_land_info_desc);
+		this->InitNested(&_land_info_desc);
 
 #if defined(_DEBUG)
 #	define LANDINFOD_LEVEL 0
@@ -298,18 +316,14 @@ void PlaceLandBlockInfo()
 
 /** Widgets for the land info window. */
 enum AboutWidgets {
-	AW_CLOSE,      ///< Close the window
-	AW_CAPTION,    ///< Title bar of the window
-	AW_BACKGROUND, ///< Background to draw on
-	AW_FRAME,      ///< The scrolling frame with goodies
-};
-
-static const Widget _about_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,   STR_TOOLTIP_CLOSE_WINDOW},           // AW_CLOSE
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   419,     0,    13, STR_ABOUT_OPENTTD, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // AW_CAPTION
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   419,    14,   271, 0x0,               STR_NULL},                           // AW_BACKGROUND
-{      WWT_FRAME,   RESIZE_NONE,  COLOUR_GREY,     5,   414,    40,   245, STR_NULL,          STR_NULL},                           // AW_FRAME
-{    WIDGETS_END},
+	AW_CLOSE,                ///< Close the window
+	AW_CAPTION,              ///< Title bar of the window
+	AW_BACKGROUND,           ///< Background to draw on
+	AW_ABOUT_ORIG_COPYRIGHT, ///< Text with original copyright info
+	AW_ABOUT_VERSION,        ///< OpenTTD version string
+	AW_FRAME,                ///< The scrolling frame with goodies
+	AW_WEBSITE,              ///< URL of OpenTTD website
+	AW_ABOUT_COPYRIGHT,      ///< OpenTTD copyright info
 };
 
 static const NWidgetPart _nested_about_widgets[] = {
@@ -317,118 +331,145 @@ static const NWidgetPart _nested_about_widgets[] = {
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, AW_CLOSE),
 		NWidget(WWT_CAPTION, COLOUR_GREY, AW_CAPTION), SetDataTip(STR_ABOUT_OPENTTD, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, AW_BACKGROUND),
-		NWidget(WWT_FRAME, COLOUR_GREY, AW_FRAME), SetMinimalSize(410, 206), SetPadding(26, 5, 26, 5), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, AW_BACKGROUND), SetPIP(4, 2, 4),
+		NWidget(WWT_TEXT, COLOUR_GREY, AW_ABOUT_ORIG_COPYRIGHT), SetDataTip(STR_ABOUT_ORIGINAL_COPYRIGHT, STR_NULL),
+		NWidget(WWT_TEXT, COLOUR_GREY, AW_ABOUT_VERSION), SetDataTip(STR_ABOUT_VERSION, STR_NULL),
+		NWidget(WWT_FRAME, COLOUR_GREY, AW_FRAME), SetPadding(0, 5, 1, 5), EndContainer(),
+		NWidget(WWT_TEXT, COLOUR_GREY, AW_WEBSITE), SetDataTip(STR_BLACK_RAW_STRING, STR_NULL),
+		NWidget(WWT_TEXT, COLOUR_GREY, AW_ABOUT_COPYRIGHT), SetDataTip(STR_ABOUT_COPYRIGHT_OPENTTD, STR_NULL),
 	EndContainer(),
 };
 
 static const WindowDesc _about_desc(
-	WDP_CENTER, WDP_CENTER, 420, 272, 420, 272,
+	WDP_CENTER, WDP_CENTER, 0, 0, 0, 0,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_about_widgets, _nested_about_widgets, lengthof(_nested_about_widgets)
+	NULL, _nested_about_widgets, lengthof(_nested_about_widgets)
 );
 
-struct AboutWindow : public Window {
-	int scroll_height;
-	uint16 counter;
+static const char *_credits[] = {
+	"Original design by Chris Sawyer",
+	"Original graphics by Simon Foster",
+	"",
+	"The OpenTTD team (in alphabetical order):",
+	"  Jean-Francois Claeys (Belugas) - GUI, newindustries and more",
+	"  Bjarni Corfitzen (Bjarni) - MacOSX port, coder and vehicles",
+	"  Matthijs Kooijman (blathijs) - Pathfinder-guru, pool rework",
+	"  Victor Fischer (Celestar) - Programming everywhere you need him to",
+	"  Christoph Elsenhans (frosch) - General coding",
+	"  Lo\xC3\xAF""c Guilloux (glx) - Windows Expert",
+	"  Michael Lutz (michi_cc) - Path based signals",
+	"  Owen Rudge (orudge) - Forum host, OS/2 port",
+	"  Peter Nelson (peter1138) - Spiritual descendant from newGRF gods",
+	"  Remko Bijker (Rubidium) - Lead coder and way more",
+	"  Zden\xC4\x9Bk Sojka (SmatZ) - Bug finder and fixer",
+	"  Thijs Marinussen (Yexo) - AI Framework",
+	"",
+	"Inactive Developers:",
+	"  Tam\xC3\xA1s Farag\xC3\xB3 (Darkvater) - Ex-Lead coder",
+	"  Jaroslav Mazanec (KUDr) - YAPG (Yet Another Pathfinder God) ;)",
+	"  Jonathan Coome (Maedhros) - High priest of the NewGRF Temple",
+	"  Attila B\xC3\xA1n (MiHaMiX) - Developer WebTranslator 1 and 2",
+	"  Christoph Mallon (Tron) - Programmer, code correctness police",
+	"",
+	"Retired Developers:",
+	"  Ludvig Strigeus (ludde) - OpenTTD author, main coder (0.1 - 0.3.3)",
+	"  Serge Paquet (vurlix) - Assistant project manager, coder (0.1 - 0.3.3)",
+	"  Dominik Scherer (dominik81) - Lead programmer, GUI expert (0.3.0 - 0.3.6)",
+	"  Benedikt Br\xC3\xBCggemeier (skidd13) - Bug fixer and code reworker",
+	"  Patric Stout (TrueLight) - Programmer (0.3 - pre0.7), sys op (active)",
+	"",
+	"Special thanks go out to:",
+	"  Josef Drexler - For his great work on TTDPatch",
+	"  Marcin Grzegorczyk - For his documentation of TTD internals",
+	"  Petr Baudis (pasky) - Many patches, newGRF support",
+	"  Stefan Mei\xC3\x9Fner (sign_de) - For his work on the console",
+	"  Simon Sasburg (HackyKid) - Many bugfixes he has blessed us with",
+	"  Cian Duffy (MYOB) - BeOS port / manual writing",
+	"  Christian Rosentreter (tokai) - MorphOS / AmigaOS port",
+	"  Richard Kempton (richK) - additional airports, initial TGP implementation",
+	"",
+	"  Alberto Demichelis - Squirrel scripting language \xC2\xA9 2003-2008",
+	"  Markus F.X.J. Oberhumer - (Mini)LZO for loading old savegames \xC2\xA9 1996-2008",
+	"  L. Peter Deutsch - MD5 implementation \xC2\xA9 1999, 2000, 2002",
+	"  Michael Blunck - Pre-Signals and Semaphores \xC2\xA9 2003",
+	"  George - Canal/Lock graphics \xC2\xA9 2003-2004",
+	"  David Dallaston - Tram tracks",
+	"  Marcin Grzegorczyk - Foundations for Tracks on Slopes",
+	"  All Translators - Who made OpenTTD a truly international game",
+	"  Bug Reporters - Without whom OpenTTD would still be full of bugs!",
+	"",
+	"",
+	"And last but not least:",
+	"  Chris Sawyer - For an amazing game!"
+};
 
-	AboutWindow() : Window(&_about_desc)
+struct AboutWindow : public Window {
+	int text_position;                       ///< The top of the scrolling text
+	byte counter;                            ///< Used to scroll the text every 5 ticks
+	int line_height;                         ///< The height of a single line
+	static const int num_visible_lines = 19; ///< The number of lines visible simultaneously
+
+	AboutWindow() : Window()
 	{
+		this->InitNested(&_about_desc);
+
 		this->counter = 5;
-		this->scroll_height = this->height - 40;
-		this->FindWindowPlacementAndResize(&_about_desc);
+		this->text_position = this->nested_array[AW_FRAME]->pos_y + this->nested_array[AW_FRAME]->current_y;
+	}
+
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget == AW_WEBSITE) SetDParamStr(0, "Website: http://www.openttd.org");
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		if (widget != AW_FRAME) return;
+
+		this->line_height = FONT_HEIGHT_NORMAL;
+
+		Dimension d;
+		d.height = this->line_height * num_visible_lines;
+
+		d.width = 0;
+		for (uint i = 0; i < lengthof(_credits); i++) {
+			d.width = max(d.width, GetStringBoundingBox(_credits[i]).width);
+		}
+		d.width += WD_FRAMETEXT_LEFT + WD_FRAMETEXT_RIGHT;
+
+		*size = maxdim(*size, d);
 	}
 
 	virtual void OnPaint()
 	{
-		static const char *credits[] = {
-			/*************************************************************************
-			 *                      maximum length of string which fits in window   -^*/
-			"Original design by Chris Sawyer",
-			"Original graphics by Simon Foster",
-			"",
-			"The OpenTTD team (in alphabetical order):",
-			"  Jean-Francois Claeys (Belugas) - GUI, newindustries and more",
-			"  Bjarni Corfitzen (Bjarni) - MacOSX port, coder and vehicles",
-			"  Matthijs Kooijman (blathijs) - Pathfinder-guru, pool rework",
-			"  Victor Fischer (Celestar) - Programming everywhere you need him to",
-			"  Christoph Elsenhans (frosch) - General coding",
-			"  Lo\xC3\xAF""c Guilloux (glx) - Windows Expert",
-			"  Michael Lutz (michi_cc) - Path based signals",
-			"  Owen Rudge (orudge) - Forum host, OS/2 port",
-			"  Peter Nelson (peter1138) - Spiritual descendant from newGRF gods",
-			"  Remko Bijker (Rubidium) - Lead coder and way more",
-			"  Zdenek Sojka (SmatZ) - Bug finder and fixer",
-			"  Thijs Marinussen (Yexo) - AI Framework",
-			"",
-			"Inactive Developers:",
-			"  Tam\xC3\xA1s Farag\xC3\xB3 (Darkvater) - Ex-Lead coder",
-			"  Jaroslav Mazanec (KUDr) - YAPG (Yet Another Pathfinder God) ;)",
-			"  Jonathan Coome (Maedhros) - High priest of the NewGRF Temple",
-			"  Attila B\xC3\xA1n (MiHaMiX) - Developer WebTranslator 1 and 2",
-			"  Christoph Mallon (Tron) - Programmer, code correctness police",
-			"",
-			"Retired Developers:",
-			"  Ludvig Strigeus (ludde) - OpenTTD author, main coder (0.1 - 0.3.3)",
-			"  Serge Paquet (vurlix) - Assistant project manager, coder (0.1 - 0.3.3)",
-			"  Dominik Scherer (dominik81) - Lead programmer, GUI expert (0.3.0 - 0.3.6)",
-			"  Benedikt Brüggemeier (skidd13) - Bug fixer and code reworker",
-			"  Patric Stout (TrueLight) - Programmer (0.3 - pre0.7), sys op (active)",
-			"",
-			"Special thanks go out to:",
-			"  Josef Drexler - For his great work on TTDPatch",
-			"  Marcin Grzegorczyk - For his documentation of TTD internals",
-			"  Petr Baudis (pasky) - Many patches, newGRF support",
-			"  Stefan Meißner (sign_de) - For his work on the console",
-			"  Simon Sasburg (HackyKid) - Many bugfixes he has blessed us with",
-			"  Cian Duffy (MYOB) - BeOS port / manual writing",
-			"  Christian Rosentreter (tokai) - MorphOS / AmigaOS port",
-			"  Richard Kempton (richK) - additional airports, initial TGP implementation",
-			"",
-			"  Alberto Demichelis - Squirrel scripting language © 2003-2008",
-			"  Markus F.X.J. Oberhumer - (Mini)LZO for loading old savegames © 1996-2008",
-			"  L. Peter Deutsch - MD5 implementation © 1999, 2000, 2002",
-			"  Michael Blunck - Pre-Signals and Semaphores © 2003",
-			"  George - Canal/Lock graphics © 2003-2004",
-			"  David Dallaston - Tram tracks",
-			"  Marcin Grzegorczyk - Foundations for Tracks on Slopes",
-			"  All Translators - Who made OpenTTD a truly international game",
-			"  Bug Reporters - Without whom OpenTTD would still be full of bugs!",
-			"",
-			"",
-			"And last but not least:",
-			"  Chris Sawyer - For an amazing game!"
-		};
-
 		this->DrawWidgets();
+	}
 
-		/* Show original copyright and revision version */
-		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, 17, STR_ABOUT_ORIGINAL_COPYRIGHT, TC_FROMSTRING, SA_CENTER);
-		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, 17 + 10, STR_ABOUT_VERSION, TC_FROMSTRING, SA_CENTER);
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != AW_FRAME) return;
 
-		int y = this->scroll_height;
+		int y = this->text_position;
 
-		/* Show all scrolling credits */
-		for (uint i = 0; i < lengthof(credits); i++) {
-			if (y >= 50 && y < (this->height - 40)) {
-				DrawString(this->widget[AW_FRAME].left + 5, this->widget[AW_FRAME].right - 5, y, credits[i], TC_BLACK);
+		/* Show all scrolling _credits */
+		for (uint i = 0; i < lengthof(_credits); i++) {
+			if (y >= r.top + 7 && y < r.bottom - this->line_height) {
+				DrawString(r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMETEXT_RIGHT, y, _credits[i], TC_BLACK);
 			}
-			y += 10;
+			y += this->line_height;
 		}
-
-		/* If the last text has scrolled start a new from the start */
-		if (y < 50) this->scroll_height = this->height - 40;
-
-		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, this->height - 25, "Website: http://www.openttd.org", TC_BLACK, SA_CENTER);
-		DrawString(this->widget[AW_BACKGROUND].left + 2, this->widget[AW_BACKGROUND].right - 2, this->height - 15, STR_ABOUT_COPYRIGHT_OPENTTD, TC_FROMSTRING, SA_CENTER);
 	}
 
 	virtual void OnTick()
 	{
 		if (--this->counter == 0) {
 			this->counter = 5;
-			this->scroll_height--;
+			this->text_position--;
+			/* If the last text has scrolled start a new from the start */
+			if (this->text_position < (int)(this->nested_array[AW_FRAME]->pos_y - lengthof(_credits) * this->line_height)) {
+				this->text_position = this->nested_array[AW_FRAME]->pos_y + this->nested_array[AW_FRAME]->current_y;
+			}
 			this->SetDirty();
 		}
 	}
@@ -747,7 +788,7 @@ struct TooltipsWindow : public Window
 			Window(x, y, width, height, WC_TOOLTIPS, widget)
 	{
 		this->string_id = str;
-		assert(sizeof(this->params[0]) == sizeof(params[0]));
+		assert_compile(sizeof(this->params[0]) == sizeof(params[0]));
 		assert(paramcount <= lengthof(this->params));
 		memcpy(this->params, params, sizeof(this->params[0]) * paramcount);
 		this->paramcount = paramcount;
@@ -768,7 +809,7 @@ struct TooltipsWindow : public Window
 		for (uint arg = 0; arg < this->paramcount; arg++) {
 			SetDParam(arg, this->params[arg]);
 		}
-		DrawStringMultiLine(1, this->width - 1, 0, this->height, this->string_id, TC_FROMSTRING, SA_CENTER);
+		DrawStringMultiLine(3, this->width - 3, 0, this->height, this->string_id, TC_FROMSTRING, SA_CENTER);
 	}
 
 	virtual void OnMouseLoop()
@@ -797,14 +838,13 @@ void GuiShowTooltips(StringID str, uint paramcount, const uint64 params[], bool 
 	char buffer[512];
 	GetString(buffer, str, lastof(buffer));
 
-	Dimension br = GetStringBoundingBox(buffer);
-	br.width += 6; br.height += 4; // increase slightly to have some space around the box
+	Dimension br;
+	br.width  = min(GetStringBoundingBox(buffer).width, 194);
+	br.height = GetStringHeight(str, br.width);
 
-	/* Cut tooltip length to 200 pixels max, wrap to new line if longer */
-	if (br.width > 200) {
-		br.height += ((br.width - 4) / 176) * 10;
-		br.width = 200;
-	}
+	/* increase slightly to have some space around the box */
+	br.width += 6;
+	br.height += 4;
 
 	/* Correctly position the tooltip position, watch out for window and cursor size
 	 * Clamp value to below main toolbar and above statusbar. If tooltip would
@@ -1298,7 +1338,7 @@ struct QueryStringWindow : public QueryStringBaseWindow
 
 static const Widget _query_string_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,   STR_TOOLTIP_CLOSE_WINDOW}, // QUERY_STR_WIDGET_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   259,     0,    13, STR_WHITE_STRINGN, STR_NULL},              // QUERY_STR_WIDGET_CAPTION
+{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   259,     0,    13, STR_WHITE_STRING,  STR_NULL},              // QUERY_STR_WIDGET_CAPTION
 {      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   259,    14,    29, 0x0,               STR_NULL},              // QUERY_STR_WIDGET_BACKGROUND
 {    WWT_EDITBOX,   RESIZE_NONE,  COLOUR_GREY,     2,   257,    16,    27, 0x0,               STR_NULL},              // QUERY_STR_WIDGET_TEXT
 {    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    86,    30,    41, STR_BUTTON_DEFAULT,       STR_NULL},              // QUERY_STR_WIDGET_DEFAULT
@@ -1310,7 +1350,7 @@ static const Widget _query_string_widgets[] = {
 static const NWidgetPart _nested_query_string_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, QUERY_STR_WIDGET_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, QUERY_STR_WIDGET_CAPTION), SetDataTip(STR_WHITE_STRINGN, STR_NULL),
+		NWidget(WWT_CAPTION, COLOUR_GREY, QUERY_STR_WIDGET_CAPTION), SetDataTip(STR_WHITE_STRING, STR_NULL),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, QUERY_STR_WIDGET_BACKGROUND),
 		NWidget(WWT_EDITBOX, COLOUR_GREY, QUERY_STR_WIDGET_TEXT), SetMinimalSize(256, 12), SetPadding(2, 2, 2, 2),
@@ -1521,8 +1561,8 @@ enum SaveLoadWindowWidgets {
 static const Widget _load_dialog_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},             // SLWW_CLOSE
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   256,     0,    13, STR_NULL,                 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},   // SLWW_WINDOWTITLE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_NAME,         STR_TOOLTIP_SORT_ORDER},                   // SLWW_SORT_BYNAME
-{ WWT_PUSHTXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_DATE,         STR_TOOLTIP_SORT_ORDER},                   // SLWW_SORT_BYDATE
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER},               // SLWW_SORT_BYNAME
+{ WWT_PUSHTXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_CAPTION_DATE, STR_TOOLTIP_SORT_ORDER},               // SLWW_SORT_BYDATE
 {      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,     0,   256,    26,    47, 0x0,                      STR_NULL},                             // SLWW_BACKGROUND
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   256,    48,   153, 0x0,                      STR_NULL},                             // SLWW_FILE_BACKGROUND
 { WWT_PUSHIMGBTN,     RESIZE_LR,  COLOUR_GREY,   245,   256,    48,    59, SPR_HOUSE_ICON,           STR_SAVELOAD_HOME_BUTTON},             // SLWW_HOME_BUTTON
@@ -1532,7 +1572,7 @@ static const Widget _load_dialog_widgets[] = {
 {      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                      STR_NULL},                             // SLWW_SAVE_OSK_TITLE
 {      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                      STR_NULL},                             // SLWW_DELETE_SELECTION
 {      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                      STR_NULL},                             // SLWW_SAVE_GAME
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   142,   153, 0x0,                      STR_TOOLTIP_RESIZE},                    // SLWW_RESIZE
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   142,   153, 0x0,                      STR_TOOLTIP_RESIZE},                   // SLWW_RESIZE
 {   WIDGETS_END},
 };
 
@@ -1544,8 +1584,8 @@ static const NWidgetPart _nested_load_dialog_widgets[] = {
 				NWidget(WWT_CAPTION, COLOUR_GREY, SLWW_WINDOWTITLE),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetMinimalSize(128, 12), SetDataTip(STR_SORT_BY_NAME, STR_TOOLTIP_SORT_ORDER),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetMinimalSize(129, 12), SetDataTip(STR_SORT_BY_DATE, STR_TOOLTIP_SORT_ORDER), SetResize(1, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetMinimalSize(128, 12), SetDataTip(STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetMinimalSize(129, 12), SetDataTip(STR_SORT_BY_CAPTION_DATE, STR_TOOLTIP_SORT_ORDER), SetResize(1, 0),
 			EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetMinimalSize(257, 22), SetResize(1, 0), EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
@@ -1581,18 +1621,18 @@ static const NWidgetPart _nested_load_dialog_widgets[] = {
 static const Widget _save_dialog_widgets[] = {
 {   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,            STR_TOOLTIP_CLOSE_WINDOW},             // SLWW_CLOSE
 {    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   256,     0,    13, STR_NULL,                   STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},   // SLWW_WINDOWTITLE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_NAME,           STR_TOOLTIP_SORT_ORDER},                   // SLWW_SORT_BYNAME
-{ WWT_PUSHTXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_DATE,           STR_TOOLTIP_SORT_ORDER},                   // SLWW_SORT_BYDATE
+{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,   127,    14,    25, STR_SORT_BY_CAPTION_NAME,   STR_TOOLTIP_SORT_ORDER},               // SLWW_SORT_BYNAME
+{ WWT_PUSHTXTBTN,  RESIZE_RIGHT,  COLOUR_GREY,   128,   256,    14,    25, STR_SORT_BY_CAPTION_DATE,   STR_TOOLTIP_SORT_ORDER},               // SLWW_SORT_BYDATE
 {      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,     0,   256,    26,    47, 0x0,                        STR_NULL},                             // SLWW_BACKGROUND
 {      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   256,    48,   167, 0x0,                        STR_NULL},                             // SLWW_FILE_BACKGROUND
 { WWT_PUSHIMGBTN,     RESIZE_LR,  COLOUR_GREY,   245,   256,    48,    59, SPR_HOUSE_ICON,             STR_SAVELOAD_HOME_BUTTON},             // SLWW_HOME_BUTTON
 {      WWT_INSET,     RESIZE_RB,  COLOUR_GREY,     2,   243,    50,   150, 0x0,                        STR_SAVELOAD_LIST_TOOLTIP},            // SLWW_DRIVES_DIRECTORIES_LIST
 {  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   245,   256,    60,   150, 0x0,                        STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // SLWW_SCROLLBAR
 {      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     0,     0,     0,     0, 0x0,                        STR_NULL},                             // SLWW_CONTENT_DOWNLOAD
-{    WWT_EDITBOX,    RESIZE_RTB,  COLOUR_GREY,     2,   254,   154,   165, STR_SAVELOAD_OSKTITLE,          STR_SAVELOAD_EDITBOX_TOOLTIP},         // SLWW_SAVE_OSK_TITLE
+{    WWT_EDITBOX,    RESIZE_RTB,  COLOUR_GREY,     2,   254,   154,   165, STR_SAVELOAD_OSKTITLE,      STR_SAVELOAD_EDITBOX_TOOLTIP},         // SLWW_SAVE_OSK_TITLE
 { WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,     0,   127,   168,   179, STR_SAVELOAD_DELETE_BUTTON, STR_SAVELOAD_DELETE_TOOLTIP},          // SLWW_DELETE_SELECTION
 { WWT_PUSHTXTBTN,    RESIZE_RTB,  COLOUR_GREY,   128,   244,   168,   179, STR_SAVELOAD_SAVE_BUTTON,   STR_SAVELOAD_SAVE_TOOLTIP},            // SLWW_SAVE_GAME
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   168,   179, 0x0,                        STR_TOOLTIP_RESIZE},                    // SLWW_RESIZE
+{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   245,   256,   168,   179, 0x0,                        STR_TOOLTIP_RESIZE},                   // SLWW_RESIZE
 {   WIDGETS_END},
 };
 
@@ -1604,8 +1644,8 @@ static const NWidgetPart _nested_save_dialog_widgets[] = {
 				NWidget(WWT_CAPTION, COLOUR_GREY, SLWW_WINDOWTITLE),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetMinimalSize(128, 12), SetDataTip(STR_SORT_BY_NAME, STR_TOOLTIP_SORT_ORDER),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetMinimalSize(129, 12), SetDataTip(STR_SORT_BY_DATE, STR_TOOLTIP_SORT_ORDER), SetResize(1, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetMinimalSize(128, 12), SetDataTip(STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetMinimalSize(129, 12), SetDataTip(STR_SORT_BY_CAPTION_DATE, STR_TOOLTIP_SORT_ORDER), SetResize(1, 0),
 			EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetMinimalSize(257, 22), SetResize(1, 0), EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
@@ -1723,7 +1763,7 @@ public:
 			STR_SAVELOAD_LOAD_HEIGHTMAP,
 		};
 
-		this->vscroll.cap = 10;
+		this->vscroll.SetCapacity(10);
 		this->resize.step_width = 2;
 		this->resize.step_height = 10;
 
@@ -1739,7 +1779,7 @@ public:
 
 			case SLD_LOAD_SCENARIO:
 			case SLD_LOAD_HEIGHTMAP:
-				this->vscroll.cap--;
+				this->vscroll.UpdateCapacity(-1);
 
 			case SLD_SAVE_GAME:     this->GenerateFileName(); break;
 			case SLD_SAVE_SCENARIO: strecpy(this->edit_str_buf, "UNNAMED", &this->edit_str_buf[edit_str_size - 1]); break;
@@ -1805,7 +1845,7 @@ public:
 	{
 		int y;
 
-		SetVScrollCount(this, _fios_items.Length());
+		this->vscroll.SetCount(_fios_items.Length());
 		this->DrawWidgets();
 		DrawFiosTexts(this->widget[SLWW_BACKGROUND].left, this->widget[SLWW_BACKGROUND].right);
 
@@ -1819,12 +1859,12 @@ public:
 		this->DrawSortButtonState(_savegame_sort_order & SORT_BY_NAME ? SLWW_SORT_BYNAME : SLWW_SORT_BYDATE, _savegame_sort_order & SORT_DESCENDING ? SBS_DOWN : SBS_UP);
 
 		y = widg->top + 1;
-		for (uint pos = this->vscroll.pos; pos < _fios_items.Length(); pos++) {
+		for (uint pos = this->vscroll.GetPosition(); pos < _fios_items.Length(); pos++) {
 			const FiosItem *item = _fios_items.Get(pos);
 
 			DrawString(widg->left + 2, widg->right - 2, y, item->title, _fios_colours[item->type]);
 			y += 10;
-			if (y >= this->vscroll.cap * 10 + widg->top + 1) break;
+			if (y >= this->vscroll.GetCapacity() * 10 + widg->top + 1) break;
 		}
 
 		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
@@ -1858,7 +1898,7 @@ public:
 			case SLWW_DRIVES_DIRECTORIES_LIST: { // Click the listbox
 				int y = (pt.y - this->widget[widget].top - 1) / 10;
 
-				if (y < 0 || (y += this->vscroll.pos) >= this->vscroll.count) return;
+				if (y < 0 || (y += this->vscroll.GetPosition()) >= this->vscroll.GetCount()) return;
 
 				const FiosItem *file = _fios_items.Get(y);
 
@@ -1974,7 +2014,7 @@ public:
 			this->widget[SLWW_SAVE_GAME].left  += diff;
 		}
 
-		this->vscroll.cap += delta.y / 10;
+		this->vscroll.UpdateCapacity(delta.y / 10);
 	}
 
 	virtual void OnInvalidateData(int data)

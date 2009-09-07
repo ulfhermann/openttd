@@ -24,7 +24,7 @@
 #include "../openttd.h"
 #include "../debug.h"
 #include "../station_base.h"
-#include "../thread.h"
+#include "../thread/thread.h"
 #include "../town.h"
 #include "../network/network.h"
 #include "../variables.h"
@@ -48,7 +48,7 @@
 
 #include "saveload_internal.h"
 
-extern const uint16 SAVEGAME_VERSION = 125;
+extern const uint16 SAVEGAME_VERSION = 127;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 

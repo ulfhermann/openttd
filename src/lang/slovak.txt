@@ -313,9 +313,9 @@ STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Plocha: 
 
 
 # The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Populacia
-STR_SORT_BY_NAME                                                :{BLACK}Nazov
-STR_SORT_BY_DATE                                                :{BLACK}Datum
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Populacia
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nazov
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datum
 STR_SORT_BY_PRODUCTION                                          :Produkcia
 STR_SORT_BY_TYPE                                                :Typ
 STR_SORT_BY_TRANSPORTED                                         :Prepravene
@@ -628,12 +628,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Celkove 
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jukebox
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Všetko
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Starý štýl
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Nový štýl
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Vlastné 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Vlastné 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Všetko
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Starý štýl
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Nový štýl
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Vlastné 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Vlastné 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Hlasitost hudby
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Hlasitost zvuk. efektov
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
@@ -642,8 +642,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Stopa{SETX 88}{BLACK}{TINYFONT}Title
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Náhodne
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Stopa
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Title
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Náhodne
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Program
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Predchádzajúca stopa
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Nasledujúca stopa
@@ -2685,15 +2686,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Odstránit vše
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Premenovat skupinu
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Nove vlaky
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nové elektrické lokomotívy a vagóny
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nove jednokolajove vlaky
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nove magneticke vlaky
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Nove vlaky
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Nové elektrické lokomotívy a vagóny
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Nove jednokolajove vlaky
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Nove magneticke vlaky
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Železnicne vozidlá
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Nove automobily
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nove lode
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Nove Lietadlo
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Železnicne vozidlá
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Nove automobily
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Nove lode
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Nove Lietadlo
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Cena: {GOLD}{CURRENCY}{BLACK} Hmotnost: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Rychlost: {GOLD}{VELOCITY}{BLACK}   Vykon: {GOLD}{POWER}
@@ -2713,30 +2714,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Všetky druhy n
 STR_PURCHASE_INFO_ALL_BUT                                       :Všetko okrem {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Max. trakcna sila: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Vyber vlakov - kliknut na vlak pre informacie
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Vyber vozidiel - kliknut pre detaily
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Vyber lodi - kliknut pre informacie
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Vyber lietadiel - kliknut pre vyber
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Vyber vlakov - kliknut na vlak pre informacie
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Vyber vozidiel - kliknut pre detaily
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Vyber lodi - kliknut pre informacie
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Vyber lietadiel - kliknut pre vyber
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Zakupit vozidlo
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Zakupit vozidlo
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Vyrobit lod
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Vyrobit lietadlo
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Zakupit vozidlo
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Zakupit vozidlo
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Vyrobit lod
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Vyrobit lietadlo
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Kupit vybrany vlak
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Zakupit vybrany automobil
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Vyrobit vybranu lod
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Vyrobit vybrane lietadlo
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Kupit vybrany vlak
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Zakupit vybrany automobil
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Vyrobit vybranu lod
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Vyrobit vybrane lietadlo
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Premenovat
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Premenovat
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Premenovat
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Premenovat
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Premenovat
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Premenovat
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Premenovat
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Premenovat
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Premenovat vlak
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Premenovat typ automobilu
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Premenovat typ lode
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Premenovat typ lietadla
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Premenovat vlak
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Premenovat typ automobilu
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Premenovat typ lode
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Premenovat typ lietadla
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Premenovat typ vlaku
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Premenovat typ automobilu
@@ -3527,10 +3528,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Nemozno 
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Nemozno poslat lod do lodenice ...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Nemozno poslat lietadlo do hangaru ...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Nemozno kupit vlak...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Nie je mozne zakupit automobil ...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Nemozno vyrobit lod...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Nemozno vyrobit lietadlo...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Nemozno kupit vlak...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Nie je mozne zakupit automobil ...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Nemozno vyrobit lod...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Nemozno vyrobit lietadlo...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Typ vlaku nemoze byt premenovany ...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Nemozno premenovat typ automobilu ...
@@ -4049,7 +4050,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
