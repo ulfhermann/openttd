@@ -12,7 +12,7 @@
 #include "stdafx.h"
 #include "openttd.h"
 #include "clear_map.h"
-#include "industry_map.h"
+#include "industry.h"
 #include "station_base.h"
 #include "train.h"
 #include "landscape.h"
@@ -102,7 +102,7 @@ IndustryType GetIndustryType(TileIndex tile)
 {
 	assert(IsTileType(tile, MP_INDUSTRY));
 
-	const Industry *ind = GetIndustryByTile(tile);
+	const Industry *ind = Industry::GetByTile(tile);
 	assert(ind != NULL);
 	return ind->type;
 }
@@ -297,7 +297,7 @@ static IndustryDrawTileProc * const _industry_draw_tile_procs[5] = {
 static void DrawTile_Industry(TileInfo *ti)
 {
 	IndustryGfx gfx = GetIndustryGfx(ti->tile);
-	Industry *ind = GetIndustryByTile(ti->tile);
+	Industry *ind = Industry::GetByTile(ti->tile);
 	const IndustryTileSpec *indts = GetIndustryTileSpec(gfx);
 	const DrawBuildingsTileStruct *dits;
 	SpriteID image;
@@ -385,14 +385,14 @@ static Foundation GetFoundation_Industry(TileIndex tile, Slope tileh)
 	if (gfx >= NEW_INDUSTRYTILEOFFSET) {
 		const IndustryTileSpec *indts = GetIndustryTileSpec(gfx);
 		if (indts->grf_prop.spritegroup != NULL && HasBit(indts->callback_flags, CBM_INDT_DRAW_FOUNDATIONS)) {
-			uint32 callback_res = GetIndustryTileCallback(CBID_INDUSTRY_DRAW_FOUNDATIONS, 0, 0, gfx, GetIndustryByTile(tile), tile);
+			uint32 callback_res = GetIndustryTileCallback(CBID_INDUSTRY_DRAW_FOUNDATIONS, 0, 0, gfx, Industry::GetByTile(tile), tile);
 			if (callback_res == 0) return FOUNDATION_NONE;
 		}
 	}
 	return FlatteningFoundation(tileh);
 }
 
-static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance)
+static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, uint32 *town_acc)
 {
 	IndustryGfx gfx = GetIndustryGfx(tile);
 	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
@@ -406,7 +406,7 @@ static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance)
 	const uint8 *cargo_acceptance = itspec->acceptance;
 
 	if (HasBit(itspec->callback_flags, CBM_INDT_ACCEPT_CARGO)) {
-		uint16 res = GetIndustryTileCallback(CBID_INDTILE_ACCEPT_CARGO, 0, 0, gfx, GetIndustryByTile(tile), tile);
+		uint16 res = GetIndustryTileCallback(CBID_INDTILE_ACCEPT_CARGO, 0, 0, gfx, Industry::GetByTile(tile), tile);
 		if (res != CALLBACK_FAILED) {
 			accepts_cargo = raw_accepts_cargo;
 			for (uint i = 0; i < lengthof(itspec->accepts_cargo); i++) raw_accepts_cargo[i] = GetCargoTranslation(GB(res, i * 5, 5), itspec->grf_prop.grffile);
@@ -414,7 +414,7 @@ static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance)
 	}
 
 	if (HasBit(itspec->callback_flags, CBM_INDT_CARGO_ACCEPTANCE)) {
-		uint16 res = GetIndustryTileCallback(CBID_INDTILE_CARGO_ACCEPTANCE, 0, 0, gfx, GetIndustryByTile(tile), tile);
+		uint16 res = GetIndustryTileCallback(CBID_INDTILE_CARGO_ACCEPTANCE, 0, 0, gfx, Industry::GetByTile(tile), tile);
 		if (res != CALLBACK_FAILED) {
 			cargo_acceptance = raw_cargo_acceptance;
 			for (uint i = 0; i < lengthof(itspec->accepts_cargo); i++) raw_cargo_acceptance[i] = GB(res, i * 4, 4);
@@ -429,7 +429,7 @@ static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance)
 
 static void GetTileDesc_Industry(TileIndex tile, TileDesc *td)
 {
-	const Industry *i = GetIndustryByTile(tile);
+	const Industry *i = Industry::GetByTile(tile);
 	const IndustrySpec *is = GetIndustrySpec(i->type);
 
 	td->owner[0] = i->owner;
@@ -446,7 +446,7 @@ static void GetTileDesc_Industry(TileIndex tile, TileDesc *td)
 
 static CommandCost ClearTile_Industry(TileIndex tile, DoCommandFlag flags)
 {
-	Industry *i = GetIndustryByTile(tile);
+	Industry *i = Industry::GetByTile(tile);
 	const IndustrySpec *indspec = GetIndustrySpec(i->type);
 
 	/* water can destroy industries
@@ -473,7 +473,7 @@ static CommandCost ClearTile_Industry(TileIndex tile, DoCommandFlag flags)
 
 static void TransportIndustryGoods(TileIndex tile)
 {
-	Industry *i = GetIndustryByTile(tile);
+	Industry *i = Industry::GetByTile(tile);
 	const IndustrySpec *indspec = GetIndustrySpec(i->type);
 	bool moved_cargo = false;
 
@@ -846,7 +846,7 @@ static void TileLoop_Industry(TileIndex tile)
 
 
 	case GFX_TOY_FACTORY: {
-			Industry *i = GetIndustryByTile(tile);
+			Industry *i = Industry::GetByTile(tile);
 			if (i->was_cargo_delivered) {
 				i->was_cargo_delivered = false;
 				SetIndustryAnimationLoop(tile, 0);
@@ -882,7 +882,7 @@ static TrackStatus GetTileTrackStatus_Industry(TileIndex tile, TransportType mod
 
 static void AddProducedCargo_Industry(TileIndex tile, CargoArray &produced)
 {
-	const Industry *i = GetIndustryByTile(tile);
+	const Industry *i = Industry::GetByTile(tile);
 
 	for (uint j = 0; j < lengthof(i->produced_cargo); j++) {
 		CargoID cargo = i->produced_cargo[j];
@@ -893,7 +893,7 @@ static void AddProducedCargo_Industry(TileIndex tile, CargoArray &produced)
 static void ChangeTileOwner_Industry(TileIndex tile, Owner old_owner, Owner new_owner)
 {
 	/* If the founder merges, the industry was created by the merged company */
-	Industry *i = GetIndustryByTile(tile);
+	Industry *i = Industry::GetByTile(tile);
 	if (i->founder == old_owner) i->founder = (new_owner == INVALID_OWNER) ? OWNER_NONE : new_owner;
 }
 
@@ -1671,20 +1671,20 @@ static Industry *CreateNewIndustryHelper(TileIndex tile, IndustryType type, DoCo
  * @param tile tile where industry is built
  * @param flags of operations to conduct
  * @param p1 various bitstuffed elements
- * - p1 = (bit  0 - 15) - industry type see build_industry.h and see industry.h
- * - p1 = (bit 16 - 31) - first layout to try
+ * - p1 = (bit  0 -  7) - industry type see build_industry.h and see industry.h
+ * - p1 = (bit  8 - 15) - first layout to try
  * @param p2 seed to use for variable 8F
  * @return index of the newly create industry, or CMD_ERROR if it failed
  */
 CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	const IndustrySpec *indspec = GetIndustrySpec(GB(p1, 0, 16));
-	const Industry *ind = NULL;
+	IndustryType it = GB(p1, 0, 8);
+	if (it >= NUM_INDUSTRYTYPES) return CMD_ERROR;
+
+	const IndustrySpec *indspec = GetIndustrySpec(it);
 
 	/* Check if the to-be built/founded industry is available for this climate. */
-	if (!indspec->enabled) {
-		return CMD_ERROR;
-	}
+	if (!indspec->enabled) return CMD_ERROR;
 
 	/* If the setting for raw-material industries is not on, you cannot build raw-material industries.
 	 * Raw material industries are industries that do not accept cargo (at least for now) */
@@ -1692,6 +1692,7 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		return CMD_ERROR;
 	}
 
+	const Industry *ind = NULL;
 	if (_game_mode != GM_EDITOR && _settings_game.construction.raw_industry_construction == 2 && indspec->IsRawIndustry()) {
 		if (flags & DC_EXEC) {
 			/* Prospected industries are build as OWNER_TOWN to not e.g. be build on owned land of the founder */
@@ -1706,7 +1707,7 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 					 * because parameter evaluation order is not guaranteed in the c++ standard
 					 */
 					tile = RandomTile();
-					ind = CreateNewIndustryHelper(tile, p1, flags, indspec, RandomRange(indspec->num_table), p2, founder);
+					ind = CreateNewIndustryHelper(tile, it, flags, indspec, RandomRange(indspec->num_table), p2, founder);
 					if (ind != NULL) {
 						break;
 					}
@@ -1717,15 +1718,16 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	} else {
 		int count = indspec->num_table;
 		const IndustryTileTable * const *itt = indspec->table;
-		int num = Clamp(GB(p1, 16, 16), 0, count - 1);
+		int num = GB(p1, 8, 8);
+		if (num >= count) return CMD_ERROR;
 
 		_error_message = STR_ERROR_SITE_UNSUITABLE;
 		do {
 			if (--count < 0) return CMD_ERROR;
 			if (--num < 0) num = indspec->num_table - 1;
-		} while (!CheckIfIndustryTilesAreFree(tile, itt[num], num, p1));
+		} while (!CheckIfIndustryTilesAreFree(tile, itt[num], num, it));
 
-		ind = CreateNewIndustryHelper(tile, p1, flags, indspec, num, p2, _current_company);
+		ind = CreateNewIndustryHelper(tile, it, flags, indspec, num, p2, _current_company);
 		if (ind == NULL) return CMD_ERROR;
 	}
 
@@ -2409,7 +2411,7 @@ static CommandCost TerraformTile_Industry(TileIndex tile, DoCommandFlag flags, u
 			/* Call callback 3C 'disable autosloping for industry tiles'. */
 			if (HasBit(itspec->callback_flags, CBM_INDT_AUTOSLOPE)) {
 				/* If the callback fails, allow autoslope. */
-				uint16 res = GetIndustryTileCallback(CBID_INDUSTRY_AUTOSLOPE, 0, 0, gfx, GetIndustryByTile(tile), tile);
+				uint16 res = GetIndustryTileCallback(CBID_INDUSTRY_AUTOSLOPE, 0, 0, gfx, Industry::GetByTile(tile), tile);
 				if ((res == 0) || (res == CALLBACK_FAILED)) return CommandCost(EXPENSES_CONSTRUCTION, _price.terraform);
 			} else {
 				/* allow autoslope */
