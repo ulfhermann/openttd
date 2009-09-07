@@ -895,8 +895,8 @@ static CommandCost RemoveRoadDepot(TileIndex tile, DoCommandFlag flags)
 	if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
-		DoClearSquare(tile);
 		delete Depot::GetByTile(tile);
+		DoClearSquare(tile);
 	}
 
 	return CommandCost(EXPENSES_CONSTRUCTION, _price.remove_road_depot);
@@ -1550,7 +1550,7 @@ static VehicleEnterTileStatus VehicleEnter_Road(Vehicle *v, TileIndex tile, int 
 				rv->state = RVSB_IN_DEPOT;
 				rv->vehstatus |= VS_HIDDEN;
 				rv->direction = ReverseDir(rv->direction);
-				if (rv->Next() == NULL) VehicleEnterDepot(rv);
+				if (rv->Next() == NULL) VehicleEnterDepot(rv->First());
 				rv->tile = tile;
 
 				InvalidateWindowData(WC_VEHICLE_DEPOT, rv->tile);
