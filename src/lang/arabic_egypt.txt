@@ -248,10 +248,13 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}الطو
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}المساحة: {NUM} x {NUM}{}فرق الارتفاع{NUM} م
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}عدد السكان
-STR_SORT_BY_NAME                                                :{BLACK}اسم
-STR_SORT_BY_DATE                                                :{BLACK}تاريخ
+# These are used in buttons
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}عدد السكان
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}اسم
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}تاريخ
+# These are used in dropdowns
+STR_SORT_BY_POPULATION                                          :السكان
+STR_SORT_BY_NAME                                                :الاسم
 STR_SORT_BY_PRODUCTION                                          :إنتاج
 STR_SORT_BY_TYPE                                                :نوع
 STR_SORT_BY_TRANSPORTED                                         :الحمولة المنقولة
@@ -266,6 +269,7 @@ STR_SORT_BY_MODEL                                               :موديل
 STR_SORT_BY_VALUE                                               :القيمة
 STR_SORT_BY_LENGTH                                              :الطول
 STR_SORT_BY_LIFE_TIME                                           :العمر المتبقي
+STR_SORT_BY_TIMETABLE_DELAY                                     :تاخير جدولة الاوامر
 STR_SORT_BY_FACILITY                                            :نوع المحطة
 STR_SORT_BY_WAITING                                             :قيمة الشحنة المنتظرة
 STR_SORT_BY_RATING_MAX                                          :اعلى نسبة شحن
@@ -564,12 +568,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}مجمو
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}صندوق الموسيقى
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}الكل
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}النمط القديم
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}النمط الجديد
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}شارع از
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}معدل1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}معدل2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}الكل
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}النمط القديم
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}النمط الجديد
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}شارع از
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}معدل1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}معدل2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}مستوى الصوت
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}مؤثرات الصوت
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}مرتفع.  .  .  .  .   .منخفض
@@ -578,8 +582,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}-----
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK} مسار  {SETX 88}{BLACK}{TINYFONT} عنوان
-STR_MUSIC_SHUFFLE                                               :{TINYFONT} عشوائي
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK} مسار
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK} عنوان
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK} عشوائي
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK} برنامج
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}تجاوز للمسار السابق
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}تجاوز للمسار التالي
@@ -925,6 +930,9 @@ STR_GAME_OPTIONS_BASE_GRF_TOOLTIP                               :{BLACK} اخت�
 STR_GAME_OPTIONS_BASE_GRF_STATUS                                :{RED}{NUM} ملف مفقود او غير صالح
 STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP                   :{BLACK} معلومات اضافية عن القاعدة الرسومية
 
+STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}قاعدة الاصوات الاساسية
+STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}اختر الاصوات الاساسية للاستخدام
+STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}معلومات اضافية حول مجوعة الصوت
 
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}فشل تشغيل نمط الشاشة الكاملة
 
@@ -1779,6 +1787,7 @@ STR_CONTENT_TYPE_AI                                             :الذكاء ا
 STR_CONTENT_TYPE_AI_LIBRARY                                     :مكتبة الذكاء الصناعي
 STR_CONTENT_TYPE_SCENARIO                                       :سناريو
 STR_CONTENT_TYPE_HEIGHTMAP                                      :خارطة المرتفعات
+STR_CONTENT_TYPE_BASE_SOUNDS                                    :الاصوات الاساسية
 
 # Content downloading progress window
 STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE} يتم التحميل الان ...
@@ -2618,15 +2627,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :أزل جميع
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}إعادة تسمية مجموعة
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}عربات قطار جديدة
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}عربات قطار كهربائية جديدة
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}عربات قطار احادي جديدة
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}عربات قطار ممغنط جديدة
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}عربات قطار جديدة
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}عربات قطار كهربائية جديدة
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}عربات قطار احادي جديدة
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}عربات قطار ممغنط جديدة
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}عربات قطار
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}عربات جديدة
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}سفن جديدة
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}طائرة جديدة
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}عربات قطار
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}عربات جديدة
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}سفن جديدة
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}طائرة جديدة
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK} التكلفة: {GOLD}{CURRENCY}{BLACK}   الوزن: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}السرعة: {GOLD}{VELOCITY}{BLACK} الطاقة: {GOLD}{POWER}
@@ -2646,30 +2655,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :كل انواع
 STR_PURCHASE_INFO_ALL_BUT                                       :الكل الا {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}تأثير الجذب القصى: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}قائمة اختيار القطارات - اضغط على العربة لعرض معلوماتها
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}قائمة اختيار العربات - اضغط على العربة لاظهار معلوماتها
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}قائمة اختيار السفن - اضغط على السفينة للتفاصيل
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}قائمة اختيار الطائرات - اضغط على الطائرة للتفاصيل
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}قائمة اختيار القطارات - اضغط على العربة لعرض معلوماتها
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}قائمة اختيار العربات - اضغط على العربة لاظهار معلوماتها
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}قائمة اختيار السفن - اضغط على السفينة للتفاصيل
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}قائمة اختيار الطائرات - اضغط على الطائرة للتفاصيل
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}شراء عربات
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}شراء عربة
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}شراء سفينة
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}شراء طائرة
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}شراء عربات
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}شراء عربة
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}شراء سفينة
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}شراء طائرة
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}شراء العربة الموضحة
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}شراء العربة
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}شراء السفينة المختارة
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}اشتر الطائرة المختارة
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}شراء العربة الموضحة
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}شراء العربة
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}شراء السفينة المختارة
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}اشتر الطائرة المختارة
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}اعادة تسمية
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}أعد التسمية
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}تسمية
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}اعادة تسمية
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}اعادة تسمية
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}أعد التسمية
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}تسمية
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}اعادة تسمية
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}اعادة تسمية نوع عربة القطار
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK} اعادة تسمية العربة
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}اعادة تسمية نوع السفينة
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}اعادة تسمية نوع الطائرة
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}اعادة تسمية نوع عربة القطار
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK} اعادة تسمية العربة
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}اعادة تسمية نوع السفينة
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}اعادة تسمية نوع الطائرة
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}اعادة تسمية عربات القطار
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE} اعادة تسمية العربة
@@ -3460,10 +3469,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}لا ي�
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}لا يمكن ارسال السفينة الى حوض الصيانة ...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}لا يمكن ارسال الطائرة لحظيرةالصيانة
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}لايمكن بناء عربات سكة حديد ...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}لا يمكن شراء عربة ...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}لا يمكن شراء السفينة...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}لا يمكن شراء الطائرة
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}لايمكن بناء عربات سكة حديد ...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}لا يمكن شراء عربة ...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}لا يمكن شراء السفينة...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}لا يمكن شراء الطائرة
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}لا يمكن اعادة تسمية عربات القطار ...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE} لايمكن اعادة تسمية العربات
@@ -3982,7 +3991,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

@@ -60,8 +60,9 @@
 #include "elrail_func.h"
 #include "rev.h"
 #include "highscore.h"
-#include "thread.h"
+#include "thread/thread.h"
 #include "station_base.h"
+#include "crashlog.h"
 
 #include "newgrf_commons.h"
 
@@ -83,7 +84,7 @@ void ProcessAsyncSaveFinish();
 void CallWindowTickEvent();
 
 extern void SetDifficultyLevel(int mode, DifficultySettings *gm_opt);
-extern Company *DoStartupNewCompany(bool is_ai);
+extern Company *DoStartupNewCompany(bool is_ai, CompanyID company = INVALID_COMPANY);
 extern void ShowOSErrorBox(const char *buf, bool system);
 extern void InitializeRailGUI();
 
@@ -124,10 +125,9 @@ void CDECL error(const char *s, ...)
 	ShowOSErrorBox(buf, true);
 	if (_video_driver != NULL) _video_driver->Stop();
 
-	/* Don't go into NOT_REACHED here; NOT_REACHED is using error, so
-	 * using it would result in an infinite loop instead of errors. */
-	assert(0);
-	exit(1);
+	/* Set the error message for the crash log and then invoke it. */
+	CrashLog::SetErrorMessage(buf);
+	abort();
 }
 
 /**

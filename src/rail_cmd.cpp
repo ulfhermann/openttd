@@ -1039,7 +1039,7 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 	CommandCost ret, total_cost(EXPENSES_CONSTRUCTION);
 	int signal_ctr;
 	byte signals;
-	bool error = true;
+	bool err = true;
 	TileIndex end_tile;
 	TileIndex start_tile = tile;
 
@@ -1118,7 +1118,7 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 
 			/* Be user-friendly and try placing signals as much as possible */
 			if (CmdSucceeded(ret)) {
-				error = false;
+				err = false;
 				total_cost.AddCost(ret);
 			}
 		}
@@ -1143,7 +1143,7 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 		}
 	}
 
-	return error ? CMD_ERROR : total_cost;
+	return err ? CMD_ERROR : total_cost;
 }
 
 /** Build signals on a stretch of track.
@@ -1442,8 +1442,8 @@ static CommandCost RemoveTrainDepot(TileIndex tile, DoCommandFlag flags)
 			if (v != NULL) FreeTrainTrackReservation(v);
 		}
 
-		DoClearSquare(tile);
 		delete Depot::GetByTile(tile);
+		DoClearSquare(tile);
 		AddSideToSignalBuffer(tile, dir, owner);
 		YapfNotifyTrackLayoutChange(tile, DiagDirToDiagTrack(dir));
 		if (v != NULL) TryPathReserve(v, true);
@@ -1733,7 +1733,7 @@ static void DrawTrackBits(TileInfo *ti, TrackBits track)
 		} else {
 			switch (rgt) {
 				case RAIL_GROUND_BARREN:     image = SPR_FLAT_BARE_LAND;  break;
-				case RAIL_GROUND_ICE_DESERT: image = SPR_FLAT_SNOWY_TILE; break;
+				case RAIL_GROUND_ICE_DESERT: image = SPR_FLAT_SNOW_DESERT_TILE; break;
 				default:                     image = SPR_FLAT_GRASS_TILE; break;
 			}
 			image += _tileh_to_sprite[ti->tileh];
@@ -1927,7 +1927,7 @@ static void DrawTile_Track(TileInfo *ti)
 			if (image != SPR_FLAT_GRASS_TILE) {
 				image += rti->snow_offset; // tile with tracks
 			} else {
-				image = SPR_FLAT_SNOWY_TILE; // flat ground
+				image = SPR_FLAT_SNOW_DESERT_TILE; // flat ground
 			}
 		}
 
@@ -2419,7 +2419,7 @@ static VehicleEnterTileStatus VehicleEnter_Track(Vehicle *u, TileIndex tile, int
 			v->track = TRACK_BIT_DEPOT,
 			v->vehstatus |= VS_HIDDEN; // hide it
 			v->direction = ReverseDir(v->direction);
-			if (v->Next() == NULL) VehicleEnterDepot(v);
+			if (v->Next() == NULL) VehicleEnterDepot(v->First());
 			v->tile = tile;
 
 			InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);

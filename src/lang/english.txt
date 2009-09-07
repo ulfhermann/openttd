@@ -248,10 +248,13 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Length: 
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Area: {NUM} x {NUM}{}Height difference: {NUM} m
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Population
-STR_SORT_BY_NAME                                                :{BLACK}Name
-STR_SORT_BY_DATE                                                :{BLACK}Date
+# These are used in buttons
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Population
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Name
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Date
+# These are used in dropdowns
+STR_SORT_BY_POPULATION                                          :Population
+STR_SORT_BY_NAME                                                :Name
 STR_SORT_BY_PRODUCTION                                          :Production
 STR_SORT_BY_TYPE                                                :Type
 STR_SORT_BY_TRANSPORTED                                         :Transported
@@ -293,10 +296,10 @@ STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_GENERAL                     :{BLACK}Display 
 STR_TOOLBAR_TOOLTIP_DISPLAY_GRAPHS                              :{BLACK}Display graphs
 STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_LEAGUE                      :{BLACK}Display company league table
 STR_TOOLBAR_TOOLTIP_FUND_CONSTRUCTION_OF_NEW                    :{BLACK}Fund construction of new industry or list all industries
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}Display list of company's trains
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_ROAD_VEHICLES       :{BLACK}Display list of company's road vehicles
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_SHIPS               :{BLACK}Display list of company's ships
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_AIRCRAFT            :{BLACK}Display list of company's aircraft
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}Display list of company's trains. Ctrl+Click toggles opening the group/vehicle list
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_ROAD_VEHICLES       :{BLACK}Display list of company's road vehicles. Ctrl+Click toggles opening the group/vehicle list
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_SHIPS               :{BLACK}Display list of company's ships. Ctrl+Click toggles opening the group/vehicle list
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_AIRCRAFT            :{BLACK}Display list of company's aircraft. Ctrl+Click toggles opening the group/vehicle list
 STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN                            :{BLACK}Zoom the view in
 STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT                           :{BLACK}Zoom the view out
 STR_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                        :{BLACK}Build railway track
@@ -565,12 +568,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Total po
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jazz Jukebox
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}All
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Old Style
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}New Style
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Custom 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Custom 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}All
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Old Style
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}New Style
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Custom 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Custom 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Music Volume
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Effects Volume
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
@@ -579,8 +582,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING1}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Track{SETX 88}{BLACK}{TINYFONT}Title
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Shuffle
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Track
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Title
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Shuffle
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Programme
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Skip to previous track in selection
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Skip to next track in selection
@@ -1309,7 +1313,7 @@ STR_INTRO_ONLINE_CONTENT                                        :{BLACK}Check On
 STR_INTRO_AI_SETTINGS                                           :{BLACK}AI Settings
 STR_INTRO_QUIT                                                  :{BLACK}Quit
 
-STR_INTRO_TOOLTIP_NEW_GAME                                      :{BLACK}Start a new game
+STR_INTRO_TOOLTIP_NEW_GAME                                      :{BLACK}Start a new game. Ctrl+Click skips map configuration
 STR_INTRO_TOOLTIP_LOAD_GAME                                     :{BLACK}Load a saved game
 STR_INTRO_TOOLTIP_PLAY_HEIGHTMAP                                :{BLACK}Start a new game, using a heightmap as landscape
 STR_INTRO_TOOLTIP_PLAY_SCENARIO                                 :{BLACK}Start a new game, using a customised scenario
@@ -1645,7 +1649,7 @@ STR_NETWORK_COMPANY_LIST_SPECTATE                               :{WHITE}Spectate
 STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}New company
 
 # Network client list
-STR_NETWORK_CLIENTLIST_NONE                                     :(none)
+STR_NETWORK_CLIENTLIST_NONE                                     :- None -
 STR_NETWORK_CLIENTLIST_KICK                                     :Kick
 STR_NETWORK_CLIENTLIST_GIVE_MONEY                               :Give money
 STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL                             :Speak to all
@@ -1839,12 +1843,12 @@ STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Electrif
 STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Monorail Construction
 STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Maglev Construction
 
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Build railway track
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Build railway track using the Autorail mode
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_TRAIN_DEPOT_FOR_BUILDING         :{BLACK}Build train depot (for building and servicing trains)
-STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL_TO_WAYPOINT               :{BLACK}Convert rail to waypoint
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Build railway station
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Build railway signals
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Build railway track. Ctrl toggles build/remove for railway construction
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Build railway track using the Autorail mode. Ctrl toggles build/remove for railway construction
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_TRAIN_DEPOT_FOR_BUILDING         :{BLACK}Build train depot (for buying and servicing trains)
+STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL_TO_WAYPOINT               :{BLACK}Convert rail to waypoint. Ctrl enables joining waypoints
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Build railway station. Ctrl enables joining stations
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Build railway signals. Ctrl toggles semaphore/light signals{}Dragging builds signals along a straight stretch of rail. Ctrl builds signals till the next junction{}Ctrl+Click toggles opening the signal selection window
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Build railway bridge
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Build railway tunnel
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Toggle build/remove for railway track and signals
@@ -1912,16 +1916,16 @@ STR_BRIDGE_TUBULAR_SILICON                                      :Tubular, Silico
 # Road construction toolbar
 STR_ROAD_TOOLBAR_ROAD_CONSTRUCTION_CAPTION                      :{WHITE}Road Construction
 STR_ROAD_TOOLBAR_TRAM_CONSTRUCTION_CAPTION                      :{WHITE}Tramway Construction
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_SECTION                     :{BLACK}Build road section
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_SECTION                  :{BLACK}Build tramway section
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOROAD                         :{BLACK}Build road section using the Autoroad mode
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOTRAM                         :{BLACK}Build tramway section using the Autotram mode
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_VEHICLE_DEPOT               :{BLACK}Build road vehicle depot (for building and servicing vehicles)
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAM_VEHICLE_DEPOT               :{BLACK}Build tram vehicle depot (for building and servicing vehicles)
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_BUS_STATION                      :{BLACK}Build bus station
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_PASSENGER_TRAM_STATION           :{BLACK}Build passenger tram station
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRUCK_LOADING_BAY                :{BLACK}Build lorry loading bay
-STR_ROAD_TOOLBAR_TOOLTIP_BUILD_CARGO_TRAM_STATION               :{BLACK}Build freight tram station
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_SECTION                     :{BLACK}Build road section. Ctrl toggles build/remove for road construction
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_SECTION                  :{BLACK}Build tramway section. Ctrl toggles build/remove for tramway construction
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOROAD                         :{BLACK}Build road section using the Autoroad mode. Ctrl toggles build/remove for road construction
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOTRAM                         :{BLACK}Build tramway section using the Autotram mode. Ctrl toggles build/remove for tramway construction
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_VEHICLE_DEPOT               :{BLACK}Build road vehicle depot (for buying and servicing vehicles)
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAM_VEHICLE_DEPOT               :{BLACK}Build tram vehicle depot (for buying and servicing vehicles)
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_BUS_STATION                      :{BLACK}Build bus station. Ctrl enables joining stations
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_PASSENGER_TRAM_STATION           :{BLACK}Build passenger tram station. Ctrl enables joining stations
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRUCK_LOADING_BAY                :{BLACK}Build lorry loading bay. Ctrl enables joining stations
+STR_ROAD_TOOLBAR_TOOLTIP_BUILD_CARGO_TRAM_STATION               :{BLACK}Build freight tram station. Ctrl enables joining stations
 STR_ROAD_TOOLBAR_TOOLTIP_TOGGLE_ONE_WAY_ROAD                    :{BLACK}Activate/Deactivate one way roads
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_ROAD_BRIDGE                      :{BLACK}Build road bridge
 STR_ROAD_TOOLBAR_TOOLTIP_BUILD_TRAMWAY_BRIDGE                   :{BLACK}Build tramway bridge
@@ -1951,8 +1955,8 @@ STR_WATERWAYS_TOOLBAR_CAPTION                                   :{WHITE}Waterway
 STR_WATERWAYS_TOOLBAR_CAPTION_SE                                :{WHITE}Waterways
 STR_WATERWAYS_TOOLBAR_BUILD_CANALS_TOOLTIP                      :{BLACK}Build canals.
 STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP                       :{BLACK}Build locks
-STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Build ship depot (for building and servicing ships)
-STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Build ship dock
+STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP                       :{BLACK}Build ship depot (for buying and servicing ships)
+STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP                        :{BLACK}Build ship dock. Ctrl enables joining stations
 STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP                              :{BLACK}Place a buoy which can be used as a waypoint
 STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP                    :{BLACK}Build aqueduct
 STR_WATERWAYS_TOOLBAR_CREATE_LAKE_TOOLTIP                       :{BLACK}Define water area.{}Make a canal, unless Ctrl is held down at sea level, when it will flood the surroundings instead
@@ -1967,7 +1971,7 @@ STR_STATION_BUILD_DOCK_CAPTION                                  :{WHITE}Dock
 
 # Airport toolbar
 STR_TOOLBAR_AIRCRAFT_CAPTION                                    :{WHITE}Airports
-STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Build airport
+STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Build airport. Ctrl enables joining stations
 
 # Airport construction window
 STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Airport Selection
@@ -2357,8 +2361,9 @@ STR_EDIT_SIGN_SIGN_OSKTITLE                                     :{BLACK}Enter a 
 
 # Town directory window
 STR_TOWN_DIRECTORY_CAPTION                                      :{WHITE}Towns
+STR_TOWN_DIRECTORY_NONE                                         :{ORANGE}- None -
 STR_TOWN_DIRECTORY_TOWN                                         :{ORANGE}{TOWN}{BLACK} ({COMMA})
-STR_TOWN_DIRECTORY_LIST_TOOLTIP                                 :{BLACK}Town names - click on name to centre view on town
+STR_TOWN_DIRECTORY_LIST_TOOLTIP                                 :{BLACK}Town names - click on name to centre view on town. Ctrl+Click opens a new viewport on town location
 STR_TOWN_POPULATION                                             :{BLACK}World population: {COMMA}
 
 # Town view window
@@ -2371,7 +2376,7 @@ STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Cargo ne
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} required
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} delivered last month
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Noise limit in town: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
-STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centre the main view on town location
+STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centre the main view on town location. Ctrl+Click opens a new viewport on town location
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Local authority
 STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP                           :{BLACK}Show information on local authority
 STR_TOWN_VIEW_RENAME_TOOLTIP                                    :{BLACK}Change town name
@@ -2414,13 +2419,13 @@ STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsidies
 STR_SUBSIDIES_OFFERED_TITLE                                     :{BLACK}Subsidies on offer for services taking:
 STR_SUBSIDIES_OFFERED_FROM_TO                                   :{ORANGE}{STRING} from {STRING2} to {STRING2}{YELLOW} (by {DATE_SHORT})
-STR_SUBSIDIES_NONE                                              :{ORANGE}None
+STR_SUBSIDIES_NONE                                              :{ORANGE}- None -
 STR_SUBSIDIES_SUBSIDISED_TITLE                                  :{BLACK}Services already subsidised:
 STR_SUBSIDIES_SUBSIDISED_FROM_TO                                :{ORANGE}{STRING} from {STRING2} to {STRING2}{YELLOW} ({COMPANY}{YELLOW}, until {DATE_SHORT})
-STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                :{BLACK}Click on service to centre view on industry/town
+STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                :{BLACK}Click on service to centre view on industry/town. Ctrl+Click opens a new viewport on industry/town location
 
 # Station list window
-STR_STATION_LIST_TOOLTIP                                        :{BLACK}Station names - click on name to centre view on station
+STR_STATION_LIST_TOOLTIP                                        :{BLACK}Station names - click on name to centre view on station. Ctrl+Click opens a new viewport on station location
 STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE                        :{BLACK}Hold down Ctrl to select more than one item
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} Station{P "" s}
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
@@ -2456,7 +2461,7 @@ STR_CARGO_RATING_EXCELLENT                                      :Excellent
 STR_CARGO_RATING_OUTSTANDING                                    :Outstanding
 ############ range for rating ends
 
-STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Centre main view on station location
+STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Centre main view on station location. Ctrl+Click opens a new viewport on station location
 STR_STATION_VIEW_RENAME_TOOLTIP                                 :{BLACK}Change name of station
 
 STR_STATION_VIEW_SCHEDULED_TRAINS_TOOLTIP                       :{BLACK}Show all trains which have this station on their schedule
@@ -2467,9 +2472,9 @@ STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP                        :{BLACK}Show all
 STR_STATION_VIEW_RENAME_STATION_CAPTION                         :Rename station/loading area
 
 # Waypoint/buoy view window
-STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Centre main view on waypoint location
+STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Centre main view on waypoint location. Ctrl+Click opens a new viewport on waypoint location
 STR_WAYPOINT_VIEW_CHANGE_WAYPOINT_NAME                          :{BLACK}Change waypoint name
-STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centre main view on buoy location
+STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centre main view on buoy location. Ctrl+Click opens a new viewport on buoy location
 STR_BUOY_VIEW_CHANGE_BUOY_NAME                                  :{BLACK}Change buoy name
 
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Edit waypoint name
@@ -2545,16 +2550,17 @@ STR_BUY_COMPANY_MESSAGE                                         :{WHITE}We are l
 
 # Industry directory
 STR_INDUSTRY_DIRECTORY_CAPTION                                  :{WHITE}Industries
+STR_INDUSTRY_DIRECTORY_NONE                                     :{ORANGE}- None -
 STR_INDUSTRY_DIRECTORY_ITEM                                     :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}){YELLOW} ({COMMA}% transported)
 STR_INDUSTRY_DIRECTORY_ITEM_TWO                                 :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}/{CARGO}{STRING}){YELLOW} ({COMMA}%/{COMMA}% transported)
 STR_INDUSTRY_DIRECTORY_ITEM_NOPROD                              :{ORANGE}{INDUSTRY}
-STR_INDUSTRY_DIRECTORY_LIST_CAPTION                             :{BLACK}Industry names - click on name to centre view on industry
+STR_INDUSTRY_DIRECTORY_LIST_CAPTION                             :{BLACK}Industry names - click on name to centre view on industry. Ctrl+Click opens a new viewport on industry location
 
 # Industry view
 STR_INDUSTRY_VIEW_CAPTION                                       :{WHITE}{INDUSTRY}
 STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE                   :{BLACK}Production last month:
 STR_INDUSTRY_VIEW_TRANSPORTED                                   :{YELLOW}{CARGO}{STRING}{BLACK} ({COMMA}% transported)
-STR_INDUSTRY_VIEW_LOCATION_TOOLTIP                              :{BLACK}Centre the main view on industry location
+STR_INDUSTRY_VIEW_LOCATION_TOOLTIP                              :{BLACK}Centre the main view on industry location. Ctrl+Click opens a new viewport on industry location
 
 ############ range for requires starts
 STR_INDUSTRY_VIEW_REQUIRES_CARGO                                :{BLACK}Requires: {YELLOW}{STRING}{STRING}
@@ -2628,15 +2634,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Remove all vehi
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Rename a group
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}New Rail Vehicles
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}New Electric Rail Vehicles
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}New Monorail Vehicles
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}New Maglev Vehicles
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}New Rail Vehicles
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}New Electric Rail Vehicles
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}New Monorail Vehicles
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}New Maglev Vehicles
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}New Rail Vehicles
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}New Road Vehicles
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}New Ships
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}New Aircraft
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}New Rail Vehicles
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}New Road Vehicles
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}New Ships
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}New Aircraft
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Cost: {GOLD}{CURRENCY}{BLACK} Weight: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Speed: {GOLD}{VELOCITY}{BLACK} Power: {GOLD}{POWER}
@@ -2656,30 +2662,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :All cargo types
 STR_PURCHASE_INFO_ALL_BUT                                       :All but {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Max. Tractive Effort: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Train vehicle selection list - click on vehicle for information
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Road vehicle selection list - click on vehicle for information
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Ship selection list - click on ship for information
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Aircraft selection list - click on aircraft for information
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Train vehicle selection list - click on vehicle for information
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Road vehicle selection list - click on vehicle for information
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Ship selection list - click on ship for information
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Aircraft selection list - click on aircraft for information
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Build Vehicle
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Build Vehicle
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Build Ship
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Build Aircraft
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Buy Vehicle
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Buy Vehicle
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Buy Ship
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Buy Aircraft
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Build the highlighted train vehicle
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Build the highlighted road vehicle
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Build the highlighted ship
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Build the highlighted aircraft
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Buy the highlighted train vehicle
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Buy the highlighted road vehicle
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Buy the highlighted ship
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Buy the highlighted aircraft
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Rename
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Rename
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Rename
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Rename
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Rename
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Rename
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Rename
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Rename
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Rename train vehicle type
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Rename road vehicle type
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Rename ship type
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Rename aircraft type
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Rename train vehicle type
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Rename road vehicle type
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Rename ship type
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Rename aircraft type
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Rename train vehicle type
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Rename road vehicle type
@@ -2724,25 +2730,25 @@ STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_BUTTON                      :{BLACK}New Vehi
 STR_DEPOT_SHIP_NEW_VEHICLES_BUTTON                              :{BLACK}New Ships
 STR_DEPOT_AIRCRAFT_NEW_VEHICLES_BUTTON                          :{BLACK}New Aircraft
 
-STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Build new train vehicle
-STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_TOOLTIP                     :{BLACK}Build new road vehicle
-STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Build new ship
-STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Build new aircraft
+STR_DEPOT_TRAIN_NEW_VEHICLES_TOOLTIP                            :{BLACK}Buy new train vehicle
+STR_DEPOT_ROAD_VEHICLE_NEW_VEHICLES_TOOLTIP                     :{BLACK}Buy new road vehicle
+STR_DEPOT_SHIP_NEW_VEHICLES_TOOLTIP                             :{BLACK}Buy new ship
+STR_DEPOT_AIRCRAFT_NEW_VEHICLES_TOOLTIP                         :{BLACK}Buy new aircraft
 
 STR_DEPOT_CLONE_TRAIN                                           :{BLACK}Clone Train
 STR_DEPOT_CLONE_ROAD_VEHICLE                                    :{BLACK}Clone Vehicle
 STR_DEPOT_CLONE_SHIP                                            :{BLACK}Clone Ship
 STR_DEPOT_CLONE_AIRCRAFT                                        :{BLACK}Clone Aircraft
 
-STR_DEPOT_CLONE_TRAIN_DEPOT_INFO                                :{BLACK}This will build a copy of a train including all cars. Click this button and then on a train inside or outside the depot. Ctrl+Click share the orders
-STR_DEPOT_CLONE_ROAD_VEHICLE_DEPOT_INFO                         :{BLACK}This will build a copy of a road vehicle. Click this button and then on a road vehicle inside or outside the depot. Ctrl+Click will will share the orders
-STR_DEPOT_CLONE_SHIP_DEPOT_INFO                                 :{BLACK}This will build a copy of a ship. Click this button and then on a ship inside or outside the depot. Ctrl+Click will share the orders
-STR_DEPOT_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                     :{BLACK}This will build a copy of an aircraft. Click this button and then on an aircraft inside or outside the hangar. Ctrl+Click will share the orders
+STR_DEPOT_CLONE_TRAIN_DEPOT_INFO                                :{BLACK}This will buy a copy of a train including all cars. Click this button and then on a train inside or outside the depot. Ctrl+Click share the orders
+STR_DEPOT_CLONE_ROAD_VEHICLE_DEPOT_INFO                         :{BLACK}This will buy a copy of a road vehicle. Click this button and then on a road vehicle inside or outside the depot. Ctrl+Click will will share the orders
+STR_DEPOT_CLONE_SHIP_DEPOT_INFO                                 :{BLACK}This will buy a copy of a ship. Click this button and then on a ship inside or outside the depot. Ctrl+Click will share the orders
+STR_DEPOT_CLONE_AIRCRAFT_INFO_HANGAR_WINDOW                     :{BLACK}This will buy a copy of an aircraft. Click this button and then on an aircraft inside or outside the hangar. Ctrl+Click will share the orders
 
-STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Centre main view on train depot location
-STR_DEPOT_ROAD_VEHICLE_LOCATION_TOOLTIP                         :{BLACK}Centre main view on road vehicle depot location
-STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Centre main view on ship depot location
-STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Centre main view on hangar location
+STR_DEPOT_TRAIN_LOCATION_TOOLTIP                                :{BLACK}Centre main view on train depot location. Ctrl+Click opens a new viewport on train depot location
+STR_DEPOT_ROAD_VEHICLE_LOCATION_TOOLTIP                         :{BLACK}Centre main view on road vehicle depot location. Ctrl+Click opens a new viewport on road depot location
+STR_DEPOT_SHIP_LOCATION_TOOLTIP                                 :{BLACK}Centre main view on ship depot location. Ctrl+Click opens a new viewport on ship depot location
+STR_DEPOT_AIRCRAFT_LOCATION_TOOLTIP                             :{BLACK}Centre main view on hangar location. Ctrl+Click opens a new viewport on hangar location
 
 STR_DEPOT_VEHICLE_ORDER_LIST_TRAIN_TOOLTIP                      :{BLACK}Get a list of all trains with the current depot in their orders
 STR_DEPOT_VEHICLE_ORDER_LIST_ROAD_VEHICLE_TOOLTIP               :{BLACK}Get a list of all road vehicles with the current depot in their orders
@@ -2810,20 +2816,20 @@ STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Make aut
 # Vehicle view
 STR_VEHICLE_VIEW_CAPTION                                        :{WHITE}{VEHICLE}
 
-STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Centre main view on train's location
-STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Centre main view on vehicle's location
-STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Centre main view on ship's location
-STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Centre main view on aircraft's location
+STR_VEHICLE_VIEW_TRAIN_LOCATION_TOOLTIP                         :{BLACK}Centre main view on train's location. Ctrl+Click will follow train in main view
+STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Centre main view on vehicle's location. Ctrl+Click will follow vehicle in main view
+STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Centre main view on ship's location. Ctrl+Click will follow ship in main view
+STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Centre main view on aircraft's location. Ctrl+Click will follow aircraft in main view
 
 STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Send train to depot. Ctrl+Click will only service
 STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Send vehicle to depot. Ctrl+Click will only service
 STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Send ship to depot. Ctrl+Click will only service
 STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Send aircraft to hangar. Ctrl+Click will only service
 
-STR_VEHICLE_VIEW_CLONE_TRAIN_INFO                               :{BLACK}This will build a copy of the train including all cars. Ctrl+Click will share the orders
-STR_VEHICLE_VIEW_CLONE_ROAD_VEHICLE_INFO                        :{BLACK}This will build a copy of the road vehicle. Ctrl+Click will share the orders
-STR_VEHICLE_VIEW_CLONE_SHIP_INFO                                :{BLACK}This will build a copy of the ship. Ctrl+Click will share the orders
-STR_VEHICLE_VIEW_CLONE_AIRCRAFT_INFO                            :{BLACK}This will build a copy of the aircraft. Ctrl+Click will share the orders
+STR_VEHICLE_VIEW_CLONE_TRAIN_INFO                               :{BLACK}This will buy a copy of the train including all cars. Ctrl+Click will share the orders
+STR_VEHICLE_VIEW_CLONE_ROAD_VEHICLE_INFO                        :{BLACK}This will buy a copy of the road vehicle. Ctrl+Click will share the orders
+STR_VEHICLE_VIEW_CLONE_SHIP_INFO                                :{BLACK}This will buy a copy of the ship. Ctrl+Click will share the orders
+STR_VEHICLE_VIEW_CLONE_AIRCRAFT_INFO                            :{BLACK}This will buy a copy of the aircraft. Ctrl+Click will share the orders
 
 STR_VEHICLE_VIEW_TRAIN_IGNORE_SIGNAL_TOOLTIP                    :{BLACK}Force train to proceed without waiting for signal to clear it
 
@@ -2835,10 +2841,10 @@ STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Refit ai
 STR_VEHICLE_VIEW_TRAIN_REVERSE_TOOLTIP                          :{BLACK}Reverse direction of train
 STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Force vehicle to turn around
 
-STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Show train's orders
-STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Show vehicle's orders
-STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Show ship's orders
-STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Show aircraft's orders
+STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Show train's orders. Ctrl+Click to show train's timetable
+STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Show vehicle's orders. Ctrl+Click to show vehicle's timetable
+STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Show ship's orders. Ctrl+Click to show ship's timetable
+STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Show aircraft's orders. Ctrl+Click to show aircraft's timetable
 
 STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Show train details
 STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Show road vehicle details
@@ -2917,8 +2923,8 @@ STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Transfer
 
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Servicing interval: {LTBLUE}{COMMA}days{BLACK}   Last service: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Servicing interval: {LTBLUE}{COMMA}%{BLACK}   Last service: {LTBLUE}{DATE_LONG}
-STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Increase servicing interval
-STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Decrease servicing interval
+STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Increase servicing interval with 10. Ctrl+Click increases servicing interval with 5
+STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Decrease servicing interval with 10. Ctrl+Click decreases servicing interval with 5
 
 STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Name train
 STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Name road vehicle
@@ -3043,7 +3049,7 @@ STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Go To
 STR_ORDER_GO_TO_NEAREST_DEPOT                                   :Go to nearest depot
 STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Go to nearest hangar
 STR_ORDER_CONDITIONAL                                           :Conditional order jump
-STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Insert a new order before the highlighted order, or add to end of list
+STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Insert a new order before the highlighted order, or add to end of list. Ctrl makes station orders 'full load any cargo', waypoint orders 'non-stop' and depot orders 'service'
 STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Insert an advanced order
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Show all vehicles that share this schedule
@@ -3470,10 +3476,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Can't se
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Can't send ship to depot...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Can't send aircraft to hangar...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Can't build railway vehicle...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Can't build road vehicle...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Can't build ship...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Can't build aircraft...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Can't buy railway vehicle...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Can't buy road vehicle...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Can't buy ship...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Can't buy aircraft...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Can't rename train vehicle type...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Can't rename road vehicle type...
@@ -3992,7 +3998,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{RAW_STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

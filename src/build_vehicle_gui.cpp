@@ -703,17 +703,6 @@ int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number)
 	return y;
 }
 
-static void DrawVehicleEngine(VehicleType type, int x, int y, EngineID engine, SpriteID pal)
-{
-	switch (type) {
-		case VEH_TRAIN:    DrawTrainEngine(   x, y, engine, pal); break;
-		case VEH_ROAD:     DrawRoadVehEngine( x, y, engine, pal); break;
-		case VEH_SHIP:     DrawShipEngine(    x, y, engine, pal); break;
-		case VEH_AIRCRAFT: DrawAircraftEngine(x, y, engine, pal); break;
-		default: NOT_REACHED();
-	}
-}
-
 /** Engine drawing loop
  * @param type Type of vehicle (VEH_*)
  * @param x,y Where should the list start
@@ -763,7 +752,7 @@ void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *
 
 		SetDParam(0, engine);
 		DrawString(x + x_offset, r, y, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK);
-		DrawVehicleEngine(type, x, y + y_offset, engine, (count_location != 0 && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
+		DrawVehicleEngine(x, y + y_offset, engine, (count_location != 0 && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
 		if (count_location != 0) {
 			SetDParam(0, num_engines);
 			DrawString(x, count_location, y + (GetVehicleListHeight(type) == 14 ? 3 : 8), STR_TINY_BLACK_COMA, TC_FROMSTRING, SA_RIGHT);
@@ -796,7 +785,7 @@ struct BuildVehicleWindow : Window {
 
 		ResizeWindow(this, 0, vlh - 14);
 		this->resize.step_height = vlh;
-		this->vscroll.cap = 1;
+		this->vscroll.SetCapacity(1);
 		this->widget[BUILD_VEHICLE_WIDGET_LIST].data = (1 << MAT_ROW_START) | (1 << MAT_COL_START);
 
 		this->resize.width  = this->width;
@@ -879,12 +868,12 @@ struct BuildVehicleWindow : Window {
 	/* Setup widget strings to fit the different types of vehicles */
 	void SetupWindowStrings(VehicleType type)
 	{
-		this->widget[BUILD_VEHICLE_WIDGET_CAPTION].data    = (this->listview_mode ? STR_VEHICLE_LIST_AVAILABLE_TRAINS : STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION) + type;
-		this->widget[BUILD_VEHICLE_WIDGET_LIST].tooltips   = STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP + type;
-		this->widget[BUILD_VEHICLE_WIDGET_BUILD].data      = STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON + type;
-		this->widget[BUILD_VEHICLE_WIDGET_BUILD].tooltips  = STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP + type;
-		this->widget[BUILD_VEHICLE_WIDGET_RENAME].data     = STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON + type;
-		this->widget[BUILD_VEHICLE_WIDGET_RENAME].tooltips = STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP + type;
+		this->widget[BUILD_VEHICLE_WIDGET_CAPTION].data    = (this->listview_mode ? STR_VEHICLE_LIST_AVAILABLE_TRAINS : STR_BUY_VEHICLE_TRAIN_ALL_CAPTION) + type;
+		this->widget[BUILD_VEHICLE_WIDGET_LIST].tooltips   = STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP + type;
+		this->widget[BUILD_VEHICLE_WIDGET_BUILD].data      = STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON + type;
+		this->widget[BUILD_VEHICLE_WIDGET_BUILD].tooltips  = STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP + type;
+		this->widget[BUILD_VEHICLE_WIDGET_RENAME].data     = STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON + type;
+		this->widget[BUILD_VEHICLE_WIDGET_RENAME].tooltips = STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP + type;
 
 		if (type == VEH_TRAIN && this->listview_mode) this->widget[BUILD_VEHICLE_WIDGET_CAPTION].data = STR_JUST_STRING;
 	}
@@ -1063,7 +1052,7 @@ struct BuildVehicleWindow : Window {
 				break;
 
 			case BUILD_VEHICLE_WIDGET_LIST: {
-				uint i = (pt.y - this->widget[BUILD_VEHICLE_WIDGET_LIST].top) / GetVehicleListHeight(this->vehicle_type) + this->vscroll.pos;
+				uint i = (pt.y - this->widget[BUILD_VEHICLE_WIDGET_LIST].top) / GetVehicleListHeight(this->vehicle_type) + this->vscroll.GetPosition();
 				size_t num_items = this->eng_list.Length();
 				this->sel_engine = (i < num_items) ? this->eng_list[i] : INVALID_ENGINE;
 				this->SetDirty();
@@ -1115,12 +1104,12 @@ struct BuildVehicleWindow : Window {
 	{
 		this->GenerateBuildList();
 
-		uint max = min(this->vscroll.pos + this->vscroll.cap, this->eng_list.Length());
+		uint max = min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->eng_list.Length());
 
-		SetVScrollCount(this, this->eng_list.Length());
+		this->vscroll.SetCount(this->eng_list.Length());
 		if (this->vehicle_type == VEH_TRAIN) {
 			if (this->filter.railtype == RAILTYPE_END) {
-				SetDParam(0, STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION);
+				SetDParam(0, STR_BUY_VEHICLE_TRAIN_ALL_CAPTION);
 			} else {
 				const RailtypeInfo *rti = GetRailTypeInfo(this->filter.railtype);
 				SetDParam(0, rti->strings.build_caption);
@@ -1135,7 +1124,7 @@ struct BuildVehicleWindow : Window {
 
 		this->DrawWidgets();
 
-		DrawEngineList(this->vehicle_type, this->widget[BUILD_VEHICLE_WIDGET_LIST].left + 2, this->widget[BUILD_VEHICLE_WIDGET_LIST].right, this->widget[BUILD_VEHICLE_WIDGET_LIST].top + 1, &this->eng_list, this->vscroll.pos, max, this->sel_engine, 0, DEFAULT_GROUP);
+		DrawEngineList(this->vehicle_type, this->widget[BUILD_VEHICLE_WIDGET_LIST].left + 2, this->widget[BUILD_VEHICLE_WIDGET_LIST].right, this->widget[BUILD_VEHICLE_WIDGET_LIST].top + 1, &this->eng_list, this->vscroll.GetPosition(), max, this->sel_engine, 0, DEFAULT_GROUP);
 
 		if (this->sel_engine != INVALID_ENGINE) {
 			const Widget *wi = &this->widget[BUILD_VEHICLE_WIDGET_PANEL];
@@ -1197,8 +1186,8 @@ struct BuildVehicleWindow : Window {
 		}
 		if (delta.y == 0) return;
 
-		this->vscroll.cap += delta.y / (int)GetVehicleListHeight(this->vehicle_type);
-		this->widget[BUILD_VEHICLE_WIDGET_LIST].data = (this->vscroll.cap << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll.UpdateCapacity(delta.y / (int)GetVehicleListHeight(this->vehicle_type));
+		this->widget[BUILD_VEHICLE_WIDGET_LIST].data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 };
 

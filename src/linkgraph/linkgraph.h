@@ -6,7 +6,7 @@
 #include "../stdafx.h"
 #include "../station_base.h"
 #include "../cargo_type.h"
-#include "../thread.h"
+#include "../thread/thread.h"
 #include "../settings_type.h"
 #include "linkgraph_types.h"
 #include <list>
