@@ -250,9 +250,9 @@ STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Svæði:
 
 
 # The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Fólksfjöldi
-STR_SORT_BY_NAME                                                :{BLACK}Nafn
-STR_SORT_BY_DATE                                                :{BLACK}Dagsetning
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Fólksfjöldi
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nafn
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Dagsetning
 STR_SORT_BY_PRODUCTION                                          :Framleiðsla
 STR_SORT_BY_TYPE                                                :Tegund
 STR_SORT_BY_TRANSPORTED                                         :Flutt
@@ -565,12 +565,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Heildarp
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jazz glymskratti
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Allt
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Gamalt
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Móðins
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy gata
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Sérval 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Sérval 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Allt
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Gamalt
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Móðins
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy gata
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Sérval 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Sérval 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Tónlistarstyrkur
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Hljóðstyrkur
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}LÁG  '  '  ' '  '  '  HÁM
@@ -579,8 +579,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Lag{SETX 88}{BLACK}{TINYFONT}Titill
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Stokka
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Lag
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Titill
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Stokka
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Listar
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Skipta yfir í fyrra lag
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Skipta yfir í næsta lag
@@ -2613,15 +2614,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Fjarlægja öll
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Endurnefna hóp
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Lestaúrval
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nýjir rafdrifnir lestarvagnar
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nýir einteingungsvagnar
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nýir segullestarvagnar
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Lestaúrval
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Nýjir rafdrifnir lestarvagnar
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Nýir einteingungsvagnar
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Nýir segullestarvagnar
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Járnbrautarlestir
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Bifreiðaúrval
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Skipaúrval
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Flugvélaúrval
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Járnbrautarlestir
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Bifreiðaúrval
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Skipaúrval
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Flugvélaúrval
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Verð: {GOLD}{CURRENCY}{BLACK} Þyngd: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Hámarkshraði: {GOLD}{VELOCITY}{BLACK}   Afl: {GOLD}{POWER}
@@ -2641,30 +2642,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Allar tegundir 
 STR_PURCHASE_INFO_ALL_BUT                                       :Allt nema {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Hámarks : {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Lestarlisti - smelltu á farartæki fyrir meiri upplýsingar
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Bifreiðalisti - ýttu á bifreið fyrir nánari upplýsingar
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Skipalisti - smelltu á skip fyrir nánari upplýsingar
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Flugvélalisti - smelltu á flugvél fyrir nánari upplýsingar
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Lestarlisti - smelltu á farartæki fyrir meiri upplýsingar
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Bifreiðalisti - ýttu á bifreið fyrir nánari upplýsingar
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Skipalisti - smelltu á skip fyrir nánari upplýsingar
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Flugvélalisti - smelltu á flugvél fyrir nánari upplýsingar
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Kaupa vagn
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Kaupa bifreið
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Kaupa skip
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Kaupa flugvél
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Kaupa vagn
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Kaupa bifreið
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Kaupa skip
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Kaupa flugvél
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Kaupa valinn lestarvagn
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Kaupa valda bifreið
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Kaupa valið skip
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Kaupa valda flugvél
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Kaupa valinn lestarvagn
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Kaupa valda bifreið
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Kaupa valið skip
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Kaupa valda flugvél
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Endurnefna
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Endurnefna
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Endurnefna
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Endurnefna
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Endurnefna
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Endurnefna
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Endurnefna
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Endurnefna
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Endurnefna lestarvagnstegund
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Endurnefna tegund bifreiðar
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Endurnefna skipategund
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Endurnefna tegund flugvélar
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Endurnefna lestarvagnstegund
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Endurnefna tegund bifreiðar
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Endurnefna skipategund
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Endurnefna tegund flugvélar
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Endurskíra lestargerð
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Endurnefna tegund bifreiðar
@@ -3451,10 +3452,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Get ekki
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Get ekki sent skip í slipp...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Get ekki sent flugvél í flugskýli...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Get ekki byggt lest...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Get ekki byggt bíl...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Get ekki smíðað skip...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Get ekki smíðað flugvél...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Get ekki byggt lest...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Get ekki byggt bíl...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Get ekki smíðað skip...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Get ekki smíðað flugvél...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Get ekki endurskírt lestargerð...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE} Get ekki endurnefnat tegund bifreiðar...
@@ -3969,7 +3970,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

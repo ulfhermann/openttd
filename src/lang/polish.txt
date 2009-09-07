@@ -628,9 +628,9 @@ STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Obszar: 
 
 
 # The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Populacja
-STR_SORT_BY_NAME                                                :{BLACK}Nazwa
-STR_SORT_BY_DATE                                                :{BLACK}Data
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Populacja
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nazwa
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Data
 STR_SORT_BY_PRODUCTION                                          :Produkcja
 STR_SORT_BY_TYPE                                                :Typ
 STR_SORT_BY_TRANSPORTED                                         :Przetransportowano
@@ -944,12 +944,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Suma prz
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jazz Jukebox
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Wszystko
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Stary styl
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Nowy styl
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Ezy Street
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Własny 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Własny 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Wszystko
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Stary styl
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Nowy styl
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Ezy Street
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Własny 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Własny 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Głośność muzyki
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Głośność efektów
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
@@ -958,8 +958,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Ścieżka{SETX 88}{BLACK}{TINYFONT}Tytuł
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Przypadkowo
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Ścieżka
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Tytuł
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Przypadkowo
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Program
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Przejdź do następnej ścieżki
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Przejdź do następnej ścieżki
@@ -1036,7 +1037,7 @@ STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_AIRCRAFT                                   :{TINYFONT}{BLACK}Samoloty
 STR_SMALLMAP_LEGENDA_TRANSPORT_ROUTES                           :{TINYFONT}{BLACK}Trasy transportowe
 STR_SMALLMAP_LEGENDA_FOREST                                     :{G=m}{TINYFONT}{BLACK}Las
-STR_SMALLMAP_LEGENDA_FOREST.d                                   :{G=m}{BLACK}{TINYFONT}Lasu
+STR_SMALLMAP_LEGENDA_FOREST.d                                   :{G=m}{TINYFONT}{BLACK}Lasu
 STR_SMALLMAP_LEGENDA_RAILROAD_STATION                           :{TINYFONT}{BLACK}Stacja kolejowa
 STR_SMALLMAP_LEGENDA_TRUCK_LOADING_BAY                          :{TINYFONT}{BLACK}Załadunek ciężarówek
 STR_SMALLMAP_LEGENDA_BUS_STATION                                :{TINYFONT}{BLACK}Przystanek
@@ -3003,15 +3004,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Usuń wszystkie
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Zmień nazwę grupy
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Nowe pociągi
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Nowe elektryczne pojazdy szynowe
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Nowe pociągi jednoszynowe
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Nowe pociągi MagLev
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Nowe pociągi
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Nowe elektryczne pojazdy szynowe
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Nowe pociągi jednoszynowe
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Nowe pociągi MagLev
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Nowe Pojazdy Szynowe
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Nowy pojazd drogowy
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Nowe statki
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Nowy samolot
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Nowe Pojazdy Szynowe
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Nowy pojazd drogowy
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Nowe statki
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Nowy samolot
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Koszt: {GOLD}{CURRENCY}{BLACK} Waga: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Prędkość: {GOLD}{VELOCITY}{BLACK} Moc: {GOLD}{POWER}
@@ -3031,30 +3032,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Wszystkie typy 
 STR_PURCHASE_INFO_ALL_BUT                                       :Wszystko oprócz {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Max. Siła Pociągowa: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Lista wyboru pociągów - kliknij na pojeździe, aby uzyskać informacje
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Lista wyboru pojazdów drogowych - kliknij na pojeździe, aby uzyskać więcej informacji
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Lista wyboru statków - kliknij na statku, aby uzyskać informacje
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Lista wyboru samolotów - kliknij na samolocie, aby uzyskać informacje
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Lista wyboru pociągów - kliknij na pojeździe, aby uzyskać informacje
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Lista wyboru pojazdów drogowych - kliknij na pojeździe, aby uzyskać więcej informacji
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Lista wyboru statków - kliknij na statku, aby uzyskać informacje
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Lista wyboru samolotów - kliknij na samolocie, aby uzyskać informacje
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Zbuduj pojazd
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Zbuduj pojazd
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Budowa statku
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Budowa samolotu
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Zbuduj pojazd
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Zbuduj pojazd
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Budowa statku
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Budowa samolotu
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Zbuduj podświetlony pociąg
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Zbuduj podświetlony pojazd drogowy
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Zbuduj podświetlony statek
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Zbuduj podświetlony samolot
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Zbuduj podświetlony pociąg
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Zbuduj podświetlony pojazd drogowy
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Zbuduj podświetlony statek
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Zbuduj podświetlony samolot
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Zmień nazwę
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Zmień nazwę
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Zmień nazwę
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Zmień nazwę
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Zmień nazwę
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Zmień nazwę
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Zmień nazwę
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Zmień nazwę
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Zmiana nazwy typu pociągu
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Zmień nazwę typu samochodu
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Zmień nazwę typu statku
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Zmień nazwę typu samolotu
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Zmiana nazwy typu pociągu
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Zmień nazwę typu samochodu
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Zmień nazwę typu statku
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Zmień nazwę typu samolotu
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Zmiana nazwy typu pociągu
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Zmień nazwę typu samochodu
@@ -3851,10 +3852,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Nie moż
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Nie można wysłać statku do stoczni...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Nie można wysłać samolotu do hangaru...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Nie można wybudować lokomotywy...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Nie można zbudować samochodu...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Nie można wybudować statku...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Nie można zbudować samolotu...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Nie można wybudować lokomotywy...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Nie można zbudować samochodu...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Nie można wybudować statku...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Nie można zbudować samolotu...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Nie można zmienić nazwy typu pojazdu...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Nie można zmienić nazwy typu samochodu...
@@ -4409,7 +4410,7 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

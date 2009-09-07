@@ -49,10 +49,10 @@ static const AirportMovingData _airport_moving_data_country[22] = {
 	{    3,   40, AMED_NOSPDCLAMP | AMED_BRAKE,    {DIR_N} }, // 12 Just landed, brake until end of runway
 	{    7,   40, 0,                               {DIR_N} }, // 13 Just landed, turn around and taxi 1 square
 	{   53,   40, 0,                               {DIR_N} }, // 14 Taxi from runway to crossing
-	{  -31,  193, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 15 Fly around waiting for a landing spot (north-east)
+	{    1,  193, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 15 Fly around waiting for a landing spot (north-east)
 	{    1,    1, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 16 Fly around waiting for a landing spot (north-west)
 	{  257,    1, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 17 Fly around waiting for a landing spot (south-west)
-	{  273,   49, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 18 Fly around waiting for a landing spot (south)
+	{  273,   47, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 18 Fly around waiting for a landing spot (south)
 	{   44,   37, AMED_HELI_RAISE,                 {DIR_N} }, // 19 Helicopter takeoff
 	{   44,   40, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 20 In position above landing spot helicopter
 	{   44,   40, AMED_HELI_LOWER,                 {DIR_N} }, // 21 Helicopter landing
@@ -81,10 +81,10 @@ static const AirportMovingData _airport_moving_data_commuter[37] = {
 	{    3,   54, AMED_NOSPDCLAMP | AMED_BRAKE,    {DIR_N} }, // 18 Just landed, brake until end of runway
 	{   12,   54, AMED_SLOWTURN,                   {DIR_NW} }, // 19 Just landed, turn around and taxi
 	{    8,   32, 0,                               {DIR_NW} }, // 20 Taxi from runway to crossing
-	{  -31,  149, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 21 Fly around waiting for a landing spot (north-east)
+	{    1,  149, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 21 Fly around waiting for a landing spot (north-east)
 	{    1,    6, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 22 Fly around waiting for a landing spot (north-west)
 	{  193,    6, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 23 Fly around waiting for a landing spot (south-west)
-	{  225,   81, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 24 Fly around waiting for a landing spot (south)
+	{  225,   62, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 24 Fly around waiting for a landing spot (south)
 	/* Helicopter */
 	{   80,    0, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 25 Bufferspace before helipad
 	{   80,    0, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 26 Bufferspace before helipad
@@ -155,7 +155,7 @@ static const AirportMovingData _airport_moving_data_metropolitan[27] = {
 	{   21,   85, 0,                               {DIR_N} }, // 16 Just landed, turn around and taxi 1 square
 	{   21,   69, 0,                               {DIR_N} }, // 17 On Runway-out taxiing to In-Way
 	{   21,   54, AMED_EXACTPOS,                   {DIR_SW} }, // 18 Taxi from runway to crossing
-	{  -31,  193, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 19 Fly around waiting for a landing spot (north-east)
+	{    1,  193, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 19 Fly around waiting for a landing spot (north-east)
 	{    1,    1, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 20 Fly around waiting for a landing spot (north-west)
 	{  257,    1, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 21 Fly around waiting for a landing spot (south-west)
 	{  273,   49, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 22 Fly around waiting for a landing spot (south)
@@ -204,7 +204,7 @@ static const AirportMovingData _airport_moving_data_international[51] = {
 	{    3,  104, AMED_NOSPDCLAMP | AMED_BRAKE,    {DIR_N} }, // 34 Just landed, brake until end of runway
 	{   12,  104, AMED_SLOWTURN,                   {DIR_N} }, // 35 Just landed, turn around and taxi 1 square
 	{    7,   84, 0,                               {DIR_N} }, // 36 Taxi from runway to crossing
-	{  -31,  209, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 37 Fly around waiting for a landing spot (north-east)
+	{    1,  209, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 37 Fly around waiting for a landing spot (north-east)
 	{    1,    6, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 38 Fly around waiting for a landing spot (north-west)
 	{  273,    6, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 39 Fly around waiting for a landing spot (south-west)
 	{  305,   81, AMED_NOSPDCLAMP | AMED_SLOWTURN, {DIR_N} }, // 40 Fly around waiting for a landing spot (south)
@@ -404,7 +404,7 @@ static const AirportFTAbuildup _airport_fta_dummy[] = {
  * this may be changed later when airports are moved to external file  */
 static const TileIndexDiffC _airport_depots_country[] = {{3, 0}};
 static const byte _airport_terminal_country[] = {1, 2};
-static const byte _airport_entries_country[] = {16, 16, 16, 16};
+static const byte _airport_entries_country[] = {16, 15, 18, 17};
 static const AirportFTAbuildup _airport_fta_country[] = {
 	{  0, HANGAR, NOTHING_block, 1 },
 	{  1, 255, AIRPORT_BUSY_block, 0 }, { 1, HANGAR, 0, 0 }, { 1, TERM1, TERM1_block, 2 }, { 1, TERM2, 0, 4 }, { 1, HELITAKEOFF, 0, 19 }, { 1, 0, 0, 6 },
@@ -437,7 +437,7 @@ static const AirportFTAbuildup _airport_fta_country[] = {
 static const TileIndexDiffC _airport_depots_commuter[] = { { 4, 0 } };
 static const byte _airport_terminal_commuter[] = { 1, 3 };
 static const byte _airport_helipad_commuter[] = { 1, 2 };
-static const byte _airport_entries_commuter[] = {21, 21, 21, 21};
+static const byte _airport_entries_commuter[] = {22, 21, 24, 23};
 static const AirportFTAbuildup _airport_fta_commuter[] = {
 	{  0, HANGAR, NOTHING_block, 1 }, { 0, HELITAKEOFF, HELIPAD2_block, 1 }, { 0, 0, 0, 1 },
 	{  1, 255, TAXIWAY_BUSY_block, 0 }, { 1, HANGAR, 0, 0 }, { 1, TAKEOFF, 0, 11 }, { 1, TERM1, TAXIWAY_BUSY_block, 10 }, { 1, TERM2, TAXIWAY_BUSY_block, 10 }, { 1, TERM3, TAXIWAY_BUSY_block, 10 }, { 1, HELIPAD1, TAXIWAY_BUSY_block, 10 }, { 1, HELIPAD2, TAXIWAY_BUSY_block, 10 }, { 1, HELITAKEOFF, TAXIWAY_BUSY_block, 10 }, { 1, 0, 0, 0 },
@@ -528,7 +528,7 @@ static const AirportFTAbuildup _airport_fta_city[] = {
 
 static const TileIndexDiffC _airport_depots_metropolitan[] = { { 5, 0 } };
 static const byte _airport_terminal_metropolitan[] = { 1, 3 };
-static const byte _airport_entries_metropolitan[] = {20, 20, 20, 20};
+static const byte _airport_entries_metropolitan[] = {20, 19, 22, 21};
 static const AirportFTAbuildup _airport_fta_metropolitan[] = {
 	{  0, HANGAR, NOTHING_block, 1 },
 	{  1, 255, TAXIWAY_BUSY_block, 0 }, { 1, HANGAR, 0, 0 }, { 1, TERM2, 0, 6 }, { 1, TERM3, 0, 6 }, { 1, 0, 0, 7 }, // for all else, go to 7
@@ -567,7 +567,7 @@ static const AirportFTAbuildup _airport_fta_metropolitan[] = {
 static const TileIndexDiffC _airport_depots_international[] = { { 0, 3 }, { 6, 1 } };
 static const byte _airport_terminal_international[] = { 2, 3, 3 };
 static const byte _airport_helipad_international[] = { 1, 2 };
-static const byte _airport_entries_international[] = { 37, 37, 37, 37 };
+static const byte _airport_entries_international[] = { 38, 37, 40, 39 };
 static const AirportFTAbuildup _airport_fta_international[] = {
 	{  0, HANGAR, NOTHING_block, 2 }, { 0, 255, TERM_GROUP1_block, 0 }, { 0, 255, TERM_GROUP2_ENTER1_block, 1 }, { 0, HELITAKEOFF, HELIPAD1_block, 2 }, { 0, 0, 0, 2 },
 	{  1, HANGAR, NOTHING_block, 3 }, { 1, 255, HANGAR2_AREA_block, 1 }, { 1, HELITAKEOFF, HELIPAD2_block, 3 }, { 1, 0, 0, 3 },
@@ -633,7 +633,7 @@ static const AirportFTAbuildup _airport_fta_international[] = {
 static const TileIndexDiffC _airport_depots_intercontinental[] = { { 0, 5 }, { 8, 4 } };
 static const byte _airport_terminal_intercontinental[] = { 2, 4, 4 };
 static const byte _airport_helipad_intercontinental[] = { 1, 2 };
-static const byte _airport_entries_intercontinental[] = { 43, 43, 43, 43 };
+static const byte _airport_entries_intercontinental[] = { 44, 43, 46, 45 };
 static const AirportFTAbuildup _airport_fta_intercontinental[] = {
 	{  0, HANGAR, NOTHING_block, 2 }, { 0, 255, HANGAR1_AREA_block | TERM_GROUP1_block, 0 }, { 0, 255, HANGAR1_AREA_block | TERM_GROUP1_block, 1 }, { 0, TAKEOFF, HANGAR1_AREA_block | TERM_GROUP1_block, 2 }, { 0, 0, 0, 2 },
 	{  1, HANGAR, NOTHING_block, 3 }, { 1, 255, HANGAR2_AREA_block, 1 }, { 1, 255, HANGAR2_AREA_block, 0 }, { 1, 0, 0, 3 },
