@@ -175,6 +175,8 @@ protected:
 
 		this->stations.Compact();
 		this->stations.RebuildDone();
+
+		this->vscroll.SetCount(this->stations.Length()); // Update the scrollbar
 	}
 
 	/** Sort stations by their name */
@@ -261,7 +263,7 @@ public:
 	CompanyStationsWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
 	{
 		this->owner = (Owner)this->window_number;
-		this->vscroll.cap = 12;
+		this->vscroll.SetCapacity(12);
 		this->resize.step_height = 10;
 		this->resize.height = this->height - 10 * 7; // minimum if 5 in the list
 
@@ -337,11 +339,9 @@ public:
 		this->BuildStationsList(owner);
 		this->SortStationsList();
 
-		SetVScrollCount(this, this->stations.Length());
-
 		/* draw widgets, with company's name in the caption */
 		SetDParam(0, owner);
-		SetDParam(1, this->vscroll.count);
+		SetDParam(1, this->vscroll.GetCount());
 
 		this->DrawWidgets();
 
@@ -372,15 +372,15 @@ public:
 		cg_ofst = this->IsWidgetLowered(SLW_FACILALL) ? 2 : 1;
 		DrawString(71 + cg_ofst, 71 + cg_ofst + 12, y + cg_ofst, STR_ABBREV_ALL, TC_BLACK);
 
-		if (this->vscroll.count == 0) { // company has no stations
+		if (this->vscroll.GetCount() == 0) { // company has no stations
 			DrawString(xb, this->width, 40, STR_STATION_LIST_NONE);
 			return;
 		}
 
-		int max = min(this->vscroll.pos + this->vscroll.cap, this->stations.Length());
+		int max = min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->stations.Length());
 		y = 40; // start of the list-widget
 
-		for (int i = this->vscroll.pos; i < max; ++i) { // do until max number of stations of owner
+		for (int i = this->vscroll.GetPosition(); i < max; ++i) { // do until max number of stations of owner
 			const Station *st = this->stations[i];
 			int x;
 
@@ -411,9 +411,9 @@ public:
 			case SLW_LIST: {
 				uint32 id_v = (pt.y - 41) / 10;
 
-				if (id_v >= this->vscroll.cap) return; // click out of bounds
+				if (id_v >= this->vscroll.GetCapacity()) return; // click out of bounds
 
-				id_v += this->vscroll.pos;
+				id_v += this->vscroll.GetPosition();
 
 				if (id_v >= this->stations.Length()) return; // click out of list bound
 
@@ -570,7 +570,7 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.cap += delta.y / 10;
+		this->vscroll.UpdateCapacity(delta.y / 10);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -1027,7 +1027,7 @@ struct StationViewWindow : public Window {
 		SelectMode(WAITING);
 		Owner owner = Station::Get(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
-		this->vscroll.cap = 4;
+		this->vscroll.SetCapacity(4);
 		this->resize.step_height = 10;
 		this->FindWindowPlacementAndResize(desc);
 	}
@@ -1352,7 +1352,7 @@ struct StationViewWindow : public Window {
 		CargoDataEntry cargo;
 		BuildCargoList(&cargo, st);
 
-		SetVScrollCount(this, cargo.Size()); // update scrollbar
+		this->vscroll.SetCount(cargo.Size()); // update scrollbar
 
 		/* disable some buttons */
 		this->SetWidgetDisabledState(SVW_RENAME,   st->owner != _local_company);
@@ -1368,9 +1368,9 @@ struct StationViewWindow : public Window {
 		/* draw arrow pointing up/down for ascending/descending sorting */
 		this->DrawSortButtonState(SVW_SORT_ORDER, sort_orders[1] == SO_ASCENDING ? SBS_UP : SBS_DOWN);
 
-		int pos = this->vscroll.pos; ///< = this->vscroll.pos
+		int pos = this->vscroll.GetPosition(); ///< = this->vscroll.pos
 
-		int maxrows = this->vscroll.cap;
+		int maxrows = this->vscroll.GetCapacity();
 
 		displayed_rows.clear();
 
@@ -1627,7 +1627,7 @@ struct StationViewWindow : public Window {
 	virtual void OnResize(Point delta)
 	{
 		if (delta.x != 0) ResizeButtons(this, SVW_LOCATION, SVW_RENAME);
-		this->vscroll.cap += delta.y / (int)this->resize.step_height;
+		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
 	}
 };
 
@@ -1821,7 +1821,7 @@ struct SelectStationWindow : Window {
 		select_station_cmd(cmd),
 		area(ta)
 	{
-		this->vscroll.cap = 6;
+		this->vscroll.SetCapacity(6);
 		this->resize.step_height = 10;
 
 		FindStationsNearby<T>(this->area, true);
@@ -1832,19 +1832,19 @@ struct SelectStationWindow : Window {
 
 	virtual void OnPaint()
 	{
-		SetVScrollCount(this, _stations_nearby_list.Length() + 1);
+		this->vscroll.SetCount(_stations_nearby_list.Length() + 1);
 
 		this->DrawWidgets();
 
 		uint y = 17;
-		if (this->vscroll.pos == 0) {
+		if (this->vscroll.GetPosition() == 0) {
 			DrawString(3, this->widget[JSW_PANEL].right - 2, y, T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT : STR_JOIN_STATION_CREATE_SPLITTED_STATION);
 			y += 10;
 		}
 
-		for (uint i = max<uint>(1, this->vscroll.pos); i <= _stations_nearby_list.Length(); ++i, y += 10) {
+		for (uint i = max<uint>(1, this->vscroll.GetPosition()); i <= _stations_nearby_list.Length(); ++i, y += 10) {
 			/* Don't draw anything if it extends past the end of the window. */
-			if (i - this->vscroll.pos >= this->vscroll.cap) break;
+			if (i - this->vscroll.GetPosition() >= this->vscroll.GetCapacity()) break;
 
 			const T *st = T::Get(_stations_nearby_list[i - 1]);
 			SetDParam(0, st->index);
@@ -1857,7 +1857,7 @@ struct SelectStationWindow : Window {
 	{
 		if (widget != JSW_PANEL) return;
 
-		uint32 st_index = (pt.y - 16) / 10 + this->vscroll.pos;
+		uint32 st_index = (pt.y - 16) / 10 + this->vscroll.GetPosition();
 		bool distant_join = (st_index > 0);
 		if (distant_join) st_index--;
 
@@ -1884,7 +1884,7 @@ struct SelectStationWindow : Window {
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.cap = (this->widget[JSW_PANEL].bottom - this->widget[JSW_PANEL].top) / 10;
+		this->vscroll.UpdateCapacity((this->widget[JSW_PANEL].bottom - this->widget[JSW_PANEL].top) / 10);
 	}
 
 	virtual void OnInvalidateData(int data)

@@ -169,7 +169,11 @@ void FixOldVehicles()
 	Vehicle *v;
 
 	FOR_ALL_VEHICLES(v) {
-		if (v->next != NULL) v->next = Vehicle::Get((size_t)v->next);
+		if ((size_t)v->next == 0xFFFF) {
+			v->next = NULL;
+		} else {
+			v->next = Vehicle::GetIfValid((size_t)v->next);
+		}
 
 		/* For some reason we need to correct for this */
 		switch (v->spritenum) {
@@ -607,7 +611,8 @@ static bool LoadOldOrder(LoadgameState *ls, int num)
 {
 	if (!LoadChunk(ls, NULL, order_chunk)) return false;
 
-	Order *o = new (num) Order(UnpackOldOrder(_old_order));
+	Order *o = new (num) Order();
+	o->AssignOrder(UnpackOldOrder(_old_order));
 
 	if (o->IsType(OT_NOTHING)) {
 		delete o;
@@ -660,76 +665,6 @@ static bool LoadOldDepot(LoadgameState *ls, int num)
 	} else {
 		delete d;
 	}
-
-	return true;
-}
-
-static int32 _old_price;
-static uint16 _old_price_frac;
-static const OldChunks price_chunk[] = {
-	OCL_VAR (  OC_INT32,   1, &_old_price ),
-	OCL_VAR ( OC_UINT16,   1, &_old_price_frac ),
-	OCL_END()
-};
-
-static bool LoadOldPrice(LoadgameState *ls, int num)
-{
-	if (_savegame_type == SGT_TTO && num == 25) {
-		/* clear_fields == build_road_depot (TTO didn't have this price) */
-		((Money*)&_price)[25] = ((Money*)&_price)[6];
-		_price_frac[25] = _price_frac[6];
-		return true;
-	}
-
-	if (!LoadChunk(ls, NULL, price_chunk)) return false;
-
-	if (_savegame_type == SGT_TTO) {
-		/* base prices are different in these two cases */
-		if (num == 15) _old_price = ClampToI32(((Money)_old_price) * 20 / 3); // build_railvehicle
-		if (num == 17) _old_price = ClampToI32(((Money)_old_price) * 10);     // aircraft_base
-	}
-
-
-	/* We use a struct to store the prices, but they are ints in a row..
-	 * so just access the struct as an array of int32s */
-	((Money*)&_price)[num] = _old_price;
-	_price_frac[num] = _old_price_frac;
-
-	return true;
-}
-
-static const OldChunks cargo_payment_rate_chunk[] = {
-	OCL_VAR (  OC_INT32,   1, &_old_price ),
-	OCL_VAR ( OC_UINT16,   1, &_old_price_frac ),
-
-	OCL_NULL( 2 ),         ///< Junk
-	OCL_END()
-};
-
-static bool LoadOldCargoPaymentRate(LoadgameState *ls, int num)
-{
-	if (_savegame_type == SGT_TTO && num == 11) { // TTD has 1 more cargo type
-		_cargo_payment_rates[num] = _cargo_payment_rates[9];
-		_cargo_payment_rates_frac[num] = _cargo_payment_rates_frac[9];
-		return true;
-	}
-
-	if (!LoadChunk(ls, NULL, cargo_payment_rate_chunk)) return false;
-
-	if (_savegame_type == SGT_TTO) {
-		/* SVXConverter about cargo payment rates correction:
-		 * "increase them to compensate for the faster time advance in TTD compared to TTO
-		 * which otherwise would cause much less income while the annual running costs of
-		 * the vehicles stay the same" */
-
-		Money m = ((((Money)_old_price) << 16) + (uint)_old_price_frac) * 124 / 74;
-
-		_old_price = m >> 16;
-		_old_price_frac = GB((int64)m, 0, 16);
-	}
-
-	_cargo_payment_rates[num] = -_old_price;
-	_cargo_payment_rates_frac[num] = _old_price_frac;
 
 	return true;
 }
@@ -789,7 +724,7 @@ static const OldChunks station_chunk[] = {
 
 	OCL_NULL( 4 ),         ///< sign left/top, no longer in use
 
-	OCL_SVAR( OC_UINT16, Station, had_vehicle_of_type ),
+	OCL_SVAR( OC_FILE_U16 | OC_VAR_U8, Station, had_vehicle_of_type ),
 
 	OCL_CHUNK( 12, LoadOldGood ),
 
@@ -982,8 +917,8 @@ static const OldChunks _company_chunk[] = {
 
 	OCL_SVAR(  OC_UINT8, Company, colour ),
 	OCL_SVAR(  OC_UINT8, Company, money_fraction ),
-	OCL_SVAR(  OC_UINT8, Company, quarters_of_bankrupcy ),
-	OCL_SVAR(  OC_UINT8, Company, bankrupt_asked ),
+	OCL_SVAR(  OC_UINT8, Company, quarters_of_bankruptcy ),
+	OCL_SVAR( OC_FILE_U8  | OC_VAR_U16, Company, bankrupt_asked ),
 	OCL_SVAR( OC_FILE_U32 | OC_VAR_I64, Company, bankrupt_value ),
 	OCL_SVAR( OC_UINT16, Company, bankrupt_timeout ),
 
@@ -1393,7 +1328,7 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 		}
 		v->current_order.AssignOrder(UnpackOldOrder(_old_order));
 
-		if (_old_next_ptr != 0xFFFF) v->next = (Vehicle *)(size_t)_old_next_ptr;
+		v->next = (Vehicle *)(size_t)_old_next_ptr;
 
 		if (_cargo_count != 0) {
 			CargoPacket *cp = new CargoPacket(_cargo_count, _cargo_days);
@@ -1663,11 +1598,13 @@ static const OldChunks main_chunk[] = {
 
 	OCL_ASSERT( OC_TTO, 0x3A2E ),
 
-	OCL_CHUNK( 49, LoadOldPrice ),
+	OCL_CNULL( OC_TTO, 48 * 6 ), ///< prices
+	OCL_CNULL( OC_TTD, 49 * 6 ), ///< prices
 
 	OCL_ASSERT( OC_TTO, 0x3B4E ),
 
-	OCL_CHUNK( 12, LoadOldCargoPaymentRate ),
+	OCL_CNULL( OC_TTO, 11 * 8 ), ///< cargo payment rates
+	OCL_CNULL( OC_TTD, 12 * 8 ), ///< cargo payment rates
 
 	OCL_ASSERT( OC_TTD, 0x4CBA ),
 	OCL_ASSERT( OC_TTO, 0x3BA6 ),
@@ -1728,19 +1665,19 @@ static const OldChunks main_chunk[] = {
 	OCL_VAR ( OC_FILE_I16 | OC_VAR_I32,   1, &_saved_scrollpos_y ),
 	OCL_VAR ( OC_FILE_U16 | OC_VAR_U8,    1, &_saved_scrollpos_zoom ),
 
-	OCL_VAR ( OC_FILE_U32 | OC_VAR_I64,   1, &_economy.max_loan ),
-	OCL_VAR ( OC_FILE_U32 | OC_VAR_I64,   1, &_economy.max_loan_unround ),
+	OCL_NULL( 4 ),           ///< max_loan
+	OCL_VAR ( OC_FILE_U32 | OC_VAR_I64,   1, &_economy.old_max_loan_unround ),
 	OCL_VAR (  OC_INT16,    1, &_economy.fluct ),
 
 	OCL_VAR ( OC_UINT16,    1, &_disaster_delay ),
 
 	OCL_ASSERT( OC_TTO, 0x496E4 ),
 
-	OCL_CNULL( OC_TTD, 144 ),             ///< cargo-stuff, calculated in InitializeLandscapeVariables
+	OCL_CNULL( OC_TTD, 144 ),             ///< cargo-stuff
 
 	OCL_CCHUNK( OC_TTD, 256, LoadOldEngineName ),
 
-	OCL_CNULL( OC_TTD, 144 ),             ///< AI cargo-stuff, calculated in InitializeLandscapeVariables
+	OCL_CNULL( OC_TTD, 144 ),             ///< AI cargo-stuff
 	OCL_NULL( 2 ),               ///< Company indexes of companies, no longer in use
 	OCL_NULL( 1 ),               ///< Station tick counter, no longer in use
 
@@ -1771,7 +1708,7 @@ static const OldChunks main_chunk[] = {
 	OCL_VAR ( OC_TTD | OC_UINT8,    1, &_settings_game.game_creation.snow_line ),
 
 	OCL_CNULL( OC_TTD, 32 ),              ///< new_industry_randtable, no longer used (because of new design)
-	OCL_CNULL( OC_TTD, 36 ),              ///< cargo-stuff, calculated in InitializeLandscapeVariables
+	OCL_CNULL( OC_TTD, 36 ),              ///< cargo-stuff
 
 	OCL_ASSERT( OC_TTD, 0x77179 ),
 	OCL_ASSERT( OC_TTO, 0x4971D ),
@@ -1857,6 +1794,12 @@ bool LoadTTOMain(LoadgameState *ls)
 
 	/* We have a new difficulty setting */
 	_settings_game.difficulty.town_council_tolerance = Clamp(_settings_game.difficulty.diff_level, 0, 2);
+
+	/* SVXConverter about cargo payment rates correction:
+	 * "increase them to compensate for the faster time advance in TTD compared to TTO
+	 * which otherwise would cause much less income while the annual running costs of
+	 * the vehicles stay the same" */
+	_economy.inflation_payment = min(_economy.inflation_payment * 124 / 74, MAX_INFLATION);
 
 	DEBUG(oldloader, 3, "Finished converting game data");
 	DEBUG(oldloader, 1, "TTO savegame successfully converted");

@@ -108,7 +108,7 @@ public:
 			Window(desc, window_number), sel_index(-1)
 	{
 		this->town = Town::Get(this->window_number);
-		this->vscroll.cap = 5;
+		this->vscroll.SetCapacity(5);
 
 		this->FindWindowPlacementAndResize(desc);
 	}
@@ -118,7 +118,7 @@ public:
 		int numact;
 		uint buttons = GetMaskOfTownActions(&numact, _local_company, this->town);
 
-		SetVScrollCount(this, numact + 1);
+		this->vscroll.SetCount(numact + 1);
 
 		if (this->sel_index != -1 && !HasBit(buttons, this->sel_index)) {
 			this->sel_index = -1;
@@ -172,7 +172,7 @@ public:
 		}
 
 		y = this->widget[TWA_COMMAND_LIST].top + 1;
-		int pos = this->vscroll.pos;
+		int pos = this->vscroll.GetPosition();
 
 		if (--pos < 0) {
 			DrawString(this->widget[TWA_COMMAND_LIST].left + 2, this->widget[TWA_COMMAND_LIST].right - 2, y, STR_LOCAL_AUTHORITY_ACTIONS_TITLE);
@@ -206,7 +206,7 @@ public:
 
 				if (!IsInsideMM(y, 0, 5)) return;
 
-				y = GetNthSetBit(GetMaskOfTownActions(NULL, _local_company, this->town), y + this->vscroll.pos - 1);
+				y = GetNthSetBit(GetMaskOfTownActions(NULL, _local_company, this->town), y + this->vscroll.GetPosition() - 1);
 				if (y >= 0) {
 					this->sel_index = y;
 					this->SetDirty();
@@ -518,8 +518,8 @@ static const NWidgetPart _nested_town_directory_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_VERTICAL),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TDW_SORTNAME), SetMinimalSize(99, 12), SetDataTip(STR_SORT_BY_NAME, STR_TOOLTIP_SORT_ORDER), SetFill(true, false),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TDW_SORTPOPULATION), SetMinimalSize(97, 12), SetDataTip(STR_SORT_BY_POPULATION, STR_TOOLTIP_SORT_ORDER), SetFill(true, false),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TDW_SORTNAME), SetMinimalSize(99, 12), SetDataTip(STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER), SetFill(true, false),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TDW_SORTPOPULATION), SetMinimalSize(97, 12), SetDataTip(STR_SORT_BY_CAPTION_POPULATION, STR_TOOLTIP_SORT_ORDER), SetFill(true, false),
 			EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_BROWN, TDW_CENTERTOWN), SetMinimalSize(196, 164), SetDataTip(0x0, STR_TOWN_DIRECTORY_LIST_TOOLTIP),
 							SetFill(true, false), SetResize(0, 10), EndContainer(),
@@ -540,7 +540,6 @@ private:
 	/* Runtime saved values */
 	static Listing last_sorting;
 	static const Town *last_town;
-	int townline_height; ///< Height of a single town line in the town directory window.
 
 	/* Constants for sorting towns */
 	static GUITownList::SortFunction * const sorter_funcs[];
@@ -559,10 +558,10 @@ private:
 
 			this->towns.Compact();
 			this->towns.RebuildDone();
-			SetVScrollCount(this, this->towns.Length()); // Update scrollbar as well.
+			this->vscroll.SetCount(this->towns.Length()); // Update scrollbar as well.
 		}
 		/* Always sort the towns. */
-		last_town = NULL;
+		this->last_town = NULL;
 		this->towns.Sort();
 	}
 
@@ -599,13 +598,12 @@ public:
 	TownDirectoryWindow(const WindowDesc *desc) : Window()
 	{
 		this->towns.SetListing(this->last_sorting);
-		this->towns.SetSortFuncs(this->sorter_funcs);
+		this->towns.SetSortFuncs(TownDirectoryWindow::sorter_funcs);
 		this->towns.ForceRebuild();
 		this->BuildSortTownList();
 
-		this->townline_height = FONT_HEIGHT_NORMAL;
 		this->InitNested(desc, 0);
-		this->vscroll.cap = this->nested_array[TDW_CENTERTOWN]->current_y / this->resize.step_height;
+		this->vscroll.SetCapacity(this->nested_array[TDW_CENTERTOWN]->current_y / (int)this->resize.step_height);
 	}
 
 	~TownDirectoryWindow()
@@ -636,18 +634,23 @@ public:
 
 			case TDW_CENTERTOWN: {
 				int n = 0;
-				int y = r.top + 2;
-				for (uint i = this->vscroll.pos; i < this->towns.Length(); i++) {
+				int y = r.top + WD_FRAMERECT_TOP;
+				if (this->towns.Length() == 0) { // No towns available.
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right, y, STR_TOWN_DIRECTORY_NONE);
+					break;
+				}
+				/* At least one town available. */
+				for (uint i = this->vscroll.GetPosition(); i < this->towns.Length(); i++) {
 					const Town *t = this->towns[i];
 
 					assert(t->xy != INVALID_TILE);
 
 					SetDParam(0, t->index);
 					SetDParam(1, t->population);
-					DrawString(r.left + 2, r.right - 2, y, STR_TOWN_DIRECTORY_TOWN);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_TOWN_DIRECTORY_TOWN);
 
-					y += this->townline_height;
-					if (++n == this->vscroll.cap) break; // max number of towns in 1 window
+					y += this->resize.step_height;
+					if (++n == this->vscroll.GetCapacity()) break; // max number of towns in 1 window
 				}
 			} break;
 		}
@@ -665,7 +668,7 @@ public:
 				break;
 			}
 			case TDW_CENTERTOWN: {
-				Dimension d = {0, 0};
+				Dimension d = GetStringBoundingBox(STR_TOWN_DIRECTORY_NONE);
 				for (uint i = 0; i < this->towns.Length(); i++) {
 					const Town *t = this->towns[i];
 
@@ -675,7 +678,7 @@ public:
 					SetDParam(1, 10000000); // 10^7
 					d = maxdim(d, GetStringBoundingBox(STR_TOWN_DIRECTORY_TOWN));
 				}
-				d.width += padding.width + 2 + 2; // Text is rendered with 2 pixel offset at both sides.
+				d.width += padding.width + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
 				d.height += padding.height;
 				*size = maxdim(*size, d);
 				resize->height = d.height;
@@ -716,11 +719,11 @@ public:
 				break;
 
 			case TDW_CENTERTOWN: { // Click on Town Matrix
-				uint16 id_v = (pt.y - this->nested_array[widget]->pos_y - 2) / this->townline_height;
+				uint16 id_v = (pt.y - this->nested_array[widget]->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
 
-				if (id_v >= this->vscroll.cap) return; // click out of bounds
+				if (id_v >= this->vscroll.GetCapacity()) return; // click out of bounds
 
-				id_v += this->vscroll.pos;
+				id_v += this->vscroll.GetPosition();
 
 				if (id_v >= this->towns.Length()) return; // click out of town bounds
 
@@ -744,7 +747,7 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.cap += delta.y / this->townline_height;
+		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
 	}
 
 	virtual void OnInvalidateData(int data)
