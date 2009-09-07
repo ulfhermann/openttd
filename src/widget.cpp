@@ -10,6 +10,7 @@
 /** @file widget.cpp Handling of the default/simple widgets. */
 
 #include "stdafx.h"
+#include "openttd.h"
 #include "company_func.h"
 #include "gfx_func.h"
 #include "window_gui.h"
@@ -17,6 +18,7 @@
 #include "zoom_func.h"
 #include "debug.h"
 #include "strings_func.h"
+#include "transparency.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -42,9 +44,9 @@ static Point HandleScrollbarHittest(const Scrollbar *sb, int top, int bottom)
 
 	height = (bottom - top);
 
-	pos = sb->pos;
-	count = sb->count;
-	cap = sb->cap;
+	pos = sb->GetPosition();
+	count = sb->GetCount();
+	cap = sb->GetCapacity();
 
 	if (count != 0) top += height * pos / count;
 
@@ -102,7 +104,7 @@ static void ScrollbarClickPositioning(Window *w, WidgetType wtp, int x, int y, i
 		w->flags4 |= WF_SCROLL_UP;
 		if (_scroller_click_timeout == 0) {
 			_scroller_click_timeout = 6;
-			if (sb->pos != 0) sb->pos--;
+			sb->UpdatePosition(-1);
 		}
 		_left_button_clicked = false;
 	} else if (pos >= ma - 10) {
@@ -111,16 +113,16 @@ static void ScrollbarClickPositioning(Window *w, WidgetType wtp, int x, int y, i
 
 		if (_scroller_click_timeout == 0) {
 			_scroller_click_timeout = 6;
-			if (sb->pos + sb->cap < sb->count) sb->pos++;
+			sb->UpdatePosition(1);
 		}
 		_left_button_clicked = false;
 	} else {
 		Point pt = HandleScrollbarHittest(sb, mi, ma);
 
 		if (pos < pt.x) {
-			sb->pos = max(sb->pos - sb->cap, 0);
+			sb->UpdatePosition(-sb->GetCapacity());
 		} else if (pos > pt.y) {
-			sb->pos = min(sb->pos + sb->cap, max(sb->count - sb->cap, 0));
+			sb->UpdatePosition(sb->GetCapacity());
 		} else {
 			_scrollbar_start_pos = pt.x - mi - 9;
 			_scrollbar_size = ma - mi - 23;
@@ -582,6 +584,11 @@ void Window::DrawWidgets() const
 {
 	if (this->nested_root != NULL) {
 		this->nested_root->Draw(this);
+
+		if (this->flags4 & WF_WHITE_BORDER_MASK) {
+			DrawFrameRect(0, 0, this->width - 1, this->height - 1, COLOUR_WHITE, FR_BORDERONLY);
+		}
+
 		return;
 	}
 
@@ -695,7 +702,6 @@ void Window::DrawWidgets() const
 	if (this->flags4 & WF_WHITE_BORDER_MASK) {
 		DrawFrameRect(0, 0, this->width - 1, this->height - 1, COLOUR_WHITE, FR_BORDERONLY);
 	}
-
 }
 
 /**
@@ -1805,8 +1811,8 @@ void NWidgetBackground::Draw(const Window *w)
 			NOT_REACHED();
 	}
 
-	if (this->child != NULL) this->child->Draw(w);
 	if (this->index >= 0) w->DrawWidget(r, this->index);
+	if (this->child != NULL) this->child->Draw(w);
 
 	if (this->IsDisabled()) {
 		GfxFillRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, _colour_gradient[this->colour & 0xF][2], FILLRECT_CHECKER);
@@ -1862,7 +1868,20 @@ void NWidgetViewport::StoreWidgets(Widget *widgets, int length, bool left_moving
 
 void NWidgetViewport::Draw(const Window *w)
 {
-	w->DrawViewport();
+	if (this->disp_flags & ND_NO_TRANSPARENCY) {
+		TransparencyOptionBits to_backup = _transparency_opt;
+		_transparency_opt = 0; // Disable all transparency
+		w->DrawViewport();
+		_transparency_opt = to_backup;
+	} else {
+		w->DrawViewport();
+	}
+
+	/* Optionally shade the viewport. */
+	if (this->disp_flags & (ND_SHADE_GREY | ND_SHADE_DIMMED)) {
+		GfxFillRect(this->pos_x, this->pos_y, this->pos_x + this->current_x - 1, this->pos_y + this->current_y - 1,
+				(this->disp_flags & ND_SHADE_DIMMED) ? PALETTE_TO_TRANSPARENT : PALETTE_TO_STRUCT_GREY, FILLRECT_RECOLOUR);
+	}
 }
 
 Scrollbar *NWidgetViewport::FindScrollbar(Window *w, bool allow_next)
@@ -2439,29 +2458,11 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				break;
 			}
 
-			case WPT_RESIZE_PTR: {
-				NWidgetResizeBase *nwrb = dynamic_cast<NWidgetResizeBase *>(*dest);
-				if (nwrb != NULL) {
-					assert(parts->u.xy_ptr->x >= 0 && parts->u.xy_ptr->y >= 0);
-					nwrb->SetResize(parts->u.xy_ptr->x, parts->u.xy_ptr->y);
-				}
-				break;
-			}
-
 			case WPT_MINSIZE: {
 				NWidgetResizeBase *nwrb = dynamic_cast<NWidgetResizeBase *>(*dest);
 				if (nwrb != NULL) {
 					assert(parts->u.xy.x >= 0 && parts->u.xy.y >= 0);
 					nwrb->SetMinimalSize(parts->u.xy.x, parts->u.xy.y);
-				}
-				break;
-			}
-
-			case WPT_MINSIZE_PTR: {
-				NWidgetResizeBase *nwrb = dynamic_cast<NWidgetResizeBase *>(*dest);
-				if (nwrb != NULL) {
-					assert(parts->u.xy_ptr->x >= 0 && parts->u.xy_ptr->y >= 0);
-					nwrb->SetMinimalSize((uint)(parts->u.xy_ptr->x), (uint)(parts->u.xy_ptr->y));
 				}
 				break;
 			}
@@ -2477,15 +2478,6 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				if (nwc != NULL) {
 					nwc->widget_data = parts->u.data_tip.data;
 					nwc->tool_tip = parts->u.data_tip.tooltip;
-				}
-				break;
-			}
-
-			case WPT_DATATIP_PTR: {
-				NWidgetCore *nwc = dynamic_cast<NWidgetCore *>(*dest);
-				if (nwc != NULL) {
-					nwc->widget_data = parts->u.datatip_ptr->data;
-					nwc->tool_tip = parts->u.datatip_ptr->tooltip;
 				}
 				break;
 			}

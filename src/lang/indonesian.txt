@@ -248,10 +248,13 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Panjang:
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Area: {NUM} x {NUM}{}beda tinggi: {NUM} m
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
-STR_SORT_BY_POPULATION                                          :{BLACK}Populasi
-STR_SORT_BY_NAME                                                :{BLACK}Nama
-STR_SORT_BY_DATE                                                :{BLACK}Tanggal
+# These are used in buttons
+STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Populasi
+STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Nama
+STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Tanggal
+# These are used in dropdowns
+STR_SORT_BY_POPULATION                                          :Populasi
+STR_SORT_BY_NAME                                                :Nama
 STR_SORT_BY_PRODUCTION                                          :Produksi
 STR_SORT_BY_TYPE                                                :Jenis
 STR_SORT_BY_TRANSPORTED                                         :Terkirim
@@ -293,10 +296,10 @@ STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_GENERAL                     :{BLACK}Tampilka
 STR_TOOLBAR_TOOLTIP_DISPLAY_GRAPHS                              :{BLACK}Tampilkan grafik
 STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_LEAGUE                      :{BLACK}Tampilkan daftar perusahaan
 STR_TOOLBAR_TOOLTIP_FUND_CONSTRUCTION_OF_NEW                    :{BLACK}Danai pembangunan industri baru atau daftar semua industri
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}Tampilkan daftar kereta perusahaan
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_ROAD_VEHICLES       :{BLACK}Tampilkan daftar bus/truk perusahaan
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_SHIPS               :{BLACK}Tampilkan daftar kapal perusahaan
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_AIRCRAFT            :{BLACK}Tampilkan daftar pesawat perusahaan
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}Tampilkan daftar kereta perusahaan. Ctrl-klik untuk membuka-tutup daftar kendaraan.
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_ROAD_VEHICLES       :{BLACK}Tampilkan daftar bus/truk perusahaan. Ctrl-Klik untuk menampilkan daftar group atau kendaraan
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_SHIPS               :{BLACK}Tampilkan daftar kapal perusahaan.Ctrl-Klik untuk menampilkan daftar group atau kendaraan
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_AIRCRAFT            :{BLACK}Tampilkan daftar pesawat perusahaan. Ctrl-Klik untuk menampilkan daftar group atau kendaraan
 STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN                            :{BLACK}Perbesar tampilan
 STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT                           :{BLACK}Perkecil tampilan
 STR_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                        :{BLACK}Membangun rel kereta
@@ -565,12 +568,12 @@ STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Total Ni
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Kotak musik Jazz
-STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}Semua
-STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}Model lama
-STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}Model Baru
-STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}Jalan Ezy
-STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}Bebas 1
-STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}Bebas 2
+STR_MUSIC_PLAYLIST_ALL                                          :{TINYFONT}{BLACK}Semua
+STR_MUSIC_PLAYLIST_OLD_STYLE                                    :{TINYFONT}{BLACK}Model lama
+STR_MUSIC_PLAYLIST_NEW_STYLE                                    :{TINYFONT}{BLACK}Model Baru
+STR_MUSIC_PLAYLIST_EZY_STREET                                   :{TINYFONT}{BLACK}Jalan Ezy
+STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLACK}Bebas 1
+STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Bebas 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Volume Musik
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Volume Efek
 STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAKS
@@ -579,8 +582,9 @@ STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGR
 STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
-STR_MUSIC_TRACK_XTITLE                                          :{TINYFONT}{BLACK}Track{SETX 88}{BLACK}{TINYFONT}Titel
-STR_MUSIC_SHUFFLE                                               :{TINYFONT}Acak
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Track
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Titel
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Acak
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Program
 STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Kembali ke musik sebelumnya
 STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Lewati ke musik berikutnya
@@ -1304,7 +1308,7 @@ STR_INTRO_ONLINE_CONTENT                                        :{BLACK}Cari kon
 STR_INTRO_AI_SETTINGS                                           :{BLACK}Pengaturan AI
 STR_INTRO_QUIT                                                  :{BLACK}Keluar
 
-STR_INTRO_TOOLTIP_NEW_GAME                                      :{BLACK}Mulai permainan baru
+STR_INTRO_TOOLTIP_NEW_GAME                                      :{BLACK}Mulai permainan baru. Ctrl-klik untuk melewati pengaturan peta
 STR_INTRO_TOOLTIP_LOAD_GAME                                     :{BLACK}Membuka permainan yang telah disimpan
 STR_INTRO_TOOLTIP_PLAY_HEIGHTMAP                                :{BLACK}Mulai permainan baru, menggunakan heightmap sebagai datarannya
 STR_INTRO_TOOLTIP_PLAY_SCENARIO                                 :{BLACK}Mulai permainan baru, menggunakan skenario kustomisasi
@@ -1839,7 +1843,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Membangu
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_TRAIN_DEPOT_FOR_BUILDING         :{BLACK}Membangun depo kereta (untuk membuat dan perbaikan kereta)
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL_TO_WAYPOINT               :{BLACK}Ubah rel menjadi waypoint
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Membangun stasiun Kereta
-STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Membangun sinyal kereta
+STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Membangun sinyal kereta. Ctrl - berganti sinyal bendera-lampu.
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Membangun Jembatan rel
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Membangun terowongan kereta
 STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Membangun/bongkar rel kereta dan sinyal
@@ -2623,15 +2627,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Jual semua
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Ubah nama kelompok
 
 # Build vehicle window
-STR_BUILD_VEHICLE_TRAIN_RAIL_CAPTION                            :{WHITE}Kereta Api Baru
-STR_BUILD_VEHICLE_TRAIN_ELRAIL_CAPTION                          :{WHITE}Kereta listrik baru
-STR_BUILD_VEHICLE_TRAIN_MONORAIL_CAPTION                        :{WHITE}Monorel Baru
-STR_BUILD_VEHICLE_TRAIN_MAGLEV_CAPTION                          :{WHITE}Maglev Baru
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Kereta Api Baru
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Kereta listrik baru
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Monorel Baru
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Maglev Baru
 
-STR_BUILD_VEHICLE_TRAIN_ALL_CAPTION                             :{WHITE}Semua Kereta
-STR_BUILD_VEHICLE_ROAD_VEHICLE_CAPTION                          :{WHITE}Bus/truk Baru
-STR_BUILD_VEHICLE_SHIP_CAPTION                                  :{WHITE}Kapal Baru
-STR_BUILD_VEHICLE_AIRCRAFT_CAPTION                              :{WHITE}Buat Pesawat
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Semua Kereta
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Bus/truk Baru
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Kapal Baru
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Buat Pesawat
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Biaya: {GOLD}{CURRENCY}{BLACK} Berat: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Kecepatan: {GOLD}{VELOCITY}{BLACK} Daya: {GOLD}{POWER}
@@ -2651,30 +2655,30 @@ STR_PURCHASE_INFO_ALL_TYPES                                     :Semua jenis kar
 STR_PURCHASE_INFO_ALL_BUT                                       :Semua tapi tidak untuk {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Traksi Maks.: {GOLD}{FORCE}
 
-STR_BUILD_VEHICLE_TRAIN_LIST_TOOLTIP                            :{BLACK}Daftar pilihan kereta - klik pada kereta untuk menampilkan informasi
-STR_BUILD_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                     :{BLACK}Daftar pilihan bus/truk - klik pada kendaraan untuk menampilkan informasi
-STR_BUILD_VEHICLE_SHIP_LIST_TOOLTIP                             :{BLACK}Daftar kapal - klik pada kapal untuk informasi
-STR_BUILD_VEHICLE_AIRCRAFT_LIST_TOOLTIP                         :{BLACK}Daftar pilihan Pesawat - Klik pada pesawat untuk informasi
+STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP                              :{BLACK}Daftar pilihan kereta - klik pada kereta untuk menampilkan informasi
+STR_BUY_VEHICLE_ROAD_VEHICLE_LIST_TOOLTIP                       :{BLACK}Daftar pilihan bus/truk - klik pada kendaraan untuk menampilkan informasi
+STR_BUY_VEHICLE_SHIP_LIST_TOOLTIP                               :{BLACK}Daftar kapal - klik pada kapal untuk informasi
+STR_BUY_VEHICLE_AIRCRAFT_LIST_TOOLTIP                           :{BLACK}Daftar pilihan Pesawat - Klik pada pesawat untuk informasi
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_BUTTON                    :{BLACK}Membuat Kendaraan
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_BUTTON             :{BLACK}Membuat Kendaraan
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_BUTTON                     :{BLACK}Membuat Kapal
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_BUTTON                 :{BLACK}Buat Pesawat
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_BUTTON                        :{BLACK}Membuat Kendaraan
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_BUTTON                 :{BLACK}Membuat Kendaraan
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_BUTTON                         :{BLACK}Membuat Kapal
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_BUTTON                     :{BLACK}Buat Pesawat
 
-STR_BUILD_VEHICLE_TRAIN_BUILD_VEHICLE_TOOLTIP                   :{BLACK}Membuat kereta sesuai pilihan
-STR_BUILD_VEHICLE_ROAD_VEHICLE_BUILD_VEHICLE_TOOLTIP            :{BLACK}Membuat bus/truk yang dipilih
-STR_BUILD_VEHICLE_SHIP_BUILD_VEHICLE_TOOLTIP                    :{BLACK}Buat kapal yang dipilih
-STR_BUILD_VEHICLE_AIRCRAFT_BUILD_VEHICLE_TOOLTIP                :{BLACK}Membuat pesawat yang dipilih
+STR_BUY_VEHICLE_TRAIN_BUY_VEHICLE_TOOLTIP                       :{BLACK}Membuat kereta sesuai pilihan
+STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Membuat bus/truk yang dipilih
+STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Buat kapal yang dipilih
+STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Membuat pesawat yang dipilih
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_BUTTON                           :{BLACK}Ubah Nama
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                    :{BLACK}Ganti Nama
-STR_BUILD_VEHICLE_SHIP_RENAME_BUTTON                            :{BLACK}Ubah Nama
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_BUTTON                        :{BLACK}Ubah Nama
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Ubah Nama
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Ganti Nama
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Ubah Nama
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Ubah Nama
 
-STR_BUILD_VEHICLE_TRAIN_RENAME_TOOLTIP                          :{BLACK}Ubah nama jenis kereta api
-STR_BUILD_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                   :{BLACK}Ganti nama jenis bus/truk
-STR_BUILD_VEHICLE_SHIP_RENAME_TOOLTIP                           :{BLACK}Ubah nama jenis kapal
-STR_BUILD_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                       :{BLACK}Ubah nama jenis pesawat
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Ubah nama jenis kereta api
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Ganti nama jenis bus/truk
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Ubah nama jenis kapal
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Ubah nama jenis pesawat
 
 STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Ubah nama jenis kereta
 STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Ganti nama jenis bus/truk
@@ -2830,10 +2834,10 @@ STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Renovasi
 STR_VEHICLE_VIEW_TRAIN_REVERSE_TOOLTIP                          :{BLACK}Balikkan arah kereta api
 STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Paksa kendaraan untuk berbalik arah
 
-STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Tampilkan perintah kereta
+STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Tampilkan order kereta. Ctrl+Click untuk menampilkan jadwal kereta.
 STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Tampilkan perintah kendaraan
-STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Tampilkan perintah kapal
-STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Tampilkan order pesawat
+STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Tampilkan order kapal. Ctrl+Click untuk menampilkan jadwal kapal.
+STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Tampilkan order pesawat. Ctrl+Click untuk menampilkan jadwal pesawat
 
 STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Tampilkan informasi kereta
 STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Tampilkan detail bus/truk
@@ -2912,8 +2916,8 @@ STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Nilai Tr
 
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Jangka waktu servis: {LTBLUE}{COMMA} hari{BLACK}   Servis terakhir: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Jangka waktu servis: {LTBLUE}{COMMA} %{BLACK}   Servis terakhir: {LTBLUE}{DATE_LONG}
-STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Menambah jarak waktu servis
-STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Mengurangi jarak waktu servis
+STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Tambah jarak waktu servis dengan 10. Ctrl+Click untuk menambah jarak waktu servis dengan 5.
+STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Kurangi jarak waktu servis dengan 10. Ctrl+Click
 
 STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Nama kereta
 STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Nama kendaraan
@@ -3038,7 +3042,7 @@ STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Pergi ke
 STR_ORDER_GO_TO_NEAREST_DEPOT                                   :Depo terdekat
 STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Hangar terdekat
 STR_ORDER_CONDITIONAL                                           :Melompat ke perintah lain
-STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Masukkan perintah baru sebelum perintah yang terpilih, atau tambahkan pada akhir daftar
+STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Masukkan perintah baru sebelum perintah yang terpilih, atau tambahkan pada akhir daftar. Sambil menekan ctrl, perintah ke stasiun menjadi 'muat penuh sembarang', penunjuk jalan menjadi 'non-stop', dan depo menjadi 'servis'
 STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Masukkan perintah berikutnya
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Tampilkan semua kendaraan yang mempunyai perintah bersama.
@@ -3465,10 +3469,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Tidak da
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Tidak dapat mengirim kapal ke galangan...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Tidak dapat mengirim pesawat ke hangar...
 
-STR_ERROR_CAN_T_BUILD_TRAIN                                     :{WHITE}Tidak dapat membuat kendaraan...
-STR_ERROR_CAN_T_BUILD_ROAD_VEHICLE                              :{WHITE}Tidak dapat membuat bus/truk...
-STR_ERROR_CAN_T_BUILD_SHIP                                      :{WHITE}Tidak dapat membuat kapal...
-STR_ERROR_CAN_T_BUILD_AIRCRAFT                                  :{WHITE}Tidak dapat membuat pesawat ...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Tidak dapat membuat kendaraan...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Tidak dapat membuat bus/truk...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Tidak dapat membuat kapal...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Tidak dapat membuat pesawat ...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Tidak dapat mengubah nama jenis kereta...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Tidak bisa mengganti nama jenis bus/truk
@@ -3981,13 +3985,13 @@ STR_SILVER_CROSS                                                :{SILVER}{CROSS}
 STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
-STR_DATE_LONG_SMALL                                             :{BLACK}{TINYFONT}{DATE_LONG}
+STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
 STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
-STR_WHITE_STRINGN                                               :{WHITE}{STRING}
+STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
 STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}

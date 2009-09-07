@@ -37,26 +37,28 @@ enum SubsidyListWidgets {
 };
 
 struct SubsidyListWindow : Window {
-	SubsidyListWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
+	SubsidyListWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
-		this->FindWindowPlacementAndResize(desc);
+		this->InitNested(desc, window_number);
+		this->OnInvalidateData(0);
+		this->vscroll.SetCapacity(this->nested_array[SLW_PANEL]->current_y / this->resize.step_height);
 	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
 		if (widget != SLW_PANEL) return;
 
-		int y = pt.y - this->widget[SLW_PANEL].top - FONT_HEIGHT_NORMAL - 1; // Skip 'subsidies on offer' line
+		int y = (pt.y - this->nested_array[SLW_PANEL]->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
+		if (!IsInsideMM(y, 0, this->vscroll.GetCapacity())) return;
 
-		if (y < 0) return;
+		y += this->vscroll.GetPosition();
 
-		uint num = 0;
-
+		int num = 0;
 		const Subsidy *s;
 		FOR_ALL_SUBSIDIES(s) {
 			if (!s->IsAwarded()) {
-				y -= FONT_HEIGHT_NORMAL;
-				if (y < 0) {
+				y--;
+				if (y == 0) {
 					this->HandleClick(s);
 					return;
 				}
@@ -65,17 +67,17 @@ struct SubsidyListWindow : Window {
 		}
 
 		if (num == 0) {
-			y -= FONT_HEIGHT_NORMAL; // "None"
+			y--; // "None"
 			if (y < 0) return;
 		}
 
-		y -= 11; // "Services already subsidised:"
+		y -= 2; // "Services already subsidised:"
 		if (y < 0) return;
 
 		FOR_ALL_SUBSIDIES(s) {
 			if (s->IsAwarded()) {
-				y -= FONT_HEIGHT_NORMAL;
-				if (y < 0) {
+				y--;
+				if (y == 0) {
 					this->HandleClick(s);
 					return;
 				}
@@ -113,71 +115,122 @@ struct SubsidyListWindow : Window {
 
 	virtual void OnPaint()
 	{
-		YearMonthDay ymd;
-		const Subsidy *s;
-
 		this->DrawWidgets();
+	}
 
-		ConvertDateToYMD(_date, &ymd);
-
-		int right = this->widget[SLW_PANEL].right;
-		int y = this->widget[SLW_PANEL].top + 1;
-		int x = this->widget[SLW_PANEL].left + 1;
-
-		/* Section for drawing the offered subisidies */
-		DrawString(x, right, y, STR_SUBSIDIES_OFFERED_TITLE);
-		y += FONT_HEIGHT_NORMAL;
-		uint num = 0;
-
+	/**
+	 * Count the number of lines in this window.
+	 * @return the number of lines
+	 */
+	uint CountLines()
+	{
+		/* Count number of (non) awarded subsidies */
+		uint num_awarded = 0;
+		uint num_not_awarded = 0;
+		const Subsidy *s;
 		FOR_ALL_SUBSIDIES(s) {
 			if (!s->IsAwarded()) {
-				/* Displays the two offered towns */
-				SetupSubsidyDecodeParam(s, 1);
-				SetDParam(7, _date - ymd.day + s->remaining * 32);
-				DrawString(x + 2, right - 2, y, STR_SUBSIDIES_OFFERED_FROM_TO);
+				num_not_awarded++;
+			} else {
+				num_awarded++;
+			}
+		}
 
-				y += FONT_HEIGHT_NORMAL;
+		/* Count the 'none' lines */
+		if (num_awarded     == 0) num_awarded = 1;
+		if (num_not_awarded == 0) num_not_awarded = 1;
+
+		/* Offered, accepted and an empty line before the accepted ones. */
+		return 3 + num_awarded + num_not_awarded;
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		if (widget != SLW_PANEL) return;
+		Dimension d = maxdim(GetStringBoundingBox(STR_SUBSIDIES_OFFERED_TITLE), GetStringBoundingBox(STR_SUBSIDIES_SUBSIDISED_TITLE));
+
+		resize->height = d.height;
+
+		d.height *= 5;
+		d.width += padding.width + WD_FRAMERECT_RIGHT + WD_FRAMERECT_LEFT;
+		d.height += padding.height + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+		*size = maxdim(*size, d);
+	}
+
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != SLW_PANEL) return;
+
+		YearMonthDay ymd;
+		ConvertDateToYMD(_date, &ymd);
+
+		int right = r.right - WD_FRAMERECT_RIGHT;
+		int y = r.top + WD_FRAMERECT_TOP;
+		int x = r.left + WD_FRAMERECT_LEFT;
+
+		int pos = -this->vscroll.GetPosition();
+		const int cap = this->vscroll.GetCapacity();
+
+		/* Section for drawing the offered subisidies */
+		if (IsInsideMM(pos, 0, cap)) DrawString(x, right, y + pos * FONT_HEIGHT_NORMAL, STR_SUBSIDIES_OFFERED_TITLE);
+		pos++;
+
+		uint num = 0;
+		const Subsidy *s;
+		FOR_ALL_SUBSIDIES(s) {
+			if (!s->IsAwarded()) {
+				if (IsInsideMM(pos, 0, cap)) {
+					/* Displays the two offered towns */
+					SetupSubsidyDecodeParam(s, 1);
+					SetDParam(7, _date - ymd.day + s->remaining * 32);
+					DrawString(x, right, y + pos * FONT_HEIGHT_NORMAL, STR_SUBSIDIES_OFFERED_FROM_TO);
+				}
+				pos++;
 				num++;
 			}
 		}
 
 		if (num == 0) {
-			DrawString(x + 2, right - 2, y, STR_SUBSIDIES_NONE);
-			y += FONT_HEIGHT_NORMAL;
+			if (IsInsideMM(pos, 0, cap)) DrawString(x, right, y + pos * FONT_HEIGHT_NORMAL, STR_SUBSIDIES_NONE);
+			pos++;
 		}
 
 		/* Section for drawing the already granted subisidies */
-		DrawString(x, right, y + 1, STR_SUBSIDIES_SUBSIDISED_TITLE);
-		y += FONT_HEIGHT_NORMAL;
+		pos++;
+		if (IsInsideMM(pos, 0, cap)) DrawString(x, right, y + pos * FONT_HEIGHT_NORMAL, STR_SUBSIDIES_SUBSIDISED_TITLE);
+		pos++;
 		num = 0;
 
 		FOR_ALL_SUBSIDIES(s) {
 			if (s->IsAwarded()) {
-				SetupSubsidyDecodeParam(s, 1);
-				SetDParam(7, s->awarded);
-				SetDParam(8, _date - ymd.day + s->remaining * 32);
+				if (IsInsideMM(pos, 0, cap)) {
+					SetupSubsidyDecodeParam(s, 1);
+					SetDParam(7, s->awarded);
+					SetDParam(8, _date - ymd.day + s->remaining * 32);
 
-				/* Displays the two connected stations */
-				DrawString(x + 2, right - 2, y, STR_SUBSIDIES_SUBSIDISED_FROM_TO);
-
-				y += FONT_HEIGHT_NORMAL;
+					/* Displays the two connected stations */
+					DrawString(x, right, y + pos * FONT_HEIGHT_NORMAL, STR_SUBSIDIES_SUBSIDISED_FROM_TO);
+				}
+				pos++;
 				num++;
 			}
 		}
 
-		if (num == 0) DrawString(x + 2, right - 2, y, STR_SUBSIDIES_NONE);
+		if (num == 0) {
+			if (IsInsideMM(pos, 0, cap)) DrawString(x, right, y + pos * FONT_HEIGHT_NORMAL, STR_SUBSIDIES_NONE);
+			pos++;
+		}
 	}
-};
 
-static const Widget _subsidies_list_widgets[] = {
-{   WWT_CLOSEBOX, RESIZE_NONE,   COLOUR_BROWN,   0,  10,   0,  13, STR_BLACK_CROSS,       STR_TOOLTIP_CLOSE_WINDOW},                       // SLW_CLOSEBOX
-{    WWT_CAPTION, RESIZE_RIGHT,  COLOUR_BROWN,  11, 307,   0,  13, STR_SUBSIDIES_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},             // SLW_CAPTION
-{  WWT_STICKYBOX, RESIZE_LR,     COLOUR_BROWN, 308, 319,   0,  13, STR_NULL,              STR_TOOLTIP_STICKY},                              // SLW_STICKYBOX
-{      WWT_PANEL, RESIZE_RB,     COLOUR_BROWN,   0, 307,  14, 126, 0x0,                   STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER}, // SLW_PANEL
-{  WWT_SCROLLBAR, RESIZE_LRB,    COLOUR_BROWN, 308, 319,  14, 114, 0x0,                   STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},           // SLW_SCROLLBAR
-{  WWT_RESIZEBOX, RESIZE_LRTB,   COLOUR_BROWN, 308, 319, 115, 126, 0x0,                   STR_TOOLTIP_RESIZE},                              // SLW_RESIZEBOX
+	virtual void OnResize(Point delta)
+	{
+		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+	}
 
-{   WIDGETS_END},
+	virtual void OnInvalidateData(int data)
+	{
+		this->vscroll.SetCount(this->CountLines());
+	}
 };
 
 static const NWidgetPart _nested_subsidies_list_widgets[] = {
@@ -187,7 +240,7 @@ static const NWidgetPart _nested_subsidies_list_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN, SLW_STICKYBOX),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, SLW_PANEL), SetMinimalSize(308, 113), SetDataTip(0x0, STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER), SetResize(1, 1), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_BROWN, SLW_PANEL), SetDataTip(0x0, STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER), SetResize(1, 1), EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, SLW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_BROWN, SLW_RESIZEBOX),
@@ -196,10 +249,10 @@ static const NWidgetPart _nested_subsidies_list_widgets[] = {
 };
 
 static const WindowDesc _subsidies_list_desc(
-	WDP_AUTO, WDP_AUTO, 320, 127, 320, 127,
+	WDP_AUTO, WDP_AUTO, 320, 127, 500, 127,
 	WC_SUBSIDIES_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_subsidies_list_widgets, _nested_subsidies_list_widgets, lengthof(_nested_subsidies_list_widgets)
+	NULL, _nested_subsidies_list_widgets, lengthof(_nested_subsidies_list_widgets)
 );
 
 
