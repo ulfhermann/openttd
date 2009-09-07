@@ -26,6 +26,7 @@
 #include "string_func.h"
 
 #include "table/strings.h"
+#include "table/sprites.h"
 
 struct SignList {
 	typedef GUIList<const Sign *> GUISignList;
@@ -88,55 +89,66 @@ enum SignListWidgets {
 };
 
 struct SignListWindow : Window, SignList {
-	SignListWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
+	int text_offset; // Offset of the sign text relative to the left edge of the SLW_LIST widget.
+
+	SignListWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
-		this->vscroll.cap = 12;
-		this->resize.step_height = 10;
-		this->resize.height = this->height - 10 * 7; // minimum if 5 in the list
+		this->InitNested(desc, window_number);
 
+		this->vscroll.SetCapacity((this->nested_array[SLW_LIST]->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
+
+		/* Create initial list. */
 		this->signs.ForceRebuild();
-		this->signs.NeedResort();
-
-		this->FindWindowPlacementAndResize(desc);
+		this->signs.ForceResort();
+		this->BuildSignsList();
+		this->SortSignsList();
+		this->vscroll.SetCount(this->signs.Length());
 	}
 
 	virtual void OnPaint()
 	{
-		BuildSignsList();
-		SortSignsList();
-
-		SetVScrollCount(this, this->signs.Length());
-
-		SetDParam(0, this->vscroll.count);
 		this->DrawWidgets();
+	}
 
-		/* No signs? */
-		int y = this->widget[SLW_LIST].top + 2; // offset from top of widget
-		if (this->vscroll.count == 0) {
-			DrawString(this->widget[SLW_LIST].left + 2, this->widget[SLW_LIST].right, y, STR_STATION_LIST_NONE);
-			return;
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		switch (widget) {
+			case SLW_LIST: {
+				uint y = r.top + WD_FRAMERECT_TOP; // Offset from top of widget.
+				/* No signs? */
+				if (this->vscroll.GetCount() == 0) {
+					DrawString(r.left + WD_FRAMETEXT_LEFT, r.right, y, STR_STATION_LIST_NONE);
+					return;
+				}
+
+				/* At least one sign available. */
+				for (uint16 i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < this->vscroll.GetCount(); i++) {
+					const Sign *si = this->signs[i];
+
+					if (si->owner != OWNER_NONE) DrawCompanyIcon(si->owner, r.left + 4, y + 1);
+
+					SetDParam(0, si->index);
+					DrawString(r.left + this->text_offset, r.right - WD_FRAMETEXT_RIGHT, y, STR_SIGN_NAME, TC_YELLOW);
+					y += this->resize.step_height;
+				}
+				break;
+			}
 		}
+	}
 
-		/* Start drawing the signs */
-		for (uint16 i = this->vscroll.pos; i < this->vscroll.cap + this->vscroll.pos && i < this->vscroll.count; i++) {
-			const Sign *si = this->signs[i];
-
-			if (si->owner != OWNER_NONE) DrawCompanyIcon(si->owner, this->widget[SLW_LIST].left + 4, y + 1);
-
-			SetDParam(0, si->index);
-			DrawString(this->widget[SLW_LIST].left + 22, this->widget[SLW_LIST].right, y, STR_SIGN_NAME, TC_YELLOW);
-			y += 10;
-		}
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget == SLW_CAPTION) SetDParam(0, this->vscroll.GetCount());
 	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
 		if (widget == SLW_LIST) {
-			uint32 id_v = (pt.y - this->widget[SLW_LIST].top - 1) / 10;
+			uint id_v = (pt.y - this->nested_array[SLW_LIST]->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
 
-			if (id_v >= this->vscroll.cap) return;
-			id_v += this->vscroll.pos;
-			if (id_v >= this->vscroll.count) return;
+			if (id_v >= this->vscroll.GetCapacity()) return;
+			id_v += this->vscroll.GetPosition();
+			if (id_v >= this->vscroll.GetCount()) return;
 
 			const Sign *si = this->signs[id_v];
 			ScrollMainWindowToTile(TileVirtXY(si->x, si->y));
@@ -145,27 +157,33 @@ struct SignListWindow : Window, SignList {
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.cap += delta.y / 10;
+		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		if (widget == SLW_LIST) {
+			Dimension spr_dim = GetSpriteSize(SPR_PLAYER_ICON);
+			this->text_offset = WD_FRAMETEXT_LEFT + spr_dim.width + 2; // 2 pixels space between icon and the sign text.
+			resize->height = max<uint>(FONT_HEIGHT_NORMAL, GetSpriteSize(SPR_PLAYER_ICON).height);
+			Dimension d = {this->text_offset + MAX_LENGTH_SIGN_NAME_PIXELS + WD_FRAMETEXT_RIGHT, WD_FRAMERECT_TOP + 5 * resize->height + WD_FRAMERECT_BOTTOM};
+			*size = maxdim(*size, d);
+		}
 	}
 
 	virtual void OnInvalidateData(int data)
 	{
-		if (data == 0) {
+		if (data == 0) { // New or deleted sign.
 			this->signs.ForceRebuild();
-		} else {
+			this->BuildSignsList();
+			this->InvalidateWidget(SLW_CAPTION);
+			this->vscroll.SetCount(this->signs.Length());
+		} else { // Change of sign contents.
 			this->signs.ForceResort();
 		}
-	}
-};
 
-static const Widget _sign_list_widget[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,       STR_TOOLTIP_CLOSE_WINDOW},
-{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   345,     0,    13, STR_SIGN_LIST_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
-{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   346,   357,     0,    13, 0x0,                   STR_TOOLTIP_STICKY},
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_GREY,     0,   345,    14,   137, 0x0,                   STR_NULL},
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   346,   357,    14,   125, 0x0,                   STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   346,   357,   126,   137, 0x0,                   STR_TOOLTIP_RESIZE},
-{   WIDGETS_END},
+		this->SortSignsList();
+	}
 };
 
 static const NWidgetPart _nested_sign_list_widgets[] = {
@@ -175,7 +193,8 @@ static const NWidgetPart _nested_sign_list_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, SLW_STICKY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_GREY, SLW_LIST), SetMinimalSize(346, 124), SetResize(1, 10), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_GREY, SLW_LIST), SetMinimalSize(WD_FRAMETEXT_LEFT + 16 + MAX_LENGTH_SIGN_NAME_PIXELS + WD_FRAMETEXT_RIGHT, 50),
+							SetResize(1, 10), SetFill(true, false), EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_GREY, SLW_RESIZE),
@@ -184,10 +203,10 @@ static const NWidgetPart _nested_sign_list_widgets[] = {
 };
 
 static const WindowDesc _sign_list_desc(
-	WDP_AUTO, WDP_AUTO, 358, 138, 358, 138,
+	WDP_AUTO, WDP_AUTO, 0, 0, 358, 138,
 	WC_SIGN_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_sign_list_widget, _nested_sign_list_widgets, lengthof(_nested_sign_list_widgets)
+	NULL, _nested_sign_list_widgets, lengthof(_nested_sign_list_widgets)
 );
 
 
@@ -356,7 +375,7 @@ struct SignWindow : QueryStringBaseWindow, SignList {
 
 static const Widget _query_sign_edit_widgets[] = {
 { WWT_CLOSEBOX, RESIZE_NONE,  COLOUR_GREY,   0,  10,   0,  13, STR_BLACK_CROSS,             STR_TOOLTIP_CLOSE_WINDOW},   // QUERY_EDIT_SIGN_WIDGET_CLOSEBOX
-{  WWT_CAPTION, RESIZE_NONE,  COLOUR_GREY,  11, 259,   0,  13, STR_WHITE_STRINGN,           STR_NULL },                  // QUERY_EDIT_SIGN_WIDGET_CAPTION
+{  WWT_CAPTION, RESIZE_NONE,  COLOUR_GREY,  11, 259,   0,  13, STR_WHITE_STRING,            STR_NULL },                  // QUERY_EDIT_SIGN_WIDGET_CAPTION
 {    WWT_PANEL, RESIZE_NONE,  COLOUR_GREY,   0, 259,  14,  29, STR_NULL,                    STR_NULL },                  // QUERY_EDIT_SIGN_WIDGET_PANEL
 {  WWT_EDITBOX, RESIZE_NONE,  COLOUR_GREY,   2, 257,  16,  27, STR_EDIT_SIGN_SIGN_OSKTITLE, STR_NULL },                  // QUERY_EDIT_SIGN_WIDGET_TEXT (Text field)
 {  WWT_TEXTBTN, RESIZE_NONE,  COLOUR_GREY,   0,  60,  30,  41, STR_BUTTON_OK,               STR_NULL },                  // QUERY_EDIT_SIGN_WIDGET_OK
@@ -371,7 +390,7 @@ static const Widget _query_sign_edit_widgets[] = {
 static const NWidgetPart _nested_query_sign_edit_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_CAPTION), SetDataTip(STR_WHITE_STRINGN, STR_NULL),
+		NWidget(WWT_CAPTION, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_CAPTION), SetDataTip(STR_WHITE_STRING, STR_NULL),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_PANEL),
 		NWidget(WWT_EDITBOX, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_TEXT), SetMinimalSize(256, 12), SetDataTip(STR_EDIT_SIGN_SIGN_OSKTITLE, STR_NULL), SetPadding(2, 2, 2, 2),
