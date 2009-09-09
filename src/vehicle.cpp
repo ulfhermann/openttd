@@ -1469,7 +1469,6 @@ void Vehicle::CancelReservation(Station *st) {
 				this->cargo_payment = new CargoPayment(this);
 			}
 			DEBUG(misc, 1, "cancelling cargo reservation");
-			this->cargo_payment->route_profit -= v->reserved.Count(); // punish that a little
 			v->reserved.MoveToStation(&st->goods[v->cargo_type], v->reserved.Count(), OUFB_TRANSFER, INVALID_STATION, INVALID_STATION, this->cargo_payment);
 		}
 	}
