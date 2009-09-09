@@ -16,30 +16,35 @@
  *
  * \b 0.8.0
  *
+ * 0.8.0 is not yet released. The following changes are not set in stone yet.
+ *
  * API additions:
  * \li AIBaseStation
  * \li AIBuoyList
  * \li AIEventCompanyAskMerger
- * \li AIRail::RemoveRailWaypointTileRect
+ * \li AIIndustry::GetLastMonthTransportedPercentage
+ * \li AIRail::RemoveRailStationTileRectangle
+ * \li AIRail::RemoveRailWaypointTileRectangle
  * \li AISubsidy::SubsidyParticipantType
  * \li AISubsidy::GetSourceType
  * \li AISubsidy::GetSourceIndex
  * \li AISubsidy::GetDestinationType
  * \li AISubsidy::GetDestinationIndex
  * \li AITown::GetLastMonthTransportedPercentage
- * \li AIIndustry::GetLastMonthTransportedPercentage
+ * \li AIVehicleList_Depot
  *
  * API removals:
- * \li AIOrder::ChangeOrder
- * \li AISign::GetMaxSignID
- * \li AITile::GetHeight
- * \li AIBaseStation::WAYPOINT_INVALID
- * \li AISubsidy::SourceIsTown
- * \li AISubsidy::GetSource
- * \li AISubsidy::DestinationIsTown
- * \li AISubsidy::GetDestination
- * \li AITown::GetMaxProduction
- * \li AIWaypoint::WAYPOINT_INVALID
+ * \li AIOrder::ChangeOrder, use AIOrder::SetOrderFlags instead
+ * \li AIRail::RemoveRailStationTileRect, use AIRail::RemoveRailStationTileRectangle instead
+ * \li AIRail::RemoveRailWaypoint, use AIRail::RemoveRailWaypointTileRectangle instead
+ * \li AISign::GetMaxSignID, use AISignList instead
+ * \li AISubsidy::SourceIsTown, use AISubsidy::GetSourceType instead
+ * \li AISubsidy::GetSource, use AISubsidy::GetSourceIndex instead
+ * \li AISubsidy::DestinationIsTown, use AISubsidy::GetDestinationType instead
+ * \li AISubsidy::GetDestination, use AISubsidy::GetDestinationIndex instead
+ * \li AITile::GetHeight, use AITile::GetMinHeight/GetMaxHeight/GetCornerHeight instead
+ * \li AITown::GetMaxProduction, use AITown::GetLastMonthProduction instead
+ * \li AIWaypoint::WAYPOINT_INVALID, use AIBaseStation::STATION_INVALID instead
  *
  * Other changes:
  * \li The GetName / SetName / GetLocation functions were moved from AIStation
@@ -50,6 +55,20 @@
  * \li WaypointID was replaced by StationID. All WaypointIDs from previous
  *     savegames are invalid. Use STATION_INVALID instead of WAYPOINT_INVALID
  * \li AIVehicleList_Station now also works for waypoints
+ * \li Stations can be build over rail without signals that is in the right
+ *     direction for the to-be built station. It will also convert the rail if
+ *     the station's rail type supports the old type.
+ * \li GetAPIVersion() was added as function to info.nut. If it does not exist
+ *     API version 0.7 is assumed. This function should return the major and
+ *     minor number of the stable version of the API the AI is written against.
+ *     For 0.7.2 that would be 0.7, for 1.1.3 it would be 1.1, etc.
+ * \li The subsidy logic has changed. Subsidy is now awarded when cargo
+ *     originating from subsidy source is delivered to station that has subsidy
+ *     destination it its catchment area. One industry tile or one town house
+ *     is enough as long as station accepts the cargo. Awarded subsidies are no
+ *     longer bound to stations used for first delivery, any station can be
+ *     used for loading and unloading as long as cargo is transfered from
+ *     source to destination.
  *
  * \b 0.7.3
  *
