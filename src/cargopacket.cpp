@@ -137,9 +137,9 @@ void CargoList<LIST>::Truncate(uint max_remain)
 		CargoPacket * cp = Deref(it);
 		uint local_count = cp->count;
 		if (max_remain == 0) {
+			packets.erase(it++);
 			RemoveFromCache(cp);
 			delete cp;
-			packets.erase(it++);
 		} else {
 			if (local_count > max_remain) {
 				uint diff = local_count - max_remain;
@@ -162,10 +162,10 @@ uint CargoList<LIST>::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEnt
 	StationID source = p->source;
 	if (p->count <= remaining_unload) {
 		payment->PayFinalDelivery(p, p->Count());
+		packets.erase(c++);
 		RemoveFromCache(p);
 		loaded = p->count;
 		delete p;
-		packets.erase(c++);
 	} else {
 		payment->PayFinalDelivery(p, remaining_unload);
 		this->count -= remaining_unload;
@@ -181,7 +181,9 @@ uint CargoList<LIST>::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEnt
 template<class LIST>
 uint CargoList<LIST>::TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
 	CargoPacket *p = Deref(c);
-	p->feeder_share += payment->PayTransfer(p, p->count);
+	Money fs = payment->PayTransfer(p, p->count);
+	p->feeder_share += fs;
+	this->feeder_share += fs;
 	p->next = dest->UpdateFlowStatsTransfer(p->source, p->count, curr_station);
 	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
 	return MovePacket(&dest->cargo, c, remaining_unload);
@@ -405,6 +407,18 @@ void CargoList<LIST>::InvalidateCache()
 		days_in_transit += cp->days_in_transit * cp->count;
 		feeder_share    += cp->feeder_share;
 	}
+}
+
+template<class LIST>
+void CargoList<LIST>::ValidateCache() {
+	uint p_count = count;
+	Money p_feeder = feeder_share;
+	uint p_days = days_in_transit;
+
+	InvalidateCache();
+	assert(p_count == count);
+	assert(p_feeder == feeder_share);
+	assert(p_days == days_in_transit);
 }
 
 /* stupid workaround to make the compile recognize the template instances */

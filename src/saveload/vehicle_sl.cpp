@@ -254,6 +254,7 @@ void AfterLoadVehicles(bool part_of_load)
 		if (v->type == VEH_ROAD)  RoadVehicle::From(v)->rcache.first_engine = INVALID_ENGINE;
 
 		v->cargo.InvalidateCache();
+		v->reserved.InvalidateCache();
 	}
 
 	/* AfterLoadVehicles may also be called in case of NewGRF reload, in this

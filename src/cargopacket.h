@@ -235,6 +235,8 @@ public:
 	 */
 	void UpdateFlows(StationID next, GoodsEntry * ge);
 
+	/** Make sure the cache is consistent with the actual packets */
+	void ValidateCache();
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 
