@@ -46,6 +46,7 @@
 #include "waypoint_base.h"
 #include "economy_base.h"
 #include "core/pool_func.hpp"
+#include "debug.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -1099,10 +1100,14 @@ uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
-			uint cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
-			StationCargoList & list = st->goods[v->cargo_type].cargo;
-			if (list.MoveToVehicle(&v->reserved, cap, next_station, st->xy) > 0) {
-				SetBit(ret, v->cargo_type);
+			int cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
+			if (cap > 0) {
+				StationCargoList & list = st->goods[v->cargo_type].cargo;
+				if (list.MoveToVehicle(&v->reserved, cap, next_station, st->xy) > 0) {
+					SetBit(ret, v->cargo_type);
+				}
+			} else if (cap < 0) {
+				DEBUG(misc, 0, "too much cargo reserved!");
 			}
 		}
 	}
@@ -1234,6 +1239,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				loaded += v->reserved.MoveToVehicle(&v->cargo, cap, st->xy);
 			}
 			if (loaded < cap) {
+				assert(v->reserved.Count() == 0);
 				loaded += ge->cargo.MoveToVehicle(&v->cargo, cap - loaded, next_station, st->xy);
 			}
 			/* TODO: Regarding this, when we do gradual loading, we
