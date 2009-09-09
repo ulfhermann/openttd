@@ -118,9 +118,9 @@ void CargoList::Truncate(uint max_remain)
 		CargoPacket * cp = *it;
 		uint local_count = cp->count;
 		if (max_remain == 0) {
+			packets.erase(it++);
 			RemoveFromCache(cp);
 			delete cp;
-			packets.erase(it++);
 		} else {
 			if (local_count > max_remain) {
 				uint diff = local_count - max_remain;
