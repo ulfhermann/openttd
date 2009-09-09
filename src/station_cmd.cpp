@@ -662,7 +662,7 @@ CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
  * @param check_clear if clearing tile should be performed (in wich case, cost will be added)
  * @return the cost in case of success, or an error code if it failed.
  */
-CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandFlag flags, uint invalid_dirs, StationID *station, bool check_clear = true)
+CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandFlag flags, uint invalid_dirs, StationID *station, bool check_clear = true, RailType rt = INVALID_RAILTYPE)
 {
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	int allowed_z = -1;
@@ -723,6 +723,29 @@ CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandFlag fla
 				}
 			}
 		} else if (check_clear) {
+			/* Rail type is only valid when building a railway station; in station to
+			 * build isn't a rail station it's INVALID_RAILTYPE. */
+			if (rt != INVALID_RAILTYPE &&
+					IsPlainRailTile(tile_cur) && !HasSignals(tile_cur) &&
+					HasPowerOnRail(GetRailType(tile_cur), rt)) {
+				/* Allow overbuilding if the tile:
+				 *  - has rail, but no signals
+				 *  - it has exactly one track
+				 *  - the track is in line with the station
+				 *  - the current rail type has power on the to-be-built type (e.g. convert normal rail to el rail)
+				 */
+				TrackBits tracks = GetTrackBits(tile_cur);
+				Track track = RemoveFirstTrack(&tracks);
+				Track expected_track = HasBit(invalid_dirs, DIAGDIR_NE) ? TRACK_X : TRACK_Y;
+
+				if (tracks == TRACK_BIT_NONE && track == expected_track) {
+					CommandCost ret = DoCommand(tile_cur, 0, track, flags, CMD_REMOVE_SINGLE_RAIL);
+					if (CmdFailed(ret)) return ret;
+					cost.AddCost(ret);
+					/* With flags & ~DC_EXEC CmdLandscapeClear would fail since the rail still exists */
+					continue;
+				}
+			}
 			CommandCost ret = DoCommand(tile_cur, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 			if (CmdFailed(ret)) return ret;
 			cost.AddCost(ret);
@@ -975,7 +998,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 	/* If DC_EXEC is in flag, do not want to pass it to CheckFlatLandBelow, because of a nice bug
 	 * for detail info, see:
 	 * https://sourceforge.net/tracker/index.php?func=detail&aid=1029064&group_id=103924&atid=636365 */
-	CommandCost ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags & ~DC_EXEC, 5 << axis, _settings_game.station.nonuniform_stations ? &est : NULL);
+	CommandCost ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags & ~DC_EXEC, 5 << axis, _settings_game.station.nonuniform_stations ? &est : NULL, true, rt);
 	if (CmdFailed(ret)) return ret;
 	CommandCost cost(EXPENSES_CONSTRUCTION, ret.GetCost() + (numtracks * _price.train_station_track + _price.train_station_length) * plat_len);
 
@@ -1045,7 +1068,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 		/* Now really clear the land below the station
 		 * It should never return CMD_ERROR.. but you never know ;)
 		 * (a bit strange function name for it, but it really does clear the land, when DC_EXEC is in flags) */
-		ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags, 5 << axis, _settings_game.station.nonuniform_stations ? &est : NULL);
+		ret = CheckFlatLandBelow(tile_org, w_org, h_org, flags, 5 << axis, _settings_game.station.nonuniform_stations ? &est : NULL, true, rt);
 		if (CmdFailed(ret)) return ret;
 
 		st->train_station = new_location;
@@ -1194,14 +1217,16 @@ restart:
  * @param affected_stations the stations affected
  * @param flags the command flags
  * @param removal_cost the cost for removing the tile
+ * @param keep_rail whether to keep the rail of the station
  * @tparam T the type of station to remove
  * @return the number of cleared tiles or an error
  */
 template <class T>
-CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected_stations, DoCommandFlag flags, Money removal_cost)
+CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected_stations, DoCommandFlag flags, Money removal_cost, bool keep_rail)
 {
 	/* Count of the number of tiles removed */
 	int quantity = 0;
+	CommandCost total_cost(EXPENSES_CONSTRUCTION);
 
 	/* Do the action for every tile into the area */
 	TILE_LOOP(tile, ta.w, ta.h, ta.tile) {
@@ -1244,7 +1269,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 				}
 			}
 
-			if (st->facilities & FACIL_WAYPOINT) {
+			if (keep_rail) {
 				MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
 			} else {
 				DoClearSquare(tile);
@@ -1264,6 +1289,10 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 				for (; v->Next() != NULL; v = v->Next()) ;
 				if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
 			}
+		}
+		if (keep_rail) {
+			/* Don't refund the 'steel' of the track! */
+			total_cost.AddCost(-_price.remove_rail);
 		}
 	}
 
@@ -1287,7 +1316,8 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 		}
 	}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, quantity * removal_cost);
+	total_cost.AddCost(quantity * removal_cost);
+	return total_cost;
 }
 
 /** Remove a single tile from a rail station.
@@ -1295,7 +1325,8 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
  * @param start tile of station piece to remove
  * @param flags operation to perform
  * @param p1 start_tile
- * @param p2 unused
+ * @param p2 various bitstuffed elements
+ * - p2 = bit 0 - if set keep the rail
  * @param text unused
  * @return cost of operation or error
  */
@@ -1307,7 +1338,7 @@ CommandCost CmdRemoveFromRailStation(TileIndex start, DoCommandFlag flags, uint3
 	TileArea ta(start, end);
 	SmallVector<Station *, 4> affected_stations;
 
-	CommandCost ret = RemoveFromRailBaseStation(ta, affected_stations, flags, _price.remove_rail_station);
+	CommandCost ret = RemoveFromRailBaseStation(ta, affected_stations, flags, _price.remove_rail_station, HasBit(p2, 0));
 	if (ret.Failed()) return ret;
 
 	/* Do all station specific functions here. */
@@ -1328,7 +1359,8 @@ CommandCost CmdRemoveFromRailStation(TileIndex start, DoCommandFlag flags, uint3
  * @param start tile of waypoint piece to remove
  * @param flags operation to perform
  * @param p1 start_tile
- * @param p2 unused
+ * @param p2 various bitstuffed elements
+ * - p2 = bit 0 - if set keep the rail
  * @param text unused
  * @return cost of operation or error
  */
@@ -1340,7 +1372,7 @@ CommandCost CmdRemoveFromRailWaypoint(TileIndex start, DoCommandFlag flags, uint
 	TileArea ta(start, end);
 	SmallVector<Waypoint *, 4> affected_stations;
 
-	return RemoveFromRailBaseStation(ta, affected_stations, flags, _price.remove_train_depot);
+	return RemoveFromRailBaseStation(ta, affected_stations, flags, _price.remove_train_depot, HasBit(p2, 0));
 }
 
 
@@ -1896,7 +1928,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	}
 
 	Station *st = NULL;
-	CommandCost ret = FindJoiningStation(INVALID_STATION, station_to_join, HasBit(p2, 0), TileArea(tile, 1, 1), &st);
+	CommandCost ret = FindJoiningStation(INVALID_STATION, station_to_join, HasBit(p2, 0), TileArea(tile, w, h), &st);
 	if (CmdFailed(ret)) return ret;
 
 	/* Distant join */
