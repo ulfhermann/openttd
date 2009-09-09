@@ -555,9 +555,9 @@ STR_PERFORMANCE_DETAIL_MONEY                                    :{BLACK}Money:
 STR_PERFORMANCE_DETAIL_LOAN                                     :{BLACK}Loan:
 STR_PERFORMANCE_DETAIL_TOTAL                                    :{BLACK}Total:
 ############ End of order list
-STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Number of vehicles; this includes road vehicles, trains, ships and aircraft
-STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP                         :{BLACK}Number of station parts. Every part of a station (e.g. train station, bus stop, airport) is counted, even if they are connected as one station
-STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP                       :{BLACK}The profit of the vehicle with the lowest income (of all vehicles older than 2 years)
+STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Number of vehicles that turned a profit last year; this includes road vehicles, trains, ships and aircraft
+STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP                         :{BLACK}Number of recently-serviced station parts. Every part of a station (e.g. train station, bus stop, airport) is counted, even if they are connected as one station
+STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP                       :{BLACK}The profit of the vehicle with the lowest income (only vehicles older than two years are considered)
 STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP                       :{BLACK}Amount of cash made in the month with the lowest profit of the last 12 quarters
 STR_PERFORMANCE_DETAIL_MAX_INCOME_TOOLTIP                       :{BLACK}Amount of cash made in the month with the highest profit of the last 12 quarters
 STR_PERFORMANCE_DETAIL_DELIVERED_TOOLTIP                        :{BLACK}Units of cargo delivered in the last four quarters
@@ -1732,6 +1732,7 @@ STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Game unpaused (
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :leaving
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {RAW_STRING} has joined the game
+STR_NETWORK_MESSAGE_CLIENT_JOINED_ID                            :*** {RAW_STRING} has joined the game (Client #{2:NUM})
 STR_NETWORK_MESSAGE_CLIENT_COMPANY_JOIN                         :*** {RAW_STRING} has joined company #{2:NUM}
 STR_NETWORK_MESSAGE_CLIENT_COMPANY_SPECTATE                     :*** {RAW_STRING} has joined spectators
 STR_NETWORK_MESSAGE_CLIENT_COMPANY_NEW                          :*** {RAW_STRING} has started a new company (#{2:NUM})
@@ -1846,7 +1847,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Build ra
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Build railway signals. Ctrl toggles semaphore/light signals{}Dragging builds signals along a straight stretch of rail. Ctrl builds signals till the next junction{}Ctrl+Click toggles opening the signal selection window
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Build railway bridge
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Build railway tunnel
-STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Toggle build/remove for railway track and signals
+STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Toggle build/remove for railway track, signals, waypoints and stations. Holding Ctrl also removes rail from waypoints and stations
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Convert/Upgrade the type of rail
 
 # Rail depot construction window
