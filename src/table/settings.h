@@ -83,7 +83,7 @@ static bool UpdateClientConfigValues(int32 p1);
  */
 
 #define NSD_GENERAL(name, def, cmd, guiflags, min, max, interval, many, str, proc, load)\
-	{name, (const void*)(def), {cmd}, {guiflags}, min, max, interval, many, str, proc, load}
+	{name, (const void*)(def), {(byte)cmd}, {(byte)guiflags}, min, max, interval, many, str, proc, load}
 
 /* Macros for various objects to go in the configuration file.
  * This section is for global variables */
@@ -575,6 +575,13 @@ const SettingDesc _settings[] = {
 	 SDTC_BOOL(gui.station_show_coverage,                S,  0, false,                        STR_NULL,                                       NULL),
 	 SDTC_BOOL(gui.persistent_buildingtools,             S,  0, false,                        STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS,    NULL),
 	 SDTC_BOOL(gui.expenses_layout,                      S,  0, false,                        STR_CONFIG_SETTING_EXPENSES_LAYOUT,             RedrawScreen),
+
+/* For the dedicated build we'll enable dates in logs by default. */
+#ifdef DEDICATED
+	 SDTC_BOOL(gui.show_date_in_logs,                    S,  0,  true,                        STR_NULL,                                       NULL),
+#else
+	 SDTC_BOOL(gui.show_date_in_logs,                    S,  0, false,                        STR_NULL,                                       NULL),
+#endif
 
 	  SDTC_VAR(gui.console_backlog_timeout,  SLE_UINT16, S,  0,   100,       10,    65500, 0, STR_NULL,                                       NULL),
 	  SDTC_VAR(gui.console_backlog_length,   SLE_UINT16, S,  0,   100,       10,    65500, 0, STR_NULL,                                       NULL),
