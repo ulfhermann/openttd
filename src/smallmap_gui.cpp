@@ -886,7 +886,7 @@ public:
 				/* Check if the town sign is within bounds */
 				if (x + t->sign.width_small > dpi->left &&
 						x < dpi->left + dpi->width &&
-						y + 6 > dpi->top &&
+						y + FONT_HEIGHT_SMALL > dpi->top &&
 						y < dpi->top + dpi->height) {
 					/* And draw it. */
 					SetDParam(0, t->index);
@@ -964,9 +964,9 @@ public:
 	{
 		/* raise any pressed buttons */
 		this->SetWidgetsLoweredState(false, SM_WIDGET_ZOOM_OUT, SM_WIDGET_ZOOM_IN, SM_WIDGET_CENTERMAP, WIDGET_LIST_END);
-		this->InvalidateWidget(SM_WIDGET_ZOOM_OUT);
-		this->InvalidateWidget(SM_WIDGET_ZOOM_IN);
-		this->InvalidateWidget(SM_WIDGET_CENTERMAP);
+		this->SetWidgetDirty(SM_WIDGET_ZOOM_OUT);
+		this->SetWidgetDirty(SM_WIDGET_ZOOM_IN);
+		this->SetWidgetDirty(SM_WIDGET_CENTERMAP);
 	}
 
 	void ResizeLegend()

@@ -16,13 +16,16 @@
 #include "rev.h"
 #include "string_func.h"
 #include "strings_func.h"
-#include "network/network.h"
 #include "blitter/factory.hpp"
 #include "base_media_base.h"
 #include "music/music_driver.hpp"
 #include "sound/sound_driver.hpp"
 #include "video/video_driver.hpp"
 #include "saveload/saveload.h"
+
+#include <squirrel.h>
+#include "ai/ai_info.hpp"
+#include "company_base.h"
 
 #include <time.h>
 
@@ -93,6 +96,17 @@ char *CrashLog::LogConfiguration(char *buffer, const char *last) const
 			BaseSounds::GetUsedSet() == NULL ? "none" : BaseSounds::GetUsedSet()->name,
 			_video_driver == NULL ? "none" : _video_driver->GetName()
 	);
+
+	buffer += seprintf(buffer, last, "AI Configuration:\n");
+	const Company *c;
+	FOR_ALL_COMPANIES(c) {
+		if (c->ai_info == NULL) {
+			buffer += seprintf(buffer, last, " %2i: Human\n", (int)c->index);
+		} else {
+			buffer += seprintf(buffer, last, " %2i: %s (v%d)\n", (int)c->index, c->ai_info->GetName(), c->ai_info->GetVersion());
+		}
+	}
+	buffer += seprintf(buffer, last, "\n");
 
 	return buffer;
 }
@@ -197,15 +211,12 @@ bool CrashLog::WriteSavegame(char *filename, const char *filename_last) const
 	if (_m == NULL) return false;
 
 	try {
-		GamelogStartAction(GLAT_EMERGENCY);
 		GamelogEmergency();
-		GamelogStopAction();
 
 		seprintf(filename, filename_last, "%scrash.sav", _personal_dir);
 
-		/* Fake ourselves to be a network server so we don't get threaded saving */
-		_network_server = true;
-		return SaveOrLoad(filename, SL_SAVE, NO_DIRECTORY) == SL_OK;
+		/* Don't do a threaded saveload. */
+		return SaveOrLoad(filename, SL_SAVE, NO_DIRECTORY, false) == SL_OK;
 	} catch (...) {
 		return false;
 	}
