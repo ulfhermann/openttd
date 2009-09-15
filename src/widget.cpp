@@ -991,7 +991,7 @@ inline void NWidgetBase::StoreSizePosition(SizingType sizing, uint x, uint y, ui
  * Mark the widget as 'dirty' (in need of repaint).
  * @param w Window owning the widget.
  */
-void NWidgetBase::Invalidate(const Window *w) const
+void NWidgetBase::SetDirty(const Window *w) const
 {
 	int abs_left = w->left + this->pos_x;
 	int abs_top = w->top + this->pos_y;
@@ -1654,7 +1654,7 @@ void NWidgetSpacer::Draw(const Window *w)
 	/* Spacer widget is never visible. */
 }
 
-void NWidgetSpacer::Invalidate(const Window *w) const
+void NWidgetSpacer::SetDirty(const Window *w) const
 {
 	/* Spacer widget never need repainting. */
 }
@@ -2271,13 +2271,6 @@ void NWidgetLeaf::Draw(const Window *w)
 		GfxFillRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, _colour_gradient[this->colour & 0xF][2], FILLRECT_CHECKER);
 	}
 }
-
-void NWidgetLeaf::Invalidate(const Window *w) const
-{
-	if (this->type == WWT_EMPTY) return; // Don't repaint dummy widgets.
-	NWidgetBase::Invalidate(w);
-}
-
 
 Scrollbar *NWidgetLeaf::FindScrollbar(Window *w, bool allow_next)
 {
