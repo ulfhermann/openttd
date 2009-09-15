@@ -256,7 +256,7 @@ protected:
 		this->last_station = NULL;
 
 		/* Set the modified widget dirty */
-		this->InvalidateWidget(SLW_LIST);
+		this->SetWidgetDirty(SLW_LIST);
 	}
 
 public:
@@ -1452,7 +1452,7 @@ struct StationViewWindow : public Window {
 				HandleCargoWaitingClick<StationID>(display.filter, display.next_station);
 			}
 		}
-		this->InvalidateWidget(SVW_WAITING);
+		this->SetWidgetDirty(SVW_WAITING);
 	}
 
 	virtual void OnClick(Point pt, int widget)
