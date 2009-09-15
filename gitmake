@@ -32,9 +32,9 @@ master: gitmake-origin
 
 smallmap-zoom-out: master
 
-smallmap-zoom-in: zoomlevels smallmap-zoom-out
-
 zoomlevels: master
+
+smallmap-zoom-in: smallmap-zoom-out zoomlevels 
 
 cargodist: station-gui smallmap-stats warning-sign
 
