@@ -163,7 +163,7 @@ static RefitList *BuildRefitList(const Vehicle *v)
 
 	do {
 		uint32 cmask = EngInfo(u->engine_type)->refit_mask;
-		byte callbackmask = EngInfo(u->engine_type)->callbackmask;
+		byte callback_mask = EngInfo(u->engine_type)->callback_mask;
 
 		/* Skip this engine if it has no capacity */
 		if (u->cargo_cap == 0) continue;
@@ -174,7 +174,7 @@ static RefitList *BuildRefitList(const Vehicle *v)
 			if (!HasBit(cmask, cid)) continue;
 
 			/* Check the vehicle's callback mask for cargo suffixes */
-			if (HasBit(callbackmask, CBM_VEHICLE_CARGO_SUFFIX)) {
+			if (HasBit(callback_mask, CBM_VEHICLE_CARGO_SUFFIX)) {
 				/* Make a note of the original cargo type. It has to be
 				 * changed to test the cargo & subtype... */
 				CargoID temp_cargo = u->cargo_type;
@@ -495,7 +495,7 @@ uint ShowRefitOptionsList(int left, int right, int y, EngineID engine)
 /** Get the cargo subtype text from NewGRF for the vehicle details window. */
 StringID GetCargoSubtypeText(const Vehicle *v)
 {
-	if (HasBit(EngInfo(v->engine_type)->callbackmask, CBM_VEHICLE_CARGO_SUFFIX)) {
+	if (HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_CARGO_SUFFIX)) {
 		uint16 cb = GetVehicleCallback(CBID_VEHICLE_CARGO_SUFFIX, 0, 0, v->engine_type, v);
 		if (cb != CALLBACK_FAILED) {
 			return GetGRFStringID(GetEngineGRFID(v->engine_type), 0xD000 + cb);
@@ -1177,9 +1177,7 @@ void ShowVehicleListWindow(CompanyID company, VehicleType vehicle_type, TileInde
 	if (vehicle_type == VEH_AIRCRAFT) {
 		depot_airport_index = GetStationIndex(depot_tile);
 	} else {
-		Depot *depot = Depot::GetByTile(depot_tile);
-		if (depot == NULL) return; // no depot to show
-		depot_airport_index = depot->index;
+		depot_airport_index = GetDepotIndex(depot_tile);
 	}
 	ShowVehicleListWindowLocal(company, VLW_DEPOT_LIST, vehicle_type, depot_airport_index);
 }
