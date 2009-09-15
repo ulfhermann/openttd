@@ -149,8 +149,8 @@ void InvalidateCompanyWindows(const Company *company)
 {
 	CompanyID cid = company->index;
 
-	if (cid == _local_company) InvalidateWindow(WC_STATUS_BAR, 0);
-	InvalidateWindow(WC_FINANCES, cid);
+	if (cid == _local_company) SetWindowDirty(WC_STATUS_BAR, 0);
+	SetWindowDirty(WC_FINANCES, cid);
 }
 
 bool CheckCompanyHasMoney(CommandCost cost)
@@ -459,9 +459,9 @@ Company *DoStartupNewCompany(bool is_ai, CompanyID company = INVALID_COMPANY)
 
 	GeneratePresidentName(c);
 
-	InvalidateWindow(WC_GRAPH_LEGEND, 0);
-	InvalidateWindow(WC_TOOLBAR_MENU, 0);
-	InvalidateWindow(WC_CLIENT_LIST, 0);
+	SetWindowDirty(WC_GRAPH_LEGEND, 0);
+	SetWindowDirty(WC_TOOLBAR_MENU, 0);
+	SetWindowDirty(WC_CLIENT_LIST, 0);
 
 	if (is_ai && (!_networking || _network_server)) AI::StartNew(c->index);
 
@@ -595,7 +595,7 @@ void CompaniesYearlyLoop()
 	FOR_ALL_COMPANIES(c) {
 		memmove(&c->yearly_expenses[1], &c->yearly_expenses[0], sizeof(c->yearly_expenses) - sizeof(c->yearly_expenses[0]));
 		memset(&c->yearly_expenses[0], 0, sizeof(c->yearly_expenses[0]));
-		InvalidateWindow(WC_FINANCES, c->index);
+		SetWindowDirty(WC_FINANCES, c->index);
 	}
 
 	if (_settings_client.gui.show_finances && _local_company != COMPANY_SPECTATOR) {
@@ -676,13 +676,10 @@ void CompanyNewsInformation::FillData(const Company *c, const Company *other)
  * - p1 = 0 - create a new company, Which company (network) it will be is in p2
  * - p1 = 1 - create a new AI company
  * - p1 = 2 - delete a company. Company is identified by p2
- * - p1 = 3 - merge two companies together. merge #1 with #2. Identified by p2
  * @param p2 various functionality, dictated by p1
  * - p1 = 0 - ClientID of the newly created client
  * - p1 = 1 - CompanyID to start AI (INVALID_COMPANY for first available)
  * - p1 = 2 - CompanyID of the that is getting deleted
- * - p1 = 3 - #1 p2 = (bit  0-15) - company to merge (p2 & 0xFFFF)
- *          - #2 p2 = (bit 16-31) - company to be merged into ((p2>>16)&0xFFFF)
  * @todo In the case of p1=0, create new company, the clientID of the new client is in parameter
  * p2. This parameter is passed in at function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
  * on the server itself. First of all this is unbelievably ugly; second of all, well,
@@ -818,18 +815,6 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			CompanyID c_index = c->index;
 			delete c;
 			AI::BroadcastNewEvent(new AIEventCompanyBankrupt(c_index));
-		} break;
-
-		case 3: { // Merge a company (#1) into another company (#2), elimination company #1
-			CompanyID cid_old = (CompanyID)GB(p2,  0, 16);
-			CompanyID cid_new = (CompanyID)GB(p2, 16, 16);
-
-			if (!Company::IsValidID(cid_old) || !Company::IsValidID(cid_new)) return CMD_ERROR;
-
-			if (!(flags & DC_EXEC)) return CMD_ERROR;
-
-			ChangeOwnershipOfCompanyItems(cid_old, cid_new);
-			delete Company::Get(cid_old);
 		} break;
 
 		default: return CMD_ERROR;
