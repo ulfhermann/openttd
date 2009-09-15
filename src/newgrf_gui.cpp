@@ -23,6 +23,8 @@
 #include "widgets/dropdown_type.h"
 #include "network/network.h"
 #include "network/network_content.h"
+#include "sortlist_type.h"
+#include "querystring_gui.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -51,7 +53,7 @@ static int parse_intlist(const char *p, int *items, int maxitems)
 }
 
 
-static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint w, uint bottom, bool show_params)
+static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint right, uint bottom, bool show_params)
 {
 	char buff[256];
 
@@ -68,24 +70,24 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint w, uint bott
 		GetString(message, c->error->custom_message == NULL ? c->error->message : STR_JUST_RAW_STRING, lastof(message));
 
 		SetDParamStr(0, message);
-		y = DrawStringMultiLine(x, x + w, y, bottom, c->error->severity);
+		y = DrawStringMultiLine(x, right, y, bottom, c->error->severity);
 	}
 
 	/* Draw filename or not if it is not known (GRF sent over internet) */
 	if (c->filename != NULL) {
 		SetDParamStr(0, c->filename);
-		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_FILENAME);
+		y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_FILENAME);
 	}
 
 	/* Prepare and draw GRF ID */
 	snprintf(buff, lengthof(buff), "%08X", BSWAP32(c->grfid));
 	SetDParamStr(0, buff);
-	y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_GRF_ID);
+	y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_GRF_ID);
 
 	/* Prepare and draw MD5 sum */
 	md5sumToString(buff, lastof(buff), c->md5sum);
 	SetDParamStr(0, buff);
-	y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_MD5SUM);
+	y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_MD5SUM);
 
 	/* Show GRF parameter list */
 	if (show_params) {
@@ -96,25 +98,25 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint w, uint bott
 		} else {
 			SetDParam(0, STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE);
 		}
-		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_PARAMETER);
+		y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_PARAMETER);
 
 		/* Draw the palette of the NewGRF */
 		SetDParamStr(0, c->windows_paletted ? "Windows" : "DOS");
-		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_PALETTE);
+		y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_PALETTE);
 	}
 
 	/* Show flags */
-	if (c->status == GCS_NOT_FOUND)       y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_NOT_FOUND);
-	if (c->status == GCS_DISABLED)        y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_DISABLED);
-	if (HasBit(c->flags, GCF_COMPATIBLE)) y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_COMPATIBLE_LOADED);
+	if (c->status == GCS_NOT_FOUND)       y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_NOT_FOUND);
+	if (c->status == GCS_DISABLED)        y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_DISABLED);
+	if (HasBit(c->flags, GCF_COMPATIBLE)) y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_COMPATIBLE_LOADED);
 
 	/* Draw GRF info if it exists */
 	if (c->info != NULL && !StrEmpty(c->info)) {
 		SetDParam(0, STR_JUST_RAW_STRING);
 		SetDParamStr(1, c->info);
-		y = DrawStringMultiLine(x, x + w, y, bottom, STR_BLACK_STRING);
+		y = DrawStringMultiLine(x, right, y, bottom, STR_BLACK_STRING);
 	} else {
-		y = DrawStringMultiLine(x, x + w, y, bottom, STR_NEWGRF_SETTINGS_NO_INFO);
+		y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_NO_INFO);
 	}
 }
 
@@ -123,6 +125,9 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint w, uint bott
 enum AddNewGRFWindowWidgets {
 	ANGRFW_CLOSEBOX = 0,
 	ANGRFW_CAPTION,
+	ANGRFW_FILTER_PANEL,
+	ANGRFW_FILTER_TITLE,
+	ANGRFW_FILTER,
 	ANGRFW_BACKGROUND,
 	ANGRFW_GRF_LIST,
 	ANGRFW_SCROLLBAR,
@@ -135,51 +140,187 @@ enum AddNewGRFWindowWidgets {
 /**
  * Window for adding NewGRF files
  */
-struct NewGRFAddWindow : public Window {
+struct NewGRFAddWindow : public QueryStringBaseWindow {
+private:
+	typedef GUIList<const GRFConfig *> GUIGRFConfigList;
+
 	GRFConfig **list;
+
+	/** Runtime saved values */
+	static Listing last_sorting;
+	static Filtering last_filtering;
+
+	static GUIGRFConfigList::SortFunction * const sorter_funcs[];
+	static GUIGRFConfigList::FilterFunction * const filter_funcs[];
+	GUIGRFConfigList grfs;
+
 	const GRFConfig *sel;
+	int sel_pos;
 
-	NewGRFAddWindow(const WindowDesc *desc, GRFConfig **list) : Window(desc, 0)
+	enum {
+		EDITBOX_MAX_SIZE = 50,
+		EDITBOX_MAX_LENGTH = 300,
+	};
+
+	/**
+	 * (Re)build the grf as its amount has changed because
+	 * an item has been added or deleted for example
+	 */
+	void BuildGrfList()
 	{
-		this->list = list;
-		this->resize.step_height = 10;
+		if (!this->grfs.NeedRebuild()) return;
 
-		this->FindWindowPlacementAndResize(desc);
+		/* Create temporary array of grfs to use for listing */
+		this->grfs.Clear();
+
+		for (const GRFConfig *c = _all_grfs; c != NULL; c = c->next) {
+			*this->grfs.Append() = c;
+		}
+
+		this->FilterGrfList();
+		this->grfs.Compact();
+		this->grfs.RebuildDone();
+		this->SortGrfList();
+
+		this->vscroll.SetCount(this->grfs.Length()); // Update the scrollbar
+		this->ScrollToSelected();
+	}
+
+	/** Sort grfs by name. */
+	static int CDECL NameSorter(const GRFConfig * const *a, const GRFConfig * const *b)
+	{
+		const char *name_a = ((*a)->name != NULL) ? (*a)->name : "";
+		const char *name_b = ((*b)->name != NULL) ? (*b)->name : "";
+		int result = strcasecmp(name_a, name_b);
+		if (result == 0) {
+			result = strcasecmp((*a)->filename, (*b)->filename);
+		}
+		return result;
+	}
+
+	/** Sort the grf list */
+	void SortGrfList()
+	{
+		if (!this->grfs.Sort()) return;
+
+		/* update list position */
+		if (this->sel != NULL) {
+			this->sel_pos = this->grfs.FindIndex(this->sel);
+			if (this->sel_pos < 0) {
+				this->sel = NULL;
+			}
+		}
+	}
+
+	/** Filter grfs by tags/name */
+	static bool CDECL TagNameFilter(const GRFConfig * const *a, const char *filter_string)
+	{
+		if ((*a)->name     != NULL && strcasestr((*a)->name,     filter_string) != NULL) return true;
+		if ((*a)->filename != NULL && strcasestr((*a)->filename, filter_string) != NULL) return true;
+		if ((*a)->info     != NULL && strcasestr((*a)->info,     filter_string) != NULL) return true;
+		return false;
+	}
+
+	/** Filter the grf list */
+	void FilterGrfList()
+	{
+		if (!this->grfs.Filter(this->edit_str_buf)) return;
+	}
+
+	/** Make sure that the currently selected grf is within the visible part of the list */
+	void ScrollToSelected()
+	{
+		if (this->sel_pos >= 0) {
+			this->vscroll.ScrollTowards(this->sel_pos);
+		}
+	}
+
+public:
+	NewGRFAddWindow(const WindowDesc *desc, GRFConfig **list) : QueryStringBaseWindow(EDITBOX_MAX_SIZE)
+	{
+		this->InitNested(desc, 0);
+
+		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, EDITBOX_MAX_LENGTH);
+		this->SetFocusedWidget(ANGRFW_FILTER);
+
+		this->list = list;
+		this->grfs.SetListing(this->last_sorting);
+		this->grfs.SetFiltering(this->last_filtering);
+		this->grfs.SetSortFuncs(this->sorter_funcs);
+		this->grfs.SetFilterFuncs(this->filter_funcs);
+
+		this->OnInvalidateData(0);
+	}
+
+	virtual void OnInvalidateData(int data)
+	{
+		/* data == 0: NewGRFS were rescanned. All pointers to GrfConfigs are invalid.
+		 * data == 1: User interaction with this window: Filter or selection change. */
+		if (data == 0) {
+			this->sel = NULL;
+			this->sel_pos = -1;
+			this->grfs.ForceRebuild();
+		}
+
+		this->BuildGrfList();
+		this->SetWidgetDisabledState(ANGRFW_ADD, this->sel == NULL || this->sel->IsOpenTTDBaseGRF());
+		this->vscroll.SetCapacity((this->nested_array[ANGRFW_GRF_LIST]->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		switch (widget) {
+			case ANGRFW_GRF_LIST:
+				resize->height = FONT_HEIGHT_NORMAL;
+				size->height = max(size->height, WD_FRAMERECT_TOP + 10 * resize->height + WD_FRAMERECT_BOTTOM + padding.height + 2);
+				break;
+
+			case ANGRFW_GRF_INFO:
+				size->height = max(size->height, WD_FRAMERECT_TOP + 10 * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM + padding.height + 2);
+				break;
+		}
+	}
+
+	virtual void OnResize(Point delta)
+	{
+		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
 	}
 
 	virtual void OnPaint()
 	{
-		const GRFConfig *c;
-		const Widget *wl = &this->widget[ANGRFW_GRF_LIST];
-		int n = 0;
-
-		/* Count the number of GRFs */
-		for (c = _all_grfs; c != NULL; c = c->next) n++;
-
-		this->vscroll.SetCapacity((wl->bottom - wl->top) / 10);
-		this->vscroll.SetCount(n);
-
-		this->SetWidgetDisabledState(ANGRFW_ADD, this->sel == NULL || this->sel->IsOpenTTDBaseGRF());
 		this->DrawWidgets();
+		this->DrawEditBox(ANGRFW_FILTER);
+	}
 
-		GfxFillRect(wl->left + 1, wl->top + 1, wl->right, wl->bottom, 0xD7);
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		switch (widget) {
+			case ANGRFW_GRF_LIST: {
+				GfxFillRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, 0xD7);
 
-		uint y = wl->top + 1;
-		for (c = _all_grfs, n = 0; c != NULL && n < (this->vscroll.GetPosition() + this->vscroll.GetCapacity()); c = c->next, n++) {
-			if (n >= this->vscroll.GetPosition()) {
-				bool h = c == this->sel;
-				const char *text = (c->name != NULL && !StrEmpty(c->name)) ? c->name : c->filename;
+				uint y = r.top + WD_FRAMERECT_TOP;
+				int min_index = this->vscroll.GetPosition();
+				int max_index = min(min_index + this->vscroll.GetCapacity(), this->grfs.Length());
 
-				/* Draw selection background */
-				if (h) GfxFillRect(this->widget[ANGRFW_GRF_LIST].left + 1, y, this->widget[ANGRFW_GRF_LIST].right, y + 9, 156);
-				DrawString(this->widget[ANGRFW_GRF_LIST].left + 2, this->widget[ANGRFW_GRF_LIST].right - 2, y, text, h ? TC_WHITE : TC_ORANGE);
-				y += 10;
+				for (int i = min_index; i < max_index; i++)
+				{
+					const GRFConfig *c = this->grfs[i];
+					bool h = c == this->sel;
+					const char *text = (c->name != NULL && !StrEmpty(c->name)) ? c->name : c->filename;
+
+					/* Draw selection background */
+					if (h) GfxFillRect(r.left + 1, y, r.right - 1, y + this->resize.step_height - 1, 156);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, text, h ? TC_WHITE : TC_ORANGE);
+					y += this->resize.step_height;
+				}
+				break;
 			}
-		}
 
-		if (this->sel != NULL) {
-			const Widget *wi = &this->widget[ANGRFW_GRF_INFO];
-			ShowNewGRFInfo(this->sel, wi->left + 2, wi->top + 2, wi->right - wi->left - 2, wi->bottom, false);
+			case ANGRFW_GRF_INFO:
+				if (this->sel != NULL) {
+					ShowNewGRFInfo(this->sel, r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP, r.right - WD_FRAMERECT_RIGHT, r.bottom - WD_FRAMERECT_BOTTOM, false);
+				}
+				break;
 		}
 	}
 
@@ -193,12 +334,16 @@ struct NewGRFAddWindow : public Window {
 		switch (widget) {
 			case ANGRFW_GRF_LIST: {
 				/* Get row... */
-				const GRFConfig *c;
-				uint i = (pt.y - this->widget[ANGRFW_GRF_LIST].top) / 10 + this->vscroll.GetPosition();
+				uint i = (pt.y - this->nested_array[ANGRFW_GRF_LIST]->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height + this->vscroll.GetPosition();
 
-				for (c = _all_grfs; c != NULL && i > 0; c = c->next, i--) {}
-				this->sel = c;
-				this->SetDirty();
+				if (i < this->grfs.Length()) {
+					this->sel = this->grfs[i];
+					this->sel_pos = i;
+				} else {
+					this->sel = NULL;
+					this->sel_pos = -1;
+				}
+				InvalidateThisWindowData(this, 1);
 				break;
 			}
 
@@ -232,26 +377,89 @@ struct NewGRFAddWindow : public Window {
 				break;
 
 			case ANGRFW_RESCAN: // Rescan list
-				this->sel = NULL;
 				ScanNewGRFFiles();
-				this->SetDirty();
+				InvalidateThisWindowData(this, 0);
 				break;
 		}
 	}
+
+	virtual void OnMouseLoop()
+	{
+		this->HandleEditBox(ANGRFW_FILTER);
+	}
+
+	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
+	{
+		switch (keycode) {
+			case WKC_UP:
+				/* scroll up by one */
+				if (this->sel_pos > 0) this->sel_pos--;
+				break;
+
+			case WKC_DOWN:
+				/* scroll down by one */
+				if (this->sel_pos < (int)this->grfs.Length() - 1) this->sel_pos++;
+				break;
+
+			case WKC_PAGEUP:
+				/* scroll up a page */
+				this->sel_pos = (this->sel_pos < this->vscroll.GetCapacity()) ? 0 : this->sel_pos - this->vscroll.GetCapacity();
+				break;
+
+			case WKC_PAGEDOWN:
+				/* scroll down a page */
+				this->sel_pos = min(this->sel_pos + this->vscroll.GetCapacity(), (int)this->grfs.Length() - 1);
+				break;
+
+			case WKC_HOME:
+				/* jump to beginning */
+				this->sel_pos = 0;
+				break;
+
+			case WKC_END:
+				/* jump to end */
+				this->sel_pos = this->grfs.Length() - 1;
+				break;
+
+			default: {
+				/* Handle editbox input */
+				EventState state = ES_NOT_HANDLED;
+				if (this->HandleEditBoxKey(ANGRFW_FILTER, key, keycode, state) == HEBR_EDITING) {
+					this->OnOSKInput(ANGRFW_FILTER);
+				}
+				return state;
+			}
+		}
+
+		if (this->grfs.Length() == 0) this->sel_pos = -1;
+		if (this->sel_pos >= 0) {
+			this->sel = this->grfs[this->sel_pos];
+
+			this->ScrollToSelected();
+
+			InvalidateThisWindowData(this, 1);
+		}
+
+		return ES_HANDLED;
+	}
+
+	virtual void OnOSKInput(int wid)
+	{
+		this->grfs.SetFilterState(!StrEmpty(this->edit_str_buf));
+		this->grfs.ForceRebuild();
+		InvalidateThisWindowData(this, 1);
+	}
 };
 
-/* Widget definition for the add a newgrf window */
-static const Widget _newgrf_add_dlg_widgets[] = {
-{   WWT_CLOSEBOX,    RESIZE_NONE,  COLOUR_GREY,   0,  10,   0,  13, STR_BLACK_CROSS,         STR_TOOLTIP_CLOSE_WINDOW },             // ANGRFW_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_RIGHT,  COLOUR_GREY,  11, 306,   0,  13, STR_NEWGRF_ADD_CAPTION,  STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS },   // ANGRFW_CAPTION
-{      WWT_PANEL,      RESIZE_RB,  COLOUR_GREY,   0, 294,  14, 121, 0x0,                     STR_NULL },                             // ANGRFW_BACKGROUND
-{      WWT_INSET,      RESIZE_RB,  COLOUR_GREY,   2, 292,  16, 119, 0x0,                     STR_NULL },                             // ANGRFW_GRF_LIST
-{  WWT_SCROLLBAR,     RESIZE_LRB,  COLOUR_GREY, 295, 306,  14, 121, 0x0,                     STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST }, // ANGRFW_SCROLLBAR
-{      WWT_PANEL,     RESIZE_RTB,  COLOUR_GREY,   0, 306, 122, 224, 0x0,                     STR_NULL },                             // ANGRFW_GRF_INFO
-{ WWT_PUSHTXTBTN,     RESIZE_RTB,  COLOUR_GREY,   0, 146, 225, 236, STR_NEWGRF_ADD_FILE,     STR_NEWGRF_ADD_FILE_TOOLTIP },              // ANGRFW_ADD
-{ WWT_PUSHTXTBTN,    RESIZE_LRTB,  COLOUR_GREY, 147, 294, 225, 236, STR_NEWGRF_ADD_RESCAN_FILES, STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP },          // ANGRFW_RESCAN
-{  WWT_RESIZEBOX,    RESIZE_LRTB,  COLOUR_GREY, 295, 306, 225, 236, 0x0,                     STR_TOOLTIP_RESIZE },                    // ANGRFW_RESIZE
-{   WIDGETS_END },
+Listing NewGRFAddWindow::last_sorting = {false, 0};
+Filtering NewGRFAddWindow::last_filtering = {false, 0};
+
+NewGRFAddWindow::GUIGRFConfigList::SortFunction * const NewGRFAddWindow::sorter_funcs[] = {
+	&NameSorter,
+};
+
+NewGRFAddWindow::GUIGRFConfigList::FilterFunction * const NewGRFAddWindow::filter_funcs[] = {
+	&TagNameFilter,
 };
 
 static const NWidgetPart _nested_newgrf_add_dlg_widgets[] = {
@@ -259,26 +467,34 @@ static const NWidgetPart _nested_newgrf_add_dlg_widgets[] = {
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, ANGRFW_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_GREY, ANGRFW_CAPTION), SetDataTip(STR_NEWGRF_ADD_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, ANGRFW_FILTER_PANEL), SetResize(1, 0),
+		NWidget(NWID_HORIZONTAL), SetPadding(WD_TEXTPANEL_TOP, 0, WD_TEXTPANEL_BOTTOM, 0), SetPIP(WD_FRAMETEXT_LEFT, WD_FRAMETEXT_RIGHT, WD_FRAMETEXT_RIGHT),
+			NWidget(WWT_TEXT, COLOUR_GREY, ANGRFW_FILTER_TITLE), SetFill(false, true), SetDataTip(STR_LIST_FILTER_TITLE, STR_NULL),
+			NWidget(WWT_EDITBOX, COLOUR_GREY, ANGRFW_FILTER), SetMinimalSize(100, 12), SetResize(1, 0), SetDataTip(STR_LIST_FILTER_OSKTITLE, STR_LIST_FILTER_TOOLTIP),
+		EndContainer(),
+	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_GREY, ANGRFW_BACKGROUND),
-			NWidget(WWT_INSET, COLOUR_GREY, ANGRFW_GRF_LIST), SetMinimalSize(291, 104), SetResize(1, 10), SetPadding(2, 2, 2, 2), EndContainer(),
+			NWidget(WWT_INSET, COLOUR_GREY, ANGRFW_GRF_LIST), SetMinimalSize(290, 1), SetResize(1, 1), SetPadding(2, 2, 2, 2), EndContainer(),
 		EndContainer(),
 		NWidget(WWT_SCROLLBAR, COLOUR_GREY, ANGRFW_SCROLLBAR),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, ANGRFW_GRF_INFO), SetResize(1, 0), SetMinimalSize(307, 103), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, ANGRFW_GRF_INFO), SetMinimalSize(306, 1), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ANGRFW_ADD), SetMinimalSize(147, 12), SetResize(1, 0), SetDataTip(STR_NEWGRF_ADD_FILE, STR_NEWGRF_ADD_FILE_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ANGRFW_RESCAN), SetMinimalSize(148, 12), SetDataTip(STR_NEWGRF_ADD_RESCAN_FILES, STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP),
-		NWidget(WWT_RESIZEBOX, COLOUR_GREY, ANGRFW_RESIZE),
+		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ANGRFW_ADD), SetMinimalSize(147, 12), SetResize(1, 0), SetDataTip(STR_NEWGRF_ADD_FILE, STR_NEWGRF_ADD_FILE_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ANGRFW_RESCAN), SetMinimalSize(147, 12), SetResize(1, 0), SetDataTip(STR_NEWGRF_ADD_RESCAN_FILES, STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP),
+		EndContainer(),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY, ANGRFW_RESIZE), SetFill(false, true),
 	EndContainer(),
 };
 
 /* Window definition for the add a newgrf window */
 static const WindowDesc _newgrf_add_dlg_desc(
-	WDP_CENTER, WDP_CENTER, 307, 237, 307, 337,
+	WDP_CENTER, WDP_CENTER, 0, 0, 306, 347,
 	WC_SAVELOAD, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	_newgrf_add_dlg_widgets, _nested_newgrf_add_dlg_widgets, lengthof(_nested_newgrf_add_dlg_widgets)
+	NULL, _nested_newgrf_add_dlg_widgets, lengthof(_nested_newgrf_add_dlg_widgets)
 );
 
 static GRFPresetList _grf_preset_list;
@@ -476,7 +692,7 @@ struct NewGRFWindow : public Window {
 		if (this->sel != NULL) {
 			/* Draw NewGRF file info */
 			const Widget *wi = &this->widget[SNGRFS_NEWGRF_INFO];
-			ShowNewGRFInfo(this->sel, wi->left + 2, wi->top + 2, wi->right - wi->left - 2, wi->bottom, this->show_params);
+			ShowNewGRFInfo(this->sel, wi->left + 2, wi->top + 2, wi->right, wi->bottom, this->show_params);
 		}
 	}
 

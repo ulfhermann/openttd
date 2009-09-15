@@ -281,7 +281,7 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 		c->old_economy[0].company_value = CalculateCompanyValue(c);
 	}
 
-	InvalidateWindow(WC_PERFORMANCE_DETAIL, 0);
+	SetWindowDirty(WC_PERFORMANCE_DETAIL, 0);
 	return score;
 }
 
@@ -576,12 +576,12 @@ static void CompaniesGenStatistics()
 		CompanyCheckBankrupt(c);
 	}
 
-	InvalidateWindow(WC_INCOME_GRAPH, 0);
-	InvalidateWindow(WC_OPERATING_PROFIT, 0);
-	InvalidateWindow(WC_DELIVERED_CARGO, 0);
-	InvalidateWindow(WC_PERFORMANCE_HISTORY, 0);
-	InvalidateWindow(WC_COMPANY_VALUE, 0);
-	InvalidateWindow(WC_COMPANY_LEAGUE, 0);
+	SetWindowDirty(WC_INCOME_GRAPH, 0);
+	SetWindowDirty(WC_OPERATING_PROFIT, 0);
+	SetWindowDirty(WC_DELIVERED_CARGO, 0);
+	SetWindowDirty(WC_PERFORMANCE_HISTORY, 0);
+	SetWindowDirty(WC_COMPANY_VALUE, 0);
+	SetWindowDirty(WC_COMPANY_LEAGUE, 0);
 }
 
 /**
@@ -670,10 +670,10 @@ void RecomputePrices()
 		cs->current_payment = ((int64)cs->initial_payment * _economy.inflation_payment) >> 16;
 	}
 
-	InvalidateWindowClasses(WC_BUILD_VEHICLE);
-	InvalidateWindowClasses(WC_REPLACE_VEHICLE);
-	InvalidateWindowClasses(WC_VEHICLE_DETAILS);
-	InvalidateWindow(WC_PAYMENT_RATES, 0);
+	SetWindowClassesDirty(WC_BUILD_VEHICLE);
+	SetWindowClassesDirty(WC_REPLACE_VEHICLE);
+	SetWindowClassesDirty(WC_VEHICLE_DETAILS);
+	SetWindowDirty(WC_PAYMENT_RATES, 0);
 }
 
 static void CompaniesPayInterest()
@@ -883,7 +883,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, uint n
 		if (cargo_index >= lengthof(ind->accepts_cargo)) continue;
 
 		/* Check if industry temporarily refuses acceptance */
-		if (HasBit(indspec->callback_flags, CBM_IND_REFUSE_CARGO)) {
+		if (HasBit(indspec->callback_mask, CBM_IND_REFUSE_CARGO)) {
 			uint16 res = GetIndustryCallback(CBID_INDUSTRY_REFUSE_CARGO, 0, GetReverseCargoTranslation(cargo_type, indspec->grf_prop.grffile), ind, ind->type, ind->xy);
 			if (res == 0) continue;
 		}
@@ -957,7 +957,7 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 static void TriggerIndustryProduction(Industry *i)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(i->type);
-	uint16 callback = indspec->callback_flags;
+	uint16 callback = indspec->callback_mask;
 
 	i->was_cargo_delivered = true;
 	i->last_cargo_accepted_at = _date;
@@ -966,7 +966,7 @@ static void TriggerIndustryProduction(Industry *i)
 		if (HasBit(callback, CBM_IND_PRODUCTION_CARGO_ARRIVAL)) {
 			IndustryProductionCallback(i, 0);
 		} else {
-			InvalidateWindow(WC_INDUSTRY_VIEW, i->index);
+			SetWindowDirty(WC_INDUSTRY_VIEW, i->index);
 		}
 	} else {
 		for (uint cargo_index = 0; cargo_index < lengthof(i->incoming_cargo_waiting); cargo_index++) {
@@ -1144,7 +1144,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		/* The default loadamount for mail is 1/4 of the load amount for passengers */
 		if (v->type == VEH_AIRCRAFT && !Aircraft::From(v)->IsNormalAircraft()) load_amount = (load_amount + 3) / 4;
 
-		if (_settings_game.order.gradual_loading && HasBit(EngInfo(v->engine_type)->callbackmask, CBM_VEHICLE_LOAD_AMOUNT)) {
+		if (_settings_game.order.gradual_loading && HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_LOAD_AMOUNT)) {
 			uint16 cb_load_amount = GetVehicleCallback(CBID_VEHICLE_LOAD_AMOUNT, 0, 0, v->engine_type, v);
 			if (cb_load_amount != CALLBACK_FAILED && GB(cb_load_amount, 0, 8) != 0) load_amount = GB(cb_load_amount, 0, 8);
 		}
@@ -1354,13 +1354,13 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	}
 
 	if (result != 0) {
-		InvalidateWindow(GetWindowClassForVehicleType(v->type), v->owner);
-		InvalidateWindow(WC_VEHICLE_DETAILS, v->index);
+		SetWindowDirty(GetWindowClassForVehicleType(v->type), v->owner);
+		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
 
 		st->MarkTilesDirty(true);
 		v->MarkDirty();
 
-		if (result & 2) InvalidateWindow(WC_STATION_VIEW, last_visited);
+		if (result & 2) SetWindowDirty(WC_STATION_VIEW, last_visited);
 	}
 }
 
@@ -1495,7 +1495,7 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 				break;
 			}
 		}
-		InvalidateWindow(WC_COMPANY, p1);
+		SetWindowDirty(WC_COMPANY, p1);
 	}
 	return cost;
 }
@@ -1525,7 +1525,7 @@ CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1
 		OwnerByte *b = c->share_owners;
 		while (*b != _current_company) b++; // share owners is guaranteed to contain company
 		*b = COMPANY_SPECTATOR;
-		InvalidateWindow(WC_COMPANY, p1);
+		SetWindowDirty(WC_COMPANY, p1);
 	}
 	return CommandCost(EXPENSES_OTHER, cost);
 }
@@ -1553,8 +1553,11 @@ CommandCost CmdBuyCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	/* Do not allow companies to take over themselves */
 	if ((CompanyID)p1 == _current_company) return CMD_ERROR;
 
+	/* Get the cost here as the company is deleted in DoAcquireCompany. */
+	CommandCost cost(EXPENSES_OTHER, c->bankrupt_value);
+
 	if (flags & DC_EXEC) {
 		DoAcquireCompany(c);
 	}
-	return CommandCost(EXPENSES_OTHER, c->bankrupt_value);
+	return cost;
 }
