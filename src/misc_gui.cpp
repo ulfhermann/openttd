@@ -40,6 +40,7 @@
 #include "newgrf_cargo.h"
 #include "tilehighlight_func.h"
 #include "querystring_gui.h"
+#include "core/sort_func.hpp"
 
 #include "table/strings.h"
 
@@ -929,7 +930,7 @@ void CheckRedrawStationCoverage(const Window *w)
 {
 	if (_thd.dirty & 1) {
 		_thd.dirty &= ~1;
-		SetWindowDirty(w);
+		w->SetDirty();
 	}
 }
 
@@ -1140,25 +1141,25 @@ HandleEditBoxResult QueryString::HandleEditBoxKey(Window *w, int wid, uint16 key
 		case WKC_RETURN: case WKC_NUM_ENTER: return HEBR_CONFIRM;
 
 		case (WKC_CTRL | 'V'):
-			if (InsertTextBufferClipboard(&this->text)) w->InvalidateWidget(wid);
+			if (InsertTextBufferClipboard(&this->text)) w->SetWidgetDirty(wid);
 			break;
 
 		case (WKC_CTRL | 'U'):
 			DeleteTextBufferAll(&this->text);
-			w->InvalidateWidget(wid);
+			w->SetWidgetDirty(wid);
 			break;
 
 		case WKC_BACKSPACE: case WKC_DELETE:
-			if (DeleteTextBufferChar(&this->text, keycode)) w->InvalidateWidget(wid);
+			if (DeleteTextBufferChar(&this->text, keycode)) w->SetWidgetDirty(wid);
 			break;
 
 		case WKC_LEFT: case WKC_RIGHT: case WKC_END: case WKC_HOME:
-			if (MoveTextBufferPos(&this->text, keycode)) w->InvalidateWidget(wid);
+			if (MoveTextBufferPos(&this->text, keycode)) w->SetWidgetDirty(wid);
 			break;
 
 		default:
 			if (IsValidChar(key, this->afilter)) {
-				if (InsertTextBufferChar(&this->text, key)) w->InvalidateWidget(wid);
+				if (InsertTextBufferChar(&this->text, key)) w->SetWidgetDirty(wid);
 			} else {
 				state = Window::ES_NOT_HANDLED;
 			}
@@ -1170,7 +1171,7 @@ HandleEditBoxResult QueryString::HandleEditBoxKey(Window *w, int wid, uint16 key
 void QueryString::HandleEditBox(Window *w, int wid)
 {
 	if (HasEditBoxFocus(w, wid) && HandleCaret(&this->text)) {
-		w->InvalidateWidget(wid);
+		w->SetWidgetDirty(wid);
 		/* When we're not the OSK, notify 'our' OSK to redraw the widget,
 		 * so the caret changes appropriately. */
 		if (w->window_class != WC_OSK) {
@@ -1182,23 +1183,35 @@ void QueryString::HandleEditBox(Window *w, int wid)
 
 void QueryString::DrawEditBox(Window *w, int wid)
 {
-	const Widget *wi = &w->widget[wid];
+	int left;
+	int right;
+	int top;
+	int bottom;
+	if (w->widget == NULL) {
+		const NWidgetCore *wi = w->nested_array[wid];
 
-	assert((wi->type & WWT_MASK) == WWT_EDITBOX);
+		assert((wi->type & WWT_MASK) == WWT_EDITBOX);
 
-	GfxFillRect(wi->left + 1, wi->top + 1, wi->right - 1, wi->bottom - 1, 215);
+		left   = wi->pos_x;
+		right  = wi->pos_x + wi->current_x - 1;
+		top    = wi->pos_y;
+		bottom = wi->pos_y + wi->current_y - 1;
+	} else {
+		const Widget *wi = &w->widget[wid];
 
-	DrawPixelInfo dpi;
-	int delta;
+		assert((wi->type & WWT_MASK) == WWT_EDITBOX);
+
+		left   = wi->left;
+		right  = wi->right;
+		top    = wi->top;
+		bottom = wi->bottom;
+	}
+
+	GfxFillRect(left + 1, top + 1, right - 1, bottom - 1, 215);
 
 	/* Limit the drawing of the string inside the widget boundaries */
-	if (!FillDrawPixelInfo(&dpi,
-			wi->left + 4,
-			wi->top + 1,
-			wi->right - wi->left - 4,
-			wi->bottom - wi->top - 1)) {
-		return;
-	}
+	DrawPixelInfo dpi;
+	if (!FillDrawPixelInfo(&dpi, left + WD_FRAMETEXT_LEFT, top + WD_FRAMERECT_TOP, right - left - WD_FRAMETEXT_RIGHT, bottom - top - WD_FRAMERECT_BOTTOM)) return;
 
 	DrawPixelInfo *old_dpi = _cur_dpi;
 	_cur_dpi = &dpi;
@@ -1206,9 +1219,7 @@ void QueryString::DrawEditBox(Window *w, int wid)
 	/* We will take the current widget length as maximum width, with a small
 	 * space reserved at the end for the caret to show */
 	const Textbuf *tb = &this->text;
-
-	delta = (wi->right - wi->left) - tb->width - 10;
-	if (delta > 0) delta = 0;
+	int delta = min(0, (right - left) - tb->width - 10);
 
 	if (tb->caretxoffs + delta < 0) delta = -tb->caretxoffs;
 
@@ -1736,9 +1747,7 @@ static void MakeSortedSaveGameList()
 	}
 
 	uint s_amount = _fios_items.Length() - sort_start - sort_end;
-	if (s_amount > 0) {
-		qsort(_fios_items.Get(sort_start), s_amount, sizeof(FiosItem), compare_FiosItems);
-	}
+	QSortT(_fios_items.Get(sort_start), s_amount, CompareFiosItems);
 }
 
 extern void StartupEngines();
@@ -1923,7 +1932,7 @@ public:
 						/* SLD_SAVE_GAME, SLD_SAVE_SCENARIO copy clicked name to editbox */
 						ttd_strlcpy(this->text.buf, file->title, this->text.maxsize);
 						UpdateTextBufferSize(&this->text);
-						this->InvalidateWidget(SLWW_SAVE_OSK_TITLE);
+						this->SetWidgetDirty(SLWW_SAVE_OSK_TITLE);
 					}
 				} else {
 					/* Changed directory, need repaint. */
@@ -2069,7 +2078,7 @@ void ShowSaveLoadDialog(SaveLoadDialogMode mode)
 
 void RedrawAutosave()
 {
-	SetWindowDirty(FindWindowById(WC_STATUS_BAR, 0));
+	SetWindowDirty(WC_STATUS_BAR, 0);
 }
 
 void SetFiosType(const byte fiostype)
