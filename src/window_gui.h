@@ -497,25 +497,6 @@ public:
 	}
 
 	/**
-	 * Set focus within this window to the given widget. The function however doesn't change which window has focus.
-	 * @param widget_index Index of the widget in the window to set the focus to.
-	 * @return Focus has changed.
-	 */
-	inline bool SetFocusedWidget(byte widget_index)
-	{
-		if (widget_index >= this->widget_count || this->widget + widget_index == this->focused_widget) {
-			return false;
-		}
-
-		if (this->focused_widget != NULL) {
-			/* Repaint the widget that lost focus. A focused edit box may else leave the caret on the screen. */
-			this->InvalidateWidget(this->focused_widget - this->widget);
-		}
-		this->focused_widget = &this->widget[widget_index];
-		return true;
-	}
-
-	/**
 	 * Check if given widget is focused within this window
 	 * @param widget_index : index of the widget in the window to check
 	 * @return true if given widget is the focused window in this window
@@ -629,6 +610,8 @@ public:
 		return this->widget[widget_index].right - this->widget[widget_index].left + 1;
 	}
 
+	bool SetFocusedWidget(byte widget_index);
+
 	void HandleButtonClick(byte widget);
 	const Widget *GetWidgetOfType(WidgetType widget_type) const;
 
@@ -636,7 +619,7 @@ public:
 	void CDECL SetWidgetsDisabledState(bool disab_stat, int widgets, ...);
 	void CDECL SetWidgetsHiddenState(bool hidden_stat, int widgets, ...);
 	void CDECL SetWidgetsLoweredState(bool lowered_stat, int widgets, ...);
-	void InvalidateWidget(byte widget_index) const;
+	void SetWidgetDirty(byte widget_index) const;
 
 	void DrawWidgets() const;
 	void DrawViewport() const;

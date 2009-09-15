@@ -31,6 +31,7 @@
 #include "../sortlist_type.h"
 #include "../company_base.h"
 #include "../company_func.h"
+#include "../core/sort_func.hpp"
 
 #include "table/strings.h"
 #include "../table/sprites.h"
@@ -63,7 +64,7 @@ void SortNetworkLanguages()
 	}
 
 	/* Sort the strings (we don't move 'any' and the 'invalid' one) */
-	qsort(&_language_dropdown[1], NETLANG_COUNT - 1, sizeof(StringID), &StringIDSorter);
+	QSortT(_language_dropdown, NETLANG_COUNT - 1, &StringIDSorter);
 }
 
 enum {
@@ -1202,7 +1203,7 @@ struct NetworkStartServerWindow : public QueryStringBaseWindow {
 			strecpy(_settings_client.network.server_password, str, lastof(_settings_client.network.server_password));
 		} else {
 			int32 value = atoi(str);
-			this->InvalidateWidget(this->widget_id);
+			this->SetWidgetDirty(this->widget_id);
 			switch (this->widget_id) {
 				default: NOT_REACHED();
 				case NSSW_CLIENTS_TXT:    _settings_client.network.max_clients    = Clamp(value, 2, MAX_CLIENTS); break;
@@ -2203,7 +2204,7 @@ struct NetworkCompanyPasswordWindow : public QueryStringBaseWindow {
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
-		this->DrawEditBox(4);
+		this->DrawEditBox(NCPWW_PASSWORD);
 	}
 
 	virtual void OnClick(Point pt, int widget)

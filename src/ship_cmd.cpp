@@ -146,14 +146,14 @@ static void CheckIfShipNeedsService(Vehicle *v)
 	if (depot == NULL || DistanceManhattan(v->tile, depot->xy) > 12) {
 		if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 			v->current_order.MakeDummy();
-			InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
+			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 		}
 		return;
 	}
 
 	v->current_order.MakeGoToDepot(depot->index, ODTFB_SERVICE);
 	v->dest_tile = depot->xy;
-	InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
+	SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 }
 
 Money Ship::GetRunningCost() const
@@ -181,9 +181,9 @@ void Ship::OnNewDay()
 
 	SubtractMoneyFromCompanyFract(this->owner, cost);
 
-	InvalidateWindow(WC_VEHICLE_DETAILS, this->index);
+	SetWindowDirty(WC_VEHICLE_DETAILS, this->index);
 	/* we need this for the profit */
-	InvalidateWindowClasses(WC_SHIPS_LIST);
+	SetWindowClassesDirty(WC_SHIPS_LIST);
 }
 
 Trackdir Ship::GetVehicleTrackdir() const
@@ -212,8 +212,8 @@ static void HandleBrokenShip(Vehicle *v)
 		if (v->breakdowns_since_last_service != 255)
 			v->breakdowns_since_last_service++;
 
-		InvalidateWindow(WC_VEHICLE_VIEW, v->index);
-		InvalidateWindow(WC_VEHICLE_DETAILS, v->index);
+		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
+		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
 
 		if (!PlayVehicleSound(v, VSE_BREAKDOWN)) {
 			SndPlayVehicleFx((_settings_game.game_creation.landscape != LT_TOYLAND) ?
@@ -229,7 +229,7 @@ static void HandleBrokenShip(Vehicle *v)
 	if (!(v->tick_counter & 1)) {
 		if (!--v->breakdown_delay) {
 			v->breakdown_ctr = 0;
-			InvalidateWindow(WC_VEHICLE_VIEW, v->index);
+			SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 		}
 	}
 }
@@ -290,7 +290,7 @@ void Ship::UpdateDeltaXY(Direction direction)
 void RecalcShipStuff(Vehicle *v)
 {
 	v->UpdateViewport(false, true);
-	InvalidateWindow(WC_VEHICLE_DEPOT, v->tile);
+	SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
 }
 
 static const TileIndexDiffC _ship_leave_depot_offs[] = {
@@ -324,7 +324,7 @@ static void CheckShipLeaveDepot(Ship *v)
 	PlayShipSound(v);
 	VehicleServiceInDepot(v);
 	InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
-	InvalidateWindowClasses(WC_SHIPS_LIST);
+	SetWindowClassesDirty(WC_SHIPS_LIST);
 }
 
 static bool ShipAccelerate(Vehicle *v)
@@ -338,7 +338,7 @@ static bool ShipAccelerate(Vehicle *v)
 	if (spd != v->cur_speed) {
 		v->cur_speed = spd;
 		if (_settings_client.gui.vehicle_speed)
-			InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
+			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
 
 	/* Decrease somewhat when turning */
@@ -627,7 +627,7 @@ static void ShipController(Ship *v)
 				 * always skip ahead. */
 				if (v->current_order.IsType(OT_LEAVESTATION)) {
 					v->current_order.Free();
-					InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
+					SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 				} else if (v->dest_tile != 0) {
 					/* We have a target, let's see if we reached it... */
 					if (v->current_order.IsType(OT_GOTO_WAYPOINT) &&
@@ -820,7 +820,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 		InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
 		InvalidateWindowClassesData(WC_SHIPS_LIST, 0);
-		InvalidateWindow(WC_COMPANY, v->owner);
+		SetWindowDirty(WC_COMPANY, v->owner);
 		if (IsLocalCompany())
 			InvalidateAutoreplaceWindow(v->engine_type, v->group_id); // updates the replace Ship window
 
@@ -919,7 +919,7 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	if (new_cid >= NUM_CARGO || !CanRefitTo(v->engine_type, new_cid)) return CMD_ERROR;
 
 	/* Check the refit capacity callback */
-	if (HasBit(EngInfo(v->engine_type)->callbackmask, CBM_VEHICLE_REFIT_CAPACITY)) {
+	if (HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_REFIT_CAPACITY)) {
 		/* Back up the existing cargo type */
 		CargoID temp_cid = v->cargo_type;
 		byte temp_subtype = v->cargo_subtype;
@@ -949,8 +949,8 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		v->cargo_subtype = new_subtype;
 		v->colourmap = PAL_NONE; // invalidate vehicle colour map
 		v->InvalidateNewGRFCacheOfChain();
-		InvalidateWindow(WC_VEHICLE_DETAILS, v->index);
-		InvalidateWindow(WC_VEHICLE_DEPOT, v->tile);
+		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
+		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
 		InvalidateWindowClassesData(WC_SHIPS_LIST, 0);
 	}
 

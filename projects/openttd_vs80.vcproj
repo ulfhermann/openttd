@@ -2476,6 +2476,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\3rdparty\squirrel\sqstdlib\sqstdmath.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\3rdparty\squirrel\squirrel\sqtable.cpp"
 				>
 			</File>
