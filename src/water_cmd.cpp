@@ -141,8 +141,8 @@ CommandCost CmdBuildShipDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 		Depot *depot = new Depot(tile);
 		depot->town_index = ClosestTownFromTile(tile, UINT_MAX)->index;
 
-		MakeShipDepot(tile,  _current_company, DEPOT_NORTH, axis, wc1);
-		MakeShipDepot(tile2, _current_company, DEPOT_SOUTH, axis, wc2);
+		MakeShipDepot(tile,  _current_company, depot->index, DEPOT_NORTH, axis, wc1);
+		MakeShipDepot(tile2, _current_company, depot->index, DEPOT_SOUTH, axis, wc2);
 		MarkTileDirtyByTile(tile);
 		MarkTileDirtyByTile(tile2);
 	}
@@ -184,7 +184,7 @@ static CommandCost RemoveShipDepot(TileIndex tile, DoCommandFlag flags)
 
 	if (flags & DC_EXEC) {
 		/* Kill the depot, which is registered at the northernmost tile. Use that one */
-		delete Depot::GetByTile(tile2 < tile ? tile2 : tile);
+		delete Depot::GetByTile(tile);
 
 		MakeWaterKeepingClass(tile,  GetTileOwner(tile));
 		MakeWaterKeepingClass(tile2, GetTileOwner(tile2));
@@ -837,8 +837,8 @@ static void FloodVehicle(Vehicle *v)
 			return;
 		}
 
-		InvalidateWindowWidget(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		InvalidateWindow(WC_VEHICLE_DEPOT, v->tile);
+		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
+		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
 
 		AI::NewEvent(v->owner, new AIEventVehicleCrashed(v->index, v->tile, AIEventVehicleCrashed::CRASH_FLOODED));
 		SetDParam(0, pass);
