@@ -34,7 +34,7 @@ cargodist: station-gui smallmap-stats
 
 station-gui: cargomap
 
-smallmap-stats: flowmapping-vehload smallmap-zoom-in
+smallmap-stats: smallmap-zoom-in flowmapping-vehload
 
 texteff: master
 
