@@ -75,7 +75,13 @@ struct OskWindow : public Window {
 		this->parent = parent;
 		assert(parent != NULL);
 
-		this->caption = (parent->widget[button].data != STR_NULL) ? parent->widget[button].data : parent->caption;
+		if (parent->widget != NULL) {
+			this->caption = (parent->widget[button].data != STR_NULL) ? parent->widget[button].data : parent->caption;
+		}
+		if (parent->nested_array != NULL) {
+			assert(parent->nested_array[button] != NULL);
+			this->caption = (parent->nested_array[button]->widget_data != STR_NULL) ? parent->nested_array[button]->widget_data : parent->caption;
+		}
 
 		this->qs         = parent;
 		this->text_btn   = button;
@@ -239,20 +245,20 @@ struct OskWindow : public Window {
 		QueryStringBaseWindow *w = dynamic_cast<QueryStringBaseWindow*>(this->parent);
 		if (w != NULL) w->OnOSKInput(this->text_btn);
 
-		this->InvalidateWidget(OSK_WIDGET_TEXT);
-		if (this->parent != NULL) this->parent->InvalidateWidget(this->text_btn);
+		this->SetWidgetDirty(OSK_WIDGET_TEXT);
+		if (this->parent != NULL) this->parent->SetWidgetDirty(this->text_btn);
 	}
 
 	virtual void OnMouseLoop()
 	{
 		this->qs->HandleEditBox(this, OSK_WIDGET_TEXT);
 		/* make the caret of the parent window also blink */
-		this->parent->InvalidateWidget(this->text_btn);
+		this->parent->SetWidgetDirty(this->text_btn);
 	}
 
 	virtual void OnInvalidateData(int)
 	{
-		this->InvalidateWidget(OSK_WIDGET_TEXT);
+		this->SetWidgetDirty(OSK_WIDGET_TEXT);
 	}
 };
 
