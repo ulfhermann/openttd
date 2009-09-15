@@ -12,7 +12,7 @@ clean:
 
 %:
 	git checkout $@
-	git merge $(^F)
+	for branch in $(^F); do git merge $${branch}; done 
 	make -j4
 
 gitmake-origin: 
