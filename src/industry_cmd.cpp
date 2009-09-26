@@ -400,7 +400,7 @@ static Foundation GetFoundation_Industry(TileIndex tile, Slope tileh)
 	return FlatteningFoundation(tileh);
 }
 
-static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, uint32 *town_acc)
+static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
 {
 	IndustryGfx gfx = GetIndustryGfx(tile);
 	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
@@ -429,9 +429,30 @@ static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, ui
 		}
 	}
 
+	const Industry *ind = Industry::GetByTile(tile);
 	for (byte i = 0; i < lengthof(itspec->accepts_cargo); i++) {
 		CargoID a = accepts_cargo[i];
-		if (a != CT_INVALID) acceptance[a] += cargo_acceptance[i];
+		if (a == CT_INVALID || cargo_acceptance[i] == 0) continue; // work only with valid cargos
+
+		/* Add accepted cargo */
+		acceptance[a] += cargo_acceptance[i];
+
+		/* Maybe set 'always accepted' bit (if it's not set already) */
+		if (HasBit(*always_accepted, a)) continue;
+
+		bool accepts = false;
+		for (uint cargo_index = 0; cargo_index < lengthof(ind->accepts_cargo); cargo_index++) {
+			/* Test whether the industry itself accepts the cargo type */
+			if (ind->accepts_cargo[cargo_index] == a) {
+				accepts = true;
+				break;
+			}
+		}
+
+		if (accepts) continue;
+
+		/* If the industry itself doesn't accept this cargo, set 'always accepted' bit */
+		SetBit(*always_accepted, a);
 	}
 }
 
@@ -1651,6 +1672,7 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const Ind
  */
 static Industry *CreateNewIndustryHelper(TileIndex tile, IndustryType type, DoCommandFlag flags, const IndustrySpec *indspec, uint itspec_index, uint32 seed, Owner founder)
 {
+	assert(itspec_index < indspec->num_table);
 	const IndustryTileTable *it = indspec->table[itspec_index];
 	bool custom_shape_check = false;
 
@@ -1692,7 +1714,8 @@ static Industry *CreateNewIndustryHelper(TileIndex tile, IndustryType type, DoCo
  * - p1 = (bit  0 -  7) - industry type see build_industry.h and see industry.h
  * - p1 = (bit  8 - 15) - first layout to try
  * @param p2 seed to use for variable 8F
- * @return index of the newly create industry, or CMD_ERROR if it failed
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1702,7 +1725,7 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	const IndustrySpec *indspec = GetIndustrySpec(it);
 
 	/* Check if the to-be built/founded industry is available for this climate. */
-	if (!indspec->enabled) return CMD_ERROR;
+	if (!indspec->enabled || indspec->num_table == 0) return CMD_ERROR;
 
 	/* If the setting for raw-material industries is not on, you cannot build raw-material industries.
 	 * Raw material industries are industries that do not accept cargo (at least for now) */
@@ -1840,7 +1863,7 @@ void GenerateIndustries()
 			}
 
 			chance = ind_spc->appear_creation[_settings_game.game_creation.landscape];
-			if (ind_spc->enabled && chance > 0) {
+			if (ind_spc->enabled && chance > 0 && ind_spc->num_table > 0) {
 				/* once the chance of appearance is determind, it have to be scaled by
 				 * the difficulty level. The "chance" in question is more an index into
 				 * the _numof_industry_table,in fact */
@@ -1863,7 +1886,7 @@ void GenerateIndustries()
 			 * @todo :  Do we really have to pass chance as un-scaled value, since we've already
 			 *          processed that scaling above? No, don't think so.  Will find a way. */
 			ind_spc = GetIndustrySpec(it);
-			if (ind_spc->enabled) {
+			if (ind_spc->enabled && ind_spc->num_table > 0) {
 				chance = ind_spc->appear_creation[_settings_game.game_creation.landscape];
 				if (chance > 0) PlaceInitialIndustry(it, chance);
 			}
@@ -1920,7 +1943,7 @@ static void MaybeNewIndustry()
 		ind_spc = GetIndustrySpec(j);
 		byte chance = ind_spc->appear_ingame[_settings_game.game_creation.landscape];
 
-		if (!ind_spc->enabled || chance == 0) continue;
+		if (!ind_spc->enabled || chance == 0 || ind_spc->num_table == 0) continue;
 
 		/* If there is no Callback CBID_INDUSTRY_AVAILABLE or if this one did anot failed,
 		 * and if appearing chance for this landscape is above 0, this industry can be chosen */

@@ -348,7 +348,7 @@ static const WindowDesc _about_desc(
 	NULL, _nested_about_widgets, lengthof(_nested_about_widgets)
 );
 
-static const char *_credits[] = {
+static const char * const _credits[] = {
 	"Original design by Chris Sawyer",
 	"Original graphics by Simon Foster",
 	"",
@@ -383,7 +383,7 @@ static const char *_credits[] = {
 	"Special thanks go out to:",
 	"  Josef Drexler - For his great work on TTDPatch",
 	"  Marcin Grzegorczyk - For his documentation of TTD internals",
-	"  Petr Baudis (pasky) - Many patches, newGRF support",
+	"  Petr Baudi\xC5\xA1 (pasky) - Many patches, newGRF support",
 	"  Stefan Mei\xC3\x9Fner (sign_de) - For his work on the console",
 	"  Simon Sasburg (HackyKid) - Many bugfixes he has blessed us with",
 	"  Cian Duffy (MYOB) - BeOS port / manual writing",
@@ -416,7 +416,7 @@ struct AboutWindow : public Window {
 		this->InitNested(&_about_desc);
 
 		this->counter = 5;
-		this->text_position = this->nested_array[AW_FRAME]->pos_y + this->nested_array[AW_FRAME]->current_y;
+		this->text_position = this->GetWidget<NWidgetBase>(AW_FRAME)->pos_y + this->GetWidget<NWidgetBase>(AW_FRAME)->current_y;
 	}
 
 	virtual void SetStringParameters(int widget) const
@@ -468,8 +468,8 @@ struct AboutWindow : public Window {
 			this->counter = 5;
 			this->text_position--;
 			/* If the last text has scrolled start a new from the start */
-			if (this->text_position < (int)(this->nested_array[AW_FRAME]->pos_y - lengthof(_credits) * this->line_height)) {
-				this->text_position = this->nested_array[AW_FRAME]->pos_y + this->nested_array[AW_FRAME]->current_y;
+			if (this->text_position < (int)(this->GetWidget<NWidgetBase>(AW_FRAME)->pos_y - lengthof(_credits) * this->line_height)) {
+				this->text_position = this->GetWidget<NWidgetBase>(AW_FRAME)->pos_y + this->GetWidget<NWidgetBase>(AW_FRAME)->current_y;
 			}
 			this->SetDirty();
 		}
@@ -1188,7 +1188,7 @@ void QueryString::DrawEditBox(Window *w, int wid)
 	int top;
 	int bottom;
 	if (w->widget == NULL) {
-		const NWidgetCore *wi = w->nested_array[wid];
+		const NWidgetBase *wi = w->GetWidget<NWidgetBase>(wid);
 
 		assert((wi->type & WWT_MASK) == WWT_EDITBOX);
 
@@ -1211,7 +1211,7 @@ void QueryString::DrawEditBox(Window *w, int wid)
 
 	/* Limit the drawing of the string inside the widget boundaries */
 	DrawPixelInfo dpi;
-	if (!FillDrawPixelInfo(&dpi, left + WD_FRAMETEXT_LEFT, top + WD_FRAMERECT_TOP, right - left - WD_FRAMETEXT_RIGHT, bottom - top - WD_FRAMERECT_BOTTOM)) return;
+	if (!FillDrawPixelInfo(&dpi, left + WD_FRAMERECT_LEFT, top + WD_FRAMERECT_TOP, right - left - WD_FRAMERECT_RIGHT, bottom - top - WD_FRAMERECT_BOTTOM)) return;
 
 	DrawPixelInfo *old_dpi = _cur_dpi;
 	_cur_dpi = &dpi;
