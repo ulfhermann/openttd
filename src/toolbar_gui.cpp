@@ -827,7 +827,7 @@ static void ToolbarScenGenTown(Window *w)
 {
 	w->HandleButtonClick(TBSE_TOWNGENERATE);
 	SndPlayFx(SND_15_BEEP);
-	ShowBuildTownWindow();
+	ShowFoundTownWindow();
 }
 
 static void ToolbarScenGenIndustry(Window *w)
@@ -935,7 +935,7 @@ static void SplitToolbar(Window *w)
 		0,  1,  3,  4,  7,  8,  9, 10, 12, 25, 19, 20, 21, 22, 23, 26, 17, 18, 27,
 	};
 
-	static const byte *arrangements[] = { arrange14, arrange15, arrange16, arrange17, arrange18, arrange19 };
+	static const byte * const arrangements[] = { arrange14, arrange15, arrange16, arrange17, arrange18, arrange19 };
 
 	uint max_icons = max(TBP_TOOLBAR_MINBUTTON, (ToolBarProperties)((w->width + TBP_BUTTONWIDTH / 2) / TBP_BUTTONWIDTH));
 

@@ -242,6 +242,7 @@ static RefitList *BuildRefitList(const Vehicle *v)
  * @param pos position of the selected item in caller widow
  * @param rows number of rows(capacity) in caller window
  * @param delta step height in caller window
+ * @param right the right most position to draw
  * @return the refit option that is hightlighted, NULL if none
  */
 static RefitOption *DrawVehicleRefitWindow(const RefitList *list, int sel, uint pos, uint rows, uint delta, uint right)
@@ -433,6 +434,7 @@ static const WindowDesc _vehicle_refit_desc(
 /** Show the refit window for a vehicle
  * @param *v The vehicle to show the refit window for
  * @param order of the vehicle ( ? )
+ * @param parent the parent window of the refit window
  */
 void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *parent)
 {
@@ -782,9 +784,9 @@ static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y)
 /**
  * Draws an image of a vehicle chain
  * @param v Front vehicle
- + @param x x Position to start at
+ * @param x x Position to start at
  * @param y y Position to draw at
- * @param seletion Selected vehicle to draw a frame around
+ * @param selection Selected vehicle to draw a frame around
  * @param max_width Number of pixels space for drawing
  * @param skip Number of pixels to skip at the front (for scrolling)
  */
@@ -826,7 +828,7 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle)
 		} else if (v->group_id != DEFAULT_GROUP) {
 			/* The vehicle has no name, but is member of a group, so print group name */
 			SetDParam(0, v->group_id);
-			DrawString(left + 19, right, y, STR_TINT_GROUP, TC_BLACK);
+			DrawString(left + 19, right, y, STR_TINY_GROUP, TC_BLACK);
 		}
 
 		if (this->resize.step_height == PLY_WND_PRC__SIZE_OF_ROW_BIG) DrawSmallOrderList(v, left + 138, right, y);
@@ -1556,11 +1558,11 @@ static const NWidgetPart _nested_vehicle_view_widgets[] = {
 		EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_CENTER_MAIN_VIEH), SetMinimalSize(18, 18), SetDataTip(SPR_CENTRE_VIEW_VEHICLE, 0x0 /* filled later */),
-			NWidget(NWID_SELECTION),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, -1),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_GOTO_DEPOT), SetMinimalSize(18, 18), SetDataTip(0x0 /* filled later */, 0x0 /* filled later */),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_CLONE_VEH), SetMinimalSize(18, 18), SetDataTip(0x0 /* filled later */, 0x0 /* filled later */),
 			EndContainer(),
-			NWidget(NWID_SELECTION),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, -1),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_REFIT_VEH), SetMinimalSize(18, 18),
 												SetDataTip(SPR_REFIT_VEHICLE, 0x0 /* filled later */),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VVW_WIDGET_TURN_AROUND), SetMinimalSize(18, 18),
