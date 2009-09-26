@@ -943,26 +943,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Πλήρ
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Προσαρμοσμένο νόμισμα
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Ισοτιμία: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Ισοτιμία: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Μείωση του ποσού της ισοτιμίας σας για μία λίρα (£)
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Αύξηση του ποσού της ισοτιμίας σας για μία λίρα (£)
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Ρυθμίστε τη συναλλαγματική ισοτιμία του νομίσματος για μια λίρα (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Διαχωριστικό: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Διαχωριστικό: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Ορίστε το διαχωριστικό για το νόμισμά σας
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Πρόθεμα: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Πρόθεμα: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Ορίστε το πρόθεμα για το νόμισμά σας
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Επίθεμα: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Επίθεμα: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Ορίστε το επίθεμα για το νόμισμά σας
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Αλλαγή σε Ευρώ: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Αλλαγή σε Ευρώ: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Αλλαγή σε Ευρώ: {ORANGE}ποτέ
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Θέστε το χρόνο που γίνεται η μετάβαση σε Ευρώ
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Να γίνει η μετάβαση σε Ευρώ νωρίτερα
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Να γίνει η μετάβαση σε Ευρώ αργότερα
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Προεπισκόπιση: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Προεπισκόπιση: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 Λίρες (£) στο νόμισμά σας
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Αλλαγή παραμέτρων προσαρμοσμένου νομίσματος
 
@@ -3074,7 +3074,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Αυτή
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Αδύνατο να χτιστούν πόλεις
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Αδύνατο να μετονομαστεί η πόλη...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Αδύνατο να χτιστεί πόλη εδώ...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Αδύνατο να χτιστεί πόλη εδώ...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... πολύ κοντά στην άκρη του χάρτη
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... πολύ κοντά σε άλλη πόλη
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... πάρα πολλές πόλεις
@@ -3087,7 +3087,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Δεν �
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Αδύνατο να χτιστεί {G ο η το} {STRING} εδώ...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Αδύνατο να χτιστεί αυτός ο τύπος βιομηχανίας εδώ...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}... πολύ κοντά σε άλλη βιομηχανία
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}... πρέπει να χτιστεί πόλη πρώτα
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}... πρέπει να χτιστεί πόλη πρώτα
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}... επιτρέπεται μόνο μία ανά πόλη
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... μπορεί να χτιστεί μόνο σε πόλεις με πληθυσμό άνω των 1200
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... μπορεί να χτιστεί μόνο σε δασώδεις περιοχές
@@ -3769,7 +3769,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

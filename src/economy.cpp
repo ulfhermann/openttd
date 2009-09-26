@@ -855,7 +855,8 @@ static SmallIndustryList _cargo_delivery_destinations;
  * All cargo is delivered to the nearest (Manhattan) industry to the station sign, which is inside the acceptance rectangle and actually accepts the cargo.
  * @param st The station that accepted the cargo
  * @param cargo_type Type of cargo delivered
- * @param nun_pieces Amount of cargo delivered
+ * @param num_pieces Amount of cargo delivered
+ * @param source The source of the cargo
  * @return actually accepted pieces of cargo
  */
 static uint DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, uint num_pieces, IndustryID source)
@@ -903,6 +904,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, uint n
 /**
  * Delivers goods to industries/towns and calculates the payment
  * @param num_pieces amount of cargo delivered
+ * @param cargo_type the type of cargo that is delivered
  * @param dest Station the cargo has been unloaded
  * @param source_tile The origin of the cargo for distance calculation
  * @param days_in_transit Travel time
@@ -930,8 +932,8 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 	/* Give the goods to the industry. */
 	uint accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
 
-	/* If there are non-industries around accepting the cargo, accept it all */
-	if (HasBit(st->town_acc, cargo_type)) accepted = num_pieces;
+	/* If this cargo type is always accepted, accept all */
+	if (HasBit(st->always_accepted, cargo_type)) accepted = num_pieces;
 
 	/* Determine profit */
 	Money profit = GetTransportedGoodsIncome(accepted, DistanceManhattan(source_tile, st->xy), days_in_transit, cargo_type);
@@ -987,7 +989,6 @@ static void TriggerIndustryProduction(Industry *i)
 /**
  * Makes us a new cargo payment helper.
  * @param front The front of the train
- * @param destinations List to add the destinations of 'our' cargo to
  */
 CargoPayment::CargoPayment(Vehicle *front) :
 	front(front),
@@ -1069,7 +1070,7 @@ void PrepareUnload(Vehicle *front_v)
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
 
 	/* Start unloading in at the first possible moment */
-	front_v->load_unload_time_rem = 1;
+	front_v->time_counter = 1;
 
 	if ((front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
 		for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
@@ -1095,10 +1096,10 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
-	assert(v->load_unload_time_rem != 0);
+	assert(v->time_counter != 0);
 
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--v->load_unload_time_rem != 0) {
+	if (--v->time_counter != 0) {
 		if (_settings_game.order.improved_load && (v->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 			/* 'Reserve' this cargo for this vehicle, because we were first. */
 			for (; v != NULL; v = v->Next()) {
@@ -1116,7 +1117,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		/* The train reversed in the station. Take the "easy" way
 		 * out and let the train just leave as it always did. */
 		SetBit(v->vehicle_flags, VF_LOADING_FINISHED);
-		v->load_unload_time_rem = 1;
+		v->time_counter = 1;
 		return;
 	}
 
@@ -1347,7 +1348,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	}
 
 	/* Always wait at least 1, otherwise we'll wait 'infinitively' long. */
-	v->load_unload_time_rem = max(1, unloading_time);
+	v->time_counter = max(1, unloading_time);
 
 	if (completely_emptied) {
 		TriggerVehicle(v, VEHICLE_TRIGGER_EMPTY);
@@ -1460,6 +1461,8 @@ extern int GetAmountOwnedBy(const Company *c, Owner owner);
  * @param flags type of operation
  * @param p1 company to buy the shares from
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1505,6 +1508,8 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
  * @param flags type of operation
  * @param p1 company to sell the shares from
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1538,6 +1543,8 @@ CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1
  * @param flags type of operation
  * @param p1 company to buy up
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuyCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {

@@ -185,6 +185,8 @@ void RoadVehUpdateCache(RoadVehicle *v)
  * @param flags operation to perform
  * @param p1 bus/truck type being built (engine)
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -245,7 +247,7 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		v->value = cost.GetCost();
 //		v->day_counter = 0;
 //		v->next_order_param = v->next_order = 0;
-//		v->load_unload_time_rem = 0;
+//		v->time_counter = 0;
 //		v->progress = 0;
 
 //		v->overtaking = 0;
@@ -286,7 +288,7 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
 			u->rcache.cached_veh_length = GetRoadVehLength(u);
 			/* Cargo capacity is zero if and only if the vehicle cannot carry anything */
-			if (u->cargo_cap != 0) u->cargo_cap = GetVehicleProperty(u, 0x0F, u->cargo_cap);
+			if (u->cargo_cap != 0) u->cargo_cap = GetVehicleProperty(u, PROP_ROADVEH_CARGO_CAPACITY, u->cargo_cap);
 			v->InvalidateNewGRFCache();
 			u->InvalidateNewGRFCache();
 		}
@@ -340,6 +342,8 @@ bool RoadVehicle::IsStoppedInDepot() const
  * @param flags operation to perform
  * @param p1 vehicle ID to be sold
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSellRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -448,6 +452,8 @@ bool RoadVehicle::FindClosestDepot(TileIndex *location, DestinationID *destinati
  * @param p2 various bitmasked elements
  * - p2 bit 0-3 - DEPOT_ flags (see vehicle.h)
  * - p2 bit 8-10 - VLW flag (for mass goto depot)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSendRoadVehToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -468,6 +474,8 @@ CommandCost CmdSendRoadVehToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1
  * @param flags operation to perform
  * @param p1 vehicle ID to turn
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdTurnRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -663,6 +671,7 @@ static void HandleBrokenRoadVeh(RoadVehicle *v)
 		if (v->breakdowns_since_last_service != 255)
 			v->breakdowns_since_last_service++;
 
+		v->MarkDirty();
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
 
@@ -680,6 +689,7 @@ static void HandleBrokenRoadVeh(RoadVehicle *v)
 	if ((v->tick_counter & 1) == 0) {
 		if (--v->breakdown_delay == 0) {
 			v->breakdown_ctr = 0;
+			v->MarkDirty();
 			SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 		}
 	}
@@ -1299,7 +1309,7 @@ static Trackdir FollowPreviousRoadVehicle(const RoadVehicle *v, const RoadVehicl
 			 *    going over the trackdirs used for turning 90 degrees, i.e.
 			 *    TRACKDIR_{UPPER,RIGHT,LOWER,LEFT}_{N,E,S,W}.
 			 */
-			Trackdir reversed_turn_lookup[2][DIAGDIR_END] = {
+			static const Trackdir reversed_turn_lookup[2][DIAGDIR_END] = {
 				{ TRACKDIR_UPPER_W, TRACKDIR_RIGHT_N, TRACKDIR_LEFT_N,  TRACKDIR_UPPER_E },
 				{ TRACKDIR_RIGHT_S, TRACKDIR_LOWER_W, TRACKDIR_LOWER_E, TRACKDIR_LEFT_S  }};
 			dir = reversed_turn_lookup[prev->tile < tile ? 0 : 1][ReverseDiagDir(entry_dir)];
@@ -1992,7 +2002,8 @@ Trackdir RoadVehicle::GetVehicleTrackdir() const
  * - p2 = (bit 0-7) - the new cargo type to refit to
  * - p2 = (bit 8-15) - the new cargo subtype to refit to
  * - p2 = (bit 16) - refit only this vehicle
- * @return cost of refit or error
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2043,7 +2054,7 @@ CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			 * carry twice as much mail/goods as normal cargo, and four times as
 			 * many passengers
 			 */
-			capacity = GetVehicleProperty(v, 0x0F, e->u.road.capacity);
+			capacity = GetVehicleProperty(v, PROP_ROADVEH_CARGO_CAPACITY, e->u.road.capacity);
 			switch (old_cid) {
 				case CT_PASSENGERS: break;
 				case CT_MAIL:
