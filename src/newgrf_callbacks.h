@@ -18,9 +18,6 @@
  * bit is set in the callback flags/trigger for a vehicle, house,
  * industry, etc.
  * Names are formatted as CBID_<CLASS>_<CALLBACK>
- *
- * @note Do not forget to add 15 bits callbacks to the switch in
- *       newgrf_spritegroup.cpp (search for "15 bits callback").
  */
 enum CallbackID {
 	/** Set when using the callback resolve system, but not to resolve a callback. */
@@ -144,7 +141,7 @@ enum CallbackID {
 	CBID_VEHICLE_SOUND_EFFECT            = 0x33, // 15 bit callback
 
 	/** Return the vehicles this given vehicle can be "upgraded" to. */
-	CBID_VEHICLE_AUTOREPLACE_SELECTION   = 0x34, // 15 bit callback
+	CBID_VEHICLE_AUTOREPLACE_SELECTION   = 0x34, // 15 bit callback, not implemented
 
 	/** Called monthly on production changes, so it can be adjusted more frequently */
 	CBID_INDUSTRY_MONTHLYPROD_CHANGE     = 0x35, // 15 bit callback
@@ -192,7 +189,7 @@ enum CallbackID {
 	CBID_SOUNDS_AMBIENT_EFFECT           = 0x144, // 15 bit callback, not implemented
 
 	/** Called to calculate part of a station rating. */
-	CBID_CARGO_STATION_RATING_CALC       = 0x145, // 15 bit callback, not implemented
+	CBID_CARGO_STATION_RATING_CALC       = 0x145, // 15 bit callback
 
 	/** Allow signal sprites to be replaced dynamically. */
 	CBID_NEW_SIGNALS_SPRITE_DRAW         = 0x146, // 15 bit callback, not implemented
@@ -217,6 +214,12 @@ enum CallbackID {
 
 	/** Called on the Get Tile Description for an house tile. */
 	CBID_HOUSE_CUSTOM_NAME               = 0x14D, // 15 bit callback
+
+	/** Called to determine the type (if any) of foundation to draw for house tile. */
+	CBID_HOUSE_DRAW_FOUNDATIONS          = 0x14E, // 15 bit callback
+
+	/** Called to determine if one can alter the ground below a house tile */
+	CBID_HOUSE_AUTOSLOPE                 = 0x14F, // 15 bit callback
 };
 
 /**
@@ -228,7 +231,7 @@ enum VehicleCallbackMask {
 	CBM_VEHICLE_LENGTH         = 1, ///< Vehicle length (trains and road vehicles)
 	CBM_VEHICLE_LOAD_AMOUNT    = 2, ///< Load amount
 	CBM_VEHICLE_REFIT_CAPACITY = 3, ///< Cargo capacity after refit
-	CBM_VEHICLE_ARTIC_ENGINE   = 4, ///< Add articulated engines (trains only)
+	CBM_VEHICLE_ARTIC_ENGINE   = 4, ///< Add articulated engines (trains and road vehicles)
 	CBM_VEHICLE_CARGO_SUFFIX   = 5, ///< Show suffix after cargo name
 	CBM_VEHICLE_COLOUR_REMAP   = 6, ///< Change colour mapping of vehicle
 	CBM_VEHICLE_SOUND_EFFECT   = 7, ///< Vehicle uses custom sound effects
@@ -260,13 +263,15 @@ enum HouseCallbackMask {
 	CBM_HOUSE_ACCEPT_CARGO              =  8, ///< decides accepted types
 	CBM_HOUSE_PRODUCE_CARGO             =  9, ///< custom cargo production
 	CBM_HOUSE_DENY_DESTRUCTION          = 10, ///< conditional protection
+	CBM_HOUSE_DRAW_FOUNDATIONS          = 11, ///< decides if default foundations need to be drawn
+	CBM_HOUSE_AUTOSLOPE                 = 12, ///< decides allowance of autosloping
 };
 
 /**
  * Callback masks for canals.
  */
 enum CanalCallbackMask {
-	CBM_CANAL_SPRITE_OFFSET       = 1, ///< Enable add sprite offset callback
+	CBM_CANAL_SPRITE_OFFSET       = 0, ///< Enable add sprite offset callback
 };
 
 /**

@@ -624,10 +624,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\namegen.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\network\network.cpp"
 				>
 			</File>
@@ -749,6 +745,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\tile_map.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\townname.cpp"
 				>
 			</File>
 			<File
@@ -1152,10 +1152,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\namegen_func.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\network\network.h"
 				>
 			</File>
@@ -1241,6 +1237,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\newgrf_industrytiles.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_properties.h"
 				>
 			</File>
 			<File
@@ -1557,6 +1557,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\town.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\townname_func.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\townname_type.h"
 				>
 			</File>
 			<File
@@ -2276,10 +2284,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\table\namegen.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\table\palette_convert.h"
 				>
 			</File>
@@ -2321,6 +2325,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\..\objs\langs\table\strings.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\townname.h"
 				>
 			</File>
 			<File
@@ -2773,6 +2781,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\ai\api\ai_industrytypelist.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\ai\api\ai_info_docs.hpp"
 				>
 			</File>
 			<File

@@ -163,7 +163,6 @@ void UpdateAllTownVirtCoords();
 void InitializeTown();
 void ShowTownViewWindow(TownID town);
 void ExpandTown(Town *t);
-Town *CreateRandomTown(uint attempts, TownSize size, bool city, TownLayout layout);
 
 enum TownRatingCheckType {
 	ROAD_REMOVE         = 0,
@@ -213,7 +212,32 @@ HouseZonesBits GetTownRadiusGroup(const Town *t, TileIndex tile);
 void SetTownRatingTestMode(bool mode);
 uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t);
 bool GenerateTowns(TownLayout layout);
-bool GenerateTownName(uint32 *townnameparts);
+
+
+/** Town actions of a company. */
+enum TownActions {
+	TACT_NONE             = 0x00, ///< Empty action set.
+
+	TACT_ADVERTISE_SMALL  = 0x01, ///< Small advertising campaign.
+	TACT_ADVERTISE_MEDIUM = 0x02, ///< Medium advertising campaign.
+	TACT_ADVERTISE_LARGE  = 0x04, ///< Large advertising campaign.
+	TACT_ROAD_REBUILD     = 0x08, ///< Rebuild the roads.
+	TACT_BUILD_STATUE     = 0x10, ///< Build a statue.
+	TACT_FOUND_BUILDINGS  = 0x20, ///< Found new buildings.
+	TACT_BUY_RIGHTS       = 0x40, ///< Buy exclusive transport rights.
+	TACT_BRIBE            = 0x80, ///< Try to bribe the counsil.
+
+	TACT_COUNT            = 8,    ///< Number of available town actions.
+
+	TACT_ADVERTISE        = TACT_ADVERTISE_SMALL | TACT_ADVERTISE_MEDIUM | TACT_ADVERTISE_LARGE, ///< All possible advertising actions.
+	TACT_CONSTRUCTION     = TACT_ROAD_REBUILD | TACT_BUILD_STATUE | TACT_FOUND_BUILDINGS,        ///< All possible construction actions.
+	TACT_FUNDS            = TACT_BUY_RIGHTS | TACT_BRIBE,                                        ///< All possible funding actions.
+	TACT_ALL              = TACT_ADVERTISE | TACT_CONSTRUCTION | TACT_FUNDS,                     ///< All possible actions.
+};
+DECLARE_ENUM_AS_BIT_SET(TownActions);
+
+extern const byte _town_action_costs[TACT_COUNT];
+extern TownID _new_town_id;
 
 /**
  * Calculate a hash value from a tile position
