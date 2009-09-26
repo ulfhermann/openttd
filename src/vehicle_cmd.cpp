@@ -65,7 +65,8 @@ const uint32 _send_to_depot_proc_table[] = {
  * @param flags type of operation
  * @param p1 vehicle to start/stop
  * @param p2 bit 0: Shall the start/stop newgrf callback be evaluated (only valid with DC_AUTOREPLACE for network safety)
- * @return result of operation.  Nothing if everything went well
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -106,6 +107,7 @@ CommandCost CmdStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 
 		v->vehstatus ^= VS_STOPPED;
 		if (v->type != VEH_TRAIN) v->cur_speed = 0; // trains can stop 'slowly'
+		v->MarkDirty();
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
 		SetWindowClassesDirty(GetWindowClassForVehicleType(v->type));
@@ -122,6 +124,8 @@ CommandCost CmdStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
  *   - bit 5 false = start vehicles, true = stop vehicles
  *   - bit 6 if set, then it's a vehicle list window, not a depot and Tile is ignored in this case
  *   - bit 8-11 Vehicle List Window type (ignored unless bit 1 is set)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdMassStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -172,6 +176,8 @@ CommandCost CmdMassStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 
  * @param flags type of operation
  * @param p1 Vehicle type
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdDepotSellAllVehicles(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -201,6 +207,8 @@ CommandCost CmdDepotSellAllVehicles(TileIndex tile, DoCommandFlag flags, uint32 
  * @param flags type of operation
  * @param p1 Type of vehicle
  * @param p2 If bit 0 is set, then either replace all or nothing (instead of replacing until money runs out)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdDepotMassAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -314,6 +322,8 @@ static void CloneVehicleName(const Vehicle *src, Vehicle *dst)
  * @param flags type of operation
  * @param p1 the original vehicle's index
  * @param p2 1 = shared orders, else copied orders
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -497,6 +507,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
  * @param service should the vehicles only get service in the depots
  * @param owner owner of the vehicles to send
  * @param vlw_flag tells what kind of list requested the goto depot
+ * @param id general purpose id whoms meaning is given by @c vlw_flag; e.g. StationID for station lists
  * @return 0 for success and CMD_ERROR if no vehicle is able to go to depot
  */
 CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool service, Owner owner, uint16 vlw_flag, uint32 id)
@@ -527,6 +538,8 @@ CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool s
  * @param flags type of operation
  * @param p1 vehicle ID to name
  * @param p2 unused
+ * @param text the new name or an empty string when resetting to the default
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRenameVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -556,6 +569,8 @@ CommandCost CmdRenameVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
  * @param flags type of operation
  * @param p1 vehicle ID that is being service-interval-changed
  * @param p2 new service interval
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdChangeServiceInt(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {

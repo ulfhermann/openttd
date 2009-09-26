@@ -266,18 +266,6 @@ StringIDToGRFIDMapping _string_to_grf_mapping;
  */
 StringID MapGRFStringID(uint32 grfid, StringID str)
 {
-	/* StringID table for TextIDs 0x4E->0x6D */
-	static const StringID units_volume[] = {
-		STR_NOTHING,    STR_PASSENGERS, STR_TONS,       STR_BAGS,
-		STR_LITERS,     STR_ITEMS,      STR_CRATES,     STR_TONS,
-		STR_TONS,       STR_TONS,       STR_TONS,       STR_BAGS,
-		STR_TONS,       STR_TONS,       STR_TONS,       STR_BAGS,
-		STR_TONS,       STR_TONS,       STR_BAGS,       STR_LITERS,
-		STR_TONS,       STR_LITERS,     STR_TONS,       STR_NOTHING,
-		STR_BAGS,       STR_LITERS,     STR_TONS,       STR_NOTHING,
-		STR_TONS,       STR_NOTHING,    STR_LITERS,     STR_NOTHING
-	};
-
 	/* 0xD0 and 0xDC stand for all the TextIDs in the range
 	 * of 0xD000 (misc graphics texts) and 0xDC00 (misc persistent texts).
 	 * These strings are unique to each grf file, and thus require to be used with the
@@ -295,41 +283,7 @@ StringID MapGRFStringID(uint32 grfid, StringID str)
 		default: break;
 	}
 
-#define TEXTID_TO_STRINGID(begin, end, stringid) if (str >= begin && str <= end) return str + (stringid - begin)
-	/* We have some changes in our cargo strings, resulting in some missing. */
-	TEXTID_TO_STRINGID(0x000E, 0x002D, STR_CARGO_PLURAL_NOTHING);
-	TEXTID_TO_STRINGID(0x002E, 0x004D, STR_CARGO_SINGULAR_NOTHING);
-	if (str >= 0x004E && str <= 0x006D) return units_volume[str - 0x004E];
-	TEXTID_TO_STRINGID(0x006E, 0x008D, STR_QUANTITY_NOTHING);
-	TEXTID_TO_STRINGID(0x008E, 0x00AD, STR_ABBREV_NOTHING);
-
-	/* Map building names according to our lang file changes. There are several
-	 * ranges of house ids, all of which need to be remapped to allow newgrfs
-	 * to use original house names. */
-	TEXTID_TO_STRINGID(0x200F, 0x201F, STR_TOWN_BUILDING_NAME_TALL_OFFICE_BLOCK_1);
-	TEXTID_TO_STRINGID(0x2036, 0x2041, STR_TOWN_BUILDING_NAME_COTTAGES_1);
-	TEXTID_TO_STRINGID(0x2059, 0x205C, STR_TOWN_BUILDING_NAME_IGLOO_1);
-
-	/* Same thing for industries */
-	TEXTID_TO_STRINGID(0x4802, 0x4826, STR_INDUSTRY_NAME_COAL_MINE);
-	TEXTID_TO_STRINGID(0x4827, 0x4829, STR_INDUSTRY_VIEW_REQUIRES_CARGO);
-	TEXTID_TO_STRINGID(0x482D, 0x482E, STR_NEWS_INDUSTRY_CONSTRUCTION);
-	TEXTID_TO_STRINGID(0x4832, 0x4834, STR_NEWS_INDUSTRY_CLOSURE_GENERAL);
-	TEXTID_TO_STRINGID(0x4835, 0x4838, STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_GENERAL);
-	TEXTID_TO_STRINGID(0x4839, 0x483A, STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_GENERAL);
-
-	switch (str) {
-		case 0x4830: return STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY;
-		case 0x4831: return STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED;
-		case 0x483B: return STR_ERROR_CAN_ONLY_BE_POSITIONED;
-	}
-#undef TEXTID_TO_STRINGID
-
-	if (str == STR_NULL) return STR_EMPTY;
-
-	DEBUG(grf, 0, "Unknown StringID 0x%04X remapped to STR_EMPTY. Please open a Feature Request if you need it", str);
-
-	return STR_EMPTY;
+	return TTDPStringIDToOTTDStringIDMapping(str);
 }
 
 static inline uint8 MapDOSColour(uint8 colour)
@@ -552,14 +506,14 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				rvi->ai_passenger_only = grf_load_byte(&buf);
 				break;
 
-			case 0x09: { // Speed (1 unit is 1 kmh)
+			case PROP_TRAIN_SPEED: { // 0x09 Speed (1 unit is 1 km-ish/h)
 				uint16 speed = grf_load_word(&buf);
 				if (speed == 0xFFFF) speed = 0;
 
 				rvi->max_speed = speed;
 			} break;
 
-			case 0x0B: // Power
+			case PROP_TRAIN_POWER: // 0x0B Power
 				rvi->power = grf_load_word(&buf);
 
 				/* Set engine / wagon state based on power */
@@ -572,7 +526,7 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				}
 				break;
 
-			case 0x0D: // Running cost factor
+			case PROP_TRAIN_RUNNING_COST_FACTOR: // 0x0D Running cost factor
 				rvi->running_cost = grf_load_byte(&buf);
 				break;
 
@@ -613,7 +567,7 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				}
 			} break;
 
-			case 0x14: // Cargo capacity
+			case PROP_TRAIN_CARGO_CAPACITY: // 0x14 Cargo capacity
 				rvi->capacity = grf_load_byte(&buf);
 				break;
 
@@ -631,11 +585,11 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				}
 			} break;
 
-			case 0x16: // Weight
+			case PROP_TRAIN_WEIGHT: // 0x16 Weight
 				SB(rvi->weight, 0, 8, grf_load_byte(&buf));
 				break;
 
-			case 0x17: // Cost factor
+			case PROP_TRAIN_COST_FACTOR: // 0x17 Cost factor
 				rvi->cost_factor = grf_load_byte(&buf);
 				break;
 
@@ -699,7 +653,7 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				ei->callback_mask = grf_load_byte(&buf);
 				break;
 
-			case 0x1F: // Tractive effort coefficient
+			case PROP_TRAIN_TRACTIVE_EFFORT: // 0x1F Tractive effort coefficient
 				rvi->tractive_effort = grf_load_byte(&buf);
 				break;
 
@@ -732,7 +686,7 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				}
 			} break;
 
-			case 0x25: // User-defined bit mask to set when checking veh. var. 42
+			case PROP_TRAIN_USER_DATA: // 0x25 User-defined bit mask to set when checking veh. var. 42
 				rvi->user_def_data = grf_load_byte(&buf);
 				break;
 
@@ -815,7 +769,7 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 				rvi->image_index = spriteid;
 			} break;
 
-			case 0x0F: // Cargo capacity
+			case PROP_ROADVEH_CARGO_CAPACITY: // 0x0F Cargo capacity
 				rvi->capacity = grf_load_byte(&buf);
 				break;
 
@@ -832,7 +786,7 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 				}
 			} break;
 
-			case 0x11: // Cost factor
+			case PROP_ROADVEH_COST_FACTOR: // 0x11 Cost factor
 				rvi->cost_factor = grf_load_byte(&buf);
 				break;
 
@@ -933,11 +887,11 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 				svi->refittable = (grf_load_byte(&buf) != 0);
 				break;
 
-			case 0x0A: // Cost factor
+			case PROP_SHIP_COST_FACTOR: // 0x0A Cost factor
 				svi->cost_factor = grf_load_byte(&buf);
 				break;
 
-			case 0x0B: // Speed (1 unit is 0.5 kmh)
+			case PROP_SHIP_SPEED: // 0x0B Speed (1 unit is 0.5 km-ish/h)
 				svi->max_speed = grf_load_byte(&buf);
 				break;
 
@@ -954,11 +908,11 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 				}
 			} break;
 
-			case 0x0D: // Cargo capacity
+			case PROP_SHIP_CARGO_CAPACITY: // 0x0D Cargo capacity
 				svi->capacity = grf_load_word(&buf);
 				break;
 
-			case 0x0F: // Running cost factor
+			case PROP_SHIP_RUNNING_COST_FACTOR: // 0x0F Running cost factor
 				svi->running_cost = grf_load_byte(&buf);
 				break;
 
@@ -1054,11 +1008,11 @@ static ChangeInfoResult AircraftVehicleChangeInfo(uint engine, int numinfo, int 
 				SB(avi->subtype, 1, 1, (grf_load_byte(&buf) != 0 ? 1 : 0)); // AIR_FAST
 				break;
 
-			case 0x0B: // Cost factor
+			case PROP_AIRCRAFT_COST_FACTOR: // 0x0B Cost factor
 				avi->cost_factor = grf_load_byte(&buf);
 				break;
 
-			case 0x0C: // Speed (1 unit is 8 mph, we translate to 1 unit is 1 km/h)
+			case PROP_AIRCRAFT_SPEED: // 0x0C Speed (1 unit is 8 mph, we translate to 1 unit is 1 km/h)
 				avi->max_speed = (grf_load_byte(&buf) * 129) / 10;
 				break;
 
@@ -1066,7 +1020,7 @@ static ChangeInfoResult AircraftVehicleChangeInfo(uint engine, int numinfo, int 
 				avi->acceleration = (grf_load_byte(&buf) * 129) / 10;
 				break;
 
-			case 0x0E: // Running cost factor
+			case PROP_AIRCRAFT_RUNNING_COST_FACTOR: // 0x0E Running cost factor
 				avi->running_cost = grf_load_byte(&buf);
 				break;
 
@@ -2194,6 +2148,25 @@ static ChangeInfoResult IndustrytilesChangeInfo(uint indtid, int numinfo, int pr
 	return ret;
 }
 
+/**
+ * Validate the industry layout; e.g. to prevent duplicate tiles.
+ * @param layout the layout to check
+ * @param size the size of the layout
+ * @return true if the layout is deemed valid
+ */
+static bool ValidateIndustryLayout(const IndustryTileTable *layout, int size)
+{
+	for (int i = 0; i < size - 1; i++) {
+		for (int j = i + 1; j < size; j++) {
+			if (layout[i].ti.x == layout[j].ti.x &&
+					layout[i].ti.y == layout[j].ti.y) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, byte **bufp, int len)
 {
 	byte *buf = *bufp;
@@ -2325,8 +2298,16 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 							itt[k].ti.y = (int8)GB(itt[k].ti.y, 0, 8);
 						}
 					}
-					tile_table[j] = CallocT<IndustryTileTable>(size);
-					memcpy(tile_table[j], copy_from, sizeof(*copy_from) * size);
+
+					if (!ValidateIndustryLayout(copy_from, size)) {
+						/* The industry layout was not valid, so skip this one. */
+						grfmsg(1, "IndustriesChangeInfo: Invalid industry layout for industry id %u. Ignoring", indid);
+						indsp->num_table--;
+						j--;
+					} else {
+						tile_table[j] = CallocT<IndustryTileTable>(size);
+						memcpy(tile_table[j], copy_from, sizeof(*copy_from) * size);
+					}
 				}
 				/* Install final layout construction in the industry spec */
 				indsp->table = tile_table;
@@ -5690,7 +5671,7 @@ static const CargoLabel _default_refitmasks_aircraft[] = {
 	'TOYS', 'BATT', 'SWET', 'TOFF', 'COLA', 'CTCD', 'BUBL', 'PLST', 'FZDR',
 	0 };
 
-static const CargoLabel *_default_refitmasks[] = {
+static const CargoLabel * const _default_refitmasks[] = {
 	_default_refitmasks_rail,
 	_default_refitmasks_road,
 	_default_refitmasks_ships,

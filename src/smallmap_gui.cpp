@@ -615,7 +615,7 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile)
 
 /* each tile has 4 x pixels and 1 y pixel */
 
-static GetSmallMapPixels *_smallmap_draw_procs[] = {
+static GetSmallMapPixels * const _smallmap_draw_procs[] = {
 	GetSmallMapContoursPixels,
 	GetSmallMapVehiclesPixels,
 	GetSmallMapIndustriesPixels,
@@ -1431,9 +1431,6 @@ public:
 	 * <li>Town names (optional)</li></ol>
 	 *
 	 * @param dpi pointer to pixel to write onto
-	 * @param w pointer to Window struct
-	 * @param type type of map requested (vegetation, owners, routes, etc)
-	 * @param show_towns true if the town names should be displayed, false if not.
 	 */
 	void DrawSmallMap(DrawPixelInfo *dpi)
 	{

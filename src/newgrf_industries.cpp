@@ -152,10 +152,10 @@ static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout
 }
 
 /** This function implements the industries variables that newGRF defines.
+ * @param object the object that we want to query
  * @param variable that is queried
  * @param parameter unused
  * @param available will return false if ever the variable asked for does not exist
- * @param ind is of course the industry we are inquiring
  * @return the value stored in the corresponding variable*/
 uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
 {

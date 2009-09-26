@@ -183,6 +183,8 @@ bool CheckBridge_Stuff(BridgeType bridge_type, uint bridge_len, DoCommandFlag fl
  * - p2 = (bit  0- 7) - bridge type (hi bh)
  * - p2 = (bit  8-14) - rail type or road types.
  * - p2 = (bit 15-16) - transport type.
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -320,13 +322,13 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 
 		if (transport_type == TRANSPORT_WATER && (tileh_start == SLOPE_FLAT || tileh_end == SLOPE_FLAT)) return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 
-		TileIndex Heads[] = {tile_start, tile_end};
+		const TileIndex heads[] = {tile_start, tile_end};
 		for (int i = 0; i < 2; i++) {
-			if (MayHaveBridgeAbove(Heads[i])) {
-				if (IsBridgeAbove(Heads[i])) {
-					TileIndex north_head = GetNorthernBridgeEnd(Heads[i]);
+			if (MayHaveBridgeAbove(heads[i])) {
+				if (IsBridgeAbove(heads[i])) {
+					TileIndex north_head = GetNorthernBridgeEnd(heads[i]);
 
-					if (direction == GetBridgeAxis(Heads[i])) return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
+					if (direction == GetBridgeAxis(heads[i])) return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 
 					if (z_start + TILE_HEIGHT == GetBridgeHeight(north_head)) {
 						return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
@@ -452,6 +454,8 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
  * @param flags type of operation
  * @param p1 railtype or roadtypes. bit 9 set means road tunnel
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildTunnel(TileIndex start_tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -749,7 +753,7 @@ static CommandCost ClearTile_TunnelBridge(TileIndex tile, DoCommandFlag flags)
  * @param psid Image and palette of a bridge pillar.
  * @param ti #TileInfo of current bridge-middle-tile.
  * @param axis Orientation of bridge.
- * @param type Bridge type.
+ * @param drawfarpillar Whether to draw the pillar at the back
  * @param x Sprite X position of front pillar.
  * @param y Sprite Y position of front pillar.
  * @param z_bridge Absolute height of bridge bottom.
