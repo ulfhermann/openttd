@@ -114,10 +114,8 @@ typedef bool (*CMSAMatcher)(TileIndex tile);
 /**
  * Counts the numbers of tiles matching a specific type in the area around
  * @param tile the center tile of the 'count area'
- * @param type the type of tile searched for
- * @param industry when type == MP_INDUSTRY, the type of the industry,
- *                 in all other cases this parameter is ignored
- * @return the result the noumber of matching tiles around
+ * @param cmp the comparator/matcher (@see CMSAMatcher)
+ * @return the number of matching tiles around
  */
 static int CountMapSquareAround(TileIndex tile, CMSAMatcher cmp)
 {
@@ -510,12 +508,12 @@ CargoArray GetProductionAroundTiles(TileIndex tile, int w, int h, int rad)
  * @param w X extent of area
  * @param h Y extent of area
  * @param rad Search radius in addition to given area
- * @param town_acc bitmask of cargo accepted by houses and headquarters; can be NULL
+ * @param always_accepted bitmask of cargo accepted by houses and headquarters; can be NULL
  */
-CargoArray GetAcceptanceAroundTiles(TileIndex tile, int w, int h, int rad, uint32 *town_acc)
+CargoArray GetAcceptanceAroundTiles(TileIndex tile, int w, int h, int rad, uint32 *always_accepted)
 {
 	CargoArray acceptance;
-	if (town_acc != NULL) *town_acc = 0;
+	if (always_accepted != NULL) *always_accepted = 0;
 
 	int x = TileX(tile);
 	int y = TileY(tile);
@@ -535,7 +533,7 @@ CargoArray GetAcceptanceAroundTiles(TileIndex tile, int w, int h, int rad, uint3
 	for (int yc = y1; yc != y2; yc++) {
 		for (int xc = x1; xc != x2; xc++) {
 			TileIndex tile = TileXY(xc, yc);
-			AddAcceptedCargo(tile, acceptance, town_acc);
+			AddAcceptedCargo(tile, acceptance, always_accepted);
 		}
 	}
 
@@ -559,7 +557,7 @@ void UpdateStationAcceptance(Station *st, bool show_msg)
 			st->rect.right  - st->rect.left + 1,
 			st->rect.bottom - st->rect.top  + 1,
 			st->GetCatchmentRadius(),
-			&st->town_acc
+			&st->always_accepted
 		);
 	}
 
@@ -660,6 +658,7 @@ CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
  * @param invalid_dirs prohibited directions (set of DiagDirections)
  * @param station StationID to be queried and returned if available
  * @param check_clear if clearing tile should be performed (in wich case, cost will be added)
+ * @param rt The rail type to check for (overbuilding rail stations over rail)
  * @return the cost in case of success, or an error code if it failed.
  */
 CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandFlag flags, uint invalid_dirs, StationID *station, bool check_clear = true, RailType rt = INVALID_RAILTYPE)
@@ -864,7 +863,7 @@ void GetStationLayout(byte *layout, int numtracks, int plat_len, const StationSp
 /**
  * Find a nearby station that joins this station.
  * @tparam T the class to find a station for
- * @param error_message the error message when building a station on top of others
+ * @tparam error_message the error message when building a station on top of others
  * @param existing_station an existing station we build over
  * @param station_to_join the station to join to
  * @param adjacent whether adjacent stations are allowed
@@ -928,7 +927,7 @@ CommandCost FindJoiningStation(StationID existing_station, StationID station_to_
  * @param waypoint_to_join the waypoint to join to
  * @param adjacent whether adjacent waypoints are allowed
  * @param ta the area of the newly build waypoint
- * @param st 'return' pointer for the found waypoint
+ * @param wp 'return' pointer for the found waypoint
  * @return command cost with the error or 'okay'
  */
 CommandCost FindJoiningWaypoint(StationID existing_waypoint, StationID waypoint_to_join, bool adjacent, TileArea ta, Waypoint **wp)
@@ -950,6 +949,8 @@ CommandCost FindJoiningWaypoint(StationID existing_waypoint, StationID waypoint_
  * - p2 = (bit  0- 7) - custom station class
  * - p2 = (bit  8-15) - custom station id
  * - p2 = (bit 16-31) - station ID to join (NEW_STATION if build new one)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1328,7 +1329,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
  * @param p2 various bitstuffed elements
  * - p2 = bit 0 - if set keep the rail
  * @param text unused
- * @return cost of operation or error
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRemoveFromRailStation(TileIndex start, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1362,7 +1363,7 @@ CommandCost CmdRemoveFromRailStation(TileIndex start, DoCommandFlag flags, uint3
  * @param p2 various bitstuffed elements
  * - p2 = bit 0 - if set keep the rail
  * @param text unused
- * @return cost of operation or error
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRemoveFromRailWaypoint(TileIndex start, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1508,6 +1509,8 @@ static RoadStop **FindRoadStopSpot(bool truck_station, Station *st)
  *           bit 2..3: the roadtypes
  *           bit 5: allow stations directly adjacent to other stations.
  *           bit 16..31: station ID to join (NEW_STATION if build new one)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1729,6 +1732,8 @@ static CommandCost RemoveRoadStop(TileIndex tile, DoCommandFlag flags)
  * @param flags operation to perform
  * @param p1 not used
  * @param p2 bit 0: 0 for Bus stops, 1 for truck stops
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRemoveRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1866,6 +1871,8 @@ void UpdateAirportsNoise()
  * @param p2 various bitstuffed elements
  * - p2 = (bit     0) - allow airports directly adjacent to other airports.
  * - p2 = (bit 16-31) - station ID to join (NEW_STATION if build new one)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2116,6 +2123,8 @@ static const byte _dock_h_chk[4] = { 1, 2, 1, 2 };
  * @param flags operation to perform
  * @param p1 (bit 0) - allow docks directly adjacent to other docks.
  * @param p2 bit 16-31: station ID to join (NEW_STATION if build new one)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2727,8 +2736,9 @@ static void UpdateStationRating(Station *st)
 	byte_inc_sat(&st->time_since_load);
 	byte_inc_sat(&st->time_since_unload);
 
-	GoodsEntry *ge = st->goods;
-	do {
+	const CargoSpec *cs;
+	FOR_ALL_CARGOSPECS(cs) {
+		GoodsEntry *ge = &st->goods[cs->Index()];
 		/* Slowly increase the rating back to his original level in the case we
 		 *  didn't deliver cargo yet to this station. This happens when a bribe
 		 *  failed while you didn't moved that cargo yet to a station. */
@@ -2740,25 +2750,35 @@ static void UpdateStationRating(Station *st)
 		if (HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
 			byte_inc_sat(&ge->days_since_pickup);
 
+			bool skip = false;
 			int rating = 0;
+			uint waiting = ge->cargo.Count();
 
-			{
+			if (HasBit(cs->callback_mask, CBM_CARGO_STATION_RATING_CALC)) {
+				/* Perform custom station rating. If it succeeds the speed, days in transit and
+				 * waiting cargo ratings must not be executed. */
+
+				/* NewGRFs expect last speed to be 0xFF when no vehicle has arrived yet. */
+				uint last_speed = ge->last_speed;
+				if (last_speed == 0) last_speed = 0xFF;
+
+				uint32 var18 = min(ge->days_since_pickup, 0xFF) | (min(waiting, 0xFFFF) << 8) | (min(last_speed, 0xFF) << 24);
+				/* Convert to the 'old' vehicle types */
+				uint32 var10 = (st->last_vehicle_type == VEH_INVALID) ? 0x0 : (st->last_vehicle_type + 0x10);
+				uint16 callback = GetCargoCallback(CBID_CARGO_STATION_RATING_CALC, var10, var18, cs);
+				if (callback != CALLBACK_FAILED) {
+					skip = true;
+					rating = GB(callback, 0, 14);
+
+					/* Simulate a 15 bit signed value */
+					if (HasBit(callback, 14)) rating -= 0x4000;
+				}
+			}
+
+			if (!skip) {
 				int b = ge->last_speed - 85;
-				if (b >= 0)
-					rating += b >> 2;
-			}
+				if (b >= 0) rating += b >> 2;
 
-			{
-				byte age = ge->last_age;
-				(age >= 3) ||
-				(rating += 10, age >= 2) ||
-				(rating += 10, age >= 1) ||
-				(rating += 13, true);
-			}
-
-			if (Company::IsValidID(st->owner) && HasBit(st->town->statues, st->owner)) rating += 26;
-
-			{
 				byte days = ge->days_since_pickup;
 				if (st->last_vehicle_type == VEH_SHIP) days >>= 2;
 				(days > 21) ||
@@ -2766,15 +2786,22 @@ static void UpdateStationRating(Station *st)
 				(rating += 25, days > 6) ||
 				(rating += 45, days > 3) ||
 				(rating += 35, true);
+
+				(rating -= 90, waiting > 1500) ||
+				(rating += 55, waiting > 1000) ||
+				(rating += 35, waiting > 600) ||
+				(rating += 10, waiting > 300) ||
+				(rating += 20, waiting > 100) ||
+				(rating += 10, true);
 			}
 
-			uint waiting = ge->cargo.Count();
-			(rating -= 90, waiting > 1500) ||
-			(rating += 55, waiting > 1000) ||
-			(rating += 35, waiting > 600) ||
-			(rating += 10, waiting > 300) ||
-			(rating += 20, waiting > 100) ||
-			(rating += 10, true);
+			if (Company::IsValidID(st->owner) && HasBit(st->town->statues, st->owner)) rating += 26;
+
+			byte age = ge->last_age;
+			(age >= 3) ||
+			(rating += 10, age >= 2) ||
+			(rating += 10, age >= 1) ||
+			(rating += 13, true);
 
 			{
 				int or_ = ge->rating; // old rating
@@ -2819,7 +2846,7 @@ static void UpdateStationRating(Station *st)
 				if (waiting_changed) ge->cargo.Truncate(waiting);
 			}
 		}
-	} while (++ge != endof(st->goods));
+	}
 
 	StationID index = st->index;
 	if (waiting_changed) {
@@ -3026,6 +3053,8 @@ static bool IsUniqueStationName(const char *name)
  * @param flags operation to perform
  * @param p1 station ID that is to be renamed
  * @param p2 unused
+ * @param text the new name or an empty string when resetting to the default
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRenameStation(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -3056,8 +3085,7 @@ CommandCost CmdRenameStation(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
  * @param tile North tile of producer
  * @param w_prod X extent of producer
  * @param h_prod Y extent of producer
- *
- * @return: Set of found stations
+ * @param stations The list to store the stations in
  */
 void FindStationsAroundTiles(TileIndex tile, int w_prod, int h_prod, StationList *stations)
 {

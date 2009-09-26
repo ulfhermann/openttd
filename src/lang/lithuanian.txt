@@ -972,26 +972,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Viso ekr
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Pasirinkti valiuta
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Keitimo santykis: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Keitimo santykis: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Sumažinti valiutos kiekį vienu svaru (£)
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Padidinti valiutos kiekį vienu svaru (£)
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Nustatyti valiutos keitimo kursą vienam svarui (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Skyriklis: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Skyriklis: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Nustatyti daliklį jūsų valiutai
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Priesdelis: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Priesdelis: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Nustatyti prifix'ą valiutai
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Pavadinimas: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Pavadinimas: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Nustatyti suffix'a valiutai
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Pereiti prie Euro: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Pereiti prie Euro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Pereiti prie Euro: {ORANGE}niekada
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Kelintais metais pereiti prie Euro?
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Pereiti prie Euro anksčiau
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Pereiti prie Euro vėliau
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Perziura: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Perziura: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 svarų (£) jūsų valiuta
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Keisti pasirinktos valiutos nustatymus
 
@@ -3220,7 +3220,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Ši komp
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Neimanoma statyti jokiu miestu
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Miesto pervardinti negalima...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Negalima įkurti miesto...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Negalima įkurti miesto...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...per arti žemėlapio krašto
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...per arti kito miesto
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...per daug miestų
@@ -3233,7 +3233,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Neįmano
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}{STRING} čia negali būti pastatyta...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Neįmanoma čia pastatyti šio tipo pramonės įmonės...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...per arti kitos gamyklos
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...pirma reikia pastatyti miestą
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...pirma reikia pastatyti miestą
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...mieste gali būti tik vienas
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...gali būti pastatyta tik miestuose, kuriuose yra bent 1200 gyventojų
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...gali būti statomas tik drėgnose miškingose teritorijose
@@ -3921,7 +3921,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
