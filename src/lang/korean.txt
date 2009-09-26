@@ -943,26 +943,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}풀스�
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}사용자 화폐 단위
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}환율: {ORANGE}{0:CURRENCY} = {1:COMMA}파운드
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}환율: {ORANGE}{CURRENCY} = {COMMA}파운드
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}(1 파운드(£)에 대한) 사용자 화폐 단위양을 감소시킵니다.
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}(1 파운드(£)에 대한) 사용자 화폐 단위양을 증가시킵니다.
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}1 파운드(£)에 해당하는 사용자 화폐 단위의 환율을 설정하십시오.
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}단위구분: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}단위구분: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}사용자 화폐 단위의 단위 구분자를 설정하십시오.
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}접두어: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}접두어: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}사용자 화폐 단위 앞에 붙는 문구를 설정하십시오.
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}접미어: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}접미어: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}사용자 화폐 단위 뒤에 붙는 문구를 설정하십시오.
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}유로화로 전환: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}유로화로 전환: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}유로화로 전환: {ORANGE}안함
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}유로화(€) 전환 연도를 설정하십시오.
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}유로화(€) 전환 연도를 앞으로 당깁니다.
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}유로화(€) 전환 연도를 늦춥니다.
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}미리보기: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}미리보기: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 파운드(£)에 해당하는 사용자 화폐 단위입니다.
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}사용자 화폐 변수 변경
 
@@ -3278,7 +3278,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}이 회�
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}도시를 만들 수 없습니다!
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}도시 이름을 바꿀 수 없습니다...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}여기에 도시를 건설할 수 없습니다...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}여기에 도시를 건설할 수 없습니다...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...맵 가장자리와 너무 가깝습니다!
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...다른 도시와 너무 가깝습니다!
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...도시가 너무 많습니다!
@@ -3291,7 +3291,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}산업�
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}여기에 {STRING}{G 0 "을" "를"} 건설할 수 없습니다...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}여기에 이 산업시설을 건설할 수 없습니다...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...다른 산업시설과 너무 가깝습니다.
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...도시를 먼저 만드십시오
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...도시를 먼저 만드십시오
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...한 도시에 하나만 건설 가능합니다!
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...인구 1200명 이상의 도시에만 건설할 수 있습니다!
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...열대우림 지역에만 건설할 수 있습니다!
@@ -3990,7 +3990,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

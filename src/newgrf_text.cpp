@@ -22,12 +22,74 @@
 #include "newgrf_storage.h"
 #include "string_func.h"
 #include "date_type.h"
+#include "debug.h"
 
 #include "table/strings.h"
 #include "table/control_codes.h"
 
 #define GRFTAB  28
 #define TABSIZE 11
+
+/**
+ * Perform a mapping from TTDPatch's string IDs to OpenTTD's
+ * string IDs, but only for the ones we are aware off; the rest
+ * like likely unused and will show a warning.
+ * @param str the string ID to convert
+ * @return the converted string ID
+ */
+StringID TTDPStringIDToOTTDStringIDMapping(StringID str)
+{
+	/* StringID table for TextIDs 0x4E->0x6D */
+	static const StringID units_volume[] = {
+		STR_NOTHING,    STR_PASSENGERS, STR_TONS,       STR_BAGS,
+		STR_LITERS,     STR_ITEMS,      STR_CRATES,     STR_TONS,
+		STR_TONS,       STR_TONS,       STR_TONS,       STR_BAGS,
+		STR_TONS,       STR_TONS,       STR_TONS,       STR_BAGS,
+		STR_TONS,       STR_TONS,       STR_BAGS,       STR_LITERS,
+		STR_TONS,       STR_LITERS,     STR_TONS,       STR_NOTHING,
+		STR_BAGS,       STR_LITERS,     STR_TONS,       STR_NOTHING,
+		STR_TONS,       STR_NOTHING,    STR_LITERS,     STR_NOTHING
+	};
+
+	/* A string straight from a NewGRF; no need to remap this as it's already mapped. */
+	if (IsInsideMM(str, 0xD000, 0xD7FF) || IsInsideMM(str, 0xDC00, 0xDCFF)) return str;
+
+#define TEXTID_TO_STRINGID(begin, end, stringid) if (str >= begin && str <= end) return str + (stringid - begin)
+	/* We have some changes in our cargo strings, resulting in some missing. */
+	TEXTID_TO_STRINGID(0x000E, 0x002D, STR_CARGO_PLURAL_NOTHING);
+	TEXTID_TO_STRINGID(0x002E, 0x004D, STR_CARGO_SINGULAR_NOTHING);
+	if (str >= 0x004E && str <= 0x006D) return units_volume[str - 0x004E];
+	TEXTID_TO_STRINGID(0x006E, 0x008D, STR_QUANTITY_NOTHING);
+	TEXTID_TO_STRINGID(0x008E, 0x00AD, STR_ABBREV_NOTHING);
+
+	/* Map building names according to our lang file changes. There are several
+	 * ranges of house ids, all of which need to be remapped to allow newgrfs
+	 * to use original house names. */
+	TEXTID_TO_STRINGID(0x200F, 0x201F, STR_TOWN_BUILDING_NAME_TALL_OFFICE_BLOCK_1);
+	TEXTID_TO_STRINGID(0x2036, 0x2041, STR_TOWN_BUILDING_NAME_COTTAGES_1);
+	TEXTID_TO_STRINGID(0x2059, 0x205C, STR_TOWN_BUILDING_NAME_IGLOO_1);
+
+	/* Same thing for industries */
+	TEXTID_TO_STRINGID(0x4802, 0x4826, STR_INDUSTRY_NAME_COAL_MINE);
+	TEXTID_TO_STRINGID(0x4827, 0x4829, STR_INDUSTRY_VIEW_REQUIRES_CARGO);
+	TEXTID_TO_STRINGID(0x482D, 0x482E, STR_NEWS_INDUSTRY_CONSTRUCTION);
+	TEXTID_TO_STRINGID(0x4832, 0x4834, STR_NEWS_INDUSTRY_CLOSURE_GENERAL);
+	TEXTID_TO_STRINGID(0x4835, 0x4838, STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_GENERAL);
+	TEXTID_TO_STRINGID(0x4839, 0x483A, STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_GENERAL);
+
+	switch (str) {
+		case 0x4830: return STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY;
+		case 0x4831: return STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED;
+		case 0x483B: return STR_ERROR_CAN_ONLY_BE_POSITIONED;
+	}
+#undef TEXTID_TO_STRINGID
+
+	if (str == STR_NULL) return STR_EMPTY;
+
+	DEBUG(grf, 0, "Unknown StringID 0x%04X remapped to STR_EMPTY. Please open a Feature Request if you need it", str);
+
+	return STR_EMPTY;
+}
 
 /**
  * Explains the newgrf shift bit positionning.
@@ -382,7 +444,7 @@ const char *GetGRFStringPtr(uint16 stringid)
  * of the current language set by the user.
  * This function is called after the user changed language,
  * from strings.cpp:ReadLanguagePack
- * @param langauge_id iso code of current selection
+ * @param language_id iso code of current selection
  */
 void SetCurrentGrfLangID(byte language_id)
 {
@@ -529,7 +591,9 @@ void RewindTextRefStack()
 /**
  * FormatString for NewGRF specific "magic" string control codes
  * @param scc   the string control code that has been read
- * @param stack the current "stack"
+ * @param buff  the buffer we're writing to
+ * @param str   the string that we need to write
+ * @param argv  the OpenTTD stack of values
  * @return the string control code to "execute" now
  */
 uint RemapNewGRFStringControlCode(uint scc, char **buff, const char **str, int64 *argv)
@@ -562,8 +626,7 @@ uint RemapNewGRFStringControlCode(uint scc, char **buff, const char **str, int64
 			case SCC_NEWGRF_UNPRINT:              *buff -= Utf8Consume(str); break;
 
 			case SCC_NEWGRF_PRINT_STRING_ID:
-				*argv = _newgrf_textrefstack->PopUnsignedWord();
-				if (*argv == STR_NULL) *argv = STR_EMPTY;
+				*argv = TTDPStringIDToOTTDStringIDMapping(_newgrf_textrefstack->PopUnsignedWord());
 				break;
 		}
 	}

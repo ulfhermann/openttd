@@ -562,19 +562,41 @@ static inline void DrawCaption(const Rect &r, Colours colour, Owner owner, Strin
 	if (str != STR_NULL) DrawString(r.left + WD_CAPTIONTEXT_LEFT, r.right - WD_CAPTIONTEXT_RIGHT, r.top + WD_CAPTIONTEXT_TOP, str, TC_FROMSTRING, SA_CENTER);
 }
 
-static inline void DrawDropdown(const Rect &r, Colours colour, bool clicked, StringID str)
+/**
+ * Draw a button with a dropdown (#WWT_DROPDOWN and #NWID_BUTTON_DRPDOWN).
+ * @param r                Rectangle containing the widget.
+ * @param colour           Background colour of the widget.
+ * @param clicked_button   The button-part is lowered.
+ * @param clicked_dropdown The drop-down part is lowered.
+ * @param str              Text of the button.
+ *
+ * @note Magic constants are also used in #NWidgetLeaf::ButtonHit.
+ */
+static inline void DrawButtonDropdown(const Rect &r, Colours colour, bool clicked_button, bool clicked_dropdown, StringID str)
 {
 	if (_dynlang.text_dir == TD_LTR) {
-		DrawFrameRect(r.left, r.top, r.right - 12, r.bottom, colour, FR_NONE);
-		DrawFrameRect(r.right - 11, r.top, r.right, r.bottom, colour, clicked ? FR_LOWERED : FR_NONE);
-		DrawString(r.right - (clicked ? 10 : 11), r.right, r.top + (clicked ? 2 : 1), STR_BLACK_ARROW_DOWN, TC_FROMSTRING, SA_CENTER);
-		if (str != STR_NULL) DrawString(r.left + WD_DROPDOWNTEXT_LEFT, r.right - WD_DROPDOWNTEXT_RIGHT, r.top + WD_DROPDOWNTEXT_TOP, str, TC_BLACK);
+		DrawFrameRect(r.left, r.top, r.right - 12, r.bottom, colour, clicked_button ? FR_LOWERED : FR_NONE);
+		DrawFrameRect(r.right - 11, r.top, r.right, r.bottom, colour, clicked_dropdown ? FR_LOWERED : FR_NONE);
+		DrawString(r.right - (clicked_dropdown ? 10 : 11), r.right, r.top + (clicked_dropdown ? 2 : 1), STR_BLACK_ARROW_DOWN, TC_FROMSTRING, SA_CENTER);
+		if (str != STR_NULL) DrawString(r.left + WD_DROPDOWNTEXT_LEFT + clicked_button, r.right - WD_DROPDOWNTEXT_RIGHT + clicked_button, r.top + WD_DROPDOWNTEXT_TOP + clicked_button, str, TC_BLACK);
 	} else {
-		DrawFrameRect(r.left + 12, r.top, r.right, r.bottom, colour, FR_NONE);
-		DrawFrameRect(r.left, r.top, r.left + 11, r.bottom, colour, clicked ? FR_LOWERED : FR_NONE);
-		DrawString(r.left + clicked, r.left + 11, r.top + (clicked ? 2 : 1), STR_BLACK_ARROW_DOWN, TC_FROMSTRING, SA_CENTER);
-		if (str != STR_NULL) DrawString(r.left + WD_DROPDOWNTEXT_RIGHT, r.right - WD_DROPDOWNTEXT_LEFT, r.top + WD_DROPDOWNTEXT_TOP, str, TC_BLACK);
+		DrawFrameRect(r.left + 12, r.top, r.right, r.bottom, colour, clicked_button ? FR_LOWERED : FR_NONE);
+		DrawFrameRect(r.left, r.top, r.left + 11, r.bottom, colour, clicked_dropdown ? FR_LOWERED : FR_NONE);
+		DrawString(r.left + clicked_dropdown, r.left + 11, r.top + (clicked_dropdown ? 2 : 1), STR_BLACK_ARROW_DOWN, TC_FROMSTRING, SA_CENTER);
+		if (str != STR_NULL) DrawString(r.left + WD_DROPDOWNTEXT_RIGHT + clicked_button, r.right - WD_DROPDOWNTEXT_LEFT + clicked_button, r.top + WD_DROPDOWNTEXT_TOP + clicked_button, str, TC_BLACK);
 	}
+}
+
+/**
+ * Draw a dropdown #WWT_DROPDOWN widget.
+ * @param r       Rectangle containing the widget.
+ * @param colour  Background colour of the widget.
+ * @param clicked The widget is lowered.
+ * @param str     Text of the button.
+ */
+static inline void DrawDropdown(const Rect &r, Colours colour, bool clicked, StringID str)
+{
+	DrawButtonDropdown(r, colour, false, clicked, str);
 }
 
 /**
@@ -834,8 +856,9 @@ void Window::DrawSortButtonState(int widget, SortButtonState state) const
 		top = this->widget[widget].top;
 	} else {
 		assert(this->nested_array != NULL);
-		base = offset + this->nested_array[widget]->pos_x + (_dynlang.text_dir == TD_LTR ? this->nested_array[widget]->current_x - WD_SORTBUTTON_ARROW_WIDTH : 0);
-		top = this->nested_array[widget]->pos_y;
+		NWidgetBase *nwid = this->GetWidget<NWidgetBase>(widget);
+		base = offset + nwid->pos_x + (_dynlang.text_dir == TD_LTR ? nwid->current_x - WD_SORTBUTTON_ARROW_WIDTH : 0);
+		top = nwid->pos_y;
 	}
 	DrawString(base, base + WD_SORTBUTTON_ARROW_WIDTH, top + 1 + offset, state == SBS_DOWN ? DOWNARROW : UPARROW, TC_BLACK, SA_CENTER);
 }
@@ -937,7 +960,7 @@ NWidgetBase::NWidgetBase(WidgetType tp) : ZeroedMemoryAllocator()
  */
 
 /**
- * @fn void FillNestedArray(NWidgetCore **array, uint length)
+ * @fn void FillNestedArray(NWidgetBase **array, uint length)
  * Fill the Window::nested_array array with pointers to nested widgets in the tree.
  * @param array Base pointer of the array.
  * @param length Length of the array.
@@ -1104,7 +1127,7 @@ void NWidgetCore::SetDataTip(uint16 widget_data, StringID tool_tip)
 	this->tool_tip = tool_tip;
 }
 
-void NWidgetCore::FillNestedArray(NWidgetCore **array, uint length)
+void NWidgetCore::FillNestedArray(NWidgetBase **array, uint length)
 {
 	if (this->index >= 0 && (uint)(this->index) < length) array[this->index] = this;
 }
@@ -1211,7 +1234,7 @@ void NWidgetContainer::Add(NWidgetBase *wid)
 	}
 }
 
-void NWidgetContainer::FillNestedArray(NWidgetCore **array, uint length)
+void NWidgetContainer::FillNestedArray(NWidgetBase **array, uint length)
 {
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
 		child_wid->FillNestedArray(array, length);
@@ -1252,10 +1275,21 @@ static inline uint ComputeOffset(uint space, uint max_space)
  */
 NWidgetStacked::NWidgetStacked(WidgetType tp) : NWidgetContainer(tp)
 {
+	this->index = -1;
+}
+
+void NWidgetStacked::SetIndex(int index)
+{
+	this->index = index;
 }
 
 void NWidgetStacked::SetupSmallestSize(Window *w, bool init_array)
 {
+	if (this->index >= 0 && init_array) { // Fill w->nested_array[]
+		assert(w->nested_array_size > (uint)this->index);
+		w->nested_array[this->index] = this;
+	}
+
 	/* First sweep, recurse down and compute minimal size and filling. */
 	this->smallest_x = 0;
 	this->smallest_y = 0;
@@ -1300,8 +1334,24 @@ void NWidgetStacked::StoreWidgets(Widget *widgets, int length, bool left_moving,
 	}
 }
 
+void NWidgetStacked::FillNestedArray(NWidgetBase **array, uint length)
+{
+	if (this->index >= 0 && (uint)(this->index) < length) array[this->index] = this;
+	NWidgetContainer::FillNestedArray(array, length);
+}
+
 void NWidgetStacked::Draw(const Window *w)
 {
+	if (this->type == NWID_SELECTION) {
+		int plane = 0;
+		for (NWidgetBase *child_wid = this->head; child_wid != NULL; plane++, child_wid = child_wid->next) {
+			if (plane == this->shown_plane) {
+				child_wid->Draw(w);
+				return;
+			}
+		}
+	}
+
 	assert(this->type == NWID_LAYERED); // Currently, NWID_SELECTION is not supported.
 	/* Render from back to front. */
 	for (NWidgetBase *child_wid = this->tail; child_wid != NULL; child_wid = child_wid->prev) {
@@ -1312,11 +1362,21 @@ void NWidgetStacked::Draw(const Window *w)
 NWidgetCore *NWidgetStacked::GetWidgetFromPos(int x, int y)
 {
 	if (!IsInsideBS(x, this->pos_x, this->current_x) || !IsInsideBS(y, this->pos_y, this->current_y)) return NULL;
-	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
-		NWidgetCore *nwid = child_wid->GetWidgetFromPos(x, y);
-		if (nwid != NULL) return nwid;
+	int plane = 0;
+	for (NWidgetBase *child_wid = this->head; child_wid != NULL; plane++, child_wid = child_wid->next) {
+		if (plane == this->shown_plane) {
+			return child_wid->GetWidgetFromPos(x, y);
+		}
 	}
 	return NULL;
+}
+
+/** Select which plane to show (for #NWID_SELECTION only).
+ * @param plane Plane number to display.
+ */
+void NWidgetStacked::SetDisplayedPlane(int plane)
+{
+	this->shown_plane = plane;
 }
 
 NWidgetPIPContainer::NWidgetPIPContainer(WidgetType tp, NWidContainerFlags flags) : NWidgetContainer(tp)
@@ -1640,7 +1700,7 @@ void NWidgetSpacer::SetupSmallestSize(Window *w, bool init_array)
 	this->smallest_y = this->min_y;
 }
 
-void NWidgetSpacer::FillNestedArray(NWidgetCore **array, uint length)
+void NWidgetSpacer::FillNestedArray(NWidgetBase **array, uint length)
 {
 }
 
@@ -1772,7 +1832,7 @@ void NWidgetBackground::StoreWidgets(Widget *widgets, int length, bool left_movi
 	if (this->child != NULL) this->child->StoreWidgets(widgets, length, left_moving, top_moving, rtl);
 }
 
-void NWidgetBackground::FillNestedArray(NWidgetCore **array, uint length)
+void NWidgetBackground::FillNestedArray(NWidgetBase **array, uint length)
 {
 	if (this->index >= 0 && (uint)(this->index) < length) array[this->index] = this;
 	if (this->child != NULL) this->child->FillNestedArray(array, length);
@@ -1832,7 +1892,7 @@ NWidgetCore *NWidgetBackground::GetWidgetFromPos(int x, int y)
 Scrollbar *NWidgetBackground::FindScrollbar(Window *w, bool allow_next)
 {
 	if (this->index > 0 && allow_next && this->child == NULL && (uint)(this->index) + 1 < w->nested_array_size) {
-		NWidgetCore *next_wid = w->nested_array[this->index + 1];
+		NWidgetCore *next_wid = w->GetWidget<NWidgetCore>(this->index + 1);
 		if (next_wid != NULL) return next_wid->FindScrollbar(w, false);
 	}
 	return NULL;
@@ -1965,6 +2025,7 @@ NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, 
 		case WWT_TEXT:
 		case WWT_MATRIX:
 		case WWT_EDITBOX:
+		case NWID_BUTTON_DRPDOWN:
 			this->SetFill(false, false);
 			break;
 
@@ -2139,7 +2200,8 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 			size = maxdim(size, d2);
 			break;
 		}
-		case WWT_DROPDOWN: {
+		case WWT_DROPDOWN:
+		case NWID_BUTTON_DRPDOWN: {
 			static const Dimension extra = {WD_DROPDOWNTEXT_LEFT + WD_DROPDOWNTEXT_RIGHT, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM};
 			padding = &extra;
 			if (this->index >= 0) w->SetStringParameters(this->index);
@@ -2262,6 +2324,11 @@ void NWidgetLeaf::Draw(const Window *w)
 			DrawDropdown(r, this->colour, clicked, this->widget_data);
 			break;
 
+		case NWID_BUTTON_DRPDOWN:
+			if (this->index >= 0) w->SetStringParameters(this->index);
+			DrawButtonDropdown(r, this->colour, clicked, (this->disp_flags & ND_DROPDOWN_ACTIVE) != 0, this->widget_data);
+			break;
+
 		default:
 			NOT_REACHED();
 	}
@@ -2278,10 +2345,28 @@ Scrollbar *NWidgetLeaf::FindScrollbar(Window *w, bool allow_next)
 	if (this->type == WWT_SCROLL2BAR) return &w->vscroll2;
 
 	if (this->index > 0 && allow_next && (uint)(this->index) + 1 < w->nested_array_size) {
-		NWidgetCore *next_wid = w->nested_array[this->index + 1];
+		NWidgetCore *next_wid = w->GetWidget<NWidgetCore>(this->index + 1);
 		if (next_wid != NULL) return next_wid->FindScrollbar(w, false);
 	}
 	return NULL;
+}
+
+/**
+ * For a #NWID_BUTTON_DRPDOWN, test whether \a pt refers to the button or to the drop-down.
+ * @param pt Point in the widget.
+ * @return The point refers to the button.
+ *
+ * @note The magic constants are also used at #DrawButtonDropdown.
+ */
+bool NWidgetLeaf::ButtonHit(const Point &pt)
+{
+	if (_dynlang.text_dir == TD_LTR) {
+		int button_width = this->pos_x + this->current_x - 12;
+		return pt.x < button_width;
+	} else {
+		int button_left = this->pos_x + 12;
+		return pt.x >= button_left;
+	}
 }
 
 /**
@@ -2434,13 +2519,11 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				break;
 			}
 
-			case NWID_SELECTION:
 			case NWID_LAYERED:
 				if (*dest != NULL) return num_used;
 				*dest = new NWidgetStacked(parts->type);
 				*fill_dest = true;
 				break;
-
 
 			case WPT_RESIZE: {
 				NWidgetResizeBase *nwrb = dynamic_cast<NWidgetResizeBase *>(*dest);
@@ -2497,9 +2580,19 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
 				break;
 
+			case NWID_SELECTION: {
+				if (*dest != NULL) return num_used;
+				NWidgetStacked *nws = new NWidgetStacked(parts->type);
+				*dest = nws;
+				*fill_dest = true;
+				nws->SetIndex(parts->u.widget.index);
+				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
+				break;
+			}
+
 			default:
 				if (*dest != NULL) return num_used;
-				assert((parts->type & WWT_MASK) < WWT_LAST);
+				assert((parts->type & WWT_MASK) < WWT_LAST || parts->type == NWID_BUTTON_DRPDOWN);
 				*dest = new NWidgetLeaf(parts->type, parts->u.widget.colour, parts->u.widget.index, 0x0, STR_NULL);
 				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
 				break;

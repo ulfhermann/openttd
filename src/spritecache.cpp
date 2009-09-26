@@ -493,12 +493,12 @@ void *AllocSprite(size_t mem_req)
  * For ST_FONT sprites, it is normal. In other cases, default sprite is loaded instead.
  * @param sprite ID of loaded sprite
  * @param requested requested sprite type
- * @param available available sprite type
+ * @param sc the currently known sprite cache for the requested sprite
  * @return fallback sprite
  * @note this function will do usererror() in the case the fallback sprite isn't available */
 static void *HandleInvalidSpriteRequest(SpriteID sprite, SpriteType requested, SpriteCache *sc)
 {
-	static const char *sprite_types[] = {
+	static const char * const sprite_types[] = {
 		"normal",        // ST_NORMAL
 		"map generator", // ST_MAPGEN
 		"character",     // ST_FONT
