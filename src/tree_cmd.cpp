@@ -74,7 +74,7 @@ static bool CanPlantTreesOnTile(TileIndex tile, bool allow_desert)
  * @pre the tile must be suitable for trees.
  *
  * @param tile where to plant the trees.
- * @param type The type of the tree
+ * @param treetype The type of the tree
  * @param count the number of trees (minus 1)
  * @param growth the growth status
  */
@@ -328,6 +328,8 @@ void GenerateTrees()
  * @param flags type of operation
  * @param p1 tree type, -1 means random.
  * @param p2 end tile of area-drag
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdPlantTree(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {

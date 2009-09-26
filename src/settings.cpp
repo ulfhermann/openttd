@@ -86,7 +86,7 @@ static bool IsSignedVarMemType(VarType vt);
 /**
  * Groups in openttd.cfg that are actually lists.
  */
-static const char *_list_group_names[] = {
+static const char * const _list_group_names[] = {
 	"bans",
 	"newgrf",
 	"servers",
@@ -301,7 +301,7 @@ static void make_manyofmany(char *buf, const char *last, const char *many, uint3
 
 /** Convert a string representation (external) of a setting to the internal rep.
  * @param desc SettingDesc struct that holds all information about the variable
- * @param str input string that will be parsed based on the type of desc
+ * @param orig_str input string that will be parsed based on the type of desc
  * @return return the parsed value of the setting */
 static const void *string_to_val(const SettingDescBase *desc, const char *orig_str)
 {
@@ -605,9 +605,8 @@ static void ini_save_settings(IniFile *ini, const SettingDesc *sd, const char *g
  * saved and a callback function should be defined that will take over the
  * list-handling and store the data itself somewhere.
  * @param ini IniFile handle to the ini file with the source data
- * @param grpname character string identifying the section-header of the ini
- * file that will be parsed
- * entries of the given section
+ * @param grpname character string identifying the section-header of the ini file that will be parsed
+ * @param list new list with entries of the given section
  */
 static void ini_load_setting_list(IniFile *ini, const char *grpname, StringList *list)
 {
@@ -1257,7 +1256,7 @@ static void SaveVersionInConfig(IniFile *ini)
 	char version[9];
 	snprintf(version, lengthof(version), "%08X", _openttd_newgrf_version);
 
-	const char *versions[][2] = {
+	const char * const versions[][2] = {
 		{ "version_string", _openttd_revision },
 		{ "version_number", version }
 	};
@@ -1410,6 +1409,8 @@ static const SettingDesc *GetSettingDescription(uint index)
  * @param p1 the index of the setting in the SettingDesc array which identifies it
  * @param p2 the new value for the setting
  * The new value is properly clamped to its minimum/maximum when setting
+ * @param text unused
+ * @return the cost of this operation or an error
  * @see _settings
  */
 CommandCost CmdChangeSetting(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
@@ -1458,6 +1459,8 @@ CommandCost CmdChangeSetting(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
  * @param p1 the index of the setting in the _company_settings array which identifies it
  * @param p2 the new value for the setting
  * The new value is properly clamped to its minimum/maximum when setting
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdChangeCompanySetting(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1489,10 +1492,8 @@ CommandCost CmdChangeCompanySetting(TileIndex tile, DoCommandFlag flags, uint32 
 /** Top function to save the new value of an element of the Settings struct
  * @param index offset in the SettingDesc array of the Settings struct which
  * identifies the setting member we want to change
- * @param object pointer to a valid settings struct that has its settings change.
- * This only affects setting-members that are not needed to be the same on all
- * clients in a network game.
- * @param value new value of the setting */
+ * @param value new value of the setting
+ */
 bool SetSettingValue(uint index, int32 value)
 {
 	const SettingDesc *sd = &_settings[index];
@@ -1523,8 +1524,8 @@ bool SetSettingValue(uint index, int32 value)
 /** Top function to save the new value of an element of the Settings struct
  * @param index offset in the SettingDesc array of the CompanySettings struct
  * which identifies the setting member we want to change
- * @param object pointer to a valid CompanySettings struct that has its settings changed.
- * @param value new value of the setting */
+ * @param value new value of the setting
+ */
 void SetCompanySetting(uint index, int32 value)
 {
 	const SettingDesc *sd = &_company_settings[index];
