@@ -217,8 +217,9 @@ STR_UNITS_VOLUME_LONG_SI                                        :{COMMA} m
 STR_UNITS_FORCE_SI                                              :{COMMA} kN
 
 # Common window strings
-STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Filtre metnini girin
+STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Süzgeç metnini girin
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Listeyi filtrelemek için bir anahtar sözcük girin
+STR_LIST_FILTER_TITLE                                           :{BLACK}Süzgeç metni:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Sıralama türü seçin (azalan/artan)
 STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Sıralama kriteri seçin
@@ -943,26 +944,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Tam ekra
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Özel Para Birimi
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Çarpan: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Çarpan: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Bir Sterlin'e (£) karşılık gelen para biriminizi azaltın
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Bir Sterlin'e (£) karşılık gelen para biriminizi arttırın
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Bir Sterlin'e (£) karşılık gelen para biriminizi belirleyin
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Ayraç: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Ayraç: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Para biriminiz için ondalık ayıracı belirleyin
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Önek: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Önek: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Para biriminiz için ön ek belirleyin
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sonek: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sonek: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Para biriminiz için son ek belirleyin
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Euro'ya geç: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Euro'ya geç: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Euro'ya geç: {ORANGE}hiçbir zaman
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Avro'ya geçiş yılını seçin
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Avro'ya daha erken geç
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Avro'ya daha sonra geç
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Önizleme: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Önizleme: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 Sterlin'in (£) para biriminizdeki karşılığı
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Özel para birimini değiştir
 
@@ -1344,6 +1345,7 @@ STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
 STR_OSNAME_OSX                                                  :OS X
 STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
 STR_OSNAME_OS2                                                  :OS/2
@@ -1760,7 +1762,7 @@ STR_CONTENT_SELECT_UPDATES_CAPTION                              :{BLACK}Güncell
 STR_CONTENT_SELECT_UPDATES_CAPTION_TOOLTIP                      :{BLACK}Mevcut içeriğin güncellemesi olan tüm içeriği indirilmek üzere işaretle
 STR_CONTENT_UNSELECT_ALL_CAPTION                                :{BLACK}Tümünden seçimi kaldır
 STR_CONTENT_UNSELECT_ALL_CAPTION_TOOLTIP                        :{BLACK}Tüm içeriği indirilmemek üzere işaretle
-STR_CONTENT_FILTER_TITLE                                        :{BLACK}Etiket/isim filtresi:
+STR_CONTENT_FILTER_TITLE                                        :{BLACK}Etiket/isim süzgeci:
 STR_CONTENT_DOWNLOAD_CAPTION                                    :{BLACK}İndir
 STR_CONTENT_DOWNLOAD_CAPTION_TOOLTIP                            :{BLACK}Seçili içeriği indirmeye başla
 STR_CONTENT_TOTAL_DOWNLOAD_SIZE                                 :{SILVER}Toplam indirme boyutu: {WHITE}{BYTES}
@@ -2031,6 +2033,12 @@ STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Rastgele
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Rastgele bir yerde şehir yarat
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Birçok rastgele şehir
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}Haritayı rastgele şehirlerle doldur
+
+STR_FOUND_TOWN_NAME_TITLE                                       :{YELLOW}Kasaba adı:
+STR_FOUND_TOWN_NAME_EDITOR_TITLE                                :{BLACK}Kasaba adı girin
+STR_FOUND_TOWN_NAME_EDITOR_HELP                                 :{BLACK}Kasaba adı girmek için tıklayın
+STR_FOUND_TOWN_NAME_RANDOM_BUTTON                               :{BLACK}Rastgele isim
+STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP                              :{BLACK}Yeni rastgele isim oluştur
 
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Şehir büyüklüğü:
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Küçük
@@ -2599,7 +2607,7 @@ STR_VEHICLE_LIST_MANAGE_LIST_TOOLTIP                            :{BLACK}Listedek
 STR_VEHICLE_LIST_REPLACE_VEHICLES                               :Araçları Değiştir
 STR_VEHICLE_LIST_SEND_FOR_SERVICING                             :Bakıma Gönder
 
-STR_VEHICLE_LIST_SEND_TRAIN_TO_DEPOT                            :Gara Gönder
+STR_VEHICLE_LIST_SEND_TRAIN_TO_DEPOT                            :Garaja Gönder
 STR_VEHICLE_LIST_SEND_ROAD_VEHICLE_TO_DEPOT                     :Garaja Gönder
 STR_VEHICLE_LIST_SEND_SHIP_TO_DEPOT                             :Tersaneye Gönder
 STR_VEHICLE_LIST_SEND_AIRCRAFT_TO_HANGAR                        :Hangara Gönder
@@ -2819,7 +2827,7 @@ STR_VEHICLE_VIEW_ROAD_VEHICLE_LOCATION_TOOLTIP                  :{BLACK}Arabayı
 STR_VEHICLE_VIEW_SHIP_LOCATION_TOOLTIP                          :{BLACK}Gemiyi göster
 STR_VEHICLE_VIEW_AIRCRAFT_LOCATION_TOOLTIP                      :{BLACK}Uçağı göster
 
-STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Treni gara gönder
+STR_VEHICLE_VIEW_TRAIN_SEND_TO_DEPOT_TOOLTIP                    :{BLACK}Treni garaja gönder
 STR_VEHICLE_VIEW_ROAD_VEHICLE_SEND_TO_DEPOT_TOOLTIP             :{BLACK}Aracı garaja gönder
 STR_VEHICLE_VIEW_SHIP_SEND_TO_DEPOT_TOOLTIP                     :{BLACK}Tersaneye gönder
 STR_VEHICLE_VIEW_AIRCRAFT_SEND_TO_DEPOT_TOOLTIP                 :{BLACK}Uçağı hangara gönder
@@ -3279,7 +3287,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Bu şirk
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Şehir kurulamaz
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}İsim değiştirilemiyor...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Buraya şehir yapılamıyor...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Buraya şehir yapılamıyor...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...haritanin kenarına çok yakın
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...başka bir şehire çok yakın
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...çok fazla şehir var
@@ -3292,7 +3300,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Fabrika 
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Buraya {STRING} yapılamaz...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Buraya bu fabrikadan yapılamaz...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...başka bir fabrikaya çok yakın
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...önce şehir yapılmalı
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...önce şehir yapılmalı
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...her şehirde yalnızca bir tane olabilir
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...yalnızca nüfusu en az 1200 olan şehirlere yapılabilir
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...yalnızca yağmur ormanlarında yapılabilir
@@ -3355,7 +3363,7 @@ STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}...yolda
 STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}...samandıra kullanımda!
 
 # Depot related errors
-STR_ERROR_CAN_T_BUILD_TRAIN_DEPOT                               :{WHITE}Buraya tren garı yapılamıyor...
+STR_ERROR_CAN_T_BUILD_TRAIN_DEPOT                               :{WHITE}Buraya tren garajı yapılamıyor...
 STR_ERROR_CAN_T_BUILD_ROAD_DEPOT                                :{WHITE}Buraya garaj yapılamaz...
 STR_ERROR_CAN_T_BUILD_TRAM_DEPOT                                :{WHITE}Buraya tramvay garı yapılamaz...
 STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Buraya tersane yapılamaz...
@@ -3469,7 +3477,7 @@ STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Araba ba
 STR_ERROR_CAN_T_STOP_START_SHIP                                 :{WHITE}Gemi durdurulamaz/başlatılamaz...
 STR_ERROR_CAN_T_STOP_START_AIRCRAFT                             :{WHITE}Uçak durdurulamaz/başlatılamaz...
 
-STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Tren gara gönderilemiyor...
+STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT                             :{WHITE}Tren garaja gönderilemiyor...
 STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Araç garaja gidemiyor...
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Gemi tersaneye gönderilemez...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Hangara gönderilemiyor...
@@ -4001,7 +4009,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

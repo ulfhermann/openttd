@@ -106,6 +106,8 @@ extern CommandCost CheckFlatLandBelow(TileIndex tile, uint w, uint h, DoCommandF
  * @param flags type of operation
  * @param p1 unused
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildCompanyHQ(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -139,7 +141,8 @@ CommandCost CmdBuildCompanyHQ(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
  * @param flags for this command type
  * @param p1 unused
  * @param p2 unused
- * @return error of cost of operation
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdPurchaseLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -166,7 +169,8 @@ CommandCost CmdPurchaseLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, 
  * @param flags for this command type
  * @param p1 unused
  * @param p2 unused
- * @return error or cost of operation
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSellLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -301,7 +305,7 @@ static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 	return CommandCost();
 }
 
-static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, uint32 *town_acc)
+static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
 {
 	if (!IsCompanyHQ(tile)) return;
 
@@ -314,14 +318,14 @@ static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, u
 	/* Top town building generates 10, so to make HQ interesting, the top
 	 * type makes 20. */
 	acceptance[CT_PASSENGERS] += max(1U, level);
-	SetBit(*town_acc, CT_PASSENGERS);
+	SetBit(*always_accepted, CT_PASSENGERS);
 
 	/* Top town building generates 4, HQ can make up to 8. The
 	 * proportion passengers:mail is different because such a huge
 	 * commercial building generates unusually high amount of mail
 	 * correspondence per physical visitor. */
 	acceptance[CT_MAIL] += max(1U, level / 2);
-	SetBit(*town_acc, CT_MAIL);
+	SetBit(*always_accepted, CT_MAIL);
 }
 
 

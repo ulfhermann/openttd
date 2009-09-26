@@ -107,14 +107,14 @@ void TrainPowerChanged(Train *v)
 			const RailVehicleInfo *rvi_u = RailVehInfo(u->engine_type);
 
 			if (engine_has_power) {
-				uint16 power = GetVehicleProperty(u, 0x0B, rvi_u->power);
+				uint16 power = GetVehicleProperty(u, PROP_TRAIN_POWER, rvi_u->power);
 				if (power != 0) {
 					/* Halve power for multiheaded parts */
 					if (u->IsMultiheaded()) power /= 2;
 
 					total_power += power;
 					/* Tractive effort in (tonnes * 1000 * 10 =) N */
-					max_te += (u->tcache.cached_veh_weight * 10000 * GetVehicleProperty(u, 0x1F, rvi_u->tractive_effort)) / 256;
+					max_te += (u->tcache.cached_veh_weight * 10000 * GetVehicleProperty(u, PROP_TRAIN_TRACTIVE_EFFORT, rvi_u->tractive_effort)) / 256;
 				}
 			}
 		}
@@ -151,7 +151,7 @@ static void TrainCargoChanged(Train *v)
 		/* Vehicle weight is not added for articulated parts. */
 		if (!u->IsArticulatedPart()) {
 			/* vehicle weight is the sum of the weight of the vehicle and the weight of its cargo */
-			vweight += GetVehicleProperty(u, 0x16, RailVehInfo(u->engine_type)->weight);
+			vweight += GetVehicleProperty(u, PROP_TRAIN_WEIGHT, RailVehInfo(u->engine_type)->weight);
 		}
 
 		/* powered wagons have extra weight added */
@@ -253,7 +253,7 @@ void TrainConsistChanged(Train *v, bool same_length)
 
 	for (Train *u = v; u != NULL; u = u->Next()) {
 		/* Update user defined data (must be done before other properties) */
-		u->tcache.user_def_data = GetVehicleProperty(u, 0x25, u->tcache.user_def_data);
+		u->tcache.user_def_data = GetVehicleProperty(u, PROP_TRAIN_USER_DATA, u->tcache.user_def_data);
 		v->InvalidateNewGRFCache();
 		u->InvalidateNewGRFCache();
 	}
@@ -316,14 +316,14 @@ void TrainConsistChanged(Train *v, bool same_length)
 
 			/* max speed is the minimum of the speed limits of all vehicles in the consist */
 			if ((rvi_u->railveh_type != RAILVEH_WAGON || _settings_game.vehicle.wagon_speed_limits) && !UsesWagonOverride(u)) {
-				uint16 speed = GetVehicleProperty(u, 0x09, rvi_u->max_speed);
+				uint16 speed = GetVehicleProperty(u, PROP_TRAIN_SPEED, rvi_u->max_speed);
 				if (speed != 0) max_speed = min(speed, max_speed);
 			}
 		}
 
 		if (e_u->CanCarryCargo() && u->cargo_type == e_u->GetDefaultCargoType() && u->cargo_subtype == 0) {
 			/* Set cargo capacity if we've not been refitted */
-			u->cargo_cap = GetVehicleProperty(u, 0x14, rvi_u->capacity);
+			u->cargo_cap = GetVehicleProperty(u, PROP_TRAIN_CARGO_CAPACITY, rvi_u->capacity);
 		}
 
 		/* check the vehicle length (callback) */
@@ -832,6 +832,8 @@ static void AddRearEngineToMultiheadedTrain(Train *v)
  * @param flags type of operation
  * @param p1 engine type id
  * @param p2 bit 1 prevents any free cars from being added to the train
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1087,6 +1089,8 @@ static void NormaliseTrainConsist(Train *v)
  * - p1 (bit  0 - 15) source vehicle index
  * - p1 (bit 16 - 31) what wagon to put the source wagon AFTER, XXX - INVALID_VEHICLE to make a new line
  * @param p2 (bit 0) move all vehicles following the source vehicle
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1153,6 +1157,15 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 				/* check if all vehicles in the dest train are stopped. */
 				dst_len = CheckTrainStoppedInDepot(dst_head);
 				if (dst_len < 0) return_cmd_error(STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT);
+			}
+
+			if (src_head == src && !HasBit(p2, 0)) {
+				/* Moving of a *single* vehicle at the front of the train.
+				 * If the next vehicle is an engine a new train will be created
+				 * instead of removing a vehicle from a free chain. The newly
+				 * created train may not be too long. */
+				const Train *u = src_head->GetNextVehicle();
+				if (u != NULL && u->IsEngine() && (src_len - 1) > max_len) return_cmd_error(STR_ERROR_TRAIN_TOO_LONG);
 			}
 
 			/* We are moving between rows, so only count the wagons from the source
@@ -1440,6 +1453,8 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
  * - p2 = 0: only sell the single dragged wagon/engine (and any belonging rear-engines)
  * - p2 = 1: sell the vehicle and all vehicles following it in the chain
  *           if the wagon is dragged, don't delete the possibly belonging rear-engine to some front
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -1648,7 +1663,7 @@ static void MarkTrainAsStuck(Train *v)
 		/* When loading the vehicle is already stopped. No need to change that. */
 		if (v->current_order.IsType(OT_LOADING)) return;
 
-		v->load_unload_time_rem = 0;
+		v->time_counter = 0;
 
 		/* Stop train */
 		v->cur_speed = 0;
@@ -1988,7 +2003,7 @@ static void ReverseTrainDirection(Train *v)
 	} else if (HasBit(v->flags, VRF_TRAIN_STUCK)) {
 		/* A train not inside a PBS block can't be stuck. */
 		ClrBit(v->flags, VRF_TRAIN_STUCK);
-		v->load_unload_time_rem = 0;
+		v->time_counter = 0;
 	}
 }
 
@@ -1997,6 +2012,8 @@ static void ReverseTrainDirection(Train *v)
  * @param flags type of operation
  * @param p1 train to reverse
  * @param p2 if true, reverse a unit in a train (needs to be in a depot)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2055,6 +2072,8 @@ CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32
  * @param flags type of operation
  * @param p1 train to ignore the red signal
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdForceTrainProceed(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2070,11 +2089,12 @@ CommandCost CmdForceTrainProceed(TileIndex tile, DoCommandFlag flags, uint32 p1,
  * @param tile unused
  * @param flags type of operation
  * @param p1 vehicle ID of the train to refit
- * param p2 various bitstuffed elements
+ * @param p2 various bitstuffed elements
  * - p2 = (bit 0-7) - the new cargo type to refit to
  * - p2 = (bit 8-15) - the new cargo subtype to refit to
  * - p2 = (bit 16) - refit only this vehicle
- * @return cost of refit or error
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRefitRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2277,6 +2297,8 @@ bool Train::FindClosestDepot(TileIndex *location, DestinationID *destination, bo
  * @param p2 various bitmasked elements
  * - p2 bit 0-3 - DEPOT_ flags (see vehicle.h)
  * - p2 bit 8-10 - VLW flag (for mass goto depot)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSendTrainToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2445,12 +2467,12 @@ static bool CheckTrainStayInDepot(Train *v)
 
 	if (v->force_proceed == 0) {
 		/* force proceed was not pressed */
-		if (++v->load_unload_time_rem < 37) {
+		if (++v->time_counter < 37) {
 			SetWindowClassesDirty(WC_TRAINS_LIST);
 			return true;
 		}
 
-		v->load_unload_time_rem = 0;
+		v->time_counter = 0;
 
 		seg_state = _settings_game.pf.reserve_paths ? SIGSEG_PBS : UpdateSignalsOnSegment(v->tile, INVALID_DIAGDIR, v->owner);
 		if (seg_state == SIGSEG_FULL || HasDepotReservation(v->tile)) {
@@ -3196,7 +3218,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 	}
 
 	if (HasBit(v->flags, VRF_TRAIN_STUCK)) {
-		v->load_unload_time_rem = 0;
+		v->time_counter = 0;
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
 	ClrBit(v->flags, VRF_TRAIN_STUCK);
@@ -3768,12 +3790,12 @@ static void TrainController(Train *v, Vehicle *nomove)
 							v->cur_speed = 0;
 							v->subspeed = 0;
 							v->progress = 255 - 100;
-							if (_settings_game.pf.wait_oneway_signal == 255 || ++v->load_unload_time_rem < _settings_game.pf.wait_oneway_signal * 20) return;
+							if (_settings_game.pf.wait_oneway_signal == 255 || ++v->time_counter < _settings_game.pf.wait_oneway_signal * 20) return;
 						} else if (HasSignalOnTrackdir(gp.new_tile, i)) {
 							v->cur_speed = 0;
 							v->subspeed = 0;
 							v->progress = 255 - 10;
-							if (_settings_game.pf.wait_twoway_signal == 255 || ++v->load_unload_time_rem < _settings_game.pf.wait_twoway_signal * 73) {
+							if (_settings_game.pf.wait_twoway_signal == 255 || ++v->time_counter < _settings_game.pf.wait_twoway_signal * 73) {
 								DiagDirection exitdir = TrackdirToExitdir(i);
 								TileIndex o_tile = TileAddByDiagDir(gp.new_tile, exitdir);
 
@@ -3787,7 +3809,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 						/* If we would reverse but are currently in a PBS block and
 						 * reversing of stuck trains is disabled, don't reverse. */
 						if (_settings_game.pf.wait_for_pbs_path == 255 && UpdateSignalsOnSegment(v->tile, enterdir, v->owner) == SIGSEG_PBS) {
-							v->load_unload_time_rem = 0;
+							v->time_counter = 0;
 							return;
 						}
 						goto reverse_train_direction;
@@ -3881,7 +3903,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 				}
 
 				if (v->IsFrontEngine()) {
-					v->load_unload_time_rem = 0;
+					v->time_counter = 0;
 
 					/* If we are approching a crossing that is reserved, play the sound now. */
 					TileIndex crossing = TrainApproachingCrossingTile(v);
@@ -3973,7 +3995,7 @@ invalid_rail:
 	if (prev != NULL) error("Disconnecting train");
 
 reverse_train_direction:
-	v->load_unload_time_rem = 0;
+	v->time_counter = 0;
 	v->cur_speed = 0;
 	v->subspeed = 0;
 	ReverseTrainDirection(v);
@@ -4137,6 +4159,7 @@ static void HandleBrokenTrain(Train *v)
 		if (v->breakdowns_since_last_service != 255)
 			v->breakdowns_since_last_service++;
 
+		v->MarkDirty();
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
 
@@ -4154,6 +4177,7 @@ static void HandleBrokenTrain(Train *v)
 	if (!(v->tick_counter & 3)) {
 		if (!--v->breakdown_delay) {
 			v->breakdown_ctr = 0;
+			v->MarkDirty();
 			SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 		}
 	}
@@ -4351,7 +4375,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 
 	bool valid_order = !v->current_order.IsType(OT_NOTHING) && v->current_order.GetType() != OT_CONDITIONAL;
 	if (ProcessOrders(v) && CheckReverseTrain(v)) {
-		v->load_unload_time_rem = 0;
+		v->time_counter = 0;
 		v->cur_speed = 0;
 		v->subspeed = 0;
 		ReverseTrainDirection(v);
@@ -4373,17 +4397,17 @@ static bool TrainLocoHandler(Train *v, bool mode)
 
 	/* Handle stuck trains. */
 	if (!mode && HasBit(v->flags, VRF_TRAIN_STUCK)) {
-		++v->load_unload_time_rem;
+		++v->time_counter;
 
 		/* Should we try reversing this tick if still stuck? */
-		bool turn_around = v->load_unload_time_rem % (_settings_game.pf.wait_for_pbs_path * DAY_TICKS) == 0 && _settings_game.pf.wait_for_pbs_path < 255;
+		bool turn_around = v->time_counter % (_settings_game.pf.wait_for_pbs_path * DAY_TICKS) == 0 && _settings_game.pf.wait_for_pbs_path < 255;
 
-		if (!turn_around && v->load_unload_time_rem % _settings_game.pf.path_backoff_interval != 0 && v->force_proceed == 0) return true;
+		if (!turn_around && v->time_counter % _settings_game.pf.path_backoff_interval != 0 && v->force_proceed == 0) return true;
 		if (!TryPathReserve(v)) {
 			/* Still stuck. */
 			if (turn_around) ReverseTrainDirection(v);
 
-			if (HasBit(v->flags, VRF_TRAIN_STUCK) && v->load_unload_time_rem > 2 * _settings_game.pf.wait_for_pbs_path * DAY_TICKS) {
+			if (HasBit(v->flags, VRF_TRAIN_STUCK) && v->time_counter > 2 * _settings_game.pf.wait_for_pbs_path * DAY_TICKS) {
 				/* Show message to player. */
 				if (_settings_client.gui.lost_train_warn && v->owner == _local_company) {
 					SetDParam(0, v->index);
@@ -4393,12 +4417,12 @@ static bool TrainLocoHandler(Train *v, bool mode)
 						v->index
 					);
 				}
-				v->load_unload_time_rem = 0;
+				v->time_counter = 0;
 			}
 			/* Exit if force proceed not pressed, else reset stuck flag anyway. */
 			if (v->force_proceed == 0) return true;
 			ClrBit(v->flags, VRF_TRAIN_STUCK);
-			v->load_unload_time_rem = 0;
+			v->time_counter = 0;
 			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 		}
 	}
@@ -4467,7 +4491,7 @@ Money Train::GetRunningCost() const
 	do {
 		const RailVehicleInfo *rvi = RailVehInfo(v->engine_type);
 
-		byte cost_factor = GetVehicleProperty(v, 0x0D, rvi->running_cost);
+		byte cost_factor = GetVehicleProperty(v, PROP_TRAIN_RUNNING_COST_FACTOR, rvi->running_cost);
 		if (cost_factor == 0) continue;
 
 		/* Halve running cost for multiheaded parts */

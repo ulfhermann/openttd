@@ -935,26 +935,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Methodd 
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Arian cyfaddas
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Cyfradd gyfnewid: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Cyfradd gyfnewid: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Llehad yr swm o eich arian cyfred am un Punt (£)
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}amlhau yr swm o eich arian cyfred am un Punt (£)
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}newid y raddfa gyfnewid o eich arian cyfred i un Punt (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Gwahanydd: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Gwahanydd: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Creu yr ysgar i eich arian Cyfred
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Rhagddodiad: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Rhagddodiad: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Creu yr rhagddodiad i eich arian Cyfred
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Olddodiad: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Olddodiad: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Creu yr olddodiad i eich arian Cyfred
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Newid i'r Ewro: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Newid i'r Ewro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Newid i'r Ewro: {ORANGE}byth
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Set yr blwyddyn i newid i'r Ewro
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Newid i'r Ewro yn gynnar.
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Newid i'r Ewro yn hwyrach
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Rhagolwg: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Rhagolwg: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 Punt (£) yn eich arian cyfaddas
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Newid paramedrau arian cyfaddas
 
@@ -3260,7 +3260,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Nid yw'r
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Methu adeiladu unrhyw drefi
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Methu ailenwi tref...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Methu adeiladu tref yma...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Methu adeiladu tref yma...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...rhy agos i ymyl y map
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...rhy agos i dref arall
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...gormod o drefi
@@ -3273,7 +3273,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Doedd di
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Ni ellir adeiladu {STRING} yma...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Does dim modd adeiladu diwydiant o'r math hwn yma...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...rhy agos i ddiwydiant arall
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...rhaid adeiladu tref yn gyntaf
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...rhaid adeiladu tref yn gyntaf
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...caniateir un yn unig ym mhob tref
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...gellir ei adeiladu'n unig mewn trefi gyda phoblogaeth o 1200 neu fwy
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...gellir ei adeiladu'n unig mewn ardal o goedwigoedd glaw
@@ -3965,7 +3965,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
