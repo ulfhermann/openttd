@@ -219,6 +219,7 @@ STR_UNITS_FORCE_SI                                              :{COMMA} kN
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Entrer le filtre
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Entrer un mot clé pour filtrer la liste
+STR_LIST_FILTER_TITLE                                           :{BLACK}Filtre:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Choisir l'ordre de tri croissant/décroissant
 STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Choisir le critère de tri
@@ -943,26 +944,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Echec du
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Devise personnalisée
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Taux de change : {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Taux de change : {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Réduire le montant de votre monnaie pour une Livre (£)
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Augmenter le montant de votre monnaie pour une Livre (£)
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Définir le taux de change de votre monnaie pour une Livre (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Séparateur : {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Séparateur : {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Définir le séparateur pour votre monnaie
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Préfixe : {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Préfixe : {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Définir le préfixe pour votre monnaie
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffixe : {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffixe : {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Définir le suffixe pour votre monnaie
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Passer à l'Euro : {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Passer à l'Euro : {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Passer à l'Euro : {ORANGE}jamais
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Définir la date de passage à l'Euro
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Passer à l'Euro plus tôt
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Passer à l'Euro plus tard
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Prévisualisation : {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Prévisualisation : {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 Livres (£) dans votre monnaie
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Changer les paramètres de devises personnalisées
 
@@ -1344,6 +1345,7 @@ STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
 STR_OSNAME_OSX                                                  :OS X
 STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
 STR_OSNAME_OS2                                                  :OS/2
@@ -2026,11 +2028,17 @@ STR_RESET_LANDSCAPE_CONFIRMATION_TEXT                           :{WHITE}Êtes-vo
 # Town generation window (SE)
 STR_FOUND_TOWN_CAPTION                                          :{WHITE}Créer les villes
 STR_FOUND_TOWN_NEW_TOWN_BUTTON                                  :{BLACK}Nouvelle ville
-STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Construire une nouvelle ville
+STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Fonder une nouvelle ville
 STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Créer une ville
-STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Construire une ville à un emplacement aléatoire
+STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Fonder une ville à un emplacement aléatoire
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Beaucoup de villes au hasard
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}Couvrir la carte avec des villes placées aléatoirement
+
+STR_FOUND_TOWN_NAME_TITLE                                       :{YELLOW}Nom de la ville:
+STR_FOUND_TOWN_NAME_EDITOR_TITLE                                :{BLACK}Entrer un nom de ville
+STR_FOUND_TOWN_NAME_EDITOR_HELP                                 :{BLACK}Cliquer pour entrer un nom de ville
+STR_FOUND_TOWN_NAME_RANDOM_BUTTON                               :{BLACK}Nom aléatoire
+STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP                              :{BLACK}Générer un nouveau nom aléatoirement
 
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Taille:
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Petite
@@ -3279,7 +3287,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Cette co
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Ne peut plus bâtir de villes
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Impossible de renommer la ville...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Impossible de construire une ville ici...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Impossible de construire une ville ici...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... trop près du bord de la carte
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... trop près d'une autre ville
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... trop de villes
@@ -3292,7 +3300,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Ne peut 
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Impossible de construire {STRING} ici...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Impossible de construire cette industrie ici...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}... trop proche d'une autre industrie
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}... une ville doit d'abord être construite
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}... une ville doit d'abord être construite
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}... droit à un par ville seulement
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... peut seulement être construit dans des villes ayant une population d'au moins 1200 habitants
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... peut seulement être construit en forêt tropicale
@@ -3991,7 +3999,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

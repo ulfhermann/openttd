@@ -218,6 +218,7 @@ STR_UNITS_FORCE_SI                                              :{COMMA} kN
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Geef het filter op
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Geef een woord waarop gefilters kan worden in de lijst
+STR_LIST_FILTER_TITLE                                           :{BLACK}Filter tekst:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Selecteer sorteerrichting (aflopend/oplopend)
 STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Selecteer sorteringscriteria
@@ -942,26 +943,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Volledig
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Aangepaste valuta
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Wisselkoers: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Wisselkoers: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Verlaag de wisselkoers van jouw munteenheid ten opzicht van de Pond (£) met één
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Verhoog de wisselkoers van jouw munteenheid ten opzicht van de Pond (£) met één
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Stel de wisselkoers in van jouw munteenheid ten opzichte van de Pond (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Scheidingsteken: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Scheidingsteken: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Stel het scheidings tekens in voor jouw munteenheid
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Voorvoegsel: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Voorvoegsel: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Stel het voorloopteken in voor jouw munteenheid
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Achtervoegsel: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Achtervoegsel: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Stel het eindteken in voor jouw munteenheid
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Overgaan op de Euro: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Overgaan op de Euro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Overgaan op de Euro: {ORANGE}nooit
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Stel het jaar in waarop de Euro wordt geïntroduceerd
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Eerder naar de Euro
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Later naar de Euro
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Voorbeeld: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Voorbeeld: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 Pound (£) in jouw munteenheid
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Verander aangepaste valuta optie
 
@@ -1343,6 +1344,7 @@ STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
 STR_OSNAME_OSX                                                  :OS X
 STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
 STR_OSNAME_OS2                                                  :OS/2
@@ -2025,11 +2027,17 @@ STR_RESET_LANDSCAPE_CONFIRMATION_TEXT                           :{WHITE}Weet je 
 # Town generation window (SE)
 STR_FOUND_TOWN_CAPTION                                          :{WHITE}Dorpsontwikkeling
 STR_FOUND_TOWN_NEW_TOWN_BUTTON                                  :{BLACK}Nieuw dorp
-STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Bouw nieuw dorp
+STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}Sticht nieuw dorp
 STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Willekeurig dorp
-STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Bouw dorp op willekeurige locatie
+STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Sticht dorp op willekeurige locatie
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Veel willekeurige steden
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}Bedek de kaart met willekeurig geplaatste steden
+
+STR_FOUND_TOWN_NAME_TITLE                                       :{YELLOW}Dorpsnaam:
+STR_FOUND_TOWN_NAME_EDITOR_TITLE                                :{BLACK}Typ dorpsnaam
+STR_FOUND_TOWN_NAME_EDITOR_HELP                                 :{BLACK}Klik om dorpsnaam in te geven
+STR_FOUND_TOWN_NAME_RANDOM_BUTTON                               :{BLACK}Willekeurige naam
+STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP                              :{BLACK}Genereer willekeurige nieuwe naam
 
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Stadsgrootte:
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Klein
@@ -2373,7 +2381,7 @@ STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Vracht n
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} nodig
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} afgelopen maand afgeleverd
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Geluidslimiet in stad: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
-STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centreer het scherm op de locatie van de stad
+STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centreer het scherm op de locatie van het dorp. Ctrl+Klik opent een nieuw venster op de locatie van het dorp
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Gemeente
 STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP                           :{BLACK}Geef informatie over de gemeente weer
 STR_TOWN_VIEW_RENAME_TOOLTIP                                    :{BLACK}Hernoem plaats
@@ -2419,10 +2427,10 @@ STR_SUBSIDIES_OFFERED_FROM_TO                                   :{ORANGE}{STRING
 STR_SUBSIDIES_NONE                                              :{ORANGE} Geen
 STR_SUBSIDIES_SUBSIDISED_TITLE                                  :{BLACK}Bestaande subsidies:
 STR_SUBSIDIES_SUBSIDISED_FROM_TO                                :{ORANGE}{STRING} van {STRING} naar {STRING}{YELLOW} ({COMPANY}{YELLOW}, tot {DATE_SHORT})
-STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                :{BLACK}Klik op de dienst om de plaats/industrie te centreren
+STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                :{BLACK}Klik op de dienst om het dorp/industrie te centreren. Ctrl+Klik opent een nieuw venster op de locatie van het dorp/industrie
 
 # Station list window
-STR_STATION_LIST_TOOLTIP                                        :{BLACK}Stationsnamen - klik op naam om het scherm te centreren op het station
+STR_STATION_LIST_TOOLTIP                                        :{BLACK}Stationsnamen - klik op naam om het scherm te centreren op het station. Ctrl+Klik opent een nieuw venster op de locatie van het station
 STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE                        :{BLACK}Houd Ctrl ingedrukt om meer items te kiezen
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} Stations
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
@@ -2458,7 +2466,7 @@ STR_CARGO_RATING_EXCELLENT                                      :Geweldig
 STR_CARGO_RATING_OUTSTANDING                                    :Uitstekend
 ############ range for rating ends
 
-STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Centreer het scherm op de locatie van het station
+STR_STATION_VIEW_CENTER_TOOLTIP                                 :{BLACK}Centreer het scherm op de locatie van het station. Ctrl+Klik opent een nieuw venster op de locatie van het station
 STR_STATION_VIEW_RENAME_TOOLTIP                                 :{BLACK}Hernoem station
 
 STR_STATION_VIEW_SCHEDULED_TRAINS_TOOLTIP                       :{BLACK}Geef alle treinen weer die dit station in hun opdrachtenlijst hebben
@@ -2469,9 +2477,9 @@ STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP                        :{BLACK}Geef all
 STR_STATION_VIEW_RENAME_STATION_CAPTION                         :Hernoem station/laadgebied
 
 # Waypoint/buoy view window
-STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Centreer scherm op de locatie van de controlepost
+STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Centreer scherm op de locatie van de controlepost. Ctrl+Klik opent een nieuw venster op de locatie van de controlepost
 STR_WAYPOINT_VIEW_CHANGE_WAYPOINT_NAME                          :{BLACK}Verander naam controlepost
-STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centreer hoofdscherm op boeilocatie
+STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centreer hoofdscherm op boeilocatie. Ctrl+Klik opent een nieuw venster op de locatie van de boei
 STR_BUOY_VIEW_CHANGE_BUOY_NAME                                  :{BLACK}Verander naam boei
 
 STR_EDIT_WAYPOINT_NAME                                          :{WHITE}Naam controlepost aanpassen
@@ -2551,13 +2559,13 @@ STR_INDUSTRY_DIRECTORY_NONE                                     :{ORANGE} Geen
 STR_INDUSTRY_DIRECTORY_ITEM                                     :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}){YELLOW} ({COMMA}% vervoerd)
 STR_INDUSTRY_DIRECTORY_ITEM_TWO                                 :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}/{CARGO}{STRING}){YELLOW} ({COMMA}%/{COMMA}% vervoerd)
 STR_INDUSTRY_DIRECTORY_ITEM_NOPROD                              :{ORANGE}{INDUSTRY}
-STR_INDUSTRY_DIRECTORY_LIST_CAPTION                             :{BLACK}Industrienamen - klik op naam om scherm te centreren op industrie
+STR_INDUSTRY_DIRECTORY_LIST_CAPTION                             :{BLACK}Industrienamen - klik op naam om scherm te centreren op industrie. Ctrl+Klik opent een nieuw venster op de locatie van de industrie
 
 # Industry view
 STR_INDUSTRY_VIEW_CAPTION                                       :{WHITE}{INDUSTRY}
 STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE                   :{BLACK}Productie vorige maand:
 STR_INDUSTRY_VIEW_TRANSPORTED                                   :{YELLOW}{CARGO}{STRING}{BLACK} ({COMMA}% getransporteerd)
-STR_INDUSTRY_VIEW_LOCATION_TOOLTIP                              :{BLACK}Centreer het scherm op de locatie van de industrie
+STR_INDUSTRY_VIEW_LOCATION_TOOLTIP                              :{BLACK}Centreer het scherm op de locatie van de industrie. Ctrl+Klik opent een nieuws venster op de locatie van de industrie
 
 ############ range for requires starts
 STR_INDUSTRY_VIEW_REQUIRES_CARGO                                :{BLACK}Vereist: {YELLOW}{STRING}{STRING}
@@ -3278,7 +3286,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Dit bedr
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Kan geen enkele plaats bouwen
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Kan dorp niet hernoemen...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Kan hier geen nieuw dorp bouwen...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Kan hier geen nieuw dorp bouwen...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... te dicht bij de rand van de kaart
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... te dicht bij een ander dorp
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... te veel dorpen
@@ -3291,7 +3299,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Kan geen
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Kan {STRING} hier niet bouwen...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Kan dit type industrie hier niet bouwen...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}... te dicht bij een andere industrie
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}... plaats eerst dorp
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}... plaats eerst dorp
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}... slechts één per dorp toegestaan
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... kan alleen in dorpen met bevolking van meer dan 1200 worden gebouwd
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... kan alleen in het regenwoud gebouwd worden
@@ -3990,7 +3998,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

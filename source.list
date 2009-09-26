@@ -40,7 +40,6 @@ map.cpp
 misc.cpp
 mixer.cpp
 music.cpp
-namegen.cpp
 network/network.cpp
 network/network_client.cpp
 network/network_command.cpp
@@ -74,6 +73,7 @@ subsidy.cpp
 texteff.cpp
 tgp.cpp
 tile_map.cpp
+townname.cpp
 #if WIN32
 #else
 	#if WINCE
@@ -191,7 +191,6 @@ map_func.h
 map_type.h
 mixer.h
 music.h
-namegen_func.h
 network/network.h
 network/network_base.h
 network/network_client.h
@@ -214,6 +213,7 @@ newgrf_generic.h
 newgrf_house.h
 newgrf_industries.h
 newgrf_industrytiles.h
+newgrf_properties.h
 newgrf_sound.h
 newgrf_spritegroup.h
 newgrf_station.h
@@ -293,6 +293,8 @@ tilehighlight_type.h
 timetable.h
 toolbar_gui.h
 town.h
+townname_func.h
+townname_type.h
 town_type.h
 track_func.h
 track_type.h
@@ -492,7 +494,6 @@ table/engines.h
 table/genland.h
 table/industry_land.h
 table/landscape_sprite.h
-table/namegen.h
 table/palette_convert.h
 table/palettes.h
 table/pricebase.h
@@ -504,6 +505,7 @@ table/sprites.h
 table/station_land.h
 table/strgen_tables.h
 ../objs/langs/table/strings.h
+table/townname.h
 table/town_land.h
 table/track_land.h
 table/train_cmd.h
@@ -624,6 +626,7 @@ ai/api/ai_industry.hpp
 ai/api/ai_industrylist.hpp
 ai/api/ai_industrytype.hpp
 ai/api/ai_industrytypelist.hpp
+ai/api/ai_info_docs.hpp
 ai/api/ai_list.hpp
 ai/api/ai_log.hpp
 ai/api/ai_map.hpp

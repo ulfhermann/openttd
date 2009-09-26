@@ -236,8 +236,9 @@ private:
 	}
 
 public:
-	NewGRFAddWindow(const WindowDesc *desc, GRFConfig **list) : QueryStringBaseWindow(EDITBOX_MAX_SIZE)
+	NewGRFAddWindow(const WindowDesc *desc, Window *parent, GRFConfig **list) : QueryStringBaseWindow(EDITBOX_MAX_SIZE)
 	{
+		this->parent = parent;
 		this->InitNested(desc, 0);
 
 		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, EDITBOX_MAX_LENGTH);
@@ -264,7 +265,7 @@ public:
 
 		this->BuildGrfList();
 		this->SetWidgetDisabledState(ANGRFW_ADD, this->sel == NULL || this->sel->IsOpenTTDBaseGRF());
-		this->vscroll.SetCapacity((this->nested_array[ANGRFW_GRF_LIST]->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
+		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(ANGRFW_GRF_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
@@ -299,10 +300,10 @@ public:
 				GfxFillRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, 0xD7);
 
 				uint y = r.top + WD_FRAMERECT_TOP;
-				int min_index = this->vscroll.GetPosition();
-				int max_index = min(min_index + this->vscroll.GetCapacity(), this->grfs.Length());
+				uint min_index = this->vscroll.GetPosition();
+				uint max_index = min(min_index + this->vscroll.GetCapacity(), this->grfs.Length());
 
-				for (int i = min_index; i < max_index; i++)
+				for (uint i = min_index; i < max_index; i++)
 				{
 					const GRFConfig *c = this->grfs[i];
 					bool h = c == this->sel;
@@ -334,7 +335,7 @@ public:
 		switch (widget) {
 			case ANGRFW_GRF_LIST: {
 				/* Get row... */
-				uint i = (pt.y - this->nested_array[ANGRFW_GRF_LIST]->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height + this->vscroll.GetPosition();
+				uint i = (pt.y - this->GetWidget<NWidgetBase>(ANGRFW_GRF_LIST)->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height + this->vscroll.GetPosition();
 
 				if (i < this->grfs.Length()) {
 					this->sel = this->grfs[i];
@@ -731,7 +732,7 @@ struct NewGRFWindow : public Window {
 
 			case SNGRFS_ADD: // Add GRF
 				DeleteWindowByClass(WC_SAVELOAD);
-				new NewGRFAddWindow(&_newgrf_add_dlg_desc, &this->list);
+				new NewGRFAddWindow(&_newgrf_add_dlg_desc, this, &this->list);
 				break;
 
 			case SNGRFS_REMOVE: { // Remove GRF
