@@ -396,6 +396,7 @@ STR_UNITS_FORCE_SI                                              :{COMMA} kN
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Unes filter teksta
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Unesite ključnu reč kako bi se filtriralo spisak
+STR_LIST_FILTER_TITLE                                           :{BLACK}Filter teksta:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Odaberite način sortiranja (opadajući/rastući)
 STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Odaberite kriterijum za sortiranje
@@ -1127,26 +1128,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Neuspeš
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Sopstvena moneta
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Devizni kurs: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Devizni kurs: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Smanjite vrednost vaše monete u odnosu na jednu funtu (£)
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Povećajte vrednost vaše monete u odnosu na jednu funtu (£)
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Postavite vrednost vaše monete u odnosu na jednu funtu (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Razdelnik: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Razdelnik: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Postavite razdelnik za vašu monetu
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefiks: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefiks: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Postavite prefiks za vašu monetu
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sufiks: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sufiks: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Postavite sufiks za vašu monetu
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Pelazak na Euro: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Pelazak na Euro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Prelazak na Euro: {ORANGE}nikada
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Odredite godinu za prelazak na euro
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Raniji prelazak na euro
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Kasniji prelazak na euro
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Primer: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Primer: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 funti (£) u vašoj moneti
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Promena parametara sopstvene monete
 
@@ -1528,6 +1529,7 @@ STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
 STR_OSNAME_OSX                                                  :OS X
 STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
 STR_OSNAME_OS2                                                  :OS/2
@@ -2215,6 +2217,12 @@ STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Nasumič
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Izgradi naselje na nasumičnoj lokaciji
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Mnogo nasumičnih naselja
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}Popunjava teren sa nasumično rasporđenim naseljima
+
+STR_FOUND_TOWN_NAME_TITLE                                       :{YELLOW}Ime grada:
+STR_FOUND_TOWN_NAME_EDITOR_TITLE                                :{BLACK}Unos imena grada
+STR_FOUND_TOWN_NAME_EDITOR_HELP                                 :{BLACK}Klik za unos imena grada
+STR_FOUND_TOWN_NAME_RANDOM_BUTTON                               :{BLACK}Proizvoljno ime
+STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP                              :{BLACK}Daje gradu proizvoljno ime
 
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Veličina naselja:
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Malo
@@ -3473,7 +3481,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Ovo pred
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Ne mogu da napravim naselje
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Naselje nije moguće preimenovati...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Ovde je nemoguće izgraditi naselje...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Ovde je nemoguće izgraditi naselje...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...previše blizu ivici terena
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...drugo naselje je previše blizu
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...previše naselja
@@ -3486,7 +3494,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Nemoguć
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE} {STRING} je nemoguće izgraditi ovde...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Nije moguće ovde izgraditi taj tip industrije...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...previše blizu druge fabrike
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...prvo bi trebalo podići naselje
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...prvo bi trebalo podići naselje
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...dozvoljena je samo jedna ovakva gradnja po naselju
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...dozvoljeno izgraditi samo u naseljima sa populacijom od najmanje 1200
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...gradnja je dozvoljena samo u područjima pod tropskim šumama
@@ -4185,7 +4193,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

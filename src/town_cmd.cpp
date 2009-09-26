@@ -50,12 +50,15 @@
 #include "core/smallmap_type.hpp"
 #include "core/pool_func.hpp"
 #include "town.h"
+#include "townname_func.h"
+#include "townname_type.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
 
 Town *_cleared_town;
 int _cleared_town_rating;
+TownID _new_town_id;
 
 uint32 _cur_town_ctr;     ///< iterator through all towns in OnTick_Town
 uint32 _cur_town_iter;    ///< frequency iterator at the same place
@@ -75,7 +78,6 @@ Town::~Town()
 	/* Delete town authority window
 	 * and remove from list of sorted towns */
 	DeleteWindowById(WC_TOWN_VIEW, this->index);
-	InvalidateWindowData(WC_TOWN_DIRECTORY, 0, 0);
 
 	/* Delete all industries belonging to the town */
 	FOR_ALL_INDUSTRIES(i) if (i->town == this) delete i;
@@ -118,6 +120,7 @@ Town::~Town()
  */
 void Town::PostDestructor(size_t index)
 {
+	InvalidateWindowData(WC_TOWN_DIRECTORY, 0, 0);
 	UpdateNearestTownForRoadTiles(false);
 }
 
@@ -174,6 +177,7 @@ enum TownGrowthResult {
 };
 
 static bool BuildTownHouse(Town *t, TileIndex tile);
+static Town *CreateRandomTown(uint attempts, uint32 townnameparts, TownSize size, bool city, TownLayout layout);
 
 static void TownDrawHouseLift(const TileInfo *ti)
 {
@@ -257,6 +261,19 @@ static uint GetSlopeZ_Town(TileIndex tile, uint x, uint y)
 /** Tile callback routine */
 static Foundation GetFoundation_Town(TileIndex tile, Slope tileh)
 {
+	HouseID hid = GetHouseType(tile);
+
+	/* For NewGRF house tiles we might not be drawing a foundation. We need to
+	 * account for this, as other structures should
+	 * draw the wall of the foundation in this case.
+	 */
+	if (hid >= NEW_HOUSE_OFFSET) {
+		const HouseSpec *hs = HouseSpec::Get(hid);
+		if (hs->spritegroup != NULL && HasBit(hs->callback_mask, CBM_HOUSE_DRAW_FOUNDATIONS)) {
+			uint32 callback_res = GetHouseCallback(CBID_HOUSE_DRAW_FOUNDATIONS, 0, 0, hid, Town::GetByTile(tile), tile);
+			if (callback_res == 0) return FOUNDATION_NONE;
+		}
+	}
 	return FlatteningFoundation(tileh);
 }
 
@@ -579,14 +596,14 @@ static void AddProducedCargo_Town(TileIndex tile, CargoArray &produced)
 	}
 }
 
-static inline void AddAcceptedCargoSetMask(CargoID cargo, uint amount, CargoArray &acceptance, uint32 *town_acc)
+static inline void AddAcceptedCargoSetMask(CargoID cargo, uint amount, CargoArray &acceptance, uint32 *always_accepted)
 {
 	if (cargo == CT_INVALID || amount == 0) return;
 	acceptance[cargo] += amount;
-	SetBit(*town_acc, cargo);
+	SetBit(*always_accepted, cargo);
 }
 
-static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32 *town_acc)
+static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
 {
 	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
 	CargoID accepts[3];
@@ -611,13 +628,13 @@ static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32
 	if (HasBit(hs->callback_mask, CBM_HOUSE_CARGO_ACCEPTANCE)) {
 		uint16 callback = GetHouseCallback(CBID_HOUSE_CARGO_ACCEPTANCE, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
 		if (callback != CALLBACK_FAILED) {
-			AddAcceptedCargoSetMask(accepts[0], GB(callback, 0, 4), acceptance, town_acc);
-			AddAcceptedCargoSetMask(accepts[1], GB(callback, 4, 4), acceptance, town_acc);
+			AddAcceptedCargoSetMask(accepts[0], GB(callback, 0, 4), acceptance, always_accepted);
+			AddAcceptedCargoSetMask(accepts[1], GB(callback, 4, 4), acceptance, always_accepted);
 			if (_settings_game.game_creation.landscape != LT_TEMPERATE && HasBit(callback, 12)) {
 				/* The 'S' bit indicates food instead of goods */
-				AddAcceptedCargoSetMask(CT_FOOD, GB(callback, 8, 4), acceptance, town_acc);
+				AddAcceptedCargoSetMask(CT_FOOD, GB(callback, 8, 4), acceptance, always_accepted);
 			} else {
-				AddAcceptedCargoSetMask(accepts[2], GB(callback, 8, 4), acceptance, town_acc);
+				AddAcceptedCargoSetMask(accepts[2], GB(callback, 8, 4), acceptance, always_accepted);
 			}
 			return;
 		}
@@ -625,7 +642,7 @@ static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32
 
 	/* No custom acceptance, so fill in with the default values */
 	for (uint8 i = 0; i < lengthof(accepts); i++) {
-		AddAcceptedCargoSetMask(accepts[i], hs->cargo_acceptance[i], acceptance, town_acc);
+		AddAcceptedCargoSetMask(accepts[i], hs->cargo_acceptance[i], acceptance, always_accepted);
 	}
 }
 
@@ -1377,89 +1394,6 @@ void UpdateTownRadius(Town *t)
 	}
 }
 
-extern int _nb_orig_names;
-
-/**
- * Struct holding a parameters used to generate town name.
- * Speeds things up a bit because these values are computed only once per name generation.
- */
-struct TownNameParams {
-	uint32 grfid;        ///< newgrf ID
-	uint16 townnametype; ///< town name style
-	bool grf;            ///< true iff a newgrf is used to generate town name
-
-	TownNameParams(byte town_name)
-	{
-		this->grf = town_name >= _nb_orig_names;
-		this->grfid = this->grf ? GetGRFTownNameId(town_name - _nb_orig_names) : 0;
-		this->townnametype = this->grf ? GetGRFTownNameType(town_name - _nb_orig_names) : SPECSTR_TOWNNAME_START + town_name;
-	}
-};
-
-/**
- * Verifies the town name is valid and unique.
- * @param r random bits
- * @param par town name parameters
- * @return true iff name is valid and unique
- */
-static bool VerifyTownName(uint32 r, const TownNameParams *par)
-{
-	/* reserve space for extra unicode character and terminating '\0' */
-	char buf1[MAX_LENGTH_TOWN_NAME_BYTES + 4 + 1];
-	char buf2[MAX_LENGTH_TOWN_NAME_BYTES + 4 + 1];
-
-	SetDParam(0, r);
-	if (par->grf && par->grfid != 0) {
-		GRFTownNameGenerate(buf1, par->grfid, par->townnametype, r, lastof(buf1));
-	} else {
-		GetString(buf1, par->townnametype, lastof(buf1));
-	}
-
-	/* Check size and width */
-	if (strlen(buf1) >= MAX_LENGTH_TOWN_NAME_BYTES) return false;
-
-	const Town *t;
-	FOR_ALL_TOWNS(t) {
-		/* We can't just compare the numbers since
-		 * several numbers may map to a single name. */
-		SetDParam(0, t->index);
-		GetString(buf2, STR_TOWN_NAME, lastof(buf2));
-		if (strcmp(buf1, buf2) == 0) return false;
-	}
-
-	return true;
-}
-
-/**
- * Generates valid town name.
- * @param townnameparts if a name is generated, it's stored there
- * @return true iff a name was generated
- */
-bool GenerateTownName(uint32 *townnameparts)
-{
-	/* Do not set too low tries, since when we run out of names, we loop
-	 * for #tries only one time anyway - then we stop generating more
-	 * towns. Do not show it too high neither, since looping through all
-	 * the other towns may take considerable amount of time (10000 is
-	 * too much). */
-	int tries = 1000;
-	TownNameParams par(_settings_game.game_creation.town_name);
-
-	assert(townnameparts != NULL);
-
-	for (;;) {
-		uint32 r = InteractiveRandom();
-
-		if (!VerifyTownName(r, &par)) {
-			if (tries-- < 0) return false;
-			continue;
-		}
-
-		*townnameparts = r;
-		return true;
-	}
-}
-
 void UpdateTownMaxPass(Town *t)
 {
 	t->max_pass = t->population >> 3;
@@ -1472,8 +1406,9 @@ void UpdateTownMaxPass(Town *t)
  * @param t The town
  * @param tile Where to put it
  * @param townnameparts The town name
- * @param size_mode How the size should be determined
  * @param size Parameter for size determination
+ * @param city whether to build a city or town
+ * @param layout the (road) layout of the town
  */
 static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize size, bool city, TownLayout layout)
 {
@@ -1509,6 +1444,7 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 	t->exclusive_counter = 0;
 	t->statues = 0;
 
+	extern int _nb_orig_names;
 	if (_settings_game.game_creation.town_name < _nb_orig_names) {
 		/* Original town name */
 		t->townnamegrfid = 0;
@@ -1567,7 +1503,23 @@ static CommandCost TownCanBePlacedHere(TileIndex tile)
 		return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 	}
 
-	return CommandCost();
+	return CommandCost(EXPENSES_OTHER);
+}
+
+/**
+ * Verifies this custom name is unique. Only custom names are checked.
+ * @param name name to check
+ * @return is this name unique?
+ */
+static bool IsUniqueTownName(const char *name)
+{
+	const Town *t;
+
+	FOR_ALL_TOWNS(t) {
+		if (t->name != NULL && strcmp(t->name, name) == 0) return false;
+	}
+
+	return true;
 }
 
 /** Create a new town.
@@ -1578,9 +1530,12 @@ static CommandCost TownCanBePlacedHere(TileIndex tile)
  * @param p1  0..1 size of the town (@see TownSize)
  *               2 true iff it should be a city
  *            3..5 town road layout (@see TownLayout)
+ *               6 use random location (randomize \c tile )
  * @param p2 town name parts
+ * @param text unused
+ * @return the cost of this operation or an error
  */
-CommandCost CmdBuildTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	/* Only in the scenario editor */
 	if (_game_mode != GM_EDITOR) return CMD_ERROR;
@@ -1589,29 +1544,54 @@ CommandCost CmdBuildTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	bool city = HasBit(p1, 2);
 	TownLayout layout = (TownLayout)GB(p1, 3, 3);
 	TownNameParams par(_settings_game.game_creation.town_name);
+	bool random = HasBit(p1, 6);
 	uint32 townnameparts = p2;
 
 	if (size > TS_RANDOM) return CMD_ERROR;
 	if (layout > TL_RANDOM) return CMD_ERROR;
 
-	if (!VerifyTownName(townnameparts, &par)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
-
-	CommandCost cost = TownCanBePlacedHere(tile);
-	if (CmdFailed(cost)) return cost;
+	if (StrEmpty(text)) {
+		/* If supplied name is empty, townnameparts has to generate unique automatic name */
+		if (!VerifyTownName(townnameparts, &par)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
+	} else {
+		/* If name is not empty, it has to be unique custom name */
+		if (strlen(text) >= MAX_LENGTH_TOWN_NAME_BYTES) return CMD_ERROR;
+		if (!IsUniqueTownName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
+	}
 
 	/* Allocate town struct */
 	if (!Town::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_TOWNS);
 
+	CommandCost cost(EXPENSES_OTHER);
+	if (!random) {
+		cost = TownCanBePlacedHere(tile);
+		if (CmdFailed(cost)) return cost;
+	}
+
 	/* Create the town */
 	if (flags & DC_EXEC) {
-		Town *t = new Town(tile);
 		_generating_world = true;
 		UpdateNearestTownForRoadTiles(true);
-		DoCreateTown(t, tile, townnameparts, size, city, layout);
+		Town *t;
+		if (random) {
+			t = CreateRandomTown(20, townnameparts, size, city, layout);
+			if (t == NULL) {
+				cost = CommandCost(STR_ERROR_NO_SPACE_FOR_TOWN);
+			} else {
+				_new_town_id = t->index;
+			}
+		} else {
+			t = new Town(tile);
+			DoCreateTown(t, tile, townnameparts, size, city, layout);
+		}
 		UpdateNearestTownForRoadTiles(false);
 		_generating_world = false;
+		if (t != NULL && !StrEmpty(text)) {
+			t->name = strdup(text);
+			t->UpdateVirtCoord();
+		}
 	}
-	return CommandCost();
+	return cost;
 }
 
 /**
@@ -1711,6 +1691,7 @@ static bool FindNearestEmptyLand(TileIndex tile, void *user_data)
  * flat spot.
  *
  * @param tile Start looking from this spot.
+ * @param layout the road layout to search for
  * @return tile that was found
  */
 static TileIndex FindNearestGoodCoastalTownSpot(TileIndex tile, TownLayout layout)
@@ -1727,7 +1708,7 @@ static TileIndex FindNearestGoodCoastalTownSpot(TileIndex tile, TownLayout layou
 	return INVALID_TILE;
 }
 
-Town *CreateRandomTown(uint attempts, TownSize size, bool city, TownLayout layout)
+static Town *CreateRandomTown(uint attempts, uint32 townnameparts, TownSize size, bool city, TownLayout layout)
 {
 	if (!Town::CanAllocateItem()) return NULL;
 
@@ -1744,10 +1725,6 @@ Town *CreateRandomTown(uint attempts, TownSize size, bool city, TownLayout layou
 
 		/* Make sure town can be placed here */
 		if (CmdFailed(TownCanBePlacedHere(tile))) continue;
-
-		uint32 townnameparts;
-		/* Get a unique name for the town. */
-		if (!GenerateTownName(&townnameparts)) break;
 
 		/* Allocate a town struct */
 		Town *t = new Town(tile);
@@ -1776,6 +1753,7 @@ bool GenerateTowns(TownLayout layout)
 	uint num = 0;
 	uint difficulty = _settings_game.difficulty.number_towns;
 	uint n = (difficulty == (uint)CUSTOM_TOWN_NUMBER_DIFFICULTY) ? _settings_game.game_creation.custom_town_number : ScaleByMapSize(_num_initial_towns[difficulty] + (Random() & 7));
+	uint32 townnameparts;
 
 	SetGeneratingWorldProgress(GWP_TOWN, n);
 
@@ -1785,22 +1763,28 @@ bool GenerateTowns(TownLayout layout)
 	do {
 		bool city = (_settings_game.economy.larger_towns != 0 && Chance16(1, _settings_game.economy.larger_towns));
 		IncreaseGeneratingWorldProgress(GWP_TOWN);
+		/* Get a unique name for the town. */
+		if (!GenerateTownName(&townnameparts)) continue;
 		/* try 20 times to create a random-sized town for the first loop. */
-		if (CreateRandomTown(20, TS_RANDOM, city, layout) != NULL) num++; // if creation successfull, raise a flag
+		if (CreateRandomTown(20, townnameparts, TS_RANDOM, city, layout) != NULL) num++; // if creation successfull, raise a flag
 	} while (--n);
+
+	if (num != 0) return true;
 
 	/* If num is still zero at this point, it means that not a single town has been created.
 	 * So give it a last try, but now more aggressive */
-	if (num == 0 && CreateRandomTown(10000, TS_RANDOM, _settings_game.economy.larger_towns != 0, layout) == NULL) {
-		if (Town::GetNumItems() == 0) {
-			if (_game_mode != GM_EDITOR) {
-				extern StringID _switch_mode_errorstr;
-				_switch_mode_errorstr = STR_ERROR_COULD_NOT_CREATE_TOWN;
-			}
-		}
-		return false;  // we are still without a town? we failed, simply
+	if (GenerateTownName(&townnameparts) &&
+			CreateRandomTown(10000, townnameparts, TS_RANDOM, _settings_game.economy.larger_towns != 0, layout) != NULL) {
+		return true;
 	}
-	return true;
+
+	/* If there are no towns at all and we are generating new game, bail out */
+	if (Town::GetNumItems() == 0 && _game_mode != GM_EDITOR) {
+		extern StringID _switch_mode_errorstr;
+		_switch_mode_errorstr = STR_ERROR_COULD_NOT_CREATE_TOWN;
+	}
+
+	return false;  // we are still without a town? we failed, simply
 }
 
 
@@ -1825,8 +1809,8 @@ HouseZonesBits GetTownRadiusGroup(const Town *t, TileIndex tile)
 
 /**
  * Clears tile and builds a house or house part.
- * @param t tile index
- * @param tid Town index
+ * @param tile tile index
+ * @param t The town to clear the house for
  * @param counter of construction step
  * @param stage of construction (used for drawing)
  * @param type of house. Index into house specs array
@@ -1850,7 +1834,7 @@ static inline void ClearMakeHouseTile(TileIndex tile, Town *t, byte counter, byt
 /**
  * Write house information into the map. For houses > 1 tile, all tiles are marked.
  * @param t tile index
- * @param tid Town index
+ * @param town The town related to this house
  * @param counter of construction step
  * @param stage of construction (used for drawing)
  * @param type of house. Index into house specs array
@@ -2275,22 +2259,13 @@ void ClearTownHouse(Town *t, TileIndex tile)
 	if (eflags & BUILDING_HAS_4_TILES) DoClearTownHouseHelper(tile + TileDiffXY(1, 1), t, ++house);
 }
 
-static bool IsUniqueTownName(const char *name)
-{
-	const Town *t;
-
-	FOR_ALL_TOWNS(t) {
-		if (t->name != NULL && strcmp(t->name, name) == 0) return false;
-	}
-
-	return true;
-}
-
 /** Rename a town (server-only).
  * @param tile unused
  * @param flags type of operation
  * @param p1 town ID to rename
  * @param p2 unused
+ * @param text the new name or an empty string when resetting to the default
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRenameTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2340,7 +2315,10 @@ void ExpandTown(Town *t)
 	UpdateTownMaxPass(t);
 }
 
-extern const byte _town_action_costs[8] = {
+/** Factor in the cost of each town action.
+ * @see TownActions
+ */
+const byte _town_action_costs[TACT_COUNT] = {
 	2, 4, 9, 35, 48, 53, 117, 175
 };
 
@@ -2490,26 +2468,6 @@ static TownActionProc * const _town_action_proc[] = {
 	TownActionBribe
 };
 
-enum TownActions {
-	TACT_NONE             = 0x00,
-
-	TACT_ADVERTISE_SMALL  = 0x01,
-	TACT_ADVERTISE_MEDIUM = 0x02,
-	TACT_ADVERTISE_LARGE  = 0x04,
-	TACT_ROAD_REBUILD     = 0x08,
-	TACT_BUILD_STATUE     = 0x10,
-	TACT_FOUND_BUILDINGS  = 0x20,
-	TACT_BUY_RIGHTS       = 0x40,
-	TACT_BRIBE            = 0x80,
-
-	TACT_ADVERTISE        = TACT_ADVERTISE_SMALL | TACT_ADVERTISE_MEDIUM | TACT_ADVERTISE_LARGE,
-	TACT_CONSTRUCTION     = TACT_ROAD_REBUILD | TACT_BUILD_STATUE | TACT_FOUND_BUILDINGS,
-	TACT_FUNDS            = TACT_BUY_RIGHTS | TACT_BRIBE,
-	TACT_ALL              = TACT_ADVERTISE | TACT_CONSTRUCTION | TACT_FUNDS,
-};
-
-DECLARE_ENUM_AS_BIT_SET(TownActions);
-
 /** Get a list of available actions to do at a town.
  * @param nump if not NULL add put the number of available actions in it
  * @param cid the company that is querying the town
@@ -2563,6 +2521,8 @@ uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t)
  * @param flags type of operation
  * @param p1 town to do the action at
  * @param p2 action to perform, @see _town_action_proc for the list of available actions
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdDoTownAction(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -2895,7 +2855,20 @@ static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, uint 
 
 		/* Here we differ from TTDP by checking TILE_NOT_SLOPED */
 		if (((hs->building_flags & TILE_NOT_SLOPED) == 0) && !IsSteepSlope(tileh_new) &&
-			(GetTileMaxZ(tile) == z_new + GetSlopeMaxZ(tileh_new))) return CommandCost(EXPENSES_CONSTRUCTION, _price.terraform);
+				(GetTileMaxZ(tile) == z_new + GetSlopeMaxZ(tileh_new))) {
+			bool allow_terraform = true;
+
+			/* Call the autosloping callback per tile, not for the whole building at once. */
+			house = GetHouseType(tile);
+			hs = HouseSpec::Get(house);
+			if (HasBit(hs->callback_mask, CBM_HOUSE_AUTOSLOPE)) {
+				/* If the callback fails, allow autoslope. */
+				uint16 res = GetHouseCallback(CBID_HOUSE_AUTOSLOPE, 0, 0, house, Town::GetByTile(tile), tile);
+				if ((res != 0) && (res != CALLBACK_FAILED)) allow_terraform = false;
+			}
+
+			if (allow_terraform) return CommandCost(EXPENSES_CONSTRUCTION, _price.terraform);
+		}
 	}
 
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
