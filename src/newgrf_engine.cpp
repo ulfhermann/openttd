@@ -709,8 +709,8 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 		case 0x0B: return v->current_order.GetDestination();
 		case 0x0C: return v->GetNumOrders();
 		case 0x0D: return v->cur_order_index;
-		case 0x10: return v->load_unload_time_rem;
-		case 0x11: return GB(v->load_unload_time_rem, 8, 8);
+		case 0x10: return v->time_counter;
+		case 0x11: return GB(v->time_counter, 8, 8);
 		case 0x12: return max(v->date_of_last_service - DAYS_TILL_ORIGINAL_BASE_YEAR, 0);
 		case 0x13: return GB(max(v->date_of_last_service - DAYS_TILL_ORIGINAL_BASE_YEAR, 0), 8, 8);
 		case 0x14: return v->service_interval;
@@ -1026,7 +1026,7 @@ uint16 GetVehicleCallbackParent(CallbackID callback, uint32 param1, uint32 param
 
 
 /* Callback 36 handlers */
-uint GetVehicleProperty(const Vehicle *v, uint8 property, uint orig_value)
+uint GetVehicleProperty(const Vehicle *v, PropertyID property, uint orig_value)
 {
 	uint16 callback = GetVehicleCallback(CBID_VEHICLE_MODIFY_PROPERTY, property, 0, v->engine_type, v);
 	if (callback != CALLBACK_FAILED) return callback;
@@ -1035,7 +1035,7 @@ uint GetVehicleProperty(const Vehicle *v, uint8 property, uint orig_value)
 }
 
 
-uint GetEngineProperty(EngineID engine, uint8 property, uint orig_value)
+uint GetEngineProperty(EngineID engine, PropertyID property, uint orig_value)
 {
 	uint16 callback = GetVehicleCallback(CBID_VEHICLE_MODIFY_PROPERTY, property, 0, engine, NULL);
 	if (callback != CALLBACK_FAILED) return callback;
