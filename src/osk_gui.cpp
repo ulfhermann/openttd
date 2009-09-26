@@ -79,8 +79,9 @@ struct OskWindow : public Window {
 			this->caption = (parent->widget[button].data != STR_NULL) ? parent->widget[button].data : parent->caption;
 		}
 		if (parent->nested_array != NULL) {
-			assert(parent->nested_array[button] != NULL);
-			this->caption = (parent->nested_array[button]->widget_data != STR_NULL) ? parent->nested_array[button]->widget_data : parent->caption;
+			NWidgetCore *par_wid = parent->GetWidget<NWidgetCore>(button);
+			assert(par_wid != NULL);
+			this->caption = (par_wid->widget_data != STR_NULL) ? par_wid->widget_data : parent->caption;
 		}
 
 		this->qs         = parent;
@@ -346,7 +347,7 @@ static const int INTER_KEY_SPACE = 2; // Number of pixels between two keys.
  * Add a key widget to a row of the keyboard.
  * @param hor     Row container to add key widget to.
  * @param height  Height of the key (all keys in a row should have equal height).
- * @param numhalf Number of 1/2 key widths that this key has.
+ * @param num_half Number of 1/2 key widths that this key has.
  * @param widtype Widget type of the key. Must be either \c NWID_SPACER for an invisible key, or a \c WWT_* widget.
  * @param widnum  Widget number of the key.
  * @param widdata Data value of the key widget.
@@ -533,8 +534,6 @@ void GetKeyboardLayout()
 /**
  * Show the on-screen keyboard (osk) associated with a given textbox
  * @param parent pointer to the Window where this keyboard originated from
- * @param q      querystr_d pointer to the query string of the parent, which is
- *               shared for both windows
  * @param button widget number of parent's textbox
  * @param cancel widget number of parent's cancel button (0 if cancel events
  *               should not be passed)

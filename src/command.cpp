@@ -146,7 +146,7 @@ DEF_COMMAND(CmdBuyShareInCompany);
 DEF_COMMAND(CmdSellShareInCompany);
 DEF_COMMAND(CmdBuyCompany);
 
-DEF_COMMAND(CmdBuildTown);
+DEF_COMMAND(CmdFoundTown);
 
 DEF_COMMAND(CmdRenameTown);
 DEF_COMMAND(CmdDoTownAction);
@@ -296,7 +296,7 @@ static const Command _command_proc_table[] = {
 	{CmdSellShareInCompany,                         0}, // CMD_SELL_SHARE_IN_COMPANY
 	{CmdBuyCompany,                                 0}, // CMD_BUY_COMANY
 
-	{CmdBuildTown,                        CMD_OFFLINE}, // CMD_BUILD_TOWN
+	{CmdFoundTown,          CMD_NO_TEST | CMD_OFFLINE}, // CMD_FOUND_TOWN
 	{CmdRenameTown,                        CMD_SERVER}, // CMD_RENAME_TOWN
 	{CmdDoTownAction,                               0}, // CMD_DO_TOWN_ACTION
 
@@ -399,6 +399,7 @@ CommandCost DoCommand(const CommandContainer *container, DoCommandFlag flags)
  * @param p2 Additional data for the command (for the #CommandProc)
  * @param flags Flags for the command and how to execute the command
  * @param cmd The command-id to execute (a value of the CMD_* enums)
+ * @param text The text to pass
  * @see CommandProc
  * @return the cost
  */
@@ -612,7 +613,7 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 		assert(res.GetCost() == res2.GetCost() && CmdFailed(res) == CmdFailed(res2)); // sanity check
 	} else {
 		if (CmdFailed(res2)) {
-			res.SetGlobalErrorMessage();
+			res2.SetGlobalErrorMessage();
 			goto show_error;
 		}
 	}
