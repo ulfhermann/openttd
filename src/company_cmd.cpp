@@ -260,7 +260,9 @@ static void GenerateCompanyName(Company *c)
 	StringID str;
 	Company *cc;
 	uint32 strp;
-	char buffer[100];
+	/* Reserve space for extra unicode character. We need to do this to be able
+	 * to detect too long company name. */
+	char buffer[MAX_LENGTH_COMPANY_NAME_BYTES + MAX_CHAR_LENGTH];
 
 	if (c->name_1 != STR_SV_UNNAMED) return;
 
@@ -392,7 +394,9 @@ restart:;
 		c->president_name_2 = Random();
 		c->president_name_1 = SPECSTR_PRESIDENT_NAME;
 
-		char buffer[MAX_LENGTH_PRESIDENT_NAME_BYTES + 1];
+		/* Reserve space for extra unicode character. We need to do this to be able
+		 * to detect too long president name. */
+		char buffer[MAX_LENGTH_PRESIDENT_NAME_BYTES + MAX_CHAR_LENGTH];
 		SetDParam(0, c->index);
 		GetString(buffer, STR_PRESIDENT_NAME, lastof(buffer));
 		if (strlen(buffer) >= MAX_LENGTH_PRESIDENT_NAME_BYTES) continue;
@@ -400,7 +404,8 @@ restart:;
 		Company *cc;
 		FOR_ALL_COMPANIES(cc) {
 			if (c != cc) {
-				char buffer2[MAX_LENGTH_PRESIDENT_NAME_BYTES + 2];
+				/* Reserve extra space so even overlength president names can be compared. */
+				char buffer2[MAX_LENGTH_PRESIDENT_NAME_BYTES + MAX_CHAR_LENGTH];
 				SetDParam(0, cc->index);
 				GetString(buffer2, STR_PRESIDENT_NAME, lastof(buffer2));
 				if (strcmp(buffer2, buffer) == 0) goto restart;
@@ -618,6 +623,7 @@ void CompaniesYearlyLoop()
  *   - bits  0-15 = old engine type
  *   - bits 16-31 = new engine type
  * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -680,6 +686,9 @@ void CompanyNewsInformation::FillData(const Company *c, const Company *other)
  * - p1 = 0 - ClientID of the newly created client
  * - p1 = 1 - CompanyID to start AI (INVALID_COMPANY for first available)
  * - p1 = 2 - CompanyID of the that is getting deleted
+ * @param text unused
+ * @return the cost of this operation or an error
+ *
  * @todo In the case of p1=0, create new company, the clientID of the new client is in parameter
  * p2. This parameter is passed in at function DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
  * on the server itself. First of all this is unbelievably ugly; second of all, well,

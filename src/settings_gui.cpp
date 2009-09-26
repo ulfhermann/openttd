@@ -426,7 +426,7 @@ struct GameOptionsWindow : Window {
 		this->SetWidgetLoweredState(GOW_FULLSCREEN_BUTTON, _fullscreen);
 
 		bool missing_files = BaseGraphics::GetUsedSet()->GetNumMissing() == 0;
-		this->nested_array[GOW_BASE_GRF_STATUS]->SetDataTip(missing_files ? STR_EMPTY : STR_GAME_OPTIONS_BASE_GRF_STATUS, STR_NULL);
+		this->GetWidget<NWidgetCore>(GOW_BASE_GRF_STATUS)->SetDataTip(missing_files ? STR_EMPTY : STR_GAME_OPTIONS_BASE_GRF_STATUS, STR_NULL);
 	}
 };
 
@@ -521,92 +521,30 @@ enum GameDifficultyWidgets {
 	GDW_LOWER_BG,
 	GDW_ACCEPT,
 	GDW_CANCEL,
-};
 
-/* Widget definition for the game difficulty settings window */
-static const Widget _game_difficulty_widgets[] = {
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,     0,    13, STR_DIFFICULTY_LEVEL_CAPTION,           STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // GDW_CAPTION
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,    14,    41, 0x0,                                    STR_NULL},                           // GDW_UPPER_BG
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    96,    16,    27, STR_DIFFICULTY_LEVEL_EASY,              STR_NULL},                           // GDW_LVL_EASY
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    97,   183,    16,    27, STR_DIFFICULTY_LEVEL_MEDIUM,            STR_NULL},                           // GDW_LVL_MEDIUM
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   184,   270,    16,    27, STR_DIFFICULTY_LEVEL_HARD,              STR_NULL},                           // GDW_LVL_HARD
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   271,   357,    16,    27, STR_DIFFICULTY_LEVEL_CUSTOM,            STR_NULL},                           // GDW_LVL_CUSTOM
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREEN,     10,   357,    28,    39, STR_DIFFICULTY_LEVEL_HIGH_SCORE_BUTTON, STR_NULL},                           // GDW_HIGHSCORE
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,    42,   262, 0x0,                                    STR_NULL},                           // GDW_SETTING_BG
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_MAUVE,      0,   369,   263,   278, 0x0,                                    STR_NULL},                           // GDW_LOWER_BG
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   105,   185,   265,   276, STR_DIFFICULTY_LEVEL_SAVE,               STR_NULL},                           // GDW_ACCEPT
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,   186,   266,   265,   276, STR_BUTTON_CANCEL,                       STR_NULL},                           // GDW_CANCEL
-{   WIDGETS_END},
+	GDW_OPTIONS_START,
 };
-
-static const NWidgetPart _nested_game_difficulty_widgets[] = {
-	NWidget(WWT_CAPTION, COLOUR_MAUVE, GDW_CAPTION), SetMinimalSize(370, 14), SetDataTip(STR_DIFFICULTY_LEVEL_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_UPPER_BG),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(10, 0),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_EASY), SetMinimalSize(87, 12), SetDataTip(STR_DIFFICULTY_LEVEL_EASY, STR_NULL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_MEDIUM), SetMinimalSize(87, 12), SetDataTip(STR_DIFFICULTY_LEVEL_MEDIUM, STR_NULL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_HARD), SetMinimalSize(87, 12), SetDataTip(STR_DIFFICULTY_LEVEL_HARD, STR_NULL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_LVL_CUSTOM), SetMinimalSize(87, 12), SetDataTip(STR_DIFFICULTY_LEVEL_CUSTOM, STR_NULL),
-			NWidget(NWID_SPACER), SetMinimalSize(12, 0),
-		EndContainer(),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(10, 0),
-			NWidget(WWT_TEXTBTN, COLOUR_GREEN, GDW_HIGHSCORE), SetMinimalSize(348, 12), SetDataTip(STR_DIFFICULTY_LEVEL_HIGH_SCORE_BUTTON, STR_NULL),
-			NWidget(NWID_SPACER), SetMinimalSize(12, 0),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
-	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_SETTING_BG), SetMinimalSize(370, 221),
-	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_LOWER_BG),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(105, 0),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_ACCEPT), SetMinimalSize(81, 12), SetDataTip(STR_DIFFICULTY_LEVEL_SAVE, STR_NULL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_CANCEL), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_CANCEL, STR_NULL),
-			NWidget(NWID_SPACER), SetMinimalSize(103, 0),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
-	EndContainer(),
-};
-
-/* Window definition for the game difficulty settings window */
-static const WindowDesc _game_difficulty_desc(
-	WDP_CENTER, WDP_CENTER, 370, 279, 370, 279,
-	WC_GAME_OPTIONS, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_game_difficulty_widgets, _nested_game_difficulty_widgets, lengthof(_nested_game_difficulty_widgets)
-);
 
 void SetDifficultyLevel(int mode, DifficultySettings *gm_opt);
 
-struct GameDifficultyWindow : public Window {
+class GameDifficultyWindow : public Window {
 private:
-	static const uint GAME_DIFFICULTY_NUM = 18;
-	bool clicked_increase;
-	uint8 clicked_button;
-	uint8 timeout;
-
 	/* Temporary holding place of values in the difficulty window until 'Save' is clicked */
 	GameSettings opt_mod_temp;
 
-	enum {
-		GAMEDIFF_WND_TOP_OFFSET = 45,
-		GAMEDIFF_WND_ROWSIZE    = 9,
-		NO_SETTINGS_BUTTON = 0xFF,
-	};
-
 public:
-	GameDifficultyWindow() : Window(&_game_difficulty_desc)
+	/** The number of difficulty settings */
+	static const uint GAME_DIFFICULTY_NUM = 18;
+	/** The number of widgets per difficulty setting */
+	static const uint WIDGETS_PER_DIFFICULTY = 3;
+
+	GameDifficultyWindow(const WindowDesc *desc) : Window()
 	{
+		this->InitNested(desc);
+
 		/* Copy current settings (ingame or in intro) to temporary holding place
 		 * change that when setting stuff, copy back on clicking 'OK' */
 		this->opt_mod_temp = (_game_mode == GM_MENU) ? _settings_newgame : _settings_game;
-		this->clicked_increase = false;
-		this->clicked_button = NO_SETTINGS_BUTTON;
-		this->timeout = 0;
 		/* Setup disabled buttons when creating window
 		 * disable all other difficulty buttons during gameplay except for 'custom' */
 		this->SetWidgetsDisabledState(_game_mode == GM_NORMAL,
@@ -618,88 +556,85 @@ public:
 		this->SetWidgetDisabledState(GDW_HIGHSCORE, _game_mode == GM_EDITOR || _networking); // highscore chart in multiplayer
 		this->SetWidgetDisabledState(GDW_ACCEPT, _networking && !_network_server); // Save-button in multiplayer (and if client)
 		this->LowerWidget(GDW_LVL_EASY + this->opt_mod_temp.difficulty.diff_level);
-		this->FindWindowPlacementAndResize(&_game_difficulty_desc);
+		this->OnInvalidateData();
+	}
+
+	virtual void SetStringParameters(int widget) const
+	{
+		widget -= GDW_OPTIONS_START;
+		if (widget < 0 || (widget % 3) != 2) return;
+
+		widget /= 3;
+
+		uint i;
+		const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i) + widget;
+		int32 value = (int32)ReadValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv);
+		SetDParam(0, sd->desc.str + value);
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		/* Only for the 'descriptions' */
+		int index = widget - GDW_OPTIONS_START;
+		if (index < 0 || (index % 3) != 2) return;
+
+		index /= 3;
+
+		uint i;
+		const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i) + index;
+		const SettingDescBase *sdb = &sd->desc;
+
+		/* Get the string and try all strings from the smallest to the highest value */
+		StringID str = this->GetWidget<NWidgetCore>(widget)->widget_data;
+		for (int32 value = sdb->min; (uint32)value <= sdb->max; value += sdb->interval) {
+			SetDParam(0, sdb->str + value);
+			*size = maxdim(*size, GetStringBoundingBox(str));
+		}
 	}
 
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
-
-		uint i;
-		const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i);
-		int y = GAMEDIFF_WND_TOP_OFFSET;
-		StringID str = STR_DIFFICULTY_LEVEL_SETTING_MAXIMUM_NO_COMPETITORS;
-		for (i = 0; i < GAME_DIFFICULTY_NUM; i++, sd++) {
-			const SettingDescBase *sdb = &sd->desc;
-			/* skip deprecated difficulty options */
-			if (!SlIsObjectCurrentlyValid(sd->save.version_from, sd->save.version_to)) continue;
-			int32 value = (int32)ReadValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv);
-			bool editable = (_game_mode == GM_MENU || (sdb->flags & SGF_NEWGAME_ONLY) == 0);
-
-			DrawArrowButtons(5, y, COLOUR_YELLOW,
-					(this->clicked_button == i) ? 1 + !!this->clicked_increase : 0,
-					editable && sdb->min != value,
-					editable && sdb->max != (uint32)value);
-
-			value += sdb->str;
-			SetDParam(0, value);
-			DrawString(30, this->width, y, str);
-
-			y += GAMEDIFF_WND_ROWSIZE + 2; // space items apart a bit
-			str++;
-		}
 	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
+		if (widget >= GDW_OPTIONS_START) {
+			widget -= GDW_OPTIONS_START;
+			if ((widget % 3) == 2) return;
+
+			/* Don't allow clients to make any changes */
+			if (_networking && !_network_server) return;
+
+			uint i;
+			const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i) + (widget / 3);
+			const SettingDescBase *sdb = &sd->desc;
+
+			/* Clicked disabled button? */
+			bool editable = (_game_mode == GM_MENU || (sdb->flags & SGF_NEWGAME_ONLY) == 0);
+			if (!editable) return;
+
+			int32 val = (int32)ReadValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv);
+			if (widget % 3 == 1) {
+				/* Increase button clicked */
+				val = min(val + sdb->interval, (int32)sdb->max);
+			} else {
+				/* Decrease button clicked */
+				val -= sdb->interval;
+				val = max(val, sdb->min);
+			}
+
+			/* save value in temporary variable */
+			WriteValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv, val);
+			this->RaiseWidget(GDW_LVL_EASY + this->opt_mod_temp.difficulty.diff_level);
+			SetDifficultyLevel(3, &this->opt_mod_temp.difficulty); // set difficulty level to custom
+			this->LowerWidget(GDW_LVL_CUSTOM);
+			this->OnInvalidateData();
+			this->SetDirty();
+			return;
+		}
+
 		switch (widget) {
-			case GDW_SETTING_BG: { // Difficulty settings widget, decode click
-				/* Don't allow clients to make any changes */
-				if (_networking && !_network_server) return;
-
-				const int x = pt.x - 5;
-				if (!IsInsideMM(x, 0, 21)) return; // Button area
-
-				const int y = pt.y - GAMEDIFF_WND_TOP_OFFSET;
-				if (y < 0) return;
-
-				/* Get button from Y coord. */
-				uint8 btn = y / (GAMEDIFF_WND_ROWSIZE + 2);
-				if (btn >= 1) btn++; // Skip the deprecated option "competitor start time"
-				if (btn >= 8) btn++; // Skip the deprecated option "competitor intelligence"
-				if (btn >= GAME_DIFFICULTY_NUM || y % (GAMEDIFF_WND_ROWSIZE + 2) >= 9) return;
-
-				uint i;
-				const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i) + btn;
-				const SettingDescBase *sdb = &sd->desc;
-
-				/* Clicked disabled button? */
-				bool editable = (_game_mode == GM_MENU || (sdb->flags & SGF_NEWGAME_ONLY) == 0);
-				if (!editable) return;
-
-				this->timeout = 5;
-				int32 val = (int32)ReadValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv);
-
-				if (x >= 10) {
-					/* Increase button clicked */
-					val = min(val + sdb->interval, (int32)sdb->max);
-					this->clicked_increase = true;
-				} else {
-					/* Decrease button clicked */
-					val -= sdb->interval;
-					val = max(val, sdb->min);
-					this->clicked_increase = false;
-				}
-				this->clicked_button = btn;
-
-				/* save value in temporary variable */
-				WriteValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv, val);
-				this->RaiseWidget(GDW_LVL_EASY + this->opt_mod_temp.difficulty.diff_level);
-				SetDifficultyLevel(3, &this->opt_mod_temp.difficulty); // set difficulty level to custom
-				this->LowerWidget(GDW_LVL_CUSTOM);
-				this->SetDirty();
-			} break;
-
 			case GDW_LVL_EASY:
 			case GDW_LVL_MEDIUM:
 			case GDW_LVL_HARD:
@@ -708,6 +643,7 @@ public:
 				this->RaiseWidget(GDW_LVL_EASY + this->opt_mod_temp.difficulty.diff_level);
 				SetDifficultyLevel(widget - GDW_LVL_EASY, &this->opt_mod_temp.difficulty);
 				this->LowerWidget(GDW_LVL_EASY + this->opt_mod_temp.difficulty.diff_level);
+				this->OnInvalidateData();
 				this->SetDirty();
 				break;
 
@@ -719,6 +655,9 @@ public:
 				GameSettings *opt_ptr = (_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game;
 
 				uint i;
+				GetSettingFromName("difficulty.diff_level", &i);
+				DoCommandP(0, i, this->opt_mod_temp.difficulty.diff_level, CMD_CHANGE_SETTING);
+
 				const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i);
 				for (uint btn = 0; btn != GAME_DIFFICULTY_NUM; btn++, sd++) {
 					int32 new_val = (int32)ReadValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv);
@@ -728,9 +667,6 @@ public:
 						DoCommandP(0, i + btn, new_val, CMD_CHANGE_SETTING);
 					}
 				}
-
-				GetSettingFromName("difficulty.diff_level", &i);
-				DoCommandP(0, i, this->opt_mod_temp.difficulty.diff_level, CMD_CHANGE_SETTING);
 				delete this;
 				/* If we are in the editor, we should reload the economy.
 				 * This way when you load a game, the max loan and interest rate
@@ -745,20 +681,109 @@ public:
 		}
 	}
 
-	virtual void OnTick()
+	virtual void OnInvalidateData(int data = 0)
 	{
-		if (this->timeout != 0) {
-			this->timeout--;
-			if (this->timeout == 0) this->clicked_button = NO_SETTINGS_BUTTON;
-			this->SetDirty();
+		uint i;
+		const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i);
+		for (i = 0; i < GAME_DIFFICULTY_NUM; i++, sd++) {
+			const SettingDescBase *sdb = &sd->desc;
+			/* skip deprecated difficulty options */
+			if (!SlIsObjectCurrentlyValid(sd->save.version_from, sd->save.version_to)) continue;
+			int32 value = (int32)ReadValue(GetVariableAddress(&this->opt_mod_temp, &sd->save), sd->save.conv);
+			bool editable = (_game_mode == GM_MENU || (sdb->flags & SGF_NEWGAME_ONLY) == 0);
+
+			this->SetWidgetDisabledState(GDW_OPTIONS_START + i * 3 + 0, !editable || sdb->min == value);
+			this->SetWidgetDisabledState(GDW_OPTIONS_START + i * 3 + 1, !editable || sdb->max == (uint32)value);
 		}
 	}
 };
 
+static NWidgetBase *MakeDifficultyOptionsWidgets(int *biggest_index)
+{
+	NWidgetVertical *vert_desc = new NWidgetVertical;
+
+	int widnum = GDW_OPTIONS_START;
+	uint i, j;
+	const SettingDesc *sd = GetSettingFromName("difficulty.max_no_competitors", &i);
+
+	for (i = 0, j = 0; i < GameDifficultyWindow::GAME_DIFFICULTY_NUM; i++, sd++, widnum += GameDifficultyWindow::WIDGETS_PER_DIFFICULTY) {
+		if (!SlIsObjectCurrentlyValid(sd->save.version_from, sd->save.version_to)) continue;
+
+		NWidgetHorizontal *hor = new NWidgetHorizontal;
+
+		/* [<] button. */
+		NWidgetLeaf *leaf = new NWidgetLeaf(WWT_PUSHTXTBTN, COLOUR_YELLOW, widnum, STR_BLACK_SMALL_ARROW_LEFT, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		hor->Add(leaf);
+
+		/* [>] button. */
+		leaf = new NWidgetLeaf(WWT_PUSHTXTBTN, COLOUR_YELLOW, widnum + 1, STR_BLACK_SMALL_ARROW_RIGHT, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		hor->Add(leaf);
+
+		/* Some spacing between the text and the description */
+		NWidgetSpacer *spacer = new NWidgetSpacer(5, 0);
+		hor->Add(spacer);
+
+		/* Descriptive text. */
+		leaf = new NWidgetLeaf(WWT_TEXT, COLOUR_YELLOW, widnum + 2, STR_DIFFICULTY_LEVEL_SETTING_MAXIMUM_NO_COMPETITORS + (j++), STR_NULL);
+		leaf->SetFill(true, false);
+		hor->Add(leaf);
+		vert_desc->Add(hor);
+
+		/* Space vertically */
+		vert_desc->Add(new NWidgetSpacer(0, 2));
+	}
+	*biggest_index = widnum - 1;
+	return vert_desc;
+}
+
+
+/** Widget definition for the game difficulty settings window */
+static const NWidgetPart _nested_game_difficulty_widgets[] = {
+	NWidget(WWT_CAPTION, COLOUR_MAUVE, GDW_CAPTION), SetDataTip(STR_DIFFICULTY_LEVEL_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_UPPER_BG),
+		NWidget(NWID_VERTICAL), SetPIP(2, 0, 2),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(10, 0, 10),
+				NWidget(WWT_TEXTBTN, COLOUR_YELLOW, GDW_LVL_EASY), SetDataTip(STR_DIFFICULTY_LEVEL_EASY, STR_NULL), SetFill(true, false),
+				NWidget(WWT_TEXTBTN, COLOUR_YELLOW, GDW_LVL_MEDIUM), SetDataTip(STR_DIFFICULTY_LEVEL_MEDIUM, STR_NULL), SetFill(true, false),
+				NWidget(WWT_TEXTBTN, COLOUR_YELLOW, GDW_LVL_HARD), SetDataTip(STR_DIFFICULTY_LEVEL_HARD, STR_NULL), SetFill(true, false),
+				NWidget(WWT_TEXTBTN, COLOUR_YELLOW, GDW_LVL_CUSTOM), SetDataTip(STR_DIFFICULTY_LEVEL_CUSTOM, STR_NULL), SetFill(true, false),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 10),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREEN, GDW_HIGHSCORE), SetDataTip(STR_DIFFICULTY_LEVEL_HIGH_SCORE_BUTTON, STR_NULL), SetFill(true, false),
+			EndContainer(),
+		EndContainer(),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_SETTING_BG),
+		NWidget(NWID_VERTICAL), SetPIP(3, 0, 1),
+			NWidget(NWID_HORIZONTAL), SetPIP(5, 0, 5),
+				NWidgetFunction(MakeDifficultyOptionsWidgets),
+			EndContainer(),
+		EndContainer(),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_MAUVE, GDW_LOWER_BG),
+		NWidget(NWID_VERTICAL), SetPIP(2, 0, 2),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(10, 0, 10),
+				NWidget(NWID_SPACER), SetFill(true, false),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_ACCEPT), SetDataTip(STR_DIFFICULTY_LEVEL_SAVE, STR_NULL), SetFill(true, false),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, GDW_CANCEL), SetDataTip(STR_BUTTON_CANCEL, STR_NULL), SetFill(true, false),
+				NWidget(NWID_SPACER), SetFill(true, false),
+			EndContainer(),
+		EndContainer(),
+	EndContainer(),
+};
+
+/** Window definition for the game difficulty settings window */
+static const WindowDesc _game_difficulty_desc(
+	WDP_CENTER, WDP_CENTER, 370, 279, 370, 279,
+	WC_GAME_OPTIONS, WC_NONE,
+	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
+	NULL, _nested_game_difficulty_widgets, lengthof(_nested_game_difficulty_widgets)
+);
+
 void ShowGameDifficulty()
 {
 	DeleteWindowById(WC_GAME_OPTIONS, 0);
-	new GameDifficultyWindow();
+	new GameDifficultyWindow(&_game_difficulty_desc);
 }
 
 static const int SETTING_HEIGHT = 11; ///< Height of a single setting in the tree view in pixels
@@ -1712,9 +1737,9 @@ enum CustomCurrencyWidgets {
 struct CustomCurrencyWindow : Window {
 	int query_widget;
 
-	CustomCurrencyWindow(const WindowDesc *desc) : Window(desc)
+	CustomCurrencyWindow(const WindowDesc *desc) : Window()
 	{
-		this->FindWindowPlacementAndResize(desc);
+		this->InitNested(desc);
 
 		SetButtonState();
 	}
@@ -1727,16 +1752,45 @@ struct CustomCurrencyWindow : Window {
 		this->SetWidgetDisabledState(CUSTCURR_YEAR_UP, _custom_currency.to_euro == MAX_YEAR);
 	}
 
+	virtual void SetStringParameters(int widget) const
+	{
+		switch (widget) {
+			case CUSTCURR_RATE:      SetDParam(0, 1); SetDParam(1, 1);            break;
+			case CUSTCURR_SEPARATOR: SetDParamStr(0, _custom_currency.separator); break;
+			case CUSTCURR_PREFIX:    SetDParamStr(0, _custom_currency.prefix);    break;
+			case CUSTCURR_SUFFIX:    SetDParamStr(0, _custom_currency.suffix);    break;
+			case CUSTCURR_YEAR:
+				SetDParam(0, (_custom_currency.to_euro != CF_NOEURO) ? STR_CURRENCY_SWITCH_TO_EURO : STR_CURRENCY_SWITCH_TO_EURO_NEVER);
+				SetDParam(1, _custom_currency.to_euro);
+				break;
+
+			case CUSTCURR_PREVIEW:
+				SetDParam(0, 10000);
+				break;
+		}
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		switch (widget) {
+			/* Set the appropriate width for the edit 'buttons' */
+			case CUSTCURR_SEPARATOR_EDIT:
+			case CUSTCURR_PREFIX_EDIT:
+			case CUSTCURR_SUFFIX_EDIT:
+				size->width  = this->GetWidget<NWidgetCore>(CUSTCURR_RATE_DOWN)->smallest_x + this->GetWidget<NWidgetCore>(CUSTCURR_RATE_UP)->smallest_x;
+				break;
+
+			/* Make sure the window is wide enough for the widest exchange rate */
+			case CUSTCURR_RATE:
+				SetDParam(0, 1);
+				SetDParam(1, INT32_MAX);
+				*size = GetStringBoundingBox(STR_CURRENCY_EXCHANGE_RATE);
+				break;
+		}
+	}
+
 	virtual void OnPaint()
 	{
-		SetDParam(0, 1);
-		SetDParam(1, 1);
-		SetDParamStr(2, _custom_currency.separator);
-		SetDParamStr(3, _custom_currency.prefix);
-		SetDParamStr(4, _custom_currency.suffix);
-		SetDParam(5, _custom_currency.to_euro);
-		this->widget[CUSTCURR_YEAR].data = (_custom_currency.to_euro != CF_NOEURO) ? STR_CURRENCY_SWITCH_TO_EURO : STR_CURRENCY_SWITCH_TO_EURO_NEVER;
-		SetDParam(6, 10000);
 		this->DrawWidgets();
 	}
 
@@ -1860,77 +1914,42 @@ struct CustomCurrencyWindow : Window {
 	}
 };
 
-static const Widget _cust_currency_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,       0,    10,     0,    13, STR_BLACK_CROSS,             STR_TOOLTIP_CLOSE_WINDOW},                     // CUSTCURR_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,      11,   229,     0,    13, STR_CURRENCY_WINDOW,         STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},           // CUSTCURR_CAPTION
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,       0,   229,    14,   119, 0x0,                         STR_NULL},                                     // CUSTCURR_BACKGROUND
-
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    19,    21,    29, STR_BLACK_SMALL_ARROW_LEFT,  STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP},           // CUSTCURR_RATE_DOWN
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    20,    29,    21,    29, STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP},           // CUSTCURR_RATE_UP
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    21,    29, STR_CURRENCY_EXCHANGE_RATE,  STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP},                // CUSTCURR_RATE
-
-{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    33,    41, 0x0,                         STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP},    // CUSTCURR_SEPARATOR_EDIT
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    33,    41, STR_CURRENCY_SEPARATOR,      STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP},    // CUSTCURR_SEPARATOR
-
-{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    45,    53, 0x0,                         STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP},       // CUSTCURR_PREFIX_EDIT
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    45,    53, STR_CURRENCY_PREFIX,         STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP},       // CUSTCURR_PREFIX
-
-{    WWT_PUSHBTN,   RESIZE_NONE,  COLOUR_DARK_BLUE, 10,    29,    57,    65, 0x0,                         STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP},       // CUSTCURR_SUFFIX_EDIT
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    57,    65, STR_CURRENCY_SUFFIX,         STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP},       // CUSTCURR_SUFFIX
-
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    10,    19,    69,    77, STR_BLACK_SMALL_ARROW_LEFT,  STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP}, // CUSTCURR_YEAR_DOWN
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_YELLOW,    20,    29,    69,    77, STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP}, // CUSTCURR_YEAR_UP
-{       WWT_TEXT,   RESIZE_NONE,  COLOUR_BLUE,      35,   227,    69,    77, STR_CURRENCY_SWITCH_TO_EURO, STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP},      // CUSTCURR_YEAR
-
-{      WWT_LABEL,   RESIZE_NONE,  COLOUR_BLUE,       2,   227,    93,   101, STR_CURRENCY_PREVIEW,        STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP},          // CUSTCURR_PREVIEW
-
-{   WIDGETS_END},
-};
-
 static const NWidgetPart _nested_cust_currency_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CUSTCURR_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_GREY, CUSTCURR_CAPTION), SetDataTip(STR_CURRENCY_WINDOW, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, CUSTCURR_BACKGROUND),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 7),
-		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_DOWN), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_UP), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_RATE), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_EXCHANGE_RATE, STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP),
-			NWidget(NWID_SPACER), SetFill(true, false),
+		NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(7, 3, 0),
+			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 5),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_DOWN), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_RATE_UP), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP),
+				NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_RATE), SetDataTip(STR_CURRENCY_EXCHANGE_RATE, STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP), SetFill(true, false),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 5),
+				NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SEPARATOR_EDIT), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP), SetFill(false, true),
+				NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SEPARATOR), SetDataTip(STR_CURRENCY_SEPARATOR, STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP), SetFill(true, false),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 5),
+				NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_PREFIX_EDIT), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP), SetFill(false, true),
+				NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_PREFIX), SetDataTip(STR_CURRENCY_PREFIX, STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP), SetFill(true, false),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 5),
+				NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SUFFIX_EDIT), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP), SetFill(false, true),
+				NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SUFFIX), SetDataTip(STR_CURRENCY_SUFFIX, STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP), SetFill(true, false),
+			EndContainer(),
+			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 5),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_DOWN), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_UP), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
+				NWidget(NWID_SPACER), SetMinimalSize(5, 0),
+				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_YEAR), SetDataTip(STR_JUST_STRING, STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP), SetFill(true, false),
+			EndContainer(),
 		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
-		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SEPARATOR_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SEPARATOR), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SEPARATOR, STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP),
-			NWidget(NWID_SPACER), SetFill(true, false),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
-		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_PREFIX_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_PREFIX), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_PREFIX, STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP),
-			NWidget(NWID_SPACER), SetFill(true, false),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
-		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHBTN, COLOUR_DARK_BLUE, CUSTCURR_SUFFIX_EDIT), SetMinimalSize(20, 9), SetDataTip(0x0, STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SUFFIX), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SUFFIX, STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP),
-			NWidget(NWID_SPACER), SetFill(true, false),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
-		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 2),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_DOWN), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, CUSTCURR_YEAR_UP), SetMinimalSize(10, 9), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(5, 0),
-			NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_YEAR), SetMinimalSize(193, 9), SetDataTip(STR_CURRENCY_SWITCH_TO_EURO, STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
-			NWidget(NWID_SPACER), SetFill(true, false),
-		EndContainer(),
-		NWidget(WWT_LABEL, COLOUR_BLUE, CUSTCURR_PREVIEW), SetMinimalSize(226, 9),
+		NWidget(WWT_LABEL, COLOUR_BLUE, CUSTCURR_PREVIEW),
 								SetDataTip(STR_CURRENCY_PREVIEW, STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP), SetPadding(15, 1, 18, 2),
 	EndContainer(),
 };
@@ -1939,7 +1958,7 @@ static const WindowDesc _cust_currency_desc(
 	WDP_CENTER, WDP_CENTER, 230, 120, 230, 120,
 	WC_CUSTOM_CURRENCY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_cust_currency_widgets, _nested_cust_currency_widgets, lengthof(_nested_cust_currency_widgets)
+	NULL, _nested_cust_currency_widgets, lengthof(_nested_cust_currency_widgets)
 );
 
 static void ShowCustCurrency()

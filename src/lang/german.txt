@@ -219,6 +219,7 @@ STR_UNITS_FORCE_SI                                              :{COMMA} kN
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Filter eingeben
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Stichwort eingeben, mit dem die Liste gefiltert werden soll
+STR_LIST_FILTER_TITLE                                           :{BLACK}Filter:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Sortierreihenfolge auswählen (absteigend/aufsteigend)
 STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Sortierkriterium auswählen
@@ -943,26 +944,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Vollbild
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Eigene Währung
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Wechselkurs: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Wechselkurs: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Eigene Währung gegenüber dem Pfund (£) verteuern
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Eigene Währung gegenüber dem Pfund (£) verbilligen
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Umrechnungskurs der eigenen Währung gegenüber dem Pfund (£) festlegen
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Trennsymbol: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Trennsymbol: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Das Tausender-Trennzeichen für die eigene Währung festlegen
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Präfix: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Präfix: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Das Zeichen für die eigene Währung festlegen (Prefix)
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffix: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffix: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Das Zeichen für die Eigene Währung setzen (Suffix)
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Umstellung auf Euro: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Umstellung auf Euro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Umstellung auf Euro: {ORANGE}nie
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Einführungsjahr des Euros festlegen
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Früher den Euro einführen
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Später den Euro einführen
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Vorschau: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Vorschau: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 Pfund (£) in der eigenen Währung
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Parameter für eigene Währung ändern
 
@@ -1344,6 +1345,7 @@ STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
 STR_OSNAME_OSX                                                  :OS X
 STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
 STR_OSNAME_OS2                                                  :OS/2
@@ -2031,6 +2033,12 @@ STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Zufälli
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Stadt an zufälligem Platz gründen
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Viele zufällige Städte
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}Das Spielfeld mit zufällig platzierten Städten füllen
+
+STR_FOUND_TOWN_NAME_TITLE                                       :{YELLOW}Stadtname
+STR_FOUND_TOWN_NAME_EDITOR_TITLE                                :{BLACK}Stadtnamen eingeben
+STR_FOUND_TOWN_NAME_EDITOR_HELP                                 :{BLACK}Klicken, um einen Stadtnamen einzugeben
+STR_FOUND_TOWN_NAME_RANDOM_BUTTON                               :{BLACK}Zufälliger Name
+STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP                              :{BLACK}Zufälligen neuen Namen erzeugen
 
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Stadtgröße:
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Klein
@@ -3279,7 +3287,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Diese Fi
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Bau von Städten unmöglich
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Die Stadt kann nicht umbenannt werden...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Stadt kann hier nicht gegründet werden...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Stadt kann hier nicht gegründet werden...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... zu dicht am Spielfeldrand
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... zu dicht an einer anderen Stadt
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... zu viele Städte
@@ -3292,7 +3300,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Industri
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}{STRING} kann hier nicht gebaut werden...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Industrie kann hier nicht gebaut werden...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}... zu nah an einer anderen Industrie
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}... erst muss eine Stadt gegründet werden
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}... erst muss eine Stadt gegründet werden
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}... pro Stadt nur einmal erlaubt
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... kann nur in Städten mit mehr als 1200 Einwohnern gebaut werden
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... kann nur in Regenwaldgebieten errichtet werden
@@ -3991,7 +3999,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

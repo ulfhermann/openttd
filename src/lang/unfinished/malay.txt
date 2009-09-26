@@ -727,7 +727,7 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Mod skri
 
 # Custom currency window
 
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Kadar pertukaran: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Kadar pertukaran: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Tetapkan kadar pertukaran mata wang anda untuk stau Paun (£)
 
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Tetapkan pemisah mata wang anda
@@ -735,7 +735,7 @@ STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Tetapkan
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Tetapkan permulaan untuk mata wang anda
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Tetapkan akhiran untuk mata wang anda
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Tukar ke Euro: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Tukar ke Euro: {ORANGE}{NUM}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Tetapkan tahun untuk menukar ke Euro
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Tukar ke Euro dahulu
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Tukar ke Euro kemudian
@@ -1567,7 +1567,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN} m
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Tidak boleh bina bandar
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Tidak boleh menamakan semula bandar...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Tidak boleh membina bandar di sini...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Tidak boleh membina bandar di sini...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...terlalu hampir kepada hujung peta
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...terlalu hampir kepada bandar lain
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...terlalu banyak bandar
@@ -1577,7 +1577,7 @@ STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Bandar i
 # Industry related errors
 STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Tidak boleh menjana industri..
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Tidak boleh bina {STRING} di sini...
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...mesti membangunkan bandar dahulu
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...mesti membangunkan bandar dahulu
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...hanya satu dibenarkan untuk setiap bandar
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... hanya boleh dibina di bandar dengan populasi lebih atau sama dengan 1200
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...hanya boleh dibina di kawasan hutan
@@ -1783,7 +1783,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
