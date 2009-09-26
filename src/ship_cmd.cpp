@@ -158,7 +158,7 @@ static void CheckIfShipNeedsService(Vehicle *v)
 
 Money Ship::GetRunningCost() const
 {
-	return GetVehicleProperty(this, 0x0F, ShipVehInfo(this->engine_type)->running_cost) * _price.ship_running;
+	return GetVehicleProperty(this, PROP_SHIP_RUNNING_COST_FACTOR, ShipVehInfo(this->engine_type)->running_cost) * _price.ship_running;
 }
 
 void Ship::OnNewDay()
@@ -212,6 +212,7 @@ static void HandleBrokenShip(Vehicle *v)
 		if (v->breakdowns_since_last_service != 255)
 			v->breakdowns_since_last_service++;
 
+		v->MarkDirty();
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
 
@@ -229,6 +230,7 @@ static void HandleBrokenShip(Vehicle *v)
 	if (!(v->tick_counter & 1)) {
 		if (!--v->breakdown_delay) {
 			v->breakdown_ctr = 0;
+			v->MarkDirty();
 			SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 		}
 	}
@@ -332,7 +334,7 @@ static bool ShipAccelerate(Vehicle *v)
 	uint spd;
 	byte t;
 
-	spd = min(v->cur_speed + 1, GetVehicleProperty(v, 0x0B, v->max_speed));
+	spd = min(v->cur_speed + 1, GetVehicleProperty(v, PROP_SHIP_SPEED, v->max_speed));
 
 	/* updates statusbar only if speed have changed to save CPU time */
 	if (spd != v->cur_speed) {
@@ -735,6 +737,8 @@ bool Ship::Tick()
  * @param flags type of operation
  * @param p1 ship type being built (engine)
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -811,7 +815,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 		v->InvalidateNewGRFCacheOfChain();
 
-		v->cargo_cap = GetVehicleProperty(v, 0x0D, svi->capacity);
+		v->cargo_cap = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY, svi->capacity);
 
 		v->InvalidateNewGRFCacheOfChain();
 
@@ -834,6 +838,8 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
  * @param flags type of operation
  * @param p1 vehicle ID to be sold
  * @param p2 unused
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSellShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -874,6 +880,8 @@ bool Ship::FindClosestDepot(TileIndex *location, DestinationID *destination, boo
  * @param p2 various bitmasked elements
  * - p2 bit 0-3 - DEPOT_ flags (see vehicle.h)
  * - p2 bit 8-10 - VLW flag (for mass goto depot)
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSendShipToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -898,7 +906,8 @@ CommandCost CmdSendShipToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
  * - p2 = (bit 0-7) - the new cargo type to refit to (p2 & 0xFF)
  * - p2 = (bit 8-15) - the new cargo subtype to refit to
  * - p2 = (bit 16) - refit only this vehicle (ignored)
- * @return cost of refit or error
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -933,7 +942,7 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	}
 
 	if (capacity == CALLBACK_FAILED) {
-		capacity = GetVehicleProperty(v, 0x0D, ShipVehInfo(v->engine_type)->capacity);
+		capacity = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY, ShipVehInfo(v->engine_type)->capacity);
 	}
 	_returned_refit_capacity = capacity;
 

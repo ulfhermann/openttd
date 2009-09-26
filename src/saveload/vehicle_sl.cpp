@@ -496,7 +496,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		 SLE_CONDVAR(Vehicle, build_year,            SLE_FILE_U8 | SLE_VAR_I32,    0,  30),
 		 SLE_CONDVAR(Vehicle, build_year,            SLE_INT32,                   31, SL_MAX_VERSION),
 
-		     SLE_VAR(Vehicle, load_unload_time_rem,  SLE_UINT16),
+		     SLE_VAR(Vehicle, time_counter,          SLE_UINT16),
 		SLEG_CONDVAR(         _cargo_paid_for,       SLE_UINT16,                  45, SL_MAX_VERSION),
 		 SLE_CONDVAR(Vehicle, vehicle_flags,         SLE_UINT8,                   40, SL_MAX_VERSION),
 
@@ -669,7 +669,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 	};
 
 
-	static const SaveLoad *_veh_descs[] = {
+	static const SaveLoad * const _veh_descs[] = {
 		_train_desc,
 		_roadveh_desc,
 		_ship_desc,

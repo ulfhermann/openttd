@@ -299,6 +299,7 @@ static inline CommandCost StartStopVehicle(const Vehicle *v, bool evaluate_callb
 /** Issue a train vehicle move command
  * @param v The vehicle to move
  * @param after The vehicle to insert 'v' after, or NULL to start new chain
+ * @param flags the command flags to use
  * @param whole_chain move all vehicles following 'v' (true), or only 'v' (false)
  * @return success or error
  */
@@ -614,6 +615,8 @@ static CommandCost ReplaceChain(Vehicle **chain, DoCommandFlag flags, bool wagon
  * @param flags type of operation
  * @param p1 Index of vehicle
  * @param p2 not used
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdAutoreplaceVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {

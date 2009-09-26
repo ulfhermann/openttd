@@ -37,7 +37,6 @@ CommandCallback CcCloneVehicle;
 CommandCallback CcPlaySound10;
 CommandCallback CcPlaceSign;
 CommandCallback CcTerraform;
-CommandCallback CcBuildTown;
 CommandCallback CcGiveMoney;
 
 /* rail_gui.cpp */
@@ -61,13 +60,17 @@ CommandCallback CcBuildShip;
 CommandCallback CcBuildWagon;
 CommandCallback CcBuildLoco;
 
+/* town_gui.cpp */
+CommandCallback CcFoundTown;
+CommandCallback CcFoundRandomTown;
+
 /* group_gui.cpp */
 CommandCallback CcCreateGroup;
 
 /* ai/ai_core.cpp */
 CommandCallback CcAI;
 
-CommandCallback *_callback_table[] = {
+CommandCallback * const _callback_table[] = {
 	/* 0x00 */ NULL,
 	/* 0x01 */ CcBuildAircraft,
 	/* 0x02 */ CcBuildAirport,
@@ -77,7 +80,7 @@ CommandCallback *_callback_table[] = {
 	/* 0x06 */ CcBuildLoco,
 	/* 0x07 */ CcBuildRoadVeh,
 	/* 0x08 */ CcBuildShip,
-	/* 0x09 */ CcBuildTown,
+	/* 0x09 */ CcFoundTown,
 	/* 0x0A */ CcBuildRoadTunnel,
 	/* 0x0B */ CcBuildRailTunnel,
 	/* 0x0C */ CcBuildWagon,
@@ -93,6 +96,7 @@ CommandCallback *_callback_table[] = {
 	/* 0x16 */ CcCloneVehicle,
 	/* 0x17 */ CcGiveMoney,
 	/* 0x18 */ CcCreateGroup,
+	/* 0x19 */ CcFoundRandomTown,
 };
 
 const int _callback_table_count = lengthof(_callback_table);
