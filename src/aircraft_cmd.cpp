@@ -253,7 +253,8 @@ uint16 AircraftDefaultCargoCapacity(CargoID cid, const AircraftVehicleInfo *avi)
  * @param flags for command
  * @param p1 aircraft type being built (engine)
  * @param p2 unused
- * return result of operation.  Could be cost, error
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -325,7 +326,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		v->name = NULL;
 //		v->next_order_param = v->next_order = 0;
 
-//		v->load_unload_time_rem = 0;
+//		v->time_counter = 0;
 //		v->progress = 0;
 		v->last_station_visited = INVALID_STATION;
 //		v->destination_coords = 0;
@@ -449,7 +450,8 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
  * @param flags for command type
  * @param p1 vehicle ID to be sold
  * @param p2 unused
- * @return result of operation.  Error or sold value
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSellAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -495,7 +497,8 @@ bool Aircraft::FindClosestDepot(TileIndex *location, DestinationID *destination,
  * @param p2 various bitmasked elements
  * - p2 bit 0-3 - DEPOT_ flags (see vehicle.h)
  * - p2 bit 8-10 - VLW flag (for mass goto depot)
- * @return o if everything went well
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdSendAircraftToHangar(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -520,7 +523,8 @@ CommandCost CmdSendAircraftToHangar(TileIndex tile, DoCommandFlag flags, uint32 
  * - p2 = (bit 0-7) - the new cargo type to refit to
  * - p2 = (bit 8-15) - the new cargo subtype to refit to
  * - p2 = (bit 16) - refit only this vehicle (ignored)
- * @return cost of refit or error
+ * @param text unused
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRefitAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -615,7 +619,7 @@ static void CheckIfAircraftNeedsService(Aircraft *v)
 
 Money Aircraft::GetRunningCost() const
 {
-	return GetVehicleProperty(this, 0x0E, AircraftVehInfo(this->engine_type)->running_cost) * _price.aircraft_running;
+	return GetVehicleProperty(this, PROP_AIRCRAFT_RUNNING_COST_FACTOR, AircraftVehInfo(this->engine_type)->running_cost) * _price.aircraft_running;
 }
 
 void Aircraft::OnNewDay()
@@ -749,7 +753,7 @@ static void PlayAircraftSound(const Vehicle *v)
 
 void UpdateAircraftCache(Aircraft *v)
 {
-	uint max_speed = GetVehicleProperty(v, 0x0C, 0);
+	uint max_speed = GetVehicleProperty(v, PROP_AIRCRAFT_SPEED, 0);
 	if (max_speed != 0) {
 		/* Convert from original units to (approx) km/h */
 		max_speed = (max_speed * 129) / 10;
@@ -1048,7 +1052,7 @@ static bool AircraftController(Aircraft *v)
 	count = UpdateAircraftSpeed(v, speed_limit, hard_limit);
 	if (count == 0) return false;
 
-	if (v->load_unload_time_rem != 0) v->load_unload_time_rem--;
+	if (v->time_counter != 0) v->time_counter--;
 
 	do {
 
@@ -1072,13 +1076,13 @@ static bool AircraftController(Aircraft *v)
 			Direction newdir = GetDirectionTowards(v, x + amd->x, y + amd->y);
 			if (newdir != v->direction) {
 				if (amd->flag & AMED_SLOWTURN && v->number_consecutive_turns < 8) {
-					if (v->load_unload_time_rem == 0 || newdir == v->last_direction) {
+					if (v->time_counter == 0 || newdir == v->last_direction) {
 						if (newdir == v->last_direction) {
 							v->number_consecutive_turns = 0;
 						} else {
 							v->number_consecutive_turns++;
 						}
-						v->load_unload_time_rem = 2 * _settings_game.vehicle.plane_speed;
+						v->time_counter = 2 * _settings_game.vehicle.plane_speed;
 						v->last_direction = v->direction;
 						v->direction = newdir;
 					}
@@ -1316,6 +1320,7 @@ static void CrashAirplane(Aircraft *v)
 
 	CreateEffectVehicleRel(v, 4, 4, 8, EV_EXPLOSION_LARGE);
 
+	v->MarkDirty();
 	SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
 	uint amt = 2;

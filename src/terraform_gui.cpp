@@ -110,8 +110,9 @@ static void GenerateRockyArea(TileIndex end, TileIndex start)
 
 /**
  * A central place to handle all X_AND_Y dragged GUI functions.
- * @param e WindowEvent variable holding in its higher bits (excluding the lower
- * 4, since that defined the X_Y drag) the type of action to be performed
+ * @param proc       Procedure related to the dragging
+ * @param start_tile Begin of the dragging
+ * @param end_tile   End of the dragging
  * @return Returns true if the action was found and handled, and false otherwise. This
  * allows for additional implements that are more local. For example X_Y drag
  * of convertrail which belongs in rail_gui.cpp and not terraform_gui.cpp
@@ -656,7 +657,7 @@ struct ScenarioEditorLandscapeGenerationWindow : Window {
 	ScenarioEditorLandscapeGenerationWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
 		this->InitNested(desc, window_number);
-		this->nested_array[ETTW_PLACE_DESERT_LIGHTHOUSE]->tool_tip = (_settings_game.game_creation.landscape == LT_TROPIC) ? STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA : STR_TERRAFORM_TOOLTIP_PLACE_LIGHTHOUSE;
+		this->GetWidget<NWidgetCore>(ETTW_PLACE_DESERT_LIGHTHOUSE)->tool_tip = (_settings_game.game_creation.landscape == LT_TROPIC) ? STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA : STR_TERRAFORM_TOOLTIP_PLACE_LIGHTHOUSE;
 	}
 
 	virtual void OnPaint() {

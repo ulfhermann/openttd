@@ -121,6 +121,7 @@ enum WidgetType {
 	NWID_SELECTION,      ///< Stacked widgets, only one visible at a time (eg in a panel with tabs).
 	NWID_LAYERED,        ///< Widgets layered on top of each other, all visible at the same time.
 	NWID_VIEWPORT,       ///< Nested widget containing a viewport.
+	NWID_BUTTON_DRPDOWN, ///< Button with a drop-down.
 
 	/* Nested widget part types. */
 	WPT_RESIZE,       ///< Widget part for specifying resizing.
@@ -185,7 +186,7 @@ public:
 	virtual void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl) = 0;
 
 	virtual void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl) = 0;
-	virtual void FillNestedArray(NWidgetCore **array, uint length) = 0;
+	virtual void FillNestedArray(NWidgetBase **array, uint length) = 0;
 
 	virtual NWidgetCore *GetWidgetFromPos(int x, int y) = 0;
 	virtual NWidgetBase *GetWidgetOfType(WidgetType tp);
@@ -278,17 +279,22 @@ public:
 
 /** Nested widget flags that affect display and interaction withe 'real' widgets. */
 enum NWidgetDisplay {
+	/* Generic. */
 	NDB_LOWERED         = 0, ///< Widget is lowered (pressed down) bit.
 	NDB_DISABLED        = 1, ///< Widget is disabled (greyed out) bit.
+	/* Viewport widget. */
 	NDB_NO_TRANSPARENCY = 2, ///< Viewport is never transparent.
 	NDB_SHADE_GREY      = 3, ///< Shade viewport to grey-scale.
 	NDB_SHADE_DIMMED    = 4, ///< Display dimmed colours in the viewport.
+	/* Button dropdown widget. */
+	NDB_DROPDOWN_ACTIVE = 5, ///< Dropdown menu of the button dropdown widget is active. @see #NWID_BUTTON_DRPDOWN
 
 	ND_LOWERED  = 1 << NDB_LOWERED,                ///< Bit value of the lowered flag.
 	ND_DISABLED = 1 << NDB_DISABLED,               ///< Bit value of the disabled flag.
 	ND_NO_TRANSPARENCY = 1 << NDB_NO_TRANSPARENCY, ///< Bit value of the 'no transparency' flag.
 	ND_SHADE_GREY      = 1 << NDB_SHADE_GREY,      ///< Bit value of the 'shade to grey' flag.
 	ND_SHADE_DIMMED    = 1 << NDB_SHADE_DIMMED,    ///< Bit value of the 'dimmed colours' flag.
+	ND_DROPDOWN_ACTIVE = 1 << NDB_DROPDOWN_ACTIVE, ///< Bit value of the 'dropdown active' flag.
 };
 DECLARE_ENUM_AS_BIT_SET(NWidgetDisplay);
 
@@ -307,7 +313,7 @@ public:
 	inline bool IsDisabled();
 
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
-	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
+	/* virtual */ void FillNestedArray(NWidgetBase **array, uint length);
 	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
 
 	virtual Scrollbar *FindScrollbar(Window *w, bool allow_next = true) = 0;
@@ -358,7 +364,7 @@ public:
 	~NWidgetContainer();
 
 	void Add(NWidgetBase *wid);
-	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
+	/* virtual */ void FillNestedArray(NWidgetBase **array, uint length);
 
 	/** Return whether the container is empty. */
 	inline bool IsEmpty() { return head == NULL; };
@@ -377,12 +383,20 @@ class NWidgetStacked : public NWidgetContainer {
 public:
 	NWidgetStacked(WidgetType tp);
 
+	void SetIndex(int index);
+
 	void SetupSmallestSize(Window *w, bool init_array);
 	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl);
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
+	/* virtual */ void FillNestedArray(NWidgetBase **array, uint length);
 
 	/* virtual */ void Draw(const Window *w);
 	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
+
+	void SetDisplayedPlane(int plane);
+
+	int shown_plane; ///< Plane being displayed (for #NWID_SELECTION only).
+	int index;       ///< If non-negative, index in the #Window::nested_array.
 };
 
 /** Nested widget container flags, */
@@ -455,7 +469,7 @@ public:
 
 	void SetupSmallestSize(Window *w, bool init_array);
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
-	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
+	/* virtual */ void FillNestedArray(NWidgetBase **array, uint length);
 
 	/* virtual */ void Draw(const Window *w);
 	/* virtual */ void SetDirty(const Window *w) const;
@@ -476,7 +490,7 @@ public:
 	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl);
 
 	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl);
-	/* virtual */ void FillNestedArray(NWidgetCore **array, uint length);
+	/* virtual */ void FillNestedArray(NWidgetBase **array, uint length);
 
 	/* virtual */ void Draw(const Window *w);
 	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
@@ -517,6 +531,8 @@ public:
 	/* virtual */ void SetupSmallestSize(Window *w, bool init_array);
 	/* virtual */ void Draw(const Window *w);
 	/* virtual */ Scrollbar *FindScrollbar(Window *w, bool allow_next = true);
+
+	bool ButtonHit(const Point &pt);
 
 	static void InvalidateDimensionCache();
 private:
@@ -642,8 +658,8 @@ static inline NWidgetPart SetResize(int16 dx, int16 dy)
 
 /**
  * Widget part function for setting the minimal size.
- * @param dx Horizontal minimal size.
- * @param dy Vertical minimal size.
+ * @param x Horizontal minimal size.
+ * @param y Vertical minimal size.
  * @ingroup NestedWidgetParts
  */
 static inline NWidgetPart SetMinimalSize(int16 x, int16 y)

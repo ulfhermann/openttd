@@ -180,7 +180,7 @@ public:
 
 		/* When downloading is finished change cancel in ok */
 		if (this->downloaded_bytes == this->total_bytes) {
-			this->nested_array[NCDSWW_CANCELOK]->widget_data = STR_BUTTON_OK;
+			this->GetWidget<NWidgetCore>(NCDSWW_CANCELOK)->widget_data = STR_BUTTON_OK;
 		}
 
 		this->SetDirty();
@@ -811,7 +811,7 @@ static const NWidgetPart _nested_network_content_list_widgets[] = {
 		/* Bottom. */
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_SPACER), SetMinimalSize(10, 0),
-			NWidget(NWID_SELECTION),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, -1),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_SELECT_ALL), SetMinimalSize(101, 12),
 										SetDataTip(STR_CONTENT_SELECT_ALL_CAPTION, STR_CONTENT_SELECT_ALL_CAPTION_TOOLTIP),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_WHITE, NCLWW_SELECT_UPDATE), SetMinimalSize(101, 12),

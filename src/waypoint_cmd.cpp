@@ -157,6 +157,7 @@ CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
  * Check whether the given tile is suitable for a waypoint.
  * @param tile the tile to check for suitability
  * @param axis the axis of the waypoint
+ * @param waypoint Waypoint the waypoint to check for is already joined to. If we find another waypoint it can join to it will throw an error.
  */
 static CommandCost IsValidTileForWaypoint(TileIndex tile, Axis axis, StationID *waypoint)
 {
@@ -210,7 +211,7 @@ extern bool CanExpandRailStation(const BaseStation *st, TileArea &new_ta, Axis a
  * - p2 = (bit  0- 7) - custom station class
  * - p2 = (bit  8-15) - custom station id
  * @param text unused
- * @return cost of operation or error
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildRailWaypoint(TileIndex start_tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -330,7 +331,7 @@ CommandCost CmdBuildRailWaypoint(TileIndex start_tile, DoCommandFlag flags, uint
  * @param p1 unused
  * @param p2 unused
  * @param text unused
- * @return cost of operation or error
+ * @return the cost of this operation or an error
  */
 CommandCost CmdBuildBuoy(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
@@ -427,8 +428,8 @@ static bool IsUniqueWaypointName(const char *name)
  * @param flags type of operation
  * @param p1 id of waypoint
  * @param p2 unused
- * @param text the new name of the waypoint or an empty string when resetting to the default
- * @return cost of operation or error
+ * @param text the new name or an empty string when resetting to the default
+ * @return the cost of this operation or an error
  */
 CommandCost CmdRenameWaypoint(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
