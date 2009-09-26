@@ -942,26 +942,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}فشل �
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}عمله مخصصه
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}معامل التبديل: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}معامل التبديل: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK} £ قلل قيمة عملتك لكل جنية استرليني
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK} £ زد قيمة عملتك لكل جنية استرليني
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK} حدد قيمة الصرف لعملتك مقابل الجنية الاسترليني (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE} فاصل العملة: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE} فاصل العملة: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK} حدد الفاصل لعملتك
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE} علامة العملة السابقة: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE} علامة العملة السابقة: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK} حدد الرمز الاستهلالي لعملتك
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}  علامة العملة الاخيرة: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}  علامة العملة الاخيرة: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK} حدد الرمز اللاحق لعملتك
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}حول إلى يورو : {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}حول إلى يورو : {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}حول إلى يورو : {ORANGE}أبدا
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK} حدد السنة لتبديل العملة لليورو
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK} بدل الى اليورو مبكرا
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK} بدل الى اليورو متاخرا
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}عرض: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}عرض: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK} 10000 جنية استرليني في عملتك
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}غير الخيارات الاختيارة
 
@@ -3275,7 +3275,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}هذه �
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}لا يمكن انشاء اي مدينة
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}لايمكن اعادة تسمية المدينة ...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}لا يمكن انشاء مدينة هنا
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}لا يمكن انشاء مدينة هنا
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...قريبة جدا من حافة الخريطة
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...قريبة جدا من مدينة أخرى
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... المدن كثيرة جدا
@@ -3288,7 +3288,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}لا ي�
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}لايمكن انشاء {STRING} هنا...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}لا بمكن بناء المصنع هنا ...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}قريب جدا من مصنع آخر
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...يجب بناء مدينة اولا
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...يجب بناء مدينة اولا
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...يسمح بواحد في المدينة فقط
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...يمكن بنائة في مدن يزيد سكانها عن 1200 نسمة
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... يمكن بنائة في الغابات المطيرة فقط
@@ -3987,7 +3987,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

@@ -943,26 +943,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}无法�
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}自定义货币
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}兑换汇率： {ORANGE}{0:CURRENCY} = {1:COMMA} 英镑(£)
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}兑换汇率： {ORANGE}{CURRENCY} = {COMMA} 英镑(£)
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}减少英磅(£)兑换自定义货币的数量
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}增加英磅(£)兑换自定义货币的数量
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}设置自定义货币与英磅(£)的兑换比率
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}分隔符： {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}分隔符： {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}设置千位分隔符
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}前缀： {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}前缀： {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}设置自定义货币的首字
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}后缀： {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}后缀： {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}设置自定义货币的尾字
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}转换为欧元： {ORANGE}{5:NUM} 年后
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}转换为欧元： {ORANGE}{NUM} 年后
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}转换为欧元： {ORANGE}不转换
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}设置转换为欧元货币的起始年份
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}提早转换为欧元货币的起始年份
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}延后转换为欧元货币的起始年份
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}预览：{ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}预览：{ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 英磅(£) 兑换自定义货币的数量
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}改变当前的货币参数
 
@@ -1344,6 +1344,7 @@ STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
 STR_OSNAME_OSX                                                  :OS X
 STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
 STR_OSNAME_OS2                                                  :OS/2
@@ -2031,6 +2032,12 @@ STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}随机�
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}随机新增一个城镇
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}大量随机城镇
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}在地图上随机创建大量城镇
+
+STR_FOUND_TOWN_NAME_TITLE                                       :{YELLOW}城镇名称：
+STR_FOUND_TOWN_NAME_EDITOR_TITLE                                :{BLACK}输入城镇名称
+STR_FOUND_TOWN_NAME_EDITOR_HELP                                 :{BLACK}点击这里输入城镇名称
+STR_FOUND_TOWN_NAME_RANDOM_BUTTON                               :{BLACK}随机名称
+STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP                              :{BLACK}重新随机生成城镇名称
 
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}城镇规模：
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}小
@@ -3279,7 +3286,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}这个�
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}不能建设任何城镇
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}不能重命名城镇……
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}不能在这里建设城镇……
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}不能在这里建设城镇……
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}太靠近地图边缘了
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}太靠近另一个城镇了
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}城镇太多了
@@ -3292,7 +3299,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}不能�
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}不能在这里建设 {STRING} ……
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}不能在此处建设这种类型的工业设施……
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}距离另一工业设施过近……
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}必须先建设一个城镇……
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}必须先建设一个城镇……
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}每个城镇只能建设一个……
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}只能在人口超过 1200 的城镇建造……
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}只能在雨林中建设……
@@ -3991,7 +3998,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
