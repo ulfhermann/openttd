@@ -13,6 +13,7 @@
 #include "openttd.h"
 #include "town.h"
 #include "viewport_func.h"
+#include "window_func.h"
 #include "gfx_func.h"
 #include "gui.h"
 #include "window_gui.h"
@@ -33,6 +34,11 @@
 #include "landscape.h"
 #include "cargotype.h"
 #include "tile_map.h"
+#include "querystring_gui.h"
+#include "window_func.h"
+#include "string_func.h"
+#include "townname_func.h"
+#include "townname_type.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -43,22 +49,11 @@ typedef GUIList<const Town*> GUITownList;
 enum TownAuthorityWidgets {
 	TWA_CLOSEBOX,
 	TWA_CAPTION,
-	TWA_RATING_INFO,
-	TWA_COMMAND_LIST,
+	TWA_RATING_INFO,  ///< Overview with ratings for each company.
+	TWA_COMMAND_LIST, ///< List of commands for the player.
 	TWA_SCROLLBAR,
-	TWA_ACTION_INFO,
-	TWA_EXECUTE,
-};
-
-static const Widget _town_authority_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_BROWN,     0,    10,     0,    13, STR_BLACK_CROSS,             STR_TOOLTIP_CLOSE_WINDOW},               // TWA_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_BROWN,    11,   316,     0,    13, STR_LOCAL_AUTHORITY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},     // TWA_CAPTION
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_BROWN,     0,   316,    14,   105, 0x0,                         STR_NULL},                               // TWA_RATING_INFO
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_BROWN,     0,   304,   106,   157, 0x0,                         STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP},    // TWA_COMMAND_LIST
-{  WWT_SCROLLBAR,   RESIZE_NONE,  COLOUR_BROWN,   305,   316,   106,   157, 0x0,                         STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},   // TWA_SCROLLBAR
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_BROWN,     0,   316,   158,   209, 0x0,                         STR_NULL},                               // TWA_ACTION_INFO
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_BROWN,     0,   316,   210,   221, STR_LOCAL_AUTHORITY_DO_IT_BUTTON, STR_LOCAL_AUTHORITY_DO_IT_TOOLTIP}, // TWA_EXECUTE
-{   WIDGETS_END},
+	TWA_ACTION_INFO,  ///< Additional information about the action.
+	TWA_EXECUTE,      ///< Do-it button.
 };
 
 static const NWidgetPart _nested_town_authority_widgets[] = {
@@ -66,7 +61,7 @@ static const NWidgetPart _nested_town_authority_widgets[] = {
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, TWA_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_BROWN, TWA_CAPTION), SetDataTip(STR_LOCAL_AUTHORITY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, TWA_RATING_INFO), SetMinimalSize(317, 92), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_BROWN, TWA_RATING_INFO), SetMinimalSize(317, 92), SetResize(0, 1), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_BROWN, TWA_COMMAND_LIST), SetMinimalSize(305, 52), SetDataTip(0x0, STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP), EndContainer(),
 		NWidget(WWT_SCROLLBAR, COLOUR_BROWN, TWA_SCROLLBAR),
@@ -75,12 +70,11 @@ static const NWidgetPart _nested_town_authority_widgets[] = {
 	NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TWA_EXECUTE),  SetMinimalSize(317, 12), SetDataTip(STR_LOCAL_AUTHORITY_DO_IT_BUTTON, STR_LOCAL_AUTHORITY_DO_IT_TOOLTIP),
 };
 
-extern const byte _town_action_costs[8];
-
+/** Town authority window. */
 struct TownAuthorityWindow : Window {
 private:
-	Town *town;
-	int sel_index;
+	Town *town;    ///< Town being displayed.
+	int sel_index; ///< Currently selected town action, \c 0 to \c TACT_COUNT-1, \c -1 means no action selected.
 
 	/**
 	 * Get the position of the Nth set bit.
@@ -104,13 +98,11 @@ private:
 	}
 
 public:
-	TownAuthorityWindow(const WindowDesc *desc, WindowNumber window_number) :
-			Window(desc, window_number), sel_index(-1)
+	TownAuthorityWindow(const WindowDesc *desc, WindowNumber window_number) : Window(), sel_index(-1)
 	{
-		this->town = Town::Get(this->window_number);
-		this->vscroll.SetCapacity(5);
-
-		this->FindWindowPlacementAndResize(desc);
+		this->town = Town::Get(window_number);
+		this->InitNested(desc, window_number);
+		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(TWA_COMMAND_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / FONT_HEIGHT_NORMAL);
 	}
 
 	virtual void OnPaint()
@@ -124,21 +116,29 @@ public:
 			this->sel_index = -1;
 		}
 
-		this->SetWidgetDisabledState(6, this->sel_index == -1);
+		this->SetWidgetDisabledState(TWA_EXECUTE, this->sel_index == -1);
 
-		SetDParam(0, this->window_number);
 		this->DrawWidgets();
+		this->DrawRatings();
+	}
 
-		int y = this->widget[TWA_RATING_INFO].top + 1;
+	/** Draw the contents of the ratings panel. May request a resize of the window if the contents does not fit. */
+	void DrawRatings()
+	{
+		NWidgetBase *nwid = this->GetWidget<NWidgetBase>(TWA_RATING_INFO);
+		int left = nwid->pos_x;
+		int right = nwid->pos_x + nwid->current_x - 1;
 
-		DrawString(this->widget[TWA_RATING_INFO].left + 2, this->widget[TWA_RATING_INFO].right - 2, y, STR_LOCAL_AUTHORITY_COMPANY_RATINGS);
-		y += 10;
+		uint y = nwid->pos_y + WD_FRAMERECT_TOP;
+
+		DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_TOP, y, STR_LOCAL_AUTHORITY_COMPANY_RATINGS);
+		y += FONT_HEIGHT_NORMAL;
 
 		/* Draw list of companies */
 		const Company *c;
 		FOR_ALL_COMPANIES(c) {
 			if ((HasBit(this->town->have_ratings, c->index) || this->town->exclusivity == c->index)) {
-				DrawCompanyIcon(c->index, 2, y);
+				DrawCompanyIcon(c->index, left + WD_FRAMERECT_LEFT, y);
 
 				SetDParam(0, c->index);
 				SetDParam(1, c->index);
@@ -156,42 +156,87 @@ public:
 
 				SetDParam(2, str);
 				if (this->town->exclusivity == c->index) { // red icon for company with exclusive rights
-					DrawSprite(SPR_BLOT, PALETTE_TO_RED, 18, y);
+					DrawSprite(SPR_BLOT, PALETTE_TO_RED, left + WD_FRAMERECT_LEFT + 16, y);
 				}
 
-				DrawString(this->widget[TWA_RATING_INFO].left + 28, this->widget[TWA_RATING_INFO].right - 2, y, STR_LOCAL_AUTHORITY_COMPANY_RATING);
-				y += 10;
+				DrawString(left + WD_FRAMERECT_LEFT + 26, right - WD_FRAMERECT_RIGHT, y, STR_LOCAL_AUTHORITY_COMPANY_RATING);
+				y += FONT_HEIGHT_NORMAL;
 			}
 		}
 
-		if (y > this->widget[TWA_RATING_INFO].bottom) {
+		y = y + WD_FRAMERECT_BOTTOM - nwid->pos_y; // Compute needed size of the widget.
+		if (y > nwid->current_y) {
 			/* If the company list is too big to fit, mark ourself dirty and draw again. */
-			ResizeWindowForWidget(this, TWA_RATING_INFO, 0, y - this->widget[TWA_RATING_INFO].bottom);
-			this->SetDirty();
-			return;
+			ResizeWindow(this, 0, y - nwid->current_y);
 		}
+	}
 
-		y = this->widget[TWA_COMMAND_LIST].top + 1;
-		int pos = this->vscroll.GetPosition();
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget == TWA_CAPTION) SetDParam(0, this->window_number);
+	}
 
-		if (--pos < 0) {
-			DrawString(this->widget[TWA_COMMAND_LIST].left + 2, this->widget[TWA_COMMAND_LIST].right - 2, y, STR_LOCAL_AUTHORITY_ACTIONS_TITLE);
-			y += 10;
-		}
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		switch (widget) {
+			case TWA_ACTION_INFO:
+				if (this->sel_index != -1) {
+					SetDParam(1, (_price.build_industry >> 8) * _town_action_costs[this->sel_index]);
+					SetDParam(0, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + this->sel_index);
+					DrawStringMultiLine(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, r.bottom - WD_FRAMERECT_BOTTOM,
+								STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING + this->sel_index);
+				}
+				break;
+			case TWA_COMMAND_LIST: {
+				int numact;
+				uint buttons = GetMaskOfTownActions(&numact, _local_company, this->town);
+				int y = r.top + WD_FRAMERECT_TOP;
+				int pos = this->vscroll.GetPosition();
 
-		for (int i = 0; buttons; i++, buttons >>= 1) {
-			if (pos <= -5) break; ///< Draw only the 5 fitting lines
+				if (--pos < 0) {
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_LOCAL_AUTHORITY_ACTIONS_TITLE);
+					y += FONT_HEIGHT_NORMAL;
+				}
 
-			if ((buttons & 1) && --pos < 0) {
-				DrawString(this->widget[TWA_COMMAND_LIST].left + 3, this->widget[TWA_COMMAND_LIST].right - 2, y, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + i, TC_ORANGE);
-				y += 10;
+				for (int i = 0; buttons; i++, buttons >>= 1) {
+					if (pos <= -5) break; ///< Draw only the 5 fitting lines
+
+					if ((buttons & 1) && --pos < 0) {
+						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + i, TC_ORANGE);
+						y += FONT_HEIGHT_NORMAL;
+					}
+				}
+				break;
 			}
 		}
+	}
 
-		if (this->sel_index != -1) {
-			SetDParam(1, (_price.build_industry >> 8) * _town_action_costs[this->sel_index]);
-			SetDParam(0, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + this->sel_index);
-			DrawStringMultiLine(this->widget[TWA_ACTION_INFO].left + 2, this->widget[TWA_ACTION_INFO].right - 2, this->widget[TWA_ACTION_INFO].top + 1, this->widget[TWA_ACTION_INFO].bottom - 1, STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING + this->sel_index);
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		switch (widget) {
+			case TWA_ACTION_INFO: {
+				assert(size->width > padding.width && size->height > padding.height);
+				size->width -= WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+				size->height -= WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+				Dimension d = {0, 0};
+				for (int i = 0; i < TACT_COUNT; i++) {
+					SetDParam(1, (_price.build_industry >> 8) * _town_action_costs[i]);
+					SetDParam(0, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + i);
+					d = maxdim(d, GetStringMultiLineBoundingBox(STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING + i, *size));
+				}
+				*size = maxdim(*size, d);
+				size->width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+				size->height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+				break;
+			}
+
+			case TWA_COMMAND_LIST:
+				size->height = WD_FRAMERECT_TOP + 5 * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM;
+				break;
+
+			case TWA_RATING_INFO:
+				size->height = WD_FRAMERECT_TOP + 9 * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM;
+				break;
 		}
 	}
 
@@ -202,7 +247,7 @@ public:
 	{
 		switch (widget) {
 			case TWA_COMMAND_LIST: {
-				int y = (pt.y - this->widget[TWA_COMMAND_LIST].top - 1) / 10;
+				int y = (pt.y - this->GetWidget<NWidgetBase>(TWA_COMMAND_LIST)->pos_y - 1) / FONT_HEIGHT_NORMAL;
 
 				if (!IsInsideMM(y, 0, 5)) return;
 
@@ -231,7 +276,7 @@ static const WindowDesc _town_authority_desc(
 	WDP_AUTO, WDP_AUTO, 317, 222, 317, 222,
 	WC_TOWN_AUTHORITY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_town_authority_widgets, _nested_town_authority_widgets, lengthof(_nested_town_authority_widgets)
+	NULL, _nested_town_authority_widgets, lengthof(_nested_town_authority_widgets)
 );
 
 static void ShowTownAuthorityWindow(uint town)
@@ -246,6 +291,7 @@ enum TownViewWidgets {
 	TVW_STICKY,
 	TVW_VIEWPORTPANEL,
 	TVW_VIEWPORTINSET,
+	TVW_VIEWPORT,
 	TVW_INFOPANEL,
 	TVW_CENTERVIEW,
 	TVW_SHOWAUTHORITY,
@@ -254,70 +300,62 @@ enum TownViewWidgets {
 	TVW_DELETE,
 };
 
+/* Town view window. */
 struct TownViewWindow : Window {
 private:
-	Town *town;
+	Town *town; ///< Town displayed by the window.
 
 public:
 	enum {
 		TVW_HEIGHT_NORMAL = 150,
 	};
 
-	TownViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
+	TownViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
-		this->town = Town::Get(this->window_number);
-		bool ingame = _game_mode != GM_EDITOR;
+		this->CreateNestedTree(desc);
+
+		this->town = Town::Get(window_number);
+		if (this->town->larger_town) this->GetWidget<NWidgetCore>(TVW_CAPTION)->widget_data = STR_TOWN_VIEW_CITY_CAPTION;
+
+		this->FinishInitNested(desc, window_number);
 
 		this->flags4 |= WF_DISABLE_VP_SCROLL;
-		int width = this->widget[TVW_VIEWPORTINSET].right - this->widget[TVW_VIEWPORTINSET].left - 1;
-		int height = this->widget[TVW_VIEWPORTINSET].bottom - this->widget[TVW_VIEWPORTINSET].top - 1;
-		InitializeWindowViewport(this, this->widget[TVW_VIEWPORTINSET].left + 1, this->widget[TVW_VIEWPORTINSET].top + 1, width, height, this->town->xy, ZOOM_LVL_TOWN);
-
-		if (this->town->larger_town) this->widget[TVW_CAPTION].data = STR_TOWN_VIEW_CITY_CAPTION;
-
-		if (ingame) {
-			/* Hide the expand button, and put the authority button over it. */
-			this->HideWidget(TVW_EXPAND);
-			this->widget[TVW_SHOWAUTHORITY].right = this->widget[TVW_EXPAND].right;
-			/* Resize caption bar */
-			this->widget[TVW_CAPTION].right = this->widget[TVW_STICKY].left -1;
-			/* Hide the delete button, and move the rename button from top on scenario to bottom in game. */
-			this->HideWidget(TVW_DELETE);
-			this->widget[TVW_CHANGENAME].top = this->widget[TVW_EXPAND].top;
-			this->widget[TVW_CHANGENAME].bottom = this->widget[TVW_EXPAND].bottom;
-			this->widget[TVW_CHANGENAME].right = this->widget[TVW_STICKY].right;
-		} else {
-			/* Hide the authority button, and put the expand button over it. */
-			this->HideWidget(TVW_SHOWAUTHORITY);
-			this->widget[TVW_EXPAND].left = this->widget[TVW_SHOWAUTHORITY].left;
-		}
+		NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(TVW_VIEWPORT);
+		nvp->InitializeViewport(this, this->town->xy, ZOOM_LVL_NEWS);
 
 		this->ResizeWindowAsNeeded();
 
-		this->FindWindowPlacementAndResize(desc);
+		/* disable renaming town in network games if you are not the server */
+		this->SetWidgetDisabledState(TVW_CHANGENAME, _networking && !_network_server);
 	}
 
 	virtual void OnPaint()
 	{
-		/* disable renaming town in network games if you are not the server */
-		this->SetWidgetDisabledState(TVW_CHANGENAME, _networking && !_network_server);
-
-		SetDParam(0, this->town->index);
 		this->DrawWidgets();
+	}
 
-		uint y = 107;
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget == TVW_CAPTION) SetDParam(0, this->town->index);
+	}
+
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != TVW_INFOPANEL) return;
+
+		uint y = r.top + WD_FRAMERECT_TOP;
 
 		SetDParam(0, this->town->population);
 		SetDParam(1, this->town->num_houses);
-		DrawString(2, this->width - 2, y, STR_TOWN_VIEW_POPULATION_HOUSES);
+		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y, STR_TOWN_VIEW_POPULATION_HOUSES);
 
 		SetDParam(0, this->town->act_pass);
 		SetDParam(1, this->town->max_pass);
-		DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX);
+		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX);
 
 		SetDParam(0, this->town->act_mail);
 		SetDParam(1, this->town->max_mail);
-		DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX);
+		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX);
 
 		uint cargo_needed_for_growth = 0;
 		switch (_settings_game.game_creation.landscape) {
@@ -333,7 +371,7 @@ public:
 		}
 
 		if (cargo_needed_for_growth > 0) {
-			DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH);
+			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH);
 
 			CargoID first_food_cargo = CT_INVALID;
 			StringID food_name = STR_CARGO_PLURAL_FOOD;
@@ -354,31 +392,29 @@ public:
 			if (first_food_cargo != CT_INVALID && this->town->act_food > 0) {
 				SetDParam(0, first_food_cargo);
 				SetDParam(1, this->town->act_food);
-				DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
+				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
 			} else {
 				SetDParam(0, food_name);
-				DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
+				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
 			}
 
 			if (cargo_needed_for_growth > 1) {
 				if (first_water_cargo != CT_INVALID && this->town->act_water > 0) {
 					SetDParam(0, first_water_cargo);
 					SetDParam(1, this->town->act_water);
-					DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
 				} else {
 					SetDParam(0, water_name);
-					DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
 				}
 			}
 		}
-
-		this->DrawViewport();
 
 		/* only show the town noise, if the noise option is activated. */
 		if (_settings_game.economy.station_noise_level) {
 			SetDParam(0, this->town->noise_reached);
 			SetDParam(1, this->town->MaxTownNoise());
-			DrawString(2, this->width - 2, y += 10, STR_TOWN_VIEW_NOISE_IN_TOWN);
+			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_NOISE_IN_TOWN);
 		}
 	}
 
@@ -414,23 +450,34 @@ public:
 
 	void ResizeWindowAsNeeded()
 	{
-		int aimed_height = TVW_HEIGHT_NORMAL;
+		uint aimed_height = 3 * FONT_HEIGHT_NORMAL + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 
 		switch (_settings_game.game_creation.landscape) {
 			case LT_ARCTIC:
-				if (TilePixelHeight(this->town->xy) >= LowestSnowLine()) aimed_height += 20;
+				if (TilePixelHeight(this->town->xy) >= LowestSnowLine()) aimed_height += 2 * FONT_HEIGHT_NORMAL;
 				break;
 
 			case LT_TROPIC:
-				if (GetTropicZone(this->town->xy) == TROPICZONE_DESERT) aimed_height += 30;
+				if (GetTropicZone(this->town->xy) == TROPICZONE_DESERT) aimed_height += 3 * FONT_HEIGHT_NORMAL;
 				break;
 
 			default: break;
 		}
 
-		if (_settings_game.economy.station_noise_level) aimed_height += 10;
+		if (_settings_game.economy.station_noise_level) aimed_height += FONT_HEIGHT_NORMAL;
 
-		if (this->height != aimed_height) ResizeWindowForWidget(this, TVW_INFOPANEL, 0, aimed_height - this->height);
+		NWidgetBase *nwid_info = this->GetWidget<NWidgetBase>(TVW_INFOPANEL);
+		if (aimed_height > nwid_info->current_y || (aimed_height < nwid_info->current_y && nwid_info->current_y > nwid_info->smallest_y)) {
+			ResizeWindow(this, 0, aimed_height - nwid_info->current_y);
+		}
+	}
+
+	virtual void OnResize(Point delta)
+	{
+		if (this->viewport != NULL) {
+			NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(TVW_VIEWPORT);
+			nvp->UpdateViewportCoordinates(this);
+		}
 	}
 
 	virtual void OnInvalidateData(int data = 0)
@@ -448,23 +495,33 @@ public:
 	}
 };
 
-
-static const Widget _town_view_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_BROWN,     0,    10,     0,    13, STR_BLACK_CROSS,                      STR_TOOLTIP_CLOSE_WINDOW},              // TVW_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_BROWN,    11,   171,     0,    13, STR_TOWN_VIEW_TOWN_CAPTION,           STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},    // TVW_CAPTION
-{  WWT_STICKYBOX,   RESIZE_NONE,  COLOUR_BROWN,   248,   259,     0,    13, 0x0,                                  STR_TOOLTIP_STICKY},                     // TVW_STICKY
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_BROWN,     0,   259,    14,   105, 0x0,                                  STR_NULL},                              // TVW_VIEWPORTPANEL
-{      WWT_INSET,   RESIZE_NONE,  COLOUR_BROWN,     2,   257,    16,   103, 0x0,                                  STR_NULL},                              // TVW_VIEWPORTINSET
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_BROWN,     0,   259,   106,   137, 0x0,                                  STR_NULL},                              // TVW_INFOPANEL
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_BROWN,     0,    85,   138,   149, STR_BUTTON_LOCATION,                  STR_TOWN_VIEW_CENTER_TOOLTIP},          // TVW_CENTERVIEW
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_BROWN,    86,   127,   138,   149, STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON, STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP}, // TVW_SHOWAUTHORITY
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_BROWN,   172,   247,     0,    13, STR_BUTTON_RENAME,                    STR_TOWN_VIEW_RENAME_TOOLTIP},          // TVW_CHANGENAME
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_BROWN,   128,   171,   138,   149, STR_TOWN_VIEW_EXPAND_BUTTON,          STR_TOWN_VIEW_EXPAND_TOOLTIP},          // TVW_EXPAND
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_BROWN,   172,   259,   138,   149, STR_TOWN_VIEW_DELETE_BUTTON,          STR_TOWN_VIEW_DELETE_TOOLTIP},          // TVW_DELETE
-{   WIDGETS_END},
+static const NWidgetPart _nested_town_game_view_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, TVW_CLOSEBOX),
+		NWidget(WWT_CAPTION, COLOUR_BROWN, TVW_CAPTION), SetDataTip(STR_TOWN_VIEW_TOWN_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN, TVW_STICKY),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_BROWN, TVW_VIEWPORTPANEL),
+		NWidget(WWT_INSET, COLOUR_BROWN, TVW_VIEWPORTINSET), SetPadding(2, 2, 2, 2),
+			NWidget(NWID_VIEWPORT, INVALID_COLOUR, TVW_VIEWPORT), SetMinimalSize(254, 86), SetFill(true, false), SetPadding(1, 1, 1, 1),
+		EndContainer(),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_BROWN, TVW_INFOPANEL), SetMinimalSize(260, 32), SetResize(0, 1), SetFill(true, false), EndContainer(),
+	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_CENTERVIEW), SetMinimalSize(80, 12), SetFill(true, true), SetDataTip(STR_BUTTON_LOCATION, STR_TOWN_VIEW_CENTER_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_SHOWAUTHORITY), SetMinimalSize(80, 12), SetFill(true, true), SetDataTip(STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON, STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_CHANGENAME), SetMinimalSize(80, 12), SetFill(true, true), SetDataTip(STR_BUTTON_RENAME, STR_TOWN_VIEW_RENAME_TOOLTIP),
+	EndContainer(),
 };
 
-static const NWidgetPart _nested_town_view_widgets[] = {
+static const WindowDesc _town_game_view_desc(
+	WDP_AUTO, WDP_AUTO, 260, TownViewWindow::TVW_HEIGHT_NORMAL, 260, TownViewWindow::TVW_HEIGHT_NORMAL,
+	WC_TOWN_VIEW, WC_NONE,
+	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
+	NULL, _nested_town_game_view_widgets, lengthof(_nested_town_game_view_widgets)
+);
+
+static const NWidgetPart _nested_town_editor_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, TVW_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_BROWN, TVW_CAPTION), SetDataTip(STR_TOWN_VIEW_TOWN_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
@@ -472,27 +529,32 @@ static const NWidgetPart _nested_town_view_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN, TVW_STICKY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_BROWN, TVW_VIEWPORTPANEL),
-		NWidget(WWT_INSET, COLOUR_BROWN, TVW_VIEWPORTINSET), SetMinimalSize(256, 88), SetPadding(2, 2, 2, 2), EndContainer(),
+		NWidget(WWT_INSET, COLOUR_BROWN, TVW_VIEWPORTINSET), SetPadding(2, 2, 2, 2),
+			NWidget(NWID_VIEWPORT, INVALID_COLOUR, TVW_VIEWPORT), SetMinimalSize(254, 86), SetFill(true, false), SetPadding(1, 1, 1, 1),
+		EndContainer(),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, TVW_INFOPANEL), SetMinimalSize(260, 32), EndContainer(),
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_CENTERVIEW), SetMinimalSize(86, 12), SetDataTip(STR_BUTTON_LOCATION, STR_TOWN_VIEW_CENTER_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_SHOWAUTHORITY), SetMinimalSize(42, 12), SetDataTip(STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON, STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_EXPAND), SetMinimalSize(44, 12), SetDataTip(STR_TOWN_VIEW_EXPAND_BUTTON, STR_TOWN_VIEW_EXPAND_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_DELETE), SetMinimalSize(88, 12), SetDataTip(STR_TOWN_VIEW_DELETE_BUTTON, STR_TOWN_VIEW_DELETE_TOOLTIP),
+	NWidget(WWT_PANEL, COLOUR_BROWN, TVW_INFOPANEL), SetMinimalSize(260, 32), SetResize(0, 1), SetFill(true, false), EndContainer(),
+	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_CENTERVIEW), SetMinimalSize(80, 12), SetFill(true, true), SetDataTip(STR_BUTTON_LOCATION, STR_TOWN_VIEW_CENTER_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_EXPAND), SetMinimalSize(80, 12), SetFill(true, true), SetDataTip(STR_TOWN_VIEW_EXPAND_BUTTON, STR_TOWN_VIEW_EXPAND_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_DELETE), SetMinimalSize(80, 12), SetFill(true, true), SetDataTip(STR_TOWN_VIEW_DELETE_BUTTON, STR_TOWN_VIEW_DELETE_TOOLTIP),
 	EndContainer(),
 };
 
-static const WindowDesc _town_view_desc(
+static const WindowDesc _town_editor_view_desc(
 	WDP_AUTO, WDP_AUTO, 260, TownViewWindow::TVW_HEIGHT_NORMAL, 260, TownViewWindow::TVW_HEIGHT_NORMAL,
 	WC_TOWN_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
-	_town_view_widgets, _nested_town_view_widgets, lengthof(_nested_town_view_widgets)
+	NULL, _nested_town_editor_view_widgets, lengthof(_nested_town_editor_view_widgets)
 );
 
 void ShowTownViewWindow(TownID town)
 {
-	AllocateWindowDescFront<TownViewWindow>(&_town_view_desc, town);
+	if (_game_mode == GM_EDITOR) {
+		AllocateWindowDescFront<TownViewWindow>(&_town_editor_view_desc, town);
+	} else {
+		AllocateWindowDescFront<TownViewWindow>(&_town_game_view_desc, town);
+	}
 }
 
 /** Widget numbers of town directory window. */
@@ -603,7 +665,7 @@ public:
 		this->BuildSortTownList();
 
 		this->InitNested(desc, 0);
-		this->vscroll.SetCapacity(this->nested_array[TDW_CENTERTOWN]->current_y / (int)this->resize.step_height);
+		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(TDW_CENTERTOWN)->current_y / (int)this->resize.step_height);
 	}
 
 	~TownDirectoryWindow()
@@ -661,7 +723,7 @@ public:
 		switch (widget) {
 			case TDW_SORTNAME:
 			case TDW_SORTPOPULATION: {
-				Dimension d = GetStringBoundingBox(this->nested_array[widget]->widget_data);
+				Dimension d = GetStringBoundingBox(this->GetWidget<NWidgetCore>(widget)->widget_data);
 				d.width += padding.width + WD_SORTBUTTON_ARROW_WIDTH * 2; // Doubled since the word is centered, also looks nice.
 				d.height += padding.height;
 				*size = maxdim(*size, d);
@@ -719,7 +781,7 @@ public:
 				break;
 
 			case TDW_CENTERTOWN: { // Click on Town Matrix
-				uint16 id_v = (pt.y - this->nested_array[widget]->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
+				uint16 id_v = (pt.y - this->GetWidget<NWidgetBase>(widget)->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
 
 				if (id_v >= this->vscroll.GetCapacity()) return; // click out of bounds
 
@@ -783,12 +845,17 @@ void ShowTownDirectory()
 	new TownDirectoryWindow(&_town_directory_desc);
 }
 
-void CcBuildTown(bool success, TileIndex tile, uint32 p1, uint32 p2)
+void CcFoundTown(bool success, TileIndex tile, uint32 p1, uint32 p2)
 {
 	if (success) {
 		SndPlayTileFx(SND_1F_SPLAT, tile);
 		if (!_settings_client.gui.persistent_buildingtools) ResetObjectToPlace();
 	}
+}
+
+void CcFoundRandomTown(bool success, TileIndex tile, uint32 p1, uint32 p2)
+{
+	if (success) ScrollMainWindowToTile(Town::Get(_new_town_id)->xy);
 }
 
 /** Widget numbers of town scenario editor window. */
@@ -800,6 +867,9 @@ enum TownScenarioEditorWidgets {
 	TSEW_NEWTOWN,
 	TSEW_RANDOMTOWN,
 	TSEW_MANYRANDOMTOWNS,
+	TSEW_TOWNNAME_TEXT,
+	TSEW_TOWNNAME_EDITBOX,
+	TSEW_TOWNNAME_RANDOM,
 	TSEW_TOWNSIZE,
 	TSEW_SIZE_SMALL,
 	TSEW_SIZE_MEDIUM,
@@ -829,6 +899,14 @@ static const NWidgetPart _nested_found_town_widgets[] = {
 										SetDataTip(STR_FOUND_TOWN_RANDOM_TOWN_BUTTON, STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP), SetPadding(0, 2, 1, 2),
 		NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_MANYRANDOMTOWNS), SetMinimalSize(156, 12), SetFill(true, false),
 										SetDataTip(STR_FOUND_TOWN_MANY_RANDOM_TOWNS, STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP), SetPadding(0, 2, 0, 2),
+		/* Town name selection. */
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_LABEL, COLOUR_DARK_GREEN, TSEW_TOWNSIZE), SetMinimalSize(156, 14), SetDataTip(STR_FOUND_TOWN_NAME_TITLE, STR_NULL),
+			NWidget(WWT_EDITBOX, COLOUR_WHITE, TSEW_TOWNNAME_EDITBOX), SetMinimalSize(156, 12), SetDataTip(STR_FOUND_TOWN_NAME_EDITOR_TITLE, STR_FOUND_TOWN_NAME_EDITOR_HELP),
+			NWidget(NWID_SPACER), SetMinimalSize(0, 3),
+			NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_TOWNNAME_RANDOM), SetMinimalSize(78, 12), SetFill(true, false),
+										SetDataTip(STR_FOUND_TOWN_NAME_RANDOM_BUTTON, STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP),
+		EndContainer(),
 		/* Town size selection. */
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_SPACER), SetFill(true, false),
@@ -874,21 +952,39 @@ static const NWidgetPart _nested_found_town_widgets[] = {
 };
 
 /** Found a town window class. */
-struct FoundTownWindow : Window {
+struct FoundTownWindow : QueryStringBaseWindow {
 private:
 	TownSize town_size;     ///< Selected town size
 	TownLayout town_layout; ///< Selected town layout
 	bool city;              ///< Are we building a city?
+	bool townnamevalid;     ///< Is generated town name valid?
+	uint32 townnameparts;   ///< Generated town name
+	TownNameParams params;  ///< Town name parameters
 
 public:
 	FoundTownWindow(const WindowDesc *desc, WindowNumber window_number) :
-			Window(),
+			QueryStringBaseWindow(MAX_LENGTH_TOWN_NAME_BYTES),
 			town_size(TS_MEDIUM),
 			town_layout(_settings_game.economy.town_layout),
-			city(false)
+			params(_settings_game.game_creation.town_name)
 	{
 		this->InitNested(desc, window_number);
+		this->RandomTownName();
 		this->UpdateButtons();
+	}
+
+	void RandomTownName()
+	{
+		this->townnamevalid = GenerateTownName(&this->townnameparts);
+
+		if (!this->townnamevalid) {
+			this->edit_str_buf[0] = '\0';
+		} else {
+			GetTownName(this->edit_str_buf, &this->params, this->townnameparts, &this->edit_str_buf[this->edit_str_size - 1]);
+		}
+		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, MAX_LENGTH_TOWN_NAME_PIXELS);
+
+		this->SetFocusedWidget(TSEW_TOWNNAME_EDITBOX);
 	}
 
 	void UpdateButtons()
@@ -906,9 +1002,29 @@ public:
 		this->SetDirty();
 	}
 
+	void ExecuteFoundTownCommand(TileIndex tile, bool random, StringID errstr, CommandCallback cc)
+	{
+		const char *name = NULL;
+
+		if (!this->townnamevalid) {
+			name = this->edit_str_buf;
+		} else {
+			/* If user changed the name, send it */
+			char buf[MAX_LENGTH_TOWN_NAME_BYTES];
+			GetTownName(buf, &this->params, this->townnameparts, lastof(buf));
+			if (strcmp(buf, this->edit_str_buf) != 0) name = this->edit_str_buf;
+		}
+
+		bool success = DoCommandP(tile, this->town_size | this->city << 2 | this->town_layout << 3 | random << 6,
+				townnameparts, CMD_FOUND_TOWN | CMD_MSG(errstr), cc, name);
+
+		if (success) this->RandomTownName();
+	}
+
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
+		this->DrawEditBox(TSEW_TOWNNAME_EDITBOX);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -918,20 +1034,14 @@ public:
 				HandlePlacePushButton(this, TSEW_NEWTOWN, SPR_CURSOR_TOWN, HT_RECT, NULL);
 				break;
 
-			case TSEW_RANDOMTOWN: {
+			case TSEW_RANDOMTOWN:
 				this->HandleButtonClick(TSEW_RANDOMTOWN);
-				_generating_world = true;
-				UpdateNearestTownForRoadTiles(true);
-				const Town *t = CreateRandomTown(20, this->town_size, this->city, this->town_layout);
-				UpdateNearestTownForRoadTiles(false);
-				_generating_world = false;
+				this->ExecuteFoundTownCommand(0, true, STR_ERROR_CAN_T_GENERATE_TOWN, CcFoundRandomTown);
+				break;
 
-				if (t == NULL) {
-					ShowErrorMessage(STR_ERROR_NO_SPACE_FOR_TOWN, STR_ERROR_CAN_T_GENERATE_TOWN, 0, 0);
-				} else {
-					ScrollMainWindowToTile(t->xy);
-				}
-			} break;
+			case TSEW_TOWNNAME_RANDOM:
+				this->RandomTownName();
+				break;
 
 			case TSEW_MANYRANDOMTOWNS:
 				this->HandleButtonClick(TSEW_MANYRANDOMTOWNS);
@@ -971,16 +1081,21 @@ public:
 		this->SetDirty();
 	}
 
+	virtual void OnMouseLoop()
+	{
+		this->HandleEditBox(TSEW_TOWNNAME_EDITBOX);
+	}
+
+	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
+	{
+		EventState state;
+		this->HandleEditBoxKey(TSEW_TOWNNAME_EDITBOX, key, keycode, state);
+		return state;
+	}
+
 	virtual void OnPlaceObject(Point pt, TileIndex tile)
 	{
-		uint32 townnameparts;
-		if (!GenerateTownName(&townnameparts)) {
-			ShowErrorMessage(STR_ERROR_TOO_MANY_TOWNS, STR_ERROR_CAN_T_BUILD_TOWN_HERE, 0, 0);
-			return;
-		}
-
-		DoCommandP(tile, this->town_size | this->city << 2 | this->town_layout << 3, townnameparts,
-				CMD_BUILD_TOWN | CMD_MSG(STR_ERROR_CAN_T_BUILD_TOWN_HERE), CcBuildTown);
+		this->ExecuteFoundTownCommand(tile, false, STR_ERROR_CAN_T_FOUND_TOWN_HERE, CcFoundTown);
 	}
 
 	virtual void OnPlaceObjectAbort()
@@ -997,7 +1112,7 @@ static const WindowDesc _found_town_desc(
 	NULL, _nested_found_town_widgets, lengthof(_nested_found_town_widgets)
 );
 
-void ShowBuildTownWindow()
+void ShowFoundTownWindow()
 {
 	if (_game_mode != GM_EDITOR && !Company::IsValidID(_local_company)) return;
 	AllocateWindowDescFront<FoundTownWindow>(&_found_town_desc, 0);

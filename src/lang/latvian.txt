@@ -944,26 +944,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Nevar uz
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Cita valūta
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Maiņas kurss: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Maiņas kurss: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Samazināt savas valūtas vienību daudzumu attiecībā pret vienu mārciņu (£)
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Palielināt savas valūtas vienību daudzumu attiecībā pret vienu mārciņu (£)
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Uzstādiet savas valūtas maiņas kursu pret vienu mārciņu (£)
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Atdalītājs: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Atdalītājs: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Uzstādiet savas valūtas atdalītājsimbolu
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefikss: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefikss: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Uzstādiet priedēkli savai valūtai
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffikss: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Suffikss: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Uzstādiet piedēkli savai valūtai
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Pariet uz Eiro: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Pariet uz Eiro: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Pariet uz Eiro: {ORANGE}nekad
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Uzstādiet gadu, kad pāriet uz Eiro
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Pāriet uz Eiro agrāk
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Pāriet uz Eiro vēlāk
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Priekšskatījums: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Priekšskatījums: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 mārciņas (£) jūsu valūtā
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}Mainīt patreizējās valūtas parametrus.
 
@@ -1737,6 +1737,7 @@ STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Spēle atsākta
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :aizeju
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} ir pievienojies spēlei
+STR_NETWORK_MESSAGE_CLIENT_JOINED_ID                            :*** {STRING} ir pievienojies spēlei (Client #{2:NUM})
 STR_NETWORK_MESSAGE_CLIENT_COMPANY_JOIN                         :*** {STRING} ir pievienojies kompānijai #{2:NUM}
 STR_NETWORK_MESSAGE_CLIENT_COMPANY_SPECTATE                     :*** {STRING} ir pievienojis skatītājus
 STR_NETWORK_MESSAGE_CLIENT_COMPANY_NEW                          :*** {STRING} ir nodibinājis jaunu kompāniju (#{2:NUM})
@@ -2359,6 +2360,8 @@ STR_EDIT_SIGN_SIGN_OSKTITLE                                     :{BLACK}Ievadiet
 
 # Town directory window
 STR_TOWN_DIRECTORY_CAPTION                                      :{WHITE}Pilsētas
+STR_TOWN_DIRECTORY_NONE                                         :{G=m}{ORANGE}- Neviens -
+STR_TOWN_DIRECTORY_NONE.kas                                     :{G=f}{ORANGE}- Neviena -
 STR_TOWN_DIRECTORY_TOWN                                         :{ORANGE}{TOWN}{BLACK} ({COMMA})
 STR_TOWN_DIRECTORY_LIST_TOOLTIP                                 :{BLACK}Pilsētu nosaukumi - klikšķināt uz nosaukuma, lai centrētu skatu uz to. Ctrl+Klikšķis atvērs skatu uz pilsētu jaunā skatulaukā
 STR_TOWN_POPULATION                                             :{BLACK}Pasaules iedzīvotāju skaits: {COMMA}
@@ -2547,6 +2550,8 @@ STR_BUY_COMPANY_MESSAGE                                         :{WHITE}Mēs mek
 
 # Industry directory
 STR_INDUSTRY_DIRECTORY_CAPTION                                  :{WHITE}Rūpnīcas
+STR_INDUSTRY_DIRECTORY_NONE                                     :{G=m}{ORANGE}- Neviens -
+STR_INDUSTRY_DIRECTORY_NONE.kas                                 :{G=f}{ORANGE}- Neviena -
 STR_INDUSTRY_DIRECTORY_ITEM                                     :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}){YELLOW} ({COMMA}% pārvadāti)
 STR_INDUSTRY_DIRECTORY_ITEM_TWO                                 :{ORANGE}{INDUSTRY}{BLACK} ({CARGO}{STRING}/{CARGO}{STRING}){YELLOW} ({COMMA}%/{COMMA}% pārvadāti)
 STR_INDUSTRY_DIRECTORY_ITEM_NOPROD                              :{ORANGE}{INDUSTRY}
@@ -3277,7 +3282,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Šī kom
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Nevar uzbūvēt pilsētas
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Nevar pārsaukt pilsētu...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Te nevar būvēt jaunu pilsētu...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Te nevar būvēt jaunu pilsētu...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... pārāk tuvu kartes malai
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... pārāk tuvu citai pilsētai
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... pārāk daudz pilsētu
@@ -3290,7 +3295,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Nevar iz
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Šeit nevar būvēt {STRING}...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Šeit nevar būvēt šī tipa rūpnīcu...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...pārāk tuvu citai rūpnīcai
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}... vispirms jāuzceļ pilsēta
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}... vispirms jāuzceļ pilsēta
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}... pilsētā atļauts tikai viens(a)
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... atļauts būvēt tikai pilsētās ar iedzīvotāju skaitu vismaz 1200
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... var celt tikai mežu apgabalos
@@ -3989,7 +3994,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

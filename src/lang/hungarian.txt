@@ -976,26 +976,26 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Teljesk�
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}Saját pénznem
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Értékarány: {ORANGE}{0:CURRENCY} = £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}Értékarány: {ORANGE}{CURRENCY} = £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Átváltási arány csökkentése egy Fonthoz (£) képest
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}Átváltási arány növelése egy Fonthoz (£) képest
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}Átváltási arány beállítása egy Fonthoz (£) képest
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Elválasztó: {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Elválasztó: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Elválasztó beállítása a pénznemedhez
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}Előtag: {ORANGE}{3:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Előtag: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Előtag beállítása a pénznemedhez
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}Előtag: {ORANGE}{4:STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Előtag: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Utótag beállítása a pénznemedhez
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Euróra váltás: {ORANGE}{5:NUM}
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}Euróra váltás: {ORANGE}{NUM}
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}Euróra váltás: {ORANGE}soha
 STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP                :{BLACK}Euróra váltás évének beállítása
 STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Euróra váltás korábban
 STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP           :{BLACK}Euróra váltás később
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}Előnézet: {ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Előnézet: {ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}10000 Font (£) a pénznemedben
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}A saját pénznem paramétereinek megváltoztatása
 
@@ -1377,6 +1377,7 @@ STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
 STR_OSNAME_OSX                                                  :OS X
 STR_OSNAME_BEOS                                                 :BeOS
+STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
 STR_OSNAME_OS2                                                  :OS/2
@@ -2064,6 +2065,12 @@ STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}Egy vél
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Egy település építése véletlenszerű helyre
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Sok véletlen település
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}Véletlenszerüen elhelyez a térképen sok települést.
+
+STR_FOUND_TOWN_NAME_TITLE                                       :{YELLOW}Városnév:
+STR_FOUND_TOWN_NAME_EDITOR_TITLE                                :{BLACK}A város nevének megadása
+STR_FOUND_TOWN_NAME_EDITOR_HELP                                 :{BLACK}Kattints ide a város nevének beírásához
+STR_FOUND_TOWN_NAME_RANDOM_BUTTON                               :{BLACK}Véletlen név
+STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP                              :{BLACK}Új véletlen név generálása
 
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Új település mérete:
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Kicsi
@@ -3312,7 +3319,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Ez a cé
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Nem lehet több települést építeni
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Nem nevezheted át a várost...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}Nem építhetsz ide várost...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Nem építhetsz ide várost...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...túl közel van a térkép széléhez
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...túl közel van egy másik településhez
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...túl sok a település
@@ -3325,7 +3332,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Nem tudo
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Nem építhető ide {STRING}...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Nem építheted ide ezt a gazdasági épületet...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...túl közel egy másik gazdasági épülethez
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...előbb települést kell építened
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...előbb települést kell építened
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...városonként csak egy lehet
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...csak 1200-nál nagyobb lakosságszámú településeken építhető
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...csak esőerdőben építhető
@@ -4061,7 +4068,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}

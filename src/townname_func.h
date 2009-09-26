@@ -7,11 +7,15 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file namegen_func.h Town name generator stuff. */
+/** @file townname_func.h Town name generator stuff. */
 
-#ifndef NAMEGEN_FUNC_H
-#define NAMEGEN_FUNC_H
+#ifndef TOWNNAME_FUNC_H
+#define TOWNNAME_FUNC_H
 
 char *GenerateTownNameString(char *buf, const char *last, size_t lang, uint32 seed);
+char *GetTownName(char *buff, const struct TownNameParams *par, uint32 townnameparts, const char *last);
+char *GetTownName(char *buff, const struct Town *t, const char *last);
+bool VerifyTownName(uint32 r, const struct TownNameParams *par);
+bool GenerateTownName(uint32 *townnameparts);
 
-#endif /* NAMEGEN_FUNC_H */
+#endif /* TOWNNAME_FUNC_H */

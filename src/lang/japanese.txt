@@ -928,20 +928,20 @@ STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}フル�
 # Custom currency window
 
 STR_CURRENCY_WINDOW                                             :{WHITE}カスタム通貨
-STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}為替レート：{ORANGE}{0:CURRENCY} ＝ £ {1:COMMA}
+STR_CURRENCY_EXCHANGE_RATE                                      :{LTBLUE}為替レート：{ORANGE}{CURRENCY} ＝ £ {COMMA}
 STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}英ポンドに対するお使いの通貨の為替レートを減らします
 STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP                     :{BLACK}英ポンドに対するお使いの通貨の為替レートを増やします
 STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP                          :{BLACK}英ポンドに対するお使いの通貨の為替レートを設定します
 
-STR_CURRENCY_SEPARATOR                                          :{LTBLUE}分離記号： {ORANGE}{2:STRING}
+STR_CURRENCY_SEPARATOR                                          :{LTBLUE}分離記号： {ORANGE}{STRING}
 
-STR_CURRENCY_PREFIX                                             :{LTBLUE}接頭文字： {ORANGE}{3:STRING}
-STR_CURRENCY_SUFFIX                                             :{LTBLUE}接尾文字： {ORANGE}{4:STRING}
+STR_CURRENCY_PREFIX                                             :{LTBLUE}接頭文字： {ORANGE}{STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}接尾文字： {ORANGE}{STRING}
 
-STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}ユーロに切替え：{ORANGE}{5:NUM}年
+STR_CURRENCY_SWITCH_TO_EURO                                     :{LTBLUE}ユーロに切替え：{ORANGE}{NUM}年
 STR_CURRENCY_SWITCH_TO_EURO_NEVER                               :{LTBLUE}ユーロに切替え：{ORANGE}しない
 
-STR_CURRENCY_PREVIEW                                            :{LTBLUE}プレビュー：{ORANGE}{6:CURRENCY}
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}プレビュー：{ORANGE}{CURRENCY}
 STR_CURRENCY_CUSTOM_CURRENCY_PREVIEW_TOOLTIP                    :{BLACK}お使いの通貨で£10,000（英ポンド）
 STR_CURRENCY_CHANGE_PARAMETER                                   :{BLACK}カスタム通貨の設定を変更
 
@@ -3200,7 +3200,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}まだ�
 # Town related errors
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}市町村を建設できません
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}町名を変更できません...
-STR_ERROR_CAN_T_BUILD_TOWN_HERE                                 :{WHITE}ここで町が建設できません...
+STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}ここで町が建設できません...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...地図の端に近すぎます
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...他の町に近すぎます
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...市町村数の制限を超えています
@@ -3213,7 +3213,7 @@ STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}産業�
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}ここに{STRING}が建設できません
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}この産業をここに建設できません...
 STR_ERROR_INDUSTRY_TOO_CLOSE                                    :{WHITE}...他の産業に近すぎます。
-STR_ERROR_MUST_BUILD_TOWN_FIRST                                 :{WHITE}...先に町を建設しなければなりません
+STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...先に町を建設しなければなりません
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...一町内に一つしか建設できません
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...人口が1200人以上の市町のみに建設できます
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...雨林地域のみに建設できます
@@ -3903,7 +3903,7 @@ STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SH
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
-STR_TINT_GROUP                                                  :{TINYFONT}{GROUP}
+STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATIONL                                         :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
