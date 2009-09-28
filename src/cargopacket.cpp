@@ -63,7 +63,7 @@ template<class LIST>
 CargoList<LIST>::~CargoList()
 {
 	for (Iterator i = packets.begin(); i != packets.end(); ++i) {
-		delete Deref(i);
+		delete *i;
 	}
 }
 
@@ -74,7 +74,7 @@ void CargoList<LIST>::AgeCargo()
 
 	days_in_transit = 0;
 	for (Iterator it = packets.begin(); it != packets.end(); it++) {
-		CargoPacket *cp = Deref(it);
+		CargoPacket *cp = *it;
 		if (cp->days_in_transit != 0xFF) ++(cp->days_in_transit);
 		days_in_transit += cp->days_in_transit * cp->count;
 	}
@@ -114,7 +114,7 @@ void CargoList<LIST>::Append(CargoPacket *cp, bool merge)
 	if (merge) {
 		std::pair<Iterator, Iterator> range = FindByNext(cp->next);
 		for (Iterator it = range.first; it != range.second; it++) {
-			CargoPacket *in_list = Deref(it);
+			CargoPacket *in_list = *it;
 			if (in_list->SameSource(cp) && in_list->count + cp->count <= CargoPacket::MAX_COUNT) {
 				in_list->count += cp->count;
 				in_list->feeder_share += cp->feeder_share;
@@ -134,7 +134,7 @@ template<class LIST>
 void CargoList<LIST>::Truncate(uint max_remain)
 {
 	for (Iterator it = packets.begin(); it != packets.end();) {
-		CargoPacket * cp = Deref(it);
+		CargoPacket * cp = *it;
 		uint local_count = cp->count;
 		if (max_remain == 0) {
 			packets.erase(it++);
@@ -157,7 +157,7 @@ void CargoList<LIST>::Truncate(uint max_remain)
 
 template<class LIST>
 uint CargoList<LIST>::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
-	CargoPacket * p = Deref(c);
+	CargoPacket * p = *c;
 	uint loaded = 0;
 	StationID source = p->source;
 	if (p->count <= remaining_unload) {
@@ -180,7 +180,7 @@ uint CargoList<LIST>::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEnt
 
 template<class LIST>
 uint CargoList<LIST>::TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
-	CargoPacket *p = Deref(c);
+	CargoPacket *p = *c;
 	Money fs = payment->PayTransfer(p, p->count);
 	p->feeder_share += fs;
 	this->feeder_share += fs;
@@ -295,7 +295,7 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 template<class LIST> template <class OTHERLIST>
 uint CargoList<LIST>::MovePacket(CargoList<OTHERLIST> *dest, Iterator &it, uint cap, TileIndex load_place)
 {
-	CargoPacket *packet = Deref(it);
+	CargoPacket *packet = *it;
 	/* load the packet if possible */
 	if (packet->count > cap) {
 		/* packet needs to be split */
@@ -342,7 +342,7 @@ template<class LIST>
 void CargoList<LIST>::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
 	std::pair<Iterator, Iterator> range = FindByNext(to);
 	for(Iterator it = range.first; it != range.second;) {
-		CargoPacket * packet = Deref(it);
+		CargoPacket * packet = *it;
 		if(packet->next == to) {
 			packets.erase(it++);
 			packet->next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
@@ -357,7 +357,7 @@ void CargoList<LIST>::RerouteStalePackets(StationID curr, StationID to, GoodsEnt
 template<class LIST>
 void CargoList<LIST>::UpdateFlows(StationID next, GoodsEntry * ge) {
 	for(Iterator i = packets.begin(); i != packets.end(); ++i) {
-		CargoPacket * p = Deref(i);
+		CargoPacket * p = *i;
 		ge->UpdateFlowStats(p->source, p->count, next);
 		p->next = next;
 	}
@@ -373,23 +373,28 @@ uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator be
 
 uint StationCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, StationID selected_station, TileIndex load_place) {
 	uint orig_cap = cap;
-	Iterator begin;
-	Iterator end;
 	if (selected_station != INVALID_STATION) {
-		begin = this->packets.lower_bound(selected_station);
-		end = this->packets.upper_bound(selected_station);
-		cap -= MovePackets(dest, cap, begin, end, load_place);
+		std::pair<Iterator, Iterator> bounds(FindByNext(selected_station));
+		cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place);
 		if (cap > 0) {
-			begin = this->packets.lower_bound(INVALID_STATION);
-			end = this->packets.upper_bound(INVALID_STATION);
-			cap -= MovePackets(dest, cap, begin, end, load_place);
+			bounds = FindByNext(INVALID_STATION);
+			cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place);
 		}
 	} else {
-		begin = this->packets.begin();
-		end = this->packets.end();
-		cap -= MovePackets(dest, cap, begin, end, load_place);
+		cap -= MovePackets(dest, cap, packets.begin(), packets.end(), load_place);
 	}
 	return orig_cap - cap;
+}
+
+std::pair<StationCargoList::Iterator, StationCargoList::Iterator> StationCargoList::FindByNext(StationID to)
+{
+	StationCargoPacketMap::MapIterator begin(packets.lower_bound(to));
+	if (begin != packets.end() && begin->first == to) {
+		StationCargoPacketMap::MapIterator end = begin;
+		return std::make_pair(begin, ++end);
+	} else {
+		return std::make_pair(begin, begin);
+	}
 }
 
 template<class LIST>
@@ -401,8 +406,8 @@ void CargoList<LIST>::InvalidateCache()
 
 	if (packets.empty()) return;
 
-	for (ConstIterator it = packets.begin(); it != packets.end(); it++) {
-		CargoPacket *cp = Deref(it);
+	for (ConstIterator it(packets.begin()); it != packets.end(); it++) {
+		CargoPacket *cp = *it;
 		count           += cp->count;
 		days_in_transit += cp->days_in_transit * cp->count;
 		feeder_share    += cp->feeder_share;

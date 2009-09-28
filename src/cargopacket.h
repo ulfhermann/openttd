@@ -19,7 +19,7 @@
 #include "order_type.h"
 #include "cargo_type.h"
 #include "vehicle_type.h"
-#include <map>
+#include "core/multimap.hpp"
 #include <list>
 
 typedef uint32 CargoPacketID;
@@ -149,12 +149,7 @@ struct UnloadDescription {
 };
 
 typedef std::list<CargoPacket *> CargoPacketList;
-typedef std::multimap<StationID, CargoPacket *> StationCargoPacketMap;
-
-inline CargoPacket *Deref(StationCargoPacketMap::iterator iter) {return iter->second;}
-inline CargoPacket *Deref(StationCargoPacketMap::const_iterator iter) {return iter->second;}
-inline CargoPacket *Deref(CargoPacketList::iterator iter) {return *iter;}
-inline CargoPacket *Deref(CargoPacketList::const_iterator iter) {return *iter;}
+typedef MultiMap<StationID, CargoPacket *> StationCargoPacketMap;
 
 /**
  * Simple collection class for a list of cargo packets
@@ -204,7 +199,7 @@ public:
 	 * Returns source of the first cargo packet in this list
 	 * @return the before mentioned source
 	 */
-	FORCEINLINE StationID Source() const { return Empty() ? INVALID_STATION : Deref(this->packets.begin())->source; }
+	FORCEINLINE StationID Source() const { return Empty() ? INVALID_STATION : (*(ConstIterator(packets.begin())))->source; }
 
 	/**
 	 * Returns average number of days in transit for a cargo entity
@@ -334,12 +329,11 @@ class StationCargoList : public CargoList<StationCargoPacketMap> {
 public:
 	uint MoveToVehicle(VehicleCargoList *dest, uint cap, StationID next_station, TileIndex load_place);
 
-	virtual void Insert(CargoPacket * cp) {packets.insert(std::make_pair(cp->Next(), cp));}
+	virtual void Insert(CargoPacket * cp) {packets.Insert(cp->Next(), cp);}
 protected:
 	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
 
-	virtual std::pair<Iterator, Iterator> FindByNext(StationID to)
-		{return packets.equal_range(to);}
+	virtual std::pair<Iterator, Iterator> FindByNext(StationID to);
 };
 
 
