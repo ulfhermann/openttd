@@ -30,6 +30,7 @@
 #include "tunnelbridge.h"
 #include "tilehighlight_func.h"
 #include "settings_type.h"
+#include "spritecache.h"
 
 #include "station_map.h"
 #include "tunnelbridge_map.h"
@@ -1511,6 +1512,7 @@ enum BuildSignalWidgets {
 	BSW_ELECTRIC_PBS_OWAY,
 	BSW_CONVERT,
 	BSW_DRAG_SIGNALS_DENSITY,
+	BSW_DRAG_SIGNALS_DENSITY_LABEL,
 	BSW_DRAG_SIGNALS_DENSITY_DECREASE,
 	BSW_DRAG_SIGNALS_DENSITY_INCREASE,
 };
@@ -1523,53 +1525,69 @@ private:
 	 *
 	 * @param widget_index index of this widget in the window
 	 * @param image        the sprite to draw
-	 * @param xrel         the relativ x value of the sprite in the grf
-	 * @param xsize        the width of the sprite
 	 */
-	void DrawSignalSprite(byte widget_index, SpriteID image, int8 xrel, uint8 xsize)
+	void DrawSignalSprite(byte widget_index, SpriteID image) const
 	{
-		int bottom = this->GetWidget<NWidgetBase>(widget_index)->pos_y + this->GetWidget<NWidgetBase>(widget_index)->current_y - 1;
-		DrawSprite(image + this->IsWidgetLowered(widget_index), PAL_NONE,
-				this->GetWidget<NWidgetBase>(widget_index)->pos_x + this->GetWidget<NWidgetBase>(widget_index)->current_x / 2 - xrel - xsize / 2 + this->IsWidgetLowered(widget_index),
-				bottom - 3 + this->IsWidgetLowered(widget_index));
+		/* First get the right image, which is one later for 'green' signals. */
+		image += this->IsWidgetLowered(widget_index);
+
+		/* Next get the actual sprite so we can calculate the right offsets. */
+		const Sprite *sprite = GetSprite(image, ST_NORMAL);
+
+		/* For the x offset we want the sprite to be centered, so undo the offset
+		 * for sprite drawing and add half of the sprite's width. For the y offset
+		 * we want the sprite to be aligned on the bottom, so again we undo the
+		 * offset for sprite drawing and assume it is the bottom of the sprite. */
+		int sprite_center_x_offset = sprite->x_offs + sprite->width / 2;
+		int sprite_bottom_y_offset = sprite->height + sprite->y_offs;
+
+		/* Next we want to know where on the window to draw. Calculate the center
+		 * and the bottom of the area to draw. */
+		const NWidgetBase *widget = this->GetWidget<NWidgetBase>(widget_index);
+		int widget_center_x = widget->pos_x + widget->current_x / 2;
+		int widget_bottom_y = widget->pos_y + widget->current_y - 2;
+
+		/* Finally we draw the signal. */
+		DrawSprite(image, PAL_NONE,
+				widget_center_x - sprite_center_x_offset + this->IsWidgetLowered(widget_index),
+				widget_bottom_y - sprite_bottom_y_offset + this->IsWidgetLowered(widget_index));
 	}
 
 public:
 	BuildSignalWindow(const WindowDesc *desc, Window *parent) : PickerWindowBase(parent)
 	{
 		this->InitNested(desc, TRANSPORT_RAIL);
+		this->OnInvalidateData();
 	};
+
+	virtual void SetStringParameters(int widget) const
+	{
+		switch (widget) {
+			case BSW_DRAG_SIGNALS_DENSITY_LABEL:
+				SetDParam(0, _settings_client.gui.drag_signals_density);
+				break;
+		}
+	}
 
 	virtual void OnPaint()
 	{
-		this->LowerWidget((_cur_signal_variant == SIG_ELECTRIC ? BSW_ELECTRIC_NORM : BSW_SEMAPHORE_NORM) + _cur_signal_type);
-
-		this->SetWidgetLoweredState(BSW_CONVERT, _convert_signal_button);
-
-		this->SetWidgetDisabledState(BSW_DRAG_SIGNALS_DENSITY_DECREASE, _settings_client.gui.drag_signals_density == 1);
-		this->SetWidgetDisabledState(BSW_DRAG_SIGNALS_DENSITY_INCREASE, _settings_client.gui.drag_signals_density == 20);
-
 		this->DrawWidgets();
+	}
 
-		/* The 'hardcoded' off sets are needed because they are reused sprites. */
-		this->DrawSignalSprite(BSW_SEMAPHORE_NORM,  SPR_IMG_SIGNAL_SEMAPHORE_NORM,   0, 12); // xsize of sprite + 1 ==  9
-		this->DrawSignalSprite(BSW_SEMAPHORE_ENTRY, SPR_IMG_SIGNAL_SEMAPHORE_ENTRY, -1, 13); // xsize of sprite + 1 == 10
-		this->DrawSignalSprite(BSW_SEMAPHORE_EXIT,  SPR_IMG_SIGNAL_SEMAPHORE_EXIT,   0, 12); // xsize of sprite + 1 ==  9
-		this->DrawSignalSprite(BSW_SEMAPHORE_COMBO, SPR_IMG_SIGNAL_SEMAPHORE_COMBO,  0, 12); // xsize of sprite + 1 ==  9
-		this->DrawSignalSprite(BSW_SEMAPHORE_PBS,   SPR_IMG_SIGNAL_SEMAPHORE_PBS,    0, 12); // xsize of sprite + 1 ==  9
-		this->DrawSignalSprite(BSW_SEMAPHORE_PBS_OWAY, SPR_IMG_SIGNAL_SEMAPHORE_PBS_OWAY, -1, 13); // xsize of sprite + 1 == 10
-		this->DrawSignalSprite(BSW_ELECTRIC_NORM,   SPR_IMG_SIGNAL_ELECTRIC_NORM,   -1,  4);
-		this->DrawSignalSprite(BSW_ELECTRIC_ENTRY,  SPR_IMG_SIGNAL_ELECTRIC_ENTRY,  -2,  6);
-		this->DrawSignalSprite(BSW_ELECTRIC_EXIT,   SPR_IMG_SIGNAL_ELECTRIC_EXIT,   -2,  6);
-		this->DrawSignalSprite(BSW_ELECTRIC_COMBO,  SPR_IMG_SIGNAL_ELECTRIC_COMBO,  -2,  6);
-		this->DrawSignalSprite(BSW_ELECTRIC_PBS,    SPR_IMG_SIGNAL_ELECTRIC_PBS,    -1,  4);
-		this->DrawSignalSprite(BSW_ELECTRIC_PBS_OWAY,SPR_IMG_SIGNAL_ELECTRIC_PBS_OWAY,-2,  6);
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (IsInsideMM(widget, BSW_SEMAPHORE_NORM, BSW_ELECTRIC_PBS_OWAY + 1)) {
+			/* We need to do some custom sprite widget drawing for the signals. */
+			const SpriteID _signal_lookup[] = {
+				SPR_IMG_SIGNAL_SEMAPHORE_NORM,  SPR_IMG_SIGNAL_SEMAPHORE_ENTRY, SPR_IMG_SIGNAL_SEMAPHORE_EXIT,
+				SPR_IMG_SIGNAL_SEMAPHORE_COMBO, SPR_IMG_SIGNAL_SEMAPHORE_PBS,   SPR_IMG_SIGNAL_SEMAPHORE_PBS_OWAY,
 
-		/* Draw dragging signal density value in the BSW_DRAG_SIGNALS_DENSITY widget */
-		SetDParam(0, _settings_client.gui.drag_signals_density);
-		int right = this->GetWidget<NWidgetBase>(BSW_DRAG_SIGNALS_DENSITY)->pos_x + this->GetWidget<NWidgetBase>(BSW_DRAG_SIGNALS_DENSITY)->current_x - 1;
-		DrawString(this->GetWidget<NWidgetBase>(BSW_DRAG_SIGNALS_DENSITY)->pos_x, right,
-				this->GetWidget<NWidgetBase>(BSW_DRAG_SIGNALS_DENSITY)->pos_y + 2, STR_JUST_INT, TC_ORANGE, SA_CENTER);
+				SPR_IMG_SIGNAL_ELECTRIC_NORM,  SPR_IMG_SIGNAL_ELECTRIC_ENTRY, SPR_IMG_SIGNAL_ELECTRIC_EXIT,
+				SPR_IMG_SIGNAL_ELECTRIC_COMBO, SPR_IMG_SIGNAL_ELECTRIC_PBS,   SPR_IMG_SIGNAL_ELECTRIC_PBS_OWAY
+			};
+
+			this->DrawSignalSprite(widget, _signal_lookup[widget - BSW_SEMAPHORE_NORM]);
+		}
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -1615,6 +1633,17 @@ public:
 		}
 
 		this->SetDirty();
+		this->OnInvalidateData();
+	}
+
+	virtual void OnInvalidateData(int data = 0)
+	{
+		this->LowerWidget((_cur_signal_variant == SIG_ELECTRIC ? BSW_ELECTRIC_NORM : BSW_SEMAPHORE_NORM) + _cur_signal_type);
+
+		this->SetWidgetLoweredState(BSW_CONVERT, _convert_signal_button);
+
+		this->SetWidgetDisabledState(BSW_DRAG_SIGNALS_DENSITY_DECREASE, _settings_client.gui.drag_signals_density == 1);
+		this->SetWidgetDisabledState(BSW_DRAG_SIGNALS_DENSITY_INCREASE, _settings_client.gui.drag_signals_density == 20);
 	}
 };
 
@@ -1624,29 +1653,33 @@ static const NWidgetPart _nested_signal_builder_widgets[] = {
 		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, BSW_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, BSW_CAPTION), SetDataTip( STR_BUILD_SIGNAL_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_NORM), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_NORM_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_ENTRY), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_EXIT), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_COMBO), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_PBS), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_PBS_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_PBS_OWAY), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_PBS_OWAY_TOOLTIP), EndContainer(),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, BSW_CONVERT), SetMinimalSize(22, 27), SetDataTip(SPR_IMG_SIGNAL_CONVERT, STR_BUILD_SIGNAL_CONVERT_TOOLTIP),
-	EndContainer(),
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_NORM), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_NORM_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_ENTRY), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_EXIT), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_EXIT_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_COMBO), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_PBS), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_PBS_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_PBS_OWAY), SetMinimalSize(22, 27), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_PBS_OWAY_TOOLTIP), EndContainer(),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_DRAG_SIGNALS_DENSITY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_TOOLTIP),
-			NWidget(NWID_SPACER), SetMinimalSize(0, 13),
-			NWidget(NWID_HORIZONTAL), SetPIP(2, 0, 2),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, BSW_DRAG_SIGNALS_DENSITY_DECREASE), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_DECREASE_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, BSW_DRAG_SIGNALS_DENSITY_INCREASE), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_INCREASE_TOOLTIP),
+	NWidget(NWID_VERTICAL, NC_EQUALSIZE),
+		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_NORM), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_NORM_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_ENTRY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_EXIT), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_COMBO), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_PBS), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_PBS_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_SEMAPHORE_PBS_OWAY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_PBS_OWAY_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, BSW_CONVERT), SetDataTip(SPR_IMG_SIGNAL_CONVERT, STR_BUILD_SIGNAL_CONVERT_TOOLTIP), SetFill(true, true),
+		EndContainer(),
+		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_NORM), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_NORM_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_ENTRY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_EXIT), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_EXIT_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_COMBO), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_PBS), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_PBS_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_ELECTRIC_PBS_OWAY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_PBS_OWAY_TOOLTIP), EndContainer(), SetFill(true, true),
+			NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BSW_DRAG_SIGNALS_DENSITY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_TOOLTIP), SetFill(true, true),
+				NWidget(WWT_LABEL, COLOUR_DARK_GREEN, BSW_DRAG_SIGNALS_DENSITY_LABEL), SetDataTip(STR_ORANGE_INT, STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_TOOLTIP), SetFill(true, true),
+				NWidget(NWID_HORIZONTAL), SetPIP(2, 0, 2),
+					NWidget(NWID_SPACER), SetFill(true, false),
+					NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, BSW_DRAG_SIGNALS_DENSITY_DECREASE), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_LEFT, STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_DECREASE_TOOLTIP),
+					NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, BSW_DRAG_SIGNALS_DENSITY_INCREASE), SetMinimalSize(9, 12), SetDataTip(SPR_ARROW_RIGHT, STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_INCREASE_TOOLTIP),
+					NWidget(NWID_SPACER), SetFill(true, false),
+				EndContainer(),
+				NWidget(NWID_SPACER), SetMinimalSize(0, 2), SetFill(true, false),
 			EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(0, 2),
 		EndContainer(),
 	EndContainer(),
 };
