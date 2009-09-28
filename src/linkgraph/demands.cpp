@@ -77,13 +77,15 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 				supply = supply * to.supply * this->mod_size / 100 / demand_per_node;
 			}
 
-			uint distance = 1;
-			if (this->mod_dist > 0) {
-				distance = this->max_distance * 100 / (this->max_distance - forward.distance) / this->mod_dist;
-			}
-			assert(distance > 0);
+			int max_dist_2 = this->max_distance / 2;
+			int distance = max_dist_2 + (forward.distance - max_dist_2) * this->mod_dist / 100;
 
-			uint demand_forw = supply / distance / this->accuracy;
+			uint demand_forw = supply / this->accuracy;
+			if (distance > 0) {
+				demand_forw /= distance;
+			} else if (distance < 0) {
+				demand_forw *= -distance;
+			}
 
 			demand_forw = max(demand_forw, (uint)1);
 			demand_forw = min(demand_forw, from.undelivered_supply);
