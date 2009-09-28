@@ -1164,7 +1164,7 @@ struct StationViewWindow : public Window {
 	void BuildCargoList(CargoID i, const StationCargoList &packets, CargoDataEntry *cargo) {
 		const CargoDataEntry *source_dest = cached_destinations.Retrieve(i);
 		for (StationCargoList::ConstIterator it = packets.Packets()->begin(); it != packets.Packets()->end(); it++) {
-			const CargoPacket *cp = it->second;
+			const CargoPacket *cp = *it;
 
 			const CargoDataEntry *source_entry = source_dest->Retrieve(cp->source);
 			if (source_entry == NULL) {
