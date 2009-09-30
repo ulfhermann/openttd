@@ -701,7 +701,7 @@ static bool LoadOldGood(LoadgameState *ls, int num)
 	if (GB(_waiting_acceptance, 0, 12) != 0) {
 		CargoPacket *cp = new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days);
 		cp->source = (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source,
-		ge->cargo.Append(cp);
+		ge->cargo.Append(INVALID_STATION, cp);
 	}
 
 	return true;

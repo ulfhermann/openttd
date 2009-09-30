@@ -308,7 +308,7 @@ static void Load_STNS()
 					cp->source      = (CheckSavegameVersion(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
 					cp->source_xy   = _cargo_source_xy;
 					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
-					ge->cargo.Append(cp);
+					ge->cargo.Append(INVALID_STATION, cp);
 				}
 			}
 		}
