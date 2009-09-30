@@ -289,25 +289,25 @@ struct ResolverObject {
 	CallbackID callback;
 	uint32 callback_param1;
 	uint32 callback_param2;
-	bool procedure_call; ///< true if we are currently resolving a var 0x7E procedure result.
 
 	byte trigger;
-	byte count;
-	uint32 last_value;
-	uint32 reseed;
-	VarSpriteGroupScope scope;
 
-	bool info_view; ///< Indicates if the item is being drawn in an info window
+	uint32 last_value;          ///< Result of most recent DeterministicSpriteGroup (including procedure calls)
+	uint32 reseed;              ///< Collects bits to rerandomise while triggering triggers.
 
-	BaseStorageArray *psa; ///< The persistent storage array of this resolved object.
+	VarSpriteGroupScope scope;  ///< Scope of currently resolved DeterministicSpriteGroup resp. RandomizedSpriteGroup
+	byte count;                 ///< Additional scope for RandomizedSpriteGroup
 
-	const GRFFile *grffile; ///< GRFFile the resolved SpriteGroup belongs to
+	BaseStorageArray *psa;      ///< The persistent storage array of this resolved object.
+
+	const GRFFile *grffile;     ///< GRFFile the resolved SpriteGroup belongs to
 
 	union {
 		struct {
 			const struct Vehicle *self;
 			const struct Vehicle *parent;
 			EngineID self_type;
+			bool info_view;                ///< Indicates if the item is being drawn in an info window
 		} vehicle;
 		struct {
 			TileIndex tile;
@@ -349,8 +349,6 @@ struct ResolverObject {
 	void (*SetTriggers)(const struct ResolverObject*, int);
 	uint32 (*GetVariable)(const struct ResolverObject*, byte, byte, bool*);
 	const SpriteGroup *(*ResolveReal)(const struct ResolverObject*, const RealSpriteGroup*);
-
-	ResolverObject() : procedure_call(false) { }
 };
 
 #endif /* NEWGRF_SPRITEGROUP_H */
