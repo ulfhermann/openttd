@@ -59,7 +59,7 @@ int DivideApprox(int a, int b) {
 
 	int ret = a / b;
 	if (abs(random_like) < abs(remainder)) {
-		ret += (a * b < 0) ? -1 : 1;
+		ret += ((a < 0) ^ (b < 0)) ? -1 : 1;
 	}
 
 	return ret;
