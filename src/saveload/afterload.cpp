@@ -1232,11 +1232,14 @@ bool AfterLoadGame()
 		 * to the current tile of the vehicle to prevent excessive profits
 		 */
 		FOR_ALL_VEHICLES(v) {
-			const CargoPacketList *packets = v->cargo.Packets();
-			for (CargoPacketList::const_iterator it = packets->begin(); it != packets->end(); it++) {
+			/* const cast is necessary as we have to do evil things here: change the source_xy */
+			CargoPacketSet *packets = const_cast<CargoPacketSet *>(v->cargo.Packets());
+			for (CargoPacketSet::iterator it = packets->begin(); it != packets->end();) {
 				CargoPacket *cp = *it;
+				packets->erase(it++);
 				cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : v->tile;
 				cp->loaded_at_xy = cp->source_xy;
+				packets->insert(cp);
 			}
 			v->cargo.InvalidateCache();
 		}
