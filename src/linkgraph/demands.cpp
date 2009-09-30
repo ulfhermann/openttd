@@ -18,7 +18,7 @@ void DemandCalculator::PrintDemandMatrix(LinkGraphComponent * graph) {
 			if (from == to) {
 				std::cout << graph->GetNode(from).supply << "\t";
 			} else {
-				std::cout << graph->GetEdge(from, to).demand << "\t";
+				std::cout << graph->GetEdge(from, to).distance << ":" << graph->GetEdge(from, to).demand << "\t";
 			}
 		}
 		std::cout << "\n";
@@ -30,11 +30,13 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 	NodeList demands;
 	uint supply_sum = 0;
 	uint num_demands = 0;
+	uint num_supplies = 0;
 	for(NodeID node = 0; node < graph->GetSize(); node++) {
 		Node & n = graph->GetNode(node);
 		if (n.supply > 0) {
 			supplies.push_back(node);
 			supply_sum += n.supply;
+			num_supplies++;
 		}
 		if (n.demand > 0) {
 			demands.push_back(node);
@@ -47,6 +49,7 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 	}
 
 	uint demand_per_node = max(supply_sum / num_demands, (uint)1);
+	uint chance = 0;
 
 	while(!supplies.empty() && !demands.empty()) {
 		NodeID node1 = supplies.front();
@@ -71,23 +74,27 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 			Edge & forward = graph->GetEdge(node1, node2);
 			Edge & backward = graph->GetEdge(node2, node1);
 
-			uint supply = from.supply;
-			assert(supply > 0);
+			int32 supply = from.supply;
 			if (this->mod_size > 0) {
-				supply = supply * to.supply * this->mod_size / 100 / demand_per_node;
+				supply = max(1, (int32)(supply * to.supply * this->mod_size / 100 / demand_per_node));
+			}
+			assert(supply > 0);
+
+			/* scale the distance by mod_dist around max_distance */
+			int32 distance = this->max_distance - (this->max_distance - (int32)forward.distance) * this->mod_dist / 100;
+
+			/* scale the accuracy by distance around accuracy / 2 */
+			int32 divisor = this->accuracy * (this->mod_dist - 50) / 100 + this->accuracy * distance / this->max_distance + 1;
+			assert(divisor > 0);
+
+			uint demand_forw = 0;
+			if (divisor < supply) {
+				demand_forw = supply / divisor;
+			} else if (++chance > this->accuracy * num_demands * num_supplies) {
+				/* after some trying distribute demand also to other nodes */
+				demand_forw = 1;
 			}
 
-			int max_dist_2 = this->max_distance / 2;
-			int distance = max_dist_2 + (forward.distance - max_dist_2) * this->mod_dist / 100;
-
-			uint demand_forw = supply / this->accuracy;
-			if (distance > 0) {
-				demand_forw /= distance;
-			} else if (distance < 0) {
-				demand_forw *= -distance;
-			}
-
-			demand_forw = max(demand_forw, (uint)1);
 			demand_forw = min(demand_forw, from.undelivered_supply);
 
 			if (this->mod_size > 0 && from.demand > 0) {
@@ -136,6 +143,11 @@ void DemandCalculator::Run(LinkGraphComponent * graph) {
 	this->accuracy = settings.accuracy;
 	this->mod_size = settings.demand_size;
 	this->mod_dist = settings.demand_distance;
+	if (this->mod_dist > 100) {
+		/* increase effect of mod_dist > 100 */
+		int over100 = this->mod_dist - 100;
+		this->mod_dist = 100 + over100 * over100;
+	}
 
 	switch (type) {
 	case DT_SYMMETRIC:
