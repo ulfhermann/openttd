@@ -16,10 +16,10 @@ public:
 	static void PrintDemandMatrix(LinkGraphComponent * graph);
 	virtual ~DemandCalculator() {}
 private:
-	uint max_distance;
-	uint mod_size;
-	uint mod_dist;
-	uint accuracy;
+	int32 max_distance;
+	int32 mod_size;
+	int32 mod_dist;
+	int32 accuracy;
 	void CalcDemand(LinkGraphComponent * graph);
 };
 
