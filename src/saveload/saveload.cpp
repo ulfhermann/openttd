@@ -48,6 +48,9 @@
 
 #include "saveload_internal.h"
 
+#include <list>
+#include <set>
+
 extern const uint16 SAVEGAME_VERSION = 127;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
@@ -749,12 +752,13 @@ static void *IntToReference(size_t index, SLRefType rt);
 
 
 /**
- * Return the size in bytes of a list
- * @param list The std::list to find the size of
+ * Return the size in bytes of a container
+ * @param list The container to find the size of
  */
-static inline size_t SlCalcListLen(const void *list)
+template<class CONTAINER>
+static inline size_t SlCalcContLen(const void *cont)
 {
-	std::list<void *> *l = (std::list<void *> *) list;
+	CONTAINER *l = (CONTAINER *) cont;
 
 	int type_size = CheckSavegameVersion(69) ? 2 : 4;
 	/* Each entry is saved as type_size bytes, plus type_size bytes are used for the length
@@ -762,29 +766,46 @@ static inline size_t SlCalcListLen(const void *list)
 	return l->size() * type_size + type_size;
 }
 
+/**
+ * Return the size in bytes of a list
+ * @param list The std::list to find the size of
+ */
+static inline size_t SlCalcListLen(const void *list)
+{
+	return SlCalcContLen<std::list<void *> >(list);
+}
 
 /**
- * Save/Load a list.
- * @param list The list being manipulated
+ * Return the size in bytes of a set
+ * @param list The std::set to find the size of
+ */
+static inline size_t SlCalcSetLen(const void *set)
+{
+	return SlCalcContLen<std::set<void *> >(set);
+}
+
+/**
+ * Save/Load a container.
+ * @param container The container being manipulated
  * @param conv SLRefType type of the list (Vehicle *, Station *, etc)
  */
-void SlList(void *list, SLRefType conv)
+template<class CONTAINER>
+void SlCont(void *container, SLRefType conv)
 {
 	/* Automatically calculate the length? */
 	if (_sl.need_length != NL_NONE) {
-		SlSetLength(SlCalcListLen(list));
+		SlSetLength(SlCalcContLen<CONTAINER>(container));
 		/* Determine length only? */
 		if (_sl.need_length == NL_CALCLENGTH) return;
 	}
 
-	typedef std::list<void *> PtrList;
-	PtrList *l = (PtrList *)list;
+	CONTAINER *l = (CONTAINER *)container;
 
 	switch (_sl.action) {
 		case SLA_SAVE: {
 			SlWriteUint32((uint32)l->size());
 
-			PtrList::iterator iter;
+			typename CONTAINER::iterator iter;
 			for (iter = l->begin(); iter != l->end(); ++iter) {
 				void *ptr = *iter;
 				SlWriteUint32((uint32)ReferenceToInt(ptr, conv));
@@ -797,18 +818,18 @@ void SlList(void *list, SLRefType conv)
 			/* Load each reference and push to the end of the list */
 			for (size_t i = 0; i < length; i++) {
 				size_t data = CheckSavegameVersion(69) ? SlReadUint16() : SlReadUint32();
-				l->push_back((void *)data);
+				l->insert(l->end(), (void *)data);
 			}
 			break;
 		}
 		case SLA_PTRS: {
-			PtrList temp = *l;
+			CONTAINER temp = *l;
 
 			l->clear();
-			PtrList::iterator iter;
+			typename CONTAINER::iterator iter;
 			for (iter = temp.begin(); iter != temp.end(); ++iter) {
 				void *ptr = IntToReference((size_t)*iter, conv);
-				l->push_back(ptr);
+				l->insert(l->end(), ptr);
 			}
 			break;
 		}
@@ -816,6 +837,15 @@ void SlList(void *list, SLRefType conv)
 	}
 }
 
+void SlList(void *list, SLRefType conv)
+{
+	SlCont<std::list<void *> >(list, conv);
+}
+
+void SlSet(void *set, SLRefType conv)
+{
+	SlCont<std::set<void *> >(set, conv);
+}
 
 /** Are we going to save this object or not? */
 static inline bool SlIsObjectValidInSavegame(const SaveLoad *sld)
@@ -866,6 +896,7 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad *sld)
 		case SL_ARR:
 		case SL_STR:
 		case SL_LST:
+		case SL_SET:
 			/* CONDITIONAL saveload types depend on the savegame version */
 			if (!SlIsObjectValidInSavegame(sld)) break;
 
@@ -875,6 +906,7 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad *sld)
 				case SL_ARR: return SlCalcArrayLen(sld->length, sld->conv);
 				case SL_STR: return SlCalcStringLen(GetVariableAddress(object, sld), sld->length, sld->conv);
 				case SL_LST: return SlCalcListLen(GetVariableAddress(object, sld));
+				case SL_SET: return SlCalcSetLen(GetVariableAddress(object, sld));
 				default: NOT_REACHED();
 			}
 			break;
@@ -896,6 +928,7 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 		case SL_ARR:
 		case SL_STR:
 		case SL_LST:
+		case SL_SET:
 			/* CONDITIONAL saveload types depend on the savegame version */
 			if (!SlIsObjectValidInSavegame(sld)) return false;
 			if (SlSkipVariableOnLoad(sld)) return false;
@@ -919,6 +952,7 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 				case SL_ARR: SlArray(ptr, sld->length, conv); break;
 				case SL_STR: SlString(ptr, sld->length, conv); break;
 				case SL_LST: SlList(ptr, (SLRefType)conv); break;
+				case SL_SET: SlSet(ptr, (SLRefType)conv); break;
 				default: NOT_REACHED();
 			}
 			break;
