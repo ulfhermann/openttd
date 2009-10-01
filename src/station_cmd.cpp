@@ -3091,8 +3091,8 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 		flow_stats.insert(FlowStat(via, planned, sent));
 		next = via;
 	}
-	CargoPacket * packet = new CargoPacket(id, next, amount, source_type, source_id);
-	good.cargo.Append(packet);
+	CargoPacket * packet = new CargoPacket(id, amount, source_type, source_id);
+	good.cargo.Append(next, packet);
 	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
 	good.supply += amount;
 

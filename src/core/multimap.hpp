@@ -199,6 +199,28 @@ public:
 	{
 		return Map::size();
 	}
+
+	std::pair<iterator, iterator> equal_range(const KEY &key)
+	{
+		MapIterator begin(lower_bound(key));
+		if (begin != Map::end() && begin->first == key) {
+			MapIterator end = begin;
+			return std::make_pair(begin, ++end);
+		} else {
+			return std::make_pair(begin, begin);
+		}
+	}
+
+	std::pair<const_iterator, const_iterator> equal_range(const KEY &key) const
+	{
+		ConstMapIterator begin(lower_bound(key));
+		if (begin != Map::end() && begin->first == key) {
+			ConstMapIterator end = begin;
+			return std::make_pair(begin, ++end);
+		} else {
+			return std::make_pair(begin, begin);
+		}
+	}
 };
 
 #endif /* MULTIMAP_HPP_ */

@@ -1040,11 +1040,11 @@ void CargoPayment::PayFinalDelivery(CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->DaysInTransit(), this->owner, cp->source_type, cp->source_id);
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->GetSourceXY(), cp->GetDaysInTransit(), this->owner, cp->GetSourceType(), cp->GetSourceID());
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
-	this->visual_profit += profit - cp->FeederShare();
+	this->visual_profit += profit - cp->GetFeederShare();
 }
 
 /**
@@ -1059,7 +1059,7 @@ Money CargoPayment::PayTransfer(CargoPacket *cp, uint count)
 		count,
 		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
 		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
-		cp->DaysInTransit(),
+		cp->GetDaysInTransit(),
 		this->ct);
 
 	this->visual_transfer += profit; // accumulate transfer profits for whole vehicle
