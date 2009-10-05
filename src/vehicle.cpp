@@ -42,7 +42,6 @@
 #include "ai/ai.hpp"
 #include "core/smallmap_type.hpp"
 #include "depot_func.h"
-#include "settings_type.h"
 #include "network/network.h"
 #include "core/pool_func.hpp"
 #include "economy_base.h"
@@ -1123,9 +1122,9 @@ GetNewVehiclePosResult GetNewVehiclePos(const Vehicle *v)
 }
 
 static const Direction _new_direction_table[] = {
-	DIR_N , DIR_NW, DIR_W ,
+	DIR_N,  DIR_NW, DIR_W,
 	DIR_NE, DIR_SE, DIR_SW,
-	DIR_E , DIR_SE, DIR_S
+	DIR_E,  DIR_SE, DIR_S
 };
 
 Direction GetDirectionTowards(const Vehicle *v, int x, int y)

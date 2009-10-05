@@ -14,7 +14,6 @@
 #include "landscape.h"
 #include "timetable.h"
 #include "command_func.h"
-#include "station_base.h"
 #include "news_func.h"
 #include "company_func.h"
 #include "npf.h"
@@ -30,11 +29,9 @@
 #include "date_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
-#include "variables.h"
 #include "autoreplace_gui.h"
 #include "gfx_func.h"
 #include "effectvehicle_func.h"
-#include "settings_type.h"
 #include "ai/ai.hpp"
 #include "pathfind.h"
 #include "landscape_type.h"
@@ -924,7 +921,6 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
 	/* Check cargo */
-	if (!ShipVehInfo(v->engine_type)->refittable) return CMD_ERROR;
 	if (new_cid >= NUM_CARGO || !CanRefitTo(v->engine_type, new_cid)) return CMD_ERROR;
 
 	/* Check the refit capacity callback */
