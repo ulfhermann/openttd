@@ -12,7 +12,6 @@
 #include <squirrel.h>
 #include "ai_abstractlist.hpp"
 #include "../../debug.h"
-#include "../../core/alloc_func.hpp"
 #include "../../script/squirrel.hpp"
 
 /**
@@ -178,7 +177,8 @@ public:
 		return item_current;
 	}
 
-	void End() {
+	void End()
+	{
 		this->bucket_list = NULL;
 		this->has_no_more_items = true;
 		this->item_next = 0;
@@ -286,7 +286,8 @@ public:
 		return item_current;
 	}
 
-	void Remove(int item) {
+	void Remove(int item)
+	{
 		if (!this->HasNext()) return;
 
 		/* If we remove the 'next' item, skip to the next */

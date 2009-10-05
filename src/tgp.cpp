@@ -17,7 +17,6 @@
 #include "core/alloc_func.hpp"
 #include "core/random_func.hpp"
 #include "landscape_type.h"
-#include "settings_type.h"
 
 /*
  *
@@ -181,7 +180,8 @@ struct HeightMap
 	 * @param y Y position
 	 * @return height as fixed point number
 	 */
-	inline height_t &height(uint x, uint y) {
+	inline height_t &height(uint x, uint y)
+	{
 		return h[x + y * dim_x];
 	}
 };
@@ -538,7 +538,7 @@ static void HeightMapAdjustWaterLevel(amplitude_t water_percent, height_t h_max_
 	 * Transform the height map into new (normalized) height map:
 	 *   values from range: h_min..h_water_level will become negative so it will be clamped to 0
 	 *   values from range: h_water_level..h_max are transformed into 0..h_max_new
-	 * , where h_max_new is 4, 8, 12 or 16 depending on terrain type (very flat, flat, hilly, mountains)
+	 *   where h_max_new is 4, 8, 12 or 16 depending on terrain type (very flat, flat, hilly, mountains)
 	 */
 	FOR_ALL_TILES_IN_HEIGHT(h) {
 		/* Transform height from range h_water_level..h_max into 0..h_max_new range */

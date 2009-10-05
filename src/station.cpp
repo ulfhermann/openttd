@@ -12,12 +12,8 @@
 #include "stdafx.h"
 #include "company_func.h"
 #include "newgrf_cargo.h"
-#include "yapf/yapf.h"
 #include "cargotype.h"
 #include "roadveh.h"
-#include "window_type.h"
-#include "station_gui.h"
-#include "zoom_func.h"
 #include "functions.h"
 #include "window_func.h"
 #include "date_func.h"
@@ -25,8 +21,6 @@
 #include "news_func.h"
 #include "aircraft.h"
 #include "vehicle_gui.h"
-#include "settings_type.h"
-#include "subsidy_func.h"
 #include "core/pool_func.hpp"
 #include "station_base.h"
 #include "roadstop_base.h"
@@ -322,7 +316,7 @@ void Station::RecomputeIndustriesNear()
 	/* Compute maximum extent of acceptance rectangle wrt. station sign */
 	TileIndex start_tile = this->xy;
 	uint max_radius = max(
-		max(DistanceManhattan(start_tile, TileXY(riv.rect.left , riv.rect.top)), DistanceManhattan(start_tile, TileXY(riv.rect.left , riv.rect.bottom))),
+		max(DistanceManhattan(start_tile, TileXY(riv.rect.left,  riv.rect.top)), DistanceManhattan(start_tile, TileXY(riv.rect.left,  riv.rect.bottom))),
 		max(DistanceManhattan(start_tile, TileXY(riv.rect.right, riv.rect.top)), DistanceManhattan(start_tile, TileXY(riv.rect.right, riv.rect.bottom)))
 	);
 
