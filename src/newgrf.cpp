@@ -41,11 +41,8 @@
 #include "strings_func.h"
 #include "gfx_func.h"
 #include "date_func.h"
-#include "vehicle_func.h"
-#include "sound_func.h"
 #include "string_func.h"
 #include "network/network.h"
-#include "map_func.h"
 #include <map>
 #include "core/alloc_type.hpp"
 #include "core/mem_func.hpp"
@@ -891,7 +888,7 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 			} break;
 
 			case 0x09: // Refittable
-				svi->refittable = (grf_load_byte(&buf) != 0);
+				svi->old_refittable = (grf_load_byte(&buf) != 0);
 				break;
 
 			case PROP_SHIP_COST_FACTOR: // 0x0A Cost factor
@@ -5759,6 +5756,9 @@ static void CalculateRefitMasks()
 		 * cargo type. Finally disable the vehicle, if there is still no cargo. */
 		if (ei->cargo_type == CT_INVALID && ei->refit_mask != 0) ei->cargo_type = (CargoID)FindFirstBit(ei->refit_mask);
 		if (ei->cargo_type == CT_INVALID) ei->climates = 0x80;
+
+		/* Clear refit_mask for not refittable ships */
+		if (e->type == VEH_SHIP && !e->u.ship.old_refittable) ei->refit_mask = 0;
 	}
 }
 
@@ -6070,7 +6070,7 @@ static void ActivateOldShore()
 		DupSprite(SPR_ORIGINALSHORE_START +  1, SPR_SHORE_BASE +  1); // SLOPE_W
 		DupSprite(SPR_ORIGINALSHORE_START +  2, SPR_SHORE_BASE +  2); // SLOPE_S
 		DupSprite(SPR_ORIGINALSHORE_START +  6, SPR_SHORE_BASE +  3); // SLOPE_SW
-		DupSprite(SPR_ORIGINALSHORE_START     , SPR_SHORE_BASE +  4); // SLOPE_E
+		DupSprite(SPR_ORIGINALSHORE_START +  0, SPR_SHORE_BASE +  4); // SLOPE_E
 		DupSprite(SPR_ORIGINALSHORE_START +  4, SPR_SHORE_BASE +  6); // SLOPE_SE
 		DupSprite(SPR_ORIGINALSHORE_START +  3, SPR_SHORE_BASE +  8); // SLOPE_N
 		DupSprite(SPR_ORIGINALSHORE_START +  7, SPR_SHORE_BASE +  9); // SLOPE_NW

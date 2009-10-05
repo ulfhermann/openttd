@@ -10,14 +10,12 @@
 /** @file network.cpp Base functions for networking support. */
 
 #include "../stdafx.h"
-#include "../company_type.h"
 
 #ifdef ENABLE_NETWORK
 
 #include "../openttd.h"
 #include "../strings_func.h"
 #include "../command_func.h"
-#include "../variables.h"
 #include "../date_func.h"
 #include "network_internal.h"
 #include "network_client.h"
@@ -32,13 +30,10 @@
 #include "../3rdparty/md5/md5.h"
 #include "../core/random_func.hpp"
 #include "../window_func.h"
-#include "../string_func.h"
 #include "../company_func.h"
 #include "../company_base.h"
-#include "../settings_type.h"
 #include "../landscape_type.h"
 #include "../rev.h"
-#include "../core/alloc_func.hpp"
 #include "../core/pool_func.hpp"
 #ifdef DEBUG_DUMP_COMMANDS
 	#include "../fileio_func.h"
@@ -367,7 +362,7 @@ static uint NetworkCountActiveClients()
 /* Check if the minimum number of active clients has been reached and pause or unpause the game as appropriate */
 static void CheckMinActiveClients()
 {
-	if (!_network_dedicated || _settings_client.network.min_active_clients == 0) return;
+	if (!_network_dedicated || _settings_client.network.min_active_clients == 0 || (_pause_mode & PM_PAUSED_ERROR) != 0) return;
 
 	if (NetworkCountActiveClients() < _settings_client.network.min_active_clients) {
 		if ((_pause_mode & PM_PAUSED_NORMAL) != 0) return;
