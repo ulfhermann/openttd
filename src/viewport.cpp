@@ -43,7 +43,6 @@
 #include "zoom_func.h"
 #include "vehicle_func.h"
 #include "company_func.h"
-#include "station_func.h"
 #include "waypoint_func.h"
 #include "window_func.h"
 #include "tilehighlight_func.h"
@@ -241,7 +240,7 @@ static void DoSetViewportPosition(const Window *w, int left, int top, int width,
 
 			if (left + width > w->left + w->width) {
 				DoSetViewportPosition(w, left, top, (w->left + w->width - left), height);
-				DoSetViewportPosition(w, left + (w->left + w->width - left), top, width - (w->left + w->width - left) , height);
+				DoSetViewportPosition(w, left + (w->left + w->width - left), top, width - (w->left + w->width - left), height);
 				return;
 			}
 
@@ -253,7 +252,7 @@ static void DoSetViewportPosition(const Window *w, int left, int top, int width,
 
 			if (top + height > w->top + w->height) {
 				DoSetViewportPosition(w, left, top, width, (w->top + w->height - top));
-				DoSetViewportPosition(w, left, top + (w->top + w->height - top), width , height - (w->top + w->height - top));
+				DoSetViewportPosition(w, left, top + (w->top + w->height - top), width, height - (w->top + w->height - top));
 				return;
 			}
 

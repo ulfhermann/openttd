@@ -20,18 +20,14 @@
 #include "network_gui.h"
 #include "network_gamelist.h"
 #include "../gui.h"
-#include "network_server.h"
 #include "network_udp.h"
 #include "../window_func.h"
-#include "../string_func.h"
 #include "../gfx_func.h"
-#include "../settings_type.h"
 #include "../widgets/dropdown_func.h"
 #include "../querystring_gui.h"
 #include "../sortlist_type.h"
 #include "../company_base.h"
 #include "../company_func.h"
-#include "../core/sort_func.hpp"
 
 #include "table/strings.h"
 #include "../table/sprites.h"
@@ -946,7 +942,7 @@ void ShowNetworkGameWindow()
 		/* add all servers from the config file to our list */
 		for (char **iter = _network_host_list.Begin(); iter != _network_host_list.End(); iter++) {
 			NetworkAddServer(*iter);
-  }
+		}
 	}
 
 	new NetworkGameWindow(&_network_game_window_desc);

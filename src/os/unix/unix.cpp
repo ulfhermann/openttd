@@ -10,14 +10,10 @@
 /** @file unix.cpp Implementation of Unix specific file handling. */
 
 #include "../../stdafx.h"
-#include "../../openttd.h"
-#include "../../variables.h"
 #include "../../textbuf_gui.h"
 #include "../../functions.h"
-#include "../../core/random_func.hpp"
 #include "../../crashlog.h"
 
-#include "table/strings.h"
 
 #include <dirent.h>
 #include <unistd.h>
@@ -25,7 +21,9 @@
 #include <time.h>
 #include <signal.h>
 
-#if (defined(_POSIX_VERSION) && _POSIX_VERSION >= 200112L) || defined(__GLIBC__)
+#ifdef __APPLE__
+	#include <sys/mount.h>
+#elif (defined(_POSIX_VERSION) && _POSIX_VERSION >= 200112L) || defined(__GLIBC__)
 	#define HAS_STATVFS
 #endif
 
@@ -75,17 +73,16 @@ bool FiosGetDiskFreeSpace(const char *path, uint64 *tot)
 {
 	uint64 free = 0;
 
-#ifdef HAS_STATVFS
-# ifdef __APPLE__
-	/* OSX 10.3 lacks statvfs so don't try to use it even though later versions of OSX has it. */
-	if (MacOSVersionIsAtLeast(10, 4, 0))
-# endif
-	{
-		struct statvfs s;
+#ifdef __APPLE__
+	struct statfs s;
 
-		if (statvfs(path, &s) != 0) return false;
-		free = (uint64)s.f_frsize * s.f_bavail;
-	}
+	if (statfs(path, &s) != 0) return false;
+	free = (uint64)s.f_bsize * s.f_bavail;
+#elif defined(HAS_STATVFS)
+	struct statvfs s;
+
+	if (statvfs(path, &s) != 0) return false;
+	free = (uint64)s.f_frsize * s.f_bavail;
 #endif
 	if (tot != NULL) *tot = free;
 	return true;
@@ -221,21 +218,17 @@ void ShowInfo(const char *str)
 	fprintf(stderr, "%s\n", str);
 }
 
+#if !defined(__APPLE__)
 void ShowOSErrorBox(const char *buf, bool system)
 {
-#if defined(__APPLE__)
-	/* this creates an NSAlertPanel with the contents of 'buf'
-	 * this is the native and nicest way to do this on OSX */
-	ShowMacDialog( buf, "See readme for more info\nMost likely you are missing files from the original TTD", "Quit" );
-#else
 	/* All unix systems, except OSX. Only use escape codes on a TTY. */
 	if (isatty(fileno(stderr))) {
 		fprintf(stderr, "\033[1;31mError: %s\033[0;39m\n", buf);
 	} else {
 		fprintf(stderr, "Error: %s\n", buf);
 	}
-#endif
 }
+#endif
 
 #ifdef WITH_COCOA
 void cocoaSetupAutoreleasePool();
@@ -269,10 +262,12 @@ int CDECL main(int argc, char *argv[])
 	return ret;
 }
 
-bool InsertTextBufferClipboard(Textbuf *tb)
+#ifndef WITH_COCOA
+bool GetClipboardContents(char *buffer, size_t buff_len)
 {
 	return false;
 }
+#endif
 
 
 /* multi os compatible sleep function */

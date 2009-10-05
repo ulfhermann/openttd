@@ -35,7 +35,6 @@
 #include "vehicle_func.h"
 #include "sound_func.h"
 #include "tunnelbridge.h"
-#include "engine_base.h"
 #include "cheat_type.h"
 #include "elrail_func.h"
 #include "landscape_type.h"
@@ -942,7 +941,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		if (catenary) EndSpriteCombine();
 
 		/* Add helper BB for sprite sorting, that separate the tunnel from things beside of it */
-		AddSortableSpriteToDraw(SPR_EMPTY_BOUNDING_BOX, PAL_NONE, ti->x             , ti->y             , BB_data[6], BB_data[7], TILE_HEIGHT, ti->z);
+		AddSortableSpriteToDraw(SPR_EMPTY_BOUNDING_BOX, PAL_NONE, ti->x,              ti->y,              BB_data[6], BB_data[7], TILE_HEIGHT, ti->z);
 		AddSortableSpriteToDraw(SPR_EMPTY_BOUNDING_BOX, PAL_NONE, ti->x + BB_data[4], ti->y + BB_data[5], BB_data[6], BB_data[7], TILE_HEIGHT, ti->z);
 
 		DrawBridgeMiddle(ti);
