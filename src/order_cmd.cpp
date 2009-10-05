@@ -16,8 +16,6 @@
 #include "news_func.h"
 #include "vehicle_gui.h"
 #include "cargotype.h"
-#include "station_map.h"
-#include "vehicle_base.h"
 #include "strings_func.h"
 #include "functions.h"
 #include "window_func.h"
@@ -25,7 +23,6 @@
 #include "timetable.h"
 #include "vehicle_func.h"
 #include "depot_base.h"
-#include "settings_type.h"
 #include "roadstop_base.h"
 #include "core/pool_func.hpp"
 #include "aircraft.h"
@@ -1380,7 +1377,7 @@ void RestoreVehicleOrders(const Vehicle *v, const BackuppedOrders *bak)
 	}
 
 	/* Restore vehicle order-index and service interval */
-	DoCommandP(0, v->index, bak->orderindex | (bak->service_interval << 16) , CMD_RESTORE_ORDER_INDEX);
+	DoCommandP(0, v->index, bak->orderindex | (bak->service_interval << 16), CMD_RESTORE_ORDER_INDEX);
 
 	/* Restore vehicle group */
 	DoCommandP(0, bak->group, v->index, CMD_ADD_VEHICLE_GROUP);

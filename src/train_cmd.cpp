@@ -15,12 +15,8 @@
 #include "command_func.h"
 #include "npf.h"
 #include "news_func.h"
-#include "engine_func.h"
-#include "engine_base.h"
 #include "company_func.h"
-#include "depot_base.h"
 #include "vehicle_gui.h"
-#include "train.h"
 #include "newgrf_engine.h"
 #include "newgrf_sound.h"
 #include "newgrf_text.h"
@@ -32,7 +28,6 @@
 #include "window_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
-#include "variables.h"
 #include "autoreplace_gui.h"
 #include "gfx_func.h"
 #include "ai/ai.hpp"
@@ -720,6 +715,7 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 		v->spritenum = rvi->image_index;
 
 		v->engine_type = engine;
+		v->tcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
 		DiagDirection dir = GetRailDepotDirection(tile);
 
@@ -900,6 +896,7 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 //		v->dest_tile = 0;
 
 		v->engine_type = p1;
+		v->tcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
 		v->reliability = e->reliability;
 		v->reliability_spd_dec = e->reliability_spd_dec;

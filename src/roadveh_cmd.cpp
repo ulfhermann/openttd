@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "landscape.h"
 #include "roadveh.h"
-#include "station_base.h"
 #include "command_func.h"
 #include "news_func.h"
 #include "pathfind.h"
@@ -30,13 +29,11 @@
 #include "date_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
-#include "variables.h"
 #include "autoreplace_gui.h"
 #include "gfx_func.h"
 #include "ai/ai.hpp"
-#include "depot_base.h"
+#include "depot_map.h"
 #include "effectvehicle_func.h"
-#include "settings_type.h"
 #include "roadstop_base.h"
 #include "cargotype.h"
 #include "newgrf_cargo.h"
@@ -255,6 +252,7 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		v->last_station_visited = INVALID_STATION;
 		v->max_speed = rvi->max_speed;
 		v->engine_type = (EngineID)p1;
+		v->rcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
 		v->reliability = e->reliability;
 		v->reliability_spd_dec = e->reliability_spd_dec;

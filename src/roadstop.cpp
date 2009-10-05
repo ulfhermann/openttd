@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "roadveh.h"
-#include "station_map.h"
 #include "core/pool_func.hpp"
 #include "roadstop_base.h"
 #include "station_base.h"
@@ -19,9 +18,10 @@
 RoadStopPool _roadstop_pool("RoadStop");
 INSTANTIATE_POOL_METHODS(RoadStop)
 
-/** De-Initializes a RoadStops. This includes clearing all slots that vehicles might
-  * have and unlinks it from the linked list of road stops at the given station
-  */
+/**
+ * De-Initializes RoadStops. This includes clearing all slots that vehicles might
+ * have and unlinks it from the linked list of road stops at the given station
+ */
 RoadStop::~RoadStop()
 {
 	if (CleaningPool()) return;
