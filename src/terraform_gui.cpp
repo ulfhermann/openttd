@@ -29,10 +29,8 @@
 #include "textbuf_gui.h"
 #include "genworld.h"
 #include "tree_map.h"
-#include "station_map.h"
 #include "landscape_type.h"
 #include "tilehighlight_func.h"
-#include "settings_type.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -224,7 +222,7 @@ static void TerraformClick_Level(Window *w)
 
 static void TerraformClick_Dynamite(Window *w)
 {
-	HandlePlacePushButton(w, TTW_DEMOLISH, ANIMCURSOR_DEMOLISH , HT_RECT, PlaceProc_DemolishArea);
+	HandlePlacePushButton(w, TTW_DEMOLISH, ANIMCURSOR_DEMOLISH, HT_RECT, PlaceProc_DemolishArea);
 }
 
 static void TerraformClick_BuyLand(Window *w)
@@ -660,7 +658,8 @@ struct ScenarioEditorLandscapeGenerationWindow : Window {
 		this->GetWidget<NWidgetCore>(ETTW_PLACE_DESERT_LIGHTHOUSE)->tool_tip = (_settings_game.game_creation.landscape == LT_TROPIC) ? STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA : STR_TERRAFORM_TOOLTIP_PLACE_LIGHTHOUSE;
 	}
 
-	virtual void OnPaint() {
+	virtual void OnPaint()
+	{
 		this->DrawWidgets();
 
 		if (this->IsWidgetLowered(ETTW_LOWER_LAND) || this->IsWidgetLowered(ETTW_RAISE_LAND)) { // change area-size if raise/lower corner is selected
