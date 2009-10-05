@@ -75,10 +75,8 @@ static inline uint32 GetAvailableVehicleCargoTypes(EngineID engine, VehicleType 
 	CargoID initial_cargo_type;
 
 	if (GetVehicleDefaultCapacity(engine, type, &initial_cargo_type) > 0) {
-		if (type != VEH_SHIP || ShipVehInfo(engine)->refittable) {
-			const EngineInfo *ei = EngInfo(engine);
-			cargos = ei->refit_mask;
-		}
+		const EngineInfo *ei = EngInfo(engine);
+		cargos = ei->refit_mask;
 		if (include_initial_cargo_type && initial_cargo_type < NUM_CARGO) SetBit(cargos, initial_cargo_type);
 	}
 
@@ -318,7 +316,7 @@ void AddArticulatedParts(Vehicle *first, VehicleType type)
 				t->subtype = 0;
 				t->track = front->track;
 				t->railtype = front->railtype;
-				t->tcache.first_engine = front->engine_type;
+				t->tcache.first_engine = front->engine_type; // needs to be set before first callback
 
 				t->spritenum = e_artic->u.rail.image_index;
 				if (e_artic->CanCarryCargo()) {
@@ -339,7 +337,7 @@ void AddArticulatedParts(Vehicle *first, VehicleType type)
 				v = rv;
 
 				rv->subtype = 0;
-				rv->rcache.first_engine = front->engine_type;
+				rv->rcache.first_engine = front->engine_type; // needs to be set before first callback
 				rv->rcache.cached_veh_length = 8; // Callback is called when the consist is finished
 				rv->state = RVSB_IN_DEPOT;
 
