@@ -9,7 +9,6 @@
 
 /** @file pbs.cpp */
 #include "stdafx.h"
-#include "pbs.h"
 #include "functions.h"
 #include "vehicle_func.h"
 #include "yapf/follow_track.hpp"
@@ -131,7 +130,7 @@ bool TryReserveRailTrack(TileIndex tile, Track t)
  * @param tile the tile
  * @param t the track
  */
- void UnreserveRailTrack(TileIndex tile, Track t)
+void UnreserveRailTrack(TileIndex tile, Track t)
 {
 	assert((GetTileTrackStatus(tile, TRANSPORT_RAIL, 0) & TrackToTrackBits(t)) != 0);
 
