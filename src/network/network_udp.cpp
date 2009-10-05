@@ -22,12 +22,8 @@
 #include "network_gamelist.h"
 #include "network_internal.h"
 #include "network_udp.h"
-#include "core/host.h"
 #include "../core/endian_func.hpp"
-#include "../core/alloc_func.hpp"
-#include "../string_func.h"
 #include "../company_base.h"
-#include "../settings_type.h"
 #include "../thread/thread.h"
 #include "../rev.h"
 
@@ -532,7 +528,7 @@ void NetworkUDPAdvertiseThread(void *pntr)
 }
 
 /* Register us to the master server
-     This function checks if it needs to send an advertise */
+ *   This function checks if it needs to send an advertise */
 void NetworkUDPAdvertise()
 {
 	/* Check if we should send an advertise */

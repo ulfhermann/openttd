@@ -29,10 +29,8 @@
 #include "station_base.h"
 #include "waypoint_base.h"
 #include "tilehighlight_func.h"
-#include "core/smallmap_type.hpp"
 #include "company_base.h"
 #include "sortlist_type.h"
-#include "settings_type.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -355,7 +353,7 @@ public:
 		const CargoSpec *cs;
 		FOR_ALL_CARGOSPECS(cs) {
 			cg_ofst = HasBit(this->cargo_filter, cs->Index()) ? 2 : 1;
-			GfxFillRect(x + cg_ofst, y + cg_ofst, x + cg_ofst + 10 , y + cg_ofst + 7, cs->rating_colour);
+			GfxFillRect(x + cg_ofst, y + cg_ofst, x + cg_ofst + 10, y + cg_ofst + 7, cs->rating_colour);
 			DrawString(x + cg_ofst, x + 12 + cg_ofst, y + cg_ofst, cs->abbrev, TC_BLACK, SA_CENTER);
 			x += 14;
 			i++;
