@@ -12,11 +12,9 @@
 #include "stdafx.h"
 #include "landscape.h"
 #include "mixer.h"
-#include "fileio_func.h"
 #include "newgrf_sound.h"
 #include "fios.h"
 #include "window_gui.h"
-#include "map_func.h"
 #include "vehicle_base.h"
 #include "debug.h"
 
@@ -131,6 +129,16 @@ static bool SetBankSource(MixerChannel *mc, const SoundEntry *sound)
 			mem[i] += -128; // Convert unsigned sound data to signed
 		}
 	}
+
+#if TTD_ENDIAN == TTD_BIG_ENDIAN
+	if (sound->bits_per_sample == 16) {
+		uint num_samples = sound->file_size / 2;
+		int16 *samples = (int16 *)mem;
+		for (uint i = 0; i < num_samples; i++) {
+			samples[i] = BSWAP16(samples[i]);
+		}
+	}
+#endif
 
 	assert(sound->bits_per_sample == 8 || sound->bits_per_sample == 16);
 	assert(sound->channels == 1);
