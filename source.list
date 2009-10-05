@@ -79,7 +79,11 @@ townname.cpp
 		#if OS2
 			os/os2/os2.cpp
 		#else
-			os/unix/crashlog_unix.cpp
+			#if OSX
+				os/macosx/crashlog_osx.cpp
+			#else
+				os/unix/crashlog_unix.cpp
+			#end
 			os/unix/unix.cpp
 		#end
 	#end
@@ -323,6 +327,7 @@ zoom_type.h
 #if WIN32
 #else
 music/bemidi.h
+music/cocoa_m.h
 music/extmidi.h
 music/libtimidity.h
 music/os2_m.h
@@ -915,6 +920,7 @@ sound/null_s.cpp
 		video/cocoa/fullscreen.mm
 		video/cocoa/wnd_quartz.mm
 		video/cocoa/wnd_quickdraw.mm
+		music/cocoa_m.cpp
 		sound/cocoa_s.cpp
 		os/macosx/splash.cpp
 	#end
