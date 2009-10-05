@@ -20,6 +20,12 @@
 #include <sys/cdefs.h>
 #include <unistd.h>
 
+/* Some gcc versions include assert.h via this header. As this would interfere
+ * with our own assert redefinition, include this header first. */
+#if defined(__GNUC__) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 3))
+#	include <debug/debug.h>
+#endif
+
 /* __LP64__ only exists in 10.5 and higher */
 #if defined(__APPLE__) && !defined(__LP64__)
 #	define __LP64__ 0
@@ -30,7 +36,6 @@
 #	error "Compiling 64 bits without _SQ64 set! (or vice versa)"
 #endif
 
-#define MAC_OS_X_VERSION_MIN_REQUIRED MAC_OS_X_VERSION_10_3
 #include <AvailabilityMacros.h>
 
 /* Name conflict */

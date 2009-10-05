@@ -13,7 +13,8 @@
 #
 
 # Simple insertion sort.
-function array_sort(ARRAY, ELEMENTS, temp, i, j) {
+function array_sort(ARRAY, ELEMENTS, temp, i, j)
+{
 	for (i = 2; i <= ELEMENTS; i++)
 		for (j = i; ARRAY[j - 1] > ARRAY[j]; --j) {
 			temp = ARRAY[j]
@@ -23,7 +24,8 @@ function array_sort(ARRAY, ELEMENTS, temp, i, j) {
 	return
 }
 
-function dump_class_templates(name) {
+function dump_class_templates(name)
+{
 	print "	template <> "       name " *GetParam(ForceType<"       name " *>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return  (" name " *)instance; }"
 	print "	template <> "       name " &GetParam(ForceType<"       name " &>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return *(" name " *)instance; }"
 	print "	template <> const " name " *GetParam(ForceType<const " name " *>, HSQUIRRELVM vm, int index, SQAutoFreePointers *ptr) { SQUserPointer instance; sq_getinstanceup(vm, index, &instance, 0); return  (" name " *)instance; }"
@@ -53,9 +55,8 @@ BEGIN {
 }
 
 /@file/ {
-	# Break it in two lines, so SVN doesn't replace it
-	printf "/* $I"
-	print "d$ */"
+	# Break it, so SVN doesn't replace it
+	print "/* $I" "d$ */"
 	print ""
 	print "/*"
 	print " * This file is part of OpenTTD."
@@ -209,7 +210,8 @@ BEGIN {
 
 	print "";
 	# Then do the registration functions of the class. */
-	print "void SQ" cls "_Register(Squirrel *engine) {"
+	print "void SQ" cls "_Register(Squirrel *engine)"
+	print "{"
 	print "	DefSQClass <" cls "> SQ" cls "(\"" cls "\");"
 	if (super_cls == "AIObject" || super_cls == "AIAbstractList::Valuator") {
 		print "	SQ" cls ".PreRegister(engine);"
