@@ -17,11 +17,9 @@
 #include "window_func.h"
 #include "string_func.h"
 #include "gfx_func.h"
-#include "core/math_func.hpp"
 #include "settings_type.h"
 #include "rev.h"
 
-#include "table/strings.h"
 
 enum {
 	ICON_HISTORY_SIZE       = 20,
@@ -295,6 +293,9 @@ struct IConsoleWindow : Window
 				MarkWholeScreenDirty();
 				break;
 
+#ifdef WITH_COCOA
+			case (WKC_META | 'V'):
+#endif
 			case (WKC_CTRL | 'V'):
 				if (InsertTextBufferClipboard(&_iconsole_cmdline)) {
 					IConsoleResetHistoryPos();
@@ -306,6 +307,9 @@ struct IConsoleWindow : Window
 				IConsoleCmdExec("clear");
 				break;
 
+#ifdef WITH_COCOA
+			case (WKC_META | 'U'):
+#endif
 			case (WKC_CTRL | 'U'):
 				DeleteTextBufferAll(&_iconsole_cmdline);
 				this->SetDirty();
