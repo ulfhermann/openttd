@@ -19,26 +19,36 @@
 CargoPacketPool _cargopacket_pool("CargoPacket");
 INSTANTIATE_POOL_METHODS(CargoPacket)
 
+/**
+ * Initialize, i.e. clean, the pool with cargo packets.
+ */
 void InitializeCargoPackets()
 {
 	_cargopacket_pool.CleanPool();
 }
 
-CargoPacket::CargoPacket(StationID source, StationID next, uint16 count, SourceType source_type, SourceID source_id)
+CargoPacket::CargoPacket(StationID source, StationID next, uint16 count, SourceType source_type, SourceID source_id) :
+	count(count),
+	source_id(source_id),
+	source(source),
+	next(next)
 {
-	if (source != INVALID_STATION) assert(count != 0);
+	this->source_type = source_type;
 
-//	this->feeder_share    = 0; // no need to zero already zeroed data (by operator new)
-	this->source_xy       = (source != INVALID_STATION) ? Station::Get(source)->xy : 0;
-	this->loaded_at_xy    = this->source_xy;
-	this->source          = source;
-	this->next            = next;
+	if (source != INVALID_STATION) {
+		assert(count != 0);
+		this->source_xy    = Station::Get(source)->xy;
+		this->loaded_at_xy = this->source_xy;
+	}
+}
 
-	this->count           = count;
-//	this->days_in_transit = 0;
-
-	this->source_type     = source_type;
-	this->source_id       = source_id;
+CargoPacket::CargoPacket(uint16 count, byte days_in_transit, Money feeder_share, SourceType source_type, SourceID source_id) :
+		feeder_share(feeder_share),
+		count(count),
+		days_in_transit(days_in_transit),
+		source_id(source_id)
+{
+	this->source_type = source_type;
 }
 
 /**
@@ -62,42 +72,56 @@ CargoPacket::CargoPacket(StationID source, StationID next, uint16 count, SourceT
 
 CargoList::~CargoList()
 {
-	while (!packets.empty()) {
-		delete packets.front();
-		packets.pop_front();
+	while (!this->packets.empty()) {
+		delete this->packets.front();
+		this->packets.pop_front();
 	}
+}
+
+void CargoList::RemoveFromCache(const CargoPacket *cp)
+{
+	this->count                 -= cp->count;
+	this->feeder_share          -= cp->feeder_share;
+	this->cargo_days_in_transit -= cp->days_in_transit * cp->count;
+}
+
+void CargoList::AddToCache(const CargoPacket *cp)
+{
+	this->count                 += cp->count;
+	this->feeder_share          += cp->feeder_share;
+	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
 }
 
 void CargoList::AgeCargo()
 {
-	if (empty) return;
+	for (List::const_iterator it = this->packets.begin(); it != this->packets.end(); it++) {
+		/* If we're at the maximum, then we can't increase no more. */
+		if ((*it)->days_in_transit == 0xFF) continue;
 
-	uint dit = 0;
-	for (List::const_iterator it = packets.begin(); it != packets.end(); it++) {
-		if ((*it)->days_in_transit != 0xFF) (*it)->days_in_transit++;
-		dit += (*it)->days_in_transit * (*it)->count;
+		(*it)->days_in_transit++;
+		this->cargo_days_in_transit += (*it)->count;
 	}
-	days_in_transit = dit / count;
 }
 
 void CargoList::Append(CargoPacket *cp)
 {
 	assert(cp != NULL);
 
-	for (List::iterator it = packets.begin(); it != packets.end(); it++) {
-		if ((*it)->SameSource(cp) && (*it)->count + cp->count <= 65535) {
-			(*it)->count        += cp->count;
-			(*it)->feeder_share += cp->feeder_share;
-			delete cp;
+	for (List::iterator it = this->packets.begin(); it != this->packets.end(); it++) {
+		CargoPacket *icp = *it;
+		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
+			icp->count        += cp->count;
+			icp->feeder_share += cp->feeder_share;
 
-			InvalidateCache();
+			this->AddToCache(cp);
+			delete cp;
 			return;
 		}
 	}
 
 	/* The packet could not be merged with another one */
-	packets.push_back(cp);
-	InvalidateCache();
+	this->packets.push_back(cp);
+	this->AddToCache(cp);
 }
 
 void CargoList::Import(List & list)
@@ -106,27 +130,30 @@ void CargoList::Import(List & list)
 	InvalidateCache();
 }
 
-void CargoList::Truncate(uint count)
+void CargoList::Truncate(uint max_remaining)
 {
-	for (List::iterator it = packets.begin(); it != packets.end(); it++) {
-		uint local_count = (*it)->count;
-		if (local_count <= count) {
-			count -= local_count;
+	for (List::iterator it = packets.begin(); it != packets.end(); /* done during loop*/) {
+		CargoPacket *cp = *it;
+		if (max_remaining == 0) {
+			/* Nothing should remain, just remove the packets. */
+			packets.erase(it++);
+			this->RemoveFromCache(cp);
+			delete cp;
 			continue;
 		}
 
-		(*it)->count = count;
-		count = 0;
+		uint local_count = cp->count;
+		if (local_count > max_remaining) {
+			uint diff = local_count - max_remaining;
+			this->count -= diff;
+			this->cargo_days_in_transit -= cp->days_in_transit * diff;
+			cp->count = max_remaining;
+			max_remaining = 0;
+		} else {
+			max_remaining -= local_count;
+		}
+		++it;
 	}
-
-	while (!packets.empty()) {
-		CargoPacket *cp = packets.back();
-		if (cp->count != 0) break;
-		delete cp;
-		packets.pop_back();
-	}
-
-	InvalidateCache();
 }
 
 CargoPacket * CargoPacket::Split(uint new_size) {
@@ -309,22 +336,13 @@ uint CargoList::MoveToVehicle(CargoList *dest, uint max_load, StationID next_sta
 
 void CargoList::InvalidateCache()
 {
-	empty = packets.empty();
-	count = 0;
-	feeder_share = 0;
-	source = INVALID_STATION;
-	days_in_transit = 0;
+	this->count = 0;
+	this->feeder_share = 0;
+	this->cargo_days_in_transit = 0;
 
-	if (empty) return;
-
-	uint dit = 0;
-	for (List::const_iterator it = packets.begin(); it != packets.end(); it++) {
-		count        += (*it)->count;
-		dit          += (*it)->days_in_transit * (*it)->count;
-		feeder_share += (*it)->feeder_share;
+	for (List::const_iterator it = this->packets.begin(); it != this->packets.end(); it++) {
+		this->AddToCache(*it);
 	}
-	days_in_transit = dit / count;
-	source = (*packets.begin())->source;
 }
 
 UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags order_flags) :

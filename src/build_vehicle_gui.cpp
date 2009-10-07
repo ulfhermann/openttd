@@ -239,8 +239,8 @@ static int CDECL TrainEngineCapacitySorter(const EngineID *a, const EngineID *b)
 	const RailVehicleInfo *rvi_a = RailVehInfo(*a);
 	const RailVehicleInfo *rvi_b = RailVehInfo(*b);
 
-	int va = GetTotalCapacityOfArticulatedParts(*a, VEH_TRAIN) * (rvi_a->railveh_type == RAILVEH_MULTIHEAD ? 2 : 1);
-	int vb = GetTotalCapacityOfArticulatedParts(*b, VEH_TRAIN) * (rvi_b->railveh_type == RAILVEH_MULTIHEAD ? 2 : 1);
+	int va = GetTotalCapacityOfArticulatedParts(*a) * (rvi_a->railveh_type == RAILVEH_MULTIHEAD ? 2 : 1);
+	int vb = GetTotalCapacityOfArticulatedParts(*b) * (rvi_b->railveh_type == RAILVEH_MULTIHEAD ? 2 : 1);
 	int r = va - vb;
 
 	/* Use EngineID to sort instead since we want consistent sorting */
@@ -262,8 +262,8 @@ static int CDECL TrainEnginesThenWagonsSorter(const EngineID *a, const EngineID 
 /* Road vehicle sorting functions */
 static int CDECL RoadVehEngineCapacitySorter(const EngineID *a, const EngineID *b)
 {
-	int va = GetTotalCapacityOfArticulatedParts(*a, VEH_ROAD);
-	int vb = GetTotalCapacityOfArticulatedParts(*b, VEH_ROAD);
+	int va = GetTotalCapacityOfArticulatedParts(*a);
+	int vb = GetTotalCapacityOfArticulatedParts(*b);
 	int r = va - vb;
 
 	/* Use EngineID to sort instead since we want consistent sorting */
@@ -298,8 +298,8 @@ static int CDECL AircraftEngineCargoSorter(const EngineID *a, const EngineID *b)
 
 	if (r == 0) {
 		/* The planes has the same passenger capacity. Check mail capacity instead */
-		va = AircraftVehInfo(*a)->mail_capacity;
-		vb = AircraftVehInfo(*b)->mail_capacity;
+		va = e_a->u.air.mail_capacity;
+		vb = e_b->u.air.mail_capacity;
 		r = va - vb;
 
 		if (r == 0) {
@@ -406,7 +406,7 @@ static const StringID _sort_listing[][11] = {{
 static bool CDECL CargoFilter(const EngineID *eid, const CargoID cid)
 {
 	if (cid == CF_ANY) return true;
-	uint32 refit_mask = GetUnionOfArticulatedRefitMasks(*eid, Engine::Get(*eid)->type, true);
+	uint32 refit_mask = GetUnionOfArticulatedRefitMasks(*eid, true);
 	return (cid == CF_NONE ? refit_mask == 0 : HasBit(refit_mask, cid));
 }
 
@@ -414,9 +414,9 @@ static GUIEngineList::FilterFunction * const _filter_funcs[] = {
 	&CargoFilter,
 };
 
-static int DrawCargoCapacityInfo(int left, int right, int y, EngineID engine, VehicleType type, bool refittable)
+static int DrawCargoCapacityInfo(int left, int right, int y, EngineID engine, bool refittable)
 {
-	CargoArray cap = GetCapacityOfArticulatedParts(engine, type);
+	CargoArray cap = GetCapacityOfArticulatedParts(engine);
 
 	for (CargoID c = 0; c < NUM_CARGO; c++) {
 		if (cap[c] == 0) continue;
@@ -629,56 +629,49 @@ int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number)
 	YearMonthDay ymd;
 	ConvertDateToYMD(e->intro_date, &ymd);
 	bool refittable = IsArticulatedVehicleRefittable(engine_number);
+	bool articulated_cargo = false;
 
 	switch (e->type) {
 		default: NOT_REACHED();
-		case VEH_TRAIN: {
-			const RailVehicleInfo *rvi = RailVehInfo(engine_number);
-			if (rvi->railveh_type == RAILVEH_WAGON) {
-				y = DrawRailWagonPurchaseInfo(left, right, y, engine_number, rvi);
+		case VEH_TRAIN:
+			if (e->u.rail.railveh_type == RAILVEH_WAGON) {
+				y = DrawRailWagonPurchaseInfo(left, right, y, engine_number, &e->u.rail);
 			} else {
-				y = DrawRailEnginePurchaseInfo(left, right, y, engine_number, rvi);
+				y = DrawRailEnginePurchaseInfo(left, right, y, engine_number, &e->u.rail);
 			}
-
-			/* Cargo type + capacity, or N/A */
-			int new_y = DrawCargoCapacityInfo(left, right, y, engine_number, VEH_TRAIN, refittable);
-
-			if (new_y == y) {
-				SetDParam(0, CT_INVALID);
-				SetDParam(2, STR_EMPTY);
-				DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY);
-				y += FONT_HEIGHT_NORMAL;
-			} else {
-				y = new_y;
-			}
+			articulated_cargo = true;
 			break;
-		}
-		case VEH_ROAD: {
+
+		case VEH_ROAD:
 			y = DrawRoadVehPurchaseInfo(left, right, y, engine_number);
-
-			/* Cargo type + capacity, or N/A */
-			int new_y = DrawCargoCapacityInfo(left, right, y, engine_number, VEH_ROAD, refittable);
-
-			if (new_y == y) {
-				SetDParam(0, CT_INVALID);
-				SetDParam(2, STR_EMPTY);
-				DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY);
-				y += FONT_HEIGHT_NORMAL;
-			} else {
-				y = new_y;
-			}
+			articulated_cargo = true;
 			break;
-		}
+
 		case VEH_SHIP:
-			y = DrawShipPurchaseInfo(left, right, y, engine_number, ShipVehInfo(engine_number), refittable);
+			y = DrawShipPurchaseInfo(left, right, y, engine_number, &e->u.ship, refittable);
 			break;
+
 		case VEH_AIRCRAFT:
-			y = DrawAircraftPurchaseInfo(left, right, y, engine_number, AircraftVehInfo(engine_number), refittable);
+			y = DrawAircraftPurchaseInfo(left, right, y, engine_number, &e->u.air, refittable);
 			break;
 	}
 
+	if (articulated_cargo) {
+		/* Cargo type + capacity, or N/A */
+		int new_y = DrawCargoCapacityInfo(left, right, y, engine_number, refittable);
+
+		if (new_y == y) {
+			SetDParam(0, CT_INVALID);
+			SetDParam(2, STR_EMPTY);
+			DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY);
+			y += FONT_HEIGHT_NORMAL;
+		} else {
+			y = new_y;
+		}
+	}
+
 	/* Draw details, that applies to all types except rail wagons */
-	if (e->type != VEH_TRAIN || RailVehInfo(engine_number)->railveh_type != RAILVEH_WAGON) {
+	if (e->type != VEH_TRAIN || e->u.rail.railveh_type != RAILVEH_WAGON) {
 		/* Design date - Life length */
 		SetDParam(0, ymd.year);
 		SetDParam(1, e->GetLifeLengthInDays() / DAYS_IN_LEAP_YEAR);
