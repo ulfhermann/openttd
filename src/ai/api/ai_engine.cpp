@@ -54,7 +54,6 @@
 	if (!AICargo::IsValidCargo(cargo_id)) return false;
 
 	if (GetCargoType(engine_id) == cargo_id) return true;
-	if (cargo_id == CT_MAIL && ::Engine::Get(engine_id)->type == VEH_AIRCRAFT) return true;
 	return ::CanRefitTo(engine_id, cargo_id);
 }
 
@@ -76,7 +75,7 @@
 	switch (e->type) {
 		case VEH_ROAD:
 		case VEH_TRAIN: {
-			CargoArray capacities = GetCapacityOfArticulatedParts(engine_id, e->type);
+			CargoArray capacities = GetCapacityOfArticulatedParts(engine_id);
 			for (CargoID c = 0; c < NUM_CARGO; c++) {
 				if (capacities[c] == 0) continue;
 				return capacities[c];

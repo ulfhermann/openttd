@@ -1028,36 +1028,37 @@ CargoPayment::~CargoPayment()
  * @param cp The cargo packet to pay for.
  * @param count The number of packets to pay for.
  */
-void CargoPayment::PayFinalDelivery(CargoPacket *cp, uint count)
+void CargoPayment::PayFinalDelivery(const CargoPacket *cp, uint count)
 {
 	if (this->owner == NULL) {
 		this->owner = Company::Get(this->front->owner);
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->days_in_transit, this->owner, cp->source_type, cp->source_id);
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->DaysInTransit(), this->owner, cp->source_type, cp->source_id);
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
-	this->visual_profit += profit - cp->feeder_share;
+	this->visual_profit += profit - cp->FeederShare();
 }
 
 /**
  * Handle payment for transfer of the given cargo packet.
- * @param cp The cargo packet to pay for.
+ * @param cp The cargo packet to pay for; actual payment won't be made!.
  * @param count The number of packets to pay for.
+ * @return The amount of money paid for the transfer.
  */
-void CargoPayment::PayTransfer(CargoPacket *cp, uint count)
+Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 {
 	Money profit = GetTransportedGoodsIncome(
 		count,
 		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
 		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
-		cp->days_in_transit,
+		cp->DaysInTransit(),
 		this->ct);
 
 	this->visual_profit += profit; // accumulate transfer profits for whole vehicle
-	cp->feeder_share    += profit; // account for the (virtual) profit already made for the cargo packet
+	return profit; // account for the (virtual) profit already made for the cargo packet
 }
 
 /**
@@ -1138,12 +1139,13 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	for (; v != NULL; v = v->Next()) {
 		if (v->cargo_cap == 0) continue;
 
-		byte load_amount = EngInfo(v->engine_type)->load_amount;
+		const Engine *e = Engine::Get(v->engine_type);
+		byte load_amount = e->info.load_amount;
 
 		/* The default loadamount for mail is 1/4 of the load amount for passengers */
 		if (v->type == VEH_AIRCRAFT && !Aircraft::From(v)->IsNormalAircraft()) load_amount = (load_amount + 3) / 4;
 
-		if (_settings_game.order.gradual_loading && HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_LOAD_AMOUNT)) {
+		if (_settings_game.order.gradual_loading && HasBit(e->info.callback_mask, CBM_VEHICLE_LOAD_AMOUNT)) {
 			uint16 cb_load_amount = GetVehicleCallback(CBID_VEHICLE_LOAD_AMOUNT, 0, 0, v->engine_type, v);
 			if (cb_load_amount != CALLBACK_FAILED && GB(cb_load_amount, 0, 8) != 0) load_amount = GB(cb_load_amount, 0, 8);
 		}
