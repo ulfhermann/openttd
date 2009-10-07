@@ -54,13 +54,11 @@ diaglvl: tileiter
 
 tileiter: master
 
-cargolist: master
-
-cargomap: cargolist flowmapping-vehload multimap slset
+cargomap: flowmapping-vehload multimap slset
 
 multimap: master
 
 slset: master
 
-push: master cargodist station-gui smallmap-stats flowmapping-vehload flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargolist cargomap multimap slset
+push: master cargodist station-gui smallmap-stats flowmapping-vehload flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap slset
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
