@@ -161,8 +161,9 @@ static RefitList *BuildRefitList(const Vehicle *v)
 	uint i;
 
 	do {
-		uint32 cmask = EngInfo(u->engine_type)->refit_mask;
-		byte callback_mask = EngInfo(u->engine_type)->callback_mask;
+		const Engine *e = Engine::Get(u->engine_type);
+		uint32 cmask = e->info.refit_mask;
+		byte callback_mask = e->info.callback_mask;
 
 		/* Skip this engine if it has no capacity */
 		if (u->cargo_cap == 0) continue;
@@ -446,7 +447,7 @@ void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *pare
 uint ShowRefitOptionsList(int left, int right, int y, EngineID engine)
 {
 	/* List of cargo types of this engine */
-	uint32 cmask = GetUnionOfArticulatedRefitMasks(engine, Engine::Get(engine)->type, false);
+	uint32 cmask = GetUnionOfArticulatedRefitMasks(engine, false);
 	/* List of cargo types available in this climate */
 	uint32 lmask = _cargo_mask;
 	char string[512];
