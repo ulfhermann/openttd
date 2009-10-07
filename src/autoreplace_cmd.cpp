@@ -33,10 +33,10 @@ extern void ChangeVehicleViewWindow(VehicleID from_index, VehicleID to_index);
  * @param type the type of the engines
  * @return true if they can both carry the same type of cargo (or at least one of them got no capacity at all)
  */
-static bool EnginesGotCargoInCommon(EngineID engine_a, EngineID engine_b, VehicleType type)
+static bool EnginesHaveCargoInCommon(EngineID engine_a, EngineID engine_b)
 {
-	uint32 available_cargos_a = GetUnionOfArticulatedRefitMasks(engine_a, type, true);
-	uint32 available_cargos_b = GetUnionOfArticulatedRefitMasks(engine_b, type, true);
+	uint32 available_cargos_a = GetUnionOfArticulatedRefitMasks(engine_a, true);
+	uint32 available_cargos_b = GetUnionOfArticulatedRefitMasks(engine_b, true);
 	return (available_cargos_a == 0 || available_cargos_b == 0 || (available_cargos_a & available_cargos_b) != 0);
 }
 
@@ -56,39 +56,38 @@ bool CheckAutoreplaceValidity(EngineID from, EngineID to, CompanyID company)
 	/* we can't replace an engine into itself (that would be autorenew) */
 	if (from == to) return false;
 
-	VehicleType type = Engine::Get(from)->type;
+	const Engine *e_from = Engine::Get(from);
+	const Engine *e_to = Engine::Get(to);
+	VehicleType type = e_from->type;
 
 	/* check that the new vehicle type is available to the company and its type is the same as the original one */
 	if (!IsEngineBuildable(to, type, company)) return false;
 
 	switch (type) {
 		case VEH_TRAIN: {
-			const RailVehicleInfo *rvi_from = RailVehInfo(from);
-			const RailVehicleInfo *rvi_to   = RailVehInfo(to);
-
 			/* make sure the railtypes are compatible */
-			if ((GetRailTypeInfo(rvi_from->railtype)->compatible_railtypes & GetRailTypeInfo(rvi_to->railtype)->compatible_railtypes) == 0) return false;
+			if ((GetRailTypeInfo(e_from->u.rail.railtype)->compatible_railtypes & GetRailTypeInfo(e_to->u.rail.railtype)->compatible_railtypes) == 0) return false;
 
 			/* make sure we do not replace wagons with engines or vise versa */
-			if ((rvi_from->railveh_type == RAILVEH_WAGON) != (rvi_to->railveh_type == RAILVEH_WAGON)) return false;
+			if ((e_from->u.rail.railveh_type == RAILVEH_WAGON) != (e_to->u.rail.railveh_type == RAILVEH_WAGON)) return false;
 			break;
 		}
 
 		case VEH_ROAD:
 			/* make sure that we do not replace a tram with a normal road vehicles or vise versa */
-			if (HasBit(EngInfo(from)->misc_flags, EF_ROAD_TRAM) != HasBit(EngInfo(to)->misc_flags, EF_ROAD_TRAM)) return false;
+			if (HasBit(e_from->info.misc_flags, EF_ROAD_TRAM) != HasBit(e_to->info.misc_flags, EF_ROAD_TRAM)) return false;
 			break;
 
 		case VEH_AIRCRAFT:
 			/* make sure that we do not replace a plane with a helicopter or vise versa */
-			if ((AircraftVehInfo(from)->subtype & AIR_CTOL) != (AircraftVehInfo(to)->subtype & AIR_CTOL)) return false;
+			if ((e_from->u.air.subtype & AIR_CTOL) != (e_to->u.air.subtype & AIR_CTOL)) return false;
 			break;
 
 		default: break;
 	}
 
 	/* the engines needs to be able to carry the same cargo */
-	return EnginesGotCargoInCommon(from, to, type);
+	return EnginesHaveCargoInCommon(from, to);
 }
 
 /** Transfer cargo from a single (articulated )old vehicle to the new vehicle chain
@@ -139,8 +138,8 @@ static bool VerifyAutoreplaceRefitForOrders(const Vehicle *v, EngineID engine_ty
 	const Order *o;
 	const Vehicle *u;
 
-	uint32 union_refit_mask_a = GetUnionOfArticulatedRefitMasks(v->engine_type, v->type, false);
-	uint32 union_refit_mask_b = GetUnionOfArticulatedRefitMasks(engine_type, v->type, false);
+	uint32 union_refit_mask_a = GetUnionOfArticulatedRefitMasks(v->engine_type, false);
+	uint32 union_refit_mask_b = GetUnionOfArticulatedRefitMasks(engine_type, false);
 
 	if (v->type == VEH_TRAIN) {
 		u = v->First();
@@ -172,11 +171,11 @@ static CargoID GetNewCargoTypeForReplace(Vehicle *v, EngineID engine_type, bool 
 {
 	CargoID cargo_type;
 
-	if (GetUnionOfArticulatedRefitMasks(engine_type, v->type, true) == 0) return CT_NO_REFIT; // Don't try to refit an engine with no cargo capacity
+	if (GetUnionOfArticulatedRefitMasks(engine_type, true) == 0) return CT_NO_REFIT; // Don't try to refit an engine with no cargo capacity
 
 	if (IsArticulatedVehicleCarryingDifferentCargos(v, &cargo_type)) return CT_INVALID; // We cannot refit to mixed cargos in an automated way
 
-	uint32 available_cargo_types = GetIntersectionOfArticulatedRefitMasks(engine_type, v->type, true);
+	uint32 available_cargo_types = GetIntersectionOfArticulatedRefitMasks(engine_type, true);
 
 	if (cargo_type == CT_INVALID) {
 		if (v->type != VEH_TRAIN) return CT_NO_REFIT; // If the vehicle does not carry anything at all, every replacement is fine.
@@ -191,7 +190,7 @@ static CargoID GetNewCargoTypeForReplace(Vehicle *v, EngineID engine_type, bool 
 			/* Now we found a cargo type being carried on the train and we will see if it is possible to carry to this one */
 			if (HasBit(available_cargo_types, v->cargo_type)) {
 				/* Do we have to refit the vehicle, or is it already carrying the right cargo? */
-				CargoArray default_capacity = GetCapacityOfArticulatedParts(engine_type, v->type);
+				CargoArray default_capacity = GetCapacityOfArticulatedParts(engine_type);
 				for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
 					if (cid != v->cargo_type && default_capacity[cid] > 0) return v->cargo_type;
 				}
@@ -207,7 +206,7 @@ static CargoID GetNewCargoTypeForReplace(Vehicle *v, EngineID engine_type, bool 
 		if (part_of_chain && !VerifyAutoreplaceRefitForOrders(v, engine_type)) return CT_INVALID; // Some refit orders lose their effect
 
 		/* Do we have to refit the vehicle, or is it already carrying the right cargo? */
-		CargoArray default_capacity = GetCapacityOfArticulatedParts(engine_type, v->type);
+		CargoArray default_capacity = GetCapacityOfArticulatedParts(engine_type);
 		for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
 			if (cid != cargo_type && default_capacity[cid] > 0) return cargo_type;
 		}
