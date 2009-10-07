@@ -1061,7 +1061,7 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 		cp->DaysInTransit(),
 		this->ct);
 
-	this->visual_profit += profit; // accumulate transfer profits for whole vehicle
+	this->visual_transfer += profit; // accumulate transfer profits for whole vehicle
 	return profit; // account for the (virtual) profit already made for the cargo packet
 }
 
