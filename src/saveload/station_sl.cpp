@@ -13,11 +13,7 @@
 #include "../station_base.h"
 #include "../waypoint_base.h"
 #include "../roadstop_base.h"
-#include "../order_base.h"
 #include "../vehicle_base.h"
-#include "../core/bitmath_func.hpp"
-#include "../core/alloc_func.hpp"
-#include "../variables.h"
 #include "../newgrf_station.h"
 
 #include "saveload.h"
@@ -200,6 +196,11 @@ static const SaveLoad _station_speclist_desc[] = {
 	SLE_END()
 };
 
+/**
+ * Wrapper function to get the GoodsEntry's internal structure while
+ * some of the variables itself are private.
+ * @return the saveload description for GoodsEntry.
+ */
 const SaveLoad *GetGoodsDesc()
 {
 	static const SaveLoad goods_desc[] = {
@@ -243,15 +244,10 @@ static void Load_STNS()
 				SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
 				if (GB(_waiting_acceptance, 0, 12) != 0) {
 					/* Don't construct the packet with station here, because that'll fail with old savegames */
-					CargoPacket *cp = new CargoPacket();
+					CargoPacket *cp = new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days, _cargo_feeder_share);
 					/* In old versions, enroute_from used 0xFF as INVALID_STATION */
 					cp->source          = (CheckSavegameVersion(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
-					cp->count           = GB(_waiting_acceptance, 0, 12);
-					cp->days_in_transit = _cargo_days;
-					cp->feeder_share    = _cargo_feeder_share;
 					cp->source_xy       = _cargo_source_xy;
-					cp->days_in_transit = _cargo_days;
-					cp->feeder_share    = _cargo_feeder_share;
 					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
 					ge->cargo.Append(cp);
 				}

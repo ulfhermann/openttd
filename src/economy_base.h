@@ -13,7 +13,6 @@
 #define ECONOMY_BASE_H
 
 #include "cargopacket.h"
-#include "vehicle_type.h"
 #include "company_type.h"
 
 /** Type of pool to store cargo payments in. */
@@ -39,8 +38,8 @@ struct CargoPayment : CargoPaymentPool::PoolItem<&_cargo_payment_pool> {
 	CargoPayment(Vehicle *front);
 	~CargoPayment();
 
-	void PayTransfer(CargoPacket *cp, uint count);
-	void PayFinalDelivery(CargoPacket *cp, uint count);
+	Money PayTransfer(const CargoPacket *cp, uint count);
+	void PayFinalDelivery(const CargoPacket *cp, uint count);
 
 	/**
 	 * Sets the currently handled cargo type.

@@ -874,6 +874,11 @@ void DetermineBasePaths(const char *exe)
 	AppendPathSeparator(tmp, MAX_PATH);
 	_searchpaths[SP_BINARY_DIR] = strdup(tmp);
 
+	if (_searchpaths[SP_WORKING_DIR] != NULL) {
+		/* Go back to the current working directory. */
+		ChangeWorkingDirectory(_searchpaths[SP_WORKING_DIR]);
+	}
+
 #if defined(__MORPHOS__) || defined(__AMIGA__) || defined(DOS) || defined(OS2)
 	_searchpaths[SP_INSTALLATION_DIR] = NULL;
 #else
@@ -907,7 +912,7 @@ void DeterminePaths(const char *exe)
 
 	if (_config_file != NULL) {
 		_personal_dir = strdup(_config_file);
-		char *end = strrchr(_personal_dir , PATHSEPCHAR);
+		char *end = strrchr(_personal_dir, PATHSEPCHAR);
 		if (end == NULL) {
 			_personal_dir[0] = '\0';
 		} else {

@@ -13,8 +13,8 @@
 
 #include "stdafx.h"
 #include "landscape.h"
-#include "town.h"
-#include "industry.h"
+#include "house.h"
+#include "industrytype.h"
 #include "newgrf.h"
 #include "newgrf_commons.h"
 #include "station_map.h"
@@ -305,7 +305,7 @@ TileIndex GetNearbyTile(byte parameter, TileIndex tile)
 }
 
 /**
- * Common part of station var 0x67 , house var 0x62, indtile var 0x60, industry var 0x62.
+ * Common part of station var 0x67, house var 0x62, indtile var 0x60, industry var 0x62.
  *
  * @param tile the tile of interest.
  * @return 0czzbbss: c = TileType; zz = TileZ; bb: 7-3 zero, 4-2 TerrainType, 1 water/shore, 0 zero; ss = TileSlope

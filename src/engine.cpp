@@ -10,11 +10,9 @@
 /** @file engine.cpp Base for all engine handling. */
 
 #include "stdafx.h"
-#include "debug.h"
 #include "company_func.h"
 #include "command_func.h"
 #include "news_func.h"
-#include "variables.h"
 #include "aircraft.h"
 #include "newgrf.h"
 #include "newgrf_engine.h"
@@ -27,8 +25,6 @@
 #include "autoreplace_gui.h"
 #include "string_func.h"
 #include "ai/ai.hpp"
-#include "vehicle_func.h"
-#include "settings_type.h"
 #include "core/pool_func.hpp"
 #include "engine_gui.h"
 
@@ -527,12 +523,10 @@ static void AcceptEnginePreview(EngineID eid, CompanyID company)
 
 	SetBit(e->company_avail, company);
 	if (e->type == VEH_TRAIN) {
-		const RailVehicleInfo *rvi = RailVehInfo(eid);
-
-		assert(rvi->railtype < RAILTYPE_END);
-		SetBit(c->avail_railtypes, rvi->railtype);
+		assert(e->u.rail.railtype < RAILTYPE_END);
+		SetBit(c->avail_railtypes, e->u.rail.railtype);
 	} else if (e->type == VEH_ROAD) {
-		SetBit(c->avail_roadtypes, HasBit(EngInfo(eid)->misc_flags, EF_ROAD_TRAM) ? ROADTYPE_TRAM : ROADTYPE_ROAD);
+		SetBit(c->avail_roadtypes, HasBit(e->info.misc_flags, EF_ROAD_TRAM) ? ROADTYPE_TRAM : ROADTYPE_ROAD);
 	}
 
 	e->preview_company_rank = 0xFF;
@@ -769,7 +763,7 @@ bool IsEngineBuildable(EngineID engine, VehicleType type, CompanyID company)
 	if (type == VEH_TRAIN) {
 		/* Check if the rail type is available to this company */
 		const Company *c = Company::Get(company);
-		if (((GetRailTypeInfo(RailVehInfo(engine)->railtype))->compatible_railtypes & c->avail_railtypes) == 0) return false;
+		if (((GetRailTypeInfo(e->u.rail.railtype))->compatible_railtypes & c->avail_railtypes) == 0) return false;
 	}
 
 	return true;
@@ -787,8 +781,6 @@ bool IsEngineRefittable(EngineID engine)
 
 	/* check if it's an engine that is in the engine array */
 	if (e == NULL) return false;
-
-	if (e->type == VEH_SHIP && !e->u.ship.refittable) return false;
 
 	if (!e->CanCarryCargo()) return false;
 

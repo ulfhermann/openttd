@@ -16,7 +16,6 @@
 #include "engine_func.h"
 #include "landscape.h"
 #include "saveload/saveload.h"
-#include "variables.h"
 #include "network/network.h"
 #include "network/network_func.h"
 #include "network/network_base.h"
@@ -29,13 +28,10 @@
 #include "strings_func.h"
 #include "viewport_func.h"
 #include "window_func.h"
-#include "map_func.h"
 #include "date_func.h"
 #include "vehicle_func.h"
-#include "string_func.h"
 #include "company_func.h"
 #include "company_base.h"
-#include "settings_type.h"
 #include "gamelog.h"
 #include "ai/ai.hpp"
 #include "ai/ai_config.hpp"
@@ -1671,7 +1667,7 @@ DEF_CONSOLE_CMD(ConContent)
 		IConsolePrintF(CC_WHITE, "id, type, state, name");
 		for (ConstContentIterator iter = _network_content_client.Begin(); iter != _network_content_client.End(); iter++) {
 			static const char * const types[] = { "Base graphics", "NewGRF", "AI", "AI library", "Scenario", "Heightmap" };
-			static const char * const states[] = { "Not selected", "Selected" , "Dep Selected", "Installed", "Unknown" };
+			static const char * const states[] = { "Not selected", "Selected", "Dep Selected", "Installed", "Unknown" };
 			static const ConsoleColour state_to_colour[] = { CC_COMMAND, CC_INFO, CC_INFO, CC_WHITE, CC_ERROR };
 
 			const ContentInfo *ci = *iter;
