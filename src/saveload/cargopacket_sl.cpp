@@ -14,17 +14,22 @@
 
 #include "saveload.h"
 
+/**
+ * Wrapper function to get the CargoPacket's internal structure while
+ * some of the variables itself are private.
+ * @return the saveload description for CargoPackets.
+ */
 const SaveLoad *GetCargoPacketDesc()
 {
 	static const SaveLoad _cargopacket_desc[] = {
-		    SLE_VAR(CargoPacket, source,          SLE_UINT16),
-		    SLE_VAR(CargoPacket, source_xy,       SLE_UINT32),
-		    SLE_VAR(CargoPacket, loaded_at_xy,    SLE_UINT32),
-		    SLE_VAR(CargoPacket, count,           SLE_UINT16),
-		    SLE_VAR(CargoPacket, days_in_transit, SLE_UINT8),
-		    SLE_VAR(CargoPacket, feeder_share,    SLE_INT64),
-		SLE_CONDVAR(CargoPacket, source_type,     SLE_UINT8,  125, SL_MAX_VERSION),
-		SLE_CONDVAR(CargoPacket, source_id,       SLE_UINT16, 125, SL_MAX_VERSION),
+		     SLE_VAR(CargoPacket, source,          SLE_UINT16),
+		     SLE_VAR(CargoPacket, source_xy,       SLE_UINT32),
+		     SLE_VAR(CargoPacket, loaded_at_xy,    SLE_UINT32),
+		     SLE_VAR(CargoPacket, count,           SLE_UINT16),
+		     SLE_VAR(CargoPacket, days_in_transit, SLE_UINT8),
+		     SLE_VAR(CargoPacket, feeder_share,    SLE_INT64),
+		 SLE_CONDVAR(CargoPacket, source_type,     SLE_UINT8,  125, SL_MAX_VERSION),
+		 SLE_CONDVAR(CargoPacket, source_id,       SLE_UINT16, 125, SL_MAX_VERSION),
 
 		/* Used to be paid_for, but that got changed. */
 		SLE_CONDNULL(1, 0, 120),
