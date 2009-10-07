@@ -160,7 +160,7 @@ struct UnloadDescription {
 
 class PacketCompare {
 public:
-	bool operator()(const CargoPacket *a, const CargoPacket *b);
+	bool operator()(const CargoPacket *a, const CargoPacket *b) const;
 };
 
 typedef std::list<CargoPacket *> CargoPacketList;

@@ -510,7 +510,7 @@ void CargoList<LIST>::ValidateCache() {
 	assert(p_days == days_in_transit);
 }
 
-bool PacketCompare::operator()(const CargoPacket *a, const CargoPacket *b) {
+bool PacketCompare::operator()(const CargoPacket *a, const CargoPacket *b) const {
 	if (a->GetSourceXY() == b->GetSourceXY()) {
 		if(a->GetSourceType() == b->GetSourceType()) {
 			if (a->GetSourceID() == b->GetSourceID()) {
