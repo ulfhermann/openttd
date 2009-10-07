@@ -14,22 +14,31 @@
 
 #include "saveload.h"
 
-static const SaveLoad _cargopacket_desc[] = {
-	     SLE_VAR(CargoPacket, source,          SLE_UINT16),
-	 SLE_CONDVAR(CargoPacket, next,            SLE_UINT16, FLOWMAP_SV, SL_MAX_VERSION),
-	     SLE_VAR(CargoPacket, source_xy,       SLE_UINT32),
-	     SLE_VAR(CargoPacket, loaded_at_xy,    SLE_UINT32),
-	     SLE_VAR(CargoPacket, count,           SLE_UINT16),
-	     SLE_VAR(CargoPacket, days_in_transit, SLE_UINT8),
-	     SLE_VAR(CargoPacket, feeder_share,    SLE_INT64),
-	 SLE_CONDVAR(CargoPacket, source_type,     SLE_UINT8,  125, SL_MAX_VERSION),
-	 SLE_CONDVAR(CargoPacket, source_id,       SLE_UINT16, 125, SL_MAX_VERSION),
+/**
+ * Wrapper function to get the CargoPacket's internal structure while
+ * some of the variables itself are private.
+ * @return the saveload description for CargoPackets.
+ */
+const SaveLoad *GetCargoPacketDesc()
+{
+	static const SaveLoad _cargopacket_desc[] = {
+		     SLE_VAR(CargoPacket, source,          SLE_UINT16),
+	         SLE_CONDVAR(CargoPacket, next,            SLE_UINT16, FLOWMAP_SV, SL_MAX_VERSION),
+		     SLE_VAR(CargoPacket, source_xy,       SLE_UINT32),
+		     SLE_VAR(CargoPacket, loaded_at_xy,    SLE_UINT32),
+		     SLE_VAR(CargoPacket, count,           SLE_UINT16),
+		     SLE_VAR(CargoPacket, days_in_transit, SLE_UINT8),
+		     SLE_VAR(CargoPacket, feeder_share,    SLE_INT64),
+		 SLE_CONDVAR(CargoPacket, source_type,     SLE_UINT8,  125, SL_MAX_VERSION),
+		 SLE_CONDVAR(CargoPacket, source_id,       SLE_UINT16, 125, SL_MAX_VERSION),
 
-	/* Used to be paid_for, but that got changed. */
-	SLE_CONDNULL(1, 0, 120),
+		/* Used to be paid_for, but that got changed. */
+		SLE_CONDNULL(1, 0, 120),
 
-	SLE_END()
-};
+		SLE_END()
+	};
+	return _cargopacket_desc;
+}
 
 static void Save_CAPA()
 {
@@ -37,7 +46,7 @@ static void Save_CAPA()
 
 	FOR_ALL_CARGOPACKETS(cp) {
 		SlSetArrayIndex(cp->index);
-		SlObject(cp, _cargopacket_desc);
+		SlObject(cp, GetCargoPacketDesc());
 	}
 }
 
@@ -47,7 +56,7 @@ static void Load_CAPA()
 
 	while ((index = SlIterateArray()) != -1) {
 		CargoPacket *cp = new (index) CargoPacket();
-		SlObject(cp, _cargopacket_desc);
+		SlObject(cp, GetCargoPacketDesc());
 	}
 }
 
