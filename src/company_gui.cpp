@@ -20,17 +20,15 @@
 #include "network/network.h"
 #include "network/network_gui.h"
 #include "network/network_func.h"
-#include "roadveh.h"
-#include "train.h"
-#include "aircraft.h"
+#include "sprite.h"
+#include "economy_func.h"
+#include "vehicle_base.h"
 #include "newgrf.h"
 #include "company_manager_face.h"
 #include "strings_func.h"
 #include "date_func.h"
-#include "string_func.h"
 #include "widgets/dropdown_type.h"
 #include "tilehighlight_func.h"
-#include "settings_type.h"
 
 #include "table/strings.h"
 
@@ -93,8 +91,8 @@ struct ExpensesList {
 };
 
 static const ExpensesList _expenses_list_types[] = {
-	ExpensesList(_expenses_list_1, lengthof(_expenses_list_1), lengthof(_expenses_list_1) * 10),
-	ExpensesList(_expenses_list_2, lengthof(_expenses_list_2), lengthof(_expenses_list_2) * 10 + 3 * 12),
+	ExpensesList(_expenses_list_1, lengthof(_expenses_list_1), lengthof(_expenses_list_1) * 10 + 26),
+	ExpensesList(_expenses_list_2, lengthof(_expenses_list_2), lengthof(_expenses_list_2) * 10 + 3 * 12 + 26),
 };
 
 /** Widgets of the company finances windows. */
@@ -352,9 +350,9 @@ struct CompanyFinancesWindow : Window {
 				this->widget[CFW_EXPS_PANEL].bottom = this->widget[CFW_EXPS_PANEL].top;
 			}
 			int height = this->widget[CFW_EXPS_PANEL].bottom - this->widget[CFW_EXPS_PANEL].top + 1;
-			if (_expenses_list_types[type].height + 26 != height) {
+			if (_expenses_list_types[type].height != height) {
 				this->SetDirty();
-				ResizeWindowForWidget(this, CFW_EXPS_PANEL, 0, _expenses_list_types[type].height - height + 26);
+				ResizeWindowForWidget(this, CFW_EXPS_PANEL, 0, _expenses_list_types[type].height - height);
 				this->SetDirty();
 				return;
 			}

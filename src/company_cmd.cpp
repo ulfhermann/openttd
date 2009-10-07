@@ -24,15 +24,12 @@
 #include "company_manager_face.h"
 #include "group.h"
 #include "window_func.h"
-#include "tile_map.h"
 #include "strings_func.h"
 #include "gfx_func.h"
 #include "date_func.h"
 #include "sound_func.h"
 #include "autoreplace_func.h"
 #include "autoreplace_gui.h"
-#include "string_func.h"
-#include "road_func.h"
 #include "rail.h"
 #include "sprite.h"
 #include "core/pool_func.hpp"
@@ -91,6 +88,9 @@ void SetLocalCompany(CompanyID new_company)
 {
 	/* company could also be COMPANY_SPECTATOR or OWNER_NONE */
 	assert(Company::IsValidID(new_company) || new_company == COMPANY_SPECTATOR || new_company == OWNER_NONE);
+
+	/* Delete the chat window, if you were team chatting. */
+	InvalidateWindowData(WC_SEND_NETWORK_MSG, DESTTYPE_TEAM, _local_company);
 
 	_local_company = new_company;
 
