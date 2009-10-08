@@ -26,7 +26,10 @@ protected:
 public:
 	MultiMapIterator() : list_valid(false) {}
 	MultiMapIterator(MAP_ITER mi) : map_iter(mi), list_valid(false) {}
-	MultiMapIterator(MAP_ITER mi, LIST_ITER li) : list_iter(li), map_iter(mi), list_valid(true) {}
+	MultiMapIterator(MAP_ITER mi, LIST_ITER li) : list_iter(li), map_iter(mi)
+	{
+		list_valid = (list_iter != map_iter->second.begin());
+	}
 
 	VALUE &operator*() const
 	{
@@ -69,7 +72,6 @@ public:
 			} else {
 				list_valid = true;
 			}
-			assert(!map_iter->second.empty());
 		}
 		return *this;
 	}
@@ -112,13 +114,22 @@ public:
 template<class MAP_ITER1, class LIST_ITER1, class MAP_ITER2, class LIST_ITER2, class KEY, class VALUE1, class VALUE2, class COMPARE>
 bool operator==(const MultiMapIterator<MAP_ITER1, LIST_ITER1, KEY, VALUE1, COMPARE> &iter1, const MultiMapIterator<MAP_ITER2, LIST_ITER2, KEY, VALUE2, COMPARE> &iter2)
 {
-	return iter1.GetListIter() == iter1.GetListIter() && iter1.GetMapIter() == iter2.GetMapIter();
+	if (iter1.ListValid()) {
+		if (!iter2.ListValid()) {
+			return false;
+		} else if (iter1.GetListIter() != iter2.GetListIter()) {
+			return false;
+		}
+	} else if (iter2.ListValid()) {
+		return false;
+	}
+	return (iter1.GetMapIter() == iter2.GetMapIter());
 }
 
 template<class MAP_ITER1, class LIST_ITER1, class MAP_ITER2, class LIST_ITER2, class KEY, class VALUE1, class VALUE2, class COMPARE>
 bool operator!=(const MultiMapIterator<MAP_ITER1, LIST_ITER1, KEY, VALUE1, COMPARE> &iter1, const MultiMapIterator<MAP_ITER2, LIST_ITER2, KEY, VALUE2, COMPARE> &iter2)
 {
-	return iter1.GetListIter() != iter1.GetListIter() || iter1.GetMapIter() != iter2.GetMapIter();
+	return !(iter1 == iter2);
 }
 
 template<class MAP_ITER1, class LIST_ITER1, class MAP_ITER2, class KEY, class VALUE, class COMPARE >
