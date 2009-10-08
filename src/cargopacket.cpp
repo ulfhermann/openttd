@@ -437,7 +437,7 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 
 void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
 	std::pair<Iterator, Iterator> range(packets.equal_range(to));
-	for(Iterator it = range.first; it != range.second && it.GetKey() == to;) {
+	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
 		CargoPacket * packet = *it;
 		packets.erase(it++);
 		StationID next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
