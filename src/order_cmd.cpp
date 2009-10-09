@@ -1854,7 +1854,7 @@ bool ProcessOrders(Vehicle *v)
 	if (((v->current_order.IsType(OT_GOTO_STATION) && (v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION)) || v->current_order.IsType(OT_GOTO_WAYPOINT)) &&
 			IsTileType(v->tile, MP_STATION) &&
 			v->current_order.GetDestination() == GetStationIndex(v->tile)) {
-		if (v->current_order.IsType(OT_GOTO_STATION)) v->last_station_visited = v->current_order.GetDestination();
+		/* treat it like a waypoint and don't set last_station_visited */
 		UpdateVehicleTimetable(v, true);
 		v->IncrementOrderIndex();
 	}
