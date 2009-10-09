@@ -714,14 +714,49 @@ class SmallMapWindow : public Window
 
 	const Station * supply_details;
 
-	struct CargoDetail {
-		CargoDetail(const LegendAndColour * c, const LinkStat &ls, const FlowStat &fs) :
-			legend(c), capacity(ls.capacity), usage(ls.usage), planned(fs.planned), sent(fs.sent) {}
-		const LegendAndColour *legend;
+	struct BaseCargoDetail {
+		BaseCargoDetail() :
+			scale(_settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit)
+		{
+			this->Clear();
+		}
+
+		void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow)
+		{
+			this->capacity += orig_link.capacity;
+			this->usage += orig_link.usage;
+			this->planned += orig_flow.planned;
+			this->sent += orig_flow.sent;
+		}
+
+		void Scale()
+		{
+			this->capacity = this->capacity * 30 / this->scale;
+			this->usage = this->usage * 30 / this->scale;
+			this->planned = this->planned * 30 / this->scale;
+			this->sent = this->sent * 30 / this->scale;
+		}
+
+		void Clear()
+		{
+			capacity = usage = planned = sent = 0;
+		}
+
 		uint capacity;
 		uint usage;
 		uint planned;
 		uint sent;
+		uint scale;
+	};
+
+	struct CargoDetail : public BaseCargoDetail {
+		CargoDetail(const LegendAndColour * c, const LinkStat &ls, const FlowStat &fs) : legend(c)
+		{
+			this->AddLink(ls, fs);
+			this->Scale();
+		}
+
+		const LegendAndColour *legend;
 	};
 
 	typedef std::vector<CargoDetail> StatVector;
@@ -1124,28 +1159,12 @@ class SmallMapWindow : public Window
 		}
 	};
 
-	class LinkValueDrawer : public LinkDrawer {
+	class LinkValueDrawer : public LinkDrawer, public BaseCargoDetail {
 	protected:
-		LinkStat link;
-		FlowStat flow;
-		uint scale;
-
-		LinkValueDrawer() :
-			scale(_settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit)
-		{}
 
 		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry)
 		{
-			this->link += orig_link;
-			this->flow += orig_flow;
-		}
-
-		void Scale()
-		{
-			this->link *= 30;
-			this->link /= this->scale;
-			this->flow *= 30;
-			this->flow /= this->scale;
+			this->BaseCargoDetail::AddLink(orig_link, orig_flow);
 		}
 	};
 
@@ -1158,16 +1177,16 @@ class SmallMapWindow : public Window
 			ptm.y = (this->pta.y + 2*this->ptb.y) / 3;
 			int nums = 0;
 			if (_legend_linkstats[_smallmap_cargo_count + STAT_CAPACITY].show_on_map) {
-				SetDParam(nums++, this->link.capacity);
+				SetDParam(nums++, this->capacity);
 			}
 			if (_legend_linkstats[_smallmap_cargo_count + STAT_USAGE].show_on_map) {
-				SetDParam(nums++, this->link.usage);
+				SetDParam(nums++, this->usage);
 			}
 			if (_legend_linkstats[_smallmap_cargo_count + STAT_PLANNED].show_on_map) {
-				SetDParam(nums++, this->flow.planned);
+				SetDParam(nums++, this->planned);
 			}
 			if (_legend_linkstats[_smallmap_cargo_count + STAT_SENT].show_on_map) {
-				SetDParam(nums++, this->flow.sent);
+				SetDParam(nums++, this->sent);
 			}
 			StringID str;
 			switch (nums) {
@@ -1185,8 +1204,7 @@ class SmallMapWindow : public Window
 				NOT_REACHED();
 			}
 			DrawString(ptm.x, ptm.x + SD_LEGEND_COLUMN_WIDTH, ptm.y, str , TC_BLACK);
-			this->flow.Clear();
-			this->link.Clear();
+			this->Clear();
 		}
 	};
 
@@ -1201,20 +1219,20 @@ class SmallMapWindow : public Window
 			 * they are not reused anywhere, so it's network safe.
 			 */
 			const LegendAndColour *legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_USAGE;
-			if (legend_entry->show_on_map && this->link.usage > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->link.usage), legend_entry->colour));
+			if (legend_entry->show_on_map && this->usage > 0) {
+				sizes.insert(std::make_pair((uint)sqrt((float)this->usage), legend_entry->colour));
 			}
 			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_CAPACITY;
-			if (legend_entry->show_on_map && this->link.capacity > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->link.capacity), legend_entry->colour));
+			if (legend_entry->show_on_map && this->capacity > 0) {
+				sizes.insert(std::make_pair((uint)sqrt((float)this->capacity), legend_entry->colour));
 			}
 			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_PLANNED;
-			if (legend_entry->show_on_map && this->flow.planned > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->flow.planned),  legend_entry->colour));
+			if (legend_entry->show_on_map && this->planned > 0) {
+				sizes.insert(std::make_pair((uint)sqrt((float)this->planned),  legend_entry->colour));
 			}
 			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_SENT;
-			if (legend_entry->show_on_map && this->flow.sent > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->flow.sent), legend_entry->colour));
+			if (legend_entry->show_on_map && this->sent > 0) {
+				sizes.insert(std::make_pair((uint)sqrt((float)this->sent), legend_entry->colour));
 			}
 
 			ptm.x = (this->pta.x + this->ptb.x) / 2;
@@ -1229,8 +1247,7 @@ class SmallMapWindow : public Window
 					GfxFillRect(ptm.x, ptm.y - i->first * 2, ptm.x + i->first / 2, ptm.y, i->second);
 				}
 			}
-			this->flow.Clear();
-			this->link.Clear();
+			this->Clear();
 		}
 	};
 
