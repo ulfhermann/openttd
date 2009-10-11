@@ -157,6 +157,21 @@ void VehicleCargoList::AgeCargo()
 	packets.swap(new_packets);
 }
 
+void VehicleCargoList::Append(CargoPacket *cp)
+{
+	AddToCache(cp);
+	Iterator it(packets.lower_bound(cp));
+	CargoPacket *icp;
+	if (it != packets.end() && cp->SameSource(icp = *it)) {
+		/* there aren't any vehicles able to carry that amount of cargo */
+		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
+		icp->Merge(cp);
+	} else {
+		/* The packet could not be merged with another one */
+		packets.insert(it, cp);
+	}
+}
+
 void StationCargoList::Append(CargoPacket *cp)
 {
 	assert(cp != NULL);
@@ -172,21 +187,6 @@ void StationCargoList::Append(CargoPacket *cp)
 
 	/* The packet could not be merged with another one */
 	this->packets.push_back(cp);
-}
-
-void VehicleCargoList::Append(CargoPacket *cp)
-{
-	AddToCache(cp);
-	Iterator it(packets.lower_bound(cp));
-	CargoPacket *icp;
-	if (it != packets.end() && cp->SameSource(icp = *it)) {
-		/* there aren't any vehicles able to carry that amount of cargo */
-		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
-		icp->Merge(cp);
-	} else {
-		/* The packet could not be merged with another one */
-		packets.insert(it, cp);
-	}
 }
 
 template<class LIST>
