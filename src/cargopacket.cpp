@@ -189,6 +189,7 @@ void StationCargoList::Append(CargoPacket *cp)
 	this->packets.push_back(cp);
 }
 
+
 template<class LIST>
 void CargoList<LIST>::Truncate(uint max_remaining)
 {
