@@ -648,6 +648,29 @@ class SmallMapWindow : public Window
 	}
 
 	/**
+	 * choose a different tile from the tiles to be drawn in one pixel
+	 * each time. This decreases the chance that certain structures
+	 * (railway lines, roads) disappear completely when zooming out.
+	 * @param x the X coordinate of the upper right corner of the drawn area
+	 * @param y the Y coordinate of the upper right corner of the drawn area
+	 * @param xc the unscaled X coordinate x was calcluated from
+	 * @param yc the unscaled Y coordinate y was calcluated from
+	 */
+	void AntiAlias(uint &x, uint &y, uint xc, uint yc)
+	{
+		int bits_needed = this->zoom - ZOOM_LVL_NORMAL;
+		if (bits_needed <= 0) return;
+		for(int i = 0; i < bits_needed; ++i) {
+			x += ((xc ^ yc) & 0x1) << i;
+			yc >>= 1;
+			y += ((xc ^ yc) & 0x1) << i;
+			xc >>= 1;
+		}
+		x = min(x, MapMaxX() - 1);
+		y = min(y, MapMaxY() - 1);
+	}
+
+	/**
 	 * Draws at most MAP_COLUMN_WIDTH columns (of one pixel each) of the small map in a certain
 	 * mode onto the screen buffer. This function looks exactly the same for all types. Due to
 	 * the constraints that no less than MAP_COLUMN_WIDTH pixels can be resolved at once via a
@@ -678,6 +701,7 @@ class SmallMapWindow : public Window
 				uint y = ScaleByZoomLower(yc, this->zoom);
 				uint32 val = 0;
 				if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
+					AntiAlias(x, y, xc, yc);
 					val = proc(TileXY(x, y));
 				}
 				uint8 *val8 = (uint8 *)&val;
