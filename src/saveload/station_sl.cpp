@@ -246,7 +246,7 @@ static void Load_STNS()
 					/* Don't construct the packet with station here, because that'll fail with old savegames */
 					CargoPacket *cp = new CargoPacket(ST_INDUSTRY, INVALID_SOURCE, _cargo_source_xy, GB(_waiting_acceptance, 0, 12), _cargo_days, _cargo_feeder_share);
 					/* In old versions, enroute_from used 0xFF as INVALID_STATION */
-					cp->source      = (CheckSavegameVersion(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
+					cp->source          = (CheckSavegameVersion(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
 					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
 					ge->cargo.Append(cp);
 				}

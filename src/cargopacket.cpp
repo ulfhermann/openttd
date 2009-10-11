@@ -41,6 +41,16 @@ CargoPacket::CargoPacket(StationID source, uint16 count, SourceType source_type,
 	}
 }
 
+CargoPacket::CargoPacket(SourceType source_type, SourceID source_id, TileIndex source_xy, uint16 count, byte days_in_transit, Money feeder_share) :
+		feeder_share(feeder_share),
+		count(count),
+		days_in_transit(days_in_transit),
+		source_id(source_id),
+		source_xy(source_xy)
+{
+	this->source_type = source_type;
+}
+
 void CargoPacket::Merge(CargoPacket *other)
 {
 	this->count += other->count;
@@ -58,6 +68,12 @@ void CargoPacket::Merge(CargoPacket *other)
 	VehicleCargoList::InvalidateAllFrom(src_type, src);
 	StationCargoList::InvalidateAllFrom(src_type, src);
 }
+
+/*
+ *
+ * Cargo list implementation
+ *
+ */
 
 /* static */ void VehicleCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
@@ -91,17 +107,28 @@ void CargoPacket::Merge(CargoPacket *other)
 	}
 }
 
-/*
- *
- * Cargo list implementation
- *
- */
 template<class LIST>
 CargoList<LIST>::~CargoList()
 {
 	for (Iterator it(this->packets.begin()); it != this->packets.end(); ++it) {
 		delete *it;
 	}
+}
+
+template<class LIST>
+void CargoList<LIST>::RemoveFromCache(const CargoPacket *cp)
+{
+	this->count                 -= cp->count;
+	this->feeder_share          -= cp->feeder_share;
+	this->cargo_days_in_transit -= cp->days_in_transit * cp->count;
+}
+
+template<class LIST>
+void CargoList<LIST>::AddToCache(const CargoPacket *cp)
+{
+	this->count                 += cp->count;
+	this->feeder_share          += cp->feeder_share;
+	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
 }
 
 void VehicleCargoList::AgeCargo()
@@ -130,22 +157,6 @@ void VehicleCargoList::AgeCargo()
 	packets.swap(new_packets);
 }
 
-template<class LIST>
-void CargoList<LIST>::RemoveFromCache(const CargoPacket *cp)
-{
-	this->count                 -= cp->count;
-	this->feeder_share          -= cp->feeder_share;
-	this->cargo_days_in_transit -= cp->days_in_transit * cp->count;
-}
-
-template<class LIST>
-void CargoList<LIST>::AddToCache(const CargoPacket *cp)
-{
-	this->count                 += cp->count;
-	this->feeder_share          += cp->feeder_share;
-	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
-}
-
 void StationCargoList::Append(CargoPacket *cp)
 {
 	assert(cp != NULL);
@@ -167,11 +178,11 @@ void VehicleCargoList::Append(CargoPacket *cp)
 {
 	AddToCache(cp);
 	Iterator it(packets.lower_bound(cp));
-	CargoPacket *in_list;
-	if (it != packets.end() && cp->SameSource(in_list = *it)) {
+	CargoPacket *icp;
+	if (it != packets.end() && cp->SameSource(icp = *it)) {
 		/* there aren't any vehicles able to carry that amount of cargo */
-		assert(cp->count + in_list->count <= CargoPacket::MAX_COUNT);
-		in_list->Merge(cp);
+		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
+		icp->Merge(cp);
 	} else {
 		/* The packet could not be merged with another one */
 		packets.insert(it, cp);

@@ -37,7 +37,6 @@ extern const struct SaveLoad *GetCargoPacketDesc();
  * Container for cargo from the same location and time
  */
 struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
-
 private:
 	/* Variables used by the CargoList cache. Only let them be modified via
 	 * the proper accessor functions and/or CargoList itself. */
@@ -52,11 +51,9 @@ private:
 	template<class LIST> friend class CargoList;
 	friend class VehicleCargoList;
 	friend class StationCargoList;
-
 	/** We want this to be saved, right? */
 	friend const struct SaveLoad *GetCargoPacketDesc();
 	friend bool AfterLoadGame();
-
 public:
 	/** Maximum number of items in a single cargo packet. */
 	static const uint16 MAX_COUNT = UINT16_MAX;
@@ -84,8 +81,7 @@ public:
 	 * @param days_in_transit number of days the cargo has been in transit
 	 * @param feeder_share    feeder share the packet has already accumulated
 	 */
-	CargoPacket(SourceType source_type, SourceID source_id, TileIndex source_xy, uint16 count, byte days_in_transit, Money feeder_share = 0) :
-		feeder_share(feeder_share), count(count), days_in_transit(days_in_transit), source_id(source_id), source_xy(source_xy) {source_type = source_type;}
+	CargoPacket(SourceType source_type, SourceID source_id, TileIndex source_xy, uint16 count, byte days_in_transit, Money feeder_share = 0);
 
 	/** Destroy the packet */
 	~CargoPacket() { }
@@ -185,6 +181,20 @@ protected:
 
 	LIST packets;               ///< The cargo packets in this list
 
+	/**
+	 * Update the cache to reflect adding of this packet.
+	 * Increases count, feeder share and days_in_transit
+	 * @param cp a new packet to be inserted
+	 */
+	void AddToCache(const CargoPacket *cp);
+
+	/**
+	 * Update the cached values to reflect the removal of this packet.
+	 * Decreases count, feeder share and days_in_transit
+	 * @param cp Packet to be removed from cache
+	 */
+	void RemoveFromCache(const CargoPacket *cp);
+
 public:
 	/** The stations, via GoodsEntry, have a CargoList. */
 	friend const struct SaveLoad *GetGoodsDesc();
@@ -250,27 +260,22 @@ public:
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
 
-	/**
-	 * Update the cache to reflect adding of this packet.
-	 * Increases count, feeder share and days_in_transit
-	 * @param cp a new packet to be inserted
-	 */
-	void AddToCache(const CargoPacket *cp);
 
 	/**
-	 * Update the cached values to reflect the removal of this packet.
-	 * Decreases count, feeder share and days_in_transit
-	 * @param cp Packet to be removed from cache
+	 * Appends the given cargo packet
+	 * @warning After appending this packet may not exist anymore!
+	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+	 * @param cp the cargo packet to add
+	 * @pre cp != NULL
 	 */
-	void RemoveFromCache(const CargoPacket *cp);
+	virtual void Append(CargoPacket *cp) = 0;
 
 	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
-	 * @param count the maximum amount of entities to be in the list after the command
+	 * @param max_remaining the maximum amount of entities to be in the list after the command
 	 */
-	void Truncate(uint count);
-
+	void Truncate(uint max_remaining);
 
 	/**
 	 * Moves the given amount of cargo to another list.
@@ -317,14 +322,7 @@ class VehicleCargoList : public CargoList<CargoPacketSet> {
 public:
 	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
 
-	/**
-	 * Appends the given cargo packet
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
-	 */
-	void Append(CargoPacket *cp);
+	virtual void Append(CargoPacket *cp);
 
 	/**
 	 * Ages the all cargo in this list
@@ -341,14 +339,7 @@ public:
  */
 class StationCargoList : public CargoList<CargoPacketList> {
 public:
-	/**
-	 * Appends the given cargo packet
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
-	 */
-	void Append(CargoPacket *cp);
+	virtual void Append(CargoPacket *cp);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 };
