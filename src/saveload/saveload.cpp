@@ -749,7 +749,6 @@ void SlArray(void *array, size_t length, VarType conv)
 static size_t ReferenceToInt(const void *obj, SLRefType rt);
 static void *IntToReference(size_t index, SLRefType rt);
 
-
 /**
  * Return the size in bytes of a container
  * @param list The container to find the size of
