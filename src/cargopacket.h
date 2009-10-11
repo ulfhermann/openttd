@@ -43,6 +43,8 @@ private:
 	Money feeder_share;     ///< Value of feeder pickup to be paid for on delivery of cargo
 	uint16 count;           ///< The amount of cargo in this packet
 	byte days_in_transit;   ///< Amount of days this packet has been in transit
+
+	/* Variables used for sorting cargo lists. These need to be private, too. */
 	SourceTypeByte source_type; ///< Type of #source_id
 	SourceID source_id;         ///< Index of source, INVALID_SOURCE if unknown/invalid
 	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain)
@@ -132,13 +134,14 @@ public:
 				this->source_id       == cp->source_id;
 	}
 
+	void Merge(CargoPacket *other);
+
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
+	/* read-only accessors for the private fields */
 	FORCEINLINE SourceTypeByte GetSourceType() const {return source_type;}
 	FORCEINLINE SourceID GetSourceID() const {return source_id;}
 	FORCEINLINE TileIndex GetSourceXY() const {return source_xy;}
-
-	void Merge(CargoPacket *other);
 };
 
 /**
@@ -156,6 +159,14 @@ public:
 
 extern const struct SaveLoad *GetGoodsDesc();
 extern const SaveLoad *GetVehicleDescription(VehicleType vt);
+
+class PacketCompare {
+public:
+	bool operator()(const CargoPacket *a, const CargoPacket *b) const;
+};
+
+typedef std::list<CargoPacket *> CargoPacketList;
+typedef std::set<CargoPacket *, PacketCompare> CargoPacketSet;
 
 /**
  * Simple collection class for a list of cargo packets
@@ -204,7 +215,7 @@ public:
 	/** Create the cargo list */
 	FORCEINLINE CargoList() { this->InvalidateCache(); }
 	/** And destroy it ("frees" all cargo packets) */
-	~CargoList();
+	virtual ~CargoList();
 
 	/**
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
@@ -307,16 +318,8 @@ public:
 	void InvalidateCache();
 };
 
-class PacketCompare {
-public:
-	bool operator()(const CargoPacket *a, const CargoPacket *b);
-};
-
-typedef std::list<CargoPacket *> CargoPacketList;
-typedef std::set<CargoPacket *, PacketCompare> CargoPacketSet;
-
 /**
- * unsorted CargoList
+ * CargoList sorted by SameSource
  */
 class VehicleCargoList : public CargoList<CargoPacketSet> {
 public:
@@ -329,13 +332,13 @@ public:
 	 */
 	void AgeCargo();
 
-	void SortAndCache();
-
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
+
+	void SortAndCache();
 };
 
 /**
- * CargoList sorted by next hop
+ * unsorted CargoList
  */
 class StationCargoList : public CargoList<CargoPacketList> {
 public:
