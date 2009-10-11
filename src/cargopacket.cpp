@@ -162,7 +162,7 @@ void StationCargoList::Append(CargoPacket *cp)
 	assert(cp != NULL);
 
 	this->AddToCache(cp);
-	if (count > 0) {
+	if (!packets.empty()) {
 		CargoPacket *icp = this->packets.back();
 		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
 			icp->Merge(cp);
