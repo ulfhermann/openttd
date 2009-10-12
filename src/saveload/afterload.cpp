@@ -1258,7 +1258,7 @@ bool AfterLoadGame()
 				GoodsEntry *ge = &st->goods[c];
 
 				const StationCargoPacketMap *packets = ge->cargo.Packets();
-				for (StationCargoPacketMap::const_iterator it = packets->begin(); it != packets->end(); it++) {
+				for (StationCargoList::ConstIterator it = packets->begin(); it != packets->end(); it++) {
 					CargoPacket *cp = *it;
 					cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : st->xy;
 					cp->loaded_at_xy = cp->source_xy;

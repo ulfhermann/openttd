@@ -825,7 +825,7 @@ struct StationViewWindow : public Window {
 
 				/* Add an entry for each distinct cargo source. */
 				const StationCargoPacketMap *packets = st->goods[i].cargo.Packets();
-				for (StationCargoPacketMap::const_iterator it = packets->begin(); it != packets->end(); it++) {
+				for (StationCargoList::ConstIterator it(packets->begin()); it != packets->end(); it++) {
 					const CargoPacket *cp = *it;
 					if (cp->source != station_id) {
 						bool added = false;

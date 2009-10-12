@@ -32,7 +32,7 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
 /** The actual pool with cargo packets */
 extern CargoPacketPool _cargopacket_pool;
 
-template <class LIST> class CargoList;
+template<class LIST> class CargoList;
 class StationCargoList;
 class VehicleCargoList;
 extern const struct SaveLoad *GetCargoPacketDesc();
@@ -49,7 +49,7 @@ private:
 	byte days_in_transit;   ///< Amount of days this packet has been in transit
 
 	/* Variables used for sorting cargo lists. These need to be private, too. */
-	SourceTypeByte source_type; ///< Type of \c source_id
+	SourceTypeByte source_type; ///< Type of #source_id
 	SourceID source_id;         ///< Index of source, INVALID_SOURCE if unknown/invalid
 	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain)
 
@@ -77,26 +77,17 @@ public:
 	 */
 	CargoPacket(StationID source = INVALID_STATION, uint16 count = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
 
-	/*
-	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
-	 * Used when loading or splitting packets.
-	 * @param cnt the number of cargo entities to put in this packet
-	 * @param dit number of days the cargo has been in transit
-	 * @param fs  feeder share the packet has already accumulated
-	 */
-	CargoPacket(SourceType st, SourceID sid, TileIndex sxy, uint16 cnt, byte dit, Money fs = 0) :
-		feeder_share(fs), count(cnt), days_in_transit(dit), source_id(sid), source_xy(sxy) {source_type = st;}
-
 	/**
 	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
 	 * Used when loading or splitting packets.
+	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
+	 * @param source_id       the actual source of the packet (for subsidies)
+	 * @param source_xy       the tile index of the source station
 	 * @param count           the number of cargo entities to put in this packet
 	 * @param days_in_transit number of days the cargo has been in transit
 	 * @param feeder_share    feeder share the packet has already accumulated
-	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
-	 * @param source_id       the actual source of the packet (for subsidies)
 	 */
-	CargoPacket(uint16 count, byte days_in_transit, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
+	CargoPacket(SourceType source_type, SourceID source_id, TileIndex source_xy, uint16 count, byte days_in_transit, Money feeder_share = 0);
 
 	/** Destroy the packet */
 	~CargoPacket() { }
@@ -146,7 +137,7 @@ public:
 				this->source_type     == cp->source_type &&
 				this->source_id       == cp->source_id;
 	}
-	
+
 	CargoPacket *Split(uint new_size);
 	void Merge(CargoPacket *other);
 
@@ -203,15 +194,14 @@ public:
 	bool operator()(const CargoPacket *a, const CargoPacket *b) const;
 };
 
-typedef std::list<CargoPacket *> CargoPacketList;
 typedef std::set<CargoPacket *, PacketCompare> CargoPacketSet;
 typedef MultiMap<StationID, CargoPacket *> StationCargoPacketMap;
 
 /**
  * Simple collection class for a list of cargo packets
  */
-template<class LIST>
-class CargoList {
+template<class LIST> class CargoList
+{
 public:
 	typedef typename LIST::iterator Iterator;
 	typedef typename LIST::const_iterator ConstIterator;
@@ -240,6 +230,9 @@ protected:
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
+	/** Make sure the cache is consistent with the actual packets */
+	void ValidateCache();
+
 	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 	uint MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
@@ -253,6 +246,9 @@ public:
 	FORCEINLINE CargoList() { this->InvalidateCache(); }
 	/** And destroy it ("frees" all cargo packets) */
 	virtual ~CargoList();
+
+	/** Invalidates the cached data and rebuild it */
+	void InvalidateCache();
 
 	/**
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
@@ -307,7 +303,7 @@ public:
 	{
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
-	
+
 	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
@@ -319,12 +315,6 @@ public:
 	 * send all packets to the specified station and update the flow stats at the GoodsEntry accordingly
 	 */
 	void UpdateFlows(StationID next, GoodsEntry * ge);
-
-	/** Invalidates the cached data and rebuild it */
-	void InvalidateCache();
-	
-	/** Make sure the cache is consistent with the actual packets */
-	void ValidateCache();
 };
 
 /**
