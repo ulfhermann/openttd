@@ -25,10 +25,18 @@ protected:
 
 public:
 	MultiMapIterator() : list_valid(false) {}
-	MultiMapIterator(MAP_ITER mi) : map_iter(mi), list_valid(false) {}
+	template<class NONCONST>
+	MultiMapIterator(NONCONST mi) : map_iter(mi), list_valid(false) {}
 	MultiMapIterator(MAP_ITER mi, LIST_ITER li) : list_iter(li), map_iter(mi)
 	{
 		list_valid = (list_iter != map_iter->second.begin());
+	}
+
+	template<class NONCONST>
+	Self &operator=(NONCONST mi)
+	{
+		map_iter = mi;
+		list_valid = false;
 	}
 
 	VALUE &operator*() const
