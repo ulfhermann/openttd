@@ -162,22 +162,11 @@ struct OskWindow : public Window {
 		}
 
 		switch (widget) {
-			case OSK_WIDGET_TEXT: {
-				/* Find the edit box of the parent window and give focus to that */
-				if (this->parent->widget != NULL) {
-					const Widget *wi = this->parent->GetWidgetOfType(WWT_EDITBOX);
-					if (wi != NULL) this->parent->focused_widget = wi;
-				}
-				if (this->parent->nested_root != NULL) {
-					const NWidgetCore *nwid = dynamic_cast<const NWidgetCore *>(this->parent->nested_root->GetWidgetOfType(WWT_EDITBOX));
-					if (nwid != NULL) this->parent->nested_focus = nwid;
-				}
-
-				/* Give focus to parent window */
+			case OSK_WIDGET_TEXT:
+				/* Return focus to the parent widget and window. */
+				this->parent->SetFocusedWidget(this->text_btn);
 				SetFocusedWindow(this->parent);
-
 				break;
-			}
 
 			case OSK_WIDGET_BACKSPACE:
 				if (DeleteTextBufferChar(&this->qs->text, WKC_BACKSPACE)) this->InvalidateParent();
@@ -546,4 +535,22 @@ void ShowOnScreenKeyboard(QueryStringBaseWindow *parent, int button, int cancel,
 
 	GetKeyboardLayout();
 	new OskWindow(&_osk_desc, parent, button, cancel, ok);
+}
+
+/**
+ * Updates the original text of the OSK so when the 'parent' changes the
+ * original and you press on cancel you won't get the 'old' original text
+ * but the updated one.
+ * @param parent window that just updated it's orignal text
+ * @param button widget number of parent's textbox to update
+ */
+void UpdateOSKOriginalText(const QueryStringBaseWindow *parent, int button)
+{
+	OskWindow *osk = dynamic_cast<OskWindow *>(FindWindowById(WC_OSK, 0));
+	if (osk == NULL || osk->qs != parent || osk->text_btn != button) return;
+
+	free(osk->orig_str_buf);
+	osk->orig_str_buf = strdup(osk->qs->text.buf);
+
+	osk->SetDirty();
 }
