@@ -182,14 +182,6 @@ public:
 extern const struct SaveLoad *GetGoodsDesc();
 extern const SaveLoad *GetVehicleDescription(VehicleType vt);
 
-class PacketCompare {
-public:
-	bool operator()(const CargoPacket *a, const CargoPacket *b) const;
-};
-
-typedef std::list<CargoPacket *> CargoPacketList;
-typedef std::set<CargoPacket *, PacketCompare> CargoPacketSet;
-
 /**
  * Simple collection class for a list of cargo packets
  * @tparam Tlist the actual container class to hold the cargo packets.
@@ -330,6 +322,13 @@ public:
 	void InvalidateCache();
 };
 
+class PacketCompare {
+public:
+	bool operator()(const CargoPacket *a, const CargoPacket *b) const;
+};
+
+typedef std::set<CargoPacket *, PacketCompare> CargoPacketSet;
+
 /**
  * CargoList sorted by the same principles as SameSource
  */
@@ -355,6 +354,8 @@ public:
 
 	void SortAndCache();
 };
+
+typedef std::list<CargoPacket *> CargoPacketList;
 
 /**
  * unsorted CargoList
