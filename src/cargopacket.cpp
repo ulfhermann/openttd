@@ -41,7 +41,7 @@ CargoPacket::CargoPacket(StationID source, uint16 count, SourceType source_type,
 	}
 }
 
-CargoPacket::CargoPacket(SourceType source_type, SourceID source_id, TileIndex source_xy, uint16 count, byte days_in_transit, Money feeder_share) :
+CargoPacket::CargoPacket(uint16 count, byte days_in_transit, Money feeder_share, TileIndex source_xy, SourceType source_type, SourceID source_id) :
 		feeder_share(feeder_share),
 		count(count),
 		days_in_transit(days_in_transit),
@@ -291,7 +291,7 @@ bool CargoList<Tlist>::MoveTo(Tother_list *dest, uint max_move, MoveToAction mta
 			Money fs = cp->feeder_share * max_move / static_cast<uint>(cp->count);
 			cp->feeder_share -= fs;
 
-			CargoPacket *cp_new = new CargoPacket(cp->source_type, cp->source_id, cp->source_xy, max_move, cp->days_in_transit, fs);
+			CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, fs, cp->source_xy, cp->source_type, cp->source_id);
 
 			cp_new->source          = cp->source;
 			cp_new->loaded_at_xy    = (mta == MTA_CARGO_LOAD) ? data : cp->loaded_at_xy;

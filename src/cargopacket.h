@@ -77,14 +77,14 @@ public:
 	/**
 	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
 	 * Used when loading or splitting packets.
-	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
-	 * @param source_id       the actual source of the packet (for subsidies)
-	 * @param source_xy       the tile index of the source station
 	 * @param count           the number of cargo entities to put in this packet
 	 * @param days_in_transit number of days the cargo has been in transit
 	 * @param feeder_share    feeder share the packet has already accumulated
+	 * @param source_xy       the tile index of the source station
+	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
+	 * @param source_id       the actual source of the packet (for subsidies)
 	 */
-	CargoPacket(SourceType source_type, SourceID source_id, TileIndex source_xy, uint16 count, byte days_in_transit, Money feeder_share = 0);
+	CargoPacket(uint16 count, byte days_in_transit, Money feeder_share, TileIndex source_xy, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
 
 	/** Destroy the packet */
 	~CargoPacket() { }
