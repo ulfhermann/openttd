@@ -754,13 +754,13 @@ static void *IntToReference(size_t index, SLRefType rt);
 
 /**
  * Return the size in bytes of a container
- * @tparam CONTAINER the type of the container; tested with std::list<void *> and std::set<void *>
+ * @tparam Tcontainer the type of the container; tested with std::list<void *> and std::set<void *>
  * @param list The container to find the size of
  */
-template<class CONTAINER>
+template <class Tcontainer>
 static inline size_t SlCalcContLen(const void *cont)
 {
-	CONTAINER *l = (CONTAINER *) cont;
+	Tcontainer *l = (Tcontainer *) cont;
 
 	int type_size = CheckSavegameVersion(69) ? 2 : 4;
 	/* Each entry is saved as type_size bytes, plus type_size bytes are used for the length
@@ -771,27 +771,27 @@ static inline size_t SlCalcContLen(const void *cont)
 
 /**
  * Save/Load a container.
- * @tparam CONTAINER the type of the container; tested with std::list<void *> and std::set<void *>
+ * @tparam Tcontainer the type of the container; tested with std::list<void *> and std::set<void *>
  * @param container The container being manipulated
  * @param conv SLRefType type of the container's contents (Vehicle *, Station *, etc)
  */
-template<class CONTAINER>
+template <class Tcontainer>
 void SlCont(void *container, SLRefType conv)
 {
 	/* Automatically calculate the length? */
 	if (_sl.need_length != NL_NONE) {
-		SlSetLength(SlCalcContLen<CONTAINER>(container));
+		SlSetLength(SlCalcContLen<Tcontainer>(container));
 		/* Determine length only? */
 		if (_sl.need_length == NL_CALCLENGTH) return;
 	}
 
-	CONTAINER *l = (CONTAINER *)container;
+	Tcontainer *l = (Tcontainer *)container;
 
 	switch (_sl.action) {
 		case SLA_SAVE: {
 			SlWriteUint32((uint32)l->size());
 
-			typename CONTAINER::iterator iter;
+			typename Tcontainer::iterator iter;
 			for (iter = l->begin(); iter != l->end(); ++iter) {
 				void *ptr = *iter;
 				SlWriteUint32((uint32)ReferenceToInt(ptr, conv));
@@ -809,10 +809,10 @@ void SlCont(void *container, SLRefType conv)
 			break;
 		}
 		case SLA_PTRS: {
-			CONTAINER temp = *l;
+			Tcontainer temp = *l;
 
 			l->clear();
-			typename CONTAINER::iterator iter;
+			typename Tcontainer::iterator iter;
 			for (iter = temp.begin(); iter != temp.end(); ++iter) {
 				void *ptr = IntToReference((size_t)*iter, conv);
 
