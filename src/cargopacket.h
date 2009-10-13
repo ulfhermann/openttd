@@ -65,14 +65,14 @@ public:
 	TileIndex loaded_at_xy;     ///< Location where this cargo has been loaded into the vehicle
 
 	/**
-	 * Creates a new cargo packet
+	 * Creates a new cargo packet at a defined source.
 	 * @param source      the source of the packet
 	 * @param count       the number of cargo entities to put in this packet
 	 * @param source_type the 'type' of source the packet comes from (for subsidies)
 	 * @param source_id   the actual source of the packet (for subsidies)
 	 * @pre count != 0 || source == INVALID_STATION
 	 */
-	CargoPacket(StationID source = INVALID_STATION, uint16 count = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
+	CargoPacket(StationID source, uint16 count, SourceType source_type, SourceID source_id);
 
 	/**
 	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
@@ -84,7 +84,7 @@ public:
 	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
 	 * @param source_id       the actual source of the packet (for subsidies)
 	 */
-	CargoPacket(uint16 count, byte days_in_transit, Money feeder_share, TileIndex source_xy, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
+	CargoPacket(uint16 count = 0, byte days_in_transit = 0, Money feeder_share = 0, TileIndex source_xy = INVALID_TILE, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
 
 	/** Destroy the packet */
 	~CargoPacket() { }
