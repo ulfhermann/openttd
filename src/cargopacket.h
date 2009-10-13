@@ -189,7 +189,9 @@ extern const SaveLoad *GetVehicleDescription(VehicleType vt);
 template <class Tlist> class CargoList
 {
 public:
+	/** iterator of the packet container */
 	typedef typename Tlist::iterator Iterator;
+	/** const iterator of the packet container */
 	typedef typename Tlist::const_iterator ConstIterator;
 
 	/** Kind of actions that could be done with packets on move */
