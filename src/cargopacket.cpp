@@ -51,6 +51,10 @@ CargoPacket::CargoPacket(SourceType source_type, SourceID source_id, TileIndex s
 	this->source_type = source_type;
 }
 
+/**
+ * Merge another packet into this one and delete the other one.
+ * @param other the other packet
+ */
 void CargoPacket::Merge(CargoPacket *other)
 {
 	this->count += other->count;
@@ -75,6 +79,12 @@ void CargoPacket::Merge(CargoPacket *other)
  *
  */
 
+/**
+ * Invalidates all cargo packets from the given source in all vehicles.
+ * @see CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
+ * @param src_type type of source
+ * @param src index of source
+ */
 /* static */ void VehicleCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
 	Vehicle *v;
@@ -93,6 +103,12 @@ void CargoPacket::Merge(CargoPacket *other)
 	}
 }
 
+/**
+ * Invalidates all cargo packets from the given source in all stations.
+ * @see CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
+ * @param src_type type of source
+ * @param src index of source
+ */
 /* static */ void StationCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
 	Station *st;
@@ -107,24 +123,24 @@ void CargoPacket::Merge(CargoPacket *other)
 	}
 }
 
-template<class LIST>
-CargoList<LIST>::~CargoList()
+template<class Tlist>
+CargoList<Tlist>::~CargoList()
 {
 	for (Iterator it(this->packets.begin()); it != this->packets.end(); ++it) {
 		delete *it;
 	}
 }
 
-template<class LIST>
-void CargoList<LIST>::RemoveFromCache(const CargoPacket *cp)
+template<class Tlist>
+void CargoList<Tlist>::RemoveFromCache(const CargoPacket *cp)
 {
 	this->count                 -= cp->count;
 	this->feeder_share          -= cp->feeder_share;
 	this->cargo_days_in_transit -= cp->days_in_transit * cp->count;
 }
 
-template<class LIST>
-void CargoList<LIST>::AddToCache(const CargoPacket *cp)
+template<class Tlist>
+void CargoList<Tlist>::AddToCache(const CargoPacket *cp)
 {
 	this->count                 += cp->count;
 	this->feeder_share          += cp->feeder_share;
@@ -190,8 +206,8 @@ void StationCargoList::Append(CargoPacket *cp)
 }
 
 
-template<class LIST>
-void CargoList<LIST>::Truncate(uint max_remaining)
+template<class Tlist>
+void CargoList<Tlist>::Truncate(uint max_remaining)
 {
 	for (Iterator it = packets.begin(); it != packets.end(); /* done during loop*/) {
 		CargoPacket *cp = *it;
@@ -217,9 +233,9 @@ void CargoList<LIST>::Truncate(uint max_remaining)
 	}
 }
 
-template<class LIST>
-template<class OTHERLIST>
-bool CargoList<LIST>::MoveTo(OTHERLIST *dest, uint max_move, MoveToAction mta, CargoPayment *payment, uint data)
+template<class Tlist>
+template<class Tother_list>
+bool CargoList<Tlist>::MoveTo(Tother_list *dest, uint max_move, MoveToAction mta, CargoPayment *payment, uint data)
 {
 	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
 	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
@@ -297,6 +313,14 @@ bool CargoList<LIST>::MoveTo(OTHERLIST *dest, uint max_move, MoveToAction mta, C
 	return it != packets.end();
 }
 
+/**
+ * Convert the packets from a std::set<void *> (which has been created by the saveload system)
+ * to a std::set<void *, PacketCompare>, then build the cache.
+ * This involves moving all packets to a temporary set, calling the destructor of the std::set<void *> manually,
+ * placement-creating a new set and swapping the temporary set in.
+ * It is assumed that sizeof(std::set<void *>) == sizeof(std::set<CargoPacket *, PacketCompare>), but if this doesn't
+ * hold we probably get problems with loading lists, too.
+ */
 void VehicleCargoList::SortAndCache() {
 	typedef std::set<CargoPacket *> UnsortedSet;
 	UnsortedSet &unsorted = (UnsortedSet &)packets;
@@ -320,8 +344,8 @@ void VehicleCargoList::SortAndCache() {
 	InvalidateCache();
 }
 
-template<class LIST>
-void CargoList<LIST>::InvalidateCache()
+template<class Tlist>
+void CargoList<Tlist>::InvalidateCache()
 {
 	this->count = 0;
 	this->feeder_share = 0;
@@ -332,18 +356,13 @@ void CargoList<LIST>::InvalidateCache()
 	}
 }
 
-template<class LIST>
-void CargoList<LIST>::ValidateCache() {
-	uint p_count = this->count;
-	Money p_feeder = this->feeder_share;
-	uint p_days = this->cargo_days_in_transit;
-
-	InvalidateCache();
-	assert(p_count == this->count);
-	assert(p_feeder == this->feeder_share);
-	assert(p_days == this->cargo_days_in_transit);
-}
-
+/**
+ * compares the given packets by the same principles as SameSource, but creates a strict weak ordering
+ * useful for std::set.
+ * @param a the first cargo packet to compare
+ * @param b the second cargo packet to compare
+ * @return if a < b according to source_xy, source_type, source_id and days_in_transit in this order.
+ */
 bool PacketCompare::operator()(const CargoPacket *a, const CargoPacket *b) const {
 	if (a->GetSourceXY() == b->GetSourceXY()) {
 		if(a->GetSourceType() == b->GetSourceType()) {

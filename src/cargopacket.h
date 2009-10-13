@@ -30,7 +30,7 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
 /** The actual pool with cargo packets */
 extern CargoPacketPool _cargopacket_pool;
 
-template<class LIST> class CargoList;
+template<class Tlist> class CargoList;
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -50,11 +50,12 @@ private:
 	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain)
 
 	/** The CargoList caches, thus needs to know about it. */
-	template<class LIST> friend class CargoList;
+	template<class Tlist> friend class CargoList;
 	friend class VehicleCargoList;
 	friend class StationCargoList;
 	/** We want this to be saved, right? */
 	friend const struct SaveLoad *GetCargoPacketDesc();
+	/** AfterLoadGame can change the sorting attributes in station cargo. */
 	friend bool AfterLoadGame();
 public:
 	/** Maximum number of items in a single cargo packet. */
@@ -119,6 +120,32 @@ public:
 		return this->days_in_transit;
 	}
 
+	/**
+	 * Gets the type of the cargo's source. industry, town or head quarter
+	 * @return the source type
+	 */
+	FORCEINLINE SourceTypeByte GetSourceType() const
+	{
+		return source_type;
+	}
+
+	/**
+	 * Gets the ID of the cargo's source. An IndustryID, TownID or CompanyID
+	 * @return the source ID
+	 */
+	FORCEINLINE SourceID GetSourceID() const
+	{
+		return source_id;
+	}
+
+	/**
+	 * Gets the coordinates of the cargo's source station
+	 * @return the source station's coordinates
+	 */
+	FORCEINLINE TileIndex GetSourceXY() const
+	{
+		return source_xy;
+	}
 
 	/**
 	 * Checks whether the cargo packet is from (exactly) the same source
@@ -137,11 +164,6 @@ public:
 	void Merge(CargoPacket *other);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
-
-	/* read-only accessors for the private fields */
-	FORCEINLINE SourceTypeByte GetSourceType() const {return source_type;}
-	FORCEINLINE SourceID GetSourceID() const {return source_id;}
-	FORCEINLINE TileIndex GetSourceXY() const {return source_xy;}
 };
 
 /**
@@ -170,12 +192,13 @@ typedef std::set<CargoPacket *, PacketCompare> CargoPacketSet;
 
 /**
  * Simple collection class for a list of cargo packets
+ * @tparam Tlist the actual container class to hold the cargo packets.
  */
-template<class LIST> class CargoList
+template <class Tlist> class CargoList
 {
 public:
-	typedef typename LIST::iterator Iterator;
-	typedef typename LIST::const_iterator ConstIterator;
+	typedef typename Tlist::iterator Iterator;
+	typedef typename Tlist::const_iterator ConstIterator;
 
 	/** Kind of actions that could be done with packets on move */
 	enum MoveToAction {
@@ -190,7 +213,7 @@ protected:
 	uint count;                 ///< Cache for the number of cargo entities
 	uint cargo_days_in_transit; ///< Cache for the sum of number of days in transit of each entity; comparable to man-hours
 
-	LIST packets;               ///< The cargo packets in this list
+	Tlist packets;               ///< The cargo packets in this list
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -221,7 +244,7 @@ public:
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
 	 * @return pointer to the packet list
 	 */
-	FORCEINLINE const LIST *Packets() const
+	FORCEINLINE const Tlist *Packets() const
 	{
 		return &this->packets;
 	}
@@ -271,16 +294,6 @@ public:
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
 
-
-	/**
-	 * Appends the given cargo packet
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
-	 */
-	virtual void Append(CargoPacket *cp) = 0;
-
 	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
@@ -295,6 +308,7 @@ public:
 	 *  - MTA_CARGO_LOAD:     sets the loaded_at_xy value of the moved packets
 	 *  - MTA_TRANSFER:       just move without side effects
 	 *  - MTA_UNLOAD:         just move without side effects
+	 * @tparam Tother_list type of the destination list. Tested with StationCargoList and VehicleCargoList.
 	 * @param dest  the destination to move the cargo to
 	 * @param count the amount of cargo entities to move
 	 * @param mta   how to handle the moving (side effects)
@@ -309,23 +323,28 @@ public:
 	 * @pre mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL
 	 * @return true if there are still packets that might be moved from this cargo list
 	 */
-	template<class OTHERLIST>
-	bool MoveTo(OTHERLIST *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
+	template <class Tother_list>
+	bool MoveTo(Tother_list *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
 
-	/** Make sure the cache is consistent with the actual packets */
-	void ValidateCache();
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
 
 /**
- * CargoList sorted by SameSource
+ * CargoList sorted by the same principles as SameSource
  */
 class VehicleCargoList : public CargoList<CargoPacketSet> {
 public:
 	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
 
-	virtual void Append(CargoPacket *cp);
+	/**
+	 * Inserts the given cargo packet into the set (not necessarily at the end).
+	 * @warning After appending this packet may not exist anymore!
+	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+	 * @param cp the cargo packet to add
+	 * @pre cp != NULL
+	 */
+	void Append(CargoPacket *cp);
 
 	/**
 	 * Ages the all cargo in this list
@@ -342,6 +361,14 @@ public:
  */
 class StationCargoList : public CargoList<CargoPacketList> {
 public:
+
+	/**
+	 * Appends the given cargo packet to the end of the list.
+	 * @warning After appending this packet may not exist anymore!
+	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+	 * @param cp the cargo packet to add
+	 * @pre cp != NULL
+	 */
 	virtual void Append(CargoPacket *cp);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
