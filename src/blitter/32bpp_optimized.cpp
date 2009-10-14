@@ -31,11 +31,11 @@ inline void Blitter_32bppOptimized::Draw(const Blitter::BlitterParams *bp, ZoomL
 
 	/* src_px : each line begins with uint32 n = 'number of bytes in this line',
 	 *          then n times is the Colour struct for this line */
-	const Colour *src_px = (const Colour *)(src->data + src->offset[zoom][0]);
+	const Colour *src_px = (const Colour *)(src->data + src->offset[zoom - ZOOM_LVL_BLITTER_MIN][0]);
 	/* src_n  : each line begins with uint32 n = 'number of bytes in this line',
 	 *          then interleaved stream of 'm' and 'n' channels. 'm' is remap,
 	 *          'n' is number of bytes with the same alpha channel class */
-	const uint8  *src_n  = (const uint8  *)(src->data + src->offset[zoom][1]);
+	const uint8  *src_n  = (const uint8  *)(src->data + src->offset[zoom - ZOOM_LVL_BLITTER_MIN][1]);
 
 	/* skip upper lines in src_px and src_n */
 	for (uint i = bp->skip_top; i != 0; i--) {
@@ -261,7 +261,7 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::Al
 	/* streams of pixels (a, r, g, b channels)
 	 *
 	 * stored in separated stream so data are always aligned on 4B boundary */
-	Colour *dst_px_orig[ZOOM_LVL_COUNT];
+	Colour *dst_px_orig[ZOOM_LVL_BLITTER_COUNT];
 
 	/* interleaved stream of 'm' channel and 'n' channel
 	 * 'n' is number if following pixels with the same alpha channel class
@@ -269,21 +269,22 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::Al
 	 *
 	 * it has to be stored in one stream so fewer registers are used -
 	 * x86 has problems with register allocation even with this solution */
-	uint8  *dst_n_orig[ZOOM_LVL_COUNT];
+	uint8  *dst_n_orig[ZOOM_LVL_BLITTER_COUNT];
 
 	/* lengths of streams */
-	uint32 lengths[ZOOM_LVL_COUNT][2];
+	uint32 lengths[ZOOM_LVL_BLITTER_COUNT][2];
 
-	for (ZoomLevel z = ZOOM_LVL_BEGIN; z < ZOOM_LVL_END; z++) {
-		const SpriteLoader::Sprite *src_orig = ResizeSprite(sprite, z);
+	ZoomLevel zoom_value = ZOOM_LVL_BLITTER_MIN;
+	for (int zoom_index = 0; zoom_index < ZOOM_LVL_BLITTER_COUNT; zoom_index++, zoom_value++) {
+		const SpriteLoader::Sprite *src_orig = ResizeSprite(sprite, zoom_value);
 
 		uint size = src_orig->height * src_orig->width;
 
-		dst_px_orig[z] = CallocT<Colour>(size + src_orig->height * 2);
-		dst_n_orig[z]  = CallocT<uint8>(size * 2 + src_orig->height * 4 * 2);
+		dst_px_orig[zoom_index] = CallocT<Colour>(size + src_orig->height * 2);
+		dst_n_orig[zoom_index]  = CallocT<uint8>(size * 2 + src_orig->height * 4 * 2);
 
-		uint32 *dst_px_ln = (uint32 *)dst_px_orig[z];
-		uint32 *dst_n_ln  = (uint32 *)dst_n_orig[z];
+		uint32 *dst_px_ln = (uint32 *)dst_px_orig[zoom_index];
+		uint32 *dst_n_ln  = (uint32 *)dst_n_orig[zoom_index];
 
 		const SpriteLoader::CommonPixel *src = (const SpriteLoader::CommonPixel *)src_orig->data;
 
@@ -350,15 +351,15 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::Al
 			dst_n_ln =  (uint32 *)dst_n;
 		}
 
-		lengths[z][0] = (byte *)dst_px_ln - (byte *)dst_px_orig[z]; // all are aligned to 4B boundary
-		lengths[z][1] = (byte *)dst_n_ln  - (byte *)dst_n_orig[z];
+		lengths[zoom_index][0] = (byte *)dst_px_ln - (byte *)dst_px_orig[zoom_index]; // all are aligned to 4B boundary
+		lengths[zoom_index][1] = (byte *)dst_n_ln  - (byte *)dst_n_orig[zoom_index];
 
 		free(src_orig->data);
 		free((void *)src_orig);
 	}
 
 	uint len = 0; // total length of data
-	for (ZoomLevel z = ZOOM_LVL_BEGIN; z < ZOOM_LVL_END; z++) {
+	for (int z = 0; z < ZOOM_LVL_BLITTER_COUNT; z++) {
 		len += lengths[z][0] + lengths[z][1];
 	}
 
@@ -371,8 +372,8 @@ Sprite *Blitter_32bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::Al
 
 	SpriteData *dst = (SpriteData *)dest_sprite->data;
 
-	for (ZoomLevel z = ZOOM_LVL_BEGIN; z < ZOOM_LVL_END; z++) {
-		dst->offset[z][0] = z == ZOOM_LVL_BEGIN ? 0 : lengths[z - 1][1] + dst->offset[z - 1][1];
+	for (int z = 0; z < ZOOM_LVL_BLITTER_COUNT; z++) {
+		dst->offset[z][0] = z == 0 ? 0 : lengths[z - 1][1] + dst->offset[z - 1][1];
 		dst->offset[z][1] = lengths[z][0] + dst->offset[z][0];
 
 		memcpy(dst->data + dst->offset[z][0], dst_px_orig[z], lengths[z][0]);
