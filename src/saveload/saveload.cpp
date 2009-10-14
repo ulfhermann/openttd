@@ -47,7 +47,12 @@
 
 #include "saveload_internal.h"
 
-extern const uint16 SAVEGAME_VERSION = 127;
+#include <list>
+#include <set>
+typedef std::list<void *> PtrList;
+typedef std::set<void *> PtrSet;
+
+extern const uint16 SAVEGAME_VERSION = CARGOMAP_SV;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -748,12 +753,14 @@ static void *IntToReference(size_t index, SLRefType rt);
 
 
 /**
- * Return the size in bytes of a list
- * @param list The std::list to find the size of
+ * Return the size in bytes of a container
+ * @tparam Tcontainer the type of the container; tested with std::list<void *> and std::set<void *>
+ * @param list The container to find the size of
  */
-static inline size_t SlCalcListLen(const void *list)
+template <class Tcontainer>
+static inline size_t SlCalcContLen(const void *cont)
 {
-	std::list<void *> *l = (std::list<void *> *) list;
+	Tcontainer *l = (Tcontainer *) cont;
 
 	int type_size = CheckSavegameVersion(69) ? 2 : 4;
 	/* Each entry is saved as type_size bytes, plus type_size bytes are used for the length
@@ -763,27 +770,28 @@ static inline size_t SlCalcListLen(const void *list)
 
 
 /**
- * Save/Load a list.
- * @param list The list being manipulated
- * @param conv SLRefType type of the list (Vehicle *, Station *, etc)
+ * Save/Load a container.
+ * @tparam Tcontainer the type of the container; tested with std::list<void *> and std::set<void *>
+ * @param container The container being manipulated
+ * @param conv SLRefType type of the container's contents (Vehicle *, Station *, etc)
  */
-void SlList(void *list, SLRefType conv)
+template <class Tcontainer>
+void SlCont(void *container, SLRefType conv)
 {
 	/* Automatically calculate the length? */
 	if (_sl.need_length != NL_NONE) {
-		SlSetLength(SlCalcListLen(list));
+		SlSetLength(SlCalcContLen<Tcontainer>(container));
 		/* Determine length only? */
 		if (_sl.need_length == NL_CALCLENGTH) return;
 	}
 
-	typedef std::list<void *> PtrList;
-	PtrList *l = (PtrList *)list;
+	Tcontainer *l = (Tcontainer *)container;
 
 	switch (_sl.action) {
 		case SLA_SAVE: {
 			SlWriteUint32((uint32)l->size());
 
-			PtrList::iterator iter;
+			typename Tcontainer::iterator iter;
 			for (iter = l->begin(); iter != l->end(); ++iter) {
 				void *ptr = *iter;
 				SlWriteUint32((uint32)ReferenceToInt(ptr, conv));
@@ -796,18 +804,22 @@ void SlList(void *list, SLRefType conv)
 			/* Load each reference and push to the end of the list */
 			for (size_t i = 0; i < length; i++) {
 				size_t data = CheckSavegameVersion(69) ? SlReadUint16() : SlReadUint32();
-				l->push_back((void *)data);
+				l->insert(l->end(), (void *)data);
 			}
 			break;
 		}
 		case SLA_PTRS: {
-			PtrList temp = *l;
+			Tcontainer temp = *l;
 
 			l->clear();
-			PtrList::iterator iter;
+			typename Tcontainer::iterator iter;
 			for (iter = temp.begin(); iter != temp.end(); ++iter) {
 				void *ptr = IntToReference((size_t)*iter, conv);
-				l->push_back(ptr);
+
+				/* if l is a list, this line is the same as l->push_back(ptr).
+				 * if it's a set l->end() is a hint which will be correct most times.
+				 */
+				l->insert(l->end(), ptr);
 			}
 			break;
 		}
@@ -865,6 +877,7 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad *sld)
 		case SL_ARR:
 		case SL_STR:
 		case SL_LST:
+		case SL_SET:
 			/* CONDITIONAL saveload types depend on the savegame version */
 			if (!SlIsObjectValidInSavegame(sld)) break;
 
@@ -873,7 +886,8 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad *sld)
 				case SL_REF: return SlCalcRefLen();
 				case SL_ARR: return SlCalcArrayLen(sld->length, sld->conv);
 				case SL_STR: return SlCalcStringLen(GetVariableAddress(object, sld), sld->length, sld->conv);
-				case SL_LST: return SlCalcListLen(GetVariableAddress(object, sld));
+				case SL_LST: return SlCalcContLen<PtrList>(GetVariableAddress(object, sld));
+				case SL_SET: return SlCalcContLen<PtrSet>(GetVariableAddress(object, sld));
 				default: NOT_REACHED();
 			}
 			break;
@@ -895,6 +909,7 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 		case SL_ARR:
 		case SL_STR:
 		case SL_LST:
+		case SL_SET:
 			/* CONDITIONAL saveload types depend on the savegame version */
 			if (!SlIsObjectValidInSavegame(sld)) return false;
 			if (SlSkipVariableOnLoad(sld)) return false;
@@ -917,7 +932,8 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 					break;
 				case SL_ARR: SlArray(ptr, sld->length, conv); break;
 				case SL_STR: SlString(ptr, sld->length, conv); break;
-				case SL_LST: SlList(ptr, (SLRefType)conv); break;
+				case SL_LST: SlCont<PtrList>(ptr, (SLRefType)conv); break;
+				case SL_SET: SlCont<PtrSet>(ptr, (SLRefType)conv); break;
 				default: NOT_REACHED();
 			}
 			break;
@@ -1445,6 +1461,7 @@ extern const ChunkHandler _group_chunk_handlers[];
 extern const ChunkHandler _cargopacket_chunk_handlers[];
 extern const ChunkHandler _autoreplace_chunk_handlers[];
 extern const ChunkHandler _labelmaps_chunk_handlers[];
+extern const ChunkHandler _linkgraph_chunk_handlers[];
 
 static const ChunkHandler * const _chunk_handlers[] = {
 	_gamelog_chunk_handlers,
@@ -1472,6 +1489,7 @@ static const ChunkHandler * const _chunk_handlers[] = {
 	_cargopacket_chunk_handlers,
 	_autoreplace_chunk_handlers,
 	_labelmaps_chunk_handlers,
+	_linkgraph_chunk_handlers,
 	NULL,
 };
 
