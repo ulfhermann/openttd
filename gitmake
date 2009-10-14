@@ -60,10 +60,6 @@ tileiter: master
 
 cargomap: flowmapping-core texteff multimap reservation
 
-reservation: master
-
-multimap: master
-
 warning-sign: demands
 
 push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap reservation warning-sign
