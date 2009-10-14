@@ -11,12 +11,20 @@ clean:
 	rm -f gitmake-origin
 
 %:
-	git checkout $@
+	git checkout master
+	git branch gitmake-tmp
+	git checkout gitmake-tmp
 	for branch in $(^F); do git merge $${branch}; done 
+	git checkout $@
+	git merge gitmake-tmp
+	git diff gitmake-tmp > patches/${@}_`cat gitmake-origin`.diff
+	git branch -D gitmake-tmp
 	make -j4
+	
 
 gitmake-origin: 
 	git fetch origin
+	git log origin | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
 	git diff --numstat origin/master master | grep -v .gitignore | grep -v gitmake && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 master: gitmake-origin
