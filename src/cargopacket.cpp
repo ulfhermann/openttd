@@ -79,7 +79,7 @@ void CargoPacket::Merge(CargoPacket *other)
  *
  */
 
-/* static */ template<class Tlist>
+template<class Tlist>
 CargoList<Tlist>::~CargoList()
 {
 	for (Iterator it(this->packets.begin()); it != this->packets.end(); ++it) {
@@ -106,7 +106,7 @@ void CargoList<Tlist>::AddToCache(const CargoPacket *cp)
 template<class Tlist>
 void CargoList<Tlist>::Truncate(uint max_remaining)
 {
-	for (Iterator it = packets.begin(); it != packets.end(); /* done during loop*/) {
+	for (Iterator it = this->packets.begin(); it != this->packets.end(); /* done during loop */) {
 		CargoPacket *cp = *it;
 		if (max_remaining == 0) {
 			/* Nothing should remain, just remove the packets. */
@@ -137,8 +137,8 @@ bool CargoList<Tlist>::MoveTo(Tother_list *dest, uint max_move, MoveToAction mta
 	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
 	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
 
-	Iterator it = packets.begin();
-	while (it != packets.end() && max_move > 0) {
+	Iterator it = this->packets.begin();
+	while (it != this->packets.end() && max_move > 0) {
 		CargoPacket *cp = *it;
 		if (cp->source == data && mta == MTA_FINAL_DELIVERY) {
 			/* Skip cargo that originated from this station. */
@@ -228,13 +228,54 @@ void CargoList<Tlist>::InvalidateCache()
  *
  */
 
+void VehicleCargoList::AgeCargo()
+{
+	CargoPacketSet new_packets;
+	CargoPacket *last = NULL;
+	for (Iterator it = this->packets.begin(); it != this->packets.end();) {
+		CargoPacket *cp = *it;
+		this->packets.erase(it++);
+		if (cp->days_in_transit != 0xFF) {
+			cp->days_in_transit++;
+			this->cargo_days_in_transit += cp->count;
+		} else if (last != NULL && last->SameSource(cp)) {
+			/* there are no vehicles with > MAX_COUNT capacity,
+			 * so we don't have to check for overflow here */
+			assert(last->count + cp->count <= CargoPacket::MAX_COUNT);
+			last->Merge(cp);
+			continue;
+		}
+
+		/* hinting makes this a constant time operation */
+		new_packets.insert(new_packets.end(), cp);
+		last = cp;
+	}
+	/* this is constant time, too */
+	this->packets.swap(new_packets);
+}
+
+void VehicleCargoList::Append(CargoPacket *cp)
+{
+	AddToCache(cp);
+	Iterator it(this->packets.lower_bound(cp));
+	CargoPacket *icp;
+	if (it != this->packets.end() && cp->SameSource(icp = *it)) {
+		/* there aren't any vehicles able to carry that amount of cargo */
+		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
+		icp->Merge(cp);
+	} else {
+		/* The packet could not be merged with another one */
+		this->packets.insert(it, cp);
+	}
+}
+
 /**
  * Invalidates all cargo packets from the given source in all vehicles.
  * @see CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
  * @param src_type type of source
  * @param src index of source
  */
-void VehicleCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
+/* static */ void VehicleCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
@@ -252,47 +293,6 @@ void VehicleCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 	}
 }
 
-/* static */ void VehicleCargoList::AgeCargo()
-{
-	CargoPacketSet new_packets;
-	CargoPacket *last = NULL;
-	for (Iterator it = packets.begin(); it != packets.end();) {
-		CargoPacket *cp = *it;
-		packets.erase(it++);
-		if (cp->days_in_transit != 0xFF) {
-			cp->days_in_transit++;
-			this->cargo_days_in_transit += cp->count;
-		} else if (last != NULL && last->SameSource(cp)) {
-			/* there are no vehicles with > MAX_COUNT capacity,
-			 * so we don't have to check for overflow here */
-			assert(last->count + cp->count <= CargoPacket::MAX_COUNT);
-			last->Merge(cp);
-			continue;
-		}
-
-		/* hinting makes this a constant time operation */
-		new_packets.insert(new_packets.end(), cp);
-		last = cp;
-	}
-	/* this is constant time, too */
-	packets.swap(new_packets);
-}
-
-void VehicleCargoList::Append(CargoPacket *cp)
-{
-	AddToCache(cp);
-	Iterator it(packets.lower_bound(cp));
-	CargoPacket *icp;
-	if (it != packets.end() && cp->SameSource(icp = *it)) {
-		/* there aren't any vehicles able to carry that amount of cargo */
-		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
-		icp->Merge(cp);
-	} else {
-		/* The packet could not be merged with another one */
-		packets.insert(it, cp);
-	}
-}
-
 /**
  * Convert the packets from a std::set<void *> (which has been created by the saveload system)
  * to a std::set<void *, PacketCompare>, then build the cache.
@@ -303,7 +303,7 @@ void VehicleCargoList::Append(CargoPacket *cp)
  */
 void VehicleCargoList::SortAndCache() {
 	typedef std::set<CargoPacket *> UnsortedSet;
-	UnsortedSet &unsorted = (UnsortedSet &)packets;
+	UnsortedSet &unsorted = (UnsortedSet &)this->packets;
 
 	CargoPacketSet new_packets;
 	for(UnsortedSet::iterator it = unsorted.begin(); it != unsorted.end(); ++it) {
@@ -317,9 +317,9 @@ void VehicleCargoList::SortAndCache() {
 	}
 
 	unsorted.~UnsortedSet(); // destroy whatever may be left
-	CargoPacketSet *my_packets = new (&packets) CargoPacketSet; // allocate a new set of the correct type there
+	CargoPacketSet *my_packets = new (&this->packets) CargoPacketSet; // allocate a new set of the correct type there
 	my_packets->swap(new_packets);
-	assert(*my_packets == packets);
+	assert(*my_packets == this->packets);
 
 	InvalidateCache();
 }
@@ -354,13 +354,30 @@ bool PacketCompare::operator()(const CargoPacket *a, const CargoPacket *b) const
  *
  */
 
+void StationCargoList::Append(CargoPacket *cp)
+{
+	assert(cp != NULL);
+
+	this->AddToCache(cp);
+	if (!this->packets.empty()) {
+		CargoPacket *icp = this->packets.back();
+		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
+			icp->Merge(cp);
+			return;
+		}
+	}
+
+	/* The packet could not be merged with another one */
+	this->packets.push_back(cp);
+}
+
 /**
  * Invalidates all cargo packets from the given source in all stations.
  * @see CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
  * @param src_type type of source
  * @param src index of source
  */
-void StationCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
+/* static */ void StationCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
 	Station *st;
 	FOR_ALL_STATIONS(st) {
@@ -372,23 +389,6 @@ void StationCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 			}
 		}
 	}
-}
-
-void StationCargoList::Append(CargoPacket *cp)
-{
-	assert(cp != NULL);
-
-	this->AddToCache(cp);
-	if (!packets.empty()) {
-		CargoPacket *icp = this->packets.back();
-		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
-			icp->Merge(cp);
-			return;
-		}
-	}
-
-	/* The packet could not be merged with another one */
-	this->packets.push_back(cp);
 }
 
 /*

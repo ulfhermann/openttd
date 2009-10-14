@@ -372,7 +372,7 @@ public:
 	 * @param cp the cargo packet to add
 	 * @pre cp != NULL
 	 */
-	virtual void Append(CargoPacket *cp);
+	void Append(CargoPacket *cp);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 };
