@@ -1039,7 +1039,7 @@ void CargoPayment::PayFinalDelivery(const CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->DaysInTransit(), this->owner, cp->source_type, cp->source_id);
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->GetSourceXY(), cp->DaysInTransit(), this->owner, cp->GetSourceType(), cp->GetSourceID());
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
@@ -1166,7 +1166,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
 				/* The cargo has reached it's final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo(NULL, amount_unloaded, CargoList::MTA_FINAL_DELIVERY, payment, last_visited);
+				remaining = v->cargo.MoveTo((StationCargoList *)NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
 
 				result |= 1;
 				accepted = true;
@@ -1178,7 +1178,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			 * station is still accepting the cargo in the vehicle. It doesn't
 			 * accept cargo that was loaded at the same station. */
 			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
-				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? CargoList::MTA_TRANSFER : CargoList::MTA_UNLOAD, payment);
+				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
 				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 
 				result |= 2;
@@ -1263,7 +1263,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			completely_emptied = false;
 			anything_loaded = true;
 
-			ge->cargo.MoveTo(&v->cargo, cap, CargoList::MTA_CARGO_LOAD, NULL, st->xy);
+			ge->cargo.MoveTo(&v->cargo, cap, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
 
 			st->time_since_load = 0;
 			st->last_vehicle_type = v->type;
