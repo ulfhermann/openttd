@@ -19,9 +19,9 @@ clean:
 	git checkout $@
 	git merge gitmake-tmp
 	git diff gitmake-tmp > patches/${@}_`cat gitmake-origin`.diff
-	git diff master > patches/trunk-${@}_`cat gitmake-origin`.diff
-	ln -s patches/${@}_`cat gitmake-origin`.diff patches/current/${@}.diff
-	ln -s patches/trunk-${@}_`cat gitmake-origin`.diff patches/current/trunk-${@}.diff
+	git diff master > patches/against_trunk/${@}_`cat gitmake-origin`.diff
+	ln -s ../${@}_`cat gitmake-origin`.diff patches/current/${@}.diff
+	ln -s ../against_trunk/${@}_`cat gitmake-origin`.diff patches/current/trunk-${@}.diff
 	git branch -D gitmake-tmp
 	make -j4
 	
