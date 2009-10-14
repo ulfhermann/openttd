@@ -19,7 +19,7 @@ clean:
 	make -j4
 	./make_diffs
 	
-gitmake-origin: 
+gitmake-origin:
 	git fetch origin
 	git log origin | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
 	cp gitmake-origin patches/current/TRUNK_VERSION.txt
