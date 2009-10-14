@@ -23,7 +23,6 @@ const SaveLoad *GetCargoPacketDesc()
 {
 	static const SaveLoad _cargopacket_desc[] = {
 		     SLE_VAR(CargoPacket, source,          SLE_UINT16),
-	         SLE_CONDVAR(CargoPacket, next,            SLE_UINT16, FLOWMAP_SV, SL_MAX_VERSION),
 		     SLE_VAR(CargoPacket, source_xy,       SLE_UINT32),
 		     SLE_VAR(CargoPacket, loaded_at_xy,    SLE_UINT32),
 		     SLE_VAR(CargoPacket, count,           SLE_UINT16),

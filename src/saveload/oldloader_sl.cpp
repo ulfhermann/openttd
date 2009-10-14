@@ -700,7 +700,7 @@ static bool LoadOldGood(LoadgameState *ls, int num)
 	if (GB(_waiting_acceptance, 0, 12) != 0) {
 		CargoPacket *cp = new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days);
 		cp->source = (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
-		ge->cargo.Append(cp);
+		ge->cargo.Append(INVALID_STATION, cp);
 	}
 
 	return true;
@@ -1330,13 +1330,9 @@ bool LoadOldVehicle(LoadgameState *ls, int num)
 		v->next = (Vehicle *)(size_t)_old_next_ptr;
 
 		if (_cargo_count != 0) {
-			CargoPacket *cp = new CargoPacket(_cargo_count, _cargo_days);
-			cp->next         = INVALID_STATION;
+			CargoPacket *cp = new CargoPacket(_cargo_count, _cargo_days, 0, (_cargo_source != 0xFF) ? Station::Get(_cargo_source)->xy : 0);
 			cp->source       = (_cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
-			cp->source_xy    = (cp->source != INVALID_STATION) ? Station::Get(cp->source)->xy : 0;
-			cp->loaded_at_xy = cp->source_xy;
-			cp->source_type  = ST_INDUSTRY;
-			cp->source_id    = INVALID_SOURCE;
+			cp->loaded_at_xy = cp->GetSourceXY();
 			v->cargo.Append(cp);
 		}
 	}
