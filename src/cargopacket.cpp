@@ -119,7 +119,7 @@ void CargoList<Tlist>::AddToCache(const CargoPacket *cp)
 template<class Tlist>
 void CargoList<Tlist>::Truncate(uint max_remaining)
 {
-	for (Iterator it = packets.begin(); it != packets.end(); /* done during loop*/) {
+	for (Iterator it = this->packets.begin(); it != this->packets.end(); /* done during loop */) {
 		CargoPacket *cp = *it;
 		if (max_remaining == 0) {
 			/* Nothing should remain, just remove the packets. */
@@ -342,6 +342,57 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 	return max_unload - remaining_unload;
 }
 
+void VehicleCargoList::AgeCargo()
+{
+	CargoPacketSet new_packets;
+	CargoPacket *last = NULL;
+	for (Iterator it = this->packets.begin(); it != this->packets.end();) {
+		CargoPacket *cp = *it;
+		this->packets.erase(it++);
+		if (cp->days_in_transit != 0xFF) {
+			cp->days_in_transit++;
+			this->cargo_days_in_transit += cp->count;
+		} else if (last != NULL && last->SameSource(cp)) {
+			/* there are no vehicles with > MAX_COUNT capacity,
+			 * so we don't have to check for overflow here */
+			assert(last->count + cp->count <= CargoPacket::MAX_COUNT);
+			last->Merge(cp);
+			continue;
+		}
+
+		/* hinting makes this a constant time operation */
+		new_packets.insert(new_packets.end(), cp);
+		last = cp;
+	}
+	/* this is constant time, too */
+	this->packets.swap(new_packets);
+}
+
+void VehicleCargoList::Append(CargoPacket *cp)
+{
+	AddToCache(cp);
+	Iterator it(this->packets.lower_bound(cp));
+	CargoPacket *icp;
+	if (it != this->packets.end() && cp->SameSource(icp = *it)) {
+		/* there aren't any vehicles able to carry that amount of cargo */
+		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
+		icp->Merge(cp);
+	} else {
+		/* The packet could not be merged with another one */
+		this->packets.insert(it, cp);
+	}
+}
+
+uint VehicleCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place)
+{
+	uint orig_cap = cap;
+	Iterator it = packets.begin();
+	while(it != packets.end() && cap > 0) {
+		cap -= MovePacket(dest, it, cap, load_place);
+	}
+	return orig_cap - cap;
+}
+
 /**
  * Invalidates all cargo packets from the given source in all vehicles.
  * @see CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
@@ -364,57 +415,6 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 			}
 		}
 	}
-}
-
-void VehicleCargoList::AgeCargo()
-{
-	CargoPacketSet new_packets;
-	CargoPacket *last = NULL;
-	for (Iterator it = packets.begin(); it != packets.end();) {
-		CargoPacket *cp = *it;
-		packets.erase(it++);
-		if (cp->days_in_transit != 0xFF) {
-			cp->days_in_transit++;
-			this->cargo_days_in_transit += cp->count;
-		} else if (last != NULL && last->SameSource(cp)) {
-			/* there are no vehicles with > MAX_COUNT capacity,
-			 * so we don't have to check for overflow here */
-			assert(last->count + cp->count <= CargoPacket::MAX_COUNT);
-			last->Merge(cp);
-			continue;
-		}
-
-		/* hinting makes this a constant time operation */
-		new_packets.insert(new_packets.end(), cp);
-		last = cp;
-	}
-	/* this is constant time, too */
-	packets.swap(new_packets);
-}
-
-void VehicleCargoList::Append(CargoPacket *cp)
-{
-	AddToCache(cp);
-	Iterator it(packets.lower_bound(cp));
-	CargoPacket *icp;
-	if (it != packets.end() && cp->SameSource(icp = *it)) {
-		/* there aren't any vehicles able to carry that amount of cargo */
-		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
-		icp->Merge(cp);
-	} else {
-		/* The packet could not be merged with another one */
-		packets.insert(it, cp);
-	}
-}
-
-uint VehicleCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place)
-{
-	uint orig_cap = cap;
-	Iterator it = packets.begin();
-	while(it != packets.end() && cap > 0) {
-		cap -= MovePacket(dest, it, cap, load_place);
-	}
-	return orig_cap - cap;
 }
 
 /**
@@ -492,6 +492,23 @@ bool PacketCompare::operator()(const CargoPacket *a, const CargoPacket *b) const
  *
  */
 
+void StationCargoList::Append(StationID next, CargoPacket *cp)
+{
+	assert(cp != NULL);
+	this->AddToCache(cp);
+	StationCargoPacketMap::List &list = this->packets[next];
+	if (list.empty()) {
+		list.push_back(cp);
+	} else {
+		CargoPacket *icp = list.back();
+		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
+			icp->Merge(cp);
+		} else {
+			list.push_back(cp);
+		}
+	}
+}
+
 uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place) {
 	uint orig_cap = cap;
 	while(begin != end && cap > 0) {
@@ -547,23 +564,6 @@ void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEn
 				CargoPacket *cp = *it;
 				if (cp->source_type == src_type && cp->source_id == src) cp->source_id = INVALID_SOURCE;
 			}
-		}
-	}
-}
-
-void StationCargoList::Append(StationID next, CargoPacket *cp)
-{
-	assert(cp != NULL);
-	this->AddToCache(cp);
-	StationCargoPacketMap::List &list = this->packets[next];
-	if (list.empty()) {
-		list.push_back(cp);
-	} else {
-		CargoPacket *icp = list.back();
-		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
-			icp->Merge(cp);
-		} else {
-			list.push_back(cp);
 		}
 	}
 }
