@@ -18,10 +18,7 @@ clean:
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
 	git merge gitmake-tmp
-	git diff gitmake-tmp > patches/${@}_`cat gitmake-origin`.diff
-	git diff master > patches/against_trunk/${@}_`cat gitmake-origin`.diff
-	ln -s ../${@}_`cat gitmake-origin`.diff patches/current/${@}.diff
-	ln -s ../against_trunk/${@}_`cat gitmake-origin`.diff patches/current/trunk-${@}.diff
+	./make_diffs
 	git branch -D gitmake-tmp
 	make -j4
 	
