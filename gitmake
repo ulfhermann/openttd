@@ -13,8 +13,8 @@ clean:
 
 %:
 	git checkout master
-	git branch gitmake-tmp
-	git checkout gitmake-tmp
+	git branch ${@}-tmp
+	git checkout ${@}-tmp
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
 	git merge ${@}-tmp
