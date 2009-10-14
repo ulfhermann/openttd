@@ -1002,22 +1002,26 @@ CargoPayment::~CargoPayment()
 
 	this->front->cargo_payment = NULL;
 
-	if (this->visual_profit == 0) return;
+	if (this->visual_profit == 0 && this->visual_transfer == 0) return;
 
 	CompanyID old_company = _current_company;
 	_current_company = this->front->owner;
 
 	SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->route_profit));
-	this->front->profit_this_year += this->visual_profit << 8;
+	this->front->profit_this_year += (this->visual_profit + this->visual_transfer) << 8;
 
+	int transfer_offset = 0;
 	if (this->route_profit != 0) {
 		if (IsLocalCompany() && !PlayVehicleSound(this->front, VSE_LOAD_UNLOAD)) {
 			SndPlayVehicleFx(SND_14_CASHTILL, this->front);
 		}
 
 		ShowCostOrIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, -this->visual_profit);
-	} else {
-		ShowFeederIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, this->visual_profit);
+		transfer_offset = 6;
+	}
+
+	if (this->visual_transfer != 0){
+		ShowFeederIncomeAnimation(this->front->x_pos + transfer_offset, this->front->y_pos + transfer_offset, this->front->z_pos, this->visual_transfer);
 	}
 
 	_current_company = old_company;
@@ -1057,7 +1061,7 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 		cp->DaysInTransit(),
 		this->ct);
 
-	this->visual_profit += profit; // accumulate transfer profits for whole vehicle
+	this->visual_transfer += profit; // accumulate transfer profits for whole vehicle
 	return profit; // account for the (virtual) profit already made for the cargo packet
 }
 
