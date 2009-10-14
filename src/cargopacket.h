@@ -232,7 +232,7 @@ public:
 	/** Create the cargo list */
 	FORCEINLINE CargoList() { this->InvalidateCache(); }
 	/** And destroy it ("frees" all cargo packets) */
-	virtual ~CargoList();
+	~CargoList();
 
 	/**
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
