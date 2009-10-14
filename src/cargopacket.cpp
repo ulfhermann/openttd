@@ -42,7 +42,7 @@ CargoPacket::CargoPacket(StationID source, uint16 count, SourceType source_type,
 	}
 }
 
-CargoPacket::CargoPacket(SourceType source_type, SourceID source_id, TileIndex source_xy, uint16 count, byte days_in_transit, Money feeder_share) :
+CargoPacket::CargoPacket(uint16 count, byte days_in_transit, Money feeder_share, TileIndex source_xy, SourceType source_type, SourceID source_id) :
 		feeder_share(feeder_share),
 		count(count),
 		days_in_transit(days_in_transit),
@@ -52,11 +52,27 @@ CargoPacket::CargoPacket(SourceType source_type, SourceID source_id, TileIndex s
 	this->source_type = source_type;
 }
 
+/**
+ * Merge another packet into this one and delete the other one.
+ * @param other the other packet
+ */
 void CargoPacket::Merge(CargoPacket *other)
 {
 	this->count += other->count;
 	this->feeder_share += other->feeder_share;
 	delete other;
+}
+
+CargoPacket * CargoPacket::Split(uint new_size) {
+	CargoPacket *cp_new = new CargoPacket(this->source, new_size, this->source_type, this->source_id);
+	Money fs = feeder_share * new_size / static_cast<uint>(count);
+	feeder_share -= fs;
+	cp_new->source_xy       = this->source_xy;
+	cp_new->loaded_at_xy    = this->loaded_at_xy;
+	cp_new->days_in_transit = this->days_in_transit;
+	cp_new->feeder_share    = fs;
+	this->count -= new_size;
+	return cp_new;
 }
 
 /**
@@ -76,136 +92,32 @@ void CargoPacket::Merge(CargoPacket *other)
  *
  */
 
-/* static */ void VehicleCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
-{
-	Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
-		CargoPacketSet &packets = v->cargo.packets;
-		for (Iterator it = packets.begin(); it != packets.end();) {
-			CargoPacket *p = *it;
-			if (p->source_type == src_type && p->source_id == src) {
-				packets.erase(it++);
-				p->source_id = INVALID_SOURCE;
-				packets.insert(p);
-			} else {
-				++it;
-			}
-		}
-	}
-}
-
-/* static */ void StationCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
-{
-	Station *st;
-	FOR_ALL_STATIONS(st) {
-		for (CargoID c = 0; c != NUM_CARGO; ++c) {
-			StationCargoPacketMap &packets = st->goods[c].cargo.packets;
-			for (Iterator it = packets.begin(); it != packets.end(); ++it) {
-				CargoPacket *cp = *it;
-				if (cp->source_type == src_type && cp->source_id == src) cp->source_id = INVALID_SOURCE;
-			}
-		}
-	}
-}
-
-template<class LIST>
-CargoList<LIST>::~CargoList()
+template<class Tlist>
+CargoList<Tlist>::~CargoList()
 {
 	for (Iterator it(this->packets.begin()); it != this->packets.end(); ++it) {
 		delete *it;
 	}
 }
 
-template<class LIST>
-void CargoList<LIST>::RemoveFromCache(const CargoPacket *cp)
+template<class Tlist>
+void CargoList<Tlist>::RemoveFromCache(const CargoPacket *cp)
 {
 	this->count                 -= cp->count;
 	this->feeder_share          -= cp->feeder_share;
 	this->cargo_days_in_transit -= cp->days_in_transit * cp->count;
 }
 
-template<class LIST>
-void CargoList<LIST>::AddToCache(const CargoPacket *cp)
+template<class Tlist>
+void CargoList<Tlist>::AddToCache(const CargoPacket *cp)
 {
 	this->count                 += cp->count;
 	this->feeder_share          += cp->feeder_share;
 	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
 }
 
-void VehicleCargoList::AgeCargo()
-{
-	CargoPacketSet new_packets;
-	CargoPacket *last = NULL;
-	for (Iterator it = packets.begin(); it != packets.end();) {
-		CargoPacket *cp = *it;
-		packets.erase(it++);
-		if (cp->days_in_transit != 0xFF) {
-			cp->days_in_transit++;
-			this->cargo_days_in_transit += cp->count;
-		} else if (last != NULL && last->SameSource(cp)) {
-			/* there are no vehicles with > MAX_COUNT capacity,
-			 * so we don't have to check for overflow here */
-			assert(last->count + cp->count <= CargoPacket::MAX_COUNT);
-			last->Merge(cp);
-			continue;
-		}
-
-		/* hinting makes this a constant time operation */
-		new_packets.insert(new_packets.end(), cp);
-		last = cp;
-	}
-	/* this is constant time, too */
-	packets.swap(new_packets);
-}
-
-void VehicleCargoList::Append(CargoPacket *cp)
-{
-	assert(cp != NULL);
-
-	this->AddToCache(cp);
-	Iterator it(packets.lower_bound(cp));
-	CargoPacket *icp;
-	if (it != this->packets.end() && cp->SameSource(icp = *it)) {
-		/* there aren't any vehicles able to carry that amount of cargo */
-		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
-		icp->Merge(cp);
-	} else {
-		/* The packet could not be merged with another one */
-		this->packets.insert(it, cp);
-	}
-}
-
-void StationCargoList::Append(StationID next, CargoPacket *cp)
-{
-	assert(cp != NULL);
-	this->AddToCache(cp);
-	StationCargoPacketMap::List &list = this->packets[next];
-	if (list.empty()) {
-		list.push_back(cp);
-	} else {
-		CargoPacket *icp = list.back();
-		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
-			icp->Merge(cp);
-		} else {
-			list.push_back(cp);
-		}
-	}
-}
-
-CargoPacket * CargoPacket::Split(uint new_size) {
-	CargoPacket *cp_new = new CargoPacket(this->source, new_size, this->source_type, this->source_id);
-	Money fs = feeder_share * new_size / static_cast<uint>(count);
-	feeder_share -= fs;
-	cp_new->source_xy       = this->source_xy;
-	cp_new->loaded_at_xy    = this->loaded_at_xy;
-	cp_new->days_in_transit = this->days_in_transit;
-	cp_new->feeder_share    = fs;
-	this->count -= new_size;
-	return cp_new;
-}
-
-template<class LIST>
-void CargoList<LIST>::Truncate(uint max_remaining)
+template<class Tlist>
+void CargoList<Tlist>::Truncate(uint max_remaining)
 {
 	for (Iterator it = packets.begin(); it != packets.end(); /* done during loop*/) {
 		CargoPacket *cp = *it;
@@ -230,6 +142,70 @@ void CargoList<LIST>::Truncate(uint max_remaining)
 		++it;
 	}
 }
+
+template<class Tlist>
+uint CargoList<Tlist>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place)
+{
+	CargoPacket *packet = MovePacket(it, cap, load_place);
+	uint ret = packet->count;
+	dest->Append(packet);
+	return ret;
+}
+
+template<class Tlist>
+uint CargoList<Tlist>::MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place)
+{
+	CargoPacket *packet = MovePacket(it, cap, load_place);
+	uint ret = packet->count;
+	dest->Append(next, packet);
+	return ret;
+}
+
+template<class Tlist>
+CargoPacket *CargoList<Tlist>::MovePacket(Iterator &it, uint cap, TileIndex load_place)
+{
+	CargoPacket *packet = *it;
+	/* load the packet if possible */
+	if (packet->count > cap) {
+		/* packet needs to be split */
+		packet = packet->Split(cap);
+		assert(packet->count == cap);
+		++it;
+	} else {
+		this->packets.erase(it++);
+	}
+	RemoveFromCache(packet);
+	if (load_place != INVALID_TILE) {
+		packet->loaded_at_xy = load_place;
+	}
+	return packet;
+}
+
+template<class Tlist>
+void CargoList<Tlist>::UpdateFlows(StationID next, GoodsEntry * ge) {
+	for(Iterator i = packets.begin(); i != packets.end(); ++i) {
+		CargoPacket * p = *i;
+		ge->UpdateFlowStats(p->source, p->count, next);
+	}
+}
+
+template<class Tlist>
+void CargoList<Tlist>::InvalidateCache()
+{
+	this->count = 0;
+	this->feeder_share = 0;
+	this->cargo_days_in_transit = 0;
+
+	for (ConstIterator it = this->packets.begin(); it != this->packets.end(); it++) {
+		this->AddToCache(*it);
+	}
+}
+
+/*
+ *
+ * Vehicle cargo list implementation
+ *
+ */
 
 uint VehicleCargoList::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
 	CargoPacket * p = *c;
@@ -366,42 +342,69 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 	return max_unload - remaining_unload;
 }
 
-template<class LIST>
-uint CargoList<LIST>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place)
+/**
+ * Invalidates all cargo packets from the given source in all vehicles.
+ * @see CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
+ * @param src_type type of source
+ * @param src index of source
+ */
+/* static */ void VehicleCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
 {
-	CargoPacket *packet = MovePacket(it, cap, load_place);
-	uint ret = packet->count;
-	dest->Append(packet);
-	return ret;
+	Vehicle *v;
+	FOR_ALL_VEHICLES(v) {
+		CargoPacketSet &packets = v->cargo.packets;
+		for (Iterator it = packets.begin(); it != packets.end();) {
+			CargoPacket *p = *it;
+			if (p->source_type == src_type && p->source_id == src) {
+				packets.erase(it++);
+				p->source_id = INVALID_SOURCE;
+				packets.insert(p);
+			} else {
+				++it;
+			}
+		}
+	}
 }
 
-template<class LIST>
-uint CargoList<LIST>::MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place)
+void VehicleCargoList::AgeCargo()
 {
-	CargoPacket *packet = MovePacket(it, cap, load_place);
-	uint ret = packet->count;
-	dest->Append(next, packet);
-	return ret;
+	CargoPacketSet new_packets;
+	CargoPacket *last = NULL;
+	for (Iterator it = packets.begin(); it != packets.end();) {
+		CargoPacket *cp = *it;
+		packets.erase(it++);
+		if (cp->days_in_transit != 0xFF) {
+			cp->days_in_transit++;
+			this->cargo_days_in_transit += cp->count;
+		} else if (last != NULL && last->SameSource(cp)) {
+			/* there are no vehicles with > MAX_COUNT capacity,
+			 * so we don't have to check for overflow here */
+			assert(last->count + cp->count <= CargoPacket::MAX_COUNT);
+			last->Merge(cp);
+			continue;
+		}
+
+		/* hinting makes this a constant time operation */
+		new_packets.insert(new_packets.end(), cp);
+		last = cp;
+	}
+	/* this is constant time, too */
+	packets.swap(new_packets);
 }
 
-template<class LIST>
-CargoPacket *CargoList<LIST>::MovePacket(Iterator &it, uint cap, TileIndex load_place)
+void VehicleCargoList::Append(CargoPacket *cp)
 {
-	CargoPacket *packet = *it;
-	/* load the packet if possible */
-	if (packet->count > cap) {
-		/* packet needs to be split */
-		packet = packet->Split(cap);
-		assert(packet->count == cap);
-		++it;
+	AddToCache(cp);
+	Iterator it(packets.lower_bound(cp));
+	CargoPacket *icp;
+	if (it != packets.end() && cp->SameSource(icp = *it)) {
+		/* there aren't any vehicles able to carry that amount of cargo */
+		assert(cp->count + icp->count <= CargoPacket::MAX_COUNT);
+		icp->Merge(cp);
 	} else {
-		this->packets.erase(it++);
+		/* The packet could not be merged with another one */
+		packets.insert(it, cp);
 	}
-	RemoveFromCache(packet);
-	if (load_place != INVALID_TILE) {
-		packet->loaded_at_xy = load_place;
-	}
-	return packet;
 }
 
 uint VehicleCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place)
@@ -414,6 +417,14 @@ uint VehicleCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex
 	return orig_cap - cap;
 }
 
+/**
+ * Convert the packets from a std::set<void *> (which has been created by the saveload system)
+ * to a std::set<void *, PacketCompare>, then build the cache.
+ * This involves moving all packets to a temporary set, calling the destructor of the std::set<void *> manually,
+ * placement-creating a new set and swapping the temporary set in.
+ * It is assumed that sizeof(std::set<void *>) == sizeof(std::set<CargoPacket *, PacketCompare>), but if this doesn't
+ * hold we probably get problems with loading lists, too.
+ */
 void VehicleCargoList::SortAndCache() {
 	typedef std::set<CargoPacket *> UnsortedSet;
 	UnsortedSet &unsorted = (UnsortedSet &)this->packets;
@@ -437,18 +448,6 @@ void VehicleCargoList::SortAndCache() {
 	InvalidateCache();
 }
 
-template<class LIST>
-void CargoList<LIST>::InvalidateCache()
-{
-	this->count = 0;
-	this->feeder_share = 0;
-	this->cargo_days_in_transit = 0;
-
-	for (ConstIterator it = this->packets.begin(); it != this->packets.end(); it++) {
-		this->AddToCache(*it);
-	}
-}
-
 UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags order_flags) :
 	dest(d), curr_station(curr), next_station(next), flags(UL_KEEP)
 {
@@ -463,29 +462,35 @@ UnloadDescription::UnloadDescription(GoodsEntry * d, StationID curr, StationID n
 	}
 }
 
-void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
-	std::pair<Iterator, Iterator> range(packets.equal_range(to));
-	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
-		CargoPacket * packet = *it;
-		packets.erase(it++);
-		StationID next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
-		assert(next != to);
-
-		/* legal, as insert doesn't invalidate iterators in the MultiMap, however
-		 * this might insert the packet between range.first and range.second (which might be end())
-		 * This is why we check for GetKey above to avoid infinite loops
-		 */
-		packets.Insert(next, packet);
+/**
+ * compares the given packets by the same principles as SameSource, but creates a strict weak ordering
+ * useful for std::set.
+ * @param a the first cargo packet to compare
+ * @param b the second cargo packet to compare
+ * @return if a < b according to source_xy, source_type, source_id and days_in_transit in this order.
+ */
+bool PacketCompare::operator()(const CargoPacket *a, const CargoPacket *b) const {
+	if (a->GetSourceXY() == b->GetSourceXY()) {
+		if(a->GetSourceType() == b->GetSourceType()) {
+			if (a->GetSourceID() == b->GetSourceID()) {
+				/* it's important to check this last to make the merging in AgeCargo work. */
+				return a->DaysInTransit() < b->DaysInTransit();
+			} else {
+				return a->GetSourceID() < b->GetSourceID();
+			}
+		} else {
+			return a->GetSourceType() < b->GetSourceType();
+		}
+	} else {
+		return a->GetSourceXY() < b->GetSourceXY();
 	}
 }
 
-template<class LIST>
-void CargoList<LIST>::UpdateFlows(StationID next, GoodsEntry * ge) {
-	for(Iterator i = packets.begin(); i != packets.end(); ++i) {
-		CargoPacket * p = *i;
-		ge->UpdateFlowStats(p->source, p->count, next);
-	}
-}
+/*
+ *
+ * Station cargo list implementation
+ *
+ */
 
 uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place) {
 	uint orig_cap = cap;
@@ -510,35 +515,61 @@ uint StationCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, StationID
 	return orig_cap - cap;
 }
 
-template<class LIST>
-void CargoList<LIST>::ValidateCache() {
-	uint p_count = this->count;
-	Money p_feeder = this->feeder_share;
-	uint p_days = this->cargo_days_in_transit;
+void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
+	std::pair<Iterator, Iterator> range(packets.equal_range(to));
+	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
+		CargoPacket * packet = *it;
+		packets.erase(it++);
+		StationID next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
+		assert(next != to);
 
-	InvalidateCache();
-	assert(p_count == this->count);
-	assert(p_feeder == this->feeder_share);
-	assert(p_days == this->cargo_days_in_transit);
-}
-
-bool PacketCompare::operator()(const CargoPacket *a, const CargoPacket *b) const {
-	if (a->GetSourceXY() == b->GetSourceXY()) {
-		if(a->GetSourceType() == b->GetSourceType()) {
-			if (a->GetSourceID() == b->GetSourceID()) {
-				/* it's important to check this last to make the merging in AgeCargo work. */
-				return a->DaysInTransit() < b->DaysInTransit();
-			} else {
-				return a->GetSourceID() < b->GetSourceID();
-			}
-		} else {
-			return a->GetSourceType() < b->GetSourceType();
-		}
-	} else {
-		return a->GetSourceXY() < b->GetSourceXY();
+		/* legal, as insert doesn't invalidate iterators in the MultiMap, however
+		 * this might insert the packet between range.first and range.second (which might be end())
+		 * This is why we check for GetKey above to avoid infinite loops
+		 */
+		packets.Insert(next, packet);
 	}
 }
 
-/* stupid workaround to make the compiler recognize the template instances */
+/**
+ * Invalidates all cargo packets from the given source in all stations.
+ * @see CargoPacket::InvalidateAllFrom(SourceType src_type, SourceID src)
+ * @param src_type type of source
+ * @param src index of source
+ */
+/* static */ void StationCargoList::InvalidateAllFrom(SourceType src_type, SourceID src)
+{
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID c = 0; c != NUM_CARGO; ++c) {
+			StationCargoPacketMap &packets = st->goods[c].cargo.packets;
+			for (Iterator it = packets.begin(); it != packets.end(); ++it) {
+				CargoPacket *cp = *it;
+				if (cp->source_type == src_type && cp->source_id == src) cp->source_id = INVALID_SOURCE;
+			}
+		}
+	}
+}
+
+void StationCargoList::Append(StationID next, CargoPacket *cp)
+{
+	assert(cp != NULL);
+	this->AddToCache(cp);
+	StationCargoPacketMap::List &list = this->packets[next];
+	if (list.empty()) {
+		list.push_back(cp);
+	} else {
+		CargoPacket *icp = list.back();
+		if (icp->SameSource(cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
+			icp->Merge(cp);
+		} else {
+			list.push_back(cp);
+		}
+	}
+}
+
+/*
+ * stupid workaround to make the compiler recognize the template instances
+ */
 template class CargoList<CargoPacketSet>;
 template class CargoList<StationCargoPacketMap>;

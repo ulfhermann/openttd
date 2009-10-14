@@ -49,6 +49,8 @@
 
 #include <list>
 #include <set>
+typedef std::list<void *> PtrList;
+typedef std::set<void *> PtrSet;
 
 extern const uint16 SAVEGAME_VERSION = CARGOMAP_SV;
 
@@ -749,14 +751,16 @@ void SlArray(void *array, size_t length, VarType conv)
 static size_t ReferenceToInt(const void *obj, SLRefType rt);
 static void *IntToReference(size_t index, SLRefType rt);
 
+
 /**
  * Return the size in bytes of a container
+ * @tparam Tcontainer the type of the container; tested with std::list<void *> and std::set<void *>
  * @param list The container to find the size of
  */
-template<class CONTAINER>
+template <class Tcontainer>
 static inline size_t SlCalcContLen(const void *cont)
 {
-	CONTAINER *l = (CONTAINER *) cont;
+	Tcontainer *l = (Tcontainer *) cont;
 
 	int type_size = CheckSavegameVersion(69) ? 2 : 4;
 	/* Each entry is saved as type_size bytes, plus type_size bytes are used for the length
@@ -764,46 +768,30 @@ static inline size_t SlCalcContLen(const void *cont)
 	return l->size() * type_size + type_size;
 }
 
-/**
- * Return the size in bytes of a list
- * @param list The std::list to find the size of
- */
-static inline size_t SlCalcListLen(const void *list)
-{
-	return SlCalcContLen<std::list<void *> >(list);
-}
-
-/**
- * Return the size in bytes of a set
- * @param list The std::set to find the size of
- */
-static inline size_t SlCalcSetLen(const void *set)
-{
-	return SlCalcContLen<std::set<void *> >(set);
-}
 
 /**
  * Save/Load a container.
+ * @tparam Tcontainer the type of the container; tested with std::list<void *> and std::set<void *>
  * @param container The container being manipulated
- * @param conv SLRefType type of the list (Vehicle *, Station *, etc)
+ * @param conv SLRefType type of the container's contents (Vehicle *, Station *, etc)
  */
-template<class CONTAINER>
+template <class Tcontainer>
 void SlCont(void *container, SLRefType conv)
 {
 	/* Automatically calculate the length? */
 	if (_sl.need_length != NL_NONE) {
-		SlSetLength(SlCalcContLen<CONTAINER>(container));
+		SlSetLength(SlCalcContLen<Tcontainer>(container));
 		/* Determine length only? */
 		if (_sl.need_length == NL_CALCLENGTH) return;
 	}
 
-	CONTAINER *l = (CONTAINER *)container;
+	Tcontainer *l = (Tcontainer *)container;
 
 	switch (_sl.action) {
 		case SLA_SAVE: {
 			SlWriteUint32((uint32)l->size());
 
-			typename CONTAINER::iterator iter;
+			typename Tcontainer::iterator iter;
 			for (iter = l->begin(); iter != l->end(); ++iter) {
 				void *ptr = *iter;
 				SlWriteUint32((uint32)ReferenceToInt(ptr, conv));
@@ -821,12 +809,16 @@ void SlCont(void *container, SLRefType conv)
 			break;
 		}
 		case SLA_PTRS: {
-			CONTAINER temp = *l;
+			Tcontainer temp = *l;
 
 			l->clear();
-			typename CONTAINER::iterator iter;
+			typename Tcontainer::iterator iter;
 			for (iter = temp.begin(); iter != temp.end(); ++iter) {
 				void *ptr = IntToReference((size_t)*iter, conv);
+
+				/* if l is a list, this line is the same as l->push_back(ptr).
+				 * if it's a set l->end() is a hint which will be correct most times.
+				 */
 				l->insert(l->end(), ptr);
 			}
 			break;
@@ -835,15 +827,6 @@ void SlCont(void *container, SLRefType conv)
 	}
 }
 
-void SlList(void *list, SLRefType conv)
-{
-	SlCont<std::list<void *> >(list, conv);
-}
-
-void SlSet(void *set, SLRefType conv)
-{
-	SlCont<std::set<void *> >(set, conv);
-}
 
 /** Are we going to save this object or not? */
 static inline bool SlIsObjectValidInSavegame(const SaveLoad *sld)
@@ -903,8 +886,8 @@ size_t SlCalcObjMemberLength(const void *object, const SaveLoad *sld)
 				case SL_REF: return SlCalcRefLen();
 				case SL_ARR: return SlCalcArrayLen(sld->length, sld->conv);
 				case SL_STR: return SlCalcStringLen(GetVariableAddress(object, sld), sld->length, sld->conv);
-				case SL_LST: return SlCalcListLen(GetVariableAddress(object, sld));
-				case SL_SET: return SlCalcSetLen(GetVariableAddress(object, sld));
+				case SL_LST: return SlCalcContLen<PtrList>(GetVariableAddress(object, sld));
+				case SL_SET: return SlCalcContLen<PtrSet>(GetVariableAddress(object, sld));
 				default: NOT_REACHED();
 			}
 			break;
@@ -949,8 +932,8 @@ bool SlObjectMember(void *ptr, const SaveLoad *sld)
 					break;
 				case SL_ARR: SlArray(ptr, sld->length, conv); break;
 				case SL_STR: SlString(ptr, sld->length, conv); break;
-				case SL_LST: SlList(ptr, (SLRefType)conv); break;
-				case SL_SET: SlSet(ptr, (SLRefType)conv); break;
+				case SL_LST: SlCont<PtrList>(ptr, (SLRefType)conv); break;
+				case SL_SET: SlCont<PtrSet>(ptr, (SLRefType)conv); break;
 				default: NOT_REACHED();
 			}
 			break;
