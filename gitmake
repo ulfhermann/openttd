@@ -9,14 +9,27 @@ check: clean gitmake-origin
 
 clean:
 	rm -f gitmake-origin
+	rm -f patches/current/*
 
 %:
-	git checkout $@
+	git checkout master
+	git branch gitmake-tmp
+	git checkout gitmake-tmp
 	for branch in $(^F); do git merge $${branch}; done 
+	git checkout $@
+	git merge gitmake-tmp
+	git diff gitmake-tmp > patches/${@}_`cat gitmake-origin`.diff
+	git diff master > patches/against_trunk/${@}_`cat gitmake-origin`.diff
+	ln -s ../${@}_`cat gitmake-origin`.diff patches/current/${@}.diff
+	ln -s ../against_trunk/${@}_`cat gitmake-origin`.diff patches/current/trunk-${@}.diff
+	git branch -D gitmake-tmp
 	make -j4
+	
 
 gitmake-origin: 
 	git fetch origin
+	git log origin | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
+	cp gitmake-origin patches/current/TRUNK_VERSION
 	git diff --numstat origin/master master | grep -v .gitignore | grep -v gitmake && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 master: gitmake-origin
@@ -62,3 +75,6 @@ cargoset: slset
 
 push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap slset cargoset
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
+	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
+	
+	
