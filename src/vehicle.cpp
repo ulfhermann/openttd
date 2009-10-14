@@ -480,10 +480,10 @@ void Vehicle::PreDestructor()
 	if (CleaningPool()) return;
 
 	if (Station::IsValidID(this->last_station_visited)) {
-		Station::Get(this->last_station_visited)->loading_vehicles.remove(this);
-
+		Station *st = Station::Get(this->last_station_visited);
+		st->loading_vehicles.remove(this);
 		HideFillingPercent(&this->fill_percent_te_id);
-
+		CancelReservation(st);
 		delete this->cargo_payment;
 	}
 
@@ -1419,7 +1419,7 @@ SpriteID GetVehiclePalette(const Vehicle *v)
 }
 
 
-void Vehicle::BeginLoading()
+void Vehicle::BeginLoading(StationID last_station_id)
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
@@ -1439,9 +1439,25 @@ void Vehicle::BeginLoading()
 		current_order.MakeLoading(false);
 	}
 
-	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
+	StationID curr_station_id = this->last_station_visited;
+	Station * curr_station = Station::Get(curr_station_id);
+	curr_station->loading_vehicles.push_back(this);
 
-	PrepareUnload(this);
+	StationID next_station_id = INVALID_STATION;
+	OrderList * orders = this->orders.list;
+	if (orders != NULL) {
+		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->type == VEH_ROAD || this->type == VEH_TRAIN);
+	}
+
+	if (last_station_id != INVALID_STATION && last_station_id != curr_station_id) {
+		IncreaseStats(Station::Get(last_station_id), this, curr_station_id);
+	}
+
+	if (next_station_id != INVALID_STATION && next_station_id != curr_station_id) {
+		IncreaseFrozen(curr_station, this, next_station_id);
+	}
+
+	PrepareUnload(curr_station, this, next_station_id);
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
@@ -1453,18 +1469,43 @@ void Vehicle::BeginLoading()
 	this->MarkDirty();
 }
 
+void Vehicle::CancelReservation(Station *st) {
+	for(Vehicle *v = this; v != NULL; v = v->next) {
+		VehicleCargoList &reserved = v->reserved;
+		if (reserved.Count() > 0) {
+			if (this->cargo_payment == NULL) {
+				this->cargo_payment = new CargoPayment(this);
+			}
+			DEBUG(misc, 1, "cancelling cargo reservation");
+			v->reserved.MoveToStation(&st->goods[v->cargo_type], v->reserved.Count(), OUFB_TRANSFER, INVALID_STATION, INVALID_STATION, this->cargo_payment);
+		}
+	}
+}
+
 void Vehicle::LeaveStation()
 {
 	assert(current_order.IsType(OT_LOADING));
-
+	Station *st = Station::Get(this->last_station_visited);
+	CancelReservation(st);
 	delete this->cargo_payment;
 
 	/* Only update the timetable if the vehicle was supposed to stop here. */
 	if (current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);
 
 	current_order.MakeLeaveStation();
-	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
+
+
+	OrderList * orders = this->orders.list;
+	if (orders != NULL) {
+		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->type == VEH_ROAD || this->type == VEH_TRAIN);
+		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
+			DecreaseFrozen(st, this, next_station_id);
+		}
+	} else {
+		DEBUG(misc, 0, "orders are NULL");
+		RecalcFrozen(st);
+	}
 
 	HideFillingPercent(&this->fill_percent_te_id);
 

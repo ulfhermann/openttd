@@ -54,4 +54,18 @@ bool IsStationTileElectrifiable(TileIndex tile);
 
 void UpdateAirportsNoise();
 
+void DecreaseFrozen(Station *st, const Vehicle *v, StationID next_station_id);
+
+void IncreaseFrozen(Station *st, const Vehicle *v, StationID next_station_id);
+
+void RecalcFrozen(Station * st);
+
+void RecalcFrozenIfLoading(const Vehicle * v);
+
+void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id);
+
+void UpdateFlows(Station * st, Vehicle *v, StationID next_station_id);
+
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
+
 #endif /* STATION_FUNC_H */
