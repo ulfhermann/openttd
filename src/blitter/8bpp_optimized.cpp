@@ -20,7 +20,7 @@ void Blitter_8bppOptimized::Draw(Blitter::BlitterParams *bp, BlitterMode mode, Z
 {
 	/* Find the offset of this zoom-level */
 	const SpriteData *sprite_src = (const SpriteData *)bp->sprite;
-	uint offset = sprite_src->offset[zoom];
+	uint offset = sprite_src->offset[zoom - ZOOM_LVL_BLITTER_MIN];
 
 	/* Find where to start reading in the source sprite */
 	const uint8 *src = sprite_src->data + offset;
@@ -113,7 +113,7 @@ Sprite *Blitter_8bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::All
 	/* Make memory for all zoom-levels */
 	uint memory = sizeof(SpriteData);
 
-	for (ZoomLevel i = ZOOM_LVL_BEGIN; i < ZOOM_LVL_END; i++) {
+	for (ZoomLevel i = ZOOM_LVL_BLITTER_MIN; i <= ZOOM_LVL_BLITTER_MAX; i++) {
 		memory += UnScaleByZoom(sprite->height, i) * UnScaleByZoom(sprite->width, i);
 	}
 
@@ -128,15 +128,16 @@ Sprite *Blitter_8bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::All
 	byte *dst = temp_dst->data;
 
 	/* Make the sprites per zoom-level */
-	for (ZoomLevel i = ZOOM_LVL_BEGIN; i < ZOOM_LVL_END; i++) {
+	ZoomLevel zoom_value = ZOOM_LVL_BLITTER_MIN;
+	for (int zoom_index = 0; zoom_index < ZOOM_LVL_BLITTER_COUNT; zoom_index++, zoom_value++) {
 		/* Store the index table */
 		uint offset = dst - temp_dst->data;
-		temp_dst->offset[i] = offset;
+		temp_dst->offset[zoom_index] = offset;
 
 		/* cache values, because compiler can't cache it */
-		int scaled_height = UnScaleByZoom(sprite->height, i);
-		int scaled_width  = UnScaleByZoom(sprite->width,  i);
-		int scaled_1      =   ScaleByZoom(1,              i);
+		int scaled_height = UnScaleByZoom(sprite->height, zoom_value);
+		int scaled_width  = UnScaleByZoom(sprite->width,  zoom_value);
+		int scaled_1      =   ScaleByZoom(1,              zoom_value);
 
 		for (int y = 0; y < scaled_height; y++) {
 			uint trans = 0;
@@ -145,7 +146,7 @@ Sprite *Blitter_8bppOptimized::Encode(SpriteLoader::Sprite *sprite, Blitter::All
 			byte *count_dst = NULL;
 
 			/* Store the scaled image */
-			const SpriteLoader::CommonPixel *src = &sprite->data[ScaleByZoom(y, i) * sprite->width];
+			const SpriteLoader::CommonPixel *src = &sprite->data[ScaleByZoom(y, zoom_value) * sprite->width];
 			const SpriteLoader::CommonPixel *src_end = &src[sprite->width];
 
 			for (int x = 0; x < scaled_width; x++) {
