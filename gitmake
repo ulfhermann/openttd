@@ -17,16 +17,16 @@ clean:
 	git checkout gitmake-tmp
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
-	git merge gitmake-tmp
+	git merge ${@}-tmp
 	./make_diffs
-	git branch -D gitmake-tmp
+	git branch -D ${@}-tmp
 	make -j4
 	
 
 gitmake-origin: 
 	git fetch origin
 	git log origin | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
-	cp gitmake-origin patches/current/TRUNK_VERSION
+	cp gitmake-origin patches/current/TRUNK_VERSION.txt
 	git diff --numstat origin/master master | grep -v .gitignore | grep -v gitmake && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 master: gitmake-origin
