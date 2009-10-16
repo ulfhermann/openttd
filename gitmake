@@ -16,9 +16,8 @@ clean:
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
 	git merge ${@}-tmp
-	./make_diffs
-	git branch -D ${@}-tmp
 	make -j4
+	./make_diffs
 	
 
 gitmake-origin: 
