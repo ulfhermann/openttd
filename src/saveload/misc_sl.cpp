@@ -51,7 +51,7 @@ void ResetViewportAfterLoadGame()
 	w->viewport->dest_scrollpos_y = _saved_scrollpos_y;
 
 	ViewPort *vp = w->viewport;
-	vp->zoom = min(_saved_scrollpos_zoom, ZOOM_LVL_MAX);
+	vp->zoom = (ZoomLevel)Clamp(_saved_scrollpos_zoom, ZOOM_LVL_BLITTER_MIN, ZOOM_LVL_BLITTER_MAX);
 	vp->virtual_width = ScaleByZoom(vp->width, vp->zoom);
 	vp->virtual_height = ScaleByZoom(vp->height, vp->zoom);
 
