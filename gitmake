@@ -12,8 +12,6 @@ clean:
 	rm -f patches/current/*
 
 %:
-	git checkout master
-	git branch ${@}-tmp
 	git checkout ${@}-tmp
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
