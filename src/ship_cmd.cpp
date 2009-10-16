@@ -646,13 +646,14 @@ static void ShipController(Ship *v)
 									return;
 								}
 							} else if (v->current_order.IsType(OT_GOTO_STATION)) {
+								StationID previous_station = v->last_station_visited;
 								v->last_station_visited = v->current_order.GetDestination();
 
 								/* Process station in the orderlist. */
 								Station *st = Station::Get(v->current_order.GetDestination());
 								if (st->facilities & FACIL_DOCK) { // ugly, ugly workaround for problem with ships able to drop off cargo at wrong stations
 									ShipArrivesAt(v, st);
-									v->BeginLoading();
+									v->BeginLoading(previous_station);
 								} else { // leave stations without docks right aways
 									v->current_order.MakeLeaveStation();
 									v->IncrementOrderIndex();

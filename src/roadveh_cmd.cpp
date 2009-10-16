@@ -1691,12 +1691,12 @@ again:
 			}
 
 			rs->SetEntranceBusy(false);
-
+			StationID previous_station = v->last_station_visited;
 			v->last_station_visited = st->index;
 
 			if (IsDriveThroughStopTile(v->tile) || (v->current_order.IsType(OT_GOTO_STATION) && v->current_order.GetDestination() == st->index)) {
 				RoadVehArrivesAt(v, st);
-				v->BeginLoading();
+				v->BeginLoading(previous_station);
 				return false;
 			}
 		} else {

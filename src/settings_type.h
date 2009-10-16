@@ -17,6 +17,7 @@
 #include "transport_type.h"
 #include "network/core/config.h"
 #include "company_type.h"
+#include "linkgraph/demand_settings.h"
 
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
@@ -330,6 +331,21 @@ struct EconomySettings {
 	bool   allow_town_roads;                 ///< towns are allowed to build roads (always allowed when generating world / in SE)
 	bool   station_noise_level;              ///< build new airports when the town noise level is still within accepted limits
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
+	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving average of capacities and usage of links
+	uint16 moving_average_length;            ///< length of the moving average for capacities and usage of links
+};
+
+struct LinkGraphSettings {
+	uint16 recalc_interval;                  ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	DistributionTypeByte demand_pax;         ///< demand calculation for passengers
+	DistributionTypeByte demand_mail;        ///< demand calculation for mail
+	DistributionTypeByte demand_express;     ///< demand calculation for express cargo class
+	DistributionTypeByte demand_armoured;    ///< demand calculation for armoured cargo class
+	DistributionTypeByte demand_default;     ///< demand calculation for all other goods
+	uint8 accuracy;                          ///< accuracy when calculating things on the link graph. low accuracy => low running time
+	uint8 demand_size;                       ///< influence of supply ("station size") on the demand function
+	uint8 demand_distance;                   ///< influence of distance between stations on the demand function
+	uint8 short_path_saturation;             ///< percentage up to which short paths are saturated before saturating most capacious paths
 };
 
 /** Settings related to stations. */
@@ -372,6 +388,7 @@ struct GameSettings {
 	OrderSettings        order;              ///< settings related to orders
 	VehicleSettings      vehicle;            ///< options for vehicles
 	EconomySettings      economy;            ///< settings to change the economy
+	LinkGraphSettings    linkgraph;          ///< settings for link graph calculations
 	StationSettings      station;            ///< settings related to station management
 	LocaleSettings       locale;             ///< settings related to used currency/unit system in the current game
 };

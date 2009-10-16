@@ -259,6 +259,8 @@ struct OrderList : OrderListPool::PoolItem<&_orderlist_pool> {
 private:
 	friend void AfterLoadVehicles(bool part_of_load); ///< For instantiating the shared vehicle chain
 	friend const struct SaveLoad *GetOrderListDescription(); ///< Saving and loading of order lists.
+	const Order * GetNext(const Order * curr) const;
+	const Order * GetNextStoppingOrder(const Order * next, uint hops, bool check_nonstop) const;
 
 	Order *first;                   ///< First order of the order list
 	VehicleOrderID num_orders;      ///< NOSAVE: How many orders there are in the list
@@ -307,6 +309,8 @@ public:
 	 * @return the last order of the chain.
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
+
+	StationID GetNextStoppingStation(VehicleOrderID curr, bool check_nonstop) const;
 
 	/**
 	 * Get number of orders in the order list.

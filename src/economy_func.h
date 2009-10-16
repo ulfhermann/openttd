@@ -21,6 +21,8 @@
 #include "industry_type.h"
 #include "company_type.h"
 #include "station_type.h"
+#include "cargopacket.h"
+#include <map>
 
 void ResetPriceBaseMultipliers();
 void SetPriceBaseMultiplier(uint price, byte factor);
@@ -37,7 +39,7 @@ void StartupIndustryDailyChanges(bool init_counter);
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, CargoID cargo_type);
 uint MoveGoodsToStation(TileIndex tile, int w, int h, CargoID type, uint amount, SourceType source_type, SourceID source_id);
 
-void PrepareUnload(Vehicle *front_v);
+void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_station_id);
 void LoadUnloadStation(Station *st);
 
 Money GetPriceByIndex(uint8 index);
