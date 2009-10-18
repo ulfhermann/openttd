@@ -480,10 +480,11 @@ void Vehicle::PreDestructor()
 	if (CleaningPool()) return;
 
 	if (Station::IsValidID(this->last_station_visited)) {
-		Station::Get(this->last_station_visited)->loading_vehicles.remove(this);
+		Station *st = Station::Get(this->last_station_visited);
+		st->loading_vehicles.remove(this);
 
 		HideFillingPercent(&this->fill_percent_te_id);
-
+		this->CancelReservation(st);
 		delete this->cargo_payment;
 	}
 
@@ -1453,6 +1454,21 @@ void Vehicle::BeginLoading()
 	this->MarkDirty();
 }
 
+/**
+ * return all reserved cargo packets to the station
+ * @param st the station where the reserved packets should go.
+ */
+void Vehicle::CancelReservation(Station *st) {
+	for(Vehicle *v = this; v != NULL; v = v->next) {
+		CargoList &reserved = v->reserved;
+		if (reserved.Count() > 0) {
+			DEBUG(misc, 1, "cancelling cargo reservation");
+			reserved.MoveTo(&st->goods[v->cargo_type].cargo, v->reserved.Count(), CargoList::MTA_UNLOAD, NULL);
+		}
+	}
+}
+
+
 void Vehicle::LeaveStation()
 {
 	assert(current_order.IsType(OT_LOADING));
@@ -1464,6 +1480,7 @@ void Vehicle::LeaveStation()
 
 	current_order.MakeLeaveStation();
 	Station *st = Station::Get(this->last_station_visited);
+	this->CancelReservation(st);
 	st->loading_vehicles.remove(this);
 
 	HideFillingPercent(&this->fill_percent_te_id);
