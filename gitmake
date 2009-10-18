@@ -59,7 +59,9 @@ diaglvl: tileiter
 
 tileiter: master
 
-cargomap: flowmapping-core texteff multimap cargoset
+cargomap: flowmapping-core texteff multimap cargoset reservation
+
+reservation: master
 
 multimap: master
 
@@ -67,7 +69,7 @@ slset: master
 
 cargoset: slset
 
-push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap slset cargoset
+push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap slset cargoset reservation
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
 	
