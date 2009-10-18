@@ -566,7 +566,7 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.UpdateCapacity(delta.y / 10);
+		this->vscroll.SetCapacity((this->widget[SLW_LIST].bottom - this->widget[SLW_LIST].top + 1) / 10);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -824,10 +824,10 @@ struct StationViewWindow : public Window {
 				this->cargo_rows[i] = (uint16)cargolist.size();
 
 				/* Add an entry for each distinct cargo source. */
-				const CargoList::List *packets = st->goods[i].cargo.Packets();
-				for (CargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
+				const StationCargoList::List *packets = st->goods[i].cargo.Packets();
+				for (StationCargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
 					const CargoPacket *cp = *it;
-					if (cp->source != station_id) {
+					if (cp->SourceStation() != station_id) {
 						bool added = false;
 
 						/* Enable the expand/hide button for this cargo type */
@@ -839,14 +839,14 @@ struct StationViewWindow : public Window {
 						/* Check if we already have this source in the list */
 						for (CargoDataList::iterator jt = cargolist.begin(); jt != cargolist.end(); jt++) {
 							CargoData *cd = &(*jt);
-							if (cd->cargo == i && cd->source == cp->source) {
+							if (cd->cargo == i && cd->source == cp->SourceStation()) {
 								cd->count += cp->Count();
 								added = true;
 								break;
 							}
 						}
 
-						if (!added) cargolist.push_back(CargoData(i, cp->source, cp->Count()));
+						if (!added) cargolist.push_back(CargoData(i, cp->SourceStation(), cp->Count()));
 					}
 				}
 			}
@@ -1052,7 +1052,7 @@ struct StationViewWindow : public Window {
 	virtual void OnResize(Point delta)
 	{
 		if (delta.x != 0) ResizeButtons(this, SVW_LOCATION, SVW_RENAME);
-		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+		this->vscroll.SetCapacity((this->widget[SVW_WAITING].bottom - this->widget[SVW_WAITING].top + 1) / this->resize.step_height);
 	}
 };
 
@@ -1296,7 +1296,7 @@ struct SelectStationWindow : Window {
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(JSW_PANEL)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
 
 	virtual void OnInvalidateData(int data)
