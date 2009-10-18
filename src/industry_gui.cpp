@@ -56,15 +56,43 @@ enum CargoSuffixType {
  * @param ind the industry (NULL if in fund window)
  * @param ind_type the industry type
  * @param indspec the industry spec
- * @return the string to display
+ * @param suffix is filled with the string to display
+ * @param suffix_last lastof(suffix)
  */
-static StringID GetCargoSuffix(uint cargo, CargoSuffixType cst, Industry *ind, IndustryType ind_type, const IndustrySpec *indspec)
+static void GetCargoSuffix(uint cargo, CargoSuffixType cst, const Industry *ind, IndustryType ind_type, const IndustrySpec *indspec, char *suffix, const char *suffix_last)
 {
+	suffix[0] = '\0';
 	if (HasBit(indspec->callback_mask, CBM_IND_CARGO_SUFFIX)) {
-		uint16 callback = GetIndustryCallback(CBID_INDUSTRY_CARGO_SUFFIX, 0, (cst << 8) | cargo, ind, ind_type, (cst != CST_FUND) ? ind->xy : INVALID_TILE);
-		if (GB(callback, 0, 8) != 0xFF) return GetGRFStringID(indspec->grf_prop.grffile->grfid, 0xD000 + callback);
+		uint16 callback = GetIndustryCallback(CBID_INDUSTRY_CARGO_SUFFIX, 0, (cst << 8) | cargo, const_cast<Industry *>(ind), ind_type, (cst != CST_FUND) ? ind->xy : INVALID_TILE);
+		if (GB(callback, 0, 8) != 0xFF) {
+			PrepareTextRefStackUsage(6);
+			GetString(suffix, GetGRFStringID(indspec->grf_prop.grffile->grfid, 0xD000 + callback), suffix_last);
+			StopTextRefStackUsage();
+		}
 	}
-	return STR_EMPTY;
+}
+
+/**
+ * Gets all strings to display after the cargos of industries (using callback 37)
+ * @param cb_offset The offset for the cargo used in cb37, 0 for accepted cargos, 3 for produced cargos
+ * @param cst the cargo suffix type (for which window is it requested). @see CargoSuffixType
+ * @param ind the industry (NULL if in fund window)
+ * @param ind_type the industry type
+ * @param indspec the industry spec
+ * @param cargos array with cargotypes. for CT_INVALID no suffix will be determined
+ * @param suffixes is filled with the suffixes
+ */
+template <typename TC, typename TS>
+static inline void GetAllCargoSuffixes(uint cb_offset, CargoSuffixType cst, const Industry *ind, IndustryType ind_type, const IndustrySpec *indspec, const TC &cargos, TS &suffixes)
+{
+	assert_tcompile(lengthof(cargos) <= lengthof(suffixes));
+	for (uint j = 0; j < lengthof(cargos); j++) {
+		if (cargos[j] != CT_INVALID) {
+			GetCargoSuffix(cb_offset + j, cst, ind, ind_type, indspec, suffixes[j], lastof(suffixes[j]));
+		} else {
+			suffixes[j][0] = '\0';
+		}
+	}
 }
 
 /** Names of the widgets of the dynamic place industries gui */
@@ -260,29 +288,32 @@ public:
 		}
 
 		/* Draw the accepted cargos, if any. Otherwhise, will print "Nothing" */
+		char cargo_suffix[3][512];
+		GetAllCargoSuffixes(0, CST_FUND, NULL, this->selected_type, indsp, indsp->accepts_cargo, cargo_suffix);
 		StringID str = STR_INDUSTRY_VIEW_REQUIRES_CARGO;
 		byte p = 0;
 		SetDParam(0, STR_JUST_NOTHING);
-		SetDParam(1, STR_EMPTY);
+		SetDParamStr(1, "");
 		for (byte j = 0; j < lengthof(indsp->accepts_cargo); j++) {
 			if (indsp->accepts_cargo[j] == CT_INVALID) continue;
 			if (p > 0) str++;
 			SetDParam(p++, CargoSpec::Get(indsp->accepts_cargo[j])->name);
-			SetDParam(p++, GetCargoSuffix(j, CST_FUND, NULL, this->selected_type, indsp));
+			SetDParamStr(p++, cargo_suffix[j]);
 		}
 		DrawString(x_str, right, y_str, str);
 		y_str += 11;
 
 		/* Draw the produced cargos, if any. Otherwhise, will print "Nothing" */
+		GetAllCargoSuffixes(3, CST_FUND, NULL, this->selected_type, indsp, indsp->produced_cargo, cargo_suffix);
 		str = STR_INDUSTRY_VIEW_PRODUCES_CARGO;
 		p = 0;
 		SetDParam(0, STR_JUST_NOTHING);
-		SetDParam(1, STR_EMPTY);
+		SetDParamStr(1, "");
 		for (byte j = 0; j < lengthof(indsp->produced_cargo); j++) {
 			if (indsp->produced_cargo[j] == CT_INVALID) continue;
 			if (p > 0) str++;
 			SetDParam(p++, CargoSpec::Get(indsp->produced_cargo[j])->name);
-			SetDParam(p++, GetCargoSuffix(j + 3, CST_FUND, NULL, this->selected_type, indsp));
+			SetDParamStr(p++, cargo_suffix[j]);
 		}
 		DrawString(x_str, right, y_str, str);
 		y_str += 11;
@@ -361,7 +392,7 @@ public:
 	virtual void OnResize(Point delta)
 	{
 		/* Adjust the number of items in the matrix depending of the rezise */
-		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+		this->vscroll.SetCapacity((this->widget[DPIW_MATRIX_WIDGET].bottom - this->widget[DPIW_MATRIX_WIDGET].top + 1) / this->resize.step_height);
 		this->widget[DPIW_MATRIX_WIDGET].data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
@@ -470,6 +501,7 @@ enum IndustryViewWidgets {
 	IVW_CAPTION,
 	IVW_STICKY,
 	IVW_BACKGROUND,
+	IVW_INSET,
 	IVW_VIEWPORT,
 	IVW_INFO,
 	IVW_GOTO,
@@ -483,45 +515,68 @@ class IndustryViewWindow : public Window
 	byte clicked_line;        ///< The line of the button that has been clicked
 	byte clicked_button;      ///< The button that has been clicked (to raise)
 	byte production_offset_y; ///< The offset of the production texts/buttons
+	int info_height;          ///< Height needed for the #IVW_INFO panel
 
 public:
-	IndustryViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
+	IndustryViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
 		this->flags4 |= WF_DISABLE_VP_SCROLL;
 		this->editbox_line = 0;
 		this->clicked_line = 0;
 		this->clicked_button = 0;
-		InitializeWindowViewport(this, 3, 17, 254, 86, Industry::Get(window_number)->xy + TileDiffXY(1, 1), ZOOM_LVL_INDUSTRY);
-		this->FindWindowPlacementAndResize(desc);
+		this->info_height = WD_FRAMERECT_TOP + 2 * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM + 1; // Info panel has at least two lines text.
+
+		this->InitNested(desc, window_number);
+		NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(IVW_VIEWPORT);
+		nvp->InitializeViewport(this, Industry::Get(window_number)->xy + TileDiffXY(1, 1), ZOOM_LVL_INDUSTRY);
 	}
 
 	virtual void OnPaint()
 	{
-		Industry *i = Industry::Get(this->window_number);
-		const IndustrySpec *ind = GetIndustrySpec(i->type);
-		int y = this->widget[IVW_INFO].top + 1;
-		bool first = true;
-		bool has_accept = false;
-
-		SetDParam(0, this->window_number);
 		this->DrawWidgets();
 
+		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(IVW_INFO);
+		uint expected = this->DrawInfo(nwi->pos_x, nwi->pos_x + nwi->current_x - 1, nwi->pos_y) - nwi->pos_y;
+		if (expected > nwi->current_y - 1) {
+			this->info_height = expected + 1;
+			this->ReInit();
+			return;
+		}
+	}
+
+	/** Draw the text in the #IVW_INFO panel.
+	 * @param left  Left edge of the panel.
+	 * @param right Right edge of the panel.
+	 * @param top   Top edge of the panel.
+	 * @return Expected position of the bottom edge of the panel.
+	 */
+	int DrawInfo(uint left, uint right, uint top)
+	{
+		Industry *i = Industry::Get(this->window_number);
+		const IndustrySpec *ind = GetIndustrySpec(i->type);
+		int y = top + WD_FRAMERECT_TOP;
+		bool first = true;
+		bool has_accept = false;
+		char cargo_suffix[3][512];
+
 		if (HasBit(ind->callback_mask, CBM_IND_PRODUCTION_CARGO_ARRIVAL) || HasBit(ind->callback_mask, CBM_IND_PRODUCTION_256_TICKS)) {
+			GetAllCargoSuffixes(0, CST_VIEW, i, i->type, ind, i->accepts_cargo, cargo_suffix);
 			for (byte j = 0; j < lengthof(i->accepts_cargo); j++) {
 				if (i->accepts_cargo[j] == CT_INVALID) continue;
 				has_accept = true;
 				if (first) {
-					DrawString(2, this->widget[IVW_INFO].right, y, STR_INDUSTRY_VIEW_WAITING_FOR_PROCESSING);
-					y += 10;
+					DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, y, STR_INDUSTRY_VIEW_WAITING_FOR_PROCESSING);
+					y += FONT_HEIGHT_NORMAL;
 					first = false;
 				}
 				SetDParam(0, i->accepts_cargo[j]);
 				SetDParam(1, i->incoming_cargo_waiting[j]);
-				SetDParam(2, GetCargoSuffix(j, CST_VIEW, i, i->type, ind));
-				DrawString(4, this->widget[IVW_INFO].right, y, STR_INDUSTRY_VIEW_WAITING_STOCKPILE_CARGO);
-				y += 10;
+				SetDParamStr(2, cargo_suffix[j]);
+				DrawString(left + WD_FRAMETEXT_LEFT, right - WD_FRAMERECT_RIGHT, y, STR_INDUSTRY_VIEW_WAITING_STOCKPILE_CARGO);
+				y += FONT_HEIGHT_NORMAL;
 			}
 		} else {
+			GetAllCargoSuffixes(0, CST_VIEW, i, i->type, ind, i->accepts_cargo, cargo_suffix);
 			StringID str = STR_INDUSTRY_VIEW_REQUIRES_CARGO;
 			byte p = 0;
 			for (byte j = 0; j < lengthof(i->accepts_cargo); j++) {
@@ -529,38 +584,38 @@ public:
 				has_accept = true;
 				if (p > 0) str++;
 				SetDParam(p++, CargoSpec::Get(i->accepts_cargo[j])->name);
-				SetDParam(p++, GetCargoSuffix(j, CST_VIEW, i, i->type, ind));
+				SetDParamStr(p++, cargo_suffix[j]);
 			}
 			if (has_accept) {
-				DrawString(2, this->widget[IVW_INFO].right, y, str);
-				y += 10;
+				DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, y, str);
+				y += FONT_HEIGHT_NORMAL;
 			}
 		}
 
+		GetAllCargoSuffixes(3, CST_VIEW, i, i->type, ind, i->produced_cargo, cargo_suffix);
 		first = true;
 		for (byte j = 0; j < lengthof(i->produced_cargo); j++) {
 			if (i->produced_cargo[j] == CT_INVALID) continue;
 			if (first) {
-				if (has_accept) y += 10;
-				DrawString(2, this->widget[IVW_INFO].right, y, STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE);
-				y += 10;
+				if (has_accept) y += WD_PAR_VSEP_WIDE;
+				DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, y, STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE);
+				y += FONT_HEIGHT_NORMAL;
 				this->production_offset_y = y;
 				first = false;
 			}
 
 			SetDParam(0, i->produced_cargo[j]);
 			SetDParam(1, i->last_month_production[j]);
-			SetDParam(2, GetCargoSuffix(j + 3, CST_VIEW, i, i->type, ind));
-
+			SetDParamStr(2, cargo_suffix[j]);
 			SetDParam(3, ToPercent8(i->last_month_pct_transported[j]));
-			uint x = 4 + (IsProductionAlterable(i) ? 30 : 0);
-			DrawString(x, this->widget[IVW_INFO].right, y, STR_INDUSTRY_VIEW_TRANSPORTED);
+			uint x = left + WD_FRAMETEXT_LEFT + (IsProductionAlterable(i) ? 30 : 0);
+			DrawString(x, right - WD_FRAMERECT_RIGHT, y, STR_INDUSTRY_VIEW_TRANSPORTED);
 			/* Let's put out those buttons.. */
 			if (IsProductionAlterable(i)) {
-				DrawArrowButtons(5, y, COLOUR_YELLOW, (this->clicked_line == j + 1) ? this->clicked_button : 0,
+				DrawArrowButtons(left + WD_FRAMETEXT_LEFT, y, COLOUR_YELLOW, (this->clicked_line == j + 1) ? this->clicked_button : 0,
 						!IsProductionMinimum(i, j), !IsProductionMaximum(i, j));
 			}
-			y += 10;
+			y += FONT_HEIGHT_NORMAL;
 		}
 
 		/* Get the extra message for the GUI */
@@ -569,27 +624,28 @@ public:
 			if (callback_res != CALLBACK_FAILED) {
 				StringID message = GetGRFStringID(ind->grf_prop.grffile->grfid, 0xD000 + callback_res);
 				if (message != STR_NULL && message != STR_UNDEFINED) {
-					const Widget *wi = &this->widget[IVW_INFO];
-					y += 10;
+					y += WD_PAR_VSEP_WIDE;
 
 					PrepareTextRefStackUsage(6);
 					/* Use all the available space left from where we stand up to the
 					 * end of the window. We ALSO enlarge the window if needed, so we
 					 * can 'go' wild with the bottom of the window. */
-					y = DrawStringMultiLine(wi->left + 2, wi->right - 2, y, UINT16_MAX, message);
+					y = DrawStringMultiLine(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, y, UINT16_MAX, message);
 					StopTextRefStackUsage();
 				}
 			}
 		}
+		return y + WD_FRAMERECT_BOTTOM;
+	}
 
-		if (y > this->widget[IVW_INFO].bottom) {
-			this->SetDirty();
-			ResizeWindowForWidget(this, IVW_INFO, 0, y - this->widget[IVW_INFO].top);
-			this->SetDirty();
-			return;
-		}
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget== IVW_CAPTION) SetDParam(0, this->window_number);
+	}
 
-		this->DrawViewport();
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		if (widget == IVW_INFO) size->height = this->info_height;
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -598,18 +654,19 @@ public:
 
 		switch (widget) {
 			case IVW_INFO: {
-				int line, x;
-
 				i = Industry::Get(this->window_number);
 
 				/* We should work if needed.. */
 				if (!IsProductionAlterable(i)) return;
-				x = pt.x;
-				line = (pt.y - this->production_offset_y) / 10;
+				uint x = pt.x;
+				int line = (pt.y - this->production_offset_y) / FONT_HEIGHT_NORMAL;
 				if (pt.y >= this->production_offset_y && IsInsideMM(line, 0, 2) && i->produced_cargo[line] != CT_INVALID) {
-					if (IsInsideMM(x, 5, 25) ) {
+					NWidgetCore *nwi = this->GetWidget<NWidgetCore>(widget);
+					uint left = nwi->pos_x + WD_FRAMETEXT_LEFT;
+					uint right = nwi->pos_x + nwi->current_x - 1 - WD_FRAMERECT_RIGHT;
+					if (IsInsideMM(x, left, left + 20) ) {
 						/* Clicked buttons, decrease or increase production */
-						if (x < 15) {
+						if (x < left + 10) {
 							if (IsProductionMinimum(i, line)) return;
 							i->production_rate[line] = max(i->production_rate[line] / 2, 0);
 						} else {
@@ -623,8 +680,8 @@ public:
 						this->SetDirty();
 						this->flags4 |= WF_TIMEOUT_BEGIN;
 						this->clicked_line = line + 1;
-						this->clicked_button = (x < 15 ? 1 : 2);
-					} else if (IsInsideMM(x, 34, 160)) {
+						this->clicked_button = (x < left + 10 ? 1 : 2);
+					} else if (IsInsideMM(x, left + 30, right)) {
 						/* clicked the text */
 						this->editbox_line = line;
 						SetDParam(0, i->production_rate[line] * 8);
@@ -653,13 +710,10 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		this->viewport->width            += delta.x;
-		this->viewport->height           += delta.y;
-		this->viewport->virtual_width    += delta.x;
-		this->viewport->virtual_height   += delta.y;
-		this->viewport->dest_scrollpos_x -= delta.x;
-		this->viewport->dest_scrollpos_y -= delta.y;
-		UpdateViewportPosition(this);
+		if (this->viewport != NULL) {
+			NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(IVW_VIEWPORT);
+			nvp->UpdateViewportCoordinates(this);
+		}
 	}
 
 	virtual void OnQueryTextFinished(char *str)
@@ -685,19 +739,6 @@ static void UpdateIndustryProduction(Industry *i)
 }
 
 /** Widget definition of the view industy gui */
-static const Widget _industry_view_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_CREAM,     0,    10,     0,    13, STR_BLACK_CROSS,           STR_TOOLTIP_CLOSE_WINDOW},           // IVW_CLOSEBOX
-{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_CREAM,    11,   247,     0,    13, STR_INDUSTRY_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // IVW_CAPTION
-{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_CREAM,   248,   259,     0,    13, 0x0,                       STR_TOOLTIP_STICKY},                  // IVW_STICKY
-{      WWT_PANEL,     RESIZE_RB,  COLOUR_CREAM,     0,   259,    14,   105, 0x0,                       STR_NULL},                           // IVW_BACKGROUND
-{      WWT_INSET,     RESIZE_RB,  COLOUR_CREAM,     2,   257,    16,   103, 0x0,                       STR_NULL},                           // IVW_VIEWPORT
-{      WWT_PANEL,    RESIZE_RTB,  COLOUR_CREAM,     0,   259,   106,   107, 0x0,                       STR_NULL},                           // IVW_INFO
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_CREAM,     0,   129,   108,   119, STR_BUTTON_LOCATION,       STR_INDUSTRY_VIEW_LOCATION_TOOLTIP}, // IVW_GOTO
-{      WWT_PANEL,    RESIZE_RTB,  COLOUR_CREAM,   130,   247,   108,   119, 0x0,                       STR_NULL},                           // IVW_SPACER
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_CREAM,   248,   259,   108,   119, 0x0,                       STR_TOOLTIP_RESIZE},                  // IVW_RESIZE
-{   WIDGETS_END},
-};
-
 static const NWidgetPart _nested_industry_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_CREAM, IVW_CLOSEBOX),
@@ -705,7 +746,8 @@ static const NWidgetPart _nested_industry_view_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_CREAM, IVW_STICKY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_CREAM, IVW_BACKGROUND),
-		NWidget(WWT_INSET, COLOUR_CREAM, IVW_VIEWPORT), SetMinimalSize(256, 88), SetPadding(2, 2, 2, 2), SetResize(1, 1),
+		NWidget(WWT_INSET, COLOUR_CREAM, IVW_INSET), SetPadding(2, 2, 2, 2),
+			NWidget(NWID_VIEWPORT, INVALID_COLOUR, IVW_VIEWPORT), SetMinimalSize(254, 86), SetFill(true, false), SetPadding(1, 1, 1, 1), SetResize(1, 1),
 		EndContainer(),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_CREAM, IVW_INFO), SetMinimalSize(260, 2), SetResize(1, 0),
@@ -722,7 +764,7 @@ static const WindowDesc _industry_view_desc(
 	WDP_AUTO, WDP_AUTO, 260, 120, 260, 120,
 	WC_INDUSTRY_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_industry_view_widgets, _nested_industry_view_widgets, lengthof(_nested_industry_view_widgets)
+	NULL, _nested_industry_view_widgets, lengthof(_nested_industry_view_widgets)
 );
 
 void ShowIndustryViewWindow(int industry)
@@ -901,12 +943,15 @@ protected:
 		/* Industry name */
 		SetDParam(p++, i->index);
 
+		char cargo_suffix[lengthof(i->produced_cargo)][512];
+		GetAllCargoSuffixes(3, CST_DIR, i, i->type, indsp, i->produced_cargo, cargo_suffix);
+
 		/* Industry productions */
 		for (byte j = 0; j < lengthof(i->produced_cargo); j++) {
 			if (i->produced_cargo[j] == CT_INVALID) continue;
 			SetDParam(p++, i->produced_cargo[j]);
 			SetDParam(p++, i->last_month_production[j]);
-			SetDParam(p++, GetCargoSuffix(j + 3, CST_DIR, const_cast<Industry *>(i), i->type, indsp));
+			SetDParamStr(p++, cargo_suffix[j]);
 		}
 
 		/* Transported productions */
@@ -1050,7 +1095,7 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(IDW_INDUSTRY_LIST)->current_y / this->resize.step_height);
 	}
 
 	virtual void OnHundredthTick()
