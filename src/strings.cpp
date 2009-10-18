@@ -1487,6 +1487,15 @@ void InitializeLanguagePacks()
 }
 
 /**
+ * Get the ISO language code of the currently loaded language.
+ * @return the ISO code.
+ */
+const char *GetCurrentLanguageIsoCode()
+{
+	return _langpack->isocode;
+}
+
+/**
  * Check whether the currently loaded language pack
  * uses characters that the currently loaded font
  * does not support. If this is the case an error
@@ -1535,7 +1544,7 @@ void CheckForMissingGlyphsInLoadedLanguagePack()
 							FreeTypeSettings backup;
 							memcpy(&backup, &_freetype, sizeof(backup));
 
-							bool success = SetFallbackFont(&_freetype, _langpack->isocode, _langpack->winlangid);
+							bool success = SetFallbackFont(&_freetype, _langpack->isocode, _langpack->winlangid, string);
 							if (success) {
 								UninitFreeType();
 								InitFreeType();
