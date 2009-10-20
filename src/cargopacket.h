@@ -19,7 +19,6 @@
 #include "cargo_type.h"
 #include "vehicle_type.h"
 #include <list>
-#include <set>
 
 /** Unique identifier for a single cargo packet. */
 typedef uint32 CargoPacketID;
@@ -30,7 +29,7 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
 /** The actual pool with cargo packets */
 extern CargoPacketPool _cargopacket_pool;
 
-template<class Tlist> class CargoList;
+template <class Tinst> class CargoList;
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -38,53 +37,54 @@ extern const struct SaveLoad *GetCargoPacketDesc();
  */
 struct CargoPacket : CargoPacketPool::PoolItem<&_cargopacket_pool> {
 private:
-	/* Variables used by the CargoList cache. Only let them be modified via
-	 * the proper accessor functions and/or CargoList itself. */
-	Money feeder_share;     ///< Value of feeder pickup to be paid for on delivery of cargo
-	uint16 count;           ///< The amount of cargo in this packet
-	byte days_in_transit;   ///< Amount of days this packet has been in transit
-
-	/* Variables used for sorting cargo lists. These need to be private, too. */
-	SourceTypeByte source_type; ///< Type of #source_id
+	Money feeder_share;         ///< Value of feeder pickup to be paid for on delivery of cargo
+	uint16 count;               ///< The amount of cargo in this packet
+	byte days_in_transit;       ///< Amount of days this packet has been in transit
+	SourceTypeByte source_type; ///< Type of \c source_id
 	SourceID source_id;         ///< Index of source, INVALID_SOURCE if unknown/invalid
+	StationID source;           ///< The station where the cargo came from first
 	TileIndex source_xy;        ///< The origin of the cargo (first station in feeder chain)
+	TileIndex loaded_at_xy;     ///< Location where this cargo has been loaded into the vehicle
 
 	/** The CargoList caches, thus needs to know about it. */
-	template<class Tlist> friend class CargoList;
+	template <class Tinst> friend class CargoList;
 	friend class VehicleCargoList;
 	friend class StationCargoList;
 	/** We want this to be saved, right? */
 	friend const struct SaveLoad *GetCargoPacketDesc();
-	/** AfterLoadGame can change the sorting attributes in station cargo. */
-	friend bool AfterLoadGame();
 public:
 	/** Maximum number of items in a single cargo packet. */
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
-	StationID source;           ///< The station where the cargo came from first
-	TileIndex loaded_at_xy;     ///< Location where this cargo has been loaded into the vehicle
+	/**
+	 * Create a new packet for savegame loading.
+	 */
+	CargoPacket();
 
 	/**
-	 * Creates a new cargo packet at a defined source.
-	 * @param source      the source of the packet
+	 * Creates a new cargo packet
+	 * @param source      the source station of the packet
+	 * @param source_xy   the source location of the packet
 	 * @param count       the number of cargo entities to put in this packet
 	 * @param source_type the 'type' of source the packet comes from (for subsidies)
 	 * @param source_id   the actual source of the packet (for subsidies)
-	 * @pre count != 0 || source == INVALID_STATION
+	 * @pre count != 0
 	 */
-	CargoPacket(StationID source, uint16 count, SourceType source_type, SourceID source_id);
+	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id);
 
 	/**
 	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
 	 * Used when loading or splitting packets.
 	 * @param count           the number of cargo entities to put in this packet
 	 * @param days_in_transit number of days the cargo has been in transit
+	 * @param source          the station the cargo was initially loaded
+	 * @param source_xy       the station location the cargo was initially loaded
+	 * @param loaded_at_xy    the location the cargo was loaded last
 	 * @param feeder_share    feeder share the packet has already accumulated
-	 * @param source_xy       the tile index of the source station
 	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
 	 * @param source_id       the actual source of the packet (for subsidies)
 	 */
-	CargoPacket(uint16 count = 0, byte days_in_transit = 0, Money feeder_share = 0, TileIndex source_xy = INVALID_TILE, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
+	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
 
 	/** Destroy the packet */
 	~CargoPacket() { }
@@ -124,46 +124,51 @@ public:
 	 * Gets the type of the cargo's source. industry, town or head quarter
 	 * @return the source type
 	 */
-	FORCEINLINE SourceTypeByte GetSourceType() const
+	FORCEINLINE SourceType SourceSubsidyType() const
 	{
-		return source_type;
+		return this->source_type;
 	}
 
 	/**
 	 * Gets the ID of the cargo's source. An IndustryID, TownID or CompanyID
 	 * @return the source ID
 	 */
-	FORCEINLINE SourceID GetSourceID() const
+	FORCEINLINE SourceID SourceSubsidyID() const
 	{
-		return source_id;
+		return this->source_id;
+	}
+
+	/**
+	 * Gets the ID of the station where the cargo was loaded for the first time
+	 * @return the StationID
+	 */
+	FORCEINLINE SourceID SourceStation() const
+	{
+		return this->source;
 	}
 
 	/**
 	 * Gets the coordinates of the cargo's source station
 	 * @return the source station's coordinates
 	 */
-	FORCEINLINE TileIndex GetSourceXY() const
+	FORCEINLINE TileIndex SourceStationXY() const
 	{
-		return source_xy;
+		return this->source_xy;
 	}
 
 	/**
-	 * Checks whether the cargo packet is from (exactly) the same source
-	 * in time and location.
-	 * @param cp the cargo packet to compare to
-	 * @return true if and only if days_in_transit and source_xy are equal
+	 * Gets the coordinates of the cargo's last loading station
+	 * @return the last loading station's coordinates
 	 */
-	FORCEINLINE bool SameSource(const CargoPacket *cp) const
+	FORCEINLINE TileIndex LoadedAtXY() const
 	{
-		return this->source_xy    == cp->source_xy &&
-				this->days_in_transit == cp->days_in_transit &&
-				this->source_type     == cp->source_type &&
-				this->source_id       == cp->source_id;
+		return this->loaded_at_xy;
 	}
 
-	void Merge(CargoPacket *other);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
+	static void InvalidateAllFrom(StationID sid);
+	static void AfterLoad();
 };
 
 /**
@@ -179,20 +184,19 @@ public:
  */
 #define FOR_ALL_CARGOPACKETS(var) FOR_ALL_CARGOPACKETS_FROM(var, 0)
 
-extern const struct SaveLoad *GetGoodsDesc();
-extern const SaveLoad *GetVehicleDescription(VehicleType vt);
-
 /**
  * Simple collection class for a list of cargo packets
- * @tparam Tlist the actual container class to hold the cargo packets.
+ * @tparam Tinst The actual instantation of this cargo list
  */
-template <class Tlist> class CargoList
-{
+template <class Tinst>
+class CargoList {
 public:
-	/** iterator of the packet container */
-	typedef typename Tlist::iterator Iterator;
-	/** const iterator of the packet container */
-	typedef typename Tlist::const_iterator ConstIterator;
+	/** Container with cargo packets */
+	typedef std::list<CargoPacket *> List;
+	/** The iterator for our container */
+	typedef List::iterator Iterator;
+	/** The const iterator for our container */
+	typedef List::const_iterator ConstIterator;
 
 	/** Kind of actions that could be done with packets on move */
 	enum MoveToAction {
@@ -203,11 +207,10 @@ public:
 	};
 
 protected:
-	Money feeder_share;         ///< Cache for the feeder share
 	uint count;                 ///< Cache for the number of cargo entities
 	uint cargo_days_in_transit; ///< Cache for the sum of number of days in transit of each entity; comparable to man-hours
 
-	Tlist packets;               ///< The cargo packets in this list
+	List packets;               ///< The cargo packets in this list
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -224,13 +227,8 @@ protected:
 	void RemoveFromCache(const CargoPacket *cp);
 
 public:
-	/** The stations, via GoodsEntry, have a CargoList. */
-	friend const struct SaveLoad *GetGoodsDesc();
-	/** The vehicles have a cargo list too. */
-	friend const SaveLoad *GetVehicleDescription(VehicleType vt);
-
 	/** Create the cargo list */
-	FORCEINLINE CargoList() { this->InvalidateCache(); }
+	CargoList() {}
 	/** And destroy it ("frees" all cargo packets) */
 	~CargoList();
 
@@ -238,7 +236,7 @@ public:
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
 	 * @return pointer to the packet list
 	 */
-	FORCEINLINE const Tlist *Packets() const
+	FORCEINLINE const List *Packets() const
 	{
 		return &this->packets;
 	}
@@ -262,21 +260,12 @@ public:
 	}
 
 	/**
-	 * Returns total sum of the feeder share for all packets
-	 * @return the before mentioned number
-	 */
-	FORCEINLINE Money FeederShare() const
-	{
-		return this->feeder_share;
-	}
-
-	/**
 	 * Returns source of the first cargo packet in this list
 	 * @return the before mentioned source
 	 */
 	FORCEINLINE StationID Source() const
 	{
-		return this->Empty() ? INVALID_STATION : (*(this->packets.begin()))->source;
+		return this->Empty() ? INVALID_STATION : this->packets.front()->source;
 	}
 
 	/**
@@ -287,6 +276,16 @@ public:
 	{
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
+
+
+	/**
+	 * Appends the given cargo packet
+	 * @warning After appending this packet may not exist anymore!
+	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+	 * @param cp the cargo packet to add
+	 * @pre cp != NULL
+	 */
+	void Append(CargoPacket *cp);
 
 	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
@@ -302,7 +301,6 @@ public:
 	 *  - MTA_CARGO_LOAD:     sets the loaded_at_xy value of the moved packets
 	 *  - MTA_TRANSFER:       just move without side effects
 	 *  - MTA_UNLOAD:         just move without side effects
-	 * @tparam Tother_list type of the destination list. Tested with StationCargoList and VehicleCargoList.
 	 * @param dest  the destination to move the cargo to
 	 * @param count the amount of cargo entities to move
 	 * @param mta   how to handle the moving (side effects)
@@ -317,64 +315,101 @@ public:
 	 * @pre mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL
 	 * @return true if there are still packets that might be moved from this cargo list
 	 */
-	template <class Tother_list>
-	bool MoveTo(Tother_list *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
+	template <class Tother_inst>
+	bool MoveTo(Tother_inst *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
 
-class PacketCompare {
-public:
-	bool operator()(const CargoPacket *a, const CargoPacket *b) const;
-};
-
-typedef std::set<CargoPacket *, PacketCompare> CargoPacketSet;
-
 /**
- * CargoList sorted by the same principles as SameSource
+ * CargoList that is used for vehicles.
  */
-class VehicleCargoList : public CargoList<CargoPacketSet> {
+class VehicleCargoList : public CargoList<VehicleCargoList> {
+protected:
+	/** The (direct) parent of this class */
+	typedef CargoList<VehicleCargoList> Parent;
+
+	Money feeder_share; ///< Cache for the feeder share
+
+	/**
+	 * Update the cache to reflect adding of this packet.
+	 * Increases count, feeder share and days_in_transit
+	 * @param cp a new packet to be inserted
+	 */
+	void AddToCache(const CargoPacket *cp);
+
+	/**
+	 * Update the cached values to reflect the removal of this packet.
+	 * Decreases count, feeder share and days_in_transit
+	 * @param cp Packet to be removed from cache
+	 */
+	void RemoveFromCache(const CargoPacket *cp);
+
 public:
+	/** The super class ought to know what it's doing */
+	friend class CargoList<VehicleCargoList>;
+	/** The vehicles have a cargo list (and we want that saved). */
 	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
 
 	/**
-	 * Inserts the given cargo packet into the set (not necessarily at the end).
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
+	 * Returns total sum of the feeder share for all packets
+	 * @return the before mentioned number
 	 */
-	void Append(CargoPacket *cp);
+	FORCEINLINE Money FeederShare() const
+	{
+		return this->feeder_share;
+	}
 
 	/**
 	 * Ages the all cargo in this list
 	 */
 	void AgeCargo();
 
-	static void InvalidateAllFrom(SourceType src_type, SourceID src);
-
-	void SortAndCache();
-};
-
-typedef std::list<CargoPacket *> CargoPacketList;
-
-/**
- * unsorted CargoList
- */
-class StationCargoList : public CargoList<CargoPacketList> {
-public:
+	/** Invalidates the cached data and rebuild it */
+	void InvalidateCache();
 
 	/**
-	 * Appends the given cargo packet to the end of the list.
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
+	 * Are two the two CargoPackets mergeable in the context of
+	 * a list of CargoPackets for a Vehicle?
+	 * @param cp1 the first CargoPacket
+	 * @param cp2 the second CargoPacket
+	 * @return true if they are mergeable
 	 */
-	void Append(CargoPacket *cp);
+	static bool AreMergable(const CargoPacket *cp1, const CargoPacket *cp2)
+	{
+		return cp1->source_xy    == cp2->source_xy &&
+				cp1->days_in_transit == cp2->days_in_transit &&
+				cp1->source_type     == cp2->source_type &&
+				cp1->source_id       == cp2->source_id &&
+				cp1->loaded_at_xy    == cp2->loaded_at_xy;
+	}
+};
 
-	static void InvalidateAllFrom(SourceType src_type, SourceID src);
+/**
+ * CargoList that is used for stations.
+ */
+class StationCargoList : public CargoList<StationCargoList> {
+public:
+	/** The super class ought to know what it's doing */
+	friend class CargoList<StationCargoList>;
+	/** The stations, via GoodsEntry, have a CargoList. */
+	friend const struct SaveLoad *GetGoodsDesc();
+
+	/**
+	 * Are two the two CargoPackets mergeable in the context of
+	 * a list of CargoPackets for a Vehicle?
+	 * @param cp1 the first CargoPacket
+	 * @param cp2 the second CargoPacket
+	 * @return true if they are mergeable
+	 */
+	static bool AreMergable(const CargoPacket *cp1, const CargoPacket *cp2)
+	{
+		return cp1->source_xy    == cp2->source_xy &&
+				cp1->days_in_transit == cp2->days_in_transit &&
+				cp1->source_type     == cp2->source_type &&
+				cp1->source_id       == cp2->source_id;
+	}
 };
 
 #endif /* CARGOPACKET_H */

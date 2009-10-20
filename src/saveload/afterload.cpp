@@ -535,6 +535,14 @@ bool AfterLoadGame()
 	/* Connect front and rear engines of multiheaded trains */
 	ConnectMultiheadedTrains();
 
+	/* Fix the CargoPackets *and* fix the caches of CargoLists.
+	 * If this isn't done before Stations and especially Vehicles are
+	 * running their AfterLoad we might get in trouble. In the case of
+	 * vehicles we could give the wrong (cached) count of items in a
+	 * vehicle which causes different results when getting their caches
+	 * filled; and that could eventually lead to desyncs. */
+	CargoPacket::AfterLoad();
+
 	/* Update all vehicles */
 	AfterLoadVehicles(true);
 
@@ -918,7 +926,7 @@ bool AfterLoadGame()
 								MakeShore(t);
 							} else {
 								if (GetTileOwner(t) == OWNER_WATER) {
-									MakeWater(t);
+									MakeSea(t);
 								} else {
 									MakeCanal(t, GetTileOwner(t), Random());
 								}
@@ -1226,47 +1234,6 @@ bool AfterLoadGame()
 		}
 	}
 
-	if (CheckSavegameVersion(44)) {
-		Vehicle *v;
-		/* If we remove a station while cargo from it is still enroute, payment calculation will assume
-		 * 0, 0 to be the source of the cargo, resulting in very high payments usually. v->source_xy
-		 * stores the coordinates, preserving them even if the station is removed. However, if a game is loaded
-		 * where this situation exists, the cargo-source information is lost. in this case, we set the source
-		 * to the current tile of the vehicle to prevent excessive profits
-		 */
-		FOR_ALL_VEHICLES(v) {
-			/* const cast is necessary as we have to do evil things here: change the source_xy */
-			CargoPacketSet *packets = const_cast<CargoPacketSet *>(v->cargo.Packets());
-			for (CargoPacketSet::iterator it = packets->begin(); it != packets->end();) {
-				CargoPacket *cp = *it;
-				packets->erase(it++);
-				cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : v->tile;
-				cp->loaded_at_xy = cp->source_xy;
-				packets->insert(cp);
-			}
-			v->cargo.InvalidateCache();
-		}
-
-		/* Store position of the station where the goods come from, so there
-		 * are no very high payments when stations get removed. However, if the
-		 * station where the goods came from is already removed, the source
-		 * information is lost. In that case we set it to the position of this
-		 * station */
-		Station *st;
-		FOR_ALL_STATIONS(st) {
-			for (CargoID c = 0; c < NUM_CARGO; c++) {
-				GoodsEntry *ge = &st->goods[c];
-
-				const CargoPacketList *packets = ge->cargo.Packets();
-				for (StationCargoList::ConstIterator it = packets->begin(); it != packets->end(); it++) {
-					CargoPacket *cp = *it;
-					cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : st->xy;
-					cp->loaded_at_xy = cp->source_xy;
-				}
-			}
-		}
-	}
-
 	if (CheckSavegameVersion(45)) {
 		Vehicle *v;
 		/* Originally just the fact that some cargo had been paid for was
@@ -1276,15 +1243,6 @@ bool AfterLoadGame()
 		 * amount that has been paid is stored. */
 		FOR_ALL_VEHICLES(v) {
 			ClrBit(v->vehicle_flags, 2);
-			v->cargo.InvalidateCache();
-		}
-	}
-
-	if (CheckSavegameVersion(120)) {
-		/* CargoPacket's source should be either INVALID_STATION or a valid station */
-		CargoPacket *cp;
-		FOR_ALL_CARGOPACKETS(cp) {
-			if (!Station::IsValidID(cp->source)) cp->source = INVALID_STATION;
 		}
 	}
 
@@ -1526,7 +1484,7 @@ bool AfterLoadGame()
 					if (IsWater(t)) {
 						Owner o = GetTileOwner(t);
 						if (o == OWNER_WATER) {
-							MakeWater(t);
+							MakeSea(t);
 						} else {
 							MakeCanal(t, o, Random());
 						}

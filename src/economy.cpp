@@ -1039,7 +1039,7 @@ void CargoPayment::PayFinalDelivery(const CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->GetSourceXY(), cp->DaysInTransit(), this->owner, cp->GetSourceType(), cp->GetSourceID());
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->SourceStationXY(), cp->DaysInTransit(), this->owner, cp->SourceSubsidyType(), cp->SourceSubsidyID());
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
@@ -1057,7 +1057,7 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 	Money profit = GetTransportedGoodsIncome(
 		count,
 		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
+		DistanceManhattan(cp->LoadedAtXY(), Station::Get(this->current_station)->xy),
 		cp->DaysInTransit(),
 		this->ct);
 
@@ -1166,7 +1166,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
 				/* The cargo has reached it's final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo((StationCargoList *)NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
+				remaining = v->cargo.MoveTo<StationCargoList>(NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
 
 				result |= 1;
 				accepted = true;
