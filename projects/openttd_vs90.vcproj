@@ -1949,6 +1949,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\viewport_gui.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\waypoint_gui.cpp"
 				>
 			</File>
