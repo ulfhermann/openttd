@@ -57,14 +57,20 @@ public:
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
 	/**
+	 * Create a new packet for savegame loading.
+	 */
+	CargoPacket();
+
+	/**
 	 * Creates a new cargo packet
-	 * @param source      the source of the packet
+	 * @param source      the source station of the packet
+	 * @param source_xy   the source location of the packet
 	 * @param count       the number of cargo entities to put in this packet
 	 * @param source_type the 'type' of source the packet comes from (for subsidies)
 	 * @param source_id   the actual source of the packet (for subsidies)
-	 * @pre count != 0 || source == INVALID_STATION
+	 * @pre count != 0
 	 */
-	CargoPacket(StationID source = INVALID_STATION, uint16 count = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
+	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id);
 
 	/**
 	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
@@ -185,8 +191,12 @@ public:
 template <class Tinst>
 class CargoList {
 public:
-	/** List of cargo packets */
+	/** Container with cargo packets */
 	typedef std::list<CargoPacket *> List;
+	/** The iterator for our container */
+	typedef List::iterator Iterator;
+	/** The const iterator for our container */
+	typedef List::const_iterator ConstIterator;
 
 	/** Kind of actions that could be done with packets on move */
 	enum MoveToAction {
@@ -197,7 +207,6 @@ public:
 	};
 
 protected:
-	Money feeder_share;         ///< Cache for the feeder share
 	uint count;                 ///< Cache for the number of cargo entities
 	uint cargo_days_in_transit; ///< Cache for the sum of number of days in transit of each entity; comparable to man-hours
 
@@ -219,7 +228,7 @@ protected:
 
 public:
 	/** Create the cargo list */
-	FORCEINLINE CargoList() { this->InvalidateCache(); }
+	CargoList() {}
 	/** And destroy it ("frees" all cargo packets) */
 	~CargoList();
 
@@ -248,15 +257,6 @@ public:
 	FORCEINLINE uint Count() const
 	{
 		return this->count;
-	}
-
-	/**
-	 * Returns total sum of the feeder share for all packets
-	 * @return the before mentioned number
-	 */
-	FORCEINLINE Money FeederShare() const
-	{
-		return this->feeder_share;
 	}
 
 	/**
@@ -326,14 +326,48 @@ public:
  * CargoList that is used for vehicles.
  */
 class VehicleCargoList : public CargoList<VehicleCargoList> {
+protected:
+	/** The (direct) parent of this class */
+	typedef CargoList<VehicleCargoList> Parent;
+
+	Money feeder_share; ///< Cache for the feeder share
+
+	/**
+	 * Update the cache to reflect adding of this packet.
+	 * Increases count, feeder share and days_in_transit
+	 * @param cp a new packet to be inserted
+	 */
+	void AddToCache(const CargoPacket *cp);
+
+	/**
+	 * Update the cached values to reflect the removal of this packet.
+	 * Decreases count, feeder share and days_in_transit
+	 * @param cp Packet to be removed from cache
+	 */
+	void RemoveFromCache(const CargoPacket *cp);
+
 public:
+	/** The super class ought to know what it's doing */
+	friend class CargoList<VehicleCargoList>;
 	/** The vehicles have a cargo list (and we want that saved). */
 	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
+
+	/**
+	 * Returns total sum of the feeder share for all packets
+	 * @return the before mentioned number
+	 */
+	FORCEINLINE Money FeederShare() const
+	{
+		return this->feeder_share;
+	}
 
 	/**
 	 * Ages the all cargo in this list
 	 */
 	void AgeCargo();
+
+	/** Invalidates the cached data and rebuild it */
+	void InvalidateCache();
 
 	/**
 	 * Are two the two CargoPackets mergeable in the context of
@@ -357,6 +391,8 @@ public:
  */
 class StationCargoList : public CargoList<StationCargoList> {
 public:
+	/** The super class ought to know what it's doing */
+	friend class CargoList<StationCargoList>;
 	/** The stations, via GoodsEntry, have a CargoList. */
 	friend const struct SaveLoad *GetGoodsDesc();
 
