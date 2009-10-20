@@ -338,5 +338,6 @@ extern char _savegame_format[8];
 #define DEMANDS_SV 150
 #define MCF_SV 160
 #define FLOWMAP_SV 170
+#define RESERVATION_SV 240
 
 #endif /* SAVELOAD_H */
