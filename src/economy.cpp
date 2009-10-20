@@ -1035,7 +1035,7 @@ void CargoPayment::PayFinalDelivery(const CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->source_xy, cp->DaysInTransit(), this->owner, cp->source_type, cp->source_id);
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->SourceStationXY(), cp->DaysInTransit(), this->owner, cp->SourceSubsidyType(), cp->SourceSubsidyID());
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
@@ -1053,7 +1053,7 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 	Money profit = GetTransportedGoodsIncome(
 		count,
 		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
+		DistanceManhattan(cp->LoadedAtXY(), Station::Get(this->current_station)->xy),
 		cp->DaysInTransit(),
 		this->ct);
 
@@ -1099,8 +1099,8 @@ uint32 ReserveConsist(Station * st, Vehicle * u)
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
 			int cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
 			if (cap > 0) {
-				CargoList & list = st->goods[v->cargo_type].cargo;
-				list.MoveTo(&v->reserved, cap, CargoList::MTA_CARGO_LOAD, NULL, st->xy);
+				StationCargoList & list = st->goods[v->cargo_type].cargo;
+				list.MoveTo(&v->reserved, cap, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
 				SetBit(ret, v->cargo_type);
 			}
 		}
@@ -1177,7 +1177,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			if (HasBit(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE) && !(u->current_order.GetUnloadType() & OUFB_TRANSFER)) {
 				/* The cargo has reached it's final destination, the packets may now be destroyed */
-				remaining = v->cargo.MoveTo(NULL, amount_unloaded, CargoList::MTA_FINAL_DELIVERY, payment, last_visited);
+				remaining = v->cargo.MoveTo<StationCargoList>(NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
 
 				result |= 1;
 				accepted = true;
@@ -1189,7 +1189,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			 * station is still accepting the cargo in the vehicle. It doesn't
 			 * accept cargo that was loaded at the same station. */
 			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
-				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? CargoList::MTA_TRANSFER : CargoList::MTA_UNLOAD, payment);
+				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
 				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 
 				result |= 2;
@@ -1251,10 +1251,10 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint reserved_count = v->reserved.Count();
 			uint station_count = ge->cargo.Count();
 			if (_settings_game.order.improved_load) {
-				v->reserved.MoveTo(&v->cargo, cap, CargoList::MTA_UNLOAD, NULL);
+				v->reserved.MoveTo(&v->cargo, cap, VehicleCargoList::MTA_UNLOAD, NULL);
 			}
 			if (v->reserved.Count() == 0) {
-				ge->cargo.MoveTo(&v->cargo, cap - reserved_count, CargoList::MTA_CARGO_LOAD, NULL, st->xy);
+				ge->cargo.MoveTo(&v->cargo, cap - reserved_count, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
 			}
 			uint loaded = reserved_count + station_count - v->reserved.Count() - ge->cargo.Count();
 
