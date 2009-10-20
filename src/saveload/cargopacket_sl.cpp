@@ -28,12 +28,11 @@
 			*/
 		FOR_ALL_VEHICLES(v) {
 			const VehicleCargoList::List *packets = v->cargo.Packets();
-			for (VehicleCargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
+			for (VehicleCargoList::ConstIterator it(packets->begin()); it != packets->end(); it++) {
 				CargoPacket *cp = *it;
 				cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : v->tile;
 				cp->loaded_at_xy = cp->source_xy;
 			}
-			v->cargo.InvalidateCache();
 		}
 
 		/* Store position of the station where the goods come from, so there
@@ -47,7 +46,7 @@
 				GoodsEntry *ge = &st->goods[c];
 
 				const StationCargoList::List *packets = ge->cargo.Packets();
-				for (StationCargoList::List::const_iterator it = packets->begin(); it != packets->end(); it++) {
+				for (StationCargoList::ConstIterator it(packets->begin()); it != packets->end(); it++) {
 					CargoPacket *cp = *it;
 					cp->source_xy = Station::IsValidID(cp->source) ? Station::Get(cp->source)->xy : st->xy;
 					cp->loaded_at_xy = cp->source_xy;
@@ -61,6 +60,19 @@
 		CargoPacket *cp;
 		FOR_ALL_CARGOPACKETS(cp) {
 			if (!Station::IsValidID(cp->source)) cp->source = INVALID_STATION;
+		}
+	}
+
+	if (!CheckSavegameVersion(68)) {
+		/* Only since version 68 we have cargo packets. Savegames from before used
+		 * 'new CargoPacket' + cargolist.Append so their caches are already
+		 * correct and do not need rebuilding. */
+		Vehicle *v;
+		FOR_ALL_VEHICLES(v) v->cargo.InvalidateCache();
+
+		Station *st;
+		FOR_ALL_STATIONS(st) {
+			for (CargoID c = 0; c < NUM_CARGO; c++) st->goods[c].cargo.InvalidateCache();
 		}
 	}
 }
