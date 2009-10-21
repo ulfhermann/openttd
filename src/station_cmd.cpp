@@ -1270,11 +1270,9 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 				}
 			}
 
-			if (keep_rail) {
-				MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
-			} else {
-				DoClearSquare(tile);
-			}
+			DoClearSquare(tile);
+			if (keep_rail) MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
+
 			st->rect.AfterRemoveTile(st, tile);
 			AddTrackToSignalBuffer(tile, track, owner);
 			YapfNotifyTrackLayoutChange(tile, track);
@@ -3091,7 +3089,7 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 		flow_stats.insert(FlowStat(via, planned, sent));
 		next = via;
 	}
-	CargoPacket * packet = new CargoPacket(id, amount, source_type, source_id);
+	CargoPacket * packet = new CargoPacket(st->index, st->xy, amount, source_type, source_id);
 	good.cargo.Append(next, packet);
 	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
 	good.supply += amount;
