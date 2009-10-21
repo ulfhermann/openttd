@@ -1216,8 +1216,8 @@ public:
 					/* if click on industries label, find right industry type and enable/disable it */
 					Widget *wi = &this->widget[SM_WIDGET_LEGEND]; // label panel
 					uint column = (pt.x - 4) / SD_LEGEND_COLUMN_WIDTH;
-					uint line = (pt.y - wi->top - 2) / 6;
-					int rows_per_column = (wi->bottom - wi->top) / 6;
+					uint line = (pt.y - wi->top - 2) / SD_LEGEND_ROW_HEIGHT;
+					int rows_per_column = (wi->bottom - wi->top) / SD_LEGEND_ROW_HEIGHT;
 
 					/* check if click is on industry label*/
 					int industry_pos = (column * rows_per_column) + line;
