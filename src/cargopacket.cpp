@@ -71,7 +71,7 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
 
 CargoPacket * CargoPacket::Split(uint new_size)
 {
-	Money fs = feeder_share * new_size / static_cast<uint>(count);
+	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
 	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
 	this->feeder_share -= fs;
 	this->count -= new_size;
@@ -243,6 +243,7 @@ uint VehicleCargoList::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEn
 		this->count -= remaining_unload;
 		this->cargo_days_in_transit -= remaining_unload * p->days_in_transit;
 		this->feeder_share -= p->feeder_share;
+		p->feeder_share = 0;
 		p->count -= remaining_unload;
 		loaded = remaining_unload;
 		++c;
