@@ -568,7 +568,7 @@ public:
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.UpdateCapacity(delta.y / 10);
+		this->vscroll.SetCapacity((this->widget[SLW_LIST].bottom - this->widget[SLW_LIST].top + 1) / 10);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -1165,22 +1165,22 @@ struct StationViewWindow : public Window {
 			const CargoPacket *cp = *it;
 			StationID next = it.GetKey();
 
-			const CargoDataEntry *source_entry = source_dest->Retrieve(cp->source);
+			const CargoDataEntry *source_entry = source_dest->Retrieve(cp->SourceStation());
 			if (source_entry == NULL) {
-				ShowCargo(cargo, i, cp->source, next, INVALID_STATION, cp->Count());
+				ShowCargo(cargo, i, cp->SourceStation(), next, INVALID_STATION, cp->Count());
 				continue;
 			}
 
 			const CargoDataEntry *via_entry = source_entry->Retrieve(next);
 			if (via_entry == NULL) {
-				ShowCargo(cargo, i, cp->source, next, INVALID_STATION, cp->Count());
+				ShowCargo(cargo, i, cp->SourceStation(), next, INVALID_STATION, cp->Count());
 				continue;
 			}
 
 			for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
 				CargoDataEntry * dest_entry = *dest_it;
 				uint val = DivideApprox(cp->Count() * dest_entry->GetCount(), via_entry->GetCount());
-				ShowCargo(cargo, i, cp->source, next, dest_entry->GetStation(), val);
+				ShowCargo(cargo, i, cp->SourceStation(), next, dest_entry->GetStation(), val);
 			}
 		}
 	}
@@ -1627,7 +1627,7 @@ struct StationViewWindow : public Window {
 	virtual void OnResize(Point delta)
 	{
 		if (delta.x != 0) ResizeButtons(this, SVW_LOCATION, SVW_RENAME);
-		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+		this->vscroll.SetCapacity((this->widget[SVW_WAITING].bottom - this->widget[SVW_WAITING].top + 1) / this->resize.step_height);
 	}
 };
 
@@ -1894,7 +1894,7 @@ struct SelectStationWindow : Window {
 
 	virtual void OnResize(Point delta)
 	{
-		this->vscroll.UpdateCapacity(delta.y / (int)this->resize.step_height);
+		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(JSW_PANEL)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
 
 	virtual void OnInvalidateData(int data)

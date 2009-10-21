@@ -186,7 +186,6 @@ enum SaveLoadTypes {
 	SL_ARR         =  2,
 	SL_STR         =  3,
 	SL_LST         =  4,
-	SL_SET         =  5,
 	/* non-normal save-load types */
 	SL_WRITEBYTE   =  8,
 	SL_VEH_INCLUDE =  9,
@@ -221,14 +220,12 @@ typedef SaveLoad SaveLoadGlobVarList;
 #define SLE_CONDARR(base, variable, type, length, from, to) SLE_GENERAL(SL_ARR, base, variable, type, length, from, to)
 #define SLE_CONDSTR(base, variable, type, length, from, to) SLE_GENERAL(SL_STR, base, variable, type, length, from, to)
 #define SLE_CONDLST(base, variable, type, from, to) SLE_GENERAL(SL_LST, base, variable, type, 0, from, to)
-#define SLE_CONDSET(base, variable, type, from, to) SLE_GENERAL(SL_SET, base, variable, type, 0, from, to)
 
 #define SLE_VAR(base, variable, type) SLE_CONDVAR(base, variable, type, 0, SL_MAX_VERSION)
 #define SLE_REF(base, variable, type) SLE_CONDREF(base, variable, type, 0, SL_MAX_VERSION)
 #define SLE_ARR(base, variable, type, length) SLE_CONDARR(base, variable, type, length, 0, SL_MAX_VERSION)
 #define SLE_STR(base, variable, type, length) SLE_CONDSTR(base, variable, type, length, 0, SL_MAX_VERSION)
 #define SLE_LST(base, variable, type) SLE_CONDLST(base, variable, type, 0, SL_MAX_VERSION)
-#define SLE_SET(base, variable, type) SLE_CONDSET(base, variable, type, 0, SL_MAX_VERSION)
 
 #define SLE_CONDNULL(length, from, to) SLE_CONDARR(NullStruct, null, SLE_FILE_U8 | SLE_VAR_NULL | SLF_CONFIG_NO, length, from, to)
 
@@ -341,6 +338,7 @@ extern char _savegame_format[8];
 #define DEMANDS_SV 150
 #define MCF_SV 160
 #define FLOWMAP_SV 170
+#define RESERVATION_SV 240
 #define CARGOMAP_SV 250
 
 #endif /* SAVELOAD_H */

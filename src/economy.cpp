@@ -1040,7 +1040,7 @@ void CargoPayment::PayFinalDelivery(const CargoPacket *cp, uint count)
 	}
 
 	/* Handle end of route payment */
-	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->GetSourceXY(), cp->DaysInTransit(), this->owner, cp->GetSourceType(), cp->GetSourceID());
+	Money profit = DeliverGoods(count, this->ct, this->current_station, cp->SourceStationXY(), cp->DaysInTransit(), this->owner, cp->SourceSubsidyType(), cp->SourceSubsidyID());
 	this->route_profit += profit;
 
 	/* The vehicle's profit is whatever route profit there is minus feeder shares. */
@@ -1058,7 +1058,7 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 	Money profit = GetTransportedGoodsIncome(
 		count,
 		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-		DistanceManhattan(cp->loaded_at_xy, Station::Get(this->current_station)->xy),
+		DistanceManhattan(cp->LoadedAtXY(), Station::Get(this->current_station)->xy),
 		cp->DaysInTransit(),
 		this->ct);
 
@@ -1095,6 +1095,10 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 
 /**
  * reserves cargo if the full load order and improved_load is set.
+ * @param st The station where the consist is loading at the moment
+ * @param u The front of the loading vehicle consist
+ * @param next_station The next station the vehicle will stop at
+ * @return bit field for the cargo classes with bit for the reserved cargos set (if anything was reserved).
  */
 uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 {
@@ -1108,8 +1112,6 @@ uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 				if (list.MoveToVehicle(&v->reserved, cap, next_station, st->xy) > 0) {
 					SetBit(ret, v->cargo_type);
 				}
-			} else if (cap < 0) {
-				DEBUG(misc, 0, "too much cargo reserved!");
 			}
 		}
 	}
@@ -1120,6 +1122,8 @@ uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 /**
  * Loads/unload the vehicle if possible.
  * @param v the vehicle to be (un)loaded
+ * @param cargos_reserved bit field: the cargo classes for which cargo has been reserved in this loading cycle
+ * @return the updated cargo_reserved
  */
 static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 {
@@ -1138,8 +1142,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 	/* We have not waited enough time till the next round of loading/unloading */
 	if (--v->time_counter != 0) {
-		cargos_reserved |= ReserveConsist(st, v, next_station);
-		return cargos_reserved;
+		return cargos_reserved | ReserveConsist(st, v, next_station);
 	}
 
 	OrderUnloadFlags unload_flags = v->current_order.GetUnloadType();
@@ -1232,10 +1235,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		int cap_left = v->cargo_cap - v->cargo.Count();
 		if (cap_left > 0) {
 			uint cap = cap_left;
-
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
-
-			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 
 			uint loaded = 0;
 			if (_settings_game.order.improved_load) {
@@ -1255,6 +1255,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			if (loaded > 0) {
 				completely_emptied = false;
 				anything_loaded = true;
+
 				st->time_since_load = 0;
 				st->last_vehicle_type = v->type;
 
@@ -1263,7 +1264,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				unloading_time += loaded;
 
 				result |= 2;
-			} else if (_settings_game.order.improved_load && HasBit(cargos_reserved, v->cargo_type)) {
+			} else if  (_settings_game.order.improved_load && HasBit(cargos_reserved, v->cargo_type)) {
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
 				SetBit(cargo_not_full, v->cargo_type);
@@ -1353,7 +1354,6 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 		if (result & 2) SetWindowDirty(WC_STATION_VIEW, last_visited);
 	}
-
 	return cargos_reserved;
 }
 
@@ -1368,12 +1368,11 @@ void LoadUnloadStation(Station *st)
 	if (st->loading_vehicles.empty()) return;
 
 	uint32 cargos_reserved = 0;
+
 	std::list<Vehicle *>::iterator iter;
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
-		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) {
-			cargos_reserved = LoadUnloadVehicle(v, cargos_reserved);
-		}
+		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) cargos_reserved = LoadUnloadVehicle(v, cargos_reserved);
 	}
 
 	/* Call the production machinery of industries */

@@ -115,7 +115,8 @@ enum WidgetDrawDistances {
 
 	WD_SORTBUTTON_ARROW_WIDTH = 11, ///< Width of up/down arrow of sort button state.
 
-	WD_PAR_VSEP_NORMAL = 2,      ///< Amount of vertical space between two paragraphs of text.
+	WD_PAR_VSEP_NORMAL = 2,      ///< Normal amount of vertical space between two paragraphs of text.
+	WD_PAR_VSEP_WIDE   = 8,      ///< Large amount of vertical space between two paragraphs of text.
 };
 
 /* wiget.cpp */
@@ -255,17 +256,6 @@ public:
 
 		this->cap = capacity;
 		if (this->cap + this->pos > this->count) this->pos = max(0, this->count - this->cap);
-	}
-
-	/**
-	 * Updates the capacity by adding/removing a number of (visible) elements.
-	 * @param difference the difference in capacity
-	 * @note updates the position if needed
-	 */
-	void UpdateCapacity(int difference)
-	{
-		if (difference == 0) return;
-		this->SetCapacity(this->cap + difference);
 	}
 
 	/**

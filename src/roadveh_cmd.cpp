@@ -144,9 +144,9 @@ void DrawRoadVehEngine(int x, int y, EngineID engine, SpriteID pal)
 	DrawSprite(GetRoadVehIcon(engine), pal, x, y);
 }
 
-byte GetRoadVehLength(const RoadVehicle *v)
+static uint GetRoadVehLength(const RoadVehicle *v)
 {
-	byte length = 8;
+	uint length = 8;
 
 	uint16 veh_len = GetVehicleCallback(CBID_VEHICLE_LENGTH, 0, 0, v->engine_type, v);
 	if (veh_len != CALLBACK_FAILED) {
@@ -278,19 +278,17 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		v->vehicle_flags = 0;
 		if (e->flags & ENGINE_EXCLUSIVE_PREVIEW) SetBit(v->vehicle_flags, VF_BUILT_AS_PROTOTYPE);
 
-		v->cargo_cap = rvi->capacity;
-
 		AddArticulatedParts(v);
 		v->InvalidateNewGRFCacheOfChain();
 
 		/* Call various callbacks after the whole consist has been constructed */
 		for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
-			u->rcache.cached_veh_length = GetRoadVehLength(u);
 			/* Cargo capacity is zero if and only if the vehicle cannot carry anything */
 			if (u->cargo_cap != 0) u->cargo_cap = GetVehicleProperty(u, PROP_ROADVEH_CARGO_CAPACITY, u->cargo_cap);
 			v->InvalidateNewGRFCache();
 			u->InvalidateNewGRFCache();
 		}
+		RoadVehUpdateCache(v);
 
 		VehicleMove(v, false);
 
