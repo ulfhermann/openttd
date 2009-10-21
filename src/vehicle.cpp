@@ -482,8 +482,9 @@ void Vehicle::PreDestructor()
 	if (Station::IsValidID(this->last_station_visited)) {
 		Station *st = Station::Get(this->last_station_visited);
 		st->loading_vehicles.remove(this);
+
 		HideFillingPercent(&this->fill_percent_te_id);
-		CancelReservation(st);
+		this->CancelReservation(st);
 		delete this->cargo_payment;
 	}
 
@@ -1469,6 +1470,10 @@ void Vehicle::BeginLoading(StationID last_station_id)
 	this->MarkDirty();
 }
 
+/**
+ * return all reserved cargo packets to the station
+ * @param st the station where the reserved packets should go.
+ */
 void Vehicle::CancelReservation(Station *st) {
 	for(Vehicle *v = this; v != NULL; v = v->next) {
 		VehicleCargoList &reserved = v->reserved;
@@ -1482,11 +1487,12 @@ void Vehicle::CancelReservation(Station *st) {
 	}
 }
 
+
 void Vehicle::LeaveStation()
 {
 	assert(current_order.IsType(OT_LOADING));
 	Station *st = Station::Get(this->last_station_visited);
-	CancelReservation(st);
+	this->CancelReservation(st);
 	delete this->cargo_payment;
 
 	/* Only update the timetable if the vehicle was supposed to stop here. */
