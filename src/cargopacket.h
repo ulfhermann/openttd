@@ -257,9 +257,6 @@ protected:
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
-	/** Make sure the cache is consistent with the actual packets */
-	void ValidateCache();
-
 	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 	uint MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
@@ -445,7 +442,7 @@ public:
 typedef MultiMap<StationID, CargoPacket *> StationCargoPacketMap;
 
 /**
- * CargoList sorted by next hop
+ * CargoList that is used for stations.
  */
 class StationCargoList : public CargoList<StationCargoList, StationCargoPacketMap> {
 public:
