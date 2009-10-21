@@ -252,8 +252,6 @@ void AfterLoadVehicles(bool part_of_load)
 		v->first = NULL;
 		if (v->type == VEH_TRAIN) Train::From(v)->tcache.first_engine = INVALID_ENGINE;
 		if (v->type == VEH_ROAD)  RoadVehicle::From(v)->rcache.first_engine = INVALID_ENGINE;
-
-		v->cargo.InvalidateCache();
 	}
 
 	/* AfterLoadVehicles may also be called in case of NewGRF reload, in this
@@ -719,10 +717,7 @@ void Load_VEHS()
 
 		if (_cargo_count != 0 && IsCompanyBuildableVehicleType(v)) {
 			/* Don't construct the packet with station here, because that'll fail with old savegames */
-			CargoPacket *cp = new CargoPacket(_cargo_count, _cargo_days, _cargo_feeder_share);
-			cp->source          = _cargo_source;
-			cp->source_xy       = _cargo_source_xy;
-			cp->loaded_at_xy    = _cargo_loaded_at_xy;
+			CargoPacket *cp = new CargoPacket(_cargo_count, _cargo_days, _cargo_source, _cargo_source_xy, _cargo_loaded_at_xy, _cargo_feeder_share);
 			v->cargo.Append(cp);
 		}
 

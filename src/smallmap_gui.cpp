@@ -22,11 +22,11 @@
 #include "blitter/factory.hpp"
 #include "tunnelbridge_map.h"
 #include "strings_func.h"
-#include "zoom_func.h"
 #include "core/endian_func.hpp"
 #include "vehicle_base.h"
 #include "sound_func.h"
 #include "window_func.h"
+#include "zoom_func.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -59,25 +59,25 @@ enum SmallMapWindowWidgets {
 static const Widget _smallmap_widgets[] = {
 {  WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_BROWN,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},                       // SM_WIDGET_CLOSEBOX
 {   WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_BROWN,    11,   337,     0,    13, STR_SMALLMAP_CAPTION,     STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},             // SM_WIDGET_CAPTION
-{ WWT_STICKYBOX,     RESIZE_LR,  COLOUR_BROWN,   338,   349,     0,    13, 0x0,                      STR_TOOLTIP_STICKY},                              // SM_WIDGET_STICKYBOX
+{ WWT_STICKYBOX,     RESIZE_LR,  COLOUR_BROWN,   338,   349,     0,    13, 0x0,                      STR_TOOLTIP_STICKY},                             // SM_WIDGET_STICKYBOX
 {     WWT_PANEL,     RESIZE_RB,  COLOUR_BROWN,     0,   349,    14,   157, 0x0,                      STR_NULL},                                       // SM_WIDGET_MAP_BORDER
 {     WWT_INSET,     RESIZE_RB,  COLOUR_BROWN,     2,   347,    16,   155, 0x0,                      STR_NULL},                                       // SM_WIDGET_MAP
 {     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   239,   158,   201, 0x0,                      STR_NULL},                                       // SM_WIDGET_LEGEND
 {     WWT_PANEL,   RESIZE_LRTB,  COLOUR_BROWN,   240,   349,   158,   158, 0x0,                      STR_NULL},                                       // SM_WIDGET_BUTTONSPANEL
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   158,   179, SPR_IMG_ZOOMIN,           STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN},           // SM_WIDGET_ZOOM_IN
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   180,   201, SPR_IMG_ZOOMOUT,          STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT},          // SM_WIDGET_ZOOM_OUT
+{WWT_PUSHIMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   158,   179, SPR_IMG_ZOOMIN,           STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN},           // SM_WIDGET_ZOOM_IN
+{WWT_PUSHIMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   240,   261,   180,   201, SPR_IMG_ZOOMOUT,          STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT},          // SM_WIDGET_ZOOM_OUT
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   158,   179, SPR_IMG_SHOW_COUNTOURS,   STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP}, // SM_WIDGET_CONTOUR
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   158,   179, SPR_IMG_SHOW_VEHICLES,    STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP},      // SM_WIDGET_VEHICLES
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   158,   179, SPR_IMG_INDUSTRY,         STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP},    // SM_WIDGET_INDUSTRIES
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   284,   305,   180,   201, SPR_IMG_SHOW_ROUTES,      STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON},  // SM_WIDGET_ROUTES
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   306,   327,   180,   201, SPR_IMG_PLANTTREES,       STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP},    // SM_WIDGET_VEGETATION
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   328,   349,   180,   201, SPR_IMG_COMPANY_GENERAL,  STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP},   // SM_WIDGET_OWNERS
-{    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   158,   179, SPR_IMG_SMALLMAP,         STR_SMALLMAP_CENTER},                            // SM_WIDGET_CENTERMAP
+{WWT_PUSHIMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   158,   179, SPR_IMG_SMALLMAP,         STR_SMALLMAP_CENTER},                            // SM_WIDGET_CENTERMAP
 {    WWT_IMGBTN,   RESIZE_LRTB,  COLOUR_BROWN,   262,   283,   180,   201, SPR_IMG_TOWN,             STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF},  // SM_WIDGET_TOGGLETOWNNAME
 {     WWT_PANEL,    RESIZE_RTB,  COLOUR_BROWN,     0,   337,   202,   213, 0x0,                      STR_NULL},                                       // SM_WIDGET_BOTTOMPANEL
 {   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,     0,    99,   202,   213, STR_SMALLMAP_ENABLE_ALL,  STR_NULL},                                       // SM_WIDGET_ENABLEINDUSTRIES
 {   WWT_TEXTBTN,     RESIZE_TB,  COLOUR_BROWN,   100,   201,   202,   213, STR_SMALLMAP_DISABLE_ALL, STR_NULL},                                       // SM_WIDGET_DISABLEINDUSTRIES
-{ WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_BROWN,   338,   349,   202,   213, 0x0,                      STR_TOOLTIP_RESIZE},                              // SM_WIDGET_RESIZEBOX
+{ WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_BROWN,   338,   349,   202,   213, 0x0,                      STR_TOOLTIP_RESIZE},                             // SM_WIDGET_RESIZEBOX
 {  WIDGETS_END},
 };
 
@@ -102,9 +102,9 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 			NWidget(NWID_VERTICAL),
 				/* Top button row. */
 				NWidget(NWID_HORIZONTAL),
-					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_IN), SetMinimalSize(22, 22),
+					NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_IN), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_ZOOMIN, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN),
-					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_CENTERMAP), SetMinimalSize(22, 22),
+					NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_CENTERMAP), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_SMALLMAP, STR_SMALLMAP_CENTER),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_CONTOUR), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_SHOW_COUNTOURS, STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP),
@@ -115,7 +115,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 				EndContainer(),
 				/* Bottom button row. */
 				NWidget(NWID_HORIZONTAL),
-					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_OUT), SetMinimalSize(22, 22),
+					NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_OUT), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_ZOOMOUT, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_TOGGLETOWNNAME), SetMinimalSize(22, 22),
 												SetDataTip(SPR_IMG_TOWN, STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF),
@@ -528,20 +528,7 @@ static const byte _vehicle_type_colours[6] = {
 };
 
 
-static void DrawVertMapIndicator(int x, int y, int x2, int y2)
-{
-	GfxFillRect(x, y,      x2, y + 3, 69);
-	GfxFillRect(x, y2 - 3, x2, y2,    69);
-}
-
-static void DrawHorizMapIndicator(int x, int y, int x2, int y2)
-{
-	GfxFillRect(x,      y, x + 3, y2, 69);
-	GfxFillRect(x2 - 3, y, x2,    y2, 69);
-}
-
-class SmallMapWindow : public Window
-{
+class SmallMapWindow : public Window {
 	enum SmallMapType {
 		SMT_CONTOUR,
 		SMT_VEHICLES,
@@ -573,14 +560,14 @@ class SmallMapWindow : public Window
 	int32 scroll_x;
 	int32 scroll_y;
 
-	uint8 refresh;
-	static const int FORCE_REFRESH = 0x1F;
-
 	/**
 	 * zoom level of the smallmap.
 	 * May be something between ZOOM_LVL_NORMAL and ZOOM_LVL_MAX.
 	 */
 	ZoomLevel zoom;
+
+	static const uint8 FORCE_REFRESH_PERIOD = 0x1F; ///< map is redrawn after that many ticks
+	uint8 refresh; ///< refresh counter, zeroed every FORCE_REFRESH_PERIOD ticks
 
 	/* The order of calculations when remapping is _very_ important as it introduces rounding errors.
 	 * Everything has to be done just like when drawing the background otherwise the rounding errors are
@@ -689,7 +676,7 @@ class SmallMapWindow : public Window
 	 * @param row_end the last row to be actually drawn
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	inline void DrawSmallMapStuff(void *dst, uint xc, uint yc, int col_start, int col_end, int row_start, int row_end)
+	void DrawSmallMapStuff(void *dst, uint xc, uint yc, int col_start, int col_end, int row_start, int row_end)
 	{
 		Blitter *blitter = BlitterFactoryBase::GetCurrentBlitter();
 		GetSmallMapPixels *proc = _smallmap_draw_procs[this->map_type];
@@ -717,18 +704,21 @@ class SmallMapWindow : public Window
 		}
 	}
 
+	/**
+	 * Adds vehicles to the smallmap.
+	 * @param dpi the part of the smallmap to be drawn into
+	 */
 	void DrawVehicles(DrawPixelInfo *dpi) {
-		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) {
-			Vehicle *v;
+		Vehicle *v;
 
-			FOR_ALL_VEHICLES(v) {
-				if (v->type != VEH_EFFECT &&
-						(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
-					DrawVehicle(dpi, v);
-				}
+		FOR_ALL_VEHICLES(v) {
+			if (v->type != VEH_EFFECT &&
+					(v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0) {
+				DrawVehicle(dpi, v);
 			}
 		}
 	}
+
 
 	/**
 	 * draws a vehicle in the smallmap if it's in the selected drawing area.
@@ -783,7 +773,78 @@ class SmallMapWindow : public Window
 		}
 	}
 
-public:
+	/**
+	 * Adds town names to the smallmap.
+	 * @param dpi the part of the smallmap to be drawn into
+	 */
+	void DrawTowns(const DrawPixelInfo *dpi)
+	{
+		const Town *t;
+		FOR_ALL_TOWNS(t) {
+			/* Remap the town coordinate */
+			Point pt = RemapTileCoords(t->xy);
+			int x = pt.x - (t->sign.width_small >> 1);
+			int y = pt.y;
+
+			/* Check if the town sign is within bounds */
+			if (x + t->sign.width_small > dpi->left &&
+					x < dpi->left + dpi->width &&
+					y + FONT_HEIGHT_SMALL > dpi->top &&
+					y < dpi->top + dpi->height) {
+				/* And draw it. */
+				SetDParam(0, t->index);
+				DrawString(x, x + t->sign.width_small, y, STR_SMALLMAP_TOWN);
+			}
+		}
+	}
+
+	/**
+	 * Draws vertical part of map indicator
+	 * @param x X coord of left/right border of main viewport
+	 * @param y Y coord of top border of main viewport
+	 * @param y2 Y coord of bottom border of main viewport
+	 */
+	static inline void DrawVertMapIndicator(int x, int y, int y2)
+	{
+		GfxFillRect(x, y,      x, y + 3, 69);
+		GfxFillRect(x, y2 - 3, x, y2,    69);
+	}
+
+	/**
+	 * Draws horizontal part of map indicator
+	 * @param x X coord of left border of main viewport
+	 * @param x2 X coord of right border of main viewport
+	 * @param y Y coord of top/bottom border of main viewport
+	 */
+	static inline void DrawHorizMapIndicator(int x, int x2, int y)
+	{
+		GfxFillRect(x,      y, x + 3, y, 69);
+		GfxFillRect(x2 - 3, y, x2,    y, 69);
+	}
+
+	/**
+	 * Adds map indicators to the smallmap.
+	 */
+	void DrawMapIndicators()
+	{
+		/* Find main viewport. */
+		const ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
+
+		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
+
+		/* UnScale everything separately to produce the same rounding errors as when drawing the background */
+		int x = UnScalePlainCoord(vp->virtual_left) - UnScalePlainCoord(pt.x);
+		int y = UnScalePlainCoord(vp->virtual_top) - UnScalePlainCoord(pt.y);
+		int x2 = x + UnScalePlainCoord(vp->virtual_width);
+		int y2 = y + UnScalePlainCoord(vp->virtual_height);
+
+		SmallMapWindow::DrawVertMapIndicator(x, y, y2);
+		SmallMapWindow::DrawVertMapIndicator(x2, y, y2);
+
+		SmallMapWindow::DrawHorizMapIndicator(x, x2, y);
+		SmallMapWindow::DrawHorizMapIndicator(x, x2, y2);
+	}
+
 	/**
 	 * Draws the small map.
 	 *
@@ -891,62 +952,18 @@ public:
 			x += SD_MAP_COLUMN_WIDTH / 2;
 		}
 
-		DrawVehicles(dpi);
+		/* Draw vehicles */
+		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) this->DrawVehicles(dpi);
 
-		DrawIndustries(dpi);
+		this->DrawIndustries(dpi);
 
-		if (this->show_towns) {
-			const Town *t;
-
-			FOR_ALL_TOWNS(t) {
-				/* Remap the town coordinate */
-				Point pt = RemapTileCoords(t->xy);
-				x = pt.x - (t->sign.width_small >> 1);
-				y = pt.y;
-
-				/* Check if the town sign is within bounds */
-				if (x + t->sign.width_small > dpi->left &&
-						x < dpi->left + dpi->width &&
-						y + FONT_HEIGHT_SMALL > dpi->top &&
-						y < dpi->top + dpi->height) {
-					/* And draw it. */
-					SetDParam(0, t->index);
-					DrawString(x, x + t->sign.width_small, y, STR_SMALLMAP_TOWN);
-				}
-			}
-		}
-
-		/* Find main viewport. */
-		ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
+		/* Draw town names */
+		if (this->show_towns) this->DrawTowns(dpi);
 
 		/* Draw map indicators */
-		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
+		this->DrawMapIndicators();
 
-		/* UnScale everything separately to produce the same rounding errors as when drawing the background */
-		x = UnScalePlainCoord(vp->virtual_left) - UnScalePlainCoord(pt.x);
-		y = UnScalePlainCoord(vp->virtual_top) - UnScalePlainCoord(pt.y);
-		int x2 = x + UnScalePlainCoord(vp->virtual_width);
-		int y2 = y + UnScalePlainCoord(vp->virtual_height);
-
-		DrawVertMapIndicator(x, y, x, y2);
-		DrawVertMapIndicator(x2, y, x2, y2);
-
-		DrawHorizMapIndicator(x, y, x2, y);
-		DrawHorizMapIndicator(x, y2, x2, y2);
 		_cur_dpi = old_dpi;
-	}
-
-	void SmallMapCenterOnCurrentPos()
-	{
-		ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
-
-		int zoomed_width = ScaleByZoom((this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE, this->zoom);
-		int zoomed_height = ScaleByZoom((this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top) * TILE_SIZE, this->zoom);
-		int x  = ((vp->virtual_width - zoomed_width) / 2 + vp->virtual_left);
-		int y  = ((vp->virtual_height - zoomed_height) / 2 + vp->virtual_top);
-		this->scroll_x = (y * 2 - x) / 4;
-		this->scroll_y = (x + y * 2) / 4;
-		this->SetDirty();
 	}
 
 	/**
@@ -981,15 +998,6 @@ public:
 		}
 	}
 
-	virtual void OnTimeout()
-	{
-		/* raise any pressed buttons */
-		this->SetWidgetsLoweredState(false, SM_WIDGET_ZOOM_OUT, SM_WIDGET_ZOOM_IN, SM_WIDGET_CENTERMAP, WIDGET_LIST_END);
-		this->SetWidgetDirty(SM_WIDGET_ZOOM_OUT);
-		this->SetWidgetDirty(SM_WIDGET_ZOOM_IN);
-		this->SetWidgetDirty(SM_WIDGET_CENTERMAP);
-	}
-
 	void ResizeLegend()
 	{
 		Widget *legend = &this->widget[SM_WIDGET_LEGEND];
@@ -1017,7 +1025,8 @@ public:
 		}
 	}
 
-	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number), zoom(ZOOM_LVL_NORMAL)
+public:
+	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(desc, window_number), zoom(ZOOM_LVL_NORMAL), refresh(FORCE_REFRESH_PERIOD)
 	{
 		this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
 		this->SetWidgetLoweredState(SM_WIDGET_TOGGLETOWNNAME, this->show_towns);
@@ -1234,10 +1243,10 @@ public:
 	virtual void OnTick()
 	{
 		/* update the window every now and then */
-		if (this->refresh++ == FORCE_REFRESH) {
-			this->refresh = 0;
-			this->SetDirty();
-		}
+		if (--this->refresh != 0) return;
+
+		this->refresh = FORCE_REFRESH_PERIOD;
+		this->SetDirty();
 	}
 
 	virtual void OnScroll(Point delta)
@@ -1290,6 +1299,19 @@ public:
 	{
 		if (delta.x != 0 && this->map_type == SMT_INDUSTRY) this->ResizeLegend();
 	}
+
+	void SmallMapCenterOnCurrentPos()
+	{
+		ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
+
+		int zoomed_width = ScaleByZoom((this->widget[SM_WIDGET_MAP].right  - this->widget[SM_WIDGET_MAP].left) * TILE_SIZE, this->zoom);
+		int zoomed_height = ScaleByZoom((this->widget[SM_WIDGET_MAP].bottom - this->widget[SM_WIDGET_MAP].top) * TILE_SIZE, this->zoom);
+		int x  = ((vp->virtual_width - zoomed_width) / 2 + vp->virtual_left);
+		int y  = ((vp->virtual_height - zoomed_height) / 2 + vp->virtual_top);
+		this->scroll_x = (y * 2 - x) / 4;
+		this->scroll_y = (x + y * 2) / 4;
+		this->SetDirty();
+	}
 };
 
 SmallMapWindow::SmallMapType SmallMapWindow::map_type = SMT_CONTOUR;
@@ -1298,174 +1320,13 @@ bool SmallMapWindow::show_towns = true;
 static const WindowDesc _smallmap_desc(
 	WDP_AUTO, WDP_AUTO, 350, 214, 460, 314,
 	WC_SMALLMAP, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
+	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_UNCLICK_BUTTONS,
 	_smallmap_widgets, _nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)
 );
 
 void ShowSmallMap()
 {
 	AllocateWindowDescFront<SmallMapWindow>(&_smallmap_desc, 0);
-}
-
-/** Widget numbers of the extra viewport window. */
-enum ExtraViewportWindowWidgets {
-	EVW_CLOSE,
-	EVW_CAPTION,
-	EVW_STICKY,
-	EVW_BACKGROUND,
-	EVW_VIEWPORT,
-	EVW_ZOOMIN,
-	EVW_ZOOMOUT,
-	EVW_MAIN_TO_VIEW,
-	EVW_VIEW_TO_MAIN,
-	EVW_SPACER,
-	EVW_RESIZE,
-};
-
-/* Extra ViewPort Window Stuff */
-static const NWidgetPart _nested_extra_view_port_widgets[] = {
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, EVW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_GREY, EVW_CAPTION), SetDataTip(STR_EXTRA_VIEW_PORT_TITLE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, EVW_STICKY),
-	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, EVW_BACKGROUND),
-		NWidget(NWID_VIEWPORT, INVALID_COLOUR, EVW_VIEWPORT), SetPadding(2, 2, 2, 2), SetResize(1, 1), SetFill(true, true),
-	EndContainer(),
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, EVW_ZOOMIN), SetDataTip(SPR_IMG_ZOOMIN, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN),
-		NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, EVW_ZOOMOUT), SetDataTip(SPR_IMG_ZOOMOUT, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT),
-		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, EVW_MAIN_TO_VIEW), SetFill(true, true), SetResize(1, 0),
-										SetDataTip(STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW, STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, EVW_VIEW_TO_MAIN), SetFill(true, true), SetResize(1, 0),
-										SetDataTip(STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN, STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT),
-		EndContainer(),
-	EndContainer(),
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_GREY, EVW_SPACER), SetFill(true, true), SetResize(1, 0), EndContainer(),
-		NWidget(WWT_RESIZEBOX, COLOUR_GREY, EVW_RESIZE),
-	EndContainer(),
-};
-
-class ExtraViewportWindow : public Window
-{
-public:
-	ExtraViewportWindow(const WindowDesc *desc, int window_number, TileIndex tile) : Window()
-	{
-		this->InitNested(desc, window_number);
-
-		NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(EVW_VIEWPORT);
-		nvp->InitializeViewport(this, 0, ZOOM_LVL_NORMAL);
-		this->DisableWidget(EVW_ZOOMIN);
-
-		Point pt;
-		if (tile == INVALID_TILE) {
-			/* the main window with the main view */
-			const Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
-
-			/* center on same place as main window (zoom is maximum, no adjustment needed) */
-			pt.x = w->viewport->scrollpos_x + w->viewport->virtual_height / 2;
-			pt.y = w->viewport->scrollpos_y + w->viewport->virtual_height / 2;
-		} else {
-			pt = RemapCoords(TileX(tile) * TILE_SIZE + TILE_SIZE / 2, TileY(tile) * TILE_SIZE + TILE_SIZE / 2, TileHeight(tile));
-		}
-
-		this->viewport->scrollpos_x = pt.x - (nvp->pos_x - ((nvp->current_x - 1) / 2));
-		this->viewport->scrollpos_y = pt.y - (nvp->pos_y - ((nvp->current_y - 1) / 2));
-		this->viewport->dest_scrollpos_x = this->viewport->scrollpos_x;
-		this->viewport->dest_scrollpos_y = this->viewport->scrollpos_y;
-	}
-
-	virtual void SetStringParameters(int widget) const
-	{
-		switch (widget) {
-			case EVW_CAPTION:
-				/* set the number in the title bar */
-				SetDParam(0, this->window_number + 1);
-				break;
-		}
-	}
-
-	virtual void OnPaint()
-	{
-		this->DrawWidgets();
-	}
-
-	virtual void OnClick(Point pt, int widget)
-	{
-		switch (widget) {
-			case EVW_ZOOMIN: DoZoomInOutWindow(ZOOM_IN,  this); break;
-			case EVW_ZOOMOUT: DoZoomInOutWindow(ZOOM_OUT, this); break;
-
-			case EVW_MAIN_TO_VIEW: { // location button (move main view to same spot as this view) 'Paste Location'
-				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
-				int x = this->viewport->scrollpos_x; // Where is the main looking at
-				int y = this->viewport->scrollpos_y;
-
-				/* set this view to same location. Based on the center, adjusting for zoom */
-				w->viewport->dest_scrollpos_x =  x - (w->viewport->virtual_width -  this->viewport->virtual_width) / 2;
-				w->viewport->dest_scrollpos_y =  y - (w->viewport->virtual_height - this->viewport->virtual_height) / 2;
-				w->viewport->follow_vehicle   = INVALID_VEHICLE;
-			} break;
-
-			case EVW_VIEW_TO_MAIN: { // inverse location button (move this view to same spot as main view) 'Copy Location'
-				const Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
-				int x = w->viewport->scrollpos_x;
-				int y = w->viewport->scrollpos_y;
-
-				this->viewport->dest_scrollpos_x =  x + (w->viewport->virtual_width -  this->viewport->virtual_width) / 2;
-				this->viewport->dest_scrollpos_y =  y + (w->viewport->virtual_height - this->viewport->virtual_height) / 2;
-			} break;
-		}
-	}
-
-	virtual void OnResize(Point delta)
-	{
-		if (this->viewport != NULL) {
-			NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(EVW_VIEWPORT);
-			nvp->UpdateViewportCoordinates(this);
-		}
-	}
-
-	virtual void OnScroll(Point delta)
-	{
-		const ViewPort *vp = IsPtInWindowViewport(this, _cursor.pos.x, _cursor.pos.y);
-		if (vp == NULL) return;
-
-		this->viewport->scrollpos_x += ScaleByZoom(delta.x, vp->zoom);
-		this->viewport->scrollpos_y += ScaleByZoom(delta.y, vp->zoom);
-		this->viewport->dest_scrollpos_x = this->viewport->scrollpos_x;
-		this->viewport->dest_scrollpos_y = this->viewport->scrollpos_y;
-	}
-
-	virtual void OnMouseWheel(int wheel)
-	{
-		ZoomInOrOutToCursorWindow(wheel < 0, this);
-	}
-
-	virtual void OnInvalidateData(int data = 0)
-	{
-		/* Only handle zoom message if intended for us (msg ZOOM_IN/ZOOM_OUT) */
-		HandleZoomMessage(this, this->viewport, EVW_ZOOMIN, EVW_ZOOMOUT);
-	}
-};
-
-static const WindowDesc _extra_view_port_desc(
-	WDP_AUTO, WDP_AUTO, 300, 68, 300, 268,
-	WC_EXTRA_VIEW_PORT, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	NULL, _nested_extra_view_port_widgets, lengthof(_nested_extra_view_port_widgets)
-);
-
-void ShowExtraViewPortWindow(TileIndex tile)
-{
-	int i = 0;
-
-	/* find next free window number for extra viewport */
-	while (FindWindowById(WC_EXTRA_VIEW_PORT, i) != NULL) i++;
-
-	new ExtraViewportWindow(&_extra_view_port_desc, i, tile);
 }
 
 /**

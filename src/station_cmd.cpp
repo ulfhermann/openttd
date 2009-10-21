@@ -1270,11 +1270,9 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 				}
 			}
 
-			if (keep_rail) {
-				MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
-			} else {
-				DoClearSquare(tile);
-			}
+			DoClearSquare(tile);
+			if (keep_rail) MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
+
 			st->rect.AfterRemoveTile(st, tile);
 			AddTrackToSignalBuffer(tile, track, owner);
 			YapfNotifyTrackLayoutChange(tile, track);
@@ -2913,7 +2911,7 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 
 static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceType source_type, SourceID source_id)
 {
-	st->goods[type].cargo.Append(new CargoPacket(st->index, amount, source_type, source_id));
+	st->goods[type].cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	SetBit(st->goods[type].acceptance_pickup, GoodsEntry::PICKUP);
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
