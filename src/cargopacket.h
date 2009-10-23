@@ -202,6 +202,7 @@ public:
 	enum MoveToAction {
 		MTA_FINAL_DELIVERY, ///< "Deliver" the packet to the final destination, i.e. destroy the packet
 		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID
+		MTA_RESERVE,        ///< Reserve cargo for later loading
 		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer
 		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload
 	};
@@ -283,9 +284,10 @@ public:
 	 * @warning After appending this packet may not exist anymore!
 	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
 	 * @param cp the cargo packet to add
+	 * @param check_merge if true, check existing packets in the list for mergability
 	 * @pre cp != NULL
 	 */
-	void Append(CargoPacket *cp);
+	void Append(CargoPacket *cp, bool check_merge = true);
 
 	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the

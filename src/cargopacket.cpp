@@ -114,19 +114,21 @@ void CargoList<Tinst>::AddToCache(const CargoPacket *cp)
 }
 
 template <class Tinst>
-void CargoList<Tinst>::Append(CargoPacket *cp)
+void CargoList<Tinst>::Append(CargoPacket *cp, bool check_merge)
 {
 	assert(cp != NULL);
 	static_cast<Tinst *>(this)->AddToCache(cp);
 
-	for (List::reverse_iterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
-		CargoPacket *icp = *it;
-		if (Tinst::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
-			icp->count        += cp->count;
-			icp->feeder_share += cp->feeder_share;
+	if (check_merge) {
+		for (List::reverse_iterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
+			CargoPacket *icp = *it;
+			if (Tinst::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
+				icp->count        += cp->count;
+				icp->feeder_share += cp->feeder_share;
 
-			delete cp;
-			return;
+				delete cp;
+				return;
+			}
 		}
 	}
 
@@ -167,7 +169,7 @@ template <class Tother_inst>
 bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta, CargoPayment *payment, uint data)
 {
 	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
-	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
+	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || mta == MTA_RESERVE || payment != NULL);
 
 	Iterator it(this->packets.begin());
 	while (it != this->packets.end() && max_move > 0) {
@@ -189,6 +191,7 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 					delete cp;
 					continue; // of the loop
 
+				case MTA_RESERVE:
 				case MTA_CARGO_LOAD:
 					cp->loaded_at_xy = data;
 					break;
@@ -200,7 +203,7 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 				case MTA_UNLOAD:
 					break;
 			}
-			dest->Append(cp);
+			dest->Append(cp, mta != MTA_RESERVE);
 			continue;
 		}
 
@@ -232,7 +235,7 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 				cp_new->feeder_share += payment->PayTransfer(cp_new, max_move);
 			}
 
-			dest->Append(cp_new);
+			dest->Append(cp_new, mta != MTA_RESERVE);
 		}
 
 		max_move = 0;
