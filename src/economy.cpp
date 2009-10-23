@@ -1104,7 +1104,7 @@ uint32 ReserveConsist(Station * st, Vehicle * u)
 			int cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
 			if (cap > 0) {
 				StationCargoList & list = st->goods[v->cargo_type].cargo;
-				list.MoveTo(&v->reserved, cap, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
+				list.MoveTo(&v->reserved, cap, StationCargoList::MTA_RESERVE, NULL, st->xy);
 				SetBit(ret, v->cargo_type);
 			}
 		}
