@@ -1109,7 +1109,7 @@ uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 			int cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
 			if (cap > 0) {
 				StationCargoList & list = st->goods[v->cargo_type].cargo;
-				if (list.MoveToVehicle(&v->reserved, cap, next_station, st->xy) > 0) {
+				if (list.MoveTo(&v->reserved, cap, next_station, st->xy) > 0) {
 					SetBit(ret, v->cargo_type);
 				}
 			}
@@ -1239,11 +1239,11 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			uint loaded = 0;
 			if (_settings_game.order.improved_load) {
-				loaded += v->reserved.MoveToVehicle(&v->cargo, cap, st->xy);
+				loaded += v->reserved.MoveTo(&v->cargo, cap, st->xy);
 			}
 			if (loaded < cap) {
 				assert(v->reserved.Count() == 0);
-				loaded += ge->cargo.MoveToVehicle(&v->cargo, cap - loaded, next_station, st->xy);
+				loaded += ge->cargo.MoveTo(&v->cargo, cap - loaded, next_station, st->xy);
 			}
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start

@@ -1476,13 +1476,13 @@ void Vehicle::BeginLoading(StationID last_station_id)
  */
 void Vehicle::CancelReservation(Station *st) {
 	for(Vehicle *v = this; v != NULL; v = v->next) {
-		VehicleCargoList &reserved = v->reserved;
+		ReservationList &reserved = v->reserved;
 		if (reserved.Count() > 0) {
 			if (this->cargo_payment == NULL) {
 				this->cargo_payment = new CargoPayment(this);
 			}
 			DEBUG(misc, 1, "cancelling cargo reservation");
-			v->reserved.MoveToStation(&st->goods[v->cargo_type], v->reserved.Count(), OUFB_TRANSFER, INVALID_STATION, INVALID_STATION, this->cargo_payment);
+			v->reserved.Revert(&st->goods[v->cargo_type]);
 		}
 	}
 }
