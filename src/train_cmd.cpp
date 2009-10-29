@@ -316,10 +316,7 @@ void TrainConsistChanged(Train *v, bool same_length)
 			}
 		}
 
-		if (e_u->CanCarryCargo() && u->cargo_type == e_u->GetDefaultCargoType() && u->cargo_subtype == 0) {
-			/* Set cargo capacity if we've not been refitted */
-			u->cargo_cap = GetVehicleProperty(u, PROP_TRAIN_CARGO_CAPACITY, rvi_u->capacity);
-		}
+		u->cargo_cap = GetVehicleCapacity(u);
 
 		/* check the vehicle length (callback) */
 		uint16 veh_len = CALLBACK_FAILED;
@@ -1227,6 +1224,10 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	 * than it actually solves (infinite loops and such).
 	 */
 	if (dst_head != NULL && !src_in_dst && (flags & DC_AUTOREPLACE) == 0) {
+		/* Forget everything, as everything is going to change */
+		src->InvalidateNewGRFCacheOfChain();
+		dst->InvalidateNewGRFCacheOfChain();
+
 		/*
 		 * When performing the 'allow wagon attach' callback, we have to check
 		 * that for each and every wagon, not only the first one. This means
@@ -1254,6 +1255,10 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 
 				/* Restore original first_engine data */
 				next_to_attach->tcache.first_engine = first_engine;
+
+				/* We do not want to remember any cached variables from the test run */
+				next_to_attach->InvalidateNewGRFCache();
+				dst_head->InvalidateNewGRFCache();
 
 				if (callback != CALLBACK_FAILED) {
 					StringID error = STR_NULL;
@@ -2108,74 +2113,18 @@ CommandCost CmdRefitRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	/* Check cargo */
 	if (new_cid >= NUM_CARGO) return CMD_ERROR;
 
-	CommandCost cost(EXPENSES_TRAIN_RUN);
-	uint num = 0;
-
-	do {
-		/* XXX: We also refit all the attached wagons en-masse if they
-		 * can be refitted. This is how TTDPatch does it.  TODO: Have
-		 * some nice [Refit] button near each wagon. --pasky */
-		if (!CanRefitTo(v->engine_type, new_cid)) continue;
-
-		const Engine *e = Engine::Get(v->engine_type);
-		if (e->CanCarryCargo()) {
-			uint16 amount = CALLBACK_FAILED;
-
-			if (HasBit(e->info.callback_mask, CBM_VEHICLE_REFIT_CAPACITY)) {
-				/* Back up the vehicle's cargo type */
-				CargoID temp_cid = v->cargo_type;
-				byte temp_subtype = v->cargo_subtype;
-				v->cargo_type = new_cid;
-				v->cargo_subtype = new_subtype;
-				/* Check the refit capacity callback */
-				amount = GetVehicleCallback(CBID_VEHICLE_REFIT_CAPACITY, 0, 0, v->engine_type, v);
-				/* Restore the original cargo type */
-				v->cargo_type = temp_cid;
-				v->cargo_subtype = temp_subtype;
-			}
-
-			if (amount == CALLBACK_FAILED) { // callback failed or not used, use default
-				CargoID old_cid = e->GetDefaultCargoType();
-				/* normally, the capacity depends on the cargo type, a rail vehicle can
-				 * carry twice as much mail/goods as normal cargo, and four times as
-				 * many passengers
-				 */
-				amount = e->u.rail.capacity;
-				switch (old_cid) {
-					case CT_PASSENGERS: break;
-					case CT_MAIL:
-					case CT_GOODS: amount *= 2; break;
-					default:       amount *= 4; break;
-				}
-				switch (new_cid) {
-					case CT_PASSENGERS: break;
-					case CT_MAIL:
-					case CT_GOODS: amount /= 2; break;
-					default:       amount /= 4; break;
-				}
-			}
-
-			if (new_cid != v->cargo_type) {
-				cost.AddCost(GetRefitCost(v->engine_type));
-			}
-
-			num += amount;
-			if (flags & DC_EXEC) {
-				v->cargo.Truncate((v->cargo_type == new_cid) ? amount : 0);
-				v->cargo_type = new_cid;
-				v->cargo_cap = amount;
-				v->cargo_subtype = new_subtype;
-				SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-				SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
-				InvalidateWindowClassesData(WC_TRAINS_LIST, 0);
-			}
-		}
-	} while ((v = v->Next()) != NULL && !only_this);
-
-	_returned_refit_capacity = num;
+	CommandCost cost = RefitVehicle(v, only_this, new_cid, new_subtype, flags);
 
 	/* Update the train's cached variables */
-	if (flags & DC_EXEC) TrainConsistChanged(Train::Get(p1)->First(), false);
+	if (flags & DC_EXEC) {
+		Train *front = v->First();
+		TrainConsistChanged(front, false);
+		SetWindowDirty(WC_VEHICLE_DETAILS, front->index);
+		SetWindowDirty(WC_VEHICLE_DEPOT, front->tile);
+		InvalidateWindowClassesData(WC_TRAINS_LIST, 0);
+	} else {
+		v->InvalidateNewGRFCacheOfChain(); // always invalidate; querycost might have filled it
+	}
 
 	return cost;
 }
