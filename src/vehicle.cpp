@@ -683,52 +683,6 @@ void CallVehicleTicks()
 	_current_company = OWNER_NONE;
 }
 
-/** Check if a given engine type can be refitted to a given cargo
- * @param engine_type Engine type to check
- * @param cid_to check refit to this cargo-type
- * @return true if it is possible, false otherwise
- */
-bool CanRefitTo(EngineID engine_type, CargoID cid_to)
-{
-	return HasBit(EngInfo(engine_type)->refit_mask, cid_to);
-}
-
-/** Learn the price of refitting a certain engine
- * @param engine_type Which engine to refit
- * @return Price for refitting
- */
-CommandCost GetRefitCost(EngineID engine_type)
-{
-	Money base_cost;
-	ExpensesType expense_type;
-	const Engine *e = Engine::Get(engine_type);
-	switch (e->type) {
-		case VEH_SHIP:
-			base_cost = _price.ship_base;
-			expense_type = EXPENSES_SHIP_RUN;
-			break;
-
-		case VEH_ROAD:
-			base_cost = _price.roadveh_base;
-			expense_type = EXPENSES_ROADVEH_RUN;
-			break;
-
-		case VEH_AIRCRAFT:
-			base_cost = _price.aircraft_base;
-			expense_type = EXPENSES_AIRCRAFT_RUN;
-			break;
-
-		case VEH_TRAIN:
-			base_cost = 2 * ((e->u.rail.railveh_type == RAILVEH_WAGON) ?
-							 _price.build_railwagon : _price.build_railvehicle);
-			expense_type = EXPENSES_TRAIN_RUN;
-			break;
-
-		default: NOT_REACHED();
-	}
-	return CommandCost(expense_type, (e->info.refit_cost * base_cost) >> 10);
-}
-
 static void DoDrawVehicle(const Vehicle *v)
 {
 	SpriteID image = v->cur_image;
@@ -1416,6 +1370,65 @@ SpriteID GetVehiclePalette(const Vehicle *v)
 	}
 
 	return GetEngineColourMap(v->engine_type, v->owner, INVALID_ENGINE, v);
+}
+
+/**
+ * Determines capacity of a given vehicle from scratch.
+ * For aircraft the main capacity is determined. Mail might be present as well.
+ * @note Keep this function consistent with Engine::GetDisplayDefaultCapacity().
+ * @param v Vehicle of interest
+ * @return Capacity
+ */
+uint GetVehicleCapacity(const Vehicle *v)
+{
+	const Engine *e = Engine::Get(v->engine_type);
+
+	if (!e->CanCarryCargo()) return 0;
+
+	CargoID default_cargo = e->GetDefaultCargoType();
+
+	/* Check the refit capacity callback if we are not in the default configuration.
+	 * Note: This might change to become more consistent/flexible/sane, esp. when default cargo is first refittable. */
+	if (HasBit(e->info.callback_mask, CBM_VEHICLE_REFIT_CAPACITY) &&
+			(default_cargo != v->cargo_type || v->cargo_subtype != 0)) {
+		uint16 callback = GetVehicleCallback(CBID_VEHICLE_REFIT_CAPACITY, 0, 0, v->engine_type, v);
+		if (callback != CALLBACK_FAILED) return callback;
+	}
+
+	/* Get capacity according to property resp. CB */
+	uint capacity;
+	switch (e->type) {
+		case VEH_TRAIN:    capacity = GetVehicleProperty(v, PROP_TRAIN_CARGO_CAPACITY,   e->u.rail.capacity); break;
+		case VEH_ROAD:     capacity = GetVehicleProperty(v, PROP_ROADVEH_CARGO_CAPACITY, e->u.road.capacity); break;
+		case VEH_SHIP:     capacity = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY,    e->u.ship.capacity); break;
+		case VEH_AIRCRAFT: capacity = e->u.air.passenger_capacity; break;
+		default: NOT_REACHED();
+	}
+
+	/* Apply multipliers depending on cargo- and vehicletype.
+	 * Note: This might change to become more consistent/flexible. */
+	if (e->type != VEH_SHIP) {
+		if (e->type == VEH_AIRCRAFT) {
+			if (v->cargo_type == CT_PASSENGERS) return capacity;
+			capacity += e->u.air.mail_capacity;
+			if (v->cargo_type == CT_MAIL) return capacity;
+		} else {
+			switch (default_cargo) {
+				case CT_PASSENGERS: break;
+				case CT_MAIL:
+				case CT_GOODS: capacity *= 2; break;
+				default:       capacity *= 4; break;
+			}
+		}
+		switch (v->cargo_type) {
+			case CT_PASSENGERS: break;
+			case CT_MAIL:
+			case CT_GOODS: capacity /= 2; break;
+			default:       capacity /= 4; break;
+		}
+	}
+
+	return capacity;
 }
 
 
