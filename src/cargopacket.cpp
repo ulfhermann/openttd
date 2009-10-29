@@ -130,6 +130,13 @@ void CargoList<Tinst, Tcont>::AddToCache(const CargoPacket *cp)
 	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
 }
 
+void ReservationList::Append(CargoPacket *cp)
+{
+	assert(cp != NULL);
+	this->AddToCache(cp);
+	this->packets.push_back(cp);
+}
+
 void VehicleCargoList::Append(CargoPacket *cp)
 {
 	assert(cp != NULL);
@@ -176,7 +183,8 @@ void CargoList<Tinst, Tcont>::Truncate(uint max_remaining)
 }
 
 template<class Tinst, class Tcont>
-uint CargoList<Tinst, Tcont>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place)
+template<class Tother_inst>
+uint CargoList<Tinst, Tcont>::MovePacket(Tother_inst *dest, Iterator &it, uint cap, TileIndex load_place)
 {
 	CargoPacket *packet = MovePacket(it, cap, load_place);
 	uint ret = packet->count;
@@ -342,6 +350,13 @@ UnloadType VehicleCargoList::WillUnloadCargoDist(const UnloadDescription & ul, c
 	}
 }
 
+void ReservationList::Revert(GoodsEntry *ge) {
+	for(Iterator c = packets.begin(); c != packets.end();) {
+		SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+		MovePacket(&ge->cargo, INVALID_STATION, c, (*c)->count);
+	}
+}
+
 uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment) {
 	uint remaining_unload = max_unload;
 	UnloadDescription ul(dest, curr_station, next_station, flags);
@@ -382,7 +397,9 @@ void VehicleCargoList::AddToCache(const CargoPacket *cp)
 	this->Parent::AddToCache(cp);
 }
 
-uint VehicleCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place)
+template <class Tinst, class Tcont>
+template <class Tother_inst>
+uint CargoList<Tinst, Tcont>::MoveTo(Tother_inst *dest, uint cap, TileIndex load_place)
 {
 	uint orig_cap = cap;
 	Iterator it = packets.begin();
@@ -443,7 +460,8 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 	list.push_back(cp);
 }
 
-uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place) {
+template <class Tother_inst>
+uint StationCargoList::MovePackets(Tother_inst *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place) {
 	uint orig_cap = cap;
 	while(begin != end && cap > 0) {
 		cap -= this->MovePacket(dest, begin, cap, load_place);
@@ -451,7 +469,8 @@ uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator be
 	return orig_cap - cap;
 }
 
-uint StationCargoList::MoveToVehicle(VehicleCargoList *dest, uint cap, StationID selected_station, TileIndex load_place) {
+template <class Tother_inst>
+uint StationCargoList::MoveTo(Tother_inst *dest, uint cap, StationID selected_station, TileIndex load_place) {
 	uint orig_cap = cap;
 	if (selected_station != INVALID_STATION) {
 		std::pair<Iterator, Iterator> bounds(packets.equal_range(selected_station));
@@ -491,5 +510,19 @@ void VehicleCargoList::InvalidateCache()
 /*
  * We have to instantiate everything we want to be usable.
  */
+/** Autoreplace Vehicle -> Vehicle 'transfer' */
+template uint CargoList<VehicleCargoList, CargoPacketList>::MoveTo(VehicleCargoList *dest, uint cap, TileIndex load_place);
+template uint CargoList<VehicleCargoList, CargoPacketList>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place);
+/** Transfer reservation */
+template uint CargoList<ReservationList, CargoPacketList>::MoveTo(VehicleCargoList *dest, uint cap, TileIndex load_place);
+template uint CargoList<ReservationList, CargoPacketList>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place);
+/** Cargo loading at a station */
+template uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID selected_station, TileIndex load_place);
+template uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
+/** Reserve cargo */
+template uint StationCargoList::MoveTo(ReservationList *dest, uint cap, StationID selected_station, TileIndex load_place);
+template uint StationCargoList::MovePackets(ReservationList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
+
 template class CargoList<VehicleCargoList, CargoPacketList>;
 template class CargoList<StationCargoList, StationCargoPacketMap>;
+template class CargoList<ReservationList, CargoPacketList>;
