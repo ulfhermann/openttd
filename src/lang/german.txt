@@ -1534,21 +1534,21 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Spielfel
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Welches Spielfeld soll verwendet werden?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Spiel nach Zufallsprinzip erstellen
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{SKIP}{STRING}
+STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (ankündigen)
-STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{SKIP}{SKIP}{NUM} Teilnehmer
+STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} Teilnehmer
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS                      :{BLACK}Max. Teilnehmeranzahl:
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS_TOOLTIP              :{BLACK}Auswahl der maximal erlaubten Anzahl von Teilnehmern. Nicht alle Slots müssen belegt werden.
-STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM} Firm{P a en}
+STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{NUM} Firm{P a en}
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES                    :{BLACK}Max. Firmenanzahl:
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES_TOOLTIP            :{BLACK}Begrenzt den Server auf eine gewisse Anzahl an Firmen
-STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{NUM} Zuschauer
+STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} Zuschauer
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Max. Zuschaueranzahl:
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Begrenzt den Server auf eine gewisse Anzahl an Zuschauern
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Gesprochene Sprache:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Damit andere Spieler wissen, welche Sprache auf diesem Server gesprochen wird.
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
+STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Spiel beginnen
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Startet ein neues Mehrspielerspiel auf einem zufällig generierten Spielfeld oder einem Szenario
@@ -1652,6 +1652,7 @@ STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}Neue Fir
 # Network client list
 STR_NETWORK_CLIENTLIST_NONE                                     :- Keine -
 STR_NETWORK_CLIENTLIST_KICK                                     :Hinauswerfen
+STR_NETWORK_CLIENTLIST_BAN                                      :Sperren
 STR_NETWORK_CLIENTLIST_GIVE_MONEY                               :Geld schenken
 STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL                             :Mit allen sprechen
 STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY                         :Mit Firma sprechen
@@ -2784,6 +2785,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :{G=w}Einschiene
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :{G=w}Magnetschwebebahn
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Kosten: {CURRENCY}   Gewicht: {WEIGHT_S}{}Geschwindigk.: {VELOCITY} Leistung: {POWER}{}Betriebskosten: {CURRENCY} pro Jahr{}Kapazität: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Preis: {CURRENCY} Gewicht: {WEIGHT_S}{}Max. Geschwindigkeit: {VELOCITY}  Leistung: {POWER}  Max. Zugkraft: {7:FORCE}{}Betriebskosten: {CURRENCY}/yr{}Kapazität: {CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Preis: {CURRENCY} Max. Geschw.: {VELOCITY}{}Kapazität: {CARGO}, {CARGO}{}Betriebskosten: {CURRENCY}/yr
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Preis: {CURRENCY} Max. Geschw.: {VELOCITY}{}Kapazität: {CARGO}{}Betriebskosten: {CURRENCY}/Jahr
 

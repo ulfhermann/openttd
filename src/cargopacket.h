@@ -28,7 +28,7 @@ struct CargoPacket;
 struct GoodsEntry;
 
 /** Type of the pool for cargo packets. */
-typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
+typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576, true, false> CargoPacketPool;
 /** The actual pool with cargo packets */
 extern CargoPacketPool _cargopacket_pool;
 

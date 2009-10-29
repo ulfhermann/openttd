@@ -42,8 +42,7 @@ byte VehicleRandomBits();
 void ResetVehiclePosHash();
 void ResetVehicleColourMap();
 
-bool CanRefitTo(EngineID engine_type, CargoID cid_to);
-CommandCost GetRefitCost(EngineID engine_type);
+CommandCost RefitVehicle(Vehicle *v, bool only_this, CargoID new_cid, byte new_subtype, DoCommandFlag flags);
 
 void ViewportAddVehicles(DrawPixelInfo *dpi);
 
@@ -111,6 +110,8 @@ SpriteID GetEnginePalette(EngineID engine_type, CompanyID company);
  * @return A ready-to-use palette modifier
  */
 SpriteID GetVehiclePalette(const Vehicle *v);
+
+uint GetVehicleCapacity(const Vehicle *v);
 
 extern const uint32 _veh_build_proc_table[];
 extern const uint32 _veh_sell_proc_table[];
