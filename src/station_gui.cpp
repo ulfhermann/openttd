@@ -564,7 +564,7 @@ public:
 		this->SetDirty();
 	}
 
-	virtual void OnResize(Point delta)
+	virtual void OnResize()
 	{
 		this->vscroll.SetCapacity((this->widget[SLW_LIST].bottom - this->widget[SLW_LIST].top + 1) / 10);
 	}
@@ -1049,9 +1049,9 @@ struct StationViewWindow : public Window {
 		DoCommandP(0, this->window_number, 0, CMD_RENAME_STATION | CMD_MSG(STR_ERROR_CAN_T_RENAME_STATION), NULL, str);
 	}
 
-	virtual void OnResize(Point delta)
+	virtual void OnResize()
 	{
-		if (delta.x != 0) ResizeButtons(this, SVW_LOCATION, SVW_RENAME);
+		ResizeButtons(this, SVW_LOCATION, SVW_RENAME);
 		this->vscroll.SetCapacity((this->widget[SVW_WAITING].bottom - this->widget[SVW_WAITING].top + 1) / this->resize.step_height);
 	}
 };
@@ -1294,7 +1294,7 @@ struct SelectStationWindow : Window {
 		}
 	}
 
-	virtual void OnResize(Point delta)
+	virtual void OnResize()
 	{
 		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(JSW_PANEL)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
