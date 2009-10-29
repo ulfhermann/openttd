@@ -1533,21 +1533,21 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Alege o 
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Ce hartă doreşti să joci?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Generează o hartă aleatoare
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{SKIP}{STRING}
+STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (fă reclamă)
-STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{SKIP}{SKIP}{NUM} client{P "" i}
+STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} client{P "" i}
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS                      :{BLACK}Număr maxim de clienţi:
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS_TOOLTIP              :{BLACK}Alege un număr maxim de clienţi. Nu trebuie ocupate toate locurile.
-STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM} compan{P ie ii}
+STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{NUM} compan{P ie ii}
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES                    :{BLACK}Maximum companii:
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES_TOOLTIP            :{BLACK}Limitează serverul la un anumit număr de companii
-STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{NUM} spectator{P "" i}
+STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} spectator{P "" i}
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Maxim spectatori:
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Limitează serverul la un anumit număr de spectatori
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Limba vorbită:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Ceilalţi jucători vor şti în ce limbă se discută pe server.
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
+STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Începe jocul
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Incepe un joc nou in retea cu o harta aleatoare sau intr-un scenariu
@@ -1651,6 +1651,7 @@ STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}Companie
 # Network client list
 STR_NETWORK_CLIENTLIST_NONE                                     :- Nici unul -
 STR_NETWORK_CLIENTLIST_KICK                                     :Kick
+STR_NETWORK_CLIENTLIST_BAN                                      :Interzice acces
 STR_NETWORK_CLIENTLIST_GIVE_MONEY                               :Donează bani
 STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL                             :Vorbeşte către toţi
 STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY                         :Vorbeşte către companie
@@ -2783,6 +2784,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :locomotivă mon
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :locomotivă pernă magnetică
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Cost: {CURRENCY} Greutate: {WEIGHT_S}{}Vitezã: {VELOCITY}  Putere: {POWER}{}Cost de rulare: {CURRENCY}/an{}Capacitate: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Preţ: {CURRENCY} Greutate: {WEIGHT_S}{}Viteză: {VELOCITY}  Putere: {POWER}  Ef. T. Max.: {7:FORCE}{}Cost rulaj: {CURRENCY}/yr{}Capacitate: {CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Cost: {CURRENCY} Viteză max.: {VELOCITY}{}Capacitate: {CARGO}, {CARGO}{}Mentenanţă: {CURRENCY}/an
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Cost: {CURRENCY} Viteză max.: {VELOCITY}{}Capacitate: {CARGO}{}Mentenanţă: {CURRENCY}/an
 
