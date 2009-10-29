@@ -939,7 +939,7 @@ STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Sons de 
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Choisir les sons de base à utiliser
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Information additionnelle sur les sons de base
 
-STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Echec du mode plein écran
+STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Échec du mode plein écran
 
 # Custom currency window
 
@@ -1534,21 +1534,21 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Choisir 
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Sur quelle carte désirez-vous jouer?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Créer une partie aléatoirement
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{SKIP}{STRING}
+STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (publier)
-STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{SKIP}{SKIP}{NUM} client{P "" s}
+STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} client{P "" s}
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS                      :{BLACK}Nombre de clients max. :
 STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS_TOOLTIP              :{BLACK}Choisir un nombre maximum de clients. Tous les emplacements n'auront pas besoin d'être remplis.
-STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM} compagnie{P "" s}
+STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{NUM} compagnie{P "" s}
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES                    :{BLACK}Max compagnies:
 STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES_TOOLTIP            :{BLACK}Limiter le serveur à un certain nombre de compagnies
-STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{NUM} spectateur{P "" s}
+STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} spectateur{P "" s}
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Max spectateurs:
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Limiter le serveur à un certain nombre de spectateurs
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Langue utilisée :
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Les autres joueurs sauront quelle langue est parlée sur ce serveur.
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{SKIP}{SKIP}{SKIP}{SKIP}{SKIP}{STRING}
+STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Démarrer la partie
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Démarrer une nouvelle partie réseau à partir d'une carte aléatoire ou d'un scénario
@@ -1651,7 +1651,8 @@ STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}Nouvelle
 
 # Network client list
 STR_NETWORK_CLIENTLIST_NONE                                     :- Aucun -
-STR_NETWORK_CLIENTLIST_KICK                                     :Jeter
+STR_NETWORK_CLIENTLIST_KICK                                     :Exclure
+STR_NETWORK_CLIENTLIST_BAN                                      :Bannir
 STR_NETWORK_CLIENTLIST_GIVE_MONEY                               :Donner de l'argent
 STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL                             :Parler à tous
 STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY                         :Parler à la compagnie
@@ -1722,7 +1723,7 @@ STR_NETWORK_ERROR_CLIENT_WRONG_REVISION                         :révision incor
 STR_NETWORK_ERROR_CLIENT_NAME_IN_USE                            :nom déjà utilisé
 STR_NETWORK_ERROR_CLIENT_WRONG_PASSWORD                         :mot de passe de partie incorrect
 STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :mauvais company-id dans DoCommand
-STR_NETWORK_ERROR_CLIENT_KICKED                                 :jeté par le serveur
+STR_NETWORK_ERROR_CLIENT_KICKED                                 :exclu par le serveur
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :a tenté de tricher
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :Serveur complet
 ############ End of leave-in-this-order
@@ -1734,7 +1735,7 @@ STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Partie suspendu
 STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Partie reprise (assez de joueurs)
 STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Partie suspendue (connexion d'un client)
 STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Partie reprise (client connecté)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Partie reprise (echec de connexion du client)
+STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Partie reprise (échec de connexion du client)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :départ
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} a rejoint la partie
@@ -1803,7 +1804,7 @@ STR_CONTENT_DOWNLOAD_PROGRESS_SIZE                              :{WHITE}{BYTES} 
 
 # Content downloading error messages
 STR_CONTENT_ERROR_COULD_NOT_CONNECT                             :{WHITE}Connexion au serveur de contenu impossible...
-STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD                            :{WHITE}Echec du téléchargement...
+STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD                            :{WHITE}Échec du téléchargement...
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_CONNECTION_LOST            :{WHITE}... connexion perdue
 STR_CONTENT_ERROR_COULD_NOT_DOWNLOAD_FILE_NOT_WRITABLE          :{WHITE}... fichier non enregistrable
 STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Impossible de décompresser le fichier téléchargé
@@ -2784,6 +2785,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :{G=f}locomotive
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :{G=f}locomotive magnétique
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Prix: {CURRENCY} Poids: {WEIGHT_S}{}Vitesse: {VELOCITY}  Puissance: {POWER}{}Coût d'entretien: {CURRENCY}/an{}Capacité: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Prix: {CURRENCY} Poids: {WEIGHT_S}{}Vitesse: {VELOCITY}  Puissance: {POWER}  E.T. max.: {7:FORCE}{}Coût d'entretien: {CURRENCY}/an{}Capacité: {CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Prix: {CURRENCY} Vitesse max.: {VELOCITY}{}Capacité: {CARGO}, {CARGO}{}Coût d'entretien: {CURRENCY}/an
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Prix: {CURRENCY} Vitesse max.: {VELOCITY}{}Capacité: {CARGO}{}Coût d'entretien: {CURRENCY}/an
 
