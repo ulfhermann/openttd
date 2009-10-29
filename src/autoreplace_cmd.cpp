@@ -119,7 +119,7 @@ static void TransferCargo(Vehicle *old_veh, Vehicle *new_head, bool part_of_chai
 			uint amount = min(src->cargo.Count(), dest->cargo_cap - dest->cargo.Count());
 			if (amount <= 0) continue;
 
-			src->cargo.MoveToVehicle(&dest->cargo, amount);
+			src->cargo.MoveTo(&dest->cargo, amount);
 		}
 	}
 

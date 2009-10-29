@@ -28,7 +28,7 @@ struct CargoPacket;
 struct GoodsEntry;
 
 /** Type of the pool for cargo packets. */
-typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576> CargoPacketPool;
+typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576, true, false> CargoPacketPool;
 /** The actual pool with cargo packets */
 extern CargoPacketPool _cargopacket_pool;
 
@@ -52,6 +52,7 @@ private:
 	/** The CargoList caches, thus needs to know about it. */
 	template <class Tinst, class Tcont> friend class CargoList;
 	friend class VehicleCargoList;
+	friend class ReservationList;
 	friend class StationCargoList;
 	/** We want this to be saved, right? */
 	friend const struct SaveLoad *GetCargoPacketDesc();
@@ -232,8 +233,6 @@ public:
 	/** The const reverse iterator for our container */
 	typedef typename Tcont::const_reverse_iterator ConstReverseIterator;
 
-
-
 private:
 	CargoPacket *MovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
@@ -258,7 +257,9 @@ protected:
 	void RemoveFromCache(const CargoPacket *cp);
 
 	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
-	uint MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
+
+	template<class Tother_inst>
+	uint MovePacket(Tother_inst *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
 public:
 	/** Create the cargo list */
@@ -325,9 +326,40 @@ public:
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
+
+	/**
+	 * Moves the given amount of cargo to a vehicle.
+	 * @param dest         the destination to move the cargo to
+	 * @param max_load     the maximum amount of cargo entities to move
+	 */
+	template <class Tother_inst>
+	uint MoveTo(Tother_inst *dest, uint cap, TileIndex load_place = INVALID_TILE);
 };
 
 typedef std::list<CargoPacket *> CargoPacketList;
+
+class ReservationList : public CargoList<ReservationList, CargoPacketList> {
+protected:
+	/** The (direct) parent of this class */
+	typedef CargoList<VehicleCargoList, CargoPacketList> Parent;
+
+public:
+	/** The super class ought to know what it's doing */
+	friend class CargoList<VehicleCargoList, CargoPacketList>;
+	/** The vehicles have a cargo list (and we want that saved). */
+	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
+
+	/**
+	 * Appends the given cargo packet
+	 * @warning After appending this packet may not exist anymore!
+	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+	 * @param cp the cargo packet to add
+	 * @pre cp != NULL
+	 */
+	void Append(CargoPacket *cp);
+
+	void Revert(GoodsEntry *ge);
+};
 
 /**
  * CargoList that is used for vehicles.
@@ -390,13 +422,6 @@ public:
 	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
 
 	/**
-	 * Moves the given amount of cargo to a vehicle.
-	 * @param dest         the destination to move the cargo to
-	 * @param max_load     the maximum amount of cargo entities to move
-	 */
-	uint MoveToVehicle(VehicleCargoList *dest, uint cap, TileIndex load_place = INVALID_TILE);
-
-	/**
 	 * Returns total sum of the feeder share for all packets
 	 * @return the before mentioned number
 	 */
@@ -410,6 +435,7 @@ public:
 	 * @warning After appending this packet may not exist anymore!
 	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
 	 * @param cp the cargo packet to add
+	 * @param check_merge if true, check existing packets in the list for mergability
 	 * @pre cp != NULL
 	 */
 	void Append(CargoPacket *cp);
@@ -466,7 +492,8 @@ public:
 				cp1->source_id       == cp2->source_id;
 	}
 
-	uint MoveToVehicle(VehicleCargoList *dest, uint cap, StationID next_station, TileIndex load_place);
+	template <class Tother_inst>
+	uint MoveTo(Tother_inst *dest, uint cap, StationID next_station, TileIndex load_place);
 
 	/**
 	 * Appends the given cargo packet to the range of packets with the same next station
@@ -486,7 +513,8 @@ public:
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
 protected:
-	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
+	template <class Tother_inst>
+	uint MovePackets(Tother_inst *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
 };
 
 #endif /* CARGOPACKET_H */

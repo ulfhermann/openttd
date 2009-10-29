@@ -814,7 +814,7 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 		v->InvalidateNewGRFCacheOfChain();
 
-		v->cargo_cap = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY, svi->capacity);
+		v->cargo_cap = GetVehicleCapacity(v);
 
 		v->InvalidateNewGRFCacheOfChain();
 
@@ -910,10 +910,8 @@ CommandCost CmdSendShipToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
  */
 CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	CommandCost cost(EXPENSES_SHIP_RUN);
 	CargoID new_cid = GB(p2, 0, 8); // gets the cargo number
 	byte new_subtype = GB(p2, 8, 8);
-	uint16 capacity = CALLBACK_FAILED;
 
 	Ship *v = Ship::GetIfValid(p1);
 
@@ -921,46 +919,18 @@ CommandCost CmdRefitShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT);
 	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_CAN_T_REFIT_DESTROYED_VEHICLE);
 
-	const Engine *e = Engine::Get(v->engine_type);
-
 	/* Check cargo */
-	if (new_cid >= NUM_CARGO || !CanRefitTo(v->engine_type, new_cid)) return CMD_ERROR;
+	if (new_cid >= NUM_CARGO) return CMD_ERROR;
 
-	/* Check the refit capacity callback */
-	if (HasBit(e->info.callback_mask, CBM_VEHICLE_REFIT_CAPACITY)) {
-		/* Back up the existing cargo type */
-		CargoID temp_cid = v->cargo_type;
-		byte temp_subtype = v->cargo_subtype;
-		v->cargo_type = new_cid;
-		v->cargo_subtype = new_subtype;
-
-		capacity = GetVehicleCallback(CBID_VEHICLE_REFIT_CAPACITY, 0, 0, v->engine_type, v);
-
-		/* Restore the cargo type */
-		v->cargo_type = temp_cid;
-		v->cargo_subtype = temp_subtype;
-	}
-
-	if (capacity == CALLBACK_FAILED) {
-		capacity = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY, e->u.ship.capacity);
-	}
-	_returned_refit_capacity = capacity;
-
-	if (new_cid != v->cargo_type) {
-		cost = GetRefitCost(v->engine_type);
-	}
+	CommandCost cost = RefitVehicle(v, true, new_cid, new_subtype, flags);
 
 	if (flags & DC_EXEC) {
-		v->cargo_cap = capacity;
-		v->cargo.Truncate((v->cargo_type == new_cid) ? capacity : 0);
-		v->cargo_type = new_cid;
-		v->cargo_subtype = new_subtype;
 		v->colourmap = PAL_NONE; // invalidate vehicle colour map
-		v->InvalidateNewGRFCacheOfChain();
 		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
 		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
 		InvalidateWindowClassesData(WC_SHIPS_LIST, 0);
 	}
+	v->InvalidateNewGRFCacheOfChain(); // always invalidate; querycost might have filled it
 
 	return cost;
 
