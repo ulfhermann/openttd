@@ -90,7 +90,8 @@ static bool MakeBmpImage(char *name, ScreenshotCallback *callb, void *userdata, 
 	if (f == NULL) return false;
 
 	/* each scanline must be aligned on a 32bit boundary */
-	padw = Align(w, 4);
+	padw = w;
+	if (pixelformat == 8) padw = Align(padw, 4);
 
 	if (pixelformat == 8) pal_size = sizeof(RgbQuad) * 256;
 
@@ -142,6 +143,15 @@ static bool MakeBmpImage(char *name, ScreenshotCallback *callb, void *userdata, 
 
 		/* render the pixels */
 		callb(userdata, buff, h, padw, n);
+
+#if TTD_ENDIAN == TTD_BIG_ENDIAN
+		if (pixelformat == 32) {
+			/* Data stored in BMP are always little endian,
+			 * but we have big endian data in buffer */
+			uint32 *buff32 = (uint32 *)buff;
+			for (i = 0; i < padw * n; i++) buff32[i] = BSWAP32(buff32[i]);
+		}
+#endif
 
 		/* write each line */
 		while (n)
