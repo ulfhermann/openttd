@@ -115,7 +115,7 @@ public:
 	 * of nodes is faster than merging all nodes of the component.
 	 */
 	void Join();
-	uint GetNumJobs() const {return jobs.size();}
+	size_t GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}
 	void AddComponent(LinkGraphComponent * component, uint join);
 
