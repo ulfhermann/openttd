@@ -181,7 +181,7 @@ static const SaveLoad _old_station_desc[] = {
 
 static uint16 _waiting_acceptance;
 static uint16 _num_links;
-static uint16 _num_flows;
+static uint32 _num_flows;
 static uint16 _cargo_source;
 static uint32 _cargo_source_xy;
 static uint16 _cargo_days;
@@ -215,7 +215,7 @@ static const SaveLoad _flowstat_desc[] = {
 void CountFlows(FlowStatMap & flows) {
 	_num_flows = 0;
 	for(FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
-		_num_flows += i->second.size();
+		_num_flows += (uint32)i->second.size();
 	}
 }
 
@@ -243,7 +243,7 @@ const SaveLoad *GetGoodsDesc()
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(            _num_flows,          SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_flows,          SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
 		SLE_END()
 	};
@@ -384,7 +384,7 @@ static void RealSave_STNN(BaseStation *bst)
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
 			LinkStatMap &stats = ge->link_stats;
-			_num_links = stats.size();
+			_num_links = (uint16)stats.size();
 			FlowStatMap & flows = ge->flows;
 			CountFlows(flows);
 			SlObject(ge, GetGoodsDesc());
@@ -437,13 +437,13 @@ static void Load_STNN()
 				FlowStatMap & flows = ge->flows;
 				SlObject(ge, GetGoodsDesc());
 				LinkStat ls;
-				for (uint i = 0; i < _num_links; ++i) {
+				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, _linkstat_desc);
 					assert(ls.capacity > 0);
 					stats[_station_id] = ls;
 				}
 				FlowStat fs;
-				for (uint i = 0; i < _num_flows; ++i) {
+				for (uint32 i = 0; i < _num_flows; ++i) {
 					SlObject(&fs, _flowstat_desc);
 					flows[_station_id].insert(fs);
 				}
