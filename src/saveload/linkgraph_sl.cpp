@@ -7,7 +7,7 @@
 
 const SettingDesc *GetSettingDescription(uint index);
 
-static uint _num_components;
+static uint32 _num_components;
 static Date _join_date;
 
 enum {
@@ -20,7 +20,7 @@ enum {
 const SaveLoad * GetLinkGraphComponentDesc() {
 
 	static const SaveLoad _component_desc[] = {
-		 SLE_CONDVAR(LinkGraphComponent, num_nodes,        SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraphComponent, num_nodes,        SLE_UINT32,   LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraphComponent, index,            SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(                    _join_date,       SLE_INT32,  LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
@@ -32,7 +32,7 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 	typedef std::vector<SaveLoad> SaveLoadVector;
 	static SaveLoadVector saveloads;
 	static const char * prefix = "linkgraph.";
-	int prefixlen = strlen(prefix);
+	size_t prefixlen = strlen(prefix);
 
 	int setting = 0;
 	const SettingDesc * desc = GetSettingDescription(setting);
@@ -58,7 +58,7 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 const SaveLoad * GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad _linkgraph_desc[] = {
-		SLEG_CONDVAR(           _num_components,      SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(           _num_components,      SLE_UINT32,   LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraph, current_component_id, SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraph, current_station_id,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraph, cargo,                SLE_UINT8,  LINKGRAPH_SV, SL_MAX_VERSION),
@@ -70,15 +70,15 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 	// edges and nodes are saved in the correct order, so we don't need to save their ids.
 
 	static const SaveLoad _node_desc[] = {
-		 SLE_CONDVAR(Node, supply,    SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Node, demand,    SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, supply,    SLE_UINT32,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, demand,    SLE_UINT32,   LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(Node, station,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
 	static const SaveLoad _edge_desc[] = {
-		 SLE_CONDVAR(Edge, distance,  SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Edge, capacity,  SLE_UINT,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Edge, distance,  SLE_UINT32,   LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Edge, capacity,  SLE_UINT32,   LINKGRAPH_SV, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
@@ -107,7 +107,7 @@ static void DoSave_LGRP(void *)
 {
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
-		_num_components = graph.GetNumJobs();
+		_num_components = (uint32)graph.GetNumJobs();
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
 		JobList & jobs = graph.GetJobs();
 		for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
@@ -125,7 +125,7 @@ static void Load_LGRP()
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph & graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
-		for (uint i = 0; i < _num_components; ++i) {
+		for (uint32 i = 0; i < _num_components; ++i) {
 			LinkGraphComponent * comp = new LinkGraphComponent(cargo);
 			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
 			comp->SetSize(comp->GetSize());
