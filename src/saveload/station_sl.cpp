@@ -366,7 +366,7 @@ static void RealSave_STNN(BaseStation *bst)
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
 			LinkStatMap &stats = ge->link_stats;
-			_num_links = stats.size();
+			_num_links = (uint16)stats.size();
 			SlObject(ge, GetGoodsDesc());
 			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
 				_station_id = i->first;
@@ -408,7 +408,7 @@ static void Load_STNN()
 				LinkStatMap &stats = ge->link_stats;
 				SlObject(ge, GetGoodsDesc());
 				LinkStat ls;
-				for (uint i = 0; i < _num_links; ++i) {
+				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, _linkstat_desc);
 					assert(ls.capacity > 0);
 					stats[_station_id] = ls;
