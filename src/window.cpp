@@ -645,12 +645,14 @@ void Window::ReInit()
 
 /** Find the Window whose parent pointer points to this window
  * @param w parent Window to find child of
- * @return a Window pointer that is the child of w, or NULL otherwise */
-static Window *FindChildWindow(const Window *w)
+ * @param wc Window class of the window to remove; WC_INVALID if class does not matter
+ * @return a Window pointer that is the child of w, or NULL otherwise
+ */
+static Window *FindChildWindow(const Window *w, WindowClass wc)
 {
 	Window *v;
 	FOR_ALL_WINDOWS_FROM_BACK(v) {
-		if (v->parent == w) return v;
+		if ((wc == WC_INVALID || wc == v->window_class) && v->parent == w) return v;
 	}
 
 	return NULL;
@@ -658,13 +660,14 @@ static Window *FindChildWindow(const Window *w)
 
 /**
  * Delete all children a window might have in a head-recursive manner
+ * @param wc Window class of the window to remove; WC_INVALID if class does not matter
  */
-void Window::DeleteChildWindows() const
+void Window::DeleteChildWindows(WindowClass wc) const
 {
-	Window *child = FindChildWindow(this);
+	Window *child = FindChildWindow(this, wc);
 	while (child != NULL) {
 		delete child;
-		child = FindChildWindow(this);
+		child = FindChildWindow(this, wc);
 	}
 }
 
@@ -1310,6 +1313,11 @@ static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int
 	return pt;
 }
 
+/* virtual */ Point Window::OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
+{
+	return LocalGetWindowPlacement(desc, sm_width, sm_height, window_number);
+}
+
 /**
  * Set the positions of a new window from a WindowDesc and open it.
  *
@@ -1356,7 +1364,7 @@ void Window::FinishInitNested(const WindowDesc *desc, WindowNumber window_number
 {
 	this->InitializeData(desc->cls, NULL, window_number);
 	this->desc_flags = desc->flags;
-	Point pt = LocalGetWindowPlacement(desc, this->nested_root->smallest_x, this->nested_root->smallest_y, window_number);
+	Point pt = this->OnInitialPosition(desc, this->nested_root->smallest_x, this->nested_root->smallest_y, window_number);
 	this->InitializePositionSize(pt.x, pt.y, this->nested_root->smallest_x, this->nested_root->smallest_y);
 	this->FindWindowPlacementAndResize(desc->default_width, desc->default_height);
 }
@@ -2712,7 +2720,7 @@ void RelocateAllWindows(int neww, int newh)
 
 			case WC_SEND_NETWORK_MSG:
 				ResizeWindow(w, Clamp(neww, 320, 640) - w->width, 0);
-				top = (newh - 26); // 26 = height of status bar + height of chat bar
+				top = newh - w->height - FindWindowById(WC_STATUS_BAR, 0)->height;
 				left = (neww - w->width) >> 1;
 				break;
 
