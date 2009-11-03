@@ -1649,7 +1649,6 @@ STR_NETWORK_COMPANY_LIST_SPECTATE                               :{WHITE}旁觀�
 STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}新公司
 
 # Network client list
-STR_NETWORK_CLIENTLIST_NONE                                     :- 無 -
 STR_NETWORK_CLIENTLIST_KICK                                     :踢除
 STR_NETWORK_CLIENTLIST_BAN                                      :封鎖
 STR_NETWORK_CLIENTLIST_GIVE_MONEY                               :給錢
@@ -2784,6 +2783,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :單軌機車頭
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :磁浮機車頭
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}{}營運成本：{CURRENCY} / 年{}容量：{CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}  最大牽引力：{7:FORCE}{}營運成本：{CURRENCY}/年{}容量：{CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}費用：{CURRENCY} 最高速度：{VELOCITY}{}容量：{CARGO}, {CARGO}{}營運成本：{CURRENCY}/年
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}費用：{CURRENCY} 最高速度：{VELOCITY}{}容量：{CARGO}{}營運成本：{CURRENCY}/年
 
