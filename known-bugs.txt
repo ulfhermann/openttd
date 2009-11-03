@@ -48,9 +48,9 @@ and that the nightlies and next major release will not have that bug.
 - 2585	[OSX] OS' mouse pointer showing
 - 2484	[OSX] Cannot enter CJK characters
 - 2427	Vehicle owner gets paid for whole cargo feeder share
-- 1944	Road vehicles not picking empty drivethrough platform
+- 1944	Road vehicles not picking empty drive through platform
 - 1762	Strange Autoreplace behaviour
-- 1495	Long vehicles might block multistop drivethrough stations
+- 1495	Long vehicles might block multistop drive through stations
 - 1140	[OSX] Not smooth moving map with touchpad
 - 1072	Text overflows in several windows
 
@@ -122,3 +122,13 @@ Lost trains ignore (block) exit signals
 	makes the impact of fixing the bug enormously small against the
 	amount of work needed to write a system that prevents the lost trains
 	from taking the wrong direction.
+
+Extreme CPU usage/hangs on exiting game when using SDL and PulseAudio
+	OpenTTD can be extremely slow/use a lot of CPU when the sound is
+	played via SDL and then through PulseAudio's ALSA wrapper. Under the
+	same configuration OpenTTD, or rather SDL, might hang when exiting
+	the game. This setup seems to be the default configuration for
+	Ubuntu 9.04 and later. For Ubuntu this issue can be solved by
+	installing the 'libsdl1.2debian-pulseaudio' package from Ubuntu's
+	Universe repository. For other distributions a similar package needs
+	to be installed.
