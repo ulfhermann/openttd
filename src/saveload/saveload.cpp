@@ -415,8 +415,8 @@ void SlSetLength(size_t length)
 			switch (_sl.block_mode) {
 				case CH_RIFF:
 					/* Ugly encoding of >16M RIFF chunks
-					* The lower 24 bits are normal
-					* The uppermost 4 bits are bits 24:27 */
+					 * The lower 24 bits are normal
+					 * The uppermost 4 bits are bits 24:27 */
 					assert(length < (1 << 28));
 					SlWriteUint32((uint32)((length & 0xFFFFFF) | ((length >> 24) << 28)));
 					break;
@@ -1697,7 +1697,7 @@ const char *GetSaveLoadErrorString()
 static void SaveFileError()
 {
 	SetDParamStr(0, GetSaveLoadErrorString());
-	ShowErrorMessage(STR_JUST_RAW_STRING, STR_NULL, 0, 0);
+	ShowErrorMessage(STR_JUST_RAW_STRING, INVALID_STRING_ID, 0, 0);
 	SaveFileDone();
 }
 
@@ -1791,7 +1791,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb, boo
 	/* An instance of saving is already active, so don't go saving again */
 	if (_ts.saveinprogress && mode == SL_SAVE) {
 		/* if not an autosave, but a user action, show error message */
-		if (!_do_autosave) ShowErrorMessage(INVALID_STRING_ID, STR_ERROR_SAVE_STILL_IN_PROGRESS, 0, 0);
+		if (!_do_autosave) ShowErrorMessage(STR_ERROR_SAVE_STILL_IN_PROGRESS, INVALID_STRING_ID, 0, 0);
 		return SL_OK;
 	}
 	WaitTillSaved();
