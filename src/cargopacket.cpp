@@ -49,13 +49,13 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
 }
 
 CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id) :
-		feeder_share(feeder_share),
-		count(count),
-		days_in_transit(days_in_transit),
-		source_id(source_id),
-		source(source),
-		source_xy(source_xy),
-		loaded_at_xy(loaded_at_xy)
+	feeder_share(feeder_share),
+	count(count),
+	days_in_transit(days_in_transit),
+	source_id(source_id),
+	source(source),
+	source_xy(source_xy),
+	loaded_at_xy(loaded_at_xy)
 {
 	assert(count != 0);
 	this->source_type = source_type;
@@ -266,13 +266,13 @@ uint VehicleCargoList::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEn
 }
 
 uint VehicleCargoList::TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
-	CargoPacket *p = *c;
-	Money fs = payment->PayTransfer(p, p->count);
-	p->feeder_share += fs;
-	this->feeder_share += fs;
+	CargoPacket *p = this->MovePacket(c, remaining_unload);
 	StationID next = dest->UpdateFlowStatsTransfer(p->source, p->count, curr_station);
+	p->feeder_share += payment->PayTransfer(p, p->count);
+	uint ret = p->count;
+	dest->cargo.Append(next, p);
 	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
-	return MovePacket(&dest->cargo, next, c, remaining_unload);
+	return ret;
 }
 
 UnloadType VehicleCargoList::WillUnload(const UnloadDescription & ul, const CargoPacket * p) const {
