@@ -1757,54 +1757,15 @@ extern void DrawCompanyIcon(CompanyID cid, int x, int y);
 /* Every action must be of this form */
 typedef void ClientList_Action_Proc(byte client_no);
 
-/* Max 10 actions per client */
-#define MAX_CLIENTLIST_ACTION 10
-
-enum {
-	CLNWND_OFFSET = 16,
-	CLNWND_ROWSIZE = 10
-};
-
-/** Widget numbers of the client list window. */
-enum ClientListWidgets {
-	CLW_CLOSE,
-	CLW_CAPTION,
-	CLW_STICKY,
-	CLW_PANEL,
-};
-
-static const Widget _client_list_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   237,     0,    13, STR_NETWORK_COMPANY_LIST_CLIENT_LIST,  STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
-{  WWT_STICKYBOX,   RESIZE_NONE,  COLOUR_GREY,   238,   249,     0,    13, STR_NULL,                 STR_TOOLTIP_STICKY},
-
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   249,    14,    14 + CLNWND_ROWSIZE + 1, 0x0, STR_NULL},
-{   WIDGETS_END},
-};
-
-static const NWidgetPart _nested_client_list_widgets[] = {
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CLW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_GREY, CLW_CAPTION), SetDataTip(STR_NETWORK_COMPANY_LIST_CLIENT_LIST, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, CLW_STICKY),
-	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, CLW_PANEL), SetMinimalSize(250, CLNWND_ROWSIZE + 2), EndContainer(),
-};
-
-static const Widget _client_list_popup_widgets[] = {
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   99,     0,     0,     0, STR_NULL},
-{   WIDGETS_END},
-};
-
 static const NWidgetPart _nested_client_list_popup_widgets[] = {
-	NWidget(WWT_PANEL, COLOUR_GREY, 0), SetMinimalSize(100, 1), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, 0), EndContainer(),
 };
 
-static const WindowDesc _client_list_desc(
-	WDP_AUTO, WDP_AUTO, 250, 1, 250, 1,
-	WC_CLIENT_LIST, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON,
-	_client_list_widgets, _nested_client_list_widgets, lengthof(_nested_client_list_widgets)
+static const WindowDesc _client_list_popup_desc(
+	WDP_AUTO, WDP_AUTO, 150, 1, 150, 1,
+	WC_TOOLBAR_MENU, WC_CLIENT_LIST,
+	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET,
+	NULL, _nested_client_list_popup_widgets, lengthof(_nested_client_list_popup_widgets)
 );
 
 /* Finds the Xth client-info that is active */
@@ -1865,144 +1826,120 @@ static void ClientList_SpeakToAll(byte client_no)
 	ShowNetworkChatQueryWindow(DESTTYPE_BROADCAST, 0);
 }
 
-static void ClientList_None(byte client_no)
-{
-	/* No action ;) */
-}
-
-
-
+/** Popup selection window to chose an action to perform */
 struct NetworkClientListPopupWindow : Window {
-	int sel_index;
-	int client_no;
-	char action[MAX_CLIENTLIST_ACTION][50];
-	ClientList_Action_Proc *proc[MAX_CLIENTLIST_ACTION];
+	/** Container for actions that can be executed. */
+	struct ClientListAction {
+		StringID name;                ///< Name of the action to execute
+		ClientList_Action_Proc *proc; ///< Action to execute
+	};
 
-	NetworkClientListPopupWindow(int x, int y, const Widget *widgets, int client_no) :
-			Window(x, y, 150, 100, WC_TOOLBAR_MENU, widgets),
+	uint sel_index;
+	int client_no;
+	Point desired_location;
+	SmallVector<ClientListAction, 2> actions; ///< Actions to execute
+
+	/**
+	 * Add an action to the list of actions to execute.
+	 * @param name the name of the action
+	 * @param proc the procedure to execute for the action
+	 */
+	inline void AddAction(StringID name, ClientList_Action_Proc *proc)
+	{
+		ClientListAction *action = this->actions.Append();
+		action->name = name;
+		action->proc = proc;
+	}
+
+	NetworkClientListPopupWindow(const WindowDesc *desc, int x, int y, int client_no) :
+			Window(),
 			sel_index(0), client_no(client_no)
 	{
-		/*
-		 * Fill the actions this client has.
-		 * Watch is, max 50 chars long!
-		 */
+		this->desired_location.x = x;
+		this->desired_location.y = y;
 
 		const NetworkClientInfo *ci = NetworkFindClientInfo(client_no);
 
-		int i = 0;
 		if (_network_own_client_id != ci->client_id) {
-			GetString(this->action[i], STR_NETWORK_CLIENTLIST_SPEAK_TO_CLIENT, lastof(this->action[i]));
-			this->proc[i++] = &ClientList_SpeakToClient;
+			this->AddAction(STR_NETWORK_CLIENTLIST_SPEAK_TO_CLIENT, &ClientList_SpeakToClient);
 		}
 
 		if (Company::IsValidID(ci->client_playas) || ci->client_playas == COMPANY_SPECTATOR) {
-			GetString(this->action[i], STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY, lastof(this->action[i]));
-			this->proc[i++] = &ClientList_SpeakToCompany;
+			this->AddAction(STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY, &ClientList_SpeakToCompany);
 		}
-		GetString(this->action[i], STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL, lastof(this->action[i]));
-		this->proc[i++] = &ClientList_SpeakToAll;
+		this->AddAction(STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL, &ClientList_SpeakToAll);
 
 		if (_network_own_client_id != ci->client_id) {
 			/* We are no spectator and the company we want to give money to is no spectator and money gifts are allowed */
 			if (Company::IsValidID(_local_company) && Company::IsValidID(ci->client_playas) && _settings_game.economy.give_money) {
-				GetString(this->action[i], STR_NETWORK_CLIENTLIST_GIVE_MONEY, lastof(this->action[i]));
-				this->proc[i++] = &ClientList_GiveMoney;
+				this->AddAction(STR_NETWORK_CLIENTLIST_GIVE_MONEY, &ClientList_GiveMoney);
 			}
 		}
 
 		/* A server can kick clients (but not himself) */
 		if (_network_server && _network_own_client_id != ci->client_id) {
-			GetString(this->action[i], STR_NETWORK_CLIENTLIST_KICK, lastof(this->action[i]));
-			this->proc[i++] = &ClientList_Kick;
-
-			GetString(this->action[i], STR_NETWORK_CLIENTLIST_BAN, lastof(this->action[i]));
-			this->proc[i++] = &ClientList_Ban;
+			this->AddAction(STR_NETWORK_CLIENTLIST_KICK, &ClientList_Kick);
+			this->AddAction(STR_NETWORK_CLIENTLIST_BAN, &ClientList_Ban);
 		}
-
-		if (i == 0) {
-			GetString(this->action[i], STR_NETWORK_CLIENTLIST_NONE, lastof(this->action[i]));
-			this->proc[i++] = &ClientList_None;
-		}
-
-		/* Calculate the height */
-		int h = ClientListPopupHeight();
-
-		/* Allocate the popup */
-		this->widget[0].bottom = this->widget[0].top + h;
-		this->widget[0].right = this->widget[0].left + 150;
 
 		this->flags4 &= ~WF_WHITE_BORDER_MASK;
-
-		this->FindWindowPlacementAndResize(150, h + 1);
+		this->InitNested(desc, 0);
 	}
 
-	/**
-	 * An action is clicked! What do we do?
-	 */
-	void HandleClientListPopupClick(byte index)
+	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
 	{
-		/* A click on the Popup of the ClientList.. handle the command */
-		if (index < MAX_CLIENTLIST_ACTION && this->proc[index] != NULL) {
-			this->proc[index](this->client_no);
-		}
+		return this->desired_location;
 	}
 
-	/**
-	 * Finds the amount of actions in the popup and set the height correct
-	 */
-	uint ClientListPopupHeight()
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
 	{
-		int num = 0;
-
-		/* Find the amount of actions */
-		for (int i = 0; i < MAX_CLIENTLIST_ACTION; i++) {
-			if (this->action[i][0] == '\0') continue;
-			if (this->proc[i] == NULL) continue;
-			num++;
+		Dimension d = *size;
+		for (const ClientListAction *action = this->actions.Begin(); action != this->actions.End(); action++) {
+			d = maxdim(GetStringBoundingBox(action->name), d);
 		}
 
-		num *= CLNWND_ROWSIZE;
-
-		return num + 1;
+		d.height *= this->actions.Length();
+		d.width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+		d.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+		*size = d;
 	}
 
-
-	virtual void OnPaint()
+	virtual void DrawWidget(const Rect &r, int widget) const
 	{
-		this->DrawWidgets();
-
 		/* Draw the actions */
 		int sel = this->sel_index;
-		int y = 1;
-		for (int i = 0; i < MAX_CLIENTLIST_ACTION; i++, y += CLNWND_ROWSIZE) {
-			if (this->action[i][0] == '\0') continue;
-			if (this->proc[i] == NULL) continue;
-
+		int y = r.top + WD_FRAMERECT_TOP;
+		for (const ClientListAction *action = this->actions.Begin(); action != this->actions.End(); action++, y += FONT_HEIGHT_NORMAL) {
 			TextColour colour;
 			if (sel-- == 0) { // Selected item, highlight it
-				GfxFillRect(1, y, 150 - 2, y + CLNWND_ROWSIZE - 1, 0);
+				GfxFillRect(r.left + 1, y, r.right - 1, y + FONT_HEIGHT_NORMAL - 1, 0);
 				colour = TC_WHITE;
 			} else {
 				colour = TC_BLACK;
 			}
 
-			DrawString(4, this->width - 4, y, this->action[i], colour);
+			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, action->name, colour);
 		}
+	}
+
+	virtual void OnPaint()
+	{
+		this->DrawWidgets();
 	}
 
 	virtual void OnMouseLoop()
 	{
 		/* We selected an action */
-		int index = (_cursor.pos.y - this->top) / CLNWND_ROWSIZE;
+		uint index = (_cursor.pos.y - this->top - WD_FRAMERECT_TOP) / FONT_HEIGHT_NORMAL;
 
 		if (_left_button_down) {
-			if (index == -1 || index == this->sel_index) return;
+			if (index == this->sel_index || index >= this->actions.Length()) return;
 
 			this->sel_index = index;
 			this->SetDirty();
 		} else {
-			if (index >= 0 && _cursor.pos.y >= this->top) {
-				HandleClientListPopupClick(index);
+			if (index < this->actions.Length() && _cursor.pos.y >= this->top) {
+				this->actions[index].proc(this->client_no);
 			}
 
 			DeleteWindowById(WC_TOOLBAR_MENU, 0);
@@ -2015,34 +1952,52 @@ struct NetworkClientListPopupWindow : Window {
  */
 static void PopupClientList(int client_no, int x, int y)
 {
-	static Widget *generated_client_list_popup_widgets = NULL;
-
 	DeleteWindowById(WC_TOOLBAR_MENU, 0);
 
 	if (NetworkFindClientInfo(client_no) == NULL) return;
 
-	const Widget *wid = InitializeWidgetArrayFromNestedWidgets(
-		_nested_client_list_popup_widgets, lengthof(_nested_client_list_popup_widgets),
-		_client_list_popup_widgets, &generated_client_list_popup_widgets
-	);
-
-	new NetworkClientListPopupWindow(x, y, wid, client_no);
+	new NetworkClientListPopupWindow(&_client_list_popup_desc, x, y, client_no);
 }
+
+
+/** Widget numbers of the client list window. */
+enum ClientListWidgets {
+	CLW_CLOSE,
+	CLW_CAPTION,
+	CLW_STICKY,
+	CLW_PANEL,
+};
+
+static const NWidgetPart _nested_client_list_widgets[] = {
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CLW_CLOSE),
+		NWidget(WWT_CAPTION, COLOUR_GREY, CLW_CAPTION), SetDataTip(STR_NETWORK_COMPANY_LIST_CLIENT_LIST, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY, CLW_STICKY),
+	EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, CLW_PANEL), SetMinimalSize(250, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM), SetResize(1, 1), EndContainer(),
+};
+
+static const WindowDesc _client_list_desc(
+	WDP_AUTO, WDP_AUTO, 250, 16, 250, 16,
+	WC_CLIENT_LIST, WC_NONE,
+	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
+	NULL, _nested_client_list_widgets, lengthof(_nested_client_list_widgets)
+);
 
 /**
  * Main handle for clientlist
  */
-struct NetworkClientListWindow : Window
-{
+struct NetworkClientListWindow : Window {
 	int selected_item;
-	int selected_y;
+
+	uint server_client_width;
+	uint company_icon_width;
 
 	NetworkClientListWindow(const WindowDesc *desc, WindowNumber window_number) :
-			Window(desc, window_number),
-			selected_item(-1),
-			selected_y(0)
+			Window(),
+			selected_item(-1)
 	{
-		this->FindWindowPlacementAndResize(desc);
+		this->InitNested(desc, window_number);
 	}
 
 	/**
@@ -2058,53 +2013,70 @@ struct NetworkClientListWindow : Window
 			if (ci->client_playas != COMPANY_INACTIVE_CLIENT) num++;
 		}
 
-		num *= CLNWND_ROWSIZE;
+		num *= FONT_HEIGHT_NORMAL;
 
+		int diff = (num + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM) - (this->GetWidget<NWidgetBase>(CLW_PANEL)->current_y);
 		/* If height is changed */
-		if (this->height != CLNWND_OFFSET + num + 1) {
-			/* XXX - magic unfortunately; (num + 2) has to be one bigger than heigh (num + 1) */
-			this->SetDirty();
-			this->widget[3].bottom = this->widget[3].top + num + 2;
-			this->height = CLNWND_OFFSET + num + 1;
-			this->SetDirty();
+		if (diff != 0) {
+			ResizeWindow(this, 0, diff);
 			return false;
 		}
 		return true;
 	}
 
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	{
+		if (widget != CLW_PANEL) return;
+
+		this->server_client_width = max(GetStringBoundingBox(STR_NETWORK_SERVER).width, GetStringBoundingBox(STR_NETWORK_CLIENT).width) + WD_FRAMERECT_RIGHT;
+		this->company_icon_width = GetSpriteSize(SPR_COMPANY_ICON).width + WD_FRAMERECT_LEFT;
+
+		uint width = 200; // Default width
+		const NetworkClientInfo *ci;
+		FOR_ALL_CLIENT_INFOS(ci) {
+			width = max(width, GetStringBoundingBox(ci->client_name).width);
+		}
+
+		size->width = WD_FRAMERECT_LEFT + this->server_client_width + this->company_icon_width + WD_FRAMERECT_RIGHT;
+	}
+
 	virtual void OnPaint()
 	{
-		NetworkClientInfo *ci;
-		int i = 0;
-
 		/* Check if we need to reset the height */
 		if (!this->CheckClientListHeight()) return;
 
 		this->DrawWidgets();
+	}
 
-		int y = CLNWND_OFFSET;
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != CLW_PANEL) return;
 
+		int y = r.top + WD_FRAMERECT_TOP;
+		int left = r.left + WD_FRAMERECT_LEFT;
+		int i = 0;
+		const NetworkClientInfo *ci;
 		FOR_ALL_CLIENT_INFOS(ci) {
 			TextColour colour;
 			if (this->selected_item == i++) { // Selected item, highlight it
-				GfxFillRect(1, y, 248, y + CLNWND_ROWSIZE - 1, 0);
+				GfxFillRect(r.left + 1, y, r.right - 1, y + FONT_HEIGHT_NORMAL - 1, 0);
 				colour = TC_WHITE;
 			} else {
 				colour = TC_BLACK;
 			}
 
 			if (ci->client_id == CLIENT_ID_SERVER) {
-				DrawString(4, 81, y, STR_NETWORK_SERVER, colour);
+				DrawString(left, left + this->server_client_width, y, STR_NETWORK_SERVER, colour);
 			} else {
-				DrawString(4, 81, y, STR_NETWORK_CLIENT, colour);
+				DrawString(left, left + this->server_client_width, y, STR_NETWORK_CLIENT, colour);
 			}
 
 			/* Filter out spectators */
-			if (Company::IsValidID(ci->client_playas)) DrawCompanyIcon(ci->client_playas, 64, y + 1);
+			if (Company::IsValidID(ci->client_playas)) DrawCompanyIcon(ci->client_playas, left + this->server_client_width, y + 1);
 
-			DrawString(81, this->width - 2, y, ci->client_name, colour);
+			DrawString(left + this->server_client_width + this->company_icon_width, r.right - WD_FRAMERECT_RIGHT, y, ci->client_name, colour);
 
-			y += CLNWND_ROWSIZE;
+			y += FONT_HEIGHT_NORMAL;
 		}
 	}
 
@@ -2120,21 +2092,21 @@ struct NetworkClientListWindow : Window
 	{
 		/* -1 means we left the current window */
 		if (pt.y == -1) {
-			this->selected_y = 0;
 			this->selected_item = -1;
 			this->SetDirty();
 			return;
 		}
-		/* It did not change.. no update! */
-		if (pt.y == this->selected_y) return;
 
 		/* Find the new selected item (if any) */
-		this->selected_y = pt.y;
-		if (pt.y > CLNWND_OFFSET) {
-			this->selected_item = (pt.y - CLNWND_OFFSET) / CLNWND_ROWSIZE;
-		} else {
-			this->selected_item = -1;
+		pt.y -= this->GetWidget<NWidgetBase>(CLW_PANEL)->pos_y;
+		int item = -1;
+		if (IsInsideMM(pt.y, WD_FRAMERECT_TOP, this->GetWidget<NWidgetBase>(CLW_PANEL)->current_y - WD_FRAMERECT_BOTTOM)) {
+			item = (pt.y - WD_FRAMERECT_TOP) / FONT_HEIGHT_NORMAL;
 		}
+
+		/* It did not change.. no update! */
+		if (item == this->selected_item) return;
+		this->selected_item = item;
 
 		/* Repaint */
 		this->SetDirty();
@@ -2177,18 +2149,23 @@ enum NetworkJoinStatusWidgets {
 };
 
 struct NetworkJoinStatusWindow : Window {
-	NetworkJoinStatusWindow(const WindowDesc *desc) : Window(desc)
+	NetworkJoinStatusWindow(const WindowDesc *desc) : Window()
 	{
 		this->parent = FindWindowById(WC_NETWORK_WINDOW, 0);
-		this->FindWindowPlacementAndResize(desc);
+		this->InitNested(desc, 0);
 	}
 
 	virtual void OnPaint()
 	{
-		uint8 progress; // used for progress bar
 		this->DrawWidgets();
+	}
 
-		DrawString(this->widget[NJSW_BACKGROUND].left + 2, this->widget[NJSW_BACKGROUND].right - 2, 35, STR_NETWORK_CONNECTING_1 + _network_join_status, TC_FROMSTRING, SA_CENTER);
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != NJSW_BACKGROUND) return;
+
+		uint8 progress; // used for progress bar
+		DrawString(r.left + 2, r.right - 2, r.top + 20, STR_NETWORK_CONNECTING_1 + _network_join_status, TC_FROMSTRING, SA_CENTER);
 		switch (_network_join_status) {
 			case NETWORK_JOIN_STATUS_CONNECTING: case NETWORK_JOIN_STATUS_AUTHORIZING:
 			case NETWORK_JOIN_STATUS_GETTING_COMPANY_INFO:
@@ -2196,20 +2173,20 @@ struct NetworkJoinStatusWindow : Window {
 				break;
 			case NETWORK_JOIN_STATUS_WAITING:
 				SetDParam(0, _network_join_waiting);
-				DrawString(this->widget[NJSW_BACKGROUND].left + 2, this->widget[NJSW_BACKGROUND].right - 2, 46, STR_NETWORK_CONNECTING_WAITING, TC_FROMSTRING, SA_CENTER);
+				DrawString(r.left + 2, r.right - 2, r.top + 20 + FONT_HEIGHT_NORMAL, STR_NETWORK_CONNECTING_WAITING, TC_FROMSTRING, SA_CENTER);
 				progress = 15; // third stage is 15%
 				break;
 			case NETWORK_JOIN_STATUS_DOWNLOADING:
 				SetDParam(0, _network_join_bytes);
 				SetDParam(1, _network_join_bytes_total);
-				DrawString(this->widget[NJSW_BACKGROUND].left + 2, this->widget[NJSW_BACKGROUND].right - 2, 46, STR_NETWORK_CONNECTING_DOWNLOADING, TC_FROMSTRING, SA_CENTER);
+				DrawString(r.left + 2, r.right - 2, r.top + 20 + FONT_HEIGHT_NORMAL, STR_NETWORK_CONNECTING_DOWNLOADING, TC_FROMSTRING, SA_CENTER);
 				/* Fallthrough */
 			default: // Waiting is 15%, so the resting receivement of map is maximum 70%
 				progress = 15 + _network_join_bytes * (100 - 15) / _network_join_bytes_total;
 		}
 
 		/* Draw nice progress bar :) */
-		DrawFrameRect(20, 18, (int)((this->width - 20) * progress / 100), 28, COLOUR_MAUVE, FR_NONE);
+		DrawFrameRect(r.left + 20, r.top + 5, (int)((this->width - 20) * progress / 100), r.top + 15, COLOUR_MAUVE, FR_NONE);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -2232,13 +2209,6 @@ struct NetworkJoinStatusWindow : Window {
 	}
 };
 
-static const Widget _network_join_status_window_widget[] = {
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,      0,   249,     0,    13, STR_NETWORK_CONNECTING_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // NJSW_CAPTION
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,      0,   249,    14,    84, 0x0,                    STR_NULL},                        // NJSW_BACKGROUND
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_WHITE,    75,   175,    69,    80, STR_NETWORK_CONNECTION_DISCONNECT, STR_NULL},                        // NJSW_CANCELOK
-{   WIDGETS_END},
-};
-
 static const NWidgetPart _nested_network_join_status_window_widgets[] = {
 	NWidget(WWT_CAPTION, COLOUR_GREY, NJSW_CAPTION), SetDataTip(STR_NETWORK_CONNECTING_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	NWidget(WWT_PANEL, COLOUR_GREY, NJSW_BACKGROUND),
@@ -2250,7 +2220,7 @@ static const WindowDesc _network_join_status_window_desc(
 	WDP_CENTER, WDP_CENTER, 250, 85, 250, 85,
 	WC_NETWORK_STATUS_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_MODAL,
-	_network_join_status_window_widget, _nested_network_join_status_window_widgets, lengthof(_nested_network_join_status_window_widgets)
+	NULL, _nested_network_join_status_window_widgets, lengthof(_nested_network_join_status_window_widgets)
 );
 
 void ShowJoinStatusWindow()
