@@ -233,9 +233,6 @@ public:
 	/** The const reverse iterator for our container */
 	typedef typename Tcont::const_reverse_iterator ConstReverseIterator;
 
-private:
-	CargoPacket *MovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
-
 protected:
 	uint count;                 ///< Cache for the number of cargo entities
 	uint cargo_days_in_transit; ///< Cache for the sum of number of days in transit of each entity; comparable to man-hours
@@ -255,6 +252,8 @@ protected:
 	 * @param cp Packet to be removed from cache
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
+
+	CargoPacket *MovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
 	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
