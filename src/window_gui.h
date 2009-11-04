@@ -621,7 +621,7 @@ public:
 	void DrawViewport() const;
 	void DrawSortButtonState(int widget, SortButtonState state) const;
 
-	void DeleteChildWindows() const;
+	void DeleteChildWindows(WindowClass wc = WC_INVALID) const;
 
 	void SetDirty() const;
 	void ReInit();
@@ -637,6 +637,18 @@ public:
 	}
 
 	/*** Event handling ***/
+
+	/**
+	 * Compute the initial position of the window.
+	 * @param *desc         The pointer to the WindowDesc of the window to create.
+	 * @param sm_width      Smallest width of the window.
+	 * @param sm_height     Smallest height of the window.
+	 * @param window_number The window number of the new window.
+	 * @return Initial position of the top-left corner of the window.
+	 *
+	 * @note Due to the way C++ works, only windows with nested widgets can usefully override this function.
+	 */
+	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number);
 
 	/**
 	 * The window must be repainted.
@@ -883,11 +895,6 @@ inline const NWID *Window::GetWidget(uint widnum) const
 class PickerWindowBase : public Window {
 
 public:
-	PickerWindowBase(const WindowDesc *desc, Window *parent, WindowNumber number = 0) : Window(desc, number)
-	{
-		this->parent = parent;
-	};
-
 	PickerWindowBase(Window *parent) : Window()
 	{
 		this->parent = parent;

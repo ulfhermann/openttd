@@ -353,7 +353,7 @@ public:
 					/* Find last entry in the list, checking for duplicate grfid on the way */
 					for (list = this->list; *list != NULL; list = &(*list)->next) {
 						if ((*list)->grfid == src->grfid) {
-							ShowErrorMessage(INVALID_STRING_ID, STR_NEWGRF_DUPLICATE_GRFID, 0, 0);
+							ShowErrorMessage(STR_NEWGRF_DUPLICATE_GRFID, INVALID_STRING_ID, 0, 0);
 							return;
 						}
 					}
@@ -749,6 +749,7 @@ struct NewGRFWindow : public Window {
 				this->sel = newsel;
 				this->preset = -1;
 				this->InvalidateData();
+				this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
 				break;
 			}
 
@@ -791,6 +792,8 @@ struct NewGRFWindow : public Window {
 				uint i = (pt.y - this->GetWidget<NWidgetBase>(SNGRFS_FILE_LIST)->pos_y) / this->resize.step_height + this->vscroll.GetPosition();
 
 				for (c = this->list; c != NULL && i > 0; c = c->next, i--) {}
+
+				if (this->sel != c) this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
 				this->sel = c;
 
 				this->InvalidateData();
@@ -819,7 +822,7 @@ struct NewGRFWindow : public Window {
 				static char buff[512];
 				GRFBuildParamList(buff, this->sel, lastof(buff));
 				SetDParamStr(0, buff);
-				ShowQueryString(STR_JUST_RAW_STRING, STR_NEWGRF_SETTINGS_PARAMETER_QUERY, 63, 250, this, CS_ALPHANUMERAL, QSF_NONE);
+				ShowQueryString(STR_JUST_RAW_STRING, STR_NEWGRF_SETTINGS_PARAMETER_QUERY, 63, 250, this, CS_NUMERAL_SPACE, QSF_NONE);
 				break;
 			}
 
@@ -832,7 +835,7 @@ struct NewGRFWindow : public Window {
 
 			case SNGRFS_CONTENT_DOWNLOAD:
 				if (!_network_available) {
-					ShowErrorMessage(INVALID_STRING_ID, STR_NETWORK_ERROR_NOTAVAILABLE, 0, 0);
+					ShowErrorMessage(STR_NETWORK_ERROR_NOTAVAILABLE, INVALID_STRING_ID, 0, 0);
 				} else {
 #if defined(ENABLE_NETWORK)
 				/* Only show the things in the current list, or everything when nothing's selected */
