@@ -1161,9 +1161,6 @@ void StateGameLoop()
 			memcpy(buff, &v->cargo, sizeof(VehicleCargoList));
 			v->cargo.InvalidateCache();
 			assert(memcmp(&v->cargo, buff, sizeof(VehicleCargoList)) == 0);
-			memcpy(buff, &v->reserved, sizeof(VehicleCargoList));
-			v->reserved.InvalidateCache();
-			assert(memcmp(&v->reserved, buff, sizeof(VehicleCargoList)) == 0);
 		}
 
 		Station *st;

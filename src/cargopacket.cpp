@@ -129,29 +129,29 @@ void CargoList<Tinst, Tcont>::AddToCache(const CargoPacket *cp)
 	this->count                 += cp->count;
 	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
 }
-
-void ReservationList::Append(CargoPacket *cp)
+void VehicleCargoList::MergeOrPush(CargoPacket *cp)
 {
-	assert(cp != NULL);
-	this->AddToCache(cp);
-	this->packets.push_back(cp);
-}
-
-void VehicleCargoList::Append(CargoPacket *cp)
-{
-	assert(cp != NULL);
-	this->AddToCache(cp);
-
-	for (ReverseIterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
+	for (CargoPacketList::reverse_iterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
 		CargoPacket *icp = *it;
 		if (VehicleCargoList::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
-			icp->Merge(cp);
+			icp->count        += cp->count;
+			icp->feeder_share += cp->feeder_share;
+
+			delete cp;
 			return;
 		}
 	}
 
 	/* The packet could not be merged with another one */
 	this->packets.push_back(cp);
+}
+
+
+void VehicleCargoList::Append(CargoPacket *cp)
+{
+	assert(cp != NULL);
+	this->AddToCache(cp);
+	this->MergeOrPush(cp);
 }
 
 
@@ -182,20 +182,67 @@ void CargoList<Tinst, Tcont>::Truncate(uint max_remaining)
 	}
 }
 
+void VehicleCargoList::Reserve(CargoPacket *cp)
+{
+	assert(cp != NULL);
+	this->AddToCache(cp);
+	this->reserved_count += cp->count;
+	this->reserved.push_back(cp);
+}
+
+
+void VehicleCargoList::Unreserve(StationID next, StationCargoList *dest)
+{
+	Iterator it(this->reserved.begin());
+	while (it != this->reserved.end()) {
+		CargoPacket *cp = *it;
+		this->RemoveFromCache(cp);
+		this->reserved_count -= cp->count;
+		dest->Append(next, cp);
+		this->reserved.erase(it++);
+	}
+}
+
+uint VehicleCargoList::LoadReserved(uint max_move)
+{
+	uint orig_max = max_move;
+	Iterator it(this->reserved.begin());
+	while (it != this->reserved.end() && max_move > 0) {
+		CargoPacket *cp = *it;
+		if (cp->count <= max_move) {
+			/* Can move the complete packet */
+			max_move -= cp->count;
+			this->reserved.erase(it++);
+			this->reserved_count -= cp->count;
+			this->MergeOrPush(cp);
+		} else {
+			cp->count -= max_move;
+			CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, cp->source, cp->source_xy, cp->loaded_at_xy, 0, cp->source_type, cp->source_id);
+			this->MergeOrPush(cp_new);
+			this->reserved_count -= max_move;
+			max_move = 0;
+		}
+	}
+	return orig_max - max_move;
+}
+
 template<class Tinst, class Tcont>
-template<class Tother_inst>
-uint CargoList<Tinst, Tcont>::MovePacket(Tother_inst *dest, Iterator &it, uint cap, TileIndex load_place)
+uint CargoList<Tinst, Tcont>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, bool reserve, TileIndex load_place)
 {
 	CargoPacket *packet = MovePacket(it, cap, load_place);
 	uint ret = packet->count;
-	dest->Append(packet);
+	if (reserve) {
+		dest->Reserve(packet);
+	} else {
+		dest->Append(packet);
+	}
 	return ret;
 }
 
 template<class Tinst, class Tcont>
-uint CargoList<Tinst, Tcont>::MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place)
+uint CargoList<Tinst, Tcont>::MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap)
 {
-	CargoPacket *packet = MovePacket(it, cap, load_place);
+	CargoPacket *packet = MovePacket(it, cap);
 	uint ret = packet->count;
 	dest->Append(next, packet);
 	return ret;
@@ -240,6 +287,12 @@ void CargoList<Tinst, Tcont>::InvalidateCache()
 	}
 }
 
+VehicleCargoList::~VehicleCargoList()
+{
+	for (Iterator it(this->reserved.begin()); it != this->reserved.end(); ++it) {
+		delete *it;
+	}
+}
 
 uint VehicleCargoList::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
 	CargoPacket * p = *c;
@@ -264,6 +317,7 @@ uint VehicleCargoList::DeliverPacket(Iterator &c, uint remaining_unload, GoodsEn
 	dest->UpdateFlowStats(source, loaded, curr_station);
 	return loaded;
 }
+
 
 uint VehicleCargoList::TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station) {
 	CargoPacket *p = this->MovePacket(c, remaining_unload);
@@ -350,13 +404,6 @@ UnloadType VehicleCargoList::WillUnloadCargoDist(const UnloadDescription & ul, c
 	}
 }
 
-void ReservationList::Revert(GoodsEntry *ge) {
-	for(Iterator c = packets.begin(); c != packets.end();) {
-		SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
-		MovePacket(&ge->cargo, INVALID_STATION, c, (*c)->count);
-	}
-}
-
 uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment) {
 	uint remaining_unload = max_unload;
 	UnloadDescription ul(dest, curr_station, next_station, flags);
@@ -397,14 +444,12 @@ void VehicleCargoList::AddToCache(const CargoPacket *cp)
 	this->Parent::AddToCache(cp);
 }
 
-template <class Tinst, class Tcont>
-template <class Tother_inst>
-uint CargoList<Tinst, Tcont>::MoveTo(Tother_inst *dest, uint cap, TileIndex load_place)
+uint VehicleCargoList::MoveTo(VehicleCargoList *dest, uint cap)
 {
 	uint orig_cap = cap;
 	Iterator it = packets.begin();
 	while(it != packets.end() && cap > 0) {
-		cap -= MovePacket(dest, it, cap, load_place);
+		cap -= MovePacket(dest, it, cap);
 	}
 	return orig_cap - cap;
 }
@@ -460,27 +505,25 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 	list.push_back(cp);
 }
 
-template <class Tother_inst>
-uint StationCargoList::MovePackets(Tother_inst *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place) {
+uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place, bool reserve) {
 	uint orig_cap = cap;
 	while(begin != end && cap > 0) {
-		cap -= this->MovePacket(dest, begin, cap, load_place);
+		cap -= this->MovePacket(dest, begin, cap, load_place, reserve);
 	}
 	return orig_cap - cap;
 }
 
-template <class Tother_inst>
-uint StationCargoList::MoveTo(Tother_inst *dest, uint cap, StationID selected_station, TileIndex load_place) {
+uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID selected_station, TileIndex load_place, bool reserve) {
 	uint orig_cap = cap;
 	if (selected_station != INVALID_STATION) {
 		std::pair<Iterator, Iterator> bounds(packets.equal_range(selected_station));
-		cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place);
+		cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place, reserve);
 		if (cap > 0) {
 			bounds = packets.equal_range(INVALID_STATION);
-			cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place);
+			cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place, reserve);
 		}
 	} else {
-		cap -= MovePackets(dest, cap, packets.begin(), packets.end(), load_place);
+		cap -= MovePackets(dest, cap, packets.begin(), packets.end(), load_place, reserve);
 	}
 	return orig_cap - cap;
 }
@@ -504,25 +547,16 @@ void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEn
 void VehicleCargoList::InvalidateCache()
 {
 	this->feeder_share = 0;
+	this->reserved_count = 0;
 	this->Parent::InvalidateCache();
+	for (ConstIterator it(this->reserved.begin()); it != this->reserved.end(); it++) {
+		this->AddToCache(*it);
+		this->reserved_count += (*it)->count;
+	}
 }
 
 /*
  * We have to instantiate everything we want to be usable.
  */
-/** Autoreplace Vehicle -> Vehicle 'transfer' */
-template uint CargoList<VehicleCargoList, CargoPacketList>::MoveTo(VehicleCargoList *dest, uint cap, TileIndex load_place);
-template uint CargoList<VehicleCargoList, CargoPacketList>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place);
-/** Transfer reservation */
-template uint CargoList<ReservationList, CargoPacketList>::MoveTo(VehicleCargoList *dest, uint cap, TileIndex load_place);
-template uint CargoList<ReservationList, CargoPacketList>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place);
-/** Cargo loading at a station */
-template uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID selected_station, TileIndex load_place);
-template uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
-/** Reserve cargo */
-template uint StationCargoList::MoveTo(ReservationList *dest, uint cap, StationID selected_station, TileIndex load_place);
-template uint StationCargoList::MovePackets(ReservationList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
-
 template class CargoList<VehicleCargoList, CargoPacketList>;
 template class CargoList<StationCargoList, StationCargoPacketMap>;
-template class CargoList<ReservationList, CargoPacketList>;

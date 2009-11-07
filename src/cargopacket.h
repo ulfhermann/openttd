@@ -33,6 +33,8 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576, true, false> CargoPacket
 extern CargoPacketPool _cargopacket_pool;
 
 template <class Tinst, class Tcont> class CargoList;
+class StationCargoList;
+class VehicleCargoList;
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -255,10 +257,9 @@ protected:
 
 	CargoPacket *MovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
-	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
+	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap);
 
-	template<class Tother_inst>
-	uint MovePacket(Tother_inst *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
+	uint MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, bool reserved = false, TileIndex load_place = INVALID_TILE);
 
 public:
 	/** Create the cargo list */
@@ -325,40 +326,9 @@ public:
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
-
-	/**
-	 * Moves the given amount of cargo to a vehicle.
-	 * @param dest         the destination to move the cargo to
-	 * @param max_load     the maximum amount of cargo entities to move
-	 */
-	template <class Tother_inst>
-	uint MoveTo(Tother_inst *dest, uint cap, TileIndex load_place = INVALID_TILE);
 };
 
 typedef std::list<CargoPacket *> CargoPacketList;
-
-class ReservationList : public CargoList<ReservationList, CargoPacketList> {
-protected:
-	/** The (direct) parent of this class */
-	typedef CargoList<VehicleCargoList, CargoPacketList> Parent;
-
-public:
-	/** The super class ought to know what it's doing */
-	friend class CargoList<VehicleCargoList, CargoPacketList>;
-	/** The vehicles have a cargo list (and we want that saved). */
-	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
-
-	/**
-	 * Appends the given cargo packet
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
-	 */
-	void Append(CargoPacket *cp);
-
-	void Revert(GoodsEntry *ge);
-};
 
 /**
  * CargoList that is used for vehicles.
@@ -374,7 +344,9 @@ protected:
 	/** The (direct) parent of this class */
 	typedef CargoList<VehicleCargoList, CargoPacketList> Parent;
 
-	Money feeder_share; ///< Cache for the feeder share
+	CargoPacketList reserved; ///< The packets reserved for unloading in this list
+	Money feeder_share;       ///< Cache for the feeder share
+	uint reserved_count;      ///< count(reserved)
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -418,6 +390,8 @@ public:
 	 */
 	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment);
 
+	~VehicleCargoList();
+
 	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
 
 	/**
@@ -430,6 +404,13 @@ public:
 	}
 
 	/**
+	 * tries to merge the packet with another one in the packets list.
+	 * if no fitting packet is found, appends it.
+	 * @param cp the packet to be inserted
+	 */
+	void MergeOrPush(CargoPacket *cp);
+
+	/**
 	 * Appends the given cargo packet
 	 * @warning After appending this packet may not exist anymore!
 	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
@@ -440,12 +421,64 @@ public:
 	void Append(CargoPacket *cp);
 
 	/**
+	 * Returns sum of cargo on board the vehicle (ie not only
+	 * reserved)
+	 * @return cargo on board the vehicle
+	 */
+	FORCEINLINE uint OnboardCount() const
+	{
+		return this->count - this->reserved_count;
+	}
+
+	/**
+	 * Returns sum of cargo reserved for the vehicle
+	 * @return cargo reserved for the vehicle
+	 */
+	FORCEINLINE uint ReservedCount() const
+	{
+		return this->reserved_count;
+	}
+
+	/**
+	 * Returns a pointer to the reserved cargo list (so you can iterate over it etc).
+	 * @return pointer to the reserved list
+	 */
+	FORCEINLINE const CargoPacketList *Reserved() const
+	{
+		return &this->reserved;
+	}
+
+	/**
+	 * Reserves a packet for later loading
+	 */
+	void Reserve(CargoPacket *cp);
+
+	/**
+	 * Returns all reserved cargo to the station
+	 */
+	void Unreserve(StationID next, StationCargoList *dest);
+
+	/**
+	 * load packets from the reserved list
+	 * @params count the number of cargo to load
+	 * @return true if there are still packets that might be loaded from the reservation list
+	 */
+	uint LoadReserved(uint count);
+
+	/**
 	 * Ages the all cargo in this list
 	 */
 	void AgeCargo();
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
+
+	/**
+	 * Moves the given amount of cargo to another vehicle (during autoreplace).
+	 * @param dest         the destination to move the cargo to
+	 * @param max_load     the maximum amount of cargo entities to move
+	 */
+	uint MoveTo(VehicleCargoList *dest, uint cap);
 
 	/**
 	 * Are two the two CargoPackets mergeable in the context of
@@ -491,8 +524,7 @@ public:
 				cp1->source_id       == cp2->source_id;
 	}
 
-	template <class Tother_inst>
-	uint MoveTo(Tother_inst *dest, uint cap, StationID next_station, TileIndex load_place);
+	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, TileIndex load_place = INVALID_TILE, bool reserve = false);
 
 	/**
 	 * Appends the given cargo packet to the range of packets with the same next station
@@ -512,8 +544,7 @@ public:
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
 protected:
-	template <class Tother_inst>
-	uint MovePackets(Tother_inst *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place);
+	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place, bool reserve);
 };
 
 #endif /* CARGOPACKET_H */
