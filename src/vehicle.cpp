@@ -1479,10 +1479,10 @@ void Vehicle::BeginLoading()
  */
 void Vehicle::CancelReservation(Station *st) {
 	for(Vehicle *v = this; v != NULL; v = v->next) {
-		VehicleCargoList &reserved = v->reserved;
-		if (reserved.Count() > 0) {
+		VehicleCargoList &cargo = v->cargo;
+		if (cargo.ReservedCount() > 0) {
 			DEBUG(misc, 1, "cancelling cargo reservation");
-			reserved.MoveTo(&st->goods[v->cargo_type].cargo, v->reserved.Count(), VehicleCargoList::MTA_UNLOAD, NULL);
+			cargo.Unreserve(&st->goods[v->cargo_type].cargo);
 		}
 	}
 }
