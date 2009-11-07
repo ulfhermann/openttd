@@ -68,10 +68,7 @@
 		 * 'new CargoPacket' + cargolist.Append so their caches are already
 		 * correct and do not need rebuilding. */
 		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			v->cargo.InvalidateCache();
-			v->reserved.InvalidateCache();
-		}
+		FOR_ALL_VEHICLES(v) v->cargo.InvalidateCache();
 
 		Station *st;
 		FOR_ALL_STATIONS(st) {

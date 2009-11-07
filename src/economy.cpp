@@ -1101,10 +1101,10 @@ uint32 ReserveConsist(Station * st, Vehicle * u)
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
-			int cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
+			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
 				StationCargoList & list = st->goods[v->cargo_type].cargo;
-				list.MoveTo(&v->reserved, cap, StationCargoList::MTA_RESERVE, NULL, st->xy);
+				list.MoveTo(&v->cargo, cap, StationCargoList::MTA_RESERVE, NULL, st->xy);
 				SetBit(ret, v->cargo_type);
 			}
 		}
@@ -1172,7 +1172,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 
 		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (u->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
-			uint cargo_count = v->cargo.Count();
+			uint cargo_count = v->cargo.OnboardCount();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 			bool remaining = false; // Are there cargo entities in this vehicle that can still be unloaded here?
 			bool accepted  = false; // Is the cargo accepted by the station?
@@ -1192,7 +1192,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			 * they were loaded, but to not force unload the vehicle when the
 			 * station is still accepting the cargo in the vehicle. It doesn't
 			 * accept cargo that was loaded at the same station. */
-			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.Count() == cargo_count)) {
+			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.OnboardCount() == cargo_count)) {
 				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
 				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 
@@ -1246,21 +1246,21 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 		/* If there's goods waiting at the station, and the vehicle
 		 * has capacity for it, load it on the vehicle. */
-		int cap_left = v->cargo_cap - v->cargo.Count();
+		int cap_left = v->cargo_cap - v->cargo.OnboardCount();
 		if (cap_left > 0) {
 			uint cap = cap_left;
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
 			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 
-			uint reserved_count = v->reserved.Count();
+			uint reserved_count = v->cargo.ReservedCount();
 			uint station_count = ge->cargo.Count();
 			if (_settings_game.order.improved_load) {
-				v->reserved.MoveTo(&v->cargo, cap, VehicleCargoList::MTA_UNLOAD, NULL);
+				v->cargo.LoadReserved(cap);
 			}
-			if (v->reserved.Count() == 0) {
+			if (v->cargo.ReservedCount() == 0) {
 				ge->cargo.MoveTo(&v->cargo, cap - reserved_count, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
 			}
-			uint loaded = reserved_count + station_count - v->reserved.Count() - ge->cargo.Count();
+			uint loaded = reserved_count + station_count - v->cargo.ReservedCount() - ge->cargo.Count();
 
 
 			/* TODO: Regarding this, when we do gradual loading, we
@@ -1290,7 +1290,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			}
 		}
 
-		if (v->cargo.Count() >= v->cargo_cap) {
+		if (v->cargo.OnboardCount() >= v->cargo_cap) {
 			SetBit(cargo_full, v->cargo_type);
 		} else {
 			SetBit(cargo_not_full, v->cargo_type);
@@ -1318,7 +1318,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			if (v->current_order.GetLoadType() == OLF_FULL_LOAD_ANY) {
 				/* if the aircraft carries passengers and is NOT full, then
 				 * continue loading, no matter how much mail is in */
-				if ((v->type == VEH_AIRCRAFT && IsCargoInClass(v->cargo_type, CC_PASSENGERS) && v->cargo_cap > v->cargo.Count()) ||
+				if ((v->type == VEH_AIRCRAFT && IsCargoInClass(v->cargo_type, CC_PASSENGERS) && v->cargo_cap > v->cargo.OnboardCount()) ||
 						(cargo_not_full && (cargo_full & ~cargo_not_full) == 0)) { // There are stull non-full cargos
 					finished_loading = false;
 				}
