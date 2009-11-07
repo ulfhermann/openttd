@@ -484,7 +484,7 @@ void Vehicle::PreDestructor()
 		st->loading_vehicles.remove(this);
 
 		HideFillingPercent(&this->fill_percent_te_id);
-		this->CancelReservation(st);
+		this->CancelReservation(INVALID_STATION, st);
 		delete this->cargo_payment;
 	}
 
@@ -1493,15 +1493,14 @@ void Vehicle::BeginLoading(StationID last_station_id)
  * return all reserved cargo packets to the station
  * @param st the station where the reserved packets should go.
  */
-void Vehicle::CancelReservation(Station *st) {
+void Vehicle::CancelReservation(StationID next, Station *st) {
 	for(Vehicle *v = this; v != NULL; v = v->next) {
-		ReservationList &reserved = v->reserved;
-		if (reserved.Count() > 0) {
-			if (this->cargo_payment == NULL) {
-				this->cargo_payment = new CargoPayment(this);
-			}
+		VehicleCargoList &cargo = v->cargo;
+		if (cargo.ReservedCount() > 0) {
 			DEBUG(misc, 1, "cancelling cargo reservation");
-			v->reserved.Revert(&st->goods[v->cargo_type]);
+			GoodsEntry &ge = st->goods[v->cargo_type];
+			cargo.Unreserve(next, &ge.cargo);
+			SetBit(ge.acceptance_pickup, GoodsEntry::PICKUP);
 		}
 	}
 }
@@ -1511,7 +1510,6 @@ void Vehicle::LeaveStation()
 {
 	assert(current_order.IsType(OT_LOADING));
 	Station *st = Station::Get(this->last_station_visited);
-	this->CancelReservation(st);
 	delete this->cargo_payment;
 
 	/* Only update the timetable if the vehicle was supposed to stop here. */
@@ -1524,10 +1522,12 @@ void Vehicle::LeaveStation()
 	OrderList * orders = this->orders.list;
 	if (orders != NULL) {
 		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->type == VEH_ROAD || this->type == VEH_TRAIN);
+		this->CancelReservation(next_station_id, st);
 		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
 			DecreaseFrozen(st, this, next_station_id);
 		}
 	} else {
+		this->CancelReservation(INVALID_STATION, st);
 		DEBUG(misc, 0, "orders are NULL");
 		RecalcFrozen(st);
 	}
