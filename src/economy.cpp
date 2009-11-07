@@ -1107,10 +1107,10 @@ uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
-			int cap = v->cargo_cap - v->cargo.Count() - v->reserved.Count();
+			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
 				StationCargoList & list = st->goods[v->cargo_type].cargo;
-				if (list.MoveTo(&v->reserved, cap, next_station, st->xy) > 0) {
+				if (list.MoveTo(&v->cargo, cap, next_station, st->xy, true) > 0) {
 					SetBit(ret, v->cargo_type);
 				}
 			}
@@ -1189,7 +1189,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (unload_flags & OUFB_NO_UNLOAD) == 0) {
 			/* vehicle wants to unload something */
 
-			uint cargo_count = v->cargo.Count();
+			uint cargo_count = v->cargo.OnboardCount();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 
 			payment->SetCargo(v->cargo_type);
@@ -1233,17 +1233,17 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 		/* If there's goods waiting at the station, and the vehicle
 		 * has capacity for it, load it on the vehicle. */
-		int cap_left = v->cargo_cap - v->cargo.Count();
+		int cap_left = v->cargo_cap - v->cargo.OnboardCount();
 		if (cap_left > 0) {
 			uint cap = cap_left;
 			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
 
 			uint loaded = 0;
 			if (_settings_game.order.improved_load) {
-				loaded += v->reserved.MoveTo(&v->cargo, cap, st->xy);
+				loaded += v->cargo.LoadReserved(cap);
 			}
 			if (loaded < cap) {
-				assert(v->reserved.Count() == 0);
+				assert(v->cargo.ReservedCount() == 0);
 				loaded += ge->cargo.MoveTo(&v->cargo, cap - loaded, next_station, st->xy);
 			}
 			/* TODO: Regarding this, when we do gradual loading, we
@@ -1273,7 +1273,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			}
 		}
 
-		if (v->cargo.Count() >= v->cargo_cap) {
+		if (v->cargo.OnboardCount() >= v->cargo_cap) {
 			SetBit(cargo_full, v->cargo_type);
 		} else {
 			SetBit(cargo_not_full, v->cargo_type);
@@ -1301,7 +1301,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			if (v->current_order.GetLoadType() == OLF_FULL_LOAD_ANY) {
 				/* if the aircraft carries passengers and is NOT full, then
 				 * continue loading, no matter how much mail is in */
-				if ((v->type == VEH_AIRCRAFT && IsCargoInClass(v->cargo_type, CC_PASSENGERS) && v->cargo_cap > v->cargo.Count()) ||
+				if ((v->type == VEH_AIRCRAFT && IsCargoInClass(v->cargo_type, CC_PASSENGERS) && v->cargo_cap > v->cargo.OnboardCount()) ||
 						(cargo_not_full && (cargo_full & ~cargo_not_full) == 0)) { // There are stull non-full cargos
 					finished_loading = false;
 				}
