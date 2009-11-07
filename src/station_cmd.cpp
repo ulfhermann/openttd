@@ -2926,7 +2926,11 @@ void UpdateFlows(Station * st, Vehicle *front, StationID next_station_id) {
 	} else {
 		for (Vehicle *v = front; v != NULL; v = v->Next()) {
 			GoodsEntry *ge = &st->goods[v->cargo_type];
-			v->cargo.UpdateFlows(next_station_id, ge);
+			const CargoPacketList * packets = v->cargo.Packets();
+			for(VehicleCargoList::ConstIterator i = packets->begin(); i != packets->end(); ++i) {
+				CargoPacket * p = *i;
+				ge->UpdateFlowStats(p->SourceStation(), p->Count(), next_station_id);
+			}
 		}
 	}
 }

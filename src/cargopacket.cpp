@@ -227,7 +227,7 @@ uint VehicleCargoList::LoadReserved(uint max_move)
 }
 
 template<class Tinst, class Tcont>
-uint CargoList<Tinst, Tcont>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, bool reserve, TileIndex load_place)
+uint CargoList<Tinst, Tcont>::MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place, bool reserve)
 {
 	CargoPacket *packet = MovePacket(it, cap, load_place);
 	uint ret = packet->count;
@@ -266,14 +266,6 @@ CargoPacket *CargoList<Tinst, Tcont>::MovePacket(Iterator &it, uint cap, TileInd
 		packet->loaded_at_xy = load_place;
 	}
 	return packet;
-}
-
-template<class Tinst, class Tcont>
-void CargoList<Tinst, Tcont>::UpdateFlows(StationID next, GoodsEntry * ge) {
-	for(Iterator i = packets.begin(); i != packets.end(); ++i) {
-		CargoPacket * p = *i;
-		ge->UpdateFlowStats(p->source, p->count, next);
-	}
 }
 
 template <class Tinst, class Tcont>
@@ -404,6 +396,13 @@ UnloadType VehicleCargoList::WillUnloadCargoDist(const UnloadDescription & ul, c
 	}
 }
 
+void VehicleCargoList::SwapReserved()
+{
+	assert(this->packets.empty());
+	this->packets.swap(this->reserved);
+	this->reserved_count = 0;
+}
+
 uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment) {
 	uint remaining_unload = max_unload;
 	UnloadDescription ul(dest, curr_station, next_station, flags);
@@ -420,10 +419,13 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 				remaining_unload -= this->TransferPacket(c, remaining_unload, dest, payment, curr_station);
 				break;
 			case UL_KEEP:
-				/* don't update the flow stats here as those packets can be kept multiple times
-				 * the flow stats are updated from LoadUnloadVehicle when all loading is done
-				 */
-				++c;
+				{
+					CargoPacket *cp = *c;
+					this->reserved.push_back(cp);
+					this->reserved_count += cp->count;
+					this->packets.erase(c++);
+					dest->UpdateFlowStats(cp->source, cp->count, next_station);
+				}
 				break;
 			default:
 				NOT_REACHED();

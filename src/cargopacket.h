@@ -259,7 +259,7 @@ protected:
 
 	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap);
 
-	uint MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, bool reserved = false, TileIndex load_place = INVALID_TILE);
+	uint MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE, bool reserved = false);
 
 public:
 	/** Create the cargo list */
@@ -318,11 +318,6 @@ public:
 	 * @param max_remaining the maximum amount of entities to be in the list after the command
 	 */
 	void Truncate(uint max_remaining);
-
-	/**
-	 * send all packets to the specified station and update the flow stats at the GoodsEntry accordingly
-	 */
-	void UpdateFlows(StationID next, GoodsEntry * ge);
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
@@ -464,6 +459,12 @@ public:
 	 * @return true if there are still packets that might be loaded from the reservation list
 	 */
 	uint LoadReserved(uint count);
+
+	/**
+	 * swap the reserved and packets lists when starting to load cargo.
+	 * @pre this->packets.empty()
+	 */
+	void SwapReserved();
 
 	/**
 	 * Ages the all cargo in this list
