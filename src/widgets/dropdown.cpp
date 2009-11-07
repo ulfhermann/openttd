@@ -69,33 +69,90 @@ static void DeleteDropDownList(DropDownList *list)
 	delete list;
 }
 
-static const Widget _dropdown_menu_widgets[] = {
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_END,     0, 0,     0, 0, 0x0, STR_NULL},
-{  WWT_SCROLLBAR,   RESIZE_NONE,  COLOUR_END,     0, 0,     0, 0, 0x0, STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST},
-{   WIDGETS_END},
+/** Widget numbers of the dropdown menu. */
+enum DropdownMenuWidgets {
+	DDM_ITEMS,  ///< Panel showing the dropdown items.
+	DDM_SCROLL, ///< Scrollbar.
 };
 
 static const NWidgetPart _nested_dropdown_menu_widgets[] = {
-	NWidget(NWID_LAYERED),
-		NWidget(WWT_PANEL, COLOUR_END, 0), SetMinimalSize(1, 1), EndContainer(),
-		NWidget(WWT_SCROLLBAR, COLOUR_END, 1), SetMinimalSize(1, 1),
+	NWidget(NWID_HORIZONTAL),
+		NWidget(WWT_PANEL, COLOUR_END, DDM_ITEMS), SetMinimalSize(1, 1), EndContainer(),
+		NWidget(WWT_SCROLLBAR, COLOUR_END, DDM_SCROLL),
 	EndContainer(),
 };
 
+const WindowDesc _dropdown_desc(
+	0, 0, 0, 0, 0, 0, // x/y position not used.
+	WC_DROPDOWN_MENU, WC_NONE,
+	WDF_DEF_WIDGET,
+	NULL, _nested_dropdown_menu_widgets, lengthof(_nested_dropdown_menu_widgets)
+);
+
+/** Drop-down menu window */
 struct DropdownWindow : Window {
 	WindowClass parent_wnd_class; ///< Parent window class.
 	WindowNumber parent_wnd_num;  ///< Parent window number.
 	byte parent_button;           ///< Parent widget number where the window is dropped from.
-	DropDownList *list;
+	DropDownList *list;           ///< List with dropdown menu items.
 	int selected_index;           ///< Index of the selected item in the list.
-	byte click_delay;
+	byte click_delay;             ///< Timer to delay selection.
 	bool drag_mode;
-	bool instant_close;
-	int scrolling;
+	bool instant_close;           ///< Close the window when the mouse button is raised.
+	int scrolling;                ///< If non-zero, auto-scroll the item list (one time).
+	Point position;               ///< Position of the topleft corner of the window.
 
-	DropdownWindow(int x, int y, int width, int height, const Widget *widget) : Window(x, y, width, height, WC_DROPDOWN_MENU, widget)
+	/** Create a dropdown menu.
+	 * @param parent        Parent window.
+	 * @param list          Dropdown item list.
+	 * @param selected      Index of the selected item in the list.
+	 * @param button        Widget of the parent window doing the dropdown.
+	 * @param instant_close Close the window when the mouse button is raised.
+	 * @param position      Topleft position of the dropdown menu window.
+	 * @param size          Size of the dropdown menu window.
+	 * @param wi_colour     Colour of the parent widget.
+	 * @param scroll        Dropdown menu has a scrollbar.
+	 * @param widget        Widgets of the dropdown menu window.
+	 */
+	DropdownWindow(Window *parent, DropDownList *list, int selected, int button, bool instant_close, const Point &position, const Dimension &size, Colours wi_colour, bool scroll) : Window()
 	{
-		this->FindWindowPlacementAndResize(width, height);
+		this->position = position;
+
+		this->CreateNestedTree(&_dropdown_desc);
+
+		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(DDM_ITEMS);
+		nwi->SetMinimalSize(size.width - (scroll ? 12 : 0), size.height + 4);
+		nwi->colour = wi_colour;
+
+		nwi = this->GetWidget<NWidgetCore>(DDM_SCROLL);
+		if (scroll) {
+			nwi->colour = wi_colour;
+		} else {
+			nwi->min_x = 0; // Make scrollbar invisible.
+		}
+
+		this->FinishInitNested(&_dropdown_desc, 0);
+		this->flags4 &= ~WF_WHITE_BORDER_MASK;
+
+		/* Total length of list */
+		int list_height = 0;
+		for (DropDownList::const_iterator it = list->begin(); it != list->end(); ++it) {
+			DropDownListItem *item = *it;
+			list_height += item->Height(size.width - WD_VSCROLLBAR_WIDTH);
+		}
+
+		/* Capacity is the average number of items visible */
+		this->vscroll.SetCapacity(size.height * (uint16)list->size() / list_height);
+		this->vscroll.SetCount((uint16)list->size());
+
+		this->parent_wnd_class = parent->window_class;
+		this->parent_wnd_num   = parent->window_number;
+		this->parent_button    = button;
+		this->list             = list;
+		this->selected_index   = selected;
+		this->click_delay      = 0;
+		this->drag_mode        = true;
+		this->instant_close    = instant_close;
 	}
 
 	~DropdownWindow()
@@ -118,12 +175,22 @@ struct DropdownWindow : Window {
 		DeleteDropDownList(this->list);
 	}
 
+	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
+	{
+		return this->position;
+	}
+
+	/** Find the dropdown item under the cursor.
+	 * @param value [out] Selected item, if function returns \c true.
+	 * @return Cursor points to a dropdown item.
+	 */
 	bool GetDropDownItem(int &value)
 	{
 		if (GetWidgetFromPos(this, _cursor.pos.x - this->left, _cursor.pos.y - this->top) < 0) return false;
 
-		int y     = _cursor.pos.y - this->top - 2;
-		int width = this->widget[0].right - 3;
+		NWidgetBase *nwi = this->GetWidget<NWidgetBase>(DDM_ITEMS);
+		int y     = _cursor.pos.y - this->top - nwi->pos_y - 2;
+		int width = nwi->current_x - 4;
 		int pos   = this->vscroll.GetPosition();
 
 		const DropDownList *list = this->list;
@@ -150,43 +217,40 @@ struct DropdownWindow : Window {
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
+	}
 
-		int x = 1;
-		int y = 2;
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != DDM_ITEMS) return;
 
-		int sel    = this->selected_index;
-		int width  = this->widget[0].right - 2;
-		int right  = this->widget[0].right;
-		int bottom = this->widget[0].bottom;
-		int pos    = this->vscroll.GetPosition();
+		TextColour colour = (TextColour)this->GetWidget<NWidgetCore>(widget)->colour;
 
-		DropDownList *list = this->list;
-
-		for (DropDownList::const_iterator it = list->begin(); it != list->end(); ++it) {
+		int y = r.top + 2;
+		int pos = this->vscroll.GetPosition();
+		for (DropDownList::const_iterator it = this->list->begin(); it != this->list->end(); ++it) {
 			const DropDownListItem *item = *it;
-			int item_height = item->Height(width);
+			int item_height = item->Height(r.right - r.left + 1);
 
 			/* Skip items that are scrolled up */
 			if (--pos >= 0) continue;
 
-			if (y + item_height < height) {
-				if (sel == item->result) GfxFillRect(x + 1, y, right - 1, y + item_height - 1, 0);
+			if (y + item_height < r.bottom) {
+				bool selected = (this->selected_index == item->result);
+				if (selected) GfxFillRect(r.left + 2, y, r.right - 1, y + item_height - 1, 0);
 
-				item->Draw(0, right, y, bottom, sel == item->result, (TextColour)this->widget[0].colour);
+				item->Draw(r.left, r.right, y, r.bottom, selected, colour);
 
 				if (item->masked) {
-					GfxFillRect(x, y, right - 1, y + item_height - 1,
-						_colour_gradient[this->widget[0].colour][5], FILLRECT_CHECKER
-					);
+					GfxFillRect(r.left + 1, y, r.right - 1, y + item_height - 1, _colour_gradient[colour][5], FILLRECT_CHECKER);
 				}
 			}
 			y += item_height;
 		}
-	};
+	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		if (widget != 0) return;
+		if (widget != DDM_ITEMS) return;
 		int item;
 		if (this->GetDropDownItem(item)) {
 			this->click_delay = 4;
@@ -255,8 +319,6 @@ struct DropdownWindow : Window {
 
 void ShowDropDownList(Window *w, DropDownList *list, int selected, int button, uint width, bool auto_width, bool instant_close)
 {
-	static Widget *generated_dropdown_menu_widgets = NULL;
-
 	DeleteWindowById(WC_DROPDOWN_MENU, 0);
 
 	/* Our parent's button widget is used to determine where to place the drop
@@ -337,47 +399,15 @@ void ShowDropDownList(Window *w, DropDownList *list, int selected, int button, u
 			scroll = true;
 			/* Add space for the scroll bar if we automatically determined
 			 * the width of the list. */
-			max_item_width += 12;
+			max_item_width += WD_VSCROLLBAR_WIDTH;
 		}
 	}
 
 	if (auto_width) width = max(width, max_item_width);
 
-	const Widget *wid = InitializeWidgetArrayFromNestedWidgets(_nested_dropdown_menu_widgets, lengthof(_nested_dropdown_menu_widgets),
-													_dropdown_menu_widgets, &generated_dropdown_menu_widgets);
-	DropdownWindow *dw = new DropdownWindow(w->left + wi_rect.left, top, width, height + 4, wid);
-
-	dw->widget[0].colour = wi_colour;
-	dw->widget[0].right = width - 1;
-	dw->widget[0].bottom = height + 3;
-
-	dw->SetWidgetHiddenState(1, !scroll);
-
-	if (scroll) {
-		/* We're scrolling, so enable the scroll bar and shrink the list by
-		 * the scrollbar's width */
-		dw->widget[1].colour = wi_colour;
-		dw->widget[1].right  = dw->widget[0].right;
-		dw->widget[1].left   = dw->widget[1].right - 11;
-		dw->widget[1].bottom = dw->widget[0].bottom;
-		dw->widget[0].right -= 12;
-
-		/* Capacity is the average number of items visible */
-		dw->vscroll.SetCapacity(height * (uint16)list->size() / list_height);
-		dw->vscroll.SetCount((uint16)list->size());
-	}
-
-	dw->desc_flags = WDF_DEF_WIDGET;
-	dw->flags4 &= ~WF_WHITE_BORDER_MASK;
-
-	dw->parent_wnd_class = w->window_class;
-	dw->parent_wnd_num   = w->window_number;
-	dw->parent_button    = button;
-	dw->list             = list;
-	dw->selected_index   = selected;
-	dw->click_delay      = 0;
-	dw->drag_mode        = true;
-	dw->instant_close    = instant_close;
+	Point dw_pos = {w->left + wi_rect.left, top};
+	Dimension dw_size = {width, height};
+	new DropdownWindow(w, list, selected, button, instant_close, dw_pos, dw_size, wi_colour, scroll);
 }
 
 /** Show a dropdown menu window near a widget of the parent window.
