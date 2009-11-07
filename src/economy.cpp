@@ -1107,6 +1107,8 @@ uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle * v = u; v != NULL; v = v->Next()) {
+			// only reserve if the vehicle is not unloading anymore. Otherwise we'll swap in reserved cargo
+			if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING)) continue;
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
 				StationCargoList & list = st->goods[v->cargo_type].cargo;
@@ -1186,7 +1188,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 		GoodsEntry *ge = &st->goods[v->cargo_type];
 
-		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) && (unload_flags & OUFB_NO_UNLOAD) == 0) {
+		if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING)) {
 			/* vehicle wants to unload something */
 
 			uint cargo_count = v->cargo.OnboardCount();
@@ -1202,12 +1204,9 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			if (!_settings_game.order.gradual_loading || delivered < amount_unloaded || delivered == 0){
 				/* done delivering */
-				if (!v->cargo.Empty()) {
-					completely_emptied = false;
-					/* update stats for kept cargo */
-					v->cargo.UpdateFlows(next_station, ge);
-				}
+				if (!v->cargo.Empty()) completely_emptied = false;
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
+				v->cargo.SwapReserved();
 			}
 
 			continue;
