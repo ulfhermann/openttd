@@ -599,8 +599,12 @@ void Window::SetDirty() const
 	SetDirtyBlocks(this->left, this->top, this->left + this->width, this->top + this->height);
 }
 
-/** Re-initialize a window. */
-void Window::ReInit()
+/** Re-initialize a window, and optionally change its size.
+ * @param rx Horizontal resize of the window.
+ * @param ry Vertical resize of the window.
+ * @note For just resizing the window, use #ResizeWindow instead.
+ */
+void Window::ReInit(int rx, int ry)
 {
 	if (this->nested_root == NULL) return; // Only nested widget windows can re-initialize.
 
@@ -620,9 +624,9 @@ void Window::ReInit()
 	this->resize.step_width  = this->nested_root->resize_x;
 	this->resize.step_height = this->nested_root->resize_y;
 
-	/* Resize as close to the original size as possible. */
-	window_width  = max(window_width,  this->width);
-	window_height = max(window_height, this->height);
+	/* Resize as close to the original size + requested resize as possible. */
+	window_width  = max(window_width  + rx, this->width);
+	window_height = max(window_height + ry, this->height);
 	int dx = (this->resize.step_width  == 0) ? 0 : window_width  - this->width;
 	int dy = (this->resize.step_height == 0) ? 0 : window_height - this->height;
 	/* dx and dy has to go by step.. calculate it.
@@ -1075,26 +1079,6 @@ void Window::FindWindowPlacementAndResize(int def_width, int def_height)
 void Window::FindWindowPlacementAndResize(const WindowDesc *desc)
 {
 	this->FindWindowPlacementAndResize(desc->default_width, desc->default_height);
-}
-
-/**
- * Open a new window. If there is no space for a new window, close an open
- * window. Try to avoid stickied windows, but if there is no else, close one of
- * those as well. Then make sure all created windows are below some always-on-top
- * ones. Finally set all variables and call the WE_CREATE event
- * @param x offset in pixels from the left of the screen
- * @param y offset in pixels from the top of the screen
- * @param width width in pixels of the window
- * @param height height in pixels of the window
- * @param cls see WindowClass class of the window, used for identification and grouping
- * @param *widget see Widget pointer to the window layout and various elements
- * @return Window pointer of the newly created window
- */
-Window::Window(int x, int y, int width, int height, WindowClass cls, const Widget *widget)
-{
-	assert(widget != NULL); // Constructor is used only for old-style widget array windows, they must always provide an old-style widget array.
-	this->InitializeData(cls, widget, 0);
-	this->InitializePositionSize(x, y, width, height);
 }
 
 /**
@@ -1600,6 +1584,26 @@ void ResizeWindow(Window *w, int delta_x, int delta_y)
 		if (resize_height) w->height += delta_y;
 	}
 	w->SetDirty();
+}
+
+/** Return the top of the main view available for general use.
+ * @return Uppermost vertical coordinate available.
+ * @note Above the upper y coordinate is often the main toolbar.
+ */
+int GetMainViewTop()
+{
+	Window *w = FindWindowById(WC_MAIN_TOOLBAR, 0);
+	return (w == NULL) ? 0 : w->top + w->height;
+}
+
+/** Return the bottom of the main view available for general use.
+ * @return The vertical coordinate of the first unusable row, so 'top + height <= bottom' gives the correct result.
+ * @note At and below the bottom y coordinate is often the status bar.
+ */
+int GetMainViewBottom()
+{
+	Window *w = FindWindowById(WC_STATUS_BAR, 0);
+	return (w == NULL) ? _screen.height : w->top;
 }
 
 /** The minimum number of pixels of the title bar must be visible in both the X or Y direction */
@@ -2193,7 +2197,7 @@ static void HandleKeyScrolling()
 	}
 }
 
-void MouseLoop(MouseClick click, int mousewheel)
+static void MouseLoop(MouseClick click, int mousewheel)
 {
 	DecreaseWindowCounters();
 	HandlePlacePresize();
@@ -2336,6 +2340,11 @@ void HandleMouseEvents()
 	}
 
 	MouseLoop(click, mousewheel);
+
+	/* We have moved the mouse the required distance,
+	 * no need to move it at any later time. */
+	_cursor.delta.x = 0;
+	_cursor.delta.y = 0;
 }
 
 /**
