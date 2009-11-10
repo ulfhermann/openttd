@@ -286,16 +286,8 @@ static inline void DrawImageButtons(const Rect &r, WidgetType type, Colours colo
 	assert(img != 0);
 	DrawFrameRect(r.left, r.top, r.right, r.bottom, colour, (clicked) ? FR_LOWERED : FR_NONE);
 
-	int left, top;
-	if ((type & WWT_MASK) == WWT_IMGBTN_2) {
-		if (clicked) img++; // Show different image when clicked for #WWT_IMGBTN_2.
-		left = WD_IMGBTN2_LEFT;
-		top  = WD_IMGBTN2_TOP;
-	} else {
-		left = WD_IMGBTN_LEFT;
-		top  = WD_IMGBTN_TOP;
-	}
-	DrawSprite(img, PAL_NONE, r.left + left + clicked, r.top + top + clicked);
+	if ((type & WWT_MASK) == WWT_IMGBTN_2 && clicked) img++; // Show different image when clicked for #WWT_IMGBTN_2.
+	DrawSprite(img, PAL_NONE, r.left + WD_IMGBTN_LEFT + clicked, r.top + WD_IMGBTN_TOP + clicked);
 }
 
 /**
@@ -722,93 +714,6 @@ void Window::DrawWidgets() const
 
 	if (this->flags4 & WF_WHITE_BORDER_MASK) {
 		DrawFrameRect(0, 0, this->width - 1, this->height - 1, COLOUR_WHITE, FR_BORDERONLY);
-	}
-}
-
-/**
- * Evenly distribute the combined horizontal length of two consecutive widgets.
- * @param w Window containing the widgets.
- * @param a Left widget to resize.
- * @param b Right widget to resize.
- * @note Widgets are assumed to lie against each other.
- */
-static void ResizeWidgets(Window *w, byte a, byte b)
-{
-	int16 offset = w->widget[a].left;
-	int16 length = w->widget[b].right - offset;
-
-	w->widget[a].right = (length / 2) + offset;
-
-	w->widget[b].left  = w->widget[a].right + 1;
-}
-
-/**
- * Evenly distribute the combined horizontal length of three consecutive widgets.
- * @param w Window containing the widgets.
- * @param a Left widget to resize.
- * @param b Middle widget to resize.
- * @param c Right widget to resize.
- * @note Widgets are assumed to lie against each other.
- */
-static void ResizeWidgets(Window *w, byte a, byte b, byte c)
-{
-	int16 offset = w->widget[a].left;
-	int16 length = w->widget[c].right - offset;
-
-	w->widget[a].right = length / 3;
-	w->widget[b].right = w->widget[a].right * 2;
-
-	w->widget[a].right += offset;
-	w->widget[b].right += offset;
-
-	/* Now the right side of the buttons are set. We will now set the left sides next to them */
-	w->widget[b].left  = w->widget[a].right + 1;
-	w->widget[c].left  = w->widget[b].right + 1;
-}
-
-/** Evenly distribute some widgets when resizing horizontally (often a button row)
- *  When only two arguments are given, the widgets are presumed to be on a line and only the ends are given
- * @param w Window to modify
- * @param left The leftmost widget to resize
- * @param right The rightmost widget to resize. Since right side of it is used, remember to set it to RESIZE_RIGHT
- */
-void ResizeButtons(Window *w, byte left, byte right)
-{
-	int16 num_widgets = right - left + 1;
-
-	if (num_widgets < 2) NOT_REACHED();
-
-	switch (num_widgets) {
-		case 2: ResizeWidgets(w, left, right); break;
-		case 3: ResizeWidgets(w, left, left + 1, right); break;
-		default: {
-			/* Looks like we got more than 3 widgets to resize
-			 * Now we will find the middle of the space desinated for the widgets
-			 * and place half of the widgets on each side of it and call recursively.
-			 * Eventually we will get down to blocks of 2-3 widgets and we got code to handle those cases */
-			int16 offset = w->widget[left].left;
-			int16 length = w->widget[right].right - offset;
-			byte widget = ((num_widgets - 1)/ 2) + left; // rightmost widget of the left side
-
-			/* Now we need to find the middle of the widgets.
-			 * It will not always be the middle because if we got an uneven number of widgets,
-			 *   we will need it to be 2/5, 3/7 and so on
-			 * To get this, we multiply with num_widgets/num_widgets. Since we calculate in int, we will get:
-			 *
-			 *    num_widgets/2 (rounding down)
-			 *   ---------------
-			 *     num_widgets
-			 *
-			 * as multiplier to length. We just multiply before divide to that we stay in the int area though */
-			int16 middle = ((length * num_widgets) / (2 * num_widgets)) + offset;
-
-			/* Set left and right on the widgets, that's next to our "middle" */
-			w->widget[widget].right = middle;
-			w->widget[widget + 1].left = w->widget[widget].right + 1;
-			/* Now resize the left and right of the middle */
-			ResizeButtons(w, left, widget);
-			ResizeButtons(w, widget + 1, right);
-		}
 	}
 }
 
@@ -2164,19 +2069,12 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 			break;
 		}
 		case WWT_IMGBTN:
+		case WWT_IMGBTN_2:
 		case WWT_PUSHIMGBTN: {
 			static const Dimension extra = {WD_IMGBTN_LEFT + WD_IMGBTN_RIGHT,  WD_IMGBTN_TOP + WD_IMGBTN_BOTTOM};
 			padding = &extra;
 			Dimension d2 = GetSpriteSize(this->widget_data);
-			d2.width += extra.width;
-			d2.height += extra.height;
-			size = maxdim(size, d2);
-			break;
-		}
-		case WWT_IMGBTN_2: {
-			static const Dimension extra = {WD_IMGBTN2_LEFT + WD_IMGBTN2_RIGHT,  WD_IMGBTN2_TOP + WD_IMGBTN2_BOTTOM};
-			padding = &extra;
-			Dimension d2 = maxdim(GetSpriteSize(this->widget_data), GetSpriteSize(this->widget_data + 1));
+			if (this->type == WWT_IMGBTN_2) d2 = maxdim(d2, GetSpriteSize(this->widget_data + 1));
 			d2.width += extra.width;
 			d2.height += extra.height;
 			size = maxdim(size, d2);
@@ -2401,7 +2299,7 @@ bool NWidgetLeaf::ButtonHit(const Point &pt)
  * @note Caller should release returned widget array with \c free(widgets).
  * @ingroup NestedWidgets
  */
-Widget *InitializeNWidgets(NWidgetBase *nwid, bool rtl, int biggest_index)
+static Widget *InitializeNWidgets(NWidgetBase *nwid, bool rtl, int biggest_index)
 {
 	/* Initialize nested widgets. */
 	nwid->SetupSmallestSize(NULL, false);
