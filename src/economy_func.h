@@ -23,7 +23,7 @@
 #include "station_type.h"
 
 void ResetPriceBaseMultipliers();
-void SetPriceBaseMultiplier(uint price, byte factor);
+void SetPriceBaseMultiplier(Price price, int factor);
 
 extern const ScoreInfo _score_info[];
 extern int _score_part[MAX_COMPANIES][SCORE_END];
@@ -40,7 +40,7 @@ uint MoveGoodsToStation(TileIndex tile, int w, int h, CargoID type, uint amount,
 void PrepareUnload(Vehicle *front_v);
 void LoadUnloadStation(Station *st);
 
-Money GetPriceByIndex(uint8 index);
+Money GetPriceByIndex(Price index);
 
 void InitializeEconomy();
 void RecomputePrices();
