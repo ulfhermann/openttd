@@ -2235,7 +2235,8 @@ STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}Manual
 
 STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}Rotatie harta inaltimi:
 STR_MAPGEN_HEIGHTMAP_NAME                                       :{BLACK}Nume harta inaltimi:
-STR_MAPGEN_HEIGHTMAP_SIZE                                       :{BLACK}Dimensiune: {ORANGE}{NUM} x {NUM}
+STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Dimensiune:
+STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} * {NUM}
 
 STR_MAPGEN_RANDOM_SEED_OSKTITLE                                 :{BLACK}Introduceţi o valoare de pornire pentru numerele aleatoare
 STR_MAPGEN_SNOW_LINE_QUERY_CAPT                                 :{WHITE}Nu pot modifica inaltimea zapezii
@@ -4028,6 +4029,3 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
-STR_NUM_1                                                       :{BLACK}{SKIP}{NUM}
-STR_NUM_2                                                       :{BLACK}{SKIP}{SKIP}{NUM}
-STR_NUM_3                                                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM}
