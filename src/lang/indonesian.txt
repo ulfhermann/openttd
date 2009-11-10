@@ -314,6 +314,7 @@ STR_TOOLBAR_TOOLTIP_LANDSCAPING                                 :{BLACK}Buka too
 STR_TOOLBAR_TOOLTIP_SHOW_SOUND_MUSIC_WINDOW                     :{BLACK}Tampilkan jendela suara/musik
 STR_TOOLBAR_TOOLTIP_SHOW_LAST_MESSAGE_NEWS                      :{BLACK}Tampilkan pesan/berita terkini, tampilkan pilihan berita
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Informasi area daratan, konsol, AI debug, pengambilan gambar, dan tentang OpenTTD
+STR_TOOLBAR_TOOLTIP_SWITCH_TOOLBAR                              :{BLACK}Berpindah toolbar
 
 # Extra tooltips for the scenario editor toolbar
 STR_SCENEDIT_TOOLBAR_TOOLTIP_SAVE_SCENARIO_LOAD_SCENARIO        :{BLACK}Simpan, buka, batalkan, keluar editor skenario
@@ -2235,7 +2236,8 @@ STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}Manual
 
 STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}Rotasi Heightmap:
 STR_MAPGEN_HEIGHTMAP_NAME                                       :{BLACK}Nama Peta Heightmap:
-STR_MAPGEN_HEIGHTMAP_SIZE                                       :{BLACK}Luas: {ORANGE}{NUM} x {NUM}
+STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Luas:
+STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} * {NUM}
 
 STR_MAPGEN_RANDOM_SEED_OSKTITLE                                 :{BLACK}Masukkan angka umpan pengacakan
 STR_MAPGEN_SNOW_LINE_QUERY_CAPT                                 :{WHITE}Ubah ketinggian garis salju
@@ -4027,7 +4029,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-
-STR_NUM_1                                                       :{BLACK}{SKIP}{NUM}
-STR_NUM_2                                                       :{BLACK}{SKIP}{SKIP}{NUM}
-STR_NUM_3                                                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM}

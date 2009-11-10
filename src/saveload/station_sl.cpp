@@ -320,7 +320,7 @@ static void Load_STNS()
 	}
 }
 
-void Ptrs_STNS()
+static void Ptrs_STNS()
 {
 	/* Don't run when savegame version is higher than or equal to 123. */
 	if (!CheckSavegameVersion(123)) return;
@@ -416,7 +416,7 @@ static void RealSave_STNN(BaseStation *bst)
 		Station *st = Station::From(bst);
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
-			_num_dests = ge->cargo.Packets()->MapSize();
+			_num_dests = (uint32)ge->cargo.Packets()->MapSize();
 			LinkStatMap &stats = ge->link_stats;
 			_num_links = (uint16)stats.size();
 			FlowStatMap & flows = ge->flows;
