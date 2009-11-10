@@ -109,7 +109,7 @@ int _score_part[MAX_COMPANIES][SCORE_END];
 Economy _economy;
 Prices _price;
 Money _additional_cash_required;
-static byte _price_base_multiplier[NUM_PRICES];
+static int8 _price_base_multiplier[PR_END];
 
 Money CalculateCompanyValue(const Company *c)
 {
@@ -123,7 +123,7 @@ Money CalculateCompanyValue(const Company *c)
 		if (st->owner == owner) num += CountBits((byte)st->facilities);
 	}
 
-	value += num * _price.station_value * 25;
+	value += num * _price[PR_STATION_VALUE] * 25;
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
@@ -558,7 +558,7 @@ static void CompaniesGenStatistics()
 
 	FOR_ALL_STATIONS(st) {
 		_current_company = st->owner;
-		CommandCost cost(EXPENSES_PROPERTY, _price.station_value >> 1);
+		CommandCost cost(EXPENSES_PROPERTY, _price[PR_STATION_VALUE] >> 1);
 		SubtractMoneyFromCompany(cost);
 	}
 
@@ -625,10 +625,8 @@ void RecomputePrices()
 	/* Setup maximum loan */
 	_economy.max_loan = (_settings_game.difficulty.max_loan * _economy.inflation_prices >> 16) / 50000 * 50000;
 
-	assert_compile(sizeof(_price) == NUM_PRICES * sizeof(Money));
-
 	/* Setup price bases */
-	for (uint i = 0; i < NUM_PRICES; i++) {
+	for (Price i = PR_BEGIN; i < PR_END; i++) {
 		Money price = _price_base_specs[i].start_price;
 
 		/* Apply difficulty settings */
@@ -654,7 +652,7 @@ void RecomputePrices()
 		price = (int64)price * _economy.inflation_prices;
 
 		/* Apply newgrf modifiers, and remove fractional part of inflation */
-		int shift = _price_base_multiplier[i] - 8 - 16;
+		int shift = _price_base_multiplier[i] - 16;
 		if (shift >= 0) {
 			price <<= shift;
 		} else {
@@ -662,7 +660,7 @@ void RecomputePrices()
 		}
 
 		/* Store value */
-		((Money *)&_price)[i] = price;
+		_price[i] = price;
 	}
 
 	/* Setup cargo payment */
@@ -698,7 +696,7 @@ static void CompaniesPayInterest()
 
 		SubtractMoneyFromCompany(CommandCost(EXPENSES_LOAN_INT, up_to_this_month - up_to_previous_month));
 
-		SubtractMoneyFromCompany(CommandCost(EXPENSES_OTHER, _price.station_value >> 2));
+		SubtractMoneyFromCompany(CommandCost(EXPENSES_OTHER, _price[PR_STATION_VALUE] >> 2));
 	}
 }
 
@@ -730,24 +728,20 @@ static void HandleEconomyFluctuations()
  */
 void ResetPriceBaseMultipliers()
 {
-	uint i;
-
-	/* 8 means no multiplier. */
-	for (i = 0; i < NUM_PRICES; i++)
-		_price_base_multiplier[i] = 8;
+	memset(_price_base_multiplier, 0, sizeof(_price_base_multiplier));
 }
 
 /**
  * Change a price base by the given factor.
- * The price base is altered by factors of two, with an offset of 8.
- * NewBaseCost = OldBaseCost * 2^(n-8)
+ * The price base is altered by factors of two.
+ * NewBaseCost = OldBaseCost * 2^n
  * @param price Index of price base to change.
  * @param factor Amount to change by.
  */
-void SetPriceBaseMultiplier(uint price, byte factor)
+void SetPriceBaseMultiplier(Price price, int factor)
 {
-	assert(price < NUM_PRICES);
-	_price_base_multiplier[price] = min(factor, MAX_PRICE_MODIFIER);
+	assert(price < PR_END);
+	_price_base_multiplier[price] = Clamp(factor, MIN_PRICE_MODIFIER, MAX_PRICE_MODIFIER);
 }
 
 /**
@@ -793,11 +787,16 @@ void InitializeEconomy()
 	_economy.inflation_prices = _economy.inflation_payment = 1 << 16;
 }
 
-Money GetPriceByIndex(uint8 index)
+/**
+ * Determine a certain base price with range checking
+ * @param index Price of interest
+ * @return Base price, or zero if out of range
+ */
+Money GetPriceByIndex(Price index)
 {
-	if (index > NUM_PRICES) return 0;
+	if (index >= PR_END) return 0;
 
-	return ((Money*)&_price)[index];
+	return _price[index];
 }
 
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, CargoID cargo_type)

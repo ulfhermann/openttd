@@ -46,7 +46,7 @@ void Waypoint::UpdateVirtCoord()
  * Set the default name for a waypoint
  * @param wp Waypoint to work on
  */
-void MakeDefaultWaypointName(Waypoint *wp)
+static void MakeDefaultWaypointName(Waypoint *wp)
 {
 	uint32 used = 0; // bitmap of used waypoint numbers, sliding window with 'next' as base
 	uint32 next = 0; // first waypoint number in the bitmap
@@ -319,7 +319,7 @@ CommandCost CmdBuildRailWaypoint(TileIndex start_tile, DoCommandFlag flags, uint
 		}
 	}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, count * _price.build_train_depot);
+	return CommandCost(EXPENSES_CONSTRUCTION, count * _price[PR_BUILD_DEPOT_TRAIN]);
 }
 
 /** Build a buoy.
@@ -366,7 +366,7 @@ CommandCost CmdBuildBuoy(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		InvalidateWindowData(WC_WAYPOINT_VIEW, wp->index);
 	}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, _price.build_dock);
+	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_STATION_DOCK]);
 }
 
 /**
@@ -404,7 +404,7 @@ CommandCost RemoveBuoy(TileIndex tile, DoCommandFlag flags)
 		wp->delete_ctr = 0;
 	}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, _price.remove_truck_station);
+	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_CLEAR_STATION_TRUCK]);
 }
 
 
