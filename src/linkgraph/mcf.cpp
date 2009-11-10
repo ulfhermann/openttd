@@ -148,8 +148,10 @@ bool MCF1stPass::EliminateCycles(PathVector & path, NodeID origin_id, NodeID nex
 	static Path * invalid_path = new Path(Node::INVALID, true);
 	Path * at_next_pos = path[next_id];
 	if (at_next_pos == invalid_path) {
+		/* this node has already been searched */
 		return false;
 	} else if (at_next_pos == NULL) {
+		/* summarize paths; add up the paths with the same source and next hop in one path each */
 		PathSet & paths = this->graph->GetNode(next_id).paths;
 		PathViaMap next_hops;
 		for(PathSet::iterator i = paths.begin(); i != paths.end(); ++i) {
@@ -167,16 +169,29 @@ bool MCF1stPass::EliminateCycles(PathVector & path, NodeID origin_id, NodeID nex
 			}
 		}
 		bool found = false;
+		/* search the next hops for nodes we have already visited */
 		for (PathViaMap::iterator via_it = next_hops.begin(); via_it != next_hops.end(); ++via_it) {
 			Path * child = via_it->second;
 			if (child->GetFlow() > 0) {
+				/* push one child into the path vector and search this child's children */
 				path[next_id] = child;
 				found = EliminateCycles(path, origin_id, child->GetNode()) || found;
 			}
 		}
-		path[next_id] = invalid_path;
+		/* All paths departing from this node have been searched. Mark as resolved if no cycles found.
+		 * If cycles were found further cycles could be found in this branch, thus it has to be
+		 * searched again next time we spot it.
+		 */
+		if (found) {
+			path[next_id] = NULL;
+		} else {
+			path[next_id] = invalid_path;
+		}
 		return found;
 	} else {
+		/* this node has already been visited => we have a cycle
+		 * backtrack to find the exact flow
+		 */
 		uint flow = FindCycleFlow(path, at_next_pos);
 		if (flow > 0) {
 			EliminateCycle(path, at_next_pos, flow);
@@ -193,6 +208,7 @@ bool MCF1stPass::EliminateCycles()
 	uint size = this->graph->GetSize();
 	PathVector path(size, NULL);
 	for (NodeID node = 0; node < size; ++node) {
+		/* starting at each node in the graph find all cycles involving this node */
 		std::fill(path.begin(), path.end(), (Path *)NULL);
 		cycles_found = EliminateCycles(path, node, node) || cycles_found;
 	}

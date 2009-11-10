@@ -416,7 +416,7 @@ static void RealSave_STNN(BaseStation *bst)
 		Station *st = Station::From(bst);
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
-			_num_dests = ge->cargo.Packets()->MapSize();
+			_num_dests = (uint32)ge->cargo.Packets()->MapSize();
 			LinkStatMap &stats = ge->link_stats;
 			_num_links = (uint16)stats.size();
 			FlowStatMap & flows = ge->flows;
