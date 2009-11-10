@@ -433,8 +433,8 @@ static LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
 				int dx = x - _cursor.pos.x;
 				int dy = y - _cursor.pos.y;
 				if (dx != 0 || dy != 0) {
-					_cursor.delta.x += dx;
-					_cursor.delta.y += dy;
+					_cursor.delta.x = dx;
+					_cursor.delta.y = dy;
 
 					pt.x = _cursor.pos.x;
 					pt.y = _cursor.pos.y;
@@ -443,8 +443,8 @@ static LRESULT CALLBACK WndProcGdi(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
 					SetCursorPos(pt.x, pt.y);
 				}
 			} else {
-				_cursor.delta.x += x - _cursor.pos.x;
-				_cursor.delta.y += y - _cursor.pos.y;
+				_cursor.delta.x = x - _cursor.pos.x;
+				_cursor.delta.y = y - _cursor.pos.y;
 				_cursor.pos.x = x;
 				_cursor.pos.y = y;
 				_cursor.dirty = true;
@@ -879,7 +879,6 @@ void VideoDriver_Win32::MainLoop()
 			if (old_ctrl_pressed != _ctrl_pressed) HandleCtrlChanged();
 
 			GameLoop();
-			_cursor.delta.x = _cursor.delta.y = 0;
 
 			if (_force_full_redraw) MarkWholeScreenDirty();
 

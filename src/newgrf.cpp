@@ -65,7 +65,7 @@ static int _skip_sprites; // XXX
 static uint _file_index; // XXX
 
 static GRFFile *_cur_grffile;
-GRFFile *_first_grffile;
+static GRFFile *_first_grffile;
 static SpriteID _cur_spriteid;
 static GrfLoadingStage _cur_stage;
 static uint32 _nfo_line;
@@ -132,7 +132,7 @@ struct GRFLocation {
 
 static std::map<GRFLocation, SpriteID> _grm_sprites;
 typedef std::map<GRFLocation, byte*> GRFLineToSpriteOverride;
-GRFLineToSpriteOverride _grf_line_to_action6_sprite_override;
+static GRFLineToSpriteOverride _grf_line_to_action6_sprite_override;
 
 /** DEBUG() function dedicated to newGRF debugging messages
  * Function is essentialy the same as DEBUG(grf, severity, ...) with the
@@ -255,7 +255,7 @@ static void ClearTemporaryNewGRFData(GRFFile *gf)
 
 
 typedef std::map<StringID *, uint32> StringIDToGRFIDMapping;
-StringIDToGRFIDMapping _string_to_grf_mapping;
+static StringIDToGRFIDMapping _string_to_grf_mapping;
 
 /** Used when setting an object's property to map to the GRF's strings
  * while taking in consideration the "drift" between TTDPatch string system and OpenTTD's one
@@ -417,6 +417,32 @@ static void MapSpriteMappingRecolour(PalSpriteID *grf_sprite)
 	}
 }
 
+/**
+ * Converts TTD(P) Base Price pointers into the enum used by OTTD
+ * See http://wiki.ttdpatch.net/tiki-index.php?page=BaseCosts
+ * @param base_pointer TTD(P) Base Price Pointer
+ * @param error_location Function name for grf error messages
+ * @param index If #base_pointer is valid, #index is assigned to the matching price; else it is left unchanged
+ */
+static void ConvertTTDBasePrice(uint32 base_pointer, const char *error_location, Price *index)
+{
+	/* Special value for 'none' */
+	if (base_pointer == 0) {
+		*index = INVALID_PRICE;
+		return;
+	}
+
+	static const uint32 start = 0x4B34; ///< Position of first base price
+	static const uint32 size  = 6;      ///< Size of each base price record
+
+	if (base_pointer < start || (base_pointer - start) % size != 0 || (base_pointer - start) / size >= PR_END) {
+		grfmsg(1, "%s: Unsupported running cost base 0x%04X, ignoring", error_location, base_pointer);
+		return;
+	}
+
+	*index = (Price)((base_pointer - start) / size);
+}
+
 enum ChangeInfoResult {
 	CIR_SUCCESS,    ///< Variable was parsed and read
 	CIR_UNHANDLED,  ///< Variable was parsed but unread
@@ -529,21 +555,9 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				rvi->running_cost = grf_load_byte(&buf);
 				break;
 
-			case 0x0E: { // Running cost base
-				uint32 base = grf_load_dword(&buf);
-
-				/* These magic numbers are used in GRFs to specify the base cost:
-				 * http://wiki.ttdpatch.net/tiki-index.php?page=BaseCosts
-				 */
-				if (base == 0) {
-					rvi->running_cost_class = 0xFF;
-				} else if (base < 0x4B34 || base > 0x4C54 || (base - 0x4B34) % 6 != 0) {
-					grfmsg(1, "RailVehicleChangeInfo: Unsupported running cost base 0x%04X, ignoring", base);
-				} else {
-					/* Convert the magic number to an index into the price data */
-					rvi->running_cost_class = (base - 0x4B34) / 6;
-				}
-			} break;
+			case 0x0E: // Running cost base
+				ConvertTTDBasePrice(grf_load_dword(&buf), "RailVehicleChangeInfo", &rvi->running_cost_class);
+				break;
 
 			case 0x12: { // Sprite ID
 				uint8 spriteid = grf_load_byte(&buf);
@@ -738,27 +752,13 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 				rvi->max_speed = grf_load_byte(&buf);
 				break;
 
-			case 0x09: // Running cost factor
+			case PROP_ROADVEH_RUNNING_COST_FACTOR: // 0x09 Running cost factor
 				rvi->running_cost = grf_load_byte(&buf);
 				break;
 
-			case 0x0A: { // Running cost base
-				uint32 base = grf_load_dword(&buf);
-
-				/* These magic numbers are used in GRFs to specify the base cost:
-				 * http://wiki.ttdpatch.net/tiki-index.php?page=BaseCosts
-				 */
-				if (base == 0) {
-					rvi->running_cost_class = 0xFF;
-				} else if (base < 0x4B34 || base > 0x4C54 || (base - 0x4B34) % 6 != 0) {
-					grfmsg(1, "RailVehicleChangeInfo: Unsupported running cost base 0x%04X, ignoring", base);
-				} else {
-					/* Convert the magic number to an index into the price data */
-					rvi->running_cost_class = (base - 0x4B34) / 6;
-				}
-
+			case 0x0A: // Running cost base
+				ConvertTTDBasePrice(grf_load_dword(&buf), "RoadVehicleChangeInfo", &rvi->running_cost_class);
 				break;
-			}
 
 			case 0x0E: { // Sprite ID
 				uint8 spriteid = grf_load_byte(&buf);
@@ -1665,11 +1665,11 @@ static ChangeInfoResult GlobalVarChangeInfo(uint gvid, int numinfo, int prop, by
 	for (int i = 0; i < numinfo; i++) {
 		switch (prop) {
 			case 0x08: { // Cost base factor
-				byte factor = grf_load_byte(&buf);
+				int factor = grf_load_byte(&buf);
 				uint price = gvid + i;
 
-				if (price < NUM_PRICES) {
-					SetPriceBaseMultiplier(price, factor);
+				if (price < PR_END) {
+					SetPriceBaseMultiplier((Price)price, factor - 8);
 				} else {
 					grfmsg(1, "GlobalVarChangeInfo: Price %d out of range, ignoring", price);
 				}
@@ -5088,7 +5088,7 @@ static void GRFImportBlock(byte *buf, int len)
 	}
 }
 
-static void LoadGRFSound(byte *buf, int len)
+static void LoadGRFSound(byte *buf, uint len)
 {
 	byte *buf_start = buf;
 
@@ -5101,22 +5101,31 @@ static void LoadGRFSound(byte *buf, int len)
 		return;
 	}
 
-	/* Size of file -- we ignore this */
-	grf_load_dword(&buf);
+	uint32 total_size = grf_load_dword(&buf);
+	if (total_size > len + 8) {
+		grfmsg(1, "LoadGRFSound: RIFF was truncated");
+		return;
+	}
 
 	if (grf_load_dword(&buf) != BSWAP32('WAVE')) {
 		grfmsg(1, "LoadGRFSound: Invalid RIFF type");
 		return;
 	}
 
-	for (;;) {
+	while (total_size >= 8) {
 		uint32 tag  = grf_load_dword(&buf);
 		uint32 size = grf_load_dword(&buf);
+		total_size -= 8;
+		if (total_size < size) {
+			grfmsg(1, "LoadGRFSound: Invalid RIFF");
+			return;
+		}
+		total_size -= size;
 
 		switch (tag) {
 			case ' tmf': // 'fmt '
 				/* Audio format, must be 1 (PCM) */
-				if (grf_load_word(&buf) != 1) {
+				if (size < 16 || grf_load_word(&buf) != 1) {
 					grfmsg(1, "LoadGRFSound: Invalid audio format");
 					return;
 				}
@@ -5126,8 +5135,8 @@ static void LoadGRFSound(byte *buf, int len)
 				grf_load_word(&buf);
 				sound->bits_per_sample = grf_load_word(&buf);
 
-				/* Consume any extra bytes */
-				for (; size > 16; size--) grf_load_byte(&buf);
+				/* The rest will be skipped */
+				size -= 16;
 				break;
 
 			case 'atad': // 'data'
@@ -5140,13 +5149,21 @@ static void LoadGRFSound(byte *buf, int len)
 				sound->priority = 0;
 
 				grfmsg(2, "LoadGRFSound: channels %u, sample rate %u, bits per sample %u, length %u", sound->channels, sound->rate, sound->bits_per_sample, size);
-				return;
+				return; // the fmt chunk has to appear before data, so we are finished
 
 			default:
-				sound->file_size = 0;
-				return;
+				/* Skip unknown chunks */
+				break;
 		}
+
+		/* Skip rest of chunk */
+		for (; size > 0; size--) grf_load_byte(&buf);
 	}
+
+	grfmsg(1, "LoadGRFSound: RIFF does not contain any sound data");
+
+	/* Clear everything that was read */
+	MemSetT(sound, 0);
 }
 
 /* Action 0x12 */
@@ -5285,22 +5302,34 @@ static void TranslateGRFStrings(byte *buf, size_t len)
 /* 'Action 0xFF' */
 static void GRFDataBlock(byte *buf, int len)
 {
+	/* <FF> <name_len> <name> '\0' <data> */
+
 	if (_grf_data_blocks == 0) {
 		grfmsg(2, "GRFDataBlock: unexpected data block, skipping");
 		return;
 	}
 
+	if (!check_length(len, 3, "GRFDataBlock")) return;
+
 	buf++;
 	uint8 name_len = grf_load_byte(&buf);
 	const char *name = (const char *)buf;
-	buf += name_len + 1;
+	buf += name_len;
+
+	/* Test string termination */
+	if (grf_load_byte(&buf) != 0) {
+		grfmsg(2, "GRFDataBlock: Name not properly terminated");
+		return;
+	}
+
+	if (!check_length(len, 3 + name_len, "GRFDataBlock")) return;
 
 	grfmsg(2, "GRFDataBlock: block name '%s'...", name);
 
 	_grf_data_blocks--;
 
 	switch (_grf_data_type) {
-		case GDT_SOUND: LoadGRFSound(buf, len - name_len - 2); break;
+		case GDT_SOUND: LoadGRFSound(buf, len - name_len - 3); break;
 		default: NOT_REACHED();
 	}
 }
