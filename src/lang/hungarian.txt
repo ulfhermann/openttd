@@ -347,6 +347,7 @@ STR_TOOLBAR_TOOLTIP_LANDSCAPING                                 :{BLACK}Nyisd me
 STR_TOOLBAR_TOOLTIP_SHOW_SOUND_MUSIC_WINDOW                     :{BLACK}Hang/zene beállítás
 STR_TOOLBAR_TOOLTIP_SHOW_LAST_MESSAGE_NEWS                      :{BLACK}Legutóbbi üzenet/újsághír, üzenetek beállításai
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Terület-információ, konzol, MI debug, képmentések, az OpenTTD-ről
+STR_TOOLBAR_TOOLTIP_SWITCH_TOOLBAR                              :{BLACK}Eszköztár változás
 
 # Extra tooltips for the scenario editor toolbar
 STR_SCENEDIT_TOOLBAR_TOOLTIP_SAVE_SCENARIO_LOAD_SCENARIO        :{BLACK}Pálya betöltése, mentése, kilépés a szerkesztőből, kilépés
@@ -2269,7 +2270,8 @@ STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}Kézi
 
 STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}Magasságtérkép elforgatása:
 STR_MAPGEN_HEIGHTMAP_NAME                                       :{BLACK}Magasságtérkép neve:
-STR_MAPGEN_HEIGHTMAP_SIZE                                       :{BLACK}Méret: {ORANGE}{NUM} x {NUM}
+STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Méret:
+STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} * {NUM}
 
 STR_MAPGEN_RANDOM_SEED_OSKTITLE                                 :{BLACK}Irj be egy tetszőleges számot
 STR_MAPGEN_SNOW_LINE_QUERY_CAPT                                 :{WHITE}Hóhatár megváltoztatása
@@ -4071,6 +4073,7 @@ STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LO
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
 STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
+STR_BLACK_INT                                                   :{BLACK}{NUM}
 STR_ORANGE_INT                                                  :{ORANGE}{NUM}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
@@ -4098,7 +4101,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-
-STR_NUM_1                                                       :{BLACK}{SKIP}{NUM}
-STR_NUM_2                                                       :{BLACK}{SKIP}{SKIP}{NUM}
-STR_NUM_3                                                       :{BLACK}{SKIP}{SKIP}{SKIP}{NUM}
