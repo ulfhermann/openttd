@@ -434,6 +434,9 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 				break;
 			case UL_TRANSFER:
 				/* TransferPacket may split the packet and return the transferred part */
+				if (via == curr_station) {
+					via = (++begin != flows.end()) ? begin->via : INVALID_STATION;
+				}
 				unloaded = this->TransferPacket(c, remaining_unload, dest, payment, via);
 				if (via != INVALID_STATION) {
 					dest->UpdateFlowStats(flows, begin, unloaded);
