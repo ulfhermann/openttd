@@ -150,14 +150,14 @@ struct GoodsEntry {
 	 * update the flow stats for count cargo from source sent to next
 	 */
 	void UpdateFlowStats(StationID source, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count);
 
 	/**
 	 * update the flow stats for count cargo that cannot be delivered here
 	 * return the direction where it is sent
 	 */
 	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
-private:
-	void UpdateFlowStats(FlowStatSet & flow_stats, FlowStatSet::iterator flow_it, uint count);
 };
 
 

@@ -199,23 +199,6 @@ enum UnloadType {
 	UL_ACCEPTED = 1 << 2, ///< cargo is accepted
 };
 
-struct UnloadDescription {
-	UnloadDescription(GoodsEntry * d, StationID curr, StationID next, OrderUnloadFlags f);
-	GoodsEntry * dest;
-	/**
-	 * station we are trying to unload at now
-	 */
-	StationID curr_station;
-	/**
-	 * station the vehicle will unload at next
-	 */
-	StationID next_station;
-	/**
-	 * delivery flags
-	 */
-	byte flags;
-};
-
 class StationCargoList;
 class VehicleCargoList;
 
@@ -330,11 +313,12 @@ typedef std::list<CargoPacket *> CargoPacketList;
  */
 class VehicleCargoList : public CargoList<VehicleCargoList, CargoPacketList> {
 protected:
-	UnloadType WillUnloadOld(const UnloadDescription & ul, const CargoPacket * p) const;
-	UnloadType WillUnloadCargoDist(const UnloadDescription & ul, const CargoPacket * p) const;
+	static UnloadType WillUnloadOld(byte flags, StationID curr_station, StationID source);
+	static UnloadType WillUnloadCargoDist(byte flags, StationID curr_station, StationID next_station, StationID via, StationID source);
 
-	uint TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station);
-	uint DeliverPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID curr_station);
+	uint TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID next);
+	uint DeliverPacket(Iterator &c, uint remaining_unload, CargoPayment *payment);
+	uint KeepPacket(Iterator &c);
 
 	/** The (direct) parent of this class */
 	typedef CargoList<VehicleCargoList, CargoPacketList> Parent;
@@ -356,6 +340,8 @@ protected:
 	 * @param cp Packet to be removed from cache
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
+
+	static byte GetUnloadFlags(GoodsEntry *dest, OrderUnloadFlags order_flags);
 
 public:
 	/** The super class ought to know what it's doing */
@@ -386,8 +372,6 @@ public:
 	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment);
 
 	~VehicleCargoList();
-
-	UnloadType WillUnload(const UnloadDescription & ul, const CargoPacket * p) const;
 
 	/**
 	 * Returns total sum of the feeder share for all packets
