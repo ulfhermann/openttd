@@ -574,6 +574,9 @@ void UpdateStationAcceptance(Station *st, bool show_msg)
 		if ((!is_passengers && !(st->facilities & ~FACIL_BUS_STOP)) ||
 				(is_passengers && !(st->facilities & ~FACIL_TRUCK_STOP))) {
 			amt = 0;
+			st->goods[i].acceptance = 0;
+		} else {
+			st->goods[i].acceptance = acceptance[i];
 		}
 
 		SB(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, amt >= 8);

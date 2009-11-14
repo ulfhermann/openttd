@@ -213,6 +213,7 @@ const SaveLoad *GetGoodsDesc()
 	static const SaveLoad goods_desc[] = {
 		SLEG_CONDVAR(            _waiting_acceptance, SLE_UINT16,                  0, 67),
 		 SLE_CONDVAR(GoodsEntry, acceptance_pickup,   SLE_UINT8,                  68, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, acceptance,          SLE_UINT,            SUPPLY_SV, SL_MAX_VERSION),
 		SLE_CONDNULL(2,                                                           51, 67),
 		     SLE_VAR(GoodsEntry, days_since_pickup,   SLE_UINT8),
 		     SLE_VAR(GoodsEntry, rating,              SLE_UINT8),

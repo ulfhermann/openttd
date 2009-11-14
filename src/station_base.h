@@ -89,6 +89,7 @@ struct GoodsEntry {
 	byte last_age;
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
 	uint supply;
+	uint acceptance;        ///< Accepted cargo (by houses, HQs, industry tiles)
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
 };
