@@ -58,10 +58,11 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 const SaveLoad * GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad _linkgraph_desc[] = {
-		SLEG_CONDVAR(           _num_components,      SLE_UINT32, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, current_component_id, SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, current_station_id,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, cargo,                SLE_UINT8,  LINKGRAPH_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(           _num_components,      SLE_UINT32,                            LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, current_component_id, SLE_UINT16,                            LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, current_station_id,   SLE_UINT16,                            LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, cargo,                SLE_UINT8,                             LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDARR(LinkGraph, component_acceptance, SLE_UINT,   LinkGraph::MAX_COMPONENTS, SUPPLY_SV,    SL_MAX_VERSION),
 		 SLE_END()
 	};
 

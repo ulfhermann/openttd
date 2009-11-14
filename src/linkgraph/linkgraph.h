@@ -91,6 +91,8 @@ typedef std::list<LinkGraphJob *> JobList;
 
 class LinkGraph {
 public:
+	static const uint MAX_COMPONENTS = 128;
+
 	LinkGraph();
 	void Clear();
 	CargoID GetCargo() const {return cargo;}
@@ -126,6 +128,7 @@ private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
 	void CreateComponent(Station * first);
 	LinkGraphComponentID current_component_id;
+	uint component_acceptance[MAX_COMPONENTS];
 	StationID current_station_id;
 	CargoID cargo;
 	JobList jobs;

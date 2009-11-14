@@ -335,5 +335,6 @@ extern char _savegame_format[8];
 
 #define CAPACITIES_SV 130
 #define LINKGRAPH_SV 140
+#define SUPPLY_SV 145
 
 #endif /* SAVELOAD_H */
