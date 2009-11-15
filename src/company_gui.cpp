@@ -550,8 +550,10 @@ enum SelectCompanyLiveryWindowWidgets {
 	SCLW_WIDGET_MATRIX,
 };
 
+/** Company livery colour scheme window. */
 struct SelectCompanyLiveryWindow : public Window {
 private:
+	static const int TEXT_INDENT = 15; ///< Number of pixels to indent the text in each column in the #SCLW_WIDGET_MATRIX to make room for the (coloured) rectangles.
 	uint32 sel;
 	LiveryClass livery_class;
 
@@ -585,64 +587,18 @@ private:
 	}
 
 public:
-	SelectCompanyLiveryWindow(const WindowDesc *desc, CompanyID company) : Window(desc, company)
+	SelectCompanyLiveryWindow(const WindowDesc *desc, CompanyID company) : Window()
 	{
-		this->owner = company;
 		this->livery_class = LC_OTHER;
 		this->sel = 1;
+		this->InitNested(desc, company);
+		this->owner = company;
 		this->LowerWidget(SCLW_WIDGET_CLASS_GENERAL);
-		this->OnInvalidateData();
-		this->FindWindowPlacementAndResize(desc);
 	}
 
-	virtual void OnPaint()
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
 	{
-		const Company *c = Company::Get((CompanyID)this->window_number);
-		LiveryScheme scheme = LS_DEFAULT;
-		int y = 51;
-
-		/* Disable dropdown controls if no scheme is selected */
-		this->SetWidgetDisabledState(SCLW_WIDGET_PRI_COL_DROPDOWN, this->sel == 0);
-		this->SetWidgetDisabledState(SCLW_WIDGET_SEC_COL_DROPDOWN, this->sel == 0);
-
-		if (this->sel != 0) {
-			for (scheme = LS_BEGIN; scheme < LS_END; scheme++) {
-				if (HasBit(this->sel, scheme)) break;
-			}
-			if (scheme == LS_END) scheme = LS_DEFAULT;
-		}
-
-		SetDParam(0, STR_COLOUR_DARK_BLUE + c->livery[scheme].colour1);
-		SetDParam(1, STR_COLOUR_DARK_BLUE + c->livery[scheme].colour2);
-
-		this->DrawWidgets();
-
-		for (scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
-			if (_livery_class[scheme] == this->livery_class) {
-				bool sel = HasBit(this->sel, scheme) != 0;
-
-				if (scheme != LS_DEFAULT) {
-					DrawSprite(c->livery[scheme].in_use ? SPR_BOX_CHECKED : SPR_BOX_EMPTY, PAL_NONE, 2, y);
-				}
-
-				DrawString(15, 165, y, STR_LIVERY_DEFAULT + scheme, sel ? TC_WHITE : TC_BLACK);
-
-				DrawSprite(SPR_SQUARE, GENERAL_SPRITE_COLOUR(c->livery[scheme].colour1), 152, y);
-				DrawString(165, 290, y, STR_COLOUR_DARK_BLUE + c->livery[scheme].colour1, sel ? TC_WHITE : TC_GOLD);
-
-				if (!this->IsWidgetHidden(SCLW_WIDGET_SEC_COL_DROPDOWN)) {
-					DrawSprite(SPR_SQUARE, GENERAL_SPRITE_COLOUR(c->livery[scheme].colour2), 277, y);
-					DrawString(290, this->width, y, STR_COLOUR_DARK_BLUE + c->livery[scheme].colour2, sel ? TC_WHITE : TC_GOLD);
-				}
-
-				y += 14;
-			}
-		}
-	}
-
-	virtual void OnClick(Point pt, int widget)
-	{
-		/* Number of liveries in each class, used to determine the height of the livery window */
+		/* Number of liveries in each class, used to determine the height of the livery matrix widget. */
 		static const byte livery_height[] = {
 			1,
 			13,
@@ -652,32 +608,124 @@ public:
 		};
 
 		switch (widget) {
+			case SCLW_WIDGET_SPACER_DROPDOWN: {
+				/* The matrix widget below needs enough room to print all the schemes. */
+				Dimension d = {0, 0};
+				for (LiveryScheme scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
+					d = maxdim(d, GetStringBoundingBox(STR_LIVERY_DEFAULT + scheme));
+				}
+				size->width = max(size->width, TEXT_INDENT + d.width + WD_FRAMERECT_RIGHT);
+				break;
+			}
+
+			case SCLW_WIDGET_MATRIX:
+				size->height = livery_height[this->livery_class] * (4 + FONT_HEIGHT_NORMAL);
+				this->GetWidget<NWidgetCore>(SCLW_WIDGET_MATRIX)->widget_data = (livery_height[this->livery_class] << MAT_ROW_START) | (1 << MAT_COL_START);
+				break;
+
+			case SCLW_WIDGET_SEC_COL_DROPDOWN:
+				if (!_loaded_newgrf_features.has_2CC) size->width = 0;
+				break;
+		}
+	}
+
+	virtual void OnPaint()
+	{
+		/* Disable dropdown controls if no scheme is selected */
+		this->SetWidgetDisabledState(SCLW_WIDGET_PRI_COL_DROPDOWN, this->sel == 0);
+		this->SetWidgetDisabledState(SCLW_WIDGET_SEC_COL_DROPDOWN, this->sel == 0);
+
+		this->DrawWidgets();
+	}
+
+	virtual void SetStringParameters(int widget) const
+	{
+		switch (widget) {
+			case SCLW_WIDGET_PRI_COL_DROPDOWN:
+			case SCLW_WIDGET_SEC_COL_DROPDOWN: {
+				const Company *c = Company::Get((CompanyID)this->window_number);
+				LiveryScheme scheme = LS_DEFAULT;
+
+				if (this->sel != 0) {
+					for (scheme = LS_BEGIN; scheme < LS_END; scheme++) {
+						if (HasBit(this->sel, scheme)) break;
+					}
+					if (scheme == LS_END) scheme = LS_DEFAULT;
+				}
+				SetDParam(0, STR_COLOUR_DARK_BLUE + ((widget == SCLW_WIDGET_PRI_COL_DROPDOWN) ? c->livery[scheme].colour1 : c->livery[scheme].colour2));
+				break;
+			}
+		}
+	}
+
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != SCLW_WIDGET_MATRIX) return;
+
+		/* Horizontal coordinates of scheme name column. */
+		const NWidgetBase *nwi = this->GetWidget<NWidgetBase>(SCLW_WIDGET_SPACER_DROPDOWN);
+		int sch_left = nwi->pos_x;
+		int sch_right = sch_left + nwi->current_x - 1;
+		/* Horizontal coordinates of first dropdown. */
+		nwi = this->GetWidget<NWidgetBase>(SCLW_WIDGET_PRI_COL_DROPDOWN);
+		int pri_left = nwi->pos_x;
+		int pri_right = pri_left + nwi->current_x - 1;
+		/* Horizontal coordinates of second dropdown. */
+		nwi = this->GetWidget<NWidgetBase>(SCLW_WIDGET_SEC_COL_DROPDOWN);
+		int sec_left = nwi->pos_x;
+		int sec_right = sec_left + nwi->current_x - 1;
+
+		int y = r.top + 3;
+		const Company *c = Company::Get((CompanyID)this->window_number);
+		for (LiveryScheme scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
+			if (_livery_class[scheme] == this->livery_class) {
+				bool sel = HasBit(this->sel, scheme) != 0;
+
+				/* Optional check box + scheme name. */
+				if (scheme != LS_DEFAULT) {
+					DrawSprite(c->livery[scheme].in_use ? SPR_BOX_CHECKED : SPR_BOX_EMPTY, PAL_NONE, sch_left + WD_FRAMERECT_LEFT, y);
+				}
+				DrawString(sch_left + TEXT_INDENT, sch_right - WD_FRAMERECT_RIGHT, y, STR_LIVERY_DEFAULT + scheme, sel ? TC_WHITE : TC_BLACK);
+
+				/* Text below the first dropdown. */
+				DrawSprite(SPR_SQUARE, GENERAL_SPRITE_COLOUR(c->livery[scheme].colour1), pri_left + WD_FRAMERECT_LEFT, y);
+				DrawString(pri_left + TEXT_INDENT, pri_right - WD_FRAMERECT_RIGHT, y, STR_COLOUR_DARK_BLUE + c->livery[scheme].colour1, sel ? TC_WHITE : TC_GOLD);
+
+				/* Text below the second dropdown. */
+				if (sec_right > sec_left) { // Second dropdown has non-zero size.
+					DrawSprite(SPR_SQUARE, GENERAL_SPRITE_COLOUR(c->livery[scheme].colour2), sec_left + WD_FRAMERECT_LEFT, y);
+					DrawString(sec_left + TEXT_INDENT, sec_right - WD_FRAMERECT_RIGHT, y, STR_COLOUR_DARK_BLUE + c->livery[scheme].colour2, sel ? TC_WHITE : TC_GOLD);
+				}
+
+				y += 4 + FONT_HEIGHT_NORMAL;
+			}
+		}
+	}
+
+	virtual void OnClick(Point pt, int widget)
+	{
+		switch (widget) {
 			/* Livery Class buttons */
 			case SCLW_WIDGET_CLASS_GENERAL:
 			case SCLW_WIDGET_CLASS_RAIL:
 			case SCLW_WIDGET_CLASS_ROAD:
 			case SCLW_WIDGET_CLASS_SHIP:
-			case SCLW_WIDGET_CLASS_AIRCRAFT: {
-				LiveryScheme scheme;
-
+			case SCLW_WIDGET_CLASS_AIRCRAFT:
 				this->RaiseWidget(this->livery_class + SCLW_WIDGET_CLASS_GENERAL);
 				this->livery_class = (LiveryClass)(widget - SCLW_WIDGET_CLASS_GENERAL);
-				this->sel = 0;
 				this->LowerWidget(this->livery_class + SCLW_WIDGET_CLASS_GENERAL);
 
 				/* Select the first item in the list */
-				for (scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
+				this->sel = 0;
+				for (LiveryScheme scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
 					if (_livery_class[scheme] == this->livery_class) {
 						this->sel = 1 << scheme;
 						break;
 					}
 				}
-				this->height = 49 + livery_height[this->livery_class] * 14;
-				this->widget[SCLW_WIDGET_MATRIX].bottom = this->height - 1;
-				this->widget[SCLW_WIDGET_MATRIX].data = (livery_height[this->livery_class] << MAT_ROW_START) | (1 << MAT_COL_START);
-				MarkWholeScreenDirty();
+
+				this->ReInit();
 				break;
-			}
 
 			case SCLW_WIDGET_PRI_COL_DROPDOWN: // First colour dropdown
 				ShowColourDropDownMenu(SCLW_WIDGET_PRI_COL_DROPDOWN);
@@ -688,10 +736,9 @@ public:
 				break;
 
 			case SCLW_WIDGET_MATRIX: {
-				LiveryScheme scheme;
-				LiveryScheme j = (LiveryScheme)((pt.y - 48) / 14);
+				LiveryScheme j = (LiveryScheme)((pt.y - this->GetWidget<NWidgetBase>(SCLW_WIDGET_MATRIX)->pos_y) / (4 + FONT_HEIGHT_NORMAL));
 
-				for (scheme = LS_BEGIN; scheme <= j; scheme++) {
+				for (LiveryScheme scheme = LS_BEGIN; scheme <= j; scheme++) {
 					if (_livery_class[scheme] != this->livery_class) j++;
 					if (scheme >= LS_END) return;
 				}
@@ -724,57 +771,37 @@ public:
 
 	virtual void OnInvalidateData(int data = 0)
 	{
-		int r = this->widget[_loaded_newgrf_features.has_2CC ? SCLW_WIDGET_SEC_COL_DROPDOWN : SCLW_WIDGET_PRI_COL_DROPDOWN].right;
-		this->SetWidgetHiddenState(SCLW_WIDGET_SEC_COL_DROPDOWN, !_loaded_newgrf_features.has_2CC);
-		this->widget[SCLW_WIDGET_CAPTION].right = r;
-		this->widget[SCLW_WIDGET_SPACER_CLASS].right = r;
-		this->widget[SCLW_WIDGET_MATRIX].right = r;
-		this->width = r + 1;
+		this->ReInit();
 	}
 };
 
 static const NWidgetPart _nested_select_company_livery_widgets [] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SCLW_WIDGET_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_GREY, SCLW_WIDGET_CAPTION), SetMinimalSize(389, 14), SetDataTip(STR_LIVERY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CAPTION, COLOUR_GREY, SCLW_WIDGET_CAPTION), SetMinimalSize(250, 14), SetDataTip(STR_LIVERY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_GENERAL), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_COMPANY_GENERAL, STR_LIVERY_GENERAL_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_RAIL), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_TRAINLIST, STR_LIVERY_TRAIN_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_ROAD), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_TRUCKLIST, STR_LIVERY_ROAD_VEHICLE_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_SHIP), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_SHIPLIST, STR_LIVERY_SHIP_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_AIRCRAFT), SetMinimalSize(22, 22), SetDataTip(SPR_IMG_AIRPLANESLIST, STR_LIVERY_AIRCRAFT_TOOLTIP),
-		NWidget(WWT_PANEL, COLOUR_GREY, SCLW_WIDGET_SPACER_CLASS), SetMinimalSize(290, 22), EndContainer(),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_GENERAL), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_COMPANY_GENERAL, STR_LIVERY_GENERAL_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_RAIL), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_TRAINLIST, STR_LIVERY_TRAIN_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_ROAD), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_TRUCKLIST, STR_LIVERY_ROAD_VEHICLE_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_SHIP), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_SHIPLIST, STR_LIVERY_SHIP_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_GREY, SCLW_WIDGET_CLASS_AIRCRAFT), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_AIRPLANESLIST, STR_LIVERY_AIRCRAFT_TOOLTIP),
+		NWidget(WWT_PANEL, COLOUR_GREY, SCLW_WIDGET_SPACER_CLASS), SetMinimalSize(90, 22), SetFill(true, true), EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_GREY, SCLW_WIDGET_SPACER_DROPDOWN), SetMinimalSize(150, 12), EndContainer(),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SCLW_WIDGET_PRI_COL_DROPDOWN), SetMinimalSize(125, 12), SetDataTip(STR_BLACK_STRING, STR_LIVERY_PRIMARY_TOOLTIP),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SCLW_WIDGET_SEC_COL_DROPDOWN), SetMinimalSize(125, 12), SetDataTip(STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO, STR_LIVERY_SECONDARY_TOOLTIP),
+		NWidget(WWT_PANEL, COLOUR_GREY, SCLW_WIDGET_SPACER_DROPDOWN), SetMinimalSize(150, 12), SetFill(true, true), EndContainer(),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SCLW_WIDGET_PRI_COL_DROPDOWN), SetMinimalSize(125, 12), SetFill(false, true), SetDataTip(STR_BLACK_STRING, STR_LIVERY_PRIMARY_TOOLTIP),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SCLW_WIDGET_SEC_COL_DROPDOWN), SetMinimalSize(125, 12), SetFill(false, true),
+				SetDataTip(STR_BLACK_STRING, STR_LIVERY_SECONDARY_TOOLTIP),
 	EndContainer(),
-	NWidget(WWT_MATRIX, COLOUR_GREY, SCLW_WIDGET_MATRIX), SetMinimalSize(400, 15), SetDataTip((1 << MAT_ROW_START) | (1 << MAT_COL_START), STR_LIVERY_PANEL_TOOLTIP),
-};
-
-static const Widget _select_company_livery_widgets[] = {
-{ WWT_CLOSEBOX, RESIZE_NONE,  COLOUR_GREY,   0,  10,   0,  13, STR_BLACK_CROSS,            STR_TOOLTIP_CLOSE_WINDOW },
-{  WWT_CAPTION, RESIZE_NONE,  COLOUR_GREY,  11, 399,   0,  13, STR_LIVERY_CAPTION,         STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS },
-{   WWT_IMGBTN, RESIZE_NONE,  COLOUR_GREY,   0,  21,  14,  35, SPR_IMG_COMPANY_GENERAL,    STR_LIVERY_GENERAL_TOOLTIP },
-{   WWT_IMGBTN, RESIZE_NONE,  COLOUR_GREY,  22,  43,  14,  35, SPR_IMG_TRAINLIST,          STR_LIVERY_TRAIN_TOOLTIP },
-{   WWT_IMGBTN, RESIZE_NONE,  COLOUR_GREY,  44,  65,  14,  35, SPR_IMG_TRUCKLIST,          STR_LIVERY_ROAD_VEHICLE_TOOLTIP },
-{   WWT_IMGBTN, RESIZE_NONE,  COLOUR_GREY,  66,  87,  14,  35, SPR_IMG_SHIPLIST,           STR_LIVERY_SHIP_TOOLTIP },
-{   WWT_IMGBTN, RESIZE_NONE,  COLOUR_GREY,  88, 109,  14,  35, SPR_IMG_AIRPLANESLIST,      STR_LIVERY_AIRCRAFT_TOOLTIP },
-{    WWT_PANEL, RESIZE_NONE,  COLOUR_GREY, 110, 399,  14,  35, 0x0,                        STR_NULL },
-{    WWT_PANEL, RESIZE_NONE,  COLOUR_GREY,   0, 149,  36,  47, 0x0,                        STR_NULL },
-{ WWT_DROPDOWN, RESIZE_NONE,  COLOUR_GREY, 150, 274,  36,  47, STR_BLACK_STRING,           STR_LIVERY_PRIMARY_TOOLTIP },
-{ WWT_DROPDOWN, RESIZE_NONE,  COLOUR_GREY, 275, 399,  36,  47, STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO, STR_LIVERY_SECONDARY_TOOLTIP },
-{   WWT_MATRIX, RESIZE_NONE,  COLOUR_GREY,   0, 399,  48,  48 + 1 * 14, (1 << 8) | 1,      STR_LIVERY_PANEL_TOOLTIP },
-{ WIDGETS_END },
+	NWidget(WWT_MATRIX, COLOUR_GREY, SCLW_WIDGET_MATRIX), SetMinimalSize(275, 15), SetFill(true, false), SetDataTip((1 << MAT_ROW_START) | (1 << MAT_COL_START), STR_LIVERY_PANEL_TOOLTIP),
 };
 
 static const WindowDesc _select_company_livery_desc(
-	WDP_AUTO, WDP_AUTO, 400, 49 + 1 * 14, 400, 49 + 1 * 14,
+	WDP_AUTO, WDP_AUTO, 0, 0, 0, 0,
 	WC_COMPANY_COLOUR, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
-	_select_company_livery_widgets, _nested_select_company_livery_widgets, lengthof(_nested_select_company_livery_widgets)
+	NULL, _nested_select_company_livery_widgets, lengthof(_nested_select_company_livery_widgets)
 );
 
 /**
@@ -879,6 +906,7 @@ enum SelectCompanyManagerFaceWidgets {
 	SCMFW_WIDGET_LABELS,
 };
 
+/** Nested widget description for the normal/simple company manager face selection dialog */
 static const NWidgetPart _nested_select_company_manager_face_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SCMFW_WIDGET_CLOSEBOX),
@@ -911,22 +939,7 @@ static const NWidgetPart _nested_select_company_manager_face_widgets[] = {
 	EndContainer(),
 };
 
-/** Widget description for the normal/simple company manager face selection dialog */
-static const Widget _select_company_manager_face_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,          STR_TOOLTIP_CLOSE_WINDOW},           // SCMFW_WIDGET_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   174,     0,    13, STR_FACE_CAPTION,         STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // SCMFW_WIDGET_CAPTION
-{     WWT_IMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   189,     0,    13, SPR_LARGE_SMALL_WINDOW,   STR_FACE_ADVANCED_TOOLTIP},              // SCMFW_WIDGET_TOGGLE_LARGE_SMALL
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   189,    14,   150, 0x0,                      STR_NULL},                           // SCMFW_WIDGET_SELECT_FACE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    94,   151,   162, STR_BUTTON_CANCEL,        STR_FACE_CANCEL_TOOLTIP},            // SCMFW_WIDGET_CANCEL
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   189,   151,   162, STR_BUTTON_OK,            STR_FACE_OK_TOOLTIP},                // SCMFW_WIDGET_ACCEPT
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   187,    75,    86, STR_FACE_MALE_BUTTON,     STR_FACE_MALE_TOOLTIP},              // SCMFW_WIDGET_MALE
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   187,    87,    98, STR_FACE_FEMALE_BUTTON,   STR_FACE_FEMALE_TOOLTIP},            // SCMFW_WIDGET_FEMALE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   137,   148, STR_FACE_NEW_FACE_BUTTON, STR_FACE_NEW_FACE_TOOLTIP},          // SCMFW_WIDGET_RANDOM_NEW_FACE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   187,    16,    27, STR_FACE_ADVANCED,        STR_FACE_ADVANCED_TOOLTIP},              // SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON
-{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     2,    93,    16,   134, 0x0,                      STR_NULL},                           // SCMFW_WIDGET_FACE
-{   WIDGETS_END},
-};
-
+/** Nested widget description for the advanced company manager face selection dialog */
 static const NWidgetPart _nested_select_company_manager_face_adv_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SCMFW_WIDGET_CLOSEBOX),
@@ -1034,68 +1047,15 @@ static const NWidgetPart _nested_select_company_manager_face_adv_widgets[] = {
 	EndContainer(),
 };
 
-/** Widget description for the advanced company manager face selection dialog */
-static const Widget _select_company_manager_face_adv_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,         STR_TOOLTIP_CLOSE_WINDOW},           // SCMFW_WIDGET_CLOSEBOX
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   204,     0,    13, STR_FACE_CAPTION,        STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS}, // SCMFW_WIDGET_CAPTION
-{     WWT_IMGBTN,   RESIZE_NONE,  COLOUR_GREY,   205,   219,     0,    13, SPR_LARGE_SMALL_WINDOW,  STR_FACE_SIMPLE_TOOLTIP},                // SCMFW_WIDGET_TOGGLE_LARGE_SMALL
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   219,    14,   207, 0x0,                     STR_NULL},                           // SCMFW_WIDGET_SELECT_FACE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     0,    94,   208,   219, STR_BUTTON_CANCEL,       STR_FACE_CANCEL_TOOLTIP},            // SCMFW_WIDGET_CANCEL
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   219,   208,   219, STR_BUTTON_OK,           STR_FACE_OK_TOOLTIP},                // SCMFW_WIDGET_ACCEPT
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    96,   156,    32,    43, STR_FACE_MALE_BUTTON,    STR_FACE_MALE_TOOLTIP},              // SCMFW_WIDGET_MALE
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,   157,   217,    32,    43, STR_FACE_FEMALE_BUTTON,  STR_FACE_FEMALE_TOOLTIP},            // SCMFW_WIDGET_FEMALE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   137,   148, STR_MAPGEN_RANDOM,       STR_FACE_NEW_FACE_TOOLTIP},          // SCMFW_WIDGET_RANDOM_NEW_FACE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,    95,   217,    16,    27, STR_FACE_SIMPLE,         STR_FACE_SIMPLE_TOOLTIP},                // SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON
-{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,     2,    93,    16,   134, 0x0,                     STR_NULL},                           // SCMFW_WIDGET_FACE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   158,   169, STR_FACE_LOAD,           STR_FACE_LOAD_TOOLTIP},                  // SCMFW_WIDGET_LOAD
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   170,   181, STR_FACE_FACECODE,       STR_FACE_FACECODE_TOOLTIP},              // SCMFW_WIDGET_FACECODE
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,     2,    93,   182,   193, STR_FACE_SAVE,           STR_FACE_SAVE_TOOLTIP},                  // SCMFW_WIDGET_SAVE
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,    96,   156,    46,    57, STR_FACE_EUROPEAN,       STR_FACE_SELECT_EUROPEAN},           // SCMFW_WIDGET_ETHNICITY_EUR
-{    WWT_TEXTBTN,   RESIZE_NONE,  COLOUR_GREY,   157,   217,    46,    57, STR_FACE_AFRICAN,        STR_FACE_SELECT_AFRICAN},            // SCMFW_WIDGET_ETHNICITY_AFR
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   217,    60,    71, STR_EMPTY,               STR_FACE_MOUSTACHE_EARRING_TOOLTIP},     // SCMFW_WIDGET_HAS_MOUSTACHE_EARRING
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   217,    72,    83, STR_EMPTY,               STR_FACE_GLASSES_TOOLTIP},               // SCMFW_WIDGET_HAS_GLASSES
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   110,   121, SPR_ARROW_LEFT,          STR_FACE_EYECOLOUR_TOOLTIP},             // SCMFW_WIDGET_EYECOLOUR_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   110,   121, STR_EMPTY,               STR_FACE_EYECOLOUR_TOOLTIP},             // SCMFW_WIDGET_EYECOLOUR
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   110,   121, SPR_ARROW_RIGHT,         STR_FACE_EYECOLOUR_TOOLTIP},             // SCMFW_WIDGET_EYECOLOUR_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   158,   169, SPR_ARROW_LEFT,          STR_FACE_CHIN_TOOLTIP},                  // SCMFW_WIDGET_CHIN_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   158,   169, STR_EMPTY,               STR_FACE_CHIN_TOOLTIP},                  // SCMFW_WIDGET_CHIN
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   158,   169, SPR_ARROW_RIGHT,         STR_FACE_CHIN_TOOLTIP},                  // SCMFW_WIDGET_CHIN_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,    98,   109, SPR_ARROW_LEFT,          STR_FACE_EYEBROWS_TOOLTIP},              // SCMFW_WIDGET_EYEBROWS_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,    98,   109, STR_EMPTY,               STR_FACE_EYEBROWS_TOOLTIP},              // SCMFW_WIDGET_EYEBROWS
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,    98,   109, SPR_ARROW_RIGHT,         STR_FACE_EYEBROWS_TOOLTIP},              // SCMFW_WIDGET_EYEBROWS_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   146,   157, SPR_ARROW_LEFT,          STR_FACE_LIPS_MOUSTACHE_TOOLTIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   146,   157, STR_EMPTY,               STR_FACE_LIPS_MOUSTACHE_TOOLTIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   146,   157, SPR_ARROW_RIGHT,         STR_FACE_LIPS_MOUSTACHE_TOOLTIP},        // SCMFW_WIDGET_LIPS_MOUSTACHE_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   134,   145, SPR_ARROW_LEFT,          STR_FACE_NOSE_TOOLTIP},                  // SCMFW_WIDGET_NOSE_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   134,   145, STR_EMPTY,               STR_FACE_NOSE_TOOLTIP},                  // SCMFW_WIDGET_NOSE
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   134,   145, SPR_ARROW_RIGHT,         STR_FACE_NOSE_TOOLTIP},                  // SCMFW_WIDGET_NOSE_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,    86,    97, SPR_ARROW_LEFT,          STR_FACE_HAIR_TOOLTIP},                  // SCMFW_WIDGET_HAIR_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,    86,    97, STR_EMPTY,               STR_FACE_HAIR_TOOLTIP},                  // SCMFW_WIDGET_HAIR
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,    86,    97, SPR_ARROW_RIGHT,         STR_FACE_HAIR_TOOLTIP},                  // SCMFW_WIDGET_HAIR_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   170,   181, SPR_ARROW_LEFT,          STR_FACE_JACKET_TOOLTIP},                // SCMFW_WIDGET_JACKET_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   170,   181, STR_EMPTY,               STR_FACE_JACKET_TOOLTIP},                // SCMFW_WIDGET_JACKET
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   170,   181, SPR_ARROW_RIGHT,         STR_FACE_JACKET_TOOLTIP},                // SCMFW_WIDGET_JACKET_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   182,   193, SPR_ARROW_LEFT,          STR_FACE_COLLAR_TOOLTIP},                // SCMFW_WIDGET_COLLAR_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   182,   193, STR_EMPTY,               STR_FACE_COLLAR_TOOLTIP},                // SCMFW_WIDGET_COLLAR
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   182,   193, SPR_ARROW_RIGHT,         STR_FACE_COLLAR_TOOLTIP},                // SCMFW_WIDGET_COLLAR_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   194,   205, SPR_ARROW_LEFT,          STR_FACE_TIE_EARRING_TOOLTIP},           // SCMFW_WIDGET_TIE_EARRING_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   194,   205, STR_EMPTY,               STR_FACE_TIE_EARRING_TOOLTIP},           // SCMFW_WIDGET_TIE_EARRING
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   194,   205, SPR_ARROW_RIGHT,         STR_FACE_TIE_EARRING_TOOLTIP},           // SCMFW_WIDGET_TIE_EARRING_R
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   175,   183,   122,   133, SPR_ARROW_LEFT,          STR_FACE_GLASSES_TOOLTIP_2},             // SCMFW_WIDGET_GLASSES_L
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   184,   208,   122,   133, STR_EMPTY,               STR_FACE_GLASSES_TOOLTIP_2},             // SCMFW_WIDGET_GLASSES
-{ WWT_PUSHIMGBTN,   RESIZE_NONE,  COLOUR_GREY,   209,   217,   122,   133, SPR_ARROW_RIGHT,         STR_FACE_GLASSES_TOOLTIP_2},             // SCMFW_WIDGET_GLASSES_R
-{      WWT_EMPTY,   RESIZE_NONE,  COLOUR_GREY,    96,   170,    60,   205, 0x0,                     STR_NULL},                           // SCMFW_WIDGET_LABELS
-{   WIDGETS_END},
-};
-
+/** Management class for customizing the face of the company manager. */
 class SelectCompanyManagerFaceWindow : public Window
 {
 	CompanyManagerFace face; ///< company manager face bits
 	bool advanced; ///< advanced company manager face selection window
 
-	GenderEthnicity ge;
-	bool is_female;
-	bool is_moust_male;
+	GenderEthnicity ge; ///< Gender and ethnicity.
+	bool is_female;     ///< Female face.
+	bool is_moust_male; ///< Male face with a moustache.
 
 	/**
 	 * Draw dynamic a label to the left of the button and a value in the button
@@ -1105,10 +1065,12 @@ class SelectCompanyManagerFaceWindow : public Window
 	 * @param val            the value which will be draw
 	 * @param is_bool_widget is it a bool button
 	 */
-	void DrawFaceStringLabel(byte widget_index, StringID str, uint8 val, bool is_bool_widget)
+	void DrawFaceStringLabel(byte widget_index, StringID str, uint8 val, bool is_bool_widget) const
 	{
 		/* Write the label in gold (0x2) to the left of the button. */
-		DrawString(this->widget[SCMFW_WIDGET_LABELS].left, this->widget[SCMFW_WIDGET_LABELS].right, this->widget[widget_index].top + 1, str, TC_GOLD, SA_RIGHT);
+		const NWidgetBase *nwi_labels = this->GetWidget<NWidgetBase>(SCMFW_WIDGET_LABELS);
+		const NWidgetCore *nwi_widget = this->GetWidget<NWidgetCore>(widget_index);
+		DrawString(nwi_labels->pos_x, nwi_labels->pos_x + nwi_labels->current_x, nwi_widget->pos_y + 1, str, TC_GOLD, SA_RIGHT);
 
 		if (!this->IsWidgetDisabled(widget_index)) {
 			if (is_bool_widget) {
@@ -1121,8 +1083,8 @@ class SelectCompanyManagerFaceWindow : public Window
 			}
 
 			/* Draw the value/bool in white (0xC). If the button clicked adds 1px to x and y text coordinates (IsWindowWidgetLowered()). */
-			DrawString(this->widget[widget_index].left + this->IsWidgetLowered(widget_index), this->widget[widget_index].right - this->IsWidgetLowered(widget_index),
-				this->widget[widget_index].top + 1 + this->IsWidgetLowered(widget_index), str, TC_WHITE, SA_CENTER);
+			DrawString(nwi_widget->pos_x + nwi_widget->IsLowered(), nwi_widget->pos_x + nwi_widget->current_x - 1 - nwi_widget->IsLowered(),
+					nwi_widget->pos_y + 1 + nwi_widget->IsLowered(), str, TC_WHITE, SA_CENTER);
 		}
 	}
 
@@ -1134,8 +1096,9 @@ class SelectCompanyManagerFaceWindow : public Window
 	}
 
 public:
-	SelectCompanyManagerFaceWindow(const WindowDesc *desc, Window *parent, bool advanced, int top, int left) : Window(desc, parent->window_number)
+	SelectCompanyManagerFaceWindow(const WindowDesc *desc, Window *parent, bool advanced, int top, int left) : Window()
 	{
+		this->InitNested(desc, parent->window_number);
 		this->parent = parent;
 		this->owner = (Owner)this->window_number;
 		this->face = Company::Get((CompanyID)this->window_number)->face;
@@ -1148,8 +1111,6 @@ public:
 			this->top = top;
 			this->left = left;
 		}
-
-		this->FindWindowPlacementAndResize(desc);
 	}
 
 	virtual void OnPaint()
@@ -1212,39 +1173,75 @@ public:
 		}
 
 		this->DrawWidgets();
+	}
 
-		/* Draw dynamic button value and labels for the advanced company manager face selection window */
-		if (this->advanced) {
-			if (this->is_female) {
-				/* Only for female faces */
-				this->DrawFaceStringLabel(SCMFW_WIDGET_HAS_MOUSTACHE_EARRING, STR_FACE_EARRING,   GetCompanyManagerFaceBits(this->face, CMFV_HAS_TIE_EARRING, this->ge), true );
-				this->DrawFaceStringLabel(SCMFW_WIDGET_TIE_EARRING,           STR_FACE_EARRING,   GetCompanyManagerFaceBits(this->face, CMFV_TIE_EARRING,     this->ge), false);
-			} else {
-				/* Only for male faces */
-				this->DrawFaceStringLabel(SCMFW_WIDGET_HAS_MOUSTACHE_EARRING, STR_FACE_MOUSTACHE, GetCompanyManagerFaceBits(this->face, CMFV_HAS_MOUSTACHE,   this->ge), true );
-				this->DrawFaceStringLabel(SCMFW_WIDGET_TIE_EARRING,           STR_FACE_TIE,       GetCompanyManagerFaceBits(this->face, CMFV_TIE_EARRING,     this->ge), false);
-			}
-			if (this->is_moust_male) {
-				/* Only for male faces with moustache */
-				this->DrawFaceStringLabel(SCMFW_WIDGET_LIPS_MOUSTACHE,        STR_FACE_MOUSTACHE, GetCompanyManagerFaceBits(this->face, CMFV_MOUSTACHE,       this->ge), false);
-			} else {
-				/* Only for female faces or male faces without moustache */
-				this->DrawFaceStringLabel(SCMFW_WIDGET_LIPS_MOUSTACHE,        STR_FACE_LIPS,      GetCompanyManagerFaceBits(this->face, CMFV_LIPS,            this->ge), false);
-			}
-			/* For all faces */
-			this->DrawFaceStringLabel(SCMFW_WIDGET_HAS_GLASSES,           STR_FACE_GLASSES,     GetCompanyManagerFaceBits(this->face, CMFV_HAS_GLASSES,     this->ge), true );
-			this->DrawFaceStringLabel(SCMFW_WIDGET_HAIR,                  STR_FACE_HAIR,        GetCompanyManagerFaceBits(this->face, CMFV_HAIR,            this->ge), false);
-			this->DrawFaceStringLabel(SCMFW_WIDGET_EYEBROWS,              STR_FACE_EYEBROWS,    GetCompanyManagerFaceBits(this->face, CMFV_EYEBROWS,        this->ge), false);
-			this->DrawFaceStringLabel(SCMFW_WIDGET_EYECOLOUR,             STR_FACE_EYECOLOUR,   GetCompanyManagerFaceBits(this->face, CMFV_EYE_COLOUR,      this->ge), false);
-			this->DrawFaceStringLabel(SCMFW_WIDGET_GLASSES,               STR_FACE_GLASSES,     GetCompanyManagerFaceBits(this->face, CMFV_GLASSES,         this->ge), false);
-			this->DrawFaceStringLabel(SCMFW_WIDGET_NOSE,                  STR_FACE_NOSE,        GetCompanyManagerFaceBits(this->face, CMFV_NOSE,            this->ge), false);
-			this->DrawFaceStringLabel(SCMFW_WIDGET_CHIN,                  STR_FACE_CHIN,        GetCompanyManagerFaceBits(this->face, CMFV_CHIN,            this->ge), false);
-			this->DrawFaceStringLabel(SCMFW_WIDGET_JACKET,                STR_FACE_JACKET,      GetCompanyManagerFaceBits(this->face, CMFV_JACKET,          this->ge), false);
-			this->DrawFaceStringLabel(SCMFW_WIDGET_COLLAR,                STR_FACE_COLLAR,      GetCompanyManagerFaceBits(this->face, CMFV_COLLAR,          this->ge), false);
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		switch (widget) {
+			case SCMFW_WIDGET_HAS_MOUSTACHE_EARRING:
+				if (this->is_female) { /* Only for female faces */
+					this->DrawFaceStringLabel(SCMFW_WIDGET_HAS_MOUSTACHE_EARRING, STR_FACE_EARRING,   GetCompanyManagerFaceBits(this->face, CMFV_HAS_TIE_EARRING, this->ge), true);
+				} else { /* Only for male faces */
+					this->DrawFaceStringLabel(SCMFW_WIDGET_HAS_MOUSTACHE_EARRING, STR_FACE_MOUSTACHE, GetCompanyManagerFaceBits(this->face, CMFV_HAS_MOUSTACHE,   this->ge), true);
+				}
+				break;
+
+			case SCMFW_WIDGET_TIE_EARRING:
+				if (this->is_female) { /* Only for female faces */
+					this->DrawFaceStringLabel(SCMFW_WIDGET_TIE_EARRING,           STR_FACE_EARRING,   GetCompanyManagerFaceBits(this->face, CMFV_TIE_EARRING,     this->ge), false);
+				} else { /* Only for male faces */
+					this->DrawFaceStringLabel(SCMFW_WIDGET_TIE_EARRING,           STR_FACE_TIE,       GetCompanyManagerFaceBits(this->face, CMFV_TIE_EARRING,     this->ge), false);
+				}
+				break;
+
+			case SCMFW_WIDGET_LIPS_MOUSTACHE:
+				if (this->is_moust_male) { /* Only for male faces with moustache */
+					this->DrawFaceStringLabel(SCMFW_WIDGET_LIPS_MOUSTACHE,        STR_FACE_MOUSTACHE, GetCompanyManagerFaceBits(this->face, CMFV_MOUSTACHE,       this->ge), false);
+				} else { /* Only for female faces or male faces without moustache */
+					this->DrawFaceStringLabel(SCMFW_WIDGET_LIPS_MOUSTACHE,        STR_FACE_LIPS,      GetCompanyManagerFaceBits(this->face, CMFV_LIPS,            this->ge), false);
+				}
+				break;
+
+			case SCMFW_WIDGET_HAS_GLASSES:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_HAS_GLASSES, STR_FACE_GLASSES,   GetCompanyManagerFaceBits(this->face, CMFV_HAS_GLASSES, this->ge), true );
+				break;
+
+			case SCMFW_WIDGET_HAIR:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_HAIR,        STR_FACE_HAIR,      GetCompanyManagerFaceBits(this->face, CMFV_HAIR,        this->ge), false);
+				break;
+
+			case SCMFW_WIDGET_EYEBROWS:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_EYEBROWS,    STR_FACE_EYEBROWS,  GetCompanyManagerFaceBits(this->face, CMFV_EYEBROWS,    this->ge), false);
+				break;
+
+			case SCMFW_WIDGET_EYECOLOUR:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_EYECOLOUR,   STR_FACE_EYECOLOUR, GetCompanyManagerFaceBits(this->face, CMFV_EYE_COLOUR,  this->ge), false);
+				break;
+
+			case SCMFW_WIDGET_GLASSES:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_GLASSES,     STR_FACE_GLASSES,   GetCompanyManagerFaceBits(this->face, CMFV_GLASSES,     this->ge), false);
+				break;
+
+			case SCMFW_WIDGET_NOSE:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_NOSE,        STR_FACE_NOSE,      GetCompanyManagerFaceBits(this->face, CMFV_NOSE,        this->ge), false);
+				break;
+
+			case SCMFW_WIDGET_CHIN:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_CHIN,        STR_FACE_CHIN,      GetCompanyManagerFaceBits(this->face, CMFV_CHIN,        this->ge), false);
+				break;
+
+			case SCMFW_WIDGET_JACKET:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_JACKET,      STR_FACE_JACKET,    GetCompanyManagerFaceBits(this->face, CMFV_JACKET,      this->ge), false);
+				break;
+
+			case SCMFW_WIDGET_COLLAR:
+				this->DrawFaceStringLabel(SCMFW_WIDGET_COLLAR,      STR_FACE_COLLAR,    GetCompanyManagerFaceBits(this->face, CMFV_COLLAR,      this->ge), false);
+				break;
+
+			case SCMFM_WIDGET_FACE:
+				DrawCompanyManagerFace(this->face, Company::Get((CompanyID)this->window_number)->colour, r.left, r.top);
+				break;
 		}
-
-		/* Draw the company manager face picture */
-		DrawCompanyManagerFace(this->face, Company::Get((CompanyID)this->window_number)->colour, this->widget[SCMFM_WIDGET_FACE].left, this->widget[SCMFM_WIDGET_FACE].top);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -1325,11 +1322,10 @@ public:
 				break;
 
 			default:
-				/* For all buttons from SCMFW_WIDGET_HAS_MOUSTACHE_EARRING to SCMFW_WIDGET_GLASSES_R is the same function.
-				 * Therefor is this combined function.
-				 * First it checks which CompanyManagerFaceVariable will be change and then
-				 * a: invert the value for boolean variables
-				 * or b: it checks inside of IncreaseCompanyManagerFaceBits() if a left (_L) butten is pressed and then decrease else increase the variable */
+				/* Here all buttons from SCMFW_WIDGET_HAS_MOUSTACHE_EARRING to SCMFW_WIDGET_GLASSES_R are handled.
+				 * First it checks which CompanyManagerFaceVariable is being changed, and then either
+				 * a: invert the value for boolean variables, or
+				 * b: it checks inside of IncreaseCompanyManagerFaceBits() if a left (_L) butten is pressed and then decrease else increase the variable */
 				if (this->advanced && widget >= SCMFW_WIDGET_HAS_MOUSTACHE_EARRING && widget <= SCMFW_WIDGET_GLASSES_R) {
 					CompanyManagerFaceVariable cmfv; // which CompanyManagerFaceVariable shall be edited
 
@@ -1386,7 +1382,7 @@ static const WindowDesc _select_company_manager_face_desc(
 	WDP_AUTO, WDP_AUTO, 190, 163, 190, 163,
 	WC_COMPANY_MANAGER_FACE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
-	_select_company_manager_face_widgets, _nested_select_company_manager_face_widgets, lengthof(_nested_select_company_manager_face_widgets)
+	NULL, _nested_select_company_manager_face_widgets, lengthof(_nested_select_company_manager_face_widgets)
 );
 
 /** advanced company manager face selection window description */
@@ -1394,7 +1390,7 @@ static const WindowDesc _select_company_manager_face_adv_desc(
 	WDP_AUTO, WDP_AUTO, 220, 220, 220, 220,
 	WC_COMPANY_MANAGER_FACE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
-	_select_company_manager_face_adv_widgets, _nested_select_company_manager_face_adv_widgets, lengthof(_nested_select_company_manager_face_adv_widgets)
+	NULL, _nested_select_company_manager_face_adv_widgets, lengthof(_nested_select_company_manager_face_adv_widgets)
 );
 
 /**
