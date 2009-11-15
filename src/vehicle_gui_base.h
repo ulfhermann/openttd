@@ -16,7 +16,6 @@
 
 /** Start of functions regarding vehicle list windows */
 enum {
-	PLY_WND_PRC__OFFSET_TOP_WIDGET = 26,
 	PLY_WND_PRC__SIZE_OF_ROW_TINY  = 13,  ///< Height of rows in group list
 	PLY_WND_PRC__SIZE_OF_ROW_SMALL = 26,  ///< Height of rows in train/roadvehicle list
 	PLY_WND_PRC__SIZE_OF_ROW_BIG   = 39,  ///< Height of rows in ship/aircraft list
@@ -31,11 +30,6 @@ struct BaseVehicleListWindow: public Window {
 
 	static const StringID vehicle_sorter_names[];
 	static GUIVehicleList::SortFunction * const vehicle_sorter_funcs[];
-
-	BaseVehicleListWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
-	{
-		this->vehicles.SetSortFuncs(this->vehicle_sorter_funcs);
-	}
 
 	BaseVehicleListWindow() : Window()
 	{
