@@ -159,7 +159,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} ζαχ
 STR_QUANTITY_BATTERIES                                          :{COMMA} μπαταρί{P α ες}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} πλαστικού
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} αναψυκτικ{P ό ά}
-STR_QUANTITY_N_A                                                :Μ/Δ{SKIP}
+STR_QUANTITY_N_A                                                :Μ/Δ
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -611,7 +611,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Λεπτ
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}.
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Οχήματα:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Σταθμοί:
@@ -1598,7 +1597,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Επιλ
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Σε ποιό χάρτη θέλετε να παίξετε;
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Δημιουργία τυχαίου νέου παιχνιδιού
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (αναγγελία)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} συμπαίκτ{P ης ες}
@@ -1612,7 +1610,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Μέγι
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Περιορισμός του διακομιστή σε συγκεκριμένο αριθμό θεατών
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Ομιλούμενη γλώσσα:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Οι υπόλοιποι παίκτες θα γνωρίζουν ποια γλώσσα ομιλείται στο διακομιστή
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Έναρξη παιχνιδιού
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Έναρξη νέου δικτυακού παιχνιδιού από τυχαίο χάρτη ή σενάριο
@@ -1792,13 +1789,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :Διακομι�
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Παύση παιχνιδιού (δεν υπάρχουν αρκετοί παίκτες)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Συνέχιση παιχνιδιού (υπάρχουν αρκετοί παίκτες)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Παύση παιχνιδιού (σύνδεση πελάτη)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Συνέχιση παιχνιδιού (πελάτης συνδέθηκε)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Συνέχιση παιχνιδιού (πελάτης απέτυχε να συνδεθεί)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :αποχώρηση
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} συμμετέχει στο παιχνίδι
@@ -2383,13 +2374,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Προειδοποίηση: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Λάθος: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Καταστροφικό: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} δεν θα δουλέψει με την έκδοση του TTDPatch οπώς αναφέρει το OpenTTD.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} είναι για την έκδοση {STRING} του TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} είναι σχεδιασμένο να δουλέψει με το {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Λάθος παράμετρος για το {STRING}: Παράμετρος {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} πρέπει να φόρτωθει πριν από το {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} πρέπει να φόρτωθει μετά από το {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} απαιτεί έκδοση OpenTTD {STRING} ή μεγαλύτερη.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} δεν θα δουλέψει με την έκδοση του TTDPatch οπώς αναφέρει το OpenTTD.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} είναι για την έκδοση {STRING} του TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} είναι σχεδιασμένο να δουλέψει με το {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Λάθος παράμετρος για το {1:STRING}: Παράμετρος {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} πρέπει να φόρτωθει πριν από το {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} πρέπει να φόρτωθει μετά από το {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} απαιτεί έκδοση OpenTTD {STRING} ή μεγαλύτερη.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :Το αρχείο GRF είναι σχεδιασμένο για να μεταφράζει
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Έχουν φορτωθεί πολλά NewGRF.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Η φόρτωση του {STRING} ως στατικό NewGRF με {STRING} μπόρει να προκαλέσει αποσυγχρονισμούς.
@@ -2876,7 +2867,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Δεν �
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Σταμάτημα της Αντικατάστασης Οχημάτων
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Πατήστε για να σταματήσει η αντικατάσταση του επιλεγμένου στα αριστερά τυπου μηχανής
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Αντικατάσταση: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Αντικατάσταση: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Εναλλάγη μεταξύ των παραθύρων αντικαταστάσης μηχανών και βαγονιών
 STR_REPLACE_ENGINES                                             :Μηχανές
 STR_REPLACE_WAGONS                                              :Βαγόνια
@@ -2888,7 +2879,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Οχήματα 
 STR_REPLACE_MONORAIL_VEHICLES                                   :Οχήματα Monorail
 STR_REPLACE_MAGLEV_VEHICLES                                     :Βαγόνια Maglev
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Αφαίρεση βαγονιού: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Αφαίρεση βαγονιού: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Επιτρέπει στην αυτομάτη αντικατάσταση να κρατάει το μήκος του τρένου αφαιρώντας βαγόνια (ξεκινωντας από μπροστά), έαν αντικατασταθεί η μηχανή θα κάνετε το τρένο μεγαλύτερο.
 
 # Vehicle view
@@ -3114,7 +3105,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :είναι αλ
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :είναι ψευδές
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Η τιμή για να γίνει η σύγκριση με τα δεδομένα του οχήματος
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Δώστε τίμη για να συγκριθεί
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Παράκαμψη
@@ -4009,10 +3999,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Σημείο κ
 
 STR_UNKNOWN_STATION                                             :άγνωστος σταθμός
 STR_DEFAULT_SIGN_NAME                                           :Πινακίδα
-STR_COMPANY_SOMEONE                                             :κάποιος{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :κάποιος
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Θεατής, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Θεατής, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
