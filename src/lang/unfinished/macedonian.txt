@@ -418,7 +418,6 @@ STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMM
 # Company league window
 
 # Performance detail window
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 ############ End of order list
 
@@ -1336,7 +1335,7 @@ STR_FORMAT_DATE_LONG                                            :{STRING} {STRIN
 STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
 
 
-STR_COMPANY_SOMEONE                                             :некој{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :некој
 
 
 # Viewport strings
