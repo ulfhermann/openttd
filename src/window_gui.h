@@ -127,7 +127,7 @@ extern Window *_focused_window;
 struct WindowDesc : ZeroedMemoryAllocator {
 
 	WindowDesc(int16 left, int16 top, int16 min_width, int16 min_height, int16 def_width, int16 def_height,
-			WindowClass window_class, WindowClass parent_class, uint32 flags, const Widget *widgets,
+			WindowClass window_class, WindowClass parent_class, uint32 flags,
 			const NWidgetPart *nwid_parts = NULL, int16 nwid_length = 0);
 
 	~WindowDesc();
@@ -141,7 +141,6 @@ struct WindowDesc : ZeroedMemoryAllocator {
 	WindowClass cls;               ///< Class of the window, @see WindowClass.
 	WindowClass parent_cls;        ///< Class of the parent window. @see WindowClass
 	uint32 flags;                  ///< Flags. @see WindowDefaultFlags
-	const Widget *widgets;         ///< List of widgets with their position and size for the window.
 	const NWidgetPart *nwid_parts; ///< Nested widget parts describing the window.
 	int16 nwid_length;             ///< Length of the #nwid_parts array.
 	mutable Widget *new_widgets;   ///< Widgets generated from #nwid_parts.
@@ -335,7 +334,7 @@ struct Window : ZeroedMemoryAllocator {
 	};
 
 protected:
-	void InitializeData(WindowClass cls, const Widget *widget, int window_number);
+	void InitializeData(WindowClass cls, const Widget *widget, int window_number, uint32 desc_flags);
 	void InitializePositionSize(int x, int y, int min_width, int min_height);
 	void FindWindowPlacementAndResize(int def_width, int def_height);
 	void FindWindowPlacementAndResize(const WindowDesc *desc);
@@ -345,11 +344,26 @@ public:
 	Window();
 
 	virtual ~Window();
-	/* Don't allow arrays; arrays of Windows are pointless as you need
-	 * to destruct them all at the same time too, which is kinda hard. */
-	FORCEINLINE void *operator new[](size_t size) { NOT_REACHED(); }
-	/* Don't free the window directly; it corrupts the linked list when iterating */
-	FORCEINLINE void operator delete(void *ptr, size_t size) {}
+
+	/**
+	 * Helper allocation function to disallow something.
+	 * Don't allow arrays; arrays of Windows are pointless as you need
+	 * to destruct them all at the same time too, which is kinda hard.
+	 * @param size the amount of space not to allocate
+	 */
+	FORCEINLINE void *operator new[](size_t size)
+	{
+		NOT_REACHED();
+	}
+
+	/**
+	 * Helper allocation function to disallow something.
+	 * Don't free the window directly; it corrupts the linked list when iterating
+	 * @param ptr the pointer not to free
+	 */
+	FORCEINLINE void operator delete(void *ptr)
+	{
+	}
 
 	uint16 flags4;              ///< Window flags, @see WindowFlags
 	WindowClass window_class;   ///< Window class
@@ -949,7 +963,5 @@ bool EditBoxInGlobalFocus();
 
 void ScrollbarClickHandler(Window *w, const Widget *wi, int x, int y);
 void ScrollbarClickHandler(Window *w, const NWidgetCore *nw, int x, int y);
-
-void ResizeWindowForWidget(Window *w, uint widget, int delta_x, int delta_y);
 
 #endif /* WINDOW_GUI_H */

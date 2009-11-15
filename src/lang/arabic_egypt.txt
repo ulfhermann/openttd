@@ -126,7 +126,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} من �
 STR_QUANTITY_BATTERIES                                          :{COMMA}بطاريات
 STR_QUANTITY_PLASTIC                                            :{VOLUME}من البلاستيك
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA}الشراب المخفوق
-STR_QUANTITY_N_A                                                :غير متاح {SKIP}
+STR_QUANTITY_N_A                                                :غير متاح
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -547,7 +547,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}تفاص
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}العربات:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}المحطات:
@@ -1534,7 +1533,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}اختر
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}في أي خريطة تود ان تلعب؟
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :ولد لعبة جديدة عشوائيا
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :شبكة محلية / انترنت
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :انترنت (دعاية)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM}عميل
@@ -1548,7 +1546,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}أقصى
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}حدد عدد المشاهدين لهذا الخادم
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}اللغة المتحدثة:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}اللاعبين الآخرين سيعرفون اللغة المتحدثة
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}أبدأ اللعبة
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}ابدأ لعبة شبكة جديدة من خريطة عشوائية او سيناريو.
@@ -1728,13 +1725,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :خادم ممت
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :اللعب متوقف - ليس هناك عدد لاعبين كافي
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :استعادة اللعب - عدد اللاعبين كافي
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :اللعب متوقف - ربط لاعب
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :الاستمرار باللعب - تم ربط اللاعب
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :الاستمرار باللعب - فشل ربط اللاعب
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :يغادر
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} قد انضم للعبة
@@ -2319,13 +2310,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED} تحذير: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED} خطأ: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED} خطأ قاتل: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} لن يعمل مع اصدار الباتش المسجل في النسخة المفتوحة
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} يعمل مع {STRING} اصدار من TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} مصمم ليستخدم مع {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP} قيم غير متوافقة {STRING} : قيم {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} يجب ان يتم تحميلة قبل {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} يجب ان يتم تحميلة بعد {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} يتطلب نسخة {STRING} من النسخة المفتوحة او احدث .
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} لن يعمل مع اصدار الباتش المسجل في النسخة المفتوحة
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} يعمل مع {STRING} اصدار من TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} مصمم ليستخدم مع {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              : قيم غير متوافقة {1:STRING} : قيم {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} يجب ان يتم تحميلة قبل {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} يجب ان يتم تحميلة بعد {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} يتطلب نسخة {STRING} من النسخة المفتوحة او احدث .
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :تم تصميم ملف GRF بغرض الترجمة
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :العديد من NewGRF تم تحميلها
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :تحميل {STRING}كملف ثابت مع NewGRF {STRING}قد يتسبب بمشكلة توافق.
@@ -2806,7 +2797,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}لم ي�
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK} اوقف تبديل العربات
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK} اضغط لايقاف تبديل المحركات المختارة في اليسار
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK} تبديل:  {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK} تبديل:  {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK} بدل بين نافذة استبدال المحركات و العربات
 STR_REPLACE_ENGINES                                             :محركات
 STR_REPLACE_WAGONS                                              :عربات
@@ -2818,7 +2809,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :سكة حديد
 STR_REPLACE_MONORAIL_VEHICLES                                   :عربات احادية السكة
 STR_REPLACE_MAGLEV_VEHICLES                                     :مركبات ممغنطة
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK} ازالة العربات: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK} ازالة العربات: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK} المحافظة على طول القطار بازالة عربات ابتداء من المقدمة عند التبديل - عندما يكون التبدل ينتج قطارا اطول.
 
 # Vehicle view
@@ -3044,7 +3035,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :صحيح
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :خاطئ
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}القيمة التي يتم مقارنة العربة معها
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}ادخل قيمة للمقارنة معها
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}تجاوز
@@ -3939,10 +3929,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :{TOWN} نقطة
 
 STR_UNKNOWN_STATION                                             :محطة غير معروفة
 STR_DEFAULT_SIGN_NAME                                           :علامة
-STR_COMPANY_SOMEONE                                             :شخص ما {SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :شخص ما
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :المشاهدين, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :المشاهدين, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ){COMMA})

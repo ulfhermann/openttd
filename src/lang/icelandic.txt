@@ -127,7 +127,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} af tof
 STR_QUANTITY_BATTERIES                                          :{COMMA} rafhl{P aða öður}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} af plasti
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} gosdrykk{P u i}r
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -542,7 +542,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Upplýsi
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Farartæki:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stöðvar:
@@ -1525,7 +1524,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Veldu ko
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Hvaða kort viltu spila?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Búa til nýjan leik
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :Staðarnet / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (auglýsa)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} biðlar{P i ar}
@@ -1539,7 +1537,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Hámarks
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Takmarka fjölda áhorfanda á vefþjóninum
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Tungumál:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Aðrir notendur munu vita hvaða tungumál er talað á þjóninum
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Hefja leik
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Hefja nýjan netleik í sérvöldu korti eða landslagi af handahófi
@@ -1717,13 +1714,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :vefþjónn full
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Leikur í bið (ekki nógu margir leikmenn)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Leikur gangsettur (nægilega margir leikmenn)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Leikur í bið (tengi notanda)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Leikur gangsettur (notandi tengdur)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Leikur gangsettur (tenging við notanda slitnaði)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :yfirgefur
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} tengdist leiknum
@@ -2298,13 +2289,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Aðvörun: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Villa: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Banvænt: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} Mun ekki virka með útgáfu TTDPatch sem OpenTTD gefur til kynna.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} er fyrir {STRING} útgáfu af TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} er hannað til að notast með {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Ógild færibreyta {STRING}: færibreyta {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} verður að hlaðast á undan {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} verður að hlaðast eftir {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} þarf OpenTTD útgáfu {STRING} eða nýrri.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} Mun ekki virka með útgáfu TTDPatch sem OpenTTD gefur til kynna.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} er fyrir {STRING} útgáfu af TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} er hannað til að notast með {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Ógild færibreyta {1:STRING}: færibreyta {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} verður að hlaðast á undan {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} verður að hlaðast eftir {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} þarf OpenTTD útgáfu {STRING} eða nýrri.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF skránni sem það var hannað til að þýða
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Of mörg NewGRF eru hlaðin.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Ef {STRING} er hlaðið sem kyrrstæðu NewGRF ásamt {STRING} gætu orðið hnökrar á keyrslu leiksins.
@@ -2778,7 +2769,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Enginn v
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Stöðva skipti
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Smelltu til að stöðva skipti á vagntegundinni sem valin er vinstra megin
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Skipti út: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Skipti út: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Skipta á milli útskiptiglugga dráttar- og flutningavagna
 STR_REPLACE_ENGINES                                             :Dráttarvagnar
 STR_REPLACE_WAGONS                                              :Vagnar
@@ -2790,7 +2781,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Rafdrifnir lest
 STR_REPLACE_MONORAIL_VEHICLES                                   :Einteinungsvagnar
 STR_REPLACE_MAGLEV_VEHICLES                                     :Segulsvifvagnar
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Selja lestarvagna: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Selja lestarvagna: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Heldur lengd lestar með því að fjarlægja vagna (framan frá) ef útskipting dráttarvagna myndi lengja hana.
 
 # Vehicle view
@@ -3016,7 +3007,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :er satt
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :er ósatt
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Gildið sem bera á við gögn farartækis
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Skrifa skal tölu til að bera saman við
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Sleppa
@@ -3903,10 +3893,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Millistöð {TO
 
 STR_UNKNOWN_STATION                                             :óþekkt stöð
 STR_DEFAULT_SIGN_NAME                                           :Skilti
-STR_COMPANY_SOMEONE                                             :einhver{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :einhver
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Áhorfandi, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Áhorfandi, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})

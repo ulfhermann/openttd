@@ -127,7 +127,7 @@ STR_QUANTITY_TOFFEE                                             :태피 {WEIGHT}
 STR_QUANTITY_BATTERIES                                          :배터리 {COMMA}개
 STR_QUANTITY_PLASTIC                                            :플라스틱 {VOLUME}
 STR_QUANTITY_FIZZY_DRINKS                                       :탄산음료 {COMMA}개
-STR_QUANTITY_N_A                                                :없음{SKIP}
+STR_QUANTITY_N_A                                                :없음
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -547,7 +547,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}자세�
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}차량:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}역:
@@ -1534,7 +1533,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}맵 선�
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}어떤 맵을 선택하시겠습니까?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :신규 무작위 게임 만들기
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / 인터넷
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :인터넷 (광고 허용)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM}명
@@ -1548,7 +1546,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}최대 �
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}게임을 관전하는 접속자의 수를 제한합니다
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}대화 언어:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}서버에서 주로 사용하는 언어를 고르십시오.
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}서버 열기
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}무작위 맵이나 시나리오로 새로운 네트워크 게임을 시작합니다.
@@ -1726,13 +1723,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :서버 꽉참
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :게임 일시정지됨 (플레이어가 부족합니다)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :게임 재개됨 (플레이어가 충분히 모였습니다)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :게임 일시정지됨 (클라이언트 연결중)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :게임 재개됨 (클라이언트 연결됨)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :게임 재개됨 (클라이언트가 연결에 실패했습니다)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :떠남
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING}님이 게임에 참여했습니다
@@ -2317,13 +2308,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}경고: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}오류: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}치명적 오류: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING}은 OpenTTD에서 보고된 TTD패치 버전에서 작동하지 않을 것입니다.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING}{G 0 "은" "는"} {STRING} 버전의 TTD를 위한 것입니다.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING}{G 0 "은" "는"} {STRING}{G 1 "와" "과"} 같이 사용해야 합니다
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}{STRING}의 부적절한 파라미터: 파라미터 {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING}{G 0 "은" "는"} 반드시 {STRING} 앞에 불러와야 합니다.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING}{G 0 "은" "는"} 반드시 {STRING} 뒤에 불러와야 합니다.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING}는 OpenTTD {STRING} 버전이나 그 이상이 필요합니다.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING}은 OpenTTD에서 보고된 TTD패치 버전에서 작동하지 않을 것입니다.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING}{G 0 "은" "는"} {STRING} 버전의 TTD를 위한 것입니다.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING}{G 0 "은" "는"} {STRING}{G 1 "와" "과"} 같이 사용해야 합니다
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{1:STRING}의 부적절한 파라미터: 파라미터 {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING}{G 0 "은" "는"} 반드시 {STRING} 앞에 불러와야 합니다.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING}{G 0 "은" "는"} 반드시 {STRING} 뒤에 불러와야 합니다.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING}는 OpenTTD {STRING} 버전이나 그 이상이 필요합니다.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF 파일 자체는 번역용으로 디자인됨
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :NewGRF이 너무 많습니다.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :{1:STRING}{G 1 "을" "를"} 포함한 정적 NewGRF {0:STRING}{G 0 "을" "를"} 불러오는 것은 비동기화를 일으킬 수 있습니다.
@@ -2803,7 +2794,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}차량�
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}차량 교체 중지
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}좌측에서 선택한 기관차 종류의 교체를 중지하려면 누르세요
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}교체중: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}교체중: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}기관차/화물차 교체 창을 번갈아 띄웁니다
 STR_REPLACE_ENGINES                                             :기관차
 STR_REPLACE_WAGONS                                              :화물차
@@ -2815,7 +2806,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :전기 철도
 STR_REPLACE_MONORAIL_VEHICLES                                   :모노레일 차량
 STR_REPLACE_MAGLEV_VEHICLES                                     :자기부상
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}화물차 제거: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}화물차 제거: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}자동교체시에 열차가 기존보다 길어지면 화물차를 제거함으로써 교체시 달라지는 열차의 길이를 같게 조정합니다 (앞쪽부터 시작됨)
 
 # Vehicle view
@@ -3041,7 +3032,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :이 있을 때
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :이 없을 때
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}차량 데이터에 대해 비교하기 위한 값
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}비교할 값을 입력하세요
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}건너뛰기
@@ -3936,10 +3926,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :웨이포인트
 
 STR_UNKNOWN_STATION                                             :알수없는 정거장
 STR_DEFAULT_SIGN_NAME                                           :팻말
-STR_COMPANY_SOMEONE                                             :누군가{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :누군가
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :관전자, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :관전자, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
