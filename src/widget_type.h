@@ -119,7 +119,6 @@ enum WidgetType {
 	NWID_VERTICAL,       ///< Vertical container.
 	NWID_SPACER,         ///< Invisible widget that takes some space.
 	NWID_SELECTION,      ///< Stacked widgets, only one visible at a time (eg in a panel with tabs).
-	NWID_LAYERED,        ///< Widgets layered on top of each other, all visible at the same time.
 	NWID_VIEWPORT,       ///< Nested widget containing a viewport.
 	NWID_BUTTON_DRPDOWN, ///< Button with a drop-down.
 
@@ -388,7 +387,7 @@ static const int STACKED_SELECTION_ZERO_SIZE = INT_MAX; ///< Display plane value
  */
 class NWidgetStacked : public NWidgetContainer {
 public:
-	NWidgetStacked(WidgetType tp);
+	NWidgetStacked();
 
 	void SetIndex(int index);
 
@@ -830,6 +829,6 @@ static inline NWidgetPart NWidgetFunction(NWidgetFunctionType *func_ptr)
 
 NWidgetContainer *MakeNWidgets(const NWidgetPart *parts, int count, int *biggest_index, NWidgetContainer *container = NULL);
 
-const Widget *InitializeWidgetArrayFromNestedWidgets(const NWidgetPart *parts, int parts_length, const Widget *orig_wid, Widget **wid_cache);
+const Widget *InitializeWidgetArrayFromNestedWidgets(const NWidgetPart *parts, int parts_length, Widget **wid_cache);
 
 #endif /* WIDGET_TYPE_H */

@@ -946,7 +946,7 @@ static const NWidgetPart _nested_network_game_widgets[] = {
 			NWidget(NWID_HORIZONTAL), SetPIP(10, 7, 10),
 				NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NGWW_CONNECTION), SetDataTip(STR_NETWORK_SERVER_LIST_CONNECTION, STR_NULL),
 				NWidget(WWT_DROPDOWN, COLOUR_LIGHT_BLUE, NGWW_CONN_BTN),
-										SetDataTip(STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO, STR_NETWORK_SERVER_LIST_CONNECTION_TOOLTIP),
+										SetDataTip(STR_BLACK_STRING, STR_NETWORK_SERVER_LIST_CONNECTION_TOOLTIP),
 				NWidget(NWID_SPACER), SetFill(true, false), SetResize(1, 0),
 				NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NGWW_CLIENT_LABEL), SetDataTip(STR_NETWORK_SERVER_LIST_PLAYER_NAME, STR_NULL),
 				NWidget(WWT_EDITBOX, COLOUR_LIGHT_BLUE, NGWW_CLIENT), SetMinimalSize(151, 12),
@@ -1014,7 +1014,7 @@ static const WindowDesc _network_game_window_desc(
 	WDP_CENTER, WDP_CENTER, 450, 264, 1000, 730,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	NULL, _nested_network_game_widgets, lengthof(_nested_network_game_widgets)
+	_nested_network_game_widgets, lengthof(_nested_network_game_widgets)
 );
 
 void ShowNetworkGameWindow()
@@ -1372,7 +1372,7 @@ static const NWidgetPart _nested_network_start_server_window_widgets[] = {
 				NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NSSW_CONNTYPE_LABEL), SetFill(true, false), SetDataTip(STR_NETWORK_SERVER_LIST_CONNECTION, STR_NULL),
 				NWidget(NWID_SPACER), SetMinimalSize(0, 1),
 				NWidget(WWT_DROPDOWN, COLOUR_LIGHT_BLUE, NSSW_CONNTYPE_BTN), SetFill(true, false),
-												SetDataTip(STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO, STR_NETWORK_SERVER_LIST_CONNECTION_TOOLTIP),
+												SetDataTip(STR_BLACK_STRING, STR_NETWORK_SERVER_LIST_CONNECTION_TOOLTIP),
 
 				NWidget(NWID_SPACER), SetMinimalSize(0, 6),
 				NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NSSW_CLIENTS_LABEL), SetFill(true, false), SetDataTip(STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS, STR_NULL),
@@ -1414,7 +1414,7 @@ static const NWidgetPart _nested_network_start_server_window_widgets[] = {
 				NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NSSW_LANGUAGE_LABEL), SetFill(true, false), SetDataTip(STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN, STR_NULL),
 				NWidget(NWID_SPACER), SetMinimalSize(0, 1),
 				NWidget(WWT_DROPDOWN, COLOUR_LIGHT_BLUE, NSSW_LANGUAGE_BTN), SetFill(true, false),
-												SetDataTip(STR_NETWORK_START_SERVER_LANGUAGE_COMBO, STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP),
+												SetDataTip(STR_BLACK_STRING, STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP),
 			EndContainer(),
 		EndContainer(),
 		/* Buttons Start / Load / Cancel. */
@@ -1431,7 +1431,7 @@ static const WindowDesc _network_start_server_window_desc(
 	WDP_CENTER, WDP_CENTER, 420, 244, 420, 244,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	NULL, _nested_network_start_server_window_widgets, lengthof(_nested_network_start_server_window_widgets)
+	_nested_network_start_server_window_widgets, lengthof(_nested_network_start_server_window_widgets)
 );
 
 static void ShowNetworkStartServerWindow()
@@ -1722,7 +1722,7 @@ static const WindowDesc _network_lobby_window_desc(
 	WDP_CENTER, WDP_CENTER, 0, 0, 0, 0,
 	WC_NETWORK_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	NULL, _nested_network_lobby_window_widgets, lengthof(_nested_network_lobby_window_widgets)
+	_nested_network_lobby_window_widgets, lengthof(_nested_network_lobby_window_widgets)
 );
 
 /* Show the networklobbywindow with the selected server
@@ -1765,7 +1765,7 @@ static const WindowDesc _client_list_popup_desc(
 	WDP_AUTO, WDP_AUTO, 150, 1, 150, 1,
 	WC_TOOLBAR_MENU, WC_CLIENT_LIST,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET,
-	NULL, _nested_client_list_popup_widgets, lengthof(_nested_client_list_popup_widgets)
+	_nested_client_list_popup_widgets, lengthof(_nested_client_list_popup_widgets)
 );
 
 /* Finds the Xth client-info that is active */
@@ -1981,7 +1981,7 @@ static const WindowDesc _client_list_desc(
 	WDP_AUTO, WDP_AUTO, 250, 16, 250, 16,
 	WC_CLIENT_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	NULL, _nested_client_list_widgets, lengthof(_nested_client_list_widgets)
+	_nested_client_list_widgets, lengthof(_nested_client_list_widgets)
 );
 
 /**
@@ -2220,7 +2220,7 @@ static const WindowDesc _network_join_status_window_desc(
 	WDP_CENTER, WDP_CENTER, 250, 85, 250, 85,
 	WC_NETWORK_STATUS_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_MODAL,
-	NULL, _nested_network_join_status_window_widgets, lengthof(_nested_network_join_status_window_widgets)
+	_nested_network_join_status_window_widgets, lengthof(_nested_network_join_status_window_widgets)
 );
 
 void ShowJoinStatusWindow()
@@ -2345,7 +2345,7 @@ static const WindowDesc _network_company_password_window_desc(
 	WDP_AUTO, WDP_AUTO, 300, 63, 300, 63,
 	WC_COMPANY_PASSWORD_WINDOW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
-	NULL, _nested_network_company_password_window_widgets, lengthof(_nested_network_company_password_window_widgets)
+	_nested_network_company_password_window_widgets, lengthof(_nested_network_company_password_window_widgets)
 );
 
 void ShowNetworkCompanyPasswordWindow(Window *parent)
