@@ -304,7 +304,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} karame
 STR_QUANTITY_BATTERIES                                          :{COMMA} baterij{P a e a}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} plastike
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} gaziran{P o a a} pić{P 0 e a a}
-STR_QUANTITY_N_A                                                :Nepoznato{SKIP}
+STR_QUANTITY_N_A                                                :Nepoznato
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -725,7 +725,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detalji
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vozila:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stanice:
@@ -1719,7 +1718,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Odaberit
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Na kom terenu želite da igrate?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Stvaranje nove proizvoljne partije
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (sa oglašavanjem)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} igrač{P "" a a}
@@ -1733,7 +1731,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Najviše
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Odaberite koliko najviše može biti posmatrača na serveru
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Govorni jezik:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Drugi igrači će znati sa kojim jezikom se razgovara na serveru
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Pokreni partiju
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Pokreće novu mrežnu partiju sa proizvoljnim terenom, ili scenarijom
@@ -1913,13 +1910,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :server je pun
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Partija pauzirana (nema dovoljno igrača)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Partija nastavljena (ima dovoljno igrača)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Partija pauzirana (igrač se priključuje)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Partija nastavljena (igrač je priključen)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Partija nastavljena (igrač nije priključen)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :napušta
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} se priključio partiji
@@ -2504,13 +2495,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Upozorenje: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Greška: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Kobno: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} neće raditi sa TTDPatch verzijom.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} je za {STRING} verziju TTD-a.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} je napravljen za korišćenje sa {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Neispravan parametar za {STRING}: parametar {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} mora biti učitan pre {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} mora biti učitan posle {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} zahteva {STRING} ili višu verziju OpenTTD-a.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} neće raditi sa TTDPatch verzijom.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} je za {STRING} verziju TTD-a.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} je napravljen za korišćenje sa {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Neispravan parametar za {1:STRING}: parametar {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} mora biti učitan pre {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} mora biti učitan posle {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} zahteva {STRING} ili višu verziju OpenTTD-a.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF fajl nije prilagođen za prevod
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Previše učitanih NewGRF-ova.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Učitavanje {STRING} kao statične NewGRF sa {STRING} može da izazove desinhronizacije.
@@ -3001,7 +2992,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Nijedno 
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Zaustavi Zamenu Vozila
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Pritisnite kako bi se zaustavila zamena vrsta lokomotive označene sa leve strane
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Zamenjuje se: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Zamenjuje se: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Prebacuje između prikaza zamene lokomotiva i zamene vagona
 STR_REPLACE_ENGINES                                             :Lokomotive
 STR_REPLACE_WAGONS                                              :Vagoni
@@ -3013,7 +3004,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Elektrošinska 
 STR_REPLACE_MONORAIL_VEHICLES                                   :Jednošinska Vozila
 STR_REPLACE_MAGLEV_VEHICLES                                     :Magnetnošinska Vozila
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Ukanjanje vagona: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Ukanjanje vagona: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Ukoliko bi se zamenom kompozicija produžila, automatska obnova će ukloniti vagone (sa početka) kako bi se zadržala dužina kompozicije.
 
 # Vehicle view
@@ -3239,7 +3230,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :potreban
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :nepotreban
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Vrednost za poređenje sa podatkom o vozilu
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Unos vrednosti za poređenje
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Preskoči
@@ -4134,10 +4124,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :{TOWN} Putanja 
 
 STR_UNKNOWN_STATION                                             :nepoznata stanica
 STR_DEFAULT_SIGN_NAME                                           :Znak
-STR_COMPANY_SOMEONE                                             :neko{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :neko
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Posmatrač, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Posmatrač, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
