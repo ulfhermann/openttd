@@ -717,33 +717,6 @@ void Window::DrawWidgets() const
 	}
 }
 
-/** Resize a widget and shuffle other widgets around to fit. */
-void ResizeWindowForWidget(Window *w, uint widget, int delta_x, int delta_y)
-{
-	int right  = w->widget[widget].right;
-	int bottom = w->widget[widget].bottom;
-
-	for (uint i = 0; i < w->widget_count; i++) {
-		if (w->widget[i].left >= right && i != widget) w->widget[i].left += delta_x;
-		if (w->widget[i].right >= right) w->widget[i].right += delta_x;
-		if (w->widget[i].top >= bottom && i != widget) w->widget[i].top += delta_y;
-		if (w->widget[i].bottom >= bottom) w->widget[i].bottom += delta_y;
-	}
-
-	/* A hidden widget has bottom == top or right == left, we need to make it
-	 * one less to fit in its new gap. */
-	if (right  == w->widget[widget].left) w->widget[widget].right--;
-	if (bottom == w->widget[widget].top)  w->widget[widget].bottom--;
-
-	if (w->widget[widget].left > w->widget[widget].right)  w->widget[widget].right  = w->widget[widget].left;
-	if (w->widget[widget].top  > w->widget[widget].bottom) w->widget[widget].bottom = w->widget[widget].top;
-
-	w->width  += delta_x;
-	w->height += delta_y;
-	w->resize.width  += delta_x;
-	w->resize.height += delta_y;
-}
-
 /**
  * Draw a sort button's up or down arrow symbol.
  * @param widget Sort button widget
@@ -1175,9 +1148,8 @@ static inline uint ComputeOffset(uint space, uint max_space)
 
 /**
  * Widgets stacked on top of each other.
- * @param tp Kind of stacking, must be either #NWID_SELECTION or #NWID_LAYERED.
  */
-NWidgetStacked::NWidgetStacked(WidgetType tp) : NWidgetContainer(tp)
+NWidgetStacked::NWidgetStacked() : NWidgetContainer(NWID_SELECTION)
 {
 	this->index = -1;
 }
@@ -1268,21 +1240,15 @@ void NWidgetStacked::Draw(const Window *w)
 {
 	if (this->shown_plane == STACKED_SELECTION_ZERO_SIZE) return;
 
-	if (this->type == NWID_SELECTION) {
-		int plane = 0;
-		for (NWidgetBase *child_wid = this->head; child_wid != NULL; plane++, child_wid = child_wid->next) {
-			if (plane == this->shown_plane) {
-				child_wid->Draw(w);
-				return;
-			}
+	int plane = 0;
+	for (NWidgetBase *child_wid = this->head; child_wid != NULL; plane++, child_wid = child_wid->next) {
+		if (plane == this->shown_plane) {
+			child_wid->Draw(w);
+			return;
 		}
 	}
 
-	assert(this->type == NWID_LAYERED);
-	/* Render from back to front. */
-	for (NWidgetBase *child_wid = this->tail; child_wid != NULL; child_wid = child_wid->prev) {
-		child_wid->Draw(w);
-	}
+	NOT_REACHED();
 }
 
 NWidgetCore *NWidgetStacked::GetWidgetFromPos(int x, int y)
@@ -2336,50 +2302,6 @@ static Widget *InitializeNWidgets(NWidgetBase *nwid, bool rtl, int biggest_index
 	return widgets;
 }
 
-/**
- * Compare two widget arrays with each other, and report differences.
- * @param orig Pointer to original widget array.
- * @param gen  Pointer to generated widget array (from the nested widgets).
- * @param report Report differences to 'misc' debug stream.
- * @return Both widget arrays are equal.
- */
-bool CompareWidgetArrays(const Widget *orig, const Widget *gen, bool report)
-{
-#define CHECK(var, prn) \
-	if (ow->var != gw->var) { \
-		same = false; \
-		if (report) DEBUG(misc, 1, "index %d, \"" #var "\" field: original " prn ", generated " prn, idx, ow->var, gw->var); \
-	}
-#define CHECK_COORD(var) \
-	if (ow->var != gw->var) { \
-		same = false; \
-		if (report) DEBUG(misc, 1, "index %d, \"" #var "\" field: original %d, generated %d, (difference %d)", idx, ow->var, gw->var, ow->var - gw->var); \
-	}
-
-	bool same = true;
-	for (int idx = 0; ; idx++) {
-		const Widget *ow = orig + idx;
-		const Widget *gw = gen + idx;
-
-		CHECK(type, "%d")
-		CHECK(display_flags, "0x%x")
-		CHECK(colour, "%d")
-		CHECK_COORD(left)
-		CHECK_COORD(right)
-		CHECK_COORD(top)
-		CHECK_COORD(bottom)
-		CHECK(data, "%u")
-		CHECK(tooltips, "%u")
-
-		if (ow->type == WWT_LAST || gw->type == WWT_LAST) break;
-	}
-
-	return same;
-
-#undef CHECK
-#undef CHECK_COORD
-}
-
 /* == Conversion code from NWidgetPart array to NWidgetBase* tree == */
 
 /**
@@ -2448,12 +2370,6 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 				break;
 			}
 
-			case NWID_LAYERED:
-				if (*dest != NULL) return num_used;
-				*dest = new NWidgetStacked(parts->type);
-				*fill_dest = true;
-				break;
-
 			case WPT_RESIZE: {
 				NWidgetResizeBase *nwrb = dynamic_cast<NWidgetResizeBase *>(*dest);
 				if (nwrb != NULL) {
@@ -2511,7 +2427,7 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 
 			case NWID_SELECTION: {
 				if (*dest != NULL) return num_used;
-				NWidgetStacked *nws = new NWidgetStacked(parts->type);
+				NWidgetStacked *nws = new NWidgetStacked();
 				*dest = nws;
 				*fill_dest = true;
 				nws->SetIndex(parts->u.widget.index);
@@ -2567,7 +2483,7 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
 		/* If sub-widget is a container, recursively fill that container. */
 		WidgetType tp = sub_widget->type;
 		if (fill_sub && (tp == NWID_HORIZONTAL || tp == NWID_HORIZONTAL_LTR || tp == NWID_VERTICAL
-							|| tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET || tp == NWID_SELECTION || tp == NWID_LAYERED)) {
+							|| tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET || tp == NWID_SELECTION)) {
 			int num_used = MakeWidgetTree(parts, count - total_used, sub_widget, biggest_index);
 			parts += num_used;
 			total_used += num_used;
@@ -2605,14 +2521,13 @@ NWidgetContainer *MakeNWidgets(const NWidgetPart *parts, int count, int *biggest
  * Also cache the result and use the cache if possible.
  * @param[in] parts        Array with parts of the widgets.
  * @param     parts_length Length of the \a parts array.
- * @param[in] orig_wid     Pointer to original widget array.
  * @param     wid_cache    Pointer to the cache for storing the generated widget array (use \c NULL to prevent caching).
  * @return Cached value if available, otherwise the generated widget array. If \a wid_cache is \c NULL, the caller should free the returned array.
  *
  * @pre Before the first call, \c *wid_cache should be \c NULL.
  * @post The widget array stored in the \c *wid_cache should be free-ed by the caller.
  */
-const Widget *InitializeWidgetArrayFromNestedWidgets(const NWidgetPart *parts, int parts_length, const Widget *orig_wid, Widget **wid_cache)
+const Widget *InitializeWidgetArrayFromNestedWidgets(const NWidgetPart *parts, int parts_length, Widget **wid_cache)
 {
 	const bool rtl = false; // Direction of the language is left-to-right
 
@@ -2622,19 +2537,6 @@ const Widget *InitializeWidgetArrayFromNestedWidgets(const NWidgetPart *parts, i
 	int biggest_index = -1;
 	NWidgetContainer *nwid = MakeNWidgets(parts, parts_length, &biggest_index);
 	Widget *gen_wid = InitializeNWidgets(nwid, rtl, biggest_index);
-
-	if (!rtl && orig_wid) {
-		/* There are two descriptions, compare them.
-		 * Comparing only makes sense when using a left-to-right language.
-		 */
-		bool ok = CompareWidgetArrays(orig_wid, gen_wid, false);
-		if (ok) {
-			DEBUG(misc, 1, "Nested widgets are equal, min-size(%u, %u)", nwid->smallest_x, nwid->smallest_y);
-		} else {
-			DEBUG(misc, 0, "Nested widgets give different results");
-			CompareWidgetArrays(orig_wid, gen_wid, true);
-		}
-	}
 	delete nwid;
 
 	if (wid_cache != NULL) *wid_cache = gen_wid;
