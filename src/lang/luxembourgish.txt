@@ -126,7 +126,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} Karmel
 STR_QUANTITY_BATTERIES                                          :{COMMA} Batterie{P "" n}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} Plastik
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} Spruddelgedrénks
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -541,7 +541,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detail
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Gefierter:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Statiounen:
@@ -1521,7 +1520,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Kaart wi
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Wéi eng Kaart wëllt der spillen?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Generéiert en zoufällegt neit Spill
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (Werben)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} Spiller
@@ -1535,7 +1533,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Max Zusc
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}D'Unzuel vun den Zuschauer limitéiren
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Geschwaaten Sprooch:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Aaner Leit gesin wéi eng Sprooch um Server geschwaat gëtt
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Spill starten
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Eng nei Partie iwwert d'Netzwierk starten
@@ -1713,13 +1710,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :Server voll
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Spill gepaust (nët genuch Spiller)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Spill leeft erëm (genuch Spiller)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Spill gepaust (Spiller connectéiert)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Spill leeft erëm (Client ass connectéiert)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Spill leeft erëm (Client konnt net connectéieren)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :verloossen
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} ass dem Spill baigetrueden
@@ -2294,13 +2285,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Warnung: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Error: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Fatal: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} wärt net mat der TTDPatch vun OpenTTD versioun funktiounéiren.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} as fir  {STRING} Versioun vun TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} as designed fir mat {STRING} benotzt ze gin
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Invaliden Parameter fir {STRING}: Parameter {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} muss firun {STRING} gelueden gin.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} muss no {STRING} gelueden gin.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} brauch OpenTTD Versioun {STRING} oder méi nei.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} wärt net mat der TTDPatch vun OpenTTD versioun funktiounéiren.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} as fir  {STRING} Versioun vun TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} as designed fir mat {STRING} benotzt ze gin
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Invaliden Parameter fir {1:STRING}: Parameter {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} muss firun {STRING} gelueden gin.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} muss no {STRING} gelueden gin.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} brauch OpenTTD Versioun {STRING} oder méi nei.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF Datei déi designed gouf fir ze iwwersetzen
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Ze vill NewGRFen gelueden.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :{STRING} als statesch NewGRF lueden mat {STRING} kann Desyncs efiirrufen.
@@ -2774,7 +2765,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Keen gef
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Stop Gefierterremplacement
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Drécken fir Remplacement ze stoppen
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Remplacéiren: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Remplacéiren: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Wiessel tëscht Maschin- an Wagonremplac. Fënster
 STR_REPLACE_ENGINES                                             :Motoren
 STR_REPLACE_WAGONS                                              :Wagonen
@@ -2786,7 +2777,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Elektresch Schi
 STR_REPLACE_MONORAIL_VEHICLES                                   :Monorail Gefierer
 STR_REPLACE_MAGLEV_VEHICLES                                     :Magnéitbunn Gefierer
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Wagon raushuelen: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Wagon raushuelen: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Mecht dass den Autoremplacement d'Lengt vum Zuch behält, andems en Wagonen (vun lénks un) wechhëllt, wann d'Lok den Zuch ze laang mecht.
 
 # Vehicle view
@@ -3012,7 +3003,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :as wouer(true)
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :as falsch(false)
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Den Wert deen mat den Gefiertsdaten verglach gëtt
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Wert anginn fir ze vergläichen
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Iwersprangen
@@ -3897,10 +3887,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Weepunkt {TOWN}
 
 STR_UNKNOWN_STATION                                             :onbekannt Statioun
 STR_DEFAULT_SIGN_NAME                                           :Schëld
-STR_COMPANY_SOMEONE                                             :iergendeen{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :iergendeen
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Zuschauer, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Zuschauer, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
