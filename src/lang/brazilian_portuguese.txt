@@ -127,7 +127,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} de car
 STR_QUANTITY_BATTERIES                                          :{COMMA} pilha{P "" s}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} de plástico
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} refrigerante{P "" s}
-STR_QUANTITY_N_A                                                :N/D{SKIP}
+STR_QUANTITY_N_A                                                :N/D
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -547,7 +547,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detalhes
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Veículos:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Estações:
@@ -1534,7 +1533,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Selecion
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Em qual mapa deseja jogar?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Gerar novo jogo aleatório
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :Rede Local / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (divulgar)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} cliente{P "" s}
@@ -1548,7 +1546,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Máx de 
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Limita o servidor para um certa quantia de espectadores
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Idioma falado:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Outros jogadores saberão o idioma utilizado no servidor.
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Iniciar Jogo
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Iniciar um novo jogo em rede com mapa ou cenário aleatórios
@@ -1727,13 +1724,8 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :servidor cheio
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Jogo pausado (faltam jogadores)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Jogo des-pausado (jogadores suficientes)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Jogo pausado (cliente conectando)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Jogo des-pausado (cliente conectado)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Jogo des-pausado (cliente não se conectou)
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_MANUAL                   :manual
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :saindo
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} entrou no jogo
@@ -2318,13 +2310,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Atenção: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Erro: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Erro Fatal: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} não irá funcionar com a versão do TTDPatch encontrada pelo OpenTTD.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} funciona na versão {STRING} de TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} é projetado para ser usado com {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}parâmetro inválido para {STRING}: parâmetro {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} deve ser carregado antes de {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} deve ser carregado depois de {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} requer versão {STRING} ou maior do OpenTTD.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} não irá funcionar com a versão do TTDPatch encontrada pelo OpenTTD.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} funciona na versão {STRING} de TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} é projetado para ser usado com {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :parâmetro inválido para {1:STRING}: parâmetro {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} deve ser carregado antes de {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} deve ser carregado depois de {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} requer versão {STRING} ou maior do OpenTTD.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :o arquivo GRF foi designado para tradução
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Muitos NewGRFs foram carregados.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Carregar {STRING} como um NewGRF estático em conjunto com {STRING} pode causar desincronias.
@@ -2804,7 +2796,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Nenhum v
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Parar Substituição
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Pressione para parar a subsituição do tipo de motor que selecionou à esquerda
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Substituindo: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Substituindo: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Troca entre substituir máquinas e substituir vagões
 STR_REPLACE_ENGINES                                             :Motores
 STR_REPLACE_WAGONS                                              :Vagões
@@ -2816,7 +2808,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Locomotivas El�
 STR_REPLACE_MONORAIL_VEHICLES                                   :Monotrilho
 STR_REPLACE_MAGLEV_VEHICLES                                     :Trem-Bala
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Remoção de vagões: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Remoção de vagões: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Faz autosubstituição manter o tamanho do trem removendo vagões (começando pela frente), se ao substituir a locomotiva o trem ficar maior.
 
 # Vehicle view
@@ -3042,7 +3034,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :é verdadeiro
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :é falso
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}O valor a comparar com os dados do veículo
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Digite o valor a ser comparado
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Saltar
@@ -3937,10 +3928,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Ponto de contro
 
 STR_UNKNOWN_STATION                                             :estação desconhecida
 STR_DEFAULT_SIGN_NAME                                           :Placa
-STR_COMPANY_SOMEONE                                             :alguém{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :alguém
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Espectador, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Espectador, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
@@ -4027,4 +4018,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-
