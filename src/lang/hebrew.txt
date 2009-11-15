@@ -127,7 +127,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} של �
 STR_QUANTITY_BATTERIES                                          :{P 0 סוללה ""} {COMMA} {P "" סוללות}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} של פלסטיק
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} משקאות מוגזים
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -547,7 +547,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}סעיף
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK} : כלי תחבורה
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK} : תחנות
@@ -1534,7 +1533,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}בחר �
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}באיזה מפה אתה רוצה לשחק?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :צור משחק אקראי חדש
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / אינטרנט
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :(אינטרנט (פרסם
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} לקוח{P "" ות}
@@ -1548,7 +1546,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK} :מספ
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}הגבלת השרת למספר צופים מסויים
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}שפת דיבור:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}שחקנים אחרים ידעו איו שפה מדוברת בשרת
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}התחל משחק
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}התחל משחק רשת עם מפה אקראית
@@ -1726,13 +1723,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :השרת מלא
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :(המשחק הושהה (אין מספיק משתתפים
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :(המשחק הופשר (יש די משתתפים
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :(המשחק הושהה (משתמש מתחבר
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :(המשחק הופשר (משתמש התחבר
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :(המשחק הופשר (חיבור משתמש נכשל
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :עוזב
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :הצטרף למשחק {STRING} ***
@@ -2315,13 +2306,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{SILVER}{STRING}{RED}  : אזהרה
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{SILVER}{STRING}{RED}: שגיאה
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{SILVER}{STRING}{RED} :שגיאה חמורה
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} לא יעבוד עם גרסת ה-TTDPatch שדווחה ע"י OpenTTD.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} היא עבור גרסת {STRING} של TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{0:SKIP}{1:STRING} תוכנן עבור {NBSP}{2:STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}פרמטר לא חוקי עבור {STRING}: פרמטר {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{0:SKIP} {1:STRING} לפני הטענת {NBSP}{2:STRING} יש להטעין את
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{0:SKIP} {1:STRING} לאחר הטענת {NBSP}{2:STRING} יש להטעין את
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} דורש גרסת {STRING} של OpenTTD ומעלה.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} לא יעבוד עם גרסת ה-TTDPatch שדווחה ע"י OpenTTD.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} היא עבור גרסת {STRING} של TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} תוכנן עבור {NBSP}{2:STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :פרמטר לא חוקי עבור {1:STRING}: פרמטר {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} לפני הטענת {NBSP}{2:STRING} יש להטעין את
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} לאחר הטענת {NBSP}{2:STRING} יש להטעין את
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} דורש גרסת {STRING} של OpenTTD ומעלה.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :קובץ השדרוג הגראפי אותו יועד לתרגם
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :יותר מידי קבצי שדרוג גראפי פתוחים בן זמנית
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Loading {STRING} as static NewGRF with {STRING} could cause desyncs.
@@ -2801,7 +2792,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}לא נ�
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}הפסק את החלפת הכלים
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}לחץ כאן להפסיק את ההחלפה
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{ORANGE}{SKIP}{SKIP}{STRING}{BLACK} : מחליף
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{ORANGE}{STRING}{BLACK} : מחליף
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}החלף בין חלונות החלפת קרון וקטר
 STR_REPLACE_ENGINES                                             :מנועים/קטרים
 STR_REPLACE_WAGONS                                              :קרונות
@@ -2813,7 +2804,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :רכבות חש
 STR_REPLACE_MONORAIL_VEHICLES                                   :רכבות חד-פס
 STR_REPLACE_MAGLEV_VEHICLES                                     :רכבות פס-מגנטי
 
-STR_REPLACE_REMOVE_WAGON                                        :{ORANGE}{SKIP}{STRING}{BLACK} : הסרת קרונות
+STR_REPLACE_REMOVE_WAGON                                        :{ORANGE}{STRING}{BLACK} : הסרת קרונות
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}הסר קרונות מהסוף על מנת לשמור על האורך המקורי של הרכבת
 
 # Vehicle view
@@ -3039,7 +3030,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :אמת
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :שקר
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}ערך להשוואה מול נתוני כלי הרכב
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}:הכנס ערך כבסיס להשוואהֿ
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}דלג
@@ -3934,10 +3924,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :{TOWN} #{COMMA}
 
 STR_UNKNOWN_STATION                                             :תחנה לא ידועה
 STR_DEFAULT_SIGN_NAME                                           :סימניה
-STR_COMPANY_SOMEONE                                             :{SKIP}{SKIP}מישהו
+STR_COMPANY_SOMEONE                                             :מישהו
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{1:STRING} ,{0:COMPANY}
-STR_SAVEGAME_NAME_SPECTATOR                                     :{SKIP}{STRING},צופה
+STR_SAVEGAME_NAME_SPECTATOR                                     :{1:STRING},צופה
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
