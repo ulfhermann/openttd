@@ -60,7 +60,7 @@ byte _special_mouse_mode;
 
 /** Window description constructor. */
 WindowDesc::WindowDesc(int16 left, int16 top, int16 min_width, int16 min_height, int16 def_width, int16 def_height,
-			WindowClass window_class, WindowClass parent_class, uint32 flags, const Widget *widgets,
+			WindowClass window_class, WindowClass parent_class, uint32 flags,
 			const NWidgetPart *nwid_parts, int16 nwid_length)
 {
 	this->left = left;
@@ -72,7 +72,6 @@ WindowDesc::WindowDesc(int16 left, int16 top, int16 min_width, int16 min_height,
 	this->cls = window_class;
 	this->parent_cls = parent_class;
 	this->flags = flags;
-	this->widgets = widgets;
 	this->nwid_parts = nwid_parts;
 	this->nwid_length = nwid_length;
 	this->new_widgets = NULL;
@@ -82,9 +81,9 @@ WindowDesc::WindowDesc(int16 left, int16 top, int16 min_width, int16 min_height,
 const Widget *WindowDesc::GetWidgets() const
 {
 	if (this->nwid_parts != NULL) {
-		InitializeWidgetArrayFromNestedWidgets(this->nwid_parts, this->nwid_length, this->widgets, &this->new_widgets);
+		InitializeWidgetArrayFromNestedWidgets(this->nwid_parts, this->nwid_length, &this->new_widgets);
 	}
-	const Widget *wids = (this->new_widgets != NULL) ? this->new_widgets : this->widgets;
+	const Widget *wids = this->new_widgets;
 	assert(wids != NULL);
 	return wids;
 }
@@ -915,11 +914,12 @@ static void AssignWidgetToWindow(Window *w, const Widget *widget)
  * @param cls           Class of the window, used for identification and grouping. @see WindowClass
  * @param *widget       Pointer to the widget array, it is \c NULL when nested widgets are used. @see Widget
  * @param window_number Number being assigned to the new window
+ * @param desc_flags    Window flags. @see WindowDefaultFlag
  * @return Window pointer of the newly created window
  * @pre If nested widgets are used (\a widget is \c NULL), #nested_root and #nested_array_size must be initialized.
  *      In addition, #nested_array is either \c NULL, or already initialized.
  */
-void Window::InitializeData(WindowClass cls, const Widget *widget, int window_number)
+void Window::InitializeData(WindowClass cls, const Widget *widget, int window_number, uint32 desc_flags)
 {
 	/* Set up window properties; some of them are needed to set up smallest size below */
 	this->window_class = cls;
@@ -928,6 +928,7 @@ void Window::InitializeData(WindowClass cls, const Widget *widget, int window_nu
 	this->focused_widget = NULL;
 	this->nested_focus = NULL;
 	this->window_number = window_number;
+	this->desc_flags = desc_flags;
 
 	/* If available, initialize nested widget tree. */
 	if (widget == NULL) {
@@ -1312,8 +1313,7 @@ static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int
  */
 Window::Window(const WindowDesc *desc, WindowNumber window_number)
 {
-	this->InitializeData(desc->cls, desc->GetWidgets(), window_number);
-	this->desc_flags = desc->flags;
+	this->InitializeData(desc->cls, desc->GetWidgets(), window_number, desc->flags);
 	Point pt = LocalGetWindowPlacement(desc, desc->minimum_width, desc->minimum_height, window_number);
 	this->InitializePositionSize(pt.x, pt.y, desc->minimum_width, desc->minimum_height);
 }
@@ -1346,8 +1346,7 @@ void Window::CreateNestedTree(const WindowDesc *desc, bool fill_nested)
  */
 void Window::FinishInitNested(const WindowDesc *desc, WindowNumber window_number)
 {
-	this->InitializeData(desc->cls, NULL, window_number);
-	this->desc_flags = desc->flags;
+	this->InitializeData(desc->cls, NULL, window_number, desc->flags);
 	Point pt = this->OnInitialPosition(desc, this->nested_root->smallest_x, this->nested_root->smallest_y, window_number);
 	this->InitializePositionSize(pt.x, pt.y, this->nested_root->smallest_x, this->nested_root->smallest_y);
 	this->FindWindowPlacementAndResize(desc->default_width, desc->default_height);

@@ -128,7 +128,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} кар
 STR_QUANTITY_BATTERIES                                          :{COMMA} батери{P я ии}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} пластмаса
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} газиран{P а и} напитк{P а и}
-STR_QUANTITY_N_A                                                :Не се предлага{SKIP}
+STR_QUANTITY_N_A                                                :Не се предлага
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -253,10 +253,11 @@ STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Дълж
 STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Площ: {NUM} x {NUM}{}Разлика във височината: {NUM} м
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
+# These are used in buttons
 STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}Население
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Име
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Дата
+# These are used in dropdowns
 STR_SORT_BY_PRODUCTION                                          :Продукция
 STR_SORT_BY_TYPE                                                :Вид
 STR_SORT_BY_TRANSPORTED                                         :Транспортирано
@@ -543,7 +544,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Подр
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Превозни средства:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Станции:
@@ -556,7 +556,7 @@ STR_PERFORMANCE_DETAIL_MONEY                                    :{BLACK}Пари
 STR_PERFORMANCE_DETAIL_LOAN                                     :{BLACK}Заем:
 STR_PERFORMANCE_DETAIL_TOTAL                                    :{BLACK}Общо:
 ############ End of order list
-STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Брой превозни средства; това включва автомобили, влакове, кораби и самолети
+STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Брой превозни средства с приход за миналата година; това включва автомобили, влакове, кораби и самолети
 STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP                         :{BLACK}Брой станции. Всяка част на станция (напр. ЖП гара, автогара, летище) се брои отделно, даже ако са свързани като една станция
 STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP                       :{BLACK}Печалбата на превозното средство с най-нисък доход (от всички на поне 2 години)
 STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP                       :{BLACK}Сумата пари спечелена през месеца с най-ниска печалба от последните 12 четвъртини
@@ -1518,7 +1518,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Избо
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Коя карта желаете да играете?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Генерирай произволна нова игра
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Интернет
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Интернет (реклама)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} клиент{P "" s}
@@ -1532,7 +1531,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Макс
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Ограничаване на сървъра до определен брой наблюдатели
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Говорим език:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Другите играчи ще знаят езика на който се говори на сървъра
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Начало на игра
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Започване на нова мрежова игра от случайна карта или сценарий
@@ -1710,13 +1708,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :сървъръ�
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Играта е на пауза (няма достатъчно играчи)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Играта продължава (отново има достатъчно играчи)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Играта е на пауза (свързва се нов играч)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Играта продължава (новият играч се свърза)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Играта продължава (новият играч не успя да се свърже)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :напускам
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} се присъедини към играта
@@ -2011,6 +2003,7 @@ STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}Пост
 STR_FOUND_TOWN_MANY_RANDOM_TOWNS                                :{BLACK}Много случайни градове
 STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP                             :{BLACK}Покриване на картата със случайно поставени градове
 
+
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}Големина на града:
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Малък
 STR_FOUND_TOWN_INITIAL_SIZE_MEDIUM_BUTTON                       :{BLACK}Среден
@@ -2290,13 +2283,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Внимание: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Грешка: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Критично: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} няма да работи с версията на TTDPatch указана от OpenTTD.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} е за {STRING} версията на TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} е проектиран да работи с {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Невалиден параметър за {STRING}: параметър {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} трябва да бъде зареден преди {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} трябва да бъде зареден след {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} поискай OpenTTD версиа {STRING} или по-добра.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} няма да работи с версията на TTDPatch указана от OpenTTD.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} е за {STRING} версията на TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} е проектиран да работи с {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Невалиден параметър за {1:STRING}: параметър {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} трябва да бъде зареден преди {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} трябва да бъде зареден след {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} поискай OpenTTD версиа {STRING} или по-добра.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF файлат беше предназначен да преведе
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Прекалено много графики (NewGRF) са заредени.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Зареждане на {STRING} като статичен NewGRF заедно с {STRING} може да доведе до проблеми.
@@ -2767,7 +2760,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Няма
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Спиране на замяната
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Натиснете за спиране подновяването на избрания в ляво двигател
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Замяна: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Замяна: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Превключване между замяна на локомотиви и вагони
 STR_REPLACE_ENGINES                                             :Двигатели
 STR_REPLACE_WAGONS                                              :Вагони
@@ -2779,7 +2772,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Електри�
 STR_REPLACE_MONORAIL_VEHICLES                                   :Монорелсови локомотиви
 STR_REPLACE_MAGLEV_VEHICLES                                     :Маглев влакове
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Премахване на вагон: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Премахване на вагон: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Автоматичната замяна ще запази дължината на влака като премахне вагони (започвайки от предните), ако замяната довежда до по-дълъг влак.
 
 # Vehicle view
@@ -2998,7 +2991,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :е правил
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :е неправилно
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Стойност, с която да сравня данните на превозното средство
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Вкарай стойност за сравнение
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Остави
@@ -3426,10 +3418,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Не м�
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Не може да пратиш кораба в депото...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Не може да изпрати самолета в хангар...
 
-STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Не може да купиш ЖП машина...
-STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Не може да купи кола...
-STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Не може да купиш кораба...
-STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Не може да построи самолет...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Не може да се купи ЖП машина...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Не може да купи превозно стредство...
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Не може да се купи кораб...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Не може да се купи самолет...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Не може да се преименува влак...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Не може да преименуваш МПС-то...
@@ -3875,10 +3867,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Пътна то
 
 STR_UNKNOWN_STATION                                             :неизвестна гара
 STR_DEFAULT_SIGN_NAME                                           :Знак
-STR_COMPANY_SOMEONE                                             :някой{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :някой
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Наблюдател, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Наблюдател, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
@@ -3964,4 +3956,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-
