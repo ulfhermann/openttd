@@ -31,7 +31,7 @@ static ScreenshotType _screenshot_type;
 
 /* called by the ScreenShot proc to generate screenshot lines. */
 typedef void ScreenshotCallback(void *userdata, void *buf, uint y, uint pitch, uint n);
-typedef bool ScreenshotHandlerProc(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette);
+typedef bool ScreenshotHandlerProc(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette);
 
 struct ScreenshotFormat {
 	const char *name;
@@ -88,10 +88,10 @@ assert_compile(sizeof(RgbTriplet) == 3);
  * @param w width in pixels
  * @param h height in pixels
  * @param pixelformat bits per pixel
- * @param paletter colour paletter (for 8bpp mode)
+ * @param palette colour palette (for 8bpp mode)
  * @return was everything ok?
  */
-static bool MakeBmpImage(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
+static bool MakeBMPImage(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
 {
 	uint bpp; // bytes per pixel
 	switch (pixelformat) {
@@ -208,16 +208,16 @@ static bool MakeBmpImage(char *name, ScreenshotCallback *callb, void *userdata, 
 
 static void PNGAPI png_my_error(png_structp png_ptr, png_const_charp message)
 {
-	DEBUG(misc, 0, "[libpng] error: %s - %s", message, (char *)png_get_error_ptr(png_ptr));
+	DEBUG(misc, 0, "[libpng] error: %s - %s", message, (const char *)png_get_error_ptr(png_ptr));
 	longjmp(png_ptr->jmpbuf, 1);
 }
 
 static void PNGAPI png_my_warning(png_structp png_ptr, png_const_charp message)
 {
-	DEBUG(misc, 1, "[libpng] warning: %s - %s", message, (char *)png_get_error_ptr(png_ptr));
+	DEBUG(misc, 1, "[libpng] warning: %s - %s", message, (const char *)png_get_error_ptr(png_ptr));
 }
 
-static bool MakePNGImage(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
+static bool MakePNGImage(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
 {
 	png_color rq[256];
 	FILE *f;
@@ -233,7 +233,7 @@ static bool MakePNGImage(char *name, ScreenshotCallback *callb, void *userdata, 
 	f = fopen(name, "wb");
 	if (f == NULL) return false;
 
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, name, png_my_error, png_my_warning);
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, (void *)name, png_my_error, png_my_warning);
 
 	if (png_ptr == NULL) {
 		fclose(f);
@@ -346,7 +346,7 @@ struct PcxHeader {
 };
 assert_compile(sizeof(PcxHeader) == 128);
 
-static bool MakePCXImage(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
+static bool MakePCXImage(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
 {
 	FILE *f;
 	uint maxlines;
@@ -478,7 +478,7 @@ static const ScreenshotFormat _screenshot_formats[] = {
 #if defined(WITH_PNG)
 	{"PNG", "png", &MakePNGImage},
 #endif
-	{"BMP", "bmp", &MakeBmpImage},
+	{"BMP", "bmp", &MakeBMPImage},
 	{"PCX", "pcx", &MakePCXImage},
 };
 
@@ -569,9 +569,11 @@ static void LargeWorldCallback(void *userdata, void *buf, uint y, uint pitch, ui
 	_screen_disable_anim = old_disable_anim;
 }
 
-static char *MakeScreenshotName(const char *ext)
+static const char *MakeScreenshotName(const char *ext)
 {
-	if (_screenshot_name[0] == '\0') {
+	bool generate = StrEmpty(_screenshot_name);
+
+	if (generate) {
 		if (_game_mode == GM_EDITOR || _game_mode == GM_MENU || _local_company == COMPANY_SPECTATOR) {
 			strecpy(_screenshot_name, "screenshot", lastof(_screenshot_name));
 		} else {
@@ -590,6 +592,7 @@ static char *MakeScreenshotName(const char *ext)
 			filename[0] = '\0';
 			break;
 		}
+		if (!generate) break; // allow overwriting of non-automatic filenames
 		if (!FileExists(filename)) break;
 		/* If file exists try another one with same name, but just with a higher index */
 		snprintf(&_screenshot_name[len], lengthof(_screenshot_name) - len, "#%u.%s", serial, ext);

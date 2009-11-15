@@ -335,7 +335,7 @@ struct Window : ZeroedMemoryAllocator {
 	};
 
 protected:
-	void InitializeData(WindowClass cls, const Widget *widget, int window_number);
+	void InitializeData(WindowClass cls, const Widget *widget, int window_number, uint32 desc_flags);
 	void InitializePositionSize(int x, int y, int min_width, int min_height);
 	void FindWindowPlacementAndResize(int def_width, int def_height);
 	void FindWindowPlacementAndResize(const WindowDesc *desc);
@@ -345,11 +345,26 @@ public:
 	Window();
 
 	virtual ~Window();
-	/* Don't allow arrays; arrays of Windows are pointless as you need
-	 * to destruct them all at the same time too, which is kinda hard. */
-	FORCEINLINE void *operator new[](size_t size) { NOT_REACHED(); }
-	/* Don't free the window directly; it corrupts the linked list when iterating */
-	FORCEINLINE void operator delete(void *ptr, size_t size) {}
+
+	/**
+	 * Helper allocation function to disallow something.
+	 * Don't allow arrays; arrays of Windows are pointless as you need
+	 * to destruct them all at the same time too, which is kinda hard.
+	 * @param size the amount of space not to allocate
+	 */
+	FORCEINLINE void *operator new[](size_t size)
+	{
+		NOT_REACHED();
+	}
+
+	/**
+	 * Helper allocation function to disallow something.
+	 * Don't free the window directly; it corrupts the linked list when iterating
+	 * @param ptr the pointer not to free
+	 */
+	FORCEINLINE void operator delete(void *ptr)
+	{
+	}
 
 	uint16 flags4;              ///< Window flags, @see WindowFlags
 	WindowClass window_class;   ///< Window class
