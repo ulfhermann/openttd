@@ -118,7 +118,6 @@
 	#define CDECL
 	#define __int64 long long
 	#define GCC_PACK __attribute__((packed))
-	#define UNUSED __attribute__((unused))
 	/* Warn about functions using 'printf' format syntax. First argument determines which parameter
 	 * is the format string, second argument is start of values passed to printf. */
 	#define WARN_FORMAT(string, args) __attribute__ ((format (printf, string, args)))
@@ -129,7 +128,6 @@
 	#define FORCEINLINE inline
 	#define CDECL
 	#define GCC_PACK
-	#define UNUSED
 	#define WARN_FORMAT(string, args)
 	#include <malloc.h>
 #endif /* __WATCOMC__ */
@@ -162,6 +160,7 @@
 	#if (_MSC_VER < 1400)                   // MSVC 2005 safety checks
 		#error "Only MSVC 2005 or higher are supported. MSVC 2003 and earlier are not! Upgrade your compiler."
 	#endif /* (_MSC_VER < 1400) */
+	#pragma warning(disable: 4291)   // no matching operator delete found; memory will not be freed if initialization throws an exception (reason: our overloaded functions never throw an exception)
 	#pragma warning(disable: 4996)   // 'strdup' was declared deprecated
 	#define _CRT_SECURE_NO_DEPRECATE // all deprecated 'unsafe string functions
 	#pragma warning(disable: 6308)   // code analyzer: 'realloc' might return null pointer: assigning null pointer to 't_ptr', which is passed as an argument to 'realloc', will cause the original memory block to be leaked
@@ -182,7 +181,6 @@
 	#endif
 
 	#define GCC_PACK
-	#define UNUSED
 
 	int CDECL snprintf(char *str, size_t size, const char *format, ...) WARN_FORMAT(3, 4);
 	#if defined(WINCE)
@@ -301,14 +299,11 @@ typedef unsigned char byte;
 #if defined(__STDCXX_VERSION__) || defined(__GXX_EXPERIMENTAL_CXX0X__) || defined(__GXX_EXPERIMENTAL_CPP0X__) || defined(static_assert)
 	/* __STDCXX_VERSION__ is c++0x feature macro, __GXX_EXPERIMENTAL_CXX0X__ is used by gcc, __GXX_EXPERIMENTAL_CPP0X__ by icc */
 	#define assert_compile(expr) static_assert(expr, #expr )
-	#define assert_tcompile(expr) assert_compile(expr)
-#elif defined(__OS2__) || (defined(__GNUC__) && __GNUC__ == 3 && __GNUC_MINOR__ < 4)
-	/* Disabled for OS/2 or GCC < 3.4 (GCC < 3 isn't supported anymore) */
+#elif defined(__OS2__)
+	/* Disabled for OS/2 */
 	#define assert_compile(expr)
-	#define assert_tcompile(expr) assert(expr)
 #else
-	#define assert_compile(expr) extern const int __ct_assert__[1 - 2 * !(expr)] UNUSED
-	#define assert_tcompile(expr) assert(expr)
+	#define assert_compile(expr) typedef int __ct_assert__[1 - 2 * !(expr)]
 #endif
 
 /* Check if the types have the bitsizes like we are using them */
