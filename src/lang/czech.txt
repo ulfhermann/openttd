@@ -194,7 +194,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} karame
 STR_QUANTITY_BATTERIES                                          :{COMMA} bateri{P e e í}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} plastu
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} limonád{P a y ""}
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -613,7 +613,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Podrobn�
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vozidla:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stanice:
@@ -1597,7 +1596,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Vyber ma
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Ve které mapě si chceš zahrát?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Vytvořit novou náhodnou hru
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :internet (zveřejnit)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} klient{P "" i ů}
@@ -1611,7 +1609,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Maximál
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Omezit serverem pocet pozorovatelů
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Jazyk ve hře:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Aby ostatní hráči věděli, jakým jazykem se bude ve hře mluvit.
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Začít hru
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Hru po síti začít s náhodnou mapou nebo se scénářem
@@ -1789,13 +1786,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :na serveru je p
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Hra pozastavena (není dost hráčů)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Hra spuštěna (dostatek hráčů)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Hra pozastavena (hráč se připojuje)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Hra spuštěna (hráč připojen)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Hra pozastavena (hráčovi se nepovedlo připojit)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :odpojování
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} jde hrát
@@ -2374,13 +2365,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Varování: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Chyba: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Závažná chyba: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} nebude fungovat s verzí TTDPatche, kterou OpenTTD hlásí.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} je pro TTD verzi {STRING}.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} je navržen pro práci s {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Neplatný parametr pro {STRING}: parametr {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} musí být nahráván před {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} musí být nahráván po {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} potřebuje verzi OpenTTD {STRING} nebo vyšší.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} nebude fungovat s verzí TTDPatche, kterou OpenTTD hlásí.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} je pro TTD verzi {STRING}.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} je navržen pro práci s {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Neplatný parametr pro {1:STRING}: parametr {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} musí být nahráván před {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} musí být nahráván po {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} potřebuje verzi OpenTTD {STRING} nebo vyšší.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :grafika, která se měla přeložit
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Je nahráno příliš mnoho grafik.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Nahrání {STRING} jako statické grafiky spolu s {STRING} může způsobit chybu synchronizace.
@@ -2864,7 +2855,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Není oz
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Vypnout vyměňování
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Zmáčkni toto tlačítko, když nechceš vyměňovat typ lokomotivy vybraný v levém seznamu
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Vyměňování: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Vyměňování: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Přepne mezi okny na výměnu lokomotiv a vagonů
 STR_REPLACE_ENGINES                                             :lokomotivy
 STR_REPLACE_WAGONS                                              :vagony
@@ -2876,7 +2867,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Elektrické lok
 STR_REPLACE_MONORAIL_VEHICLES                                   :Lokomotivy pro monorail
 STR_REPLACE_MAGLEV_VEHICLES                                     :Lokomotivy Maglev
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Odebírání vagonů: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Odebírání vagonů: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Funkce automatického vylepšování vlaků může udržovat stejnou délku vlaku odstraňovaním vagonů (od začátku vlaku), pokud by změna mašiny vlak prodloužila.
 
 # Vehicle view
@@ -3102,7 +3093,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :je pravda
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :není pravda
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Hodnota, se kterou srovnat vlastnost vozidla
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Zadej hodnotu pro srovnávání
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Přeskočit
@@ -3993,10 +3983,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Směrování {T
 
 STR_UNKNOWN_STATION                                             :neznámá stanice
 STR_DEFAULT_SIGN_NAME                                           :Nápis
-STR_COMPANY_SOMEONE                                             :někdo{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :někdo
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Pozorovatel, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Pozorovatel, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})

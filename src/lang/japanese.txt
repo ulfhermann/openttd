@@ -126,7 +126,7 @@ STR_QUANTITY_TOFFEE                                             :タフィー{WE
 STR_QUANTITY_BATTERIES                                          :電池{COMMA}本
 STR_QUANTITY_PLASTIC                                            :プラスチック{VOLUME}
 STR_QUANTITY_FIZZY_DRINKS                                       :ソーダ{COMMA}
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -537,7 +537,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}詳細
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}（{CURRCOMPACT}／{CURRCOMPACT}）
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}（{COMMA}／{COMMA}）
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}％
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}車両数：
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}駅数：
@@ -1494,7 +1493,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}地図�
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}プレイするマップを選択してください
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :新規ランダムゲームを作成
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN／インターネット
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :インターネット（公開）
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}クライアント{NUM}人
@@ -1508,7 +1506,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}最高�
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}サーバ上の傍観者上限を指定します
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}言語：
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}サーバ上の主の言語を表示します
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}ゲームを開始
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}ランダムな地図もしくはシナリオを用いて新規ネットワークゲームを開始します
@@ -1686,13 +1683,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :サーバ満員
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :ゲームは一時停止（プレヤー人数不足）
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :ゲーム停止解除（プレヤー人数十分）
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :ゲームは一時停止（クライアントが接続中）
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :ゲーム停止解除（クライアントが接続済み）
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :ゲーム停止解除（クライアントの接続が失敗）
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :退出
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} は参加してきました
@@ -2257,16 +2248,16 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}警告：{SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}エラー：{SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}エラー：{SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING}はOpenTTDのTTDPatchバージョンに対応していません。
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING}はTTDの{STRING}バージョンのみに対応しています。
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING}を使用時に、{STRING}を入にしなければなりません
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}{STRING}のパラメータが不正：パラメータ　{STRING}（{NUM}）
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{2:STRING}を読み込む前、{1:STRING}を読み込まなければなりません。
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING}は{STRING}の読み込み後のみに読み込めます。
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} は OpenTTD バージョン {STRING} もしくはそれ以降のバージョンが必要です。
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING}はOpenTTDのTTDPatchバージョンに対応していません。
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING}はTTDの{STRING}バージョンのみに対応しています。
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING}を使用時に、{STRING}を入にしなければなりません
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{1:STRING}のパラメータが不正：パラメータ　{STRING}（{NUM}）
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{2:STRING}を読み込む前、{1:STRING}を読み込まなければなりません。
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING}は{STRING}の読み込み後のみに読み込めます。
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} は OpenTTD バージョン {STRING} もしくはそれ以降のバージョンが必要です。
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :訳しにデザインされたGRFファイル
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :読み込んだ NewGRF が多すぎます。
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :{0:STRING} を {1:STRING} を含む固定的な NewGRF として開くと、desync が行う可能性があります。
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :{0:STRING} を {STRING} を含む固定的な NewGRF として開くと、desync が行う可能性があります。
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :予期しないスプライトを見つけました。
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :不明な Action 0 プロパティ。
 STR_NEWGRF_ERROR_INVALID_ID                                     :無効な ID が含む
@@ -2732,7 +2723,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}選択�
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}車両の交換を停止
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}左に選択した機関車の種類の交換を停止するにはクリックします
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}交換：{ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}交換：{ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}機関車／貨車のウィンドウに切り替えます。
 STR_REPLACE_ENGINES                                             :機関車
 STR_REPLACE_WAGONS                                              :貨車
@@ -2744,7 +2735,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :電動鉄道車
 STR_REPLACE_MONORAIL_VEHICLES                                   :モノレール車両
 STR_REPLACE_MAGLEV_VEHICLES                                     :磁気浮上式鉄道車両
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}列車の縮小：{ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}列車の縮小：{ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}自動交換によって列車の長さが長くなる場合は、列車の長さを保守するには客車／貨車を取り除くことができます。列車の先頭から開始します。
 
 # Vehicle view
@@ -2967,7 +2958,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :である
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :ではない
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}乗り物のデータと比較する値
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}比較に用いる値を入力
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}スキップ
@@ -3840,10 +3830,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :{TOWN}の通過
 
 STR_UNKNOWN_STATION                                             :不明な駅
 STR_DEFAULT_SIGN_NAME                                           :標示
-STR_COMPANY_SOMEONE                                             :誰かは{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :誰かは
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}、{STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :観客、{SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :観客、{1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} （{COMMA}）
