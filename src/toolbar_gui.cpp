@@ -1002,12 +1002,6 @@ public:
 		}
 	}
 
-	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
-	{
-		/* We don't need to support the old version anymore! */
-		NOT_REACHED();
-	}
-
 	/* virtual */ void Draw(const Window *w)
 	{
 		/* Draw brown-red toolbar bg. */
@@ -1391,7 +1385,7 @@ static ToolbarButtonProc * const _scen_toolbar_button_procs[] = {
 	ToolbarScenBuildDocks,
 	ToolbarScenPlantTrees,
 	ToolbarScenPlaceSign,
-	NULL,
+	ToolbarBtn_NULL,
 	NULL,
 	NULL,
 	NULL,
