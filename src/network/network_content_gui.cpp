@@ -381,10 +381,6 @@ public:
 				*size = maxdim(*size, GetStringBoundingBox(STR_CONTENT_FILTER_TITLE));
 				break;
 
-			case NCLWW_FILTER:
-				size->height = FONT_HEIGHT_NORMAL + padding.height;
-				break;
-
 			case NCLWW_TYPE: {
 				Dimension d = *size;
 				for (int i = CONTENT_TYPE_BEGIN; i < CONTENT_TYPE_END; i++) {
@@ -441,12 +437,9 @@ public:
 
 	void DrawMatrix(const Rect &r) const
 	{
-		const int CHECKBOX_LEFT = r.left;
-		const int TYPE_LEFT     = this->GetWidget<NWidgetBase>(NCLWW_TYPE)->pos_x;
-		const int NAME_LEFT     = this->GetWidget<NWidgetBase>(NCLWW_NAME)->pos_x;
-
-		const int TYPE_RIGHT     = NAME_LEFT - 1;
-		const int NAME_RIGHT     = r.right;
+		const NWidgetCore *nwi_checkbox = this->GetWidget<NWidgetCore>(NCLWW_CHECKBOX);
+		const NWidgetCore *nwi_name = this->GetWidget<NWidgetCore>(NCLWW_NAME);
+		const NWidgetCore *nwi_type = this->GetWidget<NWidgetCore>(NCLWW_TYPE);
 
 
 		/* Fill the matrix with the information */
@@ -455,7 +448,7 @@ public:
 		for (ConstContentIterator iter = this->content.Get(this->vscroll.GetPosition()); iter != this->content.End() && cnt < this->vscroll.GetCapacity(); iter++, cnt++) {
 			const ContentInfo *ci = *iter;
 
-			if (ci == this->selected) GfxFillRect(CHECKBOX_LEFT + 1, y + 1, NAME_RIGHT - 1, y + this->resize.step_height - 1, 10);
+			if (ci == this->selected) GfxFillRect(r.left + 1, y + 1, r.right - 1, y + this->resize.step_height - 1, 10);
 
 			SpriteID sprite;
 			SpriteID pal = PAL_NONE;
@@ -467,12 +460,12 @@ public:
 				case ContentInfo::DOES_NOT_EXIST: sprite = SPR_BLOT; pal = PALETTE_TO_RED;   break;
 				default: NOT_REACHED();
 			}
-			DrawSprite(sprite, pal, CHECKBOX_LEFT + (pal == PAL_NONE ? 3 : 4), y + WD_MATRIX_TOP + (pal == PAL_NONE ? 1 : 0));
+			DrawSprite(sprite, pal, nwi_checkbox->pos_x + (pal == PAL_NONE ? 2 : 3), y + WD_MATRIX_TOP + (pal == PAL_NONE ? 1 : 0));
 
 			StringID str = STR_CONTENT_TYPE_BASE_GRAPHICS + ci->type - CONTENT_TYPE_BASE_GRAPHICS;
-			DrawString(TYPE_LEFT, TYPE_RIGHT, y + WD_MATRIX_TOP, str, TC_BLACK, SA_CENTER);
+			DrawString(nwi_type->pos_x, nwi_type->pos_x + nwi_type->current_x - 1, y + WD_MATRIX_TOP, str, TC_BLACK, SA_CENTER);
 
-			DrawString(NAME_LEFT + 5, NAME_RIGHT, y + WD_MATRIX_TOP, ci->name, TC_BLACK);
+			DrawString(nwi_name->pos_x + WD_FRAMERECT_LEFT, nwi_name->pos_x + nwi_name->current_x - WD_FRAMERECT_RIGHT, y + WD_MATRIX_TOP, ci->name, TC_BLACK);
 			y += this->resize.step_height;
 		}
 	}
@@ -483,10 +476,12 @@ public:
 	 */
 	void DrawDetails(const Rect &r) const
 	{
-		static const int DETAIL_TITLE_HEIGHT = 50; ///< Number of pixels for the title
 		static const int DETAIL_LEFT         =  5; ///< Number of pixels at the left
 		static const int DETAIL_RIGHT        =  5; ///< Number of pixels at the right
 		static const int DETAIL_TOP          =  5; ///< Number of pixels at the top
+
+		/* Height for the title banner */
+		int DETAIL_TITLE_HEIGHT = 5 * FONT_HEIGHT_NORMAL;
 
 		/* Create the nice grayish rectangle at the details top */
 		GfxFillRect(r.left + 1, r.top + 1, r.right - 1, r.top + DETAIL_TITLE_HEIGHT, 157);
