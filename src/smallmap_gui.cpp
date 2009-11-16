@@ -1250,22 +1250,23 @@ class SmallMapWindow : public Window {
 	uint DrawLinkDetails(StatVector &details, uint x, uint y, uint right, uint bottom) const {
 		uint x_orig = x;
 		SetDParam(0, 9999);
-		static uint entry_width = LEGEND_BLOB_WIDTH + WD_FRAMERECT_LEFT +
+		static uint entry_width = LEGEND_BLOB_WIDTH +
 				GetStringBoundingBox(STR_ABBREV_PASSENGERS).width +
 				GetStringBoundingBox(STR_SMALLMAP_LINK_CAPACITY).width +
 				GetStringBoundingBox(STR_SMALLMAP_LINK_USAGE).width +
 				GetStringBoundingBox(STR_SMALLMAP_LINK_PLANNED).width +
 				GetStringBoundingBox(STR_SMALLMAP_LINK_SENT).width;
+		uint entries_per_row = (right - x_orig) / entry_width;
 		if (details.empty()) {
 			DrawString(x, x + entry_width, y, STR_TINY_NOTHING, TC_BLACK);
 			return y + FONT_HEIGHT_SMALL;
 		}
-		for (StatVector::iterator i = details.begin(); i != details.end(); ++i) {
-			CargoDetail &detail = *i;
+		for (uint i = 0; i < details.size(); ++i) {
+			CargoDetail &detail = details[i];
 			if (x + entry_width >= right) {
 				x = x_orig;
 				y += FONT_HEIGHT_SMALL;
-				if (y + 2 * FONT_HEIGHT_SMALL > bottom) {
+				if (y + 2 * FONT_HEIGHT_SMALL > bottom && details.size() - i > entries_per_row) {
 					return y | MORE_SPACE_NEEDED;
 				}
 			}
@@ -1669,12 +1670,14 @@ public:
 	{
 		this->cursor.x = -1;
 		this->cursor.y = -1;
-		this->SetWidgetDisabledState(SM_WIDGET_LINKSTATS, _smallmap_cargo_count == 0);
-		if (_smallmap_cargo_count == 0 && this->map_type == SMT_LINKSTATS) {
-			this->map_type = SMT_CONTOUR;
+		this->InitNested(desc, window_number);
+		if (_smallmap_cargo_count == 0) {
+			this->DisableWidget(SM_WIDGET_LINKSTATS);
+			if (this->map_type == SMT_LINKSTATS) {
+				this->map_type = SMT_CONTOUR;
+			}
 		}
 
-		this->InitNested(desc, window_number);
 		this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
 
 		this->SetWidgetLoweredState(SM_WIDGET_TOGGLETOWNNAME, this->show_towns);
