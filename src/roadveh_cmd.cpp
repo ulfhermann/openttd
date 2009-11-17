@@ -36,6 +36,7 @@
 #include "effectvehicle_func.h"
 #include "roadstop_base.h"
 #include "cargotype.h"
+#include "spritecache.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -138,9 +139,12 @@ SpriteID RoadVehicle::GetImage(Direction direction) const
 	return sprite;
 }
 
-void DrawRoadVehEngine(int x, int y, EngineID engine, SpriteID pal)
+void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal)
 {
-	DrawSprite(GetRoadVehIcon(engine), pal, x, y);
+	SpriteID sprite = GetRoadVehIcon(engine);
+	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
+	preferred_x = Clamp(preferred_x, left - real_sprite->x_offs, right - real_sprite->width - real_sprite->x_offs);
+	DrawSprite(sprite, pal, preferred_x, y);
 }
 
 static uint GetRoadVehLength(const RoadVehicle *v)

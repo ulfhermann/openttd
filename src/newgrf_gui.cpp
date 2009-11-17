@@ -262,7 +262,6 @@ public:
 
 		this->BuildGrfList();
 		this->SetWidgetDisabledState(ANGRFW_ADD, this->sel == NULL || this->sel->IsOpenTTDBaseGRF());
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(ANGRFW_GRF_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
@@ -488,7 +487,7 @@ static const NWidgetPart _nested_newgrf_add_dlg_widgets[] = {
 
 /* Window definition for the add a newgrf window */
 static const WindowDesc _newgrf_add_dlg_desc(
-	WDP_CENTER, WDP_CENTER, 0, 0, 306, 347,
+	WDP_CENTER, WDP_CENTER, 306, 347,
 	WC_SAVELOAD, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
 	_nested_newgrf_add_dlg_widgets, lengthof(_nested_newgrf_add_dlg_widgets)
@@ -1042,7 +1041,7 @@ static const NWidgetPart _nested_newgrf_widgets[] = {
 
 /* Window definition of the manage newgrfs window */
 static const WindowDesc _newgrf_desc(
-	WDP_CENTER, WDP_CENTER, 300, 263, 300, 263,
+	WDP_CENTER, WDP_CENTER, 300, 263,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
 	_nested_newgrf_widgets, lengthof(_nested_newgrf_widgets)
