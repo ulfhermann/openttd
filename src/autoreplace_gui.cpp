@@ -28,7 +28,8 @@
 
 #include "table/strings.h"
 
-void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *eng_list, uint16 min, uint16 max, EngineID selected_id, int count_location, GroupID selected_group);
+uint GetEngineListHeight(VehicleType type);
+void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *eng_list, uint16 min, uint16 max, EngineID selected_id, bool show_count, GroupID selected_group);
 
 /** Widget numbers of the autoreplace GUI. */
 enum ReplaceVehicleWindowWidgets {
@@ -226,12 +227,6 @@ public:
 
 		this->InitNested(desc, vehicletype);
 
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(RVW_WIDGET_LEFT_MATRIX)->current_y / this->resize.step_height);
-		this->vscroll2.SetCapacity(this->vscroll.GetCapacity());   // these two are always the same
-
-		this->GetWidget<NWidgetCore>(RVW_WIDGET_LEFT_MATRIX)->widget_data =
-				this->GetWidget<NWidgetCore>(RVW_WIDGET_RIGHT_MATRIX)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
-
 		this->owner = _local_company;
 		this->sel_group = id_g;
 	}
@@ -241,8 +236,8 @@ public:
 		switch (widget) {
 			case RVW_WIDGET_LEFT_MATRIX:
 			case RVW_WIDGET_RIGHT_MATRIX:
-				resize->height = GetVehicleListHeight((VehicleType)this->window_number);
-				size->height = (resize->height <= 14 ? 8 : 4) * resize->height;
+				resize->height = GetEngineListHeight((VehicleType)this->window_number);
+				size->height = (this->window_number <= VEH_ROAD ? 8 : 4) * resize->height;
 				break;
 
 			case RVW_WIDGET_LEFT_DETAILS:
@@ -334,7 +329,7 @@ public:
 
 				/* Do the actual drawing */
 				DrawEngineList((VehicleType)this->window_number, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP,
-						&this->engines[side], start, end, this->sel_engine[side], side == 0 ? r.right - WD_FRAMERECT_RIGHT : 0, this->sel_group);
+						&this->engines[side], start, end, this->sel_engine[side], side == 0, this->sel_group);
 				break;
 			}
 		}
@@ -525,7 +520,7 @@ static const NWidgetPart _nested_replace_rail_vehicle_widgets[] = {
 };
 
 static const WindowDesc _replace_rail_vehicle_desc(
-	WDP_AUTO, WDP_AUTO, 456, 140, 456, 140,
+	WDP_AUTO, WDP_AUTO, 456, 140,
 	WC_REPLACE_VEHICLE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_replace_rail_vehicle_widgets, lengthof(_nested_replace_rail_vehicle_widgets)
@@ -556,7 +551,7 @@ static const NWidgetPart _nested_replace_vehicle_widgets[] = {
 };
 
 static const WindowDesc _replace_vehicle_desc(
-	WDP_AUTO, WDP_AUTO, 456, 118, 456, 118,
+	WDP_AUTO, WDP_AUTO, 456, 118,
 	WC_REPLACE_VEHICLE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_replace_vehicle_widgets, lengthof(_nested_replace_vehicle_widgets)
