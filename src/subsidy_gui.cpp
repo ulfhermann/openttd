@@ -39,7 +39,6 @@ struct SubsidyListWindow : Window {
 	{
 		this->InitNested(desc, window_number);
 		this->OnInvalidateData(0);
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(SLW_PANEL)->current_y / this->resize.step_height);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -247,7 +246,7 @@ static const NWidgetPart _nested_subsidies_list_widgets[] = {
 };
 
 static const WindowDesc _subsidies_list_desc(
-	WDP_AUTO, WDP_AUTO, 320, 127, 500, 127,
+	WDP_AUTO, WDP_AUTO, 500, 127,
 	WC_SUBSIDIES_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_subsidies_list_widgets, lengthof(_nested_subsidies_list_widgets)

@@ -17,6 +17,7 @@
 #include "vehicle_func.h"
 #include "gfx_func.h"
 #include "window_gui.h"
+#include "spritecache.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -39,7 +40,7 @@ void DrawAircraftDetails(const Aircraft *v, int left, int right, int y)
 			SetDParam(0, u->engine_type);
 			SetDParam(1, u->build_year);
 			SetDParam(2, u->value);
-			DrawString(left, right, y, STR_VEHICLE_INFO_BUILT_VALUE);
+			DrawString(left, right, y, STR_VEHICLE_INFO_BUILT_VALUE, TC_FROMSTRING, SA_LEFT | SA_STRIP);
 
 			SetDParam(0, u->cargo_type);
 			SetDParam(1, u->cargo_cap);
@@ -69,18 +70,36 @@ void DrawAircraftDetails(const Aircraft *v, int left, int right, int y)
 }
 
 
-void DrawAircraftImage(const Vehicle *v, int x, int y, VehicleID selection)
+/**
+ * Draws an image of an aircraft
+ * @param v         Front vehicle
+ * @param left      The minimum horizontal position
+ * @param right     The maximum horizontal position
+ * @param y         Vertical position to draw at
+ * @param selection Selected vehicle to draw a frame around
+ */
+void DrawAircraftImage(const Vehicle *v, int left, int right, int y, VehicleID selection)
 {
+	bool rtl = _dynlang.text_dir == TD_RTL;
+
+	SpriteID sprite = v->GetImage(rtl ? DIR_E : DIR_W);
+	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
+
+	int x = rtl ? right - real_sprite->width - real_sprite->x_offs : left - real_sprite->x_offs;
+	bool helicopter = v->subtype == AIR_HELICOPTER;
+
 	SpriteID pal = (v->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(v);
-	DrawSprite(v->GetImage(DIR_W), pal, x + 25, y + 10);
-	if (v->subtype == AIR_HELICOPTER) {
+	DrawSprite(sprite, pal, x, y + 10);
+	if (helicopter) {
 		const Aircraft *a = Aircraft::From(v);
 		SpriteID rotor_sprite = GetCustomRotorSprite(a, true);
 		if (rotor_sprite == 0) rotor_sprite = SPR_ROTOR_STOPPED;
-		DrawSprite(rotor_sprite, PAL_NONE, x + 25, y + 5);
+		DrawSprite(rotor_sprite, PAL_NONE, x, y + 5);
 	}
 	if (v->index == selection) {
-		DrawFrameRect(x - 1, y - 1, x + 58, y + 21, COLOUR_WHITE, FR_BORDERONLY);
+		x += real_sprite->x_offs;
+		y += real_sprite->y_offs + 10 - (helicopter ? 5 : 0);
+		DrawFrameRect(x - 1, y - 1, x + real_sprite->width + 1, y + real_sprite->height + (helicopter ? 5 : 0) + 1, COLOUR_WHITE, FR_BORDERONLY);
 	}
 }
 
