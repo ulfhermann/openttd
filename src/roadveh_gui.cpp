@@ -40,7 +40,7 @@ void DrawRoadVehDetails(const Vehicle *v, int left, int right, int y)
 	SetDParam(0, v->engine_type);
 	SetDParam(1, v->build_year);
 	SetDParam(2, v->value);
-	DrawString(left, right, y + y_offset, STR_VEHICLE_INFO_BUILT_VALUE);
+	DrawString(left, right, y + y_offset, STR_VEHICLE_INFO_BUILT_VALUE, TC_FROMSTRING, SA_LEFT | SA_STRIP);
 
 	if (rv->HasArticulatedPart()) {
 		CargoArray max_cargo;
@@ -123,27 +123,35 @@ void DrawRoadVehDetails(const Vehicle *v, int left, int right, int y)
 
 /**
  * Draws an image of a road vehicle chain
- * @param v Front vehicle
- * @param x x Position to start at
- * @param y y Position to draw at
- * @param selection Selected vehicle to draw a border around
- * @param max_width Number of pixels space for drawing
+ * @param v         Front vehicle
+ * @param left      The minimum horizontal position
+ * @param right     The maximum horizontal position
+ * @param y         Vertical position to draw at
+ * @param selection Selected vehicle to draw a frame around
  */
-void DrawRoadVehImage(const Vehicle *v, int x, int y, VehicleID selection, int max_width)
+void DrawRoadVehImage(const Vehicle *v, int left, int right, int y, VehicleID selection)
 {
+	bool rtl = _dynlang.text_dir == TD_RTL;
+	Direction dir = rtl ? DIR_E : DIR_W;
 	const RoadVehicle *u = RoadVehicle::From(v);
-	int x_pos = 0;
-	for (; u != NULL && x_pos < max_width; u = u->Next()) {
+
+	int max_width = right - left + 1;
+	int spent_width = 0;
+	int pos = rtl ? right : left;
+
+	for (; u != NULL && spent_width < max_width; u = u->Next()) {
 		Point offset;
 		int width = u->GetDisplayImageWidth(&offset);
 
 		SpriteID pal = (u->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(u);
-		DrawSprite(u->GetImage(DIR_W), pal, x + x_pos + offset.x, y + 6 + offset.y);
-		x_pos += width;
+		DrawSprite(u->GetImage(dir), pal, pos + (rtl ? -offset.x : offset.x), y + 6 + offset.y);
+
+		pos += rtl ? -width : width;
+		spent_width += max_width;
 	}
 
 	if (v->index == selection) {
-		DrawFrameRect(x - 1, y - 1, x - 1 + x_pos, y + 12, COLOUR_WHITE, FR_BORDERONLY);
+		DrawFrameRect((rtl ? pos : left) - 1, y - 1, (rtl ? pos : right) - 1, y + 12, COLOUR_WHITE, FR_BORDERONLY);
 	}
 }
 
