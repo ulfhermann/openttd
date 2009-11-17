@@ -61,8 +61,10 @@ static void StationsWndShowStationRating(int left, int right, int y, CargoID typ
 	int colour = cs->rating_colour;
 	uint w = (minu(amount, units_full) + 5) / 36;
 
+	int height = GetCharacterHeight(FS_SMALL);
+
 	/* Draw total cargo (limited) on station (fits into 16 pixels) */
-	if (w != 0) GfxFillRect(left, y, left + w - 1, y + 6, colour);
+	if (w != 0) GfxFillRect(left, y, left + w - 1, y + height, colour);
 
 	/* Draw a one pixel-wide bar of additional cargo meter, useful
 	 * for stations with only a small amount (<=30) */
@@ -70,14 +72,14 @@ static void StationsWndShowStationRating(int left, int right, int y, CargoID typ
 		uint rest = amount / 5;
 		if (rest != 0) {
 			w += left;
-			GfxFillRect(w, y + 6 - rest, w, y + 6, colour);
+			GfxFillRect(w, y + height - rest, w, y + height, colour);
 		}
 	}
 
 	DrawString(left + 1, right, y, cs->abbrev, TC_BLACK);
 
 	/* Draw green/red ratings bar (fits into 14 pixels) */
-	y += 8;
+	y += height + 2;
 	GfxFillRect(left + 1, y, left + 14, y, 0xB8);
 	rating = minu(rating, rating_full) / 16;
 	if (rating != 0) GfxFillRect(left + 1, y, left + rating, y, 0xD0);
@@ -266,7 +268,6 @@ public:
 
 		this->InitNested(desc, window_number);
 		this->owner = (Owner)this->window_number;
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(SLW_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / FONT_HEIGHT_NORMAL);
 
 		for (uint i = 0; i < NUM_CARGO; i++) {
 			const CargoSpec *cs = CargoSpec::Get(i);
@@ -328,6 +329,7 @@ public:
 				break;
 
 			case SLW_LIST: {
+				bool rtl = _dynlang.text_dir == TD_RTL;
 				int max = min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->stations.Length());
 				int y = r.top + WD_FRAMERECT_TOP;
 				for (int i = this->vscroll.GetPosition(); i < max; ++i) { // do until max number of stations of owner
@@ -340,13 +342,25 @@ public:
 
 					SetDParam(0, st->index);
 					SetDParam(1, st->facilities);
-					int x = DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_STATION_LIST_STATION) + 5;
+					int x = DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_STATION_LIST_STATION);
+					x += rtl ? -5 : 5;
 
 					/* show cargo waiting and station ratings */
 					for (CargoID j = 0; j < NUM_CARGO; j++) {
 						if (!st->goods[j].cargo.Empty()) {
-							StationsWndShowStationRating(x, r.right - WD_FRAMERECT_RIGHT, y, j, st->goods[j].cargo.Count(), st->goods[j].rating);
-							x += 20;
+							/* For RTL we work in exactly the opposite direction. So
+							 * decrement the space needed first, then draw to the left
+							 * instead of drawing to the left and then incrementing
+							 * the space. */
+							if (rtl) {
+								x -= 20;
+								if (x < r.left + WD_FRAMERECT_LEFT) break;
+							}
+							StationsWndShowStationRating(x, x + 16, y, j, st->goods[j].cargo.Count(), st->goods[j].rating);
+							if (!rtl) {
+								x += 20;
+								if (x > r.right - WD_FRAMERECT_RIGHT) break;
+							}
 						}
 					}
 					y += FONT_HEIGHT_NORMAL;
@@ -661,7 +675,7 @@ static const NWidgetPart _nested_company_stations_widgets[] = {
 };
 
 static const WindowDesc _company_stations_desc(
-	WDP_AUTO, WDP_AUTO, 358, 162, 358, 162,
+	WDP_AUTO, WDP_AUTO, 358, 162,
 	WC_STATION_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_company_stations_widgets, lengthof(_nested_company_stations_widgets)
@@ -767,8 +781,8 @@ struct StationViewWindow : public Window {
 
 	/** Height of the #SVW_ACCEPTLIST widget for different views. */
 	enum AcceptListHeight {
-		ALH_RATING  = 130, ///< Height of the cargo ratings view.
-		ALH_ACCEPTS = 30,  ///< Height of the accepted cargo view.
+		ALH_RATING  = 13, ///< Height of the cargo ratings view.
+		ALH_ACCEPTS = 3,  ///< Height of the accepted cargo view.
 	};
 
 	StationViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
@@ -779,8 +793,6 @@ struct StationViewWindow : public Window {
 
 		Owner owner = Station::Get(window_number)->owner;
 		if (owner != OWNER_NONE) this->owner = owner;
-
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(SVW_WAITING)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
 
 	~StationViewWindow()
@@ -802,7 +814,7 @@ struct StationViewWindow : public Window {
 				break;
 
 			case SVW_ACCEPTLIST:
-				size->height = WD_FRAMERECT_TOP + ((this->GetWidget<NWidgetCore>(SVW_ACCEPTS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) ? ALH_ACCEPTS : ALH_RATING) + WD_FRAMERECT_TOP;
+				size->height = WD_FRAMERECT_TOP + ((this->GetWidget<NWidgetCore>(SVW_ACCEPTS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) ? ALH_ACCEPTS : ALH_RATING) * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM;
 				break;
 		}
 	}
@@ -1110,7 +1122,7 @@ struct StationViewWindow : public Window {
 
 
 static const WindowDesc _station_view_desc(
-	WDP_AUTO, WDP_AUTO, 249, 110, 249, 110,
+	WDP_AUTO, WDP_AUTO, 249, 110,
 	WC_STATION_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_station_view_widgets, lengthof(_nested_station_view_widgets)
@@ -1267,8 +1279,6 @@ struct SelectStationWindow : Window {
 		this->CreateNestedTree(desc);
 		this->GetWidget<NWidgetCore>(JSW_WIDGET_CAPTION)->widget_data = T::EXPECTED_FACIL == FACIL_WAYPOINT ? STR_JOIN_WAYPOINT_CAPTION : STR_JOIN_STATION_CAPTION;
 		this->FinishInitNested(desc, 0);
-
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(JSW_PANEL)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 		this->OnInvalidateData(0);
 	}
 
@@ -1360,7 +1370,7 @@ struct SelectStationWindow : Window {
 };
 
 static const WindowDesc _select_station_desc(
-	WDP_AUTO, WDP_AUTO, 200, 80, 200, 180,
+	WDP_AUTO, WDP_AUTO, 200, 180,
 	WC_SELECT_STATION, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_select_station_widgets, lengthof(_nested_select_station_widgets)
