@@ -677,9 +677,6 @@ public:
 		this->selected_order = -1;
 		this->owner = v->owner;
 
-		int num_lines = (this->GetWidget<NWidgetBase>(ORDER_WIDGET_ORDER_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height;
-		this->vscroll.SetCapacity(num_lines);
-
 		if (_settings_client.gui.quick_goto && v->owner == _local_company) {
 			/* If there are less than 2 station, make Go To active. */
 			int station_orders = 0;
@@ -1342,7 +1339,7 @@ static const NWidgetPart _nested_orders_train_widgets[] = {
 };
 
 static const WindowDesc _orders_train_desc(
-	WDP_AUTO, WDP_AUTO, 384, 100, 384, 100,
+	WDP_AUTO, WDP_AUTO, 384, 100,
 	WC_VEHICLE_ORDERS, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_orders_train_widgets, lengthof(_nested_orders_train_widgets)
@@ -1406,7 +1403,7 @@ static const NWidgetPart _nested_orders_widgets[] = {
 };
 
 static const WindowDesc _orders_desc(
-	WDP_AUTO, WDP_AUTO, 384, 100, 384, 100,
+	WDP_AUTO, WDP_AUTO, 384, 100,
 	WC_VEHICLE_ORDERS, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_orders_widgets, lengthof(_nested_orders_widgets)
@@ -1432,7 +1429,7 @@ static const NWidgetPart _nested_other_orders_widgets[] = {
 };
 
 static const WindowDesc _other_orders_desc(
-	WDP_AUTO, WDP_AUTO, 384, 86, 384, 86,
+	WDP_AUTO, WDP_AUTO, 384, 86,
 	WC_VEHICLE_ORDERS, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_other_orders_widgets, lengthof(_nested_other_orders_widgets)
