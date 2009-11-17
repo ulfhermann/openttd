@@ -106,7 +106,7 @@ static const NWidgetPart _nested_normal_news_widgets[] = {
 };
 
 static WindowDesc _normal_news_desc(
-	WDP_CENTER, 476, 430, 170, 430, 170,
+	WDP_CENTER, 476, 430, 170,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
 	_nested_normal_news_widgets, lengthof(_nested_normal_news_widgets)
@@ -133,7 +133,7 @@ static const NWidgetPart _nested_vehicle_news_widgets[] = {
 };
 
 static WindowDesc _vehicle_news_desc(
-	WDP_CENTER, 476, 430, 170, 430, 170,
+	WDP_CENTER, 476, 430, 170,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
 	_nested_vehicle_news_widgets, lengthof(_nested_vehicle_news_widgets)
@@ -164,7 +164,7 @@ static const NWidgetPart _nested_company_news_widgets[] = {
 };
 
 static WindowDesc _company_news_desc(
-	WDP_CENTER, 476, 430, 170, 430, 170,
+	WDP_CENTER, 476, 430, 170,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
 	_nested_company_news_widgets, lengthof(_nested_company_news_widgets)
@@ -187,7 +187,7 @@ static const NWidgetPart _nested_thin_news_widgets[] = {
 };
 
 static WindowDesc _thin_news_desc(
-	WDP_CENTER, 476, 430, 130, 430, 130,
+	WDP_CENTER, 476, 430, 130,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
 	_nested_thin_news_widgets, lengthof(_nested_thin_news_widgets)
@@ -211,7 +211,7 @@ static NWidgetPart _nested_small_news_widgets[] = {
 };
 
 static WindowDesc _small_news_desc(
-	WDP_CENTER, 476, 280, 87, 280, 87,
+	WDP_CENTER, 476, 280, 87,
 	WC_NEWS_WINDOW, WC_NONE,
 	WDF_DEF_WIDGET,
 	_nested_small_news_widgets, lengthof(_nested_small_news_widgets)
@@ -427,7 +427,7 @@ struct NewsWindow : Window {
 			case NTW_VEH_SPR: {
 				assert(this->ni->reftype1 == NR_ENGINE);
 				EngineID engine = this->ni->ref1;
-				DrawVehicleEngine((r.left + r.right) / 2, (r.top + r.bottom) / 2, engine, GetEnginePalette(engine, _local_company));
+				DrawVehicleEngine(r.left, r.right, (r.left + r.right) / 2, (r.top + r.bottom) / 2, engine, GetEnginePalette(engine, _local_company));
 				GfxFillRect(r.left, r.top, r.right, r.bottom, PALETTE_TO_STRUCT_GREY, FILLRECT_RECOLOUR);
 				break;
 			}
@@ -922,7 +922,6 @@ struct MessageHistoryWindow : Window {
 	MessageHistoryWindow(const WindowDesc *desc) : Window()
 	{
 		this->InitNested(desc); // Initializes 'this->line_height' and 'this->date_width'.
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(MHW_BACKGROUND)->current_y - this->top_spacing - this->bottom_spacing) / this->line_height);
 		this->OnInvalidateData(0);
 	}
 
@@ -1020,7 +1019,7 @@ static const NWidgetPart _nested_message_history[] = {
 };
 
 static const WindowDesc _message_history_desc(
-	240, 22, 400, 140, 400, 140,
+	240, 22, 400, 140,
 	WC_MESSAGE_HISTORY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_message_history, lengthof(_nested_message_history)
@@ -1308,7 +1307,7 @@ static const NWidgetPart _nested_message_options_widgets[] = {
 };
 
 static const WindowDesc _message_options_desc(
-	270,  22,  0, 0, 0, 0,
+	270, 22, 0, 0,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 	_nested_message_options_widgets, lengthof(_nested_message_options_widgets)

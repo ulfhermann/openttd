@@ -35,6 +35,16 @@
 #include "table/sprites.h"
 #include "table/strings.h"
 
+/**
+ * Get the height of a single 'entry' in the engine lists.
+ * @param type the vehicle type to get the height of
+ * @return the height for the entry
+ */
+uint GetEngineListHeight(VehicleType type)
+{
+	return max<uint>(FONT_HEIGHT_NORMAL + WD_MATRIX_TOP + WD_MATRIX_BOTTOM, GetVehicleHeight(type));
+}
+
 enum BuildVehicleWidgets {
 	BUILD_VEHICLE_WIDGET_CLOSEBOX = 0,
 	BUILD_VEHICLE_WIDGET_CAPTION,
@@ -678,48 +688,38 @@ int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number)
 
 /** Engine drawing loop
  * @param type Type of vehicle (VEH_*)
- * @param x The left most location of the list
+ * @param l The left most location of the list
  * @param r The right most location of the list
  * @param y The top most location of teh list
  * @param eng_list What engines to draw
  * @param min where to start in the list
  * @param max where in the list to end
  * @param selected_id what engine to highlight as selected, if any
- * @param count_location Offset to print the engine count (used by autoreplace). 0 means it's off
+ * @param show_count Whether to show the amount of engines or not
  * @param selected_group the group to list the engines of
  */
-void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *eng_list, uint16 min, uint16 max, EngineID selected_id, int count_location, GroupID selected_group)
+void DrawEngineList(VehicleType type, int l, int r, int y, const GUIEngineList *eng_list, uint16 min, uint16 max, EngineID selected_id, bool show_count, GroupID selected_group)
 {
-	byte step_size = GetVehicleListHeight(type);
-	byte x_offset = 0;
-	byte y_offset = 0;
+	static const int sprite_widths[]  = { 60, 60, 76, 67 };
+	static const int sprite_y_offsets[] = { -1, -1, -2, -2 };
 
+	/* Obligatory sanity checks! */
+	assert((uint)type < lengthof(sprite_widths));
+	assert_compile(lengthof(sprite_y_offsets) == lengthof(sprite_widths));
 	assert(max <= eng_list->Length());
 
-	switch (type) {
-		case VEH_TRAIN:
-			x++; // train and road vehicles use the same offset, except trains are one more pixel to the right
-			/* Fallthough */
-		case VEH_ROAD:
-			x += 26;
-			x_offset = 30;
-			y += 2;
-			y_offset = 4;
-			break;
-		case VEH_SHIP:
-			x += 35;
-			x_offset = 40;
-			y += 7;
-			y_offset = 3;
-			break;
-		case VEH_AIRCRAFT:
-			x += 27;
-			x_offset = 33;
-			y += 7;
-			y_offset = 3;
-			break;
-		default: NOT_REACHED();
-	}
+	bool rtl = _dynlang.text_dir == TD_RTL;
+	int step_size = GetEngineListHeight(type);
+	int sprite_width = sprite_widths[type];
+
+	int sprite_x        = (rtl ? r - sprite_width / 2 : l + sprite_width / 2) - 1;
+	int sprite_y_offset = sprite_y_offsets[type] + step_size / 2;
+
+	int text_left  = l + (rtl ? WD_FRAMERECT_LEFT : sprite_width);
+	int text_right = r - (rtl ? sprite_width : WD_FRAMERECT_RIGHT);
+
+	int normal_text_y_offset = (step_size - FONT_HEIGHT_NORMAL) / 2;
+	int small_text_y_offset  = step_size - FONT_HEIGHT_SMALL - WD_FRAMERECT_BOTTOM - 1;
 
 	for (; min < max; min++, y += step_size) {
 		const EngineID engine = (*eng_list)[min];
@@ -727,11 +727,11 @@ void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *
 		const uint num_engines = GetGroupNumEngines(_local_company, selected_group, engine);
 
 		SetDParam(0, engine);
-		DrawString(x + x_offset, r, y, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK);
-		DrawVehicleEngine(x, y + y_offset, engine, (count_location != 0 && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
-		if (count_location != 0) {
+		DrawString(text_left, text_right, y + normal_text_y_offset, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK);
+		DrawVehicleEngine(l, r, sprite_x, y + sprite_y_offset, engine, (show_count && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
+		if (show_count) {
 			SetDParam(0, num_engines);
-			DrawString(x, count_location, y + (GetVehicleListHeight(type) == 14 ? 3 : 8), STR_TINY_BLACK_COMA, TC_FROMSTRING, SA_RIGHT);
+			DrawString(text_left, text_right, y + small_text_y_offset, STR_TINY_BLACK_COMA, TC_FROMSTRING, SA_RIGHT);
 		}
 	}
 }
@@ -1090,7 +1090,7 @@ struct BuildVehicleWindow : Window {
 	{
 		switch (widget) {
 			case BUILD_VEHICLE_WIDGET_LIST:
-				resize->height = GetVehicleListHeight(this->vehicle_type);
+				resize->height = GetEngineListHeight(this->vehicle_type);
 				size->height = 3 * resize->height;
 				break;
 
@@ -1104,7 +1104,7 @@ struct BuildVehicleWindow : Window {
 	{
 		switch (widget) {
 			case BUILD_VEHICLE_WIDGET_LIST:
-				DrawEngineList(this->vehicle_type, r.left + WD_FRAMERECT_LEFT, r.right + WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, &this->eng_list, this->vscroll.GetPosition(), min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->eng_list.Length()), this->sel_engine, 0, DEFAULT_GROUP);
+				DrawEngineList(this->vehicle_type, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, &this->eng_list, this->vscroll.GetPosition(), min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->eng_list.Length()), this->sel_engine, false, DEFAULT_GROUP);
 				break;
 
 			case BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING:
@@ -1184,7 +1184,7 @@ struct BuildVehicleWindow : Window {
 };
 
 static const WindowDesc _build_vehicle_desc(
-	WDP_AUTO, WDP_AUTO, 240, 186, 240, 268,
+	WDP_AUTO, WDP_AUTO, 240, 268,
 	WC_BUILD_VEHICLE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_build_vehicle_widgets, lengthof(_nested_build_vehicle_widgets)
