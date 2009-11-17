@@ -61,48 +61,56 @@ void CcBuildLoco(bool success, TileIndex tile, uint32 p1, uint32 p2)
 
 /**
  * Draws an image of a whole train
- * @param v Front vehicle
- * @param x x Position to start at
- * @param y y Position to draw at
+ * @param v         Front vehicle
+ * @param left      The minimum horizontal position
+ * @param right     The maximum horizontal position
+ * @param y         Vertical position to draw at
  * @param selection Selected vehicle to draw a frame around
- * @param max_width Number of pixels space for drawing
- * @param skip Number of pixels to skip at the front (for scrolling)
+ * @param skip      Number of pixels to skip at the front (for scrolling)
  */
-void DrawTrainImage(const Train *v, int x, int y, VehicleID selection, int max_width, int skip)
+void DrawTrainImage(const Train *v, int left, int right, int y, VehicleID selection, int skip)
 {
+	bool rtl = _dynlang.text_dir == TD_RTL;
+	Direction dir = rtl ? DIR_E : DIR_W;
+
 	DrawPixelInfo tmp_dpi, *old_dpi;
 	/* Position of highlight box */
 	int highlight_l = 0;
 	int highlight_r = 0;
+	int max_width = right - left + 1;
 
-	if (!FillDrawPixelInfo(&tmp_dpi, x, y, max_width, 14)) return;
+	if (!FillDrawPixelInfo(&tmp_dpi, left, y, max_width, 14)) return;
 
 	old_dpi = _cur_dpi;
 	_cur_dpi = &tmp_dpi;
 
-	int px = -skip;
+	int px = rtl ? max_width + skip : -skip;
 	bool sel_articulated = false;
-	for (; v != NULL && px < max_width; v = v->Next()) {
+	for (; v != NULL && (rtl ? px > 0 : px < max_width); v = v->Next()) {
 		Point offset;
 		int width = Train::From(v)->GetDisplayImageWidth(&offset);
 
-		if (px + width > 0) {
+		if (rtl ? px + width > 0 : px - width < max_width) {
 			SpriteID pal = (v->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(v);
-			DrawSprite(v->GetImage(DIR_W), pal, px + offset.x, 7 + offset.y);
+			DrawSprite(v->GetImage(dir), pal, px + (rtl ? -offset.x : offset.x), 7 + offset.y);
 		}
 
 		if (!v->IsArticulatedPart()) sel_articulated = false;
 
 		if (v->index == selection) {
 			/* Set the highlight position */
-			highlight_l = px + 1;
-			highlight_r = px + width + 1;
+			highlight_l = rtl ? px - width + 1 : px + 1;
+			highlight_r = rtl ? px + 1 : px + width + 1;
 			sel_articulated = true;
 		} else if ((_cursor.vehchain && highlight_r != 0) || sel_articulated) {
-			highlight_r += width;
+			if (rtl) {
+				highlight_r += width;
+			} else {
+				highlight_l -= width;
+			}
 		}
 
-		px += width;
+		px += rtl ? -width : width;
 	}
 
 	if (highlight_l != highlight_r) {
@@ -151,12 +159,12 @@ static void TrainDetailsInfoTab(const Vehicle *v, int left, int right, int y)
 	if (RailVehInfo(v->engine_type)->railveh_type == RAILVEH_WAGON) {
 		SetDParam(0, v->engine_type);
 		SetDParam(1, v->value);
-		DrawString(left, right, y, STR_VEHICLE_DETAILS_TRAIN_WAGON_VALUE);
+		DrawString(left, right, y, STR_VEHICLE_DETAILS_TRAIN_WAGON_VALUE, TC_FROMSTRING, SA_LEFT | SA_STRIP);
 	} else {
 		SetDParam(0, v->engine_type);
 		SetDParam(1, v->build_year);
 		SetDParam(2, v->value);
-		DrawString(left, right, y, STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE);
+		DrawString(left, right, y, STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE, TC_FROMSTRING, SA_LEFT | SA_STRIP);
 	}
 }
 
@@ -228,8 +236,10 @@ void DrawTrainDetails(const Train *v, int left, int right, int y, int vscroll_po
 {
 	/* draw the first 3 details tabs */
 	if (det_tab != TDW_TAB_TOTALS) {
+		bool rtl = _dynlang.text_dir == TD_RTL;
+		Direction dir = rtl ? DIR_E : DIR_W;
 		const Train *u = v;
-		int x = 1;
+		int x = rtl ? right : left;
 		for (;;) {
 			if (--vscroll_pos < 0 && vscroll_pos >= -vscroll_cap) {
 				int px = x;
@@ -239,32 +249,32 @@ void DrawTrainDetails(const Train *v, int left, int right, int y, int vscroll_po
 					Point offset;
 					int width = u->GetDisplayImageWidth(&offset);
 					SpriteID pal = (u->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(u);
-					DrawSprite(u->GetImage(DIR_W), pal, px + offset.x, y + 6 + offset.y);
-					px += width;
+					DrawSprite(u->GetImage(dir), pal, px + (rtl ? -offset.x : offset.x), y + 4 + offset.y);
+					px += rtl ? -width : width;
 					u = u->Next();
 				} while (u != NULL && u->IsArticulatedPart() && u->cargo_cap == 0);
 
-				px += 2;
-				int py = y + 2;
+				px += rtl ? -2 : 2;
+				int py = y;
 				switch (det_tab) {
 					default: NOT_REACHED();
 
 					case TDW_TAB_CARGO:
-						TrainDetailsCargoTab(v, px, right, py);
+						TrainDetailsCargoTab(v, rtl ? left : px, rtl ? px : right, py);
 						break;
 
 					case TDW_TAB_INFO:
 						/* Only show name and value for the 'real' part */
 						if (!v->IsArticulatedPart()) {
-							TrainDetailsInfoTab(v, px, right, py);
+							TrainDetailsInfoTab(v, rtl ? left : px, rtl ? px : right, py);
 						}
 						break;
 
 					case TDW_TAB_CAPACITY:
-						TrainDetailsCapacityTab(v, px, right, py);
+						TrainDetailsCapacityTab(v, rtl ? left : px, rtl ? px : right, py);
 						break;
 				}
-				y += 14;
+				y += WD_MATRIX_TOP + FONT_HEIGHT_NORMAL + WD_MATRIX_BOTTOM;
 
 				v = u;
 			} else {
@@ -287,19 +297,21 @@ void DrawTrainDetails(const Train *v, int left, int right, int y, int vscroll_po
 		}
 
 		/* draw total cargo tab */
-		DrawString(left, right, y + 2, STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_TEXT);
+		DrawString(left, right, y, STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_TEXT);
+		y += WD_MATRIX_TOP + FONT_HEIGHT_NORMAL + WD_MATRIX_BOTTOM;
+
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			if (max_cargo[i] > 0 && --vscroll_pos < 0 && vscroll_pos > -vscroll_cap) {
-				y += 14;
 				SetDParam(0, i);            // {CARGO} #1
 				SetDParam(1, act_cargo[i]); // {CARGO} #2
 				SetDParam(2, i);            // {SHORTCARGO} #1
 				SetDParam(3, max_cargo[i]); // {SHORTCARGO} #2
 				SetDParam(4, _settings_game.vehicle.freight_trains);
-				DrawString(left, right, y + 2, FreightWagonMult(i) > 1 ? STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_MULT : STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY);
+				DrawString(left, right, y, FreightWagonMult(i) > 1 ? STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_MULT : STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY);
+				y += WD_MATRIX_TOP + FONT_HEIGHT_NORMAL + WD_MATRIX_BOTTOM;
 			}
 		}
 		SetDParam(0, feeder_share);
-		DrawString(left, right, y + 15, STR_VEHICLE_INFO_FEEDER_CARGO_VALUE);
+		DrawString(left, right, y, STR_VEHICLE_INFO_FEEDER_CARGO_VALUE);
 	}
 }
