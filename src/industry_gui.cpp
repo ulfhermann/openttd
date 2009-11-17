@@ -112,20 +112,20 @@ static const NWidgetPart _nested_build_industry_widgets[] = {
 		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, DPIW_CAPTION), SetDataTip(STR_FUND_INDUSTRY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS), SetResize(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, DPIW_MATRIX_WIDGET), SetDataTip(0x801, STR_FUND_INDUSTRY_SELECTION_TOOLTIP), SetResize(1, 1),
+		NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, DPIW_MATRIX_WIDGET), SetDataTip(0x801, STR_FUND_INDUSTRY_SELECTION_TOOLTIP), SetFill(true, false), SetResize(1, 1),
 		NWidget(WWT_SCROLLBAR, COLOUR_DARK_GREEN, DPIW_SCROLLBAR), SetResize(0, 1),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, DPIW_INFOPANEL), SetResize(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_TEXTBTN, COLOUR_DARK_GREEN, DPIW_FUND_WIDGET), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_NULL),
+		NWidget(WWT_TEXTBTN, COLOUR_DARK_GREEN, DPIW_FUND_WIDGET), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_NULL),
 		NWidget(WWT_RESIZEBOX, COLOUR_DARK_GREEN, DPIW_RESIZE_WIDGET),
 	EndContainer(),
 };
 
 /** Window definition of the dynamic place industries gui */
 static const WindowDesc _build_industry_desc(
-	WDP_AUTO, WDP_AUTO, 170, 212, 170, 212,
+	WDP_AUTO, WDP_AUTO, 170, 212,
 	WC_BUILD_INDUSTRY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_build_industry_widgets, lengthof(_nested_build_industry_widgets)
@@ -820,7 +820,7 @@ static const NWidgetPart _nested_industry_view_widgets[] = {
 
 /** Window definition of the view industy gui */
 static const WindowDesc _industry_view_desc(
-	WDP_AUTO, WDP_AUTO, 260, 120, 260, 120,
+	WDP_AUTO, WDP_AUTO, 260, 120,
 	WC_INDUSTRY_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_industry_view_widgets, lengthof(_nested_industry_view_widgets)
@@ -1036,7 +1036,6 @@ public:
 		this->BuildSortIndustriesList();
 
 		this->InitNested(desc, 0);
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(IDW_INDUSTRY_LIST)->current_y / this->resize.step_height);
 	}
 
 	~IndustryDirectoryWindow()
@@ -1197,7 +1196,7 @@ const StringID IndustryDirectoryWindow::sorter_names[] = {
 
 /** Window definition of the industy directory gui */
 static const WindowDesc _industry_directory_desc(
-	WDP_AUTO, WDP_AUTO, 428, 190, 428, 190,
+	WDP_AUTO, WDP_AUTO, 428, 190,
 	WC_INDUSTRY_DIRECTORY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_industry_directory_widgets, lengthof(_nested_industry_directory_widgets)
