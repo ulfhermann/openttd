@@ -169,7 +169,8 @@ void LinkGraph::Join() {
 		LinkGraphJob * job = jobs.front();
 		assert(job != NULL);
 
-		if (job->GetJoinDate() > _date) {
+		/* also join if join date is far in the future. This prevents excessive memory use when resetting time */
+		if (job->GetJoinDate() > _date && job->GetJoinDate() <= _date + _settings_game.linkgraph.recalc_interval) {
 			return;
 		}
 		job->Join();
