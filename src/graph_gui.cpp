@@ -140,7 +140,7 @@ static const NWidgetPart _nested_graph_legend_widgets[] = {
 };
 
 static const WindowDesc _graph_legend_desc(
-	WDP_AUTO, WDP_AUTO, 250, 196, 250, 196,
+	WDP_AUTO, WDP_AUTO, 250, 196,
 	WC_GRAPH_LEGEND, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
 	_nested_graph_legend_widgets, lengthof(_nested_graph_legend_widgets)
@@ -526,7 +526,7 @@ static const NWidgetPart _nested_operating_profit_widgets[] = {
 };
 
 static const WindowDesc _operating_profit_desc(
-	WDP_AUTO, WDP_AUTO, 576, 174, 576, 174,
+	WDP_AUTO, WDP_AUTO, 576, 174,
 	WC_OPERATING_PROFIT, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 	_nested_operating_profit_widgets, lengthof(_nested_operating_profit_widgets)
@@ -567,7 +567,7 @@ static const NWidgetPart _nested_income_graph_widgets[] = {
 
 
 static const WindowDesc _income_graph_desc(
-	WDP_AUTO, WDP_AUTO, 576, 142, 576, 142,
+	WDP_AUTO, WDP_AUTO, 576, 142,
 	WC_INCOME_GRAPH, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 	_nested_income_graph_widgets, lengthof(_nested_income_graph_widgets)
@@ -605,7 +605,7 @@ static const NWidgetPart _nested_delivered_cargo_graph_widgets[] = {
 };
 
 static const WindowDesc _delivered_cargo_graph_desc(
-	WDP_AUTO, WDP_AUTO, 576, 142, 576, 142,
+	WDP_AUTO, WDP_AUTO, 576, 142,
 	WC_DELIVERED_CARGO, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 	_nested_delivered_cargo_graph_widgets, lengthof(_nested_delivered_cargo_graph_widgets)
@@ -659,7 +659,7 @@ static const NWidgetPart _nested_performance_history_widgets[] = {
 };
 
 static const WindowDesc _performance_history_desc(
-	WDP_AUTO, WDP_AUTO, 576, 238, 576, 238,
+	WDP_AUTO, WDP_AUTO, 576, 238,
 	WC_PERFORMANCE_HISTORY, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 	_nested_performance_history_widgets, lengthof(_nested_performance_history_widgets)
@@ -697,7 +697,7 @@ static const NWidgetPart _nested_company_value_graph_widgets[] = {
 };
 
 static const WindowDesc _company_value_graph_desc(
-	WDP_AUTO, WDP_AUTO, 576, 238, 576, 238,
+	WDP_AUTO, WDP_AUTO, 576, 238,
 	WC_COMPANY_VALUE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 	_nested_company_value_graph_widgets, lengthof(_nested_company_value_graph_widgets)
@@ -859,7 +859,7 @@ static const NWidgetPart _nested_cargo_payment_rates_widgets[] = {
 };
 
 static const WindowDesc _cargo_payment_rates_desc(
-	WDP_AUTO, WDP_AUTO, 568, 46, 568, 46,
+	WDP_AUTO, WDP_AUTO, 568, 46,
 	WC_PAYMENT_RATES, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
 	_nested_cargo_payment_rates_widgets, lengthof(_nested_cargo_payment_rates_widgets)
@@ -874,6 +874,14 @@ void ShowCargoPaymentRates()
 /************************/
 /* COMPANY LEAGUE TABLE */
 /************************/
+
+/** Widget numbers for the company league window. */
+enum CompanyLeagueWidgets {
+	CLW_CLOSEBOX,
+	CLW_CAPTION,
+	CLW_STICKYBOX,
+	CLW_BACKGROUND,
+};
 
 static const StringID _performance_titles[] = {
 	STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER,
@@ -941,7 +949,13 @@ public:
 		this->companies.Sort(&PerformanceSorter);
 
 		this->DrawWidgets();
+	}
 
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		if (widget != CLW_BACKGROUND) return;
+
+		uint y = r.top + WD_FRAMERECT_TOP;
 		for (uint i = 0; i != this->companies.Length(); i++) {
 			const Company *c = this->companies[i];
 			SetDParam(0, i + STR_ORDINAL_NUMBER_1ST);
@@ -949,8 +963,9 @@ public:
 			SetDParam(2, c->index);
 			SetDParam(3, GetPerformanceTitleFromValue(c->old_economy[1].performance_history));
 
-			DrawString(2, this->width, 15 + i * 10, i == 0 ? STR_COMPANY_LEAGUE_FIRST : STR_COMPANY_LEAGUE_OTHER);
-			DrawCompanyIcon(c->index, 27, 16 + i * 10);
+			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, i == 0 ? STR_COMPANY_LEAGUE_FIRST : STR_COMPANY_LEAGUE_OTHER);
+			DrawCompanyIcon(c->index, 27, y + 1);
+			y += FONT_HEIGHT_NORMAL;
 		}
 	}
 
@@ -971,25 +986,17 @@ public:
 	}
 };
 
-/** Widget numbers for the company league window. */
-enum CompanyLeagueWidgets {
-	CLW_CLOSEBOX,
-	CLW_CAPTION,
-	CLW_STICKYBOX,
-	CLW_BACKGROUND,
-};
-
 static const NWidgetPart _nested_company_league_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CLW_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_GREY, CLW_CAPTION), SetDataTip(STR_COMPANY_LEAGUE_TABLE_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, CLW_STICKYBOX),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, CLW_BACKGROUND), SetMinimalSize(400, 153),
+	NWidget(WWT_PANEL, COLOUR_GREY, CLW_BACKGROUND), SetMinimalSize(400, 0), SetMinimalTextLines(15, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM),
 };
 
 static const WindowDesc _company_league_desc(
-	WDP_AUTO, WDP_AUTO, 400, 167, 400, 167,
+	WDP_AUTO, WDP_AUTO, 400, 167,
 	WC_COMPANY_LEAGUE, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON,
 	_nested_company_league_widgets, lengthof(_nested_company_league_widgets)
@@ -1272,7 +1279,7 @@ static const NWidgetPart _nested_performance_rating_detail_widgets[] = {
 };
 
 static const WindowDesc _performance_rating_detail_desc(
-	WDP_AUTO, WDP_AUTO, 299, 241, 299, 241,
+	WDP_AUTO, WDP_AUTO, 299, 241,
 	WC_PERFORMANCE_DETAIL, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
 	_nested_performance_rating_detail_widgets, lengthof(_nested_performance_rating_detail_widgets)

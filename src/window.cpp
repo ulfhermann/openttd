@@ -29,6 +29,7 @@
 #include "network/network.h"
 #include "querystring_gui.h"
 #include "widgets/dropdown_func.h"
+#include "strings_func.h"
 
 #include "table/sprites.h"
 
@@ -59,21 +60,19 @@ bool _scrolling_viewport;
 byte _special_mouse_mode;
 
 /** Window description constructor. */
-WindowDesc::WindowDesc(int16 left, int16 top, int16 min_width, int16 min_height, int16 def_width, int16 def_height,
+WindowDesc::WindowDesc(int16 left, int16 top, int16 def_width, int16 def_height,
 			WindowClass window_class, WindowClass parent_class, uint32 flags,
-			const NWidgetPart *nwid_parts, int16 nwid_length)
+			const NWidgetPart *nwid_parts, int16 nwid_length) :
+	left(left),
+	top(top),
+	default_width(def_width),
+	default_height(def_height),
+	cls(window_class),
+	parent_cls(parent_class),
+	flags(flags),
+	nwid_parts(nwid_parts),
+	nwid_length(nwid_length)
 {
-	this->left = left;
-	this->top = top;
-	this->minimum_width = min_width;
-	this->minimum_height = min_height;
-	this->default_width = def_width;
-	this->default_height = def_height;
-	this->cls = window_class;
-	this->parent_cls = parent_class;
-	this->flags = flags;
-	this->nwid_parts = nwid_parts;
-	this->nwid_length = nwid_length;
 }
 
 WindowDesc::~WindowDesc()
@@ -499,7 +498,7 @@ void Window::ReInit(int rx, int ry)
 
 	/* Re-initialize the window from the ground up. No need to change the nested_array, as all widgets stay where they are. */
 	this->nested_root->SetupSmallestSize(this, false);
-	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, false, false, false);
+	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, false, false, _dynlang.text_dir == TD_RTL);
 	this->width  = this->nested_root->smallest_x;
 	this->height = this->nested_root->smallest_y;
 	this->resize.width  = this->nested_root->smallest_x;
@@ -517,17 +516,9 @@ void Window::ReInit(int rx, int ry)
 	if (this->resize.step_width  > 1) dx -= dx % (int)this->resize.step_width;
 	if (this->resize.step_height > 1) dy -= dy % (int)this->resize.step_height;
 
-	if (dx == 0 && dy == 0) { // No resize needed.
-		this->SetDirty();
-		if (this->viewport != NULL) {
-			NWidgetViewport *nvp = (NWidgetViewport *)nested_root->GetWidgetOfType(NWID_VIEWPORT);
-			nvp->UpdateViewportCoordinates(this);
-		}
-		return;
-	}
-
-	ResizeWindow(this, dx, dy); // Sets post-resize dirty blocks.
-	this->OnResize(); // Calls NWidgetViewport::UpdateViewportCoordinates()
+	ResizeWindow(this, dx, dy);
+	this->OnResize();
+	this->SetDirty();
 }
 
 /** Find the Window whose parent pointer points to this window
@@ -793,7 +784,7 @@ void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flag
 		this->nested_root->SetupSmallestSize(this, false);
 	}
 	/* Initialize to smallest size. */
-	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, false, false, false);
+	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, false, false, _dynlang.text_dir == TD_RTL);
 
 	/* Further set up window properties,
 	 * this->left, this->top, this->width, this->height, this->resize.width, and this->resize.height are initialized later. */
@@ -901,8 +892,10 @@ void Window::FindWindowPlacementAndResize(int def_width, int def_height)
 		if (this->resize.step_height > 1) enlarge_y -= enlarge_y % (int)this->resize.step_height;
 
 		ResizeWindow(this, enlarge_x, enlarge_y);
-		this->OnResize();
 	}
+
+	/* Always call OnResize; that way the scrollbars and matrices get initialized */
+	this->OnResize();
 
 	int nx = this->left;
 	int ny = this->top;
@@ -1364,7 +1357,7 @@ void ResizeWindow(Window *w, int delta_x, int delta_y)
 	assert(w->nested_root->resize_x == 0 || new_xinc % w->nested_root->resize_x == 0);
 	assert(w->nested_root->resize_y == 0 || new_yinc % w->nested_root->resize_y == 0);
 
-	w->nested_root->AssignSizePosition(ST_RESIZE, 0, 0, w->nested_root->smallest_x + new_xinc, w->nested_root->smallest_y + new_yinc, false, false, false);
+	w->nested_root->AssignSizePosition(ST_RESIZE, 0, 0, w->nested_root->smallest_x + new_xinc, w->nested_root->smallest_y + new_yinc, false, false, _dynlang.text_dir == TD_RTL);
 	w->width  = w->nested_root->current_x;
 	w->height = w->nested_root->current_y;
 	w->SetDirty();
@@ -1681,10 +1674,12 @@ static bool HandleScrollbarScrolling()
 
 			int i;
 			Scrollbar *sb;
+			bool rtl = false;
 
 			if (w->flags4 & WF_HSCROLL) {
 				sb = &w->hscroll;
 				i = _cursor.pos.x - _cursorpos_drag_start.x;
+				rtl = _dynlang.text_dir == TD_RTL;
 			} else if (w->flags4 & WF_SCROLL2) {
 				sb = &w->vscroll2;
 				i = _cursor.pos.y - _cursorpos_drag_start.y;
@@ -1695,6 +1690,7 @@ static bool HandleScrollbarScrolling()
 
 			/* Find the item we want to move to and make sure it's inside bounds. */
 			int pos = min(max(0, i + _scrollbar_start_pos) * sb->GetCount() / _scrollbar_size, max(0, sb->GetCount() - sb->GetCapacity()));
+			if (rtl) pos = sb->GetCount() - sb->GetCapacity() - pos;
 			if (pos != sb->GetPosition()) {
 				sb->SetPosition(pos);
 				w->SetDirty();

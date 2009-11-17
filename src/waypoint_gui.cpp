@@ -126,7 +126,7 @@ public:
 static const NWidgetPart _nested_waypoint_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, WAYPVW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, WAYPVW_CAPTION), SetDataTip(STR_VIEWPORT_WAYPOINT, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CAPTION, COLOUR_GREY, WAYPVW_CAPTION), SetDataTip(STR_WAYPOINT_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, WAYPVW_STICKY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, WAYPVW_VIEWPORTPANEL),
@@ -142,7 +142,7 @@ static const NWidgetPart _nested_waypoint_view_widgets[] = {
 };
 
 static const WindowDesc _waypoint_view_desc(
-	WDP_AUTO, WDP_AUTO, 260, 118, 260, 118,
+	WDP_AUTO, WDP_AUTO, 260, 118,
 	WC_WAYPOINT_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
 	_nested_waypoint_view_widgets, lengthof(_nested_waypoint_view_widgets)
