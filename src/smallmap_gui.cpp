@@ -1296,7 +1296,7 @@ SmallMapWindow::SmallMapType SmallMapWindow::map_type = SMT_CONTOUR;
 bool SmallMapWindow::show_towns = true;
 
 static const WindowDesc _smallmap_desc(
-	WDP_AUTO, WDP_AUTO, 350, 214, 460, 314,
+	WDP_AUTO, WDP_AUTO, 460, 314,
 	WC_SMALLMAP, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_UNCLICK_BUTTONS,
 	_nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)
