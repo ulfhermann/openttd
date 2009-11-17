@@ -60,9 +60,7 @@ struct AIListWindow : public Window {
 
 		this->InitNested(desc); // Initializes 'this->line_height' as side effect.
 
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(AIL_WIDGET_LIST)->current_y / this->line_height);
 		this->vscroll.SetCount((int)this->ai_info_list->size() + 1);
-		this->GetWidget<NWidgetCore>(AIL_WIDGET_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 
 		/* Try if we can find the currently selected AI */
 		this->selected = -1;
@@ -233,7 +231,7 @@ static const NWidgetPart _nested_ai_list_widgets[] = {
 
 /* Window definition for the ai list window. */
 static const WindowDesc _ai_list_desc(
-	WDP_CENTER, WDP_CENTER, 200, 234, 200, 234,
+	WDP_CENTER, WDP_CENTER, 200, 234,
 	WC_AI_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
 	_nested_ai_list_widgets, lengthof(_nested_ai_list_widgets)
@@ -277,9 +275,7 @@ struct AISettingsWindow : public Window {
 
 		this->InitNested(desc);  // Initializes 'this->line_height' as side effect.
 
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(AIS_WIDGET_BACKGROUND)->current_y / this->line_height);
 		this->vscroll.SetCount((int)this->ai_config->GetConfigList()->size());
-		this->GetWidget<NWidgetCore>(AIS_WIDGET_BACKGROUND)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
@@ -432,7 +428,7 @@ static const NWidgetPart _nested_ai_settings_widgets[] = {
 
 /* Window definition for the AI settings window. */
 static const WindowDesc _ai_settings_desc(
-	WDP_CENTER, WDP_CENTER, 200, 208, 500, 208,
+	WDP_CENTER, WDP_CENTER, 500, 208,
 	WC_AI_SETTINGS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
 	_nested_ai_settings_widgets, lengthof(_nested_ai_settings_widgets)
@@ -482,7 +478,7 @@ static const NWidgetPart _nested_ai_config_widgets[] = {
 
 /* Window definition for the configure AI window. */
 static const WindowDesc _ai_config_desc(
-	WDP_CENTER, WDP_CENTER, 300, 172, 300, 172,
+	WDP_CENTER, WDP_CENTER, 300, 172,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
 	_nested_ai_config_widgets, lengthof(_nested_ai_config_widgets)
@@ -676,8 +672,6 @@ struct AIDebugWindow : public Window {
 			this->SetWidgetDisabledState(i + AID_WIDGET_COMPANY_BUTTON_START, !Company::IsValidAiID(i));
 		}
 		this->DisableWidget(AID_WIDGET_RELOAD_TOGGLE);
-
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(AID_WIDGET_LOG_PANEL)->current_y / this->resize.step_height);
 
 		this->last_vscroll_pos = 0;
 		this->autoscroll = true;
@@ -957,7 +951,7 @@ static const NWidgetPart _nested_ai_debug_widgets[] = {
 };
 
 static const WindowDesc _ai_debug_desc(
-	WDP_AUTO, WDP_AUTO, 299, 241, 299, 241,
+	WDP_AUTO, WDP_AUTO, 299, 241,
 	WC_AI_DEBUG, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_ai_debug_widgets, lengthof(_nested_ai_debug_widgets)

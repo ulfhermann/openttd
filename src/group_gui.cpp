@@ -15,7 +15,6 @@
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "vehicle_gui.h"
-#include "vehicle_gui_base.h"
 #include "vehicle_base.h"
 #include "group.h"
 #include "strings_func.h"
@@ -27,6 +26,7 @@
 #include "widgets/dropdown_type.h"
 #include "widgets/dropdown_func.h"
 #include "tilehighlight_func.h"
+#include "vehicle_gui_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -104,9 +104,9 @@ static const NWidgetPart _nested_group_widgets[] = {
 			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_ALL_VEHICLES), SetMinimalSize(200, 13), EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_DEFAULT_VEHICLES), SetMinimalSize(200, 13), EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_GROUP), SetMinimalSize(188, 117), SetDataTip(0x701, STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP),
+				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_GROUP), SetMinimalSize(188, 0), SetDataTip(0x701, STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP),
 						SetFill(true, false), SetResize(0, 1),
-				NWidget(WWT_SCROLL2BAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR), SetMinimalSize(12, 117),
+				NWidget(WWT_SCROLL2BAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR), SetMinimalSize(12, 0),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_CREATE_GROUP), SetMinimalSize(24, 25), SetFill(false, true),
@@ -129,8 +129,8 @@ static const NWidgetPart _nested_group_widgets[] = {
 				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY_TOP_RIGHT), SetMinimalSize(12, 12), SetResize(1, 0), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE), SetMinimalSize(248, 156), SetDataTip(0x701, STR_NULL), SetResize(1, 1), SetFill(true, false),
-				NWidget(WWT_SCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE_SCROLLBAR), SetMinimalSize(12, 156),
+				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE), SetMinimalSize(248, 0), SetDataTip(0x701, STR_NULL), SetResize(1, 1), SetFill(true, false),
+				NWidget(WWT_SCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE_SCROLLBAR), SetMinimalSize(12, 0),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_AVAILABLE_VEHICLES), SetMinimalSize(106, 12), SetFill(false, true),
@@ -154,6 +154,7 @@ private:
 	VehicleID vehicle_sel; ///< Selected vehicle
 	GroupID group_rename;  ///< Group being renamed, INVALID_GROUP if none
 	GUIGroupList groups;   ///< List of groups
+	uint tiny_step_height; ///< Step height for the group list
 
 	/**
 	 * (Re)Build the group list.
@@ -208,23 +209,6 @@ public:
 		this->vehicle_type = (VehicleType)GB(window_number, 11, 5);
 		switch (this->vehicle_type) {
 			default: NOT_REACHED();
-			case VEH_TRAIN:
-			case VEH_ROAD:
-				this->vscroll2.SetCapacity(9);
-				this->vscroll.SetCapacity(6);
-				break;
-			case VEH_SHIP:
-			case VEH_AIRCRAFT:
-				this->vscroll2.SetCapacity(9);
-				this->vscroll.SetCapacity(4);
-				break;
-		}
-
-		this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_GROUP)->widget_data = (this->vscroll2.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
-		this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_VEHICLE)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
-
-		switch (this->vehicle_type) {
-			default: NOT_REACHED();
 			case VEH_TRAIN:    this->sorting = &_sorting.train;    break;
 			case VEH_ROAD:     this->sorting = &_sorting.roadveh;  break;
 			case VEH_SHIP:     this->sorting = &_sorting.ship;     break;
@@ -269,13 +253,20 @@ public:
 	{
 		switch (widget) {
 			case GRP_WIDGET_LIST_GROUP:
-				resize->height = PLY_WND_PRC__SIZE_OF_ROW_TINY;
-				size->height = this->vscroll2.GetCapacity() * resize->height;
+				this->tiny_step_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
+				resize->height = this->tiny_step_height;
+				/* Minimum height is the height of the list widget minus all and default vehicles and a bit for the bottom bar */
+				size->height =  4 * GetVehicleListHeight(this->vehicle_type, this->tiny_step_height) - 3 * this->tiny_step_height;
+				break;
+
+			case GRP_WIDGET_ALL_VEHICLES:
+			case GRP_WIDGET_DEFAULT_VEHICLES:
+				size->height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
 				break;
 
 			case GRP_WIDGET_LIST_VEHICLE:
-				resize->height = (this->vehicle_type == VEH_TRAIN || this->vehicle_type == VEH_ROAD) ? PLY_WND_PRC__SIZE_OF_ROW_SMALL : PLY_WND_PRC__SIZE_OF_ROW_BIG;
-				size->height = this->vscroll.GetCapacity() * resize->height;
+				resize->height = GetVehicleListHeight(this->vehicle_type, FONT_HEIGHT_NORMAL + WD_MATRIX_TOP);
+				size->height = 4 * resize->height;
 				break;
 		}
 	}
@@ -409,7 +400,7 @@ public:
 					SetDParam(0, g->num_vehicle);
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y1 + 1, STR_TINY_COMMA, (this->group_sel == g->index) ? TC_WHITE : TC_BLACK, SA_RIGHT);
 
-					y1 += PLY_WND_PRC__SIZE_OF_ROW_TINY;
+					y1 += this->tiny_step_height;
 				}
 				break;
 			}
@@ -453,7 +444,7 @@ public:
 				break;
 
 			case GRP_WIDGET_LIST_GROUP: { // Matrix Group
-				uint16 id_g = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_GROUP)->pos_y) / PLY_WND_PRC__SIZE_OF_ROW_TINY;
+				uint16 id_g = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_GROUP)->pos_y) / (int)this->tiny_step_height;
 
 				if (id_g >= this->vscroll2.GetCapacity()) return;
 
@@ -546,7 +537,7 @@ public:
 				break;
 
 			case GRP_WIDGET_LIST_GROUP: { // Maxtrix group
-				uint16 id_g = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_GROUP)->pos_y) / PLY_WND_PRC__SIZE_OF_ROW_TINY;
+				uint16 id_g = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_GROUP)->pos_y) / (int)this->tiny_step_height;
 				const VehicleID vindex = this->vehicle_sel;
 
 				this->vehicle_sel = INVALID_VEHICLE;
@@ -596,7 +587,7 @@ public:
 	virtual void OnResize()
 	{
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_GROUP);
-		this->vscroll2.SetCapacity(nwi->current_y / PLY_WND_PRC__SIZE_OF_ROW_TINY);
+		this->vscroll2.SetCapacity(nwi->current_y / this->tiny_step_height);
 		nwi->widget_data = (this->vscroll2.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 
 		nwi = this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_VEHICLE);
@@ -683,14 +674,14 @@ public:
 
 
 static WindowDesc _other_group_desc(
-	WDP_AUTO, WDP_AUTO, 460, 194, 460, 246,
+	WDP_AUTO, WDP_AUTO, 460, 246,
 	WC_INVALID, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_group_widgets, lengthof(_nested_group_widgets)
 );
 
 const static WindowDesc _train_group_desc(
-	WDP_AUTO, WDP_AUTO, 525, 194, 525, 246,
+	WDP_AUTO, WDP_AUTO, 525, 246,
 	WC_TRAINS_LIST, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_group_widgets, lengthof(_nested_group_widgets)

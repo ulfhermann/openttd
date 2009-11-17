@@ -39,6 +39,7 @@
 #include "vehiclelist.h"
 #include "articulated_vehicles.h"
 #include "cargotype.h"
+#include "spritecache.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -99,6 +100,22 @@ void BaseVehicleListWindow::BuildVehicleList(Owner owner, uint16 index, uint16 w
 	DEBUG(misc, 3, "Building vehicle list for company %d at station %d", owner, index);
 
 	GenerateVehicleSortList(&this->vehicles, this->vehicle_type, owner, index, window_type);
+
+	uint unitnumber = 0;
+	for (const Vehicle **v = this->vehicles.Begin(); v != this->vehicles.End(); v++) {
+		unitnumber = max<uint>(unitnumber, (*v)->unitnumber);
+	}
+
+	/* Because 111 is much less wide than e.g. 999 we use the
+	 * wider numbers to determine the width instead of just
+	 * the random number that it seems to be. */
+	if (unitnumber >= 1000) {
+		this->max_unitnumber = 9999;
+	} else if (unitnumber >= 100) {
+		this->max_unitnumber = 999;
+	} else {
+		this->max_unitnumber = 99;
+	}
 
 	this->vehicles.RebuildDone();
 	this->vscroll.SetCount(this->vehicles.Length());
@@ -298,7 +315,6 @@ struct RefitWindow : public Window {
 
 		this->FinishInitNested(desc, v->index);
 		this->owner = v->owner;
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetCore>(VRW_MATRIX)->current_y / this->resize.step_height);
 
 		this->order = order;
 		this->sel  = -1;
@@ -434,7 +450,7 @@ static const NWidgetPart _nested_vehicle_refit_widgets[] = {
 };
 
 static const WindowDesc _vehicle_refit_desc(
-	WDP_AUTO, WDP_AUTO, 240, 174, 240, 174,
+	WDP_AUTO, WDP_AUTO, 240, 174,
 	WC_VEHICLE_REFIT, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_vehicle_refit_widgets, lengthof(_nested_vehicle_refit_widgets)
@@ -719,13 +735,13 @@ static const NWidgetPart _nested_vehicle_list[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLW_WIDGET_SORT_ORDER), SetMinimalSize(81, 12), SetFill(false, true), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
 		NWidget(WWT_DROPDOWN, COLOUR_GREY, VLW_WIDGET_SORT_BY_PULLDOWN), SetMinimalSize(167, 12), SetFill(false, true), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
-		NWidget(WWT_PANEL, COLOUR_GREY, VLW_WIDGET_EMPTY_TOP_RIGHT), SetMinimalSize(12, 12), SetFill(false, true), SetResize(1, 0),
+		NWidget(WWT_PANEL, COLOUR_GREY, VLW_WIDGET_EMPTY_TOP_RIGHT), SetMinimalSize(12, 12), SetFill(true, true), SetResize(1, 0),
 		EndContainer(),
 	EndContainer(),
 
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_GREY, VLW_WIDGET_LIST), SetMinimalSize(248, 156), SetResize(1,1), // vertical resize step size will be modified
-		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VLW_WIDGET_SCROLLBAR), SetMinimalSize(12, 156),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VLW_WIDGET_LIST), SetMinimalSize(248, 0), SetFill(true, false),
+		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VLW_WIDGET_SCROLLBAR), SetMinimalSize(12, 0),
 	EndContainer(),
 
 	NWidget(NWID_HORIZONTAL),
@@ -751,19 +767,19 @@ static const NWidgetPart _nested_vehicle_list[] = {
 static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y)
 {
 	const Order *order;
-	int sel, i = 0;
+	int i = 0;
 
-	sel = v->cur_order_index;
+	int sel = v->cur_order_index;
 
 	FOR_VEHICLE_ORDERS(v, order) {
-		if (sel == 0) DrawString(left - 6, left, y, STR_TINY_RIGHT_ARROW, TC_BLACK);
+		if (sel == 0) DrawString(left, right, y, STR_TINY_RIGHT_ARROW, TC_BLACK);
 		sel--;
 
 		if (order->IsType(OT_GOTO_STATION)) {
 			SetDParam(0, order->GetDestination());
-			DrawString(left, right, y, STR_TINY_BLACK_STATION);
+			DrawString(left + 6, right - 6, y, STR_TINY_BLACK_STATION);
 
-			y += 6;
+			y += FONT_HEIGHT_SMALL;
 			if (++i == 4) break;
 		}
 	}
@@ -771,22 +787,42 @@ static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y)
 
 /**
  * Draws an image of a vehicle chain
- * @param v Front vehicle
- * @param x x Position to start at
- * @param y y Position to draw at
+ * @param v         Front vehicle
+ * @param left      The minimum horizontal position
+ * @param right     The maximum horizontal position
+ * @param y         Vertical position to draw at
  * @param selection Selected vehicle to draw a frame around
- * @param max_width Number of pixels space for drawing
- * @param skip Number of pixels to skip at the front (for scrolling)
+ * @param skip      Number of pixels to skip at the front (for scrolling)
  */
-static void DrawVehicleImage(const Vehicle *v, int x, int y, VehicleID selection, int max_width, int skip)
+static void DrawVehicleImage(const Vehicle *v, int left, int right, int y, VehicleID selection, int skip)
 {
 	switch (v->type) {
-		case VEH_TRAIN:    DrawTrainImage(Train::From(v), x, y, selection, max_width, skip); break;
-		case VEH_ROAD:     DrawRoadVehImage(v, x, y, selection, max_width);     break;
-		case VEH_SHIP:     DrawShipImage(v, x, y, selection);                   break;
-		case VEH_AIRCRAFT: DrawAircraftImage(v, x, y, selection);               break;
+		case VEH_TRAIN:    DrawTrainImage(Train::From(v), left, right, y, selection, skip); break;
+		case VEH_ROAD:     DrawRoadVehImage(v, left, right, y, selection);  break;
+		case VEH_SHIP:     DrawShipImage(v, left, right, y, selection);     break;
+		case VEH_AIRCRAFT: DrawAircraftImage(v, left, right, y, selection); break;
 		default: NOT_REACHED();
 	}
+}
+
+/**
+ * Get the height of a vehicle in the vehicle list GUIs.
+ * @param type    the vehicle type to look at
+ * @param divisor the resulting height must be dividable by this
+ * @return the height
+ */
+uint GetVehicleListHeight(VehicleType type, uint divisor)
+{
+	/* Name + vehicle + profit */
+	uint base = GetVehicleHeight(type) + 2 * FONT_HEIGHT_SMALL;
+	/* Drawing of the 4 small orders + profit*/
+	if (type >= VEH_SHIP) base = max(base, 5U * FONT_HEIGHT_SMALL);
+
+	if (divisor == 1) return base;
+
+	/* Make sure the height is dividable by divisor */
+	uint rem = base % divisor;
+	return base + (rem == 0 ? 0 : divisor - rem);
 }
 
 /**
@@ -799,6 +835,23 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle, int
 {
 	int left = r.left + WD_MATRIX_LEFT;
 	int right = r.right - WD_MATRIX_RIGHT;
+	int width = right - left;
+	bool rtl = _dynlang.text_dir == TD_RTL;
+
+	SetDParam(0, this->max_unitnumber);
+	int text_offset = GetStringBoundingBox(STR_JUST_INT).width + WD_FRAMERECT_RIGHT;
+	int text_left  = left  + (rtl ?           0 : text_offset);
+	int text_right = right - (rtl ? text_offset :           0);
+
+	bool show_orderlist = vehicle_type >= VEH_SHIP;
+	int orderlist_left  = left  + (rtl ? 0 : max(100 + text_offset, width / 2));
+	int orderlist_right = right - (rtl ? max(100 + text_offset, width / 2) : 0);
+
+	int image_left  = (rtl && show_orderlist) ? orderlist_right : text_left;
+	int image_right = (!rtl && show_orderlist) ? orderlist_left : text_right;
+
+	int vehicle_button_x = rtl ? right - 8 : left;
+
 	int y = r.top;
 	uint max = min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->vehicles.Length());
 	for (uint i = this->vscroll.GetPosition(); i < max; ++i) {
@@ -808,20 +861,20 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle, int
 		SetDParam(0, v->GetDisplayProfitThisYear());
 		SetDParam(1, v->GetDisplayProfitLastYear());
 
-		DrawVehicleImage(v, left + 19, y + 5, selected_vehicle, right - left + 1 - 19, 0);
-		DrawString(left + 19, right, y + line_height - 8, STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR);
+		DrawVehicleImage(v, image_left, image_right, y + FONT_HEIGHT_SMALL - 1, selected_vehicle, 0);
+		DrawString(text_left, text_right, y + line_height - FONT_HEIGHT_SMALL - WD_FRAMERECT_BOTTOM - 1, STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR);
 
 		if (v->name != NULL) {
 			/* The vehicle got a name so we will print it */
 			SetDParam(0, v->index);
-			DrawString(left + 19, right, y, STR_TINY_BLACK_VEHICLE);
+			DrawString(text_left, text_right, y, STR_TINY_BLACK_VEHICLE);
 		} else if (v->group_id != DEFAULT_GROUP) {
 			/* The vehicle has no name, but is member of a group, so print group name */
 			SetDParam(0, v->group_id);
-			DrawString(left + 19, right, y, STR_TINY_GROUP, TC_BLACK);
+			DrawString(text_left, text_right, y, STR_TINY_GROUP, TC_BLACK);
 		}
 
-		if (line_height == PLY_WND_PRC__SIZE_OF_ROW_BIG) DrawSmallOrderList(v, left + 138, right, y);
+		if (show_orderlist) DrawSmallOrderList(v, orderlist_left, orderlist_right, y);
 
 		if (v->IsInDepot()) {
 			str = STR_BLUE_COMMA;
@@ -832,7 +885,7 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle, int
 		SetDParam(0, v->unitnumber);
 		DrawString(left, right, y + 2, str);
 
-		DrawVehicleProfitButton(v, left, y + 13);
+		DrawVehicleProfitButton(v, vehicle_button_x, y + FONT_HEIGHT_NORMAL + 3);
 
 		y += line_height;
 	}
@@ -895,9 +948,6 @@ public:
 		this->FinishInitNested(desc, window_number);
 		this->owner = company;
 
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(VLW_WIDGET_LIST)->current_y / this->resize.step_height);
-		this->GetWidget<NWidgetCore>(VLW_WIDGET_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
-
 		if (this->vehicle_type == VEH_TRAIN) ResizeWindow(this, 65, 0);
 	}
 
@@ -911,17 +961,17 @@ public:
 		if (widget != VLW_WIDGET_LIST) return;
 
 		resize->width = 0;
+		resize->height = GetVehicleListHeight(this->vehicle_type, 1);
+
 		switch (this->vehicle_type) {
 			case VEH_TRAIN:
 				resize->width = 1;
 				/* Fallthrough */
 			case VEH_ROAD:
-				resize->height = PLY_WND_PRC__SIZE_OF_ROW_SMALL;
 				size->height = 6 * resize->height;
 				break;
 			case VEH_SHIP:
 			case VEH_AIRCRAFT:
-				resize->height = PLY_WND_PRC__SIZE_OF_ROW_BIG;
 				size->height = 4 * resize->height;
 				break;
 			default: NOT_REACHED();
@@ -1145,7 +1195,7 @@ public:
 };
 
 static WindowDesc _vehicle_list_desc(
-	WDP_AUTO, WDP_AUTO, 260, 194, 260, 246,
+	WDP_AUTO, WDP_AUTO, 260, 246,
 	WC_INVALID, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_vehicle_list, lengthof(_nested_vehicle_list)
@@ -1236,17 +1286,19 @@ static const NWidgetPart _nested_nontrain_vehicle_details_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, VLD_WIDGET_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_GREY, VLD_WIDGET_CAPTION), SetDataTip(STR_VEHICLE_DETAILS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_RENAME_VEHICLE), SetMinimalSize(40, 14), SetDataTip(STR_VEHICLE_NAME_BUTTON, STR_NULL /* filled in later */),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_RENAME_VEHICLE), SetMinimalSize(40, 0), SetMinimalTextLines(1, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + 2), SetDataTip(STR_VEHICLE_NAME_BUTTON, STR_NULL /* filled in later */),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, VLD_WIDGET_STICKY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_TOP_DETAILS), SetMinimalSize(405, 42), EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_MIDDLE_DETAILS), SetMinimalSize(405, 45), EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_BOTTOM_RIGHT),
 		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(false, true),
-					SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(false, true),
-					SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
+			NWidget(NWID_HORIZONTAL_LTR),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(false, true),
+						SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(false, true),
+						SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
+			EndContainer(),
 			NWidget(WWT_EMPTY, COLOUR_GREY, VLD_WIDGET_SERVICING_INTERVAL), SetFill(true, true),
 		EndContainer(),
 	EndContainer(),
@@ -1257,30 +1309,32 @@ static const NWidgetPart _nested_train_vehicle_details_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY, VLD_WIDGET_CLOSEBOX),
 		NWidget(WWT_CAPTION, COLOUR_GREY, VLD_WIDGET_CAPTION), SetDataTip(STR_VEHICLE_DETAILS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_RENAME_VEHICLE), SetMinimalSize(40, 14), SetDataTip(STR_VEHICLE_NAME_BUTTON, STR_NULL /* filled in later */),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_RENAME_VEHICLE), SetMinimalSize(40, 0), SetMinimalTextLines(1, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + 2), SetDataTip(STR_VEHICLE_NAME_BUTTON, STR_NULL /* filled in later */),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY, VLD_WIDGET_STICKY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_TOP_DETAILS), SetResize(1, 0), SetMinimalSize(405, 42), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_GREY, VLD_WIDGET_MATRIX), SetResize(1, 1), SetMinimalSize(393, 45), SetDataTip(0x701, STR_NULL),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VLD_WIDGET_MATRIX), SetResize(1, 1), SetMinimalSize(393, 45), SetDataTip(0x701, STR_NULL), SetFill(true, false),
 		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VLD_WIDGET_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_BOTTOM_RIGHT),
 		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(false, true),
-					SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(false, true),
-					SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
+			NWidget(NWID_HORIZONTAL_LTR),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(false, true),
+						SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(false, true),
+						SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
+			EndContainer(),
 			NWidget(WWT_EMPTY, COLOUR_GREY, VLD_WIDGET_SERVICING_INTERVAL), SetFill(true, true), SetResize(1, 0),
 		EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_CARGO_CARRIED), SetMinimalSize(96, 12),
-				SetDataTip(STR_VEHICLE_DETAIL_TAB_CARGO, STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP),
+				SetDataTip(STR_VEHICLE_DETAIL_TAB_CARGO, STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP), SetResize(1, 0),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_TRAIN_VEHICLES), SetMinimalSize(99, 12),
-				SetDataTip(STR_VEHICLE_DETAIL_TAB_INFORMATION, STR_VEHICLE_DETAILS_TRAIN_INFORMATION_TOOLTIP),
+				SetDataTip(STR_VEHICLE_DETAIL_TAB_INFORMATION, STR_VEHICLE_DETAILS_TRAIN_INFORMATION_TOOLTIP), SetResize(1, 0),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_CAPACITY_OF_EACH), SetMinimalSize(99, 12),
-				SetDataTip(STR_VEHICLE_DETAIL_TAB_CAPACITIES, STR_VEHICLE_DETAILS_TRAIN_CAPACITIES_TOOLTIP),
+				SetDataTip(STR_VEHICLE_DETAIL_TAB_CAPACITIES, STR_VEHICLE_DETAILS_TRAIN_CAPACITIES_TOOLTIP), SetResize(1, 0),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLD_WIDGET_DETAILS_TOTAL_CARGO), SetMinimalSize(99, 12),
 				SetDataTip(STR_VEHICLE_DETAIL_TAB_TOTAL_CARGO, STR_VEHICLE_DETAILS_TRAIN_TOTAL_CARGO_TOOLTIP), SetResize(1, 0),
 		NWidget(WWT_RESIZEBOX, COLOUR_GREY, VLD_WIDGET_RESIZE),
@@ -1307,11 +1361,6 @@ struct VehicleDetailsWindow : Window {
 
 		this->GetWidget<NWidgetCore>(VLD_WIDGET_RENAME_VEHICLE)->tool_tip = STR_VEHICLE_DETAILS_TRAIN_RENAME + v->type;
 
-		if (v->type == VEH_TRAIN) {
-			NWidgetCore *nwi = this->GetWidget<NWidgetCore>(VLD_WIDGET_MATRIX);
-			this->vscroll.SetCapacity(nwi->current_y / this->resize.step_height);
-			nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
-		}
 		this->owner = v->owner;
 		this->tab = TDW_TAB_CARGO;
 	}
@@ -1354,7 +1403,7 @@ struct VehicleDetailsWindow : Window {
 			}
 
 			case VLD_WIDGET_MATRIX:
-				resize->height = 14;
+				resize->height = WD_MATRIX_TOP + FONT_HEIGHT_NORMAL + WD_MATRIX_BOTTOM;
 				size->height = 4 * resize->height;
 				break;
 
@@ -1457,14 +1506,23 @@ struct VehicleDetailsWindow : Window {
 
 			case VLD_WIDGET_MATRIX:
 				/* For trains only. */
-				DrawVehicleDetails(v, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->tab);
+				DrawVehicleDetails(v, r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, r.top + WD_MATRIX_TOP, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->tab);
 				break;
 
-			case VLD_WIDGET_MIDDLE_DETAILS:
+			case VLD_WIDGET_MIDDLE_DETAILS: {
 				/* For other vehicles, at the place of the matrix. */
-				DrawVehicleImage(v, r.left + 3, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, r.right - r.left + 1 - 6, 0);
-				DrawVehicleDetails(v, r.left + 75, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->tab);
-				break;
+				bool rtl = _dynlang.text_dir == TD_RTL;
+				uint sprite_width = max<uint>(GetSprite(v->GetImage(rtl ? DIR_E : DIR_W), ST_NORMAL)->width, 70U) + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+
+				uint text_left  = r.left  + (rtl ? 0 : sprite_width);
+				uint text_right = r.right - (rtl ? sprite_width : 0);
+
+				uint sprite_left  = rtl ? text_right : r.left;
+				uint sprite_right = rtl ? r.right : text_left;
+
+				DrawVehicleImage(v, sprite_left + WD_FRAMERECT_LEFT, sprite_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, 0);
+				DrawVehicleDetails(v, text_left + WD_FRAMERECT_LEFT, text_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->tab);
+			} break;
 
 			case VLD_WIDGET_SERVICING_INTERVAL:
 				/* Draw service interval text */
@@ -1556,7 +1614,7 @@ struct VehicleDetailsWindow : Window {
 
 /** Vehicle details window descriptor. */
 static const WindowDesc _train_vehicle_details_desc(
-	WDP_AUTO, WDP_AUTO, 405, 113, 405, 178,
+	WDP_AUTO, WDP_AUTO, 405, 178,
 	WC_VEHICLE_DETAILS, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_train_vehicle_details_widgets, lengthof(_nested_train_vehicle_details_widgets)
@@ -1564,7 +1622,7 @@ static const WindowDesc _train_vehicle_details_desc(
 
 /** Vehicle details window descriptor for other vehicles than a train. */
 static const WindowDesc _nontrain_vehicle_details_desc(
-	WDP_AUTO, WDP_AUTO, 405, 113, 405, 113,
+	WDP_AUTO, WDP_AUTO, 405, 113,
 	WC_VEHICLE_DETAILS, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_nontrain_vehicle_details_widgets, lengthof(_nested_nontrain_vehicle_details_widgets)
@@ -1614,14 +1672,14 @@ static const NWidgetPart _nested_vehicle_view_widgets[] = {
 		EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHBTN, COLOUR_GREY, VVW_WIDGET_START_STOP_VEH), SetMinimalSize(0, 12), SetResize(1, 0), SetFill(true, false),
+		NWidget(WWT_PUSHBTN, COLOUR_GREY, VVW_WIDGET_START_STOP_VEH), SetMinimalTextLines(1, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM), SetResize(1, 0), SetFill(true, false),
 		NWidget(WWT_RESIZEBOX, COLOUR_GREY, VVW_WIDGET_RESIZE),
 	EndContainer(),
 };
 
 /** Vehicle view window descriptor for all vehicles but trains. */
 static const WindowDesc _vehicle_view_desc(
-	WDP_AUTO, WDP_AUTO, 250, 116, 250, 116,
+	WDP_AUTO, WDP_AUTO, 250, 116,
 	WC_VEHICLE_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_vehicle_view_widgets, lengthof(_nested_vehicle_view_widgets)
@@ -1631,7 +1689,7 @@ static const WindowDesc _vehicle_view_desc(
  *  default_height are different for train view.
  */
 static const WindowDesc _train_view_desc(
-	WDP_AUTO, WDP_AUTO, 250, 134, 250, 134,
+	WDP_AUTO, WDP_AUTO, 250, 134,
 	WC_VEHICLE_VIEW, WC_NONE,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
 	_nested_vehicle_view_widgets, lengthof(_nested_vehicle_view_widgets)
