@@ -60,7 +60,6 @@ struct TimetableWindow : Window {
 		this->InitNested(desc, window_number);
 		this->owner = this->vehicle->owner;
 		this->sel_index = -1;
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(TTV_TIMETABLE_PANEL)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
@@ -382,7 +381,7 @@ static const NWidgetPart _nested_timetable_widgets[] = {
 };
 
 static const WindowDesc _timetable_desc(
-	WDP_AUTO, WDP_AUTO, 400, 130, 400, 130,
+	WDP_AUTO, WDP_AUTO, 400, 130,
 	WC_VEHICLE_TIMETABLE, WC_VEHICLE_VIEW,
 	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
 	_nested_timetable_widgets, lengthof(_nested_timetable_widgets)
