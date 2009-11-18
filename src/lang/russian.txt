@@ -643,7 +643,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Леге
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Показать легенду к графикам
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}График прибыли от основной деятельности
@@ -2942,7 +2942,7 @@ STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :магнито�
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE.gen                        :магниторельсового локомотива
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Цена: {CURRENCY} Вес: {WEIGHT_S}{}Скорость: {VELOCITY}  Мощность: {POWER}{}Стоимость обслуж.: {CURRENCY}/год{}Ёмкость: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Цена: {CURRENCY} Вес: {WEIGHT_S}{}Скорость: {VELOCITY}  Мощность: {POWER}  Макс. ТУ: {7:FORCE}{}Стоимость обслуж.: {CURRENCY}/год{}Ёмкость: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Цена: {CURRENCY} Вес: {WEIGHT_S}{}Скорость: {VELOCITY}  Мощность: {POWER}  Макс. ТУ: {7:FORCE}{}Стоимость обслуж.: {4:CURRENCY}/год{}Ёмкость: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Цена: {CURRENCY} Макс. скорость: {VELOCITY}{}Ёмкость: {CARGO}, {CARGO}{}Стоимость обслуживания: {CURRENCY}/год
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Цена: {CURRENCY} Макс. скорость: {VELOCITY}{}Ёмкость: {CARGO}{}Стоимость обслуж.: {CURRENCY}/год
 
