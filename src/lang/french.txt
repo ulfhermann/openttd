@@ -507,7 +507,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Légende
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Affiche la légende
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Graphique du profit d'opération
@@ -2480,6 +2480,7 @@ STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP                        :{BLACK}Afficher
 STR_STATION_VIEW_RENAME_STATION_CAPTION                         :Renommer la gare
 
 # Waypoint/buoy view window
+STR_WAYPOINT_VIEW_CAPTION                                       :{WHITE}{WAYPOINT}
 STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Centrer la vue sur le point de contrôle. Ctrl-clic pour ouvrir une nouvelle vue sur le point de contrôle
 STR_WAYPOINT_VIEW_CHANGE_WAYPOINT_NAME                          :{BLACK}Renommer le point decontrôle
 STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centrer la vue sur la bouée. Ctrl-clic pour ouvrir une nouvelle vue sur la bouée
@@ -2786,7 +2787,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :{G=f}locomotive
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :{G=f}locomotive magnétique
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Prix{NBSP}: {CURRENCY} Poids{NBSP}: {WEIGHT_S}{}Vitesse{NBSP}: {VELOCITY}  Puissance{NBSP}: {POWER}{}Coût d'entretien{NBSP}: {CURRENCY}/an{}Capacité{NBSP}: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Prix{NBSP}: {CURRENCY} Poids{NBSP}: {WEIGHT_S}{}Vitesse{NBSP}: {VELOCITY}  Puissance{NBSP}: {POWER}  E.T. max.{NBSP}: {7:FORCE}{}Coût d'entretien{NBSP}: {CURRENCY}/an{}Capacité{NBSP}: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Prix{NBSP}: {CURRENCY} Poids{NBSP}: {WEIGHT_S}{}Vitesse{NBSP}: {VELOCITY}  Puissance{NBSP}: {POWER}  E.T. max.{NBSP}: {7:FORCE}{}Coût d'entretien{NBSP}: {4:CURRENCY}/an{}Capacité{NBSP}: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Prix{NBSP}: {CURRENCY} Vitesse max.{NBSP}: {VELOCITY}{}Capacité{NBSP}: {CARGO}, {CARGO}{}Coût d'entretien{NBSP}: {CURRENCY}/an
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Prix{NBSP}: {CURRENCY} Vitesse max.{NBSP}: {VELOCITY}{}Capacité{NBSP}: {CARGO}{}Coût d'entretien{NBSP}: {CURRENCY}/an
 

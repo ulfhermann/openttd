@@ -506,7 +506,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Nút
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Hiện khóa trên biểu đồ
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Biểu Đồ Lợi Nhuận Hoạt Động
@@ -1737,7 +1737,7 @@ STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Thay tê
 
 # Engine preview window
 
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Giá: {CURRENCY} Nặng: {WEIGHT_S}{}Tốc độ: {VELOCITY}  Công suất: {POWER}  Max. T.E.: {7:FORCE}{}Giá vận hành: {CURRENCY}/yr{}Năng suất: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Giá: {CURRENCY} Nặng: {WEIGHT_S}{}Tốc độ: {VELOCITY}  Công suất: {POWER}  Max. T.E.: {7:FORCE}{}Giá vận hành: {4:CURRENCY}/yr{}Năng suất: {5:CARGO}
 
 # Autoreplace window
 STR_REPLACE_VEHICLE_TRAIN                                       :Tàu
