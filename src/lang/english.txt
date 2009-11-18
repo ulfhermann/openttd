@@ -506,7 +506,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Key
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Show key to graphs
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING2}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING2}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Operating Profit Graph
@@ -2187,7 +2187,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Company-owned l
 STR_ABOUT_OPENTTD                                               :{WHITE}About OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Original copyright {COPYRIGHT} 1995 Chris Sawyer, All rights reserved
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD version {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 The OpenTTD team
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2009 The OpenTTD team
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Save Game
@@ -2791,7 +2791,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :monorail locomo
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :maglev locomotive
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Cost: {CURRENCY} Weight: {WEIGHT_S}{}Speed: {VELOCITY}  Power: {POWER}{}Running Cost: {CURRENCY}/yr{}Capacity: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Cost: {CURRENCY} Weight: {WEIGHT_S}{}Speed: {VELOCITY}  Power: {POWER}  Max. T.E.: {7:FORCE}{}Running Cost: {CURRENCY}/yr{}Capacity: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Cost: {CURRENCY} Weight: {WEIGHT_S}{}Speed: {VELOCITY}  Power: {POWER}  Max. T.E.: {7:FORCE}{}Running Cost: {4:CURRENCY}/yr{}Capacity: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Cost: {CURRENCY} Max. Speed: {VELOCITY}{}Capacity: {CARGO}, {CARGO}{}Running Cost: {CURRENCY}/yr
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Cost: {CURRENCY} Max. Speed: {VELOCITY}{}Capacity: {CARGO}{}Running Cost: {CURRENCY}/yr
 
