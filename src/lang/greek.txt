@@ -570,7 +570,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Κλει
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Εμφάνιση κλειδιού στα γραφήματα
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Γράφημα Ενεργών Εσόδων
@@ -2856,7 +2856,7 @@ STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :{G=f}μηχαν
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE.geniki                     :{G=f}μηχανής maglev
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Κόστος: {CURRENCY} Βάρος: {WEIGHT_S}{}Ταχύτητα: {VELOCITY}  Ιπποδύναμη: {POWER}{}Κόστος Λειτουργίας: {CURRENCY}/χρ{}Χωρητικότητα: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Κόστος: {CURRENCY} Βάρος: {WEIGHT_S}{}Ταχύτητα: {VELOCITY}  Ιπποδύναμη: {POWER}  Μεγ. Ε.Δ: {7:FORCE}{}Κόστος Λειτουργίας: {CURRENCY}/yr{}Χωρητικότητα: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Κόστος: {CURRENCY} Βάρος: {WEIGHT_S}{}Ταχύτητα: {VELOCITY}  Ιπποδύναμη: {POWER}  Μεγ. Ε.Δ: {7:FORCE}{}Κόστος Λειτουργίας: {4:CURRENCY}/yr{}Χωρητικότητα: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Κόστος: {CURRENCY} Μεγ. Ταχύτητα: {VELOCITY}{}Χωρητικότητα: {CARGO}, {CARGO}{}Κόστος Λειτουργίας: {CURRENCY}/χρ
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Κόστος: {CURRENCY} Μεγ. Ταχύτητα: {VELOCITY}{}Χωρητικότητα: {CARGO}{}Κόστος Λειτουργίας: {CURRENCY}/χρ
 
