@@ -751,17 +751,19 @@ SpriteID GetCargoSprite(CargoID i)
  *
  * @param i type of cargo
  * @param waiting number of waiting units
- * @param x x on-screen coordinate where to start with drawing icons
+ * @param left  left most coordinate to draw on
+ * @param right right most coordinate to draw on
  * @param y y coordinate
  * @param width the width of the view
  */
-static void DrawCargoIcons(CargoID i, uint waiting, int x, int y, uint width)
+static void DrawCargoIcons(CargoID i, uint waiting, int left, int right, int y)
 {
-	uint num = min((waiting + 5) / 10, width / 10); // maximum is width / 10 icons so it won't overflow
+	uint num = min((waiting + 5) / 10, (right - left) / 10); // maximum is width / 10 icons so it won't overflow
 	if (num == 0) return;
 
 	SpriteID sprite = GetCargoSprite(i);
 
+	int x = _dynlang.text_dir == TD_RTL ? right - num * 10 : left;
 	do {
 		DrawSprite(sprite, PAL_NONE, x, y);
 		x += 10;
@@ -963,8 +965,6 @@ struct StationViewWindow : public Window {
 
 	typedef std::vector<RowDisplay> CargoDataVector;
 
-	static const int _spacing_symbol = 10;
-	static const int _spacing_column = 10;
 	static const int _num_columns = 4;
 
 	enum Invalidation {
@@ -984,6 +984,8 @@ struct StationViewWindow : public Window {
 		PLANNED,
 		SENT
 	};
+	
+	uint expand_shrink_width;     ///< The width allocated to the expand/shrink 'button'
 
 	/** Height of the #SVW_ACCEPTLIST widget for different views. */
 	enum AcceptListHeight {
@@ -1068,6 +1070,7 @@ struct StationViewWindow : public Window {
 			case SVW_WAITING:
 				resize->height = FONT_HEIGHT_NORMAL;
 				size->height = WD_FRAMERECT_TOP + 4 * resize->height + WD_FRAMERECT_BOTTOM;
+				this->expand_shrink_width = max(GetStringBoundingBox("-").width, GetStringBoundingBox("+").width) + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
 				break;
 
 			case SVW_ACCEPTLIST:
@@ -1345,13 +1348,7 @@ struct StationViewWindow : public Window {
 
 				if (groupings[column] == GR_CARGO) {
 					str = STR_STATION_VIEW_WAITING_CARGO;
-					DrawCargoIcons(
-							cd->GetCargo(),
-							cd->GetCount(),
-							r.left + WD_FRAMERECT_LEFT + column * _spacing_column,
-							y,
-							r.right - r.left - WD_FRAMERECT_LEFT - WD_FRAMERECT_RIGHT
-					);
+					DrawCargoIcons(cd->GetCargo(), cd->GetCount(), r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y);
 				} else {
 					StationID station = cd->GetStation();
 
@@ -1375,23 +1372,18 @@ struct StationViewWindow : public Window {
 						ScrollMainWindowToTile(Station::Get(station)->xy);
 					}
 				}
-				DrawString(
-						r.left + WD_FRAMERECT_LEFT + column * _spacing_column,
-						r.right - WD_FRAMERECT_RIGHT - _spacing_symbol,
-						y,
-						str,
-						TC_FROMSTRING
-				);
+				
+				bool rtl = _dynlang.text_dir == TD_RTL;
+				int text_left    = rtl ? r.left + this->expand_shrink_width : r.left + WD_FRAMERECT_LEFT;
+				int text_right   = rtl ? r.right - WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width;
+				int shrink_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width + WD_FRAMERECT_LEFT;
+				int shrink_right = rtl ? r.left + this->expand_shrink_width - WD_FRAMERECT_RIGHT : r.right - WD_FRAMERECT_RIGHT;
+
+				DrawString(text_left + column * this->expand_shrink_width, text_right, y, str, TC_FROMSTRING);
 
 				if (column < _num_columns - 1) {
 					const char *sym = cd->Size() > 0 ? "-" : "+";
-					DrawString(
-							r.right - _spacing_symbol,
-							r.right,
-							y,
-							sym,
-							TC_YELLOW
-					);
+					DrawString(shrink_left, shrink_right, y, sym, TC_YELLOW);
 				}
 				SetDisplayedRow(cd);
 			}
@@ -1464,7 +1456,7 @@ struct StationViewWindow : public Window {
 			SetDParam(1, DivideApprox(ge->supply * 30, scale));
 			SetDParam(3, ToPercent8(ge->rating));
 			SetDParam(2, STR_CARGO_RATING_APPALLING + (ge->rating >> 5));
-			DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT, y, STR_STATION_VIEW_CARGO_SUPPLY_RATING);
+			DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT - 6, y, STR_STATION_VIEW_CARGO_SUPPLY_RATING);
 			y += FONT_HEIGHT_NORMAL;
 		}
 	}

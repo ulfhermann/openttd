@@ -562,7 +562,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Selgitus
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Näita selgitust graafikute juures
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Opereerimiskasumi graafik
@@ -2832,7 +2832,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :monorelssvedur
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :magnethõljukvedur
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Hind: {CURRENCY} Tühimass: {WEIGHT_S}{}Tippkiirus: {VELOCITY}  Võimsus: {POWER}{}Käituskulud: {CURRENCY}/aastas{}Kandevõime: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Hind: {CURRENCY} Tühimass: {WEIGHT_S}{}Kiirus: {VELOCITY}  Võimsus: {POWER}  Veojõud: {7:FORCE}{}Käituskulud: {CURRENCY}/aasta{}Mahutavus: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Hind: {CURRENCY} Tühimass: {WEIGHT_S}{}Kiirus: {VELOCITY}  Võimsus: {POWER}  Veojõud: {7:FORCE}{}Käituskulud: {4:CURRENCY}/aasta{}Mahutavus: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Hind: {CURRENCY} Tippkiirus: {VELOCITY}{}Kandevõime: {CARGO}, {CARGO}{}Käituskulud: {CURRENCY}/a
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Hind: {CURRENCY} Tippkiirus: {VELOCITY}{}Kandevõime: {CARGO}{}Käituskulud: {CURRENCY}/a
 
