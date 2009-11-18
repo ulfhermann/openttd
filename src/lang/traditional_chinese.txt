@@ -506,7 +506,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}圖例
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}顯示圖例
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}營運損益圖表
@@ -2785,7 +2785,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :單軌機車頭
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :磁浮機車頭
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}{}營運成本：{CURRENCY} / 年{}容量：{CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}  最大牽引力：{7:FORCE}{}營運成本：{CURRENCY}/年{}容量：{CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}  最大牽引力：{7:FORCE}{}營運成本：{4:CURRENCY}/年{}容量：{5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}費用：{CURRENCY} 最高速度：{VELOCITY}{}容量：{CARGO}, {CARGO}{}營運成本：{CURRENCY}/年
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}費用：{CURRENCY} 最高速度：{VELOCITY}{}容量：{CARGO}{}營運成本：{CURRENCY}/年
 
