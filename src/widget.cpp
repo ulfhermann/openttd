@@ -515,7 +515,7 @@ static inline void DrawCaption(const Rect &r, Colours colour, Owner owner, Strin
 }
 
 /**
- * Draw a button with a dropdown (#WWT_DROPDOWN and #NWID_BUTTON_DRPDOWN).
+ * Draw a button with a dropdown (#WWT_DROPDOWN and #NWID_BUTTON_DROPDOWN).
  * @param r                Rectangle containing the widget.
  * @param colour           Background colour of the widget.
  * @param clicked_button   The button-part is lowered.
@@ -529,12 +529,12 @@ static inline void DrawButtonDropdown(const Rect &r, Colours colour, bool clicke
 	if (_dynlang.text_dir == TD_LTR) {
 		DrawFrameRect(r.left, r.top, r.right - 12, r.bottom, colour, clicked_button ? FR_LOWERED : FR_NONE);
 		DrawFrameRect(r.right - 11, r.top, r.right, r.bottom, colour, clicked_dropdown ? FR_LOWERED : FR_NONE);
-		DrawString(r.right - (clicked_dropdown ? 10 : 11), r.right, r.top + (clicked_dropdown ? 2 : 1), STR_BLACK_ARROW_DOWN, TC_FROMSTRING, SA_CENTER);
+		DrawString(r.right - (clicked_dropdown ? 10 : 11), r.right, r.top + (clicked_dropdown ? 2 : 1), DOWNARROW, TC_BLACK, SA_CENTER);
 		if (str != STR_NULL) DrawString(r.left + WD_DROPDOWNTEXT_LEFT + clicked_button, r.right - WD_DROPDOWNTEXT_RIGHT + clicked_button, r.top + WD_DROPDOWNTEXT_TOP + clicked_button, str, TC_BLACK);
 	} else {
 		DrawFrameRect(r.left + 12, r.top, r.right, r.bottom, colour, clicked_button ? FR_LOWERED : FR_NONE);
 		DrawFrameRect(r.left, r.top, r.left + 11, r.bottom, colour, clicked_dropdown ? FR_LOWERED : FR_NONE);
-		DrawString(r.left + clicked_dropdown, r.left + 11, r.top + (clicked_dropdown ? 2 : 1), STR_BLACK_ARROW_DOWN, TC_FROMSTRING, SA_CENTER);
+		DrawString(r.left + clicked_dropdown, r.left + 11, r.top + (clicked_dropdown ? 2 : 1), DOWNARROW, TC_BLACK, SA_CENTER);
 		if (str != STR_NULL) DrawString(r.left + WD_DROPDOWNTEXT_RIGHT + clicked_button, r.right - WD_DROPDOWNTEXT_LEFT + clicked_button, r.top + WD_DROPDOWNTEXT_TOP + clicked_button, str, TC_BLACK);
 	}
 }
@@ -1461,16 +1461,16 @@ void NWidgetBackground::SetupSmallestSize(Window *w, bool init_array)
 
 		/* Account for the size of the frame's text if that exists */
 		if (w != NULL && this->type == WWT_FRAME) {
+			this->child->padding_left   = WD_FRAMETEXT_LEFT;
+			this->child->padding_right  = WD_FRAMETEXT_RIGHT;
+			this->child->padding_top    = max((int)WD_FRAMETEXT_TOP, this->widget_data != STR_NULL ? FONT_HEIGHT_NORMAL + WD_FRAMETEXT_TOP / 2 : 0);
+			this->child->padding_bottom = WD_FRAMETEXT_BOTTOM;
+
+			this->smallest_x += this->child->padding_left + this->child->padding_right;
+			this->smallest_y += this->child->padding_top + this->child->padding_bottom;
+
 			if (this->index >= 0) w->SetStringParameters(this->index);
 			this->smallest_x = max(this->smallest_x, GetStringBoundingBox(this->widget_data).width + WD_FRAMETEXT_LEFT + WD_FRAMETEXT_RIGHT);
-			if (this->widget_data != STR_NULL) {
-				/* Adjust child's padding to fit text. We assume that the
-				 * original padding is designed around the 10 pixel high
-				 * sprite font. */
-				int y = FONT_HEIGHT_NORMAL - 10;
-				this->child->padding_top += y;
-				this->smallest_y += y;
-			}
 		}
 	} else {
 		Dimension d = {this->min_x, this->min_y};
@@ -1694,7 +1694,8 @@ NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, 
 		case WWT_TEXT:
 		case WWT_MATRIX:
 		case WWT_EDITBOX:
-		case NWID_BUTTON_DRPDOWN:
+		case NWID_BUTTON_DROPDOWN:
+		case NWID_BUTTON_ARROW:
 			this->SetFill(false, false);
 			break;
 
@@ -1823,6 +1824,16 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 			size = maxdim(size, d2);
 			break;
 		}
+		case NWID_BUTTON_ARROW: {
+			static const Dimension extra = {WD_IMGBTN_LEFT + WD_IMGBTN_RIGHT,  WD_IMGBTN_TOP + WD_IMGBTN_BOTTOM};
+			padding = &extra;
+			Dimension d2 = maxdim(GetSpriteSize(SPR_ARROW_LEFT), GetSpriteSize(SPR_ARROW_RIGHT));
+			d2.width += extra.width;
+			d2.height += extra.height;
+			size = maxdim(size, d2);
+			break;
+		}
+
 		case WWT_CLOSEBOX: {
 			static const Dimension extra = {WD_CLOSEBOX_LEFT + WD_CLOSEBOX_RIGHT, WD_CLOSEBOX_TOP + WD_CLOSEBOX_BOTTOM};
 			padding = &extra;
@@ -1865,7 +1876,7 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 			break;
 		}
 		case WWT_DROPDOWN:
-		case NWID_BUTTON_DRPDOWN: {
+		case NWID_BUTTON_DROPDOWN: {
 			static const Dimension extra = {WD_DROPDOWNTEXT_LEFT + WD_DROPDOWNTEXT_RIGHT, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM};
 			padding = &extra;
 			if (this->index >= 0) w->SetStringParameters(this->index);
@@ -1924,6 +1935,18 @@ void NWidgetLeaf::Draw(const Window *w)
 			DrawFrameRect(r.left, r.top, r.right, r.bottom, this->colour, (clicked) ? FR_LOWERED : FR_NONE);
 			DrawLabel(r, this->type, clicked, this->widget_data);
 			break;
+
+		case NWID_BUTTON_ARROW: {
+			SpriteID sprite;
+			switch (this->widget_data) {
+				case AWV_DECREASE: sprite = _dynlang.text_dir != TD_RTL ? SPR_ARROW_LEFT : SPR_ARROW_RIGHT; break;
+				case AWV_INCREASE: sprite = _dynlang.text_dir == TD_RTL ? SPR_ARROW_LEFT : SPR_ARROW_RIGHT; break;
+				case AWV_LEFT:     sprite = SPR_ARROW_LEFT;  break;
+				case AWV_RIGHT:    sprite = SPR_ARROW_RIGHT; break;
+				default: NOT_REACHED();
+			}
+			DrawImageButtons(r, WWT_PUSHIMGBTN, this->colour, clicked, sprite);
+		}
 
 		case WWT_LABEL:
 			if (this->index >= 0) w->SetStringParameters(this->index);
@@ -1988,7 +2011,7 @@ void NWidgetLeaf::Draw(const Window *w)
 			DrawDropdown(r, this->colour, clicked, this->widget_data);
 			break;
 
-		case NWID_BUTTON_DRPDOWN:
+		case NWID_BUTTON_DROPDOWN:
 			if (this->index >= 0) w->SetStringParameters(this->index);
 			DrawButtonDropdown(r, this->colour, clicked, (this->disp_flags & ND_DROPDOWN_ACTIVE) != 0, this->widget_data);
 			break;
@@ -2016,7 +2039,7 @@ Scrollbar *NWidgetLeaf::FindScrollbar(Window *w, bool allow_next)
 }
 
 /**
- * For a #NWID_BUTTON_DRPDOWN, test whether \a pt refers to the button or to the drop-down.
+ * For a #NWID_BUTTON_DROPDOWN, test whether \a pt refers to the button or to the drop-down.
  * @param pt Point in the widget.
  * @return The point refers to the button.
  *
@@ -2177,7 +2200,7 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
 
 			default:
 				if (*dest != NULL) return num_used;
-				assert((parts->type & WWT_MASK) < WWT_LAST || parts->type == NWID_BUTTON_DRPDOWN);
+				assert((parts->type & WWT_MASK) < WWT_LAST || parts->type == NWID_BUTTON_DROPDOWN || parts->type == NWID_BUTTON_ARROW);
 				*dest = new NWidgetLeaf(parts->type, parts->u.widget.colour, parts->u.widget.index, 0x0, STR_NULL);
 				*biggest_index = max(*biggest_index, (int)parts->u.widget.index);
 				break;
