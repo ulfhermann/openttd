@@ -1201,7 +1201,12 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			anything_unloaded = true;
 			result |= 1;
 
-			if (!_settings_game.order.gradual_loading || delivered < amount_unloaded || delivered == 0){
+			/* load_amount might (theoretically) be 0, which would make delivered == 0 even though there is still cargo
+			 * in the vehicle. Thus OnboardCount > 0. In that case we can't stop unloading as SwapReserved wouldn't work.
+			 * v->cargo also contains the cargo reserved for the vehicle which is not on board at the moment, but will be
+			 * swapped back when done unloading.
+			 */
+			if (v->cargo.OnboardCount() == 0) {
 				/* done delivering */
 				if (!v->cargo.Empty()) completely_emptied = false;
 				ClrBit(v->vehicle_flags, VF_CARGO_UNLOADING);
