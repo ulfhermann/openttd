@@ -270,9 +270,10 @@ struct MusicTrackSelectionWindow : public Window {
 
 				for (uint i = 1; i <= NUM_SONGS_AVAILABLE; i++) {
 					SetDParam(0, i);
-					SetDParam(2, i);
-					SetDParam(1, SPECSTR_SONGNAME);
-					Dimension d2 = GetStringBoundingBox((i < 10) ? STR_PLAYLIST_TRACK_SINGLE_DIGIT : STR_PLAYLIST_TRACK_DOUBLE_DIGIT);
+					SetDParam(1, 2);
+					SetDParam(2, SPECSTR_SONGNAME);
+					SetDParam(3, i);
+					Dimension d2 = GetStringBoundingBox(STR_PLAYLIST_TRACK_NAME);
 					d.width = max(d.width, d2.width);
 					d.height += d2.height;
 				}
@@ -292,9 +293,10 @@ struct MusicTrackSelectionWindow : public Window {
 				int y = r.top + WD_FRAMERECT_TOP;
 				for (uint i = 1; i <= NUM_SONGS_AVAILABLE; i++) {
 					SetDParam(0, i);
-					SetDParam(2, i);
-					SetDParam(1, SPECSTR_SONGNAME);
-					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, (i < 10) ? STR_PLAYLIST_TRACK_SINGLE_DIGIT : STR_PLAYLIST_TRACK_DOUBLE_DIGIT);
+					SetDParam(1, 2);
+					SetDParam(2, SPECSTR_SONGNAME);
+					SetDParam(3, i);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_PLAYLIST_TRACK_NAME);
 					y += FONT_HEIGHT_SMALL;
 				}
 			} break;
@@ -306,9 +308,10 @@ struct MusicTrackSelectionWindow : public Window {
 				for (const byte *p = _playlists[msf.playlist]; *p != 0; p++) {
 					uint i = *p;
 					SetDParam(0, i);
-					SetDParam(1, SPECSTR_SONGNAME);
-					SetDParam(2, i);
-					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, (i < 10) ? STR_PLAYLIST_TRACK_SINGLE_DIGIT : STR_PLAYLIST_TRACK_DOUBLE_DIGIT);
+					SetDParam(1, 2);
+					SetDParam(2, SPECSTR_SONGNAME);
+					SetDParam(3, i);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_PLAYLIST_TRACK_NAME);
 					y += FONT_HEIGHT_SMALL;
 				}
 			} break;
@@ -490,6 +493,12 @@ struct MusicWindow : public Window {
 				d.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 				*size = maxdim(*size, d);
 			} break;
+
+			/* Hack-ish: set the proper widget data; only needs to be done once
+			 * per (Re)Init as that's the only time the language changes. */
+			case MW_PREV: this->GetWidget<NWidgetCore>(MW_PREV)->widget_data = _dynlang.text_dir == TD_RTL ? SPR_IMG_SKIP_TO_NEXT : SPR_IMG_SKIP_TO_PREV; break;
+			case MW_NEXT: this->GetWidget<NWidgetCore>(MW_NEXT)->widget_data = _dynlang.text_dir == TD_RTL ? SPR_IMG_SKIP_TO_PREV : SPR_IMG_SKIP_TO_NEXT; break;
+			case MW_PLAY: this->GetWidget<NWidgetCore>(MW_PLAY)->widget_data = _dynlang.text_dir == TD_RTL ? SPR_IMG_PLAY_MUSIC_RTL : SPR_IMG_PLAY_MUSIC; break;
 		}
 	}
 
@@ -516,7 +525,8 @@ struct MusicWindow : public Window {
 				StringID str = STR_MUSIC_TRACK_NONE;
 				if (_song_is_active != 0 && _music_wnd_cursong != 0) {
 					SetDParam(0, _music_wnd_cursong);
-					str = (_music_wnd_cursong < 10) ? STR_MUSIC_TRACK_SINGLE_DIGIT : STR_MUSIC_TRACK_DOUBLE_DIGIT;
+					SetDParam(0, 2);
+					str = STR_MUSIC_TRACK_DIGIT;
 				}
 				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, str);
 			} break;
@@ -539,7 +549,12 @@ struct MusicWindow : public Window {
 				DrawString(r.left, r.right, r.bottom - FONT_HEIGHT_SMALL, STR_MUSIC_MIN_MAX_RULER, TC_FROMSTRING, SA_CENTER);
 				y = (r.top + r.bottom - slider_height) / 2;
 				byte volume = (widget == MW_MUSIC_VOL) ? msf.music_vol : msf.effect_vol;
-				int x = r.left + (volume * (r.right - r.left) / 127);
+				int x = (volume * (r.right - r.left) / 127);
+				if (_dynlang.text_dir == TD_RTL) {
+					x = r.right - x;
+				} else {
+					x += r.left;
+				}
 				DrawFrameRect(x, y, x + slider_width, y + slider_height, COLOUR_GREY, FR_NONE);
 			} break;
 		}
@@ -587,6 +602,7 @@ struct MusicWindow : public Window {
 				byte *vol = (widget == MW_MUSIC_VOL) ? &msf.music_vol : &msf.effect_vol;
 
 				byte new_vol = x * 127 / this->GetWidget<NWidgetBase>(widget)->current_x;
+				if (_dynlang.text_dir == TD_RTL) new_vol = 127 - new_vol;
 				if (new_vol != *vol) {
 					*vol = new_vol;
 					if (widget == MW_MUSIC_VOL) MusicVolumeChanged(new_vol);
