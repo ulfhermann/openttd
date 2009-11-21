@@ -39,14 +39,20 @@ enum TimetableViewWindowWidgets {
 	TTV_RESIZE,
 };
 
-void SetTimetableParams(int param1, int param2, uint32 time)
+/**
+ * Set the timetable parameters in the format as described by the setting.
+ * @param param1 the first DParam to fill
+ * @param param2 the second DParam to fill
+ * @param ticks  the number of ticks to 'draw'
+ */
+void SetTimetableParams(int param1, int param2, Ticks ticks)
 {
 	if (_settings_client.gui.timetable_in_ticks) {
 		SetDParam(param1, STR_TIMETABLE_TICKS);
-		SetDParam(param2, time);
+		SetDParam(param2, ticks);
 	} else {
 		SetDParam(param1, STR_TIMETABLE_DAYS);
-		SetDParam(param2, time / DAY_TICKS);
+		SetDParam(param2, ticks / DAY_TICKS);
 	}
 }
 
@@ -242,17 +248,10 @@ struct TimetableWindow : Window {
 			case TTV_SUMMARY_PANEL: {
 				int y = r.top + WD_FRAMERECT_TOP;
 
-				uint total_time = 0;
-				bool complete = true;
-				for (const Order *order = v->GetOrder(0); order != NULL; order = order->next) {
-					total_time += order->travel_time + order->wait_time;
-					if (order->travel_time == 0 && !order->IsType(OT_CONDITIONAL)) complete = false;
-					if (order->wait_time == 0 && order->IsType(OT_GOTO_STATION) && !(order->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION)) complete = false;
-				}
-
+				Ticks total_time = v->orders.list != NULL ? v->orders.list->GetTimetableDurationIncomplete() : 0;
 				if (total_time != 0) {
 					SetTimetableParams(0, 1, total_time);
-					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, complete ? STR_TIMETABLE_TOTAL_TIME : STR_TIMETABLE_TOTAL_TIME_INCOMPLETE);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, v->orders.list->IsCompleteTimetable() ? STR_TIMETABLE_TOTAL_TIME : STR_TIMETABLE_TOTAL_TIME_INCOMPLETE);
 				}
 				y += FONT_HEIGHT_NORMAL;
 
