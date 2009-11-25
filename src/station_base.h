@@ -18,12 +18,105 @@
 #include "cargo_type.h"
 #include "industry_type.h"
 #include "core/geometry_type.hpp"
+#include "linkgraph/linkgraph_types.h"
 #include <list>
+#include <map>
+#include <set>
 
 typedef Pool<BaseStation, StationID, 32, 64000> StationPool;
 extern StationPool _station_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
+
+class LinkStat {
+public:
+	uint capacity;
+	uint frozen;
+	uint usage;
+	LinkStat() : capacity(0), frozen(0), usage(0) {}
+
+	inline LinkStat & operator*=(uint factor) {
+		capacity *= factor;
+		usage *= factor;
+		return *this;
+	}
+
+	inline LinkStat & operator/=(uint divident) {
+		capacity /= divident;
+		if (capacity < frozen) {
+			capacity = frozen;
+		}
+		usage /= divident;
+		return *this;
+	}
+
+	inline LinkStat & operator+=(const LinkStat & other)
+	{
+		this->capacity += other.capacity;
+		this->usage += other.usage;
+		this->frozen += other.frozen;
+		return *this;
+	}
+
+	inline void Clear()
+	{
+		this->capacity = 0;
+		this->usage = 0;
+		this->frozen = 0;
+	}
+};
+
+class FlowStat {
+public:
+	FlowStat(StationID st = INVALID_STATION, uint p = 0, uint s = 0) :
+		planned(p), sent(s), via(st) {}
+	uint planned;
+	uint sent;
+	StationID via;
+	struct comp {
+		bool operator()(const FlowStat & x, const FlowStat & y) const {
+			int diff_x = (int)x.planned - (int)x.sent;
+			int diff_y = (int)y.planned - (int)y.sent;
+			if (diff_x != diff_y) {
+				return diff_x > diff_y;
+			} else {
+				return x.via > y.via;
+			}
+		}
+	};
+
+	inline FlowStat & operator*=(uint factor) {
+		planned *= factor;
+		sent *= factor;
+		return *this;
+	}
+
+	inline FlowStat & operator/=(uint divident) {
+		planned /= divident;
+		sent /= divident;
+		return *this;
+	}
+
+	inline FlowStat & operator+=(const FlowStat & other)
+	{
+		assert(this->via == INVALID_STATION || other.via == INVALID_STATION || this->via == other.via);
+		this->via = other.via;
+		this->planned += other.planned;
+		this->sent += other.sent;
+		return *this;
+	}
+
+	inline void Clear()
+	{
+		this->planned = 0;
+		this->sent = 0;
+		this->via = INVALID_STATION;
+	}
+};
+
+typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow to be sent via specified station (or consumed locally)
+typedef std::map<StationID, LinkStat> LinkStatMap;
+typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by origin stations
 
 struct GoodsEntry {
 	enum AcceptancePickup {
@@ -36,7 +129,8 @@ struct GoodsEntry {
 		days_since_pickup(255),
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
-		last_age(255)
+		last_age(255),
+		last_component(0)
 	{}
 
 	byte acceptance_pickup;
@@ -45,6 +139,25 @@ struct GoodsEntry {
 	byte last_speed;
 	byte last_age;
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
+	uint supply;
+	FlowStatMap flows;      ///< The planned flows through this station
+	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
+	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
+	
+	FlowStat GetSumFlowVia(StationID via) const;
+
+	/**
+	 * update the flow stats for count cargo from source sent to next
+	 */
+	void UpdateFlowStats(StationID source, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count);
+
+	/**
+	 * update the flow stats for count cargo that cannot be delivered here
+	 * return the direction where it is sent
+	 */
+	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
 };
 
 

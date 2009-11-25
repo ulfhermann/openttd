@@ -47,7 +47,7 @@
 
 #include "saveload_internal.h"
 
-extern const uint16 SAVEGAME_VERSION = 128;
+extern const uint16 SAVEGAME_VERSION = CARGOMAP_SV;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -1445,6 +1445,7 @@ extern const ChunkHandler _group_chunk_handlers[];
 extern const ChunkHandler _cargopacket_chunk_handlers[];
 extern const ChunkHandler _autoreplace_chunk_handlers[];
 extern const ChunkHandler _labelmaps_chunk_handlers[];
+extern const ChunkHandler _linkgraph_chunk_handlers[];
 
 static const ChunkHandler * const _chunk_handlers[] = {
 	_gamelog_chunk_handlers,
@@ -1472,6 +1473,7 @@ static const ChunkHandler * const _chunk_handlers[] = {
 	_cargopacket_chunk_handlers,
 	_autoreplace_chunk_handlers,
 	_labelmaps_chunk_handlers,
+	_linkgraph_chunk_handlers,
 	NULL,
 };
 

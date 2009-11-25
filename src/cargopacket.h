@@ -16,20 +16,25 @@
 #include "economy_type.h"
 #include "tile_type.h"
 #include "station_type.h"
+#include "order_type.h"
 #include "cargo_type.h"
 #include "vehicle_type.h"
+#include "core/multimap.hpp"
 #include <list>
 
 /** Unique identifier for a single cargo packet. */
 typedef uint32 CargoPacketID;
 struct CargoPacket;
+struct GoodsEntry;
 
 /** Type of the pool for cargo packets. */
 typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576, true, false> CargoPacketPool;
 /** The actual pool with cargo packets */
 extern CargoPacketPool _cargopacket_pool;
 
-template <class Tinst> class CargoList;
+template <class Tinst, class Tcont> class CargoList;
+class StationCargoList;
+class VehicleCargoList;
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -47,8 +52,9 @@ private:
 	TileIndex loaded_at_xy;     ///< Location where this cargo has been loaded into the vehicle
 
 	/** The CargoList caches, thus needs to know about it. */
-	template <class Tinst> friend class CargoList;
+	template <class Tinst, class Tcont> friend class CargoList;
 	friend class VehicleCargoList;
+	friend class ReservationList;
 	friend class StationCargoList;
 	/** We want this to be saved, right? */
 	friend const struct SaveLoad *GetCargoPacketDesc();
@@ -165,6 +171,8 @@ public:
 		return this->loaded_at_xy;
 	}
 
+	CargoPacket *Split(uint new_size);
+	void Merge(CargoPacket *other);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 	static void InvalidateAllFrom(StationID sid);
@@ -184,33 +192,37 @@ public:
  */
 #define FOR_ALL_CARGOPACKETS(var) FOR_ALL_CARGOPACKETS_FROM(var, 0)
 
+enum UnloadType {
+	UL_KEEP     = 0,      ///< keep cargo on vehicle
+	UL_DELIVER  = 1 << 0, ///< deliver cargo
+	UL_TRANSFER = 1 << 1, ///< transfer cargo
+	UL_ACCEPTED = 1 << 2, ///< cargo is accepted
+};
+
+class StationCargoList;
+class VehicleCargoList;
+
 /**
  * Simple collection class for a list of cargo packets
  * @tparam Tinst The actual instantation of this cargo list
  */
-template <class Tinst>
+template <class Tinst, class Tcont>
 class CargoList {
 public:
-	/** Container with cargo packets */
-	typedef std::list<CargoPacket *> List;
 	/** The iterator for our container */
-	typedef List::iterator Iterator;
+	typedef typename Tcont::iterator Iterator;
 	/** The const iterator for our container */
-	typedef List::const_iterator ConstIterator;
-
-	/** Kind of actions that could be done with packets on move */
-	enum MoveToAction {
-		MTA_FINAL_DELIVERY, ///< "Deliver" the packet to the final destination, i.e. destroy the packet
-		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID
-		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer
-		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload
-	};
+	typedef typename Tcont::const_iterator ConstIterator;
+	/** The reverse iterator for our container */
+	typedef typename Tcont::reverse_iterator ReverseIterator;
+	/** The const reverse iterator for our container */
+	typedef typename Tcont::const_reverse_iterator ConstReverseIterator;
 
 protected:
 	uint count;                 ///< Cache for the number of cargo entities
 	uint cargo_days_in_transit; ///< Cache for the sum of number of days in transit of each entity; comparable to man-hours
 
-	List packets;               ///< The cargo packets in this list
+	Tcont packets;               ///< The cargo packets in this list
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -226,6 +238,12 @@ protected:
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
+	CargoPacket *MovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
+
+	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap);
+
+	uint MovePacket(VehicleCargoList *dest, Iterator &it, uint cap, TileIndex load_place = INVALID_TILE, bool reserved = false);
+
 public:
 	/** Create the cargo list */
 	CargoList() {}
@@ -236,7 +254,7 @@ public:
 	 * Returns a pointer to the cargo packet list (so you can iterate over it etc).
 	 * @return pointer to the packet list
 	 */
-	FORCEINLINE const List *Packets() const
+	FORCEINLINE const Tcont *Packets() const
 	{
 		return &this->packets;
 	}
@@ -265,7 +283,7 @@ public:
 	 */
 	FORCEINLINE StationID Source() const
 	{
-		return this->Empty() ? INVALID_STATION : this->packets.front()->source;
+		return this->Empty() ? INVALID_STATION : (*(ConstIterator(packets.begin())))->source;
 	}
 
 	/**
@@ -277,16 +295,6 @@ public:
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
 
-
-	/**
-	 * Appends the given cargo packet
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
-	 */
-	void Append(CargoPacket *cp);
-
 	/**
 	 * Truncates the cargo in this list to the given amount. It leaves the
 	 * first count cargo entities and removes the rest.
@@ -294,43 +302,30 @@ public:
 	 */
 	void Truncate(uint max_remaining);
 
-	/**
-	 * Moves the given amount of cargo to another list.
-	 * Depending on the value of mta the side effects of this function differ:
-	 *  - MTA_FINAL_DELIVERY: destroys the packets that do not originate from a specific station
-	 *  - MTA_CARGO_LOAD:     sets the loaded_at_xy value of the moved packets
-	 *  - MTA_TRANSFER:       just move without side effects
-	 *  - MTA_UNLOAD:         just move without side effects
-	 * @param dest  the destination to move the cargo to
-	 * @param count the amount of cargo entities to move
-	 * @param mta   how to handle the moving (side effects)
-	 * @param data  Depending on mta the data of this variable differs:
-	 *              - MTA_FINAL_DELIVERY - station ID of packet's origin not to remove
-	 *              - MTA_CARGO_LOAD     - station's tile index of load
-	 *              - MTA_TRANSFER       - unused
-	 *              - MTA_UNLOAD         - unused
-	 * @param payment The payment helper
-	 *
-	 * @pre mta == MTA_FINAL_DELIVERY || dest != NULL
-	 * @pre mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL
-	 * @return true if there are still packets that might be moved from this cargo list
-	 */
-	template <class Tother_inst>
-	bool MoveTo(Tother_inst *dest, uint count, MoveToAction mta, CargoPayment *payment, uint data = 0);
-
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
 
+typedef std::list<CargoPacket *> CargoPacketList;
+
 /**
  * CargoList that is used for vehicles.
  */
-class VehicleCargoList : public CargoList<VehicleCargoList> {
+class VehicleCargoList : public CargoList<VehicleCargoList, CargoPacketList> {
 protected:
-	/** The (direct) parent of this class */
-	typedef CargoList<VehicleCargoList> Parent;
+	static UnloadType WillUnloadOld(byte flags, StationID curr_station, StationID source);
+	static UnloadType WillUnloadCargoDist(byte flags, StationID curr_station, StationID next_station, StationID via, StationID source);
 
-	Money feeder_share; ///< Cache for the feeder share
+	uint TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID next);
+	uint DeliverPacket(Iterator &c, uint remaining_unload, CargoPayment *payment);
+	uint KeepPacket(Iterator &c);
+
+	/** The (direct) parent of this class */
+	typedef CargoList<VehicleCargoList, CargoPacketList> Parent;
+
+	CargoPacketList reserved; ///< The packets reserved for unloading in this list
+	Money feeder_share;       ///< Cache for the feeder share
+	uint reserved_count;      ///< count(reserved)
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -346,11 +341,37 @@ protected:
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
+	static byte GetUnloadFlags(GoodsEntry *dest, OrderUnloadFlags order_flags);
+
 public:
 	/** The super class ought to know what it's doing */
-	friend class CargoList<VehicleCargoList>;
+	friend class CargoList<VehicleCargoList, CargoPacketList>;
 	/** The vehicles have a cargo list (and we want that saved). */
 	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
+	/**
+	 * Moves the given amount of cargo from a vehicle to a station.
+	 * Depending on the value of flags and dest the side effects of this function differ:
+	 *  - dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
+	 *                        => MoveToStation sets OUF_UNLOAD_IF_POSSIBLE in the flags
+	 *                        packets are accepted here and may be unloaded and/or delivered (=destroyed);
+	 *                        if not using cargodist: all packets are unloaded and delivered
+	 *                        if using cargodist: only packets which have this station as final destination are unloaded and delivered
+	 *                        if using cargodist: other packets may or may not be unloaded, depending on next_station
+	 *                        if not set and using cargodist: packets may still be unloaded, but not delivered.
+	 *  - OUFB_UNLOAD: unload all packets unconditionally;
+	 *                        if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist)
+	 *  - OUFB_TRANSFER: don't deliver any packets;
+	 *                        overrides delivering aspect of OUF_UNLOAD_IF_POSSIBLE
+	 * @param dest         the destination to move the cargo to
+	 * @param max_unload   the maximum amount of cargo entities to move
+	 * @param flags        how to handle the moving (side effects)
+	 * @param curr_station the station where the cargo currently resides
+	 * @param next_station the next unloading station in the vehicle's order list
+	 * @return the number of cargo entities actually moved
+	 */
+	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment);
+
+	~VehicleCargoList();
 
 	/**
 	 * Returns total sum of the feeder share for all packets
@@ -362,12 +383,87 @@ public:
 	}
 
 	/**
+	 * tries to merge the packet with another one in the packets list.
+	 * if no fitting packet is found, appends it.
+	 * @param cp the packet to be inserted
+	 */
+	void MergeOrPush(CargoPacket *cp);
+
+	/**
+	 * Appends the given cargo packet
+	 * @warning After appending this packet may not exist anymore!
+	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+	 * @param cp the cargo packet to add
+	 * @param check_merge if true, check existing packets in the list for mergability
+	 * @pre cp != NULL
+	 */
+	void Append(CargoPacket *cp);
+
+	/**
+	 * Returns sum of cargo on board the vehicle (ie not only
+	 * reserved)
+	 * @return cargo on board the vehicle
+	 */
+	FORCEINLINE uint OnboardCount() const
+	{
+		return this->count - this->reserved_count;
+	}
+
+	/**
+	 * Returns sum of cargo reserved for the vehicle
+	 * @return cargo reserved for the vehicle
+	 */
+	FORCEINLINE uint ReservedCount() const
+	{
+		return this->reserved_count;
+	}
+
+	/**
+	 * Returns a pointer to the reserved cargo list (so you can iterate over it etc).
+	 * @return pointer to the reserved list
+	 */
+	FORCEINLINE const CargoPacketList *Reserved() const
+	{
+		return &this->reserved;
+	}
+
+	/**
+	 * Reserves a packet for later loading
+	 */
+	void Reserve(CargoPacket *cp);
+
+	/**
+	 * Returns all reserved cargo to the station
+	 */
+	void Unreserve(StationID next, StationCargoList *dest);
+
+	/**
+	 * load packets from the reserved list
+	 * @params count the number of cargo to load
+	 * @return true if there are still packets that might be loaded from the reservation list
+	 */
+	uint LoadReserved(uint count);
+
+	/**
+	 * swap the reserved and packets lists when starting to load cargo.
+	 * @pre this->packets.empty()
+	 */
+	void SwapReserved();
+
+	/**
 	 * Ages the all cargo in this list
 	 */
 	void AgeCargo();
 
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
+
+	/**
+	 * Moves the given amount of cargo to another vehicle (during autoreplace).
+	 * @param dest         the destination to move the cargo to
+	 * @param max_load     the maximum amount of cargo entities to move
+	 */
+	uint MoveTo(VehicleCargoList *dest, uint cap);
 
 	/**
 	 * Are two the two CargoPackets mergeable in the context of
@@ -386,13 +482,15 @@ public:
 	}
 };
 
+typedef MultiMap<StationID, CargoPacket *> StationCargoPacketMap;
+
 /**
  * CargoList that is used for stations.
  */
-class StationCargoList : public CargoList<StationCargoList> {
+class StationCargoList : public CargoList<StationCargoList, StationCargoPacketMap> {
 public:
 	/** The super class ought to know what it's doing */
-	friend class CargoList<StationCargoList>;
+	friend class CargoList<StationCargoList, StationCargoPacketMap>;
 	/** The stations, via GoodsEntry, have a CargoList. */
 	friend const struct SaveLoad *GetGoodsDesc();
 
@@ -410,6 +508,28 @@ public:
 				cp1->source_type     == cp2->source_type &&
 				cp1->source_id       == cp2->source_id;
 	}
+
+	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, TileIndex load_place = INVALID_TILE, bool reserve = false);
+
+	/**
+	 * Appends the given cargo packet to the range of packets with the same next station
+	 * @warning After appending this packet may not exist anymore!
+	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+	 * @param next the next hop
+	 * @param cp the cargo packet to add
+	 * @pre cp != NULL
+	 */
+	void Append(StationID next, CargoPacket *cp);
+
+	/**
+	 * route all packets with station "to" as next hop to a different place, except "curr"
+	 */
+	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge);
+
+	static void InvalidateAllFrom(SourceType src_type, SourceID src);
+
+protected:
+	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place, bool reserve);
 };
 
 #endif /* CARGOPACKET_H */

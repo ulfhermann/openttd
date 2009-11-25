@@ -333,4 +333,12 @@ bool SlObjectMember(void *object, const SaveLoad *sld);
 
 extern char _savegame_format[8];
 
+#define CAPACITIES_SV 130
+#define LINKGRAPH_SV 140
+#define DEMANDS_SV 150
+#define MCF_SV 160
+#define FLOWMAP_SV 170
+#define RESERVATION_SV 240
+#define CARGOMAP_SV 250
+
 #endif /* SAVELOAD_H */

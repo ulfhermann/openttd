@@ -1305,6 +1305,7 @@ static void AircraftEntersTerminal(Aircraft *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) return;
 
 	Station *st = Station::Get(v->targetairport);
+	StationID previous_station = v->last_station_visited;
 	v->last_station_visited = v->targetairport;
 
 	/* Check if station was ever visited before */
@@ -1321,7 +1322,7 @@ static void AircraftEntersTerminal(Aircraft *v)
 		AI::NewEvent(v->owner, new AIEventStationFirstVehicle(st->index, v->index));
 	}
 
-	v->BeginLoading();
+	v->BeginLoading(previous_station);
 }
 
 static void AircraftLandAirplane(Aircraft *v)
