@@ -528,8 +528,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Trykk he
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Firmarangering
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Ingeniør
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Trafikkleder
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Transportkoordinator
@@ -579,7 +578,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Egendefinert 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Musikkvolum
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Lydeffektvolum
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1719,6 +1717,10 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :serveren er ful
 
 # Network related errors
 ############ Leave those lines in this order!!
+STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED                          :Spill satt på pause ({STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_NOT_ENOUGH_PLAYERS       :ikke nok spillere
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_CONNECTING_CLIENTS       :kobler til klienter
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_MANUAL                   :manual
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :forlater
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} har blitt med i spillet
@@ -1815,10 +1817,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Godtar: 
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Varer: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Slå sammen stasjonene
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Slå sammen stasjonene
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Bygg separat stasjon
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Slå sammen kontrollpunkt
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Slå sammen kontrollpunkt
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Bygg separat kontrollpunkt
 
 # Rail construction toolbar
@@ -2515,7 +2517,9 @@ STR_COMPANY_VIEW_COMPANY_VALUE                                  :{GOLD}Firmaverd
 STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}{NBSP}% eies av {COMPANY})
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Bygg hovedkontor
+STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Bygg firmaets hovedkontor
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Se hovedkontor
+STR_COMPANY_VIEW_VIEW_HQ_TOOLTIP                                :{BLACK}Vis firmaets hovedkontor
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Omplasser hovedkvarter
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Gjenoppbygg spelskapets hovedkvarter en annen plass for 1{NBSP}% av selskapsverdien
 
@@ -3980,6 +3984,7 @@ STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LO
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
 STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
+STR_BLACK_INT                                                   :{BLACK}{NUM}
 STR_ORANGE_INT                                                  :{ORANGE}{NUM}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
@@ -3987,7 +3992,6 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
@@ -4003,4 +4007,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-

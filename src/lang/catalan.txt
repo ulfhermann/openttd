@@ -529,8 +529,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Clica aq
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Taula de la Lliga d'Empreses
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Enginyer
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Director de Trànsit
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Coordinador de Transport
@@ -580,7 +579,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Opcional 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Volum de la música
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Volum dels efectes
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1829,10 +1827,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepta:
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Provisions: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Ajuntar estació
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Ajuntar estació
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Construir una estació separada
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Uneix punt de control
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Uneix punt de control
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Construeix un punt de control separat
 
 # Rail construction toolbar
@@ -2530,7 +2528,9 @@ STR_COMPANY_VIEW_COMPANY_VALUE                                  :{GOLD}Valor de 
 STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}% propietat de {COMPANY})
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Construir Seu
+STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Construeix seu de la companyia
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Veure Seu
+STR_COMPANY_VIEW_VIEW_HQ_TOOLTIP                                :{BLACK}Veure seu de la companyia
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Trasllada la Seu
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Trasllada la seu de la companyia a un altre lloc amb el cost d'un 1% del seu valor
 

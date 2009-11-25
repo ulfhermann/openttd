@@ -91,14 +91,9 @@ static void PlaceDocks_Aqueduct(TileIndex tile)
 
 /** Enum referring to the widgets of the build dock toolbar */
 enum DockToolbarWidgets {
-	DTW_BEGIN = 0,                 ///< Start of toolbar widgets
-	DTW_CLOSEBOX = DTW_BEGIN,      ///< Close window button
-	DTW_CAPTION,                   ///< Window caption
-	DTW_STICKY,                    ///< Sticky window button
 	DTW_BUTTONS_BEGIN,             ///< Begin of clickable buttons (except seperating panel)
 	DTW_CANAL = DTW_BUTTONS_BEGIN, ///< Build canal button
 	DTW_LOCK,                      ///< Build lock button
-	DTW_SEPERATOR,                 ///< Seperating panel between lock and demolish
 	DTW_DEMOLISH,                  ///< Demolish aka dynamite button
 	DTW_DEPOT,                     ///< Build depot button
 	DTW_STATION,                   ///< Build station button
@@ -159,7 +154,6 @@ typedef void OnButtonClick(Window *w);
 static OnButtonClick * const _build_docks_button_proc[] = {
 	BuildDocksClick_Canal,
 	BuildDocksClick_Lock,
-	NULL,
 	BuildDocksClick_Demolish,
 	BuildDocksClick_Depot,
 	BuildDocksClick_Dock,
@@ -188,7 +182,7 @@ struct BuildDocksToolbarWindow : Window {
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		if (widget >= DTW_BUTTONS_BEGIN && widget != DTW_SEPERATOR) _build_docks_button_proc[widget - DTW_BUTTONS_BEGIN](this);
+		if (widget >= DTW_BUTTONS_BEGIN) _build_docks_button_proc[widget - DTW_BUTTONS_BEGIN](this);
 	}
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
@@ -268,26 +262,26 @@ struct BuildDocksToolbarWindow : Window {
  */
 static const NWidgetPart _nested_build_docks_toolbar_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, DTW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, DTW_CAPTION), SetMinimalSize(80, 14), SetFill(true, false), SetDataTip(STR_WATERWAYS_TOOLBAR_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN, DTW_STICKY),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_WATERWAYS_TOOLBAR_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL_LTR),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_CANAL), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_BUILD_CANAL, STR_WATERWAYS_TOOLBAR_BUILD_CANALS_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_LOCK), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_BUILD_LOCK, STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, DTW_SEPERATOR), SetMinimalSize(5, 22), SetFill(true, true), EndContainer(),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEMOLISH), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_DYNAMITE, STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEPOT), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_SHIP_DEPOT, STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_STATION), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_SHIP_DOCK, STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUOY), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_BOUY, STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUILD_AQUEDUCT), SetMinimalSize(23, 22), SetFill(false, true), SetDataTip(SPR_IMG_AQUEDUCT, STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_CANAL), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BUILD_CANAL, STR_WATERWAYS_TOOLBAR_BUILD_CANALS_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_LOCK), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BUILD_LOCK, STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP),
+		NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetMinimalSize(5, 22), SetFill(1, 1), EndContainer(),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEMOLISH), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_DYNAMITE, STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEPOT), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_SHIP_DEPOT, STR_WATERWAYS_TOOLBAR_BUILD_DEPOT_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_STATION), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_SHIP_DOCK, STR_WATERWAYS_TOOLBAR_BUILD_DOCK_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUOY), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BOUY, STR_WATERWAYS_TOOLBAR_BUOY_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUILD_AQUEDUCT), SetMinimalSize(23, 22), SetFill(0, 1), SetDataTip(SPR_IMG_AQUEDUCT, STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP),
 	EndContainer(),
 };
 
 static const WindowDesc _build_docks_toolbar_desc(
 	WDP_ALIGN_TBR, 22, 160, 36,
 	WC_BUILD_TOOLBAR, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_CONSTRUCTION,
+	WDF_CONSTRUCTION,
 	_nested_build_docks_toolbar_widgets, lengthof(_nested_build_docks_toolbar_widgets)
 );
 
@@ -305,17 +299,17 @@ void ShowBuildDocksToolbar()
  */
 static const NWidgetPart _nested_build_docks_scen_toolbar_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, DTW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, DTW_CAPTION), SetMinimalSize(80, 14), SetFill(true, false), SetDataTip(STR_WATERWAYS_TOOLBAR_CAPTION_SE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN, DTW_STICKY),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_WATERWAYS_TOOLBAR_CAPTION_SE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_CANAL), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_BUILD_CANAL, STR_WATERWAYS_TOOLBAR_CREATE_LAKE_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_LOCK), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_BUILD_LOCK, STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP),
-		NWidget(WWT_PANEL, COLOUR_DARK_GREEN, DTW_SEPERATOR), SetMinimalSize(5, 22), SetFill(false, true), EndContainer(),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEMOLISH), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_DYNAMITE, STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_RIVER), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_BUILD_RIVER, STR_WATERWAYS_TOOLBAR_CREATE_RIVER_TOOLTIP),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUILD_AQUEDUCT), SetMinimalSize(22, 22), SetFill(false, true), SetDataTip(SPR_IMG_AQUEDUCT, STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_CANAL), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BUILD_CANAL, STR_WATERWAYS_TOOLBAR_CREATE_LAKE_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_LOCK), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BUILD_LOCK, STR_WATERWAYS_TOOLBAR_BUILD_LOCKS_TOOLTIP),
+		NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetMinimalSize(5, 22), SetFill(1, 1), EndContainer(),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_DEMOLISH), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_DYNAMITE, STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_RIVER), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_BUILD_RIVER, STR_WATERWAYS_TOOLBAR_CREATE_RIVER_TOOLTIP),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, DTW_BUILD_AQUEDUCT), SetMinimalSize(22, 22), SetFill(0, 1), SetDataTip(SPR_IMG_AQUEDUCT, STR_WATERWAYS_TOOLBAR_BUILD_AQUEDUCT_TOOLTIP),
 	EndContainer(),
 };
 
@@ -323,7 +317,7 @@ static const NWidgetPart _nested_build_docks_scen_toolbar_widgets[] = {
 static const WindowDesc _build_docks_scen_toolbar_desc(
 	WDP_AUTO, WDP_AUTO, 115, 36,
 	WC_SCEN_BUILD_TOOLBAR, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_CONSTRUCTION,
+	WDF_CONSTRUCTION,
 	_nested_build_docks_scen_toolbar_widgets, lengthof(_nested_build_docks_scen_toolbar_widgets)
 );
 
@@ -334,8 +328,6 @@ void ShowBuildDocksScenToolbar()
 
 /** Widget numbers of the build-dock GUI. */
 enum BuildDockStationWidgets {
-	BDSW_CLOSE,      ///< Closebox.
-	BDSW_CAPTION,    ///< Titlebar.
 	BDSW_BACKGROUND, ///< Background panel.
 	BDSW_LT_OFF,     ///< 'Off' button of coverage high light.
 	BDSW_LT_ON,      ///< 'On' button of coverage high light.
@@ -403,15 +395,15 @@ public:
 /** Nested widget parts of a build dock station window. */
 static const NWidgetPart _nested_build_dock_station_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, BDSW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, BDSW_CAPTION), SetDataTip(STR_STATION_BUILD_DOCK_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_STATION_BUILD_DOCK_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BDSW_BACKGROUND),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
 		NWidget(WWT_LABEL, COLOUR_DARK_GREEN, BDSW_INFO), SetMinimalSize(148, 14), SetDataTip(STR_STATION_BUILD_COVERAGE_AREA_TITLE, STR_NULL),
 		NWidget(NWID_HORIZONTAL), SetPIP(14, 0, 14),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BDSW_LT_OFF), SetMinimalSize(40, 12), SetFill(true, false), SetDataTip(STR_STATION_BUILD_COVERAGE_OFF, STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, BDSW_LT_ON), SetMinimalSize(40, 12), SetFill(true, false), SetDataTip(STR_STATION_BUILD_COVERAGE_ON, STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP),
+			NWidget(WWT_TEXTBTN, COLOUR_GREY, BDSW_LT_OFF), SetMinimalSize(40, 12), SetFill(1, 0), SetDataTip(STR_STATION_BUILD_COVERAGE_OFF, STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP),
+			NWidget(WWT_TEXTBTN, COLOUR_GREY, BDSW_LT_ON), SetMinimalSize(40, 12), SetFill(1, 0), SetDataTip(STR_STATION_BUILD_COVERAGE_ON, STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 20), SetResize(0, 1),
 	EndContainer(),
@@ -420,7 +412,7 @@ static const NWidgetPart _nested_build_dock_station_widgets[] = {
 static const WindowDesc _build_dock_station_desc(
 	WDP_AUTO, WDP_AUTO, 148, 75,
 	WC_BUILD_STATION, WC_BUILD_TOOLBAR,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION,
+	WDF_CONSTRUCTION,
 	_nested_build_dock_station_widgets, lengthof(_nested_build_dock_station_widgets)
 );
 
@@ -431,8 +423,6 @@ static void ShowBuildDockStationPicker(Window *parent)
 
 /** Widgets for the build ship depot window. */
 enum BuildDockDepotWidgets {
-	BDDW_CLOSE,
-	BDDW_CAPTION,
 	BDDW_BACKGROUND,
 	BDDW_X,
 	BDDW_Y,
@@ -485,8 +475,8 @@ public:
 
 static const NWidgetPart _nested_build_docks_depot_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, BDDW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, BDDW_CAPTION), SetMinimalSize(193, 14), SetDataTip(STR_DEPOT_BUILD_SHIP_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_DEPOT_BUILD_SHIP_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BDDW_BACKGROUND),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
@@ -506,7 +496,7 @@ static const NWidgetPart _nested_build_docks_depot_widgets[] = {
 static const WindowDesc _build_docks_depot_desc(
 	WDP_AUTO, WDP_AUTO, 204, 86,
 	WC_BUILD_DEPOT, WC_BUILD_TOOLBAR,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION,
+	WDF_CONSTRUCTION,
 	_nested_build_docks_depot_widgets, lengthof(_nested_build_docks_depot_widgets)
 );
 

@@ -167,7 +167,7 @@ public:
 		/* It's possible the company is deleted while the dropdown is open */
 		if (!Company::IsValidID(company)) return;
 
-		DrawCompanyIcon(company, rtl ? right - 16 : left + 2, top + 1);
+		DrawCompanyIcon(company, rtl ? right - 16 : left + 2, top + 1 + (FONT_HEIGHT_NORMAL - 10) / 2);
 
 		SetDParam(0, company);
 		SetDParam(1, company);
@@ -405,12 +405,17 @@ static void MenuClickMap(int index)
 
 static void ToolbarTownClick(Window *w)
 {
-	PopupMainToolbMenu(w, TBN_TOWNDIRECTORY, STR_TOWN_MENU_TOWN_DIRECTORY, 1);
+	PopupMainToolbMenu(w, TBN_TOWNDIRECTORY, STR_TOWN_MENU_TOWN_DIRECTORY, (_settings_game.economy.found_town == TF_FORBIDDEN) ? 1 : 2);
 }
 
 static void MenuClickTown(int index)
 {
-	ShowTownDirectory();
+	switch (index) {
+		case 0: ShowTownDirectory(); break;
+		case 1: // setting could be changed when the dropdown was open
+			if (_settings_game.economy.found_town != TF_FORBIDDEN) ShowFoundTownWindow();
+			break;
+	}
 }
 
 /* --- Subidies button menu --- */
@@ -914,8 +919,8 @@ public:
 	{
 		this->smallest_x = 0; // Biggest child
 		this->smallest_y = 0; // Biggest child
-		this->fill_x = true;
-		this->fill_y = false;
+		this->fill_x = 1;
+		this->fill_y = 0;
 		this->resize_x = 1; // We only resize in this direction
 		this->resize_y = 0; // We never resize in this direction
 		this->spacers = 0;
@@ -1360,7 +1365,7 @@ static const NWidgetPart _nested_toolbar_normal_widgets[] = {
 static const WindowDesc _toolb_normal_desc(
 	0, 0, 640, 22,
 	WC_MAIN_TOOLBAR, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_NO_FOCUS,
+	WDF_NO_FOCUS,
 	_nested_toolbar_normal_widgets, lengthof(_nested_toolbar_normal_widgets)
 );
 
@@ -1437,7 +1442,7 @@ public:
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case TBSE_SPACERPANEL:
@@ -1583,7 +1588,7 @@ static const NWidgetPart _nested_toolb_scen_widgets[] = {
 static const WindowDesc _toolb_scen_desc(
 	0, 0, 640, 22,
 	WC_MAIN_TOOLBAR, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
+	WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
 	_nested_toolb_scen_widgets, lengthof(_nested_toolb_scen_widgets)
 );
 
