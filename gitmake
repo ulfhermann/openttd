@@ -16,7 +16,7 @@ clean:
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
 	git merge ${@}-tmp
-	make -j4
+	test -e gitmake-build && make -j`cat gitmake-build`
 	./make_diffs
 	
 
