@@ -34,23 +34,16 @@
 typedef GUIList<const Group*> GUIGroupList;
 
 enum GroupListWidgets {
-	GRP_WIDGET_CLOSEBOX = 0,
 	GRP_WIDGET_CAPTION,
-	GRP_WIDGET_STICKY,
 	GRP_WIDGET_SORT_BY_ORDER,
 	GRP_WIDGET_SORT_BY_DROPDOWN,
-	GRP_WIDGET_EMPTY_TOP_RIGHT,
 	GRP_WIDGET_LIST_VEHICLE,
 	GRP_WIDGET_LIST_VEHICLE_SCROLLBAR,
-	GRP_WIDGET_EMPTY2,
 	GRP_WIDGET_AVAILABLE_VEHICLES,
 	GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN,
 	GRP_WIDGET_STOP_ALL,
 	GRP_WIDGET_START_ALL,
-	GRP_WIDGET_EMPTY_BOTTOM_RIGHT,
-	GRP_WIDGET_RESIZE,
 
-	GRP_WIDGET_EMPTY_TOP_LEFT,
 	GRP_WIDGET_ALL_VEHICLES,
 	GRP_WIDGET_DEFAULT_VEHICLES,
 	GRP_WIDGET_LIST_GROUP,
@@ -58,7 +51,6 @@ enum GroupListWidgets {
 	GRP_WIDGET_CREATE_GROUP,
 	GRP_WIDGET_DELETE_GROUP,
 	GRP_WIDGET_RENAME_GROUP,
-	GRP_WIDGET_EMPTY1,
 	GRP_WIDGET_REPLACE_PROTECTION,
 };
 
@@ -93,32 +85,32 @@ static void ShowGroupActionDropdown(Window *w, GroupID gid)
 
 static const NWidgetPart _nested_group_widgets[] = {
 	NWidget(NWID_HORIZONTAL), // Window header
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, GRP_WIDGET_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, GRP_WIDGET_CAPTION), SetMinimalSize(437, 14),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, GRP_WIDGET_STICKY),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY, GRP_WIDGET_CAPTION),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		/* left part */
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY_TOP_LEFT), SetMinimalSize(200, 12), EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_ALL_VEHICLES), SetMinimalSize(200, 13), EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_DEFAULT_VEHICLES), SetMinimalSize(200, 13), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalTextLines(1, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM), SetFill(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_ALL_VEHICLES), SetMinimalSize(200, 13), SetFill(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_DEFAULT_VEHICLES), SetMinimalSize(200, 13), SetFill(1, 0), EndContainer(),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_GROUP), SetMinimalSize(188, 0), SetDataTip(0x701, STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP),
-						SetFill(true, false), SetResize(0, 1),
-				NWidget(WWT_SCROLL2BAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR), SetMinimalSize(12, 0),
+						SetFill(1, 0), SetResize(0, 1),
+				NWidget(WWT_SCROLL2BAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_CREATE_GROUP), SetMinimalSize(24, 25), SetFill(false, true),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_CREATE_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
 						SetDataTip(SPR_GROUP_CREATE_TRAIN, STR_GROUP_CREATE_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_DELETE_GROUP), SetMinimalSize(24, 25), SetFill(false, true),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_DELETE_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
 						SetDataTip(SPR_GROUP_DELETE_TRAIN, STR_GROUP_DELETE_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_RENAME_GROUP), SetMinimalSize(24, 25), SetFill(false, true),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_RENAME_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
 						SetDataTip(SPR_GROUP_RENAME_TRAIN, STR_GROUP_RENAME_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY1), SetMinimalSize(92, 25), SetFill(true, true), EndContainer(),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_REPLACE_PROTECTION), SetMinimalSize(24, 25), SetFill(false, true),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(92, 25), SetFill(1, 1), EndContainer(),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_REPLACE_PROTECTION), SetMinimalSize(24, 25), SetFill(0, 1),
 						SetDataTip(SPR_GROUP_REPLACE_OFF_TRAIN, STR_GROUP_REPLACE_PROTECTION_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY2), SetMinimalSize(12, 25), SetFill(false, true), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(12, 25), SetFill(0, 1), EndContainer(),
 			EndContainer(),
 		EndContainer(),
 		/* right part */
@@ -126,23 +118,23 @@ static const NWidgetPart _nested_group_widgets[] = {
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_SORT_BY_ORDER), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
 				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_SORT_BY_DROPDOWN), SetMinimalSize(167, 12), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY_TOP_RIGHT), SetMinimalSize(12, 12), SetResize(1, 0), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(12, 12), SetResize(1, 0), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE), SetMinimalSize(248, 0), SetDataTip(0x701, STR_NULL), SetResize(1, 1), SetFill(true, false),
-				NWidget(WWT_SCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE_SCROLLBAR), SetMinimalSize(12, 0),
+				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE), SetMinimalSize(248, 0), SetDataTip(0x701, STR_NULL), SetResize(1, 1), SetFill(1, 0),
+				NWidget(WWT_SCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE_SCROLLBAR),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_AVAILABLE_VEHICLES), SetMinimalSize(106, 12), SetFill(false, true),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_AVAILABLE_VEHICLES), SetMinimalSize(106, 12), SetFill(0, 1),
 						SetDataTip(0x0, STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP),
-				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN), SetMinimalSize(118, 12), SetFill(false, true),
+				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN), SetMinimalSize(118, 12), SetFill(0, 1),
 						SetDataTip(STR_VEHICLE_LIST_MANAGE_LIST, STR_VEHICLE_LIST_MANAGE_LIST_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_STOP_ALL), SetMinimalSize(12, 12), SetFill(false, true),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_STOP_ALL), SetMinimalSize(12, 12), SetFill(0, 1),
 						SetDataTip(SPR_FLAG_VEH_STOPPED, STR_VEHICLE_LIST_MASS_STOP_LIST_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_START_ALL), SetMinimalSize(12, 12), SetFill(false, true),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_START_ALL), SetMinimalSize(12, 12), SetFill(0, 1),
 						SetDataTip(SPR_FLAG_VEH_RUNNING, STR_VEHICLE_LIST_MASS_START_LIST_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY_BOTTOM_RIGHT), SetMinimalSize(0, 12), SetFill(true, true), SetResize(1, 0), EndContainer(),
-				NWidget(WWT_RESIZEBOX, COLOUR_GREY, GRP_WIDGET_RESIZE), SetMinimalSize(12, 12), SetFill(false, true),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(0, 12), SetFill(1, 1), SetResize(1, 0), EndContainer(),
+				NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 			EndContainer(),
 		EndContainer(),
 	EndContainer(),
@@ -249,25 +241,38 @@ public:
 		*this->sorting = this->vehicles.GetListing();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case GRP_WIDGET_LIST_GROUP:
 				this->tiny_step_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
 				resize->height = this->tiny_step_height;
 				/* Minimum height is the height of the list widget minus all and default vehicles and a bit for the bottom bar */
-				size->height =  4 * GetVehicleListHeight(this->vehicle_type, this->tiny_step_height) - 3 * this->tiny_step_height;
+				size->height =  4 * GetVehicleListHeight(this->vehicle_type, this->tiny_step_height) - (this->tiny_step_height > 25 ? 2 : 3) * this->tiny_step_height;
 				break;
 
 			case GRP_WIDGET_ALL_VEHICLES:
 			case GRP_WIDGET_DEFAULT_VEHICLES:
 				size->height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
+				size->width = max(GetStringBoundingBox(STR_GROUP_DEFAULT_TRAINS + this->vehicle_type).width, GetStringBoundingBox(STR_GROUP_ALL_TRAINS + this->vehicle_type).width);
+				size->width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT + 8 + 8;
 				break;
 
 			case GRP_WIDGET_LIST_VEHICLE:
 				resize->height = GetVehicleListHeight(this->vehicle_type, FONT_HEIGHT_NORMAL + WD_MATRIX_TOP);
 				size->height = 4 * resize->height;
 				break;
+
+			case GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN: {
+				static const StringID _dropdown_text[] = {STR_VEHICLE_LIST_REPLACE_VEHICLES, STR_VEHICLE_LIST_SEND_FOR_SERVICING, STR_VEHICLE_LIST_SEND_TRAIN_TO_DEPOT, STR_GROUP_ADD_SHARED_VEHICLE, STR_GROUP_REMOVE_ALL_VEHICLES};
+				Dimension d = {0, 0};
+				for (const StringID *sid = _dropdown_text; sid != endof(_dropdown_text); sid++) {
+					d = maxdim(d, GetStringBoundingBox(*sid));
+				}
+				d.height += padding.height;
+				d.width  += padding.width;
+				*size = maxdim(*size, d);
+			} break;
 		}
 	}
 
@@ -375,12 +380,12 @@ public:
 	{
 		switch (widget) {
 			case GRP_WIDGET_ALL_VEHICLES:
-				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP + 1,
+				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_MATRIX_TOP,
 						STR_GROUP_ALL_TRAINS + this->vehicle_type, IsAllGroupID(this->group_sel) ? TC_WHITE : TC_BLACK);
 				break;
 
 			case GRP_WIDGET_DEFAULT_VEHICLES:
-				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP + 1,
+				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_MATRIX_TOP,
 						STR_GROUP_DEFAULT_TRAINS + this->vehicle_type, IsDefaultGroupID(this->group_sel) ? TC_WHITE : TC_BLACK);
 				break;
 
@@ -676,14 +681,14 @@ public:
 static WindowDesc _other_group_desc(
 	WDP_AUTO, WDP_AUTO, 460, 246,
 	WC_INVALID, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
+	WDF_UNCLICK_BUTTONS,
 	_nested_group_widgets, lengthof(_nested_group_widgets)
 );
 
 const static WindowDesc _train_group_desc(
 	WDP_AUTO, WDP_AUTO, 525, 246,
 	WC_TRAINS_LIST, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
+	WDF_UNCLICK_BUTTONS,
 	_nested_group_widgets, lengthof(_nested_group_widgets)
 );
 
