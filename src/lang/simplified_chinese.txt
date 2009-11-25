@@ -528,8 +528,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}点击�
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}公司评价排名
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :工程师
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :交通经理
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :运输总监
@@ -579,7 +578,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}自定义2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}音乐音量
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}音效音量
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}小' ' '' ' '大
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1819,10 +1817,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}接受�
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}供给: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}合并车站
+STR_JOIN_STATION_CAPTION                                        :{WHITE}合并车站
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}建造分体车站
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}合并路点
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}合并路点
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}建造分体路点
 
 # Rail construction toolbar
