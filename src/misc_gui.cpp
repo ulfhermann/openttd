@@ -58,15 +58,13 @@ int _caret_timer;
 
 /** Widgets for the land info window. */
 enum LandInfoWidgets {
-	LIW_CLOSE,      ///< Close the window
-	LIW_CAPTION,    ///< Title bar of the window
 	LIW_BACKGROUND, ///< Background to draw on
 };
 
 static const NWidgetPart _nested_land_info_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, LIW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_GREY, LIW_CAPTION), SetDataTip(STR_LAND_AREA_INFORMATION_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_LAND_AREA_INFORMATION_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, LIW_BACKGROUND), EndContainer(),
 };
@@ -74,7 +72,7 @@ static const NWidgetPart _nested_land_info_widgets[] = {
 static const WindowDesc _land_info_desc(
 	WDP_AUTO, WDP_AUTO, 0, 0,
 	WC_LAND_INFO, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
+	0,
 	_nested_land_info_widgets, lengthof(_nested_land_info_widgets)
 );
 
@@ -114,7 +112,7 @@ public:
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != LIW_BACKGROUND) return;
 
@@ -321,37 +319,30 @@ void PlaceLandBlockInfo()
 
 /** Widgets for the land info window. */
 enum AboutWidgets {
-	AW_CLOSE,                ///< Close the window
-	AW_CAPTION,              ///< Title bar of the window
-	AW_BACKGROUND,           ///< Background to draw on
-	AW_ABOUT_ORIG_COPYRIGHT, ///< Text with original copyright info
-	AW_ABOUT_VERSION,        ///< OpenTTD version string
-	AW_FRAME,                ///< The frame with the scrolling text
 	AW_SCROLLING_TEXT,       ///< The actually scrolling text
 	AW_WEBSITE,              ///< URL of OpenTTD website
-	AW_ABOUT_COPYRIGHT,      ///< OpenTTD copyright info
 };
 
 static const NWidgetPart _nested_about_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, AW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_GREY, AW_CAPTION), SetDataTip(STR_ABOUT_OPENTTD, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_ABOUT_OPENTTD, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, AW_BACKGROUND), SetPIP(4, 2, 4),
-		NWidget(WWT_TEXT, COLOUR_GREY, AW_ABOUT_ORIG_COPYRIGHT), SetDataTip(STR_ABOUT_ORIGINAL_COPYRIGHT, STR_NULL),
-		NWidget(WWT_TEXT, COLOUR_GREY, AW_ABOUT_VERSION), SetDataTip(STR_ABOUT_VERSION, STR_NULL),
-		NWidget(WWT_FRAME, COLOUR_GREY, AW_FRAME), SetPadding(0, 5, 1, 5),
+	NWidget(WWT_PANEL, COLOUR_GREY), SetPIP(4, 2, 4),
+		NWidget(WWT_TEXT, COLOUR_GREY), SetDataTip(STR_ABOUT_ORIGINAL_COPYRIGHT, STR_NULL),
+		NWidget(WWT_TEXT, COLOUR_GREY), SetDataTip(STR_ABOUT_VERSION, STR_NULL),
+		NWidget(WWT_FRAME, COLOUR_GREY), SetPadding(0, 5, 1, 5),
 			NWidget(WWT_EMPTY, INVALID_COLOUR, AW_SCROLLING_TEXT),
 		EndContainer(),
 		NWidget(WWT_TEXT, COLOUR_GREY, AW_WEBSITE), SetDataTip(STR_BLACK_RAW_STRING, STR_NULL),
-		NWidget(WWT_TEXT, COLOUR_GREY, AW_ABOUT_COPYRIGHT), SetDataTip(STR_ABOUT_COPYRIGHT_OPENTTD, STR_NULL),
+		NWidget(WWT_TEXT, COLOUR_GREY), SetDataTip(STR_ABOUT_COPYRIGHT_OPENTTD, STR_NULL),
 	EndContainer(),
 };
 
 static const WindowDesc _about_desc(
 	WDP_CENTER, WDP_CENTER, 0, 0,
 	WC_GAME_OPTIONS, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
+	0,
 	_nested_about_widgets, lengthof(_nested_about_widgets)
 );
 
@@ -432,7 +423,7 @@ struct AboutWindow : public Window {
 		if (widget == AW_WEBSITE) SetDParamStr(0, "Website: http://www.openttd.org");
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != AW_SCROLLING_TEXT) return;
 
@@ -490,19 +481,17 @@ void ShowAboutWindow()
 
 /** Widgets of the error message windows */
 enum ErrorMessageWidgets {
-	EMW_CLOSE = 0,
 	EMW_CAPTION,
-	EMW_PANEL,
 	EMW_FACE,
 	EMW_MESSAGE,
 };
 
 static const NWidgetPart _nested_errmsg_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_RED, EMW_CLOSE),
+		NWidget(WWT_CLOSEBOX, COLOUR_RED),
 		NWidget(WWT_CAPTION, COLOUR_RED, EMW_CAPTION), SetDataTip(STR_ERROR_MESSAGE_CAPTION, STR_NULL),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_RED, EMW_PANEL),
+	NWidget(WWT_PANEL, COLOUR_RED),
 		NWidget(WWT_EMPTY, COLOUR_RED, EMW_MESSAGE), SetPadding(0, 2, 0, 2), SetMinimalSize(236, 32),
 	EndContainer(),
 };
@@ -510,19 +499,19 @@ static const NWidgetPart _nested_errmsg_widgets[] = {
 static const WindowDesc _errmsg_desc(
 	0, 0, 240, 46, // x/y position is not used.
 	WC_ERRMSG, WC_NONE,
-	WDF_STD_BTN | WDF_DEF_WIDGET,
+	0,
 	_nested_errmsg_widgets, lengthof(_nested_errmsg_widgets)
 );
 
 static const NWidgetPart _nested_errmsg_face_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_RED, EMW_CLOSE),
+		NWidget(WWT_CLOSEBOX, COLOUR_RED),
 		NWidget(WWT_CAPTION, COLOUR_RED, EMW_CAPTION), SetDataTip(STR_ERROR_MESSAGE_CAPTION_OTHER_COMPANY, STR_NULL),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_RED, EMW_PANEL),
+	NWidget(WWT_PANEL, COLOUR_RED),
 		NWidget(NWID_HORIZONTAL), SetPIP(2, 1, 2),
-			NWidget(WWT_EMPTY, COLOUR_RED, EMW_FACE), SetMinimalSize(91, 120), SetFill(false, true), SetPadding(2, 0, 1, 0),
-			NWidget(WWT_EMPTY, COLOUR_RED, EMW_MESSAGE), SetFill(false, true), SetMinimalSize(238, 123),
+			NWidget(WWT_EMPTY, COLOUR_RED, EMW_FACE), SetMinimalSize(91, 120), SetFill(0, 1), SetPadding(2, 0, 1, 0),
+			NWidget(WWT_EMPTY, COLOUR_RED, EMW_MESSAGE), SetFill(0, 1), SetMinimalSize(238, 123),
 		EndContainer(),
 	EndContainer(),
 };
@@ -530,7 +519,7 @@ static const NWidgetPart _nested_errmsg_face_widgets[] = {
 static const WindowDesc _errmsg_face_desc(
 	0, 0, 334, 137, // x/y position is not used.
 	WC_ERRMSG, WC_NONE,
-	WDF_STD_BTN | WDF_DEF_WIDGET,
+	0,
 	_nested_errmsg_face_widgets, lengthof(_nested_errmsg_face_widgets)
 );
 
@@ -559,7 +548,7 @@ public:
 		this->InitNested(desc);
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != EMW_MESSAGE) return;
 
@@ -823,7 +812,7 @@ struct TooltipsWindow : public Window
 		return pt;
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		/* There is only one widget. */
 		for (uint i = 0; i != this->paramcount; i++) SetDParam(i, this->params[i]);
@@ -1304,9 +1293,7 @@ void QueryStringBaseWindow::OnOpenOSKWindow(int wid)
 
 /** Widget of the string query window. */
 enum QueryStringWidgets {
-	QUERY_STR_WIDGET_CLOSEBOX,
 	QUERY_STR_WIDGET_CAPTION,
-	QUERY_STR_WIDGET_BACKGROUND,
 	QUERY_STR_WIDGET_TEXT,
 	QUERY_STR_WIDGET_DEFAULT,
 	QUERY_STR_WIDGET_CANCEL,
@@ -1339,10 +1326,10 @@ struct QueryStringWindow : public QueryStringBaseWindow
 		this->LowerWidget(QUERY_STR_WIDGET_TEXT);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget == QUERY_STR_WIDGET_DEFAULT && (this->flags & QSF_ENABLE_DEFAULT) == 0) {
-			this->GetWidget<NWidgetCore>(widget)->SetFill(false, true);
+			this->GetWidget<NWidgetCore>(widget)->SetFill(0, 1);
 			size->width = 0;
 		}
 	}
@@ -1427,23 +1414,23 @@ struct QueryStringWindow : public QueryStringBaseWindow
 
 static const NWidgetPart _nested_query_string_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, QUERY_STR_WIDGET_CLOSEBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, QUERY_STR_WIDGET_CAPTION), SetDataTip(STR_WHITE_STRING, STR_NULL),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, QUERY_STR_WIDGET_BACKGROUND),
-		NWidget(WWT_EDITBOX, COLOUR_GREY, QUERY_STR_WIDGET_TEXT), SetMinimalSize(256, 12), SetFill(true, true), SetPadding(2, 2, 2, 2),
+	NWidget(WWT_PANEL, COLOUR_GREY),
+		NWidget(WWT_EDITBOX, COLOUR_GREY, QUERY_STR_WIDGET_TEXT), SetMinimalSize(256, 12), SetFill(1, 1), SetPadding(2, 2, 2, 2),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, QUERY_STR_WIDGET_DEFAULT), SetMinimalSize(87, 12), SetFill(true, true), SetDataTip(STR_BUTTON_DEFAULT, STR_NULL),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, QUERY_STR_WIDGET_CANCEL), SetMinimalSize(86, 12), SetFill(true, true), SetDataTip(STR_BUTTON_CANCEL, STR_NULL),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, QUERY_STR_WIDGET_OK), SetMinimalSize(87, 12), SetFill(true, true), SetDataTip(STR_BUTTON_OK, STR_NULL),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, QUERY_STR_WIDGET_DEFAULT), SetMinimalSize(87, 12), SetFill(1, 1), SetDataTip(STR_BUTTON_DEFAULT, STR_NULL),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, QUERY_STR_WIDGET_CANCEL), SetMinimalSize(86, 12), SetFill(1, 1), SetDataTip(STR_BUTTON_CANCEL, STR_NULL),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, QUERY_STR_WIDGET_OK), SetMinimalSize(87, 12), SetFill(1, 1), SetDataTip(STR_BUTTON_OK, STR_NULL),
 	EndContainer(),
 };
 
 static const WindowDesc _query_string_desc(
 	190, 219, 260, 42,
 	WC_QUERY_STRING, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET,
+	0,
 	_nested_query_string_widgets, lengthof(_nested_query_string_widgets)
 );
 
@@ -1465,9 +1452,7 @@ void ShowQueryString(StringID str, StringID caption, uint maxsize, uint maxwidth
 
 
 enum QueryWidgets {
-	QUERY_WIDGET_CLOSEBOX,
 	QUERY_WIDGET_CAPTION,
-	QUERY_WIDGET_BACKGROUND,
 	QUERY_WIDGET_TEXT,
 	QUERY_WIDGET_NO,
 	QUERY_WIDGET_YES
@@ -1518,7 +1503,7 @@ struct QueryWindow : public Window {
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != QUERY_WIDGET_TEXT) return;
 
@@ -1583,10 +1568,10 @@ struct QueryWindow : public Window {
 
 static const NWidgetPart _nested_query_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_RED, QUERY_WIDGET_CLOSEBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_RED),
 		NWidget(WWT_CAPTION, COLOUR_RED, QUERY_WIDGET_CAPTION), SetDataTip(STR_JUST_STRING, STR_NULL),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_RED, QUERY_WIDGET_BACKGROUND), SetPIP(8, 15, 8),
+	NWidget(WWT_PANEL, COLOUR_RED), SetPIP(8, 15, 8),
 		NWidget(WWT_TEXT, COLOUR_RED, QUERY_WIDGET_TEXT), SetMinimalSize(200, 12),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(20, 29, 20),
 			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, QUERY_WIDGET_NO), SetMinimalSize(71, 12), SetDataTip(STR_QUIT_NO, STR_NULL),
@@ -1598,7 +1583,7 @@ static const NWidgetPart _nested_query_widgets[] = {
 static const WindowDesc _query_desc(
 	WDP_CENTER, WDP_CENTER, 210, 82,
 	WC_CONFIRM_POPUP_QUERY, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_DEF_WIDGET | WDF_MODAL,
+	WDF_UNCLICK_BUTTONS | WDF_MODAL,
 	_nested_query_widgets, lengthof(_nested_query_widgets)
 );
 
@@ -1617,7 +1602,6 @@ void ShowQuery(StringID caption, StringID message, Window *parent, QueryCallback
 
 
 enum SaveLoadWindowWidgets {
-	SLWW_CLOSE = 0,
 	SLWW_WINDOWTITLE,
 	SLWW_SORT_BYNAME,
 	SLWW_SORT_BYDATE,
@@ -1630,24 +1614,23 @@ enum SaveLoadWindowWidgets {
 	SLWW_SAVE_OSK_TITLE,       ///< only available for save operations
 	SLWW_DELETE_SELECTION,     ///< same in here
 	SLWW_SAVE_GAME,            ///< not to mention in here too
-	SLWW_RESIZE,
 	SLWW_CONTENT_DOWNLOAD_SEL, ///< Selection 'stack' to 'hide' the content download
 };
 
 static const NWidgetPart _nested_load_dialog_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SLWW_CLOSE),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, SLWW_WINDOWTITLE),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetDataTip(STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER), SetFill(true, false), SetResize(1, 0),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetDataTip(STR_SORT_BY_CAPTION_DATE, STR_TOOLTIP_SORT_ORDER), SetFill(true, false), SetResize(1, 0),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetDataTip(STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER), SetFill(1, 0), SetResize(1, 0),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetDataTip(STR_SORT_BY_CAPTION_DATE, STR_TOOLTIP_SORT_ORDER), SetFill(1, 0), SetResize(1, 0),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetFill(true, false), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_VERTICAL),
-				NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetFill(true, true), SetPadding(2, 1, 2, 2),
+				NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetFill(1, 1), SetPadding(2, 1, 2, 2),
 										SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(1, 10), EndContainer(),
 				NWidget(NWID_SELECTION, INVALID_COLOUR, SLWW_CONTENT_DOWNLOAD_SEL),
 					NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_CONTENT_DOWNLOAD), SetResize(1, 0),
@@ -1657,7 +1640,7 @@ static const NWidgetPart _nested_load_dialog_widgets[] = {
 			NWidget(NWID_VERTICAL),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, SLWW_HOME_BUTTON), SetMinimalSize(12, 12), SetDataTip(SPR_HOUSE_ICON, STR_SAVELOAD_HOME_BUTTON),
 				NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
-				NWidget(WWT_RESIZEBOX, COLOUR_GREY, SLWW_RESIZE),
+				NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 			EndContainer(),
 		EndContainer(),
 	EndContainer(),
@@ -1665,14 +1648,14 @@ static const NWidgetPart _nested_load_dialog_widgets[] = {
 
 static const NWidgetPart _nested_save_dialog_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SLWW_CLOSE),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, SLWW_WINDOWTITLE),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetDataTip(STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER), SetFill(true, false), SetResize(1, 0),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetDataTip(STR_SORT_BY_CAPTION_DATE, STR_TOOLTIP_SORT_ORDER), SetFill(true, false), SetResize(1, 0),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYNAME), SetDataTip(STR_SORT_BY_CAPTION_NAME, STR_TOOLTIP_SORT_ORDER), SetFill(1, 0), SetResize(1, 0),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SORT_BYDATE), SetDataTip(STR_SORT_BY_CAPTION_DATE, STR_TOOLTIP_SORT_ORDER), SetFill(1, 0), SetResize(1, 0),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetFill(true, false), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, SLWW_BACKGROUND), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetPadding(2, 1, 0, 2),
@@ -1682,13 +1665,13 @@ static const NWidgetPart _nested_save_dialog_widgets[] = {
 				NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
 			EndContainer(),
 		EndContainer(),
-		NWidget(WWT_EDITBOX, COLOUR_GREY, SLWW_SAVE_OSK_TITLE), SetPadding(3, 2, 2, 2), SetFill(true, false), SetResize(1, 0),
+		NWidget(WWT_EDITBOX, COLOUR_GREY, SLWW_SAVE_OSK_TITLE), SetPadding(3, 2, 2, 2), SetFill(1, 0), SetResize(1, 0),
 										SetDataTip(STR_SAVELOAD_OSKTITLE, STR_SAVELOAD_EDITBOX_TOOLTIP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_DELETE_SELECTION), SetDataTip(STR_SAVELOAD_DELETE_BUTTON, STR_SAVELOAD_DELETE_TOOLTIP), SetFill(true, false), SetResize(1, 0),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SAVE_GAME),        SetDataTip(STR_SAVELOAD_SAVE_BUTTON, STR_SAVELOAD_SAVE_TOOLTIP),     SetFill(true, false), SetResize(1, 0),
-		NWidget(WWT_RESIZEBOX, COLOUR_GREY, SLWW_RESIZE),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_DELETE_SELECTION), SetDataTip(STR_SAVELOAD_DELETE_BUTTON, STR_SAVELOAD_DELETE_TOOLTIP), SetFill(1, 0), SetResize(1, 0),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_SAVE_GAME),        SetDataTip(STR_SAVELOAD_SAVE_BUTTON, STR_SAVELOAD_SAVE_TOOLTIP),     SetFill(1, 0), SetResize(1, 0),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 	EndContainer(),
 };
 
@@ -1865,7 +1848,7 @@ public:
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case SLWW_CONTENT_DOWNLOAD_SEL:
@@ -2041,14 +2024,14 @@ public:
 static const WindowDesc _load_dialog_desc(
 	WDP_CENTER, WDP_CENTER, 257, 294,
 	WC_SAVELOAD, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
+	WDF_UNCLICK_BUTTONS,
 	_nested_load_dialog_widgets, lengthof(_nested_load_dialog_widgets)
 );
 
 static const WindowDesc _save_dialog_desc(
 	WDP_CENTER, WDP_CENTER, 257, 320,
 	WC_SAVELOAD, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
+	WDF_UNCLICK_BUTTONS,
 	_nested_save_dialog_widgets, lengthof(_nested_save_dialog_widgets)
 );
 
