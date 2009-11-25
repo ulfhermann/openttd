@@ -26,12 +26,8 @@
 
 /** Widget numbers for the subsidy list window. */
 enum SubsidyListWidgets {
-	SLW_CLOSEBOX,
-	SLW_CAPTION,
-	SLW_STICKYBOX,
 	SLW_PANEL,
 	SLW_SCROLLBAR,
-	SLW_RESIZEBOX,
 };
 
 struct SubsidyListWindow : Window {
@@ -141,7 +137,7 @@ struct SubsidyListWindow : Window {
 		return 3 + num_awarded + num_not_awarded;
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != SLW_PANEL) return;
 		Dimension d = maxdim(GetStringBoundingBox(STR_SUBSIDIES_OFFERED_TITLE), GetStringBoundingBox(STR_SUBSIDIES_SUBSIDISED_TITLE));
@@ -232,15 +228,15 @@ struct SubsidyListWindow : Window {
 
 static const NWidgetPart _nested_subsidies_list_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, SLW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_BROWN, SLW_CAPTION), SetDataTip(STR_SUBSIDIES_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_BROWN, SLW_STICKYBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
+		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_SUBSIDIES_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_BROWN, SLW_PANEL), SetDataTip(0x0, STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER), SetResize(1, 1), EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, SLW_SCROLLBAR),
-			NWidget(WWT_RESIZEBOX, COLOUR_BROWN, SLW_RESIZEBOX),
+			NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
 		EndContainer(),
 	EndContainer(),
 };
@@ -248,7 +244,7 @@ static const NWidgetPart _nested_subsidies_list_widgets[] = {
 static const WindowDesc _subsidies_list_desc(
 	WDP_AUTO, WDP_AUTO, 500, 127,
 	WC_SUBSIDIES_LIST, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
+	0,
 	_nested_subsidies_list_widgets, lengthof(_nested_subsidies_list_widgets)
 );
 
