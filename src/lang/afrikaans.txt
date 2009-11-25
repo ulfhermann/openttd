@@ -524,8 +524,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Kliek hi
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Maatskappy Liga Tabel
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Ingenieur
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Verkeer Bestuurder
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Vervoer Koordineerder
@@ -575,7 +574,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Op Bestelling 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Musiek Volume
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Effek Volume
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAKS
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1762,7 +1760,7 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aanvaar:
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Voorraad: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Sluit by stasie aan
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Sluit by stasie aan
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Bou 'n aparte stasie
 
 

@@ -530,8 +530,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Click aq
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Ranking de Empresas
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Ingeniero
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Gerente de tráfico
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Coordinador de transporte
@@ -581,7 +580,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Personal 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Volumen música
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Volumen efectos
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1064,7 +1065,7 @@ STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Unir es
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Permitir unir estaciones no adyacentes: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Usar algoritmo mejorado de carga: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Cargar vehículos gradualmente: {ORANGE}{STRING}
-STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflacción: {ORANGE}{STRING}
+STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflación: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Entregar mercancía a una estación sólo si hay demanda: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Permitir la construcción de puentes muy largos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Permitir órdenes de ir a depósito: {ORANGE}{STRING}
@@ -1830,10 +1831,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Acepta: 
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Provisiones: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Unir estación
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Unir estación
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Construir una estación separada
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Unir punto de ruta
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Unir punto de ruta
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Construir un punto de ruta separado
 
 # Rail construction toolbar
