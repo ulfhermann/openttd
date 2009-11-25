@@ -18,7 +18,6 @@ clean:
 	git merge ${@}-tmp
 	test -e gitmake-build && make -j`cat gitmake-build`
 	./make_diffs
-	
 
 gitmake-origin:
 	git fetch git://git.openttd.org/openttd/trunk.git master:trunk
