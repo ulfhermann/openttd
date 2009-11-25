@@ -23,42 +23,37 @@
 
 /** Widget numbers of the extra viewport window. */
 enum ExtraViewportWindowWidgets {
-	EVW_CLOSE,
 	EVW_CAPTION,
-	EVW_STICKY,
-	EVW_BACKGROUND,
 	EVW_VIEWPORT,
 	EVW_ZOOMIN,
 	EVW_ZOOMOUT,
 	EVW_MAIN_TO_VIEW,
 	EVW_VIEW_TO_MAIN,
-	EVW_SPACER,
-	EVW_RESIZE,
 };
 
 /* Extra ViewPort Window Stuff */
 static const NWidgetPart _nested_extra_view_port_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, EVW_CLOSE),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, EVW_CAPTION), SetDataTip(STR_EXTRA_VIEW_PORT_TITLE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, EVW_STICKY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, EVW_BACKGROUND),
-		NWidget(NWID_VIEWPORT, INVALID_COLOUR, EVW_VIEWPORT), SetPadding(2, 2, 2, 2), SetResize(1, 1), SetFill(true, true),
+	NWidget(WWT_PANEL, COLOUR_GREY),
+		NWidget(NWID_VIEWPORT, INVALID_COLOUR, EVW_VIEWPORT), SetPadding(2, 2, 2, 2), SetResize(1, 1), SetFill(1, 1),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, EVW_ZOOMIN), SetDataTip(SPR_IMG_ZOOMIN, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN),
 		NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, EVW_ZOOMOUT), SetDataTip(SPR_IMG_ZOOMOUT, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, EVW_MAIN_TO_VIEW), SetFill(true, true), SetResize(1, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, EVW_MAIN_TO_VIEW), SetFill(1, 1), SetResize(1, 0),
 										SetDataTip(STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW, STR_EXTRA_VIEW_MOVE_MAIN_TO_VIEW_TT),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, EVW_VIEW_TO_MAIN), SetFill(true, true), SetResize(1, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, EVW_VIEW_TO_MAIN), SetFill(1, 1), SetResize(1, 0),
 										SetDataTip(STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN, STR_EXTRA_VIEW_MOVE_VIEW_TO_MAIN_TT),
 		EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_GREY, EVW_SPACER), SetFill(true, true), SetResize(1, 0), EndContainer(),
-		NWidget(WWT_RESIZEBOX, COLOUR_GREY, EVW_RESIZE),
+		NWidget(WWT_PANEL, COLOUR_GREY), SetFill(1, 1), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 	EndContainer(),
 };
 
@@ -167,7 +162,7 @@ public:
 static const WindowDesc _extra_view_port_desc(
 	WDP_AUTO, WDP_AUTO, 300, 268,
 	WC_EXTRA_VIEW_PORT, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
+	WDF_UNCLICK_BUTTONS,
 	_nested_extra_view_port_widgets, lengthof(_nested_extra_view_port_widgets)
 );
 
