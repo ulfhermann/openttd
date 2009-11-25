@@ -44,9 +44,6 @@ StringID GetEngineCategoryName(EngineID engine)
 
 /** Widgets used for the engine preview window */
 enum EnginePreviewWidgets {
-	EPW_CLOSE,      ///< Close button
-	EPW_CAPTION,    ///< Title bar/caption
-	EPW_BACKGROUND, ///< Background
 	EPW_QUESTION,   ///< The container for the question
 	EPW_NO,         ///< No button
 	EPW_YES,        ///< Yes button
@@ -54,14 +51,14 @@ enum EnginePreviewWidgets {
 
 static const NWidgetPart _nested_engine_preview_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE, EPW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE, EPW_CAPTION), SetDataTip(STR_ENGINE_PREVIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE),
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE), SetDataTip(STR_ENGINE_PREVIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, EPW_BACKGROUND),
-		NWidget(WWT_EMPTY, INVALID_COLOUR, EPW_QUESTION), SetMinimalSize(300, 0), SetPadding(8, 8, 8, 8), SetFill(true, false),
+	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE),
+		NWidget(WWT_EMPTY, INVALID_COLOUR, EPW_QUESTION), SetMinimalSize(300, 0), SetPadding(8, 8, 8, 8), SetFill(1, 0),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(85, 10, 85),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_LIGHT_BLUE, EPW_NO), SetDataTip(STR_QUIT_NO, STR_NULL), SetFill(true, false),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_LIGHT_BLUE, EPW_YES), SetDataTip(STR_QUIT_YES, STR_NULL), SetFill(true, false),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_LIGHT_BLUE, EPW_NO), SetDataTip(STR_QUIT_NO, STR_NULL), SetFill(1, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_LIGHT_BLUE, EPW_YES), SetDataTip(STR_QUIT_YES, STR_NULL), SetFill(1, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 8),
 	EndContainer(),
@@ -80,7 +77,7 @@ struct EnginePreviewWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != EPW_QUESTION) return;
 
@@ -126,7 +123,7 @@ struct EnginePreviewWindow : Window {
 static const WindowDesc _engine_preview_desc(
 	WDP_CENTER, WDP_CENTER, 300, 192,
 	WC_ENGINE_PREVIEW, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION,
+	WDF_CONSTRUCTION,
 	_nested_engine_preview_widgets, lengthof(_nested_engine_preview_widgets)
 );
 

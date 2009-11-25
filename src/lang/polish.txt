@@ -908,8 +908,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Kliknij 
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Tabela Ligi Firm
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Inżynier
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Administrator Ruchu
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Koordynator Transportu
@@ -959,7 +958,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Własny 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Głośność muzyki
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Głośność efektów
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -2209,10 +2210,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Akceptuj
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Zasoby: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Połącz stację
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Połącz stację
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Zbuduj oddzielną stację
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Połącz pkt. orientacyjne
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Połącz pkt. orientacyjne
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Zbuduj oddzielny pkt. orientacyjny
 
 # Rail construction toolbar
@@ -2780,7 +2781,7 @@ STR_LOCAL_AUTHORITY_COMPANY_RATING                              :{YELLOW}{COMPAN
 STR_LOCAL_AUTHORITY_ACTIONS_TITLE                               :{BLACK}Możliwe działania:
 STR_LOCAL_AUTHORITY_ACTIONS_TOOLTIP                             :{BLACK}Lista rzeczy do zrobienia w tym mieście - klik po więcej detali
 STR_LOCAL_AUTHORITY_DO_IT_BUTTON                                :{BLACK}Wykonaj
-STR_LOCAL_AUTHORITY_DO_IT_TOOLTIP                               :{BLACK}Wykonaj podświetloną akcję z poniższej listy
+STR_LOCAL_AUTHORITY_DO_IT_TOOLTIP                               :{BLACK}Wykonaj zaznaczone działanie z listy powyżej
 
 STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN           :Mała kampania reklamowa
 STR_LOCAL_AUTHORITY_ACTION_MEDIUM_ADVERTISING_CAMPAIGN          :Średnia kampania reklamowa
@@ -2910,7 +2911,9 @@ STR_COMPANY_VIEW_COMPANY_VALUE                                  :{GOLD}Wartość
 STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}% w posiadaniu przez {COMPANY})
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Budowa Siedziby
+STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Zbuduj siedzibę firmy
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Zobacz SG
+STR_COMPANY_VIEW_VIEW_HQ_TOOLTIP                                :{BLACK}Zobacz siedzibę firmy
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Przenieś SG
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Zbuduj siedzibę główna w innym miejscu za cenę 1% wartości firmy
 
@@ -4114,7 +4117,7 @@ STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_ASIASTAR_ELECTRIC            :'AsiaStar' (Ele
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_PASSENGER_CAR                 :Wagon pasażerski
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_MAIL_VAN                      :Wagon pocztowy
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_COAL_CAR                      :Wagon na węgiel
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_OIL_TANKER                    :Cysterna
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_OIL_TANKER                    :Cysterna na ropę
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_LIVESTOCK_VAN                 :Wagon na żywiec
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_GOODS_VAN                     :Wagon towarowy
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_GRAIN_HOPPER                  :Wagon na ziarno
@@ -4144,7 +4147,7 @@ STR_VEHICLE_NAME_TRAIN_ENGINE_MONORAIL_WIZZOWOW_Z99             :Wizzowow Z99
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_PASSENGER_CAR             :Wagon pasażerski
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_MAIL_VAN                  :Wagon pocztowy
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COAL_CAR                  :Wagon na węgiel
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_OIL_TANKER                :Cysterna
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_OIL_TANKER                :Cysterna na ropę
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_LIVESTOCK_VAN             :Wagon na żywiec
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_GOODS_VAN                 :Wagon towarowy
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_GRAIN_HOPPER              :Wagon na ziarno
@@ -4176,7 +4179,7 @@ STR_VEHICLE_NAME_TRAIN_ENGINE_MAGLEV_WIZZOWOW_ROCKETEER         :Wizzowow Rocket
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PASSENGER_CAR               :Wagon pasażerski
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_MAIL_VAN                    :Wagon pocztowy
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COAL_CAR                    :Wagon na węgiel
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_OIL_TANKER                  :Cysterna
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_OIL_TANKER                  :Cysterna na ropę
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_LIVESTOCK_VAN               :Wagon na żywiec
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_GOODS_VAN                   :Wagon towarowy
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_GRAIN_HOPPER                :Wagon na ziarno
@@ -4428,7 +4431,6 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1

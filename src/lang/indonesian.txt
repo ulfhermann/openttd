@@ -529,8 +529,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Klik dis
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Tabel Liga Perusahaan
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Insinyur
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Manajer Lalu lintas
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Koordinator trasportasi
@@ -580,7 +579,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Bebas 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Volume Musik
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Volume Efek
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAKS
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1725,6 +1723,11 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :server penuh
 # Network related errors
 STR_NETWORK_SERVER_MESSAGE                                      :*** {1:STRING}
 ############ Leave those lines in this order!!
+STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED                          :Permainan dihentikan ({STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_1                  :Permainan masih dihentikan ({STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_2                  :Permainan masih dihentikan ({STRING}, {STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_3                  :Permainan masih dihentikan ({STRING}, {STRING}, {STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED                        :Permainan dilanjutkan ({STRING})
 STR_NETWORK_SERVER_MESSAGE_GAME_REASON_NOT_ENOUGH_PLAYERS       :pemain tidak cukup
 STR_NETWORK_SERVER_MESSAGE_GAME_REASON_CONNECTING_CLIENTS       :menghubungkan ke klien
 STR_NETWORK_SERVER_MESSAGE_GAME_REASON_MANUAL                   :manual
@@ -1824,10 +1827,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Menerima
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Suplai: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Gabung stasiun
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Gabung stasiun
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Pisahkan stasiun
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Gabungkan waypoint
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Gabungkan waypoint
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Pisahkan waypoint
 
 # Rail construction toolbar
@@ -2175,7 +2178,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Tanah milik Per
 STR_ABOUT_OPENTTD                                               :{WHITE}Tentang OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Hak Cipta asli {COPYRIGHT} 1995 Chris Sawyer, Hak Cipta dilindungi
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD versi {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 Tim OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2009 Tim OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Simpan Permainan
@@ -2472,6 +2475,7 @@ STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP                        :{BLACK}Tampilka
 STR_STATION_VIEW_RENAME_STATION_CAPTION                         :Ubah nama stasiun/area bongkar muat
 
 # Waypoint/buoy view window
+STR_WAYPOINT_VIEW_CAPTION                                       :{WHITE}{WAYPOINT}
 STR_WAYPOINT_VIEW_CENTER_TOOLTIP                                :{BLACK}Arahkan pandangan utama pada lokasi waypoint. Ctrl+Click akan membuka viewport baru pada lokasi waypoint
 STR_WAYPOINT_VIEW_CHANGE_WAYPOINT_NAME                          :{BLACK}Ubah nama waypoint
 STR_BUOY_VIEW_CENTER_TOOLTIP                                    :{BLACK}Arahkan pandangan utama pada lokasi pelampung. Ctrl+Click akan membuka viewport baru pada lokasi pelampung
@@ -2524,8 +2528,10 @@ STR_COMPANY_VIEW_COMPANY_VALUE                                  :{GOLD}Nilai Per
 STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}% saham dimiliki oleh {COMPANY})
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Kantor Pusat
+STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Membangun kantor pusat
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Lokasi Kantor
-STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Relokasi Kantor
+STR_COMPANY_VIEW_VIEW_HQ_TOOLTIP                                :{BLACK}Tampilkan kantor pusat
+STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Pindah Kantor Pusat
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Membangun kembali kantor pusat perusahaan di tempat lain dengan 1% ongkos dari nilai perusahaan
 
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}Ganti Wajah
@@ -4000,7 +4006,6 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
