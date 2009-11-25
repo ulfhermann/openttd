@@ -114,11 +114,8 @@ void CargoList<Tinst>::AddToCache(const CargoPacket *cp)
 }
 
 template <class Tinst>
-void CargoList<Tinst>::Append(CargoPacket *cp)
+void CargoList<Tinst>::MergeOrPush(CargoPacket *cp)
 {
-	assert(cp != NULL);
-	static_cast<Tinst *>(this)->AddToCache(cp);
-
 	for (List::reverse_iterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
 		CargoPacket *icp = *it;
 		if (Tinst::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
@@ -132,6 +129,15 @@ void CargoList<Tinst>::Append(CargoPacket *cp)
 
 	/* The packet could not be merged with another one */
 	this->packets.push_back(cp);
+}
+
+
+template <class Tinst>
+void CargoList<Tinst>::Append(CargoPacket *cp)
+{
+	assert(cp != NULL);
+	static_cast<Tinst *>(this)->AddToCache(cp);
+	MergeOrPush(cp);
 }
 
 
@@ -162,12 +168,55 @@ void CargoList<Tinst>::Truncate(uint max_remaining)
 	}
 }
 
+void VehicleCargoList::Reserve(CargoPacket *cp)
+{
+	assert(cp != NULL);
+	this->AddToCache(cp);
+	this->reserved_count += cp->count;
+	this->reserved.push_back(cp);
+}
+
+
+void VehicleCargoList::Unreserve(StationCargoList *dest)
+{
+	Iterator it(this->reserved.begin());
+	while (it != this->reserved.end()) {
+		CargoPacket *cp = *it;
+		this->RemoveFromCache(cp);
+		this->reserved_count -= cp->count;
+		dest->Append(cp);
+		this->reserved.erase(it++);
+	}
+}
+
+bool VehicleCargoList::LoadReserved(uint max_move)
+{
+	Iterator it(this->reserved.begin());
+	while (it != this->reserved.end() && max_move > 0) {
+		CargoPacket *cp = *it;
+		if (cp->count <= max_move) {
+			/* Can move the complete packet */
+			max_move -= cp->count;
+			this->reserved.erase(it++);
+			this->reserved_count -= cp->count;
+			this->MergeOrPush(cp);
+		} else {
+			cp->count -= max_move;
+			CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, cp->source, cp->source_xy, cp->loaded_at_xy, 0, cp->source_type, cp->source_id);
+			this->MergeOrPush(cp_new);
+			this->reserved_count -= max_move;
+			max_move = 0;
+		}
+	}
+	return it != packets.end();
+}
+
 template <class Tinst>
 template <class Tother_inst>
 bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta, CargoPayment *payment, uint data)
 {
 	assert(mta == MTA_FINAL_DELIVERY || dest != NULL);
-	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || payment != NULL);
+	assert(mta == MTA_UNLOAD || mta == MTA_CARGO_LOAD || mta == MTA_RESERVE || payment != NULL);
 
 	Iterator it(this->packets.begin());
 	while (it != this->packets.end() && max_move > 0) {
@@ -188,6 +237,11 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 					payment->PayFinalDelivery(cp, cp->count);
 					delete cp;
 					continue; // of the loop
+
+				case MTA_RESERVE:
+					cp->loaded_at_xy = data;
+					reinterpret_cast<VehicleCargoList *>(dest)->Reserve(cp);
+					continue;
 
 				case MTA_CARGO_LOAD:
 					cp->loaded_at_xy = data;
@@ -232,7 +286,11 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 				cp_new->feeder_share += payment->PayTransfer(cp_new, max_move);
 			}
 
-			dest->Append(cp_new);
+			if (mta == MTA_RESERVE) {
+				reinterpret_cast<VehicleCargoList *>(dest)->Reserve(cp_new);
+			} else {
+				dest->Append(cp_new);
+			}
 		}
 
 		max_move = 0;
@@ -280,7 +338,12 @@ void VehicleCargoList::AgeCargo()
 void VehicleCargoList::InvalidateCache()
 {
 	this->feeder_share = 0;
+	this->reserved_count = 0;
 	this->Parent::InvalidateCache();
+	for (ConstIterator it(this->reserved.begin()); it != this->reserved.end(); it++) {
+		this->AddToCache(*it);
+		this->reserved_count += (*it)->count;
+	}
 }
 
 /*

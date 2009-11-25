@@ -206,6 +206,7 @@ public:
 	virtual ~Vehicle();
 
 	void BeginLoading(StationID last_station_id);
+	void CancelReservation(Station *st);
 	void LeaveStation();
 
 	/**

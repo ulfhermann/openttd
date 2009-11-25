@@ -30,6 +30,8 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576, true, false> CargoPacket
 extern CargoPacketPool _cargopacket_pool;
 
 template <class Tinst> class CargoList;
+class StationCargoList;
+class VehicleCargoList;
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -202,6 +204,7 @@ public:
 	enum MoveToAction {
 		MTA_FINAL_DELIVERY, ///< "Deliver" the packet to the final destination, i.e. destroy the packet
 		MTA_CARGO_LOAD,     ///< Load the packet onto a vehicle, i.e. set the last loaded station ID
+		MTA_RESERVE,        ///< Reserve cargo for later loading
 		MTA_TRANSFER,       ///< The cargo is moved as part of a transfer
 		MTA_UNLOAD,         ///< The cargo is moved as part of a forced unload
 	};
@@ -211,6 +214,13 @@ protected:
 	uint cargo_days_in_transit; ///< Cache for the sum of number of days in transit of each entity; comparable to man-hours
 
 	List packets;               ///< The cargo packets in this list
+
+	/**
+	 * tries to merge the packet with another one in the packets list.
+	 * if no fitting packet is found, appends it.
+	 * @param cp the packet to be inserted
+	 */
+	void MergeOrPush(CargoPacket *cp);
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -330,7 +340,9 @@ protected:
 	/** The (direct) parent of this class */
 	typedef CargoList<VehicleCargoList> Parent;
 
-	Money feeder_share; ///< Cache for the feeder share
+	List reserved;       ///< The packets reserved for unloading in this list
+	Money feeder_share;  ///< Cache for the feeder share
+	uint reserved_count; ///< count(reserved)
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -360,6 +372,51 @@ public:
 	{
 		return this->feeder_share;
 	}
+
+	/**
+	 * Returns sum of cargo on board the vehicle (ie not only
+	 * reserved)
+	 * @return cargo on board the vehicle
+	 */
+	FORCEINLINE uint OnboardCount() const
+	{
+		return this->count - this->reserved_count;
+	}
+
+	/**
+	 * Returns sum of cargo reserved for the vehicle
+	 * @return cargo reserved for the vehicle
+	 */
+	FORCEINLINE uint ReservedCount() const
+	{
+		return this->reserved_count;
+	}
+
+	/**
+	 * Returns a pointer to the reserved cargo list (so you can iterate over it etc).
+	 * @return pointer to the reserved list
+	 */
+	FORCEINLINE const List *Reserved() const
+	{
+		return &this->reserved;
+	}
+
+	/**
+	 * Reserves a packet for later loading
+	 */
+	void Reserve(CargoPacket *cp);
+
+	/**
+	 * Returns all reserved cargo to the station
+	 */
+	void Unreserve(StationCargoList *dest);
+
+	/**
+	 * load packets from the reserved list
+	 * @params count the number of cargo to load
+	 * @return true if there are still packets that might be loaded from the reservation list
+	 */
+	bool LoadReserved(uint count);
 
 	/**
 	 * Ages the all cargo in this list
