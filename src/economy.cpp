@@ -109,7 +109,7 @@ int _score_part[MAX_COMPANIES][SCORE_END];
 Economy _economy;
 Prices _price;
 Money _additional_cash_required;
-static int8 _price_base_multiplier[PR_END];
+static PriceMultipliers _price_base_multiplier;
 
 Money CalculateCompanyValue(const Company *c)
 {
@@ -788,15 +788,27 @@ void InitializeEconomy()
 }
 
 /**
- * Determine a certain base price with range checking
- * @param index Price of interest
- * @return Base price, or zero if out of range
+ * Determine a certain price
+ * @param index Price base
+ * @param cost_factor Price factor
+ * @param grf_file NewGRF to use local price multipliers from.
+ * @param shift Extra bit shifting after the computation
+ * @return Price
  */
-Money GetPriceByIndex(Price index)
+Money GetPrice(Price index, uint cost_factor, const GRFFile *grf_file, int shift)
 {
 	if (index >= PR_END) return 0;
 
-	return _price[index];
+	Money cost = _price[index] * cost_factor;
+	if (grf_file != NULL) shift += grf_file->price_base_multipliers[index];
+
+	if (shift >= 0) {
+		cost <<= shift;
+	} else {
+		cost >>= -shift;
+	}
+
+	return cost;
 }
 
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, CargoID cargo_type)

@@ -26,11 +26,7 @@
 
 /** Widget definitions for the waypoint window. */
 enum WaypointWindowWidgets {
-	WAYPVW_CLOSEBOX = 0,
 	WAYPVW_CAPTION,
-	WAYPVW_STICKY,
-	WAYPVW_VIEWPORTPANEL,
-	WAYPVW_SPACER,
 	WAYPVW_VIEWPORT,
 	WAYPVW_CENTERVIEW,
 	WAYPVW_RENAME,
@@ -114,6 +110,14 @@ public:
 		ScrollWindowTo(x, y, -1, this);
 	}
 
+	virtual void OnResize()
+	{
+		if (this->viewport != NULL) {
+			NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(WAYPVW_VIEWPORT);
+			nvp->UpdateViewportCoordinates(this);
+		}
+	}
+
 	virtual void OnQueryTextFinished(char *str)
 	{
 		if (str == NULL) return;
@@ -125,26 +129,27 @@ public:
 
 static const NWidgetPart _nested_waypoint_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, WAYPVW_CLOSEBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, WAYPVW_CAPTION), SetDataTip(STR_WAYPOINT_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, WAYPVW_STICKY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, WAYPVW_VIEWPORTPANEL),
-		NWidget(WWT_INSET, COLOUR_GREY, WAYPVW_SPACER), SetPadding(2, 2, 2, 2),
-			NWidget(NWID_VIEWPORT, COLOUR_GREY, WAYPVW_VIEWPORT), SetMinimalSize(256, 88), SetPadding(1, 1, 1, 1),
+	NWidget(WWT_PANEL, COLOUR_GREY),
+		NWidget(WWT_INSET, COLOUR_GREY), SetPadding(2, 2, 2, 2),
+			NWidget(NWID_VIEWPORT, COLOUR_GREY, WAYPVW_VIEWPORT), SetMinimalSize(256, 88), SetPadding(1, 1, 1, 1), SetResize(1, 1),
 		EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WAYPVW_CENTERVIEW), SetMinimalSize(100, 12), SetFill(true, false), SetDataTip(STR_BUTTON_LOCATION, STR_BUOY_VIEW_CENTER_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WAYPVW_RENAME), SetMinimalSize(100, 12), SetFill(true, false), SetDataTip(STR_BUTTON_RENAME, STR_BUOY_VIEW_CHANGE_BUOY_NAME),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WAYPVW_CENTERVIEW), SetMinimalSize(100, 12), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_BUTTON_LOCATION, STR_BUOY_VIEW_CENTER_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WAYPVW_RENAME), SetMinimalSize(100, 12), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_BUTTON_RENAME, STR_BUOY_VIEW_CHANGE_BUOY_NAME),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WAYPVW_SHOW_VEHICLES), SetMinimalSize(15, 12), SetDataTip(STR_SHIP, STR_STATION_VIEW_SCHEDULED_SHIPS_TOOLTIP),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 	EndContainer(),
 };
 
 static const WindowDesc _waypoint_view_desc(
 	WDP_AUTO, WDP_AUTO, 260, 118,
 	WC_WAYPOINT_VIEW, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON,
+	WDF_UNCLICK_BUTTONS,
 	_nested_waypoint_view_widgets, lengthof(_nested_waypoint_view_widgets)
 );
 
