@@ -24,10 +24,8 @@
 #include "table/strings.h"
 
 enum TimetableViewWindowWidgets {
-	TTV_WIDGET_CLOSEBOX = 0,
 	TTV_CAPTION,
 	TTV_ORDER_VIEW,
-	TTV_STICKY,
 	TTV_TIMETABLE_PANEL,
 	TTV_SCROLLBAR,
 	TTV_SUMMARY_PANEL,
@@ -35,8 +33,6 @@ enum TimetableViewWindowWidgets {
 	TTV_CLEAR_TIME,
 	TTV_RESET_LATENESS,
 	TTV_AUTOFILL,
-	TTV_EMPTY,
-	TTV_RESIZE,
 };
 
 /**
@@ -68,7 +64,7 @@ struct TimetableWindow : Window {
 		this->sel_index = -1;
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case TTV_TIMETABLE_PANEL:
@@ -359,10 +355,10 @@ struct TimetableWindow : Window {
 
 static const NWidgetPart _nested_timetable_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, TTV_WIDGET_CLOSEBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, TTV_CAPTION), SetDataTip(STR_TIMETABLE_TITLE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_ORDER_VIEW), SetMinimalSize(61, 14), SetDataTip( STR_TIMETABLE_ORDER_VIEW, STR_TIMETABLE_ORDER_VIEW_TOOLTIP),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, TTV_STICKY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_GREY, TTV_TIMETABLE_PANEL), SetMinimalSize(388, 82), SetResize(1, 10), SetDataTip(STR_NULL, STR_TIMETABLE_TOOLTIP), EndContainer(),
@@ -374,15 +370,15 @@ static const NWidgetPart _nested_timetable_widgets[] = {
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_CLEAR_TIME), SetMinimalSize(110, 12), SetDataTip(STR_TIMETABLE_CLEAR_TIME, STR_TIMETABLE_CLEAR_TIME_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_RESET_LATENESS), SetMinimalSize(118, 12), SetDataTip(STR_TIMETABLE_RESET_LATENESS, STR_TIMETABLE_RESET_LATENESS_TOOLTIP),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, TTV_AUTOFILL), SetMinimalSize(50, 12), SetDataTip(STR_TIMETABLE_AUTOFILL, STR_TIMETABLE_AUTOFILL_TOOLTIP),
-		NWidget(WWT_PANEL, COLOUR_GREY, TTV_EMPTY), SetMinimalSize(0, 12), SetResize(1, 0), EndContainer(),
-		NWidget(WWT_RESIZEBOX,COLOUR_GREY, TTV_RESIZE),
+		NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(0, 12), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_RESIZEBOX,COLOUR_GREY),
 	EndContainer(),
 };
 
 static const WindowDesc _timetable_desc(
 	WDP_AUTO, WDP_AUTO, 400, 130,
 	WC_VEHICLE_TIMETABLE, WC_VEHICLE_VIEW,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_CONSTRUCTION,
+	WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
 	_nested_timetable_widgets, lengthof(_nested_timetable_widgets)
 );
 

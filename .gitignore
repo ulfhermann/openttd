@@ -1,6 +1,7 @@
 Makefile*
 gitmake-all
 gitmake-origin
+gitmake-build
 bin/*
 bundle/*
 bundles/
