@@ -16,9 +16,8 @@ clean:
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
 	git merge ${@}-tmp
-	test -e gitmake-build && make -j`cat gitmake-build`
+	test -e gitmake-build && make -j`cat gitmake-build` || true
 	./make_diffs
-	
 
 gitmake-origin:
 	git fetch git://git.openttd.org/openttd/trunk.git master:trunk
