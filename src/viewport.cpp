@@ -460,10 +460,10 @@ Point GetTileZoomCenterWindow(bool in, Window * w)
  * @param widget_zoom_out widget index for window with zoom-out button */
 void HandleZoomMessage(Window *w, const ViewPort *vp, byte widget_zoom_in, byte widget_zoom_out)
 {
-	w->SetWidgetDisabledState(widget_zoom_in, vp->zoom == ZOOM_LVL_MIN);
+	w->SetWidgetDisabledState(widget_zoom_in, vp->zoom == ZOOM_LVL_BLITTER_MIN);
 	w->SetWidgetDirty(widget_zoom_in);
 
-	w->SetWidgetDisabledState(widget_zoom_out, vp->zoom == ZOOM_LVL_MAX);
+	w->SetWidgetDisabledState(widget_zoom_out, vp->zoom == ZOOM_LVL_BLITTER_MAX);
 	w->SetWidgetDirty(widget_zoom_out);
 }
 
@@ -1200,14 +1200,14 @@ void ViewportSign::UpdatePosition(int center, int top, StringID str)
  */
 void ViewportSign::MarkDirty() const
 {
-	/* We use ZOOM_LVL_MAX here, as every viewport can have an other zoom,
+	/* We use ZOOM_LVL_BLITTER_MAX here, as every viewport can have an other zoom,
 	 *  and there is no way for us to know which is the biggest. So make the
 	 *  biggest area dirty, and we are safe for sure. */
 	MarkAllViewportsDirty(
 		this->left - 6,
 		this->top  - 3,
-		this->left + ScaleByZoom(this->width_normal + 12, ZOOM_LVL_MAX),
-		this->top  + ScaleByZoom(FONT_HEIGHT_NORMAL + 2, ZOOM_LVL_MAX));
+		this->left + ScaleByZoom(this->width_normal + 12, ZOOM_LVL_BLITTER_MAX),
+		this->top  + ScaleByZoom(FONT_HEIGHT_NORMAL + 2, ZOOM_LVL_BLITTER_MAX));
 }
 
 static void ViewportDrawTileSprites(const TileSpriteToDrawVector *tstdv)

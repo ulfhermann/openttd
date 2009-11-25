@@ -18,7 +18,7 @@
 class Blitter_32bppOptimized : public Blitter_32bppSimple {
 public:
 	struct SpriteData {
-		uint32 offset[ZOOM_LVL_COUNT][2];
+		uint32 offset[ZOOM_LVL_BLITTER_COUNT][2];
 		byte data[];
 	};
 
