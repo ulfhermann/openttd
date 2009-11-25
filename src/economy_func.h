@@ -41,7 +41,7 @@ uint MoveGoodsToStation(CargoID type, uint amount, SourceType source_type, Sourc
 void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_station_id);
 void LoadUnloadStation(Station *st);
 
-Money GetPriceByIndex(Price index);
+Money GetPrice(Price index, uint cost_factor, const struct GRFFile *grf_file, int shift = 0);
 
 void InitializeEconomy();
 void RecomputePrices();

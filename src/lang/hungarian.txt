@@ -562,8 +562,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}A válla
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}A cégek helyezése
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Mérnök
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Forgalomigazgató
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Szállításszervező
@@ -613,7 +612,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}SAJÁT 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}ZENE HANGEREJE
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}HANGOK HANGEREJE
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  '  '  '  '  MAX
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1863,10 +1864,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Elfogad:
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Termel: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Állomás egyesítése
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Állomás egyesítése
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Különálló állomás építése
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Ellenőrző pont egyesítése
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Ellenőrző pont egyesítése
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Különálló ellenőrző pont építése
 
 # Rail construction toolbar
@@ -2564,7 +2565,9 @@ STR_COMPANY_VIEW_COMPANY_VALUE                                  :{GOLD}Cég ért
 STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}% {COMPANY} tulajdona)
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Székház építése
+STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Székház építése
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Székház
+STR_COMPANY_VIEW_VIEW_HQ_TOOLTIP                                :{BLACK}Székház megtekintése
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}SZH áthelyezése
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}A cég székházának újraépítése máshol a cég értékének 1%-áért
 
