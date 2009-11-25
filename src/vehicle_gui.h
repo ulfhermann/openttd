@@ -23,11 +23,7 @@ void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *pare
 
 /** Constants of vehicle view widget indices */
 enum VehicleViewWindowWidgets {
-	VVW_WIDGET_CLOSEBOX = 0,
 	VVW_WIDGET_CAPTION,
-	VVW_WIDGET_STICKY,
-	VVW_WIDGET_PANEL,
-	VVW_WIDGET_INSET,
 	VVW_WIDGET_VIEWPORT,           ///< Viewport widget.
 	VVW_WIDGET_START_STOP_VEH,
 	VVW_WIDGET_CENTER_MAIN_VIEH,
@@ -36,10 +32,8 @@ enum VehicleViewWindowWidgets {
 	VVW_WIDGET_SHOW_ORDERS,
 	VVW_WIDGET_SHOW_DETAILS,
 	VVW_WIDGET_CLONE_VEH,
-	VVW_WIDGET_EMPTY_BOTTOM_RIGHT,
 	VVW_WIDGET_SELECT_DEPOT_CLONE, ///< Selection widget between 'goto depot', and 'clone vehicle' buttons.
 	VVW_WIDGET_SELECT_REFIT_TURN,  ///< Selection widget between 'refit' and 'turn around' buttons.
-	VVW_WIDGET_RESIZE,
 	VVW_WIDGET_TURN_AROUND,
 	VVW_WIDGET_FORCE_PROCEED,
 };

@@ -529,8 +529,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Klik hie
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Bedrijfscompetitietabel
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Ingenieur
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Verkeersleider
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Transportcoördinator
@@ -580,7 +579,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Aangepast 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Muziekvolume
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Geluidsvolume
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1829,10 +1827,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Acceptee
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Bied aan: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Station samenvoegen
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Station samenvoegen
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Bouw een losstaand station
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Controlepost samenvoegen
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Controlepost samenvoegen
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Bouw een losstaande controlepost
 
 # Rail construction toolbar
@@ -2180,7 +2178,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Terrein in bedr
 STR_ABOUT_OPENTTD                                               :{WHITE}Over OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Originele copyright {COPYRIGHT} 1995 Chris Sawyer, alle rechten voorbehouden
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD versie {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 Het OpenTTD team
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2009 Het OpenTTD team
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Spel Opslaan
@@ -4006,7 +4004,6 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
