@@ -133,15 +133,13 @@ static const CheatEntry _cheats_ui[] = {
 
 /* Names of the cheat window widgets. */
 enum CheatWidgets {
-	CW_CLOSEBOX,
-	CW_CAPTION,
 	CW_PANEL,
 };
 
 static const NWidgetPart _nested_cheat_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, CW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, CW_CAPTION), SetDataTip(STR_CHEATS, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_CHEATS, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, CW_PANEL), SetDataTip(0x0, STR_CHEATS_TOOLTIP), EndContainer(),
 };
@@ -215,7 +213,7 @@ struct CheatWindow : Window {
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != CW_PANEL) return;
 
@@ -273,7 +271,7 @@ struct CheatWindow : Window {
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		const NWidgetCore *wid = this->GetWidget<NWidgetCore>(CW_PANEL);
+		const NWidgetBase *wid = this->GetWidget<NWidgetBase>(CW_PANEL);
 		uint btn = (pt.y - wid->pos_y - WD_FRAMERECT_TOP - this->header_height) / (FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL);
 		uint x = pt.x - wid->pos_x;
 		bool rtl = _dynlang.text_dir == TD_RTL;
@@ -320,7 +318,7 @@ struct CheatWindow : Window {
 static const WindowDesc _cheats_desc(
 	240, 22, 0, 0,
 	WC_CHEATS, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
+	WDF_UNCLICK_BUTTONS,
 	_nested_cheat_widgets, lengthof(_nested_cheat_widgets)
 );
 
