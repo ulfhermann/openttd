@@ -18,26 +18,23 @@
 
 /** Enum for StationView, referring to _station_view_widgets and _station_view_expanded_widgets */
 enum StationViewWidgets {
-	SVW_CLOSEBOX   =  0, ///< Close 'X' button
-	SVW_CAPTION    =  1, ///< Caption of the window
-	SVW_STICKYBOX  =  2, ///< Sticky button
-	SVW_SORT_ORDER =  3, ///< 'Sort order' button
-	SVW_SORT_BY    =  4, ///< 'Sort by' button
-	SVW_MODE       =  5, ///< button for toggling planned and real flows
-	SVW_GROUP_BY   =  6, ///< 'Group by' button
-	SVW_WAITING    =  7, ///< List of waiting cargo
-	SVW_SCROLLBAR  =  8, ///< Scrollbar
-	SVW_ACCEPTLIST =  9, ///< List of accepted cargos
-	SVW_RATINGLIST =  9, ///< Ratings of cargos
-	SVW_LOCATION   = 10, ///< 'Location' button
-	SVW_RATINGS    = 11, ///< 'Ratings' button
-	SVW_ACCEPTS    = 11, ///< 'Accepts' button
-	SVW_RENAME     = 12, ///< 'Rename' button
-	SVW_TRAINS     = 13, ///< List of scheduled trains button
+	SVW_CAPTION    =  0, ///< Caption of the window
+	SVW_SORT_ORDER =  1, ///< 'Sort order' button
+	SVW_SORT_BY    =  2, ///< 'Sort by' button
+	SVW_MODE       =  3, ///< button for toggling planned and real flows
+	SVW_GROUP_BY   =  4, ///< 'Group by' button
+	SVW_WAITING    =  5, ///< List of waiting cargo
+	SVW_SCROLLBAR  =  6, ///< Scrollbar
+	SVW_ACCEPTLIST =  7, ///< List of accepted cargos
+	SVW_RATINGLIST =  7, ///< Ratings of cargos
+	SVW_LOCATION   =  8, ///< 'Location' button
+	SVW_RATINGS    =  9, ///< 'Ratings' button
+	SVW_ACCEPTS    =  9, ///< 'Accepts' button
+	SVW_RENAME     = 10, ///< 'Rename' button
+	SVW_TRAINS     = 11, ///< List of scheduled trains button
 	SVW_ROADVEHS,        ///< List of scheduled road vehs button
 	SVW_PLANES,          ///< List of scheduled planes button
 	SVW_SHIPS,           ///< List of scheduled ships button
-	SVW_RESIZE,          ///< Resize button
 };
 
 enum StationCoverageType {

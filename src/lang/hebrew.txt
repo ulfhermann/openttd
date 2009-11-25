@@ -529,8 +529,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}לחץ �
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}טבלת ליגת החברות
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :מהנדס זוטר
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :מהנדס בכיר
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :מנהל תחבורה זוטר
@@ -580,7 +579,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}מותאם אישית 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}עוצמת מנגינת רקע
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}עוצמת הצלילים
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1829,10 +1827,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK} :מקב
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}מספק: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}חבר לתחנה קיימת
+STR_JOIN_STATION_CAPTION                                        :{WHITE}חבר לתחנה קיימת
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}בנה תחנה נפרדת
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}חבר נקודות ציון
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}חבר נקודות ציון
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}בנה נקודת ציון נפרדת
 
 # Rail construction toolbar
