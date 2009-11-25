@@ -32,9 +32,7 @@
 
 /** Widget numbers of the small map window. */
 enum SmallMapWindowWidgets {
-	SM_WIDGET_CLOSEBOX,
 	SM_WIDGET_CAPTION,
-	SM_WIDGET_STICKYBOX,
 	SM_WIDGET_MAP_BORDER,
 	SM_WIDGET_MAP,
 	SM_WIDGET_LEGEND,
@@ -47,18 +45,16 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_OWNERS,
 	SM_WIDGET_CENTERMAP,
 	SM_WIDGET_TOGGLETOWNNAME,
-	SM_WIDGET_BOTTOMPANEL,
 	SM_WIDGET_SELECTINDUSTRIES,
 	SM_WIDGET_ENABLEINDUSTRIES,
 	SM_WIDGET_DISABLEINDUSTRIES,
-	SM_WIDGET_RESIZEBOX,
 };
 
 static const NWidgetPart _nested_smallmap_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, SM_WIDGET_CLOSEBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN, SM_WIDGET_CAPTION), SetDataTip(STR_SMALLMAP_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_BROWN, SM_WIDGET_STICKYBOX),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	/* Small map display. */
 	NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_MAP_BORDER),
@@ -69,45 +65,37 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 		NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_LEGEND), SetMinimalSize(262, 44), SetResize(1, 0), EndContainer(),
 		NWidget(NWID_VERTICAL),
 			/* Top button row. */
-			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_CENTERMAP), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_SMALLMAP, STR_SMALLMAP_CENTER),
-				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_CONTOUR), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_SHOW_COUNTOURS, STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP),
-				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_VEHICLES), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_SHOW_VEHICLES, STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP),
-				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_INDUSTRIES), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_INDUSTRY, STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_CENTERMAP), SetDataTip(SPR_IMG_SMALLMAP, STR_SMALLMAP_CENTER),
+				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_CONTOUR), SetDataTip(SPR_IMG_SHOW_COUNTOURS, STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP),
+				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_VEHICLES), SetDataTip(SPR_IMG_SHOW_VEHICLES, STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP),
+				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_INDUSTRIES), SetDataTip(SPR_IMG_INDUSTRY, STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP),
 			EndContainer(),
 			/* Bottom button row. */
-			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_TOGGLETOWNNAME), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_TOWN, STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF),
-				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ROUTES), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_SHOW_ROUTES, STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON),
-				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_VEGETATION), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_PLANTTREES, STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP),
-				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_OWNERS), SetMinimalSize(22, 22),
-											SetDataTip(SPR_IMG_COMPANY_GENERAL, STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_TOGGLETOWNNAME), SetDataTip(SPR_IMG_TOWN, STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF),
+				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ROUTES), SetDataTip(SPR_IMG_SHOW_ROUTES, STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON),
+				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_VEGETATION), SetDataTip(SPR_IMG_PLANTTREES, STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP),
+				NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_OWNERS), SetDataTip(SPR_IMG_COMPANY_GENERAL, STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BUTTONSPANEL), SetFill(true, true), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BUTTONSPANEL), SetFill(1, 1), EndContainer(),
 		EndContainer(),
 	EndContainer(),
 	/* Bottom button row and resize box. */
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, SM_WIDGET_BOTTOMPANEL),
+		NWidget(WWT_PANEL, COLOUR_BROWN),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(NWID_SELECTION, INVALID_COLOUR, SM_WIDGET_SELECTINDUSTRIES),
 					NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 						NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_ENABLEINDUSTRIES), SetMinimalSize(100, 12), SetDataTip(STR_SMALLMAP_ENABLE_ALL, STR_NULL),
 						NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_DISABLEINDUSTRIES), SetMinimalSize(100, 12), SetDataTip(STR_SMALLMAP_DISABLE_ALL, STR_NULL),
 					EndContainer(),
-					NWidget(NWID_SPACER), SetFill(true, true),
+					NWidget(NWID_SPACER), SetFill(1, 1),
 				EndContainer(),
-				NWidget(NWID_SPACER), SetFill(true, false), SetResize(1, 0),
+				NWidget(NWID_SPACER), SetFill(1, 0), SetResize(1, 0),
 			EndContainer(),
 		EndContainer(),
-		NWidget(WWT_RESIZEBOX, COLOUR_BROWN, SM_WIDGET_RESIZEBOX), SetFill(false, true),
+		NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
 	EndContainer(),
 };
 
@@ -864,7 +852,7 @@ public:
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != SM_WIDGET_LEGEND) return;
 
@@ -1024,7 +1012,7 @@ public:
 				/* If industry type small map*/
 				if (this->map_type == SMT_INDUSTRY) {
 					/* If click on industries label, find right industry type and enable/disable it */
-					const NWidgetCore *wi = this->GetWidget<NWidgetCore>(SM_WIDGET_LEGEND); // Label panel
+					const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_LEGEND); // Label panel
 					uint line = (pt.y - wi->pos_y - WD_FRAMERECT_TOP) / FONT_HEIGHT_SMALL;
 					if (line >= this->number_of_rows) break;
 
@@ -1111,7 +1099,7 @@ public:
 			}
 		}
 
-		const NWidgetCore *wi = this->GetWidget<NWidgetCore>(SM_WIDGET_MAP);
+		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 		int hx = wi->current_x / 2;
 		int hy = wi->current_y / 2;
 		int hvx = hx * -4 + hy * 8;
@@ -1143,7 +1131,7 @@ public:
 	void SmallMapCenterOnCurrentPos()
 	{
 		const ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
-		const NWidgetCore *wi = this->GetWidget<NWidgetCore>(SM_WIDGET_MAP);
+		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 
 		int x = ((vp->virtual_width  - (int)wi->current_x * TILE_SIZE) / 2 + vp->virtual_left) / 4;
 		int y = ((vp->virtual_height - (int)wi->current_y * TILE_SIZE) / 2 + vp->virtual_top ) / 2 - TILE_SIZE * 2;
@@ -1159,7 +1147,7 @@ bool SmallMapWindow::show_towns = true;
 static const WindowDesc _smallmap_desc(
 	WDP_AUTO, WDP_AUTO, 446, 314,
 	WC_SMALLMAP, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE | WDF_UNCLICK_BUTTONS,
+	WDF_UNCLICK_BUTTONS,
 	_nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)
 );
 

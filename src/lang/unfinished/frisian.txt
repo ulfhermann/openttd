@@ -470,8 +470,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Klik hji
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Bedriuwskompetysjetabel
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Inzjenieur
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Ferkearsbehearder
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Transportcoördinator
@@ -497,7 +496,6 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Eigen 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Musyk Folume
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Effekten Folume
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAKS
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -1084,7 +1082,7 @@ STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Levert: 
 
 # Join station window
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Kontrôlepost gearfoegje
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Kontrôlepost gearfoegje
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}In apart kontrôlepost bouwe
 
 # Rail construction toolbar
