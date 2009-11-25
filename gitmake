@@ -18,7 +18,7 @@ clean:
 	git merge ${@}-tmp
 	test -e gitmake-build && make -j`cat gitmake-build`
 	./make_diffs
-	
+
 gitmake-origin:
 	git fetch git://git.openttd.org/openttd/trunk.git master:trunk
 	git log trunk | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
