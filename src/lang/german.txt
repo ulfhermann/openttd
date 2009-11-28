@@ -346,14 +346,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Schwierigkeitsg
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Erweiterte Einstellungen
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF-Einstellungen
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Transparenzeinstellungen
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Städtenamen anzeigen
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Stationsnamen anzeigen
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Wegpunktnamen anzeigen
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Schilder anzeigen
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Vollständige Animation
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Vollständige Detailansicht
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Transparenz für Gebäude
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Transparenz für Stationsnamen
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Städtenamen anzeigen
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Stationsnamen anzeigen
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Wegpunktnamen anzeigen
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Schilder anzeigen
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Vollständige Animation
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Vollständige Detailansicht
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Transparenz für Gebäude
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Transparenz für Stationsnamen
 ############ range ends here
 
 ############ range for file menu starts
@@ -369,7 +369,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Zusatzansicht
 STR_MAP_MENU_SIGN_LIST                                          :Schilderliste
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Städteverzeichnis
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Stadt gründen
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subventionen
@@ -580,6 +582,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Benutzerdef. 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Musiklautstärke
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Soundlautstärke
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -757,6 +762,8 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} startet bei {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} wurde von {STRING} übernommen!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Manager)
+
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}{STRING} finanziert die Gründung der Stadt {TOWN}!
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Neue{G r "" s ""} {STRING} {G 0 wird wird wird werden} nahe {TOWN} gebaut!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Neue{G r "" s ""} {STRING} {G 0 wird wird wird werden} nahe {TOWN} angepflanzt!
@@ -1171,6 +1178,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Eigene Firma
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Alle Firmen
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Fahrpläne für Fahrzeuge aktivieren: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Zeitpläne in Ticks anstatt in Tagen anzeigen: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Zeige Ankunft und Abfahrt im Fahrplan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Schnelle Erzeugung von Aufträgen für Fahrzeuge: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Gleistyp bei Spielbeginn/geladenem Spiel: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normales Gleis
@@ -1235,6 +1243,10 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :3×3-Gitter
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :Zufällig
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Städten das Bauen von Straßen erlauben: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Stadt kontrolliert Lärmbelastung der Flughäfen: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Städte im Spiel gründen: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :verboten
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :erlaubt
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :erlaubt mit wählbarem Straßenbauplan
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Position der Werkzeugleiste: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Links
@@ -2987,11 +2999,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Fahrplan
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Zur Fahrplanansicht wechseln
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Auftragsliste - zum Markieren hier anklicken. Strg+Klick springt zum Bahnhof
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Ende der Aufträge - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Ende des gemeinsam genutzten Fahrplans - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Ende der Aufträge - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Ende des gemeinsam genutzten Fahrplans - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}ohne Halt
@@ -3114,9 +3124,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Zur Auft
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Fahrplan - Einträge anklicken, um sie zu markieren.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Nicht unterwegs
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Unterwegs (ohne Fahrplan)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Unterwegs für {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Nicht unterwegs
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Unterwegs (ohne Fahrplan)
+STR_TIMETABLE_TRAVEL_FOR                                        :Unterwegs für {STRING}
 STR_TIMETABLE_STAY_FOR                                          :und {STRING} lang bleiben
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :und {STRING} lang unterwegs
 STR_TIMETABLE_DAYS                                              :{COMMA} Tag{P "" e}
@@ -3128,6 +3138,11 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Dieser F
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Das Fahrzeug ist derzeit pünktlich.
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Dieses Fahrzeug hat {STRING} Verspätung
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Dieses Fahrzeug ist {STRING} zu früh
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Dieser Fahrplan ist noch nicht gültig
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Dieser Fahrplan tritt ab {STRING} in Kraft
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Anfangsdatum
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Wähle ein Anfangsdatum für den Fahrplan
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Zeit ändern
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Zeitrahmen für den markierten Auftrag ändern
@@ -3140,6 +3155,23 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Verspät
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Erfassen
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Zeiten automatisch bei der nächsten Fahrt eintragen (Mit Strg+Klick wird versucht, die aktuellen Wartezeiten beizubehalten)
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Voraussichtlich
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Geplant
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Umschalten zwischen erwarteter Ankunftszeit und Fahrplan
+
+STR_TIMETABLE_ARRIVAL_ABBREVIATION                              :an
+STR_TIMETABLE_DEPARTURE_ABBREVIATION                            :ab
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Datum auswählen
+STR_DATE_SET_DATE                                               :{BLACK}Datum auswählen
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Setze den Fahrplan ab dem gewählten Datum in Kraft
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Tag auswählen
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Monat auswählen
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Jahr auswählen
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}KI Debug
@@ -4005,6 +4037,8 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
