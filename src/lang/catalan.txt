@@ -345,14 +345,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Paràmetres de 
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Paràmetres avançats
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Extensions NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Opcions de transparència
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Mostra els noms de les poblacions
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Mostra els noms de les estacions
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Mostra els punts de control
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Mostra les senyals
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animació completa
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Detall complet
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Edificis Transparents
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Signes d'estació transparents
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Mostra els noms de les poblacions
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Mostra els noms de les estacions
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Mostra els punts de control
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Mostra les senyals
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Animació completa
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Detall complet
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Edificis Transparents
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Signes d'estació transparents
 ############ range ends here
 
 ############ range for file menu starts
@@ -368,7 +368,8 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Vista extra
 STR_MAP_MENU_SIGN_LIST                                          :Llista de senyals
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Directori de Poblacions
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subvencions
@@ -579,6 +580,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Opcional 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Volum de la música
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Volum dels efectes
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -756,6 +760,7 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} comença la construcció prop de {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} ha estat absorbida per {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(President)
+
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Nou/nova {STRING} en construcció prop de {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}S'està plantant un nou {STRING} prop de {TOWN}!
@@ -2986,11 +2991,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Horari
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Commuta a la vista d'horaris
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Llista d'ordres - clica en una per seleccionar-la
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Fi d'Ordres - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Fi d'Ordres Compartides - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Fi d'Ordres - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Fi d'Ordres Compartides - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Sense parar
@@ -3113,9 +3116,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Commuta 
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Horari - clica sobre l'ordre per marcar-la.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Sense viatge
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Viatge (fora d'horari)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Viatge a {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Sense viatge
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Viatge (fora d'horari)
+STR_TIMETABLE_TRAVEL_FOR                                        :Viatge a {STRING}
 STR_TIMETABLE_STAY_FOR                                          :i estigues {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :i viatge per {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} di{P a es}
@@ -3139,6 +3142,13 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Reseteja
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Autoomple
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Omple automàticament l'horari amb valors del proper viatge (CTRL+clic per intentar mantenir els temps d'espera)
+
+
+### Do not separate or reorder ###
+#####
+
+### Do not separate or reorder ###
+#####
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Depuració IA
