@@ -28,7 +28,7 @@ gitmake-origin:
 master: gitmake-origin
 	git checkout $@
 	git rebase trunk
-	test -e gitmake-build && make -j`cat gitmake-build`
+	test -e gitmake-build && make -j`cat gitmake-build` || true
 
 smallmap-zoom-out: master
 
