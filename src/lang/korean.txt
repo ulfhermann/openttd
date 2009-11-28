@@ -346,14 +346,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :난이도 설�
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :고급 설정
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF 설정
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :투명 설정
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}도시 이름을 표시함
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}역 이름을 표시함
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}웨이포인트 이름을 표시함
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}팻말을 표시함
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}완전한 애니메이션
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}아주 상세하게
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}건물 안 보이기
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}역명판 감추기
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :도시 이름을 표시함
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :역 이름을 표시함
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :웨이포인트 이름을 표시함
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :팻말을 표시함
+STR_SETTINGS_MENU_FULL_ANIMATION                                :완전한 애니메이션
+STR_SETTINGS_MENU_FULL_DETAIL                                   :아주 상세하게
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :건물 안 보이기
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :역명판 감추기
 ############ range ends here
 
 ############ range for file menu starts
@@ -2987,11 +2987,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}시간�
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}시간표 보기 전환
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}이 열차의 경로 - 선택하려면 클릭하세요. CTRL+클릭하시면 그 역이 있는 장소로 이동합니다.
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - 경로의 끝 - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - 공유된 경로의 끝 - -
+STR_ORDERS_END_OF_ORDERS                                        :- - 경로의 끝 - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - 공유된 경로의 끝 - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}통과 설정
@@ -3114,9 +3112,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}순서 �
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}시간표 - 경로를 클릭하면 선택합니다.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}운행정보 없음
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}여행 (시간표 없음)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}{STRING}로 여행
+STR_TIMETABLE_NO_TRAVEL                                         :운행정보 없음
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :여행 (시간표 없음)
+STR_TIMETABLE_TRAVEL_FOR                                        :{STRING}로 여행
 STR_TIMETABLE_STAY_FOR                                          :그리고 {STRING}에 머무름
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :그리고 {STRING}(으)로 이동
 STR_TIMETABLE_DAYS                                              :{COMMA} 일

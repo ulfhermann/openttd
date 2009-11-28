@@ -445,7 +445,7 @@ static const NWidgetPart _nested_vehicle_refit_widgets[] = {
 };
 
 static const WindowDesc _vehicle_refit_desc(
-	WDP_AUTO, WDP_AUTO, 240, 174,
+	WDP_AUTO, 240, 174,
 	WC_VEHICLE_REFIT, WC_VEHICLE_VIEW,
 	WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
 	_nested_vehicle_refit_widgets, lengthof(_nested_vehicle_refit_widgets)
@@ -753,16 +753,16 @@ static const NWidgetPart _nested_vehicle_list[] = {
 	EndContainer(),
 };
 
-static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y)
+static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y, VehicleOrderID start = 0)
 {
-	const Order *order;
+	const Order *order = v->GetOrder(start);
+	if (order == NULL) return;
+
 	int i = 0;
+	VehicleOrderID oid = start;
 
-	int sel = v->cur_order_index;
-
-	FOR_VEHICLE_ORDERS(v, order) {
-		if (sel == 0) DrawString(left, right, y, STR_TINY_RIGHT_ARROW, TC_BLACK);
-		sel--;
+	do {
+		if (oid == v->cur_order_index) DrawString(left, right, y, STR_TINY_RIGHT_ARROW, TC_BLACK);
 
 		if (order->IsType(OT_GOTO_STATION)) {
 			SetDParam(0, order->GetDestination());
@@ -771,7 +771,14 @@ static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y)
 			y += FONT_HEIGHT_SMALL;
 			if (++i == 4) break;
 		}
-	}
+
+		oid++;
+		order = order->next;
+		if (order == NULL) {
+			order = v->orders.list->GetFirstOrder();
+			oid = 0;
+		}
+	} while (oid != start);
 }
 
 /**
@@ -863,7 +870,7 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle, int
 			DrawString(text_left, text_right, y, STR_TINY_GROUP, TC_BLACK);
 		}
 
-		if (show_orderlist) DrawSmallOrderList(v, orderlist_left, orderlist_right, y);
+		if (show_orderlist) DrawSmallOrderList(v, orderlist_left, orderlist_right, y, v->cur_order_index);
 
 		if (v->IsInDepot()) {
 			str = STR_BLUE_COMMA;
@@ -1184,7 +1191,7 @@ public:
 };
 
 static WindowDesc _vehicle_list_desc(
-	WDP_AUTO, WDP_AUTO, 260, 246,
+	WDP_AUTO, 260, 246,
 	WC_INVALID, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_vehicle_list, lengthof(_nested_vehicle_list)
@@ -1595,7 +1602,7 @@ struct VehicleDetailsWindow : Window {
 
 /** Vehicle details window descriptor. */
 static const WindowDesc _train_vehicle_details_desc(
-	WDP_AUTO, WDP_AUTO, 405, 178,
+	WDP_AUTO, 405, 178,
 	WC_VEHICLE_DETAILS, WC_VEHICLE_VIEW,
 	WDF_UNCLICK_BUTTONS,
 	_nested_train_vehicle_details_widgets, lengthof(_nested_train_vehicle_details_widgets)
@@ -1603,7 +1610,7 @@ static const WindowDesc _train_vehicle_details_desc(
 
 /** Vehicle details window descriptor for other vehicles than a train. */
 static const WindowDesc _nontrain_vehicle_details_desc(
-	WDP_AUTO, WDP_AUTO, 405, 113,
+	WDP_AUTO, 405, 113,
 	WC_VEHICLE_DETAILS, WC_VEHICLE_VIEW,
 	WDF_UNCLICK_BUTTONS,
 	_nested_nontrain_vehicle_details_widgets, lengthof(_nested_nontrain_vehicle_details_widgets)
@@ -1660,7 +1667,7 @@ static const NWidgetPart _nested_vehicle_view_widgets[] = {
 
 /** Vehicle view window descriptor for all vehicles but trains. */
 static const WindowDesc _vehicle_view_desc(
-	WDP_AUTO, WDP_AUTO, 250, 116,
+	WDP_AUTO, 250, 116,
 	WC_VEHICLE_VIEW, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_vehicle_view_widgets, lengthof(_nested_vehicle_view_widgets)
@@ -1670,7 +1677,7 @@ static const WindowDesc _vehicle_view_desc(
  *  default_height are different for train view.
  */
 static const WindowDesc _train_view_desc(
-	WDP_AUTO, WDP_AUTO, 250, 134,
+	WDP_AUTO, 250, 134,
 	WC_VEHICLE_VIEW, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_vehicle_view_widgets, lengthof(_nested_vehicle_view_widgets)
