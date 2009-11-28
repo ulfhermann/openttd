@@ -345,14 +345,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Zorluk Ayarlar�
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Gelişmiş ayarlar
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Newgrf ayarları
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Şeffaflık seçenekleri
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Şehir isimlerini göster
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}İstasyon isimlerini göster
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Yolimlerini göster
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Tabelaları göster
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Tüm animasyonlar
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Tam detay
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Şeffaf binalar
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Transparan istasyon tabelaları
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Şehir isimlerini göster
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :İstasyon isimlerini göster
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Yolimlerini göster
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Tabelaları göster
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Tüm animasyonlar
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Tam detay
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Şeffaf binalar
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Transparan istasyon tabelaları
 ############ range ends here
 
 ############ range for file menu starts
@@ -2972,11 +2972,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Zaman ç
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Zaman tablosu görünümüne geç
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Talimat listesi - seçmek için komutu tıklayın. CTRL + tıklama istasyona kaydırir
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Talimatların Sonu - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Paylaşılmış talimat sonu - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Talimatların Sonu - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Paylaşılmış talimat sonu - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Durmaksızın
@@ -3099,9 +3097,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Emir gö
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Zaman çizelgesi - işaretlemek için bir talimata tıklayın.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Sefer yok
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Gezi (zamanlı değil)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}{STRING} boyunca yol al
+STR_TIMETABLE_NO_TRAVEL                                         :Sefer yok
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Gezi (zamanlı değil)
+STR_TIMETABLE_TRAVEL_FOR                                        :{STRING} boyunca yol al
 STR_TIMETABLE_STAY_FOR                                          :{STRING} bekle
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :ve şuraya sefer yap: {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} gün
