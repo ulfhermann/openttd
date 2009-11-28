@@ -345,14 +345,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Thiết lập �
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Thiết lập cao cấp
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Thông số NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Thiết lập độ trong suốt
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Hiển thị tên thị trấn
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Hiển thị tên nhà ga
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Hiển thị tên Waypoint
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Hiển thị ký hiệu
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animation đầy đủ
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Chi tiết
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Không hiện nhà cửa
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Không hiện biển hiệu nhà ga
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Hiển thị tên thị trấn
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Hiển thị tên nhà ga
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Hiển thị tên Waypoint
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Hiển thị ký hiệu
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Animation đầy đủ
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Chi tiết
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Không hiện nhà cửa
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Không hiện biển hiệu nhà ga
 ############ range ends here
 
 ############ range for file menu starts
@@ -1819,11 +1819,9 @@ STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Thay m�
 STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Lịch chạy
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Lịch trình - click để tô sáng một thứ tự nào đó. Ctr+Click để nhảy đến nhà ga tương ứng
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Kết thúc - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Kết thúc - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Kết thúc - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Kết thúc - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Chạy suốt
