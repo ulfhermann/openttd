@@ -917,6 +917,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\date_gui.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\date_type.h"
 				>
 			</File>
@@ -1798,6 +1802,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\console_gui.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\date_gui.cpp"
 				>
 			</File>
 			<File
