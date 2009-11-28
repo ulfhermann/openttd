@@ -60,11 +60,10 @@ bool _scrolling_viewport;
 byte _special_mouse_mode;
 
 /** Window description constructor. */
-WindowDesc::WindowDesc(int16 left, int16 top, int16 def_width, int16 def_height,
+WindowDesc::WindowDesc(WindowPosition def_pos, int16 def_width, int16 def_height,
 			WindowClass window_class, WindowClass parent_class, uint32 flags,
 			const NWidgetPart *nwid_parts, int16 nwid_length) :
-	left(left),
-	top(top),
+	default_pos(def_pos),
 	default_width(def_width),
 	default_height(def_height),
 	cls(window_class),
@@ -1052,6 +1051,20 @@ restart:
 }
 
 /**
+ * Computer the position of the top-left corner of a window to be opened right
+ * under the toolbar.
+ * @param window_width the width of the window to get the position for
+ * @return Coordinate of the top-left corner of the new window.
+ */
+Point GetToolbarAlignedWindowPosition(int window_width)
+{
+	const Window *w = FindWindowById(WC_MAIN_TOOLBAR, 0);
+	assert(w != NULL);
+	Point pt = { _dynlang.text_dir == TD_RTL ? w->left : (w->left + w->width) - window_width, w->top + w->height };
+	return pt;
+}
+
+/**
  * Compute the position of the top-left corner of a new window that is opened.
  *
  * By default position a child window at an offset of 10/10 of its parent.
@@ -1071,7 +1084,7 @@ restart:
 static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
 {
 	Point pt;
-	Window *w;
+	const Window *w;
 
 	int16 default_width  = max(desc->default_width,  sm_width);
 	int16 default_height = max(desc->default_height, sm_height);
@@ -1085,46 +1098,28 @@ static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int
 			pt.x = (_screen.width + 10 - default_width) - 20;
 		}
 		pt.y = w->top + ((desc->parent_cls == WC_BUILD_TOOLBAR || desc->parent_cls == WC_SCEN_LAND_GEN) ? w->height : 10);
-	} else {
-		switch (desc->left) {
-			case WDP_ALIGN_TBR: // Align the right side with the top toolbar
-				w = FindWindowById(WC_MAIN_TOOLBAR, 0);
-				pt.x = (w->left + w->width) - default_width;
-				break;
+		return pt;
+	}
 
-			case WDP_ALIGN_TBL: // Align the left side with the top toolbar
-				pt.x = FindWindowById(WC_MAIN_TOOLBAR, 0)->left;
-				break;
+	switch (desc->default_pos) {
+		case WDP_ALIGN_TOOLBAR: // Align to the toolbar
+			return GetToolbarAlignedWindowPosition(default_width);
 
-			case WDP_AUTO: // Find a good automatic position for the window
-				return GetAutoPlacePosition(default_width, default_height);
+		case WDP_AUTO: // Find a good automatic position for the window
+			return GetAutoPlacePosition(default_width, default_height);
 
-			case WDP_CENTER: // Centre the window horizontally
-				pt.x = (_screen.width - default_width) / 2;
-				break;
+		case WDP_CENTER: // Centre the window horizontally
+			pt.x = (_screen.width - default_width) / 2;
+			pt.y = (_screen.height - default_height) / 2;
+			break;
 
-			default:
-				pt.x = desc->left;
-				if (pt.x < 0) pt.x += _screen.width; // negative is from right of the screen
-		}
+		case WDP_MANUAL:
+			pt.x = 0;
+			pt.y = 0;
+			break;
 
-		switch (desc->top) {
-			case WDP_CENTER: // Centre the window vertically
-				pt.y = (_screen.height - default_height) / 2;
-				break;
-
-			/* WDP_AUTO sets the position at once and is controlled by desc->left.
-			 * Both left and top must be set to WDP_AUTO */
-			case WDP_AUTO:
-				NOT_REACHED();
-				assert(desc->left == WDP_AUTO && desc->top != WDP_AUTO);
-				/* fallthrough */
-
-			default:
-				pt.y = desc->top;
-				if (pt.y < 0) pt.y += _screen.height; // negative is from bottom of the screen
-				break;
-		}
+		default:
+			NOT_REACHED();
 	}
 
 	return pt;
