@@ -700,7 +700,7 @@ STR_SCENEDIT_TOOLBAR_TOOLTIP_SAVE_SCENARIO_LOAD_SCENARIO        :{BLACK}Zapis sc
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Edytor scenariuszy
 STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD    :{BLACK}Zmień datę początkową do tyłu o 1 rok
-STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD     :{BLACK}Zmień datę początkawą do przodu o 1 rok
+STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD     :{BLACK}Zmień datę początkową do przodu o 1 rok
 STR_SCENEDIT_TOOLBAR_TOOLTIP_DISPLAY_MAP_TOWN_DIRECTORY         :{BLACK}Wyświetl mapę, listę miast
 STR_SCENEDIT_TOOLBAR_LANDSCAPE_GENERATION                       :{BLACK}Tworzenie krajobrazu
 STR_SCENEDIT_TOOLBAR_TOWN_GENERATION                            :{BLACK}Tworzenie miast
@@ -724,14 +724,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Ustawienia trud
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Ustawienia zaawanasowane
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Ustawienia NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Opcje przeźroczystości
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Wyświetlanie nazw miast
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Wyświetlanie nazw stacji
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Wyświetlanie nazw pkt. orientacyjnych
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Wyświetlanie napisów
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Pełna animacja
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Wszystkie detale
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Przezroczyste budynki
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Przezroczyste nazwy stacji
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Wyświetlanie nazw miast
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Wyświetlanie nazw stacji
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Wyświetlanie nazw pkt. orientacyjnych
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Wyświetlanie napisów
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Pełna animacja
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Wszystkie detale
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Przezroczyste budynki
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Przezroczyste nazwy stacji
 ############ range ends here
 
 ############ range for file menu starts
@@ -747,7 +747,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Dodatkowy podgl
 STR_MAP_MENU_SIGN_LIST                                          :Lista napisów
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Lista miast
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Ufunduj miasto
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subsydia
@@ -1139,6 +1141,8 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} rozpoczyna budowę niedaleko {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} zostało przejęte przez {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Prezes)
+
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}{STRING} sponsoruje konstrukcję nowego miasta {TOWN}!
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Rozpoczęto budowę nowe{G go j go} {STRING.d} blisko {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Now{G y a e} {STRING} został{G 0 "" a o} posadzon{G 0 y a e} blisko {TOWN}!
@@ -1553,6 +1557,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Dla własnej fi
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Dla wszystkich firm
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Uaktywnij rozkłady jazdy pojazdów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Pokazuj rozkłady jazdy w tickach, a nie w dniach: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Show arrival and departure in timetables: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Szybkie tworzenie poleceń pojazdu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Domyślny typ torowiska (w nowej grze/po wczytaniu gry): {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normalne
@@ -1617,6 +1622,10 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :siatka 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :losowo
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Miasta mogą budować drogi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Pozwól miastom kontrolować poziom hałasu dla lotnisk: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Zakładanie miast w grze: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :zabronione
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :dozwolone
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :zezwalaj, dowolny układ miasta
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Pozycja głównego paska narzędzi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Z lewej strony
@@ -3375,11 +3384,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Rozkład
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Otwórz widok rozkładu jazdy
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Lista poleceń - klik na poleceniu, aby zaznaczyć. Ctrl+klik przenosi do stacji
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Koniec poleceń - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Koniec współdzielonych poleceń - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Koniec poleceń - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Koniec współdzielonych poleceń - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Non-stop
@@ -3502,9 +3509,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Przełą
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Rozkład jazdy - kliknij na poleceniu aby je zaznaczyć.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Nie podróżuje
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Przejazd (bez ustalonego czasu)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Przejazd przez {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Nie podróżuje
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Przejazd (bez ustalonego czasu)
+STR_TIMETABLE_TRAVEL_FOR                                        :Przejazd przez {STRING}
 STR_TIMETABLE_STAY_FOR                                          :i zostań tam przez {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :i podróżuje przez{STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} d{P zień ni ni}
@@ -3516,6 +3523,11 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Ten rozk
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Ten pojazd podróżuje teraz zgodnie z rozkładem jazdy
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Ten pojazd jest teraz spóźniony o {STRING}
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Ten pojazd spieszy się teraz o {STRING}
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Ten rozkład jazdy jeszcze się nie rozpoczął
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Ten rozkład jazdy rozpocznie się {STRING}
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Data początkowa
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Wybierz datę początkową tego rozkładu jazdy
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Zmień czas
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Zmień ilość czasu którą zaznaczone zadanie powinno zająć
@@ -3528,6 +3540,21 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Wyzeruj 
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Autofill
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Wypełnij rozkład jazdy automatycznie wartościami z następnego wyjazdu (CTRL-klik by spróbować utrzymać czasy oczekiwania))
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Expected
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Scheduled
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Switch between expected and schedule
+
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Ustaw datę
+STR_DATE_SET_DATE                                               :{BLACK}Ustaw datę
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Użyj wybranej daty jako datę rozpoczęcia rozkładu jazdy
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Wybierz dzień
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Wybierz miesiąc
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Wybierz rok
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Odpluskwianie SI

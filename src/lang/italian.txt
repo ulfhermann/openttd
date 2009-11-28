@@ -347,14 +347,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Impostazioni di
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Impostazioni avanzate
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Impostazioni NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Opzioni trasparenza
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Mostra nomi città
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Mostra nomi stazioni
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Mostra nomi waypoint
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Mostra cartelli
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animazione completa
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Massimo dettaglio
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Edifici trasparenti
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Nomi stazioni trasparenti
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Mostra nomi città
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Mostra nomi stazioni
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Mostra nomi waypoint
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Mostra cartelli
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Animazione completa
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Massimo dettaglio
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Edifici trasparenti
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Nomi stazioni trasparenti
 ############ range ends here
 
 ############ range for file menu starts
@@ -370,7 +370,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Mini visuale ex
 STR_MAP_MENU_SIGN_LIST                                          :Elenco cartelli
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Elenco città
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Fonda città
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Sussidi
@@ -581,6 +583,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Personale 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Volume musica
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Volume effetti
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -758,6 +763,8 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}La {STRING} inizia a costruire vicino a {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}La {STRING} è stata rilevata dalla {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Presidente)
+
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}La {STRING} finanzia la costruzione della nuova cittadina di {TOWN}!
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Nuov{G o a} {STRING} in costruzione vicino a {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Nuov{G 0 o a} {STRING} piantat{G 0 o a} vicino a {TOWN}!
@@ -1172,6 +1179,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Propria compagn
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Tutte le compagnie
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Abilita la definizione di tabelle orarie per i veicoli: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Mostra le tabelle orarie in tick piuttosto che in giorni: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Mostra gli arrivi e le partenze nelle tabelle orarie: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Creazione rapida degli ordini dei veicoli: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Ferrovia predefinita (a inizio/ripresa partita): {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Ferrovia normale
@@ -1236,6 +1244,10 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :Griglia 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :Casuale
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Permetti alle città di costruire strade: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Consenti controllo rumore aeroporti da parte delle città: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Fondazione città durante la partita: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :Non permessa
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :Permessa
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :Permessa, disposizione strade personalizzata
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Posizione barra degli strumenti principale: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Sinistra
@@ -2076,7 +2088,7 @@ STR_LAND_AREA_INFORMATION_ROAD_OWNER                            :{BLACK}Propriet
 STR_LAND_AREA_INFORMATION_TRAM_OWNER                            :{BLACK}Proprietario tranvia: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}Proprietario ferrovia: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY                       :{BLACK}Autorità locale: {LTBLUE}{STRING}
-STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Nessuno
+STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Nessuna
 STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Coordinate: {LTBLUE}{NUM}x{NUM}x{NUM} ({STRING})
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Costruito il: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Categoria stazione: {LTBLUE}{STRING}
@@ -2849,10 +2861,10 @@ STR_VEHICLE_VIEW_AIRCRAFT_REFIT_TOOLTIP                         :{BLACK}Riadatta
 STR_VEHICLE_VIEW_TRAIN_REVERSE_TOOLTIP                          :{BLACK}Inverte la direzione del treno
 STR_VEHICLE_VIEW_ROAD_VEHICLE_REVERSE_TOOLTIP                   :{BLACK}Fa fare un'inversione al veicolo
 
-STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Mostra gli ordini del treno. CTRL+clic mostra la tabella tabella oraria.
-STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Mostra gli ordini del veicolo. CTRL+clic mostra la tabella tabella oraria.
-STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Mostra gli ordini della nave. CTRL+clic mostra la tabella tabella oraria.
-STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Mostra gli ordini dell'aeromobile. CTRL+clic mostra la tabella tabella oraria.
+STR_VEHICLE_VIEW_TRAIN_ORDERS_TOOLTIP                           :{BLACK}Mostra gli ordini del treno. CTRL+clic mostra la tabella oraria.
+STR_VEHICLE_VIEW_ROAD_VEHICLE_ORDERS_TOOLTIP                    :{BLACK}Mostra gli ordini del veicolo. CTRL+clic mostra la tabella oraria.
+STR_VEHICLE_VIEW_SHIP_ORDERS_TOOLTIP                            :{BLACK}Mostra gli ordini della nave. CTRL+clic mostra la tabella oraria.
+STR_VEHICLE_VIEW_AIRCRAFT_ORDERS_TOOLTIP                        :{BLACK}Mostra gli ordini dell'aeromobile. CTRL+clic mostra la tabella oraria.
 
 STR_VEHICLE_VIEW_TRAIN_SHOW_DETAILS_TOOLTIP                     :{BLACK}Mostra i dettagli sul treno
 STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Mostra i dettagli sull'automezzo
@@ -2988,11 +3000,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Orario
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Passa alla visualizzazione della tabella oraria
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Lista degli ordini - fare clic su un ordine per selezionarlo e CTRL+clic per portarsi sulla stazione corrispondente
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Fine degli ordini - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Fine degli ordini condivisi - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Fine degli ordini - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Fine degli ordini condivisi - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}No-stop
@@ -3115,20 +3125,25 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Passa al
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Tabella oraria - fare clic su un ordine per selezionarlo
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Nessun viaggio
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Viaggia senza orario
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Viaggia per {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Nessun viaggio
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Viaggia senza orario
+STR_TIMETABLE_TRAVEL_FOR                                        :Viaggia per {STRING}
 STR_TIMETABLE_STAY_FOR                                          :e sosta per {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :e viaggia per {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} giorn{P o i}
 STR_TIMETABLE_TICKS                                             :{COMMA} tick
 
-STR_TIMETABLE_TOTAL_TIME                                        :{BLACK}Questi ordini richiedono {STRING}
-STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Questi ordini richiedono almeno {STRING} (non tutti i tempi specificati)
+STR_TIMETABLE_TOTAL_TIME                                        :{BLACK}Gli ordini richiedono complessivamente {STRING}
+STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Gli ordini richiedono almeno {STRING} (non tutti i tempi specificati)
 
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Il veicolo viaggia in orario
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Il veicolo viaggia con un ritardo di {STRING}
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Il veicolo viaggia con un anticipo di {STRING}
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Il viaggio non è ancora iniziato
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Il viaggio inizierà in data {STRING}
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Data iniziale
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Seleziona una data come punto di partenza della tabella oraria
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Cambia tempo
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Cambia la quantità di tempo che dovrebbe essere impiegata per l'ordine selezionato
@@ -3141,6 +3156,21 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Azzera i
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Auto
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Riempie automaticamente la tabella oraria con i tempi del prossimo viaggio (CTRL-clic per cercare di mantenere i tempi di attesa)
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Orari attesi
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Orari programmati
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Alterna fra la visualizzazione degli orari attesi e degli orari programmati
+
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Impostazione data
+STR_DATE_SET_DATE                                               :{BLACK}Imposta
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Usa la data selezionata come punto di partenza della tabella oraria
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Seleziona il giorno
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Seleziona il mese
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Seleziona l'anno
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Debug IA
