@@ -346,14 +346,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Configuración 
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Opciones avanzadas
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Configuración NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Opciones de transparencia
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Ver nombres de pueblos
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Ver nombres de estaciones
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Ver puntos de ruta
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Ver carteles
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animación completa
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Detalle completo
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Edificios transparentes
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Carteles transparentes
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Ver nombres de pueblos
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Ver nombres de estaciones
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Ver puntos de ruta
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Ver carteles
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Animación completa
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Detalle completo
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Edificios transparentes
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Carteles transparentes
 ############ range ends here
 
 ############ range for file menu starts
@@ -369,7 +369,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Punto de vista 
 STR_MAP_MENU_SIGN_LIST                                          :Lista de carteles
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Directorio de pueblos
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Fundar pueblo
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subvenciones
@@ -760,6 +762,8 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} comienza su construcción cerca de {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} ha sido comprada por {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Presidente)
+
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}{STRING} patrocina la construcción del nuevo pueblo {TOWN}!
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Nuevo {STRING} bajo construcción cerca de {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Nuevo {STRING} está siendo plantado cerca de {TOWN}!
@@ -1174,6 +1178,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Propia empresa
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Todas las empresas
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Activar horarios para vehículos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Mostrar horario en ticks en vez de en dias: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Mostrar salidas y llegadas en en horarios: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Creación rápida de órdenes para vehículos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Rail por defecto (juego nuevo/cargar juego): {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Rail normal
@@ -1238,6 +1243,10 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :rejilla 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :aleatorio
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Permitir que los pueblos construyan carreteras: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Permitir al pueblo controlar el nivel de ruido de los aeropuertos: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Fundar pueblos: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :prohibido
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :permitido
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :permitido, patrón de carreteras personalizado
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Posición de la barra de herramientas principal: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Izquierda
@@ -2990,11 +2999,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Horarios
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Cambiar a la vista de horarios
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Lista de órdenes - click en orden para resaltarla
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Fin de pedidos - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Fin de órdenes compartidas - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Fin de pedidos - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Fin de órdenes compartidas - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Sin paradas
@@ -3117,9 +3124,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Cambiar 
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Horarios - pulse en una orden para marcarla.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Sin viaje
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Viaje (sin horarios)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Viaje para {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Sin viaje
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Viaje (sin horarios)
+STR_TIMETABLE_TRAVEL_FOR                                        :Viaje para {STRING}
 STR_TIMETABLE_STAY_FOR                                          :y estancia en {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :y viajar por {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} días{P "" s}
@@ -3131,6 +3138,11 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Estos ho
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Este vehículo está actualmente en hora
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Este vehículo está actualmente retrasado {STRING}
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Este vehículo está actualmente {STRING} adelantado
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Este horario no ha comenzado
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Este horario empezará en {STRING}
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Fecha de inicio
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Selecciona una fecha como fecha de inicio de este horario
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Cambiar Horario
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Cambia la cantidad de tiempo que debe tomar una orden marcada
@@ -3143,6 +3155,23 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Reajusta
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Automático
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Rellena la tabla de horarios automáticamente con los valores de la siguiente jornada (Ctrl+Click para tratar de mantener los tiempos de espera))
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Esperado
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Programado
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Alternar entre esperado y programado
+
+STR_TIMETABLE_ARRIVAL_ABBREVIATION                              :Ll:
+STR_TIMETABLE_DEPARTURE_ABBREVIATION                            :S:
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Seleccionar fecha
+STR_DATE_SET_DATE                                               :{BLACK}Seleccionar fecha
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Usar la fecha seleccionada como punto de inicio del horario
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Selecciona dia
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Selecciona mes
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Selecciona año
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Depuración de la IA
@@ -4008,6 +4037,8 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}

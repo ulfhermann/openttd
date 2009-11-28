@@ -28,7 +28,7 @@ gitmake-origin:
 master: gitmake-origin
 	git checkout $@
 	git rebase trunk
-	test -e gitmake-build && make -j`cat gitmake-build`
+	test -e gitmake-build && make -j`cat gitmake-build` || true
 
 smallmap-zoom-out: master
 
@@ -69,5 +69,4 @@ warning-sign: demands
 push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap reservation warning-sign
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
-	
-	
+
