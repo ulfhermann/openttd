@@ -117,19 +117,29 @@ enum ToolbarScenEditorWidgets {
  * Drop down list entry for showing a checked/unchecked toggle item.
  */
 class DropDownListCheckedItem : public DropDownListStringItem {
+	uint checkmark_width;
 public:
 	bool checked;
 
-	DropDownListCheckedItem(StringID string, int result, bool masked, bool checked) : DropDownListStringItem(string, result, masked), checked(checked) {}
+	DropDownListCheckedItem(StringID string, int result, bool masked, bool checked) : DropDownListStringItem(string, result, masked), checked(checked)
+	{
+		this->checkmark_width = GetStringBoundingBox(STR_JUST_CHECKMARK).width + 3;
+	}
 
 	virtual ~DropDownListCheckedItem() {}
 
+	uint Width() const
+	{
+		return DropDownListStringItem::Width() + this->checkmark_width;
+	}
+
 	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
-		if (checked) {
-			DrawString(left + 2, right - 2, top, STR_JUST_CHECKMARK, sel ? TC_WHITE : TC_BLACK);
+		bool rtl = _dynlang.text_dir == TD_RTL;
+		if (this->checked) {
+			DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, top, STR_JUST_CHECKMARK, sel ? TC_WHITE : TC_BLACK);
 		}
-		DrawString(left + 2, right - 2, top, this->String(), sel ? TC_WHITE : TC_BLACK);
+		DrawString(left + WD_FRAMERECT_LEFT + (rtl ? 0 : this->checkmark_width), right - WD_FRAMERECT_RIGHT - (rtl ? this->checkmark_width : 0), top, this->String(), sel ? TC_WHITE : TC_BLACK);
 	}
 };
 
@@ -137,10 +147,14 @@ public:
  * Drop down list entry for showing a company entry, with companies 'blob'.
  */
 class DropDownListCompanyItem : public DropDownListItem {
+	uint icon_width;
 public:
 	bool greyed;
 
-	DropDownListCompanyItem(int result, bool masked, bool greyed) : DropDownListItem(result, masked), greyed(greyed) {}
+	DropDownListCompanyItem(int result, bool masked, bool greyed) : DropDownListItem(result, masked), greyed(greyed)
+	{
+		this->icon_width = GetSpriteSize(SPR_COMPANY_ICON).width;
+	}
 
 	virtual ~DropDownListCompanyItem() {}
 
@@ -151,23 +165,21 @@ public:
 
 	uint Width() const
 	{
-		char buffer[512];
-		CompanyID company = (CompanyID)result;
+		CompanyID company = (CompanyID)this->result;
 		SetDParam(0, company);
 		SetDParam(1, company);
-		GetString(buffer, STR_COMPANY_NAME_COMPANY_NUM, lastof(buffer));
-		return GetStringBoundingBox(buffer).width + 19;
+		return GetStringBoundingBox(STR_COMPANY_NAME_COMPANY_NUM).width + this->icon_width + 3;
 	}
 
 	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
-		CompanyID company = (CompanyID)result;
+		CompanyID company = (CompanyID)this->result;
 		bool rtl = _dynlang.text_dir == TD_RTL;
 
 		/* It's possible the company is deleted while the dropdown is open */
 		if (!Company::IsValidID(company)) return;
 
-		DrawCompanyIcon(company, rtl ? right - 16 : left + 2, top + 1 + (FONT_HEIGHT_NORMAL - 10) / 2);
+		DrawCompanyIcon(company, rtl ? right - this->icon_width - WD_FRAMERECT_RIGHT : left + WD_FRAMERECT_LEFT, top + 1 + (FONT_HEIGHT_NORMAL - 10) / 2);
 
 		SetDParam(0, company);
 		SetDParam(1, company);
@@ -177,7 +189,7 @@ public:
 		} else {
 			col = sel ? TC_WHITE : TC_BLACK;
 		}
-		DrawString(rtl ? left + 2 : left + 19, rtl ? right - 19 : right - 2, top, STR_COMPANY_NAME_COMPANY_NUM, col);
+		DrawString(left + WD_FRAMERECT_LEFT + (rtl ? 0 : 3 + this->icon_width), right - WD_FRAMERECT_RIGHT - (rtl ? 3 + this->icon_width : 0), top, STR_COMPANY_NAME_COMPANY_NUM, col);
 	}
 };
 
@@ -1014,7 +1026,8 @@ public:
 		GfxFillRect(this->pos_x, this->pos_y, this->pos_x + this->current_x - 1, this->pos_y + this->current_y - 1, 0xB2);
 		GfxFillRect(this->pos_x, this->pos_y, this->pos_x + this->current_x - 1, this->pos_y + this->current_y - 1, 0xB4, FILLRECT_CHECKER);
 
-		for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
+		bool rtl = _dynlang.text_dir == TD_RTL;
+		for (NWidgetBase *child_wid = rtl ? this->tail : this->head; child_wid != NULL; child_wid = rtl ? child_wid->prev : child_wid->next) {
 			if (child_wid->type == NWID_SPACER) continue;
 			if (!this->visible[((NWidgetCore*)child_wid)->index]) continue;
 
@@ -1363,7 +1376,7 @@ static const NWidgetPart _nested_toolbar_normal_widgets[] = {
 };
 
 static const WindowDesc _toolb_normal_desc(
-	0, 0, 640, 22,
+	WDP_MANUAL, 640, 22,
 	WC_MAIN_TOOLBAR, WC_NONE,
 	WDF_NO_FOCUS,
 	_nested_toolbar_normal_widgets, lengthof(_nested_toolbar_normal_widgets)
@@ -1586,7 +1599,7 @@ static const NWidgetPart _nested_toolb_scen_widgets[] = {
 };
 
 static const WindowDesc _toolb_scen_desc(
-	0, 0, 640, 22,
+	WDP_MANUAL, 640, 22,
 	WC_MAIN_TOOLBAR, WC_NONE,
 	WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
 	_nested_toolb_scen_widgets, lengthof(_nested_toolb_scen_widgets)
