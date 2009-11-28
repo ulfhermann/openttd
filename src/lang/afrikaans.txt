@@ -341,14 +341,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Moelikheid stel
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Gevorderde stellings
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF stellings
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Deursigtigheid opsies
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Dorp name vertoon
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Stasie name vertoon
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Wegpunte vertoon
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Tekens vertoon
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Volle animasie
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Volle besonderhede
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Deurskynende geboue
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Deurskynend stasie tekens
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Dorp name vertoon
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Stasie name vertoon
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Wegpunte vertoon
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Tekens vertoon
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Volle animasie
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Volle besonderhede
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Deurskynende geboue
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Deurskynend stasie tekens
 ############ range ends here
 
 ############ range for file menu starts
@@ -2884,11 +2884,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Rooster
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Skakel na die rooster uitsig
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Opdraglys - kliek op 'n opdrag om dit te verlig. CTRL + kliek senter op stasie
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Einde van Opdrae - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Einde van Gedeel Opdrae - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Einde van Opdrae - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Einde van Gedeel Opdrae - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Sonder-stop
@@ -3010,9 +3008,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Verander
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Rooster - kliek op 'n opdrag om dit te verlig
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Geen reis
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Reis (Nie gerooster nie)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Reis vir {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Geen reis
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Reis (Nie gerooster nie)
+STR_TIMETABLE_TRAVEL_FOR                                        :Reis vir {STRING}
 STR_TIMETABLE_STAY_FOR                                          :en bly vir {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :en reis vir {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} da{P g e}
