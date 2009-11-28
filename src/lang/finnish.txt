@@ -345,14 +345,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Vaikeusasetukse
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Lisäasetukset
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF-asetukset
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Läpinäkyvyysvalinnat
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Kaupunkien nimet näkyvissä
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Asemien nimet näkyvissä
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Reittipisteitten nimet näkyvissä
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Kyltit näkyvissä
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Täysi animointi
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Kaikki yksityiskohdat
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Läpinäkyvät rakennukset
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Läpinäkyvät asemakyltit
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Kaupunkien nimet näkyvissä
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Asemien nimet näkyvissä
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Reittipisteitten nimet näkyvissä
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Kyltit näkyvissä
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Täysi animointi
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Kaikki yksityiskohdat
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Läpinäkyvät rakennukset
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Läpinäkyvät asemakyltit
 ############ range ends here
 
 ############ range for file menu starts
@@ -368,7 +368,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Lisänäkymä
 STR_MAP_MENU_SIGN_LIST                                          :Kylttilista
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Kaupunkihakemisto
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Perusta kaupunki
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Tuet
@@ -579,6 +581,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Oma 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Musiikin voimakkuus
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Äänitehosteiden voimakkuus
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -756,6 +761,8 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} aloittaa rakentamisen kaupugin {TOWN} lähistölle!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}Yhtiön {STRING} on ottanut haltuun {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(pääjohtaja)
+
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}{STRING} rahoitti uuden kaupungin, {TOWN}, rakentamista!
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Uusi {STRING} rakennetaan kaupungin {TOWN} lähistölle!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Uusi {STRING} istutetaan kaupungin {TOWN} lähistölle!
@@ -1170,6 +1177,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Oma yhtiö
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Kaikki yhtiöt
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Aikataulut ajoneuvoille: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Näytä aikataulu tickseissä päivien sijaan: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Näytä saapuminen ja lähtö aikatauluissa: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Nopea kulkuneuvon käskyjen luominen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Oletusraidetyyppi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Tavallinen raide
@@ -1234,6 +1242,10 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :3x3 ruudukko
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :satunnainen
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Kaupungit saavat rakentaa teitä: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Käytä kaupunkien hallitsemaa melutasoa lentokentille: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Kaupunkien perustaminen pelissä: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :kielletty
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :sallittu
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :sallittu, oma kaupugin kaava
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Päätyökalupalkin sijainti: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :vasen
@@ -2986,11 +2998,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Aikataul
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Näytä aikataulu
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Aikataulu - napsauta määräystä korostaaksesi.
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - aikataulun loppu - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - jaetun aikataulun loppu - -
+STR_ORDERS_END_OF_ORDERS                                        :- - aikataulun loppu - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - jaetun aikataulun loppu - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Nonstop
@@ -3113,9 +3123,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Vaihda m
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Aikataulu - valitse rivi
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Ei kulkua
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Kiertävä (ei aikataulua)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Kulje kohteeseen {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Ei kulkua
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Kiertävä (ei aikataulua)
+STR_TIMETABLE_TRAVEL_FOR                                        :Kulje kohteeseen {STRING}
 STR_TIMETABLE_STAY_FOR                                          :ja odota {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :ja kulje {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} päivä{P "" ä}
@@ -3127,6 +3137,11 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Aikataul
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Ajoneuvo on aikataulussa
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Ajoneuvo on {STRING} myöhässä
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Ajoneuvo on {STRING} etuajassa
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Tämä aikataulu ei ole vielä alkanut
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Tämä aikataulu alkaa {STRING}
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Aloituspäivä
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Valitse tämän aikataulun alkamispäivä
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Muuta aikaa
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Aseta kuinka kauan käskyn tulisi kestää
@@ -3139,6 +3154,26 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Nollaa m
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Automaattinen
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Täytä aikataulu automaattisesti seuraavan matkan arvoilla (Ctrl+Click: yritä säilyttää odotusajat)
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Odotettu
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Aikataulussa
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Vaihda odotetun ja aikataulun välillä
+
+### Do not separate or reorder ###
+#####
+
+### Do not separate or reorder ###
+#####
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Aseta päivämäärä
+STR_DATE_SET_DATE                                               :{BLACK}Aseta päivämäärä
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Käytä valittua päivää aikataulun aloituspäivänä
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Valitse päivä
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Valitse kuukausi
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Valitse vuosi
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Tekoälyn virheenjäljitys

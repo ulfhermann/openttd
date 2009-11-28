@@ -409,14 +409,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Ρυθμίσε�
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Προχωρημένες ρυθμίσεις
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Ρυθμίσεις NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Επιλογές διαφάνειας
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Εμφάνιση ονομάτων πόλεων
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Εμφάνιση ονομάτων σταθμών
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Εμφάνιση ονομάτων σημείων καθοδήγησης
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Εμφάνιση πινακίδων
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Πλήρες animation
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Πλήρης λεπτομέρειες
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Διαφανή κτίρια
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Διαφανές ταμπέλες σταθμών
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Εμφάνιση ονομάτων πόλεων
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Εμφάνιση ονομάτων σταθμών
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Εμφάνιση ονομάτων σημείων καθοδήγησης
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Εμφάνιση πινακίδων
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Πλήρες animation
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Πλήρης λεπτομέρειες
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Διαφανή κτίρια
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Διαφανές ταμπέλες σταθμών
 ############ range ends here
 
 ############ range for file menu starts
@@ -432,7 +432,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Πρόσθετ�
 STR_MAP_MENU_SIGN_LIST                                          :Λίστα πινακίδων
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Καταλογος πόλεων
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Ιδρύση πόλης
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Χρηματοδοτήσεις
@@ -855,6 +857,8 @@ STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}Η {STRING} εξαγοράστηκε από την {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Διευθυντής)
 
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}{STRING} χορηγός εταιρία στη κατασκεύη της νέας πόλης {TOWN}!
+
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Νέ{G ος α ο} {STRING} υπό κατασκευή κοντά στην πόλη {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Νέα {STRING} φυτεύεται κοντά στην πόλη {TOWN}!
 
@@ -1268,6 +1272,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Η εταιρί
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Όλες οι εταιρίες
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Ενεργοποίηση δρομολογίων για τα οχήματα: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Εμφάνιση δρομολογίων σε στιγμές αντί για ημέρες: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Εμφάνιση άφιξη και αναχώρηση στα δρομολόγια: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Γρήγορη δημιουργία εντολών για τα οχήματα: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Προεπιλογή τύπου σιδηροτροχιάς (μετά από νέο παιχνίδι/φόρτωση παιχνιδιού): {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Κανονική Σιδηροτροχιά
@@ -1332,6 +1337,10 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :Πλέγμα 3x
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :τυχαίο
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Οι πόλεις επιτρέπεται να χτίσουν δρόμους: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Επιτρεπεται η πόλη να ελέγχει το επίπεδο θορύβου των αεροδρομίων: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Ιδρύση πολέων στο παιχνίδι: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :δεν επιτρέπεται
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :επιτρέπεται
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :επιτρεπέται, προσαρμοσμένο σχέδιο πόλης
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Θέση κύριας εργαλειοθήκης: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Αριστερά
@@ -3090,11 +3099,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Δρομ
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Αλλαγή στην προβολή δρομολογίων
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Λίστα εντολών - κλικ σε μια εντολή για να την επιλέξετε. Ctrl+κλικ μετακινεί σε σταθμό
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Τέλος Εντολών - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Τέλος Μοιρασμένων Οδηγιών - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Τέλος Εντολών - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Τέλος Μοιρασμένων Οδηγιών - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Χωρίς στάση
@@ -3217,9 +3224,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Αλλα
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Δρομολόγια - κλικ σε μια εντολή για την τονίσετε.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Μη ταξιδέψεις
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Ταξίδεψε (όχι μεσώ δρομολογίου)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Ταξίδεψε για {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Μη ταξιδέψεις
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Ταξίδεψε (όχι μεσώ δρομολογίου)
+STR_TIMETABLE_TRAVEL_FOR                                        :Ταξίδεψε για {STRING}
 STR_TIMETABLE_STAY_FOR                                          :και μείνε για {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :και ταξίδεψε για {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} μέρ{P α ες}
@@ -3232,6 +3239,8 @@ STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Αυτό
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Αυτό το όχημα εχει καθυστερήσει κατά {STRING}
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Το όχημα αυτό τρέχει {STRING} αργά
 
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Επιλέξτε μια ημερομηνία ως αρχή για αυτό το δρομολόγιο
+
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Αλλαγή Χρόνων
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Αλλάζει ο χρόνος που παίρνει η επιλεγμένη επιλογή για να εκτελεστεί
 
@@ -3243,6 +3252,15 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Επαν
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Αυτόματη πλήρωση
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Συμπληρώστε το δρομολόγιο αυτόματα με τιμές από το επόμενο ταξίδι (Ctrl+κλικ για να προσπαθήσει να κρατήσει τους χρόνους αναμονής)
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Αναμενόμενη
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Προγραμματισμένη
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Εναλλάγη μεταξύ αναμένομενης και προγραμματισμένης
+
+
+
+# Date window (for timetable)
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Αποσφαλμάτωση AI
