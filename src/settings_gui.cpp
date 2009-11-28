@@ -476,7 +476,7 @@ static const NWidgetPart _nested_game_options_widgets[] = {
 };
 
 static const WindowDesc _game_options_desc(
-	WDP_CENTER, WDP_CENTER, 370, 249,
+	WDP_CENTER, 0, 0,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_game_options_widgets, lengthof(_nested_game_options_widgets)
@@ -750,7 +750,7 @@ static const NWidgetPart _nested_game_difficulty_widgets[] = {
 
 /** Window definition for the game difficulty settings window */
 static const WindowDesc _game_difficulty_desc(
-	WDP_CENTER, WDP_CENTER, 370, 279,
+	WDP_CENTER, 0, 0,
 	WC_GAME_OPTIONS, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_game_difficulty_widgets, lengthof(_nested_game_difficulty_widgets)
@@ -1238,6 +1238,7 @@ static SettingEntry _settings_ui[] = {
 	SettingEntry("gui.pause_on_newgame"),
 	SettingEntry("gui.advanced_vehicle_list"),
 	SettingEntry("gui.timetable_in_ticks"),
+	SettingEntry("gui.timetable_arrival_departure"),
 	SettingEntry("gui.quick_goto"),
 	SettingEntry("gui.default_rail_type"),
 	SettingEntry("gui.always_build_infrastructure"),
@@ -1652,7 +1653,7 @@ static const NWidgetPart _nested_settings_selection_widgets[] = {
 };
 
 static const WindowDesc _settings_selection_desc(
-	WDP_CENTER, WDP_CENTER, 450, 397,
+	WDP_CENTER, 450, 397,
 	WC_GAME_OPTIONS, WC_NONE,
 	0,
 	_nested_settings_selection_widgets, lengthof(_nested_settings_selection_widgets)
@@ -1931,7 +1932,7 @@ static const NWidgetPart _nested_cust_currency_widgets[] = {
 };
 
 static const WindowDesc _cust_currency_desc(
-	WDP_CENTER, WDP_CENTER, 230, 120,
+	WDP_CENTER, 0, 0,
 	WC_CUSTOM_CURRENCY, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_cust_currency_widgets, lengthof(_nested_cust_currency_widgets)

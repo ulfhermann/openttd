@@ -345,14 +345,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Difficulty sett
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Advanced settings
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF settings
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Transparency options
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Town names displayed
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Station names displayed
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Waypoint names displayed
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Signs displayed
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Full animation
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Full detail
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Transparent buildings
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Transparent station signs
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Town names displayed
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Station names displayed
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Waypoint names displayed
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Signs displayed
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Full animation
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Full detail
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Transparent buildings
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Transparent station signs
 ############ range ends here
 
 ############ range for file menu starts
@@ -1177,6 +1177,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Own company
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :All companies
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Enable timetabling for vehicles: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Show timetable in ticks rather than days: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Show arrival and departure in timetables: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Quick creation of vehicle orders: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Default rail type (after new game/game load): {ORANGE}{STRING1}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normal Rail
@@ -3002,11 +3003,11 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Timetabl
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Switch to the timetable view
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Orders list - click on an order to highlight it. Ctrl+Click scrolls to the station
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING4} {STRING2}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING4} {STRING2}
+STR_ORDER_INDEX                                                 :{COMMA}:{NBSP}
+STR_ORDER_TEXT                                                  :{STRING4} {STRING2}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - End of Orders - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - End of Shared Orders - -
+STR_ORDERS_END_OF_ORDERS                                        :- - End of Orders - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - End of Shared Orders - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Non-stop
@@ -3129,9 +3130,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Switch t
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Timetable - click on an order to highlight it.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}No travel
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Travel (not timetabled)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Travel for {STRING1}
+STR_TIMETABLE_NO_TRAVEL                                         :No travel
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Travel (not timetabled)
+STR_TIMETABLE_TRAVEL_FOR                                        :Travel for {STRING1}
 STR_TIMETABLE_STAY_FOR                                          :and stay for {STRING1}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :and travel for {STRING1}
 STR_TIMETABLE_DAYS                                              :{COMMA} day{P "" s}
@@ -3143,6 +3144,11 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}This tim
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}This vehicle is currently running on time
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}This vehicle is currently running {STRING1} late
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}This vehicle is currently running {STRING1} early
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}This timetable has not yet started
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}This timetable will start at {STRING1}
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Start date
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Select a date as starting point of this timetable
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Change Time
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Change the amount of time that the highlighted order should take
@@ -3155,6 +3161,23 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Reset th
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Autofill
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Fill the timetable automatically with the values from the next journey (Ctrl+Click to try to keep waiting times)
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Expected
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Scheduled
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Switch between expected and schedule
+
+STR_TIMETABLE_ARRIVAL_ABBREVIATION                              :A:
+STR_TIMETABLE_DEPARTURE_ABBREVIATION                            :D:
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Set date
+STR_DATE_SET_DATE                                               :{BLACK}Set date
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Use the selected date as starting date for the timetable
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Select day
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Select month
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Select year
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}AI Debug
@@ -4020,6 +4043,8 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{RAW_STRING}
+STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
