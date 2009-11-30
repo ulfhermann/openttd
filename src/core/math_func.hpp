@@ -154,6 +154,31 @@ static FORCEINLINE int Clamp(const int a, const int min, const int max)
 }
 
 /**
+ * Clamp a value between an interval.
+ *
+ * This function returns a value which is between the given interval of
+ * min and max. If the given value is in this interval the value itself
+ * is returned otherwise the border of the interval is returned, according
+ * which side of the interval was 'left'.
+ *
+ * @note The min value must be less or equal of max or you get some
+ *       unexpected results.
+ * @param a The value to clamp/truncate.
+ * @param min The minimum of the interval.
+ * @param max the maximum of the interval.
+ * @returns A value between min and max which is closest to a.
+ * @see ClampU(uint, uint, uint)
+ * @see Clamp(int, int, int)
+ */
+template <typename T>
+static FORCEINLINE T Clamp(const T a, const T min, const T max)
+{
+	if (a <= min) return min;
+	if (a >= max) return max;
+	return a;
+}
+
+/**
  * Clamp an unsigned integer between an interval.
  *
  * This function returns a value which is between the given interval of
