@@ -2366,8 +2366,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}人口�
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}上月旅客数量：{ORANGE}{COMMA}{BLACK}  最大值：{ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}上月邮包数量：{ORANGE}{COMMA}{BLACK}  最大值：{ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}城镇发展所必需的货物：
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{BLACK} 需要： {ORANGE}{STRING}
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{BLACK} 上个月已运到： {ORANGE}{CARGO}
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{BLACK} 需要： {ORANGE}{STRING}
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{BLACK} 上个月已运到： {ORANGE}{CARGO}
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}当前城镇噪音: {ORANGE}{COMMA}{BLACK}  最大: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}将屏幕中心移动到城镇所在的位置. 单击的同时按住Ctrl会在新视点中显示城镇位置
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}地方政府
@@ -2496,9 +2496,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}流动�
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}已贷款额
 STR_FINANCES_MAX_LOAN                                           :{WHITE}最大贷款额度：{BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}贷款 {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}贷款 {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}贷款{}Ctrl+点击 可贷款最大额度
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}还款 {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}还款 {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}偿还贷款{}Ctrl+点击 可最大额度偿还贷款
 
 # Company view
@@ -2908,8 +2908,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}今年�
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}可靠性：{LTBLUE}{COMMA}%  {BLACK}上次保养后抛锚的次数：{LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}建造年份：{LTBLUE}{NUM}{BLACK} 价值：{LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}运载能力：{LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}运载能力：{LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}运载能力：{LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}运载能力：{LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}运载能力：{LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}转运成本： {LTBLUE}{CURRENCY}
