@@ -2386,8 +2386,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Prebival
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Potnikov prejšnji mesec: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Pošte prejšnji mesec: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Količina potrebnega tovora za rast mesta:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} potrebno
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} podeljeno zadnji mesec
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} potrebno
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} podeljeno zadnji mesec
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Meja hrupa v mestu: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Premakni celotni pogled na mesto
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Mestni svet
@@ -2512,9 +2512,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Bančno 
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Posojilo
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Meja posojila:  {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Izposoja {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Izposoja {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Povečaj višino posojila
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Vračilo {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Vračilo {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Odplačaj del posojila
 
 # Company view
@@ -2922,8 +2922,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Letošnj
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Zanesljivost: {LTBLUE}{COMMA}%  {BLACK}Okvare po zadnjem servisu: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Zgrajeno: {LTBLUE}{NUM}{BLACK} Vrednost: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Zmogljivost: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Zmogljivost: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Zmogljivost: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Zmogljivost: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Zmogljivost: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Prenesi kredite: {LTBLUE}{CURRENCY}
