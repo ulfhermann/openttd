@@ -2377,8 +2377,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}인구: 
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}지난달 승객수: {ORANGE}{COMMA}{BLACK}  최고: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}지난달 우편수: {ORANGE}{COMMA}{BLACK}  최고: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}도시가 성장하기 위해 필요한 화물:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK}{G 0 "이" "가"} 필요함
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK}{G 0 "이" "가"} 지난달에 수송됨
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK}{G 0 "이" "가"} 필요함
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK}{G 0 "이" "가"} 지난달에 수송됨
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}도시 소음 제한: {ORANGE}{COMMA}{BLACK}  최고: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}이 도시의 위치로 시점을 변경합니다. Ctrl+클릭하면 이 도시 위치의 새로운 뷰포트를 엽니다.
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}지역 당국
@@ -2508,9 +2508,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}소유�
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}대출
 STR_FINANCES_MAX_LOAN                                           :{WHITE}최대 대출: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}{SKIP}{SKIP}{CURRENCY} 빌리기
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}{CURRENCY} 빌리기
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}돈을 빌립니다. Ctrl+클릭하면 빌릴 수 있는만큼 빌립니다
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}{SKIP}{SKIP}{CURRENCY} 갚기
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}{CURRENCY} 갚기
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}돈을 갚습니다. Ctrl+클릭하시면 갚을 수 있는 만큼 갚습니다
 
 # Company view
@@ -2922,8 +2922,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}올해 �
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}신뢰도: {LTBLUE}{COMMA}%  {BLACK}최근 점검 이후의 고장: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}생산: {LTBLUE}{NUM}{BLACK} 가격: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}수송량: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}수송량: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}수송량: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}수송량: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}수송량: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}환승 단위: {LTBLUE}{CURRENCY}
