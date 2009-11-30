@@ -257,8 +257,7 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, bool double_click)
 	 * So unless the clicked widget is the caption bar, change focus to this widget */
 	if (widget_type != WWT_CAPTION) {
 		/* Close the OSK window if a edit box loses focus */
-		if ((w->nested_root != NULL && w->nested_focus != NULL &&  w->nested_focus->type == WWT_EDITBOX &&
-					w->nested_focus != nw && w->window_class != WC_OSK)) {
+		if (w->nested_focus != NULL &&  w->nested_focus->type == WWT_EDITBOX && w->nested_focus != nw && w->window_class != WC_OSK) {
 			DeleteWindowById(WC_OSK, 0);
 		}
 
@@ -486,14 +485,13 @@ void Window::SetDirty() const
  */
 void Window::ReInit(int rx, int ry)
 {
-	if (this->nested_root == NULL) return; // Only nested widget windows can re-initialize.
-
 	this->SetDirty(); // Mark whole current window as dirty.
 
 	/* Save current size. */
 	int window_width  = this->width;
 	int window_height = this->height;
 
+	this->OnInit();
 	/* Re-initialize the window from the ground up. No need to change the nested_array, as all widgets stay where they are. */
 	this->nested_root->SetupSmallestSize(this, false);
 	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, _dynlang.text_dir == TD_RTL);
@@ -587,6 +585,22 @@ Window *FindWindowById(WindowClass cls, WindowNumber number)
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
 		if (w->window_class == cls && w->window_number == number) return w;
+	}
+
+	return NULL;
+}
+
+/**
+ * Find any window by its class. Useful when searching for a window that uses
+ * the window number as a WindowType, like WC_SEND_NETWORK_MSG.
+ * @param cls Window class
+ * @return Pointer to the found window, or \c NULL if not available
+ */
+Window *FindWindowByClass(WindowClass cls)
+{
+	Window *w;
+	FOR_ALL_WINDOWS_FROM_BACK(w) {
+		if (w->window_class == cls) return w;
 	}
 
 	return NULL;
@@ -773,7 +787,8 @@ void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flag
 	this->window_number = window_number;
 	this->desc_flags = desc_flags;
 
-	/* If available, initialize nested widget tree. */
+	this->OnInit();
+	/* Initialize nested widget tree. */
 	if (this->nested_array == NULL) {
 		this->nested_array = CallocT<NWidgetBase *>(this->nested_array_size);
 		this->nested_root->SetupSmallestSize(this, true);
@@ -785,14 +800,13 @@ void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flag
 
 	/* Further set up window properties,
 	 * this->left, this->top, this->width, this->height, this->resize.width, and this->resize.height are initialized later. */
-	this->resize.step_width  = (this->nested_root != NULL) ? this->nested_root->resize_x : 1;
-	this->resize.step_height = (this->nested_root != NULL) ? this->nested_root->resize_y : 1;
+	this->resize.step_width  = this->nested_root->resize_x;
+	this->resize.step_height = this->nested_root->resize_y;
 
 	/* Give focus to the opened window unless it is the OSK window or a text box
 	 * of focused window has focus (so we don't interrupt typing). But if the new
 	 * window has a text box, then take focus anyway. */
-	bool has_editbox = this->nested_root != NULL && this->nested_root->GetWidgetOfType(WWT_EDITBOX) != NULL;
-	if (this->window_class != WC_OSK && (!EditBoxInGlobalFocus() || has_editbox)) SetFocusedWindow(this);
+	if (this->window_class != WC_OSK && (!EditBoxInGlobalFocus() || this->nested_root->GetWidgetOfType(WWT_EDITBOX) != NULL)) SetFocusedWindow(this);
 
 	/* Hacky way of specifying always-on-top windows. These windows are
 	 * always above other windows because they are moved below them.
@@ -807,7 +821,7 @@ void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flag
 		if (FindWindowById(WC_MAIN_TOOLBAR, 0)     != NULL) w = w->z_back;
 		if (FindWindowById(WC_STATUS_BAR, 0)       != NULL) w = w->z_back;
 		if (FindWindowById(WC_NEWS_WINDOW, 0)      != NULL) w = w->z_back;
-		if (FindWindowById(WC_SEND_NETWORK_MSG, 0) != NULL) w = w->z_back;
+		if (FindWindowByClass(WC_SEND_NETWORK_MSG) != NULL) w = w->z_back;
 
 		if (w == NULL) {
 			_z_back_window->z_front = this;
@@ -1570,11 +1584,10 @@ static bool HandleWindowDragging()
 				x = _cursor.pos.x - _drag_delta.x;
 			}
 
-			if (w->nested_root != NULL) {
-				/* Nested widgets also allow resize.step_width and/or resize.step_height to become 0 which means no resize is possible. */
-				if (w->resize.step_width  == 0) x = 0;
-				if (w->resize.step_height == 0) y = 0;
-			}
+			/* resize.step_width and/or resize.step_height may be 0, which means no resize is possible. */
+			if (w->resize.step_width  == 0) x = 0;
+			if (w->resize.step_height == 0) y = 0;
+
 			/* X and Y has to go by step.. calculate it.
 			 * The cast to int is necessary else x/y are implicitly casted to
 			 * unsigned int, which won't work. */

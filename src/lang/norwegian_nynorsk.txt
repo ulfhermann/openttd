@@ -2337,8 +2337,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Innbyggj
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Passasjerar førre månad: {ORANGE}{COMMA}{BLACK}  maks: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Post førre månad: {ORANGE}{COMMA}{BLACK}  maks: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Frakt naudsynt for folketalsauke:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} naudsynt
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} levert forrige månad
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} naudsynt
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} levert forrige månad
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Grense for lydnivå i byen: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Sentrer biletet rundt byen
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Bystyre
@@ -2463,9 +2463,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Saldo
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Lån
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Maks lån: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Lån meir ({SKIP}{SKIP}{CURRENCY})
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Lån meir ({CURRENCY})
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Auk storleiken på lånet. Ctrl+klikk tek opp maksimalt lån.
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Betal attende ({SKIP}{SKIP}{CURRENCY})
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Betal attende ({CURRENCY})
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Betal attende ein del av lånet. Ctrl+Click betal attende så mykkje som mogleg
 
 # Company view
