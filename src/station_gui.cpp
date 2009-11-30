@@ -795,10 +795,10 @@ static void DrawCargoIcons(CargoID i, uint waiting, int left, int right, int y)
 
 	SpriteID sprite = GetCargoSprite(i);
 
-	int x = _dynlang.text_dir == TD_RTL ? right - num * 10 : left;
+	int x = _dynlang.text_dir == TD_RTL ? left + num * 10 : right - 20;
 	do {
 		DrawSprite(sprite, PAL_NONE, x, y);
-		x += 10;
+		x -= 10;
 	} while (--num);
 }
 
