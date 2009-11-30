@@ -2337,7 +2337,7 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Насе
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Пасажери през последния месец: {ORANGE}{COMMA}{BLACK}  максимум: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Поща през последния месец: {ORANGE}{COMMA}{BLACK}  максимум: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Товар нужен за растеж на града:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} необходим
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} необходим
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Лимит на шумът в градът: {ORANGE}{COMMA}{BLACK}  най-много: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Центриране на главния изглед спрямо разположението на града
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Местни власти
@@ -2464,9 +2464,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Бала
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Заем
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Максимален заем: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Изтегли {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Изтегли {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Увеличи размера на заема. Ctrl+Click заема възможно най много
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Изплати {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Изплати {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Изплати част от заема. Ctrl+Click изплаща възможно най-много
 
 # Company view
@@ -2865,8 +2865,8 @@ STR_VEHICLE_INFO_AGE_RED                                        :{RED}{COMMA} г
 STR_VEHICLE_INFO_MAX_SPEED                                      :{BLACK}Макс. скорост: {LTBLUE}{VELOCITY}
 
 
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Капацитет: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Капацитет: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Капацитет: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Капацитет: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Капацитет: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Сума за преместване: {LTBLUE}{CURRENCY}
