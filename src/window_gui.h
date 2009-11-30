@@ -510,7 +510,6 @@ public:
 
 	void RaiseButtons(bool autoraise = false);
 	void CDECL SetWidgetsDisabledState(bool disab_stat, int widgets, ...);
-	void CDECL SetWidgetsHiddenState(bool hidden_stat, int widgets, ...);
 	void CDECL SetWidgetsLoweredState(bool lowered_stat, int widgets, ...);
 	void SetWidgetDirty(byte widget_index) const;
 
@@ -536,14 +535,18 @@ public:
 	/*** Event handling ***/
 
 	/**
+	 * Notification that the nested widget tree gets initialized. The event can be used to perform general computations.
+	 * @note #nested_root and/or #nested_array (normally accessed via #GetWidget()) may not exist during this call.
+	 */
+	virtual void OnInit() { }
+
+	/**
 	 * Compute the initial position of the window.
 	 * @param *desc         The pointer to the WindowDesc of the window to create.
 	 * @param sm_width      Smallest width of the window.
 	 * @param sm_height     Smallest height of the window.
 	 * @param window_number The window number of the new window.
 	 * @return Initial position of the top-left corner of the window.
-	 *
-	 * @note Due to the way C++ works, only windows with nested widgets can usefully override this function.
 	 */
 	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number);
 
@@ -597,14 +600,14 @@ public:
 	 * A key has been pressed.
 	 * @param key     the Unicode value of the key.
 	 * @param keycode the untranslated key code including shift state.
-	 * @return ES_HANDLED if the key press has been handled and no other
+	 * @return #ES_HANDLED if the key press has been handled and no other
 	 *         window should receive the event.
 	 */
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode) { return ES_NOT_HANDLED; }
 
 	/**
 	 * The state of the control key has changed
-	 * @return ES_HANDLED if the change has been handled and no other
+	 * @return #ES_HANDLED if the change has been handled and no other
 	 *         window should receive the event.
 	 */
 	virtual EventState OnCTRLStateChange() { return ES_NOT_HANDLED; }
