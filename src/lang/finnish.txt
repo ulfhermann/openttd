@@ -2388,8 +2388,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Asukaslu
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Matkustajia viime kuussa: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Postia viime kuussa: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Kaupungin kasvuun tarvittava rahti:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} vaadittu
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} kuljetettu viime kuussa
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} vaadittu
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} kuljetettu viime kuussa
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Meluraja kaupungissa: {ORANGE}{COMMA}{BLACK}  maks.: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Keskitä näkymä kaupungin sijaintiin. Ctrl+Click avaa uuden näkymäikkunan kaupungin sijaintiin
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Viranomaiset
@@ -2501,10 +2501,10 @@ STR_FINANCES_EXPENDITURE_INCOME_TITLE                           :{WHITE}Menot/tu
 STR_FINANCES_YEAR                                               :{WHITE}{NUM}
 STR_FINANCES_SECTION_CONSTRUCTION                               :{GOLD}Rakentaminen
 STR_FINANCES_SECTION_NEW_VEHICLES                               :{GOLD}Uudet ajoneuvot
-STR_FINANCES_SECTION_TRAIN_RUNNING_COSTS                        :{GOLD}Junien käyttökust.
-STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD}Autojen käyttökust.
-STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD}Lentokoneiden käyttökust.
-STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD}Laivojen käyttökust.
+STR_FINANCES_SECTION_TRAIN_RUNNING_COSTS                        :{GOLD}Junien käyttökustannukset
+STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD}Autojen käyttökustannukset
+STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD}Lentokoneiden käyttökustannukset
+STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD}Laivojen käyttökustannukset
 STR_FINANCES_SECTION_PROPERTY_MAINTENANCE                       :{GOLD}Omaisuudenhallinta
 STR_FINANCES_SECTION_TRAIN_INCOME                               :{GOLD}Junien tulot
 STR_FINANCES_SECTION_ROAD_VEHICLE_INCOME                        :{GOLD}Ajoneuvojen tulot
@@ -2519,9 +2519,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Tilin sa
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Laina
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Laina enimmillään: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Lainaa {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Lainaa {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Ota lisää lainaa. Ctrl+Click lisää lainaa niin paljon kuin mahdollista
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Lyhennä lainaa {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Lyhennä lainaa {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Lyhennä lainaa. Ctrl+Click lyhentää lainaa niin paljon kuin mahdollista
 
 # Company view
@@ -2933,8 +2933,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Tuotto t
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Luotettavuus: {LTBLUE}{COMMA}%  {BLACK}Hajoamiset viime huollon jälkeen: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Rakennettu: {LTBLUE}{NUM}{BLACK} Arvo: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapasiteetti: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapasiteetti: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapasiteetti: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapasiteetti: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Kapasiteetti: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Siirrä rahaa: {LTBLUE}{CURRENCY}
@@ -2998,6 +2998,8 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Aikataul
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Näytä aikataulu
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Aikataulu - napsauta määräystä korostaaksesi.
+STR_ORDER_INDEX                                                 :{COMMA}:{NBSP}
+STR_ORDER_TEXT                                                  :{STRING} {STRING}
 
 STR_ORDERS_END_OF_ORDERS                                        :- - aikataulun loppu - -
 STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - jaetun aikataulun loppu - -
@@ -3156,14 +3158,11 @@ STR_TIMETABLE_AUTOFILL                                          :{BLACK}Automaat
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Täytä aikataulu automaattisesti seuraavan matkan arvoilla (Ctrl+Click: yritä säilyttää odotusajat)
 
 STR_TIMETABLE_EXPECTED                                          :{BLACK}Odotettu
-STR_TIMETABLE_SCHEDULED                                         :{BLACK}Aikataulussa
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Aikataulu
 STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Vaihda odotetun ja aikataulun välillä
 
-### Do not separate or reorder ###
-#####
-
-### Do not separate or reorder ###
-#####
+STR_TIMETABLE_ARRIVAL_ABBREVIATION                              :S:
+STR_TIMETABLE_DEPARTURE_ABBREVIATION                            :L:
 
 
 # Date window (for timetable)
@@ -4039,6 +4038,8 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
