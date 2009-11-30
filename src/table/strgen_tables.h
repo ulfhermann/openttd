@@ -28,17 +28,11 @@ struct CmdStruct {
 	CmdFlags flags;
 };
 
-static void EmitSetX(char *buf, int value);
-static void EmitSetXY(char *buf, int value);
 static void EmitSingleChar(char *buf, int value);
 static void EmitPlural(char *buf, int value);
 static void EmitGender(char *buf, int value);
 
 static const CmdStruct _cmd_structs[] = {
-	/* Update position */
-	{"SETX",            EmitSetX,       SCC_SETX,               0, C_NONE},
-	{"SETXY",           EmitSetXY,      SCC_SETXY,              0, C_NONE},
-
 	/* Font size */
 	{"TINYFONT",        EmitSingleChar, SCC_TINYFONT,           0, C_NONE},
 	{"BIGFONT",         EmitSingleChar, SCC_BIGFONT,            0, C_NONE},
@@ -90,8 +84,6 @@ static const CmdStruct _cmd_structs[] = {
 	{"DATE_SHORT",      EmitSingleChar, SCC_DATE_SHORT,         1, C_NONE},
 	{"DATE_LONG",       EmitSingleChar, SCC_DATE_LONG,          1, C_NONE},
 	{"DATE_ISO",        EmitSingleChar, SCC_DATE_ISO,           1, C_NONE},
-
-	{"SKIP",            EmitSingleChar, SCC_SKIP,               1, C_NONE},
 
 	{"STRING",          EmitSingleChar, SCC_STRING,             1, C_CASE},
 	{"RAW_STRING",      EmitSingleChar, SCC_RAW_STRING_POINTER, 1, C_NONE},
