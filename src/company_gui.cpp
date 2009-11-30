@@ -20,7 +20,6 @@
 #include "network/network.h"
 #include "network/network_gui.h"
 #include "network/network_func.h"
-#include "sprite.h"
 #include "economy_func.h"
 #include "vehicle_base.h"
 #include "newgrf.h"
@@ -309,7 +308,7 @@ struct CompanyFinancesWindow : Window {
 
 			case CFW_INCREASE_LOAN:
 			case CFW_REPAY_LOAN:
-				SetDParam(2, LOAN_INTERVAL);
+				SetDParam(0, LOAN_INTERVAL);
 				break;
 		}
 	}
@@ -1082,8 +1081,11 @@ class SelectCompanyManagerFaceWindow : public Window
 	bool is_female;     ///< Female face.
 	bool is_moust_male; ///< Male face with a moustache.
 
-	static const StringID PART_TEXTS_IS_FEMALE[];
-	static const StringID PART_TEXTS[];
+	Dimension yesno_dim;  ///< Dimension of a yes/no button of a part in the advanced face window.
+	Dimension number_dim; ///< Dimension of a number widget of a part in the advanced face window.
+
+	static const StringID PART_TEXTS_IS_FEMALE[]; ///< Strings depending on #is_female, used to describe parts (2 entries for a part).
+	static const StringID PART_TEXTS[];           ///< Fixed strings to describe parts of the face.
 
 	/**
 	 * Draw dynamic a label to the left of the button and a value in the button
@@ -1151,6 +1153,29 @@ public:
 		}
 	}
 
+	virtual void OnInit()
+	{
+		/* Size of the boolean yes/no button. */
+		Dimension yesno_dim = maxdim(GetStringBoundingBox(STR_FACE_YES), GetStringBoundingBox(STR_FACE_NO));
+		yesno_dim.width  += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+		yesno_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+		/* Size of the number button + arrows. */
+		Dimension number_dim = {0, 0};
+		for (int val = 1; val <= 12; val++) {
+			SetDParam(0, val);
+			number_dim = maxdim(number_dim, GetStringBoundingBox(STR_JUST_INT));
+		}
+		uint arrows_width = GetSpriteSize(SPR_ARROW_LEFT).width + GetSpriteSize(SPR_ARROW_RIGHT).width + 2 * (WD_IMGBTN_LEFT + WD_IMGBTN_RIGHT);
+		number_dim.width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT + arrows_width;
+		number_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+		/* Compute width of both buttons. */
+		yesno_dim.width = max(yesno_dim.width, number_dim.width);
+		number_dim.width = yesno_dim.width - arrows_width;
+
+		this->yesno_dim = yesno_dim;
+		this->number_dim = number_dim;
+	}
+
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
@@ -1185,6 +1210,9 @@ public:
 
 			case SCMFW_WIDGET_HAS_MOUSTACHE_EARRING:
 			case SCMFW_WIDGET_HAS_GLASSES:
+				*size = this->yesno_dim;
+				break;
+
 			case SCMFW_WIDGET_EYECOLOUR:
 			case SCMFW_WIDGET_CHIN:
 			case SCMFW_WIDGET_EYEBROWS:
@@ -1194,31 +1222,9 @@ public:
 			case SCMFW_WIDGET_JACKET:
 			case SCMFW_WIDGET_COLLAR:
 			case SCMFW_WIDGET_TIE_EARRING:
-			case SCMFW_WIDGET_GLASSES: {
-				/* Size of the boolean yes/no button. */
-				Dimension yesno_dim = maxdim(GetStringBoundingBox(STR_FACE_YES), GetStringBoundingBox(STR_FACE_NO));
-				yesno_dim.width  += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
-				yesno_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
-				/* Size of the number button + arrows. */
-				Dimension number_dim = {0, 0};
-				for (int val = 1; val <= 12; val++) {
-					SetDParam(0, val);
-					number_dim = maxdim(number_dim, GetStringBoundingBox(STR_JUST_INT));
-				}
-				uint arrows_width = GetSpriteSize(SPR_ARROW_LEFT).width + GetSpriteSize(SPR_ARROW_RIGHT).width + 2 * (WD_IMGBTN_LEFT + WD_IMGBTN_RIGHT);
-				number_dim.width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT + arrows_width;
-				number_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
-				/* Compute width of yes/no button. */
-				yesno_dim.width = max(yesno_dim.width, number_dim.width);
-				number_dim.width = yesno_dim.width - arrows_width;
-
-				if (widget == SCMFW_WIDGET_HAS_MOUSTACHE_EARRING || widget == SCMFW_WIDGET_HAS_GLASSES) {
-					*size = yesno_dim;
-				} else {
-					*size = number_dim;
-				}
+			case SCMFW_WIDGET_GLASSES:
+				*size = this->number_dim;
 				break;
-			}
 		}
 	}
 

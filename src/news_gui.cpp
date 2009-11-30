@@ -287,7 +287,7 @@ struct NewsWindow : Window {
 	NewsWindow(const WindowDesc *desc, NewsItem *ni) : Window(), ni(ni)
 	{
 		NewsWindow::duration = 555;
-		const Window *w = FindWindowById(WC_SEND_NETWORK_MSG, 0);
+		const Window *w = FindWindowByClass(WC_SEND_NETWORK_MSG);
 		this->chat_height = (w != NULL) ? w->height : 0;
 		this->status_height = FindWindowById(WC_STATUS_BAR, 0)->height;
 
@@ -1071,7 +1071,8 @@ enum MessageOptionWidgets {
 
 struct MessageOptionsWindow : Window {
 	static const StringID message_opt[]; ///< Message report options, 'off', 'summary', or 'full'.
-	int state; ///< Option value for setting all categories at once.
+	int state;                           ///< Option value for setting all categories at once.
+	Dimension dim_message_opt;           ///< Amount of space needed for a label such that all labels will fit.
 
 	MessageOptionsWindow(const WindowDesc *desc) : Window()
 	{
@@ -1118,6 +1119,13 @@ struct MessageOptionsWindow : Window {
 		}
 	}
 
+	virtual void OnInit()
+	{
+		this->dim_message_opt.width  = 0;
+		this->dim_message_opt.height = 0;
+		for (const StringID *str = message_opt; *str != INVALID_STRING_ID; str++) this->dim_message_opt = maxdim(this->dim_message_opt, GetStringBoundingBox(*str));
+	}
+
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget >= WIDGET_NEWSOPT_START_OPTION && widget < WIDGET_NEWSOPT_END_OPTION) {
@@ -1126,9 +1134,7 @@ struct MessageOptionsWindow : Window {
 
 			/* Compute width for the label widget only. */
 			if ((widget - WIDGET_NEWSOPT_START_OPTION) % MOS_WIDG_PER_SETTING == 1) {
-				Dimension d = {0, 0};
-				for (const StringID *str = message_opt; *str != INVALID_STRING_ID; str++) d = maxdim(d, GetStringBoundingBox(*str));
-				size->width = d.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
+				size->width = this->dim_message_opt.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
 			}
 			return;
 		}
@@ -1139,9 +1145,7 @@ struct MessageOptionsWindow : Window {
 			size->height = FONT_HEIGHT_NORMAL + max(WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM);
 
 			if (widget == WIDGET_NEWSOPT_DROP_SUMMARY) {
-				Dimension d = {0, 0};
-				for (const StringID *str = message_opt; *str != INVALID_STRING_ID; str++) d = maxdim(d, GetStringBoundingBox(*str));
-				size->width = d.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
+				size->width = this->dim_message_opt.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
 			} else if (widget == WIDGET_NEWSOPT_SOUNDTICKER) {
 				size->width += MOS_BUTTON_SPACE; // A bit extra for better looks.
 			}
