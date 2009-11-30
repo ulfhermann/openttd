@@ -13,7 +13,6 @@
 #include "station_base.h"
 #include "core/pool_func.hpp"
 #include "economy_base.h"
-#include "station_base.h"
 
 /* Initialize the cargopacket-pool */
 CargoPacketPool _cargopacket_pool("CargoPacket");
