@@ -795,10 +795,10 @@ static void DrawCargoIcons(CargoID i, uint waiting, int left, int right, int y)
 
 	SpriteID sprite = GetCargoSprite(i);
 
-	int x = _dynlang.text_dir == TD_RTL ? left + num * 10 : right - 20;
+	int x = _dynlang.text_dir == TD_RTL ? left : right - num * 10;
 	do {
 		DrawSprite(sprite, PAL_NONE, x, y);
-		x -= 10;
+		x += 10;
 	} while (--num);
 }
 
@@ -1380,7 +1380,7 @@ struct StationViewWindow : public Window {
 
 				if (groupings[column] == GR_CARGO) {
 					str = STR_STATION_VIEW_WAITING_CARGO;
-					DrawCargoIcons(cd->GetCargo(), cd->GetCount(), r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y);
+					DrawCargoIcons(cd->GetCargo(), cd->GetCount(), r.left + WD_FRAMERECT_LEFT + this->expand_shrink_width, r.right - WD_FRAMERECT_RIGHT - this->expand_shrink_width, y);
 				} else {
 					StationID station = cd->GetStation();
 
@@ -1406,12 +1406,12 @@ struct StationViewWindow : public Window {
 				}
 				
 				bool rtl = _dynlang.text_dir == TD_RTL;
-				int text_left    = rtl ? r.left + this->expand_shrink_width : r.left + WD_FRAMERECT_LEFT;
-				int text_right   = rtl ? r.right - WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width;
+				int text_left    = rtl ? r.left + this->expand_shrink_width : r.left + WD_FRAMERECT_LEFT + column * this->expand_shrink_width;
+				int text_right   = rtl ? r.right - WD_FRAMERECT_LEFT - column * this->expand_shrink_width : r.right - this->expand_shrink_width;
 				int shrink_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width + WD_FRAMERECT_LEFT;
 				int shrink_right = rtl ? r.left + this->expand_shrink_width - WD_FRAMERECT_RIGHT : r.right - WD_FRAMERECT_RIGHT;
 
-				DrawString(text_left + column * this->expand_shrink_width, text_right, y, str, TC_FROMSTRING);
+				DrawString(text_left, text_right, y, str, TC_FROMSTRING);
 
 				if (column < _num_columns - 1) {
 					const char *sym = cd->Size() > 0 ? "-" : "+";
