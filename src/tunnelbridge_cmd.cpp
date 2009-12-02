@@ -25,7 +25,7 @@
 #include "ship.h"
 #include "roadveh.h"
 #include "water_map.h"
-#include "yapf/yapf.h"
+#include "pathfinder/yapf/yapf.h"
 #include "newgrf_sound.h"
 #include "autoslope.h"
 #include "tunnelbridge_map.h"
@@ -38,6 +38,7 @@
 #include "cheat_type.h"
 #include "elrail_func.h"
 #include "landscape_type.h"
+#include "pbs.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
