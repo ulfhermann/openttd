@@ -1287,11 +1287,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Città
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industrie
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Pathfinder per i treni: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(non raccomandato)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(raccomandato)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Pathfinder per gli automezzi: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Originale {RED}(non raccomandato)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(raccomandato)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Pathfinder per le navi: {ORANGE}{STRING}
@@ -2935,6 +2933,7 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Profitto
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Affidabilità: {LTBLUE}{COMMA}%  {BLACK}Guasti dall'ultima manutenzione: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Costruito nel: {LTBLUE}{NUM}{BLACK} Valore: {LTBLUE}{CURRENCY}
+STR_VEHICLE_INFO_NO_CAPACITY                                    :{BLACK}Capacità: {LTBLUE}Nessuna
 STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Capacità: {LTBLUE}{CARGO}{4:STRING}
 STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Capacità: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Capacità: {LTBLUE}{CARGO}, {CARGO}{STRING}
