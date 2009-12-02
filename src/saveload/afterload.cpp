@@ -25,7 +25,7 @@
 #include "../clear_map.h"
 #include "../vehicle_func.h"
 #include "../newgrf_station.h"
-#include "../yapf/yapf.hpp"
+#include "../pathfinder/yapf/yapf.hpp"
 #include "../elrail_func.h"
 #include "../signs_func.h"
 #include "../aircraft.h"
@@ -1556,13 +1556,13 @@ bool AfterLoadGame()
 		if (_settings_game.pf.yapf.rail_use_yapf || CheckSavegameVersion(28)) {
 			_settings_game.pf.pathfinder_for_trains = VPF_YAPF;
 		} else {
-			_settings_game.pf.pathfinder_for_trains = (_settings_game.pf.new_pathfinding_all ? VPF_NPF : VPF_NTP);
+			_settings_game.pf.pathfinder_for_trains = VPF_NPF;
 		}
 
 		if (_settings_game.pf.yapf.road_use_yapf || CheckSavegameVersion(28)) {
 			_settings_game.pf.pathfinder_for_roadvehs = VPF_YAPF;
 		} else {
-			_settings_game.pf.pathfinder_for_roadvehs = (_settings_game.pf.new_pathfinding_all ? VPF_NPF : VPF_OPF);
+			_settings_game.pf.pathfinder_for_roadvehs = VPF_NPF;
 		}
 
 		if (_settings_game.pf.yapf.ship_use_yapf) {
