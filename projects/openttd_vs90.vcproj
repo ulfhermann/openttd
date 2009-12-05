@@ -3496,6 +3496,10 @@
 				RelativePath=".\..\src\pathfinder\pathfinder_func.h"
 				>
 			</File>
+			<File
+				RelativePath=".\..\src\pathfinder\pathfinder_type.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="NPF"
@@ -3550,6 +3554,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\pathfinder\yapf\yapf_base.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\pathfinder\yapf\yapf_cache.h"
 				>
 			</File>
 			<File
