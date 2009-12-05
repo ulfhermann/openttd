@@ -12,7 +12,6 @@
 #include "../stdafx.h"
 #include "../void_map.h"
 #include "../signs_base.h"
-#include "../roadstop_base.h"
 #include "../depot_base.h"
 #include "../window_func.h"
 #include "../fios.h"
@@ -25,7 +24,18 @@
 #include "../clear_map.h"
 #include "../vehicle_func.h"
 #include "../newgrf_station.h"
-#include "../pathfinder/yapf/yapf.hpp"
+#include "../openttd.h"
+#include "../debug.h"
+#include "../string_func.h"
+#include "../date_func.h"
+#include "../roadveh.h"
+#include "../train.h"
+#include "../station_base.h"
+#include "../waypoint_base.h"
+#include "../roadstop_base.h"
+#include "../tunnelbridge_map.h"
+#include "../landscape.h"
+#include "../pathfinder/yapf/yapf_cache.h"
 #include "../elrail_func.h"
 #include "../signs_func.h"
 #include "../aircraft.h"
@@ -1078,13 +1088,6 @@ bool AfterLoadGame()
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
 			rv->vehstatus &= ~0x40;
-			rv->slot = NULL;
-			rv->slot_age = 0;
-		}
-	} else {
-		RoadVehicle *rv;
-		FOR_ALL_ROADVEHICLES(rv) {
-			if (rv->slot != NULL) rv->slot->num_vehicles++;
 		}
 	}
 
@@ -1357,7 +1360,7 @@ bool AfterLoadGame()
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
 			if (rv->state == 250 || rv->state == 251) {
-				SetBit(rv->state, RVS_IS_STOPPING);
+				SetBit(rv->state, 2);
 			}
 		}
 	}
@@ -1956,6 +1959,8 @@ bool AfterLoadGame()
 		}
 	}
 
+	/* Road stops is 'only' updating some caches */
+	AfterLoadRoadStops();
 	AfterLoadLabelMaps();
 
 	GamelogPrintDebug(1);
