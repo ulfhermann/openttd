@@ -13,7 +13,7 @@
 #include "gui.h"
 #include "articulated_vehicles.h"
 #include "command_func.h"
-#include "pathfinder/npf/npf.h"
+#include "pathfinder/npf/npf_func.h"
 #include "news_func.h"
 #include "company_func.h"
 #include "vehicle_gui.h"
@@ -2138,77 +2138,28 @@ CommandCost CmdRefitRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	return cost;
 }
 
-struct TrainFindDepotData {
-	uint best_length;
-	TileIndex tile;
-	Owner owner;
-	/**
-	 * true if reversing is necessary for the train to get to this depot
-	 * This value is unused when new depot finding and NPF are both disabled
-	 */
-	bool reverse;
-};
-
 /** returns the tile of a depot to goto to. The given vehicle must not be
  * crashed! */
-static TrainFindDepotData FindClosestTrainDepot(Train *v, int max_distance)
+static FindDepotData FindClosestTrainDepot(Train *v, int max_distance)
 {
 	assert(!(v->vehstatus & VS_CRASHED));
 
-	TrainFindDepotData tfdd;
-	tfdd.owner = v->owner;
-	tfdd.reverse = false;
-
-	if (IsRailDepotTile(v->tile)) {
-		tfdd.tile = v->tile;
-		tfdd.best_length = 0;
-		return tfdd;
-	}
+	if (IsRailDepotTile(v->tile)) return FindDepotData(v->tile, 0);
 
 	PBSTileInfo origin = FollowTrainReservation(v);
-	if (IsRailDepotTile(origin.tile)) {
-		tfdd.tile = origin.tile;
-		tfdd.best_length = 0;
-		return tfdd;
-	}
-
-	tfdd.best_length = UINT_MAX;
+	if (IsRailDepotTile(origin.tile)) return FindDepotData(origin.tile, 0);
 
 	switch (_settings_game.pf.pathfinder_for_trains) {
-		case VPF_YAPF: { // YAPF
-			bool found = YapfFindNearestRailDepotTwoWay(v, max_distance, NPF_INFINITE_PENALTY, &tfdd.tile, &tfdd.reverse);
-			tfdd.best_length = found ? max_distance / 2 : UINT_MAX; // some fake distance or NOT_FOUND
-		} break;
+		case VPF_NPF: return NPFTrainFindNearestDepot(v, max_distance);
+		case VPF_YAPF: return YapfTrainFindNearestDepot(v, max_distance);
 
-		case VPF_NPF: { // NPF
-			const Vehicle *last = v->Last();
-			Trackdir trackdir = v->GetVehicleTrackdir();
-			Trackdir trackdir_rev = ReverseTrackdir(last->GetVehicleTrackdir());
-
-			assert(trackdir != INVALID_TRACKDIR);
-			NPFFoundTargetData ftd = NPFRouteToDepotBreadthFirstTwoWay(v->tile, trackdir, false, last->tile, trackdir_rev, false, TRANSPORT_RAIL, 0, v->owner, v->compatible_railtypes, NPF_INFINITE_PENALTY);
-			if (ftd.best_bird_dist == 0) {
-				/* Found target */
-				tfdd.tile = ftd.node.tile;
-				/* Our caller expects a number of tiles, so we just approximate that
-				 * number by this. It might not be completely what we want, but it will
-				 * work for now :-) We can possibly change this when the old pathfinder
-				 * is removed. */
-				tfdd.best_length = ftd.best_path_dist / NPF_TILE_LENGTH;
-				if (NPFGetFlag(&ftd.node, NPF_FLAG_REVERSE)) tfdd.reverse = true;
-			}
-		} break;
-
-		default:
-			NOT_REACHED();
+		default: NOT_REACHED();
 	}
-
-	return tfdd;
 }
 
 bool Train::FindClosestDepot(TileIndex *location, DestinationID *destination, bool *reverse)
 {
-	TrainFindDepotData tfdd = FindClosestTrainDepot(this, 0);
+	FindDepotData tfdd = FindClosestTrainDepot(this, 0);
 	if (tfdd.best_length == UINT_MAX) return false;
 
 	if (location    != NULL) *location    = tfdd.tile;
@@ -2556,71 +2507,14 @@ static const byte _initial_tile_subcoord[6][4][3] = {
  * @param dest [out] State and destination of the requested path
  * @return The best track the train should follow
  */
-static Track DoTrainPathfind(Train *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks, bool *path_not_found, bool do_track_reservation, PBSTileInfo *dest)
+static Track DoTrainPathfind(const Train *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks, bool *path_not_found, bool do_track_reservation, PBSTileInfo *dest)
 {
-	Track best_track;
-
-#ifdef PF_BENCHMARK
-	TIC()
-#endif
-
-	if (path_not_found) *path_not_found = false;
-
 	switch (_settings_game.pf.pathfinder_for_trains) {
-		case VPF_YAPF: { // YAPF
-			Trackdir trackdir = YapfChooseRailTrack(v, tile, enterdir, tracks, path_not_found, do_track_reservation, dest);
-			if (trackdir != INVALID_TRACKDIR) {
-				best_track = TrackdirToTrack(trackdir);
-			} else {
-				best_track = FindFirstTrack(tracks);
-			}
-		} break;
+		case VPF_NPF: return NPFTrainChooseTrack(v, tile, enterdir, tracks, path_not_found, do_track_reservation, dest);
+		case VPF_YAPF: return YapfTrainChooseTrack(v, tile, enterdir, tracks, path_not_found, do_track_reservation, dest);
 
-		case VPF_NPF: { // NPF
-			void *perf = NpfBeginInterval();
-
-			NPFFindStationOrTileData fstd;
-			NPFFillWithOrderData(&fstd, v, do_track_reservation);
-
-			PBSTileInfo origin = FollowTrainReservation(v);
-			assert(IsValidTrackdir(origin.trackdir));
-
-			NPFFoundTargetData ftd = NPFRouteToStationOrTile(origin.tile, origin.trackdir, true, &fstd, TRANSPORT_RAIL, 0, v->owner, v->compatible_railtypes);
-
-			if (dest != NULL) {
-				dest->tile = ftd.node.tile;
-				dest->trackdir = (Trackdir)ftd.node.direction;
-				dest->okay = ftd.res_okay;
-			}
-
-			if (ftd.best_trackdir == INVALID_TRACKDIR) {
-				/* We are already at our target. Just do something
-				 * @todo maybe display error?
-				 * @todo: go straight ahead if possible? */
-				best_track = FindFirstTrack(tracks);
-			} else {
-				/* If ftd.best_bird_dist is 0, we found our target and ftd.best_trackdir contains
-				 * the direction we need to take to get there, if ftd.best_bird_dist is not 0,
-				 * we did not find our target, but ftd.best_trackdir contains the direction leading
-				 * to the tile closest to our target. */
-				if (ftd.best_bird_dist != 0 && path_not_found != NULL) *path_not_found = true;
-				/* Discard enterdir information, making it a normal track */
-				best_track = TrackdirToTrack(ftd.best_trackdir);
-			}
-
-			int time = NpfEndInterval(perf);
-			DEBUG(yapf, 4, "[NPFT] %d us - %d rounds - %d open - %d closed -- ", time, 0, _aystar_stats_open_size, _aystar_stats_closed_size);
-		} break;
-
-		default:
-			NOT_REACHED();
+		default: NOT_REACHED();
 	}
-
-#ifdef PF_BENCHMARK
-	TOC("PF time = ", 1)
-#endif
-
-	return best_track;
 }
 
 /**
@@ -2717,15 +2611,16 @@ static PBSTileInfo ExtendTrainReservation(const Train *v, TrackBits *new_tracks,
  * @param v The vehicle.
  * @param tile The tile the search should start from.
  * @param td The trackdir the search should start from.
- * @param override_tailtype Whether all physically compatible railtypes should be followed.
+ * @param override_railtype Whether all physically compatible railtypes should be followed.
  * @return True if a path to a safe stopping tile could be reserved.
  */
 static bool TryReserveSafeTrack(const Train *v, TileIndex tile, Trackdir td, bool override_tailtype)
 {
-	if (_settings_game.pf.pathfinder_for_trains == VPF_YAPF) {
-		return YapfRailFindNearestSafeTile(v, tile, td, override_tailtype);
-	} else {
-		return NPFRouteToSafeTile(v, tile, td, override_tailtype).res_okay;
+	switch (_settings_game.pf.pathfinder_for_trains) {
+		case VPF_NPF: return NPFTrainFindNearestSafeTile(v, tile, td, override_tailtype);
+		case VPF_YAPF: return YapfTrainFindNearestSafeTile(v, tile, td, override_tailtype);
+
+		default: NOT_REACHED();
 	}
 }
 
@@ -3069,7 +2964,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 }
 
 
-static bool CheckReverseTrain(Train *v)
+static bool CheckReverseTrain(const Train *v)
 {
 	if (_settings_game.difficulty.line_reverse_mode != 0 ||
 			v->track == TRACK_BIT_DEPOT || v->track == TRACK_BIT_WORMHOLE ||
@@ -3077,31 +2972,13 @@ static bool CheckReverseTrain(Train *v)
 		return false;
 	}
 
-	assert(v->track);
+	assert(v->track != TRACK_BIT_NONE);
 
 	switch (_settings_game.pf.pathfinder_for_trains) {
-		case VPF_YAPF: // YAPF
-			return YapfCheckReverseTrain(v);
+		case VPF_NPF: return NPFTrainCheckReverse(v);
+		case VPF_YAPF: return YapfTrainCheckReverse(v);
 
-		case VPF_NPF: { // NPF
-			NPFFindStationOrTileData fstd;
-			NPFFoundTargetData ftd;
-			Vehicle *last = v->Last();
-
-			NPFFillWithOrderData(&fstd, v);
-
-			Trackdir trackdir = v->GetVehicleTrackdir();
-			Trackdir trackdir_rev = ReverseTrackdir(last->GetVehicleTrackdir());
-			assert(trackdir != INVALID_TRACKDIR);
-			assert(trackdir_rev != INVALID_TRACKDIR);
-
-			ftd = NPFRouteToStationOrTileTwoWay(v->tile, trackdir, false, last->tile, trackdir_rev, false, &fstd, TRANSPORT_RAIL, 0, v->owner, v->compatible_railtypes);
-			/* If we didn't find anything, just keep on going straight ahead, otherwise take the reverse flag */
-			return ftd.best_bird_dist != 0 && NPFGetFlag(&ftd.node, NPF_FLAG_REVERSE);
-		} break;
-
-		default:
-			NOT_REACHED();
+		default: NOT_REACHED();
 	}
 }
 
@@ -3312,56 +3189,34 @@ void Train::ReserveTrackUnderConsist() const
 	}
 }
 
-static void SetVehicleCrashed(Train *v)
+uint Train::Crash(bool flooded)
 {
-	if (v->crash_anim_pos != 0) return;
+	uint pass = 0;
+	if (this->IsFrontEngine()) {
+		pass += 4; // driver
 
-	if (v->IsFrontEngine()) {
 		/* Remove the reserved path in front of the train if it is not stuck.
 		 * Also clear all reserved tracks the train is currently on. */
-		if (!HasBit(v->flags, VRF_TRAIN_STUCK)) FreeTrainTrackReservation(v);
-		for (const Train *u = v; u != NULL; u = u->Next()) {
-			ClearPathReservation(u, u->tile, u->GetVehicleTrackdir());
-			if (IsTileType(u->tile, MP_TUNNELBRIDGE)) {
+		if (!HasBit(this->flags, VRF_TRAIN_STUCK)) FreeTrainTrackReservation(this);
+		for (const Train *v = this; v != NULL; v = v->Next()) {
+			ClearPathReservation(v, v->tile, v->GetVehicleTrackdir());
+			if (IsTileType(v->tile, MP_TUNNELBRIDGE)) {
 				/* ClearPathReservation will not free the wormhole exit
 				 * if the train has just entered the wormhole. */
-				SetTunnelBridgeReservation(GetOtherTunnelBridgeEnd(u->tile), false);
+				SetTunnelBridgeReservation(GetOtherTunnelBridgeEnd(v->tile), false);
 			}
 		}
+
+		/* we may need to update crossing we were approaching,
+		* but must be updated after the train has been marked crashed */
+		TileIndex crossing = TrainApproachingCrossingTile(this);
+		if (crossing != INVALID_TILE) UpdateLevelCrossing(crossing);
 	}
 
-	/* we may need to update crossing we were approaching */
-	TileIndex crossing = TrainApproachingCrossingTile(v);
+	pass += Vehicle::Crash(flooded);
 
-	v->crash_anim_pos++;
-
-	SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-	SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-
-	if (v->track == TRACK_BIT_DEPOT) {
-		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
-	}
-
-	InvalidateWindowClassesData(WC_TRAINS_LIST, 0);
-
-	for (; v != NULL; v = v->Next()) {
-		v->vehstatus |= VS_CRASHED;
-		MarkSingleVehicleDirty(v);
-	}
-
-	/* must be updated after the train has been marked crashed */
-	if (crossing != INVALID_TILE) UpdateLevelCrossing(crossing);
-}
-
-static uint CountPassengersInTrain(const Train *v)
-{
-	uint num = 0;
-
-	for (; v != NULL; v = v->Next()) {
-		if (IsCargoInClass(v->cargo_type, CC_PASSENGERS)) num += v->cargo.Count();
-	}
-
-	return num;
+	this->crash_anim_pos = flooded ? 4000 : 1; // max 4440, disappear pretty fast when flooded
+	return pass;
 }
 
 /**
@@ -3376,10 +3231,7 @@ static uint TrainCrashed(Train *v)
 
 	/* do not crash train twice */
 	if (!(v->vehstatus & VS_CRASHED)) {
-		/* two drivers + passengers */
-		num = 2 + CountPassengersInTrain(v);
-
-		SetVehicleCrashed(v);
+		num = v->Crash();
 		AI::NewEvent(v->owner, new AIEventVehicleCrashed(v->index, v->tile, AIEventVehicleCrashed::CRASH_TRAIN));
 	}
 
@@ -4314,7 +4166,7 @@ static void CheckIfTrainNeedsService(Train *v)
 		return;
 	}
 
-	TrainFindDepotData tfdd = FindClosestTrainDepot(v, MAX_ACCEPTABLE_DEPOT_DIST);
+	FindDepotData tfdd = FindClosestTrainDepot(v, MAX_ACCEPTABLE_DEPOT_DIST);
 	/* Only go to the depot if it is not too far out of our way. */
 	if (tfdd.best_length == UINT_MAX || tfdd.best_length > MAX_ACCEPTABLE_DEPOT_DIST) {
 		if (v->current_order.IsType(OT_GOTO_DEPOT)) {
