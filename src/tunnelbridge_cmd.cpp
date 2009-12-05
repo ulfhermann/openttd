@@ -25,7 +25,7 @@
 #include "ship.h"
 #include "roadveh.h"
 #include "water_map.h"
-#include "pathfinder/yapf/yapf.h"
+#include "pathfinder/yapf/yapf_cache.h"
 #include "newgrf_sound.h"
 #include "autoslope.h"
 #include "tunnelbridge_map.h"
@@ -241,6 +241,8 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 	if (transport_type != TRANSPORT_WATER) {
 		/* set and test bridge length, availability */
 		if (!CheckBridge_Stuff(bridge_type, bridge_len, flags)) return_cmd_error(STR_ERROR_CAN_T_BUILD_BRIDGE_HERE);
+	} else {
+		if (bridge_len > (_settings_game.construction.longbridges ? 100U : 16U)) return_cmd_error(STR_ERROR_CAN_T_BUILD_BRIDGE_HERE);
 	}
 
 	/* retrieve landscape height and ensure it's on land */
@@ -1412,7 +1414,6 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				rv->state = _road_exit_tunnel_state[dir];
 				rv->frame = _road_exit_tunnel_frame[dir];
 				rv->vehstatus &= ~VS_HIDDEN;
-				rv->FindRoadStopSlot();
 				return VETSB_ENTERED_WORMHOLE;
 			}
 		}

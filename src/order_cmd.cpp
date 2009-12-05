@@ -15,19 +15,18 @@
 #include "company_func.h"
 #include "news_func.h"
 #include "vehicle_gui.h"
-#include "cargotype.h"
 #include "strings_func.h"
 #include "functions.h"
 #include "window_func.h"
 #include "timetable.h"
 #include "vehicle_func.h"
 #include "depot_base.h"
-#include "roadstop_base.h"
 #include "core/pool_func.hpp"
 #include "aircraft.h"
 #include "roadveh.h"
 #include "station_base.h"
 #include "waypoint_base.h"
+#include "roadstop_base.h"
 
 #include "table/strings.h"
 
@@ -554,10 +553,12 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				default: return CMD_ERROR;
 
 				case VEH_TRAIN:
+					if (!(wp->facilities & FACIL_TRAIN)) return_cmd_error(STR_ERROR_CAN_T_ADD_ORDER);
 					if (!CheckOwnership(wp->owner)) return CMD_ERROR;
 					break;
 
 				case VEH_SHIP:
+					if (!(wp->facilities & FACIL_DOCK)) return_cmd_error(STR_ERROR_CAN_T_ADD_ORDER);
 					if (!CheckOwnership(wp->owner) && wp->owner != OWNER_NONE) return CMD_ERROR;
 					break;
 			}
@@ -788,8 +789,6 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 	if (flags & DC_EXEC) {
 		v->cur_order_index = sel_ord;
-
-		if (v->type == VEH_ROAD) ClearSlot(RoadVehicle::From(v));
 
 		if (v->current_order.IsType(OT_LOADING)) v->LeaveStation();
 
@@ -1140,9 +1139,8 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 			}
 
 			/* Trucks can't share orders with busses (and visa versa) */
-			if (src->type == VEH_ROAD) {
-				if (src->cargo_type != dst->cargo_type && (IsCargoInClass(src->cargo_type, CC_PASSENGERS) || IsCargoInClass(dst->cargo_type, CC_PASSENGERS)))
-					return CMD_ERROR;
+			if (src->type == VEH_ROAD && RoadVehicle::From(src)->IsBus() != RoadVehicle::From(dst)->IsBus()) {
+				return CMD_ERROR;
 			}
 
 			/* Is the vehicle already in the shared list? */
@@ -1796,7 +1794,6 @@ bool ProcessOrders(Vehicle *v)
 
 		v->current_order.Free();
 		v->dest_tile = 0;
-		if (v->type == VEH_ROAD) ClearSlot(RoadVehicle::From(v));
 		return false;
 	}
 
