@@ -10,6 +10,7 @@
 /** @file yapf_ship.cpp Implementation of YAPF for ships. */
 
 #include "../../stdafx.h"
+#include "../../ship.h"
 
 #include "yapf.hpp"
 
@@ -48,7 +49,7 @@ public:
 		return 'w';
 	}
 
-	static Trackdir ChooseShipTrack(const Vehicle *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
+	static Trackdir ChooseShipTrack(const Ship *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
 	{
 		/* handle special case - when next tile is destination tile */
 		if (tile == v->dest_tile) {
@@ -150,6 +151,7 @@ struct CYapfShip_TypesT
 	typedef Ttrack_follower                   TrackFollower;
 	/** node list type */
 	typedef Tnode_list                        NodeList;
+	typedef Ship                              VehicleType;
 	/** pathfinder components (modules) */
 	typedef CYapfBaseT<Types>                 PfBase;        // base pathfinder class
 	typedef CYapfFollowShipT<Types>           PfFollow;      // node follower
@@ -167,10 +169,10 @@ struct CYapfShip2 : CYapfT<CYapfShip_TypesT<CYapfShip2, CFollowTrackWater    , C
 struct CYapfShip3 : CYapfT<CYapfShip_TypesT<CYapfShip3, CFollowTrackWaterNo90, CShipNodeListTrackDir> > {};
 
 /** Ship controller helper - path finder invoker */
-Track YapfChooseShipTrack(const Vehicle *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
+Track YapfShipChooseTrack(const Ship *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
 {
 	/* default is YAPF type 2 */
-	typedef Trackdir (*PfnChooseShipTrack)(const Vehicle*, TileIndex, DiagDirection, TrackBits);
+	typedef Trackdir (*PfnChooseShipTrack)(const Ship*, TileIndex, DiagDirection, TrackBits);
 	PfnChooseShipTrack pfnChooseShipTrack = CYapfShip2::ChooseShipTrack; // default: ExitDir, allow 90-deg
 
 	/* check if non-default YAPF type needed */
@@ -182,22 +184,4 @@ Track YapfChooseShipTrack(const Vehicle *v, TileIndex tile, DiagDirection enterd
 
 	Trackdir td_ret = pfnChooseShipTrack(v, tile, enterdir, tracks);
 	return (td_ret != INVALID_TRACKDIR) ? TrackdirToTrack(td_ret) : INVALID_TRACK;
-}
-
-/** performance measurement helper */
-void *NpfBeginInterval()
-{
-	CPerformanceTimer& perf = *new CPerformanceTimer;
-	perf.Start();
-	return &perf;
-}
-
-/** performance measurement helper */
-int NpfEndInterval(void *vperf)
-{
-	CPerformanceTimer& perf = *(CPerformanceTimer*)vperf;
-	perf.Stop();
-	int t = perf.Get(1000000);
-	delete &perf;
-	return t;
 }
