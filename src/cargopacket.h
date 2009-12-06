@@ -392,13 +392,13 @@ public:
 		return &this->reserved;
 	}
 
-    /**
-     * Returns source of the first cargo packet in this list
-     * If the regular packets list is empty but there are packets
-     * in the reservation list it returns the source of the first
-     * reserved packet.
-     * @return the before mentioned source
-     */
+	/**
+	 * Returns source of the first cargo packet in this list
+	 * If the regular packets list is empty but there are packets
+	 * in the reservation list it returns the source of the first
+	 * reserved packet.
+	 * @return the before mentioned source
+	 */
 	FORCEINLINE StationID Source() const
 	{
 		if (this->Empty()) {
