@@ -8,10 +8,10 @@ callback_table.cpp
 cargopacket.cpp
 cargotype.cpp
 cheat.cpp
-crashlog.cpp
 command.cpp
 console.cpp
 console_cmds.cpp
+crashlog.cpp
 currency.cpp
 date.cpp
 debug.cpp
@@ -120,7 +120,6 @@ cargotype.h
 cheat_func.h
 cheat_type.h
 cmd_helper.h
-crashlog.h
 command_func.h
 command_type.h
 company_base.h
@@ -132,6 +131,7 @@ console_func.h
 console_gui.h
 console_internal.h
 console_type.h
+crashlog.h
 currency.h
 date_func.h
 date_gui.h
@@ -287,9 +287,9 @@ tilehighlight_type.h
 timetable.h
 toolbar_gui.h
 town.h
+town_type.h
 townname_func.h
 townname_type.h
-town_type.h
 track_func.h
 track_type.h
 train.h
@@ -502,8 +502,8 @@ table/sprites.h
 table/station_land.h
 table/strgen_tables.h
 ../objs/langs/table/strings.h
-table/townname.h
 table/town_land.h
+table/townname.h
 table/track_land.h
 table/train_cmd.h
 table/tree_land.h
@@ -818,22 +818,22 @@ network/core/udp.cpp
 network/core/udp.h
 
 # Pathfinder
+pathfinder/follow_track.hpp
 pathfinder/opf/opf_ship.cpp
 pathfinder/opf/opf_ship.h
 pathfinder/pathfinder_func.h
 pathfinder/pathfinder_type.h
+pathfinder/pf_performance_timer.hpp
 
 # NPF
 pathfinder/npf/aystar.cpp
 pathfinder/npf/aystar.h
+pathfinder/npf/npf.cpp
+pathfinder/npf/npf_func.h
 pathfinder/npf/queue.cpp
 pathfinder/npf/queue.h
-pathfinder/npf/npf.cpp
-pathfinder/npf/npf.h
-pathfinder/npf/npf_func.h
 
 # YAPF
-pathfinder/yapf/follow_track.hpp
 pathfinder/yapf/nodelist.hpp
 pathfinder/yapf/yapf.h
 pathfinder/yapf/yapf.hpp
