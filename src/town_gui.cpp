@@ -53,6 +53,7 @@ static const NWidgetPart _nested_town_authority_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN, TWA_CAPTION), SetDataTip(STR_LOCAL_AUTHORITY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_BROWN, TWA_RATING_INFO), SetMinimalSize(317, 92), SetResize(1, 1), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -342,6 +343,20 @@ public:
 		if (widget == TVW_CAPTION) SetDParam(0, this->town->index);
 	}
 
+	/**
+	 * Determines the first cargo with a certain town effect
+	 * @param effect Town effect of interest
+	 * @return first active cargo slot with that effect
+	 */
+	const CargoSpec *FindFirstCargoWithTownEffect(TownEffect effect) const
+	{
+		const CargoSpec *cs;
+		FOR_ALL_CARGOSPECS(cs) {
+			if (cs->town_effect == effect) return cs;
+		}
+		return NULL;
+	}
+
 	virtual void DrawWidget(const Rect &r, int widget) const
 	{
 		if (widget != TVW_INFOPANEL) return;
@@ -360,10 +375,12 @@ public:
 		SetDParam(1, this->town->max_mail);
 		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX);
 
+		StringID required_text = STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED;
 		uint cargo_needed_for_growth = 0;
 		switch (_settings_game.game_creation.landscape) {
 			case LT_ARCTIC:
 				if (TilePixelHeight(this->town->xy) >= LowestSnowLine()) cargo_needed_for_growth = 1;
+				if (TilePixelHeight(this->town->xy) < GetSnowLine()) required_text = STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER;
 				break;
 
 			case LT_TROPIC:
@@ -380,21 +397,13 @@ public:
 			uint cargo_text_left = r.left + WD_FRAMERECT_LEFT + (rtl ? 0 : 20);
 			uint cargo_text_right = r.right - WD_FRAMERECT_RIGHT - (rtl ? 20 : 0);
 
-			CargoID first_food_cargo = CT_INVALID;
-			StringID food_name = STR_CARGO_PLURAL_FOOD;
-			CargoID first_water_cargo = CT_INVALID;
-			StringID water_name = STR_CARGO_PLURAL_WATER;
-			for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
-				const CargoSpec *cs = CargoSpec::Get(cid);
-				if (first_food_cargo == CT_INVALID && cs->town_effect == TE_FOOD) {
-					first_food_cargo = cid;
-					food_name = cs->name;
-				}
-				if (first_water_cargo == CT_INVALID && cs->town_effect == TE_WATER) {
-					first_water_cargo = cid;
-					water_name = cs->name;
-				}
-			}
+			const CargoSpec *food = FindFirstCargoWithTownEffect(TE_FOOD);
+			CargoID first_food_cargo = (food != NULL) ? food->Index() : (CargoID)CT_INVALID;
+			StringID food_name       = (food != NULL) ? food->name    : STR_CARGO_PLURAL_FOOD;
+
+			const CargoSpec *water = FindFirstCargoWithTownEffect(TE_WATER);
+			CargoID first_water_cargo = (water != NULL) ? water->Index() : (CargoID)CT_INVALID;
+			StringID water_name       = (water != NULL) ? water->name    : STR_CARGO_PLURAL_WATER;
 
 			if (first_food_cargo != CT_INVALID && this->town->act_food > 0) {
 				SetDParam(0, first_food_cargo);
@@ -402,7 +411,7 @@ public:
 				DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
 			} else {
 				SetDParam(0, food_name);
-				DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
+				DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, required_text);
 			}
 
 			if (cargo_needed_for_growth > 1) {
@@ -412,7 +421,7 @@ public:
 					DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
 				} else {
 					SetDParam(0, water_name);
-					DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
+					DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, required_text);
 				}
 			}
 		}
