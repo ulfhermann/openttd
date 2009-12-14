@@ -649,7 +649,7 @@ void CallVehicleTicks()
 				if (v->type == VEH_AIRCRAFT && v->subtype != AIR_HELICOPTER) continue;
 				if (v->type == VEH_ROAD && !RoadVehicle::From(v)->IsRoadVehFront()) continue;
 
-				v->motion_counter += (v->direction & 1) ? (v->cur_speed * 3) / 4 : v->cur_speed;
+				v->motion_counter += v->cur_speed;
 				/* Play a running sound if the motion counter passes 256 (Do we not skip sounds?) */
 				if (GB(v->motion_counter, 0, 8) < v->cur_speed) PlayVehicleSound(v, VSE_RUNNING);
 
@@ -1616,6 +1616,8 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 
 void Vehicle::SetNext(Vehicle *next)
 {
+	assert(this != next);
+
 	if (this->next != NULL) {
 		/* We had an old next vehicle. Update the first and previous pointers */
 		for (Vehicle *v = this->next; v != NULL; v = v->Next()) {
