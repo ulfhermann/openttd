@@ -63,6 +63,7 @@ static const NWidgetPart _nested_build_vehicle_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CAPTION), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY),
 		NWidget(NWID_HORIZONTAL),
@@ -757,8 +758,6 @@ struct BuildVehicleWindow : Window {
 		this->vehicle_type = type;
 		this->window_number = tile == INVALID_TILE ? (int)type : tile;
 
-		this->owner = (tile != INVALID_TILE) ? GetTileOwner(tile) : _local_company;
-
 		this->sel_engine      = INVALID_ENGINE;
 
 		this->sort_criteria         = _last_sort_criteria[type];
@@ -833,6 +832,8 @@ struct BuildVehicleWindow : Window {
 		this->details_height = ((this->vehicle_type == VEH_TRAIN) ? 10 : 9) * FONT_HEIGHT_NORMAL + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 
 		this->FinishInitNested(desc, tile == INVALID_TILE ? (int)type : tile);
+
+		this->owner = (tile != INVALID_TILE) ? GetTileOwner(tile) : _local_company;
 
 		this->eng_list.ForceRebuild();
 		this->GenerateBuildList(); // generate the list, since we need it in the next line
