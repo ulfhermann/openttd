@@ -39,7 +39,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-100                     ICON    DISCARDABLE     "../media/openttd.ico"
+100                     ICON    DISCARDABLE     "../../../media/openttd.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -58,6 +58,17 @@ BEGIN
                     WS_HSCROLL | NOT WS_TABSTOP
     LTEXT           "",10,36,7,262,65
     ICON            100,IDC_STATIC,9,9,20,20
+END
+
+
+101 DIALOG DISCARDABLE  0, 0, 600, 400
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "OpenTTD command line help"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "&OK",12,274,378,50,14,BS_CENTER
+    EDITTEXT        11,7,6,583,365,ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_HSCROLL
 END
 
 
@@ -84,7 +95,7 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "Comments", "This program is licensed under the GNU General Public License.\0"
+            VALUE "Comments", "This program is licensed under the GNU General Public License version 2.\0"
             VALUE "CompanyName", "OpenTTD Development Team\0"
             VALUE "FileDescription", "OpenTTD\0"
             VALUE "FileVersion", "Development !!VERSION!!\0"
