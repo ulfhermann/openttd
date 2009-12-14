@@ -651,11 +651,11 @@ NWidgetBase::NWidgetBase(WidgetType tp) : ZeroedMemoryAllocator()
  *
  * The smallest size of a widget is the smallest size that a widget needs to
  * display itself properly. In addition, filling and resizing of the widget are computed.
- * If \a w is not \c NULL, the function calls #Window::UpdateWidgetSize for each leaf widget and
+ * The function calls #Window::UpdateWidgetSize for each leaf widget and
  * background widget without child with a non-negative index.
  *
- * @param w Optional window owning the widget.
- * @param init_array Initialize the \c w->nested_array as well. Should only be set if \a w != NULL.
+ * @param w          Window owning the widget.
+ * @param init_array Initialize the \c w->nested_array.
  *
  * @note After the computation, the results can be queried by accessing the #smallest_x and #smallest_y data members of the widget.
  */
@@ -702,7 +702,7 @@ inline void NWidgetBase::StoreSizePosition(SizingType sizing, uint x, uint y, ui
 }
 
 /**
- * @fn void Draw(const Window *w)
+ * @fn void NWidgetBase::Draw(const Window *w)
  * Draw the widgets of the tree.
  * The function calls #Window::DrawWidget for each widget with a non-negative index, after the widget itself is painted.
  * @param w Window that owns the tree.
@@ -1775,19 +1775,11 @@ NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, 
 
 void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 {
-	if (w == NULL) { // Conversion to widget array.
-		this->smallest_x = this->min_x;
-		this->smallest_y = this->min_y;
-		/* All other data is already at the right place. */
-		return;
-	}
-
 	if (this->index >= 0 && init_array) { // Fill w->nested_array[]
 		assert(w->nested_array_size > (uint)this->index);
 		w->nested_array[this->index] = this;
 	}
 
-	/* A non-NULL window pointer acts as switch to turn dynamic widget sizing on. */
 	Dimension size = {this->min_x, this->min_y};
 	Dimension fill = {this->fill_x, this->fill_y};
 	Dimension resize = {this->resize_x, this->resize_y};
@@ -2097,7 +2089,7 @@ bool NWidgetLeaf::ButtonHit(const Point &pt)
  * @param fill_dest Fill the composed widget with child widgets.
  * @param biggest_index Pointer to biggest nested widget index in the tree encountered so far.
  * @return Number of widget part elements used to compose the widget.
- * @precond \c biggest_index != NULL.
+ * @pre \c biggest_index != NULL.
  */
 static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, bool *fill_dest, int *biggest_index)
 {
@@ -2245,7 +2237,7 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
  * @param parent Container to use for storing the child widgets.
  * @param biggest_index Pointer to biggest nested widget index in the tree.
  * @return Number of widget part elements used to fill the container.
- * @postcond \c *biggest_index contains the largest widget index of the tree and \c -1 if no index is used.
+ * @post \c *biggest_index contains the largest widget index of the tree and \c -1 if no index is used.
  */
 static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *parent, int *biggest_index)
 {

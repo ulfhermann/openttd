@@ -471,7 +471,7 @@ STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Átváltás kon
 STR_ABOUT_MENU_AI_DEBUG                                         :MI debug
 STR_ABOUT_MENU_SCREENSHOT                                       :Képmentés (Ctrl+S)
 STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Óriás képmentés (Ctrl+G)
-STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Az  'OpenTTD'-ről
+STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Az 'OpenTTD'-ről
 ############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
@@ -740,7 +740,7 @@ STR_MESSAGE_NEWS_FORMAT                                         :{STRING}  -  {S
 # Message settings window
 STR_NEWS_MESSAGE_CAPTION                                        :{WHITE}Üzenet
 STR_NEWS_MESSAGE_OPTIONS_CAPTION                                :{WHITE}Üzenetek beállításai
-STR_NEWS_MESSAGES_ALL                                           :{YELLOW}Összes üzenettípus beállítása (be/rövid/ki)
+STR_NEWS_MESSAGES_ALL                                           :{YELLOW}Összes üzenettípus beállítása (ki / kivonat / teljes)
 STR_NEWS_MESSAGES_SOUND                                         :{YELLOW}Figyelmeztető hang lejátszása rövid üzenetnél
 STR_NEWS_MESSAGES_OFF                                           :Ki
 STR_NEWS_MESSAGES_SUMMARY                                       :Kivonat
@@ -1097,7 +1097,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Óriás
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Vonatok gyorsulási módja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Eredeti
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Valósághű
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Vonatok és hajók nem tesznek 90°-os kanyart: {ORANGE}{STRING} {LTBLUE}(nem NTP-vel)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Vonatok és hajók nem tesznek 90 fokos kanyart: {ORANGE}{STRING} {LTBLUE}(nem OPF-fell)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Meglévő vasútállomás utólag bővíthető: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Nem közvetlen szomszédos állomások egyesítése: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Járművek egymás utáni telerakodása (egyidejű helyett): {ORANGE}{STRING}
@@ -1325,7 +1325,7 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Útvona
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Ajánlott)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Útvonalkereső hajókhoz: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Eredeti {BLUE}(Ajánlott)
+STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Eredeti (OPF) {BLUE}(Ajánlott)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Ellenjavallt)
 
@@ -2421,6 +2421,7 @@ STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Utasok a
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Levélcsomagok az előző hónapban: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}A város növekedéséhez szükséges áru:
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} szükséges
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} szükséges télen
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} szállítva a múlt hónapban
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Zajszint a városban: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}A fő nézetet a városra állítja. Ctrl+kattintás esetén új nézetet nyit a város pozíciójára.
@@ -2595,7 +2596,7 @@ STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}25% elad
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :A vállalat neve
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :Az elnök neve
 
-STR_BUY_COMPANY_MESSAGE                                         :{WHITE}Cégünk vagyontárgyait eladásra kínáljuk: járművek, terület és hálózat tulajdonok, bankszámla{}{}Megveszed {COMPANY}  céget {CURRENCY}-ért?
+STR_BUY_COMPANY_MESSAGE                                         :{WHITE}Cégünk vagyontárgyait eladásra kínáljuk: járművek, terület és hálózat tulajdonok, bankszámla{}{}Megveszed {COMPANY} céget {CURRENCY}-ért?
 
 # Industry directory
 STR_INDUSTRY_DIRECTORY_CAPTION                                  :{WHITE}Gazdasági épületek
@@ -2706,7 +2707,7 @@ STR_PURCHASE_INFO_WEIGHT_CWEIGHT                                :{BLACK}Súly: {
 STR_PURCHASE_INFO_COST_SPEED                                    :{BLACK}Ár: {GOLD}{CURRENCY}{BLACK} Sebesség: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_AIRCRAFT_CAPACITY                             :{BLACK}Kapacitás: {GOLD}{CARGO}, {CARGO}
 STR_PURCHASE_INFO_PWAGPOWER_PWAGWEIGHT                          :{BLACK}Meghajtott vagonok: {GOLD}+{POWER}{BLACK} Súly: {GOLD}+{WEIGHT_S}
-STR_PURCHASE_INFO_REFITTABLE_TO                                 :{BLACK}Átalakítható:  {GOLD}
+STR_PURCHASE_INFO_REFITTABLE_TO                                 :{BLACK}Átalakítható: {GOLD}
 STR_PURCHASE_INFO_ALL_TYPES                                     :Minden szállítmány típusra
 STR_PURCHASE_INFO_ALL_BUT                                       :Mindenre, kivéve {GOLD}
 STR_PURCHASE_INFO_MAX_TE                                        :{BLACK}Maximális vonóerő: {GOLD}{FORCE}
