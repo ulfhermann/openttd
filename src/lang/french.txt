@@ -1248,6 +1248,11 @@ STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :interdit
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :autorisé
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :autorisé, agencement des routes personnalisé
 
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}Plantation des arbres durant la partie{NBSP}: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :nulle part {RED}(les scieries ne fonctionneront plus)
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :seulement dans les forêts tropicales
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :partout
+
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Position de la barre d'outils principale{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :À gauche
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Centrée
@@ -2326,6 +2331,7 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Attention{NBSP}: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Erreur{NBSP}: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Fatal{NBSP}: {SILVER}{STRING}
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}Une erreur NewGRF fatale est survenue{NBSP}: {}{STRING}
 STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} ne fonctionnera pas avec la version de TTDPatch reportée par OpenTTD.
 STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} est pour la version {STRING} de TTD.
 STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} est conçu pour être utilisé avec {STRING}
@@ -3190,6 +3196,11 @@ STR_AI_CONFIG_CAPTION                                           :{WHITE}Configur
 STR_AI_CONFIG_LIST_TOOLTIP                                      :{BLACK}Toutes les IA qui seront chargées pendant la prochaine partie
 STR_AI_CONFIG_HUMAN_PLAYER                                      :Joueur Humain
 STR_AI_CONFIG_RANDOM_AI                                         :IA aléatoire
+
+STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Déplacer vers le haut
+STR_AI_CONFIG_MOVE_UP_TOOLTIP                                   :{BLACK}Déplacer l'IA sélectionnée vers le haut
+STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Déplacer vers le bas
+STR_AI_CONFIG_MOVE_DOWN_TOOLTIP                                 :{BLACK}Déplacer l'IA sélectionnée vers le bas
 
 STR_AI_CONFIG_CHANGE                                            :{BLACK}Sélection IA
 STR_AI_CONFIG_CHANGE_TOOLTIP                                    :{BLACK}Charger une autre IA
