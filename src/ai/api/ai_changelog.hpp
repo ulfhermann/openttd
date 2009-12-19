@@ -23,6 +23,7 @@
  * \li AIBuoyList
  * \li AIEventCompanyAskMerger
  * \li AIIndustry::GetLastMonthTransportedPercentage
+ * \li AIOrder::AIOF_GOTO_NEAREST_DEPOT
  * \li AIRail::RemoveRailStationTileRectangle
  * \li AIRail::RemoveRailWaypointTileRectangle
  * \li AISubsidy::SubsidyParticipantType
@@ -44,6 +45,7 @@
  * \li AISubsidy::GetDestination, use AISubsidy::GetDestinationIndex instead
  * \li AITile::GetHeight, use AITile::GetMinHeight/GetMaxHeight/GetCornerHeight instead
  * \li AITown::GetMaxProduction, use AITown::GetLastMonthProduction instead
+ * \li AIVehicle::SkipToVehicleOrder, use AIOrder::SkipToOrder instead
  * \li AIWaypoint::WAYPOINT_INVALID, use AIBaseStation::STATION_INVALID instead
  *
  * Other changes:
