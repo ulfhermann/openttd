@@ -169,6 +169,8 @@ void RoadVehUpdateCache(RoadVehicle *v)
 
 	v->InvalidateNewGRFCacheOfChain();
 
+	v->rcache.cached_total_length = 0;
+
 	for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
 		/* Check the v->first cache. */
 		assert(u->First() == v);
@@ -178,6 +180,7 @@ void RoadVehUpdateCache(RoadVehicle *v)
 
 		/* Update the length of the vehicle. */
 		u->rcache.cached_veh_length = GetRoadVehLength(u);
+		v->rcache.cached_total_length += u->rcache.cached_veh_length;
 
 		/* Invalidate the vehicle colour map */
 		u->colourmap = PAL_NONE;
@@ -1310,7 +1313,23 @@ again:
 				v->cur_speed = 0;
 				return false;
 			}
-			if (IsRoadStop(v->tile)) RoadStop::GetByTile(v->tile, GetRoadStopType(v->tile))->Leave(v);
+
+			/* If we are a drive through road stop and the next tile is of
+			 * the same road stop and the next tile isn't this one (i.e. we
+			 * are not reversing), then keep the reservation and state.
+			 * This way we will not be shortly unregister from the road
+			 * stop. It also makes it possible to load when on the edge of
+			 * two road stops; otherwise you could get vehicles that should
+			 * be loading but are not actually loading. */
+			if (IsDriveThroughStopTile(v->tile) &&
+					RoadStop::IsDriveThroughRoadStopContinuation(v->tile, tile) &&
+					v->tile != tile) {
+				/* So, keep 'our' state */
+				dir = (Trackdir)v->state;
+			} else if (IsRoadStop(v->tile)) {
+				/* We're not continuing our drive through road stop, so leave. */
+				RoadStop::GetByTile(v->tile, GetRoadStopType(v->tile))->Leave(v);
+			}
 		}
 
 		if (!HasBit(r, VETS_ENTERED_WORMHOLE)) {
