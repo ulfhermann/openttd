@@ -253,13 +253,13 @@ bool DrawNewIndustryTile(TileInfo *ti, Industry *i, IndustryGfx gfx, const Indus
 	NewIndustryTileResolver(&object, gfx, ti->tile, i);
 
 	group = SpriteGroup::Resolve(inds->grf_prop.spritegroup, &object);
-	if (group == NULL || group->type != SGT_TILELAYOUT) {
+	const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
+	if (group == NULL || group->type != SGT_TILELAYOUT || tlgroup->num_building_stages == 0) {
 		return false;
 	} else {
-		const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
 		/* Limit the building stage to the number of stages supplied. */
 		byte stage = GetIndustryConstructionStage(ti->tile);
-		stage = Clamp(stage - 4 + tlgroup->num_sprites, 0, tlgroup->num_sprites - 1);
+		stage = Clamp(stage - 4 + tlgroup->num_building_stages, 0, tlgroup->num_building_stages - 1);
 		IndustryDrawTileLayout(ti, tlgroup, i->random_colour, stage, gfx);
 		return true;
 	}
