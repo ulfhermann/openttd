@@ -2249,14 +2249,26 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 
 			case 0x0A: { // Set industry layout(s)
 				indsp->num_table = grf_load_byte(&buf); // Number of layaouts
-				uint32 defsize = grf_load_dword(&buf);  // Total size of the definition
+				/* We read the total size in bytes, but we can't rely on the
+				 * newgrf to provide a sane value. First assume the value is
+				 * sane but later on we make sure we enlarge the array if the
+				 * newgrf contains more data. Each tile uses either 3 or 5
+				 * bytes, so to play it safe we assume 3. */
+				uint32 def_num_tiles = grf_load_dword(&buf) / 3 + 1;
 				IndustryTileTable **tile_table = CallocT<IndustryTileTable*>(indsp->num_table); // Table with tiles to compose an industry
-				IndustryTileTable *itt = CallocT<IndustryTileTable>(defsize); // Temporary array to read the tile layouts from the GRF
-				int size;
+				IndustryTileTable *itt = CallocT<IndustryTileTable>(def_num_tiles); // Temporary array to read the tile layouts from the GRF
+				uint size;
 				const IndustryTileTable *copy_from;
 
 				for (byte j = 0; j < indsp->num_table; j++) {
-					for (int k = 0;; k++) {
+					for (uint k = 0;; k++) {
+						if (k >= def_num_tiles) {
+							grfmsg(3, "IndustriesChangeInfo: Incorrect size for industry tile layout definition for industry %u.", indid);
+							/* Size reported by newgrf was not big enough so enlarge the array. */
+							def_num_tiles *= 2;
+							itt = ReallocT<IndustryTileTable>(itt, def_num_tiles);
+						}
+
 						itt[k].ti.x = grf_load_byte(&buf); // Offsets from northermost tile
 
 						if (itt[k].ti.x == 0xFE && k == 0) {
@@ -2896,13 +2908,13 @@ static void NewSpriteGroup(byte *buf, size_t len)
 
 				case GSF_TOWNHOUSE:
 				case GSF_INDUSTRYTILES: {
-					byte sprites     = _cur_grffile->spriteset_numents;
-					byte num_sprites = max((uint8)1, type);
+					byte num_sprite_sets      = _cur_grffile->spriteset_numents;
+					byte num_building_sprites = max((uint8)1, type);
 					uint i;
 
 					TileLayoutSpriteGroup *group = new TileLayoutSpriteGroup();
 					act_group = group;
-					group->num_sprites = sprites;
+					group->num_building_stages = num_sprite_sets;
 					group->dts = CallocT<DrawTileSprites>(1);
 
 					/* Groundsprite */
@@ -2915,14 +2927,14 @@ static void NewSpriteGroup(byte *buf, size_t len)
 					if (HasBit(group->dts->ground.pal, 15)) {
 						/* Bit 31 set means this is a custom sprite, so rewrite it to the
 						 * last spriteset defined. */
-						SpriteID sprite = _cur_grffile->spriteset_start + GB(group->dts->ground.sprite, 0, 14) * sprites;
+						SpriteID sprite = _cur_grffile->spriteset_start + GB(group->dts->ground.sprite, 0, 14) * num_sprite_sets;
 						SB(group->dts->ground.sprite, 0, SPRITE_WIDTH, sprite);
 						ClrBit(group->dts->ground.pal, 15);
 					}
 
-					group->dts->seq = CallocT<DrawTileSeqStruct>(num_sprites + 1);
+					group->dts->seq = CallocT<DrawTileSeqStruct>(num_building_sprites + 1);
 
-					for (i = 0; i < num_sprites; i++) {
+					for (i = 0; i < num_building_sprites; i++) {
 						DrawTileSeqStruct *seq = const_cast<DrawTileSeqStruct*>(&group->dts->seq[i]);
 
 						seq->image.sprite = grf_load_word(&buf);
@@ -2935,7 +2947,7 @@ static void NewSpriteGroup(byte *buf, size_t len)
 						if (HasBit(seq->image.pal, 15)) {
 							/* Bit 31 set means this is a custom sprite, so rewrite it to the
 							 * last spriteset defined. */
-							SpriteID sprite = _cur_grffile->spriteset_start + GB(seq->image.sprite, 0, 14) * sprites;
+							SpriteID sprite = _cur_grffile->spriteset_start + GB(seq->image.sprite, 0, 14) * num_sprite_sets;
 							SB(seq->image.sprite, 0, SPRITE_WIDTH, sprite);
 							ClrBit(seq->image.pal, 15);
 						}
