@@ -261,6 +261,7 @@ static void InitializeWindowsAndCaches()
 	UpdateAirportsNoise();
 
 	CheckTrainsLengths();
+	ShowNewGRFError();
 }
 
 typedef void (CDECL *SignalHandlerPointer)(int);
@@ -1963,6 +1964,15 @@ bool AfterLoadGame()
 		FOR_ALL_DEPOTS(d) {
 			_m[d->xy].m2 = d->index;
 			if (IsTileType(d->xy, MP_WATER)) _m[GetOtherShipDepotTile(d->xy)].m2 = d->index;
+		}
+	}
+
+	/* The behaviour of force_proceed has been changed. Now
+	 * it counts signals instead of some random time out. */
+	if (CheckSavegameVersion(131)) {
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			t->force_proceed = min<byte>(t->force_proceed, 1);
 		}
 	}
 
