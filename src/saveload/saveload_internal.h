@@ -29,6 +29,7 @@ const SaveLoad *GetBaseStationDescription();
 
 void AfterLoadVehicles(bool part_of_load);
 void AfterLoadStations();
+void AfterLoadRoadStops();
 void AfterLoadLabelMaps();
 void UpdateHousesAndTowns();
 
@@ -45,6 +46,7 @@ void CopyTempEngineData();
 
 extern int32 _saved_scrollpos_x;
 extern int32 _saved_scrollpos_y;
+extern ZoomLevelByte _saved_scrollpos_zoom;
 
 extern SavegameType _savegame_type;
 extern uint32 _ttdp_version;

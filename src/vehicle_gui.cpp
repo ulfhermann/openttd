@@ -156,6 +156,72 @@ static void DrawVehicleProfitButton(const Vehicle *v, int x, int y)
 	DrawSprite(SPR_BLOT, pal, x, y);
 }
 
+/** Maximum number of refit cycles we try, to prevent infinite loops. */
+static const int MAX_REFIT_CYCLE = 16;
+
+/**
+ * Get the best fitting subtype when 'cloning'/'replacing' v_from with v_for.
+ * Assuming they are going to carry the same cargo ofcourse!
+ * @param v_from the vehicle to match the subtype from
+ * @param v_for  the vehicle to get the subtype for
+ * @return the best sub type
+ */
+byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for)
+{
+	const Engine *e_from = Engine::Get(v_from->engine_type);
+	const Engine *e_for  = Engine::Get(v_for->engine_type);
+
+	/* If one them doesn't carry cargo, there's no need to find a sub type */
+	if (!e_from->CanCarryCargo() || !e_for->CanCarryCargo()) return 0;
+
+	if (!HasBit(e_from->info.callback_mask, CBM_VEHICLE_CARGO_SUFFIX) ||
+			!HasBit(e_for->info.callback_mask,  CBM_VEHICLE_CARGO_SUFFIX)) {
+		/* One of the engines doesn't have cargo suffixes, i.e. sub types. */
+		return 0;
+	}
+
+	/* It has to be possible for v_for to carry the cargo of v_from. */
+	assert(HasBit(e_for->info.refit_mask, v_from->cargo_type));
+
+	StringID expected_string = GetCargoSubtypeText(v_from);
+
+	CargoID old_cargo_type = v_for->cargo_type;
+	byte old_cargo_subtype = v_for->cargo_subtype;
+	byte ret_refit_cyc = 0;
+
+	/* Set the 'destination' cargo */
+	v_for->cargo_type = v_from->cargo_type;
+
+	/* Cycle through the refits */
+	for (byte refit_cyc = 0; refit_cyc < MAX_REFIT_CYCLE; refit_cyc++) {
+		v_for->cargo_subtype = refit_cyc;
+
+		/* Make sure we don't pick up anything cached. */
+		v_for->First()->InvalidateNewGRFCache();
+		v_for->InvalidateNewGRFCache();
+		uint16 callback = GetVehicleCallback(CBID_VEHICLE_CARGO_SUFFIX, 0, 0, v_for->engine_type, v_for);
+
+		if (callback == 0xFF) callback = CALLBACK_FAILED;
+		if (callback == CALLBACK_FAILED) break;
+
+		if (GetCargoSubtypeText(v_for) != expected_string) continue;
+
+		/* We found something matching. */
+		ret_refit_cyc = refit_cyc;
+		break;
+	}
+
+	/* Reset the vehicle's cargo type */
+	v_for->cargo_type    = old_cargo_type;
+	v_for->cargo_subtype = old_cargo_subtype;
+
+	/* Make sure we don't taint the vehicle. */
+	v_for->First()->InvalidateNewGRFCache();
+	v_for->InvalidateNewGRFCache();
+
+	return ret_refit_cyc;
+}
+
 struct RefitOption {
 	CargoID cargo;
 	byte subtype;
@@ -200,11 +266,15 @@ static RefitList *BuildRefitList(const Vehicle *v)
 
 				u->cargo_type = cid;
 
-				for (refit_cyc = 0; refit_cyc < 16 && num_lines < max_lines; refit_cyc++) {
+				for (refit_cyc = 0; refit_cyc < MAX_REFIT_CYCLE && num_lines < max_lines; refit_cyc++) {
 					bool duplicate = false;
 					uint16 callback;
 
 					u->cargo_subtype = refit_cyc;
+
+					/* Make sure we don't pick up anything cached. */
+					u->First()->InvalidateNewGRFCache();
+					u->InvalidateNewGRFCache();
 					callback = GetVehicleCallback(CBID_VEHICLE_CARGO_SUFFIX, 0, 0, u->engine_type, u);
 
 					if (callback == 0xFF) callback = CALLBACK_FAILED;
@@ -227,6 +297,10 @@ static RefitList *BuildRefitList(const Vehicle *v)
 				/* Reset the vehicle's cargo type */
 				u->cargo_type    = temp_cargo;
 				u->cargo_subtype = temp_subtype;
+
+				/* And make sure we haven't tainted the cache */
+				u->First()->InvalidateNewGRFCache();
+				u->InvalidateNewGRFCache();
 			} else {
 				/* No cargo suffix callback -- use no subtype */
 				bool duplicate = false;
@@ -744,7 +818,7 @@ static const NWidgetPart _nested_vehicle_list[] = {
 								SetDataTip(SPR_FLAG_VEH_STOPPED, STR_VEHICLE_LIST_MASS_STOP_LIST_TOOLTIP),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, VLW_WIDGET_START_ALL), SetMinimalSize(12, 12), SetFill(0, 1),
 								SetDataTip(SPR_FLAG_VEH_RUNNING, STR_VEHICLE_LIST_MASS_START_LIST_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(0, 12), SetResize(1, 0), SetFill(0, 1), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(0, 12), SetResize(1, 0), SetFill(1, 1), EndContainer(),
 			EndContainer(),
 			/* Widget to be shown for other companies hiding the previous 5 widgets. */
 			NWidget(WWT_PANEL, COLOUR_GREY), SetFill(1, 1), SetResize(1, 0), EndContainer(),
@@ -1353,9 +1427,25 @@ struct VehicleDetailsWindow : Window {
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
-			case VLD_WIDGET_TOP_DETAILS:
+			case VLD_WIDGET_TOP_DETAILS: {
+				Dimension dim = { 0, 0 };
 				size->height = WD_FRAMERECT_TOP + 4 * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM;
-				break;
+
+				for (uint i = 0; i < 4; i++) SetDParam(i, INT16_MAX);
+				static const StringID info_strings[] = {
+					STR_VEHICLE_INFO_MAX_SPEED,
+					STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED,
+					STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE,
+					STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR,
+					STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS
+				};
+				for (uint i = 0; i < lengthof(info_strings); i++) {
+					dim = maxdim(dim, GetStringBoundingBox(info_strings[i]));
+				}
+				SetDParam(0, STR_VEHICLE_INFO_AGE);
+				dim = maxdim(dim, GetStringBoundingBox(STR_VEHICLE_INFO_AGE_RUNNING_COST_YR));
+				size->width = dim.width + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+			} break;
 
 			case VLD_WIDGET_MIDDLE_DETAILS: {
 				const Vehicle *v = Vehicle::Get(this->window_number);
@@ -1869,6 +1959,7 @@ public:
 		this->SetWidgetDisabledState(VVW_WIDGET_CLONE_VEH, !is_localcompany);
 
 		if (v->type == VEH_TRAIN) {
+			this->SetWidgetLoweredState(VVW_WIDGET_FORCE_PROCEED, Train::From(v)->force_proceed == 2);
 			this->SetWidgetDisabledState(VVW_WIDGET_FORCE_PROCEED, !is_localcompany);
 			this->SetWidgetDisabledState(VVW_WIDGET_TURN_AROUND, !is_localcompany);
 		}

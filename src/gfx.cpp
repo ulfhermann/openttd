@@ -10,7 +10,6 @@
 /** @file gfx.cpp Handling of drawing text and other gfx related stuff. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "gfx_func.h"
 #include "variables.h"
 #include "fontcache.h"
@@ -71,7 +70,7 @@ static ReusableBuffer<uint8> _cursor_backup;
  */
 static Rect _invalid_rect;
 static const byte *_colour_remap_ptr;
-static byte _string_colourremap[3];
+static byte _string_colourremap[3]; ///< Recoloursprite for stringdrawing. The grf loader ensures, that ST_FONT sprites only use colours 0 to 2.
 
 enum {
 	DIRTY_BLOCK_HEIGHT   = 8,
@@ -1243,20 +1242,20 @@ void DoPaletteAnimations()
 	if (_use_palette == PAL_DOS) {
 		/* Dark blue water DOS */
 		s = (_settings_game.game_creation.landscape == LT_TOYLAND) ? ev->dark_water_toyland : ev->dark_water;
-		j = EXTR(320, 5);
-		for (i = 0; i != 5; i++) {
+		j = EXTR(320, EPV_CYCLES_DARK_WATER);
+		for (i = 0; i != EPV_CYCLES_DARK_WATER; i++) {
 			*palette_pos++ = s[j];
 			j++;
-			if (j == 5) j = 0;
+			if (j == EPV_CYCLES_DARK_WATER) j = 0;
 		}
 
 		/* Glittery water DOS */
 		s = (_settings_game.game_creation.landscape == LT_TOYLAND) ? ev->glitter_water_toyland : ev->glitter_water;
-		j = EXTR(128, 15);
-		for (i = 0; i != 5; i++) {
+		j = EXTR(128, EPV_CYCLES_GLITTER_WATER);
+		for (i = 0; i != EPV_CYCLES_GLITTER_WATER / 3; i++) {
 			*palette_pos++ = s[j];
 			j += 3;
-			if (j >= 15) j -= 15;
+			if (j >= EPV_CYCLES_GLITTER_WATER) j -= EPV_CYCLES_GLITTER_WATER;
 		}
 	}
 
