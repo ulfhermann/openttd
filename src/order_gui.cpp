@@ -17,6 +17,7 @@
 #include "depot_base.h"
 #include "vehicle_base.h"
 #include "vehicle_gui.h"
+#include "roadveh.h"
 #include "timetable.h"
 #include "cargotype.h"
 #include "strings_func.h"
@@ -195,7 +196,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 	SpriteID sprite = rtl ? SPR_ARROW_LEFT : SPR_ARROW_RIGHT;
 	Dimension sprite_size = GetSpriteSize(sprite);
 	if (v->cur_order_index == order_index) {
-		DrawSprite(sprite, PAL_NONE, rtl ? right - sprite_size.width : left, y + (FONT_HEIGHT_NORMAL - sprite_size.height) / 2);
+		DrawSprite(sprite, PAL_NONE, rtl ? right - sprite_size.width : left, y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
 	}
 
 	SetDParam(0, order_index + 1);
@@ -379,7 +380,7 @@ static Order GetOrderCmdFromTile(const Vehicle *v, TileIndex tile)
 			(facil = FACIL_DOCK, v->type == VEH_SHIP) ||
 			(facil = FACIL_TRAIN, v->type == VEH_TRAIN) ||
 			(facil = FACIL_AIRPORT, v->type == VEH_AIRCRAFT) ||
-			(facil = FACIL_BUS_STOP, v->type == VEH_ROAD && IsCargoInClass(v->cargo_type, CC_PASSENGERS)) ||
+			(facil = FACIL_BUS_STOP, v->type == VEH_ROAD && RoadVehicle::From(v)->IsBus()) ||
 			(facil = FACIL_TRUCK_STOP, 1);
 			if (st->facilities & facil) {
 				order.MakeGoToStation(st_index);

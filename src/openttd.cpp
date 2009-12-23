@@ -15,7 +15,6 @@
 #include "variables.h"
 #undef VARDEF
 
-#include "openttd.h"
 
 #include "blitter/factory.hpp"
 #include "sound/sound_driver.hpp"
@@ -59,9 +58,7 @@
 #include "rev.h"
 #include "highscore.h"
 #include "thread/thread.h"
-#include "base_station_base.h"
 #include "station_base.h"
-#include "airport.h"
 #include "crashlog.h"
 
 #include "newgrf_commons.h"
@@ -610,7 +607,7 @@ int ttd_main(int argc, char *argv[])
 	if (sounds_set == NULL && BaseSounds::ini_set != NULL) sounds_set = strdup(BaseSounds::ini_set);
 	if (!BaseSounds::SetSet(sounds_set)) {
 		StrEmpty(sounds_set) ?
-			usererror("Failed to find a sounds set. Please acquire a sounds set for OpenTTD.") :
+			usererror("Failed to find a sounds set. Please acquire a sounds set for OpenTTD. See section 4.1 of readme.txt.") :
 			usererror("Failed to select requested sounds set '%s'", sounds_set);
 	}
 	free(sounds_set);
@@ -618,7 +615,7 @@ int ttd_main(int argc, char *argv[])
 	if (graphics_set == NULL && BaseGraphics::ini_set != NULL) graphics_set = strdup(BaseGraphics::ini_set);
 	if (!BaseGraphics::SetSet(graphics_set)) {
 		StrEmpty(graphics_set) ?
-			usererror("Failed to find a graphics set. Please acquire a graphics set for OpenTTD.") :
+			usererror("Failed to find a graphics set. Please acquire a graphics set for OpenTTD. See section 4.1 of readme.txt.") :
 			usererror("Failed to select requested graphics set '%s'", graphics_set);
 	}
 	free(graphics_set);
@@ -645,15 +642,6 @@ int ttd_main(int argc, char *argv[])
 	}
 	free(sounddriver);
 
-	if (musicdriver == NULL && _ini_musicdriver != NULL) musicdriver = strdup(_ini_musicdriver);
-	_music_driver = (MusicDriver*)MusicDriverFactoryBase::SelectDriver(musicdriver, Driver::DT_MUSIC);
-	if (_music_driver == NULL) {
-		StrEmpty(musicdriver) ?
-			usererror("Failed to autoprobe music driver") :
-			usererror("Failed to select requested music driver '%s'", musicdriver);
-	}
-	free(musicdriver);
-
 	if (videodriver == NULL && _ini_videodriver != NULL) videodriver = strdup(_ini_videodriver);
 	_video_driver = (VideoDriver*)VideoDriverFactoryBase::SelectDriver(videodriver, Driver::DT_VIDEO);
 	if (_video_driver == NULL) {
@@ -662,6 +650,15 @@ int ttd_main(int argc, char *argv[])
 			usererror("Failed to select requested video driver '%s'", videodriver);
 	}
 	free(videodriver);
+
+	if (musicdriver == NULL && _ini_musicdriver != NULL) musicdriver = strdup(_ini_musicdriver);
+	_music_driver = (MusicDriver*)MusicDriverFactoryBase::SelectDriver(musicdriver, Driver::DT_MUSIC);
+	if (_music_driver == NULL) {
+		StrEmpty(musicdriver) ?
+			usererror("Failed to autoprobe music driver") :
+			usererror("Failed to select requested music driver '%s'", musicdriver);
+	}
+	free(musicdriver);
 
 	_savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 	/* Initialize the zoom level of the screen to normal */
@@ -1099,6 +1096,16 @@ void StateGameLoop()
 		CallWindowTickEvent();
 		NewsLoop();
 	} else {
+		/* Temporary strict checking of the road stop cache entries */
+		const RoadStop *rs;
+		FOR_ALL_ROADSTOPS(rs) {
+			if (IsStandardRoadStopTile(rs->xy)) continue;
+
+			assert(rs->GetEntry(DIAGDIR_NE) != rs->GetEntry(DIAGDIR_NW));
+			rs->GetEntry(DIAGDIR_NE)->CheckIntegrity(rs);
+			rs->GetEntry(DIAGDIR_NW)->CheckIntegrity(rs);
+		}
+
 		if (_debug_desync_level > 1) {
 			Vehicle *v;
 			FOR_ALL_VEHICLES(v) {

@@ -297,7 +297,7 @@ STR_TOOLTIP_STICKY                                              :{BLACK}Σημε
 STR_TOOLTIP_RESIZE                                              :{BLACK}Κάντε κλίκ και σύρετε για να αλλάξετε το μέγεθος του παραθύρου
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Εναλλαγή μεγάλου/μικρού παραθύρου
 STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Μπάρα Κύλισης - μετακινεί την λίστα πάνω/κάτω
-STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Μπάρα κίνησης - κινεί τη λίστα  αριστερά/δεξιά
+STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Μπάρα κίνησης - κινεί τη λίστα αριστερά/δεξιά
 STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Κατεδάφιση κτιρίων κ.λπ. σε συγκεκριμένο τετράγωνο
 
 # Query window
@@ -416,7 +416,7 @@ STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Εμφάνισ�
 STR_SETTINGS_MENU_FULL_ANIMATION                                :Πλήρες animation
 STR_SETTINGS_MENU_FULL_DETAIL                                   :Πλήρης λεπτομέρειες
 STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Διαφανή κτίρια
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Διαφανές ταμπέλες σταθμών
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Διάφανες ταμπέλες σταθμών
 ############ range ends here
 
 ############ range for file menu starts
@@ -862,7 +862,7 @@ STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Νέ{G ος α ο} {STRING} υπό κατασκευή κοντά στην πόλη {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Νέα {STRING} φυτεύεται κοντά στην πόλη {TOWN}!
 
-STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{G Ο Η Το} {STRING} ανακοίνωσε άμεσο κλείσιμο!
+STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{G 0:2 Ο Η Το} {STRING} ανακοίνωσε άμεσο κλείσιμο!
 STR_NEWS_INDUSTRY_CLOSURE_SUPPLY_PROBLEMS                       :{BIGFONT}{BLACK}Προβλήματα στην προμήθεια υλικών αναγκάζουν {G το τη το} {STRING} να κλείσει αμέσως!
 STR_NEWS_INDUSTRY_CLOSURE_LACK_OF_TREES                         :{BIGFONT}{BLACK}Η έλλειψη δέντρων αναγκάζει την βιομηχανία {STRING} να κλείσει αμέσως!
 
@@ -1158,7 +1158,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Επι�
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Μοντέλο επιτάχυνσης τραίνων: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Αρχικό
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Ρεαλιστικό
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Απαγόρευση στροφών 90 μοιρών για τραίνα και πλοία: {ORANGE}{STRING} {LTBLUE} (απαιτεί NPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Απαγόρευση στροφών 90 μοιρών για τραίνα και πλοία: {ORANGE}{STRING} {LTBLUE} (οχι με OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Συνένωση σταθμών τρένων χτισμένων δίπλα σε άλλο: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Να επιτρέπεται η συνένωση μη παρακείμενων σταθμών: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Χρησιμοποίηση βελτιωμένου αλγόριθμου φόρτωσης: {ORANGE}{STRING}
@@ -1380,11 +1380,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Πόλ�
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Βιομηχανίες
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Μέθοδος δρομολόγησης για τρένα: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Δεν συνίσταται)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Συνίσταται)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Μέθοδος δρομολόγησης για οχήματα δρόμου: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(Δεν συνίσταται)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Συνίσταται)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Μέθοδος δρομολόγησης για πλοία: {ORANGE}{STRING}
@@ -2483,8 +2481,9 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Πληθ
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Επιβάτες τον προηγούμενο μήνα: {ORANGE}{COMMA}{BLACK}  μεγ: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Αλληλογραφία τον προηγούμενο μήνα: {ORANGE}{COMMA}{BLACK}  μεγ: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Εμπορεύματα που χρειάζονται για την ανάπτυξη της πόλης:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} απαιτείται
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} παραδόθηκε τον τελευταίο μήνα
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} απαιτείται
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} απαιτείται τον χειμώνα
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} παραδόθηκε τον τελευταίο μήνα
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Επίπεδο θορύβου στη πόλη: {ORANGE}{COMMA}{BLACK}  μέγιστο: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Κεντράρισμα της εικόνας στην τοποθεσία της πόλης. Ctrl-κλικ ανοίγει ένα νεο παράθυρο προβολής στην τοποθεσία της πόλης
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Τοπική αρχή
@@ -2614,9 +2613,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Ισολ
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Δάνειο
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Μέγιστο Δάνειο: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Δανεισμός {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Δανεισμός {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Αύξηση του ποσού του δανείου. Ctrl+κλικ για να δανειστείτε όσο περισσότερο γίνεται
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Πληρωμή {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Πληρωμή {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Αποπληρωμή μέρους του δανείου. Ctrl+κλικ αποπληρώνετε όσο περισσότερο γίνεται
 
 # Company view
@@ -3034,8 +3033,9 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Κέρδ
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Αξιοπιστία: {LTBLUE}{COMMA}%  {BLACK}Βλάβες μετά την τελευταία επισκευή: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Κατασκευή: {LTBLUE}{NUM}{BLACK} Αξία: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Χωρητικότητα: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Χωρητικότητα: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_NO_CAPACITY                                    :{BLACK}Χωρητικότητα: {LTBLUE}Τίποτα
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Χωρητικότητα: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Χωρητικότητα: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Χωρητικότητα: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Έσοδα μεταφοράς: {LTBLUE}{CURRENCY}
@@ -3099,6 +3099,8 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Δρομ
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Αλλαγή στην προβολή δρομολογίων
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Λίστα εντολών - κλικ σε μια εντολή για να την επιλέξετε. Ctrl+κλικ μετακινεί σε σταθμό
+STR_ORDER_INDEX                                                 :{COMMA}:{NBSP}
+STR_ORDER_TEXT                                                  :{STRING} {STRING}
 
 STR_ORDERS_END_OF_ORDERS                                        :- - Τέλος Εντολών - -
 STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Τέλος Μοιρασμένων Οδηγιών - -
@@ -3238,7 +3240,10 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Το δ�
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Αυτό το όχημα πηγαίνει στην ώρα του
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Αυτό το όχημα εχει καθυστερήσει κατά {STRING}
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Το όχημα αυτό τρέχει {STRING} αργά
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Αυτό το δρομολόγιο ακόμα δεν έχει ξεκίνησει
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Αυτό το δρομολόγιο θα ξεκίνησει στις {STRING}
 
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Εναρκτήρια ημερομηνία
 STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Επιλέξτε μια ημερομηνία ως αρχή για αυτό το δρομολόγιο
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Αλλαγή Χρόνων
@@ -3257,9 +3262,17 @@ STR_TIMETABLE_EXPECTED                                          :{BLACK}Αναμ
 STR_TIMETABLE_SCHEDULED                                         :{BLACK}Προγραμματισμένη
 STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Εναλλάγη μεταξύ αναμένομενης και προγραμματισμένης
 
+STR_TIMETABLE_ARRIVAL_ABBREVIATION                              :ΑΦ:
+STR_TIMETABLE_DEPARTURE_ABBREVIATION                            :ΑΝ:
 
 
 # Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Δώστε ημερομηνία
+STR_DATE_SET_DATE                                               :{BLACK}Δώστε ημερομηνία
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Χρήση της επιλεγμένης ημερομηνίας ως εναρκτήριας ημερομηνίας για το δρομολόγιο
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Επιλέξτε μέρα
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Επιλέξτε μήνα
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Επιλέξτε έτος
 
 
 # AI debug window
@@ -4126,6 +4139,8 @@ STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}

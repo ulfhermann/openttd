@@ -25,7 +25,7 @@
 #include "newgrf_cargo.h"
 #include "newgrf_station.h"
 #include "newgrf_commons.h"
-#include "yapf/yapf.h"
+#include "pathfinder/yapf/yapf_cache.h"
 #include "road_internal.h" /* For drawing catenary/checking road removal */
 #include "variables.h"
 #include "autoslope.h"
@@ -43,6 +43,8 @@
 #include "roadstop_base.h"
 #include "waypoint_base.h"
 #include "waypoint_func.h"
+#include "pbs.h"
+#include "debug.h"
 
 #include "table/strings.h"
 
@@ -67,18 +69,6 @@ bool IsHangar(TileIndex t)
 	}
 
 	return false;
-}
-
-static uint GetNumRoadStopsInStation(const Station *st, RoadStopType type)
-{
-	uint num = 0;
-
-	assert(st != NULL);
-	for (const RoadStop *rs = st->GetPrimaryRoadStop(type); rs != NULL; rs = rs->next) {
-		num++;
-	}
-
-	return num;
 }
 
 /**
@@ -395,12 +385,12 @@ void Station::GetTileArea(TileArea *ta, StationType type) const
 			return;
 
 		case STATION_TRUCK:
-			ta->tile = this->truck_stops != NULL ? this->truck_stops->xy : INVALID_TILE;
-			break;
+			*ta = this->truck_station;
+			return;
 
 		case STATION_BUS:
-			ta->tile = this->bus_stops != NULL ? this->bus_stops->xy : INVALID_TILE;
-			break;
+			*ta = this->bus_station;
+			return;
 
 		case STATION_DOCK:
 		case STATION_OILRIG:
@@ -1108,7 +1098,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 						FreeTrainTrackReservation(v);
 						*affected_vehicles.Append() = v;
 						if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), false);
-						for (; v->Next() != NULL; v = v->Next()) ;
+						for (; v->Next() != NULL; v = v->Next()) { }
 						if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), false);
 					}
 				}
@@ -1148,7 +1138,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 			Train *v = affected_vehicles[i];
 			if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), true);
 			TryPathReserve(v, true, true);
-			for (; v->Next() != NULL; v = v->Next()) ;
+			for (; v->Next() != NULL; v = v->Next()) { }
 			if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
 		}
 
@@ -1210,7 +1200,7 @@ restart:
 			}
 		}
 	} else {
-		ta.tile = INVALID_TILE;
+		ta.Clear();
 	}
 
 	st->train_station = ta;
@@ -1269,7 +1259,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 					FreeTrainTrackReservation(v);
 					if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), false);
 					Vehicle *temp = v;
-					for (; temp->Next() != NULL; temp = temp->Next()) ;
+					for (; temp->Next() != NULL; temp = temp->Next()) { }
 					if (IsRailStationTile(temp->tile)) SetRailStationPlatformReservation(temp->tile, TrackdirToExitdir(ReverseTrackdir(temp->GetVehicleTrackdir())), false);
 				}
 			}
@@ -1289,7 +1279,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 				/* Restore station reservation. */
 				if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(v->GetVehicleTrackdir()), true);
 				TryPathReserve(v, true, true);
-				for (; v->Next() != NULL; v = v->Next()) ;
+				for (; v->Next() != NULL; v = v->Next()) { }
 				if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
 			}
 		}
@@ -1425,9 +1415,7 @@ CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 	if (flags & DC_EXEC) {
 		st->rect.AfterRemoveRect(st, st->train_station.tile, st->train_station.w, st->train_station.h);
 
-		st->train_station.tile = INVALID_TILE;
-		st->train_station.w = 0;
-		st->train_station.h = 0;
+		st->train_station.Clear();
 
 		st->facilities &= ~FACIL_TRAIN;
 
@@ -1589,11 +1577,6 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	/* give us a road stop in the list, and check if something went wrong */
 	if (!RoadStop::CanAllocateItem()) return_cmd_error(type ? STR_ERROR_TOO_MANY_TRUCK_STOPS : STR_ERROR_TOO_MANY_BUS_STOPS);
 
-	if (st != NULL &&
-			GetNumRoadStopsInStation(st, ROADSTOP_BUS) + GetNumRoadStopsInStation(st, ROADSTOP_TRUCK) >= RoadStop::LIMIT) {
-		return_cmd_error(type ? STR_ERROR_TOO_MANY_TRUCK_STOPS : STR_ERROR_TOO_MANY_BUS_STOPS);
-	}
-
 	if (st != NULL) {
 		if (st->owner != _current_company) {
 			return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION);
@@ -1624,6 +1607,12 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		RoadStop **currstop = FindRoadStopSpot(type, st);
 		*currstop = road_stop;
 
+		if (type) {
+			st->truck_station.Add(tile);
+		} else {
+			st->bus_station.Add(tile);
+		}
+
 		/* initialize an empty station */
 		st->AddFacility((type) ? FACIL_TRUCK_STOP : FACIL_BUS_STOP, tile);
 
@@ -1632,6 +1621,7 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		RoadStopType rs_type = type ? ROADSTOP_TRUCK : ROADSTOP_BUS;
 		if (is_drive_through) {
 			MakeDriveThroughRoadStop(tile, st->owner, road_owner, tram_owner, st->index, rs_type, rts, (Axis)p1);
+			road_stop->MakeDriveThrough();
 		} else {
 			MakeRoadStop(tile, st->owner, st->index, rs_type, rts, (DiagDirection)p1);
 		}
@@ -1715,6 +1705,13 @@ static CommandCost RemoveRoadStop(TileIndex tile, DoCommandFlag flags)
 			pred->next = cur_stop->next;
 		}
 
+		if (IsDriveThroughStopTile(tile)) {
+			/* Clears the tile for us */
+			cur_stop->ClearDriveThrough();
+		} else {
+			DoClearSquare(tile);
+		}
+
 		SetWindowWidgetDirty(WC_STATION_VIEW, st->index, SVW_ROADVEHS);
 		delete cur_stop;
 
@@ -1727,12 +1724,20 @@ static CommandCost RemoveRoadStop(TileIndex tile, DoCommandFlag flags)
 			}
 		}
 
-		DoClearSquare(tile);
 		st->rect.AfterRemoveTile(st, tile);
 
 		st->UpdateVirtCoord();
 		st->RecomputeIndustriesNear();
 		DeleteStationIfEmpty(st);
+
+		/* Update the tile area of the truck/bus stop */
+		if (is_truck) {
+			st->truck_station.Clear();
+			for (const RoadStop *rs = st->truck_stops; rs != NULL; rs = rs->next) st->truck_station.Add(rs->xy);
+		} else {
+			st->bus_station.Clear();
+			for (const RoadStop *rs = st->bus_stops; rs != NULL; rs = rs->next) st->bus_station.Add(rs->xy);
+		}
 	}
 
 	return CommandCost(EXPENSES_CONSTRUCTION, _price[is_truck ? PR_CLEAR_STATION_TRUCK : PR_CLEAR_STATION_BUS]);
@@ -2368,7 +2373,7 @@ static void DrawTile_Station(TileInfo *ti)
 		/* PBS debugging, draw reserved tracks darker */
 		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && HasStationRail(ti->tile) && HasStationReservation(ti->tile)) {
 			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
-			DrawGroundSprite(GetRailStationAxis(ti->tile) == AXIS_X ? rti->base_sprites.single_y : rti->base_sprites.single_x, PALETTE_CRASH);
+			DrawGroundSprite(GetRailStationAxis(ti->tile) == AXIS_X ? rti->base_sprites.single_x : rti->base_sprites.single_y, PALETTE_CRASH);
 		}
 	}
 
@@ -2633,9 +2638,8 @@ static bool ClickTile_Station(TileIndex tile)
 
 static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, int x, int y)
 {
-	StationID station_id = GetStationIndex(tile);
-
 	if (v->type == VEH_TRAIN) {
+		StationID station_id = GetStationIndex(tile);
 		if (!v->current_order.ShouldStopAtStation(v, station_id)) return VETSB_CONTINUE;
 		if (!IsRailStation(tile) || !Train::From(v)->IsFrontEngine()) return VETSB_CONTINUE;
 
@@ -2673,42 +2677,7 @@ static VehicleEnterTileStatus VehicleEnter_Station(Vehicle *v, TileIndex tile, i
 		if (rv->state < RVSB_IN_ROAD_STOP && !IsReversingRoadTrackdir((Trackdir)rv->state) && rv->frame == 0) {
 			if (IsRoadStop(tile) && rv->IsRoadVehFront()) {
 				/* Attempt to allocate a parking bay in a road stop */
-				RoadStop *rs = RoadStop::GetByTile(tile, GetRoadStopType(tile));
-
-				if (IsDriveThroughStopTile(tile)) {
-					if (!rv->current_order.ShouldStopAtStation(v, station_id)) return VETSB_CONTINUE;
-
-					/* Vehicles entering a drive-through stop from the 'normal' side use first bay (bay 0). */
-					byte side = ((DirToDiagDir(rv->direction) == ReverseDiagDir(GetRoadStopDir(tile))) == (rv->overtaking == 0)) ? 0 : 1;
-
-					if (!rs->IsFreeBay(side)) return VETSB_CANNOT_ENTER;
-
-					/* Check if the vehicle is stopping at this road stop */
-					if (GetRoadStopType(tile) == (IsCargoInClass(rv->cargo_type, CC_PASSENGERS) ? ROADSTOP_BUS : ROADSTOP_TRUCK) &&
-							rv->current_order.GetDestination() == GetStationIndex(tile)) {
-						SetBit(rv->state, RVS_IS_STOPPING);
-						rs->AllocateDriveThroughBay(side);
-					}
-
-					/* Indicate if vehicle is using second bay. */
-					if (side == 1) SetBit(rv->state, RVS_USING_SECOND_BAY);
-					/* Indicate a drive-through stop */
-					SetBit(rv->state, RVS_IN_DT_ROAD_STOP);
-					return VETSB_CONTINUE;
-				}
-
-				/* For normal (non drive-through) road stops
-				 * Check if station is busy or if there are no free bays or whether it is a articulated vehicle. */
-				if (rs->IsEntranceBusy() || !rs->HasFreeBay() || rv->HasArticulatedPart()) return VETSB_CANNOT_ENTER;
-
-				SetBit(rv->state, RVS_IN_ROAD_STOP);
-
-				/* Allocate a bay and update the road state */
-				uint bay_nr = rs->AllocateBay();
-				SB(rv->state, RVS_USING_SECOND_BAY, 1, bay_nr);
-
-				/* Mark the station entrace as busy */
-				rs->SetEntranceBusy(true);
+				return RoadStop::GetByTile(tile, GetRoadStopType(tile))->Enter(rv) ? VETSB_CONTINUE : VETSB_CANNOT_ENTER;
 			}
 		}
 	}
@@ -3329,6 +3298,9 @@ static void ChangeTileOwner_Station(TileIndex tile, Owner old_owner, Owner new_o
  */
 static bool CanRemoveRoadWithStop(TileIndex tile, DoCommandFlag flags)
 {
+	/* Yeah... water can always remove stops, right? */
+	if (_current_company == OWNER_WATER) return true;
+
 	Owner road_owner = _current_company;
 	Owner tram_owner = _current_company;
 

@@ -1398,11 +1398,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Міс�
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Промисловість
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Шукач шляху для поїздів: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(не рекомендовано)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(рекомендовано)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Шукач шляху для автомобілів: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Оригінальний {RED}(не рекомендовано)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(рекомендовано)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Шукач шляху для кораблів: {ORANGE}{STRING}
@@ -2501,8 +2499,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Насе
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Пасажирів за місяць: {ORANGE}{COMMA}{BLACK} найбільше: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Пошти за місяць: {ORANGE}{COMMA}{BLACK} найбільше: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Вантаж, потрібний для зростання міста:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} потрібно
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} перевезено за останній місяць
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} потрібно
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} перевезено за останній місяць
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Ліміт шуму в місті: {ORANGE}{COMMA}{BLACK}  макс: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Показати місто в центрі екрану. Ctrl+клік відкриє нове вікно у місці розташування міста
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Місцева влада
@@ -2631,9 +2629,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Раху
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Позика
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Макс. позика: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Позичити {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Позичити {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Збільшити розмір позики
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Повернути {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Повернути {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Повернути частину позики
 
 # Company view
@@ -3043,8 +3041,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Дохі
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Надійність: {LTBLUE}{COMMA}%  {BLACK}Аварії після останнього техогляду: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Побудований: {LTBLUE}{NUM}{BLACK} Вартість: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Місткість: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Місткість: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Місткість: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Місткість: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Місткість: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Плата за трансфер: {LTBLUE}{CURRENCY}

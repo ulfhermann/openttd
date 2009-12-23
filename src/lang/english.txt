@@ -1063,7 +1063,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Enable 
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Train acceleration model: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistic
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Forbid trains and ships to make 90 deg turns: {ORANGE}{STRING1} {LTBLUE} (not with NTP)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Forbid trains and ships to make 90 deg turns: {ORANGE}{STRING1} {LTBLUE} (not with OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Join train stations built next to each other: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Allow to join stations not directly adjacent: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Use improved loading algorithm: {ORANGE}{STRING1}
@@ -1247,6 +1247,11 @@ STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :forbidden
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :allowed
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :allowed, custom town layout
 
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}In game placement of trees: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :none {RED}(breaks lumber mill)
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :only in rain forests
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :everywhere
+
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Position of main toolbar: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Left
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Centre
@@ -1314,11 +1319,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Towns
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industries
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Pathfinder for trains: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Not recommended)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Recommended)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Pathfinder for road vehicles: {ORANGE}{STRING1}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(Not recommended)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Recommended)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Pathfinder for ships: {ORANGE}{STRING1}
@@ -2356,6 +2359,7 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{RAW_ST
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Warning: {SILVER}{RAW_STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Error: {SILVER}{RAW_STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Fatal: {SILVER}{RAW_STRING}
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}A fatal NewGRF error has occurred: {}{STRING5}
 STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING1} will not work with the TTDPatch version reported by OpenTTD.
 STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING1} is for the {STRING1} version of TTD.
 STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING1} is designed to be used with {STRING1}
@@ -2417,8 +2421,9 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Populati
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Passengers last month: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Mail last month: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Cargo needed for town growth:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} required
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} delivered last month
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} required
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} required in winter
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} delivered last month
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Noise limit in town: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centre the main view on town location. Ctrl+Click opens a new viewport on town location
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Local authority
@@ -2548,9 +2553,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Bank Bal
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Loan
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Max Loan: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Borrow {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Borrow {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Increase size of loan. Ctrl+Click borrows as much as possible
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Repay {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Repay {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Repay part of loan. Ctrl+Click repays as much loan as possible
 
 # Company view
@@ -2962,8 +2967,9 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Profit t
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Reliability: {LTBLUE}{COMMA}%  {BLACK}Breakdowns since last service: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Built: {LTBLUE}{NUM}{BLACK} Value: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Capacity: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Capacity: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_NO_CAPACITY                                    :{BLACK}Capacity: {LTBLUE}None
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Capacity: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Capacity: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Capacity: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Transfer Credits: {LTBLUE}{CURRENCY}
@@ -3218,6 +3224,11 @@ STR_AI_CONFIG_CAPTION                                           :{WHITE}AI Confi
 STR_AI_CONFIG_LIST_TOOLTIP                                      :{BLACK}All AIs that will be loaded in the next game
 STR_AI_CONFIG_HUMAN_PLAYER                                      :Human player
 STR_AI_CONFIG_RANDOM_AI                                         :Random AI
+
+STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Move Up
+STR_AI_CONFIG_MOVE_UP_TOOLTIP                                   :{BLACK}Move selected AI up in the list
+STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Move Down
+STR_AI_CONFIG_MOVE_DOWN_TOOLTIP                                 :{BLACK}Move selected AI down in the list
 
 STR_AI_CONFIG_CHANGE                                            :{BLACK}Select AI
 STR_AI_CONFIG_CHANGE_TOOLTIP                                    :{BLACK}Load another AI

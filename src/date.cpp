@@ -10,7 +10,6 @@
 /** @file date.cpp Handling of dates in our native format and transforming them to something human readable. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "variables.h"
 #include "network/network.h"
 #include "network/network_func.h"
@@ -256,6 +255,9 @@ static void OnNewDay()
 
 	SetWindowWidgetDirty(WC_STATUS_BAR, 0, 0);
 	EnginesDailyLoop();
+
+	/* Refresh after possible snowline change */
+	SetWindowClassesDirty(WC_TOWN_VIEW);
 }
 
 /**
