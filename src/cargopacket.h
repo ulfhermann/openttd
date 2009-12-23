@@ -270,15 +270,6 @@ public:
 	}
 
 	/**
-	 * Returns source of the first cargo packet in this list
-	 * @return the before mentioned source
-	 */
-	FORCEINLINE StationID Source() const
-	{
-		return this->Empty() ? INVALID_STATION : this->packets.front()->source;
-	}
-
-	/**
 	 * Returns average number of days in transit for a cargo entity
 	 * @return the before mentioned number
 	 */
@@ -402,6 +393,24 @@ public:
 	}
 
 	/**
+	 * Returns source of the first cargo packet in this list
+	 * If the regular packets list is empty but there are packets
+	 * in the reservation list it returns the source of the first
+	 * reserved packet.
+	 * @return the before mentioned source
+	 */
+	FORCEINLINE StationID Source() const
+	{
+		if (this->Empty()) {
+			return INVALID_STATION;
+		} else if (this->packets.empty()) {
+			return this->reserved.front()->source;
+		} else {
+			return this->packets.front()->source;
+		}
+	}
+
+	/**
 	 * Reserves a packet for later loading
 	 */
 	void Reserve(CargoPacket *cp);
@@ -466,6 +475,15 @@ public:
 				cp1->days_in_transit == cp2->days_in_transit &&
 				cp1->source_type     == cp2->source_type &&
 				cp1->source_id       == cp2->source_id;
+	}
+
+	/**
+	 * Returns source of the first cargo packet in this list
+	 * @return the before mentioned source
+	 */
+	FORCEINLINE StationID Source() const
+	{
+		return this->Empty() ? INVALID_STATION : this->packets.front()->source;
 	}
 };
 
