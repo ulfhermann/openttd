@@ -64,6 +64,8 @@ warning-sign: demands
 
 multimap: master
 
+reservation: master
+
 push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap reservation warning-sign
 	git push -f ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/

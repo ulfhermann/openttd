@@ -3,6 +3,7 @@ gitmake-all
 gitmake-origin
 gitmake-build
 bundle/*
+bin/*
 bundles/
 !bin/data/chars.grf
 !bin/data/openttdd.grf
