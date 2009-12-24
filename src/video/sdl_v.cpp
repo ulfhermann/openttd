@@ -249,6 +249,7 @@ static bool CreateMainSurface(uint w, uint h)
 	_screen.width = newscreen->w;
 	_screen.height = newscreen->h;
 	_screen.pitch = newscreen->pitch / (bpp / 8);
+	_screen.dst_ptr = newscreen->pixels;
 	_sdl_screen = newscreen;
 	InitPalette();
 
@@ -468,7 +469,7 @@ static int PollEvent()
 		case SDL_VIDEORESIZE: {
 			int w = max(ev.resize.w, 64);
 			int h = max(ev.resize.h, 64);
-			ChangeResInGame(w, h);
+			CreateMainSurface(w, h);
 			break;
 		}
 	}
@@ -587,7 +588,6 @@ void VideoDriver_SDL::MainLoop()
 
 			if (_draw_threaded) _draw_mutex->BeginCritical();
 
-			_screen.dst_ptr = _sdl_screen->pixels;
 			UpdateWindows();
 			if (++pal_tick > 4) {
 				CheckPaletteAnim();
@@ -599,7 +599,6 @@ void VideoDriver_SDL::MainLoop()
 			CSleep(1);
 			if (_draw_threaded) _draw_mutex->BeginCritical();
 
-			_screen.dst_ptr = _sdl_screen->pixels;
 			NetworkDrawChatMessage();
 			DrawMouseCursor();
 		}
@@ -628,14 +627,17 @@ void VideoDriver_SDL::MainLoop()
 
 bool VideoDriver_SDL::ChangeResolution(int w, int h)
 {
-	return CreateMainSurface(w, h);
+	if (_draw_threaded) _draw_mutex->BeginCritical();
+	bool ret = CreateMainSurface(w, h);
+	if (_draw_threaded) _draw_mutex->EndCritical();
+	return ret;
 }
 
 bool VideoDriver_SDL::ToggleFullscreen(bool fullscreen)
 {
 	_fullscreen = fullscreen;
 	GetVideoModes(); // get the list of available video modes
-	if (_num_resolutions == 0 || !this->ChangeResolution(_cur_resolution.width, _cur_resolution.height)) {
+	if (_num_resolutions == 0 || !CreateMainSurface(_cur_resolution.width, _cur_resolution.height)) {
 		/* switching resolution failed, put back full_screen to original status */
 		_fullscreen ^= true;
 		return false;
