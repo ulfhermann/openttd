@@ -229,6 +229,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Nimeä u
 
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Sulje ikkuna
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Ikkunan otsake - vedä tästä siirtääksesi ikkunaa
+STR_TOOLTIP_SHADE                                               :{BLACK}Pienennä ikkuna - Näytä vain otsikko
 STR_TOOLTIP_STICKY                                              :{BLACK}'Sulje Kaikki Ikkunat'-nappi ei vaikuta tähän ikkunaan.
 STR_TOOLTIP_RESIZE                                              :{BLACK}Napsauta ja vedä muuttaaksesi tämän ikkunan kokoa.
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Suuri/pieni ikkunan koko
@@ -527,7 +528,7 @@ STR_GRAPH_PERFORMANCE_DETAIL_TOOLTIP                            :{BLACK}Näytä 
 
 # Graph key window
 STR_GRAPH_KEY_CAPTION                                           :{WHITE}Selite yhtiön kuvaajiin
-STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Napsauta tässä laittaaksesi yhtiön merkinnän graafissa päälle/pois.
+STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Napsauta tätä vaihtaaksesi yhtiön merkinnän kuvaajassa päälle/pois.
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Yhtiökilpataulukko
@@ -605,6 +606,8 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_1_USER_DEFINED                  :{BLACK}Valitse 
 STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Valitse 'oma 2' (käyttäjän määritettävissä)
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Sekoittaminen päälle/pois
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Näytä musiikkiraitojen valintaikkuna
+
+STR_ERROR_NO_SONGS                                              :{WHITE}Musiikkipaketti jossa ei ole kappaleita on valittu. Musiikkia ei soiteta
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Soittolistan valinta
@@ -941,6 +944,11 @@ STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Perusä�
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Valitse käytettävät perusäänet
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Lisätietoja perusäänistä
 
+STR_GAME_OPTIONS_BASE_MUSIC                                     :{BLACK}Musiikkipaketti
+STR_GAME_OPTIONS_BASE_MUSIC_TOOLTIP                             :{BLACK}Valitse käytettävä musiikkipaketti
+STR_GAME_OPTIONS_BASE_MUSIC_STATUS                              :{RED}{NUM} korruptoitun{P ut utta} tiedosto{P "" a}
+STR_GAME_OPTIONS_BASE_MUSIC_DESCRIPTION_TOOLTIP                 :{BLACK}Lisätietoja musiikkipaketista
+
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Täyskuvatila ei toimi
 
 # Custom currency window
@@ -1007,6 +1015,13 @@ STR_NUM_LOW                                                     :Matala
 STR_NUM_NORMAL                                                  :Normaali
 STR_NUM_HIGH                                                    :Korkea
 STR_NUM_CUSTOM                                                  :Oma
+
+STR_VARIETY_NONE                                                :Ei yhtään
+STR_VARIETY_VERY_LOW                                            :Erittäin vähän
+STR_VARIETY_LOW                                                 :Vähän
+STR_VARIETY_MEDIUM                                              :Keskisuuri
+STR_VARIETY_HIGH                                                :Korkea
+STR_VARIETY_VERY_HIGH                                           :Erittäin korkea
 
 STR_AI_SPEED_VERY_SLOW                                          :Hyvin hidas
 STR_AI_SPEED_SLOW                                               :Hidas
@@ -1804,6 +1819,7 @@ STR_CONTENT_TYPE_AI_LIBRARY                                     :Tekoälykirjast
 STR_CONTENT_TYPE_SCENARIO                                       :Skenaario
 STR_CONTENT_TYPE_HEIGHTMAP                                      :Korkeuskartta
 STR_CONTENT_TYPE_BASE_SOUNDS                                    :Perusäänet
+STR_CONTENT_TYPE_BASE_MUSIC                                     :Musiikkipaketti
 
 # Content downloading progress window
 STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Ladataan sisältöä...
@@ -2231,6 +2247,7 @@ STR_MAPGEN_TREE_PLACER                                          :{BLACK}Puiden a
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Maaston tyyppi:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Merenpinta:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Tasaisuus:
+STR_MAPGEN_VARIETY                                              :{BLACK}Vaihtelun hajautus:
 STR_MAPGEN_GENERATE                                             :{WHITE}Generoi
 
 # Strings for map borders at game generation
