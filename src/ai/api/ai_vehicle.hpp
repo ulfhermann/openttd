@@ -80,10 +80,6 @@ public:
 		VT_WATER,          //!< Water type vehicle.
 		VT_AIR,            //!< Air type vehicle.
 		VT_INVALID = 0xFF, //!< Invalid vehicle type.
-
-#ifdef DEFINE_SCRIPT_FILES
-		VEHICLE_INVALID = -1, //!< Invalid VehicleID.
-#endif /* DEFINE_SCRIPT_FILES */
 	};
 
 	/**
@@ -99,6 +95,8 @@ public:
 
 		VS_INVALID = 0xFF, //!< An invalid vehicle state.
 	};
+
+	static const int VEHICLE_INVALID = -1; //!< Invalid VehicleID.
 
 	/**
 	 * Checks whether the given vehicle is valid and owned by you.
@@ -458,15 +456,6 @@ public:
 	 * @return True if and only if the vehicle has been started or stopped.
 	 */
 	static bool StartStopVehicle(VehicleID vehicle_id);
-
-	/**
-	 * Skips the current order of the given vehicle.
-	 * @param vehicle_id The vehicle to skip the order for.
-	 * @param order_position The selected order to which we want to skip.
-	 * @pre IsValidVehicleOrder(vehicle_id, order_position).
-	 * @return True if and only if the order has been skipped.
-	 */
-	static bool SkipToVehicleOrder(VehicleID vehicle_id, AIOrder::OrderPosition order_position);
 
 	/**
 	 * Turn the given vehicle so it'll drive the other way.

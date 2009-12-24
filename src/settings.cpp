@@ -23,7 +23,6 @@
  */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "currency.h"
 #include "screenshot.h"
 #include "variables.h"
@@ -32,8 +31,7 @@
 #include "settings_internal.h"
 #include "command_func.h"
 #include "console_func.h"
-#include "npf.h"
-#include "yapf/yapf.h"
+#include "pathfinder/pathfinder_type.h"
 #include "genworld.h"
 #include "train.h"
 #include "news_func.h"

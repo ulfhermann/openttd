@@ -431,7 +431,8 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Dalsi pohlad
 STR_MAP_MENU_SIGN_LIST                                          :Zoznam popisov
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Zoznam miest
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Dotacie
@@ -822,6 +823,7 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} zacina stavat nedaleko mesta {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} bola kupena spolocnostou {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Prezident)
+
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}{STRING} sa zacina stavat nedaleko mesta {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}{STRING} sa vysadza nedaleko mesta {TOWN}!
@@ -1339,11 +1341,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Mestá
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Priemysel
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Algoritmus hladania cesty pre vlaky: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(neodporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(odporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Algoritmus hladania cesty pre automobily: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :pôvodný {RED}(neodporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(odporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Algoritmus hladania cesty pre lode: {ORANGE}{STRING}
@@ -2433,8 +2433,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Obyvatel
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Cestujuci posledny mesiac: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Posta posledny mesiac: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Tovar potrebný k rozrastu mesta:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} potrebný
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} doručené posledný mesiac
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} potrebný
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} doručené posledný mesiac
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Hlukový limit v meste: {ORANGE}{COMMA}{BLACK}  max.: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Pohlad na stred mesta
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Miestna sprava
@@ -2563,9 +2563,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Zostatok
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Uver
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Uverovy limit:  {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Pozicat {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Pozicat {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Zvysit velkost uveru
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Splatit {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Splatit {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Splatit cast uveru
 
 # Company view
@@ -2975,8 +2975,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Profit t
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Spoľahlivosť: {LTBLUE}{COMMA}%  {BLACK}Poruchy od posledného servisu: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Vyrobený: {LTBLUE}{NUM}{BLACK} Cena: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Kapacita: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Transfer kredity: {LTBLUE}{CURRENCY}
@@ -3179,6 +3179,11 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Na dokon
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Toto vozidlo ide presne
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Toto vozidlo mešká {STRING}
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Toto vozidlo ide {STRING} skor
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Tento cestovný poriadok ešte nezačal
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Tento cestovný poriadok začne {STRING}
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Začiatočný dátum
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Vyberte dátum ako začiatočný bod tohto cestovného poriadku
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Zmenit cas
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Zmenit dlžku trvania oznaceného príkazu
@@ -3191,6 +3196,22 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Resetnú
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Vyplnit
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Naplň časový plán automaticky s hodnotami z nasledujúcej trasy (CTRL-klik - pokúsiť sa udržať čakacie doby)
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Čakať
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Naplánovaný
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Prepnúť medzi čakaním a cestovným poriadkom
+
+STR_TIMETABLE_DEPARTURE_ABBREVIATION                            :D:
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Nastaviť dátum
+STR_DATE_SET_DATE                                               :{BLACK}Nastaviť dátum
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Vybrať označený dátum za začiatočný pre tento cestovný poriadok
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Vyberte deň
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Vyberte mesiac
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Vyberte rok
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}AI debugovanie
@@ -4056,7 +4077,6 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
@@ -4072,4 +4092,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-

@@ -7,38 +7,12 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file yapf.hpp Base includes/functions for YAPF. */
+/** @file pf_performance_timer.hpp Performance timer for pathfinders. */
 
-#ifndef  YAPF_HPP
-#define  YAPF_HPP
-
-#include "../openttd.h"
-#include "../vehicle_base.h"
-#include "../road_map.h"
-#include "../tunnel_map.h"
-#include "../bridge_map.h"
-#include "../tunnelbridge_map.h"
-#include "../bridge.h"
-#include "../station_map.h"
-#include "../tile_cmd.h"
-#include "../landscape.h"
-#include "yapf.h"
-#include "../pathfind.h"
-#include "../waypoint_base.h"
-#include "../debug.h"
-#include "../settings_type.h"
-#include "../tunnelbridge.h"
+#ifndef  PF_PERFORMANCE_TIMER_HPP
+#define  PF_PERFORMANCE_TIMER_HPP
 
 extern uint64 ottd_rdtsc();
-
-#include <limits.h>
-#include <new>
-
-#if defined(_WIN32) || defined(_WIN64)
-#  include <windows.h>
-#else
-#  include <time.h>
-#endif
 
 struct CPerformanceTimer
 {
@@ -105,25 +79,4 @@ struct CPerfStartFake
 
 typedef CPerfStartFake CPerfStart;
 
-
-//#undef FORCEINLINE
-//#define FORCEINLINE inline
-
-#include "../misc/crc32.hpp"
-#include "../misc/blob.hpp"
-#include "../misc/str.hpp"
-#include "../misc/fixedsizearray.hpp"
-#include "../misc/array.hpp"
-#include "../misc/hashtable.hpp"
-#include "../misc/binaryheap.hpp"
-#include "../misc/dbg_helpers.h"
-#include "nodelist.hpp"
-#include "follow_track.hpp"
-#include "yapf_base.hpp"
-#include "yapf_node.hpp"
-#include "yapf_common.hpp"
-#include "yapf_costbase.hpp"
-#include "yapf_costcache.hpp"
-
-
-#endif /* YAPF_HPP */
+#endif /* PF_PERFORMANCE_TIMER_HPP */

@@ -34,7 +34,7 @@
 
 #include "table/strings.h"
 
-NewsItem _statusbar_news_item;
+const NewsItem *_statusbar_news_item = NULL;
 bool _news_ticker_sound; ///< Make a ticker sound when a news item is published.
 
 static uint MIN_NEWS_AMOUNT = 30;           ///< prefered minimum amount of news messages
@@ -46,10 +46,10 @@ static NewsItem *_latest_news = NULL;       ///< tail of news items queue
  * Users can force an item by accessing the history or "last message".
  * If the message being shown was forced by the user, a pointer is stored
  * in _forced_news. Otherwise, \a _forced_news variable is NULL. */
-static NewsItem *_forced_news = NULL;       ///< item the user has asked for
+static const NewsItem *_forced_news = NULL;       ///< item the user has asked for
 
 /** Current news item (last item shown regularly). */
-static NewsItem *_current_news = NULL;
+static const NewsItem *_current_news = NULL;
 
 
 /**
@@ -281,13 +281,13 @@ assert_compile(lengthof(_news_type_data) == NT_END);
 struct NewsWindow : Window {
 	uint16 chat_height;   ///< Height of the chat window.
 	uint16 status_height; ///< Height of the status bar window
-	NewsItem *ni;         ///< News item to display.
+	const NewsItem *ni;   ///< News item to display.
 	static uint duration; ///< Remaining time for showing current news message (may only be accessed while a news item is displayed).
 
-	NewsWindow(const WindowDesc *desc, NewsItem *ni) : Window(), ni(ni)
+	NewsWindow(const WindowDesc *desc, const NewsItem *ni) : Window(), ni(ni)
 	{
 		NewsWindow::duration = 555;
-		const Window *w = FindWindowById(WC_SEND_NETWORK_MSG, 0);
+		const Window *w = FindWindowByClass(WC_SEND_NETWORK_MSG);
 		this->chat_height = (w != NULL) ? w->height : 0;
 		this->status_height = FindWindowById(WC_STATUS_BAR, 0)->height;
 
@@ -561,7 +561,7 @@ private:
 
 
 /** Open up an own newspaper window for the news item */
-static void ShowNewspaper(NewsItem *ni)
+static void ShowNewspaper(const NewsItem *ni)
 {
 	SoundFx sound = _news_type_data[_news_subtype_data[ni->subtype].type].sound;
 	if (sound != 0) SndPlayFx(sound);
@@ -574,7 +574,7 @@ static void ShowTicker(const NewsItem *ni)
 {
 	if (_news_ticker_sound) SndPlayFx(SND_16_MORSE);
 
-	_statusbar_news_item = *ni;
+	_statusbar_news_item = ni;
 	InvalidateWindowData(WC_STATUS_BAR, 0, SBI_SHOW_TICKER);
 }
 
@@ -592,6 +592,7 @@ void InitNewsItemStructs()
 	_latest_news = NULL;
 	_forced_news = NULL;
 	_current_news = NULL;
+	_statusbar_news_item = NULL;
 	NewsWindow::duration = 0;
 }
 
@@ -601,7 +602,7 @@ void InitNewsItemStructs()
  */
 static bool ReadyForNextItem()
 {
-	NewsItem *ni = _forced_news == NULL ? _current_news : _forced_news;
+	const NewsItem *ni = _forced_news == NULL ? _current_news : _forced_news;
 	if (ni == NULL) return true;
 
 	/* Ticker message
@@ -621,11 +622,12 @@ static void MoveToNextItem()
 	InvalidateWindowData(WC_STATUS_BAR, 0, SBI_NEWS_DELETED); // invalidate the statusbar
 	DeleteWindowById(WC_NEWS_WINDOW, 0); // close the newspapers window if shown
 	_forced_news = NULL;
+	_statusbar_news_item = NULL;
 
 	/* if we're not at the last item, then move on */
 	if (_current_news != _latest_news) {
 		_current_news = (_current_news == NULL) ? _oldest_news : _current_news->next;
-		NewsItem *ni = _current_news;
+		const NewsItem *ni = _current_news;
 		const NewsType type = _news_subtype_data[ni->subtype].type;
 
 		/* check the date, don't show too old items */
@@ -658,7 +660,7 @@ static void MoveToNextItem()
  * @param ref2     Reference 2 to some object: Used for scrolling after clicking on the news, and for deleteing the news when the object is deleted.
  * @param free_data Pointer to data that must be freed once the news message is cleared
  *
- * @see NewsSubype
+ * @see NewsSubtype
  */
 void AddNewsItem(StringID string, NewsSubtype subtype, NewsReferenceType reftype1, uint32 ref1, NewsReferenceType reftype2, uint32 ref2, void *free_data)
 {
@@ -832,7 +834,7 @@ void NewsLoop()
 }
 
 /** Do a forced show of a specific message */
-static void ShowNewsMessage(NewsItem *ni)
+static void ShowNewsMessage(const NewsItem *ni)
 {
 	assert(_total_news != 0);
 
@@ -1016,6 +1018,7 @@ static const NWidgetPart _nested_message_history[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_MESSAGE_HISTORY, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 
@@ -1071,7 +1074,8 @@ enum MessageOptionWidgets {
 
 struct MessageOptionsWindow : Window {
 	static const StringID message_opt[]; ///< Message report options, 'off', 'summary', or 'full'.
-	int state; ///< Option value for setting all categories at once.
+	int state;                           ///< Option value for setting all categories at once.
+	Dimension dim_message_opt;           ///< Amount of space needed for a label such that all labels will fit.
 
 	MessageOptionsWindow(const WindowDesc *desc) : Window()
 	{
@@ -1118,6 +1122,13 @@ struct MessageOptionsWindow : Window {
 		}
 	}
 
+	virtual void OnInit()
+	{
+		this->dim_message_opt.width  = 0;
+		this->dim_message_opt.height = 0;
+		for (const StringID *str = message_opt; *str != INVALID_STRING_ID; str++) this->dim_message_opt = maxdim(this->dim_message_opt, GetStringBoundingBox(*str));
+	}
+
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget >= WIDGET_NEWSOPT_START_OPTION && widget < WIDGET_NEWSOPT_END_OPTION) {
@@ -1126,9 +1137,7 @@ struct MessageOptionsWindow : Window {
 
 			/* Compute width for the label widget only. */
 			if ((widget - WIDGET_NEWSOPT_START_OPTION) % MOS_WIDG_PER_SETTING == 1) {
-				Dimension d = {0, 0};
-				for (const StringID *str = message_opt; *str != INVALID_STRING_ID; str++) d = maxdim(d, GetStringBoundingBox(*str));
-				size->width = d.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
+				size->width = this->dim_message_opt.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
 			}
 			return;
 		}
@@ -1139,9 +1148,7 @@ struct MessageOptionsWindow : Window {
 			size->height = FONT_HEIGHT_NORMAL + max(WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM);
 
 			if (widget == WIDGET_NEWSOPT_DROP_SUMMARY) {
-				Dimension d = {0, 0};
-				for (const StringID *str = message_opt; *str != INVALID_STRING_ID; str++) d = maxdim(d, GetStringBoundingBox(*str));
-				size->width = d.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
+				size->width = this->dim_message_opt.width + padding.width + MOS_BUTTON_SPACE; // A bit extra for better looks.
 			} else if (widget == WIDGET_NEWSOPT_SOUNDTICKER) {
 				size->width += MOS_BUTTON_SPACE; // A bit extra for better looks.
 			}

@@ -32,12 +32,15 @@ enum StationViewWidgets {
 	SVW_SHIPS,           ///< List of scheduled ships button
 };
 
+/** Types of cargo to display for station coverage. */
 enum StationCoverageType {
-	SCT_PASSENGERS_ONLY,
-	SCT_NON_PASSENGERS_ONLY,
-	SCT_ALL
+	SCT_PASSENGERS_ONLY,     ///< Draw only passenger class cargos.
+	SCT_NON_PASSENGERS_ONLY, ///< Draw all non-passenger class cargos.
+	SCT_ALL,                 ///< Draw all cargos.
 };
 
+/* misc_gui.cpp */
+int DrawCargoListText(uint32 cargo_mask, const Rect &r, StringID prefix);
 int DrawStationCoverageAreaText(int left, int right, int top, StationCoverageType sct, int rad, bool supplies);
 void CheckRedrawStationCoverage(const Window *w);
 
