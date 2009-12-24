@@ -230,6 +230,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Umbenenn
 
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Fenster schließen
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Titelleiste klicken und ziehen, um das Fenster zu verschieben
+STR_TOOLTIP_SHADE                                               :{BLACK}Fenster einklappen - Nur die Titelleiste zeigen
 STR_TOOLTIP_STICKY                                              :{BLACK}Fenster wird nicht durch die "schließe alle Fenster"-Taste geschlossen
 STR_TOOLTIP_RESIZE                                              :{BLACK}Klicken und Ziehen zum Ändern der Größe des Fensters
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Schalter für großes/kleines Fenster
@@ -1008,6 +1009,13 @@ STR_NUM_LOW                                                     :Niedrig
 STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :Hoch
 STR_NUM_CUSTOM                                                  :Eigene
+
+STR_VARIETY_NONE                                                :Minimal
+STR_VARIETY_VERY_LOW                                            :Sehr klein
+STR_VARIETY_LOW                                                 :Klein
+STR_VARIETY_MEDIUM                                              :Mittel
+STR_VARIETY_HIGH                                                :Groß
+STR_VARIETY_VERY_HIGH                                           :Sehr groß
 
 STR_AI_SPEED_VERY_SLOW                                          :Sehr langsam
 STR_AI_SPEED_SLOW                                               :Langsam
@@ -2232,6 +2240,7 @@ STR_MAPGEN_TREE_PLACER                                          :{BLACK}Baumalgo
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Landschaftstyp:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Gewässermenge:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Gleichmäßigkeit:
+STR_MAPGEN_VARIETY                                              :{BLACK}Größe der Geländeformen:
 STR_MAPGEN_GENERATE                                             :{WHITE}Erzeugen
 
 # Strings for map borders at game generation
