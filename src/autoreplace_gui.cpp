@@ -392,7 +392,7 @@ public:
 				needed_height = max(needed_height, text_end - (int)nwi->pos_y + WD_FRAMERECT_BOTTOM);
 			}
 		}
-		if (needed_height != this->details_height) { // Details window are not high enough, enlarge them.
+		if (!this->IsShaded() && needed_height != this->details_height) { // Details window are not high enough, enlarge them.
 			this->details_height = needed_height;
 			this->ReInit();
 			return;
@@ -480,8 +480,8 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(RVW_WIDGET_LEFT_MATRIX)->current_y / this->resize.step_height);
-		this->vscroll2.SetCapacity(this->GetWidget<NWidgetBase>(RVW_WIDGET_RIGHT_MATRIX)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, RVW_WIDGET_LEFT_MATRIX);
+		this->vscroll2.SetCapacityFromWidget(this, RVW_WIDGET_RIGHT_MATRIX);
 
 		this->GetWidget<NWidgetCore>(RVW_WIDGET_LEFT_MATRIX)->widget_data =
 				this->GetWidget<NWidgetCore>(RVW_WIDGET_RIGHT_MATRIX)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
@@ -501,6 +501,7 @@ static const NWidgetPart _nested_replace_rail_vehicle_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, RVW_WIDGET_CAPTION), SetDataTip(STR_REPLACE_VEHICLES_WHITE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
@@ -540,6 +541,7 @@ static const NWidgetPart _nested_replace_vehicle_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, RVW_WIDGET_CAPTION), SetMinimalSize(433, 14), SetDataTip(STR_REPLACE_VEHICLES_WHITE, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
