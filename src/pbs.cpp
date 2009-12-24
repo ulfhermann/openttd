@@ -7,11 +7,13 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file pbs.cpp */
+/** @file pbs.cpp PBS support routines */
+
 #include "stdafx.h"
 #include "functions.h"
 #include "vehicle_func.h"
-#include "yapf/follow_track.hpp"
+#include "pathfinder/follow_track.hpp"
+//#include "depot_map.h"
 
 /**
  * Get the reserved trackbits for any tile, regardless of type.
@@ -242,7 +244,7 @@ static Vehicle *FindTrainOnTrackEnum(Vehicle *v, void *data)
 	if (v->type != VEH_TRAIN || (v->vehstatus & VS_CRASHED)) return NULL;
 
 	Train *t = Train::From(v);
-	if (HasBit((TrackBits)t->track, TrackdirToTrack(info->res.trackdir))) {
+	if (t->track == TRACK_BIT_WORMHOLE || HasBit((TrackBits)t->track, TrackdirToTrack(info->res.trackdir))) {
 		t = t->First();
 
 		/* ALWAYS return the lowest ID (anti-desync!) */

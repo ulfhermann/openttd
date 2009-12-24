@@ -20,7 +20,6 @@
 #include "network/network.h"
 #include "network/network_gui.h"
 #include "network/network_func.h"
-#include "sprite.h"
 #include "economy_func.h"
 #include "vehicle_base.h"
 #include "newgrf.h"
@@ -231,6 +230,7 @@ static const NWidgetPart _nested_company_finances_widgets[] = {
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, CFW_CAPTION), SetDataTip(STR_FINANCES_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 		NWidget(WWT_IMGBTN, COLOUR_GREY, CFW_TOGGLE_SIZE), SetDataTip(SPR_LARGE_SMALL_WINDOW, STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_SELECTION, INVALID_COLOUR, CFW_SEL_PANEL),
@@ -309,7 +309,7 @@ struct CompanyFinancesWindow : Window {
 
 			case CFW_INCREASE_LOAN:
 			case CFW_REPAY_LOAN:
-				SetDParam(2, LOAN_INTERVAL);
+				SetDParam(0, LOAN_INTERVAL);
 				break;
 		}
 	}
@@ -392,39 +392,41 @@ struct CompanyFinancesWindow : Window {
 	 */
 	void SetupWidgets()
 	{
-		int plane = small ? STACKED_SELECTION_ZERO_SIZE : 0;
+		int plane = this->small ? SZSP_NONE : 0;
 		this->GetWidget<NWidgetStacked>(CFW_SEL_PANEL)->SetDisplayedPlane(plane);
 		this->GetWidget<NWidgetStacked>(CFW_SEL_MAXLOAN)->SetDisplayedPlane(plane);
 
 		CompanyID company = (CompanyID)this->window_number;
-		plane = (company != _local_company) ? STACKED_SELECTION_ZERO_SIZE : 0;
+		plane = (company != _local_company) ? SZSP_NONE : 0;
 		this->GetWidget<NWidgetStacked>(CFW_SEL_BUTTONS)->SetDisplayedPlane(plane);
 	}
 
 	virtual void OnPaint()
 	{
-		if (!small) {
-			/* Check that the expenses panel height matches the height needed for the layout. */
-			int type = _settings_client.gui.expenses_layout;
-			if (_expenses_list_types[type].GetHeight() != this->GetWidget<NWidgetBase>(CFW_EXPS_CATEGORY)->current_y) {
+		if (!this->IsShaded()) {
+			if (!this->small) {
+				/* Check that the expenses panel height matches the height needed for the layout. */
+				int type = _settings_client.gui.expenses_layout;
+				if (_expenses_list_types[type].GetHeight() != this->GetWidget<NWidgetBase>(CFW_EXPS_CATEGORY)->current_y) {
+					this->SetupWidgets();
+					this->ReInit();
+					return;
+				}
+			}
+
+			/* Check that the loan buttons are shown only when the user owns the company. */
+			CompanyID company = (CompanyID)this->window_number;
+			int req_plane = (company != _local_company) ? SZSP_NONE : 0;
+			if (req_plane != this->GetWidget<NWidgetStacked>(CFW_SEL_BUTTONS)->shown_plane) {
 				this->SetupWidgets();
 				this->ReInit();
 				return;
 			}
-		}
 
-		/* Check that the loan buttons are shown only when the user owns the company. */
-		CompanyID company = (CompanyID)this->window_number;
-		int req_plane = (company != _local_company) ? STACKED_SELECTION_ZERO_SIZE : 0;
-		if (req_plane != this->GetWidget<NWidgetStacked>(CFW_SEL_BUTTONS)->shown_plane) {
-			this->SetupWidgets();
-			this->ReInit();
-			return;
+			const Company *c = Company::Get(company);
+			this->SetWidgetDisabledState(CFW_INCREASE_LOAN, c->current_loan == _economy.max_loan); // Borrow button only shows when there is any more money to loan.
+			this->SetWidgetDisabledState(CFW_REPAY_LOAN, company != _local_company || c->current_loan == 0); // Repay button only shows when there is any more money to repay.
 		}
-
-		const Company *c = Company::Get(company);
-		this->SetWidgetDisabledState(CFW_INCREASE_LOAN, c->current_loan == _economy.max_loan); // Borrow button only shows when there is any more money to loan.
-		this->SetWidgetDisabledState(CFW_REPAY_LOAN, company != _local_company || c->current_loan == 0); // Repay button only shows when there is any more money to repay.
 
 		this->DrawWidgets();
 	}
@@ -1082,8 +1084,11 @@ class SelectCompanyManagerFaceWindow : public Window
 	bool is_female;     ///< Female face.
 	bool is_moust_male; ///< Male face with a moustache.
 
-	static const StringID PART_TEXTS_IS_FEMALE[];
-	static const StringID PART_TEXTS[];
+	Dimension yesno_dim;  ///< Dimension of a yes/no button of a part in the advanced face window.
+	Dimension number_dim; ///< Dimension of a number widget of a part in the advanced face window.
+
+	static const StringID PART_TEXTS_IS_FEMALE[]; ///< Strings depending on #is_female, used to describe parts (2 entries for a part).
+	static const StringID PART_TEXTS[];           ///< Fixed strings to describe parts of the face.
 
 	/**
 	 * Draw dynamic a label to the left of the button and a value in the button
@@ -1138,9 +1143,9 @@ public:
 	 */
 	void SelectDisplayPlanes(bool advanced)
 	{
-		this->GetWidget<NWidgetStacked>(SCMFW_WIDGET_SEL_LOADSAVE)->SetDisplayedPlane(advanced ? 0 : STACKED_SELECTION_ZERO_SIZE);
-		this->GetWidget<NWidgetStacked>(SCMFW_WIDGET_SEL_PARTS)->SetDisplayedPlane(advanced ? 0 : STACKED_SELECTION_ZERO_SIZE);
-		this->GetWidget<NWidgetStacked>(SCMFW_WIDGET_SEL_MALEFEMALE)->SetDisplayedPlane(advanced ? STACKED_SELECTION_ZERO_SIZE : 0);
+		this->GetWidget<NWidgetStacked>(SCMFW_WIDGET_SEL_LOADSAVE)->SetDisplayedPlane(advanced ? 0 : SZSP_NONE);
+		this->GetWidget<NWidgetStacked>(SCMFW_WIDGET_SEL_PARTS)->SetDisplayedPlane(advanced ? 0 : SZSP_NONE);
+		this->GetWidget<NWidgetStacked>(SCMFW_WIDGET_SEL_MALEFEMALE)->SetDisplayedPlane(advanced ? SZSP_NONE : 0);
 		this->GetWidget<NWidgetCore>(SCMFW_WIDGET_RANDOM_NEW_FACE)->widget_data = advanced ? STR_MAPGEN_RANDOM : STR_FACE_NEW_FACE_BUTTON;
 
 		NWidgetCore *wi = this->GetWidget<NWidgetCore>(SCMFW_WIDGET_TOGGLE_LARGE_SMALL_BUTTON);
@@ -1149,6 +1154,29 @@ public:
 		} else {
 			wi->SetDataTip(STR_FACE_ADVANCED, STR_FACE_ADVANCED_TOOLTIP);
 		}
+	}
+
+	virtual void OnInit()
+	{
+		/* Size of the boolean yes/no button. */
+		Dimension yesno_dim = maxdim(GetStringBoundingBox(STR_FACE_YES), GetStringBoundingBox(STR_FACE_NO));
+		yesno_dim.width  += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+		yesno_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+		/* Size of the number button + arrows. */
+		Dimension number_dim = {0, 0};
+		for (int val = 1; val <= 12; val++) {
+			SetDParam(0, val);
+			number_dim = maxdim(number_dim, GetStringBoundingBox(STR_JUST_INT));
+		}
+		uint arrows_width = GetSpriteSize(SPR_ARROW_LEFT).width + GetSpriteSize(SPR_ARROW_RIGHT).width + 2 * (WD_IMGBTN_LEFT + WD_IMGBTN_RIGHT);
+		number_dim.width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT + arrows_width;
+		number_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+		/* Compute width of both buttons. */
+		yesno_dim.width = max(yesno_dim.width, number_dim.width);
+		number_dim.width = yesno_dim.width - arrows_width;
+
+		this->yesno_dim = yesno_dim;
+		this->number_dim = number_dim;
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
@@ -1185,6 +1213,9 @@ public:
 
 			case SCMFW_WIDGET_HAS_MOUSTACHE_EARRING:
 			case SCMFW_WIDGET_HAS_GLASSES:
+				*size = this->yesno_dim;
+				break;
+
 			case SCMFW_WIDGET_EYECOLOUR:
 			case SCMFW_WIDGET_CHIN:
 			case SCMFW_WIDGET_EYEBROWS:
@@ -1194,31 +1225,9 @@ public:
 			case SCMFW_WIDGET_JACKET:
 			case SCMFW_WIDGET_COLLAR:
 			case SCMFW_WIDGET_TIE_EARRING:
-			case SCMFW_WIDGET_GLASSES: {
-				/* Size of the boolean yes/no button. */
-				Dimension yesno_dim = maxdim(GetStringBoundingBox(STR_FACE_YES), GetStringBoundingBox(STR_FACE_NO));
-				yesno_dim.width  += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
-				yesno_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
-				/* Size of the number button + arrows. */
-				Dimension number_dim = {0, 0};
-				for (int val = 1; val <= 12; val++) {
-					SetDParam(0, val);
-					number_dim = maxdim(number_dim, GetStringBoundingBox(STR_JUST_INT));
-				}
-				uint arrows_width = GetSpriteSize(SPR_ARROW_LEFT).width + GetSpriteSize(SPR_ARROW_RIGHT).width + 2 * (WD_IMGBTN_LEFT + WD_IMGBTN_RIGHT);
-				number_dim.width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT + arrows_width;
-				number_dim.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
-				/* Compute width of yes/no button. */
-				yesno_dim.width = max(yesno_dim.width, number_dim.width);
-				number_dim.width = yesno_dim.width - arrows_width;
-
-				if (widget == SCMFW_WIDGET_HAS_MOUSTACHE_EARRING || widget == SCMFW_WIDGET_HAS_GLASSES) {
-					*size = yesno_dim;
-				} else {
-					*size = number_dim;
-				}
+			case SCMFW_WIDGET_GLASSES:
+				*size = this->number_dim;
 				break;
-			}
 		}
 	}
 
@@ -1584,6 +1593,8 @@ static const NWidgetPart _nested_company_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, CW_WIDGET_CAPTION), SetDataTip(STR_COMPANY_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY),
 		NWidget(NWID_HORIZONTAL), SetPIP(4, 6, 4),
@@ -1706,44 +1717,46 @@ struct CompanyWindow : Window
 		const Company *c = Company::Get((CompanyID)this->window_number);
 		bool local = this->window_number == _local_company;
 
-		/* Button bar selection. */
-		int plane = local ? CWP_BUTTONS_LOCAL : CWP_BUTTONS_OTHER;
-		NWidgetStacked *wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_BUTTONS);
-		if (plane != wi->shown_plane) {
-			wi->SetDisplayedPlane(plane);
-			this->SetDirty();
-			return;
-		}
+		if (!this->IsShaded()) {
+			/* Button bar selection. */
+			int plane = local ? CWP_BUTTONS_LOCAL : CWP_BUTTONS_OTHER;
+			NWidgetStacked *wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_BUTTONS);
+			if (plane != wi->shown_plane) {
+				wi->SetDisplayedPlane(plane);
+				this->SetDirty();
+				return;
+			}
 
-		/* Build HQ button handling. */
-		plane = (local && c->location_of_HQ == INVALID_TILE) ? CWP_VB_BUILD : CWP_VB_VIEW;
-		wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_VIEW_BUILD_HQ);
-		if (plane != wi->shown_plane) {
-			wi->SetDisplayedPlane(plane);
-			this->SetDirty();
-			return;
-		}
+			/* Build HQ button handling. */
+			plane = (local && c->location_of_HQ == INVALID_TILE) ? CWP_VB_BUILD : CWP_VB_VIEW;
+			wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_VIEW_BUILD_HQ);
+			if (plane != wi->shown_plane) {
+				wi->SetDisplayedPlane(plane);
+				this->SetDirty();
+				return;
+			}
 
-		this->SetWidgetDisabledState(CW_WIDGET_VIEW_HQ, c->location_of_HQ == INVALID_TILE);
+			this->SetWidgetDisabledState(CW_WIDGET_VIEW_HQ, c->location_of_HQ == INVALID_TILE);
 
-		/* Enable/disable 'Relocate HQ' button. */
-		plane = (!local || c->location_of_HQ == INVALID_TILE) ? CWP_RELOCATE_HIDE : CWP_RELOCATE_SHOW;
-		wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_RELOCATE);
-		if (plane != wi->shown_plane) {
-			wi->SetDisplayedPlane(plane);
-			this->SetDirty();
-			return;
-		}
+			/* Enable/disable 'Relocate HQ' button. */
+			plane = (!local || c->location_of_HQ == INVALID_TILE) ? CWP_RELOCATE_HIDE : CWP_RELOCATE_SHOW;
+			wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_RELOCATE);
+			if (plane != wi->shown_plane) {
+				wi->SetDisplayedPlane(plane);
+				this->SetDirty();
+				return;
+			}
 
-		/* Multiplayer buttons. */
-		plane = ((!_networking) ? CWP_MP_EMPTY : (local ? CWP_MP_C_PWD : CWP_MP_C_JOIN));
-		wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_MULTIPLAYER);
-		if (plane != wi->shown_plane) {
-			wi->SetDisplayedPlane(plane);
-			this->SetDirty();
-			return;
+			/* Multiplayer buttons. */
+			plane = ((!_networking) ? CWP_MP_EMPTY : (local ? CWP_MP_C_PWD : CWP_MP_C_JOIN));
+			wi = this->GetWidget<NWidgetStacked>(CW_WIDGET_SELECT_MULTIPLAYER);
+			if (plane != wi->shown_plane) {
+				wi->SetDisplayedPlane(plane);
+				this->SetDirty();
+				return;
+			}
+			this->SetWidgetDisabledState(CW_WIDGET_COMPANY_JOIN,   c->is_ai);
 		}
-		this->SetWidgetDisabledState(CW_WIDGET_COMPANY_JOIN,   c->is_ai);
 
 		if (!local) {
 			if (_settings_game.economy.allow_shares) { // Shares are allowed

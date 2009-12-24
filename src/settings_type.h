@@ -169,6 +169,7 @@ struct GameCreationSettings {
 	byte   snow_line;                        ///< the snowline level in this game
 	byte   water_borders;                    ///< bitset of the borders that are water
 	uint16 custom_town_number;               ///< manually entered number of towns
+	byte   variety;                          ///< variety level applied to TGP
 };
 
 /** Settings related to construction in-game */
@@ -182,6 +183,7 @@ struct ConstructionSettings {
 	bool   road_stop_on_competitor_road;     ///< allow building of drive-through road stops on roads owned by competitors
 	uint8  raw_industry_construction;        ///< type of (raw) industry construction (none, "normal", prospecting)
 	bool   freeform_edges;                   ///< allow terraforming the tiles at the map edges
+	uint8  extra_tree_placement;             ///< (dis)allow building extra trees in-game
 };
 
 /** Settings related to the AI. */
@@ -208,6 +210,7 @@ struct NPFSettings {
 	 * of not being perfect anymore.
 	 */
 	uint32 npf_max_search_nodes;
+	uint32 maximum_go_to_depot_penalty;      ///< What is the maximum penalty that may be endured for going to a depot
 
 	uint32 npf_rail_firstred_penalty;        ///< the penalty for when the first signal is red (and it is not an exit or combo signal)
 	uint32 npf_rail_firstred_exit_penalty;   ///< the penalty for when the first signal is red (and it is an exit or combo signal)
@@ -223,12 +226,15 @@ struct NPFSettings {
 	uint32 npf_road_curve_penalty;           ///< the penalty for curves
 	uint32 npf_crossing_penalty;             ///< the penalty for level crossings
 	uint32 npf_road_drive_through_penalty;   ///< the penalty for going through a drive-through road stop
+	uint32 npf_road_dt_occupied_penalty;     ///< the penalty multiplied by the fill percentage of a drive-through road stop
+	uint32 npf_road_bay_occupied_penalty;    ///< the penalty multiplied by the fill percentage of a road bay
 };
 
 /** Settings related to the yet another pathfinder. */
 struct YAPFSettings {
 	bool   disable_node_optimization;        ///< whether to use exit-dir instead of trackdir in node key
 	uint32 max_search_nodes;                 ///< stop path-finding when this number of nodes visited
+	uint32 maximum_go_to_depot_penalty;      ///< What is the maximum penalty that may be endured for going to a depot
 	bool   ship_use_yapf;                    ///< use YAPF for ships
 	bool   road_use_yapf;                    ///< use YAPF for road
 	bool   rail_use_yapf;                    ///< use YAPF for rail
@@ -236,6 +242,8 @@ struct YAPFSettings {
 	uint32 road_curve_penalty;               ///< penalty for curves
 	uint32 road_crossing_penalty;            ///< penalty for level crossing
 	uint32 road_stop_penalty;                ///< penalty for going through a drive-through road stop
+	uint32 road_stop_occupied_penalty;       ///< penalty multiplied by the fill percentage of a drive-through road stop
+	uint32 road_stop_bay_occupied_penalty;   ///< penalty multiplied by the fill percentage of a road bay
 	bool   rail_firstred_twoway_eol;         ///< treat first red two-way signal as dead end
 	uint32 rail_firstred_penalty;            ///< penalty for first red signal
 	uint32 rail_firstred_exit_penalty;       ///< penalty for first red exit signal

@@ -53,6 +53,8 @@ static const NWidgetPart _nested_town_authority_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN, TWA_CAPTION), SetDataTip(STR_LOCAL_AUTHORITY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_BROWN, TWA_RATING_INFO), SetMinimalSize(317, 92), SetResize(1, 1), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -115,7 +117,7 @@ public:
 		this->SetWidgetDisabledState(TWA_EXECUTE, this->sel_index == -1);
 
 		this->DrawWidgets();
-		this->DrawRatings();
+		if (!this->IsShaded()) this->DrawRatings();
 	}
 
 	/** Draw the contents of the ratings panel. May request a resize of the window if the contents does not fit. */
@@ -342,6 +344,20 @@ public:
 		if (widget == TVW_CAPTION) SetDParam(0, this->town->index);
 	}
 
+	/**
+	 * Determines the first cargo with a certain town effect
+	 * @param effect Town effect of interest
+	 * @return first active cargo slot with that effect
+	 */
+	const CargoSpec *FindFirstCargoWithTownEffect(TownEffect effect) const
+	{
+		const CargoSpec *cs;
+		FOR_ALL_CARGOSPECS(cs) {
+			if (cs->town_effect == effect) return cs;
+		}
+		return NULL;
+	}
+
 	virtual void DrawWidget(const Rect &r, int widget) const
 	{
 		if (widget != TVW_INFOPANEL) return;
@@ -360,10 +376,12 @@ public:
 		SetDParam(1, this->town->max_mail);
 		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX);
 
+		StringID required_text = STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED;
 		uint cargo_needed_for_growth = 0;
 		switch (_settings_game.game_creation.landscape) {
 			case LT_ARCTIC:
 				if (TilePixelHeight(this->town->xy) >= LowestSnowLine()) cargo_needed_for_growth = 1;
+				if (TilePixelHeight(this->town->xy) < GetSnowLine()) required_text = STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER;
 				break;
 
 			case LT_TROPIC:
@@ -376,39 +394,35 @@ public:
 		if (cargo_needed_for_growth > 0) {
 			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH);
 
-			CargoID first_food_cargo = CT_INVALID;
-			StringID food_name = STR_CARGO_PLURAL_FOOD;
-			CargoID first_water_cargo = CT_INVALID;
-			StringID water_name = STR_CARGO_PLURAL_WATER;
-			for (CargoID cid = 0; cid < NUM_CARGO; cid++) {
-				const CargoSpec *cs = CargoSpec::Get(cid);
-				if (first_food_cargo == CT_INVALID && cs->town_effect == TE_FOOD) {
-					first_food_cargo = cid;
-					food_name = cs->name;
-				}
-				if (first_water_cargo == CT_INVALID && cs->town_effect == TE_WATER) {
-					first_water_cargo = cid;
-					water_name = cs->name;
-				}
-			}
+			bool rtl = _dynlang.text_dir == TD_RTL;
+			uint cargo_text_left = r.left + WD_FRAMERECT_LEFT + (rtl ? 0 : 20);
+			uint cargo_text_right = r.right - WD_FRAMERECT_RIGHT - (rtl ? 20 : 0);
+
+			const CargoSpec *food = FindFirstCargoWithTownEffect(TE_FOOD);
+			CargoID first_food_cargo = (food != NULL) ? food->Index() : (CargoID)CT_INVALID;
+			StringID food_name       = (food != NULL) ? food->name    : STR_CARGO_PLURAL_FOOD;
+
+			const CargoSpec *water = FindFirstCargoWithTownEffect(TE_WATER);
+			CargoID first_water_cargo = (water != NULL) ? water->Index() : (CargoID)CT_INVALID;
+			StringID water_name       = (water != NULL) ? water->name    : STR_CARGO_PLURAL_WATER;
 
 			if (first_food_cargo != CT_INVALID && this->town->act_food > 0) {
 				SetDParam(0, first_food_cargo);
 				SetDParam(1, this->town->act_food);
-				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
+				DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
 			} else {
 				SetDParam(0, food_name);
-				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
+				DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, required_text);
 			}
 
 			if (cargo_needed_for_growth > 1) {
 				if (first_water_cargo != CT_INVALID && this->town->act_water > 0) {
 					SetDParam(0, first_water_cargo);
 					SetDParam(1, this->town->act_water);
-					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
+					DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH);
 				} else {
 					SetDParam(0, water_name);
-					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, y += FONT_HEIGHT_NORMAL, STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED);
+					DrawString(cargo_text_left, cargo_text_right, y += FONT_HEIGHT_NORMAL, required_text);
 				}
 			}
 		}
@@ -521,6 +535,7 @@ static const NWidgetPart _nested_town_game_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN, TVW_CAPTION), SetDataTip(STR_TOWN_VIEW_TOWN_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_BROWN),
@@ -551,6 +566,7 @@ static const NWidgetPart _nested_town_editor_view_widgets[] = {
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN, TVW_CAPTION), SetDataTip(STR_TOWN_VIEW_TOWN_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, TVW_CHANGENAME), SetMinimalSize(76, 14), SetDataTip(STR_BUTTON_RENAME, STR_TOWN_VIEW_RENAME_TOOLTIP),
+		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_BROWN),
@@ -599,6 +615,7 @@ static const NWidgetPart _nested_town_directory_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_TOWN_DIRECTORY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -832,7 +849,7 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(TDW_CENTERTOWN)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, TDW_CENTERTOWN);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -908,6 +925,7 @@ static const NWidgetPart _nested_found_town_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
 		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_FOUND_TOWN_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_DARK_GREEN),
 		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
 	/* Construct new town(s) buttons. */
@@ -920,15 +938,13 @@ static const NWidgetPart _nested_found_town_widgets[] = {
 		NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_MANYRANDOMTOWNS), SetMinimalSize(156, 12), SetFill(1, 0),
 										SetDataTip(STR_FOUND_TOWN_MANY_RANDOM_TOWNS, STR_FOUND_TOWN_RANDOM_TOWNS_TOOLTIP), SetPadding(0, 2, 0, 2),
 		/* Town name selection. */
-		NWidget(NWID_VERTICAL),
-			NWidget(WWT_LABEL, COLOUR_DARK_GREEN, TSEW_TOWNSIZE), SetMinimalSize(156, 14), SetDataTip(STR_FOUND_TOWN_NAME_TITLE, STR_NULL),
-			NWidget(WWT_EDITBOX, COLOUR_WHITE, TSEW_TOWNNAME_EDITBOX), SetMinimalSize(156, 12), SetDataTip(STR_FOUND_TOWN_NAME_EDITOR_TITLE, STR_FOUND_TOWN_NAME_EDITOR_HELP),
-			NWidget(NWID_SPACER), SetMinimalSize(0, 3),
-			NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_TOWNNAME_RANDOM), SetMinimalSize(78, 12), SetFill(1, 0),
+		NWidget(WWT_LABEL, COLOUR_DARK_GREEN, TSEW_TOWNSIZE), SetMinimalSize(156, 14), SetPadding(0, 2, 0, 2), SetDataTip(STR_FOUND_TOWN_NAME_TITLE, STR_NULL),
+		NWidget(WWT_EDITBOX, COLOUR_WHITE, TSEW_TOWNNAME_EDITBOX), SetMinimalSize(156, 12), SetPadding(0, 2, 3, 2),
+										SetDataTip(STR_FOUND_TOWN_NAME_EDITOR_TITLE, STR_FOUND_TOWN_NAME_EDITOR_HELP),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_TOWNNAME_RANDOM), SetMinimalSize(78, 12), SetPadding(0, 2, 0, 2), SetFill(1, 0),
 										SetDataTip(STR_FOUND_TOWN_NAME_RANDOM_BUTTON, STR_FOUND_TOWN_NAME_RANDOM_TOOLTIP),
-		EndContainer(),
 		/* Town size selection. */
-		NWidget(NWID_HORIZONTAL),
+		NWidget(NWID_HORIZONTAL), SetPIP(2, 0, 2),
 			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_LABEL, COLOUR_DARK_GREEN, TSEW_TOWNSIZE), SetMinimalSize(148, 14), SetDataTip(STR_FOUND_TOWN_INITIAL_SIZE_TITLE, STR_NULL),
 			NWidget(NWID_SPACER), SetFill(1, 0),
@@ -950,7 +966,7 @@ static const NWidgetPart _nested_found_town_widgets[] = {
 		NWidget(WWT_TEXTBTN, COLOUR_GREY, TSEW_CITY), SetPadding(0, 2, 0, 2), SetMinimalSize(156, 12), SetFill(1, 0),
 										SetDataTip(STR_FOUND_TOWN_CITY, STR_FOUND_TOWN_CITY_TOOLTIP), SetFill(1, 0),
 		/* Town roads selection. */
-		NWidget(NWID_HORIZONTAL),
+		NWidget(NWID_HORIZONTAL), SetPIP(2, 0, 2),
 			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_LABEL, COLOUR_DARK_GREEN, TSEW_TOWNLAYOUT), SetMinimalSize(148, 14), SetDataTip(STR_FOUND_TOWN_ROAD_LAYOUT, STR_NULL),
 			NWidget(NWID_SPACER), SetFill(1, 0),
@@ -1054,7 +1070,7 @@ public:
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
-		this->DrawEditBox(TSEW_TOWNNAME_EDITBOX);
+		if (!this->IsShaded()) this->DrawEditBox(TSEW_TOWNNAME_EDITBOX);
 	}
 
 	virtual void OnClick(Point pt, int widget)

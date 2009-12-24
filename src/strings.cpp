@@ -18,7 +18,6 @@
 #include "waypoint_base.h"
 #include "industry.h"
 #include "newgrf_text.h"
-#include "music.h"
 #include "fileio_func.h"
 #include "group.h"
 #include "signs_base.h"
@@ -801,10 +800,6 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 				break;
 			}
 
-			case SCC_SKIP: // {SKIP}
-				argv++;
-				break;
-
 			/* This sets up the gender for the string.
 			 * We just ignore this one. It's used in {G 0 Der Die Das} to determine the case. */
 			case SCC_GENDER_INDEX: // {GENDER 0}
@@ -1204,9 +1199,6 @@ static char *GetSpecialNameString(char *buff, int ind, int64 *argv, const char *
 
 		case 3: // President name
 			return GenPresidentName(buff, GetInt32(&argv), last);
-
-		case 4: // song names
-			return strecpy(buff, _origin_songs_specs[GetInt32(&argv) - 1].song_name, last);
 	}
 
 	/* town name? */
