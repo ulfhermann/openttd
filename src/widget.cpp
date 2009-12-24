@@ -453,6 +453,18 @@ static inline void DrawFrame(const Rect &r, Colours colour, StringID str)
 }
 
 /**
+ * Draw a shade box.
+ * @param r       Rectangle of the box.
+ * @param colour  Colour of the shade box.
+ * @param clicked Box is lowered.
+ */
+static inline void DrawShadeBox(const Rect &r, Colours colour, bool clicked)
+{
+	DrawFrameRect(r.left, r.top, r.right, r.bottom, colour, (clicked) ? FR_LOWERED : FR_NONE);
+	DrawSprite((clicked) ? SPR_WINDOW_SHADE : SPR_WINDOW_UNSHADE, PAL_NONE, r.left + WD_SHADEBOX_LEFT + clicked, r.top + WD_SHADEBOX_TOP + clicked);
+}
+
+/**
  * Draw a sticky box.
  * @param r       Rectangle of the box.
  * @param colour  Colour of the sticky box.
@@ -953,13 +965,13 @@ void NWidgetStacked::SetupSmallestSize(Window *w, bool init_array)
 	}
 
 	/* Zero size plane selected */
-	if (this->shown_plane == STACKED_SELECTION_ZERO_SIZE) {
-		Dimension size = {0, 0};
+	if (this->shown_plane >= SZSP_BEGIN) {
+		Dimension size    = {0, 0};
 		Dimension padding = {0, 0};
-		Dimension fill = {0, 0};
-		Dimension resize = {0, 0};
+		Dimension fill    = {(this->shown_plane == SZSP_HORIZONTAL), (this->shown_plane == SZSP_VERTICAL)};
+		Dimension resize  = {(this->shown_plane == SZSP_HORIZONTAL), (this->shown_plane == SZSP_VERTICAL)};
 		/* Here we're primarily interested in the value of resize */
-		w->UpdateWidgetSize(this->index, &size, padding, &fill, &resize);
+		if (this->index >= 0) w->UpdateWidgetSize(this->index, &size, padding, &fill, &resize);
 
 		this->smallest_x = size.width;
 		this->smallest_y = size.height;
@@ -994,7 +1006,7 @@ void NWidgetStacked::AssignSizePosition(SizingType sizing, uint x, uint y, uint 
 	assert(given_width >= this->smallest_x && given_height >= this->smallest_y);
 	StoreSizePosition(sizing, x, y, given_width, given_height);
 
-	if (this->shown_plane == STACKED_SELECTION_ZERO_SIZE) return;
+	if (this->shown_plane >= SZSP_BEGIN) return;
 
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
 		uint hor_step = (sizing == ST_SMALLEST) ? 1 : child_wid->GetHorizontalStepSize(sizing);
@@ -1017,7 +1029,7 @@ void NWidgetStacked::FillNestedArray(NWidgetBase **array, uint length)
 
 void NWidgetStacked::Draw(const Window *w)
 {
-	if (this->shown_plane == STACKED_SELECTION_ZERO_SIZE) return;
+	if (this->shown_plane >= SZSP_BEGIN) return;
 
 	int plane = 0;
 	for (NWidgetBase *child_wid = this->head; child_wid != NULL; plane++, child_wid = child_wid->next) {
@@ -1032,7 +1044,7 @@ void NWidgetStacked::Draw(const Window *w)
 
 NWidgetCore *NWidgetStacked::GetWidgetFromPos(int x, int y)
 {
-	if (this->shown_plane == STACKED_SELECTION_ZERO_SIZE) return NULL;
+	if (this->shown_plane >= SZSP_BEGIN) return NULL;
 
 	if (!IsInsideBS(x, this->pos_x, this->current_x) || !IsInsideBS(y, this->pos_y, this->current_y)) return NULL;
 	int plane = 0;
@@ -1589,7 +1601,11 @@ NWidgetCore *NWidgetBackground::GetWidgetFromPos(int x, int y)
 Scrollbar *NWidgetBackground::FindScrollbar(Window *w, bool allow_next) const
 {
 	if (this->index >= 0 && allow_next && this->child == NULL && (uint)(this->index) + 1 < w->nested_array_size) {
-		const NWidgetCore *next_wid = w->GetWidget<NWidgetCore>(this->index + 1);
+		/* GetWidget ensures that the widget is of the given type.
+		 * As we might have cases where the next widget in the array
+		 * is a non-Core widget (e.g. NWID_SELECTION) we first get
+		 * the base class and then dynamic_cast that. */
+		const NWidgetCore *next_wid = dynamic_cast<NWidgetCore*>(w->GetWidget<NWidgetBase>(this->index + 1));
 		if (next_wid != NULL) return next_wid->FindScrollbar(w, false);
 	}
 	return NULL;
@@ -1673,11 +1689,13 @@ void NWidgetViewport::UpdateViewportCoordinates(Window *w)
 /** Reset the cached dimensions. */
 /* static */ void NWidgetLeaf::InvalidateDimensionCache()
 {
+	shadebox_dimension.width  = shadebox_dimension.height  = 0;
 	stickybox_dimension.width = stickybox_dimension.height = 0;
 	resizebox_dimension.width = resizebox_dimension.height = 0;
 	closebox_dimension.width  = closebox_dimension.height  = 0;
 }
 
+Dimension NWidgetLeaf::shadebox_dimension  = {0, 0};
 Dimension NWidgetLeaf::stickybox_dimension = {0, 0};
 Dimension NWidgetLeaf::resizebox_dimension = {0, 0};
 Dimension NWidgetLeaf::closebox_dimension  = {0, 0};
@@ -1692,7 +1710,7 @@ Dimension NWidgetLeaf::closebox_dimension  = {0, 0};
  */
 NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, StringID tip) : NWidgetCore(tp, colour, 1, 1, data, tip)
 {
-	assert(index >= 0 || tp == WWT_LABEL || tp == WWT_TEXT || tp == WWT_CAPTION || tp == WWT_RESIZEBOX || tp == WWT_STICKYBOX || tp == WWT_CLOSEBOX);
+	assert(index >= 0 || tp == WWT_LABEL || tp == WWT_TEXT || tp == WWT_CAPTION || tp == WWT_RESIZEBOX || tp == WWT_SHADEBOX || tp == WWT_STICKYBOX || tp == WWT_CLOSEBOX);
 	if (index >= 0) this->SetIndex(index);
 	this->SetMinimalSize(0, 0);
 	this->SetResize(0, 0);
@@ -1751,6 +1769,12 @@ NWidgetLeaf::NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, 
 			this->SetDataTip(STR_NULL, STR_TOOLTIP_STICKY);
 			break;
 
+		case WWT_SHADEBOX:
+			this->SetFill(0, 0);
+			this->SetMinimalSize(WD_SHADEBOX_TOP, 14);
+			this->SetDataTip(STR_NULL, STR_TOOLTIP_SHADE);
+			break;
+
 		case WWT_RESIZEBOX:
 			this->SetFill(0, 0);
 			this->SetMinimalSize(WD_RESIZEBOX_WIDTH, 12);
@@ -1797,6 +1821,17 @@ void NWidgetLeaf::SetupSmallestSize(Window *w, bool init_array)
 		case WWT_MATRIX: {
 			static const Dimension extra = {WD_MATRIX_LEFT + WD_MATRIX_RIGHT, WD_MATRIX_TOP + WD_MATRIX_BOTTOM};
 			padding = &extra;
+			break;
+		}
+		case WWT_SHADEBOX: {
+			static const Dimension extra = {WD_SHADEBOX_LEFT + WD_SHADEBOX_RIGHT, WD_SHADEBOX_TOP + WD_SHADEBOX_BOTTOM};
+			padding = &extra;
+			if (NWidgetLeaf::shadebox_dimension.width == 0) {
+				NWidgetLeaf::shadebox_dimension = maxdim(GetSpriteSize(SPR_WINDOW_SHADE), GetSpriteSize(SPR_WINDOW_UNSHADE));
+				NWidgetLeaf::shadebox_dimension.width += extra.width;
+				NWidgetLeaf::shadebox_dimension.height += extra.height;
+			}
+			size = maxdim(size, NWidgetLeaf::shadebox_dimension);
 			break;
 		}
 		case WWT_STICKYBOX: {
@@ -2010,6 +2045,11 @@ void NWidgetLeaf::Draw(const Window *w)
 								(w->flags4 & (WF_SCROLL_DOWN | WF_HSCROLL)) == (WF_SCROLL_DOWN | WF_HSCROLL), &w->hscroll);
 			break;
 
+		case WWT_SHADEBOX:
+			assert(this->widget_data == 0);
+			DrawShadeBox(r, this->colour, w->IsShaded());
+			break;
+
 		case WWT_STICKYBOX:
 			assert(this->widget_data == 0);
 			DrawStickyBox(r, this->colour, !!(w->flags4 & WF_STICKY));
@@ -2050,7 +2090,11 @@ Scrollbar *NWidgetLeaf::FindScrollbar(Window *w, bool allow_next) const
 	if (this->type == WWT_SCROLL2BAR) return &w->vscroll2;
 
 	if (this->index >= 0 && allow_next && (uint)(this->index) + 1 < w->nested_array_size) {
-		const NWidgetCore *next_wid = w->GetWidget<NWidgetCore>(this->index + 1);
+		/* GetWidget ensures that the widget is of the given type.
+		 * As we might have cases where the next widget in the array
+		 * is a non-Core widget (e.g. NWID_SELECTION) we first get
+		 * the base class and then dynamic_cast that. */
+		const NWidgetCore *next_wid = dynamic_cast<NWidgetCore*>(w->GetWidget<NWidgetBase>(this->index + 1));
 		if (next_wid != NULL) return next_wid->FindScrollbar(w, false);
 	}
 	return NULL;
@@ -2234,17 +2278,18 @@ static int MakeNWidget(const NWidgetPart *parts, int count, NWidgetBase **dest, 
  * Build a nested widget tree by recursively filling containers with nested widgets read from their parts.
  * @param parts  Array with parts of the nested widgets.
  * @param count  Length of the \a parts array.
- * @param parent Container to use for storing the child widgets.
+ * @param parent Pointer or container to use for storing the child widgets (*parent == NULL or *parent == container or background widget).
  * @param biggest_index Pointer to biggest nested widget index in the tree.
  * @return Number of widget part elements used to fill the container.
  * @post \c *biggest_index contains the largest widget index of the tree and \c -1 if no index is used.
  */
-static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *parent, int *biggest_index)
+static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase **parent, int *biggest_index)
 {
-	/* Given parent must be either a #NWidgetContainer or a #NWidgetBackground object. */
-	NWidgetContainer *nwid_cont = dynamic_cast<NWidgetContainer *>(parent);
-	NWidgetBackground *nwid_parent = dynamic_cast<NWidgetBackground *>(parent);
-	assert((nwid_cont != NULL && nwid_parent == NULL) || (nwid_cont == NULL && nwid_parent != NULL));
+	/* If *parent == NULL, only the first widget is read and returned. Otherwise, *parent must point to either
+	 * a #NWidgetContainer or a #NWidgetBackground object, and parts are added as much as possible. */
+	NWidgetContainer *nwid_cont = dynamic_cast<NWidgetContainer *>(*parent);
+	NWidgetBackground *nwid_parent = dynamic_cast<NWidgetBackground *>(*parent);
+	assert(*parent == NULL || (nwid_cont != NULL && nwid_parent == NULL) || (nwid_cont == NULL && nwid_parent != NULL));
 
 	int total_used = 0;
 	while (true) {
@@ -2257,17 +2302,22 @@ static int MakeWidgetTree(const NWidgetPart *parts, int count, NWidgetBase *pare
 		/* Break out of loop when end reached */
 		if (sub_widget == NULL) break;
 
-		/* Add sub_widget to parent container. */
-		if (nwid_cont) nwid_cont->Add(sub_widget);
-		if (nwid_parent) nwid_parent->Add(sub_widget);
-
 		/* If sub-widget is a container, recursively fill that container. */
 		WidgetType tp = sub_widget->type;
 		if (fill_sub && (tp == NWID_HORIZONTAL || tp == NWID_HORIZONTAL_LTR || tp == NWID_VERTICAL
 							|| tp == WWT_PANEL || tp == WWT_FRAME || tp == WWT_INSET || tp == NWID_SELECTION)) {
-			int num_used = MakeWidgetTree(parts, count - total_used, sub_widget, biggest_index);
+			NWidgetBase *sub_ptr = sub_widget;
+			int num_used = MakeWidgetTree(parts, count - total_used, &sub_ptr, biggest_index);
 			parts += num_used;
 			total_used += num_used;
+		}
+
+		/* Add sub_widget to parent container if available, otherwise return the widget to the caller. */
+		if (nwid_cont) nwid_cont->Add(sub_widget);
+		if (nwid_parent) nwid_parent->Add(sub_widget);
+		if (!nwid_cont && !nwid_parent) {
+			*parent = sub_widget;
+			return total_used;
 		}
 	}
 
@@ -2293,6 +2343,59 @@ NWidgetContainer *MakeNWidgets(const NWidgetPart *parts, int count, int *biggest
 {
 	*biggest_index = -1;
 	if (container == NULL) container = new NWidgetVertical();
-	MakeWidgetTree(parts, count, container, biggest_index);
+	NWidgetBase *cont_ptr = container;
+	MakeWidgetTree(parts, count, &cont_ptr, biggest_index);
 	return container;
+}
+
+/** Make a nested widget tree for a window from a parts array. Besides loading, it inserts a shading selection widget
+ * between the title bar and the window body if the first widget in the parts array looks like a title bar (it is a horizontal
+ * container with a caption widget) and has a shade box widget.
+ * @param parts Array with parts of the widgets.
+ * @param count Length of the \a parts array.
+ * @param biggest_index Pointer to biggest nested widget index collected in the tree.
+ * @param [out] shade_select Pointer to the inserted shade selection widget (\c NULL if not unserted).
+ * @return Root of the nested widget tree, a vertical container containing the entire GUI.
+ * @ingroup NestedWidgetParts
+ * @pre \c biggest_index != NULL
+ * @post \c *biggest_index contains the largest widget index of the tree and \c -1 if no index is used.
+ */
+NWidgetContainer *MakeWindowNWidgetTree(const NWidgetPart *parts, int count, int *biggest_index, NWidgetStacked **shade_select)
+{
+	*biggest_index = -1;
+
+	/* Read the first widget recursively from the array. */
+	NWidgetBase *nwid = NULL;
+	int num_used = MakeWidgetTree(parts, count, &nwid, biggest_index);
+	assert(nwid != NULL);
+	parts += num_used;
+	count -= num_used;
+
+	NWidgetContainer *root = new NWidgetVertical;
+	root->Add(nwid);
+	if (count == 0) { // There is no body at all.
+		*shade_select = NULL;
+		return root;
+	}
+
+	/* If the first widget looks like a titlebar, treat it as such.
+	 * If it has a shading box, silently add a shade selection widget in the tree. */
+	NWidgetHorizontal *hor_cont = dynamic_cast<NWidgetHorizontal *>(nwid);
+	NWidgetContainer *body;
+	if (hor_cont != NULL && hor_cont->GetWidgetOfType(WWT_CAPTION) != NULL && hor_cont->GetWidgetOfType(WWT_SHADEBOX) != NULL) {
+		*shade_select = new NWidgetStacked;
+		root->Add(*shade_select);
+		body = new NWidgetVertical;
+		(*shade_select)->Add(body);
+	} else {
+		*shade_select = NULL;
+		body = root;
+	}
+
+	/* Load the remaining parts into 'body'. */
+	int biggest2 = -1;
+	MakeNWidgets(parts, count, &biggest2, body);
+
+	*biggest_index = max(*biggest_index, biggest2);
+	return root;
 }

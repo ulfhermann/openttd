@@ -1129,10 +1129,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\music.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\network\network.h"
 				>
 			</File>
@@ -2372,10 +2368,6 @@
 		<Filter
 			Name="Script"
 			>
-			<File
-				RelativePath=".\..\src\script\fake_squirrel_types.hpp"
-				>
-			</File>
 			<File
 				RelativePath=".\..\src\script\script_info.cpp"
 				>
