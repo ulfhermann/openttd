@@ -181,6 +181,7 @@ static void ShowHelp()
 		"                          specified in graphics set file (see below)\n"
 		"  -I graphics_set     = Force the graphics set (see below)\n"
 		"  -S sounds_set       = Force the sounds set (see below)\n"
+		"  -M music_set        = Force the music set (see below)\n"
 		"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n"
 		"  -x                  = Do not automatically save to config file on exit\n"
 		"\n",
@@ -192,6 +193,9 @@ static void ShowHelp()
 
 	/* List the sounds packs */
 	p = BaseSounds::GetSetsList(p, lastof(buf));
+
+	/* List the music packs */
+	p = BaseMusic::GetSetsList(p, lastof(buf));
 
 	/* List the drivers */
 	p = VideoDriverFactoryBase::GetDriversInfo(p, lastof(buf));
@@ -409,6 +413,7 @@ int ttd_main(int argc, char *argv[])
 	char *blitter = NULL;
 	char *graphics_set = NULL;
 	char *sounds_set = NULL;
+	char *music_set = NULL;
 	Dimension resolution = {0, 0};
 	Year startyear = INVALID_YEAR;
 	uint generation_seed = GENERATE_NEW_SEED;
@@ -446,6 +451,7 @@ int ttd_main(int argc, char *argv[])
 		switch (i) {
 		case 'I': free(graphics_set); graphics_set = strdup(mgo.opt); break;
 		case 'S': free(sounds_set); sounds_set = strdup(mgo.opt); break;
+		case 'M': free(music_set); music_set = strdup(mgo.opt); break;
 		case 'm': free(musicdriver); musicdriver = strdup(mgo.opt); break;
 		case 's': free(sounddriver); sounddriver = strdup(mgo.opt); break;
 		case 'v': free(videodriver); videodriver = strdup(mgo.opt); break;
@@ -536,6 +542,7 @@ int ttd_main(int argc, char *argv[])
 			DeterminePaths(argv[0]);
 			BaseGraphics::FindSets();
 			BaseSounds::FindSets();
+			BaseMusic::FindSets();
 			ShowHelp();
 			return 0;
 		}
@@ -549,6 +556,7 @@ int ttd_main(int argc, char *argv[])
 	DeterminePaths(argv[0]);
 	BaseGraphics::FindSets();
 	BaseSounds::FindSets();
+	BaseMusic::FindSets();
 
 #if defined(UNIX) && !defined(__MORPHOS__)
 	/* We must fork here, or we'll end up without some resources we need (like sockets) */
@@ -619,6 +627,14 @@ int ttd_main(int argc, char *argv[])
 			usererror("Failed to select requested graphics set '%s'", graphics_set);
 	}
 	free(graphics_set);
+
+	if (music_set == NULL && BaseMusic::ini_set != NULL) music_set = strdup(BaseMusic::ini_set);
+	if (!BaseMusic::SetSet(music_set)) {
+		StrEmpty(music_set) ?
+			usererror("Failed to find a music set. Please acquire a music set for OpenTTD. See section 4.1 of readme.txt.") :
+			usererror("Failed to select requested music set '%s'", music_set);
+	}
+	free(music_set);
 
 	/* Initialize game palette */
 	GfxInitPalettes();
@@ -748,6 +764,7 @@ int ttd_main(int argc, char *argv[])
 
 	free(const_cast<char *>(BaseGraphics::ini_set));
 	free(const_cast<char *>(BaseSounds::ini_set));
+	free(const_cast<char *>(BaseMusic::ini_set));
 	free(_ini_musicdriver);
 	free(_ini_sounddriver);
 	free(_ini_videodriver);
@@ -766,17 +783,6 @@ void HandleExitGameRequest()
 	} else {
 		AskExitGame();
 	}
-}
-
-static void ShowScreenshotResult(bool b)
-{
-	if (b) {
-		SetDParamStr(0, _screenshot_name);
-		ShowErrorMessage(STR_MESSAGE_SCREENSHOT_SUCCESSFULLY, INVALID_STRING_ID, 0, 0);
-	} else {
-		ShowErrorMessage(STR_ERROR_SCREENSHOT_FAILED, INVALID_STRING_ID, 0, 0);
-	}
-
 }
 
 static void MakeNewGameDone()
@@ -1034,6 +1040,8 @@ void SwitchToMode(SwitchMode new_mode)
 			if (SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_EDITOR, NO_DIRECTORY)) {
 				SetLocalCompany(OWNER_NONE);
 				_settings_newgame.game_creation.starting_year = _cur_year;
+				/* Cancel the saveload pausing */
+				DoCommandP(0, PM_PAUSED_SAVELOAD, 0, CMD_PAUSE);
 			} else {
 				SetDParamStr(0, GetSaveLoadErrorString());
 				ShowErrorMessage(STR_JUST_RAW_STRING, INVALID_STRING_ID, 0, 0);
@@ -1238,9 +1246,6 @@ void GameLoop()
 		DoAutosave();
 		RedrawAutosave();
 	}
-
-	/* make a screenshot? */
-	if (IsScreenshotRequested()) ShowScreenshotResult(MakeScreenshot());
 
 	/* switch game mode? */
 	if (_switch_mode != SM_NONE) {
