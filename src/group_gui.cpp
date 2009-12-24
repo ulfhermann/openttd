@@ -87,6 +87,7 @@ static const NWidgetPart _nested_group_widgets[] = {
 	NWidget(NWID_HORIZONTAL), // Window header
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, GRP_WIDGET_CAPTION),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -596,7 +597,7 @@ public:
 		nwi->widget_data = (this->vscroll2.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 
 		nwi = this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_VEHICLE);
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_VEHICLE)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, GRP_WIDGET_LIST_VEHICLE);
 		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
