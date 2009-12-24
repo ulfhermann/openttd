@@ -217,7 +217,7 @@ struct SubsidyListWindow : Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(SLW_PANEL)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, SLW_PANEL);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -230,6 +230,7 @@ static const NWidgetPart _nested_subsidies_list_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
 		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_SUBSIDIES_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),

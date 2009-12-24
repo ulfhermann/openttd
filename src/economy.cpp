@@ -929,22 +929,22 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 {
 	assert(num_pieces > 0);
 
-	/* Update company statistics */
-	company->cur_economy.delivered_cargo += num_pieces;
-	SetBit(company->cargo_types, cargo_type);
-
 	const Station *st = Station::Get(dest);
-
-	/* Increase town's counter for some special goods types */
-	const CargoSpec *cs = CargoSpec::Get(cargo_type);
-	if (cs->town_effect == TE_FOOD) st->town->new_act_food += num_pieces;
-	if (cs->town_effect == TE_WATER) st->town->new_act_water += num_pieces;
 
 	/* Give the goods to the industry. */
 	uint accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
 
 	/* If this cargo type is always accepted, accept all */
 	if (HasBit(st->always_accepted, cargo_type)) accepted = num_pieces;
+
+	/* Update company statistics */
+	company->cur_economy.delivered_cargo += accepted;
+	if (accepted > 0) SetBit(company->cargo_types, cargo_type);
+
+	/* Increase town's counter for some special goods types */
+	const CargoSpec *cs = CargoSpec::Get(cargo_type);
+	if (cs->town_effect == TE_FOOD) st->town->new_act_food += accepted;
+	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
 
 	/* Determine profit */
 	Money profit = GetTransportedGoodsIncome(accepted, DistanceManhattan(source_tile, st->xy), days_in_transit, cargo_type);
@@ -1135,7 +1135,8 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 	int unloading_time = 0;
 	Vehicle *u = v;
-	int result = 0;
+	bool dirty_vehicle = false;
+	bool dirty_station = false;
 
 	bool completely_emptied = true;
 	bool anything_unloaded = false;
@@ -1175,7 +1176,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 				/* The cargo has reached it's final destination, the packets may now be destroyed */
 				remaining = v->cargo.MoveTo<StationCargoList>(NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
 
-				result |= 1;
+				dirty_vehicle = true;
 				accepted = true;
 			}
 
@@ -1188,7 +1189,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
 				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 
-				result |= 2;
+				dirty_vehicle = dirty_station = true;
 			} else if (!accepted) {
 				/* The order changed while unloading (unset unload/transfer) or the
 				 * station does not accept our goods. */
@@ -1279,7 +1280,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 			unloading_time += cap;
 
-			result |= 2;
+			dirty_vehicle = dirty_station = true;
 		}
 
 		if (v->cargo.Count() >= v->cargo_cap) {
@@ -1367,14 +1368,14 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		TriggerVehicle(v, VEHICLE_TRIGGER_EMPTY);
 	}
 
-	if (result != 0) {
+	if (dirty_vehicle) {
 		SetWindowDirty(GetWindowClassForVehicleType(v->type), v->owner);
 		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-
-		st->MarkTilesDirty(true);
 		v->MarkDirty();
-
-		if (result & 2) SetWindowDirty(WC_STATION_VIEW, last_visited);
+	}
+	if (dirty_station) {
+		st->MarkTilesDirty(true);
+		SetWindowDirty(WC_STATION_VIEW, last_visited);
 	}
 }
 
