@@ -788,19 +788,8 @@ static bool IsRoadAllowedHere(Town *t, TileIndex tile, DiagDirection dir)
 		}
 
 		cur_slope = _settings_game.construction.build_on_slopes ? GetFoundationSlope(tile, NULL) : GetTileSlope(tile, NULL);
-		if (cur_slope == SLOPE_FLAT) {
-no_slope:
-			/* Tile has no slope */
-			switch (t->layout) {
-				default: NOT_REACHED();
-
-				case TL_ORIGINAL: // Disallow the road if any neighboring tile has a road (distance: 1)
-					return !IsNeighborRoadTile(tile, dir, 1);
-
-				case TL_BETTER_ROADS: // Disallow the road if any neighboring tile has a road (distance: 1 and 2).
-					return !IsNeighborRoadTile(tile, dir, 2);
-			}
-		}
+		bool ret = !IsNeighborRoadTile(tile, dir, t->layout == TL_ORIGINAL ? 1 : 2);
+		if (cur_slope == SLOPE_FLAT) return ret;
 
 		/* If the tile is not a slope in the right direction, then
 		 * maybe terraform some. */
@@ -815,12 +804,12 @@ no_slope:
 				}
 				if (CmdFailed(res) && Chance16(1, 3)) {
 					/* We can consider building on the slope, though. */
-					goto no_slope;
+					return ret;
 				}
 			}
 			return false;
 		}
-		return true;
+		return ret;
 	}
 }
 
@@ -1577,13 +1566,13 @@ CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	cost.MultiplyCost(mult);
 
-	if (cost.GetCost() > GetAvailableMoneyForCommand()) {
-		_additional_cash_required = cost.GetCost();
-		return CommandCost(EXPENSES_OTHER);
-	}
-
 	/* Create the town */
 	if (flags & DC_EXEC) {
+		if (cost.GetCost() > GetAvailableMoneyForCommand()) {
+			_additional_cash_required = cost.GetCost();
+			return CommandCost(EXPENSES_OTHER);
+		}
+
 		_generating_world = true;
 		UpdateNearestTownForRoadTiles(true);
 		Town *t;
@@ -2105,7 +2094,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 		const HouseSpec *hs = HouseSpec::Get(i);
 
 		/* Verify that the candidate house spec matches the current tile status */
-		if ((~hs->building_availability & bitmask) != 0 || !hs->enabled) continue;
+		if ((~hs->building_availability & bitmask) != 0 || !hs->enabled || hs->override != INVALID_HOUSE_ID) continue;
 
 		/* Don't let these counters overflow. Global counters are 32bit, there will never be that many houses. */
 		if (hs->class_id != HOUSE_NO_CLASS) {
@@ -2143,13 +2132,9 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 
 		const HouseSpec *hs = HouseSpec::Get(house);
 
-		if (_loaded_newgrf_features.has_newhouses) {
-			if (hs->override != 0) {
-				house = hs->override;
-				hs = HouseSpec::Get(house);
-			}
-
-			if ((hs->extra_flags & BUILDING_IS_HISTORICAL) && !_generating_world && _game_mode != GM_EDITOR) continue;
+		if (_loaded_newgrf_features.has_newhouses && !_generating_world &&
+				_game_mode != GM_EDITOR && (hs->extra_flags & BUILDING_IS_HISTORICAL) != 0) {
+			continue;
 		}
 
 		if (_cur_year < hs->min_year || _cur_year > hs->max_year) continue;

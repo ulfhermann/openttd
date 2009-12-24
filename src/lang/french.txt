@@ -230,6 +230,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Renommer
 
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Fermer la fenêtre
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Titre de fenêtre - Faire Glisser pour déplacer la fenêtre
+STR_TOOLTIP_SHADE                                               :{BLACK}Enrouler la fenêtre - N'afficher que la barre de titre
 STR_TOOLTIP_STICKY                                              :{BLACK}Marquer cette fenêtre comme ineffaçable pour la touche 'Fermer toutes les fenêtres'
 STR_TOOLTIP_RESIZE                                              :{BLACK}Cliquer et faire glisse pour redimensionner la fenêtre
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Bascule entre une grande/petite fenêtre
@@ -244,7 +245,7 @@ STR_BUTTON_OK                                                   :{BLACK}OK
 
 # On screen keyboard window
 STR_OSK_KEYBOARD_LAYOUT                                         :²&é"'(-è_çà)= azertyuiop^$qsdfghjklmù*<wxcvbn,;:!
-STR_OSK_KEYBOARD_LAYOUT_CAPS                                    : 1234567890°+ AZERTYUIOP¨£QSDFGHJKLM%µ>WXCVBN?./§
+STR_OSK_KEYBOARD_LAYOUT_CAPS                                    :²1234567890°+ AZERTYUIOP¨£QSDFGHJKLM%µ>WXCVBN?./§
 
 # Measurement tooltip
 STR_MEASURE_LENGTH                                              :{BLACK}Longueur{NBSP}: {NUM}
@@ -607,6 +608,8 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Choisir 
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Active/Désactive le mode aléatoire
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Afficher la fenêtre de sélection de pistes
 
+STR_ERROR_NO_SONGS                                              :{WHITE}Un ensemble de musique vide a été choisis. Aucune musique ne sera jouée.
+
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Sélection du Programme Musical
 STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
@@ -942,6 +945,11 @@ STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Sons de 
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Choisir les sons de base à utiliser
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Information additionnelle sur les sons de base
 
+STR_GAME_OPTIONS_BASE_MUSIC                                     :{BLACK}Musique de base
+STR_GAME_OPTIONS_BASE_MUSIC_TOOLTIP                             :{BLACK}Choisir la musique de base à utiliser
+STR_GAME_OPTIONS_BASE_MUSIC_STATUS                              :{RED}{NUM} fichier{P "" s} corrompu{P "" s}
+STR_GAME_OPTIONS_BASE_MUSIC_DESCRIPTION_TOOLTIP                 :{BLACK}Information additionnelle sur la musique de base
+
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Échec du mode plein écran
 
 # Custom currency window
@@ -1009,6 +1017,13 @@ STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :Élevé
 STR_NUM_CUSTOM                                                  :Personnalisé
 
+STR_VARIETY_NONE                                                :Aucune
+STR_VARIETY_VERY_LOW                                            :Très basse
+STR_VARIETY_LOW                                                 :Basse
+STR_VARIETY_MEDIUM                                              :Moyenne
+STR_VARIETY_HIGH                                                :Élevée
+STR_VARIETY_VERY_HIGH                                           :Très élevée
+
 STR_AI_SPEED_VERY_SLOW                                          :Très Lent
 STR_AI_SPEED_SLOW                                               :Lent
 STR_AI_SPEED_MEDIUM                                             :Moyen
@@ -1064,7 +1079,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Permett
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Modèle d'accélération des trains{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Réaliste
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Interdire aux trains et navires les virages à 90°{NBSP}: {ORANGE}{STRING} {LTBLUE} (pas avec NTP)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Interdire aux trains et navires les virages à 90°{NBSP}: {ORANGE}{STRING} {LTBLUE} (pas avec OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Joindre les gares juxtaposées{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Permettre de joindre une station non adjacente{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Utiliser l'algorithme amélioré de chargement{NBSP}: {ORANGE}{STRING}
@@ -1248,6 +1263,11 @@ STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :interdit
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :autorisé
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :autorisé, agencement des routes personnalisé
 
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}Plantation des arbres durant la partie{NBSP}: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :nulle part {RED}(les scieries ne fonctionneront plus)
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :seulement dans les forêts tropicales
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :partout
+
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Position de la barre d'outils principale{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :À gauche
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Centrée
@@ -1286,11 +1306,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Villes
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industries
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Recherche de chemin des trains{NBSP}: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Non recommandé)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Recommandé)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Recherche de chemin des véhicules routiers{NBSP}: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(Non recommandé)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Recommandé)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Recherche de chemin des navires{NBSP}: {ORANGE}{STRING}
@@ -1802,6 +1820,7 @@ STR_CONTENT_TYPE_AI_LIBRARY                                     :Bibliothèque I
 STR_CONTENT_TYPE_SCENARIO                                       :Scénario
 STR_CONTENT_TYPE_HEIGHTMAP                                      :Carte d'altitude
 STR_CONTENT_TYPE_BASE_SOUNDS                                    :Sons de base
+STR_CONTENT_TYPE_BASE_MUSIC                                     :Musique de base
 
 # Content downloading progress window
 STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Téléchargement du contenu...
@@ -2229,6 +2248,7 @@ STR_MAPGEN_TREE_PLACER                                          :{BLACK}Ajout de
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Type de terrain{NBSP}:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Niveau de la mer{NBSP}:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Lissage{NBSP}:
+STR_MAPGEN_VARIETY                                              :{BLACK}Variété de distribution{NBSP}:
 STR_MAPGEN_GENERATE                                             :{WHITE}Créer
 
 # Strings for map borders at game generation
@@ -2328,6 +2348,7 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Attention{NBSP}: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Erreur{NBSP}: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Fatal{NBSP}: {SILVER}{STRING}
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}Une erreur NewGRF fatale est survenue{NBSP}: {}{STRING}
 STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} ne fonctionnera pas avec la version de TTDPatch reportée par OpenTTD.
 STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} est pour la version {STRING} de TTD.
 STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} est conçu pour être utilisé avec {STRING}
@@ -2389,8 +2410,9 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Populati
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Passagers le mois dernier{NBSP}: {ORANGE}{COMMA}{BLACK}  max{NBSP}: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Courrier le mois dernier{NBSP}: {ORANGE}{COMMA}{BLACK}  max{NBSP}: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Cargaison nécessaire à la croissance de la ville{NBSP}:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} requis
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} livré le mois dernier
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} requis
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} requis en hiver
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} livré le mois dernier
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Limite de nuisance pour la ville{NBSP}: {ORANGE}{COMMA}{BLACK}  max{NBSP}: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Centrer la vue sur la ville. Ctrl-clic pour ouvrir une nouvelle vue sur la ville
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Municipalité
@@ -2520,9 +2542,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Équilib
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Emprunt
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Emprunt maximum{NBSP}: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Emprunter {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Emprunter {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Augmenter le prêt. Ctrl-clic pour emprunter autant que possible
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Rembourser {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Rembourser {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Rembourser une partie du prêt. Ctrl-clic pour rembourser autant que possible
 
 # Company view
@@ -2934,8 +2956,9 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Profit c
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Fiabilité{NBSP}: {LTBLUE}{COMMA}%  {BLACK}Pannes depuis le dernier entretien{NBSP}: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE}{BLACK}Construit{NBSP}: {LTBLUE}{NUM}{BLACK} Valeur{NBSP}: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_NO_CAPACITY                                    :{BLACK}Capacité{NBSP}: {LTBLUE}Aucune
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Crédits de transfert{NBSP}: {LTBLUE}{CURRENCY}
@@ -2999,6 +3022,8 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Horaire
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Basculer vers la vue horaire
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Liste des ordres - Cliquer sur un ordre pour le sélectionner. Ctrl-clic pour déplacer la vue sur la station
+STR_ORDER_INDEX                                                 :{COMMA}:{NBSP}
+STR_ORDER_TEXT                                                  :{STRING} {STRING}
 
 STR_ORDERS_END_OF_ORDERS                                        :- - Fin des ordres - -
 STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Fin des ordres partagés - -
@@ -3188,6 +3213,11 @@ STR_AI_CONFIG_CAPTION                                           :{WHITE}Configur
 STR_AI_CONFIG_LIST_TOOLTIP                                      :{BLACK}Toutes les IA qui seront chargées pendant la prochaine partie
 STR_AI_CONFIG_HUMAN_PLAYER                                      :Joueur Humain
 STR_AI_CONFIG_RANDOM_AI                                         :IA aléatoire
+
+STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Déplacer vers le haut
+STR_AI_CONFIG_MOVE_UP_TOOLTIP                                   :{BLACK}Déplacer l'IA sélectionnée vers le haut
+STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Déplacer vers le bas
+STR_AI_CONFIG_MOVE_DOWN_TOOLTIP                                 :{BLACK}Déplacer l'IA sélectionnée vers le bas
 
 STR_AI_CONFIG_CHANGE                                            :{BLACK}Sélection IA
 STR_AI_CONFIG_CHANGE_TOOLTIP                                    :{BLACK}Charger une autre IA

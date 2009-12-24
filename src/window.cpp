@@ -79,6 +79,23 @@ WindowDesc::~WindowDesc()
 }
 
 /**
+ * Set capacity of visible elements from the size and resize properties of a widget.
+ * @param w       Window.
+ * @param widget  Widget with size and resize properties.
+ * @param padding Padding to subtract from the size.
+ * @note Updates the position if needed.
+ */
+void Scrollbar::SetCapacityFromWidget(Window *w, int widget, int padding)
+{
+	NWidgetBase *nwid = w->GetWidget<NWidgetBase>(widget);
+	if (this->is_vertical) {
+		this->SetCapacity(((int)nwid->current_y - padding) / (int)nwid->resize_y);
+	} else {
+		this->SetCapacity(((int)nwid->current_x - padding) / (int)nwid->resize_x);
+	}
+}
+
+/**
  * Set the window that has the focus
  * @param w The window to set the focus on
  */
@@ -257,8 +274,7 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, bool double_click)
 	 * So unless the clicked widget is the caption bar, change focus to this widget */
 	if (widget_type != WWT_CAPTION) {
 		/* Close the OSK window if a edit box loses focus */
-		if ((w->nested_root != NULL && w->nested_focus != NULL &&  w->nested_focus->type == WWT_EDITBOX &&
-					w->nested_focus != nw && w->window_class != WC_OSK)) {
+		if (w->nested_focus != NULL &&  w->nested_focus->type == WWT_EDITBOX && w->nested_focus != nw && w->window_class != WC_OSK) {
 			DeleteWindowById(WC_OSK, 0);
 		}
 
@@ -315,6 +331,11 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, bool double_click)
 			 * we assume that that button is used to resize to the left. */
 			StartWindowSizing(w, (int)nw->pos_x < (w->width / 2));
 			nw->SetDirty(w);
+			return;
+
+		case WWT_SHADEBOX:
+			nw->SetDirty(w);
+			w->SetShaded(!w->IsShaded());
 			return;
 
 		case WWT_STICKYBOX:
@@ -375,6 +396,13 @@ static void DispatchMouseWheelEvent(Window *w, const NWidgetCore *nwid, int whee
 {
 	if (nwid == NULL) return;
 
+	/* Using wheel on caption/shade-box shades or unshades the window. */
+	if (nwid->type == WWT_CAPTION || nwid->type == WWT_SHADEBOX) {
+		w->SetShaded(!w->IsShaded());
+		return;
+	}
+
+	/* Scroll the widget attached to the scrollbar. */
 	Scrollbar *sb = nwid->FindScrollbar(w);
 	if (sb != NULL && sb->GetCount() > sb->GetCapacity()) {
 		sb->UpdatePosition(wheel);
@@ -486,21 +514,18 @@ void Window::SetDirty() const
  */
 void Window::ReInit(int rx, int ry)
 {
-	if (this->nested_root == NULL) return; // Only nested widget windows can re-initialize.
-
 	this->SetDirty(); // Mark whole current window as dirty.
 
 	/* Save current size. */
 	int window_width  = this->width;
 	int window_height = this->height;
 
+	this->OnInit();
 	/* Re-initialize the window from the ground up. No need to change the nested_array, as all widgets stay where they are. */
 	this->nested_root->SetupSmallestSize(this, false);
 	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, _dynlang.text_dir == TD_RTL);
 	this->width  = this->nested_root->smallest_x;
 	this->height = this->nested_root->smallest_y;
-	this->resize.width  = this->nested_root->smallest_x;
-	this->resize.height = this->nested_root->smallest_y;
 	this->resize.step_width  = this->nested_root->resize_x;
 	this->resize.step_height = this->nested_root->resize_y;
 
@@ -517,6 +542,30 @@ void Window::ReInit(int rx, int ry)
 	ResizeWindow(this, dx, dy);
 	this->OnResize();
 	this->SetDirty();
+}
+
+/** Set the shaded state of the window to \a make_shaded.
+ * @param make_shaded If \c true, shade the window (roll up until just the title bar is visible), else unshade/unroll the window to its original size.
+ * @note The method uses #Window::ReInit(), thus after the call, the whole window should be considered changed.
+ */
+void Window::SetShaded(bool make_shaded)
+{
+	if (this->shade_select == NULL) return;
+
+	int desired = make_shaded ? SZSP_HORIZONTAL : 0;
+	if (this->shade_select->shown_plane != desired) {
+		if (make_shaded) {
+			this->unshaded_size.width  = this->width;
+			this->unshaded_size.height = this->height;
+			this->shade_select->SetDisplayedPlane(desired);
+			this->ReInit(0, -this->height);
+		} else {
+			this->shade_select->SetDisplayedPlane(desired);
+			int dx = ((int)this->unshaded_size.width  > this->width)  ? (int)this->unshaded_size.width  - this->width  : 0;
+			int dy = ((int)this->unshaded_size.height > this->height) ? (int)this->unshaded_size.height - this->height : 0;
+			this->ReInit(dx, dy);
+		}
+	}
 }
 
 /** Find the Window whose parent pointer points to this window
@@ -587,6 +636,22 @@ Window *FindWindowById(WindowClass cls, WindowNumber number)
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
 		if (w->window_class == cls && w->window_number == number) return w;
+	}
+
+	return NULL;
+}
+
+/**
+ * Find any window by its class. Useful when searching for a window that uses
+ * the window number as a WindowType, like WC_SEND_NETWORK_MSG.
+ * @param cls Window class
+ * @return Pointer to the found window, or \c NULL if not available
+ */
+Window *FindWindowByClass(WindowClass cls)
+{
+	Window *w;
+	FOR_ALL_WINDOWS_FROM_BACK(w) {
+		if (w->window_class == cls) return w;
 	}
 
 	return NULL;
@@ -682,8 +747,8 @@ void ChangeWindowOwner(Owner old_owner, Owner new_owner)
 
 static void BringWindowToFront(Window *w);
 
-/** Find a window and make it the top-window on the screen. The window
- * gets a white border for a brief period of time to visualize its "activation"
+/** Find a window and make it the top-window on the screen.
+ * The window gets unshaded if it was shaded, and a white border is drawn at its edges for a brief period of time to visualize its "activation".
  * @param cls WindowClass of the window to activate
  * @param number WindowNumber of the window to activate
  * @return a pointer to the window thus activated */
@@ -692,6 +757,8 @@ Window *BringWindowToFrontById(WindowClass cls, WindowNumber number)
 	Window *w = FindWindowById(cls, number);
 
 	if (w != NULL) {
+		if (w->IsShaded()) w->SetShaded(false); // Restore original window size if it was shaded.
+
 		w->flags4 |= WF_WHITE_BORDER_MASK;
 		BringWindowToFront(w);
 		w->SetDirty();
@@ -773,7 +840,8 @@ void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flag
 	this->window_number = window_number;
 	this->desc_flags = desc_flags;
 
-	/* If available, initialize nested widget tree. */
+	this->OnInit();
+	/* Initialize nested widget tree. */
 	if (this->nested_array == NULL) {
 		this->nested_array = CallocT<NWidgetBase *>(this->nested_array_size);
 		this->nested_root->SetupSmallestSize(this, true);
@@ -785,14 +853,13 @@ void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flag
 
 	/* Further set up window properties,
 	 * this->left, this->top, this->width, this->height, this->resize.width, and this->resize.height are initialized later. */
-	this->resize.step_width  = (this->nested_root != NULL) ? this->nested_root->resize_x : 1;
-	this->resize.step_height = (this->nested_root != NULL) ? this->nested_root->resize_y : 1;
+	this->resize.step_width  = this->nested_root->resize_x;
+	this->resize.step_height = this->nested_root->resize_y;
 
 	/* Give focus to the opened window unless it is the OSK window or a text box
 	 * of focused window has focus (so we don't interrupt typing). But if the new
 	 * window has a text box, then take focus anyway. */
-	bool has_editbox = this->nested_root != NULL && this->nested_root->GetWidgetOfType(WWT_EDITBOX) != NULL;
-	if (this->window_class != WC_OSK && (!EditBoxInGlobalFocus() || has_editbox)) SetFocusedWindow(this);
+	if (this->window_class != WC_OSK && (!EditBoxInGlobalFocus() || this->nested_root->GetWidgetOfType(WWT_EDITBOX) != NULL)) SetFocusedWindow(this);
 
 	/* Hacky way of specifying always-on-top windows. These windows are
 	 * always above other windows because they are moved below them.
@@ -807,7 +874,7 @@ void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flag
 		if (FindWindowById(WC_MAIN_TOOLBAR, 0)     != NULL) w = w->z_back;
 		if (FindWindowById(WC_STATUS_BAR, 0)       != NULL) w = w->z_back;
 		if (FindWindowById(WC_NEWS_WINDOW, 0)      != NULL) w = w->z_back;
-		if (FindWindowById(WC_SEND_NETWORK_MSG, 0) != NULL) w = w->z_back;
+		if (FindWindowByClass(WC_SEND_NETWORK_MSG) != NULL) w = w->z_back;
 
 		if (w == NULL) {
 			_z_back_window->z_front = this;
@@ -848,8 +915,6 @@ void Window::InitializePositionSize(int x, int y, int sm_width, int sm_height)
 	this->top = y;
 	this->width = sm_width;
 	this->height = sm_height;
-	this->resize.width = sm_width;
-	this->resize.height = sm_height;
 }
 
 /**
@@ -1141,8 +1206,7 @@ static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int
 void Window::CreateNestedTree(const WindowDesc *desc, bool fill_nested)
 {
 	int biggest_index = -1;
-	NWidgetBase *nested_root = MakeNWidgets(desc->nwid_parts, desc->nwid_length, &biggest_index);
-	this->nested_root = nested_root;
+	this->nested_root = MakeWindowNWidgetTree(desc->nwid_parts, desc->nwid_length, &biggest_index, &this->shade_select);
 	this->nested_array_size = (uint)(biggest_index + 1);
 
 	if (fill_nested) {
@@ -1176,7 +1240,7 @@ void Window::InitNested(const WindowDesc *desc, WindowNumber window_number)
 }
 
 /** Empty constructor, initialization has been moved to #InitNested() called from the constructor of the derived class. */
-Window::Window()
+Window::Window() : hscroll(false), vscroll(true), vscroll2(true)
 {
 }
 
@@ -1570,23 +1634,22 @@ static bool HandleWindowDragging()
 				x = _cursor.pos.x - _drag_delta.x;
 			}
 
-			if (w->nested_root != NULL) {
-				/* Nested widgets also allow resize.step_width and/or resize.step_height to become 0 which means no resize is possible. */
-				if (w->resize.step_width  == 0) x = 0;
-				if (w->resize.step_height == 0) y = 0;
-			}
+			/* resize.step_width and/or resize.step_height may be 0, which means no resize is possible. */
+			if (w->resize.step_width  == 0) x = 0;
+			if (w->resize.step_height == 0) y = 0;
+
 			/* X and Y has to go by step.. calculate it.
 			 * The cast to int is necessary else x/y are implicitly casted to
 			 * unsigned int, which won't work. */
 			if (w->resize.step_width  > 1) x -= x % (int)w->resize.step_width;
 			if (w->resize.step_height > 1) y -= y % (int)w->resize.step_height;
 
-			/* Check if we don't go below the minimum set size */
-			if ((int)w->width + x < (int)w->resize.width) {
-				x = w->resize.width - w->width;
+			/* Check that we don't go below the minimum set size */
+			if ((int)w->width + x < (int)w->nested_root->smallest_x) {
+				x = w->nested_root->smallest_x - w->width;
 			}
-			if ((int)w->height + y < (int)w->resize.height) {
-				y = w->resize.height - w->height;
+			if ((int)w->height + y < (int)w->nested_root->smallest_y) {
+				y = w->nested_root->smallest_y - w->height;
 			}
 
 			/* Window already on size */
@@ -1761,6 +1824,14 @@ static bool MaybeBringWindowToFront(Window *w)
 		return true;
 	}
 
+	/* Use unshaded window size rather than current size for shaded windows. */
+	int w_width  = w->width;
+	int w_height = w->height;
+	if (w->IsShaded()) {
+		w_width  = w->unshaded_size.width;
+		w_height = w->unshaded_size.height;
+	}
+
 	Window *u;
 	FOR_ALL_WINDOWS_FROM_BACK_FROM(u, w->z_front) {
 		/* A modal child will prevent the activation of the parent window */
@@ -1778,9 +1849,9 @@ static bool MaybeBringWindowToFront(Window *w)
 		}
 
 		/* Window sizes don't interfere, leave z-order alone */
-		if (w->left + w->width <= u->left ||
+		if (w->left + w_width <= u->left ||
 				u->left + u->width <= w->left ||
-				w->top  + w->height <= u->top ||
+				w->top  + w_height <= u->top ||
 				u->top + u->height <= w->top) {
 			continue;
 		}
@@ -1962,7 +2033,6 @@ static void HandleKeyScrolling()
 
 static void MouseLoop(MouseClick click, int mousewheel)
 {
-	DecreaseWindowCounters();
 	HandlePlacePresize();
 	UpdateTileSelection();
 
@@ -2167,6 +2237,8 @@ void InputLoop()
 		free(w);
 	}
 
+	DecreaseWindowCounters();
+
 	if (_input_events_this_tick != 0) {
 		/* The input loop is called only once per GameLoop() - so we can clear the counter here */
 		_input_events_this_tick = 0;
@@ -2207,7 +2279,8 @@ void UpdateWindows()
 	DrawDirtyBlocks();
 
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
-		if (w->viewport != NULL) UpdateViewportPosition(w);
+		/* Update viewport only if window is not shaded. */
+		if (w->viewport != NULL && !w->IsShaded()) UpdateViewportPosition(w);
 	}
 	NetworkDrawChatMessage();
 	/* Redraw mouse cursor in case it was hidden */

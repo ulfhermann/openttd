@@ -25,7 +25,7 @@
 #include "ship.h"
 #include "roadveh.h"
 #include "water_map.h"
-#include "yapf/yapf.h"
+#include "pathfinder/yapf/yapf_cache.h"
 #include "newgrf_sound.h"
 #include "autoslope.h"
 #include "tunnelbridge_map.h"
@@ -38,6 +38,7 @@
 #include "cheat_type.h"
 #include "elrail_func.h"
 #include "landscape_type.h"
+#include "pbs.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -240,6 +241,8 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 	if (transport_type != TRANSPORT_WATER) {
 		/* set and test bridge length, availability */
 		if (!CheckBridge_Stuff(bridge_type, bridge_len, flags)) return_cmd_error(STR_ERROR_CAN_T_BUILD_BRIDGE_HERE);
+	} else {
+		if (bridge_len > (_settings_game.construction.longbridges ? 100U : 16U)) return_cmd_error(STR_ERROR_CAN_T_BUILD_BRIDGE_HERE);
 	}
 
 	/* retrieve landscape height and ensure it's on land */
@@ -908,7 +911,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		/* PBS debugging, draw reserved tracks darker */
 		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && (transport_type == TRANSPORT_RAIL && HasTunnelBridgeReservation(ti->tile))) {
 			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
-			DrawGroundSprite(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_y : rti->base_sprites.single_x, PALETTE_CRASH);
+			DrawGroundSprite(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_x : rti->base_sprites.single_y, PALETTE_CRASH);
 		}
 
 		if (transport_type == TRANSPORT_ROAD) {
@@ -994,7 +997,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && transport_type == TRANSPORT_RAIL && HasTunnelBridgeReservation(ti->tile)) {
 			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
 			if (HasBridgeFlatRamp(ti->tileh, DiagDirToAxis(tunnelbridge_direction))) {
-				AddSortableSpriteToDraw(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_y : rti->base_sprites.single_x, PALETTE_CRASH, ti->x, ti->y, 16, 16, 0, ti->z + 8);
+				AddSortableSpriteToDraw(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_x : rti->base_sprites.single_y, PALETTE_CRASH, ti->x, ti->y, 16, 16, 0, ti->z + 8);
 			} else {
 				AddSortableSpriteToDraw(rti->base_sprites.single_sloped + tunnelbridge_direction, PALETTE_CRASH, ti->x, ti->y, 16, 16, 8, ti->z);
 			}
@@ -1411,7 +1414,6 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				rv->state = _road_exit_tunnel_state[dir];
 				rv->frame = _road_exit_tunnel_frame[dir];
 				rv->vehstatus &= ~VS_HIDDEN;
-				rv->FindRoadStopSlot();
 				return VETSB_ENTERED_WORMHOLE;
 			}
 		}

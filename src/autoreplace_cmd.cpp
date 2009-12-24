@@ -170,12 +170,12 @@ static bool VerifyAutoreplaceRefitForOrders(const Vehicle *v, EngineID engine_ty
 static CargoID GetNewCargoTypeForReplace(Vehicle *v, EngineID engine_type, bool part_of_chain)
 {
 	CargoID cargo_type;
+	uint32 available_cargo_types, union_mask;
+	GetArticulatedRefitMasks(engine_type, true, &union_mask, &available_cargo_types);
 
-	if (GetUnionOfArticulatedRefitMasks(engine_type, true) == 0) return CT_NO_REFIT; // Don't try to refit an engine with no cargo capacity
+	if (union_mask == 0) return CT_NO_REFIT; // Don't try to refit an engine with no cargo capacity
 
 	if (IsArticulatedVehicleCarryingDifferentCargos(v, &cargo_type)) return CT_INVALID; // We cannot refit to mixed cargos in an automated way
-
-	uint32 available_cargo_types = GetIntersectionOfArticulatedRefitMasks(engine_type, true);
 
 	if (cargo_type == CT_INVALID) {
 		if (v->type != VEH_TRAIN) return CT_NO_REFIT; // If the vehicle does not carry anything at all, every replacement is fine.
@@ -271,8 +271,13 @@ static CommandCost BuildReplacementVehicle(Vehicle *old_veh, Vehicle **new_vehic
 	*new_vehicle = new_veh;
 
 	/* Refit the vehicle if needed */
+	byte subtype = GetBestFittingSubType(old_veh, new_veh);
+	/* If the subtype isn't zero and the refit cargo is not set,
+	 * we're better off setting the refit cargo too. */
+	if (subtype != 0 && refit_cargo == CT_NO_REFIT) refit_cargo = old_veh->cargo_type;
+
 	if (refit_cargo != CT_NO_REFIT) {
-		cost.AddCost(DoCommand(0, new_veh->index, refit_cargo, DC_EXEC, GetCmdRefitVeh(new_veh)));
+		cost.AddCost(DoCommand(0, new_veh->index, refit_cargo | (subtype << 8), DC_EXEC, GetCmdRefitVeh(new_veh)));
 		assert(cost.Succeeded()); // This should be ensured by GetNewCargoTypeForReplace()
 	}
 
