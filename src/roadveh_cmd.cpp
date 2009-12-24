@@ -361,8 +361,8 @@ static FindDepotData FindClosestRoadDepot(const RoadVehicle *v, int max_distance
 	if (IsRoadDepotTile(v->tile)) return FindDepotData(v->tile, 0);
 
 	switch (_settings_game.pf.pathfinder_for_roadvehs) {
-		case VPF_NPF: return NPFRoadVehicleFindNearestDepot(v, _settings_game.pf.npf.maximum_go_to_depot_penalty);
-		case VPF_YAPF: return YapfRoadVehicleFindNearestDepot(v, _settings_game.pf.yapf.maximum_go_to_depot_penalty);
+		case VPF_NPF: return NPFRoadVehicleFindNearestDepot(v, max_distance);
+		case VPF_YAPF: return YapfRoadVehicleFindNearestDepot(v, max_distance);
 
 		default: NOT_REACHED();
 	}
@@ -862,7 +862,7 @@ static void RoadVehCheckOvertake(RoadVehicle *v, RoadVehicle *u)
 	if (v->roadtype == ROADTYPE_TRAM) return;
 
 	/* Don't overtake in stations */
-	if (IsTileType(v->tile, MP_STATION)) return;
+	if (IsTileType(v->tile, MP_STATION) || IsTileType(u->tile, MP_STATION)) return;
 
 	/* For now, articulated road vehicles can't overtake anything. */
 	if (v->HasArticulatedPart()) return;
