@@ -749,6 +749,8 @@ struct AIDebugWindow : public Window {
 		/* Draw standard stuff */
 		this->DrawWidgets();
 
+		if (this->IsShaded()) return; // Don't draw anything when the window is shaded.
+
 		/* If there are no active companies, don't display anything else. */
 		if (ai_debug_company == INVALID_COMPANY) return;
 
@@ -906,7 +908,7 @@ struct AIDebugWindow : public Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(AID_WIDGET_LOG_PANEL)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, AID_WIDGET_LOG_PANEL);
 	}
 };
 
@@ -918,6 +920,7 @@ static const NWidgetPart _nested_ai_debug_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_AI_DEBUG, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_VIEW),
