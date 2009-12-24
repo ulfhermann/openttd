@@ -62,6 +62,7 @@ static const NWidgetPart _nested_train_depot_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, DEPOT_WIDGET_CAPTION),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -631,15 +632,14 @@ struct DepotWindow : Window {
 					this->count_width = 0;
 				}
 
-				SetDParam(0, 999);
-				Dimension unumber = GetStringBoundingBox(STR_BLACK_COMMA);
+				Dimension unumber = { GetDigitWidth() * 4, FONT_HEIGHT_NORMAL };
 				const Sprite *spr = GetSprite(SPR_FLAG_VEH_STOPPED, ST_NORMAL);
 				this->flag_width  = spr->width + WD_FRAMERECT_RIGHT;
 				this->flag_height = spr->height;
 
 				if (this->type == VEH_TRAIN || this->type == VEH_ROAD) {
 					min_height = max<uint>(unumber.height + WD_MATRIX_TOP, spr->height);
-					this->header_width = unumber.width + this->flag_width;
+					this->header_width = unumber.width + this->flag_width + WD_FRAMERECT_LEFT;
 				} else {
 					min_height = unumber.height + spr->height + WD_MATRIX_TOP + WD_PAR_VSEP_NORMAL + WD_MATRIX_BOTTOM;
 					this->header_width = max<uint>(unumber.width, this->flag_width) + WD_FRAMERECT_RIGHT;
@@ -942,12 +942,12 @@ struct DepotWindow : Window {
 	virtual void OnResize()
 	{
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(DEPOT_WIDGET_MATRIX);
-		this->vscroll.SetCapacity(nwi->current_y / (int)this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, DEPOT_WIDGET_MATRIX);
 		if (this->type == VEH_TRAIN) {
 			this->hscroll.SetCapacity(nwi->current_x - this->header_width - this->count_width);
 			nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 		} else {
-			this->hscroll.SetCapacity(nwi->current_x / (int)this->resize.step_width);
+			this->hscroll.SetCapacityFromWidget(this, DEPOT_WIDGET_MATRIX);
 			nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (this->hscroll.GetCapacity() << MAT_COL_START);
 		}
 	}
