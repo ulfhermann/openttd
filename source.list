@@ -184,7 +184,6 @@ livery.h
 map_func.h
 map_type.h
 mixer.h
-music.h
 network/network.h
 network/network_base.h
 network/network_client.h
@@ -518,7 +517,6 @@ table/water_land.h
 3rdparty/minilzo/minilzo.h
 
 # Script
-script/fake_squirrel_types.hpp
 script/script_info.cpp
 script/script_info.hpp
 script/script_scanner.cpp
