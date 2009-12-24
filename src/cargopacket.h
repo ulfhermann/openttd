@@ -278,15 +278,6 @@ public:
 	}
 
 	/**
-	 * Returns source of the first cargo packet in this list
-	 * @return the before mentioned source
-	 */
-	FORCEINLINE StationID Source() const
-	{
-		return this->Empty() ? INVALID_STATION : (*(ConstIterator(packets.begin())))->source;
-	}
-
-	/**
 	 * Returns average number of days in transit for a cargo entity
 	 * @return the before mentioned number
 	 */
@@ -428,6 +419,24 @@ public:
 	}
 
 	/**
+	 * Returns source of the first cargo packet in this list
+	 * If the regular packets list is empty but there are packets
+	 * in the reservation list it returns the source of the first
+	 * reserved packet.
+	 * @return the before mentioned source
+	 */
+	FORCEINLINE StationID Source() const
+	{
+		if (this->Empty()) {
+			return INVALID_STATION;
+		} else if (this->packets.empty()) {
+			return this->reserved.front()->source;
+		} else {
+			return this->packets.front()->source;
+		}
+	}
+
+	/**
 	 * Reserves a packet for later loading
 	 */
 	void Reserve(CargoPacket *cp);
@@ -493,6 +502,15 @@ public:
 	friend class CargoList<StationCargoList, StationCargoPacketMap>;
 	/** The stations, via GoodsEntry, have a CargoList. */
 	friend const struct SaveLoad *GetGoodsDesc();
+
+	/**
+	 * Returns source of the first cargo packet in this list
+	 * @return the before mentioned source
+	 */
+	FORCEINLINE StationID Source() const
+	{
+		return this->Empty() ? INVALID_STATION : this->packets.begin()->second.front()->source;
+	}
 
 	/**
 	 * Are two the two CargoPackets mergeable in the context of
