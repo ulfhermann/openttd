@@ -930,22 +930,22 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 {
 	assert(num_pieces > 0);
 
-	/* Update company statistics */
-	company->cur_economy.delivered_cargo += num_pieces;
-	SetBit(company->cargo_types, cargo_type);
-
 	const Station *st = Station::Get(dest);
-
-	/* Increase town's counter for some special goods types */
-	const CargoSpec *cs = CargoSpec::Get(cargo_type);
-	if (cs->town_effect == TE_FOOD) st->town->new_act_food += num_pieces;
-	if (cs->town_effect == TE_WATER) st->town->new_act_water += num_pieces;
 
 	/* Give the goods to the industry. */
 	uint accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
 
 	/* If this cargo type is always accepted, accept all */
 	if (HasBit(st->always_accepted, cargo_type)) accepted = num_pieces;
+
+	/* Update company statistics */
+	company->cur_economy.delivered_cargo += accepted;
+	if (accepted > 0) SetBit(company->cargo_types, cargo_type);
+
+	/* Increase town's counter for some special goods types */
+	const CargoSpec *cs = CargoSpec::Get(cargo_type);
+	if (cs->town_effect == TE_FOOD) st->town->new_act_food += accepted;
+	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
 
 	/* Determine profit */
 	Money profit = GetTransportedGoodsIncome(accepted, DistanceManhattan(source_tile, st->xy), days_in_transit, cargo_type);
@@ -1170,7 +1170,8 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 	int unloading_time = 0;
 	Vehicle *u = v;
-	int result = 0;
+	bool dirty_vehicle = false;
+	bool dirty_station = false;
 
 	bool completely_emptied = true;
 	bool anything_unloaded = false;
@@ -1210,7 +1211,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			st->time_since_unload = 0;
 			unloading_time += delivered;
 			anything_unloaded = true;
-			result |= 1;
+			dirty_vehicle = true;
 
 			/* load_amount might (theoretically) be 0, which would make delivered == 0 even though there is still cargo
 			 * in the vehicle. Thus OnboardCount > 0. In that case we can't stop unloading as SwapReserved wouldn't work.
@@ -1278,7 +1279,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 				unloading_time += loaded;
 
-				result |= 2;
+				dirty_vehicle = dirty_station = true;
 			} else if  (_settings_game.order.improved_load && HasBit(cargos_reserved, v->cargo_type)) {
 				/* Skip loading this vehicle if another train/vehicle is already handling
 				 * the same cargo type at this station */
@@ -1360,14 +1361,14 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		TriggerVehicle(v, VEHICLE_TRIGGER_EMPTY);
 	}
 
-	if (result != 0) {
+	if (dirty_vehicle) {
 		SetWindowDirty(GetWindowClassForVehicleType(v->type), v->owner);
 		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-
-		st->MarkTilesDirty(true);
 		v->MarkDirty();
-
-		if (result & 2) SetWindowDirty(WC_STATION_VIEW, last_visited);
+	}
+	if (dirty_station) {
+		st->MarkTilesDirty(true);
+		SetWindowDirty(WC_STATION_VIEW, last_visited);
 	}
 	return cargos_reserved;
 }
