@@ -14,15 +14,16 @@
  * functions may still be available if you return an older API version
  * in GetAPIVersion() in info.nut.
  *
- * \b 0.8.0
+ * \b 1.0.0
  *
- * 0.8.0 is not yet released. The following changes are not set in stone yet.
+ * 1.0.0 is not yet released. The following changes are not set in stone yet.
  *
  * API additions:
  * \li AIBaseStation
  * \li AIBuoyList
  * \li AIEventCompanyAskMerger
  * \li AIIndustry::GetLastMonthTransportedPercentage
+ * \li AIOrder::AIOF_GOTO_NEAREST_DEPOT
  * \li AIRail::RemoveRailStationTileRectangle
  * \li AIRail::RemoveRailWaypointTileRectangle
  * \li AISubsidy::SubsidyParticipantType
@@ -44,6 +45,7 @@
  * \li AISubsidy::GetDestination, use AISubsidy::GetDestinationIndex instead
  * \li AITile::GetHeight, use AITile::GetMinHeight/GetMaxHeight/GetCornerHeight instead
  * \li AITown::GetMaxProduction, use AITown::GetLastMonthProduction instead
+ * \li AIVehicle::SkipToVehicleOrder, use AIOrder::SkipToOrder instead
  * \li AIWaypoint::WAYPOINT_INVALID, use AIBaseStation::STATION_INVALID instead
  *
  * Other changes:
@@ -79,6 +81,10 @@
  *     For GetCargoType the first most used cargo type is returned.
  * \li AIIndustryType::GetConstructionCost() now returns -1 if the industry is
  *     neither buildable nor prospectable.
+ *
+ * \b 0.7.5
+ *
+ * No changes
  *
  * \b 0.7.4
  *

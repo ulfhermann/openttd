@@ -103,7 +103,7 @@ void DrawRoadVehDetails(const Vehicle *v, int left, int right, int y)
 		SetDParam(0, v->cargo_type);
 		SetDParam(1, v->cargo_cap);
 		SetDParam(4, GetCargoSubtypeText(v));
-		DrawString(left, right, y + 10 + y_offset, STR_VEHICLE_INFO_CAPACITY);
+		DrawString(left, right, y + FONT_HEIGHT_NORMAL + y_offset, STR_VEHICLE_INFO_CAPACITY);
 
 		str = STR_VEHICLE_DETAILS_CARGO_EMPTY;
 		if (!v->cargo.Empty()) {
@@ -147,7 +147,7 @@ void DrawRoadVehImage(const Vehicle *v, int left, int right, int y, VehicleID se
 		DrawSprite(u->GetImage(dir), pal, pos + (rtl ? -offset.x : offset.x), y + 6 + offset.y);
 
 		pos += rtl ? -width : width;
-		spent_width += max_width;
+		spent_width += width;
 	}
 
 	if (v->index == selection) {

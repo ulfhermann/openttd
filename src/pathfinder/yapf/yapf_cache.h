@@ -7,19 +7,18 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file music.h Base for the music handling. */
+/** @file yapf_cache.h Entry point for OpenTTD to YAPF's cache. */
 
-#ifndef MUSIC_H
-#define MUSIC_H
+#ifndef  YAPF_CACHE_H
+#define  YAPF_CACHE_H
 
-#define NUM_SONGS_PLAYLIST 33
-#define NUM_SONGS_AVAILABLE 22
+#include "../../track_type.h"
 
-struct SongSpecs {
-	char filename[MAX_PATH];
-	char song_name[64];
-};
+/**
+ * Use this function to notify YAPF that track layout (or signal configuration) has change.
+ * @param tile  the tile that is changed
+ * @param track what piece of track is changed
+ */
+void YapfNotifyTrackLayoutChange(TileIndex tile, Track track);
 
-extern const SongSpecs _origin_songs_specs[];
-
-#endif /* MUSIC_H */
+#endif /* YAPF_CACHE_H */

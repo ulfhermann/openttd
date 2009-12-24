@@ -10,7 +10,6 @@
 /** @file misc.cpp Misc functions that shouldn't be here. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "landscape.h"
 #include "news_func.h"
 #include "variables.h"
@@ -27,12 +26,12 @@
 #include "network/network_func.h"
 #include "window_func.h"
 
-#include "table/sprites.h"
 
 extern TileIndex _cur_tileloop_tile;
 extern void MakeNewgameSettingsLive();
 
 void InitializeSound();
+void InitializeMusic();
 void InitializeVehicles();
 void InitializeDepots();
 void InitializeEngineRenews();
@@ -73,6 +72,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	if (reset_settings) MakeNewgameSettingsLive();
 
 	InitializeSound();
+	InitializeMusic();
 
 	if (reset_date) {
 		SetDate(ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1));

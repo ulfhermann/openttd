@@ -25,7 +25,6 @@
 #include "viewport_func.h"
 #include "gfx_func.h"
 #include "widgets/dropdown_func.h"
-#include "newgrf_cargo.h"
 #include "station_base.h"
 #include "waypoint_base.h"
 #include "tilehighlight_func.h"
@@ -605,7 +604,7 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(SLW_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / FONT_HEIGHT_NORMAL);
+		this->vscroll.SetCapacityFromWidget(this, SLW_LIST, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -677,6 +676,7 @@ static const NWidgetPart _nested_company_stations_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, SLW_CAPTION), SetDataTip(STR_STATION_LIST_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -729,6 +729,7 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, SVW_CAPTION), SetDataTip(STR_STATION_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -751,23 +752,6 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 	EndContainer(),
 };
 
-SpriteID GetCargoSprite(CargoID i)
-{
-	const CargoSpec *cs = CargoSpec::Get(i);
-	SpriteID sprite;
-
-	if (cs->sprite == 0xFFFF) {
-		/* A value of 0xFFFF indicates we should draw a custom icon */
-		sprite = GetCustomCargoSprite(cs);
-	} else {
-		sprite = cs->sprite;
-	}
-
-	if (sprite == 0) sprite = SPR_CARGO_GOODS;
-
-	return sprite;
-}
-
 /**
  * Draws icons of waiting cargo in the StationView window
  *
@@ -783,7 +767,7 @@ static void DrawCargoIcons(CargoID i, uint waiting, int left, int right, int y)
 	uint num = min((waiting + 5) / 10, (right - left) / 10); // maximum is width / 10 icons so it won't overflow
 	if (num == 0) return;
 
-	SpriteID sprite = GetCargoSprite(i);
+	SpriteID sprite = CargoSpec::Get(i)->GetCargoIcon();
 
 	int x = _dynlang.text_dir == TD_RTL ? right - num * 10 : left;
 	do {
@@ -873,9 +857,11 @@ struct StationViewWindow : public Window {
 
 		this->DrawWidgets();
 
-		NWidgetBase *nwi = this->GetWidget<NWidgetBase>(SVW_WAITING);
-		Rect waiting_rect = {nwi->pos_x, nwi->pos_y, nwi->pos_x + nwi->current_x - 1, nwi->pos_y + nwi->current_y - 1};
-		this->DrawWaitingCargo(waiting_rect, cargolist, transfers);
+		if (!this->IsShaded()) {
+			NWidgetBase *nwi = this->GetWidget<NWidgetBase>(SVW_WAITING);
+			Rect waiting_rect = {nwi->pos_x, nwi->pos_y, nwi->pos_x + nwi->current_x - 1, nwi->pos_y + nwi->current_y - 1};
+			this->DrawWaitingCargo(waiting_rect, cargolist, transfers);
+		}
 	}
 
 	virtual void DrawWidget(const Rect &r, int widget) const
@@ -1014,37 +1000,14 @@ struct StationViewWindow : public Window {
 	 */
 	void DrawAcceptedCargo(const Rect &r) const
 	{
-		char string[512];
-		char *b = string;
-		bool first = true;
-
-		b = InlineString(b, STR_STATION_VIEW_ACCEPTS_CARGO);
-
 		const Station *st = Station::Get(this->window_number);
+
+		uint32 cargo_mask = 0;
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			if (b >= lastof(string) - (1 + 2 * 4)) break; // ',' or ' ' and two calls to Utf8Encode()
-			if (HasBit(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
-				if (first) {
-					first = false;
-				} else {
-					/* Add a comma if this is not the first item */
-					*b++ = ',';
-					*b++ = ' ';
-				}
-				b = InlineString(b, CargoSpec::Get(i)->name);
-			}
+			if (HasBit(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE)) SetBit(cargo_mask, i);
 		}
-
-		/* If first is still true then no cargo is accepted */
-		if (first) b = InlineString(b, STR_JUST_NOTHING);
-
-		*b = '\0';
-
-		/* Make sure we detect any buffer overflow */
-		assert(b < endof(string));
-
-		SetDParamStr(0, string);
-		DrawStringMultiLine(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, r.bottom - WD_FRAMERECT_BOTTOM, STR_JUST_RAW_STRING);
+		Rect s = {r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP, r.right - WD_FRAMERECT_RIGHT, r.bottom - WD_FRAMERECT_BOTTOM};
+		DrawCargoListText(cargo_mask, s, STR_STATION_VIEW_ACCEPTS_CARGO);
 	}
 
 	/** Draw cargo ratings in the #SVW_ACCEPTLIST widget.
@@ -1110,7 +1073,7 @@ struct StationViewWindow : public Window {
 					nwi->SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP); // Switch to ratings view.
 					height_change = ALH_ACCEPTS - ALH_RATING;
 				}
-				this->ReInit(0, height_change);
+				this->ReInit(0, height_change * FONT_HEIGHT_NORMAL);
 				break;
 			}
 
@@ -1159,7 +1122,7 @@ struct StationViewWindow : public Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(SVW_WAITING)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, SVW_WAITING, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM);
 	}
 };
 
@@ -1400,7 +1363,7 @@ struct SelectStationWindow : Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(JSW_PANEL)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, JSW_PANEL, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM);
 	}
 
 	virtual void OnInvalidateData(int data)
