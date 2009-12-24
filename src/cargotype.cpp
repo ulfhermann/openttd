@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "cargotype.h"
 #include "core/bitmath_func.hpp"
+#include "newgrf_cargo.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -19,10 +20,14 @@
 
 CargoSpec CargoSpec::array[NUM_CARGO];
 
-/* Bitmask of cargo types available */
+/** Bitmask of cargo types available.
+ * Initialized during a call to #SetupCargoForClimate.
+ */
 uint32 _cargo_mask;
 
-
+/** Set up the default cargo types for the given landscape type.
+ * @param l Landscape
+ */
 void SetupCargoForClimate(LandscapeID l)
 {
 	assert(l < lengthof(_default_climate_cargo));
@@ -59,7 +64,10 @@ void SetupCargoForClimate(LandscapeID l)
 	}
 }
 
-
+/** Get the cargo ID by cargo label.
+ * @param cl Cargo type to get.
+ * @return ID number if the cargo exists, else #CT_INVALID
+ */
 CargoID GetCargoIDByLabel(CargoLabel cl)
 {
 	const CargoSpec *cs;
@@ -74,7 +82,7 @@ CargoID GetCargoIDByLabel(CargoLabel cl)
 
 /** Find the CargoID of a 'bitnum' value.
  * @param bitnum 'bitnum' to find.
- * @return First CargoID with the given bitnum, or CT_INVALID if not found.
+ * @return First CargoID with the given bitnum, or #CT_INVALID if not found or if the provided \a bitnum is invalid.
  */
 CargoID GetCargoIDByBitnum(uint8 bitnum)
 {
@@ -87,5 +95,21 @@ CargoID GetCargoIDByBitnum(uint8 bitnum)
 
 	/* No matching label was found, so it is invalid */
 	return CT_INVALID;
+}
+
+/** Get sprite for showing cargo of this type.
+ * @return Sprite number to use.
+ */
+SpriteID CargoSpec::GetCargoIcon() const
+{
+	SpriteID sprite = this->sprite;
+	if (sprite == 0xFFFF) {
+		/* A value of 0xFFFF indicates we should draw a custom icon */
+		sprite = GetCustomCargoSprite(this);
+	}
+
+	if (sprite == 0) sprite = SPR_CARGO_GOODS;
+
+	return sprite;
 }
 

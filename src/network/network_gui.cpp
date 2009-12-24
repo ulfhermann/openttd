@@ -11,7 +11,6 @@
 
 #ifdef ENABLE_NETWORK
 #include "../stdafx.h"
-#include "../openttd.h"
 #include "../strings_func.h"
 #include "../date_func.h"
 #include "../fios.h"
@@ -452,10 +451,8 @@ public:
 		UpdateNetworkGameWindow(true);
 
 		this->field = NGWW_CLIENT;
-		this->server = NULL;
-		this->list_pos = SLP_INVALID;
-
 		this->last_joined = NetworkGameListAddItem(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port));
+		this->server = this->last_joined;
 
 		this->servers.SetListing(this->last_sorting);
 		this->servers.SetSortFuncs(this->sorter_funcs);
@@ -898,9 +895,8 @@ public:
 
 	virtual void OnResize()
 	{
-		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(NGWW_MATRIX);
-		this->vscroll.SetCapacity(nwi->current_y / this->resize.step_height);
-		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll.SetCapacityFromWidget(this, NGWW_MATRIX);
+		this->GetWidget<NWidgetCore>(NGWW_MATRIX)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 };
 
@@ -920,15 +916,11 @@ static NWidgetBase *MakeResizableHeader(int *biggest_index)
 	return new NWidgetServerListHeader();
 }
 
-/* Generates incorrect display_flags for widgets NGWW_NAME, and incorrect
- * display_flags and/or left/right side for the overlapping widgets
- * NGWW_CLIENTS through NGWW_YEARS.
- */
 static const NWidgetPart _nested_network_game_widgets[] = {
 	/* TOP */
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE),
-		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE), SetDataTip(STR_NETWORK_SERVER_LIST_CAPTION, STR_NULL), // XXX Add default caption tooltip!
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE), SetDataTip(STR_NETWORK_SERVER_LIST_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NGWW_MAIN),
 		NWidget(NWID_VERTICAL), SetPIP(10, 7, 0),
@@ -1340,7 +1332,7 @@ struct NetworkStartServerWindow : public QueryStringBaseWindow {
 static const NWidgetPart _nested_network_start_server_window_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE),
-		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE), SetDataTip(STR_NETWORK_START_SERVER_CAPTION, STR_NULL),
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE), SetDataTip(STR_NETWORK_START_SERVER_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NSSW_BACKGROUND),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 8, 10),
@@ -1676,16 +1668,15 @@ struct NetworkLobbyWindow : public Window {
 
 	virtual void OnResize()
 	{
-		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(NLWW_MATRIX);
-		this->vscroll.SetCapacity(nwi->current_y / this->resize.step_height);
-		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll.SetCapacityFromWidget(this, NLWW_MATRIX);
+		this->GetWidget<NWidgetCore>(NLWW_MATRIX)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 };
 
 static const NWidgetPart _nested_network_lobby_window_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_LIGHT_BLUE),
-		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE), SetDataTip(STR_NETWORK_GAME_LOBBY_CAPTION, STR_NULL),
+		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE), SetDataTip(STR_NETWORK_GAME_LOBBY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE, NLWW_BACKGROUND),
 		NWidget(WWT_TEXT, COLOUR_LIGHT_BLUE, NLWW_TEXT), SetDataTip(STR_NETWORK_GAME_LOBBY_PREPARE_TO_JOIN, STR_NULL), SetResize(1, 0), SetPadding(10, 10, 0, 10),
@@ -2031,13 +2022,13 @@ struct NetworkClientListWindow : Window {
 		this->server_client_width = max(GetStringBoundingBox(STR_NETWORK_SERVER).width, GetStringBoundingBox(STR_NETWORK_CLIENT).width) + WD_FRAMERECT_RIGHT;
 		this->company_icon_width = GetSpriteSize(SPR_COMPANY_ICON).width + WD_FRAMERECT_LEFT;
 
-		uint width = 200; // Default width
+		uint width = 100; // Default width
 		const NetworkClientInfo *ci;
 		FOR_ALL_CLIENT_INFOS(ci) {
 			width = max(width, GetStringBoundingBox(ci->client_name).width);
 		}
 
-		size->width = WD_FRAMERECT_LEFT + this->server_client_width + this->company_icon_width + WD_FRAMERECT_RIGHT;
+		size->width = WD_FRAMERECT_LEFT + this->server_client_width + this->company_icon_width + width + WD_FRAMERECT_RIGHT;
 	}
 
 	virtual void OnPaint()
@@ -2337,7 +2328,7 @@ struct NetworkCompanyPasswordWindow : public QueryStringBaseWindow {
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
 	{
 		EventState state = ES_NOT_HANDLED;
-		switch (this->HandleEditBoxKey(4, key, keycode, state)) {
+		switch (this->HandleEditBoxKey(NCPWW_PASSWORD, key, keycode, state)) {
 			default: break;
 
 			case HEBR_CONFIRM:
