@@ -230,6 +230,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Renombra
 
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Cerrar ventana
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Título de la ventana - arrastrelo para moverla
+STR_TOOLTIP_SHADE                                               :{BLACK}Mostrar solo título de la ventana
 STR_TOOLTIP_STICKY                                              :{BLACK}Marcar esta ventana como no borrable para el comando de 'Cerrar Todas las Ventanas'
 STR_TOOLTIP_RESIZE                                              :{BLACK}Pulse y arrastre para redimensionar la ventana
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Cambiar entre tamaño de ventana grande/pequeño
@@ -607,6 +608,7 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Seleccio
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Encender/apagar mezclador
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Mostrar ventana de selección de pistas musicales
 
+
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Selección del programa de música
 STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
@@ -942,6 +944,11 @@ STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Conjunto
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Seleccionar conjunto de sonidos base a emplear
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Información adicional sobre el conjunto de sonidos base
 
+STR_GAME_OPTIONS_BASE_MUSIC                                     :{BLACK}Conjunto de música base
+STR_GAME_OPTIONS_BASE_MUSIC_TOOLTIP                             :{BLACK}Seleccionar conjunto de música base a usar
+STR_GAME_OPTIONS_BASE_MUSIC_STATUS                              :{RED}{NUM} archivo{P "" s} corrupto{P "" s}
+STR_GAME_OPTIONS_BASE_MUSIC_DESCRIPTION_TOOLTIP                 :{BLACK}Información adicional sobre el conjunto de música base
+
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}El modo de pantalla completa ha fallado
 
 # Custom currency window
@@ -1008,6 +1015,13 @@ STR_NUM_LOW                                                     :Baja
 STR_NUM_NORMAL                                                  :Normal
 STR_NUM_HIGH                                                    :Alta
 STR_NUM_CUSTOM                                                  :Personalizado
+
+STR_VARIETY_NONE                                                :Ninguna
+STR_VARIETY_VERY_LOW                                            :Muy baja
+STR_VARIETY_LOW                                                 :Baja
+STR_VARIETY_MEDIUM                                              :Media
+STR_VARIETY_HIGH                                                :Alta
+STR_VARIETY_VERY_HIGH                                           :Muy Alta
 
 STR_AI_SPEED_VERY_SLOW                                          :Muy lenta
 STR_AI_SPEED_SLOW                                               :Lenta
@@ -1805,6 +1819,7 @@ STR_CONTENT_TYPE_AI_LIBRARY                                     :Librería de IA
 STR_CONTENT_TYPE_SCENARIO                                       :Escenario
 STR_CONTENT_TYPE_HEIGHTMAP                                      :Mapa de alturas
 STR_CONTENT_TYPE_BASE_SOUNDS                                    :Sonidos base
+STR_CONTENT_TYPE_BASE_MUSIC                                     :Música base
 
 # Content downloading progress window
 STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Descargando contenido...
@@ -2232,6 +2247,7 @@ STR_MAPGEN_TREE_PLACER                                          :{BLACK}Algoritm
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Tipo de terreno
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Nivel del mar:
 STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Suavidad:
+STR_MAPGEN_VARIETY                                              :{BLACK}Variedad:
 STR_MAPGEN_GENERATE                                             :{WHITE}Generar
 
 # Strings for map borders at game generation
