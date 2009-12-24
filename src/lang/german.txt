@@ -318,7 +318,7 @@ STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Gebietsi
 STR_TOOLBAR_TOOLTIP_SWITCH_TOOLBAR                              :{BLACK}Werkzeugleisten wechseln
 
 # Extra tooltips for the scenario editor toolbar
-STR_SCENEDIT_TOOLBAR_TOOLTIP_SAVE_SCENARIO_LOAD_SCENARIO        :{BLACK}Szenario speichern, Szenario laden,  Szenariobearbeitung beenden, Beenden
+STR_SCENEDIT_TOOLBAR_TOOLTIP_SAVE_SCENARIO_LOAD_SCENARIO        :{BLACK}Szenario speichern, Szenario laden, Szenariobearbeitung beenden, Beenden
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR                            :{YELLOW}Szenario Editor
 STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD    :{BLACK}Startdatum auf 1 Jahr früher setzen
@@ -614,7 +614,7 @@ STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLAC
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programm - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Bereinigen
 STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Speichern
-STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Lösche laufendes Programm  (nur für Benutzerdefiniert 1 und 2)
+STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Lösche laufendes Programm (nur für Benutzerdefiniert 1 und 2)
 STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Musikeinstellungen speichern
 STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Klicke auf den Musiktitel, um ihn in das laufende Programm zu übernehmen (nur für Benutzerdefiniert 1 und 2)
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Klicke auf einen Musiktitel, um ihn aus der aktuellen Liste zu entfernen (nur für Benutzerdefiniert 1 und 2)
@@ -768,15 +768,15 @@ STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Neue{G r "" s ""} {STRING} {G 0 wird wird wird werden} nahe {TOWN} gebaut!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Neue{G r "" s ""} {STRING} {G 0 wird wird wird werden} nahe {TOWN} angepflanzt!
 
-STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{STRING} gibt baldige Schließung bekannt!
-STR_NEWS_INDUSTRY_CLOSURE_SUPPLY_PROBLEMS                       :{BIGFONT}{BLACK}Wegen fehlender Rohstoffe kündigt {STRING} die baldige Schließung an!
-STR_NEWS_INDUSTRY_CLOSURE_LACK_OF_TREES                         :{BIGFONT}{BLACK}Wegen Holzmangel gibt {STRING} die baldige Schließung bekannt!
+STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{STRING} {G 0 gibt gibt gibt geben} baldige Schließung bekannt!
+STR_NEWS_INDUSTRY_CLOSURE_SUPPLY_PROBLEMS                       :{BIGFONT}{BLACK}Wegen fehlender Rohstoffe {G 0:2 kündigt kündigt kündigt kündigen} {STRING} die baldige Schließung an!
+STR_NEWS_INDUSTRY_CLOSURE_LACK_OF_TREES                         :{BIGFONT}{BLACK}Wegen Holzmangel {G 0:2 gibt gibt gibt geben} {STRING} die baldige Schließung bekannt!
 
 STR_NEWS_EURO_INTRODUCTION                                      :{BIGFONT}{BLACK}Europäische Währungsunion!{}{}Der Euro wird einzige Währung für alltägliche Zahlungsvorgänge.
 STR_NEWS_BEGIN_OF_RECESSION                                     :{BLACK}{BIGFONT}Weltwirtschaftskrise!{}{}Finanzexperten befürchten schlimmsten Zusammenbruch der Wirtschaft!
 STR_NEWS_END_OF_RECESSION                                       :{BLACK}{BIGFONT}Wirtschaftskrise beendet!{}{}Aufschwung des Handels gibt Vertrauen in die Industrie und stärkt die Wirtschaft!
 
-STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_GENERAL                   :{BIGFONT}{BLACK}{INDUSTRY} erhöht die Produktion!
+STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_GENERAL                   :{BIGFONT}{BLACK}{INDUSTRY} {G 0 erhöht erhöht erhöht erhöhen} die Produktion!
 STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_COAL                      :{BIGFONT}{BLACK}Neue Kohlevorkommen bei {INDUSTRY} gefunden!{}Förderung verdoppelt!
 STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_OIL                       :{BIGFONT}{BLACK}Neue Ölfunde bei {INDUSTRY}!{}Förderung wird vermutlich verdoppelt!
 STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_FARM                      :{BIGFONT}{BLACK}Neue Getreideanbaumethoden bei {INDUSTRY} werden Erträge verdoppeln!
@@ -1064,7 +1064,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Bau von
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Beschleunigungsmodell für Züge: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistisch
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zügen und Schiffen 90°-Kurven verbieten: {ORANGE}{STRING} {LTBLUE} (nicht mit NTP)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zügen und Schiffen 90°-Kurven verbieten: {ORANGE}{STRING} {LTBLUE} (nicht mit OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Bahnhöfe vereinigen, die nebeneinander gebaut werden: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Erlaubt nicht direkt benachbarte Stationen zu verbinden: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Verbessertes Beladeverfahren nutzen: {ORANGE}{STRING}
@@ -1248,6 +1248,11 @@ STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :verboten
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :erlaubt
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :erlaubt mit wählbarem Straßenbauplan
 
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}Platzierung von Bäumen während des Spiels: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :nirgends {RED}(macht Holzmühle nutzlos)
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :nur im Regenwald
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :überall
+
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Position der Werkzeugleiste: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Links
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Mitte
@@ -1286,15 +1291,13 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Städte
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industrien
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Pathfinder für Züge: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(nicht empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Pathfinder für Straßenfahrzeuge: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(nicht empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Pathfinder für Schiffe: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Original {BLUE}(empfohlen)
+STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :OPF {BLUE}(empfohlen)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(nicht empfohlen)
 
@@ -1806,7 +1809,7 @@ STR_CONTENT_TYPE_BASE_SOUNDS                                    :Basissound
 # Content downloading progress window
 STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Lade Erweiterungen herunter...
 STR_CONTENT_DOWNLOAD_INITIALISE                                 :{WHITE}Fordere Dateien an...
-STR_CONTENT_DOWNLOAD_FILE                                       :{WHITE}Lade momentan herunter:  {STRING} ({NUM} von {NUM})
+STR_CONTENT_DOWNLOAD_FILE                                       :{WHITE}Lade momentan herunter: {STRING} ({NUM} von {NUM})
 STR_CONTENT_DOWNLOAD_COMPLETE                                   :{WHITE}Herunterladen abgeschlossen
 STR_CONTENT_DOWNLOAD_PROGRESS_SIZE                              :{WHITE}{BYTES} von {BYTES} heruntergeladen ({NUM} %)
 
@@ -2228,7 +2231,7 @@ STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Landgene
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Baumalgorithmus:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Landschaftstyp:
 STR_MAPGEN_QUANTITY_OF_SEA_LAKES                                :{BLACK}Gewässermenge:
-STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Weichheit:
+STR_MAPGEN_SMOOTHNESS                                           :{BLACK}Gleichmäßigkeit:
 STR_MAPGEN_GENERATE                                             :{WHITE}Erzeugen
 
 # Strings for map borders at game generation
@@ -2270,8 +2273,8 @@ STR_GENERATION_ABORT_CAPTION                                    :{WHITE}Spielfel
 STR_GENERATION_ABORT_MESSAGE                                    :{YELLOW}Soll die Spielfeldgenerierung wirklich abgebrochen werden?
 STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% abgeschlossen
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
-STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Spielfeldgenerierung
-STR_GENERATION_TREE_GENERATION                                  :{BLACK}Baumerzeugung
+STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Spielfeld wird erzeugt
+STR_GENERATION_TREE_GENERATION                                  :{BLACK}Bäume werden erzeugt
 STR_GENERATION_UNMOVABLE_GENERATION                             :{BLACK}Unbewegliche Objekte werden erzeugt
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Raue, felsige Landschaft wird erzeugt
 STR_GENERATION_SETTINGUP_GAME                                   :{BLACK}Spiel wird vorbereitet
@@ -2280,14 +2283,14 @@ STR_GENERATION_PREPARING_GAME                                   :{BLACK}Spiel wi
 
 # NewGRF settings
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}NewGRF-Einstellungen
-STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Gespeicherte Voreinstellung aus Liste auswählen
-STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Set speichern
+STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Ausgewählte Voreinstellung laden
+STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Voreinstellung speichern
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}Aktuelle Liste als Voreinstellung speichern
 STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}Name der Voreinstellung
-STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Set löschen
+STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Voreinstellung löschen
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}Ausgewählte Voreinstellung löschen
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}Hinzufügen
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Eine neue NewGRF-Datei zur Liste hinzufügen
+STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Eine weitere NewGRF-Datei zur Liste hinzufügen
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}Entfernen
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}Die ausgewählte NewGRF-Datei von der Liste entfernen
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Nach oben
@@ -2297,7 +2300,7 @@ STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP                            :{BLACK}Die ausg
 STR_NEWGRF_SETTINGS_FILE_TOOLTIP                                :{BLACK}Eine Liste der installierten NewGRF-Dateien. Zum Ändern der Parameter Datei auswählen
 
 STR_NEWGRF_SETTINGS_SET_PARAMETERS                              :{BLACK}Parameter setzen
-STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Palette ändern
+STR_NEWGRF_SETTINGS_TOGGLE_PALETTE                              :{BLACK}Farbpalette ändern
 STR_NEWGRF_SETTINGS_TOGGLE_PALETTE_TOOLTIP                      :{BLACK}Farbpalette des ausgewählten NewGRF ändern.{}Nutze dieses, wenn die Grafiken des NewGRF im Spiel pink dargestellt werden
 STR_NEWGRF_SETTINGS_APPLY_CHANGES                               :{BLACK}Übernehmen
 
@@ -2307,7 +2310,7 @@ STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP                :{BLACK}Versuche
 STR_NEWGRF_SETTINGS_FILENAME                                    :{BLACK}Dateiname: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_GRF_ID                                      :{BLACK}NewGRF-ID: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_MD5SUM                                      :{BLACK}MD5-Summe: {SILVER}{STRING}
-STR_NEWGRF_SETTINGS_PALETTE                                     :{BLACK}Palette: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_PALETTE                                     :{BLACK}Farbpalette: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Parameter: {SILVER}{STRING}
 
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Keine Informationen verfügbar
@@ -2328,6 +2331,7 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Warnung: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Fehler: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Schwerer Fehler: {SILVER}{STRING}
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}Ein schwerer NewGRF Fehler ist aufgetreten: {}{STRING}
 STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} funktioniert nicht im Zusammenhang mit der von OpenTTD ermittelten TTDPatch-Version.
 STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} ist für die {STRING}-Version von TTD.
 STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} ist für die Nutzung mit {STRING} vorgesehen
@@ -2373,7 +2377,7 @@ STR_EDIT_SIGN_CAPTION                                           :{WHITE}Schildte
 STR_EDIT_SIGN_NEXT_SIGN_TOOLTIP                                 :{BLACK}Zum nächsten Schild wechseln
 STR_EDIT_SIGN_PREVIOUS_SIGN_TOOLTIP                             :{BLACK}Zum vorherigen Schild wechseln
 
-STR_EDIT_SIGN_SIGN_OSKTITLE                                     :{BLACK}Einen Namen für dieses Schild eingeben
+STR_EDIT_SIGN_SIGN_OSKTITLE                                     :{BLACK}Text für dieses Schild eingeben
 
 # Town directory window
 STR_TOWN_DIRECTORY_CAPTION                                      :{WHITE}Städte
@@ -2389,8 +2393,9 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Bevölke
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Passagiere letzten Monat: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Postsäcke letzten Monat: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Für Stadtwachstum benötigte Fracht:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} benötigt
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} angeliefert im letzten Monat
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} benötigt
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} im Winter benötigt
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} angeliefert im letzten Monat
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Lärmbelastung in der Stadt: {ORANGE}{COMMA}{BLACK}  Grenzwert: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Hauptansicht zur Stadt scrollen. Strg+Klick öffnet neue Zusatzansicht bei der Stadt
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Stadtverwaltung
@@ -2447,8 +2452,8 @@ STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
 STR_STATION_LIST_WAYPOINT                                       :{YELLOW}{WAYPOINT}
 STR_STATION_LIST_NONE                                           :{YELLOW}- Keine -
-STR_STATION_LIST_SELECT_ALL_FACILITIES                          :{BLACK}Alle Anlagen auswählen
-STR_STATION_LIST_SELECT_ALL_TYPES                               :{BLACK}Alle Frachtarten auswählen (einschließlich keine Fracht)
+STR_STATION_LIST_SELECT_ALL_FACILITIES                          :{BLACK}Alle Stationstypen auswählen
+STR_STATION_LIST_SELECT_ALL_TYPES                               :{BLACK}Alle Frachtarten auswählen (einschließlich keiner Fracht)
 STR_STATION_LIST_NO_WAITING_CARGO                               :{BLACK}Keine Fracht im Wartezustand
 
 # Station view window
@@ -2520,9 +2525,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Kontosta
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Kredit
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Maximaler Kredit: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}{SKIP}{SKIP}{CURRENCY} leihen
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}{CURRENCY} leihen
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Kredit aufnehmen. Strg+Klick, um maximalen Kredit aufzunehmen
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}{SKIP}{SKIP}{CURRENCY} zurückzahlen
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}{CURRENCY} zurückzahlen
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Kredit abzahlen. Strg+Klick, um die größtmögliche Summe zurückzuzahlen
 
 # Company view
@@ -2544,7 +2549,7 @@ STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Firmensi
 STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Firmensitz bauen
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Firmensitz
 STR_COMPANY_VIEW_VIEW_HQ_TOOLTIP                                :{BLACK}Firmensitz anzeigen
-STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}verlegen
+STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Verlegen
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Errichte Firmensitz für 1% des Firmenwertes an anderer Stelle neu.
 
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}Neues Gesicht
@@ -2564,7 +2569,7 @@ STR_COMPANY_VIEW_SELL_SHARE_TOOLTIP                             :{BLACK}25% der 
 STR_COMPANY_VIEW_COMPANY_NAME_QUERY_CAPTION                     :Firmenname
 STR_COMPANY_VIEW_PRESIDENT_S_NAME_QUERY_CAPTION                 :Name des Managers
 
-STR_BUY_COMPANY_MESSAGE                                         :{WHITE}Wir suchen eine Transportfirma, die unsere Firma übernimmt.{}{}Besteht Interesse daran, {COMPANY}  für {CURRENCY} zu übernehmen?
+STR_BUY_COMPANY_MESSAGE                                         :{WHITE}Wir suchen eine Transportfirma, die unsere Firma übernimmt.{}{}Besteht Interesse daran, {COMPANY} für {CURRENCY} zu übernehmen?
 
 # Industry directory
 STR_INDUSTRY_DIRECTORY_CAPTION                                  :{WHITE}Industrien
@@ -2934,8 +2939,9 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Gewinn d
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Zuverlässigkeit: {LTBLUE}{COMMA}%  {BLACK}Pannen seit der letzten Wartung: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Gebaut: {LTBLUE}{NUM}{BLACK} Wert: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapazität: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapazität: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_NO_CAPACITY                                    :{BLACK}Kapazität: {LTBLUE}Keine
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapazität: {LTBLUE}{CARGO}{4:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapazität: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Kapazität: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Transfer-Einnahmen: {LTBLUE}{CURRENCY}
@@ -2999,6 +3005,8 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Fahrplan
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Zur Fahrplanansicht wechseln
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Auftragsliste - zum Markieren hier anklicken. Strg+Klick springt zum Bahnhof
+STR_ORDER_INDEX                                                 :{COMMA}:{NBSP}
+STR_ORDER_TEXT                                                  :{STRING} {STRING}
 
 STR_ORDERS_END_OF_ORDERS                                        :- - Ende der Aufträge - -
 STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Ende des gemeinsam genutzten Fahrplans - -
@@ -3188,6 +3196,11 @@ STR_AI_CONFIG_CAPTION                                           :{WHITE}KI einst
 STR_AI_CONFIG_LIST_TOOLTIP                                      :{BLACK}Liste aller KIs, die im nächsten Spiel geladen werden
 STR_AI_CONFIG_HUMAN_PLAYER                                      :menschlicher Spieler
 STR_AI_CONFIG_RANDOM_AI                                         :Zufällige KI
+
+STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Nach oben bewegen
+STR_AI_CONFIG_MOVE_UP_TOOLTIP                                   :{BLACK}Die ausgewählte KI in der Liste nach oben bewegen
+STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Nach unten bewegen
+STR_AI_CONFIG_MOVE_DOWN_TOOLTIP                                 :{BLACK}Die ausgewählte KI in der Liste nach unten bewegen
 
 STR_AI_CONFIG_CHANGE                                            :{BLACK}KI wählen
 STR_AI_CONFIG_CHANGE_TOOLTIP                                    :{BLACK}Eine andere KI für diesen Eintrag auswählen

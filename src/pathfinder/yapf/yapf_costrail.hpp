@@ -12,7 +12,7 @@
 #ifndef  YAPF_COSTRAIL_HPP
 #define  YAPF_COSTRAIL_HPP
 
-#include "../pbs.h"
+#include "../../pbs.h"
 
 template <class Types>
 class CYapfCostRailT
@@ -251,11 +251,11 @@ public:
 	FORCEINLINE int PlatformLengthPenalty(int platform_length)
 	{
 		int cost = 0;
-		const Vehicle *v = Yapf().GetVehicle();
+		const Train *v = Yapf().GetVehicle();
 		assert(v != NULL);
 		assert(v->type == VEH_TRAIN);
-		assert(Train::From(v)->tcache.cached_total_length != 0);
-		int missing_platform_length = (Train::From(v)->tcache.cached_total_length + TILE_SIZE - 1) / TILE_SIZE - platform_length;
+		assert(v->tcache.cached_total_length != 0);
+		int missing_platform_length = (v->tcache.cached_total_length + TILE_SIZE - 1) / TILE_SIZE - platform_length;
 		if (missing_platform_length < 0) {
 			/* apply penalty for longer platform than needed */
 			cost += Yapf().PfGetSettings().rail_longer_platform_penalty + Yapf().PfGetSettings().rail_longer_platform_per_tile_penalty * -missing_platform_length;
@@ -322,7 +322,7 @@ public:
 		int segment_entry_cost = 0;
 		int segment_cost = 0;
 
-		const Vehicle *v = Yapf().GetVehicle();
+		const Train *v = Yapf().GetVehicle();
 
 		/* start at n.m_key.m_tile / n.m_key.m_td and walk to the end of segment */
 		TILE cur(n.m_key.m_tile, n.m_key.m_td);
@@ -404,6 +404,37 @@ no_entry_cost: // jump here at the beginning if the node has no parent (it is th
 				/* We will end in this pass (depot is possible target) */
 				end_segment_reason |= ESRB_DEPOT;
 
+			} else if (cur.tile_type == MP_STATION && IsRailWaypoint(cur.tile)) {
+				if (v->current_order.IsType(OT_GOTO_WAYPOINT) && GetStationIndex(cur.tile) == v->current_order.GetDestination()) {
+					/* This waypoint is our destination; maybe this isn't an unreserved
+					 * one, so check that and if so see that as the last signal being
+					 * red. This way waypoints near stations should work better. */
+					CFollowTrackRail ft(v);
+					TileIndex t = cur.tile;
+					Trackdir td = cur.td;
+					while (ft.Follow(t, td)) {
+						assert(t != ft.m_new_tile);
+						t = ft.m_new_tile;
+						if (KillFirstBit(ft.m_new_td_bits) != TRACKDIR_BIT_NONE) {
+							/* We encountered a junction; it's going to be too complex to
+							 * handle this perfectly, so just bail out. There is no simple
+							 * free path, so try the other possibilities. */
+							td = INVALID_TRACKDIR;
+							break;
+						}
+						td = RemoveFirstTrackdir(&ft.m_new_td_bits);
+						/* If this is a safe waiting position we're done searching for it */
+						if (IsSafeWaitingPosition(v, t, td, true, _settings_game.pf.forbid_90_deg)) break;
+					}
+					if (td == INVALID_TRACKDIR ||
+							!IsSafeWaitingPosition(v, t, td, true, _settings_game.pf.forbid_90_deg) ||
+							!IsWaitingPositionFree(v, t, td, _settings_game.pf.forbid_90_deg)) {
+						extra_cost += Yapf().PfGetSettings().rail_lastred_exit_penalty;
+					}
+				}
+				/* Waypoint is also a good reason to finish. */
+				end_segment_reason |= ESRB_WAYPOINT;
+
 			} else if (tf->m_is_station) {
 				/* Station penalties. */
 				uint platform_length = tf->m_tiles_skipped + 1;
@@ -413,9 +444,6 @@ no_entry_cost: // jump here at the beginning if the node has no parent (it is th
 				/* We will end in this pass (station is possible target) */
 				end_segment_reason |= ESRB_STATION;
 
-			} else if (cur.tile_type == MP_STATION && IsRailWaypoint(cur.tile)) {
-				/* Waypoint is also a good reason to finish. */
-				end_segment_reason |= ESRB_WAYPOINT;
 			} else if (TrackFollower::DoTrackMasking() && cur.tile_type == MP_RAILWAY) {
 				/* Searching for a safe tile? */
 				if (HasSignalOnTrackdir(cur.tile, cur.td) && !IsPbsSignal(GetSignalType(cur.tile, TrackdirToTrack(cur.td)))) {

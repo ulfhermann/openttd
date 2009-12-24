@@ -325,6 +325,13 @@ public:
 	virtual void OnNewDay() {};
 
 	/**
+	 * Crash the (whole) vehicle chain.
+	 * @param flooded whether the cause of the crash is flooding or not.
+	 * @return the number of lost souls.
+	 */
+	virtual uint Crash(bool flooded = false);
+
+	/**
 	 * Update vehicle sprite- and position caches
 	 * @param moved Was the vehicle moved?
 	 * @param turned Did the vehicle direction change?
@@ -640,7 +647,7 @@ struct SpecializedVehicle : public Vehicle {
 	 */
 	static FORCEINLINE T *GetIfValid(size_t index)
 	{
-		return IsValidID(index) ? Get(index) : NULL ;
+		return IsValidID(index) ? Get(index) : NULL;
 	}
 
 	/**
@@ -691,7 +698,7 @@ struct DisasterVehicle : public SpecializedVehicle<DisasterVehicle, VEH_DISASTER
 struct FreeUnitIDGenerator {
 	bool *cache;  ///< array of occupied unit id numbers
 	UnitID maxid; ///< maximum ID at the moment of constructor call
-	UnitID curid; ///< last ID returned ; 0 if none
+	UnitID curid; ///< last ID returned; 0 if none
 
 	/** Initializes the structure. Vehicle unit numbers are supposed not to change after
 	 * struct initialization, except after each call to this->NextID() the returned value

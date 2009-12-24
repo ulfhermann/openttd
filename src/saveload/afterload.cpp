@@ -12,7 +12,6 @@
 #include "../stdafx.h"
 #include "../void_map.h"
 #include "../signs_base.h"
-#include "../roadstop_base.h"
 #include "../depot_base.h"
 #include "../window_func.h"
 #include "../fios.h"
@@ -25,7 +24,18 @@
 #include "../clear_map.h"
 #include "../vehicle_func.h"
 #include "../newgrf_station.h"
-#include "../yapf/yapf.hpp"
+#include "../openttd.h"
+#include "../debug.h"
+#include "../string_func.h"
+#include "../date_func.h"
+#include "../roadveh.h"
+#include "../train.h"
+#include "../station_base.h"
+#include "../waypoint_base.h"
+#include "../roadstop_base.h"
+#include "../tunnelbridge_map.h"
+#include "../landscape.h"
+#include "../pathfinder/yapf/yapf_cache.h"
 #include "../elrail_func.h"
 #include "../signs_func.h"
 #include "../aircraft.h"
@@ -200,6 +210,16 @@ static inline RailType UpdateRailType(RailType rt, RailType min)
 }
 
 /**
+ * Update the viewport coordinates of all signs.
+ */
+void UpdateAllVirtCoords()
+{
+	UpdateAllStationVirtCoords();
+	UpdateAllSignVirtCoords();
+	UpdateAllTownVirtCoords();
+}
+
+/**
  * Initialization of the windows and several kinds of caches.
  * This is not done directly in AfterLoadGame because these
  * functions require that all saveload conversions have been
@@ -214,12 +234,9 @@ static void InitializeWindowsAndCaches()
 	ResetWindowSystem();
 	SetupColoursAndInitialWindow();
 
-	ResetViewportAfterLoadGame();
-
 	/* Update coordinates of the signs. */
-	UpdateAllStationVirtCoords();
-	UpdateAllSignVirtCoords();
-	UpdateAllTownVirtCoords();
+	UpdateAllVirtCoords();
+	ResetViewportAfterLoadGame();
 
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
@@ -244,6 +261,7 @@ static void InitializeWindowsAndCaches()
 	UpdateAirportsNoise();
 
 	CheckTrainsLengths();
+	ShowNewGRFError();
 }
 
 typedef void (CDECL *SignalHandlerPointer)(int);
@@ -1078,13 +1096,6 @@ bool AfterLoadGame()
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
 			rv->vehstatus &= ~0x40;
-			rv->slot = NULL;
-			rv->slot_age = 0;
-		}
-	} else {
-		RoadVehicle *rv;
-		FOR_ALL_ROADVEHICLES(rv) {
-			if (rv->slot != NULL) rv->slot->num_vehicles++;
 		}
 	}
 
@@ -1357,7 +1368,7 @@ bool AfterLoadGame()
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
 			if (rv->state == 250 || rv->state == 251) {
-				SetBit(rv->state, RVS_IS_STOPPING);
+				SetBit(rv->state, 2);
 			}
 		}
 	}
@@ -1556,13 +1567,13 @@ bool AfterLoadGame()
 		if (_settings_game.pf.yapf.rail_use_yapf || CheckSavegameVersion(28)) {
 			_settings_game.pf.pathfinder_for_trains = VPF_YAPF;
 		} else {
-			_settings_game.pf.pathfinder_for_trains = (_settings_game.pf.new_pathfinding_all ? VPF_NPF : VPF_NTP);
+			_settings_game.pf.pathfinder_for_trains = VPF_NPF;
 		}
 
 		if (_settings_game.pf.yapf.road_use_yapf || CheckSavegameVersion(28)) {
 			_settings_game.pf.pathfinder_for_roadvehs = VPF_YAPF;
 		} else {
-			_settings_game.pf.pathfinder_for_roadvehs = (_settings_game.pf.new_pathfinding_all ? VPF_NPF : VPF_OPF);
+			_settings_game.pf.pathfinder_for_roadvehs = VPF_NPF;
 		}
 
 		if (_settings_game.pf.yapf.ship_use_yapf) {
@@ -1956,6 +1967,17 @@ bool AfterLoadGame()
 		}
 	}
 
+	/* The behaviour of force_proceed has been changed. Now
+	 * it counts signals instead of some random time out. */
+	if (CheckSavegameVersion(131)) {
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			t->force_proceed = min<byte>(t->force_proceed, 1);
+		}
+	}
+
+	/* Road stops is 'only' updating some caches */
+	AfterLoadRoadStops();
 	AfterLoadLabelMaps();
 
 	GamelogPrintDebug(1);

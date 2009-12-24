@@ -32,6 +32,7 @@
 #include "base_media_base.h"
 #include "company_base.h"
 #include "company_func.h"
+#include "viewport_func.h"
 #include <map>
 
 #include "table/sprites.h"
@@ -380,7 +381,7 @@ struct GameOptionsWindow : Window {
 			case GOW_LANG_DROPDOWN: // Change interface language
 				ReadLanguagePack(index);
 				CheckForMissingGlyphsInLoadedLanguagePack();
-				UpdateAllStationVirtCoords();
+				UpdateAllVirtCoords();
 				ReInitAllWindows();
 				break;
 
@@ -1101,7 +1102,7 @@ void SettingEntry::DrawSetting(GameSettings *settings_ptr, const SettingDesc *sd
 			if (sdb->flags & SGF_CURRENCY) {
 				SetDParam(0, STR_JUST_CURRENCY);
 			} else if (sdb->flags & SGF_MULTISTRING) {
-				SetDParam(0, sdb->str + value + 1);
+				SetDParam(0, sdb->str - sdb->min + value + 1);
 			} else {
 				SetDParam(0, (sdb->flags & SGF_NOCOMMA) ? STR_JUST_INT : STR_JUST_COMMA);
 			}
@@ -1267,6 +1268,7 @@ static SettingEntry _settings_construction[] = {
 	SettingEntry("construction.longbridges"),
 	SettingEntry("station.never_expire_airports"),
 	SettingEntry("construction.freeform_edges"),
+	SettingEntry("construction.extra_tree_placement"),
 };
 /** Construction sub-page */
 static SettingsPage _settings_construction_page = {_settings_construction, lengthof(_settings_construction)};
