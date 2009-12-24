@@ -2,8 +2,8 @@ Makefile*
 gitmake-all
 gitmake-origin
 gitmake-build
-bundle/*
 bin/*
+bundle/*
 bundles/
 !bin/data/chars.grf
 !bin/data/openttdd.grf
