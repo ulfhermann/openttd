@@ -510,7 +510,7 @@ static const NWidgetPart _nested_errmsg_face_widgets[] = {
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_RED),
 		NWidget(NWID_HORIZONTAL), SetPIP(2, 1, 2),
-			NWidget(WWT_EMPTY, COLOUR_RED, EMW_FACE), SetMinimalSize(91, 120), SetFill(0, 1), SetPadding(2, 0, 1, 0),
+			NWidget(WWT_EMPTY, COLOUR_RED, EMW_FACE), SetMinimalSize(92, 119), SetFill(0, 1), SetPadding(2, 0, 1, 0),
 			NWidget(WWT_EMPTY, COLOUR_RED, EMW_MESSAGE), SetFill(0, 1), SetMinimalSize(238, 123),
 		EndContainer(),
 	EndContainer(),
@@ -722,7 +722,7 @@ void ShowCostOrIncomeAnimation(int x, int y, int z, Money cost)
 		msg = STR_INCOME_FLOAT_INCOME;
 	}
 	SetDParam(0, cost);
-	AddTextEffect(msg, pt.x, pt.y, 0x250, TE_RISING);
+	AddTextEffect(msg, pt.x, pt.y, DAY_TICKS, TE_RISING);
 }
 
 void ShowFeederIncomeAnimation(int x, int y, int z, Money cost)
@@ -730,7 +730,7 @@ void ShowFeederIncomeAnimation(int x, int y, int z, Money cost)
 	Point pt = RemapCoords(x, y, z);
 
 	SetDParam(0, cost);
-	AddTextEffect(STR_FEEDER, pt.x, pt.y, 0x250, TE_RISING);
+	AddTextEffect(STR_FEEDER, pt.x, pt.y, DAY_TICKS, TE_RISING);
 }
 
 TextEffectID ShowFillingPercent(int x, int y, int z, uint8 percent, StringID string)
@@ -740,7 +740,7 @@ TextEffectID ShowFillingPercent(int x, int y, int z, uint8 percent, StringID str
 	assert(string != STR_NULL);
 
 	SetDParam(0, percent);
-	return AddTextEffect(string, pt.x, pt.y, 0xFFFF, TE_STATIC);
+	return AddTextEffect(string, pt.x, pt.y, 0, TE_STATIC);
 }
 
 void UpdateFillingPercent(TextEffectID te_id, uint8 percent, StringID string)
