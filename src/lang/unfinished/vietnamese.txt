@@ -229,6 +229,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Đổi t
 
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Đóng cửa sổ
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Tiêu đề cửa sổ - kéo nó để di chuyển cửa số
+STR_TOOLTIP_SHADE                                               :{BLACK}Che cửa sổ - Chỉ hiển thị thanh tiêu đề
 STR_TOOLTIP_STICKY                                              :{BLACK}Đánh dấu không-thể-đóng khi bấm nút "Đóng Tất Cả Cửa Sổ"
 STR_TOOLTIP_RESIZE                                              :{BLACK}Click và kéo để thay đổi kích thước cửa sổ
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Bật kích cỡ cửa sổ lớn/nhỏ
@@ -369,6 +370,7 @@ STR_MAP_MENU_SIGN_LIST                                          :Danh sách ký 
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Thư mục thị trấn
 ############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Thị Xã
 ############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
@@ -580,6 +582,9 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Tự Chọn 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Âm Lượng
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Hiệu Ứng Tiếng
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}Nhỏ
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}Lớn
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
 STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
@@ -602,6 +607,7 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Chọn k
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Bật/tắt chơi nhạc ngẫu nhiên
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Hiện cửa số chọn bài nhạc
 
+STR_ERROR_NO_SONGS                                              :{WHITE}Đã chọn gói nhạc chuẩn nhưng không có bài nào. Không có bài nào để chơi
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Chọn Kiểu Chơi Nhạc
@@ -759,6 +765,7 @@ STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} đã bị kiểm soát bởi {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Giám Đốc)
 
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}{STRING} Tài trợ xây dựng Thị Xã mới {TOWN}!
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Cụm công nghiệp {STRING} đang xây dựng gần thị trấn {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Cụm công nghiệp {STRING} đã được lên kế hoạch gần thị trấn {TOWN}!
@@ -937,6 +944,10 @@ STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Bộ âm
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Chọn bộ âm thanh chuẩn để dùng
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Thông tin thêm về bộ âm thanh chuẩn
 
+STR_GAME_OPTIONS_BASE_MUSIC                                     :{BLACK}Bộ nhạc chuẩn
+STR_GAME_OPTIONS_BASE_MUSIC_TOOLTIP                             :{BLACK}Chọn gói nhạc để sử dụng
+STR_GAME_OPTIONS_BASE_MUSIC_STATUS                              :{RED}{NUM} file bị hỏng{P "" s}
+STR_GAME_OPTIONS_BASE_MUSIC_DESCRIPTION_TOOLTIP                 :{BLACK}Thông tin thêm về gói nhạc chuẩn
 
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Thất bại khi bật chế độ fullscreen
 
@@ -1181,6 +1192,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Công ty đang 
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Tất cả công ty
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Bật bảng giờ giấc cho ph.tiện: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Hiện bảng giờ giấc ở dạng cụ thể thay vì ngày: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Hiển thị Đến và Khởi hành trên bảng: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Tạo lệnh nhanh cho ph.tiện: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Loại đường ray mặc định (sau game mới/nạp game): {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Ray Bình Thường
@@ -1245,9 +1257,13 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :ô 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :ngẫu nhiên
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Thị trấn được quyền xây đường sá: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Cho phép thị trấn kiểm tra độ ồn của sân bay: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Thành lập Thị Xã trong game: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :cấm
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :cho phép
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :cho phép, tùy chọn bố trí thị trấn
 
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}Theo vị trí của cây trong trò chơi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :không có {RED}(phá vỡ nhà máy chế biến gỗ)
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :chỉ trong rừng nhiệt đới
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :mọi nơi
 
@@ -1439,17 +1455,103 @@ STR_FACE_LOAD_TOOLTIP                                           :{BLACK}Chọn v
 STR_FACE_LOAD_DONE                                              :{WHITE}Vẻ mặt ưa thích đã được nạp từ file thiết lập của OpenTTD.
 STR_FACE_FACECODE                                               :{BLACK}Vẻ mặt thứ.
 STR_FACE_FACECODE_TOOLTIP                                       :{BLACK}Xem và/hoặc sửa số vẻ mặt
+STR_FACE_FACECODE_CAPTION                                       :{WHITE}Xem và/hoặc chọn số bộ mặt người chơi
+STR_FACE_FACECODE_SET                                           :{WHITE}Mã số gương mặt mới được thiết lập.
+STR_FACE_FACECODE_ERR                                           :{WHITE}Không thể thiết lập mã số gương mặt - mã số phải được 0 và 4,294,967,295!
+STR_FACE_SAVE                                                   :{BLACK}Lưu
+STR_FACE_SAVE_TOOLTIP                                           :{BLACK}Lưu gương mặt yêu thích
+STR_FACE_SAVE_DONE                                              :{WHITE}Gương mặt yêu thích này sẽ được lưu lại trong tập tin cấu hình OpenTTD .
+STR_FACE_EUROPEAN                                               :{BLACK}Châu Âu
+STR_FACE_SELECT_EUROPEAN                                        :{BLACK}Chọn gương mặt Châu Âu
+STR_FACE_AFRICAN                                                :{BLACK}Châu Phi
+STR_FACE_SELECT_AFRICAN                                         :{BLACK}Chọn gương mặt Châu Phi
+STR_FACE_YES                                                    :Đồng ý
+STR_FACE_NO                                                     :Không
+STR_FACE_MOUSTACHE_EARRING_TOOLTIP                              :{BLACK}Chọn ria mép hoặc bông tai
+STR_FACE_HAIR                                                   :Tóc:
+STR_FACE_HAIR_TOOLTIP                                           :{BLACK}Thay đổi tóc
+STR_FACE_EYEBROWS                                               :Lông mày:
+STR_FACE_EYEBROWS_TOOLTIP                                       :{BLACK}Thay đổi Lông mày
+STR_FACE_EYECOLOUR                                              :Màu mắt:
+STR_FACE_EYECOLOUR_TOOLTIP                                      :{BLACK}Thay đổi màu mắt
+STR_FACE_GLASSES                                                :Mắt kính:
+STR_FACE_GLASSES_TOOLTIP                                        :{BLACK}Chọn mắt kính
+STR_FACE_GLASSES_TOOLTIP_2                                      :{BLACK}Thay đổi mắt kính
+STR_FACE_NOSE                                                   :Mũi:
+STR_FACE_NOSE_TOOLTIP                                           :{BLACK}Thay đổi mũi
+STR_FACE_LIPS                                                   :Môi:
+STR_FACE_MOUSTACHE                                              :Ria mép:
+STR_FACE_LIPS_MOUSTACHE_TOOLTIP                                 :{BLACK}Thay đổi môi hoặc ria mép
+STR_FACE_CHIN                                                   :Cằm:
+STR_FACE_CHIN_TOOLTIP                                           :{BLACK}Thay đổi cằm
+STR_FACE_JACKET                                                 :Áo Jacket:
+STR_FACE_JACKET_TOOLTIP                                         :{BLACK}Thay đổi áo Jacket
+STR_FACE_COLLAR                                                 :Cổ áo:
+STR_FACE_COLLAR_TOOLTIP                                         :{BLACK}Thay đổi cổ áo
+STR_FACE_TIE                                                    :Cà vạt:
+STR_FACE_EARRING                                                :Bông tai:
+STR_FACE_TIE_EARRING_TOOLTIP                                    :{BLACK}Thay đổi cà vạt hoặc bông tai
 
 # Network server list
+STR_NETWORK_SERVER_LIST_CAPTION                                 :{WHITE}Nhiều người chơi
+STR_NETWORK_SERVER_LIST_CONNECTION                              :{BLACK}Kết nối:
+STR_NETWORK_SERVER_LIST_CONNECTION_TOOLTIP                      :{BLACK}Lựa chọn chơi game nối mạng internet hặc nối mạng nội bộ (LAN)
+STR_NETWORK_SERVER_LIST_LAN                                     :Mạng nội bộ
+STR_NETWORK_SERVER_LIST_INTERNET                                :Mạng internet
+STR_NETWORK_SERVER_LIST_PLAYER_NAME                             :{BLACK}Tên người chơi:
+STR_NETWORK_SERVER_LIST_ENTER_NAME_TOOLTIP                      :{BLACK}Đây là tên khác mà người chơi sẽ nhận ra bạn
 
+STR_NETWORK_SERVER_LIST_GAME_NAME                               :{BLACK}Tên
+STR_NETWORK_SERVER_LIST_GAME_NAME_TOOLTIP                       :{BLACK}Tên trong trò chơi
+STR_NETWORK_SERVER_LIST_GENERAL_ONLINE                          :{BLACK}{COMMA}/{COMMA} - {COMMA}/{COMMA}
+STR_NETWORK_SERVER_LIST_CLIENTS_CAPTION                         :{BLACK}Máy con
+STR_NETWORK_SERVER_LIST_CLIENTS_CAPTION_TOOLTIP                 :{BLACK}Máy con trực tuyến / Máy con tối đa{}Máy chủ trực tuyến / máy chủ tối đa
+STR_NETWORK_SERVER_LIST_MAP_SIZE_SHORT                          :{BLACK}{COMMA}x{COMMA}
+STR_NETWORK_SERVER_LIST_MAP_SIZE_CAPTION                        :{BLACK}Kích thước bản đồ
+STR_NETWORK_SERVER_LIST_MAP_SIZE_CAPTION_TOOLTIP                :{BLACK}Kích thước bản đồ trong game{}Nhấn vào đây để sắp xếp theo diện tích
+STR_NETWORK_SERVER_LIST_DATE_CAPTION                            :{BLACK}Ngày
+STR_NETWORK_SERVER_LIST_DATE_CAPTION_TOOLTIP                    :{BLACK}Ngày hiện tại
+STR_NETWORK_SERVER_LIST_YEARS_CAPTION                           :{BLACK}Năm
+STR_NETWORK_SERVER_LIST_YEARS_CAPTION_TOOLTIP                   :{BLACK}Số năm{}mà game đang chạy
+STR_NETWORK_SERVER_LIST_INFO_ICONS_TOOLTIP                      :{BLACK}Ngôn ngữ, phiên bản server, etc.
 
+STR_NETWORK_SERVER_LIST_CLICK_GAME_TO_SELECT                    :{BLACK}Chọn một game trong danh sách
+STR_NETWORK_SERVER_LIST_LAST_JOINED_SERVER                      :{BLACK}Server bạn đã vào lần trước:
+STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Chọn server bạn đã chơi lần trước
 
+STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}THÔNG TIN GAME
+STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Máy con: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
+STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Ngôn ngữ: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Tileset: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Cỡ bản đồ: {WHITE}{COMMA}x{COMMA}
+STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Phiên bản server: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Địa chỉ server: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_START_DATE                              :{SILVER}Ngày bắt đầu: {WHITE}{DATE_SHORT}
+STR_NETWORK_SERVER_LIST_CURRENT_DATE                            :{SILVER}Ngày hiện tại: {WHITE}{DATE_SHORT}
+STR_NETWORK_SERVER_LIST_PASSWORD                                :{SILVER}Mật khẩu bảo vệ!
+STR_NETWORK_SERVER_LIST_SERVER_OFFLINE                          :{SILVER}SERVER OFFLINE
+STR_NETWORK_SERVER_LIST_SERVER_FULL                             :{SILVER}SERVER ĐẦY
+STR_NETWORK_SERVER_LIST_VERSION_MISMATCH                        :{SILVER}SAI PHIÊN BẢN
+STR_NETWORK_SERVER_LIST_GRF_MISMATCH                            :{SILVER}SAI NEWGRF
 
+STR_NETWORK_SERVER_LIST_JOIN_GAME                               :{BLACK}Vào game
+STR_NETWORK_SERVER_LIST_REFRESH                                 :{BLACK}Refresh server
+STR_NETWORK_SERVER_LIST_REFRESH_TOOLTIP                         :{BLACK}Refresh thông tin server
 
+STR_NETWORK_SERVER_LIST_FIND_SERVER                             :{BLACK}Tìm server
+STR_NETWORK_SERVER_LIST_FIND_SERVER_TOOLTIP                     :{BLACK}Tìm server trong mạng
+STR_NETWORK_SERVER_LIST_ADD_SERVER                              :{BLACK}Thêm server
+STR_NETWORK_SERVER_LIST_ADD_SERVER_TOOLTIP                      :{BLACK}Thêm server vào danh sách luôn được chọn khi chạy game.
+STR_NETWORK_SERVER_LIST_START_SERVER                            :{BLACK}Tạo server
+STR_NETWORK_SERVER_LIST_START_SERVER_TOOLTIP                    :{BLACK}Tạo server của riêng bạn
 
+STR_NETWORK_SERVER_LIST_PLAYER_NAME_OSKTITLE                    :{BLACK}Gõ tên của bạn
+STR_NETWORK_SERVER_LIST_ENTER_IP                                :{BLACK}Gõ địa chỉ của máy chủ
 
 # Start new multiplayer server
+STR_NETWORK_START_SERVER_CAPTION                                :{WHITE}Bắt đầu game mới nhiều người chơi
 
+STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Tên trò chơi:
 
 
 
@@ -1508,6 +1610,7 @@ STR_NETWORK_MESSAGE_CLIENT_JOINED_ID                            :*** {STRING} đ
 
 # Order of these is important!
 STR_CONTENT_TYPE_BASE_SOUNDS                                    :Âm thanh chuẩn
+STR_CONTENT_TYPE_BASE_MUSIC                                     :Nhạc chuẩn
 
 # Content downloading progress window
 
@@ -1604,6 +1707,7 @@ STR_ABOUT_VERSION                                               :{BLACK}OpenTTD 
 # World generation
 STR_MAPGEN_MAPSIZE                                              :{BLACK}Kích thước bản đồ:
 STR_MAPGEN_BY                                                   :{BLACK}*
+STR_MAPGEN_VARIETY                                              :{BLACK}Nhiều phân phối:
 
 # Strings for map borders at game generation
 
@@ -1625,6 +1729,7 @@ STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Cỡ:
 # NewGRF add window
 
 # NewGRF (self) generated warnings/errors
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}Xảy ra lỗi NewGRF gây hư hỏng: {}{STRING}
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Chú ý!
@@ -1643,6 +1748,7 @@ STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Chú ý!
 STR_TOWN_DIRECTORY_NONE                                         :{ORANGE}- Không Có -
 
 # Town view window
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} Yêu cầu trong mùa đông
 
 
 
@@ -1934,7 +2040,12 @@ STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Chọn x
 
 
 # AI configuration window
+STR_AI_CONFIG_RANDOM_AI                                         :AI Ngẫu Nhiên
 
+STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Di chuyển lên trên
+STR_AI_CONFIG_MOVE_UP_TOOLTIP                                   :{BLACK}Di chuyển AI lên trên danh sách
+STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Di chuyển xuống
+STR_AI_CONFIG_MOVE_DOWN_TOOLTIP                                 :{BLACK}Di chuyển AI xuống dưới danh sách
 
 
 # Available AIs window
