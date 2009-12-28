@@ -765,10 +765,11 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 		/* Try to connect the vehicle to one of free chains of wagons. */
 		Train *w;
 		FOR_ALL_TRAINS(w) {
-			/* do not connect new wagon with crashed/flooded consists */
-			if (w->tile == tile && w->IsFreeWagon() &&
-					w->engine_type == engine &&
-					!(w->vehstatus & VS_CRASHED)) {
+			if (w->tile == tile &&              ///< Same depot
+					w->IsFreeWagon() &&             ///< A free wagon chain
+					w->engine_type == engine &&     ///< Same type
+					w->First() != v &&              ///< Don't connect to ourself
+					!(w->vehstatus & VS_CRASHED)) { ///< Not crashed/flooded
 				DoCommand(0, v->index | (w->Last()->index << 16), 1, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
 				break;
 			}
@@ -2872,14 +2873,14 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 		}
 	}
 
-	bool other_train = false;
+	Vehicle *other_train = NULL;
 	PBSTileInfo origin = FollowTrainReservation(v, &other_train);
 	/* The path we are driving on is alread blocked by some other train.
 	 * This can only happen in certain situations when mixing path and
 	 * block signals or when changing tracks and/or signals.
 	 * Exit here as doing any further reservations will probably just
 	 * make matters worse. */
-	if (other_train && v->tile != origin.tile) {
+	if (other_train != NULL && other_train->index != v->index) {
 		if (mark_as_stuck) MarkTrainAsStuck(v);
 		return false;
 	}
@@ -2913,7 +2914,12 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 	}
 
 	if (HasBit(v->flags, VRF_TRAIN_STUCK)) {
-		v->time_counter = 0;
+		/* This might be called when a train is loading. At that time the counter
+		 * is (mis)used (or rather PBS misuses it) for determining how long to wait
+		 * till going to the next load cycle. If that number is set to 0 the wait
+		 * for loading will be 65535 ticks, which is not what we want. Actually, We
+		 * do not want to reset the waiting period during loading in any case. */
+		if (!v->current_order.IsType(OT_LOADING)) v->time_counter = 0;
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
 	ClrBit(v->flags, VRF_TRAIN_STUCK);
