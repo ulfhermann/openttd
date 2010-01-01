@@ -760,6 +760,10 @@ STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRI
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Vypnout všechny
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Zapnout všechny
+STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Zobrazit výšku
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL                                :{BLACK}Nezobrazit na mapě žádný průmysl
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL                                 :{BLACK}Zobrazit na mapě veškerý průmysl
+STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}Zapnout zobrazení výškové mapy
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Ukázat poslední zprávu nebo článek
@@ -1429,7 +1433,7 @@ STR_QUIT_NO                                                     :{BLACK}Ne
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unixu
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -2269,7 +2273,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Půda vlastněn
 STR_ABOUT_OPENTTD                                               :{WHITE}O OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Původní copyright: {COPYRIGHT} 1995 Chris Sawyer, všechna práva vyhrazena
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD verze {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2009 Tým OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2010 Tým OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Uložit hru
@@ -3019,8 +3023,8 @@ STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Spolehli
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Koupeno: {LTBLUE}{NUM}{BLACK} Cena: {LTBLUE}{CURRENCY}
 STR_VEHICLE_INFO_NO_CAPACITY                                    :{BLACK}Kapacita: {LTBLUE}nic
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{4:STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{3:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{3:STRING} (x{4:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Kapacita: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Podíl za převoz: {LTBLUE}{CURRENCY}

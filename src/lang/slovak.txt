@@ -1404,7 +1404,7 @@ STR_QUIT_NO                                                     :{BLACK}Nie
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -2235,7 +2235,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Spolocnostou vl
 STR_ABOUT_OPENTTD                                               :{WHITE}OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Povodný copyright: {COPYRIGHT} 1995 Chris Sawyer, vsetky prava vyhradene
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD verzia {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 team OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 team OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Ulozit hru
@@ -2975,8 +2975,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Profit t
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Spoľahlivosť: {LTBLUE}{COMMA}%  {BLACK}Poruchy od posledného servisu: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Vyrobený: {LTBLUE}{NUM}{BLACK} Cena: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{4:STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{3:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{3:STRING} (x{4:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Kapacita: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Transfer kredity: {LTBLUE}{CURRENCY}
