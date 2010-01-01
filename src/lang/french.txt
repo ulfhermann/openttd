@@ -694,6 +694,10 @@ STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRI
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Désactiver tout
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Activer tout
+STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Relief
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL                                :{BLACK}N'afficher aucune industrie sur la carte
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL                                 :{BLACK}Afficher toutes les industries sur la carte
+STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}Basculer l'affichage du relief
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Afficher le dernier message ou bulletin
@@ -1079,6 +1083,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Permett
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Modèle d'accélération des trains{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Réaliste
+STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Inclinaison des pentes pour les trains{NBSP}: {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Interdire aux trains et navires les virages à 90°{NBSP}: {ORANGE}{STRING} {LTBLUE} (pas avec OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Joindre les gares juxtaposées{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Permettre de joindre une station non adjacente{NBSP}: {ORANGE}{STRING}
@@ -1369,7 +1374,7 @@ STR_QUIT_NO                                                     :{BLACK}Non
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -2210,7 +2215,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Terrain apparte
 STR_ABOUT_OPENTTD                                               :{WHITE}A propos de OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Copyright original {COPYRIGHT} 1995 Chris Sawyer, Tous droits réservés
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD version {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2009 L'équipe OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2010 L'équipe OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Sauvegarder la partie
@@ -2957,8 +2962,8 @@ STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Fiabilit
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE}{BLACK}Construit{NBSP}: {LTBLUE}{NUM}{BLACK} Valeur{NBSP}: {LTBLUE}{CURRENCY}
 STR_VEHICLE_INFO_NO_CAPACITY                                    :{BLACK}Capacité{NBSP}: {LTBLUE}Aucune
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{4:STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{4:STRING} (x{5:NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{3:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}{3:STRING} (x{4:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Capacité{NBSP}: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Crédits de transfert{NBSP}: {LTBLUE}{CURRENCY}
@@ -3369,7 +3374,7 @@ STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... peut
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}... peut seulement être construit dans les endroits désertiques
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}... peut seulement être construit en ville
 STR_ERROR_CAN_ONLY_BE_POSITIONED                                :{WHITE}... positionnement uniquement sur les bords de la carte
-STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED                            :{WHITE}... les forêts ne peuvent pas être plantées sur de la neige
+STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED                            :{WHITE}... les forêts ne peuvent être plantées que au dessus de l'altitude d'enneignement
 
 # Station construction related errors
 STR_ERROR_CAN_T_BUILD_RAILROAD_STATION                          :{WHITE}Impossible de construire la gare ici...
