@@ -59,6 +59,7 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_SELECTINDUSTRIES,
 	SM_WIDGET_ENABLE_ALL,
 	SM_WIDGET_DISABLE_ALL,
+	SM_WIDGET_SHOW_HEIGHT,
 };
 
 
@@ -169,6 +170,8 @@ static const LegendAndColour _legend_land_owners[] = {
 static LegendAndColour _legend_from_industries[NUM_INDUSTRYTYPES + 1];
 /* For connecting industry type to position in industries list(small map legend) */
 static uint _industry_to_list_pos[NUM_INDUSTRYTYPES];
+/** Show heightmap in smallmap window. */
+static bool _smallmap_show_heightmap;
 
 /**
  * Fills an array for the industries legends.
@@ -346,21 +349,6 @@ static const AndOr _smallmap_vehicles_andor[] = {
 	{MKCOLOUR(0x00D7D700), MKCOLOUR(0xFF0000FF)},
 };
 
-static const AndOr _smallmap_vegetation_andor[] = {
-	{MKCOLOUR(0x00000000), MKCOLOUR(0xFFFFFFFF)},
-	{MKCOLOUR(0x00D7D700), MKCOLOUR(0xFF0000FF)},
-	{MKCOLOUR(0x00D7D700), MKCOLOUR(0xFF0000FF)},
-	{MKCOLOUR(0x00B5B500), MKCOLOUR(0xFF0000FF)},
-	{MKCOLOUR(0x00575700), MKCOLOUR(0xFF0000FF)},
-	{MKCOLOUR(0x00D7D700), MKCOLOUR(0xFF0000FF)},
-	{MKCOLOUR(0xCACACACA), MKCOLOUR(0x00000000)},
-	{MKCOLOUR(0x00000000), MKCOLOUR(0xFFFFFFFF)},
-	{MKCOLOUR(0xB5B5B5B5), MKCOLOUR(0x00000000)},
-	{MKCOLOUR(0x00000000), MKCOLOUR(0xFFFFFFFF)},
-	{MKCOLOUR(0x00B5B500), MKCOLOUR(0xFF0000FF)},
-	{MKCOLOUR(0x00D7D700), MKCOLOUR(0xFF0000FF)},
-};
-
 typedef uint32 GetSmallMapPixels(TileIndex tile); ///< Typedef callthrough function
 
 
@@ -421,11 +409,11 @@ static inline uint32 GetSmallMapIndustriesPixels(TileIndex tile)
 			return GetIndustrySpec(Industry::GetByTile(tile)->type)->map_colour * 0x01010101;
 		} else {
 			/* Otherwise, return the colour of the clear tiles, which will make it disappear */
-			return ApplyMask(MKCOLOUR(0x54545454), &_smallmap_vehicles_andor[MP_CLEAR]);
+			t = MP_CLEAR;
 		}
 	}
 
-	return ApplyMask(MKCOLOUR(0x54545454), &_smallmap_vehicles_andor[t]);
+	return ApplyMask(_smallmap_show_heightmap ? _map_height_bits[TileHeight(tile)] : MKCOLOUR(0x54545454), &_smallmap_vehicles_andor[t]);
 }
 
 /**
@@ -451,6 +439,17 @@ static inline uint32 GetSmallMapRoutesPixels(TileIndex tile)
 
 	/* Ground colour */
 	return ApplyMask(MKCOLOUR(0x54545454), &_smallmap_contours_andor[t]);
+}
+
+/**
+ * Return the colour a tile would be displayed with in the small map in mode "link stats".
+ *
+ * @param tile The tile of which we would like to get the colour.
+ * @return The colour of tile in the small map in mode "link stats"
+ */
+static inline uint32 GetSmallMapLinkStatsPixels(TileIndex tile)
+{
+	return _smallmap_show_heightmap ? GetSmallMapContoursPixels(tile) : GetSmallMapRoutesPixels(tile);
 }
 
 
@@ -520,7 +519,7 @@ static GetSmallMapPixels * const _smallmap_draw_procs[] = {
 	GetSmallMapContoursPixels,
 	GetSmallMapVehiclesPixels,
 	GetSmallMapIndustriesPixels,
-	GetSmallMapContoursPixels,
+	GetSmallMapLinkStatsPixels,
 	GetSmallMapRoutesPixels,
 	GetSmallMapVegetationPixels,
 	GetSmallMapOwnerPixels,
@@ -1615,6 +1614,9 @@ public:
 
 		this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
 
+		_smallmap_show_heightmap = (this->map_type != SMT_INDUSTRY);
+		this->SetWidgetLoweredState(SM_WIDGET_SHOW_HEIGHT, _smallmap_show_heightmap);
+
 		this->SetWidgetLoweredState(SM_WIDGET_TOGGLETOWNNAME, this->show_towns);
 		this->GetWidget<NWidgetStacked>(SM_WIDGET_SELECTINDUSTRIES)->SetDisplayedPlane(this->map_type != SMT_INDUSTRY && this->map_type != SMT_LINKSTATS);
 
@@ -1919,6 +1921,12 @@ public:
 				this->SetDirty();
 				break;
 			}
+
+			case SM_WIDGET_SHOW_HEIGHT: // Enable/disable showing of heightmap.
+				_smallmap_show_heightmap = !_smallmap_show_heightmap;
+				this->SetWidgetLoweredState(SM_WIDGET_SHOW_HEIGHT, _smallmap_show_heightmap);
+				this->SetDirty();
+				break;
 		}
 	}
 
@@ -2180,8 +2188,9 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 			NWidget(NWID_HORIZONTAL),
 				NWidget(NWID_SELECTION, INVALID_COLOUR, SM_WIDGET_SELECTINDUSTRIES),
 					NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-						NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_ENABLE_ALL), SetMinimalSize(100, 12), SetDataTip(STR_SMALLMAP_ENABLE_ALL, STR_NULL),
-						NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_DISABLE_ALL), SetMinimalSize(100, 12), SetDataTip(STR_SMALLMAP_DISABLE_ALL, STR_NULL),
+						NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_ENABLE_ALL), SetDataTip(STR_SMALLMAP_ENABLE_ALL, STR_SMALLMAP_TOOLTIP_ENABLE_ALL),
+						NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_DISABLE_ALL), SetDataTip(STR_SMALLMAP_DISABLE_ALL, STR_SMALLMAP_TOOLTIP_DISABLE_ALL),
+						NWidget(WWT_TEXTBTN, COLOUR_BROWN, SM_WIDGET_SHOW_HEIGHT), SetDataTip(STR_SMALLMAP_SHOW_HEIGHT, STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT),
 					EndContainer(),
 					NWidget(NWID_SPACER), SetFill(1, 1),
 				EndContainer(),
