@@ -21,6 +21,7 @@
  * API additions:
  * \li AIBaseStation
  * \li AIBuoyList
+ * \li AIEngine::IsBuildable
  * \li AIEventCompanyAskMerger
  * \li AIIndustry::GetLastMonthTransportedPercentage
  * \li AIOrder::AIOF_GOTO_NEAREST_DEPOT
@@ -33,12 +34,14 @@
  * \li AISubsidy::GetDestinationIndex
  * \li AITown::GetLastMonthTransportedPercentage
  * \li AIVehicleList_Depot
+ * \li Some error messages to AIWaypoint
  *
  * API removals:
  * \li AIOrder::ChangeOrder, use AIOrder::SetOrderFlags instead
  * \li AIRail::RemoveRailStationTileRect, use AIRail::RemoveRailStationTileRectangle instead
  * \li AIRail::RemoveRailWaypoint, use AIRail::RemoveRailWaypointTileRectangle instead
  * \li AISign::GetMaxSignID, use AISignList instead
+ * \li AIStation::ERR_STATION_TOO_LARGE, use AIError::ERR_STATION_TOO_SPREAD_OUT instead
  * \li AISubsidy::SourceIsTown, use AISubsidy::GetSourceType instead
  * \li AISubsidy::GetSource, use AISubsidy::GetSourceIndex instead
  * \li AISubsidy::DestinationIsTown, use AISubsidy::GetDestinationType instead
@@ -81,6 +84,10 @@
  *     For GetCargoType the first most used cargo type is returned.
  * \li AIIndustryType::GetConstructionCost() now returns -1 if the industry is
  *     neither buildable nor prospectable.
+ * \li AIEngine::IsValidEngine will now return true if you have at least one
+ *     vehicle of that type in your company, regardless if it's still buildable
+ *     or not. AIEngine::IsBuildable returns only true when you can actually
+ *     build an engine.
  *
  * \b 0.7.5
  *
