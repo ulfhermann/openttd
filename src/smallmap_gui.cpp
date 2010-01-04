@@ -1724,7 +1724,14 @@ public:
 			this->DrawLinkDetails(x, y_org, r.right - WD_FRAMERECT_RIGHT, r.bottom - WD_FRAMERECT_BOTTOM);
 		} else {
 			uint columns = this->GetNumberColumnsLegend(r.right - r.left + 1);
-			uint number_of_rows = max(this->map_type == SMT_INDUSTRY ? (_smallmap_industry_count + columns - 1) / columns : 0, this->min_number_of_fixed_rows);
+
+			uint number_of_rows = this->min_number_of_fixed_rows;
+			if (this->map_type == SMT_INDUSTRY) {
+				number_of_rows = max(number_of_rows, (_smallmap_industry_count + columns - 1) / columns);
+			} else if (this->map_type == SMT_LINKSTATS) {
+				number_of_rows = max(number_of_rows, (_smallmap_cargo_count + columns - 2) / (columns - 1));
+			}
+
 			bool rtl = _dynlang.text_dir == TD_RTL;
 			uint y_org = r.top + WD_FRAMERECT_TOP;
 			uint x = rtl ? r.right - this->column_width - WD_FRAMERECT_RIGHT : r.left + WD_FRAMERECT_LEFT;
@@ -2202,7 +2209,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 };
 
 static const WindowDesc _smallmap_desc(
-	WDP_AUTO, 460, 314,
+	WDP_AUTO, 550, 314,
 	WC_SMALLMAP, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)
