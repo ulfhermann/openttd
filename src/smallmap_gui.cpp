@@ -1628,8 +1628,9 @@ public:
 	 */
 	inline uint GetMaxLegendHeight() const
 	{
-		uint num_rows = max(this->min_number_of_fixed_rows, (_smallmap_industry_count + this->min_number_of_columns - 1) / this->min_number_of_columns);
-		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + num_rows * FONT_HEIGHT_SMALL;
+		uint number_of_rows = max(this->min_number_of_fixed_rows, (_smallmap_industry_count + this->min_number_of_columns - 1) / this->min_number_of_columns);
+		number_of_rows = max(number_of_rows, (_smallmap_cargo_count + this->min_number_of_columns - 2) / (this->min_number_of_columns - 1));
+		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + number_of_rows * FONT_HEIGHT_SMALL;
 	}
 
 	/** Compute minimal required width of the legends.
@@ -1654,8 +1655,7 @@ public:
 	uint GetLegendHeight(uint width) const
 	{
 		uint num_columns = this->GetNumberColumnsLegend(width);
-		uint num_rows = max(this->min_number_of_fixed_rows, (_smallmap_industry_count + num_columns - 1) / num_columns);
-		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + num_rows * FONT_HEIGHT_SMALL;
+		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + this->GetNumberRowsLegend(num_columns) * FONT_HEIGHT_SMALL;
 	}
 
 	virtual void SetStringParameters(int widget) const
@@ -1715,6 +1715,16 @@ public:
 		}
 	}
 
+	uint GetNumberRowsLegend(uint columns) const {
+		uint number_of_rows = this->min_number_of_fixed_rows;
+		if (this->map_type == SMT_INDUSTRY) {
+			number_of_rows = max(number_of_rows, (_smallmap_industry_count + columns - 1) / columns);
+		} else if (this->map_type == SMT_LINKSTATS) {
+			number_of_rows = max(number_of_rows, (_smallmap_cargo_count + columns - 2) / (columns - 1));
+		}
+		return number_of_rows;
+	}
+
 	void DrawLegend(const Rect &r) const {
 		uint y_org = r.top + WD_FRAMERECT_TOP;
 		uint x = r.left + WD_FRAMERECT_LEFT;
@@ -1725,12 +1735,7 @@ public:
 		} else {
 			uint columns = this->GetNumberColumnsLegend(r.right - r.left + 1);
 
-			uint number_of_rows = this->min_number_of_fixed_rows;
-			if (this->map_type == SMT_INDUSTRY) {
-				number_of_rows = max(number_of_rows, (_smallmap_industry_count + columns - 1) / columns);
-			} else if (this->map_type == SMT_LINKSTATS) {
-				number_of_rows = max(number_of_rows, (_smallmap_cargo_count + columns - 2) / (columns - 1));
-			}
+			uint number_of_rows = this->GetNumberRowsLegend(columns);
 
 			bool rtl = _dynlang.text_dir == TD_RTL;
 			uint y_org = r.top + WD_FRAMERECT_TOP;
