@@ -73,8 +73,6 @@ struct ETileArea : TileArea {
 
 			case TA_WHOLE:
 				st->GetTileArea(this, Station::IsExpected(st) ? STATION_RAIL : STATION_WAYPOINT);
-				this->w++;
-				this->h++;
 				break;
 		}
 	}
@@ -744,6 +742,20 @@ SpriteID GetCustomStationGroundRelocation(const StationSpec *statspec, const Bas
 }
 
 
+SpriteID GetCustomStationFoundationRelocation(const StationSpec *statspec, const BaseStation *st, TileIndex tile)
+{
+	const SpriteGroup *group;
+	ResolverObject object;
+
+	NewStationResolver(&object, statspec, st, tile);
+	object.callback_param1 = 2; // Indicate we are resolving the foundation sprites
+
+	group = ResolveStation(&object);
+	if (group == NULL || group->type != SGT_RESULT) return 0;
+	return group->GetResult() + GetRegister(0x100);
+}
+
+
 uint16 GetStationCallback(CallbackID callback, uint32 param1, uint32 param2, const StationSpec *statspec, const BaseStation *st, TileIndex tile)
 {
 	const SpriteGroup *group;
@@ -1064,23 +1076,19 @@ void StationAnimationTrigger(const BaseStation *st, TileIndex tile, StatAnimTrig
 	ETileArea area = ETileArea(st, tile, tas[trigger]);
 
 	/* Check all tiles over the station to check if the specindex is still in use */
-	for (uint y = 0; y < area.h; y++) {
-		for (uint x = 0; x < area.w; x++) {
-			if (st->TileBelongsToRailStation(area.tile)) {
-				const StationSpec *ss = GetStationSpec(area.tile);
-				if (ss != NULL && HasBit(ss->anim_triggers, trigger)) {
-					CargoID cargo;
-					if (cargo_type == CT_INVALID) {
-						cargo = CT_INVALID;
-					} else {
-						cargo = GetReverseCargoTranslation(cargo_type, ss->grffile);
-					}
-					ChangeStationAnimationFrame(ss, st, area.tile, random_bits, trigger, cargo);
+	TILE_LOOP(tile, area.w, area.h, area.tile) {
+		if (st->TileBelongsToRailStation(tile)) {
+			const StationSpec *ss = GetStationSpec(tile);
+			if (ss != NULL && HasBit(ss->anim_triggers, trigger)) {
+				CargoID cargo;
+				if (cargo_type == CT_INVALID) {
+					cargo = CT_INVALID;
+				} else {
+					cargo = GetReverseCargoTranslation(cargo_type, ss->grffile);
 				}
+				ChangeStationAnimationFrame(ss, st, tile, random_bits, trigger, cargo);
 			}
-			area.tile += TileDiffXY(1, 0);
 		}
-		area.tile += TileDiffXY(-area.w, 1);
 	}
 }
 
