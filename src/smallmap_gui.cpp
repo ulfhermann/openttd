@@ -1628,9 +1628,7 @@ public:
 	 */
 	inline uint GetMaxLegendHeight() const
 	{
-		uint number_of_rows = max(this->min_number_of_fixed_rows, (_smallmap_industry_count + this->min_number_of_columns - 1) / this->min_number_of_columns);
-		number_of_rows = max(number_of_rows, (_smallmap_cargo_count + this->min_number_of_columns - 2) / (this->min_number_of_columns - 1));
-		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + number_of_rows * FONT_HEIGHT_SMALL;
+		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + this->GetMaxNumberRowsLegend(this->min_number_of_columns) * FONT_HEIGHT_SMALL;
 	}
 
 	/** Compute minimal required width of the legends.
@@ -1655,7 +1653,7 @@ public:
 	uint GetLegendHeight(uint width) const
 	{
 		uint num_columns = this->GetNumberColumnsLegend(width);
-		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + this->GetNumberRowsLegend(num_columns) * FONT_HEIGHT_SMALL;
+		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + this->GetMaxNumberRowsLegend(num_columns) * FONT_HEIGHT_SMALL;
 	}
 
 	virtual void SetStringParameters(int widget) const
@@ -1722,6 +1720,13 @@ public:
 		} else if (this->map_type == SMT_LINKSTATS) {
 			number_of_rows = max(number_of_rows, (_smallmap_cargo_count + columns - 2) / (columns - 1));
 		}
+		return number_of_rows;
+	}
+
+	uint GetMaxNumberRowsLegend(uint columns) const {
+		uint number_of_rows = this->min_number_of_fixed_rows;
+		number_of_rows = max(number_of_rows, (_smallmap_industry_count + columns - 1) / columns);
+		number_of_rows = max(number_of_rows, (_smallmap_cargo_count + columns - 2) / (columns - 1));
 		return number_of_rows;
 	}
 
