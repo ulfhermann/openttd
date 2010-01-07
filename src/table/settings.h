@@ -465,7 +465,7 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, linkgraph.accuracy,                   SLE_UINT8,DEMANDS_SV, SL_MAX_VERSION, 0, 0,16,  2,      64, 1, STR_CONFIG_SETTING_LINKGRAPH_ACCURACY,     NULL),
 	 SDT_CONDVAR(GameSettings, linkgraph.demand_distance,            SLE_UINT8,DEMANDS_SV, SL_MAX_VERSION, 0, 0,100, 0,     255, 5, STR_CONFIG_SETTING_DEMAND_DISTANCE,        NULL),
 	 SDT_CONDVAR(GameSettings, linkgraph.demand_size,                SLE_UINT8,DEMANDS_SV, SL_MAX_VERSION, 0, 0,100, 0,     100, 5, STR_CONFIG_SETTING_DEMAND_SIZE,            NULL),
-	 SDT_CONDVAR(GameSettings, linkgraph.short_path_saturation,      SLE_UINT8,  MCF_SV, SL_MAX_VERSION, 0, 0,80,    0,     100, 5, STR_CONFIG_SETTING_SHORT_PATH_SATURATION,  NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.short_path_saturation,      SLE_UINT8,  MCF_SV, SL_MAX_VERSION, 0, 0,80,    0,     250, 5, STR_CONFIG_SETTING_SHORT_PATH_SATURATION,  NULL),
 
 	 SDT_CONDVAR(GameSettings, pf.wait_for_pbs_path,                 SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    30,     2,     255, 0, STR_NULL,                                  NULL),
 	SDT_CONDBOOL(GameSettings, pf.reserve_paths,                               100, SL_MAX_VERSION, 0, 0, false,                    STR_NULL,                                  NULL),

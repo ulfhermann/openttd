@@ -328,8 +328,9 @@ uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
 	if (parent != NULL) {
 		Edge & edge = graph->GetEdge(parent->node, node);
 		if (only_positive) {
-			if(edge.capacity > edge.flow) {
-				f = min(f, edge.capacity - edge.flow);
+			uint usable_cap = edge.capacity * graph->GetSettings().short_path_saturation / 100;
+			if(usable_cap > edge.flow) {
+				f = min(f, usable_cap - edge.flow);
 			} else {
 				return 0;
 			}
