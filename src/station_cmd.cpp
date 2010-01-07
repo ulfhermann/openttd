@@ -485,10 +485,25 @@ CargoArray GetProductionAroundTiles(TileIndex tile, int w, int h, int rad)
 	assert(w > 0);
 	assert(h > 0);
 
-	for (int yc = y1; yc != y2; yc++) {
-		for (int xc = x1; xc != x2; xc++) {
-			TileIndex tile = TileXY(xc, yc);
-			AddProducedCargo(tile, produced);
+	TileArea ta(TileXY(x1, y1), TileXY(x2 - 1, y2 - 1));
+
+	/* Loop over all tiles to get the produced cargo of
+	 * everything except industries */
+	TILE_AREA_LOOP(tile, ta) AddProducedCargo(tile, produced);
+
+	/* Loop over the industries. They produce cargo for
+	 * anything that is within 'rad' from their bounding
+	 * box. As such if you have e.g. a oil well the tile
+	 * area loop might not hit an industry tile while
+	 * the industry would produce cargo for the station.
+	 */
+	const Industry *i;
+	FOR_ALL_INDUSTRIES(i) {
+		if (!ta.Intersects(i->location)) continue;
+
+		for (uint j = 0; j < lengthof(i->produced_cargo); j++) {
+			CargoID cargo = i->produced_cargo[j];
+			if (cargo != CT_INVALID) produced[cargo]++;
 		}
 	}
 
@@ -1223,7 +1238,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 	CommandCost total_cost(EXPENSES_CONSTRUCTION);
 
 	/* Do the action for every tile into the area */
-	TILE_LOOP(tile, ta.w, ta.h, ta.tile) {
+	TILE_AREA_LOOP(tile, ta) {
 		/* Make sure the specified tile is a rail station */
 		if (!HasStationTileRail(tile)) continue;
 
@@ -1388,7 +1403,7 @@ CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	/* clear all areas of the station */
-	TILE_LOOP(tile, ta.w, ta.h, ta.tile) {
+	TILE_AREA_LOOP(tile, ta) {
 		/* for nonuniform stations, only remove tiles that are actually train station tiles */
 		if (!st->TileBelongsToRailStation(tile)) continue;
 
@@ -2382,11 +2397,13 @@ static void DrawTile_Station(TileInfo *ti)
 				if (!HasFoundationNW(ti->tile, slope, z)) ClrBit(parts, 6);
 				if (!HasFoundationNE(ti->tile, slope, z)) ClrBit(parts, 7);
 
+				StartSpriteCombine();
 				for (int i = 0; i < 8; i++) {
 					if (HasBit(parts, i)) {
 						AddSortableSpriteToDraw(image + i, PAL_NONE, ti->x, ti->y, 16, 16, 7, ti->z);
 					}
 				}
+				EndSpriteCombine();
 			}
 
 			OffsetGroundSprite(31, 1);
@@ -3112,19 +3129,17 @@ CommandCost CmdRenameStation(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 /**
  * Find all stations around a rectangular producer (industry, house, headquarter, ...)
  *
- * @param tile North tile of producer
- * @param w_prod X extent of producer
- * @param h_prod Y extent of producer
+ * @param location The location/area of the producer
  * @param stations The list to store the stations in
  */
-void FindStationsAroundTiles(TileIndex tile, int w_prod, int h_prod, StationList *stations)
+void FindStationsAroundTiles(const TileArea &location, StationList *stations)
 {
 	/* area to search = producer plus station catchment radius */
 	int max_rad = (_settings_game.station.modified_catchment ? MAX_CATCHMENT : CA_UNMODIFIED);
 
-	for (int dy = -max_rad; dy < h_prod + max_rad; dy++) {
-		for (int dx = -max_rad; dx < w_prod + max_rad; dx++) {
-			TileIndex cur_tile = TileAddWrap(tile, dx, dy);
+	for (int dy = -max_rad; dy < location.h + max_rad; dy++) {
+		for (int dx = -max_rad; dx < location.w + max_rad; dx++) {
+			TileIndex cur_tile = TileAddWrap(location.tile, dx, dy);
 			if (cur_tile == INVALID_TILE || !IsTileType(cur_tile, MP_STATION)) continue;
 
 			Station *st = Station::GetByTile(cur_tile);
@@ -3132,7 +3147,7 @@ void FindStationsAroundTiles(TileIndex tile, int w_prod, int h_prod, StationList
 
 			if (_settings_game.station.modified_catchment) {
 				int rad = st->GetCatchmentRadius();
-				if (dx < -rad || dx >= rad + w_prod || dy < -rad || dy >= rad + h_prod) continue;
+				if (dx < -rad || dx >= rad + location.w || dy < -rad || dy >= rad + location.h) continue;
 			}
 
 			/* Insert the station in the set. This will fail if it has
@@ -3150,7 +3165,7 @@ void FindStationsAroundTiles(TileIndex tile, int w_prod, int h_prod, StationList
 const StationList *StationFinder::GetStations()
 {
 	if (this->tile != INVALID_TILE) {
-		FindStationsAroundTiles(this->tile, this->x_extent, this->y_extent, &this->stations);
+		FindStationsAroundTiles(*this, &this->stations);
 		this->tile = INVALID_TILE;
 	}
 	return &this->stations;
