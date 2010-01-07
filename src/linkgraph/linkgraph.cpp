@@ -20,11 +20,11 @@ void LinkGraph::CreateComponent(Station * first) {
 
 	search_queue.push(first);
 
-	first->goods[cargo].last_component = current_component_id;
-	component = new LinkGraphComponent(cargo, current_component_id);
-	GoodsEntry & good = first->goods[cargo];
-	node = component->AddNode(current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
-	index[current_station_id++] = node;
+	first->goods[this->cargo].last_component = this->current_component_id;
+	component = new LinkGraphComponent(this->cargo, this->current_component_id);
+	GoodsEntry & good = first->goods[this->cargo];
+	node = component->AddNode(this->current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+	index[this->current_station_id++] = node;
 	// find all stations belonging to the current component
 	while(!search_queue.empty()) {
 		Station * source = search_queue.front();
@@ -43,7 +43,7 @@ void LinkGraph::CreateComponent(Station * first) {
 			if (index_it == index.end()) {
 				Station * target = Station::Get(target_id);
 				GoodsEntry & good = target->goods[cargo];
-				good.last_component = current_component_id;
+				good.last_component = this->current_component_id;
 				search_queue.push(target);
 				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 				index[target_id] = node;
@@ -57,43 +57,43 @@ void LinkGraph::CreateComponent(Station * first) {
 	component->CalculateDistances();
 	LinkGraphJob * job = new LinkGraphJob(component);
 	assert(job != NULL);
-	job->SpawnThread(cargo);
-	jobs.push_back(job);
+	job->SpawnThread(this->cargo);
+	this->jobs.push_back(job);
 }
 
 void LinkGraph::NextComponent()
 {
-	while (!Station::IsValidID(current_station_id) && current_station_id > 0) {
-		--current_station_id;
+	while (!Station::IsValidID(this->current_station_id) && this->current_station_id > 0) {
+		--this->current_station_id;
 	}
-	StationID last_station_id = current_station_id;
+	StationID last_station_id = this->current_station_id;
 
 	do {
 		// find first station of next component
-		if (Station::IsValidID(current_station_id)) {
-			Station * station = Station::Get(current_station_id);
-			GoodsEntry & ge = station->goods[cargo];
-			if ((ge.last_component + current_component_id) % 2 != 0) {
+		if (Station::IsValidID(this->current_station_id)) {
+			Station * station = Station::Get(this->current_station_id);
+			GoodsEntry & ge = station->goods[this->cargo];
+			if ((ge.last_component + this->current_component_id) % 2 != 0) {
 				// has not been seen in this run through the graph
 
 				LinkStatMap & links = station->goods[cargo].link_stats;
 				if (!links.empty()) {
-					current_component_id += 2;
+					this->current_component_id += 2;
 					CreateComponent(station);
 					return;
 				}
 			}
 		}
 
-		if (++current_station_id == Station::GetPoolSize()) {
-			current_station_id = 0;
-			if (current_component_id % 2 == 0) {
-				current_component_id = 1;
+		if (++this->current_station_id == Station::GetPoolSize()) {
+			this->current_station_id = 0;
+			if (this->current_component_id % 2 == 0) {
+				this->current_component_id = 1;
 			} else {
-				current_component_id = 0;
+				this->current_component_id = 0;
 			}
 		}
-	} while (current_station_id != last_station_id);
+	} while (this->current_station_id != last_station_id);
 }
 
 void OnTick_LinkGraph()
@@ -165,8 +165,8 @@ LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID col) :
 }
 
 void LinkGraph::Join() {
-	while (!jobs.empty()) {
-		LinkGraphJob * job = jobs.front();
+	while (!this->jobs.empty()) {
+		LinkGraphJob * job = this->jobs.front();
 		assert(job != NULL);
 
 		/* also join if join date is far in the future. This prevents excessive memory use when resetting time */
@@ -176,7 +176,7 @@ void LinkGraph::Join() {
 		job->Join();
 
 		delete job;
-		jobs.pop_front();
+		this->jobs.pop_front();
 	}
 }
 
@@ -190,26 +190,27 @@ void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 	}
 	LinkGraphJob * job = new LinkGraphJob(component, join);
 	assert(job != NULL);
-	job->SpawnThread(cargo);
-	jobs.push_back(job);
+	job->SpawnThread(this->cargo);
+	this->jobs.push_back(job);
 }
 
 void LinkGraphJob::Run() {
-	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
 		ComponentHandler * handler = *i;
-		handler->Run(component);
+		handler->Run(this->component);
 	}
 }
 
 LinkGraphJob::~LinkGraphJob() {
-	for (HandlerList::iterator i = handlers.begin(); i != handlers.end(); ++i) {
+	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
 		ComponentHandler * handler = *i;
 		delete handler;
 	}
-	handlers.clear();
-	DEBUG(misc, 2, "removing job for cargo %d with index %d and join date %d at %d", component->GetCargo(), component->GetIndex(), join_date, _date);
-	delete component;
-	delete thread;
+	this->handlers.clear();
+	DEBUG(misc, 2, "removing job for cargo %d with index %d and join date %d at %d", this->component->GetCargo(),
+			this->component->GetIndex(), this->join_date, _date);
+	delete this->component;
+	delete this->thread;
 }
 
 void RunLinkGraphJob(void * j) {
