@@ -45,8 +45,8 @@ bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint
 template<class ANNOTATION>
 void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool create_new_paths) {
 	typedef std::set<ANNOTATION *, typename ANNOTATION::comp> AnnoSet;
-	uint size = graph->GetSize();
-	StationID source_station = graph->GetNode(source_node).station;
+	uint size = this->graph->GetSize();
+	StationID source_station = this->graph->GetNode(source_node).station;
 	AnnoSet annos;
 	paths.resize(size, NULL);
 	for (NodeID node = 0; node < size; ++node) {
@@ -59,18 +59,19 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool c
 		ANNOTATION * source = *i;
 		annos.erase(i);
 		NodeID from = source->GetNode();
-		NodeID to = graph->GetFirstEdge(from);
+		NodeID to = this->graph->GetFirstEdge(from);
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
 			assert(edge.capacity > 0 && edge.distance < UINT_MAX);
-			if (create_new_paths || graph->GetNode(from).flows[source_station][graph->GetNode(to).station] > 0) {
+			if (create_new_paths || this->graph->GetNode(from).flows[source_station][graph->GetNode(to).station] > 0) {
 				int capacity = edge.capacity;
 				if (create_new_paths) {
-					capacity *= graph->GetSettings().short_path_saturation;
+					capacity *= this->graph->GetSettings().short_path_saturation;
 					capacity /= 100;
 					if (capacity == 0) {
 						capacity = 1;
 					}
+					assert(capacity > 0);
 				}
 				capacity -= edge.flow;
 				uint distance = edge.distance + 1; // punish in-between stops a little
