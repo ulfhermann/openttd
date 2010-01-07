@@ -296,30 +296,18 @@ CommandCost CmdBuildLock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 CommandCost CmdBuildCanal(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	CommandCost cost(EXPENSES_CONSTRUCTION);
-	int size_x, size_y;
-	int x;
-	int y;
-	int sx, sy;
 
 	if (p1 >= MapSize()) return CMD_ERROR;
 
 	/* Outside of the editor you can only build canals, not oceans */
 	if (p2 != 0 && _game_mode != GM_EDITOR) return CMD_ERROR;
 
-	x = TileX(tile);
-	y = TileY(tile);
-	sx = TileX(p1);
-	sy = TileY(p1);
-
-	if (x < sx) Swap(x, sx);
-	if (y < sy) Swap(y, sy);
-	size_x = (x - sx) + 1;
-	size_y = (y - sy) + 1;
+	TileArea ta(tile, p1);
 
 	/* Outside the editor you can only drag canals, and not areas */
-	if (_game_mode != GM_EDITOR && (sx != x && sy != y)) return CMD_ERROR;
+	if (_game_mode != GM_EDITOR && ta.w != 1 && ta.h != 1) return CMD_ERROR;
 
-	TILE_LOOP(tile, size_x, size_y, TileXY(sx, sy)) {
+	TILE_AREA_LOOP(tile, ta) {
 		CommandCost ret;
 
 		Slope slope = GetTileSlope(tile, NULL);
@@ -761,7 +749,7 @@ static void FloodVehicles(TileIndex tile)
 	if (!_settings_game.station.nonuniform_stations && IsTileType(tile, MP_STATION) && GetStationType(tile) == STATION_RAIL) {
 		const Station *st = Station::GetByTile(tile);
 
-		TILE_LOOP(t, st->train_station.w, st->train_station.h, st->train_station.tile) {
+		TILE_AREA_LOOP(t, st->train_station) {
 			if (st->TileBelongsToRailStation(t)) {
 				FindVehicleOnPos(tile, &z, &FloodVehicleProc);
 			}
