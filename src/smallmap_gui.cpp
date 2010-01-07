@@ -484,7 +484,7 @@ static inline uint32 GetSmallMapVegetationPixels(TileIndex tile)
 			return GetIndustrySpec(Industry::GetByTile(tile)->type)->check_proc == CHECK_FOREST ? MKCOLOUR(0xD0D0D0D0) : MKCOLOUR(0xB5B5B5B5);
 
 		case MP_TREES:
-			if (GetTreeGround(tile) == TREE_GROUND_SNOW_DESERT) {
+			if (GetTreeGround(tile) == TREE_GROUND_SNOW_DESERT || GetTreeGround(tile) == TREE_GROUND_ROUGH_SNOW) {
 				return (_settings_game.game_creation.landscape == LT_ARCTIC) ? MKCOLOUR(0x98575798) : MKCOLOUR(0xC25757C2);
 			}
 			return MKCOLOUR(0x54575754);
@@ -1171,7 +1171,7 @@ class SmallMapWindow : public Window {
 			const Industry *i;
 			FOR_ALL_INDUSTRIES(i) {
 				if (_legend_from_industries[_industry_to_list_pos[i->type]].show_on_map) {
-					Point pt = RemapTileCoords(i->xy);
+					Point pt = RemapTileCoords(i->location.tile);
 
 					int y = pt.y - dpi->top;
 					if (!IsInsideMM(y, 0, dpi->height)) continue;
