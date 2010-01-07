@@ -654,7 +654,7 @@ class SmallMapWindow : public Window {
 			const Industry *i;
 			FOR_ALL_INDUSTRIES(i) {
 				if (_legend_from_industries[_industry_to_list_pos[i->type]].show_on_map) {
-					Point pt = RemapTileCoords(i->xy);
+					Point pt = RemapTileCoords(i->location.tile);
 
 					int y = pt.y - dpi->top;
 					if (!IsInsideMM(y, 0, dpi->height)) continue;
