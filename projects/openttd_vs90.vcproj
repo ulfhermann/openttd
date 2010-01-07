@@ -1465,6 +1465,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\tilearea_type.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\tile_cmd.h"
 				>
 			</File>
@@ -2637,10 +2641,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\ai\api\ai_buoylist.hpp"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\ai\api\ai_cargo.hpp"
 				>
 			</File>
@@ -2858,10 +2858,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\ai\api\ai_bridgelist.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\ai\api\ai_buoylist.cpp"
 				>
 			</File>
 			<File
