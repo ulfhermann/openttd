@@ -68,7 +68,7 @@ static bool CanPlantTreesOnTile(TileIndex tile, bool allow_desert)
 			return !IsBridgeAbove(tile) && IsCoast(tile) && !IsSlopeWithOneCornerRaised(GetTileSlope(tile, NULL));
 
 		case MP_CLEAR:
-			return !IsBridgeAbove(tile) && !IsClearGround(tile, CLEAR_FIELDS) && !IsClearGround(tile, CLEAR_ROCKS) &&
+			return !IsBridgeAbove(tile) && !IsClearGround(tile, CLEAR_FIELDS) && GetRawClearGround(tile) != CLEAR_ROCKS &&
 			       (allow_desert || !IsClearGround(tile, CLEAR_DESERT));
 
 		default: return false;
@@ -101,10 +101,12 @@ static void PlantTreesOnTile(TileIndex tile, TreeType treetype, uint count, uint
 
 		case MP_CLEAR:
 			switch (GetClearGround(tile)) {
-				case CLEAR_GRASS:  ground = TREE_GROUND_GRASS;       density = GetClearDensity(tile); break;
-				case CLEAR_ROUGH:  ground = TREE_GROUND_ROUGH;                                        break;
-				default:           ground = TREE_GROUND_SNOW_DESERT; density = GetClearDensity(tile); break;
+				case CLEAR_GRASS:  ground = TREE_GROUND_GRASS;       break;
+				case CLEAR_ROUGH:  ground = TREE_GROUND_ROUGH;       break;
+				case CLEAR_SNOW:   ground = GetRawClearGround(tile) == CLEAR_ROUGH ? TREE_GROUND_ROUGH_SNOW : TREE_GROUND_SNOW_DESERT; break;
+				default:           ground = TREE_GROUND_SNOW_DESERT; break;
 			}
+			if (GetClearGround(tile) != CLEAR_ROUGH) density = GetClearDensity(tile);
 			break;
 
 		default: NOT_REACHED();
@@ -163,7 +165,7 @@ static void PlaceTree(TileIndex tile, uint32 r)
 
 		/* Rerandomize ground, if neither snow nor shore */
 		TreeGround ground = GetTreeGround(tile);
-		if (ground != TREE_GROUND_SNOW_DESERT && ground != TREE_GROUND_SHORE) {
+		if (ground != TREE_GROUND_SNOW_DESERT && ground != TREE_GROUND_ROUGH_SNOW && ground != TREE_GROUND_SHORE) {
 			SetTreeGroundDensity(tile, (TreeGround)GB(r, 28, 1), 3);
 		}
 
@@ -343,98 +345,84 @@ CommandCost CmdPlantTree(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 {
 	StringID msg = INVALID_STRING_ID;
 	CommandCost cost(EXPENSES_OTHER);
-	int ex;
-	int ey;
-	int sx, sy, x, y;
 
 	if (p2 >= MapSize()) return CMD_ERROR;
 	/* Check the tree type. It can be random or some valid value within the current climate */
 	if (p1 != UINT_MAX && p1 - _tree_base_by_landscape[_settings_game.game_creation.landscape] >= _tree_count_by_landscape[_settings_game.game_creation.landscape]) return CMD_ERROR;
 
-	/* make sure sx,sy are smaller than ex, ey */
-	ex = TileX(tile);
-	ey = TileY(tile);
-	sx = TileX(p2);
-	sy = TileY(p2);
-	if (ex < sx) Swap(ex, sx);
-	if (ey < sy) Swap(ey, sy);
+	TileArea ta(tile, p2);
+	TILE_AREA_LOOP(tile, ta) {
+		switch (GetTileType(tile)) {
+			case MP_TREES:
+				/* no more space for trees? */
+				if (_game_mode != GM_EDITOR && GetTreeCount(tile) == 4) {
+					msg = STR_ERROR_TREE_ALREADY_HERE;
+					continue;
+				}
 
-	for (x = sx; x <= ex; x++) {
-		for (y = sy; y <= ey; y++) {
-			TileIndex tile = TileXY(x, y);
+				if (flags & DC_EXEC) {
+					AddTreeCount(tile, 1);
+					MarkTileDirtyByTile(tile);
+				}
+				/* 2x as expensive to add more trees to an existing tile */
+				cost.AddCost(_price[PR_BUILD_TREES] * 2);
+				break;
 
-			switch (GetTileType(tile)) {
-				case MP_TREES:
-					/* no more space for trees? */
-					if (_game_mode != GM_EDITOR && GetTreeCount(tile) == 4) {
-						msg = STR_ERROR_TREE_ALREADY_HERE;
-						continue;
-					}
-
-					if (flags & DC_EXEC) {
-						AddTreeCount(tile, 1);
-						MarkTileDirtyByTile(tile);
-					}
-					/* 2x as expensive to add more trees to an existing tile */
-					cost.AddCost(_price[PR_BUILD_TREES] * 2);
-					break;
-
-				case MP_WATER:
-					if (!IsCoast(tile) || IsSlopeWithOneCornerRaised(GetTileSlope(tile, NULL))) {
-						msg = STR_ERROR_CAN_T_BUILD_ON_WATER;
-						continue;
-					}
-				/* FALL THROUGH */
-				case MP_CLEAR:
-					if (IsBridgeAbove(tile)) {
-						msg = STR_ERROR_SITE_UNSUITABLE;
-						continue;
-					}
-
-					if (IsTileType(tile, MP_CLEAR)) {
-						/* Remove fields or rocks. Note that the ground will get barrened */
-						switch (GetClearGround(tile)) {
-							case CLEAR_FIELDS:
-							case CLEAR_ROCKS: {
-								CommandCost ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-								if (CmdFailed(ret)) return ret;
-								cost.AddCost(ret);
-								break;
-							}
-
-							default: break;
-						}
-					}
-
-					if (_game_mode != GM_EDITOR && Company::IsValidID(_current_company)) {
-						Town *t = ClosestTownFromTile(tile, _settings_game.economy.dist_local_authority);
-						if (t != NULL) ChangeTownRating(t, RATING_TREE_UP_STEP, RATING_TREE_MAXIMUM, flags);
-					}
-
-					if (flags & DC_EXEC) {
-						TreeType treetype;
-
-						treetype = (TreeType)p1;
-						if (treetype == TREE_INVALID) {
-							treetype = GetRandomTreeType(tile, GB(Random(), 24, 8));
-							if (treetype == TREE_INVALID) treetype = TREE_CACTUS;
-						}
-
-						/* Plant full grown trees in scenario editor */
-						PlantTreesOnTile(tile, treetype, 0, _game_mode == GM_EDITOR ? 3 : 0);
-						MarkTileDirtyByTile(tile);
-
-						/* When planting rainforest-trees, set tropiczone to rainforest in editor. */
-						if (_game_mode == GM_EDITOR && IsInsideMM(treetype, TREE_RAINFOREST, TREE_CACTUS))
-							SetTropicZone(tile, TROPICZONE_RAINFOREST);
-					}
-					cost.AddCost(_price[PR_BUILD_TREES]);
-					break;
-
-				default:
+			case MP_WATER:
+				if (!IsCoast(tile) || IsSlopeWithOneCornerRaised(GetTileSlope(tile, NULL))) {
+					msg = STR_ERROR_CAN_T_BUILD_ON_WATER;
+					continue;
+				}
+			/* FALL THROUGH */
+			case MP_CLEAR:
+				if (IsBridgeAbove(tile)) {
 					msg = STR_ERROR_SITE_UNSUITABLE;
-					break;
-			}
+					continue;
+				}
+
+				if (IsTileType(tile, MP_CLEAR)) {
+					/* Remove fields or rocks. Note that the ground will get barrened */
+					switch (GetRawClearGround(tile)) {
+						case CLEAR_FIELDS:
+						case CLEAR_ROCKS: {
+							CommandCost ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
+							if (CmdFailed(ret)) return ret;
+							cost.AddCost(ret);
+							break;
+						}
+
+						default: break;
+					}
+				}
+
+				if (_game_mode != GM_EDITOR && Company::IsValidID(_current_company)) {
+					Town *t = ClosestTownFromTile(tile, _settings_game.economy.dist_local_authority);
+					if (t != NULL) ChangeTownRating(t, RATING_TREE_UP_STEP, RATING_TREE_MAXIMUM, flags);
+				}
+
+				if (flags & DC_EXEC) {
+					TreeType treetype;
+
+					treetype = (TreeType)p1;
+					if (treetype == TREE_INVALID) {
+						treetype = GetRandomTreeType(tile, GB(Random(), 24, 8));
+						if (treetype == TREE_INVALID) treetype = TREE_CACTUS;
+					}
+
+					/* Plant full grown trees in scenario editor */
+					PlantTreesOnTile(tile, treetype, 0, _game_mode == GM_EDITOR ? 3 : 0);
+					MarkTileDirtyByTile(tile);
+
+					/* When planting rainforest-trees, set tropiczone to rainforest in editor. */
+					if (_game_mode == GM_EDITOR && IsInsideMM(treetype, TREE_RAINFOREST, TREE_CACTUS))
+						SetTropicZone(tile, TROPICZONE_RAINFOREST);
+				}
+				cost.AddCost(_price[PR_BUILD_TREES]);
+				break;
+
+			default:
+				msg = STR_ERROR_SITE_UNSUITABLE;
+				break;
 		}
 	}
 
@@ -469,7 +457,7 @@ static void DrawTile_Trees(TileInfo *ti)
 	uint index = GB(tmp, 0, 2) + (GetTreeType(ti->tile) << 2);
 
 	/* different tree styles above one of the grounds */
-	if (GetTreeGround(ti->tile) == TREE_GROUND_SNOW_DESERT &&
+	if ((GetTreeGround(ti->tile) == TREE_GROUND_SNOW_DESERT || GetTreeGround(ti->tile) == TREE_GROUND_ROUGH_SNOW) &&
 			GetTreeDensity(ti->tile) >= 2 &&
 			IsInsideMM(index, TREE_SUB_ARCTIC << 2, TREE_RAINFOREST << 2)) {
 		index += 164 - (TREE_SUB_ARCTIC << 2);
@@ -599,14 +587,19 @@ static void TileLoopTreesAlps(TileIndex tile)
 	int k = GetTileZ(tile) - GetSnowLine() + TILE_HEIGHT;
 
 	if (k < 0) {
-		if (GetTreeGround(tile) != TREE_GROUND_SNOW_DESERT) return;
-		SetTreeGroundDensity(tile, TREE_GROUND_GRASS, 3);
+		switch (GetTreeGround(tile)) {
+			case TREE_GROUND_SNOW_DESERT: SetTreeGroundDensity(tile, TREE_GROUND_GRASS, 3); break;
+			case TREE_GROUND_ROUGH_SNOW:  SetTreeGroundDensity(tile, TREE_GROUND_ROUGH, 3); break;
+			default: return;
+		}
 	} else {
 		uint density = min((uint)k / TILE_HEIGHT, 3);
 
-		if (GetTreeGround(tile) != TREE_GROUND_SNOW_DESERT ||
-				GetTreeDensity(tile) != density) {
-			SetTreeGroundDensity(tile, TREE_GROUND_SNOW_DESERT, density);
+		if (GetTreeGround(tile) != TREE_GROUND_SNOW_DESERT && GetTreeGround(tile) != TREE_GROUND_ROUGH_SNOW) {
+			TreeGround tg = GetTreeGround(tile) == TREE_GROUND_ROUGH ? TREE_GROUND_ROUGH_SNOW : TREE_GROUND_SNOW_DESERT;
+			SetTreeGroundDensity(tile, tg, density);
+		} else if (GetTreeDensity(tile) != density) {
+			SetTreeGroundDensity(tile, GetTreeGround(tile), density);
 		} else {
 			if (GetTreeDensity(tile) == 3) {
 				uint32 r = Random();
@@ -709,8 +702,20 @@ static void TileLoop_Trees(TileIndex tile)
 					case TREE_GROUND_SHORE: MakeShore(tile); break;
 					case TREE_GROUND_GRASS: MakeClear(tile, CLEAR_GRASS, GetTreeDensity(tile)); break;
 					case TREE_GROUND_ROUGH: MakeClear(tile, CLEAR_ROUGH, 3); break;
+					case TREE_GROUND_ROUGH_SNOW: {
+						uint density = GetTreeDensity(tile);
+						MakeClear(tile, CLEAR_ROUGH, 3);
+						MakeSnow(tile, density);
+						break;
+					}
 					default: // snow or desert
-						MakeClear(tile, _settings_game.game_creation.landscape == LT_TROPIC ? CLEAR_DESERT : CLEAR_SNOW, GetTreeDensity(tile));
+						if (_settings_game.game_creation.landscape == LT_TROPIC) {
+							MakeClear(tile, CLEAR_DESERT, GetTreeDensity(tile));
+						} else {
+							uint density = GetTreeDensity(tile);
+							MakeClear(tile, CLEAR_GRASS, 3);
+							MakeSnow(tile, density);
+						}
 						break;
 				}
 			}
