@@ -14,31 +14,31 @@ void MultiCommodityFlow::Run(LinkGraphComponent * g) {
 
 bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint dist) const {
 	if (cap > 0 && base->capacity > 0) {
-		if (capacity <= 0) {
+		if (this->capacity <= 0) {
 			return true; // if the other path has capacity left and this one hasn't, the other one's better
 		} else {
-			return base->distance + dist < distance;
+			return base->distance + dist < this->distance;
 		}
 	} else {
-		if (capacity > 0 || base->distance == UINT_MAX) {
+		if (this->capacity > 0 || base->distance == UINT_MAX) {
 			return false; // if the other path doesn't have capacity left or is disconnected, but this one has, this one is always better
 		} else {
 			/* if both paths are out of capacity, do the regular distance comparison again */
-			return base->distance + dist < distance;
+			return base->distance + dist < this->distance;
 		}
 	}
 }
 
 bool CapacityAnnotation::IsBetter(const CapacityAnnotation * base, int cap, uint dist) const {
 	int min_cap = min(base->capacity, cap);
-	if (min_cap == capacity) {
+	if (min_cap == this->capacity) {
 		if (base->distance != UINT_MAX) { // if the capacities are the same, choose the shorter path
-			return (base->distance + dist < distance);
+			return (base->distance + dist < this->distance);
 		} else {
 			return false;
 		}
 	} else {
-		return min_cap > capacity;
+		return min_cap > this->capacity;
 	}
 }
 
@@ -238,9 +238,8 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 					 * but if no demand has been assigned yet, make an exception and allow
 					 * any valid path *once*.
 					 */
-					if (path->GetCapacity() > 0) {
-						PushFlow(edge, path, accuracy, true);
-						if (edge.unsatisfied_demand > 0) {
+					if (path->GetCapacity() > 0 && PushFlow(edge, path, accuracy, true) > 0) {
+						more_loops = (edge.unsatisfied_demand > 0); {
 							/* if a path has been found there is a chance we can find more */
 							more_loops = true;
 						}
