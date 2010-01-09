@@ -156,7 +156,10 @@ struct Town : TownPool::PoolItem<&_town_pool>, CargoSourceSink {
 		return Town::Get(GetTownIndex(tile));
 	}
 
-	static Town *GetRandom();
+	/** Callback function for #Town::GetRandom. */
+	typedef bool (*EnumTownProc)(const Town *t, void *data);
+
+	static Town *GetRandom(EnumTownProc enum_proc = NULL, TownID skip = INVALID_TOWN, void *data = NULL);
 	static void PostDestructor(size_t index);
 };
 
@@ -246,6 +249,7 @@ DECLARE_ENUM_AS_BIT_SET(TownActions)
 
 extern const byte _town_action_costs[TACT_COUNT];
 extern TownID _new_town_id;
+
 
 /**
  * Set the default name for a depot/waypoint

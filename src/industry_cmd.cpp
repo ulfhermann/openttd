@@ -189,17 +189,36 @@ void Industry::PostDestructor(size_t index)
 
 
 /**
- * Return a random valid industry.
- * @return random industry, NULL if there are no industries
+ * Return a random industry that statisfies some criteria
+ * specified with a callback function.
+ *
+ * @param enum_proc Callback function. Return true for a matching industry and false to continue iterating.
+ * @param skip Skip over this industry id when searching.
+ * @param data Optional data passed to the callback function.
+ * @return An industry satisfying the search criteria or NULL if no such industry exists.
  */
-/* static */ Industry *Industry::GetRandom()
+/* static */ Industry *Industry::GetRandom(EnumIndustryProc enum_proc, IndustryID skip, void *data)
 {
-	if (Industry::GetNumItems() == 0) return NULL;
-	int num = RandomRange((uint16)Industry::GetNumItems());
-	size_t index = MAX_UVALUE(size_t);
+	assert(skip == INVALID_INDUSTRY || Industry::IsValidID(skip));
 
-	while (num >= 0) {
-		num--;
+	uint16 max_num = 0;
+	if (enum_proc != NULL) {
+		/* A callback was given, count all matching industries. */
+		Industry *ind;
+		FOR_ALL_INDUSTRIES(ind) {
+			if (ind->index != skip && enum_proc(ind, data)) max_num++;
+		}
+	} else {
+		max_num = (uint16)Industry::GetNumItems();
+		/* Subtract one if an industry to skip was given. max_num is at least
+		* one here as otherwise skip could not be valid. */
+		if (skip != INVALID_INDUSTRY) max_num--;
+	}
+	if (max_num == 0) return NULL;
+
+	uint num = RandomRange(max_num) + 1;
+	size_t index = MAX_UVALUE(size_t);
+	do {
 		index++;
 
 		/* Make sure we have a valid industry */
@@ -207,7 +226,9 @@ void Industry::PostDestructor(size_t index)
 			index++;
 			assert(index < Industry::GetPoolSize());
 		}
-	}
+
+		if (index != skip && (enum_proc == NULL || enum_proc(Industry::Get(index), data))) num--;
+	} while (num > 0);
 
 	return Industry::Get(index);
 }

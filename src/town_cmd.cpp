@@ -133,17 +133,36 @@ void Town::InitializeLayout(TownLayout layout)
 }
 
 /**
- * Return a random valid town.
- * @return random town, NULL if there are no towns
+ * Return a random town that statisfies some criteria specified
+ * with a callback function.
+ *
+ * @param enum_proc Callback function. Return true for a matching town and false to continue iterating.
+ * @param skip Skip over this town id when searching.
+ * @param data Optional data passed to the callback function.
+ * @return A town satisfying the search criteria or NULL if no such town exists.
  */
-/* static */ Town *Town::GetRandom()
+/* static */ Town *Town::GetRandom(EnumTownProc enum_proc, TownID skip, void *data)
 {
-	if (Town::GetNumItems() == 0) return NULL;
-	int num = RandomRange((uint16)Town::GetNumItems());
-	size_t index = MAX_UVALUE(size_t);
+	assert(skip == INVALID_TOWN || Town::IsValidID(skip));
 
-	while (num >= 0) {
-		num--;
+	uint16 max_num = 0;
+	if (enum_proc != NULL) {
+		/* A callback was given, count all matching towns. */
+		Town *t;
+		FOR_ALL_TOWNS(t) {
+			if (t->index != skip && enum_proc(t, data)) max_num++;
+		}
+	} else {
+		max_num = (uint16)Town::GetNumItems();
+		/* Subtract one if a town to skip was given. max_num is at least
+		 * one here as otherwise skip could not be valid. */
+		if (skip != INVALID_TOWN) max_num--;
+	}
+	if (max_num == 0) return NULL;
+
+	uint num = RandomRange(max_num) + 1;
+	size_t index = MAX_UVALUE(size_t);
+	do {
 		index++;
 
 		/* Make sure we have a valid town */
@@ -151,7 +170,9 @@ void Town::InitializeLayout(TownLayout layout)
 			index++;
 			assert(index < Town::GetPoolSize());
 		}
-	}
+
+		if (index != skip && (enum_proc == NULL || enum_proc(Town::Get(index), data))) num--;
+	} while (num > 0);
 
 	return Town::Get(index);
 }
