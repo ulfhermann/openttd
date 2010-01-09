@@ -103,7 +103,10 @@ struct Industry : IndustryPool::PoolItem<&_industry_pool>, CargoSourceSink {
 		return Industry::Get(GetIndustryIndex(tile));
 	}
 
-	static Industry *GetRandom();
+	/** Callback function for #Industry::GetRandom. */
+	typedef bool (*EnumIndustryProc)(const Industry *ind, void *data);
+
+	static Industry *GetRandom(EnumIndustryProc enum_proc = NULL, IndustryID skip = INVALID_INDUSTRY, void *data = NULL);
 	static void PostDestructor(size_t index);
 
 	/**
