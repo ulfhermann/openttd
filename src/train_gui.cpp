@@ -23,9 +23,9 @@
 #include "table/sprites.h"
 #include "table/strings.h"
 
-void CcBuildWagon(bool success, TileIndex tile, uint32 p1, uint32 p2)
+void CcBuildWagon(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
-	if (!success) return;
+	if (result.Failed()) return;
 
 	/* find a locomotive in the depot. */
 	const Vehicle *found = NULL;
@@ -45,18 +45,6 @@ void CcBuildWagon(bool success, TileIndex tile, uint32 p1, uint32 p2)
 		DoCommandP(0, _new_vehicle_id | (found->index << 16), 0, CMD_MOVE_RAIL_VEHICLE);
 		InvalidateWindowClassesData(WC_TRAINS_LIST, 0);
 	}
-}
-
-void CcBuildLoco(bool success, TileIndex tile, uint32 p1, uint32 p2)
-{
-	if (!success) return;
-
-	const Vehicle *v = Vehicle::Get(_new_vehicle_id);
-	if (tile == _backup_orders_tile) {
-		_backup_orders_tile = 0;
-		RestoreVehicleOrders(v);
-	}
-	ShowVehicleViewWindow(v);
 }
 
 /**
