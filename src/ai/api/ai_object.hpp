@@ -27,7 +27,7 @@ typedef void (AISuspendCallbackProc)(class AIInstance *instance);
 /**
  * The callback function for Mode-classes.
  */
-typedef bool (AIModeProc)(TileIndex tile, uint32 p1, uint32 p2, uint cmd, CommandCost costs);
+typedef bool (AIModeProc)();
 
 /**
  * Uper-parent object of all API classes. You should never use this class in
@@ -36,7 +36,7 @@ typedef bool (AIModeProc)(TileIndex tile, uint32 p1, uint32 p2, uint cmd, Comman
  *   command processing, and command-validation checks.
  */
 class AIObject : public SimpleCountedObject {
-friend void CcAI(bool success, TileIndex tile, uint32 p1, uint32 p2);
+friend void CcAI(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2);
 friend class AIInstance;
 protected:
 	/**
