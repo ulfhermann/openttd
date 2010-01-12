@@ -1089,7 +1089,7 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
 
 	/* Start unloading in at the first possible moment */
-	front_v->time_counter = 1;
+	front_v->load_unload_ticks = 1;
 
 	if ((front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) != 0) {
 		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
@@ -1144,7 +1144,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
-	assert(v->time_counter != 0);
+	assert(v->load_unload_ticks != 0);
 
 	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
@@ -1156,7 +1156,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--v->time_counter != 0) {
+	if (--v->load_unload_ticks != 0) {
 		return cargos_reserved | ReserveConsist(st, v, next_station);
 	}
 
@@ -1166,7 +1166,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		/* The train reversed in the station. Take the "easy" way
 		 * out and let the train just leave as it always did. */
 		SetBit(v->vehicle_flags, VF_LOADING_FINISHED);
-		v->time_counter = 1;
+		v->load_unload_ticks = 1;
 		return cargos_reserved;
 	}
 
@@ -1357,7 +1357,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	}
 
 	/* Always wait at least 1, otherwise we'll wait 'infinitively' long. */
-	v->time_counter = max(1, unloading_time);
+	v->load_unload_ticks = max(1, unloading_time);
 
 	if (completely_emptied) {
 		TriggerVehicle(v, VEHICLE_TRIGGER_EMPTY);
