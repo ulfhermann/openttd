@@ -2908,13 +2908,15 @@ static void NewSpriteGroup(byte *buf, size_t len)
 
 				case GSF_TOWNHOUSE:
 				case GSF_INDUSTRYTILES: {
-					byte num_sprite_sets      = _cur_grffile->spriteset_numents;
+					byte num_spriteset_ents   = _cur_grffile->spriteset_numents;
+					byte num_spritesets       = _cur_grffile->spriteset_numsets;
 					byte num_building_sprites = max((uint8)1, type);
 					uint i;
 
 					TileLayoutSpriteGroup *group = new TileLayoutSpriteGroup();
 					act_group = group;
-					group->num_building_stages = num_sprite_sets;
+					/* num_building_stages should be 1, if we are only using non-custom sprites */
+					group->num_building_stages = max((uint8)1, num_spriteset_ents);
 					group->dts = CallocT<DrawTileSprites>(1);
 
 					/* Groundsprite */
@@ -2927,9 +2929,16 @@ static void NewSpriteGroup(byte *buf, size_t len)
 					if (HasBit(group->dts->ground.pal, 15)) {
 						/* Bit 31 set means this is a custom sprite, so rewrite it to the
 						 * last spriteset defined. */
-						SpriteID sprite = _cur_grffile->spriteset_start + GB(group->dts->ground.sprite, 0, 14) * num_sprite_sets;
-						SB(group->dts->ground.sprite, 0, SPRITE_WIDTH, sprite);
-						ClrBit(group->dts->ground.pal, 15);
+						uint spriteset = GB(group->dts->ground.sprite, 0, 14);
+						if (num_spriteset_ents == 0 || spriteset >= num_spritesets) {
+							grfmsg(1, "NewSpriteGroup: Spritelayout uses undefined custom spriteset %d", spriteset);
+							group->dts->ground.sprite = SPR_IMG_QUERY;
+							group->dts->ground.pal = PAL_NONE;
+						} else {
+							SpriteID sprite = _cur_grffile->spriteset_start + spriteset * num_spriteset_ents;
+							SB(group->dts->ground.sprite, 0, SPRITE_WIDTH, sprite);
+							ClrBit(group->dts->ground.pal, 15);
+						}
 					}
 
 					group->dts->seq = CallocT<DrawTileSeqStruct>(num_building_sprites + 1);
@@ -2947,9 +2956,16 @@ static void NewSpriteGroup(byte *buf, size_t len)
 						if (HasBit(seq->image.pal, 15)) {
 							/* Bit 31 set means this is a custom sprite, so rewrite it to the
 							 * last spriteset defined. */
-							SpriteID sprite = _cur_grffile->spriteset_start + GB(seq->image.sprite, 0, 14) * num_sprite_sets;
-							SB(seq->image.sprite, 0, SPRITE_WIDTH, sprite);
-							ClrBit(seq->image.pal, 15);
+							uint spriteset = GB(seq->image.sprite, 0, 14);
+							if (num_spriteset_ents == 0 || spriteset >= num_spritesets) {
+								grfmsg(1, "NewSpriteGroup: Spritelayout uses undefined custom spriteset %d", spriteset);
+								seq->image.sprite = SPR_IMG_QUERY;
+								seq->image.pal = PAL_NONE;
+							} else {
+								SpriteID sprite = _cur_grffile->spriteset_start + spriteset * num_spriteset_ents;
+								SB(seq->image.sprite, 0, SPRITE_WIDTH, sprite);
+								ClrBit(seq->image.pal, 15);
+							}
 						}
 
 						if (type > 0) {
@@ -3183,7 +3199,7 @@ static void StationMapSpriteGroup(byte *buf, uint8 idcount)
 		if (ctype == CT_INVALID) continue;
 
 		for (uint i = 0; i < idcount; i++) {
-			StationSpec *statspec = _cur_grffile->stations[stations[i]];
+			StationSpec *statspec = _cur_grffile->stations == NULL ? NULL : _cur_grffile->stations[stations[i]];
 
 			if (statspec == NULL) {
 				grfmsg(1, "StationMapSpriteGroup: Station with ID 0x%02X does not exist, skipping", stations[i]);
@@ -3198,7 +3214,7 @@ static void StationMapSpriteGroup(byte *buf, uint8 idcount)
 	if (!IsValidGroupID(groupid, "StationMapSpriteGroup")) return;
 
 	for (uint i = 0; i < idcount; i++) {
-		StationSpec *statspec = _cur_grffile->stations[stations[i]];
+		StationSpec *statspec = _cur_grffile->stations == NULL ? NULL : _cur_grffile->stations[stations[i]];
 
 		if (statspec == NULL) {
 			grfmsg(1, "StationMapSpriteGroup: Station with ID 0x%02X does not exist, skipping", stations[i]);
@@ -3227,6 +3243,11 @@ static void TownHouseMapSpriteGroup(byte *buf, uint8 idcount)
 	uint16 groupid = grf_load_word(&buf);
 	if (!IsValidGroupID(groupid, "TownHouseMapSpriteGroup")) return;
 
+	if (_cur_grffile->housespec == NULL) {
+		grfmsg(1, "TownHouseMapSpriteGroup: No houses defined, skipping");
+		return;
+	}
+
 	for (uint i = 0; i < idcount; i++) {
 		HouseSpec *hs = _cur_grffile->housespec[houses[i]];
 
@@ -3253,6 +3274,11 @@ static void IndustryMapSpriteGroup(byte *buf, uint8 idcount)
 	uint16 groupid = grf_load_word(&buf);
 	if (!IsValidGroupID(groupid, "IndustryMapSpriteGroup")) return;
 
+	if (_cur_grffile->industryspec == NULL) {
+		grfmsg(1, "IndustryMapSpriteGroup: No industries defined, skipping");
+		return;
+	}
+
 	for (uint i = 0; i < idcount; i++) {
 		IndustrySpec *indsp = _cur_grffile->industryspec[industries[i]];
 
@@ -3278,6 +3304,11 @@ static void IndustrytileMapSpriteGroup(byte *buf, uint8 idcount)
 
 	uint16 groupid = grf_load_word(&buf);
 	if (!IsValidGroupID(groupid, "IndustrytileMapSpriteGroup")) return;
+
+	if (_cur_grffile->indtspec == NULL) {
+		grfmsg(1, "IndustrytileMapSpriteGroup: No industry tiles defined, skipping");
+		return;
+	}
 
 	for (uint i = 0; i < idcount; i++) {
 		IndustryTileSpec *indtsp = _cur_grffile->indtspec[indtiles[i]];
@@ -4153,7 +4184,7 @@ static void SkipIf(byte *buf, size_t len)
 		_skip_sprites = -1;
 
 		/* If an action 8 hasn't been encountered yet, disable the grf. */
-		if (_cur_grfconfig->status != GCS_ACTIVATED) {
+		if (_cur_grfconfig->status != (_cur_stage < GLS_RESERVE ? GCS_INITIALISED : GCS_ACTIVATED)) {
 			_cur_grfconfig->status = GCS_DISABLED;
 			ClearTemporaryNewGRFData(_cur_grffile);
 		}
