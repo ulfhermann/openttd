@@ -1138,7 +1138,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	Station *st = Station::Get(last_visited);
 
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--v->load_unload_ticks!= 0) {
+	if (--v->load_unload_ticks != 0) {
 		return cargos_reserved | ReserveConsist(st, v);
 	}
 
