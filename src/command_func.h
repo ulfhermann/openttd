@@ -13,6 +13,7 @@
 #define COMMAND_FUNC_H
 
 #include "command_type.h"
+#include "company_type.h"
 
 /**
  * Checks if a command failes.
@@ -69,12 +70,14 @@ CommandCost DoCommand(const CommandContainer *container, DoCommandFlag flags);
 bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallback *callback = NULL, const char *text = NULL, bool my_cmd = true);
 bool DoCommandP(const CommandContainer *container, bool my_cmd = true);
 
-#ifdef ENABLE_NETWORK
+/** Internal helper function for DoCommandP. Do not use. */
+CommandCost DoCommandPInternal(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallback *callback, const char *text, bool my_cmd, bool estimate_only);
 
+#ifdef ENABLE_NETWORK
 /**
  * Send a command over the network
  */
-void NetworkSend_Command(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallback *callback, const char *text);
+void NetworkSend_Command(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallback *callback, const char *text, CompanyID company);
 #endif /* ENABLE_NETWORK */
 
 extern Money _additional_cash_required;
@@ -106,5 +109,53 @@ static inline DoCommandFlag CommandFlagsToDCFlags(uint cmd_flags)
 	if (cmd_flags & CMD_ALL_TILES) flags |= DC_ALL_TILES;
 	return flags;
 }
+
+/*** All command callbacks that exist ***/
+
+/* ai/ai_core.cpp */
+CommandCallback CcAI;
+
+/* airport_gui.cpp */
+CommandCallback CcBuildAirport;
+
+/* bridge_gui.cpp */
+CommandCallback CcBuildBridge;
+
+/* dock_gui.cpp */
+CommandCallback CcBuildDocks;
+CommandCallback CcBuildCanal;
+
+/* depot_gui.cpp */
+CommandCallback CcCloneVehicle;
+
+/* group_gui.cpp */
+CommandCallback CcCreateGroup;
+
+/* main_gui.cpp */
+CommandCallback CcPlaySound10;
+CommandCallback CcPlaceSign;
+CommandCallback CcTerraform;
+CommandCallback CcGiveMoney;
+
+/* rail_gui.cpp */
+CommandCallback CcPlaySound1E;
+CommandCallback CcRailDepot;
+CommandCallback CcStation;
+CommandCallback CcBuildRailTunnel;
+
+/* road_gui.cpp */
+CommandCallback CcPlaySound1D;
+CommandCallback CcBuildRoadTunnel;
+CommandCallback CcRoadDepot;
+
+/* train_gui.cpp */
+CommandCallback CcBuildWagon;
+
+/* town_gui.cpp */
+CommandCallback CcFoundTown;
+CommandCallback CcFoundRandomTown;
+
+/* vehicle_gui.cpp */
+CommandCallback CcBuildPrimaryVehicle;
 
 #endif /* COMMAND_FUNC_H */
