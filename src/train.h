@@ -44,9 +44,6 @@ enum VehicleRailFlags {
 	VRF_TRAIN_STUCK    = 8,
 };
 
-void CcBuildLoco(bool success, TileIndex tile, uint32 p1, uint32 p2);
-void CcBuildWagon(bool success, TileIndex tile, uint32 p1, uint32 p2);
-
 byte FreightWagonMult(CargoID cargo);
 
 void UpdateTrainAcceleration(Train *v);
@@ -113,6 +110,9 @@ struct Train : public SpecializedVehicle<Train, VEH_TRAIN> {
 	byte force_proceed;
 	RailTypeByte railtype;
 	RailTypes compatible_railtypes;
+
+	/** Ticks waiting in front of a signal, ticks being stuck or a counter for forced proceeding through signals. */
+	uint16 wait_counter;
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
 	Train() : SpecializedVehicle<Train, VEH_TRAIN>() {}

@@ -1276,6 +1276,7 @@ STR_CONFIG_SETTING_COLOURED_NEWS_YEAR                           :{LTBLUE}Színes
 STR_CONFIG_SETTING_STARTING_YEAR                                :{LTBLUE}Játék induló dátuma: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_ECONOMY                               :{LTBLUE}Egyenletes gazdaság (több, kisebb változás): {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_SHARES                                 :{LTBLUE}Másik cégekből részvényt lehet vásárolni: {ORANGE}{STRING}
+STR_CONFIG_SETTING_FEEDER_PAYMENT_SHARE                         :{LTBLUE}Kifizetendő profitszázalék a ráhordó rendszereknek: {ORANGE}{STRING}%
 STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}Amikor megragadom helyezzen jelzőket minden {ORANGE}{STRING}. mezőre
 STR_CONFIG_SETTING_SEMAPHORE_BUILD_BEFORE_DATE                  :{LTBLUE}Automatikusan alakjelző épüljön eddig: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_SIGNAL_GUI                            :{LTBLUE}Jelzőépítés-kezelő engedélyezése: {ORANGE}{STRING}
@@ -2856,7 +2857,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :egysínű mozdo
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :MagLev mozdony
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Ár: {CURRENCY}    Súly: {WEIGHT_S}{}Sebesség: {VELOCITY}    Teljesítmény: {POWER}{}Működtetési költség: {CURRENCY}/év{}Kapacitás: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Ár: {CURRENCY} Súly: {WEIGHT_S}{}Sebesség: {VELOCITY} Erő: {POWER} Maximális Vonóerő: {7:FORCE}{}Üzemeltetési költségeit: {4:CURRENCY}/év{}Capacity: {5:CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Ár: {CURRENCY} Súly: {WEIGHT_S}{}Sebesség: {VELOCITY} Erő: {POWER} Maximális Vonóerő: {6:FORCE}{}Üzemeltetési költségeit: {4:CURRENCY}/év{}Capacity: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Ár: {CURRENCY} Végsebesség: {VELOCITY}{}Kapacitás: {CARGO}, {CARGO}{}Üzemeltetés: {CURRENCY}/év
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Ár: {CURRENCY} Végsebesség: {VELOCITY}{}Kapacitás: {CARGO}{}Üzemeltetés: {CURRENCY}/év
 
@@ -3238,6 +3239,7 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Válassz
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}MI nyomkövetés
+STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}MI neve
 STR_AI_DEBUG_RELOAD                                             :{BLACK}MI újratöltése
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}MI kilövése, szkript újratöltése, MI újraindítása
