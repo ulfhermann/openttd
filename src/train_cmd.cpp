@@ -531,10 +531,12 @@ static int GetTrainAcceleration(Train *v, bool mode)
 
 	v->max_speed = max_speed;
 
+	bool maglev = GetRailTypeInfo(v->railtype)->acceleration_type == 2;
+
 	const int area = 120;
 	const int friction = 35; //[1e-3]
 	int resistance;
-	if (v->railtype != RAILTYPE_MAGLEV) {
+	if (!maglev) {
 		resistance = 13 * mass / 10;
 		resistance += 60 * num;
 		resistance += friction * mass * speed / 1000;
@@ -548,24 +550,17 @@ static int GetTrainAcceleration(Train *v, bool mode)
 	const int max_te = v->tcache.cached_max_te; // [N]
 	int force;
 	if (speed > 0) {
-		switch (v->railtype) {
-			case RAILTYPE_RAIL:
-			case RAILTYPE_ELECTRIC:
-			case RAILTYPE_MONO:
-				force = power / speed; //[N]
-				force *= 22;
-				force /= 10;
-				if (mode == AM_ACCEL && force > max_te) force = max_te;
-				break;
-
-			default: NOT_REACHED();
-			case RAILTYPE_MAGLEV:
-				force = power / 25;
-				break;
+		if (!maglev) {
+			force = power / speed; //[N]
+			force *= 22;
+			force /= 10;
+			if (mode == AM_ACCEL && force > max_te) force = max_te;
+		} else {
+			force = power / 25;
 		}
 	} else {
 		/* "kickoff" acceleration */
-		force = (mode == AM_ACCEL && v->railtype != RAILTYPE_MAGLEV) ? min(max_te, power) : power;
+		force = (mode == AM_ACCEL && !maglev) ? min(max_te, power) : power;
 		force = max(force, (mass * 8) + resistance);
 	}
 
@@ -1614,10 +1609,7 @@ static void MarkTrainAsStuck(Train *v)
 		/* It is the first time the problem occured, set the "train stuck" flag. */
 		SetBit(v->flags, VRF_TRAIN_STUCK);
 
-		/* When loading the vehicle is already stopped. No need to change that. */
-		if (v->current_order.IsType(OT_LOADING)) return;
-
-		v->time_counter = 0;
+		v->wait_counter = 0;
 
 		/* Stop train */
 		v->cur_speed = 0;
@@ -1957,7 +1949,7 @@ static void ReverseTrainDirection(Train *v)
 	} else if (HasBit(v->flags, VRF_TRAIN_STUCK)) {
 		/* A train not inside a PBS block can't be stuck. */
 		ClrBit(v->flags, VRF_TRAIN_STUCK);
-		v->time_counter = 0;
+		v->wait_counter = 0;
 	}
 }
 
@@ -2304,12 +2296,12 @@ static bool CheckTrainStayInDepot(Train *v)
 
 	if (v->force_proceed == 0) {
 		/* force proceed was not pressed */
-		if (++v->time_counter < 37) {
+		if (++v->wait_counter < 37) {
 			SetWindowClassesDirty(WC_TRAINS_LIST);
 			return true;
 		}
 
-		v->time_counter = 0;
+		v->wait_counter = 0;
 
 		seg_state = _settings_game.pf.reserve_paths ? SIGSEG_PBS : UpdateSignalsOnSegment(v->tile, INVALID_DIAGDIR, v->owner);
 		if (seg_state == SIGSEG_FULL || HasDepotReservation(v->tile)) {
@@ -2859,20 +2851,6 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 		}
 	}
 
-	/* Special check if we are in front of a two-sided conventional signal. */
-	DiagDirection dir = TrainExitDir(v->direction, v->track);
-	TileIndex next_tile = TileAddByDiagDir(v->tile, dir);
-	if (IsTileType(next_tile, MP_RAILWAY) && HasReservedTracks(next_tile, DiagdirReachesTracks(dir))) {
-		/* Can have only one reserved trackdir. */
-		Trackdir td = FindFirstTrackdir(TrackBitsToTrackdirBits(GetReservedTrackbits(next_tile)) & DiagdirReachesTrackdirs(dir));
-		if (HasSignalOnTrackdir(next_tile, td) && HasSignalOnTrackdir(next_tile, ReverseTrackdir(td)) &&
-				!IsPbsSignal(GetSignalType(next_tile, TrackdirToTrack(td)))) {
-			/* Signal already reserved, is not ours. */
-			if (mark_as_stuck) MarkTrainAsStuck(v);
-			return false;
-		}
-	}
-
 	Vehicle *other_train = NULL;
 	PBSTileInfo origin = FollowTrainReservation(v, &other_train);
 	/* The path we are driving on is alread blocked by some other train.
@@ -2914,12 +2892,7 @@ bool TryPathReserve(Train *v, bool mark_as_stuck, bool first_tile_okay)
 	}
 
 	if (HasBit(v->flags, VRF_TRAIN_STUCK)) {
-		/* This might be called when a train is loading. At that time the counter
-		 * is (mis)used (or rather PBS misuses it) for determining how long to wait
-		 * till going to the next load cycle. If that number is set to 0 the wait
-		 * for loading will be 65535 ticks, which is not what we want. Actually, We
-		 * do not want to reset the waiting period during loading in any case. */
-		if (!v->current_order.IsType(OT_LOADING)) v->time_counter = 0;
+		v->wait_counter = 0;
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
 	ClrBit(v->flags, VRF_TRAIN_STUCK);
@@ -3397,12 +3370,12 @@ static void TrainController(Train *v, Vehicle *nomove)
 							v->cur_speed = 0;
 							v->subspeed = 0;
 							v->progress = 255 - 100;
-							if (_settings_game.pf.wait_oneway_signal == 255 || ++v->time_counter < _settings_game.pf.wait_oneway_signal * 20) return;
+							if (_settings_game.pf.wait_oneway_signal == 255 || ++v->wait_counter < _settings_game.pf.wait_oneway_signal * 20) return;
 						} else if (HasSignalOnTrackdir(gp.new_tile, i)) {
 							v->cur_speed = 0;
 							v->subspeed = 0;
 							v->progress = 255 - 10;
-							if (_settings_game.pf.wait_twoway_signal == 255 || ++v->time_counter < _settings_game.pf.wait_twoway_signal * 73) {
+							if (_settings_game.pf.wait_twoway_signal == 255 || ++v->wait_counter < _settings_game.pf.wait_twoway_signal * 73) {
 								DiagDirection exitdir = TrackdirToExitdir(i);
 								TileIndex o_tile = TileAddByDiagDir(gp.new_tile, exitdir);
 
@@ -3416,7 +3389,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 						/* If we would reverse but are currently in a PBS block and
 						 * reversing of stuck trains is disabled, don't reverse. */
 						if (_settings_game.pf.wait_for_pbs_path == 255 && UpdateSignalsOnSegment(v->tile, enterdir, v->owner) == SIGSEG_PBS) {
-							v->time_counter = 0;
+							v->wait_counter = 0;
 							return;
 						}
 						goto reverse_train_direction;
@@ -3510,7 +3483,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 				}
 
 				if (v->IsFrontEngine()) {
-					v->time_counter = 0;
+					v->wait_counter = 0;
 
 					/* If we are approching a crossing that is reserved, play the sound now. */
 					TileIndex crossing = TrainApproachingCrossingTile(v);
@@ -3602,7 +3575,7 @@ invalid_rail:
 	if (prev != NULL) error("Disconnecting train");
 
 reverse_train_direction:
-	v->time_counter = 0;
+	v->wait_counter = 0;
 	v->cur_speed = 0;
 	v->subspeed = 0;
 	ReverseTrainDirection(v);
@@ -3980,7 +3953,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 
 	bool valid_order = !v->current_order.IsType(OT_NOTHING) && v->current_order.GetType() != OT_CONDITIONAL;
 	if (ProcessOrders(v) && CheckReverseTrain(v)) {
-		v->time_counter = 0;
+		v->wait_counter = 0;
 		v->cur_speed = 0;
 		v->subspeed = 0;
 		ReverseTrainDirection(v);
@@ -4002,17 +3975,17 @@ static bool TrainLocoHandler(Train *v, bool mode)
 
 	/* Handle stuck trains. */
 	if (!mode && HasBit(v->flags, VRF_TRAIN_STUCK)) {
-		++v->time_counter;
+		++v->wait_counter;
 
 		/* Should we try reversing this tick if still stuck? */
-		bool turn_around = v->time_counter % (_settings_game.pf.wait_for_pbs_path * DAY_TICKS) == 0 && _settings_game.pf.wait_for_pbs_path < 255;
+		bool turn_around = v->wait_counter % (_settings_game.pf.wait_for_pbs_path * DAY_TICKS) == 0 && _settings_game.pf.wait_for_pbs_path < 255;
 
-		if (!turn_around && v->time_counter % _settings_game.pf.path_backoff_interval != 0 && v->force_proceed == 0) return true;
+		if (!turn_around && v->wait_counter % _settings_game.pf.path_backoff_interval != 0 && v->force_proceed == 0) return true;
 		if (!TryPathReserve(v)) {
 			/* Still stuck. */
 			if (turn_around) ReverseTrainDirection(v);
 
-			if (HasBit(v->flags, VRF_TRAIN_STUCK) && v->time_counter > 2 * _settings_game.pf.wait_for_pbs_path * DAY_TICKS) {
+			if (HasBit(v->flags, VRF_TRAIN_STUCK) && v->wait_counter > 2 * _settings_game.pf.wait_for_pbs_path * DAY_TICKS) {
 				/* Show message to player. */
 				if (_settings_client.gui.lost_train_warn && v->owner == _local_company) {
 					SetDParam(0, v->index);
@@ -4022,12 +3995,12 @@ static bool TrainLocoHandler(Train *v, bool mode)
 						v->index
 					);
 				}
-				v->time_counter = 0;
+				v->wait_counter = 0;
 			}
 			/* Exit if force proceed not pressed, else reset stuck flag anyway. */
 			if (v->force_proceed == 0) return true;
 			ClrBit(v->flags, VRF_TRAIN_STUCK);
-			v->time_counter = 0;
+			v->wait_counter = 0;
 			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 		}
 	}
