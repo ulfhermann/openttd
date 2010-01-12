@@ -2822,7 +2822,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :單軌機車頭
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :磁浮機車頭
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}{}營運成本：{CURRENCY} / 年{}容量：{CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}  最大牽引力：{7:FORCE}{}營運成本：{4:CURRENCY}/年{}容量：{5:CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}費用：{CURRENCY} 載重：{WEIGHT_S}{}速度：{VELOCITY}  功率：{POWER}  最大牽引力：{6:FORCE}{}營運成本：{4:CURRENCY}/年{}容量：{5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}費用：{CURRENCY} 最高速度：{VELOCITY}{}容量：{CARGO}, {CARGO}{}營運成本：{CURRENCY}/年
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}費用：{CURRENCY} 最高速度：{VELOCITY}{}容量：{CARGO}{}營運成本：{CURRENCY}/年
 
@@ -3204,6 +3204,7 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}選擇�
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}AI 除錯
+STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}AI 名稱
 STR_AI_DEBUG_RELOAD                                             :{BLACK}重新載入 AI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}結束 AI、重新載入腳本、重新啟動 AI
