@@ -4,7 +4,6 @@ animated_tile.cpp
 articulated_vehicles.cpp
 autoreplace.cpp
 bmp.cpp
-callback_table.cpp
 cargopacket.cpp
 cargotype.cpp
 cheat.cpp
@@ -113,7 +112,6 @@ base_media_func.h
 base_station_base.h
 bmp.h
 bridge.h
-callback_table.h
 cargo_type.h
 cargopacket.h
 cargotype.h
@@ -514,12 +512,6 @@ table/water_land.h
 # MD5
 3rdparty/md5/md5.cpp
 3rdparty/md5/md5.h
-
-# MiniLZO
-3rdparty/minilzo/lzoconf.h
-3rdparty/minilzo/lzodefs.h
-3rdparty/minilzo/minilzo.c
-3rdparty/minilzo/minilzo.h
 
 # Script
 script/script_info.cpp

@@ -173,7 +173,6 @@ static void NewIndustryTileResolver(ResolverObject *res, IndustryGfx gfx, TileIn
 static void IndustryDrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGroup *group, byte rnd_colour, byte stage, IndustryGfx gfx)
 {
 	const DrawTileSprites *dts = group->dts;
-	const DrawTileSeqStruct *dtss;
 
 	SpriteID image = dts->ground.sprite;
 	SpriteID pal   = dts->ground.pal;
@@ -190,32 +189,7 @@ static void IndustryDrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGro
 		}
 	}
 
-	foreach_draw_tile_seq(dtss, dts->seq) {
-		if (GB(dtss->image.sprite, 0, SPRITE_WIDTH) == 0) continue;
-
-		image = dtss->image.sprite;
-		pal   = dtss->image.pal;
-
-		/* Stop drawing sprite sequence once we meet a sprite that doesn't have to be opaque */
-		if (IsInvisibilitySet(TO_INDUSTRIES) && !HasBit(image, SPRITE_MODIFIER_OPAQUE)) return;
-
-		if (IS_CUSTOM_SPRITE(image)) image += stage;
-
-		pal = SpriteLayoutPaletteTransform(image, pal, GENERAL_SPRITE_COLOUR(rnd_colour));
-
-		if ((byte)dtss->delta_z != 0x80) {
-			AddSortableSpriteToDraw(
-				image, pal,
-				ti->x + dtss->delta_x, ti->y + dtss->delta_y,
-				dtss->size_x, dtss->size_y,
-				dtss->size_z, ti->z + dtss->delta_z,
-				!HasBit(image, SPRITE_MODIFIER_OPAQUE) && IsTransparencySet(TO_INDUSTRIES)
-			);
-		} else {
-			/* For industries and houses delta_x and delta_y are unsigned */
-			AddChildSpriteScreen(image, pal, (byte)dtss->delta_x, (byte)dtss->delta_y, !HasBit(image, SPRITE_MODIFIER_OPAQUE) && IsTransparencySet(TO_INDUSTRIES));
-		}
-	}
+	DrawTileSeq(ti, dts, TO_INDUSTRIES, stage, GENERAL_SPRITE_COLOUR(rnd_colour));
 }
 
 uint16 GetIndustryTileCallback(CallbackID callback, uint32 param1, uint32 param2, IndustryGfx gfx_id, Industry *industry, TileIndex tile)
@@ -253,11 +227,11 @@ bool DrawNewIndustryTile(TileInfo *ti, Industry *i, IndustryGfx gfx, const Indus
 	NewIndustryTileResolver(&object, gfx, ti->tile, i);
 
 	group = SpriteGroup::Resolve(inds->grf_prop.spritegroup, &object);
-	const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
-	if (group == NULL || group->type != SGT_TILELAYOUT || tlgroup->num_building_stages == 0) {
+	if (group == NULL || group->type != SGT_TILELAYOUT) {
 		return false;
 	} else {
 		/* Limit the building stage to the number of stages supplied. */
+		const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
 		byte stage = GetIndustryConstructionStage(ti->tile);
 		stage = Clamp(stage - 4 + tlgroup->num_building_stages, 0, tlgroup->num_building_stages - 1);
 		IndustryDrawTileLayout(ti, tlgroup, i->random_colour, stage, gfx);
