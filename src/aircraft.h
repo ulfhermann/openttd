@@ -28,15 +28,6 @@ enum AircraftSubType {
 };
 
 
-/**
- * This is the Callback method after the construction attempt of an aircraft
- * @param success indicates completion (or not) of the operation
- * @param tile of depot where aircraft is built
- * @param p1 unused
- * @param p2 unused
- */
-void CcBuildAircraft(bool success, TileIndex tile, uint32 p1, uint32 p2);
-
 /** Handle Aircraft specific tasks when a an Aircraft enters a hangar
  * @param *v Vehicle that enters the hangar
  */
@@ -84,6 +75,9 @@ struct Aircraft : public SpecializedVehicle<Aircraft, VEH_AIRCRAFT> {
 	byte state;
 	DirectionByte last_direction;
 	byte number_consecutive_turns;
+
+	/** Ticks between each turn to prevent > 45 degree turns. */
+	byte turn_counter;
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
 	Aircraft() : SpecializedVehicle<Aircraft, VEH_AIRCRAFT>() {}
