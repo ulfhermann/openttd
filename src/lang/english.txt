@@ -564,8 +564,8 @@ STR_PERFORMANCE_DETAIL_TOTAL                                    :{BLACK}Total:
 STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Number of vehicles that turned a profit last year; this includes road vehicles, trains, ships and aircraft
 STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP                         :{BLACK}Number of recently-serviced station parts. Every part of a station (e.g. train station, bus stop, airport) is counted, even if they are connected as one station
 STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP                       :{BLACK}The profit of the vehicle with the lowest income (only vehicles older than two years are considered)
-STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP                       :{BLACK}Amount of cash made in the month with the lowest profit of the last 12 quarters
-STR_PERFORMANCE_DETAIL_MAX_INCOME_TOOLTIP                       :{BLACK}Amount of cash made in the month with the highest profit of the last 12 quarters
+STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP                       :{BLACK}Amount of cash made in the quarter with the lowest profit of the last 12 quarters
+STR_PERFORMANCE_DETAIL_MAX_INCOME_TOOLTIP                       :{BLACK}Amount of cash made in the quarter with the highest profit of the last 12 quarters
 STR_PERFORMANCE_DETAIL_DELIVERED_TOOLTIP                        :{BLACK}Units of cargo delivered in the last four quarters
 STR_PERFORMANCE_DETAIL_CARGO_TOOLTIP                            :{BLACK}Number of types of cargo delivered in the last quarter
 STR_PERFORMANCE_DETAIL_MONEY_TOOLTIP                            :{BLACK}Amount of money this company has in the bank
@@ -2823,7 +2823,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :monorail locomo
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :maglev locomotive
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Cost: {CURRENCY} Weight: {WEIGHT_S}{}Speed: {VELOCITY}  Power: {POWER}{}Running Cost: {CURRENCY}/yr{}Capacity: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Cost: {CURRENCY} Weight: {WEIGHT_S}{}Speed: {VELOCITY}  Power: {POWER}  Max. T.E.: {7:FORCE}{}Running Cost: {4:CURRENCY}/yr{}Capacity: {5:CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Cost: {CURRENCY} Weight: {WEIGHT_S}{}Speed: {VELOCITY}  Power: {POWER}  Max. T.E.: {6:FORCE}{}Running Cost: {4:CURRENCY}/yr{}Capacity: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Cost: {CURRENCY} Max. Speed: {VELOCITY}{}Capacity: {CARGO}, {CARGO}{}Running Cost: {CURRENCY}/yr
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Cost: {CURRENCY} Max. Speed: {VELOCITY}{}Capacity: {CARGO}{}Running Cost: {CURRENCY}/yr
 
