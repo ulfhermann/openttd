@@ -134,10 +134,16 @@ char *CrashLog::LogConfiguration(char *buffer, const char *last) const
 #ifdef WITH_ICU
 #	include <unicode/uversion.h>
 #endif /* WITH_ICU */
+#ifdef WITH_LZO
+#include <lzo/lzo1x.h>
+#endif
 #ifdef WITH_SDL
 #	include "sdl.h"
 #	include <SDL.h>
 #endif /* WITH_SDL */
+#ifdef WITH_ZLIB
+# include <zlib.h>
+#endif
 
 char *CrashLog::LogLibraries(char *buffer, const char *last) const
 {
@@ -170,6 +176,10 @@ char *CrashLog::LogLibraries(char *buffer, const char *last) const
 	buffer += seprintf(buffer, last, " ICU:        %s\n", buf);
 #endif /* WITH_ICU */
 
+#ifdef WITH_LZO
+	buffer += seprintf(buffer, last, " LZO:        %s\n", lzo_version_string());
+#endif
+
 #ifdef WITH_PNG
 	buffer += seprintf(buffer, last, " PNG:        %s\n", png_get_libpng_ver(NULL));
 #endif /* WITH_PNG */
@@ -184,6 +194,10 @@ char *CrashLog::LogLibraries(char *buffer, const char *last) const
 		buffer += seprintf(buffer, last, " SDL:        %d.%d.%d\n", v->major, v->minor, v->patch);
 	}
 #endif /* WITH_SDL */
+
+#ifdef WITH_ZLIB
+	buffer += seprintf(buffer, last, " Zlib:       %s\n", zlibVersion());
+#endif
 
 	buffer += seprintf(buffer, last, "\n");
 	return buffer;
