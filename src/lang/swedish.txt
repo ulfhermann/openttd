@@ -2822,7 +2822,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :monorail-lok
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :maglev-lok
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Kostnad: {CURRENCY} Vikt: {WEIGHT_S}{}Hastighet: {VELOCITY}  Kraft {POWER}{}Löpande kostnad: {CURRENCY}/år{}Kapacitet: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Kostnad: {CURRENCY} Vikt: {WEIGHT_S}{}Hastighet: {VELOCITY}  Effekt: {POWER}  Max. T.E.: {7:FORCE}{}Löpande kostnad: {4:CURRENCY}/yr{}Kapacitet: {5:CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Kostnad: {CURRENCY} Vikt: {WEIGHT_S}{}Hastighet: {VELOCITY}  Effekt: {POWER}  Max. T.E.: {6:FORCE}{}Löpande kostnad: {4:CURRENCY}/yr{}Kapacitet: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Kostnad: {CURRENCY} Maxhastiget: {VELOCITY}{}Kapacitet: {CARGO}, {CARGO}{}Körkostnad: {CURRENCY}/år
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Kostnad: {CURRENCY} Maxhastiget: {VELOCITY}{}Kapacitet: {CARGO}{}Körkostnad: {CURRENCY}/år
 
@@ -3204,6 +3204,7 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Välj å
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Felsökning av datorspelare
+STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Namn på datorspelaren
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Ladda om datorspelaren
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Stoppa datorspelaren, ladda om scriptet och starta sedan om datorspelaren
