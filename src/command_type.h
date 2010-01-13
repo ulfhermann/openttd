@@ -108,6 +108,17 @@ public:
 	}
 
 	/**
+	 * Makes this CommandCost behave like an error command.
+	 * @param mesasge the error message.
+	 */
+	void MakeError(StringID message)
+	{
+		assert(message != INVALID_STRING_ID);
+		this->success = false;
+		this->message = message;
+	}
+
+	/**
 	 * Returns the error message of a command
 	 * @return the error message, if succeeded INVALID_STRING_ID
 	 */
@@ -243,7 +254,6 @@ enum {
 	CMD_BUY_COMPANY,                  ///< buy a company which is bankrupt
 
 	CMD_FOUND_TOWN,                   ///< found a town
-
 	CMD_RENAME_TOWN,                  ///< rename a town
 	CMD_DO_TOWN_ACTION,               ///< do a action from the town detail window (like advertises or bribe)
 
@@ -294,6 +304,7 @@ enum {
 	CMD_CHANGE_TIMETABLE,             ///< change the timetable for a vehicle
 	CMD_SET_VEHICLE_ON_TIME,          ///< set the vehicle on time feature (timetable)
 	CMD_AUTOFILL_TIMETABLE,           ///< autofill the timetable
+	CMD_SET_TIMETABLE_START,          ///< set the date that a timetable should start
 };
 
 /**
@@ -392,13 +403,13 @@ struct Command {
  * are from the #CommandProc callback type. The boolean parameter indicates if the
  * command succeeded or failed.
  *
- * @param success If the command succeeded or not.
+ * @param result The result of the executed command
  * @param tile The tile of the command action
  * @param p1 Additional data of the command
  * @param p1 Additional data of the command
  * @see CommandProc
  */
-typedef void CommandCallback(bool success, TileIndex tile, uint32 p1, uint32 p2);
+typedef void CommandCallback(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2);
 
 /**
  * Structure for buffering the build command when selecting a station to join.

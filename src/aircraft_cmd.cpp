@@ -198,14 +198,17 @@ static SpriteID GetAircraftIcon(EngineID engine)
 	return DIR_W + _aircraft_sprite[spritenum];
 }
 
-void DrawAircraftEngine(int x, int y, EngineID engine, SpriteID pal)
+void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal)
 {
-	DrawSprite(GetAircraftIcon(engine), pal, x, y);
+	SpriteID sprite = GetAircraftIcon(engine);
+	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
+	preferred_x = Clamp(preferred_x, left - real_sprite->x_offs, right - real_sprite->width - real_sprite->x_offs);
+	DrawSprite(sprite, pal, preferred_x, y);
 
 	if (!(AircraftVehInfo(engine)->subtype & AIR_CTOL)) {
 		SpriteID rotor_sprite = GetCustomRotorIcon(engine);
 		if (rotor_sprite == 0) rotor_sprite = SPR_ROTOR_STOPPED;
-		DrawSprite(rotor_sprite, PAL_NONE, x, y - 5);
+		DrawSprite(rotor_sprite, PAL_NONE, preferred_x, y - 5);
 	}
 }
 
@@ -519,6 +522,10 @@ static void CheckIfAircraftNeedsService(Aircraft *v)
 		return;
 	}
 
+	/* When we're parsing conditional orders and the like
+	 * we don't want to consider going to a depot too. */
+	if (!v->current_order.IsType(OT_GOTO_DEPOT) && !v->current_order.IsType(OT_GOTO_STATION)) return;
+
 	const Station *st = Station::Get(v->current_order.GetDestination());
 
 	assert(st != NULL);
@@ -537,7 +544,9 @@ static void CheckIfAircraftNeedsService(Aircraft *v)
 
 Money Aircraft::GetRunningCost() const
 {
-	return GetVehicleProperty(this, PROP_AIRCRAFT_RUNNING_COST_FACTOR, AircraftVehInfo(this->engine_type)->running_cost) * _price[PR_RUNNING_AIRCRAFT];
+	const Engine *e = Engine::Get(this->engine_type);
+	uint cost_factor = GetVehicleProperty(this, PROP_AIRCRAFT_RUNNING_COST_FACTOR, e->u.air.running_cost);
+	return GetPrice(PR_RUNNING_AIRCRAFT, cost_factor, e->grffile);
 }
 
 void Aircraft::OnNewDay()
@@ -970,7 +979,7 @@ static bool AircraftController(Aircraft *v)
 	count = UpdateAircraftSpeed(v, speed_limit, hard_limit);
 	if (count == 0) return false;
 
-	if (v->time_counter != 0) v->time_counter--;
+	if (v->turn_counter != 0) v->turn_counter--;
 
 	do {
 
@@ -993,14 +1002,14 @@ static bool AircraftController(Aircraft *v)
 			/* Turn. Do it slowly if in the air. */
 			Direction newdir = GetDirectionTowards(v, x + amd->x, y + amd->y);
 			if (newdir != v->direction) {
-				if (amd->flag & AMED_SLOWTURN && v->number_consecutive_turns < 8) {
-					if (v->time_counter == 0 || newdir == v->last_direction) {
+				if (amd->flag & AMED_SLOWTURN && v->number_consecutive_turns < 8 && v->subtype == AIR_AIRCRAFT) {
+					if (v->turn_counter == 0 || newdir == v->last_direction) {
 						if (newdir == v->last_direction) {
 							v->number_consecutive_turns = 0;
 						} else {
 							v->number_consecutive_turns++;
 						}
-						v->time_counter = 2 * _settings_game.vehicle.plane_speed;
+						v->turn_counter = 2 * _settings_game.vehicle.plane_speed;
 						v->last_direction = v->direction;
 						v->direction = newdir;
 					}
@@ -1233,19 +1242,21 @@ void Aircraft::MarkDirty()
 	if (this->subtype == AIR_HELICOPTER) this->Next()->Next()->cur_image = GetRotorImage(this);
 }
 
+
+uint Aircraft::Crash(bool flooded)
+{
+	uint pass = Vehicle::Crash(flooded) + 2; // pilots
+	this->crashed_counter = flooded ? 9000 : 0; // max 10000, disappear pretty fast when flooded
+
+	return pass;
+}
+
 static void CrashAirplane(Aircraft *v)
 {
-	v->vehstatus |= VS_CRASHED;
-	v->crashed_counter = 0;
-
 	CreateEffectVehicleRel(v, 4, 4, 8, EV_EXPLOSION_LARGE);
 
-	v->MarkDirty();
-	SetWindowDirty(WC_VEHICLE_VIEW, v->index);
-
-	uint amt = 2;
-	if (IsCargoInClass(v->cargo_type, CC_PASSENGERS)) amt += v->cargo.Count();
-	SetDParam(0, amt);
+	uint pass = v->Crash();
+	SetDParam(0, pass);
 
 	v->cargo.Truncate(0);
 	v->Next()->cargo.Truncate(0);
@@ -1366,46 +1377,6 @@ void AircraftLeaveHangar(Aircraft *v)
 	SetAircraftPosition(v, v->x_pos, v->y_pos, v->z_pos);
 	InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
 	SetWindowClassesDirty(WC_AIRCRAFT_LIST);
-}
-
-/** Checks if an aircraft should head towards a hangar because it needs replacement
- * @param *v the vehicle to test
- * @return true if the aircraft should head towards a hangar
- */
-static inline bool CheckSendAircraftToHangarForReplacement(const Vehicle *v)
-{
-	EngineID new_engine;
-	Company *c = Company::Get(v->owner);
-
-	if (VehicleHasDepotOrders(v)) return false; // The aircraft will end up in the hangar eventually on it's own
-
-	new_engine = EngineReplacementForCompany(c, v->engine_type, v->group_id);
-
-	if (new_engine == INVALID_ENGINE) {
-		/* There is no autoreplace assigned to this EngineID so we will set it to renew to the same type if needed */
-		new_engine = v->engine_type;
-
-		if (!v->NeedsAutorenewing(c)) {
-			/* No need to replace the aircraft */
-			return false;
-		}
-	}
-
-	if (!HasBit(Engine::Get(new_engine)->company_avail, v->owner)) {
-		/* Engine is not buildable anymore */
-		return false;
-	}
-
-	if (c->money < (c->settings.engine_renew_money + (2 * DoCommand(0, new_engine, 0, DC_QUERY_COST, CMD_BUILD_AIRCRAFT).GetCost()))) {
-		/* We lack enough money to request the replacement right away.
-		 * We want 2*(the price of the new vehicle) and not looking at the value of the vehicle we are going to sell.
-		 * The reason is that we don't want to send a whole lot of vehicles to the hangars when we only have enough money to replace a single one.
-		 * Remember this happens in the background so the user can't stop this. */
-		return false;
-	}
-
-	/* We found no reason NOT to send the aircraft to a hangar so we will send it there at once */
-	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1549,7 +1520,7 @@ static void AircraftEventHandler_HeliTakeOff(Aircraft *v, const AirportFTAClass 
 	AircraftNextAirportPos_and_Order(v);
 
 	/* Send the helicopter to a hangar if needed for replacement */
-	if (CheckSendAircraftToHangarForReplacement(v)) {
+	if (v->NeedsAutomaticServicing()) {
 		_current_company = v->owner;
 		DoCommand(v->tile, v->index, DEPOT_SERVICE | DEPOT_LOCATE_HANGAR, DC_EXEC, CMD_SEND_AIRCRAFT_TO_HANGAR);
 		_current_company = OWNER_NONE;
@@ -1601,7 +1572,7 @@ static void AircraftEventHandler_Landing(Aircraft *v, const AirportFTAClass *apc
 	AircraftLandAirplane(v);  // maybe crash airplane
 
 	/* check if the aircraft needs to be replaced or renewed and send it to a hangar if needed */
-	if (CheckSendAircraftToHangarForReplacement(v)) {
+	if (v->NeedsAutomaticServicing()) {
 		_current_company = v->owner;
 		DoCommand(v->tile, v->index, DEPOT_SERVICE, DC_EXEC, CMD_SEND_AIRCRAFT_TO_HANGAR);
 		_current_company = OWNER_NONE;

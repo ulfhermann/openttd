@@ -29,6 +29,7 @@
 #include "network/network.h"
 #include "querystring_gui.h"
 #include "widgets/dropdown_func.h"
+#include "strings_func.h"
 
 #include "table/sprites.h"
 
@@ -59,39 +60,39 @@ bool _scrolling_viewport;
 byte _special_mouse_mode;
 
 /** Window description constructor. */
-WindowDesc::WindowDesc(int16 left, int16 top, int16 min_width, int16 min_height, int16 def_width, int16 def_height,
-			WindowClass window_class, WindowClass parent_class, uint32 flags, const Widget *widgets,
-			const NWidgetPart *nwid_parts, int16 nwid_length)
+WindowDesc::WindowDesc(WindowPosition def_pos, int16 def_width, int16 def_height,
+			WindowClass window_class, WindowClass parent_class, uint32 flags,
+			const NWidgetPart *nwid_parts, int16 nwid_length) :
+	default_pos(def_pos),
+	default_width(def_width),
+	default_height(def_height),
+	cls(window_class),
+	parent_cls(parent_class),
+	flags(flags),
+	nwid_parts(nwid_parts),
+	nwid_length(nwid_length)
 {
-	this->left = left;
-	this->top = top;
-	this->minimum_width = min_width;
-	this->minimum_height = min_height;
-	this->default_width = def_width;
-	this->default_height = def_height;
-	this->cls = window_class;
-	this->parent_cls = parent_class;
-	this->flags = flags;
-	this->widgets = widgets;
-	this->nwid_parts = nwid_parts;
-	this->nwid_length = nwid_length;
-	this->new_widgets = NULL;
-}
-
-/** Get widget array of the window description. */
-const Widget *WindowDesc::GetWidgets() const
-{
-	if (this->nwid_parts != NULL) {
-		InitializeWidgetArrayFromNestedWidgets(this->nwid_parts, this->nwid_length, this->widgets, &this->new_widgets);
-	}
-	const Widget *wids = (this->new_widgets != NULL) ? this->new_widgets : this->widgets;
-	assert(wids != NULL);
-	return wids;
 }
 
 WindowDesc::~WindowDesc()
 {
-	free(this->new_widgets);
+}
+
+/**
+ * Set capacity of visible elements from the size and resize properties of a widget.
+ * @param w       Window.
+ * @param widget  Widget with size and resize properties.
+ * @param padding Padding to subtract from the size.
+ * @note Updates the position if needed.
+ */
+void Scrollbar::SetCapacityFromWidget(Window *w, int widget, int padding)
+{
+	NWidgetBase *nwid = w->GetWidget<NWidgetBase>(widget);
+	if (this->is_vertical) {
+		this->SetCapacity(((int)nwid->current_y - padding) / (int)nwid->resize_y);
+	} else {
+		this->SetCapacity(((int)nwid->current_x - padding) / (int)nwid->resize_x);
+	}
 }
 
 /**
@@ -104,10 +105,6 @@ void SetFocusedWindow(Window *w)
 
 	/* Invalidate focused widget */
 	if (_focused_window != NULL) {
-		if (_focused_window->focused_widget != NULL) {
-			uint focused_widget_id = _focused_window->focused_widget - _focused_window->widget;
-			_focused_window->SetWidgetDirty(focused_widget_id);
-		}
 		if (_focused_window->nested_focus != NULL) _focused_window->nested_focus->SetDirty(_focused_window);
 	}
 
@@ -132,10 +129,19 @@ bool EditBoxInGlobalFocus()
 	/* The console does not have an edit box so a special case is needed. */
 	if (_focused_window->window_class == WC_CONSOLE) return true;
 
-	if (_focused_window->nested_array != NULL) {
-		return _focused_window->nested_focus != NULL && _focused_window->nested_focus->type == WWT_EDITBOX;
+	return _focused_window->nested_focus != NULL && _focused_window->nested_focus->type == WWT_EDITBOX;
+}
+
+/**
+ * Makes no widget on this window have focus. The function however doesn't change which window has focus.
+ */
+void Window::UnfocusFocusedWidget()
+{
+	if (this->nested_focus != NULL) {
+		/* Repaint the widget that lost focus. A focused edit box may else leave the caret on the screen. */
+		this->nested_focus->SetDirty(this);
+		this->nested_focus = NULL;
 	}
-	return _focused_window->focused_widget != NULL && _focused_window->focused_widget->type == WWT_EDITBOX;
 }
 
 /**
@@ -145,33 +151,18 @@ bool EditBoxInGlobalFocus()
  */
 bool Window::SetFocusedWidget(byte widget_index)
 {
-	if (this->widget != NULL) {
-		/* Do nothing if widget_index is already focused, or if it wasn't a valid widget. */
-		if (widget_index >= this->widget_count || this->widget + widget_index == this->focused_widget) return false;
+	/* Do nothing if widget_index is already focused, or if it wasn't a valid widget. */
+	if (widget_index >= this->nested_array_size) return false;
 
-		if (this->focused_widget != NULL) {
-			/* Repaint the widget that lost focus. A focused edit box may else leave the caret on the screen. */
-			this->SetWidgetDirty(this->focused_widget - this->widget);
-		}
-		this->focused_widget = &this->widget[widget_index];
-		return true;
+	assert(this->nested_array[widget_index] != NULL); // Setting focus to a non-existing widget is a bad idea.
+	if (this->nested_focus != NULL) {
+		if (this->GetWidget<NWidgetCore>(widget_index) == this->nested_focus) return false;
+
+		/* Repaint the widget that lost focus. A focused edit box may else leave the caret on the screen. */
+		this->nested_focus->SetDirty(this);
 	}
-
-	if (this->nested_array != NULL) {
-		/* Do nothing if widget_index is already focused, or if it wasn't a valid widget. */
-		if (widget_index >= this->nested_array_size) return false;
-
-		assert(this->nested_array[widget_index] != NULL); // Setting focus to a non-existing widget is a bad idea.
-		if (this->nested_focus != NULL) {
-			if (this->GetWidget<NWidgetCore>(widget_index) == this->nested_focus) return false;
-
-			/* Repaint the widget that lost focus. A focused edit box may else leave the caret on the screen. */
-			this->nested_focus->SetDirty(this);
-		}
-		this->nested_focus = this->GetWidget<NWidgetCore>(widget_index);
-		return true;
-	}
-	NOT_REACHED();
+	this->nested_focus = this->GetWidget<NWidgetCore>(widget_index);
+	return true;
 }
 
 /**
@@ -189,27 +180,6 @@ void CDECL Window::SetWidgetsDisabledState(bool disab_stat, int widgets, ...)
 
 	while (widgets != WIDGET_LIST_END) {
 		SetWidgetDisabledState(widgets, disab_stat);
-		widgets = va_arg(wdg_list, int);
-	}
-
-	va_end(wdg_list);
-}
-
-/**
- * Sets the hidden/shown status of a list of widgets.
- * By default, widgets are visible.
- * On certain conditions, they have to be hidden.
- * @param hidden_stat status to use ie. hidden = true, visible = false
- * @param widgets list of widgets ended by WIDGET_LIST_END
- */
-void CDECL Window::SetWidgetsHiddenState(bool hidden_stat, int widgets, ...)
-{
-	va_list wdg_list;
-
-	va_start(wdg_list, widgets);
-
-	while (widgets != WIDGET_LIST_END) {
-		SetWidgetHiddenState(widgets, hidden_stat);
 		widgets = va_arg(wdg_list, int);
 	}
 
@@ -241,20 +211,11 @@ void CDECL Window::SetWidgetsLoweredState(bool lowered_stat, int widgets, ...)
  */
 void Window::RaiseButtons(bool autoraise)
 {
-	if (this->widget != NULL) {
-		for (uint i = 0; i < this->widget_count; i++) {
-			if ((!autoraise || (this->widget[i].type & WWB_PUSHBUTTON)) && this->IsWidgetLowered(i)) {
-				this->RaiseWidget(i);
-				this->SetWidgetDirty(i);
-			}
-		}
-	}
-	if (this->nested_array != NULL) {
-		for (uint i = 0; i < this->nested_array_size; i++) {
-			if (this->nested_array[i] != NULL && (!autoraise || (this->nested_array[i]->type & WWB_PUSHBUTTON)) && this->IsWidgetLowered(i)) {
-				this->RaiseWidget(i);
-				this->SetWidgetDirty(i);
-			}
+	for (uint i = 0; i < this->nested_array_size; i++) {
+		if (this->nested_array[i] != NULL && (this->nested_array[i]->type & ~WWB_PUSHBUTTON) < WWT_LAST &&
+				(!autoraise || (this->nested_array[i]->type & WWB_PUSHBUTTON)) && this->IsWidgetLowered(i)) {
+			this->RaiseWidget(i);
+			this->SetWidgetDirty(i);
 		}
 	}
 }
@@ -265,15 +226,10 @@ void Window::RaiseButtons(bool autoraise)
  */
 void Window::SetWidgetDirty(byte widget_index) const
 {
-	if (this->widget != NULL) {
-		const Widget *wi = &this->widget[widget_index];
+	/* Sometimes this function is called before the window is even fully initialized */
+	if (this->nested_array == NULL) return;
 
-		/* Don't redraw the window if the widget is invisible or of no-type */
-		if (wi->type == WWT_EMPTY || IsWidgetHidden(widget_index)) return;
-
-		SetDirtyBlocks(this->left + wi->left, this->top + wi->top, this->left + wi->right + 1, this->top + wi->bottom + 1);
-	}
-	if (this->nested_array != NULL) this->nested_array[widget_index]->SetDirty(this);
+	this->nested_array[widget_index]->SetDirty(this);
 }
 
 /**
@@ -288,18 +244,6 @@ void Window::HandleButtonClick(byte widget)
 	this->SetWidgetDirty(widget);
 }
 
-/**
- * Return a widget of the requested type from the window.
- * @param widget_type the widget type to look for
- */
-const Widget *Window::GetWidgetOfType(WidgetType widget_type) const
-{
-	for (uint i = 0; i < this->widget_count; i++) {
-		if (this->widget[i].type == widget_type) return &this->widget[i];
-	}
-	return NULL;
-}
-
 static void StartWindowDrag(Window *w);
 static void StartWindowSizing(Window *w, bool to_left);
 
@@ -312,51 +256,39 @@ static void StartWindowSizing(Window *w, bool to_left);
  */
 static void DispatchLeftClickEvent(Window *w, int x, int y, bool double_click)
 {
-	int widget_index = 0;
-	if (w->desc_flags & WDF_DEF_WIDGET) {
-		const Widget *wi = NULL;
-		const NWidgetCore *nw = NULL;
-		WidgetType widget_type;
-		if (w->widget != NULL) {
-			widget_index = GetWidgetFromPos(w, x, y);
-			wi = &w->widget[widget_index];
-			widget_type = (widget_index >= 0) ? wi->type : WWT_EMPTY;
-		} else {
-			assert(w->nested_root != NULL);
-			nw = w->nested_root->GetWidgetFromPos(x, y);
-			widget_index = (nw != NULL) ? nw->index : -1;
-			widget_type = (widget_index >= 0) ? nw->type : WWT_EMPTY;
+	const NWidgetCore *nw = w->nested_root->GetWidgetFromPos(x, y);
+	WidgetType widget_type = (nw != NULL) ? nw->type : WWT_EMPTY;
+
+	bool focused_widget_changed = false;
+	/* If clicked on a window that previously did dot have focus */
+	if (_focused_window != w &&                 // We already have focus, right?
+			(w->desc_flags & WDF_NO_FOCUS) == 0 &&  // Don't lose focus to toolbars
+			widget_type != WWT_CLOSEBOX) {          // Don't change focused window if 'X' (close button) was clicked
+		focused_widget_changed = true;
+		if (_focused_window != NULL) {
+			_focused_window->OnFocusLost();
+
+			/* The window that lost focus may have had opened a OSK, window so close it, unless the user has clicked on the OSK window. */
+			if (w->window_class != WC_OSK) DeleteWindowById(WC_OSK, 0);
 		}
+		SetFocusedWindow(w);
+		w->OnFocus();
+	}
 
-		bool focused_widget_changed = false;
-		/* If clicked on a window that previously did dot have focus */
-		if (_focused_window != w &&
-				(w->desc_flags & WDF_NO_FOCUS) == 0 &&           // Don't lose focus to toolbars
-				!((w->desc_flags & WDF_STD_BTN) && widget_type == WWT_CLOSEBOX)) { // Don't change focused window if 'X' (close button) was clicked
-			focused_widget_changed = true;
-			if (_focused_window != NULL) {
-				_focused_window->OnFocusLost();
+	if (nw == NULL) return; // exit if clicked outside of widgets
 
-				/* The window that lost focus may have had opened a OSK, window so close it, unless the user has clicked on the OSK window. */
-				if (w->window_class != WC_OSK) DeleteWindowById(WC_OSK, 0);
-			}
-			SetFocusedWindow(w);
-			w->OnFocus();
-		}
+	/* don't allow any interaction if the button has been disabled */
+	if (nw->IsDisabled()) return;
 
-		if (widget_index < 0) return; // exit if clicked outside of widgets
+	int widget_index = nw->index; ///< Index of the widget
 
-		/* don't allow any interaction if the button has been disabled */
-		if (w->IsWidgetDisabled(widget_index)) return;
-
+	/* Process special buttons (only single clicks) */
+	if (!double_click) {
 		/* Clicked on a widget that is not disabled.
 		 * So unless the clicked widget is the caption bar, change focus to this widget */
 		if (widget_type != WWT_CAPTION) {
 			/* Close the OSK window if a edit box loses focus */
-			if ((w->widget != NULL && w->focused_widget != NULL && w->focused_widget->type == WWT_EDITBOX && // An edit box was previously selected
-						w->focused_widget != wi && w->window_class != WC_OSK) ||                 // and focus is going to change and it is not the OSK window
-					(w->nested_root != NULL && w->nested_focus != NULL &&  w->nested_focus->type == WWT_EDITBOX &&
-						w->nested_focus != nw && w->window_class != WC_OSK)) {
+			if (w->nested_focus != NULL &&  w->nested_focus->type == WWT_EDITBOX && w->nested_focus != nw && w->window_class != WC_OSK) {
 				DeleteWindowById(WC_OSK, 0);
 			}
 
@@ -372,61 +304,66 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, bool double_click)
 			focused_widget_changed |= w->SetFocusedWidget(widget_index);
 		}
 
-		if (widget_type & WWB_PUSHBUTTON) {
-			/* special widget handling for buttons*/
-			switch (widget_type) {
-				default: NOT_REACHED();
-				case WWT_PANEL   | WWB_PUSHBUTTON: // WWT_PUSHBTN
-				case WWT_IMGBTN  | WWB_PUSHBUTTON: // WWT_PUSHIMGBTN
-				case WWT_TEXTBTN | WWB_PUSHBUTTON: // WWT_PUSHTXTBTN
-					w->HandleButtonClick(widget_index);
-					break;
-			}
-		} else if (widget_type == WWT_SCROLLBAR || widget_type == WWT_SCROLL2BAR || widget_type == WWT_HSCROLLBAR) {
-			if (wi != NULL) {
-				ScrollbarClickHandler(w, wi, x, y);
-			} else {
-				ScrollbarClickHandler(w, nw, x, y);
-			}
-		} else if (widget_type == WWT_EDITBOX && !focused_widget_changed) { // Only open the OSK window if clicking on an already focused edit box
-			/* Open the OSK window if clicked on an edit box */
-			QueryStringBaseWindow *qs = dynamic_cast<QueryStringBaseWindow *>(w);
-			if (qs != NULL) {
-				qs->OnOpenOSKWindow(widget_index);
-			}
-		}
-
 		/* Close any child drop down menus. If the button pressed was the drop down
 		 * list's own button, then we should not process the click any further. */
-		if (HideDropDownMenu(w) == widget_index) return;
+		if (HideDropDownMenu(w) == widget_index && widget_index >= 0) return;
 
-		if (w->desc_flags & WDF_STD_BTN) {
-			if (widget_type == WWT_CLOSEBOX) { // 'X'
+		switch (widget_type) {
+			/* special widget handling for buttons*/
+			case WWT_PANEL   | WWB_PUSHBUTTON: // WWT_PUSHBTN
+			case WWT_IMGBTN  | WWB_PUSHBUTTON: // WWT_PUSHIMGBTN
+			case WWT_TEXTBTN | WWB_PUSHBUTTON: // WWT_PUSHTXTBTN
+				w->HandleButtonClick(widget_index);
+				break;
+
+			case WWT_SCROLLBAR:
+			case WWT_SCROLL2BAR:
+			case WWT_HSCROLLBAR:
+				ScrollbarClickHandler(w, nw, x, y);
+				break;
+
+			case WWT_EDITBOX:
+				if (!focused_widget_changed) { // Only open the OSK window if clicking on an already focused edit box
+					/* Open the OSK window if clicked on an edit box */
+					QueryStringBaseWindow *qs = dynamic_cast<QueryStringBaseWindow *>(w);
+					if (qs != NULL) {
+						qs->OnOpenOSKWindow(widget_index);
+					}
+				}
+				break;
+
+			case WWT_CLOSEBOX: // 'X'
 				delete w;
 				return;
-			}
 
-			if (widget_type == WWT_CAPTION) { // 'Title bar'
+			case WWT_CAPTION: // 'Title bar'
 				StartWindowDrag(w);
 				return;
-			}
-		}
 
-		if ((w->desc_flags & WDF_RESIZABLE) && widget_type == WWT_RESIZEBOX) {
-			/* When the resize widget is on the left size of the window
-			 * we assume that that button is used to resize to the left. */
-			int left_pos = (wi != NULL) ? wi->left : nw->pos_x;
-			StartWindowSizing(w, left_pos < (w->width / 2));
-			w->SetWidgetDirty(widget_index);
-			return;
-		}
+			case WWT_RESIZEBOX:
+				/* When the resize widget is on the left size of the window
+				 * we assume that that button is used to resize to the left. */
+				StartWindowSizing(w, (int)nw->pos_x < (w->width / 2));
+				nw->SetDirty(w);
+				return;
 
-		if ((w->desc_flags & WDF_STICKY_BUTTON) && widget_type == WWT_STICKYBOX) {
-			w->flags4 ^= WF_STICKY;
-			w->SetWidgetDirty(widget_index);
-			return;
+			case WWT_SHADEBOX:
+				nw->SetDirty(w);
+				w->SetShaded(!w->IsShaded());
+				return;
+
+			case WWT_STICKYBOX:
+				w->flags4 ^= WF_STICKY;
+				nw->SetDirty(w);
+				return;
+
+			default:
+				break;
 		}
 	}
+
+	/* Widget has no index, so the window is not interested in it. */
+	if (widget_index < 0) return;
 
 	Point pt = { x, y };
 
@@ -445,57 +382,43 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, bool double_click)
  */
 static void DispatchRightClickEvent(Window *w, int x, int y)
 {
-	int widget = 0;
-	StringID tooltip = 0;
+	NWidgetCore *wid = w->nested_root->GetWidgetFromPos(x, y);
 
-	/* default tooltips handler? */
-	if (w->desc_flags & WDF_STD_TOOLTIPS) {
-		if (w->nested_root != NULL) {
-			NWidgetCore *wid = w->nested_root->GetWidgetFromPos(x, y);
-			if (wid == NULL || wid->index < 0) return;
-			widget = wid->index;
-			tooltip = wid->tool_tip;
-		}
-		if (w->widget != NULL) {
-			widget = GetWidgetFromPos(w, x, y);
-			if (widget < 0) return; // exit if clicked outside of widgets
-			tooltip = w->widget[widget].tooltips;
-		}
+	/* No widget to handle */
+	if (wid == NULL) return;
 
-		if (tooltip != 0) {
-			GuiShowTooltips(tooltip);
-			return;
-		}
+	/* Show the tooltip if there is any */
+	if (wid->tool_tip != 0) {
+		GuiShowTooltips(wid->tool_tip);
+		return;
 	}
 
+	/* Widget has no index, so the window is not interested in it. */
+	if (wid->index < 0) return;
+
 	Point pt = { x, y };
-	w->OnRightClick(pt, widget);
+	w->OnRightClick(pt, wid->index);
 }
 
 /**
  * Dispatch the mousewheel-action to the window.
  * The window will scroll any compatible scrollbars if the mouse is pointed over the bar or its contents
  * @param w Window
- * @param widget the widget where the scrollwheel was used
+ * @param nwid the widget where the scrollwheel was used
  * @param wheel scroll up or down
  */
-static void DispatchMouseWheelEvent(Window *w, int widget, int wheel)
+static void DispatchMouseWheelEvent(Window *w, const NWidgetCore *nwid, int wheel)
 {
-	if (widget < 0) return;
+	if (nwid == NULL) return;
 
-	Scrollbar *sb = NULL;
-	if (w->widget != NULL) {
-		const Widget *wi1 = &w->widget[widget];
-		const Widget *wi2 = &w->widget[widget + 1];
-		if (wi1->type == WWT_SCROLLBAR || wi2->type == WWT_SCROLLBAR) {
-			sb = &w->vscroll;
-		} else if (wi1->type == WWT_SCROLL2BAR || wi2->type == WWT_SCROLL2BAR) {
-			sb = &w->vscroll2;
-		}
+	/* Using wheel on caption/shade-box shades or unshades the window. */
+	if (nwid->type == WWT_CAPTION || nwid->type == WWT_SHADEBOX) {
+		w->SetShaded(!w->IsShaded());
+		return;
 	}
 
-	if (w->nested_array != NULL && (uint)widget < w->nested_array_size) sb = w->GetWidget<NWidgetCore>(widget)->FindScrollbar(w);
-
+	/* Scroll the widget attached to the scrollbar. */
+	Scrollbar *sb = nwid->FindScrollbar(w);
 	if (sb != NULL && sb->GetCount() > sb->GetCapacity()) {
 		sb->UpdatePosition(wheel);
 		w->SetDirty();
@@ -606,21 +529,18 @@ void Window::SetDirty() const
  */
 void Window::ReInit(int rx, int ry)
 {
-	if (this->nested_root == NULL) return; // Only nested widget windows can re-initialize.
-
 	this->SetDirty(); // Mark whole current window as dirty.
 
 	/* Save current size. */
 	int window_width  = this->width;
 	int window_height = this->height;
 
+	this->OnInit();
 	/* Re-initialize the window from the ground up. No need to change the nested_array, as all widgets stay where they are. */
 	this->nested_root->SetupSmallestSize(this, false);
-	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, false, false, false);
+	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, _dynlang.text_dir == TD_RTL);
 	this->width  = this->nested_root->smallest_x;
 	this->height = this->nested_root->smallest_y;
-	this->resize.width  = this->nested_root->smallest_x;
-	this->resize.height = this->nested_root->smallest_y;
 	this->resize.step_width  = this->nested_root->resize_x;
 	this->resize.step_height = this->nested_root->resize_y;
 
@@ -634,17 +554,33 @@ void Window::ReInit(int rx, int ry)
 	if (this->resize.step_width  > 1) dx -= dx % (int)this->resize.step_width;
 	if (this->resize.step_height > 1) dy -= dy % (int)this->resize.step_height;
 
-	if (dx == 0 && dy == 0) { // No resize needed.
-		this->SetDirty();
-		if (this->viewport != NULL) {
-			NWidgetViewport *nvp = (NWidgetViewport *)nested_root->GetWidgetOfType(NWID_VIEWPORT);
-			nvp->UpdateViewportCoordinates(this);
-		}
-		return;
-	}
+	ResizeWindow(this, dx, dy);
+	this->OnResize();
+	this->SetDirty();
+}
 
-	ResizeWindow(this, dx, dy); // Sets post-resize dirty blocks.
-	this->OnResize(); // Calls NWidgetViewport::UpdateViewportCoordinates()
+/** Set the shaded state of the window to \a make_shaded.
+ * @param make_shaded If \c true, shade the window (roll up until just the title bar is visible), else unshade/unroll the window to its original size.
+ * @note The method uses #Window::ReInit(), thus after the call, the whole window should be considered changed.
+ */
+void Window::SetShaded(bool make_shaded)
+{
+	if (this->shade_select == NULL) return;
+
+	int desired = make_shaded ? SZSP_HORIZONTAL : 0;
+	if (this->shade_select->shown_plane != desired) {
+		if (make_shaded) {
+			this->unshaded_size.width  = this->width;
+			this->unshaded_size.height = this->height;
+			this->shade_select->SetDisplayedPlane(desired);
+			this->ReInit(0, -this->height);
+		} else {
+			this->shade_select->SetDisplayedPlane(desired);
+			int dx = ((int)this->unshaded_size.width  > this->width)  ? (int)this->unshaded_size.width  - this->width  : 0;
+			int dy = ((int)this->unshaded_size.height > this->height) ? (int)this->unshaded_size.height - this->height : 0;
+			this->ReInit(dx, dy);
+		}
+	}
 }
 
 /** Find the Window whose parent pointer points to this window
@@ -698,7 +634,6 @@ Window::~Window()
 
 	this->SetDirty();
 
-	free(this->widget);
 	free(this->nested_array); // Contents is released through deletion of #nested_root.
 	delete this->nested_root;
 
@@ -722,6 +657,22 @@ Window *FindWindowById(WindowClass cls, WindowNumber number)
 }
 
 /**
+ * Find any window by its class. Useful when searching for a window that uses
+ * the window number as a WindowType, like WC_SEND_NETWORK_MSG.
+ * @param cls Window class
+ * @return Pointer to the found window, or \c NULL if not available
+ */
+Window *FindWindowByClass(WindowClass cls)
+{
+	Window *w;
+	FOR_ALL_WINDOWS_FROM_BACK(w) {
+		if (w->window_class == cls) return w;
+	}
+
+	return NULL;
+}
+
+/**
  * Delete a window by its class and window number (if it is open).
  * @param cls Window class
  * @param number Number of the window within the window class
@@ -731,7 +682,6 @@ void DeleteWindowById(WindowClass cls, WindowNumber number, bool force)
 {
 	Window *w = FindWindowById(cls, number);
 	if (force || w == NULL ||
-			(w->desc_flags & WDF_STICKY_BUTTON) == 0 ||
 			(w->flags4 & WF_STICKY) == 0) {
 		delete w;
 	}
@@ -812,8 +762,8 @@ void ChangeWindowOwner(Owner old_owner, Owner new_owner)
 
 static void BringWindowToFront(Window *w);
 
-/** Find a window and make it the top-window on the screen. The window
- * gets a white border for a brief period of time to visualize its "activation"
+/** Find a window and make it the top-window on the screen.
+ * The window gets unshaded if it was shaded, and a white border is drawn at its edges for a brief period of time to visualize its "activation".
  * @param cls WindowClass of the window to activate
  * @param number WindowNumber of the window to activate
  * @return a pointer to the window thus activated */
@@ -822,6 +772,8 @@ Window *BringWindowToFrontById(WindowClass cls, WindowNumber number)
 	Window *w = FindWindowById(cls, number);
 
 	if (w != NULL) {
+		if (w->IsShaded()) w->SetShaded(false); // Restore original window size if it was shaded.
+
 		w->flags4 |= WF_WHITE_BORDER_MASK;
 		BringWindowToFront(w);
 		w->SetDirty();
@@ -885,75 +837,44 @@ static void BringWindowToFront(Window *w)
 }
 
 /**
- * Assign widgets to a new window by initialising its widget pointers, and by
- * copying the widget array \a widget to \c w->widget to allow for resizable
- * windows.
- * @param w Window on which to attach the widget array
- * @param widget pointer of widget array to fill the window with
- *
- * @post \c w->widget points to allocated memory and contains the copied widget array except for the terminating widget,
- *       \c w->widget_count contains number of widgets in the allocated memory.
- */
-static void AssignWidgetToWindow(Window *w, const Widget *widget)
-{
-	if (widget != NULL) {
-		uint index = 1;
-
-		for (const Widget *wi = widget; wi->type != WWT_LAST; wi++) index++;
-
-		w->widget = MallocT<Widget>(index);
-		memcpy(w->widget, widget, sizeof(*w->widget) * index);
-		w->widget_count = index - 1;
-	} else {
-		w->widget = NULL;
-		w->widget_count = 0;
-	}
-}
-
-/**
  * Initializes the data (except the position and initial size) of a new Window.
  * @param cls           Class of the window, used for identification and grouping. @see WindowClass
- * @param *widget       Pointer to the widget array, it is \c NULL when nested widgets are used. @see Widget
  * @param window_number Number being assigned to the new window
+ * @param desc_flags    Window flags. @see WindowDefaultFlag
  * @return Window pointer of the newly created window
  * @pre If nested widgets are used (\a widget is \c NULL), #nested_root and #nested_array_size must be initialized.
  *      In addition, #nested_array is either \c NULL, or already initialized.
  */
-void Window::InitializeData(WindowClass cls, const Widget *widget, int window_number)
+void Window::InitializeData(WindowClass cls, int window_number, uint32 desc_flags)
 {
 	/* Set up window properties; some of them are needed to set up smallest size below */
 	this->window_class = cls;
-	this->flags4 = WF_WHITE_BORDER_MASK; // just opened windows have a white border
+	this->flags4 |= WF_WHITE_BORDER_MASK; // just opened windows have a white border
 	this->owner = INVALID_OWNER;
-	this->focused_widget = NULL;
 	this->nested_focus = NULL;
 	this->window_number = window_number;
+	this->desc_flags = desc_flags;
 
-	/* If available, initialize nested widget tree. */
-	if (widget == NULL) {
-		if (this->nested_array == NULL) {
-			this->nested_array = CallocT<NWidgetBase *>(this->nested_array_size);
-			this->nested_root->SetupSmallestSize(this, true);
-		} else {
-			this->nested_root->SetupSmallestSize(this, false);
-		}
-		/* Initialize to smallest size. */
-		this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, false, false, false);
+	this->OnInit();
+	/* Initialize nested widget tree. */
+	if (this->nested_array == NULL) {
+		this->nested_array = CallocT<NWidgetBase *>(this->nested_array_size);
+		this->nested_root->SetupSmallestSize(this, true);
+	} else {
+		this->nested_root->SetupSmallestSize(this, false);
 	}
-	/* Else, all data members of nested widgets have been set to 0 by the #ZeroedMemoryAllocator base class. */
+	/* Initialize to smallest size. */
+	this->nested_root->AssignSizePosition(ST_SMALLEST, 0, 0, this->nested_root->smallest_x, this->nested_root->smallest_y, _dynlang.text_dir == TD_RTL);
 
 	/* Further set up window properties,
 	 * this->left, this->top, this->width, this->height, this->resize.width, and this->resize.height are initialized later. */
-	AssignWidgetToWindow(this, widget);
-	this->resize.step_width  = (this->nested_root != NULL) ? this->nested_root->resize_x : 1;
-	this->resize.step_height = (this->nested_root != NULL) ? this->nested_root->resize_y : 1;
+	this->resize.step_width  = this->nested_root->resize_x;
+	this->resize.step_height = this->nested_root->resize_y;
 
 	/* Give focus to the opened window unless it is the OSK window or a text box
 	 * of focused window has focus (so we don't interrupt typing). But if the new
 	 * window has a text box, then take focus anyway. */
-	bool has_editbox = (this->widget != NULL && this->GetWidgetOfType(WWT_EDITBOX) != NULL) ||
-			(this->nested_root != NULL && this->nested_root->GetWidgetOfType(WWT_EDITBOX) != NULL);
-	if (this->window_class != WC_OSK && (!EditBoxInGlobalFocus() || has_editbox)) SetFocusedWindow(this);
+	if (this->window_class != WC_OSK && (!EditBoxInGlobalFocus() || this->nested_root->GetWidgetOfType(WWT_EDITBOX) != NULL)) SetFocusedWindow(this);
 
 	/* Hacky way of specifying always-on-top windows. These windows are
 	 * always above other windows because they are moved below them.
@@ -968,7 +889,7 @@ void Window::InitializeData(WindowClass cls, const Widget *widget, int window_nu
 		if (FindWindowById(WC_MAIN_TOOLBAR, 0)     != NULL) w = w->z_back;
 		if (FindWindowById(WC_STATUS_BAR, 0)       != NULL) w = w->z_back;
 		if (FindWindowById(WC_NEWS_WINDOW, 0)      != NULL) w = w->z_back;
-		if (FindWindowById(WC_SEND_NETWORK_MSG, 0) != NULL) w = w->z_back;
+		if (FindWindowByClass(WC_SEND_NETWORK_MSG) != NULL) w = w->z_back;
 
 		if (w == NULL) {
 			_z_back_window->z_front = this;
@@ -1009,8 +930,6 @@ void Window::InitializePositionSize(int x, int y, int sm_width, int sm_height)
 	this->top = y;
 	this->width = sm_width;
 	this->height = sm_height;
-	this->resize.width = sm_width;
-	this->resize.height = sm_height;
 }
 
 /**
@@ -1050,8 +969,10 @@ void Window::FindWindowPlacementAndResize(int def_width, int def_height)
 		if (this->resize.step_height > 1) enlarge_y -= enlarge_y % (int)this->resize.step_height;
 
 		ResizeWindow(this, enlarge_x, enlarge_y);
-		this->OnResize();
 	}
+
+	/* Always call OnResize; that way the scrollbars and matrices get initialized */
+	this->OnResize();
 
 	int nx = this->left;
 	int ny = this->top;
@@ -1070,15 +991,6 @@ void Window::FindWindowPlacementAndResize(int def_width, int def_height)
 	this->top = ny;
 
 	this->SetDirty();
-}
-
-/**
- * Resize window towards the default size given in the window description.
- * @param desc the description to get the default size from.
- */
-void Window::FindWindowPlacementAndResize(const WindowDesc *desc)
-{
-	this->FindWindowPlacementAndResize(desc->default_width, desc->default_height);
 }
 
 /**
@@ -1219,6 +1131,20 @@ restart:
 }
 
 /**
+ * Computer the position of the top-left corner of a window to be opened right
+ * under the toolbar.
+ * @param window_width the width of the window to get the position for
+ * @return Coordinate of the top-left corner of the new window.
+ */
+Point GetToolbarAlignedWindowPosition(int window_width)
+{
+	const Window *w = FindWindowById(WC_MAIN_TOOLBAR, 0);
+	assert(w != NULL);
+	Point pt = { _dynlang.text_dir == TD_RTL ? w->left : (w->left + w->width) - window_width, w->top + w->height };
+	return pt;
+}
+
+/**
  * Compute the position of the top-left corner of a new window that is opened.
  *
  * By default position a child window at an offset of 10/10 of its parent.
@@ -1238,7 +1164,7 @@ restart:
 static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
 {
 	Point pt;
-	Window *w;
+	const Window *w;
 
 	int16 default_width  = max(desc->default_width,  sm_width);
 	int16 default_height = max(desc->default_height, sm_height);
@@ -1252,46 +1178,28 @@ static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int
 			pt.x = (_screen.width + 10 - default_width) - 20;
 		}
 		pt.y = w->top + ((desc->parent_cls == WC_BUILD_TOOLBAR || desc->parent_cls == WC_SCEN_LAND_GEN) ? w->height : 10);
-	} else {
-		switch (desc->left) {
-			case WDP_ALIGN_TBR: // Align the right side with the top toolbar
-				w = FindWindowById(WC_MAIN_TOOLBAR, 0);
-				pt.x = (w->left + w->width) - default_width;
-				break;
+		return pt;
+	}
 
-			case WDP_ALIGN_TBL: // Align the left side with the top toolbar
-				pt.x = FindWindowById(WC_MAIN_TOOLBAR, 0)->left;
-				break;
+	switch (desc->default_pos) {
+		case WDP_ALIGN_TOOLBAR: // Align to the toolbar
+			return GetToolbarAlignedWindowPosition(default_width);
 
-			case WDP_AUTO: // Find a good automatic position for the window
-				return GetAutoPlacePosition(default_width, default_height);
+		case WDP_AUTO: // Find a good automatic position for the window
+			return GetAutoPlacePosition(default_width, default_height);
 
-			case WDP_CENTER: // Centre the window horizontally
-				pt.x = (_screen.width - default_width) / 2;
-				break;
+		case WDP_CENTER: // Centre the window horizontally
+			pt.x = (_screen.width - default_width) / 2;
+			pt.y = (_screen.height - default_height) / 2;
+			break;
 
-			default:
-				pt.x = desc->left;
-				if (pt.x < 0) pt.x += _screen.width; // negative is from right of the screen
-		}
+		case WDP_MANUAL:
+			pt.x = 0;
+			pt.y = 0;
+			break;
 
-		switch (desc->top) {
-			case WDP_CENTER: // Centre the window vertically
-				pt.y = (_screen.height - default_height) / 2;
-				break;
-
-			/* WDP_AUTO sets the position at once and is controlled by desc->left.
-			 * Both left and top must be set to WDP_AUTO */
-			case WDP_AUTO:
-				NOT_REACHED();
-				assert(desc->left == WDP_AUTO && desc->top != WDP_AUTO);
-				/* fallthrough */
-
-			default:
-				pt.y = desc->top;
-				if (pt.y < 0) pt.y += _screen.height; // negative is from bottom of the screen
-				break;
-		}
+		default:
+			NOT_REACHED();
 	}
 
 	return pt;
@@ -1300,22 +1208,6 @@ static Point LocalGetWindowPlacement(const WindowDesc *desc, int16 sm_width, int
 /* virtual */ Point Window::OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
 {
 	return LocalGetWindowPlacement(desc, sm_width, sm_height, window_number);
-}
-
-/**
- * Set the positions of a new window from a WindowDesc and open it.
- *
- * @param *desc         The pointer to the WindowDesc to be created
- * @param window_number the window number of the new window
- *
- * @return Window pointer of the newly created window
- */
-Window::Window(const WindowDesc *desc, WindowNumber window_number)
-{
-	this->InitializeData(desc->cls, desc->GetWidgets(), window_number);
-	this->desc_flags = desc->flags;
-	Point pt = LocalGetWindowPlacement(desc, desc->minimum_width, desc->minimum_height, window_number);
-	this->InitializePositionSize(pt.x, pt.y, desc->minimum_width, desc->minimum_height);
 }
 
 /**
@@ -1329,8 +1221,7 @@ Window::Window(const WindowDesc *desc, WindowNumber window_number)
 void Window::CreateNestedTree(const WindowDesc *desc, bool fill_nested)
 {
 	int biggest_index = -1;
-	NWidgetBase *nested_root = MakeNWidgets(desc->nwid_parts, desc->nwid_length, &biggest_index);
-	this->nested_root = nested_root;
+	this->nested_root = MakeWindowNWidgetTree(desc->nwid_parts, desc->nwid_length, &biggest_index, &this->shade_select);
 	this->nested_array_size = (uint)(biggest_index + 1);
 
 	if (fill_nested) {
@@ -1346,8 +1237,7 @@ void Window::CreateNestedTree(const WindowDesc *desc, bool fill_nested)
  */
 void Window::FinishInitNested(const WindowDesc *desc, WindowNumber window_number)
 {
-	this->InitializeData(desc->cls, NULL, window_number);
-	this->desc_flags = desc->flags;
+	this->InitializeData(desc->cls, window_number, desc->flags);
 	Point pt = this->OnInitialPosition(desc, this->nested_root->smallest_x, this->nested_root->smallest_y, window_number);
 	this->InitializePositionSize(pt.x, pt.y, this->nested_root->smallest_x, this->nested_root->smallest_y);
 	this->FindWindowPlacementAndResize(desc->default_width, desc->default_height);
@@ -1365,7 +1255,7 @@ void Window::InitNested(const WindowDesc *desc, WindowNumber window_number)
 }
 
 /** Empty constructor, initialization has been moved to #InitNested() called from the constructor of the derived class. */
-Window::Window()
+Window::Window() : hscroll(false), vscroll(true), vscroll2(true)
 {
 }
 
@@ -1511,11 +1401,8 @@ static bool HandleMouseOver()
 	if (w != NULL) {
 		/* send an event in client coordinates. */
 		Point pt = { _cursor.pos.x - w->left, _cursor.pos.y - w->top };
-		int widget = 0;
-		if (w->widget != NULL) {
-			widget = GetWidgetFromPos(w, pt.x, pt.y);
-		}
-		w->OnMouseOver(pt, widget);
+		const NWidgetCore *widget = w->nested_root->GetWidgetFromPos(pt.x, pt.y);
+		if (widget != NULL) w->OnMouseOver(pt, widget->index);
 	}
 
 	/* Mouseover never stops execution */
@@ -1537,52 +1424,14 @@ void ResizeWindow(Window *w, int delta_x, int delta_y)
 
 	w->SetDirty();
 
-	if (w->nested_root != NULL) {
-		uint new_xinc = max(0, (w->nested_root->resize_x == 0) ? 0 : (int)(w->nested_root->current_x - w->nested_root->smallest_x) + delta_x);
-		uint new_yinc = max(0, (w->nested_root->resize_y == 0) ? 0 : (int)(w->nested_root->current_y - w->nested_root->smallest_y) + delta_y);
-		assert(w->nested_root->resize_x == 0 || new_xinc % w->nested_root->resize_x == 0);
-		assert(w->nested_root->resize_y == 0 || new_yinc % w->nested_root->resize_y == 0);
+	uint new_xinc = max(0, (w->nested_root->resize_x == 0) ? 0 : (int)(w->nested_root->current_x - w->nested_root->smallest_x) + delta_x);
+	uint new_yinc = max(0, (w->nested_root->resize_y == 0) ? 0 : (int)(w->nested_root->current_y - w->nested_root->smallest_y) + delta_y);
+	assert(w->nested_root->resize_x == 0 || new_xinc % w->nested_root->resize_x == 0);
+	assert(w->nested_root->resize_y == 0 || new_yinc % w->nested_root->resize_y == 0);
 
-		w->nested_root->AssignSizePosition(ST_RESIZE, 0, 0, w->nested_root->smallest_x + new_xinc, w->nested_root->smallest_y + new_yinc, false, false, false);
-		w->width  = w->nested_root->current_x;
-		w->height = w->nested_root->current_y;
-	} else {
-		assert(w->widget != NULL);
-
-		bool resize_height = false;
-		bool resize_width = false;
-		for (Widget *wi = w->widget; wi->type != WWT_LAST; wi++) {
-			/* Isolate the resizing flags */
-			byte rsizeflag = GB(wi->display_flags, 0, 4);
-
-			if (rsizeflag == RESIZE_NONE) continue;
-
-			/* Resize the widget based on its resize-flag */
-			if (rsizeflag & RESIZE_LEFT) {
-				wi->left += delta_x;
-				resize_width = true;
-			}
-
-			if (rsizeflag & RESIZE_RIGHT) {
-				wi->right += delta_x;
-				resize_width = true;
-			}
-
-			if (rsizeflag & RESIZE_TOP) {
-				wi->top += delta_y;
-				resize_height = true;
-			}
-
-			if (rsizeflag & RESIZE_BOTTOM) {
-				wi->bottom += delta_y;
-				resize_height = true;
-			}
-		}
-
-		/* We resized at least 1 widget, so let's resize the window totally */
-		if (resize_width)  w->width  += delta_x;
-		if (resize_height) w->height += delta_y;
-	}
+	w->nested_root->AssignSizePosition(ST_RESIZE, 0, 0, w->nested_root->smallest_x + new_xinc, w->nested_root->smallest_y + new_yinc, _dynlang.text_dir == TD_RTL);
+	w->width  = w->nested_root->current_x;
+	w->height = w->nested_root->current_y;
 	w->SetDirty();
 }
 
@@ -1758,22 +1607,12 @@ static bool HandleWindowDragging()
 
 			/* Search for the title bar rectangle. */
 			Rect caption_rect;
-			if (w->widget != NULL) {
-				const Widget *caption = w->GetWidgetOfType(WWT_CAPTION);
-				assert(caption != NULL);
-				caption_rect.left   = caption->left;
-				caption_rect.right  = caption->right;
-				caption_rect.top    = caption->top;
-				caption_rect.bottom = caption->bottom;
-			} else {
-				assert(w->nested_root != NULL);
-				const NWidgetBase *caption = w->nested_root->GetWidgetOfType(WWT_CAPTION);
-				assert(caption != NULL);
-				caption_rect.left   = caption->pos_x;
-				caption_rect.right  = caption->pos_x + caption->current_x;
-				caption_rect.top    = caption->pos_y;
-				caption_rect.bottom = caption->pos_y + caption->current_y;
-			}
+			const NWidgetBase *caption = w->nested_root->GetWidgetOfType(WWT_CAPTION);
+			assert(caption != NULL);
+			caption_rect.left   = caption->pos_x;
+			caption_rect.right  = caption->pos_x + caption->current_x;
+			caption_rect.top    = caption->pos_y;
+			caption_rect.bottom = caption->pos_y + caption->current_y;
 
 			/* Make sure the window doesn't leave the screen */
 			nx = Clamp(nx, MIN_VISIBLE_TITLE_BAR - caption_rect.right, _screen.width - MIN_VISIBLE_TITLE_BAR - caption_rect.left);
@@ -1810,23 +1649,22 @@ static bool HandleWindowDragging()
 				x = _cursor.pos.x - _drag_delta.x;
 			}
 
-			if (w->nested_root != NULL) {
-				/* Nested widgets also allow resize.step_width and/or resize.step_height to become 0 which means no resize is possible. */
-				if (w->resize.step_width  == 0) x = 0;
-				if (w->resize.step_height == 0) y = 0;
-			}
+			/* resize.step_width and/or resize.step_height may be 0, which means no resize is possible. */
+			if (w->resize.step_width  == 0) x = 0;
+			if (w->resize.step_height == 0) y = 0;
+
 			/* X and Y has to go by step.. calculate it.
 			 * The cast to int is necessary else x/y are implicitly casted to
 			 * unsigned int, which won't work. */
 			if (w->resize.step_width  > 1) x -= x % (int)w->resize.step_width;
 			if (w->resize.step_height > 1) y -= y % (int)w->resize.step_height;
 
-			/* Check if we don't go below the minimum set size */
-			if ((int)w->width + x < (int)w->resize.width) {
-				x = w->resize.width - w->width;
+			/* Check that we don't go below the minimum set size */
+			if ((int)w->width + x < (int)w->nested_root->smallest_x) {
+				x = w->nested_root->smallest_x - w->width;
 			}
-			if ((int)w->height + y < (int)w->resize.height) {
-				y = w->resize.height - w->height;
+			if ((int)w->height + y < (int)w->nested_root->smallest_y) {
+				y = w->nested_root->smallest_y - w->height;
 			}
 
 			/* Window already on size */
@@ -1907,10 +1745,12 @@ static bool HandleScrollbarScrolling()
 
 			int i;
 			Scrollbar *sb;
+			bool rtl = false;
 
 			if (w->flags4 & WF_HSCROLL) {
 				sb = &w->hscroll;
 				i = _cursor.pos.x - _cursorpos_drag_start.x;
+				rtl = _dynlang.text_dir == TD_RTL;
 			} else if (w->flags4 & WF_SCROLL2) {
 				sb = &w->vscroll2;
 				i = _cursor.pos.y - _cursorpos_drag_start.y;
@@ -1921,6 +1761,7 @@ static bool HandleScrollbarScrolling()
 
 			/* Find the item we want to move to and make sure it's inside bounds. */
 			int pos = min(max(0, i + _scrollbar_start_pos) * sb->GetCount() / _scrollbar_size, max(0, sb->GetCount() - sb->GetCapacity()));
+			if (rtl) pos = sb->GetCount() - sb->GetCapacity() - pos;
 			if (pos != sb->GetPosition()) {
 				sb->SetPosition(pos);
 				w->SetDirty();
@@ -1998,6 +1839,14 @@ static bool MaybeBringWindowToFront(Window *w)
 		return true;
 	}
 
+	/* Use unshaded window size rather than current size for shaded windows. */
+	int w_width  = w->width;
+	int w_height = w->height;
+	if (w->IsShaded()) {
+		w_width  = w->unshaded_size.width;
+		w_height = w->unshaded_size.height;
+	}
+
 	Window *u;
 	FOR_ALL_WINDOWS_FROM_BACK_FROM(u, w->z_front) {
 		/* A modal child will prevent the activation of the parent window */
@@ -2015,9 +1864,9 @@ static bool MaybeBringWindowToFront(Window *w)
 		}
 
 		/* Window sizes don't interfere, leave z-order alone */
-		if (w->left + w->width <= u->left ||
+		if (w->left + w_width <= u->left ||
 				u->left + u->width <= w->left ||
-				w->top  + w->height <= u->top ||
+				w->top  + w_height <= u->top ||
 				u->top + u->height <= w->top) {
 			continue;
 		}
@@ -2199,7 +2048,6 @@ static void HandleKeyScrolling()
 
 static void MouseLoop(MouseClick click, int mousewheel)
 {
-	DecreaseWindowCounters();
 	HandlePlacePresize();
 	UpdateTileSelection();
 
@@ -2231,7 +2079,7 @@ static void MouseLoop(MouseClick click, int mousewheel)
 		}
 
 		/* Dispatch a MouseWheelEvent for widgets if it is not a viewport */
-		if (vp == NULL) DispatchMouseWheelEvent(w, GetWidgetFromPos(w, x - w->left, y - w->top), mousewheel);
+		if (vp == NULL) DispatchMouseWheelEvent(w, w->nested_root->GetWidgetFromPos(x - w->left, y - w->top), mousewheel);
 	}
 
 	if (vp != NULL) {
@@ -2273,12 +2121,13 @@ static void MouseLoop(MouseClick click, int mousewheel)
 		}
 	} else {
 		switch (click) {
-			case MC_DOUBLE_LEFT:
-				DispatchLeftClickEvent(w, x - w->left, y - w->top, true);
-				if (_mouseover_last_w == NULL) break; // The window got removed.
-				/* fallthough, and also give a single-click for backwards compatibility */
 			case MC_LEFT:
+			case MC_DOUBLE_LEFT:
 				DispatchLeftClickEvent(w, x - w->left, y - w->top, false);
+				if (click == MC_DOUBLE_LEFT && _mouseover_last_w != NULL) {
+					/* Issue the doubleclick, if the window was not removed */
+					DispatchLeftClickEvent(w, x - w->left, y - w->top, true);
+				}
 				break;
 
 			default:
@@ -2404,6 +2253,8 @@ void InputLoop()
 		free(w);
 	}
 
+	DecreaseWindowCounters();
+
 	if (_input_events_this_tick != 0) {
 		/* The input loop is called only once per GameLoop() - so we can clear the counter here */
 		_input_events_this_tick = 0;
@@ -2444,7 +2295,8 @@ void UpdateWindows()
 	DrawDirtyBlocks();
 
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
-		if (w->viewport != NULL) UpdateViewportPosition(w);
+		/* Update viewport only if window is not shaded. */
+		if (w->viewport != NULL && !w->IsShaded()) UpdateViewportPosition(w);
 	}
 	NetworkDrawChatMessage();
 	/* Redraw mouse cursor in case it was hidden */

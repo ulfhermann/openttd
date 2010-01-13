@@ -23,11 +23,7 @@ void ShowVehicleRefitWindow(const Vehicle *v, VehicleOrderID order, Window *pare
 
 /** Constants of vehicle view widget indices */
 enum VehicleViewWindowWidgets {
-	VVW_WIDGET_CLOSEBOX = 0,
 	VVW_WIDGET_CAPTION,
-	VVW_WIDGET_STICKY,
-	VVW_WIDGET_PANEL,
-	VVW_WIDGET_INSET,
 	VVW_WIDGET_VIEWPORT,           ///< Viewport widget.
 	VVW_WIDGET_START_STOP_VEH,
 	VVW_WIDGET_CENTER_MAIN_VIEH,
@@ -36,10 +32,8 @@ enum VehicleViewWindowWidgets {
 	VVW_WIDGET_SHOW_ORDERS,
 	VVW_WIDGET_SHOW_DETAILS,
 	VVW_WIDGET_CLONE_VEH,
-	VVW_WIDGET_EMPTY_BOTTOM_RIGHT,
 	VVW_WIDGET_SELECT_DEPOT_CLONE, ///< Selection widget between 'goto depot', and 'clone vehicle' buttons.
 	VVW_WIDGET_SELECT_REFIT_TURN,  ///< Selection widget between 'refit' and 'turn around' buttons.
-	VVW_WIDGET_RESIZE,
 	VVW_WIDGET_TURN_AROUND,
 	VVW_WIDGET_FORCE_PROCEED,
 };
@@ -70,10 +64,10 @@ static inline bool ValidVLWFlags(uint16 flags)
 
 int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number);
 
-void DrawTrainImage(const Train *v, int x, int y, VehicleID selection, int max_width, int skip);
-void DrawRoadVehImage(const Vehicle *v, int x, int y, VehicleID selection, int max_width);
-void DrawShipImage(const Vehicle *v, int x, int y, VehicleID selection);
-void DrawAircraftImage(const Vehicle *v, int x, int y, VehicleID selection);
+void DrawTrainImage(const Train *v, int left, int right, int y, VehicleID selection, int skip);
+void DrawRoadVehImage(const Vehicle *v, int left, int right, int y, VehicleID selection);
+void DrawShipImage(const Vehicle *v, int left, int right, int y, VehicleID selection);
+void DrawAircraftImage(const Vehicle *v, int left, int right, int y, VehicleID selection);
 
 void ShowBuildVehicleWindow(TileIndex tile, VehicleType type);
 
@@ -86,8 +80,12 @@ void ShowVehicleListWindow(CompanyID company, VehicleType vehicle_type);
 void ShowVehicleListWindow(CompanyID company, VehicleType vehicle_type, StationID station);
 void ShowVehicleListWindow(CompanyID company, VehicleType vehicle_type, TileIndex depot_tile);
 
-
-static inline uint GetVehicleListHeight(VehicleType type)
+/**
+ * Get the height of a single vehicle in the GUIs.
+ * @param type the vehicle type to look at
+ * @return the height
+ */
+static inline uint GetVehicleHeight(VehicleType type)
 {
 	return (type == VEH_TRAIN || type == VEH_ROAD) ? 14 : 24;
 }

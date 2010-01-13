@@ -465,6 +465,8 @@ static void TileLoop_Town(TileIndex tile)
 	Town *t = Town::GetByTile(tile);
 	uint32 r = Random();
 
+	StationFinder stations(TileArea(tile, 1, 1));
+
 	if (HasBit(hs->callback_mask, CBM_HOUSE_PRODUCE_CARGO)) {
 		for (uint i = 0; i < 256; i++) {
 			uint16 callback = GetHouseCallback(CBID_HOUSE_PRODUCE_CARGO, i, r, house_id, t, tile);
@@ -477,7 +479,7 @@ static void TileLoop_Town(TileIndex tile)
 			uint amt = GB(callback, 0, 8);
 			if (amt == 0) continue;
 
-			uint moved = MoveGoodsToStation(tile, 1, 1, cargo, amt, ST_TOWN, t->index);
+			uint moved = MoveGoodsToStation(cargo, amt, ST_TOWN, t->index, stations.GetStations());
 
 			const CargoSpec *cs = CargoSpec::Get(cargo);
 			switch (cs->town_effect) {
@@ -501,7 +503,7 @@ static void TileLoop_Town(TileIndex tile)
 
 			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
 			t->new_max_pass += amt;
-			t->new_act_pass += MoveGoodsToStation(tile, 1, 1, CT_PASSENGERS, amt, ST_TOWN, t->index);
+			t->new_act_pass += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 
 		if (GB(r, 8, 8) < hs->mail_generation) {
@@ -509,7 +511,7 @@ static void TileLoop_Town(TileIndex tile)
 
 			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
 			t->new_max_mail += amt;
-			t->new_act_mail += MoveGoodsToStation(tile, 1, 1, CT_MAIL, amt, ST_TOWN, t->index);
+			t->new_act_mail += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
 		}
 	}
 
@@ -786,19 +788,8 @@ static bool IsRoadAllowedHere(Town *t, TileIndex tile, DiagDirection dir)
 		}
 
 		cur_slope = _settings_game.construction.build_on_slopes ? GetFoundationSlope(tile, NULL) : GetTileSlope(tile, NULL);
-		if (cur_slope == SLOPE_FLAT) {
-no_slope:
-			/* Tile has no slope */
-			switch (t->layout) {
-				default: NOT_REACHED();
-
-				case TL_ORIGINAL: // Disallow the road if any neighboring tile has a road (distance: 1)
-					return !IsNeighborRoadTile(tile, dir, 1);
-
-				case TL_BETTER_ROADS: // Disallow the road if any neighboring tile has a road (distance: 1 and 2).
-					return !IsNeighborRoadTile(tile, dir, 2);
-			}
-		}
+		bool ret = !IsNeighborRoadTile(tile, dir, t->layout == TL_ORIGINAL ? 1 : 2);
+		if (cur_slope == SLOPE_FLAT) return ret;
 
 		/* If the tile is not a slope in the right direction, then
 		 * maybe terraform some. */
@@ -813,12 +804,12 @@ no_slope:
 				}
 				if (CmdFailed(res) && Chance16(1, 3)) {
 					/* We can consider building on the slope, though. */
-					goto no_slope;
+					return ret;
 				}
 			}
 			return false;
 		}
-		return true;
+		return ret;
 	}
 }
 
@@ -1400,8 +1391,9 @@ void UpdateTownMaxPass(Town *t)
  * @param size Parameter for size determination
  * @param city whether to build a city or town
  * @param layout the (road) layout of the town
+ * @param manual was the town placed manually?
  */
-static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize size, bool city, TownLayout layout)
+static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize size, bool city, TownLayout layout, bool manual)
 {
 	t->xy = tile;
 	t->num_houses = 0;
@@ -1456,7 +1448,8 @@ static void DoCreateTown(Town *t, TileIndex tile, uint32 townnameparts, TownSize
 
 	int x = (int)size * 16 + 3;
 	if (size == TS_RANDOM) x = (Random() & 0xF) + 8;
-	if (city) x *= _settings_game.economy.initial_city_size;
+	/* Don't create huge cities when founding town in-game */
+	if (city && (!manual || _game_mode == GM_EDITOR)) x *= _settings_game.economy.initial_city_size;
 
 	t->num_houses += x;
 	UpdateTownRadius(t);
@@ -1513,9 +1506,8 @@ static bool IsUniqueTownName(const char *name)
 	return true;
 }
 
-/** Create a new town.
- * This obviously only works in the scenario editor. Function not removed
- * as it might be possible in the future to fund your own town :)
+/**
+ * Create a new town.
  * @param tile coordinates where town is built
  * @param flags type of operation
  * @param p1  0..1 size of the town (@see TownSize)
@@ -1528,9 +1520,6 @@ static bool IsUniqueTownName(const char *name)
  */
 CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	/* Only in the scenario editor */
-	if (_game_mode != GM_EDITOR) return CMD_ERROR;
-
 	TownSize size = (TownSize)GB(p1, 0, 2);
 	bool city = HasBit(p1, 2);
 	TownLayout layout = (TownLayout)GB(p1, 3, 3);
@@ -1540,6 +1529,16 @@ CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	if (size > TS_RANDOM) return CMD_ERROR;
 	if (layout > TL_RANDOM) return CMD_ERROR;
+
+	/* Some things are allowed only in the scenario editor */
+	if (_game_mode != GM_EDITOR) {
+		if (_settings_game.economy.found_town == TF_FORBIDDEN) return CMD_ERROR;
+		if (size == TS_LARGE) return CMD_ERROR;
+		if (random) return CMD_ERROR;
+		if (_settings_game.economy.found_town != TF_CUSTOM_LAYOUT && layout != _settings_game.economy.town_layout) {
+			return CMD_ERROR;
+		}
+	}
 
 	if (StrEmpty(text)) {
 		/* If supplied name is empty, townnameparts has to generate unique automatic name */
@@ -1553,14 +1552,27 @@ CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	/* Allocate town struct */
 	if (!Town::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_TOWNS);
 
-	CommandCost cost(EXPENSES_OTHER);
 	if (!random) {
-		cost = TownCanBePlacedHere(tile);
-		if (CmdFailed(cost)) return cost;
+		CommandCost ret = TownCanBePlacedHere(tile);
+		if (CmdFailed(ret)) return ret;
 	}
+
+	static const byte price_mult[][TS_RANDOM + 1] = {{ 15, 25, 40, 25 }, { 20, 35, 55, 35 }};
+	/* multidimensional arrays have to have defined length of non-first dimension */
+	assert_compile(lengthof(price_mult[0]) == 4);
+
+	CommandCost cost(EXPENSES_OTHER, _price[PR_BUILD_TOWN]);
+	byte mult = price_mult[city][size];
+
+	cost.MultiplyCost(mult);
 
 	/* Create the town */
 	if (flags & DC_EXEC) {
+		if (cost.GetCost() > GetAvailableMoneyForCommand()) {
+			_additional_cash_required = cost.GetCost();
+			return CommandCost(EXPENSES_OTHER);
+		}
+
 		_generating_world = true;
 		UpdateNearestTownForRoadTiles(true);
 		Town *t;
@@ -1573,13 +1585,28 @@ CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			}
 		} else {
 			t = new Town(tile);
-			DoCreateTown(t, tile, townnameparts, size, city, layout);
+			DoCreateTown(t, tile, townnameparts, size, city, layout, true);
 		}
 		UpdateNearestTownForRoadTiles(false);
 		_generating_world = false;
+
 		if (t != NULL && !StrEmpty(text)) {
 			t->name = strdup(text);
 			t->UpdateVirtCoord();
+		}
+
+		if (_game_mode != GM_EDITOR) {
+			/* 't' can't be NULL since 'random' is false outside scenedit */
+			assert(!random);
+			char company_name[MAX_LENGTH_COMPANY_NAME_BYTES];
+			SetDParam(0, _current_company);
+			GetString(company_name, STR_COMPANY_NAME, lastof(company_name));
+
+			char *cn = strdup(company_name);
+			SetDParamStr(0, cn);
+			SetDParam(1, t->index);
+
+			AddNewsItem(STR_NEWS_NEW_TOWN, NS_INDUSTRY_OPEN, NR_TILE, tile, NR_NONE, UINT32_MAX, cn);
 		}
 	}
 	return cost;
@@ -1720,7 +1747,7 @@ static Town *CreateRandomTown(uint attempts, uint32 townnameparts, TownSize size
 		/* Allocate a town struct */
 		Town *t = new Town(tile);
 
-		DoCreateTown(t, tile, townnameparts, size, city, layout);
+		DoCreateTown(t, tile, townnameparts, size, city, layout, false);
 
 		/* if the population is still 0 at the point, then the
 		 * placement is so bad it couldn't grow at all */
@@ -2067,7 +2094,7 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 		const HouseSpec *hs = HouseSpec::Get(i);
 
 		/* Verify that the candidate house spec matches the current tile status */
-		if ((~hs->building_availability & bitmask) != 0 || !hs->enabled) continue;
+		if ((~hs->building_availability & bitmask) != 0 || !hs->enabled || hs->override != INVALID_HOUSE_ID) continue;
 
 		/* Don't let these counters overflow. Global counters are 32bit, there will never be that many houses. */
 		if (hs->class_id != HOUSE_NO_CLASS) {
@@ -2105,13 +2132,9 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 
 		const HouseSpec *hs = HouseSpec::Get(house);
 
-		if (_loaded_newgrf_features.has_newhouses) {
-			if (hs->override != 0) {
-				house = hs->override;
-				hs = HouseSpec::Get(house);
-			}
-
-			if ((hs->extra_flags & BUILDING_IS_HISTORICAL) && !_generating_world && _game_mode != GM_EDITOR) continue;
+		if (_loaded_newgrf_features.has_newhouses && !_generating_world &&
+				_game_mode != GM_EDITOR && (hs->extra_flags & BUILDING_IS_HISTORICAL) != 0) {
+			continue;
 		}
 
 		if (_cur_year < hs->min_year || _cur_year > hs->max_year) continue;
@@ -2475,7 +2498,6 @@ uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t)
 
 		/* Things worth more than this are not shown */
 		Money avail = Company::Get(cid)->money + _price[PR_STATION_VALUE] * 200;
-		Money ref = _price[PR_BUILD_INDUSTRY] >> 8;
 
 		/* Check the action bits for validity and
 		 * if they are valid add them */
@@ -2494,7 +2516,7 @@ uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t)
 			if (cur == TACT_BUILD_STATUE && HasBit(t->statues, cid))
 				continue;
 
-			if (avail >= _town_action_costs[i] * ref) {
+			if (avail >= _town_action_costs[i] * _price[PR_TOWN_ACTION] >> 8) {
 				buttons |= cur;
 				num++;
 			}
@@ -2522,7 +2544,7 @@ CommandCost CmdDoTownAction(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 	if (!HasBit(GetMaskOfTownActions(NULL, _current_company, t), p2)) return CMD_ERROR;
 
-	CommandCost cost(EXPENSES_OTHER, (_price[PR_BUILD_INDUSTRY] >> 8) * _town_action_costs[p2]);
+	CommandCost cost(EXPENSES_OTHER, _price[PR_TOWN_ACTION] * _town_action_costs[p2] >> 8);
 
 	if (flags & DC_EXEC) {
 		_town_action_proc[p2](t);
@@ -2858,7 +2880,7 @@ static CommandCost TerraformTile_Town(TileIndex tile, DoCommandFlag flags, uint 
 				if ((res != 0) && (res != CALLBACK_FAILED)) allow_terraform = false;
 			}
 
-			if (allow_terraform) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]);
+			if (allow_terraform) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 		}
 	}
 

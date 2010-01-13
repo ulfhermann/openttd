@@ -27,9 +27,6 @@ void PlaceTreesRandomly();
 
 /** Widget definitions for the build trees window. */
 enum BuildTreesWidgets {
-	BTW_CLOSE,
-	BTW_CAPTION,
-	BTW_BACKGROUND,
 	BTW_TYPE_11,
 	BTW_TYPE_12,
 	BTW_TYPE_13,
@@ -62,7 +59,7 @@ public:
 		ResetObjectToPlace();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget != BTW_MANY_RANDOM) return;
 
@@ -167,10 +164,12 @@ public:
 
 static const NWidgetPart _nested_build_trees_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, BTW_CLOSE),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, BTW_CAPTION), SetMinimalSize(132, 14), SetDataTip(STR_PLANT_TREE_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_PLANT_TREE_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BTW_BACKGROUND),
+	NWidget(WWT_PANEL, COLOUR_DARK_GREEN),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 2),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
@@ -228,10 +227,10 @@ static const NWidgetPart _nested_build_trees_widgets[] = {
 };
 
 static const WindowDesc _build_trees_desc(
-	WDP_AUTO, WDP_AUTO, 143, 184, 143, 184,
+	WDP_AUTO, 0, 0,
 	WC_BUILD_TREES, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION,
-	NULL, _nested_build_trees_widgets, lengthof(_nested_build_trees_widgets)
+	WDF_CONSTRUCTION,
+	_nested_build_trees_widgets, lengthof(_nested_build_trees_widgets)
 );
 
 void ShowBuildTreesToolbar()

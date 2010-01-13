@@ -35,10 +35,18 @@
 #include "table/sprites.h"
 #include "table/strings.h"
 
+/**
+ * Get the height of a single 'entry' in the engine lists.
+ * @param type the vehicle type to get the height of
+ * @return the height for the entry
+ */
+uint GetEngineListHeight(VehicleType type)
+{
+	return max<uint>(FONT_HEIGHT_NORMAL + WD_MATRIX_TOP + WD_MATRIX_BOTTOM, GetVehicleHeight(type));
+}
+
 enum BuildVehicleWidgets {
-	BUILD_VEHICLE_WIDGET_CLOSEBOX = 0,
 	BUILD_VEHICLE_WIDGET_CAPTION,
-	BUILD_VEHICLE_WIDGET_LIST_CONTROL,
 	BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING,
 	BUILD_VEHICLE_WIDGET_SORT_DROPDOWN,
 	BUILD_VEHICLE_WIDGET_CARGO_FILTER_DROPDOWN,
@@ -48,30 +56,31 @@ enum BuildVehicleWidgets {
 	BUILD_VEHICLE_WIDGET_BUILD,
 	BUILD_VEHICLE_WIDGET_BUILD_SEL,
 	BUILD_VEHICLE_WIDGET_RENAME,
-	BUILD_VEHICLE_WIDGET_RESIZE,
 	BUILD_VEHICLE_WIDGET_END
 };
 
 static const NWidgetPart _nested_build_vehicle_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CAPTION), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CAPTION), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, BUILD_VEHICLE_WIDGET_LIST_CONTROL),
+	NWidget(WWT_PANEL, COLOUR_GREY),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_VERTICAL),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER), SetFill(true, false),
-				NWidget(NWID_SPACER), SetFill(true, true),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER), SetFill(1, 0),
+				NWidget(NWID_SPACER), SetFill(1, 1),
 			EndContainer(),
 			NWidget(NWID_VERTICAL),
-				NWidget(WWT_DROPDOWN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SORT_DROPDOWN), SetResize(1, 0), SetFill(true, false), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_SORT_CRITERIAP),
-				NWidget(WWT_DROPDOWN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CARGO_FILTER_DROPDOWN), SetResize(1, 0), SetFill(true, false), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_FILTER_CRITERIA),
+				NWidget(WWT_DROPDOWN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SORT_DROPDOWN), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_SORT_CRITERIAP),
+				NWidget(WWT_DROPDOWN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_CARGO_FILTER_DROPDOWN), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_FILTER_CRITERIA),
 			EndContainer(),
 		EndContainer(),
 	EndContainer(),
 	/* Vehicle list. */
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_GREY, BUILD_VEHICLE_WIDGET_LIST), SetResize(1, 1), SetFill(true, false), SetDataTip(0x101, STR_NULL),
+		NWidget(WWT_MATRIX, COLOUR_GREY, BUILD_VEHICLE_WIDGET_LIST), SetResize(1, 1), SetFill(1, 0), SetDataTip(0x101, STR_NULL),
 		NWidget(WWT_SCROLLBAR, COLOUR_GREY, BUILD_VEHICLE_WIDGET_SCROLLBAR),
 	EndContainer(),
 	/* Panel with details. */
@@ -79,10 +88,10 @@ static const NWidgetPart _nested_build_vehicle_widgets[] = {
 	/* Build/rename buttons, resize button. */
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_SELECTION, INVALID_COLOUR, BUILD_VEHICLE_WIDGET_BUILD_SEL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_BUILD), SetResize(1, 0), SetFill(true, false),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_BUILD), SetResize(1, 0), SetFill(1, 0),
 		EndContainer(),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_RENAME), SetResize(1, 0), SetFill(true, false),
-		NWidget(WWT_RESIZEBOX, COLOUR_GREY, BUILD_VEHICLE_WIDGET_RESIZE),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, BUILD_VEHICLE_WIDGET_RENAME), SetResize(1, 0), SetFill(1, 0),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 	EndContainer(),
 };
 
@@ -678,48 +687,38 @@ int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number)
 
 /** Engine drawing loop
  * @param type Type of vehicle (VEH_*)
- * @param x The left most location of the list
+ * @param l The left most location of the list
  * @param r The right most location of the list
  * @param y The top most location of teh list
  * @param eng_list What engines to draw
  * @param min where to start in the list
  * @param max where in the list to end
  * @param selected_id what engine to highlight as selected, if any
- * @param count_location Offset to print the engine count (used by autoreplace). 0 means it's off
+ * @param show_count Whether to show the amount of engines or not
  * @param selected_group the group to list the engines of
  */
-void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *eng_list, uint16 min, uint16 max, EngineID selected_id, int count_location, GroupID selected_group)
+void DrawEngineList(VehicleType type, int l, int r, int y, const GUIEngineList *eng_list, uint16 min, uint16 max, EngineID selected_id, bool show_count, GroupID selected_group)
 {
-	byte step_size = GetVehicleListHeight(type);
-	byte x_offset = 0;
-	byte y_offset = 0;
+	static const int sprite_widths[]  = { 60, 60, 76, 67 };
+	static const int sprite_y_offsets[] = { -1, -1, -2, -2 };
 
+	/* Obligatory sanity checks! */
+	assert((uint)type < lengthof(sprite_widths));
+	assert_compile(lengthof(sprite_y_offsets) == lengthof(sprite_widths));
 	assert(max <= eng_list->Length());
 
-	switch (type) {
-		case VEH_TRAIN:
-			x++; // train and road vehicles use the same offset, except trains are one more pixel to the right
-			/* Fallthough */
-		case VEH_ROAD:
-			x += 26;
-			x_offset = 30;
-			y += 2;
-			y_offset = 4;
-			break;
-		case VEH_SHIP:
-			x += 35;
-			x_offset = 40;
-			y += 7;
-			y_offset = 3;
-			break;
-		case VEH_AIRCRAFT:
-			x += 27;
-			x_offset = 33;
-			y += 7;
-			y_offset = 3;
-			break;
-		default: NOT_REACHED();
-	}
+	bool rtl = _dynlang.text_dir == TD_RTL;
+	int step_size = GetEngineListHeight(type);
+	int sprite_width = sprite_widths[type];
+
+	int sprite_x        = (rtl ? r - sprite_width / 2 : l + sprite_width / 2) - 1;
+	int sprite_y_offset = sprite_y_offsets[type] + step_size / 2;
+
+	int text_left  = l + (rtl ? WD_FRAMERECT_LEFT : sprite_width);
+	int text_right = r - (rtl ? sprite_width : WD_FRAMERECT_RIGHT);
+
+	int normal_text_y_offset = (step_size - FONT_HEIGHT_NORMAL) / 2;
+	int small_text_y_offset  = step_size - FONT_HEIGHT_SMALL - WD_FRAMERECT_BOTTOM - 1;
 
 	for (; min < max; min++, y += step_size) {
 		const EngineID engine = (*eng_list)[min];
@@ -727,11 +726,11 @@ void DrawEngineList(VehicleType type, int x, int r, int y, const GUIEngineList *
 		const uint num_engines = GetGroupNumEngines(_local_company, selected_group, engine);
 
 		SetDParam(0, engine);
-		DrawString(x + x_offset, r, y, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK);
-		DrawVehicleEngine(x, y + y_offset, engine, (count_location != 0 && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
-		if (count_location != 0) {
+		DrawString(text_left, text_right, y + normal_text_y_offset, STR_ENGINE_NAME, engine == selected_id ? TC_WHITE : TC_BLACK);
+		DrawVehicleEngine(l, r, sprite_x, y + sprite_y_offset, engine, (show_count && num_engines == 0) ? PALETTE_CRASH : GetEnginePalette(engine, _local_company));
+		if (show_count) {
 			SetDParam(0, num_engines);
-			DrawString(x, count_location, y + (GetVehicleListHeight(type) == 14 ? 3 : 8), STR_TINY_BLACK_COMA, TC_FROMSTRING, SA_RIGHT);
+			DrawString(text_left, text_right, y + small_text_y_offset, STR_TINY_BLACK_COMA, TC_FROMSTRING, SA_RIGHT);
 		}
 	}
 }
@@ -759,8 +758,6 @@ struct BuildVehicleWindow : Window {
 	{
 		this->vehicle_type = type;
 		this->window_number = tile == INVALID_TILE ? (int)type : tile;
-
-		this->owner = (tile != INVALID_TILE) ? GetTileOwner(tile) : _local_company;
 
 		this->sel_engine      = INVALID_ENGINE;
 
@@ -820,7 +817,7 @@ struct BuildVehicleWindow : Window {
 
 		/* If we are just viewing the list of vehicles, we do not need the Build button.
 		 * So we just hide it, and enlarge the Rename buton by the now vacant place. */
-		if (this->listview_mode) this->GetWidget<NWidgetStacked>(BUILD_VEHICLE_WIDGET_BUILD_SEL)->SetDisplayedPlane(STACKED_SELECTION_ZERO_SIZE);
+		if (this->listview_mode) this->GetWidget<NWidgetStacked>(BUILD_VEHICLE_WIDGET_BUILD_SEL)->SetDisplayedPlane(SZSP_NONE);
 
 		NWidgetCore *widget = this->GetWidget<NWidgetCore>(BUILD_VEHICLE_WIDGET_LIST);
 		widget->tool_tip = STR_BUY_VEHICLE_TRAIN_LIST_TOOLTIP + type;
@@ -836,6 +833,8 @@ struct BuildVehicleWindow : Window {
 		this->details_height = ((this->vehicle_type == VEH_TRAIN) ? 10 : 9) * FONT_HEIGHT_NORMAL + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 
 		this->FinishInitNested(desc, tile == INVALID_TILE ? (int)type : tile);
+
+		this->owner = (tile != INVALID_TILE) ? GetTileOwner(tile) : _local_company;
 
 		this->eng_list.ForceRebuild();
 		this->GenerateBuildList(); // generate the list, since we need it in the next line
@@ -1017,7 +1016,7 @@ struct BuildVehicleWindow : Window {
 				break;
 
 			case BUILD_VEHICLE_WIDGET_LIST: {
-				uint i = (pt.y - this->GetWidget<NWidgetCore>(BUILD_VEHICLE_WIDGET_LIST)->pos_y) / this->resize.step_height + this->vscroll.GetPosition();
+				uint i = (pt.y - this->GetWidget<NWidgetBase>(BUILD_VEHICLE_WIDGET_LIST)->pos_y) / this->resize.step_height + this->vscroll.GetPosition();
 				size_t num_items = this->eng_list.Length();
 				this->sel_engine = (i < num_items) ? this->eng_list[i] : INVALID_ENGINE;
 				this->SetDirty();
@@ -1035,14 +1034,7 @@ struct BuildVehicleWindow : Window {
 			case BUILD_VEHICLE_WIDGET_BUILD: {
 				EngineID sel_eng = this->sel_engine;
 				if (sel_eng != INVALID_ENGINE) {
-					CommandCallback *callback;
-					switch (this->vehicle_type) {
-						default: NOT_REACHED();
-						case VEH_TRAIN:    callback = (RailVehInfo(sel_eng)->railveh_type == RAILVEH_WAGON) ? CcBuildWagon : CcBuildLoco; break;
-						case VEH_ROAD:     callback = CcBuildRoadVeh; break;
-						case VEH_SHIP:     callback = CcBuildShip; break;
-						case VEH_AIRCRAFT: callback = CcBuildAircraft; break;
-					}
+					CommandCallback *callback = (this->vehicle_type == VEH_TRAIN && RailVehInfo(sel_eng)->railveh_type == RAILVEH_WAGON) ? NULL : CcBuildPrimaryVehicle;
 					DoCommandP(this->window_number, sel_eng, 0, GetCmdBuildVeh(this->vehicle_type), callback);
 				}
 				break;
@@ -1086,11 +1078,11 @@ struct BuildVehicleWindow : Window {
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case BUILD_VEHICLE_WIDGET_LIST:
-				resize->height = GetVehicleListHeight(this->vehicle_type);
+				resize->height = GetEngineListHeight(this->vehicle_type);
 				size->height = 3 * resize->height;
 				break;
 
@@ -1104,7 +1096,7 @@ struct BuildVehicleWindow : Window {
 	{
 		switch (widget) {
 			case BUILD_VEHICLE_WIDGET_LIST:
-				DrawEngineList(this->vehicle_type, r.left + WD_FRAMERECT_LEFT, r.right + WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, &this->eng_list, this->vscroll.GetPosition(), min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->eng_list.Length()), this->sel_engine, 0, DEFAULT_GROUP);
+				DrawEngineList(this->vehicle_type, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, &this->eng_list, this->vscroll.GetPosition(), min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->eng_list.Length()), this->sel_engine, false, DEFAULT_GROUP);
 				break;
 
 			case BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING:
@@ -1120,20 +1112,22 @@ struct BuildVehicleWindow : Window {
 
 		this->DrawWidgets();
 
-		int needed_height = this->details_height;
-		/* Draw details panels. */
-		for (int side = 0; side < 2; side++) {
-			if (this->sel_engine != INVALID_ENGINE) {
-				NWidgetCore *nwi = this->GetWidget<NWidgetCore>(BUILD_VEHICLE_WIDGET_PANEL);
-				int text_end = DrawVehiclePurchaseInfo(nwi->pos_x + WD_FRAMETEXT_LEFT, nwi->pos_x + nwi->current_x - WD_FRAMETEXT_RIGHT,
-						nwi->pos_y + WD_FRAMERECT_TOP, this->sel_engine);
-				needed_height = max(needed_height, text_end - (int)nwi->pos_y + WD_FRAMERECT_BOTTOM);
+		if (!this->IsShaded()) {
+			int needed_height = this->details_height;
+			/* Draw details panels. */
+			for (int side = 0; side < 2; side++) {
+				if (this->sel_engine != INVALID_ENGINE) {
+					NWidgetBase *nwi = this->GetWidget<NWidgetBase>(BUILD_VEHICLE_WIDGET_PANEL);
+					int text_end = DrawVehiclePurchaseInfo(nwi->pos_x + WD_FRAMETEXT_LEFT, nwi->pos_x + nwi->current_x - WD_FRAMETEXT_RIGHT,
+							nwi->pos_y + WD_FRAMERECT_TOP, this->sel_engine);
+					needed_height = max(needed_height, text_end - (int)nwi->pos_y + WD_FRAMERECT_BOTTOM);
+				}
 			}
-		}
-		if (needed_height != this->details_height) { // Details window are not high enough, enlarge them.
-			this->details_height = needed_height;
-			this->ReInit();
-			return;
+			if (needed_height != this->details_height) { // Details window are not high enough, enlarge them.
+				this->details_height = needed_height;
+				this->ReInit();
+				return;
+			}
 		}
 	}
 
@@ -1178,16 +1172,16 @@ struct BuildVehicleWindow : Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetCore>(BUILD_VEHICLE_WIDGET_LIST)->current_y) / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, BUILD_VEHICLE_WIDGET_LIST);
 		this->GetWidget<NWidgetCore>(BUILD_VEHICLE_WIDGET_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 };
 
 static const WindowDesc _build_vehicle_desc(
-	WDP_AUTO, WDP_AUTO, 240, 186, 240, 268,
+	WDP_AUTO, 240, 268,
 	WC_BUILD_VEHICLE, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	NULL, _nested_build_vehicle_widgets, lengthof(_nested_build_vehicle_widgets)
+	WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
+	_nested_build_vehicle_widgets, lengthof(_nested_build_vehicle_widgets)
 );
 
 void ShowBuildVehicleWindow(TileIndex tile, VehicleType type)

@@ -23,7 +23,6 @@
  */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "currency.h"
 #include "screenshot.h"
 #include "variables.h"
@@ -32,8 +31,7 @@
 #include "settings_internal.h"
 #include "command_func.h"
 #include "console_func.h"
-#include "npf.h"
-#include "yapf/yapf.h"
+#include "pathfinder/pathfinder_type.h"
 #include "genworld.h"
 #include "train.h"
 #include "news_func.h"
@@ -750,6 +748,22 @@ static bool DragSignalsDensityChanged(int32)
 {
 	InvalidateWindowData(WC_BUILD_SIGNAL, 0);
 
+	return true;
+}
+
+static bool TownFoundingChanged(int32 p1)
+{
+	if (_game_mode != GM_EDITOR && _settings_game.economy.found_town == TF_FORBIDDEN) {
+		DeleteWindowById(WC_FOUND_TOWN, 0);
+		return true;
+	}
+	InvalidateWindowData(WC_FOUND_TOWN, 0);
+	return true;
+}
+
+static bool InvalidateVehTimetableWindow(int32 p1)
+{
+	InvalidateWindowClassesData(WC_VEHICLE_TIMETABLE, -2);
 	return true;
 }
 
@@ -1565,7 +1579,7 @@ void SyncCompanySettings()
 		const void *new_var = GetVariableAddress(&_settings_client.company, &sd->save);
 		uint32 old_value = (uint32)ReadValue(old_var, sd->save.conv);
 		uint32 new_value = (uint32)ReadValue(new_var, sd->save.conv);
-		if (old_value != new_value) NetworkSend_Command(0, i, new_value, CMD_CHANGE_COMPANY_SETTING, NULL, NULL);
+		if (old_value != new_value) NetworkSend_Command(0, i, new_value, CMD_CHANGE_COMPANY_SETTING, NULL, NULL, _local_company);
 	}
 }
 #endif /* ENABLE_NETWORK */

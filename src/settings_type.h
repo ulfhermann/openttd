@@ -76,6 +76,7 @@ struct GUISettings {
 	uint8  right_mouse_btn_emulation;        ///< should we emulate right mouse clicking?
 	uint8  scrollwheel_scrolling;            ///< scrolling using the scroll wheel?
 	uint8  scrollwheel_multiplier;           ///< how much 'wheel' per incoming event from the OS?
+	bool   timetable_arrival_departure;      ///< show arrivals and departures in vehicle timetables
 	bool   left_mouse_btn_scrolling;         ///< left mouse button scroll
 	bool   pause_on_newgame;                 ///< whether to start new games paused or not
 	bool   enable_signal_gui;                ///< show the signal GUI when the signal button is pressed
@@ -168,6 +169,7 @@ struct GameCreationSettings {
 	byte   snow_line;                        ///< the snowline level in this game
 	byte   water_borders;                    ///< bitset of the borders that are water
 	uint16 custom_town_number;               ///< manually entered number of towns
+	byte   variety;                          ///< variety level applied to TGP
 };
 
 /** Settings related to construction in-game */
@@ -181,6 +183,7 @@ struct ConstructionSettings {
 	bool   road_stop_on_competitor_road;     ///< allow building of drive-through road stops on roads owned by competitors
 	uint8  raw_industry_construction;        ///< type of (raw) industry construction (none, "normal", prospecting)
 	bool   freeform_edges;                   ///< allow terraforming the tiles at the map edges
+	uint8  extra_tree_placement;             ///< (dis)allow building extra trees in-game
 };
 
 /** Settings related to the AI. */
@@ -207,6 +210,7 @@ struct NPFSettings {
 	 * of not being perfect anymore.
 	 */
 	uint32 npf_max_search_nodes;
+	uint32 maximum_go_to_depot_penalty;      ///< What is the maximum penalty that may be endured for going to a depot
 
 	uint32 npf_rail_firstred_penalty;        ///< the penalty for when the first signal is red (and it is not an exit or combo signal)
 	uint32 npf_rail_firstred_exit_penalty;   ///< the penalty for when the first signal is red (and it is an exit or combo signal)
@@ -222,12 +226,15 @@ struct NPFSettings {
 	uint32 npf_road_curve_penalty;           ///< the penalty for curves
 	uint32 npf_crossing_penalty;             ///< the penalty for level crossings
 	uint32 npf_road_drive_through_penalty;   ///< the penalty for going through a drive-through road stop
+	uint32 npf_road_dt_occupied_penalty;     ///< the penalty multiplied by the fill percentage of a drive-through road stop
+	uint32 npf_road_bay_occupied_penalty;    ///< the penalty multiplied by the fill percentage of a road bay
 };
 
 /** Settings related to the yet another pathfinder. */
 struct YAPFSettings {
 	bool   disable_node_optimization;        ///< whether to use exit-dir instead of trackdir in node key
 	uint32 max_search_nodes;                 ///< stop path-finding when this number of nodes visited
+	uint32 maximum_go_to_depot_penalty;      ///< What is the maximum penalty that may be endured for going to a depot
 	bool   ship_use_yapf;                    ///< use YAPF for ships
 	bool   road_use_yapf;                    ///< use YAPF for road
 	bool   rail_use_yapf;                    ///< use YAPF for rail
@@ -235,6 +242,8 @@ struct YAPFSettings {
 	uint32 road_curve_penalty;               ///< penalty for curves
 	uint32 road_crossing_penalty;            ///< penalty for level crossing
 	uint32 road_stop_penalty;                ///< penalty for going through a drive-through road stop
+	uint32 road_stop_occupied_penalty;       ///< penalty multiplied by the fill percentage of a drive-through road stop
+	uint32 road_stop_bay_occupied_penalty;   ///< penalty multiplied by the fill percentage of a road bay
 	bool   rail_firstred_twoway_eol;         ///< treat first red two-way signal as dead end
 	uint32 rail_firstred_penalty;            ///< penalty for first red signal
 	uint32 rail_firstred_exit_penalty;       ///< penalty for first red exit signal
@@ -298,6 +307,7 @@ struct OrderSettings {
 struct VehicleSettings {
 	bool   mammoth_trains;                   ///< allow very long trains
 	uint8  train_acceleration_model;         ///< realistic acceleration for trains
+	uint8  train_slope_steepness;            ///< Steepness of hills for trains when using realistic acceleration
 	bool   wagon_speed_limits;               ///< enable wagon speed limits
 	bool   disable_elrails;                  ///< when true, the elrails are disabled
 	UnitID max_trains;                       ///< max trains in game per company
@@ -318,6 +328,7 @@ struct EconomySettings {
 	bool   bribe;                            ///< enable bribing the local authority
 	bool   smooth_economy;                   ///< smooth economy
 	bool   allow_shares;                     ///< allow the buying/selling of shares
+	uint8  feeder_payment_share;             ///< percentage of leg payment to virtually pay in feeder systems
 	byte   dist_local_authority;             ///< distance for town local authority, default 20
 	bool   exclusive_rights;                 ///< allow buying exclusive rights
 	bool   give_money;                       ///< allow giving other companies money
@@ -327,8 +338,9 @@ struct EconomySettings {
 	uint8  town_growth_rate;                 ///< town growth rate
 	uint8  larger_towns;                     ///< the number of cities to build. These start off larger and grow twice as fast
 	uint8  initial_city_size;                ///< multiplier for the initial size of the cities compared to towns
-	TownLayoutByte town_layout;              ///< select town layout
+	TownLayoutByte town_layout;              ///< select town layout, @see TownLayout
 	bool   allow_town_roads;                 ///< towns are allowed to build roads (always allowed when generating world / in SE)
+	TownFoundingByte found_town;             ///< town founding, @see TownFounding
 	bool   station_noise_level;              ///< build new airports when the town noise level is still within accepted limits
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
 	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving average of capacities and usage of links

@@ -21,8 +21,6 @@
 #include "../script/squirrel_helper.hpp"
 #include "../script/squirrel_class.hpp"
 
-#define DEFINE_SCRIPT_FILES
-
 #include "ai_config.hpp"
 #include "ai_storage.hpp"
 #include "ai_instance.hpp"
@@ -37,7 +35,6 @@
 #include "api/ai_basestation.hpp.sq"
 #include "api/ai_bridge.hpp.sq"
 #include "api/ai_bridgelist.hpp.sq"
-#include "api/ai_buoylist.hpp.sq"
 #include "api/ai_cargo.hpp.sq"
 #include "api/ai_cargolist.hpp.sq"
 #include "api/ai_company.hpp.sq"
@@ -81,8 +78,6 @@
 #include "api/ai_vehiclelist.hpp.sq"
 #include "api/ai_waypoint.hpp.sq"
 #include "api/ai_waypointlist.hpp.sq"
-
-#undef DEFINE_SCRIPT_FILES
 
 #include "../fileio_func.h"
 
@@ -181,7 +176,6 @@ void AIInstance::RegisterAPI()
 	SQAIBridge_Register(this->engine);
 	SQAIBridgeList_Register(this->engine);
 	SQAIBridgeList_Length_Register(this->engine);
-	SQAIBuoyList_Register(this->engine);
 	SQAICargo_Register(this->engine);
 	SQAICargoList_Register(this->engine);
 	SQAICargoList_IndustryAccepting_Register(this->engine);
@@ -397,7 +391,7 @@ void AIInstance::GameLoop()
 	}
 }
 
-void AIInstance::CollectGarbage()
+void AIInstance::CollectGarbage() const
 {
 	if (this->is_started && !this->IsDead()) this->engine->CollectGarbage();
 }

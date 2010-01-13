@@ -16,11 +16,12 @@
 #include "command_func.h"
 #include "news_func.h"
 #include "company_func.h"
-#include "npf.h"
+#include "pathfinder/npf/npf_func.h"
 #include "depot_base.h"
+#include "station_base.h"
 #include "vehicle_gui.h"
 #include "newgrf_engine.h"
-#include "yapf/yapf.h"
+#include "pathfinder/yapf/yapf.h"
 #include "newgrf_sound.h"
 #include "spritecache.h"
 #include "strings_func.h"
@@ -33,20 +34,13 @@
 #include "gfx_func.h"
 #include "effectvehicle_func.h"
 #include "ai/ai.hpp"
-#include "pathfind.h"
+#include "pathfinder/opf/opf_ship.h"
 #include "landscape_type.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
 
 static const uint16 _ship_sprites[] = {0x0E5D, 0x0E55, 0x0E65, 0x0E6D};
-
-static const TrackBits _ship_sometracks[4] = {
-	TRACK_BIT_X | TRACK_BIT_LOWER | TRACK_BIT_LEFT,  // 0x19, // DIAGDIR_NE
-	TRACK_BIT_Y | TRACK_BIT_UPPER | TRACK_BIT_LEFT,  // 0x16, // DIAGDIR_SE
-	TRACK_BIT_X | TRACK_BIT_UPPER | TRACK_BIT_RIGHT, // 0x25, // DIAGDIR_SW
-	TRACK_BIT_Y | TRACK_BIT_LOWER | TRACK_BIT_RIGHT, // 0x2A, // DIAGDIR_NW
-};
 
 static inline TrackBits GetTileShipTrackStatus(TileIndex tile)
 {
@@ -68,9 +62,12 @@ static SpriteID GetShipIcon(EngineID engine)
 	return DIR_W + _ship_sprites[spritenum];
 }
 
-void DrawShipEngine(int x, int y, EngineID engine, SpriteID pal)
+void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal)
 {
-	DrawSprite(GetShipIcon(engine), pal, x, y);
+	SpriteID sprite = GetShipIcon(engine);
+	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
+	preferred_x = Clamp(preferred_x, left - real_sprite->x_offs, right - real_sprite->width - real_sprite->x_offs);
+	DrawSprite(sprite, pal, preferred_x, y);
 }
 
 /** Get the size of the sprite of a ship sprite heading west (used for lists)
@@ -100,22 +97,17 @@ SpriteID Ship::GetImage(Direction direction) const
 	return _ship_sprites[spritenum] + direction;
 }
 
-static const Depot *FindClosestShipDepot(const Vehicle *v)
+static const Depot *FindClosestShipDepot(const Vehicle *v, uint max_distance)
 {
-	if (_settings_game.pf.pathfinder_for_ships == VPF_NPF) { // NPF is used
-		Trackdir trackdir = v->GetVehicleTrackdir();
-		NPFFoundTargetData ftd = NPFRouteToDepotTrialError(v->tile, trackdir, false, TRANSPORT_WATER, 0, v->owner, INVALID_RAILTYPES);
-
-		if (ftd.best_bird_dist == 0) return Depot::GetByTile(ftd.node.tile); // Found target
-
-		return NULL; // Did not find target
-	}
-
-	/* OPF or YAPF - find the closest depot */
-
+	/* Find the closest depot */
 	const Depot *depot;
 	const Depot *best_depot = NULL;
-	uint best_dist = UINT_MAX;
+	/* If we don't have a maximum distance, i.e. distance = 0,
+	 * we want to find any depot so the best distance of no
+	 * depot must be more than any correct distance. On the
+	 * other hand if we have set a maximum distance, any depot
+	 * further away than max_distance can safely be ignored. */
+	uint best_dist = max_distance == 0 ? UINT_MAX : max_distance + 1;
 
 	FOR_ALL_DEPOTS(depot) {
 		TileIndex tile = depot->xy;
@@ -139,9 +131,17 @@ static void CheckIfShipNeedsService(Vehicle *v)
 		return;
 	}
 
-	const Depot *depot = FindClosestShipDepot(v);
+	uint max_distance;
+	switch (_settings_game.pf.pathfinder_for_ships) {
+		case VPF_OPF:  max_distance = 12; break;
+		case VPF_NPF:  max_distance = _settings_game.pf.npf.maximum_go_to_depot_penalty  / NPF_TILE_LENGTH;  break;
+		case VPF_YAPF: max_distance = _settings_game.pf.yapf.maximum_go_to_depot_penalty / YAPF_TILE_LENGTH; break;
+		default: NOT_REACHED();
+	}
 
-	if (depot == NULL || DistanceManhattan(v->tile, depot->xy) > 12) {
+	const Depot *depot = FindClosestShipDepot(v, max_distance);
+
+	if (depot == NULL) {
 		if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 			v->current_order.MakeDummy();
 			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
@@ -156,7 +156,9 @@ static void CheckIfShipNeedsService(Vehicle *v)
 
 Money Ship::GetRunningCost() const
 {
-	return GetVehicleProperty(this, PROP_SHIP_RUNNING_COST_FACTOR, ShipVehInfo(this->engine_type)->running_cost) * _price[PR_RUNNING_SHIP];
+	const Engine *e = Engine::Get(this->engine_type);
+	uint cost_factor = GetVehicleProperty(this, PROP_SHIP_RUNNING_COST_FACTOR, e->u.ship.running_cost);
+	return GetPrice(PR_RUNNING_SHIP, cost_factor, e->grffile);
 }
 
 void Ship::OnNewDay()
@@ -306,10 +308,10 @@ static void CheckShipLeaveDepot(Ship *v)
 	Axis axis = GetShipDepotAxis(tile);
 
 	/* Check first (north) side */
-	if (_ship_sometracks[axis] & GetTileShipTrackStatus(TILE_ADD(tile, ToTileIndexDiff(_ship_leave_depot_offs[axis])))) {
+	if (DiagdirReachesTracks((DiagDirection)axis) & GetTileShipTrackStatus(TILE_ADD(tile, ToTileIndexDiff(_ship_leave_depot_offs[axis])))) {
 		v->direction = ReverseDir(AxisToDirection(axis));
 	/* Check second (south) side */
-	} else if (_ship_sometracks[axis + 2] & GetTileShipTrackStatus(TILE_ADD(tile, -2 * ToTileIndexDiff(_ship_leave_depot_offs[axis])))) {
+	} else if (DiagdirReachesTracks((DiagDirection)(axis + 2)) & GetTileShipTrackStatus(TILE_ADD(tile, -2 * ToTileIndexDiff(_ship_leave_depot_offs[axis])))) {
 		v->direction = AxisToDirection(axis);
 	} else {
 		return;
@@ -369,154 +371,20 @@ static void ShipArrivesAt(const Vehicle *v, Station *st)
 	}
 }
 
-struct PathFindShip {
-	TileIndex skiptile;
-	TileIndex dest_coords;
-	uint best_bird_dist;
-	uint best_length;
-};
-
-static bool ShipTrackFollower(TileIndex tile, PathFindShip *pfs, int track, uint length)
-{
-	/* Found dest? */
-	if (tile == pfs->dest_coords) {
-		pfs->best_bird_dist = 0;
-
-		pfs->best_length = minu(pfs->best_length, length);
-		return true;
-	}
-
-	/* Skip this tile in the calculation */
-	if (tile != pfs->skiptile) {
-		pfs->best_bird_dist = minu(pfs->best_bird_dist, DistanceMaxPlusManhattan(pfs->dest_coords, tile));
-	}
-
-	return false;
-}
-
-static const byte _ship_search_directions[6][4] = {
-	{ 0, 9, 2, 9 },
-	{ 9, 1, 9, 3 },
-	{ 9, 0, 3, 9 },
-	{ 1, 9, 9, 2 },
-	{ 3, 2, 9, 9 },
-	{ 9, 9, 1, 0 },
-};
-
-static const byte _pick_shiptrack_table[6] = {1, 3, 2, 2, 0, 0};
-
-static uint FindShipTrack(Vehicle *v, TileIndex tile, DiagDirection dir, TrackBits bits, TileIndex skiptile, Track *track)
-{
-	PathFindShip pfs;
-	Track i, best_track;
-	uint best_bird_dist = 0;
-	uint best_length    = 0;
-	uint r;
-	byte ship_dir = v->direction & 3;
-
-	pfs.dest_coords = v->dest_tile;
-	pfs.skiptile = skiptile;
-
-	best_track = INVALID_TRACK;
-
-	do {
-		i = RemoveFirstTrack(&bits);
-
-		pfs.best_bird_dist = UINT_MAX;
-		pfs.best_length = UINT_MAX;
-
-		FollowTrack(tile, PATHFIND_FLAGS_SHIP_MODE | PATHFIND_FLAGS_DISABLE_TILE_HASH, TRANSPORT_WATER, 0, (DiagDirection)_ship_search_directions[i][dir], (TPFEnumProc*)ShipTrackFollower, NULL, &pfs);
-
-		if (best_track != INVALID_TRACK) {
-			if (pfs.best_bird_dist != 0) {
-				/* neither reached the destination, pick the one with the smallest bird dist */
-				if (pfs.best_bird_dist > best_bird_dist) goto bad;
-				if (pfs.best_bird_dist < best_bird_dist) goto good;
-			} else {
-				if (pfs.best_length > best_length) goto bad;
-				if (pfs.best_length < best_length) goto good;
-			}
-
-			/* if we reach this position, there's two paths of equal value so far.
-			 * pick one randomly. */
-			r = GB(Random(), 0, 8);
-			if (_pick_shiptrack_table[i] == ship_dir) r += 80;
-			if (_pick_shiptrack_table[best_track] == ship_dir) r -= 80;
-			if (r <= 127) goto bad;
-		}
-good:;
-		best_track = i;
-		best_bird_dist = pfs.best_bird_dist;
-		best_length = pfs.best_length;
-bad:;
-
-	} while (bits != 0);
-
-	*track = best_track;
-	return best_bird_dist;
-}
-
-static inline NPFFoundTargetData PerfNPFRouteToStationOrTile(TileIndex tile, Trackdir trackdir, bool ignore_start_tile, NPFFindStationOrTileData *target, TransportType type, Owner owner, RailTypes railtypes)
-{
-
-	void *perf = NpfBeginInterval();
-	NPFFoundTargetData ret = NPFRouteToStationOrTile(tile, trackdir, ignore_start_tile, target, type, 0, owner, railtypes);
-	int t = NpfEndInterval(perf);
-	DEBUG(yapf, 4, "[NPFW] %d us - %d rounds - %d open - %d closed -- ", t, 0, _aystar_stats_open_size, _aystar_stats_closed_size);
-	return ret;
-}
 
 /** returns the track to choose on the next tile, or -1 when it's better to
  * reverse. The tile given is the tile we are about to enter, enterdir is the
  * direction in which we are entering the tile */
-static Track ChooseShipTrack(Ship *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
+static Track ChooseShipTrack(const Ship *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
 {
 	assert(IsValidDiagDirection(enterdir));
 
 	switch (_settings_game.pf.pathfinder_for_ships) {
-		case VPF_YAPF: { // YAPF
-			Trackdir trackdir = YapfChooseShipTrack(v, tile, enterdir, tracks);
-			if (trackdir != INVALID_TRACKDIR) return TrackdirToTrack(trackdir);
-		} break;
-
-		case VPF_NPF: { // NPF
-			NPFFindStationOrTileData fstd;
-			Trackdir trackdir = v->GetVehicleTrackdir();
-			assert(trackdir != INVALID_TRACKDIR); // Check that we are not in a depot
-
-			NPFFillWithOrderData(&fstd, v);
-
-			NPFFoundTargetData ftd = PerfNPFRouteToStationOrTile(tile - TileOffsByDiagDir(enterdir), trackdir, true, &fstd, TRANSPORT_WATER, v->owner, INVALID_RAILTYPES);
-
-			/* If ftd.best_bird_dist is 0, we found our target and ftd.best_trackdir contains
-			 * the direction we need to take to get there, if ftd.best_bird_dist is not 0,
-			 * we did not find our target, but ftd.best_trackdir contains the direction leading
-			 * to the tile closest to our target. */
-			if (ftd.best_trackdir != 0xff) return TrackdirToTrack(ftd.best_trackdir); // TODO: Wrapper function?
-		} break;
-
-		default:
-		case VPF_OPF: { // OPF
-			TileIndex tile2 = TILE_ADD(tile, -TileOffsByDiagDir(enterdir));
-			Track track;
-
-			/* Let's find out how far it would be if we would reverse first */
-			TrackBits b = GetTileShipTrackStatus(tile2) & _ship_sometracks[ReverseDiagDir(enterdir)] & v->state;
-
-			uint distr = UINT_MAX; // distance if we reversed
-			if (b != 0) {
-				distr = FindShipTrack(v, tile2, ReverseDiagDir(enterdir), b, tile, &track);
-				if (distr != UINT_MAX) distr++; // penalty for reversing
-			}
-
-			/* And if we would not reverse? */
-			uint dist = FindShipTrack(v, tile, enterdir, tracks, 0, &track);
-
-			if (dist <= distr) return track;
-		} break;
+		case VPF_OPF: return OPFShipChooseTrack(v, tile, enterdir, tracks);
+		case VPF_NPF: return NPFShipChooseTrack(v, tile, enterdir, tracks);
+		case VPF_YAPF: return YapfShipChooseTrack(v, tile, enterdir, tracks);
+		default: NOT_REACHED();
 	}
-
-	return INVALID_TRACK; // We could better reverse
 }
 
 static const Direction _new_vehicle_direction_table[] = {
@@ -540,9 +408,9 @@ static Direction ShipGetNewDirection(Vehicle *v, int x, int y)
 	return _new_vehicle_direction_table[offs];
 }
 
-static inline TrackBits GetAvailShipTracks(TileIndex tile, int dir)
+static inline TrackBits GetAvailShipTracks(TileIndex tile, DiagDirection dir)
 {
-	return GetTileShipTrackStatus(tile) & _ship_sometracks[dir];
+	return GetTileShipTrackStatus(tile) & DiagdirReachesTracks(dir);
 }
 
 static const byte _ship_subcoord[4][6][3] = {
@@ -862,7 +730,7 @@ CommandCost CmdSellShip(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p
 
 bool Ship::FindClosestDepot(TileIndex *location, DestinationID *destination, bool *reverse)
 {
-	const Depot *depot = FindClosestShipDepot(this);
+	const Depot *depot = FindClosestShipDepot(this, 0);
 
 	if (depot == NULL) return false;
 

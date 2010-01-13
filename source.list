@@ -3,16 +3,14 @@ airport.cpp
 animated_tile.cpp
 articulated_vehicles.cpp
 autoreplace.cpp
-aystar.cpp
 bmp.cpp
-callback_table.cpp
 cargopacket.cpp
 cargotype.cpp
 cheat.cpp
-crashlog.cpp
 command.cpp
 console.cpp
 console_cmds.cpp
+crashlog.cpp
 currency.cpp
 date.cpp
 debug.cpp
@@ -46,12 +44,9 @@ network/network_content.cpp
 network/network_gamelist.cpp
 network/network_server.cpp
 network/network_udp.cpp
-npf.cpp
 openttd.cpp
 os_timer.cpp
-pathfind.cpp
 pbs.cpp
-queue.cpp
 rail.cpp
 rev.cpp
 road.cpp
@@ -112,20 +107,17 @@ autoreplace_func.h
 autoreplace_gui.h
 autoreplace_type.h
 autoslope.h
-aystar.h
 base_media_base.h
 base_media_func.h
 base_station_base.h
 bmp.h
 bridge.h
-callback_table.h
 cargo_type.h
 cargopacket.h
 cargotype.h
 cheat_func.h
 cheat_type.h
 cmd_helper.h
-crashlog.h
 command_func.h
 command_type.h
 company_base.h
@@ -137,8 +129,10 @@ console_func.h
 console_gui.h
 console_internal.h
 console_type.h
+crashlog.h
 currency.h
 date_func.h
+date_gui.h
 date_type.h
 debug.h
 video/dedicated_v.h
@@ -191,7 +185,6 @@ livery.h
 map_func.h
 map_type.h
 mixer.h
-music.h
 network/network.h
 network/network_base.h
 network/network_client.h
@@ -225,7 +218,6 @@ newgrf_townname.h
 news_func.h
 news_gui.h
 news_type.h
-npf.h
 music/null_m.h
 sound/null_s.h
 video/null_v.h
@@ -233,10 +225,8 @@ openttd.h
 order_base.h
 order_func.h
 order_type.h
-pathfind.h
 pbs.h
 querystring_gui.h
-queue.h
 rail.h
 rail_gui.h
 rail_type.h
@@ -287,6 +277,7 @@ terraform_gui.h
 textbuf_gui.h
 texteff.hpp
 tgp.h
+tilearea_type.h
 tile_cmd.h
 tile_type.h
 tilehighlight_func.h
@@ -294,9 +285,9 @@ tilehighlight_type.h
 timetable.h
 toolbar_gui.h
 town.h
+town_type.h
 townname_func.h
 townname_type.h
-town_type.h
 track_func.h
 track_type.h
 train.h
@@ -377,6 +368,7 @@ build_vehicle_gui.cpp
 cheat_gui.cpp
 company_gui.cpp
 console_gui.cpp
+date_gui.cpp
 depot_gui.cpp
 dock_gui.cpp
 engine_gui.cpp
@@ -508,8 +500,8 @@ table/sprites.h
 table/station_land.h
 table/strgen_tables.h
 ../objs/langs/table/strings.h
-table/townname.h
 table/town_land.h
+table/townname.h
 table/track_land.h
 table/train_cmd.h
 table/tree_land.h
@@ -521,14 +513,7 @@ table/water_land.h
 3rdparty/md5/md5.cpp
 3rdparty/md5/md5.h
 
-# MiniLZO
-3rdparty/minilzo/lzoconf.h
-3rdparty/minilzo/lzodefs.h
-3rdparty/minilzo/minilzo.c
-3rdparty/minilzo/minilzo.h
-
 # Script
-script/fake_squirrel_types.hpp
 script/script_info.cpp
 script/script_info.hpp
 script/script_scanner.cpp
@@ -608,7 +593,6 @@ ai/api/ai_base.hpp
 ai/api/ai_basestation.hpp
 ai/api/ai_bridge.hpp
 ai/api/ai_bridgelist.hpp
-ai/api/ai_buoylist.hpp
 ai/api/ai_cargo.hpp
 ai/api/ai_cargolist.hpp
 ai/api/ai_changelog.hpp
@@ -665,7 +649,6 @@ ai/api/ai_base.cpp
 ai/api/ai_basestation.cpp
 ai/api/ai_bridge.cpp
 ai/api/ai_bridgelist.cpp
-ai/api/ai_buoylist.cpp
 ai/api/ai_cargo.cpp
 ai/api/ai_cargolist.cpp
 ai/api/ai_company.cpp
@@ -823,23 +806,39 @@ network/core/tcp_game.h
 network/core/udp.cpp
 network/core/udp.h
 
+# Pathfinder
+pathfinder/follow_track.hpp
+pathfinder/opf/opf_ship.cpp
+pathfinder/opf/opf_ship.h
+pathfinder/pathfinder_func.h
+pathfinder/pathfinder_type.h
+pathfinder/pf_performance_timer.hpp
+
+# NPF
+pathfinder/npf/aystar.cpp
+pathfinder/npf/aystar.h
+pathfinder/npf/npf.cpp
+pathfinder/npf/npf_func.h
+pathfinder/npf/queue.cpp
+pathfinder/npf/queue.h
+
 # YAPF
-yapf/follow_track.hpp
-yapf/nodelist.hpp
-yapf/yapf.h
-yapf/yapf.hpp
-yapf/yapf_base.hpp
-yapf/yapf_common.hpp
-yapf/yapf_costbase.hpp
-yapf/yapf_costcache.hpp
-yapf/yapf_costrail.hpp
-yapf/yapf_destrail.hpp
-yapf/yapf_node.hpp
-yapf/yapf_node_rail.hpp
-yapf/yapf_node_road.hpp
-yapf/yapf_rail.cpp
-yapf/yapf_road.cpp
-yapf/yapf_ship.cpp
+pathfinder/yapf/nodelist.hpp
+pathfinder/yapf/yapf.h
+pathfinder/yapf/yapf.hpp
+pathfinder/yapf/yapf_base.hpp
+pathfinder/yapf/yapf_cache.h
+pathfinder/yapf/yapf_common.hpp
+pathfinder/yapf/yapf_costbase.hpp
+pathfinder/yapf/yapf_costcache.hpp
+pathfinder/yapf/yapf_costrail.hpp
+pathfinder/yapf/yapf_destrail.hpp
+pathfinder/yapf/yapf_node.hpp
+pathfinder/yapf/yapf_node_rail.hpp
+pathfinder/yapf/yapf_node_road.hpp
+pathfinder/yapf/yapf_rail.cpp
+pathfinder/yapf/yapf_road.cpp
+pathfinder/yapf/yapf_ship.cpp
 
 # Video
 video/dedicated_v.cpp

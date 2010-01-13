@@ -7,11 +7,13 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file pbs.cpp */
+/** @file pbs.cpp PBS support routines */
+
 #include "stdafx.h"
 #include "functions.h"
 #include "vehicle_func.h"
-#include "yapf/follow_track.hpp"
+#include "pathfinder/follow_track.hpp"
+//#include "depot_map.h"
 
 /**
  * Get the reserved trackbits for any tile, regardless of type.
@@ -242,7 +244,7 @@ static Vehicle *FindTrainOnTrackEnum(Vehicle *v, void *data)
 	if (v->type != VEH_TRAIN || (v->vehstatus & VS_CRASHED)) return NULL;
 
 	Train *t = Train::From(v);
-	if (HasBit((TrackBits)t->track, TrackdirToTrack(info->res.trackdir))) {
+	if (t->track == TRACK_BIT_WORMHOLE || HasBit((TrackBits)t->track, TrackdirToTrack(info->res.trackdir))) {
 		t = t->First();
 
 		/* ALWAYS return the lowest ID (anti-desync!) */
@@ -260,7 +262,7 @@ static Vehicle *FindTrainOnTrackEnum(Vehicle *v, void *data)
  * @param train_on_res Is set to a train we might encounter
  * @returns The last tile of the reservation or the current train tile if no reservation present.
  */
-PBSTileInfo FollowTrainReservation(const Train *v, bool *train_on_res)
+PBSTileInfo FollowTrainReservation(const Train *v, Vehicle **train_on_res)
 {
 	assert(v->type == VEH_TRAIN);
 
@@ -272,7 +274,21 @@ PBSTileInfo FollowTrainReservation(const Train *v, bool *train_on_res)
 	FindTrainOnTrackInfo ftoti;
 	ftoti.res = FollowReservation(v->owner, GetRailTypeInfo(v->railtype)->compatible_railtypes, tile, trackdir);
 	ftoti.res.okay = IsSafeWaitingPosition(v, ftoti.res.tile, ftoti.res.trackdir, true, _settings_game.pf.forbid_90_deg);
-	if (train_on_res != NULL) *train_on_res = HasVehicleOnPos(ftoti.res.tile, &ftoti, FindTrainOnTrackEnum);
+	if (train_on_res != NULL) {
+		FindVehicleOnPos(ftoti.res.tile, &ftoti, FindTrainOnTrackEnum);
+		if (ftoti.best != NULL) *train_on_res = ftoti.best->First();
+		if (*train_on_res == NULL && IsRailStationTile(ftoti.res.tile)) {
+			/* The target tile is a rail station. The track follower
+			 * has stopped on the last platform tile where we haven't
+			 * found a train. Also check all previous platform tiles
+			 * for a possible train. */
+			TileIndexDiff diff = TileOffsByDiagDir(TrackdirToExitdir(ReverseTrackdir(ftoti.res.trackdir)));
+			for (TileIndex st_tile = ftoti.res.tile + diff; *train_on_res == NULL && IsCompatibleTrainStationTile(st_tile, ftoti.res.tile); st_tile += diff) {
+				FindVehicleOnPos(st_tile, &ftoti, FindTrainOnTrackEnum);
+				if (ftoti.best != NULL) *train_on_res = ftoti.best->First();
+			}
+		}
+	}
 	return ftoti.res;
 }
 
@@ -353,8 +369,14 @@ bool IsSafeWaitingPosition(const Train *v, TileIndex tile, Trackdir trackdir, bo
 	if (ft.m_new_td_bits == TRACKDIR_BIT_NONE) return include_line_end;
 
 	if (ft.m_new_td_bits != TRACKDIR_BIT_NONE && KillFirstBit(ft.m_new_td_bits) == TRACKDIR_BIT_NONE) {
+		Trackdir td = FindFirstTrackdir(ft.m_new_td_bits);
 		/* PBS signal on next trackdir? Safe position. */
-		if (HasPbsSignalOnTrackdir(ft.m_new_tile, FindFirstTrackdir(ft.m_new_td_bits))) return true;
+		if (HasPbsSignalOnTrackdir(ft.m_new_tile, td)) return true;
+		/* One-way PBS signal against us? Safe if end-of-line is allowed. */
+		if (IsTileType(ft.m_new_tile, MP_RAILWAY) && HasSignalOnTrackdir(ft.m_new_tile, ReverseTrackdir(td)) &&
+				GetSignalType(ft.m_new_tile, TrackdirToTrack(td)) == SIGTYPE_PBS_ONEWAY) {
+			return include_line_end;
+		}
 	}
 
 	return false;

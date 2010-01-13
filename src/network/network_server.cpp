@@ -28,8 +28,7 @@
 #include "../company_func.h"
 #include "../company_gui.h"
 #include "../window_func.h"
-#include "../openttd.h"
-#include "../cargotype.h"
+#include "../roadveh.h"
 
 #include "table/strings.h"
 
@@ -481,7 +480,7 @@ DEF_SERVER_SEND_COMMAND_PARAM(PACKET_SERVER_COMMAND)(NetworkClientSocket *cs, co
 	 *    uint32: P2
 	 *    uint32: Tile
 	 *    string: text
-	 *    uint8:  CallBackID (see callback_table.c)
+	 *    uint8:  CallBackID
 	 *    uint32: Frame of execution
 	 */
 
@@ -829,13 +828,6 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_MAP_OK)
 			}
 		}
 
-		if (_settings_client.network.pause_on_join) {
-			/* Now pause the game till the client is in sync */
-			DoCommandP(0, PM_PAUSED_JOIN, 1, CMD_PAUSE);
-
-			NetworkServerSendChat(NETWORK_ACTION_SERVER_MESSAGE, DESTTYPE_BROADCAST, 0, "", CLIENT_ID_SERVER, NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT);
-		}
-
 		/* also update the new client with our max values */
 		SEND_COMMAND(PACKET_SERVER_CONFIG_UPDATE)(cs);
 
@@ -1023,11 +1015,6 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_ACK)
 
 		/* Now he is! Unpause the game */
 		cs->status = STATUS_ACTIVE;
-
-		if (_pause_mode & PM_PAUSED_JOIN) {
-			DoCommandP(0, PM_PAUSED_JOIN, 0, CMD_PAUSE);
-			NetworkServerSendChat(NETWORK_ACTION_SERVER_MESSAGE, DESTTYPE_BROADCAST, 0, "", CLIENT_ID_SERVER, NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT);
-		}
 
 		/* Execute script for, e.g. MOTD */
 		IConsoleCmdExec("exec scripts/on_server_connect.scr 0");
@@ -1381,7 +1368,7 @@ void NetworkPopulateCompanyStats(NetworkCompanyStats *stats)
 		byte type = 0;
 		switch (v->type) {
 			case VEH_TRAIN: type = 0; break;
-			case VEH_ROAD: type = IsCargoInClass(v->cargo_type, CC_PASSENGERS) ? 2 : 1; break;
+			case VEH_ROAD: type = RoadVehicle::From(v)->IsBus() ? 2 : 1; break;
 			case VEH_AIRCRAFT: type = 3; break;
 			case VEH_SHIP: type = 4; break;
 			default: continue;

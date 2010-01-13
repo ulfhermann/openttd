@@ -56,7 +56,7 @@ enum Sprites {
 
 	/* Extra graphic spritenumbers */
 	SPR_OPENTTD_BASE     = 4896,
-	OPENTTD_SPRITE_COUNT = 150,
+	OPENTTD_SPRITE_COUNT = 153,
 
 	/* Halftile-selection sprites */
 	SPR_HALFTILE_SELECTION_FLAT = SPR_OPENTTD_BASE,
@@ -71,6 +71,9 @@ enum Sprites {
 	SPR_WARNING_SIGN       = SPR_OPENTTD_BASE + 43, // warning sign (shown if there are any newgrf errors)
 	SPR_WINDOW_RESIZE_RIGHT= SPR_OPENTTD_BASE + 44, // resize icon to the right
 	SPR_WINDOW_RESIZE_LEFT = SPR_OPENTTD_BASE + 149, // resize icon to the left
+	SPR_WINDOW_SHADE       = SPR_OPENTTD_BASE + 151, // shade the window icon
+	SPR_WINDOW_UNSHADE     = SPR_OPENTTD_BASE + 152, // unshade the window icon
+	SPR_IMG_PLAY_MUSIC_RTL = SPR_OPENTTD_BASE + 150, // play music button, but then for RTL users
 	/* Arrow icons pointing in all 4 directions */
 	SPR_ARROW_DOWN         = SPR_OPENTTD_BASE + 45,
 	SPR_ARROW_UP           = SPR_OPENTTD_BASE + 46,
@@ -305,8 +308,8 @@ enum Sprites {
 
 	SPR_ORIGINAL_SIGNALS_BASE   = 1275,
 
-	SPR_RAIL_SINGLE_Y           = 1005,
-	SPR_RAIL_SINGLE_X           = 1006,
+	SPR_RAIL_SINGLE_X           = 1005,
+	SPR_RAIL_SINGLE_Y           = 1006,
 	SPR_RAIL_SINGLE_NORTH       = 1007,
 	SPR_RAIL_SINGLE_SOUTH       = 1008,
 	SPR_RAIL_SINGLE_EAST        = 1009,
@@ -341,8 +344,8 @@ enum Sprites {
 	SPR_RAIL_ROOF_GLASS_Y_TILE_A      = 1084,
 	SPR_RAIL_ROOF_GLASS_X_TILE_B      = 1085, // second half of the roof glass
 	SPR_RAIL_ROOF_GLASS_Y_TILE_B      = 1086,
-	SPR_MONO_SINGLE_Y                 = 1087,
-	SPR_MONO_SINGLE_X                 = 1088,
+	SPR_MONO_SINGLE_X                 = 1087,
+	SPR_MONO_SINGLE_Y                 = 1088,
 	SPR_MONO_SINGLE_NORTH             = 1089,
 	SPR_MONO_SINGLE_SOUTH             = 1090,
 	SPR_MONO_SINGLE_EAST              = 1091,
@@ -350,8 +353,8 @@ enum Sprites {
 	SPR_MONO_TRACK_Y                  = 1093,
 	SPR_MONO_TRACK_BASE               = 1100,
 	SPR_MONO_TRACK_N_S                = 1117,
-	SPR_MGLV_SINGLE_Y                 = 1169,
-	SPR_MGLV_SINGLE_X                 = 1170,
+	SPR_MGLV_SINGLE_X                 = 1169,
+	SPR_MGLV_SINGLE_Y                 = 1170,
 	SPR_MGLV_SINGLE_NORTH             = 1171,
 	SPR_MGLV_SINGLE_SOUTH             = 1172,
 	SPR_MGLV_SINGLE_EAST              = 1173,

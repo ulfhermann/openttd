@@ -15,19 +15,18 @@
 #include "company_func.h"
 #include "news_func.h"
 #include "vehicle_gui.h"
-#include "cargotype.h"
 #include "strings_func.h"
 #include "functions.h"
 #include "window_func.h"
 #include "timetable.h"
 #include "vehicle_func.h"
 #include "depot_base.h"
-#include "roadstop_base.h"
 #include "core/pool_func.hpp"
 #include "aircraft.h"
 #include "roadveh.h"
 #include "station_base.h"
 #include "waypoint_base.h"
+#include "roadstop_base.h"
 
 #include "table/strings.h"
 
@@ -190,7 +189,7 @@ void InvalidateVehicleOrder(const Vehicle *v, int data)
 
 /**
  *
- * Assign data to an order (from an other order)
+ * Assign data to an order (from another order)
  *   This function makes sure that the index is maintained correctly
  *
  */
@@ -423,7 +422,7 @@ void OrderList::DebugCheckSanity() const
 {
 	VehicleOrderID check_num_orders = 0;
 	uint check_num_vehicles = 0;
-	uint check_timetable_duration = 0;
+	Ticks check_timetable_duration = 0;
 
 	DEBUG(misc, 6, "Checking OrderList %hu for sanity...", this->index);
 
@@ -439,7 +438,7 @@ void OrderList::DebugCheckSanity() const
 		assert(v->orders.list == this);
 	}
 	assert(this->num_vehicles == check_num_vehicles);
-	DEBUG(misc, 6, "... detected %u orders, %u vehicles, %u ticks", (uint)this->num_orders,
+	DEBUG(misc, 6, "... detected %u orders, %u vehicles, %i ticks", (uint)this->num_orders,
 	      this->num_vehicles, this->timetable_duration);
 }
 
@@ -615,10 +614,12 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				default: return CMD_ERROR;
 
 				case VEH_TRAIN:
+					if (!(wp->facilities & FACIL_TRAIN)) return_cmd_error(STR_ERROR_CAN_T_ADD_ORDER);
 					if (!CheckOwnership(wp->owner)) return CMD_ERROR;
 					break;
 
 				case VEH_SHIP:
+					if (!(wp->facilities & FACIL_DOCK)) return_cmd_error(STR_ERROR_CAN_T_ADD_ORDER);
 					if (!CheckOwnership(wp->owner) && wp->owner != OWNER_NONE) return CMD_ERROR;
 					break;
 			}
@@ -855,8 +856,6 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	}
 
 	if (flags & DC_EXEC) {
-		if (v->type == VEH_ROAD) ClearSlot(RoadVehicle::From(v));
-
 		if (v->current_order.IsType(OT_LOADING)) v->LeaveStation();
 
 		v->cur_order_index = sel_ord;
@@ -1183,7 +1182,7 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	return CommandCost();
 }
 
-/** Clone/share/copy an order-list of an other vehicle.
+/** Clone/share/copy an order-list of another vehicle.
  * @param tile unused
  * @param flags operation to perform
  * @param p1 various bitstuffed elements
@@ -1212,9 +1211,8 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 			}
 
 			/* Trucks can't share orders with busses (and visa versa) */
-			if (src->type == VEH_ROAD) {
-				if (src->cargo_type != dst->cargo_type && (IsCargoInClass(src->cargo_type, CC_PASSENGERS) || IsCargoInClass(dst->cargo_type, CC_PASSENGERS)))
-					return CMD_ERROR;
+			if (src->type == VEH_ROAD && RoadVehicle::From(src)->IsBus() != RoadVehicle::From(dst)->IsBus()) {
+				return CMD_ERROR;
 			}
 
 			/* Is the vehicle already in the shared list? */
@@ -1491,20 +1489,6 @@ CommandCost CmdRestoreOrderIndex(TileIndex tile, DoCommandFlag flags, uint32 p1,
 }
 
 
-static TileIndex GetStationTileForVehicle(const Vehicle *v, const Station *st)
-{
-	if (!CanVehicleUseStation(v, st)) return INVALID_TILE;
-
-	switch (v->type) {
-		default: NOT_REACHED();
-		case VEH_TRAIN:     return st->train_station.tile;
-		case VEH_AIRCRAFT:  return st->airport_tile;
-		case VEH_SHIP:      return st->dock_tile;
-		case VEH_ROAD:      return st->GetPrimaryRoadStop(RoadVehicle::From(v))->xy;
-	}
-}
-
-
 /**
  *
  * Check the orders of a vehicle, to see if there are invalid orders and stuff
@@ -1543,10 +1527,9 @@ void CheckOrders(const Vehicle *v)
 			/* Does station have a load-bay for this vehicle? */
 			if (order->IsType(OT_GOTO_STATION)) {
 				const Station *st = Station::Get(order->GetDestination());
-				TileIndex required_tile = GetStationTileForVehicle(v, st);
 
 				n_st++;
-				if (required_tile == INVALID_TILE) problem_type = 3;
+				if (!CanVehicleUseStation(v, st)) problem_type = 3;
 			}
 		}
 
@@ -1676,13 +1659,24 @@ uint16 GetServiceIntervalClamped(uint interval, CompanyID company_id)
  * Check if a vehicle has any valid orders
  *
  * @return false if there are no valid orders
+ * @note Conditional orders are not considered valid destination orders
  *
  */
 static bool CheckForValidOrders(const Vehicle *v)
 {
 	const Order *order;
 
-	FOR_VEHICLE_ORDERS(v, order) if (!order->IsType(OT_DUMMY)) return true;
+	FOR_VEHICLE_ORDERS(v, order) {
+		switch (order->GetType()) {
+			case OT_GOTO_STATION:
+			case OT_GOTO_DEPOT:
+			case OT_GOTO_WAYPOINT:
+				return true;
+
+			default:
+				break;
+		}
+	}
 
 	return false;
 }
@@ -1864,7 +1858,7 @@ bool ProcessOrders(Vehicle *v)
 	const Order *order = v->GetOrder(v->cur_order_index);
 
 	/* If no order, do nothing. */
-	if (order == NULL || (v->type == VEH_AIRCRAFT && order->IsType(OT_DUMMY) && !CheckForValidOrders(v))) {
+	if (order == NULL || (v->type == VEH_AIRCRAFT && !CheckForValidOrders(v))) {
 		if (v->type == VEH_AIRCRAFT) {
 			/* Aircraft do something vastly different here, so handle separately */
 			extern void HandleMissingAircraftOrders(Aircraft *v);
@@ -1874,7 +1868,6 @@ bool ProcessOrders(Vehicle *v)
 
 		v->current_order.Free();
 		v->dest_tile = 0;
-		if (v->type == VEH_ROAD) ClearSlot(RoadVehicle::From(v));
 		return false;
 	}
 

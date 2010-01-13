@@ -69,12 +69,12 @@ public:
 	LinkGraphJob(LinkGraphComponent * c);
 	LinkGraphJob(LinkGraphComponent * c, Date join);
 
-	void AddHandler(ComponentHandler * handler) {handlers.push_back(handler);}
+	void AddHandler(ComponentHandler * handler) {this->handlers.push_back(handler);}
 	void Run();
 	void SpawnThread(CargoID cargo);
-	void Join() {if (thread != NULL) thread->Join();}
-	Date GetJoinDate() {return join_date;}
-	LinkGraphComponent * GetComponent() {return component;}
+	void Join() {if (this->thread != NULL) this->thread->Join();}
+	Date GetJoinDate() {return this->join_date;}
+	LinkGraphComponent * GetComponent() {return this->component;}
 	~LinkGraphJob();
 private:
 	/**

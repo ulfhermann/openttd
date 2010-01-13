@@ -11,8 +11,6 @@
 
 #include "stdafx.h"
 #include "company_func.h"
-#include "newgrf_cargo.h"
-#include "cargotype.h"
 #include "roadveh.h"
 #include "functions.h"
 #include "window_func.h"
@@ -39,6 +37,8 @@ BaseStation::~BaseStation()
 
 Station::Station(TileIndex tile) :
 	SpecializedStation<Station, false>(tile),
+	bus_station(INVALID_TILE, 0, 0),
+	truck_station(INVALID_TILE, 0, 0),
 	airport_tile(INVALID_TILE),
 	dock_tile(INVALID_TILE),
 	indtype(IT_INVALID),
@@ -118,7 +118,7 @@ void BaseStation::PostDestructor(size_t index)
  */
 RoadStop *Station::GetPrimaryRoadStop(const RoadVehicle *v) const
 {
-	RoadStop *rs = this->GetPrimaryRoadStop(IsCargoInClass(v->cargo_type, CC_PASSENGERS) ? ROADSTOP_BUS : ROADSTOP_TRUCK);
+	RoadStop *rs = this->GetPrimaryRoadStop(v->IsBus() ? ROADSTOP_BUS : ROADSTOP_TRUCK);
 
 	for (; rs != NULL; rs = rs->next) {
 		/* The vehicle cannot go to this roadstop (different roadtype) */
@@ -510,6 +510,57 @@ TileArea::TileArea(TileIndex start, TileIndex end)
 	this->tile = TileXY(sx, sy);
 	this->w    = ex - sx + 1;
 	this->h    = ey - sy + 1;
+}
+
+void TileArea::Add(TileIndex to_add)
+{
+	if (this->tile == INVALID_TILE) {
+		this->tile = to_add;
+		this->w = 1;
+		this->h = 1;
+		return;
+	}
+
+	uint sx = TileX(this->tile);
+	uint sy = TileY(this->tile);
+	uint ex = sx + this->w - 1;
+	uint ey = sy + this->h - 1;
+
+	uint ax = TileX(to_add);
+	uint ay = TileY(to_add);
+
+	sx = min(ax, sx);
+	sy = min(ay, sy);
+	ex = max(ax, ex);
+	ey = max(ay, ey);
+
+	this->tile = TileXY(sx, sy);
+	this->w    = ex - sx + 1;
+	this->h    = ey - sy + 1;
+}
+
+bool TileArea::Intersects(const TileArea &ta) const
+{
+	if (ta.w == 0 || this->w == 0) return false;
+
+	assert(ta.w != 0 && ta.h != 0 && this->w != 0 && this->h != 0);
+
+	uint left1   = TileX(this->tile);
+	uint top1    = TileY(this->tile);
+	uint right1  = left1 + this->w - 1;
+	uint bottom1 = top1  + this->h - 1;
+
+	uint left2   = TileX(ta.tile);
+	uint top2    = TileY(ta.tile);
+	uint right2  = left2 + ta.w - 1;
+	uint bottom2 = top2  + ta.h - 1;
+
+	return !(
+			left2   > right1  ||
+			right2  < left1   ||
+			top2    > bottom1 ||
+			bottom2 < top1
+		);
 }
 
 

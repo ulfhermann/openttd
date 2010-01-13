@@ -1,6 +1,6 @@
 OpenTTD README
-Last updated:    2009-10-01
-Release version: 0.7.3
+Last updated:    2010-01-05
+Release version: 1.0.0-beta2
 ------------------------------------------------------------------------
 
 
@@ -19,9 +19,8 @@ Table of Contents:
 7.0) Compiling
  * 7.1) Required/optional libraries
 8.0) Translating
- * 8.1 Guidelines
- * 8.2 Translation
- * 8.3 Previewing
+ * 8.1 Translation
+ * 8.2 Previewing
 9.0) Troubleshooting
 X.X) Credits
 
@@ -68,7 +67,8 @@ When you are sure it is not already reported you should:
    forum thread related to that patch pack.
  * Make it reproducible for the developers. In other words, create a savegame
    in which you can reproduce the issue once loaded. It is very useful to give
-   us the crash.dmp, crash.sav and crash.log which are created on crashes.
+   us the crash.dmp, crash.sav, crash.log and crash screenshot which are
+   created on crashes.
  * Check whether the bug is already reported on our bug tracker. This includes
    searching for recently closed bug reports as the bug might already be fixed.
 
@@ -148,7 +148,7 @@ are:
   DOS                  - Allegro
   FreeBSD              - SDL
   Linux                - SDL or Allegro
-  MacOS X (universal)  - Cocoa video and sound drivers (SDL works too, but not 100% and not as a universal binary)
+  MacOS X (universal)  - Cocoa video and sound drivers
   MorphOS              - SDL
   OpenBSD              - SDL
   OS/2                 - SDL
@@ -175,39 +175,61 @@ If you want savegames and screenshots in the directory where the OpenTTD binary
 resides, simply have your config file in that location. But if you remove this
 config file, savegames will still be in this directory (see notes in section 4.2)
 
+OpenTTD comes without AIs, so if you want to play with AIs you have to download
+them. The easiest way is via the "Check Online Content" button in the main menu.
+You can select some AIs that you think are compatible with your playing style.
+Another way is manually downloading the AIs from the forum although then you
+need to make sure that you install all the required AI libraries too; they get
+automatically selected (and downloaded) if you get the AIs via the "Check
+Online Content". If you do not have an AI but have configured OpenTTD to start
+an AI a message will be shown that the 'dummy' AI has been started.
+
 4.1) (Required) 3rd party files:
 ---- ---------------------------
 
 Before you run OpenTTD, you need to put the game's data files into a data/
 directory which can be located in various places addressed in the following
 section.
-As OpenTTD makes use of the original TTD artwork you will need the files listed
-below, which you can find on a Transport Tycoon Deluxe CD-ROM.
-The Windows installer optionally can copy these files from that CD-ROM.
 
-List of the required files:
-	- sample.cat
-	- trg1r.grf
-	- trgcr.grf
-	- trghr.grf
-	- trgir.grf
-	- trgtr.grf
-
-Alternatively you can use the TTD GRF files from the DOS version:
-	- TRG1.GRF
-	- TRGC.GRF
-	- TRGH.GRF
-	- TRGI.GRF
-	- TRGT.GRF
-
-If you want the TTD music, copy the gm/ folder from the Windows version
-of TTD to your OpenTTD folder (not your data folder - also explained in
-the following sections).
+For OpenTTD you need to acquire some third party data files. For this you have
+the choice of using the original Transport Tycoon Deluxe data files or a set
+of free data files.
 
 Do NOT copy files included with OpenTTD into "shared" directories (explained in
 the following sections) as sooner or later you will run into graphical glitches
 when using other versions of the game.
 
+4.1.1) Free graphics and sound files
+------ -----------------------------
+The free data files, split into OpenGFX for graphics and OpenSFX for sounds
+can be found at:
+ - http://bundles.openttdcoop.org/opengfx/releases/ for OpenGFX
+ - http://bundles.openttdcoop.org/opensfx/releases/ for OpenSFX
+Please follow the readme of these packages about the installation procedure.
+The Windows installer can optionally download and install these packages.
+
+4.1.2) Original Transport Tycoon Deluxe graphics and sound files
+------ ---------------------------------------------------------
+If you want to play with the original Transport Tycoon Deluxe data files you
+have to copy the data files from the CD-ROM into the data/ directory. It does
+not matter whether you copy them from the DOS or Windows version of Transport
+Tycoon Deluxe. The Windows install can optionally copy these files.
+You need to copy the following files:
+ - sample.cat
+ - trg1r.grf or TRG1.GRF
+ - trgcr.grf or TRGC.GRF
+ - trghr.grf or TRGH.GRF
+ - trgir.grf or TRGI.GRF
+ - trgtr.grf or TRGT.GRF
+
+4.1.3) Original Transport Tycoon Deluxe music
+------ --------------------------------------
+If you want the TTD music, copy the gm/ folder from the Windows version
+of TTD to your OpenTTD folder (not your data folder - also explained in
+the following sections). The music from the DOS version does not work.
+
+4.1.4) AIs
+------ ---
 If you want AIs use the in-game content downloader. If for some reason that is
 not possible or you want to use an AI that has not been uploaded to the content
 download system download the tar file and place it in the ai/ directory. If the
@@ -388,6 +410,7 @@ DOS:
 The following libraries are used by OpenTTD for:
   - libSDL/liballegro: hardware access (video, sound, mouse)
   - zlib: (de)compressing of savegames
+  - liblzo2: (de)compressing of old (pre 0.3.0) savegames
   - libpng: making screenshots and loading heightmaps
   - libfreetype: loading generic fonts and rendering them
   - libfontconfig: searching for fonts, resolving font names to actual fonts
@@ -409,15 +432,11 @@ simply follow the guidelines in the FAQ of the translator website.
 If for some reason the website is down for a longer period of time, the
 information below might be of help.
 
-8.1) Guidelines:
----- -------------------
-Here are some translation guidelines which you should follow closely.
+Please contact the translations manager (http://www.openttd.org/contact)
+before beginning the translation process! This avoids double work, as
+someone else may have already started translating to the same language.
 
-    * Please contact the development team before beginning the translation
-      process! This avoids double work, as someone else may have already
-      started translating to the same language.
-
-8.2) Translation:
+8.1) Translation:
 ---- -------------------
 So, now that you've notified the development team about your intention to
 translate (You did, right? Of course you did.) you can pick up english.txt
@@ -435,7 +454,7 @@ Note: Do not alter the following parts of the file:
     * Lines beginning with ## (such as ##id), other than the first two lines of
       the file
 
-8.3) Previewing:
+8.2) Previewing:
 ---- -------------------
 In order to view the translation in the game, you need to compile your language
 file with the strgen utility. You can download the precompiled strgen from:
@@ -489,6 +508,7 @@ put them in the data/ folder and you're set to go.
 X.X) Credits:
 ---- --------
 The OpenTTD team (in alphabetical order):
+  Albert Hofkamp (Alberth)       - GUI expert
   Jean-Francois Claeys (Belugas) - GUI, newindustries and more
   Bjarni Corfitzen (Bjarni)      - MacOSX port, coder and vehicles
   Matthijs Kooijman (blathijs)   - Pathfinder-guru, pool rework
@@ -527,7 +547,6 @@ Thanks to:
   Christian Rosentreter (tokai)  - MorphOS / AmigaOS port
   Richard Kempton (RichK67)      - Additional airports, initial TGP implementation
   Alberto Demichelis             - Squirrel scripting language
-  Markus F.X.J. Oberhumer        - MiniLZO for loading old savegames
   L. Peter Deutsch               - MD5 implementation
   Michael Blunck                 - For revolutionizing TTD with awesome graphics
   George                         - Canal graphics

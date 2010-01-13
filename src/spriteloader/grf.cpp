@@ -94,7 +94,7 @@ bool SpriteLoaderGrf::LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, 
 
 	sprite->AllocateData(sprite->width * sprite->height);
 
-	/* When there are transparency pixels, this format has an other trick.. decode it */
+	/* When there are transparency pixels, this format has another trick.. decode it */
 	if (type & 0x08) {
 		for (int y = 0; y < sprite->height; y++) {
 			bool last_item = false;
@@ -127,7 +127,11 @@ bool SpriteLoaderGrf::LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, 
 				}
 
 				for (int x = 0; x < length; x++) {
-					data->m = ((sprite_type == ST_NORMAL && _palette_remap_grf[file_slot]) ? _palette_remap[*dest] : *dest);
+					switch (sprite_type) {
+						case ST_NORMAL: data->m = _palette_remap_grf[file_slot] ? _palette_remap[*dest] : *dest; break;
+						case ST_FONT:   data->m = min(*dest, 2u); break;
+						default:        data->m = *dest; break;
+					}
 					dest++;
 					data++;
 				}
@@ -148,7 +152,11 @@ bool SpriteLoaderGrf::LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, 
 		dest = dest_orig;
 
 		for (int i = 0; i < sprite->width * sprite->height; i++) {
-			sprite->data[i].m = ((sprite_type == ST_NORMAL && _palette_remap_grf[file_slot]) ? _palette_remap[dest[i]] : dest[i]);
+			switch (sprite_type) {
+				case ST_NORMAL: sprite->data[i].m = _palette_remap_grf[file_slot] ? _palette_remap[dest[i]] : dest[i]; break;
+				case ST_FONT:   sprite->data[i].m = min(dest[i], 2u); break;
+				default:        sprite->data[i].m = dest[i]; break;
+			}
 		}
 	}
 

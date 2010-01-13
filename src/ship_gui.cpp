@@ -16,29 +16,34 @@
 #include "vehicle_gui.h"
 #include "strings_func.h"
 #include "vehicle_func.h"
+#include "spritecache.h"
 
 #include "table/strings.h"
 
-void DrawShipImage(const Vehicle *v, int x, int y, VehicleID selection)
+/**
+ * Draws an image of a ship
+ * @param v         Front vehicle
+ * @param left      The minimum horizontal position
+ * @param right     The maximum horizontal position
+ * @param y         Vertical position to draw at
+ * @param selection Selected vehicle to draw a frame around
+ */
+void DrawShipImage(const Vehicle *v, int left, int right, int y, VehicleID selection)
 {
-	DrawSprite(v->GetImage(DIR_W), GetVehiclePalette(v), x + 32, y + 10);
+	bool rtl = _dynlang.text_dir == TD_RTL;
+
+	SpriteID sprite = v->GetImage(rtl ? DIR_E : DIR_W);
+	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
+
+	int x = rtl ? right - real_sprite->width - real_sprite->x_offs : left - real_sprite->x_offs;
+
+	DrawSprite(sprite, GetVehiclePalette(v), x, y + 10);
 
 	if (v->index == selection) {
-		DrawFrameRect(x - 5, y - 1, x + 67, y + 21, COLOUR_WHITE, FR_BORDERONLY);
+		x += real_sprite->x_offs;
+		y += real_sprite->y_offs + 10;
+		DrawFrameRect(x - 1, y - 1, x + real_sprite->width + 1, y + real_sprite->height + 1, COLOUR_WHITE, FR_BORDERONLY);
 	}
-}
-
-void CcBuildShip(bool success, TileIndex tile, uint32 p1, uint32 p2)
-{
-	const Vehicle *v;
-	if (!success) return;
-
-	v = Vehicle::Get(_new_vehicle_id);
-	if (v->tile == _backup_orders_tile) {
-		_backup_orders_tile = 0;
-		RestoreVehicleOrders(v);
-	}
-	ShowVehicleViewWindow(v);
 }
 
 /**
@@ -54,7 +59,7 @@ void DrawShipDetails(const Vehicle *v, int left, int right, int y)
 	SetDParam(0, v->engine_type);
 	SetDParam(1, v->build_year);
 	SetDParam(2, v->value);
-	DrawString(left, right, y, STR_VEHICLE_INFO_BUILT_VALUE);
+	DrawString(left, right, y, STR_VEHICLE_INFO_BUILT_VALUE, TC_FROMSTRING, SA_LEFT | SA_STRIP);
 
 	SetDParam(0, v->cargo_type);
 	SetDParam(1, v->cargo_cap);

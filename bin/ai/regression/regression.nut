@@ -805,13 +805,17 @@ function Regression::Marine()
 	print("  IsCanalTile():        " + AIMarine.IsCanalTile(32127));
 	print("  GetBankBalance():     " + AICompany.GetBankBalance(AICompany.COMPANY_SELF));
 
-	local list = AIBuoyList();
+	local list = AIWaypointList(AIWaypoint.WAYPOINT_BUOY);
 	print("");
-	print("--AIBuoyList--");
+	print("--AIWaypointList(BUOY)--");
 	print("  Count():             " + list.Count());
 	print("  Location ListDump:");
 	for (local i = list.Begin(); list.HasNext(); i = list.Next()) {
-		print("    " + i);
+		print("    " + AIWaypoint.GetLocation(i));
+	}
+	print("  HasWaypointType:");
+	for (local i = list.Begin(); list.HasNext(); i = list.Next()) {
+		print("    " + AIWaypoint.HasWaypointType(i, AIWaypoint.WAYPOINT_RAIL) + "  " + AIWaypoint.HasWaypointType(i, AIWaypoint.WAYPOINT_BUOY) + "  " + AIWaypoint.HasWaypointType(i, AIWaypoint.WAYPOINT_ANY));
 	}
 	print("");
 
@@ -838,14 +842,37 @@ function Regression::Order()
 	print("  GetOrderCount():       " + AIOrder.GetOrderCount(12));
 	print("  GetOrderDestination(): " + AIOrder.GetOrderDestination(12, 1));
 	print("  AreOrderFlagsValid():  " + AIOrder.AreOrderFlagsValid(33416, AIOrder.AIOF_TRANSFER));
+	print("  AreOrderFlagsValid():  " + AIOrder.AreOrderFlagsValid(33416, AIOrder.AIOF_TRANSFER | AIOrder.AIOF_UNLOAD));
+	print("  AreOrderFlagsValid():  " + AIOrder.AreOrderFlagsValid(33416, AIOrder.AIOF_TRANSFER | AIOrder.AIOF_FULL_LOAD));
+	print("  AreOrderFlagsValid():  " + AIOrder.AreOrderFlagsValid(33417, AIOrder.AIOF_SERVICE_IF_NEEDED));
+	print("  AreOrderFlagsValid():  " + AIOrder.AreOrderFlagsValid(33417, AIOrder.AIOF_STOP_IN_DEPOT));
+	print("  AreOrderFlagsValid():  " + AIOrder.AreOrderFlagsValid(0, AIOrder.AIOF_SERVICE_IF_NEEDED | AIOrder.AIOF_GOTO_NEAREST_DEPOT));
+	print("  IsValidConditionalOrder(): " + AIOrder.IsValidConditionalOrder(AIOrder.OC_LOAD_PERCENTAGE, AIOrder.CF_EQUALS));
+	print("  IsValidConditionalOrder(): " + AIOrder.IsValidConditionalOrder(AIOrder.OC_RELIABILITY, AIOrder.CF_IS_TRUE));
+	print("  IsValidConditionalOrder(): " + AIOrder.IsValidConditionalOrder(AIOrder.OC_REQUIRES_SERVICE, AIOrder.CF_IS_FALSE));
+	print("  IsValidConditionalOrder(): " + AIOrder.IsValidConditionalOrder(AIOrder.OC_AGE, AIOrder.CF_INVALID));
 	print("  IsValidVehicleOrder(): " + AIOrder.IsValidVehicleOrder(12, 1));
+	print("  IsGotoStationOrder():  " + AIOrder.IsGotoStationOrder(12, 1));
+	print("  IsGotoDepotOrder():    " + AIOrder.IsGotoDepotOrder(12, 1));
+	print("  IsGotoWaypointOrder(): " + AIOrder.IsGotoWaypointOrder(12, 1));
+	print("  IsConditionalOrder():  " + AIOrder.IsConditionalOrder(12, 1));
+	print("  IsCurrentOrderPartOfOrderList(): " + AIOrder.IsCurrentOrderPartOfOrderList(12));
 	print("  GetOrderFlags():       " + AIOrder.GetOrderFlags(12, 1));
 	print("  AppendOrder():         " + AIOrder.AppendOrder(12, 33416, AIOrder.AIOF_TRANSFER));
 	print("  InsertOrder():         " + AIOrder.InsertOrder(12, 0, 33416, AIOrder.AIOF_TRANSFER));
 	print("  GetOrderCount():       " + AIOrder.GetOrderCount(12));
 	print("  IsValidVehicleOrder(): " + AIOrder.IsValidVehicleOrder(12, 1));
+	print("  IsGotoStationOrder():  " + AIOrder.IsGotoStationOrder(12, 1));
+	print("  IsGotoDepotOrder():    " + AIOrder.IsGotoDepotOrder(12, 1));
+	print("  IsGotoWaypointOrder(): " + AIOrder.IsGotoWaypointOrder(12, 1));
+	print("  IsConditionalOrder():  " + AIOrder.IsConditionalOrder(12, 1));
+	print("  IsCurrentOrderPartOfOrderList(): " + AIOrder.IsCurrentOrderPartOfOrderList(12));
+	print("  GetOrderFlags():       " + AIOrder.GetOrderFlags(12, 0));
+	print("  GetOrderFlags():       " + AIOrder.GetOrderFlags(12, 1));
+	print("  GetOrderJumpTo():      " + AIOrder.GetOrderJumpTo(12, 1));
 	print("  RemoveOrder():         " + AIOrder.RemoveOrder(12, 0));
 	print("  SetOrderFlags():       " + AIOrder.SetOrderFlags(12, 0, AIOrder.AIOF_FULL_LOAD));
+	print("  GetOrderFlags():       " + AIOrder.GetOrderFlags(12, 0));
 	print("  GetOrderDestination(): " + AIOrder.GetOrderDestination(12, 0));
 	print("  CopyOrders():          " + AIOrder.CopyOrders(12, 1));
 	print("  CopyOrders():          " + AIOrder.CopyOrders(13, 12));

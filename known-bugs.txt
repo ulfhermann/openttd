@@ -1,6 +1,6 @@
 OpenTTD's known bugs
-Last updated:    2009-10-01
-Release version: 0.7.3
+Last updated:    2010-01-05
+Release version: 1.0.0-beta2
 ------------------------------------------------------------------------
 
 
@@ -34,25 +34,12 @@ that you can find at: http://bugs.openttd.org
 If the bugs are closed but still listed here it means that the bug is fixed
 and that the nightlies and next major release will not have that bug.
 
-- 3198	[OSX] "Could not get system colour space" error on some Mac OS X 10.6
-- 3194	[OSX] Full screen 'strobing' on some Mac OS X 10.6
-- 3190	[OSX] Compiling fails on some Mac OS X 10.6
-- 3159	[NewGRF] Autoreplace resets (or does not keep) value of variable F2
-- 3057	Road vehicle sometimes 'forget' the need for servicing
-- 3040	Not all alternatives are always shown in the "Join station" list
-- 2955	With path signals depots are less likely to be visited
-- 2891	Ignore signal does not keep the train running when in path signalled block till the next signal
-- 2769	No offer for buying bankrupt AIs
-- 2616	[NewGRF] Cloning creates vehicles with invalid subcargos
-- 2613	[NewGRF] House property 15 does not work
+- 3447	[OSX] SDL port is unuseable
+- 3194	[OSX] Full screen strobing/flickering
+- 2782	[OSX] Port hopelessly outdated
 - 2585	[OSX] OS' mouse pointer showing
 - 2484	[OSX] Cannot enter CJK characters
-- 2427	Vehicle owner gets paid for whole cargo feeder share
-- 1944	Road vehicles not picking empty drive through platform
-- 1762	Strange Autoreplace behaviour
-- 1495	Long vehicles might block multistop drive through stations
 - 1140	[OSX] Not smooth moving map with touchpad
-- 1072	Text overflows in several windows
 
 
 3) Known bugs that will not be solved:
@@ -62,7 +49,18 @@ reasons why we think that fixing them is infeasible. We might make some
 minor improvements that reduce the scope of these bugs, but we will not
 be able to completely fix them.
 
-Clipping problems
+No suitable AI can be found
+	If you have no AIs and an AI is started the so-called 'dummy' AI will
+	be loaded. This AI does nothing but writing a message on the AI debug
+	window and showing a red warning. There are basically two solutions
+	for this problem: you must change the settings so no AI is started,
+	this is done in the difficulty settings window. The other solution is
+	acquiring (downloading) some AI. The easiest way to do this is via
+	the "Check Online Content" button in the main (intro) menu or via
+	"AI Settings" -> "Select AI" -> "Check Online Content" which is also
+	accessed via the main menu.
+
+Clipping problems [FS#119]
 	In some cases sprites are not drawn as one would expect. Examples of
 	this are aircraft that might be hidden below the runway or trees that
 	in some cases are rendered over vehicles.
@@ -80,7 +78,45 @@ Clipping problems
 	leave the Transport Tycoon graphics, which in effect means OpenTTD
 	will not be a Transport Tycoon clone anymore.
 
-Duplicate (station) names after renaming
+Lost trains ignore (block) exit signals [FS#1473]
+	If trains are lost they ignore block exit signals, blocking junctions
+	with presignals. This is caused because the path finders cannot tell
+	where the train needs to go. As such a random direction is chosen at
+	each junction. This causes the trains to occasionally to make choices
+	that are unwanted from a player's point of view.
+	This will not be fixed because lost trains are in almost all cases a
+	network problem, e.g. a train can never reach a specific place. This
+	makes the impact of fixing the bug enormously small against the
+	amount of work needed to write a system that prevents the lost trains
+	from taking the wrong direction.
+
+Vehicle owner of last transfer leg gets paid for all [FS#2427]
+	When you make a transfer system that switches vehicle owners. This
+	is only possible with 'industry stations', e.g. the oil rig station
+	the owner of the vehicle that does the final delivery gets paid for
+	the whole trip. It is not shared amongst the different vehicle
+	owners that have participated in transporting the cargo.
+	This sharing is not done because it would enormously increase the
+	memory and CPU usage in big games for something that is happening
+	in only one corner case. We think it is not worth the effort until
+	sharing of stations is an official feature.
+
+Forbid 90 degree turns does not work for crossing PBS paths [FS#2737]
+	When you run a train through itself on a X junction with PBS turned on
+	the train will not obey the 'forbid 90 degree turns' setting. This is
+	due to the fact that we can not be sure that the setting was turned
+	off when the track was reserved, which means that we assume it was
+	turned on and that the setting does not hold at the time. We made it
+	this way to allow one to change the setting in-game, but it breaks
+	slightly when you are running your train through itself. Running a
+	train through means that your network is broken and is thus a user
+	error which OpenTTD tries to graciously handle.
+	Fixing this bug means that we need to record whether this particular
+	setting was turned on or off at the time the reservation was made. This
+	means adding quite a bit of data to the savegame for solving an issue
+	that is basically an user error. We think it is not worth the effort.
+
+Duplicate (station) names after renaming [FS#3204]
 	After renaming stations one can create duplicate station names. This
 	is done giving a station the same custom name as another station with
 	an automatically generated name.
@@ -96,39 +132,41 @@ Duplicate (station) names after renaming
 	compared to the other custom names in the same class and not compared
 	to the automatically generated names.
 
-Forbid 90 degree turns does not work for crossing PBS paths
-	When you run a train through itself on a X junction with PBS turned on
-	the train will not obey the 'forbid 90 degree turns' setting. This is
-	due to the fact that we can not be sure that the setting was turned
-	off when the track was reserved, which means that we assume it was
-	turned on and that the setting does not hold at the time. We made it
-	this way to allow one to change the setting in-game, but it breaks
-	slightly when you are running your train through itself. Running a
-	train through means that your network is broken and is thus a user
-	error which OpenTTD tries to graciously handle.
-	Fixing this bug means that we need to record whether this particular
-	setting was turned on or off at the time the reservation was made. This
-	means adding quite a bit of data to the savegame for solving an issue
-	that is basically an user error. We think it is not worth the effort.
-
-Lost trains ignore (block) exit signals
-	If trains are lost they ignore block exit signals, blocking junctions
-	with presignals. This is caused because the path finders cannot tell
-	where the train needs to go. As such a random direction is chosen at
-	each junction. This causes the trains to occasionally to make choices
-	that are unwanted from a player's point of view.
-	This will not be fixed because lost trains are in almost all cases a
-	network problem, e.g. a train can never reach a specific place. This
-	makes the impact of fixing the bug enormously small against the
-	amount of work needed to write a system that prevents the lost trains
-	from taking the wrong direction.
-
-Extreme CPU usage/hangs on exiting game when using SDL and PulseAudio
+Extreme CPU usage/hangs when using SDL and PulseAudio [FS#3294]
 	OpenTTD can be extremely slow/use a lot of CPU when the sound is
 	played via SDL and then through PulseAudio's ALSA wrapper. Under the
 	same configuration OpenTTD, or rather SDL, might hang when exiting
-	the game. This setup seems to be the default configuration for
-	Ubuntu 9.04 and later. For Ubuntu this issue can be solved by
-	installing the 'libsdl1.2debian-pulseaudio' package from Ubuntu's
-	Universe repository. For other distributions a similar package needs
-	to be installed.
+	the game. This problem is seen most in Ubuntu 9.04 and higher.
+
+	This is because recent versions of the PulseAudio sound server are
+	configured to use timer-based audio scheduling rather than
+	interrupt-based audio scheduling. Configuring PulseAudio to force
+	use of interrupt-based scheduling may resolve sound problems for
+	some users. Under recent versions of Ubuntu Linux (9.04 and higher)
+	this can be accomplished by changing the following line in the
+	/etc/pulsa/default.pa file:
+		load-module module-udev-detect
+	to
+		load-module module-udev-detect tsched=0
+	Note that PulseAudio must be restarted for changes to take effect.
+	Older versions of PulseAudio may use the module-hal-detect module
+	instead. Adding tsched=0 to the end of that line will have a similar
+	effect.
+
+	Another possible solution is selecting the "pulse" backend of SDL
+	by either using "SDL_AUDIODRIVER=pulse openttd" at the command
+	prompt or installing the 'libsdl1.2debian-pulseaudio' package from
+	Ubuntu's Universe repository. For other distributions a similar
+	package needs to be installed.
+
+OpenTTD not properly resizing with SDL on X [FS#3305]
+	Under some X window managers OpenTTD's window does not properly
+	resize. You will either end up with a black bar at the right/bottom
+	side of the window or you cannot see the right/bottom of the window,
+	e.g you cannot see the status bar. The problem is that OpenTTD does
+	not always receive a resize event from SDL making it impossible for
+	OpenTTD to know that the window was resized; sometimes moving the
+	window will solve the problem.
+	Window managers that are known to exhibit this behaviour are KDE's
+	and GNOME's. With the XFCE's and LXDE's window managers the resize
+	event is sent when the user releases the mouse.

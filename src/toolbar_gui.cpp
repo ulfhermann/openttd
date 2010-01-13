@@ -117,19 +117,29 @@ enum ToolbarScenEditorWidgets {
  * Drop down list entry for showing a checked/unchecked toggle item.
  */
 class DropDownListCheckedItem : public DropDownListStringItem {
+	uint checkmark_width;
 public:
 	bool checked;
 
-	DropDownListCheckedItem(StringID string, int result, bool masked, bool checked) : DropDownListStringItem(string, result, masked), checked(checked) {}
+	DropDownListCheckedItem(StringID string, int result, bool masked, bool checked) : DropDownListStringItem(string, result, masked), checked(checked)
+	{
+		this->checkmark_width = GetStringBoundingBox(STR_JUST_CHECKMARK).width + 3;
+	}
 
 	virtual ~DropDownListCheckedItem() {}
 
+	uint Width() const
+	{
+		return DropDownListStringItem::Width() + this->checkmark_width;
+	}
+
 	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
-		if (checked) {
-			DrawString(left + 2, right - 2, top, STR_JUST_CHECKMARK, sel ? TC_WHITE : TC_BLACK);
+		bool rtl = _dynlang.text_dir == TD_RTL;
+		if (this->checked) {
+			DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, top, STR_JUST_CHECKMARK, sel ? TC_WHITE : TC_BLACK);
 		}
-		DrawString(left + 2, right - 2, top, this->String(), sel ? TC_WHITE : TC_BLACK);
+		DrawString(left + WD_FRAMERECT_LEFT + (rtl ? 0 : this->checkmark_width), right - WD_FRAMERECT_RIGHT - (rtl ? this->checkmark_width : 0), top, this->String(), sel ? TC_WHITE : TC_BLACK);
 	}
 };
 
@@ -137,10 +147,14 @@ public:
  * Drop down list entry for showing a company entry, with companies 'blob'.
  */
 class DropDownListCompanyItem : public DropDownListItem {
+	uint icon_width;
 public:
 	bool greyed;
 
-	DropDownListCompanyItem(int result, bool masked, bool greyed) : DropDownListItem(result, masked), greyed(greyed) {}
+	DropDownListCompanyItem(int result, bool masked, bool greyed) : DropDownListItem(result, masked), greyed(greyed)
+	{
+		this->icon_width = GetSpriteSize(SPR_COMPANY_ICON).width;
+	}
 
 	virtual ~DropDownListCompanyItem() {}
 
@@ -151,22 +165,21 @@ public:
 
 	uint Width() const
 	{
-		char buffer[512];
-		CompanyID company = (CompanyID)result;
+		CompanyID company = (CompanyID)this->result;
 		SetDParam(0, company);
 		SetDParam(1, company);
-		GetString(buffer, STR_COMPANY_NAME_COMPANY_NUM, lastof(buffer));
-		return GetStringBoundingBox(buffer).width + 19;
+		return GetStringBoundingBox(STR_COMPANY_NAME_COMPANY_NUM).width + this->icon_width + 3;
 	}
 
 	void Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 	{
-		CompanyID company = (CompanyID)result;
+		CompanyID company = (CompanyID)this->result;
+		bool rtl = _dynlang.text_dir == TD_RTL;
 
 		/* It's possible the company is deleted while the dropdown is open */
 		if (!Company::IsValidID(company)) return;
 
-		DrawCompanyIcon(company, left + 2, top + 1);
+		DrawCompanyIcon(company, rtl ? right - this->icon_width - WD_FRAMERECT_RIGHT : left + WD_FRAMERECT_LEFT, top + 1 + (FONT_HEIGHT_NORMAL - 10) / 2);
 
 		SetDParam(0, company);
 		SetDParam(1, company);
@@ -176,7 +189,7 @@ public:
 		} else {
 			col = sel ? TC_WHITE : TC_BLACK;
 		}
-		DrawString(left + 19, right - 2, top, STR_COMPANY_NAME_COMPANY_NUM, col);
+		DrawString(left + WD_FRAMERECT_LEFT + (rtl ? 0 : 3 + this->icon_width), right - WD_FRAMERECT_RIGHT - (rtl ? 3 + this->icon_width : 0), top, STR_COMPANY_NAME_COMPANY_NUM, col);
 	}
 };
 
@@ -404,12 +417,17 @@ static void MenuClickMap(int index)
 
 static void ToolbarTownClick(Window *w)
 {
-	PopupMainToolbMenu(w, TBN_TOWNDIRECTORY, STR_TOWN_MENU_TOWN_DIRECTORY, 1);
+	PopupMainToolbMenu(w, TBN_TOWNDIRECTORY, STR_TOWN_MENU_TOWN_DIRECTORY, (_settings_game.economy.found_town == TF_FORBIDDEN) ? 1 : 2);
 }
 
 static void MenuClickTown(int index)
 {
-	ShowTownDirectory();
+	switch (index) {
+		case 0: ShowTownDirectory(); break;
+		case 1: // setting could be changed when the dropdown was open
+			if (_settings_game.economy.found_town != TF_FORBIDDEN) ShowFoundTownWindow();
+			break;
+	}
 }
 
 /* --- Subidies button menu --- */
@@ -468,7 +486,7 @@ static void MenuClickCompany(int index)
 				if (_network_server) {
 					DoCommandP(0, 0, _network_own_client_id, CMD_COMPANY_CTRL);
 				} else {
-					NetworkSend_Command(0, 0, 0, CMD_COMPANY_CTRL, NULL, NULL);
+					NetworkSend_Command(0, 0, 0, CMD_COMPANY_CTRL, NULL, NULL, _local_company);
 				}
 				return;
 
@@ -738,12 +756,12 @@ static void ToolbarHelpClick(Window *w)
 
 static void MenuClickSmallScreenshot()
 {
-	RequestScreenshot(SC_VIEWPORT, NULL);
+	MakeScreenshot(SC_VIEWPORT, NULL);
 }
 
 static void MenuClickWorldScreenshot()
 {
-	RequestScreenshot(SC_WORLD, NULL);
+	MakeScreenshot(SC_WORLD, NULL);
 }
 
 static void MenuClickHelp(int index)
@@ -913,8 +931,8 @@ public:
 	{
 		this->smallest_x = 0; // Biggest child
 		this->smallest_y = 0; // Biggest child
-		this->fill_x = true;
-		this->fill_y = false;
+		this->fill_x = 1;
+		this->fill_y = 0;
 		this->resize_x = 1; // We only resize in this direction
 		this->resize_y = 0; // We never resize in this direction
 		this->spacers = 0;
@@ -939,7 +957,7 @@ public:
 		}
 	}
 
-	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool allow_resize_x, bool allow_resize_y, bool rtl)
+	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl)
 	{
 		assert(given_width >= this->smallest_x && given_height >= this->smallest_y);
 
@@ -991,7 +1009,7 @@ public:
 				button_space -= child_wid->current_x;
 				button_i++;
 			}
-			child_wid->AssignSizePosition(sizing, x + position, y, child_wid->current_x, this->current_y, allow_resize_x, (this->resize_y > 0), rtl);
+			child_wid->AssignSizePosition(sizing, x + position, y, child_wid->current_x, this->current_y, rtl);
 			position += child_wid->current_x;
 
 			if (rtl) {
@@ -1002,19 +1020,14 @@ public:
 		}
 	}
 
-	void StoreWidgets(Widget *widgets, int length, bool left_moving, bool top_moving, bool rtl)
-	{
-		/* We don't need to support the old version anymore! */
-		NOT_REACHED();
-	}
-
 	/* virtual */ void Draw(const Window *w)
 	{
 		/* Draw brown-red toolbar bg. */
 		GfxFillRect(this->pos_x, this->pos_y, this->pos_x + this->current_x - 1, this->pos_y + this->current_y - 1, 0xB2);
 		GfxFillRect(this->pos_x, this->pos_y, this->pos_x + this->current_x - 1, this->pos_y + this->current_y - 1, 0xB4, FILLRECT_CHECKER);
 
-		for (NWidgetBase *child_wid = this->head; child_wid != NULL; child_wid = child_wid->next) {
+		bool rtl = _dynlang.text_dir == TD_RTL;
+		for (NWidgetBase *child_wid = rtl ? this->tail : this->head; child_wid != NULL; child_wid = rtl ? child_wid->prev : child_wid->next) {
 			if (child_wid->type == NWID_SPACER) continue;
 			if (!this->visible[((NWidgetCore*)child_wid)->index]) continue;
 
@@ -1363,10 +1376,10 @@ static const NWidgetPart _nested_toolbar_normal_widgets[] = {
 };
 
 static const WindowDesc _toolb_normal_desc(
-	0, 0, 0, 22, 640, 22,
+	WDP_MANUAL, 640, 22,
 	WC_MAIN_TOOLBAR, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_NO_FOCUS,
-	NULL, _nested_toolbar_normal_widgets, lengthof(_nested_toolbar_normal_widgets)
+	WDF_NO_FOCUS,
+	_nested_toolbar_normal_widgets, lengthof(_nested_toolbar_normal_widgets)
 );
 
 
@@ -1391,7 +1404,7 @@ static ToolbarButtonProc * const _scen_toolbar_button_procs[] = {
 	ToolbarScenBuildDocks,
 	ToolbarScenPlantTrees,
 	ToolbarScenPlaceSign,
-	NULL,
+	ToolbarBtn_NULL,
 	NULL,
 	NULL,
 	NULL,
@@ -1442,7 +1455,7 @@ public:
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case TBSE_SPACERPANEL:
@@ -1586,10 +1599,10 @@ static const NWidgetPart _nested_toolb_scen_widgets[] = {
 };
 
 static const WindowDesc _toolb_scen_desc(
-	0, 0, 0, 22, 640, 22,
+	WDP_MANUAL, 640, 22,
 	WC_MAIN_TOOLBAR, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
-	NULL, _nested_toolb_scen_widgets, lengthof(_nested_toolb_scen_widgets)
+	WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
+	_nested_toolb_scen_widgets, lengthof(_nested_toolb_scen_widgets)
 );
 
 /* --- Allocating the toolbar --- */

@@ -15,7 +15,6 @@
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "vehicle_gui.h"
-#include "vehicle_gui_base.h"
 #include "vehicle_base.h"
 #include "group.h"
 #include "strings_func.h"
@@ -27,6 +26,7 @@
 #include "widgets/dropdown_type.h"
 #include "widgets/dropdown_func.h"
 #include "tilehighlight_func.h"
+#include "vehicle_gui_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -34,23 +34,16 @@
 typedef GUIList<const Group*> GUIGroupList;
 
 enum GroupListWidgets {
-	GRP_WIDGET_CLOSEBOX = 0,
 	GRP_WIDGET_CAPTION,
-	GRP_WIDGET_STICKY,
 	GRP_WIDGET_SORT_BY_ORDER,
 	GRP_WIDGET_SORT_BY_DROPDOWN,
-	GRP_WIDGET_EMPTY_TOP_RIGHT,
 	GRP_WIDGET_LIST_VEHICLE,
 	GRP_WIDGET_LIST_VEHICLE_SCROLLBAR,
-	GRP_WIDGET_EMPTY2,
 	GRP_WIDGET_AVAILABLE_VEHICLES,
 	GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN,
 	GRP_WIDGET_STOP_ALL,
 	GRP_WIDGET_START_ALL,
-	GRP_WIDGET_EMPTY_BOTTOM_RIGHT,
-	GRP_WIDGET_RESIZE,
 
-	GRP_WIDGET_EMPTY_TOP_LEFT,
 	GRP_WIDGET_ALL_VEHICLES,
 	GRP_WIDGET_DEFAULT_VEHICLES,
 	GRP_WIDGET_LIST_GROUP,
@@ -58,7 +51,6 @@ enum GroupListWidgets {
 	GRP_WIDGET_CREATE_GROUP,
 	GRP_WIDGET_DELETE_GROUP,
 	GRP_WIDGET_RENAME_GROUP,
-	GRP_WIDGET_EMPTY1,
 	GRP_WIDGET_REPLACE_PROTECTION,
 };
 
@@ -91,62 +83,35 @@ static void ShowGroupActionDropdown(Window *w, GroupID gid)
 	ShowDropDownList(w, list, 0, GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN);
 }
 
-
-static const Widget _group_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,      STR_TOOLTIP_CLOSE_WINDOW},          // GRP_WIDGET_CLOSEBOX
-{    WWT_CAPTION,  RESIZE_RIGHT,  COLOUR_GREY,    11,   447,     0,    13, 0x0,                  STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},// GRP_WIDGET_CAPTION
-{  WWT_STICKYBOX,     RESIZE_LR,  COLOUR_GREY,   448,   459,     0,    13, 0x0,                  STR_TOOLTIP_STICKY},                 // GRP_WIDGET_STICKY
-{ WWT_PUSHTXTBTN,   RESIZE_NONE,  COLOUR_GREY,   200,   280,    14,    25, STR_BUTTON_SORT_BY,   STR_TOOLTIP_SORT_ORDER},                // GRP_WIDGET_SORT_BY_ORDER
-{   WWT_DROPDOWN,   RESIZE_NONE,  COLOUR_GREY,   281,   447,    14,    25, 0x0,                  STR_TOOLTIP_SORT_CRITERIAP},             // GRP_WIDGET_SORT_BY_DROPDOWN
-{      WWT_PANEL,  RESIZE_RIGHT,  COLOUR_GREY,   448,   459,    14,    25, 0x0,                  STR_NULL},                          // GRP_WIDGET_EMPTY_TOP_RIGHT
-{     WWT_MATRIX,     RESIZE_RB,  COLOUR_GREY,   200,   447,    26,   181, 0x701,                STR_NULL},                          // GRP_WIDGET_LIST_VEHICLE
-{  WWT_SCROLLBAR,    RESIZE_LRB,  COLOUR_GREY,   448,   459,    26,   181, 0x0,                  STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // GRP_WIDGET_LIST_VEHICLE_SCROLLBAR
-{      WWT_PANEL,     RESIZE_TB,  COLOUR_GREY,   188,   199,   169,   193, 0x0,                  STR_NULL},                          // GRP_WIDGET_EMPTY2
-{ WWT_PUSHTXTBTN,     RESIZE_TB,  COLOUR_GREY,   200,   305,   182,   193, 0x0,                  STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP},         // GRP_WIDGET_AVAILABLE_VEHICLES
-{   WWT_DROPDOWN,     RESIZE_TB,  COLOUR_GREY,   306,   423,   182,   193, STR_VEHICLE_LIST_MANAGE_LIST,      STR_VEHICLE_LIST_MANAGE_LIST_TOOLTIP},               // GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN
-{ WWT_PUSHIMGBTN,     RESIZE_TB,  COLOUR_GREY,   424,   435,   182,   193, SPR_FLAG_VEH_STOPPED, STR_VEHICLE_LIST_MASS_STOP_LIST_TOOLTIP},            // GRP_WIDGET_STOP_ALL
-{ WWT_PUSHIMGBTN,     RESIZE_TB,  COLOUR_GREY,   436,   447,   182,   193, SPR_FLAG_VEH_RUNNING, STR_VEHICLE_LIST_MASS_START_LIST_TOOLTIP},           // GRP_WIDGET_START_ALL
-{      WWT_PANEL,    RESIZE_RTB,  COLOUR_GREY,   448,   447,   182,   193, 0x0,                  STR_NULL},                          // GRP_WIDGET_EMPTY_BOTTOM_RIGHT
-{  WWT_RESIZEBOX,   RESIZE_LRTB,  COLOUR_GREY,   448,   459,   182,   193, 0x0,                  STR_TOOLTIP_RESIZE},                 // GRP_WIDGET_RESIZE
-
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   199,    14,    25, 0x0,                  STR_NULL},                          // GRP_WIDGET_EMPTY_TOP_LEFT
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   199,    26,    38, 0x0,                  STR_NULL},                          // GRP_WIDGET_ALL_VEHICLES
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   199,    39,    51, 0x0,                  STR_NULL},                          // GRP_WIDGET_DEFAULT_VEHICLES
-{     WWT_MATRIX, RESIZE_BOTTOM,  COLOUR_GREY,     0,   187,    52,   168, 0x701,                STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP}, // GRP_WIDGET_LIST_GROUP
-{ WWT_SCROLL2BAR, RESIZE_BOTTOM,  COLOUR_GREY,   188,   199,    52,   168, 0x0,                  STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST}, // GRP_WIDGET_LIST_GROUP_SCROLLBAR
-{ WWT_PUSHIMGBTN,     RESIZE_TB,  COLOUR_GREY,     0,    23,   169,   193, 0x0,                  STR_GROUP_CREATE_TOOLTIP},              // GRP_WIDGET_CREATE_GROUP
-{ WWT_PUSHIMGBTN,     RESIZE_TB,  COLOUR_GREY,    24,    47,   169,   193, 0x0,                  STR_GROUP_DELETE_TOOLTIP},              // GRP_WIDGET_DELETE_GROUP
-{ WWT_PUSHIMGBTN,     RESIZE_TB,  COLOUR_GREY,    48,    71,   169,   193, 0x0,                  STR_GROUP_RENAME_TOOLTIP},              // GRP_WIDGET_RENAME_GROUP
-{      WWT_PANEL,     RESIZE_TB,  COLOUR_GREY,    72,   163,   169,   193, 0x0,                  STR_NULL},                          // GRP_WIDGET_EMPTY1
-{ WWT_PUSHIMGBTN,     RESIZE_TB,  COLOUR_GREY,   164,   187,   169,   193, 0x0,                  STR_GROUP_REPLACE_PROTECTION_TOOLTIP},  // GRP_WIDGET_REPLACE_PROTECTION
-{   WIDGETS_END},
-};
-
 static const NWidgetPart _nested_group_widgets[] = {
 	NWidget(NWID_HORIZONTAL), // Window header
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, GRP_WIDGET_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, GRP_WIDGET_CAPTION), SetMinimalSize(437, 14),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, GRP_WIDGET_STICKY),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY, GRP_WIDGET_CAPTION),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
-
 	NWidget(NWID_HORIZONTAL),
 		/* left part */
 		NWidget(NWID_VERTICAL),
-
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY_TOP_LEFT), SetMinimalSize(200, 12), EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_ALL_VEHICLES), SetMinimalSize(200, 13), EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_DEFAULT_VEHICLES), SetMinimalSize(200, 13), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalTextLines(1, WD_DROPDOWNTEXT_TOP + WD_DROPDOWNTEXT_BOTTOM), SetFill(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_ALL_VEHICLES), SetMinimalSize(200, 13), SetFill(1, 0), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_DEFAULT_VEHICLES), SetMinimalSize(200, 13), SetFill(1, 0), EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_GROUP), SetMinimalSize(188, 117), SetDataTip(0x701, STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP), SetResize(0, 1),
-				NWidget(WWT_SCROLL2BAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR), SetMinimalSize(12, 117),
+				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_GROUP), SetMinimalSize(188, 0), SetDataTip(0x701, STR_GROUPS_CLICK_ON_GROUP_FOR_TOOLTIP),
+						SetFill(1, 0), SetResize(0, 1),
+				NWidget(WWT_SCROLL2BAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_CREATE_GROUP), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_CREATE_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_DELETE_GROUP), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_DELETE_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_RENAME_GROUP), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_RENAME_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY1), SetMinimalSize(92, 25), SetFill(true, false), EndContainer(),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_REPLACE_PROTECTION), SetMinimalSize(24, 25), SetDataTip(0x0, STR_GROUP_REPLACE_PROTECTION_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY2), SetMinimalSize(12, 25), EndContainer(),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_CREATE_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
+						SetDataTip(SPR_GROUP_CREATE_TRAIN, STR_GROUP_CREATE_TOOLTIP),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_DELETE_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
+						SetDataTip(SPR_GROUP_DELETE_TRAIN, STR_GROUP_DELETE_TOOLTIP),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_RENAME_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
+						SetDataTip(SPR_GROUP_RENAME_TRAIN, STR_GROUP_RENAME_TOOLTIP),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(92, 25), SetFill(1, 1), EndContainer(),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_REPLACE_PROTECTION), SetMinimalSize(24, 25), SetFill(0, 1),
+						SetDataTip(SPR_GROUP_REPLACE_OFF_TRAIN, STR_GROUP_REPLACE_PROTECTION_TOOLTIP),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(12, 25), SetFill(0, 1), EndContainer(),
 			EndContainer(),
 		EndContainer(),
 		/* right part */
@@ -154,19 +119,23 @@ static const NWidgetPart _nested_group_widgets[] = {
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_SORT_BY_ORDER), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
 				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_SORT_BY_DROPDOWN), SetMinimalSize(167, 12), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY_TOP_RIGHT), SetMinimalSize(12, 12), SetResize(1, 0), EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(12, 12), SetResize(1, 0), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE), SetMinimalSize(248, 156), SetDataTip(0x701, STR_NULL), SetResize(1, 1),
-				NWidget(WWT_SCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE_SCROLLBAR), SetMinimalSize(12, 156),
+				NWidget(WWT_MATRIX, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE), SetMinimalSize(248, 0), SetDataTip(0x701, STR_NULL), SetResize(1, 1), SetFill(1, 0),
+				NWidget(WWT_SCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_VEHICLE_SCROLLBAR),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_AVAILABLE_VEHICLES), SetMinimalSize(106, 12), SetDataTip(0x0, STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP),
-				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN), SetMinimalSize(118, 12), SetDataTip(STR_VEHICLE_LIST_MANAGE_LIST, STR_VEHICLE_LIST_MANAGE_LIST_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_STOP_ALL), SetMinimalSize(12, 12), SetDataTip(SPR_FLAG_VEH_STOPPED, STR_VEHICLE_LIST_MASS_STOP_LIST_TOOLTIP),
-				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_START_ALL), SetMinimalSize(12, 12), SetDataTip(SPR_FLAG_VEH_RUNNING, STR_VEHICLE_LIST_MASS_START_LIST_TOOLTIP),
-				NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_EMPTY_BOTTOM_RIGHT), SetMinimalSize(0, 12), SetResize(1, 0), EndContainer(),
-				NWidget(WWT_RESIZEBOX, COLOUR_GREY, GRP_WIDGET_RESIZE), SetMinimalSize(12, 12),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_AVAILABLE_VEHICLES), SetMinimalSize(106, 12), SetFill(0, 1),
+						SetDataTip(0x0, STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP),
+				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN), SetMinimalSize(118, 12), SetFill(0, 1),
+						SetDataTip(STR_VEHICLE_LIST_MANAGE_LIST, STR_VEHICLE_LIST_MANAGE_LIST_TOOLTIP),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_STOP_ALL), SetMinimalSize(12, 12), SetFill(0, 1),
+						SetDataTip(SPR_FLAG_VEH_STOPPED, STR_VEHICLE_LIST_MASS_STOP_LIST_TOOLTIP),
+				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_START_ALL), SetMinimalSize(12, 12), SetFill(0, 1),
+						SetDataTip(SPR_FLAG_VEH_RUNNING, STR_VEHICLE_LIST_MASS_START_LIST_TOOLTIP),
+				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(0, 12), SetFill(1, 1), SetResize(1, 0), EndContainer(),
+				NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 			EndContainer(),
 		EndContainer(),
 	EndContainer(),
@@ -178,6 +147,7 @@ private:
 	VehicleID vehicle_sel; ///< Selected vehicle
 	GroupID group_rename;  ///< Group being renamed, INVALID_GROUP if none
 	GUIGroupList groups;   ///< List of groups
+	uint tiny_step_height; ///< Step height for the group list
 
 	/**
 	 * (Re)Build the group list.
@@ -225,33 +195,11 @@ private:
 	}
 
 public:
-	VehicleGroupWindow(const WindowDesc *desc, WindowNumber window_number) : BaseVehicleListWindow(desc, window_number)
+	VehicleGroupWindow(const WindowDesc *desc, WindowNumber window_number) : BaseVehicleListWindow()
 	{
-		const Owner owner = (Owner)GB(this->window_number, 0, 8);
-		this->vehicle_type = (VehicleType)GB(this->window_number, 11, 5);
+		this->CreateNestedTree(desc);
 
-		this->owner = owner;
-		this->resize.step_width = 1;
-
-		switch (this->vehicle_type) {
-			default: NOT_REACHED();
-			case VEH_TRAIN:
-			case VEH_ROAD:
-				this->vscroll2.SetCapacity(9);
-				this->vscroll.SetCapacity(6);
-				this->resize.step_height = PLY_WND_PRC__SIZE_OF_ROW_SMALL;
-				break;
-			case VEH_SHIP:
-			case VEH_AIRCRAFT:
-				this->vscroll2.SetCapacity(9);
-				this->vscroll.SetCapacity(4);
-				this->resize.step_height = PLY_WND_PRC__SIZE_OF_ROW_BIG;
-				break;
-		}
-
-		this->widget[GRP_WIDGET_LIST_GROUP].data = (this->vscroll2.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
-		this->widget[GRP_WIDGET_LIST_VEHICLE].data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
-
+		this->vehicle_type = (VehicleType)GB(window_number, 11, 5);
 		switch (this->vehicle_type) {
 			default: NOT_REACHED();
 			case VEH_TRAIN:    this->sorting = &_sorting.train;    break;
@@ -260,55 +208,73 @@ public:
 			case VEH_AIRCRAFT: this->sorting = &_sorting.aircraft; break;
 		}
 
-		this->vehicles.SetListing(*this->sorting);
-		this->vehicles.ForceRebuild();
-		this->vehicles.NeedResort();
-
-		this->groups.ForceRebuild();
-		this->groups.NeedResort();
-
 		this->group_sel = ALL_GROUP;
 		this->vehicle_sel = INVALID_VEHICLE;
 		this->group_rename = INVALID_GROUP;
 
-		this->widget[GRP_WIDGET_LIST_VEHICLE].tooltips   = STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP + this->vehicle_type;
-		this->widget[GRP_WIDGET_AVAILABLE_VEHICLES].data = STR_VEHICLE_LIST_AVAILABLE_TRAINS + this->vehicle_type;
+		const Owner owner = (Owner)GB(window_number, 0, 8);
+		this->vehicles.SetListing(*this->sorting);
+		this->vehicles.ForceRebuild();
+		this->vehicles.NeedResort();
+		this->BuildVehicleList(owner, this->group_sel, IsAllGroupID(this->group_sel) ? VLW_STANDARD : VLW_GROUP_LIST);
+		this->SortVehicleList();
 
-		switch (this->vehicle_type) {
-			case VEH_TRAIN:
-				this->widget[GRP_WIDGET_CREATE_GROUP].data = SPR_GROUP_CREATE_TRAIN;
-				this->widget[GRP_WIDGET_RENAME_GROUP].data = SPR_GROUP_RENAME_TRAIN;
-				this->widget[GRP_WIDGET_DELETE_GROUP].data = SPR_GROUP_DELETE_TRAIN;
-				break;
+		this->groups.ForceRebuild();
+		this->groups.NeedResort();
+		this->BuildGroupList(owner);
+		this->groups.Sort(&GroupNameSorter);
 
-			case VEH_ROAD:
-				this->widget[GRP_WIDGET_CREATE_GROUP].data = SPR_GROUP_CREATE_ROADVEH;
-				this->widget[GRP_WIDGET_RENAME_GROUP].data = SPR_GROUP_RENAME_ROADVEH;
-				this->widget[GRP_WIDGET_DELETE_GROUP].data = SPR_GROUP_DELETE_ROADVEH;
-				break;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_CAPTION)->widget_data = STR_VEHICLE_LIST_TRAIN_CAPTION + this->vehicle_type;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_VEHICLE)->tool_tip = STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP + this->vehicle_type;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_AVAILABLE_VEHICLES)->widget_data = STR_VEHICLE_LIST_AVAILABLE_TRAINS + this->vehicle_type;
 
-			case VEH_SHIP:
-				this->widget[GRP_WIDGET_CREATE_GROUP].data = SPR_GROUP_CREATE_SHIP;
-				this->widget[GRP_WIDGET_RENAME_GROUP].data = SPR_GROUP_RENAME_SHIP;
-				this->widget[GRP_WIDGET_DELETE_GROUP].data = SPR_GROUP_DELETE_SHIP;
-				break;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_CREATE_GROUP)->widget_data += this->vehicle_type;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_RENAME_GROUP)->widget_data += this->vehicle_type;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_DELETE_GROUP)->widget_data += this->vehicle_type;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_REPLACE_PROTECTION)->widget_data += this->vehicle_type;
 
-			case VEH_AIRCRAFT:
-				this->widget[GRP_WIDGET_CREATE_GROUP].data = SPR_GROUP_CREATE_AIRCRAFT;
-				this->widget[GRP_WIDGET_RENAME_GROUP].data = SPR_GROUP_RENAME_AIRCRAFT;
-				this->widget[GRP_WIDGET_DELETE_GROUP].data = SPR_GROUP_DELETE_AIRCRAFT;
-				break;
-
-			default: NOT_REACHED();
-		}
-
-		this->FindWindowPlacementAndResize(desc);
-		if (this->vehicle_type == VEH_TRAIN) ResizeWindow(this, 65, 0);
+		this->FinishInitNested(desc, window_number);
+		this->owner = owner;
 	}
 
 	~VehicleGroupWindow()
 	{
 		*this->sorting = this->vehicles.GetListing();
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
+	{
+		switch (widget) {
+			case GRP_WIDGET_LIST_GROUP:
+				this->tiny_step_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
+				resize->height = this->tiny_step_height;
+				/* Minimum height is the height of the list widget minus all and default vehicles and a bit for the bottom bar */
+				size->height =  4 * GetVehicleListHeight(this->vehicle_type, this->tiny_step_height) - (this->tiny_step_height > 25 ? 2 : 3) * this->tiny_step_height;
+				break;
+
+			case GRP_WIDGET_ALL_VEHICLES:
+			case GRP_WIDGET_DEFAULT_VEHICLES:
+				size->height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
+				size->width = max(GetStringBoundingBox(STR_GROUP_DEFAULT_TRAINS + this->vehicle_type).width, GetStringBoundingBox(STR_GROUP_ALL_TRAINS + this->vehicle_type).width);
+				size->width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT + 8 + 8;
+				break;
+
+			case GRP_WIDGET_LIST_VEHICLE:
+				resize->height = GetVehicleListHeight(this->vehicle_type, FONT_HEIGHT_NORMAL + WD_MATRIX_TOP);
+				size->height = 4 * resize->height;
+				break;
+
+			case GRP_WIDGET_MANAGE_VEHICLES_DROPDOWN: {
+				static const StringID _dropdown_text[] = {STR_VEHICLE_LIST_REPLACE_VEHICLES, STR_VEHICLE_LIST_SEND_FOR_SERVICING, STR_VEHICLE_LIST_SEND_TRAIN_TO_DEPOT, STR_GROUP_ADD_SHARED_VEHICLE, STR_GROUP_REMOVE_ALL_VEHICLES};
+				Dimension d = {0, 0};
+				for (const StringID *sid = _dropdown_text; sid != endof(_dropdown_text); sid++) {
+					d = maxdim(d, GetStringBoundingBox(*sid));
+				}
+				d.height += padding.height;
+				d.width  += padding.width;
+				*size = maxdim(*size, d);
+			} break;
+		}
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -333,12 +299,30 @@ public:
 		this->SetDirty();
 	}
 
+	virtual void SetStringParameters(int widget) const
+	{
+		if (widget != GRP_WIDGET_CAPTION) return;
+
+		/* If selected_group == DEFAULT_GROUP || ALL_GROUP, draw the standard caption
+		 * We list all vehicles or ungrouped vehicles */
+		if (IsDefaultGroupID(this->group_sel) || IsAllGroupID(this->group_sel)) {
+			SetDParam(0, STR_COMPANY_NAME);
+			SetDParam(1, GB(this->window_number, 0, 8));
+			SetDParam(2, this->vehicles.Length());
+			SetDParam(3, this->vehicles.Length());
+		} else {
+			const Group *g = Group::Get(this->group_sel);
+
+			SetDParam(0, STR_GROUP_NAME);
+			SetDParam(1, g->index);
+			SetDParam(2, g->num_vehicle);
+			SetDParam(3, g->num_vehicle);
+		}
+	}
+
 	virtual void OnPaint()
 	{
 		const Owner owner = (Owner)GB(this->window_number, 0, 8);
-		int y1 = PLY_WND_PRC__OFFSET_TOP_WIDGET + 2;
-		int max;
-		int i;
 
 		/* If we select the all vehicles, this->list will contain all vehicles of the owner
 		 * else this->list will contain all vehicles which belong to the selected group */
@@ -382,62 +366,59 @@ public:
 				GRP_WIDGET_AVAILABLE_VEHICLES,
 				WIDGET_LIST_END);
 
-
-		this->widget[GRP_WIDGET_CAPTION].data = STR_VEHICLE_LIST_TRAIN_CAPTION + this->vehicle_type;
-
-		/* If selected_group == DEFAULT_GROUP || ALL_GROUP, draw the standard caption
-		 * We list all vehicles or ungrouped vehicles */
-		if (IsDefaultGroupID(this->group_sel) || IsAllGroupID(this->group_sel)) {
-			SetDParam(0, STR_COMPANY_NAME);
-			SetDParam(1, owner);
-			SetDParam(2, this->vehicles.Length());
-
-			this->widget[GRP_WIDGET_REPLACE_PROTECTION].data = SPR_GROUP_REPLACE_OFF_TRAIN + this->vehicle_type;
-		} else {
-			const Group *g = Group::Get(this->group_sel);
-
-			SetDParam(0, STR_GROUP_NAME);
-			SetDParam(1, g->index);
-			SetDParam(2, g->num_vehicle);
-
-			this->widget[GRP_WIDGET_REPLACE_PROTECTION].data = ((g->replace_protection) ? SPR_GROUP_REPLACE_ON_TRAIN : SPR_GROUP_REPLACE_OFF_TRAIN) + this->vehicle_type;
-		}
+		/* If not a default group and the group has replace protection, show an enabled replace sprite. */
+		uint16 protect_sprite = SPR_GROUP_REPLACE_OFF_TRAIN;
+		if (!IsDefaultGroupID(this->group_sel) && !IsAllGroupID(this->group_sel) && Group::Get(this->group_sel)->replace_protection) protect_sprite = SPR_GROUP_REPLACE_ON_TRAIN;
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_REPLACE_PROTECTION)->widget_data = protect_sprite + this->vehicle_type;
 
 		/* Set text of sort by dropdown */
-		this->widget[GRP_WIDGET_SORT_BY_DROPDOWN].data = this->vehicle_sorter_names[this->vehicles.SortType()];
+		this->GetWidget<NWidgetCore>(GRP_WIDGET_SORT_BY_DROPDOWN)->widget_data = this->vehicle_sorter_names[this->vehicles.SortType()];
 
 		this->DrawWidgets();
+	}
 
-		/* Draw Matrix Group
-		 * The selected group is drawn in white */
-		DrawString(this->widget[GRP_WIDGET_LIST_GROUP].left + 10, this->widget[GRP_WIDGET_LIST_GROUP].right, y1, STR_GROUP_ALL_TRAINS + this->vehicle_type, IsAllGroupID(this->group_sel) ? TC_WHITE : TC_BLACK);
+	virtual void DrawWidget(const Rect &r, int widget) const
+	{
+		switch (widget) {
+			case GRP_WIDGET_ALL_VEHICLES:
+				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_MATRIX_TOP,
+						STR_GROUP_ALL_TRAINS + this->vehicle_type, IsAllGroupID(this->group_sel) ? TC_WHITE : TC_BLACK);
+				break;
 
-		y1 += 13;
+			case GRP_WIDGET_DEFAULT_VEHICLES:
+				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_MATRIX_TOP,
+						STR_GROUP_DEFAULT_TRAINS + this->vehicle_type, IsDefaultGroupID(this->group_sel) ? TC_WHITE : TC_BLACK);
+				break;
 
-		DrawString(this->widget[GRP_WIDGET_LIST_GROUP].left + 10, this->widget[GRP_WIDGET_LIST_GROUP].right, y1, STR_GROUP_DEFAULT_TRAINS + this->vehicle_type, IsDefaultGroupID(this->group_sel) ? TC_WHITE : TC_BLACK);
+			case GRP_WIDGET_LIST_GROUP: {
+				int y1 = r.top + WD_FRAMERECT_TOP + 1;
+				int max = min(this->vscroll2.GetPosition() + this->vscroll2.GetCapacity(), this->groups.Length());
+				for (int i = this->vscroll2.GetPosition(); i < max; ++i) {
+					const Group *g = this->groups[i];
 
-		max = min(this->vscroll2.GetPosition() + this->vscroll2.GetCapacity(), this->groups.Length());
-		for (i = this->vscroll2.GetPosition() ; i < max ; ++i) {
-			const Group *g = this->groups[i];
+					assert(g->owner == this->owner);
 
-			assert(g->owner == owner);
+					/* draw the selected group in white, else we draw it in black */
+					SetDParam(0, g->index);
+					DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT, y1, STR_GROUP_NAME, (this->group_sel == g->index) ? TC_WHITE : TC_BLACK);
 
-			y1 += PLY_WND_PRC__SIZE_OF_ROW_TINY;
+					/* draw the number of vehicles of the group */
+					SetDParam(0, g->num_vehicle);
+					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y1 + 1, STR_TINY_COMMA, (this->group_sel == g->index) ? TC_WHITE : TC_BLACK, SA_RIGHT);
 
-			/* draw the selected group in white, else we draw it in black */
-			SetDParam(0, g->index);
-			DrawString(this->widget[GRP_WIDGET_LIST_GROUP].left + 10, this->widget[GRP_WIDGET_LIST_GROUP].right, y1, STR_GROUP_NAME, (this->group_sel == g->index) ? TC_WHITE : TC_BLACK);
+					y1 += this->tiny_step_height;
+				}
+				break;
+			}
 
-			/* draw the number of vehicles of the group */
-			SetDParam(0, g->num_vehicle);
-			DrawString(this->widget[GRP_WIDGET_LIST_GROUP].left, this->widget[GRP_WIDGET_LIST_GROUP].right, y1 + 1, STR_TINY_COMMA, (this->group_sel == g->index) ? TC_WHITE : TC_BLACK, SA_RIGHT);
+			case GRP_WIDGET_SORT_BY_ORDER:
+				this->DrawSortButtonState(GRP_WIDGET_SORT_BY_ORDER, this->vehicles.IsDescSortOrder() ? SBS_DOWN : SBS_UP);
+				break;
+
+			case GRP_WIDGET_LIST_VEHICLE:
+				this->DrawVehicleListItems(this->vehicle_sel, this->resize.step_height, r);
+				break;
 		}
-
-		this->DrawSortButtonState(GRP_WIDGET_SORT_BY_ORDER, this->vehicles.IsDescSortOrder() ? SBS_DOWN : SBS_UP);
-
-		Rect rect = {this->widget[GRP_WIDGET_LIST_VEHICLE].left, this->widget[GRP_WIDGET_LIST_VEHICLE].top,
-				this->widget[GRP_WIDGET_LIST_VEHICLE].right, this->widget[GRP_WIDGET_LIST_VEHICLE].bottom};
-		this->DrawVehicleListItems(this->vehicle_sel, this->resize.step_height, rect);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -469,7 +450,7 @@ public:
 				break;
 
 			case GRP_WIDGET_LIST_GROUP: { // Matrix Group
-				uint16 id_g = (pt.y - PLY_WND_PRC__OFFSET_TOP_WIDGET - 26) / PLY_WND_PRC__SIZE_OF_ROW_TINY;
+				uint16 id_g = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_GROUP)->pos_y) / (int)this->tiny_step_height;
 
 				if (id_g >= this->vscroll2.GetCapacity()) return;
 
@@ -485,7 +466,7 @@ public:
 			}
 
 			case GRP_WIDGET_LIST_VEHICLE: { // Matrix Vehicle
-				uint32 id_v = (pt.y - PLY_WND_PRC__OFFSET_TOP_WIDGET) / (int)this->resize.step_height;
+				uint32 id_v = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_VEHICLE)->pos_y) / (int)this->resize.step_height;
 				if (id_v >= this->vscroll.GetCapacity()) return; // click out of bounds
 
 				id_v += this->vscroll.GetPosition();
@@ -504,7 +485,6 @@ public:
 			}
 
 			case GRP_WIDGET_CREATE_GROUP: { // Create a new group
-				extern void CcCreateGroup(bool success, TileIndex tile, uint32 p1, uint32 p2);
 				DoCommandP(0, this->vehicle_type, 0, CMD_CREATE_GROUP | CMD_MSG(STR_ERROR_GROUP_CAN_T_CREATE), CcCreateGroup);
 				break;
 			}
@@ -559,11 +539,10 @@ public:
 				this->vehicle_sel = INVALID_VEHICLE;
 
 				this->SetDirty();
-
 				break;
 
 			case GRP_WIDGET_LIST_GROUP: { // Maxtrix group
-				uint16 id_g = (pt.y - PLY_WND_PRC__OFFSET_TOP_WIDGET - 26) / PLY_WND_PRC__SIZE_OF_ROW_TINY;
+				uint16 id_g = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_GROUP)->pos_y) / (int)this->tiny_step_height;
 				const VehicleID vindex = this->vehicle_sel;
 
 				this->vehicle_sel = INVALID_VEHICLE;
@@ -577,13 +556,11 @@ public:
 				if (id_g >= this->groups.Length()) return;
 
 				DoCommandP(0, this->groups[id_g]->index, vindex, CMD_ADD_VEHICLE_GROUP | CMD_MSG(STR_ERROR_GROUP_CAN_T_ADD_VEHICLE));
-
 				break;
 			}
 
 			case GRP_WIDGET_LIST_VEHICLE: { // Maxtrix vehicle
-				uint32 id_v = (pt.y - PLY_WND_PRC__OFFSET_TOP_WIDGET) / (int)this->resize.step_height;
-				const Vehicle *v;
+				uint32 id_v = (pt.y - this->GetWidget<NWidgetBase>(GRP_WIDGET_LIST_VEHICLE)->pos_y) / (int)this->resize.step_height;
 				const VehicleID vindex = this->vehicle_sel;
 
 				this->vehicle_sel = INVALID_VEHICLE;
@@ -596,12 +573,10 @@ public:
 
 				if (id_v >= this->vehicles.Length()) return; // click out of list bound
 
-				v = this->vehicles[id_v];
-
+				const Vehicle *v = this->vehicles[id_v];
 				if (vindex == v->index) {
 					ShowVehicleViewWindow(v);
 				}
-
 				break;
 			}
 		}
@@ -616,11 +591,13 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll2.SetCapacity((this->widget[GRP_WIDGET_LIST_GROUP].bottom - this->widget[GRP_WIDGET_LIST_GROUP].top + 1) / PLY_WND_PRC__SIZE_OF_ROW_TINY);
-		this->widget[GRP_WIDGET_LIST_GROUP].data = (this->vscroll2.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_GROUP);
+		this->vscroll2.SetCapacity(nwi->current_y / this->tiny_step_height);
+		nwi->widget_data = (this->vscroll2.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 
-		this->vscroll.SetCapacity((this->widget[GRP_WIDGET_LIST_VEHICLE].bottom - this->widget[GRP_WIDGET_LIST_VEHICLE].top + 1) / this->resize.step_height);
-		this->widget[GRP_WIDGET_LIST_VEHICLE].data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		nwi = this->GetWidget<NWidgetCore>(GRP_WIDGET_LIST_VEHICLE);
+		this->vscroll.SetCapacityFromWidget(this, GRP_WIDGET_LIST_VEHICLE);
+		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
 	virtual void OnDropdownSelect(int widget, int index)
@@ -701,20 +678,31 @@ public:
 };
 
 
-static WindowDesc _group_desc(
-	WDP_AUTO, WDP_AUTO, 460, 194, 460, 246,
+static WindowDesc _other_group_desc(
+	WDP_AUTO, 460, 246,
 	WC_INVALID, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	_group_widgets, _nested_group_widgets, lengthof(_nested_group_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_group_widgets, lengthof(_nested_group_widgets)
+);
+
+const static WindowDesc _train_group_desc(
+	WDP_AUTO, 525, 246,
+	WC_TRAINS_LIST, WC_NONE,
+	WDF_UNCLICK_BUTTONS,
+	_nested_group_widgets, lengthof(_nested_group_widgets)
 );
 
 void ShowCompanyGroup(CompanyID company, VehicleType vehicle_type)
 {
 	if (!Company::IsValidID(company)) return;
 
-	_group_desc.cls = GetWindowClassForVehicleType(vehicle_type);
 	WindowNumber num = (vehicle_type << 11) | VLW_GROUP_LIST | company;
-	AllocateWindowDescFront<VehicleGroupWindow>(&_group_desc, num);
+	if (vehicle_type == VEH_TRAIN) {
+		AllocateWindowDescFront<VehicleGroupWindow>(&_train_group_desc, num);
+	} else {
+		_other_group_desc.cls = GetWindowClassForVehicleType(vehicle_type);
+		AllocateWindowDescFront<VehicleGroupWindow>(&_other_group_desc, num);
+	}
 }
 
 /**
@@ -736,9 +724,9 @@ static inline VehicleGroupWindow *FindVehicleGroupWindow(VehicleType vt, Owner o
  * @param p2 unused
  * @see CmdCreateGroup
  */
-void CcCreateGroup(bool success, TileIndex tile, uint32 p1, uint32 p2)
+void CcCreateGroup(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
-	if (!success) return;
+	if (result.Failed()) return;
 	assert(p1 <= VEH_AIRCRAFT);
 
 	VehicleGroupWindow *w = FindVehicleGroupWindow((VehicleType)p1, _current_company);

@@ -21,17 +21,21 @@
 #include "map_func.h"
 #include "saveload/saveload.h"
 #include "company_func.h"
+#include "strings_func.h"
+#include "gui.h"
+
+#include "table/strings.h"
 
 
 char _screenshot_format_name[8];
 uint _num_screenshot_formats;
 uint _cur_screenshot_format;
-char _screenshot_name[128];
-static ScreenshotType _screenshot_type;
+static char _screenshot_name[128];
+char _full_screenshot_name[MAX_PATH];
 
 /* called by the ScreenShot proc to generate screenshot lines. */
 typedef void ScreenshotCallback(void *userdata, void *buf, uint y, uint pitch, uint n);
-typedef bool ScreenshotHandlerProc(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette);
+typedef bool ScreenshotHandlerProc(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette);
 
 struct ScreenshotFormat {
 	const char *name;
@@ -74,12 +78,6 @@ struct RgbQuad {
 };
 assert_compile(sizeof(RgbQuad) == 4);
 
-/** Pixel data in 24bpp BMP */
-struct RgbTriplet {
-	byte b, g, r;
-};
-assert_compile(sizeof(RgbTriplet) == 3);
-
 /**
  * Generic .BMP writer
  * @param name file name including extension
@@ -88,10 +86,10 @@ assert_compile(sizeof(RgbTriplet) == 3);
  * @param w width in pixels
  * @param h height in pixels
  * @param pixelformat bits per pixel
- * @param paletter colour paletter (for 8bpp mode)
+ * @param palette colour palette (for 8bpp mode)
  * @return was everything ok?
  */
-static bool MakeBmpImage(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
+static bool MakeBMPImage(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
 {
 	uint bpp; // bytes per pixel
 	switch (pixelformat) {
@@ -178,11 +176,11 @@ static bool MakeBmpImage(char *name, ScreenshotCallback *callb, void *userdata, 
 				/* Convert from 'native' 32bpp to BMP-like 24bpp.
 				 * Works for both big and little endian machines */
 				Colour *src = ((Colour *)buff) + n * w;
-				RgbTriplet *dst = (RgbTriplet *)line;
+				byte *dst = line;
 				for (uint i = 0; i < w; i++) {
-					dst[i].r = src[i].r;
-					dst[i].g = src[i].g;
-					dst[i].b = src[i].b;
+					dst[i * 3    ] = src[i].b;
+					dst[i * 3 + 1] = src[i].g;
+					dst[i * 3 + 2] = src[i].r;
 				}
 			}
 			/* Write to file */
@@ -208,16 +206,16 @@ static bool MakeBmpImage(char *name, ScreenshotCallback *callb, void *userdata, 
 
 static void PNGAPI png_my_error(png_structp png_ptr, png_const_charp message)
 {
-	DEBUG(misc, 0, "[libpng] error: %s - %s", message, (char *)png_get_error_ptr(png_ptr));
-	longjmp(png_ptr->jmpbuf, 1);
+	DEBUG(misc, 0, "[libpng] error: %s - %s", message, (const char *)png_get_error_ptr(png_ptr));
+	longjmp(png_jmpbuf(png_ptr), 1);
 }
 
 static void PNGAPI png_my_warning(png_structp png_ptr, png_const_charp message)
 {
-	DEBUG(misc, 1, "[libpng] warning: %s - %s", message, (char *)png_get_error_ptr(png_ptr));
+	DEBUG(misc, 1, "[libpng] warning: %s - %s", message, (const char *)png_get_error_ptr(png_ptr));
 }
 
-static bool MakePNGImage(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
+static bool MakePNGImage(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
 {
 	png_color rq[256];
 	FILE *f;
@@ -233,7 +231,7 @@ static bool MakePNGImage(char *name, ScreenshotCallback *callb, void *userdata, 
 	f = fopen(name, "wb");
 	if (f == NULL) return false;
 
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, name, png_my_error, png_my_warning);
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, (void *)name, png_my_error, png_my_warning);
 
 	if (png_ptr == NULL) {
 		fclose(f);
@@ -346,7 +344,7 @@ struct PcxHeader {
 };
 assert_compile(sizeof(PcxHeader) == 128);
 
-static bool MakePCXImage(char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
+static bool MakePCXImage(const char *name, ScreenshotCallback *callb, void *userdata, uint w, uint h, int pixelformat, const Colour *palette)
 {
 	FILE *f;
 	uint maxlines;
@@ -355,7 +353,7 @@ static bool MakePCXImage(char *name, ScreenshotCallback *callb, void *userdata, 
 	bool success;
 
 	if (pixelformat == 32) {
-		DEBUG(misc, 0, "Can't convert a 32bpp screenshot to PCX format. Please pick an other format.");
+		DEBUG(misc, 0, "Can't convert a 32bpp screenshot to PCX format. Please pick another format.");
 		return false;
 	}
 	if (pixelformat != 8 || w == 0)
@@ -478,7 +476,7 @@ static const ScreenshotFormat _screenshot_formats[] = {
 #if defined(WITH_PNG)
 	{"PNG", "png", &MakePNGImage},
 #endif
-	{"BMP", "bmp", &MakeBmpImage},
+	{"BMP", "bmp", &MakeBMPImage},
 	{"PCX", "pcx", &MakePCXImage},
 };
 
@@ -492,7 +490,6 @@ void InitializeScreenshotFormats()
 		}
 	_cur_screenshot_format = j;
 	_num_screenshot_formats = lengthof(_screenshot_formats);
-	_screenshot_type = SC_NONE;
 }
 
 const char *GetScreenshotFormatDesc(int i)
@@ -569,9 +566,11 @@ static void LargeWorldCallback(void *userdata, void *buf, uint y, uint pitch, ui
 	_screen_disable_anim = old_disable_anim;
 }
 
-static char *MakeScreenshotName(const char *ext)
+static const char *MakeScreenshotName(const char *ext)
 {
-	if (_screenshot_name[0] == '\0') {
+	bool generate = StrEmpty(_screenshot_name);
+
+	if (generate) {
 		if (_game_mode == GM_EDITOR || _game_mode == GM_MENU || _local_company == COMPANY_SPECTATOR) {
 			strecpy(_screenshot_name, "screenshot", lastof(_screenshot_name));
 		} else {
@@ -583,31 +582,19 @@ static char *MakeScreenshotName(const char *ext)
 	size_t len = strlen(_screenshot_name);
 	snprintf(&_screenshot_name[len], lengthof(_screenshot_name) - len, ".%s", ext);
 
-	static char filename[MAX_PATH];
 	for (uint serial = 1;; serial++) {
-		if (snprintf(filename, lengthof(filename), "%s%s", _personal_dir, _screenshot_name) >= (int)lengthof(filename)) {
+		if (snprintf(_full_screenshot_name, lengthof(_full_screenshot_name), "%s%s", _personal_dir, _screenshot_name) >= (int)lengthof(_full_screenshot_name)) {
 			/* We need more characters than MAX_PATH -> end with error */
-			filename[0] = '\0';
+			_full_screenshot_name[0] = '\0';
 			break;
 		}
-		if (!FileExists(filename)) break;
+		if (!generate) break; // allow overwriting of non-automatic filenames
+		if (!FileExists(_full_screenshot_name)) break;
 		/* If file exists try another one with same name, but just with a higher index */
 		snprintf(&_screenshot_name[len], lengthof(_screenshot_name) - len, "#%u.%s", serial, ext);
 	}
 
-	return filename;
-}
-
-void RequestScreenshot(ScreenshotType t, const char *name)
-{
-	_screenshot_type = t;
-	_screenshot_name[0] = '\0';
-	if (name != NULL) strecpy(_screenshot_name, name, lastof(_screenshot_name));
-}
-
-bool IsScreenshotRequested()
-{
-	return (_screenshot_type != SC_NONE);
+	return _full_screenshot_name;
 }
 
 static bool MakeSmallScreenshot()
@@ -635,17 +622,47 @@ static bool MakeWorldScreenshot()
 	return sf->proc(MakeScreenshotName(sf->extension), LargeWorldCallback, &vp, vp.width, vp.height, BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth(), _cur_palette);
 }
 
-bool MakeScreenshot()
+/**
+ * Make an actual screenshot.
+ * @param t    the type of screenshot to make.
+ * @param name the name to give to the screenshot.
+ * @return true iff the screenshow was made succesfully
+ */
+bool MakeScreenshot(ScreenshotType t, const char *name)
 {
-	switch (_screenshot_type) {
-		case SC_VIEWPORT:
-			UndrawMouseCursor();
-			DrawDirtyBlocks();
-			_screenshot_type = SC_NONE;
-			return MakeSmallScreenshot();
-		case SC_WORLD:
-			_screenshot_type = SC_NONE;
-			return MakeWorldScreenshot();
-		default: return false;
+	if (t == SC_VIEWPORT) {
+		/* First draw the dirty parts of the screen and only then change the name
+		 * of the screenshot. This way the screenshot will always show the name
+		 * of the previous screenshot in the 'succesful' message instead of the
+		 * name of the new screenshot (or an empty name). */
+		UndrawMouseCursor();
+		DrawDirtyBlocks();
 	}
+
+	_screenshot_name[0] = '\0';
+	if (name != NULL) strecpy(_screenshot_name, name, lastof(_screenshot_name));
+
+	bool ret;
+	switch (t) {
+		case SC_VIEWPORT:
+		case SC_RAW:
+			ret = MakeSmallScreenshot();
+			break;
+
+		case SC_WORLD:
+			ret = MakeWorldScreenshot();
+			break;
+
+		default:
+			NOT_REACHED();
+	}
+
+	if (ret) {
+		SetDParamStr(0, _screenshot_name);
+		ShowErrorMessage(STR_MESSAGE_SCREENSHOT_SUCCESSFULLY, INVALID_STRING_ID, 0, 0);
+	} else {
+		ShowErrorMessage(STR_ERROR_SCREENSHOT_FAILED, INVALID_STRING_ID, 0, 0);
+	}
+
+	return ret;
 }

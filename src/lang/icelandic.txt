@@ -127,7 +127,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} af tof
 STR_QUANTITY_BATTERIES                                          :{COMMA} rafhl{P aða öður}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} af plasti
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} gosdrykk{P u i}r
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -340,14 +340,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Erfiðleikastig
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Þróaðri stillingar
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF stillingar
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Gegnsæisstillingar
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Bæjanöfn sýnd
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Stöðvarnöfn sýnd
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Millistöðvar sýndar
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Skilti sýnd
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Fullar myndhreyfingar
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Full nákvæmni
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Gegnsæjar byggingar
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Gegnsæ stöðvanöfn
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Bæjanöfn sýnd
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Stöðvarnöfn sýnd
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Millistöðvar sýndar
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Skilti sýnd
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Fullar myndhreyfingar
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Full nákvæmni
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Gegnsæjar byggingar
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Gegnsæ stöðvanöfn
 ############ range ends here
 
 ############ range for file menu starts
@@ -501,7 +501,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Lykill
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Sýna lykilmynd
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Resktrartekju línurit
@@ -524,8 +524,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Smelltu 
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Fyrirtækjalisti
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Verkfræðingur
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Umferðarstjórnandi
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Flutningaskipuleggjandi
@@ -542,7 +541,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Upplýsi
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Farartæki:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stöðvar:
@@ -576,10 +574,8 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Sérval 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Tónlistarstyrkur
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Hljóðstyrkur
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}LÁG  '  '  ' '  '  '  HÁM
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
-STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGREEN}0{COMMA}
-STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
 STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Lag
@@ -602,8 +598,7 @@ STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Sýna la
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Lagalistar
-STR_PLAYLIST_TRACK_SINGLE_DIGIT                                 :{TINYFONT}{LTBLUE}0{COMMA} "{STRING}"
-STR_PLAYLIST_TRACK_DOUBLE_DIGIT                                 :{TINYFONT}{LTBLUE}{COMMA} "{STRING}"
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Laganúmer
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Listi - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Hreinsa
@@ -1270,11 +1265,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Bæir
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Iðnaðuð
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Leiðsagnarkerfi lesta: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Óráðlegt)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Ráðlegt)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Leiðsögukerfi bifreiða: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Original {RED}(Óráðlegt)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Ráðlegt)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Leiðsögukerfi skipa: {ORANGE}{STRING}
@@ -1335,7 +1328,7 @@ STR_QUIT_NO                                                     :{BLACK}Nei
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
@@ -1525,7 +1518,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Veldu ko
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Hvaða kort viltu spila?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Búa til nýjan leik
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :Staðarnet / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (auglýsa)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} biðlar{P i ar}
@@ -1539,7 +1531,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Hámarks
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Takmarka fjölda áhorfanda á vefþjóninum
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Tungumál:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Aðrir notendur munu vita hvaða tungumál er talað á þjóninum
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Hefja leik
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Hefja nýjan netleik í sérvöldu korti eða landslagi af handahófi
@@ -1717,13 +1708,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :vefþjónn full
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Leikur í bið (ekki nógu margir leikmenn)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Leikur gangsettur (nægilega margir leikmenn)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Leikur í bið (tengi notanda)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Leikur gangsettur (notandi tengdur)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Leikur gangsettur (tenging við notanda slitnaði)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :yfirgefur
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} tengdist leiknum
@@ -1818,7 +1803,7 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Mótteku
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Birgðir: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Tengja stöðvar
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Tengja stöðvar
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Reisa aðra stöð
 
 
@@ -2161,7 +2146,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Land í eigu fy
 STR_ABOUT_OPENTTD                                               :{WHITE}Um OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Upphaflegur höfundarréttur {COPYRIGHT} 1995 Chris Sawyer, Öll réttindi áskilin
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD útgáfa {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 OpenTTD hópurinn
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 OpenTTD hópurinn
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Vista leik
@@ -2298,13 +2283,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Aðvörun: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Villa: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Banvænt: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} Mun ekki virka með útgáfu TTDPatch sem OpenTTD gefur til kynna.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} er fyrir {STRING} útgáfu af TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} er hannað til að notast með {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Ógild færibreyta {STRING}: færibreyta {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} verður að hlaðast á undan {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} verður að hlaðast eftir {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} þarf OpenTTD útgáfu {STRING} eða nýrri.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} Mun ekki virka með útgáfu TTDPatch sem OpenTTD gefur til kynna.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} er fyrir {STRING} útgáfu af TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} er hannað til að notast með {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Ógild færibreyta {1:STRING}: færibreyta {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} verður að hlaðast á undan {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} verður að hlaðast eftir {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} þarf OpenTTD útgáfu {STRING} eða nýrri.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF skránni sem það var hannað til að þýða
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Of mörg NewGRF eru hlaðin.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Ef {STRING} er hlaðið sem kyrrstæðu NewGRF ásamt {STRING} gætu orðið hnökrar á keyrslu leiksins.
@@ -2358,8 +2343,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Íbúafj
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Farþegar síðasta mánaðar: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Póstur síðasta mánaðar: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Nauðsynlegur farmur fyrir stækkun bæjarins:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} nauðsynlegt
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} flutt í síðasta mánuði
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} nauðsynlegt
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} flutt í síðasta mánuði
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Hávaðamörk í bænum: {ORANGE}{COMMA}{BLACK}  mest: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Færa sjónarhorn á staðsetningu bæjar
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Bæjaryfirvöld
@@ -2484,9 +2469,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Bankainn
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Lán
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Hámarkslán:  {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Taka lán {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Taka lán {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Auka lán
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Borga lán {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Borga lán {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Borga til baka hluta af láni
 
 # Company view
@@ -2506,7 +2491,6 @@ STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Byggja HS
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Skoða HS
-STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Byggja höfuðstöðvar fyrirtækisins / skoða höfuðstöðvar fyrirtækisins
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Flytja HS
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Endurreisa höfuðstöðvarnar annarsstaðar fyrir 1% af verðmæti fyrirtækis
 
@@ -2778,7 +2762,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Enginn v
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Stöðva skipti
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Smelltu til að stöðva skipti á vagntegundinni sem valin er vinstra megin
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Skipti út: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Skipti út: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Skipta á milli útskiptiglugga dráttar- og flutningavagna
 STR_REPLACE_ENGINES                                             :Dráttarvagnar
 STR_REPLACE_WAGONS                                              :Vagnar
@@ -2790,7 +2774,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Rafdrifnir lest
 STR_REPLACE_MONORAIL_VEHICLES                                   :Einteinungsvagnar
 STR_REPLACE_MAGLEV_VEHICLES                                     :Segulsvifvagnar
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Selja lestarvagna: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Selja lestarvagna: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Heldur lengd lestar með því að fjarlægja vagna (framan frá) ef útskipting dráttarvagna myndi lengja hana.
 
 # Vehicle view
@@ -2895,8 +2879,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Hagnaðu
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Áreiðanleiki: {LTBLUE}{COMMA}%  {BLACK}Bilanir frá síðustu skoðun: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Framleiðsluár: {LTBLUE}{NUM}{BLACK} Verðgildi: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Burðargeta: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Burðargeta: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Burðargeta: {LTBLUE}{CARGO}{3:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Burðargeta: {LTBLUE}{CARGO}{3:STRING} (x{4:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Burðargeta: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Millifæra gjaldeyri: {LTBLUE}{CURRENCY}
@@ -2960,11 +2944,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Áætlun
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Skipta yfir í áætlanasýn
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Áætlun - smelltu til að velja stöð. CTRL + músartakki færir sjónarhorn að stöðinni
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Endi skipana - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Endi sameiginlegra skipana - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Endi skipana - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Endi sameiginlegra skipana - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Hraðleið
@@ -3016,7 +2998,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :er satt
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :er ósatt
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Gildið sem bera á við gögn farartækis
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Skrifa skal tölu til að bera saman við
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Sleppa
@@ -3088,9 +3069,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Skipta y
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Áætlun - smelltu á skipun til að velja hana.
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Engin ferðalög
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Ferðalag (ekki sett í áætlun)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Ferðast í {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Engin ferðalög
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Ferðalag (ekki sett í áætlun)
+STR_TIMETABLE_TRAVEL_FOR                                        :Ferðast í {STRING}
 STR_TIMETABLE_STAY_FOR                                          :og bíða í {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :og ferðast í {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} dag{P "" a}
@@ -3903,10 +3884,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Millistöð {TO
 
 STR_UNKNOWN_STATION                                             :óþekkt stöð
 STR_DEFAULT_SIGN_NAME                                           :Skilti
-STR_COMPANY_SOMEONE                                             :einhver{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :einhver
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Áhorfandi, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Áhorfandi, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
@@ -3950,8 +3931,6 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
 STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
@@ -3973,11 +3952,7 @@ STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
 STR_BLACK_2                                                     :{BLACK}2

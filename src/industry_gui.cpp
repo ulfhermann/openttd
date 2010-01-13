@@ -63,7 +63,7 @@ static void GetCargoSuffix(uint cargo, CargoSuffixType cst, const Industry *ind,
 {
 	suffix[0] = '\0';
 	if (HasBit(indspec->callback_mask, CBM_IND_CARGO_SUFFIX)) {
-		uint16 callback = GetIndustryCallback(CBID_INDUSTRY_CARGO_SUFFIX, 0, (cst << 8) | cargo, const_cast<Industry *>(ind), ind_type, (cst != CST_FUND) ? ind->xy : INVALID_TILE);
+		uint16 callback = GetIndustryCallback(CBID_INDUSTRY_CARGO_SUFFIX, 0, (cst << 8) | cargo, const_cast<Industry *>(ind), ind_type, (cst != CST_FUND) ? ind->location.tile : INVALID_TILE);
 		if (GB(callback, 0, 8) != 0xFF) {
 			PrepareTextRefStackUsage(6);
 			GetString(suffix, GetGRFStringID(indspec->grf_prop.grffile->grfid, 0xD000 + callback), suffix_last);
@@ -85,7 +85,7 @@ static void GetCargoSuffix(uint cargo, CargoSuffixType cst, const Industry *ind,
 template <typename TC, typename TS>
 static inline void GetAllCargoSuffixes(uint cb_offset, CargoSuffixType cst, const Industry *ind, IndustryType ind_type, const IndustrySpec *indspec, const TC &cargos, TS &suffixes)
 {
-	assert_tcompile(lengthof(cargos) <= lengthof(suffixes));
+	assert_compile(lengthof(cargos) <= lengthof(suffixes));
 	for (uint j = 0; j < lengthof(cargos); j++) {
 		if (cargos[j] != CT_INVALID) {
 			GetCargoSuffix(cb_offset + j, cst, ind, ind_type, indspec, suffixes[j], lastof(suffixes[j]));
@@ -97,38 +97,37 @@ static inline void GetAllCargoSuffixes(uint cb_offset, CargoSuffixType cst, cons
 
 /** Names of the widgets of the dynamic place industries gui */
 enum DynamicPlaceIndustriesWidgets {
-	DPIW_CLOSEBOX = 0,
-	DPIW_CAPTION,
 	DPIW_MATRIX_WIDGET,
 	DPIW_SCROLLBAR,
 	DPIW_INFOPANEL,
 	DPIW_FUND_WIDGET,
-	DPIW_RESIZE_WIDGET,
 };
 
 static const NWidgetPart _nested_build_industry_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, DPIW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, DPIW_CAPTION), SetDataTip(STR_FUND_INDUSTRY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS), SetResize(1, 0),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_FUND_INDUSTRY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, DPIW_MATRIX_WIDGET), SetDataTip(0x801, STR_FUND_INDUSTRY_SELECTION_TOOLTIP), SetResize(1, 1),
-		NWidget(WWT_SCROLLBAR, COLOUR_DARK_GREEN, DPIW_SCROLLBAR), SetResize(0, 1),
+		NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, DPIW_MATRIX_WIDGET), SetDataTip(0x801, STR_FUND_INDUSTRY_SELECTION_TOOLTIP), SetFill(1, 0), SetResize(1, 1),
+		NWidget(WWT_SCROLLBAR, COLOUR_DARK_GREEN, DPIW_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, DPIW_INFOPANEL), SetResize(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_TEXTBTN, COLOUR_DARK_GREEN, DPIW_FUND_WIDGET), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_NULL),
-		NWidget(WWT_RESIZEBOX, COLOUR_DARK_GREEN, DPIW_RESIZE_WIDGET),
+		NWidget(WWT_TEXTBTN, COLOUR_DARK_GREEN, DPIW_FUND_WIDGET), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_NULL),
+		NWidget(WWT_RESIZEBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
 };
 
 /** Window definition of the dynamic place industries gui */
 static const WindowDesc _build_industry_desc(
-	WDP_AUTO, WDP_AUTO, 170, 212, 170, 212,
+	WDP_AUTO, 170, 212,
 	WC_BUILD_INDUSTRY, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	NULL, _nested_build_industry_widgets, lengthof(_nested_build_industry_widgets)
+	WDF_CONSTRUCTION,
+	_nested_build_industry_widgets, lengthof(_nested_build_industry_widgets)
 );
 
 /** Build (fund or prospect) a new industry, */
@@ -207,7 +206,7 @@ public:
 		this->InitNested(&_build_industry_desc, 0);
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case DPIW_MATRIX_WIDGET: {
@@ -233,7 +232,7 @@ public:
 					const IndustrySpec *indsp = GetIndustrySpec(this->index[i]);
 
 					char cargo_suffix[3][512];
-					GetAllCargoSuffixes(0, CST_FUND, NULL, this->selected_type, indsp, indsp->accepts_cargo, cargo_suffix);
+					GetAllCargoSuffixes(0, CST_FUND, NULL, this->index[i], indsp, indsp->accepts_cargo, cargo_suffix);
 					StringID str = STR_INDUSTRY_VIEW_REQUIRES_CARGO;
 					byte p = 0;
 					SetDParam(0, STR_JUST_NOTHING);
@@ -247,7 +246,7 @@ public:
 					d = maxdim(d, GetStringBoundingBox(str));
 
 					/* Draw the produced cargos, if any. Otherwhise, will print "Nothing" */
-					GetAllCargoSuffixes(3, CST_FUND, NULL, this->selected_type, indsp, indsp->produced_cargo, cargo_suffix);
+					GetAllCargoSuffixes(3, CST_FUND, NULL, this->index[i], indsp, indsp->produced_cargo, cargo_suffix);
 					str = STR_INDUSTRY_VIEW_PRODUCES_CARGO;
 					p = 0;
 					SetDParam(0, STR_JUST_NOTHING);
@@ -402,7 +401,7 @@ public:
 		switch (widget) {
 			case DPIW_MATRIX_WIDGET: {
 				const IndustrySpec *indsp;
-				int y = (pt.y - this->GetWidget<NWidgetBase>(DPIW_MATRIX_WIDGET)->pos_y) / this->resize.step_height + this->vscroll.GetPosition() ;
+				int y = (pt.y - this->GetWidget<NWidgetBase>(DPIW_MATRIX_WIDGET)->pos_y) / this->resize.step_height + this->vscroll.GetPosition();
 
 				if (y >= 0 && y < count) { // Is it within the boundaries of available data?
 					this->selected_index = y;
@@ -447,7 +446,7 @@ public:
 	virtual void OnResize()
 	{
 		/* Adjust the number of items in the matrix depending of the resize */
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(DPIW_MATRIX_WIDGET)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, DPIW_MATRIX_WIDGET);
 		this->GetWidget<NWidgetCore>(DPIW_MATRIX_WIDGET)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
@@ -556,16 +555,10 @@ static inline bool IsProductionAlterable(const Industry *i)
 
 /** Names of the widgets of the view industry gui */
 enum IndustryViewWidgets {
-	IVW_CLOSEBOX = 0,
 	IVW_CAPTION,
-	IVW_STICKY,
-	IVW_BACKGROUND,
-	IVW_INSET,
 	IVW_VIEWPORT,
 	IVW_INFO,
 	IVW_GOTO,
-	IVW_SPACER,
-	IVW_RESIZE,
 };
 
 class IndustryViewWindow : public Window
@@ -587,14 +580,16 @@ public:
 
 		this->InitNested(desc, window_number);
 		NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(IVW_VIEWPORT);
-		nvp->InitializeViewport(this, Industry::Get(window_number)->xy + TileDiffXY(1, 1), ZOOM_LVL_INDUSTRY);
+		nvp->InitializeViewport(this, Industry::Get(window_number)->location.tile + TileDiffXY(1, 1), ZOOM_LVL_INDUSTRY);
 	}
 
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
 
-		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(IVW_INFO);
+		if (this->IsShaded()) return; // Don't draw anything when the window is shaded.
+
+		NWidgetBase *nwi = this->GetWidget<NWidgetBase>(IVW_INFO);
 		uint expected = this->DrawInfo(nwi->pos_x, nwi->pos_x + nwi->current_x - 1, nwi->pos_y) - nwi->pos_y;
 		if (expected > nwi->current_y - 1) {
 			this->info_height = expected + 1;
@@ -679,7 +674,7 @@ public:
 
 		/* Get the extra message for the GUI */
 		if (HasBit(ind->callback_mask, CBM_IND_WINDOW_MORE_TEXT)) {
-			uint16 callback_res = GetIndustryCallback(CBID_INDUSTRY_WINDOW_MORE_TEXT, 0, 0, i, i->type, i->xy);
+			uint16 callback_res = GetIndustryCallback(CBID_INDUSTRY_WINDOW_MORE_TEXT, 0, 0, i, i->type, i->location.tile);
 			if (callback_res != CALLBACK_FAILED) {
 				StringID message = GetGRFStringID(ind->grf_prop.grffile->grfid, 0xD000 + callback_res);
 				if (message != STR_NULL && message != STR_UNDEFINED) {
@@ -702,7 +697,7 @@ public:
 		if (widget== IVW_CAPTION) SetDParam(0, this->window_number);
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget == IVW_INFO) size->height = this->info_height;
 	}
@@ -720,7 +715,7 @@ public:
 				uint x = pt.x;
 				int line = (pt.y - this->production_offset_y) / FONT_HEIGHT_NORMAL;
 				if (pt.y >= this->production_offset_y && IsInsideMM(line, 0, 2) && i->produced_cargo[line] != CT_INVALID) {
-					NWidgetCore *nwi = this->GetWidget<NWidgetCore>(widget);
+					NWidgetBase *nwi = this->GetWidget<NWidgetBase>(widget);
 					uint left = nwi->pos_x + WD_FRAMETEXT_LEFT;
 					uint right = nwi->pos_x + nwi->current_x - 1 - WD_FRAMERECT_RIGHT;
 					if (IsInsideMM(x, left, left + 20) ) {
@@ -752,9 +747,9 @@ public:
 			case IVW_GOTO:
 				i = Industry::Get(this->window_number);
 				if (_ctrl_pressed) {
-					ShowExtraViewPortWindow(i->xy + TileDiffXY(1, 1));
+					ShowExtraViewPortWindow(i->location.tile + TileDiffXY(1, 1));
 				} else {
-					ScrollMainWindowToTile(i->xy + TileDiffXY(1, 1));
+					ScrollMainWindowToTile(i->location.tile + TileDiffXY(1, 1));
 				}
 				break;
 		}
@@ -800,30 +795,31 @@ static void UpdateIndustryProduction(Industry *i)
 /** Widget definition of the view industy gui */
 static const NWidgetPart _nested_industry_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_CREAM, IVW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_CREAM, IVW_CAPTION), SetMinimalSize(237, 14), SetDataTip(STR_INDUSTRY_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS), SetResize(1, 0),
-		NWidget(WWT_STICKYBOX, COLOUR_CREAM, IVW_STICKY),
+		NWidget(WWT_CLOSEBOX, COLOUR_CREAM),
+		NWidget(WWT_CAPTION, COLOUR_CREAM, IVW_CAPTION), SetDataTip(STR_INDUSTRY_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_CREAM),
+		NWidget(WWT_STICKYBOX, COLOUR_CREAM),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_CREAM, IVW_BACKGROUND),
-		NWidget(WWT_INSET, COLOUR_CREAM, IVW_INSET), SetPadding(2, 2, 2, 2),
-			NWidget(NWID_VIEWPORT, INVALID_COLOUR, IVW_VIEWPORT), SetMinimalSize(254, 86), SetFill(true, false), SetPadding(1, 1, 1, 1), SetResize(1, 1),
+	NWidget(WWT_PANEL, COLOUR_CREAM),
+		NWidget(WWT_INSET, COLOUR_CREAM), SetPadding(2, 2, 2, 2),
+			NWidget(NWID_VIEWPORT, INVALID_COLOUR, IVW_VIEWPORT), SetMinimalSize(254, 86), SetFill(1, 0), SetPadding(1, 1, 1, 1), SetResize(1, 1),
 		EndContainer(),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_CREAM, IVW_INFO), SetMinimalSize(260, 2), SetResize(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_CREAM, IVW_GOTO), SetMinimalSize(130, 12), SetDataTip(STR_BUTTON_LOCATION, STR_INDUSTRY_VIEW_LOCATION_TOOLTIP),
-		NWidget(WWT_PANEL, COLOUR_CREAM, IVW_SPACER), /*SetMinimalSize(118, 12),*/ SetResize(1, 0), EndContainer(),
-		NWidget(WWT_RESIZEBOX, COLOUR_CREAM, IVW_RESIZE),
+		NWidget(WWT_PANEL, COLOUR_CREAM), SetResize(1, 0), EndContainer(),
+		NWidget(WWT_RESIZEBOX, COLOUR_CREAM),
 	EndContainer(),
 };
 
 /** Window definition of the view industy gui */
 static const WindowDesc _industry_view_desc(
-	WDP_AUTO, WDP_AUTO, 260, 120, 260, 120,
+	WDP_AUTO, 260, 120,
 	WC_INDUSTRY_VIEW, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	NULL, _nested_industry_view_widgets, lengthof(_nested_industry_view_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_industry_view_widgets, lengthof(_nested_industry_view_widgets)
 );
 
 void ShowIndustryViewWindow(int industry)
@@ -833,38 +829,32 @@ void ShowIndustryViewWindow(int industry)
 
 /** Names of the widgets of the industry directory gui */
 enum IndustryDirectoryWidgets {
-	IDW_CLOSEBOX = 0,
-	IDW_CAPTION,
-	IDW_STICKY,
 	IDW_DROPDOWN_ORDER,
 	IDW_DROPDOWN_CRITERIA,
-	IDW_SPACER,
 	IDW_INDUSTRY_LIST,
 	IDW_SCROLLBAR,
-	IDW_RESIZE,
 };
 
 /** Widget definition of the industy directory gui */
 static const NWidgetPart _nested_industry_directory_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, IDW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_BROWN, IDW_CAPTION), SetDataTip(STR_INDUSTRY_DIRECTORY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_BROWN, IDW_STICKY),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
+		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_INDUSTRY_DIRECTORY_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_BROWN),
+		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_VERTICAL),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_TEXTBTN, COLOUR_BROWN, IDW_DROPDOWN_ORDER), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
 				NWidget(WWT_DROPDOWN, COLOUR_BROWN, IDW_DROPDOWN_CRITERIA), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_SORT_CRITERIAP),
-				NWidget(WWT_PANEL, COLOUR_BROWN, IDW_SPACER), SetResize(1, 0),
-				EndContainer(),
+				NWidget(WWT_PANEL, COLOUR_BROWN), SetResize(1, 0), EndContainer(),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_BROWN, IDW_INDUSTRY_LIST), SetDataTip(0x0, STR_INDUSTRY_DIRECTORY_LIST_CAPTION), SetResize(1, 1),
-			EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_BROWN, IDW_INDUSTRY_LIST), SetDataTip(0x0, STR_INDUSTRY_DIRECTORY_LIST_CAPTION), SetResize(1, 1), EndContainer(),
 		EndContainer(),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, IDW_SCROLLBAR), SetResize(0, 1),
-			NWidget(WWT_RESIZEBOX, COLOUR_BROWN, IDW_RESIZE),
+			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, IDW_SCROLLBAR),
+			NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
 		EndContainer(),
 	EndContainer(),
 };
@@ -1002,7 +992,7 @@ protected:
 		/* Industry name */
 		SetDParam(p++, i->index);
 
-		char cargo_suffix[lengthof(i->produced_cargo)][512];
+		static char cargo_suffix[lengthof(i->produced_cargo)][512];
 		GetAllCargoSuffixes(3, CST_DIR, i, i->type, indsp, i->produced_cargo, cargo_suffix);
 
 		/* Industry productions */
@@ -1036,7 +1026,6 @@ public:
 		this->BuildSortIndustriesList();
 
 		this->InitNested(desc, 0);
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(IDW_INDUSTRY_LIST)->current_y / this->resize.step_height);
 	}
 
 	~IndustryDirectoryWindow()
@@ -1078,7 +1067,7 @@ public:
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case IDW_DROPDOWN_ORDER: {
@@ -1135,9 +1124,9 @@ public:
 				p = y + this->vscroll.GetPosition();
 				if (p < this->industries.Length()) {
 					if (_ctrl_pressed) {
-						ShowExtraViewPortWindow(this->industries[p]->xy);
+						ShowExtraViewPortWindow(this->industries[p]->location.tile);
 					} else {
-						ScrollMainWindowToTile(this->industries[p]->xy);
+						ScrollMainWindowToTile(this->industries[p]->location.tile);
 					}
 				}
 			} break;
@@ -1154,7 +1143,7 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(IDW_INDUSTRY_LIST)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, IDW_INDUSTRY_LIST);
 	}
 
 	virtual void OnHundredthTick()
@@ -1197,10 +1186,10 @@ const StringID IndustryDirectoryWindow::sorter_names[] = {
 
 /** Window definition of the industy directory gui */
 static const WindowDesc _industry_directory_desc(
-	WDP_AUTO, WDP_AUTO, 428, 190, 428, 190,
+	WDP_AUTO, 428, 190,
 	WC_INDUSTRY_DIRECTORY, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	NULL, _nested_industry_directory_widgets, lengthof(_nested_industry_directory_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_industry_directory_widgets, lengthof(_nested_industry_directory_widgets)
 );
 
 void ShowIndustryDirectory()

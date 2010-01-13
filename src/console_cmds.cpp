@@ -10,7 +10,6 @@
 /** @file console_cmds.cpp Implementation of the console hooks. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "console_internal.h"
 #include "debug.h"
 #include "engine_func.h"
@@ -491,16 +490,9 @@ DEF_CONSOLE_CMD(ConPauseGame)
 		return true;
 	}
 
-#ifdef ENABLE_NETWORK
-	if (_network_dedicated && _settings_client.network.min_active_clients != 0) {
-		IConsolePrint(CC_WARNING, "Manual pausing is disabled. Set network.min_active_clients to 0 (disable autopausing) to enable manual pausing.");
-		return true;
-	}
-#endif /* ENABLE_NETWORK */
-
-	if (_pause_mode == PM_UNPAUSED) {
+	if ((_pause_mode & PM_PAUSED_NORMAL) == PM_UNPAUSED) {
 		DoCommandP(0, PM_PAUSED_NORMAL, 1, CMD_PAUSE);
-		IConsolePrint(CC_DEFAULT, "Game paused.");
+		if (!_networking) IConsolePrint(CC_DEFAULT, "Game paused.");
 	} else {
 		IConsolePrint(CC_DEFAULT, "Game is already paused.");
 	}
@@ -515,16 +507,13 @@ DEF_CONSOLE_CMD(ConUnPauseGame)
 		return true;
 	}
 
-#ifdef ENABLE_NETWORK
-	if (_network_dedicated && _settings_client.network.min_active_clients != 0) {
-		IConsolePrint(CC_WARNING, "Manual unpausing is disabled. Set network.min_active_clients to 0 (disable autopausing) to enable manual unpausing.");
-		return true;
-	}
-#endif /* ENABLE_NETWORK */
-
-	if (_pause_mode != PM_UNPAUSED) {
+	if ((_pause_mode & PM_PAUSED_NORMAL) != PM_UNPAUSED) {
 		DoCommandP(0, PM_PAUSED_NORMAL, 0, CMD_PAUSE);
-		IConsolePrint(CC_DEFAULT, "Game unpaused.");
+		if (!_networking) IConsolePrint(CC_DEFAULT, "Game unpaused.");
+	} else if ((_pause_mode & PM_PAUSED_ERROR) != PM_UNPAUSED) {
+		IConsolePrint(CC_DEFAULT, "Game is in error state and cannot be unpaused via console.");
+	} else if (_pause_mode != PM_UNPAUSED) {
+		IConsolePrint(CC_DEFAULT, "Game cannot be unpaused manually; disable pause_on_join/min_active_clients.");
 	} else {
 		IConsolePrint(CC_DEFAULT, "Game is already unpaused.");
 	}
@@ -1242,13 +1231,12 @@ DEF_CONSOLE_CMD(ConScreenShot)
 			/* screenshot filename */
 			name = argv[1];
 		} else {
-			/* screenshot argv[1] argv[2] - invalid*/
+			/* screenshot argv[1] argv[2] - invalid */
 			return false;
 		}
 	}
 
-	RequestScreenshot(type, name);
-
+	MakeScreenshot(type, name);
 	return true;
 }
 
@@ -1681,7 +1669,8 @@ DEF_CONSOLE_CMD(ConContent)
 	if (strcasecmp(argv[1], "state") == 0) {
 		IConsolePrintF(CC_WHITE, "id, type, state, name");
 		for (ConstContentIterator iter = _network_content_client.Begin(); iter != _network_content_client.End(); iter++) {
-			static const char * const types[] = { "Base graphics", "NewGRF", "AI", "AI library", "Scenario", "Heightmap" };
+			static const char * const types[] = { "Base graphics", "NewGRF", "AI", "AI library", "Scenario", "Heightmap", "Base sound", "Base music" };
+			assert_compile(lengthof(types) == CONTENT_TYPE_END - CONTENT_TYPE_BEGIN);
 			static const char * const states[] = { "Not selected", "Selected", "Dep Selected", "Installed", "Unknown" };
 			static const ConsoleColour state_to_colour[] = { CC_COMMAND, CC_INFO, CC_INFO, CC_WHITE, CC_ERROR };
 

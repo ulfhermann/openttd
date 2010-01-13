@@ -18,7 +18,6 @@
 #include "fileio_func.h"
 #include "engine_func.h"
 #include "engine_base.h"
-#include "spritecache.h"
 #include "variables.h"
 #include "bridge.h"
 #include "town.h"
@@ -64,8 +63,9 @@
 static int _skip_sprites; // XXX
 static uint _file_index; // XXX
 
+static SmallVector<GRFFile *, 16> _grf_files;
+
 static GRFFile *_cur_grffile;
-static GRFFile *_first_grffile;
 static SpriteID _cur_spriteid;
 static GrfLoadingStage _cur_stage;
 static uint32 _nfo_line;
@@ -218,22 +218,20 @@ static const char *grf_load_string(byte **buf, size_t max_len)
 
 static GRFFile *GetFileByGRFID(uint32 grfid)
 {
-	GRFFile *file;
-
-	for (file = _first_grffile; file != NULL; file = file->next) {
-		if (file->grfid == grfid) break;
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile * const *file = _grf_files.Begin(); file != end; file++) {
+		if ((*file)->grfid == grfid) return *file;
 	}
-	return file;
+	return NULL;
 }
 
 static GRFFile *GetFileByFilename(const char *filename)
 {
-	GRFFile *file;
-
-	for (file = _first_grffile; file != NULL; file = file->next) {
-		if (strcmp(file->filename, filename) == 0) break;
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile * const *file = _grf_files.Begin(); file != end; file++) {
+		if (strcmp((*file)->filename, filename) == 0) return *file;
 	}
-	return file;
+	return NULL;
 }
 
 /** Reset all NewGRFData that was used only while processing data */
@@ -1562,7 +1560,7 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, byt
 				break;
 
 			case 0x14: // House callback mask
-				housespec->callback_mask = grf_load_byte(&buf);
+				housespec->callback_mask |= grf_load_byte(&buf);
 				break;
 
 			case 0x15: { // House override byte
@@ -1669,7 +1667,7 @@ static ChangeInfoResult GlobalVarChangeInfo(uint gvid, int numinfo, int prop, by
 				uint price = gvid + i;
 
 				if (price < PR_END) {
-					SetPriceBaseMultiplier((Price)price, factor - 8);
+					_cur_grffile->price_base_multipliers[price] = min<int>(factor - 8, MAX_PRICE_MODIFIER);
 				} else {
 					grfmsg(1, "GlobalVarChangeInfo: Price %d out of range, ignoring", price);
 				}
@@ -2251,14 +2249,26 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 
 			case 0x0A: { // Set industry layout(s)
 				indsp->num_table = grf_load_byte(&buf); // Number of layaouts
-				uint32 defsize = grf_load_dword(&buf);  // Total size of the definition
+				/* We read the total size in bytes, but we can't rely on the
+				 * newgrf to provide a sane value. First assume the value is
+				 * sane but later on we make sure we enlarge the array if the
+				 * newgrf contains more data. Each tile uses either 3 or 5
+				 * bytes, so to play it safe we assume 3. */
+				uint32 def_num_tiles = grf_load_dword(&buf) / 3 + 1;
 				IndustryTileTable **tile_table = CallocT<IndustryTileTable*>(indsp->num_table); // Table with tiles to compose an industry
-				IndustryTileTable *itt = CallocT<IndustryTileTable>(defsize); // Temporary array to read the tile layouts from the GRF
-				int size;
+				IndustryTileTable *itt = CallocT<IndustryTileTable>(def_num_tiles); // Temporary array to read the tile layouts from the GRF
+				uint size;
 				const IndustryTileTable *copy_from;
 
 				for (byte j = 0; j < indsp->num_table; j++) {
-					for (int k = 0;; k++) {
+					for (uint k = 0;; k++) {
+						if (k >= def_num_tiles) {
+							grfmsg(3, "IndustriesChangeInfo: Incorrect size for industry tile layout definition for industry %u.", indid);
+							/* Size reported by newgrf was not big enough so enlarge the array. */
+							def_num_tiles *= 2;
+							itt = ReallocT<IndustryTileTable>(itt, def_num_tiles);
+						}
+
 						itt[k].ti.x = grf_load_byte(&buf); // Offsets from northermost tile
 
 						if (itt[k].ti.x == 0xFE && k == 0) {
@@ -2481,8 +2491,7 @@ static void FeatureChangeInfo(byte *buf, size_t len)
 
 	/* <00> <feature> <num-props> <num-info> <id> (<property <new-info>)...
 	 *
-	 * B feature       0, 1, 2 or 3 for trains, road vehicles, ships or planes
-	 *                 4 for defining new train station sets
+	 * B feature
 	 * B num-props     how many properties to change per vehicle/station
 	 * B num-info      how many vehicles/stations to change
 	 * E id            ID of first vehicle/station to change, if num-info is
@@ -2490,7 +2499,6 @@ static void FeatureChangeInfo(byte *buf, size_t len)
 	 *                 vehicles/stations will be changed
 	 * B property      what property to change, depends on the feature
 	 * V new-info      new bytes of info (variable size; depends on properties) */
-	/* TODO: Bridges, town houses. */
 
 	static const VCI_Handler handler[] = {
 		/* GSF_TRAIN */        RailVehicleChangeInfo,
@@ -2522,6 +2530,9 @@ static void FeatureChangeInfo(byte *buf, size_t len)
 		if (feature != GSF_CARGOS) grfmsg(1, "FeatureChangeInfo: Unsupported feature %d, skipping", feature);
 		return;
 	}
+
+	/* Mark the feature as used by the grf */
+	SetBit(_cur_grffile->grf_features, feature);
 
 	while (numprops-- && buf < bufend) {
 		uint8 prop = grf_load_byte(&buf);
@@ -2726,8 +2737,9 @@ static void NewSpriteGroup(byte *buf, size_t len)
 		/* Allocate memory for new sprite group references. */
 		_cur_grffile->spritegroups = ReallocT(_cur_grffile->spritegroups, setid + 1);
 		/* Initialise new space to NULL */
-		for (; _cur_grffile->spritegroups_count < (setid + 1); _cur_grffile->spritegroups_count++)
+		for (; _cur_grffile->spritegroups_count < (setid + 1); _cur_grffile->spritegroups_count++) {
 			_cur_grffile->spritegroups[_cur_grffile->spritegroups_count] = NULL;
+		}
 	}
 
 	switch (type) {
@@ -2896,13 +2908,15 @@ static void NewSpriteGroup(byte *buf, size_t len)
 
 				case GSF_TOWNHOUSE:
 				case GSF_INDUSTRYTILES: {
-					byte sprites     = _cur_grffile->spriteset_numents;
-					byte num_sprites = max((uint8)1, type);
+					byte num_spriteset_ents   = _cur_grffile->spriteset_numents;
+					byte num_spritesets       = _cur_grffile->spriteset_numsets;
+					byte num_building_sprites = max((uint8)1, type);
 					uint i;
 
 					TileLayoutSpriteGroup *group = new TileLayoutSpriteGroup();
 					act_group = group;
-					group->num_sprites = sprites;
+					/* num_building_stages should be 1, if we are only using non-custom sprites */
+					group->num_building_stages = max((uint8)1, num_spriteset_ents);
 					group->dts = CallocT<DrawTileSprites>(1);
 
 					/* Groundsprite */
@@ -2915,14 +2929,21 @@ static void NewSpriteGroup(byte *buf, size_t len)
 					if (HasBit(group->dts->ground.pal, 15)) {
 						/* Bit 31 set means this is a custom sprite, so rewrite it to the
 						 * last spriteset defined. */
-						SpriteID sprite = _cur_grffile->spriteset_start + GB(group->dts->ground.sprite, 0, 14) * sprites;
-						SB(group->dts->ground.sprite, 0, SPRITE_WIDTH, sprite);
-						ClrBit(group->dts->ground.pal, 15);
+						uint spriteset = GB(group->dts->ground.sprite, 0, 14);
+						if (num_spriteset_ents == 0 || spriteset >= num_spritesets) {
+							grfmsg(1, "NewSpriteGroup: Spritelayout uses undefined custom spriteset %d", spriteset);
+							group->dts->ground.sprite = SPR_IMG_QUERY;
+							group->dts->ground.pal = PAL_NONE;
+						} else {
+							SpriteID sprite = _cur_grffile->spriteset_start + spriteset * num_spriteset_ents;
+							SB(group->dts->ground.sprite, 0, SPRITE_WIDTH, sprite);
+							ClrBit(group->dts->ground.pal, 15);
+						}
 					}
 
-					group->dts->seq = CallocT<DrawTileSeqStruct>(num_sprites + 1);
+					group->dts->seq = CallocT<DrawTileSeqStruct>(num_building_sprites + 1);
 
-					for (i = 0; i < num_sprites; i++) {
+					for (i = 0; i < num_building_sprites; i++) {
 						DrawTileSeqStruct *seq = const_cast<DrawTileSeqStruct*>(&group->dts->seq[i]);
 
 						seq->image.sprite = grf_load_word(&buf);
@@ -2935,9 +2956,16 @@ static void NewSpriteGroup(byte *buf, size_t len)
 						if (HasBit(seq->image.pal, 15)) {
 							/* Bit 31 set means this is a custom sprite, so rewrite it to the
 							 * last spriteset defined. */
-							SpriteID sprite = _cur_grffile->spriteset_start + GB(seq->image.sprite, 0, 14) * sprites;
-							SB(seq->image.sprite, 0, SPRITE_WIDTH, sprite);
-							ClrBit(seq->image.pal, 15);
+							uint spriteset = GB(seq->image.sprite, 0, 14);
+							if (num_spriteset_ents == 0 || spriteset >= num_spritesets) {
+								grfmsg(1, "NewSpriteGroup: Spritelayout uses undefined custom spriteset %d", spriteset);
+								seq->image.sprite = SPR_IMG_QUERY;
+								seq->image.pal = PAL_NONE;
+							} else {
+								SpriteID sprite = _cur_grffile->spriteset_start + spriteset * num_spriteset_ents;
+								SB(seq->image.sprite, 0, SPRITE_WIDTH, sprite);
+								ClrBit(seq->image.pal, 15);
+							}
 						}
 
 						if (type > 0) {
@@ -3171,7 +3199,7 @@ static void StationMapSpriteGroup(byte *buf, uint8 idcount)
 		if (ctype == CT_INVALID) continue;
 
 		for (uint i = 0; i < idcount; i++) {
-			StationSpec *statspec = _cur_grffile->stations[stations[i]];
+			StationSpec *statspec = _cur_grffile->stations == NULL ? NULL : _cur_grffile->stations[stations[i]];
 
 			if (statspec == NULL) {
 				grfmsg(1, "StationMapSpriteGroup: Station with ID 0x%02X does not exist, skipping", stations[i]);
@@ -3186,7 +3214,7 @@ static void StationMapSpriteGroup(byte *buf, uint8 idcount)
 	if (!IsValidGroupID(groupid, "StationMapSpriteGroup")) return;
 
 	for (uint i = 0; i < idcount; i++) {
-		StationSpec *statspec = _cur_grffile->stations[stations[i]];
+		StationSpec *statspec = _cur_grffile->stations == NULL ? NULL : _cur_grffile->stations[stations[i]];
 
 		if (statspec == NULL) {
 			grfmsg(1, "StationMapSpriteGroup: Station with ID 0x%02X does not exist, skipping", stations[i]);
@@ -3215,6 +3243,11 @@ static void TownHouseMapSpriteGroup(byte *buf, uint8 idcount)
 	uint16 groupid = grf_load_word(&buf);
 	if (!IsValidGroupID(groupid, "TownHouseMapSpriteGroup")) return;
 
+	if (_cur_grffile->housespec == NULL) {
+		grfmsg(1, "TownHouseMapSpriteGroup: No houses defined, skipping");
+		return;
+	}
+
 	for (uint i = 0; i < idcount; i++) {
 		HouseSpec *hs = _cur_grffile->housespec[houses[i]];
 
@@ -3241,6 +3274,11 @@ static void IndustryMapSpriteGroup(byte *buf, uint8 idcount)
 	uint16 groupid = grf_load_word(&buf);
 	if (!IsValidGroupID(groupid, "IndustryMapSpriteGroup")) return;
 
+	if (_cur_grffile->industryspec == NULL) {
+		grfmsg(1, "IndustryMapSpriteGroup: No industries defined, skipping");
+		return;
+	}
+
 	for (uint i = 0; i < idcount; i++) {
 		IndustrySpec *indsp = _cur_grffile->industryspec[industries[i]];
 
@@ -3266,6 +3304,11 @@ static void IndustrytileMapSpriteGroup(byte *buf, uint8 idcount)
 
 	uint16 groupid = grf_load_word(&buf);
 	if (!IsValidGroupID(groupid, "IndustrytileMapSpriteGroup")) return;
+
+	if (_cur_grffile->indtspec == NULL) {
+		grfmsg(1, "IndustrytileMapSpriteGroup: No industry tiles defined, skipping");
+		return;
+	}
 
 	for (uint i = 0; i < idcount; i++) {
 		IndustryTileSpec *indtsp = _cur_grffile->indtspec[indtiles[i]];
@@ -3347,6 +3390,9 @@ static void FeatureMapSpriteGroup(byte *buf, size_t len)
 		AddGenericCallback(feature, _cur_grffile, _cur_grffile->spritegroups[groupid]);
 		return;
 	}
+
+	/* Mark the feature as used by the grf (generic callbacks do not count) */
+	SetBit(_cur_grffile->grf_features, feature);
 
 	grfmsg(6, "FeatureMapSpriteGroup: Feature %d, %d ids", feature, idcount);
 
@@ -3848,7 +3894,7 @@ static uint32 GetParamVal(byte param, uint32 *cond_val)
 
 		default:
 			/* GRF Parameter */
-			if (param < 0x80) return _cur_grffile->param[param];
+			if (param < 0x80) return _cur_grffile->GetParam(param);
 
 			/* In-game variable. */
 			grfmsg(1, "Unsupported in-game variable 0x%02X", param);
@@ -4138,7 +4184,7 @@ static void SkipIf(byte *buf, size_t len)
 		_skip_sprites = -1;
 
 		/* If an action 8 hasn't been encountered yet, disable the grf. */
-		if (_cur_grfconfig->status != GCS_ACTIVATED) {
+		if (_cur_grfconfig->status != (_cur_stage < GLS_RESERVE ? GCS_INITIALISED : GCS_ACTIVATED)) {
 			_cur_grfconfig->status = GCS_DISABLED;
 			ClearTemporaryNewGRFData(_cur_grffile);
 		}
@@ -4356,13 +4402,16 @@ static void GRFLoadError(byte *buf, size_t len)
 		len -= (strlen(data) + 1);
 
 		error->data = TranslateTTDPatchCodes(_cur_grffile->grfid, data);
+	} else {
+		grfmsg(7, "GRFLoadError: No message data supplied.");
+		error->data = strdup("");
 	}
 
 	/* Only two parameter numbers can be used in the string. */
 	uint i = 0;
 	for (; i < 2 && len > 0; i++) {
 		uint param_number = grf_load_byte(&buf);
-		error->param_value[i] = (param_number < _cur_grffile->param_end ? _cur_grffile->param[param_number] : 0);
+		error->param_value[i] = _cur_grffile->GetParam(param_number);
 		len--;
 	}
 	error->num_params = i;
@@ -4475,11 +4524,11 @@ static uint32 PerformGRM(uint32 *grm, uint16 num_ids, uint16 count, uint8 op, ui
 
 	if (op == 6) {
 		/* Return GRFID of set that reserved ID */
-		return grm[_cur_grffile->param[target]];
+		return grm[_cur_grffile->GetParam(target)];
 	}
 
 	/* With an operation of 2 or 3, we want to reserve a specific block of IDs */
-	if (op == 2 || op == 3) start = _cur_grffile->param[target];
+	if (op == 2 || op == 3) start = _cur_grffile->GetParam(target);
 
 	for (uint i = start; i < num_ids; i++) {
 		if (grm[i] == 0) {
@@ -4613,7 +4662,7 @@ static void ParamSet(byte *buf, size_t len)
 								switch (op) {
 									case 2:
 									case 3:
-										src1 = _cur_grffile->param[target];
+										src1 = _cur_grffile->GetParam(target);
 										break;
 
 									default:
@@ -4662,10 +4711,10 @@ static void ParamSet(byte *buf, size_t len)
 				/* Disable the read GRF if it is a static NewGRF. */
 				DisableStaticNewGRFInfluencingNonStaticNewGRFs(c);
 				src1 = 0;
-			} else if (file == NULL || src1 >= file->param_end || (c != NULL && c->status == GCS_DISABLED)) {
+			} else if (file == NULL || (c != NULL && c->status == GCS_DISABLED)) {
 				src1 = 0;
 			} else {
-				src1 = file->param[src1];
+				src1 = file->GetParam(src1);
 			}
 		}
 	} else {
@@ -4811,6 +4860,7 @@ static void ParamSet(byte *buf, size_t len)
 		default:
 			if (target < 0x80) {
 				_cur_grffile->param[target] = res;
+				/* param is zeroed by default */
 				if (target + 1U > _cur_grffile->param_end) _cur_grffile->param_end = target + 1;
 			} else {
 				grfmsg(7, "ParamSet: Skipping unknown target 0x%02X", target);
@@ -5430,11 +5480,13 @@ static void InitializeGRFSpecial()
 
 static void ResetCustomStations()
 {
-	for (GRFFile *file = _first_grffile; file != NULL; file = file->next) {
-		if (file->stations == NULL) continue;
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		StationSpec **&stations = (*file)->stations;
+		if (stations == NULL) continue;
 		for (uint i = 0; i < MAX_STATIONS; i++) {
-			if (file->stations[i] == NULL) continue;
-			StationSpec *statspec = file->stations[i];
+			if (stations[i] == NULL) continue;
+			StationSpec *statspec = stations[i];
 
 			/* Release renderdata, if it wasn't copied from another custom station spec  */
 			if (!statspec->copied_renderdata) {
@@ -5461,33 +5513,38 @@ static void ResetCustomStations()
 		}
 
 		/* Free and reset the station data */
-		free(file->stations);
-		file->stations = NULL;
+		free(stations);
+		stations = NULL;
 	}
 }
 
 static void ResetCustomHouses()
 {
-	for (GRFFile *file = _first_grffile; file != NULL; file = file->next) {
-		if (file->housespec == NULL) continue;
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		HouseSpec **&housespec = (*file)->housespec;
+		if (housespec == NULL) continue;
 		for (uint i = 0; i < HOUSE_MAX; i++) {
-			free(file->housespec[i]);
+			free(housespec[i]);
 		}
 
-		free(file->housespec);
-		file->housespec = NULL;
+		free(housespec);
+		housespec = NULL;
 	}
 }
 
 static void ResetCustomIndustries()
 {
-	for (GRFFile *file = _first_grffile; file != NULL; file = file->next) {
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		IndustrySpec **&industryspec = (*file)->industryspec;
+		IndustryTileSpec **&indtspec = (*file)->indtspec;
+
 		/* We are verifiying both tiles and industries specs loaded from the grf file
 		 * First, let's deal with industryspec */
-		if (file->industryspec != NULL) {
-
+		if (industryspec != NULL) {
 			for (uint i = 0; i < NUM_INDUSTRYTYPES; i++) {
-				IndustrySpec *ind = file->industryspec[i];
+				IndustrySpec *ind = industryspec[i];
 				if (ind == NULL) continue;
 
 				/* We need to remove the sounds array */
@@ -5509,34 +5566,32 @@ static void ResetCustomIndustries()
 				free(ind);
 			}
 
-			free(file->industryspec);
-			file->industryspec = NULL;
+			free(industryspec);
+			industryspec = NULL;
 		}
 
-		if (file->indtspec == NULL) continue;
+		if (indtspec == NULL) continue;
 		for (uint i = 0; i < NUM_INDUSTRYTILES; i++) {
-			free(file->indtspec[i]);
+			free(indtspec[i]);
 		}
 
-		free(file->indtspec);
-		file->indtspec = NULL;
+		free(indtspec);
+		indtspec = NULL;
 	}
 }
 
 static void ResetNewGRF()
 {
-	GRFFile *next;
-
-	for (GRFFile *f = _first_grffile; f != NULL; f = next) {
-		next = f->next;
-
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		GRFFile *f = *file;
 		free(f->filename);
 		free(f->cargo_list);
 		free(f->railtype_list);
 		free(f);
 	}
 
-	_first_grffile = NULL;
+	_grf_files.Clear();
 	_cur_grffile   = NULL;
 }
 
@@ -5672,18 +5727,23 @@ static void InitNewGRFFile(const GRFConfig *config, int sprite_offset)
 	newfile->traininfo_vehicle_pitch = 0;
 	newfile->traininfo_vehicle_width = TRAININFO_DEFAULT_VEHICLE_WIDTH;
 
-	/* Copy the initial parameter list */
-	assert_compile(lengthof(newfile->param) == lengthof(config->param) && lengthof(config->param) == 0x80);
-	newfile->param_end = config->num_params;
-	memcpy(newfile->param, config->param, sizeof(newfile->param));
-
-	if (_first_grffile == NULL) {
-		_cur_grffile = newfile;
-		_first_grffile = newfile;
-	} else {
-		_cur_grffile->next = newfile;
-		_cur_grffile = newfile;
+	/* Mark price_base_multipliers as 'not set' */
+	for (Price i = PR_BEGIN; i < PR_END; i++) {
+		newfile->price_base_multipliers[i] = INVALID_PRICE_MODIFIER;
 	}
+
+	/* Copy the initial parameter list
+	 * 'Uninitialised' parameters are zeroed as that is their default value when dynamically creating them. */
+	assert_compile(lengthof(newfile->param) == lengthof(config->param) && lengthof(config->param) == 0x80);
+	memset(newfile->param, 0, sizeof(newfile->param));
+
+	assert(config->num_params <= lengthof(config->param));
+	newfile->param_end = config->num_params;
+	if (newfile->param_end > 0) {
+		MemCpyT(newfile->param, config->param, newfile->param_end);
+	}
+
+	*_grf_files.Append() = _cur_grffile = newfile;
 }
 
 
@@ -5809,17 +5869,19 @@ static void FinaliseHouseArray()
 	 */
 	Year min_year = MAX_YEAR;
 
-	for (GRFFile *file = _first_grffile; file != NULL; file = file->next) {
-		if (file->housespec == NULL) continue;
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		HouseSpec **&housespec = (*file)->housespec;
+		if (housespec == NULL) continue;
 
 		for (int i = 0; i < HOUSE_MAX; i++) {
-			HouseSpec *hs = file->housespec[i];
+			HouseSpec *hs = housespec[i];
 
 			if (hs == NULL) continue;
 
-			const HouseSpec *next1 = (i + 1 < HOUSE_MAX ? file->housespec[i + 1] : NULL);
-			const HouseSpec *next2 = (i + 2 < HOUSE_MAX ? file->housespec[i + 2] : NULL);
-			const HouseSpec *next3 = (i + 3 < HOUSE_MAX ? file->housespec[i + 3] : NULL);
+			const HouseSpec *next1 = (i + 1 < HOUSE_MAX ? housespec[i + 1] : NULL);
+			const HouseSpec *next2 = (i + 2 < HOUSE_MAX ? housespec[i + 2] : NULL);
+			const HouseSpec *next3 = (i + 3 < HOUSE_MAX ? housespec[i + 3] : NULL);
 
 			if (((hs->building_flags & BUILDING_HAS_2_TILES) != 0 &&
 						(next1 == NULL || !next1->enabled || (next1->building_flags & BUILDING_HAS_1_TILE) != 0)) ||
@@ -5827,7 +5889,7 @@ static void FinaliseHouseArray()
 						(next2 == NULL || !next2->enabled || (next2->building_flags & BUILDING_HAS_1_TILE) != 0 ||
 						next3 == NULL || !next3->enabled || (next3->building_flags & BUILDING_HAS_1_TILE) != 0))) {
 				hs->enabled = false;
-				DEBUG(grf, 1, "FinaliseHouseArray: %s defines house %d as multitile, but no suitable tiles follow. Disabling house.", file->filename, hs->local_id);
+				DEBUG(grf, 1, "FinaliseHouseArray: %s defines house %d as multitile, but no suitable tiles follow. Disabling house.", (*file)->filename, hs->local_id);
 				continue;
 			}
 
@@ -5837,7 +5899,7 @@ static void FinaliseHouseArray()
 			if (((hs->building_flags & BUILDING_HAS_2_TILES) != 0 && next1->population != 0) ||
 					((hs->building_flags & BUILDING_HAS_4_TILES) != 0 && (next2->population != 0 || next3->population != 0))) {
 				hs->enabled = false;
-				DEBUG(grf, 1, "FinaliseHouseArray: %s defines multitile house %d with non-zero population on additional tiles. Disabling house.", file->filename, hs->local_id);
+				DEBUG(grf, 1, "FinaliseHouseArray: %s defines multitile house %d with non-zero population on additional tiles. Disabling house.", (*file)->filename, hs->local_id);
 				continue;
 			}
 
@@ -5860,10 +5922,13 @@ static void FinaliseHouseArray()
  * after the file has finished loading. */
 static void FinaliseIndustriesArray()
 {
-	for (GRFFile *file = _first_grffile; file != NULL; file = file->next) {
-		if (file->industryspec != NULL) {
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		IndustrySpec **&industryspec = (*file)->industryspec;
+		IndustryTileSpec **&indtspec = (*file)->indtspec;
+		if (industryspec != NULL) {
 			for (int i = 0; i < NUM_INDUSTRYTYPES; i++) {
-				IndustrySpec *indsp = file->industryspec[i];
+				IndustrySpec *indsp = industryspec[i];
 
 				if (indsp != NULL && indsp->enabled) {
 					StringID strid;
@@ -5898,9 +5963,9 @@ static void FinaliseIndustriesArray()
 			}
 		}
 
-		if (file->indtspec != NULL) {
+		if (indtspec != NULL) {
 			for (int i = 0; i < NUM_INDUSTRYTILES; i++) {
-				IndustryTileSpec *indtsp = file->indtspec[i];
+				IndustryTileSpec *indtsp = indtspec[i];
 				if (indtsp != NULL) {
 					_industile_mngr.SetEntitySpec(indtsp);
 				}
@@ -6124,6 +6189,122 @@ static void ActivateOldShore()
 	}
 }
 
+/**
+ * Decide whether price base multipliers of grfs shall apply globally or only to the grf specifying them
+ */
+static void FinalisePriceBaseMultipliers()
+{
+	extern const PriceBaseSpec _price_base_specs[];
+	static const uint32 override_features = (1 << GSF_TRAIN) | (1 << GSF_ROAD) | (1 << GSF_SHIP) | (1 << GSF_AIRCRAFT);
+
+	/* Evaluate grf overrides */
+	int num_grfs = _grf_files.Length();
+	int *grf_overrides = AllocaM(int, num_grfs);
+	for (int i = 0; i < num_grfs; i++) {
+		grf_overrides[i] = -1;
+
+		GRFFile *source = _grf_files[i];
+		uint32 override = _grf_id_overrides[source->grfid];
+		if (override == 0) continue;
+
+		GRFFile *dest = GetFileByGRFID(override);
+		if (dest == NULL) continue;
+
+		grf_overrides[i] = _grf_files.FindIndex(dest);
+		assert(grf_overrides[i] >= 0);
+	}
+
+	/* Override features and price base multipliers of earlier loaded grfs */
+	for (int i = 0; i < num_grfs; i++) {
+		if (grf_overrides[i] < 0 || grf_overrides[i] >= i) continue;
+		GRFFile *source = _grf_files[i];
+		GRFFile *dest = _grf_files[grf_overrides[i]];
+
+		uint32 features = (source->grf_features | dest->grf_features) & override_features;
+		source->grf_features |= features;
+		dest->grf_features |= features;
+
+		for (Price p = PR_BEGIN; p < PR_END; p++) {
+			/* No price defined -> nothing to do */
+			if (!HasBit(features, _price_base_specs[p].grf_feature) || source->price_base_multipliers[p] == INVALID_PRICE_MODIFIER) continue;
+			DEBUG(grf, 3, "'%s' overrides price base multiplier %d of '%s'", source->filename, p, dest->filename);
+			dest->price_base_multipliers[p] = source->price_base_multipliers[p];
+		}
+	}
+
+	/* Propagate features and price base multipliers of afterwards loaded grfs, if none is present yet */
+	for (int i = num_grfs - 1; i >= 0; i--) {
+		if (grf_overrides[i] < 0 || grf_overrides[i] <= i) continue;
+		GRFFile *source = _grf_files[i];
+		GRFFile *dest = _grf_files[grf_overrides[i]];
+
+		uint32 features = (source->grf_features | dest->grf_features) & override_features;
+		source->grf_features |= features;
+		dest->grf_features |= features;
+
+		for (Price p = PR_BEGIN; p < PR_END; p++) {
+			/* Already a price defined -> nothing to do */
+			if (!HasBit(features, _price_base_specs[p].grf_feature) || dest->price_base_multipliers[p] != INVALID_PRICE_MODIFIER) continue;
+			DEBUG(grf, 3, "Price base multiplier %d from '%s' propagated to '%s'", p, source->filename, dest->filename);
+			dest->price_base_multipliers[p] = source->price_base_multipliers[p];
+		}
+	}
+
+	/* The 'master grf' now have the correct multipliers. Assign them to the 'addon grfs' to make everything consistent. */
+	for (int i = 0; i < num_grfs; i++) {
+		if (grf_overrides[i] < 0) continue;
+		GRFFile *source = _grf_files[i];
+		GRFFile *dest = _grf_files[grf_overrides[i]];
+
+		uint32 features = (source->grf_features | dest->grf_features) & override_features;
+		source->grf_features |= features;
+		dest->grf_features |= features;
+
+		for (Price p = PR_BEGIN; p < PR_END; p++) {
+			if (!HasBit(features, _price_base_specs[p].grf_feature)) continue;
+			if (source->price_base_multipliers[p] != dest->price_base_multipliers[p]) {
+				DEBUG(grf, 3, "Price base multiplier %d from '%s' propagated to '%s'", p, dest->filename, source->filename);
+			}
+			source->price_base_multipliers[p] = dest->price_base_multipliers[p];
+		}
+	}
+
+	/* Apply fallback prices */
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		PriceMultipliers &price_base_multipliers = (*file)->price_base_multipliers;
+		for (Price p = PR_BEGIN; p < PR_END; p++) {
+			Price fallback_price = _price_base_specs[p].fallback_price;
+			if (fallback_price != INVALID_PRICE && price_base_multipliers[p] == INVALID_PRICE_MODIFIER) {
+				/* No price multiplier has been set.
+				 * So copy the multiplier from the fallback price, maybe a multiplier was set there. */
+				price_base_multipliers[p] = price_base_multipliers[fallback_price];
+			}
+		}
+	}
+
+	/* Decide local/global scope of price base multipliers */
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		PriceMultipliers &price_base_multipliers = (*file)->price_base_multipliers;
+		for (Price p = PR_BEGIN; p < PR_END; p++) {
+			if (price_base_multipliers[p] == INVALID_PRICE_MODIFIER) {
+				/* No multiplier was set; set it to a neutral value */
+				price_base_multipliers[p] = 0;
+			} else {
+				if (!HasBit((*file)->grf_features, _price_base_specs[p].grf_feature)) {
+					/* The grf does not define any objects of the feature,
+					 * so it must be a difficulty setting. Apply it globally */
+					DEBUG(grf, 3, "'%s' sets global price base multiplier %d", (*file)->filename, p);
+					SetPriceBaseMultiplier(p, price_base_multipliers[p]);
+					price_base_multipliers[p] = 0;
+				} else {
+					DEBUG(grf, 3, "'%s' sets local price base multiplier %d", (*file)->filename, p);
+				}
+			}
+		}
+	}
+}
+
 void InitDepotWindowBlockSizes();
 
 extern void InitGRFTownGeneratorNames();
@@ -6174,6 +6355,8 @@ static void AfterLoadGRFs()
 	}
 
 	SetYearEngineAgingStops();
+
+	FinalisePriceBaseMultipliers();
 
 	/* Deallocate temporary loading data */
 	free(_gted);

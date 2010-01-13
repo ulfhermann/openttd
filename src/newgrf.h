@@ -74,7 +74,6 @@ struct GRFFile {
 	uint32 grfid;
 	uint16 sprite_offset;
 	byte grf_version;
-	GRFFile *next;
 
 	/* A sprite group contains all sprites of a given vehicle (or multiple
 	 * vehicles) when carrying given cargo. It consists of several sprite
@@ -116,6 +115,18 @@ struct GRFFile {
 
 	int traininfo_vehicle_pitch;  ///< Vertical offset for draing train images in depot GUI and vehicle details
 	int traininfo_vehicle_width;  ///< Width (in pixels) of a 8/8 train vehicle in depot GUI and vehicle details
+
+	uint32 grf_features;                     ///< Bitset of GrfSpecFeature the grf uses
+	PriceMultipliers price_base_multipliers; ///< Price base multipliers as set by the grf.
+
+	/** Get GRF Parameter with range checking */
+	uint32 GetParam(uint number) const
+	{
+		/* Note: We implicitly test for number < lengthof(this->param) and return 0 for invalid parameters.
+		 *       In fact this is the more important test, as param is zeroed anyway. */
+		assert(this->param_end <= lengthof(this->param));
+		return (number < this->param_end) ? this->param[number] : 0;
+	}
 };
 
 enum ShoreReplacement {
@@ -145,5 +156,6 @@ bool HasGrfMiscBit(GrfMiscBit bit);
 bool GetGlobalVariable(byte param, uint32 *value);
 
 StringID MapGRFStringID(uint32 grfid, StringID str);
+void ShowNewGRFError();
 
 #endif /* NEWGRF_H */

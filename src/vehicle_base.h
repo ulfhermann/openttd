@@ -105,6 +105,7 @@ public:
 	/* Used for timetabling. */
 	uint32 current_order_time;     ///< How many ticks have passed since this order started.
 	int32 lateness_counter;        ///< How many ticks late (or early if negative) this vehicle is.
+	Date timetable_start;          ///< When the vehicle is supposed to start the timetable.
 
 	/* Boundaries for the current position in the world and a next hash link.
 	 * NOSAVE: All of those can be updated with VehiclePositionChanged() */
@@ -183,13 +184,8 @@ public:
 
 	byte vehicle_flags;             ///< Used for gradual loading and other miscellaneous things (@see VehicleFlags enum)
 
-	/**
-	 * Multi purpose variable used as counter for:
-	 *  - loading/unloading: ticks to wait before starting next cycle.
-	 *  - aircraft: ticks between each turn to prevent > 45 degree turns.
-	 *  - trains: ticks waiting in front of a signal, ticks being stuck or a counter for forced proceeding through signals.
-	 */
-	uint16 time_counter;
+	/** Ticks to wait before starting next cycle. */
+	uint16 load_unload_ticks;
 
 	GroupID group_id;               ///< Index of group Pool array
 
@@ -321,6 +317,13 @@ public:
 	 * Calls the new day handler of the vehicle
 	 */
 	virtual void OnNewDay() {};
+
+	/**
+	 * Crash the (whole) vehicle chain.
+	 * @param flooded whether the cause of the crash is flooding or not.
+	 * @return the number of lost souls.
+	 */
+	virtual uint Crash(bool flooded = false);
 
 	/**
 	 * Update vehicle sprite- and position caches
@@ -484,6 +487,7 @@ public:
 
 		this->current_order_time = src->current_order_time;
 		this->lateness_counter = src->lateness_counter;
+		this->timetable_start = src->timetable_start;
 
 		this->service_interval = src->service_interval;
 	}
@@ -637,7 +641,7 @@ struct SpecializedVehicle : public Vehicle {
 	 */
 	static FORCEINLINE T *GetIfValid(size_t index)
 	{
-		return IsValidID(index) ? Get(index) : NULL ;
+		return IsValidID(index) ? Get(index) : NULL;
 	}
 
 	/**
@@ -688,7 +692,7 @@ struct DisasterVehicle : public SpecializedVehicle<DisasterVehicle, VEH_DISASTER
 struct FreeUnitIDGenerator {
 	bool *cache;  ///< array of occupied unit id numbers
 	UnitID maxid; ///< maximum ID at the moment of constructor call
-	UnitID curid; ///< last ID returned ; 0 if none
+	UnitID curid; ///< last ID returned; 0 if none
 
 	/** Initializes the structure. Vehicle unit numbers are supposed not to change after
 	 * struct initialization, except after each call to this->NextID() the returned value

@@ -109,9 +109,30 @@ struct StatusBarWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
-		size->height = FONT_HEIGHT_NORMAL + padding.height;
+		Dimension d;
+		switch (widget) {
+			case SBW_LEFT:
+				SetDParam(0, MAX_YEAR * DAYS_IN_YEAR);
+				d = GetStringBoundingBox(STR_WHITE_DATE_LONG);
+				break;
+
+			case SBW_RIGHT: {
+				int64 max_money = UINT32_MAX;
+				const Company *c;
+				FOR_ALL_COMPANIES(c) max_money = max<int64>(c->money, max_money);
+				SetDParam(0, 100LL * max_money);
+				d = GetStringBoundingBox(STR_COMPANY_MONEY);
+			} break;
+
+			default:
+				return;
+		}
+
+		d.width += padding.width;
+		d.height += padding.height;
+		*size = maxdim(d, *size);
 	}
 
 	virtual void DrawWidget(const Rect &r, int widget) const
@@ -140,9 +161,9 @@ struct StatusBarWindow : Window {
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, STR_STATUSBAR_AUTOSAVE, TC_FROMSTRING, SA_CENTER);
 				} else if (_pause_mode != PM_UNPAUSED) {
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, STR_STATUSBAR_PAUSED, TC_FROMSTRING, SA_CENTER);
-				} else if (this->ticker_scroll < TICKER_STOP && FindWindowById(WC_NEWS_WINDOW, 0) == NULL && _statusbar_news_item.string_id != 0) {
+				} else if (this->ticker_scroll < TICKER_STOP && FindWindowById(WC_NEWS_WINDOW, 0) == NULL && _statusbar_news_item != NULL && _statusbar_news_item->string_id != 0) {
 					/* Draw the scrolling news text */
-					if (!DrawScrollingStatusText(&_statusbar_news_item, this->ticker_scroll, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, r.bottom)) {
+					if (!DrawScrollingStatusText(_statusbar_news_item, this->ticker_scroll, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, r.bottom)) {
 						InvalidateWindowData(WC_STATUS_BAR, 0, SBI_NEWS_DELETED);
 						if (Company::IsValidID(_local_company)) {
 							/* This is the default text */
@@ -214,10 +235,10 @@ static const NWidgetPart _nested_main_status_widgets[] = {
 };
 
 static const WindowDesc _main_status_desc(
-	WDP_CENTER, 0, 320, 12, 640, 12,
+	WDP_MANUAL, 640, 12,
 	WC_STATUS_BAR, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
-	NULL, _nested_main_status_widgets, lengthof(_nested_main_status_widgets)
+	WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
+	_nested_main_status_widgets, lengthof(_nested_main_status_widgets)
 );
 
 /**

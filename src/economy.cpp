@@ -10,7 +10,6 @@
 /** @file economy.cpp Handling of the economy. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "tile_cmd.h"
 #include "company_func.h"
 #include "command_func.h"
@@ -109,7 +108,7 @@ int _score_part[MAX_COMPANIES][SCORE_END];
 Economy _economy;
 Prices _price;
 Money _additional_cash_required;
-static int8 _price_base_multiplier[PR_END];
+static PriceMultipliers _price_base_multiplier;
 
 Money CalculateCompanyValue(const Company *c)
 {
@@ -305,7 +304,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 				if (c->share_owners[i] == old_owner) {
 					/* Sell his shares */
 					CommandCost res = DoCommand(0, c->index, 0, DC_EXEC, CMD_SELL_SHARE_IN_COMPANY);
-					/* Because we are in a DoCommand, we can't just execute an other one and
+					/* Because we are in a DoCommand, we can't just execute another one and
 					 *  expect the money to be removed. We need to do it ourself! */
 					SubtractMoneyFromCompany(res);
 				}
@@ -319,7 +318,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 			if (_current_company != INVALID_OWNER) {
 				/* Sell the shares */
 				CommandCost res = DoCommand(0, old_owner, 0, DC_EXEC, CMD_SELL_SHARE_IN_COMPANY);
-				/* Because we are in a DoCommand, we can't just execute an other one and
+				/* Because we are in a DoCommand, we can't just execute another one and
 				 *  expect the money to be removed. We need to do it ourself! */
 				SubtractMoneyFromCompany(res);
 			}
@@ -788,15 +787,27 @@ void InitializeEconomy()
 }
 
 /**
- * Determine a certain base price with range checking
- * @param index Price of interest
- * @return Base price, or zero if out of range
+ * Determine a certain price
+ * @param index Price base
+ * @param cost_factor Price factor
+ * @param grf_file NewGRF to use local price multipliers from.
+ * @param shift Extra bit shifting after the computation
+ * @return Price
  */
-Money GetPriceByIndex(Price index)
+Money GetPrice(Price index, uint cost_factor, const GRFFile *grf_file, int shift)
 {
 	if (index >= PR_END) return 0;
 
-	return _price[index];
+	Money cost = _price[index] * cost_factor;
+	if (grf_file != NULL) shift += grf_file->price_base_multipliers[index];
+
+	if (shift >= 0) {
+		cost <<= shift;
+	} else {
+		cost >>= -shift;
+	}
+
+	return cost;
 }
 
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, CargoID cargo_type)
@@ -885,7 +896,7 @@ static uint DeliverGoodsToIndustry(const Station *st, CargoID cargo_type, uint n
 
 		/* Check if industry temporarily refuses acceptance */
 		if (HasBit(indspec->callback_mask, CBM_IND_REFUSE_CARGO)) {
-			uint16 res = GetIndustryCallback(CBID_INDUSTRY_REFUSE_CARGO, 0, GetReverseCargoTranslation(cargo_type, indspec->grf_prop.grffile), ind, ind->type, ind->xy);
+			uint16 res = GetIndustryCallback(CBID_INDUSTRY_REFUSE_CARGO, 0, GetReverseCargoTranslation(cargo_type, indspec->grf_prop.grffile), ind, ind->type, ind->location.tile);
 			if (res == 0) continue;
 		}
 
@@ -918,22 +929,22 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 {
 	assert(num_pieces > 0);
 
-	/* Update company statistics */
-	company->cur_economy.delivered_cargo += num_pieces;
-	SetBit(company->cargo_types, cargo_type);
-
 	const Station *st = Station::Get(dest);
-
-	/* Increase town's counter for some special goods types */
-	const CargoSpec *cs = CargoSpec::Get(cargo_type);
-	if (cs->town_effect == TE_FOOD) st->town->new_act_food += num_pieces;
-	if (cs->town_effect == TE_WATER) st->town->new_act_water += num_pieces;
 
 	/* Give the goods to the industry. */
 	uint accepted = DeliverGoodsToIndustry(st, cargo_type, num_pieces, src_type == ST_INDUSTRY ? src : INVALID_INDUSTRY);
 
 	/* If this cargo type is always accepted, accept all */
 	if (HasBit(st->always_accepted, cargo_type)) accepted = num_pieces;
+
+	/* Update company statistics */
+	company->cur_economy.delivered_cargo += accepted;
+	if (accepted > 0) SetBit(company->cargo_types, cargo_type);
+
+	/* Increase town's counter for some special goods types */
+	const CargoSpec *cs = CargoSpec::Get(cargo_type);
+	if (cs->town_effect == TE_FOOD) st->town->new_act_food += accepted;
+	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
 
 	/* Determine profit */
 	Money profit = GetTransportedGoodsIncome(accepted, DistanceManhattan(source_tile, st->xy), days_in_transit, cargo_type);
@@ -1057,6 +1068,8 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 		cp->DaysInTransit(),
 		this->ct);
 
+	profit = profit * _settings_game.economy.feeder_payment_share / 100;
+
 	this->visual_profit += profit; // accumulate transfer profits for whole vehicle
 	return profit; // account for the (virtual) profit already made for the cargo packet
 }
@@ -1071,7 +1084,7 @@ void PrepareUnload(Vehicle *front_v)
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
 
 	/* Start unloading in at the first possible moment */
-	front_v->time_counter = 1;
+	front_v->load_unload_ticks = 1;
 
 	if ((front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) == 0) {
 		for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
@@ -1097,10 +1110,10 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
-	assert(v->time_counter != 0);
+	assert(v->load_unload_ticks != 0);
 
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--v->time_counter != 0) {
+	if (--v->load_unload_ticks != 0) {
 		if (_settings_game.order.improved_load && (v->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 			/* 'Reserve' this cargo for this vehicle, because we were first. */
 			for (; v != NULL; v = v->Next()) {
@@ -1118,13 +1131,14 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		/* The train reversed in the station. Take the "easy" way
 		 * out and let the train just leave as it always did. */
 		SetBit(v->vehicle_flags, VF_LOADING_FINISHED);
-		v->time_counter = 1;
+		v->load_unload_ticks = 1;
 		return;
 	}
 
 	int unloading_time = 0;
 	Vehicle *u = v;
-	int result = 0;
+	bool dirty_vehicle = false;
+	bool dirty_station = false;
 
 	bool completely_emptied = true;
 	bool anything_unloaded = false;
@@ -1164,7 +1178,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 				/* The cargo has reached it's final destination, the packets may now be destroyed */
 				remaining = v->cargo.MoveTo<StationCargoList>(NULL, amount_unloaded, VehicleCargoList::MTA_FINAL_DELIVERY, payment, last_visited);
 
-				result |= 1;
+				dirty_vehicle = true;
 				accepted = true;
 			}
 
@@ -1177,7 +1191,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
 				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
 
-				result |= 2;
+				dirty_vehicle = dirty_station = true;
 			} else if (!accepted) {
 				/* The order changed while unloading (unset unload/transfer) or the
 				 * station does not accept our goods. */
@@ -1268,7 +1282,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 
 			unloading_time += cap;
 
-			result |= 2;
+			dirty_vehicle = dirty_station = true;
 		}
 
 		if (v->cargo.Count() >= v->cargo_cap) {
@@ -1350,20 +1364,20 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 	}
 
 	/* Always wait at least 1, otherwise we'll wait 'infinitively' long. */
-	v->time_counter = max(1, unloading_time);
+	v->load_unload_ticks = max(1, unloading_time);
 
 	if (completely_emptied) {
 		TriggerVehicle(v, VEHICLE_TRIGGER_EMPTY);
 	}
 
-	if (result != 0) {
+	if (dirty_vehicle) {
 		SetWindowDirty(GetWindowClassForVehicleType(v->type), v->owner);
 		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-
-		st->MarkTilesDirty(true);
 		v->MarkDirty();
-
-		if (result & 2) SetWindowDirty(WC_STATION_VIEW, last_visited);
+	}
+	if (dirty_station) {
+		st->MarkTilesDirty(true);
+		SetWindowDirty(WC_STATION_VIEW, last_visited);
 	}
 }
 

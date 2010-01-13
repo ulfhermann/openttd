@@ -26,6 +26,29 @@
 #include "table/strings.h"
 #include "table/sprites.h"
 
+/**
+ * Show the first NewGRF error we can find.
+ */
+void ShowNewGRFError()
+{
+	for (const GRFConfig *c = _grfconfig; c != NULL; c = c->next) {
+		/* We only want to show fatal errors */
+		if (c->error == NULL || c->error->severity != STR_NEWGRF_ERROR_MSG_FATAL) continue;
+
+		SetDParam   (0, c->error->custom_message == NULL ? c->error->message : STR_JUST_RAW_STRING);
+		SetDParamStr(1, c->error->custom_message);
+		SetDParam   (2, STR_JUST_RAW_STRING);
+		SetDParamStr(3, c->filename);
+		SetDParam   (4, STR_JUST_RAW_STRING);
+		SetDParamStr(5, c->error->data);
+		for (uint i = 0; i < c->error->num_params; i++) {
+			SetDParam(6 + i, c->error->param_value[i]);
+		}
+		ShowErrorMessage(STR_NEWGRF_ERROR_FATAL_POPUP, INVALID_STRING_ID, 0, 0, true);
+		break;
+	}
+}
+
 /** Parse an integerlist string and set each found value
  * @param p the string to be parsed. Each element in the list is seperated by a
  * comma or a space character
@@ -120,18 +143,12 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint right, uint 
 
 /** Names of the add a newgrf window widgets. */
 enum AddNewGRFWindowWidgets {
-	ANGRFW_CLOSEBOX = 0,
-	ANGRFW_CAPTION,
-	ANGRFW_FILTER_PANEL,
-	ANGRFW_FILTER_TITLE,
 	ANGRFW_FILTER,
-	ANGRFW_BACKGROUND,
 	ANGRFW_GRF_LIST,
 	ANGRFW_SCROLLBAR,
 	ANGRFW_GRF_INFO,
 	ANGRFW_ADD,
 	ANGRFW_RESCAN,
-	ANGRFW_RESIZE,
 };
 
 /**
@@ -199,7 +216,12 @@ private:
 	void SortGrfList()
 	{
 		if (!this->grfs.Sort()) return;
+		this->UpdateListPosition();
+	}
 
+	/** Update selection position. */
+	void UpdateListPosition()
+	{
 		/* update list position */
 		if (this->sel != NULL) {
 			this->sel_pos = this->grfs.FindIndex(this->sel);
@@ -222,6 +244,7 @@ private:
 	void FilterGrfList()
 	{
 		if (!this->grfs.Filter(this->edit_str_buf)) return;
+		this->UpdateListPosition();
 	}
 
 	/** Make sure that the currently selected grf is within the visible part of the list */
@@ -262,10 +285,9 @@ public:
 
 		this->BuildGrfList();
 		this->SetWidgetDisabledState(ANGRFW_ADD, this->sel == NULL || this->sel->IsOpenTTDBaseGRF());
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(ANGRFW_GRF_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case ANGRFW_GRF_LIST:
@@ -281,7 +303,7 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(ANGRFW_GRF_LIST)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, ANGRFW_GRF_LIST);
 	}
 
 	virtual void OnPaint()
@@ -461,17 +483,17 @@ NewGRFAddWindow::GUIGRFConfigList::FilterFunction * const NewGRFAddWindow::filte
 
 static const NWidgetPart _nested_newgrf_add_dlg_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, ANGRFW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_GREY, ANGRFW_CAPTION), SetDataTip(STR_NEWGRF_ADD_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_NEWGRF_ADD_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, ANGRFW_FILTER_PANEL), SetResize(1, 0),
+	NWidget(WWT_PANEL, COLOUR_GREY), SetResize(1, 0),
 		NWidget(NWID_HORIZONTAL), SetPadding(WD_TEXTPANEL_TOP, 0, WD_TEXTPANEL_BOTTOM, 0), SetPIP(WD_FRAMETEXT_LEFT, WD_FRAMETEXT_RIGHT, WD_FRAMETEXT_RIGHT),
-			NWidget(WWT_TEXT, COLOUR_GREY, ANGRFW_FILTER_TITLE), SetFill(false, true), SetDataTip(STR_LIST_FILTER_TITLE, STR_NULL),
-			NWidget(WWT_EDITBOX, COLOUR_GREY, ANGRFW_FILTER), SetMinimalSize(100, 12), SetResize(1, 0), SetDataTip(STR_LIST_FILTER_OSKTITLE, STR_LIST_FILTER_TOOLTIP),
+			NWidget(WWT_TEXT, COLOUR_GREY), SetFill(0, 1), SetDataTip(STR_LIST_FILTER_TITLE, STR_NULL),
+			NWidget(WWT_EDITBOX, COLOUR_GREY, ANGRFW_FILTER), SetFill(1, 0), SetMinimalSize(100, 12), SetResize(1, 0), SetDataTip(STR_LIST_FILTER_OSKTITLE, STR_LIST_FILTER_TOOLTIP),
 		EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_GREY, ANGRFW_BACKGROUND),
+		NWidget(WWT_PANEL, COLOUR_GREY),
 			NWidget(WWT_INSET, COLOUR_GREY, ANGRFW_GRF_LIST), SetMinimalSize(290, 1), SetResize(1, 1), SetPadding(2, 2, 2, 2), EndContainer(),
 		EndContainer(),
 		NWidget(WWT_SCROLLBAR, COLOUR_GREY, ANGRFW_SCROLLBAR),
@@ -482,16 +504,16 @@ static const NWidgetPart _nested_newgrf_add_dlg_widgets[] = {
 			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ANGRFW_ADD), SetMinimalSize(147, 12), SetResize(1, 0), SetDataTip(STR_NEWGRF_ADD_FILE, STR_NEWGRF_ADD_FILE_TOOLTIP),
 			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ANGRFW_RESCAN), SetMinimalSize(147, 12), SetResize(1, 0), SetDataTip(STR_NEWGRF_ADD_RESCAN_FILES, STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP),
 		EndContainer(),
-		NWidget(WWT_RESIZEBOX, COLOUR_GREY, ANGRFW_RESIZE), SetFill(false, true),
+		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 	EndContainer(),
 };
 
 /* Window definition for the add a newgrf window */
 static const WindowDesc _newgrf_add_dlg_desc(
-	WDP_CENTER, WDP_CENTER, 0, 0, 306, 347,
+	WDP_CENTER, 306, 347,
 	WC_SAVELOAD, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	NULL, _nested_newgrf_add_dlg_widgets, lengthof(_nested_newgrf_add_dlg_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_newgrf_add_dlg_widgets, lengthof(_nested_newgrf_add_dlg_widgets)
 );
 
 static GRFPresetList _grf_preset_list;
@@ -517,13 +539,9 @@ static void NewGRFConfirmationCallback(Window *w, bool confirmed);
 
 /** Names of the manage newgrfs window widgets. */
 enum ShowNewGRFStateWidgets {
-	SNGRFS_CLOSEBOX = 0,
-	SNGRFS_CAPTION,
-	SNGRFS_BACKGROUND1,
 	SNGRFS_PRESET_LIST,
 	SNGRFS_PRESET_SAVE,
 	SNGRFS_PRESET_DELETE,
-	SNGRFS_BACKGROUND2,
 	SNGRFS_ADD,
 	SNGRFS_REMOVE,
 	SNGRFS_MOVE_UP,
@@ -535,7 +553,6 @@ enum ShowNewGRFStateWidgets {
 	SNGRFS_TOGGLE_PALETTE,
 	SNGRFS_APPLY_CHANGES,
 	SNGRFS_CONTENT_DOWNLOAD,
-	SNGRFS_RESIZE,
 };
 
 /**
@@ -581,7 +598,7 @@ struct NewGRFWindow : public Window {
 		_grf_preset_list.Clear();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case SNGRFS_FILE_LIST:
@@ -610,7 +627,7 @@ struct NewGRFWindow : public Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetCore>(SNGRFS_FILE_LIST)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, SNGRFS_FILE_LIST);
 		this->GetWidget<NWidgetCore>(SNGRFS_FILE_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
@@ -638,6 +655,13 @@ struct NewGRFWindow : public Window {
 		switch (widget) {
 			case SNGRFS_FILE_LIST: {
 				uint y = r.top + WD_MATRIX_TOP;
+				int sprite_offset_y = (FONT_HEIGHT_NORMAL - 10) / 2 - 1;
+
+				bool rtl = _dynlang.text_dir == TD_RTL;
+				uint text_left    = rtl ? r.left + WD_FRAMERECT_LEFT : r.left + 25;
+				uint text_right   = rtl ? r.right - 25 : r.right - WD_FRAMERECT_RIGHT;
+				uint square_left  = rtl ? r.right - 15 : r.left + 5;
+				uint warning_left = rtl ? r.right - 30 : r.left + 20;
 
 				int i = 0;
 				for (const GRFConfig *c = this->list; c != NULL; c = c->next, i++) {
@@ -668,10 +692,10 @@ struct NewGRFWindow : public Window {
 							}
 						}
 
-						DrawSprite(SPR_SQUARE, pal, r.left + 5, y - 1);
-						if (c->error != NULL) DrawSprite(SPR_WARNING_SIGN, 0, r.left + 20, y - 1);
-						byte txtoffset = c->error != NULL ? 35 : 25;
-						DrawString(r.left + txtoffset, r.right - WD_FRAMERECT_RIGHT, y, text, this->sel == c ? TC_WHITE : TC_BLACK);
+						DrawSprite(SPR_SQUARE, pal, square_left, y + sprite_offset_y);
+						if (c->error != NULL) DrawSprite(SPR_WARNING_SIGN, 0, warning_left, y + sprite_offset_y);
+						uint txtoffset = c->error == NULL ? 0 : 10;
+						DrawString(text_left + (rtl ? 0 : txtoffset), text_right - (rtl ? txtoffset : 0), y, text, this->sel == c ? TC_WHITE : TC_BLACK);
 						y += this->resize.step_height;
 					}
 				}
@@ -679,7 +703,7 @@ struct NewGRFWindow : public Window {
 
 			case SNGRFS_NEWGRF_INFO:
 				if (this->sel != NULL) {
-					ShowNewGRFInfo(this->sel, r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP, r.right - WD_FRAMERECT_RIGHT, r.bottom - WD_FRAMERECT_BOTTOM, false);
+					ShowNewGRFInfo(this->sel, r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP, r.right - WD_FRAMERECT_RIGHT, r.bottom - WD_FRAMERECT_BOTTOM, this->show_params);
 				}
 				break;
 		}
@@ -951,7 +975,7 @@ struct NewGRFWindow : public Window {
 
 				for (c = this->list, i = 0; c != NULL; c = c->next, i++) {}
 
-				this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(SNGRFS_FILE_LIST)->current_y) / this->resize.step_height);
+				this->vscroll.SetCapacityFromWidget(this, SNGRFS_FILE_LIST);
 				this->GetWidget<NWidgetCore>(SNGRFS_FILE_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 				this->vscroll.SetCount(i);
 				break;
@@ -1004,48 +1028,48 @@ struct NewGRFWindow : public Window {
 /* Widget definition of the manage newgrfs window */
 static const NWidgetPart _nested_newgrf_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_MAUVE, SNGRFS_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_MAUVE, SNGRFS_CAPTION), SetDataTip(STR_NEWGRF_SETTINGS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_MAUVE),
+		NWidget(WWT_CAPTION, COLOUR_MAUVE), SetDataTip(STR_NEWGRF_SETTINGS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_MAUVE, SNGRFS_BACKGROUND1),
+	NWidget(WWT_PANEL, COLOUR_MAUVE),
 		NWidget(NWID_HORIZONTAL), SetPadding(2, 10, 2, 10),
-			NWidget(WWT_DROPDOWN, COLOUR_YELLOW, SNGRFS_PRESET_LIST), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP),
+			NWidget(WWT_DROPDOWN, COLOUR_YELLOW, SNGRFS_PRESET_LIST), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP),
 			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_PRESET_SAVE), SetFill(true, false), SetDataTip(STR_NEWGRF_SETTINGS_PRESET_SAVE, STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_PRESET_DELETE), SetFill(true, false), SetDataTip(STR_NEWGRF_SETTINGS_PRESET_DELETE, STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_PRESET_SAVE), SetFill(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_PRESET_SAVE, STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_PRESET_DELETE), SetFill(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_PRESET_DELETE, STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP),
 			EndContainer(),
 		EndContainer(),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_MAUVE, SNGRFS_BACKGROUND2),
+	NWidget(WWT_PANEL, COLOUR_MAUVE),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPadding(2, 10, 2, 10),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_ADD), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_ADD, STR_NEWGRF_SETTINGS_ADD_TOOLTIP),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_REMOVE), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_REMOVE, STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_UP), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_MOVEUP, STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_DOWN), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_MOVEDOWN, STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_ADD), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_ADD, STR_NEWGRF_SETTINGS_ADD_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_REMOVE), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_REMOVE, STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_UP), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_MOVEUP, STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_DOWN), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_MOVEDOWN, STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP),
 		EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_MAUVE, SNGRFS_FILE_LIST), SetFill(true, false), SetDataTip(0x501, STR_NEWGRF_SETTINGS_FILE_TOOLTIP), SetResize(1, 0),
+		NWidget(WWT_MATRIX, COLOUR_MAUVE, SNGRFS_FILE_LIST), SetFill(1, 0), SetDataTip(0x501, STR_NEWGRF_SETTINGS_FILE_TOOLTIP), SetResize(1, 0),
 		NWidget(WWT_SCROLLBAR, COLOUR_MAUVE, SNGRFS_SCROLLBAR),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO), SetFill(true, false), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO), SetFill(1, 0), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_SET_PARAMETERS), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_SET_PARAMETERS, STR_NULL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_TOGGLE_PALETTE), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_TOGGLE_PALETTE, STR_NEWGRF_SETTINGS_TOGGLE_PALETTE_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_APPLY_CHANGES), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_APPLY_CHANGES, STR_NULL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_SET_PARAMETERS), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_SET_PARAMETERS, STR_NULL),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_TOGGLE_PALETTE), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_TOGGLE_PALETTE, STR_NEWGRF_SETTINGS_TOGGLE_PALETTE_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_APPLY_CHANGES), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_NEWGRF_SETTINGS_APPLY_CHANGES, STR_NULL),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_CONTENT_DOWNLOAD), SetFill(true, false), SetResize(1, 0), SetDataTip(STR_INTRO_ONLINE_CONTENT, STR_INTRO_TOOLTIP_ONLINE_CONTENT),
-		NWidget(WWT_RESIZEBOX, COLOUR_MAUVE, SNGRFS_RESIZE),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, SNGRFS_CONTENT_DOWNLOAD), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_INTRO_ONLINE_CONTENT, STR_INTRO_TOOLTIP_ONLINE_CONTENT),
+		NWidget(WWT_RESIZEBOX, COLOUR_MAUVE),
 	EndContainer(),
 };
 
 /* Window definition of the manage newgrfs window */
 static const WindowDesc _newgrf_desc(
-	WDP_CENTER, WDP_CENTER, 300, 263, 300, 263,
+	WDP_CENTER, 300, 263,
 	WC_GAME_OPTIONS, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS | WDF_RESIZABLE,
-	NULL, _nested_newgrf_widgets, lengthof(_nested_newgrf_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_newgrf_widgets, lengthof(_nested_newgrf_widgets)
 );
 
 /** Callback function for the newgrf 'apply changes' confirmation window

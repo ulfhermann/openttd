@@ -19,12 +19,10 @@
 #include "tile_type.h"
 #include "cargo_type.h"
 #include "vehicle_type.h"
-#include "core/smallvec_type.hpp"
 
 void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint radius);
 
-typedef SmallVector<Station*, 1> StationList;
-void FindStationsAroundTiles(TileIndex tile, int w_prod, int h_prod, StationList *stations);
+void FindStationsAroundTiles(const TileArea &location, StationList *stations);
 
 void ShowStationViewWindow(StationID station);
 void UpdateAllStationVirtCoords();
@@ -41,8 +39,6 @@ bool HasStationInUse(StationID station, CompanyID company);
 
 RoadStop *GetRoadStopByTile(TileIndex tile, RoadStopType type);
 uint GetNumRoadStops(const Station *st, RoadStopType type);
-
-void ClearSlot(struct RoadVehicle *v);
 
 void DeleteOilRig(TileIndex t);
 

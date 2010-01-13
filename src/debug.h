@@ -29,14 +29,13 @@
 #ifdef NO_DEBUG_MESSAGES
 	#define DEBUG(name, level, ...) { }
 #else /* NO_DEBUG_MESSAGES */
-	#define DEBUG(name, level, ...) if (level == 0 || _debug_ ## name ## _level >= level) debug(#name, __VA_ARGS__)
+	#define DEBUG(name, level, ...) if ((level) == 0 || _debug_ ## name ## _level >= (level)) debug(#name, __VA_ARGS__)
 
 	extern int _debug_ai_level;
 	extern int _debug_driver_level;
 	extern int _debug_grf_level;
 	extern int _debug_map_level;
 	extern int _debug_misc_level;
-	extern int _debug_ms_level;
 	extern int _debug_net_level;
 	extern int _debug_sprite_level;
 	extern int _debug_oldloader_level;
@@ -73,7 +72,7 @@ const char *GetDebugString();
  * Is the correct usage for multiple TIC() / TOC() calls.
  *
  * TIC() / TOC() creates it's own block, so make sure not the mangle
- *  it with an other block.
+ *  it with another block.
  **/
 #define TIC() {\
 	extern uint64 ottd_rdtsc();\

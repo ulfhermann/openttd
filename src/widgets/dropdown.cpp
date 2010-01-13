@@ -16,7 +16,6 @@
 #include "../window_func.h"
 #include "dropdown_type.h"
 
-#include "table/strings.h"
 
 void DropDownListItem::Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 {
@@ -37,7 +36,7 @@ uint DropDownListStringItem::Width() const
 
 void DropDownListStringItem::Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 {
-	DrawString(left + 2, right - 2, top, this->String(), sel ? TC_WHITE : TC_BLACK);
+	DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, top, this->String(), sel ? TC_WHITE : TC_BLACK);
 }
 
 StringID DropDownListParamStringItem::String() const
@@ -53,7 +52,7 @@ uint DropDownListCharStringItem::Width() const
 
 void DropDownListCharStringItem::Draw(int left, int right, int top, int bottom, bool sel, int bg_colour) const
 {
-	DrawString(left + 2, right - 2, top, this->string, sel ? TC_WHITE : TC_BLACK);
+	DrawString(left + WD_FRAMERECT_LEFT, right - WD_FRAMERECT_RIGHT, top, this->string, sel ? TC_WHITE : TC_BLACK);
 }
 
 /**
@@ -83,10 +82,10 @@ static const NWidgetPart _nested_dropdown_menu_widgets[] = {
 };
 
 const WindowDesc _dropdown_desc(
-	0, 0, 0, 0, 0, 0, // x/y position not used.
+	WDP_MANUAL, 0, 0,
 	WC_DROPDOWN_MENU, WC_NONE,
-	WDF_DEF_WIDGET,
-	NULL, _nested_dropdown_menu_widgets, lengthof(_nested_dropdown_menu_widgets)
+	0,
+	_nested_dropdown_menu_widgets, lengthof(_nested_dropdown_menu_widgets)
 );
 
 /** Drop-down menu window */
@@ -162,7 +161,7 @@ struct DropdownWindow : Window {
 		if (w2 != NULL) {
 			if (w2->nested_array != NULL) {
 				NWidgetCore *nwi2 = w2->GetWidget<NWidgetCore>(this->parent_button);
-				if (nwi2->type == NWID_BUTTON_DRPDOWN) {
+				if (nwi2->type == NWID_BUTTON_DROPDOWN) {
 					nwi2->disp_flags &= ~ND_DROPDOWN_ACTIVE;
 				} else {
 					w2->RaiseWidget(this->parent_button);
@@ -326,27 +325,16 @@ void ShowDropDownList(Window *w, DropDownList *list, int selected, int button, u
 	 * down list window. */
 	Rect wi_rect;
 	Colours wi_colour;
-	if (w->nested_array != NULL) {
-		NWidgetCore *nwi = w->GetWidget<NWidgetCore>(button);
-		wi_rect.left   = nwi->pos_x;
-		wi_rect.right  = nwi->pos_x + nwi->current_x - 1;
-		wi_rect.top    = nwi->pos_y;
-		wi_rect.bottom = nwi->pos_y + nwi->current_y - 1;
-		wi_colour = nwi->colour;
+	NWidgetCore *nwi = w->GetWidget<NWidgetCore>(button);
+	wi_rect.left   = nwi->pos_x;
+	wi_rect.right  = nwi->pos_x + nwi->current_x - 1;
+	wi_rect.top    = nwi->pos_y;
+	wi_rect.bottom = nwi->pos_y + nwi->current_y - 1;
+	wi_colour = nwi->colour;
 
-		if (nwi->type == NWID_BUTTON_DRPDOWN) {
-			nwi->disp_flags |= ND_DROPDOWN_ACTIVE;
-		} else {
-			w->LowerWidget(button);
-		}
+	if (nwi->type == NWID_BUTTON_DROPDOWN) {
+		nwi->disp_flags |= ND_DROPDOWN_ACTIVE;
 	} else {
-		const Widget *wi = &w->widget[button];
-		wi_rect.left   = wi->left;
-		wi_rect.right  = wi->right;
-		wi_rect.top    = wi->top;
-		wi_rect.bottom = wi->bottom;
-		wi_colour = wi->colour;
-
 		w->LowerWidget(button);
 	}
 	w->SetWidgetDirty(button);
@@ -401,7 +389,7 @@ void ShowDropDownList(Window *w, DropDownList *list, int selected, int button, u
 
 	if (auto_width) width = max(width, max_item_width);
 
-	Point dw_pos = {w->left + wi_rect.left, top};
+	Point dw_pos = { w->left + (_dynlang.text_dir == TD_RTL ? wi_rect.right + 1 - width : wi_rect.left), top};
 	Dimension dw_size = {width, height};
 	new DropdownWindow(w, list, selected, button, instant_close, dw_pos, dw_size, wi_colour, scroll);
 }

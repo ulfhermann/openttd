@@ -17,188 +17,102 @@
 #include "transparency.h"
 #include "strings_func.h"
 #include "core/alloc_func.hpp"
+#include "core/smallvec_type.hpp"
 #include "viewport_func.h"
 #include "settings_type.h"
 
-enum {
-	INIT_NUM_TEXT_EFFECTS  =  20,
+/** Container for all information about a text effect */
+struct TextEffect : public ViewportSign{
+	uint64 params_1;     ///< DParam parameter
+	StringID string_id;  ///< String to draw for the text effect, if INVALID_STRING_ID then it's not valid
+	uint8 duration;      ///< How long the text effect should stay, in ticks (applies only when mode == TE_RISING)
+	TextEffectMode mode; ///< Type of text effect
+
+	/** Reset the text effect */
+	void Reset()
+	{
+		this->MarkDirty();
+		this->width_normal = 0;
+		this->string_id = INVALID_STRING_ID;
+	}
 };
 
-struct TextEffect {
-	StringID string_id;
-	int32 x;
-	int32 y;
-	int32 right;
-	int32 bottom;
-	uint16 duration;
-	uint64 params_1;
-	TextEffectMode mode;
-};
-
-/* used for text effects */
-static TextEffect *_text_effect_list = NULL;
-static uint16 _num_text_effects = INIT_NUM_TEXT_EFFECTS;
+static SmallVector<struct TextEffect, 32> _text_effects; ///< Text effects are stored there
 
 /* Text Effects */
-/**
- * Mark the area of the text effect as dirty.
- *
- * This function marks the area of a text effect as dirty for repaint.
- *
- * @param te The TextEffect to mark the area dirty
- * @ingroup dirty
- */
-static void MarkTextEffectAreaDirty(TextEffect *te)
+TextEffectID AddTextEffect(StringID msg, int center, int y, uint8 duration, TextEffectMode mode)
 {
-	/* Width and height of the text effect are doubled, so they are correct in both zoom out levels 1x and 2x. */
-	MarkAllViewportsDirty(
-		te->x,
-		te->y - 1,
-		(te->right - te->x)*2 + te->x + 1,
-		(te->bottom - (te->y - 1)) * 2 + (te->y - 1) + 1
-	);
-}
-
-TextEffectID AddTextEffect(StringID msg, int x, int y, uint16 duration, TextEffectMode mode)
-{
-	TextEffect *te;
-	int w;
-	char buffer[100];
-	TextEffectID i;
-
 	if (_game_mode == GM_MENU) return INVALID_TE_ID;
 
-	/* Look for a free spot in the text effect array */
-	for (i = 0; i < _num_text_effects; i++) {
-		if (_text_effect_list[i].string_id == INVALID_STRING_ID) break;
+	TextEffectID i;
+	for (i = 0; i < _text_effects.Length(); i++) {
+		if (_text_effects[i].string_id == INVALID_STRING_ID) break;
 	}
+	if (i == _text_effects.Length()) _text_effects.Append();
 
-	/* If there is none found, we grow the array */
-	if (i == _num_text_effects) {
-		_num_text_effects += 25;
-		_text_effect_list = ReallocT<TextEffect>(_text_effect_list, _num_text_effects);
-		for (; i < _num_text_effects; i++) _text_effect_list[i].string_id = INVALID_STRING_ID;
-		i = _num_text_effects - 1;
-	}
-
-	te = &_text_effect_list[i];
+	TextEffect *te = _text_effects.Get(i);
 
 	/* Start defining this object */
 	te->string_id = msg;
 	te->duration = duration;
-	te->y = y - 5;
-	te->bottom = y + 5;
 	te->params_1 = GetDParam(0);
 	te->mode = mode;
 
-	GetString(buffer, msg, lastof(buffer));
-	w = GetStringBoundingBox(buffer).width;
-
-	te->x = x - (w >> 1);
-	te->right = x + (w >> 1) - 1;
-	MarkTextEffectAreaDirty(te);
+	/* Make sure we only dirty the new area */
+	te->width_normal = 0;
+	te->UpdatePosition(center, y, msg);
 
 	return i;
 }
 
 void UpdateTextEffect(TextEffectID te_id, StringID msg)
 {
-	assert(te_id < _num_text_effects);
-	TextEffect *te;
-
 	/* Update details */
-	te = &_text_effect_list[te_id];
+	TextEffect *te = _text_effects.Get(te_id);
 	te->string_id = msg;
 	te->params_1 = GetDParam(0);
 
-	/* Update width of text effect */
-	char buffer[100];
-	GetString(buffer, msg, lastof(buffer));
-	int w = GetStringBoundingBox(buffer).width;
-
-	/* Only allow to make it broader, so it completely covers the old text. That avoids remnants of the old text. */
-	int right_new = te->x + w;
-	if (te->right < right_new) te->right = right_new;
-
-	MarkTextEffectAreaDirty(te);
+	te->UpdatePosition(te->center, te->top, msg);
 }
 
 void RemoveTextEffect(TextEffectID te_id)
 {
-	assert(te_id < _num_text_effects);
-	TextEffect *te;
-
-	te = &_text_effect_list[te_id];
-	MarkTextEffectAreaDirty(te);
-	te->string_id = INVALID_STRING_ID;
-}
-
-static void MoveTextEffect(TextEffect *te)
-{
-	/* Never expire for duration of 0xFFFF */
-	if (te->duration == 0xFFFF) return;
-	if (te->duration < 8) {
-		te->string_id = INVALID_STRING_ID;
-	} else {
-		te->duration -= 8;
-		te->y--;
-		te->bottom--;
-	}
-	MarkTextEffectAreaDirty(te);
+	_text_effects[te_id].Reset();
 }
 
 void MoveAllTextEffects()
 {
-	for (TextEffectID i = 0; i < _num_text_effects; i++) {
-		TextEffect *te = &_text_effect_list[i];
-		if (te->string_id != INVALID_STRING_ID && te->mode == TE_RISING) MoveTextEffect(te);
+	const TextEffect *end = _text_effects.End();
+	for (TextEffect *te = _text_effects.Begin(); te != end; te++) {
+		if (te->string_id == INVALID_STRING_ID) continue;
+		if (te->mode != TE_RISING) continue;
+
+		if (te->duration-- == 0) {
+			te->Reset();
+			continue;
+		}
+
+		te->MarkDirty();
+		te->top--;
+		te->MarkDirty();
 	}
 }
 
 void InitTextEffects()
 {
-	if (_text_effect_list == NULL) _text_effect_list = MallocT<TextEffect>(_num_text_effects);
-
-	for (TextEffectID i = 0; i < _num_text_effects; i++) _text_effect_list[i].string_id = INVALID_STRING_ID;
+	_text_effects.Reset();
 }
 
 void DrawTextEffects(DrawPixelInfo *dpi)
 {
-	switch (dpi->zoom) {
-		case ZOOM_LVL_NORMAL:
-			for (TextEffectID i = 0; i < _num_text_effects; i++) {
-				TextEffect *te = &_text_effect_list[i];
-				if (te->string_id != INVALID_STRING_ID &&
-						dpi->left <= te->right &&
-						dpi->top  <= te->bottom &&
-						dpi->left + dpi->width  > te->x &&
-						dpi->top  + dpi->height > te->y) {
-					if (te->mode == TE_RISING || (_settings_client.gui.loading_indicators && !IsTransparencySet(TO_LOADING))) {
-						AddStringToDraw(te->x, te->y, te->string_id, te->params_1, INVALID_STRING_ID);
-					}
-				}
-			}
-			break;
+	/* Don't draw the text effects when zoomed out a lot */
+	if (dpi->zoom > ZOOM_LVL_OUT_2X) return;
 
-		case ZOOM_LVL_OUT_2X:
-			for (TextEffectID i = 0; i < _num_text_effects; i++) {
-				TextEffect *te = &_text_effect_list[i];
-				if (te->string_id != INVALID_STRING_ID &&
-						dpi->left <= te->right  * 2 - te->x &&
-						dpi->top  <= te->bottom * 2 - te->y &&
-						dpi->left + dpi->width  > te->x &&
-						dpi->top  + dpi->height > te->y) {
-					if (te->mode == TE_RISING || (_settings_client.gui.loading_indicators && !IsTransparencySet(TO_LOADING))) {
-						AddStringToDraw(te->x, te->y, (StringID)(te->string_id - 1), te->params_1, INVALID_STRING_ID);
-					}
-				}
-			}
-			break;
-
-		case ZOOM_LVL_OUT_4X:
-		case ZOOM_LVL_OUT_8X:
-			break;
-
-		default: NOT_REACHED();
+	const TextEffect *end = _text_effects.End();
+	for (TextEffect *te = _text_effects.Begin(); te != end; te++) {
+		if (te->string_id == INVALID_STRING_ID) continue;
+		if (te->mode == TE_RISING || (_settings_client.gui.loading_indicators && !IsTransparencySet(TO_LOADING))) {
+			ViewportAddString(dpi, ZOOM_LVL_OUT_2X, te, te->string_id, te->string_id - 1, 0, te->params_1);
+		}
 	}
 }

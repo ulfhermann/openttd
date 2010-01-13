@@ -80,12 +80,9 @@ const Sign *SignList::last_sign = NULL;
 
 /** Enum referring to the widgets of the sign list window */
 enum SignListWidgets {
-	SLW_CLOSEBOX = 0,
 	SLW_CAPTION,
-	SLW_STICKY,
 	SLW_LIST,
 	SLW_SCROLLBAR,
-	SLW_RESIZE,
 };
 
 struct SignListWindow : Window, SignList {
@@ -94,8 +91,6 @@ struct SignListWindow : Window, SignList {
 	SignListWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
 		this->InitNested(desc, window_number);
-
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(SLW_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
 
 		/* Create initial list. */
 		this->signs.ForceRebuild();
@@ -121,14 +116,20 @@ struct SignListWindow : Window, SignList {
 					return;
 				}
 
+				bool rtl = _dynlang.text_dir == TD_RTL;
+				int sprite_offset_y = (FONT_HEIGHT_NORMAL - 10) / 2 + 1;
+				uint icon_left  = 4 + (rtl ? r.right - this->text_offset : r.left);
+				uint text_left  = r.left + (rtl ? WD_FRAMERECT_LEFT : this->text_offset);
+				uint text_right = r.right - (rtl ? this->text_offset : WD_FRAMERECT_RIGHT);
+
 				/* At least one sign available. */
 				for (uint16 i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < this->vscroll.GetCount(); i++) {
 					const Sign *si = this->signs[i];
 
-					if (si->owner != OWNER_NONE) DrawCompanyIcon(si->owner, r.left + 4, y + 1);
+					if (si->owner != OWNER_NONE) DrawCompanyIcon(si->owner, icon_left, y + sprite_offset_y);
 
 					SetDParam(0, si->index);
-					DrawString(r.left + this->text_offset, r.right - WD_FRAMETEXT_RIGHT, y, STR_SIGN_NAME, TC_YELLOW);
+					DrawString(text_left, text_right, y, STR_SIGN_NAME, TC_YELLOW);
 					y += this->resize.step_height;
 				}
 				break;
@@ -157,17 +158,26 @@ struct SignListWindow : Window, SignList {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity((this->GetWidget<NWidgetBase>(SLW_LIST)->current_y - WD_FRAMERECT_TOP - WD_FRAMERECT_BOTTOM) / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, SLW_LIST, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM);
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
-		if (widget == SLW_LIST) {
-			Dimension spr_dim = GetSpriteSize(SPR_COMPANY_ICON);
-			this->text_offset = WD_FRAMETEXT_LEFT + spr_dim.width + 2; // 2 pixels space between icon and the sign text.
-			resize->height = max<uint>(FONT_HEIGHT_NORMAL, GetSpriteSize(SPR_COMPANY_ICON).height);
-			Dimension d = {this->text_offset + MAX_LENGTH_SIGN_NAME_PIXELS + WD_FRAMETEXT_RIGHT, WD_FRAMERECT_TOP + 5 * resize->height + WD_FRAMERECT_BOTTOM};
-			*size = maxdim(*size, d);
+		switch (widget) {
+			case SLW_LIST: {
+				Dimension spr_dim = GetSpriteSize(SPR_COMPANY_ICON);
+				this->text_offset = WD_FRAMETEXT_LEFT + spr_dim.width + 2; // 2 pixels space between icon and the sign text.
+				resize->height = max<uint>(FONT_HEIGHT_NORMAL, GetSpriteSize(SPR_COMPANY_ICON).height);
+				Dimension d = {this->text_offset + MAX_LENGTH_SIGN_NAME_PIXELS + WD_FRAMETEXT_RIGHT, WD_FRAMERECT_TOP + 5 * resize->height + WD_FRAMERECT_BOTTOM};
+				*size = maxdim(*size, d);
+			} break;
+
+			case SLW_CAPTION:
+				SetDParam(0, max<size_t>(1000, Sign::GetPoolSize()));
+				*size = GetStringBoundingBox(STR_SIGN_LIST_CAPTION);
+				size->height += padding.height;
+				size->width  += padding.width;
+				break;
 		}
 	}
 
@@ -188,25 +198,26 @@ struct SignListWindow : Window, SignList {
 
 static const NWidgetPart _nested_sign_list_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, SLW_CLOSEBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, SLW_CAPTION), SetDataTip(STR_SIGN_LIST_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-		NWidget(WWT_STICKYBOX, COLOUR_GREY, SLW_STICKY),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_GREY, SLW_LIST), SetMinimalSize(WD_FRAMETEXT_LEFT + 16 + MAX_LENGTH_SIGN_NAME_PIXELS + WD_FRAMETEXT_RIGHT, 50),
-							SetResize(1, 10), SetFill(true, false), EndContainer(),
+							SetResize(1, 10), SetFill(1, 0), EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLW_SCROLLBAR),
-			NWidget(WWT_RESIZEBOX, COLOUR_GREY, SLW_RESIZE),
+			NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 		EndContainer(),
 	EndContainer(),
 };
 
 static const WindowDesc _sign_list_desc(
-	WDP_AUTO, WDP_AUTO, 0, 0, 358, 138,
+	WDP_AUTO, 358, 138,
 	WC_SIGN_LIST, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_STICKY_BUTTON | WDF_RESIZABLE,
-	NULL, _nested_sign_list_widgets, lengthof(_nested_sign_list_widgets)
+	0,
+	_nested_sign_list_widgets, lengthof(_nested_sign_list_widgets)
 );
 
 
@@ -230,14 +241,11 @@ static bool RenameSign(SignID index, const char *text)
 
 /** Widget numbers of the query sign edit window. */
 enum QueryEditSignWidgets {
-	QUERY_EDIT_SIGN_WIDGET_CLOSEBOX,
 	QUERY_EDIT_SIGN_WIDGET_CAPTION,
-	QUERY_EDIT_SIGN_WIDGET_PANEL,
 	QUERY_EDIT_SIGN_WIDGET_TEXT,
 	QUERY_EDIT_SIGN_WIDGET_OK,
 	QUERY_EDIT_SIGN_WIDGET_CANCEL,
 	QUERY_EDIT_SIGN_WIDGET_DELETE,
-	QUERY_EDIT_SIGN_WIDGET_FILL,
 	QUERY_EDIT_SIGN_WIDGET_PREVIOUS,
 	QUERY_EDIT_SIGN_WIDGET_NEXT,
 };
@@ -316,7 +324,7 @@ struct SignWindow : QueryStringBaseWindow, SignList {
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
-		this->DrawEditBox(QUERY_EDIT_SIGN_WIDGET_TEXT);
+		if (!this->IsShaded()) this->DrawEditBox(QUERY_EDIT_SIGN_WIDGET_TEXT);
 	}
 
 	virtual void OnClick(Point pt, int widget)
@@ -384,27 +392,27 @@ struct SignWindow : QueryStringBaseWindow, SignList {
 
 static const NWidgetPart _nested_query_sign_edit_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_CLOSEBOX),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_CAPTION), SetDataTip(STR_WHITE_STRING, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_PANEL),
+	NWidget(WWT_PANEL, COLOUR_GREY),
 		NWidget(WWT_EDITBOX, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_TEXT), SetMinimalSize(256, 12), SetDataTip(STR_EDIT_SIGN_SIGN_OSKTITLE, STR_NULL), SetPadding(2, 2, 2, 2),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_OK), SetMinimalSize(61, 12), SetDataTip(STR_BUTTON_OK, STR_NULL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_CANCEL), SetMinimalSize(60, 12), SetDataTip(STR_BUTTON_CANCEL, STR_NULL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_DELETE), SetMinimalSize(60, 12), SetDataTip(STR_TOWN_VIEW_DELETE_BUTTON, STR_NULL),
-		NWidget(WWT_PANEL, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_FILL), SetFill(true, true), EndContainer(),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_PREVIOUS), SetMinimalSize(11, 12), SetDataTip(STR_BLACK_SMALL_ARROW_LEFT, STR_EDIT_SIGN_PREVIOUS_SIGN_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_NEXT), SetMinimalSize(11, 12), SetDataTip(STR_BLACK_SMALL_ARROW_RIGHT, STR_EDIT_SIGN_NEXT_SIGN_TOOLTIP),
+		NWidget(WWT_PANEL, COLOUR_GREY), SetFill(1, 1), EndContainer(),
+		NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_PREVIOUS), SetMinimalSize(11, 12), SetDataTip(AWV_DECREASE, STR_EDIT_SIGN_PREVIOUS_SIGN_TOOLTIP),
+		NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, QUERY_EDIT_SIGN_WIDGET_NEXT), SetMinimalSize(11, 12), SetDataTip(AWV_INCREASE, STR_EDIT_SIGN_NEXT_SIGN_TOOLTIP),
 	EndContainer(),
 };
 
 static const WindowDesc _query_sign_edit_desc(
-	190, 170, 260, 42, 260, 42,
+	WDP_AUTO, 0, 0,
 	WC_QUERY_STRING, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_CONSTRUCTION | WDF_UNCLICK_BUTTONS,
-	NULL, _nested_query_sign_edit_widgets, lengthof(_nested_query_sign_edit_widgets)
+	WDF_CONSTRUCTION | WDF_UNCLICK_BUTTONS,
+	_nested_query_sign_edit_widgets, lengthof(_nested_query_sign_edit_widgets)
 );
 
 void HandleClickOnSign(const Sign *si)

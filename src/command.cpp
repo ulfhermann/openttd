@@ -31,174 +31,163 @@
 
 StringID _error_message;
 
-/**
- * Helper macro to define the header of all command handler macros.
- *
- * This macro create the function header for a given command handler function, as
- * all command handler functions got the parameters from the #CommandProc callback
- * type.
- *
- * @param yyyy The desired function name of the new command handler function.
- */
-#define DEF_COMMAND(yyyy) CommandCost yyyy(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandProc CmdBuildRailroadTrack;
+CommandProc CmdRemoveRailroadTrack;
+CommandProc CmdBuildSingleRail;
+CommandProc CmdRemoveSingleRail;
 
-DEF_COMMAND(CmdBuildRailroadTrack);
-DEF_COMMAND(CmdRemoveRailroadTrack);
-DEF_COMMAND(CmdBuildSingleRail);
-DEF_COMMAND(CmdRemoveSingleRail);
+CommandProc CmdLandscapeClear;
 
-DEF_COMMAND(CmdLandscapeClear);
+CommandProc CmdBuildBridge;
 
-DEF_COMMAND(CmdBuildBridge);
+CommandProc CmdBuildRailStation;
+CommandProc CmdRemoveFromRailStation;
+CommandProc CmdConvertRail;
 
-DEF_COMMAND(CmdBuildRailStation);
-DEF_COMMAND(CmdRemoveFromRailStation);
-DEF_COMMAND(CmdConvertRail);
+CommandProc CmdBuildSingleSignal;
+CommandProc CmdRemoveSingleSignal;
 
-DEF_COMMAND(CmdBuildSingleSignal);
-DEF_COMMAND(CmdRemoveSingleSignal);
+CommandProc CmdTerraformLand;
 
-DEF_COMMAND(CmdTerraformLand);
+CommandProc CmdPurchaseLandArea;
+CommandProc CmdSellLandArea;
 
-DEF_COMMAND(CmdPurchaseLandArea);
-DEF_COMMAND(CmdSellLandArea);
+CommandProc CmdBuildTunnel;
 
-DEF_COMMAND(CmdBuildTunnel);
+CommandProc CmdBuildTrainDepot;
+CommandProc CmdBuildRailWaypoint;
+CommandProc CmdRenameWaypoint;
+CommandProc CmdRemoveFromRailWaypoint;
 
-DEF_COMMAND(CmdBuildTrainDepot);
-DEF_COMMAND(CmdBuildRailWaypoint);
-DEF_COMMAND(CmdRenameWaypoint);
-DEF_COMMAND(CmdRemoveFromRailWaypoint);
+CommandProc CmdBuildRoadStop;
+CommandProc CmdRemoveRoadStop;
 
-DEF_COMMAND(CmdBuildRoadStop);
-DEF_COMMAND(CmdRemoveRoadStop);
+CommandProc CmdBuildLongRoad;
+CommandProc CmdRemoveLongRoad;
+CommandProc CmdBuildRoad;
+CommandProc CmdRemoveRoad;
 
-DEF_COMMAND(CmdBuildLongRoad);
-DEF_COMMAND(CmdRemoveLongRoad);
-DEF_COMMAND(CmdBuildRoad);
-DEF_COMMAND(CmdRemoveRoad);
+CommandProc CmdBuildRoadDepot;
 
-DEF_COMMAND(CmdBuildRoadDepot);
+CommandProc CmdBuildAirport;
 
-DEF_COMMAND(CmdBuildAirport);
+CommandProc CmdBuildDock;
 
-DEF_COMMAND(CmdBuildDock);
+CommandProc CmdBuildShipDepot;
 
-DEF_COMMAND(CmdBuildShipDepot);
+CommandProc CmdBuildBuoy;
 
-DEF_COMMAND(CmdBuildBuoy);
+CommandProc CmdPlantTree;
 
-DEF_COMMAND(CmdPlantTree);
+CommandProc CmdBuildRailVehicle;
+CommandProc CmdMoveRailVehicle;
 
-DEF_COMMAND(CmdBuildRailVehicle);
-DEF_COMMAND(CmdMoveRailVehicle);
+CommandProc CmdSellRailWagon;
 
-DEF_COMMAND(CmdSellRailWagon);
+CommandProc CmdSendTrainToDepot;
+CommandProc CmdForceTrainProceed;
+CommandProc CmdReverseTrainDirection;
 
-DEF_COMMAND(CmdSendTrainToDepot);
-DEF_COMMAND(CmdForceTrainProceed);
-DEF_COMMAND(CmdReverseTrainDirection);
+CommandProc CmdModifyOrder;
+CommandProc CmdSkipToOrder;
+CommandProc CmdDeleteOrder;
+CommandProc CmdInsertOrder;
+CommandProc CmdChangeServiceInt;
+CommandProc CmdRestoreOrderIndex;
 
-DEF_COMMAND(CmdModifyOrder);
-DEF_COMMAND(CmdSkipToOrder);
-DEF_COMMAND(CmdDeleteOrder);
-DEF_COMMAND(CmdInsertOrder);
-DEF_COMMAND(CmdChangeServiceInt);
-DEF_COMMAND(CmdRestoreOrderIndex);
+CommandProc CmdBuildIndustry;
 
-DEF_COMMAND(CmdBuildIndustry);
+CommandProc CmdBuildCompanyHQ;
+CommandProc CmdSetCompanyManagerFace;
+CommandProc CmdSetCompanyColour;
 
-DEF_COMMAND(CmdBuildCompanyHQ);
-DEF_COMMAND(CmdSetCompanyManagerFace);
-DEF_COMMAND(CmdSetCompanyColour);
+CommandProc CmdIncreaseLoan;
+CommandProc CmdDecreaseLoan;
 
-DEF_COMMAND(CmdIncreaseLoan);
-DEF_COMMAND(CmdDecreaseLoan);
+CommandProc CmdWantEnginePreview;
 
-DEF_COMMAND(CmdWantEnginePreview);
+CommandProc CmdRenameVehicle;
+CommandProc CmdRenameEngine;
 
-DEF_COMMAND(CmdRenameVehicle);
-DEF_COMMAND(CmdRenameEngine);
+CommandProc CmdRenameCompany;
+CommandProc CmdRenamePresident;
 
-DEF_COMMAND(CmdRenameCompany);
-DEF_COMMAND(CmdRenamePresident);
+CommandProc CmdRenameStation;
 
-DEF_COMMAND(CmdRenameStation);
+CommandProc CmdSellAircraft;
+CommandProc CmdBuildAircraft;
+CommandProc CmdSendAircraftToHangar;
+CommandProc CmdRefitAircraft;
 
-DEF_COMMAND(CmdSellAircraft);
-DEF_COMMAND(CmdBuildAircraft);
-DEF_COMMAND(CmdSendAircraftToHangar);
-DEF_COMMAND(CmdRefitAircraft);
+CommandProc CmdPlaceSign;
+CommandProc CmdRenameSign;
 
-DEF_COMMAND(CmdPlaceSign);
-DEF_COMMAND(CmdRenameSign);
+CommandProc CmdBuildRoadVeh;
+CommandProc CmdSellRoadVeh;
+CommandProc CmdSendRoadVehToDepot;
+CommandProc CmdTurnRoadVeh;
+CommandProc CmdRefitRoadVeh;
 
-DEF_COMMAND(CmdBuildRoadVeh);
-DEF_COMMAND(CmdSellRoadVeh);
-DEF_COMMAND(CmdSendRoadVehToDepot);
-DEF_COMMAND(CmdTurnRoadVeh);
-DEF_COMMAND(CmdRefitRoadVeh);
+CommandProc CmdPause;
 
-DEF_COMMAND(CmdPause);
+CommandProc CmdBuyShareInCompany;
+CommandProc CmdSellShareInCompany;
+CommandProc CmdBuyCompany;
 
-DEF_COMMAND(CmdBuyShareInCompany);
-DEF_COMMAND(CmdSellShareInCompany);
-DEF_COMMAND(CmdBuyCompany);
+CommandProc CmdFoundTown;
 
-DEF_COMMAND(CmdFoundTown);
+CommandProc CmdRenameTown;
+CommandProc CmdDoTownAction;
 
-DEF_COMMAND(CmdRenameTown);
-DEF_COMMAND(CmdDoTownAction);
+CommandProc CmdChangeSetting;
+CommandProc CmdChangeCompanySetting;
 
-DEF_COMMAND(CmdChangeSetting);
-DEF_COMMAND(CmdChangeCompanySetting);
+CommandProc CmdSellShip;
+CommandProc CmdBuildShip;
+CommandProc CmdSendShipToDepot;
+CommandProc CmdRefitShip;
 
-DEF_COMMAND(CmdSellShip);
-DEF_COMMAND(CmdBuildShip);
-DEF_COMMAND(CmdSendShipToDepot);
-DEF_COMMAND(CmdRefitShip);
+CommandProc CmdOrderRefit;
+CommandProc CmdCloneOrder;
 
-DEF_COMMAND(CmdOrderRefit);
-DEF_COMMAND(CmdCloneOrder);
+CommandProc CmdClearArea;
 
-DEF_COMMAND(CmdClearArea);
+CommandProc CmdGiveMoney;
+CommandProc CmdMoneyCheat;
+CommandProc CmdBuildCanal;
+CommandProc CmdBuildLock;
 
-DEF_COMMAND(CmdGiveMoney);
-DEF_COMMAND(CmdMoneyCheat);
-DEF_COMMAND(CmdBuildCanal);
-DEF_COMMAND(CmdBuildLock);
+CommandProc CmdCompanyCtrl;
 
-DEF_COMMAND(CmdCompanyCtrl);
+CommandProc CmdLevelLand;
 
-DEF_COMMAND(CmdLevelLand);
+CommandProc CmdRefitRailVehicle;
 
-DEF_COMMAND(CmdRefitRailVehicle);
+CommandProc CmdBuildSignalTrack;
+CommandProc CmdRemoveSignalTrack;
 
-DEF_COMMAND(CmdBuildSignalTrack);
-DEF_COMMAND(CmdRemoveSignalTrack);
+CommandProc CmdSetAutoReplace;
 
-DEF_COMMAND(CmdSetAutoReplace);
+CommandProc CmdCloneVehicle;
+CommandProc CmdStartStopVehicle;
+CommandProc CmdMassStartStopVehicle;
+CommandProc CmdAutoreplaceVehicle;
+CommandProc CmdDepotSellAllVehicles;
+CommandProc CmdDepotMassAutoReplace;
 
-DEF_COMMAND(CmdCloneVehicle);
-DEF_COMMAND(CmdStartStopVehicle);
-DEF_COMMAND(CmdMassStartStopVehicle);
-DEF_COMMAND(CmdAutoreplaceVehicle);
-DEF_COMMAND(CmdDepotSellAllVehicles);
-DEF_COMMAND(CmdDepotMassAutoReplace);
+CommandProc CmdCreateGroup;
+CommandProc CmdRenameGroup;
+CommandProc CmdDeleteGroup;
+CommandProc CmdAddVehicleGroup;
+CommandProc CmdAddSharedVehicleGroup;
+CommandProc CmdRemoveAllVehiclesGroup;
+CommandProc CmdSetGroupReplaceProtection;
 
-DEF_COMMAND(CmdCreateGroup);
-DEF_COMMAND(CmdRenameGroup);
-DEF_COMMAND(CmdDeleteGroup);
-DEF_COMMAND(CmdAddVehicleGroup);
-DEF_COMMAND(CmdAddSharedVehicleGroup);
-DEF_COMMAND(CmdRemoveAllVehiclesGroup);
-DEF_COMMAND(CmdSetGroupReplaceProtection);
-
-DEF_COMMAND(CmdMoveOrder);
-DEF_COMMAND(CmdChangeTimetable);
-DEF_COMMAND(CmdSetVehicleOnTime);
-DEF_COMMAND(CmdAutofillTimetable);
-#undef DEF_COMMAND
+CommandProc CmdMoveOrder;
+CommandProc CmdChangeTimetable;
+CommandProc CmdSetVehicleOnTime;
+CommandProc CmdAutofillTimetable;
+CommandProc CmdSetTimetableStart;
 
 /**
  * The master command table
@@ -295,7 +284,7 @@ static const Command _command_proc_table[] = {
 	{CmdSellShareInCompany,                         0}, // CMD_SELL_SHARE_IN_COMPANY
 	{CmdBuyCompany,                                 0}, // CMD_BUY_COMANY
 
-	{CmdFoundTown,          CMD_NO_TEST | CMD_OFFLINE}, // CMD_FOUND_TOWN
+	{CmdFoundTown,                        CMD_NO_TEST}, // CMD_FOUND_TOWN; founding random town can fail only in exec run
 	{CmdRenameTown,                        CMD_SERVER}, // CMD_RENAME_TOWN
 	{CmdDoTownAction,                               0}, // CMD_DO_TOWN_ACTION
 
@@ -343,6 +332,7 @@ static const Command _command_proc_table[] = {
 	{CmdChangeTimetable,                            0}, // CMD_CHANGE_TIMETABLE
 	{CmdSetVehicleOnTime,                           0}, // CMD_SET_VEHICLE_ON_TIME
 	{CmdAutofillTimetable,                          0}, // CMD_AUTOFILL_TIMETABLE
+	{CmdSetTimetableStart,                          0}, // CMD_SET_TIMETABLE_START
 };
 
 /*!
@@ -422,14 +412,12 @@ CommandCost DoCommand(TileIndex tile, uint32 p1, uint32 p2, DoCommandFlag flags,
 		res = proc(tile, flags & ~DC_EXEC, p1, p2, text);
 		SetTownRatingTestMode(false);
 		if (CmdFailed(res)) {
-			res.SetGlobalErrorMessage();
 			goto error;
 		}
 
 		if (_docommand_recursive == 1 &&
 				!(flags & DC_QUERY_COST) &&
 				!(flags & DC_BANKRUPT) &&
-				res.GetCost() != 0 &&
 				!CheckCompanyHasMoney(res)) {
 			goto error;
 		}
@@ -444,8 +432,8 @@ CommandCost DoCommand(TileIndex tile, uint32 p1, uint32 p2, DoCommandFlag flags,
 	 * themselves to the cost object at some point */
 	res = proc(tile, flags, p1, p2, text);
 	if (CmdFailed(res)) {
-		res.SetGlobalErrorMessage();
 error:
+		res.SetGlobalErrorMessage();
 		_docommand_recursive--;
 		return CMD_ERROR;
 	}
@@ -500,23 +488,90 @@ bool DoCommandP(const CommandContainer *container, bool my_cmd)
  */
 bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallback *callback, const char *text, bool my_cmd)
 {
-	assert(_docommand_recursive == 0);
+	/* Cost estimation is generally only done when the
+	 * local user presses shift while doing somthing.
+	 * However, in case of incoming network commands,
+	 * map generation of the pause button we do want
+	 * to execute. */
+	bool estimate_only = _shift_pressed && IsLocalCompany() &&
+			!IsGeneratingWorld() &&
+			!(cmd & CMD_NETWORK_COMMAND) &&
+			(cmd & CMD_ID_MASK) != CMD_PAUSE;
 
-	CommandCost res, res2;
+	/* We're only sending the command, so don't do
+	 * fancy things for 'success'. */
+	bool only_sending = _networking && !(cmd & CMD_NETWORK_COMMAND);
 
+	/* Where to show the message? */
 	int x = TileX(tile) * TILE_SIZE;
 	int y = TileY(tile) * TILE_SIZE;
 
+	CommandCost res = DoCommandPInternal(tile, p1, p2, cmd, callback, text, my_cmd, estimate_only);
+	if (CmdFailed(res)) {
+		res.SetGlobalErrorMessage();
+
+		/* Only show the error when it's for us. */
+		StringID error_part1 = GB(cmd, 16, 16);
+		if (estimate_only || (IsLocalCompany() && error_part1 != 0 && my_cmd)) {
+			ShowErrorMessage(error_part1, _error_message, x, y);
+		}
+	} else if (estimate_only) {
+		ShowEstimatedCostOrIncome(res.GetCost(), x, y);
+	} else if (!only_sending && res.GetCost() != 0 && tile != 0 && IsLocalCompany() && _game_mode != GM_EDITOR) {
+		/* Only show the cost animation when we did actually
+		 * execute the command, i.e. we're not sending it to
+		 * the server, when it has cost the local company
+		 * something. Furthermore in the editor there is no
+		 * concept of cost, so don't show it there either. */
+		ShowCostOrIncomeAnimation(x, y, GetSlopeZ(x, y), res.GetCost());
+	}
+
+	if (!estimate_only && !only_sending && callback != NULL) {
+		callback(res, tile, p1, p2);
+	}
+
+	return CmdSucceeded(res);
+}
+
+
+/**
+ * Helper to deduplicate the code for returning.
+ * @param cmd   the command cost to return.
+ * @param clear whether to keep the storage changes or not.
+ */
+#define return_dcpi(cmd, clear) { _docommand_recursive = 0; ClearStorageChanges(clear); return cmd; }
+
+/*!
+ * Helper function for the toplevel network safe docommand function for the current company.
+ *
+ * @param tile The tile to perform a command on (see #CommandProc)
+ * @param p1 Additional data for the command (see #CommandProc)
+ * @param p2 Additional data for the command (see #CommandProc)
+ * @param cmd The command to execute (a CMD_* value)
+ * @param callback A callback function to call after the command is finished
+ * @param text The text to pass
+ * @param my_cmd indicator if the command is from a company or server (to display error messages for a user)
+ * @param estimate_only whether to give only the estimate or also execute the command
+ * @return the command cost of this function.
+ */
+CommandCost DoCommandPInternal(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallback *callback, const char *text, bool my_cmd, bool estimate_only)
+{
+	/* Prevent recursion; it gives a mess over the network */
+	assert(_docommand_recursive == 0);
+	_docommand_recursive = 1;
+
+	/* Reset the state. */
 	_error_message = INVALID_STRING_ID;
-	StringID error_part1 = GB(cmd, 16, 16);
 	_additional_cash_required = 0;
 
-	/* get pointer to command handler */
+	/* Get pointer to command handler */
 	byte cmd_id = cmd & CMD_ID_MASK;
 	assert(cmd_id < lengthof(_command_proc_table));
 
 	CommandProc *proc = _command_proc_table[cmd_id].proc;
-	if (proc == NULL) return false;
+	/* Shouldn't happen, but you never know when someone adds
+	 * NULLs to the _command_proc_table. */
+	assert(proc != NULL);
 
 	/* Command flags are used internally */
 	uint cmd_flags = GetCommandFlags(cmd);
@@ -524,7 +579,7 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 	DoCommandFlag flags = CommandFlagsToDCFlags(cmd_flags);
 
 	/* Do not even think about executing out-of-bounds tile-commands */
-	if (tile != 0 && (tile >= MapSize() || (!IsValidTile(tile) && (cmd_flags & CMD_ALL_TILES) == 0))) return false;
+	if (tile != 0 && (tile >= MapSize() || (!IsValidTile(tile) && (cmd_flags & CMD_ALL_TILES) == 0))) return_dcpi(CMD_ERROR, false);
 
 	/* Always execute server and spectator commands as spectator */
 	if (cmd_flags & (CMD_SPECTATOR | CMD_SERVER)) _current_company = COMPANY_SPECTATOR;
@@ -535,49 +590,41 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 	 * The server will ditch any server commands a client sends to it, so effectively
 	 * this guards the server from executing functions for an invalid company. */
 	if (_game_mode == GM_NORMAL && (cmd_flags & (CMD_SPECTATOR | CMD_SERVER)) == 0 && !Company::IsValidID(_current_company)) {
-		if (my_cmd) ShowErrorMessage(error_part1, _error_message, x, y);
-		return false;
+		return_dcpi(CMD_ERROR, false);
 	}
 
-	bool notest = (cmd_flags & CMD_NO_TEST) != 0;
+	bool test_and_exec_can_differ = (cmd_flags & CMD_NO_TEST) != 0;
+	bool skip_test = _networking && (cmd & CMD_NO_TEST_IF_IN_NETWORK) != 0;
 
-	_docommand_recursive = 1;
-
-	/* cost estimation only? */
-	if (!IsGeneratingWorld() &&
-			_shift_pressed &&
-			IsLocalCompany() &&
-			!(cmd & CMD_NETWORK_COMMAND) &&
-			cmd_id != CMD_PAUSE) {
-		/* estimate the cost. */
+	/* Do we need to do a test run?
+	 * Basically we need to always do this, except when
+	 * the no-test-in-network flag is giving and we're
+	 * in a network game (e.g. restoring orders would
+	 * fail this test because the first order does not
+	 * exist yet when inserting the second, giving that
+	 * a wrong insert location and ignoring the command
+	 * and thus breaking restoring). However, when we
+	 * just want to do cost estimation we don't care
+	 * because it's only done once anyway. */
+	CommandCost res;
+	if (estimate_only || !skip_test) {
+		/* Test the command. */
 		SetTownRatingTestMode(true);
 		res = proc(tile, flags, p1, p2, text);
 		SetTownRatingTestMode(false);
-		if (CmdFailed(res)) {
-			res.SetGlobalErrorMessage();
-			ShowErrorMessage(error_part1, _error_message, x, y);
-		} else {
-			ShowEstimatedCostOrIncome(res.GetCost(), x, y);
-		}
 
-		_docommand_recursive = 0;
-		ClearStorageChanges(false);
-		return false;
-	}
-
-
-	if (!((cmd & CMD_NO_TEST_IF_IN_NETWORK) && _networking)) {
-		/* first test if the command can be executed. */
-		SetTownRatingTestMode(true);
-		res = proc(tile, flags, p1, p2, text);
-		SetTownRatingTestMode(false);
+		/* Make sure we're not messing things up here. */
 		assert(cmd_id == CMD_COMPANY_CTRL || old_company == _current_company);
-		if (CmdFailed(res)) {
-			res.SetGlobalErrorMessage();
-			goto show_error;
+
+		/* If the command fails, we're doing an estimate
+		 * or the player does not have enough money
+		 * (unless it's a command where the test and
+		 * execution phase might return different costs)
+		 * we bail out here. */
+		if (CmdFailed(res) || estimate_only ||
+				(!test_and_exec_can_differ && !CheckCompanyHasMoney(res))) {
+			return_dcpi(res, false);
 		}
-		/* no money? Only check if notest is off */
-		if (!notest && res.GetCost() != 0 && !CheckCompanyHasMoney(res)) goto show_error;
 	}
 
 #ifdef ENABLE_NETWORK
@@ -586,13 +633,40 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 	 * send it to the command-queue and abort execution
 	 */
 	if (_networking && !(cmd & CMD_NETWORK_COMMAND)) {
-		NetworkSend_Command(tile, p1, p2, cmd & ~CMD_FLAGS_MASK, callback, text);
-		_docommand_recursive = 0;
-		ClearStorageChanges(false);
-		return true;
+		NetworkSend_Command(tile, p1, p2, cmd & ~CMD_FLAGS_MASK, callback, text, _current_company);
+
+		/* Don't return anything special here; no error, no costs.
+		 * This way it's not handled by DoCommand and only the
+		 * actual execution of the command causes messages. Also
+		 * reset the storages as we've not executed the command. */
+		return_dcpi(CommandCost(), false);
 	}
 #endif /* ENABLE_NETWORK */
 	DEBUG(desync, 1, "cmd: %08x; %08x; %1x; %06x; %08x; %08x; %04x; %s\n", _date, _date_fract, (int)_current_company, tile, p1, p2, cmd & ~CMD_NETWORK_COMMAND, text);
+
+	/* Actually try and execute the command. If no cost-type is given
+	 * use the construction one */
+	CommandCost res2 = proc(tile, flags | DC_EXEC, p1, p2, text);
+
+	/* Make sure nothing bad happened, like changing the current company. */
+	assert(cmd_id == CMD_COMPANY_CTRL || old_company == _current_company);
+
+	/* If the test and execution can differ, or we skipped the test
+	 * we have to check the return of the command. Otherwise we can
+	 * check whether the test and execution have yielded the same
+	 * result, i.e. cost and error state are the same. */
+	if (!test_and_exec_can_differ && !skip_test) {
+		assert(res.GetCost() == res2.GetCost() && CmdFailed(res) == CmdFailed(res2)); // sanity check
+	} else if (CmdFailed(res2)) {
+		return_dcpi(res2, false);
+	}
+
+	/* If we're needing more money and we haven't done
+	 * anything yet, ask for the money! */
+	if (_additional_cash_required != 0 && res2.GetCost() == 0) {
+		SetDParam(0, _additional_cash_required);
+		return_dcpi(CommandCost(STR_ERROR_NOT_ENOUGH_CASH_REQUIRES_CURRENCY), false);
+	}
 
 	/* update last build coordinate of company. */
 	if (tile != 0) {
@@ -600,56 +674,14 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 		if (c != NULL) c->last_build_coordinate = tile;
 	}
 
-	/* Actually try and execute the command. If no cost-type is given
-	 * use the construction one */
-	res2 = proc(tile, flags | DC_EXEC, p1, p2, text);
-
-	assert(cmd_id == CMD_COMPANY_CTRL || old_company == _current_company);
-
-	/* If notest is on, it means the result of the test can be different than
-	 *  the real command.. so ignore the test */
-	if (!notest && !((cmd & CMD_NO_TEST_IF_IN_NETWORK) && _networking)) {
-		assert(res.GetCost() == res2.GetCost() && CmdFailed(res) == CmdFailed(res2)); // sanity check
-	} else {
-		if (CmdFailed(res2)) {
-			res2.SetGlobalErrorMessage();
-			goto show_error;
-		}
-	}
-
 	SubtractMoneyFromCompany(res2);
 
 	/* update signals if needed */
 	UpdateSignalsInBuffer();
 
-	if (IsLocalCompany() && _game_mode != GM_EDITOR) {
-		if (res2.GetCost() != 0 && tile != 0) ShowCostOrIncomeAnimation(x, y, GetSlopeZ(x, y), res2.GetCost());
-		if (_additional_cash_required != 0) {
-			SetDParam(0, _additional_cash_required);
-			if (my_cmd) ShowErrorMessage(error_part1, STR_ERROR_NOT_ENOUGH_CASH_REQUIRES_CURRENCY, x, y);
-			if (res2.GetCost() == 0) goto callb_err;
-		}
-	}
-
-	_docommand_recursive = 0;
-
-	if (callback) callback(true, tile, p1, p2);
-	ClearStorageChanges(true);
-	return true;
-
-show_error:
-	/* show error message if the command fails? */
-	if (IsLocalCompany() && error_part1 != 0 && my_cmd) {
-		ShowErrorMessage(error_part1, _error_message, x, y);
-	}
-
-callb_err:
-	_docommand_recursive = 0;
-
-	if (callback) callback(false, tile, p1, p2);
-	ClearStorageChanges(false);
-	return false;
+	return_dcpi(res2, true);
 }
+#undef return_dcpi
 
 
 CommandCost CommandCost::AddCost(CommandCost ret)

@@ -20,6 +20,7 @@
 #include "../../gamelog.h"
 
 #include <windows.h>
+#include <signal.h>
 
 /**
  * Windows implementation for the crash logger.
@@ -44,6 +45,8 @@ public:
 	char crashlog_filename[MAX_PATH];
 	/** Buffer for the filename of the crash dump */
 	char crashdump_filename[MAX_PATH];
+	/** Buffer for the filename of the crash screenshot */
+	char screenshot_filename[MAX_PATH];
 
 	/**
 	 * A crash log is always generated when it's generated.
@@ -55,6 +58,7 @@ public:
 		this->crashlog[0] = '\0';
 		this->crashlog_filename[0] = '\0';
 		this->crashdump_filename[0] = '\0';
+		this->screenshot_filename[0] = '\0';
 	}
 
 	/**
@@ -224,7 +228,6 @@ static char *PrintModuleInfo(char *output, const char *last, HMODULE mod)
 	buffer += seprintf(buffer, last, "Registers:\n");
 #ifdef _M_AMD64
 	buffer += seprintf(buffer, last,
-		"Registers:\n"
 		" RAX: %.16llX RBX: %.16llX RCX: %.16llX RDX: %.16llX\n"
 		" RSI: %.16llX RDI: %.16llX RBP: %.16llX RSP: %.16llX\n"
 		" R8:  %.16llX R9:  %.16llX R10: %.16llX R11: %.16llX\n"
@@ -380,6 +383,7 @@ static LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS *ep)
 	log->FillCrashLog(log->crashlog, lastof(log->crashlog));
 	log->WriteCrashLog(log->crashlog, log->crashlog_filename, lastof(log->crashlog_filename));
 	log->WriteCrashDump(log->crashdump_filename, lastof(log->crashdump_filename));
+	log->WriteScreenshot(log->screenshot_filename, lastof(log->screenshot_filename));
 
 	/* Close any possible log files */
 	CloseConsoleLogIfActive();
@@ -403,6 +407,11 @@ static LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS *ep)
 extern "C" void *_get_safe_esp();
 #endif
 
+static void CDECL CustomAbort(int signal)
+{
+	RaiseException(0xE1212012, 0, 0, NULL);
+}
+
 /* static */ void CrashLog::InitialiseCrashLog()
 {
 #if defined(_MSC_VER)
@@ -417,6 +426,12 @@ extern "C" void *_get_safe_esp();
 	asm("movl %esp, __safe_esp");
 #endif
 
+	/* SIGABRT is not an unhandled exception, so we need to intercept it. */
+	signal(SIGABRT, CustomAbort);
+#if defined(_MSC_VER)
+	/* Don't show abort message as we will get the crashlog window anyway. */
+	_set_abort_behavior(0, _WRITE_ABORT_MSG);
+#endif
 	SetUnhandledExceptionFilter(ExceptionHandler);
 }
 
@@ -430,10 +445,10 @@ static const TCHAR _crash_desc[] =
 	_T("This will greatly help debugging. The correct place to do this is http://bugs.openttd.org. ")
 	_T("The information contained in the report is displayed below.\n")
 	_T("Press \"Emergency save\" to attempt saving the game. Generated file(s):\n")
-	_T("'%s%s%s'");
+	_T("%s");
 
 static const TCHAR _save_succeeded[] =
-	_T("Emergency save succeeded. Its location is '%s'.\n")
+	_T("Emergency save succeeded.\nIts location is '%s'.\n")
 	_T("Be aware that critical parts of the internal game state may have become ")
 	_T("corrupted. The saved game is not guaranteed to work.");
 
@@ -481,11 +496,21 @@ static INT_PTR CALLBACK CrashDialogFunc(HWND wnd, UINT msg, WPARAM wParam, LPARA
 			*p = '\0';
 
 			/* Add path to crash.log and crash.dmp (if any) to the crash window text */
-			size_t len = _tcslen(_crash_desc) + _tcslen(OTTD2FS(CrashLogWindows::current->crashlog_filename)) + _tcslen(OTTD2FS(CrashLogWindows::current->crashdump_filename)) + 4;
+			size_t len = _tcslen(_crash_desc) + 2;
+			len += _tcslen(OTTD2FS(CrashLogWindows::current->crashlog_filename)) + 2;
+			len += _tcslen(OTTD2FS(CrashLogWindows::current->crashdump_filename)) + 2;
+			len += _tcslen(OTTD2FS(CrashLogWindows::current->screenshot_filename)) + 1;
+
 			TCHAR *text = AllocaM(TCHAR, len);
-			TCHAR *dump = _tcsdup(OTTD2FS(CrashLogWindows::current->crashdump_filename));
-			_sntprintf(text, len, _crash_desc, OTTD2FS(CrashLogWindows::current->crashlog_filename), dump[0] != _T('\0') ? _T("'\n'") : _T(""), dump);
-			free(dump);
+			_sntprintf(text, len, _crash_desc, OTTD2FS(CrashLogWindows::current->crashlog_filename));
+			if (OTTD2FS(CrashLogWindows::current->crashdump_filename)[0] != _T('\0')) {
+				_tcscat(text, _T("\n"));
+				_tcscat(text, OTTD2FS(CrashLogWindows::current->crashdump_filename));
+			}
+			if (OTTD2FS(CrashLogWindows::current->screenshot_filename)[0] != _T('\0')) {
+				_tcscat(text, _T("\n"));
+				_tcscat(text, OTTD2FS(CrashLogWindows::current->screenshot_filename));
+			}
 
 			SetDlgItemText(wnd, 10, text);
 			SetDlgItemText(wnd, 11, MB_TO_WIDE_BUFFER(dos_nl, crash_msgW, lengthof(crash_msgW)));

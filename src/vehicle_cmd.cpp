@@ -152,7 +152,7 @@ CommandCost CmdMassStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 
 
 		if (!vehicle_list_window) {
 			if (vehicle_type == VEH_TRAIN) {
-				if (CheckTrainInDepot(Train::From(v), false) == -1) continue;
+				if (!Train::From(v)->IsInDepot()) continue;
 			} else {
 				if (!(v->vehstatus & VS_HIDDEN)) continue;
 			}
@@ -262,33 +262,35 @@ CommandCost CmdDepotMassAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 
  */
 static CommandCost GetRefitCost(EngineID engine_type)
 {
-	Money base_cost;
 	ExpensesType expense_type;
 	const Engine *e = Engine::Get(engine_type);
+	Price base_price;
+	uint cost_factor = e->info.refit_cost;
 	switch (e->type) {
 		case VEH_SHIP:
-			base_cost = _price[PR_BUILD_VEHICLE_SHIP];
+			base_price = PR_BUILD_VEHICLE_SHIP;
 			expense_type = EXPENSES_SHIP_RUN;
 			break;
 
 		case VEH_ROAD:
-			base_cost = _price[PR_BUILD_VEHICLE_ROAD];
+			base_price = PR_BUILD_VEHICLE_ROAD;
 			expense_type = EXPENSES_ROADVEH_RUN;
 			break;
 
 		case VEH_AIRCRAFT:
-			base_cost = _price[PR_BUILD_VEHICLE_AIRCRAFT];
+			base_price = PR_BUILD_VEHICLE_AIRCRAFT;
 			expense_type = EXPENSES_AIRCRAFT_RUN;
 			break;
 
 		case VEH_TRAIN:
-			base_cost = 2 * _price[(e->u.rail.railveh_type == RAILVEH_WAGON) ? PR_BUILD_VEHICLE_WAGON : PR_BUILD_VEHICLE_TRAIN];
+			base_price = (e->u.rail.railveh_type == RAILVEH_WAGON) ? PR_BUILD_VEHICLE_WAGON : PR_BUILD_VEHICLE_TRAIN;
+			cost_factor <<= 1;
 			expense_type = EXPENSES_TRAIN_RUN;
 			break;
 
 		default: NOT_REACHED();
 	}
-	return CommandCost(expense_type, (e->info.refit_cost * base_cost) >> 10);
+	return CommandCost(expense_type, GetPrice(base_price, cost_factor, e->grffile, -10));
 }
 
 /**
@@ -305,13 +307,11 @@ CommandCost RefitVehicle(Vehicle *v, bool only_this, CargoID new_cid, byte new_s
 {
 	CommandCost cost(v->GetExpenseType(false));
 	uint total_capacity = 0;
-	bool success = false;
 
 	v->InvalidateNewGRFCacheOfChain();
 	for (; v != NULL; v = (only_this ? NULL : v->Next())) {
 		const Engine *e = Engine::Get(v->engine_type);
 		if (!e->CanCarryCargo() || !HasBit(e->info.refit_mask, new_cid)) continue;
-		success = true;
 
 		/* Back up the vehicle's cargo type */
 		CargoID temp_cid = v->cargo_type;
@@ -345,7 +345,7 @@ CommandCost RefitVehicle(Vehicle *v, bool only_this, CargoID new_cid, byte new_s
 	}
 
 	_returned_refit_capacity = total_capacity;
-	return success ? cost : CMD_ERROR;
+	return cost;
 }
 
 /** Test if a name is unique among vehicle names.
@@ -534,8 +534,10 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			if (flags & DC_EXEC) {
 				assert(w != NULL);
 
-				if (w->cargo_type != v->cargo_type || w->cargo_subtype != v->cargo_subtype) {
-					CommandCost cost = DoCommand(0, w->index, v->cargo_type | (v->cargo_subtype << 8) | 1U << 16, flags, GetCmdRefitVeh(v));
+				/* Find out what's the best sub type */
+				byte subtype = GetBestFittingSubType(v, w);
+				if (w->cargo_type != v->cargo_type || w->cargo_subtype != subtype) {
+					CommandCost cost = DoCommand(0, w->index, v->cargo_type | (subtype << 8) | 1U << 16, flags, GetCmdRefitVeh(v));
 					if (CmdSucceeded(cost)) total_cost.AddCost(cost);
 				}
 
@@ -586,7 +588,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			/* The vehicle has already been bought, so now it must be sold again. */
 			DoCommand(w_front->tile, w_front->index, 1, flags, GetCmdSellVeh(w_front));
 		}
-		return CMD_ERROR;
+		return total_cost;
 	}
 
 	return total_cost;

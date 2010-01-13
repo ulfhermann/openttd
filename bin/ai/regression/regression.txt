@@ -3209,7 +3209,7 @@
     GetCapacity():      31
     GetReliability():   78
     GetMaxSpeed():      56
-    GetPrice():         4920
+    GetPrice():         4921
     GetMaxAge():        4392
     GetRunningCost():   426
     GetPower():         -1
@@ -3335,7 +3335,7 @@
     GetCapacity():      20
     GetReliability():   77
     GetMaxSpeed():      48
-    GetPrice():         4428
+    GetPrice():         4429
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3389,7 +3389,7 @@
     GetCapacity():      22
     GetReliability():   92
     GetMaxSpeed():      48
-    GetPrice():         4715
+    GetPrice():         4716
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3497,7 +3497,7 @@
     GetCapacity():      21
     GetReliability():   98
     GetMaxSpeed():      48
-    GetPrice():         4510
+    GetPrice():         4511
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3551,7 +3551,7 @@
     GetCapacity():      14
     GetReliability():   97
     GetMaxSpeed():      48
-    GetPrice():         4305
+    GetPrice():         4306
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3605,7 +3605,7 @@
     GetCapacity():      14
     GetReliability():   87
     GetMaxSpeed():      48
-    GetPrice():         4387
+    GetPrice():         4388
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3659,7 +3659,7 @@
     GetCapacity():      20
     GetReliability():   97
     GetMaxSpeed():      48
-    GetPrice():         4674
+    GetPrice():         4675
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3713,7 +3713,7 @@
     GetCapacity():      20
     GetReliability():   98
     GetMaxSpeed():      48
-    GetPrice():         4838
+    GetPrice():         4839
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3767,7 +3767,7 @@
     GetCapacity():      22
     GetReliability():   97
     GetMaxSpeed():      48
-    GetPrice():         4961
+    GetPrice():         4962
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3821,7 +3821,7 @@
     GetCapacity():      15
     GetReliability():   82
     GetMaxSpeed():      48
-    GetPrice():         4592
+    GetPrice():         4593
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -3875,7 +3875,7 @@
     GetCapacity():      12
     GetReliability():   76
     GetMaxSpeed():      48
-    GetPrice():         5945
+    GetPrice():         5947
     GetMaxAge():        5490
     GetRunningCost():   421
     GetPower():         -1
@@ -4793,7 +4793,7 @@
     GetCapacity():      220
     GetReliability():   99
     GetMaxSpeed():      24
-    GetPrice():         30465
+    GetPrice():         30468
     GetMaxAge():        10980
     GetRunningCost():   2296
     GetPower():         -1
@@ -4829,7 +4829,7 @@
     GetCapacity():      100
     GetReliability():   88
     GetMaxSpeed():      32
-    GetPrice():         18279
+    GetPrice():         18281
     GetMaxAge():        10980
     GetRunningCost():   1476
     GetPower():         -1
@@ -4919,7 +4919,7 @@
     GetCapacity():      160
     GetReliability():   81
     GetMaxSpeed():      24
-    GetPrice():         24372
+    GetPrice():         24375
     GetMaxAge():        10980
     GetRunningCost():   2460
     GetPower():         -1
@@ -5792,17 +5792,17 @@
     126 => 48
     123 => 48
   Price ListDump:
-    153 => 5945
-    147 => 4961
-    116 => 4920
-    144 => 4838
-    126 => 4715
-    141 => 4674
-    150 => 4592
-    132 => 4510
-    123 => 4428
-    138 => 4387
-    135 => 4305
+    153 => 5947
+    147 => 4962
+    116 => 4921
+    144 => 4839
+    126 => 4716
+    141 => 4675
+    150 => 4593
+    132 => 4511
+    123 => 4429
+    138 => 4388
+    135 => 4306
 
 --Group--
   SetAutoReplace():         false
@@ -6934,7 +6934,7 @@
     Id:                      9
     IsRawIndustry():         true
     ProductionCanIncrease(): true
-    GetConstructionCost():   747070
+    GetConstructionCost():   -1
     GetName():               Farm
     CanBuildIndustry():      false
     CanProspectIndustry():   false
@@ -6944,7 +6944,7 @@
     Id:                      5
     IsRawIndustry():         true
     ProductionCanIncrease(): true
-    GetConstructionCost():   747070
+    GetConstructionCost():   -1
     GetName():               Oil Rig
     CanBuildIndustry():      false
     CanProspectIndustry():   false
@@ -6964,7 +6964,7 @@
     Id:                      11
     IsRawIndustry():         true
     ProductionCanIncrease(): false
-    GetConstructionCost():   747070
+    GetConstructionCost():   -1
     GetName():               Oil Wells
     CanBuildIndustry():      false
     CanProspectIndustry():   false
@@ -6984,7 +6984,7 @@
     Id:                      3
     IsRawIndustry():         true
     ProductionCanIncrease(): true
-    GetConstructionCost():   747070
+    GetConstructionCost():   -1
     GetName():               Forest
     CanBuildIndustry():      false
     CanProspectIndustry():   false
@@ -7004,7 +7004,7 @@
     Id:                      18
     IsRawIndustry():         true
     ProductionCanIncrease(): true
-    GetConstructionCost():   747070
+    GetConstructionCost():   -1
     GetName():               Iron Ore Mine
     CanBuildIndustry():      false
     CanProspectIndustry():   false
@@ -7014,7 +7014,7 @@
     Id:                      0
     IsRawIndustry():         true
     ProductionCanIncrease(): true
-    GetConstructionCost():   747070
+    GetConstructionCost():   -1
     GetName():               Coal Mine
     CanBuildIndustry():      false
     CanProspectIndustry():   false
@@ -7100,10 +7100,12 @@
   IsCanalTile():        true
   GetBankBalance():     1999951154
 
---AIBuoyList--
+--AIWaypointList(BUOY)--
   Count():             1
   Location ListDump:
     28481
+  HasWaypointType:
+    false  true  false
 
   RemoveWaterDepot():   true
   RemoveDock():         true
@@ -7819,97 +7821,99 @@
     19693 => 8
 
 --TileList_IndustryProducing--
-  Count():             90
+  Count():             92
   Location ListDump:
-    46149 => 14
-    46146 => 14
-    45894 => 14
-    45889 => 14
-    45638 => 14
-    45633 => 14
-    45382 => 14
-    45377 => 14
-    45126 => 12
-    45121 => 12
-    44869 => 12
-    44868 => 12
-    44867 => 12
-    44866 => 12
-    46150 => 11
-    46145 => 11
-    46405 => 10
-    46404 => 10
-    46403 => 10
-    46402 => 10
-    45895 => 9
-    45888 => 9
-    45639 => 9
-    45632 => 9
-    45383 => 9
-    45376 => 9
-    44870 => 9
-    44865 => 9
-    46406 => 8
-    46401 => 8
-    45127 => 8
-    45120 => 8
-    44613 => 8
-    44612 => 8
-    44611 => 8
-    44610 => 8
-    46151 => 7
-    46144 => 7
-    46661 => 6
-    46660 => 6
-    46659 => 6
-    46658 => 6
-    44871 => 6
-    44864 => 6
-    44614 => 6
-    44609 => 6
-    46662 => 5
-    46657 => 5
-    46407 => 5
-    46400 => 5
-    45896 => 4
-    45887 => 4
-    45640 => 4
-    45631 => 4
-    45384 => 4
-    45375 => 4
-    45128 => 4
-    45119 => 4
-    44615 => 4
-    44608 => 4
-    44357 => 4
-    44356 => 4
-    44355 => 4
-    44354 => 4
-    46663 => 3
-    46656 => 3
-    46152 => 3
-    46143 => 3
-    44872 => 3
-    44863 => 3
-    44358 => 3
-    44353 => 3
-    46918 => 2
-    46917 => 2
-    46916 => 2
-    46915 => 2
-    46914 => 2
-    46913 => 2
-    46408 => 2
-    46399 => 2
-    44616 => 2
-    44607 => 2
-    44359 => 2
-    44352 => 2
+    46920 => 1
     46919 => 1
+    46918 => 1
+    46917 => 1
+    46916 => 1
+    46915 => 1
+    46914 => 1
+    46913 => 1
     46912 => 1
+    46911 => 1
     46664 => 1
+    46663 => 1
+    46662 => 1
+    46661 => 1
+    46660 => 1
+    46659 => 1
+    46658 => 1
+    46657 => 1
+    46656 => 1
     46655 => 1
+    46408 => 1
+    46407 => 1
+    46406 => 1
+    46405 => 1
+    46404 => 1
+    46403 => 1
+    46402 => 1
+    46401 => 1
+    46400 => 1
+    46399 => 1
+    46152 => 1
+    46151 => 1
+    46150 => 1
+    46149 => 1
+    46146 => 1
+    46145 => 1
+    46144 => 1
+    46143 => 1
+    45896 => 1
+    45895 => 1
+    45894 => 1
+    45889 => 1
+    45888 => 1
+    45887 => 1
+    45640 => 1
+    45639 => 1
+    45638 => 1
+    45633 => 1
+    45632 => 1
+    45631 => 1
+    45384 => 1
+    45383 => 1
+    45382 => 1
+    45377 => 1
+    45376 => 1
+    45375 => 1
+    45128 => 1
+    45127 => 1
+    45126 => 1
+    45121 => 1
+    45120 => 1
+    45119 => 1
+    44872 => 1
+    44871 => 1
+    44870 => 1
+    44869 => 1
+    44868 => 1
+    44867 => 1
+    44866 => 1
+    44865 => 1
+    44864 => 1
+    44863 => 1
+    44616 => 1
+    44615 => 1
+    44614 => 1
+    44613 => 1
+    44612 => 1
+    44611 => 1
+    44610 => 1
+    44609 => 1
+    44608 => 1
+    44607 => 1
     44360 => 1
+    44359 => 1
+    44358 => 1
+    44357 => 1
+    44356 => 1
+    44355 => 1
+    44354 => 1
+    44353 => 1
+    44352 => 1
     44351 => 1
 
 --TileList_StationType--
@@ -8316,8 +8320,8 @@
   IsValidVehicle(12):   true
   CloneVehicle():       13
   --Accounting--
-    GetCosts():         11890
-    Should be:          11890
+    GetCosts():         11894
+    Should be:          11894
     ResetCosts():       (null : 0x00000000)
   SellVehicle(13):      true
   IsInDepot():          true
@@ -8329,8 +8333,8 @@
   IsInDepot():          false
   IsStoppedInDepot():   false
   --Accounting--
-    GetCosts():         -5945
-    Should be:          -5945
+    GetCosts():         -5947
+    Should be:          -5947
   GetName():            Road Vehicle 1
   SetName():            true
   GetName():            MyVehicleName
@@ -8346,7 +8350,7 @@
     GetRunningCost():    421
     GetProfitThisYear(): 0
     GetProfitLastYear(): 0
-    GetCurrentValue():   5945
+    GetCurrentValue():   5947
     GetVehicleType():    1
     GetRoadType():       0
     GetCapacity():       12
@@ -8455,10 +8459,10 @@
     12 => 0
   CurrentValue ListDump:
     14 => 30761
-    16 => 30465
+    16 => 30468
     17 => 22265
-    13 => 5945
-    12 => 5945
+    13 => 5947
+    12 => 5947
   VehicleType ListDump:
     14 => 3
     16 => 2
@@ -8488,14 +8492,37 @@
   GetOrderCount():       0
   GetOrderDestination(): -1
   AreOrderFlagsValid():  true
+  AreOrderFlagsValid():  false
+  AreOrderFlagsValid():  true
+  AreOrderFlagsValid():  true
+  AreOrderFlagsValid():  true
+  AreOrderFlagsValid():  true
+  IsValidConditionalOrder(): true
+  IsValidConditionalOrder(): false
+  IsValidConditionalOrder(): true
+  IsValidConditionalOrder(): false
   IsValidVehicleOrder(): false
+  IsGotoStationOrder():  false
+  IsGotoDepotOrder():    false
+  IsGotoWaypointOrder(): false
+  IsConditionalOrder():  false
+  IsCurrentOrderPartOfOrderList(): false
   GetOrderFlags():       65535
   AppendOrder():         true
   InsertOrder():         true
   GetOrderCount():       2
   IsValidVehicleOrder(): true
+  IsGotoStationOrder():  true
+  IsGotoDepotOrder():    false
+  IsGotoWaypointOrder(): false
+  IsConditionalOrder():  false
+  IsCurrentOrderPartOfOrderList(): false
+  GetOrderFlags():       8
+  GetOrderFlags():       8
+  GetOrderJumpTo():      -1
   RemoveOrder():         true
   SetOrderFlags():       true
+  GetOrderFlags():       64
   GetOrderDestination(): 33411
   CopyOrders():          false
   CopyOrders():          true

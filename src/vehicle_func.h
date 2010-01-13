@@ -42,6 +42,7 @@ byte VehicleRandomBits();
 void ResetVehiclePosHash();
 void ResetVehicleColourMap();
 
+byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for);
 CommandCost RefitVehicle(Vehicle *v, bool only_this, CargoID new_cid, byte new_subtype, DoCommandFlag flags);
 
 void ViewportAddVehicles(DrawPixelInfo *dpi);
@@ -63,8 +64,6 @@ CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool s
 void VehicleEnterDepot(Vehicle *v);
 
 bool CanBuildVehicleInfrastructure(VehicleType type);
-
-void CcCloneVehicle(bool success, TileIndex tile, uint32 p1, uint32 p2);
 
 /** Position information of a vehicle after it moved */
 struct GetNewVehiclePosResult {

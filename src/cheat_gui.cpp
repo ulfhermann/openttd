@@ -131,45 +131,53 @@ static const CheatEntry _cheats_ui[] = {
 	{SLE_INT32, STR_CHEAT_CHANGE_DATE,     &_cur_year,                              &_cheats.change_date.been_used,      &ClickChangeDateCheat    },
 };
 
-
-static const Widget _cheat_widgets[] = {
-{   WWT_CLOSEBOX,   RESIZE_NONE,  COLOUR_GREY,     0,    10,     0,    13, STR_BLACK_CROSS,   STR_TOOLTIP_CLOSE_WINDOW},
-{    WWT_CAPTION,   RESIZE_NONE,  COLOUR_GREY,    11,   399,     0,    13, STR_CHEATS,        STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS},
-{      WWT_PANEL,   RESIZE_NONE,  COLOUR_GREY,     0,   399,    14,   169, 0x0,               STR_CHEATS_TOOLTIP},
-{   WIDGETS_END},
+/* Names of the cheat window widgets. */
+enum CheatWidgets {
+	CW_PANEL,
 };
 
 static const NWidgetPart _nested_cheat_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_GREY, 0),
-		NWidget(WWT_CAPTION, COLOUR_GREY, 1), SetDataTip(STR_CHEATS, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
+		NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_CHEATS, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_SHADEBOX, COLOUR_GREY),
+		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, 2), SetMinimalSize(400, 156), SetDataTip(0x0, STR_CHEATS_TOOLTIP), EndContainer(),
+	NWidget(WWT_PANEL, COLOUR_GREY, CW_PANEL), SetDataTip(0x0, STR_CHEATS_TOOLTIP), EndContainer(),
 };
 
 struct CheatWindow : Window {
 	int clicked;
+	int header_height;
 
-	CheatWindow(const WindowDesc *desc) : Window(desc)
+	CheatWindow(const WindowDesc *desc) : Window()
 	{
-		this->FindWindowPlacementAndResize(desc);
+		this->InitNested(desc);
 	}
 
-	virtual void OnPaint()
+	virtual void DrawWidget(const Rect &r, int widget) const
 	{
-		this->DrawWidgets();
-		DrawStringMultiLine(20, this->width - 20, 15, 45, STR_CHEATS_WARNING, TC_FROMSTRING, SA_CENTER);
+		if (widget != CW_PANEL) return;
 
-		for (int i = 0, x = 0, y = 45; i != lengthof(_cheats_ui); i++) {
+		int y = r.top + WD_FRAMERECT_TOP + this->header_height;
+		DrawStringMultiLine(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP, y, STR_CHEATS_WARNING, TC_FROMSTRING, SA_CENTER);
+
+		bool rtl = _dynlang.text_dir == TD_RTL;
+		uint box_left    = rtl ? r.right - 12 : r.left + 5;
+		uint button_left = rtl ? r.right - 40 : r.left + 20;
+		uint text_left   = r.left + (rtl ? WD_FRAMERECT_LEFT: 50);
+		uint text_right  = r.right - (rtl ? 50 : WD_FRAMERECT_RIGHT);
+
+		for (int i = 0; i != lengthof(_cheats_ui); i++) {
 			const CheatEntry *ce = &_cheats_ui[i];
 
-			DrawSprite((*ce->been_used) ? SPR_BOX_CHECKED : SPR_BOX_EMPTY, PAL_NONE, x + 5, y + 2);
+			DrawSprite((*ce->been_used) ? SPR_BOX_CHECKED : SPR_BOX_EMPTY, PAL_NONE, box_left, y + 2);
 
 			switch (ce->type) {
 				case SLE_BOOL: {
 					bool on = (*(bool*)ce->variable);
 
-					DrawFrameRect(x + 20, y + 1, x + 30 + 9, y + 9, on ? COLOUR_GREEN : COLOUR_RED, on ? FR_LOWERED : FR_NONE);
+					DrawFrameRect(button_left, y + 1, button_left + 20 - 1, y + FONT_HEIGHT_NORMAL - 1, on ? COLOUR_GREEN : COLOUR_RED, on ? FR_LOWERED : FR_NONE);
 					SetDParam(0, on ? STR_CONFIG_SETTING_ON : STR_CONFIG_SETTING_OFF);
 				} break;
 
@@ -178,18 +186,19 @@ struct CheatWindow : Window {
 					char buf[512];
 
 					/* Draw [<][>] boxes for settings of an integer-type */
-					DrawArrowButtons(x + 20, y, COLOUR_YELLOW, clicked - (i * 2), true, true);
+					DrawArrowButtons(button_left, y, COLOUR_YELLOW, clicked - (i * 2), true, true);
 
 					switch (ce->str) {
 						/* Display date for change date cheat */
 						case STR_CHEAT_CHANGE_DATE: SetDParam(0, _date); break;
 
 						/* Draw coloured flag for change company cheat */
-						case STR_CHEAT_CHANGE_COMPANY:
+						case STR_CHEAT_CHANGE_COMPANY: {
 							SetDParam(0, val + 1);
 							GetString(buf, STR_CHEAT_CHANGE_COMPANY, lastof(buf));
-							DrawCompanyIcon(_local_company, 60 + GetStringBoundingBox(buf).width, y + 2);
-							break;
+							uint offset = 10 + GetStringBoundingBox(buf).width;
+							DrawCompanyIcon(_local_company, rtl ? text_right - offset - 10 : text_left + offset, y + 2);
+						} break;
 
 						/* Set correct string for switch climate cheat */
 						case STR_CHEAT_SWITCH_CLIMATE: val += STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE;
@@ -200,16 +209,75 @@ struct CheatWindow : Window {
 				} break;
 			}
 
-			DrawString(50, this->width, y + 1, ce->str);
+			DrawString(text_left, text_right, y + 1, ce->str);
 
-			y += 12;
+			y += FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL;
 		}
+	}
+
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
+	{
+		if (widget != CW_PANEL) return;
+
+		uint width = 0;
+		for (int i = 0; i != lengthof(_cheats_ui); i++) {
+			const CheatEntry *ce = &_cheats_ui[i];
+			switch (ce->type) {
+				case SLE_BOOL:
+					SetDParam(0, STR_CONFIG_SETTING_ON);
+					width = max(width, GetStringBoundingBox(ce->str).width);
+					SetDParam(0, STR_CONFIG_SETTING_OFF);
+					width = max(width, GetStringBoundingBox(ce->str).width);
+					break;
+
+				default:
+					switch (ce->str) {
+						/* Display date for change date cheat */
+						case STR_CHEAT_CHANGE_DATE:
+							SetDParam(0, ConvertYMDToDate(MAX_YEAR, 11, 31));
+							width = max(width, GetStringBoundingBox(ce->str).width);
+							break;
+
+						/* Draw coloured flag for change company cheat */
+						case STR_CHEAT_CHANGE_COMPANY:
+							SetDParam(0, 15);
+							width = max(width, GetStringBoundingBox(ce->str).width + 10 + 10);
+							break;
+
+						/* Set correct string for switch climate cheat */
+						case STR_CHEAT_SWITCH_CLIMATE:
+							for (StringID i = STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE; i <= STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE; i++) {
+								SetDParam(0, i);
+								width = max(width, GetStringBoundingBox(ce->str).width);
+							}
+							break;
+
+						default:
+							SetDParam(0, INT64_MAX);
+							width = max(width, GetStringBoundingBox(ce->str).width);
+							break;
+					}
+					break;
+			}
+		}
+
+		size->width = width + 50 /* stuff on the left */ + 10 /* extra spacing on right */;
+		this->header_height = GetStringHeight(STR_CHEATS_WARNING, size->width - WD_FRAMERECT_LEFT - WD_FRAMERECT_RIGHT) + WD_PAR_VSEP_WIDE;
+		size->height = this->header_height + WD_FRAMERECT_TOP + WD_PAR_VSEP_NORMAL + WD_FRAMERECT_BOTTOM + (FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL) * lengthof(_cheats_ui);
+	}
+
+	virtual void OnPaint()
+	{
+		this->DrawWidgets();
 	}
 
 	virtual void OnClick(Point pt, int widget)
 	{
-		uint btn = (pt.y - 46) / 12;
-		uint x = pt.x;
+		const NWidgetBase *wid = this->GetWidget<NWidgetBase>(CW_PANEL);
+		uint btn = (pt.y - wid->pos_y - WD_FRAMERECT_TOP - this->header_height) / (FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL);
+		uint x = pt.x - wid->pos_x;
+		bool rtl = _dynlang.text_dir == TD_RTL;
+		if (rtl) x = wid->current_x - x;
 
 		/* Not clicking a button? */
 		if (!IsInsideMM(x, 20, 40) || btn >= lengthof(_cheats_ui)) return;
@@ -231,7 +299,7 @@ struct CheatWindow : Window {
 				value = ce->proc(value + ((x >= 30) ? 1 : -1), (x >= 30) ? 1 : -1);
 
 				/* The first cheat (money), doesn't return a different value. */
-				if (value != oldvalue || btn == 0) this->clicked = btn * 2 + 1 + ((x >= 30) ? 1 : 0);
+				if (value != oldvalue || btn == 0) this->clicked = btn * 2 + 1 + ((x >= 30) != rtl ? 1 : 0);
 				break;
 		}
 
@@ -250,10 +318,10 @@ struct CheatWindow : Window {
 };
 
 static const WindowDesc _cheats_desc(
-	240, 22, 400, 170, 400, 170,
+	WDP_AUTO, 0, 0,
 	WC_CHEATS, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	_cheat_widgets, _nested_cheat_widgets, lengthof(_nested_cheat_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_cheat_widgets, lengthof(_nested_cheat_widgets)
 );
 
 

@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "fontcache.h"
 #include "blitter/factory.hpp"
-#include "gfx_func.h"
 #include "core/math_func.hpp"
 
 #include "table/sprites.h"
@@ -36,6 +35,7 @@ static FT_Library _library = NULL;
 static FT_Face _face_small = NULL;
 static FT_Face _face_medium = NULL;
 static FT_Face _face_large = NULL;
+static int _ascender[FS_END];
 
 FreeTypeSettings _freetype;
 
@@ -120,7 +120,7 @@ static FT_Error GetFontByFaceName(const char *font_name, FT_Face *face)
 	font_namep = MallocT<TCHAR>(MAX_PATH);
 	MB_TO_WIDE_BUFFER(font_name, font_namep, MAX_PATH * sizeof(TCHAR));
 #else
-	font_namep = (char*)font_name; // only cast because in unicode pointer is not const
+	font_namep = const_cast<char *>(font_name); // only cast because in unicode pointer is not const
 #endif
 
 	for (index = 0;; index++) {
@@ -707,6 +707,22 @@ FT_Error GetFontByFaceName(const char *font_name, FT_Face *face) {return FT_Err_
 bool SetFallbackFont(FreeTypeSettings *settings, const char *language_isocode, int winlangid, const char *str) { return false; }
 #endif /* WITH_FONTCONFIG */
 
+static void SetFontGeometry(FT_Face face, FontSize size, int pixels)
+{
+	FT_Set_Pixel_Sizes(face, 0, pixels);
+
+	if (FT_IS_SCALABLE(face)) {
+		int asc = face->ascender * pixels / face->units_per_EM;
+		int dec = face->descender * pixels / face->units_per_EM;
+
+		_ascender[size] = asc;
+		_font_height[size] = asc - dec;
+	} else {
+		_ascender[size] = pixels;
+		_font_height[size] = pixels;
+	}
+}
+
 /**
  * Loads the freetype font.
  * First type to load the fontname as if it were a path. If that fails,
@@ -781,16 +797,13 @@ void InitFreeType()
 
 	/* Set each font size */
 	if (_face_small != NULL) {
-		FT_Set_Pixel_Sizes(_face_small, 0, _freetype.small_size);
-		_font_height[FS_SMALL] = _freetype.small_size;
+		SetFontGeometry(_face_small, FS_SMALL, _freetype.small_size);
 	}
 	if (_face_medium != NULL) {
-		FT_Set_Pixel_Sizes(_face_medium, 0, _freetype.medium_size);
-		_font_height[FS_NORMAL] = _freetype.medium_size;
+		SetFontGeometry(_face_medium, FS_NORMAL, _freetype.medium_size);
 	}
 	if (_face_large != NULL) {
-		FT_Set_Pixel_Sizes(_face_large, 0, _freetype.large_size);
-		_font_height[FS_LARGE] = _freetype.large_size;
+		SetFontGeometry(_face_large, FS_LARGE, _freetype.large_size);
 	}
 }
 
@@ -934,7 +947,6 @@ const Sprite *GetGlyph(FontSize size, WChar key)
 	int height;
 	int x;
 	int y;
-	int y_adj;
 
 	assert(IsPrintable(key));
 
@@ -968,9 +980,7 @@ const Sprite *GetGlyph(FontSize size, WChar key)
 	sprite.width = width;
 	sprite.height = height;
 	sprite.x_offs = slot->bitmap_left;
-	/* XXX 2 should be determined somehow... it's right for the normal face */
-	y_adj = (size == FS_NORMAL) ? 2 : 0;
-	sprite.y_offs = GetCharacterHeight(size) - slot->bitmap_top - y_adj;
+	sprite.y_offs = _ascender[size] - slot->bitmap_top;
 
 	/* Draw shadow for medium size */
 	if (size == FS_NORMAL) {
@@ -994,7 +1004,7 @@ const Sprite *GetGlyph(FontSize size, WChar key)
 	}
 
 	new_glyph.sprite = BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, AllocateFont);
-	new_glyph.width  = (slot->advance.x >> 6) + (size != FS_NORMAL);
+	new_glyph.width  = slot->advance.x >> 6;
 
 	SetGlyphPtr(size, key, &new_glyph);
 

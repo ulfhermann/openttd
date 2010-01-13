@@ -39,7 +39,6 @@ enum RoadVehicleStates {
 
 	/* Bit numbers */
 	RVS_USING_SECOND_BAY         =    1,                      ///< Only used while in a road stop
-	RVS_IS_STOPPING              =    2,                      ///< Only used for drive-through stops. Vehicle will stop here
 	RVS_DRIVE_SIDE               =    4,                      ///< Only used when retrieving move data
 	RVS_IN_ROAD_STOP             =    5,                      ///< The vehicle is in a road stop
 	RVS_IN_DT_ROAD_STOP          =    6,                      ///< The vehicle is in a drive-through road stop
@@ -70,7 +69,7 @@ enum {
 	RVC_START_FRAME_AFTER_LONG_TRAM        = 21,
 	RVC_TURN_AROUND_START_FRAME_SHORT_TRAM = 16,
 	/* Stop frame for a vehicle in a drive-through stop */
-	RVC_DRIVE_THROUGH_STOP_FRAME           =  7,
+	RVC_DRIVE_THROUGH_STOP_FRAME           = 11,
 	RVC_DEPOT_STOP_FRAME                   = 11,
 };
 
@@ -80,14 +79,13 @@ enum RoadVehicleSubType {
 };
 
 
-void CcBuildRoadVeh(bool success, TileIndex tile, uint32 p1, uint32 p2);
-
 void RoadVehUpdateCache(RoadVehicle *v);
 
 /** Cached oftenly queried (NewGRF) values */
 struct RoadVehicleCache {
-	byte cached_veh_length;
-	EngineID first_engine;   ///< cached EngineID of the front vehicle. INVALID_ENGINE for the front vehicle itself.
+	uint16 cached_total_length; ///< Length of the whole train, valid only for first engine.
+	byte cached_veh_length;     ///< length of this vehicle in units of 1/8 of normal length, cached because this can be set by a callback
+	EngineID first_engine;      ///< Cached EngineID of the front vehicle. INVALID_ENGINE for the front vehicle itself.
 };
 
 /**
@@ -102,8 +100,6 @@ struct RoadVehicle : public SpecializedVehicle<RoadVehicle, VEH_ROAD> {
 	byte overtaking_ctr;
 	uint16 crashed_ctr;
 	byte reverse_ctr;
-	struct RoadStop *slot;
-	byte slot_age;
 
 	RoadType roadtype;
 	RoadTypes compatible_roadtypes;
@@ -127,9 +123,12 @@ struct RoadVehicle : public SpecializedVehicle<RoadVehicle, VEH_ROAD> {
 	bool IsStoppedInDepot() const;
 	bool Tick();
 	void OnNewDay();
+	uint Crash(bool flooded = false);
 	Trackdir GetVehicleTrackdir() const;
 	TileIndex GetOrderStationLocation(StationID station);
 	bool FindClosestDepot(TileIndex *location, DestinationID *destination, bool *reverse);
+
+	bool IsBus() const;
 
 	/**
 	 * Check if vehicle is a front engine

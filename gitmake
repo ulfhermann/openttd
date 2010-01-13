@@ -16,20 +16,19 @@ clean:
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
 	git merge ${@}-tmp
-	make -j4
+	test -e gitmake-build && make -j`cat gitmake-build` || true
 	./make_diffs
-	
 
-gitmake-origin: 
-	git fetch origin
-	git log origin | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
+gitmake-origin:
+	git fetch git://git.openttd.org/openttd/trunk.git master:trunk
+	git log trunk | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
 	cp gitmake-origin patches/current/TRUNK_VERSION.txt
-	git diff --numstat origin/master master | grep -v .gitignore | grep -v gitmake | grep -v make_diffs && touch gitmake-origin || touch -t 197001010100 gitmake-origin
+	git diff --numstat trunk master | grep -v .gitignore | grep -v gitmake | grep -v make_diffs && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 master: gitmake-origin
 	git checkout $@
-	git pull
-	make -j4
+	git merge trunk
+	test -e gitmake-build && make -j`cat gitmake-build` || true
 
 smallmap-zoom-out: master
 
@@ -70,5 +69,4 @@ warning-sign: demands
 push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in smallmap-zoom-out zoomlevels diaglvl tileiter texteff cargomap multimap reservation warning-sign
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
-	
-	
+

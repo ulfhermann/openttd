@@ -15,7 +15,6 @@
 #include "variables.h"
 #undef VARDEF
 
-#include "openttd.h"
 
 #include "blitter/factory.hpp"
 #include "sound/sound_driver.hpp"
@@ -59,9 +58,7 @@
 #include "rev.h"
 #include "highscore.h"
 #include "thread/thread.h"
-#include "base_station_base.h"
 #include "station_base.h"
-#include "airport.h"
 #include "crashlog.h"
 
 #include "newgrf_commons.h"
@@ -123,7 +120,6 @@ void CDECL error(const char *s, ...)
 	va_end(va);
 
 	ShowOSErrorBox(buf, true);
-	if (_video_driver != NULL) _video_driver->Stop();
 
 	/* Set the error message for the crash log and then invoke it. */
 	CrashLog::SetErrorMessage(buf);
@@ -185,6 +181,7 @@ static void ShowHelp()
 		"                          specified in graphics set file (see below)\n"
 		"  -I graphics_set     = Force the graphics set (see below)\n"
 		"  -S sounds_set       = Force the sounds set (see below)\n"
+		"  -M music_set        = Force the music set (see below)\n"
 		"  -c config_file      = Use 'config_file' instead of 'openttd.cfg'\n"
 		"  -x                  = Do not automatically save to config file on exit\n"
 		"\n",
@@ -196,6 +193,9 @@ static void ShowHelp()
 
 	/* List the sounds packs */
 	p = BaseSounds::GetSetsList(p, lastof(buf));
+
+	/* List the music packs */
+	p = BaseMusic::GetSetsList(p, lastof(buf));
 
 	/* List the drivers */
 	p = VideoDriverFactoryBase::GetDriversInfo(p, lastof(buf));
@@ -413,6 +413,7 @@ int ttd_main(int argc, char *argv[])
 	char *blitter = NULL;
 	char *graphics_set = NULL;
 	char *sounds_set = NULL;
+	char *music_set = NULL;
 	Dimension resolution = {0, 0};
 	Year startyear = INVALID_YEAR;
 	uint generation_seed = GENERATE_NEW_SEED;
@@ -450,6 +451,7 @@ int ttd_main(int argc, char *argv[])
 		switch (i) {
 		case 'I': free(graphics_set); graphics_set = strdup(mgo.opt); break;
 		case 'S': free(sounds_set); sounds_set = strdup(mgo.opt); break;
+		case 'M': free(music_set); music_set = strdup(mgo.opt); break;
 		case 'm': free(musicdriver); musicdriver = strdup(mgo.opt); break;
 		case 's': free(sounddriver); sounddriver = strdup(mgo.opt); break;
 		case 'v': free(videodriver); videodriver = strdup(mgo.opt); break;
@@ -540,6 +542,7 @@ int ttd_main(int argc, char *argv[])
 			DeterminePaths(argv[0]);
 			BaseGraphics::FindSets();
 			BaseSounds::FindSets();
+			BaseMusic::FindSets();
 			ShowHelp();
 			return 0;
 		}
@@ -553,6 +556,7 @@ int ttd_main(int argc, char *argv[])
 	DeterminePaths(argv[0]);
 	BaseGraphics::FindSets();
 	BaseSounds::FindSets();
+	BaseMusic::FindSets();
 
 #if defined(UNIX) && !defined(__MORPHOS__)
 	/* We must fork here, or we'll end up without some resources we need (like sockets) */
@@ -611,7 +615,7 @@ int ttd_main(int argc, char *argv[])
 	if (sounds_set == NULL && BaseSounds::ini_set != NULL) sounds_set = strdup(BaseSounds::ini_set);
 	if (!BaseSounds::SetSet(sounds_set)) {
 		StrEmpty(sounds_set) ?
-			usererror("Failed to find a sounds set. Please acquire a sounds set for OpenTTD.") :
+			usererror("Failed to find a sounds set. Please acquire a sounds set for OpenTTD. See section 4.1 of readme.txt.") :
 			usererror("Failed to select requested sounds set '%s'", sounds_set);
 	}
 	free(sounds_set);
@@ -619,10 +623,18 @@ int ttd_main(int argc, char *argv[])
 	if (graphics_set == NULL && BaseGraphics::ini_set != NULL) graphics_set = strdup(BaseGraphics::ini_set);
 	if (!BaseGraphics::SetSet(graphics_set)) {
 		StrEmpty(graphics_set) ?
-			usererror("Failed to find a graphics set. Please acquire a graphics set for OpenTTD.") :
+			usererror("Failed to find a graphics set. Please acquire a graphics set for OpenTTD. See section 4.1 of readme.txt.") :
 			usererror("Failed to select requested graphics set '%s'", graphics_set);
 	}
 	free(graphics_set);
+
+	if (music_set == NULL && BaseMusic::ini_set != NULL) music_set = strdup(BaseMusic::ini_set);
+	if (!BaseMusic::SetSet(music_set)) {
+		StrEmpty(music_set) ?
+			usererror("Failed to find a music set. Please acquire a music set for OpenTTD. See section 4.1 of readme.txt.") :
+			usererror("Failed to select requested music set '%s'", music_set);
+	}
+	free(music_set);
 
 	/* Initialize game palette */
 	GfxInitPalettes();
@@ -646,15 +658,6 @@ int ttd_main(int argc, char *argv[])
 	}
 	free(sounddriver);
 
-	if (musicdriver == NULL && _ini_musicdriver != NULL) musicdriver = strdup(_ini_musicdriver);
-	_music_driver = (MusicDriver*)MusicDriverFactoryBase::SelectDriver(musicdriver, Driver::DT_MUSIC);
-	if (_music_driver == NULL) {
-		StrEmpty(musicdriver) ?
-			usererror("Failed to autoprobe music driver") :
-			usererror("Failed to select requested music driver '%s'", musicdriver);
-	}
-	free(musicdriver);
-
 	if (videodriver == NULL && _ini_videodriver != NULL) videodriver = strdup(_ini_videodriver);
 	_video_driver = (VideoDriver*)VideoDriverFactoryBase::SelectDriver(videodriver, Driver::DT_VIDEO);
 	if (_video_driver == NULL) {
@@ -663,6 +666,15 @@ int ttd_main(int argc, char *argv[])
 			usererror("Failed to select requested video driver '%s'", videodriver);
 	}
 	free(videodriver);
+
+	if (musicdriver == NULL && _ini_musicdriver != NULL) musicdriver = strdup(_ini_musicdriver);
+	_music_driver = (MusicDriver*)MusicDriverFactoryBase::SelectDriver(musicdriver, Driver::DT_MUSIC);
+	if (_music_driver == NULL) {
+		StrEmpty(musicdriver) ?
+			usererror("Failed to autoprobe music driver") :
+			usererror("Failed to select requested music driver '%s'", musicdriver);
+	}
+	free(musicdriver);
 
 	_savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 	/* Initialize the zoom level of the screen to normal */
@@ -752,6 +764,7 @@ int ttd_main(int argc, char *argv[])
 
 	free(const_cast<char *>(BaseGraphics::ini_set));
 	free(const_cast<char *>(BaseSounds::ini_set));
+	free(const_cast<char *>(BaseMusic::ini_set));
 	free(_ini_musicdriver);
 	free(_ini_sounddriver);
 	free(_ini_videodriver);
@@ -770,17 +783,6 @@ void HandleExitGameRequest()
 	} else {
 		AskExitGame();
 	}
-}
-
-static void ShowScreenshotResult(bool b)
-{
-	if (b) {
-		SetDParamStr(0, _screenshot_name);
-		ShowErrorMessage(STR_MESSAGE_SCREENSHOT_SUCCESSFULLY, INVALID_STRING_ID, 0, 0);
-	} else {
-		ShowErrorMessage(STR_ERROR_SCREENSHOT_FAILED, INVALID_STRING_ID, 0, 0);
-	}
-
 }
 
 static void MakeNewGameDone()
@@ -1038,6 +1040,8 @@ void SwitchToMode(SwitchMode new_mode)
 			if (SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_EDITOR, NO_DIRECTORY)) {
 				SetLocalCompany(OWNER_NONE);
 				_settings_newgame.game_creation.starting_year = _cur_year;
+				/* Cancel the saveload pausing */
+				DoCommandP(0, PM_PAUSED_SAVELOAD, 0, CMD_PAUSE);
 			} else {
 				SetDParamStr(0, GetSaveLoadErrorString());
 				ShowErrorMessage(STR_JUST_RAW_STRING, INVALID_STRING_ID, 0, 0);
@@ -1100,6 +1104,16 @@ void StateGameLoop()
 		CallWindowTickEvent();
 		NewsLoop();
 	} else {
+		/* Temporary strict checking of the road stop cache entries */
+		const RoadStop *rs;
+		FOR_ALL_ROADSTOPS(rs) {
+			if (IsStandardRoadStopTile(rs->xy)) continue;
+
+			assert(rs->GetEntry(DIAGDIR_NE) != rs->GetEntry(DIAGDIR_NW));
+			rs->GetEntry(DIAGDIR_NE)->CheckIntegrity(rs);
+			rs->GetEntry(DIAGDIR_NW)->CheckIntegrity(rs);
+		}
+
 		if (_debug_desync_level > 1) {
 			Vehicle *v;
 			FOR_ALL_VEHICLES(v) {
@@ -1232,9 +1246,6 @@ void GameLoop()
 		DoAutosave();
 		RedrawAutosave();
 	}
-
-	/* make a screenshot? */
-	if (IsScreenshotRequested()) ShowScreenshotResult(MakeScreenshot());
 
 	/* switch game mode? */
 	if (_switch_mode != SM_NONE) {

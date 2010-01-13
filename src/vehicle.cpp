@@ -45,6 +45,8 @@
 #include "network/network.h"
 #include "core/pool_func.hpp"
 #include "economy_base.h"
+#include "articulated_vehicles.h"
+#include "roadstop_base.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -91,17 +93,62 @@ void VehicleServiceInDepot(Vehicle *v)
 
 bool Vehicle::NeedsServicing() const
 {
+	/* Stopped or crashed vehicles will not move, as such making unmovable
+	 * vehicles to go for service is lame. */
 	if (this->vehstatus & (VS_STOPPED | VS_CRASHED)) return false;
 
-	if (_settings_game.order.no_servicing_if_no_breakdowns && _settings_game.difficulty.vehicle_breakdowns == 0) {
-		/* Vehicles set for autoreplacing needs to go to a depot even if breakdowns are turned off.
-		 * Note: If servicing is enabled, we postpone replacement till next service. */
-		return EngineHasReplacementForCompany(Company::Get(this->owner), this->engine_type, this->group_id);
+	/* Are we ready for the next service cycle? */
+	const Company *c = Company::Get(this->owner);
+	if (c->settings.vehicle.servint_ispercent ?
+			(this->reliability >= Engine::Get(this->engine_type)->reliability * (100 - this->service_interval) / 100) :
+			(this->date_of_last_service + this->service_interval >= _date)) {
+		return false;
 	}
 
-	return Company::Get(this->owner)->settings.vehicle.servint_ispercent ?
-		(this->reliability < Engine::Get(this->engine_type)->reliability * (100 - this->service_interval) / 100) :
-		(this->date_of_last_service + this->service_interval < _date);
+	/* If we're servicing anyway, because we have not disabled servicing when
+	 * there are no breakdowns or we are playing with breakdowns, bail out. */
+	if (!_settings_game.order.no_servicing_if_no_breakdowns ||
+			_settings_game.difficulty.vehicle_breakdowns != 0) {
+		return true;
+	}
+
+	/* Test whether there is some pending autoreplace.
+	 * Note: We do this after the service-interval test.
+	 * There are a lot more reasons for autoreplace to fail than we can test here reasonably. */
+	bool pending_replace = false;
+	Money needed_money = c->settings.engine_renew_money;
+	if (needed_money > c->money) return false;
+
+	for (const Vehicle *v = this; v != NULL; v = (v->type == VEH_TRAIN) ? Train::From(v)->GetNextUnit() : NULL) {
+		EngineID new_engine = EngineReplacementForCompany(c, v->engine_type, v->group_id);
+
+		/* Check engine availability */
+		if (new_engine == INVALID_ENGINE || !HasBit(Engine::Get(new_engine)->company_avail, v->owner)) continue;
+
+		/* Check refittability */
+		uint32 available_cargo_types, union_mask;
+		GetArticulatedRefitMasks(new_engine, true, &union_mask, &available_cargo_types);
+		/* Is there anything to refit? */
+		if (union_mask != 0) {
+			CargoID cargo_type;
+			/* We cannot refit to mixed cargos in an automated way */
+			if (IsArticulatedVehicleCarryingDifferentCargos(v, &cargo_type)) continue;
+
+			/* Did the old vehicle carry anything? */
+			if (cargo_type != CT_INVALID) {
+				/* We can't refit the vehicle to carry the cargo we want */
+				if (!HasBit(available_cargo_types, cargo_type)) continue;
+			}
+		}
+
+		/* Check money.
+		 * We want 2*(the price of the new vehicle) without looking at the value of the vehicle we are going to sell. */
+		pending_replace = true;
+		needed_money += 2 * Engine::Get(new_engine)->GetCost();
+		if (needed_money > c->money) return false;
+	}
+
+	return pending_replace;
 }
 
 bool Vehicle::NeedsAutomaticServicing() const
@@ -111,6 +158,29 @@ bool Vehicle::NeedsAutomaticServicing() const
 	if (this->current_order.IsType(OT_GOTO_DEPOT) && this->current_order.GetDepotOrderType() != ODTFB_SERVICE) return false;
 	return NeedsServicing();
 }
+
+uint Vehicle::Crash(bool flooded)
+{
+	assert((this->vehstatus & VS_CRASHED) == 0);
+	assert(this->Previous() == NULL); // IsPrimaryVehicle fails for free-wagon-chains
+
+	uint pass = 0;
+	/* crash all wagons, and count passengers */
+	for (Vehicle *v = this; v != NULL; v = v->Next()) {
+		if (IsCargoInClass(v->cargo_type, CC_PASSENGERS)) pass += v->cargo.Count();
+		v->vehstatus |= VS_CRASHED;
+		MarkSingleVehicleDirty(v);
+	}
+
+	/* Dirty some windows */
+	InvalidateWindowClassesData(GetWindowClassForVehicleType(this->type), 0);
+	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
+	SetWindowDirty(WC_VEHICLE_DETAILS, this->index);
+	SetWindowDirty(WC_VEHICLE_DEPOT, this->tile);
+
+	return pass;
+}
+
 
 /**
  * Displays a "NewGrf Bug" error message for a engine, and pauses the game if not networking.
@@ -496,13 +566,21 @@ void Vehicle::PreDestructor()
 		if (this->IsPrimaryVehicle()) DecreaseGroupNumVehicle(this->group_id);
 	}
 
-	if (this->type == VEH_ROAD) ClearSlot(RoadVehicle::From(this));
 	if (this->type == VEH_AIRCRAFT && this->IsPrimaryVehicle()) {
 		Aircraft *a = Aircraft::From(this);
 		Station *st = GetTargetAirportIfValid(a);
 		if (st != NULL) {
 			const AirportFTA *layout = st->Airport()->layout;
 			CLRBITS(st->airport_flags, layout[a->previous_pos].block | layout[a->pos].block);
+		}
+	}
+
+
+	if (this->type == VEH_ROAD && this->IsPrimaryVehicle()) {
+		RoadVehicle *v = RoadVehicle::From(this);
+		if (!(v->vehstatus & VS_CRASHED) && IsInsideMM(v->state, RVSB_IN_DT_ROAD_STOP, RVSB_IN_DT_ROAD_STOP_END)) {
+			/* Leave the drive through roadstop, when you have not already left it. */
+			RoadStop::GetByTile(v->tile, GetRoadStopType(v->tile))->Leave(v);
 		}
 	}
 
@@ -627,7 +705,7 @@ void CallVehicleTicks()
 				if (v->type == VEH_AIRCRAFT && v->subtype != AIR_HELICOPTER) continue;
 				if (v->type == VEH_ROAD && !RoadVehicle::From(v)->IsRoadVehFront()) continue;
 
-				v->motion_counter += (v->direction & 1) ? (v->cur_speed * 3) / 4 : v->cur_speed;
+				v->motion_counter += v->cur_speed;
 				/* Play a running sound if the motion counter passes 256 (Do we not skip sounds?) */
 				if (GB(v->motion_counter, 0, 8) < v->cur_speed) PlayVehicleSound(v, VSE_RUNNING);
 
@@ -920,7 +998,7 @@ void VehicleEnterDepot(Vehicle *v)
 			if (_settings_client.gui.show_track_reservation) MarkTileDirtyByTile(t->tile);
 
 			UpdateSignalsOnSegment(t->tile, INVALID_DIAGDIR, t->owner);
-			t->time_counter = 0;
+			t->wait_counter = 0;
 			ClrBit(t->flags, VRF_TOGGLE_REVERSE);
 			TrainConsistChanged(t, true);
 			break;
@@ -1563,7 +1641,7 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 	if (this->IsStoppedInDepot()) return CMD_ERROR;
 
 	if (this->current_order.IsType(OT_GOTO_DEPOT)) {
-		bool halt_in_depot = this->current_order.GetDepotActionType() & ODATFB_HALT;
+		bool halt_in_depot = (this->current_order.GetDepotActionType() & ODATFB_HALT) != 0;
 		if (!!(command & DEPOT_SERVICE) == halt_in_depot) {
 			/* We called with a different DEPOT_SERVICE setting.
 			 * Now we change the setting to apply the new one and let the vehicle head for the same depot.
@@ -1621,6 +1699,8 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 
 void Vehicle::SetNext(Vehicle *next)
 {
+	assert(this != next);
+
 	if (this->next != NULL) {
 		/* We had an old next vehicle. Update the first and previous pointers */
 		for (Vehicle *v = this->next; v != NULL; v = v->Next()) {

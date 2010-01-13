@@ -28,17 +28,11 @@ struct CmdStruct {
 	CmdFlags flags;
 };
 
-static void EmitSetX(char *buf, int value);
-static void EmitSetXY(char *buf, int value);
 static void EmitSingleChar(char *buf, int value);
 static void EmitPlural(char *buf, int value);
 static void EmitGender(char *buf, int value);
 
 static const CmdStruct _cmd_structs[] = {
-	/* Update position */
-	{"SETX",            EmitSetX,       SCC_SETX,               0, C_NONE},
-	{"SETXY",           EmitSetXY,      SCC_SETXY,              0, C_NONE},
-
 	/* Font size */
 	{"TINYFONT",        EmitSingleChar, SCC_TINYFONT,           0, C_NONE},
 	{"BIGFONT",         EmitSingleChar, SCC_BIGFONT,            0, C_NONE},
@@ -74,7 +68,7 @@ static const CmdStruct _cmd_structs[] = {
 
 	{"STATIONFEATURES", EmitSingleChar, SCC_STATION_FEATURES,   1, C_NONE}, // station features string, icons of the features
 	{"INDUSTRY",        EmitSingleChar, SCC_INDUSTRY_NAME,      1, C_NONE}, // industry, takes an industry #
-	{"CARGO",           EmitSingleChar, SCC_CARGO,              1, C_NONE},
+	{"CARGO",           EmitSingleChar, SCC_CARGO,              2, C_NONE},
 	{"POWER",           EmitSingleChar, SCC_POWER,              1, C_NONE},
 	{"VOLUME",          EmitSingleChar, SCC_VOLUME,             1, C_NONE},
 	{"VOLUME_S",        EmitSingleChar, SCC_VOLUME_SHORT,       1, C_NONE},
@@ -91,14 +85,13 @@ static const CmdStruct _cmd_structs[] = {
 	{"DATE_LONG",       EmitSingleChar, SCC_DATE_LONG,          1, C_NONE},
 	{"DATE_ISO",        EmitSingleChar, SCC_DATE_ISO,           1, C_NONE},
 
-	{"SKIP",            EmitSingleChar, SCC_SKIP,               1, C_NONE},
-
 	{"STRING",          EmitSingleChar, SCC_STRING,             1, C_CASE},
 	{"RAW_STRING",      EmitSingleChar, SCC_RAW_STRING_POINTER, 1, C_NONE},
 
 	/* Numbers */
 	{"COMMA",           EmitSingleChar, SCC_COMMA,              1, C_NONE}, // Number with comma
 	{"NUM",             EmitSingleChar, SCC_NUM,                1, C_NONE}, // Signed number
+	{"ZEROFILL_NUM",    EmitSingleChar, SCC_ZEROFILL_NUM,       2, C_NONE}, // Unsigned number with zero fill, e.g. "02". First parameter is number, second minimum length
 	{"BYTES",           EmitSingleChar, SCC_BYTES,              1, C_NONE}, // Unsigned number with "bytes", i.e. "1.02 MiB or 123 KiB"
 
 	{"CURRENCY",        EmitSingleChar, SCC_CURRENCY,           1, C_NONE},

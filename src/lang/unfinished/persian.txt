@@ -125,7 +125,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} آب �
 STR_QUANTITY_BATTERIES                                          :{COMMA}باطری{P y ies}
 STR_QUANTITY_PLASTIC                                            :{VOLUME}پلاستیک
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} نوشیدنی گاز دار{P "" s}
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -231,10 +231,11 @@ STR_BUTTON_OK                                                   :{BLACK}تایی
 # Measurement tooltip
 
 
-# The first three are also used as 'Sort by' buttons, the rest only in dropdowns
+# These are used in buttons
 STR_SORT_BY_CAPTION_POPULATION                                  :{BLACK}جمعیت
 STR_SORT_BY_CAPTION_NAME                                        :{BLACK}نام
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}تاریخ
+# These are used in dropdowns
 STR_SORT_BY_PRODUCTION                                          :تولید
 STR_SORT_BY_TYPE                                                :نوع
 STR_SORT_BY_TRANSPORTED                                         :منتقل شده
@@ -272,7 +273,7 @@ STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_FINANCES                    :{BLACK}اطلا
 STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_GENERAL                     :{BLACK}توضیحات کلی راجع به شرکت را نشان می دهد
 STR_TOOLBAR_TOOLTIP_DISPLAY_GRAPHS                              :{BLACK}نمودار ها را نشان می دهد
 STR_TOOLBAR_TOOLTIP_DISPLAY_COMPANY_LEAGUE                      :{BLACK}جدول رده بندی شرکت ها را نشان می دهد
-STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}نمایش لیست قطار های شرکت
+STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_TRAINS              :{BLACK}نمایش لیست قطار های شرکت، Ctrl+Click نمابش را بین گروه ها و قطار ها تغییر می دهد
 STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_ROAD_VEHICLES       :{BLACK}نمایش لیست ماشین های شرکت
 STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_SHIPS               :{BLACK}نمایش لیست کشتی های شرکت
 STR_TOOLBAR_TOOLTIP_DISPLAY_LIST_OF_COMPANY_AIRCRAFT            :{BLACK}نمایش لیست هواپیماهای شرکت
@@ -306,12 +307,12 @@ STR_SCENEDIT_FILE_MENU_QUIT                                     :خروج
 ############ range for settings menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :تنظیمات بازی
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :تنظیمات سختی
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}نام شهرها نشان داده شود
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}نام ایستگاه ها نشان داده شود
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}علامت ها نشان داده شوند
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}انیمیشن کامل
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}جزعیات کامل
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}ساختمان های نامرئی
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :نام شهرها نشان داده شود
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :نام ایستگاه ها نشان داده شود
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :علامت ها نشان داده شوند
+STR_SETTINGS_MENU_FULL_ANIMATION                                :انیمیشن کامل
+STR_SETTINGS_MENU_FULL_DETAIL                                   :جزعیات کامل
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :ساختمان های نامرئی
 ############ range ends here
 
 ############ range for file menu starts
@@ -325,7 +326,8 @@ STR_FILE_MENU_EXIT                                              :خروج
 STR_MAP_MENU_MAP_OF_WORLD                                       :نقشه ی دنیا
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :لیست شهر ها
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 ############ range ends here
@@ -382,7 +384,7 @@ STR_NEWS_MENU_MESSAGE_SETTINGS                                  :تنظیمات 
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_AI_DEBUG                                         :رفع اشکالات هوش مصنوعی
 STR_ABOUT_MENU_SCREENSHOT                                       :(Ctrl-S) تصویر از بازی
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :(Ctrl-G) نصویر از دنیا
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :(Ctrl-G) تصویر از دنیا
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :'OpenTTD' درباره
 ############ range ends here
 
@@ -439,7 +441,7 @@ STR_MONTH_ABBREV_DEC                                            :دی
 # Graph window
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 
@@ -464,7 +466,6 @@ STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_PRESIDENT                  :رئیس جمه
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TYCOON                     :ترک اصیل!
 
 # Performance detail window
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 ############ End of order list
 
@@ -476,10 +477,8 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}انتخابی 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}شدت صدای موسیقی
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}شدت صدای محیط
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}حد اکثر . . . . . . . . . حد اقل
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
-STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGREEN}0{COMMA}
-STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
 STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}پخش تصادفی
@@ -489,9 +488,9 @@ STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}آهنگ
 STR_MUSIC_TOOLTIP_STOP_PLAYING_MUSIC                            :{BLACK}توقف موسیقی
 STR_MUSIC_TOOLTIP_START_PLAYING_MUSIC                           :{BLACK}پخش موسیقی
 
+
 # Playlist window
-STR_PLAYLIST_TRACK_SINGLE_DIGIT                                 :{TINYFONT}{LTBLUE}0{COMMA} "{STRING}"
-STR_PLAYLIST_TRACK_DOUBLE_DIGIT                                 :{TINYFONT}{LTBLUE}{COMMA} "{STRING}"
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}شماره ی آهنگ
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}پاک کن
 STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}ذخیره کن
@@ -591,6 +590,7 @@ STR_NEWS_AIRCRAFT_CRASH                                         :{BIGFONT}{BLACK
 
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} توسط {STRING} خریداری شد!
 
+
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK} {STRING} جدیدی در مجاورت {TOWN} در حال ساخت است!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK} {STRING} جدیدی در مجاورت {TOWN} در حال کاشته شدن است!
 
@@ -665,6 +665,7 @@ STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP                   :{BLACK} اطل�
 
 
 
+
 # Custom currency window
 
 
@@ -702,7 +703,9 @@ STR_NUM_CUSTOM                                                  :انتخابی
 
 
 
+
 # Advanced settings window
+
 
 
 
@@ -758,7 +761,7 @@ STR_QUIT_NO                                                     :{BLACK}خیر
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_MORPHOS                                              :MorphOS
 STR_OSNAME_AMIGAOS                                              :AmigaOS
@@ -1003,6 +1006,7 @@ STR_FOUND_TOWN_NEW_TOWN_TOOLTIP                                 :{BLACK}ساخت
 STR_FOUND_TOWN_RANDOM_TOWN_BUTTON                               :{BLACK}شهر صادفی
 STR_FOUND_TOWN_RANDOM_TOWN_TOOLTIP                              :{BLACK}شهری در مکانی تصادفی بساز
 
+
 STR_FOUND_TOWN_INITIAL_SIZE_TITLE                               :{YELLOW}اندازه ی شهر :
 STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}کوچک
 STR_FOUND_TOWN_INITIAL_SIZE_MEDIUM_BUTTON                       :{BLACK}متوسط
@@ -1074,7 +1078,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :زمین خری
 STR_ABOUT_OPENTTD                                               :{WHITE}OpenTTD در باره ی
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Original copyright {COPYRIGHT} 1995 Chris Sawyer, All rights reserved
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD version {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 The OpenTTD team
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 The OpenTTD team
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}ذخیره ی بازی
@@ -1204,7 +1208,6 @@ STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}ساخت ساختمان مرکزی
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}دیدن ساختمان مرکزی
-STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}ساخت / دیدن ساختمان مرکزی
 
 
 STR_COMPANY_VIEW_BUY_SHARE_BUTTON                               :{BLACK}25% سهام شرکت را بخر
@@ -1466,10 +1469,8 @@ STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}تعمی
 STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE} (دستورات)
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}لیست دستورات - برای مشخص کردن دستور روی آن کلیک کنید. Ctrl+click به ایستگاه میرود
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - پایان دستورات - -
+STR_ORDERS_END_OF_ORDERS                                        :- - پایان دستورات - -
 
 # Order bottom buttons
 
@@ -1507,8 +1508,15 @@ STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}وارد
 
 
 
+
 STR_TIMETABLE_CLEAR_TIME                                        :{BLACK}پاک کردن زمان
 
+
+
+
+
+
+# Date window (for timetable)
 
 
 # AI debug window
@@ -1524,6 +1532,7 @@ STR_AI_CONFIG_CAPTION                                           :{WHITE}تنظی
 STR_AI_CONFIG_LIST_TOOLTIP                                      :{BLACK}همه هوشهای مصنوعی که در بازی بعد بازگشایی می شوند
 STR_AI_CONFIG_HUMAN_PLAYER                                      :بازیکن آدمیزاد
 STR_AI_CONFIG_RANDOM_AI                                         :انتخاب هوش مصنوعی به صورت اتفاقی
+
 
 STR_AI_CONFIG_CHANGE                                            :{BLACK}انتخاب هوش مصنوعی
 STR_AI_CONFIG_CHANGE_TOOLTIP                                    :{BLACK}باز گشایی یک هوش مصنوعی دیگر
@@ -2107,7 +2116,7 @@ STR_FORMAT_GROUP_NAME                                           :گروه {COMMA
 STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
 
 STR_DEFAULT_SIGN_NAME                                           :علامت
-STR_COMPANY_SOMEONE                                             :یک نفر{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :یک نفر
 
 
 # Viewport strings
@@ -2152,8 +2161,6 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
 STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
@@ -2174,12 +2181,7 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
 STR_BLACK_2                                                     :{BLACK}2
@@ -2194,4 +2196,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-

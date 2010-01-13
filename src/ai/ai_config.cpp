@@ -16,12 +16,13 @@
 #include "ai.hpp"
 #include "ai_config.hpp"
 
-void AIConfig::ChangeAI(const char *name, int version)
+void AIConfig::ChangeAI(const char *name, int version, bool is_random_ai)
 {
 	free((void *)this->name);
 	this->name = (name == NULL) ? NULL : strdup(name);
 	this->info = (name == NULL) ? NULL : AI::FindInfo(this->name, version);
 	this->version = (info == NULL) ? -1 : info->GetVersion();
+	this->is_random_ai = is_random_ai;
 	if (this->config_list != NULL) delete this->config_list;
 	this->config_list = (info == NULL) ? NULL : new AIConfigItemList();
 	if (this->config_list != NULL) this->config_list->push_back(_start_date_config);
@@ -56,6 +57,7 @@ AIConfig::AIConfig(const AIConfig *config)
 	this->info = config->info;
 	this->version = config->version;
 	this->config_list = NULL;
+	this->is_random_ai = config->is_random_ai;
 
 	for (SettingValueList::const_iterator it = config->settings.begin(); it != config->settings.end(); it++) {
 		this->settings[strdup((*it).first)] = (*it).second;
@@ -70,7 +72,7 @@ AIConfig::~AIConfig()
 	if (this->config_list != NULL) delete this->config_list;
 }
 
-AIInfo *AIConfig::GetInfo()
+AIInfo *AIConfig::GetInfo() const
 {
 	return this->info;
 }
@@ -103,9 +105,9 @@ AIConfig *AIConfig::GetConfig(CompanyID company, bool forceNewgameSetting)
 	return *config;
 }
 
-int AIConfig::GetSetting(const char *name)
+int AIConfig::GetSetting(const char *name) const
 {
-	SettingValueList::iterator it = this->settings.find(name);
+	SettingValueList::const_iterator it = this->settings.find(name);
 	/* Return the default value if the setting is not set, or if we are in a not-custom difficult level */
 	if (it == this->settings.end() || ((_game_mode == GM_MENU) ? _settings_newgame.difficulty.diff_level : _settings_game.difficulty.diff_level) != 3) {
 		if (this->info == NULL) {
@@ -162,17 +164,22 @@ void AIConfig::AddRandomDeviation()
 	}
 }
 
-bool AIConfig::HasAI()
+bool AIConfig::HasAI() const
 {
 	return this->info != NULL;
 }
 
-const char *AIConfig::GetName()
+bool AIConfig::IsRandomAI() const
+{
+	return this->is_random_ai;
+}
+
+const char *AIConfig::GetName() const
 {
 	return this->name;
 }
 
-int AIConfig::GetVersion()
+int AIConfig::GetVersion() const
 {
 	return this->version;
 }
@@ -203,10 +210,10 @@ void AIConfig::StringToSettings(const char *value)
 	free(value_copy);
 }
 
-void AIConfig::SettingsToString(char *string, size_t size)
+void AIConfig::SettingsToString(char *string, size_t size) const
 {
 	string[0] = '\0';
-	for (SettingValueList::iterator it = this->settings.begin(); it != this->settings.end(); it++) {
+	for (SettingValueList::const_iterator it = this->settings.begin(); it != this->settings.end(); it++) {
 		char no[10];
 		snprintf(no, sizeof(no), "%d", (*it).second);
 

@@ -126,7 +126,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} kẹo 
 STR_QUANTITY_BATTERIES                                          :{COMMA} pin{P y ies}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} chất dẻo
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} đồ uống có ga{P "" s}
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -229,6 +229,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Đổi t
 
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Đóng cửa sổ
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Tiêu đề cửa sổ - kéo nó để di chuyển cửa số
+STR_TOOLTIP_SHADE                                               :{BLACK}Che cửa sổ - Chỉ hiển thị thanh tiêu đề
 STR_TOOLTIP_STICKY                                              :{BLACK}Đánh dấu không-thể-đóng khi bấm nút "Đóng Tất Cả Cửa Sổ"
 STR_TOOLTIP_RESIZE                                              :{BLACK}Click và kéo để thay đổi kích thước cửa sổ
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Bật kích cỡ cửa sổ lớn/nhỏ
@@ -314,6 +315,7 @@ STR_TOOLBAR_TOOLTIP_LANDSCAPING                                 :{BLACK}Mở tha
 STR_TOOLBAR_TOOLTIP_SHOW_SOUND_MUSIC_WINDOW                     :{BLACK}Hiện cửa sổ âm thanh/nhạc
 STR_TOOLBAR_TOOLTIP_SHOW_LAST_MESSAGE_NEWS                      :{BLACK}Hiện thông báo/tin tức cuối cùng, hiện tùy chọn thông báo
 STR_TOOLBAR_TOOLTIP_LAND_BLOCK_INFORMATION                      :{BLACK}Thông tin vùng đất, bảng lệnh, AI debug, ảnh chụp, nói về OpenTTD
+STR_TOOLBAR_TOOLTIP_SWITCH_TOOLBAR                              :{BLACK}Chuyển thanh công cụ
 
 # Extra tooltips for the scenario editor toolbar
 STR_SCENEDIT_TOOLBAR_TOOLTIP_SAVE_SCENARIO_LOAD_SCENARIO        :{BLACK}Lưu kịch bản, nạp kịch bản, bỏ trình chỉnh sửa kịch bản, thoát
@@ -344,14 +346,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Thiết lập �
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Thiết lập cao cấp
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Thông số NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Thiết lập độ trong suốt
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Hiển thị tên thị trấn
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Hiển thị tên nhà ga
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Hiển thị tên Waypoint
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Hiển thị ký hiệu
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animation đầy đủ
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Chi tiết
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Không hiện nhà cửa
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Không hiện biển hiệu nhà ga
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Hiển thị tên thị trấn
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Hiển thị tên nhà ga
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Hiển thị tên Waypoint
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Hiển thị ký hiệu
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Animation đầy đủ
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Chi tiết
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Không hiện nhà cửa
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Không hiện biển hiệu nhà ga
 ############ range ends here
 
 ############ range for file menu starts
@@ -367,7 +369,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Cổng nhìn b�
 STR_MAP_MENU_SIGN_LIST                                          :Danh sách ký hiệu
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Thư mục thị trấn
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Thị Xã
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Tiền trợ cấp
@@ -505,7 +509,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Nút
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Hiện khóa trên biểu đồ
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Biểu Đồ Lợi Nhuận Hoạt Động
@@ -528,8 +532,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Click v�
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Bảng liên đoàn công ty
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Kỹ sư
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Quản Lý Giao Thông
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Người Phối Hợp Vận Chuyển
@@ -546,7 +549,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Chi ti�
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Ph.tiện:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Trạm:
@@ -580,10 +582,11 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Tự Chọn 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Âm Lượng
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Hiệu Ứng Tiếng
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}Nhỏ
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}Lớn
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
-STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGREEN}0{COMMA}
-STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
 STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Bài Nhạc
@@ -604,10 +607,11 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Chọn k
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Bật/tắt chơi nhạc ngẫu nhiên
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Hiện cửa số chọn bài nhạc
 
+STR_ERROR_NO_SONGS                                              :{WHITE}Đã chọn gói nhạc chuẩn nhưng không có bài nào. Không có bài nào để chơi
+
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Chọn Kiểu Chơi Nhạc
-STR_PLAYLIST_TRACK_SINGLE_DIGIT                                 :{TINYFONT}{LTBLUE}0{COMMA} "{STRING}"
-STR_PLAYLIST_TRACK_DOUBLE_DIGIT                                 :{TINYFONT}{LTBLUE}{COMMA} "{STRING}"
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Bảng Bài Nhạc
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Chương Trình - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Xóa
@@ -689,6 +693,8 @@ STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRI
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Tắt tất cả
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Bật tất cả
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL                                :{BLACK}Không hiện khu công nghiệp trên bản đồ
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL                                 :{BLACK}Hiện tất cả khu công nghiệp trên bản đồ
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Hiện thông điệp hoặc tin tức cuối cùng
@@ -760,6 +766,8 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} đang được xây dựng gần thị trấn {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} đã bị kiểm soát bởi {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Giám Đốc)
+
+STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT}{STRING} Tài trợ xây dựng Thị Xã mới {TOWN}!
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Cụm công nghiệp {STRING} đang xây dựng gần thị trấn {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Cụm công nghiệp {STRING} đã được lên kế hoạch gần thị trấn {TOWN}!
@@ -938,6 +946,11 @@ STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Bộ âm
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Chọn bộ âm thanh chuẩn để dùng
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Thông tin thêm về bộ âm thanh chuẩn
 
+STR_GAME_OPTIONS_BASE_MUSIC                                     :{BLACK}Bộ nhạc chuẩn
+STR_GAME_OPTIONS_BASE_MUSIC_TOOLTIP                             :{BLACK}Chọn gói nhạc để sử dụng
+STR_GAME_OPTIONS_BASE_MUSIC_STATUS                              :{RED}{NUM} file bị hỏng{P "" s}
+STR_GAME_OPTIONS_BASE_MUSIC_DESCRIPTION_TOOLTIP                 :{BLACK}Thông tin thêm về gói nhạc chuẩn
+
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Thất bại khi bật chế độ fullscreen
 
 # Custom currency window
@@ -1005,6 +1018,13 @@ STR_NUM_NORMAL                                                  :Thường
 STR_NUM_HIGH                                                    :Cao
 STR_NUM_CUSTOM                                                  :Tự Chỉnh
 
+STR_VARIETY_NONE                                                :Không
+STR_VARIETY_VERY_LOW                                            :Rất Thấp
+STR_VARIETY_LOW                                                 :Thấp
+STR_VARIETY_MEDIUM                                              :Vừa
+STR_VARIETY_HIGH                                                :Cao
+STR_VARIETY_VERY_HIGH                                           :Rất Cao
+
 STR_AI_SPEED_VERY_SLOW                                          :Chậm Nhất
 STR_AI_SPEED_SLOW                                               :Chậm
 STR_AI_SPEED_MEDIUM                                             :Trung Bình
@@ -1060,7 +1080,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Bật c
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Kiểu tăng tốc của tàu hỏa: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Gốc
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Thật
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Cấm tàu hỏa và tàu thủy quay 90 độ: {ORANGE}{STRING} {LTBLUE} (vô hiệu với NTD)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Cấm tàu hỏa và tàu thủy quay 90 độ: {ORANGE}{STRING} {LTBLUE} (vô hiệu với OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Nhập ga xe lửa xây kế nhau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Cho phép nhập trạm không kế nhau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Sử dụng thuật toán chất hàng cải tiến: {ORANGE}{STRING}
@@ -1174,6 +1194,7 @@ STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Công ty đang 
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Tất cả công ty
 STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Bật bảng giờ giấc cho ph.tiện: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Hiện bảng giờ giấc ở dạng cụ thể thay vì ngày: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Hiển thị Đến và Khởi hành trên bảng: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Tạo lệnh nhanh cho ph.tiện: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Loại đường ray mặc định (sau game mới/nạp game): {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Ray Bình Thường
@@ -1238,6 +1259,15 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :ô 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :ngẫu nhiên
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Thị trấn được quyền xây đường sá: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Cho phép thị trấn kiểm tra độ ồn của sân bay: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Thành lập Thị Xã trong game: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :cấm
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :cho phép
+STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :cho phép, tùy chọn bố trí thị trấn
+
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}Theo vị trí của cây trong trò chơi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :không có {RED}(phá vỡ nhà máy chế biến gỗ)
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :chỉ trong rừng nhiệt đới
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :mọi nơi
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Vị trí của thanh công cụ chính: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Trái
@@ -1277,11 +1307,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Thị t
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Công nghiệp
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Cơ chế tìm đường cho tàu lửa: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Không khuyến khích)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Khuyến khích)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Cơ chế tìm đường cho xe cơ giới: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Gốc {RED}(Không khuyến khích)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Khuyến khích)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Cơ chế tìm đường cho tàu thủy: {ORANGE}{STRING}
@@ -1342,7 +1370,7 @@ STR_QUIT_NO                                                     :{BLACK}Không �
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -1366,26 +1394,191 @@ STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Đườ
 STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Xây trong chế độ dừng game: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Máy bay sẽ không hư (thường xuyên) ở các sân bay nhỏ: {ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Đổi thời tiết: {ORANGE}{STRING}
+STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Địa hình vừa phải
+STR_CHEAT_SWITCH_CLIMATE_SUB_ARCTIC_LANDSCAPE                   :Địa hình giá lạnh
+STR_CHEAT_SWITCH_CLIMATE_SUB_TROPICAL_LANDSCAPE                 :Địa hình cận nhiệt đới
+STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE                      :Địa hình đồ chơi
+STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Sửa thời gian: {ORANGE}{DATE_SHORT}
+STR_CHEAT_SETUP_PROD                                            :{LTBLUE}Cho phép khả năng sửa giá trị sản xuất: {ORANGE}{STRING}
 
 # Livery window
+STR_LIVERY_CAPTION                                              :{WHITE}Cách Phối Màu Mới
 
+STR_LIVERY_GENERAL_TOOLTIP                                      :{BLACK}Hiển thị phối màu chung
+STR_LIVERY_TRAIN_TOOLTIP                                        :{BLACK}Hiển thị phối màu tàu hỏa
+STR_LIVERY_ROAD_VEHICLE_TOOLTIP                                 :{BLACK}Hiển thị phối màu xe cơ giới
+STR_LIVERY_SHIP_TOOLTIP                                         :{BLACK}Hiển thị phối màu tàu thủy
+STR_LIVERY_AIRCRAFT_TOOLTIP                                     :{BLACK}Hiển thị phối màu máy bay
+STR_LIVERY_PRIMARY_TOOLTIP                                      :{BLACK}Chọn màu chủ đạo cho bảng phối màu đang chọn
+STR_LIVERY_SECONDARY_TOOLTIP                                    :{BLACK}Chọn màu thứ hai cho bảng phối màu đang chọn
+STR_LIVERY_PANEL_TOOLTIP                                        :{BLACK}Chọn một bảng phối màu để sửa, hoặc nhiều bảng phối màu với Ctrl+Click.Click vào bảng để bật/tắt bảng phối
 
+STR_LIVERY_DEFAULT                                              :Chế Phục Tiêu Chuẩn
+STR_LIVERY_STEAM                                                :Động Cơ Hơi Nước
+STR_LIVERY_DIESEL                                               :Động Cơ Diesel
+STR_LIVERY_ELECTRIC                                             :Động Cơ Điện
+STR_LIVERY_MONORAIL                                             :Động Cơ Đơn Ray
+STR_LIVERY_MAGLEV                                               :Động Cơ Ray Đệm
+STR_LIVERY_DMU                                                  :DMU
+STR_LIVERY_EMU                                                  :EMU
+STR_LIVERY_PASSENGER_WAGON_STEAM                                :Toa Hành Khách (Hơi Nước)
+STR_LIVERY_PASSENGER_WAGON_DIESEL                               :Toa Hành Khách (Diesel)
+STR_LIVERY_PASSENGER_WAGON_ELECTRIC                             :Toa Hành Khách (Điện)
+STR_LIVERY_PASSENGER_WAGON_MONORAIL                             :Toa Hành Khách (Ray Đơn)
+STR_LIVERY_PASSENGER_WAGON_MAGLEV                               :Toa Hành Khách (Ray Đệm)
+STR_LIVERY_FREIGHT_WAGON                                        :Toa Chở Hàng
+STR_LIVERY_BUS                                                  :Bus
+STR_LIVERY_TRUCK                                                :Xe Tải
+STR_LIVERY_PASSENGER_SHIP                                       :Phà Chở Khách
+STR_LIVERY_FREIGHT_SHIP                                         :Thuyền Chở Hàng
+STR_LIVERY_HELICOPTER                                           :Trực Thăng
+STR_LIVERY_SMALL_PLANE                                          :Máy Bay Nhỏ
+STR_LIVERY_LARGE_PLANE                                          :Máy Bay Lớn
+STR_LIVERY_PASSENGER_TRAM                                       :Tàu Khách Điện
+STR_LIVERY_FREIGHT_TRAM                                         :Tàu Hàng Điện
 
 # Face selection window
+STR_FACE_CAPTION                                                :{WHITE}Chọn Vẻ Mặt
+STR_FACE_CANCEL_TOOLTIP                                         :{BLACK}Bỏ qua lựa chọn vẻ mặt
+STR_FACE_OK_TOOLTIP                                             :{BLACK}Lựa chọn vẻ mặt mới
 
+STR_FACE_MALE_BUTTON                                            :{BLACK}Nam
+STR_FACE_MALE_TOOLTIP                                           :{BLACK}Chọn vẻ mặt nam
+STR_FACE_FEMALE_BUTTON                                          :{BLACK}Nữ
+STR_FACE_FEMALE_TOOLTIP                                         :{BLACK}Chọn vẻ mặt nữ
+STR_FACE_NEW_FACE_BUTTON                                        :{BLACK}Vẻ Mặt Mới
+STR_FACE_NEW_FACE_TOOLTIP                                       :{BLACK}Tự động tạo vẻ mặt mới
+STR_FACE_ADVANCED                                               :{BLACK}Cấp Cao
+STR_FACE_ADVANCED_TOOLTIP                                       :{BLACK}Tùy chọn vẻ mặt cấp cao.
+STR_FACE_SIMPLE                                                 :{BLACK}Đơn giản
+STR_FACE_SIMPLE_TOOLTIP                                         :{BLACK}Trình chọn vẻ mặt đơn giản.
+STR_FACE_LOAD                                                   :{BLACK}Nạp
+STR_FACE_LOAD_TOOLTIP                                           :{BLACK}Chọn vẻ mặt ưa thích
+STR_FACE_LOAD_DONE                                              :{WHITE}Vẻ mặt ưa thích đã được nạp từ file thiết lập của OpenTTD.
+STR_FACE_FACECODE                                               :{BLACK}Vẻ mặt thứ.
+STR_FACE_FACECODE_TOOLTIP                                       :{BLACK}Xem và/hoặc sửa số vẻ mặt
+STR_FACE_FACECODE_CAPTION                                       :{WHITE}Xem và/hoặc chọn số bộ mặt người chơi
+STR_FACE_FACECODE_SET                                           :{WHITE}Mã số gương mặt mới được thiết lập.
+STR_FACE_FACECODE_ERR                                           :{WHITE}Không thể thiết lập mã số gương mặt - mã số phải được 0 và 4,294,967,295!
+STR_FACE_SAVE                                                   :{BLACK}Lưu
+STR_FACE_SAVE_TOOLTIP                                           :{BLACK}Lưu gương mặt yêu thích
+STR_FACE_SAVE_DONE                                              :{WHITE}Gương mặt yêu thích này sẽ được lưu lại trong tập tin cấu hình OpenTTD .
+STR_FACE_EUROPEAN                                               :{BLACK}Châu Âu
+STR_FACE_SELECT_EUROPEAN                                        :{BLACK}Chọn gương mặt Châu Âu
+STR_FACE_AFRICAN                                                :{BLACK}Châu Phi
+STR_FACE_SELECT_AFRICAN                                         :{BLACK}Chọn gương mặt Châu Phi
+STR_FACE_YES                                                    :Đồng ý
+STR_FACE_NO                                                     :Không
+STR_FACE_MOUSTACHE_EARRING_TOOLTIP                              :{BLACK}Chọn ria mép hoặc bông tai
+STR_FACE_HAIR                                                   :Tóc:
+STR_FACE_HAIR_TOOLTIP                                           :{BLACK}Thay đổi tóc
+STR_FACE_EYEBROWS                                               :Lông mày:
+STR_FACE_EYEBROWS_TOOLTIP                                       :{BLACK}Thay đổi Lông mày
+STR_FACE_EYECOLOUR                                              :Màu mắt:
+STR_FACE_EYECOLOUR_TOOLTIP                                      :{BLACK}Thay đổi màu mắt
+STR_FACE_GLASSES                                                :Mắt kính:
+STR_FACE_GLASSES_TOOLTIP                                        :{BLACK}Chọn mắt kính
+STR_FACE_GLASSES_TOOLTIP_2                                      :{BLACK}Thay đổi mắt kính
+STR_FACE_NOSE                                                   :Mũi:
+STR_FACE_NOSE_TOOLTIP                                           :{BLACK}Thay đổi mũi
+STR_FACE_LIPS                                                   :Môi:
+STR_FACE_MOUSTACHE                                              :Ria mép:
+STR_FACE_LIPS_MOUSTACHE_TOOLTIP                                 :{BLACK}Thay đổi môi hoặc ria mép
+STR_FACE_CHIN                                                   :Cằm:
+STR_FACE_CHIN_TOOLTIP                                           :{BLACK}Thay đổi cằm
+STR_FACE_JACKET                                                 :Áo Jacket:
+STR_FACE_JACKET_TOOLTIP                                         :{BLACK}Thay đổi áo Jacket
+STR_FACE_COLLAR                                                 :Cổ áo:
+STR_FACE_COLLAR_TOOLTIP                                         :{BLACK}Thay đổi cổ áo
+STR_FACE_TIE                                                    :Cà vạt:
+STR_FACE_EARRING                                                :Bông tai:
+STR_FACE_TIE_EARRING_TOOLTIP                                    :{BLACK}Thay đổi cà vạt hoặc bông tai
 
 # Network server list
+STR_NETWORK_SERVER_LIST_CAPTION                                 :{WHITE}Nhiều người chơi
+STR_NETWORK_SERVER_LIST_CONNECTION                              :{BLACK}Kết nối:
+STR_NETWORK_SERVER_LIST_CONNECTION_TOOLTIP                      :{BLACK}Lựa chọn chơi game nối mạng internet hặc nối mạng nội bộ (LAN)
+STR_NETWORK_SERVER_LIST_LAN                                     :Mạng nội bộ
+STR_NETWORK_SERVER_LIST_INTERNET                                :Mạng internet
+STR_NETWORK_SERVER_LIST_PLAYER_NAME                             :{BLACK}Tên người chơi:
+STR_NETWORK_SERVER_LIST_ENTER_NAME_TOOLTIP                      :{BLACK}Đây là tên khác mà người chơi sẽ nhận ra bạn
 
+STR_NETWORK_SERVER_LIST_GAME_NAME                               :{BLACK}Tên
+STR_NETWORK_SERVER_LIST_GAME_NAME_TOOLTIP                       :{BLACK}Tên trong trò chơi
+STR_NETWORK_SERVER_LIST_GENERAL_ONLINE                          :{BLACK}{COMMA}/{COMMA} - {COMMA}/{COMMA}
+STR_NETWORK_SERVER_LIST_CLIENTS_CAPTION                         :{BLACK}Máy con
+STR_NETWORK_SERVER_LIST_CLIENTS_CAPTION_TOOLTIP                 :{BLACK}Máy con trực tuyến / Máy con tối đa{}Máy chủ trực tuyến / máy chủ tối đa
+STR_NETWORK_SERVER_LIST_MAP_SIZE_SHORT                          :{BLACK}{COMMA}x{COMMA}
+STR_NETWORK_SERVER_LIST_MAP_SIZE_CAPTION                        :{BLACK}Kích thước bản đồ
+STR_NETWORK_SERVER_LIST_MAP_SIZE_CAPTION_TOOLTIP                :{BLACK}Kích thước bản đồ trong game{}Nhấn vào đây để sắp xếp theo diện tích
+STR_NETWORK_SERVER_LIST_DATE_CAPTION                            :{BLACK}Ngày
+STR_NETWORK_SERVER_LIST_DATE_CAPTION_TOOLTIP                    :{BLACK}Ngày hiện tại
+STR_NETWORK_SERVER_LIST_YEARS_CAPTION                           :{BLACK}Năm
+STR_NETWORK_SERVER_LIST_YEARS_CAPTION_TOOLTIP                   :{BLACK}Số năm{}mà game đang chạy
+STR_NETWORK_SERVER_LIST_INFO_ICONS_TOOLTIP                      :{BLACK}Ngôn ngữ, phiên bản server, etc.
 
+STR_NETWORK_SERVER_LIST_CLICK_GAME_TO_SELECT                    :{BLACK}Chọn một game trong danh sách
+STR_NETWORK_SERVER_LIST_LAST_JOINED_SERVER                      :{BLACK}Server bạn đã vào lần trước:
+STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Chọn server bạn đã chơi lần trước
 
+STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}THÔNG TIN GAME
+STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Máy con: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
+STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Ngôn ngữ: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Tileset: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Cỡ bản đồ: {WHITE}{COMMA}x{COMMA}
+STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Phiên bản server: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Địa chỉ server: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_START_DATE                              :{SILVER}Ngày bắt đầu: {WHITE}{DATE_SHORT}
+STR_NETWORK_SERVER_LIST_CURRENT_DATE                            :{SILVER}Ngày hiện tại: {WHITE}{DATE_SHORT}
+STR_NETWORK_SERVER_LIST_PASSWORD                                :{SILVER}Mật khẩu bảo vệ!
+STR_NETWORK_SERVER_LIST_SERVER_OFFLINE                          :{SILVER}SERVER OFFLINE
+STR_NETWORK_SERVER_LIST_SERVER_FULL                             :{SILVER}SERVER ĐẦY
+STR_NETWORK_SERVER_LIST_VERSION_MISMATCH                        :{SILVER}SAI PHIÊN BẢN
+STR_NETWORK_SERVER_LIST_GRF_MISMATCH                            :{SILVER}SAI NEWGRF
 
+STR_NETWORK_SERVER_LIST_JOIN_GAME                               :{BLACK}Vào game
+STR_NETWORK_SERVER_LIST_REFRESH                                 :{BLACK}Refresh server
+STR_NETWORK_SERVER_LIST_REFRESH_TOOLTIP                         :{BLACK}Refresh thông tin server
 
+STR_NETWORK_SERVER_LIST_FIND_SERVER                             :{BLACK}Tìm server
+STR_NETWORK_SERVER_LIST_FIND_SERVER_TOOLTIP                     :{BLACK}Tìm server trong mạng
+STR_NETWORK_SERVER_LIST_ADD_SERVER                              :{BLACK}Thêm server
+STR_NETWORK_SERVER_LIST_ADD_SERVER_TOOLTIP                      :{BLACK}Thêm server vào danh sách luôn được chọn khi chạy game.
+STR_NETWORK_SERVER_LIST_START_SERVER                            :{BLACK}Tạo server
+STR_NETWORK_SERVER_LIST_START_SERVER_TOOLTIP                    :{BLACK}Tạo server của riêng bạn
 
+STR_NETWORK_SERVER_LIST_PLAYER_NAME_OSKTITLE                    :{BLACK}Gõ tên của bạn
+STR_NETWORK_SERVER_LIST_ENTER_IP                                :{BLACK}Gõ địa chỉ của máy chủ
 
 # Start new multiplayer server
+STR_NETWORK_START_SERVER_CAPTION                                :{WHITE}Bắt đầu game mới nhiều người chơi
 
+STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Tên trò chơi:
+STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Tên của game sẽ được hiển thị trong bảng chọn game nhiều người chơi
+STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Đặt mật khẩu
+STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Bảo vệ game của bạn bằng mật khẩu nếu bạn không muốn người khác vào tùy tiện
+STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Chọn bản đồ:
+STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Bạn muốn chơi bản đồ nào?
+STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Khởi tạo ngẫu nhiên game mới
 
+STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
+STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (lên list)
+STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} máy con{P "" s}
+STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS                      :{BLACK}Máy con tối đa:
+STR_NETWORK_START_SERVER_NUMBER_OF_CLIENTS_TOOLTIP              :{BLACK}Chọn số máy con tối đa. Không cần thiết phải vào đầy
+STR_NETWORK_START_SERVER_COMPANIES_SELECT                       :{BLACK}{NUM} công ty{P y ies}
+STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES                    :{BLACK}Số công ty tối đa:
+STR_NETWORK_START_SERVER_NUMBER_OF_COMPANIES_TOOLTIP            :{BLACK}Giới hạn số công ty trong server
+STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} người xem{P "" s}
+STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Số người xem tối đa:
+STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Giới hạn số người xem trong server
+STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Ngôn ngữ trò chuyện:
+STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Những người chơi sẽ biết ngôn ngữ dùng để trao đổi trong server
 
+STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Chạy Game
+STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Bắt đầu game mạng từ một bản đồ ngẫu nhiên, hoặc kich bản
+STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Nạp Game
+STR_NETWORK_START_SERVER_LOAD_GAME_TOOLTIP                      :{BLACK}Tiếp tục một game đã được lưu (chắc chắn rằng đã kết nối với đúng người)
 
 
 # Network game languages
@@ -1409,6 +1602,7 @@ STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Đổi 
 # Network company list added strings
 
 # Network client list
+STR_NETWORK_CLIENTLIST_BAN                                      :Cấm
 
 
 
@@ -1426,6 +1620,14 @@ STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Đổi 
 
 # Network related errors
 ############ Leave those lines in this order!!
+STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED                          :Dừng game ({STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_1                  :Game đang dừng ({STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_2                  :Game đang dừng ({STRING}, {STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_3                  :Game vẫn đang dừng ({STRING}, {STRING}, {STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED                        :Không dừng game ({STRING})
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_NOT_ENOUGH_PLAYERS       :không đủ người chơi
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_CONNECTING_CLIENTS       :kết nối đến clients
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_MANUAL                   :tự chọn
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_JOINED_ID                            :*** {STRING} đã vào trò chơi (Client #{2:NUM})
 
@@ -1433,6 +1635,7 @@ STR_NETWORK_MESSAGE_CLIENT_JOINED_ID                            :*** {STRING} đ
 
 # Order of these is important!
 STR_CONTENT_TYPE_BASE_SOUNDS                                    :Âm thanh chuẩn
+STR_CONTENT_TYPE_BASE_MUSIC                                     :Nhạc chuẩn
 
 # Content downloading progress window
 
@@ -1529,9 +1732,11 @@ STR_ABOUT_VERSION                                               :{BLACK}OpenTTD 
 # World generation
 STR_MAPGEN_MAPSIZE                                              :{BLACK}Kích thước bản đồ:
 STR_MAPGEN_BY                                                   :{BLACK}*
+STR_MAPGEN_VARIETY                                              :{BLACK}Nhiều phân phối:
 
 # Strings for map borders at game generation
 
+STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Cỡ:
 
 
 # SE Map generation
@@ -1549,6 +1754,7 @@ STR_MAPGEN_BY                                                   :{BLACK}*
 # NewGRF add window
 
 # NewGRF (self) generated warnings/errors
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}Xảy ra lỗi NewGRF gây hư hỏng: {}{STRING}
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Chú ý!
@@ -1567,6 +1773,7 @@ STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Chú ý!
 STR_TOWN_DIRECTORY_NONE                                         :{ORANGE}- Không Có -
 
 # Town view window
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} Yêu cầu trong mùa đông
 
 
 
@@ -1704,6 +1911,7 @@ STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Thay tê
 
 # Engine preview window
 
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Giá: {CURRENCY} Nặng: {WEIGHT_S}{}Tốc độ: {VELOCITY}  Công suất: {POWER}  Max. T.E.: {6:FORCE}{}Giá vận hành: {4:CURRENCY}/yr{}Năng suất: {5:CARGO}
 
 # Autoreplace window
 STR_REPLACE_VEHICLE_TRAIN                                       :Tàu
@@ -1789,11 +1997,9 @@ STR_REFIT_AIRCRAFT_REFIT_TOOLTIP                                :{BLACK}Thay m�
 STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Lịch chạy
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Lịch trình - click để tô sáng một thứ tự nào đó. Ctr+Click để nhảy đến nhà ga tương ứng
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Kết thúc - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Kết thúc - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Kết thúc - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Kết thúc - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Chạy suốt
@@ -1848,10 +2054,23 @@ STR_ORDER_REFIT_TOOLTIP                                         :{BLACK}Chọn x
 
 
 
+
+
+
+
+# Date window (for timetable)
+
+
 # AI debug window
 
 
 # AI configuration window
+STR_AI_CONFIG_RANDOM_AI                                         :AI Ngẫu Nhiên
+
+STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Di chuyển lên trên
+STR_AI_CONFIG_MOVE_UP_TOOLTIP                                   :{BLACK}Di chuyển AI lên trên danh sách
+STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Di chuyển xuống
+STR_AI_CONFIG_MOVE_DOWN_TOOLTIP                                 :{BLACK}Di chuyển AI xuống dưới danh sách
 
 
 # Available AIs window
@@ -2022,7 +2241,7 @@ STR_FORMAT_DATE_LONG                                            :{STRING} {STRIN
 STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
 
 
-STR_COMPANY_SOMEONE                                             :ai đó{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :ai đó
 
 
 # Viewport strings
@@ -2067,8 +2286,6 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
 STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
@@ -2083,6 +2300,7 @@ STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LO
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
 STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
+STR_BLACK_INT                                                   :{BLACK}{NUM}
 STR_ORANGE_INT                                                  :{ORANGE}{NUM}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
@@ -2090,12 +2308,7 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
 STR_BLACK_2                                                     :{BLACK}2
@@ -2110,4 +2323,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-

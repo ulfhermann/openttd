@@ -86,7 +86,7 @@ static uint32 IndustryTileGetVariable(const ResolverObject *object, byte variabl
 		case 0x42: return GetTownRadiusGroup(ClosestTownFromTile(tile, UINT_MAX), tile);
 
 		/* Relative position */
-		case 0x43: return GetRelativePosition(tile, inds->xy);
+		case 0x43: return GetRelativePosition(tile, inds->location.tile);
 
 		/* Animation frame. Like house variable 46 but can contain anything 0..FF. */
 		case 0x44: return (IsTileType(tile, MP_INDUSTRY)) ? GetIndustryAnimationState(tile) : 0;
@@ -173,7 +173,6 @@ static void NewIndustryTileResolver(ResolverObject *res, IndustryGfx gfx, TileIn
 static void IndustryDrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGroup *group, byte rnd_colour, byte stage, IndustryGfx gfx)
 {
 	const DrawTileSprites *dts = group->dts;
-	const DrawTileSeqStruct *dtss;
 
 	SpriteID image = dts->ground.sprite;
 	SpriteID pal   = dts->ground.pal;
@@ -190,32 +189,7 @@ static void IndustryDrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGro
 		}
 	}
 
-	foreach_draw_tile_seq(dtss, dts->seq) {
-		if (GB(dtss->image.sprite, 0, SPRITE_WIDTH) == 0) continue;
-
-		image = dtss->image.sprite;
-		pal   = dtss->image.pal;
-
-		/* Stop drawing sprite sequence once we meet a sprite that doesn't have to be opaque */
-		if (IsInvisibilitySet(TO_INDUSTRIES) && !HasBit(image, SPRITE_MODIFIER_OPAQUE)) return;
-
-		if (IS_CUSTOM_SPRITE(image)) image += stage;
-
-		pal = SpriteLayoutPaletteTransform(image, pal, GENERAL_SPRITE_COLOUR(rnd_colour));
-
-		if ((byte)dtss->delta_z != 0x80) {
-			AddSortableSpriteToDraw(
-				image, pal,
-				ti->x + dtss->delta_x, ti->y + dtss->delta_y,
-				dtss->size_x, dtss->size_y,
-				dtss->size_z, ti->z + dtss->delta_z,
-				!HasBit(image, SPRITE_MODIFIER_OPAQUE) && IsTransparencySet(TO_INDUSTRIES)
-			);
-		} else {
-			/* For industries and houses delta_x and delta_y are unsigned */
-			AddChildSpriteScreen(image, pal, (byte)dtss->delta_x, (byte)dtss->delta_y, !HasBit(image, SPRITE_MODIFIER_OPAQUE) && IsTransparencySet(TO_INDUSTRIES));
-		}
-	}
+	DrawTileSeq(ti, dts, TO_INDUSTRIES, stage, GENERAL_SPRITE_COLOUR(rnd_colour));
 }
 
 uint16 GetIndustryTileCallback(CallbackID callback, uint32 param1, uint32 param2, IndustryGfx gfx_id, Industry *industry, TileIndex tile)
@@ -256,10 +230,10 @@ bool DrawNewIndustryTile(TileInfo *ti, Industry *i, IndustryGfx gfx, const Indus
 	if (group == NULL || group->type != SGT_TILELAYOUT) {
 		return false;
 	} else {
-		const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
 		/* Limit the building stage to the number of stages supplied. */
+		const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
 		byte stage = GetIndustryConstructionStage(ti->tile);
-		stage = Clamp(stage - 4 + tlgroup->num_sprites, 0, tlgroup->num_sprites - 1);
+		stage = Clamp(stage - 4 + tlgroup->num_building_stages, 0, tlgroup->num_building_stages - 1);
 		IndustryDrawTileLayout(ti, tlgroup, i->random_colour, stage, gfx);
 		return true;
 	}
@@ -271,8 +245,8 @@ bool PerformIndustryTileSlopeCheck(TileIndex ind_base_tile, TileIndex ind_tile, 
 {
 	Industry ind;
 	ind.index = INVALID_INDUSTRY;
-	ind.xy = ind_base_tile;
-	ind.width = 0;
+	ind.location.tile = ind_base_tile;
+	ind.location.w = 0;
 	ind.type = type;
 
 	uint16 callback_res = GetIndustryTileCallback(CBID_INDTILE_SHAPE_CHECK, 0, itspec_index, gfx, &ind, ind_tile);
@@ -396,7 +370,7 @@ bool StartStopIndustryTileAnimation(const Industry *ind, IndustryAnimationTrigge
 {
 	bool ret = true;
 	uint32 random = Random();
-	TILE_LOOP(tile, ind->width, ind->height, ind->xy) {
+	TILE_AREA_LOOP(tile, ind->location) {
 		if (IsTileType(tile, MP_INDUSTRY) && GetIndustryIndex(tile) == ind->index) {
 			if (StartStopIndustryTileAnimation(tile, iat, random)) {
 				SB(random, 0, 16, Random());
@@ -441,7 +415,7 @@ void TriggerIndustryTile(TileIndex tile, IndustryTileTrigger trigger)
 
 void TriggerIndustry(Industry *ind, IndustryTileTrigger trigger)
 {
-	TILE_LOOP(tile, ind->width, ind->height, ind->xy) {
+	TILE_AREA_LOOP(tile, ind->location) {
 		if (IsTileType(tile, MP_INDUSTRY) && GetIndustryIndex(tile) == ind->index) {
 			DoTriggerIndustryTile(tile, trigger, ind);
 		}

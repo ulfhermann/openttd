@@ -60,17 +60,26 @@ enum WidgetDrawDistances {
 
 	/* Extra space at top/bottom of text panels */
 	WD_TEXTPANEL_TOP    = 6,    ///< Offset at top to draw above the text
-	WD_TEXTPANEL_BOTTOM = 6,   ///< Offset at bottom to draw below the text
+	WD_TEXTPANEL_BOTTOM = 6,    ///< Offset at bottom to draw below the text
 
 	/* WWT_FRAME */
-	WD_FRAMETEXT_LEFT  = 6,     ///< Left offset of the text of the frame.
-	WD_FRAMETEXT_RIGHT = 6,     ///< Right offset of the text of the frame.
+	WD_FRAMETEXT_LEFT   = 6,    ///< Left offset of the text of the frame.
+	WD_FRAMETEXT_RIGHT  = 6,    ///< Right offset of the text of the frame.
+	WD_FRAMETEXT_TOP    = 6,    ///< Top offset of the text of the frame
+	WD_FRAMETEXT_BOTTOM = 6,    ///< Bottom offset of the text of the frame
 
 	/* WWT_MATRIX */
 	WD_MATRIX_LEFT   = 2,       ///< Offset at left of a matrix cell.
 	WD_MATRIX_RIGHT  = 2,       ///< Offset at right of a matrix cell.
 	WD_MATRIX_TOP    = 3,       ///< Offset at top of a matrix cell.
 	WD_MATRIX_BOTTOM = 1,       ///< Offset at bottom of a matrix cell.
+
+	/* WWT_SHADEBOX */
+	WD_SHADEBOX_WIDTH  = 12,    ///< Width of a standard shade box widget.
+	WD_SHADEBOX_LEFT   = 2,     ///< Left offset of shade sprite.
+	WD_SHADEBOX_RIGHT  = 2,     ///< Right offset of shade sprite.
+	WD_SHADEBOX_TOP    = 3,     ///< Top offset of shade sprite.
+	WD_SHADEBOX_BOTTOM = 3,     ///< Bottom offset of shade sprite.
 
 	/* WWT_STICKYBOX */
 	WD_STICKYBOX_WIDTH  = 12,   ///< Width of a standard sticky box widget.
@@ -121,59 +130,46 @@ extern Window *_z_front_window;
 extern Window *_z_back_window;
 extern Window *_focused_window;
 
+
+/** How do we the window to be placed? */
+enum WindowPosition {
+	WDP_MANUAL,        ///< Manually align the window (so no automatic location finding)
+	WDP_AUTO,          ///< Find a place automatically
+	WDP_CENTER,        ///< Center the window
+	WDP_ALIGN_TOOLBAR, ///< Align toward the toolbar
+};
+
+Point GetToolbarAlignedWindowPosition(int window_width);
+
 /**
  * High level window description
  */
 struct WindowDesc : ZeroedMemoryAllocator {
 
-	WindowDesc(int16 left, int16 top, int16 min_width, int16 min_height, int16 def_width, int16 def_height,
-			WindowClass window_class, WindowClass parent_class, uint32 flags, const Widget *widgets,
-			const NWidgetPart *nwid_parts = NULL, int16 nwid_length = 0);
+	WindowDesc(WindowPosition default_pos, int16 def_width, int16 def_height,
+			WindowClass window_class, WindowClass parent_class, uint32 flags,
+			const NWidgetPart *nwid_parts, int16 nwid_length);
 
 	~WindowDesc();
 
-	int16 left;                    ///< Prefered x position of left edge of the window. @see WindowDefaultPosition()
-	int16 top;                     ///< Prefered y position of the top of the window. @see WindowDefaultPosition()
-	int16 minimum_width;           ///< Minimal width of the window.
-	int16 minimum_height;          ///< Minimal height of the window.
+	WindowPosition default_pos;    ///< Prefered position of the window. @see WindowPosition()
 	int16 default_width;           ///< Prefered initial width of the window.
 	int16 default_height;          ///< Prefered initial height of the window.
 	WindowClass cls;               ///< Class of the window, @see WindowClass.
 	WindowClass parent_cls;        ///< Class of the parent window. @see WindowClass
 	uint32 flags;                  ///< Flags. @see WindowDefaultFlags
-	const Widget *widgets;         ///< List of widgets with their position and size for the window.
 	const NWidgetPart *nwid_parts; ///< Nested widget parts describing the window.
 	int16 nwid_length;             ///< Length of the #nwid_parts array.
-	mutable Widget *new_widgets;   ///< Widgets generated from #nwid_parts.
-
-	const Widget *GetWidgets() const;
 };
 
 /**
  * Window default widget/window handling flags
  */
 enum WindowDefaultFlag {
-	WDF_STD_TOOLTIPS    =   1 << 0, ///< use standard routine when displaying tooltips
-	WDF_DEF_WIDGET      =   1 << 1, ///< Default widget control for some widgets in the on click event, @see DispatchLeftClickEvent()
-	WDF_STD_BTN         =   1 << 2, ///< Default handling for close and titlebar widgets (the widgets with type WWT_CLOSEBOX and WWT_CAPTION).
-	WDF_CONSTRUCTION    =   1 << 3, ///< This window is used for construction; close it whenever changing company.
-
-	WDF_UNCLICK_BUTTONS =   1 << 4, ///< Unclick buttons when the window event times out
-	WDF_STICKY_BUTTON   =   1 << 5, ///< Set window to sticky mode; they are not closed unless closed with 'X' (widget with type WWT_STICKYBOX).
-	WDF_RESIZABLE       =   1 << 6, ///< Window can be resized
-	WDF_MODAL           =   1 << 7, ///< The window is a modal child of some other window, meaning the parent is 'inactive'
-
-	WDF_NO_FOCUS        =   1 << 8, ///< This window won't get focus/make any other window lose focus when click
-};
-
-/**
- * Special values for 'left' and 'top' to cause a specific placement
- */
-enum WindowDefaultPosition {
-	WDP_AUTO      = -1, ///< Find a place automatically
-	WDP_CENTER    = -2, ///< Center the window (left/right or top/bottom)
-	WDP_ALIGN_TBR = -3, ///< Align the right side of the window with the right side of the main toolbar
-	WDP_ALIGN_TBL = -4, ///< Align the left side of the window with the left side of the main toolbar
+	WDF_CONSTRUCTION    =   1 << 0, ///< This window is used for construction; close it whenever changing company.
+	WDF_UNCLICK_BUTTONS =   1 << 1, ///< Unclick buttons when the window event times out
+	WDF_MODAL           =   1 << 2, ///< The window is a modal child of some other window, meaning the parent is 'inactive'
+	WDF_NO_FOCUS        =   1 << 3, ///< This window won't get focus/make any other window lose focus when click
 };
 
 /**
@@ -181,10 +177,16 @@ enum WindowDefaultPosition {
  */
 class Scrollbar {
 private:
-	uint16 count;  ///< Number of elements in the list
-	uint16 cap;    ///< Number of visible elements of the scroll bar
-	uint16 pos;    ///< Index of first visible item of the list
+	const bool is_vertical; ///< Scrollbar has vertical orientation.
+	uint16 count;           ///< Number of elements in the list.
+	uint16 cap;             ///< Number of visible elements of the scroll bar.
+	uint16 pos;             ///< Index of first visible item of the list.
+
 public:
+	Scrollbar(bool is_vertical) : is_vertical(is_vertical)
+	{
+	}
+
 	/**
 	 * Gets the number of elements in the list
 	 * @return the number of elements
@@ -252,6 +254,8 @@ public:
 		if (this->cap + this->pos > this->count) this->pos = max(0, this->count - this->cap);
 	}
 
+	void SetCapacityFromWidget(Window *w, int widget, int padding = 0);
+
 	/**
 	 * Sets the position of the first visible element
 	 * @param position the position of the element
@@ -296,8 +300,6 @@ public:
  * Data structure for resizing a window
  */
 struct ResizeInfo {
-	uint width;       ///< Minimum allowed width of the window
-	uint height;      ///< Minimum allowed height of the window
 	uint step_width;  ///< Step-size of width resize changes
 	uint step_height; ///< Step-size of height resize changes
 };
@@ -335,21 +337,34 @@ struct Window : ZeroedMemoryAllocator {
 	};
 
 protected:
-	void InitializeData(WindowClass cls, const Widget *widget, int window_number);
+	void InitializeData(WindowClass cls, int window_number, uint32 desc_flags);
 	void InitializePositionSize(int x, int y, int min_width, int min_height);
 	void FindWindowPlacementAndResize(int def_width, int def_height);
-	void FindWindowPlacementAndResize(const WindowDesc *desc);
 
 public:
-	Window(const WindowDesc *desc, WindowNumber number = 0);
 	Window();
 
 	virtual ~Window();
-	/* Don't allow arrays; arrays of Windows are pointless as you need
-	 * to destruct them all at the same time too, which is kinda hard. */
-	FORCEINLINE void *operator new[](size_t size) { NOT_REACHED(); }
-	/* Don't free the window directly; it corrupts the linked list when iterating */
-	FORCEINLINE void operator delete(void *ptr, size_t size) {}
+
+	/**
+	 * Helper allocation function to disallow something.
+	 * Don't allow arrays; arrays of Windows are pointless as you need
+	 * to destruct them all at the same time too, which is kinda hard.
+	 * @param size the amount of space not to allocate
+	 */
+	FORCEINLINE void *operator new[](size_t size)
+	{
+		NOT_REACHED();
+	}
+
+	/**
+	 * Helper allocation function to disallow something.
+	 * Don't free the window directly; it corrupts the linked list when iterating
+	 * @param ptr the pointer not to free
+	 */
+	FORCEINLINE void operator delete(void *ptr)
+	{
+	}
 
 	uint16 flags4;              ///< Window flags, @see WindowFlags
 	WindowClass window_class;   ///< Window class
@@ -368,14 +383,13 @@ public:
 	Owner owner;        ///< The owner of the content shown in this window. Company colour is acquired from this variable.
 
 	ViewportData *viewport;          ///< Pointer to viewport data, if present.
-	Widget *widget;                  ///< Widgets of the window.
-	uint widget_count;               ///< Number of widgets of the window.
 	uint32 desc_flags;               ///< Window/widgets default flags setting. @see WindowDefaultFlag
-	const Widget *focused_widget;    ///< Currently focused widget, or \c NULL if no widget has focus.
 	const NWidgetCore *nested_focus; ///< Currently focused nested widget, or \c NULL if no nested widget has focus.
 	NWidgetBase *nested_root;        ///< Root of the nested tree.
 	NWidgetBase **nested_array;      ///< Array of pointers into the tree. Do not access directly, use #Window::GetWidget() instead.
 	uint nested_array_size;          ///< Size of the nested array.
+	NWidgetStacked *shade_select;    ///< Selection widget (#NWID_SELECTION) to use for shading the window. If \c NULL, window cannot shade.
+	Dimension unshaded_size;         ///< Last known unshaded size (only valid while shaded).
 
 	Window *parent;                  ///< Parent window.
 	Window *z_front;                 ///< The window in front of us in z-order.
@@ -400,14 +414,8 @@ public:
 	 */
 	inline void SetWidgetDisabledState(byte widget_index, bool disab_stat)
 	{
-		if (this->widget != NULL) {
-			assert(widget_index < this->widget_count);
-			SB(this->widget[widget_index].display_flags, WIDG_DISABLED, 1, !!disab_stat);
-		}
-		if (this->nested_array != NULL) {
-			assert(widget_index < this->nested_array_size);
-			if (this->nested_array[widget_index] != NULL) this->GetWidget<NWidgetCore>(widget_index)->SetDisabled(disab_stat);
-		}
+		assert(widget_index < this->nested_array_size);
+		if (this->nested_array[widget_index] != NULL) this->GetWidget<NWidgetCore>(widget_index)->SetDisabled(disab_stat);
 	}
 
 	/**
@@ -435,54 +443,8 @@ public:
 	 */
 	inline bool IsWidgetDisabled(byte widget_index) const
 	{
-		if (this->nested_array != NULL) {
-			assert(widget_index < this->nested_array_size);
-			return this->GetWidget<NWidgetCore>(widget_index)->IsDisabled();
-		}
-		assert(widget_index < this->widget_count);
-		return HasBit(this->widget[widget_index].display_flags, WIDG_DISABLED);
-	}
-
-	/**
-	 * Sets the hidden/shown status of a widget.
-	 * By default, widgets are visible.
-	 * On certain conditions, they have to be hidden.
-	 * @param widget_index index of this widget in the window
-	 * @param hidden_stat status to use ie. hidden = true, visible = false
-	 */
-	inline void SetWidgetHiddenState(byte widget_index, bool hidden_stat)
-	{
-		assert(widget_index < this->widget_count);
-		SB(this->widget[widget_index].display_flags, WIDG_HIDDEN, 1, !!hidden_stat);
-	}
-
-	/**
-	 * Sets a widget hidden.
-	 * @param widget_index index of this widget in the window
-	 */
-	inline void HideWidget(byte widget_index)
-	{
-		SetWidgetHiddenState(widget_index, true);
-	}
-
-	/**
-	 * Sets a widget visible.
-	 * @param widget_index index of this widget in the window
-	 */
-	inline void ShowWidget(byte widget_index)
-	{
-		SetWidgetHiddenState(widget_index, false);
-	}
-
-	/**
-	 * Gets the visibility of a widget.
-	 * @param widget_index index of this widget in the window
-	 * @return status of the widget ie: hidden = true, visible = false
-	 */
-	inline bool IsWidgetHidden(byte widget_index) const
-	{
-		assert(widget_index < this->widget_count);
-		return HasBit(this->widget[widget_index].display_flags, WIDG_HIDDEN);
+		assert(widget_index < this->nested_array_size);
+		return this->GetWidget<NWidgetCore>(widget_index)->IsDisabled();
 	}
 
 	/**
@@ -492,8 +454,7 @@ public:
 	 */
 	inline bool IsWidgetFocused(byte widget_index) const
 	{
-		return (this->widget != NULL && this->focused_widget == &this->widget[widget_index]) ||
-			(this->nested_focus != NULL && this->nested_focus->index == widget_index);
+		return this->nested_focus != NULL && this->nested_focus->index == widget_index;
 	}
 
 	/**
@@ -514,14 +475,8 @@ public:
 	 */
 	inline void SetWidgetLoweredState(byte widget_index, bool lowered_stat)
 	{
-		if (this->widget != NULL) {
-			assert(widget_index < this->widget_count);
-			SB(this->widget[widget_index].display_flags, WIDG_LOWERED, 1, !!lowered_stat);
-		}
-		if (this->nested_array != NULL) {
-			assert(widget_index < this->nested_array_size);
-			this->GetWidget<NWidgetCore>(widget_index)->SetLowered(lowered_stat);
-		}
+		assert(widget_index < this->nested_array_size);
+		this->GetWidget<NWidgetCore>(widget_index)->SetLowered(lowered_stat);
 	}
 
 	/**
@@ -530,15 +485,9 @@ public:
 	 */
 	inline void ToggleWidgetLoweredState(byte widget_index)
 	{
-		if (this->widget != NULL) {
-			assert(widget_index < this->widget_count);
-			ToggleBit(this->widget[widget_index].display_flags, WIDG_LOWERED);
-		}
-		if (this->nested_array != NULL) {
-			assert(widget_index < this->nested_array_size);
-			bool lowered_state = this->GetWidget<NWidgetCore>(widget_index)->IsLowered();
-			this->GetWidget<NWidgetCore>(widget_index)->SetLowered(!lowered_state);
-		}
+		assert(widget_index < this->nested_array_size);
+		bool lowered_state = this->GetWidget<NWidgetCore>(widget_index)->IsLowered();
+		this->GetWidget<NWidgetCore>(widget_index)->SetLowered(!lowered_state);
 	}
 
 	/**
@@ -566,22 +515,17 @@ public:
 	 */
 	inline bool IsWidgetLowered(byte widget_index) const
 	{
-		if (this->nested_array != NULL) {
-			assert(widget_index < this->nested_array_size);
-			return this->GetWidget<NWidgetCore>(widget_index)->IsLowered();
-		}
-		assert(widget_index < this->widget_count);
-		return HasBit(this->widget[widget_index].display_flags, WIDG_LOWERED);
+		assert(widget_index < this->nested_array_size);
+		return this->GetWidget<NWidgetCore>(widget_index)->IsLowered();
 	}
 
+	void UnfocusFocusedWidget();
 	bool SetFocusedWidget(byte widget_index);
 
 	void HandleButtonClick(byte widget);
-	const Widget *GetWidgetOfType(WidgetType widget_type) const;
 
 	void RaiseButtons(bool autoraise = false);
 	void CDECL SetWidgetsDisabledState(bool disab_stat, int widgets, ...);
-	void CDECL SetWidgetsHiddenState(bool hidden_stat, int widgets, ...);
 	void CDECL SetWidgetsLoweredState(bool lowered_stat, int widgets, ...);
 	void SetWidgetDirty(byte widget_index) const;
 
@@ -593,6 +537,14 @@ public:
 
 	void SetDirty() const;
 	void ReInit(int rx = 0, int ry = 0);
+
+	/** Is window shaded currently? */
+	inline bool IsShaded() const
+	{
+		return this->shade_select != NULL && this->shade_select->shown_plane == SZSP_HORIZONTAL;
+	}
+
+	void SetShaded(bool make_shaded);
 
 	/**
 	 * Mark this window's data as invalid (in need of re-computing)
@@ -607,14 +559,18 @@ public:
 	/*** Event handling ***/
 
 	/**
+	 * Notification that the nested widget tree gets initialized. The event can be used to perform general computations.
+	 * @note #nested_root and/or #nested_array (normally accessed via #GetWidget()) may not exist during this call.
+	 */
+	virtual void OnInit() { }
+
+	/**
 	 * Compute the initial position of the window.
 	 * @param *desc         The pointer to the WindowDesc of the window to create.
 	 * @param sm_width      Smallest width of the window.
 	 * @param sm_height     Smallest height of the window.
 	 * @param window_number The window number of the new window.
 	 * @return Initial position of the top-left corner of the window.
-	 *
-	 * @note Due to the way C++ works, only windows with nested widgets can usefully override this function.
 	 */
 	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number);
 
@@ -641,9 +597,10 @@ public:
 	 * @param widget  Widget number.
 	 * @param size    Size of the widget.
 	 * @param padding Recommended amount of space between the widget content and the widget edge.
+	 * @param fill    Fill step of the widget.
 	 * @param resize  Resize step of the widget.
 	 */
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize) {}
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) {}
 
 	/**
 	 * Initialize string parameters for a widget.
@@ -667,14 +624,14 @@ public:
 	 * A key has been pressed.
 	 * @param key     the Unicode value of the key.
 	 * @param keycode the untranslated key code including shift state.
-	 * @return ES_HANDLED if the key press has been handled and no other
+	 * @return #ES_HANDLED if the key press has been handled and no other
 	 *         window should receive the event.
 	 */
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode) { return ES_NOT_HANDLED; }
 
 	/**
 	 * The state of the control key has changed
-	 * @return ES_HANDLED if the change has been handled and no other
+	 * @return #ES_HANDLED if the change has been handled and no other
 	 *         window should receive the event.
 	 */
 	virtual EventState OnCTRLStateChange() { return ES_NOT_HANDLED; }
@@ -947,9 +904,6 @@ Window *GetCallbackWnd();
 void SetFocusedWindow(Window *w);
 bool EditBoxInGlobalFocus();
 
-void ScrollbarClickHandler(Window *w, const Widget *wi, int x, int y);
 void ScrollbarClickHandler(Window *w, const NWidgetCore *nw, int x, int y);
-
-void ResizeWindowForWidget(Window *w, uint widget, int delta_x, int delta_y);
 
 #endif /* WINDOW_GUI_H */

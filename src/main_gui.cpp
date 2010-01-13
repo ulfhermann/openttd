@@ -43,10 +43,10 @@
 static int _rename_id = 1;
 static int _rename_what = -1;
 
-void CcGiveMoney(bool success, TileIndex tile, uint32 p1, uint32 p2)
+void CcGiveMoney(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
 #ifdef ENABLE_NETWORK
-	if (!success || !_settings_game.economy.give_money) return;
+	if (result.Failed() || !_settings_game.economy.give_money) return;
 
 	/* Inform the company of the action of one of it's clients (controllers). */
 	char msg[64];
@@ -112,9 +112,9 @@ bool HandlePlacePushButton(Window *w, int widget, CursorID cursor, HighLightStyl
 }
 
 
-void CcPlaySound10(bool success, TileIndex tile, uint32 p1, uint32 p2)
+void CcPlaySound10(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
-	if (success) SndPlayTileFx(SND_12_EXPLOSION, tile);
+	if (result.Succeeded()) SndPlayTileFx(SND_12_EXPLOSION, tile);
 }
 
 #ifdef ENABLE_NETWORK
@@ -188,8 +188,6 @@ void ZoomInOrOutToCursorWindow(bool in, Window *w)
 	}
 }
 
-extern void UpdateAllStationVirtCoords();
-
 /** Widgets of the main window. */
 enum MainWindowWidgets {
 	MW_VIEWPORT, ///< Main window viewport.
@@ -200,10 +198,10 @@ static const struct NWidgetPart _nested_main_window_widgets[] = {
 };
 
 static const WindowDesc _main_window_desc(
-	0, 0, 0, 0, 0, 0,
+	WDP_MANUAL, 0, 0,
 	WC_MAIN_WINDOW, WC_NONE,
 	0,
-	NULL, _nested_main_window_widgets, lengthof(_nested_main_window_widgets)
+	_nested_main_window_widgets, lengthof(_nested_main_window_widgets)
 );
 
 struct MainWindow : Window
@@ -293,7 +291,7 @@ struct MainWindow : Window
 				break;
 
 			case '2' | WKC_ALT: // Update the coordinates of all station signs
-				UpdateAllStationVirtCoords();
+				UpdateAllVirtCoords();
 				break;
 #endif
 

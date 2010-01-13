@@ -190,7 +190,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} karame
 STR_QUANTITY_BATTERIES                                          :{COMMA} bateri{P a e i}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} zuvacka
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} sumien{P ka ky ok}
-STR_QUANTITY_N_A                                                :Nie je{SKIP}
+STR_QUANTITY_N_A                                                :Nie je
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -408,14 +408,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Nastavenia obti
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Rozšírené nastavenia
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Nastavenie newgrf
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Nastavenia priehladnosti
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Zobrazit nazvy miest
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Zobrazit nazvy stanic
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Zobrazit navigacne body
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Zobrazit popisy
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Plna animacia
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Plne detaily
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Priesvitne budovy
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Transparentne nazvy stanic
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Zobrazit nazvy miest
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Zobrazit nazvy stanic
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Zobrazit navigacne body
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Zobrazit popisy
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Plna animacia
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Plne detaily
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Priesvitne budovy
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Transparentne nazvy stanic
 ############ range ends here
 
 ############ range for file menu starts
@@ -431,7 +431,8 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Dalsi pohlad
 STR_MAP_MENU_SIGN_LIST                                          :Zoznam popisov
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Zoznam miest
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Dotacie
@@ -569,7 +570,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Vyb.
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Vybrat polozky na grafe
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Graf prevadzkoveho zisku
@@ -592,8 +593,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Kliknut 
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Hodnotenie spolocnosti
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Inzinier
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Manazer dopravy
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Koordinator dopravy
@@ -610,7 +610,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Podrobne
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vozidla:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stanice:
@@ -644,10 +643,8 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Vlastné 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Hlasitost hudby
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Hlasitost zvuk. efektov
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
-STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGREEN}0{COMMA}
-STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
 STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Stopa
@@ -670,8 +667,7 @@ STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Zobrazit
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Výber hudobného programu
-STR_PLAYLIST_TRACK_SINGLE_DIGIT                                 :{TINYFONT}{LTBLUE}0{COMMA} "{STRING}"
-STR_PLAYLIST_TRACK_DOUBLE_DIGIT                                 :{TINYFONT}{LTBLUE}{COMMA} "{STRING}"
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Císlo stopy
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Program - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Zmazat
@@ -827,6 +823,7 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} zacina stavat nedaleko mesta {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} bola kupena spolocnostou {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Prezident)
+
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}{STRING} sa zacina stavat nedaleko mesta {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}{STRING} sa vysadza nedaleko mesta {TOWN}!
@@ -1344,11 +1341,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Mestá
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Priemysel
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Algoritmus hladania cesty pre vlaky: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(neodporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(odporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Algoritmus hladania cesty pre automobily: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :pôvodný {RED}(neodporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(odporúca sa)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Algoritmus hladania cesty pre lode: {ORANGE}{STRING}
@@ -1409,7 +1404,7 @@ STR_QUIT_NO                                                     :{BLACK}Nie
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -1600,7 +1595,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Vyber ma
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Ktoru mapu chces hrat?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Vygenerovat nahodnu novu hru
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (oznamit)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} klient{P "" i ov}
@@ -1614,7 +1608,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Max. poc
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Omedzi maximalny pocet divakov na serveri
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Jazyk hracov:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Aby ostatni hraci vedeli, akym jazykom sa bude hovorit na serveri.
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Spustit hru
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Zacat sietovu hru z nahodnej mapy alebo scenara
@@ -1794,13 +1787,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :server je plny
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Hra pozastavená (nedostatok hráčov)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Hra spustená (dostatok hráčov)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Hra pozastavená (pripája sa klient)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Hra spustená (klient sa pripojil)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Hra spustená (zlyhalo pripojenie klienta)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :odchádza
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} vstúpil do hry
@@ -1897,10 +1884,10 @@ STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Prijíma
 STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Dodáva: {GOLD}
 
 # Join station window
-STR_JOIN_STATION_CAPTION                                        :{BLACK}Spojiť stanicu
+STR_JOIN_STATION_CAPTION                                        :{WHITE}Spojiť stanicu
 STR_JOIN_STATION_CREATE_SPLITTED_STATION                        :{YELLOW}Postaviť oddelene stanicu
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Nasledovať navádzač
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Nasledovať navádzač
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Postaviť oddelený navádzač
 
 # Rail construction toolbar
@@ -2248,7 +2235,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Spolocnostou vl
 STR_ABOUT_OPENTTD                                               :{WHITE}OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Povodný copyright: {COPYRIGHT} 1995 Chris Sawyer, vsetky prava vyhradene
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD verzia {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 team OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 team OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Ulozit hru
@@ -2385,13 +2372,13 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Upozornenie: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Chyba: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Kritická chyba: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} nebude fungovat s TTDPatch verziou hlásenou OpenTTD.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} je pre {STRING} verziu TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} je navrhnutý pre použitie s {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Neplatný parameter {STRING}: parameter {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} musí byt nahratý pred {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} musí byt nahratý po {STRING}.
-STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{SKIP}{STRING} vyžaduje verziu OpenTTD {STRING} alebo vyššiu.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} nebude fungovat s TTDPatch verziou hlásenou OpenTTD.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} je pre {STRING} verziu TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} je navrhnutý pre použitie s {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Neplatný parameter {1:STRING}: parameter {STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} musí byt nahratý pred {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} musí byt nahratý po {STRING}.
+STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} vyžaduje verziu OpenTTD {STRING} alebo vyššiu.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF súbor bol navrhnutý na preklad
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Nahraných príliš vela NewGRF súborov.
 STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Nahratie {STRING} ako statického NewGRF s {STRING} by mohlo sposobit desynchronizáciu.
@@ -2446,8 +2433,8 @@ STR_TOWN_VIEW_POPULATION_HOUSES                                 :{BLACK}Obyvatel
 STR_TOWN_VIEW_PASSENGERS_LAST_MONTH_MAX                         :{BLACK}Cestujuci posledny mesiac: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_MAIL_LAST_MONTH_MAX                               :{BLACK}Posta posledny mesiac: {ORANGE}{COMMA}{BLACK}  max: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH                              :{BLACK}Tovar potrebný k rozrastu mesta:
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{SETX 20}{ORANGE}{STRING}{BLACK} potrebný
-STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{SETX 20}{ORANGE}{CARGO}{BLACK} doručené posledný mesiac
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED                     :{ORANGE}{STRING}{BLACK} potrebný
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_LAST_MONTH                   :{ORANGE}{CARGO}{BLACK} doručené posledný mesiac
 STR_TOWN_VIEW_NOISE_IN_TOWN                                     :{BLACK}Hlukový limit v meste: {ORANGE}{COMMA}{BLACK}  max.: {ORANGE}{COMMA}
 STR_TOWN_VIEW_CENTER_TOOLTIP                                    :{BLACK}Pohlad na stred mesta
 STR_TOWN_VIEW_LOCAL_AUTHORITY_BUTTON                            :{BLACK}Miestna sprava
@@ -2576,9 +2563,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Zostatok
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Uver
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Uverovy limit:  {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Pozicat {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Pozicat {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Zvysit velkost uveru
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Splatit {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Splatit {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Splatit cast uveru
 
 # Company view
@@ -2598,7 +2585,6 @@ STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Postavit sidlo
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Pozriet sidlo
-STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Postavit sidlo spolocnosti / pozriet sidlo spolocnosti
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Premiestnit sidlo
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Sidlo spolocnosti je mozne premiestnit za 1% hodnoty spolocnosti
 
@@ -2851,7 +2837,7 @@ STR_ENGINE_PREVIEW_MONORAIL_LOCOMOTIVE                          :jednokolajova l
 STR_ENGINE_PREVIEW_MAGLEV_LOCOMOTIVE                            :magneticka lokomotiva
 
 STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER                      :{BLACK}Cena: {CURRENCY} Hmotnost: {WEIGHT_S}{}Rýchlost: {VELOCITY}  Výkon: {POWER}{}Náklady na prevádzku: {CURRENCY}/rok{}Kapacita: {CARGO}
-STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Cena: {CURRENCY} Hmotnosť: {WEIGHT_S}{}Rýchlosť: {VELOCITY}  Sila: {POWER}  Max. T.E.: {7:FORCE}{}Prevádzkové náklady: {CURRENCY}/yr{}Kapacita: {CARGO}
+STR_ENGINE_PREVIEW_COST_WEIGHT_SPEED_POWER_MAX_TE               :{BLACK}Cena: {CURRENCY} Hmotnosť: {WEIGHT_S}{}Rýchlosť: {VELOCITY}  Sila: {POWER}  Max. T.E.: {6:FORCE}{}Prevádzkové náklady: {4:CURRENCY}/yr{}Kapacita: {5:CARGO}
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_CAPACITY_RUNCOST     :{BLACK}Cena: {CURRENCY} Max. Rýchlost: {VELOCITY}{}Kapacita: {CARGO}, {CARGO}{}Prevádzkové náklady: {CURRENCY}/yr
 STR_ENGINE_PREVIEW_COST_MAX_SPEED_CAPACITY_RUNCOST              :{BLACK}Cena: {CURRENCY} Max. Rýchlosť: {VELOCITY}{}Kapacita: {CARGO}{}Prevádzkové náklady: {CURRENCY}/yr
 
@@ -2872,7 +2858,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Nie je o
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Zastavit vymenu vozidiel
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Stlac toto tlacidlo, ak nechces vymienat typ lokomotivy vybrany v lavom zozname
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Vymena: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Vymena: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Prepne medzi oknami na vymenu lokomotiv a vagonov
 STR_REPLACE_ENGINES                                             :Lokomotívy
 STR_REPLACE_WAGONS                                              :Vagonov
@@ -2884,7 +2870,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Elektrické lok
 STR_REPLACE_MONORAIL_VEHICLES                                   :Lokomotiva pre jednokolajovku
 STR_REPLACE_MAGLEV_VEHICLES                                     :Lokomotiva pre magneticku drahu
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Odstranenie vagonu: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Odstranenie vagonu: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Funkcia automatickeho vylepsovania vlakov moze udrzovat rovnaku dlzku vlakov odstranovanim vagonov (od zaciatku vlakov), pokial by zmena rusna vlak predlzila.
 
 # Vehicle view
@@ -2989,8 +2975,8 @@ STR_VEHICLE_INFO_PROFIT_THIS_YEAR_LAST_YEAR                     :{BLACK}Profit t
 STR_VEHICLE_INFO_RELIABILITY_BREAKDOWNS                         :{BLACK}Spoľahlivosť: {LTBLUE}{COMMA}%  {BLACK}Poruchy od posledného servisu: {LTBLUE}{COMMA}
 
 STR_VEHICLE_INFO_BUILT_VALUE                                    :{LTBLUE}{ENGINE} {BLACK}Vyrobený: {LTBLUE}{NUM}{BLACK} Cena: {LTBLUE}{CURRENCY}
-STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING}
-STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{SKIP}{SKIP}{STRING} (x{NUM})
+STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Kapacita: {LTBLUE}{CARGO}{3:STRING}
+STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Kapacita: {LTBLUE}{CARGO}{3:STRING} (x{4:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Kapacita: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Transfer kredity: {LTBLUE}{CURRENCY}
@@ -3054,11 +3040,9 @@ STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}CP
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Prepnút na zobrazenie cestovného poriadku
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Zoznam prikazov - kliknut na prikaz pre oznacenie
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Koniec prikazov - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Koniec zdielanych prikazov - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Koniec prikazov - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Koniec zdielanych prikazov - -
 
 # Order bottom buttons
 STR_ORDER_NON_STOP                                              :{BLACK}Non-stop
@@ -3110,7 +3094,6 @@ STR_ORDER_CONDITIONAL_COMPARATOR_IS_TRUE                        :je pravda
 STR_ORDER_CONDITIONAL_COMPARATOR_IS_FALSE                       :je nepravda
 
 STR_ORDER_CONDITIONAL_VALUE_TOOLTIP                             :{BLACK}Hodnota, s ktorou sa majú porovnat dáta vozidla
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 STR_ORDER_CONDITIONAL_VALUE_CAPT                                :{WHITE}Zadajte hodnotu voci ktorej sa ma porovnat
 
 STR_ORDERS_SKIP_BUTTON                                          :{BLACK}Preskocit
@@ -3182,9 +3165,9 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Prepnút
 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Cestovný poriadok - kliknite na príkaz pre jeho oznacenie
 
-STR_TIMETABLE_NO_TRAVEL                                         :{SETX 30}Necestuj
-STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :{SETX 30}Cesta (neurcený cas)
-STR_TIMETABLE_TRAVEL_FOR                                        :{SETX 30}Cesta do {STRING}
+STR_TIMETABLE_NO_TRAVEL                                         :Necestuj
+STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Cesta (neurcený cas)
+STR_TIMETABLE_TRAVEL_FOR                                        :Cesta do {STRING}
 STR_TIMETABLE_STAY_FOR                                          :prestávka {STRING}
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :a cestuj {STRING}
 STR_TIMETABLE_DAYS                                              :{COMMA} d{P en ni ní}
@@ -3196,6 +3179,11 @@ STR_TIMETABLE_TOTAL_TIME_INCOMPLETE                             :{BLACK}Na dokon
 STR_TIMETABLE_STATUS_ON_TIME                                    :{BLACK}Toto vozidlo ide presne
 STR_TIMETABLE_STATUS_LATE                                       :{BLACK}Toto vozidlo mešká {STRING}
 STR_TIMETABLE_STATUS_EARLY                                      :{BLACK}Toto vozidlo ide {STRING} skor
+STR_TIMETABLE_STATUS_NOT_STARTED                                :{BLACK}Tento cestovný poriadok ešte nezačal
+STR_TIMETABLE_STATUS_START_AT                                   :{BLACK}Tento cestovný poriadok začne {STRING}
+
+STR_TIMETABLE_STARTING_DATE                                     :{BLACK}Začiatočný dátum
+STR_TIMETABLE_STARTING_DATE_TOOLTIP                             :{BLACK}Vyberte dátum ako začiatočný bod tohto cestovného poriadku
 
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Zmenit cas
 STR_TIMETABLE_WAIT_TIME_TOOLTIP                                 :{BLACK}Zmenit dlžku trvania oznaceného príkazu
@@ -3208,6 +3196,22 @@ STR_TIMETABLE_RESET_LATENESS_TOOLTIP                            :{BLACK}Resetnú
 
 STR_TIMETABLE_AUTOFILL                                          :{BLACK}Vyplnit
 STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Naplň časový plán automaticky s hodnotami z nasledujúcej trasy (CTRL-klik - pokúsiť sa udržať čakacie doby)
+
+STR_TIMETABLE_EXPECTED                                          :{BLACK}Čakať
+STR_TIMETABLE_SCHEDULED                                         :{BLACK}Naplánovaný
+STR_TIMETABLE_EXPECTED_TOOLTIP                                  :{BLACK}Prepnúť medzi čakaním a cestovným poriadkom
+
+STR_TIMETABLE_DEPARTURE_ABBREVIATION                            :D:
+
+
+# Date window (for timetable)
+STR_DATE_CAPTION                                                :{WHITE}Nastaviť dátum
+STR_DATE_SET_DATE                                               :{BLACK}Nastaviť dátum
+STR_DATE_SET_DATE_TOOLTIP                                       :{BLACK}Vybrať označený dátum za začiatočný pre tento cestovný poriadok
+STR_DATE_DAY_TOOLTIP                                            :{BLACK}Vyberte deň
+STR_DATE_MONTH_TOOLTIP                                          :{BLACK}Vyberte mesiac
+STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Vyberte rok
+
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}AI debugovanie
@@ -4005,10 +4009,10 @@ STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Smerovy bod {TO
 
 STR_UNKNOWN_STATION                                             :neznáma stanica
 STR_DEFAULT_SIGN_NAME                                           :Popis
-STR_COMPANY_SOMEONE                                             :niekto{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :niekto
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY}, {STRING}
-STR_SAVEGAME_NAME_SPECTATOR                                     :Pozorovateľ, {SKIP}{STRING}
+STR_SAVEGAME_NAME_SPECTATOR                                     :Pozorovateľ, {1:STRING}
 
 # Viewport strings
 STR_VIEWPORT_TOWN_POP                                           :{WHITE}{TOWN} ({COMMA})
@@ -4052,8 +4056,6 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
 STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
@@ -4075,12 +4077,7 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
 STR_BLACK_2                                                     :{BLACK}2
@@ -4095,4 +4092,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-

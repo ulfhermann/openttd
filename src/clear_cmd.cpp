@@ -63,19 +63,14 @@ void DrawHillyLandTile(const TileInfo *ti)
 
 void DrawClearLandFence(const TileInfo *ti)
 {
-	byte z = ti->z;
-
-	if (ti->tileh & SLOPE_S) {
-		z += TILE_HEIGHT;
-		if (ti->tileh == SLOPE_STEEP_S) z += TILE_HEIGHT;
-	}
+	int z = GetSlopeZInCorner(ti->tileh, CORNER_S);
 
 	if (GetFenceSW(ti->tile) != 0) {
-		DrawGroundSpriteAt(_clear_land_fence_sprites[GetFenceSW(ti->tile) - 1] + _fence_mod_by_tileh_sw[ti->tileh], PAL_NONE, ti->x, ti->y, z);
+		DrawGroundSpriteAt(_clear_land_fence_sprites[GetFenceSW(ti->tile) - 1] + _fence_mod_by_tileh_sw[ti->tileh], PAL_NONE, 0, 0, z);
 	}
 
 	if (GetFenceSE(ti->tile) != 0) {
-		DrawGroundSpriteAt(_clear_land_fence_sprites[GetFenceSE(ti->tile) - 1] + _fence_mod_by_tileh_se[ti->tileh], PAL_NONE, ti->x, ti->y, z);
+		DrawGroundSpriteAt(_clear_land_fence_sprites[GetFenceSE(ti->tile) - 1] + _fence_mod_by_tileh_se[ti->tileh], PAL_NONE, 0, 0, z);
 	}
 }
 
@@ -156,30 +151,35 @@ void TileLoopClearHelper(TileIndex tile)
 }
 
 
-/* convert into snowy tiles */
+/** Convert to or from snowy tiles. */
 static void TileLoopClearAlps(TileIndex tile)
 {
 	int k = GetTileZ(tile) - GetSnowLine() + TILE_HEIGHT;
 
-	if (k < 0) { // well below the snow line
-		if (!IsClearGround(tile, CLEAR_SNOW)) return;
-		if (GetClearDensity(tile) == 0) SetClearGroundDensity(tile, CLEAR_GRASS, 3);
+	if (k < 0) {
+		/* Below the snow line, do nothing if no snow. */
+		if (!IsSnowTile(tile)) return;
 	} else {
-		if (!IsClearGround(tile, CLEAR_SNOW)) {
-			SetClearGroundDensity(tile, CLEAR_SNOW, 0);
-		} else {
-			uint density = min((uint)k / TILE_HEIGHT, 3);
-
-			if (GetClearDensity(tile) < density) {
-				AddClearDensity(tile, 1);
-			} else if (GetClearDensity(tile) > density) {
-				AddClearDensity(tile, -1);
-			} else {
-				return;
-			}
+		/* At or above the snow line, make snow tile if needed. */
+		if (!IsSnowTile(tile)) {
+			MakeSnow(tile);
+			MarkTileDirtyByTile(tile);
+			return;
 		}
 	}
+	/* Update snow density. */
+	uint curent_density = GetClearDensity(tile);
+	uint req_density = (k < 0) ? 0u : min((uint)k / TILE_HEIGHT, 3);
 
+	if (curent_density < req_density) {
+		AddClearDensity(tile, 1);
+	} else if (curent_density > req_density) {
+		AddClearDensity(tile, -1);
+	} else {
+		/* Density at the required level. */
+		if (k >= 0) return;
+		ClearSnow(tile);
+	}
 	MarkTileDirtyByTile(tile);
 }
 

@@ -13,7 +13,9 @@
 #define STATION_TYPE_H
 
 #include "core/enum_type.hpp"
+#include "core/smallvec_type.hpp"
 #include "tile_type.h"
+#include "tilearea_type.h"
 
 typedef uint16 StationID;
 typedef uint16 RoadStopID;
@@ -90,29 +92,22 @@ enum {
 	MAX_LENGTH_STATION_NAME_PIXELS = 180, ///< The maximum length of a station name in pixels
 };
 
-/** Represents the covered area of e.g. a rail station */
-struct TileArea {
-	/** Just construct this tile area */
-	TileArea() {}
+/** List of stations */
+typedef SmallVector<Station *, 2> StationList;
 
+/**
+ * Structure contains cached list of stations nearby. The list
+ * is created upon first call to GetStations()
+ */
+class StationFinder : TileArea {
+	StationList stations; ///< List of stations nearby
+public:
 	/**
-	 * Construct this tile area with some set values
-	 * @param tile the base tile
-	 * @param w the width
-	 * @param h the height
+	 * Constructs StationFinder
+	 * @param area the area to search from
 	 */
-	TileArea(TileIndex tile, uint8 w, uint8 h) : tile(tile), w(w), h(h) {}
-
-	/**
-	 * Construct this tile area based on two points.
-	 * @param start the start of the area
-	 * @param end   the end of the area
-	 */
-	TileArea(TileIndex start, TileIndex end);
-
-	TileIndex tile; ///< The base tile of the area
-	uint8 w;        ///< The width of the area
-	uint8 h;        ///< The height of the area
+	StationFinder(const TileArea &area) : TileArea(area) {}
+	const StationList *GetStations();
 };
 
 #endif /* STATION_TYPE_H */

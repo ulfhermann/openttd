@@ -10,7 +10,6 @@
 /** @file gfx.cpp Handling of drawing text and other gfx related stuff. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "gfx_func.h"
 #include "variables.h"
 #include "fontcache.h"
@@ -21,6 +20,7 @@
 #include "strings_func.h"
 #include "settings_type.h"
 #include "landscape_type.h"
+#include "network/network.h"
 #include "network/network_func.h"
 #include "thread/thread.h"
 #include "window_func.h"
@@ -49,6 +49,9 @@ int _pal_first_dirty;
 int _pal_count_dirty;
 
 Colour _cur_palette[256];
+
+static int _max_char_height; ///< Cache of the height of the largest font
+static int _max_char_width;  ///< Cache of the width of the largest font
 static byte _stringwidth_table[FS_END][224]; ///< Cache containing width of often used characters. @see GetCharacterWidth()
 DrawPixelInfo *_cur_dpi;
 byte _colour_gradient[COLOUR_END][8];
@@ -68,7 +71,7 @@ static ReusableBuffer<uint8> _cursor_backup;
  */
 static Rect _invalid_rect;
 static const byte *_colour_remap_ptr;
-static byte _string_colourremap[3];
+static byte _string_colourremap[3]; ///< Recoloursprite for stringdrawing. The grf loader ensures, that ST_FONT sprites only use colours 0 to 2.
 
 enum {
 	DIRTY_BLOCK_HEIGHT   = 8,
@@ -86,7 +89,7 @@ void GfxScroll(int left, int top, int width, int height, int xo, int yo)
 	if (_cursor.visible) UndrawMouseCursor();
 
 #ifdef ENABLE_NETWORK
-	NetworkUndrawChatMessage();
+	if (_networking) NetworkUndrawChatMessage();
 #endif /* ENABLE_NETWORK */
 
 	blitter->ScrollBuffer(_screen.dst_ptr, left, top, width, height, xo, yo);
@@ -327,9 +330,10 @@ static UChar *HandleBiDiAndArabicShapes(UChar *buffer)
  * If the string is truncated, add three dots ('...') to show this.
  * @param *str string that is checked and possibly truncated
  * @param maxw maximum width in pixels of the string
+ * @param ignore_setxy whether to ignore SETX(Y) or not
  * @return new width of (truncated) string
  */
-static int TruncateString(char *str, int maxw)
+static int TruncateString(char *str, int maxw, bool ignore_setxy)
 {
 	int w = 0;
 	FontSize size = _cur_fontsize;
@@ -353,10 +357,10 @@ static int TruncateString(char *str, int maxw)
 			}
 		} else {
 			if (c == SCC_SETX) {
-				w = *str;
+				if (!ignore_setxy) w = *str;
 				str++;
 			} else if (c == SCC_SETXY) {
-				w = *str;
+				if (!ignore_setxy) w = *str;
 				str += 2;
 			} else if (c == SCC_TINYFONT) {
 				size = FS_SMALL;
@@ -446,7 +450,7 @@ static int DrawString(int left, int right, int top, char *str, const char *last,
 	int initial_right = right;
 	int initial_top = top;
 
-	if (truncate) TruncateString(str, right - left + 1);
+	if (truncate) TruncateString(str, right - left + 1, (align & SA_STRIP) == SA_STRIP);
 
 	/*
 	 * To support SETX and SETXY properly with RTL languages we have to
@@ -477,6 +481,14 @@ static int DrawString(int left, int right, int top, char *str, const char *last,
 		}
 		if (c != SCC_SETX && c != SCC_SETXY) {
 			loc += len;
+			continue;
+		}
+
+		if (align & SA_STRIP) {
+			/* We do not want to keep the SETX(Y)!. It was already copied, so
+			 * remove it and undo the incrementing of the pointer! */
+			*p-- = '\0';
+			loc += len + (c == SCC_SETXY ? 2 : 1);
 			continue;
 		}
 
@@ -557,7 +569,7 @@ static int DrawString(int left, int right, int top, char *str, const char *last,
 
 		ReallyDoDrawString(to_draw, left, top, colour, !truncate);
 		if (underline) {
-			GfxFillRect(left, top + 10, right, top + 10, _string_colourremap[1]);
+			GfxFillRect(left, top + FONT_HEIGHT_NORMAL, right, top + FONT_HEIGHT_NORMAL, _string_colourremap[1]);
 		}
 	}
 
@@ -947,7 +959,7 @@ switch_colour:;
 	}
 
 check_bounds:
-	if (y + 19 <= dpi->top || dpi->top + dpi->height <= y) {
+	if (y + _max_char_height <= dpi->top || dpi->top + dpi->height <= y) {
 skip_char:;
 		for (;;) {
 			c = *string++;
@@ -964,7 +976,7 @@ skip_cont:;
 		}
 		if (IsPrintable(c)) {
 			if (x >= dpi->left + dpi->width) goto skip_char;
-			if (x + 26 >= dpi->left) {
+			if (x + _max_char_width >= dpi->left) {
 				GfxMainBlitter(GetGlyph(size, c), x, y, BM_COLOUR_REMAP);
 			}
 			x += GetCharacterWidth(size, c);
@@ -1231,20 +1243,20 @@ void DoPaletteAnimations()
 	if (_use_palette == PAL_DOS) {
 		/* Dark blue water DOS */
 		s = (_settings_game.game_creation.landscape == LT_TOYLAND) ? ev->dark_water_toyland : ev->dark_water;
-		j = EXTR(320, 5);
-		for (i = 0; i != 5; i++) {
+		j = EXTR(320, EPV_CYCLES_DARK_WATER);
+		for (i = 0; i != EPV_CYCLES_DARK_WATER; i++) {
 			*palette_pos++ = s[j];
 			j++;
-			if (j == 5) j = 0;
+			if (j == EPV_CYCLES_DARK_WATER) j = 0;
 		}
 
 		/* Glittery water DOS */
 		s = (_settings_game.game_creation.landscape == LT_TOYLAND) ? ev->glitter_water_toyland : ev->glitter_water;
-		j = EXTR(128, 15);
-		for (i = 0; i != 5; i++) {
+		j = EXTR(128, EPV_CYCLES_GLITTER_WATER);
+		for (i = 0; i != EPV_CYCLES_GLITTER_WATER / 3; i++) {
 			*palette_pos++ = s[j];
 			j += 3;
-			if (j >= 15) j -= 15;
+			if (j >= EPV_CYCLES_GLITTER_WATER) j -= EPV_CYCLES_GLITTER_WATER;
 		}
 	}
 
@@ -1263,22 +1275,20 @@ void DoPaletteAnimations()
 /** Initialize _stringwidth_table cache */
 void LoadStringWidthTable()
 {
-	uint i;
+	_max_char_height = 0;
+	_max_char_width  = 0;
 
-	/* Normal font */
-	for (i = 0; i != 224; i++) {
-		_stringwidth_table[FS_NORMAL][i] = GetGlyphWidth(FS_NORMAL, i + 32);
+	for (FontSize fs = FS_BEGIN; fs < FS_END; fs++) {
+		_max_char_height = max<int>(_max_char_height, GetCharacterHeight(fs));
+		for (uint i = 0; i != 224; i++) {
+			_stringwidth_table[fs][i] = GetGlyphWidth(fs, i + 32);
+			_max_char_width = max<int>(_max_char_width, _stringwidth_table[fs][i]);
+		}
 	}
 
-	/* Small font */
-	for (i = 0; i != 224; i++) {
-		_stringwidth_table[FS_SMALL][i] = GetGlyphWidth(FS_SMALL, i + 32);
-	}
-
-	/* Large font */
-	for (i = 0; i != 224; i++) {
-		_stringwidth_table[FS_LARGE][i] = GetGlyphWidth(FS_LARGE, i + 32);
-	}
+	/* Needed because they need to be 1 more than the widest. */
+	_max_char_height++;
+	_max_char_width++;
 
 	ReInitAllWindows();
 }
@@ -1295,6 +1305,20 @@ byte GetCharacterWidth(FontSize size, WChar key)
 	if (key >= 32 && key < 256) return _stringwidth_table[size][key - 32];
 
 	return GetGlyphWidth(size, key);
+}
+
+/**
+ * Return the maximum width of single digit.
+ * @param size  Font of the digit
+ * @return Width of the digit.
+ */
+byte GetDigitWidth(FontSize size)
+{
+	byte width = 0;
+	for (char c = '0'; c <= '9'; c++) {
+		width = max(GetCharacterWidth(size, c), width);
+	}
+	return width;
 }
 
 
@@ -1399,7 +1423,7 @@ void RedrawScreenRect(int left, int top, int right, int bottom)
 	}
 
 #ifdef ENABLE_NETWORK
-	NetworkUndrawChatMessage();
+	if (_networking) NetworkUndrawChatMessage();
 #endif /* ENABLE_NETWORK */
 
 	DrawOverlappedWindowForAll(left, top, right, bottom);

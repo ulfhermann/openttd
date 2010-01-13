@@ -126,7 +126,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} toffee
 STR_QUANTITY_BATTERIES                                          :{COMMA} pila{P y k}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} plastikoarena
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} edari burbuilatsua {P "" k}
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -210,7 +210,7 @@ STR_UNITS_WEIGHT_LONG_SI                                        :{COMMA} kg
 STR_UNITS_VOLUME_SHORT_METRIC                                   :{COMMA}l
 STR_UNITS_VOLUME_SHORT_SI                                       :{COMMA}m³
 
-STR_UNITS_VOLUME_LONG_METRIC                                    :{COMMA} litro{P "" }
+STR_UNITS_VOLUME_LONG_METRIC                                    :{COMMA} litro
 STR_UNITS_VOLUME_LONG_SI                                        :{COMMA} m³
 
 STR_UNITS_FORCE_SI                                              :{COMMA} kN
@@ -344,14 +344,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Zailtasun ezarp
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Ezarpen aurreratuak
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF ezarpenak
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Transparentzia aukerak
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Herri izen erakutsiak
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Geltoki izen erakutsiak
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Ibilbide izen erakutsiak
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Erakutsitako kartelak
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Animazio betea
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Xehetasun betea
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Eraikin transparenteak
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Geltoki kartel transparenteak
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Herri izen erakutsiak
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Geltoki izen erakutsiak
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Ibilbide izen erakutsiak
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Erakutsitako kartelak
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Animazio betea
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Xehetasun betea
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Eraikin transparenteak
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Geltoki kartel transparenteak
 ############ range ends here
 
 ############ range for file menu starts
@@ -367,7 +367,9 @@ STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Bista extra
 STR_MAP_MENU_SIGN_LIST                                          :Kartel zerrenda
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
 STR_TOWN_MENU_TOWN_DIRECTORY                                    :Herri direktorioa
-############ both ranges ends here
+############ end of the 'Display map' dropdown
+STR_TOWN_MENU_FOUND_TOWN                                        :Hiria aurkitua
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subsidioak
@@ -505,7 +507,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Giltza
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Erakutsi giltza grafikoetan
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Operazio Onuren Grafikoa
@@ -526,8 +528,7 @@ STR_GRAPH_KEY_CAPTION                                           :{WHITE}Giltza k
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Konpaniako Liga Tabloia
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Ingienaria
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Trafiko Zuzendaria
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Garraio Koordinatzailea
@@ -544,7 +545,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Xehetasu
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Garraioak:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Geltokiak:
@@ -564,6 +564,7 @@ STR_PERFORMANCE_DETAIL_DELIVERED_TOOLTIP                        :{BLACK}Entregat
 STR_PERFORMANCE_DETAIL_CARGO_TOOLTIP                            :{BLACK}Entregatutako karga tipo zenbakia azkeneko laudenean
 STR_PERFORMANCE_DETAIL_MONEY_TOOLTIP                            :{BLACK}Konpania honek duen dirua bankuan
 STR_PERFORMANCE_DETAIL_LOAN_TOOLTIP                             :{BLACK}Konpania honek hartu duen dirua mailegutan
+STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Punto gehienak puntu posibleak kontatu gabe
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jazz Jukebox
@@ -575,30 +576,44 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Pertsonalizatua 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Musikaren Bolumena
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Efektuen Bolumena
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAX
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}MIN
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}MAX
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
-STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGREEN}0{COMMA}
-STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
 STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Pista
 STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Titulua
+STR_MUSIC_SHUFFLE                                               :{TINYFONT}{BLACK}Nahasi
 STR_MUSIC_PROGRAM                                               :{TINYFONT}{BLACK}Programatu
+STR_MUSIC_TOOLTIP_SKIP_TO_PREVIOUS_TRACK                        :{BLACK}Selekzioko aurreko kantara joan
+STR_MUSIC_TOOLTIP_SKIP_TO_NEXT_TRACK_IN_SELECTION               :{BLACK}Selekzioko hurrengo kantara joan
 STR_MUSIC_TOOLTIP_STOP_PLAYING_MUSIC                            :{BLACK}Musika jotzen gelditu
 STR_MUSIC_TOOLTIP_START_PLAYING_MUSIC                           :{BLACK}Musika jotzen hasi
+STR_MUSIC_TOOLTIP_DRAG_SLIDERS_TO_SET_MUSIC                     :{BLACK}Mugitu barrak musikaren eta soinu efektuak ezartzeko
 STR_MUSIC_TOOLTIP_SELECT_ALL_TRACKS_PROGRAM                     :{BLACK}'Kanta guztiak' programa selekzionatu
+STR_MUSIC_TOOLTIP_SELECT_OLD_STYLE_MUSIC                        :{BLACK}'Estilo zaharra' programa aukeratu
+STR_MUSIC_TOOLTIP_SELECT_NEW_STYLE_MUSIC                        :{BLACK}'Estilo berria' programa aukeratu
+STR_MUSIC_TOOLTIP_SELECT_EZY_STREET_STYLE                       :{BLACK}'Ezy Street musika estiloa' programa aukeratu
+STR_MUSIC_TOOLTIP_SELECT_CUSTOM_1_USER_DEFINED                  :{BLACK}'Pertsonala 1' (erabiltzaileak aukeratutakoa) programa aukeratu
+STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}'Pertsonala 2' (erabiltzaileak aukeratutakoa) programa aukeratu
+STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Erakutsi kanten selekzio leihoa
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Musika Programen Selekzioa
-STR_PLAYLIST_TRACK_SINGLE_DIGIT                                 :{TINYFONT}{LTBLUE}0{COMMA} "{STRING}"
-STR_PLAYLIST_TRACK_DOUBLE_DIGIT                                 :{TINYFONT}{LTBLUE}{COMMA} "{STRING}"
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Pistaren Indizea
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programatu - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Garbitu
 STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Gorde
+STR_PLAYLIST_TOOLTIP_CLEAR_CURRENT_PROGRAM_CUSTOM1              :{BLACK}Uneko programa ezabatu (Perstonala1 edo Pertsonala2 bakarrik)
 STR_PLAYLIST_TOOLTIP_SAVE_MUSIC_SETTINGS                        :{BLACK}Musikaren ezarpenak gorde
+STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}Musika kantan click egin uneko programari gehitzeko (Perstonala1 edo Perstonala2 bakarrik)
+STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}Musika kantan clik egin uneko programatik ezabatzeko (Perstonala1 edo Pertsonala2 bakarrik)
 
 # Highscore window
+STR_HIGHSCORE_TOP_COMPANIES_WHO_REACHED                         :{BIGFONT}{BLACK}Top companiak {NUM}{}({STRING} Nibela lortu dutenak)
 STR_HIGHSCORE_POSITION                                          :{BIGFONT}{BLACK}{COMMA}.
 STR_HIGHSCORE_PERFORMANCE_TITLE_BUSINESSMAN                     :Negozio gizona
 STR_HIGHSCORE_PERFORMANCE_TITLE_ENTREPRENEUR                    :Empresarioa
@@ -661,6 +676,7 @@ STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLACK}Basamortua
 STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}Elurra
 
+STR_SMALLMAP_CENTER                                             :{BLACK}Minimapa uneko posizioan zentratu
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Dena desgaitu
@@ -681,16 +697,21 @@ STR_MESSAGE_NEWS_FORMAT                                         :{STRING}  -  {S
 # Message settings window
 STR_NEWS_MESSAGE_CAPTION                                        :{WHITE}Mezua
 STR_NEWS_MESSAGE_OPTIONS_CAPTION                                :{WHITE}Mezu Aukerak
+STR_NEWS_MESSAGES_ALL                                           :{YELLOW}Mezu mota guztiak aldatu: Bat ere ez/Sumarioa/Denak-era
 STR_NEWS_MESSAGES_OFF                                           :Off
 STR_NEWS_MESSAGES_SUMMARY                                       :Sumarioa
 STR_NEWS_MESSAGES_FULL                                          :Betea
 
 STR_NEWS_MESSAGE_TYPES                                          :{BLACK}Mezu motak:
+STR_NEWS_MESSAGE_TYPE_ARRIVAL_OF_FIRST_VEHICLE_OWN              :{YELLOW}Lehenengo garraioaren etorrera jokalariaren geltokira
+STR_NEWS_MESSAGE_TYPE_ARRIVAL_OF_FIRST_VEHICLE_OTHER            :{YELLOW}Lehenengo garraioaren etorrera lehiakidearen geltokira
 STR_NEWS_MESSAGE_TYPE_ACCIDENTS_DISASTERS                       :{YELLOW}Akzidenteak / desastreak
 STR_NEWS_MESSAGE_TYPE_COMPANY_INFORMATION                       :{YELLOW}Konpaniako informazioa
 STR_NEWS_MESSAGE_TYPE_INDUSTRY_OPEN                             :{YELLOW}Industrien zabalerak
 STR_NEWS_MESSAGE_TYPE_INDUSTRY_CLOSE                            :{YELLOW}Industrien itxierak
 STR_NEWS_MESSAGE_TYPE_ECONOMY_CHANGES                           :{YELLOW}Ekonomia aldaketak
+STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_COMPANY        :{YELLOW}Produkzio aldaketak konpaniagatik zerbitzatutako industriatan
+STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_OTHER          :{YELLOW}Produkzio aldaketak lehiakidearen(en) zerbitzatutako industriatan
 STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_UNSERVED                 :{YELLOW}OBeste indutria produkzio aldaketak
 STR_NEWS_MESSAGE_TYPE_NEW_VEHICLES                              :{YELLOW}Garraio berriak
 STR_NEWS_MESSAGE_TYPE_SUBSIDIES                                 :{YELLOW}Subsidioak
@@ -700,6 +721,7 @@ STR_NEWS_FIRST_TRAIN_ARRIVAL                                    :{BIGFONT}{BLACK
 STR_NEWS_FIRST_BUS_ARRIVAL                                      :{BIGFONT}{BLACK}Hiritarrek ospatzen dute . . .{} {STATION}era heltzen del lehenengo autobusa!
 STR_NEWS_FIRST_TRUCK_ARRIVAL                                    :{BIGFONT}{BLACK}Hiritarrek ospatzen dute . . .{} {STATION}era heltzen den lehenengo kamioia!
 STR_NEWS_FIRST_PASSENGER_TRAM_ARRIVAL                           :{BIGFONT}{BLACK}Hiritarrek ospatzen dute . . .{} {STATION}era heltzen den lehenego tranvia!
+STR_NEWS_FIRST_CARGO_TRAM_ARRIVAL                               :{BIGFONT}{BLACK}Hiritarrek ospatzen dute . . .{} {STATION}era heldu den lehen tranvia!
 STR_NEWS_FIRST_SHIP_ARRIVAL                                     :{BIGFONT}{BLACK}Hiritarrek ospatzen dute . . .{}{STATION}era heltzen den lehenengo itsasontzia!
 STR_NEWS_FIRST_AIRCRAFT_ARRIVAL                                 :{BIGFONT}{BLACK}Hiritarrek ospatzen dute . . .{} {STATION}era heltzen den lehenengo hegazkina!
 
@@ -707,6 +729,7 @@ STR_NEWS_TRAIN_CRASH                                            :{BIGFONT}{BLACK
 STR_NEWS_ROAD_VEHICLE_CRASH_DRIVER                              :{BIGFONT}{BLACK}Errepideko Garraio baten eztanda!{}Gidaria tren batekin kolisionatu eta gero hiltzen da
 STR_NEWS_ROAD_VEHICLE_CRASH                                     :{BIGFONT}{BLACK}Errepideko Garraio Baten Eztanda!{}{COMMA} hiltzen dira trenarekin kolisionatu eta gero
 STR_NEWS_AIRCRAFT_CRASH                                         :{BIGFONT}{BLACK}Hegazkin Istripua!{}{COMMA} hiltzen dira {STATION}ean
+
 
 
 
@@ -770,6 +793,7 @@ STR_NEWS_AIRCRAFT_CRASH                                         :{BIGFONT}{BLACK
 
 
 
+
 STR_SUBSIDY_X1_5                                                :x1.5
 STR_SUBSIDY_X2                                                  :x2
 STR_SUBSIDY_X3                                                  :x3
@@ -782,6 +806,7 @@ STR_SUBSIDY_X4                                                  :x4
 
 
 # Advanced settings window
+
 
 
 
@@ -817,7 +842,7 @@ STR_INTRO_CAPTION                                               :{WHITE}OpenTTD 
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -849,8 +874,6 @@ STR_NETWORK_SERVER_LIST_MAP_SIZE_SHORT                          :{BLACK}{COMMA}x
 # Start new multiplayer server
 
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 
 
@@ -891,7 +914,6 @@ STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
 ############ End of leave-in-this-order
 
@@ -1025,6 +1047,7 @@ STR_TOWN_DIRECTORY_TOWN                                         :{ORANGE}{TOWN}{
 
 # Town view window
 STR_TOWN_VIEW_TOWN_CAPTION                                      :{WHITE}{TOWN}
+STR_TOWN_VIEW_CARGO_FOR_TOWNGROWTH_REQUIRED_WINTER              :{ORANGE}{STRING}{BLACK} Neguan beharrezkoa
 
 
 
@@ -1183,8 +1206,6 @@ STR_VEHICLE_DETAILS_TRAIN_TOTAL_CAPACITY_MULT                   :{LTBLUE}- {CARG
 
 # Order view
 
-STR_ORDER                                                       :{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
-STR_ORDER_SELECTED                                              :{RIGHTARROW}{SETX 10}{COMMA}: {SETX 30}{STRING} {STRING}
 
 
 # Order bottom buttons
@@ -1195,7 +1216,6 @@ STR_ORDER_SELECTED                                              :{RIGHTARROW}{SE
 
 
 
-STR_ORDER_CONDITIONAL_VALUE                                     :{SKIP}{BLACK}{COMMA}
 
 
 
@@ -1224,10 +1244,18 @@ STR_ORDER_GO_TO_STATION                                         :{STRING} {STATI
 
 
 
+
+
+
+
+# Date window (for timetable)
+
+
 # AI debug window
 
 
 # AI configuration window
+
 
 
 # Available AIs window
@@ -1402,8 +1430,6 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
 STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
@@ -1425,12 +1451,7 @@ STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
 STR_BLACK_2                                                     :{BLACK}2
@@ -1445,4 +1466,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-

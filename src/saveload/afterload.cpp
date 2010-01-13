@@ -12,7 +12,6 @@
 #include "../stdafx.h"
 #include "../void_map.h"
 #include "../signs_base.h"
-#include "../roadstop_base.h"
 #include "../depot_base.h"
 #include "../window_func.h"
 #include "../fios.h"
@@ -25,7 +24,18 @@
 #include "../clear_map.h"
 #include "../vehicle_func.h"
 #include "../newgrf_station.h"
-#include "../yapf/yapf.hpp"
+#include "../openttd.h"
+#include "../debug.h"
+#include "../string_func.h"
+#include "../date_func.h"
+#include "../roadveh.h"
+#include "../train.h"
+#include "../station_base.h"
+#include "../waypoint_base.h"
+#include "../roadstop_base.h"
+#include "../tunnelbridge_map.h"
+#include "../landscape.h"
+#include "../pathfinder/yapf/yapf_cache.h"
 #include "../elrail_func.h"
 #include "../signs_func.h"
 #include "../aircraft.h"
@@ -110,7 +120,7 @@ void SetWaterClassDependingOnSurroundings(TileIndex t, bool include_invalid_wate
 
 			case MP_TREES:
 				/* trees on shore */
-				has_water |= (GetTreeGround(neighbour) == TREE_GROUND_SHORE);
+				has_water |= (GB(_m[neighbour].m2, 4, 2) == TREE_GROUND_SHORE);
 				break;
 
 			default: break;
@@ -200,6 +210,16 @@ static inline RailType UpdateRailType(RailType rt, RailType min)
 }
 
 /**
+ * Update the viewport coordinates of all signs.
+ */
+void UpdateAllVirtCoords()
+{
+	UpdateAllStationVirtCoords();
+	UpdateAllSignVirtCoords();
+	UpdateAllTownVirtCoords();
+}
+
+/**
  * Initialization of the windows and several kinds of caches.
  * This is not done directly in AfterLoadGame because these
  * functions require that all saveload conversions have been
@@ -214,12 +234,9 @@ static void InitializeWindowsAndCaches()
 	ResetWindowSystem();
 	SetupColoursAndInitialWindow();
 
-	ResetViewportAfterLoadGame();
-
 	/* Update coordinates of the signs. */
-	UpdateAllStationVirtCoords();
-	UpdateAllSignVirtCoords();
-	UpdateAllTownVirtCoords();
+	UpdateAllVirtCoords();
+	ResetViewportAfterLoadGame();
 
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
@@ -244,6 +261,7 @@ static void InitializeWindowsAndCaches()
 	UpdateAirportsNoise();
 
 	CheckTrainsLengths();
+	ShowNewGRFError();
 }
 
 typedef void (CDECL *SignalHandlerPointer)(int);
@@ -411,6 +429,15 @@ bool AfterLoadGame()
 		/* Restore the signals */
 		ResetSignalHandlers();
 		return false;
+	} else if (!_networking || _network_server) {
+		/* If we are in single player, i.e. not networking, and loading the
+		 * savegame or we are loading the savegame as network server we do
+		 * not want to be bothered by being paused because of the automatic
+		 * reason of a network server, e.g. joining clients or too few
+		 * active clients. Note that resetting these values for a network
+		 * client are very bad because then the client is going to execute
+		 * the game loop when the server is not, i.e. it desyncs. */
+		_pause_mode &= ~PMB_PAUSED_NETWORK;
 	}
 
 	/* in very old versions, size of train stations was stored differently */
@@ -1069,13 +1096,6 @@ bool AfterLoadGame()
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
 			rv->vehstatus &= ~0x40;
-			rv->slot = NULL;
-			rv->slot_age = 0;
-		}
-	} else {
-		RoadVehicle *rv;
-		FOR_ALL_ROADVEHICLES(rv) {
-			if (rv->slot != NULL) rv->slot->num_vehicles++;
 		}
 	}
 
@@ -1348,7 +1368,7 @@ bool AfterLoadGame()
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
 			if (rv->state == 250 || rv->state == 251) {
-				SetBit(rv->state, RVS_IS_STOPPING);
+				SetBit(rv->state, 2);
 			}
 		}
 	}
@@ -1417,8 +1437,8 @@ bool AfterLoadGame()
 	if (CheckSavegameVersion(81)) {
 		for (TileIndex t = 0; t < map_size; t++) {
 			if (GetTileType(t) == MP_TREES) {
-				TreeGround groundType = GetTreeGround(t);
-				if (groundType != TREE_GROUND_SNOW_DESERT) SetTreeGroundDensity(t, groundType, 3);
+				TreeGround groundType = (TreeGround)GB(_m[t].m2, 4, 2);
+				if (groundType != TREE_GROUND_SNOW_DESERT) SB(_m[t].m2, 6, 2, 3);
 			}
 		}
 	}
@@ -1547,13 +1567,13 @@ bool AfterLoadGame()
 		if (_settings_game.pf.yapf.rail_use_yapf || CheckSavegameVersion(28)) {
 			_settings_game.pf.pathfinder_for_trains = VPF_YAPF;
 		} else {
-			_settings_game.pf.pathfinder_for_trains = (_settings_game.pf.new_pathfinding_all ? VPF_NPF : VPF_NTP);
+			_settings_game.pf.pathfinder_for_trains = VPF_NPF;
 		}
 
 		if (_settings_game.pf.yapf.road_use_yapf || CheckSavegameVersion(28)) {
 			_settings_game.pf.pathfinder_for_roadvehs = VPF_YAPF;
 		} else {
-			_settings_game.pf.pathfinder_for_roadvehs = (_settings_game.pf.new_pathfinding_all ? VPF_NPF : VPF_OPF);
+			_settings_game.pf.pathfinder_for_roadvehs = VPF_NPF;
 		}
 
 		if (_settings_game.pf.yapf.ship_use_yapf) {
@@ -1947,6 +1967,51 @@ bool AfterLoadGame()
 		}
 	}
 
+	/* The behaviour of force_proceed has been changed. Now
+	 * it counts signals instead of some random time out. */
+	if (CheckSavegameVersion(131)) {
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			t->force_proceed = min<byte>(t->force_proceed, 1);
+		}
+	}
+
+	/* The bits for the tree ground and tree density have
+	 * been swapped (m2 bits 7..6 and 5..4. */
+	if (CheckSavegameVersion(135)) {
+		for (TileIndex t = 0; t < map_size; t++) {
+			if (IsTileType(t, MP_CLEAR)) {
+				if (GetRawClearGround(t) == CLEAR_SNOW) {
+					SetClearGroundDensity(t, CLEAR_GRASS, GetClearDensity(t));
+					SetBit(_m[t].m3, 4);
+				} else {
+					ClrBit(_m[t].m3, 4);
+				}
+			}
+			if (IsTileType(t, MP_TREES)) {
+				uint density = GB(_m[t].m2, 6, 2);
+				uint ground = GB(_m[t].m2, 4, 2);
+				uint counter = GB(_m[t].m2, 0, 4);
+				_m[t].m2 = ground << 6 | density << 4 | counter;
+			}
+		}
+	}
+
+	/* Wait counter and load/unload ticks got split. */
+	if (CheckSavegameVersion(136)) {
+		Aircraft *a;
+		FOR_ALL_AIRCRAFT(a) {
+			a->turn_counter = a->current_order.IsType(OT_LOADING) ? 0 : a->load_unload_ticks;
+		}
+
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			t->wait_counter = t->current_order.IsType(OT_LOADING) ? 0 : t->load_unload_ticks;
+		}
+	}
+
+	/* Road stops is 'only' updating some caches */
+	AfterLoadRoadStops();
 	AfterLoadLabelMaps();
 
 	GamelogPrintDebug(1);

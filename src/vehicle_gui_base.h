@@ -14,28 +14,16 @@
 
 #include "sortlist_type.h"
 
-/** Start of functions regarding vehicle list windows */
-enum {
-	PLY_WND_PRC__OFFSET_TOP_WIDGET = 26,
-	PLY_WND_PRC__SIZE_OF_ROW_TINY  = 13,  ///< Height of rows in group list
-	PLY_WND_PRC__SIZE_OF_ROW_SMALL = 26,  ///< Height of rows in train/roadvehicle list
-	PLY_WND_PRC__SIZE_OF_ROW_BIG   = 39,  ///< Height of rows in ship/aircraft list
-};
-
 typedef GUIList<const Vehicle*> GUIVehicleList;
 
-struct BaseVehicleListWindow: public Window {
+struct BaseVehicleListWindow : public Window {
 	GUIVehicleList vehicles;  ///< The list of vehicles
 	Listing *sorting;         ///< Pointer to the vehicle type related sorting.
 	VehicleType vehicle_type; ///< The vehicle type that is sorted
+	byte unitnumber_digits;   ///< The number of digits of the highest unit number
 
 	static const StringID vehicle_sorter_names[];
 	static GUIVehicleList::SortFunction * const vehicle_sorter_funcs[];
-
-	BaseVehicleListWindow(const WindowDesc *desc, WindowNumber window_number) : Window(desc, window_number)
-	{
-		this->vehicles.SetSortFuncs(this->vehicle_sorter_funcs);
-	}
 
 	BaseVehicleListWindow() : Window()
 	{
@@ -46,6 +34,8 @@ struct BaseVehicleListWindow: public Window {
 	void SortVehicleList();
 	void BuildVehicleList(Owner owner, uint16 index, uint16 window_type);
 };
+
+uint GetVehicleListHeight(VehicleType type, uint divisor = 1);
 
 struct Sorting {
 	Listing aircraft;

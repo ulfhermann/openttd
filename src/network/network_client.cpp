@@ -13,7 +13,6 @@
 
 #include "../stdafx.h"
 #include "../debug.h"
-#include "../openttd.h"
 #include "network_internal.h"
 #include "network_gui.h"
 #include "../saveload/saveload.h"
@@ -234,7 +233,7 @@ DEF_CLIENT_SEND_COMMAND_PARAM(PACKET_CLIENT_COMMAND)(const CommandPacket *cp)
 	 *    uint32: P2
 	 *    uint32: Tile
 	 *    string: text
-	 *    uint8:  CallBackID (see callback_table.c)
+	 *    uint8:  CallBackID
 	 */
 
 	Packet *p = new Packet(PACKET_CLIENT_COMMAND);
@@ -644,7 +643,7 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_MAP)
 				 * the server will give us a client-id and let us in */
 				_network_join_status = NETWORK_JOIN_STATUS_REGISTERING;
 				ShowJoinStatusWindow();
-				NetworkSend_Command(0, 0, 0, CMD_COMPANY_CTRL, NULL, NULL);
+				NetworkSend_Command(0, 0, 0, CMD_COMPANY_CTRL, NULL, NULL, _local_company);
 			}
 		} else {
 			/* take control over an existing company */

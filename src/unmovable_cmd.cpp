@@ -16,7 +16,6 @@
 #include "viewport_func.h"
 #include "company_base.h"
 #include "town.h"
-#include "sprite.h"
 #include "bridge_map.h"
 #include "genworld.h"
 #include "autoslope.h"
@@ -344,12 +343,14 @@ static void TileLoop_Unmovable(TileIndex tile)
 	uint level = GetCompanyHQSize(tile) + 1;
 	assert(level < 6);
 
+	StationFinder stations(TileArea(tile, 2, 2));
+
 	uint r = Random();
 	/* Top town buildings generate 250, so the top HQ type makes 256. */
 	if (GB(r, 0, 8) < (256 / 4 / (6 - level))) {
 		uint amt = GB(r, 0, 8) / 8 / 4 + 1;
 		if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
-		MoveGoodsToStation(tile, 2, 2, CT_PASSENGERS, amt, ST_HEADQUARTERS, GetTileOwner(tile));
+		MoveGoodsToStation(CT_PASSENGERS, amt, ST_HEADQUARTERS, GetTileOwner(tile), stations.GetStations());
 	}
 
 	/* Top town building generates 90, HQ can make up to 196. The
@@ -358,7 +359,7 @@ static void TileLoop_Unmovable(TileIndex tile)
 	if (GB(r, 8, 8) < (196 / 4 / (6 - level))) {
 		uint amt = GB(r, 8, 8) / 8 / 4 + 1;
 		if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
-		MoveGoodsToStation(tile, 2, 2, CT_MAIL, amt, ST_HEADQUARTERS, GetTileOwner(tile));
+		MoveGoodsToStation(CT_MAIL, amt, ST_HEADQUARTERS, GetTileOwner(tile), stations.GetStations());
 	}
 }
 
@@ -500,7 +501,7 @@ static CommandCost TerraformTile_Unmovable(TileIndex tile, DoCommandFlag flags, 
 	if (IsOwnedLand(tile) && CheckTileOwnership(tile)) return CommandCost();
 
 	if (AutoslopeEnabled() && (IsStatue(tile) || IsCompanyHQ(tile))) {
-		if (!IsSteepSlope(tileh_new) && (z_new + GetSlopeMaxZ(tileh_new) == GetTileMaxZ(tile))) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]);
+		if (!IsSteepSlope(tileh_new) && (z_new + GetSlopeMaxZ(tileh_new) == GetTileMaxZ(tile))) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	}
 
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);

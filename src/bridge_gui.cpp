@@ -44,25 +44,23 @@ typedef GUIList<BuildBridgeData> GUIBridgeList;
 /**
  * Callback executed after a build Bridge CMD has been called
  *
- * @param success True if the build succeded
+ * @param result Whether the build succeded
  * @param tile The tile where the command has been executed
  * @param p1 not used
  * @param p2 not used
  */
-void CcBuildBridge(bool success, TileIndex tile, uint32 p1, uint32 p2)
+void CcBuildBridge(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
-	if (success) SndPlayTileFx(SND_27_BLACKSMITH_ANVIL, tile);
+	if (result.Succeeded()) SndPlayTileFx(SND_27_BLACKSMITH_ANVIL, tile);
 }
 
 /* Names of the build bridge selection window */
 enum BuildBridgeSelectionWidgets {
-	BBSW_CLOSEBOX = 0,
 	BBSW_CAPTION,
 	BBSW_DROPDOWN_ORDER,
 	BBSW_DROPDOWN_CRITERIA,
 	BBSW_BRIDGE_LIST,
 	BBSW_SCROLLBAR,
-	BBSW_RESIZEBOX
 };
 
 class BuildBridgeWindow : public Window {
@@ -143,13 +141,11 @@ public:
 		this->SortBridgeList();
 
 		this->vscroll.SetCount(bl->Length());
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(BBSW_BRIDGE_LIST)->current_y / this->resize.step_height);
 		if (this->last_size < this->vscroll.GetCapacity()) this->last_size = this->vscroll.GetCapacity();
 		if (this->last_size > this->vscroll.GetCount()) this->last_size = this->vscroll.GetCount();
 		/* Resize the bridge selection window if we used a bigger one the last time. */
 		if (this->last_size > this->vscroll.GetCapacity()) {
 			ResizeWindow(this, 0, (this->last_size - this->vscroll.GetCapacity()) * this->resize.step_height);
-			this->vscroll.SetCapacity(this->last_size);
 		}
 		this->GetWidget<NWidgetCore>(BBSW_BRIDGE_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
@@ -166,7 +162,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case BBSW_DROPDOWN_ORDER: {
@@ -284,7 +280,7 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(BBSW_BRIDGE_LIST)->current_y / this->resize.step_height);
+		this->vscroll.SetCapacityFromWidget(this, BBSW_BRIDGE_LIST);
 		this->GetWidget<NWidgetCore>(BBSW_BRIDGE_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 
 		this->last_size = max(this->vscroll.GetCapacity(), this->last_size);
@@ -314,35 +310,35 @@ const StringID BuildBridgeWindow::sorter_names[] = {
 static const NWidgetPart _nested_build_bridge_widgets[] = {
 	/* Header */
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN, BBSW_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, BBSW_CAPTION), SetFill(true, false), SetDataTip(STR_SELECT_RAIL_BRIDGE_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CLOSEBOX, COLOUR_DARK_GREEN),
+		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN, BBSW_CAPTION), SetDataTip(STR_SELECT_RAIL_BRIDGE_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_VERTICAL),
 			/* Sort order + criteria buttons */
 			NWidget(NWID_HORIZONTAL),
-				NWidget(WWT_TEXTBTN, COLOUR_DARK_GREEN, BBSW_DROPDOWN_ORDER), SetFill(true, false), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
-				NWidget(WWT_DROPDOWN, COLOUR_DARK_GREEN, BBSW_DROPDOWN_CRITERIA), SetFill(true, false), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
+				NWidget(WWT_TEXTBTN, COLOUR_DARK_GREEN, BBSW_DROPDOWN_ORDER), SetFill(1, 0), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
+				NWidget(WWT_DROPDOWN, COLOUR_DARK_GREEN, BBSW_DROPDOWN_CRITERIA), SetFill(1, 0), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
 			EndContainer(),
 			/* Matrix. */
-			NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, BBSW_BRIDGE_LIST), SetFill(true, false), SetResize(0, 22), SetDataTip(0x401, STR_SELECT_BRIDGE_SELECTION_TOOLTIP),
+			NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, BBSW_BRIDGE_LIST), SetFill(1, 0), SetResize(0, 22), SetDataTip(0x401, STR_SELECT_BRIDGE_SELECTION_TOOLTIP),
 		EndContainer(),
 
 		/* scrollbar + resize button */
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_SCROLLBAR, COLOUR_DARK_GREEN, BBSW_SCROLLBAR), SetFill(false, true),
-			NWidget(WWT_RESIZEBOX, COLOUR_DARK_GREEN, BBSW_RESIZEBOX),
+			NWidget(WWT_SCROLLBAR, COLOUR_DARK_GREEN, BBSW_SCROLLBAR),
+			NWidget(WWT_RESIZEBOX, COLOUR_DARK_GREEN),
 		EndContainer(),
 	EndContainer(),
 };
 
 /* Window definition for the rail bridge selection window */
 static const WindowDesc _build_bridge_desc(
-	WDP_AUTO, WDP_AUTO, 200, 114, 200, 114,
+	WDP_AUTO, 200, 114,
 	WC_BUILD_BRIDGE, WC_BUILD_TOOLBAR,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_RESIZABLE | WDF_CONSTRUCTION,
-	NULL, _nested_build_bridge_widgets, lengthof(_nested_build_bridge_widgets)
+	WDF_CONSTRUCTION,
+	_nested_build_bridge_widgets, lengthof(_nested_build_bridge_widgets)
 );
 
 /**

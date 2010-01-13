@@ -10,133 +10,19 @@
 /** @file misc_cmd.cpp Some misc functions that are better fitted in other files, but never got moved there... */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "command_func.h"
 #include "economy_func.h"
 #include "window_func.h"
 #include "textbuf_gui.h"
 #include "network/network.h"
-#include "company_manager_face.h"
+#include "network/network_func.h"
 #include "strings_func.h"
-#include "gfx_func.h"
 #include "functions.h"
-#include "vehicle_func.h"
-#include "string_func.h"
 #include "company_func.h"
 #include "company_gui.h"
-#include "vehicle_base.h"
+#include "company_base.h"
 
 #include "table/strings.h"
-
-/** Change the company manager's face.
- * @param tile unused
- * @param flags operation to perform
- * @param p1 unused
- * @param p2 face bitmasked
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdSetCompanyManagerFace(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	CompanyManagerFace cmf = (CompanyManagerFace)p2;
-
-	if (!IsValidCompanyManagerFace(cmf)) return CMD_ERROR;
-
-	if (flags & DC_EXEC) {
-		Company::Get(_current_company)->face = cmf;
-		MarkWholeScreenDirty();
-	}
-	return CommandCost();
-}
-
-/** Change the company's company-colour
- * @param tile unused
- * @param flags operation to perform
- * @param p1 bitstuffed:
- * p1 bits 0-7 scheme to set
- * p1 bits 8-9 set in use state or first/second colour
- * @param p2 new colour for vehicles, property, etc.
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdSetCompanyColour(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	if (p2 >= 16) return CMD_ERROR; // max 16 colours
-
-	Colours colour = (Colours)p2;
-
-	LiveryScheme scheme = (LiveryScheme)GB(p1, 0, 8);
-	byte state = GB(p1, 8, 2);
-
-	if (scheme >= LS_END || state >= 3) return CMD_ERROR;
-
-	Company *c = Company::Get(_current_company);
-
-	/* Ensure no two companies have the same primary colour */
-	if (scheme == LS_DEFAULT && state == 0) {
-		const Company *cc;
-		FOR_ALL_COMPANIES(cc) {
-			if (cc != c && cc->colour == colour) return CMD_ERROR;
-		}
-	}
-
-	if (flags & DC_EXEC) {
-		switch (state) {
-			case 0:
-				c->livery[scheme].colour1 = colour;
-
-				/* If setting the first colour of the default scheme, adjust the
-				 * original and cached company colours too. */
-				if (scheme == LS_DEFAULT) {
-					_company_colours[_current_company] = colour;
-					c->colour = colour;
-				}
-				break;
-
-			case 1:
-				c->livery[scheme].colour2 = colour;
-				break;
-
-			case 2:
-				c->livery[scheme].in_use = colour != 0;
-
-				/* Now handle setting the default scheme's in_use flag.
-				 * This is different to the other schemes, as it signifies if any
-				 * scheme is active at all. If this flag is not set, then no
-				 * processing of vehicle types occurs at all, and only the default
-				 * colours will be used. */
-
-				/* If enabling a scheme, set the default scheme to be in use too */
-				if (colour != 0) {
-					c->livery[LS_DEFAULT].in_use = true;
-					break;
-				}
-
-				/* Else loop through all schemes to see if any are left enabled.
-				 * If not, disable the default scheme too. */
-				c->livery[LS_DEFAULT].in_use = false;
-				for (scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
-					if (c->livery[scheme].in_use) {
-						c->livery[LS_DEFAULT].in_use = true;
-						break;
-					}
-				}
-				break;
-
-			default:
-				break;
-		}
-		ResetVehicleColourMap();
-		MarkWholeScreenDirty();
-
-		/* Company colour data is indirectly cached. */
-		Vehicle *v;
-		FOR_ALL_VEHICLES(v) {
-			if (v->owner == _current_company) v->InvalidateNewGRFCache();
-		}
-	}
-	return CommandCost();
-}
 
 /** Increase the loan of your company.
  * @param tile unused
@@ -229,95 +115,6 @@ CommandCost CmdDecreaseLoan(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	return CommandCost();
 }
 
-static bool IsUniqueCompanyName(const char *name)
-{
-	const Company *c;
-
-	FOR_ALL_COMPANIES(c) {
-		if (c->name != NULL && strcmp(c->name, name) == 0) return false;
-	}
-
-	return true;
-}
-
-/** Change the name of the company.
- * @param tile unused
- * @param flags operation to perform
- * @param p1 unused
- * @param p2 unused
- * @param text the new name or an empty string when resetting to the default
- * @return the cost of this operation or an error
- */
-CommandCost CmdRenameCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	bool reset = StrEmpty(text);
-
-	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_COMPANY_NAME_BYTES) return CMD_ERROR;
-		if (!IsUniqueCompanyName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
-	}
-
-	if (flags & DC_EXEC) {
-		Company *c = Company::Get(_current_company);
-		free(c->name);
-		c->name = reset ? NULL : strdup(text);
-		MarkWholeScreenDirty();
-	}
-
-	return CommandCost();
-}
-
-static bool IsUniquePresidentName(const char *name)
-{
-	const Company *c;
-
-	FOR_ALL_COMPANIES(c) {
-		if (c->president_name != NULL && strcmp(c->president_name, name) == 0) return false;
-	}
-
-	return true;
-}
-
-/** Change the name of the president.
- * @param tile unused
- * @param flags operation to perform
- * @param p1 unused
- * @param p2 unused
- * @param text the new name or an empty string when resetting to the default
- * @return the cost of this operation or an error
- */
-CommandCost CmdRenamePresident(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	bool reset = StrEmpty(text);
-
-	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_PRESIDENT_NAME_BYTES) return CMD_ERROR;
-		if (!IsUniquePresidentName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
-	}
-
-	if (flags & DC_EXEC) {
-		Company *c = Company::Get(_current_company);
-		free(c->president_name);
-
-		if (reset) {
-			c->president_name = NULL;
-		} else {
-			c->president_name = strdup(text);
-
-			if (c->name_1 == STR_SV_UNNAMED && c->name == NULL) {
-				char buf[80];
-
-				snprintf(buf, lengthof(buf), "%s Transport", text);
-				DoCommand(0, 0, 0, DC_EXEC, CMD_RENAME_COMPANY, buf);
-			}
-		}
-
-		MarkWholeScreenDirty();
-	}
-
-	return CommandCost();
-}
-
 /**
  * In case of an unsafe unpause, we want the
  * user to confirm that it might crash.
@@ -329,10 +126,11 @@ static void AskUnsafeUnpauseCallback(Window *w, bool confirmed)
 	DoCommandP(0, PM_PAUSED_ERROR, confirmed ? 0 : 1, CMD_PAUSE);
 }
 
-/** Pause/Unpause the game (server-only).
- * Increase or decrease the pause counter. If the counter is zero,
- * the game is unpaused. A counter is used instead of a boolean value
- * to have more control over the game when saving/loading, etc.
+/**
+ * Pause/Unpause the game (server-only).
+ * Set or unset a bit in the pause mode. If pause mode is zero the game is
+ * unpaused. A bitset is used instead of a boolean value/counter to have
+ * more control over the game when saving/loading, etc.
  * @param tile unused
  * @param flags operation to perform
  * @param p1 the pause mode to change
@@ -345,9 +143,15 @@ CommandCost CmdPause(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, 
 	switch (p1) {
 		case PM_PAUSED_SAVELOAD:
 		case PM_PAUSED_ERROR:
-		case PM_PAUSED_JOIN:
 		case PM_PAUSED_NORMAL:
 			break;
+
+#ifdef ENABLE_NETWORK
+		case PM_PAUSED_JOIN:
+		case PM_PAUSED_ACTIVE_CLIENTS:
+			if (!_networking) return CMD_ERROR;
+			break;
+#endif /* ENABLE_NETWORK */
 
 		default: return CMD_ERROR;
 	}
@@ -360,11 +164,19 @@ CommandCost CmdPause(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, 
 				AskUnsafeUnpauseCallback
 			);
 		} else {
+#ifdef ENABLE_NETWORK
+			PauseMode prev_mode = _pause_mode;
+#endif /* ENABLE_NETWORK */
+
 			if (p2 == 0) {
 				_pause_mode = _pause_mode & ~p1;
 			} else {
 				_pause_mode = _pause_mode | p1;
 			}
+
+#ifdef ENABLE_NETWORK
+			NetworkHandlePauseChange(prev_mode, (PauseMode)p1);
+#endif /* ENABLE_NETWORK */
 		}
 
 		SetWindowDirty(WC_STATUS_BAR, 0);

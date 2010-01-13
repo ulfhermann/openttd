@@ -17,19 +17,18 @@ void InitializeScreenshotFormats();
 const char *GetScreenshotFormatDesc(int i);
 void SetScreenshotFormat(int i);
 
+/** Type of requested screenshot */
 enum ScreenshotType {
-	SC_NONE,
-	SC_VIEWPORT,
-	SC_WORLD
+	SC_VIEWPORT, ///< Screenshot of viewport
+	SC_RAW,      ///< Raw screenshot from blitter buffer
+	SC_WORLD,    ///< World screenshot
 };
 
-bool MakeScreenshot();
-void RequestScreenshot(ScreenshotType t, const char *name);
-bool IsScreenshotRequested();
+bool MakeScreenshot(ScreenshotType t, const char *name);
 
 extern char _screenshot_format_name[8];
 extern uint _num_screenshot_formats;
 extern uint _cur_screenshot_format;
-extern char _screenshot_name[];
+extern char _full_screenshot_name[MAX_PATH];
 
 #endif /* SCREENSHOT_H */

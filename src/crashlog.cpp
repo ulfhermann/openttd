@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "crashlog.h"
 #include "gamelog.h"
+#include "date_func.h"
 #include "map_func.h"
 #include "rev.h"
 #include "strings_func.h"
@@ -21,6 +22,8 @@
 #include "sound/sound_driver.hpp"
 #include "video/video_driver.hpp"
 #include "saveload/saveload.h"
+#include "screenshot.h"
+#include "gfx_func.h"
 
 #include <squirrel.h>
 #include "ai/ai_info.hpp"
@@ -84,6 +87,7 @@ char *CrashLog::LogConfiguration(char *buffer, const char *last) const
 			" Graphics set: %s\n"
 			" Language:     %s\n"
 			" Music driver: %s\n"
+			" Music set:    %s\n"
 			" Sound driver: %s\n"
 			" Sound set:    %s\n"
 			" Video driver: %s\n\n",
@@ -91,6 +95,7 @@ char *CrashLog::LogConfiguration(char *buffer, const char *last) const
 			BaseGraphics::GetUsedSet() == NULL ? "none" : BaseGraphics::GetUsedSet()->name,
 			StrEmpty(_dynlang.curr_file) ? "none" : _dynlang.curr_file,
 			_music_driver == NULL ? "none" : _music_driver->GetName(),
+			BaseMusic::GetUsedSet() == NULL ? "none" : BaseMusic::GetUsedSet()->name,
 			_sound_driver == NULL ? "none" : _sound_driver->GetName(),
 			BaseSounds::GetUsedSet() == NULL ? "none" : BaseSounds::GetUsedSet()->name,
 			_video_driver == NULL ? "none" : _video_driver->GetName()
@@ -129,10 +134,16 @@ char *CrashLog::LogConfiguration(char *buffer, const char *last) const
 #ifdef WITH_ICU
 #	include <unicode/uversion.h>
 #endif /* WITH_ICU */
+#ifdef WITH_LZO
+#include <lzo/lzo1x.h>
+#endif
 #ifdef WITH_SDL
 #	include "sdl.h"
 #	include <SDL.h>
 #endif /* WITH_SDL */
+#ifdef WITH_ZLIB
+# include <zlib.h>
+#endif
 
 char *CrashLog::LogLibraries(char *buffer, const char *last) const
 {
@@ -165,14 +176,28 @@ char *CrashLog::LogLibraries(char *buffer, const char *last) const
 	buffer += seprintf(buffer, last, " ICU:        %s\n", buf);
 #endif /* WITH_ICU */
 
+#ifdef WITH_LZO
+	buffer += seprintf(buffer, last, " LZO:        %s\n", lzo_version_string());
+#endif
+
 #ifdef WITH_PNG
 	buffer += seprintf(buffer, last, " PNG:        %s\n", png_get_libpng_ver(NULL));
 #endif /* WITH_PNG */
 
 #ifdef WITH_SDL
-	const SDL_version *v = SDL_CALL SDL_Linked_Version();
-	buffer += seprintf(buffer, last, " SDL:        %d.%d.%d\n", v->major, v->minor, v->patch);
+#ifdef DYNAMICALLY_LOADED_SDL
+	if (SDL_CALL SDL_Linked_Version != NULL) {
+#else
+	{
+#endif
+		const SDL_version *v = SDL_CALL SDL_Linked_Version();
+		buffer += seprintf(buffer, last, " SDL:        %d.%d.%d\n", v->major, v->minor, v->patch);
+	}
 #endif /* WITH_SDL */
+
+#ifdef WITH_ZLIB
+	buffer += seprintf(buffer, last, " Zlib:       %s\n", zlibVersion());
+#endif
 
 	buffer += seprintf(buffer, last, "\n");
 	return buffer;
@@ -195,7 +220,11 @@ char *CrashLog::FillCrashLog(char *buffer, const char *last) const
 {
 	time_t cur_time = time(NULL);
 	buffer += seprintf(buffer, last, "*** OpenTTD Crash Report ***\n\n");
-	buffer += seprintf(buffer, last, "Crash at: %s\n", asctime(gmtime(&cur_time)));
+	buffer += seprintf(buffer, last, "Crash at: %s", asctime(gmtime(&cur_time)));
+
+	YearMonthDay ymd;
+	ConvertDateToYMD(_date, &ymd);
+	buffer += seprintf(buffer, last, "In game date: %i-%02i-%02i (%i)\n\n", ymd.year, ymd.month + 1, ymd.day, _date_fract);
 
 	buffer = this->LogError(buffer, last, CrashLog::message);
 	buffer = this->LogOpenTTDVersion(buffer, last);
@@ -249,6 +278,16 @@ bool CrashLog::WriteSavegame(char *filename, const char *filename_last) const
 	}
 }
 
+bool CrashLog::WriteScreenshot(char *filename, const char *filename_last) const
+{
+	/* Don't draw when we have invalid screen size */
+	if (_screen.width < 1 || _screen.height < 1 || _screen.dst_ptr == NULL) return false;
+
+	bool res = MakeScreenshot(SC_RAW, "crash");
+	if (res) strecpy(filename, _full_screenshot_name, filename_last);
+	return res;
+}
+
 bool CrashLog::MakeCrashLog() const
 {
 	/* Don't keep looping logging crashes. */
@@ -290,6 +329,15 @@ bool CrashLog::MakeCrashLog() const
 	} else {
 		ret = false;
 		printf("Writing crash savegame failed. Please attach the last (auto)save to any bug reports.\n\n");
+	}
+
+	printf("Writing crash screenshot...\n");
+	bret = this->WriteScreenshot(filename, lastof(filename));
+	if (bret) {
+		printf("Crash screenshot written to %s. Please add this file to any bug reports.\n\n", filename);
+	} else {
+		ret = false;
+		printf("Writing crash screenshot failed.\n\n");
 	}
 
 	return ret;

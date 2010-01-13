@@ -18,7 +18,6 @@
 #include "waypoint_base.h"
 #include "industry.h"
 #include "newgrf_text.h"
-#include "music.h"
 #include "fileio_func.h"
 #include "group.h"
 #include "signs_base.h"
@@ -185,29 +184,24 @@ void InjectDParam(uint amount)
 	memmove(_decode_parameters + amount, _decode_parameters, sizeof(_decode_parameters) - amount * sizeof(uint64));
 }
 
-static char *FormatNumber(char *buff, int64 number, const char *last, const char *separator)
+static char *FormatNumber(char *buff, int64 number, const char *last, const char *separator, int zerofill_from = 19)
 {
 	uint64 divisor = 10000000000000000000ULL;
-	uint64 quot;
-	int i;
-	uint64 tot;
-	uint64 num;
 
 	if (number < 0) {
 		buff += seprintf(buff, last, "-");
 		number = -number;
 	}
 
-	num = number;
-
-	tot = 0;
-	for (i = 0; i < 20; i++) {
-		quot = 0;
+	uint64 num = number;
+	uint64 tot = 0;
+	for (int i = 0; i < 20; i++) {
+		uint64 quot = 0;
 		if (num >= divisor) {
 			quot = num / divisor;
 			num = num % divisor;
 		}
-		if (tot |= quot || i == 19) {
+		if (tot |= quot || i >= zerofill_from) {
 			buff += seprintf(buff, last, "%i", (int)quot);
 			if ((i % 3) == 1 && i != 19) buff = strecpy(buff, separator, last);
 		}
@@ -230,6 +224,11 @@ static char *FormatCommaNumber(char *buff, int64 number, const char *last)
 static char *FormatNoCommaNumber(char *buff, int64 number, const char *last)
 {
 	return FormatNumber(buff, number, last, "");
+}
+
+static char *FormatZerofillNumber(char *buff, int64 number, int64 count, const char *last)
+{
+	return FormatNumber(buff, number, last, "", 20 - count);
 }
 
 static char *FormatHexNumber(char *buff, int64 number, const char *last)
@@ -749,9 +748,7 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 			}
 
 			case SCC_CARGO: { // {CARGO}
-				/* Layout now is:
-				 *   8bit   - cargo type
-				 *   16-bit - cargo count */
+				/* First parameter is cargo type, second parameter is cargo count */
 				CargoID cargo = GetInt32(&argv);
 				StringID cargo_str = (cargo == CT_INVALID) ? STR_QUANTITY_N_A : CargoSpec::Get(cargo)->quantifier;
 				buff = GetStringWithArgs(buff, cargo_str, argv++, last);
@@ -803,10 +800,6 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 				break;
 			}
 
-			case SCC_SKIP: // {SKIP}
-				argv++;
-				break;
-
 			/* This sets up the gender for the string.
 			 * We just ignore this one. It's used in {G 0 Der Die Das} to determine the case. */
 			case SCC_GENDER_INDEX: // {GENDER 0}
@@ -840,6 +833,11 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 			case SCC_NUM: // {NUM}
 				buff = FormatNoCommaNumber(buff, GetInt64(&argv), last);
 				break;
+
+			case SCC_ZEROFILL_NUM: { // {ZEROFILL_NUM}
+				int64 num = GetInt64(&argv);
+				buff = FormatZerofillNumber(buff, num, GetInt64(&argv), last);
+			} break;
 
 			case SCC_HEX: // {HEX}
 				buff = FormatHexNumber(buff, GetInt64(&argv), last);
@@ -1201,9 +1199,6 @@ static char *GetSpecialNameString(char *buff, int ind, int64 *argv, const char *
 
 		case 3: // President name
 			return GenPresidentName(buff, GetInt32(&argv), last);
-
-		case 4: // song names
-			return strecpy(buff, _origin_songs_specs[GetInt32(&argv) - 1].song_name, last);
 	}
 
 	/* town name? */

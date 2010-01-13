@@ -56,66 +56,44 @@ static inline void SetNewLandscapeType(byte landscape)
 }
 
 enum GenerateLandscapeWindowWidgets {
-	GLAND_CLOSEBOX,
-	GLAND_TITLEBAR,
-	GLAND_BACKGROUND,
-
 	GLAND_TEMPERATE,
 	GLAND_ARCTIC,
 	GLAND_TROPICAL,
 	GLAND_TOYLAND,
 
-	GLAND_MAPSIZE_X_TEXT,
 	GLAND_MAPSIZE_X_PULLDOWN,
-	GLAND_MAPSIZE_Y_TEXT,
 	GLAND_MAPSIZE_Y_PULLDOWN,
 
-	GLAND_TOWN_TEXT,
 	GLAND_TOWN_PULLDOWN,
-	GLAND_INDUSTRY_TEXT,
 	GLAND_INDUSTRY_PULLDOWN,
 
-	GLAND_RANDOM_TEXT,
 	GLAND_RANDOM_EDITBOX,
 	GLAND_RANDOM_BUTTON,
 
 	GLAND_GENERATE_BUTTON,
 
-	GLAND_START_DATE_TEXT1,
 	GLAND_START_DATE_DOWN,
 	GLAND_START_DATE_TEXT,
 	GLAND_START_DATE_UP,
 
-	GLAND_SNOW_LEVEL_TEXT1,
 	GLAND_SNOW_LEVEL_DOWN,
 	GLAND_SNOW_LEVEL_TEXT,
 	GLAND_SNOW_LEVEL_UP,
 
-	GLAND_TREE_TEXT,
 	GLAND_TREE_PULLDOWN,
-	GLAND_LANDSCAPE_TEXT,
 	GLAND_LANDSCAPE_PULLDOWN,
-	GLAND_HEIGHTMAP_NAME_LABEL,
 	GLAND_HEIGHTMAP_NAME_TEXT,
 	GLAND_HEIGHTMAP_NAME_SPACER,
-	GLAND_HEIGHTMAP_SIZE_LABEL,
 	GLAND_HEIGHTMAP_SIZE_TEXT,
-	GLAND_HEIGHTMAP_ROTATION_TEXT,
 	GLAND_HEIGHTMAP_ROTATION_PULLDOWN,
 
-	GLAND_TERRAIN_TEXT,
 	GLAND_TERRAIN_PULLDOWN,
-	GLAND_WATER_TEXT,
 	GLAND_WATER_PULLDOWN,
-	GLAND_SMOOTHNESS_TEXT,
 	GLAND_SMOOTHNESS_PULLDOWN,
+	GLAND_VARIETY_PULLDOWN,
 
 	GLAND_BORDER_TYPES,
 	GLAND_BORDERS_RANDOM,
-	GLAND_WATER_NW_TEXT,
-	GLAND_WATER_NE_TEXT,
-	GLAND_WATER_SE_TEXT,
-	GLAND_WATER_SW_TEXT,
 	GLAND_WATER_NW,
 	GLAND_WATER_NE,
 	GLAND_WATER_SE,
@@ -124,189 +102,191 @@ enum GenerateLandscapeWindowWidgets {
 
 static const NWidgetPart _nested_generate_landscape_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, GLAND_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_BROWN, GLAND_TITLEBAR), SetDataTip(STR_MAPGEN_WORLD_GENERATION_CAPTION, STR_NULL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
+		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_MAPGEN_WORLD_GENERATION_CAPTION, STR_NULL),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, GLAND_BACKGROUND),
+	NWidget(WWT_PANEL, COLOUR_BROWN),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 10),
 		/* Landscape selection. */
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 10),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_TEMPERATE), SetDataTip(SPR_SELECT_TEMPERATE, STR_INTRO_TOOLTIP_TEMPERATE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_ARCTIC), SetDataTip(SPR_SELECT_SUB_ARCTIC, STR_INTRO_TOOLTIP_SUB_ARCTIC_LANDSCAPE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_TROPICAL), SetDataTip(SPR_SELECT_SUB_TROPICAL, STR_INTRO_TOOLTIP_SUB_TROPICAL_LANDSCAPE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_TOYLAND), SetDataTip(SPR_SELECT_TOYLAND, STR_INTRO_TOOLTIP_TOYLAND_LANDSCAPE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 11),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 5, 10),
 			NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
 				/* Left column with labels. */
 				NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_MAPSIZE_X_TEXT), SetDataTip(STR_MAPGEN_MAPSIZE, STR_NULL), SetFill(true, true),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_LANDSCAPE_TEXT), SetDataTip(STR_MAPGEN_LAND_GENERATOR, STR_NULL), SetFill(true, true),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_TOWN_TEXT), SetDataTip(STR_MAPGEN_NUMBER_OF_TOWNS, STR_NULL), SetFill(true, true),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_TERRAIN_TEXT), SetDataTip(STR_MAPGEN_TERRAIN_TYPE, STR_NULL), SetFill(true, true),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_RANDOM_TEXT), SetDataTip(STR_MAPGEN_RANDOM_SEED, STR_NULL), SetFill(true, true),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_WATER_TEXT), SetDataTip(STR_MAPGEN_QUANTITY_OF_SEA_LAKES, STR_NULL), SetFill(true, true),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_TREE_TEXT), SetDataTip(STR_MAPGEN_TREE_PLACER, STR_NULL), SetFill(true, true),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_BORDER_TYPES), SetDataTip(STR_MAPGEN_BORDER_TYPE, STR_NULL), SetFill(true, true),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_MAPSIZE, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_LAND_GENERATOR, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_NUMBER_OF_TOWNS, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_TERRAIN_TYPE, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_RANDOM_SEED, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_QUANTITY_OF_SEA_LAKES, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_TREE_PLACER, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_VARIETY, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_BORDER_TYPES), SetDataTip(STR_MAPGEN_BORDER_TYPE, STR_NULL), SetFill(1, 1),
 				EndContainer(),
 				/* Widgets at the right of the labels. */
 				NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
 					/* Mapsize X * Y. */
 					NWidget(NWID_HORIZONTAL), SetPIP(0, 4, 0),
-						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_X_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(true, false),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_MAPSIZE_Y_TEXT), SetDataTip(STR_MAPGEN_BY, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(true, true),
-						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_Y_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(true, false),
+						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_X_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(1, 0),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_BY, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(1, 1),
+						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_Y_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(1, 0),
 					EndContainer(),
-					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_LANDSCAPE_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TOWN_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TERRAIN_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-					NWidget(WWT_EDITBOX, COLOUR_WHITE, GLAND_RANDOM_EDITBOX), SetDataTip(STR_MAPGEN_RANDOM_SEED_OSKTITLE, STR_MAPGEN_RANDOM_SEED_HELP), SetFill(true, true),
-					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_WATER_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TREE_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-					NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_BORDERS_RANDOM), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_LANDSCAPE_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TOWN_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TERRAIN_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+					NWidget(WWT_EDITBOX, COLOUR_WHITE, GLAND_RANDOM_EDITBOX), SetDataTip(STR_MAPGEN_RANDOM_SEED_OSKTITLE, STR_MAPGEN_RANDOM_SEED_HELP), SetFill(1, 1),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_WATER_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TREE_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_VARIETY_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_BORDERS_RANDOM), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
 				EndContainer(),
 			EndContainer(),
 			NWidget(NWID_VERTICAL), SetPIP(0, 4, 0),
 				NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
 					NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_START_DATE_TEXT1), SetDataTip(STR_MAPGEN_DATE, STR_NULL), SetFill(true, true),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_SNOW_LEVEL_TEXT1), SetDataTip(STR_MAPGEN_SNOW_LINE_HEIGHT, STR_NULL), SetFill(true, true),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_INDUSTRY_TEXT), SetDataTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES, STR_NULL), SetFill(true, true),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_SMOOTHNESS_TEXT), SetDataTip(STR_MAPGEN_SMOOTHNESS, STR_NULL), SetFill(true, true),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_DATE, STR_NULL), SetFill(1, 1),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_SNOW_LINE_HEIGHT, STR_NULL), SetFill(1, 1),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES, STR_NULL), SetFill(1, 1),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_SMOOTHNESS, STR_NULL), SetFill(1, 1),
 					EndContainer(),
 					NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
 						/* Starting date. */
 						NWidget(NWID_HORIZONTAL),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD), SetFill(false, true),
-							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_START_DATE_TEXT), SetDataTip(STR_BLACK_DATE_LONG, STR_NULL), SetFill(true, false),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_UP), SetDataTip(SPR_ARROW_UP, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD), SetFill(false, true),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD), SetFill(0, 1),
+							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_START_DATE_TEXT), SetDataTip(STR_BLACK_DATE_LONG, STR_NULL), SetFill(1, 0),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_UP), SetDataTip(SPR_ARROW_UP, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD), SetFill(0, 1),
 						EndContainer(),
 						/* Snow line. */
 						NWidget(NWID_HORIZONTAL),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_MAPGEN_SNOW_LINE_DOWN), SetFill(false, true),
-							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_TEXT), SetDataTip(STR_BLACK_INT, STR_NULL), SetFill(true, false),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_UP), SetDataTip(SPR_ARROW_UP, STR_MAPGEN_SNOW_LINE_UP), SetFill(false, true),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_MAPGEN_SNOW_LINE_DOWN), SetFill(0, 1),
+							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_TEXT), SetDataTip(STR_BLACK_INT, STR_NULL), SetFill(1, 0),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_UP), SetDataTip(SPR_ARROW_UP, STR_MAPGEN_SNOW_LINE_UP), SetFill(0, 1),
 						EndContainer(),
-						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_INDUSTRY_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_JUST_STRING), SetFill(true, false),
-						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_SMOOTHNESS_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
+						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_INDUSTRY_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+						NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_SMOOTHNESS_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
 					EndContainer(),
 				EndContainer(),
-				NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_RANDOM_BUTTON), SetDataTip(STR_MAPGEN_RANDOM, STR_MAPGEN_RANDOM_HELP), SetFill(true, false),
-				NWidget(NWID_SPACER), SetFill(true, true),
-				NWidget(WWT_TEXTBTN, COLOUR_GREEN, GLAND_GENERATE_BUTTON), SetMinimalSize(84, 30), SetDataTip(STR_MAPGEN_GENERATE, STR_NULL), SetFill(true, false),
+				NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_RANDOM_BUTTON), SetDataTip(STR_MAPGEN_RANDOM, STR_MAPGEN_RANDOM_HELP), SetFill(1, 0),
+				NWidget(NWID_SPACER), SetFill(1, 1),
+				NWidget(WWT_TEXTBTN, COLOUR_GREEN, GLAND_GENERATE_BUTTON), SetMinimalSize(84, 30), SetDataTip(STR_MAPGEN_GENERATE, STR_NULL), SetFill(1, 0),
 			EndContainer(),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 4),
 		/* Map borders buttons for each edge. */
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(10, 0, 10),
 			NWidget(NWID_HORIZONTAL), SetPIP(0, 0, 3),
-				NWidget(NWID_SPACER), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_WATER_NW_TEXT), SetDataTip(STR_MAPGEN_NORTHWEST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(false, true),
+				NWidget(NWID_SPACER), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_NORTHWEST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(0, 1),
 			EndContainer(),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_NW), SetDataTip(STR_JUST_STRING, STR_MAPGEN_NORTHWEST), SetFill(true, true),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_SW), SetDataTip(STR_JUST_STRING, STR_MAPGEN_SOUTHWEST), SetFill(true, true),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_NW), SetDataTip(STR_JUST_STRING, STR_MAPGEN_NORTHWEST), SetFill(1, 1),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_NE), SetDataTip(STR_JUST_STRING, STR_MAPGEN_NORTHEAST), SetFill(1, 1),
 			NWidget(NWID_HORIZONTAL), SetPIP(3, 0, 0),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_WATER_NE_TEXT), SetDataTip(STR_MAPGEN_NORTHEAST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(false, true),
-				NWidget(NWID_SPACER), SetFill(true, true),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_NORTHEAST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(0, 1),
+				NWidget(NWID_SPACER), SetFill(1, 1),
 			EndContainer(),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(10, 0, 10),
 			NWidget(NWID_HORIZONTAL), SetPIP(0, 0, 3),
-				NWidget(NWID_SPACER), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_WATER_SW_TEXT), SetDataTip(STR_MAPGEN_SOUTHWEST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(false, true),
+				NWidget(NWID_SPACER), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_SOUTHWEST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(0, 1),
 			EndContainer(),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_NE), SetDataTip(STR_JUST_STRING, STR_MAPGEN_NORTHEAST), SetFill(true, true),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_SE), SetDataTip(STR_JUST_STRING, STR_MAPGEN_SOUTHEAST), SetFill(true, true),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_SW), SetDataTip(STR_JUST_STRING, STR_MAPGEN_SOUTHWEST), SetFill(1, 1),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, GLAND_WATER_SE), SetDataTip(STR_JUST_STRING, STR_MAPGEN_SOUTHEAST), SetFill(1, 1),
 			NWidget(NWID_HORIZONTAL), SetPIP(3, 0, 0),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_WATER_SE_TEXT), SetDataTip(STR_MAPGEN_SOUTHEAST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(false, true),
-				NWidget(NWID_SPACER), SetFill(true, true),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_SOUTHEAST, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(0, 1),
+				NWidget(NWID_SPACER), SetFill(1, 1),
 			EndContainer(),
 		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 9), SetFill(true, true),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 9), SetFill(1, 1),
 	EndContainer(),
 };
 
 static const NWidgetPart _nested_heightmap_load_widgets[] = {
 	/* Window header. */
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, GLAND_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_BROWN, GLAND_TITLEBAR), SetDataTip(STR_MAPGEN_WORLD_GENERATION_CAPTION, STR_NULL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
+		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_MAPGEN_WORLD_GENERATION_CAPTION, STR_NULL),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, GLAND_BACKGROUND),
+	NWidget(WWT_PANEL, COLOUR_BROWN),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 10),
 		/* Landscape selection. */
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 10),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_TEMPERATE), SetDataTip(SPR_SELECT_TEMPERATE, STR_INTRO_TOOLTIP_TEMPERATE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_ARCTIC), SetDataTip(SPR_SELECT_SUB_ARCTIC, STR_INTRO_TOOLTIP_SUB_ARCTIC_LANDSCAPE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_TROPICAL), SetDataTip(SPR_SELECT_SUB_TROPICAL, STR_INTRO_TOOLTIP_SUB_TROPICAL_LANDSCAPE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 			NWidget(WWT_IMGBTN_2, COLOUR_ORANGE, GLAND_TOYLAND), SetDataTip(SPR_SELECT_TOYLAND, STR_INTRO_TOOLTIP_TOYLAND_LANDSCAPE),
-			NWidget(NWID_SPACER), SetFill(true, false),
+			NWidget(NWID_SPACER), SetFill(1, 0),
 		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 11), SetFill(false, true),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 11), SetFill(0, 1),
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 3, 10),
 			/* Labels at the left side. */
 			NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_HEIGHTMAP_NAME_LABEL), SetDataTip(STR_MAPGEN_HEIGHTMAP_NAME, STR_NULL), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_MAPSIZE_X_TEXT), SetDataTip(STR_MAPGEN_MAPSIZE, STR_NULL), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_TOWN_TEXT), SetDataTip(STR_MAPGEN_NUMBER_OF_TOWNS, STR_NULL), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_INDUSTRY_TEXT), SetDataTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES, STR_NULL), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_RANDOM_TEXT), SetDataTip(STR_MAPGEN_RANDOM_SEED, STR_NULL), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_TREE_TEXT), SetDataTip(STR_MAPGEN_TREE_PLACER, STR_NULL), SetFill(true, true),
-				NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_HEIGHTMAP_ROTATION_TEXT), SetDataTip(STR_MAPGEN_HEIGHTMAP_ROTATION, STR_NULL), SetFill(true, true),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_HEIGHTMAP_NAME, STR_NULL), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_MAPSIZE, STR_NULL), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_NUMBER_OF_TOWNS, STR_NULL), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_NUMBER_OF_INDUSTRIES, STR_NULL), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_RANDOM_SEED, STR_NULL), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_TREE_PLACER, STR_NULL), SetFill(1, 1),
+				NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_HEIGHTMAP_ROTATION, STR_NULL), SetFill(1, 1),
 			EndContainer(),
 			/* Widgets at the right of the labels. */
 			NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
-				NWidget(WWT_EMPTY, COLOUR_ORANGE, GLAND_HEIGHTMAP_NAME_TEXT), SetFill(true, false),
+				NWidget(WWT_EMPTY, COLOUR_ORANGE, GLAND_HEIGHTMAP_NAME_TEXT), SetFill(1, 0),
 				/* Mapsize X * Y. */
 				NWidget(NWID_HORIZONTAL), SetPIP(0, 4, 0),
-					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_X_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(true, false),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_MAPSIZE_Y_TEXT), SetDataTip(STR_MAPGEN_BY, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(true, true),
-					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_Y_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(true, false),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_X_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(1, 0),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_BY, STR_NULL), SetPadding(1, 0, 0, 0), SetFill(1, 1),
+					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_MAPSIZE_Y_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetFill(1, 0),
 				EndContainer(),
-				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TOWN_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_INDUSTRY_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-				NWidget(WWT_EDITBOX, COLOUR_WHITE, GLAND_RANDOM_EDITBOX), SetDataTip(STR_MAPGEN_RANDOM_SEED_OSKTITLE, STR_MAPGEN_RANDOM_SEED_HELP), SetFill(true, true),
-				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TREE_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
-				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_HEIGHTMAP_ROTATION_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(true, false),
+				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TOWN_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_INDUSTRY_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+				NWidget(WWT_EDITBOX, COLOUR_WHITE, GLAND_RANDOM_EDITBOX), SetDataTip(STR_MAPGEN_RANDOM_SEED_OSKTITLE, STR_MAPGEN_RANDOM_SEED_HELP), SetFill(1, 1),
+				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_TREE_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
+				NWidget(WWT_DROPDOWN, COLOUR_ORANGE, GLAND_HEIGHTMAP_ROTATION_PULLDOWN), SetDataTip(STR_JUST_STRING, STR_NULL), SetFill(1, 0),
 			EndContainer(),
 			NWidget(NWID_VERTICAL), SetPIP(0, 4, 0),
 				NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
 					NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
-						NWidget(WWT_EMPTY, INVALID_COLOUR, GLAND_HEIGHTMAP_NAME_SPACER), SetFill(true, false),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_HEIGHTMAP_SIZE_LABEL), SetDataTip(STR_MAPGEN_HEIGHTMAP_SIZE_LABEL, STR_NULL), SetFill(true, true),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_START_DATE_TEXT1), SetDataTip(STR_MAPGEN_DATE, STR_NULL), SetFill(true, true),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_SNOW_LEVEL_TEXT1), SetDataTip(STR_MAPGEN_SNOW_LINE_HEIGHT, STR_NULL), SetFill(true, true),
+						NWidget(WWT_EMPTY, INVALID_COLOUR, GLAND_HEIGHTMAP_NAME_SPACER), SetFill(1, 0),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_HEIGHTMAP_SIZE_LABEL, STR_NULL), SetFill(1, 1),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_DATE, STR_NULL), SetFill(1, 1),
+						NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_SNOW_LINE_HEIGHT, STR_NULL), SetFill(1, 1),
 					EndContainer(),
 					NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
-						NWidget(WWT_EMPTY, INVALID_COLOUR, GLAND_HEIGHTMAP_NAME_SPACER), SetFill(true, false),
-						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_HEIGHTMAP_SIZE_TEXT), SetDataTip(STR_MAPGEN_HEIGHTMAP_SIZE, STR_NULL), SetFill(true, false),
+						NWidget(WWT_EMPTY, INVALID_COLOUR, GLAND_HEIGHTMAP_NAME_SPACER), SetFill(1, 0),
+						NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_HEIGHTMAP_SIZE_TEXT), SetDataTip(STR_MAPGEN_HEIGHTMAP_SIZE, STR_NULL), SetFill(1, 0),
 						NWidget(NWID_HORIZONTAL),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD), SetFill(false, true),
-							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_START_DATE_TEXT), SetDataTip(STR_BLACK_DATE_LONG, STR_NULL), SetFill(true, false),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_UP), SetDataTip(SPR_ARROW_UP, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD), SetFill(false, true),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD), SetFill(0, 1),
+							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_START_DATE_TEXT), SetDataTip(STR_BLACK_DATE_LONG, STR_NULL), SetFill(1, 0),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_START_DATE_UP), SetDataTip(SPR_ARROW_UP, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD), SetFill(0, 1),
 						EndContainer(),
 						NWidget(NWID_HORIZONTAL),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_MAPGEN_SNOW_LINE_DOWN), SetFill(false, true),
-							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_TEXT), SetDataTip(STR_BLACK_INT, STR_NULL), SetFill(true, false),
-							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_UP), SetDataTip(SPR_ARROW_UP, STR_MAPGEN_SNOW_LINE_UP), SetFill(false, true),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_DOWN), SetDataTip(SPR_ARROW_DOWN, STR_MAPGEN_SNOW_LINE_DOWN), SetFill(0, 1),
+							NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_TEXT), SetDataTip(STR_BLACK_INT, STR_NULL), SetFill(1, 0),
+							NWidget(WWT_IMGBTN, COLOUR_ORANGE, GLAND_SNOW_LEVEL_UP), SetDataTip(SPR_ARROW_UP, STR_MAPGEN_SNOW_LINE_UP), SetFill(0, 1),
 						EndContainer(),
 					EndContainer(),
 				EndContainer(),
-				NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_RANDOM_BUTTON), SetDataTip(STR_MAPGEN_RANDOM, STR_MAPGEN_RANDOM_HELP), SetFill(true, false),
-				NWidget(WWT_TEXTBTN, COLOUR_GREEN, GLAND_GENERATE_BUTTON), SetDataTip(STR_MAPGEN_GENERATE, STR_NULL), SetFill(true, true),
+				NWidget(WWT_TEXTBTN, COLOUR_ORANGE, GLAND_RANDOM_BUTTON), SetDataTip(STR_MAPGEN_RANDOM, STR_MAPGEN_RANDOM_HELP), SetFill(1, 0),
+				NWidget(WWT_TEXTBTN, COLOUR_GREEN, GLAND_GENERATE_BUTTON), SetDataTip(STR_MAPGEN_GENERATE, STR_NULL), SetFill(1, 1),
 			EndContainer(),
 		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 9), SetFill(true, true),
+		NWidget(NWID_SPACER), SetMinimalSize(0, 9), SetFill(1, 1),
 	EndContainer(),
 };
 
@@ -353,6 +333,7 @@ static const StringID _rotation[]    = {STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_CO
 static const StringID _landscape[]   = {STR_CONFIG_SETTING_LAND_GENERATOR_ORIGINAL, STR_CONFIG_SETTING_LAND_GENERATOR_TERRA_GENESIS, INVALID_STRING_ID};
 static const StringID _num_towns[]   = {STR_NUM_VERY_LOW, STR_NUM_LOW, STR_NUM_NORMAL, STR_NUM_HIGH, STR_NUM_CUSTOM, INVALID_STRING_ID};
 static const StringID _num_inds[]    = {STR_NONE, STR_NUM_VERY_LOW, STR_NUM_LOW, STR_NUM_NORMAL, STR_NUM_HIGH, INVALID_STRING_ID};
+static const StringID _variety[]     = {STR_VARIETY_NONE, STR_VARIETY_VERY_LOW, STR_VARIETY_LOW, STR_VARIETY_MEDIUM, STR_VARIETY_HIGH, STR_VARIETY_VERY_HIGH, INVALID_STRING_ID};
 
 struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 	uint widget_id;
@@ -392,6 +373,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 			case GLAND_TERRAIN_PULLDOWN:    SetDParam(0, _elevations[_settings_newgame.difficulty.terrain_type]); break;
 			case GLAND_WATER_PULLDOWN:      SetDParam(0, _sea_lakes[_settings_newgame.difficulty.quantity_sea_lakes]); break;
 			case GLAND_SMOOTHNESS_PULLDOWN: SetDParam(0, _smoothness[_settings_newgame.game_creation.tgen_smoothness]); break;
+			case GLAND_VARIETY_PULLDOWN:    SetDParam(0, _variety[_settings_newgame.game_creation.variety]); break;
 			case GLAND_BORDERS_RANDOM:      SetDParam(0, (_settings_newgame.game_creation.water_borders == BORDERS_RANDOM) ? STR_MAPGEN_BORDER_RANDOMIZE : STR_MAPGEN_BORDER_MANUAL); break;
 			case GLAND_WATER_NE: SetDParam(0, (_settings_newgame.game_creation.water_borders == BORDERS_RANDOM) ? STR_MAPGEN_BORDER_RANDOM : HasBit(_settings_newgame.game_creation.water_borders, BORDER_NE) ? STR_MAPGEN_BORDER_WATER : STR_MAPGEN_BORDER_FREEFORM); break;
 			case GLAND_WATER_NW: SetDParam(0, (_settings_newgame.game_creation.water_borders == BORDERS_RANDOM) ? STR_MAPGEN_BORDER_RANDOM : HasBit(_settings_newgame.game_creation.water_borders, BORDER_NW) ? STR_MAPGEN_BORDER_WATER : STR_MAPGEN_BORDER_FREEFORM); break;
@@ -411,7 +393,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 		}
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		const StringID *strs = NULL;
 		switch (widget) {
@@ -444,6 +426,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 			case GLAND_TERRAIN_PULLDOWN:    strs = _elevations; break;
 			case GLAND_WATER_PULLDOWN:      strs = _sea_lakes; break;
 			case GLAND_SMOOTHNESS_PULLDOWN: strs = _smoothness; break;
+			case GLAND_VARIETY_PULLDOWN:    strs = _variety; break;
 			case GLAND_HEIGHTMAP_ROTATION_PULLDOWN: strs = _rotation; break;
 			case GLAND_BORDERS_RANDOM:
 				*size = maxdim(GetStringBoundingBox(STR_MAPGEN_BORDER_RANDOMIZE), GetStringBoundingBox(STR_MAPGEN_BORDER_MANUAL));
@@ -476,9 +459,14 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 	virtual void DrawWidget(const Rect &r, int widget) const
 	{
 		switch (widget) {
-			case GLAND_HEIGHTMAP_NAME_TEXT:
-				DrawString(r.left, this->width - WD_FRAMERECT_RIGHT, r.top, this->name, TC_ORANGE);
-				break;
+			case GLAND_HEIGHTMAP_NAME_TEXT: {
+				/* Little bit of a hack going on here; just to get the widgets
+				 * spaced without doing much magic. The space we can draw on is
+				 * covered by both the spacer and text widgets, so take their
+				 * outer most boundaries (left and right) as draw locations. */
+				const NWidgetBase *nwi_spacer = this->GetWidget<NWidgetBase>(GLAND_HEIGHTMAP_NAME_SPACER);
+				DrawString(min(r.left, nwi_spacer->pos_x), max<int>(r.right, nwi_spacer->pos_x + nwi_spacer->current_x), r.top, this->name, TC_ORANGE);
+			} break;
 		}
 	}
 
@@ -487,6 +475,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 		/* You can't select smoothness / non-water borders if not terragenesis */
 		if (mode == GLWP_GENERATE) {
 			this->SetWidgetDisabledState(GLAND_SMOOTHNESS_PULLDOWN, _settings_newgame.game_creation.land_generator == 0);
+			this->SetWidgetDisabledState(GLAND_VARIETY_PULLDOWN, _settings_newgame.game_creation.land_generator == 0);
 			this->SetWidgetDisabledState(GLAND_BORDERS_RANDOM, _settings_newgame.game_creation.land_generator == 0 || !_settings_newgame.construction.freeform_edges);
 			this->SetWidgetsDisabledState(_settings_newgame.game_creation.land_generator == 0 || !_settings_newgame.construction.freeform_edges || _settings_newgame.game_creation.water_borders == BORDERS_RANDOM,
 					GLAND_WATER_NW, GLAND_WATER_NE, GLAND_WATER_SE, GLAND_WATER_SW, WIDGET_LIST_END);
@@ -497,6 +486,9 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 			this->SetWidgetLoweredState(GLAND_WATER_NE, HasBit(_settings_newgame.game_creation.water_borders, BORDER_NE));
 			this->SetWidgetLoweredState(GLAND_WATER_SE, HasBit(_settings_newgame.game_creation.water_borders, BORDER_SE));
 			this->SetWidgetLoweredState(GLAND_WATER_SW, HasBit(_settings_newgame.game_creation.water_borders, BORDER_SW));
+
+			this->SetWidgetsDisabledState(_settings_newgame.game_creation.land_generator == 0 && (_settings_newgame.game_creation.landscape == LT_ARCTIC || _settings_newgame.game_creation.landscape == LT_TROPIC),
+					GLAND_TERRAIN_PULLDOWN, GLAND_WATER_PULLDOWN, WIDGET_LIST_END);
 		}
 		/* Disable snowline if not hilly */
 		this->SetWidgetDisabledState(GLAND_SNOW_LEVEL_TEXT, _settings_newgame.game_creation.landscape != LT_ARCTIC);
@@ -507,7 +499,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 
 		this->SetWidgetDisabledState(GLAND_START_DATE_DOWN, _settings_newgame.game_creation.starting_year <= MIN_YEAR);
 		this->SetWidgetDisabledState(GLAND_START_DATE_UP,   _settings_newgame.game_creation.starting_year >= MAX_YEAR);
-		this->SetWidgetDisabledState(GLAND_SNOW_LEVEL_DOWN, _settings_newgame.game_creation.snow_line_height <= 2 || _settings_newgame.game_creation.landscape != LT_ARCTIC);
+		this->SetWidgetDisabledState(GLAND_SNOW_LEVEL_DOWN, _settings_newgame.game_creation.snow_line_height <= MIN_SNOWLINE_HEIGHT || _settings_newgame.game_creation.landscape != LT_ARCTIC);
 		this->SetWidgetDisabledState(GLAND_SNOW_LEVEL_UP,   _settings_newgame.game_creation.snow_line_height >= MAX_SNOWLINE_HEIGHT || _settings_newgame.game_creation.landscape != LT_ARCTIC);
 
 		this->SetWidgetLoweredState(GLAND_TEMPERATE, _settings_newgame.game_creation.landscape == LT_TEMPERATE);
@@ -523,8 +515,6 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 	virtual void OnClick(Point pt, int widget)
 	{
 		switch (widget) {
-			case 0: delete this; break;
-
 			case GLAND_TEMPERATE:
 			case GLAND_ARCTIC:
 			case GLAND_TROPICAL:
@@ -599,7 +589,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 					this->HandleButtonClick(widget);
 					this->SetDirty();
 
-					_settings_newgame.game_creation.snow_line_height = Clamp(_settings_newgame.game_creation.snow_line_height + widget - GLAND_SNOW_LEVEL_TEXT, 2, MAX_SNOWLINE_HEIGHT);
+					_settings_newgame.game_creation.snow_line_height = Clamp(_settings_newgame.game_creation.snow_line_height + widget - GLAND_SNOW_LEVEL_TEXT, MIN_SNOWLINE_HEIGHT, MAX_SNOWLINE_HEIGHT);
 				}
 				_left_button_clicked = false;
 				break;
@@ -632,6 +622,10 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 
 			case GLAND_SMOOTHNESS_PULLDOWN: // Map smoothness
 				ShowDropDownMenu(this, _smoothness, _settings_newgame.game_creation.tgen_smoothness, GLAND_SMOOTHNESS_PULLDOWN, 0, 0);
+				break;
+
+			case GLAND_VARIETY_PULLDOWN: // Map variety
+				ShowDropDownMenu(this, _variety, _settings_newgame.game_creation.variety, GLAND_VARIETY_PULLDOWN, 0, 0);
 				break;
 
 			/* Freetype map borders */
@@ -693,6 +687,9 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 			case GLAND_MAPSIZE_Y_PULLDOWN:     _settings_newgame.game_creation.map_y = index; break;
 			case GLAND_TREE_PULLDOWN:          _settings_newgame.game_creation.tree_placer = index; break;
 			case GLAND_SMOOTHNESS_PULLDOWN:    _settings_newgame.game_creation.tgen_smoothness = index;  break;
+			case GLAND_VARIETY_PULLDOWN:       _settings_newgame.game_creation.variety = index; break;
+			case GLAND_LANDSCAPE_PULLDOWN:     _settings_newgame.game_creation.land_generator = index; break;
+			case GLAND_HEIGHTMAP_ROTATION_PULLDOWN: _settings_newgame.game_creation.heightmap_rotation = index; break;
 
 			case GLAND_TOWN_PULLDOWN:
 				if ((uint)index == CUSTOM_TOWN_NUMBER_DIFFICULTY) {
@@ -705,15 +702,6 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 
 			case GLAND_INDUSTRY_PULLDOWN:
 				IConsoleSetSetting("difficulty.number_industries", index);
-				break;
-
-			case GLAND_LANDSCAPE_PULLDOWN:
-			/* case GLAND_HEIGHTMAP_PULLDOWN: */
-				if (mode == GLWP_HEIGHTMAP) {
-					_settings_newgame.game_creation.heightmap_rotation = index;
-				} else {
-					_settings_newgame.game_creation.land_generator = index;
-				}
 				break;
 
 			case GLAND_TERRAIN_PULLDOWN: {
@@ -737,42 +725,51 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 
 	virtual void OnQueryTextFinished(char *str)
 	{
+		int32 value;
 		if (!StrEmpty(str)) {
-			int32 value = atoi(str);
-
+			value = atoi(str);
+		} else {
+			/* An empty string means revert to the default */
 			switch (this->widget_id) {
-				case GLAND_START_DATE_TEXT:
-					this->SetWidgetDirty(GLAND_START_DATE_TEXT);
-					_settings_newgame.game_creation.starting_year = Clamp(value, MIN_YEAR, MAX_YEAR);
-					break;
-
-				case GLAND_SNOW_LEVEL_TEXT:
-					this->SetWidgetDirty(GLAND_SNOW_LEVEL_TEXT);
-					_settings_newgame.game_creation.snow_line_height = Clamp(value, 2, MAX_SNOWLINE_HEIGHT);
-					break;
-
-				case GLAND_TOWN_PULLDOWN:
-					_settings_newgame.game_creation.custom_town_number = Clamp(value, 1, CUSTOM_TOWN_MAX_NUMBER);
-					break;
+				case GLAND_START_DATE_TEXT: value = DEF_START_YEAR; break;
+				case GLAND_SNOW_LEVEL_TEXT: value = DEF_SNOWLINE_HEIGHT; break;
+				case GLAND_TOWN_PULLDOWN:   value = 1; break; // There's not really a default
+				default: NOT_REACHED();
 			}
-
-			this->SetDirty();
 		}
+
+		switch (this->widget_id) {
+			case GLAND_START_DATE_TEXT:
+				this->SetWidgetDirty(GLAND_START_DATE_TEXT);
+				_settings_newgame.game_creation.starting_year = Clamp(value, MIN_YEAR, MAX_YEAR);
+				break;
+
+			case GLAND_SNOW_LEVEL_TEXT:
+				this->SetWidgetDirty(GLAND_SNOW_LEVEL_TEXT);
+				_settings_newgame.game_creation.snow_line_height = Clamp(value, MIN_SNOWLINE_HEIGHT, MAX_SNOWLINE_HEIGHT);
+				break;
+
+			case GLAND_TOWN_PULLDOWN:
+				_settings_newgame.game_creation.custom_town_number = Clamp(value, 1, CUSTOM_TOWN_MAX_NUMBER);
+				break;
+		}
+
+		this->SetDirty();
 	}
 };
 
 static const WindowDesc _generate_landscape_desc(
-	WDP_CENTER, WDP_CENTER, 338, 313, 338, 313,
+	WDP_CENTER, 0, 0,
 	WC_GENERATE_LANDSCAPE, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	NULL, _nested_generate_landscape_widgets, lengthof(_nested_generate_landscape_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_generate_landscape_widgets, lengthof(_nested_generate_landscape_widgets)
 );
 
 static const WindowDesc _heightmap_load_desc(
-	WDP_CENTER, WDP_CENTER, 338, 236, 338, 236,
+	WDP_CENTER, 0, 0,
 	WC_GENERATE_LANDSCAPE, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS,
-	NULL, _nested_heightmap_load_widgets, lengthof(_nested_heightmap_load_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_heightmap_load_widgets, lengthof(_nested_heightmap_load_widgets)
 );
 
 static void _ShowGenerateLandscape(glwp_modes mode)
@@ -826,24 +823,17 @@ void StartNewGameWithoutGUI(uint seed)
 
 /** Widget numbers of the create scenario window. */
 enum CreateScenarioWindowWidgets {
-	CSCEN_CLOSEBOX,               ///< Close button.
-	CSCEN_CAPTION,                ///< Title bar.
-	CSCEN_BACKGROUND,             ///< Background panel.
 	CSCEN_TEMPERATE,              ///< Select temperate landscape style.
 	CSCEN_ARCTIC,                 ///< Select arctic landscape style.
 	CSCEN_TROPICAL,               ///< Select tropical landscape style.
 	CSCEN_TOYLAND,                ///< Select toy-land landscape style.
 	CSCEN_EMPTY_WORLD,            ///< Generate an empty flat world.
 	CSCEN_RANDOM_WORLD,           ///< Generate random land button
-	CSCEN_MAPSIZE_X_TEXT,         ///< Clickable currently selected x map size.
 	CSCEN_MAPSIZE_X_PULLDOWN,     ///< Pull-down arrow for x map size.
-	CSCEN_MAPSIZE_Y_TEXT,         ///< Clickable currently selected y map size.
 	CSCEN_MAPSIZE_Y_PULLDOWN,     ///< Pull-down arrow for y map size.
-	CSCEN_START_DATE_LABEL,       ///< 'Date' label
 	CSCEN_START_DATE_DOWN,        ///< Decrease start year (start earlier).
 	CSCEN_START_DATE_TEXT,        ///< Clickable start date value.
 	CSCEN_START_DATE_UP,          ///< Increase start year (start later).
-	CSCEN_FLAT_LAND_HEIGHT_LABEL, ///< 'Height of flat land' label.
 	CSCEN_FLAT_LAND_HEIGHT_DOWN,  ///< Decrease flat land height.
 	CSCEN_FLAT_LAND_HEIGHT_TEXT,  ///< Clickable flat land height value.
 	CSCEN_FLAT_LAND_HEIGHT_UP     ///< Increase flat land height.
@@ -896,7 +886,7 @@ struct CreateScenarioWindow : public Window
 		this->DrawWidgets();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		StringID str = STR_JUST_INT;
 		switch (widget) {
@@ -987,6 +977,17 @@ struct CreateScenarioWindow : public Window
 		}
 	}
 
+	virtual void OnTimeout()
+	{
+		static const int raise_widgets[] = {CSCEN_START_DATE_DOWN, CSCEN_START_DATE_UP, CSCEN_FLAT_LAND_HEIGHT_DOWN, CSCEN_FLAT_LAND_HEIGHT_UP, WIDGET_LIST_END};
+		for (const int *widget = raise_widgets; *widget != WIDGET_LIST_END; widget++) {
+			if (this->IsWidgetLowered(*widget)) {
+				this->RaiseWidget(*widget);
+				this->SetWidgetDirty(*widget);
+			}
+		}
+	}
+
 	virtual void OnDropdownSelect(int widget, int index)
 	{
 		switch (widget) {
@@ -1020,10 +1021,10 @@ struct CreateScenarioWindow : public Window
 
 static const NWidgetPart _nested_create_scenario_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_CLOSEBOX, COLOUR_BROWN, CSCEN_CLOSEBOX),
-		NWidget(WWT_CAPTION, COLOUR_BROWN, CSCEN_CAPTION), SetDataTip(STR_SE_MAPGEN_CAPTION, STR_NULL),
+		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
+		NWidget(WWT_CAPTION, COLOUR_BROWN), SetDataTip(STR_SE_MAPGEN_CAPTION, STR_NULL),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_BROWN, CSCEN_BACKGROUND),
+	NWidget(WWT_PANEL, COLOUR_BROWN),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 10),
 		/* Landscape style selection. */
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 3, 10),
@@ -1035,35 +1036,35 @@ static const NWidgetPart _nested_create_scenario_widgets[] = {
 		NWidget(NWID_HORIZONTAL), SetPIP(10, 8, 10),
 			/* Green generation type buttons: 'Flat land' and 'Random land'. */
 			NWidget(NWID_VERTICAL), SetPIP(10, 6, 10),
-				NWidget(WWT_TEXTBTN, COLOUR_GREEN, CSCEN_EMPTY_WORLD), SetDataTip(STR_SE_MAPGEN_FLAT_WORLD, STR_SE_MAPGEN_FLAT_WORLD_TOOLTIP), SetFill(true, true),
-				NWidget(WWT_TEXTBTN, COLOUR_GREEN, CSCEN_RANDOM_WORLD), SetDataTip(STR_SE_MAPGEN_RANDOM_LAND, STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND), SetFill(true, true),
+				NWidget(WWT_TEXTBTN, COLOUR_GREEN, CSCEN_EMPTY_WORLD), SetDataTip(STR_SE_MAPGEN_FLAT_WORLD, STR_SE_MAPGEN_FLAT_WORLD_TOOLTIP), SetFill(1, 1),
+				NWidget(WWT_TEXTBTN, COLOUR_GREEN, CSCEN_RANDOM_WORLD), SetDataTip(STR_SE_MAPGEN_RANDOM_LAND, STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND), SetFill(1, 1),
 			EndContainer(),
 			/* Labels + setting drop-downs */
 			NWidget(NWID_VERTICAL), SetPIP(10, 6, 10),
 				/* Map size. */
 				NWidget(NWID_HORIZONTAL),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_MAPSIZE_X_TEXT), SetDataTip(STR_MAPGEN_MAPSIZE, STR_NULL), SetPadding(1, 0, 0, 0),
-					NWidget(NWID_SPACER), SetMinimalSize(6, 0), SetFill(true, false),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_MAPSIZE, STR_NULL), SetPadding(1, 0, 0, 0),
+					NWidget(NWID_SPACER), SetMinimalSize(6, 0), SetFill(1, 0),
 					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, CSCEN_MAPSIZE_X_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL), SetPadding(0, 4, 0, 0),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_MAPSIZE_Y_TEXT), SetDataTip(STR_MAPGEN_BY, STR_NULL), SetPadding(1, 2, 0, 0),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_BY, STR_NULL), SetPadding(1, 2, 0, 0),
 					NWidget(WWT_DROPDOWN, COLOUR_ORANGE, CSCEN_MAPSIZE_Y_PULLDOWN), SetDataTip(STR_JUST_INT, STR_NULL),
 				EndContainer(),
 				/* Date. */
 				NWidget(NWID_HORIZONTAL),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_START_DATE_LABEL), SetDataTip(STR_MAPGEN_DATE, STR_NULL), SetPadding(1, 0, 0, 0),
-					NWidget(NWID_SPACER), SetMinimalSize(6, 0), SetFill(true, false),
-					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_START_DATE_DOWN), SetFill(false, true), SetDataTip(SPR_ARROW_DOWN, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_DATE, STR_NULL), SetPadding(1, 0, 0, 0),
+					NWidget(NWID_SPACER), SetMinimalSize(6, 0), SetFill(1, 0),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_START_DATE_DOWN), SetFill(0, 1), SetDataTip(SPR_ARROW_DOWN, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_BACKWARD),
 					NWidget(WWT_TEXTBTN, COLOUR_ORANGE, CSCEN_START_DATE_TEXT), SetDataTip(STR_BLACK_DATE_LONG, STR_NULL),
-					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_START_DATE_UP), SetFill(false, true), SetDataTip(SPR_ARROW_UP, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_START_DATE_UP), SetFill(0, 1), SetDataTip(SPR_ARROW_UP, STR_SCENEDIT_TOOLBAR_TOOLTIP_MOVE_THE_STARTING_DATE_FORWARD),
 				EndContainer(),
 				/* Flat map height. */
 				NWidget(NWID_HORIZONTAL),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_LABEL),
+					NWidget(WWT_TEXT, COLOUR_ORANGE),
 												SetDataTip(STR_SE_MAPGEN_FLAT_WORLD_HEIGHT, STR_NULL), SetPadding(1, 0, 0, 0),
-					NWidget(NWID_SPACER), SetMinimalSize(6, 0), SetFill(true, false),
-					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_DOWN), SetFill(false, true), SetDataTip(SPR_ARROW_DOWN, STR_SE_MAPGEN_FLAT_WORLD_HEIGHT_DOWN),
+					NWidget(NWID_SPACER), SetMinimalSize(6, 0), SetFill(1, 0),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_DOWN), SetFill(0, 1), SetDataTip(SPR_ARROW_DOWN, STR_SE_MAPGEN_FLAT_WORLD_HEIGHT_DOWN),
 					NWidget(WWT_TEXTBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_TEXT), SetDataTip(STR_BLACK_INT, STR_NULL),
-					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_UP), SetFill(false, true), SetDataTip(SPR_ARROW_UP, STR_SE_MAPGEN_FLAT_WORLD_HEIGHT_UP),
+					NWidget(WWT_IMGBTN, COLOUR_ORANGE, CSCEN_FLAT_LAND_HEIGHT_UP), SetFill(0, 1), SetDataTip(SPR_ARROW_UP, STR_SE_MAPGEN_FLAT_WORLD_HEIGHT_UP),
 				EndContainer(),
 			EndContainer(),
 		EndContainer(),
@@ -1071,10 +1072,10 @@ static const NWidgetPart _nested_create_scenario_widgets[] = {
 };
 
 static const WindowDesc _create_scenario_desc(
-	WDP_CENTER, WDP_CENTER, 338, 170, 338, 170,
+	WDP_CENTER, 0, 0,
 	WC_GENERATE_LANDSCAPE, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_DEF_WIDGET | WDF_STD_BTN | WDF_UNCLICK_BUTTONS,
-	NULL, _nested_create_scenario_widgets, lengthof(_nested_create_scenario_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_create_scenario_widgets, lengthof(_nested_create_scenario_widgets)
 );
 
 void ShowCreateScenario()
@@ -1084,21 +1085,19 @@ void ShowCreateScenario()
 }
 
 enum GenerationProgressWindowWidgets {
-	GPWW_CAPTION,
-	GPWW_BACKGROUND,
 	GPWW_PROGRESS_BAR,
 	GPWW_PROGRESS_TEXT,
 	GPWW_ABORT,
 };
 
 static const NWidgetPart _nested_generate_progress_widgets[] = {
-	NWidget(WWT_CAPTION, COLOUR_GREY, GPWW_CAPTION), SetDataTip(STR_GENERATION_WORLD, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
-	NWidget(WWT_PANEL, COLOUR_GREY, GPWW_BACKGROUND),
+	NWidget(WWT_CAPTION, COLOUR_GREY), SetDataTip(STR_GENERATION_WORLD, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+	NWidget(WWT_PANEL, COLOUR_GREY),
 		NWidget(NWID_HORIZONTAL), SetPIP(20, 0, 20),
 			NWidget(NWID_VERTICAL), SetPIP(11, 8, 11),
-				NWidget(WWT_EMPTY, INVALID_COLOUR, GPWW_PROGRESS_BAR), SetFill(true, false),
-				NWidget(WWT_EMPTY, INVALID_COLOUR, GPWW_PROGRESS_TEXT), SetFill(true, false),
-				NWidget(WWT_TEXTBTN, COLOUR_WHITE, GPWW_ABORT), SetDataTip(STR_GENERATION_ABORT, STR_NULL), SetFill(true, false),
+				NWidget(WWT_EMPTY, INVALID_COLOUR, GPWW_PROGRESS_BAR), SetFill(1, 0),
+				NWidget(WWT_EMPTY, INVALID_COLOUR, GPWW_PROGRESS_TEXT), SetFill(1, 0),
+				NWidget(WWT_TEXTBTN, COLOUR_WHITE, GPWW_ABORT), SetDataTip(STR_GENERATION_ABORT, STR_NULL), SetFill(1, 0),
 			EndContainer(),
 		EndContainer(),
 	EndContainer(),
@@ -1106,10 +1105,10 @@ static const NWidgetPart _nested_generate_progress_widgets[] = {
 
 
 static const WindowDesc _generate_progress_desc(
-	WDP_CENTER, WDP_CENTER, 181, 97, 181, 97,
+	WDP_CENTER, 0, 0,
 	WC_GENERATE_PROGRESS_WINDOW, WC_NONE,
-	WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	NULL, _nested_generate_progress_widgets, lengthof(_nested_generate_progress_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_generate_progress_widgets, lengthof(_nested_generate_progress_widgets)
 );
 
 struct tp_info {
@@ -1172,7 +1171,7 @@ struct GenerateProgressWindow : public Window {
 		this->DrawWidgets();
 	}
 
-	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *resize)
+	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
 			case GPWW_PROGRESS_BAR: {

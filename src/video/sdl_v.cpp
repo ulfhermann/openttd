@@ -29,8 +29,6 @@ static FVideoDriver_SDL iFVideoDriver_SDL;
 
 static SDL_Surface *_sdl_screen;
 static bool _all_modes;
-/** Flag used to determine if _cursor.fix_at has changed. */
-static bool _last_fix_at;
 
 /** Whether the drawing is/may be done in a separate thread. */
 static bool _draw_threaded;
@@ -249,7 +247,11 @@ static bool CreateMainSurface(uint w, uint h)
 	_screen.width = newscreen->w;
 	_screen.height = newscreen->h;
 	_screen.pitch = newscreen->pitch / (bpp / 8);
+	_screen.dst_ptr = newscreen->pixels;
 	_sdl_screen = newscreen;
+
+	BlitterFactoryBase::GetCurrentBlitter()->PostResize();
+
 	InitPalette();
 
 	snprintf(caption, sizeof(caption), "OpenTTD %s", _openttd_revision);
@@ -365,29 +367,17 @@ static int PollEvent()
 {
 	SDL_Event ev;
 
-	if (_cursor.fix_at != _last_fix_at) {
-		_last_fix_at = _cursor.fix_at;
-		if (_last_fix_at) {
-			/* Move to centre of window */
-			SDL_CALL SDL_WarpMouse(_screen.width / 2, _screen.height / 2);
-
-		} else {
-			/* Restore position */
-			SDL_CALL SDL_WarpMouse(_cursor.pos.x, _cursor.pos.y);
-		}
-	}
-
 	if (!SDL_CALL SDL_PollEvent(&ev)) return -2;
 
 	switch (ev.type) {
 		case SDL_MOUSEMOTION:
 			if (_cursor.fix_at) {
-				int dx = ev.motion.x - _screen.width / 2;
-				int dy = ev.motion.y - _screen.height / 2;
+				int dx = ev.motion.x - _cursor.pos.x;
+				int dy = ev.motion.y - _cursor.pos.y;
 				if (dx != 0 || dy != 0) {
 					_cursor.delta.x = dx;
 					_cursor.delta.y = dy;
-					SDL_CALL SDL_WarpMouse(_screen.width / 2, _screen.height / 2);
+					SDL_CALL SDL_WarpMouse(_cursor.pos.x, _cursor.pos.y);
 				}
 			} else {
 				_cursor.delta.x = ev.motion.x - _cursor.pos.x;
@@ -463,7 +453,7 @@ static int PollEvent()
 		case SDL_VIDEORESIZE: {
 			int w = max(ev.resize.w, 64);
 			int h = max(ev.resize.h, 64);
-			ChangeResInGame(w, h);
+			CreateMainSurface(w, h);
 			break;
 		}
 	}
@@ -582,25 +572,27 @@ void VideoDriver_SDL::MainLoop()
 
 			if (_draw_threaded) _draw_mutex->BeginCritical();
 
-			_screen.dst_ptr = _sdl_screen->pixels;
 			UpdateWindows();
 			if (++pal_tick > 4) {
 				CheckPaletteAnim();
 				pal_tick = 1;
-			}
-
-			/* End of the critical part. */
-			if (_draw_threaded && !IsGeneratingWorld()) {
-				_draw_mutex->SendSignal();
-			} else {
-				/* Oh, we didn't have threads, then just draw unthreaded */
-				DrawSurfaceToScreen();
 			}
 		} else {
 			/* Release the thread while sleeping */
 			if (_draw_threaded) _draw_mutex->EndCritical();
 			CSleep(1);
 			if (_draw_threaded) _draw_mutex->BeginCritical();
+
+			NetworkDrawChatMessage();
+			DrawMouseCursor();
+		}
+
+		/* End of the critical part. */
+		if (_draw_threaded && !IsGeneratingWorld()) {
+			_draw_mutex->SendSignal();
+		} else {
+			/* Oh, we didn't have threads, then just draw unthreaded */
+			DrawSurfaceToScreen();
 		}
 	}
 
@@ -619,14 +611,17 @@ void VideoDriver_SDL::MainLoop()
 
 bool VideoDriver_SDL::ChangeResolution(int w, int h)
 {
-	return CreateMainSurface(w, h);
+	if (_draw_threaded) _draw_mutex->BeginCritical();
+	bool ret = CreateMainSurface(w, h);
+	if (_draw_threaded) _draw_mutex->EndCritical();
+	return ret;
 }
 
 bool VideoDriver_SDL::ToggleFullscreen(bool fullscreen)
 {
 	_fullscreen = fullscreen;
 	GetVideoModes(); // get the list of available video modes
-	if (_num_resolutions == 0 || !this->ChangeResolution(_cur_resolution.width, _cur_resolution.height)) {
+	if (_num_resolutions == 0 || !CreateMainSurface(_cur_resolution.width, _cur_resolution.height)) {
 		/* switching resolution failed, put back full_screen to original status */
 		_fullscreen ^= true;
 		return false;

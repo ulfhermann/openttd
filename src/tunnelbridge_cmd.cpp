@@ -25,7 +25,7 @@
 #include "ship.h"
 #include "roadveh.h"
 #include "water_map.h"
-#include "yapf/yapf.h"
+#include "pathfinder/yapf/yapf_cache.h"
 #include "newgrf_sound.h"
 #include "autoslope.h"
 #include "tunnelbridge_map.h"
@@ -38,6 +38,7 @@
 #include "cheat_type.h"
 #include "elrail_func.h"
 #include "landscape_type.h"
+#include "pbs.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -133,7 +134,7 @@ static CommandCost CheckBridgeSlopeNorth(Axis axis, Slope *tileh, uint *z)
 
 	if (f == FOUNDATION_NONE) return CommandCost();
 
-	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]);
+	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 }
 
 /**
@@ -154,7 +155,7 @@ static CommandCost CheckBridgeSlopeSouth(Axis axis, Slope *tileh, uint *z)
 
 	if (f == FOUNDATION_NONE) return CommandCost();
 
-	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]);
+	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 }
 
 bool CheckBridge_Stuff(BridgeType bridge_type, uint bridge_len, DoCommandFlag flags)
@@ -240,6 +241,8 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 	if (transport_type != TRANSPORT_WATER) {
 		/* set and test bridge length, availability */
 		if (!CheckBridge_Stuff(bridge_type, bridge_len, flags)) return_cmd_error(STR_ERROR_CAN_T_BUILD_BRIDGE_HERE);
+	} else {
+		if (bridge_len > (_settings_game.construction.longbridges ? 100U : 16U)) return_cmd_error(STR_ERROR_CAN_T_BUILD_BRIDGE_HERE);
 	}
 
 	/* retrieve landscape height and ensure it's on land */
@@ -586,7 +589,7 @@ static inline bool CheckAllowRemoveTunnelBridge(TileIndex tile)
 			if (road_owner == OWNER_NONE || road_owner == OWNER_TOWN) road_owner = _current_company;
 			if (tram_owner == OWNER_NONE) tram_owner = _current_company;
 
-			return CheckOwnership(road_owner) && CheckOwnership(tram_owner);
+			return CheckOwnership(road_owner, tile) && CheckOwnership(tram_owner, tile);
 		}
 
 		case TRANSPORT_RAIL:
@@ -908,7 +911,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		/* PBS debugging, draw reserved tracks darker */
 		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && (transport_type == TRANSPORT_RAIL && HasTunnelBridgeReservation(ti->tile))) {
 			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
-			DrawGroundSprite(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_y : rti->base_sprites.single_x, PALETTE_CRASH);
+			DrawGroundSprite(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_x : rti->base_sprites.single_y, PALETTE_CRASH);
 		}
 
 		if (transport_type == TRANSPORT_ROAD) {
@@ -994,7 +997,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && transport_type == TRANSPORT_RAIL && HasTunnelBridgeReservation(ti->tile)) {
 			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
 			if (HasBridgeFlatRamp(ti->tileh, DiagDirToAxis(tunnelbridge_direction))) {
-				AddSortableSpriteToDraw(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_y : rti->base_sprites.single_x, PALETTE_CRASH, ti->x, ti->y, 16, 16, 0, ti->z + 8);
+				AddSortableSpriteToDraw(DiagDirToAxis(tunnelbridge_direction) == AXIS_X ? rti->base_sprites.single_x : rti->base_sprites.single_y, PALETTE_CRASH, ti->x, ti->y, 16, 16, 0, ti->z + 8);
 			} else {
 				AddSortableSpriteToDraw(rti->base_sprites.single_sloped + tunnelbridge_direction, PALETTE_CRASH, ti->x, ti->y, 16, 16, 8, ti->z);
 			}
@@ -1181,7 +1184,7 @@ void DrawBridgeMiddle(const TileInfo *ti)
 				pal = PALETTE_TO_TRANSPARENT;
 			}
 
-			DrawGroundSpriteAt(image, pal, x, y, z);
+			DrawGroundSpriteAt(image, pal, x - ti->x, y - ti->y, z - ti->z);
 		}
 	} else if (_settings_client.gui.bridge_pillars) {
 		/* draw pillars below for high bridges */
@@ -1505,7 +1508,7 @@ static CommandCost TerraformTile_TunnelBridge(TileIndex tile, DoCommandFlag flag
 		}
 
 		/* Surface slope is valid and remains unchanged? */
-		if (!CmdFailed(res) && (z_old == z_new) && (tileh_old == tileh_new)) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]);
+		if (!CmdFailed(res) && (z_old == z_new) && (tileh_old == tileh_new)) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	}
 
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);

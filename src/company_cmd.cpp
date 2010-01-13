@@ -10,7 +10,6 @@
 /** @file company_cmd.cpp Handling of companies. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "engine_base.h"
 #include "company_func.h"
 #include "company_gui.h"
@@ -31,9 +30,10 @@
 #include "autoreplace_func.h"
 #include "autoreplace_gui.h"
 #include "rail.h"
-#include "sprite.h"
 #include "core/pool_func.hpp"
 #include "settings_func.h"
+#include "vehicle_base.h"
+#include "vehicle_func.h"
 
 #include "table/strings.h"
 
@@ -76,6 +76,7 @@ void Company::PostDestructor(size_t index)
 {
 	InvalidateWindowData(WC_GRAPH_LEGEND, 0, (int)index);
 	InvalidateWindowData(WC_PERFORMANCE_DETAIL, 0, (int)index);
+	InvalidateWindowData(WC_COMPANY_LEAGUE, 0, 0);
 }
 
 /**
@@ -89,8 +90,10 @@ void SetLocalCompany(CompanyID new_company)
 	/* company could also be COMPANY_SPECTATOR or OWNER_NONE */
 	assert(Company::IsValidID(new_company) || new_company == COMPANY_SPECTATOR || new_company == OWNER_NONE);
 
+#ifdef ENABLE_NETWORK
 	/* Delete the chat window, if you were team chatting. */
 	InvalidateWindowData(WC_SEND_NETWORK_MSG, DESTTYPE_TEAM, _local_company);
+#endif
 
 	_local_company = new_company;
 
@@ -153,13 +156,13 @@ void InvalidateCompanyWindows(const Company *company)
 	SetWindowDirty(WC_FINANCES, cid);
 }
 
-bool CheckCompanyHasMoney(CommandCost cost)
+bool CheckCompanyHasMoney(CommandCost &cost)
 {
 	if (cost.GetCost() > 0) {
 		const Company *c = Company::GetIfValid(_current_company);
 		if (c != NULL && cost.GetCost() > c->money) {
 			SetDParam(0, cost.GetCost());
-			_error_message = STR_ERROR_NOT_ENOUGH_CASH_REQUIRES_CURRENCY;
+			cost.MakeError(STR_ERROR_NOT_ENOUGH_CASH_REQUIRES_CURRENCY);
 			return false;
 		}
 	}
@@ -209,6 +212,12 @@ void SubtractMoneyFromCompanyFract(CompanyID company, CommandCost cst)
 	if (cost != 0) SubtractMoneyFromAnyCompany(c, CommandCost(cst.GetExpensesType(), cost));
 }
 
+/**
+ * Set the right DParams to get the name of an owner.
+ * @param owner the owner to get the name of.
+ * @param tile  optional tile to get the right town.
+ * @pre if tile == 0, then owner can't be OWNER_TOWN.
+ */
 void GetNameOfOwner(Owner owner, TileIndex tile)
 {
 	SetDParam(2, owner);
@@ -221,6 +230,7 @@ void GetNameOfOwner(Owner owner, TileIndex tile)
 			SetDParam(1, owner);
 		}
 	} else {
+		assert(tile != 0);
 		const Town *t = ClosestTownFromTile(tile, UINT_MAX);
 
 		SetDParam(0, STR_TOWN_NAME);
@@ -229,16 +239,32 @@ void GetNameOfOwner(Owner owner, TileIndex tile)
 }
 
 
-bool CheckOwnership(Owner owner)
+/**
+ * Check whether the current owner owns something.
+ * If that isn't the case an appropriate error will be given.
+ * @param owner the owner of the thing to check.
+ * @param tile  optional tile to get the right town.
+ * @pre if tile == 0 then the owner can't be OWNER_TOWN.
+ * @return true iff it's owned by the current company.
+ */
+bool CheckOwnership(Owner owner, TileIndex tile)
 {
 	assert(owner < OWNER_END);
+	assert(owner != OWNER_TOWN || tile != 0);
 
 	if (owner == _current_company) return true;
 	_error_message = STR_ERROR_OWNED_BY;
-	GetNameOfOwner(owner, 0);
+	GetNameOfOwner(owner, tile);
 	return false;
 }
 
+/**
+ * Check whether the current owner owns the stuff on
+ * the given tile.  If that isn't the case an
+ * appropriate error will be given.
+ * @param tile the tile to check.
+ * @return true iff it's owned by the current company.
+ */
 bool CheckTileOwnership(TileIndex tile)
 {
 	Owner owner = GetTileOwner(tile);
@@ -764,7 +790,6 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				NetworkUpdateClientInfo(ci->client_id);
 
 				if (Company::IsValidID(ci->client_playas)) {
-					CompanyID company_backup = _local_company;
 					_network_company_states[c->index].months_empty = 0;
 					_network_company_states[c->index].password[0] = '\0';
 					NetworkServerUpdateCompanyPassworded(ci->client_playas, false);
@@ -780,9 +805,7 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 					 * TODO: Perhaps this could be improved by when the client is ready
 					 * with joining to let it send itself the command, and not the server?
 					 * For example in network_client.c:534? */
-					_local_company = ci->client_playas;
-					NetworkSend_Command(0, 0, 0, CMD_RENAME_PRESIDENT, NULL, ci->client_name);
-					_local_company = company_backup;
+					NetworkSend_Command(0, 0, 0, CMD_RENAME_PRESIDENT, NULL, ci->client_name, ci->client_playas);
 				}
 
 				/* Announce new company on network, if the client was a SPECTATOR before */
@@ -827,6 +850,205 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		} break;
 
 		default: return CMD_ERROR;
+	}
+
+	return CommandCost();
+}
+
+/** Change the company manager's face.
+ * @param tile unused
+ * @param flags operation to perform
+ * @param p1 unused
+ * @param p2 face bitmasked
+ * @param text unused
+ * @return the cost of this operation or an error
+ */
+CommandCost CmdSetCompanyManagerFace(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	CompanyManagerFace cmf = (CompanyManagerFace)p2;
+
+	if (!IsValidCompanyManagerFace(cmf)) return CMD_ERROR;
+
+	if (flags & DC_EXEC) {
+		Company::Get(_current_company)->face = cmf;
+		MarkWholeScreenDirty();
+	}
+	return CommandCost();
+}
+
+/** Change the company's company-colour
+ * @param tile unused
+ * @param flags operation to perform
+ * @param p1 bitstuffed:
+ * p1 bits 0-7 scheme to set
+ * p1 bits 8-9 set in use state or first/second colour
+ * @param p2 new colour for vehicles, property, etc.
+ * @param text unused
+ * @return the cost of this operation or an error
+ */
+CommandCost CmdSetCompanyColour(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	if (p2 >= 16) return CMD_ERROR; // max 16 colours
+
+	Colours colour = (Colours)p2;
+
+	LiveryScheme scheme = (LiveryScheme)GB(p1, 0, 8);
+	byte state = GB(p1, 8, 2);
+
+	if (scheme >= LS_END || state >= 3) return CMD_ERROR;
+
+	Company *c = Company::Get(_current_company);
+
+	/* Ensure no two companies have the same primary colour */
+	if (scheme == LS_DEFAULT && state == 0) {
+		const Company *cc;
+		FOR_ALL_COMPANIES(cc) {
+			if (cc != c && cc->colour == colour) return CMD_ERROR;
+		}
+	}
+
+	if (flags & DC_EXEC) {
+		switch (state) {
+			case 0:
+				c->livery[scheme].colour1 = colour;
+
+				/* If setting the first colour of the default scheme, adjust the
+				 * original and cached company colours too. */
+				if (scheme == LS_DEFAULT) {
+					_company_colours[_current_company] = colour;
+					c->colour = colour;
+				}
+				break;
+
+			case 1:
+				c->livery[scheme].colour2 = colour;
+				break;
+
+			case 2:
+				c->livery[scheme].in_use = colour != 0;
+
+				/* Now handle setting the default scheme's in_use flag.
+				 * This is different to the other schemes, as it signifies if any
+				 * scheme is active at all. If this flag is not set, then no
+				 * processing of vehicle types occurs at all, and only the default
+				 * colours will be used. */
+
+				/* If enabling a scheme, set the default scheme to be in use too */
+				if (colour != 0) {
+					c->livery[LS_DEFAULT].in_use = true;
+					break;
+				}
+
+				/* Else loop through all schemes to see if any are left enabled.
+				 * If not, disable the default scheme too. */
+				c->livery[LS_DEFAULT].in_use = false;
+				for (scheme = LS_DEFAULT; scheme < LS_END; scheme++) {
+					if (c->livery[scheme].in_use) {
+						c->livery[LS_DEFAULT].in_use = true;
+						break;
+					}
+				}
+				break;
+
+			default:
+				break;
+		}
+		ResetVehicleColourMap();
+		MarkWholeScreenDirty();
+
+		/* Company colour data is indirectly cached. */
+		Vehicle *v;
+		FOR_ALL_VEHICLES(v) {
+			if (v->owner == _current_company) v->InvalidateNewGRFCache();
+		}
+	}
+	return CommandCost();
+}
+
+static bool IsUniqueCompanyName(const char *name)
+{
+	const Company *c;
+
+	FOR_ALL_COMPANIES(c) {
+		if (c->name != NULL && strcmp(c->name, name) == 0) return false;
+	}
+
+	return true;
+}
+
+/** Change the name of the company.
+ * @param tile unused
+ * @param flags operation to perform
+ * @param p1 unused
+ * @param p2 unused
+ * @param text the new name or an empty string when resetting to the default
+ * @return the cost of this operation or an error
+ */
+CommandCost CmdRenameCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	bool reset = StrEmpty(text);
+
+	if (!reset) {
+		if (strlen(text) >= MAX_LENGTH_COMPANY_NAME_BYTES) return CMD_ERROR;
+		if (!IsUniqueCompanyName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
+	}
+
+	if (flags & DC_EXEC) {
+		Company *c = Company::Get(_current_company);
+		free(c->name);
+		c->name = reset ? NULL : strdup(text);
+		MarkWholeScreenDirty();
+	}
+
+	return CommandCost();
+}
+
+static bool IsUniquePresidentName(const char *name)
+{
+	const Company *c;
+
+	FOR_ALL_COMPANIES(c) {
+		if (c->president_name != NULL && strcmp(c->president_name, name) == 0) return false;
+	}
+
+	return true;
+}
+
+/** Change the name of the president.
+ * @param tile unused
+ * @param flags operation to perform
+ * @param p1 unused
+ * @param p2 unused
+ * @param text the new name or an empty string when resetting to the default
+ * @return the cost of this operation or an error
+ */
+CommandCost CmdRenamePresident(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	bool reset = StrEmpty(text);
+
+	if (!reset) {
+		if (strlen(text) >= MAX_LENGTH_PRESIDENT_NAME_BYTES) return CMD_ERROR;
+		if (!IsUniquePresidentName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
+	}
+
+	if (flags & DC_EXEC) {
+		Company *c = Company::Get(_current_company);
+		free(c->president_name);
+
+		if (reset) {
+			c->president_name = NULL;
+		} else {
+			c->president_name = strdup(text);
+
+			if (c->name_1 == STR_SV_UNNAMED && c->name == NULL) {
+				char buf[80];
+
+				snprintf(buf, lengthof(buf), "%s Transport", text);
+				DoCommand(0, 0, 0, DC_EXEC, CMD_RENAME_COMPANY, buf);
+			}
+		}
+
+		MarkWholeScreenDirty();
 	}
 
 	return CommandCost();

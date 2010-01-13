@@ -308,6 +308,39 @@ static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte
 
 		/* Distance test for some house types */
 		case 0x65: return GetDistanceFromNearbyHouse(parameter, tile, object->u.house.house_id);
+
+		/* Class and ID of nearby house tile */
+		case 0x66: {
+			TileIndex testtile = GetNearbyTile(parameter, tile);
+			if (!IsTileType(testtile, MP_HOUSE)) return 0xFFFFFFFF;
+			HouseSpec *hs = HouseSpec::Get(GetHouseType(testtile));
+			/* Information about the grf local classid if the house has a class */
+			uint houseclass = 0;
+			if (hs->class_id != HOUSE_NO_CLASS) {
+				houseclass = (hs->grffile == object->grffile ? 1 : 2) << 8;
+				houseclass |= _class_mapping[hs->class_id].class_id;
+			}
+			/* old house type or grf-local houseid */
+			uint local_houseid = 0;
+			if (house_id < NEW_HOUSE_OFFSET) {
+				local_houseid = house_id;
+			} else {
+				local_houseid = (hs->grffile == object->grffile ? 1 : 2) << 8;
+				local_houseid |= hs->local_id;
+			}
+			return houseclass << 16 | local_houseid;
+		}
+
+		/* GRFID of nearby house tile */
+		case 0x67: {
+			TileIndex testtile = GetNearbyTile(parameter, tile);
+			if (!IsTileType(testtile, MP_HOUSE)) return 0xFFFFFFFF;
+			HouseID house_id = GetHouseType(testtile);
+			if (house_id < NEW_HOUSE_OFFSET) return 0;
+			/* Checking the grffile information via HouseSpec doesn't work
+			 * in case the newgrf was removed. */
+			return _house_mngr.mapping_ID[house_id].grfid;
+		}
 	}
 
 	DEBUG(grf, 1, "Unhandled house property 0x%X", variable);
@@ -370,7 +403,6 @@ uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, House
 static void DrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGroup *group, byte stage, HouseID house_id)
 {
 	const DrawTileSprites *dts = group->dts;
-	const DrawTileSeqStruct *dtss;
 
 	const HouseSpec *hs = HouseSpec::Get(house_id);
 	SpriteID palette = hs->random_colour[TileHash2Bit(ti->x, ti->y)] + PALETTE_RECOLOUR_START;
@@ -391,32 +423,7 @@ static void DrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGroup *grou
 		DrawGroundSprite(image, GroundSpritePaletteTransform(image, pal, palette));
 	}
 
-	foreach_draw_tile_seq(dtss, dts->seq) {
-		if (GB(dtss->image.sprite, 0, SPRITE_WIDTH) == 0) continue;
-
-		image = dtss->image.sprite;
-		pal   = dtss->image.pal;
-
-		/* Stop drawing sprite sequence once we meet a sprite that doesn't have to be opaque */
-		if (IsInvisibilitySet(TO_HOUSES) && !HasBit(image, SPRITE_MODIFIER_OPAQUE)) return;
-
-		if (IS_CUSTOM_SPRITE(image)) image += stage;
-
-		pal = SpriteLayoutPaletteTransform(image, pal, palette);
-
-		if ((byte)dtss->delta_z != 0x80) {
-			AddSortableSpriteToDraw(
-				image, pal,
-				ti->x + dtss->delta_x, ti->y + dtss->delta_y,
-				dtss->size_x, dtss->size_y,
-				dtss->size_z, ti->z + dtss->delta_z,
-				!HasBit(image, SPRITE_MODIFIER_OPAQUE) && IsTransparencySet(TO_HOUSES)
-			);
-		} else {
-			/* For industries and houses delta_x and delta_y are unsigned */
-			AddChildSpriteScreen(image, pal, (byte)dtss->delta_x, (byte)dtss->delta_y, !HasBit(image, SPRITE_MODIFIER_OPAQUE) && IsTransparencySet(TO_HOUSES));
-		}
-	}
+	DrawTileSeq(ti, dts, TO_HOUSES, stage, palette);
 }
 
 void DrawNewHouseTile(TileInfo *ti, HouseID house_id)
@@ -440,13 +447,12 @@ void DrawNewHouseTile(TileInfo *ti, HouseID house_id)
 
 	group = SpriteGroup::Resolve(hs->spritegroup, &object);
 	if (group == NULL || group->type != SGT_TILELAYOUT) {
-		/* XXX: This is for debugging purposes really, and shouldn't stay. */
-		DrawGroundSprite(SPR_SHADOW_CELL, PAL_NONE);
+		return;
 	} else {
-		const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
 		/* Limit the building stage to the number of stages supplied. */
+		const TileLayoutSpriteGroup *tlgroup = (const TileLayoutSpriteGroup *)group;
 		byte stage = GetHouseBuildingStage(ti->tile);
-		stage = Clamp(stage - 4 + tlgroup->num_sprites, 0, tlgroup->num_sprites - 1);
+		stage = Clamp(stage - 4 + tlgroup->num_building_stages, 0, tlgroup->num_building_stages - 1);
 		DrawTileLayout(ti, tlgroup, stage, house_id);
 	}
 }

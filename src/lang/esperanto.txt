@@ -127,7 +127,7 @@ STR_QUANTITY_TOFFEE                                             :{WEIGHT} da tof
 STR_QUANTITY_BATTERIES                                          :{COMMA} baterio{P "" j}
 STR_QUANTITY_PLASTIC                                            :{VOLUME} da plastiko
 STR_QUANTITY_FIZZY_DRINKS                                       :{COMMA} amuza{P "" j} trinkaĵo{P "" j}
-STR_QUANTITY_N_A                                                :N/A{SKIP}
+STR_QUANTITY_N_A                                                :N/A
 
 # Two letter abbreviation of cargo name
 STR_ABBREV_NOTHING                                              :
@@ -341,14 +341,14 @@ STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Malfacilec-agor
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Avancitaj agordoj
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Agordoj de NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Ebloj por travidebleco
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Urbonomoj montriĝas
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Staciaj nomoj montriĝas
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Montru nomojn de vojpunktoj
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Afiŝoj montriĝas
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Plena animado
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Plenaj detaloj
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Travideblaj konstruaĵoj
-STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :{SETX 12}Travideblaj staciaj afiŝoj
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Urbonomoj montriĝas
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Staciaj nomoj montriĝas
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Montru nomojn de vojpunktoj
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Afiŝoj montriĝas
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Plena animado
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Plenaj detaloj
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Travideblaj konstruaĵoj
+STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Travideblaj staciaj afiŝoj
 ############ range ends here
 
 ############ range for file menu starts
@@ -502,7 +502,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Ŝlosilo
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Montru ŝlosilon al grafikoj
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Gajna Grafiko
@@ -524,8 +524,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Klaku ĉ
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Kompaniara tabelo
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Inĝeniero
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Trafikkontrolisto
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Transportmanaĝanto
@@ -542,7 +541,6 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detaloj
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Veturiloj:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stacioj:
@@ -576,10 +574,8 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Propra 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Muzika Volumeno
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Efekta Volumeno
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}-  '  '  ' '  '  '  +
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
-STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGREEN}0{COMMA}
-STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
 STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Numero
@@ -602,8 +598,7 @@ STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Montru m
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Elekto de Muzikprogramo
-STR_PLAYLIST_TRACK_SINGLE_DIGIT                                 :{TINYFONT}{LTBLUE}0{COMMA} "{STRING}"
-STR_PLAYLIST_TRACK_DOUBLE_DIGIT                                 :{TINYFONT}{LTBLUE}{COMMA} "{STRING}"
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Numera Indekso
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programo - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Viŝu
@@ -1262,11 +1257,9 @@ STR_CONFIG_SETTING_ECONOMY_TOWNS                                :{ORANGE}Urboj
 STR_CONFIG_SETTING_ECONOMY_INDUSTRIES                           :{ORANGE}Industrioj
 
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS                        :{LTBLUE}Padtrovilo por trajnoj: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NTP                    :NTP {RED}(Ne rekomendita)
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_NPF                    :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_TRAINS_YAPF                   :YAPF {BLUE}(Rekomendita)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES                 :{LTBLUE}Padtrovilo por vojveturiloj: {ORANGE}{STRING}
-STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_OPF             :Originala {RED}(Ne rekomendita)
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_NPF             :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_ROAD_VEHICLES_YAPF            :YAPF {BLUE}(Rekomendita)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Padtrovilo por ŝipoj: {ORANGE}{STRING}
@@ -1322,7 +1315,7 @@ STR_QUIT_NO                                                     :{BLACK}Ne
 STR_OSNAME_WINDOWS                                              :Vindozo
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unikso
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -1483,7 +1476,6 @@ STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Elektu m
 STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Kiun mapon vi volas ludi?
 STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Generu hazardan novan ludon
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :Loka reto / Interreto
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Interreto (reklamu)
 STR_NETWORK_START_SERVER_CLIENTS_SELECT                         :{BLACK}{NUM} client{P "" s}
@@ -1497,7 +1489,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Spektant
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Limigu la servilon al certa kvanto da spektantoj
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Parolata lingvo:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Aliaj ludantoj scios kiu lingvo paroliĝas en la servilo
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Startu Ludon
 STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Komencu novan retan ludon de hazarda mapo, aŭ scenaro
@@ -1669,13 +1660,7 @@ STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :servilo plenas
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_PLAYERS                  :Ludo paŭzita (ne sufiĉaj ludantoj)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_PLAYERS                :Ludo malpaŭzita (sufiĉaj ludandoj)
-STR_NETWORK_SERVER_MESSAGE_GAME_PAUSED_CONNECT                  :Ludo paŭzita (konektanta kliento)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT                :Ludo malpaŭzita (kliento konektita)
-STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED_CONNECT_FAIL           :Ludo malpaŭzita (konektado de kliento fiaskis)
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :forlasanta
 STR_NETWORK_MESSAGE_CLIENT_JOINED                               :*** {STRING} ensalutis la ludon
@@ -2006,7 +1991,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Kompanie poseda
 STR_ABOUT_OPENTTD                                               :{WHITE}Pri OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Origina kopirajto {COPYRIGHT} 1995 Chris Sawyer, Ĉiuj rajtoj rezervitaj
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD-versio {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 La teamo de OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 La teamo de OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Konservu Ludon
@@ -2120,12 +2105,12 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Averto: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Eraro: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Fatalo: {SILVER}{STRING}
-STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{SKIP}{STRING} ne funkcios kun la versio de TTDPatch menciata de OpenTTD.
-STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{SKIP}{STRING} estas por versio {STRING} de TTD.
-STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{SKIP}{STRING} estas intencita por uzo kun {STRING}
-STR_NEWGRF_ERROR_INVALID_PARAMETER                              :{SKIP}Nevalida parametro por {STRING}: parametro{STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{SKIP}{STRING} estu ŝarĝata antaŭ {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{SKIP}{STRING} estu ŝarĝata post {STRING}.
+STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} ne funkcios kun la versio de TTDPatch menciata de OpenTTD.
+STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} estas por versio {STRING} de TTD.
+STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} estas intencita por uzo kun {STRING}
+STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Nevalida parametro por {1:STRING}: parametro{STRING} ({NUM})
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} estu ŝarĝata antaŭ {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} estu ŝarĝata post {STRING}.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :la GRF-dosiero estas farita por traduki
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Tro da novaj grafikaĵoj estas ŝarĝataj
 
@@ -2283,9 +2268,9 @@ STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Banka Ba
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Prunto
 STR_FINANCES_MAX_LOAN                                           :{WHITE}Maksimuma prunto: {BLACK}{CURRENCY}
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Pruntu {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Pruntu {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Grandigu prunton
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Repagu {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Repagu {CURRENCY}
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Repagu pruntparton
 
 # Company view
@@ -2305,7 +2290,6 @@ STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Faru HQ
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Vidu HQ
-STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Konstruu kompanian ĉefkonstruaĵon / vidu kompanian ĉefkonstruaĵon
 STR_COMPANY_VIEW_RELOCATE_HQ                                    :{BLACK}Relokigu HQ
 STR_COMPANY_VIEW_RELOCATE_COMPANY_HEADQUARTERS                  :{BLACK}Rekonstruu kompanian ĉefkonstruaĵon aliloke por 1% de kompanivaloro
 
@@ -2561,7 +2545,7 @@ STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Ne elekt
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Ĉesu Anstataŭi
 STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Premu por ĉesi anstataŭi la maldekstre elektitan maŝinon
 
-STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Anstataŭante: {ORANGE}{SKIP}{SKIP}{STRING}
+STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Anstataŭante: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Ŝaltu inter maŝina kaj vagona anstataŭigo
 STR_REPLACE_ENGINES                                             :Maŝinoj
 STR_REPLACE_WAGONS                                              :Vagonoj
@@ -2573,7 +2557,7 @@ STR_REPLACE_ELRAIL_VEHICLES                                     :Elektraj Relaj 
 STR_REPLACE_MONORAIL_VEHICLES                                   :Unurelaj Veturiloj
 STR_REPLACE_MAGLEV_VEHICLES                                     :Maglevaj Veturiloj
 
-STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Vagonforigo: {ORANGE}{SKIP}{STRING}
+STR_REPLACE_REMOVE_WAGON                                        :{BLACK}Vagonforigo: {ORANGE}{STRING}
 STR_REPLACE_REMOVE_WAGON_HELP                                   :{BLACK}Ĉe aŭtomata anstataŭigo tenu saman longecon de la trajno per forigo de vagonoj (defronte), se per nova maŝino la trajno plilongiĝas
 
 # Vehicle view
@@ -2729,8 +2713,8 @@ STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE
 
 STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Ordena listo - alklaku ordenon por elekti. CTRL + klako skrolas al la stacio
 
-STR_ORDERS_END_OF_ORDERS                                        :{SETX 10}- - Fino de Ordenoj - -
-STR_ORDERS_END_OF_SHARED_ORDERS                                 :{SETX 10}- - Fino de Dividitaj Ordenoj - -
+STR_ORDERS_END_OF_ORDERS                                        :- - Fino de Ordenoj - -
+STR_ORDERS_END_OF_SHARED_ORDERS                                 :- - Fino de Dividitaj Ordenoj - -
 
 # Order bottom buttons
 
@@ -3505,7 +3489,7 @@ STR_FORMAT_WAYPOINT_NAME                                        :Vojpunkto {TOWN
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Vojpunkto {TOWN} #{COMMA}
 
 STR_DEFAULT_SIGN_NAME                                           :Afiŝo
-STR_COMPANY_SOMEONE                                             :iu{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :iu
 
 STR_SAVEGAME_NAME_DEFAULT                                       :{COMPANY} je {STRING}
 
@@ -3551,8 +3535,6 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
 STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
@@ -3575,11 +3557,7 @@ STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
 STR_BLACK_2                                                     :{BLACK}2

@@ -310,13 +310,13 @@ STR_SCENEDIT_FILE_MENU_QUIT                                     :Ôfslúte
 ############ range for settings menu starts
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Spul Opsjes
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Swierrichheid ynstellings
-STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :{SETX 12}Stêd nammen sjen litte
-STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :{SETX 12}Stasjon nammen sjen litte
-STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :{SETX 12}Nammen fan kontrôleposten sjen litte
-STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :{SETX 12}Buordsjes sjen litte
-STR_SETTINGS_MENU_FULL_ANIMATION                                :{SETX 12}Folle animaasje
-STR_SETTINGS_MENU_FULL_DETAIL                                   :{SETX 12}Folle detail
-STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :{SETX 12}Trochsichtige gebouwen
+STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Stêd nammen sjen litte
+STR_SETTINGS_MENU_STATION_NAMES_DISPLAYED                       :Stasjon nammen sjen litte
+STR_SETTINGS_MENU_WAYPOINTS_DISPLAYED                           :Nammen fan kontrôleposten sjen litte
+STR_SETTINGS_MENU_SIGNS_DISPLAYED                               :Buordsjes sjen litte
+STR_SETTINGS_MENU_FULL_ANIMATION                                :Folle animaasje
+STR_SETTINGS_MENU_FULL_DETAIL                                   :Folle detail
+STR_SETTINGS_MENU_TRANSPARENT_BUILDINGS                         :Trochsichtige gebouwen
 ############ range ends here
 
 ############ range for file menu starts
@@ -448,7 +448,7 @@ STR_GRAPH_KEY_BUTTON                                            :{BLACK}Kaai
 STR_GRAPH_KEY_TOOLTIP                                           :{BLACK}Lit kaai foar grafyk sjen
 STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
 STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
-STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}-
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
 STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 STR_GRAPH_OPERATING_PROFIT_CAPTION                              :{WHITE}Fertsjinstengrafyk
@@ -470,8 +470,7 @@ STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP                         :{BLACK}Klik hji
 
 # Company league window
 STR_COMPANY_LEAGUE_TABLE_CAPTION                                :{WHITE}Bedriuwskompetysjetabel
-STR_COMPANY_LEAGUE_FIRST                                        :{WHITE}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
-STR_COMPANY_LEAGUE_OTHER                                        :{YELLOW}{STRING}{SETX 45}{ORANGE}{COMPANY} {BLACK}{COMPANYNUM}  '{STRING}'
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Inzjenieur
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRAFFIC_MANAGER            :Ferkearsbehearder
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TRANSPORT_COORDINATOR      :Transportcoördinator
@@ -483,7 +482,6 @@ STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_PRESIDENT                  :President
 STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TYCOON                     :Tycoon
 
 # Performance detail window
-STR_PERFORMANCE_DETAIL_INT                                      :{BLACK}{NUM}
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_MIN_PROFIT                               :{BLACK}Min. fertsjinste:
 ############ End of order list
@@ -498,10 +496,8 @@ STR_MUSIC_PLAYLIST_CUSTOM_1                                     :{TINYFONT}{BLAC
 STR_MUSIC_PLAYLIST_CUSTOM_2                                     :{TINYFONT}{BLACK}Eigen 2
 STR_MUSIC_MUSIC_VOLUME                                          :{TINYFONT}{BLACK}Musyk Folume
 STR_MUSIC_EFFECTS_VOLUME                                        :{TINYFONT}{BLACK}Effekten Folume
-STR_MUSIC_MIN_MAX_RULER                                         :{TINYFONT}{BLACK}MIN  '  '  ' '  '  '  MAKS
 STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
-STR_MUSIC_TRACK_SINGLE_DIGIT                                    :{TINYFONT}{DKGREEN}0{COMMA}
-STR_MUSIC_TRACK_DOUBLE_DIGIT                                    :{TINYFONT}{DKGREEN}{COMMA}
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
 STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
 STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
 STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Nûmer
@@ -524,8 +520,7 @@ STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Lit musy
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Musyk Programma Seleksje
-STR_PLAYLIST_TRACK_SINGLE_DIGIT                                 :{TINYFONT}{LTBLUE}0{COMMA} "{STRING}"
-STR_PLAYLIST_TRACK_DOUBLE_DIGIT                                 :{TINYFONT}{LTBLUE}{COMMA} "{STRING}"
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
 STR_PLAYLIST_TRACK_INDEX                                        :{TINYFONT}{BLACK}Musyk Yndex
 STR_PLAYLIST_PROGRAM                                            :{TINYFONT}{BLACK}Programma - '{STRING}'
 STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Leech
@@ -877,7 +872,7 @@ STR_QUIT_NO                                                     :{BLACK}Nee
 STR_OSNAME_WINDOWS                                              :Windows
 STR_OSNAME_DOS                                                  :DOS
 STR_OSNAME_UNIX                                                 :Unix
-STR_OSNAME_OSX                                                  :OS X
+STR_OSNAME_OSX                                                  :OS{NBSP}X
 STR_OSNAME_BEOS                                                 :BeOS
 STR_OSNAME_HAIKU                                                :Haiku
 STR_OSNAME_MORPHOS                                              :MorphOS
@@ -943,11 +938,9 @@ STR_NETWORK_START_SERVER_CAPTION                                :{WHITE}Start in
 STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Spulnamme:
 STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Selektear in lân:
 
-STR_NETWORK_START_SERVER_LAN_INTERNET_COMBO                     :{BLACK}{STRING}
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Ynternet
 STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} taskôger{P "" s}
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Maksimaal tal taskôgers:
-STR_NETWORK_START_SERVER_LANGUAGE_COMBO                         :{BLACK}{STRING}
 
 STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Start Spul
 STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Laad Spul
@@ -1045,7 +1038,6 @@ STR_NETWORK_ERROR_CLIENT_SAVEGAME                               :koe it lân net
 ############ End of leave-in-this-order
 
 # Network related errors
-STR_NETWORK_SERVER_MESSAGE                                      :*** {2:STRING}
 ############ Leave those lines in this order!!
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_JOINED_ID                            :*** {STRING} der is ien bykommen(Client #{2:NUM})
@@ -1090,7 +1082,7 @@ STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Levert: 
 
 # Join station window
 
-STR_JOIN_WAYPOINT_CAPTION                                       :{BLACK}Kontrôlepost gearfoegje
+STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Kontrôlepost gearfoegje
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}In apart kontrôlepost bouwe
 
 # Rail construction toolbar
@@ -1315,7 +1307,7 @@ STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Lân fan bedriu
 STR_ABOUT_OPENTTD                                               :{WHITE}Oer OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Orizjineel copyright {COPYRIGHT} 1995 Chris Sawyer, All rights reserved
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD-ferzje {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2009 It OpenTTD team
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 It OpenTTD team
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Spul Opslaan
@@ -1479,9 +1471,9 @@ STR_FINANCES_TOTAL_CAPTION                                      :{WHITE}Totaal:
 STR_FINANCES_BANK_BALANCE_TITLE                                 :{WHITE}Jild
 STR_FINANCES_LOAN_TITLE                                         :{WHITE}Liening
 STR_FINANCES_TOTAL_CURRENCY                                     :{BLACK}{CURRENCY}
-STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Lien {SKIP}{SKIP}{CURRENCY}
+STR_FINANCES_BORROW_BUTTON                                      :{BLACK}Lien {CURRENCY}
 STR_FINANCES_BORROW_TOOLTIP                                     :{BLACK}Lien mear jild. Ctrl+Klik om it maksimale te lienen
-STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Betelje {SKIP}{SKIP}{CURRENCY} werom
+STR_FINANCES_REPAY_BUTTON                                       :{BLACK}Betelje {CURRENCY} werom
 STR_FINANCES_REPAY_TOOLTIP                                      :{BLACK}Betelje in diel fan de liening werom. Ctrl+Klik om it maksimale werom te beteljen
 
 # Company view
@@ -1497,7 +1489,6 @@ STR_COMPANY_VIEW_SHARES_OWNED_BY                                :{WHITE}({COMMA}
 
 STR_COMPANY_VIEW_BUILD_HQ_BUTTON                                :{BLACK}Bou haadkantoar
 STR_COMPANY_VIEW_VIEW_HQ_BUTTON                                 :{BLACK}Sjoch haadkantoar
-STR_COMPANY_VIEW_BUILD_HQ_TOOLTIP                               :{BLACK}Bou haadkantoar / sjoch haadkantoar
 
 STR_COMPANY_VIEW_NEW_FACE_BUTTON                                :{BLACK}Nei Gesicht
 STR_COMPANY_VIEW_NEW_FACE_TOOLTIP                               :{BLACK}Selektear nei gesicht foar de bedriuwslieder
@@ -2271,7 +2262,7 @@ STR_FORMAT_WAYPOINT_NAME                                        :{TOWN} Kontrôl
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :{TOWN} Kontrôlepost #{COMMA}
 
 STR_DEFAULT_SIGN_NAME                                           :Buordsje
-STR_COMPANY_SOMEONE                                             :immen{SKIP}{SKIP}
+STR_COMPANY_SOMEONE                                             :immen
 
 
 # Viewport strings
@@ -2316,8 +2307,6 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
-STR_BLACK_ARROW_DOWN                                            :{BLACK}{DOWNARROW}
-STR_BLACK_ARROW_UP                                              :{BLACK}{UPARROW}
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
 STR_TINY_BLACK_COMA                                             :{TINYFONT}{BLACK}{COMMA}
 STR_TINY_COMMA                                                  :{TINYFONT}{COMMA}
@@ -2340,11 +2329,7 @@ STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 
-STR_BLACK_SMALL_ARROW_UP                                        :{BLACK}{SMALLUPARROW}
-STR_BLACK_SMALL_ARROW_DOWN                                      :{BLACK}{SMALLDOWNARROW}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
-STR_BLACK_SMALL_ARROW_LEFT                                      :{BLACK}{SMALLLEFTARROW}
-STR_BLACK_SMALL_ARROW_RIGHT                                     :{BLACK}{SMALLRIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
 STR_BLACK_2                                                     :{BLACK}2

@@ -62,6 +62,29 @@ struct EndGameHighScoreBaseWindow : Window {
 	{
 		delete this;
 	}
+
+	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
+	{
+		switch (keycode) {
+			/* Keys for telling we want to go on */
+			case WKC_RETURN:
+			case WKC_ESC:
+			case WKC_SPACE:
+				delete this;
+				return ES_HANDLED;
+
+			/* Allow CTRL-Q to work like ALT-F4 in all cases */
+			case 'Q' | WKC_CTRL:
+			case 'Q' | WKC_META:
+				return ES_NOT_HANDLED;
+
+			default:
+				/* We want to handle all keys; we don't want windows in
+				 * the background to open. Especially the ones that do
+				 * locate themselves based on the status-/toolbars. */
+				return ES_HANDLED;
+		}
+	}
 };
 
 /** End game window shown at the end of the game */
@@ -115,11 +138,11 @@ struct EndGameWindow : EndGameHighScoreBaseWindow {
 			SetDParam(0, c->index);
 			SetDParam(1, c->index);
 			SetDParam(2, EndGameGetPerformanceTitleFromValue(c->old_economy[0].performance_history));
-			DrawStringMultiLine(pt.x, pt.x + 640, pt.y + 140, pt.y + 206, STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS, TC_FROMSTRING, SA_CENTER);
+			DrawStringMultiLine(pt.x + 15, pt.x + 640 - 25, pt.y + 90, pt.y + 160, STR_HIGHSCORE_PRESIDENT_OF_COMPANY_ACHIEVES_STATUS, TC_FROMSTRING, SA_CENTER);
 		} else {
 			SetDParam(0, c->index);
 			SetDParam(1, EndGameGetPerformanceTitleFromValue(c->old_economy[0].performance_history));
-			DrawStringMultiLine(pt.x, pt.x + 640, pt.y + 90, pt.y + 210, STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS, TC_FROMSTRING, SA_CENTER);
+			DrawStringMultiLine(pt.x + 36, pt.x + 640, pt.y + 140, pt.y + 206, STR_HIGHSCORE_COMPANY_ACHIEVES_STATUS, TC_FROMSTRING, SA_CENTER);
 		}
 	}
 };
@@ -168,7 +191,7 @@ struct HighScoreWindow : EndGameHighScoreBaseWindow {
 				DrawString(pt.x + 71, pt.x + 569, pt.y + 140 + (i * 55), hs[i].company, colour);
 				SetDParam(0, hs[i].title);
 				SetDParam(1, hs[i].score);
-				DrawString(pt.x + 71, pt.x + 569, pt.y + 160 + (i * 55), STR_HIGHSCORE_STATS, colour);
+				DrawString(pt.x + 71, pt.x + 569, pt.y + 140 + FONT_HEIGHT_LARGE + (i * 55), STR_HIGHSCORE_STATS, colour);
 			}
 		}
 	}
@@ -179,17 +202,17 @@ static const NWidgetPart _nested_highscore_widgets[] = {
 };
 
 static const WindowDesc _highscore_desc(
-	0, 0, 641, 481, 641, 481,
+	WDP_MANUAL, 0, 0,
 	WC_HIGHSCORE, WC_NONE,
 	0,
-	NULL, _nested_highscore_widgets, lengthof(_nested_highscore_widgets)
+	_nested_highscore_widgets, lengthof(_nested_highscore_widgets)
 );
 
 static const WindowDesc _endgame_desc(
-	0, 0, 641, 481, 641, 481,
+	WDP_MANUAL, 0, 0,
 	WC_ENDSCREEN, WC_NONE,
 	0,
-	NULL, _nested_highscore_widgets, lengthof(_nested_highscore_widgets)
+	_nested_highscore_widgets, lengthof(_nested_highscore_widgets)
 );
 
 /** Show the highscore table for a given difficulty. When called from

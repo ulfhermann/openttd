@@ -239,37 +239,13 @@ static void EmitSingleChar(char *buf, int value)
 }
 
 
-static void EmitSetX(char *buf, int value)
-{
-	char *err;
-	int x = strtol(buf, &err, 0);
-	if (*err != '\0') error("SetX param invalid");
-	PutUtf8(SCC_SETX);
-	PutByte((byte)x);
-}
-
-
-static void EmitSetXY(char *buf, int value)
-{
-	char *err;
-
-	int x = strtol(buf, &err, 0);
-	if (*err != ' ') error("SetXY param invalid");
-	int y = strtol(err + 1, &err, 0);
-	if (*err != 0) error("SetXY param invalid");
-
-	PutUtf8(SCC_SETXY);
-	PutByte((byte)x);
-	PutByte((byte)y);
-}
-
 /* The plural specifier looks like
  * {NUM} {PLURAL -1 passenger passengers} then it picks either passenger/passengers depending on the count in NUM */
 
 /* This is encoded like
  *  CommandByte <ARG#> <NUM> {Length of each string} {each string} */
 
-bool ParseRelNum(char **buf, int *value)
+bool ParseRelNum(char **buf, int *value, int *offset)
 {
 	const char *s = *buf;
 	char *end;
@@ -286,6 +262,12 @@ bool ParseRelNum(char **buf, int *value)
 		*value += v;
 	} else {
 		*value = v;
+	}
+	if (offset != NULL && *end == ':') {
+		/* Take the Nth within */
+		s = end + 1;
+		*offset = strtol(s, &end, 0);
+		if (end == s) return false;
 	}
 	*buf = end;
 	return true;
@@ -327,7 +309,7 @@ char *ParseWord(char **buf)
 }
 
 /* Forward declaration */
-static int TranslateArgumentIdx(int arg);
+static int TranslateArgumentIdx(int arg, int offset = 0);
 
 static void EmitWordList(const char * const *words, uint nw)
 {
@@ -342,11 +324,12 @@ static void EmitWordList(const char * const *words, uint nw)
 static void EmitPlural(char *buf, int value)
 {
 	int argidx = _cur_argidx;
+	int offset = 0;
 	const char *words[5];
 	int nw = 0;
 
 	/* Parse out the number, if one exists. Otherwise default to prev arg. */
-	if (!ParseRelNum(&buf, &argidx)) argidx--;
+	if (!ParseRelNum(&buf, &argidx, &offset)) argidx--;
 
 	/* Parse each string */
 	for (nw = 0; nw < 5; nw++) {
@@ -375,7 +358,7 @@ static void EmitPlural(char *buf, int value)
 	}
 
 	PutUtf8(SCC_PLURAL_LIST);
-	PutByte(TranslateArgumentIdx(argidx));
+	PutByte(TranslateArgumentIdx(argidx, offset));
 	EmitWordList(words, nw);
 }
 
@@ -383,6 +366,7 @@ static void EmitPlural(char *buf, int value)
 static void EmitGender(char *buf, int value)
 {
 	int argidx = _cur_argidx;
+	int offset = 0;
 	uint nw;
 
 	if (buf[0] == '=') {
@@ -401,7 +385,7 @@ static void EmitGender(char *buf, int value)
 
 		/* This is a {G 0 foo bar two} command.
 		 * If no relative number exists, default to +0 */
-		if (!ParseRelNum(&buf, &argidx)) {}
+		if (!ParseRelNum(&buf, &argidx, &offset)) {}
 
 		for (nw = 0; nw < MAX_NUM_GENDER; nw++) {
 			words[nw] = ParseWord(&buf);
@@ -409,7 +393,7 @@ static void EmitGender(char *buf, int value)
 		}
 		if (nw != _numgenders) error("Bad # of arguments for gender command");
 		PutUtf8(SCC_GENDER_LIST);
-		PutByte(TranslateArgumentIdx(argidx));
+		PutByte(TranslateArgumentIdx(argidx, offset));
 		EmitWordList(words, nw);
 	}
 }
@@ -972,20 +956,29 @@ static void WriteStringsH(const char *filename)
 	}
 }
 
-static int TranslateArgumentIdx(int argidx)
+static int TranslateArgumentIdx(int argidx, int offset)
 {
 	int sum;
 
 	if (argidx < 0 || (uint)argidx >= lengthof(_cur_pcs.cmd)) {
 		error("invalid argidx %d", argidx);
 	}
+	const CmdStruct *cs = _cur_pcs.cmd[argidx];
+	if (cs != NULL && cs->consumes <= offset) {
+		error("invalid argidx offset %d:%d", argidx, offset);
+	}
+
+	if (_cur_pcs.cmd[argidx] == NULL) {
+		error("no command for this argidx %d", argidx);
+	}
 
 	for (int i = sum = 0; i < argidx; i++) {
 		const CmdStruct *cs = _cur_pcs.cmd[i];
+
 		sum += (cs != NULL) ? cs->consumes : 1;
 	}
 
-	return sum;
+	return sum + offset;
 }
 
 static void PutArgidxCommand()
@@ -1228,11 +1221,7 @@ int CDECL main(int argc, char *argv[])
 						break;
 
 					default:
-						if (cs->proc == EmitSetX) {
-							flags = '1'; // Command needs one parameter
-						} else if (cs->proc == EmitSetXY) {
-							flags = '2'; // Command needs two parameters
-						} else if (cs->proc == EmitGender) {
+						if (cs->proc == EmitGender) {
 							flags = 'g'; // Command needs number of parameters defined by number of genders
 						} else if (cs->proc == EmitPlural) {
 							flags = 'p'; // Command needs number of parameters defined by plural value

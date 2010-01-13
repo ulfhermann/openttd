@@ -23,9 +23,7 @@
 /** Widget numbers of the on-screen keyboard (OSK) window. */
 enum OskWidgets {
 	OSK_WIDGET_CAPTION,         ///< Title bar.
-	OSK_WIDGET_TEXT_BACKGROUND, ///< Background around the edit box.
 	OSK_WIDGET_TEXT,            ///< Edit box.
-	OSK_WIDGET_KEYS_BACKGROUND, ///< Background of the keys.
 	OSK_WIDGET_CANCEL,          ///< Cancel key.
 	OSK_WIDGET_OK,              ///< Ok key.
 	OSK_WIDGET_BACKSPACE,       ///< Backspace key.
@@ -75,14 +73,9 @@ struct OskWindow : public Window {
 		this->parent = parent;
 		assert(parent != NULL);
 
-		if (parent->widget != NULL) {
-			this->caption = (parent->widget[button].data != STR_NULL) ? parent->widget[button].data : parent->caption;
-		}
-		if (parent->nested_array != NULL) {
-			NWidgetCore *par_wid = parent->GetWidget<NWidgetCore>(button);
-			assert(par_wid != NULL);
-			this->caption = (par_wid->widget_data != STR_NULL) ? par_wid->widget_data : parent->caption;
-		}
+		NWidgetCore *par_wid = parent->GetWidget<NWidgetCore>(button);
+		assert(par_wid != NULL);
+		this->caption = (par_wid->widget_data != STR_NULL) ? par_wid->widget_data : parent->caption;
 
 		this->qs         = parent;
 		this->text_btn   = button;
@@ -298,8 +291,8 @@ static void AddKey(NWidgetHorizontal *hor, int height, int num_half, WidgetType 
 /** Construct the top row keys (cancel, ok, backspace). */
 static NWidgetBase *MakeTopKeys(int *biggest_index)
 {
-	NWidgetHorizontal *hor = new NWidgetHorizontal;
-	int key_height = 12;
+	NWidgetHorizontal *hor = new NWidgetHorizontal();
+	int key_height = FONT_HEIGHT_NORMAL + 2;
 
 	AddKey(hor, key_height, 6 * 2, WWT_TEXTBTN,    OSK_WIDGET_CANCEL,    STR_BUTTON_CANCEL,  biggest_index);
 	AddKey(hor, key_height, 6 * 2, WWT_TEXTBTN,    OSK_WIDGET_OK,        STR_BUTTON_OK,      biggest_index);
@@ -310,8 +303,8 @@ static NWidgetBase *MakeTopKeys(int *biggest_index)
 /** Construct the row containing the digit keys. */
 static NWidgetBase *MakeNumberKeys(int *biggest_index)
 {
-	NWidgetHorizontal *hor = new NWidgetHorizontal;
-	int key_height = 16;
+	NWidgetHorizontal *hor = new NWidgetHorizontalLTR();
+	int key_height = FONT_HEIGHT_NORMAL + 6;
 
 	for (int widnum = OSK_WIDGET_NUMBERS_FIRST; widnum <= OSK_WIDGET_NUMBERS_LAST; widnum++) {
 		AddKey(hor, key_height, 2, WWT_PUSHBTN, widnum, 0x0, biggest_index);
@@ -322,8 +315,8 @@ static NWidgetBase *MakeNumberKeys(int *biggest_index)
 /** Construct the qwerty row keys. */
 static NWidgetBase *MakeQwertyKeys(int *biggest_index)
 {
-	NWidgetHorizontal *hor = new NWidgetHorizontal;
-	int key_height = 16;
+	NWidgetHorizontal *hor = new NWidgetHorizontalLTR();
+	int key_height = FONT_HEIGHT_NORMAL + 6;
 
 	AddKey(hor, key_height, 3, WWT_PUSHIMGBTN, OSK_WIDGET_SPECIAL, SPR_OSK_SPECIAL, biggest_index);
 	for (int widnum = OSK_WIDGET_QWERTY_FIRST; widnum <= OSK_WIDGET_QWERTY_LAST; widnum++) {
@@ -336,8 +329,8 @@ static NWidgetBase *MakeQwertyKeys(int *biggest_index)
 /** Construct the asdfg row keys. */
 static NWidgetBase *MakeAsdfgKeys(int *biggest_index)
 {
-	NWidgetHorizontal *hor = new NWidgetHorizontal;
-	int key_height = 16;
+	NWidgetHorizontal *hor = new NWidgetHorizontalLTR();
+	int key_height = FONT_HEIGHT_NORMAL + 6;
 
 	AddKey(hor, key_height, 4, WWT_IMGBTN, OSK_WIDGET_CAPS, SPR_OSK_CAPS, biggest_index);
 	for (int widnum = OSK_WIDGET_ASDFG_FIRST; widnum <= OSK_WIDGET_ASDFG_LAST; widnum++) {
@@ -349,8 +342,8 @@ static NWidgetBase *MakeAsdfgKeys(int *biggest_index)
 /** Construct the zxcvb row keys. */
 static NWidgetBase *MakeZxcvbKeys(int *biggest_index)
 {
-	NWidgetHorizontal *hor = new NWidgetHorizontal;
-	int key_height = 16;
+	NWidgetHorizontal *hor = new NWidgetHorizontalLTR();
+	int key_height = FONT_HEIGHT_NORMAL + 6;
 
 	AddKey(hor, key_height, 3, WWT_IMGBTN, OSK_WIDGET_SHIFT, SPR_OSK_SHIFT, biggest_index);
 	for (int widnum = OSK_WIDGET_ZXCVB_FIRST; widnum <= OSK_WIDGET_ZXCVB_LAST; widnum++) {
@@ -363,8 +356,8 @@ static NWidgetBase *MakeZxcvbKeys(int *biggest_index)
 /** Construct the spacebar row keys. */
 static NWidgetBase *MakeSpacebarKeys(int *biggest_index)
 {
-	NWidgetHorizontal *hor = new NWidgetHorizontal;
-	int key_height = 16;
+	NWidgetHorizontal *hor = new NWidgetHorizontal();
+	int key_height = FONT_HEIGHT_NORMAL + 6;
 
 	AddKey(hor, key_height,  8, NWID_SPACER, 0, 0, biggest_index);
 	AddKey(hor, key_height, 13, WWT_PUSHTXTBTN, OSK_WIDGET_SPACE, STR_EMPTY, biggest_index);
@@ -377,10 +370,10 @@ static NWidgetBase *MakeSpacebarKeys(int *biggest_index)
 
 static const NWidgetPart _nested_osk_widgets[] = {
 	NWidget(WWT_CAPTION, COLOUR_GREY, OSK_WIDGET_CAPTION), SetDataTip(STR_WHITE_STRING, STR_NULL),
-	NWidget(WWT_PANEL, COLOUR_GREY, OSK_WIDGET_TEXT_BACKGROUND),
+	NWidget(WWT_PANEL, COLOUR_GREY),
 		NWidget(WWT_EDITBOX, COLOUR_GREY, OSK_WIDGET_TEXT), SetMinimalSize(252, 12), SetPadding(2, 2, 2, 2),
 	EndContainer(),
-	NWidget(WWT_PANEL, COLOUR_GREY, OSK_WIDGET_KEYS_BACKGROUND), SetPIP(5, 2, 3),
+	NWidget(WWT_PANEL, COLOUR_GREY), SetPIP(5, 2, 3),
 		NWidgetFunction(MakeTopKeys), SetPadding(0, 3, 0, 3),
 		NWidgetFunction(MakeNumberKeys), SetPadding(0, 3, 0, 3),
 		NWidgetFunction(MakeQwertyKeys), SetPadding(0, 3, 0, 3),
@@ -391,10 +384,10 @@ static const NWidgetPart _nested_osk_widgets[] = {
 };
 
 static const WindowDesc _osk_desc(
-	WDP_CENTER, WDP_CENTER, 256, 140, 256, 140,
+	WDP_CENTER, 0, 0,
 	WC_OSK, WC_NONE,
-	WDF_STD_TOOLTIPS | WDF_STD_BTN | WDF_DEF_WIDGET | WDF_UNCLICK_BUTTONS,
-	NULL, _nested_osk_widgets, lengthof(_nested_osk_widgets)
+	WDF_UNCLICK_BUTTONS,
+	_nested_osk_widgets, lengthof(_nested_osk_widgets)
 );
 
 /**

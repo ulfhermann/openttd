@@ -190,7 +190,7 @@ void FixOldVehicles()
 		if (v->type == VEH_ROAD) {
 			RoadVehicle *rv = RoadVehicle::From(v);
 			if (rv->state != RVSB_IN_DEPOT && rv->state != RVSB_WORMHOLE) {
-				ClrBit(rv->state, RVS_IS_STOPPING);
+				ClrBit(rv->state, 2);
 			}
 		}
 
@@ -776,10 +776,10 @@ static bool LoadOldStation(LoadgameState *ls, int num)
 }
 
 static const OldChunks industry_chunk[] = {
-	OCL_SVAR(   OC_TILE, Industry, xy ),
+	OCL_SVAR(   OC_TILE, Industry, location.tile ),
 	OCL_VAR ( OC_UINT32,   1, &_old_town_index ),
-	OCL_SVAR(  OC_UINT8, Industry, width ),
-	OCL_SVAR(  OC_UINT8, Industry, height ),
+	OCL_SVAR(  OC_UINT8, Industry, location.w ),
+	OCL_SVAR(  OC_UINT8, Industry, location.h ),
 	OCL_NULL( 2 ),  ///< used to be industry's produced_cargo
 
 	OCL_SVAR( OC_TTD | OC_UINT16, Industry, produced_cargo_waiting[0] ),
@@ -825,7 +825,7 @@ static bool LoadOldIndustry(LoadgameState *ls, int num)
 	Industry *i = new (num) Industry();
 	if (!LoadChunk(ls, i, industry_chunk)) return false;
 
-	if (i->xy != 0) {
+	if (i->location.tile != 0) {
 		i->town = Town::Get(RemapTownIndex(_old_town_index));
 
 		if (_savegame_type == SGT_TTO) {
@@ -1129,7 +1129,7 @@ static const OldChunks vehicle_chunk[] = {
 	OCL_NULL ( 1 ), ///< num_orders, now calculated
 	OCL_SVAR(  OC_UINT8, Vehicle, cur_order_index ),
 	OCL_SVAR(   OC_TILE, Vehicle, dest_tile ),
-	OCL_SVAR( OC_UINT16, Vehicle, time_counter ),
+	OCL_SVAR( OC_UINT16, Vehicle, load_unload_ticks ),
 	OCL_SVAR( OC_FILE_U16 | OC_VAR_U32, Vehicle, date_of_last_service ),
 	OCL_SVAR( OC_UINT16, Vehicle, service_interval ),
 	OCL_SVAR( OC_FILE_U8 | OC_VAR_U16, Vehicle, last_station_visited ),

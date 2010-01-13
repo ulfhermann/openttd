@@ -19,7 +19,7 @@
 static const RailtypeInfo _original_railtypes[] = {
 	/** Railway */
 	{ // Main Sprites
-		{ SPR_RAIL_TRACK_Y, SPR_RAIL_TRACK_N_S, SPR_RAIL_TRACK_BASE, SPR_RAIL_SINGLE_Y, SPR_RAIL_SINGLE_X,
+		{ SPR_RAIL_TRACK_Y, SPR_RAIL_TRACK_N_S, SPR_RAIL_TRACK_BASE, SPR_RAIL_SINGLE_X, SPR_RAIL_SINGLE_Y,
 			SPR_RAIL_SINGLE_NORTH, SPR_RAIL_SINGLE_SOUTH, SPR_RAIL_SINGLE_EAST, SPR_RAIL_SINGLE_WEST,
 			SPR_TRACKS_FOR_SLOPES_RAIL_BASE,
 			SPR_CROSSING_OFF_X_RAIL,
@@ -81,13 +81,16 @@ static const RailtypeInfo _original_railtypes[] = {
 		/* cost multiplier */
 		8,
 
+		/* accelration type */
+		0,
+
 		/* rail type label */
 		'RAIL',
 	},
 
 	/** Electrified railway */
 	{ // Main Sprites
-		{ SPR_RAIL_TRACK_Y, SPR_RAIL_TRACK_N_S, SPR_RAIL_TRACK_BASE, SPR_RAIL_SINGLE_Y, SPR_RAIL_SINGLE_X,
+		{ SPR_RAIL_TRACK_Y, SPR_RAIL_TRACK_N_S, SPR_RAIL_TRACK_BASE, SPR_RAIL_SINGLE_X, SPR_RAIL_SINGLE_Y,
 			SPR_RAIL_SINGLE_NORTH, SPR_RAIL_SINGLE_SOUTH, SPR_RAIL_SINGLE_EAST, SPR_RAIL_SINGLE_WEST,
 			SPR_TRACKS_FOR_SLOPES_RAIL_BASE,
 			SPR_CROSSING_OFF_X_RAIL,
@@ -153,13 +156,16 @@ static const RailtypeInfo _original_railtypes[] = {
 		/* cost multiplier */
 		12,
 
+		/* acceleration type */
+		0,
+
 		/* rail type label */
 		'ELRL',
 	},
 
 	/** Monorail */
 	{ // Main Sprites
-		{ SPR_MONO_TRACK_Y, SPR_MONO_TRACK_N_S, SPR_MONO_TRACK_BASE, SPR_MONO_SINGLE_Y, SPR_MONO_SINGLE_X,
+		{ SPR_MONO_TRACK_Y, SPR_MONO_TRACK_N_S, SPR_MONO_TRACK_BASE, SPR_MONO_SINGLE_X, SPR_MONO_SINGLE_Y,
 			SPR_MONO_SINGLE_NORTH, SPR_MONO_SINGLE_SOUTH, SPR_MONO_SINGLE_EAST, SPR_MONO_SINGLE_WEST,
 			SPR_TRACKS_FOR_SLOPES_MONO_BASE,
 			SPR_CROSSING_OFF_X_MONO,
@@ -221,13 +227,16 @@ static const RailtypeInfo _original_railtypes[] = {
 		/* cost multiplier */
 		16,
 
+		/* acceleration type */
+		1,
+
 		/* rail type label */
 		'MONO',
 	},
 
 	/** Maglev */
 	{ // Main sprites
-		{ SPR_MGLV_TRACK_Y, SPR_MGLV_TRACK_N_S, SPR_MGLV_TRACK_BASE, SPR_MGLV_SINGLE_Y, SPR_MGLV_SINGLE_X,
+		{ SPR_MGLV_TRACK_Y, SPR_MGLV_TRACK_N_S, SPR_MGLV_TRACK_BASE, SPR_MGLV_SINGLE_X, SPR_MGLV_SINGLE_Y,
 			SPR_MGLV_SINGLE_NORTH, SPR_MGLV_SINGLE_SOUTH, SPR_MGLV_SINGLE_EAST, SPR_MGLV_SINGLE_WEST,
 			SPR_TRACKS_FOR_SLOPES_MAGLEV_BASE,
 			SPR_CROSSING_OFF_X_MAGLEV,
@@ -288,6 +297,9 @@ static const RailtypeInfo _original_railtypes[] = {
 
 		/* cost multiplier */
 		24,
+
+		/* acceleration type */
+		2,
 
 		/* rail type label */
 		'MGLV',

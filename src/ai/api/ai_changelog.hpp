@@ -14,15 +14,16 @@
  * functions may still be available if you return an older API version
  * in GetAPIVersion() in info.nut.
  *
- * \b 0.8.0
+ * \b 1.0.0
  *
- * 0.8.0 is not yet released. The following changes are not set in stone yet.
+ * 1.0.0 is not yet released. The following changes are not set in stone yet.
  *
  * API additions:
  * \li AIBaseStation
- * \li AIBuoyList
+ * \li AIEngine::IsBuildable
  * \li AIEventCompanyAskMerger
  * \li AIIndustry::GetLastMonthTransportedPercentage
+ * \li AIOrder::AIOF_GOTO_NEAREST_DEPOT
  * \li AIRail::RemoveRailStationTileRectangle
  * \li AIRail::RemoveRailWaypointTileRectangle
  * \li AISubsidy::SubsidyParticipantType
@@ -32,18 +33,23 @@
  * \li AISubsidy::GetDestinationIndex
  * \li AITown::GetLastMonthTransportedPercentage
  * \li AIVehicleList_Depot
+ * \li AIWaypoint::WaypointType
+ * \li AIWaypoint::HasWaypointType
+ * \li Some error messages to AIWaypoint
  *
  * API removals:
  * \li AIOrder::ChangeOrder, use AIOrder::SetOrderFlags instead
  * \li AIRail::RemoveRailStationTileRect, use AIRail::RemoveRailStationTileRectangle instead
  * \li AIRail::RemoveRailWaypoint, use AIRail::RemoveRailWaypointTileRectangle instead
  * \li AISign::GetMaxSignID, use AISignList instead
+ * \li AIStation::ERR_STATION_TOO_LARGE, use AIError::ERR_STATION_TOO_SPREAD_OUT instead
  * \li AISubsidy::SourceIsTown, use AISubsidy::GetSourceType instead
  * \li AISubsidy::GetSource, use AISubsidy::GetSourceIndex instead
  * \li AISubsidy::DestinationIsTown, use AISubsidy::GetDestinationType instead
  * \li AISubsidy::GetDestination, use AISubsidy::GetDestinationIndex instead
  * \li AITile::GetHeight, use AITile::GetMinHeight/GetMaxHeight/GetCornerHeight instead
  * \li AITown::GetMaxProduction, use AITown::GetLastMonthProduction instead
+ * \li AIVehicle::SkipToVehicleOrder, use AIOrder::SkipToOrder instead
  * \li AIWaypoint::WAYPOINT_INVALID, use AIBaseStation::STATION_INVALID instead
  *
  * Other changes:
@@ -54,6 +60,8 @@
  *     AIBaseStation, but can still be used as AIStation.GetConstructionDate
  * \li WaypointID was replaced by StationID. All WaypointIDs from previous
  *     savegames are invalid. Use STATION_INVALID instead of WAYPOINT_INVALID
+ * \li AIWaypointList constructor now needs a WaypointType similiar to AIStationList,
+ *     it can also handle buoys.
  * \li AIVehicleList_Station now also works for waypoints
  * \li Stations can be build over rail without signals that is in the right
  *     direction for the to-be built station. It will also convert the rail if
@@ -69,6 +77,34 @@
  *     longer bound to stations used for first delivery, any station can be
  *     used for loading and unloading as long as cargo is transfered from
  *     source to destination.
+ * \li Make AIEngine:CanRefitCargo() not report refittability to mail by
+ *     default for aircraft. It is not necessarily true. This means that even
+ *     if the aircraft can carry mail (as secondary cargo) it does not return
+ *     true if the aircraft cannot carry it as its only cargo.
+ * \li Improve behaviour of (AIEngine|AIEventEnginePreview)::GetCargoType()
+ *     and AIEngine::CanRefitCargo() for articulated vehicles. For
+ *     CanRefitCargo true is returned if at least one part can be refitted.
+ *     For GetCargoType the first most used cargo type is returned.
+ * \li AIIndustryType::GetConstructionCost() now returns -1 if the industry is
+ *     neither buildable nor prospectable.
+ * \li AIEngine::IsValidEngine will now return true if you have at least one
+ *     vehicle of that type in your company, regardless if it's still buildable
+ *     or not. AIEngine::IsBuildable returns only true when you can actually
+ *     build an engine.
+ * \li AITile::GetCargoProduction will now return the number of producers,
+ *     including houses instead the number of producing tiles. This means that
+ *     also industries that do not have a tile within the radius, but where
+ *     the search bounding box and the industry's bounding box intersect, are
+ *     counted. Previously these industries (and their cargos), although they
+ *     produced cargo for a station at the given location, were not returned.
+ *
+ * \b 0.7.5
+ *
+ * No changes
+ *
+ * \b 0.7.4
+ *
+ * No changes
  *
  * \b 0.7.3
  *
@@ -85,7 +121,7 @@
  * \li AIs are now killed when they execute a DoCommand or Sleep at a time
  *     they are not allowed to do so.
  * \li When the API requests a string as parameter you can give every squirrel
- *     type and it'll be converted to a string
+ *     type and it will be converted to a string
  * \li AIs can create subclasses of API classes and use API constants as part
  *     of their own constants
  *

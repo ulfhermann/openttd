@@ -1,7 +1,14 @@
+# Version numbers to update
+!define APPV_MAJOR 1
+!define APPV_MINOR 0
+!define APPV_MAINT 0
+!define APPV_BUILD 1
+!define APPV_EXTRA "-beta2"
+
 !define APPNAME "OpenTTD"   ; Define application name
-!define APPVERSION "0.8.0"  ; Define application version
-!define APPVERSIONINTERNAL "0.8.0.0" ; Define application version in X.X.X.X
-!define INSTALLERVERSION 65 ; NEED TO UPDATE THIS FOR EVERY RELEASE!!!
+!define APPVERSION "${APPV_MAJOR}.${APPV_MINOR}.${APPV_MAINT}${APPV_EXTRA}"  ; Define application version
+!define APPVERSIONINTERNAL "${APPV_MAJOR}.${APPV_MINOR}.${APPV_MAINT}.${APPV_BUILD}" ; Define application version in X.X.X.X
+!define INSTALLERVERSION ${APPV_MAJOR}${APPV_MINOR}${APPV_MAINT}${APPV_BUILD}
 !include ${VERSION_INCLUDE}
 
 !define APPURLLINK "http://www.openttd.org"
@@ -9,6 +16,7 @@
 
 !define OPENGFX_BASE_VERSION "0.7.0"
 !define OPENSFX_BASE_VERSION "0.8.0"
+!define NOSOUND_BASE_VERSION "0.8.0"
 
 !define MUI_ICON "..\..\..\media\openttd.ico"
 !define MUI_UNICON "..\..\..\media\openttd.ico"
@@ -22,7 +30,7 @@ SetCompressor LZMA
 ; Version Info
 Var AddWinPrePopulate
 VIProductVersion "${APPVERSIONINTERNAL}"
-VIAddVersionKey "ProductName" "OpenTTD Installer ${APPBITS} bits version ${EXTRA_VERSION}"
+VIAddVersionKey "ProductName" "OpenTTD ${APPBITS}-bit Installer for Windows ${EXTRA_VERSION}"
 VIAddVersionKey "Comments" "Installs ${APPNAMEANDVERSION}"
 VIAddVersionKey "CompanyName" "OpenTTD Developers"
 VIAddVersionKey "FileDescription" "Installs ${APPNAMEANDVERSION}"
@@ -31,7 +39,7 @@ VIAddVersionKey "InternalName" "InstOpenTTD-${APPARCH}"
 VIAddVersionKey "FileVersion" "${APPVERSION}-${APPARCH}"
 VIAddVersionKey "LegalCopyright" " "
 ; Main Install settings
-Name "${APPNAMEANDVERSION} ${APPBITS} bits version ${EXTRA_VERSION}"
+Name "${APPNAMEANDVERSION} ${APPBITS}-bit for Windows ${EXTRA_VERSION}"
 
 ; NOTE: Keep trailing backslash!
 InstallDirRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenTTD" "Install Folder"
@@ -45,17 +53,15 @@ Var SHORTCUTS
 Var CDDRIVE
 
 ; Modern interface settings
-!include "MUI.nsh"
+!include "MUI2.nsh"
+!include "InstallOptions.nsh"
 
 !define MUI_ABORTWARNING
 !define MUI_WELCOMEPAGE_TITLE_3LINES
 !insertmacro MUI_PAGE_WELCOME
-
-!define MUI_LICENSEPAGE_RADIOBUTTONS
-!insertmacro MUI_DEFAULT MUI_LICENSEPAGE_RADIOBUTTONS_TEXT_ACCEPT "I &accept this agreement"
-!insertmacro MUI_DEFAULT MUI_LICENSEPAGE_RADIOBUTTONS_TEXT_DECLINE "I &do not accept this agreement"
 !insertmacro MUI_PAGE_LICENSE "..\..\..\COPYING"
 
+!define MUI_COMPONENTSPAGE_SMALLDESC
 !insertmacro MUI_PAGE_COMPONENTS
 
 ;---------------------------------
@@ -77,7 +83,7 @@ Page custom SelectCDEnter SelectCDExit ": TTD folder"
 !define MUI_FINISHPAGE_TITLE_3LINES
 !define MUI_FINISHPAGE_RUN_TEXT "Run ${APPNAMEANDVERSION} now!"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\openttd.exe"
-!define MUI_FINISHPAGE_LINK "Visit the OpenTTD site for latest news, FAQs and downloads"
+!define MUI_FINISHPAGE_LINK "Visit the OpenTTD site for the latest news, FAQs and downloads"
 !define MUI_FINISHPAGE_LINK_LOCATION "${APPURLLINK}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\readme.txt"
@@ -104,7 +110,7 @@ Section "!OpenTTD" Section1
 
 	; Copy language files
 	SetOutPath "$INSTDIR\lang\"
-	File ${PATH_ROOT}bin\lang\*.lng
+	File ${PATH_ROOT}bin\lang\english.lng
 
 	; Copy AI files
 	SetOutPath "$INSTDIR\ai\"
@@ -117,9 +123,21 @@ Section "!OpenTTD" Section1
 	File ${PATH_ROOT}bin\data\*.obs
 	File ${PATH_ROOT}bin\data\opntitle.dat
 
+	; Copy the music base metadata files
+	SetOutPath "$INSTDIR\gm\"
+	File ${PATH_ROOT}bin\gm\*.obm
+
 	; Copy the scripts
 	SetOutPath "$INSTDIR\scripts\"
 	File ${PATH_ROOT}bin\scripts\*.*
+
+	; Copy some documention files
+	SetOutPath "$INSTDIR\docs\"
+	File ${PATH_ROOT}docs\obg_format.txt
+	File ${PATH_ROOT}docs\obm_format.txt
+	File ${PATH_ROOT}docs\obs_format.txt
+	File ${PATH_ROOT}docs\multiplayer.txt
+	File ${PATH_ROOT}docs\32bpp.txt
 
 	; Copy the rest of the stuff
 	SetOutPath "$INSTDIR\"
@@ -166,12 +184,23 @@ Section "!OpenTTD" Section1
 	!insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
-;----------------------------------------------------------------------------------
-; OpenGFX files install section. Downloads OpenGFX and installs it
-Section "Download free Graphics" Section3
+;--------------------------------------------------------------
+; OpenTTD translation install section. Copies only translations
+Section "OpenTTD translations" Section6
+	; Overwrite files by default, but don't complain on failure
 	SetOverwrite try
 
-	NSISdl::download "http://binaries.openttd.org/installer/opengfx-${OPENGFX_BASE_VERSION}.tar.7z" "$INSTDIR\data\opengfx.tar.7z"
+	; Copy language files
+	SetOutPath "$INSTDIR\lang\"
+	File ${PATH_ROOT}bin\lang\*.lng
+SectionEnd
+
+;----------------------------------------------------------------------------------
+; OpenGFX files install section. Downloads OpenGFX and installs it
+Section "Download OpenGFX (free graphics set)" Section3
+	SetOverwrite try
+
+	NSISdl::download "http://binaries.openttd.org/installer/opengfx-${OPENGFX_BASE_VERSION}.7z" "$INSTDIR\data\opengfx.7z"
 	Pop $R0 ;Get the return value
 	StrCmp $R0 "success" +3
 		MessageBox MB_OK "Downloading of OpenGFX failed"
@@ -179,9 +208,9 @@ Section "Download free Graphics" Section3
 
 	; Let's extract the files
 	SetOutPath "$INSTDIR\data\"
-	NSIS7z::Extract "$INSTDIR\data\opengfx.tar.7z"
+	NSIS7z::Extract "$INSTDIR\data\opengfx.7z"
 
-	Delete "$INSTDIR\data\opengfx.tar.7z"
+	Delete "$INSTDIR\data\opengfx.7z"
 	SetOutPath "$INSTDIR\"
 Done:
 
@@ -189,10 +218,10 @@ SectionEnd
 
 ;----------------------------------------------------------------------------------
 ; OpenSFX files install section. Downloads OpenSFX and installs it
-Section "Download free Sounds" Section4
+Section "Download OpenSFX (free sound set)" Section4
 	SetOverwrite try
 
-	NSISdl::download "http://binaries.openttd.org/installer/opensfx-${OPENSFX_BASE_VERSION}.tar.7z" "$INSTDIR\data\opensfx.tar.7z"
+	NSISdl::download "http://binaries.openttd.org/installer/opensfx-${OPENSFX_BASE_VERSION}.7z" "$INSTDIR\data\opensfx.7z"
 	Pop $R0 ;Get the return value
 	StrCmp $R0 "success" +3
 		MessageBox MB_OK "Downloading of OpenSFX failed"
@@ -200,9 +229,30 @@ Section "Download free Sounds" Section4
 
 	; Let's extract the files
 	SetOutPath "$INSTDIR\data\"
-	NSIS7z::Extract "$INSTDIR\data\opensfx.tar.7z"
+	NSIS7z::Extract "$INSTDIR\data\opensfx.7z"
 
-	Delete "$INSTDIR\data\opensfx.tar.7z"
+	Delete "$INSTDIR\data\opensfx.7z"
+	SetOutPath "$INSTDIR\"
+Done:
+
+SectionEnd
+
+;----------------------------------------------------------------------------------
+; NoSound files install section. Downloads NoSound and installs it
+Section "Download NoSound (free sound set)" Section5
+	SetOverwrite try
+
+	NSISdl::download "http://binaries.openttd.org/installer/nosound-${NOSOUND_BASE_VERSION}.7z" "$INSTDIR\data\nosound.7z"
+	Pop $R0 ;Get the return value
+	StrCmp $R0 "success" +3
+		MessageBox MB_OK "Downloading of NoSound failed"
+		Goto Done
+
+	; Let's extract the files
+	SetOutPath "$INSTDIR\data\"
+	NSIS7z::Extract "$INSTDIR\data\nosound.7z"
+
+	Delete "$INSTDIR\data\nosound.7z"
 	SetOutPath "$INSTDIR\"
 Done:
 
@@ -210,7 +260,7 @@ SectionEnd
 
 ;----------------------------------------------------------------------------------
 ; TTDLX files install section. Copies all needed TTDLX files from CD or install dir
-Section /o "Copy Game Graphics" Section2
+Section /o "Copy data from Transport Tycoon Deluxe CD-ROM" Section2
 	SetOverwrite try
 	; Let's copy the files with size approximation
 	SetOutPath "$INSTDIR\gm"
@@ -240,9 +290,11 @@ SectionEnd
 
 ; Modern install component descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-	!insertmacro MUI_DESCRIPTION_TEXT ${Section1} "OpenTTD is a fully functional clone of Transport Tycoon Deluxe and is very playable. You need at least one of the game graphics and sound sets installed"
-	!insertmacro MUI_DESCRIPTION_TEXT ${Section3} "Download the free OpenGFX game graphics. This download is about 3 MiB."
-	!insertmacro MUI_DESCRIPTION_TEXT ${Section4} "Download the free OpenSFX game sounds. This download is about 7 MiB."
+	!insertmacro MUI_DESCRIPTION_TEXT ${Section1} "Minimal OpenTTD installation in English. You need at least one of the game graphics and sound sets installed."
+	!insertmacro MUI_DESCRIPTION_TEXT ${Section6} "Translations of OpenTTD."
+	!insertmacro MUI_DESCRIPTION_TEXT ${Section3} "Download the free OpenGFX game graphics set. This download is about 3 MiB."
+	!insertmacro MUI_DESCRIPTION_TEXT ${Section4} "Download the free OpenSFX game sound set. This download is about 10 MiB."
+	!insertmacro MUI_DESCRIPTION_TEXT ${Section5} "Download the free NoSound game sound set. You will not hear anything with this. This download is about 7 KiB."
 	!insertmacro MUI_DESCRIPTION_TEXT ${Section2} "Copies the game graphics and sounds from the Transport Tycoon Deluxe CD."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
@@ -343,9 +395,13 @@ Section "Uninstall"
 	; Music
 	Delete "$INSTDIR\gm\*.gm"
 
-	; Downloaded OpenGFX/OpenSFX
-	Delete "$INSTDIR\data\opengfx.tar"
-	Delete "$INSTDIR\data\opensfx.tar"
+	; Downloaded OpenGFX/OpenSFX/NoSound
+	Delete "$INSTDIR\data\opengfx\*"
+	RMDir  "$INSTDIR\data\opengfx"
+	Delete "$INSTDIR\data\opensfx\*"
+	RMDir  "$INSTDIR\data\opensfx"
+	Delete "$INSTDIR\data\nosound\*"
+	RMDir  "$INSTDIR\data\nosound"
 
 	; Language files
 	Delete "$INSTDIR\lang\*.lng"
@@ -353,12 +409,22 @@ Section "Uninstall"
 	; Scripts
 	Delete "$INSTDIR\scripts\*.*"
 
+	; Documentation
+	Delete "$INSTDIR\docs\*.*"
+
+	; Base sets for music
+	Delete "$INSTDIR\gm\orig_win.obm"
+	Delete "$INSTDIR\gm\no_music.obm"
+
 	; Remove remaining directories
 	RMDir "$SMPROGRAMS\$SHORTCUTS\Extras\"
 	RMDir "$SMPROGRAMS\$SHORTCUTS"
+	RMDir "$INSTDIR\ai"
+	RMDir "$INSTDIR\data"
 	RMDir "$INSTDIR\gm"
 	RMDir "$INSTDIR\lang"
-	RMDir "$INSTDIR\data"
+	RMDir "$INSTDIR\scripts"
+	RMDir "$INSTDIR\docs"
 	RMDir "$INSTDIR"
 
 SectionEnd
@@ -377,7 +443,7 @@ NoAbort:
 
 	GetTempFileName $R0
 	!insertmacro MUI_HEADER_TEXT "Locate TTD" "Setup needs the location of Transport Tycoon Deluxe in order to continue."
-	!insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "CDFinder.ini" "CDFinder"
+	!insertmacro INSTALLOPTIONS_EXTRACT_AS "CDFinder.ini" "CDFinder"
 
 	ClearErrors
 	; Now, let's populate $CDDRIVE
@@ -392,18 +458,18 @@ NoTTD:
 	StrCpy $AddWinPrePopulate "Setup couldn't find TTD. Please enter the path where the graphics files from TTD are stored and press Next to continue."
 TruFinish:
 	ClearErrors
-	!insertmacro MUI_INSTALLOPTIONS_WRITE "CDFinder" "Field 2" "State" $CDDRIVE          ; TTDLX path
-	!insertmacro MUI_INSTALLOPTIONS_WRITE "CDFinder" "Field 3" "Text" $AddWinPrePopulate ; Caption
+	!insertmacro INSTALLOPTIONS_WRITE "CDFinder" "Field 2" "State" $CDDRIVE          ; TTDLX path
+	!insertmacro INSTALLOPTIONS_WRITE "CDFinder" "Field 3" "Text" $AddWinPrePopulate ; Caption
 DoneCD:
 	; Initialize the dialog *AFTER* we've changed the text otherwise we won't see the changes
-	!insertmacro MUI_INSTALLOPTIONS_INITDIALOG "CDFinder"
-	!insertmacro MUI_INSTALLOPTIONS_SHOW
+	!insertmacro INSTALLOPTIONS_INITDIALOG "CDFinder"
+	!insertmacro INSTALLOPTIONS_SHOW
 FunctionEnd
 
 ;----------------------------------------------------------------
 ; Custom page function when 'next' is selected for the TTDLX path
 Function SelectCDExit
-	!insertmacro MUI_INSTALLOPTIONS_READ $CDDRIVE "CDFinder" "Field 2" "State"
+	!insertmacro INSTALLOPTIONS_READ $CDDRIVE "CDFinder" "Field 2" "State"
 	; If trg1r.grf does not exist at the path, retry with DOS version
 	IfFileExists $CDDRIVE\trg1r.grf "" DosCD
 	IfFileExists $CDDRIVE\trgir.grf "" NoCD
@@ -413,20 +479,9 @@ DosCD:
 	IfFileExists $CDDRIVE\TRGI.GRF "" NoCD
 	IfFileExists $CDDRIVE\SAMPLE.CAT hasCD NoCD
 NoCD:
-	MessageBox MB_OK "Setup cannot continue without the Transport Tycoon Deluxe Location!"
+	MessageBox MB_OK "Setup cannot continue without the Transport Tycoon Deluxe location!"
 	Abort
 hasCD:
-FunctionEnd
-
-;----------------------------------------------------------------------------------
-; Disable the "Back" button on finish page if the installer is run on Win9x systems
-Function DisableBack
-	Call GetWindowsVersion
-	Pop $R0
-	StrCmp $R0 "win9x" 0 WinNT
-	!insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
-WinNT:
-	ClearErrors
 FunctionEnd
 
 ;-------------------------------------------------------------------------------
@@ -452,12 +507,12 @@ Function CheckProcessorArchitecture
 	IntCmp $R0 64 Win64 0
 	ClearErrors
 	IntCmp ${APPBITS} 64 0 Done
-	MessageBox MB_OKCANCEL|MB_ICONSTOP "You want to install the 64 bits OpenTTD on a 32 bits Operating System. This is not going to work. Please download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
+	MessageBox MB_OKCANCEL|MB_ICONSTOP "You are trying to install the 64-bit OpenTTD on a 32-bit operating system. This is not going to work. Please download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
 	GoTo Done
 Win64:
 	ClearErrors
 	IntCmp ${APPBITS} 64 Done 0
-	MessageBox MB_OKCANCEL|MB_ICONINFORMATION "You want to install the 32 bits OpenTTD on a 64 bits Operating System. This is not adviced, but will work with reduced capabilities. We suggest that you download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
+	MessageBox MB_OKCANCEL|MB_ICONINFORMATION "You are trying to install the 32-bit OpenTTD on a 64-bit operating system. This is not advised, but will work with reduced capabilities. We suggest that you download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
 	GoTo Done
 Abort:
 	Quit
@@ -473,12 +528,12 @@ Function CheckWindowsVersion
 	StrCmp $R0 "win9x" 0 WinNT
 	ClearErrors
 	StrCmp ${APPARCH} "win9x" Done 0
-	MessageBox MB_OKCANCEL|MB_ICONSTOP "You want to install the Windows 2000, XP and Vista version on Windows 95, 98 or ME. This is will not work. Please download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
+	MessageBox MB_OKCANCEL|MB_ICONSTOP "You are trying to install the Windows 2000, XP and Vista version on Windows 95, 98 or ME. This is will not work. Please download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
 	GoTo Done
 WinNT:
 	ClearErrors
 	StrCmp ${APPARCH} "win9x" 0 Done
-	MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION "You want to install the Windows 95, 98 and ME version on Windows 2000, XP or Vista. This is not adviced, but will work with reduced capabilities. We suggest that you download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
+	MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION "You are trying to install the Windows 95, 98 and ME version on Windows 2000, XP or Vista. This is not advised, but will work with reduced capabilities. We suggest that you download the correct version. Do you really want to continue?" IDOK Done IDCANCEL Abort
 Abort:
 	Quit
 Done:
@@ -493,7 +548,8 @@ Function .onInit
 	StrCpy $SHORTCUTS "OpenTTD"
 
 	SectionSetSize ${Section3} 6144
-	SectionSetSize ${Section4} 10240
+	SectionSetSize ${Section4} 13312
+	SectionSetSize ${Section5} 30
 
 	SectionSetFlags 0 17
 
@@ -518,13 +574,14 @@ WelcomeToSetup:
 	SectionSetFlags ${Section2} 0x80 ; set bit 7
 	SectionSetFlags ${Section3} 0x80 ; set bit 7
 	SectionSetFlags ${Section4} 0x80 ; set bit 7
+	SectionSetFlags ${Section5} 0x80 ; set bit 7
 	Goto FinishCallback
 
 VersionsAreEqual:
 	ReadRegStr $UninstallString HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenTTD" "UninstallString"
 	IfFileExists "$UninstallString" "" FinishCallback
 	MessageBox MB_YESNO|MB_ICONQUESTION \
-		"Setup detected ${APPNAMEANDVERSION} on your system. That's the version this program will install.$\n \
+		"Setup detected ${APPNAMEANDVERSION} on your system. This is the same version that this program will install.$\n \
 		Are you trying to uninstall it?" \
 		IDYES DoUninstall IDNO FinishCallback
 DoUninstall: ; You have the same version as this installer.  This allows you to uninstall.

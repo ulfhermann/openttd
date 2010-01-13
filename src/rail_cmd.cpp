@@ -17,7 +17,7 @@
 #include "command_func.h"
 #include "engine_base.h"
 #include "depot_base.h"
-#include "yapf/yapf.h"
+#include "pathfinder/yapf/yapf_cache.h"
 #include "newgrf_engine.h"
 #include "landscape_type.h"
 #include "newgrf_commons.h"
@@ -33,6 +33,7 @@
 #include "functions.h"
 #include "elrail_func.h"
 #include "town.h"
+#include "pbs.h"
 
 #include "table/strings.h"
 #include "table/railtypes.h"
@@ -297,7 +298,7 @@ static CommandCost CheckRailSlope(Slope tileh, TrackBits rail_bits, TrackBits ex
 	}
 
 	Foundation f_old = GetRailFoundation(tileh, existing);
-	return CommandCost(EXPENSES_CONSTRUCTION, f_new != f_old ? _price[PR_TERRAFORM] : (Money)0);
+	return CommandCost(EXPENSES_CONSTRUCTION, f_new != f_old ? _price[PR_BUILD_FOUNDATION] : (Money)0);
 }
 
 /* Validate functions for rail building */
@@ -972,7 +973,13 @@ CommandCost CmdBuildSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1,
 		MarkTileDirtyByTile(tile);
 		AddTrackToSignalBuffer(tile, track, _current_company);
 		YapfNotifyTrackLayoutChange(tile, track);
-		if (v != NULL) TryPathReserve(v, true);
+		if (v != NULL) {
+			/* Extend the train's path if it's not stopped or loading, or not at a safe position. */
+			if (!(((v->vehstatus & VS_STOPPED) && v->cur_speed == 0) || v->current_order.IsType(OT_LOADING)) ||
+					!IsSafeWaitingPosition(v, v->tile, v->GetVehicleTrackdir(), true, _settings_game.pf.forbid_90_deg)) {
+				TryPathReserve(v, true);
+			}
+		}
 	}
 
 	return cost;
@@ -1213,6 +1220,18 @@ CommandCost CmdRemoveSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1
 		Train *v = NULL;
 		if (HasReservedTracks(tile, TrackToTrackBits(track))) {
 			v = GetTrainForReservation(tile, track);
+		} else if (IsPbsSignal(GetSignalType(tile, track))) {
+			/* PBS signal, might be the end of a path reservation. */
+			Trackdir td = TrackToTrackdir(track);
+			for (int i = 0; v == NULL && i < 2; i++, td = ReverseTrackdir(td)) {
+				/* Only test the active signal side. */
+				if (!HasSignalOnTrackdir(tile, ReverseTrackdir(td))) continue;
+				TileIndex next = TileAddByDiagDir(tile, TrackdirToExitdir(td));
+				TrackBits tracks = TrackdirBitsToTrackBits(TrackdirReachesTrackdirs(td));
+				if (HasReservedTracks(next, tracks)) {
+					v = GetTrainForReservation(next, TrackBitsToTrack(GetReservedTrackbits(next) & tracks));
+				}
+			}
 		}
 		SetPresentSignals(tile, GetPresentSignals(tile) & ~SignalOnTrack(track));
 
@@ -1803,8 +1822,8 @@ static void DrawTrackBits(TileInfo *ti, TrackBits track)
 
 	/* Draw track pieces individually for junction tiles */
 	if (junction) {
-		if (track & TRACK_BIT_X)     DrawGroundSprite(rti->base_sprites.single_y, PAL_NONE);
-		if (track & TRACK_BIT_Y)     DrawGroundSprite(rti->base_sprites.single_x, PAL_NONE);
+		if (track & TRACK_BIT_X)     DrawGroundSprite(rti->base_sprites.single_x, PAL_NONE);
+		if (track & TRACK_BIT_Y)     DrawGroundSprite(rti->base_sprites.single_y, PAL_NONE);
 		if (track & TRACK_BIT_UPPER) DrawGroundSprite(rti->base_sprites.single_n, PAL_NONE);
 		if (track & TRACK_BIT_LOWER) DrawGroundSprite(rti->base_sprites.single_s, PAL_NONE);
 		if (track & TRACK_BIT_LEFT)  DrawGroundSprite(rti->base_sprites.single_w, PAL_NONE);
@@ -1817,14 +1836,14 @@ static void DrawTrackBits(TileInfo *ti, TrackBits track)
 		TrackBits pbs = GetRailReservationTrackBits(ti->tile) & track;
 		if (pbs & TRACK_BIT_X) {
 			if (ti->tileh == SLOPE_FLAT || ti->tileh == SLOPE_ELEVATED) {
-				DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH);
+				DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH);
 			} else {
 				DrawGroundSprite(_track_sloped_sprites[ti->tileh - 1] + rti->base_sprites.single_sloped - 20, PALETTE_CRASH);
 			}
 		}
 		if (pbs & TRACK_BIT_Y) {
 			if (ti->tileh == SLOPE_FLAT || ti->tileh == SLOPE_ELEVATED) {
-				DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH);
+				DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH);
 			} else {
 				DrawGroundSprite(_track_sloped_sprites[ti->tileh - 1] + rti->base_sprites.single_sloped - 20, PALETTE_CRASH);
 			}
@@ -1958,8 +1977,8 @@ static void DrawTile_Track(TileInfo *ti)
 		/* PBS debugging, draw reserved tracks darker */
 		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && HasDepotReservation(ti->tile)) {
 			switch (GetRailDepotDirection(ti->tile)) {
-				case DIAGDIR_SW: DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH); break;
-				case DIAGDIR_SE: DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH); break;
+				case DIAGDIR_SW: DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH); break;
+				case DIAGDIR_SE: DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH); break;
 				default: break;
 			}
 		}
@@ -2490,7 +2509,7 @@ static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, uint z_ol
 		case TRACK_BIT_UPPER: track_corner = CORNER_N; break;
 
 		/* Surface slope must not be changed */
-		default: return (((z_old != z_new) || (tileh_old != tileh_new)) ? CMD_ERROR : CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]));
+		default: return (((z_old != z_new) || (tileh_old != tileh_new)) ? CMD_ERROR : CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]));
 	}
 
 	/* The height of the track_corner must not be changed. The rest ensures GetRailFoundation() already. */
@@ -2498,7 +2517,7 @@ static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, uint z_ol
 	z_new += GetSlopeZInCorner(RemoveHalftileSlope(tileh_new), track_corner);
 	if (z_old != z_new) return CMD_ERROR;
 
-	CommandCost cost = CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]);
+	CommandCost cost = CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	/* Make the ground dirty, if surface slope has changed */
 	if (tileh_old != tileh_new) {
 		/* If there is flat water on the lower halftile add the cost for clearing it */
@@ -2550,7 +2569,7 @@ static CommandCost TerraformTile_Track(TileIndex tile, DoCommandFlag flags, uint
 		return CommandCost(EXPENSES_CONSTRUCTION, was_water ? _price[PR_CLEAR_WATER] : (Money)0);
 	} else if (_settings_game.construction.build_on_slopes && AutoslopeEnabled() &&
 			AutoslopeCheckForEntranceEdge(tile, z_new, tileh_new, GetRailDepotDirection(tile))) {
-		return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_TERRAFORM]);
+		return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	}
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
