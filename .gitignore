@@ -5,6 +5,7 @@ gitmake-build
 bin/*
 bundle/*
 bundles/
+save/
 !bin/data/chars.grf
 !bin/data/openttdd.grf
 !bin/data/openttdw.grf
