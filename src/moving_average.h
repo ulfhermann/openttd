@@ -9,6 +9,7 @@
 #define MOVING_AVERAGE_H_
 
 #include "stdafx.h"
+#include "date_type.h"
 #include "core/pool_type.hpp"
 #include <deque>
 #include <list>
@@ -26,21 +27,14 @@ extern const struct SaveLoad *GetMovingAverageDesc();
 
 class MovingAverage : public MovingAveragePool::PoolItem<&_movingaverage_pool> {
 private:
-	typedef std::list<MovingAverageID> MovingAverageList;
-	typedef std::deque<MovingAverageList> MovingAverageDeque;
-
-	static MovingAverageDeque _moving_averages;
-
 	uint value;
 	uint length;
 
 	void Register();
 
+	friend void OnTick_MovingAverage();
 	friend const SaveLoad *GetMovingAverageDesc();
 public:
-
-	static void Tick();
-
 	MovingAverage(uint length = 0);
 
 	inline uint Length() const
@@ -49,11 +43,13 @@ public:
 	inline uint Value() const
 		{return this->value;}
 
+	inline uint Monthly() const
+		{return this->value * DAY_TICKS * 30 / this->length;}
+
 	inline uint Decrease()
 		{assert(this->length > 0); return (this->value = this->value * (this->length - 1) / this->length);}
 	inline uint Increase(uint increment)
 		{return this->value += increment;}
-
 };
 
 /**
@@ -68,6 +64,13 @@ public:
  * @param var   the variable used as "iterator"
  */
 #define FOR_ALL_MOVING_AVERAGES(var) FOR_ALL_MOVING_AVERAGES_FROM(var, 0)
+
+typedef std::list<MovingAverageID> MovingAverageList;
+typedef std::deque<MovingAverageList> MovingAverageRegistry;
+
+extern MovingAverageRegistry _moving_averages;
+
+void OnTick_MovingAverage();
 
 #endif /* MOVING_AVERAGE_H_ */
 

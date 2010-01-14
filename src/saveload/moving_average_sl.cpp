@@ -22,12 +22,25 @@
 const SaveLoad *GetMovingAverageDesc()
 {
 	static const SaveLoad _moving_average_desc[] = {
-		SLE_VAR(MovingAverage, length, SLE_UINT32),
-		SLE_VAR(MovingAverage, value,  SLE_UINT32),
+		SLE_VAR(MovingAverage, length, SLE_UINT),
+		SLE_VAR(MovingAverage, value,  SLE_UINT),
 		SLE_END()
 	};
 	return _moving_average_desc;
 }
+
+static MovingAverageList _ma_entry;
+static size_t _ma_size;
+
+const SaveLoad _moving_average_registry_size_desc[] = {
+	SLEG_VAR(_ma_size, SLE_UINT),
+	SLE_END()
+};
+
+const SaveLoad _moving_average_registry_entry_desc[] = {
+	SLEG_LST(_ma_entry, SLE_UINT),
+	SLE_END()
+};
 
 static void Save_MOVA()
 {
@@ -36,6 +49,14 @@ static void Save_MOVA()
 	FOR_ALL_MOVING_AVERAGES(ma) {
 		SlSetArrayIndex(ma->index);
 		SlObject(ma, GetMovingAverageDesc());
+	}
+	
+	_ma_size = _moving_averages.size();
+	SlObject(NULL, _moving_average_registry_size_desc);
+
+	for (MovingAverageRegistry::iterator i = _moving_averages.begin(); i != _moving_averages.end(); ++i) {
+		_ma_entry = *i;
+		SlObject(NULL, _moving_average_registry_entry_desc);
 	}
 }
 
@@ -46,6 +67,13 @@ static void Load_MOVA()
 	while ((index = SlIterateArray()) != -1) {
 		MovingAverage *ma = new (index) MovingAverage();
 		SlObject(ma, GetMovingAverageDesc());
+	}
+
+	SlObject(NULL, _moving_average_registry_size_desc);
+	
+	while(_ma_size-- != 0) {
+		SlObject(NULL, _moving_average_registry_entry_desc);
+		_moving_averages.push_back(_ma_entry);
 	}
 }
 

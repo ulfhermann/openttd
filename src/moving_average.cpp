@@ -12,9 +12,9 @@
 MovingAveragePool _movingaverage_pool("MovingAverage");
 INSTANTIATE_POOL_METHODS(MovingAverage)
 
-MovingAverage::MovingAverageDeque MovingAverage::_moving_averages;
+MovingAverageRegistry _moving_averages;
 
-/* static */ void MovingAverage::Tick()
+void OnTick_MovingAverage()
 {
 	MovingAverageList &list = _moving_averages.front();
 	for(MovingAverageList::iterator i = list.begin(); i != list.end(); ++i) {
