@@ -52,7 +52,7 @@ demands: components
 
 components: capacities
 
-capacities: master
+capacities: moving-average
 
 diaglvl: tileiter
 
