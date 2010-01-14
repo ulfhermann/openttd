@@ -22,14 +22,14 @@ MovingAverage::MovingAverageDeque MovingAverage::_moving_averages;
 		if (MovingAverage::IsValidID(id)) {
 			MovingAverage *average = MovingAverage::Get(id);
 			average->Decrease();
-			average->InsertIntoDeque();
+			average->Register();
 		}
 	}
 	_moving_averages.pop_front();
 }
 
 
-void MovingAverage::InsertIntoDeque() {
+void MovingAverage::Register() {
 	assert(this->length > 0);
 	if (_moving_averages.size() <= this->length) {
 		_moving_averages.resize(this->length + 1, MovingAverageList());
@@ -40,5 +40,5 @@ void MovingAverage::InsertIntoDeque() {
 MovingAverage::MovingAverage(uint length) :
 	value(0), length(length)
 {
-	this->InsertIntoDeque();
+	this->Register();
 }

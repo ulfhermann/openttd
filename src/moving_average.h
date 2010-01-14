@@ -22,6 +22,7 @@ typedef Pool<MovingAverage, MovingAverageID, 1024, 1048576, true, false> MovingA
 /** The actual pool with moving averages */
 extern MovingAveragePool _movingaverage_pool;
 
+extern const struct SaveLoad *GetMovingAverageDesc();
 
 class MovingAverage : public MovingAveragePool::PoolItem<&_movingaverage_pool> {
 private:
@@ -31,15 +32,19 @@ private:
 	static MovingAverageDeque _moving_averages;
 
 	uint value;
-
-	void InsertIntoDeque();
-
-public:
-	static void Tick();
-
 	uint length;
 
-	MovingAverage(uint length);
+	void Register();
+
+	friend const SaveLoad *GetMovingAverageDesc();
+public:
+
+	static void Tick();
+
+	MovingAverage(uint length = 0);
+
+	inline uint Length() const
+		{return this->length;}
 
 	inline uint Value() const
 		{return this->value;}
@@ -50,6 +55,19 @@ public:
 		{return this->value += increment;}
 
 };
+
+/**
+ * Iterate over all _valid_ moving averages from the given start
+ * @param var   the variable used as "iterator"
+ * @param start the moving average ID of the first packet to iterate over
+ */
+#define FOR_ALL_MOVING_AVERAGES_FROM(var, start) FOR_ALL_ITEMS_FROM(MovingAverage, movingaverage_index, var, start)
+
+/**
+ * Iterate over all _valid_ moving averages from the begin of the pool
+ * @param var   the variable used as "iterator"
+ */
+#define FOR_ALL_MOVING_AVERAGES(var) FOR_ALL_MOVING_AVERAGES_FROM(var, 0)
 
 #endif /* MOVING_AVERAGE_H_ */
 
