@@ -317,5 +317,6 @@ static FORCEINLINE uint ToPercent16(uint i)
 
 int LeastCommonMultiple(int a, int b);
 int GreatestCommonDivisor(int a, int b);
+int DivideApprox(int a, int b);
 
 #endif /* MATH_FUNC_HPP */

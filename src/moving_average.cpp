@@ -31,10 +31,15 @@ void OnTick_MovingAverage()
 
 void MovingAverage::Register() {
 	assert(this->length > 0);
-	if (_moving_averages.size() <= this->length) {
-		_moving_averages.resize(this->length + 1, MovingAverageList());
+	/* moving_average_unit determines how often the moving averages are calculated.
+	 * Setting each average "further away" in the registry delays its calculation.
+	 * This is taken into account when retrieving the monthly value
+	 */
+	uint real_length = this->length * _settings_game.economy.moving_average_unit * DAY_TICKS;
+	if (_moving_averages.size() <= real_length) {
+		_moving_averages.resize(real_length + 1, MovingAverageList());
 	}
-	_moving_averages[this->length].push_back(this->index);
+	_moving_averages[real_length].push_back(this->index);
 }
 
 MovingAverage::MovingAverage(uint length) :

@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "date_type.h"
+#include "settings_type.h"
 #include "core/pool_type.hpp"
 #include <deque>
 #include <list>
@@ -35,20 +36,20 @@ private:
 	friend void OnTick_MovingAverage();
 	friend const SaveLoad *GetMovingAverageDesc();
 public:
-	MovingAverage(uint length = 0);
+	MovingAverage(uint length = _settings_game.economy.moving_average_length);
 
-	inline uint Length() const
+	FORCEINLINE uint Length() const
 		{return this->length;}
 
-	inline uint Value() const
-		{return this->value;}
+	FORCEINLINE uint Monthly() const
+		{return this->value * 30 / this->length / _settings_game.economy.moving_average_unit;}
 
-	inline uint Monthly() const
-		{return this->value * DAY_TICKS * 30 / this->length;}
+	FORCEINLINE uint Yearly() const
+		{return this->value * 365 / this->length / _settings_game.economy.moving_average_unit;}
 
-	inline uint Decrease()
+	FORCEINLINE uint Decrease()
 		{assert(this->length > 0); return (this->value = this->value * (this->length - 1) / this->length);}
-	inline uint Increase(uint increment)
+	FORCEINLINE uint Increase(uint increment)
 		{return this->value += increment;}
 };
 
