@@ -1372,6 +1372,8 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry(&_settings_economy_industries_page, STR_CONFIG_SETTING_ECONOMY_INDUSTRIES),
 	SettingEntry("economy.inflation"),
 	SettingEntry("economy.smooth_economy"),
+	SettingEntry("economy.moving_average_unit"),
+	SettingEntry("economy.moving_average_length"),
 	SettingEntry("economy.feeder_payment_share"),
 };
 /** Economy sub-page */

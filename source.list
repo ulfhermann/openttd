@@ -182,6 +182,8 @@ livery.h
 map_func.h
 map_type.h
 mixer.h
+moving_average.h
+moving_average.cpp
 network/network.h
 network/network_base.h
 network/network_client.h
@@ -456,6 +458,7 @@ saveload/industry_sl.cpp
 saveload/labelmaps_sl.cpp
 saveload/map_sl.cpp
 saveload/misc_sl.cpp
+saveload/moving_average_sl.cpp
 saveload/newgrf_sl.cpp
 saveload/oldloader.cpp
 saveload/oldloader.h
