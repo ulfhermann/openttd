@@ -13,8 +13,6 @@
 #include "settings_type.h"
 #include "core/math_func.hpp"
 #include "core/pool_type.hpp"
-#include <deque>
-#include <list>
 
 /** Unique identifier for a single moving average. */
 typedef uint32 MovingAverageID;
@@ -65,7 +63,7 @@ public:
  */
 #define FOR_ALL_MOVING_AVERAGES(var) FOR_ALL_MOVING_AVERAGES_FROM(var, 0)
 
-void OnTick_MovingAverage();
+void CallMovingAverageTick();
 
 #endif /* MOVING_AVERAGE_H_ */
 

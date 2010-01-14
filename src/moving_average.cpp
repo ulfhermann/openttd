@@ -13,7 +13,7 @@
 MovingAveragePool _movingaverage_pool("MovingAverage");
 INSTANTIATE_POOL_METHODS(MovingAverage)
 
-void OnTick_MovingAverage()
+void CallMovingAverageTick()
 {
 	uint interval = _settings_game.economy.moving_average_unit * DAY_TICKS;
 	for(uint ma_id = _tick_counter % interval; ma_id < MovingAverage::GetPoolSize(); ++ma_id) {
