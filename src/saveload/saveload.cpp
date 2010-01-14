@@ -42,6 +42,7 @@
 #include "../gamelog.h"
 #include "../string_func.h"
 #include "../engine_base.h"
+#include "../moving_average.h"
 
 #include "table/strings.h"
 
@@ -129,6 +130,7 @@ extern const ChunkHandler _group_chunk_handlers[];
 extern const ChunkHandler _cargopacket_chunk_handlers[];
 extern const ChunkHandler _autoreplace_chunk_handlers[];
 extern const ChunkHandler _labelmaps_chunk_handlers[];
+extern const ChunkHandler _moving_average_chunk_handlers[];
 
 static const ChunkHandler * const _chunk_handlers[] = {
 	_gamelog_chunk_handlers,
@@ -156,6 +158,7 @@ static const ChunkHandler * const _chunk_handlers[] = {
 	_cargopacket_chunk_handlers,
 	_autoreplace_chunk_handlers,
 	_labelmaps_chunk_handlers,
+	_moving_average_chunk_handlers,
 	NULL,
 };
 
@@ -1516,9 +1519,10 @@ static size_t ReferenceToInt(const void *obj, SLRefType rt)
 		case REF_TOWN:      return ((const     Town*)obj)->index + 1;
 		case REF_ORDER:     return ((const    Order*)obj)->index + 1;
 		case REF_ROADSTOPS: return ((const RoadStop*)obj)->index + 1;
-		case REF_ENGINE_RENEWS: return ((const EngineRenew*)obj)->index + 1;
-		case REF_CARGO_PACKET:  return ((const CargoPacket*)obj)->index + 1;
-		case REF_ORDERLIST:     return ((const   OrderList*)obj)->index + 1;
+		case REF_ENGINE_RENEWS:  return ((const   EngineRenew*)obj)->index + 1;
+		case REF_CARGO_PACKET:   return ((const   CargoPacket*)obj)->index + 1;
+		case REF_ORDERLIST:      return ((const     OrderList*)obj)->index + 1;
+		case REF_MOVING_AVERAGE: return ((const MovingAverage*)obj)->index + 1;
 		default: NOT_REACHED();
 	}
 }
@@ -1587,6 +1591,11 @@ static void *IntToReference(size_t index, SLRefType rt)
 		case REF_CARGO_PACKET:
 			if (CargoPacket::IsValidID(index)) return CargoPacket::Get(index);
 			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid CargoPacket");
+
+		case REF_MOVING_AVERAGE:
+			if (MovingAverage::IsValidID(index)) return MovingAverage::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid MovingAverage");
+
 
 		default: NOT_REACHED();
 	}
