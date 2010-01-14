@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "date_type.h"
 #include "settings_type.h"
+#include "core/math_func.hpp"
 #include "core/pool_type.hpp"
 #include <deque>
 #include <list>
@@ -42,15 +43,15 @@ public:
 		{return this->length;}
 
 	FORCEINLINE uint Monthly() const
-		{return this->value * 30 / this->length / _settings_game.economy.moving_average_unit;}
+		{assert(this->length > 0); return this->value * 30 / this->length / _settings_game.economy.moving_average_unit;}
 
 	FORCEINLINE uint Yearly() const
-		{return this->value * 365 / this->length / _settings_game.economy.moving_average_unit;}
+		{assert(this->length > 0); return this->value * 365 / this->length / _settings_game.economy.moving_average_unit;}
 
-	FORCEINLINE uint Decrease()
-		{assert(this->length > 0); return (this->value = this->value * (this->length - 1) / this->length);}
-	FORCEINLINE uint Increase(uint increment)
-		{return this->value += increment;}
+	FORCEINLINE void Decrease()
+		{assert(this->length > 0); this->value = DivideApprox(this->value, (this->length - 1) / this->length);}
+	FORCEINLINE void Increase(uint increment)
+		{this->value += increment;}
 };
 
 /**
