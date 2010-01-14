@@ -32,8 +32,6 @@ private:
 	uint value;
 	uint length;
 
-	void Register();
-
 	friend void OnTick_MovingAverage();
 	friend const SaveLoad *GetMovingAverageDesc();
 public:
@@ -66,11 +64,6 @@ public:
  * @param var   the variable used as "iterator"
  */
 #define FOR_ALL_MOVING_AVERAGES(var) FOR_ALL_MOVING_AVERAGES_FROM(var, 0)
-
-typedef std::list<MovingAverageID> MovingAverageList;
-typedef std::deque<MovingAverageList> MovingAverageRegistry;
-
-extern MovingAverageRegistry _moving_averages;
 
 void OnTick_MovingAverage();
 
