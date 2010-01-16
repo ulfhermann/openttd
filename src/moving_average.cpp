@@ -14,7 +14,7 @@
 #include "variables.h"
 
 template<class Titem>
-/* static */ void MovingAverage::RunAverages()
+/* static */ void RunAverages()
 {
 	uint interval = _settings_game.economy.moving_average_unit * DAY_TICKS;
 	for(uint id = _tick_counter % interval; id < Titem::GetPoolSize(); ++id) {
