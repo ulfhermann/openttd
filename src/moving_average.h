@@ -14,6 +14,7 @@
 
 #include "stdafx.h"
 #include "settings_type.h"
+#include "core/math_func.hpp"
 
 class MovingAverage {
 private:
@@ -34,6 +35,9 @@ public:
 
 	FORCEINLINE uint Decrease(uint value) const
 		{return DivideApprox(value * (this->length), this->length + 1);}
+
+	template<class Titem>
+	void RunAverages();
 };
 
 #endif /* MOVING_AVERAGE_H_ */
