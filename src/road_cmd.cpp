@@ -697,9 +697,9 @@ do_clear:;
 }
 
 /** Build a long piece of road.
- * @param end_tile end tile of drag
+ * @param start_tile start tile of drag (the building cost will appear over this tile)
  * @param flags operation to perform
- * @param p1 start tile of drag
+ * @param p1 end tile of drag
  * @param p2 various bitstuffed elements
  * - p2 = (bit 0) - start tile starts in the 2nd half of tile (p2 & 1)
  * - p2 = (bit 1) - end tile starts in the 2nd half of tile (p2 & 2)
@@ -709,7 +709,7 @@ do_clear:;
  * @param text unused
  * @return the cost of this operation or an error
  */
-CommandCost CmdBuildLongRoad(TileIndex end_tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdBuildLongRoad(TileIndex start_tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 	bool had_bridge = false;
@@ -721,53 +721,55 @@ CommandCost CmdBuildLongRoad(TileIndex end_tile, DoCommandFlag flags, uint32 p1,
 
 	if (p1 >= MapSize()) return CMD_ERROR;
 
-	TileIndex start_tile = p1;
+	TileIndex end_tile = p1;
 	RoadType rt = (RoadType)GB(p2, 3, 2);
 	if (!IsValidRoadType(rt) || !ValParamRoadType(rt)) return CMD_ERROR;
 
+	Axis axis = Extract<Axis, 2>(p2);
 	/* Only drag in X or Y direction dictated by the direction variable */
-	if (!HasBit(p2, 2) && TileY(start_tile) != TileY(end_tile)) return CMD_ERROR; // x-axis
-	if (HasBit(p2, 2)  && TileX(start_tile) != TileX(end_tile)) return CMD_ERROR; // y-axis
+	if (axis == AXIS_X && TileY(start_tile) != TileY(end_tile)) return CMD_ERROR; // x-axis
+	if (axis == AXIS_Y && TileX(start_tile) != TileX(end_tile)) return CMD_ERROR; // y-axis
 
-	/* Swap start and ending tile, also the half-tile drag var (bit 0 and 1) */
+	DiagDirection dir = AxisToDiagDir(axis);
+
+	/* Swap direction, also the half-tile drag var (bit 0 and 1) */
 	if (start_tile > end_tile || (start_tile == end_tile && HasBit(p2, 0))) {
-		TileIndex t = start_tile;
-		start_tile = end_tile;
-		end_tile = t;
-		p2 ^= IsInsideMM(p2 & 3, 1, 3) ? 3 : 0;
+		dir = ReverseDiagDir(dir);
+		p2 ^= 3;
 		drd = DRD_SOUTHBOUND;
 	}
 
 	/* On the X-axis, we have to swap the initial bits, so they
 	 * will be interpreted correctly in the GTTS. Futhermore
 	 * when you just 'click' on one tile to build them. */
-	if (HasBit(p2, 2) == (start_tile == end_tile && HasBit(p2, 0) == HasBit(p2, 1))) drd ^= DRD_BOTH;
+	if ((axis == AXIS_Y) == (start_tile == end_tile && HasBit(p2, 0) == HasBit(p2, 1))) drd ^= DRD_BOTH;
 	/* No disallowed direction bits have to be toggled */
 	if (!HasBit(p2, 5)) drd = DRD_NONE;
 
 	TileIndex tile = start_tile;
-	/* Start tile is the small number. */
+	/* Start tile is the first tile clicked by the user. */
 	for (;;) {
-		RoadBits bits = HasBit(p2, 2) ? ROAD_Y : ROAD_X;
+		RoadBits bits = AxisToRoadBits(axis);
 
-		if (tile == end_tile && !HasBit(p2, 1)) bits &= ROAD_NW | ROAD_NE;
-		if (tile == start_tile && HasBit(p2, 0)) bits &= ROAD_SE | ROAD_SW;
+		/* Road parts only have to be built at the start tile or at the end tile. */
+		if (tile == end_tile && !HasBit(p2, 1)) bits &= DiagDirToRoadBits(ReverseDiagDir(dir));
+		if (tile == start_tile && HasBit(p2, 0)) bits &= DiagDirToRoadBits(dir);
 
 		_error_message = INVALID_STRING_ID;
 		CommandCost ret = DoCommand(tile, drd << 6 | rt << 4 | bits, 0, flags, CMD_BUILD_ROAD);
 		if (CmdFailed(ret)) {
-			if (_error_message != STR_ERROR_ALREADY_BUILT) return CMD_ERROR;
+			if (_error_message != STR_ERROR_ALREADY_BUILT) break;
 		} else {
 			had_success = true;
 			/* Only pay for the upgrade on one side of the bridges and tunnels */
 			if (IsTileType(tile, MP_TUNNELBRIDGE)) {
 				if (IsBridge(tile)) {
-					if ((!had_bridge || GetTunnelBridgeDirection(tile) == DIAGDIR_SE || GetTunnelBridgeDirection(tile) == DIAGDIR_SW)) {
+					if ((!had_bridge || GetTunnelBridgeDirection(tile) == dir)) {
 						cost.AddCost(ret);
 					}
 					had_bridge = true;
 				} else { // IsTunnel(tile)
-					if ((!had_tunnel || GetTunnelBridgeDirection(tile) == DIAGDIR_SE || GetTunnelBridgeDirection(tile) == DIAGDIR_SW)) {
+					if ((!had_tunnel || GetTunnelBridgeDirection(tile) == dir)) {
 						cost.AddCost(ret);
 					}
 					had_tunnel = true;
@@ -779,7 +781,7 @@ CommandCost CmdBuildLongRoad(TileIndex end_tile, DoCommandFlag flags, uint32 p1,
 
 		if (tile == end_tile) break;
 
-		tile += HasBit(p2, 2) ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+		tile += TileOffsByDiagDir(dir);
 	}
 
 	return !had_success ? CMD_ERROR : cost;
@@ -807,9 +809,10 @@ CommandCost CmdRemoveLongRoad(TileIndex end_tile, DoCommandFlag flags, uint32 p1
 	RoadType rt = (RoadType)GB(p2, 3, 2);
 	if (!IsValidRoadType(rt)) return CMD_ERROR;
 
+	Axis axis = Extract<Axis, 2>(p2);
 	/* Only drag in X or Y direction dictated by the direction variable */
-	if (!HasBit(p2, 2) && TileY(start_tile) != TileY(end_tile)) return CMD_ERROR; // x-axis
-	if (HasBit(p2, 2)  && TileX(start_tile) != TileX(end_tile)) return CMD_ERROR; // y-axis
+	if (axis == AXIS_X && TileY(start_tile) != TileY(end_tile)) return CMD_ERROR; // x-axis
+	if (axis == AXIS_Y && TileX(start_tile) != TileX(end_tile)) return CMD_ERROR; // y-axis
 
 	/* Swap start and ending tile, also the half-tile drag var (bit 0 and 1) */
 	if (start_tile > end_tile || (start_tile == end_tile && HasBit(p2, 0))) {
@@ -823,7 +826,7 @@ CommandCost CmdRemoveLongRoad(TileIndex end_tile, DoCommandFlag flags, uint32 p1
 	TileIndex tile = start_tile;
 	/* Start tile is the small number. */
 	for (;;) {
-		RoadBits bits = HasBit(p2, 2) ? ROAD_Y : ROAD_X;
+		RoadBits bits = AxisToRoadBits(axis);
 
 		if (tile == end_tile && !HasBit(p2, 1)) bits &= ROAD_NW | ROAD_NE;
 		if (tile == start_tile && HasBit(p2, 0)) bits &= ROAD_SE | ROAD_SW;
@@ -846,7 +849,7 @@ CommandCost CmdRemoveLongRoad(TileIndex end_tile, DoCommandFlag flags, uint32 p1
 
 		if (tile == end_tile) break;
 
-		tile += HasBit(p2, 2) ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
+		tile += (axis == AXIS_Y) ? TileDiffXY(0, 1) : TileDiffXY(1, 0);
 	}
 
 	return (cost.GetCost() == 0) ? CMD_ERROR : cost;
