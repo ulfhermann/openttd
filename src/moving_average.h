@@ -37,7 +37,7 @@ public:
 		{return DivideApprox(value * (this->length), this->length + 1);}
 
 	template<class Titem>
-	void RunAverages();
+	static void RunAverages();
 };
 
 #endif /* MOVING_AVERAGE_H_ */
