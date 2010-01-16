@@ -1,49 +1,26 @@
+/* $Id$ */
+
 /*
- * moving_average.cpp
- *
- *  Created on: Jan 13, 2010
- *      Author: alve
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file cargopacket.cpp Implementation of moving average functions */
+
+
 #include "moving_average.h"
-#include "core/pool_func.hpp"
+#include "variables.h"
 
-/* Initialize the movingaverage-pool */
-MovingAveragePool _movingaverage_pool("MovingAverage");
-INSTANTIATE_POOL_METHODS(MovingAverage)
-
-MovingAverageRegistry _moving_averages;
-
-void OnTick_MovingAverage()
+template<class Titem>
+/* static */ void RunAverages()
 {
-	MovingAverageList &list = _moving_averages.front();
-	for(MovingAverageList::iterator i = list.begin(); i != list.end(); ++i) {
-		MovingAverageID id = *i;
-		if (MovingAverage::IsValidID(id)) {
-			MovingAverage *average = MovingAverage::Get(id);
-			average->Decrease();
-			average->Register();
+	uint interval = _settings_game.economy.moving_average_unit * DAY_TICKS;
+	for(uint id = _tick_counter % interval; id < Titem::GetPoolSize(); ++id) {
+		Titem *item = Titem::GetIfValid(id);
+		if (item != NULL) {
+			item->RunAverages();
 		}
 	}
-	_moving_averages.pop_front();
-}
-
-
-void MovingAverage::Register() {
-	assert(this->length > 0);
-	/* moving_average_unit determines how often the moving averages are calculated.
-	 * Setting each average "further away" in the registry delays its calculation.
-	 * This is taken into account when retrieving the monthly value
-	 */
-	uint real_length = this->length * _settings_game.economy.moving_average_unit * DAY_TICKS;
-	if (_moving_averages.size() <= real_length) {
-		_moving_averages.resize(real_length + 1, MovingAverageList());
-	}
-	_moving_averages[real_length].push_back(this->index);
-}
-
-MovingAverage::MovingAverage(uint length) :
-	value(0), length(length)
-{
-	this->Register();
 }
