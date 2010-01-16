@@ -68,16 +68,15 @@ struct NullStruct {
 };
 
 enum SLRefType {
-	REF_ORDER          = 0,
-	REF_VEHICLE        = 1,
-	REF_STATION        = 2,
-	REF_TOWN           = 3,
-	REF_VEHICLE_OLD    = 4,
-	REF_ROADSTOPS      = 5,
-	REF_ENGINE_RENEWS  = 6,
-	REF_CARGO_PACKET   = 7,
-	REF_ORDERLIST      = 8,
-	REF_MOVING_AVERAGE = 9,
+	REF_ORDER         = 0,
+	REF_VEHICLE       = 1,
+	REF_STATION       = 2,
+	REF_TOWN          = 3,
+	REF_VEHICLE_OLD   = 4,
+	REF_ROADSTOPS     = 5,
+	REF_ENGINE_RENEWS = 6,
+	REF_CARGO_PACKET  = 7,
+	REF_ORDERLIST     = 8,
 };
 
 #define SL_MAX_VERSION 255

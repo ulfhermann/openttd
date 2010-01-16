@@ -60,7 +60,6 @@
 #include "thread/thread.h"
 #include "station_base.h"
 #include "crashlog.h"
-#include "moving_average.h"
 
 #include "newgrf_commons.h"
 
@@ -1198,7 +1197,6 @@ void StateGameLoop()
 		RunTileLoop();
 		CallVehicleTicks();
 		CallLandscapeTick();
-		CallMovingAverageTick();
 		ClearStorageChanges(true);
 
 		AI::GameLoop();
