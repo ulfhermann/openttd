@@ -44,6 +44,7 @@
 #include "waypoint_base.h"
 #include "waypoint_func.h"
 #include "pbs.h"
+#include "moving_average.h"
 #include "debug.h"
 
 #include "table/strings.h"
@@ -2914,20 +2915,22 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
-static void UpdateStationStats(Station * st) {
+void Station::RunAverages() {
 	uint length = _settings_game.economy.moving_average_length;
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
-		GoodsEntry & good = st->goods[goods_index];
+		GoodsEntry & good = this->goods[goods_index];
 		good.supply = DivideApprox(good.supply * length, length + 1);
 		LinkStatMap & links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
-			if (!Station::IsValidID(id)) {
+			Station *other = Station::GetIfValid(id);
+			if (other == NULL) {
 				links.erase(i++);
 			} else {
+				uint distance = DistanceManhattan(this->xy, other->xy);
+				MovingAverage<LinkStat> ma(distance);
 				LinkStat & ls = i->second;
-				ls *= length;
-				ls /= (length + 1);
+				ls = ma.Decrease(ls);
 				if (ls.capacity == 0) {
 					links.erase(i++);
 				} else {
@@ -3037,16 +3040,12 @@ void OnTick_Station()
 {
 	if (_game_mode == GM_EDITOR) return;
 
+	RunAverages<Station>();
+
 	BaseStation *st;
 	FOR_ALL_BASE_STATIONS(st) {
 		StationHandleSmallTick(st);
-		if (Station::IsExpected(st)) {
-			Station * real_st = Station::From(st);
-			// update the station statistics every <unit> days
-			if ((_tick_counter + real_st->index) % (DAY_TICKS * _settings_game.economy.moving_average_unit) == 0) {
-				UpdateStationStats(real_st);
-			}
-		}
+		
 		/* Run 250 tick interval trigger for station animation.
 		 * Station index is included so that triggers are not all done
 		 * at the same time. */
