@@ -39,7 +39,7 @@ public:
 
 };
 
-template<class Titem> static void RunAverages();
+template<class Titem> void RunAverages();
 
 #endif /* MOVING_AVERAGE_H_ */
 

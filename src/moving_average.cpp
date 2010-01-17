@@ -12,15 +12,17 @@
 
 #include "moving_average.h"
 #include "variables.h"
+#include "station_base.h"
 
-template<class Titem>
-/* static */ void RunAverages()
+template <class Titem> void RunAverages()
 {
 	uint interval = _settings_game.economy.moving_average_unit * DAY_TICKS;
-	for(uint id = _tick_counter % interval; id < Titem::GetPoolSize(); ++id) {
+	for(uint id = _tick_counter % interval; id < Titem::GetPoolSize(); id += interval) {
 		Titem *item = Titem::GetIfValid(id);
 		if (item != NULL) {
 			item->RunAverages();
 		}
 	}
 }
+
+template void RunAverages<Station>();

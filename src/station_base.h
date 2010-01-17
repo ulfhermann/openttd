@@ -31,12 +31,17 @@ public:
 	uint capacity;
 	uint frozen;
 	uint usage;
-	LinkStat() : capacity(0), frozen(0), usage(0) {}
+	LinkStat(uint capacity = 0, uint frozen = 0, uint usage = 0) : 
+		capacity(capacity), frozen(frozen), usage(usage) {}
 
 	inline LinkStat & operator*=(uint factor) {
 		capacity *= factor;
 		usage *= factor;
 		return *this;
+	}
+
+	inline LinkStat operator*(uint factor) {
+		return LinkStat(capacity * factor, frozen, usage * factor);
 	}
 
 	inline LinkStat & operator/=(uint divident) {
@@ -46,6 +51,14 @@ public:
 		}
 		usage /= divident;
 		return *this;
+	}
+
+	inline LinkStat operator/(uint divident) {
+		uint new_cap = capacity / divident;
+		if (new_cap < frozen) {
+			new_cap = frozen;
+		}
+		return LinkStat(new_cap, frozen, usage / divident);
 	}
 
 	inline LinkStat & operator+=(const LinkStat & other)
@@ -61,7 +74,7 @@ public:
 		this->capacity = 0;
 		this->usage = 0;
 		this->frozen = 0;
-	}
+	}	
 };
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
@@ -170,6 +183,8 @@ public:
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;
 
 	/* virtual */ void GetTileArea(TileArea *ta, StationType type) const;
+
+	void RunAverages();
 };
 
 #define FOR_ALL_STATIONS(var) FOR_ALL_BASE_STATIONS_OF_TYPE(Station, var)
