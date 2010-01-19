@@ -31,51 +31,38 @@ public:
 	uint capacity;
 	uint frozen;
 	uint usage;
-	LinkStat(uint capacity = 0, uint frozen = 0, uint usage = 0) : 
+
+	FORCEINLINE LinkStat(uint capacity = 0, uint frozen = 0, uint usage = 0) : 
 		capacity(capacity), frozen(frozen), usage(usage) {}
 
-	inline LinkStat & operator*=(uint factor) {
-		capacity *= factor;
-		usage *= factor;
-		return *this;
-	}
-
-	inline LinkStat operator*(uint factor) {
-		return LinkStat(capacity * factor, frozen, usage * factor);
-	}
-
-	inline LinkStat & operator/=(uint divident) {
-		capacity /= divident;
-		if (capacity < frozen) {
-			capacity = frozen;
-		}
-		usage /= divident;
-		return *this;
-	}
-
-	inline LinkStat operator/(uint divident) {
-		uint new_cap = capacity / divident;
-		if (new_cap < frozen) {
-			new_cap = frozen;
-		}
-		return LinkStat(new_cap, frozen, usage / divident);
-	}
-
-	inline LinkStat & operator+=(const LinkStat & other)
-	{
-		this->capacity += other.capacity;
-		this->usage += other.usage;
-		this->frozen += other.frozen;
-		return *this;
-	}
-
-	inline void Clear()
+	FORCEINLINE void Clear()
 	{
 		this->capacity = 0;
 		this->usage = 0;
 		this->frozen = 0;
 	}	
 };
+
+FORCEINLINE LinkStat operator*(const LinkStat &ls, uint factor) 
+	{return LinkStat(ls.capacity * factor, ls.frozen, ls.usage * factor);}
+
+FORCEINLINE LinkStat operator*(uint factor, const LinkStat &ls) 
+	{return ls * factor;}
+
+FORCEINLINE LinkStat operator/(const LinkStat &ls, uint divident) 
+	{return LinkStat(max(ls.capacity / divident, ls.frozen), ls.frozen, ls.usage / divident);}
+
+FORCEINLINE LinkStat operator+(const LinkStat &a, const LinkStat &b)
+	{return LinkStat(a.capacity + b.capacity, a.frozen + b.frozen, a.usage + b.usage);}
+
+FORCEINLINE LinkStat &operator*=(LinkStat &ls, uint factor)
+	{return ls = ls * factor;}
+
+FORCEINLINE LinkStat &operator/=(LinkStat &ls, uint divident)
+	{return ls = ls / divident;}
+
+FORCEINLINE LinkStat &operator+=(LinkStat &a, const LinkStat &b)
+	{return a = a + b;}
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
 
