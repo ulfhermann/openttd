@@ -18,11 +18,11 @@
 
 template<class Tvalue = uint>
 class MovingAverage {
-private:
+protected:
 	uint length;
 
 public:
-	MovingAverage(uint length = _settings_game.economy.moving_average_length) : length(length) 
+	FORCEINLINE MovingAverage(uint length = _settings_game.economy.moving_average_length) : length(length) 
 		{assert(this->length > 0);}
 
 	FORCEINLINE uint Length() const
@@ -31,12 +31,8 @@ public:
 	FORCEINLINE Tvalue Monthly(const Tvalue &value) const
 		{return value * 30 / this->length / _settings_game.economy.moving_average_unit;}
 
-	FORCEINLINE Tvalue Yearly(const Tvalue &value) const
-		{return value * 365 / this->length / _settings_game.economy.moving_average_unit;}
-
 	FORCEINLINE Tvalue Decrease(const Tvalue &value) const
 		{return value * (this->length) / (this->length + 1);}
-
 };
 
 template<class Titem> void RunAverages();
