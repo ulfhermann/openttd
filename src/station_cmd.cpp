@@ -2916,11 +2916,11 @@ static void UpdateStationRating(Station *st)
 }
 
 void Station::RunAverages() {
-	uint length = _settings_game.economy.moving_average_length;
 	FlowStatSet new_flows;
+	MovingAverage<uint> default_ma;
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = this->goods[goods_index];
-		good.supply = DivideApprox(good.supply * length, length + 1);
+		good.supply = default_ma.Decrease(good.supply);
 		LinkStatMap & links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
@@ -2948,9 +2948,10 @@ void Station::RunAverages() {
 			} else {
 				FlowStatSet & flow_set = i->second;
 				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
-					StationID via = j->via;
-					if (Station::IsValidID(via)) {
-						new_flows.insert(FlowStat(via, j->planned, (j->sent * length) / (length + 1)));
+					Station *via = Station::GetIfValid(j->via);
+					if (via != NULL) {
+						MovingAverage<uint> ma(DistanceManhattan(this->xy, via->xy));
+						new_flows.insert(FlowStat(via->index, j->planned, ma.Decrease(j->sent)));
 					}
 				}
 				flow_set.swap(new_flows);
