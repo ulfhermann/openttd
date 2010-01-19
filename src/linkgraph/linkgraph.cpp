@@ -6,6 +6,7 @@
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
+#include "../moving_average.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -25,6 +26,7 @@ void LinkGraph::CreateComponent(Station * first) {
 	GoodsEntry & good = first->goods[this->cargo];
 	node = component->AddNode(this->current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 	index[this->current_station_id++] = node;
+	MovingAverage<uint> default_ma;
 	// find all stations belonging to the current component
 	while(!search_queue.empty()) {
 		Station * source = search_queue.front();
@@ -45,11 +47,15 @@ void LinkGraph::CreateComponent(Station * first) {
 				GoodsEntry & good = target->goods[cargo];
 				good.last_component = this->current_component_id;
 				search_queue.push(target);
-				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+				node = component->AddNode(
+					target_id, default_ma.Monthly(good.supply), 
+					HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE)
+				);
 				index[target_id] = node;
 			} else {
 				node = index_it->second;
 			}
+			
 			component->AddEdge(index[source_id], node, link_stat.capacity);
 		}
 	}
@@ -144,8 +150,17 @@ void LinkGraphComponent::CalculateDistances() {
 			Station * st1 = Station::Get(nodes[i].station);
 			Station * st2 = Station::Get(nodes[j].station);
 			uint distance = DistanceManhattan(st1->xy, st2->xy);
-			edges[i][j].distance = distance;
-			edges[j][i].distance = distance;
+			Edge &forw = edges[i][j];
+			Edge &back = edges[j][i];
+			forw.distance = distance;
+			back.distance = distance;
+			MovingAverage<uint> ma(distance);
+			if (forw.capacity > 0) {
+				forw.capacity = ma.Monthly(forw.capacity);
+			}
+			if (back.capacity > 0) {
+				back.capacity = ma.Monthly(back.capacity);
+			}
 		}
 	}
 }
