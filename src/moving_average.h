@@ -16,7 +16,7 @@
 #include "settings_type.h"
 #include "core/math_func.hpp"
 
-template<class Tvalue>
+template<class Tvalue = uint>
 class MovingAverage {
 private:
 	uint length;
@@ -28,13 +28,13 @@ public:
 	FORCEINLINE uint Length() const
 		{return this->length;}
 
-	FORCEINLINE Tvalue Monthly(Tvalue &value) const
+	FORCEINLINE Tvalue Monthly(const Tvalue &value) const
 		{return value * 30 / this->length / _settings_game.economy.moving_average_unit;}
 
-	FORCEINLINE Tvalue Yearly(Tvalue &value) const
+	FORCEINLINE Tvalue Yearly(const Tvalue &value) const
 		{return value * 365 / this->length / _settings_game.economy.moving_average_unit;}
 
-	FORCEINLINE Tvalue Decrease(Tvalue &value) const
+	FORCEINLINE Tvalue Decrease(const Tvalue &value) const
 		{return value * (this->length) / (this->length + 1);}
 
 };
