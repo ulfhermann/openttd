@@ -29,41 +29,54 @@ static const byte INITIAL_STATION_RATING = 175;
 
 class LinkStat {
 public:
+	/**
+	 * capacity of the link.
+	 * This is a moving average use MovingAverage::Monthly() to get a meaningful value 
+	 */
 	uint capacity;
+	
+	/**
+	 * capacity of currently loading vehicles
+	 */
 	uint frozen;
+	
+	/**
+	 * usage of the link.
+	 * This is a moving average use MovingAverage::Monthly() to get a meaningful value 
+	 */
 	uint usage;
-	LinkStat() : capacity(0), frozen(0), usage(0) {}
 
-	inline LinkStat & operator*=(uint factor) {
-		capacity *= factor;
-		usage *= factor;
-		return *this;
-	}
+	FORCEINLINE LinkStat(uint capacity = 0, uint frozen = 0, uint usage = 0) : 
+		capacity(capacity), frozen(frozen), usage(usage) {}
 
-	inline LinkStat & operator/=(uint divident) {
-		capacity /= divident;
-		if (capacity < frozen) {
-			capacity = frozen;
-		}
-		usage /= divident;
-		return *this;
-	}
-
-	inline LinkStat & operator+=(const LinkStat & other)
-	{
-		this->capacity += other.capacity;
-		this->usage += other.usage;
-		this->frozen += other.frozen;
-		return *this;
-	}
-
-	inline void Clear()
+	FORCEINLINE void Clear()
 	{
 		this->capacity = 0;
 		this->usage = 0;
 		this->frozen = 0;
-	}
+	}	
 };
+
+FORCEINLINE LinkStat operator*(const LinkStat &ls, uint factor) 
+	{return LinkStat(ls.capacity * factor, ls.frozen, ls.usage * factor);}
+
+FORCEINLINE LinkStat operator*(uint factor, const LinkStat &ls) 
+	{return ls * factor;}
+
+FORCEINLINE LinkStat operator/(const LinkStat &ls, uint divident) 
+	{return LinkStat(max(ls.capacity / divident, ls.frozen), ls.frozen, ls.usage / divident);}
+
+FORCEINLINE LinkStat operator+(const LinkStat &a, const LinkStat &b)
+	{return LinkStat(a.capacity + b.capacity, a.frozen + b.frozen, a.usage + b.usage);}
+
+FORCEINLINE LinkStat &operator*=(LinkStat &ls, uint factor)
+	{return ls = ls * factor;}
+
+FORCEINLINE LinkStat &operator/=(LinkStat &ls, uint divident)
+	{return ls = ls / divident;}
+
+FORCEINLINE LinkStat &operator+=(LinkStat &a, const LinkStat &b)
+	{return a = a + b;}
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
 
@@ -110,6 +123,12 @@ public:
 	{
 		if (airport_tile == INVALID_TILE) return GetAirport(AT_DUMMY);
 		return GetAirport(airport_type);
+	}
+
+	const AirportSpec *GetAirportSpec() const
+	{
+		if (airport_tile == INVALID_TILE) return &AirportSpec::dummy;
+		return AirportSpec::Get(this->airport_type);
 	}
 
 	RoadStop *bus_stops;    ///< All the road stops
@@ -167,6 +186,8 @@ public:
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;
 
 	/* virtual */ void GetTileArea(TileArea *ta, StationType type) const;
+
+	void RunAverages();
 };
 
 #define FOR_ALL_STATIONS(var) FOR_ALL_BASE_STATIONS_OF_TYPE(Station, var)

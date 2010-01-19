@@ -757,10 +757,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\airport_movement.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\animated_tile_func.h"
 				>
 			</File>
@@ -1098,6 +1094,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\mixer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\moving_average.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\moving_average.cpp"
 				>
 			</File>
 			<File
@@ -2184,6 +2188,14 @@
 		<Filter
 			Name="Tables"
 			>
+			<File
+				RelativePath=".\..\src\table\airport_defaults.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\airport_movement.h"
+				>
+			</File>
 			<File
 				RelativePath=".\..\src\table\animcursors.h"
 				>
