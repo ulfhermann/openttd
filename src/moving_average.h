@@ -35,21 +35,6 @@ public:
 		{return value * (this->length) / (this->length + 1);}
 };
 
-class UintMovingAverage : private MovingAverage<uint> {
-private:
-	uint value;
-
-public:
-	FORCEINLINE UintMovingAverage(uint length = _settings_game.economy.moving_average_length) :
-		MovingAverage<uint>(length), value(0) {}
-
-	FORCEINLINE void Increase(uint value) {this->value += value;}
-
-	FORCEINLINE void Decrease() {this->value = this->MovingAverage<uint>::Decrease(this->value);}
-
-	FORCEINLINE uint Value() const {return this->MovingAverage<uint>::Monthly(this->value);}
-};
-
 template<class Titem> void RunAverages();
 
 #endif /* MOVING_AVERAGE_H_ */
