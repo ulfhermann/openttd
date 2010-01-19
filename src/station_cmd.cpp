@@ -2916,10 +2916,9 @@ static void UpdateStationRating(Station *st)
 }
 
 void Station::RunAverages() {
-	uint length = _settings_game.economy.moving_average_length;
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = this->goods[goods_index];
-		good.supply = DivideApprox(good.supply * length, length + 1);
+		good.supply.Decrease();
 		LinkStatMap & links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
@@ -2927,11 +2926,9 @@ void Station::RunAverages() {
 			if (other == NULL) {
 				links.erase(i++);
 			} else {
-				uint distance = DistanceManhattan(this->xy, other->xy);
-				MovingAverage<LinkStat> ma(distance);
 				LinkStat & ls = i->second;
-				ls = ma.Decrease(ls);
-				if (ls.capacity == 0) {
+				ls.Decrease();
+				if (ls.Capacity() == 0) {
 					links.erase(i++);
 				} else {
 					++i;
@@ -2946,9 +2943,8 @@ void IncreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
 			LinkStat & ls = st->goods[v->cargo_type].link_stats[next_station_id];
-			ls.frozen += v->cargo_cap;
-			ls.capacity = max(ls.capacity, ls.frozen);
-			assert(ls.capacity > 0);
+			ls.Freeze(v->cargo_cap);
+			ls.CheckNotNull();
 		}
 	}
 }
@@ -2969,7 +2965,7 @@ void RecalcFrozen(Station * st) {
 		GoodsEntry & good = st->goods[goods_index];
 		LinkStatMap & links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
-			i->second.frozen = 0;
+			i->second.Unfreeze();
 		}
 	}
 
@@ -2999,27 +2995,35 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 				return;
 			} else {
 				LinkStat & link_stat = lstat_it->second;
-				if (link_stat.frozen < v->cargo_cap) {
+				if (link_stat.Frozen() < v->cargo_cap) {
 					DEBUG(misc, 0, "frozen is smaller than cargo cap.");
 					RecalcFrozen(st);
 					return;
 				} else {
-					link_stat.frozen -= v->cargo_cap;
+					link_stat.Unfreeze(v->cargo_cap);
 				}
-				assert(link_stat.capacity > 0);
+				link_stat.CheckNotNull();
 			}
 		}
 	}
 }
 
 void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id) {
-	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
+	assert(st->index != next_station_id && Station::IsValidID(next_station_id));
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
-			LinkStat & link_stat = st->goods[v->cargo_type].link_stats[next_station_id];
-			link_stat.capacity += v->cargo_cap;
-			link_stat.usage += v->cargo.Count();
-			assert(link_stat.capacity > 0);
+			LinkStatMap &stats = st->goods[v->cargo_type].link_stats;
+			LinkStatMap::iterator i = stats.find(next_station_id);
+			if (i == stats.end()) {
+				stats.insert(std::make_pair(next_station_id, LinkStat(
+					DistanceManhattan(st->xy, Station::Get(next_station_id)->xy),
+					v->cargo_cap, 0, v->cargo.Count()
+				)));
+			} else {
+				LinkStat & link_stat = i->second;
+				link_stat.Increase(v->cargo_cap, v->cargo.Count());
+				link_stat.CheckNotNull();
+			}
 		}
 	}
 }
@@ -3086,7 +3090,7 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	GoodsEntry & good = st->goods[type];
 	good.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
-	good.supply += amount;
+	good.supply.Increase(amount);
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
 
