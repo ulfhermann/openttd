@@ -28,8 +28,21 @@ static const byte INITIAL_STATION_RATING = 175;
 
 class LinkStat {
 public:
+	/**
+	 * capacity of the link.
+	 * This is a moving average use MovingAverage::Monthly() to get a meaningful value 
+	 */
 	uint capacity;
+	
+	/**
+	 * capacity of currently loading vehicles
+	 */
 	uint frozen;
+	
+	/**
+	 * usage of the link.
+	 * This is a moving average use MovingAverage::Monthly() to get a meaningful value 
+	 */
 	uint usage;
 
 	FORCEINLINE LinkStat(uint capacity = 0, uint frozen = 0, uint usage = 0) : 
