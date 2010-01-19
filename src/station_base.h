@@ -111,6 +111,23 @@ public:
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
 
+class SupplyMovingAverage : private MovingAverage<uint> {
+private:
+	uint supply;
+
+public:
+	friend const SaveLoad *GetGoodsDesc();
+
+	FORCEINLINE SupplyMovingAverage() : supply(0) {}
+
+	FORCEINLINE void Increase(uint value) {this->supply += value;}
+
+	FORCEINLINE void Decrease() {this->supply = this->MovingAverage<uint>::Decrease(this->supply);}
+
+	FORCEINLINE uint Value() const {return this->MovingAverage<uint>::Monthly(this->supply);}
+};
+
+
 struct GoodsEntry {
 	enum AcceptancePickup {
 		ACCEPTANCE,
@@ -131,7 +148,7 @@ struct GoodsEntry {
 	byte last_speed;
 	byte last_age;
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
-	UintMovingAverage supply;
+	SupplyMovingAverage supply;
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 };
 
