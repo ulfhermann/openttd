@@ -10,26 +10,23 @@
 /** @file newgrf_industrytiles.cpp NewGRF handling of industry tiles. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "variables.h"
 #include "debug.h"
 #include "viewport_func.h"
 #include "landscape.h"
 #include "newgrf.h"
-#include "core/random_func.hpp"
 #include "newgrf_commons.h"
 #include "newgrf_industries.h"
 #include "newgrf_industrytiles.h"
 #include "newgrf_sound.h"
 #include "newgrf_text.h"
 #include "industry.h"
-#include "sprite.h"
-#include "transparency.h"
 #include "functions.h"
 #include "town.h"
 #include "command_func.h"
 #include "animated_tile_func.h"
 #include "water.h"
+#include "sprite.h"
 
 #include "table/strings.h"
 
@@ -175,9 +172,9 @@ static void IndustryDrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGro
 	const DrawTileSprites *dts = group->dts;
 
 	SpriteID image = dts->ground.sprite;
-	SpriteID pal   = dts->ground.pal;
+	PaletteID pal  = dts->ground.pal;
 
-	if (IS_CUSTOM_SPRITE(image)) image += stage;
+	if (HasBit(image, SPRITE_MODIFIER_CUSTOM_SPRITE)) image += stage;
 
 	if (GB(image, 0, SPRITE_WIDTH) != 0) {
 		/* If the ground sprite is the default flat water sprite, draw also canal/river borders
@@ -189,7 +186,7 @@ static void IndustryDrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGro
 		}
 	}
 
-	DrawTileSeq(ti, dts, TO_INDUSTRIES, stage, GENERAL_SPRITE_COLOUR(rnd_colour));
+	DrawNewGRFTileSeq(ti, dts, TO_INDUSTRIES, stage, GENERAL_SPRITE_COLOUR(rnd_colour));
 }
 
 uint16 GetIndustryTileCallback(CallbackID callback, uint32 param1, uint32 param2, IndustryGfx gfx_id, Industry *industry, TileIndex tile)
