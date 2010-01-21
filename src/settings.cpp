@@ -57,10 +57,11 @@
 #include "gamelog.h"
 #include "settings_func.h"
 #include "ini_type.h"
-#include "ai/ai.hpp"
 #include "ai/ai_config.hpp"
 #include "newgrf.h"
 #include "ship.h"
+#include "company_base.h"
+#include "engine_base.h"
 
 #include "void_map.h"
 #include "station_base.h"
@@ -699,7 +700,7 @@ static bool UpdateConsists(int32 p1)
 	Train *t;
 	FOR_ALL_TRAINS(t) {
 		/* Update the consist of all trains so the maximum speed is set correctly. */
-		if (t->IsFrontEngine() || t->IsFreeWagon()) TrainConsistChanged(t, true);
+		if (t->IsFrontEngine() || t->IsFreeWagon()) t->ConsistChanged(true);
 	}
 	return true;
 }
@@ -736,9 +737,24 @@ static bool TrainAccelerationModelChanged(int32 p1)
 	Train *t;
 	FOR_ALL_TRAINS(t) {
 		if (t->IsFrontEngine()) {
-			t->tcache.cached_max_curve_speed = GetTrainCurveSpeedLimit(t);
-			UpdateTrainAcceleration(t);
+			t->tcache.cached_max_curve_speed = t->GetCurveSpeedLimit();
+			t->UpdateAcceleration();
 		}
+	}
+
+	return true;
+}
+
+/**
+ * This function updates the train acceleration cache after a steepness change.
+ * @param p1 Callback parameter.
+ * @return Always true.
+ */
+static bool TrainSlopeSteepnessChanged(int32 p1)
+{
+	Train *t;
+	FOR_ALL_TRAINS(t) {
+		if (t->IsFrontEngine()) t->CargoChanged();
 	}
 
 	return true;
@@ -878,21 +894,6 @@ static int32 ConvertLandscape(const char *value)
 {
 	/* try with the old values */
 	return lookup_oneofmany("normal|hilly|desert|candy", value);
-}
-
-/**
- * Check for decent values been supplied by the user for the noise tolerance setting.
- * The primary idea is to avoid division by zero in game mode.
- * The secondary idea is to make it so the values will be somewhat sane and that towns will
- * not be overcrowed with airports.  It would be easy to abuse such a feature
- * So basically, 200, 400, 800 are the lowest allowed values */
-static int32 CheckNoiseToleranceLevel(const char *value)
-{
-	GameSettings *s = (_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game;
-	for (uint16 i = 0; i < lengthof(s->economy.town_noise_population); i++) {
-		s->economy.town_noise_population[i] = max(uint16(200 * (i + 1)), s->economy.town_noise_population[i]);
-	}
-	return 0;
 }
 
 static bool CheckFreeformEdges(int32 p1)

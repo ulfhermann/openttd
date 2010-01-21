@@ -23,3 +23,4 @@ template <class Titem> void RunAverages()
 		}
 	}
 }
+
