@@ -15,7 +15,6 @@
 #include "../depot_base.h"
 #include "../window_func.h"
 #include "../fios.h"
-#include "../gamelog.h"
 #include "../gamelog_internal.h"
 #include "../network/network.h"
 #include "../gfxinit.h"
@@ -23,8 +22,6 @@
 #include "../industry.h"
 #include "../clear_map.h"
 #include "../vehicle_func.h"
-#include "../newgrf_station.h"
-#include "../openttd.h"
 #include "../debug.h"
 #include "../string_func.h"
 #include "../date_func.h"
@@ -49,6 +46,10 @@
 #include "../animated_tile_func.h"
 #include "../subsidy_base.h"
 #include "../subsidy_func.h"
+#include "../company_base.h"
+#include "../newgrf.h"
+#include "../engine_base.h"
+#include "../engine_func.h"
 
 #include "table/strings.h"
 
@@ -310,6 +311,19 @@ static const GRFIdentifier *GetOverriddenIdentifier(const GRFConfig *c)
 	return c;
 }
 
+/** Was the saveload crash because of missing NewGRFs? */
+static bool _saveload_crash_with_missing_newgrfs = false;
+
+/**
+ * Did loading the savegame cause a crash? If so,
+ * were NewGRFs missing?
+ * @return when the saveload crashed due to missing NewGRFs.
+ */
+bool SaveloadCrashWithMissingNewGRFs()
+{
+	return _saveload_crash_with_missing_newgrfs;
+}
+
 /**
  * Signal handler used to give a user a more useful report for crashes during
  * the savegame loading process; especially when there's problems with the
@@ -341,11 +355,13 @@ static void CDECL HandleSavegameLoadCrash(int signum)
 			char buf[40];
 			md5sumToString(buf, lastof(buf), replaced->md5sum);
 			p += seprintf(p, lastof(buffer), "NewGRF %08X (checksum %s) not found.\n  Loaded NewGRF \"%s\" with same GRF ID instead.\n", BSWAP32(c->grfid), buf, c->filename);
+			_saveload_crash_with_missing_newgrfs = true;
 		}
 		if (c->status == GCS_NOT_FOUND) {
 			char buf[40];
 			md5sumToString(buf, lastof(buf), c->md5sum);
 			p += seprintf(p, lastof(buffer), "NewGRF %08X (%s) not found; checksum %s.\n", BSWAP32(c->grfid), c->filename, buf);
+			_saveload_crash_with_missing_newgrfs = true;
 		}
 	}
 
@@ -1041,7 +1057,7 @@ bool AfterLoadGame()
 		}
 
 		FOR_ALL_TRAINS(v) {
-			if (v->IsFrontEngine() || v->IsFreeWagon()) TrainConsistChanged(v, true);
+			if (v->IsFrontEngine() || v->IsFreeWagon()) v->ConsistChanged(true);
 		}
 
 	}
