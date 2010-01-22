@@ -2864,7 +2864,7 @@ void Station::RunAverages() {
 			} else {
 				LinkStat & ls = i->second;
 				ls.Decrease();
-				if (ls.Capacity() == 0) {
+				if (ls.IsNull()) {
 					links.erase(i++);
 				} else {
 					++i;
@@ -2880,7 +2880,7 @@ void IncreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 		if (v->cargo_cap > 0) {
 			LinkStat & ls = st->goods[v->cargo_type].link_stats[next_station_id];
 			ls.Freeze(v->cargo_cap);
-			ls.CheckNotNull();
+			assert(!ls.IsNull());
 		}
 	}
 }
@@ -2938,7 +2938,7 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 				} else {
 					link_stat.Unfreeze(v->cargo_cap);
 				}
-				link_stat.CheckNotNull();
+				assert(!link_stat.IsNull());
 			}
 		}
 	}
@@ -2958,7 +2958,7 @@ void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id)
 			} else {
 				LinkStat & link_stat = i->second;
 				link_stat.Increase(v->cargo_cap, v->cargo.Count());
-				link_stat.CheckNotNull();
+				assert(!link_stat.IsNull());
 			}
 		}
 	}
