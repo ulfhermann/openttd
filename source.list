@@ -60,6 +60,7 @@ settings.cpp
 signal.cpp
 signs.cpp
 sound.cpp
+sprite.cpp
 spritecache.cpp
 station.cpp
 string.cpp
@@ -182,7 +183,7 @@ landscape_type.h
 linkgraph/demands.h
 linkgraph/demand_settings.h
 linkgraph/linkgraph.h
-linkgraph/linkgraph_types.h
+linkgraph/linkgraph_type.h
 livery.h
 map_func.h
 map_type.h
@@ -482,6 +483,7 @@ saveload/waypoint_sl.cpp
 
 # Tables
 table/airport_defaults.h
+table/airporttiles.h
 table/airport_movement.h
 table/animcursors.h
 table/autorail.h

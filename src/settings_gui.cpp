@@ -10,10 +10,8 @@
 /** @file settings_gui.cpp GUI for settings. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "currency.h"
 #include "gui.h"
-#include "window_gui.h"
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "screenshot.h"
@@ -24,15 +22,16 @@
 #include "strings_func.h"
 #include "window_func.h"
 #include "string_func.h"
-#include "gfx_func.h"
 #include "widgets/dropdown_type.h"
 #include "widgets/dropdown_func.h"
-#include "station_func.h"
+#include "openttd.h"
 #include "highscore.h"
 #include "base_media_base.h"
 #include "company_base.h"
 #include "company_func.h"
 #include "viewport_func.h"
+#include "core/geometry_func.hpp"
+#include "ai/ai.hpp"
 #include <map>
 
 #include "table/sprites.h"
@@ -655,6 +654,11 @@ public:
 			SetDifficultyLevel(3, &this->opt_mod_temp.difficulty); // set difficulty level to custom
 			this->LowerWidget(GDW_LVL_CUSTOM);
 			this->InvalidateData();
+
+			if (widget / 3 == 0 && this->opt_mod_temp.difficulty.max_no_competitors != 0 &&
+					AI::GetInfoList()->size() == 0) {
+				ShowErrorMessage(STR_WARNING_NO_SUITABLE_AI, INVALID_STRING_ID, 0, 0, true);
+			}
 			return;
 		}
 

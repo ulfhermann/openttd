@@ -30,14 +30,17 @@
 #include "vehicle_func.h"
 #include "sound_func.h"
 #include "autoreplace_gui.h"
-#include "gfx_func.h"
 #include "ai/ai.hpp"
 #include "depot_map.h"
 #include "effectvehicle_func.h"
+#include "effectvehicle_base.h"
 #include "roadstop_base.h"
 #include "cargotype.h"
 #include "spritecache.h"
-#include "debug.h"
+#include "core/random_func.hpp"
+#include "engine_base.h"
+#include "company_base.h"
+#include "engine_func.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -142,7 +145,7 @@ SpriteID RoadVehicle::GetImage(Direction direction) const
 	return sprite;
 }
 
-void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal)
+void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal)
 {
 	SpriteID sprite = GetRoadVehIcon(engine);
 	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
@@ -1153,7 +1156,7 @@ static bool CanBuildTramTrackOnTile(CompanyID c, TileIndex t, RoadBits r)
 	CommandCost ret = DoCommand(t, ROADTYPE_TRAM << 4 | r, 0, DC_NONE, CMD_BUILD_ROAD);
 
 	_current_company = original_company;
-	return CmdSucceeded(ret);
+	return ret.Succeeded();
 }
 
 static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *prev)

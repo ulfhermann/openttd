@@ -15,10 +15,9 @@
 #include "base_station_base.h"
 #include "airport.h"
 #include "cargopacket.h"
-#include "cargo_type.h"
 #include "industry_type.h"
-#include "core/geometry_type.hpp"
-#include "linkgraph/linkgraph_types.h"
+#include "linkgraph/linkgraph_type.h"
+#include "moving_average.h"
 #include <list>
 #include <map>
 
@@ -27,8 +26,8 @@ extern StationPool _station_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
 
-class LinkStat {
-public:
+class LinkStat : private MovingAverage<uint> {
+private:
 	/**
 	 * capacity of the link.
 	 * This is a moving average use MovingAverage::Monthly() to get a meaningful value 
@@ -46,39 +45,86 @@ public:
 	 */
 	uint usage;
 
-	FORCEINLINE LinkStat(uint capacity = 0, uint frozen = 0, uint usage = 0) : 
-		capacity(capacity), frozen(frozen), usage(usage) {}
+public:
+	friend const SaveLoad *GetLinkStatDesc();
+
+	FORCEINLINE LinkStat(uint distance = 0, uint capacity = 0, uint frozen = 0, uint usage = 0) : 
+		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
 
 	FORCEINLINE void Clear()
 	{
 		this->capacity = 0;
 		this->usage = 0;
 		this->frozen = 0;
-	}	
+	}
+
+	FORCEINLINE void Decrease()
+	{
+		this->usage = this->MovingAverage<uint>::Decrease(this->usage);
+		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
+	}
+
+	FORCEINLINE uint Capacity()
+	{
+		return this->MovingAverage<uint>::Monthly(this->capacity);
+	}
+
+	FORCEINLINE uint Usage()
+	{
+		return this->MovingAverage<uint>::Monthly(this->usage);
+	}
+
+	FORCEINLINE uint Frozen()
+	{
+		return this->frozen;
+	}
+
+	FORCEINLINE void Increase(uint capacity, uint usage)
+	{
+		this->capacity += capacity;
+		this->usage += usage;
+	}
+
+	FORCEINLINE void Freeze(uint capacity)
+	{
+		this->frozen += capacity;
+		this->capacity = max(this->frozen, this->capacity);
+	}
+
+	FORCEINLINE void Unfreeze(uint capacity)
+	{
+		this->frozen -= capacity;
+	}
+
+	FORCEINLINE void Unfreeze()
+	{
+		this->frozen = 0;
+	}
+
+	FORCEINLINE bool IsNull()
+	{
+		return this->capacity == 0;
+	}
 };
 
-FORCEINLINE LinkStat operator*(const LinkStat &ls, uint factor) 
-	{return LinkStat(ls.capacity * factor, ls.frozen, ls.usage * factor);}
-
-FORCEINLINE LinkStat operator*(uint factor, const LinkStat &ls) 
-	{return ls * factor;}
-
-FORCEINLINE LinkStat operator/(const LinkStat &ls, uint divident) 
-	{return LinkStat(max(ls.capacity / divident, ls.frozen), ls.frozen, ls.usage / divident);}
-
-FORCEINLINE LinkStat operator+(const LinkStat &a, const LinkStat &b)
-	{return LinkStat(a.capacity + b.capacity, a.frozen + b.frozen, a.usage + b.usage);}
-
-FORCEINLINE LinkStat &operator*=(LinkStat &ls, uint factor)
-	{return ls = ls * factor;}
-
-FORCEINLINE LinkStat &operator/=(LinkStat &ls, uint divident)
-	{return ls = ls / divident;}
-
-FORCEINLINE LinkStat &operator+=(LinkStat &a, const LinkStat &b)
-	{return a = a + b;}
-
 typedef std::map<StationID, LinkStat> LinkStatMap;
+
+class SupplyMovingAverage {
+private:
+	uint supply;
+
+public:
+	friend const SaveLoad *GetGoodsDesc();
+
+	FORCEINLINE SupplyMovingAverage() : supply(0) {}
+
+	FORCEINLINE void Increase(uint value) {this->supply += value;}
+
+	FORCEINLINE void Decrease() {this->supply = MovingAverage<uint>().Decrease(this->supply);}
+
+	FORCEINLINE uint Value() const {return MovingAverage<uint>().Monthly(this->supply);}
+};
+
 
 struct GoodsEntry {
 	enum AcceptancePickup {
@@ -101,7 +147,7 @@ struct GoodsEntry {
 	byte last_speed;
 	byte last_age;
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
-	uint supply;
+	SupplyMovingAverage supply;
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
 };
@@ -181,6 +227,18 @@ public:
 	/* virtual */ FORCEINLINE bool TileBelongsToRailStation(TileIndex tile) const
 	{
 		return IsRailStationTile(tile) && GetStationIndex(tile) == this->index;
+	}
+
+	FORCEINLINE bool TileBelongsToAirport(TileIndex tile) const
+	{
+		return IsAirportTile(tile) && GetStationIndex(tile) == this->index;
+	}
+
+	FORCEINLINE TileIndex GetHangarTile(uint hangar_num) const
+	{
+		assert(this->airport_tile != INVALID_TILE);
+		assert(hangar_num < this->GetAirportSpec()->nof_depots);
+		return this->airport_tile + ToTileIndexDiff(this->GetAirportSpec()->depot_table[hangar_num]);
 	}
 
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;

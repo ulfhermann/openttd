@@ -15,7 +15,6 @@
 #include "newgrf_engine.h"
 #include "strings_func.h"
 #include "vehicle_func.h"
-#include "gfx_func.h"
 #include "window_gui.h"
 #include "spritecache.h"
 
@@ -88,7 +87,7 @@ void DrawAircraftImage(const Vehicle *v, int left, int right, int y, VehicleID s
 	int x = rtl ? right - real_sprite->width - real_sprite->x_offs : left - real_sprite->x_offs;
 	bool helicopter = v->subtype == AIR_HELICOPTER;
 
-	SpriteID pal = (v->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(v);
+	PaletteID pal = (v->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(v);
 	DrawSprite(sprite, pal, x, y + 10);
 	if (helicopter) {
 		const Aircraft *a = Aircraft::From(v);

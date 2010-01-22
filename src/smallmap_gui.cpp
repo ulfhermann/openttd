@@ -17,7 +17,6 @@
 #include "window_gui.h"
 #include "tree_map.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "town.h"
 #include "blitter/factory.hpp"
 #include "tunnelbridge_map.h"
@@ -26,6 +25,7 @@
 #include "vehicle_base.h"
 #include "sound_func.h"
 #include "window_func.h"
+#include "company_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -953,11 +953,12 @@ public:
 				 */
 				_left_button_clicked = false;
 
+				const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				w->viewport->dest_scrollpos_x = pt.x + ((_cursor.pos.x - this->left + 2) << 4) - (w->viewport->virtual_width >> 1);
-				w->viewport->dest_scrollpos_y = pt.y + ((_cursor.pos.y - this->top - 16) << 4) - (w->viewport->virtual_height >> 1);
+				w->viewport->dest_scrollpos_x = pt.x + ((_cursor.pos.x - this->left + wid->pos_x) << 4) - (w->viewport->virtual_width  >> 1);
+				w->viewport->dest_scrollpos_y = pt.y + ((_cursor.pos.y - this->top  - wid->pos_y) << 4) - (w->viewport->virtual_height >> 1);
 
 				this->SetDirty();
 			} break;
