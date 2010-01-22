@@ -14,7 +14,6 @@
 
 #include "../spritecache.h"
 #include "../spriteloader/spriteloader.hpp"
-#include "../zoom_type.h"
 
 enum BlitterMode {
 	BM_NORMAL,
@@ -69,7 +68,7 @@ public:
 	 * @param height the height of the buffer.
 	 * @param pal the palette to use.
 	 */
-	virtual void DrawColourMappingRect(void *dst, int width, int height, int pal) = 0;
+	virtual void DrawColourMappingRect(void *dst, int width, int height, PaletteID pal) = 0;
 
 	/**
 	 * Convert a sprite from the loader to our own format.

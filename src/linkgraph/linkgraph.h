@@ -8,7 +8,7 @@
 #include "../cargo_type.h"
 #include "../thread/thread.h"
 #include "../settings_type.h"
-#include "linkgraph_types.h"
+#include "linkgraph_type.h"
 #include <list>
 #include <vector>
 

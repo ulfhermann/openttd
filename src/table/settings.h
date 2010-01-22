@@ -22,6 +22,7 @@ static bool DeleteSelectStationWindow(int32 p1);
 static bool UpdateConsists(int32 p1);
 static bool CheckInterval(int32 p1);
 static bool TrainAccelerationModelChanged(int32 p1);
+static bool TrainSlopeSteepnessChanged(int32 p1);
 static bool DragSignalsDensityChanged(int32);
 static bool TownFoundingChanged(int32 p1);
 static bool DifficultyReset(int32 level);
@@ -29,7 +30,6 @@ static bool DifficultyChange(int32);
 static bool DifficultyNoiseChange(int32 i);
 static bool CheckRoadSide(int p1);
 static int32 ConvertLandscape(const char *value);
-static int32 CheckNoiseToleranceLevel(const char *value);
 static bool CheckFreeformEdges(int32 p1);
 static bool ChangeDynamicEngines(int32 p1);
 static bool StationCatchmentChanged(int32 p1);
@@ -146,8 +146,6 @@ static bool UpdateClientConfigValues(int32 p1);
 	SDT_GENERAL(#var, SDT_INTLIST, SL_ARR, type, flags, guiflags, base, var, lengthof(((base*)8)->var), def, 0, 0, 0, NULL, str, proc, NULL, from, to)
 #define SDT_LIST(base, var, type, flags, guiflags, def, str, proc)\
 	SDT_CONDLIST(base, var, type, 0, SL_MAX_VERSION, flags, guiflags, def, str, proc)
-#define SDT_CONDLISTO(base, var, length, type, from, to, flags, guiflags, def, str, proc, load)\
-	SDT_GENERAL(#var, SDT_INTLIST, SL_ARR, type, flags, guiflags, base, var, length, def, 0, 0, 0, NULL, str, proc, load, from, to)
 
 #define SDT_CONDSTR(base, var, type, from, to, flags, guiflags, def, str, proc)\
 	SDT_GENERAL(#var, SDT_STRING, SL_STR, type, flags, guiflags, base, var, lengthof(((base*)8)->var), def, 0, 0, 0, NULL, str, proc, NULL, from, to)
@@ -309,7 +307,7 @@ static const SettingDesc _gameopt_settings[] = {
 	 SDTG_GENERAL("diff_custom", SDT_INTLIST, SL_ARR, SLE_FILE_I16 | SLE_VAR_U16,    C, 0, _old_diff_custom, 17, 0, 0, 0, 0, NULL, STR_NULL, NULL, 0,  3),
 	 SDTG_GENERAL("diff_custom", SDT_INTLIST, SL_ARR, SLE_UINT16,                    C, 0, _old_diff_custom, 18, 0, 0, 0, 0, NULL, STR_NULL, NULL, 4, SL_MAX_VERSION),
 
-	      SDT_VAR(GameSettings, difficulty.diff_level,    SLE_UINT8,                     0, 0, 0, 0,  3, 0, STR_NULL, NULL),
+	      SDT_VAR(GameSettings, difficulty.diff_level,    SLE_UINT8,                     0, 0, 3, 0,  3, 0, STR_NULL, NULL),
 	    SDT_OMANY(GameSettings, locale.currency,          SLE_UINT8,                     N, 0, 0, CUSTOM_CURRENCY_ID, _locale_currencies, STR_NULL, NULL, NULL),
 	    SDT_OMANY(GameSettings, locale.units,             SLE_UINT8,                     N, 0, 1, 2, _locale_units, STR_NULL, NULL, NULL),
 	/* There are only 21 predefined town_name values (0-20), but you can have more with newgrf action F so allow these bigger values (21-255). Invalid values will fallback to english on use and (undefined string) in GUI. */
@@ -335,7 +333,7 @@ const SettingDesc _settings[] = {
 	/***************************************************************************/
 	/* Saved settings variables. */
 	/* Do not ADD or REMOVE something in this "difficulty.XXX" table or before it. It breaks savegame compatability. */
-	 SDT_CONDVAR(GameSettings, difficulty.max_no_competitors,        SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     2,0,MAX_COMPANIES-1,1,STR_NULL,                                  DifficultyChange),
+	 SDT_CONDVAR(GameSettings, difficulty.max_no_competitors,        SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,0,MAX_COMPANIES-1,1,STR_NULL,                                  DifficultyChange),
 	SDT_CONDNULL(                                                            1, 97, 109),
 	 SDT_CONDVAR(GameSettings, difficulty.number_towns,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NG,     2,     0,      4,  1, STR_NUM_VERY_LOW,                          DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.number_industries,         SLE_UINT8, 97, SL_MAX_VERSION, 0,NG,     4,     0,      4,  1, STR_NONE,                                  DifficultyChange),
@@ -353,7 +351,7 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, difficulty.line_reverse_mode,         SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      1,  1, STR_REVERSE_AT_END_OF_LINE_AND_AT_STATIONS,DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.disasters,                 SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      1,  1, STR_DISASTERS_OFF,                         DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.town_council_tolerance,    SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      2,  1, STR_CITY_APPROVAL_PERMISSIVE,                            DifficultyNoiseChange),
-	 SDT_CONDVAR(GameSettings, difficulty.diff_level,                SLE_UINT8, 97, SL_MAX_VERSION, 0,NG,     0,     0,      3,  0, STR_NULL,                                  DifficultyReset),
+	 SDT_CONDVAR(GameSettings, difficulty.diff_level,                SLE_UINT8, 97, SL_MAX_VERSION, 0,NG,     3,     0,      3,  0, STR_NULL,                                  DifficultyReset),
 
 	/* There are only 21 predefined town_name values (0-20), but you can have more with newgrf action F so allow these bigger values (21-255). Invalid values will fallback to english on use and (undefined string) in GUI. */
  SDT_CONDOMANY(GameSettings, game_creation.town_name,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, 0, 255, _town_names,      STR_NULL,                                  NULL, NULL),
@@ -372,7 +370,7 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, economy.found_town,                   SLE_UINT8,128, SL_MAX_VERSION, 0,MS,TF_FORBIDDEN,TF_BEGIN,TF_END - 1, 1, STR_CONFIG_SETTING_TOWN_FOUNDING, TownFoundingChanged),
 
 	     SDT_VAR(GameSettings, vehicle.train_acceleration_model,     SLE_UINT8,                     0,MS,     0,     0,       1, 1, STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL, TrainAccelerationModelChanged),
-	 SDT_CONDVAR(GameSettings, vehicle.train_slope_steepness,        SLE_UINT8,133, SL_MAX_VERSION, 0, 0,     3,     0,      10, 1, STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS,  NULL),
+	 SDT_CONDVAR(GameSettings, vehicle.train_slope_steepness,        SLE_UINT8,133, SL_MAX_VERSION, 0, 0,     3,     0,      10, 1, STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS,  TrainSlopeSteepnessChanged),
 	    SDT_BOOL(GameSettings, pf.forbid_90_deg,                                                    0, 0, false,                    STR_CONFIG_SETTING_FORBID_90_DEG,          NULL),
 	    SDT_BOOL(GameSettings, vehicle.mammoth_trains,                                              0,NN,  true,                    STR_CONFIG_SETTING_MAMMOTHTRAINS,          NULL),
 	    SDT_BOOL(GameSettings, order.gotodepot,                                                     0, 0,  true,                    STR_CONFIG_SETTING_GOTODEPOT,              NULL),
@@ -452,9 +450,11 @@ const SettingDesc _settings[] = {
 	     SDT_VAR(GameSettings, economy.dist_local_authority,         SLE_UINT8,                     0, 0,    20,     5,      60, 0, STR_NULL,                                  NULL),
 	     SDT_VAR(GameSettings, pf.wait_oneway_signal,                SLE_UINT8,                     0, 0,    15,     2,     255, 0, STR_NULL,                                  NULL),
 	     SDT_VAR(GameSettings, pf.wait_twoway_signal,                SLE_UINT8,                     0, 0,    41,     2,     255, 0, STR_NULL,                                  NULL),
-	SDT_CONDLISTO(GameSettings, economy.town_noise_population, 3,   SLE_UINT16, 96, SL_MAX_VERSION, 0,D0, "800,2000,4000",          STR_NULL,                                  NULL, CheckNoiseToleranceLevel),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_unit,         SLE_UINT16, MOVING_AVERAGE_SV, SL_MAX_VERSION, 0, 0, 1, 1, 4096, 1,	STR_CONFIG_SETTING_AVERAGE_UNIT,           NULL),
 	 SDT_CONDVAR(GameSettings, economy.moving_average_length,       SLE_UINT16, MOVING_AVERAGE_SV, SL_MAX_VERSION, 0, 0, 128, 1, 4096, 4, STR_CONFIG_SETTING_AVERAGE_LENGTH,       NULL),
+	 SDT_CONDVAR(GameSettings, economy.town_noise_population[0],    SLE_UINT16, 96, SL_MAX_VERSION, 0, 0,   800,   200,   65535, 0, STR_NULL,                                  NULL),
+	 SDT_CONDVAR(GameSettings, economy.town_noise_population[1],    SLE_UINT16, 96, SL_MAX_VERSION, 0, 0,  2000,   400,   65535, 0, STR_NULL,                                  NULL),
+	 SDT_CONDVAR(GameSettings, economy.town_noise_population[2],    SLE_UINT16, 96, SL_MAX_VERSION, 0, 0,  4000,   800,   65535, 0, STR_NULL,                                  NULL),
 
 	 SDT_CONDVAR(GameSettings, linkgraph.recalc_interval,           SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION,  0, 0,16, 1, 4096, 1, STR_CONFIG_SETTING_LINKGRAPH_INTERVAL,     NULL),
 
@@ -471,7 +471,7 @@ const SettingDesc _settings[] = {
 	     SDT_VAR(GameSettings, pf.npf.npf_rail_lastred_penalty,                SLE_UINT,                     0, 0, ( 10 * NPF_TILE_LENGTH),   0,  100000, 0, STR_NULL,         NULL),
 	     SDT_VAR(GameSettings, pf.npf.npf_rail_station_penalty,                SLE_UINT,                     0, 0, (  1 * NPF_TILE_LENGTH),   0,  100000, 0, STR_NULL,         NULL),
 	     SDT_VAR(GameSettings, pf.npf.npf_rail_slope_penalty,                  SLE_UINT,                     0, 0, (  1 * NPF_TILE_LENGTH),   0,  100000, 0, STR_NULL,         NULL),
-	     SDT_VAR(GameSettings, pf.npf.npf_rail_curve_penalty,                  SLE_UINT,                     0, 0, (  1 * NPF_TILE_LENGTH),    0,  100000, 0, STR_NULL,         NULL),
+	     SDT_VAR(GameSettings, pf.npf.npf_rail_curve_penalty,                  SLE_UINT,                     0, 0, (  1 * NPF_TILE_LENGTH),   0,  100000, 0, STR_NULL,         NULL),
 	     SDT_VAR(GameSettings, pf.npf.npf_rail_depot_reverse_penalty,          SLE_UINT,                     0, 0, ( 50 * NPF_TILE_LENGTH),   0,  100000, 0, STR_NULL,         NULL),
 	 SDT_CONDVAR(GameSettings, pf.npf.npf_rail_pbs_cross_penalty,              SLE_UINT,100, SL_MAX_VERSION, 0, 0, (  3 * NPF_TILE_LENGTH),   0,  100000, 0, STR_NULL,         NULL),
 	 SDT_CONDVAR(GameSettings, pf.npf.npf_rail_pbs_signal_back_penalty,        SLE_UINT,100, SL_MAX_VERSION, 0, 0, ( 15 * NPF_TILE_LENGTH),   0,  100000, 0, STR_NULL,         NULL),

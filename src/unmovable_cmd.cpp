@@ -10,7 +10,6 @@
 /** @file unmovable_cmd.cpp Handling of unmovable tiles. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "landscape.h"
 #include "command_func.h"
 #include "viewport_func.h"
@@ -28,6 +27,9 @@
 #include "landscape_type.h"
 #include "unmovable.h"
 #include "cargopacket.h"
+#include "sprite.h"
+#include "core/random_func.hpp"
+#include "unmovable_map.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -112,7 +114,7 @@ CommandCost CmdBuildCompanyHQ(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 	CommandCost cost(EXPENSES_PROPERTY);
 
 	cost = CheckFlatLandBelow(tile, 2, 2, flags, 0, NULL);
-	if (CmdFailed(cost)) return cost;
+	if (cost.Failed()) return cost;
 
 	if (c->location_of_HQ != INVALID_TILE) { // Moving HQ
 		cost.AddCost(DestroyCompanyHQ(_current_company, flags));
@@ -150,7 +152,7 @@ CommandCost CmdPurchaseLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	}
 
 	cost = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (CmdFailed(cost)) return CMD_ERROR;
+	if (cost.Failed()) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
 		MakeOwnedLand(tile, _current_company);
@@ -230,7 +232,7 @@ static void DrawTile_Unmovable(TileInfo *ti)
 			assert(IsCompanyHQ(ti->tile));
 			if (ti->tileh != SLOPE_FLAT) DrawFoundation(ti, FOUNDATION_LEVELED);
 
-			SpriteID palette = COMPANY_SPRITE_COLOUR(GetTileOwner(ti->tile));
+			PaletteID palette = COMPANY_SPRITE_COLOUR(GetTileOwner(ti->tile));
 
 			const DrawTileSprites *t = &_unmovable_display_datas[GetCompanyHQSize(ti->tile) << 2 | GetCompanyHQSection(ti->tile)];
 			DrawGroundSprite(t->ground.sprite, palette);

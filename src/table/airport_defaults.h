@@ -1,5 +1,12 @@
 /* $Id$ */
 
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file airport_defaults.h Tables with default values for airports and airport tiles. */
 
 #ifndef AIRPORT_DEFAULTS_H
@@ -381,7 +388,7 @@ static AirportTileTable *_tile_table_helistation[] = {
 #define AS(ap_name, size_x, size_y, min_year, max_year, catchment, noise) \
 	AS_GENERIC(_tile_table_##ap_name, _airport_depots_##ap_name, lengthof(_airport_depots_##ap_name), size_x, size_y, noise, catchment, min_year, max_year)
 
-AirportSpec _origin_airport_specs[NUM_AIRPORTS] = {
+static const AirportSpec _origin_airport_specs[] = {
 	AS(country, 4, 3, 0, 1959, 4, 3),
 	AS(city, 6, 6, 1960, MAX_YEAR, 5, 5),
 	AS_ND(heliport, 1, 1, 1963, MAX_YEAR, 4, 1),
@@ -392,6 +399,8 @@ AirportSpec _origin_airport_specs[NUM_AIRPORTS] = {
 	AS(intercontinental, 9, 11, 2002, MAX_YEAR, 10, 25),
 	AS(helistation, 4, 2, 1980, MAX_YEAR, 4, 3),
 };
+
+assert_compile(NUM_AIRPORTS == lengthof(_origin_airport_specs));
 
 #undef AS
 #undef AS_ND
