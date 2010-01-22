@@ -9,10 +9,9 @@
 
 /** @file build_vehicle_gui.cpp GUI for building vehicles. */
 
-#include "train.h"
-#include "roadveh.h"
-#include "ship.h"
-#include "aircraft.h"
+#include "stdafx.h"
+#include "engine_base.h"
+#include "engine_func.h"
 #include "station_base.h"
 #include "articulated_vehicles.h"
 #include "textbuf_gui.h"
@@ -26,9 +25,7 @@
 #include "window_func.h"
 #include "date_func.h"
 #include "vehicle_func.h"
-#include "gfx_func.h"
 #include "widgets/dropdown_func.h"
-#include "window_gui.h"
 #include "engine_gui.h"
 #include "cargotype.h"
 
@@ -482,7 +479,7 @@ static int DrawRailEnginePurchaseInfo(int left, int right, int y, EngineID engin
 	y += FONT_HEIGHT_NORMAL;
 
 	/* Max tractive effort - not applicable if old acceleration or maglev */
-	if (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && rvi->railtype != RAILTYPE_MAGLEV) {
+	if (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && GetRailTypeInfo(rvi->railtype)->acceleration_type != 2) {
 		SetDParam(0, e->GetDisplayMaxTractiveEffort());
 		DrawString(left, right, y, STR_PURCHASE_INFO_MAX_TE);
 		y += FONT_HEIGHT_NORMAL;

@@ -693,6 +693,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\sprite.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\spritecache.cpp"
 				>
 			</File>
@@ -1093,7 +1097,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\linkgraph\linkgraph_types.h"
+				RelativePath=".\..\src\linkgraph\linkgraph_type.h"
 				>
 			</File>
 			<File
@@ -2210,6 +2214,10 @@
 			>
 			<File
 				RelativePath=".\..\src\table\airport_defaults.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\airporttiles.h"
 				>
 			</File>
 			<File
