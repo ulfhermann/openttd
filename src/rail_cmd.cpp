@@ -10,7 +10,6 @@
 /** @file rail_cmd.cpp Handling of rail tiles. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "cmd_helper.h"
 #include "landscape.h"
 #include "viewport_func.h"
@@ -20,7 +19,6 @@
 #include "pathfinder/yapf/yapf_cache.h"
 #include "newgrf_engine.h"
 #include "landscape_type.h"
-#include "newgrf_commons.h"
 #include "train.h"
 #include "variables.h"
 #include "autoslope.h"
@@ -34,8 +32,10 @@
 #include "elrail_func.h"
 #include "town.h"
 #include "pbs.h"
+#include "company_base.h"
 
 #include "table/strings.h"
+#include "table/sprites.h"
 #include "table/railtypes.h"
 #include "table/track_land.h"
 
@@ -340,7 +340,7 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 			}
 
 			ret = CheckRailSlope(tileh, trackbit, GetTrackBits(tile), tile);
-			if (CmdFailed(ret)) return ret;
+			if (ret.Failed()) return ret;
 			cost.AddCost(ret);
 
 			/* If the rail types don't match, try to convert only if engines of
@@ -349,7 +349,7 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 			if (GetRailType(tile) != railtype && !HasPowerOnRail(railtype, GetRailType(tile))) {
 				if (HasPowerOnRail(GetRailType(tile), railtype)) {
 					ret = DoCommand(tile, tile, railtype, flags, CMD_CONVERT_RAIL);
-					if (CmdFailed(ret)) return ret;
+					if (ret.Failed()) return ret;
 					cost.AddCost(ret);
 				} else {
 					return CMD_ERROR;
@@ -415,11 +415,11 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 			bool water_ground = IsTileType(tile, MP_WATER) && IsSlopeWithOneCornerRaised(tileh);
 
 			ret = CheckRailSlope(tileh, trackbit, TRACK_BIT_NONE, tile);
-			if (CmdFailed(ret)) return ret;
+			if (ret.Failed()) return ret;
 			cost.AddCost(ret);
 
 			ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-			if (CmdFailed(ret)) return ret;
+			if (ret.Failed()) return ret;
 			cost.AddCost(ret);
 
 			if (water_ground) {
@@ -581,7 +581,7 @@ bool FloodHalftile(TileIndex t)
 		TrackBits to_remove = lower_track & rail_bits;
 		if (to_remove != 0) {
 			_current_company = OWNER_WATER;
-			if (CmdFailed(DoCommand(t, 0, FIND_FIRST_BIT(to_remove), DC_EXEC, CMD_REMOVE_SINGLE_RAIL))) return flooded; // not yet floodable
+			if (DoCommand(t, 0, FIND_FIRST_BIT(to_remove), DC_EXEC, CMD_REMOVE_SINGLE_RAIL).Failed()) return flooded; // not yet floodable
 			flooded = true;
 			rail_bits = rail_bits & ~to_remove;
 			if (rail_bits == 0) {
@@ -693,14 +693,14 @@ static CommandCost CmdRailTrackHelper(TileIndex tile, DoCommandFlag flags, uint3
 	TileIndex end_tile = p1;
 	Trackdir trackdir = TrackToTrackdir(track);
 
-	if (CmdFailed(ValidateAutoDrag(&trackdir, tile, end_tile))) return CMD_ERROR;
+	if (ValidateAutoDrag(&trackdir, tile, end_tile).Failed()) return CMD_ERROR;
 
 	if (flags & DC_EXEC) SndPlayTileFx(SND_20_SPLAT_2, tile);
 
 	for (;;) {
 		ret = DoCommand(tile, railtype, TrackdirToTrack(trackdir), flags, remove ? CMD_REMOVE_SINGLE_RAIL : CMD_BUILD_SINGLE_RAIL);
 
-		if (CmdFailed(ret)) {
+		if (ret.Failed()) {
 			if (_error_message != STR_ERROR_ALREADY_BUILT && !remove) break;
 			_error_message = INVALID_STRING_ID;
 		} else {
@@ -792,7 +792,7 @@ CommandCost CmdBuildTrainDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	}
 
 	CommandCost cost = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (CmdFailed(cost)) return CMD_ERROR;
+	if (cost.Failed()) return CMD_ERROR;
 
 	if (MayHaveBridgeAbove(tile) && IsBridgeAbove(tile)) return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 
@@ -1082,7 +1082,7 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 	 * since the original amount will be too dense (shorter tracks) */
 	signal_density *= 2;
 
-	if (CmdFailed(ValidateAutoDrag(&trackdir, tile, end_tile))) return CMD_ERROR;
+	if (ValidateAutoDrag(&trackdir, tile, end_tile).Failed()) return CMD_ERROR;
 
 	track = TrackdirToTrack(trackdir); // trackdir might have changed, keep track in sync
 	Trackdir start_trackdir = trackdir;
@@ -1138,7 +1138,7 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 			ret = DoCommand(tile, p1, signals, flags, remove ? CMD_REMOVE_SIGNALS : CMD_BUILD_SIGNALS);
 
 			/* Be user-friendly and try placing signals as much as possible */
-			if (CmdSucceeded(ret)) {
+			if (ret.Succeeded()) {
 				err = false;
 				total_cost.AddCost(ret);
 			}
@@ -1279,13 +1279,13 @@ static Vehicle *UpdateTrainPowerProc(Vehicle *v, void *data)
 {
 	if (v->type != VEH_TRAIN) return NULL;
 
-	/* Similiar checks as in TrainPowerChanged() */
+	/* Similar checks as in Train::PowerChanged() */
 
 	Train *t = Train::From(v);
 	if (t->IsArticulatedPart()) return NULL;
 
 	const RailVehicleInfo *rvi = RailVehInfo(t->engine_type);
-	if (GetVehicleProperty(t, PROP_TRAIN_POWER, rvi->power) != 0) TrainPowerChanged(t->First());
+	if (GetVehicleProperty(t, PROP_TRAIN_POWER, rvi->power) != 0) t->First()->PowerChanged();
 
 	return NULL;
 }
@@ -1521,7 +1521,7 @@ static CommandCost ClearTile_Track(TileIndex tile, DoCommandFlag flags)
 			while (tracks != TRACK_BIT_NONE) {
 				Track track = RemoveFirstTrack(&tracks);
 				ret = DoCommand(tile, 0, track, flags, CMD_REMOVE_SINGLE_RAIL);
-				if (CmdFailed(ret)) return CMD_ERROR;
+				if (ret.Failed()) return CMD_ERROR;
 				cost.AddCost(ret);
 			}
 
@@ -1757,7 +1757,7 @@ static void DrawTrackBits(TileInfo *ti, TrackBits track)
 	/* DrawFoundation modifies ti */
 
 	SpriteID image;
-	SpriteID pal = PAL_NONE;
+	PaletteID pal = PAL_NONE;
 	const SubSprite *sub = NULL;
 	bool junction = false;
 
@@ -1944,7 +1944,7 @@ static void DrawTile_Track(TileInfo *ti)
 	} else {
 		/* draw depot */
 		const DrawTileSprites *dts;
-		SpriteID pal = PAL_NONE;
+		PaletteID pal = PAL_NONE;
 
 		if (ti->tileh != SLOPE_FLAT) DrawFoundation(ti, FOUNDATION_LEVELED);
 
@@ -1982,23 +1982,9 @@ static void DrawTile_Track(TileInfo *ti)
 		if (HasCatenaryDrawn(GetRailType(ti->tile))) DrawCatenary(ti);
 
 		/* No NewGRF depots, so no relocation */
-		DrawStationTileSeq(ti, dts, TO_BUILDINGS, rti->total_offset, 0, _drawtile_track_palette);
+		DrawRailTileSeq(ti, dts, TO_BUILDINGS, rti->total_offset, 0, _drawtile_track_palette);
 	}
 	DrawBridgeMiddle(ti);
-}
-
-
-static void DrawTileSequence(int x, int y, SpriteID ground, const DrawTileSeqStruct *dtss, uint32 offset)
-{
-	SpriteID palette = COMPANY_SPRITE_COLOUR(_local_company);
-
-	DrawSprite(ground, PAL_NONE, x, y);
-	for (; dtss->image.sprite != 0; dtss++) {
-		Point pt = RemapCoords(dtss->delta_x, dtss->delta_y, dtss->delta_z);
-		SpriteID image = dtss->image.sprite + offset;
-
-		DrawSprite(image, HasBit(image, PALETTE_MODIFIER_COLOUR) ? palette : PAL_NONE, x + pt.x, y + pt.y);
-	}
 }
 
 void DrawTrainDepotSprite(int x, int y, int dir, RailType railtype)
@@ -2007,8 +1993,14 @@ void DrawTrainDepotSprite(int x, int y, int dir, RailType railtype)
 	SpriteID image = dts->ground.sprite;
 	uint32 offset = GetRailTypeInfo(railtype)->total_offset;
 
+	x += 33;
+	y += 17;
+
 	if (image != SPR_FLAT_GRASS_TILE) image += offset;
-	DrawTileSequence(x + 33, y + 17, image, dts->seq, offset);
+	PaletteID palette = COMPANY_SPRITE_COLOUR(_local_company);
+
+	DrawSprite(image, PAL_NONE, x, y);
+	DrawRailTileSeqInGUI(x, y, dts, offset, 0, palette);
 }
 
 static uint GetSlopeZ_Track(TileIndex tile, uint x, uint y)
@@ -2462,7 +2454,7 @@ static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, uint z_ol
 	if (!_settings_game.construction.build_on_slopes || !AutoslopeEnabled()) return CMD_ERROR;
 
 	/* Is the slope-rail_bits combination valid in general? I.e. is it safe to call GetRailFoundation() ? */
-	if (CmdFailed(CheckRailSlope(tileh_new, rail_bits, TRACK_BIT_NONE, tile))) return CMD_ERROR;
+	if (CheckRailSlope(tileh_new, rail_bits, TRACK_BIT_NONE, tile).Failed()) return CMD_ERROR;
 
 	/* Get the slopes on top of the foundations */
 	z_old += ApplyFoundationToSlope(GetRailFoundation(tileh_old, rail_bits), &tileh_old);
