@@ -11,7 +11,6 @@
 
 #include "../stdafx.h"
 #include "../core/math_func.hpp"
-#include "../gfx_func.h"
 #include "../video/video_driver.hpp"
 #include "32bpp_anim.hpp"
 
@@ -210,7 +209,7 @@ void Blitter_32bppAnim::Draw(Blitter::BlitterParams *bp, BlitterMode mode, ZoomL
 	}
 }
 
-void Blitter_32bppAnim::DrawColourMappingRect(void *dst, int width, int height, int pal)
+void Blitter_32bppAnim::DrawColourMappingRect(void *dst, int width, int height, PaletteID pal)
 {
 	if (_screen_disable_anim) {
 		/* This means our output is not to the screen, so we can't be doing any animation stuff, so use our parent DrawColourMappingRect() */

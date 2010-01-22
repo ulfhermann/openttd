@@ -9,6 +9,7 @@
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
+#include "../moving_average.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -26,7 +27,7 @@ void LinkGraph::CreateComponent(Station * first) {
 	first->goods[this->cargo].last_component = this->current_component_id;
 	component = new LinkGraphComponent(this->cargo, this->current_component_id);
 	GoodsEntry & good = first->goods[this->cargo];
-	node = component->AddNode(this->current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+	node = component->AddNode(this->current_station_id, good.supply.Value(), HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 	index[this->current_station_id++] = node;
 	// find all stations belonging to the current component
 	while(!search_queue.empty()) {
@@ -48,12 +49,16 @@ void LinkGraph::CreateComponent(Station * first) {
 				GoodsEntry & good = target->goods[cargo];
 				good.last_component = this->current_component_id;
 				search_queue.push(target);
-				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+				node = component->AddNode(
+					target_id, good.supply.Value(),
+					HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE)
+				);
 				index[target_id] = node;
 			} else {
 				node = index_it->second;
 			}
-			component->AddEdge(index[source_id], node, link_stat.capacity);
+			
+			component->AddEdge(index[source_id], node, link_stat.Capacity());
 		}
 	}
 	// here the list of nodes and edges for this component is complete.
@@ -206,17 +211,22 @@ void Node::ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via
 	if (!Station::IsValidID(source)) {
 		source_flows.clear();
 	} else {
+		Station *curr_station = Station::Get(this->station);
 		for (FlowViaMap::iterator update = source_flows.begin(); update != source_flows.end();) {
-			assert(update->second >= 0);
 			StationID next = update->first;
-			if (update->second > 0 && Station::IsValidID(next)) {
-				if (next != station) {
-					LinkStatMap & ls = Station::Get(station)->goods[cargo].link_stats;
+			int planned = update->second;
+			assert(planned >= 0);
+
+			Station *via = Station::GetIfValid(next);
+			if (planned > 0 && via != NULL) {
+				uint distance = DistanceManhattan(curr_station->xy, via->xy);
+				if (next != this->station) {
+					LinkStatMap & ls = curr_station->goods[cargo].link_stats;
 					if (ls.find(next) != ls.end()) {
-						via_set.insert(FlowStat(update->first, update->second, 0));
+						via_set.insert(FlowStat(distance, next, planned, 0));
 					}
 				} else {
-					via_set.insert(FlowStat(update->first, update->second, 0));
+					via_set.insert(FlowStat(distance, next, planned, 0));
 				}
 			}
 			source_flows.erase(update++);
@@ -240,11 +250,11 @@ void Node::ExportFlows(FlowStatMap & station_flows, CargoID cargo) {
 			FlowStatSet & via_set = flowmap_it->second;
 			/* loop over the station's flow stats for this source node and update them */
 			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end();) {
-				FlowViaMap::iterator update = source_flows.find(flowset_it->via);
+				FlowViaMap::iterator update = source_flows.find(flowset_it->Via());
 				if (update != source_flows.end()) {
 					assert(update->second >= 0);
 					if (update->second > 0) {
-						new_flows.insert(FlowStat(flowset_it->via, update->second, flowset_it->sent));
+						new_flows.insert(FlowStat(*flowset_it, update->second));
 					}
 					source_flows.erase(update);
 				}
