@@ -99,16 +99,15 @@ public:
 		this->frozen = 0;
 	}
 
-	FORCEINLINE void CheckNotNull()
+	FORCEINLINE bool IsNull()
 	{
-		assert(this->capacity > 0);
-	
+		return this->capacity == 0;
 	}
 };
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
 
-class SupplyMovingAverage : private MovingAverage<uint> {
+class SupplyMovingAverage {
 private:
 	uint supply;
 
@@ -119,9 +118,9 @@ public:
 
 	FORCEINLINE void Increase(uint value) {this->supply += value;}
 
-	FORCEINLINE void Decrease() {this->supply = this->MovingAverage<uint>::Decrease(this->supply);}
+	FORCEINLINE void Decrease() {this->supply = MovingAverage<uint>().Decrease(this->supply);}
 
-	FORCEINLINE uint Value() const {return this->MovingAverage<uint>::Monthly(this->supply);}
+	FORCEINLINE uint Value() const {return MovingAverage<uint>().Monthly(this->supply);}
 };
 
 
