@@ -31,8 +31,12 @@ public:
 	FORCEINLINE Tvalue Monthly(const Tvalue &value) const
 		{return value * 30 / (this->length * _settings_game.economy.moving_average_unit);}
 
-	FORCEINLINE Tvalue Decrease(const Tvalue &value) const
-		{return value * this->length / (this->length + 1);}
+	FORCEINLINE Tvalue &Decrease(Tvalue &value) const
+	{
+		value *= this->length;
+		value /= (this->length + 1);
+		return value;
+	}
 };
 
 template<class Titem> void RunAverages();
