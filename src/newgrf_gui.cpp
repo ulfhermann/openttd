@@ -14,7 +14,6 @@
 #include "newgrf.h"
 #include "strings_func.h"
 #include "window_func.h"
-#include "gfx_func.h"
 #include "gamelog.h"
 #include "settings_func.h"
 #include "widgets/dropdown_type.h"
@@ -22,6 +21,7 @@
 #include "network/network_content.h"
 #include "sortlist_type.h"
 #include "querystring_gui.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -381,11 +381,7 @@ public:
 					}
 
 					/* Copy GRF details from scanned list */
-					GRFConfig *c = CallocT<GRFConfig>(1);
-					*c = *src;
-					c->filename = strdup(src->filename);
-					if (src->name      != NULL) c->name      = strdup(src->name);
-					if (src->info      != NULL) c->info      = strdup(src->info);
+					GRFConfig *c = DuplicateGRFConfig(src);
 					c->next = NULL;
 
 					/* Append GRF config to configuration list */
@@ -667,7 +663,7 @@ struct NewGRFWindow : public Window {
 				for (const GRFConfig *c = this->list; c != NULL; c = c->next, i++) {
 					if (this->vscroll.IsVisible(i)) {
 						const char *text = (c->name != NULL && !StrEmpty(c->name)) ? c->name : c->filename;
-						SpriteID pal;
+						PaletteID pal;
 
 						/* Pick a colour */
 						switch (c->status) {

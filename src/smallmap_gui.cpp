@@ -17,7 +17,6 @@
 #include "window_gui.h"
 #include "tree_map.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "town.h"
 #include "blitter/factory.hpp"
 #include "tunnelbridge_map.h"
@@ -31,6 +30,7 @@
 #include "company_func.h"
 #include "station_base.h"
 #include "zoom_func.h"
+#include "company_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -1825,13 +1825,14 @@ public:
 				 */
 				_left_button_clicked = false;
 
+				const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				int scaled_x_off = ScaleByZoom((_cursor.pos.x - this->left - WD_FRAMERECT_LEFT) * TILE_SIZE, this->zoom);
-				int scaled_y_off = ScaleByZoom((_cursor.pos.y - this->top - WD_FRAMERECT_TOP - WD_CAPTION_HEIGHT) * TILE_SIZE, this->zoom);
-				w->viewport->dest_scrollpos_x = pt.x + scaled_x_off - w->viewport->virtual_width / 2;
-				w->viewport->dest_scrollpos_y = pt.y + scaled_y_off - w->viewport->virtual_height / 2;
+				int scaled_x_off = ScaleByZoom((_cursor.pos.x - this->left + wid->pos_x) * TILE_SIZE, this->zoom);
+				int scaled_y_off = ScaleByZoom((_cursor.pos.y - this->top - wid->pos_y) * TILE_SIZE, this->zoom);
+				w->viewport->dest_scrollpos_x = pt.x + scaled_x_off - (w->viewport->virtual_width >> 1);
+				w->viewport->dest_scrollpos_y = pt.y + scaled_y_off - (w->viewport->virtual_height >> 1);
 
 				this->SetDirty();
 			} break;

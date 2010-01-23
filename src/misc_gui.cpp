@@ -33,6 +33,7 @@
 #include "window_func.h"
 #include "tilehighlight_func.h"
 #include "querystring_gui.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 
@@ -188,7 +189,7 @@ public:
 			c->money = INT64_MAX;
 			CommandCost costclear = DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
 			c->money = old_money;
-			if (CmdSucceeded(costclear)) {
+			if (costclear.Succeeded()) {
 				Money cost = costclear.GetCost();
 				if (cost < 0) {
 					cost = -cost; // Negate negative cost to a positive revenue

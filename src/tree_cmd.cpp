@@ -10,7 +10,6 @@
 /** @file tree_cmd.cpp Handling of tree tiles. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "clear_map.h"
 #include "landscape.h"
 #include "tree_map.h"
@@ -28,6 +27,7 @@
 #include "water.h"
 #include "landscape_type.h"
 #include "company_base.h"
+#include "core/random_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -386,7 +386,7 @@ CommandCost CmdPlantTree(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 						case CLEAR_FIELDS:
 						case CLEAR_ROCKS: {
 							CommandCost ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-							if (CmdFailed(ret)) return ret;
+							if (ret.Failed()) return ret;
 							cost.AddCost(ret);
 							break;
 						}
@@ -433,9 +433,7 @@ CommandCost CmdPlantTree(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	}
 }
 
-struct TreeListEnt {
-	SpriteID image;
-	SpriteID pal;
+struct TreeListEnt : PalSpriteID {
 	byte x, y;
 };
 
@@ -477,11 +475,11 @@ static void DrawTile_Trees(TileInfo *ti)
 	uint trees = GetTreeCount(ti->tile);
 
 	for (uint i = 0; i < trees; i++) {
-		SpriteID image = s[0].sprite + (i == trees - 1 ? GetTreeGrowth(ti->tile) : 3);
-		SpriteID pal = s[0].pal;
+		SpriteID sprite = s[0].sprite + (i == trees - 1 ? GetTreeGrowth(ti->tile) : 3);
+		PaletteID pal = s[0].pal;
 
-		te[i].image = image;
-		te[i].pal   = pal;
+		te[i].sprite = sprite;
+		te[i].pal    = pal;
 		te[i].x = d->x;
 		te[i].y = d->y;
 		s++;
@@ -502,7 +500,7 @@ static void DrawTile_Trees(TileInfo *ti)
 			}
 		}
 
-		AddSortableSpriteToDraw(te[mi].image, te[mi].pal, ti->x + te[mi].x, ti->y + te[mi].y, 16 - te[mi].x, 16 - te[mi].y, 0x30, z, IsTransparencySet(TO_TREES), -te[mi].x, -te[mi].y);
+		AddSortableSpriteToDraw(te[mi].sprite, te[mi].pal, ti->x + te[mi].x, ti->y + te[mi].y, 16 - te[mi].x, 16 - te[mi].y, 0x30, z, IsTransparencySet(TO_TREES), -te[mi].x, -te[mi].y);
 
 		/* replace the removed one with the last one */
 		te[mi] = te[trees - 1];
