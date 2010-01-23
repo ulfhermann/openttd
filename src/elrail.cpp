@@ -54,7 +54,6 @@
  */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "station_map.h"
 #include "viewport_func.h"
 #include "landscape.h"
@@ -64,6 +63,7 @@
 #include "tunnelbridge.h"
 #include "elrail_func.h"
 #include "engine_base.h"
+#include "company_base.h"
 
 #include "table/sprites.h"
 #include "table/elrail_data.h"
@@ -573,8 +573,8 @@ bool SettingsDisableElrail(int32 p1)
 	FOR_ALL_TRAINS(t) {
 		/* power and acceleration is cached only for front engines */
 		if (t->IsFrontEngine()) {
-			TrainPowerChanged(t);
-			UpdateTrainAcceleration(t);
+			t->PowerChanged();
+			t->UpdateAcceleration();
 		}
 	}
 

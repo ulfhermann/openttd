@@ -14,7 +14,6 @@
 
 #include "direction_type.h"
 #include "map_type.h"
-#include "tile_type.h"
 #include "date_type.h"
 
 /** Current limits for airports */
@@ -22,6 +21,11 @@ enum {
 	MAX_TERMINALS =  10, ///< maximum number of terminals per airport
 	MAX_HELIPADS  =   4, ///< maximum number of helipads per airport
 	MAX_ELEMENTS  = 255, ///< maximum number of aircraft positions at airport
+	NUM_AIRPORTTILES = 144, ///< total number of airport tiles
+};
+
+enum {
+	AIRPORTTILE_NOANIM    = 0xFF, ///< flag to mark airport tiles as having no animation
 };
 
 /** Airport types */
@@ -40,6 +44,46 @@ enum {
 	AT_DUMMY         = 255
 };
 
+/* Copy from station_map.h */
+typedef byte StationGfx;
+
+struct AirportTileTable {
+	TileIndexDiffC ti;
+	StationGfx gfx;
+};
+
+/**
+ * Defines the data structure for an airport.
+ */
+struct AirportSpec {
+	const AirportTileTable * const *table; ///< list of the tiles composing the airport
+	const TileIndexDiffC *depot_table;     ///< gives the position of the depots on the airports
+	byte nof_depots;                       ///< the number of depots in this airport
+	byte size_x;                           ///< size of airport in x direction
+	byte size_y;                           ///< size of airport in y direction
+	byte noise_level;                      ///< noise that this airport generates
+	byte catchment;                        ///< catchment area of this airport
+	Year min_year;                         ///< first year the airport is available
+	Year max_year;                         ///< last year the airport is available
+
+	static const AirportSpec *Get(byte type);
+
+	bool IsAvailable() const;
+
+	static AirportSpec dummy;
+	static AirportSpec oilrig;
+};
+
+
+/**
+ * Defines the data structure of each indivudual tile of an airport.
+ */
+struct AirportTileSpec {
+	StationGfx anim_next;                 ///< Next StationGfx in an animation
+	uint8 animation_speed;                ///< The speed of the animation
+
+	static const AirportTileSpec *Get(StationGfx gfx);
+};
 
 enum {
 	AMED_NOSPDCLAMP = 1 << 0,
@@ -153,15 +197,7 @@ public:
 		const byte *entry_points,
 		Flags flags,
 		const AirportFTAbuildup *apFA,
-		const TileIndexDiffC *depots,
-		byte nof_depots,
-		uint size_x,
-		uint size_y,
-		uint8 noise_level,
-		byte delta_z,
-		byte catchment,
-		Year first_available,
-		Year last_available
+		byte delta_z
 	);
 
 	~AirportFTAClass();
@@ -172,25 +208,14 @@ public:
 		return &moving_data[position];
 	}
 
-	/** Is this airport available at this date? */
-	bool IsAvailable() const;
-
 	const AirportMovingData *moving_data;
 	struct AirportFTA *layout;            ///< state machine for airport
 	const byte *terminals;
 	const byte *helipads;
-	const TileIndexDiffC *airport_depots; ///< gives the position of the depots on the airports
 	Flags flags;
-	byte nof_depots;                      ///< number of depots this airport has
 	byte nofelements;                     ///< number of positions the airport consists of
 	const byte *entry_points;             ///< when an airplane arrives at this airport, enter it at position entry_point, index depends on direction
-	byte size_x;
-	byte size_y;
-	uint8 noise_level;                    ///< noise that this airport generates
 	byte delta_z;                         ///< Z adjustment for helicopter pads
-	byte catchment;
-	Year first_available;                 ///< the year this airport becomes available
-	Year last_available;                  ///< the year this airport expires
 };
 
 DECLARE_ENUM_AS_BIT_SET(AirportFTAClass::Flags)

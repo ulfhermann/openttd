@@ -10,17 +10,14 @@
 /** @file vehicle_gui.cpp The base GUI for all vehicles. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "debug.h"
 #include "company_func.h"
 #include "gui.h"
-#include "window_gui.h"
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "vehicle_gui.h"
 #include "vehicle_gui_base.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "newgrf_engine.h"
 #include "newgrf_text.h"
 #include "waypoint_base.h"
@@ -40,6 +37,10 @@
 #include "articulated_vehicles.h"
 #include "cargotype.h"
 #include "spritecache.h"
+#include "core/geometry_func.hpp"
+#include "company_base.h"
+#include "engine_base.h"
+#include "engine_func.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -141,7 +142,7 @@ void DepotSortList(VehicleList *list)
 /** draw the vehicle profit button in the vehicle list window. */
 static void DrawVehicleProfitButton(const Vehicle *v, int x, int y)
 {
-	SpriteID pal;
+	PaletteID pal;
 
 	/* draw profit-based coloured icons */
 	if (v->age <= DAYS_IN_YEAR * 2) {
@@ -231,7 +232,7 @@ struct RefitOption {
 
 	FORCEINLINE bool operator != (const RefitOption &other) const
 	{
-		return other.cargo != this->cargo || other.subtype != this->subtype;
+		return other.cargo != this->cargo || other.value != this->value;
 	}
 };
 
@@ -425,7 +426,7 @@ struct RefitWindow : public Window {
 				if (this->cargo != NULL) {
 					Vehicle *v = Vehicle::Get(this->window_number);
 					CommandCost cost = DoCommand(v->tile, v->index, this->cargo->cargo | this->cargo->subtype << 8, DC_QUERY_COST, GetCmdRefitVeh(v->type));
-					if (CmdSucceeded(cost)) {
+					if (cost.Succeeded()) {
 						SetDParam(0, this->cargo->cargo);
 						SetDParam(1, _returned_refit_capacity);
 						SetDParam(2, cost.GetCost());
@@ -1531,7 +1532,7 @@ struct VehicleDetailsWindow : Window {
 						SetDParam(1, Train::From(v)->tcache.cached_power);
 						SetDParam(0, Train::From(v)->tcache.cached_weight);
 						SetDParam(3, Train::From(v)->tcache.cached_max_te / 1000);
-						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && Train::From(v)->railtype != RAILTYPE_MAGLEV) ?
+						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && GetRailTypeInfo(Train::From(v)->railtype)->acceleration_type != 2) ?
 								STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE : STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED);
 						break;
 
