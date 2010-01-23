@@ -32,22 +32,8 @@ static inline StationID GetStationIndex(TileIndex t)
 
 
 enum {
-	GFX_RADAR_LARGE_FIRST             =  31,
-	GFX_RADAR_LARGE_LAST              =  42,
-	GFX_WINDSACK_FIRST                =  50,
-	GFX_WINDSACK_LAST                 =  53,
-
 	GFX_DOCK_BASE_WATER_PART          =  4,
 	GFX_TRUCK_BUS_DRIVETHROUGH_OFFSET =  4,
-
-	GFX_RADAR_INTERNATIONAL_FIRST     =  66,
-	GFX_RADAR_INTERNATIONAL_LAST      =  77,
-	GFX_RADAR_METROPOLITAN_FIRST      =  78,
-	GFX_RADAR_METROPOLITAN_LAST       =  89,
-	GFX_RADAR_DISTRICTWE_FIRST        = 121,
-	GFX_RADAR_DISTRICTWE_LAST         = 132,
-	GFX_WINDSACK_INTERCON_FIRST       = 140,
-	GFX_WINDSACK_INTERCON_LAST        = 143,
 };
 
 /**
@@ -196,6 +182,16 @@ static inline bool HasStationTileRail(TileIndex t)
 static inline bool IsAirport(TileIndex t)
 {
 	return GetStationType(t) == STATION_AIRPORT;
+}
+
+/**
+ * Is this tile a station tile and an airport tile?
+ * @param t the tile to get the information from
+ * @return true if and only if the tile is an airport
+ */
+static inline bool IsAirportTile(TileIndex t)
+{
+	return IsTileType(t, MP_STATION) && IsAirport(t);
 }
 
 bool IsHangar(TileIndex t);
@@ -405,7 +401,7 @@ static inline TileIndexDiffC GetDockOffset(TileIndex t)
 
 static inline bool IsCustomStationSpecIndex(TileIndex t)
 {
-	assert(IsTileType(t, MP_STATION));
+	assert(HasStationTileRail(t));
 	return _m[t].m4 != 0;
 }
 

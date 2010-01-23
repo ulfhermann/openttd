@@ -26,7 +26,7 @@
 #include "roadveh.h"
 #include "station_base.h"
 #include "waypoint_base.h"
-#include "roadstop_base.h"
+#include "company_base.h"
 
 #include "table/strings.h"
 
@@ -571,7 +571,7 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 					if (st == NULL || !CheckOwnership(st->owner) ||
 							!CanVehicleUseStation(v, st) ||
-							st->Airport()->nof_depots == 0) {
+							st->GetAirportSpec()->nof_depots == 0) {
 						return CMD_ERROR;
 					}
 				} else {
