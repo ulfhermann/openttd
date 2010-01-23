@@ -613,26 +613,17 @@ class SmallMapWindow : public Window {
 	Point cursor;
 
 	struct BaseCargoDetail {
-		BaseCargoDetail() :
-			scale(_settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit)
+		BaseCargoDetail()
 		{
 			this->Clear();
 		}
 
 		void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow)
 		{
-			this->capacity += orig_link.capacity;
-			this->usage += orig_link.usage;
-			this->planned += orig_flow.planned;
-			this->sent += orig_flow.sent;
-		}
-
-		void Scale()
-		{
-			this->capacity = this->capacity * 30 / this->scale;
-			this->usage = this->usage * 30 / this->scale;
-			this->planned = this->planned * 30 / this->scale;
-			this->sent = this->sent * 30 / this->scale;
+			this->capacity += orig_link.Capacity();
+			this->usage += orig_link.Usage();
+			this->planned += orig_flow.Planned();
+			this->sent += orig_flow.Sent();
 		}
 
 		void Clear()
@@ -644,14 +635,12 @@ class SmallMapWindow : public Window {
 		uint usage;
 		uint planned;
 		uint sent;
-		uint scale;
 	};
 
 	struct CargoDetail : public BaseCargoDetail {
 		CargoDetail(const LegendAndColour * c, const LinkStat &ls, const FlowStat &fs) : legend(c)
 		{
 			this->AddLink(ls, fs);
-			this->Scale();
 		}
 
 		const LegendAndColour *legend;
@@ -906,7 +895,7 @@ class SmallMapWindow : public Window {
 				const LegendAndColour &tbl = _legend_table[this->map_type][i];
 				if (!tbl.show_on_map && supply_details != st) continue;
 				CargoID c = tbl.type;
-				int add = st->goods[c].supply;
+				int add = st->goods[c].supply.Value();
 				if (add > 0) {
 					q += add * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;
 					colour += tbl.colour;
@@ -1084,7 +1073,6 @@ class SmallMapWindow : public Window {
 	class LinkTextDrawer : public LinkValueDrawer {
 	protected:
 		virtual void DrawContent() {
-			Scale();
 			Point ptm;
 			ptm.x = (this->pta.x + 2*this->ptb.x) / 3;
 			ptm.y = (this->pta.y + 2*this->ptb.y) / 3;
@@ -1125,7 +1113,6 @@ class SmallMapWindow : public Window {
 		typedef std::multimap<uint, byte, std::greater<uint> > SizeMap;
 	protected:
 		virtual void DrawContent() {
-			Scale();
 			Point ptm;
 			SizeMap sizes;
 			/* these floats only serve to calculate the size of the coloured boxes for capacity, usage, planned, sent
@@ -1294,7 +1281,7 @@ class SmallMapWindow : public Window {
 			const LegendAndColour &tbl = _legend_table[this->map_type][i];
 
 			CargoID c = tbl.type;
-			int supply = st->goods[c].supply * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;;
+			int supply = st->goods[c].supply.Value();
 			if (supply > 0) {
 				TextColour textcol = TC_BLACK;
 				if (tbl.show_on_map) {
