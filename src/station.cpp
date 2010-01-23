@@ -70,6 +70,15 @@ Station::~Station()
 		if (a->targetairport == this->index) a->targetairport = INVALID_STATION;
 	}
 
+	Station * st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
+			GoodsEntry & ge = st->goods[c];
+			ge.link_stats.erase(this->index);
+			DeleteStaleFlows(st->index, c, this->index);
+		}
+	}
+
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
 		/* Forget about this station if this station is removed */

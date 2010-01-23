@@ -60,4 +60,6 @@ void RecalcFrozenIfLoading(const Vehicle * v);
 
 void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id);
 
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
+
 #endif /* STATION_FUNC_H */
