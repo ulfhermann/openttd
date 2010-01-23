@@ -14,12 +14,13 @@
 
 #include "base.hpp"
 #include "../core/bitmath_func.hpp"
+#include "../gfx_func.h"
 
 class Blitter_32bppBase : public Blitter {
 public:
 	/* virtual */ uint8 GetScreenDepth() { return 32; }
 //	/* virtual */ void Draw(Blitter::BlitterParams *bp, BlitterMode mode, ZoomLevel zoom);
-//	/* virtual */ void DrawColourMappingRect(void *dst, int width, int height, int pal);
+//	/* virtual */ void DrawColourMappingRect(void *dst, int width, int height, PaletteID pal);
 //	/* virtual */ Sprite *Encode(SpriteLoader::Sprite *sprite, Blitter::AllocatorProc *allocator);
 	/* virtual */ void *MoveTo(const void *video, int x, int y);
 	/* virtual */ void SetPixel(void *video, int x, int y, uint8 colour);
