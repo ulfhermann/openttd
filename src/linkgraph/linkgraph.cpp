@@ -35,14 +35,14 @@ void LinkGraph::CreateComponent(Station * first) {
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID target_id = i->first;
-			if (!Station::IsValidID(target_id)) {
+			Station *target = Station::GetIfValid(target_id);
+			if (target == NULL) {
 				continue;
 			}
 			assert(target_id != source_id);
 			LinkStat & link_stat = i->second;
 			ReverseNodeIndex::iterator index_it = index.find(target_id);
 			if (index_it == index.end()) {
-				Station * target = Station::Get(target_id);
 				GoodsEntry & good = target->goods[cargo];
 				good.last_component = this->current_component_id;
 				search_queue.push(target);
@@ -188,9 +188,9 @@ void LinkGraph::Join() {
 void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 	LinkGraphComponentID index = component->GetIndex();
 	for(NodeID i = 0; i < component->GetSize(); ++i) {
-		StationID station_id = component->GetNode(i).station;
-		if (Station::IsValidID(station_id)) {
-			Station::Get(station_id)->goods[cargo].last_component = index;
+		Station *station = Station::GetIfValid(component->GetNode(i).station);
+		if (station != NULL) {
+			station->goods[cargo].last_component = index;
 		}
 	}
 	LinkGraphJob * job = new LinkGraphJob(component, join);
