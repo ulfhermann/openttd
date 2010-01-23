@@ -2851,6 +2851,11 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
+uint GetMovingAverageLength(const Station *from, const Station *to)
+{
+	return _settings_game.economy.moving_average_length + (DistanceManhattan(from->xy, to->xy) >> 2);
+}
+
 void Station::RunAverages() {
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = this->goods[goods_index];
@@ -2945,15 +2950,17 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 }
 
 void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id) {
-	assert(st->index != next_station_id && Station::IsValidID(next_station_id));
+	Station *next = Station::GetIfValid(next_station_id);
+	assert(st->index != next_station_id && next != NULL);
+	uint average_length = GetMovingAverageLength(st, next);
+
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
 			LinkStatMap &stats = st->goods[v->cargo_type].link_stats;
 			LinkStatMap::iterator i = stats.find(next_station_id);
 			if (i == stats.end()) {
 				stats.insert(std::make_pair(next_station_id, LinkStat(
-					DistanceManhattan(st->xy, Station::Get(next_station_id)->xy),
-					v->cargo_cap, 0, v->cargo.Count()
+					average_length, v->cargo_cap, 0, v->cargo.Count()
 				)));
 			} else {
 				LinkStat & link_stat = i->second;
