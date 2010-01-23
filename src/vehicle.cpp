@@ -1549,11 +1549,11 @@ void Vehicle::BeginLoading(StationID last_station_id)
 	}
 
 	if (last_station_id != INVALID_STATION && last_station_id != curr_station_id) {
-		IncreaseStats(Station::Get(last_station_id), this, curr_station_id);
+		IncreaseStats(Station::Get(last_station_id), this, curr_station_id, false);
 	}
 
 	if (next_station_id != INVALID_STATION && next_station_id != curr_station_id) {
-		IncreaseFrozen(curr_station, this, next_station_id);
+		IncreaseStats(curr_station, this, next_station_id, true);
 	}
 
 	PrepareUnload(this);
