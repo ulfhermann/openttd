@@ -10,15 +10,12 @@
 /** @file road_gui.cpp GUI for building roads. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "gui.h"
 #include "window_gui.h"
 #include "station_gui.h"
 #include "terraform_gui.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "command_func.h"
-#include "road_type.h"
 #include "road_cmd.h"
 #include "road_map.h"
 #include "station_func.h"
@@ -605,7 +602,7 @@ struct BuildRoadToolbarWindow : Window {
 					 * not the 3rd bit set) */
 					_place_road_flag = (RoadFlags)((_place_road_flag & RF_DIR_Y) ? (_place_road_flag & 0x07) : (_place_road_flag >> 3));
 
-					DoCommandP(end_tile, start_tile, _place_road_flag | (_cur_roadtype << 3) | (_one_way_button_clicked << 5),
+					DoCommandP(start_tile, end_tile, _place_road_flag | (_cur_roadtype << 3) | (_one_way_button_clicked << 5),
 						_remove_button_clicked ?
 						CMD_REMOVE_LONG_ROAD | CMD_MSG(_road_type_infos[_cur_roadtype].err_remove_road) :
 						CMD_BUILD_LONG_ROAD | CMD_MSG(_road_type_infos[_cur_roadtype].err_build_road), CcPlaySound1D);

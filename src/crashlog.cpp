@@ -24,16 +24,40 @@
 #include "saveload/saveload.h"
 #include "screenshot.h"
 #include "gfx_func.h"
+#include "network/network.h"
 
-#include <squirrel.h>
 #include "ai/ai_info.hpp"
 #include "company_base.h"
+#include "company_func.h"
 
-#include <time.h>
 
 /* static */ const char *CrashLog::message = NULL;
 /* static */ char *CrashLog::gamelog_buffer = NULL;
 /* static */ const char *CrashLog::gamelog_last = NULL;
+
+char *CrashLog::LogCompiler(char *buffer, const char *last) const
+{
+			buffer += seprintf(buffer, last, " Compiler: "
+#if defined(_MSC_VER)
+			"MSVC %d", _MSC_VER
+#elif defined(__ICC) && defined(__GNUC__)
+			"ICC %d (GCC %d.%d.%d mode)", __ICC,  __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__
+#elif defined(__ICC)
+			"ICC %d", __ICC
+#elif defined(__GNUC__)
+			"GCC %d.%d.%d", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__
+#elif defined(__WATCOMC__)
+			"WatcomC %d", __WATCOMC__
+#else
+			"<unknown>"
+#endif
+			);
+#if defined(__VERSION__)
+			return buffer + seprintf(buffer, last,  " \"" __VERSION__ "\"\n\n");
+#else
+			return buffer + seprintf(buffer, last,  "\n\n");
+#endif
+}
 
 /* virtual */ char *CrashLog::LogRegisters(char *buffer, const char *last) const
 {
@@ -88,6 +112,7 @@ char *CrashLog::LogConfiguration(char *buffer, const char *last) const
 			" Language:     %s\n"
 			" Music driver: %s\n"
 			" Music set:    %s\n"
+			" Network:      %s\n"
 			" Sound driver: %s\n"
 			" Sound set:    %s\n"
 			" Video driver: %s\n\n",
@@ -96,12 +121,13 @@ char *CrashLog::LogConfiguration(char *buffer, const char *last) const
 			StrEmpty(_dynlang.curr_file) ? "none" : _dynlang.curr_file,
 			_music_driver == NULL ? "none" : _music_driver->GetName(),
 			BaseMusic::GetUsedSet() == NULL ? "none" : BaseMusic::GetUsedSet()->name,
+			_networking ? (_network_server ? "server" : "client") : "no",
 			_sound_driver == NULL ? "none" : _sound_driver->GetName(),
 			BaseSounds::GetUsedSet() == NULL ? "none" : BaseSounds::GetUsedSet()->name,
 			_video_driver == NULL ? "none" : _video_driver->GetName()
 	);
 
-	buffer += seprintf(buffer, last, "AI Configuration:\n");
+	buffer += seprintf(buffer, last, "AI Configuration (local: %i):\n", (int)_local_company);
 	const Company *c;
 	FOR_ALL_COMPANIES(c) {
 		if (c->ai_info == NULL) {
@@ -231,6 +257,7 @@ char *CrashLog::FillCrashLog(char *buffer, const char *last) const
 	buffer = this->LogRegisters(buffer, last);
 	buffer = this->LogStacktrace(buffer, last);
 	buffer = this->LogOSVersion(buffer, last);
+	buffer = this->LogCompiler(buffer, last);
 	buffer = this->LogConfiguration(buffer, last);
 	buffer = this->LogLibraries(buffer, last);
 	buffer = this->LogModules(buffer, last);
