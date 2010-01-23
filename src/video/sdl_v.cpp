@@ -22,6 +22,7 @@
 #include "../functions.h"
 #include "../thread/thread.h"
 #include "../genworld.h"
+#include "../core/random_func.hpp"
 #include "sdl_v.h"
 #include <SDL.h>
 
@@ -112,8 +113,11 @@ static void DrawSurfaceToScreen()
 
 static void DrawSurfaceToScreenThread(void *)
 {
-	/* First wait till we 'may' start */
+	/* First tell the main thread we're started */
 	_draw_mutex->BeginCritical();
+	_draw_mutex->SendSignal();
+
+	/* Now wait for the first thing to draw! */
 	_draw_mutex->WaitForSignal();
 
 	while (_draw_continue) {
@@ -516,6 +520,9 @@ void VideoDriver_SDL::MainLoop()
 			if (!_draw_threaded) {
 				_draw_mutex->EndCritical();
 				delete _draw_mutex;
+			} else {
+				/* Wait till the draw mutex has started itself. */
+				_draw_mutex->WaitForSignal();
 			}
 		}
 	}
