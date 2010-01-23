@@ -14,9 +14,7 @@
 #ifndef NETWORK_CORE_TCP_H
 #define NETWORK_CORE_TCP_H
 
-#include "os_abstraction.h"
 #include "address.h"
-#include "core.h"
 #include "packet.h"
 
 #ifdef ENABLE_NETWORK
@@ -38,7 +36,7 @@ public:
 
 	virtual NetworkRecvStatus CloseConnection(bool error = true);
 	void Send_Packet(Packet *packet);
-	bool Send_Packets();
+	bool Send_Packets(bool closing_down = false);
 	bool IsPacketQueueEmpty();
 
 	Packet *Recv_Packet();
