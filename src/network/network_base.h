@@ -15,7 +15,9 @@
 #ifdef ENABLE_NETWORK
 
 #include "network_type.h"
+#include "core/address.h"
 #include "../core/pool_type.hpp"
+#include "../company_type.h"
 
 typedef Pool<NetworkClientInfo, ClientIndex, 8, MAX_CLIENT_SLOTS> NetworkClientInfoPool;
 extern NetworkClientInfoPool _networkclientinfo_pool;
@@ -27,7 +29,6 @@ struct NetworkClientInfo : NetworkClientInfoPool::PoolItem<&_networkclientinfo_p
 	CompanyID client_playas;                        ///< As which company is this client playing (CompanyID)
 	NetworkAddress client_address;                  ///< IP-address of the client (so he can be banned)
 	Date join_date;                                 ///< Gamedate the client has joined
-	char unique_id[NETWORK_UNIQUE_ID_LENGTH];       ///< Every play sends an unique id so we can indentify him
 
 	NetworkClientInfo(ClientID client_id = INVALID_CLIENT_ID) : client_id(client_id) {}
 	~NetworkClientInfo();

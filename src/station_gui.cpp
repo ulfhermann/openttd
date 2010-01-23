@@ -10,10 +10,8 @@
 /** @file station_gui.cpp The GUI for stations. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "debug.h"
 #include "gui.h"
-#include "window_gui.h"
 #include "textbuf_gui.h"
 #include "company_func.h"
 #include "command_func.h"
@@ -23,13 +21,13 @@
 #include "strings_func.h"
 #include "window_func.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "widgets/dropdown_func.h"
 #include "station_base.h"
 #include "waypoint_base.h"
 #include "tilehighlight_func.h"
 #include "company_base.h"
 #include "sortlist_type.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -1254,11 +1252,12 @@ struct StationViewWindow : public Window {
 			const FlowStatSet & flow_set = it->second;
 			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
 				const FlowStat & stat = *flow_it;
-				CargoDataEntry * via_entry = source_entry->InsertOrRetrieve(stat.via);
-				if (stat.via == this->window_number) {
-					via_entry->InsertOrRetrieve(stat.via)->Update(stat.planned);
+				StationID via = stat.Via();
+				CargoDataEntry * via_entry = source_entry->InsertOrRetrieve(via);
+				if (via == this->window_number) {
+					via_entry->InsertOrRetrieve(via)->Update(stat.Planned());
 				} else {
-					EstimateDestinations(i, from, stat.via, stat.planned, via_entry);
+					EstimateDestinations(i, from, via, stat.Planned(), via_entry);
 				}
 			}
 		}
@@ -1272,7 +1271,7 @@ struct StationViewWindow : public Window {
 			if (map_it != flowmap.end()) {
 				FlowStatSet & flows = map_it->second;
 				for (FlowStatSet::iterator i = flows.begin(); i != flows.end(); ++i) {
-					tmp.InsertOrRetrieve(i->via)->Update(i->planned);
+					tmp.InsertOrRetrieve(i->Via())->Update(i->Planned());
 				}
 			}
 
@@ -1309,7 +1308,6 @@ struct StationViewWindow : public Window {
 	}
 
 	void BuildFlowList(CargoID i, const FlowStatMap & flows, CargoDataEntry * cargo) {
-		uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
 		const CargoDataEntry *source_dest = cached_destinations.Retrieve(i);
 		for (FlowStatMap::const_iterator it = flows.begin(); it != flows.end(); ++it) {
 			StationID from = it->first;
@@ -1317,16 +1315,15 @@ struct StationViewWindow : public Window {
 			const FlowStatSet & flow_set = it->second;
 			for (FlowStatSet::const_iterator flow_it = flow_set.begin(); flow_it != flow_set.end(); ++flow_it) {
 				const FlowStat & stat = *flow_it;
-				const CargoDataEntry *via_entry = source_entry->Retrieve(stat.via);
+				const CargoDataEntry *via_entry = source_entry->Retrieve(stat.Via());
 				for (CargoDataSet::iterator dest_it = via_entry->Begin(); dest_it != via_entry->End(); ++dest_it) {
 					CargoDataEntry *dest_entry = *dest_it;
-					uint val = dest_entry->GetCount() * 30;
+					uint val = dest_entry->GetCount();
 					if (this->current_mode == SENT) {
-						val *= stat.sent;
+						val *= stat.Sent();
 						val = DivideApprox(val, via_entry->GetCount());
 					}
-					val = DivideApprox(val, scale);
-					ShowCargo(cargo, i, from, stat.via, dest_entry->GetStation(), val);
+					ShowCargo(cargo, i, from, stat.Via(), dest_entry->GetStation(), val);
 				}
 			}
 		}
@@ -1532,14 +1529,13 @@ struct StationViewWindow : public Window {
 		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_STATION_VIEW_CARGO_RATINGS_TITLE);
 		y += FONT_HEIGHT_NORMAL;
 
-		uint scale = _settings_game.economy.moving_average_length * _settings_game.economy.moving_average_unit;
 		const CargoSpec *cs;
 		FOR_ALL_CARGOSPECS(cs) {
 			const GoodsEntry *ge = &st->goods[cs->Index()];
 			if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) continue;
 
 			SetDParam(0, cs->name);
-			SetDParam(1, DivideApprox(ge->supply * 30, scale));
+			SetDParam(1, ge->supply.Value());
 			SetDParam(3, ToPercent8(ge->rating));
 			SetDParam(2, STR_CARGO_RATING_APPALLING + (ge->rating >> 5));
 			DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT - 6, y, STR_STATION_VIEW_CARGO_SUPPLY_RATING);
@@ -2052,7 +2048,7 @@ static bool StationJoinerNeeded(CommandContainer cmd, TileArea ta)
 	if (!_ctrl_pressed) return false;
 
 	/* Now check if we could build there */
-	if (CmdFailed(DoCommand(&cmd, CommandFlagsToDCFlags(GetCommandFlags(cmd.cmd))))) return false;
+	if (DoCommand(&cmd, CommandFlagsToDCFlags(GetCommandFlags(cmd.cmd))).Failed()) return false;
 
 	/* Test for adjacent station or station below selection.
 	 * If adjacent-stations is disabled and we are building next to a station, do not show the selection window.

@@ -410,7 +410,7 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 		StationID source = (*c)->source;
 		FlowStatSet &flows = dest->flows[source];
 		FlowStatSet::iterator begin = flows.begin();
-		StationID via = (begin != flows.end() ? begin->via : INVALID_STATION);
+		StationID via = (begin != flows.end() ? begin->Via() : INVALID_STATION);
 		if (via != INVALID_STATION && next_station != INVALID_STATION) {
 			/* use cargodist unloading*/
 			action = WillUnloadCargoDist(flags, curr_station, next_station, via, source);
@@ -434,7 +434,7 @@ uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUn
 			case UL_TRANSFER:
 				/* TransferPacket may split the packet and return the transferred part */
 				if (via == curr_station) {
-					via = (++begin != flows.end()) ? begin->via : INVALID_STATION;
+					via = (++begin != flows.end()) ? begin->Via() : INVALID_STATION;
 				}
 				unloaded = this->TransferPacket(c, remaining_unload, dest, payment, via);
 				if (via != INVALID_STATION) {

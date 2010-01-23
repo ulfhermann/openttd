@@ -27,14 +27,15 @@
 #include "sound_func.h"
 #include "functions.h"
 #include "cheat_type.h"
-#include "autoreplace_func.h"
+#include "company_base.h"
 #include "autoreplace_gui.h"
-#include "gfx_func.h"
 #include "ai/ai.hpp"
 #include "company_func.h"
 #include "effectvehicle_func.h"
 #include "station_base.h"
-#include "cargotype.h"
+#include "engine_base.h"
+#include "engine_func.h"
+#include "core/random_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -116,7 +117,8 @@ static StationID FindNearestHangar(const Aircraft *v)
 		if (st->owner != v->owner || !(st->facilities & FACIL_AIRPORT)) continue;
 
 		const AirportFTAClass *afc = st->Airport();
-		if (afc->nof_depots == 0 || (
+		const AirportSpec *as = st->GetAirportSpec();
+		if (as->nof_depots == 0 || (
 					/* don't crash the plane if we know it can't land at the airport */
 					(afc->flags & AirportFTAClass::SHORT_STRIP) &&
 					(avi->subtype & AIR_FAST) &&
@@ -198,7 +200,7 @@ static SpriteID GetAircraftIcon(EngineID engine)
 	return DIR_W + _aircraft_sprite[spritenum];
 }
 
-void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal)
+void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal)
 {
 	SpriteID sprite = GetAircraftIcon(engine);
 	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
@@ -334,8 +336,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 			const Station *st = Station::GetByTile(tile);
 			const AirportFTAClass *apc = st->Airport();
 
-			assert(i != apc->nof_depots);
-			if (st->airport_tile + ToTileIndexDiff(apc->airport_depots[i]) == tile) {
+			if (st->GetHangarTile(i) == tile) {
 				assert(apc->layout[i].heading == HANGAR);
 				v->pos = apc->layout[i].position;
 				break;
@@ -436,7 +437,7 @@ bool Aircraft::FindClosestDepot(TileIndex *location, DestinationID *destination,
 {
 	const Station *st = GetTargetAirportIfValid(this);
 	/* If the station is not a valid airport or if it has no hangars */
-	if (st == NULL || st->Airport()->nof_depots == 0) {
+	if (st == NULL || st->GetAirportSpec()->nof_depots == 0) {
 		/* the aircraft has to search for a hangar on its own */
 		StationID station = FindNearestHangar(this);
 
@@ -530,10 +531,8 @@ static void CheckIfAircraftNeedsService(Aircraft *v)
 
 	assert(st != NULL);
 
-	/* only goto depot if the target airport has terminals (eg. it is airport) */
-	if (st->airport_tile != INVALID_TILE && st->Airport()->terminals != NULL) {
-//		printf("targetairport = %d, st->index = %d\n", v->targetairport, st->index);
-//		v->targetairport = st->index;
+	/* only goto depot if the target airport has a depot */
+	if (st->GetAirportSpec()->nof_depots > 0 && CanVehicleUseStation(v, st)) {
 		v->current_order.MakeGoToDepot(st->index, ODTFB_SERVICE);
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	} else if (v->current_order.IsType(OT_GOTO_DEPOT)) {
@@ -1218,7 +1217,7 @@ void HandleMissingAircraftOrders(Aircraft *v)
 		ret = DoCommand(v->tile, v->index, 0, DC_EXEC, CMD_SEND_AIRCRAFT_TO_HANGAR);
 		_current_company = old_company;
 
-		if (CmdFailed(ret)) CrashAirplane(v);
+		if (ret.Failed()) CrashAirplane(v);
 	} else if (!v->current_order.IsType(OT_GOTO_DEPOT)) {
 		v->current_order.Free();
 	}
@@ -1475,7 +1474,7 @@ static void AircraftEventHandler_AtTerminal(Aircraft *v, const AirportFTAClass *
 			return;
 		default:  // orders have been deleted (no orders), goto depot and don't bother us
 			v->current_order.Free();
-			go_to_hangar = Station::Get(v->targetairport)->Airport()->nof_depots != 0;
+			go_to_hangar = Station::Get(v->targetairport)->GetAirportSpec()->nof_depots != 0;
 	}
 
 	if (go_to_hangar) {
@@ -1616,7 +1615,8 @@ static void AircraftEventHandler_HeliEndLanding(Aircraft *v, const AirportFTACla
 	if (v->current_order.IsType(OT_GOTO_STATION)) {
 		if (AirportFindFreeHelipad(v, apc)) return;
 	}
-	v->state = (apc->nof_depots != 0) ? HANGAR : HELITAKEOFF;
+	const AirportSpec *as = Station::Get(v->targetairport)->GetAirportSpec();
+	v->state = (as->nof_depots != 0) ? HANGAR : HELITAKEOFF;
 }
 
 typedef void AircraftStateHandler(Aircraft *v, const AirportFTAClass *apc);
