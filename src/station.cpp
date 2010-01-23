@@ -79,7 +79,7 @@ Station::~Station()
 			ge.cargo.RerouteStalePackets(this->index, this->index, &ge);
 		}
 	}
-	
+
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
 		/* Forget about this station if this station is removed */
