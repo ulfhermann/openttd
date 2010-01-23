@@ -2879,17 +2879,6 @@ void Station::RunAverages() {
 	}
 }
 
-void IncreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id) {
-	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
-	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
-		if (v->cargo_cap > 0) {
-			LinkStat & ls = st->goods[v->cargo_type].link_stats[next_station_id];
-			ls.Freeze(v->cargo_cap);
-			assert(!ls.IsNull());
-		}
-	}
-}
-
 void RecalcFrozenIfLoading(const Vehicle * v) {
 	if (v->current_order.IsType(OT_LOADING)) {
 		RecalcFrozen(Station::Get(v->last_station_visited));
@@ -2917,7 +2906,7 @@ void RecalcFrozen(Station * st) {
 		if (orders != NULL) {
 			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
 			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
-				IncreaseFrozen(st, front, next_station_id);
+				IncreaseStats(st, front, next_station_id, true);
 			}
 		}
 		++v_it;
@@ -2949,7 +2938,7 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 	}
 }
 
-void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id) {
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze) {
 	Station *next = Station::GetIfValid(next_station_id);
 	assert(st->index != next_station_id && next != NULL);
 	uint average_length = GetMovingAverageLength(st, next);
@@ -2960,11 +2949,17 @@ void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id)
 			LinkStatMap::iterator i = stats.find(next_station_id);
 			if (i == stats.end()) {
 				stats.insert(std::make_pair(next_station_id, LinkStat(
-					average_length, v->cargo_cap, 0, v->cargo.Count()
+					average_length, v->cargo_cap,
+					freeze ? v->cargo_cap : 0,
+					freeze ? 0 : v->cargo.Count()
 				)));
 			} else {
 				LinkStat & link_stat = i->second;
-				link_stat.Increase(v->cargo_cap, v->cargo.Count());
+				if (freeze) {
+					link_stat.Freeze(v->cargo_cap);
+				} else {
+					link_stat.Increase(v->cargo_cap, v->cargo.Count());
+				}
 				assert(!link_stat.IsNull());
 			}
 		}
