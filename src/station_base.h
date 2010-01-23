@@ -62,17 +62,17 @@ public:
 		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
 	}
 
-	FORCEINLINE uint Capacity()
+	FORCEINLINE uint Capacity() const
 	{
 		return this->MovingAverage<uint>::Monthly(this->capacity);
 	}
 
-	FORCEINLINE uint Usage()
+	FORCEINLINE uint Usage() const
 	{
 		return this->MovingAverage<uint>::Monthly(this->usage);
 	}
 
-	FORCEINLINE uint Frozen()
+	FORCEINLINE uint Frozen() const
 	{
 		return this->frozen;
 	}
@@ -99,7 +99,7 @@ public:
 		this->frozen = 0;
 	}
 
-	FORCEINLINE bool IsNull()
+	FORCEINLINE bool IsNull() const
 	{
 		return this->capacity == 0;
 	}
