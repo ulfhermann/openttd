@@ -31,11 +31,14 @@
 #include "vehicle_func.h"
 #include "sound_func.h"
 #include "autoreplace_gui.h"
-#include "gfx_func.h"
 #include "effectvehicle_func.h"
+#include "effectvehicle_base.h"
 #include "ai/ai.hpp"
 #include "pathfinder/opf/opf_ship.h"
 #include "landscape_type.h"
+#include "engine_base.h"
+#include "engine_func.h"
+#include "company_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -62,7 +65,7 @@ static SpriteID GetShipIcon(EngineID engine)
 	return DIR_W + _ship_sprites[spritenum];
 }
 
-void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal)
+void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal)
 {
 	SpriteID sprite = GetShipIcon(engine);
 	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
