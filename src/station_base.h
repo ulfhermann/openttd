@@ -107,6 +107,8 @@ public:
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
 
+uint GetMovingAverageLength(const Station *from, const Station *to);
+
 class SupplyMovingAverage {
 private:
 	uint supply;
