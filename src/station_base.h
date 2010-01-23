@@ -171,7 +171,9 @@ public:
 		this->via = other.via;
 		this->planned += other.planned;
 		uint sent = this->sent + other.sent;
-		this->length = (this->length * this->sent + other.length * other.sent) / sent;
+		if (sent > 0) {
+			this->length = (this->length * this->sent + other.length * other.sent) / sent;
+		}
 		this->sent = sent;
 		return *this;
 	}
