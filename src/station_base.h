@@ -61,7 +61,7 @@ public:
 
 	FORCEINLINE void Decrease()
 	{
-		this->usage = this->MovingAverage<uint>::Decrease(this->usage);
+		this->MovingAverage<uint>::Decrease(this->usage);
 		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
 	}
 
@@ -187,6 +187,8 @@ typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow 
 typedef std::map<StationID, LinkStat> LinkStatMap;
 typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by origin stations
 
+uint GetMovingAverageLength(const Station *from, const Station *to);
+
 class SupplyMovingAverage {
 private:
 	uint supply;
@@ -194,13 +196,25 @@ private:
 public:
 	friend const SaveLoad *GetGoodsDesc();
 
-	FORCEINLINE SupplyMovingAverage() : supply(0) {}
+	FORCEINLINE SupplyMovingAverage(uint supply = 0) : supply(supply) {}
 
 	FORCEINLINE void Increase(uint value) {this->supply += value;}
 
-	FORCEINLINE void Decrease() {this->supply = MovingAverage<uint>().Decrease(this->supply);}
+	FORCEINLINE void Decrease() {MovingAverage<SupplyMovingAverage>().Decrease(*this);}
 
 	FORCEINLINE uint Value() const {return MovingAverage<uint>().Monthly(this->supply);}
+
+	FORCEINLINE SupplyMovingAverage &operator/=(uint divident)
+		{this->supply = DivideApprox(this->supply, divident); return *this;}
+
+	FORCEINLINE SupplyMovingAverage &operator*=(uint factor)
+		{this->supply *= factor; return *this;}
+
+	FORCEINLINE SupplyMovingAverage operator/(uint divident) const
+		{return SupplyMovingAverage(DivideApprox(this->supply, divident));}
+
+	FORCEINLINE SupplyMovingAverage operator*(uint factor) const
+		{return SupplyMovingAverage(this->supply * factor);}
 };
 
 
