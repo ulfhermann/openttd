@@ -2851,6 +2851,25 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+	FlowStatMap & flows = Station::Get(at)->goods[c_id].flows;
+	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
+		FlowStatSet & s_flows = f_it->second;
+		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
+			if (s_it->Via() == to) {
+				s_flows.erase(s_it++);
+			} else {
+				++s_it;
+			}
+		}
+		if (s_flows.empty()) {
+			flows.erase(f_it++);
+		} else {
+			++f_it;
+		}
+	}
+}
+
 uint GetMovingAverageLength(const Station *from, const Station *to)
 {
 	return _settings_game.economy.moving_average_length + (DistanceManhattan(from->xy, to->xy) >> 2);
@@ -2871,6 +2890,7 @@ void Station::RunAverages() {
 				LinkStat & ls = i->second;
 				ls.Decrease();
 				if (ls.IsNull()) {
+					DeleteStaleFlows(this->index, goods_index, id);
 					links.erase(i++);
 				} else {
 					++i;
