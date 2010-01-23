@@ -219,7 +219,7 @@ void Node::ExportNewFlows(FlowMap::iterator & source_flows_it, FlowStatSet & via
 
 			Station *via = Station::GetIfValid(next);
 			if (planned > 0 && via != NULL) {
-				uint distance = DistanceManhattan(curr_station->xy, via->xy);
+				uint distance = GetMovingAverageLength(curr_station, via);
 				if (next != this->station) {
 					LinkStatMap & ls = curr_station->goods[cargo].link_stats;
 					if (ls.find(next) != ls.end()) {

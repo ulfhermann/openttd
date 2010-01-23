@@ -128,7 +128,9 @@ public:
 	 */
 	FORCEINLINE FlowStat GetDecreasedCopy() const
 	{
-		return FlowStat(this->length, this->via, this->planned, this->MovingAverage<uint>::Decrease(this->sent));
+		FlowStat ret(this->length, this->via, this->planned, this->sent);
+		this->MovingAverage<uint>::Decrease(ret.sent);
+		return ret;
 	}
 
 	FORCEINLINE void Increase(uint sent)
