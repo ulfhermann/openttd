@@ -17,6 +17,7 @@
 #include "../aircraft.h"
 #include "../station_base.h"
 #include "../effectvehicle_base.h"
+#include "../engine_base.h"
 
 #include "saveload.h"
 
@@ -317,7 +318,7 @@ void AfterLoadVehicles(bool part_of_load)
 			Train *t = Train::From(v);
 			if (t->IsFrontEngine() || t->IsFreeWagon()) {
 				t->tcache.last_speed = t->cur_speed; // update displayed train speed
-				TrainConsistChanged(t, false);
+				t->ConsistChanged(false);
 			}
 		} else if (v->type == VEH_ROAD) {
 			RoadVehicle *rv = RoadVehicle::From(v);

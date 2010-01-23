@@ -13,18 +13,12 @@
 #define SPRITE_H
 
 #include "gfx_type.h"
+#include "transparency.h"
+
+#include "table/sprites.h"
 
 #define GENERAL_SPRITE_COLOUR(colour) ((colour) + PALETTE_RECOLOUR_START)
 #define COMPANY_SPRITE_COLOUR(owner) (GENERAL_SPRITE_COLOUR(_company_colours[owner]))
-
-/**
- * Whether a sprite comes from the original graphics files or a new grf file
- * (either supplied by OpenTTD or supplied by the user).
- *
- * @param sprite The sprite to check
- * @return True if it is a new sprite, or false if it is original.
- */
-#define IS_CUSTOM_SPRITE(sprite) ((sprite) >= SPR_SIGNALS_BASE)
 
 /* The following describes bunch of sprites to be drawn together in a single 3D
  * bounding box. Used especially for various multi-sprite buildings (like
@@ -65,6 +59,91 @@ struct DrawBuildingsTileStruct {
 /** Iterate through all DrawTileSeqStructs in DrawTileSprites. */
 #define foreach_draw_tile_seq(idx, list) for (idx = list; ((byte) idx->delta_x) != 0x80; idx++)
 
-bool SkipSpriteData(byte type, uint16 num);
+void DrawCommonTileSeq(const struct TileInfo *ti, const DrawTileSprites *dts, TransparencyOption to, int32 orig_offset, uint32 newgrf_offset, PaletteID default_palette, bool child_offset_is_unsigned);
+void DrawCommonTileSeqInGUI(int x, int y, const DrawTileSprites *dts, int32 orig_offset, uint32 newgrf_offset, PaletteID default_palette, bool child_offset_is_unsigned);
+
+/**
+ * Draw tile sprite sequence on tile with railroad specifics.
+ * @param total_offset Spriteoffset from normal rail to current railtype.
+ * @param newgrf_offset Startsprite of the Action1 to use.
+ */
+static inline void DrawRailTileSeq(const struct TileInfo *ti, const DrawTileSprites *dts, TransparencyOption to, int32 total_offset, uint32 newgrf_offset, PaletteID default_palette)
+{
+	DrawCommonTileSeq(ti, dts, to, total_offset, newgrf_offset, default_palette, false);
+}
+
+/**
+ * Draw tile sprite sequence in GUI with railroad specifics.
+ * @param total_offset Spriteoffset from normal rail to current railtype.
+ * @param newgrf_offset Startsprite of the Action1 to use.
+ */
+static inline void DrawRailTileSeqInGUI(int x, int y, const DrawTileSprites *dts, int32 total_offset, uint32 newgrf_offset, PaletteID default_palette)
+{
+	DrawCommonTileSeqInGUI(x, y, dts, total_offset, newgrf_offset, default_palette, false);
+}
+
+/**
+ * Draw TTD sprite sequence on tile.
+ */
+static inline void DrawOrigTileSeq(const struct TileInfo *ti, const DrawTileSprites *dts, TransparencyOption to, PaletteID default_palette)
+{
+	DrawCommonTileSeq(ti, dts, to, 0, 0, default_palette, false);
+}
+
+/**
+ * Draw TTD sprite sequence in GUI.
+ */
+static inline void DrawOrigTileSeqInGUI(int x, int y, const DrawTileSprites *dts, PaletteID default_palette)
+{
+	DrawCommonTileSeqInGUI(x, y, dts, 0, 0, default_palette, false);
+}
+
+/**
+ * Draw NewGRF industrytile or house sprite layout
+ * @param stage Sprite inside the Action1 spritesets to use, i.e. construction stage.
+ */
+static inline void DrawNewGRFTileSeq(const struct TileInfo *ti, const DrawTileSprites *dts, TransparencyOption to, uint32 stage, PaletteID default_palette)
+{
+	DrawCommonTileSeq(ti, dts, to, 0, stage, default_palette, true);
+}
+
+/**
+ * Applies PALETTE_MODIFIER_TRANSPARENT and PALETTE_MODIFIER_COLOUR to a palette entry of a sprite layout entry
+ * @Note for ground sprites use #GroundSpritePaletteTransform
+ * @Note Not useable for OTTD internal spritelayouts from table/xxx_land.h as PALETTE_MODIFIER_TRANSPARENT is only set
+ *       when to use the default palette.
+ *
+ * @param image The sprite to draw
+ * @param pal The palette from the sprite layout
+ * @param default_pal The default recolour sprite to use (typically company colour resp. random industry/house colour)
+ * @return The palette to use
+ */
+static inline PaletteID SpriteLayoutPaletteTransform(SpriteID image, PaletteID pal, PaletteID default_pal)
+{
+	if (HasBit(image, PALETTE_MODIFIER_TRANSPARENT) || HasBit(image, PALETTE_MODIFIER_COLOUR)) {
+		return (pal != 0 ? pal : default_pal);
+	} else {
+		return PAL_NONE;
+	}
+}
+
+/**
+ * Applies PALETTE_MODIFIER_COLOUR to a palette entry of a ground sprite
+ * @Note Not useable for OTTD internal spritelayouts from table/xxx_land.h as PALETTE_MODIFIER_TRANSPARENT is only set
+ *       when to use the default palette.
+ *
+ * @param image The sprite to draw
+ * @param pal The palette from the sprite layout
+ * @param default_pal The default recolour sprite to use (typically company colour resp. random industry/house colour)
+ * @return The palette to use
+ */
+static inline PaletteID GroundSpritePaletteTransform(SpriteID image, PaletteID pal, PaletteID default_pal)
+{
+	if (HasBit(image, PALETTE_MODIFIER_COLOUR)) {
+		return (pal != 0 ? pal : default_pal);
+	} else {
+		return PAL_NONE;
+	}
+}
 
 #endif /* SPRITE_H */
