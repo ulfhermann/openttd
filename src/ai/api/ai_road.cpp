@@ -9,7 +9,6 @@
 
 /** @file ai_road.cpp Implementation of AIRoad. */
 
-#include "../../stdafx.h"
 #include "ai_map.hpp"
 #include "ai_station.hpp"
 #include "ai_cargo.hpp"
@@ -472,7 +471,7 @@ static bool NeighbourHasReachableRoad(::RoadTypes rts, TileIndex start_tile, Dia
 	EnforcePrecondition(false, !one_way || AIObject::GetRoadType() == ::ROADTYPE_ROAD);
 	EnforcePrecondition(false, IsRoadTypeAvailable(GetCurrentRoadType()));
 
-	return AIObject::DoCommand(end, start, (::TileY(start) != ::TileY(end) ? 4 : 0) | (((start < end) == !full) ? 1 : 2) | (AIObject::GetRoadType() << 3) | ((one_way ? 1 : 0) << 5), CMD_BUILD_LONG_ROAD);
+	return AIObject::DoCommand(start, end, (::TileY(start) != ::TileY(end) ? 4 : 0) | (((start < end) == !full) ? 1 : 2) | (AIObject::GetRoadType() << 3) | ((one_way ? 1 : 0) << 5), CMD_BUILD_LONG_ROAD);
 }
 
 /* static */ bool AIRoad::BuildRoad(TileIndex start, TileIndex end)
