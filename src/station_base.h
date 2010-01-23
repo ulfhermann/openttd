@@ -58,7 +58,7 @@ public:
 
 	FORCEINLINE void Decrease()
 	{
-		this->usage = this->MovingAverage<uint>::Decrease(this->usage);
+		this->MovingAverage<uint>::Decrease(this->usage);
 		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
 	}
 
@@ -120,7 +120,7 @@ public:
 
 	FORCEINLINE void Increase(uint value) {this->supply += value;}
 
-	FORCEINLINE void Decrease() {*this = MovingAverage<SupplyMovingAverage>().Decrease(*this);}
+	FORCEINLINE void Decrease() {MovingAverage<SupplyMovingAverage>().Decrease(*this);}
 
 	FORCEINLINE uint Value() const {return MovingAverage<uint>().Monthly(this->supply);}
 
