@@ -2522,15 +2522,17 @@ static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 	}
 	td->build_date = BaseStation::GetByTile(tile)->build_date;
 
-	const StationSpec *spec = GetStationSpec(tile);
+	if (HasStationTileRail(tile)) {
+		const StationSpec *spec = GetStationSpec(tile);
 
-	if (spec != NULL) {
-		td->station_class = GetStationClassName(spec->sclass);
-		td->station_name = spec->name;
+		if (spec != NULL) {
+			td->station_class = GetStationClassName(spec->sclass);
+			td->station_name  = spec->name;
 
-		if (spec->grffile != NULL) {
-			const GRFConfig *gc = GetGRFConfig(spec->grffile->grfid);
-			td->grf = gc->name;
+			if (spec->grffile != NULL) {
+				const GRFConfig *gc = GetGRFConfig(spec->grffile->grfid);
+				td->grf = gc->name;
+			}
 		}
 	}
 
@@ -3495,7 +3497,7 @@ StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, Stat
 }
 
 FlowStat GoodsEntry::GetSumFlowVia(StationID via) const {
-	FlowStat ret(0, via);
+	FlowStat ret(1, via);
 	for(FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
 		const FlowStatSet & flow_set = i->second;
 		for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {

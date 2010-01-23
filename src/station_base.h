@@ -65,17 +65,17 @@ public:
 		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
 	}
 
-	FORCEINLINE uint Capacity()
+	FORCEINLINE uint Capacity() const
 	{
 		return this->MovingAverage<uint>::Monthly(this->capacity);
 	}
 
-	FORCEINLINE uint Usage()
+	FORCEINLINE uint Usage() const
 	{
 		return this->MovingAverage<uint>::Monthly(this->usage);
 	}
 
-	FORCEINLINE uint Frozen()
+	FORCEINLINE uint Frozen() const
 	{
 		return this->frozen;
 	}
@@ -102,7 +102,7 @@ public:
 		this->frozen = 0;
 	}
 
-	FORCEINLINE bool IsNull()
+	FORCEINLINE bool IsNull() const
 	{
 		return this->capacity == 0;
 	}
@@ -171,7 +171,9 @@ public:
 		this->via = other.via;
 		this->planned += other.planned;
 		uint sent = this->sent + other.sent;
-		this->length = (this->length * this->sent + other.length * other.sent) / sent;
+		if (sent > 0) {
+			this->length = (this->length * this->sent + other.length * other.sent) / sent;
+		}
 		this->sent = sent;
 		return *this;
 	}
