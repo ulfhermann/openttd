@@ -46,7 +46,7 @@ private:
 public:
 	friend const SaveLoad *GetLinkStatDesc();
 
-	FORCEINLINE LinkStat(uint distance = 0, uint capacity = 0, uint frozen = 0, uint usage = 0) : 
+	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 0, uint frozen = 0, uint usage = 0) :
 		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
 
 	FORCEINLINE void Clear()
