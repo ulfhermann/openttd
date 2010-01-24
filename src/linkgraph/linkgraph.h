@@ -120,6 +120,7 @@ public:
 	size_t GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}
 	void AddComponent(LinkGraphComponent * component, uint join);
+	uint GetComponentAcceptance(LinkGraphComponentID id);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;

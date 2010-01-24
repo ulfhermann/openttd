@@ -800,6 +800,9 @@ static void TileLoopIndustry_BubbleGenerator(TileIndex tile)
 
 static void TileLoop_Industry(TileIndex tile)
 {
+	uint dummy;
+	AddAcceptedCargo_Industry(tile, GlobalCargoAcceptance::inst.CurrentLoop(), &dummy);
+
 	IndustryGfx newgfx;
 	IndustryGfx gfx;
 

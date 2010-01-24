@@ -47,6 +47,7 @@
 #include "company_base.h"
 #include "newgrf.h"
 #include "moving_average.h"
+#include "linkgraph/linkgraph.h"
 
 #include "table/strings.h"
 
@@ -2802,6 +2803,12 @@ static void UpdateStationRating(Station *st)
 			(rating += 10, age >= 2) ||
 			(rating += 10, age >= 1) ||
 			(rating += 13, true);
+
+			if (_settings_game.economy.cap_ratings_by_component) {
+				CargoID c_id = cs->Index();
+				uint component_cap = 128 + 128 * _link_graphs[c_id].GetComponentAcceptance(ge->last_component) / (GlobalCargoAcceptance::inst.Get(c_id) + 1);
+				rating = min(rating, component_cap);
+			}
 
 			{
 				int or_ = ge->rating; // old rating

@@ -669,6 +669,7 @@ void RunTileLoop()
 	assert((tile & ~TILELOOP_ASSERTMASK) == 0);
 	uint count = (MapSizeX() / TILELOOP_SIZE) * (MapSizeY() / TILELOOP_SIZE);
 	do {
+		if (tile == 0) GlobalCargoAcceptance::inst.NewLoop();
 		_tile_type_procs[GetTileType(tile)]->tile_loop_proc(tile);
 
 		if (TileX(tile) < MapSizeX() - TILELOOP_SIZE) {

@@ -13,6 +13,8 @@
 #define CARGO_TYPE_H
 
 #include "core/enum_type.hpp"
+#include "core/math_func.hpp"
+#include "saveload/saveload.h"
 
 /**
  * Cargo slots to indicate a cargo type within a game.
@@ -106,6 +108,29 @@ public:
 	}
 };
 
+class GlobalCargoAcceptance {
+private:
+	CargoArray *acceptance;
+	CargoArray *current_tile_loop;
+
+	GlobalCargoAcceptance() {
+		acceptance = new CargoArray();
+		current_tile_loop = new CargoArray();
+	}
+
+public:
+	friend const SaveLoad *GetGlobalCargoAcceptanceDesc();
+
+	FORCEINLINE uint Get(CargoID c) {return (*acceptance)[c];}
+	FORCEINLINE CargoArray &CurrentLoop() {return *current_tile_loop;}
+	FORCEINLINE void NewLoop()
+	{
+		Swap(acceptance, current_tile_loop);
+		current_tile_loop->Clear();
+	}
+
+	static GlobalCargoAcceptance inst;
+};
 
 /** Types of cargo source and destination */
 enum SourceType {

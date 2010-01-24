@@ -24,7 +24,8 @@ void LinkGraph::CreateComponent(Station * first) {
 	first->goods[this->cargo].last_component = this->current_component_id;
 	component = new LinkGraphComponent(this->cargo, this->current_component_id);
 	GoodsEntry & good = first->goods[this->cargo];
-	node = component->AddNode(this->current_station_id, good.supply.Value(), HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+	node = component->AddNode(this->current_station_id, good.supply.Value(), good.acceptance);
+	this->component_acceptance[this->current_component_id] = good.acceptance;
 	index[this->current_station_id++] = node;
 	// find all stations belonging to the current component
 	while(!search_queue.empty()) {
@@ -46,10 +47,8 @@ void LinkGraph::CreateComponent(Station * first) {
 				GoodsEntry & good = target->goods[cargo];
 				good.last_component = this->current_component_id;
 				search_queue.push(target);
-				node = component->AddNode(
-					target_id, good.supply.Value(),
-					HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE)
-				);
+				node = component->AddNode(target_id, good.supply.Value(), good.acceptance);
+				this->component_acceptance[this->current_component_id] += good.acceptance;
 				index[target_id] = node;
 			} else {
 				node = index_it->second;
@@ -84,6 +83,13 @@ void LinkGraph::NextComponent()
 				LinkStatMap & links = station->goods[cargo].link_stats;
 				if (!links.empty()) {
 					this->current_component_id += 2;
+					if (this->current_component_id >= LinkGraph::MAX_COMPONENTS) {
+						if (this->current_component_id % 2 == 0) {
+							this->current_component_id = 0;
+						} else {
+							this->current_component_id = 1;
+						}
+					}
 					CreateComponent(station);
 					return;
 				}
@@ -138,7 +144,6 @@ NodeID LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
 }
 
 void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
-	assert(capacity > 0);
 	assert(from != to);
 	edges[from][to].capacity = capacity;
 }
@@ -235,6 +240,11 @@ void LinkGraphJob::SpawnThread(CargoID cargo) {
 		// "Step" is called. No problem in principle.
 		RunLinkGraphJob(this);
 	}
+}
+
+uint LinkGraph::GetComponentAcceptance(LinkGraphComponentID id)
+{
+	return this->component_acceptance[id];
 }
 
 LinkGraphJob::LinkGraphJob(LinkGraphComponent * c) :

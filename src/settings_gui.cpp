@@ -1378,6 +1378,7 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.smooth_economy"),
 	SettingEntry("economy.moving_average_unit"),
 	SettingEntry("economy.moving_average_length"),
+	SettingEntry("economy.cap_ratings_by_component"),
 	SettingEntry("economy.feeder_payment_share"),
 };
 /** Economy sub-page */

@@ -55,6 +55,17 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 	return &saveloads[0];
 }
 
+const SaveLoad *GetGlobalCargoAcceptanceDesc()
+{
+	static const SaveLoad acceptance_desc[] = {
+		SLE_CONDARR(GlobalCargoAcceptance, acceptance,        SLE_UINT, NUM_CARGO, SUPPLY_SV, SL_MAX_VERSION),
+		SLE_CONDARR(GlobalCargoAcceptance, current_tile_loop, SLE_UINT, NUM_CARGO, SUPPLY_SV, SL_MAX_VERSION),
+		SLE_END()
+	};
+
+	return acceptance_desc;
+}
+
 const SaveLoad * GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad _linkgraph_desc[] = {
@@ -119,6 +130,8 @@ static void DoSave_LGRP(void *)
 			SaveLoad_LinkGraphComponent(comp);
 		}
 	}
+
+	SlObject(&GlobalCargoAcceptance::inst, GetGlobalCargoAcceptanceDesc());
 }
 
 static void Load_LGRP()
@@ -134,6 +147,8 @@ static void Load_LGRP()
 			graph.AddComponent(comp, _join_date);
 		}
 	}
+
+	SlObject(&GlobalCargoAcceptance::inst, GetGlobalCargoAcceptanceDesc());
 }
 
 static void Save_LGRP() {

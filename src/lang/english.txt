@@ -1294,6 +1294,7 @@ STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Initial
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove absurd road-elements during the road construction: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_AVERAGE_UNIT                                 :{LTBLUE}Moving Average Unit: {ORANGE}{STRING1} days
 STR_CONFIG_SETTING_AVERAGE_LENGTH                               :{LTBLUE}Minimum Moving Average Length: {ORANGE}{STRING1} units
+STR_CONFIG_SETTING_CAP_RATING                                   :{LTBLUE}Cap cargo ratings by size of linkgraph component: {ORANGE}{STRING1} 
 
 STR_CONFIG_SETTING_LINKGRAPH_INTERVAL                           :{LTBLUE}Link graph recalculation interval: {ORANGE}{STRING1} days
 

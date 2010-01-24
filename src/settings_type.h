@@ -345,6 +345,7 @@ struct EconomySettings {
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
 	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving averages
 	uint16 moving_average_length;            ///< minimum length of moving averages
+	bool   cap_ratings_by_component;         ///< cap the supply of cargo by size of the linkgraph component
 };
 
 struct LinkGraphSettings {

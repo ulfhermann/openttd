@@ -333,6 +333,9 @@ static void TileLoop_Unmovable(TileIndex tile)
 {
 	if (!IsCompanyHQ(tile)) return;
 
+	uint dummy;
+	AddAcceptedCargo_Unmovable(tile, GlobalCargoAcceptance::inst.CurrentLoop(), &dummy);
+
 	/* HQ accepts passenger and mail; but we have to divide the values
 	 * between 4 tiles it occupies! */
 
