@@ -49,7 +49,7 @@ private:
 public:
 	friend const SaveLoad *GetLinkStatDesc();
 
-	FORCEINLINE LinkStat(uint distance = 0, uint capacity = 0, uint frozen = 0, uint usage = 0) : 
+	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 0, uint frozen = 0, uint usage = 0) :
 		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
 
 	FORCEINLINE void Clear()
@@ -117,7 +117,7 @@ private:
 public:
 	friend const SaveLoad *GetFlowStatDesc();
 
-	FORCEINLINE FlowStat(uint distance = 0, StationID st = INVALID_STATION, uint p = 0, uint s = 0) :
+	FORCEINLINE FlowStat(uint distance = 1, StationID st = INVALID_STATION, uint p = 0, uint s = 0) :
 		MovingAverage<uint>(distance), planned(p), sent(s), via(st) {}
 
 	FORCEINLINE FlowStat(const FlowStat &prev, uint new_plan) :
