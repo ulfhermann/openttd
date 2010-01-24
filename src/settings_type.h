@@ -133,7 +133,7 @@ struct NetworkSettings {
 	char   client_name[NETWORK_CLIENT_NAME_LENGTH];       ///< name of the player (as client)
 	char   default_company_pass[NETWORK_PASSWORD_LENGTH]; ///< default password for new companies in encrypted form
 	char   connect_to_ip[NETWORK_HOSTNAME_LENGTH];        ///< default for the "Add server" query
-	char   network_id[NETWORK_UNIQUE_ID_LENGTH];          ///< semi-unique ID of the client
+	char   network_id[NETWORK_SERVER_ID_LENGTH];          ///< network ID for servers
 	bool   autoclean_companies;                           ///< automatically remove companies that are not in use
 	uint8  autoclean_unprotected;                         ///< remove passwordless companies after this many months
 	uint8  autoclean_protected;                           ///< remove the password from passworded companies after this many months
@@ -343,8 +343,8 @@ struct EconomySettings {
 	TownFoundingByte found_town;             ///< town founding, @see TownFounding
 	bool   station_noise_level;              ///< build new airports when the town noise level is still within accepted limits
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
-	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving average of capacities and usage of links
-	uint16 moving_average_length;            ///< length of the moving average for capacities and usage of links
+	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving averages
+	uint16 moving_average_length;            ///< minimum length of moving averages
 };
 
 struct LinkGraphSettings {

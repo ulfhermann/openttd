@@ -324,8 +324,11 @@ void SlArray(void *array, size_t length, VarType conv);
 void SlObject(void *object, const SaveLoad *sld);
 bool SlObjectMember(void *object, const SaveLoad *sld);
 
+bool SaveloadCrashWithMissingNewGRFs();
+
 extern char _savegame_format[8];
 
+#define MOVING_AVERAGE_SV 149
 #define CAPACITIES_SV 150
 #define LINKGRAPH_SV 155
 #define SUPPLY_SV 157

@@ -16,9 +16,9 @@
 #include "sprite.h"
 #include "rail_type.h"
 #include "road_type.h"
-#include "tile_type.h"
 #include "cargo_type.h"
-#include "vehicle_type.h"
+#include "company_type.h"
+#include "vehicle_base.h"
 
 void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint radius);
 
@@ -52,12 +52,10 @@ void UpdateAirportsNoise();
 
 void DecreaseFrozen(Station *st, const Vehicle *v, StationID next_station_id);
 
-void IncreaseFrozen(Station *st, const Vehicle *v, StationID next_station_id);
-
 void RecalcFrozen(Station * st);
 
 void RecalcFrozenIfLoading(const Vehicle * v);
 
-void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id);
+void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id, bool freeze);
 
 #endif /* STATION_FUNC_H */

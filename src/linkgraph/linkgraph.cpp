@@ -6,6 +6,7 @@
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
+#include "../moving_average.h"
 #include <queue>
 
 LinkGraph _link_graphs[NUM_CARGO];
@@ -23,7 +24,7 @@ void LinkGraph::CreateComponent(Station * first) {
 	first->goods[this->cargo].last_component = this->current_component_id;
 	component = new LinkGraphComponent(this->cargo, this->current_component_id);
 	GoodsEntry & good = first->goods[this->cargo];
-	node = component->AddNode(this->current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+	node = component->AddNode(this->current_station_id, good.supply.Value(), HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 	index[this->current_station_id++] = node;
 	// find all stations belonging to the current component
 	while(!search_queue.empty()) {
@@ -34,23 +35,27 @@ void LinkGraph::CreateComponent(Station * first) {
 		LinkStatMap & links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID target_id = i->first;
-			if (!Station::IsValidID(target_id)) {
+			Station *target = Station::GetIfValid(target_id);
+			if (target == NULL) {
 				continue;
 			}
 			assert(target_id != source_id);
 			LinkStat & link_stat = i->second;
 			ReverseNodeIndex::iterator index_it = index.find(target_id);
 			if (index_it == index.end()) {
-				Station * target = Station::Get(target_id);
 				GoodsEntry & good = target->goods[cargo];
 				good.last_component = this->current_component_id;
 				search_queue.push(target);
-				node = component->AddNode(target_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
+				node = component->AddNode(
+					target_id, good.supply.Value(),
+					HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE)
+				);
 				index[target_id] = node;
 			} else {
 				node = index_it->second;
 			}
-			component->AddEdge(index[source_id], node, link_stat.capacity);
+			
+			component->AddEdge(index[source_id], node, link_stat.Capacity());
 		}
 	}
 	// here the list of nodes and edges for this component is complete.
@@ -183,9 +188,9 @@ void LinkGraph::Join() {
 void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 	LinkGraphComponentID index = component->GetIndex();
 	for(NodeID i = 0; i < component->GetSize(); ++i) {
-		StationID station_id = component->GetNode(i).station;
-		if (Station::IsValidID(station_id)) {
-			Station::Get(station_id)->goods[cargo].last_component = index;
+		Station *station = Station::GetIfValid(component->GetNode(i).station);
+		if (station != NULL) {
+			station->goods[cargo].last_component = index;
 		}
 	}
 	LinkGraphJob * job = new LinkGraphJob(component, join);

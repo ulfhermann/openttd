@@ -23,7 +23,6 @@
 #include "sound_func.h"
 #include "fios.h"
 #include "string_func.h"
-#include "gfx_func.h"
 #include "widgets/dropdown_type.h"
 #include "widgets/dropdown_func.h"
 #include "landscape_type.h"
@@ -31,6 +30,8 @@
 #include "town.h"
 #include "thread/thread.h"
 #include "settings_func.h"
+#include "core/geometry_func.hpp"
+#include "core/random_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -38,16 +39,19 @@
 /**
  * In what 'mode' the GenerateLandscapeWindowProc is.
  */
-enum glwp_modes {
-	GLWP_GENERATE,
-	GLWP_HEIGHTMAP,
-	GLWP_SCENARIO,
-	GLWP_END
+enum GenenerateLandscapeWindowMode {
+	GLWM_GENERATE,  ///< Generate new game
+	GLWM_HEIGHTMAP, ///< Load from heightmap
+	GLWM_SCENARIO,  ///< Generate flat land
 };
 
 extern void SwitchToMode(SwitchMode new_mode);
 extern void MakeNewgameSettingsLive();
 
+/**
+ * Changes landscape type and sets genworld window dirty
+ * @param landscape new landscape type
+ */
 static inline void SetNewLandscapeType(byte landscape)
 {
 	_settings_newgame.game_creation.landscape = landscape;
@@ -55,51 +59,53 @@ static inline void SetNewLandscapeType(byte landscape)
 	SetWindowClassesDirty(WC_GENERATE_LANDSCAPE);
 }
 
+/** Widgets of GenerateLandscapeWindow */
 enum GenerateLandscapeWindowWidgets {
-	GLAND_TEMPERATE,
-	GLAND_ARCTIC,
-	GLAND_TROPICAL,
-	GLAND_TOYLAND,
+	GLAND_TEMPERATE,          ///< Button with icon "Temperate"
+	GLAND_ARCTIC,             ///< Button with icon "Arctic"
+	GLAND_TROPICAL,           ///< Button with icon "Tropical"
+	GLAND_TOYLAND,            ///< Button with icon "Toyland"
 
-	GLAND_MAPSIZE_X_PULLDOWN,
-	GLAND_MAPSIZE_Y_PULLDOWN,
+	GLAND_MAPSIZE_X_PULLDOWN, ///< Dropdown 'map X size'
+	GLAND_MAPSIZE_Y_PULLDOWN, ///< Dropdown 'map Y size'
 
-	GLAND_TOWN_PULLDOWN,
-	GLAND_INDUSTRY_PULLDOWN,
+	GLAND_TOWN_PULLDOWN,      ///< Dropdown 'No. of towns'
+	GLAND_INDUSTRY_PULLDOWN,  ///< Dropdown 'No. of industries'
 
-	GLAND_RANDOM_EDITBOX,
-	GLAND_RANDOM_BUTTON,
+	GLAND_RANDOM_EDITBOX,     ///< 'Random seed' editbox
+	GLAND_RANDOM_BUTTON,      ///< 'Randomise' button
 
-	GLAND_GENERATE_BUTTON,
+	GLAND_GENERATE_BUTTON,    ///< 'Generate' button
 
-	GLAND_START_DATE_DOWN,
-	GLAND_START_DATE_TEXT,
-	GLAND_START_DATE_UP,
+	GLAND_START_DATE_DOWN,    ///< Decrease start year
+	GLAND_START_DATE_TEXT,    ///< Start year
+	GLAND_START_DATE_UP,      ///< Increase start year
 
-	GLAND_SNOW_LEVEL_DOWN,
-	GLAND_SNOW_LEVEL_TEXT,
-	GLAND_SNOW_LEVEL_UP,
+	GLAND_SNOW_LEVEL_DOWN,    ///< Docrease snow level
+	GLAND_SNOW_LEVEL_TEXT,    ///< Snow level
+	GLAND_SNOW_LEVEL_UP,      ///< Increase snow level
 
-	GLAND_TREE_PULLDOWN,
-	GLAND_LANDSCAPE_PULLDOWN,
-	GLAND_HEIGHTMAP_NAME_TEXT,
-	GLAND_HEIGHTMAP_NAME_SPACER,
-	GLAND_HEIGHTMAP_SIZE_TEXT,
-	GLAND_HEIGHTMAP_ROTATION_PULLDOWN,
+	GLAND_TREE_PULLDOWN,      ///< Dropdown 'Tree algorithm'
+	GLAND_LANDSCAPE_PULLDOWN, ///< Dropdown 'Land generator'
 
-	GLAND_TERRAIN_PULLDOWN,
-	GLAND_WATER_PULLDOWN,
-	GLAND_SMOOTHNESS_PULLDOWN,
-	GLAND_VARIETY_PULLDOWN,
+	GLAND_HEIGHTMAP_NAME_TEXT,         ///< Heightmap name
+	GLAND_HEIGHTMAP_NAME_SPACER,       ///< Spacer used for aligning items in the second column nicely
+	GLAND_HEIGHTMAP_SIZE_TEXT,         ///< Size of heightmap
+	GLAND_HEIGHTMAP_ROTATION_PULLDOWN, ///< Dropdown 'Heightmap rotation'
 
-	GLAND_BORDER_TYPES,
-	GLAND_BORDERS_RANDOM,
-	GLAND_WATER_NW,
-	GLAND_WATER_NE,
-	GLAND_WATER_SE,
-	GLAND_WATER_SW,
+	GLAND_TERRAIN_PULLDOWN,    ///< Dropdown 'Terrain type'
+	GLAND_WATER_PULLDOWN,      ///< Dropdown 'Sea level'
+	GLAND_SMOOTHNESS_PULLDOWN, ///< Dropdown 'Smoothness'
+	GLAND_VARIETY_PULLDOWN,    ///< Dropdown 'Variety distribution'
+
+	GLAND_BORDERS_RANDOM,      ///< 'Random'/'Manual' borders
+	GLAND_WATER_NW,            ///< NW 'Water'/'Freeform'
+	GLAND_WATER_NE,            ///< NE 'Water'/'Freeform'
+	GLAND_WATER_SE,            ///< SE 'Water'/'Freeform'
+	GLAND_WATER_SW,            ///< SW 'Water'/'Freeform'
 };
 
+/** Widgets of GenerateLandscapeWindow when generating world */
 static const NWidgetPart _nested_generate_landscape_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
@@ -132,7 +138,7 @@ static const NWidgetPart _nested_generate_landscape_widgets[] = {
 					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_QUANTITY_OF_SEA_LAKES, STR_NULL), SetFill(1, 1),
 					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_TREE_PLACER, STR_NULL), SetFill(1, 1),
 					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_VARIETY, STR_NULL), SetFill(1, 1),
-					NWidget(WWT_TEXT, COLOUR_ORANGE, GLAND_BORDER_TYPES), SetDataTip(STR_MAPGEN_BORDER_TYPE, STR_NULL), SetFill(1, 1),
+					NWidget(WWT_TEXT, COLOUR_ORANGE), SetDataTip(STR_MAPGEN_BORDER_TYPE, STR_NULL), SetFill(1, 1),
 				EndContainer(),
 				/* Widgets at the right of the labels. */
 				NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(0, 4, 0),
@@ -212,6 +218,7 @@ static const NWidgetPart _nested_generate_landscape_widgets[] = {
 	EndContainer(),
 };
 
+/** Widgets of GenerateLandscapeWindow when loading heightmap */
 static const NWidgetPart _nested_heightmap_load_widgets[] = {
 	/* Window header. */
 	NWidget(NWID_HORIZONTAL),
@@ -290,7 +297,7 @@ static const NWidgetPart _nested_heightmap_load_widgets[] = {
 	EndContainer(),
 };
 
-static void StartGeneratingLandscape(glwp_modes mode)
+static void StartGeneratingLandscape(GenenerateLandscapeWindowMode mode)
 {
 	DeleteAllNonVitalWindows();
 
@@ -300,16 +307,16 @@ static void StartGeneratingLandscape(glwp_modes mode)
 
 	SndPlayFx(SND_15_BEEP);
 	switch (mode) {
-		case GLWP_GENERATE:  _switch_mode = (_game_mode == GM_EDITOR) ? SM_GENRANDLAND    : SM_NEWGAME;         break;
-		case GLWP_HEIGHTMAP: _switch_mode = (_game_mode == GM_EDITOR) ? SM_LOAD_HEIGHTMAP : SM_START_HEIGHTMAP; break;
-		case GLWP_SCENARIO:  _switch_mode = SM_EDITOR; break;
+		case GLWM_GENERATE:  _switch_mode = (_game_mode == GM_EDITOR) ? SM_GENRANDLAND    : SM_NEWGAME;         break;
+		case GLWM_HEIGHTMAP: _switch_mode = (_game_mode == GM_EDITOR) ? SM_LOAD_HEIGHTMAP : SM_START_HEIGHTMAP; break;
+		case GLWM_SCENARIO:  _switch_mode = SM_EDITOR; break;
 		default: NOT_REACHED();
 	}
 }
 
 static void LandscapeGenerationCallback(Window *w, bool confirmed)
 {
-	if (confirmed) StartGeneratingLandscape((glwp_modes)w->window_number);
+	if (confirmed) StartGeneratingLandscape((GenenerateLandscapeWindowMode)w->window_number);
 }
 
 static DropDownList *BuildMapsizeDropDown()
@@ -340,7 +347,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 	uint x;
 	uint y;
 	char name[64];
-	glwp_modes mode;
+	GenenerateLandscapeWindowMode mode;
 
 	GenerateLandscapeWindow(const WindowDesc *desc, WindowNumber number = 0) : QueryStringBaseWindow(11)
 	{
@@ -355,7 +362,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 		this->caption = STR_NULL;
 		this->afilter = CS_NUMERAL;
 
-		this->mode = (glwp_modes)this->window_number;
+		this->mode = (GenenerateLandscapeWindowMode)this->window_number;
 	}
 
 
@@ -473,7 +480,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 	virtual void OnPaint()
 	{
 		/* You can't select smoothness / non-water borders if not terragenesis */
-		if (mode == GLWP_GENERATE) {
+		if (mode == GLWM_GENERATE) {
 			this->SetWidgetDisabledState(GLAND_SMOOTHNESS_PULLDOWN, _settings_newgame.game_creation.land_generator == 0);
 			this->SetWidgetDisabledState(GLAND_VARIETY_PULLDOWN, _settings_newgame.game_creation.land_generator == 0);
 			this->SetWidgetDisabledState(GLAND_BORDERS_RANDOM, _settings_newgame.game_creation.land_generator == 0 || !_settings_newgame.construction.freeform_edges);
@@ -549,7 +556,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 			case GLAND_GENERATE_BUTTON: // Generate
 				MakeNewgameSettingsLive();
 
-				if (mode == GLWP_HEIGHTMAP &&
+				if (mode == GLWM_HEIGHTMAP &&
 						(this->x * 2 < (1U << _settings_newgame.game_creation.map_x) ||
 						this->x / 2 > (1U << _settings_newgame.game_creation.map_x) ||
 						this->y * 2 < (1U << _settings_newgame.game_creation.map_y) ||
@@ -725,6 +732,9 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 
 	virtual void OnQueryTextFinished(char *str)
 	{
+		/* Was 'cancel' pressed? */
+		if (str == NULL) return;
+
 		int32 value;
 		if (!StrEmpty(str)) {
 			value = atoi(str);
@@ -772,7 +782,7 @@ static const WindowDesc _heightmap_load_desc(
 	_nested_heightmap_load_widgets, lengthof(_nested_heightmap_load_widgets)
 );
 
-static void _ShowGenerateLandscape(glwp_modes mode)
+static void _ShowGenerateLandscape(GenenerateLandscapeWindowMode mode)
 {
 	uint x = 0;
 	uint y = 0;
@@ -782,14 +792,14 @@ static void _ShowGenerateLandscape(glwp_modes mode)
 	/* Always give a new seed if not editor */
 	if (_game_mode != GM_EDITOR) _settings_newgame.game_creation.generation_seed = InteractiveRandom();
 
-	if (mode == GLWP_HEIGHTMAP) {
+	if (mode == GLWM_HEIGHTMAP) {
 		/* If the function returns negative, it means there was a problem loading the heightmap */
 		if (!GetHeightmapDimensions(_file_to_saveload.name, &x, &y)) return;
 	}
 
-	GenerateLandscapeWindow *w = AllocateWindowDescFront<GenerateLandscapeWindow>((mode == GLWP_HEIGHTMAP) ? &_heightmap_load_desc : &_generate_landscape_desc, mode);
+	GenerateLandscapeWindow *w = AllocateWindowDescFront<GenerateLandscapeWindow>((mode == GLWM_HEIGHTMAP) ? &_heightmap_load_desc : &_generate_landscape_desc, mode);
 
-	if (mode == GLWP_HEIGHTMAP) {
+	if (mode == GLWM_HEIGHTMAP) {
 		w->x = x;
 		w->y = y;
 		strecpy(w->name, _file_to_saveload.title, lastof(w->name));
@@ -800,17 +810,17 @@ static void _ShowGenerateLandscape(glwp_modes mode)
 
 void ShowGenerateLandscape()
 {
-	_ShowGenerateLandscape(GLWP_GENERATE);
+	_ShowGenerateLandscape(GLWM_GENERATE);
 }
 
 void ShowHeightmapLoad()
 {
-	_ShowGenerateLandscape(GLWP_HEIGHTMAP);
+	_ShowGenerateLandscape(GLWM_HEIGHTMAP);
 }
 
 void StartScenarioEditor()
 {
-	StartGeneratingLandscape(GLWP_SCENARIO);
+	StartGeneratingLandscape(GLWM_SCENARIO);
 }
 
 void StartNewGameWithoutGUI(uint seed)
@@ -818,7 +828,7 @@ void StartNewGameWithoutGUI(uint seed)
 	/* GenerateWorld takes care of the possible GENERATE_NEW_SEED value in 'seed' */
 	_settings_newgame.game_creation.generation_seed = seed;
 
-	StartGeneratingLandscape(GLWP_GENERATE);
+	StartGeneratingLandscape(GLWM_GENERATE);
 }
 
 /** Widget numbers of the create scenario window. */
@@ -932,7 +942,7 @@ struct CreateScenarioWindow : public Window
 				break;
 
 			case CSCEN_EMPTY_WORLD: // Empty world / flat world
-				StartGeneratingLandscape(GLWP_SCENARIO);
+				StartGeneratingLandscape(GLWM_SCENARIO);
 				break;
 
 			case CSCEN_RANDOM_WORLD: // Generate
@@ -1081,7 +1091,7 @@ static const WindowDesc _create_scenario_desc(
 void ShowCreateScenario()
 {
 	DeleteWindowByClass(WC_GENERATE_LANDSCAPE);
-	new CreateScenarioWindow(&_create_scenario_desc, GLWP_SCENARIO);
+	new CreateScenarioWindow(&_create_scenario_desc, GLWM_SCENARIO);
 }
 
 enum GenerationProgressWindowWidgets {
@@ -1111,7 +1121,7 @@ static const WindowDesc _generate_progress_desc(
 	_nested_generate_progress_widgets, lengthof(_nested_generate_progress_widgets)
 );
 
-struct tp_info {
+struct GenWorldStatus {
 	uint percent;
 	StringID cls;
 	uint current;
@@ -1119,9 +1129,9 @@ struct tp_info {
 	int timer;
 };
 
-static tp_info _tp;
+static GenWorldStatus _gws;
 
-static const StringID _generation_class_table[GWP_CLASS_COUNT]  = {
+static const StringID _generation_class_table[]  = {
 	STR_GENERATION_WORLD_GENERATION,
 	STR_SCENEDIT_TOOLBAR_LANDSCAPE_GENERATION,
 	STR_GENERATION_CLEARING_TILES,
@@ -1133,6 +1143,7 @@ static const StringID _generation_class_table[GWP_CLASS_COUNT]  = {
 	STR_GENERATION_PREPARING_TILELOOP,
 	STR_GENERATION_PREPARING_GAME
 };
+assert_compile(lengthof(_generation_class_table) == GWP_CLASS_COUNT);
 
 
 static void AbortGeneratingWorldCallback(Window *w, bool confirmed)
@@ -1197,18 +1208,18 @@ struct GenerateProgressWindow : public Window {
 			case GPWW_PROGRESS_BAR:
 				/* Draw the % complete with a bar and a text */
 				DrawFrameRect(r.left, r.top, r.right, r.bottom, COLOUR_GREY, FR_BORDERONLY);
-				DrawFrameRect(r.left + 1, r.top + 1, (int)((r.right - r.left - 2) * _tp.percent / 100) + r.left + 1, r.bottom - 1, COLOUR_MAUVE, FR_NONE);
-				SetDParam(0, _tp.percent);
+				DrawFrameRect(r.left + 1, r.top + 1, (int)((r.right - r.left - 2) * _gws.percent / 100) + r.left + 1, r.bottom - 1, COLOUR_MAUVE, FR_NONE);
+				SetDParam(0, _gws.percent);
 				DrawString(r.left, r.right, r.top + 5, STR_GENERATION_PROGRESS, TC_FROMSTRING, SA_CENTER);
 				break;
 
 			case GPWW_PROGRESS_TEXT:
 				/* Tell which class we are generating */
-				DrawString(r.left, r.right, r.top, _tp.cls, TC_FROMSTRING, SA_CENTER);
+				DrawString(r.left, r.right, r.top, _gws.cls, TC_FROMSTRING, SA_CENTER);
 
 				/* And say where we are in that class */
-				SetDParam(0, _tp.current);
-				SetDParam(1, _tp.total);
+				SetDParam(0, _gws.current);
+				SetDParam(1, _gws.total);
 				DrawString(r.left, r.right, r.top + FONT_HEIGHT_NORMAL + WD_PAR_VSEP_NORMAL, STR_GENERATION_PROGRESS_NUM, TC_FROMSTRING, SA_CENTER);
 		}
 	}
@@ -1219,11 +1230,11 @@ struct GenerateProgressWindow : public Window {
  */
 void PrepareGenerateWorldProgress()
 {
-	_tp.cls   = STR_GENERATION_WORLD_GENERATION;
-	_tp.current = 0;
-	_tp.total   = 0;
-	_tp.percent = 0;
-	_tp.timer   = 0; // Forces to paint the progress window immediatelly
+	_gws.cls     = STR_GENERATION_WORLD_GENERATION;
+	_gws.current = 0;
+	_gws.total   = 0;
+	_gws.percent = 0;
+	_gws.timer   = 0; // Forces to paint the progress window immediatelly
 }
 
 /**
@@ -1235,7 +1246,7 @@ void ShowGenerateWorldProgress()
 	new GenerateProgressWindow();
 }
 
-static void _SetGeneratingWorldProgress(gwp_class cls, uint progress, uint total)
+static void _SetGeneratingWorldProgress(GenWorldProgress cls, uint progress, uint total)
 {
 	static const int percent_table[GWP_CLASS_COUNT + 1] = {0, 5, 15, 20, 40, 60, 65, 80, 85, 99, 100 };
 
@@ -1247,35 +1258,36 @@ static void _SetGeneratingWorldProgress(gwp_class cls, uint progress, uint total
 	if (IsGeneratingWorldAborted()) HandleGeneratingWorldAbortion();
 
 	if (total == 0) {
-		assert(_tp.cls == _generation_class_table[cls]);
-		_tp.current += progress;
+		assert(_gws.cls == _generation_class_table[cls]);
+		_gws.current += progress;
+		assert(_gws.current <= _gws.total);
 	} else {
-		_tp.cls   = _generation_class_table[cls];
-		_tp.current = progress;
-		_tp.total   = total;
-		_tp.percent = percent_table[cls];
+		_gws.cls     = _generation_class_table[cls];
+		_gws.current = progress;
+		_gws.total   = total;
+		_gws.percent = percent_table[cls];
 	}
 
 	/* Don't update the screen too often. So update it once in every once in a while... */
-	if (!_network_dedicated && _tp.timer != 0 && _realtime_tick - _tp.timer < GENWORLD_REDRAW_TIMEOUT) return;
+	if (!_network_dedicated && _gws.timer != 0 && _realtime_tick - _gws.timer < GENWORLD_REDRAW_TIMEOUT) return;
 
 	/* Percentage is about the number of completed tasks, so 'current - 1' */
-	_tp.percent = percent_table[cls] + (percent_table[cls + 1] - percent_table[cls]) * (_tp.current == 0 ? 0 : _tp.current - 1) / _tp.total;
+	_gws.percent = percent_table[cls] + (percent_table[cls + 1] - percent_table[cls]) * (_gws.current == 0 ? 0 : _gws.current - 1) / _gws.total;
 
 	if (_network_dedicated) {
 		static uint last_percent = 0;
 
 		/* Never display 0% */
-		if (_tp.percent == 0) return;
+		if (_gws.percent == 0) return;
 		/* Reset if percent is lower than the last recorded */
-		if (_tp.percent < last_percent) last_percent = 0;
+		if (_gws.percent < last_percent) last_percent = 0;
 		/* Display every 5%, but 6% is also very valid.. just not smaller steps than 5% */
-		if (_tp.percent % 5 != 0 && _tp.percent <= last_percent + 5) return;
+		if (_gws.percent % 5 != 0 && _gws.percent <= last_percent + 5) return;
 		/* Never show steps smaller than 2%, even if it is a mod 5% */
-		if (_tp.percent <= last_percent + 2) return;
+		if (_gws.percent <= last_percent + 2) return;
 
-		DEBUG(net, 1, "Map generation percentage complete: %d", _tp.percent);
-		last_percent = _tp.percent;
+		DEBUG(net, 1, "Map generation percentage complete: %d", _gws.percent);
+		last_percent = _gws.percent;
 
 		/* Don't continue as dedicated never has a thread running */
 		return;
@@ -1293,7 +1305,7 @@ static void _SetGeneratingWorldProgress(gwp_class cls, uint progress, uint total
 	_genworld_mapgen_mutex->BeginCritical();
 	_genworld_paint_mutex->EndCritical();
 
-	_tp.timer = _realtime_tick;
+	_gws.timer = _realtime_tick;
 }
 
 /**
@@ -1304,7 +1316,7 @@ static void _SetGeneratingWorldProgress(gwp_class cls, uint progress, uint total
  * Warning: this function isn't clever. Don't go from class 4 to 3. Go upwards, always.
  *  Also, progress works if total is zero, total works if progress is zero.
  */
-void SetGeneratingWorldProgress(gwp_class cls, uint total)
+void SetGeneratingWorldProgress(GenWorldProgress cls, uint total)
 {
 	if (total == 0) return;
 
@@ -1318,7 +1330,7 @@ void SetGeneratingWorldProgress(gwp_class cls, uint total)
  * Warning: this function isn't clever. Don't go from class 4 to 3. Go upwards, always.
  *  Also, progress works if total is zero, total works if progress is zero.
  */
-void IncreaseGeneratingWorldProgress(gwp_class cls)
+void IncreaseGeneratingWorldProgress(GenWorldProgress cls)
 {
 	/* In fact the param 'class' isn't needed.. but for some security reasons, we want it around */
 	_SetGeneratingWorldProgress(cls, 1, 0);

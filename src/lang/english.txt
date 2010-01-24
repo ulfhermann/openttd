@@ -1065,6 +1065,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Permissive
 STR_CITY_APPROVAL_TOLERANT                                      :Tolerant
 STR_CITY_APPROVAL_HOSTILE                                       :Hostile
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}No suitable AIs available...{}You can download several AIs via the 'Online Content' system
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}This action changed the difficulty level to custom
 
 # Advanced settings window
@@ -1292,7 +1293,7 @@ STR_CONFIG_SETTING_LARGER_TOWNS_DISABLED                        :{LTBLUE}Proport
 STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Initial city size multiplier: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove absurd road-elements during the road construction: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_AVERAGE_UNIT                                 :{LTBLUE}Moving Average Unit: {ORANGE}{STRING1} days
-STR_CONFIG_SETTING_AVERAGE_LENGTH                               :{LTBLUE}Moving Average Length: {ORANGE}{STRING1} units
+STR_CONFIG_SETTING_AVERAGE_LENGTH                               :{LTBLUE}Minimum Moving Average Length: {ORANGE}{STRING1} units
 
 STR_CONFIG_SETTING_LINKGRAPH_INTERVAL                           :{LTBLUE}Link graph recalculation interval: {ORANGE}{STRING1} days
 
@@ -2017,8 +2018,8 @@ STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Select s
 
 STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Small
 STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}City
-STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Metropolitan airport
-STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}International airport
+STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Metropolitan
+STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}International
 STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}Commuter
 STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Intercontinental
 STR_STATION_BUILD_AIRPORT_HELIPORT                              :{BLACK}Heliport
@@ -2374,6 +2375,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Unknown Action 
 STR_NEWGRF_ERROR_INVALID_ID                                     :Attempt to use invalid ID.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{RAW_STRING} contains a corrupt sprite. All corrupt sprites will be shown as a red question mark (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Contains multiple Action 8 entries.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Read past end of pseudo-sprite.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Caution!

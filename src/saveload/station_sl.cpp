@@ -15,7 +15,6 @@
 #include "../roadstop_base.h"
 #include "../vehicle_base.h"
 #include "../newgrf_station.h"
-#include "../station_map.h"
 
 #include "saveload.h"
 #include "table/strings.h"
@@ -221,13 +220,18 @@ static const SaveLoad _station_speclist_desc[] = {
 
 static StationID _station_id;
 
-static const SaveLoad _linkstat_desc[] = {
+const SaveLoad *GetLinkStatDesc() {
+	static const SaveLoad linkstat_desc[] = {
 		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_END()
-};
+	};
+	
+	return linkstat_desc;
+}
 
 /**
  * Wrapper function to get the GoodsEntry's internal structure while
@@ -252,7 +256,7 @@ const SaveLoad *GetGoodsDesc()
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply.supply,       SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
 		SLE_END()
@@ -398,8 +402,7 @@ static void RealSave_STNN(BaseStation *bst)
 			SlObject(ge, GetGoodsDesc());
 			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
 				_station_id = i->first;
-				assert(i->second.capacity > 0);
-				SlObject(&(i->second), _linkstat_desc);
+				SlObject(&(i->second), GetLinkStatDesc());
 			}
 		}
 	}
@@ -437,8 +440,8 @@ static void Load_STNN()
 				SlObject(ge, GetGoodsDesc());
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {
-					SlObject(&ls, _linkstat_desc);
-					assert(ls.capacity > 0);
+					SlObject(&ls, GetLinkStatDesc());
+					assert(!ls.IsNull());
 					stats[_station_id] = ls;
 				}
 			}

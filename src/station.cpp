@@ -23,6 +23,7 @@
 #include "station_base.h"
 #include "roadstop_base.h"
 #include "industry.h"
+#include "core/random_func.hpp"
 
 #include "table/strings.h"
 
@@ -67,6 +68,14 @@ Station::~Station()
 	FOR_ALL_AIRCRAFT(a) {
 		if (!a->IsNormalAircraft()) continue;
 		if (a->targetairport == this->index) a->targetairport = INVALID_STATION;
+	}
+
+	Station * st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
+			GoodsEntry & ge = st->goods[c];
+			ge.link_stats.erase(this->index);
+		}
 	}
 
 	Vehicle *v;
@@ -222,7 +231,7 @@ uint Station::GetCatchmentRadius() const
 		if (this->truck_stops        != NULL)         ret = max<uint>(ret, CA_TRUCK);
 		if (this->train_station.tile != INVALID_TILE) ret = max<uint>(ret, CA_TRAIN);
 		if (this->dock_tile          != INVALID_TILE) ret = max<uint>(ret, CA_DOCK);
-		if (this->airport_tile       != INVALID_TILE) ret = max<uint>(ret, this->Airport()->catchment);
+		if (this->airport_tile       != INVALID_TILE) ret = max<uint>(ret, this->GetAirportSpec()->catchment);
 	} else {
 		if (this->bus_stops != NULL || this->truck_stops != NULL || this->train_station.tile != INVALID_TILE || this->dock_tile != INVALID_TILE || this->airport_tile != INVALID_TILE) {
 			ret = CA_UNMODIFIED;
