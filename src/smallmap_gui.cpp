@@ -635,7 +635,7 @@ class SmallMapWindow : public Window {
 		/* Remap into flat coordinates. */
 		Point pt = RemapTileCoords(v->tile);
 
-		int x = pt.x - dpi->left;
+		int x = pt.x - dpi->left - 3; // mysterious -3 inherited from trunk
 		int y = pt.y - dpi->top;
 
 		byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
@@ -663,7 +663,7 @@ class SmallMapWindow : public Window {
 					int y = pt.y - dpi->top;
 					if (!IsInsideMM(y, 0, dpi->height)) continue;
 
-					int x = pt.x - dpi->left;
+					int x = pt.x - dpi->left - 3; // mysterious -3 inherited from trunk (vehicle drawing)
 					byte colour = GetIndustrySpec(i->type)->map_colour;
 
 					for (int offset = 0; offset < SD_MAP_MIN_INDUSTRY_WIDTH; ++offset) {
