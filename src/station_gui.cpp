@@ -1266,10 +1266,10 @@ struct StationViewWindow : public Window {
 	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, CargoDataEntry *dest) {
 		if (Station::IsValidID(next) && Station::IsValidID(source)) {
 			CargoDataEntry tmp;
-			FlowStatMap & flowmap = Station::Get(next)->goods[cargo].flows;
+			FlowStatMap &flowmap = Station::Get(next)->goods[cargo].flows;
 			FlowStatMap::iterator map_it = flowmap.find(source);
 			if (map_it != flowmap.end()) {
-				FlowStatSet & flows = map_it->second;
+				FlowStatSet &flows = map_it->second;
 				for (FlowStatSet::iterator i = flows.begin(); i != flows.end(); ++i) {
 					tmp.InsertOrRetrieve(i->Via())->Update(i->Planned());
 				}
@@ -1330,7 +1330,7 @@ struct StationViewWindow : public Window {
 	}
 
 	void BuildCargoList(CargoID i, const StationCargoList &packets, CargoDataEntry *cargo) {
-		const CargoDataEntry *source_dest = cached_destinations.Retrieve(i);
+		const CargoDataEntry *source_dest = this->cached_destinations.Retrieve(i);
 		for (StationCargoList::ConstIterator it = packets.Packets()->begin(); it != packets.Packets()->end(); it++) {
 			const CargoPacket *cp = *it;
 			StationID next = it.GetKey();
