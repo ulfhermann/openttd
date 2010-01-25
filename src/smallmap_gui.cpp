@@ -632,33 +632,38 @@ class SmallMapWindow : public Window {
 			const Vehicle *v = Vehicle::GetIfValid((*i).vehicle);
 			if (v == NULL) continue;
 
+			DrawVehicle(dpi, (*i).tile, v, blitter);
+		}
+	}
 
-			/* Remap into flat coordinates. */
-			Point pos = RemapTileCoords((*i).tile);
 
-			pos.x -= dpi->left - 3; // mysterious -3 inherited from trunk
-			pos.y -= dpi->top;
+	/**
+	 * draws a vehicle in the smallmap if it's in the selected drawing area.
+	 * @param dpi the part of the smallmap to be drawn into
+	 * @param v the vehicle to be drawn
+	 */
+	void DrawVehicle(const DrawPixelInfo *dpi, TileIndex tile, const Vehicle *v, Blitter *blitter) const
+	{
+		/* Remap into flat coordinates. */
+		Point pt = RemapTileCoords(tile);
 
-			int scale = GetVehicleScale();
-			/* Check if rhombus is inside bounds */
-			if (!IsInsideMM(pos.x, -2 * scale, dpi->width + 2 * scale) ||
-				!IsInsideMM(pos.y, -2 * scale, dpi->height + 2 * scale)) {
-				continue;
-			}
+		int x = pt.x - dpi->left - 3; // mysterious -3 inherited from trunk
+		int y = pt.y - dpi->top;
 
-			byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
+		int scale = GetVehicleScale();
 
-			/* Draw rhombus */
-			for (int dy = 0; dy < scale; dy++) {
-				for (int dx = 0; dx < scale; dx++) {
-					Point pt = RemapCoords(-dx, -dy, 0);
-					if (IsInsideMM(pos.y + pt.y, 0, dpi->height)) {
-						if (IsInsideMM(pos.x + pt.x, 0, dpi->width)) {
-							blitter->SetPixel(dpi->dst_ptr, pos.x + pt.x, pos.y + pt.y, colour);
-						}
-						if (IsInsideMM(pos.x + pt.x + 1, 0, dpi->width)) {
-							blitter->SetPixel(dpi->dst_ptr, pos.x + pt.x + 1, pos.y + pt.y, colour);
-						}
+		byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
+
+		/* Draw rhombus */
+		for (int dy = 0; dy < scale; dy++) {
+			for (int dx = 0; dx < scale; dx++) {
+				Point pt = RemapCoords(dx, dy, 0);
+				if (IsInsideMM(y + pt.y, 0, dpi->height)) {
+					if (IsInsideMM(x + pt.x, 0, dpi->width)) {
+						blitter->SetPixel(dpi->dst_ptr, x + pt.x, y + pt.y, colour);
+					}
+					if (IsInsideMM(x + pt.x + 1, 0, dpi->width)) {
+						blitter->SetPixel(dpi->dst_ptr, x + pt.x + 1, y + pt.y, colour);
 					}
 				}
 			}
