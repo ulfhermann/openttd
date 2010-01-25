@@ -520,7 +520,6 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile)
 	return _owner_colours[o];
 }
 
-
 /* Each tile has 4 x pixels and 1 y pixel */
 
 /** Holds function pointers to determine tile colour in the smallmap for each smallmap mode. */
@@ -780,38 +779,43 @@ class SmallMapWindow : public Window {
 	 * is respected when drawing.
 	 *
 	 * @param dst Pointer to a part of the screen buffer to write to.
-	 * @param xc First unscaled X coordinate of the first tile in the column.
-	 * @param yc First unscaled Y coordinate of the first tile in the column
-	 * @param col_start the first column in the buffer to be actually drawn
-	 * @param col_end the last column to be actually drawn
-	 * @param row_start the first row to be actually drawn
-	 * @param row_end the last row to be actually drawn
+	 * @param xc The X coordinate of the first tile in the column.
+	 * @param yc The Y coordinate of the first tile in the column
+	 * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
+	 * @param reps Number of lines to draw
+	 * @param start_pos Position of first pixel to draw.
+	 * @param end_pos Position of last pixel to draw (exclusive).
+	 * @param blitter current blitter
+	 * @param proc Pointer to the colour function
+	 * @note If pixel position is below \c 0, skip drawing.
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	void DrawSmallMapStuff(void *dst, uint xc, uint yc, int col_start, int col_end, int row_start, int row_end, Blitter *blitter, GetSmallMapPixels *proc) const
+	void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, int start_pos, int end_pos, Blitter *blitter, GetSmallMapPixels *proc) const
 	{
-		for (int row = 0; row < row_end; row += SD_MAP_ROW_OFFSET) {
-			if (row >= row_start) {
-				/* check if the tile (xc,yc) is within the map range */
-				uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-				uint x = ScaleByZoomLower(xc, this->zoom);
-				uint y = ScaleByZoomLower(yc, this->zoom);
-				uint32 val = 0;
-				if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
-					AntiAlias(x, y, xc, yc);
-					val = proc(TileXY(x, y));
-				}
+		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
+
+		do {
+			/* Check if the tile (xc,yc) is within the map range */
+			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
+			uint x = ScaleByZoomLower(xc, this->zoom);
+			uint y = ScaleByZoomLower(yc, this->zoom);
+
+			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
+				/* Check if the dst pointer points to a pixel inside the screen buffer */
+				if (dst < _screen.dst_ptr) continue;
+				if (dst >= dst_ptr_abs_end) continue;
+
+				AntiAlias(x, y, xc, yc);
+				uint32 val = proc(TileXY(x, y));
 				uint8 *val8 = (uint8 *)&val;
-				for (int i = col_start; i < col_end; ++i ) {
-					blitter->SetPixel(dst, i, 0, val8[i]);
+				int idx = max(0, -start_pos);
+				for (int pos = max(0, start_pos); pos < end_pos; pos++) {
+					blitter->SetPixel(dst, idx, 0, val8[idx]);
+					idx++;
 				}
 			}
-
-			/* switch to next row in the column */
-			xc++;
-			yc++;
-			dst = blitter->MoveTo(dst, 0, SD_MAP_ROW_OFFSET);
-		}
+		/* Switch to next tile in the column */
+		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
 	/**
@@ -825,33 +829,38 @@ class SmallMapWindow : public Window {
 			const Vehicle *v = Vehicle::GetIfValid((*i).vehicle);
 			if (v == NULL) continue;
 
+			DrawVehicle(dpi, (*i).tile, v, blitter);
+		}
+	}
 
-			/* Remap into flat coordinates. */
-			Point pos = RemapTileCoords((*i).tile);
 
-			pos.x -= dpi->left;
-			pos.y -= dpi->top;
+	/**
+	 * draws a vehicle in the smallmap if it's in the selected drawing area.
+	 * @param dpi the part of the smallmap to be drawn into
+	 * @param v the vehicle to be drawn
+	 */
+	void DrawVehicle(const DrawPixelInfo *dpi, TileIndex tile, const Vehicle *v, Blitter *blitter) const
+	{
+		/* Remap into flat coordinates. */
+		Point pt = RemapTileCoords(tile);
 
-			int scale = GetVehicleScale();
-			/* Check if rhombus is inside bounds */
-			if (!IsInsideMM(pos.x, -2 * scale, dpi->width + 2 * scale) ||
-				!IsInsideMM(pos.y, -2 * scale, dpi->height + 2 * scale)) {
-				continue;
-			}
+		int x = pt.x - dpi->left - 3; // mysterious -3 inherited from trunk
+		int y = pt.y - dpi->top;
 
-			byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
+		int scale = GetVehicleScale();
 
-			/* Draw rhombus */
-			for (int dy = 0; dy < scale; dy++) {
-				for (int dx = 0; dx < scale; dx++) {
-					Point pt = RemapCoords(-dx, -dy, 0);
-					if (IsInsideMM(pos.y + pt.y, 0, dpi->height)) {
-						if (IsInsideMM(pos.x + pt.x, 0, dpi->width)) {
-							blitter->SetPixel(dpi->dst_ptr, pos.x + pt.x, pos.y + pt.y, colour);
-						}
-						if (IsInsideMM(pos.x + pt.x + 1, 0, dpi->width)) {
-							blitter->SetPixel(dpi->dst_ptr, pos.x + pt.x + 1, pos.y + pt.y, colour);
-						}
+		byte colour = (this->map_type == SMT_VEHICLES) ? _vehicle_type_colours[v->type]	: 0xF;
+
+		/* Draw rhombus */
+		for (int dy = 0; dy < scale; dy++) {
+			for (int dx = 0; dx < scale; dx++) {
+				Point pt = RemapCoords(dx, dy, 0);
+				if (IsInsideMM(y + pt.y, 0, dpi->height)) {
+					if (IsInsideMM(x + pt.x, 0, dpi->width)) {
+						blitter->SetPixel(dpi->dst_ptr, x + pt.x, y + pt.y, colour);
+					}
+					if (IsInsideMM(x + pt.x + 1, 0, dpi->width)) {
+						blitter->SetPixel(dpi->dst_ptr, x + pt.x + 1, y + pt.y, colour);
 					}
 				}
 			}
@@ -1163,7 +1172,7 @@ class SmallMapWindow : public Window {
 					int y = pt.y - dpi->top;
 					if (!IsInsideMM(y, 0, dpi->height)) continue;
 
-					int x = pt.x - dpi->left;
+					int x = pt.x - dpi->left - 3; // mysterious -3 inherited from trunk (vehicle drawing)
 					byte colour = GetIndustrySpec(i->type)->map_colour;
 
 					for (int offset = 0; offset < SD_MAP_MIN_INDUSTRY_WIDTH; ++offset) {
@@ -1389,6 +1398,9 @@ class SmallMapWindow : public Window {
 		old_dpi = _cur_dpi;
 		_cur_dpi = dpi;
 
+		/* Clear it */
+		GfxFillRect(dpi->left, dpi->top, dpi->left + dpi->width - 1, dpi->top + dpi->height - 1, 0);
+
 		/* Setup owner table */
 		if (this->map_type == SMT_OWNER) {
 			const Company *c;
@@ -1417,68 +1429,43 @@ class SmallMapWindow : public Window {
 		tile_x += dy / 2;
 		tile_y += dy / 2;
 
-		/* prevent some artifacts when partially redrawing.
-		 * I have no idea how this works.
-		 */
-		dx += 1;
 		if (dy & 1) {
 			tile_x++;
 			dx += 2;
+			if (dx > 3) {
+				dx -= 4;
+				tile_x--;
+				tile_y++;
+			}
 		}
 
-		/**
-		 * As we can resolve no less than 4 pixels of the smallmap at once we have to start drawing at an X position <= -4
-		 * otherwise we get artifacts when partially redrawing.
-		 * Make sure dx provides for that and update tile_x and tile_y accordingly.
-		 */
-		while(dx < SD_MAP_COLUMN_WIDTH) {
-			dx += SD_MAP_COLUMN_WIDTH;
-			tile_x++;
-			tile_y--;
-		}
-
-		/* The map background is off by a little less than one tile in y direction compared to vehicles and signs.
-		 * I have no idea why this is the case.
-		 * on zoom levels >= ZOOM_LVL_NORMAL this isn't visible as only full tiles can be shown. However, beginning
-		 * at ZOOM_LVL_OUT_2X it's again off by 1 pixel
-		 */
-		dy = 0;
-		if (this->zoom < ZOOM_LVL_NORMAL) {
-			dy = UnScaleByZoomLower(2, this->zoom) - 2;
-		} else if (this->zoom > ZOOM_LVL_NORMAL) {
-			dy = 1;
-		}
-
-		/* correct the various problems mentioned above by moving the initial drawing pointer a little */
-		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx, -dy);
-		int x = -dx;
+		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
+		int x = - dx - 4;
 		int y = 0;
 
 		for (;;) {
 			/* Distance from left edge */
-			if (x > -SD_MAP_COLUMN_WIDTH) {
+			if (x >= -3) {
+				if (x >= dpi->width) break; // Exit the loop.
 
-				/* Distance from right edge */
-				if (dpi->width - x <= 0) break;
-
-				int col_start = x < 0 ? -x : 0;
-				int col_end = x + SD_MAP_COLUMN_WIDTH > dpi->width ? dpi->width - x : SD_MAP_COLUMN_WIDTH;
-				int row_start = dy - y;
-				int row_end = dy + dpi->height - y;
-				this->DrawSmallMapStuff(ptr, tile_x, tile_y, col_start, col_end, row_start, row_end, blitter, _smallmap_draw_procs[this->map_type]);
+				int end_pos = min(dpi->width, x + 4);
+				int reps = (dpi->height - y + 1) / 2; // Number of lines.
+				if (reps > 0) {
+					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, x, end_pos, blitter, _smallmap_draw_procs[this->map_type]);
+				}
 			}
 
 			if (y == 0) {
 				tile_y++;
 				y++;
-				ptr = blitter->MoveTo(ptr, 0, SD_MAP_ROW_OFFSET / 2);
+				ptr = blitter->MoveTo(ptr, 0, 1);
 			} else {
 				tile_x--;
 				y--;
-				ptr = blitter->MoveTo(ptr, 0, -SD_MAP_ROW_OFFSET / 2);
+				ptr = blitter->MoveTo(ptr, 0, -1);
 			}
-			ptr = blitter->MoveTo(ptr, SD_MAP_COLUMN_WIDTH / 2, 0);
-			x += SD_MAP_COLUMN_WIDTH / 2;
+			ptr = blitter->MoveTo(ptr, 2, 0);
+			x += 2;
 		}
 
 		/* Draw vehicles */
@@ -1585,8 +1572,6 @@ class SmallMapWindow : public Window {
 			/* Remap into flat coordinates. */
 			Point pos = RemapTileCoords(v->tile);
 
-			pos.x -= wi->pos_x;
-			pos.y -= wi->pos_y;
 			/* Check if rhombus is inside bounds */
 			if (IsInsideMM(pos.x, -2 * scale, wi->current_x + 2 * scale) &&
 				IsInsideMM(pos.y, -2 * scale, wi->current_y + 2 * scale)) {
