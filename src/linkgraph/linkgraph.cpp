@@ -54,6 +54,7 @@ void LinkGraph::CreateComponent(Station * first) {
 				node = index_it->second;
 			}
 			
+			assert(!link_stat.IsNull());
 			component->AddEdge(index[source_id], node, link_stat.Capacity());
 		}
 	}
