@@ -878,8 +878,8 @@ class SmallMapWindow : public Window {
 	}
 
 	inline Point GetStationMiddle(const Station * st) const {
-		int x = (st->rect.right + st->rect.left - 1) * TILE_SIZE / 2;
-		int y = (st->rect.bottom + st->rect.top - 1) * TILE_SIZE / 2;
+		int x = (st->rect.right + st->rect.left + 1) * TILE_SIZE / 2;
+		int y = (st->rect.bottom + st->rect.top + 1) * TILE_SIZE / 2;
 		return RemapPlainCoords(x, y);
 	}
 
@@ -904,9 +904,9 @@ class SmallMapWindow : public Window {
 				const LegendAndColour &tbl = _legend_table[this->map_type][i];
 				if (!tbl.show_on_map && supply_details != st) continue;
 				CargoID c = tbl.type;
-				int add = st->goods[c].supply.Value();
-				if (add > 0) {
-					q += add * 30 / _settings_game.economy.moving_average_length / _settings_game.economy.moving_average_unit;
+				const SupplyMovingAverage &supply = st->goods[c].supply;
+				if (!supply.IsNull()) {
+					q += supply.Value();
 					colour += tbl.colour;
 					numCargos++;
 				}
