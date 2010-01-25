@@ -137,6 +137,9 @@ public:
 
 	FORCEINLINE SupplyMovingAverage operator*(uint factor) const
 		{return SupplyMovingAverage(this->supply * factor);}
+
+	FORCEINLINE bool IsNull() const
+		{return this->supply == 0;}
 };
 
 
