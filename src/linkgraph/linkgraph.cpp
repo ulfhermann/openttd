@@ -58,6 +58,7 @@ void LinkGraph::CreateComponent(Station * first) {
 				node = index_it->second;
 			}
 			
+			assert(!link_stat.IsNull());
 			component->AddEdge(index[source_id], node, link_stat.Capacity());
 		}
 	}
@@ -141,7 +142,6 @@ NodeID LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
 }
 
 void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
-	assert(capacity > 0);
 	assert(from != to);
 	Edge & edge = edges[from][to];
 	Edge & first = edges[from][from];
