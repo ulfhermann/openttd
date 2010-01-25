@@ -925,15 +925,12 @@ class SmallMapWindow : public Window {
 			/* Remap into flat coordinates. */
 			Point pos = RemapTileCoords(v->tile);
 
-			pos.x -= wi->pos_x;
-			pos.y -= wi->pos_y;
 			/* Check if rhombus is inside bounds */
 			if (IsInsideMM(pos.x, -2 * scale, wi->current_x + 2 * scale) &&
 				IsInsideMM(pos.y, -2 * scale, wi->current_y + 2 * scale)) {
 
 				this->vehicles_on_map.push_back(VehicleAndPosition(v));
 			}
-
 		}
 	}
 
