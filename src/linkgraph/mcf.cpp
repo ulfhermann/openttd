@@ -62,7 +62,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool c
 		NodeID to = this->graph->GetFirstEdge(from);
 		while (to != Node::INVALID) {
 			Edge & edge = graph->GetEdge(from, to);
-			assert(edge.capacity > 0 && edge.distance < UINT_MAX);
+			assert(edge.distance < UINT_MAX);
 			if (create_new_paths || this->graph->GetNode(from).flows[source_station][graph->GetNode(to).station] > 0) {
 				int capacity = edge.capacity;
 				if (create_new_paths) {
