@@ -131,6 +131,11 @@ typedef Foundation GetFoundationProc(TileIndex tile, Slope tileh);
  */
 typedef CommandCost TerraformTileProc(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new);
 
+enum AcceptanceMode {
+	ACCEPTANCE_ADD,
+	ACCEPTANCE_SUBTRACT,
+};
+
 /**
  * Set of callback functions for performing tile operations of a given tile type.
  * @see TileType */

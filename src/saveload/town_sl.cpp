@@ -13,6 +13,7 @@
 #include "../newgrf_house.h"
 #include "../newgrf_commons.h"
 #include "../town.h"
+#include "../economy_func.h"
 
 #include "saveload.h"
 
@@ -33,6 +34,7 @@ void UpdateHousesAndTowns()
 	FOR_ALL_TOWNS(town) {
 		town->population = 0;
 		town->num_houses = 0;
+		town->acceptance.Clear();
 	}
 
 	for (TileIndex t = 0; t < MapSize(); t++) {
@@ -50,7 +52,10 @@ void UpdateHousesAndTowns()
 
 		town = Town::GetByTile(t);
 		IncreaseBuildingCount(town, house_id);
-		if (IsHouseCompleted(t)) town->population += HouseSpec::Get(house_id)->population;
+		if (IsHouseCompleted(t)) {
+			ModifyAcceptedCargo_Town(t, town->acceptance, ACCEPTANCE_ADD);
+			ModifyAcceptedCargo_Town(t, _economy.global_acceptance, ACCEPTANCE_ADD);
+		}
 
 		/* Increase the number of houses for every house, but only once. */
 		if (GetHouseNorthPart(house_id) == 0) town->num_houses++;
