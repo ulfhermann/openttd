@@ -20,6 +20,7 @@
 #include "vehicle_base.h"
 #include "debug.h"
 #include "rail_gui.h"
+#include "economy_func.h"
 #include "saveload/saveload.h"
 
 Year      _cur_year;   ///< Current year, starting at 0
@@ -236,6 +237,9 @@ static void OnNewMonth()
 	TownsMonthlyLoop();
 	IndustryMonthlyLoop();
 	StationMonthlyLoop();
+
+	_economy.global_production = _economy.global_production_new;
+	_economy.global_production_new.Clear();
 #ifdef ENABLE_NETWORK
 	if (_network_server) NetworkServerMonthlyLoop();
 #endif /* ENABLE_NETWORK */

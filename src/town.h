@@ -114,7 +114,6 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	BuildingCounts<uint16> building_counts;
 
 	CargoArray acceptance;
-	CargoArray production;
 
 	/**
 	 * Creates a new town

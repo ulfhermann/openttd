@@ -523,6 +523,7 @@ static void TransportIndustryGoods(TileIndex tile)
 			if (_economy.fluct <= 0) cw = (cw + 1) / 2;
 
 			i->this_month_production[j] += cw;
+			_economy.global_production_new[i->produced_cargo[j]] += cw;
 
 			uint am = MoveGoodsToStation(i->produced_cargo[j], cw, ST_INDUSTRY, i->index, stations.GetStations());
 			i->this_month_transported[j] += am;
