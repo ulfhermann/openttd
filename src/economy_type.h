@@ -29,6 +29,7 @@ struct Economy {
 	uint64 inflation_prices;              ///< Cumulated inflation of prices since game start; 16 bit fractional part
 	uint64 inflation_payment;             ///< Cumulated inflation of cargo paypent since game start; 16 bit fractional part
 	CargoArray global_production;
+	CargoArray global_production_new;
 	CargoArray global_acceptance;
 
 	/* Old stuff for savegame conversion only */

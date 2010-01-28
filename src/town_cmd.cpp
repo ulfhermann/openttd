@@ -477,6 +477,7 @@ static void TileLoop_Town(TileIndex tile)
 			uint amt = GB(callback, 0, 8);
 			if (amt == 0) continue;
 
+			_economy.global_production_new[cargo] += amt;
 			uint moved = MoveGoodsToStation(cargo, amt, ST_TOWN, t->index, stations.GetStations());
 
 			const CargoSpec *cs = CargoSpec::Get(cargo);
@@ -500,6 +501,8 @@ static void TileLoop_Town(TileIndex tile)
 			uint amt = GB(r, 0, 8) / 8 + 1;
 
 			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+
+			_economy.global_production_new[CT_PASSENGERS] += amt;
 			t->new_max_pass += amt;
 			t->new_act_pass += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
 		}
@@ -508,6 +511,7 @@ static void TileLoop_Town(TileIndex tile)
 			uint amt = GB(r, 8, 8) / 8 + 1;
 
 			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+			_economy.global_production_new[CT_MAIL] += amt;
 			t->new_max_mail += amt;
 			t->new_act_mail += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
 		}
