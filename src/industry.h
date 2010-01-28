@@ -17,6 +17,7 @@
 #include "subsidy_type.h"
 #include "industry_map.h"
 #include "tilearea_type.h"
+#include "tile_cmd.h"
 
 
 typedef Pool<Industry, IndustryID, 64, 64000> IndustryPool;
@@ -29,7 +30,7 @@ struct Industry : IndustryPool::PoolItem<&_industry_pool> {
 	typedef PersistentStorageArray<uint32, 16> PersistentStorage;
 
 	TileArea location;                  ///< Location of the industry
-	const Town *town;                   ///< Nearest town
+	Town *town;                         ///< Nearest town
 	CargoID produced_cargo[2];          ///< 2 production cargo slots
 	uint16 produced_cargo_waiting[2];   ///< amount of cargo produced per cargo
 	uint16 incoming_cargo_waiting[3];   ///< incoming cargo waiting to be processed
@@ -88,6 +89,8 @@ void ReleaseDisastersTargetingIndustry(IndustryID);
 void BuildIndustriesLegend();
 /* industry_cmd.cpp */
 void SetIndustryDailyChanges();
+
+void ModifyAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted = NULL);
 
 #define FOR_ALL_INDUSTRIES_FROM(var, start) FOR_ALL_ITEMS_FROM(Industry, industry_index, var, start)
 #define FOR_ALL_INDUSTRIES(var) FOR_ALL_INDUSTRIES_FROM(var, 0)

@@ -587,14 +587,25 @@ static void AddProducedCargo_Town(TileIndex tile, CargoArray &produced)
 	}
 }
 
-static inline void AddAcceptedCargoSetMask(CargoID cargo, uint amount, CargoArray &acceptance, uint32 *always_accepted)
+static inline void AddAcceptedCargoSetMask(CargoID cargo, uint amount, CargoArray &acceptance, uint32 *always_accepted, AcceptanceMode mode)
 {
 	if (cargo == CT_INVALID || amount == 0) return;
-	acceptance[cargo] += amount;
-	SetBit(*always_accepted, cargo);
+	if (mode == ACCEPTANCE_ADD) {
+		acceptance[cargo] += amount;
+	} else {
+		acceptance[cargo] -= amount;
+	}
+	if (always_accepted != NULL) {
+		SetBit(*always_accepted, cargo);
+	}
 }
 
-static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
+static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted = NULL)
+{
+	ModifyAcceptedCargo_Town(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
+}
+
+void ModifyAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
 {
 	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
 	CargoID accepts[3];
@@ -619,13 +630,13 @@ static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32
 	if (HasBit(hs->callback_mask, CBM_HOUSE_CARGO_ACCEPTANCE)) {
 		uint16 callback = GetHouseCallback(CBID_HOUSE_CARGO_ACCEPTANCE, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
 		if (callback != CALLBACK_FAILED) {
-			AddAcceptedCargoSetMask(accepts[0], GB(callback, 0, 4), acceptance, always_accepted);
-			AddAcceptedCargoSetMask(accepts[1], GB(callback, 4, 4), acceptance, always_accepted);
+			AddAcceptedCargoSetMask(accepts[0], GB(callback, 0, 4), acceptance, always_accepted, mode);
+			AddAcceptedCargoSetMask(accepts[1], GB(callback, 4, 4), acceptance, always_accepted, mode);
 			if (_settings_game.game_creation.landscape != LT_TEMPERATE && HasBit(callback, 12)) {
 				/* The 'S' bit indicates food instead of goods */
-				AddAcceptedCargoSetMask(CT_FOOD, GB(callback, 8, 4), acceptance, always_accepted);
+				AddAcceptedCargoSetMask(CT_FOOD, GB(callback, 8, 4), acceptance, always_accepted, mode);
 			} else {
-				AddAcceptedCargoSetMask(accepts[2], GB(callback, 8, 4), acceptance, always_accepted);
+				AddAcceptedCargoSetMask(accepts[2], GB(callback, 8, 4), acceptance, always_accepted, mode);
 			}
 			return;
 		}
@@ -633,7 +644,7 @@ static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32
 
 	/* No custom acceptance, so fill in with the default values */
 	for (uint8 i = 0; i < lengthof(accepts); i++) {
-		AddAcceptedCargoSetMask(accepts[i], hs->cargo_acceptance[i], acceptance, always_accepted);
+		AddAcceptedCargoSetMask(accepts[i], hs->cargo_acceptance[i], acceptance, always_accepted, mode);
 	}
 }
 
@@ -1843,6 +1854,11 @@ static inline void ClearMakeHouseTile(TileIndex tile, Town *t, byte counter, byt
 	MakeHouseTile(tile, t->index, counter, stage, type, random_bits);
 	if (HouseSpec::Get(type)->building_flags & BUILDING_IS_ANIMATED) AddAnimatedTile(tile);
 
+	if (stage == TOWN_HOUSE_COMPLETED) {
+		AddAcceptedCargo_Town(tile, t->acceptance);
+		AddAcceptedCargo_Town(tile, _economy.global_acceptance);
+	}
+
 	MarkTileDirtyByTile(tile);
 }
 
@@ -2206,6 +2222,11 @@ static bool BuildTownHouse(Town *t, TileIndex tile)
 static void DoClearTownHouseHelper(TileIndex tile, Town *t, HouseID house)
 {
 	assert(IsTileType(tile, MP_HOUSE));
+	if (IsHouseCompleted(tile)) {
+		ModifyAcceptedCargo_Town(tile, t->acceptance, ACCEPTANCE_SUBTRACT);
+		ModifyAcceptedCargo_Town(tile, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
+	}
+
 	DecreaseBuildingCount(t, house);
 	DoClearSquare(tile);
 	DeleteAnimatedTile(tile);

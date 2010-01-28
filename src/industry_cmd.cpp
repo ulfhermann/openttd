@@ -146,6 +146,9 @@ Industry::~Industry()
 	TILE_AREA_LOOP(tile_cur, this->location) {
 		if (IsTileType(tile_cur, MP_INDUSTRY)) {
 			if (GetIndustryIndex(tile_cur) == this->index) {
+				ModifyAcceptedCargo_Industry(tile_cur, this->town->acceptance, ACCEPTANCE_SUBTRACT);
+				ModifyAcceptedCargo_Industry(tile_cur, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
+
 				/* MakeWaterKeepingClass() can also handle 'land' */
 				MakeWaterKeepingClass(tile_cur, OWNER_NONE);
 
@@ -394,7 +397,12 @@ static Foundation GetFoundation_Industry(TileIndex tile, Slope tileh)
 	return FlatteningFoundation(tileh);
 }
 
-static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
+void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
+{
+	ModifyAcceptedCargo_Industry(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
+}
+
+void ModifyAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
 {
 	IndustryGfx gfx = GetIndustryGfx(tile);
 	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
@@ -429,10 +437,14 @@ static void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, ui
 		if (a == CT_INVALID || cargo_acceptance[i] == 0) continue; // work only with valid cargos
 
 		/* Add accepted cargo */
-		acceptance[a] += cargo_acceptance[i];
+		if (mode == ACCEPTANCE_ADD) {
+			acceptance[a] += cargo_acceptance[i];
+		} else {
+			acceptance[a] -= cargo_acceptance[i];
+		}
 
 		/* Maybe set 'always accepted' bit (if it's not set already) */
-		if (HasBit(*always_accepted, a)) continue;
+		if (always_accepted == NULL || HasBit(*always_accepted, a)) continue;
 
 		bool accepts = false;
 		for (uint cargo_index = 0; cargo_index < lengthof(ind->accepts_cargo); cargo_index++) {
@@ -1237,9 +1249,9 @@ static CheckNewIndustryProc * const _check_new_industry_procs[CHECK_END] = {
 	CheckNewIndustry_OilRig
 };
 
-static const Town *CheckMultipleIndustryInTown(TileIndex tile, int type)
+static Town *CheckMultipleIndustryInTown(TileIndex tile, int type)
 {
-	const Town *t;
+	Town *t;
 	const Industry *i;
 
 	t = ClosestTownFromTile(tile, UINT_MAX);
@@ -1516,7 +1528,7 @@ enum ProductionLevels {
 	PRODLEVEL_MAXIMUM = 0x80,  ///< the industry is running at full speed
 };
 
-static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const IndustryTileTable *it, byte layout, const Town *t, Owner owner, Owner founder)
+static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const IndustryTileTable *it, byte layout, Town *t, Owner owner, Owner founder)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 	uint32 r;
@@ -1616,6 +1628,8 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const Ind
 			DoCommand(cur_tile, 0, 0, DC_EXEC | DC_NO_TEST_TOWN_RATING | DC_NO_MODIFY_TOWN_RATING, CMD_LANDSCAPE_CLEAR);
 
 			MakeIndustry(cur_tile, i->index, it->gfx, Random(), wc);
+			ModifyAcceptedCargo_Industry(cur_tile, i->town->acceptance, ACCEPTANCE_ADD);
+			ModifyAcceptedCargo_Industry(cur_tile, _economy.global_acceptance, ACCEPTANCE_ADD);
 
 			if (_generating_world) {
 				SetIndustryConstructionCounter(cur_tile, 3);
@@ -1664,7 +1678,7 @@ static Industry *CreateNewIndustryHelper(TileIndex tile, IndustryType type, DoCo
 	if (!custom_shape_check && _settings_game.game_creation.land_generator == LG_TERRAGENESIS && _generating_world && !_ignore_restrictions && !CheckIfCanLevelIndustryPlatform(tile, DC_NO_WATER, it, type)) return NULL;
 	if (!CheckIfFarEnoughFromIndustry(tile, type)) return NULL;
 
-	const Town *t = CheckMultipleIndustryInTown(tile, type);
+	Town *t = CheckMultipleIndustryInTown(tile, type);
 	if (t == NULL) return NULL;
 
 	if (!CheckIfIndustryIsAllowed(tile, type, t)) return NULL;
