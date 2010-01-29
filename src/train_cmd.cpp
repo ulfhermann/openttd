@@ -139,7 +139,7 @@ void Train::CargoChanged()
 	for (Train *u = this; u != NULL; u = u->Next()) {
 		uint32 current_weight = u->GetWeight();
 		weight += current_weight;
-		u->tcache.cached_slope_resistance = current_weight * 20 * _settings_game.vehicle.train_slope_steepness; //1% slope * slope steepness
+		u->tcache.cached_slope_resistance = current_weight * u->GetSlopeSteepness();
 	}
 
 	/* store consist weight in cache */
@@ -3123,6 +3123,9 @@ uint Train::Crash(bool flooded)
 		* but must be updated after the train has been marked crashed */
 		TileIndex crossing = TrainApproachingCrossingTile(this);
 		if (crossing != INVALID_TILE) UpdateLevelCrossing(crossing);
+
+		/* Remove the loading indicators (if any) */
+		HideFillingPercent(&this->fill_percent_te_id);
 	}
 
 	pass += Vehicle::Crash(flooded);
