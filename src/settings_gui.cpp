@@ -1467,6 +1467,7 @@ static SettingEntry _settings_vehicles[] = {
 	SettingEntry("vehicle.max_aircraft"),
 	SettingEntry("vehicle.max_ships"),
 	SettingEntry("vehicle.plane_speed"),
+	SettingEntry("vehicle.plane_crashes"),
 	SettingEntry("order.timetabling"),
 	SettingEntry("vehicle.dynamic_engines"),
 };
