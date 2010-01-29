@@ -301,6 +301,11 @@ static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 
 static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
 {
+	ModifyAcceptedCargo_Unmovable(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
+}
+
+void ModifyAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
+{
 	if (!IsCompanyHQ(tile)) return;
 
 	/* HQ accepts passenger and mail; but we have to divide the values
@@ -312,14 +317,14 @@ static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, u
 	/* Top town building generates 10, so to make HQ interesting, the top
 	 * type makes 20. */
 	acceptance[CT_PASSENGERS] += max(1U, level);
-	SetBit(*always_accepted, CT_PASSENGERS);
+	if (always_accepted != NULL) SetBit(*always_accepted, CT_PASSENGERS);
 
 	/* Top town building generates 4, HQ can make up to 8. The
 	 * proportion passengers:mail is different because such a huge
 	 * commercial building generates unusually high amount of mail
 	 * correspondence per physical visitor. */
 	acceptance[CT_MAIL] += max(1U, level / 2);
-	SetBit(*always_accepted, CT_MAIL);
+	if (always_accepted != NULL) SetBit(*always_accepted, CT_MAIL);
 }
 
 
@@ -347,6 +352,7 @@ static void TileLoop_Unmovable(TileIndex tile)
 	if (GB(r, 0, 8) < (256 / 4 / (6 - level))) {
 		uint amt = GB(r, 0, 8) / 8 / 4 + 1;
 		if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+		_economy.global_production_new[CT_PASSENGERS] += amt;
 		MoveGoodsToStation(CT_PASSENGERS, amt, ST_HEADQUARTERS, GetTileOwner(tile), stations.GetStations());
 	}
 
@@ -356,6 +362,7 @@ static void TileLoop_Unmovable(TileIndex tile)
 	if (GB(r, 8, 8) < (196 / 4 / (6 - level))) {
 		uint amt = GB(r, 8, 8) / 8 / 4 + 1;
 		if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+		_economy.global_production_new[CT_MAIL] += amt;
 		MoveGoodsToStation(CT_MAIL, amt, ST_HEADQUARTERS, GetTileOwner(tile), stations.GetStations());
 	}
 }

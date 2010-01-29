@@ -17,6 +17,8 @@
 
 void UpdateCompanyHQ(Company *c, uint score);
 
+void ModifyAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted = NULL);
+
 struct UnmovableSpec {
 	StringID name;
 	uint8 buy_cost_multiplier;
