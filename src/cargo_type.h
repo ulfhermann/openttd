@@ -110,23 +110,18 @@ public:
 
 class GlobalCargoAcceptance {
 private:
-	CargoArray *acceptance;
-	CargoArray *current_tile_loop;
-
-	GlobalCargoAcceptance() {
-		acceptance = new CargoArray();
-		current_tile_loop = new CargoArray();
-	}
+	CargoArray acceptance;
+	CargoArray current_tile_loop;
 
 public:
 	friend const SaveLoad *GetGlobalCargoAcceptanceDesc();
 
-	FORCEINLINE uint Get(CargoID c) {return (*acceptance)[c];}
-	FORCEINLINE CargoArray &CurrentLoop() {return *current_tile_loop;}
+	FORCEINLINE uint Get(CargoID c) {return (acceptance)[c];}
+	FORCEINLINE CargoArray &CurrentLoop() {return current_tile_loop;}
 	FORCEINLINE void NewLoop()
 	{
-		Swap(acceptance, current_tile_loop);
-		current_tile_loop->Clear();
+		acceptance = current_tile_loop;
+		current_tile_loop.Clear();
 	}
 
 	static GlobalCargoAcceptance inst;
