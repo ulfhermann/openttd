@@ -166,15 +166,11 @@ static void Ptrs_INDY()
 void UpdateGlobalIndustryStatistics() {
 	const Industry *i;
 	FOR_ALL_INDUSTRIES(i) {
-		for (int index = 0; index < 2; ++index) {
-			_economy.global_production[i->produced_cargo[index]] += i->last_month_production[index];
-		}
-	}
-
-	TILE_AREA_LOOP(tile_cur, i->location) {
-		if (IsTileType(tile_cur, MP_INDUSTRY)) {
-			ModifyAcceptedCargo_Industry(tile_cur, i->town->acceptance, ACCEPTANCE_ADD);
-			ModifyAcceptedCargo_Industry(tile_cur, _economy.global_acceptance, ACCEPTANCE_ADD);
+		TILE_AREA_LOOP(tile_cur, i->location) {
+			if (IsTileType(tile_cur, MP_INDUSTRY)) {
+				ModifyAcceptedCargo_Industry(tile_cur, i->town->acceptance, ACCEPTANCE_ADD);
+				ModifyAcceptedCargo_Industry(tile_cur, _economy.global_acceptance, ACCEPTANCE_ADD);
+			}
 		}
 	}
 }

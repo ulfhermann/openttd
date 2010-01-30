@@ -136,6 +136,7 @@ static inline byte GetCompanyHQSize(TileIndex t)
 static inline void SetCompanyHQSize(TileIndex t, uint8 size)
 {
 	assert(IsTileType(t, MP_UNMOVABLE) && IsCompanyHQ(t));
+	/* HQs don't belong to towns, so no town acceptance is updated */
 	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
 	SB(_m[t].m3, 2, 3, size);
 	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_ADD);
@@ -256,6 +257,8 @@ static inline void MakeUnmovableHQHelper(TileIndex t, uint8 section, Owner o)
 {
 	MakeUnmovable(t, UNMOVABLE_HQ, o);
 	SetCompanyHQSection(t, section);
+	/* HQs don't belong to towns, so no town acceptance is updated */
+	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_ADD);
 }
 
 /**
