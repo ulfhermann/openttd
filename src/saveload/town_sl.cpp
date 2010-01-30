@@ -35,6 +35,7 @@ void UpdateHousesAndTowns()
 		town->population = 0;
 		town->num_houses = 0;
 		town->acceptance.Clear();
+		town->num_accepted_cargos = 0;
 	}
 
 	for (TileIndex t = 0; t < MapSize(); t++) {
@@ -55,6 +56,7 @@ void UpdateHousesAndTowns()
 		if (IsHouseCompleted(t)) town->population += HouseSpec::Get(house_id)->population;
 
 		ModifyAcceptedCargo_Town(t, town->acceptance, ACCEPTANCE_ADD);
+		town->CountAcceptedCargos();
 		ModifyAcceptedCargo_Town(t, _economy.global_acceptance, ACCEPTANCE_ADD);
 
 		/* Increase the number of houses for every house, but only once. */

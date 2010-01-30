@@ -113,6 +113,7 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	/* NOSAVE: The number of each type of building in the town. */
 	BuildingCounts<uint16> building_counts;
 
+	byte num_accepted_cargos;
 	CargoArray acceptance;
 
 	/**
@@ -124,6 +125,8 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	~Town();
 
 	void InitializeLayout(TownLayout layout);
+
+	void CountAcceptedCargos();
 
 	/** Calculate the max town noise
 	 * The value is counted using the population divided by the content of the

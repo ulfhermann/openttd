@@ -126,6 +126,14 @@ void Town::InitializeLayout(TownLayout layout)
 	this->layout = TileHash(TileX(this->xy), TileY(this->xy)) % (NUM_TLS - 1);
 }
 
+void Town::CountAcceptedCargos()
+{
+	this->num_accepted_cargos = 0;
+	for (CargoID c = 0; c < NUM_CARGO; ++c) {
+		if (this->acceptance[c] > 0) this->num_accepted_cargos++;
+	}
+}
+
 /**
  * Return a random valid town.
  * @return random town, NULL if there are no towns
@@ -706,6 +714,16 @@ static void TownTickHandler(Town *t)
 			}
 		}
 		t->grow_counter = i;
+	}
+
+	Company *c;
+	FOR_ALL_COMPANIES(c) {
+		if (t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
+		// use a 32bit number for the calculation
+		uint rating = (uint)t->ratings[c->index];
+		rating *= RATING_DECREASE_PERCENTAGE;
+		rating >>= 8;
+		t->ratings[c->index] = rating;
 	}
 
 	UpdateTownRadius(t);
@@ -1859,6 +1877,7 @@ static inline void ClearMakeHouseTile(TileIndex tile, Town *t, byte counter, byt
 	if (HouseSpec::Get(type)->building_flags & BUILDING_IS_ANIMATED) AddAnimatedTile(tile);
 
 	AddAcceptedCargo_Town(tile, t->acceptance);
+	t->CountAcceptedCargos();
 	AddAcceptedCargo_Town(tile, _economy.global_acceptance);
 
 	MarkTileDirtyByTile(tile);
@@ -2226,6 +2245,7 @@ static void DoClearTownHouseHelper(TileIndex tile, Town *t, HouseID house)
 	assert(IsTileType(tile, MP_HOUSE));
 
 	ModifyAcceptedCargo_Town(tile, t->acceptance, ACCEPTANCE_SUBTRACT);
+	t->CountAcceptedCargos();
 	ModifyAcceptedCargo_Town(tile, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
 
 	DecreaseBuildingCount(t, house);

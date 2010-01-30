@@ -955,6 +955,15 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 	if (cs->town_effect == TE_FOOD) st->town->new_act_food += accepted;
 	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
 
+	Town *t = st->town;
+	if (t->num_accepted_cargos > 0) { // there are towns without a single house
+		uint intended_amount = max(1U, _economy.global_production[cargo_type] * t->acceptance[cargo_type] / (_economy.global_acceptance[cargo_type] + 1));
+		/* if you deliver the intended amout for each cargo you will get the same bonus as the monthly
+		 * malus for RATING_OUTSTANDING
+		 */
+		t->ratings[company->index] += max(1U, RATING_DELIVERY_UP * num_pieces / intended_amount / t->num_accepted_cargos);
+	}
+
 	/* Determine profit */
 	Money profit = GetTransportedGoodsIncome(accepted, DistanceManhattan(source_tile, st->xy), days_in_transit, cargo_type);
 
