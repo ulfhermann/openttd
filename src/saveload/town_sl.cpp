@@ -52,6 +52,7 @@ void UpdateHousesAndTowns()
 
 		town = Town::GetByTile(t);
 		IncreaseBuildingCount(town, house_id);
+		if (IsHouseCompleted(t)) town->population += HouseSpec::Get(house_id)->population;
 
 		ModifyAcceptedCargo_Town(t, town->acceptance, ACCEPTANCE_ADD);
 		ModifyAcceptedCargo_Town(t, _economy.global_acceptance, ACCEPTANCE_ADD);
