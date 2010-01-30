@@ -166,9 +166,11 @@ static void Ptrs_INDY()
 void UpdateGlobalIndustryStatistics() {
 	const Industry *i;
 	FOR_ALL_INDUSTRIES(i) {
+		Town *t = i->town;
 		TILE_AREA_LOOP(tile_cur, i->location) {
 			if (IsTileType(tile_cur, MP_INDUSTRY)) {
-				ModifyAcceptedCargo_Industry(tile_cur, i->town->acceptance, ACCEPTANCE_ADD);
+				ModifyAcceptedCargo_Industry(tile_cur, t->acceptance, ACCEPTANCE_ADD);
+				t->CountAcceptedCargos();
 				ModifyAcceptedCargo_Industry(tile_cur, _economy.global_acceptance, ACCEPTANCE_ADD);
 			}
 		}

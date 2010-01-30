@@ -147,6 +147,7 @@ Industry::~Industry()
 		if (IsTileType(tile_cur, MP_INDUSTRY)) {
 			if (GetIndustryIndex(tile_cur) == this->index) {
 				ModifyAcceptedCargo_Industry(tile_cur, this->town->acceptance, ACCEPTANCE_SUBTRACT);
+				this->town->CountAcceptedCargos();
 				ModifyAcceptedCargo_Industry(tile_cur, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
 
 				/* MakeWaterKeepingClass() can also handle 'land' */
@@ -1626,7 +1627,9 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const Ind
 			DoCommand(cur_tile, 0, 0, DC_EXEC | DC_NO_TEST_TOWN_RATING | DC_NO_MODIFY_TOWN_RATING, CMD_LANDSCAPE_CLEAR);
 
 			MakeIndustry(cur_tile, i->index, it->gfx, Random(), wc);
-			ModifyAcceptedCargo_Industry(cur_tile, i->town->acceptance, ACCEPTANCE_ADD);
+			Town *t = i->town;
+			ModifyAcceptedCargo_Industry(cur_tile, t->acceptance, ACCEPTANCE_ADD);
+			t->CountAcceptedCargos();
 			ModifyAcceptedCargo_Industry(cur_tile, _economy.global_acceptance, ACCEPTANCE_ADD);
 
 			if (_generating_world) {
