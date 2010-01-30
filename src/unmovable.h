@@ -14,6 +14,7 @@
 
 #include "economy_func.h"
 #include "strings_type.h"
+#include "tile_cmd.h"
 
 void UpdateCompanyHQ(Company *c, uint score);
 

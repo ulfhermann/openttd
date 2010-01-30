@@ -13,6 +13,7 @@
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../company_manager_face.h"
+#include "../unmovable.h"
 
 #include "saveload.h"
 
@@ -295,6 +296,20 @@ static void Ptrs_PLYR()
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
 		SlObject(c, _company_desc);
+	}
+}
+
+void UpdateCompanyHQAcceptance()
+{
+	Company *c;
+	FOR_ALL_COMPANIES(c) {
+		TileIndex t = c->location_of_HQ;
+		if (t == INVALID_TILE) continue;
+		/* HQs don't belong to towns, so no town acceptance is updated */
+		ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_ADD);
+		ModifyAcceptedCargo_Unmovable(t + TileDiffXY(0, 1), _economy.global_acceptance, ACCEPTANCE_ADD);
+		ModifyAcceptedCargo_Unmovable(t + TileDiffXY(1, 0), _economy.global_acceptance, ACCEPTANCE_ADD);
+		ModifyAcceptedCargo_Unmovable(t + TileDiffXY(1, 1), _economy.global_acceptance, ACCEPTANCE_ADD);
 	}
 }
 

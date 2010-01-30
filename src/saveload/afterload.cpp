@@ -1242,7 +1242,7 @@ bool AfterLoadGame()
 
 	/* Check and update house and town values */
 	UpdateHousesAndTowns();
-
+	UpdateCompanyHQAcceptance();
 	UpdateGlobalIndustryStatistics();
 
 	if (CheckSavegameVersion(43)) {
@@ -2098,10 +2098,10 @@ void ReloadNewGRFData()
 	AfterLoadStations();
 
 	_economy.global_acceptance.Clear();
-	_economy.global_production.Clear();
 
 	/* Check and update house and town values */
 	UpdateHousesAndTowns();
+	UpdateCompanyHQAcceptance();
 	UpdateGlobalIndustryStatistics();
 
 	/* Update livery selection windows */
