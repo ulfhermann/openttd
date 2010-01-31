@@ -615,6 +615,8 @@ class SmallMapWindow : public Window {
 		do {
 			/* Check if the tile (xc,yc) is within the map range */
 			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
+
+			/* divide by TILE_SIZE last to avoid loss of information which leads to glitches */
 			uint x = ScaleByZoomLower(xc, this->zoom) / TILE_SIZE;
 			uint y = ScaleByZoomLower(yc, this->zoom) / TILE_SIZE;
 
