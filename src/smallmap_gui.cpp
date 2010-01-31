@@ -615,15 +615,15 @@ class SmallMapWindow : public Window {
 		do {
 			/* Check if the tile (xc,yc) is within the map range */
 			uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
-			uint x = ScaleByZoomLower(xc, this->zoom);
-			uint y = ScaleByZoomLower(yc, this->zoom);
+			uint x = ScaleByZoomLower(xc, this->zoom) / TILE_SIZE;
+			uint y = ScaleByZoomLower(yc, this->zoom) / TILE_SIZE;
 
 			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
 				/* Check if the dst pointer points to a pixel inside the screen buffer */
 				if (dst < _screen.dst_ptr) continue;
 				if (dst >= dst_ptr_abs_end) continue;
 
-				AntiAlias(x, y, xc, yc);
+				AntiAlias(x, y, xc / TILE_SIZE, yc / TILE_SIZE);
 				uint32 val = proc(TileXY(x, y));
 				uint8 *val8 = (uint8 *)&val;
 				int idx = max(0, -start_pos);
@@ -633,7 +633,7 @@ class SmallMapWindow : public Window {
 				}
 			}
 		/* Switch to next tile in the column */
-		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
+		} while (xc += TILE_SIZE, yc += TILE_SIZE, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
 	/**
@@ -829,8 +829,8 @@ class SmallMapWindow : public Window {
 		/* Which tile is displayed at (dpi->left, dpi->top)? */
 		int dx;
 		Point tile = this->PixelToWorld(dpi->left, dpi->top, &dx);
-		int tile_x = UnScaleByZoomLower(this->scroll_x / TILE_SIZE + tile.x / TILE_SIZE, this->zoom);
-		int tile_y = UnScaleByZoomLower(this->scroll_y / TILE_SIZE + tile.y / TILE_SIZE, this->zoom);
+		int tile_x = UnScaleByZoomLower(this->scroll_x + tile.x, this->zoom);
+		int tile_y = UnScaleByZoomLower(this->scroll_y + tile.y, this->zoom);
 
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
@@ -849,11 +849,11 @@ class SmallMapWindow : public Window {
 			}
 
 			if (y == 0) {
-				tile_y++;
+				tile_y += TILE_SIZE;
 				y++;
 				ptr = blitter->MoveTo(ptr, 0, 1);
 			} else {
-				tile_x--;
+				tile_x -= TILE_SIZE;
 				y--;
 				ptr = blitter->MoveTo(ptr, 0, -1);
 			}
