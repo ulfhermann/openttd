@@ -481,16 +481,6 @@ class SmallMapWindow : public Window {
 	}
 
 	/**
-	 * remap a tile coordinate into coordinates on the smallmap
-	 * @param tile the tile to be remapped
-	 * @return Point with coordinates of the tile's upper left corner in the smallmap
-	 */
-	inline Point RemapTileCoords(TileIndex tile) const
-	{
-		return RemapPlainCoords(TileX(tile) * TILE_SIZE, TileY(tile) * TILE_SIZE);
-	}
-
-	/**
 	 * scale a coordinate from the main map into the smallmap dimension
 	 * @param pos coordinate to be scaled
 	 * @return scaled coordinate
@@ -677,7 +667,8 @@ class SmallMapWindow : public Window {
 			const Industry *i;
 			FOR_ALL_INDUSTRIES(i) {
 				if (_legend_from_industries[_industry_to_list_pos[i->type]].show_on_map) {
-					Point pt = RemapTileCoords(i->location.tile);
+					TileIndex tile = i->location.tile;
+					Point pt = RemapTile(TileX(tile), TileY(tile));
 
 					int y = pt.y - dpi->top;
 					if (!IsInsideMM(y, 0, dpi->height)) continue;
