@@ -1157,6 +1157,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Dovoli 
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Neenake postaje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Koeficient teže tovora za simulacijo težkih vlakov: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Faktor hitrosti letal: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Število letalskih nesreč: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :brez
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :zmanjšano
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normalno
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Dovoli prehodne postaje na cestah v lasti mest: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Dovoli prevoženja postaj na tekmečevih cestah: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Dovoli gradnjo združljivih postaj: {ORANGE}{STRING}
@@ -2493,14 +2497,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Sponzoriraj nov
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Kupi eksluzivne transportne pravice
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Podkupi lokalno oblast
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Izvrši majhno reklamno kampanijo z namenom privabiti več potnikov in tovora podjetju.{}Cena: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Izvrši srednje-veliko reklamno kampanijo z namenom privabiti več potnikov in tovora podjetju.{}Cena: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Izvrši veliko reklamno kampanijo z namenom privabiti več potnikov in tovora podjetju.{}Cena: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Financiraj obnovo cest. S tem nastanejo motnje prometa do 6 mesecev.{}Cena: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Zgradi spomenik v čast podjetju.{}Cena: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Financiraj izgradnjo novih poslovnih stavb v mestu.{}Cena: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Kupi enoletno izključno pravico do transporta v mestu. Lokalne oblasti bodo dovolile potnikom in tovoru do uporabe izključno tvojih transportnih storitev.{}Cena: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Podkupi lokalno oblast za izboljšavo svojih ocen kljub tveganju resnih kazni ob odkritju.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Izvrši majhno reklamno kampanijo z namenom privabiti več potnikov in tovora podjetju.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Izvrši srednje-veliko reklamno kampanijo z namenom privabiti več potnikov in tovora podjetju.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Izvrši veliko reklamno kampanijo z namenom privabiti več potnikov in tovora podjetju.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Financiraj obnovo cest. S tem nastanejo motnje prometa do 6 mesecev.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Zgradi spomenik v čast podjetju.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Financiraj izgradnjo novih poslovnih stavb v mestu.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Kupi enoletno izključno pravico do transporta v mestu. Lokalne oblasti bodo dovolile potnikom in tovoru do uporabe izključno tvojih transportnih storitev.{}Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Podkupi lokalno oblast za izboljšavo svojih ocen kljub tveganju resnih kazni ob odkritju.{}Cena: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subvencije
@@ -2605,7 +2609,7 @@ STR_COMPANY_VIEW_COLOUR_SCHEME_TITLE                            :{GOLD}Barvna sh
 STR_COMPANY_VIEW_VEHICLES_TITLE                                 :{GOLD}Vozila:
 STR_COMPANY_VIEW_TRAINS                                         :{WHITE}{COMMA} vlak{P "" a i ov}
 STR_COMPANY_VIEW_ROAD_VEHICLES                                  :{WHITE}{COMMA} cestn{P o i a ih} vozil{P o i a ""}
-STR_COMPANY_VIEW_AIRCRAFT                                       :{WHITE}{COMMA} letalo
+STR_COMPANY_VIEW_AIRCRAFT                                       :{WHITE}{COMMA} letal{P o i a ""}
 STR_COMPANY_VIEW_SHIPS                                          :{WHITE}{COMMA} lad{P ja ji je ij}
 STR_COMPANY_VIEW_VEHICLES_NONE                                  :{WHITE}Brez
 STR_COMPANY_VIEW_COMPANY_VALUE                                  :{GOLD}Vrednost podjetja: {WHITE}{CURRENCY}
@@ -3251,6 +3255,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Izbeir l
 STR_AI_DEBUG                                                    :{WHITE}UI Čiščenje
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Ime UI
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}Nastavitve UI
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Spremeni nastavitve UI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Ponovno naloži UI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Uniči UI, ponovno naloži skripto in ponovno zaženi UI
 
