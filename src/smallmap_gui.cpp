@@ -545,8 +545,6 @@ class SmallMapWindow : public Window {
 	 */
 	FORCEINLINE Point PixelToWorld(int dx, int dy, int *sub) const
 	{
-		dx *= TILE_SIZE;
-		dy *= TILE_SIZE;
 		dx += this->subscroll;  // Total horizontal offset.
 
 		/* For each two rows down, add a x and a y tile, and
@@ -564,8 +562,8 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		pt.x = ScaleByZoomLower(pt.x, this->zoom);
-		pt.y = ScaleByZoomLower(pt.y, this->zoom);
+		pt.x = ScaleByZoomLower(pt.x * TILE_SIZE, this->zoom);
+		pt.y = ScaleByZoomLower(pt.y * TILE_SIZE, this->zoom);
 
 		*sub = dx;
 		return pt;
@@ -831,8 +829,8 @@ class SmallMapWindow : public Window {
 		/* Which tile is displayed at (dpi->left, dpi->top)? */
 		int dx;
 		Point tile = this->PixelToWorld(dpi->left, dpi->top, &dx);
-		int tile_x = UnScaleByZoomLower(this->scroll_x + tile.x, this->zoom) / TILE_SIZE;
-		int tile_y = UnScaleByZoomLower(this->scroll_y + tile.y, this->zoom) / TILE_SIZE;
+		int tile_x = UnScaleByZoomLower(this->scroll_x / TILE_SIZE + tile.x / TILE_SIZE, this->zoom);
+		int tile_y = UnScaleByZoomLower(this->scroll_y / TILE_SIZE + tile.y / TILE_SIZE, this->zoom);
 
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
