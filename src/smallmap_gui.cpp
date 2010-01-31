@@ -546,15 +546,15 @@ class SmallMapWindow : public Window {
 
 		/* For each two rows down, add a x and a y tile, and
 		 * For each four pixels to the right, move a tile to the right. */
-		Point pt = {(dy >> 1) - (dx >> 2), (dy >> 1) + (dx >> 2)};
+		Point pt = {ScaleByZoomLower((dy >> 1) - (dx >> 2), this->zoom), ScaleByZoomLower((dy >> 1) + (dx >> 2), this->zoom)};
 		dx &= 3;
 
 		if (dy & 1) { // Odd number of rows, handle the 2 pixel shift.
 			if (dx < 2) {
-				pt.x++;
+				pt.x += ScaleByZoomLower(1, this->zoom);
 				dx += 2;
 			} else {
-				pt.y++;
+				pt.y += ScaleByZoomLower(1, this->zoom);
 				dx -= 2;
 			}
 		}
@@ -811,8 +811,8 @@ class SmallMapWindow : public Window {
 		/* Which tile is displayed at (dpi->left, dpi->top)? */
 		int dx;
 		Point tile = this->PixelToTile(dpi->left, dpi->top, &dx);
-		int tile_x = UnScalePlainCoord(this->scroll_x) + tile.x;
-		int tile_y = UnScalePlainCoord(this->scroll_y) + tile.y;
+		int tile_x = UnScaleByZoomLower(this->scroll_x / TILE_SIZE + tile.x, this->zoom);
+		int tile_y = UnScaleByZoomLower(this->scroll_y / TILE_SIZE + tile.y, this->zoom);
 
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
