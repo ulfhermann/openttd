@@ -752,13 +752,16 @@ class SmallMapWindow : public Window {
 		/* Find main viewport. */
 		const ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
 
-		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
-
 		/* UnScale everything separately to produce the same rounding errors as when drawing the background */
-		int x = UnScalePlainCoord(vp->virtual_left) - UnScalePlainCoord(pt.x);
-		int y = UnScalePlainCoord(vp->virtual_top) - UnScalePlainCoord(pt.y);
+		Point pt = RemapCoords(UnScalePlainCoord(this->scroll_x), UnScalePlainCoord(this->scroll_y), 0);
+
+		int x = UnScalePlainCoord(vp->virtual_left) - pt.x;
+		int y = UnScalePlainCoord(vp->virtual_top) - pt.y;
 		int x2 = x + UnScalePlainCoord(vp->virtual_width);
 		int y2 = y + UnScalePlainCoord(vp->virtual_height);
+
+		x -= this->subscroll;
+		x2 -= this->subscroll;
 
 		SmallMapWindow::DrawVertMapIndicator(x, y, y2);
 		SmallMapWindow::DrawVertMapIndicator(x2, y, y2);
