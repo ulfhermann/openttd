@@ -536,18 +536,21 @@ class SmallMapWindow : public Window {
 
 		/* For each two rows down, add a x and a y tile, and
 		 * For each four pixels to the right, move a tile to the right. */
-		Point pt = {ScaleByZoomLower((dy >> 1) - (dx >> 2), this->zoom), ScaleByZoomLower((dy >> 1) + (dx >> 2), this->zoom)};
+		Point pt = {(dy >> 1) - (dx >> 2), (dy >> 1) + (dx >> 2)};
 		dx &= 3;
 
 		if (dy & 1) { // Odd number of rows, handle the 2 pixel shift.
 			if (dx < 2) {
-				pt.x += ScaleByZoomLower(1, this->zoom);
+				pt.x++;
 				dx += 2;
 			} else {
-				pt.y += ScaleByZoomLower(1, this->zoom);
+				pt.y++;
 				dx -= 2;
 			}
 		}
+
+		pt.x = ScaleByZoomLower(pt.x, this->zoom);
+		pt.y = ScaleByZoomLower(pt.y, this->zoom);
 
 		*sub = dx;
 		return pt;
