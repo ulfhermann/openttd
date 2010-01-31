@@ -545,6 +545,8 @@ class SmallMapWindow : public Window {
 	 */
 	FORCEINLINE Point PixelToWorld(int dx, int dy, int *sub) const
 	{
+		dx *= TILE_SIZE;
+		dy *= TILE_SIZE;
 		dx += this->subscroll;  // Total horizontal offset.
 
 		/* For each two rows down, add a x and a y tile, and
@@ -562,8 +564,8 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		pt.x = ScaleByZoomLower(pt.x * TILE_SIZE, this->zoom);
-		pt.y = ScaleByZoomLower(pt.y * TILE_SIZE, this->zoom);
+		pt.x = ScaleByZoomLower(pt.x, this->zoom);
+		pt.y = ScaleByZoomLower(pt.y, this->zoom);
 
 		*sub = dx;
 		return pt;
