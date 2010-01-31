@@ -1300,6 +1300,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Dozvolj
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Dozvoljene stanice različitih oblika: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Množilac težine tovara za simulaciju opterećenja vozova: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Delitelj brzine leta aviona: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Broj avionskih nesreća: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :nikakav
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :umanjen
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normalan
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Dozvoljene ulične stanice na kolovozima u vlasništvu naselja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Dozvoljene ulične stanice na kolovozima u vlasništvu drugih preduzeća: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Dozvoljena gradnja stanica jedne pored druge: {ORANGE}{STRING}
@@ -2636,14 +2640,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Finansiranje no
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Kupovina ekskluzivnih prava prevoza
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Podmićivanje lokalne vlasti
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Ulaganje u malu reklamnu kampanju će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Ulaganje u reklamnu kampanju srednje veličine će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Ulaganje u veliku reklamnu kampanju će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW} Finansiranje rekonstrukcije lokalne mreže puteva. Može prouzrokovati kolaps u drumskom saobraćaju u trajanju do 6 meseci.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Otkrivanje spomenika preduzeća.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW} Finansiranje izgradnje novih komercijalnih objekata u naselju.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Kupovina ekskluzivnih prava prevoza od lokalne vlasti na godinu dana, osigurava da će lokalni korisnici prevoza koristiti isključivo usluge vašeg preduzeća.{} Trošak: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Davanje mita lokalnoj vlasti kako bi porastao rejting vašeg preduzeća, uz rizik velike štete ukoliko se otkrije.{} Cena: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Ulaganje u malu reklamnu kampanju će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Ulaganje u reklamnu kampanju srednje veličine će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Ulaganje u veliku reklamnu kampanju će doneti preduzeću više putnika i robe iz ovog naselja.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} Finansiranje rekonstrukcije lokalne mreže puteva. Može prouzrokovati kolaps u drumskom saobraćaju u trajanju do 6 meseci.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Otkrivanje spomenika preduzeća.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} Finansiranje izgradnje novih komercijalnih objekata u naselju.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Kupovina ekskluzivnih prava prevoza od lokalne vlasti na godinu dana, osigurava da će lokalni korisnici prevoza koristiti isključivo usluge vašeg preduzeća.{} Trošak: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Davanje mita lokalnoj vlasti kako bi porastao rejting vašeg preduzeća, uz rizik velike štete ukoliko se otkrije.{} Cena: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subvencije
@@ -3404,6 +3408,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Izbor go
 STR_AI_DEBUG                                                    :{WHITE}Korekcija veštačke inteligencije
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Naziv VI
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}VI Podešavanja
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Promena podešavanja vezanih za VI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Ponovno učitavanje
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Zaustavlja Veštačku Inteligenciju, ponovo učitava skriptu, i restartuje je
 
