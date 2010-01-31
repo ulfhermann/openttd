@@ -449,33 +449,55 @@ class SmallMapWindow : public Window {
 	uint min_number_of_fixed_rows; ///< Minimal number of rows in the legends for the fixed layouts only (all except #SMT_INDUSTRY).
 	uint column_width;             ///< Width of a column in the #SM_WIDGET_LEGEND widget.
 
-	int32 scroll_x;
-	int32 scroll_y;
-	int32 subscroll;
+	int32 scroll_x;  ///< Horizontal world coordinate of the base tile left of the top-left corner of the smallmap display.
+	int32 scroll_y;  ///< Vertical world coordinate of the base tile left of the top-left corner of the smallmap display.
+	int32 subscroll; ///< Number of pixels (0..3) between the right end of the base tile and the pixel at the top-left corner of the smallmap display.
 
 	static const uint8 FORCE_REFRESH_PERIOD = 0x1F; ///< map is redrawn after that many ticks
 	uint8 refresh; ///< refresh counter, zeroed every FORCE_REFRESH_PERIOD ticks
 
 	/**
-	 * Remap a map's tile X coordinate (TileX(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_x the tile's X coordinate.
-	 * @return the X coordinate to draw on.
+	 * Remap tile to location on this smallmap.
+	 * @param tile_x X coordinate of the tile.
+	 * @param tile_y Y coordinate of the tile.
+	 * @return Position to draw on.
 	 */
-	inline int RemapX(int tile_x) const
+	FORCEINLINE Point RemapTile(int tile_x, int tile_y) const
 	{
-		return tile_x - this->scroll_x / TILE_SIZE;
+		return RemapCoords(tile_x - this->scroll_x / TILE_SIZE,
+				tile_y - this->scroll_y / TILE_SIZE, 0);
 	}
 
 	/**
-	 * Remap a map's tile Y coordinate (TileY(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_y the tile's Y coordinate.
-	 * @return the Y coordinate to draw on.
+	 * Determine the tile relative to the base tile of the smallmap, and the pixel position at
+	 * that tile for a point in the smallmap.
+	 * @param px Horizontal coordinate of the pixel.
+	 * @param py Vertical coordinate of the pixel.
+	 * @param sub[out] Pixel position at the tile (0..3).
+	 * @return Tile being displayed at the given position relative to #scroll_x and #scroll_y.
+	 * @note The #subscroll offset is already accounted for.
 	 */
-	inline int RemapY(int tile_y) const
+	FORCEINLINE Point PixelToTile(int dx, int dy, int *sub) const
 	{
-		return tile_y - this->scroll_y / TILE_SIZE;
+		dx += this->subscroll;  // Total horizontal offset.
+
+		/* For each two rows down, add a x and a y tile, and
+		 * For each four pixels to the right, move a tile to the right. */
+		Point pt = {(dy >> 1) - (dx >> 2), (dy >> 1) + (dx >> 2)};
+		dx &= 3;
+
+		if (dy & 1) { // Odd number of rows, handle the 2 pixel shift.
+			if (dx < 2) {
+				pt.x++;
+				dx += 2;
+			} else {
+				pt.y++;
+				dx -= 2;
+			}
+		}
+
+		*sub = dx;
+		return pt;
 	}
 
 	/**
@@ -531,23 +553,13 @@ class SmallMapWindow : public Window {
 			if (v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) continue;
 
 			/* Remap into flat coordinates. */
-			Point pt = RemapCoords(
-					this->RemapX(v->x_pos / TILE_SIZE),
-					this->RemapY(v->y_pos / TILE_SIZE),
-					0);
-			int x = pt.x;
-			int y = pt.y;
+			Point pt = this->RemapTile(v->x_pos / TILE_SIZE, v->y_pos / TILE_SIZE);
 
-			/* Check if y is out of bounds? */
-			y -= dpi->top;
-			if (!IsInsideMM(y, 0, dpi->height)) continue;
+			int y = pt.y - dpi->top;
+			if (!IsInsideMM(y, 0, dpi->height)) continue; // y is out of bounds.
 
-			/* Default is to draw both pixels. */
-			bool skip = false;
-
-			/* Offset X coordinate */
-			x -= this->subscroll + 3 + dpi->left;
-
+			bool skip = false; // Default is to draw both pixels.
+			int x = pt.x - this->subscroll - 3 - dpi->left; // Offset X coordinate.
 			if (x < 0) {
 				/* if x+1 is 0, that means we're on the very left edge,
 				 * and should thus only draw a single pixel */
@@ -577,10 +589,7 @@ class SmallMapWindow : public Window {
 		const Town *t;
 		FOR_ALL_TOWNS(t) {
 			/* Remap the town coordinate */
-			Point pt = RemapCoords(
-					this->RemapX(TileX(t->xy)),
-					this->RemapY(TileY(t->xy)),
-					0);
+			Point pt = this->RemapTile(TileX(t->xy), TileY(t->xy));
 			int x = pt.x - this->subscroll - (t->sign.width_small >> 1);
 			int y = pt.y;
 
@@ -685,27 +694,11 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		int tile_x = this->scroll_x / TILE_SIZE;
-		int tile_y = this->scroll_y / TILE_SIZE;
-
-		int dx = dpi->left + this->subscroll;
-		tile_x -= dx / 4;
-		tile_y += dx / 4;
-		dx &= 3;
-
-		int dy = dpi->top;
-		tile_x += dy / 2;
-		tile_y += dy / 2;
-
-		if (dy & 1) {
-			tile_x++;
-			dx += 2;
-			if (dx > 3) {
-				dx -= 4;
-				tile_x--;
-				tile_y++;
-			}
-		}
+		/* Which tile is displayed at (dpi->left, dpi->top)? */
+		int dx;
+		Point tile = this->PixelToTile(dpi->left, dpi->top, &dx);
+		int tile_x = this->scroll_x / TILE_SIZE + tile.x;
+		int tile_y = this->scroll_y / TILE_SIZE + tile.y;
 
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
@@ -905,7 +898,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SM_WIDGET_MAP: { // Map window
@@ -1037,27 +1030,11 @@ public:
 	{
 		_cursor.fix_at = true;
 
-		int x = this->scroll_x;
-		int y = this->scroll_y;
-
-		int sub = this->subscroll + delta.x;
-
-		x -= (sub >> 2) << 4;
-		y += (sub >> 2) << 4;
-		sub &= 3;
-
-		x += (delta.y >> 1) << 4;
-		y += (delta.y >> 1) << 4;
-
-		if (delta.y & 1) {
-			x += TILE_SIZE;
-			sub += 2;
-			if (sub > 3) {
-				sub -= 4;
-				x -= TILE_SIZE;
-				y += TILE_SIZE;
-			}
-		}
+		/* While tile is at (delta.x, delta.y)? */
+		int sub;
+		Point pt = this->PixelToTile(delta.x, delta.y, &sub);
+		int x = this->scroll_x + pt.x * TILE_SIZE;
+		int y = this->scroll_y + pt.y * TILE_SIZE;
 
 		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 		int hx = wi->current_x / 2;
