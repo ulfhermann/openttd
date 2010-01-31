@@ -1116,6 +1116,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Permiti
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Estaciones no uniformes: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Carga el multiplicador de peso para simular trenes pesados: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Factor velocidad avión: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Cantidad de aviones estrellados: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :ninguno
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :reducidos
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normal
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Permite construir paradas sobre carreteras de pueblo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Permitir pasar a través de las paradas de carretera de los competidores: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Permitir construcción en estaciones contiguas : {ORANGE}{STRING}
@@ -2452,14 +2456,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Pagar la constr
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Comprar la exclusiva de los servicios de transporte
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Sobornar la autoridad local
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Iniciar una pequeña campaña publicitaria local para atraer más pasajeros y carga a sus servicios de transporte.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Iniciar una campaña publicitaria local mediana para atraer más pasajeros y carga a sus servicios de transporte.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Iniciar una gran campaña publicitaria local para atraer más pasajeros y carga a sus servicios de transporte.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Pagar la reconstrucción de las carreteras locales. Provoca considerables complicaciones del tráfico durante 6 meses.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Construye una estatua en honor a su empresa.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Pagar la construcción de nuevos edificios comerciales en el pueblo.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Comprar en exclusiva los derechos de transporte en este pueblo durante un año. Las autoridades solo permitirán el uso de las estaciones de su empresa.{}Coste: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Sobornar a las autoridades locales para aumentar su ranking, con el riesgo de una severa penalización si es descubierto.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Iniciar una pequeña campaña publicitaria local para atraer más pasajeros y carga a sus servicios de transporte.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Iniciar una campaña publicitaria local mediana para atraer más pasajeros y carga a sus servicios de transporte.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Iniciar una gran campaña publicitaria local para atraer más pasajeros y carga a sus servicios de transporte.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Pagar la reconstrucción de las carreteras locales. Provoca considerables complicaciones del tráfico durante 6 meses.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Construye una estatua en honor a su empresa.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Pagar la construcción de nuevos edificios comerciales en el pueblo.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Comprar en exclusiva los derechos de transporte en este pueblo durante un año. Las autoridades solo permitirán el uso de las estaciones de su empresa.{}Coste: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Sobornar a las autoridades locales para aumentar su ranking, con el riesgo de una severa penalización si es descubierto.{}Coste: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subvenciones
@@ -3210,6 +3214,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Seleccio
 STR_AI_DEBUG                                                    :{WHITE}Depuración de IA
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Nombre de la IA
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}Configuración de la IA
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Cambiar la configuración de la IA
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Recarga la IA
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Elimina la IA, recarga el código y reinicia la IA
 

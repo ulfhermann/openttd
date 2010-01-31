@@ -534,7 +534,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SLW_LIST: {
@@ -1568,7 +1568,7 @@ struct StationViewWindow : public Window {
 		this->SetWidgetDirty(SVW_WAITING);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SVW_WAITING:
@@ -1970,7 +1970,7 @@ struct SelectStationWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget != JSW_PANEL) return;
 
