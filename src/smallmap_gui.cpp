@@ -685,7 +685,7 @@ class SmallMapWindow : public Window {
 					int x = pt.x - dpi->left - 3; // mysterious -3 inherited from trunk (vehicle drawing)
 					byte colour = GetIndustrySpec(i->type)->map_colour;
 
-					for (int offset = 0; offset < SD_MAP_MIN_INDUSTRY_WIDTH; ++offset) {
+					for (int offset = 0; offset < 4; ++offset) {
 						if (IsInsideMM(x + offset, 0, dpi->width)) {
 							blitter->SetPixel(dpi->dst_ptr, x + offset, y, colour);
 						}
