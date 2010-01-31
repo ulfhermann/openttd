@@ -1115,6 +1115,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Salli r
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Epäyhtenäiset asemat: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Rahdin painokerroin raskaiden junien simulointia varten: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Lentokoneen nopeuskerroin: {ORANGE}1/{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Lentokoneonnettomuuksien määrä: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :ei yhtään
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :vähennetty
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :tavallinen
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Läpiajettavat pysäkit kaupungin teille: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Salli läpiajettavat pysäkit kilpailijoiden omistamilla teillä: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Vierekkäiset asemat: {ORANGE}{STRING}
@@ -2451,14 +2455,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Rahoita uusia r
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Osta yksinoikeudet kuljetuksiin
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Lahjo viranomaisia
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Käynnistä pieni mainoskampanja hoikutellaksesi lisää matkustajia ja rahtia kuljetuspalveluihisi.{}Kustannus: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Käynnistä keskikokoinen mainoskampanja houkutellaksesi lisää matkustajia ja rahtia kuljetuspalveluihisi.{}Kustannus: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Käynnistä suuri mainoskampanja hoikutellaksesi lisää matkustajia ja rahtia kuljetuspalveluihisi.{}Kustannus: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Rahoita kaupungin tieverkon rakentamista. Aiheuttaa huomattavaa häiriötä tieliikenteessä kuuden kuukauden ajan.{}Kustannus: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Rakenna patsas yhtiösi kunniaksi.{}Kustannus: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Rahoita uusien kaupparakennusten rakentamista kaupungissa.{}Kustannus: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Osta vuoden yksinoikeudet kaupungin liikennöintiin. Paikallisviranomaiset eivät salli muiden yhtiöiden kuljettaa matkustajia ja rahtia.{}Kustannus: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Lahjo viranomaisia lisätäksesi arviotasi; rangaistus voi olla kuitenkin suuri, jos jäät kiinni.{}Kulu: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Käynnistä pieni mainoskampanja hoikutellaksesi lisää matkustajia ja rahtia kuljetuspalveluihisi.{}Kustannus: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Käynnistä keskikokoinen mainoskampanja houkutellaksesi lisää matkustajia ja rahtia kuljetuspalveluihisi.{}Kustannus: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Käynnistä suuri mainoskampanja hoikutellaksesi lisää matkustajia ja rahtia kuljetuspalveluihisi.{}Kustannus: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Rahoita kaupungin tieverkon rakentamista. Aiheuttaa huomattavaa häiriötä tieliikenteessä kuuden kuukauden ajan.{}Kustannus: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Rakenna patsas yhtiösi kunniaksi.{}Kustannus: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Rahoita uusien kaupparakennusten rakentamista kaupungissa.{}Kustannus: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Osta vuoden yksinoikeudet kaupungin liikennöintiin. Paikallisviranomaiset eivät salli muiden yhtiöiden kuljettaa matkustajia ja rahtia.{}Kustannus: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Lahjo viranomaisia lisätäksesi arviotasi; rangaistus voi olla kuitenkin suuri, jos jäät kiinni.{}Kulu: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Tuet
@@ -3209,6 +3213,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Valitse 
 STR_AI_DEBUG                                                    :{WHITE}Tekoälyn virheenjäljitys
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Tekoälyn nimi
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}Tekoälyn asetukset
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Muuta tekoälyn asetuksia
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Lataa tekoäly uudelleen
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Lopeta tekoäly, lataa skripti uudelleen ja käynnistä tekoäly uudelleen
 
