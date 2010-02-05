@@ -133,7 +133,7 @@ struct NetworkSettings {
 	char   client_name[NETWORK_CLIENT_NAME_LENGTH];       ///< name of the player (as client)
 	char   default_company_pass[NETWORK_PASSWORD_LENGTH]; ///< default password for new companies in encrypted form
 	char   connect_to_ip[NETWORK_HOSTNAME_LENGTH];        ///< default for the "Add server" query
-	char   network_id[NETWORK_UNIQUE_ID_LENGTH];          ///< semi-unique ID of the client
+	char   network_id[NETWORK_SERVER_ID_LENGTH];          ///< network ID for servers
 	bool   autoclean_companies;                           ///< automatically remove companies that are not in use
 	uint8  autoclean_unprotected;                         ///< remove passwordless companies after this many months
 	uint8  autoclean_protected;                           ///< remove the password from passworded companies after this many months
@@ -147,6 +147,7 @@ struct NetworkSettings {
 	bool   reload_cfg;                                    ///< reload the config file before restarting
 	char   last_host[NETWORK_HOSTNAME_LENGTH];            ///< IP address of the last joined server
 	uint16 last_port;                                     ///< port of the last joined server
+	bool   no_http_content_downloads;                     ///< do not do content downloads over HTTP
 #else /* ENABLE_NETWORK */
 #endif
 };
@@ -320,6 +321,7 @@ struct VehicleSettings {
 	bool   never_expire_vehicles;            ///< never expire vehicles
 	byte   extend_vehicle_life;              ///< extend vehicle life by this many years
 	byte   road_side;                        ///< the side of the road vehicles drive on
+	uint8  plane_crashes;                    ///< number of plane crashes, 0 = none, 1 = reduced, 2 = normal
 };
 
 /** Settings related to the economy. */

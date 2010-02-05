@@ -10,7 +10,6 @@
 /** @file water_cmd.cpp Handling of water tiles. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "cmd_helper.h"
 #include "landscape.h"
 #include "viewport_func.h"
@@ -19,17 +18,11 @@
 #include "news_func.h"
 #include "depot_base.h"
 #include "depot_func.h"
-#include "vehicle_gui.h"
-#include "train.h"
-#include "roadveh.h"
 #include "water.h"
 #include "industry_map.h"
-#include "cargotype.h"
 #include "newgrf_canal.h"
-#include "transparency.h"
 #include "strings_func.h"
 #include "functions.h"
-#include "window_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
 #include "company_func.h"
@@ -40,6 +33,7 @@
 #include "tunnelbridge_map.h"
 #include "station_base.h"
 #include "ai/ai.hpp"
+#include "core/random_func.hpp"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -132,9 +126,9 @@ CommandCost CmdBuildShipDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 	WaterClass wc1 = GetWaterClass(tile);
 	WaterClass wc2 = GetWaterClass(tile2);
 	ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (CmdFailed(ret)) return CMD_ERROR;
+	if (ret.Failed()) return CMD_ERROR;
 	ret = DoCommand(tile2, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (CmdFailed(ret)) return CMD_ERROR;
+	if (ret.Failed()) return CMD_ERROR;
 
 	if (!Depot::CanAllocateItem()) return CMD_ERROR;
 
@@ -204,14 +198,14 @@ static CommandCost DoBuildShiplift(TileIndex tile, DiagDirection dir, DoCommandF
 
 	/* middle tile */
 	ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (CmdFailed(ret)) return CMD_ERROR;
+	if (ret.Failed()) return CMD_ERROR;
 
 	delta = TileOffsByDiagDir(dir);
 	/* lower tile */
 	WaterClass wc_lower = IsWaterTile(tile - delta) ? GetWaterClass(tile - delta) : WATER_CLASS_CANAL;
 
 	ret = DoCommand(tile - delta, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (CmdFailed(ret)) return CMD_ERROR;
+	if (ret.Failed()) return CMD_ERROR;
 	if (GetTileSlope(tile - delta, NULL) != SLOPE_FLAT) {
 		return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 	}
@@ -220,7 +214,7 @@ static CommandCost DoBuildShiplift(TileIndex tile, DiagDirection dir, DoCommandF
 	WaterClass wc_upper = IsWaterTile(tile + delta) ? GetWaterClass(tile + delta) : WATER_CLASS_CANAL;
 
 	ret = DoCommand(tile + delta, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (CmdFailed(ret)) return CMD_ERROR;
+	if (ret.Failed()) return CMD_ERROR;
 	if (GetTileSlope(tile + delta, NULL) != SLOPE_FLAT) {
 		return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 	}
@@ -319,7 +313,7 @@ CommandCost CmdBuildCanal(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 		if (IsTileType(tile, MP_WATER) && (!IsTileOwner(tile, OWNER_WATER) || p2 == 1)) continue;
 
 		ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-		if (CmdFailed(ret)) return ret;
+		if (ret.Failed()) return ret;
 		cost.AddCost(ret);
 
 		if (flags & DC_EXEC) {
@@ -541,7 +535,7 @@ struct LocksDrawTileStruct {
 #include "table/water_land.h"
 
 static void DrawWaterStuff(const TileInfo *ti, const WaterDrawTileStruct *wdts,
-	SpriteID palette, uint base, bool draw_ground)
+	PaletteID palette, uint base, bool draw_ground)
 {
 	SpriteID image;
 	SpriteID water_base = GetCanalSprite(CF_WATERSLOPE, ti->tile);
@@ -730,7 +724,7 @@ static void FloodVehicles(TileIndex tile)
 {
 	byte z = 0;
 
-	if (IsTileType(tile, MP_STATION) && IsAirport(tile)) {
+	if (IsAirportTile(tile)) {
 		const Station *st = Station::GetByTile(tile);
 		const AirportSpec *as = st->GetAirportSpec();
 		z = 1 + st->Airport()->delta_z;
@@ -779,7 +773,7 @@ static void FloodVehicle(Vehicle *v)
 		/* Crashing aircraft are always at z_pos == 1, never on z_pos == 0,
 		 * because that's always the shadow. Except for the heliport, because
 		 * that station has a big z_offset for the aircraft. */
-		if (!IsTileType(v->tile, MP_STATION) || !IsAirport(v->tile) || GetTileMaxZ(v->tile) != 0) return;
+		if (!IsAirportTile(v->tile) || GetTileMaxZ(v->tile) != 0) return;
 		const Station *st = Station::GetByTile(v->tile);
 		const AirportFTAClass *airport = st->Airport();
 
@@ -874,7 +868,7 @@ void DoFloodTile(TileIndex target)
 				}
 			/* FALL THROUGH */
 			case MP_CLEAR:
-				if (CmdSucceeded(DoCommand(target, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR))) {
+				if (DoCommand(target, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR).Succeeded()) {
 					MakeShore(target);
 					MarkTileDirtyByTile(target);
 					flooded = true;
@@ -889,7 +883,7 @@ void DoFloodTile(TileIndex target)
 		FloodVehicles(target);
 
 		/* flood flat tile */
-		if (CmdSucceeded(DoCommand(target, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR))) {
+		if (DoCommand(target, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR).Succeeded()) {
 			MakeSea(target);
 			MarkTileDirtyByTile(target);
 			flooded = true;
@@ -939,7 +933,7 @@ static void DoDryUp(TileIndex tile)
 		case MP_WATER:
 			assert(IsCoast(tile));
 
-			if (CmdSucceeded(DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR))) {
+			if (DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR).Succeeded()) {
 				MakeClear(tile, CLEAR_GRASS, 3);
 				MarkTileDirtyByTile(tile);
 			}

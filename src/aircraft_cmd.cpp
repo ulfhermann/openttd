@@ -27,14 +27,15 @@
 #include "sound_func.h"
 #include "functions.h"
 #include "cheat_type.h"
-#include "autoreplace_func.h"
+#include "company_base.h"
 #include "autoreplace_gui.h"
-#include "gfx_func.h"
 #include "ai/ai.hpp"
 #include "company_func.h"
 #include "effectvehicle_func.h"
 #include "station_base.h"
-#include "cargotype.h"
+#include "engine_base.h"
+#include "engine_func.h"
+#include "core/random_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -199,7 +200,7 @@ static SpriteID GetAircraftIcon(EngineID engine)
 	return DIR_W + _aircraft_sprite[spritenum];
 }
 
-void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal)
+void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal)
 {
 	SpriteID sprite = GetAircraftIcon(engine);
 	const Sprite *real_sprite = GetSprite(sprite, ST_NORMAL);
@@ -333,11 +334,9 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		 * of all depots, it is simple */
 		for (uint i = 0;; i++) {
 			const Station *st = Station::GetByTile(tile);
-			const AirportSpec *as = st->GetAirportSpec();
 			const AirportFTAClass *apc = st->Airport();
 
-			assert(i != as->nof_depots);
-			if (st->airport_tile + ToTileIndexDiff(as->depot_table[i]) == tile) {
+			if (st->GetHangarTile(i) == tile) {
 				assert(apc->layout[i].heading == HANGAR);
 				v->pos = apc->layout[i].position;
 				break;
@@ -532,10 +531,8 @@ static void CheckIfAircraftNeedsService(Aircraft *v)
 
 	assert(st != NULL);
 
-	/* only goto depot if the target airport has terminals (eg. it is airport) */
-	if (st->airport_tile != INVALID_TILE && st->Airport()->terminals != NULL) {
-//		printf("targetairport = %d, st->index = %d\n", v->targetairport, st->index);
-//		v->targetairport = st->index;
+	/* only goto depot if the target airport has a depot */
+	if (st->GetAirportSpec()->nof_depots > 0 && CanVehicleUseStation(v, st)) {
 		v->current_order.MakeGoToDepot(st->index, ODTFB_SERVICE);
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	} else if (v->current_order.IsType(OT_GOTO_DEPOT)) {
@@ -839,6 +836,9 @@ static byte AircraftGetEntryPoint(const Aircraft *v, const AirportFTAClass *apc)
 	return apc->entry_points[dir];
 }
 
+
+static void MaybeCrashAirplane(Aircraft *v);
+
 /**
  * Controls the movement of an aircraft. This function actually moves the vehicle
  * on the map and takes care of minor things like sound playback.
@@ -968,6 +968,11 @@ static bool AircraftController(Aircraft *v)
 
 		SetAircraftPosition(v, v->x_pos, v->y_pos, v->z_pos);
 		return false;
+	}
+
+	if (amd->flag & AMED_BRAKE && v->cur_speed > SPEED_LIMIT_TAXI * _settings_game.vehicle.plane_speed) {
+		MaybeCrashAirplane(v);
+		if ((v->vehstatus & VS_CRASHED) != 0) return false;
 	}
 
 	uint speed_limit = SPEED_LIMIT_TAXI;
@@ -1220,7 +1225,7 @@ void HandleMissingAircraftOrders(Aircraft *v)
 		ret = DoCommand(v->tile, v->index, 0, DC_EXEC, CMD_SEND_AIRCRAFT_TO_HANGAR);
 		_current_company = old_company;
 
-		if (CmdFailed(ret)) CrashAirplane(v);
+		if (ret.Failed()) CrashAirplane(v);
 	} else if (!v->current_order.IsType(OT_GOTO_DEPOT)) {
 		v->current_order.Free();
 	}
@@ -1286,17 +1291,21 @@ static void CrashAirplane(Aircraft *v)
 
 static void MaybeCrashAirplane(Aircraft *v)
 {
+	if (_settings_game.vehicle.plane_crashes == 0) return;
+
 	Station *st = Station::Get(v->targetairport);
 
 	/* FIXME -- MaybeCrashAirplane -> increase crashing chances of very modern airplanes on smaller than AT_METROPOLITAN airports */
-	uint16 prob = 0x10000 / 1500;
+	uint32 prob = (0x4000 << _settings_game.vehicle.plane_crashes);
 	if ((st->Airport()->flags & AirportFTAClass::SHORT_STRIP) &&
 			(AircraftVehInfo(v->engine_type)->subtype & AIR_FAST) &&
 			!_cheats.no_jetcrash.value) {
-		prob = 0x10000 / 20;
+		prob /= 20;
+	} else {
+		prob /= 1500;
 	}
 
-	if (GB(Random(), 0, 16) > prob) return;
+	if (GB(Random(), 0, 22) > prob) return;
 
 	/* Crash the airplane. Remove all goods stored at the station. */
 	for (CargoID i = 0; i < NUM_CARGO; i++) {
@@ -1339,7 +1348,6 @@ static void AircraftLandAirplane(Aircraft *v)
 	if (!PlayVehicleSound(v, VSE_TOUCHDOWN)) {
 		SndPlayVehicleFx(SND_17_SKID_PLANE, v);
 	}
-	MaybeCrashAirplane(v);
 }
 
 

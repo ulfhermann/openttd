@@ -10,7 +10,6 @@
 /** @file 32bpp_simple.cpp Implementation of the simple 32 bpp blitter. */
 
 #include "../stdafx.h"
-#include "../gfx_func.h"
 #include "../zoom_func.h"
 #include "32bpp_simple.hpp"
 
@@ -64,7 +63,7 @@ void Blitter_32bppSimple::Draw(Blitter::BlitterParams *bp, BlitterMode mode, Zoo
 	}
 }
 
-void Blitter_32bppSimple::DrawColourMappingRect(void *dst, int width, int height, int pal)
+void Blitter_32bppSimple::DrawColourMappingRect(void *dst, int width, int height, PaletteID pal)
 {
 	uint32 *udst = (uint32 *)dst;
 

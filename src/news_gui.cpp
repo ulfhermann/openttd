@@ -10,12 +10,9 @@
 /** @file news_gui.cpp GUI functions related to news messages. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "gui.h"
-#include "window_gui.h"
 #include "viewport_func.h"
 #include "news_type.h"
-#include "gfx_func.h"
 #include "strings_func.h"
 #include "window_func.h"
 #include "date_func.h"
@@ -31,6 +28,7 @@
 #include "company_manager_face.h"
 #include "company_func.h"
 #include "engine_gui.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 
@@ -446,7 +444,7 @@ struct NewsWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case NTW_CLOSEBOX:
@@ -990,7 +988,7 @@ struct MessageHistoryWindow : Window {
 		this->vscroll.SetCount(_total_news);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget == MHW_BACKGROUND) {
 			NewsItem *ni = _latest_news;
@@ -1165,7 +1163,7 @@ struct MessageOptionsWindow : Window {
 		this->SetWidgetLoweredState(WIDGET_NEWSOPT_SOUNDTICKER, _news_ticker_sound);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case WIDGET_NEWSOPT_DROP_SUMMARY: // Dropdown menu for all settings

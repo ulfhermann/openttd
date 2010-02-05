@@ -9,7 +9,6 @@
 
 /** @file ai_road.cpp Implementation of AIRoad. */
 
-#include "../../stdafx.h"
 #include "ai_map.hpp"
 #include "ai_station.hpp"
 #include "ai_cargo.hpp"
@@ -472,7 +471,7 @@ static bool NeighbourHasReachableRoad(::RoadTypes rts, TileIndex start_tile, Dia
 	EnforcePrecondition(false, !one_way || AIObject::GetRoadType() == ::ROADTYPE_ROAD);
 	EnforcePrecondition(false, IsRoadTypeAvailable(GetCurrentRoadType()));
 
-	return AIObject::DoCommand(end, start, (::TileY(start) != ::TileY(end) ? 4 : 0) | (((start < end) == !full) ? 1 : 2) | (AIObject::GetRoadType() << 3) | ((one_way ? 1 : 0) << 5), CMD_BUILD_LONG_ROAD);
+	return AIObject::DoCommand(start, end, (::TileY(start) != ::TileY(end) ? 4 : 0) | (((start < end) == !full) ? 1 : 2) | (AIObject::GetRoadType() << 3) | ((one_way ? 1 : 0) << 5) | 1 << 6, CMD_BUILD_LONG_ROAD);
 }
 
 /* static */ bool AIRoad::BuildRoad(TileIndex start, TileIndex end)
@@ -579,4 +578,17 @@ static bool NeighbourHasReachableRoad(::RoadTypes rts, TileIndex start_tile, Dia
 	EnforcePrecondition(false, IsRoadStop(tile));
 
 	return AIObject::DoCommand(tile, 0, GetRoadStopType(tile), CMD_REMOVE_ROAD_STOP);
+}
+
+/* static */ Money AIRoad::GetBuildCost(RoadType roadtype, BuildType build_type)
+{
+	if (!AIRoad::IsRoadTypeAvailable(roadtype)) return -1;
+
+	switch (build_type) {
+		case BT_ROAD:       return ::GetPrice(PR_BUILD_ROAD, 1, NULL);
+		case BT_DEPOT:      return ::GetPrice(PR_BUILD_DEPOT_ROAD, 1, NULL);
+		case BT_BUS_STOP:   return ::GetPrice(PR_BUILD_STATION_BUS, 1, NULL);
+		case BT_TRUCK_STOP: return ::GetPrice(PR_BUILD_STATION_TRUCK, 1, NULL);
+		default: return -1;
+	}
 }

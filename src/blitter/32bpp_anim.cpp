@@ -11,7 +11,6 @@
 
 #include "../stdafx.h"
 #include "../core/math_func.hpp"
-#include "../gfx_func.h"
 #include "../video/video_driver.hpp"
 #include "32bpp_anim.hpp"
 
@@ -210,7 +209,7 @@ void Blitter_32bppAnim::Draw(Blitter::BlitterParams *bp, BlitterMode mode, ZoomL
 	}
 }
 
-void Blitter_32bppAnim::DrawColourMappingRect(void *dst, int width, int height, int pal)
+void Blitter_32bppAnim::DrawColourMappingRect(void *dst, int width, int height, PaletteID pal)
 {
 	if (_screen_disable_anim) {
 		/* This means our output is not to the screen, so we can't be doing any animation stuff, so use our parent DrawColourMappingRect() */
@@ -260,17 +259,6 @@ void Blitter_32bppAnim::SetPixel(void *video, int x, int y, uint8 colour)
 	/* Set the colour in the anim-buffer too, if we are rendering to the screen */
 	if (_screen_disable_anim) return;
 	this->anim_buf[((uint32 *)video - (uint32 *)_screen.dst_ptr) + x + y * this->anim_buf_width] = colour;
-}
-
-void Blitter_32bppAnim::SetPixelIfEmpty(void *video, int x, int y, uint8 colour)
-{
-	uint32 *dst = (uint32 *)video + x + y * _screen.pitch;
-	if (*dst == 0) {
-		*dst = LookupColourInPalette(colour);
-		/* Set the colour in the anim-buffer too, if we are rendering to the screen */
-		if (_screen_disable_anim) return;
-		this->anim_buf[((uint32 *)video - (uint32 *)_screen.dst_ptr) + x + y * this->anim_buf_width] = colour;
-	}
 }
 
 void Blitter_32bppAnim::DrawRect(void *video, int width, int height, uint8 colour)

@@ -681,6 +681,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\sprite.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\spritecache.cpp"
 				>
 			</File>
@@ -2177,6 +2181,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\table\airporttile_ids.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\airporttiles.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\table\airport_movement.h"
 				>
 			</File>
@@ -3406,6 +3418,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\network\core\tcp_game.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\network\core\tcp_http.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\network\core\tcp_http.h"
 				>
 			</File>
 			<File

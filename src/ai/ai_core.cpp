@@ -17,7 +17,6 @@
 #include "../network/network.h"
 #include "../window_func.h"
 #include "../command_func.h"
-#include "ai.hpp"
 #include "ai_scanner.hpp"
 #include "ai_instance.hpp"
 #include "ai_config.hpp"
@@ -45,7 +44,7 @@
 		info = AI::ai_scanner->SelectRandomAI();
 		assert(info != NULL);
 		/* Load default data and store the name in the settings */
-		config->ChangeAI(info->GetName(), -1, true);
+		config->ChangeAI(info->GetName(), -1, false, true);
 	}
 
 	_current_company = company;
@@ -106,6 +105,7 @@
 	_current_company = old_company;
 
 	InvalidateWindowData(WC_AI_DEBUG, 0, -1);
+	DeleteWindowById(WC_AI_SETTINGS, company);
 }
 
 /* static */ void AI::KillAll()
@@ -289,9 +289,9 @@ void CcAI(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 	return AI::ai_scanner->GetUniqueAIInfoList();
 }
 
-/* static */ AIInfo *AI::FindInfo(const char *name, int version)
+/* static */ AIInfo *AI::FindInfo(const char *name, int version, bool force_exact_match)
 {
-	return AI::ai_scanner->FindInfo(name, version);
+	return AI::ai_scanner->FindInfo(name, version, force_exact_match);
 }
 
 /* static */ bool AI::ImportLibrary(const char *library, const char *class_name, int version, HSQUIRRELVM vm)
