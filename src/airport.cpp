@@ -12,208 +12,42 @@
 #include "stdafx.h"
 #include "debug.h"
 #include "airport.h"
-#include "airport_movement.h"
+#include "table/airport_movement.h"
 #include "core/alloc_func.hpp"
 #include "date_func.h"
 #include "settings_type.h"
+#include "table/airporttile_ids.h"
+#include "table/airport_defaults.h"
+#include "table/airporttiles.h"
+
+AirportSpec AirportSpec::dummy = {NULL, NULL, 0, 0, 0, 0, 0, MIN_YEAR, MIN_YEAR};
+AirportSpec AirportSpec::oilrig = {NULL, NULL, 0, 1, 1, 0, 4, MIN_YEAR, MIN_YEAR};
 
 
-/* 8-66 are mapped to 0-58, 83+ are mapped to 59+ */
-enum AirportTiles {
-	APT_APRON                  = 0,
-	APT_APRON_FENCE_NW         = 1,
-	APT_APRON_FENCE_SW         = 2,
-	APT_STAND                  = 3,
-	APT_APRON_W                = 4,
-	APT_APRON_S                = 5,
-	APT_APRON_VER_CROSSING_S   = 6,
-	APT_APRON_HOR_CROSSING_W   = 7,
-	APT_APRON_VER_CROSSING_N   = 8,
-	APT_APRON_HOR_CROSSING_E   = 9,
-	APT_APRON_E                = 10,
-	APT_ARPON_N                = 11,
-	APT_APRON_HOR              = 12,
-	APT_APRON_N_FENCE_SW       = 13,
-	APT_RUNWAY_1               = 14,
-	APT_RUNWAY_2               = 15,
-	APT_RUNWAY_3               = 16,
-	APT_RUNWAY_4               = 17,
-	APT_RUNWAY_END_FENCE_SE    = 18,
-	APT_BUILDING_2             = 19,
-	APT_TOWER_FENCE_SW         = 20,
-	APT_ROUND_TERMINAL         = 21,
-	APT_BUILDING_3             = 22,
-	APT_BUILDING_1             = 23,
-	APT_DEPOT_SE               = 24,
-	APT_STAND_1                = 25,
-	APT_STAND_PIER_NE          = 26,
-	APT_PIER_NW_NE             = 27,
-	APT_PIER                   = 28,
-	APT_EMPTY                  = 29,
-	APT_EMPTY_FENCE_NE         = 30,
-	APT_RADAR_GRASS_FENCE_SW   = 31,
-	/* 32-42 are for turning the radar */
-	APT_RADIO_TOWER_FENCE_NE   = 43,
-	APT_SMALL_BUILDING_3       = 44,
-	APT_SMALL_BUILDING_2       = 45,
-	APT_SMALL_BUILDING_1       = 46,
-	APT_GRASS_FENCE_SW         = 47,
-	APT_GRASS_2                = 48,
-	APT_GRASS_1                = 49,
-	APT_GRASS_FENCE_NE_FLAG    = 50,
-	/* 51-53 are for flag animation */
-	APT_RUNWAY_SMALL_NEAR_END  = 54,
-	APT_RUNWAY_SMALL_MIDDLE    = 55,
-	APT_RUNWAY_SMALL_FAR_END   = 56,
-	APT_SMALL_DEPOT_SE         = 57,
-	APT_HELIPORT               = 58,
-	APT_RUNWAY_END             = 59,
-	APT_RUNWAY_5               = 60,
-	APT_TOWER                  = 61,
-	APT_SMALL_DEPOT_SE_2       = 62, // unused (copy of APT_SMALL_DEPOT_SE)
-	APT_APRON_FENCE_NE         = 63,
-	APT_RUNWAY_END_FENCE_NW    = 64,
-	APT_RUNWAY_FENCE_NW        = 65,
-	APT_RADAR_FENCE_SW         = 66,
-	/* 67-77 are for turning the radar */
-	APT_RADAR_FENCE_NE         = 78,
-	/* 79-89 are for turning the radar */
-	APT_HELIPAD_1              = 90,
-	APT_HELIPAD_2_FENCE_NW     = 91,
-	APT_HELIPAD_2              = 92,
-	APT_APRON_FENCE_NE_SW      = 93,
-	APT_RUNWAY_END_FENCE_NW_SW = 94,
-	APT_RUNWAY_END_FENCE_SE_SW = 95,
-	APT_RUNWAY_END_FENCE_NE_NW = 96,
-	APT_RUNWAY_END_FENCE_NE_SE = 97,
-	APT_HELIPAD_2_FENCE_NE_SE  = 98,
-	APT_APRON_FENCE_SE_SW      = 99,
-	APT_LOW_BUILDING_FENCE_N   = 100,
-	APT_ROT_RUNWAY_FENCE_NE    = 101, // unused
-	APT_ROT_RUNWAY_END_FENCE_NE= 102, // unused
-	APT_ROT_RUNWAY_FENCE_SW    = 103, // unused
-	APT_ROT_RUNWAY_END_FENCE_SW= 104, // unused
-	APT_DEPOT_SW               = 105, // unused
-	APT_DEPOT_NW               = 106, // unused
-	APT_DEPOT_NE               = 107, // unused
-	APT_HELIPAD_2_FENCE_SE_SW  = 108, // unused
-	APT_HELIPAD_2_FENCE_SE     = 109, // unused
-	APT_LOW_BUILDING_FENCE_NW  = 110,
-	APT_LOW_BUILDING_FENCE_NE  = 111, // unused
-	APT_LOW_BUILDING_FENCE_SW  = 112, // unused
-	APT_LOW_BUILDING_FENCE_SE  = 113, // unused
-	APT_STAND_FENCE_NE         = 114, // unused
-	APT_STAND_FENCE_SE         = 115, // unused
-	APT_STAND_FENCE_SW         = 116, // unused
-	APT_APRON_FENCE_NE_2       = 117, // unused (copy of APT_APRON_FENCE_NE)
-	APT_APRON_FENCE_SE         = 118,
-	APT_HELIPAD_2_FENCE_NW_SW  = 119, // unused
-	APT_HELIPAD_2_FENCE_SW     = 120, // unused
-	APT_RADAR_FENCE_SE         = 121, // unused
-	/* 122-132 used for radar rotation */
-	APT_HELIPAD_3_FENCE_SE_SW  = 133,
-	APT_HELIPAD_3_FENCE_NW_SW  = 134,
-	APT_HELIPAD_3_FENCE_NW     = 135,
-	APT_LOW_BUILDING           = 136,
-	APT_APRON_FENCE_NE_SE      = 137,
-	APT_APRON_HALF_EAST        = 138,
-	APT_APRON_HALF_WEST        = 139,
-	APT_GRASS_FENCE_NE_FLAG_2  = 140,
-	/* 141-143 used for flag animation */
-};
+/**
+ * Retrieve airport spec for the given airport
+ * @param type index of airport
+ * @return A pointer to the corresponding AirportSpec
+ */
+/* static */ const AirportSpec *AirportSpec::Get(byte type)
+{
+	if (type == AT_OILRIG) return &oilrig;
+	assert(type < NUM_AIRPORTS);
+	extern const AirportSpec _origin_airport_specs[];
+	return &_origin_airport_specs[type];
+}
 
-/** Tiles for Country Airfield (small) */
-static const byte _airport_sections_country[] = {
-	APT_SMALL_BUILDING_1,     APT_SMALL_BUILDING_2,    APT_SMALL_BUILDING_3,    APT_SMALL_DEPOT_SE,
-	APT_GRASS_FENCE_NE_FLAG,  APT_GRASS_1,             APT_GRASS_2,             APT_GRASS_FENCE_SW,
-	APT_RUNWAY_SMALL_FAR_END, APT_RUNWAY_SMALL_MIDDLE, APT_RUNWAY_SMALL_MIDDLE, APT_RUNWAY_SMALL_NEAR_END
-};
-
-/** Tiles for City Airport (large) */
-static const byte _airport_sections_town[] = {
-	APT_BUILDING_1,           APT_APRON_FENCE_NW, APT_STAND_1,              APT_APRON_FENCE_NW,       APT_APRON_FENCE_NW, APT_DEPOT_SE,
-	APT_BUILDING_2,           APT_PIER,           APT_ROUND_TERMINAL,       APT_STAND_PIER_NE,        APT_APRON,          APT_APRON_FENCE_SW,
-	APT_BUILDING_3,           APT_STAND,          APT_PIER_NW_NE,           APT_APRON_S,              APT_APRON_HOR,      APT_APRON_N_FENCE_SW,
-	APT_RADIO_TOWER_FENCE_NE, APT_APRON_W,        APT_APRON_VER_CROSSING_S, APT_APRON_HOR_CROSSING_E, APT_ARPON_N,        APT_TOWER_FENCE_SW,
-	APT_EMPTY_FENCE_NE,       APT_APRON_S,        APT_APRON_HOR_CROSSING_W, APT_APRON_VER_CROSSING_N, APT_APRON_E,        APT_RADAR_GRASS_FENCE_SW,
-	APT_RUNWAY_END_FENCE_SE,  APT_RUNWAY_1,       APT_RUNWAY_2,             APT_RUNWAY_3,             APT_RUNWAY_4,       APT_RUNWAY_END_FENCE_SE
-};
-
-/** Tiles for Metropolitain Airport (large) - 2 runways */
-static const byte _airport_sections_metropolitan[] = {
-	APT_BUILDING_1,           APT_APRON_FENCE_NW, APT_STAND_1,        APT_APRON_FENCE_NW, APT_APRON_FENCE_NW, APT_DEPOT_SE,
-	APT_BUILDING_2,           APT_PIER,           APT_ROUND_TERMINAL, APT_STAND_PIER_NE,  APT_APRON,          APT_APRON_FENCE_SW,
-	APT_BUILDING_3,           APT_STAND,          APT_PIER_NW_NE,     APT_APRON_S,        APT_APRON_HOR,      APT_APRON_N_FENCE_SW,
-	APT_RADAR_FENCE_NE,       APT_APRON,          APT_APRON,          APT_APRON,          APT_APRON,          APT_TOWER_FENCE_SW,
-	APT_RUNWAY_END,           APT_RUNWAY_5,       APT_RUNWAY_5,       APT_RUNWAY_5,       APT_RUNWAY_5,       APT_RUNWAY_END,
-	APT_RUNWAY_END_FENCE_SE,  APT_RUNWAY_2,       APT_RUNWAY_2,       APT_RUNWAY_2,       APT_RUNWAY_2,       APT_RUNWAY_END_FENCE_SE
-};
-
-/** Tiles for International Airport (large) - 2 runways */
-static const byte _airport_sections_international[] = {
-	APT_RUNWAY_END_FENCE_NW,  APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_END_FENCE_NW,
-	APT_RADIO_TOWER_FENCE_NE, APT_APRON,           APT_APRON,           APT_APRON,           APT_APRON,           APT_APRON,           APT_DEPOT_SE,
-	APT_BUILDING_3,           APT_APRON,           APT_STAND,           APT_BUILDING_2,      APT_STAND,           APT_APRON,           APT_APRON_FENCE_SW,
-	APT_DEPOT_SE,             APT_APRON,           APT_STAND,           APT_BUILDING_2,      APT_STAND,           APT_APRON,           APT_HELIPAD_1,
-	APT_APRON_FENCE_NE,       APT_APRON,           APT_STAND,           APT_TOWER,           APT_STAND,           APT_APRON,           APT_HELIPAD_1,
-	APT_APRON_FENCE_NE,       APT_APRON,           APT_APRON,           APT_APRON,           APT_APRON,           APT_APRON,           APT_RADAR_FENCE_SW,
-	APT_RUNWAY_END_FENCE_SE,  APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_END_FENCE_SE
-};
-
-/** Tiles for Intercontinental Airport (vlarge) - 4 runways */
-static const byte _airport_sections_intercontinental[] = {
-	APT_RADAR_FENCE_NE,         APT_RUNWAY_END_FENCE_NE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW,        APT_RUNWAY_END_FENCE_NW_SW,
-	APT_RUNWAY_END_FENCE_NE_NW, APT_RUNWAY_2,               APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_END_FENCE_SE_SW, APT_APRON_FENCE_NE_SW,
-	APT_APRON_FENCE_NE,         APT_SMALL_BUILDING_1,       APT_APRON_FENCE_NE,  APT_APRON,           APT_APRON,           APT_APRON,           APT_APRON,           APT_RADIO_TOWER_FENCE_NE,   APT_APRON_FENCE_NE_SW,
-	APT_APRON_FENCE_NE,         APT_APRON_HALF_EAST,        APT_APRON_FENCE_NE,  APT_TOWER,           APT_HELIPAD_2,       APT_HELIPAD_2,       APT_APRON,           APT_APRON_FENCE_NW,         APT_APRON_FENCE_SW,
-	APT_APRON_FENCE_NE,         APT_APRON,                  APT_APRON,           APT_STAND,           APT_BUILDING_1,      APT_STAND,           APT_APRON,           APT_LOW_BUILDING,           APT_DEPOT_SE,
-	APT_DEPOT_SE,               APT_LOW_BUILDING,           APT_APRON,           APT_STAND,           APT_BUILDING_2,      APT_STAND,           APT_APRON,           APT_APRON,                  APT_APRON_FENCE_SW,
-	APT_APRON_FENCE_NE,         APT_APRON,                  APT_APRON,           APT_STAND,           APT_BUILDING_3,      APT_STAND,           APT_APRON,           APT_APRON,                  APT_APRON_FENCE_SW,
-	APT_APRON_FENCE_NE,         APT_APRON_FENCE_SE,         APT_APRON,           APT_STAND,           APT_ROUND_TERMINAL,  APT_STAND,           APT_APRON_FENCE_SW,  APT_APRON_HALF_WEST,        APT_APRON_FENCE_SW,
-	APT_APRON_FENCE_NE,         APT_GRASS_FENCE_NE_FLAG_2,  APT_APRON_FENCE_NE,  APT_APRON,           APT_APRON,           APT_APRON,           APT_APRON_FENCE_SW,  APT_EMPTY,                  APT_APRON_FENCE_NE_SW,
-	APT_APRON_FENCE_NE,         APT_RUNWAY_END_FENCE_NE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW, APT_RUNWAY_FENCE_NW,        APT_RUNWAY_END_FENCE_SE_SW,
-	APT_RUNWAY_END_FENCE_NE_SE, APT_RUNWAY_2,               APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_2,        APT_RUNWAY_END_FENCE_SE_SW, APT_EMPTY
-};
-
-
-/** Tiles for Commuter Airfield (small) */
-static const byte _airport_sections_commuter[] = {
-	APT_TOWER,               APT_BUILDING_3, APT_HELIPAD_2_FENCE_NW, APT_HELIPAD_2_FENCE_NW, APT_DEPOT_SE,
-	APT_APRON_FENCE_NE,      APT_APRON,      APT_APRON,              APT_APRON,              APT_APRON_FENCE_SW,
-	APT_APRON_FENCE_NE,      APT_STAND,      APT_STAND,              APT_STAND,              APT_APRON_FENCE_SW,
-	APT_RUNWAY_END_FENCE_SE, APT_RUNWAY_2,   APT_RUNWAY_2,           APT_RUNWAY_2,           APT_RUNWAY_END_FENCE_SE
-};
-
-/** Tiles for Heliport */
-static const byte _airport_sections_heliport[] = {
-	APT_HELIPORT,
-};
-
-/** Tiles for Helidepot */
-static const byte _airport_sections_helidepot[] = {
-	APT_LOW_BUILDING_FENCE_N,  APT_DEPOT_SE,
-	APT_HELIPAD_2_FENCE_NE_SE, APT_APRON_FENCE_SE_SW
-};
-
-/** Tiles for Helistation */
-static const byte _airport_sections_helistation[] = {
-	APT_DEPOT_SE,          APT_LOW_BUILDING_FENCE_NW, APT_HELIPAD_3_FENCE_NW, APT_HELIPAD_3_FENCE_NW_SW,
-	APT_APRON_FENCE_NE_SE, APT_APRON_FENCE_SE,        APT_APRON_FENCE_SE,     APT_HELIPAD_3_FENCE_SE_SW
-};
-
-const byte * const _airport_sections[] = {
-	_airport_sections_country,           // Country Airfield (small)
-	_airport_sections_town,              // City Airport (large)
-	_airport_sections_heliport,          // Heliport
-	_airport_sections_metropolitan,      // Metropolitain Airport (large)
-	_airport_sections_international,     // International Airport (xlarge)
-	_airport_sections_commuter,          // Commuter Airport (small)
-	_airport_sections_helidepot,         // Helidepot
-	_airport_sections_intercontinental,  // Intercontinental Airport (xxlarge)
-	_airport_sections_helistation,       // Helistation
-};
-
-assert_compile(NUM_AIRPORTS == lengthof(_airport_sections));
+/**
+ * Retrieve airport tile spec for the given airport tile
+ * @param gfx index of airport tile
+ * @return A pointer to the corresponding AirportTileSpec
+ */
+/* static */ const AirportTileSpec *AirportTileSpec::Get(StationGfx gfx)
+{
+	assert(gfx < NUM_AIRPORTTILES);
+	extern const AirportTileSpec _origin_airporttile_specs[];
+	return &_origin_airporttile_specs[gfx];
+}
 
 /* Uncomment this to print out a full report of the airport-structure
  * You should either use
@@ -244,12 +78,7 @@ void InitializeAirports()
 		_airport_entries_dummy,
 		AirportFTAClass::ALL,
 		_airport_fta_dummy,
-		NULL,
-		0,
-		0, 0, 0,
-		0,
-		0,
-		MAX_YEAR + 1, MAX_YEAR + 1
+		0
 	);
 
 	_country_airport = new AirportFTAClass(
@@ -259,12 +88,7 @@ void InitializeAirports()
 		_airport_entries_country,
 		AirportFTAClass::ALL | AirportFTAClass::SHORT_STRIP,
 		_airport_fta_country,
-		_airport_depots_country,
-		lengthof(_airport_depots_country),
-		4, 3, 3,
-		0,
-		4,
-		0, 1959
+		0
 	);
 
 	_city_airport = new AirportFTAClass(
@@ -274,12 +98,7 @@ void InitializeAirports()
 		_airport_entries_city,
 		AirportFTAClass::ALL,
 		_airport_fta_city,
-		_airport_depots_city,
-		lengthof(_airport_depots_city),
-		6, 6, 5,
-		0,
-		5,
-		1955, MAX_YEAR
+		0
 	);
 
 	_metropolitan_airport = new AirportFTAClass(
@@ -289,12 +108,7 @@ void InitializeAirports()
 		_airport_entries_metropolitan,
 		AirportFTAClass::ALL,
 		_airport_fta_metropolitan,
-		_airport_depots_metropolitan,
-		lengthof(_airport_depots_metropolitan),
-		6, 6, 8,
-		0,
-		6,
-		1980, MAX_YEAR
+		0
 	);
 
 	_international_airport = new AirportFTAClass(
@@ -304,12 +118,7 @@ void InitializeAirports()
 		_airport_entries_international,
 		AirportFTAClass::ALL,
 		_airport_fta_international,
-		_airport_depots_international,
-		lengthof(_airport_depots_international),
-		7, 7, 17,
-		0,
-		8,
-		1990, MAX_YEAR
+		0
 	);
 
 	_intercontinental_airport = new AirportFTAClass(
@@ -319,12 +128,7 @@ void InitializeAirports()
 		_airport_entries_intercontinental,
 		AirportFTAClass::ALL,
 		_airport_fta_intercontinental,
-		_airport_depots_intercontinental,
-		lengthof(_airport_depots_intercontinental),
-		9, 11, 25,
-		0,
-		10,
-		2002, MAX_YEAR
+		0
 	);
 
 	_heliport = new AirportFTAClass(
@@ -334,12 +138,7 @@ void InitializeAirports()
 		_airport_entries_heliport_oilrig,
 		AirportFTAClass::HELICOPTERS,
 		_airport_fta_heliport_oilrig,
-		NULL,
-		0,
-		1, 1, 1,
-		60,
-		4,
-		1963, MAX_YEAR
+		60
 	);
 
 	_oilrig = new AirportFTAClass(
@@ -349,12 +148,7 @@ void InitializeAirports()
 		_airport_entries_heliport_oilrig,
 		AirportFTAClass::HELICOPTERS,
 		_airport_fta_heliport_oilrig,
-		NULL,
-		0,
-		1, 1, 0,
-		54,
-		3,
-		MAX_YEAR + 1, MAX_YEAR + 1
+		54
 	);
 
 	_commuter_airport = new AirportFTAClass(
@@ -364,12 +158,7 @@ void InitializeAirports()
 		_airport_entries_commuter,
 		AirportFTAClass::ALL | AirportFTAClass::SHORT_STRIP,
 		_airport_fta_commuter,
-		_airport_depots_commuter,
-		lengthof(_airport_depots_commuter),
-		5, 4, 4,
-		0,
-		4,
-		1983, MAX_YEAR
+		0
 	);
 
 	_heli_depot = new AirportFTAClass(
@@ -379,12 +168,7 @@ void InitializeAirports()
 		_airport_entries_helidepot,
 		AirportFTAClass::HELICOPTERS,
 		_airport_fta_helidepot,
-		_airport_depots_helidepot,
-		lengthof(_airport_depots_helidepot),
-		2, 2, 2,
-		0,
-		4,
-		1976, MAX_YEAR
+		0
 	);
 
 	_heli_station = new AirportFTAClass(
@@ -394,12 +178,7 @@ void InitializeAirports()
 		_airport_entries_helistation,
 		AirportFTAClass::HELICOPTERS,
 		_airport_fta_helistation,
-		_airport_depots_helistation,
-		lengthof(_airport_depots_helistation),
-		4, 2, 3,
-		0,
-		4,
-		1980, MAX_YEAR
+		0
 	);
 }
 
@@ -435,31 +214,15 @@ AirportFTAClass::AirportFTAClass(
 	const byte *entry_points_,
 	Flags flags_,
 	const AirportFTAbuildup *apFA,
-	const TileIndexDiffC *depots_,
-	const byte nof_depots_,
-	uint size_x_,
-	uint size_y_,
-	byte noise_level_,
-	byte delta_z_,
-	byte catchment_,
-	Year first_available_,
-	Year last_available_
+	byte delta_z_
 ) :
 	moving_data(moving_data_),
 	terminals(terminals_),
 	helipads(helipads_),
-	airport_depots(depots_),
 	flags(flags_),
-	nof_depots(nof_depots_),
 	nofelements(AirportGetNofElements(apFA)),
 	entry_points(entry_points_),
-	size_x(size_x_),
-	size_y(size_y_),
-	noise_level(noise_level_),
-	delta_z(delta_z_),
-	catchment(catchment_),
-	first_available(first_available_),
-	last_available(last_available_)
+	delta_z(delta_z_)
 {
 	byte nofterminalgroups, nofhelipadgroups;
 
@@ -519,11 +282,11 @@ AirportFTAClass::~AirportFTAClass()
 	free(layout);
 }
 
-bool AirportFTAClass::IsAvailable() const
+bool AirportSpec::IsAvailable() const
 {
-	if (_cur_year < this->first_available) return false;
+	if (_cur_year < this->min_year) return false;
 	if (_settings_game.station.never_expire_airports) return true;
-	return _cur_year <= this->last_available;
+	return _cur_year <= this->max_year;
 }
 
 /** Get the number of elements of a source Airport state automata

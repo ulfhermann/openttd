@@ -57,10 +57,12 @@
 #include "gamelog.h"
 #include "settings_func.h"
 #include "ini_type.h"
-#include "ai/ai.hpp"
 #include "ai/ai_config.hpp"
+#include "ai/ai.hpp"
 #include "newgrf.h"
 #include "ship.h"
+#include "company_base.h"
+#include "engine_base.h"
 
 #include "void_map.h"
 #include "station_base.h"
@@ -699,7 +701,7 @@ static bool UpdateConsists(int32 p1)
 	Train *t;
 	FOR_ALL_TRAINS(t) {
 		/* Update the consist of all trains so the maximum speed is set correctly. */
-		if (t->IsFrontEngine() || t->IsFreeWagon()) TrainConsistChanged(t, true);
+		if (t->IsFrontEngine() || t->IsFreeWagon()) t->ConsistChanged(true);
 	}
 	return true;
 }
@@ -736,9 +738,24 @@ static bool TrainAccelerationModelChanged(int32 p1)
 	Train *t;
 	FOR_ALL_TRAINS(t) {
 		if (t->IsFrontEngine()) {
-			t->tcache.cached_max_curve_speed = GetTrainCurveSpeedLimit(t);
-			UpdateTrainAcceleration(t);
+			t->tcache.cached_max_curve_speed = t->GetCurveSpeedLimit();
+			t->UpdateAcceleration();
 		}
+	}
+
+	return true;
+}
+
+/**
+ * This function updates the train acceleration cache after a steepness change.
+ * @param p1 Callback parameter.
+ * @return Always true.
+ */
+static bool TrainSlopeSteepnessChanged(int32 p1)
+{
+	Train *t;
+	FOR_ALL_TRAINS(t) {
+		if (t->IsFrontEngine()) t->CargoChanged();
 	}
 
 	return true;
@@ -835,6 +852,11 @@ static bool DifficultyChange(int32)
 		_settings_game.difficulty.diff_level = 3;
 	}
 
+	if (((_game_mode == GM_MENU) ? _settings_newgame.difficulty : _settings_game.difficulty).max_no_competitors != 0 &&
+			AI::GetInfoList()->size() == 0 && (!_networking || _network_server)) {
+		ShowErrorMessage(STR_WARNING_NO_SUITABLE_AI, INVALID_STRING_ID, 0, 0, true);
+	}
+
 	/* If we are a network-client, update the difficult setting (if it is open).
 	 * Use this instead of just dirtying the window because we need to load in
 	 * the new difficulty settings */
@@ -878,21 +900,6 @@ static int32 ConvertLandscape(const char *value)
 {
 	/* try with the old values */
 	return lookup_oneofmany("normal|hilly|desert|candy", value);
-}
-
-/**
- * Check for decent values been supplied by the user for the noise tolerance setting.
- * The primary idea is to avoid division by zero in game mode.
- * The secondary idea is to make it so the values will be somewhat sane and that towns will
- * not be overcrowed with airports.  It would be easy to abuse such a feature
- * So basically, 200, 400, 800 are the lowest allowed values */
-static int32 CheckNoiseToleranceLevel(const char *value)
-{
-	GameSettings *s = (_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game;
-	for (uint16 i = 0; i < lengthof(s->economy.town_noise_population); i++) {
-		s->economy.town_noise_population[i] = max(uint16(200 * (i + 1)), s->economy.town_noise_population[i]);
-	}
-	return 0;
 }
 
 static bool CheckFreeformEdges(int32 p1)
@@ -1508,8 +1515,9 @@ CommandCost CmdChangeCompanySetting(TileIndex tile, DoCommandFlag flags, uint32 
  * @param index offset in the SettingDesc array of the Settings struct which
  * identifies the setting member we want to change
  * @param value new value of the setting
+ * @param force_newgame force the newgame settings
  */
-bool SetSettingValue(uint index, int32 value)
+bool SetSettingValue(uint index, int32 value, bool force_newgame)
 {
 	const SettingDesc *sd = &_settings[index];
 	/* If an item is company-based, we do not send it over the network
@@ -1526,6 +1534,12 @@ bool SetSettingValue(uint index, int32 value)
 		}
 		if (sd->desc.proc != NULL) sd->desc.proc((int32)ReadValue(var, sd->save.conv));
 		SetWindowDirty(WC_GAME_OPTIONS, 0);
+		return true;
+	}
+
+	if (force_newgame) {
+		void *var2 = GetVariableAddress(&_settings_newgame, &sd->save);
+		Write_ValidateSetting(var2, sd, value);
 		return true;
 	}
 
@@ -1654,7 +1668,7 @@ const SettingDesc *GetSettingFromName(const char *name, uint *i)
 
 /* Those 2 functions need to be here, else we have to make some stuff non-static
  * and besides, it is also better to keep stuff like this at the same place */
-void IConsoleSetSetting(const char *name, const char *value)
+void IConsoleSetSetting(const char *name, const char *value, bool force_newgame)
 {
 	uint index;
 	const SettingDesc *sd = GetSettingFromName(name, &index);
@@ -1676,7 +1690,7 @@ void IConsoleSetSetting(const char *name, const char *value)
 			return;
 		}
 
-		success = SetSettingValue(index, val);
+		success = SetSettingValue(index, val, force_newgame);
 	}
 
 	if (!success) {
@@ -1699,8 +1713,9 @@ void IConsoleSetSetting(const char *name, int value)
 /**
  * Output value of a specific setting to the console
  * @param name  Name of the setting to output its value
+ * @param force_newgame force the newgame settings
  */
-void IConsoleGetSetting(const char *name)
+void IConsoleGetSetting(const char *name, bool force_newgame)
 {
 	char value[20];
 	uint index;
@@ -1712,7 +1727,7 @@ void IConsoleGetSetting(const char *name)
 		return;
 	}
 
-	ptr = GetVariableAddress((_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game, &sd->save);
+	ptr = GetVariableAddress((_game_mode == GM_MENU || force_newgame) ? &_settings_newgame : &_settings_game, &sd->save);
 
 	if (sd->desc.cmd == SDT_STRING) {
 		IConsolePrintF(CC_WARNING, "Current value for '%s' is: '%s'", name, (const char *)ptr);
@@ -1769,6 +1784,7 @@ static void LoadSettings(const SettingDesc *osd, void *object)
 		void *ptr = GetVariableAddress(object, sld);
 
 		if (!SlObjectMember(ptr, sld)) continue;
+		if (IsNumericType(sld->conv)) Write_ValidateSetting(ptr, osd, ReadValue(ptr, sld->conv));
 	}
 }
 

@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "gui.h"
-#include "openttd.h"
 #include "debug.h"
 #include "roadveh.h"
 #include "ship.h"
@@ -47,6 +46,9 @@
 #include "economy_base.h"
 #include "articulated_vehicles.h"
 #include "roadstop_base.h"
+#include "core/random_func.hpp"
+#include "engine_base.h"
+#include "newgrf.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -764,7 +766,7 @@ void CallVehicleTicks()
 static void DoDrawVehicle(const Vehicle *v)
 {
 	SpriteID image = v->cur_image;
-	SpriteID pal = PAL_NONE;
+	PaletteID pal = PAL_NONE;
 
 	if (v->vehstatus & VS_DEFPAL) pal = (v->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(v);
 
@@ -1000,7 +1002,7 @@ void VehicleEnterDepot(Vehicle *v)
 			UpdateSignalsOnSegment(t->tile, INVALID_DIAGDIR, t->owner);
 			t->wait_counter = 0;
 			ClrBit(t->flags, VRF_TOGGLE_REVERSE);
-			TrainConsistChanged(t, true);
+			t->ConsistChanged(true);
 			break;
 		}
 
@@ -1055,7 +1057,7 @@ void VehicleEnterDepot(Vehicle *v)
 			_current_company = v->owner;
 			CommandCost cost = DoCommand(v->tile, v->index, t.GetRefitCargo() | t.GetRefitSubtype() << 8, DC_EXEC, GetCmdRefitVeh(v));
 
-			if (CmdFailed(cost)) {
+			if (cost.Failed()) {
 				_vehicles_to_autoreplace[v] = false;
 				if (v->owner == _local_company) {
 					/* Notify the user that we stopped the vehicle */
@@ -1207,10 +1209,10 @@ FreeUnitIDGenerator::FreeUnitIDGenerator(VehicleType type, CompanyID owner) : ca
 
 	if (this->maxid == 0) return;
 
-	this->maxid++; // so there is space for last item (with v->unitnumber == maxid)
-	this->maxid++; // this one will always be free (well, it will fail when there are 65535 units, so this overflows)
-
-	this->cache = CallocT<bool>(this->maxid);
+	/* Reserving 'maxid + 2' because we need:
+	 * - space for the last item (with v->unitnumber == maxid)
+	 * - one free slot working as loop terminator in FreeUnitIDGenerator::NextID() */
+	this->cache = CallocT<bool>(this->maxid + 2);
 
 	/* Fill the cache */
 	FOR_ALL_VEHICLES(v) {
@@ -1391,9 +1393,9 @@ const Livery *GetEngineLivery(EngineID engine_type, CompanyID company, EngineID 
 }
 
 
-static SpriteID GetEngineColourMap(EngineID engine_type, CompanyID company, EngineID parent_engine_type, const Vehicle *v)
+static PaletteID GetEngineColourMap(EngineID engine_type, CompanyID company, EngineID parent_engine_type, const Vehicle *v)
 {
-	SpriteID map = (v != NULL) ? v->colourmap : PAL_NONE;
+	PaletteID map = (v != NULL) ? v->colourmap : PAL_NONE;
 
 	/* Return cached value if any */
 	if (map != PAL_NONE) return map;
@@ -1419,7 +1421,7 @@ static SpriteID GetEngineColourMap(EngineID engine_type, CompanyID company, Engi
 
 	bool twocc = HasBit(e->info.misc_flags, EF_USES_2CC);
 
-	if (map == PAL_NONE) map = twocc ? (SpriteID)SPR_2CCMAP_BASE : (SpriteID)PALETTE_RECOLOUR_START;
+	if (map == PAL_NONE) map = twocc ? (PaletteID)SPR_2CCMAP_BASE : (PaletteID)PALETTE_RECOLOUR_START;
 
 	/* Spectator has news shown too, but has invalid company ID - as well as dedicated server */
 	if (!Company::IsValidID(company)) return map;
@@ -1434,12 +1436,12 @@ static SpriteID GetEngineColourMap(EngineID engine_type, CompanyID company, Engi
 	return map;
 }
 
-SpriteID GetEnginePalette(EngineID engine_type, CompanyID company)
+PaletteID GetEnginePalette(EngineID engine_type, CompanyID company)
 {
 	return GetEngineColourMap(engine_type, company, INVALID_ENGINE, NULL);
 }
 
-SpriteID GetVehiclePalette(const Vehicle *v)
+PaletteID GetVehiclePalette(const Vehicle *v)
 {
 	if (v->type == VEH_TRAIN) {
 		return GetEngineColourMap(v->engine_type, v->owner, Train::From(v)->tcache.first_engine, v);

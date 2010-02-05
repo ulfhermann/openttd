@@ -14,7 +14,6 @@
 
 #include "rail_type.h"
 #include "track_type.h"
-#include "vehicle_type.h"
 #include "gfx_type.h"
 #include "core/bitmath_func.hpp"
 #include "economy_func.h"
@@ -145,6 +144,11 @@ struct RailtypeInfo {
 	 * Acceleration type of this rail type
 	 */
 	uint8 acceleration_type;
+
+	/**
+	 * Maximum speed for vehicles travelling on this rail type
+	 */
+	uint16 max_speed;
 
 	/**
 	 * Unique 32 bit rail type identifier
@@ -281,5 +285,10 @@ RailType GetRailTypeByLabel(RailTypeLabel label);
  * Reset all rail type information to its default values.
  */
 void ResetRailTypes();
+
+/**
+ * Allocate a new rail type label
+ */
+RailType AllocateRailType(RailTypeLabel label);
 
 #endif /* RAIL_H */

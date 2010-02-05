@@ -26,7 +26,6 @@
  */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "landscape.h"
 #include "viewport_func.h"
 #include "station_base.h"
@@ -38,7 +37,6 @@
 #include "vehicle_base.h"
 #include "vehicle_gui.h"
 #include "blitter/factory.hpp"
-#include "transparency.h"
 #include "strings_func.h"
 #include "zoom_func.h"
 #include "vehicle_func.h"
@@ -65,7 +63,7 @@ struct StringSpriteToDraw {
 
 struct TileSpriteToDraw {
 	SpriteID image;
-	SpriteID pal;
+	PaletteID pal;
 	const SubSprite *sub;           ///< only draw a rectangular part of the sprite
 	int32 x;                        ///< screen X coordinate of sprite
 	int32 y;                        ///< screen Y coordinate of sprite
@@ -73,7 +71,7 @@ struct TileSpriteToDraw {
 
 struct ChildScreenSpriteToDraw {
 	SpriteID image;
-	SpriteID pal;
+	PaletteID pal;
 	const SubSprite *sub;           ///< only draw a rectangular part of the sprite
 	int32 x;
 	int32 y;
@@ -83,7 +81,7 @@ struct ChildScreenSpriteToDraw {
 /** Parent sprite that should be drawn */
 struct ParentSpriteToDraw {
 	SpriteID image;                 ///< sprite to draw
-	SpriteID pal;                   ///< palette to use
+	PaletteID pal;                  ///< palette to use
 	const SubSprite *sub;           ///< only draw a rectangular part of the sprite
 
 	int32 x;                        ///< screen X coordinate of sprite
@@ -478,7 +476,7 @@ void HandleZoomMessage(Window *w, const ViewPort *vp, byte widget_zoom_in, byte 
  * @param extra_offs_x Pixel X offset for the sprite position.
  * @param extra_offs_y Pixel Y offset for the sprite position.
  */
-static void AddTileSpriteToDraw(SpriteID image, SpriteID pal, int32 x, int32 y, int z, const SubSprite *sub = NULL, int extra_offs_x = 0, int extra_offs_y = 0)
+static void AddTileSpriteToDraw(SpriteID image, PaletteID pal, int32 x, int32 y, int z, const SubSprite *sub = NULL, int extra_offs_x = 0, int extra_offs_y = 0)
 {
 	assert((image & SPRITE_MASK) < MAX_SPRITES);
 
@@ -503,7 +501,7 @@ static void AddTileSpriteToDraw(SpriteID image, SpriteID pal, int32 x, int32 y, 
  * @param extra_offs_x Pixel X offset for the sprite position.
  * @param extra_offs_y Pixel Y offset for the sprite position.
  */
-static void AddChildSpriteToFoundation(SpriteID image, SpriteID pal, const SubSprite *sub, FoundationPart foundation_part, int extra_offs_x, int extra_offs_y)
+static void AddChildSpriteToFoundation(SpriteID image, PaletteID pal, const SubSprite *sub, FoundationPart foundation_part, int extra_offs_x, int extra_offs_y)
 {
 	assert(IsInsideMM(foundation_part, 0, FOUNDATION_PART_END));
 	assert(_vd.foundation[foundation_part] != -1);
@@ -532,7 +530,7 @@ static void AddChildSpriteToFoundation(SpriteID image, SpriteID pal, const SubSp
  * @param extra_offs_x Pixel X offset for the sprite position.
  * @param extra_offs_y Pixel Y offset for the sprite position.
  */
-void DrawGroundSpriteAt(SpriteID image, SpriteID pal, int32 x, int32 y, int z, const SubSprite *sub, int extra_offs_x, int extra_offs_y)
+void DrawGroundSpriteAt(SpriteID image, PaletteID pal, int32 x, int32 y, int z, const SubSprite *sub, int extra_offs_x, int extra_offs_y)
 {
 	/* Switch to first foundation part, if no foundation was drawn */
 	if (_vd.foundation_part == FOUNDATION_PART_NONE) _vd.foundation_part = FOUNDATION_PART_NORMAL;
@@ -555,7 +553,7 @@ void DrawGroundSpriteAt(SpriteID image, SpriteID pal, int32 x, int32 y, int z, c
  * @param extra_offs_x Pixel X offset for the sprite position.
  * @param extra_offs_y Pixel Y offset for the sprite position.
  */
-void DrawGroundSprite(SpriteID image, SpriteID pal, const SubSprite *sub, int extra_offs_x, int extra_offs_y)
+void DrawGroundSprite(SpriteID image, PaletteID pal, const SubSprite *sub, int extra_offs_x, int extra_offs_y)
 {
 	DrawGroundSpriteAt(image, pal, 0, 0, 0, sub, extra_offs_x, extra_offs_y);
 }
@@ -599,7 +597,7 @@ void OffsetGroundSprite(int x, int y)
  * @param z position z of the sprite.
  * @param sub Only draw a part of the sprite.
  */
-static void AddCombinedSprite(SpriteID image, SpriteID pal, int x, int y, byte z, const SubSprite *sub)
+static void AddCombinedSprite(SpriteID image, PaletteID pal, int x, int y, byte z, const SubSprite *sub)
 {
 	Point pt = RemapCoords(x, y, z);
 	const Sprite *spr = GetSprite(image & SPRITE_MASK, ST_NORMAL);
@@ -638,7 +636,7 @@ static void AddCombinedSprite(SpriteID image, SpriteID pal, int x, int y, byte z
  * @param bb_offset_z bounding box extent towards negative Z (world)
  * @param sub Only draw a part of the sprite.
  */
-void AddSortableSpriteToDraw(SpriteID image, SpriteID pal, int x, int y, int w, int h, int dz, int z, bool transparent, int bb_offset_x, int bb_offset_y, int bb_offset_z, const SubSprite *sub)
+void AddSortableSpriteToDraw(SpriteID image, PaletteID pal, int x, int y, int w, int h, int dz, int z, bool transparent, int bb_offset_x, int bb_offset_y, int bb_offset_z, const SubSprite *sub)
 {
 	int32 left, right, top, bottom;
 
@@ -761,7 +759,7 @@ void EndSpriteCombine()
  * @param transparent if true, switch the palette between the provided palette and the transparent palette,
  * @param sub Only draw a part of the sprite.
  */
-void AddChildSpriteScreen(SpriteID image, SpriteID pal, int x, int y, bool transparent, const SubSprite *sub)
+void AddChildSpriteScreen(SpriteID image, PaletteID pal, int x, int y, bool transparent, const SubSprite *sub)
 {
 	assert((image & SPRITE_MASK) < MAX_SPRITES);
 
@@ -817,7 +815,7 @@ static void AddStringToDraw(int x, int y, StringID string, uint64 params_1, uint
  * @param z_offset Z offset relative to the groundsprite. Only used for the sprite position, not for sprite sorting.
  * @param foundation_part Foundation part the sprite belongs to.
  */
-static void DrawSelectionSprite(SpriteID image, SpriteID pal, const TileInfo *ti, int z_offset, FoundationPart foundation_part)
+static void DrawSelectionSprite(SpriteID image, PaletteID pal, const TileInfo *ti, int z_offset, FoundationPart foundation_part)
 {
 	/* FIXME: This is not totally valid for some autorail highlights, that extent over the edges of the tile. */
 	if (_vd.foundation[foundation_part] == -1) {
@@ -835,7 +833,7 @@ static void DrawSelectionSprite(SpriteID image, SpriteID pal, const TileInfo *ti
  * @param ti TileInfo Tile that is being drawn
  * @param pal Palette to apply.
  */
-static void DrawTileSelectionRect(const TileInfo *ti, SpriteID pal)
+static void DrawTileSelectionRect(const TileInfo *ti, PaletteID pal)
 {
 	if (!IsValidTile(ti->tile)) return;
 
@@ -898,7 +896,7 @@ static const HighLightStyle _autorail_type[6][2] = {
 static void DrawAutorailSelection(const TileInfo *ti, uint autorail_type)
 {
 	SpriteID image;
-	SpriteID pal;
+	PaletteID pal;
 	int offset;
 
 	FoundationPart foundation_part = FOUNDATION_PART_NORMAL;
@@ -2528,6 +2526,8 @@ void VpSelectTilesWithMethod(int x, int y, ViewportPlaceMethod method)
 	sx = _thd.selstart.x;
 	sy = _thd.selstart.y;
 
+	int limit = 0;
+
 	switch (method) {
 		case VPM_X_OR_Y: // drag in X or Y direction
 			if (abs(sy - y) < abs(sx - x)) {
@@ -2538,15 +2538,29 @@ void VpSelectTilesWithMethod(int x, int y, ViewportPlaceMethod method)
 				style = HT_DIR_Y;
 			}
 			goto calc_heightdiff_single_direction;
+
+		case VPM_X_LIMITED: // Drag in X direction (limited size).
+			limit = (_thd.sizelimit - 1) * TILE_SIZE;
+			/* Fallthrough. */
+
 		case VPM_FIX_X: // drag in Y direction
 			x = sx;
 			style = HT_DIR_Y;
 			goto calc_heightdiff_single_direction;
+
+		case VPM_Y_LIMITED: // Drag in Y direction (limited size).
+			limit = (_thd.sizelimit - 1) * TILE_SIZE;
+			/* Fallthrough. */
+
 		case VPM_FIX_Y: // drag in X direction
 			y = sy;
 			style = HT_DIR_X;
 
 calc_heightdiff_single_direction:;
+			if (limit > 0) {
+				x = sx + Clamp(x - sx, -limit, limit);
+				y = sy + Clamp(y - sy, -limit, limit);
+			}
 			if (_settings_client.gui.measure_tooltip) {
 				TileIndex t0 = TileVirtXY(sx, sy);
 				TileIndex t1 = TileVirtXY(x, y);
@@ -2569,11 +2583,12 @@ calc_heightdiff_single_direction:;
 				ShowMeasurementTooltips(measure_strings_length[index], index, params);
 			} break;
 
-		case VPM_X_AND_Y_LIMITED: { // drag an X by Y constrained rect area
-			int limit = (_thd.sizelimit - 1) * TILE_SIZE;
+		case VPM_X_AND_Y_LIMITED: // Drag an X by Y constrained rect area.
+			limit = (_thd.sizelimit - 1) * TILE_SIZE;
 			x = sx + Clamp(x - sx, -limit, limit);
 			y = sy + Clamp(y - sy, -limit, limit);
-			} // Fallthrough
+			/* Fallthrough. */
+
 		case VPM_X_AND_Y: { // drag an X by Y area
 			if (_settings_client.gui.measure_tooltip) {
 				static const StringID measure_strings_area[] = {
@@ -2658,14 +2673,14 @@ bool VpHandlePlaceSizingDrag()
 	return false;
 }
 
-void SetObjectToPlaceWnd(CursorID icon, SpriteID pal, HighLightStyle mode, Window *w)
+void SetObjectToPlaceWnd(CursorID icon, PaletteID pal, HighLightStyle mode, Window *w)
 {
 	SetObjectToPlace(icon, pal, mode, w->window_class, w->window_number);
 }
 
 #include "table/animcursors.h"
 
-void SetObjectToPlace(CursorID icon, SpriteID pal, HighLightStyle mode, WindowClass window_class, WindowNumber window_num)
+void SetObjectToPlace(CursorID icon, PaletteID pal, HighLightStyle mode, WindowClass window_class, WindowNumber window_num)
 {
 	/* undo clicking on button and drag & drop */
 	if (_thd.place_mode != HT_NONE || _special_mouse_mode == WSM_DRAGDROP) {
@@ -2699,8 +2714,8 @@ void SetObjectToPlace(CursorID icon, SpriteID pal, HighLightStyle mode, WindowCl
 	if (mode == HT_SPECIAL) // special tools, like tunnels or docks start with presizing mode
 		VpStartPreSizing();
 
-	if ((int)icon < 0) {
-		SetAnimatedMouseCursor(_animcursors[~icon]);
+	if ((icon & ANIMCURSOR_FLAG) != 0) {
+		SetAnimatedMouseCursor(_animcursors[icon & ~ANIMCURSOR_FLAG]);
 	} else {
 		SetMouseCursor(icon, pal);
 	}

@@ -25,6 +25,7 @@
 #include "variables.h"
 #include "window_func.h"
 #include "statusbar_gui.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -199,7 +200,7 @@ struct StatusBarWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SBW_MIDDLE: ShowLastNewsMessage(); break;
