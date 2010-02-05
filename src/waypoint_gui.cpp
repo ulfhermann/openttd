@@ -16,7 +16,6 @@
 #include "vehicle_gui.h"
 #include "viewport_func.h"
 #include "strings_func.h"
-#include "gfx_func.h"
 #include "command_func.h"
 #include "company_func.h"
 #include "window_func.h"
@@ -76,7 +75,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case WAYPVW_CENTERVIEW: // scroll to location

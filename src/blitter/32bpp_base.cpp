@@ -10,7 +10,6 @@
 /** @file 32bpp_base.cpp Implementation of base for 32 bpp blitters. */
 
 #include "../stdafx.h"
-#include "../gfx_func.h"
 #include "32bpp_base.hpp"
 
 void *Blitter_32bppBase::MoveTo(const void *video, int x, int y)
@@ -21,12 +20,6 @@ void *Blitter_32bppBase::MoveTo(const void *video, int x, int y)
 void Blitter_32bppBase::SetPixel(void *video, int x, int y, uint8 colour)
 {
 	*((uint32 *)video + x + y * _screen.pitch) = LookupColourInPalette(colour);
-}
-
-void Blitter_32bppBase::SetPixelIfEmpty(void *video, int x, int y, uint8 colour)
-{
-	uint32 *dst = (uint32 *)video + x + y * _screen.pitch;
-	if (*dst == 0) *dst = LookupColourInPalette(colour);
 }
 
 void Blitter_32bppBase::DrawRect(void *video, int width, int height, uint8 colour)

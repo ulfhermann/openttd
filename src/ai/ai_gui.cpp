@@ -10,6 +10,7 @@
 /** @file ai_gui.cpp Window for configuring the AIs */
 
 #include "../stdafx.h"
+#include "../openttd.h"
 #include "../gui.h"
 #include "../window_gui.h"
 #include "../company_func.h"
@@ -148,7 +149,7 @@ struct AIListWindow : public Window {
 		SetWindowDirty(WC_GAME_OPTIONS, 0);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case AIL_WIDGET_LIST: { // Select one of the AIs
@@ -156,6 +157,10 @@ struct AIListWindow : public Window {
 				if (sel < (int)this->ai_info_list->size()) {
 					this->selected = sel;
 					this->SetDirty();
+					if (click_count > 1) {
+						this->ChangeAI();
+						delete this;
+					}
 				}
 				break;
 			}
@@ -169,21 +174,6 @@ struct AIListWindow : public Window {
 			case AIL_WIDGET_CANCEL:
 				delete this;
 				break;
-		}
-	}
-
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		switch (widget) {
-			case AIL_WIDGET_LIST: {
-				int sel = (pt.y - this->GetWidget<NWidgetBase>(AIL_WIDGET_LIST)->pos_y) / this->line_height + this->vscroll.GetPosition() - 1;
-				if (sel < (int)this->ai_info_list->size()) {
-					this->selected = sel;
-					this->ChangeAI();
-					delete this;
-				}
-				break;
-			}
 		}
 	}
 
@@ -256,7 +246,9 @@ struct AISettingsWindow : public Window {
 	{
 		this->ai_config = AIConfig::GetConfig(slot);
 
-		this->InitNested(desc);  // Initializes 'this->line_height' as side effect.
+		this->InitNested(desc, slot);  // Initializes 'this->line_height' as side effect.
+
+		this->SetWidgetDisabledState(AIS_WIDGET_RESET, _game_mode != GM_MENU);
 
 		this->vscroll.SetCount((int)this->ai_config->GetConfigList()->size());
 	}
@@ -297,12 +289,13 @@ struct AISettingsWindow : public Window {
 		int y = r.top;
 		for (; this->vscroll.IsVisible(i) && it != config->GetConfigList()->end(); i++, it++) {
 			int current_value = config->GetSetting((*it).name);
+			bool editable = (_game_mode == GM_MENU) || ((it->flags & AICONFIG_INGAME) != 0);
 
 			uint x = rtl ? r.right : r.left;
 			if (((*it).flags & AICONFIG_BOOLEAN) != 0) {
 				DrawFrameRect(buttons_left, y  + 2, buttons_left + 19, y + 10, (current_value != 0) ? COLOUR_GREEN : COLOUR_RED, (current_value != 0) ? FR_LOWERED : FR_NONE);
 			} else {
-				DrawArrowButtons(buttons_left, y + 2, COLOUR_YELLOW, (this->clicked_button == i) ? 1 + (this->clicked_increase != rtl) : 0, current_value > (*it).min_value, current_value < (*it).max_value);
+				DrawArrowButtons(buttons_left, y + 2, COLOUR_YELLOW, (this->clicked_button == i) ? 1 + (this->clicked_increase != rtl) : 0, editable && current_value > (*it).min_value, editable && current_value < (*it).max_value);
 				if (it->labels != NULL && it->labels->Find(current_value) != it->labels->End()) {
 					x = DrawString(value_left, value_right, y + WD_MATRIX_TOP, it->labels->Find(current_value)->second, TC_ORANGE);
 				} else {
@@ -316,7 +309,19 @@ struct AISettingsWindow : public Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	void CheckDifficultyLevel()
+	{
+		if (_game_mode == GM_MENU) {
+			if (_settings_newgame.difficulty.diff_level != 3) {
+				_settings_newgame.difficulty.diff_level = 3;
+				ShowErrorMessage(STR_WARNING_DIFFICULTY_TO_CUSTOM, INVALID_STRING_ID, 0, 0);
+			}
+		} else if (_settings_game.difficulty.diff_level != 3) {
+			IConsoleSetSetting("difficulty.diff_level", 3);
+		}
+	}
+
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case AIS_WIDGET_BACKGROUND: {
@@ -327,6 +332,8 @@ struct AISettingsWindow : public Window {
 				AIConfigItemList::const_iterator it = this->ai_config->GetConfigList()->begin();
 				for (int i = 0; i < num; i++) it++;
 				AIConfigItem config_item = *it;
+				if (_game_mode != GM_MENU && (config_item.flags & AICONFIG_INGAME) == 0) return;
+
 				bool bool_item = (config_item.flags & AICONFIG_BOOLEAN) != 0;
 
 				int x = pt.x - wid->pos_x;
@@ -353,10 +360,7 @@ struct AISettingsWindow : public Window {
 					this->clicked_button = num;
 					this->timeout = 5;
 
-					if (_settings_newgame.difficulty.diff_level != 3) {
-						_settings_newgame.difficulty.diff_level = 3;
-						ShowErrorMessage(STR_WARNING_DIFFICULTY_TO_CUSTOM, INVALID_STRING_ID, 0, 0);
-					}
+					this->CheckDifficultyLevel();
 				} else if (!bool_item) {
 					/* Display a query box so users can enter a custom value. */
 					this->clicked_row = num;
@@ -386,6 +390,7 @@ struct AISettingsWindow : public Window {
 		for (int i = 0; i < this->clicked_row; i++) it++;
 		int32 value = atoi(str);
 		this->ai_config->SetSetting((*it).name, value);
+		this->CheckDifficultyLevel();
 		this->SetDirty();
 	}
 
@@ -572,7 +577,7 @@ struct AIConfigWindow : public Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case AIC_WIDGET_DECREASE:
@@ -591,6 +596,7 @@ struct AIConfigWindow : public Window {
 			case AIC_WIDGET_LIST: { // Select a slot
 				this->selected_slot = (CompanyID)((pt.y - this->GetWidget<NWidgetBase>(widget)->pos_y) / this->line_height + this->vscroll.GetPosition());
 				this->InvalidateData();
+				if (click_count > 1 && this->selected_slot != INVALID_COMPANY) ShowAIListWindow((CompanyID)this->selected_slot);
 				break;
 			}
 
@@ -598,6 +604,7 @@ struct AIConfigWindow : public Window {
 				if (this->selected_slot > 1) {
 					Swap(_settings_newgame.ai_config[this->selected_slot], _settings_newgame.ai_config[this->selected_slot - 1]);
 					this->selected_slot--;
+					this->vscroll.ScrollTowards(this->selected_slot);
 					this->InvalidateData();
 				}
 				break;
@@ -606,6 +613,7 @@ struct AIConfigWindow : public Window {
 				if (this->selected_slot < _settings_newgame.difficulty.max_no_competitors) {
 					Swap(_settings_newgame.ai_config[this->selected_slot], _settings_newgame.ai_config[this->selected_slot + 1]);
 					this->selected_slot++;
+					this->vscroll.ScrollTowards(this->selected_slot);
 					this->InvalidateData();
 				}
 				break;
@@ -630,16 +638,6 @@ struct AIConfigWindow : public Window {
 					ShowNetworkContentListWindow(NULL, CONTENT_TYPE_AI);
 #endif
 				}
-				break;
-		}
-	}
-
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		switch (widget) {
-			case AIC_WIDGET_LIST:
-				this->OnClick(pt, widget);
-				if (this->selected_slot != INVALID_COMPANY) ShowAIListWindow((CompanyID)this->selected_slot);
 				break;
 		}
 	}
@@ -677,6 +675,7 @@ void ShowAIConfigWindow()
 enum AIDebugWindowWidgets {
 	AID_WIDGET_VIEW,
 	AID_WIDGET_NAME_TEXT,
+	AID_WIDGET_SETTINGS,
 	AID_WIDGET_RELOAD_TOGGLE,
 	AID_WIDGET_LOG_PANEL,
 	AID_WIDGET_SCROLLBAR,
@@ -704,6 +703,7 @@ struct AIDebugWindow : public Window {
 			this->SetWidgetDisabledState(i + AID_WIDGET_COMPANY_BUTTON_START, !Company::IsValidAiID(i));
 		}
 		this->DisableWidget(AID_WIDGET_RELOAD_TOGGLE);
+		this->DisableWidget(AID_WIDGET_SETTINGS);
 
 		this->last_vscroll_pos = 0;
 		this->autoscroll = true;
@@ -743,8 +743,11 @@ struct AIDebugWindow : public Window {
 			}
 		}
 
-		/* Update "Reload AI" button */
-		this->SetWidgetDisabledState(AID_WIDGET_RELOAD_TOGGLE, ai_debug_company == INVALID_COMPANY);
+		/* Update "Reload AI" and "AI settings" buttons */
+		this->SetWidgetsDisabledState(ai_debug_company == INVALID_COMPANY,
+			AID_WIDGET_RELOAD_TOGGLE,
+			AID_WIDGET_SETTINGS,
+			WIDGET_LIST_END);
 
 		/* Draw standard stuff */
 		this->DrawWidgets();
@@ -781,7 +784,7 @@ struct AIDebugWindow : public Window {
 			if (!valid) continue;
 
 			byte offset = (i == ai_debug_company) ? 1 : 0;
-			DrawCompanyIcon(i, this->GetWidget<NWidgetBase>(AID_WIDGET_COMPANY_BUTTON_START + i)->pos_x + 11 + offset, this->GetWidget<NWidgetBase>(AID_WIDGET_COMPANY_BUTTON_START + i)->pos_y + 2 + offset);
+			DrawCompanyIcon(i, button->pos_x + button->current_x / 2 - 7 + offset, this->GetWidget<NWidgetBase>(AID_WIDGET_COMPANY_BUTTON_START + i)->pos_y + 2 + offset);
 		}
 
 		CompanyID old_company = _current_company;
@@ -884,9 +887,11 @@ struct AIDebugWindow : public Window {
 		this->autoscroll = true;
 		this->last_vscroll_pos = this->vscroll.GetPosition();
 		this->SetDirty();
+		/* Close AI settings window to prevent confusion */
+		DeleteWindowByClass(WC_AI_SETTINGS);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		/* Check which button is clicked */
 		if (IsInsideMM(widget, AID_WIDGET_COMPANY_BUTTON_START, AID_WIDGET_COMPANY_BUTTON_END + 1)) {
@@ -895,16 +900,24 @@ struct AIDebugWindow : public Window {
 				ChangeToAI((CompanyID)(widget - AID_WIDGET_COMPANY_BUTTON_START));
 			}
 		}
-		if (widget == AID_WIDGET_RELOAD_TOGGLE && !this->IsWidgetDisabled(widget)) {
-			/* First kill the company of the AI, then start a new one. This should start the current AI again */
-			DoCommandP(0, 2, ai_debug_company, CMD_COMPANY_CTRL);
-			DoCommandP(0, 1, ai_debug_company, CMD_COMPANY_CTRL);
+
+		switch (widget) {
+			case AID_WIDGET_RELOAD_TOGGLE:
+				/* First kill the company of the AI, then start a new one. This should start the current AI again */
+				DoCommandP(0, 2, ai_debug_company, CMD_COMPANY_CTRL);
+				DoCommandP(0, 1, ai_debug_company, CMD_COMPANY_CTRL);
+				break;
+
+			case AID_WIDGET_SETTINGS:
+				ShowAISettingsWindow(ai_debug_company);
+				break;
 		}
 	}
 
 	virtual void OnTimeout()
 	{
 		this->RaiseWidget(AID_WIDGET_RELOAD_TOGGLE);
+		this->RaiseWidget(AID_WIDGET_SETTINGS);
 		this->SetDirty();
 	}
 
@@ -933,47 +946,48 @@ static const NWidgetPart _nested_ai_debug_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_VIEW),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 1), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 1), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 2), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 2), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 3), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 3), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 4), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 4), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 5), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 5), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 6), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 6), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 7), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 7), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0), SetResize(1, 0),
+			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL),
 			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 8), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 8), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 9), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 9), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 10), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 10), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 11), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 11), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 12), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 12), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 13), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 13), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 14), SetMinimalSize(37, 13), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 14), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
 			EndContainer(),
 			NWidget(NWID_SPACER), SetMinimalSize(39, 0), SetResize(1, 0),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 1), SetResize(1, 0),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_TEXTBTN, COLOUR_GREY, AID_WIDGET_NAME_TEXT), SetMinimalSize(150, 20), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_AI_DEBUG_NAME_TOOLTIP),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, AID_WIDGET_RELOAD_TOGGLE), SetMinimalSize(149, 20), SetDataTip(STR_AI_DEBUG_RELOAD, STR_AI_DEBUG_RELOAD_TOOLTIP),
+		NWidget(WWT_TEXTBTN, COLOUR_GREY, AID_WIDGET_NAME_TEXT), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_AI_DEBUG_NAME_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, AID_WIDGET_SETTINGS), SetMinimalSize(100, 20), SetDataTip(STR_AI_DEBUG_SETTINGS, STR_AI_DEBUG_SETTINGS_TOOLTIP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, AID_WIDGET_RELOAD_TOGGLE), SetMinimalSize(100, 20), SetDataTip(STR_AI_DEBUG_RELOAD, STR_AI_DEBUG_RELOAD_TOOLTIP),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_LOG_PANEL), SetMinimalSize(287, 180), SetResize(1, 1),
@@ -986,7 +1000,7 @@ static const NWidgetPart _nested_ai_debug_widgets[] = {
 };
 
 static const WindowDesc _ai_debug_desc(
-	WDP_AUTO, 299, 241,
+	WDP_AUTO, 600, 450,
 	WC_AI_DEBUG, WC_NONE,
 	0,
 	_nested_ai_debug_widgets, lengthof(_nested_ai_debug_widgets)

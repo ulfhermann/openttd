@@ -597,8 +597,8 @@ STR_PERFORMANCE_DETAIL_TOTAL                                    :{BLACK}Összese
 STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Az előző évben profitált járművek száma; ebbe beleértendőek a közúti, kötöttpályás, vizi és légi járművek.
 STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP                         :{BLACK}Közelmúltban javított állomásrészek száma. Minden rész számít (pl. vasútállomás, buszmegálló, repülőtér), még akkor is, ha egy állomáshoz tartoznak.
 STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP                       :{BLACK}A legalacsonyabb profitot hozó jármű profitja (csak 2 évnél idősebb járművek)
-STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP                       :{BLACK}Az utóbbi 12 negyedév legalacsonyabb havi profitja
-STR_PERFORMANCE_DETAIL_MAX_INCOME_TOOLTIP                       :{BLACK}Az utóbbi 12 negyedév legjövedelmezőbb havi profitja
+STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP                       :{BLACK}Megkeresett pénz a negyedévben a legkisebb profitnál az utolsó 12 negyedévben.
+STR_PERFORMANCE_DETAIL_MAX_INCOME_TOOLTIP                       :{BLACK}Megkeresett pénz a negyedévben a legkisebb profitnál az utolsó 12 negyedévben.
 STR_PERFORMANCE_DETAIL_DELIVERED_TOOLTIP                        :{BLACK}Utolsó négy negyedévben elszállított rakomány.
 STR_PERFORMANCE_DETAIL_CARGO_TOOLTIP                            :{BLACK}Az utolsó negyedévben elszállított áruk típusa.
 STR_PERFORMANCE_DETAIL_MONEY_TOOLTIP                            :{BLACK}Elérhető készpénz
@@ -1099,6 +1099,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Engedékeny
 STR_CITY_APPROVAL_TOLERANT                                      :Toleráns
 STR_CITY_APPROVAL_HOSTILE                                       :Ellenséges
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Nincsen megfelelő MI...{}Letölthetsz néhány MI-t a tartalomletöltő rendszeren keresztül
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Ez a módosítás megváltoztatta a nehézségi szintet egyedire.
 
 # Advanced settings window
@@ -1148,6 +1149,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Lehesse
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Különböző vágánytípusok engedélyezése egy állomáson: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Tömegszorzó tehervonatoknak (szimulációs célból): {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Repülőgép sebességszorzó: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Lezuhanó repülőgépek száma: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :nincs
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :csökkentett
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normál
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Áthajtó állomások engedélyezése városi tulajdonú utakra: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Áthajtó állomások engedélyezése vetélytárs tulajdonában lévő utakon: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Érintkező állomások építésének engedélyezése: {ORANGE}{STRING}
@@ -1234,10 +1239,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Menetre
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Indulás és érkezés megjelenítése a menetrendekben: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Gyors menetrend-készítés: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Alapértelmezett vasúti pályatipus: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normál vasúti pálya
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Villamosított vasúti pálya
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Egysínű
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Maglev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Első elérhető
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Utolsó elérhető
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Legutoljára használt
@@ -2403,6 +2404,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Ismeretlen "Act
 STR_NEWGRF_ERROR_INVALID_ID                                     :Érvénytelen ID-használati kisérlet.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} hibás sprite-ot tartalmaz. Minden hibás sprite piros kérdőjellel (?) kerül jelölésre.
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Túl sok Action 8 bejegyzést tartalmaz.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Ál-sprite távoli végének olvasása.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Figyelem!
@@ -2483,14 +2485,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Új épületek 
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Kizárólagos szállítási jogok vétele
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Önkormányzat megvesztegetése
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Kis helyi reklámhadjárat indítása, hogy több utast és árut vonzz a megállóidba.{}Ára: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Közepes helyi reklámhadjárat indítása, hogy több utast és árut vonzz a megállóidba.{}Ára: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Nagy helyi reklámhadjárat indítása, hogy több utast és árut vonzz a megállóidba.{}Ára: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}A városi úthálózat helyreállításának támogatása. Több, mint hat hónapig jelentősen összezavarja a közúti forgalmat.{}Ára: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Szobor építése a vállalatod tiszteletére.{}Ára: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Új kereskedelmi épületek építésének támogatása a városban.{}Ára: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Egy éves kizárólagos szállítási jogok vétele a városban. Az önkormányzat csak a te állomásaid használatát engedi meg az utasoknak és az áruknak.{}Ára: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}A megítélésed növelése az önkormányzat megvesztegetésével, komoly büntetést kockáztatva, ha ez kiderül.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Kis helyi reklámhadjárat indítása, hogy több utast és árut vonzz a megállóidba.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Közepes helyi reklámhadjárat indítása, hogy több utast és árut vonzz a megállóidba.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Nagy helyi reklámhadjárat indítása, hogy több utast és árut vonzz a megállóidba.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}A városi úthálózat helyreállításának támogatása. Több, mint hat hónapig jelentősen összezavarja a közúti forgalmat.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Szobor építése a vállalatod tiszteletére.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Új kereskedelmi épületek építésének támogatása a városban.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Egy éves kizárólagos szállítási jogok vétele a városban. Az önkormányzat csak a te állomásaid használatát engedi meg az utasoknak és az áruknak.{}Ára: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}A megítélésed növelése az önkormányzat megvesztegetésével, komoly büntetést kockáztatva, ha ez kiderül.{}Ára: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Támogatások
@@ -3241,6 +3243,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Válassz
 STR_AI_DEBUG                                                    :{WHITE}MI nyomkövetés
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}MI neve
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}MI beállítások
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}MI beállításainak módosítása
 STR_AI_DEBUG_RELOAD                                             :{BLACK}MI újratöltése
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}MI kilövése, szkript újratöltése, MI újraindítása
 
