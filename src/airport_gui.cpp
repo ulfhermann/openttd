@@ -22,6 +22,7 @@
 #include "company_func.h"
 #include "tilehighlight_func.h"
 #include "company_base.h"
+#include "station_type.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -89,7 +90,7 @@ struct BuildAirToolbarWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (!IsInsideBS(widget, ATW_AIRPORT, lengthof(_build_air_button_proc))) return;
 
@@ -256,7 +257,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case BAW_SMALL_AIRPORT: case BAW_CITY_AIRPORT: case BAW_HELIPORT: case BAW_METRO_AIRPORT:

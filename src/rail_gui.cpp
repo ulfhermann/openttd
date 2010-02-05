@@ -15,7 +15,6 @@
 #include "station_gui.h"
 #include "terraform_gui.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "command_func.h"
 #include "waypoint_func.h"
 #include "newgrf_station.h"
@@ -30,6 +29,7 @@
 #include "tunnelbridge.h"
 #include "tilehighlight_func.h"
 #include "spritecache.h"
+#include "core/geometry_func.hpp"
 
 #include "station_map.h"
 #include "tunnelbridge_map.h"
@@ -694,7 +694,7 @@ struct BuildRailToolbarWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget >= RTW_BUILD_NS) {
 			_remove_button_clicked = false;
@@ -1165,7 +1165,7 @@ public:
 		if (widget == BRSW_NEWST_DROPDOWN) SetDParam(0, GetStationClassName(_railstation.station_class));
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case BRSW_PLATFORM_DIR_X:
@@ -1587,7 +1587,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case BSW_SEMAPHORE_NORM:
@@ -1723,7 +1723,7 @@ struct BuildRailDepotWindow : public PickerWindowBase {
 		DrawTrainDepotSprite(r.left - 1, r.top, widget - BRDW_DEPOT_NE + DIAGDIR_NE, _cur_railtype);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case BRDW_DEPOT_NE:
@@ -1826,7 +1826,7 @@ struct BuildRailWaypointWindow : PickerWindowBase {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case BRWW_WAYPOINT_1:
@@ -1912,40 +1912,38 @@ static void SetDefaultRailGui()
 	if (_local_company == COMPANY_SPECTATOR || !Company::IsValidID(_local_company)) return;
 
 	extern RailType _last_built_railtype;
-	RailType rt = (RailType)_settings_client.gui.default_rail_type;
-	if (rt >= RAILTYPE_END) {
-		if (rt == DEF_RAILTYPE_MOST_USED) {
-			/* Find the most used rail type */
-			RailType count[RAILTYPE_END];
-			memset(count, 0, sizeof(count));
-			for (TileIndex t = 0; t < MapSize(); t++) {
-				if (IsTileType(t, MP_RAILWAY) || IsLevelCrossingTile(t) || HasStationTileRail(t) ||
-						(IsTileType(t, MP_TUNNELBRIDGE) && GetTunnelBridgeTransportType(t) == TRANSPORT_RAIL)) {
-					count[GetRailType(t)]++;
-				}
+	RailType rt = (RailType)(_settings_client.gui.default_rail_type + RAILTYPE_END);
+	if (rt == DEF_RAILTYPE_MOST_USED) {
+		/* Find the most used rail type */
+		RailType count[RAILTYPE_END];
+		memset(count, 0, sizeof(count));
+		for (TileIndex t = 0; t < MapSize(); t++) {
+			if (IsTileType(t, MP_RAILWAY) || IsLevelCrossingTile(t) || HasStationTileRail(t) ||
+					(IsTileType(t, MP_TUNNELBRIDGE) && GetTunnelBridgeTransportType(t) == TRANSPORT_RAIL)) {
+				count[GetRailType(t)]++;
 			}
+		}
 
+		rt = RAILTYPE_RAIL;
+		for (RailType r = RAILTYPE_ELECTRIC; r < RAILTYPE_END; r++) {
+			if (count[r] >= count[rt]) rt = r;
+		}
+
+		/* No rail, just get the first available one */
+		if (count[rt] == 0) rt = DEF_RAILTYPE_FIRST;
+	}
+	switch (rt) {
+		case DEF_RAILTYPE_FIRST:
 			rt = RAILTYPE_RAIL;
-			for (RailType r = RAILTYPE_ELECTRIC; r < RAILTYPE_END; r++) {
-				if (count[r] >= count[rt]) rt = r;
-			}
+			while (rt < RAILTYPE_END && !HasRailtypeAvail(_local_company, rt)) rt++;
+			break;
 
-			/* No rail, just get the first available one */
-			if (count[rt] == 0) rt = DEF_RAILTYPE_FIRST;
-		}
-		switch (rt) {
-			case DEF_RAILTYPE_FIRST:
-				rt = RAILTYPE_RAIL;
-				while (rt < RAILTYPE_END && !HasRailtypeAvail(_local_company, rt)) rt++;
-				break;
+		case DEF_RAILTYPE_LAST:
+			rt = GetBestRailtype(_local_company);
+			break;
 
-			case DEF_RAILTYPE_LAST:
-				rt = GetBestRailtype(_local_company);
-				break;
-
-			default:
-				break;
-		}
+		default:
+			break;
 	}
 
 	_last_built_railtype = _cur_railtype = rt;

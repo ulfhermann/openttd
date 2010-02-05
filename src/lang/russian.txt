@@ -1219,6 +1219,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Дозволя�
 STR_CITY_APPROVAL_TOLERANT                                      :Терпимое
 STR_CITY_APPROVAL_HOSTILE                                       :Враждебное
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Модули ИИ отсутствуют.{}Их можно скачать через систему проверки онлайн-контента.
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Ваши действия сменили уровень сложности на пользовательский
 
 # Advanced settings window
@@ -1268,6 +1269,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Раз�
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Станции могут быть произвольной формы: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Множитель увеличения веса груза для товарных поездов: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Коэффициент скорости авиатранспорта: {ORANGE}1/{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Вероятность падения самолёта: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :отсутствует
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :сниженная
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :обычная
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Позволять строить остановки на городских дорогах: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Разрешить проезд через остановки соперников по их дорогам: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Разрешить строительство смежных станций: {ORANGE}{STRING}
@@ -1354,10 +1359,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Пок�
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Показывать время прибытия и отправления в графиках: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Быстрое создание заданий транспорта: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Тип рельсов по умолчанию (после старта/загрузки): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :обычные
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :электро
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :монорельс
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :магнитные
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :первые доступные
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :последние доступные
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :наиболее используемые
@@ -2529,6 +2530,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Неизвес�
 STR_NEWGRF_ERROR_INVALID_ID                                     :Используется неправильный ID.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} содержит неправильный спрайт. Все неправльные спрайты будут показаны красным знаком вопроса (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Содержит несколько Action 8 действий.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Данные внезапно закончились.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Осторожно!
@@ -2609,14 +2611,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Профина�
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Купить эксклюзивные транспортные права
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Взятка местной администрации
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Провести малую рекламную кампанию для увеличения грузо- и пассажиропотока на ваших станциях.{}Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Провести среднюю рекламную кампанию для увеличения грузо- и пассажиропотока на ваших станциях.{}Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Провести большую рекламную кампанию для увеличения грузо- и пассажиропотока на ваших станциях.{}Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Профинансировать реконструкцию городских дорог. Вызывает большие нарушения движения на срок до 6 месяцев.{}Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Установить статую в честь вашей компании.{}Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Профинансировать строительство новых коммерческих зданий в городе.{}Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Купить годовые эксклюзивные права на транспортные перевозки в городе. Администрация разрешит пользоваться ТОЛЬКО вашими станциями.{}Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Дать взятку городской администрации для повышения рейтинга. Существует риск санкций, если факт взятки раскроется.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Провести малую рекламную кампанию для увеличения грузо- и пассажиропотока на ваших станциях.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Провести среднюю рекламную кампанию для увеличения грузо- и пассажиропотока на ваших станциях.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Провести большую рекламную кампанию для увеличения грузо- и пассажиропотока на ваших станциях.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Профинансировать реконструкцию городских дорог. Вызывает большие нарушения движения на срок до 6 месяцев.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Установить статую в честь вашей компании.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Профинансировать строительство новых коммерческих зданий в городе.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Купить годовые эксклюзивные права на транспортные перевозки в городе. Администрация разрешит пользоваться ТОЛЬКО вашими станциями.{}Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Дать взятку городской администрации для повышения рейтинга. Существует риск санкций, если факт взятки раскроется.{}Цена: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Субсидии
@@ -3377,6 +3379,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Выбо
 STR_AI_DEBUG                                                    :{WHITE}Отладка ИИ
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Имя ИИ
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}Настройки ИИ
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Изменить настройки ИИ
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Перезагрузить ИИ
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Удалить ИИ, перезагрузить скрипт и перезапустить ИИ
 

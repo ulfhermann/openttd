@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "openttd.h"
 #include "gui.h"
-#include "window_gui.h"
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "viewport_func.h"
@@ -31,6 +30,8 @@
 #include "sortlist_type.h"
 #include "widgets/dropdown_func.h"
 #include "company_base.h"
+#include "core/geometry_func.hpp"
+#include "core/random_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -390,13 +391,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget != DPIW_MATRIX_WIDGET) return;
-		this->OnClick(pt, DPIW_FUND_WIDGET);
-	}
-
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case DPIW_MATRIX_WIDGET: {
@@ -418,6 +413,7 @@ public:
 					}
 
 					this->SetWidgetDisabledState(DPIW_FUND_WIDGET, !this->enabled[this->selected_index]);
+					if (this->enabled[this->selected_index] && click_count > 1) this->OnClick(pt, DPIW_FUND_WIDGET, 1);
 				}
 			} break;
 
@@ -702,7 +698,7 @@ public:
 		if (widget == IVW_INFO) size->height = this->info_height;
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		Industry *i;
 
@@ -1104,7 +1100,7 @@ public:
 	}
 
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case IDW_DROPDOWN_ORDER:

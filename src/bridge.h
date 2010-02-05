@@ -13,7 +13,6 @@
 #define BRIDGE_H
 
 #include "gfx_type.h"
-#include "direction_type.h"
 #include "tile_cmd.h"
 
 /** This enum is related to the definition of bridge pieces,
@@ -48,7 +47,7 @@ struct BridgeSpec {
 	uint16 price;                ///< the price multiplier
 	uint16 speed;                ///< maximum travel speed
 	SpriteID sprite;             ///< the sprite which is used in the GUI
-	SpriteID pal;                ///< the palette which is used in the GUI
+	PaletteID pal;               ///< the palette which is used in the GUI
 	StringID material;           ///< the string that contains the bridge description
 	StringID transport_name[2];  ///< description of the bridge, when built for road or rail
 	PalSpriteID **sprite_table;  ///< table of sprites for drawing the bridge

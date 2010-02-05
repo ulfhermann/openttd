@@ -15,10 +15,7 @@
 #include "base_station_base.h"
 #include "airport.h"
 #include "cargopacket.h"
-#include "cargo_type.h"
 #include "industry_type.h"
-#include "core/geometry_type.hpp"
-#include <list>
 
 typedef Pool<BaseStation, StationID, 32, 64000> StationPool;
 extern StationPool _station_pool;
@@ -122,6 +119,18 @@ public:
 	/* virtual */ FORCEINLINE bool TileBelongsToRailStation(TileIndex tile) const
 	{
 		return IsRailStationTile(tile) && GetStationIndex(tile) == this->index;
+	}
+
+	FORCEINLINE bool TileBelongsToAirport(TileIndex tile) const
+	{
+		return IsAirportTile(tile) && GetStationIndex(tile) == this->index;
+	}
+
+	FORCEINLINE TileIndex GetHangarTile(uint hangar_num) const
+	{
+		assert(this->airport_tile != INVALID_TILE);
+		assert(hangar_num < this->GetAirportSpec()->nof_depots);
+		return this->airport_tile + ToTileIndexDiff(this->GetAirportSpec()->depot_table[hangar_num]);
 	}
 
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;

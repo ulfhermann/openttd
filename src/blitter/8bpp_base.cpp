@@ -13,7 +13,7 @@
 #include "../gfx_func.h"
 #include "8bpp_base.hpp"
 
-void Blitter_8bppBase::DrawColourMappingRect(void *dst, int width, int height, int pal)
+void Blitter_8bppBase::DrawColourMappingRect(void *dst, int width, int height, PaletteID pal)
 {
 	const uint8 *ctab = GetNonSprite(pal, ST_RECOLOUR) + 1;
 
@@ -31,12 +31,6 @@ void *Blitter_8bppBase::MoveTo(const void *video, int x, int y)
 void Blitter_8bppBase::SetPixel(void *video, int x, int y, uint8 colour)
 {
 	*((uint8 *)video + x + y * _screen.pitch) = colour;
-}
-
-void Blitter_8bppBase::SetPixelIfEmpty(void *video, int x, int y, uint8 colour)
-{
-	uint8 *dst = (uint8 *)video + x + y * _screen.pitch;
-	if (*dst == 0) *dst = colour;
 }
 
 void Blitter_8bppBase::DrawRect(void *video, int width, int height, uint8 colour)

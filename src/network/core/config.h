@@ -18,12 +18,17 @@
 #define NETWORK_MASTER_SERVER_HOST "master.openttd.org"
 /** DNS hostname of the content server */
 #define NETWORK_CONTENT_SERVER_HOST "content.openttd.org"
+/** DNS hostname of the HTTP-content mirror server */
+#define NETWORK_CONTENT_MIRROR_HOST "binaries.openttd.org"
+/** URL of the HTTP mirror system */
+#define NETWORK_CONTENT_MIRROR_URL "/bananas"
 /** Message sent to the masterserver to 'identify' this client as OpenTTD */
 #define NETWORK_MASTER_SERVER_WELCOME_MESSAGE "OpenTTDRegister"
 
 enum {
 	NETWORK_MASTER_SERVER_PORT    = 3978, ///< The default port of the master server (UDP)
 	NETWORK_CONTENT_SERVER_PORT   = 3978, ///< The default port of the content server (TCP)
+	NETWORK_CONTENT_MIRROR_PORT   =   80, ///< The default port of the content mirror (TCP)
 	NETWORK_DEFAULT_PORT          = 3979, ///< The default port of the game server (TCP & UDP)
 	NETWORK_DEFAULT_DEBUGLOG_PORT = 3982, ///< The default port debug-log is sent too (TCP)
 
@@ -36,9 +41,9 @@ enum {
 	NETWORK_NAME_LENGTH           =   80, ///< The maximum length of the server name and map name, in bytes including '\0'
 	NETWORK_COMPANY_NAME_LENGTH   =   31, ///< The maximum length of the company name, in bytes including '\0'
 	NETWORK_HOSTNAME_LENGTH       =   80, ///< The maximum length of the host name, in bytes including '\0'
-	NETWORK_UNIQUE_ID_LENGTH      =   33, ///< The maximum length of the unique id of the clients, in bytes including '\0'
+	NETWORK_SERVER_ID_LENGTH      =   33, ///< The maximum length of the network id of the servers, in bytes including '\0'
 	NETWORK_REVISION_LENGTH       =   15, ///< The maximum length of the revision, in bytes including '\0'
-	NETWORK_PASSWORD_LENGTH       =   33, ///< The maximum length of the password, in bytes including '\0' (must be >= NETWORK_UNIQUE_ID_LENGTH)
+	NETWORK_PASSWORD_LENGTH       =   33, ///< The maximum length of the password, in bytes including '\0' (must be >= NETWORK_SERVER_ID_LENGTH)
 	NETWORK_CLIENTS_LENGTH        =  200, ///< The maximum length for the list of clients that controls a company, in bytes including '\0'
 	NETWORK_CLIENT_NAME_LENGTH    =   25, ///< The maximum length of a client's name, in bytes including '\0'
 	NETWORK_RCONCOMMAND_LENGTH    =  500, ///< The maximum length of a rconsole command, in bytes including '\0'
