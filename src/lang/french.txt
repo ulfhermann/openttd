@@ -1066,6 +1066,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Laxiste
 STR_CITY_APPROVAL_TOLERANT                                      :Tolérant
 STR_CITY_APPROVAL_HOSTILE                                       :Hostile
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Aucune IA utilisables...{}Vous pouvez télécharger diverses IA via le système de 'Contenu en ligne'
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Cette action a modifié le niveau de difficulté en personnalisé
 
 # Advanced settings window
@@ -1115,6 +1116,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Autoris
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Gares non uniformes{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Multiplier le poids pour les trains fret (simule des trains lourds){NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Facteur de vitesse des aéroplanes{NBSP}: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Nombre d'accidents d'avion{NBSP}: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :aucun
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :réduit
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normal
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Autoriser les arrêts de bus sur les routes des municipalités{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Autoriser les arrêts de bus sur les routes des concurrents{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Autoriser la construction de stations adjacentes{NBSP}: {ORANGE}{STRING}
@@ -1201,10 +1206,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Affiche
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Afficher l'arrivée et le départ dans les horaires{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Création rapide des ordres de véhicule{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Type de rail par défaut (après nouvelle partie/chargement){NBSP}: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Rail normal
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Rail électrifié
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Monorail
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Maglev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Premier disponible
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Dernier disponible
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Le plus utilisé
@@ -2013,7 +2014,7 @@ STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Choix du
 
 STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Petit
 STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}Urbain
-STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Aéroport métropolitain
+STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Métropolitain
 STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}International
 STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}de Banlieue
 STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Intercontinental
@@ -2370,6 +2371,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Propriété d'A
 STR_NEWGRF_ERROR_INVALID_ID                                     :Tentative d'utilisation d'un ID invalide.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} contient un sprite corrompu. Tous les sprites corrompus seront remplacés par un point d'interrogation rouge (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Contient plusieurs Action 8.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Lecture après la fin d'un pseudo-sprite.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Attention!
@@ -2450,14 +2452,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Financer de nou
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Acheter les droits de transports exclusifs
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Corrompre la municipalité
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Lancer une petite campagne de publicité, pour attirer plus de voyageurs et de marchandises sur vos lignes.{}Coût{NBSP}: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Lancer une campagne de publicité moyenne, pour attirer plus de voyageurs et de marchandises sur vos lignes.{}Coût{NBSP}: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Lancer une grande campagne de publicité, pour attirer plus de voyageurs et de marchandises sur vos lignes.{}Coût{NBSP}: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Financer la reconstruction du réseau routier local. Provoque de nombreux problèmes de trafic routier pendant 6 mois.{}Coût{NBSP}: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Construire une statue en l'honneur de votre compagnie.{}Coût{NBSP}: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Financer la construction de nouveaux immeubles commerciaux.{}Coût{NBSP}: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Acheter les droits de transports exclusifs dans cette ville pour 1 an. Seules vos lignes seront autorisées dans la ville.{}Coût{NBSP}: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Corrompre la municipalité pour améliorer votre réputation. Risque de pénalisation si le pot-de-vin est dévoilé.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Lancer une petite campagne de publicité, pour attirer plus de voyageurs et de marchandises sur vos lignes.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Lancer une campagne de publicité moyenne, pour attirer plus de voyageurs et de marchandises sur vos lignes.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Lancer une grande campagne de publicité, pour attirer plus de voyageurs et de marchandises sur vos lignes.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Financer la reconstruction du réseau routier local. Provoque de nombreux problèmes de trafic routier pendant 6 mois.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Construire une statue en l'honneur de votre compagnie.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Financer la construction de nouveaux immeubles commerciaux.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Acheter les droits de transports exclusifs dans cette ville pour 1 an. Seules vos lignes seront autorisées dans la ville.{}Coût{NBSP}: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Corrompre la municipalité pour améliorer votre réputation. Risque de pénalisation si le pot-de-vin est dévoilé.{}Coût{NBSP}: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subventions
@@ -3208,6 +3210,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Sélecti
 STR_AI_DEBUG                                                    :{WHITE}Débogage d'IA
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Nom de l'IA
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}Configuration IA
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Modifier la configuration de l'IA
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Recharger IA
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Tuer l'IA, recharger le script et relancer l'IA
 

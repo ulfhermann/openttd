@@ -24,6 +24,7 @@
 #include "querystring_gui.h"
 #include "sortlist_type.h"
 #include "string_func.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -142,7 +143,7 @@ struct SignListWindow : Window, SignList {
 		if (widget == SLW_CAPTION) SetDParam(0, this->vscroll.GetCount());
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget == SLW_LIST) {
 			uint id_v = (pt.y - this->GetWidget<NWidgetBase>(SLW_LIST)->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
@@ -327,7 +328,7 @@ struct SignWindow : QueryStringBaseWindow, SignList {
 		if (!this->IsShaded()) this->DrawEditBox(QUERY_EDIT_SIGN_WIDGET_TEXT);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case QUERY_EDIT_SIGN_WIDGET_PREVIOUS:

@@ -16,7 +16,6 @@
 #include "../../group.h"
 #include "../../string_func.h"
 #include "../../strings_func.h"
-#include "../../command_func.h"
 #include "../../autoreplace_func.h"
 #include "../../settings_func.h"
 #include "table/strings.h"
@@ -113,7 +112,7 @@
 
 /* static */ bool AIGroup::SetAutoReplace(GroupID group_id, EngineID engine_id_old, EngineID engine_id_new)
 {
-	EnforcePrecondition(false, IsValidGroup(group_id) || group_id == GROUP_ALL);
+	EnforcePrecondition(false, IsValidGroup(group_id) || group_id == GROUP_DEFAULT || group_id == GROUP_ALL);
 	EnforcePrecondition(false, AIEngine::IsBuildable(engine_id_new));
 
 	return AIObject::DoCommand(0, group_id << 16, (engine_id_new << 16) | engine_id_old, CMD_SET_AUTOREPLACE);
@@ -121,14 +120,14 @@
 
 /* static */ EngineID AIGroup::GetEngineReplacement(GroupID group_id, EngineID engine_id)
 {
-	if (!IsValidGroup(group_id) && group_id != GROUP_ALL) return ::INVALID_ENGINE;
+	if (!IsValidGroup(group_id) && group_id != GROUP_DEFAULT && group_id != GROUP_ALL) return ::INVALID_ENGINE;
 
 	return ::EngineReplacementForCompany(Company::Get(_current_company), engine_id, group_id);
 }
 
 /* static */ bool AIGroup::StopAutoReplace(GroupID group_id, EngineID engine_id)
 {
-	EnforcePrecondition(false, IsValidGroup(group_id) || group_id == GROUP_ALL);
+	EnforcePrecondition(false, IsValidGroup(group_id) || group_id == GROUP_DEFAULT || group_id == GROUP_ALL);
 
 	return AIObject::DoCommand(0, group_id << 16, (::INVALID_ENGINE << 16) | engine_id, CMD_SET_AUTOREPLACE);
 }

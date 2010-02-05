@@ -34,6 +34,7 @@
 #include "gamelog.h"
 #include "ai/ai.hpp"
 #include "ai/ai_config.hpp"
+#include "console_func.h"
 
 #ifdef ENABLE_NETWORK
 	#include "table/strings.h"
@@ -212,7 +213,7 @@ DEF_CONSOLE_CMD(ConSave)
 		if (SaveOrLoad(filename, SL_SAVE, SAVE_DIR) != SL_OK) {
 			IConsolePrint(CC_ERROR, "Saving map failed");
 		} else {
-			IConsolePrintF(CC_DEFAULT, "Map sucessfully saved to %s", filename);
+			IConsolePrintF(CC_DEFAULT, "Map successfully saved to %s", filename);
 		}
 		free(filename);
 		return true;
@@ -1051,7 +1052,7 @@ DEF_CONSOLE_CMD(ConStartAI)
 
 	AIConfig *config = AIConfig::GetConfig((CompanyID)n);
 	if (argc >= 2) {
-		config->ChangeAI(argv[1]);
+		config->ChangeAI(argv[1], -1, true);
 		if (!config->HasAI()) {
 			IConsoleWarning("Failed to load the specified AI");
 			return true;
@@ -1712,6 +1713,25 @@ DEF_CONSOLE_CMD(ConSetting)
 	return true;
 }
 
+DEF_CONSOLE_CMD(ConSettingNewgame)
+{
+	if (argc == 0) {
+		IConsoleHelp("Change setting for the next game. Usage: 'setting_newgame <name> [<value>]'");
+		IConsoleHelp("Omitting <value> will print out the current value of the setting.");
+		return true;
+	}
+
+	if (argc == 1 || argc > 3) return false;
+
+	if (argc == 2) {
+		IConsoleGetSetting(argv[1], true);
+	} else {
+		IConsoleSetSetting(argv[1], argv[2], true);
+	}
+
+	return true;
+}
+
 DEF_CONSOLE_CMD(ConListSettings)
 {
 	if (argc == 0) {
@@ -1817,6 +1837,7 @@ void IConsoleStdLibRegister()
 	IConsoleCmdRegister("pwd",          ConPrintWorkingDirectory);
 	IConsoleCmdRegister("clear",        ConClearBuffer);
 	IConsoleCmdRegister("setting",      ConSetting);
+	IConsoleCmdRegister("setting_newgame", ConSettingNewgame);
 	IConsoleCmdRegister("list_settings",ConListSettings);
 	IConsoleCmdRegister("gamelog",      ConGamelogPrint);
 
@@ -1827,6 +1848,7 @@ void IConsoleStdLibRegister()
 	IConsoleAliasRegister("new_game",     "newgame");
 	IConsoleAliasRegister("patch",        "setting %+");
 	IConsoleAliasRegister("set",          "setting %+");
+	IConsoleAliasRegister("set_newgame",  "setting_newgame %+");
 	IConsoleAliasRegister("list_patches", "list_settings %+");
 
 

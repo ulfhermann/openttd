@@ -597,6 +597,7 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Dewis y 
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Togu cymysgu trefn raglen ymlaen neu i ffwrdd
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Dangos y ffenestr dewis traciau cerddoriaeth
 
+
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Dewisiadau Rhaglen Gerddoriaeth
 STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
@@ -928,6 +929,7 @@ STR_GAME_OPTIONS_BASE_GRF_STATUS                                :{RED}{NUM} ar g
 STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP                   :{BLACK}gwybodaeth ychwanegol am y set sall graffeg
 
 
+
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Methodd y modd sgrin llawn
 
 # Custom currency window
@@ -994,6 +996,7 @@ STR_NUM_LOW                                                     :Isel
 STR_NUM_NORMAL                                                  :Arferol
 STR_NUM_HIGH                                                    :Anodd
 STR_NUM_CUSTOM                                                  :Addasedig
+
 
 STR_AI_SPEED_VERY_SLOW                                          :Araf Iawn
 STR_AI_SPEED_SLOW                                               :Araf
@@ -1081,6 +1084,8 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Caniat�
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Gorsafoedd anunffurf: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Lluosogydd pwysau ar gyfer llwythi i adlewyrchu trenau trwm{ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Ffactor cyflymder awyrenau: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :Dim
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :Llai
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Caniatáu arosfannau gyrru-trwodd ar ffyrdd sy'n eiddo i drefi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Caniatáu i ffyrdd gyrru-drwodd stopio ar ffyrdd sy'n eiddo i gystadleuwyr: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Caniatáu adeiladu gorsafoedd cyfochrog: {ORANGE}{STRING}
@@ -1166,10 +1171,6 @@ STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Galluog
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Dangos amserlen fesul ticiau yn hytrach na dyddiau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Creu cyflym ar gyfer gorchmynion cerbydau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Math rheilffordd ragosodedig (ar ôl gêm newydd/llwytho gêm ): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Rheilffordd Gyffredin
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Rheilffordd Drydan
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Monoreilffordd
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Maglef
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Y Cyntaf sydd ar gael
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Yr olaf sydd ar gael
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Defnydd mwyaf
@@ -1228,6 +1229,7 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :grid 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :ar hap
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Caiff trefi adeiladu ffyrdd: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Caniatáu i drefi reoli lefel swn meysydd awyrenau: {ORANGE}{STRING}
+
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Safle'r prif far offer: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Chwith
@@ -1952,7 +1954,7 @@ STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Dewiswch
 STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Bach
 STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}Dinas
 STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Maes awyr metropolitan
-STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Maes awyr rhyngwladol
+STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Rhyngwladol
 STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}Cymudol
 STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Rhyng-gyfandirol
 STR_STATION_BUILD_AIRPORT_HELIPORT                              :{BLACK}Porth Hofrennydd
@@ -2301,6 +2303,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Priodwedd Gweit
 STR_NEWGRF_ERROR_INVALID_ID                                     :Ceisio defnyddio ID annilys.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}Mae'r {STRING} yn cynnwys corlun llygredig. Bydd corluniaid llygredig yn cael eu dangos gyda mark cwestiwn coch (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Mae'n cynnwys nifer o gofnodion Gweithred 8.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Ddarllen ar ol diwedd y psuedo-sprite
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Rhybudd!
@@ -2379,14 +2382,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Ariannu adeilad
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Prynu'r hawl unigryw i wasanaethu anghenion cludiant y dref
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Llwgrwobrwyo awdurdod lleol
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} Dechrau ymgyrch hysbyseb bach yn lleol, er mwyn denu mwy o deithwyr a llwythi i'ch gorsafoedd.{} Côst: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW} Dechrau ymgyrch hysbyseb bach yn lleol, er mwyn denu mwy o deithwyr a llwythi i'ch gorsafoedd.{} Côst: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} Dechrau ymgyrch hysbyseb bach yn lleol, er mwyn denu mwy o deithwyr a llwythi i'ch gorsafoedd .{} Côst: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW} Ariannu gwith ffordd trefol. Bydd yn amharu'n fawr ar drafnidiaeth y dref am hyd at 6 mis .{} Côst: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW} Adeiladu a statue in honour o your company.{} Côst: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW} Ariannu adeiladu adeiladau masnachol newydd yn y dref.{} Côst: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW} Prynu'r hawl i fod yr unig gwmni trafnidiaeth sy'n cael gweithredu yn ardal y dref  am flwydd. Dim ond eich gorsafoedd chi fydd yr awdurdod lleol yn caniatáu i deithwyr a llwythi eu defnyddio.{} Côst: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW} Llwgrwobrwyo'r awdurdod lleol i wella'ch gradd, ond byddwch mewn perygl o dderbyn côsb sylweddol os cewch chi'ch dal.{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW} Dechrau ymgyrch hysbyseb bach yn lleol, er mwyn denu mwy o deithwyr a llwythi i'ch gorsafoedd.{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW} Dechrau ymgyrch hysbyseb bach yn lleol, er mwyn denu mwy o deithwyr a llwythi i'ch gorsafoedd.{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW} Dechrau ymgyrch hysbyseb bach yn lleol, er mwyn denu mwy o deithwyr a llwythi i'ch gorsafoedd .{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} Ariannu gwith ffordd trefol. Bydd yn amharu'n fawr ar drafnidiaeth y dref am hyd at 6 mis .{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW} Adeiladu a statue in honour o your company.{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} Ariannu adeiladu adeiladau masnachol newydd yn y dref.{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW} Prynu'r hawl i fod yr unig gwmni trafnidiaeth sy'n cael gweithredu yn ardal y dref  am flwydd. Dim ond eich gorsafoedd chi fydd yr awdurdod lleol yn caniatáu i deithwyr a llwythi eu defnyddio.{} Côst: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW} Llwgrwobrwyo'r awdurdod lleol i wella'ch gradd, ond byddwch mewn perygl o dderbyn côsb sylweddol os cewch chi'ch dal.{} Côst: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Cymorthdaliadau
@@ -3108,6 +3111,7 @@ STR_TIMETABLE_AUTOFILL_TOOLTIP                                  :{BLACK}Llenwch 
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Dadfygio AI
+STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Enw'r AI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Ail-lwytho AI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}lladd yr AI, ail-lwytho'r sgript ac ailgychwyn yr AI

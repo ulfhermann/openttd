@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "openttd.h"
-#include "fileio_func.h"
 #include "base_media_base.h"
 #include "music/music_driver.hpp"
 #include "window_gui.h"
@@ -21,6 +20,8 @@
 #include "gfx_func.h"
 #include "core/random_func.hpp"
 #include "gui.h"
+#include "core/geometry_func.hpp"
+#include "string_func.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -396,7 +397,7 @@ struct MusicTrackSelectionWindow : public Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case MTSW_LIST_LEFT: { // add to playlist
@@ -642,7 +643,7 @@ struct MusicWindow : public Window {
 		this->SetDirty();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case MW_PREV: // skip to prev

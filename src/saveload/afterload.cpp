@@ -15,7 +15,6 @@
 #include "../depot_base.h"
 #include "../window_func.h"
 #include "../fios.h"
-#include "../gamelog.h"
 #include "../gamelog_internal.h"
 #include "../network/network.h"
 #include "../gfxinit.h"
@@ -23,8 +22,6 @@
 #include "../industry.h"
 #include "../clear_map.h"
 #include "../vehicle_func.h"
-#include "../newgrf_station.h"
-#include "../openttd.h"
 #include "../debug.h"
 #include "../string_func.h"
 #include "../date_func.h"
@@ -49,6 +46,10 @@
 #include "../animated_tile_func.h"
 #include "../subsidy_base.h"
 #include "../subsidy_func.h"
+#include "../company_base.h"
+#include "../newgrf.h"
+#include "../engine_base.h"
+#include "../engine_func.h"
 
 #include "table/strings.h"
 
@@ -310,6 +311,19 @@ static const GRFIdentifier *GetOverriddenIdentifier(const GRFConfig *c)
 	return c;
 }
 
+/** Was the saveload crash because of missing NewGRFs? */
+static bool _saveload_crash_with_missing_newgrfs = false;
+
+/**
+ * Did loading the savegame cause a crash? If so,
+ * were NewGRFs missing?
+ * @return when the saveload crashed due to missing NewGRFs.
+ */
+bool SaveloadCrashWithMissingNewGRFs()
+{
+	return _saveload_crash_with_missing_newgrfs;
+}
+
 /**
  * Signal handler used to give a user a more useful report for crashes during
  * the savegame loading process; especially when there's problems with the
@@ -341,11 +355,13 @@ static void CDECL HandleSavegameLoadCrash(int signum)
 			char buf[40];
 			md5sumToString(buf, lastof(buf), replaced->md5sum);
 			p += seprintf(p, lastof(buffer), "NewGRF %08X (checksum %s) not found.\n  Loaded NewGRF \"%s\" with same GRF ID instead.\n", BSWAP32(c->grfid), buf, c->filename);
+			_saveload_crash_with_missing_newgrfs = true;
 		}
 		if (c->status == GCS_NOT_FOUND) {
 			char buf[40];
 			md5sumToString(buf, lastof(buf), c->md5sum);
 			p += seprintf(p, lastof(buffer), "NewGRF %08X (%s) not found; checksum %s.\n", BSWAP32(c->grfid), c->filename, buf);
+			_saveload_crash_with_missing_newgrfs = true;
 		}
 	}
 
@@ -1041,7 +1057,7 @@ bool AfterLoadGame()
 		}
 
 		FOR_ALL_TRAINS(v) {
-			if (v->IsFrontEngine() || v->IsFreeWagon()) TrainConsistChanged(v, true);
+			if (v->IsFrontEngine() || v->IsFreeWagon()) v->ConsistChanged(true);
 		}
 
 	}
@@ -2007,6 +2023,43 @@ bool AfterLoadGame()
 		Train *t;
 		FOR_ALL_TRAINS(t) {
 			t->wait_counter = t->current_order.IsType(OT_LOADING) ? 0 : t->load_unload_ticks;
+		}
+	}
+
+	/* Airport tile animation uses animation frame instead of other graphics id */
+	if (CheckSavegameVersion(137)) {
+		struct AirportTileConversion {
+			byte old_start;
+			byte num_frames;
+		};
+		static const AirportTileConversion atc[] = {
+			{31,  12}, // APT_RADAR_GRASS_FENCE_SW
+			{50,   4}, // APT_GRASS_FENCE_NE_FLAG
+			{62,   2}, // 1 unused tile
+			{66,  12}, // APT_RADAR_FENCE_SW
+			{78,  12}, // APT_RADAR_FENCE_NE
+			{101, 10}, // 9 unused tiles
+			{111,  8}, // 7 unused tiles
+			{119, 15}, // 14 unused tiles (radar)
+			{140,  4}, // APT_GRASS_FENCE_NE_FLAG_2
+		};
+		for (TileIndex t = 0; t < map_size; t++) {
+			if (IsAirportTile(t)) {
+				StationGfx old_gfx = GetStationGfx(t);
+				byte offset = 0;
+				for (uint i = 0; i < lengthof(atc); i++) {
+					if (old_gfx < atc[i].old_start) {
+						SetStationGfx(t, old_gfx - offset);
+						break;
+					}
+					if (old_gfx < atc[i].old_start + atc[i].num_frames) {
+						SetStationAnimationFrame(t, old_gfx - atc[i].old_start);
+						SetStationGfx(t, atc[i].old_start - offset);
+						break;
+					}
+					offset += atc[i].num_frames - 1;
+				}
+			}
 		}
 	}
 

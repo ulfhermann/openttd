@@ -23,6 +23,7 @@
 #include "date_func.h"
 #include "date_gui.h"
 #include "vehicle_gui.h"
+#include "settings_type.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -276,9 +277,9 @@ struct TimetableWindow : Window {
 				bool travel = HasBit(this->sel_index, 0);
 
 				if (from != selected_order) {
-					/* Moving from preceeding order? */
+					/* Moving from preceding order? */
 					selected_order -= (int)(from <= selected_order);
-					/* Moving to   preceeding order? */
+					/* Moving to   preceding order? */
 					selected_order += (int)(to   <= selected_order);
 				} else {
 					/* Now we are modifying the selected order */
@@ -438,7 +439,7 @@ struct TimetableWindow : Window {
 							DrawString(abbr_left, abbr_right, y, STR_TIMETABLE_ARRIVAL_ABBREVIATION, i == selected ? TC_WHITE : TC_BLACK);
 							if (this->show_expected && i / 2 == earlyID) {
 								SetArrivalDepartParams(0, 1, arr_dep[i / 2].arrival);
-								DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_GREEN_STRING, i == selected ? TC_WHITE : TC_BLACK);
+								DrawString(time_left, time_right, y, STR_GREEN_STRING, i == selected ? TC_WHITE : TC_BLACK);
 							} else {
 								SetArrivalDepartParams(0, 1, arr_dep[i / 2].arrival + offset);
 								DrawString(time_left, time_right, y, show_late ? STR_RED_STRING : STR_JUST_STRING, i == selected ? TC_WHITE : TC_BLACK);
@@ -496,7 +497,7 @@ struct TimetableWindow : Window {
 		return v->index | (order_number << 16) | (is_journey << 24);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		const Vehicle *v = this->vehicle;
 

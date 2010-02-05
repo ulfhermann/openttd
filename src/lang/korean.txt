@@ -1066,6 +1066,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :신경 안씀
 STR_CITY_APPROVAL_TOLERANT                                      :신경 씀
 STR_CITY_APPROVAL_HOSTILE                                       :싫어함
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}사용하기 적합한 AI가 없습니다...{}'온라인 콘텐츠' 시스템을 통해 AI를 다운받을 수 있습니다.
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}이 행위는 난이도를 사용자 설정으로 변경합니다
 
 # Advanced settings window
@@ -1115,6 +1116,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}다른 
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}이미 지어진 역에 추가로 역을 증축하는 것을 허용 : {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}무거운 열차를 운행하기 위해 화물에 무게를 가함 : {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}비행기 속도 인수: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}비행기 추락 횟수: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :없음
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :적음
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :보통
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}도시 소유의 도로 위에 버스 정류장 건설 허용: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}경쟁자가 소유중인 도로를 통과하는 버스 정류장 건설 허용: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}정거장 근처에 건물 짓기 허용: {ORANGE}{STRING}
@@ -1201,10 +1206,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}시간�
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}시간표에서 출발일과 도착일 표시: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}빠른 행선지 설정: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}철도 형식 기본값 설정 (게임 시작/불러온 후): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :보통 철도
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :전기 철도
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :모노레일
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :자기부상
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :처음 사용 가능한 것
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :최신 기술의 철도
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :가장 많이 사용한 것
@@ -2370,6 +2371,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :알수없는 �
 STR_NEWGRF_ERROR_INVALID_ID                                     :유효하지 않은 ID 사용 시도
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} 에 손상된 스프라이트가 있습니다. 모든 손상된 스프라이트는 붉은 물음표(?)로 보일 것입니다.
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Action 8 엔트리가 여러개 존재합니다.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :pseudo-sprite의 읽기 범위를 초과했습니다.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}경고!
@@ -2450,14 +2452,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :새 건물에 �
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :수송 권한 독점권 구입
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :지역 당국에 뇌물 먹이기
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} 더 많은 승객과 화물을 유치하기 위해 소규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW} 더 많은 승객과 화물을 유치하기 위해 중간 규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} 더 많은 승객과 화물을 유치하기 위해 대규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW} 도시 도로 네트워크망의 재공사에 투자합니다. 앞으로 6개월간 극심한 도로 혼잡을 일으킵니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW} 당신의 회사를 대표하는 '명예의 동상'을 건설합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW} 도시 상업 건물의 건설에 투자합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW} 1년간의 수송 권한 독점권을 구입합니다. 도시 당국은 오직 당신 회사의 역에만 승객과 화물을 허용할 것입니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW} 성취도를 올리기 위해 처벌을 감수하고 지역 당국에 뇌물을 줍니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW} 더 많은 승객과 화물을 유치하기 위해 소규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW} 더 많은 승객과 화물을 유치하기 위해 중간 규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW} 더 많은 승객과 화물을 유치하기 위해 대규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} 도시 도로 네트워크망의 재공사에 투자합니다. 앞으로 6개월간 극심한 도로 혼잡을 일으킵니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW} 당신의 회사를 대표하는 '명예의 동상'을 건설합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} 도시 상업 건물의 건설에 투자합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW} 1년간의 수송 권한 독점권을 구입합니다. 도시 당국은 오직 당신 회사의 역에만 승객과 화물을 허용할 것입니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW} 성취도를 올리기 위해 처벌을 감수하고 지역 당국에 뇌물을 줍니다.{}가격: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}보조금
@@ -3208,6 +3210,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}년(年)
 STR_AI_DEBUG                                                    :{WHITE}AI 디버그
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}AI의 이름
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}AI 설정
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}AI의 설정 변경
 STR_AI_DEBUG_RELOAD                                             :{BLACK}AI 재시작
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}AI를 종료시키고, 스크립트를 다시 불러와, AI를 재시작합니다
 
