@@ -181,16 +181,14 @@ static const Order *ResolveOrder(VehicleID vehicle_id, AIOrder::OrderPosition or
 			if (v->type != VEH_AIRCRAFT) return ::Depot::Get(order->GetDestination())->xy;
 			/* Aircraft's hangars are referenced by StationID, not DepotID */
 			const Station *st = ::Station::Get(order->GetDestination());
-			const AirportSpec *as = st->GetAirportSpec();
-			if (as == NULL || as->nof_depots == 0) return INVALID_TILE;
-			return st->airport_tile + ::ToTileIndexDiff(as->depot_table[0]);
+			if (st->GetAirportSpec()->nof_depots == 0) return INVALID_TILE;
+			return st->GetHangarTile(0);
 		}
 
 		case OT_GOTO_STATION: {
 			const Station *st = ::Station::Get(order->GetDestination());
 			if (st->train_station.tile != INVALID_TILE) {
-				for (uint i = 0; i < st->train_station.w; i++) {
-					TileIndex t = st->train_station.tile + TileDiffXY(i, 0);
+				TILE_AREA_LOOP(t, st->train_station) {
 					if (st->TileBelongsToRailStation(t)) return t;
 				}
 			} else if (st->dock_tile != INVALID_TILE) {
@@ -207,7 +205,17 @@ static const Order *ResolveOrder(VehicleID vehicle_id, AIOrder::OrderPosition or
 			}
 			return INVALID_TILE;
 		}
-		case OT_GOTO_WAYPOINT: return ::Waypoint::Get(order->GetDestination())->xy;
+
+		case OT_GOTO_WAYPOINT: {
+			const Waypoint *wp = ::Waypoint::Get(order->GetDestination());
+			if (wp->train_station.tile != INVALID_TILE) {
+				TILE_AREA_LOOP(t, wp->train_station) {
+					if (wp->TileBelongsToRailStation(t)) return t;
+				}
+			}
+			/* If the waypoint has no rail waypoint tiles, it must have a buoy */
+			return wp->xy;
+		}
 		default:               return INVALID_TILE;
 	}
 }
@@ -277,6 +285,16 @@ static const Order *ResolveOrder(VehicleID vehicle_id, AIOrder::OrderPosition or
 	return value;
 }
 
+/* static */ AIOrder::StopLocation AIOrder::GetStopLocation(VehicleID vehicle_id, OrderPosition order_position)
+{
+	if (!IsValidVehicleOrder(vehicle_id, order_position)) return STOPLOCATION_INVALID;
+	if (AIVehicle::GetVehicleType(vehicle_id) != AIVehicle::VT_RAIL) return STOPLOCATION_INVALID;
+	if (!IsGotoStationOrder(vehicle_id, order_position)) return STOPLOCATION_INVALID;
+
+	const Order *order = Vehicle::Get(vehicle_id)->GetOrder(order_position);
+	return (AIOrder::StopLocation)order->GetStopLocation();
+}
+
 /* static */ bool AIOrder::SetOrderJumpTo(VehicleID vehicle_id, OrderPosition order_position, OrderPosition jump_to)
 {
 	EnforcePrecondition(false, IsValidVehicleOrder(vehicle_id, order_position));
@@ -312,6 +330,18 @@ static const Order *ResolveOrder(VehicleID vehicle_id, AIOrder::OrderPosition or
 	if (GetOrderCondition(vehicle_id, order_position) == OC_MAX_SPEED) value = value * 10 / 16;
 
 	return AIObject::DoCommand(0, vehicle_id | (order_position << 16), MOF_COND_VALUE | (value << 4), CMD_MODIFY_ORDER);
+}
+
+/* static */ bool AIOrder::SetStopLocation(VehicleID vehicle_id, OrderPosition order_position, StopLocation stop_location)
+{
+	EnforcePrecondition(false, IsValidVehicleOrder(vehicle_id, order_position));
+	EnforcePrecondition(false, AIVehicle::GetVehicleType(vehicle_id) == AIVehicle::VT_RAIL);
+	EnforcePrecondition(false, IsGotoStationOrder(vehicle_id, order_position));
+	EnforcePrecondition(false, stop_location >= STOPLOCATION_NEAR && stop_location <= STOPLOCATION_FAR);
+
+	uint32 p1 = vehicle_id | (order_position << 16);
+	uint32 p2 = MOF_STOP_LOCATION | (stop_location << 4);
+	return AIObject::DoCommand(0, p1, p2, CMD_MODIFY_ORDER);
 }
 
 /* static */ bool AIOrder::AppendOrder(VehicleID vehicle_id, TileIndex destination, AIOrderFlags order_flags)

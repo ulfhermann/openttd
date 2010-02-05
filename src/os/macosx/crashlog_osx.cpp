@@ -13,6 +13,7 @@
 #include "../../crashlog.h"
 #include "../../string_func.h"
 #include "../../gamelog.h"
+#include "../../saveload/saveload.h"
 #include "macos.h"
 
 #include <errno.h>
@@ -58,10 +59,10 @@ class CrashLogOSX : public CrashLog {
 
 		return buffer + seprintf(buffer, last,
 				"Operating system:\n"
-				" Name:    Mac OS X\n"
-				" Release: %d.%d.%d\n"
-				" Machine: %s\n"
-				" Min Ver: %d\n\n",
+				" Name:     Mac OS X\n"
+				" Release:  %d.%d.%d\n"
+				" Machine:  %s\n"
+				" Min Ver:  %d\n",
 				ver_maj, ver_min, ver_bug,
 				arch != NULL ? arch->description : "unknown",
 				MAC_OS_X_VERSION_MIN_REQUIRED
@@ -226,6 +227,13 @@ void CDECL HandleCrash(int signum)
 	if (GamelogTestEmergency()) {
 		ShowMacDialog("A serious fault condition occured in the game. The game will shut down.",
 				"As you loaded an emergency savegame no crash information will be generated.\n",
+				"Quit");
+		abort();
+	}
+
+	if (SaveloadCrashWithMissingNewGRFs()) {
+		ShowMacDialog("A serious fault condition occured in the game. The game will shut down.",
+				"As you loaded an savegame for which you do not have the required NewGRFs no crash information will be generated.\n",
 				"Quit");
 		abort();
 	}

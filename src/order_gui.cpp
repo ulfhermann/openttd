@@ -10,12 +10,9 @@
 /** @file order_gui.cpp GUI related to orders. */
 
 #include "stdafx.h"
-#include "window_gui.h"
 #include "command_func.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "depot_base.h"
-#include "vehicle_base.h"
 #include "vehicle_gui.h"
 #include "roadveh.h"
 #include "timetable.h"
@@ -31,6 +28,7 @@
 #include "network/network.h"
 #include "station_base.h"
 #include "waypoint_base.h"
+#include "core/geometry_func.hpp"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -778,9 +776,9 @@ public:
 				if (from == to) break; // no need to change anything
 
 				if (from != this->selected_order) {
-					/* Moving from preceeding order? */
+					/* Moving from preceding order? */
 					this->selected_order -= (int)(from <= this->selected_order);
-					/* Moving to   preceeding order? */
+					/* Moving to   preceding order? */
 					this->selected_order += (int)(to   <= this->selected_order);
 					break;
 				}
@@ -987,7 +985,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case ORDER_WIDGET_ORDER_LIST: {

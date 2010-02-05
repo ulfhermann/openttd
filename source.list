@@ -58,6 +58,7 @@ settings.cpp
 signal.cpp
 signs.cpp
 sound.cpp
+sprite.cpp
 spritecache.cpp
 station.cpp
 string.cpp
@@ -473,6 +474,8 @@ saveload/waypoint_sl.cpp
 
 # Tables
 table/airport_defaults.h
+table/airporttile_ids.h
+table/airporttiles.h
 table/airport_movement.h
 table/animcursors.h
 table/autorail.h
@@ -800,6 +803,8 @@ network/core/tcp_content.cpp
 network/core/tcp_content.h
 network/core/tcp_game.cpp
 network/core/tcp_game.h
+network/core/tcp_http.cpp
+network/core/tcp_http.h
 network/core/udp.cpp
 network/core/udp.h
 

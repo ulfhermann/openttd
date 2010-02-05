@@ -14,10 +14,11 @@
 #include "../strings_func.h"
 #include "../date_func.h"
 #include "../fios.h"
-#include "network_internal.h"
 #include "network_client.h"
 #include "network_gui.h"
 #include "network_gamelist.h"
+#include "network.h"
+#include "network_base.h"
 #include "../gui.h"
 #include "network_udp.h"
 #include "../window_func.h"
@@ -27,6 +28,7 @@
 #include "../sortlist_type.h"
 #include "../company_base.h"
 #include "../company_func.h"
+#include "../core/geometry_func.hpp"
 
 #include "table/strings.h"
 #include "../table/sprites.h"
@@ -656,7 +658,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		this->field = widget;
 		switch (widget) {
@@ -695,6 +697,9 @@ public:
 				this->server = (id_v < this->servers.Length()) ? this->servers[id_v] : NULL;
 				this->list_pos = (server == NULL) ? SLP_INVALID : id_v;
 				this->SetDirty();
+
+				/* FIXME the disabling should go into some InvalidateData, which is called instead of the SetDirty */
+				if (click_count > 1 && !this->IsWidgetDisabled(NGWW_JOIN)) this->OnClick(pt, NGWW_JOIN, 1);
 			} break;
 
 			case NGWW_LASTJOINED: {
@@ -711,6 +716,9 @@ public:
 					}
 					this->ScrollToSelectedServer();
 					this->SetDirty();
+
+					/* FIXME the disabling should go into some InvalidateData, which is called instead of the SetDirty */
+					if (click_count > 1 && !this->IsWidgetDisabled(NGWW_JOIN)) this->OnClick(pt, NGWW_JOIN, 1);
 				}
 			} break;
 
@@ -750,14 +758,6 @@ public:
 			case NGWW_NEWGRF: // NewGRF Settings
 				if (this->server != NULL) ShowNewGRFSettings(false, false, false, &this->server->info.grfconfig);
 				break;
-		}
-	}
-
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget == NGWW_MATRIX || widget == NGWW_LASTJOINED) {
-			/* is the Join button enabled? */
-			if (!this->IsWidgetDisabled(NGWW_JOIN)) this->OnClick(pt, NGWW_JOIN);
 		}
 	}
 
@@ -1155,7 +1155,7 @@ struct NetworkStartServerWindow : public QueryStringBaseWindow {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		this->field = widget;
 		switch (widget) {
@@ -1619,7 +1619,7 @@ struct NetworkLobbyWindow : public Window {
 		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_NETWORK_GAME_LOBBY_PLAYERS); // players
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case NLWW_CANCEL:   // Cancel button
@@ -1634,6 +1634,9 @@ struct NetworkLobbyWindow : public Window {
 				id_v += this->vscroll.GetPosition();
 				this->company = (id_v >= this->server->info.companies_on) ? INVALID_COMPANY : NetworkLobbyFindCompanyIndex(id_v);
 				this->SetDirty();
+
+				/* FIXME the disabling should go into some InvalidateData, which is called instead of the SetDirty */
+				if (click_count > 1 && !this->IsWidgetDisabled(NLWW_JOIN)) this->OnClick(pt, NLWW_JOIN, 1);
 			} break;
 
 			case NLWW_JOIN:     // Join company
@@ -1655,14 +1658,6 @@ struct NetworkLobbyWindow : public Window {
 				/* Clear the information so removed companies don't remain */
 				memset(this->company_info, 0, sizeof(this->company_info));
 				break;
-		}
-	}
-
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget == NLWW_MATRIX) {
-			/* is the Join button enabled? */
-			if (!this->IsWidgetDisabled(NLWW_JOIN)) this->OnClick(pt, NLWW_JOIN);
 		}
 	}
 
@@ -2083,7 +2078,7 @@ struct NetworkClientListWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		/* Show the popup with option */
 		if (this->selected_item != -1) {
@@ -2216,7 +2211,7 @@ struct NetworkJoinStatusWindow : Window {
 		size->width = width + WD_FRAMERECT_LEFT + WD_FRAMERECT_BOTTOM + 10;
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget == NJSW_CANCELOK) { // Disconnect button
 			NetworkDisconnect();
@@ -2302,7 +2297,7 @@ struct NetworkCompanyPasswordWindow : public QueryStringBaseWindow {
 		this->DrawEditBox(NCPWW_PASSWORD);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case NCPWW_OK:

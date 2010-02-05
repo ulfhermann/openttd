@@ -13,10 +13,11 @@
 #define SETTINGS_FUNC_H
 
 #include "core/smallvec_type.hpp"
+#include "company_type.h"
 
-void IConsoleSetSetting(const char *name, const char *value);
+void IConsoleSetSetting(const char *name, const char *value, bool force_newgame = false);
 void IConsoleSetSetting(const char *name, int32 value);
-void IConsoleGetSetting(const char *name);
+void IConsoleGetSetting(const char *name, bool force_newgame = false);
 void IConsoleListSettings(const char *prefilter);
 
 void LoadFromConfig();
