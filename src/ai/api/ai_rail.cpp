@@ -16,8 +16,10 @@
 #include "../../debug.h"
 #include "../../station_base.h"
 #include "../../company_func.h"
+#include "../../newgrf.h"
 #include "../../newgrf_generic.h"
 #include "../../newgrf_station.h"
+#include "../../economy_func.h"
 
 /* static */ bool AIRail::IsRailTile(TileIndex tile)
 {
@@ -330,7 +332,7 @@ static uint32 SimulateDrag(TileIndex from, TileIndex tile, TileIndex *to)
 			(::TileX(from) == ::TileX(tile) && ::TileX(tile) == ::TileX(to)) ||
 			(::TileY(from) == ::TileY(tile) && ::TileY(tile) == ::TileY(to)));
 
-	uint32 p2 = SimulateDrag(from, tile, &to);
+	uint32 p2 = SimulateDrag(from, tile, &to) | 1 << 8;
 	return AIObject::DoCommand(tile, to, p2, CMD_BUILD_RAILROAD_TRACK);
 }
 
@@ -452,4 +454,18 @@ static bool IsValidSignalType(int signal_type)
 	EnforcePrecondition(false, track != INVALID_TRACK);
 
 	return AIObject::DoCommand(tile, track, 0, CMD_REMOVE_SIGNALS);
+}
+
+/* static */ Money AIRail::GetBuildCost(RailType railtype, BuildType build_type)
+{
+	if (!AIRail::IsRailTypeAvailable(railtype)) return -1;
+
+	switch (build_type) {
+		case BT_TRACK:    return ::RailBuildCost((::RailType)railtype);
+		case BT_SIGNAL:   return ::GetPrice(PR_BUILD_SIGNALS, 1, NULL);
+		case BT_DEPOT:    return ::GetPrice(PR_BUILD_DEPOT_TRAIN, 1, NULL);
+		case BT_STATION:  return ::GetPrice(PR_BUILD_STATION_RAIL, 1, NULL) + ::GetPrice(PR_BUILD_STATION_RAIL_LENGTH, 1, NULL);
+		case BT_WAYPOINT: return ::GetPrice(PR_BUILD_WAYPOINT_RAIL, 1, NULL);
+		default: return -1;
+	}
 }

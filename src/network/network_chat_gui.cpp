@@ -24,8 +24,10 @@
 #include "../querystring_gui.h"
 #include "../town.h"
 #include "../window_func.h"
-#include "network_internal.h"
+#include "../core/geometry_func.hpp"
+#include "network.h"
 #include "network_client.h"
+#include "network_base.h"
 
 #include "table/strings.h"
 
@@ -478,7 +480,7 @@ struct NetworkChatWindow : public QueryStringBaseWindow {
 		DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, this->dest_string, TC_BLACK, SA_RIGHT);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			/* Send */
