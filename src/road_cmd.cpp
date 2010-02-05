@@ -351,25 +351,6 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 }
 
 
-/** Delete a piece of road.
- * @param tile tile where to remove road from
- * @param flags operation to perform
- * @param p1 bit 0..3 road pieces to remove (RoadBits)
- *           bit 4..5 road type
- * @param p2 unused
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdRemoveRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	RoadType rt = (RoadType)GB(p1, 4, 2);
-	if (!IsValidRoadType(rt)) return CMD_ERROR;
-
-	RoadBits pieces = Extract<RoadBits, 0>(p1);
-
-	return RemoveRoad(tile, flags, pieces, rt, true);
-}
-
 /**
  * Calculate the costs for roads on slopes
  *  Aside modify the RoadBits to fit on the slopes
@@ -483,6 +464,7 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	Slope tileh = GetTileSlope(tile, NULL);
 
+	bool tile_cleared = false; // Used to remember that the tile was cleared during test run
 	switch (GetTileType(tile)) {
 		case MP_ROAD:
 			switch (GetRoadTileType(tile)) {
@@ -601,6 +583,7 @@ do_clear:;
 			CommandCost ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 			if (ret.Failed()) return ret;
 			cost.AddCost(ret);
+			tile_cleared = true;
 		} break;
 	}
 
@@ -615,7 +598,7 @@ do_clear:;
 		cost.AddCost(ret);
 	}
 
-	if (IsTileType(tile, MP_ROAD)) {
+	if (!tile_cleared && IsTileType(tile, MP_ROAD)) {
 		/* Don't put the pieces that already exist */
 		pieces &= ComplementRoadBits(existing);
 
@@ -637,10 +620,10 @@ do_clear:;
 		}
 	}
 
-	if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
+	if (!tile_cleared && !EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
 
 	cost.AddCost(CountBits(pieces) * _price[PR_BUILD_ROAD]);
-	if (IsTileType(tile, MP_TUNNELBRIDGE)) {
+	if (!tile_cleared && IsTileType(tile, MP_TUNNELBRIDGE)) {
 		/* Pay for *every* tile of the bridge or tunnel */
 		cost.MultiplyCost(GetTunnelBridgeLength(GetOtherTunnelBridgeEnd(tile), tile) + 2);
 	}
@@ -707,6 +690,7 @@ do_clear:;
  * - p2 = (bit 2) - direction: 0 = along x-axis, 1 = along y-axis (p2 & 4)
  * - p2 = (bit 3 + 4) - road type
  * - p2 = (bit 5) - set road direction
+ * - p2 = (bit 6) - 0 = build up to an obstacle, 1 = fail if an obstacle is found (used for AIs).
  * @param text unused
  * @return the cost of this operation or an error
  */
@@ -759,7 +743,10 @@ CommandCost CmdBuildLongRoad(TileIndex start_tile, DoCommandFlag flags, uint32 p
 		_error_message = INVALID_STRING_ID;
 		CommandCost ret = DoCommand(tile, drd << 6 | rt << 4 | bits, 0, flags, CMD_BUILD_ROAD);
 		if (ret.Failed()) {
-			if (_error_message != STR_ERROR_ALREADY_BUILT) break;
+			if (_error_message != STR_ERROR_ALREADY_BUILT) {
+				if (HasBit(p2, 6)) return CMD_ERROR;
+				break;
+			}
 		} else {
 			had_success = true;
 			/* Only pay for the upgrade on one side of the bridges and tunnels */
