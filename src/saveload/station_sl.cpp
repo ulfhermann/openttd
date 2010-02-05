@@ -15,7 +15,6 @@
 #include "../roadstop_base.h"
 #include "../vehicle_base.h"
 #include "../newgrf_station.h"
-#include "../station_map.h"
 
 #include "saveload.h"
 #include "table/strings.h"
@@ -222,21 +221,31 @@ static const SaveLoad _station_speclist_desc[] = {
 
 static StationID _station_id;
 
-static const SaveLoad _linkstat_desc[] = {
+const SaveLoad *GetLinkStatDesc() {
+	static const SaveLoad linkstat_desc[] = {
 		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		 SLE_END()
-};
+	};
+	
+	return linkstat_desc;
+}
 
-static const SaveLoad _flowstat_desc[] = {
+const SaveLoad *GetFlowStatDesc() {
+	static const SaveLoad _flowstat_desc[] = {
 		SLEG_CONDVAR(             _station_id,         SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(FlowStat,    via,                 SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    length,              SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(FlowStat,    planned,             SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(FlowStat,    sent,                SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
 		 SLE_END()
-};
+	};
+
+	return _flowstat_desc;
+}
 
 void CountFlows(FlowStatMap & flows) {
 	_num_flows = 0;
@@ -267,7 +276,7 @@ const SaveLoad *GetGoodsDesc()
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply.supply,       SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
 		SLEG_CONDVAR(            _num_flows,          SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
@@ -416,15 +425,14 @@ static void RealSave_STNN(BaseStation *bst)
 			SlObject(ge, GetGoodsDesc());
 			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
 				_station_id = i->first;
-				assert(i->second.capacity > 0);
-				SlObject(&(i->second), _linkstat_desc);
+				SlObject(&(i->second), GetLinkStatDesc());
 			}
 			for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
 				_station_id = i->first;
 				FlowStatSet & flow_set = i->second;
 				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
 					FlowStat fs = *j;
-					SlObject(&fs, _flowstat_desc);
+					SlObject(&fs, GetFlowStatDesc());
 				}
 			}
 		}
@@ -464,13 +472,13 @@ static void Load_STNN()
 				SlObject(ge, GetGoodsDesc());
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {
-					SlObject(&ls, _linkstat_desc);
-					assert(ls.capacity > 0);
+					SlObject(&ls, GetLinkStatDesc());
+					assert(!ls.IsNull());
 					stats[_station_id] = ls;
 				}
 				FlowStat fs;
 				for (uint32 i = 0; i < _num_flows; ++i) {
-					SlObject(&fs, _flowstat_desc);
+					SlObject(&fs, GetFlowStatDesc());
 					flows[_station_id].insert(fs);
 				}
 			}

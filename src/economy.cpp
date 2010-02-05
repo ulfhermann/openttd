@@ -10,7 +10,6 @@
 /** @file economy.cpp Handling of the economy. */
 
 #include "stdafx.h"
-#include "tile_cmd.h"
 #include "company_func.h"
 #include "command_func.h"
 #include "industry.h"
@@ -36,7 +35,6 @@
 #include "date_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
-#include "gfx_func.h"
 #include "autoreplace_func.h"
 #include "company_gui.h"
 #include "signs_base.h"
@@ -46,6 +44,8 @@
 #include "waypoint_base.h"
 #include "economy_base.h"
 #include "core/pool_func.hpp"
+#include "newgrf.h"
+#include "engine_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -110,7 +110,16 @@ Prices _price;
 Money _additional_cash_required;
 static PriceMultipliers _price_base_multiplier;
 
-Money CalculateCompanyValue(const Company *c)
+/**
+ * Calculate the value of the company. That is the value of all
+ * assets (vehicles, stations, etc) and money minus the loan,
+ * except when including_loan is \c false which is useful when
+ * we want to calculate the value for bankruptcy.
+ * @param c              the company to get the value of.
+ * @param including_loan include the loan in the company value.
+ * @return the value of the company.
+ */
+Money CalculateCompanyValue(const Company *c, bool including_loan)
 {
 	Owner owner = c->index;
 	Money value = 0;
@@ -137,7 +146,7 @@ Money CalculateCompanyValue(const Company *c)
 	}
 
 	/* Add real money value */
-	value -= c->current_loan;
+	if (including_loan) value -= c->current_loan;
 	value += c->money;
 
 	return max(value, (Money)1);
@@ -507,7 +516,7 @@ static void CompanyCheckBankrupt(Company *c)
 		case 3: {
 			/* Check if the company has any value.. if not, declare it bankrupt
 			 *  right now */
-			Money val = CalculateCompanyValue(c);
+			Money val = CalculateCompanyValue(c, false);
 			if (val > 0) {
 				c->bankrupt_value = val;
 				c->bankrupt_asked = 1 << c->index; // Don't ask the owner

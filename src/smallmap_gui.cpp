@@ -17,7 +17,6 @@
 #include "window_gui.h"
 #include "tree_map.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "town.h"
 #include "blitter/factory.hpp"
 #include "tunnelbridge_map.h"
@@ -26,6 +25,7 @@
 #include "vehicle_base.h"
 #include "sound_func.h"
 #include "window_func.h"
+#include "company_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -410,19 +410,6 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile)
 	return _owner_colours[o];
 }
 
-
-static const uint32 _smallmap_mask_left[3] = {
-	MKCOLOUR(0xFF000000),
-	MKCOLOUR(0xFFFF0000),
-	MKCOLOUR(0xFFFFFF00),
-};
-
-static const uint32 _smallmap_mask_right[] = {
-	MKCOLOUR(0x000000FF),
-	MKCOLOUR(0x0000FFFF),
-	MKCOLOUR(0x00FFFFFF),
-};
-
 /* Each tile has 4 x pixels and 1 y pixel */
 
 /** Holds function pointers to determine tile colour in the smallmap for each smallmap mode. */
@@ -462,33 +449,55 @@ class SmallMapWindow : public Window {
 	uint min_number_of_fixed_rows; ///< Minimal number of rows in the legends for the fixed layouts only (all except #SMT_INDUSTRY).
 	uint column_width;             ///< Width of a column in the #SM_WIDGET_LEGEND widget.
 
-	int32 scroll_x;
-	int32 scroll_y;
-	int32 subscroll;
+	int32 scroll_x;  ///< Horizontal world coordinate of the base tile left of the top-left corner of the smallmap display.
+	int32 scroll_y;  ///< Vertical world coordinate of the base tile left of the top-left corner of the smallmap display.
+	int32 subscroll; ///< Number of pixels (0..3) between the right end of the base tile and the pixel at the top-left corner of the smallmap display.
 
 	static const uint8 FORCE_REFRESH_PERIOD = 0x1F; ///< map is redrawn after that many ticks
 	uint8 refresh; ///< refresh counter, zeroed every FORCE_REFRESH_PERIOD ticks
 
 	/**
-	 * Remap a map's tile X coordinate (TileX(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_x the tile's X coordinate.
-	 * @return the X coordinate to draw on.
+	 * Remap tile to location on this smallmap.
+	 * @param tile_x X coordinate of the tile.
+	 * @param tile_y Y coordinate of the tile.
+	 * @return Position to draw on.
 	 */
-	inline int RemapX(int tile_x) const
+	FORCEINLINE Point RemapTile(int tile_x, int tile_y) const
 	{
-		return tile_x - this->scroll_x / TILE_SIZE;
+		return RemapCoords(tile_x - this->scroll_x / TILE_SIZE,
+				tile_y - this->scroll_y / TILE_SIZE, 0);
 	}
 
 	/**
-	 * Remap a map's tile Y coordinate (TileY(TileIndex)) to
-	 * a location on this smallmap.
-	 * @param tile_y the tile's Y coordinate.
-	 * @return the Y coordinate to draw on.
+	 * Determine the tile relative to the base tile of the smallmap, and the pixel position at
+	 * that tile for a point in the smallmap.
+	 * @param px Horizontal coordinate of the pixel.
+	 * @param py Vertical coordinate of the pixel.
+	 * @param sub[out] Pixel position at the tile (0..3).
+	 * @return Tile being displayed at the given position relative to #scroll_x and #scroll_y.
+	 * @note The #subscroll offset is already accounted for.
 	 */
-	inline int RemapY(int tile_y) const
+	FORCEINLINE Point PixelToTile(int dx, int dy, int *sub) const
 	{
-		return tile_y - this->scroll_y / TILE_SIZE;
+		dx += this->subscroll;  // Total horizontal offset.
+
+		/* For each two rows down, add a x and a y tile, and
+		 * For each four pixels to the right, move a tile to the right. */
+		Point pt = {(dy >> 1) - (dx >> 2), (dy >> 1) + (dx >> 2)};
+		dx &= 3;
+
+		if (dy & 1) { // Odd number of rows, handle the 2 pixel shift.
+			if (dx < 2) {
+				pt.x++;
+				dx += 2;
+			} else {
+				pt.y++;
+				dx -= 2;
+			}
+		}
+
+		*sub = dx;
+		return pt;
 	}
 
 	/**
@@ -500,15 +509,16 @@ class SmallMapWindow : public Window {
 	 * @param yc The Y coordinate of the first tile in the column
 	 * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
 	 * @param reps Number of lines to draw
-	 * @param mask Some bytes may need to be masked out when at the border of drawn area
+	 * @param start_pos Position of first pixel to draw.
+	 * @param end_pos Position of last pixel to draw (exclusive).
 	 * @param blitter current blitter
 	 * @param proc Pointer to the colour function
+	 * @note If pixel position is below \c 0, skip drawing.
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, uint32 mask, Blitter *blitter, GetSmallMapPixels *proc) const
+	void DrawSmallMapStuff(void *dst, uint xc, uint yc, int pitch, int reps, int start_pos, int end_pos, Blitter *blitter, GetSmallMapPixels *proc) const
 	{
 		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
-		void *dst_ptr_end = blitter->MoveTo(dst_ptr_abs_end, -4, 0);
 
 		do {
 			/* Check if the tile (xc,yc) is within the map range */
@@ -518,21 +528,12 @@ class SmallMapWindow : public Window {
 				if (dst < _screen.dst_ptr) continue;
 				if (dst >= dst_ptr_abs_end) continue;
 
-				uint32 val = proc(TileXY(xc, yc)) & mask;
+				uint32 val = proc(TileXY(xc, yc));
 				uint8 *val8 = (uint8 *)&val;
-
-				if (dst <= dst_ptr_end) {
-					blitter->SetPixelIfEmpty(dst, 0, 0, val8[0]);
-					blitter->SetPixelIfEmpty(dst, 1, 0, val8[1]);
-					blitter->SetPixelIfEmpty(dst, 2, 0, val8[2]);
-					blitter->SetPixelIfEmpty(dst, 3, 0, val8[3]);
-				} else {
-					/* It happens that there are only 1, 2 or 3 pixels left to fill, so
-					 * in that special case, write till the end of the video-buffer */
-					int i = 0;
-					do {
-						blitter->SetPixelIfEmpty(dst, 0, 0, val8[i]);
-					} while (i++, dst = blitter->MoveTo(dst, 1, 0), dst < dst_ptr_abs_end);
+				int idx = max(0, -start_pos);
+				for (int pos = max(0, start_pos); pos < end_pos; pos++) {
+					blitter->SetPixel(dst, idx, 0, val8[idx]);
+					idx++;
 				}
 			}
 		/* Switch to next tile in the column */
@@ -552,23 +553,13 @@ class SmallMapWindow : public Window {
 			if (v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) continue;
 
 			/* Remap into flat coordinates. */
-			Point pt = RemapCoords(
-					this->RemapX(v->x_pos / TILE_SIZE),
-					this->RemapY(v->y_pos / TILE_SIZE),
-					0);
-			int x = pt.x;
-			int y = pt.y;
+			Point pt = this->RemapTile(v->x_pos / TILE_SIZE, v->y_pos / TILE_SIZE);
 
-			/* Check if y is out of bounds? */
-			y -= dpi->top;
-			if (!IsInsideMM(y, 0, dpi->height)) continue;
+			int y = pt.y - dpi->top;
+			if (!IsInsideMM(y, 0, dpi->height)) continue; // y is out of bounds.
 
-			/* Default is to draw both pixels. */
-			bool skip = false;
-
-			/* Offset X coordinate */
-			x -= this->subscroll + 3 + dpi->left;
-
+			bool skip = false; // Default is to draw both pixels.
+			int x = pt.x - this->subscroll - 3 - dpi->left; // Offset X coordinate.
 			if (x < 0) {
 				/* if x+1 is 0, that means we're on the very left edge,
 				 * and should thus only draw a single pixel */
@@ -598,10 +589,7 @@ class SmallMapWindow : public Window {
 		const Town *t;
 		FOR_ALL_TOWNS(t) {
 			/* Remap the town coordinate */
-			Point pt = RemapCoords(
-					this->RemapX(TileX(t->xy)),
-					this->RemapY(TileY(t->xy)),
-					0);
+			Point pt = this->RemapTile(TileX(t->xy), TileY(t->xy));
 			int x = pt.x - this->subscroll - (t->sign.width_small >> 1);
 			int y = pt.y;
 
@@ -706,54 +694,25 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		int tile_x = this->scroll_x / TILE_SIZE;
-		int tile_y = this->scroll_y / TILE_SIZE;
-
-		int dx = dpi->left + this->subscroll;
-		tile_x -= dx / 4;
-		tile_y += dx / 4;
-		dx &= 3;
-
-		int dy = dpi->top;
-		tile_x += dy / 2;
-		tile_y += dy / 2;
-
-		if (dy & 1) {
-			tile_x++;
-			dx += 2;
-			if (dx > 3) {
-				dx -= 4;
-				tile_x--;
-				tile_y++;
-			}
-		}
+		/* Which tile is displayed at (dpi->left, dpi->top)? */
+		int dx;
+		Point tile = this->PixelToTile(dpi->left, dpi->top, &dx);
+		int tile_x = this->scroll_x / TILE_SIZE + tile.x;
+		int tile_y = this->scroll_y / TILE_SIZE + tile.y;
 
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
 		int y = 0;
 
 		for (;;) {
-			uint32 mask = 0xFFFFFFFF;
-
 			/* Distance from left edge */
 			if (x >= -3) {
-				if (x < 0) {
-					/* Mask to use at the left edge */
-					mask = _smallmap_mask_left[x + 3];
-				}
+				if (x >= dpi->width) break; // Exit the loop.
 
-				/* Distance from right edge */
-				int t = dpi->width - x;
-				if (t < 4) {
-					if (t <= 0) break; // Exit loop
-					/* Mask to use at the right edge */
-					mask &= _smallmap_mask_right[t - 1];
-				}
-
-				/* Number of lines */
-				int reps = (dpi->height - y + 1) / 2;
+				int end_pos = min(dpi->width, x + 4);
+				int reps = (dpi->height - y + 1) / 2; // Number of lines.
 				if (reps > 0) {
-					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, mask, blitter, _smallmap_draw_procs[this->map_type]);
+					this->DrawSmallMapStuff(ptr, tile_x, tile_y, dpi->pitch * 2, reps, x, end_pos, blitter, _smallmap_draw_procs[this->map_type]);
 				}
 			}
 
@@ -939,7 +898,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SM_WIDGET_MAP: { // Map window
@@ -953,11 +912,12 @@ public:
 				 */
 				_left_button_clicked = false;
 
+				const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				w->viewport->dest_scrollpos_x = pt.x + ((_cursor.pos.x - this->left + 2) << 4) - (w->viewport->virtual_width >> 1);
-				w->viewport->dest_scrollpos_y = pt.y + ((_cursor.pos.y - this->top - 16) << 4) - (w->viewport->virtual_height >> 1);
+				w->viewport->dest_scrollpos_x = pt.x + ((_cursor.pos.x - this->left + wid->pos_x) << 4) - (w->viewport->virtual_width  >> 1);
+				w->viewport->dest_scrollpos_y = pt.y + ((_cursor.pos.y - this->top  - wid->pos_y) << 4) - (w->viewport->virtual_height >> 1);
 
 				this->SetDirty();
 			} break;
@@ -1070,27 +1030,11 @@ public:
 	{
 		_cursor.fix_at = true;
 
-		int x = this->scroll_x;
-		int y = this->scroll_y;
-
-		int sub = this->subscroll + delta.x;
-
-		x -= (sub >> 2) << 4;
-		y += (sub >> 2) << 4;
-		sub &= 3;
-
-		x += (delta.y >> 1) << 4;
-		y += (delta.y >> 1) << 4;
-
-		if (delta.y & 1) {
-			x += TILE_SIZE;
-			sub += 2;
-			if (sub > 3) {
-				sub -= 4;
-				x -= TILE_SIZE;
-				y += TILE_SIZE;
-			}
-		}
+		/* While tile is at (delta.x, delta.y)? */
+		int sub;
+		Point pt = this->PixelToTile(delta.x, delta.y, &sub);
+		int x = this->scroll_x + pt.x * TILE_SIZE;
+		int y = this->scroll_y + pt.y * TILE_SIZE;
 
 		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 		int hx = wi->current_x / 2;

@@ -62,6 +62,7 @@ settings.cpp
 signal.cpp
 signs.cpp
 sound.cpp
+sprite.cpp
 spritecache.cpp
 station.cpp
 string.cpp
@@ -102,7 +103,6 @@ window.cpp
 #end
 aircraft.h
 airport.h
-airport_movement.h
 animated_tile_func.h
 articulated_vehicles.h
 autoreplace_base.h
@@ -186,12 +186,14 @@ linkgraph/demands.h
 linkgraph/demand_settings.h
 linkgraph/flowmapper.h
 linkgraph/linkgraph.h
-linkgraph/linkgraph_types.h
+linkgraph/linkgraph_type.h
 linkgraph/mcf.h
 livery.h
 map_func.h
 map_type.h
 mixer.h
+moving_average.h
+moving_average.cpp
 network/network.h
 network/network_base.h
 network/network_client.h
@@ -485,6 +487,10 @@ saveload/vehicle_sl.cpp
 saveload/waypoint_sl.cpp
 
 # Tables
+table/airport_defaults.h
+table/airporttile_ids.h
+table/airporttiles.h
+table/airport_movement.h
 table/animcursors.h
 table/autorail.h
 table/bridge_land.h
@@ -811,6 +817,8 @@ network/core/tcp_content.cpp
 network/core/tcp_content.h
 network/core/tcp_game.cpp
 network/core/tcp_game.h
+network/core/tcp_http.cpp
+network/core/tcp_http.h
 network/core/udp.cpp
 network/core/udp.h
 

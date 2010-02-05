@@ -14,7 +14,6 @@
 #include "window_gui.h"
 #include "textbuf_gui.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "company_func.h"
 #include "command_func.h"
 #include "network/network.h"
@@ -28,6 +27,9 @@
 #include "date_func.h"
 #include "widgets/dropdown_type.h"
 #include "tilehighlight_func.h"
+#include "sprite.h"
+#include "company_base.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 
@@ -431,7 +433,7 @@ struct CompanyFinancesWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case CFW_TOGGLE_SIZE: // toggle size
@@ -727,7 +729,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			/* Livery Class buttons */
@@ -844,7 +846,7 @@ void DrawCompanyManagerFace(CompanyManagerFace cmf, int colour, int x, int y)
 	bool has_moustache   = !HasBit(ge, GENDER_FEMALE) && GetCompanyManagerFaceBits(cmf, CMFV_HAS_MOUSTACHE,   ge) != 0;
 	bool has_tie_earring = !HasBit(ge, GENDER_FEMALE) || GetCompanyManagerFaceBits(cmf, CMFV_HAS_TIE_EARRING, ge) != 0;
 	bool has_glasses     = GetCompanyManagerFaceBits(cmf, CMFV_HAS_GLASSES, ge) != 0;
-	SpriteID pal;
+	PaletteID pal;
 
 	/* Modify eye colour palette only if 2 or more valid values exist */
 	if (_cmf_info[CMFV_EYE_COLOUR].valid_values[ge] < 2) {
@@ -1391,7 +1393,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			/* Toggle size, advanced/simple face selection */
@@ -1914,7 +1916,7 @@ struct CompanyWindow : Window
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case CW_WIDGET_NEW_FACE: DoSelectCompanyManagerFace(this); break;
@@ -2113,7 +2115,7 @@ struct BuyCompanyWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case BCW_NO:

@@ -14,7 +14,6 @@
 
 #include "core/overflowsafe_type.hpp"
 #include "core/enum_type.hpp"
-#include "cargo_type.h"
 
 typedef OverflowSafeInt64 Money;
 
@@ -90,7 +89,7 @@ enum Price {
 	PR_CLEAR_GRASS,
 	PR_CLEAR_ROUGH,
 	PR_CLEAR_ROCKS,
-	PR_CLEAR_FILEDS,
+	PR_CLEAR_FIELDS,
 	PR_CLEAR_TREES,
 	PR_CLEAR_RAIL,
 	PR_CLEAR_SIGNALS,

@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "openttd.h"
-#include "window_gui.h"
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "vehicle_gui.h"
@@ -21,12 +20,13 @@
 #include "window_func.h"
 #include "vehicle_func.h"
 #include "autoreplace_gui.h"
-#include "gfx_func.h"
 #include "company_func.h"
 #include "widgets/dropdown_type.h"
 #include "widgets/dropdown_func.h"
 #include "tilehighlight_func.h"
 #include "vehicle_gui_base.h"
+#include "core/geometry_func.hpp"
+#include "company_base.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -421,7 +421,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case GRP_WIDGET_SORT_BY_ORDER: // Flip sorting method ascending/descending
@@ -498,7 +498,7 @@ public:
 			}
 
 			case GRP_WIDGET_RENAME_GROUP: // Rename the selected roup
-				this->ShowRenameGroupWindow(this->group_sel);
+				this->ShowRenameGroupWindow(this->group_sel, false);
 				break;
 
 			case GRP_WIDGET_AVAILABLE_VEHICLES:
@@ -658,12 +658,17 @@ public:
 		this->SetWidgetDirty(GRP_WIDGET_LIST_VEHICLE);
 	}
 
-	void ShowRenameGroupWindow(GroupID group)
+	void ShowRenameGroupWindow(GroupID group, bool empty)
 	{
 		assert(Group::IsValidID(group));
 		this->group_rename = group;
-		SetDParam(0, group);
-		ShowQueryString(STR_GROUP_NAME, STR_GROUP_RENAME_CAPTION, MAX_LENGTH_GROUP_NAME_BYTES, MAX_LENGTH_GROUP_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
+		/* Show empty query for new groups */
+		StringID str = STR_EMPTY;
+		if (!empty) {
+			SetDParam(0, group);
+			str = STR_GROUP_NAME;
+		}
+		ShowQueryString(str, STR_GROUP_RENAME_CAPTION, MAX_LENGTH_GROUP_NAME_BYTES, MAX_LENGTH_GROUP_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
 	}
 
 	/**
@@ -730,7 +735,7 @@ void CcCreateGroup(const CommandCost &result, TileIndex tile, uint32 p1, uint32 
 	assert(p1 <= VEH_AIRCRAFT);
 
 	VehicleGroupWindow *w = FindVehicleGroupWindow((VehicleType)p1, _current_company);
-	if (w != NULL) w->ShowRenameGroupWindow(_new_group_id);
+	if (w != NULL) w->ShowRenameGroupWindow(_new_group_id, true);
 }
 
 /**

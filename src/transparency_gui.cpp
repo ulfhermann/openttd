@@ -10,7 +10,6 @@
 /** @file transparency_gui.cpp The transparency GUI. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "window_gui.h"
 #include "transparency.h"
 #include "sound_func.h"
@@ -83,7 +82,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget >= TTW_WIDGET_BEGIN && widget < TTW_WIDGET_END) {
 			if (_ctrl_pressed) {

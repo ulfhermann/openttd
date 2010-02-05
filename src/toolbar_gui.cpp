@@ -10,7 +10,6 @@
 /** @file toolbar_gui.cpp Code related to the (main) toolbar. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "gui.h"
 #include "window_gui.h"
 #include "window_func.h"
@@ -41,6 +40,7 @@
 #include "tilehighlight_func.h"
 #include "rail.h"
 #include "widgets/dropdown_type.h"
+#include "company_base.h"
 
 #include "network/network.h"
 #include "network/network_gui.h"
@@ -1233,7 +1233,7 @@ struct MainToolbarWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (_game_mode != GM_MENU && !this->IsWidgetDisabled(widget)) _toolbar_button_procs[widget](this);
 	}
@@ -1470,7 +1470,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (_game_mode == GM_MENU) return;
 		_scen_toolbar_button_procs[widget](this);

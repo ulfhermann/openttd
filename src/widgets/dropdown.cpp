@@ -12,7 +12,6 @@
 #include "../stdafx.h"
 #include "../window_gui.h"
 #include "../strings_func.h"
-#include "../gfx_func.h"
 #include "../window_func.h"
 #include "dropdown_type.h"
 
@@ -248,7 +247,7 @@ struct DropdownWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget != DDM_ITEMS) return;
 		int item;
@@ -261,9 +260,16 @@ struct DropdownWindow : Window {
 
 	virtual void OnTick()
 	{
-		this->vscroll.UpdatePosition(this->scrolling);
-		this->scrolling = 0;
-		this->SetDirty();
+		if (this->scrolling != 0) {
+			int pos = this->vscroll.GetPosition();
+
+			this->vscroll.UpdatePosition(this->scrolling);
+			this->scrolling = 0;
+
+			if (pos != this->vscroll.GetPosition()) {
+				this->SetDirty();
+			}
+		}
 	}
 
 	virtual void OnMouseLoop()
@@ -311,8 +317,10 @@ struct DropdownWindow : Window {
 				if (!this->GetDropDownItem(item)) return;
 			}
 
-			this->selected_index = item;
-			this->SetDirty();
+			if (this->selected_index != item) {
+				this->selected_index = item;
+				this->SetDirty();
+			}
 		}
 	}
 };
