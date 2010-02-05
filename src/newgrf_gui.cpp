@@ -14,7 +14,6 @@
 #include "newgrf.h"
 #include "strings_func.h"
 #include "window_func.h"
-#include "gfx_func.h"
 #include "gamelog.h"
 #include "settings_func.h"
 #include "widgets/dropdown_type.h"
@@ -22,6 +21,7 @@
 #include "network/network_content.h"
 #include "sortlist_type.h"
 #include "querystring_gui.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -344,12 +344,7 @@ public:
 		}
 	}
 
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget == ANGRFW_GRF_LIST) this->OnClick(pt, ANGRFW_ADD);
-	}
-
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case ANGRFW_GRF_LIST: {
@@ -364,9 +359,9 @@ public:
 					this->sel_pos = -1;
 				}
 				this->InvalidateData(1);
-				break;
+				if (click_count == 1) break;
 			}
-
+			/* FALL THROUGH */
 			case ANGRFW_ADD: // Add selection to list
 				if (this->sel != NULL) {
 					const GRFConfig *src = this->sel;
@@ -381,11 +376,7 @@ public:
 					}
 
 					/* Copy GRF details from scanned list */
-					GRFConfig *c = CallocT<GRFConfig>(1);
-					*c = *src;
-					c->filename = strdup(src->filename);
-					if (src->name      != NULL) c->name      = strdup(src->name);
-					if (src->info      != NULL) c->info      = strdup(src->info);
+					GRFConfig *c = DuplicateGRFConfig(src);
 					c->next = NULL;
 
 					/* Append GRF config to configuration list */
@@ -667,7 +658,7 @@ struct NewGRFWindow : public Window {
 				for (const GRFConfig *c = this->list; c != NULL; c = c->next, i++) {
 					if (this->vscroll.IsVisible(i)) {
 						const char *text = (c->name != NULL && !StrEmpty(c->name)) ? c->name : c->filename;
-						SpriteID pal;
+						PaletteID pal;
 
 						/* Pick a colour */
 						switch (c->status) {
@@ -709,12 +700,7 @@ struct NewGRFWindow : public Window {
 		}
 	}
 
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget == SNGRFS_FILE_LIST) this->OnClick(pt, SNGRFS_SET_PARAMETERS);
-	}
-
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SNGRFS_PRESET_LIST: {
@@ -772,7 +758,7 @@ struct NewGRFWindow : public Window {
 
 				this->sel = newsel;
 				this->preset = -1;
-				this->InvalidateData();
+				this->InvalidateData(3);
 				this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
 				break;
 			}
@@ -781,7 +767,8 @@ struct NewGRFWindow : public Window {
 				GRFConfig **pc, *c;
 				if (this->sel == NULL) break;
 
-				for (pc = &this->list; (c = *pc) != NULL; pc = &c->next) {
+				int pos = 0;
+				for (pc = &this->list; (c = *pc) != NULL; pc = &c->next, pos++) {
 					if (c->next == this->sel) {
 						c->next = this->sel->next;
 						this->sel->next = c;
@@ -789,6 +776,7 @@ struct NewGRFWindow : public Window {
 						break;
 					}
 				}
+				this->vscroll.ScrollTowards(pos);
 				this->preset = -1;
 				this->InvalidateData();
 				break;
@@ -798,7 +786,8 @@ struct NewGRFWindow : public Window {
 				GRFConfig **pc, *c;
 				if (this->sel == NULL) break;
 
-				for (pc = &this->list; (c = *pc) != NULL; pc = &c->next) {
+				int pos = 1; // Start at 1 as we swap the selected newgrf with the next one
+				for (pc = &this->list; (c = *pc) != NULL; pc = &c->next, pos++) {
 					if (c == this->sel) {
 						*pc = c->next;
 						c->next = c->next->next;
@@ -806,6 +795,7 @@ struct NewGRFWindow : public Window {
 						break;
 					}
 				}
+				this->vscroll.ScrollTowards(pos);
 				this->preset = -1;
 				this->InvalidateData();
 				break;
@@ -821,6 +811,7 @@ struct NewGRFWindow : public Window {
 				this->sel = c;
 
 				this->InvalidateData();
+				if (click_count > 1) this->OnClick(pt, SNGRFS_SET_PARAMETERS, 1);
 				break;
 			}
 

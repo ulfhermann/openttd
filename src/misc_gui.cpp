@@ -33,6 +33,7 @@
 #include "window_func.h"
 #include "tilehighlight_func.h"
 #include "querystring_gui.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 
@@ -188,7 +189,7 @@ public:
 			c->money = INT64_MAX;
 			CommandCost costclear = DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
 			c->money = old_money;
-			if (CmdSucceeded(costclear)) {
+			if (costclear.Succeeded()) {
 				Money cost = costclear.GetCost();
 				if (cost < 0) {
 					cost = -cost; // Negate negative cost to a positive revenue
@@ -350,20 +351,21 @@ static const char * const _credits[] = {
 	"",
 	"The OpenTTD team (in alphabetical order):",
 	"  Albert Hofkamp (Alberth) - GUI expert",
-	"  Jean-Francois Claeys (Belugas) - GUI, newindustries and more",
-	"  Bjarni Corfitzen (Bjarni) - MacOSX port, coder and vehicles",
+	"  Jean-Fran\xC3\xA7ois Claeys (Belugas) - GUI, newindustries and more",
 	"  Matthijs Kooijman (blathijs) - Pathfinder-guru, pool rework",
-	"  Victor Fischer (Celestar) - Programming everywhere you need him to",
 	"  Christoph Elsenhans (frosch) - General coding",
 	"  Lo\xC3\xAF""c Guilloux (glx) - Windows Expert",
 	"  Michael Lutz (michi_cc) - Path based signals",
 	"  Owen Rudge (orudge) - Forum host, OS/2 port",
-	"  Peter Nelson (peter1138) - Spiritual descendant from newGRF gods",
+	"  Peter Nelson (peter1138) - Spiritual descendant from NewGRF gods",
 	"  Remko Bijker (Rubidium) - Lead coder and way more",
 	"  Zden\xC4\x9Bk Sojka (SmatZ) - Bug finder and fixer",
+	"  Jos\xC3\xA9 Soler (Terkhen) - General coding",
 	"  Thijs Marinussen (Yexo) - AI Framework",
 	"",
 	"Inactive Developers:",
+	"  Bjarni Corfitzen (Bjarni) - MacOSX port, coder and vehicles",
+	"  Victor Fischer (Celestar) - Programming everywhere you need him to",
 	"  Tam\xC3\xA1s Farag\xC3\xB3 (Darkvater) - Ex-Lead coder",
 	"  Jaroslav Mazanec (KUDr) - YAPG (Yet Another Pathfinder God) ;)",
 	"  Jonathan Coome (Maedhros) - High priest of the NewGRF Temple",
@@ -1251,7 +1253,9 @@ struct QueryStringWindow : public QueryStringBaseWindow
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		if (widget == QUERY_STR_WIDGET_DEFAULT && (this->flags & QSF_ENABLE_DEFAULT) == 0) {
-			this->GetWidget<NWidgetCore>(widget)->SetFill(0, 1);
+			/* We don't want this widget to show! */
+			fill->width = 0;
+			resize->width = 0;
 			size->width = 0;
 		}
 	}
@@ -1282,7 +1286,7 @@ struct QueryStringWindow : public QueryStringBaseWindow
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case QUERY_STR_WIDGET_DEFAULT:
@@ -1447,7 +1451,7 @@ struct QueryWindow : public Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case QUERY_WIDGET_YES: {
@@ -1799,7 +1803,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SLWW_SORT_BYNAME: // Sort save names by name

@@ -1172,10 +1172,6 @@ STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Iespēj
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Rādīt sarakstu tikšķos nevis dienās: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Ātrā transporta norīkojumu veidošana: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Sliežu tips pēc noklusējuma: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Parastās sliedes
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektriskās sliedes
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Viensliedes
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Magleva
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Pirmās pieejamās
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Pēdējās pieejamās
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Visbiežāk lietotās
@@ -2390,14 +2386,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Finansēt jauna
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Nopirkt vienīgā pārvadātāja tiesības
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Dot kukuli pašvaldībai
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Veikt mazu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Veikt vidēju reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Veikt lielu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Finansēt ceļu remontdarbus. Rada satiksmes traucējumus līdz pat pusgadam.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Uzbūvēt statuju par godu savam uzņēmumam.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Finansēt jaunu komercēku būvniecību šajā pilsētā.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Pirkt eksluzīvas 1 gada tiesības uz kravu un pasažieru transportēšanu. Pašvaldība atļaus pasažieriem un kravas pārvešanai izmantot tkai jūsu uzņēmuma stacijas.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Piekukuļot vietējo pašvaldību lai paceltu reitingu, riskējot saņemt lielu sodu.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Veikt mazu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Veikt vidēju reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Veikt lielu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Finansēt ceļu remontdarbus. Rada satiksmes traucējumus līdz pat pusgadam.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Uzbūvēt statuju par godu savam uzņēmumam.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Finansēt jaunu komercēku būvniecību šajā pilsētā.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Pirkt eksluzīvas 1 gada tiesības uz kravu un pasažieru transportēšanu. Pašvaldība atļaus pasažieriem un kravas pārvešanai izmantot tkai jūsu uzņēmuma stacijas.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Piekukuļot vietējo pašvaldību lai paceltu reitingu, riskējot saņemt lielu sodu.{}Izmaksas: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsīdijas

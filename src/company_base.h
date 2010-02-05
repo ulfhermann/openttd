@@ -12,12 +12,9 @@
 #ifndef COMPANY_BASE_H
 #define COMPANY_BASE_H
 
-#include "company_type.h"
 #include "core/pool_type.hpp"
 #include "road_type.h"
 #include "rail_type.h"
-#include "date_type.h"
-#include "engine_type.h"
 #include "livery.h"
 #include "autoreplace_type.h"
 #include "economy_type.h"
@@ -110,7 +107,7 @@ struct Company : CompanyPool::PoolItem<&_company_pool> {
 #define FOR_ALL_COMPANIES_FROM(var, start) FOR_ALL_ITEMS_FROM(Company, company_index, var, start)
 #define FOR_ALL_COMPANIES(var) FOR_ALL_COMPANIES_FROM(var, 0)
 
-Money CalculateCompanyValue(const Company *c);
+Money CalculateCompanyValue(const Company *c, bool including_loan = true);
 
 extern uint _next_competitor_start;
 extern uint _cur_company_tick_index;

@@ -1330,6 +1330,7 @@ STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Dodatkow
 
 STR_GAME_OPTIONS_BASE_MUSIC                                     :{BLACK}Podstawowy zestaw muzyki
 STR_GAME_OPTIONS_BASE_MUSIC_TOOLTIP                             :{BLACK}Wybierz podstawowy zestaw muzyki do użycia
+STR_GAME_OPTIONS_BASE_MUSIC_STATUS                              :{RED}{NUM} plik{P "" i ów} uszkodzony
 STR_GAME_OPTIONS_BASE_MUSIC_DESCRIPTION_TOOLTIP                 :{BLACK}Dodatkowe informacje o muzyce podstawowej
 
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Uruchomienie trybu pełnoekranowego nie powiodło się
@@ -1444,6 +1445,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Przyjazne
 STR_CITY_APPROVAL_TOLERANT                                      :Tolerancyjne
 STR_CITY_APPROVAL_HOSTILE                                       :Wrogie
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Brak pasujących SI...{}Możesz pobrać wszystkie SI przez system "Zawartości online"
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Zmieniono poziom trudności na "własny"
 
 # Advanced settings window
@@ -1461,6 +1463,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Pozwól
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Model przyspieszania pociągu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Oryginalnie
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistycznie
+STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Nachylenie zboczy dla pociągów {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zabroń pociągom i statkom skręcać o 90 stopni: {ORANGE}{STRING} {LTBLUE} (nie z OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Połącz stacje budowane jedna obok drugiej: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Pozwól na łączenie stacji nie sąsiadujących bezpośrednio: {ORANGE}{STRING}
@@ -1578,10 +1581,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Pokazuj
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Pokazuj przyjazdy i odjazdy w rozkładach: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Szybkie tworzenie poleceń pojazdu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Domyślny typ torowiska: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normalne
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektryfikowane
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Jednoszynowe
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :MagLev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Pierwszy dostępny
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Najnowszy
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Najczęściej używany
@@ -1620,6 +1619,7 @@ STR_CONFIG_SETTING_COLOURED_NEWS_YEAR                           :{LTBLUE}Pojawie
 STR_CONFIG_SETTING_STARTING_YEAR                                :{LTBLUE}Data rozpoczęcia gry: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_ECONOMY                               :{LTBLUE}Pozwól na łagodną ekonomię (więcej małych zmian): {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_SHARES                                 :{LTBLUE}Pozwól kupować udziały w innych firmach: {ORANGE}{STRING}
+STR_CONFIG_SETTING_FEEDER_PAYMENT_SHARE                         :{LTBLUE}Udział w zyskach w przypadku częściowego transportu (przeładunku): {ORANGE}{STRING}%
 STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}W trakcie przeciągania ustaw sygnały co: {ORANGE}{STRING} kratk{P e i ek}
 STR_CONFIG_SETTING_SEMAPHORE_BUILD_BEFORE_DATE                  :{LTBLUE}Automatycznie buduj semafory przed: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_SIGNAL_GUI                            :{LTBLUE}Uaktywnij okno budowania sygnałów: {ORANGE}{STRING}
@@ -2057,7 +2057,7 @@ STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}Nowa fir
 
 # Network client list
 STR_NETWORK_CLIENTLIST_KICK                                     :Wyrzuć
-STR_NETWORK_CLIENTLIST_BAN                                      :Ban
+STR_NETWORK_CLIENTLIST_BAN                                      :Banuj
 STR_NETWORK_CLIENTLIST_GIVE_MONEY                               :Przekazanie pieniędzy
 STR_NETWORK_CLIENTLIST_SPEAK_TO_ALL                             :Mów do wszystkich
 STR_NETWORK_CLIENTLIST_SPEAK_TO_COMPANY                         :Mów do firmy
@@ -2769,7 +2769,7 @@ STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Informac
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' spowodował nieskończoną pętlę w wywołaniu produkcji.
 
 # Sign list window
-STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista napisów - {COMMA} napisów
+STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista napisów - {COMMA} napis{P "" y ów}
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Edycja tekstu napisu
@@ -2826,14 +2826,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Ufunduj nowe bu
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Kup wyłączność transportową
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Daj łapówkę lokalnym władzom
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Rozpocznij małą kampanię reklamową aby zachęcić pasażerów i fabryki do Twoich usług.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Rozpocznij średnią kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Rozpocznij dużą kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Ufunduj remont sieci dróg. Powoduje zakłócenia w ruchu ulicznym do 6 miesięcy.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Zbuduj pomnik dla uczczenia Twojej firmy.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Ufundowanie nowych budynków komercyjnych w mieście.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Kup roczną wyłączność na prawa transportowe w mieście. Lokalne władze pozwolą korzystać tylko z usług Twojej firmy.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Daj łapówkę lokalnym władzom, powiększ Swoją ocenę, ryzykując poważne kary w razie złapania.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Rozpocznij małą kampanię reklamową aby zachęcić pasażerów i fabryki do Twoich usług.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Rozpocznij średnią kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Rozpocznij dużą kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Ufunduj remont sieci dróg. Powoduje zakłócenia w ruchu ulicznym do 6 miesięcy.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Zbuduj pomnik dla uczczenia Twojej firmy.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Ufundowanie nowych budynków komercyjnych w mieście.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Kup roczną wyłączność na prawa transportowe w mieście. Lokalne władze pozwolą korzystać tylko z usług Twojej firmy.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Daj łapówkę lokalnym władzom, powiększ Swoją ocenę, ryzykując poważne kary w razie złapania.{}Koszt: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsydia
@@ -3588,6 +3588,7 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Wybierz 
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}Odpluskwianie SI
+STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Nazwa SI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Przeładuj SI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Zabij SI, przeładuj skrypt i zrestartuj SI

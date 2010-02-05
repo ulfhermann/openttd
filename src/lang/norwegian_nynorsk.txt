@@ -1066,6 +1066,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Tillatande
 STR_CITY_APPROVAL_TOLERANT                                      :Tolerant
 STR_CITY_APPROVAL_HOSTILE                                       :Fiendsleg
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Inga passande AI tilgjengeleg...{}Du kan laste ned fleire AIer via 'Online Content'-systemet
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Denne handlinga endra vanskegraden til eigendefinert
 
 # Advanced settings window
@@ -1083,6 +1084,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Tillat 
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Togakselerasjonsmodell: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Orginal
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistisk
+STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Hellingsnivå for tog {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Forby tog og skip å gjere 90-graderssvingar: {ORANGE}{STRING} {LTBLUE} (ikkje med OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Slå saman stasjoner som vert bygde på sida av einannan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Tillat samanbygging av ikkje direkte tilstøtande stasjonar: {ORANGE}{STRING}
@@ -1114,6 +1116,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Gje hø
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Ikkje-einsarta stasjonar: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Vektmultiplikator for frakt til å simulere tunge tog: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Flyfartfaktor: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Antal flystyrtar: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :ingen
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :redusert
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normalt
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Tillat å køyre gjennom stoppestadar på vegar som byane eig: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Tillat gjennomkøyrings-stasjonar på vegar eigd av konkurentar: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Tillat å byggje stasjonar inntil andre: {ORANGE}{STRING}
@@ -1200,10 +1206,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Syne ru
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Syne ankomst og avferd i rutetabellane: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Hurtig-laging av køyrety-ordrar: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Standard Jernbane / etter nytt spel / lasta spel: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Vanleg jernbane
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elekrisk Jernbane
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Monorail
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Maglev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Første tilgjengelege
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Siste tilgjengelege
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Mest brukte
@@ -1242,6 +1244,7 @@ STR_CONFIG_SETTING_COLOURED_NEWS_YEAR                           :{LTBLUE}Avisa v
 STR_CONFIG_SETTING_STARTING_YEAR                                :{LTBLUE}Start spelet i år {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_ECONOMY                               :{LTBLUE}Jamn økonomi (fleire, mindre endringar): {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_SHARES                                 :{LTBLUE}Tillat kjøp av aksjar i andre selskap: {ORANGE}{STRING}
+STR_CONFIG_SETTING_FEEDER_PAYMENT_SHARE                         :{LTBLUE}Prosent av etappeforteneste å betale i tilbringarsystemer: {ORANGE}{STRING}%
 STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}Ved opptrekking, plasser signal hver: {ORANGE}{STRING} rute{P "" r}
 STR_CONFIG_SETTING_SEMAPHORE_BUILD_BEFORE_DATE                  :{LTBLUE}Bygg semaforer automatisk før: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_SIGNAL_GUI                            :{LTBLUE}Bruk signal GUI: {ORANGE}{STRING}
@@ -2011,7 +2014,7 @@ STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Vel stor
 
 STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Liten
 STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}By
-STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Metropolflyplass
+STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Storbyflyplass
 STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Internasjonal flyplass
 STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}Pendler
 STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Interkontinental
@@ -2368,6 +2371,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Ukjent Handling
 STR_NEWGRF_ERROR_INVALID_ID                                     :Forsøk på å bruka ugyldig ID.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} inneheld ein øydelagt grafikk. All øydelagt grafikk vil bli vist som raude spørsmålsteikn (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Inneheld fleire "Action 8" oppføringar.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Las forbi slutten på pseudo-sprite.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Åtvaring!
@@ -2448,14 +2452,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Finansier nye b
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Kjøp eksklusive transportrettar
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Smør bystyret
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} Start ein liten lokal reklamekampanje for å trekkje til deg fleire passasjerar og varer til tenestene dine.{} Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW} Start ein middels stor lokal reklamekampanje for å trekkje til deg fleire passajerar og varer til tenestene dine.{} Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} Start ein stor lokal reklamekampanje for å trekkje til deg fleire passasjerar og varer til tenestene dine.{} Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW} Finansier ombygging av det lokale vegnettet. Vil gje vegproblem dei neste 6 månadene.{} Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW} Bygg ein statue for å heidre grunnleggjaren av firmaet.{} Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW} Finansier bygging av nye forretningsbygg i byen.{} Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW} Kjøp ekslusive transportrettar for eit år i byen. Bystyret tillèt då berre bruk av tenestene dine.{} Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW} Smør bystyret til å forbetre vurderinga av firmaet, du risikerer bøter dersom du vert oppdaga.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW} Start ein liten lokal reklamekampanje for å trekkje til deg fleire passasjerar og varer til tenestene dine.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW} Start ein middels stor lokal reklamekampanje for å trekkje til deg fleire passajerar og varer til tenestene dine.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW} Start ein stor lokal reklamekampanje for å trekkje til deg fleire passasjerar og varer til tenestene dine.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} Finansier ombygging av det lokale vegnettet. Vil gje vegproblem dei neste 6 månadene.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW} Bygg ein statue for å heidre grunnleggjaren av firmaet.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} Finansier bygging av nye forretningsbygg i byen.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW} Kjøp ekslusive transportrettar for eit år i byen. Bystyret tillèt då berre bruk av tenestene dine.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW} Smør bystyret til å forbetre vurderinga av firmaet, du risikerer bøter dersom du vert oppdaga.{} Kostnad: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsidiar
@@ -3204,7 +3208,10 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Vel år
 
 # AI debug window
 STR_AI_DEBUG                                                    :{WHITE}AI feilsøking
+STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Namnet til datamaskinspelaren
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}AI Instillingar
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Endre innstillingane for AI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Last datamaskinspelaren på ny
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Drep datamaskinspelaren, last skriptet på ny og starte om datamaskinspelaren
 

@@ -12,20 +12,12 @@
 #ifndef VEHICLE_BASE_H
 #define VEHICLE_BASE_H
 
-#include "vehicle_type.h"
 #include "track_type.h"
-#include "cargo_type.h"
 #include "direction_type.h"
-#include "gfx_type.h"
 #include "command_type.h"
-#include "date_type.h"
-#include "company_base.h"
-#include "company_type.h"
-#include "core/pool_type.hpp"
 #include "order_base.h"
 #include "cargopacket.h"
 #include "texteff.hpp"
-#include "group_type.h"
 #include "engine_type.h"
 #include "order_func.h"
 #include "transport_type.h"
@@ -488,6 +480,10 @@ public:
 		this->current_order_time = src->current_order_time;
 		this->lateness_counter = src->lateness_counter;
 		this->timetable_start = src->timetable_start;
+
+		if (HasBit(src->vehicle_flags, VF_TIMETABLE_STARTED)) SetBit(this->vehicle_flags, VF_TIMETABLE_STARTED);
+		if (HasBit(src->vehicle_flags, VF_AUTOFILL_TIMETABLE)) SetBit(this->vehicle_flags, VF_AUTOFILL_TIMETABLE);
+		if (HasBit(src->vehicle_flags, VF_AUTOFILL_PRES_WAIT_TIME)) SetBit(this->vehicle_flags, VF_AUTOFILL_PRES_WAIT_TIME);
 
 		this->service_interval = src->service_interval;
 	}
