@@ -14,7 +14,6 @@
 
 #include "../spritecache.h"
 #include "../spriteloader/spriteloader.hpp"
-#include "../zoom_type.h"
 
 enum BlitterMode {
 	BM_NORMAL,
@@ -69,7 +68,7 @@ public:
 	 * @param height the height of the buffer.
 	 * @param pal the palette to use.
 	 */
-	virtual void DrawColourMappingRect(void *dst, int width, int height, int pal) = 0;
+	virtual void DrawColourMappingRect(void *dst, int width, int height, PaletteID pal) = 0;
 
 	/**
 	 * Convert a sprite from the loader to our own format.
@@ -94,15 +93,6 @@ public:
 	 * @param colour A 8bpp mapping colour.
 	 */
 	virtual void SetPixel(void *video, int x, int y, uint8 colour) = 0;
-
-	/**
-	 * Draw a pixel with a given colour on the video-buffer if there is currently a black pixel.
-	 * @param video The destination pointer (video-buffer).
-	 * @param x The x position within video-buffer.
-	 * @param y The y position within video-buffer.
-	 * @param colour A 8bpp mapping colour.
-	 */
-	virtual void SetPixelIfEmpty(void *video, int x, int y, uint8 colour) = 0;
 
 	/**
 	 * Make a single horizontal line in a single colour on the video-buffer.

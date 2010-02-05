@@ -10,10 +10,8 @@
 /** @file settings_gui.cpp GUI for settings. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "currency.h"
 #include "gui.h"
-#include "window_gui.h"
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "screenshot.h"
@@ -24,15 +22,16 @@
 #include "strings_func.h"
 #include "window_func.h"
 #include "string_func.h"
-#include "gfx_func.h"
 #include "widgets/dropdown_type.h"
 #include "widgets/dropdown_func.h"
-#include "station_func.h"
+#include "openttd.h"
 #include "highscore.h"
 #include "base_media_base.h"
 #include "company_base.h"
 #include "company_func.h"
 #include "viewport_func.h"
+#include "core/geometry_func.hpp"
+#include "ai/ai.hpp"
 #include <map>
 
 #include "table/sprites.h"
@@ -278,7 +277,7 @@ struct GameOptionsWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case GOW_CURRENCY_DROPDOWN: // Setup currencies dropdown
@@ -626,7 +625,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget >= GDW_OPTIONS_START) {
 			widget -= GDW_OPTIONS_START;
@@ -655,6 +654,11 @@ public:
 			SetDifficultyLevel(3, &this->opt_mod_temp.difficulty); // set difficulty level to custom
 			this->LowerWidget(GDW_LVL_CUSTOM);
 			this->InvalidateData();
+
+			if (widget / 3 == 0 && this->opt_mod_temp.difficulty.max_no_competitors != 0 &&
+					AI::GetInfoList()->size() == 0) {
+				ShowErrorMessage(STR_WARNING_NO_SUITABLE_AI, INVALID_STRING_ID, 0, 0, true);
+			}
 			return;
 		}
 
@@ -1456,6 +1460,7 @@ static SettingEntry _settings_vehicles[] = {
 	SettingEntry("vehicle.max_aircraft"),
 	SettingEntry("vehicle.max_ships"),
 	SettingEntry("vehicle.plane_speed"),
+	SettingEntry("vehicle.plane_crashes"),
 	SettingEntry("order.timetabling"),
 	SettingEntry("vehicle.dynamic_engines"),
 };
@@ -1536,7 +1541,7 @@ struct GameSettingsWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget != SETTINGSEL_OPTIONSPANEL) return;
 
@@ -1641,7 +1646,7 @@ struct GameSettingsWindow : Window {
 
 				this->valuewindow_entry = pe;
 				SetDParam(0, value);
-				ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPTION, 10, 100, this, CS_NUMERAL, QSF_NONE);
+				ShowQueryString(STR_JUST_INT, STR_CONFIG_SETTING_QUERY_CAPTION, 10, 100, this, CS_NUMERAL, QSF_ENABLE_DEFAULT);
 			}
 		}
 	}
@@ -1657,22 +1662,29 @@ struct GameSettingsWindow : Window {
 
 	virtual void OnQueryTextFinished(char *str)
 	{
+		/* The user pressed cancel */
+		if (str == NULL) return;
+
+		assert(this->valuewindow_entry != NULL);
+		assert((this->valuewindow_entry->flags & SEF_KIND_MASK) == SEF_SETTING_KIND);
+		const SettingDesc *sd = this->valuewindow_entry->d.entry.setting;
+
+		int32 value;
 		if (!StrEmpty(str)) {
-			assert(this->valuewindow_entry != NULL);
-			assert((this->valuewindow_entry->flags & SEF_KIND_MASK) == SEF_SETTING_KIND);
-			const SettingDesc *sd = this->valuewindow_entry->d.entry.setting;
-			int32 value = atoi(str);
+			value = atoi(str);
 
 			/* Save the correct currency-translated value */
 			if (sd->desc.flags & SGF_CURRENCY) value /= _currency->rate;
-
-			if ((sd->desc.flags & SGF_PER_COMPANY) != 0) {
-				SetCompanySetting(this->valuewindow_entry->d.entry.index, value);
-			} else {
-				SetSettingValue(this->valuewindow_entry->d.entry.index, value);
-			}
-			this->SetDirty();
+		} else {
+			value = (int32)(size_t)sd->desc.def;
 		}
+
+		if ((sd->desc.flags & SGF_PER_COMPANY) != 0) {
+			SetCompanySetting(this->valuewindow_entry->d.entry.index, value);
+		} else {
+			SetSettingValue(this->valuewindow_entry->d.entry.index, value);
+		}
+		this->SetDirty();
 	}
 
 	virtual void OnResize()
@@ -1816,7 +1828,7 @@ struct CustomCurrencyWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		int line = 0;
 		int len = 0;

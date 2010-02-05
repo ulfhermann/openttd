@@ -1065,6 +1065,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Tolerant
 STR_CITY_APPROVAL_TOLERANT                                      :Neutraal
 STR_CITY_APPROVAL_HOSTILE                                       :Negatief
 
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Geen bruikbare AIs beschikbaar...{}U kunt diverse AI's downloaden via het 'Online Content' systeem
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Deze actie past de moeilijkheidsgraad aan naar 'aangepast'
 
 # Advanced settings window
@@ -1076,7 +1077,7 @@ STR_CONFIG_SETTING_DISABLED                                     :uitgeschakeld
 STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Geef voertuigsnelheid weer in statusbalk: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Bouwen op hellingen en kusten toestaan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Omgeving aanpassen onder gebouwen, spoorwegen, enz. toestaan (autoslope): {ORANGE}{STRING}
-STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Gebruik realistisch handelsgebied: {ORANGE}{STRING}
+STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Gebruik meer realistische handelsgebieden: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Sta verwijderen van meer stedelijke wegen, bruggen, enz. toe: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Zeer lange treinen toestaan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Trein acceleratie model: {ORANGE}{STRING}
@@ -1114,6 +1115,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Geld ge
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Vrij gevormde stations: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Gewichtsverhouding voor vracht om zware treinen te simuleren: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Vliegtuigsnelheidsverhouding: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Aantal vliegtuigcrashes: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :Geen
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :Verminderd
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :Normaal
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Sta toe dat doorrijwegstops worden geplaatst op door stad beheerde wegen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Sta doorrijhaltes op wegen van tegenstanders toe: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Bouwen van aangrenzende stations toestaan: {ORANGE}{STRING}
@@ -1172,7 +1177,7 @@ STR_CONFIG_SETTING_SCROLLWHEEL_SCROLLING                        :{LTBLUE}Functie
 STR_CONFIG_SETTING_SCROLLWHEEL_ZOOM                             :Zoom kaart
 STR_CONFIG_SETTING_SCROLLWHEEL_SCROLL                           :Scroll kaart
 STR_CONFIG_SETTING_SCROLLWHEEL_OFF                              :Uit
-STR_CONFIG_SETTING_SCROLLWHEEL_MULTIPLIER                       :{LTBLUE}Kaartmuiswielsnelheid: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SCROLLWHEEL_MULTIPLIER                       :{LTBLUE}Muiswielsnelheid: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU                          :{LTBLUE}Rechtsklikemulatie: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_COMMAND                  :Command-klik
@@ -1200,10 +1205,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Toon di
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Toon aankomst- en vertrektijden in dienstregeling: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Snel voertuigorders maken: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Standaard spoorsoort (bij nieuw of opgeslagen spel): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normaal spoor
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Geëlektrificeerd spoor
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Monorail
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Zweefspoor
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Eerst beschikbare
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Laatst beschikbare
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Meest gebruikte
@@ -1269,7 +1270,7 @@ STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :toestaan
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :toestaan, eigen wegpatroon
 
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}Plaatsing van bomen in het spel: {ORANGE}{STRING}
-STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :geen {RED}(breekt houtzagerij)
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :geen {RED}(houtzagerij werkt niet)
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :alleen in regenwouden
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :overal
 
@@ -2012,7 +2013,7 @@ STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Kies gro
 
 STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Klein
 STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}Stad
-STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Hoofdstedelijk vliegveld
+STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Hoofdstedelijk
 STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Internationaal vliegveld
 STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}Pendel
 STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Intercontinentaal
@@ -2369,6 +2370,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Onbekende 'Acti
 STR_NEWGRF_ERROR_INVALID_ID                                     :Poging tot gebruik ongeldig ID.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} bevat een ongeldige afbeelding. Alle ongeldige afbeeldingen worden getoond als een rood vraagteken (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Bevat meerdere 'Action 8'-elementen.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Lees voorbij einde van pseudo-sprite.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Waarschuwing!
@@ -2449,14 +2451,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Betaal nieuwe g
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Koop exclusieve transportrechten
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Koop de gemeenteraad om
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begin een kleine reclamecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Begin een middelgrote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begin een grote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Betaal een vernieuwing van het wegennetwerk. Veroorzaakt tot 6 maanden lang een aanzienlijke verstoring van het wegverkeer.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Bouw een standbeeld ter ere van jouw bedrijf.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Betaal de bouw van nieuwe commerciële gebouwen in de stad.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Koop 1 jaar exclusieve transportrechten in deze plaats. De gemeenteraad staat passagiers en vracht aleeen toe om jouw stations te gebruiken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Koop het plaatselijk gezag om om je reputatie te verhogen, met het gevaar van een strenge sanctie, wanneer je gepakt wordt.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Begin een kleine reclamecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Begin een middelgrote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Begin een grote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Betaal een vernieuwing van het wegennetwerk. Veroorzaakt tot 6 maanden lang een aanzienlijke verstoring van het wegverkeer.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Bouw een standbeeld ter ere van jouw bedrijf.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Betaal de bouw van nieuwe commerciële gebouwen in de stad.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Koop 1 jaar exclusieve transportrechten in deze plaats. De gemeenteraad staat passagiers en vracht aleeen toe om jouw stations te gebruiken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Koop het plaatselijk gezag om om je reputatie te verhogen, met het gevaar van een strenge sanctie, wanneer je gepakt wordt.{}Kosten: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsidies
@@ -3207,6 +3209,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Kies jaa
 STR_AI_DEBUG                                                    :{WHITE}AI Debug
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Naam computerspeler
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}AI Instellingen
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Wijzig de instelling van de AI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Herlaad computerspeler
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Verwijder computerspeler, herlaad het script en herstart computerspeler
 

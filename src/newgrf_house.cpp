@@ -10,24 +10,23 @@
 /** @file newgrf_house.cpp Implementation of NewGRF houses. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "variables.h"
 #include "debug.h"
 #include "viewport_func.h"
 #include "landscape.h"
-#include "sprite.h"
 #include "newgrf.h"
 #include "newgrf_house.h"
 #include "newgrf_spritegroup.h"
 #include "newgrf_town.h"
 #include "newgrf_sound.h"
 #include "newgrf_commons.h"
-#include "transparency.h"
 #include "functions.h"
 #include "company_func.h"
 #include "animated_tile_func.h"
 #include "company_base.h"
 #include "town.h"
+#include "core/random_func.hpp"
+#include "sprite.h"
 
 static BuildingCounts<uint32> _building_counts;
 static HouseClassMapping _class_mapping[HOUSE_CLASS_MAX];
@@ -405,7 +404,7 @@ static void DrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGroup *grou
 	const DrawTileSprites *dts = group->dts;
 
 	const HouseSpec *hs = HouseSpec::Get(house_id);
-	SpriteID palette = hs->random_colour[TileHash2Bit(ti->x, ti->y)] + PALETTE_RECOLOUR_START;
+	PaletteID palette = hs->random_colour[TileHash2Bit(ti->x, ti->y)] + PALETTE_RECOLOUR_START;
 	if (HasBit(hs->callback_mask, CBM_HOUSE_COLOUR)) {
 		uint16 callback = GetHouseCallback(CBID_HOUSE_COLOUR, 0, 0, house_id, Town::GetByTile(ti->tile), ti->tile);
 		if (callback != CALLBACK_FAILED) {
@@ -415,15 +414,15 @@ static void DrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGroup *grou
 	}
 
 	SpriteID image = dts->ground.sprite;
-	SpriteID pal   = dts->ground.pal;
+	PaletteID pal  = dts->ground.pal;
 
-	if (IS_CUSTOM_SPRITE(image)) image += stage;
+	if (HasBit(image, SPRITE_MODIFIER_CUSTOM_SPRITE)) image += stage;
 
 	if (GB(image, 0, SPRITE_WIDTH) != 0) {
 		DrawGroundSprite(image, GroundSpritePaletteTransform(image, pal, palette));
 	}
 
-	DrawTileSeq(ti, dts, TO_HOUSES, stage, palette);
+	DrawNewGRFTileSeq(ti, dts, TO_HOUSES, stage, palette);
 }
 
 void DrawNewHouseTile(TileInfo *ti, HouseID house_id)
