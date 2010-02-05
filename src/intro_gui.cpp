@@ -25,6 +25,7 @@
 #include "functions.h"
 #include "ai/ai_gui.hpp"
 #include "gfx_func.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -96,7 +97,7 @@ struct SelectGameWindow : public Window {
 		*size = maxdim(*size, textdim);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 #ifdef ENABLE_NETWORK
 		/* Do not create a network server when you (just) have closed one of the game

@@ -10,7 +10,6 @@
 /** @file industry_cmd.cpp Handling of industry tiles. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "clear_map.h"
 #include "industry.h"
 #include "station_base.h"
@@ -30,7 +29,6 @@
 #include "newgrf_industries.h"
 #include "newgrf_industrytiles.h"
 #include "autoslope.h"
-#include "transparency.h"
 #include "water.h"
 #include "strings_func.h"
 #include "functions.h"
@@ -40,6 +38,7 @@
 #include "sound_func.h"
 #include "animated_tile_func.h"
 #include "effectvehicle_func.h"
+#include "effectvehicle_base.h"
 #include "ai/ai.hpp"
 #include "core/pool_func.hpp"
 #include "subsidy_func.h"
@@ -311,8 +310,6 @@ static void DrawTile_Industry(TileInfo *ti)
 	Industry *ind = Industry::GetByTile(ti->tile);
 	const IndustryTileSpec *indts = GetIndustryTileSpec(gfx);
 	const DrawBuildingsTileStruct *dits;
-	SpriteID image;
-	SpriteID pal;
 
 	/* Retrieve pointer to the draw industry tile struct */
 	if (gfx >= NEW_INDUSTRYTILEOFFSET) {
@@ -337,12 +334,7 @@ static void DrawTile_Industry(TileInfo *ti)
 			GetIndustryAnimationState(ti->tile) & INDUSTRY_COMPLETED :
 			GetIndustryConstructionStage(ti->tile))];
 
-	image = dits->ground.sprite;
-	if (HasBit(image, PALETTE_MODIFIER_COLOUR) && dits->ground.pal == PAL_NONE) {
-		pal = GENERAL_SPRITE_COLOUR(ind->random_colour);
-	} else {
-		pal = dits->ground.pal;
-	}
+	SpriteID image = dits->ground.sprite;
 
 	/* DrawFoundation() modifes ti->z and ti->tileh */
 	if (ti->tileh != SLOPE_FLAT) DrawFoundation(ti, FOUNDATION_LEVELED);
@@ -352,7 +344,7 @@ static void DrawTile_Industry(TileInfo *ti)
 	if (image == SPR_FLAT_WATER_TILE && IsIndustryTileOnWater(ti->tile)) {
 		DrawWaterClassGround(ti);
 	} else {
-		DrawGroundSprite(image, pal);
+		DrawGroundSprite(image, GroundSpritePaletteTransform(image, dits->ground.pal, GENERAL_SPRITE_COLOUR(ind->random_colour)));
 	}
 
 	/* If industries are transparent and invisible, do not draw the upper part */
@@ -361,8 +353,7 @@ static void DrawTile_Industry(TileInfo *ti)
 	/* Add industry on top of the ground? */
 	image = dits->building.sprite;
 	if (image != 0) {
-		AddSortableSpriteToDraw(image,
-			(HasBit(image, PALETTE_MODIFIER_COLOUR) && dits->building.pal == PAL_NONE) ? GENERAL_SPRITE_COLOUR(ind->random_colour) : dits->building.pal,
+		AddSortableSpriteToDraw(image, SpriteLayoutPaletteTransform(image, dits->building.pal, GENERAL_SPRITE_COLOUR(ind->random_colour)),
 			ti->x + dits->subtile_x,
 			ti->y + dits->subtile_y,
 			dits->width,
@@ -1291,12 +1282,9 @@ static bool CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable 
 
 	do {
 		IndustryGfx gfx = GetTranslatedIndustryTileID(it->gfx);
-		if (TileX(tile) + it->ti.x >= MapSizeX()) return false;
-		if (TileY(tile) + it->ti.y >= MapSizeY()) return false;
-		TileIndex cur_tile = tile + ToTileIndexDiff(it->ti);
+		TileIndex cur_tile = TileAddWrap(tile, it->ti.x, it->ti.y);
 
 		if (!IsValidTile(cur_tile)) {
-			if (gfx == GFX_WATERTILE_SPECIALCHECK) continue;
 			return false;
 		}
 
@@ -1334,13 +1322,13 @@ static bool CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable 
 				/* Clear the tiles as OWNER_TOWN to not affect town rating, and to not clear protected buildings */
 				CompanyID old_company = _current_company;
 				_current_company = OWNER_TOWN;
-				bool not_clearable = CmdFailed(DoCommand(cur_tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR));
+				bool not_clearable = DoCommand(cur_tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed();
 				_current_company = old_company;
 
 				if (not_clearable) return false;
 			} else {
 				/* Clear the tiles, but do not affect town ratings */
-				bool not_clearable = CmdFailed(DoCommand(cur_tile, 0, 0, DC_AUTO | DC_NO_TEST_TOWN_RATING | DC_NO_MODIFY_TOWN_RATING, CMD_LANDSCAPE_CLEAR));
+				bool not_clearable = DoCommand(cur_tile, 0, 0, DC_AUTO | DC_NO_TEST_TOWN_RATING | DC_NO_MODIFY_TOWN_RATING, CMD_LANDSCAPE_CLEAR).Failed();
 
 				if (not_clearable) return false;
 			}
@@ -1452,7 +1440,7 @@ static bool CheckIfCanLevelIndustryPlatform(TileIndex tile, DoCommandFlag flags,
 			}
 			/* This is not 100% correct check, but the best we can do without modifying the map.
 			 *  What is missing, is if the difference in height is more than 1.. */
-			if (CmdFailed(DoCommand(tile_walk, SLOPE_N, (curh > h) ? 0 : 1, flags & ~DC_EXEC, CMD_TERRAFORM_LAND))) {
+			if (DoCommand(tile_walk, SLOPE_N, (curh > h) ? 0 : 1, flags & ~DC_EXEC, CMD_TERRAFORM_LAND).Failed()) {
 				_current_company = old_company;
 				return false;
 			}

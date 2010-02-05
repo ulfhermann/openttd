@@ -12,13 +12,10 @@
 #ifndef WINDOW_GUI_H
 #define WINDOW_GUI_H
 
-#include "core/geometry_func.hpp"
 #include "core/math_func.hpp"
 #include "vehicle_type.h"
 #include "viewport_type.h"
 #include "company_type.h"
-#include "core/alloc_type.hpp"
-#include "window_type.h"
 #include "tile_type.h"
 #include "widget_type.h"
 
@@ -641,15 +638,9 @@ public:
 	 * A click with the left mouse button has been made on the window.
 	 * @param pt     the point inside the window that has been clicked.
 	 * @param widget the clicked widget.
+	 * @param click_count Number of fast consecutive clicks at same position
 	 */
-	virtual void OnClick(Point pt, int widget) {}
-
-	/**
-	 * A double click with the left mouse button has been made on the window.
-	 * @param pt     the point inside the window that has been clicked.
-	 * @param widget the clicked widget.
-	 */
-	virtual void OnDoubleClick(Point pt, int widget) {}
+	virtual void OnClick(Point pt, int widget, int click_count) {}
 
 	/**
 	 * A click with the right mouse button has been made on the window.
@@ -722,8 +713,9 @@ public:
 
 	/**
 	 * The query window opened from this window has closed.
-	 * @param str the new value of the string or NULL if the window
-	 *            was cancelled.
+	 * @param str the new value of the string, NULL if the window
+	 *            was cancelled or an empty string when the default
+	 *            button was pressed, i.e. StrEmpty(str).
 	 */
 	virtual void OnQueryTextFinished(char *str) {}
 

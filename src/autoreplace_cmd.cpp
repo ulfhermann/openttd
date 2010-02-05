@@ -20,6 +20,7 @@
 #include "functions.h"
 #include "autoreplace_func.h"
 #include "articulated_vehicles.h"
+#include "core/random_func.hpp"
 
 #include "table/strings.h"
 
@@ -49,9 +50,7 @@ static bool EnginesHaveCargoInCommon(EngineID engine_a, EngineID engine_b)
  */
 bool CheckAutoreplaceValidity(EngineID from, EngineID to, CompanyID company)
 {
-	/* First we make sure that it's a valid type the user requested
-	 * check that it's an engine that is in the engine array */
-	if (!Engine::IsValidID(from) || !Engine::IsValidID(to)) return false;
+	assert(Engine::IsValidID(from) && Engine::IsValidID(to));
 
 	/* we can't replace an engine into itself (that would be autorenew) */
 	if (from == to) return false;
@@ -124,7 +123,7 @@ static void TransferCargo(Vehicle *old_veh, Vehicle *new_head, bool part_of_chai
 	}
 
 	/* Update train weight etc., the old vehicle will be sold anyway */
-	if (part_of_chain && new_head->type == VEH_TRAIN) TrainConsistChanged(Train::From(new_head), true);
+	if (part_of_chain && new_head->type == VEH_TRAIN) Train::From(new_head)->ConsistChanged(true);
 }
 
 /**

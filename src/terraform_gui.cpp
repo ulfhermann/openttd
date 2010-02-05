@@ -10,7 +10,6 @@
 /** @file terraform_gui.cpp GUI related to terraforming the map. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "clear_map.h"
 #include "company_func.h"
 #include "company_base.h"
@@ -18,7 +17,6 @@
 #include "window_gui.h"
 #include "window_func.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "command_func.h"
 #include "signs_func.h"
 #include "variables.h"
@@ -243,7 +241,7 @@ struct TerraformToolbarWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget >= TTW_BUTTONS_START) _terraform_button_proc[widget - TTW_BUTTONS_START](this);
 	}
@@ -675,7 +673,7 @@ struct ScenarioEditorLandscapeGenerationWindow : Window {
 		return ES_NOT_HANDLED;
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (IsInsideMM(widget, ETTW_BUTTONS_START, ETTW_BUTTONS_END)) {
 			_editor_terraform_button_proc[widget - ETTW_BUTTONS_START](this);

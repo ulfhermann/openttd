@@ -19,6 +19,9 @@
 #ifdef WIN32
 #include <windows.h>
 #else
+#ifdef OPENBSD
+#include <unistd.h>
+#endif
 #include <pwd.h>
 #endif
 #include <sys/stat.h>
@@ -276,7 +279,7 @@ char *FioFindFullPath(char *buf, size_t buflen, Subdirectory subdir, const char 
 		/* Be, as opening files, aware that sometimes the filename
 		 * might be in uppercase when it is in lowercase on the
 		 * disk. Ofcourse Windows doesn't care about casing. */
-		strtolower(buf + ((subdir == NO_DIRECTORY) ? 0 : strlen(_searchpaths[sp]) - 1));
+		strtolower(buf + strlen(_searchpaths[sp]) - 1);
 		if (FileExists(buf)) break;
 #endif
 	}
