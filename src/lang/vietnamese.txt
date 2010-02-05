@@ -706,7 +706,7 @@ STR_STATUSBAR_AUTOSAVE                                          :{RED}LƯU TỰ 
 STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  ĐANG LƯU GAME *  *
 
 # News message history
-STR_MESSAGE_HISTORY                                             :{WHITE}Lịch Sử Thông Điệp
+STR_MESSAGE_HISTORY                                             :{WHITE}Lịch Sử Thông Điệp
 STR_MESSAGE_HISTORY_TOOLTIP                                     :{BLACK}Danh sách những tin tức gần đây
 STR_MESSAGE_NEWS_FORMAT                                         :{STRING}  -  {STRING}
 
@@ -789,7 +789,7 @@ STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_FARM                      :{BIGFONT}{BLACK
 STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_SMOOTH                    :{BIGFONT}{BLACK}{STRING} sản xuất tại {INDUSTRY} tăng lên {COMMA}%!
 STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_GENERAL                   :{BIGFONT}{BLACK}{INDUSTRY} sản lượng giảm 50%
 STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_FARM                      :{BIGFONT}{BLACK}Bị sâu bọ tàn phá tại {INDUSTRY}!{}Năng suất giảm 50%
-STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_SMOOTH                    :{BIGFONT}{BLACK}{STRING} năng suất tại {INDUSTRY} giảm {COMMA}%!
+STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_SMOOTH                    :{BIGFONT}{BLACK}Năng suất {STRING} tại {INDUSTRY} giảm {COMMA}%!
 
 STR_NEWS_TRAIN_IS_WAITING                                       :{WHITE}{VEHICLE} đang chờ tại xưởng
 STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} đang chờ tại xưởng
@@ -825,7 +825,7 @@ STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIGFONT}{BLACK}Lời đề nghị trợ cấp đã hết hạn:{}{}{STRING} từ {STRING} đến {STRING} bây giờ sẽ không có trợ cấp.
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIGFONT}{BLACK}Đã rút khỏi trợ cấp:{}{}{STRING} kinh doanh từ {STRING} đến {STRING} sẽ không còn trợ cấp nữa.
-STR_NEWS_SERVICE_SUBSIDY_OFFERED                                :{BIGFONT}{BLACK}Khuyến mãi trợ cấp dịch vụ:{}{}Dịch vụ {STRING} đầu tiên từ {STRING} đến {STRING} sẽ thu hút tiền trợ cấp trong một năm của chính quyền địa phương!
+STR_NEWS_SERVICE_SUBSIDY_OFFERED                                :{BIGFONT}{BLACK}Khuyến mãi trợ cấp dịch vụ:{}{}Dịch vụ {STRING} đầu tiên từ {STRING} đến {STRING} sẽ thu hút tiền trợ cấp trong một năm của chính quyền địa phương!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_HALF                           :{BIGFONT}{BLACK}Trợ cấp dịch vụ được trao cho {STRING}!{}{}Dịch vụ {STRING} từ {STRING} đến {STRING} sẽ thu lợi cao hơn 50% đến năm sau!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_DOUBLE                         :{BIGFONT}{BLACK}Trợ cấp dịch vụ được trao cho {STRING}!{}{}Dịch vụ {STRING} từ {STRING} đến {STRING} sẽ thu lợi gấp đôi đến năm sau!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_TRIPLE                         :{BIGFONT}{BLACK}Trợ cấp dịch vụ được trao cho {STRING}!{}{}Dịch vụ {STRING} từ {STRING} đến {STRING} sẽ thu lợi gấp ba đến năm sau!
@@ -1205,10 +1205,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Hiện 
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Hiển thị nơi đến và nơi đi trên lịch trình: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Tạo điểm lộ trình nhanh cho ph.tiện: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Loại đường ray mặc định (sau game mới/nạp game): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Ray Bình Thường
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Ray Điện
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Ray Đơn
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Ray Đệm
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Có trước tiên
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Có sau cùng
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Dùng nhiều
@@ -1395,7 +1391,7 @@ STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Bạn c
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Cheats
 STR_CHEATS_TOOLTIP                                              :{BLACK}Ô đánh dấu cho biết nếu bạn đã từng dùng mã ăn gian đó
-STR_CHEATS_WARNING                                              :{BLACK}Cảnh báo! Bạn muốn lừa dối những đối thủ thành thực của bạn ư. Những hành động đó của bạn sẽ là vết nhơ suốt đời.
+STR_CHEATS_WARNING                                              :{BLACK}Cảnh báo! Bạn muốn lừa dối những đối thủ thành thực của bạn ư? Những hành động đó của bạn sẽ là vết nhơ suốt đời!
 STR_CHEAT_MONEY                                                 :{LTBLUE}Tăng số tiền lên {CURRENCY}
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Điều khiển công ty: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Xe ủi thần kỳ (xúc văng nhà máy, vật không thể di chuyển): {ORANGE}{STRING}
@@ -1520,9 +1516,9 @@ STR_NETWORK_SERVER_LIST_CLIENTS_CAPTION_TOOLTIP                 :{BLACK}Máy con
 STR_NETWORK_SERVER_LIST_MAP_SIZE_SHORT                          :{BLACK}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_MAP_SIZE_CAPTION                        :{BLACK}Kích thước bản đồ
 STR_NETWORK_SERVER_LIST_MAP_SIZE_CAPTION_TOOLTIP                :{BLACK}Kích thước bản đồ trong game{}Nhấn vào đây để sắp xếp theo diện tích
-STR_NETWORK_SERVER_LIST_DATE_CAPTION                            :{BLACK}Ngày
+STR_NETWORK_SERVER_LIST_DATE_CAPTION                            :{BLACK}Năm
 STR_NETWORK_SERVER_LIST_DATE_CAPTION_TOOLTIP                    :{BLACK}Ngày hiện tại
-STR_NETWORK_SERVER_LIST_YEARS_CAPTION                           :{BLACK}Năm
+STR_NETWORK_SERVER_LIST_YEARS_CAPTION                           :{BLACK}Số Năm
 STR_NETWORK_SERVER_LIST_YEARS_CAPTION_TOOLTIP                   :{BLACK}Số năm{}mà game đang chạy
 STR_NETWORK_SERVER_LIST_INFO_ICONS_TOOLTIP                      :{BLACK}Ngôn ngữ, phiên bản server, etc.
 
@@ -1533,7 +1529,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Chọn s
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}THÔNG TIN GAME
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Máy con: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Ngôn ngữ: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Tileset: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Địa hình: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Cỡ bản đồ: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Phiên bản server: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Địa chỉ server: {WHITE}{STRING}
@@ -3119,7 +3115,7 @@ STR_ORDER_TRAIN_DEPOT                                           :Xưởng tàu h
 STR_ORDER_ROAD_VEHICLE_DEPOT                                    :Xưởng ôtô
 STR_ORDER_SHIP_DEPOT                                            :Xưởng tàu biển
 STR_ORDER_GO_TO_DEPOT_FORMAT                                    :{STRING} {TOWN} {STRING}
-STR_ORDER_GO_TO_NEAREST_DEPOT_FORMAT                            :{STRING} {STRING} {STRING}
+STR_ORDER_GO_TO_NEAREST_DEPOT_FORMAT                            :{0:STRING} {2:STRING} {1:STRING}
 STR_ORDER_GO_TO_HANGAR_FORMAT                                   :{STRING} Xưởng {STATION}
 
 STR_ORDER_REFIT_ORDER                                           :(Cải biến thành {STRING})
@@ -4007,7 +4003,7 @@ STR_FORMAT_BUOY_NAME                                            :Phao {TOWN}
 STR_FORMAT_BUOY_NAME_SERIAL                                     :Phao {TOWN} số #{COMMA}
 STR_FORMAT_COMPANY_NUM                                          :(Công ty {COMMA})
 STR_FORMAT_GROUP_NAME                                           :Nhóm {COMMA}
-STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
+STR_FORMAT_INDUSTRY_NAME                                        :{1:STRING} {0:TOWN}
 STR_FORMAT_WAYPOINT_NAME                                        :Điểm mốc {TOWN}
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Điểm mốc {TOWN} số #{COMMA}
 
