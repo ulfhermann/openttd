@@ -29,12 +29,16 @@ STR_JUST_NOTHING                                                :Nieko
 # Cargo related strings
 # Plural cargo name
 STR_CARGO_PLURAL_NOTHING                                        :
-STR_CARGO_PLURAL_PASSENGERS                                     :Keleivius
+STR_CARGO_PLURAL_PASSENGERS                                     :Keleiviai
 STR_CARGO_PLURAL_PASSENGERS.ko                                  :Keleivių
+STR_CARGO_PLURAL_PASSENGERS.ka                                  :Keleivius
 STR_CARGO_PLURAL_COAL                                           :Anglį
+STR_CARGO_PLURAL_COAL.kas                                       :Anglis
 STR_CARGO_PLURAL_COAL.ko                                        :Anglies
-STR_CARGO_PLURAL_MAIL                                           :Paštą
+STR_CARGO_PLURAL_COAL.ka                                        :Anglį
+STR_CARGO_PLURAL_MAIL                                           :Paštas
 STR_CARGO_PLURAL_MAIL.ko                                        :Pašto
+STR_CARGO_PLURAL_MAIL.ka                                        :Paštą
 STR_CARGO_PLURAL_OIL                                            :Naftą
 STR_CARGO_PLURAL_OIL.ko                                         :Naftos
 STR_CARGO_PLURAL_LIVESTOCK                                      :Galvijus
@@ -257,7 +261,7 @@ STR_LIST_FILTER_TITLE                                           :{BLACK}Įrašo 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Pasirink rikiavimo tvarką (mažėjimo/didėjimo)
 STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Pasirink rikiavimo kriteriju
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Pasirinkite filtravimo kriterijus
-STR_BUTTON_SORT_BY                                              :{BLACK}Rikiuoti pagal
+STR_BUTTON_SORT_BY                                              :{BLACK}Rikiuoti pag.
 STR_BUTTON_LOCATION                                             :{BLACK}Vieta
 STR_BUTTON_RENAME                                               :{BLACK}Pervadinti
 
@@ -293,7 +297,7 @@ STR_SORT_BY_CAPTION_NAME                                        :{BLACK}Vardą
 STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Datą
 # These are used in dropdowns
 STR_SORT_BY_POPULATION                                          :Populiacija
-STR_SORT_BY_NAME                                                :Pavadinimas
+STR_SORT_BY_NAME                                                :Pavadinimą
 STR_SORT_BY_PRODUCTION                                          :Produkciją
 STR_SORT_BY_TYPE                                                :Tipą
 STR_SORT_BY_TRANSPORTED                                         :Pervežimus
@@ -308,7 +312,7 @@ STR_SORT_BY_MODEL                                               :Modelį
 STR_SORT_BY_VALUE                                               :Vertę
 STR_SORT_BY_LENGTH                                              :Ilgį
 STR_SORT_BY_LIFE_TIME                                           :Likusį gyvavimo laiką
-STR_SORT_BY_TIMETABLE_DELAY                                     :Tvarkaraščio užtrukimas
+STR_SORT_BY_TIMETABLE_DELAY                                     :Tvarkaraščio užtrukimą
 STR_SORT_BY_FACILITY                                            :Stoties tipą
 STR_SORT_BY_WAITING                                             :Laukiančio krovinio vertę
 STR_SORT_BY_RATING_MAX                                          :Didžiausias krovinio reitingas
@@ -641,7 +645,7 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Parinkti
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Programos „Atsitiktiniai takeliai“ įj./išj.
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Rodyti muzikos takelių pasirinkimo langą
 
-STR_ERROR_NO_SONGS                                              :{WHITE}Pasirinkta muzikos rinkinys be dainų. Dainos nebus grojamos
+STR_ERROR_NO_SONGS                                              :{WHITE}Pasirinktas muzikos rinkinys be dainų. Dainos nebus grojamos
 
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Muzikos programos pasirinkimas
@@ -808,9 +812,9 @@ STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Statomas naujas {STRING} netoli miesto: {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Sodinamas naujas {STRING} netoli miesto: {TOWN}!
 
-STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{STRING} praneša apie neatidėliotina uždarymą!
+STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{STRING} praneša apie neatidėliotiną uždarymą!
 STR_NEWS_INDUSTRY_CLOSURE_SUPPLY_PROBLEMS                       :{BIGFONT}{BLACK}Tiekimo problemos verčia {STRING} paskelbti apie uždarymą!
-STR_NEWS_INDUSTRY_CLOSURE_LACK_OF_TREES                         :{BIGFONT}{BLACK}Medienos trukūmas verčia {STRING} pasklebti apie neatidėliotina uždarymą!
+STR_NEWS_INDUSTRY_CLOSURE_LACK_OF_TREES                         :{BIGFONT}{BLACK}Medienos trukūmas verčia {STRING} pasklebti apie neatidėliotiną uždarymą!
 
 STR_NEWS_EURO_INTRODUCTION                                      :{BIGFONT}{BLACK}Bendras Europos sąjungos piniginis vienetas - Euras!{}{}Nuo šiol Euras tampa pagrindine valiuta kasdieniniuose atsiskaitymuose!
 STR_NEWS_BEGIN_OF_RECESSION                                     :{BIGFONT}{BLACK}Pasaulinė krizė!{}{}Ekonomikai griūvant, finansų ekspertai bijo paties blogiausio!
@@ -1054,9 +1058,9 @@ STR_NUM_NORMAL                                                  :Vidutinis
 STR_NUM_HIGH                                                    :Aukštas
 STR_NUM_CUSTOM                                                  :Tinkintas
 
-STR_VARIETY_NONE                                                :Nieko
+STR_VARIETY_NONE                                                :Joks
 STR_VARIETY_VERY_LOW                                            :Labai mažas
-STR_VARIETY_LOW                                                 :Žemas
+STR_VARIETY_LOW                                                 :Mažas
 STR_VARIETY_MEDIUM                                              :Vidutinis
 STR_VARIETY_HIGH                                                :Aukštas
 STR_VARIETY_VERY_HIGH                                           :Labai aukštas
@@ -1239,10 +1243,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Rodyti 
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Rodyti arvykimą ir išvykimą tvarkaraščiuose: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Greitas tr. priemonių paskyrimų kūrimas: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Numatytoji bėgių rūšis (po žaidimo paleidimo): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Paprasti bėgiai
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektrifikuoti bėgiai
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Vienbėgis
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Magnetinės levitacijos
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Pirmas galimas
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Paskutinis įmanomas
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Dažniausiai naudojamas
@@ -1405,7 +1405,7 @@ STR_INTRO_TOOLTIP_QUIT                                          :{BLACK}Išeiti 
 
 # Quit window
 STR_QUIT_CAPTION                                                :{WHITE}Baigti
-STR_QUIT_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD                  :{YELLOW}Ar jūs tikrai norite sustabdyti žaidimą ir grižti į {STRING}?
+STR_QUIT_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD                  :{YELLOW}Ar jūs tikrai norite sustabdyti žaidimą ir grįžti į {STRING}?
 STR_QUIT_YES                                                    :{BLACK}Taip
 STR_QUIT_NO                                                     :{BLACK}Ne
 
@@ -2275,7 +2275,7 @@ STR_SAVELOAD_OSKTITLE                                           :{BLACK}Įveskit
 
 # World generation
 STR_MAPGEN_WORLD_GENERATION_CAPTION                             :{WHITE}Pasaulio kūrimas
-STR_MAPGEN_MAPSIZE                                              :{BLACK}Zemelapio dydis:
+STR_MAPGEN_MAPSIZE                                              :{BLACK}Žemėlapio dydis:
 STR_MAPGEN_BY                                                   :{BLACK}*
 STR_MAPGEN_NUMBER_OF_TOWNS                                      :{BLACK}Miestu kiekis:
 STR_MAPGEN_DATE                                                 :{BLACK}Data:
@@ -2432,7 +2432,7 @@ STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}'{1:ENGI
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' sukėle begalinį cikla produkcijos kvietime atgal.
 
 # Sign list window
-STR_SIGN_LIST_CAPTION                                           :{WHITE}Zenklu sarasas - {COMMA} Zenklai
+STR_SIGN_LIST_CAPTION                                           :{WHITE}Ženklų sąrašas - {COMMA} ženkl{P as ai ų}
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Redaguoti ženklo tekstą
@@ -3746,7 +3746,7 @@ STR_SV_STNAME_NORTH                                             :{STRING} Šiaur
 STR_SV_STNAME_SOUTH                                             :{STRING} Pietūs
 STR_SV_STNAME_EAST                                              :{STRING} Rytai
 STR_SV_STNAME_WEST                                              :{STRING} Vakarai
-STR_SV_STNAME_CENTRAL                                           :{STRING} Centrine
+STR_SV_STNAME_CENTRAL                                           :{STRING} Centrinė
 STR_SV_STNAME_TRANSFER                                          :{STRING} Perdavimas
 STR_SV_STNAME_HALT                                              :{STRING} Galine
 STR_SV_STNAME_VALLEY                                            :{STRING} Slenio
