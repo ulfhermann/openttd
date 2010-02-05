@@ -19,7 +19,6 @@
 #include "../script/squirrel.hpp"
 #include "../script/squirrel_helper.hpp"
 #include "../script/squirrel_class.hpp"
-#include "ai.hpp"
 #include "ai_info.hpp"
 #include "ai_scanner.hpp"
 #include "api/ai_controller.hpp"
@@ -40,8 +39,10 @@ AIScanner::AIScanner() :
 	SQAIInfo.AddConstructor<void (AIInfo::*)(), 1>(engine, "x");
 	SQAIInfo.DefSQAdvancedMethod(this->engine, &AIInfo::AddSetting, "AddSetting");
 	SQAIInfo.DefSQAdvancedMethod(this->engine, &AIInfo::AddLabels, "AddLabels");
+	SQAIInfo.DefSQConst(engine, AICONFIG_NONE, "AICONFIG_NONE");
 	SQAIInfo.DefSQConst(engine, AICONFIG_RANDOM, "AICONFIG_RANDOM");
 	SQAIInfo.DefSQConst(engine, AICONFIG_BOOLEAN, "AICONFIG_BOOLEAN");
+	SQAIInfo.DefSQConst(engine, AICONFIG_INGAME, "AICONFIG_INGAME");
 	SQAIInfo.PostRegister(engine);
 	this->engine->AddMethod("RegisterAI", &AIInfo::Constructor, 2, "tx");
 	this->engine->AddMethod("RegisterDummyAI", &AIInfo::DummyConstructor, 2, "tx");
@@ -100,7 +101,7 @@ bool AIScanner::ImportLibrary(const char *library, const char *class_name, int v
 		} else {
 			snprintf(error, sizeof(error), "couldn't find library '%s' version %d. The latest version available is %d", library, version, (*iter).second->GetVersion());
 		}
-		sq_throwerror(vm, OTTD2FS(error));
+		sq_throwerror(vm, OTTD2SQ(error));
 		return false;
 	}
 
@@ -117,13 +118,13 @@ bool AIScanner::ImportLibrary(const char *library, const char *class_name, int v
 
 		/* Load the library in a 'fake' namespace, so we can link it to the name the user requested */
 		sq_pushroottable(vm);
-		sq_pushstring(vm, OTTD2FS(fake_class), -1);
+		sq_pushstring(vm, OTTD2SQ(fake_class), -1);
 		sq_newclass(vm, SQFalse);
 		/* Load the library */
 		if (!Squirrel::LoadScript(vm, (*iter).second->GetMainScript(), false)) {
 			char error[1024];
 			snprintf(error, sizeof(error), "there was a compile error when importing '%s' version %d", library, version);
-			sq_throwerror(vm, OTTD2FS(error));
+			sq_throwerror(vm, OTTD2SQ(error));
 			return false;
 		}
 		/* Create the fake class */
@@ -135,16 +136,16 @@ bool AIScanner::ImportLibrary(const char *library, const char *class_name, int v
 
 	/* Find the real class inside the fake class (like 'sets.Vector') */
 	sq_pushroottable(vm);
-	sq_pushstring(vm, OTTD2FS(fake_class), -1);
+	sq_pushstring(vm, OTTD2SQ(fake_class), -1);
 	if (SQ_FAILED(sq_get(vm, -2))) {
 		sq_throwerror(vm, _SC("internal error assigning library class"));
 		return false;
 	}
-	sq_pushstring(vm, OTTD2FS((*iter).second->GetInstanceName()), -1);
+	sq_pushstring(vm, OTTD2SQ((*iter).second->GetInstanceName()), -1);
 	if (SQ_FAILED(sq_get(vm, -2))) {
 		char error[1024];
 		snprintf(error, sizeof(error), "unable to find class '%s' in the library '%s' version %d", (*iter).second->GetInstanceName(), library, version);
-		sq_throwerror(vm, OTTD2FS(error));
+		sq_throwerror(vm, OTTD2SQ(error));
 		return false;
 	}
 	HSQOBJECT obj;
@@ -158,7 +159,7 @@ bool AIScanner::ImportLibrary(const char *library, const char *class_name, int v
 
 	/* Now link the name the user wanted to our 'fake' class */
 	sq_pushobject(vm, parent);
-	sq_pushstring(vm, OTTD2FS(class_name), -1);
+	sq_pushstring(vm, OTTD2SQ(class_name), -1);
 	sq_pushobject(vm, obj);
 	sq_newclass(vm, SQTrue);
 	sq_newslot(vm, -3, SQFalse);
@@ -275,7 +276,7 @@ AIInfo *AIScanner::SelectRandomAI() const
 	return (*it).second;
 }
 
-AIInfo *AIScanner::FindInfo(const char *nameParam, int versionParam)
+AIInfo *AIScanner::FindInfo(const char *nameParam, int versionParam, bool force_exact_match)
 {
 	if (this->info_list.size() == 0) return NULL;
 	if (nameParam == NULL) return NULL;
@@ -300,21 +301,19 @@ AIInfo *AIScanner::FindInfo(const char *nameParam, int versionParam)
 		/* Fall-through, like we were calling this function with a version */
 	}
 
-	/* Try to find a direct 'name.version' match */
-	char ai_name_tmp[1024];
-	snprintf(ai_name_tmp, sizeof(ai_name_tmp), "%s.%d", ai_name, versionParam);
-	strtolower(ai_name_tmp);
-	if (this->info_list.find(ai_name_tmp) != this->info_list.end()) return this->info_list[ai_name_tmp];
+	if (force_exact_match) {
+		/* Try to find a direct 'name.version' match */
+		char ai_name_tmp[1024];
+		snprintf(ai_name_tmp, sizeof(ai_name_tmp), "%s.%d", ai_name, versionParam);
+		strtolower(ai_name_tmp);
+		if (this->info_list.find(ai_name_tmp) != this->info_list.end()) return this->info_list[ai_name_tmp];
+	}
 
 	/* See if there is a compatible AI which goes by that name, with the highest
 	 *  version which allows loading the requested version */
 	AIInfoList::iterator it = this->info_list.begin();
 	for (; it != this->info_list.end(); it++) {
-		char ai_name_compare[1024];
-		snprintf(ai_name_compare, sizeof(ai_name_compare), "%s", (*it).second->GetName());
-		strtolower(ai_name_compare);
-
-		if (strcasecmp(ai_name, ai_name_compare) == 0 && (*it).second->CanLoadFromVersion(versionParam) && (version == -1 || (*it).second->GetVersion() > version)) {
+		if (strcasecmp(ai_name, (*it).second->GetName()) == 0 && (*it).second->CanLoadFromVersion(versionParam) && (version == -1 || (*it).second->GetVersion() > version)) {
 			version = (*it).second->GetVersion();
 			info = (*it).second;
 		}

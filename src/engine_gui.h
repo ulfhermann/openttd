@@ -12,7 +12,9 @@
 #ifndef ENGINE_GUI_H
 #define ENGINE_GUI_H
 
+#include "engine_type.h"
 #include "sortlist_type.h"
+#include "gfx_type.h"
 
 typedef GUIList<EngineID, CargoID> GUIEngineList;
 
@@ -23,10 +25,10 @@ void EngList_SortPartial(GUIEngineList *el, EngList_SortTypeFunction compare, ui
 StringID GetEngineCategoryName(EngineID engine);
 StringID GetEngineInfoString(EngineID engine);
 
-void DrawVehicleEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal);
-void DrawTrainEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal);
-void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal);
-void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal);
-void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID engine, SpriteID pal);
+void DrawVehicleEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal);
+void DrawTrainEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal);
+void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal);
+void DrawShipEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal);
+void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID engine, PaletteID pal);
 
 #endif /* ENGINE_GUI_H */

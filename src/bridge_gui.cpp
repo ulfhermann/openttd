@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "gui.h"
-#include "window_gui.h"
 #include "command_func.h"
 #include "economy_func.h"
 #include "bridge.h"
@@ -22,6 +21,7 @@
 #include "tunnelbridge.h"
 #include "sortlist_type.h"
 #include "widgets/dropdown_func.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 
@@ -243,7 +243,7 @@ public:
 		return ES_NOT_HANDLED;
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			default: break;
@@ -386,7 +386,7 @@ void ShowBuildBridgeWindow(TileIndex start, TileIndex end, TransportType transpo
 	CommandCost ret = DoCommand(end, start, type, DC_AUTO | DC_QUERY_COST, CMD_BUILD_BRIDGE);
 
 	GUIBridgeList *bl = NULL;
-	if (CmdFailed(ret)) {
+	if (ret.Failed()) {
 		errmsg = _error_message;
 	} else {
 		/* check which bridges can be built */

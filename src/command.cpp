@@ -65,7 +65,6 @@ CommandProc CmdRemoveRoadStop;
 CommandProc CmdBuildLongRoad;
 CommandProc CmdRemoveLongRoad;
 CommandProc CmdBuildRoad;
-CommandProc CmdRemoveRoad;
 
 CommandProc CmdBuildRoadDepot;
 
@@ -221,8 +220,7 @@ static const Command _command_proc_table[] = {
 	{CmdRemoveRoadStop,                             0}, // CMD_REMOVE_ROAD_STOP
 	{CmdBuildLongRoad,        CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_LONG_ROAD
 	{CmdRemoveLongRoad,        CMD_NO_TEST | CMD_AUTO}, // CMD_REMOVE_LONG_ROAD; towns may disallow removing road bits (as they are connected) in test, but in exec they're removed and thus removing is allowed.
-	{CmdBuildRoad,                                  0}, // CMD_BUILD_ROAD
-	{CmdRemoveRoad,                                 0}, // CMD_REMOVE_ROAD
+	{CmdBuildRoad,            CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_ROAD
 	{CmdBuildRoadDepot,       CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_ROAD_DEPOT
 
 	{CmdBuildAirport,         CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_AIRPORT
@@ -411,7 +409,7 @@ CommandCost DoCommand(TileIndex tile, uint32 p1, uint32 p2, DoCommandFlag flags,
 		SetTownRatingTestMode(true);
 		res = proc(tile, flags & ~DC_EXEC, p1, p2, text);
 		SetTownRatingTestMode(false);
-		if (CmdFailed(res)) {
+		if (res.Failed()) {
 			goto error;
 		}
 
@@ -431,7 +429,7 @@ CommandCost DoCommand(TileIndex tile, uint32 p1, uint32 p2, DoCommandFlag flags,
 	/* Execute the command here. All cost-relevant functions set the expenses type
 	 * themselves to the cost object at some point */
 	res = proc(tile, flags, p1, p2, text);
-	if (CmdFailed(res)) {
+	if (res.Failed()) {
 error:
 		res.SetGlobalErrorMessage();
 		_docommand_recursive--;
@@ -507,7 +505,7 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 	int y = TileY(tile) * TILE_SIZE;
 
 	CommandCost res = DoCommandPInternal(tile, p1, p2, cmd, callback, text, my_cmd, estimate_only);
-	if (CmdFailed(res)) {
+	if (res.Failed()) {
 		res.SetGlobalErrorMessage();
 
 		/* Only show the error when it's for us. */
@@ -530,7 +528,7 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 		callback(res, tile, p1, p2);
 	}
 
-	return CmdSucceeded(res);
+	return res.Succeeded();
 }
 
 
@@ -621,7 +619,7 @@ CommandCost DoCommandPInternal(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd,
 		 * (unless it's a command where the test and
 		 * execution phase might return different costs)
 		 * we bail out here. */
-		if (CmdFailed(res) || estimate_only ||
+		if (res.Failed() || estimate_only ||
 				(!test_and_exec_can_differ && !CheckCompanyHasMoney(res))) {
 			return_dcpi(res, false);
 		}
@@ -656,8 +654,8 @@ CommandCost DoCommandPInternal(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd,
 	 * check whether the test and execution have yielded the same
 	 * result, i.e. cost and error state are the same. */
 	if (!test_and_exec_can_differ && !skip_test) {
-		assert(res.GetCost() == res2.GetCost() && CmdFailed(res) == CmdFailed(res2)); // sanity check
-	} else if (CmdFailed(res2)) {
+		assert(res.GetCost() == res2.GetCost() && res.Failed() == res2.Failed()); // sanity check
+	} else if (res2.Failed()) {
 		return_dcpi(res2, false);
 	}
 

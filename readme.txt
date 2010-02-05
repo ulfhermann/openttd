@@ -1,6 +1,6 @@
 OpenTTD README
-Last updated:    2010-01-05
-Release version: 1.0.0-beta2
+Last updated:    2010-02-04
+Release version: 1.0.0-beta4
 ------------------------------------------------------------------------
 
 
@@ -250,11 +250,14 @@ The TTD artwork files listed in the section 4.1 "(Required) 3rd party files"
 can be placed in a few different locations:
 	1. The current working directory (from where you started OpenTTD)
 	2. Your personal directory
-		Windows: C:\Documents and Settings\<username>\My Documents\OpenTTD
+		Windows: C:\My Documents (95, 98, ME)
+		         C:\Documents and Settings\<username>\My Documents\OpenTTD (2000, XP)
+		         C:\Users\<username>\Documents\OpenTTD (Vista, 7)
 		Mac OSX: ~/Documents/OpenTTD
 		Linux:   ~/.openttd
 	3. The shared directory
-		Windows: C:\Documents and Settings\All Users\Documents\OpenTTD
+		Windows: C:\Documents and Settings\All Users\Shared Documents\OpenTTD (2000, XP)
+		         C:\Users\Public\Documents\OpenTTD (Vista, 7)
 		Mac OSX: /Library/Application Support/OpenTTD
 		Linux:   not available
 	4. The binary directory (where the OpenTTD executable is)
@@ -509,10 +512,8 @@ X.X) Credits:
 ---- --------
 The OpenTTD team (in alphabetical order):
   Albert Hofkamp (Alberth)       - GUI expert
-  Jean-Francois Claeys (Belugas) - GUI, newindustries and more
-  Bjarni Corfitzen (Bjarni)      - MacOSX port, coder and vehicles
+  Jean-François Claeys (Belugas) - GUI, newindustries and more
   Matthijs Kooijman (blathijs)   - Pathfinder-guru, pool rework
-  Victor Fischer (Celestar)      - Programming everywhere you need him to
   Christoph Elsenhans (frosch)   - General coding
   Loïc Guilloux (glx)            - Windows Expert
   Michael Lutz (michi_cc)        - Path based signals
@@ -520,9 +521,12 @@ The OpenTTD team (in alphabetical order):
   Peter Nelson (peter1138)       - Spiritual descendant from newGRF gods
   Remko Bijker (Rubidium)        - Lead coder and way more
   Zdeněk Sojka (SmatZ)           - Bug finder and fixer
+  José Soler (Terkhen)           - General coding
   Thijs Marinussen (Yexo)        - AI Framework
 
 Inactive Developers:
+  Bjarni Corfitzen (Bjarni)      - MacOSX port, coder and vehicles
+  Victor Fischer (Celestar)      - Programming everywhere you need him to
   Tamás Faragó (Darkvater)       - Ex-Lead coder
   Jaroslav Mazanec (KUDr)        - YAPG (Yet Another Pathfinder God) ;)
   Jonathan Coome (Maedhros)      - High priest of the NewGRF Temple
