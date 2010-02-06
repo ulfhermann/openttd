@@ -312,9 +312,11 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 				}
 			}
 
-			/* If we change the foundation we have to pay for it. */
-			return CommandCost(EXPENSES_CONSTRUCTION, CountBits(pieces) * _price[PR_CLEAR_ROAD] +
-					((GetRoadFoundation(tileh, present) != f) ? _price[PR_BUILD_FOUNDATION] : (Money)0));
+			CommandCost cost(EXPENSES_CONSTRUCTION, CountBits(pieces) * _price[PR_CLEAR_ROAD]);
+			/* If we build a foundation we have to pay for it. */
+			if (f == FOUNDATION_NONE && GetRoadFoundation(tileh, present) != FOUNDATION_NONE) cost.AddCost(_price[PR_BUILD_FOUNDATION]);
+
+			return cost;
 		}
 
 		case ROAD_TILE_CROSSING: {
@@ -420,7 +422,7 @@ static CommandCost CheckRoadSlope(Slope tileh, RoadBits *pieces, RoadBits existi
 				return CommandCost();
 			}
 		} else {
-			if (CountBits(existing) == 1) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
+			if (HasExactlyOneBit(existing) && GetRoadFoundation(tileh, existing) == FOUNDATION_NONE) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 			return CommandCost();
 		}
 	}
@@ -909,7 +911,7 @@ static CommandCost ClearTile_Road(TileIndex tile, DoCommandFlag flags)
 			RoadBits b = GetAllRoadBits(tile);
 
 			/* Clear the road if only one piece is on the tile OR we are not using the DC_AUTO flag */
-			if ((CountBits(b) == 1 && GetRoadBits(tile, ROADTYPE_TRAM) == ROAD_NONE) || !(flags & DC_AUTO)) {
+			if ((HasExactlyOneBit(b) && GetRoadBits(tile, ROADTYPE_TRAM) == ROAD_NONE) || !(flags & DC_AUTO)) {
 				RoadTypes rts = GetRoadTypes(tile);
 				CommandCost ret(EXPENSES_CONSTRUCTION);
 				for (RoadType rt = ROADTYPE_ROAD; rt < ROADTYPE_END; rt++) {
@@ -1143,7 +1145,7 @@ static void DrawRoadBits(TileInfo *ti)
 	}
 
 	/* If there are no road bits, return, as there is nothing left to do */
-	if (CountBits(road) < 2) return;
+	if (HasAtMostOneBit(road)) return;
 
 	/* Draw extra details. */
 	for (const DrawRoadTileStruct *drts = _road_display_table[roadside][road | tram]; drts->image != 0; drts++) {
@@ -1320,7 +1322,7 @@ static void TileLoop_Road(TileIndex tile)
 			/* Show an animation to indicate road work */
 			if (t->road_build_months != 0 &&
 					(DistanceManhattan(t->xy, tile) < 8 || grp != HZB_TOWN_EDGE) &&
-					IsNormalRoad(tile) && CountBits(GetAllRoadBits(tile)) > 1 ) {
+					IsNormalRoad(tile) && !HasAtMostOneBit(GetAllRoadBits(tile))) {
 				if (GetFoundationSlope(tile, NULL) == SLOPE_FLAT && EnsureNoVehicleOnGround(tile) && Chance16(1, 40)) {
 					StartRoadWorks(tile);
 
