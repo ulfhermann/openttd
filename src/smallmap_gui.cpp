@@ -600,10 +600,10 @@ class SmallMapWindow : public Window {
 		uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
 
 		do {
-			/* Check if the tile (xc,yc) is within the map range */
 			uint x = ScaleByZoomLower(xc, this->zoom);
 			uint y = ScaleByZoomLower(yc, this->zoom);
 
+			/* Check if the tile (x,y) is within the map range */
 			if (IsInsideMM(x, min_xy, MapMaxX()) && IsInsideMM(y, min_xy, MapMaxY())) {
 				/* Check if the dst pointer points to a pixel inside the screen buffer */
 				if (dst < _screen.dst_ptr) continue;
