@@ -84,12 +84,6 @@ void ResetIndustries()
 	_industry_mngr.ResetOverride();
 }
 
-void ResetIndustryCreationProbility(IndustryType type)
-{
-	assert(type < INVALID_INDUSTRYTYPE);
-	_industry_specs[type].appear_creation[_settings_game.game_creation.landscape] = 0;
-}
-
 /**
  * Retrieve the type for this industry.  Although it is accessed by a tile,
  * it will return the general type of industry, and not the sprite index
@@ -1788,82 +1782,56 @@ static const byte _numof_industry_table[NB_DIFFICULTY_LEVEL][NB_NUMOFINDUSTRY] =
  * of random industries during game creation
  * @param type IndustryType of the desired industry
  * @param amount of industries that need to be built */
-static void PlaceInitialIndustry(IndustryType type, int amount)
+static void PlaceInitialIndustry(IndustryType type, uint amount)
 {
-	/* We need to bypass the amount given in parameter if it exceeds the maximum dimension of the
-	 * _numof_industry_table.  newgrf can specify a big amount */
-	int num = (amount > NB_NUMOFINDUSTRY) ? amount : _numof_industry_table[_settings_game.difficulty.number_industries][amount];
-	const IndustrySpec *ind_spc = GetIndustrySpec(type);
+	CompanyID old_company = _current_company;
+	_current_company = OWNER_NONE;
 
-	/* These are always placed next to the coastline, so we scale by the perimeter instead. */
-	num = (ind_spc->check_proc == CHECK_REFINERY || ind_spc->check_proc == CHECK_OIL_RIG) ? ScaleByMapSize1D(num) : ScaleByMapSize(num);
+	for (; amount > 0; amount--) {
+		IncreaseGeneratingWorldProgress(GWP_INDUSTRY);
 
-	if (_settings_game.difficulty.number_industries != 0) {
-		CompanyID old_company = _current_company;
-		_current_company = OWNER_NONE;
-		assert(num > 0);
-
-		do {
-			uint i;
-
-			IncreaseGeneratingWorldProgress(GWP_INDUSTRY);
-
-			for (i = 0; i < 2000; i++) {
-				if (CreateNewIndustry(RandomTile(), type) != NULL) break;
-			}
-		} while (--num);
-
-		_current_company = old_company;
+		for (uint i = 0; i < 2000; i++) {
+			if (CreateNewIndustry(RandomTile(), type) != NULL) break;
+		}
 	}
+
+	_current_company = old_company;
 }
 
 /** This function will create ramdon industries during game creation.
  * It will scale the amount of industries by map size as well as difficulty level */
 void GenerateIndustries()
 {
-	uint i = 0;
-	uint8 chance;
-	IndustryType it;
-	const IndustrySpec *ind_spc;
+	uint total_amount = 0;
+	uint industry_counts[NUM_INDUSTRYTYPES];
+	memset(industry_counts, 0, sizeof(industry_counts));
 
 	/* Find the total amount of industries */
 	if (_settings_game.difficulty.number_industries > 0) {
-		for (it = 0; it < NUM_INDUSTRYTYPES; it++) {
+		for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
+			const IndustrySpec *ind_spc = GetIndustrySpec(it);
 
-			ind_spc = GetIndustrySpec(it);
-
-			if (!CheckIfCallBackAllowsAvailability(it, IACT_MAPGENERATION)) {
-				ResetIndustryCreationProbility(it);
-			}
-
-			chance = ind_spc->appear_creation[_settings_game.game_creation.landscape];
-			if (ind_spc->enabled && chance > 0 && ind_spc->num_table > 0) {
+			uint8 chance = ind_spc->appear_creation[_settings_game.game_creation.landscape];
+			if (ind_spc->enabled && chance > 0 && ind_spc->num_table > 0 && CheckIfCallBackAllowsAvailability(it, IACT_MAPGENERATION)) {
 				/* once the chance of appearance is determind, it have to be scaled by
 				 * the difficulty level. The "chance" in question is more an index into
 				 * the _numof_industry_table,in fact */
-				int num = (chance > NB_NUMOFINDUSTRY) ? chance : _numof_industry_table[_settings_game.difficulty.number_industries][chance];
+				uint num = (chance > NB_NUMOFINDUSTRY) ? chance : _numof_industry_table[_settings_game.difficulty.number_industries][chance];
 
 				/* These are always placed next to the coastline, so we scale by the perimeter instead. */
 				num = (ind_spc->check_proc == CHECK_REFINERY || ind_spc->check_proc == CHECK_OIL_RIG) ? ScaleByMapSize1D(num) : ScaleByMapSize(num);
-				i += num;
+				industry_counts[it] = num;
+				total_amount += num;
 			}
 		}
 	}
 
-	SetGeneratingWorldProgress(GWP_INDUSTRY, i);
+	SetGeneratingWorldProgress(GWP_INDUSTRY, total_amount);
 
 	if (_settings_game.difficulty.number_industries > 0) {
-		for (it = 0; it < NUM_INDUSTRYTYPES; it++) {
-			/* Once the number of industries has been determined, let's really create them.
-			 * The test for chance allows us to try create industries that are available only
-			 * for this landscape.
-			 * @todo :  Do we really have to pass chance as un-scaled value, since we've already
-			 *          processed that scaling above? No, don't think so.  Will find a way. */
-			ind_spc = GetIndustrySpec(it);
-			if (ind_spc->enabled && ind_spc->num_table > 0) {
-				chance = ind_spc->appear_creation[_settings_game.game_creation.landscape];
-				if (chance > 0) PlaceInitialIndustry(it, chance);
-			}
+		for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
+			/* Once the number of industries has been determined, let's really create them. */
+			if (industry_counts[it] > 0) PlaceInitialIndustry(it, industry_counts[it]);
 		}
 	}
 }
