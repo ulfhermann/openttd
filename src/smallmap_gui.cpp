@@ -36,6 +36,8 @@ enum SmallMapWindowWidgets {
 	SM_WIDGET_MAP_BORDER,        ///< Border around the smallmap.
 	SM_WIDGET_MAP,               ///< Panel containing the smallmap.
 	SM_WIDGET_LEGEND,            ///< Bottom panel to display smallmap legends.
+	SM_WIDGET_ZOOM_IN,           ///< Button to zoom in one step.
+	SM_WIDGET_ZOOM_OUT,          ///< Button to zoom out one step.
 	SM_WIDGET_CONTOUR,           ///< Button to select the contour view (height map).
 	SM_WIDGET_VEHICLES,          ///< Button to select the vehicles view.
 	SM_WIDGET_INDUSTRIES,        ///< Button to select the industries view.
@@ -252,7 +254,21 @@ static const AndOr _smallmap_vehicles_andor[] = {
 	{MKCOLOUR(0x00D7D700), MKCOLOUR(0xFF0000FF)},
 };
 
-typedef uint32 GetSmallMapPixels(TileIndex tile); ///< Typedef callthrough function
+/** Mapping of tile type to importance of the tile (higher number means more interesting to show). */
+static const byte _tiletype_importance[] = {
+	2, // MP_CLEAR
+	8, // MP_RAILWAY
+	7, // MP_ROAD
+	5, // MP_HOUSE
+	2, // MP_TREES
+	9, // MP_STATION
+	2, // MP_WATER
+	1, // MP_VOID
+	6, // MP_INDUSTRY
+	8, // MP_TUNNELBRIDGE
+	2, // MP_UNMOVABLE
+	0,
+};
 
 
 static inline TileType GetEffectiveTileType(TileIndex tile)
@@ -274,12 +290,11 @@ static inline TileType GetEffectiveTileType(TileIndex tile)
 /**
  * Return the colour a tile would be displayed with in the small map in mode "Contour".
  * @param tile The tile of which we would like to get the colour.
+ * @param t    Effective tile type of the tile (see #GetEffectiveTileType).
  * @return The colour of tile in the small map in mode "Contour"
  */
-static inline uint32 GetSmallMapContoursPixels(TileIndex tile)
+static inline uint32 GetSmallMapContoursPixels(TileIndex tile, TileType t)
 {
-	TileType t = GetEffectiveTileType(tile);
-
 	return ApplyMask(_map_height_bits[TileHeight(tile)], &_smallmap_contours_andor[t]);
 }
 
@@ -287,12 +302,11 @@ static inline uint32 GetSmallMapContoursPixels(TileIndex tile)
  * Return the colour a tile would be displayed with in the small map in mode "Vehicles".
  *
  * @param tile The tile of which we would like to get the colour.
+ * @param t    Effective tile type of the tile (see #GetEffectiveTileType).
  * @return The colour of tile in the small map in mode "Vehicles"
  */
-static inline uint32 GetSmallMapVehiclesPixels(TileIndex tile)
+static inline uint32 GetSmallMapVehiclesPixels(TileIndex tile, TileType t)
 {
-	TileType t = GetEffectiveTileType(tile);
-
 	return ApplyMask(MKCOLOUR(0x54545454), &_smallmap_vehicles_andor[t]);
 }
 
@@ -300,12 +314,11 @@ static inline uint32 GetSmallMapVehiclesPixels(TileIndex tile)
  * Return the colour a tile would be displayed with in the small map in mode "Industries".
  *
  * @param tile The tile of which we would like to get the colour.
+ * @param t    Effective tile type of the tile (see #GetEffectiveTileType).
  * @return The colour of tile in the small map in mode "Industries"
  */
-static inline uint32 GetSmallMapIndustriesPixels(TileIndex tile)
+static inline uint32 GetSmallMapIndustriesPixels(TileIndex tile, TileType t)
 {
-	TileType t = GetEffectiveTileType(tile);
-
 	if (t == MP_INDUSTRY) {
 		/* If industry is allowed to be seen, use its colour on the map */
 		if (_legend_from_industries[_industry_to_list_pos[Industry::GetByTile(tile)->type]].show_on_map) {
@@ -323,12 +336,11 @@ static inline uint32 GetSmallMapIndustriesPixels(TileIndex tile)
  * Return the colour a tile would be displayed with in the small map in mode "Routes".
  *
  * @param tile The tile of which we would like to get the colour.
+ * @param t    Effective tile type of the tile (see #GetEffectiveTileType).
  * @return The colour of tile  in the small map in mode "Routes"
  */
-static inline uint32 GetSmallMapRoutesPixels(TileIndex tile)
+static inline uint32 GetSmallMapRoutesPixels(TileIndex tile, TileType t)
 {
-	TileType t = GetEffectiveTileType(tile);
-
 	if (t == MP_STATION) {
 		switch (GetStationType(tile)) {
 			case STATION_RAIL:    return MKCOLOUR(0x56565656);
@@ -360,12 +372,11 @@ static const uint32 _vegetation_clear_bits[] = {
  * Return the colour a tile would be displayed with in the smallmap in mode "Vegetation".
  *
  * @param tile The tile of which we would like to get the colour.
+ * @param t    Effective tile type of the tile (see #GetEffectiveTileType).
  * @return The colour of tile  in the smallmap in mode "Vegetation"
  */
-static inline uint32 GetSmallMapVegetationPixels(TileIndex tile)
+static inline uint32 GetSmallMapVegetationPixels(TileIndex tile, TileType t)
 {
-	TileType t = GetEffectiveTileType(tile);
-
 	switch (t) {
 		case MP_CLEAR:
 			return (IsClearGround(tile, CLEAR_GRASS) && GetClearDensity(tile) < 3) ? MKCOLOUR(0x37373737) : _vegetation_clear_bits[GetClearGround(tile)];
@@ -391,13 +402,14 @@ static uint32 _owner_colours[OWNER_END + 1];
  * Return the colour a tile would be displayed with in the small map in mode "Owner".
  *
  * @param tile The tile of which we would like to get the colour.
+ * @param t    Effective tile type of the tile (see #GetEffectiveTileType).
  * @return The colour of tile in the small map in mode "Owner"
  */
-static inline uint32 GetSmallMapOwnerPixels(TileIndex tile)
+static inline uint32 GetSmallMapOwnerPixels(TileIndex tile, TileType t)
 {
 	Owner o;
 
-	switch (GetTileType(tile)) {
+	switch (t) {
 		case MP_INDUSTRY: o = OWNER_END;          break;
 		case MP_HOUSE:    o = OWNER_TOWN;         break;
 		default:          o = GetTileOwner(tile); break;
@@ -409,18 +421,6 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile)
 
 	return _owner_colours[o];
 }
-
-/* Each tile has 4 x pixels and 1 y pixel */
-
-/** Holds function pointers to determine tile colour in the smallmap for each smallmap mode. */
-static GetSmallMapPixels * const _smallmap_draw_procs[] = {
-	GetSmallMapContoursPixels,
-	GetSmallMapVehiclesPixels,
-	GetSmallMapIndustriesPixels,
-	GetSmallMapRoutesPixels,
-	GetSmallMapVegetationPixels,
-	GetSmallMapOwnerPixels,
-};
 
 /** Vehicle colours in #SMT_VEHICLES mode. Indexed by #VehicleTypeByte. */
 static const byte _vehicle_type_colours[6] = {
@@ -440,6 +440,13 @@ class SmallMapWindow : public Window {
 		SMT_OWNER,
 	};
 
+	/** Available kinds of zoomlevel changes. */
+	enum ZoomLevelChange {
+		ZLC_INITIALIZE, ///< Initialize zoom level.
+		ZLC_ZOOM_OUT,   ///< Zoom out.
+		ZLC_ZOOM_IN,    ///< Zoom in.
+	};
+
 	static SmallMapType map_type; ///< Currently displayed legends.
 	static bool show_towns;       ///< Display town names in the smallmap.
 
@@ -452,6 +459,7 @@ class SmallMapWindow : public Window {
 	int32 scroll_x;  ///< Horizontal world coordinate of the base tile left of the top-left corner of the smallmap display.
 	int32 scroll_y;  ///< Vertical world coordinate of the base tile left of the top-left corner of the smallmap display.
 	int32 subscroll; ///< Number of pixels (0..3) between the right end of the base tile and the pixel at the top-left corner of the smallmap display.
+	int zoom;        ///< Zoom level. Bigger number means more zoom-out (further away).
 
 	static const uint8 FORCE_REFRESH_PERIOD = 0x1F; ///< map is redrawn after that many ticks
 	uint8 refresh; ///< refresh counter, zeroed every FORCE_REFRESH_PERIOD ticks
@@ -464,8 +472,16 @@ class SmallMapWindow : public Window {
 	 */
 	FORCEINLINE Point RemapTile(int tile_x, int tile_y) const
 	{
-		return RemapCoords(tile_x - this->scroll_x / TILE_SIZE,
-				tile_y - this->scroll_y / TILE_SIZE, 0);
+		int x_offset = tile_x - this->scroll_x / TILE_SIZE;
+		int y_offset = tile_y - this->scroll_y / TILE_SIZE;
+
+		if (this->zoom == 1) return RemapCoords(x_offset, y_offset, 0);
+
+		/* For negative offsets, round towards -inf. */
+		if (x_offset < 0) x_offset -= this->zoom - 1;
+		if (y_offset < 0) y_offset -= this->zoom - 1;
+
+		return RemapCoords(x_offset / this->zoom, y_offset / this->zoom, 0);
 	}
 
 	/**
@@ -483,21 +499,110 @@ class SmallMapWindow : public Window {
 
 		/* For each two rows down, add a x and a y tile, and
 		 * For each four pixels to the right, move a tile to the right. */
-		Point pt = {(dy >> 1) - (dx >> 2), (dy >> 1) + (dx >> 2)};
+		Point pt = {((dy >> 1) - (dx >> 2)) * this->zoom, ((dy >> 1) + (dx >> 2)) * this->zoom};
 		dx &= 3;
 
 		if (dy & 1) { // Odd number of rows, handle the 2 pixel shift.
 			if (dx < 2) {
-				pt.x++;
+				pt.x += this->zoom;
 				dx += 2;
 			} else {
-				pt.y++;
+				pt.y += this->zoom;
 				dx -= 2;
 			}
 		}
 
 		*sub = dx;
 		return pt;
+	}
+
+	/** Initialize or change the zoom level.
+	 * @param change  Way to change the zoom level.
+	 * @param zoom_pt Position to keep fixed while zooming.
+	 * @pre \c *zoom_pt should contain a point in the smallmap display when zooming in or out.
+	 */
+	void SetZoomLevel(ZoomLevelChange change, const Point *zoom_pt)
+	{
+		static const int zoomlevels[] = {1, 2, 4, 6, 8}; // Available zoom levels. Bigger number means more zoom-out (further away).
+		static const int MIN_ZOOM_INDEX = 0;
+		static const int MAX_ZOOM_INDEX = lengthof(zoomlevels) - 1;
+
+		int new_index, cur_index, sub;
+		Point tile;
+		switch (change) {
+			case ZLC_INITIALIZE:
+				cur_index = - 1; // Definitely different from new_index.
+				new_index = MIN_ZOOM_INDEX;
+				break;
+
+			case ZLC_ZOOM_IN:
+			case ZLC_ZOOM_OUT:
+				for (cur_index = MIN_ZOOM_INDEX; cur_index <= MAX_ZOOM_INDEX; cur_index++) {
+					if (this->zoom == zoomlevels[cur_index]) break;
+				}
+				assert(cur_index <= MAX_ZOOM_INDEX);
+
+				tile = this->PixelToTile(zoom_pt->x, zoom_pt->y, &sub);
+				new_index = Clamp(cur_index + ((change == ZLC_ZOOM_IN) ? -1 : 1), MIN_ZOOM_INDEX, MAX_ZOOM_INDEX);
+				break;
+
+			default: NOT_REACHED();
+		}
+
+		if (new_index != cur_index) {
+			this->zoom = zoomlevels[new_index];
+			if (cur_index >= 0) {
+				Point new_tile = this->PixelToTile(zoom_pt->x, zoom_pt->y, &sub);
+				this->SetNewScroll(this->scroll_x + (tile.x - new_tile.x) * TILE_SIZE,
+						this->scroll_y + (tile.y - new_tile.y) * TILE_SIZE, sub);
+			}
+			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN,  this->zoom == zoomlevels[MIN_ZOOM_INDEX]);
+			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_OUT, this->zoom == zoomlevels[MAX_ZOOM_INDEX]);
+			this->SetDirty();
+		}
+	}
+
+	/**
+	 * Decide which colours to show to the user for a group of tiles.
+	 * @param ta Tile area to investigate.
+	 * @return Colours to display.
+	 */
+	inline uint32 GetTileColours(const TileArea &ta) const
+	{
+		int importance = 0;
+		TileIndex tile = INVALID_TILE; // Position of the most important tile.
+		TileType et = MP_VOID;         // Effective tile type at that position.
+
+		TILE_AREA_LOOP(ti, ta) {
+			TileType ttype = GetEffectiveTileType(ti);
+			if (_tiletype_importance[ttype] > importance) {
+				importance = _tiletype_importance[ttype];
+				tile = ti;
+				et = ttype;
+			}
+		}
+
+		switch (this->map_type) {
+			case SMT_CONTOUR:
+				return GetSmallMapContoursPixels(tile, et);
+
+			case SMT_VEHICLES:
+				return GetSmallMapVehiclesPixels(tile, et);
+
+			case SMT_INDUSTRY:
+				return GetSmallMapIndustriesPixels(tile, et);
+
+			case SMT_ROUTES:
+				return GetSmallMapRoutesPixels(tile, et);
+
+			case SMT_VEGETATION:
+				return GetSmallMapVegetationPixels(tile, et);
+
+			case SMT_OWNER:
+				return GetSmallMapOwnerPixels(tile, et);
+
+			default: NOT_REACHED();
+		}
 	}
 
 	/**
@@ -511,32 +616,42 @@ class SmallMapWindow : public Window {
 	 * @param start_pos Position of first pixel to draw.
 	 * @param end_pos Position of last pixel to draw (exclusive).
 	 * @param blitter current blitter
-	 * @param proc Pointer to the colour function
 	 * @note If pixel position is below \c 0, skip drawing.
 	 * @see GetSmallMapPixels(TileIndex)
 	 */
-	void DrawSmallMapColumn(void *dst, uint xc, uint yc, int pitch, int reps, int start_pos, int end_pos, Blitter *blitter, GetSmallMapPixels *proc) const
+	void DrawSmallMapColumn(void *dst, uint xc, uint yc, int pitch, int reps, int start_pos, int end_pos, Blitter *blitter) const
 	{
 		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
 		uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
 
 		do {
 			/* Check if the tile (xc,yc) is within the map range */
-			if (IsInsideMM(xc, min_xy, MapMaxX()) && IsInsideMM(yc, min_xy, MapMaxY())) {
-				/* Check if the dst pointer points to a pixel inside the screen buffer */
-				if (dst < _screen.dst_ptr) continue;
-				if (dst >= dst_ptr_abs_end) continue;
+			if (xc >= MapMaxX() || yc >= MapMaxY()) continue;
 
-				uint32 val = proc(TileXY(xc, yc));
-				uint8 *val8 = (uint8 *)&val;
-				int idx = max(0, -start_pos);
-				for (int pos = max(0, start_pos); pos < end_pos; pos++) {
-					blitter->SetPixel(dst, idx, 0, val8[idx]);
-					idx++;
-				}
+			/* Check if the dst pointer points to a pixel inside the screen buffer */
+			if (dst < _screen.dst_ptr) continue;
+			if (dst >= dst_ptr_abs_end) continue;
+
+			/* Construct tilearea covered by (xc, yc, xc + this->zoom, yc + this->zoom) such that it is within min_xy limits. */
+			TileArea ta;
+			if (min_xy == 1 && (xc == 0 || yc == 0)) {
+				if (this->zoom == 1) continue; // The tile area is empty, don't draw anything.
+
+				ta = TileArea(TileXY(max(min_xy, xc), max(min_xy, yc)), this->zoom - (xc == 0), this->zoom - (yc == 0));
+			} else {
+				ta = TileArea(TileXY(xc, yc), this->zoom, this->zoom);
+			}
+			ta.ClampToMap(); // Clamp to map boundaries (may contain MP_VOID tiles!).
+
+			uint32 val = this->GetTileColours(ta);
+			uint8 *val8 = (uint8 *)&val;
+			int idx = max(0, -start_pos);
+			for (int pos = max(0, start_pos); pos < end_pos; pos++) {
+				blitter->SetPixel(dst, idx, 0, val8[idx]);
+				idx++;
 			}
 		/* Switch to next tile in the column */
-		} while (xc++, yc++, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
+		} while (xc += this->zoom, yc += this->zoom, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
 	/**
@@ -636,23 +751,19 @@ class SmallMapWindow : public Window {
 		/* Find main viewport. */
 		const ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
 
-		Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
+		Point tile = InverseRemapCoords(vp->virtual_left, vp->virtual_top);
+		Point tl = this->RemapTile(tile.x >> 4, tile.y >> 4);
+		tl.x -= this->subscroll;
 
-		int x = vp->virtual_left - pt.x;
-		int y = vp->virtual_top - pt.y;
-		int x2 = (x + vp->virtual_width) / TILE_SIZE;
-		int y2 = (y + vp->virtual_height) / TILE_SIZE;
-		x /= TILE_SIZE;
-		y /= TILE_SIZE;
+		tile = InverseRemapCoords(vp->virtual_left + vp->virtual_width, vp->virtual_top + vp->virtual_height);
+		Point br = this->RemapTile(tile.x >> 4, tile.y >> 4);
+		br.x -= this->subscroll;
 
-		x -= this->subscroll;
-		x2 -= this->subscroll;
+		SmallMapWindow::DrawVertMapIndicator(tl.x, tl.y, br.y);
+		SmallMapWindow::DrawVertMapIndicator(br.x, tl.y, br.y);
 
-		SmallMapWindow::DrawVertMapIndicator(x, y, y2);
-		SmallMapWindow::DrawVertMapIndicator(x2, y, y2);
-
-		SmallMapWindow::DrawHorizMapIndicator(x, x2, y);
-		SmallMapWindow::DrawHorizMapIndicator(x, x2, y2);
+		SmallMapWindow::DrawHorizMapIndicator(tl.x, br.x, tl.y);
+		SmallMapWindow::DrawHorizMapIndicator(tl.x, br.x, br.y);
 	}
 
 	/**
@@ -711,16 +822,16 @@ class SmallMapWindow : public Window {
 				int end_pos = min(dpi->width, x + 4);
 				int reps = (dpi->height - y + 1) / 2; // Number of lines.
 				if (reps > 0) {
-					this->DrawSmallMapColumn(ptr, tile_x, tile_y, dpi->pitch * 2, reps, x, end_pos, blitter, _smallmap_draw_procs[this->map_type]);
+					this->DrawSmallMapColumn(ptr, tile_x, tile_y, dpi->pitch * 2, reps, x, end_pos, blitter);
 				}
 			}
 
 			if (y == 0) {
-				tile_y++;
+				tile_y += this->zoom;
 				y++;
 				ptr = blitter->MoveTo(ptr, 0, 1);
 			} else {
-				tile_x--;
+				tile_x -= this->zoom;
 				y--;
 				ptr = blitter->MoveTo(ptr, 0, -1);
 			}
@@ -752,6 +863,7 @@ public:
 		this->SetWidgetLoweredState(SM_WIDGET_TOGGLETOWNNAME, this->show_towns);
 		this->GetWidget<NWidgetStacked>(SM_WIDGET_SELECTINDUSTRIES)->SetDisplayedPlane(this->map_type != SMT_INDUSTRY);
 
+		this->SetZoomLevel(ZLC_INITIALIZE, NULL);
 		this->SmallMapCenterOnCurrentPos();
 	}
 
@@ -912,14 +1024,26 @@ public:
 				_left_button_clicked = false;
 
 				const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
-				Point pt = RemapCoords(this->scroll_x, this->scroll_y, 0);
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
+				int sub;
+				pt = this->PixelToTile(pt.x - wid->pos_x, pt.y - wid->pos_y, &sub);
+				pt = RemapCoords(this->scroll_x + pt.x * TILE_SIZE + this->zoom * (TILE_SIZE - sub * TILE_SIZE / 4),
+						this->scroll_y + pt.y * TILE_SIZE + sub * this->zoom * TILE_SIZE / 4, 0);
+
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
-				w->viewport->dest_scrollpos_x = pt.x + ((_cursor.pos.x - this->left + wid->pos_x) << 4) - (w->viewport->virtual_width  >> 1);
-				w->viewport->dest_scrollpos_y = pt.y + ((_cursor.pos.y - this->top  - wid->pos_y) << 4) - (w->viewport->virtual_height >> 1);
+				w->viewport->dest_scrollpos_x = pt.x - (w->viewport->virtual_width  >> 1);
+				w->viewport->dest_scrollpos_y = pt.y - (w->viewport->virtual_height >> 1);
 
 				this->SetDirty();
 			} break;
+
+			case SM_WIDGET_ZOOM_IN:
+			case SM_WIDGET_ZOOM_OUT: {
+				const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
+				Point pt = {wid->current_x / 2, wid->current_y / 2};
+				this->SetZoomLevel((widget == SM_WIDGET_ZOOM_IN) ? ZLC_ZOOM_IN : ZLC_ZOOM_OUT, &pt);
+				break;
+			}
 
 			case SM_WIDGET_CONTOUR:    // Show land contours
 			case SM_WIDGET_VEHICLES:   // Show vehicles
@@ -1016,6 +1140,17 @@ public:
 		}
 	}
 
+	virtual void OnMouseWheel(int wheel)
+	{
+		const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
+		int cursor_x = _cursor.pos.x - this->left - wid->pos_x;
+		int cursor_y = _cursor.pos.y - this->top  - wid->pos_y;
+		if (IsInsideMM(cursor_x, 0, wid->current_x) && IsInsideMM(cursor_y, 0, wid->current_y)) {
+			Point pt = {cursor_x, cursor_y};
+			this->SetZoomLevel((wheel < 0) ? ZLC_ZOOM_IN : ZLC_ZOOM_OUT, &pt);
+		}
+	}
+
 	virtual void OnTick()
 	{
 		/* Update the window every now and then */
@@ -1025,6 +1160,42 @@ public:
 		this->SetDirty();
 	}
 
+	/**
+	 * Set new #scroll_x, #scroll_y, and #subscroll values after limiting them such that the center
+	 * of the smallmap always contains a part of the map.
+	 * @param sx  Proposed new #scroll_x
+	 * @param sy  Proposed new #scroll_y
+	 * @param sub Proposed new #subscroll
+	 */
+	void SetNewScroll(int sx, int sy, int sub)
+	{
+		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
+		Point hv = InverseRemapCoords(wi->current_x * TILE_SIZE / 2, wi->current_y * TILE_SIZE / 2);
+		hv.x *= this->zoom;
+		hv.y *= this->zoom;
+
+		if (sx < -hv.x) {
+			sx = -hv.x;
+			sub = 0;
+		}
+		if (sx > (int)MapMaxX() * TILE_SIZE - hv.x) {
+			sx = MapMaxX() * TILE_SIZE - hv.x;
+			sub = 0;
+		}
+		if (sy < -hv.y) {
+			sy = -hv.y;
+			sub = 0;
+		}
+		if (sy > (int)MapMaxY() * TILE_SIZE - hv.y) {
+			sy = MapMaxY() * TILE_SIZE - hv.y;
+			sub = 0;
+		}
+
+		this->scroll_x = sx;
+		this->scroll_y = sy;
+		this->subscroll = sub;
+	}
+
 	virtual void OnScroll(Point delta)
 	{
 		_cursor.fix_at = true;
@@ -1032,34 +1203,7 @@ public:
 		/* While tile is at (delta.x, delta.y)? */
 		int sub;
 		Point pt = this->PixelToTile(delta.x, delta.y, &sub);
-		int x = this->scroll_x + pt.x * TILE_SIZE;
-		int y = this->scroll_y + pt.y * TILE_SIZE;
-
-		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
-		int hx = wi->current_x / 2;
-		int hy = wi->current_y / 2;
-		int hvx = hx * -4 + hy * 8;
-		int hvy = hx *  4 + hy * 8;
-		if (x < -hvx) {
-			x = -hvx;
-			sub = 0;
-		}
-		if (x > (int)MapMaxX() * TILE_SIZE - hvx) {
-			x = MapMaxX() * TILE_SIZE - hvx;
-			sub = 0;
-		}
-		if (y < -hvy) {
-			y = -hvy;
-			sub = 0;
-		}
-		if (y > (int)MapMaxY() * TILE_SIZE - hvy) {
-			y = MapMaxY() * TILE_SIZE - hvy;
-			sub = 0;
-		}
-
-		this->scroll_x = x;
-		this->scroll_y = y;
-		this->subscroll = sub;
+		this->SetNewScroll(this->scroll_x + pt.x * TILE_SIZE, this->scroll_y + pt.y * TILE_SIZE, sub);
 
 		this->SetDirty();
 	}
@@ -1067,12 +1211,13 @@ public:
 	void SmallMapCenterOnCurrentPos()
 	{
 		const ViewPort *vp = FindWindowById(WC_MAIN_WINDOW, 0)->viewport;
-		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
+		Point pt = InverseRemapCoords(vp->virtual_left + vp->virtual_width  / 2, vp->virtual_top  + vp->virtual_height / 2);
 
-		int x = ((vp->virtual_width  - (int)wi->current_x * TILE_SIZE) / 2 + vp->virtual_left) / 4;
-		int y = ((vp->virtual_height - (int)wi->current_y * TILE_SIZE) / 2 + vp->virtual_top ) / 2 - TILE_SIZE * 2;
-		this->scroll_x = (y - x) & ~0xF;
-		this->scroll_y = (x + y) & ~0xF;
+		int sub;
+		const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
+		Point tile = this->PixelToTile(wid->current_x / 2, wid->current_y / 2, &sub);
+
+		this->SetNewScroll(pt.x - tile.x * TILE_SIZE, pt.y - tile.y * TILE_SIZE, sub);
 		this->SetDirty();
 	}
 };
@@ -1168,6 +1313,7 @@ static const NWidgetPart _nested_smallmap_bar[] = {
 			NWidget(NWID_VERTICAL),
 				/* Top button row. */
 				NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+					NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_IN), SetDataTip(SPR_IMG_ZOOMIN, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_IN),
 					NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_CENTERMAP), SetDataTip(SPR_IMG_SMALLMAP, STR_SMALLMAP_CENTER),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_CONTOUR), SetDataTip(SPR_IMG_SHOW_COUNTOURS, STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_VEHICLES), SetDataTip(SPR_IMG_SHOW_VEHICLES, STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP),
@@ -1175,6 +1321,7 @@ static const NWidgetPart _nested_smallmap_bar[] = {
 				EndContainer(),
 				/* Bottom button row. */
 				NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+					NWidget(WWT_PUSHIMGBTN, COLOUR_BROWN, SM_WIDGET_ZOOM_OUT), SetDataTip(SPR_IMG_ZOOMOUT, STR_TOOLBAR_TOOLTIP_ZOOM_THE_VIEW_OUT),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_TOGGLETOWNNAME), SetDataTip(SPR_IMG_TOWN, STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_ROUTES), SetDataTip(SPR_IMG_SHOW_ROUTES, STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON),
 					NWidget(WWT_IMGBTN, COLOUR_BROWN, SM_WIDGET_VEGETATION), SetDataTip(SPR_IMG_PLANTTREES, STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP),
