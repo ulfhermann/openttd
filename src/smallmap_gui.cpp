@@ -555,16 +555,23 @@ class SmallMapWindow : public Window {
 	 */
 	FORCEINLINE Point RemapTile(int tile_x, int tile_y) const
 	{
-		int x_offset = tile_x - this->scroll_x / TILE_SIZE;
-		int y_offset = tile_y - this->scroll_y / TILE_SIZE;
+		if (this->zoom > 0) {
+			int x_offset = tile_x - this->scroll_x / TILE_SIZE;
+			int y_offset = tile_y - this->scroll_y / TILE_SIZE;
 
-		if (this->zoom == 1) return RemapCoords(x_offset, y_offset, 0);
+			/* For negative offsets, round towards -inf. */
+			if (x_offset < 0) x_offset -= this->zoom - 1;
+			if (y_offset < 0) y_offset -= this->zoom - 1;
 
-		/* For negative offsets, round towards -inf. */
-		if (x_offset < 0) x_offset -= this->zoom - 1;
-		if (y_offset < 0) y_offset -= this->zoom - 1;
-
-		return RemapCoords(x_offset / this->zoom, y_offset / this->zoom, 0);
+			return RemapCoords(x_offset / this->zoom, y_offset / this->zoom, 0);
+		} else {
+			int x_offset = tile_x * TILE_SIZE - this->scroll_x;
+			int y_offset = tile_y * TILE_SIZE - this->scroll_y;
+			return RemapCoords(
+				x_offset * (-this->zoom) / TILE_SIZE, 
+				y_offset * (-this->zoom) / TILE_SIZE, 0
+			);
+		}
 	}
 
 	/**
@@ -583,17 +590,27 @@ class SmallMapWindow : public Window {
 		/* For each two rows down, add a x and a y tile, and
 		 * For each four pixels to the right, move a tile to the right. */
 		Point pt = {
-			((dy >> 1) - (dx >> 2)) * TILE_SIZE * this->zoom, 
-			((dy >> 1) + (dx >> 2)) * TILE_SIZE * this->zoom
+			((dy >> 1) - (dx >> 2)) * TILE_SIZE, 
+			((dy >> 1) + (dx >> 2)) * TILE_SIZE
 		};
+
+		if (this->zoom > 0) {
+			pt.x *= this->zoom;
+			pt.y *= this->zoom;
+		} else {
+			pt.x /= (-this->zoom);
+			pt.y /= (-this->zoom);
+		}
+
 		dx &= 3;
 
 		if (dy & 1) { // Odd number of rows, handle the 2 pixel shift.
+			int offset = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom);
 			if (dx < 2) {
-				pt.x += this->zoom * TILE_SIZE;
+				pt.x += offset; 
 				dx += 2;
 			} else {
-				pt.y += this->zoom * TILE_SIZE;
+				pt.y += offset; 
 				dx -= 2;
 			}
 		}
@@ -609,7 +626,7 @@ class SmallMapWindow : public Window {
 	 */
 	void SetZoomLevel(ZoomLevelChange change, const Point *zoom_pt)
 	{
-		static const int zoomlevels[] = {1, 2, 4, 6, 8}; // Available zoom levels. Bigger number means more zoom-out (further away).
+		static const int zoomlevels[] = {-8, -4, -2, 1, 2, 4, 6, 8}; // Available zoom levels. Bigger number means more zoom-out (further away).
 		static const int MIN_ZOOM_INDEX = 0;
 		static const int MAX_ZOOM_INDEX = lengthof(zoomlevels) - 1;
 
@@ -639,8 +656,8 @@ class SmallMapWindow : public Window {
 			this->zoom = zoomlevels[new_index];
 			if (cur_index >= 0) {
 				Point new_pos = this->PixelToWorld(zoom_pt->x, zoom_pt->y, &sub);
-				this->SetNewScroll(this->scroll_x + (position.x - new_pos.x),
-						this->scroll_y + (position.y - new_pos.y), sub);
+				this->SetNewScroll(this->scroll_x + position.x - new_pos.x,
+						this->scroll_y + position.y - new_pos.y, sub);
 			}
 			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_IN,  this->zoom == zoomlevels[MIN_ZOOM_INDEX]);
 			this->SetWidgetDisabledState(SM_WIDGET_ZOOM_OUT, this->zoom == zoomlevels[MAX_ZOOM_INDEX]);
@@ -710,9 +727,12 @@ class SmallMapWindow : public Window {
 		void *dst_ptr_abs_end = blitter->MoveTo(_screen.dst_ptr, 0, _screen.height);
 		uint min_xy = _settings_game.construction.freeform_edges ? 1 : 0;
 
+		int increment = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom);
+		int extent = this->zoom > 0 ? this->zoom : 1;
+
 		do {
 			/* Check if the tile (xc,yc) is within the map range */
-			if (xc >= MapMaxX() || yc >= MapMaxY()) continue;
+			if (xc / TILE_SIZE >= MapMaxX() || yc / TILE_SIZE >= MapMaxY()) continue;
 
 			/* Check if the dst pointer points to a pixel inside the screen buffer */
 			if (dst < _screen.dst_ptr) continue;
@@ -720,12 +740,12 @@ class SmallMapWindow : public Window {
 
 			/* Construct tilearea covered by (xc, yc, xc + this->zoom, yc + this->zoom) such that it is within min_xy limits. */
 			TileArea ta;
-			if (min_xy == 1 && (xc == 0 || yc == 0)) {
-				if (this->zoom == 1) continue; // The tile area is empty, don't draw anything.
+			if (min_xy == 1 && (xc < TILE_SIZE || yc < TILE_SIZE)) {
+				if (this->zoom <= 1) continue; // The tile area is empty, don't draw anything.
 
-				ta = TileArea(TileXY(max(min_xy, xc), max(min_xy, yc)), this->zoom - (xc == 0), this->zoom - (yc == 0));
+				ta = TileArea(TileXY(max(min_xy, xc / TILE_SIZE), max(min_xy, yc / TILE_SIZE)), this->zoom - (xc < TILE_SIZE), this->zoom - (yc < TILE_SIZE));
 			} else {
-				ta = TileArea(TileXY(xc, yc), this->zoom, this->zoom);
+				ta = TileArea(TileXY(xc / TILE_SIZE, yc / TILE_SIZE), extent, extent);
 			}
 			ta.ClampToMap(); // Clamp to map boundaries (may contain MP_VOID tiles!).
 
@@ -737,7 +757,7 @@ class SmallMapWindow : public Window {
 				idx++;
 			}
 		/* Switch to next tile in the column */
-		} while (xc += this->zoom, yc += this->zoom, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
+		} while (xc += increment, yc += increment, dst = blitter->MoveTo(dst, pitch, 0), --reps != 0);
 	}
 
 	/**
@@ -893,13 +913,14 @@ class SmallMapWindow : public Window {
 
 		/* Which tile is displayed at (dpi->left, dpi->top)? */
 		int dx;
-		Point tile = this->PixelToWorld(dpi->left, dpi->top, &dx);
-		int tile_x = this->scroll_x + tile.x;
-		int tile_y = this->scroll_y + tile.y;
+		Point position = this->PixelToWorld(dpi->left, dpi->top, &dx);
+		int pos_x = this->scroll_x + position.x;
+		int pos_y = this->scroll_y + position.y;
 
 		void *ptr = blitter->MoveTo(dpi->dst_ptr, -dx - 4, 0);
 		int x = - dx - 4;
 		int y = 0;
+		int increment = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom); 
 
 		for (;;) {
 			/* Distance from left edge */
@@ -909,16 +930,16 @@ class SmallMapWindow : public Window {
 				int end_pos = min(dpi->width, x + 4);
 				int reps = (dpi->height - y + 1) / 2; // Number of lines.
 				if (reps > 0) {
-					this->DrawSmallMapColumn(ptr, tile_x, tile_y, dpi->pitch * 2, reps, x, end_pos, blitter);
+					this->DrawSmallMapColumn(ptr, pos_x, pos_y, dpi->pitch * 2, reps, x, end_pos, blitter);
 				}
 			}
 
 			if (y == 0) {
-				tile_y += this->zoom;
+				pos_y += increment;
 				y++;
 				ptr = blitter->MoveTo(ptr, 0, 1);
 			} else {
-				tile_x -= this->zoom;
+				pos_x -= increment;
 				y--;
 				ptr = blitter->MoveTo(ptr, 0, -1);
 			}
@@ -961,7 +982,7 @@ class SmallMapWindow : public Window {
 	}
 
 public:
-	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(), zoom(ZOOM_LVL_NORMAL), refresh(FORCE_REFRESH_PERIOD)
+	SmallMapWindow(const WindowDesc *desc, int window_number) : Window(), refresh(FORCE_REFRESH_PERIOD)
 	{
 		this->InitNested(desc, window_number);
 		this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
@@ -1137,8 +1158,9 @@ public:
 				Window *w = FindWindowById(WC_MAIN_WINDOW, 0);
 				int sub;
 				pt = this->PixelToWorld(pt.x - wid->pos_x, pt.y - wid->pos_y, &sub);
-				pt = RemapCoords(this->scroll_x + pt.x + this->zoom * (TILE_SIZE - sub * TILE_SIZE / 4),
-						this->scroll_y + pt.y + sub * this->zoom * TILE_SIZE / 4, 0);
+				int offset = this->zoom > 0 ? this->zoom * TILE_SIZE : TILE_SIZE / (-this->zoom);
+				pt = RemapCoords(this->scroll_x + pt.x + offset - offset * sub / 4,
+						this->scroll_y + pt.y + sub * offset / 4, 0);
 
 				w->viewport->follow_vehicle = INVALID_VEHICLE;
 				w->viewport->dest_scrollpos_x = pt.x - (w->viewport->virtual_width  >> 1);
@@ -1283,8 +1305,13 @@ public:
 	{
 		const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
 		Point hv = InverseRemapCoords(wi->current_x * TILE_SIZE / 2, wi->current_y * TILE_SIZE / 2);
-		hv.x *= this->zoom;
-		hv.y *= this->zoom;
+		if (this->zoom > 0) {
+			hv.x *= this->zoom;
+			hv.y *= this->zoom;
+		} else {
+			hv.x /= (-this->zoom);
+			hv.y /= (-this->zoom);
+		}
 
 		if (sx < -hv.x) {
 			sx = -hv.x;
