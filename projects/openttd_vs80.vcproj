@@ -720,6 +720,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\tilearea.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\townname.cpp"
 				>
 			</File>
@@ -1181,6 +1185,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\newgrf_properties.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_railtype.h"
 				>
 			</File>
 			<File
@@ -3189,6 +3197,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\newgrf_industrytiles.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_railtype.cpp"
 				>
 			</File>
 			<File
