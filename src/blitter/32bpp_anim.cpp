@@ -23,8 +23,8 @@ inline void Blitter_32bppAnim::Draw(const Blitter::BlitterParams *bp, ZoomLevel 
 {
 	const SpriteData *src = (const SpriteData *)bp->sprite;
 
-	const Colour *src_px = (const Colour *)(src->data + src->offset[zoom - ZOOM_LVL_BLITTER_MIN][0]);
-	const uint8  *src_n  = (const uint8  *)(src->data + src->offset[zoom - ZOOM_LVL_BLITTER_MIN][1]);
+	const Colour *src_px = (const Colour *)(src->data + src->offset[zoom][0]);
+	const uint8  *src_n  = (const uint8  *)(src->data + src->offset[zoom][1]);
 
 	for (uint i = bp->skip_top; i != 0; i--) {
 		src_px = (const Colour *)((const byte *)src_px + *(const uint32 *)src_px);

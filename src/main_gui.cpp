@@ -137,7 +137,7 @@ bool DoZoomInOutWindow(int how, Window *w)
 
 	switch (how) {
 		case ZOOM_IN:
-			if (vp->zoom == ZOOM_LVL_BLITTER_MIN) return false;
+			if (vp->zoom == ZOOM_LVL_MIN) return false;
 			vp->zoom = (ZoomLevel)((int)vp->zoom - 1);
 			vp->virtual_width >>= 1;
 			vp->virtual_height >>= 1;
@@ -148,7 +148,7 @@ bool DoZoomInOutWindow(int how, Window *w)
 			w->viewport->dest_scrollpos_y = w->viewport->scrollpos_y;
 			break;
 		case ZOOM_OUT:
-			if (vp->zoom == ZOOM_LVL_BLITTER_MAX) return false;
+			if (vp->zoom == ZOOM_LVL_MAX) return false;
 			vp->zoom = (ZoomLevel)((int)vp->zoom + 1);
 
 			w->viewport->scrollpos_x -= vp->virtual_width >> 1;
@@ -175,7 +175,7 @@ void ZoomInOrOutToCursorWindow(bool in, Window *w)
 
 	if (_game_mode != GM_MENU) {
 		ViewPort *vp = w->viewport;
-		if ((in && vp->zoom == ZOOM_LVL_BLITTER_MIN) || (!in && vp->zoom == ZOOM_LVL_BLITTER_MAX))
+		if ((in && vp->zoom == ZOOM_LVL_MIN) || (!in && vp->zoom == ZOOM_LVL_MAX))
 			return;
 
 		Point pt = GetTileZoomCenterWindow(in, w);
