@@ -1861,8 +1861,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Off
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}On
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Não evidenciar área de cobertura do sítio proposto
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Evidenciar área de cobertura do sítio proposto
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aceita: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Fornecimentos: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aceita: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Fornecimentos: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Juntar estação
@@ -2370,7 +2370,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Propriedade da 
 STR_NEWGRF_ERROR_INVALID_ID                                     :Tentativa de usar ID inválido.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} contém uma rotina corrompida. As rotinas corrompidas serão assinaladas com um ponto de interrogação (?) vermelho.
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Contém 8 entradas de acção múltipla
-STR_NEWGRF_ERROR_READ_BOUNDS                                    :Leitura ultrapassou o fim da pseudo-rotina.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Leitura ultrapassou o fim do pseudo-sprite.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Cuidado!
