@@ -45,6 +45,7 @@
 #include <map>
 #include "core/alloc_type.hpp"
 #include "core/mem_func.hpp"
+#include "smallmap_gui.h"
 
 #include "table/strings.h"
 #include "table/build_industry.h"
@@ -2566,7 +2567,7 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 				break;
 
 			case 0x12: // Station graphic
-				rti->total_offset = Clamp(buf->ReadByte(), 0, 2) * 88;
+				rti->total_offset = Clamp(buf->ReadByte(), 0, 2) * 82;
 				break;
 
 			case 0x13: // Construction cost factor
@@ -5667,7 +5668,7 @@ static void ResetCustomIndustries()
 				}
 
 				/* We need to remove the tiles layouts */
-				if (HasBit(ind->cleanup_flag, CLEAN_TILELSAYOUT) && ind->table != NULL) {
+				if (HasBit(ind->cleanup_flag, CLEAN_TILELAYOUT) && ind->table != NULL) {
 					for (int j = 0; j < ind->num_table; j++) {
 						/* remove the individual layouts */
 						free((void*)ind->table[j]);

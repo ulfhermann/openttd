@@ -1207,6 +1207,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Eno ali 
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Največja razširitev postaje: {ORANGE}{STRING} {RED}Pozor: Visoka vrednost upočasnjuje igro
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Avtomatski servis helikopterjev na pristajališču: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Pripni orodje za teren k orodju za gradnjo cest/železnic itd.: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Barva zemlje uporabljena na zemljevidu: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Zelena
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Temno zelena
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Vijolična
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Obrni smer premika okna: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Gladek premik pogleda: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Prikaz merilnega nasveta med uporabo gradbenih orodij: {ORANGE}{STRING}
@@ -1903,8 +1907,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Izključ
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Vključeno
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Ne osvetli zajemnega območja predvidene lokacije
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Osvetli zajemno območje predvidene lokacije
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Sprejema: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Dobavlja: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Sprejema: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Dobavlja: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Združi postaje
