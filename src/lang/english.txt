@@ -1165,6 +1165,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}One or m
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Max station spread: {ORANGE}{STRING1} {RED}Warning: High setting slows game
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Service helicopters at helipads automatically: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Link landscape toolbar to rail/road/water/airport toolbars: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Land colour used at the smallmap: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Green
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Dark green
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Violet
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Reverse scroll direction: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Smooth viewport scrolling: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Show a measurement tooltip when using various build-tools: {ORANGE}{STRING1}
@@ -1861,8 +1865,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Off
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}On
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Don't highlight coverage area of proposed site
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Highlight coverage area of proposed site
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepts: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Supplies: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepts: {GOLD}{RAW_STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Supplies: {GOLD}{RAW_STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Join station
