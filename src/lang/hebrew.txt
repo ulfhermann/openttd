@@ -9,6 +9,7 @@
 ##winlangid 0x040d
 ##grflangid 0x61
 ##gender m f
+##case singular plural gen
 
 
 # $Id$
@@ -63,20 +64,27 @@ STR_CARGO_PLURAL_FIZZY_DRINKS                                   :משקאות מ
 # Singular cargo name
 STR_CARGO_SINGULAR_NOTHING                                      :
 STR_CARGO_SINGULAR_PASSENGER                                    :נוסע
+STR_CARGO_SINGULAR_PASSENGER.plural                             :נוסעים
 STR_CARGO_SINGULAR_COAL                                         :פחם
 STR_CARGO_SINGULAR_MAIL                                         :דואר
 STR_CARGO_SINGULAR_OIL                                          :נפט
 STR_CARGO_SINGULAR_LIVESTOCK                                    :בקר
-STR_CARGO_SINGULAR_GOODS                                        :מוצרים
+STR_CARGO_SINGULAR_GOODS                                        :מוצר
+STR_CARGO_SINGULAR_GOODS.plural                                 :מוצרים
 STR_CARGO_SINGULAR_GRAIN                                        :תבואה
 STR_CARGO_SINGULAR_WOOD                                         :עץ
 STR_CARGO_SINGULAR_IRON_ORE                                     :עפרת ברזל
+STR_CARGO_SINGULAR_IRON_ORE.plural                              :עופרות ברזל
 STR_CARGO_SINGULAR_STEEL                                        :פלדה
-STR_CARGO_SINGULAR_VALUABLES                                    :מוצרי ערך
+STR_CARGO_SINGULAR_VALUABLES                                    :מוצר ערך
+STR_CARGO_SINGULAR_VALUABLES.plural                             :מוצרי ערך
 STR_CARGO_SINGULAR_COPPER_ORE                                   :עפרת נחושת
+STR_CARGO_SINGULAR_COPPER_ORE.plural                            :עופרות נחושת
 STR_CARGO_SINGULAR_MAIZE                                        :תירס
 STR_CARGO_SINGULAR_FRUIT                                        :פרי
+STR_CARGO_SINGULAR_FRUIT.plural                                 :פירות
 STR_CARGO_SINGULAR_DIAMOND                                      :יהלום
+STR_CARGO_SINGULAR_DIAMOND.plural                               :יהלומים
 STR_CARGO_SINGULAR_FOOD                                         :מזון
 STR_CARGO_SINGULAR_PAPER                                        :נייר
 STR_CARGO_SINGULAR_GOLD                                         :זהב
@@ -85,14 +93,19 @@ STR_CARGO_SINGULAR_WHEAT                                        :חיטה
 STR_CARGO_SINGULAR_RUBBER                                       :גומי
 STR_CARGO_SINGULAR_SUGAR                                        :סוכר
 STR_CARGO_SINGULAR_TOY                                          :צעצוע
+STR_CARGO_SINGULAR_TOY.plural                                   :צעצועים
 STR_CARGO_SINGULAR_CANDY                                        :ממתק
+STR_CARGO_SINGULAR_CANDY.plural                                 :ממתקים
 STR_CARGO_SINGULAR_COLA                                         :קולה
 STR_CARGO_SINGULAR_COTTON_CANDY                                 :צמר גפן מתוק
 STR_CARGO_SINGULAR_BUBBLE                                       :בועה
+STR_CARGO_SINGULAR_BUBBLE.plural                                :בועות
 STR_CARGO_SINGULAR_TOFFEE                                       :טופי
 STR_CARGO_SINGULAR_BATTERY                                      :סוללה
+STR_CARGO_SINGULAR_BATTERY.plural                               :סוללות
 STR_CARGO_SINGULAR_PLASTIC                                      :פלסטיק
 STR_CARGO_SINGULAR_FIZZY_DRINK                                  :משקה מוגז
+STR_CARGO_SINGULAR_FIZZY_DRINK.plural                           :משקאות מוגזים
 
 # Quantity of cargo
 STR_QUANTITY_NOTHING                                            :
@@ -222,7 +235,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}הכנס
 STR_LIST_FILTER_TITLE                                           :{BLACK}מחרוזת סינון:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}(בחר(י) סדר מיון (עולה\יורד
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}בחר\י קרטריון מיון
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}בחר\י קרטריון מיון
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}בחר קריטריון סינון
 STR_BUTTON_SORT_BY                                              :{BLACK}מיון לפי
 STR_BUTTON_LOCATION                                             :{BLACK}מיקום
@@ -623,7 +636,7 @@ STR_PLAYLIST_TOOLTIP_CLICK_TO_ADD_TRACK                         :{BLACK}(לחץ 
 STR_PLAYLIST_TOOLTIP_CLICK_TO_REMOVE_TRACK                      :{BLACK}(לחץ על רצועה כדי להסיר אותה מהתוכנית הנוחכית(מותאם אישית 1 או מותאם אישית 2 בלבד
 
 # Highscore window
-STR_HIGHSCORE_TOP_COMPANIES_WHO_REACHED                         :{BIGFONT}{BLACK}חמשת החברות שהגיעו לרמת {NUM}{}){STRING})
+STR_HIGHSCORE_TOP_COMPANIES_WHO_REACHED                         :{BIGFONT}{BLACK}חמש החברות שהגיעו לשנת {NUM}{}({STRING})
 STR_HIGHSCORE_TOP_COMPANIES_NETWORK_GAME                        :{BIGFONT}{BLACK}טבלת ליגה של חברות ב {NUM}
 STR_HIGHSCORE_POSITION                                          :{BIGFONT}{BLACK}.{COMMA}
 STR_HIGHSCORE_PERFORMANCE_TITLE_BUSINESSMAN                     :איש עסקים
@@ -689,7 +702,7 @@ STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}שלג
 
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}הצג/הסתר שמות ערים
-STR_SMALLMAP_CENTER                                             :{BLACK}מרכז את המפה על המיקום הנוכחי
+STR_SMALLMAP_CENTER                                             :{BLACK}מרכז את המפה הקטנה על המיקום הנוכחי
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}({1:NUM}){0:STRING}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}השתק את כולן
@@ -731,7 +744,7 @@ STR_NEWS_MESSAGE_TYPE_ECONOMY_CHANGES                           :{YELLOW}שינ�
 STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_COMPANY        :{YELLOW}שינויים ביצור של תעשיות בשירות החברה
 STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_SERVED_BY_OTHER          :{YELLOW}שינויים ביצור של תעשיות בשירות המתחרה/ים
 STR_NEWS_MESSAGE_TYPE_INDUSTRY_CHANGES_UNSERVED                 :{YELLOW}שינויים ביצור תעשיה אחרת
-STR_NEWS_MESSAGE_TYPE_ADVICE_INFORMATION_ON_COMPANY             :{YELLOW}עיצות/מידע על כלים של החברה
+STR_NEWS_MESSAGE_TYPE_ADVICE_INFORMATION_ON_COMPANY             :{YELLOW}עיצות/מידע על כלי רכב של החברה
 STR_NEWS_MESSAGE_TYPE_NEW_VEHICLES                              :{YELLOW}דגמים חדשים
 STR_NEWS_MESSAGE_TYPE_CHANGES_OF_CARGO_ACCEPTANCE               :{YELLOW}שינויים במטענים המתקבלים
 STR_NEWS_MESSAGE_TYPE_SUBSIDIES                                 :{YELLOW}סובסידיות
@@ -760,7 +773,7 @@ STR_NEWS_DISASTER_COAL_MINE_SUBSIDENCE                          :{BIGFONT}{BLACK
 STR_NEWS_DISASTER_FLOOD_VEHICLE                                 :{BIGFONT}{BLACK}נעדרים,חשש גדול לחייהם {COMMA} מבול ! שיטפון ! לפחות
 
 STR_NEWS_COMPANY_IN_TROUBLE_TITLE                               :{BIGFONT}{BLACK}!!!חברת תחבורה בקשיים
-STR_NEWS_COMPANY_IN_TROUBLE_DESCRIPTION                         :{BIGFONT}{BLACK}! תימכר או תוכרז כפושטת רגל אם לא תשפר את ביצועיה בקרוב {STRING}
+STR_NEWS_COMPANY_IN_TROUBLE_DESCRIPTION                         :{BIGFONT}{BLACK}{STRING} תימכר או תוכרז כפושטת רגל אם לא תשפר את ביצועיה בקרוב!
 STR_NEWS_COMPANY_MERGER_TITLE                                   :{BIGFONT}{BLACK}!איחוד חברות
 STR_NEWS_COMPANY_MERGER_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} נמכרה ל-{STRING} עבור {CURRENCY}!
 STR_NEWS_COMPANY_BANKRUPT_TITLE                                 :{BIGFONT}{BLACK}!פשיטת רגל
@@ -815,7 +828,7 @@ STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :ריווחי {W
 STR_NEWS_ORDER_REFIT_FAILED                                     :כשלון בהתאמה מחדש הביא לעצירה של {WHITE}{VEHICLE}
 STR_NEWS_VEHICLE_AUTORENEW_FAILED                               :{WHITE}{1:STRING}{}נכשל {NBSP}{0:VEHICLE} חידוש אוטומטי עבור
 
-STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE                              :{BIGFONT}{BLACK}{STRING}חדש זמין!
+STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE                              :{BIGFONT}{BLACK}{STRING} חדש זמין!
 STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIGFONT}{BLACK}{ENGINE}
 STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}{STRING} חדש זמין כעת  -  {ENGINE}!
 
@@ -824,13 +837,13 @@ STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION
 STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} מקבלת כעת {STRING}
 STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} מקבלת כעת {STRING} ו{STRING}
 
-STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIGFONT}{BLACK}פג תוקף הצעת סובסידיה:{}{}סובסידיה של {STRING} מ{STRING} אל {STRING} לא תזכה עוד בסיבסוד.
-STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIGFONT}{BLACK}סובסידיה הוסרה:{}{}שירות {STRING} מ{STRING} אל {STRING} אינו מסובסד יותר.
-STR_NEWS_SERVICE_SUBSIDY_OFFERED                                :{BIGFONT}{BLACK}הצעה למתן סובסידיה:{}{}שירות {STRING} ראשון מ{STRING} אל {STRING} יזכה לסובסידיה בת שנה מהרשות המקומית!
-STR_NEWS_SERVICE_SUBSIDY_AWARDED_HALF                           :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות {STRING} מ{STRING} אל {STRING} יזכה לשיעור תשלום גדול ב-50% לשנה הקרובה!
-STR_NEWS_SERVICE_SUBSIDY_AWARDED_DOUBLE                         :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות {STRING} מ{STRING} אל {STRING} יזכה לשיעור תשלום כפול לשנה הקרובה!
-STR_NEWS_SERVICE_SUBSIDY_AWARDED_TRIPLE                         :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות {STRING} מ{STRING} אל {STRING} יזכה לשיעור תשלום משולש לשנה הקרובה!
-STR_NEWS_SERVICE_SUBSIDY_AWARDED_QUADRUPLE                      :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות {STRING} מ{STRING} אל {STRING} יזכה לשיעור תשלום מוכפל פי 4 לשנה הקרובה!
+STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIGFONT}{BLACK}פג תוקף הצעת סובסידיה:{}{}סובסידיה של הובלת {STRING.plural} מ{STRING} אל {STRING} לא תזכה עוד בסיבסוד.
+STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIGFONT}{BLACK}סובסידיה הוסרה:{}{}שירות הובלת {STRING.plural} מ{STRING} אל {STRING} אינו מסובסד יותר.
+STR_NEWS_SERVICE_SUBSIDY_OFFERED                                :{BIGFONT}{BLACK}הצעה למתן סובסידיה:{}{}שירות הובלת {STRING.plural} ראשון מ{STRING} אל {STRING} יזכה לסובסידיה בת שנה מהרשות המקומית!
+STR_NEWS_SERVICE_SUBSIDY_AWARDED_HALF                           :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות הובלת {STRING.plural} מ{STRING} אל {STRING} יזכה לשיעור תשלום גדול ב-50% לשנה הקרובה
+STR_NEWS_SERVICE_SUBSIDY_AWARDED_DOUBLE                         :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות הובלת {STRING.plural} מ{STRING} אל {STRING} יזכה לשיעור תשלום כפול לשנה הקרובה!
+STR_NEWS_SERVICE_SUBSIDY_AWARDED_TRIPLE                         :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות הובלת {STRING.plural} מ{STRING} אל {STRING} יזכה לשיעור תשלום משולש לשנה הקרובה!
+STR_NEWS_SERVICE_SUBSIDY_AWARDED_QUADRUPLE                      :{BIGFONT}{BLACK}סובסידיה לשירות הניתן ע"י {STRING}!{}{}שירות הובלת {STRING.plural} מ{STRING} אל {STRING} יזכה לשיעור תשלום מוכפל פי 4 לשנה הקרובה!
 
 STR_NEWS_ROAD_REBUILDING                                        :{BIGFONT}{BLACK}פקקי תנועה ענקיים ב{TOWN}!{}{} תכנית לשיפוץ מקיף של הכבישים במימון {STRING} מביאה לקטסטרופת תנועה לשישה חודשים
 
@@ -1166,6 +1179,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}לפחו
 STR_CONFIG_SETTING_STATION_SPREAD                               :{RED}אזהרה : ערכים גבוהים מאיטים את המשחק {ORANGE}{STRING}{LTBLUE} :פריסה מירבית עבור תחנה
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{ORANGE}{STRING}{LTBLUE}טיפול אוטומטי במסוקים במנחת
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{ORANGE}{STRING}ֿ{LTBLUE} :חבר את סרגל פני השטח לסרגלי בניית כבישים/מסילות/שדות תעופה/מזחים
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}צבע קרקע שבשימוש מפה קטנה: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :ירוק
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :ירוק כהה
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :סגול
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{ORANGE}{STRING}{LTBLUE} :היפוך כיוון הגלילה של התצוגה
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{ORANGE}{STRING}{LTBLUE} :גלילה חלקה של התצוגה המשנית
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{ORANGE}{STRING}{LTBLUE} :'הצג מידות בעת בניית כבישים/מסילות וכיוב
@@ -1387,7 +1404,7 @@ STR_OSNAME_SUNOS                                                :סולריס
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}עזוב משחק
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}?האם אתה בטוח שברצונך לעזוב את המשחק
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}האם אתה בטוח שברצונך לצאת משלב זה?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}האם אתה בטוח שברצונך לצאת משלב זה?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}(cheats) טריקים
@@ -1470,9 +1487,9 @@ STR_FACE_SAVE                                                   :{BLACK}שמור
 STR_FACE_SAVE_TOOLTIP                                           :{BLACK}שמור את הפנים לקובץ
 STR_FACE_SAVE_DONE                                              :{WHITE}פנים אלה ישמרו כהעדפה אישית שלך בקובץ ההגדרות של המשחק
 STR_FACE_EUROPEAN                                               :{BLACK}אירופאי
-STR_FACE_SELECT_EUROPEAN                                        :{BLACK}בחר תוי פנים אירופאיים
+STR_FACE_SELECT_EUROPEAN                                        :{BLACK}בחר תווי פנים אירופאיים
 STR_FACE_AFRICAN                                                :{BLACK}אפריקני
-STR_FACE_SELECT_AFRICAN                                         :{BLACK}בחר תוי פנים אפריקניים
+STR_FACE_SELECT_AFRICAN                                         :{BLACK}בחר תווי פנים אפריקניים
 STR_FACE_YES                                                    :כן
 STR_FACE_NO                                                     :לא
 STR_FACE_MOUSTACHE_EARRING_TOOLTIP                              :{BLACK}אפשר זקן/עגילים
@@ -1530,7 +1547,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}לחץ �
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}מידע על המשחק
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}לקוחות: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}שפה: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{WHITE}{STRING}{SILVER} :סוג הקרקע
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}סוג הקרקע: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}גודל המפה: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}גרסת השרת: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}כתובת השרת: {WHITE}{STRING}
@@ -1806,7 +1823,7 @@ STR_CONTENT_DETAIL_SUBTITLE_SELECTED                            :{SILVER}בחר�
 STR_CONTENT_DETAIL_SUBTITLE_AUTOSELECTED                        :{SILVER} פריט תלוי זה נבחר להורדה
 STR_CONTENT_DETAIL_SUBTITLE_ALREADY_HERE                        :{SILVER} כבר יש לך את זה
 STR_CONTENT_DETAIL_SUBTITLE_DOES_NOT_EXIST                      :{SILVER} תוכן זה לא מוכר ואינו ניתן להורדה ב-OpenTTD
-STR_CONTENT_DETAIL_UPDATE                                       :{SILVER} קיים {STRING} זוהי חלופה ל
+STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}זוהי חלופה ל{STRING} קיים
 STR_CONTENT_DETAIL_NAME                                         :{WHITE}{STRING}{SILVER} :שם
 STR_CONTENT_DETAIL_VERSION                                      :{WHITE}{STRING}{SILVER} :גירסה
 STR_CONTENT_DETAIL_DESCRIPTION                                  :{WHITE}{STRING}{SILVER} :תיאור
@@ -1862,6 +1879,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}מופס
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}מופעל
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}בטל הדגשת השטח המכוסה ע"י התחנה
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}הדגש את השטח המכוסה ע"י התחנה
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}מקבלת: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}מספקת: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}חבר לתחנה קיימת
@@ -1917,13 +1936,13 @@ STR_BUILD_SIGNAL_CAPTION                                        :{WHITE}בחיר
 STR_BUILD_SIGNAL_SEMAPHORE_NORM_TOOLTIP                         :{BLACK}(רמזורי בלוק (מכאניים{NBSP}{}אלו הרמזורים הפשוטים ביותר, מאפשרים לרכבת אחת בלבד להמצא בבלוק מסויים בזמן נתון
 STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TOOLTIP                        :{BLACK}(רמזורי כניסה (מכאניים {}{NBSP}ירוקים כל עוד יש לפחות רמזור יציאה ירוק הקטע המסילה העוקב. אחרת-אדומים
 STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TOOLTIP                         :{BLACK}(רמזורי יציאה (מכאניים {}{NBSP} מתנהגים בדומה לרמזורי הבלוק, אבל מחייבים שינוי האור ברמזור בעת כניסה
-STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP                        :{BLACK}(רמזורים משולבים (מכאניים){}{NBSP}מתפקדים כרמזורי כניסה ויציאה במשולב, מאפשרים יצירת "עצים" מורכבים של רמזורים
+STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP                        :{BLACK}רמזורים משולבים (מכאניים){}מתפקדים כרמזורי כניסה ויציאה במשולב. דבר זה מאפשר יצירת "עצים" מורכבים של רמזורים
 STR_BUILD_SIGNAL_SEMAPHORE_PBS_TOOLTIP                          :{BLACK}(רמזורי נתיב (מכאניים{}{NBSP} מאפשרים ליותר מרכבת אחת להכנס לאותו הבלוק בו זמנית, כל עוד קיים נתיב פנוי למקום עצירה בטוח
 STR_BUILD_SIGNAL_SEMAPHORE_PBS_OWAY_TOOLTIP                     :{BLACK}(רמזורי נתיב חד-סיטרי (מכאניים{}{NBSP} מאפשרים ליותר מרכבת אחת להכנס לאותו הבלוק בו זמנית, כל עוד קיים נתיב פנוי למקום עצירה
 STR_BUILD_SIGNAL_ELECTRIC_NORM_TOOLTIP                          :{BLACK}(רמזורי בלוק (חשמליים{NBSP}{}אלו הרמזורים הפשוטים ביותר, מאפשרים לרכבת אחת בלבד להמצא בבלוק מסויים בזמן נתון
 STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TOOLTIP                         :{BLACK}(רמזורי כניסה (חשמליים {}{NBSP}ירוקים כל עוד יש לפחות רמזור יציאה ירוק הקטע המסילה העוקב. אחרת-אדומים
 STR_BUILD_SIGNAL_ELECTRIC_EXIT_TOOLTIP                          :{BLACK}(רמזורי יציאה (חשמליים {}{NBSP} מתנהגים בדומה לרמזורי הבלוק, אבל מחייבים שינוי האור ברמזור בעת כניסה
-STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP                         :{BLACK}(רמזורים משולבים (חשמליים){}{NBSP}מתפקדים כרמזורי כניסה ויציאה במשולב, מאפשרים יצירת "עצים" מורכבים של רמזורים
+STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP                         :{BLACK}רמזורים משולבים (חשמליים){}מתפקדים כרמזורי כניסה ויציאה במשולב, מאפשרים יצירת "עצים" מורכבים של רמזורים
 STR_BUILD_SIGNAL_ELECTRIC_PBS_TOOLTIP                           :{BLACK}(רמזורי נתיב (חשמליים{}{NBSP} מאפשרים ליותר מרכבת אחת להכנס לאותו הבלוק בו זמנית, כל עוד קיים נתיב פנוי למקום עצירה בטוח
 STR_BUILD_SIGNAL_ELECTRIC_PBS_OWAY_TOOLTIP                      :{BLACK}(רמזורי נתיב חד-סיטרי (חשמליים{}{NBSP}מאפשרים ליותר מרכבת אחת להכנס לאותו הבלוק בו זמנית, כל עוד קיים נתיב פנוי למקום עצירה
 STR_BUILD_SIGNAL_CONVERT_TOOLTIP                                :{BLACK}החלפת סוג הרמזור – בחר סוג חדש ולחץ על רמזור קיים להחלפה
@@ -2109,7 +2128,7 @@ STR_LAND_AREA_INFORMATION_OWNER_N_A                             :לא זמין
 STR_LAND_AREA_INFORMATION_OWNER                                 :{BLACK}{LTBLUE}{STRING} :בעלים
 STR_LAND_AREA_INFORMATION_ROAD_OWNER                            :{BLACK}בעלי הכביש: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_TRAM_OWNER                            :{BLACK}:בעלי מסילת החשמלית{LTBLUE}{STRING}
-STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}בעלי מסילת הרכבת {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}בעלי מסילת הרכבת: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY                       :{LTBLUE}{STRING}{BLACK} :רשות מקומית
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :אין
 STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{LTBLUE}{NUM}x{NUM}x{NUM} ({STRING}) {BLACK} :קואורדינטות
@@ -2487,7 +2506,6 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}מקבל
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}הצג רשימת סוגי המטען שהתחנה מקבלת
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK} :מקבל {WHITE}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}דירוג
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}הצג את דירוג השירות
@@ -2531,7 +2549,7 @@ STR_FINANCES_YEAR                                               :{WHITE}{NUM}
 STR_FINANCES_SECTION_CONSTRUCTION                               :{GOLD}בנייה
 STR_FINANCES_SECTION_NEW_VEHICLES                               :{GOLD}כלי תחבורה חדשים
 STR_FINANCES_SECTION_TRAIN_RUNNING_COSTS                        :{GOLD}עלות הפעלת רכבות
-STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD} עלות הפעלת רכבים
+STR_FINANCES_SECTION_ROAD_VEHICLE_RUNNING_COSTS                 :{GOLD}עלות תפעול רכבים
 STR_FINANCES_SECTION_AIRCRAFT_RUNNING_COSTS                     :{GOLD} עלות הפעלת כלי טייס
 STR_FINANCES_SECTION_SHIP_RUNNING_COSTS                         :{GOLD} עלות הפעלת כלי שייט
 STR_FINANCES_SECTION_PROPERTY_MAINTENANCE                       :{GOLD}הוצאות אחזקה
@@ -3042,10 +3060,10 @@ STR_ORDER_GO_VIA                                                :עבור דרך
 STR_ORDER_GO_NON_STOP_VIA                                       :עבור דרך ללא עצירה
 STR_ORDER_TOOLTIP_NON_STOP                                      :{BLACK}שנה את דפוס העצירה ביעד שנבחר
 
-STR_ORDER_TOGGLE_FULL_LOAD                                      :{BLACK}העמס עד שנגמר המקום למטען מסויים
+STR_ORDER_TOGGLE_FULL_LOAD                                      :{BLACK}העמס מטען מסויים במלואו
 STR_ORDER_DROP_LOAD_IF_POSSIBLE                                 :העמס מטען זמין
-STR_ORDER_DROP_FULL_LOAD_ALL                                    :העמס הכל
-STR_ORDER_DROP_FULL_LOAD_ANY                                    :העמס עד שנגמר המקום למטען מסויים
+STR_ORDER_DROP_FULL_LOAD_ALL                                    :העמס כל מטען במלואו
+STR_ORDER_DROP_FULL_LOAD_ANY                                    :העמס כל סוג מטען במלואו
 STR_ORDER_DROP_NO_LOADING                                       :אל תעמיס
 STR_ORDER_TOOLTIP_FULL_LOAD                                     :{BLACK}שנה את דפוס ההעמסה ביעד שנבחר
 
@@ -3115,7 +3133,7 @@ STR_ORDER_ROAD_VEHICLE_DEPOT                                    :מוסך רכב
 STR_ORDER_SHIP_DEPOT                                            :מבדוק ספינות
 STR_ORDER_GO_TO_DEPOT_FORMAT                                    :{STRING} {TOWN} {STRING}
 STR_ORDER_GO_TO_NEAREST_DEPOT_FORMAT                            :{2:STRING} {1:STRING} {0:STRING}
-STR_ORDER_GO_TO_HANGAR_FORMAT                                   :{STRING}סככת המטוסים ב{STATION}
+STR_ORDER_GO_TO_HANGAR_FORMAT                                   :{STRING} סככת המטוסים ב{STATION}
 
 STR_ORDER_REFIT_ORDER                                           :({STRING} התאם לנשיאת)
 STR_ORDER_REFIT_STOP_ORDER                                      :(ועצור {STRING} התאם לנשיאת)
@@ -3124,19 +3142,19 @@ STR_ORDER_STOP_ORDER                                            :(עצור)
 STR_ORDER_GO_TO_STATION                                         :{2:STRING} {1:STATION} {0:STRING}
 
 STR_ORDER_FULL_LOAD                                             :(העמס הכל)
-STR_ORDER_FULL_LOAD_ANY                                         :(העמס עד שמתמלא מטען מסויים)
+STR_ORDER_FULL_LOAD_ANY                                         :(העמס כל סוג מטען במלואו)
 STR_ORDER_NO_LOAD                                               :(אל תעמיס)
 STR_ORDER_UNLOAD                                                :(פרוק והטען מחדש)
-STR_ORDER_UNLOAD_FULL_LOAD                                      :(פרוק והמתן למילוי מחדש)
-STR_ORDER_UNLOAD_FULL_LOAD_ANY                                  :(פרוק והמתן למילוי מטען מסויים)
+STR_ORDER_UNLOAD_FULL_LOAD                                      :(פרוק והמתן להעמסה מלאה)
+STR_ORDER_UNLOAD_FULL_LOAD_ANY                                  :(פרוק והמתן להעמסה מלאה של כל מטען)
 STR_ORDER_UNLOAD_NO_LOAD                                        :(פרוק ועזוב ריק)
 STR_ORDER_TRANSFER                                              :(העבר מטען קיים, הטען מחדש)
-STR_ORDER_TRANSFER_FULL_LOAD                                    :(העבר מטען קיים, המתן עד למילוי מחדש)
-STR_ORDER_TRANSFER_FULL_LOAD_ANY                                :(העבר מטען קיים, המתן עד להתמלאות מטען מסויים חדש)
+STR_ORDER_TRANSFER_FULL_LOAD                                    :(העבר מטען קיים והמתן להעמסה מלאה)
+STR_ORDER_TRANSFER_FULL_LOAD_ANY                                :(העבר מטען קיים והמתן עד להעמסה מלאה של כל סוג מטען)
 STR_ORDER_TRANSFER_NO_LOAD                                      :(העבר מטען קיים ועזוב ריק)
 STR_ORDER_NO_UNLOAD                                             :(אל תפרוק, העמס מטען זמין)
-STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(אל תפרוק,המתן למילוי)
-STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(אל תפרוק, המתן עד שיתמלא מטען מסויים)
+STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(אל תפרוק והמתן להעמסה מלאה)
+STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(אל תפרוק והמתן עד להעמסה מלאה של כל סוג מטען)
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[קצה קרוב]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[אמצע]
@@ -3212,6 +3230,9 @@ STR_AI_DEBUG_SETTINGS                                           :{BLACK}הגדר
 STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}שנה את הגדרות הבינה המלאכותית
 STR_AI_DEBUG_RELOAD                                             :{BLACK}טען מחדש בינה מלאכותית
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK} הטען מחדש את הסקריפט ואתחל בינה מלאכותית
+
+STR_ERROR_NO_AI                                                 :{WHITE}המשחק נבנה ללא תמיכה בבינה מלאכותית...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... אין בינות מלאכותיות זמינות!
 
 STR_ERROR_AI_NO_AI_FOUND                                        :לא נמצאה בינה מלאכותית מתאימה לטעינה.{}בינה מלאכותית זו הינה מדומה ולא תעשה כלום.{}באפשרותך להוריד מספר אלגורתמים של בינה מלאכותית בעזרת מערכת 'תוכן מקוון'.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}אחד מאלגורתמי הבינה המלאכותית קרס. אנא דווח זאת ליוצר האלגוריתם וצרף צילום מסך של מסך ה-Debug.
@@ -3330,7 +3351,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}הרשו
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}ניסיונך לשחד את הרשות המקומית
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}נחשף ע"י מבקר המדינה
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}לא ניתן להגביה את הקרקע...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}לא ניתן להנמיך את הקרקע...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}לא ניתן לשטח את פני הקרקע כאן...
@@ -3655,7 +3676,7 @@ STR_TOWN_BUILDING_NAME_PIGGY_BANK_1                             :בנק דן-ח�
 ##id 0x4800
 # industry names
 STR_INDUSTRY_NAME_COAL_MINE                                     :מכרה פחם
-STR_INDUSTRY_NAME_POWER_STATION                                 :תחנת חשמל
+STR_INDUSTRY_NAME_POWER_STATION                                 :תחנת כוח
 STR_INDUSTRY_NAME_SAWMILL                                       :מנסרת עץ
 STR_INDUSTRY_NAME_FOREST                                        :יער
 STR_INDUSTRY_NAME_OIL_REFINERY                                  :בית זיקוק
@@ -3664,6 +3685,7 @@ STR_INDUSTRY_NAME_FACTORY                                       :מפעל
 STR_INDUSTRY_NAME_PRINTING_WORKS                                :בית דפוס
 STR_INDUSTRY_NAME_STEEL_MILL                                    :מכרה ברזל
 STR_INDUSTRY_NAME_FARM                                          :חווה
+STR_INDUSTRY_NAME_FARM.gen                                      :חוות
 STR_INDUSTRY_NAME_COPPER_ORE_MINE                               :מכרה נחושת
 STR_INDUSTRY_NAME_OIL_WELLS                                     :בארות נפט
 STR_INDUSTRY_NAME_BANK                                          :בנק
@@ -3679,6 +3701,7 @@ STR_INDUSTRY_NAME_WATER_SUPPLY                                  :משאבת מי
 STR_INDUSTRY_NAME_WATER_TOWER                                   :מגדל מים
 STR_INDUSTRY_NAME_FACTORY_2                                     :מפעל
 STR_INDUSTRY_NAME_FARM_2                                        :חווה
+STR_INDUSTRY_NAME_FARM_2.gen                                    :חוות
 STR_INDUSTRY_NAME_LUMBER_MILL                                   :מנסרת עץ
 STR_INDUSTRY_NAME_COTTON_CANDY_FOREST                           :יער צמר גפן מתוק
 STR_INDUSTRY_NAME_CANDY_FACTORY                                 :מפעל ממתקים
@@ -3697,10 +3720,10 @@ STR_INDUSTRY_NAME_SUGAR_MINE                                    :מכרה סוכ
 ##id 0x6000
 STR_SV_EMPTY                                                    :
 STR_SV_UNNAMED                                                  :ללא שם
-STR_SV_TRAIN_NAME                                               :{COMMA} רכבת
-STR_SV_ROAD_VEHICLE_NAME                                        :{COMMA} רכב
-STR_SV_SHIP_NAME                                                :{COMMA} כלי שייט
-STR_SV_AIRCRAFT_NAME                                            :{COMMA} כלי טייס
+STR_SV_TRAIN_NAME                                               :רכבת {COMMA}
+STR_SV_ROAD_VEHICLE_NAME                                        :רכב {COMMA}
+STR_SV_SHIP_NAME                                                :כלי שייט {COMMA}
+STR_SV_AIRCRAFT_NAME                                            :כלי טייס {COMMA}
 
 STR_SV_STNAME                                                   :{STRING}
 STR_SV_STNAME_NORTH                                             :תחנת {STRING} צפון
@@ -3716,9 +3739,9 @@ STR_SV_STNAME_WOODS                                             :תחנת יער
 STR_SV_STNAME_LAKESIDE                                          :תחנת {STRING} לצד אגם
 STR_SV_STNAME_EXCHANGE                                          :תחנת החלפה {STRING}
 STR_SV_STNAME_AIRPORT                                           :נמל תעופה {STRING}
-STR_SV_STNAME_OILFIELD                                          :{STRING} שדה הנפט
-STR_SV_STNAME_MINES                                             :{STRING} מכרות
-STR_SV_STNAME_DOCKS                                             :{STRING} רציפי
+STR_SV_STNAME_OILFIELD                                          :שדה הנפט {STRING}
+STR_SV_STNAME_MINES                                             :מכרות {STRING}
+STR_SV_STNAME_DOCKS                                             :רציפי {STRING}
 STR_SV_STNAME_BUOY                                              :{STRING}
 STR_SV_STNAME_WAYPOINT                                          :{STRING}
 ##id 0x6020
@@ -3727,7 +3750,7 @@ STR_SV_STNAME_SIDINGS                                           :תחנת מסי
 STR_SV_STNAME_BRANCH                                            :תחנת הסתעפות {STRING}
 STR_SV_STNAME_UPPER                                             :עילית {STRING}
 STR_SV_STNAME_LOWER                                             :תחתית {STRING}
-STR_SV_STNAME_HELIPORT                                          :{STRING} מנחת מסוקי
+STR_SV_STNAME_HELIPORT                                          :מנחת מסוקי {STRING}
 STR_SV_STNAME_FOREST                                            :יער {STRING}
 STR_SV_STNAME_FALLBACK                                          :{STRING} תחנה מספר {NUM}
 ############ end of savegame specific region!
@@ -4002,8 +4025,8 @@ STR_FORMAT_BUOY_NAME                                            :מצוף {TOWN}
 STR_FORMAT_BUOY_NAME_SERIAL                                     :מצוף {TOWN} #{COMMA}
 STR_FORMAT_COMPANY_NUM                                          :({COMMA} חברה)
 STR_FORMAT_GROUP_NAME                                           :{COMMA} קבוצה
-STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
-STR_FORMAT_WAYPOINT_NAME                                        :נקודות ציון {TOWN}
+STR_FORMAT_INDUSTRY_NAME                                        :{1:STRING.gen} {0:TOWN}
+STR_FORMAT_WAYPOINT_NAME                                        :נקודת ציון {TOWN}
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :נקודת ציון {TOWN} #{COMMA}
 
 STR_UNKNOWN_STATION                                             :תחנה לא ידועה

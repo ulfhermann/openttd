@@ -289,7 +289,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Vložte 
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filtrovat podle:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Vyber způsob řazeni (sestupně/vzestupně)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Vyber, podle čeho se má třídit
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Vyber, podle čeho se má třídit
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Vyber třídící podmínku
 STR_BUTTON_SORT_BY                                              :{BLACK}Řadit podle
 STR_BUTTON_LOCATION                                             :{BLACK}Umístění
@@ -1233,6 +1233,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Alespoň
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Největší rozsah stanice: {ORANGE}{STRING} {RED}Pozor: Vysoké nastavení zpomalí hru
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Údržba vrtulníků na heliportech: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Otevírat lištu na úpravy terénu s lištami na výstavbu tratí/silnic atd.: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Barva země v mapě: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Zelená
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Tmavě zelená
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Fialová
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Posouvat pohled opačným směrem: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Plynulé posouvání po mapě: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Ukázat rozměry při použití stavebních nástrojů: {ORANGE}{STRING}
@@ -1454,7 +1458,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Konec hry
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Opravdu chceš ukončit tuto hru?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Určite chceš opustit toto mapu?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Určite chceš opustit toto mapu?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Cheaty
@@ -1597,7 +1601,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Kliknut�
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}INFO O HŘE
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Klientů: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Jazyk: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Prostředí: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Prostředí: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Velikost mapy: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Verze hry na serveru: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Adresa serveru: {WHITE}{STRING}
@@ -1834,7 +1838,7 @@ STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_2                  :Hra stále poza
 STR_NETWORK_SERVER_MESSAGE_GAME_STILL_PAUSED_3                  :Hra stále pozastavena ({STRING}, {STRING}, {STRING})
 STR_NETWORK_SERVER_MESSAGE_GAME_UNPAUSED                        :Hra obnovena ({STRING})
 STR_NETWORK_SERVER_MESSAGE_GAME_REASON_NOT_ENOUGH_PLAYERS       :nedostatek hráčů
-STR_NETWORK_SERVER_MESSAGE_GAME_REASON_CONNECTING_CLIENTS       :připojuji klienty
+STR_NETWORK_SERVER_MESSAGE_GAME_REASON_CONNECTING_CLIENTS       :připojují se klienti
 STR_NETWORK_SERVER_MESSAGE_GAME_REASON_MANUAL                   :ručně
 ############ End of leave-in-this-order
 STR_NETWORK_MESSAGE_CLIENT_LEAVING                              :odpojování
@@ -2556,7 +2560,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Přijímá
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Ukázat seznam přijímaného nákladu
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Přijímá: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Přijímá: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Hodnocení
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Ukázat hodnocení společností
@@ -3283,10 +3287,13 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Vybrat r
 STR_AI_DEBUG                                                    :{WHITE}Ladění AI
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Název AI
-STR_AI_DEBUG_SETTINGS                                           :{BLACK}AI Nastavení
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}Nastavení AI
 STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Změnit nastavení AI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Obnovit AI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Zničit AI, znovu nahrát jeho skript a restartovat AI
+
+STR_ERROR_NO_AI                                                 :{WHITE}Hra byla zkompilována bez podpory AI...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... AI není dostupné!
 
 STR_ERROR_AI_NO_AI_FOUND                                        :Nebyla nalezena žádná AI.{}Tato AI je výchozí a nedělá vůbec nic.{}Spoustu AI ale můžeš stáhnout v "Stahování součástí".
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Některá z bežících AI skončila s chybou. Prosím oznamte toto autorovi AI spolu se screenshotem okna Ladění AI.
@@ -3405,7 +3412,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}Zastupit
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Tvůj pokus o úplatek byl
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}odhalen místním vyšetřovatelem.
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Zde nelze zvednout terén...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}Zde nelze snížit terén...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}Zde nelze srovnat terén...
