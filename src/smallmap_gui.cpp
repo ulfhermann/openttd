@@ -565,12 +565,10 @@ class SmallMapWindow : public Window {
 
 			return RemapCoords(x_offset / this->zoom, y_offset / this->zoom, 0);
 		} else {
-			int x_offset = tile_x * TILE_SIZE - this->scroll_x;
-			int y_offset = tile_y * TILE_SIZE - this->scroll_y;
-			return RemapCoords(
-				x_offset * (-this->zoom) / TILE_SIZE, 
-				y_offset * (-this->zoom) / TILE_SIZE, 0
-			);
+			int x_offset = tile_x * (-this->zoom) - this->scroll_x * (-this->zoom) / TILE_SIZE;
+			int y_offset = tile_y * (-this->zoom) - this->scroll_y * (-this->zoom) / TILE_SIZE;
+
+			return RemapCoords(x_offset, y_offset, 0);
 		}
 	}
 
@@ -662,6 +660,7 @@ class SmallMapWindow : public Window {
 	{
 		static const int zoomlevels[] = {-8, -4, -2, 1, 2, 4, 6, 8}; // Available zoom levels. Bigger number means more zoom-out (further away).
 		static const int MIN_ZOOM_INDEX = 0;
+		static const int DEFAULT_ZOOM_INDEX = 3;
 		static const int MAX_ZOOM_INDEX = lengthof(zoomlevels) - 1;
 
 		int new_index, cur_index, sub;
@@ -669,7 +668,7 @@ class SmallMapWindow : public Window {
 		switch (change) {
 			case ZLC_INITIALIZE:
 				cur_index = - 1; // Definitely different from new_index.
-				new_index = MIN_ZOOM_INDEX;
+				new_index = DEFAULT_ZOOM_INDEX;
 				break;
 
 			case ZLC_ZOOM_IN:
