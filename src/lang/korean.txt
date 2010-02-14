@@ -222,7 +222,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}검색�
 STR_LIST_FILTER_TITLE                                           :{BLACK}필터링할 문자열:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}정렬 방법을 선택하십시오 (내림차순/오름차순)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}정렬 기준 선택
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}정렬 기준 선택
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}필터링 기준 선택
 STR_BUTTON_SORT_BY                                              :{BLACK}정렬
 STR_BUTTON_LOCATION                                             :{BLACK}위치
@@ -1391,7 +1391,7 @@ STR_OSNAME_SUNOS                                                :{G=f}SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}게임 그만하기
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}정말 이 게임을 종료하고 메인으로 이동하시겠습니까?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}정말 이 시나리오를 종료하시겠습니까?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}정말 이 시나리오를 종료하시겠습니까?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}치트
@@ -1534,7 +1534,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}최근�
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}게임 정보
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}클라이언트: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}언어: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}기후: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}기후: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}맵 크기: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}서버 버전: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}서버 주소: {WHITE}{STRING}
@@ -2493,7 +2493,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({1:STA
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}받음
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}받는 화물의 목록 표시
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}받음: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}받음: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}등급
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}역의 등급 표시
@@ -3219,6 +3219,9 @@ STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}AI의 �
 STR_AI_DEBUG_RELOAD                                             :{BLACK}AI 재시작
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}AI를 종료시키고, 스크립트를 다시 불러와, AI를 재시작합니다
 
+STR_ERROR_NO_AI                                                 :{WHITE}AI 지원 없이 OpenTTD를 빌드합니다...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... 사용 가능한 AI가 없습니다!
+
 STR_ERROR_AI_NO_AI_FOUND                                        :불러올 인공지능이 없습니다.{}이 인공지능은 아무것도 하지 않는 더미입니다.{}'온라인 컨텐츠 체크' 기능으로 인공지능을 다운받으세요.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}작동중인 인공지능 중 하나가 충돌했습니다. 인공지능 디버그 창에서 스크린샷을 찍어 인공지능 제작자에게 보고하십시오.
 STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}AI 디버그창은 오직 서버만 사용 가능합니다
@@ -3336,7 +3339,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} �
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}당신의 뇌물 수수 행위가
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}지역 당국에 의해 발각되었습니다!
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}이곳의 땅을 올릴 수 없습니다...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}이곳의 땅을 내릴 수 없습니다...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}이 땅의 높이를 조절할 수 없습니다...

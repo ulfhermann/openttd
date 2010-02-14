@@ -223,7 +223,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Inserire
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filtro:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Seleziona l'ordinamento (discendente/ascendente)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Seleziona il criterio di ordinamento
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Seleziona il criterio di ordinamento
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Seleziona il criterio di filtraggio
 STR_BUTTON_SORT_BY                                              :{BLACK}Ordina per
 STR_BUTTON_LOCATION                                             :{BLACK}Posizione
@@ -1167,6 +1167,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Uno o pi
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Max estensione stazioni: {ORANGE}{STRING} {RED}Nota: Valori alti rallentano il gioco
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Manutieni automaticamente gli elicotteri presso gli eliporti: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Apri strumenti terreno assieme a quelli di costruzione: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Colore del terreno della mappa: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Verde
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Verde scuro
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Viola
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Inverti direzione di scorrimento della mappa: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Scorrimento morbido delle visuali: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Mostra un tooltip di misura durante la costruzione: {ORANGE}{STRING}
@@ -1388,7 +1392,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Abbandona partita
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Si è sicuri di voler abbandonare la partita in corso?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Si è sicuri di voler abbandonare questo scenario?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Si è sicuri di voler abbandonare questo scenario?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Trucchi
@@ -1531,7 +1535,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Fare cli
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}INFORMAZIONI PARTITA
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Client: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Lingua: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Paesaggio: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Paesaggio: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Dimensione mappa: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Versione server: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Indirizzo del server: {WHITE}{STRING}
@@ -2490,7 +2494,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Accetta
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Mostra la lista delle merci accettate
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accetta: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accetta: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Valutazione
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Mostra la valutazione della stazione
@@ -3216,6 +3220,9 @@ STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Cambia l
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Ricarica IA
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Termina la IA, ricarica lo script, e riavvia la IA
 
+STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD è stato compilato senza supporto IA...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... nessuna IA disponibile!
+
 STR_ERROR_AI_NO_AI_FOUND                                        :Impossibile trovare una IA adatta da caricare.{}La IA caricata è solo un abbozzo e resterà semplicemente passiva.{}È possibile scaricare numerose IA tramite il sistema 'Contenuti online'.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Una delle IA in funzione è andata in crash. Si prega di inviare una segnalazione all'autore della IA con uno screenshot della finestra Debug IA.
 STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}La finestra di debug IA è disponibile soltanto per il server
@@ -3333,7 +3340,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}L'autori
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Il tuo tentativo di corruzione è stato
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}scoperto dalla Guardia di Finanzia.
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Impossibile alzare il terreno qui...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}Impossibile abbassare il terreno qui...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}Impossibile livellare il terreno qui...
