@@ -41,11 +41,11 @@
  * @param prefix     String to use as prefix for the list of cargos.
  * @return Bottom position of the last line used for drawing the cargos.
  */
-int DrawCargoListText(uint32 cargo_mask, const Rect &r, StringID prefix)
+static int DrawCargoListText(uint32 cargo_mask, const Rect &r, StringID prefix)
 {
 	bool first = true;
 	char string[512];
-	char *b = InlineString(string, prefix);
+	char *b = string;
 
 	for (CargoID i = 0; i < NUM_CARGO; i++) {
 		if (b >= lastof(string) - (1 + 2 * 4)) break; // ',' or ' ' and two calls to Utf8Encode()
@@ -70,7 +70,7 @@ int DrawCargoListText(uint32 cargo_mask, const Rect &r, StringID prefix)
 	assert(b < endof(string));
 
 	SetDParamStr(0, string);
-	return DrawStringMultiLine(r.left, r.right, r.top, r.bottom, STR_JUST_RAW_STRING);
+	return DrawStringMultiLine(r.left, r.right, r.top, r.bottom, prefix);
 }
 
 /**
@@ -785,7 +785,7 @@ static const NWidgetPart _nested_company_stations_widgets[] = {
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_TEXTBTN, COLOUR_GREY, SLW_SORTBY), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, SLW_SORTDROPBTN), SetMinimalSize(163, 12), SetDataTip(STR_SORT_BY_NAME, STR_TOOLTIP_SORT_CRITERIAP), // widget_data gets overwritten.
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, SLW_SORTDROPBTN), SetMinimalSize(163, 12), SetDataTip(STR_SORT_BY_NAME, STR_TOOLTIP_SORT_CRITERIA), // widget_data gets overwritten.
 		NWidget(WWT_PANEL, COLOUR_GREY), SetDataTip(0x0, STR_NULL), SetResize(1, 0), SetFill(1, 1), EndContainer(),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -825,7 +825,7 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_SORT_ORDER), SetMinimalSize(81, 12), SetFill(1, 1), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetFill(0, 1), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_SORT_BY), SetMinimalSize(168, 12), SetResize(1, 0), SetFill(0, 1), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIA),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_DROPDOWN, COLOUR_GREY, SVW_MODE), SetMinimalSize(81, 12), SetFill(1, 1), SetDataTip(STR_STATION_VIEW_WAITING, STR_STATION_VIEW_TOGGLE_CARGO_VIEW),
@@ -1091,6 +1091,8 @@ struct StationViewWindow : public Window {
 	};
 	
 	uint expand_shrink_width;     ///< The width allocated to the expand/shrink 'button'
+	int rating_lines;             ///< Number of lines in the cargo ratings view.
+	int accepts_lines;            ///< Number of lines in the accepted cargo view.
 
 	/** Height of the #SVW_ACCEPTLIST widget for different views. */
 	enum AcceptListHeight {
@@ -1117,6 +1119,9 @@ struct StationViewWindow : public Window {
 	StationViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window(),
 		scroll_to_row(INT_MAX), grouping_index(0)
 	{
+		this->rating_lines  = ALH_RATING;
+		this->accepts_lines = ALH_ACCEPTS;
+
 		this->CreateNestedTree(desc);
 		/* Nested widget tree creation is done in two steps to ensure that this->GetWidget<NWidgetCore>(SVW_ACCEPTS) exists in UpdateWidgetSize(). */
 		this->FinishInitNested(desc, window_number);
@@ -1179,7 +1184,7 @@ struct StationViewWindow : public Window {
 				break;
 
 			case SVW_ACCEPTLIST:
-				size->height = WD_FRAMERECT_TOP + ((this->GetWidget<NWidgetCore>(SVW_ACCEPTS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) ? ALH_ACCEPTS : ALH_RATING) * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM;
+				size->height = WD_FRAMERECT_TOP + ((this->GetWidget<NWidgetCore>(SVW_ACCEPTS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) ? this->accepts_lines : this->rating_lines) * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM;
 				break;
 		}
 	}
@@ -1203,31 +1208,38 @@ struct StationViewWindow : public Window {
 		SetDParam(1, st->facilities);
 		this->DrawWidgets();
 
-		/* draw arrow pointing up/down for ascending/descending sorting */
-		this->DrawSortButtonState(SVW_SORT_ORDER, sort_orders[1] == SO_ASCENDING ? SBS_UP : SBS_DOWN);
-
-		int pos = this->vscroll.GetPosition(); ///< = this->vscroll.pos
-
-		int maxrows = this->vscroll.GetCapacity();
-
-		displayed_rows.clear();
+		const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SVW_ACCEPTLIST);
+		const Rect r = {wid->pos_x, wid->pos_y, wid->pos_x + wid->current_x - 1, wid->pos_y + wid->current_y - 1};
+		if (this->GetWidget<NWidgetCore>(SVW_ACCEPTS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) {
+			int lines = this->DrawAcceptedCargo(r);
+			if (lines > this->accepts_lines) { // Resize the widget, and perform re-initialization of the window.
+				this->accepts_lines = lines;
+				this->ReInit();
+				return;
+			}
+		} else {
+			int lines = this->DrawCargoRatings(r);
+			if (lines > this->rating_lines) { // Resize the widget, and perform re-initialization of the window.
+				this->rating_lines = lines;
+				this->ReInit();
+				return;
+			}
+		}
 
 		if (!this->IsShaded()) {
+			/* draw arrow pointing up/down for ascending/descending sorting */
+			this->DrawSortButtonState(SVW_SORT_ORDER, sort_orders[1] == SO_ASCENDING ? SBS_UP : SBS_DOWN);
+
+			int pos = this->vscroll.GetPosition(); ///< = this->vscroll.pos
+
+			int maxrows = this->vscroll.GetCapacity();
+
+			displayed_rows.clear();
+
 			NWidgetBase *nwi = this->GetWidget<NWidgetBase>(SVW_WAITING);
 			Rect waiting_rect = {nwi->pos_x, nwi->pos_y, nwi->pos_x + nwi->current_x - 1, nwi->pos_y + nwi->current_y - 1};
 			this->DrawEntries(&cargo, waiting_rect, pos, maxrows, 0);
 			scroll_to_row = INT_MAX;
-		}
-	}
-
-	virtual void DrawWidget(const Rect &r, int widget) const
-	{
-		if (widget != SVW_ACCEPTLIST) return;
-
-		if (this->GetWidget<NWidgetCore>(SVW_ACCEPTS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) {
-			this->DrawAcceptedCargo(r);
-		} else {
-			this->DrawCargoRatings(r);
 		}
 	}
 
@@ -1505,8 +1517,9 @@ struct StationViewWindow : public Window {
 
 	/** Draw accepted cargo in the #SVW_ACCEPTLIST widget.
 	 * @param r Rectangle of the widget.
+	 * @return Number of lines needed for drawing the accepted cargo.
 	 */
-	void DrawAcceptedCargo(const Rect &r) const
+	int DrawAcceptedCargo(const Rect &r) const
 	{
 		const Station *st = Station::Get(this->window_number);
 
@@ -1514,14 +1527,16 @@ struct StationViewWindow : public Window {
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			if (HasBit(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE)) SetBit(cargo_mask, i);
 		}
-		Rect s = {r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP, r.right - WD_FRAMERECT_RIGHT, r.bottom - WD_FRAMERECT_BOTTOM};
-		DrawCargoListText(cargo_mask, s, STR_STATION_VIEW_ACCEPTS_CARGO);
+		Rect s = {r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP, r.right - WD_FRAMERECT_RIGHT, INT32_MAX};
+		int bottom = DrawCargoListText(cargo_mask, s, STR_STATION_VIEW_ACCEPTS_CARGO);
+		return (bottom - r.top - WD_FRAMERECT_TOP + FONT_HEIGHT_NORMAL - 1) / FONT_HEIGHT_NORMAL;
 	}
 
 	/** Draw cargo ratings in the #SVW_ACCEPTLIST widget.
 	 * @param r Rectangle of the widget.
+	 * @return Number of lines needed for drawing the cargo ratings.
 	 */
-	void DrawCargoRatings(const Rect &r) const
+	int DrawCargoRatings(const Rect &r) const
 	{
 		const Station *st = Station::Get(this->window_number);
 		int y = r.top + WD_FRAMERECT_TOP;
@@ -1541,6 +1556,7 @@ struct StationViewWindow : public Window {
 			DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT - 6, y, STR_STATION_VIEW_CARGO_SUPPLY_RATING);
 			y += FONT_HEIGHT_NORMAL;
 		}
+		return (y - r.top - WD_FRAMERECT_TOP + FONT_HEIGHT_NORMAL - 1) / FONT_HEIGHT_NORMAL;
 	}
 
 	template<class ID>
@@ -1589,10 +1605,10 @@ struct StationViewWindow : public Window {
 				NWidgetCore *nwi = this->GetWidget<NWidgetCore>(SVW_RATINGS);
 				if (this->GetWidget<NWidgetCore>(SVW_RATINGS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) {
 					nwi->SetDataTip(STR_STATION_VIEW_ACCEPTS_BUTTON, STR_STATION_VIEW_ACCEPTS_TOOLTIP); // Switch to accepts view.
-					height_change = ALH_RATING - ALH_ACCEPTS;
+					height_change = this->rating_lines - this->accepts_lines;
 				} else {
 					nwi->SetDataTip(STR_STATION_VIEW_RATINGS_BUTTON, STR_STATION_VIEW_RATINGS_TOOLTIP); // Switch to ratings view.
-					height_change = ALH_ACCEPTS - ALH_RATING;
+					height_change = this->accepts_lines - this->rating_lines;
 				}
 				this->ReInit(0, height_change * FONT_HEIGHT_NORMAL);
 				break;
