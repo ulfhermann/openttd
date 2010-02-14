@@ -29,17 +29,16 @@ int _debug_driver_level;
 int _debug_grf_level;
 int _debug_map_level;
 int _debug_misc_level;
-int _debug_ms_level;
 int _debug_net_level;
 int _debug_sprite_level;
 int _debug_oldloader_level;
-int _debug_ntp_level;
 int _debug_npf_level;
 int _debug_yapf_level;
 int _debug_freetype_level;
 int _debug_sl_level;
 int _debug_gamelog_level;
 int _debug_desync_level;
+int _debug_console_level;
 
 
 struct DebugLevel {
@@ -54,17 +53,16 @@ struct DebugLevel {
 	DEBUG_LEVEL(grf),
 	DEBUG_LEVEL(map),
 	DEBUG_LEVEL(misc),
-	DEBUG_LEVEL(ms),
 	DEBUG_LEVEL(net),
 	DEBUG_LEVEL(sprite),
 	DEBUG_LEVEL(oldloader),
-	DEBUG_LEVEL(ntp),
 	DEBUG_LEVEL(npf),
 	DEBUG_LEVEL(yapf),
 	DEBUG_LEVEL(freetype),
 	DEBUG_LEVEL(sl),
 	DEBUG_LEVEL(gamelog),
 	DEBUG_LEVEL(desync),
+	DEBUG_LEVEL(console),
 	};
 #undef DEBUG_LEVEL
 
