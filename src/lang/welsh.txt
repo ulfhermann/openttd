@@ -220,7 +220,7 @@ STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Rhowch l
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Rhowch allweddair er mwyn ei ddefnyddio i hidlo'r rhestr
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Dewiswch drefn trefnu (disgynnol/esgynnol)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Dewiswch drefn trefnu
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Dewiswch drefn trefnu
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}dewis criteria hidlyr
 STR_BUTTON_SORT_BY                                              :{BLACK}Trefnu yn ôl
 STR_BUTTON_LOCATION                                             :{BLACK}Lleoliad
@@ -1342,7 +1342,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Rhoi'r gorau i Gêm
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Ydych chi'n siwr eich bod chi eisiau rhoi'r gorau i'r gêm?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Ydych chi'n siwr eich bod chi eisiau gadael y senario hwn?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Ydych chi'n siwr eich bod chi eisiau gadael y senario hwn?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Twyllo
@@ -1485,7 +1485,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Cliciwch
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}GWYBODAETH AM Y GÊM
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Cleientiaid:  {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Iaith:  {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Set Teils:  {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Set Teils:  {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Maint Map:  {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Fersiwn Gweinydd:  {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Cyfeiriad Gweinydd:  {WHITE}{STRING}
@@ -1803,8 +1803,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}I Ffwrdd
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Ymlaen
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Peidio amlygu'r ardal fydd yn cael ei ddylanwadu
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Amlygu'r ardal fydd yn cael ei ddylanwadu
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Derbyn: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Deunydd crai yn weddill: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Derbyn: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Deunydd crai yn weddill: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Uno gorsaf
@@ -2418,7 +2418,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Derbyn
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Dangos rhestr o'r llwythi sy'n cael eu derbyn
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Derbyn: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Derbyn: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Perfformiad
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Dangos graddfeydd gorsaf
