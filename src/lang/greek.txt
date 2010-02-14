@@ -285,7 +285,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Εισά
 STR_LIST_FILTER_TITLE                                           :{BLACK}Φίλτρο:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Επιλογή σειράς ταξινόμησης (καθοδικά/ανοδικά)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Επιλογή κριτηρίου ταξινόμησης
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Επιλογή κριτηρίου ταξινόμησης
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Επιλέξτε κριτήρια φιλτραρίσματος
 STR_BUTTON_SORT_BY                                              :{BLACK}Ταξινόμηση κατά
 STR_BUTTON_LOCATION                                             :{BLACK}Τοποθεσία
@@ -1260,6 +1260,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Ένα �
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Μέγιστη διασπορά σταθμών: {ORANGE}{STRING} {RED}Προσοχή: Η υψηλή ρύθμιση καθυστερεί το παιχνίδι
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Αυτόματη επισκευή ελικοπτέρων στα ελικοδρόμια: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Σύνδεση γραμμής εργαλείων τοπίου με γραμμή εργαλείων σιδηροτροχιάς/δρόμου/νερού/αεροδρομίου: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Χρώμα εδάφους που χρησιμοποιείται στον μικροχάρτη: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Πράσινο
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Σκούρο πράσινο
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Βιολετί
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Ανάποδη μετακίνηση οθόνης: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Ομαλή μετάβαση οθόνης: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Εμφάνιση εργαλείου μετρήσεως όταν χρησιμοποιούνται διάφορα εργαλεία: {ORANGE}{STRING}
@@ -1481,7 +1485,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Εγκατάλειψη Παιχνιδιού
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Είστε σίγουροι ότι θέλετε να εγκαταλείψετε το παιχνίδι;
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Είστε σίγουροι ότι θέλετε να εγκαταλείψετε το σενάριο;
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Είστε σίγουροι ότι θέλετε να εγκαταλείψετε το σενάριο;
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Cheats
@@ -1624,7 +1628,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Κάντ
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}ΠΛΗΡΟΦΟΡΙΕΣ ΠΑΙΧΝΙΔΙΟΥ
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Συμμετέχοντες:: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Γλώσσα: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Σετ πλακιδίων: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Σετ πλακιδίων: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Μέγεθος χάρτη: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Έκδοση διακομιστή: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Διεύθυνση διακομιστή: {WHITE}{STRING}
@@ -1956,8 +1960,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Ανεν
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Ενεργό
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Μη εμφάνιση κάλυψης του προτεινούμενου τόπου
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Εμφάνιση κάλυψης του προτεινούμενου τόπου
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Δέχεται: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Προμηθεύει : {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Δέχεται: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Προμηθεύει : {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Συνενώση σταθμού
@@ -2522,7 +2526,7 @@ STR_TOWN_VIEW_LOCAL_AUTHORITY_TOOLTIP                           :{BLACK}Εμφά
 STR_TOWN_VIEW_RENAME_TOOLTIP                                    :{BLACK}Αλλαγή ονόματος πόλης
 
 STR_TOWN_VIEW_EXPAND_BUTTON                                     :{BLACK}Επέκταση
-STR_TOWN_VIEW_EXPAND_TOOLTIP                                    :{BLACK}Αύξηση μεγέθους πόλης
+STR_TOWN_VIEW_EXPAND_TOOLTIP                                    :{BLACK}Αύξηση με�έθους πόλης
 STR_TOWN_VIEW_DELETE_BUTTON                                     :{BLACK}Διαγραφή
 STR_TOWN_VIEW_DELETE_TOOLTIP                                    :{BLACK}Διαγράφη της πόλης ολοκληρωτικά
 
@@ -2583,7 +2587,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Δέχεται
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Εμφάνιση λίστας αποδεκτών φορτίων
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Δέχεται: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Δέχεται: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Βαθμολογίες
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Εμφάνιση στατιστικών σταθμού
@@ -3314,6 +3318,7 @@ STR_AI_DEBUG_SETTINGS                                           :{BLACK}Ρυθμ
 STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Αλλαγή των ρυθμίσεων του AI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Ξαναφορτώση AI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Τερματίστε το AI, ξαναφορτώστε το σενάριο και ξαναεκκινήστε το AI
+
 
 STR_ERROR_AI_NO_AI_FOUND                                        :Δεν βρέθηκε κατάλληλο AI για φόρτωση.{}Αυτό το AI είναι ένα ψεύτικο AI και δεν θα κάνει τίποτα.{}Μπορείτε να κατεβάσετε διάφορα AΙ από το σύστημα 'Online περιεχομένου"
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Ένα από τα AI που εκτελούνται κράσαρε. Παρακαλώ ενημερώστε τον συγγραφέα του AI με μια φωτογραφία οθόνης από το παράθυρο αποσφαλμάτωσης AI.
