@@ -222,7 +222,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Sleutel 
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filter string:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Selekteer sorteer orde (afklimende/klimende)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Selekteer sorteer maatstaf
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Selekteer sorteer maatstaf
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Selekteer filtrering kriteria
 STR_BUTTON_SORT_BY                                              :{BLACK}Sorteer by
 STR_BUTTON_LOCATION                                             :{BLACK}Lokasie
@@ -1382,7 +1382,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Verlaat Spel
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Is jy seker jy wil die speletjie verlaat?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Is jy seker jy wil die draaiboek verlaat?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Is jy seker jy wil die draaiboek verlaat?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Kullery
@@ -1525,7 +1525,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Die bedi
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}SPEL INFORMASIE
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Kliente:  {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Taal:  {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Blokkiestel:  {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Blokkiestel:  {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Kaart groote:  {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Verskaffer hersiening:  {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Verskaffer adres:  {WHITE}{STRING}
@@ -1857,8 +1857,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Af
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Aan
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Moenie die dekking area van die voorgestelde bouterrein verlig nie
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Verlig dekking area van die voorgestelde bouterrein
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aanvaar: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Voorraad: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aanvaar: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Voorraad: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Sluit by stasie aan
@@ -2478,7 +2478,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Aanvaar
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Wys lys van aanvaarde vrag
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Aanvaar: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Aanvaar: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Graderings
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Toon stasie graderings
