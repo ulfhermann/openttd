@@ -70,6 +70,7 @@ subsidy.cpp
 texteff.cpp
 tgp.cpp
 tile_map.cpp
+tilearea.cpp
 townname.cpp
 #if WIN32
 #else
@@ -167,6 +168,7 @@ genworld.h
 gfx_func.h
 gfx_type.h
 gfxinit.h
+graph_gui.h
 group.h
 group_gui.h
 group_type.h
@@ -215,6 +217,7 @@ newgrf_house.h
 newgrf_industries.h
 newgrf_industrytiles.h
 newgrf_properties.h
+newgrf_railtype.h
 newgrf_sound.h
 newgrf_spritegroup.h
 newgrf_station.h
@@ -247,6 +250,7 @@ roadstop_base.h
 roadveh.h
 screenshot.h
 sdl.h
+smallmap_gui.h
 sound/sdl_s.h
 video/sdl_v.h
 settings_func.h
@@ -524,6 +528,7 @@ table/water_land.h
 3rdparty/md5/md5.cpp
 3rdparty/md5/md5.h
 
+#if AI
 # Script
 script/script_info.cpp
 script/script_info.hpp
@@ -704,6 +709,7 @@ ai/api/ai_vehicle.cpp
 ai/api/ai_vehiclelist.cpp
 ai/api/ai_waypoint.cpp
 ai/api/ai_waypointlist.cpp
+#end
 
 # Blitters
 #if DEDICATED
@@ -755,6 +761,7 @@ newgrf_generic.cpp
 newgrf_house.cpp
 newgrf_industries.cpp
 newgrf_industrytiles.cpp
+newgrf_railtype.cpp
 newgrf_sound.cpp
 newgrf_spritegroup.cpp
 newgrf_station.cpp
