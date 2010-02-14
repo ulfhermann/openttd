@@ -161,7 +161,6 @@ static void ShowHelp()
 		"  -s drv              = Set sound driver (see below) (param bufsize,hz)\n"
 		"  -m drv              = Set music driver (see below)\n"
 		"  -b drv              = Set the blitter to use (see below)\n"
-		"  -a ai               = Force use of specific AI (see below)\n"
 		"  -r res              = Set resolution (for instance 800x600)\n"
 		"  -h                  = Display this help text\n"
 		"  -t year             = Set starting year\n"
@@ -386,20 +385,24 @@ static void LoadIntroGame()
 
 void MakeNewgameSettingsLive()
 {
+#ifdef ENABLE_AI
 	for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
 		if (_settings_game.ai_config[c] != NULL) {
 			delete _settings_game.ai_config[c];
 		}
 	}
+#endif /* ENABLE_AI */
 
 	_settings_game = _settings_newgame;
 
+#ifdef ENABLE_AI
 	for (CompanyID c = COMPANY_FIRST; c < MAX_COMPANIES; c++) {
 		_settings_game.ai_config[c] = NULL;
 		if (_settings_newgame.ai_config[c] != NULL) {
 			_settings_game.ai_config[c] = new AIConfig(_settings_newgame.ai_config[c]);
 		}
 	}
+#endif /* ENABLE_AI */
 }
 
 byte _savegame_sort_order;
@@ -817,8 +820,7 @@ static void MakeNewGameDone()
 	/* We are the server, we start a new company (not dedicated),
 	 * so set the default password *if* needed. */
 	if (_network_server && !StrEmpty(_settings_client.network.default_company_pass)) {
-		char *password = _settings_client.network.default_company_pass;
-		NetworkChangeCompanyPassword(1, &password);
+		NetworkChangeCompanyPassword(_settings_client.network.default_company_pass);
 	}
 #endif /* ENABLE_NETWORK */
 

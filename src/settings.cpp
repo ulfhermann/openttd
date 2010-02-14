@@ -63,6 +63,7 @@
 #include "ship.h"
 #include "company_base.h"
 #include "engine_base.h"
+#include "smallmap_gui.h"
 
 #include "void_map.h"
 #include "station_base.h"
@@ -658,6 +659,18 @@ static bool RedrawScreen(int32 p1)
 	return true;
 }
 
+/**
+ * Redraw the smallmap after a colour scheme change.
+ * @param p1 Callback parameter.
+ * @return Always true.
+ */
+static bool RedrawSmallmap(int32 p1)
+{
+	BuildLandLegend();
+	SetWindowClassesDirty(WC_SMALLMAP);
+	return true;
+}
+
 static bool InvalidateDetailsWindow(int32 p1)
 {
 	SetWindowClassesDirty(WC_VEHICLE_DETAILS);
@@ -853,7 +866,10 @@ static bool DifficultyChange(int32)
 	}
 
 	if (((_game_mode == GM_MENU) ? _settings_newgame.difficulty : _settings_game.difficulty).max_no_competitors != 0 &&
-			AI::GetInfoList()->size() == 0 && (!_networking || _network_server)) {
+#ifdef ENABLE_AI
+			AI::GetInfoList()->size() == 0 &&
+#endif /* ENABLE_AI */
+			(!_networking || _network_server)) {
 		ShowErrorMessage(STR_WARNING_NO_SUITABLE_AI, INVALID_STRING_ID, 0, 0, true);
 	}
 
@@ -1117,14 +1133,17 @@ static void NewsDisplayLoadConfig(IniFile *ini, const char *grpname)
 			continue;
 		}
 
-		if (strcasecmp(item->value, "full") == 0) {
+		if (StrEmpty(item->value)) {
+			DEBUG(misc, 0, "Empty display value for newstype %s", item->name);
+			continue;
+		} else if (strcasecmp(item->value, "full") == 0) {
 			_news_type_data[news_item].display = ND_FULL;
 		} else if (strcasecmp(item->value, "off") == 0) {
 			_news_type_data[news_item].display = ND_OFF;
 		} else if (strcasecmp(item->value, "summarized") == 0) {
 			_news_type_data[news_item].display = ND_SUMMARY;
 		} else {
-			DEBUG(misc, 0, "Invalid display value: %s", item->value);
+			DEBUG(misc, 0, "Invalid display value for newstype %s: %s", item->name, item->value);
 			continue;
 		}
 	}
@@ -1132,6 +1151,7 @@ static void NewsDisplayLoadConfig(IniFile *ini, const char *grpname)
 
 static void AILoadConfig(IniFile *ini, const char *grpname)
 {
+#ifdef ENABLE_AI
 	IniGroup *group = ini->GetGroup(grpname);
 	IniItem *item;
 
@@ -1156,6 +1176,7 @@ static void AILoadConfig(IniFile *ini, const char *grpname)
 		}
 		if (item->value != NULL) config->StringToSettings(item->value);
 	}
+#endif /* ENABLE_AI */
 }
 
 /* Load a GRF configuration from the given group name */
@@ -1241,6 +1262,7 @@ static void NewsDisplaySaveConfig(IniFile *ini, const char *grpname)
 
 static void AISaveConfig(IniFile *ini, const char *grpname)
 {
+#ifdef ENABLE_AI
 	IniGroup *group = ini->GetGroup(grpname);
 
 	if (group == NULL) return;
@@ -1261,6 +1283,7 @@ static void AISaveConfig(IniFile *ini, const char *grpname)
 		IniItem *item = new IniItem(group, name, strlen(name));
 		item->SetValue(value);
 	}
+#endif /* ENABLE_AI */
 }
 
 /**
@@ -1754,9 +1777,7 @@ void IConsoleListSettings(const char *prefilter)
 
 	for (const SettingDesc *sd = _settings; sd->save.cmd != SL_END; sd++) {
 		if (!SlIsObjectCurrentlyValid(sd->save.version_from, sd->save.version_to)) continue;
-		if (prefilter != NULL) {
-			if (strncmp(sd->desc.name, prefilter, min(strlen(sd->desc.name), strlen(prefilter))) != 0) continue;
-		}
+		if (prefilter != NULL && strstr(sd->desc.name, prefilter) == NULL) continue;
 		char value[80];
 		const void *ptr = GetVariableAddress((_game_mode == GM_MENU) ? &_settings_newgame : &_settings_game, &sd->save);
 
