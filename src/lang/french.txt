@@ -222,7 +222,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Entrer u
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filtre{NBSP}:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Choisir l'ordre de tri croissant/décroissant
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Choisir le critère de tri
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Choisir le critère de tri
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Choisir le critère de filtrage
 STR_BUTTON_SORT_BY                                              :{BLACK}Trier par
 STR_BUTTON_LOCATION                                             :{BLACK}Emplacement
@@ -230,7 +230,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Renommer
 
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Fermer la fenêtre
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Titre de fenêtre - Faire Glisser pour déplacer la fenêtre
-STR_TOOLTIP_SHADE                                               :{BLACK}Enrouler la fenêtre - N'afficher que la barre de titre
+STR_TOOLTIP_SHADE                                               :{BLACK}Enrouler la fenêtre - n'afficher que la barre de titre
 STR_TOOLTIP_STICKY                                              :{BLACK}Marquer cette fenêtre comme ineffaçable pour la touche 'Fermer toutes les fenêtres'
 STR_TOOLTIP_RESIZE                                              :{BLACK}Cliquer et faire glisse pour redimensionner la fenêtre
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Bascule entre une grande/petite fenêtre
@@ -1066,7 +1066,7 @@ STR_CITY_APPROVAL_PERMISSIVE                                    :Laxiste
 STR_CITY_APPROVAL_TOLERANT                                      :Tolérant
 STR_CITY_APPROVAL_HOSTILE                                       :Hostile
 
-STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Aucune IA utilisables...{}Vous pouvez télécharger diverses IA via le système de 'Contenu en ligne'
+STR_WARNING_NO_SUITABLE_AI                                      :{WHITE}Aucune IA utilisable...{}Vous pouvez télécharger diverses IA via le système de 'Contenu en ligne'
 STR_WARNING_DIFFICULTY_TO_CUSTOM                                :{WHITE}Cette action a modifié le niveau de difficulté en personnalisé
 
 # Advanced settings window
@@ -1166,6 +1166,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Une ou p
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Etendue max. des stations{NBSP}: {ORANGE}{STRING} {RED}Attention{NBSP}: Valeur élevée = jeu lent
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Entretenir automatiquement les hélicoptères à l'héliport{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Relier la barre d'outils paysage avec celle des rails/routes/eau et aéroport{NBSP}: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Couleur utilisée pour le terrain sur la carte{NBSP}: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Vert
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Vert foncé
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Violet
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Inverser la direction lors du défilement avec la souris{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Défilement régulier de la vue{NBSP}: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Montrer une infobulle de mesure lors de l'utilisation de divers outils de construction{NBSP}: {ORANGE}{STRING}
@@ -1387,7 +1391,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Abandonner la partie
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Êtes vous sur de vouloir abandonner cette partie{NBSP}?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Voulez-vous vraiment quitter ce scénario{NBSP}?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Voulez-vous vraiment quitter ce scénario{NBSP}?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Triches
@@ -1530,7 +1534,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Cliquer 
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}INFOS SUR LE SERVEUR
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Clients{NBSP}: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Langue{NBSP}: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Terrain{NBSP}: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Terrain{NBSP}: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Taille de la carte{NBSP}: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Version du serveur{NBSP}: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Adresse du serveur{NBSP}: {WHITE}{STRING}
@@ -1806,7 +1810,7 @@ STR_CONTENT_DETAIL_SUBTITLE_SELECTED                            :{SILVER}Vous av
 STR_CONTENT_DETAIL_SUBTITLE_AUTOSELECTED                        :{SILVER}Cette dépendance a été sélectionnée pour être téléchargée
 STR_CONTENT_DETAIL_SUBTITLE_ALREADY_HERE                        :{SILVER}Vous avez déjà ceci
 STR_CONTENT_DETAIL_SUBTITLE_DOES_NOT_EXIST                      :{SILVER}Ce contenu est inconnu et ne peut pas être téléchargé dans OpenTTD
-STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}Ceci est un remplacement pour un {STRING} existant
+STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}Ceci est un remplacement pour {G "un" "des" "une"} {STRING} existant{G 0 "" "s" "e"}
 STR_CONTENT_DETAIL_NAME                                         :{SILVER}Nom{NBSP}: {WHITE}{STRING}
 STR_CONTENT_DETAIL_VERSION                                      :{SILVER}Version{NBSP}: {WHITE}{STRING}
 STR_CONTENT_DETAIL_DESCRIPTION                                  :{SILVER}Description{NBSP}: {WHITE}{STRING}
@@ -1820,14 +1824,14 @@ STR_CONTENT_NO_ZLIB                                             :{WHITE}OpenTTD 
 STR_CONTENT_NO_ZLIB_SUB                                         :{WHITE}... télécharger du contenu est impossible!
 
 # Order of these is important!
-STR_CONTENT_TYPE_BASE_GRAPHICS                                  :Graphiques de base
-STR_CONTENT_TYPE_NEWGRF                                         :NewGRF
-STR_CONTENT_TYPE_AI                                             :IA
-STR_CONTENT_TYPE_AI_LIBRARY                                     :Bibliothèque IA
-STR_CONTENT_TYPE_SCENARIO                                       :Scénario
-STR_CONTENT_TYPE_HEIGHTMAP                                      :Carte d'altitude
-STR_CONTENT_TYPE_BASE_SOUNDS                                    :Sons de base
-STR_CONTENT_TYPE_BASE_MUSIC                                     :Musique de base
+STR_CONTENT_TYPE_BASE_GRAPHICS                                  :{G=m2}Graphiques de base
+STR_CONTENT_TYPE_NEWGRF                                         :{G=m}NewGRF
+STR_CONTENT_TYPE_AI                                             :{G=f}IA
+STR_CONTENT_TYPE_AI_LIBRARY                                     :{G=f}Bibliothèque IA
+STR_CONTENT_TYPE_SCENARIO                                       :{G=m}Scénario
+STR_CONTENT_TYPE_HEIGHTMAP                                      :{G=f}Carte d'altitude
+STR_CONTENT_TYPE_BASE_SOUNDS                                    :{G=m2}Sons de base
+STR_CONTENT_TYPE_BASE_MUSIC                                     :{G=m2}Musiques de base
 
 # Content downloading progress window
 STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Téléchargement du contenu...
@@ -1862,8 +1866,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Désacti
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Activé
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Ne pas afficher la zone couverte
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Afficher la zone couverte
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepte{NBSP}: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Fournit{NBSP}: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepte{NBSP}: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Fournit{NBSP}: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Joindre une station
@@ -1936,7 +1940,7 @@ STR_BUILD_SIGNAL_DRAG_SIGNALS_DENSITY_INCREASE_TOOLTIP          :{BLACK}Augmente
 # Bridge selection window
 STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Choisir Pont Ferroviaire
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Choisir Pont Routier
-STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Sélection de Pont - cliquer sur le type de pont désiré pour le construire
+STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Sélection de pont - cliquer sur le type de pont désiré pour le construire
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING},{} {VELOCITY} {WHITE}{CURRENCY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Suspendu en acier
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :À poutres en Acier
@@ -2489,7 +2493,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Accepte
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Afficher les marchandises acceptées
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepte{NBSP}: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepte{NBSP}: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Qualité
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Afficher la notation de la station
@@ -3215,6 +3219,9 @@ STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Modifier
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Recharger IA
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Tuer l'IA, recharger le script et relancer l'IA
 
+STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD est compilé sans support pour les IAs...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... aucune IA disponible{NBSP}!
+
 STR_ERROR_AI_NO_AI_FOUND                                        :Aucune IA n'a été trouvée.{}Cette IA est factice et ne fera rien.{}Vous pouvez télécharger diverses IA via le système de 'Contenu en ligne'.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}L'une des IA a rencontré un problème. Merci de rapporter ceci à l'auteur de l'IA avec une capture d'écran de la fenêtre de débogage d'IA.
 STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}La fenêtre de débogage d'IA n'est disponible que pour le serveur
@@ -3332,7 +3339,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}La munic
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Votre tentative de corruption à été
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}révélée à la presse par un journaliste régional.
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Impossible d'élever le terrain ici...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}Impossible d'abaisser le terrain ici...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}Impossible de niveler le terrain ici...

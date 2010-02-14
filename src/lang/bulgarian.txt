@@ -223,7 +223,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Въве
 STR_LIST_FILTER_TITLE                                           :{BLACK}Филтър:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Избери вида на сортирането (намаляващо/нарастващо)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Избери критерий за сортиране
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Избери критерий за сортиране
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Избери критерии за филтриране
 STR_BUTTON_SORT_BY                                              :{BLACK}Сортирай по
 STR_BUTTON_LOCATION                                             :{BLACK}Позиция
@@ -1379,7 +1379,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Прекъсване на играта
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Искате ли да прекъснете играта?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Искате ли да прекъснете сценария?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Искате ли да прекъснете сценария?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Кодове
@@ -1522,7 +1522,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Нати
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}ИНФО ЗА ИГРАТА
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Играчи: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Език: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Терен: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Терен: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Големина на картата: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Версия на сървъра: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Адрес на сървъра: {WHITE}{STRING}
@@ -1854,8 +1854,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Изкл
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Включен
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Не отбелязвай зоната от предложеното място
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Отбележи зоната от предложеното място
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Приема: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Запаси: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Приема: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Запаси: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Присъедини станцията
@@ -2476,7 +2476,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Приема
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Покажи списък с приетите товари
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Приема: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Приема: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Рейтинги
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Покажи нивото на обслужване

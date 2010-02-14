@@ -29,16 +29,6 @@ void ShowGameDifficulty();
 void ShowGameSettings();
 void DrawArrowButtons(int x, int y, Colours button_colour, byte state, bool clickable_left, bool clickable_right);
 
-/* graph_gui.cpp */
-void ShowOperatingProfitGraph();
-void ShowIncomeGraph();
-void ShowDeliveredCargoGraph();
-void ShowPerformanceHistoryGraph();
-void ShowCompanyValueGraph();
-void ShowCargoPaymentRates();
-void ShowCompanyLeagueTable();
-void ShowPerformanceRatingDetail();
-
 /* train_gui.cpp */
 void ShowOrdersWindow(const Vehicle *v);
 
@@ -64,7 +54,6 @@ void ShowSubsidiesList();
 void ShowEstimatedCostOrIncome(Money cost, int x, int y);
 void ShowErrorMessage(StringID summary_msg, StringID detailed_msg, int x, int y, bool no_timeout = false);
 
-void ShowSmallMap();
 void ShowExtraViewPortWindow(TileIndex tile = INVALID_TILE);
 
 void BuildFileList();
