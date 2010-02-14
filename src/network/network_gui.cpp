@@ -621,7 +621,7 @@ public:
 			y += FONT_HEIGHT_NORMAL;
 
 			SetDParam(0, STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE + sel->info.map_set);
-			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_NETWORK_SERVER_LIST_TILESET); // tileset
+			DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_NETWORK_SERVER_LIST_LANDSCAPE); // landscape
 			y += FONT_HEIGHT_NORMAL;
 
 			SetDParam(0, sel->info.map_width);
@@ -2285,10 +2285,7 @@ struct NetworkCompanyPasswordWindow : public QueryStringBaseWindow {
 			snprintf(_settings_client.network.default_company_pass, lengthof(_settings_client.network.default_company_pass), "%s", this->edit_str_buf);
 		}
 
-		/* empty password is a '*' because of console argument */
-		if (StrEmpty(this->edit_str_buf)) snprintf(this->edit_str_buf, this->edit_str_size, "*");
-		char *password = this->edit_str_buf;
-		NetworkChangeCompanyPassword(1, &password);
+		NetworkChangeCompanyPassword(this->edit_str_buf);
 	}
 
 	virtual void OnPaint()

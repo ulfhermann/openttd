@@ -42,6 +42,7 @@ NetworkClientSocket::~NetworkClientSocket()
 		this->command_queue = p;
 	}
 
+	if (_redirect_console_to_client == this->client_id) _redirect_console_to_client = INVALID_CLIENT_ID;
 	this->client_id = INVALID_CLIENT_ID;
 	this->status = STATUS_INACTIVE;
 }
@@ -66,8 +67,7 @@ NetworkRecvStatus NetworkClientSocket::CloseConnection(bool error)
 		return NETWORK_RECV_STATUS_CONN_LOST;
 	}
 
-	NetworkCloseClient(this, error);
-	return NETWORK_RECV_STATUS_OKAY;
+	return NetworkCloseClient(this, error ? NETWORK_RECV_STATUS_SERVER_ERROR : NETWORK_RECV_STATUS_CONN_LOST);
 }
 
 #endif /* ENABLE_NETWORK */
