@@ -221,7 +221,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Introduc
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filtru:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Alegeţi ordinea de sortare ascendentă/descendentă
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Alege criteriul de sortare
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Alege criteriul de sortare
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Selectează criteriul de filtrare
 STR_BUTTON_SORT_BY                                              :{BLACK}Ordonează
 STR_BUTTON_LOCATION                                             :{BLACK}Locaţie
@@ -1165,6 +1165,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Una sau 
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Dimensiunea maximă a staţiilor: {ORANGE}{STRING} {RED}Atenţie: Valorile mari încetinesc jocul!
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Service automat pentru elicoptere la helipaduri: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Conectează bara de instrumente pentru peisaj cu cea de construcţii feroviare/auto/aeriane: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Culoarea folosita pentru teren pe hartă: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Verde
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Verde închis
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Mov
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Inversează direcţia de scroll: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Derulare uşoară ecran: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Arată o indicaţie de distanţă la folosirea uneltelor de construcţie: {ORANGE}{STRING}
@@ -1386,7 +1390,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Ieşire din joc
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Eşti sigur că vrei să renunţi la acest joc?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Eşti sigur că vrei să renunţi la acest scenariu?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Eşti sigur că vrei să renunţi la acest scenariu?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Cheat-uri
@@ -1529,7 +1533,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Clic pen
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}INFO JOC
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Clienţi: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Limba: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Tileset: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Tileset: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Mărimea hărţii: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Versiune server: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Adresa serverului: {WHITE}{STRING}
@@ -1861,8 +1865,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}inactiv
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}activ
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Nu arăta aria de acoperire a locaţiei propuse
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Arată aria de acoperire a locaţiei propuse
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Acceptă: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Resurse: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Acceptă: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Resurse: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Contopeşte (uneşte) staţia
@@ -2488,7 +2492,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Acceptă
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Afişează lista de încărcături acceptate
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Acceptă: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Acceptă: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Evaluări
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Afişează evaluările staţiei
@@ -3214,6 +3218,9 @@ STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Schimbă
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Reîncarcă IA
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Opreşte IA, raîncarcă scriptul, apoi reporneşte IA
 
+STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD este compilat fără suport de Inteligenţă Artificială...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... nu este disponibil nici un modul de Inteligenţă artificială!
+
 STR_ERROR_AI_NO_AI_FOUND                                        :Nici o IA potrivită a fost găsită{}Această IA este nefuncţională.{}Poţi descărca IA-uri folsind opţiunea "Resurse online" din meniul principal.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}O Inteligentă Artificială s-a oprit în mod eronat. Raportează această problemă autorului împreună cu o captură de ecran a ferestrei Depanare IA
 STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}Fereastra pentru depanare IA este disponibilă doar serverului
@@ -3331,7 +3338,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}Autorita
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Încercarea ta de mituire
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}a fost descoperită de un procuror local
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Nu se poate înălţa terenul...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}Nu se poate coborî terenul...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}Terenul nu poate fi uniformizat aici...
