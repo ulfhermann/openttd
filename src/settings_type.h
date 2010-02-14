@@ -54,6 +54,7 @@ struct GUISettings {
 	bool   autoscroll;                       ///< scroll when moving mouse to the edge
 	byte   errmsg_duration;                  ///< duration of error message
 	bool   link_terraform_toolbar;           ///< display terraform toolbar when displaying rail, road, water and airport toolbars
+	uint8  smallmap_land_colour;             ///< colour used for land and heightmap at the smallmap
 	bool   reverse_scroll;                   ///< right-Click-Scrolling scrolls in the opposite direction
 	bool   smooth_scroll;                    ///< smooth scroll viewports
 	bool   measure_tooltip;                  ///< show a permanent tooltip when dragging tools
@@ -105,6 +106,7 @@ struct GUISettings {
 	uint8  network_chat_box_height;          ///< height of the chat box in lines
 #endif
 
+	uint8  developer;                        ///< print non-fatal warnings in console (>= 1), copy debug output to console (== 2)
 	bool   show_date_in_logs;                ///< whether to show dates in console logs
 };
 
