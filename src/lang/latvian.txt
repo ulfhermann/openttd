@@ -222,7 +222,7 @@ STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Ievadīt
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Ievadiet atslēgvārdu, lai filtrētu sarakstu
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Izvēlieties kārtošanas secību (dilstošs/augošs)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Izvēlieties kārtošanas kritēriju
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Izvēlieties kārtošanas kritēriju
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Izvēlieties atlasīšanas nosacījumus
 STR_BUTTON_SORT_BY                                              :{BLACK}Kārtot pēc
 STR_BUTTON_LOCATION                                             :{BLACK}Izvietojums
@@ -1172,10 +1172,6 @@ STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Iespēj
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Rādīt sarakstu tikšķos nevis dienās: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Ātrā transporta norīkojumu veidošana: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Sliežu tips pēc noklusējuma: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Parastās sliedes
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektriskās sliedes
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Viensliedes
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Magleva
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Pirmās pieejamās
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Pēdējās pieejamās
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Visbiežāk lietotās
@@ -1346,7 +1342,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Pamest spēli
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Vai jūs tiešām vēlaties pārtraukt šo spēli?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Vai esat pārliecināts, ka vēlaties pamest šo scenāriju?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Vai esat pārliecināts, ka vēlaties pamest šo scenāriju?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Blēdības
@@ -1489,7 +1485,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Klik, la
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}SPĒLES INFORMĀCIJA
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Klienti: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Valoda: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Grafikas kopa: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Grafikas kopa: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Kartes izmērs: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Servera versija: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Servera adrese: {WHITE}{STRING}
@@ -1809,8 +1805,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Nav
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Ir
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Neiezīmēt jaunceļamā objekta pārklājumu
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Iezīmēt jaunceļamā objekta pārklājumu
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Pieņem: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Piegādā: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Pieņem: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Piegādā: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Pievienot staciju
@@ -2390,14 +2386,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Finansēt jauna
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Nopirkt vienīgā pārvadātāja tiesības
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Dot kukuli pašvaldībai
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Veikt mazu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Veikt vidēju reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Veikt lielu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Finansēt ceļu remontdarbus. Rada satiksmes traucējumus līdz pat pusgadam.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Uzbūvēt statuju par godu savam uzņēmumam.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Finansēt jaunu komercēku būvniecību šajā pilsētā.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Pirkt eksluzīvas 1 gada tiesības uz kravu un pasažieru transportēšanu. Pašvaldība atļaus pasažieriem un kravas pārvešanai izmantot tkai jūsu uzņēmuma stacijas.{}Izmaksas: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Piekukuļot vietējo pašvaldību lai paceltu reitingu, riskējot saņemt lielu sodu.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Veikt mazu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Veikt vidēju reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Veikt lielu reklāmas kampaņu, lai piesaistītu vairāk pasažieru un kravu savai kompānijai.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Finansēt ceļu remontdarbus. Rada satiksmes traucējumus līdz pat pusgadam.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Uzbūvēt statuju par godu savam uzņēmumam.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Finansēt jaunu komercēku būvniecību šajā pilsētā.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Pirkt eksluzīvas 1 gada tiesības uz kravu un pasažieru transportēšanu. Pašvaldība atļaus pasažieriem un kravas pārvešanai izmantot tkai jūsu uzņēmuma stacijas.{}Izmaksas: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Piekukuļot vietējo pašvaldību lai paceltu reitingu, riskējot saņemt lielu sodu.{}Izmaksas: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsīdijas
@@ -2427,7 +2423,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Pieņem
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Rādīt pieņemamo kravas sarakstu
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Pieņem: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Pieņem: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Reitingi
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Parādīt stacijas reitingu

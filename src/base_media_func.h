@@ -24,7 +24,7 @@ template <class Tbase_set> /* static */ Tbase_set *BaseMedia<Tbase_set>::availab
  */
 #define fetch_metadata(name) \
 	item = metadata->GetItem(name, false); \
-	if (item == NULL || strlen(item->value) == 0) { \
+	if (item == NULL || StrEmpty(item->value)) { \
 		DEBUG(grf, 0, "Base " SET_TYPE "set detail loading: %s field missing", name); \
 		return false; \
 	}
@@ -140,7 +140,7 @@ bool BaseMedia<Tbase_set>::AddFile(const char *filename, size_t basepath_length)
 	bool ret = false;
 	DEBUG(grf, 1, "Checking %s for base " SET_TYPE " set", filename);
 
-	Tbase_set *set = new Tbase_set();;
+	Tbase_set *set = new Tbase_set();
 	IniFile *ini = new IniFile();
 	ini->LoadFromDisk(filename);
 

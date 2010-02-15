@@ -600,7 +600,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Wpisz s�
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filtruj napis:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Wybierz porządek sortowania (malejąco/rosnąco)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Wybierz kryterium sortowania
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Wybierz kryterium sortowania
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Wybierz kryteria filtrowania
 STR_BUTTON_SORT_BY                                              :{BLACK}Sortuj wg
 STR_BUTTON_LOCATION                                             :{BLACK}Położenie
@@ -1495,6 +1495,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Pozwól
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Niejednolite stacje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Mnożnik wagi dla symulacji ciężkich pociągów towarowych: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Współczynnik prędkości samolotu: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Liczba katastrof lotniczych: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :żaden
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :zredukowany
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normalny
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Pozwól na budowę przystanków typu ro-ro na drogach miejskich: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Pozwól na przejazd przez przystanki należące do przeciwników: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Pozwól na budowę stacji przyległych do stacji przeciwnika (z Ctrl){ORANGE}{STRING}
@@ -1541,6 +1545,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Jedno lu
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Maks. wielkość stacji: {ORANGE}{STRING} {RED}Uwaga: Duże wartości spowalniają grę
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Automatycznie serwisuj helikoptery na lądowiskach: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Przyłącz narzędzia krajobrazu do okien środków transportu: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Kolor lądu używany w minimapie: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Zielony
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Ciemnozielony
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Fioletowy
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Przewijaj obraz myszką w przeciwnym kierunku: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Wygładź przesuwanie widoku: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Pokaż dymek z pomiarem podczas używania rożnych narzędzi: {ORANGE}{STRING}
@@ -1581,10 +1589,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Pokazuj
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Pokazuj przyjazdy i odjazdy w rozkładach: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Szybkie tworzenie poleceń pojazdu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Domyślny typ torowiska: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normalne
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektryfikowane
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Jednoszynowe
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :MagLev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Pierwszy dostępny
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Najnowszy
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Najczęściej używany
@@ -1766,7 +1770,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Wyjście
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Czy jesteś pewien że chcesz skończyć grę?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Czy jesteś pewien że chcesz opuścić ten scenariusz?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Czy jesteś pewien że chcesz opuścić ten scenariusz?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Oszukiwanie
@@ -1909,7 +1913,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Kliknij,
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}INFO O GRZE
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Klienci: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Język: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Krajobraz: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Krajobraz: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Rozmiar mapy: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Wersja serwera: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Adres serwera: {WHITE}{STRING}
@@ -2241,8 +2245,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Wył.
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Wł.
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Nie podświetlaj zasięgu projektowanej stacji
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Podświetl zasięg projektowanej stacji
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Akceptuje: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Zasoby: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Akceptuje: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Zasoby: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Połącz stację
@@ -2830,14 +2834,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Ufunduj nowe bu
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Kup wyłączność transportową
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Daj łapówkę lokalnym władzom
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Rozpocznij małą kampanię reklamową aby zachęcić pasażerów i fabryki do Twoich usług.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Rozpocznij średnią kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Rozpocznij dużą kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Ufunduj remont sieci dróg. Powoduje zakłócenia w ruchu ulicznym do 6 miesięcy.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Zbuduj pomnik dla uczczenia Twojej firmy.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Ufundowanie nowych budynków komercyjnych w mieście.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Kup roczną wyłączność na prawa transportowe w mieście. Lokalne władze pozwolą korzystać tylko z usług Twojej firmy.{}Koszt: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Daj łapówkę lokalnym władzom, powiększ Swoją ocenę, ryzykując poważne kary w razie złapania.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Rozpocznij małą kampanię reklamową aby zachęcić pasażerów i fabryki do Twoich usług.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Rozpocznij średnią kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Rozpocznij dużą kampanię reklamową aby zachęcić więcej pasażerów i fabryk do Twoich usług transportowych.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Ufunduj remont sieci dróg. Powoduje zakłócenia w ruchu ulicznym do 6 miesięcy.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Zbuduj pomnik dla uczczenia Twojej firmy.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Ufundowanie nowych budynków komercyjnych w mieście.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Kup roczną wyłączność na prawa transportowe w mieście. Lokalne władze pozwolą korzystać tylko z usług Twojej firmy.{}Koszt: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Daj łapówkę lokalnym władzom, powiększ Swoją ocenę, ryzykując poważne kary w razie złapania.{}Koszt: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsydia
@@ -2867,7 +2871,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Akceptuje
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Pokaż listę akceptowanych ładunków
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Akceptuje: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Akceptuje: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Oceny
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Pokaż ocenę stacji
@@ -3594,8 +3598,12 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Wybierz 
 STR_AI_DEBUG                                                    :{WHITE}Odpluskwianie SI
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Nazwa SI
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}Ustawienia SI
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Zmień ustawienia SI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Przeładuj SI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Zabij SI, przeładuj skrypt i zrestartuj SI
+
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... żadna SI nie jest dostępna!
 
 STR_ERROR_AI_NO_AI_FOUND                                        :Nie znaleziono SI do wczytania.{}SI jest nieaktywne i nic nie robi.{}Możesz ściągnąć SI z 'Dodatki Online' w głównym menu gry.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Jedna z działających SI przestała działać. Prosimy o zgłoszenie tego autorowi SI dołączając zrzut ekranu okna odpluskwiania SI.
@@ -3714,7 +3722,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} l
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Twoja próba wręczenia łapówki została
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}wykryta przez lokalnych śledczych
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Nie można tutaj podnieść lądu...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}Nie można tutaj obniżyć lądu...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}Nie można tutaj wyrównać terenu...

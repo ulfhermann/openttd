@@ -44,14 +44,14 @@
 static FILE *_script_file;
 static bool _script_running;
 
-/* console command / variable defines */
+/* console command defines */
 #define DEF_CONSOLE_CMD(function) static bool function(byte argc, char *argv[])
 #define DEF_CONSOLE_HOOK(function) static bool function()
 
 
-/*****************************
- * variable and command hooks
- *****************************/
+/****************
+ * command hooks
+ ****************/
 
 #ifdef ENABLE_NETWORK
 
@@ -69,7 +69,7 @@ DEF_CONSOLE_HOOK(ConHookServerOnly)
 	if (!NetworkAvailable()) return false;
 
 	if (!_network_server) {
-		IConsoleError("This command/variable is only available to a network server.");
+		IConsoleError("This command is only available to a network server.");
 		return false;
 	}
 	return true;
@@ -80,7 +80,7 @@ DEF_CONSOLE_HOOK(ConHookClientOnly)
 	if (!NetworkAvailable()) return false;
 
 	if (_network_server) {
-		IConsoleError("This command/variable is not available to a network server.");
+		IConsoleError("This command is not available to a network server.");
 		return false;
 	}
 	return true;
@@ -91,7 +91,7 @@ DEF_CONSOLE_HOOK(ConHookNeedNetwork)
 	if (!NetworkAvailable()) return false;
 
 	if (!_networking) {
-		IConsoleError("Not connected. This command/variable is only available in multiplayer.");
+		IConsoleError("Not connected. This command is only available in multiplayer.");
 		return false;
 	}
 	return true;
@@ -100,12 +100,14 @@ DEF_CONSOLE_HOOK(ConHookNeedNetwork)
 DEF_CONSOLE_HOOK(ConHookNoNetwork)
 {
 	if (_networking) {
-		IConsoleError("This command/variable is forbidden in multiplayer.");
+		IConsoleError("This command is forbidden in multiplayer.");
 		return false;
 	}
 	return true;
 }
 
+#else
+#	define ConHookNoNetwork NULL
 #endif /* ENABLE_NETWORK */
 
 static void IConsoleHelp(const char *str)
@@ -213,7 +215,7 @@ DEF_CONSOLE_CMD(ConSave)
 		if (SaveOrLoad(filename, SL_SAVE, SAVE_DIR) != SL_OK) {
 			IConsolePrint(CC_ERROR, "Saving map failed");
 		} else {
-			IConsolePrintF(CC_DEFAULT, "Map sucessfully saved to %s", filename);
+			IConsolePrintF(CC_DEFAULT, "Map successfully saved to %s", filename);
 		}
 		free(filename);
 		return true;
@@ -555,7 +557,7 @@ DEF_CONSOLE_CMD(ConServerInfo)
 {
 	if (argc == 0) {
 		IConsoleHelp("List current and maximum client/company limits. Usage 'server_info'");
-		IConsoleHelp("You can change these values by setting the variables 'max_clients', 'max_companies' and 'max_spectators'");
+		IConsoleHelp("You can change these values by modifying settings 'network.max_clients', 'network.max_companies' and 'network.max_spectators'");
 		return true;
 	}
 
@@ -991,6 +993,7 @@ DEF_CONSOLE_CMD(ConRestart)
 	return true;
 }
 
+#ifdef ENABLE_AI
 DEF_CONSOLE_CMD(ConListAI)
 {
 	char buf[4096];
@@ -1157,6 +1160,7 @@ DEF_CONSOLE_CMD(ConRescanAI)
 
 	return true;
 }
+#endif /* ENABLE_AI */
 
 DEF_CONSOLE_CMD(ConGetSeed)
 {
@@ -1241,35 +1245,6 @@ DEF_CONSOLE_CMD(ConScreenShot)
 	return true;
 }
 
-DEF_CONSOLE_CMD(ConInfoVar)
-{
-	static const char * const _icon_vartypes[] = {"boolean", "byte", "uint16", "uint32", "int16", "int32", "string"};
-	const IConsoleVar *var;
-
-	if (argc == 0) {
-		IConsoleHelp("Print out debugging information about a variable. Usage: 'info_var <var>'");
-		return true;
-	}
-
-	if (argc < 2) return false;
-
-	var = IConsoleVarGet(argv[1]);
-	if (var == NULL) {
-		IConsoleError("the given variable was not found");
-		return true;
-	}
-
-	IConsolePrintF(CC_DEFAULT, "variable name: %s", var->name);
-	IConsolePrintF(CC_DEFAULT, "variable type: %s", _icon_vartypes[var->type]);
-	IConsolePrintF(CC_DEFAULT, "variable addr: %p", var->addr);
-
-	if (var->hook.access) IConsoleWarning("variable is access hooked");
-	if (var->hook.pre) IConsoleWarning("variable is pre hooked");
-	if (var->hook.post) IConsoleWarning("variable is post hooked");
-	return true;
-}
-
-
 DEF_CONSOLE_CMD(ConInfoCmd)
 {
 	const IConsoleCmd *cmd;
@@ -1290,9 +1265,7 @@ DEF_CONSOLE_CMD(ConInfoCmd)
 	IConsolePrintF(CC_DEFAULT, "command name: %s", cmd->name);
 	IConsolePrintF(CC_DEFAULT, "command proc: %p", cmd->proc);
 
-	if (cmd->hook.access) IConsoleWarning("command is access hooked");
-	if (cmd->hook.pre) IConsoleWarning("command is pre hooked");
-	if (cmd->hook.post) IConsoleWarning("command is post hooked");
+	if (cmd->hook != NULL) IConsoleWarning("command is hooked");
 
 	return true;
 }
@@ -1346,7 +1319,6 @@ DEF_CONSOLE_CMD(ConHelp)
 {
 	if (argc == 2) {
 		const IConsoleCmd *cmd;
-		const IConsoleVar *var;
 		const IConsoleAlias *alias;
 
 		cmd = IConsoleCmdGet(argv[1]);
@@ -1366,25 +1338,16 @@ DEF_CONSOLE_CMD(ConHelp)
 			return true;
 		}
 
-		var = IConsoleVarGet(argv[1]);
-		if (var != NULL && var->help != NULL) {
-			IConsoleHelp(var->help);
-			return true;
-		}
-
-		IConsoleError("command or variable not found");
+		IConsoleError("command not found");
 		return true;
 	}
 
 	IConsolePrint(CC_WARNING, " ---- OpenTTD Console Help ---- ");
-	IConsolePrint(CC_DEFAULT, " - variables: [command to list all variables: list_vars]");
-	IConsolePrint(CC_DEFAULT, " set value with '<var> = <value>', use '++/--' to in-or decrement");
-	IConsolePrint(CC_DEFAULT, " or omit '=' and just '<var> <value>'. get value with typing '<var>'");
 	IConsolePrint(CC_DEFAULT, " - commands: [command to list all commands: list_cmds]");
 	IConsolePrint(CC_DEFAULT, " call commands with '<command> <arg2> <arg3>...'");
 	IConsolePrint(CC_DEFAULT, " - to assign strings, or use them as arguments, enclose it within quotes");
 	IConsolePrint(CC_DEFAULT, " like this: '<command> \"string argument with spaces\"'");
-	IConsolePrint(CC_DEFAULT, " - use 'help <command> | <variable>' to get specific information");
+	IConsolePrint(CC_DEFAULT, " - use 'help <command>' to get specific information");
 	IConsolePrint(CC_DEFAULT, " - scroll console output with shift + (up | down) | (pageup | pagedown))");
 	IConsolePrint(CC_DEFAULT, " - scroll console input history with the up | down arrows");
 	IConsolePrint(CC_DEFAULT, "");
@@ -1394,39 +1357,16 @@ DEF_CONSOLE_CMD(ConHelp)
 DEF_CONSOLE_CMD(ConListCommands)
 {
 	const IConsoleCmd *cmd;
-	size_t l = 0;
 
 	if (argc == 0) {
 		IConsoleHelp("List all registered commands. Usage: 'list_cmds [<pre-filter>]'");
 		return true;
 	}
 
-	if (argv[1] != NULL) l = strlen(argv[1]);
-
 	for (cmd = _iconsole_cmds; cmd != NULL; cmd = cmd->next) {
-		if (argv[1] == NULL || strncmp(cmd->name, argv[1], l) == 0) {
+		if (argv[1] == NULL || strstr(cmd->name, argv[1]) != NULL) {
 				IConsolePrintF(CC_DEFAULT, "%s", cmd->name);
 		}
-	}
-
-	return true;
-}
-
-DEF_CONSOLE_CMD(ConListVariables)
-{
-	const IConsoleVar *var;
-	size_t l = 0;
-
-	if (argc == 0) {
-		IConsoleHelp("List all registered variables. Usage: 'list_vars [<pre-filter>]'");
-		return true;
-	}
-
-	if (argv[1] != NULL) l = strlen(argv[1]);
-
-	for (var = _iconsole_vars; var != NULL; var = var->next) {
-		if (argv[1] == NULL || strncmp(var->name, argv[1], l) == 0)
-			IConsolePrintF(CC_DEFAULT, "%s", var->name);
 	}
 
 	return true;
@@ -1435,18 +1375,16 @@ DEF_CONSOLE_CMD(ConListVariables)
 DEF_CONSOLE_CMD(ConListAliases)
 {
 	const IConsoleAlias *alias;
-	size_t l = 0;
 
 	if (argc == 0) {
 		IConsoleHelp("List all registered aliases. Usage: 'list_aliases [<pre-filter>]'");
 		return true;
 	}
 
-	if (argv[1] != NULL) l = strlen(argv[1]);
-
 	for (alias = _iconsole_aliases; alias != NULL; alias = alias->next) {
-		if (argv[1] == NULL || strncmp(alias->name, argv[1], l) == 0)
+		if (argv[1] == NULL || strstr(alias->name, argv[1]) != NULL) {
 			IConsolePrintF(CC_DEFAULT, "%s => %s", alias->name, alias->cmdline);
+		}
 	}
 
 	return true;
@@ -1551,8 +1489,7 @@ DEF_CONSOLE_CMD(ConSayClient)
 
 extern void HashCurrentCompanyPassword(const char *password);
 
-/* Also use from within company_gui to change the password graphically */
-bool NetworkChangeCompanyPassword(byte argc, char *argv[])
+DEF_CONSOLE_CMD(ConCompanyPassword)
 {
 	if (argc == 0) {
 		IConsoleHelp("Change the password of your company. Usage: 'company_pw \"<password>\"'");
@@ -1560,22 +1497,20 @@ bool NetworkChangeCompanyPassword(byte argc, char *argv[])
 		return true;
 	}
 
+	if (argc != 2) return false;
+
 	if (!Company::IsValidID(_local_company)) {
 		IConsoleError("You have to own a company to make use of this command.");
 		return false;
 	}
 
-	if (argc != 1) return false;
+	const char *password = NetworkChangeCompanyPassword(argv[1]);
 
-	if (strcmp(argv[0], "*") == 0) argv[0][0] = '\0';
-
-	if (!_network_server) {
-		NetworkClientSetPassword(argv[0]);
+	if (StrEmpty(password)) {
+		IConsolePrintF(CC_WARNING, "Company password cleared");
 	} else {
-		HashCurrentCompanyPassword(argv[0]);
+		IConsolePrintF(CC_WARNING, "Company password changed to: %s", password);
 	}
-
-	IConsolePrintF(CC_WARNING, "'company_pw' changed to:  %s", argv[0]);
 
 	return true;
 }
@@ -1745,26 +1680,6 @@ DEF_CONSOLE_CMD(ConListSettings)
 	return true;
 }
 
-DEF_CONSOLE_CMD(ConListDumpVariables)
-{
-	const IConsoleVar *var;
-	size_t l = 0;
-
-	if (argc == 0) {
-		IConsoleHelp("List all variables with their value. Usage: 'dump_vars [<pre-filter>]'");
-		return true;
-	}
-
-	if (argv[1] != NULL) l = strlen(argv[1]);
-
-	for (var = _iconsole_vars; var != NULL; var = var->next) {
-		if (argv[1] == NULL || strncmp(var->name, argv[1], l) == 0)
-			IConsoleVarPrintGetValue(var);
-	}
-
-	return true;
-}
-
 DEF_CONSOLE_CMD(ConGamelogPrint)
 {
 	GamelogPrintConsole();
@@ -1772,16 +1687,12 @@ DEF_CONSOLE_CMD(ConGamelogPrint)
 }
 
 #ifdef _DEBUG
-/*******************************************
- *  debug commands and variables
- ********************************************/
+/******************
+ *  debug commands
+ ******************/
 
 static void IConsoleDebugLibRegister()
 {
-	/* debugging variables and functions */
-	extern bool _stdlib_con_developer; // XXX extern in .cpp
-
-	IConsoleVarRegister("con_developer",    &_stdlib_con_developer, ICONSOLE_VAR_BOOLEAN, "Enable/disable console debugging information (internal)");
 	IConsoleCmdRegister("resettile",        ConResetTile);
 	IConsoleCmdRegister("stopall",          ConStopAllVehicles);
 	IConsoleAliasRegister("dbg_echo",       "echo %A; echo %B");
@@ -1789,18 +1700,13 @@ static void IConsoleDebugLibRegister()
 }
 #endif
 
-/*******************************************
- * console command and variable registration
- ********************************************/
+/*******************************
+ * console command registration
+ *******************************/
 
 void IConsoleStdLibRegister()
 {
-	/* stdlib */
-	extern byte _stdlib_developer; // XXX extern in .cpp
-
-	/* default variables and functions */
 	IConsoleCmdRegister("debug_level",  ConDebugLevel);
-	IConsoleCmdRegister("dump_vars",    ConListDumpVariables);
 	IConsoleCmdRegister("echo",         ConEcho);
 	IConsoleCmdRegister("echoc",        ConEchoC);
 	IConsoleCmdRegister("exec",         ConExec);
@@ -1808,19 +1714,14 @@ void IConsoleStdLibRegister()
 	IConsoleCmdRegister("part",         ConPart);
 	IConsoleCmdRegister("help",         ConHelp);
 	IConsoleCmdRegister("info_cmd",     ConInfoCmd);
-	IConsoleCmdRegister("info_var",     ConInfoVar);
-	IConsoleCmdRegister("list_ai",      ConListAI);
 	IConsoleCmdRegister("list_cmds",    ConListCommands);
-	IConsoleCmdRegister("list_vars",    ConListVariables);
 	IConsoleCmdRegister("list_aliases", ConListAliases);
 	IConsoleCmdRegister("newgame",      ConNewGame);
 	IConsoleCmdRegister("restart",      ConRestart);
 	IConsoleCmdRegister("getseed",      ConGetSeed);
 	IConsoleCmdRegister("getdate",      ConGetDate);
 	IConsoleCmdRegister("quit",         ConExit);
-	IConsoleCmdRegister("reload_ai",    ConReloadAI);
-	IConsoleCmdRegister("rescan_ai",    ConRescanAI);
-	IConsoleCmdRegister("resetengines", ConResetEngines);
+	IConsoleCmdRegister("resetengines", ConResetEngines, ConHookNoNetwork);
 	IConsoleCmdRegister("return",       ConReturn);
 	IConsoleCmdRegister("screenshot",   ConScreenShot);
 	IConsoleCmdRegister("script",       ConScript);
@@ -1830,8 +1731,6 @@ void IConsoleStdLibRegister()
 	IConsoleCmdRegister("rm",           ConRemove);
 	IConsoleCmdRegister("save",         ConSave);
 	IConsoleCmdRegister("saveconfig",   ConSaveConfig);
-	IConsoleCmdRegister("start_ai",     ConStartAI);
-	IConsoleCmdRegister("stop_ai",      ConStopAI);
 	IConsoleCmdRegister("ls",           ConListFiles);
 	IConsoleCmdRegister("cd",           ConChangeDirectory);
 	IConsoleCmdRegister("pwd",          ConPrintWorkingDirectory);
@@ -1850,76 +1749,55 @@ void IConsoleStdLibRegister()
 	IConsoleAliasRegister("set",          "setting %+");
 	IConsoleAliasRegister("set_newgame",  "setting_newgame %+");
 	IConsoleAliasRegister("list_patches", "list_settings %+");
+	IConsoleAliasRegister("developer",    "setting developer %+");
 
+#ifdef ENABLE_AI
+	IConsoleCmdRegister("list_ai",      ConListAI);
+	IConsoleCmdRegister("reload_ai",    ConReloadAI);
+	IConsoleCmdRegister("rescan_ai",    ConRescanAI);
+	IConsoleCmdRegister("start_ai",     ConStartAI);
+	IConsoleCmdRegister("stop_ai",      ConStopAI);
+#endif /* ENABLE_AI */
 
-
-	IConsoleVarRegister("developer", &_stdlib_developer, ICONSOLE_VAR_BYTE, "Redirect debugging output from the console/command line to the ingame console (value 2). Default value: 1");
-
-	/* networking variables and functions */
+	/* networking functions */
 #ifdef ENABLE_NETWORK
-	/* Network hooks; only active in network */
-	IConsoleCmdHookAdd ("resetengines", ICONSOLE_HOOK_ACCESS, ConHookNoNetwork);
-
 /* Content downloading is only available with ZLIB */
 #if defined(WITH_ZLIB)
 	IConsoleCmdRegister("content",         ConContent);
 #endif /* defined(WITH_ZLIB) */
 
 	/*** Networking commands ***/
-	IConsoleCmdRegister("say",             ConSay);
-	IConsoleCmdHookAdd("say",              ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
-	IConsoleCmdRegister("companies",       ConCompanies);
-	IConsoleCmdHookAdd("companies",        ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
+	IConsoleCmdRegister("say",             ConSay, ConHookNeedNetwork);
+	IConsoleCmdRegister("companies",       ConCompanies, ConHookServerOnly);
 	IConsoleAliasRegister("players",       "companies");
-	IConsoleCmdRegister("say_company",     ConSayCompany);
-	IConsoleCmdHookAdd("say_company",      ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
+	IConsoleCmdRegister("say_company",     ConSayCompany, ConHookNeedNetwork);
 	IConsoleAliasRegister("say_player",    "say_company %+");
-	IConsoleCmdRegister("say_client",      ConSayClient);
-	IConsoleCmdHookAdd("say_client",       ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
+	IConsoleCmdRegister("say_client",      ConSayClient, ConHookNeedNetwork);
 
-	IConsoleCmdRegister("connect",         ConNetworkConnect);
-	IConsoleCmdHookAdd("connect",          ICONSOLE_HOOK_ACCESS, ConHookClientOnly);
-	IConsoleCmdRegister("clients",         ConNetworkClients);
-	IConsoleCmdHookAdd("clients",          ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
-	IConsoleCmdRegister("status",          ConStatus);
-	IConsoleCmdHookAdd("status",           ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
-	IConsoleCmdRegister("server_info",     ConServerInfo);
-	IConsoleCmdHookAdd("server_info",      ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
+	IConsoleCmdRegister("connect",         ConNetworkConnect, ConHookClientOnly);
+	IConsoleCmdRegister("clients",         ConNetworkClients, ConHookNeedNetwork);
+	IConsoleCmdRegister("status",          ConStatus, ConHookServerOnly);
+	IConsoleCmdRegister("server_info",     ConServerInfo, ConHookServerOnly);
 	IConsoleAliasRegister("info",          "server_info");
-	IConsoleCmdRegister("reconnect",       ConNetworkReconnect);
-	IConsoleCmdHookAdd("reconnect",        ICONSOLE_HOOK_ACCESS, ConHookClientOnly);
-	IConsoleCmdRegister("rcon",            ConRcon);
-	IConsoleCmdHookAdd("rcon",             ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
+	IConsoleCmdRegister("reconnect",       ConNetworkReconnect, ConHookClientOnly);
+	IConsoleCmdRegister("rcon",            ConRcon, ConHookNeedNetwork);
 
-	IConsoleCmdRegister("join",            ConJoinCompany);
-	IConsoleCmdHookAdd("join",             ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
+	IConsoleCmdRegister("join",            ConJoinCompany, ConHookNeedNetwork);
 	IConsoleAliasRegister("spectate",      "join 255");
-	IConsoleCmdRegister("move",            ConMoveClient);
-	IConsoleCmdHookAdd("move",             ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
-	IConsoleCmdRegister("reset_company",   ConResetCompany);
-	IConsoleCmdHookAdd("reset_company",    ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
+	IConsoleCmdRegister("move",            ConMoveClient, ConHookServerOnly);
+	IConsoleCmdRegister("reset_company",   ConResetCompany, ConHookServerOnly);
 	IConsoleAliasRegister("clean_company", "reset_company %A");
-	IConsoleCmdRegister("client_name",     ConClientNickChange);
-	IConsoleCmdHookAdd("client_name",      ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
-	IConsoleCmdRegister("kick",            ConKick);
-	IConsoleCmdHookAdd("kick",             ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
-	IConsoleCmdRegister("ban",             ConBan);
-	IConsoleCmdHookAdd("ban",              ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
-	IConsoleCmdRegister("unban",           ConUnBan);
-	IConsoleCmdHookAdd("unban",            ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
-	IConsoleCmdRegister("banlist",         ConBanList);
-	IConsoleCmdHookAdd("banlist",          ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
+	IConsoleCmdRegister("client_name",     ConClientNickChange, ConHookServerOnly);
+	IConsoleCmdRegister("kick",            ConKick, ConHookServerOnly);
+	IConsoleCmdRegister("ban",             ConBan, ConHookServerOnly);
+	IConsoleCmdRegister("unban",           ConUnBan, ConHookServerOnly);
+	IConsoleCmdRegister("banlist",         ConBanList, ConHookServerOnly);
 
-	IConsoleCmdRegister("pause",           ConPauseGame);
-	IConsoleCmdHookAdd("pause",            ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
-	IConsoleCmdRegister("unpause",         ConUnPauseGame);
-	IConsoleCmdHookAdd("unpause",          ICONSOLE_HOOK_ACCESS, ConHookServerOnly);
+	IConsoleCmdRegister("pause",           ConPauseGame, ConHookServerOnly);
+	IConsoleCmdRegister("unpause",         ConUnPauseGame, ConHookServerOnly);
 
-	/*** Networking variables ***/
-	IConsoleVarStringRegister("company_pw",      NULL, 0, "Set a password for your company, so no one without the correct password can join. Use '*' to clear the password");
-	IConsoleVarHookAdd("company_pw",             ICONSOLE_HOOK_ACCESS, ConHookNeedNetwork);
-	IConsoleVarProcAdd("company_pw",             NetworkChangeCompanyPassword);
-	IConsoleAliasRegister("company_password",    "company_pw %+");
+	IConsoleCmdRegister("company_pw",      ConCompanyPassword, ConHookNeedNetwork);
+	IConsoleAliasRegister("company_password",      "company_pw %+");
 
 	IConsoleAliasRegister("net_frame_freq",        "setting frame_freq %+");
 	IConsoleAliasRegister("net_sync_freq",         "setting sync_freq %+");

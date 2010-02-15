@@ -39,13 +39,13 @@
 	extern int _debug_net_level;
 	extern int _debug_sprite_level;
 	extern int _debug_oldloader_level;
-	extern int _debug_ntp_level;
 	extern int _debug_npf_level;
 	extern int _debug_yapf_level;
 	extern int _debug_freetype_level;
 	extern int _debug_sl_level;
 	extern int _debug_gamelog_level;
 	extern int _debug_desync_level;
+	extern int _debug_console_level;
 
 	void CDECL debug(const char *dbg, const char *format, ...) WARN_FORMAT(2, 3);
 #endif /* NO_DEBUG_MESSAGES */

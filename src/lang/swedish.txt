@@ -221,7 +221,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Skriv in
 STR_LIST_FILTER_TITLE                                           :{BLACK}Sökfilter:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Välj sorteringsordning (fallande/stigande)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Välj sortering
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Välj sortering
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Angre kriterier för filtrering
 STR_BUTTON_SORT_BY                                              :{BLACK}Sortera efter
 STR_BUTTON_LOCATION                                             :{BLACK}Plats
@@ -942,7 +942,7 @@ STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Välj fi
 STR_GAME_OPTIONS_BASE_GRF                                       :{BLACK}Grafikpaket som standard
 STR_GAME_OPTIONS_BASE_GRF_TOOLTIP                               :{BLACK}Välj vilket grafikpaket som ska användas som standard
 STR_GAME_OPTIONS_BASE_GRF_STATUS                                :{RED}{NUM} saknad/trasig fil{P "" s}
-STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP                   :{BLACK}Ytterligare information om bas-grafik settet
+STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP                   :{BLACK}Ytterligare information om basgrafik-set
 
 STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Grundljudspaket
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Välj grundljudspaket att använda
@@ -1115,6 +1115,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Tillåt
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Icke-rektangulära stationer: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Godsfaktor för att simulera tunga tåg: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Hastighetsfaktor för flygplan: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Antal flygplanskrascher: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :inga
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :reducerad
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normal
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Tillåt genomfarts-stop på stadsägda vägar: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Tillåt dina fordon att köra genom motståndarens hållplatser: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Tillåt konstruktion av närliggande stationer: {ORANGE}{STRING}
@@ -1201,10 +1205,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Visa ti
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Visa inkommande och avgående i tidtabeller: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Snabbskapande av fordonsorder: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Standard järnvägsräls (efter nytt/laddat spel): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normal Järnvägsräls
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektrisk Järnvägsräls
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Monorail
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Maglev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Första tillgängliga
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Sista tillgängliga
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Mest använd
@@ -1386,7 +1386,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Avsluta spelet
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Vill du verkligen avsluta spelet?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Vill du verkligen avsluta detta scenario?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Vill du verkligen avsluta detta scenario?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Fusk
@@ -1529,7 +1529,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Välj se
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}SPELINFO
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Klienter: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Språk: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Klimat: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Klimat: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Kartstorlek: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Serverversion: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Serveradress: {WHITE}{STRING}
@@ -1861,8 +1861,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Av
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}På
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Markera inte täckande yta för stationen
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Markera täckande yta för stationen
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepterar: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Leverar: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepterar: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Leverar: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Slå ihop stationer
@@ -2370,6 +2370,7 @@ STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Okänd egenskap
 STR_NEWGRF_ERROR_INVALID_ID                                     :Försök att använda ogiltig ID.
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} innehåller en skadad sprite. Alla korrupta sprites kommer att visas som ett rött frågetecken (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Innehåller mer än en Action 8 funktion.
+STR_NEWGRF_ERROR_READ_BOUNDS                                    :Läs förbi slutet av pseudo-sprite.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Varning!
@@ -2450,14 +2451,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Bekosta nya byg
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Köp exklusiva transporträttigheter
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Muta de lokala myndigheterna
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Starta en liten lokal reklamkampanj, för att attrahera fler passagerare och gods till dina tranporttjänster.{}Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Starta en mellanstor lokal reklamkampanj, för att attrahera fler passagerare och gods till dina tranporttjänster.{}Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Starta en stor lokal reklamkampanj, för att attrahera fler passagerare och gods till dina tranporttjänster.{}Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Bekosta ombyggnad av stadens vägnätverk. Orsakar ansenliga störningar för vägtrafik i upp till 6 månader.{}Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Bygg en staty i ditt företags ära.{}Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Bekosta uppbyggnad av nya kommersiella byggnader i staden.{}Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW} Köp 1 års exklusiv transporträttighet i staden. Stadens myndigheter kommer bara tillåta passagerare och gods till användning för ditt företags stationer.{}Kostnad: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW} Muta de lokala myndigheterna för att öka din värdering, med risk för att få höga böter om du blir upptäckt.{} Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Starta en liten lokal reklamkampanj, för att attrahera fler passagerare och gods till dina tranporttjänster.{}Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Starta en mellanstor lokal reklamkampanj, för att attrahera fler passagerare och gods till dina tranporttjänster.{}Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Starta en stor lokal reklamkampanj, för att attrahera fler passagerare och gods till dina tranporttjänster.{}Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Bekosta ombyggnad av stadens vägnätverk. Orsakar ansenliga störningar för vägtrafik i upp till 6 månader.{}Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Bygg en staty i ditt företags ära.{}Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Bekosta uppbyggnad av nya kommersiella byggnader i staden.{}Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW} Köp 1 års exklusiv transporträttighet i staden. Stadens myndigheter kommer bara tillåta passagerare och gods till användning för ditt företags stationer.{}Kostnad: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW} Muta de lokala myndigheterna för att öka din värdering, med risk för att få höga böter om du blir upptäckt.{} Kostnad: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subventioner
@@ -2487,7 +2488,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Accepterar
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Visa lista över accepterat gods. Ctrl+Musklick döljer listan över grupper
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepterar: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepterar: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Värderingar
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Visa stationens klassificering
@@ -3208,6 +3209,8 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Välj å
 STR_AI_DEBUG                                                    :{WHITE}Felsökning av datorspelare
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Namn på datorspelaren
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}AI-inställningar
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Ändra inställningar för AI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Ladda om datorspelaren
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Stoppa datorspelaren, ladda om scriptet och starta sedan om datorspelaren
 

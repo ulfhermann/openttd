@@ -222,7 +222,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Sleutel 
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filter string:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Selekteer sorteer orde (afklimende/klimende)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Selekteer sorteer maatstaf
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Selekteer sorteer maatstaf
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Selekteer filtrering kriteria
 STR_BUTTON_SORT_BY                                              :{BLACK}Sorteer by
 STR_BUTTON_LOCATION                                             :{BLACK}Lokasie
@@ -1201,10 +1201,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Vertoon
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Toon aankoms en vertrek in tydroosters: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Vinnige skepping van voertuig opdragte: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Verstek spoor tipe (na nuwe spel/spel laai): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Gewone Spoor
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektrifiseerde Spoor
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Eenspoor
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Maglev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Eers beskikbaar
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Laas beskikbaar
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Meeste gebruik
@@ -1386,7 +1382,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Verlaat Spel
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Is jy seker jy wil die speletjie verlaat?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Is jy seker jy wil die draaiboek verlaat?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Is jy seker jy wil die draaiboek verlaat?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Kullery
@@ -1529,7 +1525,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Die bedi
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}SPEL INFORMASIE
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Kliente:  {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Taal:  {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Blokkiestel:  {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Blokkiestel:  {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Kaart groote:  {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Verskaffer hersiening:  {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Verskaffer adres:  {WHITE}{STRING}
@@ -1861,8 +1857,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Af
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Aan
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Moenie die dekking area van die voorgestelde bouterrein verlig nie
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Verlig dekking area van die voorgestelde bouterrein
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aanvaar: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Voorraad: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aanvaar: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Voorraad: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Sluit by stasie aan
@@ -2445,14 +2441,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Befonds nuwe ge
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Koop eksklusief vervoer regte
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Omkoop die plaaslike raad
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begin 'n klein plaaslik advertensie veldtog, om meer passasiers en cargo tot jou vervoer dienste te lok.{}Prys: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Begin 'n middlemaatige plaaslik advertensie veldtog, om meer passasiers en cargo tot jou vervoer dienste te lok.{}Prys: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begin 'n groot plaaslik advertensie veldtog, om meer passasiers en cargo tot jou vervoer dienste te lok.{}Prys: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW} Fonds die herkonstruksie van die stedelik pad netwerk. Veroorsaak aansienlike skeuring to pad verkeer vir op tot 6 maande.{}  Prys: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW} Bou 'n standbeeld in eer van u maatskappy.{} Prys: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW} Fonds die bou van nuwe kommersieel geboue in die stad.{}  Prys: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW} Koop 1 jare eksklusief vervoer regte in dorp. Dorp raad sal slegs passasiers en cargo toelaat om jou maatskappy se stasies te gebruik.{} Prys: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW} Omkoop die plaaslike raad om jou gradering te verbeter, by die risiko van 'n ernstig straf indien gevang{}  Kos: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Begin 'n klein plaaslik advertensie veldtog, om meer passasiers en cargo tot jou vervoer dienste te lok.{}Prys: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Begin 'n middlemaatige plaaslik advertensie veldtog, om meer passasiers en cargo tot jou vervoer dienste te lok.{}Prys: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Begin 'n groot plaaslik advertensie veldtog, om meer passasiers en cargo tot jou vervoer dienste te lok.{}Prys: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} Fonds die herkonstruksie van die stedelik pad netwerk. Veroorsaak aansienlike skeuring to pad verkeer vir op tot 6 maande.{}  Prys: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW} Bou 'n standbeeld in eer van u maatskappy.{} Prys: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} Fonds die bou van nuwe kommersieel geboue in die stad.{}  Prys: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW} Koop 1 jare eksklusief vervoer regte in dorp. Dorp raad sal slegs passasiers en cargo toelaat om jou maatskappy se stasies te gebruik.{} Prys: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW} Omkoop die plaaslike raad om jou gradering te verbeter, by die risiko van 'n ernstig straf indien gevang{}  Kos: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsidiee
@@ -2482,7 +2478,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Aanvaar
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Wys lys van aanvaarde vrag
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Aanvaar: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Aanvaar: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Graderings
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Toon stasie graderings

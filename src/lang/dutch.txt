@@ -221,7 +221,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Geef een
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filter tekst:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Selecteer sorteerrichting (aflopend/oplopend)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Selecteer sorteringscriteria
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Selecteer sorteringscriteria
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Kies filtercriteria
 STR_BUTTON_SORT_BY                                              :{BLACK}Sorteer op
 STR_BUTTON_LOCATION                                             :{BLACK}Locatie
@@ -1115,6 +1115,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Geld ge
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Vrij gevormde stations: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Gewichtsverhouding voor vracht om zware treinen te simuleren: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Vliegtuigsnelheidsverhouding: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Aantal vliegtuigcrashes: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :Geen
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :Verminderd
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :Normaal
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Sta toe dat doorrijwegstops worden geplaatst op door stad beheerde wegen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Sta doorrijhaltes op wegen van tegenstanders toe: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Bouwen van aangrenzende stations toestaan: {ORANGE}{STRING}
@@ -1161,6 +1165,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Een of m
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Maximale stationsomvang: {ORANGE}{STRING} {RED}Pas op: Hoge waarde vertraagt spel
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Helikopters automatisch repareren op helipads: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Verbind de knoppenbalk voor terreinvorming met die voor spoor/weg/water/vliegveld: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Gebruiker land kleur op de kleine kaart: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Groen
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Donker groen
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Violet
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Omgekeerde scrollrichting: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Vloeiend scrollen kijkvenster: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Toon dimensie-informatie bij het gebruik van diverse bouwgereedschappen: {ORANGE}{STRING}
@@ -1173,7 +1181,7 @@ STR_CONFIG_SETTING_SCROLLWHEEL_SCROLLING                        :{LTBLUE}Functie
 STR_CONFIG_SETTING_SCROLLWHEEL_ZOOM                             :Zoom kaart
 STR_CONFIG_SETTING_SCROLLWHEEL_SCROLL                           :Scroll kaart
 STR_CONFIG_SETTING_SCROLLWHEEL_OFF                              :Uit
-STR_CONFIG_SETTING_SCROLLWHEEL_MULTIPLIER                       :{LTBLUE}Kaartmuiswielsnelheid: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SCROLLWHEEL_MULTIPLIER                       :{LTBLUE}Muiswielsnelheid: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU                          :{LTBLUE}Rechtsklikemulatie: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_COMMAND                  :Command-klik
@@ -1201,10 +1209,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Toon di
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Toon aankomst- en vertrektijden in dienstregeling: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Snel voertuigorders maken: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Standaard spoorsoort (bij nieuw of opgeslagen spel): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Normaal spoor
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Geëlektrificeerd spoor
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Monorail
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Zweefspoor
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Eerst beschikbare
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Laatst beschikbare
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Meest gebruikte
@@ -1270,7 +1274,7 @@ STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED                        :toestaan
 STR_CONFIG_SETTING_TOWN_FOUNDING_ALLOWED_CUSTOM_LAYOUT          :toestaan, eigen wegpatroon
 
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT                         :{LTBLUE}Plaatsing van bomen in het spel: {ORANGE}{STRING}
-STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :geen {RED}(breekt houtzagerij)
+STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_NONE                    :geen {RED}(houtzagerij werkt niet)
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :alleen in regenwouden
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :overal
 
@@ -1386,7 +1390,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Verlaat spel
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Weet je zeker dat je dit spel wilt afsluiten?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Weet je zeker dat je dit scenario wilt sluiten?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Weet je zeker dat je dit scenario wilt sluiten?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Cheats
@@ -1529,7 +1533,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Klik om 
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}SPELINFORMATIE
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Spelers: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Taal: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Klimaat: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Klimaat: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Kaartgrootte: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Serverversie: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Serveradres: {WHITE}{STRING}
@@ -1861,8 +1865,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Uit
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Aan
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Markeer het dekkingsgebied van de voorgestelde locatie niet
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Markeer het dekkingsgebied van de voorgestelde locatie
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepteert: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Biedt aan: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Accepteert: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Biedt aan: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Station samenvoegen
@@ -2013,7 +2017,7 @@ STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Kies gro
 
 STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Klein
 STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}Stad
-STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Hoofdstedelijk vliegveld
+STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Hoofdstedelijk
 STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Internationaal vliegveld
 STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}Pendel
 STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Intercontinentaal
@@ -2451,14 +2455,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Betaal nieuwe g
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Koop exclusieve transportrechten
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Koop de gemeenteraad om
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begin een kleine reclamecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Begin een middelgrote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begin een grote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Betaal een vernieuwing van het wegennetwerk. Veroorzaakt tot 6 maanden lang een aanzienlijke verstoring van het wegverkeer.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Bouw een standbeeld ter ere van jouw bedrijf.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Betaal de bouw van nieuwe commerciële gebouwen in de stad.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Koop 1 jaar exclusieve transportrechten in deze plaats. De gemeenteraad staat passagiers en vracht aleeen toe om jouw stations te gebruiken.{}Kosten: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Koop het plaatselijk gezag om om je reputatie te verhogen, met het gevaar van een strenge sanctie, wanneer je gepakt wordt.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Begin een kleine reclamecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Begin een middelgrote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Begin een grote advertentiecampagne, om meer passagiers en vracht naar jouw transportdiensten te trekken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Betaal een vernieuwing van het wegennetwerk. Veroorzaakt tot 6 maanden lang een aanzienlijke verstoring van het wegverkeer.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Bouw een standbeeld ter ere van jouw bedrijf.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Betaal de bouw van nieuwe commerciële gebouwen in de stad.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Koop 1 jaar exclusieve transportrechten in deze plaats. De gemeenteraad staat passagiers en vracht aleeen toe om jouw stations te gebruiken.{}Kosten: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Koop het plaatselijk gezag om om je reputatie te verhogen, met het gevaar van een strenge sanctie, wanneer je gepakt wordt.{}Kosten: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsidies
@@ -2488,7 +2492,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Accepteert
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Laat lijst van gevraagde goederen zien
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepteert: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepteert: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Rangen
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Bekijk stationsreputaties
@@ -3209,8 +3213,13 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}Kies jaa
 STR_AI_DEBUG                                                    :{WHITE}AI Debug
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}Naam computerspeler
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}AI Instellingen
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Wijzig de instelling van de AI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Herlaad computerspeler
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Verwijder computerspeler, herlaad het script en herstart computerspeler
+
+STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD is gecompileerd zonder AI ondersteuning...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... geen AIs zijn beschikbaar!
 
 STR_ERROR_AI_NO_AI_FOUND                                        :Geen geschikte AI gevonden. {} Deze AI is een 'dummy' en voert niets uit.{}Verschillende AI's kunnen worden gedownload via het 'Online Content' systeem.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Een van de draaiende AI's is gecrashed. Meldt dit bij de schrijver van deze AI met een schermprint van het AI Debugscherm.
@@ -3329,7 +3338,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} l
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Je poging tot omkopen is
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}ontdekt door een regionale onderzoeker
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Kan het land hier niet verhogen...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}Kan het land hier niet verlagen...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}Kan land hier niet egaliseren...

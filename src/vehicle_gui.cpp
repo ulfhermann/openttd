@@ -438,12 +438,7 @@ struct RefitWindow : public Window {
 		}
 	}
 
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget == VRW_MATRIX) this->OnClick(pt, VRW_REFITBUTTON);
-	}
-
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case VRW_MATRIX: { // listbox
@@ -452,9 +447,10 @@ struct RefitWindow : public Window {
 					this->sel = (y / (int)this->resize.step_height) + this->vscroll.GetPosition();
 					this->SetDirty();
 				}
-				break;
+				/* FIXME We need to call some InvalidateData to make this->cargo valid */
+				if (click_count == 1) break;
 			}
-
+			/* FALL THROUGH */
 			case VRW_REFITBUTTON: // refit button
 				if (this->cargo != NULL) {
 					const Vehicle *v = Vehicle::Get(this->window_number);
@@ -524,7 +520,7 @@ uint ShowRefitOptionsList(int left, int right, int y, EngineID engine)
 	char *b = string;
 
 	/* Draw nothing if the engine is not refittable */
-	if (CountBits(cmask) <= 1) return y;
+	if (HasAtMostOneBit(cmask)) return y;
 
 	b = InlineString(b, STR_PURCHASE_INFO_REFITTABLE_TO);
 
@@ -774,7 +770,7 @@ static const NWidgetPart _nested_vehicle_list[] = {
 
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, VLW_WIDGET_SORT_ORDER), SetMinimalSize(81, 12), SetFill(0, 1), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
-		NWidget(WWT_DROPDOWN, COLOUR_GREY, VLW_WIDGET_SORT_BY_PULLDOWN), SetMinimalSize(167, 12), SetFill(0, 1), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
+		NWidget(WWT_DROPDOWN, COLOUR_GREY, VLW_WIDGET_SORT_BY_PULLDOWN), SetMinimalSize(167, 12), SetFill(0, 1), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIA),
 		NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(12, 12), SetFill(1, 1), SetResize(1, 0),
 		EndContainer(),
 	EndContainer(),
@@ -1116,7 +1112,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case VLW_WIDGET_SORT_ORDER: // Flip sorting method ascending/descending
@@ -1532,7 +1528,7 @@ struct VehicleDetailsWindow : Window {
 						SetDParam(1, Train::From(v)->tcache.cached_power);
 						SetDParam(0, Train::From(v)->tcache.cached_weight);
 						SetDParam(3, Train::From(v)->tcache.cached_max_te / 1000);
-						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && GetRailTypeInfo(Train::From(v)->railtype)->acceleration_type != 2) ?
+						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, (_settings_game.vehicle.train_acceleration_model != AM_ORIGINAL && GetRailTypeInfo(Train::From(v)->railtype)->acceleration_type != 2) ?
 								STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED_MAX_TE : STR_VEHICLE_INFO_WEIGHT_POWER_MAX_SPEED);
 						break;
 
@@ -1611,7 +1607,7 @@ struct VehicleDetailsWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case VLD_WIDGET_RENAME_VEHICLE: { // rename
@@ -2041,7 +2037,7 @@ public:
 		DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, str, TC_FROMSTRING, SA_CENTER);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		const Vehicle *v = Vehicle::Get(this->window_number);
 

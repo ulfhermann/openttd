@@ -222,7 +222,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}검색�
 STR_LIST_FILTER_TITLE                                           :{BLACK}필터링할 문자열:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}정렬 방법을 선택하십시오 (내림차순/오름차순)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}정렬 기준 선택
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}정렬 기준 선택
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}필터링 기준 선택
 STR_BUTTON_SORT_BY                                              :{BLACK}정렬
 STR_BUTTON_LOCATION                                             :{BLACK}위치
@@ -1116,6 +1116,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}다른 
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}이미 지어진 역에 추가로 역을 증축하는 것을 허용 : {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}무거운 열차를 운행하기 위해 화물에 무게를 가함 : {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}비행기 속도 인수: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}비행기 추락 횟수: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :없음
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :적음
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :보통
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}도시 소유의 도로 위에 버스 정류장 건설 허용: {ORANGE}{STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}경쟁자가 소유중인 도로를 통과하는 버스 정류장 건설 허용: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}정거장 근처에 건물 짓기 허용: {ORANGE}{STRING}
@@ -1162,6 +1166,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}가장�
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}역의 최대 크기: {ORANGE}{STRING} {RED}경고! 높은 값은 게임을 느리게함!
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}헬리콥터를 발착장에서 자동으로 점검 : {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}철도/도로/항만/공항 툴바에 지형 툴바 연결 : {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}스몰맵에서 사용되는 땅의 색상: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :녹색
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :어두운 녹색
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :보라색
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}스크롤 방향 뒤집기 : {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}부드러운 화면 스크롤: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}건설도구 사용시 거리 툴팁 표시 : {ORANGE}{STRING}
@@ -1202,10 +1210,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}시간�
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}시간표에서 출발일과 도착일 표시: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}빠른 행선지 설정: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}철도 형식 기본값 설정 (게임 시작/불러온 후): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :보통 철도
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :전기 철도
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :모노레일
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :자기부상
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :처음 사용 가능한 것
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :최신 기술의 철도
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :가장 많이 사용한 것
@@ -1387,7 +1391,7 @@ STR_OSNAME_SUNOS                                                :{G=f}SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}게임 그만하기
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}정말 이 게임을 종료하고 메인으로 이동하시겠습니까?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}정말 이 시나리오를 종료하시겠습니까?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}정말 이 시나리오를 종료하시겠습니까?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}치트
@@ -1530,7 +1534,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}최근�
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}게임 정보
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}클라이언트: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}언어: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}기후: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}기후: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}맵 크기: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}서버 버전: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}서버 주소: {WHITE}{STRING}
@@ -1862,8 +1866,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}끄기
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}켜기
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}역세권을 하이라이트하지 않습니다.
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}역세권을 하이라이트합니다.
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}받음: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}공급: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}받음: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}공급: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}같은 이름으로 정거장 만들기
@@ -2452,14 +2456,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :새 건물에 �
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :수송 권한 독점권 구입
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :지역 당국에 뇌물 먹이기
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} 더 많은 승객과 화물을 유치하기 위해 소규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW} 더 많은 승객과 화물을 유치하기 위해 중간 규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} 더 많은 승객과 화물을 유치하기 위해 대규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW} 도시 도로 네트워크망의 재공사에 투자합니다. 앞으로 6개월간 극심한 도로 혼잡을 일으킵니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW} 당신의 회사를 대표하는 '명예의 동상'을 건설합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW} 도시 상업 건물의 건설에 투자합니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW} 1년간의 수송 권한 독점권을 구입합니다. 도시 당국은 오직 당신 회사의 역에만 승객과 화물을 허용할 것입니다.{}가격: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW} 성취도를 올리기 위해 처벌을 감수하고 지역 당국에 뇌물을 줍니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW} 더 많은 승객과 화물을 유치하기 위해 소규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW} 더 많은 승객과 화물을 유치하기 위해 중간 규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW} 더 많은 승객과 화물을 유치하기 위해 대규모의 광고 캠페인을 시작합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} 도시 도로 네트워크망의 재공사에 투자합니다. 앞으로 6개월간 극심한 도로 혼잡을 일으킵니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW} 당신의 회사를 대표하는 '명예의 동상'을 건설합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} 도시 상업 건물의 건설에 투자합니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW} 1년간의 수송 권한 독점권을 구입합니다. 도시 당국은 오직 당신 회사의 역에만 승객과 화물을 허용할 것입니다.{}가격: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW} 성취도를 올리기 위해 처벌을 감수하고 지역 당국에 뇌물을 줍니다.{}가격: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}보조금
@@ -2489,7 +2493,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({1:STA
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}받음
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}받는 화물의 목록 표시
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}받음: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}받음: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}등급
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}역의 등급 표시
@@ -3210,8 +3214,13 @@ STR_DATE_YEAR_TOOLTIP                                           :{BLACK}년(年)
 STR_AI_DEBUG                                                    :{WHITE}AI 디버그
 STR_AI_DEBUG_NAME_AND_VERSION                                   :{BLACK}{STRING} (v{NUM})
 STR_AI_DEBUG_NAME_TOOLTIP                                       :{BLACK}AI의 이름
+STR_AI_DEBUG_SETTINGS                                           :{BLACK}AI 설정
+STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}AI의 설정 변경
 STR_AI_DEBUG_RELOAD                                             :{BLACK}AI 재시작
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}AI를 종료시키고, 스크립트를 다시 불러와, AI를 재시작합니다
+
+STR_ERROR_NO_AI                                                 :{WHITE}AI 지원 없이 OpenTTD를 빌드합니다...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... 사용 가능한 AI가 없습니다!
 
 STR_ERROR_AI_NO_AI_FOUND                                        :불러올 인공지능이 없습니다.{}이 인공지능은 아무것도 하지 않는 더미입니다.{}'온라인 컨텐츠 체크' 기능으로 인공지능을 다운받으세요.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}작동중인 인공지능 중 하나가 충돌했습니다. 인공지능 디버그 창에서 스크린샷을 찍어 인공지능 제작자에게 보고하십시오.
@@ -3330,7 +3339,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} �
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}당신의 뇌물 수수 행위가
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}지역 당국에 의해 발각되었습니다!
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}이곳의 땅을 올릴 수 없습니다...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}이곳의 땅을 내릴 수 없습니다...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}이 땅의 높이를 조절할 수 없습니다...

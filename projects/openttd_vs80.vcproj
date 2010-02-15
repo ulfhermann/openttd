@@ -60,7 +60,7 @@
 				FavorSizeOrSpeed="2"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\objs\langs;..\src\3rdparty\squirrel\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;WITH_ASSERT"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;WITH_ASSERT"
 				StringPooling="true"
 				ExceptionHandling="1"
 				RuntimeLibrary="0"
@@ -169,7 +169,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\objs\langs;..\src\3rdparty\squirrel\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -273,7 +273,7 @@
 				FavorSizeOrSpeed="2"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\objs\langs;..\src\3rdparty\squirrel\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64;WITH_ASSERT"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64;WITH_ASSERT"
 				StringPooling="true"
 				ExceptionHandling="1"
 				RuntimeLibrary="0"
@@ -383,7 +383,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\objs\langs;..\src\3rdparty\squirrel\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -720,6 +720,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\tilearea.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\townname.cpp"
 				>
 			</File>
@@ -1020,6 +1024,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\graph_gui.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\group.h"
 				>
 			</File>
@@ -1184,6 +1192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\newgrf_railtype.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\newgrf_sound.h"
 				>
 			</File>
@@ -1309,6 +1321,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\sdl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\smallmap_gui.h"
 				>
 			</File>
 			<File
@@ -3192,6 +3208,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\newgrf_railtype.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\newgrf_sound.cpp"
 				>
 			</File>
@@ -3413,6 +3433,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\network\core\tcp_game.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\network\core\tcp_http.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\network\core\tcp_http.h"
 				>
 			</File>
 			<File

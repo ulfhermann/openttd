@@ -211,7 +211,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Typ in w
 STR_LIST_FILTER_TITLE                                           :{BLACK}Filter namme:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Selektear skiftrjochting (oprinnend/ôfrinnend)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Selektear skiftnoarm
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Selektear skiftnoarm
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Selekear filternoarm
 STR_BUTTON_SORT_BY                                              :{BLACK}Skifte op
 STR_BUTTON_LOCATION                                             :{BLACK}Lokaasje
@@ -883,7 +883,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Ferlit Spul
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Wolsto echt dit lânskip slúte?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Wolsto echt dit lânskip slúte?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Wolsto echt dit lânskip slúte?
 
 # Cheat window
 STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE                      :Boartersguodlânskip
@@ -1077,8 +1077,8 @@ STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Kin it d
 # Base for station construction window(s)
 STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Ut
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Oan
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aksepteart: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Levert: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Aksepteart: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Levert: {GOLD}{STRING}
 
 # Join station window
 
@@ -1397,10 +1397,10 @@ STR_LOCAL_AUTHORITY_ACTION_ROAD_RECONSTRUCTION                  :Subsidiearje lo
 STR_LOCAL_AUTHORITY_ACTION_STATUE_OF_COMPANY                    :Bou stânbyld fan bedrieuwseigner
 STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Betelje bouw fan nije gebouwen
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begjin in lytse advertinsjecampanje, om mear passazjiers en fracht nei dyn transporttsjinsten te lûken.{}Kostet: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Begjin in middelgrutte advertinsjecampanje, om mear passazjiers en fracht nei dyn transporttsjinsten te lûken.{}Kostet: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Begjin in grutte advertinsjecampanje, om mear passazjiers en fracht nei dyn transport tsjinsten te lûken.{}Kostet: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Bou in stânbyld ter eare fan jo bedriuw.{}Kostet: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Begjin in lytse advertinsjecampanje, om mear passazjiers en fracht nei dyn transporttsjinsten te lûken.{}Kostet: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Begjin in middelgrutte advertinsjecampanje, om mear passazjiers en fracht nei dyn transporttsjinsten te lûken.{}Kostet: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Begjin in grutte advertinsjecampanje, om mear passazjiers en fracht nei dyn transport tsjinsten te lûken.{}Kostet: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Bou in stânbyld ter eare fan jo bedriuw.{}Kostet: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subsydzjes
@@ -1423,7 +1423,7 @@ STR_STATION_VIEW_WAITING_CARGO                                  :{WHITE}{CARGO}
 STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORTCARGO} ûnderweis fan {STATION} ôf)
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Aksepteart: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Aksepteart: {WHITE}{STRING}
 
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
 

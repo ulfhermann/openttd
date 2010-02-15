@@ -1,6 +1,6 @@
 OpenTTD README
-Last updated:    2010-01-21
-Release version: 1.0.0-beta3
+Last updated:    2010-02-04
+Release version: 1.0.0-beta4
 ------------------------------------------------------------------------
 
 
@@ -18,6 +18,7 @@ Table of Contents:
 6.0) Configuration File
 7.0) Compiling
  * 7.1) Required/optional libraries
+ * 7.2) Supported compilers
 8.0) Translating
  * 8.1 Translation
  * 8.2 Previewing
@@ -424,6 +425,23 @@ zlib you cannot open most savegames or use the content downloading system.
 Without libSDL/liballegro on non-Windows and non-MacOS X machines you have
 no graphical user interface; you would be building a dedicated server.
 
+7.2) Supported compilers:
+---- -------------------
+The following compilers are known to compile OpenTTD:
+  - Microsoft Visual C++ (MSVC) 2005 and 2008.
+    Version 2005 gives bogus warnings about scoping issues.
+  - GNU Compiler Collection (GCC) 3.3 - 4.5.
+    Versions 4.1 and earlier give bogus warnings about uninitialised variables.
+    Versions 4.4 and later give bogus warnings about freeing heap objects.
+  - Intel C++ Compiler (ICC) 11.0 and 11.1.
+
+The following compilers are known not to compile OpenTTD:
+  - Microsoft Visual C++ (MSVC) 2003 and earlier.
+  - GNU Compiler Collection (GCC) 3.2 and earlier.
+  - (Open) Watcom.
+
+If any of these compilers can compile OpenTTD again, please let us know.
+
 8.0) Translating:
 ---- -------------------
 See http://www.openttd.org/development for up-to-date information.
@@ -512,10 +530,8 @@ X.X) Credits:
 ---- --------
 The OpenTTD team (in alphabetical order):
   Albert Hofkamp (Alberth)       - GUI expert
-  Jean-Francois Claeys (Belugas) - GUI, newindustries and more
-  Bjarni Corfitzen (Bjarni)      - MacOSX port, coder and vehicles
+  Jean-François Claeys (Belugas) - GUI, newindustries and more
   Matthijs Kooijman (blathijs)   - Pathfinder-guru, pool rework
-  Victor Fischer (Celestar)      - Programming everywhere you need him to
   Christoph Elsenhans (frosch)   - General coding
   Loïc Guilloux (glx)            - Windows Expert
   Michael Lutz (michi_cc)        - Path based signals
@@ -523,9 +539,12 @@ The OpenTTD team (in alphabetical order):
   Peter Nelson (peter1138)       - Spiritual descendant from newGRF gods
   Remko Bijker (Rubidium)        - Lead coder and way more
   Zdeněk Sojka (SmatZ)           - Bug finder and fixer
+  José Soler (Terkhen)           - General coding
   Thijs Marinussen (Yexo)        - AI Framework
 
 Inactive Developers:
+  Bjarni Corfitzen (Bjarni)      - MacOSX port, coder and vehicles
+  Victor Fischer (Celestar)      - Programming everywhere you need him to
   Tamás Faragó (Darkvater)       - Ex-Lead coder
   Jaroslav Mazanec (KUDr)        - YAPG (Yet Another Pathfinder God) ;)
   Jonathan Coome (Maedhros)      - High priest of the NewGRF Temple

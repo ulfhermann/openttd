@@ -34,6 +34,8 @@
 #include "townname_func.h"
 #include "townname_type.h"
 #include "core/geometry_func.hpp"
+#include "station_base.h"
+#include "depot_base.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -187,8 +189,7 @@ public:
 		switch (widget) {
 			case TWA_ACTION_INFO:
 				if (this->sel_index != -1) {
-					SetDParam(1, _price[PR_TOWN_ACTION] * _town_action_costs[this->sel_index] >> 8);
-					SetDParam(0, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + this->sel_index);
+					SetDParam(0, _price[PR_TOWN_ACTION] * _town_action_costs[this->sel_index] >> 8);
 					DrawStringMultiLine(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, r.bottom - WD_FRAMERECT_BOTTOM,
 								STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING + this->sel_index);
 				}
@@ -208,7 +209,8 @@ public:
 					if (pos <= -5) break; ///< Draw only the 5 fitting lines
 
 					if ((buttons & 1) && --pos < 0) {
-						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + i, TC_ORANGE);
+						DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y,
+								STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + i, this->sel_index == i ? TC_WHITE : TC_ORANGE);
 						y += FONT_HEIGHT_NORMAL;
 					}
 				}
@@ -226,8 +228,7 @@ public:
 				size->height -= WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 				Dimension d = {0, 0};
 				for (int i = 0; i < TACT_COUNT; i++) {
-					SetDParam(1, _price[PR_TOWN_ACTION] * _town_action_costs[i] >> 8);
-					SetDParam(0, STR_LOCAL_AUTHORITY_ACTION_SMALL_ADVERTISING_CAMPAIGN + i);
+					SetDParam(0, _price[PR_TOWN_ACTION] * _town_action_costs[i] >> 8);
 					d = maxdim(d, GetStringMultiLineBoundingBox(STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING + i, *size));
 				}
 				*size = maxdim(*size, d);
@@ -252,10 +253,7 @@ public:
 		}
 	}
 
-	virtual void OnDoubleClick(Point pt, int widget) { HandleClick(pt, widget, true); }
-	virtual void OnClick(Point pt, int widget) { HandleClick(pt, widget, false); }
-
-	void HandleClick(Point pt, int widget, bool double_click)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case TWA_COMMAND_LIST: {
@@ -269,7 +267,7 @@ public:
 					this->SetDirty();
 				}
 				/* Fall through to clicking in case we are double-clicked */
-				if (!double_click || y < 0) break;
+				if (click_count == 1 || y < 0) break;
 			}
 
 			case TWA_EXECUTE:
@@ -436,7 +434,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case TVW_CENTERVIEW: // scroll to location
@@ -461,9 +459,63 @@ public:
 				break;
 
 			case TVW_DELETE: // delete town - only available on Scenario editor
-				delete this->town;
+				if (this->CanDeleteTown()) {
+					delete this->town;
+				} else {
+					ShowErrorMessage(STR_ERROR_TOWN_CAN_T_DELETE, INVALID_STRING_ID, 0, 0);
+				}
 				break;
 		}
+	}
+
+	/**
+	 * Can we delete the town?
+	 * Or in other words, does anything refer to this town?
+	 * @return true if it's possible
+	 */
+	bool CanDeleteTown() const
+	{
+		/* Stations refer to towns. */
+		const Station *st;
+		FOR_ALL_STATIONS(st) {
+			if (st->town == this->town) {
+				/* Non-oil rig stations are always a problem. */
+				if (!(st->facilities & FACIL_AIRPORT) || st->airport_type != AT_OILRIG) return false;
+				/* We can only automatically delete oil rigs *if* there's no vehicle on them. */
+				if (DoCommand(st->airport_tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
+			}
+		}
+
+		/* Depots refer to towns. */
+		const Depot *d;
+		FOR_ALL_DEPOTS(d) {
+			if (d->town_index == this->town->index) return false;
+		}
+
+		/* Check all tiles for town ownership. */
+		for (TileIndex tile = 0; tile < MapSize(); ++tile) {
+			switch (GetTileType(tile)) {
+				case MP_ROAD:
+					if (HasTownOwnedRoad(tile) && GetTownIndex(tile) == this->town->index) {
+						/* Can we clear this tile? */
+						if (DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
+					}
+					break;
+
+				case MP_TUNNELBRIDGE:
+					if (IsTileOwner(tile, OWNER_TOWN) &&
+							ClosestTownFromTile(tile, UINT_MAX) == this->town) {
+						/* Can we clear this bridge? */
+						if (DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
+					}
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		return true;
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
@@ -798,7 +850,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case TDW_SORTNAME: // Sort by Name ascending/descending
@@ -1074,7 +1126,7 @@ public:
 		if (!this->IsShaded()) this->DrawEditBox(TSEW_TOWNNAME_EDITBOX);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case TSEW_NEWTOWN:
