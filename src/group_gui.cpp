@@ -118,7 +118,7 @@ static const NWidgetPart _nested_group_widgets[] = {
 		NWidget(NWID_VERTICAL),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, GRP_WIDGET_SORT_BY_ORDER), SetMinimalSize(81, 12), SetDataTip(STR_BUTTON_SORT_BY, STR_TOOLTIP_SORT_ORDER),
-				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_SORT_BY_DROPDOWN), SetMinimalSize(167, 12), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIAP),
+				NWidget(WWT_DROPDOWN, COLOUR_GREY, GRP_WIDGET_SORT_BY_DROPDOWN), SetMinimalSize(167, 12), SetDataTip(0x0, STR_TOOLTIP_SORT_CRITERIA),
 				NWidget(WWT_PANEL, COLOUR_GREY), SetMinimalSize(12, 12), SetResize(1, 0), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
@@ -421,7 +421,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case GRP_WIDGET_SORT_BY_ORDER: // Flip sorting method ascending/descending
@@ -458,7 +458,7 @@ public:
 
 				if (id_g >= this->groups.Length()) return;
 
-				this->group_sel = this->groups[id_g]->index;;
+				this->group_sel = this->groups[id_g]->index;
 
 				this->vehicles.ForceRebuild();
 				this->SetDirty();
@@ -498,7 +498,7 @@ public:
 			}
 
 			case GRP_WIDGET_RENAME_GROUP: // Rename the selected roup
-				this->ShowRenameGroupWindow(this->group_sel);
+				this->ShowRenameGroupWindow(this->group_sel, false);
 				break;
 
 			case GRP_WIDGET_AVAILABLE_VEHICLES:
@@ -658,12 +658,17 @@ public:
 		this->SetWidgetDirty(GRP_WIDGET_LIST_VEHICLE);
 	}
 
-	void ShowRenameGroupWindow(GroupID group)
+	void ShowRenameGroupWindow(GroupID group, bool empty)
 	{
 		assert(Group::IsValidID(group));
 		this->group_rename = group;
-		SetDParam(0, group);
-		ShowQueryString(STR_GROUP_NAME, STR_GROUP_RENAME_CAPTION, MAX_LENGTH_GROUP_NAME_BYTES, MAX_LENGTH_GROUP_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
+		/* Show empty query for new groups */
+		StringID str = STR_EMPTY;
+		if (!empty) {
+			SetDParam(0, group);
+			str = STR_GROUP_NAME;
+		}
+		ShowQueryString(str, STR_GROUP_RENAME_CAPTION, MAX_LENGTH_GROUP_NAME_BYTES, MAX_LENGTH_GROUP_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
 	}
 
 	/**
@@ -685,7 +690,7 @@ static WindowDesc _other_group_desc(
 	_nested_group_widgets, lengthof(_nested_group_widgets)
 );
 
-const static WindowDesc _train_group_desc(
+static const WindowDesc _train_group_desc(
 	WDP_AUTO, 525, 246,
 	WC_TRAINS_LIST, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
@@ -730,7 +735,7 @@ void CcCreateGroup(const CommandCost &result, TileIndex tile, uint32 p1, uint32 
 	assert(p1 <= VEH_AIRCRAFT);
 
 	VehicleGroupWindow *w = FindVehicleGroupWindow((VehicleType)p1, _current_company);
-	if (w != NULL) w->ShowRenameGroupWindow(_new_group_id);
+	if (w != NULL) w->ShowRenameGroupWindow(_new_group_id, true);
 }
 
 /**

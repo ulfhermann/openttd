@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 #include "openttd.h"
-#include "gui.h"
+#include "graph_gui.h"
 #include "window_gui.h"
 #include "company_base.h"
 #include "company_gui.h"
@@ -81,7 +81,7 @@ struct GraphLegendWindow : Window {
 		DrawString(r.left + (rtl ? WD_FRAMERECT_LEFT : 19), r.right - (rtl ? 19 : WD_FRAMERECT_RIGHT), r.top + WD_FRAMERECT_TOP, STR_COMPANY_NAME_COMPANY_NUM, HasBit(_legend_excluded_companies, cid) ? TC_BLACK : TC_WHITE);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (!IsInsideMM(widget, GLW_FIRST_COMPANY, MAX_COMPANIES + GLW_FIRST_COMPANY)) return;
 
@@ -513,7 +513,7 @@ public:
 		return INVALID_DATAPOINT;
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		/* Clicked on legend? */
 		if (widget == BGW_KEY_BUTTON) ShowGraphLegend();
@@ -725,10 +725,10 @@ struct PerformanceHistoryGraphWindow : BaseGraphWindow {
 		return c->old_economy[j].performance_history;
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget == PHW_DETAILED_PERFORMANCE) ShowPerformanceRatingDetail();
-		this->BaseGraphWindow::OnClick(pt, widget);
+		this->BaseGraphWindow::OnClick(pt, widget, click_count);
 	}
 };
 
@@ -842,7 +842,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 		const CargoSpec *cs = CargoSpec::Get(widget - CPW_CARGO_FIRST);
 		SetDParam(0, cs->name);
 		Dimension d = GetStringBoundingBox(STR_GRAPH_CARGO_PAYMENT_CARGO);
-		d.width += 14; /* colour field */
+		d.width += 14; // colour field
 		d.width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
 		d.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 		*size = maxdim(d, *size);
@@ -874,7 +874,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 		DrawString(rtl ? r.left : x + 14 + clk_dif, (rtl ? r.right - 14 + clk_dif : r.right), y + clk_dif, STR_GRAPH_CARGO_PAYMENT_CARGO);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget >= CPW_CARGO_FIRST) {
 			int i = 0;
@@ -1330,7 +1330,7 @@ struct PerformanceRatingDetailWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		/* Check which button is clicked */
 		if (IsInsideMM(widget, PRW_COMPANY_FIRST, PRW_COMPANY_LAST + 1)) {

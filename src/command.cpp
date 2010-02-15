@@ -65,7 +65,6 @@ CommandProc CmdRemoveRoadStop;
 CommandProc CmdBuildLongRoad;
 CommandProc CmdRemoveLongRoad;
 CommandProc CmdBuildRoad;
-CommandProc CmdRemoveRoad;
 
 CommandProc CmdBuildRoadDepot;
 
@@ -221,8 +220,7 @@ static const Command _command_proc_table[] = {
 	{CmdRemoveRoadStop,                             0}, // CMD_REMOVE_ROAD_STOP
 	{CmdBuildLongRoad,        CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_LONG_ROAD
 	{CmdRemoveLongRoad,        CMD_NO_TEST | CMD_AUTO}, // CMD_REMOVE_LONG_ROAD; towns may disallow removing road bits (as they are connected) in test, but in exec they're removed and thus removing is allowed.
-	{CmdBuildRoad,                                  0}, // CMD_BUILD_ROAD
-	{CmdRemoveRoad,                                 0}, // CMD_REMOVE_ROAD
+	{CmdBuildRoad,            CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_ROAD
 	{CmdBuildRoadDepot,       CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_ROAD_DEPOT
 
 	{CmdBuildAirport,         CMD_NO_WATER | CMD_AUTO}, // CMD_BUILD_AIRPORT
@@ -684,12 +682,16 @@ CommandCost DoCommandPInternal(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd,
 #undef return_dcpi
 
 
-CommandCost CommandCost::AddCost(CommandCost ret)
+/**
+ * Adds the cost of the given command return value to this cost.
+ * Also takes a possible error message when it is set.
+ * @param ret The command to add the cost of.
+ */
+void CommandCost::AddCost(const CommandCost &ret)
 {
 	this->AddCost(ret.cost);
 	if (this->success && !ret.success) {
 		this->message = ret.message;
 		this->success = false;
 	}
-	return *this;
 }

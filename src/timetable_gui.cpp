@@ -277,9 +277,9 @@ struct TimetableWindow : Window {
 				bool travel = HasBit(this->sel_index, 0);
 
 				if (from != selected_order) {
-					/* Moving from preceeding order? */
+					/* Moving from preceding order? */
 					selected_order -= (int)(from <= selected_order);
-					/* Moving to   preceeding order? */
+					/* Moving to   preceding order? */
 					selected_order += (int)(to   <= selected_order);
 				} else {
 					/* Now we are modifying the selected order */
@@ -497,7 +497,7 @@ struct TimetableWindow : Window {
 		return v->index | (order_number << 16) | (is_journey << 24);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		const Vehicle *v = this->vehicle;
 

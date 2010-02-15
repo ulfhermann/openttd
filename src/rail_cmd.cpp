@@ -19,6 +19,8 @@
 #include "pathfinder/yapf/yapf_cache.h"
 #include "newgrf_engine.h"
 #include "landscape_type.h"
+#include "newgrf_railtype.h"
+#include "newgrf_commons.h"
 #include "train.h"
 #include "variables.h"
 #include "autoslope.h"
@@ -50,6 +52,57 @@ void ResetRailTypes()
 {
 	memset(_railtypes, 0, sizeof(_railtypes));
 	memcpy(_railtypes, _original_railtypes, sizeof(_original_railtypes));
+}
+
+void ResolveRailTypeGUISprites(RailtypeInfo *rti)
+{
+	SpriteID cursors_base = GetCustomRailSprite(rti, INVALID_TILE, RTSG_CURSORS);
+	if (cursors_base != 0) {
+		rti->gui_sprites.build_ns_rail = cursors_base +  0;
+		rti->gui_sprites.build_x_rail  = cursors_base +  1;
+		rti->gui_sprites.build_ew_rail = cursors_base +  2;
+		rti->gui_sprites.build_y_rail  = cursors_base +  3;
+		rti->gui_sprites.auto_rail     = cursors_base +  4;
+		rti->gui_sprites.build_depot   = cursors_base +  5;
+		rti->gui_sprites.build_tunnel  = cursors_base +  6;
+		rti->gui_sprites.convert_rail  = cursors_base +  7;
+		rti->cursor.rail_ns   = cursors_base +  8;
+		rti->cursor.rail_swne = cursors_base +  9;
+		rti->cursor.rail_ew   = cursors_base + 10;
+		rti->cursor.rail_nwse = cursors_base + 11;
+		rti->cursor.autorail  = cursors_base + 12;
+		rti->cursor.depot     = cursors_base + 13;
+		rti->cursor.tunnel    = cursors_base + 14;
+		rti->cursor.convert   = cursors_base + 15;
+	}
+}
+
+void InitRailTypes()
+{
+	for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
+		RailtypeInfo *rti = &_railtypes[rt];
+		ResolveRailTypeGUISprites(rti);
+	}
+}
+
+RailType AllocateRailType(RailTypeLabel label)
+{
+	for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
+		RailtypeInfo *rti = &_railtypes[rt];
+
+		if (rti->label == 0) {
+			/* Set up new rail type */
+			memcpy(rti, &_railtypes[RAILTYPE_RAIL], sizeof(*rti));
+			rti->label = label;
+
+			/* Make us compatible with ourself. */
+			rti->powered_railtypes    = (RailTypes)(1 << rt);
+			rti->compatible_railtypes = (RailTypes)(1 << rt);
+			return rt;
+		}
+	}
+
+	return INVALID_RAILTYPE;
 }
 
 static const byte _track_sloped_sprites[14] = {
@@ -440,7 +493,8 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		YapfNotifyTrackLayoutChange(tile, track);
 	}
 
-	return cost.AddCost(RailBuildCost(railtype));
+	cost.AddCost(RailBuildCost(railtype));
+	return cost;
 }
 
 /** Remove a single piece of track
@@ -678,6 +732,7 @@ static CommandCost ValidateAutoDrag(Trackdir *trackdir, TileIndex start, TileInd
  * - p2 = (bit 0-3) - railroad type normal/maglev (0 = normal, 1 = mono, 2 = maglev)
  * - p2 = (bit 4-6) - track-orientation, valid values: 0-5 (Track enum)
  * - p2 = (bit 7)   - 0 = build, 1 = remove tracks
+ * - p2 = (bit 8)   - 0 = build up to an obstacle, 1 = fail if an obstacle is found (used for AIs).
  * @param text unused
  * @return the cost of this operation or an error
  */
@@ -701,7 +756,10 @@ static CommandCost CmdRailTrackHelper(TileIndex tile, DoCommandFlag flags, uint3
 		ret = DoCommand(tile, railtype, TrackdirToTrack(trackdir), flags, remove ? CMD_REMOVE_SINGLE_RAIL : CMD_BUILD_SINGLE_RAIL);
 
 		if (ret.Failed()) {
-			if (_error_message != STR_ERROR_ALREADY_BUILT && !remove) break;
+			if (_error_message != STR_ERROR_ALREADY_BUILT && !remove) {
+				if (HasBit(p2, 8)) return CMD_ERROR;
+				break;
+			}
 			_error_message = INVALID_STRING_ID;
 		} else {
 			total_cost.AddCost(ret);
@@ -809,7 +867,8 @@ CommandCost CmdBuildTrainDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		YapfNotifyTrackLayoutChange(tile, DiagDirToDiagTrack(dir));
 	}
 
-	return cost.AddCost(_price[PR_BUILD_DEPOT_TRAIN]);
+	cost.AddCost(_price[PR_BUILD_DEPOT_TRAIN]);
+	return cost;
 }
 
 /** Build signals, alternate between double/single, signal/semaphore,
@@ -1685,10 +1744,11 @@ static void DrawTrackFence_WE_2(const TileInfo *ti, SpriteID base_image)
 }
 
 
-static void DrawTrackDetails(const TileInfo *ti)
+static void DrawTrackDetails(const TileInfo *ti, const RailtypeInfo *rti)
 {
 	/* Base sprite for track fences. */
-	SpriteID base_image = SPR_TRACK_FENCE_FLAT_X;
+	SpriteID base_image = GetCustomRailSprite(rti, ti->tile, RTSG_FENCES);
+	if (base_image == 0) base_image = SPR_TRACK_FENCE_FLAT_X;
 
 	switch (GetRailGroundType(ti->tile)) {
 		case RAIL_GROUND_FENCE_NW:     DrawTrackFence_NW(ti, base_image);    break;
@@ -1723,6 +1783,162 @@ static void DrawTrackDetails(const TileInfo *ti)
 	}
 }
 
+/* SubSprite for drawing the track halftile of 'three-corners-raised'-sloped rail sprites. */
+static const int INF = 1000; // big number compared to tilesprite size
+static const SubSprite _halftile_sub_sprite[4] = {
+	{ -INF    , -INF  , 32 - 33, INF     }, // CORNER_W, clip 33 pixels from right
+	{ -INF    ,  0 + 7, INF    , INF     }, // CORNER_S, clip 7 pixels from top
+	{ -31 + 33, -INF  , INF    , INF     }, // CORNER_E, clip 33 pixels from left
+	{ -INF    , -INF  , INF    , 30 - 23 }  // CORNER_N, clip 23 pixels from bottom
+};
+
+static inline void DrawTrackSprite(SpriteID sprite, PaletteID pal, const TileInfo *ti, Slope s)
+{
+	DrawGroundSprite(sprite, pal, NULL, 0, (ti->tileh & s) ? -8 : 0);
+}
+
+static void DrawTrackBitsOverlay(TileInfo *ti, TrackBits track, const RailtypeInfo *rti)
+{
+	RailGroundType rgt = GetRailGroundType(ti->tile);
+	Foundation f = GetRailFoundation(ti->tileh, track);
+	Corner halftile_corner = CORNER_INVALID;
+
+	if (IsNonContinuousFoundation(f)) {
+		/* Save halftile corner */
+		halftile_corner = (f == FOUNDATION_STEEP_BOTH ? GetHighestSlopeCorner(ti->tileh) : GetHalftileFoundationCorner(f));
+		/* Draw lower part first */
+		track &= ~CornerToTrackBits(halftile_corner);
+		f = (f == FOUNDATION_STEEP_BOTH ? FOUNDATION_STEEP_LOWER : FOUNDATION_NONE);
+	}
+
+	DrawFoundation(ti, f);
+	/* DrawFoundation modifies ti */
+
+	/* Draw ground */
+	if (track == TRACK_BIT_NONE && rgt == RAIL_GROUND_WATER) {
+		if (IsSteepSlope(ti->tileh)) {
+			DrawShoreTile(ti->tileh);
+		} else {
+			DrawGroundSprite(SPR_FLAT_WATER_TILE, PAL_NONE);
+		}
+	} else {
+		SpriteID image;
+
+		switch (rgt) {
+			case RAIL_GROUND_BARREN:     image = SPR_FLAT_BARE_LAND;  break;
+			case RAIL_GROUND_ICE_DESERT: image = SPR_FLAT_SNOW_DESERT_TILE; break;
+			default:                     image = SPR_FLAT_GRASS_TILE; break;
+		}
+
+		image += _tileh_to_sprite[ti->tileh];
+
+		DrawGroundSprite(image, PAL_NONE);
+	}
+
+	SpriteID overlay = GetCustomRailSprite(rti, ti->tile, RTSG_OVERLAY);
+	SpriteID ground = GetCustomRailSprite(rti, ti->tile, RTSG_GROUND);
+	TrackBits pbs = _settings_client.gui.show_track_reservation ? GetRailReservationTrackBits(ti->tile) : TRACK_BIT_NONE;
+
+	if (track == TRACK_BIT_NONE) {
+		/* Half-tile foundation, no track here? */
+	} else if (ti->tileh == SLOPE_NW && track == TRACK_BIT_Y) {
+		DrawGroundSprite(ground + RTO_SLOPE_NW, PAL_NONE);
+		if (pbs != TRACK_BIT_NONE) DrawGroundSprite(overlay + 9, PALETTE_CRASH);
+	} else if (ti->tileh == SLOPE_NE && track == TRACK_BIT_X) {
+		DrawGroundSprite(ground + RTO_SLOPE_NE, PAL_NONE);
+		if (pbs != TRACK_BIT_NONE) DrawGroundSprite(overlay + 6, PALETTE_CRASH);
+	} else if (ti->tileh == SLOPE_SE && track == TRACK_BIT_Y) {
+		DrawGroundSprite(ground + RTO_SLOPE_SE, PAL_NONE);
+		if (pbs != TRACK_BIT_NONE) DrawGroundSprite(overlay + 7, PALETTE_CRASH);
+	} else if (ti->tileh == SLOPE_SW && track == TRACK_BIT_X) {
+		DrawGroundSprite(ground + RTO_SLOPE_SW, PAL_NONE);
+		if (pbs != TRACK_BIT_NONE) DrawGroundSprite(overlay + 8, PALETTE_CRASH);
+	} else {
+		switch (track) {
+			/* Draw single ground sprite when not overlapping. No track overlay
+			 * is necessary for these sprites. */
+			case TRACK_BIT_X:     DrawGroundSprite(ground + RTO_X, PAL_NONE); break;
+			case TRACK_BIT_Y:     DrawGroundSprite(ground + RTO_Y, PAL_NONE); break;
+			case TRACK_BIT_UPPER: DrawTrackSprite(ground + RTO_N, PAL_NONE, ti, SLOPE_N); break;
+			case TRACK_BIT_LOWER: DrawTrackSprite(ground + RTO_S, PAL_NONE, ti, SLOPE_S); break;
+			case TRACK_BIT_RIGHT: DrawTrackSprite(ground + RTO_E, PAL_NONE, ti, SLOPE_E); break;
+			case TRACK_BIT_LEFT:  DrawTrackSprite(ground + RTO_W, PAL_NONE, ti, SLOPE_W); break;
+			case TRACK_BIT_CROSS: DrawGroundSprite(ground + RTO_CROSSING_XY, PAL_NONE); break;
+			case TRACK_BIT_HORZ:  DrawTrackSprite(ground + RTO_N, PAL_NONE, ti, SLOPE_N);
+			                      DrawTrackSprite(ground + RTO_S, PAL_NONE, ti, SLOPE_S); break;
+			case TRACK_BIT_VERT:  DrawTrackSprite(ground + RTO_E, PAL_NONE, ti, SLOPE_E);
+			                      DrawTrackSprite(ground + RTO_W, PAL_NONE, ti, SLOPE_W); break;
+
+			default:
+				/* We're drawing a junction tile */
+				if ((track & TRACK_BIT_3WAY_NE) == 0) {
+					DrawGroundSprite(ground + RTO_JUNCTION_SW, PAL_NONE);
+				} else if ((track & TRACK_BIT_3WAY_SW) == 0) {
+					DrawGroundSprite(ground + RTO_JUNCTION_NE, PAL_NONE);
+				} else if ((track & TRACK_BIT_3WAY_NW) == 0) {
+					DrawGroundSprite(ground + RTO_JUNCTION_SE, PAL_NONE);
+				} else if ((track & TRACK_BIT_3WAY_SE) == 0) {
+					DrawGroundSprite(ground + RTO_JUNCTION_NW, PAL_NONE);
+				} else {
+					DrawGroundSprite(ground + RTO_JUNCTION_NSEW, PAL_NONE);
+				}
+
+				/* Mask out PBS bits as we shall draw them afterwards anyway. */
+				track &= ~pbs;
+
+				/* Draw regular track bits */
+				if (track & TRACK_BIT_X)     DrawGroundSprite(overlay + RTO_X, PAL_NONE);
+				if (track & TRACK_BIT_Y)     DrawGroundSprite(overlay + RTO_Y, PAL_NONE);
+				if (track & TRACK_BIT_UPPER) DrawGroundSprite(overlay + RTO_N, PAL_NONE);
+				if (track & TRACK_BIT_LOWER) DrawGroundSprite(overlay + RTO_S, PAL_NONE);
+				if (track & TRACK_BIT_RIGHT) DrawGroundSprite(overlay + RTO_E, PAL_NONE);
+				if (track & TRACK_BIT_LEFT)  DrawGroundSprite(overlay + RTO_W, PAL_NONE);
+		}
+
+		/* Draw reserved track bits */
+		if (pbs & TRACK_BIT_X)     DrawGroundSprite(overlay + RTO_X, PALETTE_CRASH);
+		if (pbs & TRACK_BIT_Y)     DrawGroundSprite(overlay + RTO_Y, PALETTE_CRASH);
+		if (pbs & TRACK_BIT_UPPER) DrawTrackSprite(overlay + RTO_N, PALETTE_CRASH, ti, SLOPE_N);
+		if (pbs & TRACK_BIT_LOWER) DrawTrackSprite(overlay + RTO_S, PALETTE_CRASH, ti, SLOPE_S);
+		if (pbs & TRACK_BIT_RIGHT) DrawTrackSprite(overlay + RTO_E, PALETTE_CRASH, ti, SLOPE_E);
+		if (pbs & TRACK_BIT_LEFT)  DrawTrackSprite(overlay + RTO_W, PALETTE_CRASH, ti, SLOPE_W);
+	}
+
+	if (IsValidCorner(halftile_corner)) {
+		DrawFoundation(ti, HalftileFoundation(halftile_corner));
+
+		/* Draw higher halftile-overlay: Use the sloped sprites with three corners raised. They probably best fit the lightning. */
+		Slope fake_slope = SlopeWithThreeCornersRaised(OppositeCorner(halftile_corner));
+
+		SpriteID image;
+		switch (rgt) {
+			case RAIL_GROUND_BARREN:     image = SPR_FLAT_BARE_LAND;  break;
+			case RAIL_GROUND_ICE_DESERT:
+			case RAIL_GROUND_HALF_SNOW:  image = SPR_FLAT_SNOW_DESERT_TILE; break;
+			default:                     image = SPR_FLAT_GRASS_TILE; break;
+		}
+
+		image += _tileh_to_sprite[fake_slope];
+
+		DrawGroundSprite(image, PAL_NONE, &(_halftile_sub_sprite[halftile_corner]));
+
+		track = CornerToTrackBits(halftile_corner);
+
+		int offset;
+		switch (track) {
+			default: NOT_REACHED();
+			case TRACK_BIT_UPPER: offset = RTO_N; break;
+			case TRACK_BIT_LOWER: offset = RTO_S; break;
+			case TRACK_BIT_RIGHT: offset = RTO_E; break;
+			case TRACK_BIT_LEFT:  offset = RTO_W; break;
+		}
+
+		DrawTrackSprite(ground + offset, PAL_NONE, ti, fake_slope);
+		if (HasReservedTracks(ti->tile, track)) {
+			DrawTrackSprite(overlay + offset, PALETTE_CRASH, ti, fake_slope);
+		}
+	}
+}
 
 /**
  * Draw ground sprite and track bits
@@ -1731,16 +1947,13 @@ static void DrawTrackDetails(const TileInfo *ti)
  */
 static void DrawTrackBits(TileInfo *ti, TrackBits track)
 {
-	/* SubSprite for drawing the track halftile of 'three-corners-raised'-sloped rail sprites. */
-	static const int INF = 1000; // big number compared to tilesprite size
-	static const SubSprite _halftile_sub_sprite[4] = {
-		{ -INF    , -INF  , 32 - 33, INF     }, // CORNER_W, clip 33 pixels from right
-		{ -INF    ,  0 + 7, INF    , INF     }, // CORNER_S, clip 7 pixels from top
-		{ -31 + 33, -INF  , INF    , INF     }, // CORNER_E, clip 33 pixels from left
-		{ -INF    , -INF  , INF    , 30 - 23 }  // CORNER_N, clip 23 pixels from bottom
-	};
-
 	const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
+
+	if (rti->UsesOverlay()) {
+		DrawTrackBitsOverlay(ti, track, rti);
+		return;
+	}
+
 	RailGroundType rgt = GetRailGroundType(ti->tile);
 	Foundation f = GetRailFoundation(ti->tileh, track);
 	Corner halftile_corner = CORNER_INVALID;
@@ -1936,7 +2149,7 @@ static void DrawTile_Track(TileInfo *ti)
 
 		DrawTrackBits(ti, rails);
 
-		if (HasBit(_display_opt, DO_FULL_DETAIL)) DrawTrackDetails(ti);
+		if (HasBit(_display_opt, DO_FULL_DETAIL)) DrawTrackDetails(ti, rti);
 
 		if (HasCatenaryDrawn(GetRailType(ti->tile))) DrawCatenary(ti);
 
@@ -1945,6 +2158,7 @@ static void DrawTile_Track(TileInfo *ti)
 		/* draw depot */
 		const DrawTileSprites *dts;
 		PaletteID pal = PAL_NONE;
+		SpriteID relocation;
 
 		if (ti->tileh != SLOPE_FLAT) DrawFoundation(ti, FOUNDATION_LEVELED);
 
@@ -1955,8 +2169,12 @@ static void DrawTile_Track(TileInfo *ti)
 			dts = &_depot_gfx_table[GetRailDepotDirection(ti->tile)];
 		}
 
-		image = dts->ground.sprite;
-		if (image != SPR_FLAT_GRASS_TILE) image += rti->total_offset;
+		if (rti->UsesOverlay()) {
+			image = SPR_FLAT_GRASS_TILE;
+		} else {
+			image = dts->ground.sprite;
+			if (image != SPR_FLAT_GRASS_TILE) image += rti->total_offset;
+		}
 
 		/* adjust ground tile for desert
 		 * don't adjust for snow, because snow in depots looks weird */
@@ -1970,19 +2188,43 @@ static void DrawTile_Track(TileInfo *ti)
 
 		DrawGroundSprite(image, GroundSpritePaletteTransform(image, pal, _drawtile_track_palette));
 
-		/* PBS debugging, draw reserved tracks darker */
-		if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && HasDepotReservation(ti->tile)) {
+		if (rti->UsesOverlay()) {
+			SpriteID ground = GetCustomRailSprite(rti, ti->tile, RTSG_GROUND);
+
 			switch (GetRailDepotDirection(ti->tile)) {
-				case DIAGDIR_SW: DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH); break;
-				case DIAGDIR_SE: DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH); break;
+				case DIAGDIR_SW: DrawGroundSprite(ground + RTO_X, PAL_NONE); break;
+				case DIAGDIR_SE: DrawGroundSprite(ground + RTO_Y, PAL_NONE); break;
 				default: break;
 			}
+
+			if (_settings_client.gui.show_track_reservation && HasDepotReservation(ti->tile)) {
+				SpriteID overlay = GetCustomRailSprite(rti, ti->tile, RTSG_OVERLAY);
+
+				switch (GetRailDepotDirection(ti->tile)) {
+					case DIAGDIR_SW: DrawGroundSprite(overlay + RTO_X, PALETTE_CRASH); break;
+					case DIAGDIR_SE: DrawGroundSprite(overlay + RTO_Y, PALETTE_CRASH); break;
+					default: break;
+				}
+			}
+
+			relocation  = GetCustomRailSprite(rti, ti->tile, RTSG_DEPOT);
+			relocation -= SPR_RAIL_DEPOT_SE_1;
+		} else {
+			/* PBS debugging, draw reserved tracks darker */
+			if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && HasDepotReservation(ti->tile)) {
+				switch (GetRailDepotDirection(ti->tile)) {
+					case DIAGDIR_SW: DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH); break;
+					case DIAGDIR_SE: DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH); break;
+					default: break;
+				}
+			}
+
+			relocation = rti->total_offset;
 		}
 
 		if (HasCatenaryDrawn(GetRailType(ti->tile))) DrawCatenary(ti);
 
-		/* No NewGRF depots, so no relocation */
-		DrawRailTileSeq(ti, dts, TO_BUILDINGS, rti->total_offset, 0, _drawtile_track_palette);
+		DrawRailTileSeq(ti, dts, TO_BUILDINGS, relocation, 0, _drawtile_track_palette);
 	}
 	DrawBridgeMiddle(ti);
 }
@@ -1990,8 +2232,9 @@ static void DrawTile_Track(TileInfo *ti)
 void DrawTrainDepotSprite(int x, int y, int dir, RailType railtype)
 {
 	const DrawTileSprites *dts = &_depot_gfx_table[dir];
-	SpriteID image = dts->ground.sprite;
-	uint32 offset = GetRailTypeInfo(railtype)->total_offset;
+	const RailtypeInfo *rti = GetRailTypeInfo(railtype);
+	SpriteID image = rti->UsesOverlay() ? SPR_FLAT_GRASS_TILE : dts->ground.sprite;
+	uint32 offset = rti->total_offset;
 
 	x += 33;
 	y += 17;
@@ -2000,6 +2243,20 @@ void DrawTrainDepotSprite(int x, int y, int dir, RailType railtype)
 	PaletteID palette = COMPANY_SPRITE_COLOUR(_local_company);
 
 	DrawSprite(image, PAL_NONE, x, y);
+
+	if (rti->UsesOverlay()) {
+		SpriteID ground = GetCustomRailSprite(rti, INVALID_TILE, RTSG_GROUND);
+
+		switch (dir) {
+			case DIAGDIR_SW: DrawSprite(ground + RTO_X, PAL_NONE, x, y); break;
+			case DIAGDIR_SE: DrawSprite(ground + RTO_Y, PAL_NONE, x, y); break;
+			default: break;
+		}
+
+		offset  = GetCustomRailSprite(rti, INVALID_TILE, RTSG_DEPOT);
+		offset -= SPR_RAIL_DEPOT_SE_1;
+	}
+
 	DrawRailTileSeqInGUI(x, y, dts, offset, 0, palette);
 }
 

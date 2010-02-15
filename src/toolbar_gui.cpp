@@ -41,6 +41,8 @@
 #include "rail.h"
 #include "widgets/dropdown_type.h"
 #include "company_base.h"
+#include "smallmap_gui.h"
+#include "graph_gui.h"
 
 #include "network/network.h"
 #include "network/network_gui.h"
@@ -1233,7 +1235,7 @@ struct MainToolbarWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (_game_mode != GM_MENU && !this->IsWidgetDisabled(widget)) _toolbar_button_procs[widget](this);
 	}
@@ -1470,7 +1472,7 @@ public:
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (_game_mode == GM_MENU) return;
 		_scen_toolbar_button_procs[widget](this);
@@ -1613,7 +1615,7 @@ void AllocateToolbar()
 	_last_built_roadtype = ROADTYPE_ROAD;
 
 	if (_game_mode == GM_EDITOR) {
-		new ScenarioEditorToolbarWindow(&_toolb_scen_desc);;
+		new ScenarioEditorToolbarWindow(&_toolb_scen_desc);
 	} else {
 		new MainToolbarWindow(&_toolb_normal_desc);
 	}

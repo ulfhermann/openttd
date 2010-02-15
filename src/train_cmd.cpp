@@ -99,6 +99,7 @@ void Train::PowerChanged()
 	uint32 total_power = 0;
 	uint32 max_te = 0;
 	uint32 number_of_parts = 0;
+	uint16 max_rail_speed = this->tcache.cached_max_speed;
 
 	for (const Train *u = this; u != NULL; u = u->Next()) {
 		uint32 current_power = u->GetPower();
@@ -108,6 +109,10 @@ void Train::PowerChanged()
 		if (current_power > 0) max_te += u->GetWeight() * u->GetTractiveEffort();
 		total_power += u->GetPoweredPartPower(this);
 		number_of_parts++;
+
+		/* Get minimum max speed for rail */
+		uint16 rail_speed = GetRailTypeInfo(GetRailType(u->tile))->max_speed;
+		if (rail_speed > 0) max_rail_speed = min(max_rail_speed, rail_speed);
 	}
 
 	this->tcache.cached_axle_resistance = 60 * number_of_parts;
@@ -124,6 +129,8 @@ void Train::PowerChanged()
 		SetWindowDirty(WC_VEHICLE_DETAILS, this->index);
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
 	}
+
+	this->tcache.cached_max_rail_speed = max_rail_speed;
 }
 
 
@@ -392,7 +399,7 @@ int Train::GetCurveSpeedLimit() const
 	static const int absolute_max_speed = UINT16_MAX;
 	int max_speed = absolute_max_speed;
 
-	if (_settings_game.vehicle.train_acceleration_model == TAM_ORIGINAL) return max_speed;
+	if (_settings_game.vehicle.train_acceleration_model == AM_ORIGINAL) return max_speed;
 
 	int curvecount[2] = {0, 0};
 
@@ -491,7 +498,7 @@ int Train::GetCurrentMaxSpeed() const
 		}
 	}
 
-	return min(max_speed, this->tcache.cached_max_speed);
+	return min(max_speed, this->tcache.cached_max_rail_speed);
 }
 
 /**
@@ -557,7 +564,7 @@ void Train::UpdateAcceleration()
 {
 	assert(this->IsFrontEngine());
 
-	this->max_speed = this->tcache.cached_max_speed;
+	this->max_speed = this->tcache.cached_max_rail_speed;
 
 	uint power = this->tcache.cached_power;
 	uint weight = this->tcache.cached_weight;
@@ -703,17 +710,14 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 		v->track = TRACK_BIT_DEPOT;
 		v->vehstatus = VS_HIDDEN | VS_DEFPAL;
 
-//		v->subtype = 0;
 		v->SetWagon();
 
 		v->SetFreeWagon();
 		InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
 
 		v->cargo_type = e->GetDefaultCargoType();
-//		v->cargo_subtype = 0;
 		v->cargo_cap = rvi->capacity;
 		v->value = value.GetCost();
-//		v->day_counter = 0;
 
 		v->railtype = rvi->railtype;
 
@@ -783,7 +787,6 @@ static void AddRearEngineToMultiheadedTrain(Train *v)
 	u->z_pos = v->z_pos;
 	u->track = TRACK_BIT_DEPOT;
 	u->vehstatus = v->vehstatus & ~VS_STOPPED;
-//	u->subtype = 0;
 	u->spritenum = v->spritenum + 1;
 	u->cargo_type = v->cargo_type;
 	u->cargo_subtype = v->cargo_subtype;
@@ -863,17 +866,14 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		v->x_pos = x;
 		v->y_pos = y;
 		v->z_pos = GetSlopeZ(x, y);
-//		v->running_ticks = 0;
 		v->track = TRACK_BIT_DEPOT;
 		v->vehstatus = VS_HIDDEN | VS_STOPPED | VS_DEFPAL;
 		v->spritenum = rvi->image_index;
 		v->cargo_type = e->GetDefaultCargoType();
-//		v->cargo_subtype = 0;
 		v->cargo_cap = rvi->capacity;
 		v->max_speed = rvi->max_speed;
 		v->value = value.GetCost();
 		v->last_station_visited = INVALID_STATION;
-//		v->dest_tile = 0;
 
 		v->engine_type = p1;
 		v->tcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
@@ -882,7 +882,6 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		v->reliability_spd_dec = e->reliability_spd_dec;
 		v->max_age = e->GetLifeLengthInDays();
 
-		v->name = NULL;
 		v->railtype = rvi->railtype;
 		_new_vehicle_id = v->index;
 
@@ -892,12 +891,10 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		v->cur_image = SPR_IMG_QUERY;
 		v->random_bits = VehicleRandomBits();
 
-//		v->vehicle_flags = 0;
 		if (e->flags & ENGINE_EXCLUSIVE_PREVIEW) SetBit(v->vehicle_flags, VF_BUILT_AS_PROTOTYPE);
 
 		v->group_id = DEFAULT_GROUP;
 
-//		v->subtype = 0;
 		v->SetFrontEngine();
 		v->SetEngine();
 
@@ -1989,7 +1986,7 @@ CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32
 			v->force_proceed = 0;
 			SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-			if (_settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL && v->cur_speed != 0) {
+			if (_settings_game.vehicle.train_acceleration_model != AM_ORIGINAL && v->cur_speed != 0) {
 				ToggleBit(v->flags, VRF_REVERSING);
 			} else {
 				v->cur_speed = 0;
@@ -2941,8 +2938,10 @@ int Train::UpdateSpeed()
 
 	switch (_settings_game.vehicle.train_acceleration_model) {
 		default: NOT_REACHED();
-		case TAM_ORIGINAL: accel = this->acceleration * (this->GetAccelerationStatus() == AS_BRAKE ? -4 : 2); break;
-		case TAM_REALISTIC:
+		case AM_ORIGINAL:
+			accel = this->acceleration * (this->GetAccelerationStatus() == AS_BRAKE ? -4 : 2);
+			break;
+		case AM_REALISTIC:
 			this->max_speed = this->GetCurrentMaxSpeed();
 			accel = this->GetAcceleration();
 			break;
@@ -3055,7 +3054,7 @@ static const RailtypeSlowdownParams _railtype_slowdown[] = {
 /** Modify the speed of the vehicle due to a change in altitude */
 static inline void AffectSpeedByZChange(Train *v, byte old_z)
 {
-	if (old_z == v->z_pos || _settings_game.vehicle.train_acceleration_model != TAM_ORIGINAL) return;
+	if (old_z == v->z_pos || _settings_game.vehicle.train_acceleration_model != AM_ORIGINAL) return;
 
 	const RailtypeSlowdownParams *rsp = &_railtype_slowdown[v->railtype];
 
@@ -3440,6 +3439,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 
 					if (GetTileRailType(gp.new_tile) != GetTileRailType(gp.old_tile)) {
 						v->First()->PowerChanged();
+						v->First()->UpdateAcceleration();
 					}
 
 					v->track = chosen_track;
@@ -3451,7 +3451,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 				update_signals_crossing = true;
 
 				if (chosen_dir != v->direction) {
-					if (prev == NULL && _settings_game.vehicle.train_acceleration_model == TAM_ORIGINAL) {
+					if (prev == NULL && _settings_game.vehicle.train_acceleration_model == AM_ORIGINAL) {
 						const RailtypeSlowdownParams *rsp = &_railtype_slowdown[v->railtype];
 						DirDiff diff = DirDifference(v->direction, chosen_dir);
 						v->cur_speed -= (diff == DIRDIFF_45RIGHT || diff == DIRDIFF_45LEFT ? rsp->small_turn : rsp->large_turn) * v->cur_speed >> 8;

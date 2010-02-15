@@ -166,7 +166,8 @@ CommandCost CmdPurchaseLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		MarkTileDirtyByTile(tile);
 	}
 
-	return cost.AddCost(GetUnmovableSpec(UNMOVABLE_OWNED_LAND)->GetBuildingCost());
+	cost.AddCost(GetUnmovableSpec(UNMOVABLE_OWNED_LAND)->GetBuildingCost());
+	return cost;
 }
 
 /** Sell a land area. Actually you only sell one tile, so
@@ -231,7 +232,7 @@ static void DrawTile_Unmovable(TileInfo *ti)
 			DrawBridgeMiddle(ti);
 			break;
 
-		case UNMOVABLE_HQ:{
+		case UNMOVABLE_HQ: {
 			assert(IsCompanyHQ(ti->tile));
 
 			PaletteID palette = COMPANY_SPRITE_COLOUR(GetTileOwner(ti->tile));
@@ -294,9 +295,11 @@ static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 	if (IsStatue(tile)) {
 		if (flags & DC_AUTO) return_cmd_error(STR_ERROR_OBJECT_IN_THE_WAY);
 
-		TownID town = GetStatueTownID(tile);
-		ClrBit(Town::Get(town)->statues, GetTileOwner(tile));
-		SetWindowDirty(WC_TOWN_AUTHORITY, town);
+		if (flags & DC_EXEC) {
+			TownID town = GetStatueTownID(tile);
+			ClrBit(Town::Get(town)->statues, GetTileOwner(tile));
+			SetWindowDirty(WC_TOWN_AUTHORITY, town);
+		}
 	}
 
 	if (flags & DC_EXEC) {

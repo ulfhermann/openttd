@@ -444,7 +444,7 @@ struct NewsWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case NTW_CLOSEBOX:
@@ -723,8 +723,6 @@ static void DeleteNewsItem(NewsItem *ni)
 		_latest_news = ni->prev;
 	}
 
-	free(ni->free_data);
-
 	if (_current_news == ni) _current_news = ni->prev;
 	_total_news--;
 	delete ni;
@@ -988,7 +986,7 @@ struct MessageHistoryWindow : Window {
 		this->vscroll.SetCount(_total_news);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget == MHW_BACKGROUND) {
 			NewsItem *ni = _latest_news;
@@ -1163,7 +1161,7 @@ struct MessageOptionsWindow : Window {
 		this->SetWidgetLoweredState(WIDGET_NEWSOPT_SOUNDTICKER, _news_ticker_sound);
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case WIDGET_NEWSOPT_DROP_SUMMARY: // Dropdown menu for all settings

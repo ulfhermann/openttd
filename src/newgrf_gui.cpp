@@ -131,7 +131,7 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint right, uint 
 	if (HasBit(c->flags, GCF_COMPATIBLE)) y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_COMPATIBLE_LOADED);
 
 	/* Draw GRF info if it exists */
-	if (c->info != NULL && !StrEmpty(c->info)) {
+	if (!StrEmpty(c->info)) {
 		SetDParam(0, STR_JUST_RAW_STRING);
 		SetDParamStr(1, c->info);
 		y = DrawStringMultiLine(x, right, y, bottom, STR_BLACK_STRING);
@@ -326,7 +326,7 @@ public:
 				{
 					const GRFConfig *c = this->grfs[i];
 					bool h = c == this->sel;
-					const char *text = (c->name != NULL && !StrEmpty(c->name)) ? c->name : c->filename;
+					const char *text = (!StrEmpty(c->name)) ? c->name : c->filename;
 
 					/* Draw selection background */
 					if (h) GfxFillRect(r.left + 1, y, r.right - 1, y + this->resize.step_height - 1, 156);
@@ -344,12 +344,7 @@ public:
 		}
 	}
 
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget == ANGRFW_GRF_LIST) this->OnClick(pt, ANGRFW_ADD);
-	}
-
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case ANGRFW_GRF_LIST: {
@@ -364,9 +359,9 @@ public:
 					this->sel_pos = -1;
 				}
 				this->InvalidateData(1);
-				break;
+				if (click_count == 1) break;
 			}
-
+			/* FALL THROUGH */
 			case ANGRFW_ADD: // Add selection to list
 				if (this->sel != NULL) {
 					const GRFConfig *src = this->sel;
@@ -662,7 +657,7 @@ struct NewGRFWindow : public Window {
 				int i = 0;
 				for (const GRFConfig *c = this->list; c != NULL; c = c->next, i++) {
 					if (this->vscroll.IsVisible(i)) {
-						const char *text = (c->name != NULL && !StrEmpty(c->name)) ? c->name : c->filename;
+						const char *text = (!StrEmpty(c->name)) ? c->name : c->filename;
 						PaletteID pal;
 
 						/* Pick a colour */
@@ -705,12 +700,7 @@ struct NewGRFWindow : public Window {
 		}
 	}
 
-	virtual void OnDoubleClick(Point pt, int widget)
-	{
-		if (widget == SNGRFS_FILE_LIST) this->OnClick(pt, SNGRFS_SET_PARAMETERS);
-	}
-
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case SNGRFS_PRESET_LIST: {
@@ -821,6 +811,7 @@ struct NewGRFWindow : public Window {
 				this->sel = c;
 
 				this->InvalidateData();
+				if (click_count > 1) this->OnClick(pt, SNGRFS_SET_PARAMETERS, 1);
 				break;
 			}
 
@@ -960,8 +951,8 @@ struct NewGRFWindow : public Window {
 					free(c->info);
 
 					c->filename  = f->filename == NULL ? NULL : strdup(f->filename);
-					c->name      = f->name == NULL ? NULL : strdup(f->name);;
-					c->info      = f->info == NULL ? NULL : strdup(f->info);;
+					c->name      = f->name == NULL ? NULL : strdup(f->name);
+					c->info      = f->info == NULL ? NULL : strdup(f->info);
 					c->status    = GCS_UNKNOWN;
 				}
 				break;

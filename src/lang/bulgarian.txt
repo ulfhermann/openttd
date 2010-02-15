@@ -223,7 +223,7 @@ STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Въве
 STR_LIST_FILTER_TITLE                                           :{BLACK}Филтър:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Избери вида на сортирането (намаляващо/нарастващо)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Избери критерий за сортиране
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Избери критерий за сортиране
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Избери критерии за филтриране
 STR_BUTTON_SORT_BY                                              :{BLACK}Сортирай по
 STR_BUTTON_LOCATION                                             :{BLACK}Позиция
@@ -525,6 +525,7 @@ STR_GRAPH_CARGO_PAYMENT_RATES_TITLE                             :{TINYFONT}{BLAC
 STR_GRAPH_CARGO_PAYMENT_TOGGLE_CARGO                            :{BLACK}Активирай/деактивирай графиката за видовете товар
 STR_GRAPH_CARGO_PAYMENT_CARGO                                   :{TINYFONT}{BLACK}{STRING}
 
+STR_GRAPH_PERFORMANCE_DETAIL_TOOLTIP                            :{BLACK}Покажи подробен рейтинг на представянето
 
 # Graph key window
 STR_GRAPH_KEY_CAPTION                                           :{WHITE}Легенда на графиката за компаниите
@@ -1110,6 +1111,10 @@ STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Поз�
 STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Нестандартни станции: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Теглови множител за симулация на тежки влакове: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Скоростен множител за самолети: {ORANGE}1 / {STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Разбивания на самолети: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :никакви
+STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :намалени
+STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :нормални
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Преминаване през спирки на градски пътища: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Позвалявай допрени гари: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES                              :{LTBLUE}Няколко NewGRF алгоритъма едновременно: {ORANGE}{STRING}
@@ -1195,10 +1200,6 @@ STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Раз�
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Покажи пристигането и заминаването в расписанията: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Бързо създаване на задачите на превозните средства: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Стандартни релси: {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :нормални релси
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :електрифицирани релси
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :монорелси
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :маглев релси
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :първите налични
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :последните налични
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :най-използваните
@@ -1378,7 +1379,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Прекъсване на играта
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Искате ли да прекъснете играта?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Искате ли да прекъснете сценария?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Искате ли да прекъснете сценария?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Кодове
@@ -1521,7 +1522,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Нати
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}ИНФО ЗА ИГРАТА
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Играчи: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Език: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Терен: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Терен: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Големина на картата: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Версия на сървъра: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Адрес на сървъра: {WHITE}{STRING}
@@ -1853,8 +1854,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Изкл
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Включен
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Не отбелязвай зоната от предложеното място
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Отбележи зоната от предложеното място
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Приема: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Запаси: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Приема: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Запаси: {GOLD}{STRING}
 
 # Join station window
 STR_JOIN_STATION_CAPTION                                        :{WHITE}Присъедини станцията
@@ -2438,14 +2439,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Финанси�
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Покупка на специални транспортни права
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Подкупи местните власти
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} Иницииране на малка местна рекламна кампания, за привличане на повече пътници и товар към вашите транспортни услуги.{} Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW} Иницииране на малка местна рекламна кампания, за привличане на повече пътници и товар към вашите транспортни услуги.{} Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW} Иницииране на малка местна рекламна кампания, за привличане на повече пътници и товар към вашите транспортни услуги.{} Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW} Финансиране преустройството на градската пътна мрежа. Ще породи значителен разрив на градския трафик за не повече от 6 месеца.{} Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW} Строеж на статуя в чест на вашата компания.{} Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW} Финансиране изграждането на нови комерсиални сгради в града.{} Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW} Покупка на едногодишни специални транспортни права в града. Градските власти ще позволят единствено на пътниците и товара да използват гарите на вашата компания.{} Цена: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW} Подкупването на местната власт за да увеличи рейтинга носи огромен риск ако бъдете хванати.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW} Иницииране на малка местна рекламна кампания, за привличане на повече пътници и товар към вашите транспортни услуги.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW} Иницииране на малка местна рекламна кампания, за привличане на повече пътници и товар към вашите транспортни услуги.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW} Иницииране на малка местна рекламна кампания, за привличане на повече пътници и товар към вашите транспортни услуги.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW} Финансиране преустройството на градската пътна мрежа. Ще породи значителен разрив на градския трафик за не повече от 6 месеца.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW} Строеж на статуя в чест на вашата компания.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW} Финансиране изграждането на нови комерсиални сгради в града.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW} Покупка на едногодишни специални транспортни права в града. Градските власти ще позволят единствено на пътниците и товара да използват гарите на вашата компания.{} Цена: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW} Подкупването на местната власт за да увеличи рейтинга носи огромен риск ако бъдете хванати.{} Цена: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Субсидии
@@ -2475,7 +2476,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Приема
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Покажи списък с приетите товари
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Приема: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Приема: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Рейтинги
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Покажи нивото на обслужване

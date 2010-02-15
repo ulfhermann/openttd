@@ -85,8 +85,6 @@ void PlantRandomFarmField(const Industry *i);
 
 void ReleaseDisastersTargetingIndustry(IndustryID);
 
-/* smallmap_gui.cpp */
-void BuildIndustriesLegend();
 /* industry_cmd.cpp */
 void SetIndustryDailyChanges();
 

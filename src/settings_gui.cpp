@@ -277,7 +277,7 @@ struct GameOptionsWindow : Window {
 		}
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
 			case GOW_CURRENCY_DROPDOWN: // Setup currencies dropdown
@@ -625,7 +625,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget >= GDW_OPTIONS_START) {
 			widget -= GDW_OPTIONS_START;
@@ -655,8 +655,11 @@ public:
 			this->LowerWidget(GDW_LVL_CUSTOM);
 			this->InvalidateData();
 
-			if (widget / 3 == 0 && this->opt_mod_temp.difficulty.max_no_competitors != 0 &&
-					AI::GetInfoList()->size() == 0) {
+			if (widget / 3 == 0 &&
+#ifdef ENABLE_AI
+					AI::GetInfoList()->size() == 0 &&
+#endif /* ENABLE_AI */
+					this->opt_mod_temp.difficulty.max_no_competitors != 0) {
 				ShowErrorMessage(STR_WARNING_NO_SUITABLE_AI, INVALID_STRING_ID, 0, 0, true);
 			}
 			return;
@@ -1256,6 +1259,7 @@ static SettingEntry _settings_ui_display[] = {
 	SettingEntry("gui.liveries"),
 	SettingEntry("gui.show_track_reservation"),
 	SettingEntry("gui.expenses_layout"),
+	SettingEntry("gui.smallmap_land_colour"),
 };
 /** Display options sub-page */
 static SettingsPage _settings_ui_display_page = {_settings_ui_display, lengthof(_settings_ui_display)};
@@ -1539,7 +1543,7 @@ struct GameSettingsWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		if (widget != SETTINGSEL_OPTIONSPANEL) return;
 
@@ -1826,7 +1830,7 @@ struct CustomCurrencyWindow : Window {
 		this->DrawWidgets();
 	}
 
-	virtual void OnClick(Point pt, int widget)
+	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		int line = 0;
 		int len = 0;

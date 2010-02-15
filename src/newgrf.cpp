@@ -45,6 +45,7 @@
 #include <map>
 #include "core/alloc_type.hpp"
 #include "core/mem_func.hpp"
+#include "smallmap_gui.h"
 
 #include "table/strings.h"
 #include "table/build_industry.h"
@@ -2160,7 +2161,7 @@ static ChangeInfoResult IndustrytilesChangeInfo(uint indtid, int numinfo, int pr
 				break;
 
 			case 0x12: // Special flags
-				tsp->animation_special_flags = buf->ReadByte();
+				tsp->special_flags = (IndustryTileSpecialFlags)buf->ReadByte();
 				break;
 
 			default:
@@ -2488,6 +2489,165 @@ static ChangeInfoResult IndustriesChangeInfo(uint indid, int numinfo, int prop, 
 	return ret;
 }
 
+static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteReader *buf)
+{
+	ChangeInfoResult ret = CIR_SUCCESS;
+
+	extern RailtypeInfo _railtypes[RAILTYPE_END];
+
+	if (id + numinfo > RAILTYPE_END) {
+		grfmsg(1, "RailTypeChangeInfo: Rail type %u is invalid, max %u, ignoring", id + numinfo, RAILTYPE_END);
+		return CIR_INVALID_ID;
+	}
+
+	for (int i = 0; i < numinfo; i++) {
+		RailType rt = _cur_grffile->railtype_map[id + i];
+		if (rt == INVALID_RAILTYPE) return CIR_INVALID_ID;
+
+		RailtypeInfo *rti = &_railtypes[rt];
+
+		switch (prop) {
+			case 0x08: // Label of rail type
+				/* Skipped here as this is loaded during reservation stage. */
+				buf->ReadDWord();
+				break;
+
+			case 0x09: // Name of railtype
+				rti->strings.toolbar_caption = buf->ReadWord();
+				_string_to_grf_mapping[&rti->strings.toolbar_caption] = _cur_grffile->grfid;
+				break;
+
+			case 0x0A: // Menu text of railtype
+				rti->strings.menu_text = buf->ReadWord();
+				_string_to_grf_mapping[&rti->strings.menu_text] = _cur_grffile->grfid;
+				break;
+
+			case 0x0B: // Build window caption
+				rti->strings.build_caption = buf->ReadWord();
+				_string_to_grf_mapping[&rti->strings.build_caption] = _cur_grffile->grfid;
+				break;
+
+			case 0x0C: // Autoreplace text
+				rti->strings.replace_text = buf->ReadWord();
+				_string_to_grf_mapping[&rti->strings.replace_text] = _cur_grffile->grfid;
+				break;
+
+			case 0x0D: // New locomotive text
+				rti->strings.new_loco = buf->ReadWord();
+				_string_to_grf_mapping[&rti->strings.new_loco] = _cur_grffile->grfid;
+				break;
+
+			case 0x0E: // Compatible railtype list
+			case 0x0F: // Powered railtype list
+			{
+				/* Rail type compatibility bits are added to the existing bits
+				 * to allow multiple GRFs to modify compatibility with the
+				 * default rail types. */
+				int n = buf->ReadByte();
+				for (int j = 0; j != n; j++) {
+					RailTypeLabel label = buf->ReadDWord();
+					RailType rt = GetRailTypeByLabel(BSWAP32(label));
+					if (rt != INVALID_RAILTYPE) {
+						if (prop == 0x0E) {
+							SetBit(rti->compatible_railtypes, rt);
+						} else {
+							SetBit(rti->powered_railtypes, rt);
+						}
+					}
+				}
+				break;
+			}
+
+			case 0x10: // Rail Type flags
+				rti->flags = (RailTypeFlags)buf->ReadByte();
+				break;
+
+			case 0x11: // Curve speed advantage
+				rti->curve_speed = buf->ReadByte();
+				break;
+
+			case 0x12: // Station graphic
+				rti->total_offset = Clamp(buf->ReadByte(), 0, 2) * 82;
+				break;
+
+			case 0x13: // Construction cost factor
+				rti->cost_multiplier = buf->ReadByte();
+				break;
+
+			case 0x14: // Speed limit
+				rti->max_speed = buf->ReadWord();
+				break;
+
+			case 0x15: // Acceleration model
+				rti->acceleration_type = Clamp(buf->ReadByte(), 0, 2);
+				break;
+
+			default:
+				ret = CIR_UNKNOWN;
+				break;
+		}
+	}
+
+	return ret;
+}
+
+static ChangeInfoResult RailTypeReserveInfo(uint id, int numinfo, int prop, ByteReader *buf)
+{
+	ChangeInfoResult ret = CIR_SUCCESS;
+
+	if (id + numinfo > RAILTYPE_END) {
+		grfmsg(1, "RailTypeReserveInfo: Rail type %u is invalid, max %u, ignoring", id + numinfo, RAILTYPE_END);
+		return CIR_INVALID_ID;
+	}
+
+	for (int i = 0; i < numinfo; i++) {
+		switch (prop) {
+			case 0x08: // Label of rail type
+			{
+				RailTypeLabel rtl = buf->ReadDWord();
+				rtl = BSWAP32(rtl);
+
+				RailType rt = GetRailTypeByLabel(rtl);
+				if (rt == INVALID_RAILTYPE) {
+					/* Set up new rail type */
+					rt = AllocateRailType(rtl);
+				}
+
+				_cur_grffile->railtype_map[id + i] = rt;
+				break;
+			}
+
+			case 0x09: // Name of railtype
+			case 0x0A: // Menu text
+			case 0x0B: // Build window caption
+			case 0x0C: // Autoreplace text
+			case 0x0D: // New loco
+			case 0x14: // Speed limit
+				buf->ReadWord();
+				break;
+
+			case 0x0E: // Compatible railtype list
+			case 0x0F: // Powered railtype list
+				for (int j = buf->ReadByte(); j != 0; j--) buf->ReadDWord();
+				break;
+
+			case 0x10: // Rail Type flags
+			case 0x11: // Curve speed advantage
+			case 0x12: // Station graphic
+			case 0x13: // Construction cost
+			case 0x15: // Acceleration model
+				buf->ReadByte();
+				break;
+
+			default:
+				ret = CIR_UNKNOWN;
+				break;
+		}
+	}
+
+	return ret;
+}
+
 static bool HandleChangeInfoResult(const char *caller, ChangeInfoResult cir, uint8 feature, uint8 property)
 {
 	switch (cir) {
@@ -2543,6 +2703,10 @@ static void FeatureChangeInfo(ByteReader *buf)
 		/* GSF_INDUSTRIES */   IndustriesChangeInfo,
 		/* GSF_CARGOS */       NULL, // Cargo is handled during reservation
 		/* GSF_SOUNDFX */      SoundEffectChangeInfo,
+		/* GSF_AIRPORTS */     NULL,
+		/* GSF_SIGNALS */      NULL,
+		/* GSF_OBJECTS */      NULL,
+		/* GSF_RAILTYPES */    RailTypeChangeInfo,
 	};
 
 	uint8 feature  = buf->ReadByte();
@@ -2611,7 +2775,7 @@ static void ReserveChangeInfo(ByteReader *buf)
 {
 	uint8 feature  = buf->ReadByte();
 
-	if (feature != GSF_CARGOS && feature != GSF_GLOBALVAR) return;
+	if (feature != GSF_CARGOS && feature != GSF_GLOBALVAR && feature != GSF_RAILTYPES) return;
 
 	uint8 numprops = buf->ReadByte();
 	uint8 numinfo  = buf->ReadByte();
@@ -2629,6 +2793,10 @@ static void ReserveChangeInfo(ByteReader *buf)
 
 			case GSF_GLOBALVAR:
 				cir = GlobalVarReserveInfo(index, numinfo, prop, buf);
+				break;
+
+			case GSF_RAILTYPES:
+				cir = RailTypeReserveInfo(index, numinfo, prop, buf);
 				break;
 		}
 
@@ -2870,6 +3038,7 @@ static void NewSpriteGroup(ByteReader *buf)
 				case GSF_STATION:
 				case GSF_CANAL:
 				case GSF_CARGOS:
+				case GSF_RAILTYPES:
 				{
 					byte sprites     = _cur_grffile->spriteset_numents;
 					byte num_loaded  = type;
@@ -3352,6 +3521,35 @@ static void CargoMapSpriteGroup(ByteReader *buf, uint8 idcount)
 	}
 }
 
+static void RailTypeMapSpriteGroup(ByteReader *buf, uint8 idcount)
+{
+	uint8 *railtypes = AllocaM(uint8, idcount);
+	for (uint i = 0; i < idcount; i++) {
+		railtypes[i] = _cur_grffile->railtype_map[buf->ReadByte()];
+	}
+
+	uint8 cidcount = buf->ReadByte();
+	for (uint c = 0; c < cidcount; c++) {
+		uint8 ctype = buf->ReadByte();
+		uint16 groupid = buf->ReadWord();
+		if (!IsValidGroupID(groupid, "RailTypeMapSpriteGroup")) continue;
+
+		if (ctype >= RTSG_END) continue;
+
+		extern RailtypeInfo _railtypes[RAILTYPE_END];
+		for (uint i = 0; i < idcount; i++) {
+			if (railtypes[i] != INVALID_RAILTYPE) {
+				RailtypeInfo *rti = &_railtypes[railtypes[i]];
+
+				rti->group[ctype] = _cur_grffile->spritegroups[groupid];
+			}
+		}
+	}
+
+	/* Railtypes do not use the default group. */
+	buf->ReadWord();
+}
+
 
 /* Action 0x03 */
 static void FeatureMapSpriteGroup(ByteReader *buf)
@@ -3426,6 +3624,10 @@ static void FeatureMapSpriteGroup(ByteReader *buf)
 		case GSF_CARGOS:
 			CargoMapSpriteGroup(buf, idcount);
 			return;
+
+		case GSF_RAILTYPES:
+			RailTypeMapSpriteGroup(buf, idcount);
+			break;
 
 		default:
 			grfmsg(1, "FeatureMapSpriteGroup: Unsupported feature %d, skipping", feature);
@@ -5466,7 +5668,7 @@ static void ResetCustomIndustries()
 				}
 
 				/* We need to remove the tiles layouts */
-				if (HasBit(ind->cleanup_flag, CLEAN_TILELSAYOUT) && ind->table != NULL) {
+				if (HasBit(ind->cleanup_flag, CLEAN_TILELAYOUT) && ind->table != NULL) {
 					for (int j = 0; j < ind->num_table; j++) {
 						/* remove the individual layouts */
 						free((void*)ind->table[j]);
@@ -5644,6 +5846,13 @@ static void InitNewGRFFile(const GRFConfig *config, int sprite_offset)
 	for (Price i = PR_BEGIN; i < PR_END; i++) {
 		newfile->price_base_multipliers[i] = INVALID_PRICE_MODIFIER;
 	}
+
+	/* Initialise rail type map with default rail types */
+	memset(newfile->railtype_map, INVALID_RAILTYPE, sizeof newfile->railtype_map);
+	newfile->railtype_map[0] = RAILTYPE_RAIL;
+	newfile->railtype_map[1] = RAILTYPE_ELECTRIC;
+	newfile->railtype_map[2] = RAILTYPE_MONO;
+	newfile->railtype_map[3] = RAILTYPE_MAGLEV;
 
 	/* Copy the initial parameter list
 	 * 'Uninitialised' parameters are zeroed as that is their default value when dynamically creating them. */
@@ -6271,6 +6480,9 @@ static void AfterLoadGRFs()
 
 	/* Load old shore sprites in new position, if they were replaced by ActionA */
 	ActivateOldShore();
+
+	/* Set up custom rail types */
+	InitRailTypes();
 
 	Engine *e;
 	FOR_ALL_ENGINES_OF_TYPE(e, VEH_ROAD) {

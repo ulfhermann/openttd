@@ -219,7 +219,7 @@ STR_UNITS_FORCE_SI                                              :{COMMA} kN
 # Common window strings
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Elektu vicordo (deira/alira)
-STR_TOOLTIP_SORT_CRITERIAP                                      :{BLACK}Elektu ordigaj kondiĉoj
+STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Elektu ordigaj kondiĉoj
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Selektu kriteriojn por filtrado
 STR_BUTTON_SORT_BY                                              :{BLACK}Ordigu laŭ
 STR_BUTTON_LOCATION                                             :{BLACK}Loko
@@ -363,8 +363,9 @@ STR_MAP_MENU_MAP_OF_WORLD                                       :Mondomapo
 STR_MAP_MENU_EXTRA_VIEW_PORT                                    :Plia videjo
 STR_MAP_MENU_SIGN_LIST                                          :Afiŝa listo
 ############ range for town menu starts, yet the town directory is shown in the map menu in the scenario editor
-STR_TOWN_MENU_TOWN_DIRECTORY                                    :Urbaro
-############ both ranges ends here
+STR_TOWN_MENU_TOWN_DIRECTORY                                    :Urba katalogo
+############ end of the 'Display map' dropdown
+############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
 STR_SUBSIDIES_MENU_SUBSIDIES                                    :Subvencioj
@@ -385,7 +386,7 @@ STR_GRAPH_MENU_DETAILED_PERFORMANCE_RATING                      :Detala rendimen
 ############ range ends here
 
 ############ range for industry menu starts
-STR_INDUSTRY_MENU_INDUSTRY_DIRECTORY                            :Industriaro
+STR_INDUSTRY_MENU_INDUSTRY_DIRECTORY                            :Industria katalogo
 STR_INDUSTRY_MENU_FUND_NEW_INDUSTRY                             :Fondu novan industrion
 ############ range ends here
 
@@ -596,6 +597,7 @@ STR_MUSIC_TOOLTIP_SELECT_CUSTOM_2_USER_DEFINED                  :{BLACK}Elektu l
 STR_MUSIC_TOOLTIP_TOGGLE_PROGRAM_SHUFFLE                        :{BLACK}Miksu/ne miksu
 STR_MUSIC_TOOLTIP_SHOW_MUSIC_TRACK_SELECTION                    :{BLACK}Montru muziker-elektan fenestron
 
+
 # Playlist window
 STR_PLAYLIST_MUSIC_PROGRAM_SELECTION                            :{WHITE}Elekto de Muzikprogramo
 STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
@@ -675,7 +677,7 @@ STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}Neĝo
 
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Vidu aŭ ne vidu urbonomojn sur la mapo
-STR_SMALLMAP_CENTER                                             :{BLACK}Centrigu la mapeton al la nuna loko
+STR_SMALLMAP_CENTER                                             :{BLACK}Centrigi la mapeton al la nuna loko
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Malaktivigu ĉiujn
@@ -751,6 +753,7 @@ STR_NEWS_COMPANY_LAUNCH_TITLE                                   :{BIGFONT}{BLACK
 STR_NEWS_COMPANY_LAUNCH_DESCRIPTION                             :{BIGFONT}{BLACK}{STRING} ekkonstruas ĉe {TOWN}!
 STR_NEWS_MERGER_TAKEOVER_TITLE                                  :{BIGFONT}{BLACK}{STRING} estas transprenita de {STRING}!
 STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDENTNAME}{}(Manaĝanto)
+
 
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Nova {STRING} konstruiĝas ĉe {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Nova {STRING} plantiĝas ĉe {TOWN}!
@@ -928,6 +931,7 @@ STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Baza son
 STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Elektu la uzendan sonaron
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Aldonaj informoj pri la baza sonaro
 
+
 STR_ERROR_FULLSCREEN_FAILED                                     :{WHITE}Plenekrana moduso fiaskis
 
 # Custom currency window
@@ -984,6 +988,7 @@ STR_NUM_LOW                                                     :Malalte
 STR_NUM_NORMAL                                                  :Normale
 STR_NUM_HIGH                                                    :Alte
 STR_NUM_CUSTOM                                                  :Ŝanĝitaj
+
 
 STR_AI_SPEED_VERY_SLOW                                          :Tre Malrapide
 STR_AI_SPEED_SLOW                                               :Malrapide
@@ -1117,6 +1122,7 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Almenaŭ
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Maksimuma stacivasteco: {ORANGE}{STRING} {RED}Atentu: Pli alte, malpli rapide
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Aŭtomate prizorgu helikopterojn sur helikopterejoj: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Ligu landaspektan breton al konstruadaj bretoj: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Verda
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Inversigu skroldirekton: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Glata rulumado de vidujo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}Montru mezuran konsilbalonon ĉe uzo de konstruiloj: {ORANGE}{STRING}
@@ -1156,10 +1162,6 @@ STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Ebligu 
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Montru horaron laŭ tikoj anstataŭ laŭ tagoj: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Rapidkreo de veturilordonoj: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE                            :{LTBLUE}Defaŭlta reltipo (post novludo/ŝargludo): {ORANGE}{STRING}
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_RAIL                       :Kutima Relo
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_ELRAIL                     :Elektrizita Relo
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MONORAIL                   :Unurelo
-STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MAGLEV                     :Maglev
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_FIRST                      :Unue havebla
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_LAST                       :Laste havebla
 STR_CONFIG_SETTING_DEFAULT_RAIL_TYPE_MOST_USED                  :Pli uzata
@@ -1218,6 +1220,7 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :kvadrataro de 3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :hazarda
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Permesu ke urboj konstruu stratojn: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Permesu urbe kontrolatan laŭtecon por flughavenoj: {ORANGE}{STRING}
+
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Loko de ĉefa ilbreto: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Maldekstre
@@ -1293,7 +1296,7 @@ STR_INTRO_TOOLTIP_LOAD_GAME                                     :{BLACK}Ŝarĝu 
 STR_INTRO_TOOLTIP_PLAY_HEIGHTMAP                                :{BLACK}Startu novan ludon, uzante altecmapon por landaspekto
 STR_INTRO_TOOLTIP_PLAY_SCENARIO                                 :{BLACK}Komencu novan ludon per propra scenaro
 STR_INTRO_TOOLTIP_SCENARIO_EDITOR                               :{BLACK}Kreu mem ludmondon/scenaron
-STR_INTRO_TOOLTIP_MULTIPLAYER                                   :{BLACK}Komencu ludon pluropan ludantoj
+STR_INTRO_TOOLTIP_MULTIPLAYER                                   :{BLACK}Komencu plurludantan ludon
 
 STR_INTRO_TOOLTIP_TEMPERATE                                     :{BLACK}Elektu 'moderan' landstilon
 STR_INTRO_TOOLTIP_SUB_ARCTIC_LANDSCAPE                          :{BLACK}Elektu 'sub-arktikan' landstilon
@@ -1326,7 +1329,7 @@ STR_OSNAME_SUNOS                                                :SunOS
 # Abandon game
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Foriri de la ludo
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Ĉu vi certas ke vi volas foriri?
-STR_ABANDOM_SCENARIO_QUERY                                      :{YELLOW}Ĉu vi certas ke vi volas forlasi ĉi tiun scenaron?
+STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Ĉu vi certas ke vi volas forlasi ĉi tiun scenaron?
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Filudaĵoj
@@ -1338,12 +1341,12 @@ STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Magia f
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Tuneloj rajtas kruciĝi unu kun la alia: {ORANGE}{STRING}
 STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Konstruado eblas dum paŭzo: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Jet-aviadiloj ne kraŝos (frekvente) sur etaj flughavenoj: {ORANGE} {STRING}
-STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Ŝanĝu klimaton: {ORANGE} {STRING}
+STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Ŝanĝu klimaton: {ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Modera landaspekto
 STR_CHEAT_SWITCH_CLIMATE_SUB_ARCTIC_LANDSCAPE                   :Arktikeca landaspekto
 STR_CHEAT_SWITCH_CLIMATE_SUB_TROPICAL_LANDSCAPE                 :Tropikeca landaspekto
 STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE                      :Ludolandaspekto
-STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Ŝanĝu daton: {ORANGE} {DATE_SHORT}
+STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Ŝanĝu daton: {ORANGE}{DATE_SHORT}
 STR_CHEAT_SETUP_PROD                                            :{LTBLUE}Ebligu ŝanĝi produktvalorojn: {ORANGE}{STRING}
 
 # Livery window
@@ -1392,17 +1395,17 @@ STR_FACE_NEW_FACE_TOOLTIP                                       :{BLACK}Kreu haz
 STR_FACE_SIMPLE                                                 :{BLACK}Simpla
 STR_FACE_SAVE                                                   :{BLACK}Konservi
 STR_FACE_SAVE_TOOLTIP                                           :{BLACK}Konservi faman vizaĝon
-STR_FACE_SAVE_DONE                                              :{WHITE}Tiu ĉi vizaĝo estos konservita kiel via fama en agord-dosiero de OpenTTD.
+STR_FACE_SAVE_DONE                                              :{WHITE}Tiu ĉi vizaĝo estos konservita kiel via favorata en agord-dosiero de OpenTTD.
 STR_FACE_EUROPEAN                                               :{BLACK}Europa
-STR_FACE_SELECT_EUROPEAN                                        :{BLACK}Elekti eŭropecajn vizaĝojn
+STR_FACE_SELECT_EUROPEAN                                        :{BLACK}Elekti eŭropajn vizaĝojn
 STR_FACE_AFRICAN                                                :{BLACK}Afrika
-STR_FACE_SELECT_AFRICAN                                         :{BLACK}Elekti afrikecajn vizaĝojn
+STR_FACE_SELECT_AFRICAN                                         :{BLACK}Elekti afrikajn vizaĝojn
 STR_FACE_YES                                                    :Jes
 STR_FACE_NO                                                     :Ne
 STR_FACE_HAIR                                                   :Hararo:
 STR_FACE_HAIR_TOOLTIP                                           :{BLACK}Ŝanĝu hararon
 STR_FACE_EYECOLOUR                                              :Okula koloro:
-STR_FACE_EYECOLOUR_TOOLTIP                                      :{BLACK}Ŝanĝu okulan koloron
+STR_FACE_EYECOLOUR_TOOLTIP                                      :{BLACK}Ŝanĝi okulan koloron
 STR_FACE_GLASSES                                                :Okulvitroj:
 STR_FACE_NOSE                                                   :Nazo:
 STR_FACE_NOSE_TOOLTIP                                           :{BLACK}Ŝanĝi nazon
@@ -1439,7 +1442,7 @@ STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Klaku po
 STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}LUDINFORMOJ
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Klientoj: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Lingvo: {WHITE}{STRING}
-STR_NETWORK_SERVER_LIST_TILESET                                 :{SILVER}Tegolaro: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Pejzaĝo: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Mapgrandeco: {WHITE}{COMMA}x{COMMA}
 STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Versio de servilo: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Adreso de servilo: {WHITE}{STRING}
@@ -1587,7 +1590,7 @@ STR_NETWORK_NEED_COMPANY_PASSWORD_CAPTION                       :{WHITE}Kompanio
 # Network company list added strings
 STR_NETWORK_COMPANY_LIST_CLIENT_LIST                            :{WHITE}Klientlisto
 STR_NETWORK_COMPANY_LIST_SPECTATE                               :{WHITE}Spekti
-STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}Nova Kompanio
+STR_NETWORK_COMPANY_LIST_NEW_COMPANY                            :{WHITE}Nova kompanio
 
 # Network client list
 STR_NETWORK_CLIENTLIST_KICK                                     :Forbatu
@@ -1700,8 +1703,8 @@ STR_STATION_BUILD_COVERAGE_OFF                                  :{BLACK}Malaktiv
 STR_STATION_BUILD_COVERAGE_ON                                   :{BLACK}Aktiva
 STR_STATION_BUILD_COVERAGE_AREA_OFF_TOOLTIP                     :{BLACK}Ne marku ŝarĝregionon de proponata loko
 STR_STATION_BUILD_COVERAGE_AREA_ON_TOOLTIP                      :{BLACK}Marku ŝarĝregionon ĉe proponata loko
-STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Akceptiĝas: {GOLD}
-STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Provizoj: {GOLD}
+STR_STATION_BUILD_ACCEPTS_CARGO                                 :{BLACK}Akceptiĝas: {GOLD}{STRING}
+STR_STATION_BUILD_SUPPLIES_CARGO                                :{BLACK}Provizoj: {GOLD}{STRING}
 
 # Join station window
 
@@ -1753,7 +1756,7 @@ STR_STATION_CLASS_WAYP                                          :Transirejoj
 # Bridge selection window
 STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Elektu Relan Ponton
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Elektu Vojan Ponton
-STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Pontelekton - alklaku vian preferatan ponton por konstrui ĝin
+STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Pontelekto - klaku vian preferatan ponton por konstrui ĝin
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING},{} {VELOCITY} {WHITE}{CURRENCY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Ŝtala pendanta
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :Ŝtala ebena
@@ -1811,8 +1814,8 @@ STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Elektu g
 
 STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Malgranda flughaveno
 STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}Urba flughaveno
-STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Ĉefurba flughaveno
-STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Internacia flughaveno
+STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Ĉefurba
+STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Internacia
 STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}Urbeta flughaveno
 STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Interkontinenta
 STR_STATION_BUILD_AIRPORT_HELIPORT                              :{BLACK}Helikopterejo
@@ -1904,7 +1907,7 @@ STR_LAND_AREA_INFORMATION_OWNER_N_A                             :N/A
 STR_LAND_AREA_INFORMATION_OWNER                                 :{BLACK}Posedanto: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_ROAD_OWNER                            :{BLACK}Stratposedanto: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_TRAM_OWNER                            :{BLACK}Posedanto de tramreloj: {LTBLUE}{STRING}
-STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}Posedanto de fervojreloj: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}Posedanto de fervojo: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY                       :{BLACK}Lokaj estroj: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Neniu
 STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Troviĝo: {LTBLUE}{NUM}x{NUM}x{NUM} ({STRING})
@@ -1932,7 +1935,7 @@ STR_LAI_RAIL_DESCRIPTION_TRACK_WITH_NORMAL_PRESIGNALS           :Reloj kun blok-
 STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT                            :Trajndeponejo
 
 STR_LAI_ROAD_DESCRIPTION_ROAD                                   :Vojo
-STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Vojo kun lanternoj
+STR_LAI_ROAD_DESCRIPTION_ROAD_WITH_STREETLIGHTS                 :Vojo kun lampoj
 STR_LAI_ROAD_DESCRIPTION_TREE_LINED_ROAD                        :Vojo kun arboj apude
 STR_LAI_ROAD_DESCRIPTION_ROAD_VEHICLE_DEPOT                     :Vojveturila deponejo
 STR_LAI_ROAD_DESCRIPTION_ROAD_RAIL_LEVEL_CROSSING               :Kruciĝo inter vojo kaj relo
@@ -2176,14 +2179,14 @@ STR_LOCAL_AUTHORITY_ACTION_NEW_BUILDINGS                        :Fondu novajn ko
 STR_LOCAL_AUTHORITY_ACTION_EXCLUSIVE_TRANSPORT                  :Aĉetu ekskluzivan transportrajton
 STR_LOCAL_AUTHORITY_ACTION_BRIBE                                :Subaĉetu la lokajn estrojn
 
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Komencu malgrandan lokan reklamadon, por altiri pli da pasaĝeroj kaj ŝarĝoj al viaj transportservoj.{}Kosto: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{WHITE}{STRING}{}{YELLOW}Komencu mezgrandan lokan reklamadon, por altiri pli da pasaĝeroj kaj ŝarĝoj al viaj transportservoj.{}Kosto: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{WHITE}{STRING}{}{YELLOW}Komencu grandan lokan varbadkampanjon, por altiri pliajn pasaĝerojn kaj kargojn al viaj transportservoj.{} Kosto: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{WHITE}{STRING}{}{YELLOW}Pagu rekonstruadon de la urba stratreto. Kaŭzos konsiderindan ĝenon al la trafiko por ĝis 6 monatoj.{} Kosto: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{WHITE}{STRING}{}{YELLOW}Konstruu statuon honore al via kompanio.{}Kosto: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{WHITE}{STRING}{}{YELLOW}Pagu la konstruadon de novaj komercaj konstruaĵoj en la urbo.{} Kosto: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{WHITE}{STRING}{}{YELLOW}Aĉetu ekskluzivajn transportrajtojn en la urbo por 1 jaro. La urbo nur permesos pasaĝerojn kaj kargojn uzi la staciojn de via entrepreno.{}Cost: {CURRENCY}
-STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{WHITE}{STRING}{}{YELLOW}Subaĉetu la lokajn estrojn por pliigi vian rendimenton, riskante grandan punon je kaptiĝo.{}Kosto: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_SMALL_ADVERTISING            :{YELLOW}Komencu malgrandan lokan reklamadon, por altiri pli da pasaĝeroj kaj ŝarĝoj al viaj transportservoj.{}Kosto: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_MEDIUM_ADVERTISING           :{YELLOW}Komencu mezgrandan lokan reklamadon, por altiri pli da pasaĝeroj kaj ŝarĝoj al viaj transportservoj.{}Kosto: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_LARGE_ADVERTISING            :{YELLOW}Komencu grandan lokan varbadkampanjon, por altiri pliajn pasaĝerojn kaj kargojn al viaj transportservoj.{} Kosto: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_ROAD_RECONSTRUCTION          :{YELLOW}Pagu rekonstruadon de la urba stratreto. Kaŭzos konsiderindan ĝenon al la trafiko por ĝis 6 monatoj.{} Kosto: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_STATUE_OF_COMPANY            :{YELLOW}Konstruu statuon honore al via kompanio.{}Kosto: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_NEW_BUILDINGS                :{YELLOW}Pagu la konstruadon de novaj komercaj konstruaĵoj en la urbo.{} Kosto: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_EXCLUSIVE_TRANSPORT          :{YELLOW}Aĉetu ekskluzivajn transportrajtojn en la urbo por 1 jaro. La urbo nur permesos pasaĝerojn kaj kargojn uzi la staciojn de via entrepreno.{}Cost: {CURRENCY}
+STR_LOCAL_AUTHORITY_ACTION_TOOLTIP_BRIBE                        :{YELLOW}Subaĉetu la lokajn estrojn por pliigi vian rendimenton, riskante grandan punon je kaptiĝo.{}Kosto: {CURRENCY}
 
 # Subsidies window
 STR_SUBSIDIES_CAPTION                                           :{WHITE}Subvencioj
@@ -2212,7 +2215,7 @@ STR_STATION_VIEW_EN_ROUTE_FROM                                  :{YELLOW}({SHORT
 
 STR_STATION_VIEW_ACCEPTS_BUTTON                                 :{BLACK}Akceptas
 STR_STATION_VIEW_ACCEPTS_TOOLTIP                                :{BLACK}Montru liston de akceptataj ŝarĝoj
-STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Akceptiĝas: {WHITE}
+STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Akceptiĝas: {WHITE}{STRING}
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Takso
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Montru stacian takson
@@ -2764,15 +2767,24 @@ STR_TIMETABLE_TITLE                                             :{WHITE}{VEHICLE
 
 
 
+
 STR_TIMETABLE_CHANGE_TIME                                       :{BLACK}Ŝanĝu tempon
 
 
 
 
+
+
+
+# Date window (for timetable)
+
+
 # AI debug window
 
 
+
 # AI configuration window
+
 
 
 # Available AIs window
@@ -2843,8 +2855,8 @@ STR_ERROR_CAN_T_DO_THIS                                         :{WHITE}Ne eblas
 STR_ERROR_BUILDING_MUST_BE_DEMOLISHED                           :{WHITE}Antaŭe forigu konstruaĵon
 STR_ERROR_CAN_T_CLEAR_THIS_AREA                                 :{WHITE}Ne eblas malplenigi la regionon....
 STR_ERROR_SITE_UNSUITABLE                                       :{WHITE}...nekonvena ejo
-STR_ERROR_ALREADY_BUILT                                         :{WHITE}...jam konstruite
-STR_ERROR_OWNED_BY                                              :{WHITE}...posedata de {STRING}
+STR_ERROR_ALREADY_BUILT                                         :{WHITE}... jam konstruita
+STR_ERROR_OWNED_BY                                              :{WHITE}... posedata de {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}...regiono estas posedata de alia kompanio
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Nomo devas esti ununura
 STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}{STRING} okupas la lokon
@@ -2855,7 +2867,7 @@ STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}La lokaj
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Via subaĉeta provo estas
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}malkovrita de regiona esploristo
 
-# Leveling errors
+# Levelling errors
 STR_ERROR_CAN_T_RAISE_LAND_HERE                                 :{WHITE}Ne povas altigi landon ĉi tie...
 STR_ERROR_CAN_T_LOWER_LAND_HERE                                 :{WHITE}Ne povas malaltigi landon ĉi tie...
 STR_ERROR_CAN_T_LEVEL_LAND_HERE                                 :{WHITE}Ne povas ebenigi terenon ĉi tie...
@@ -2871,7 +2883,7 @@ STR_ERROR_CAN_T_CHANGE_PRESIDENT                                :{WHITE}Ne povas
 STR_ERROR_MAXIMUM_PERMITTED_LOAN                                :{WHITE}...maksimuma permesata prunto estas {CURRENCY}
 STR_ERROR_CAN_T_BORROW_ANY_MORE_MONEY                           :{WHITE}Ne povas prunti pli da mono...
 STR_ERROR_LOAN_ALREADY_REPAYED                                  :{WHITE}...ne estas repagebla prunto
-STR_ERROR_CURRENCY_REQUIRED                                     :{WHITE}...{CURRENCY} necesas
+STR_ERROR_CURRENCY_REQUIRED                                     :{WHITE}... {CURRENCY} necesas
 STR_ERROR_CAN_T_REPAY_LOAN                                      :{WHITE}Ne povas repagi prunton...
 STR_ERROR_INSUFFICIENT_FUNDS                                    :{WHITE}Ne povas donaci monon pruntitan de la banko...
 STR_ERROR_CAN_T_BUY_COMPANY                                     :{WHITE}Ne povas aĉeti kompanion...
@@ -2886,7 +2898,7 @@ STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Ne povas
 STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Ne povas fari urbon ĉi tie...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}...tro proksime al la mapa rando
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}...tro proksime al alia urbo
-STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}...tro da urboj
+STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... tro da urboj
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}...spaco mankas sur la mapo
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}La urbo ne konstruos stratojn. Vi povas ebligi stratkonstruadon per Avancitaj Agordoj->Ekonomio->Urboj.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Aktivas vojprilaborado
@@ -2900,10 +2912,10 @@ STR_ERROR_MUST_FOUND_TOWN_FIRST                                 :{WHITE}...anta�
 STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN                             :{WHITE}...nur unu permesiĝas en ĉiu urbo
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}...nur konstruebla en urboj havantaj pli ol 1200 enloĝantojn
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}...nur konstruebla en praarbaraj regionoj
-STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}...nur konstruebla en dezertaj regionoj
-STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}...nur konstruebla en urboj
-STR_ERROR_CAN_ONLY_BE_POSITIONED                                :{WHITE}...nur lokebla ĉe la randoj de la mapo
-STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED                            :{WHITE}...arbaro nur planteblas super neĝa limlinio
+STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}... konstruebla nur en dezertaj regionoj
+STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}... konstruebla nur en urboj
+STR_ERROR_CAN_ONLY_BE_POSITIONED                                :{WHITE}... lokebla nur ĉe la randoj de la mapo
+STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED                            :{WHITE}... arbaro nur planteblas super neĝa limlinio
 
 # Station construction related errors
 STR_ERROR_CAN_T_BUILD_RAILROAD_STATION                          :{WHITE}Ne povas konstrui stacidomon ĉi tie...
@@ -2913,7 +2925,7 @@ STR_ERROR_CAN_T_BUILD_DOCK_HERE                                 :{WHITE}Ne povas
 STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Ne povas konstrui flughavenon ĉi tie...
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Alligas pli ol unu ekzistantan stacion/ŝarĝejon
-STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}...stacio tro vastas
+STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... stacio tro vastas
 STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}...nekonformaj stacioj neebligitaj
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Tro da stacioj/ŝarĝejoj
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Tro da bushaltejoj
@@ -2944,7 +2956,7 @@ STR_ERROR_CAN_T_POSITION_BUOY_HERE                              :{WHITE}Ne povas
 STR_ERROR_CAN_T_CHANGE_WAYPOINT_NAME                            :{WHITE}Ne povas ŝanĝi trairejan nomon...
 
 STR_ERROR_CAN_T_REMOVE_TRAIN_WAYPOINT                           :{WHITE}Ne povas forigi trajnan trairejon ĉi tie...
-STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}...buo okupas la lokon
+STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}... buo okupas la lokon
 STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}...buo estas uzata
 
 # Depot related errors
@@ -2953,7 +2965,7 @@ STR_ERROR_CAN_T_BUILD_ROAD_DEPOT                                :{WHITE}Ne povas
 STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Ne povas konstrui ŝipdeponejon ĉi tie...
 
 STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Trajno estu halta en deponejo
-STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}...devas esti haltigata en vojveturila deponejo
+STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... devas esti haltigata en vojveturila deponejo
 STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Ŝipo devas halti en deponejo
 STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Aviadilo devas esti haltigata en la hangaro
 
@@ -2995,17 +3007,18 @@ STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Ne povas
 STR_ERROR_CAN_T_BUILD_CANALS                                    :{WHITE}Ne povas konstrui kanalojn ĉi tie...
 STR_ERROR_CAN_T_BUILD_LOCKS                                     :{WHITE}Ne povas konstrui kluzojn ĉi tie...
 STR_ERROR_CAN_T_PLACE_RIVERS                                    :{WHITE}Ne povas meti riverojn ĉi tien...
-STR_ERROR_MUST_BE_BUILT_ON_WATER                                :{WHITE}...devas esti konstruata sur akvo
-STR_ERROR_CAN_T_BUILD_ON_WATER                                  :{WHITE}...Ne povas konstrui sur akvo
+STR_ERROR_MUST_BE_BUILT_ON_WATER                                :{WHITE}... devas esti konstruata sur akvo
+STR_ERROR_CAN_T_BUILD_ON_WATER                                  :{WHITE}... ne povas konstrui sur akvo
 
 # Tree related errors
-STR_ERROR_TREE_ALREADY_HERE                                     :{WHITE}...jam estas arbo
+STR_ERROR_TREE_ALREADY_HERE                                     :{WHITE}... jam estas arbo ĉi tie
 STR_ERROR_CAN_T_PLANT_TREE_HERE                                 :{WHITE}Ne povas planti arbon ĉi tie...
 
 # Bridge related errors
 STR_ERROR_CAN_T_BUILD_BRIDGE_HERE                               :{WHITE}Ne povas konstrui ponton ĉi tie...
 STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST                            :{WHITE}Antaŭe forigu ponton
 STR_ERROR_CAN_T_START_AND_END_ON                                :{WHITE}Ne povas komenci kaj fini en la sama loko
+STR_ERROR_BRIDGE_TOO_LOW_FOR_TERRAIN                            :{WHITE}Ponto estas tro malalta por la tereno
 STR_ERROR_START_AND_END_MUST_BE_IN                              :{WHITE}Komenco kaj fino devas esti samliniaj
 STR_ERROR_ENDS_OF_BRIDGE_MUST_BOTH                              :{WHITE}...ambaŭ pontfinoj devas esti sur lando
 
@@ -3020,11 +3033,12 @@ STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Ne eblas
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Objekto okupas la lokon
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}...kompania ĉefkonstruaĵo okupas la lokon
 STR_ERROR_CAN_T_PURCHASE_THIS_LAND                              :{WHITE}Ne povas aĉeti ĉi tiun regionon...
-STR_ERROR_YOU_ALREADY_OWN_IT                                    :{WHITE}...vi jam posedas ĝin!
+STR_ERROR_YOU_ALREADY_OWN_IT                                    :{WHITE}... vi jam posedas ĝin!
 
 # Group related errors
 STR_ERROR_GROUP_CAN_T_CREATE                                    :{WHITE}Ne eblas krei grupon...
 STR_ERROR_GROUP_CAN_T_DELETE                                    :{WHITE}Ne eblas viŝi grupon...
+STR_ERROR_GROUP_CAN_T_RENAME                                    :{WHITE}Ne povas renomi grupon...
 
 # Generic vehicle errors
 STR_ERROR_TRAIN_IN_THE_WAY                                      :{WHITE}Trajno okupas la lokon
@@ -3052,10 +3066,10 @@ STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT                      :{WHITE}Ne povas
 STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT                              :{WHITE}Ne povas sendi ŝipon al deponejo...
 STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR                         :{WHITE}Ne povas sendi aviadilon al hangaro...
 
-STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Ne povas krei relan veturilon...
-STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Ne povas krei vojveturilon
-STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Ne povas krei ŝipon...
-STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Ne povas krei aviadilon...
+STR_ERROR_CAN_T_BUY_TRAIN                                       :{WHITE}Ne povas aĉeti relveturilon...
+STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Ne povas aĉeti vojveturilon
+STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Ne povas aĉeti ŝipon...
+STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Ne povas aĉeti aviadilon...
 
 STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Ne povas renomi trajnan veturiltipon...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Ne povas renomi vojveturilan tipon...
@@ -3206,6 +3220,8 @@ STR_SV_STNAME_AIRPORT                                           :Flughaveno de {
 STR_SV_STNAME_OILFIELD                                          :Olefonto de {STRING}
 STR_SV_STNAME_MINES                                             :Minejo de {STRING}
 STR_SV_STNAME_DOCKS                                             :Haveno de {STRING}
+STR_SV_STNAME_BUOY                                              :{STRING}
+STR_SV_STNAME_WAYPOINT                                          :{STRING}
 ##id 0x6020
 STR_SV_STNAME_ANNEXE                                            :Ekstera {STRING}
 STR_SV_STNAME_SIDINGS                                           :Flanka {STRING}
@@ -3483,6 +3499,9 @@ STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
 STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
 STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:STRING}-{0:STRING}
 
+STR_FORMAT_BUOY_NAME                                            :{TOWN} Buo
+STR_FORMAT_BUOY_NAME_SERIAL                                     :{TOWN} Buo #{COMMA}
+STR_FORMAT_COMPANY_NUM                                          :(Kompanio {COMMA})
 STR_FORMAT_GROUP_NAME                                           :Group {COMMA}
 STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
 STR_FORMAT_WAYPOINT_NAME                                        :Vojpunkto {TOWN}
@@ -3532,6 +3551,7 @@ STR_JUST_DATE_SHORT                                             :{DATE_SHORT}
 STR_JUST_DATE_LONG                                              :{DATE_LONG}
 STR_JUST_DATE_ISO                                               :{DATE_ISO}
 STR_JUST_STRING                                                 :{STRING}
+STR_JUST_STRING_SPACE_STRING                                    :{STRING} {STRING}
 STR_JUST_RAW_STRING                                             :{STRING}
 
 # Slightly 'raw' stringcodes with colour or size
@@ -3549,14 +3569,16 @@ STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LO
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
 STR_TINY_GROUP                                                  :{TINYFONT}{GROUP}
+STR_BLACK_INT                                                   :{BLACK}{NUM}
 STR_ORANGE_INT                                                  :{ORANGE}{NUM}
 STR_WHITE_SIGN                                                  :{WHITE}{SIGN}
 STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLACK}{STATION}
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
+STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
-
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
 STR_BLACK_1                                                     :{BLACK}1
@@ -3572,4 +3594,3 @@ STR_BUS                                                         :{BLACK}{BUS}
 STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
-
