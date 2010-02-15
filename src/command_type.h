@@ -48,43 +48,34 @@ public:
 	 * @param ex_t the expense type
 	 * @param cst the initial cost of this command
 	 */
-	CommandCost(ExpensesType ex_t, Money cst) : expense_type(ex_t), cost(cst), message(INVALID_STRING_ID), success(true) {}
+	CommandCost(ExpensesType ex_t, const Money &cst) : expense_type(ex_t), cost(cst), message(INVALID_STRING_ID), success(true) {}
 
-	/**
-	 * Adds the cost of the given command return value to this cost.
-	 * Also takes a possible error message when it is set.
-	 * @param ret the command to add the cost of.
-	 * @return this class.
-	 */
-	CommandCost AddCost(CommandCost ret);
 
 	/**
 	 * Adds the given cost to the cost of the command.
 	 * @param cost the cost to add
-	 * @return this class.
 	 */
-	CommandCost AddCost(Money cost)
+	FORCEINLINE void AddCost(const Money &cost)
 	{
 		this->cost += cost;
-		return *this;
 	}
+
+	void AddCost(const CommandCost &cmd_cost);
 
 	/**
 	 * Multiplies the cost of the command by the given factor.
 	 * @param factor factor to multiply the costs with
-	 * @return this class
 	 */
-	CommandCost MultiplyCost(int factor)
+	FORCEINLINE void MultiplyCost(int factor)
 	{
 		this->cost *= factor;
-		return *this;
 	}
 
 	/**
 	 * The costs as made up to this moment
 	 * @return the costs
 	 */
-	Money GetCost() const
+	FORCEINLINE Money GetCost() const
 	{
 		return this->cost;
 	}
@@ -93,7 +84,7 @@ public:
 	 * The expense type of the cost
 	 * @return the expense type
 	 */
-	ExpensesType GetExpensesType() const
+	FORCEINLINE ExpensesType GetExpensesType() const
 	{
 		return this->expense_type;
 	}
@@ -101,7 +92,7 @@ public:
 	/**
 	 * Sets the global error message *if* this class has one.
 	 */
-	void SetGlobalErrorMessage() const
+	FORCEINLINE void SetGlobalErrorMessage() const
 	{
 		extern StringID _error_message;
 		if (this->message != INVALID_STRING_ID) _error_message = this->message;
@@ -135,7 +126,7 @@ public:
 	 * Did this command succeed?
 	 * @return true if and only if it succeeded
 	 */
-	bool Succeeded() const
+	FORCEINLINE bool Succeeded() const
 	{
 		return this->success;
 	}
@@ -144,7 +135,7 @@ public:
 	 * Did this command fail?
 	 * @return true if and only if it failed
 	 */
-	bool Failed() const
+	FORCEINLINE bool Failed() const
 	{
 		return !this->success;
 	}
