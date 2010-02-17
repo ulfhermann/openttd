@@ -35,7 +35,7 @@ void UpdateHousesAndTowns()
 		town->population = 0;
 		town->num_houses = 0;
 		town->acceptance.Clear();
-		town->num_accepted_cargos = 0;
+		town->sum_accepted_cargos_payment = 0;
 	}
 
 	for (TileIndex t = 0; t < MapSize(); t++) {
