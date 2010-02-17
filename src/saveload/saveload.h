@@ -339,5 +339,6 @@ bool SaveloadCrashWithMissingNewGRFs();
 extern char _savegame_format[8];
 
 #define COUNTERS_SV 197
+#define PAYMENT_SV  198
 
 #endif /* SAVELOAD_H */
