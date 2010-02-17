@@ -1246,6 +1246,7 @@ STR_CONFIG_SETTING_DISABLE_ELRAILS                              :{LTBLUE}Disable
 STR_CONFIG_SETTING_COLOURED_NEWS_YEAR                           :{LTBLUE}Coloured news appears in: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_STARTING_YEAR                                :{LTBLUE}Starting year: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_SMOOTH_ECONOMY                               :{LTBLUE}Enable smooth economy (more, smaller changes): {ORANGE}{STRING1}
+STR_CONFIG_SETTING_RATING_PAYMENT                               :{LTBLUE}Pay by town rating, not by cargo delivered: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_ALLOW_SHARES                                 :{LTBLUE}Allow buying shares from other companies: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_FEEDER_PAYMENT_SHARE                         :{LTBLUE}Percentage of leg profit to pay in feeder systems: {ORANGE}{STRING1}%
 STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}When dragging, place signals every: {ORANGE}{STRING1} tile(s)
