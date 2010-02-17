@@ -956,12 +956,19 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
 
 	Town *t = st->town;
-	if (t->num_accepted_cargos > 0) { // there are towns without a single house
-		uint intended_amount = max(1U, _economy.global_production[cargo_type] * t->acceptance[cargo_type] / (_economy.global_acceptance[cargo_type] + 1));
-		/* if you deliver the intended amout for each cargo you will get the same bonus as the monthly
-		 * malus for RATING_OUTSTANDING
+	if (t->num_accepted_cargos > 0) {
+		/* there are towns without a single house */
+		uint intended_amount = max(1U, _economy.global_production[cargo_type] *
+				t->acceptance[cargo_type] /
+				(_economy.global_acceptance[cargo_type] + 1)
+		);
+		/* if you deliver the intended amount for each cargo you will get the
+		 * same bonus as the monthly malus for RATING_OUTSTANDING
 		 */
-		t->ratings[company->index] += max(1U, RATING_DELIVERY_UP * num_pieces / intended_amount / t->num_accepted_cargos);
+		t->ratings[company->index] += max((uint64)1, (uint64)num_pieces *
+				(uint64)RATING_DELIVERY_UP / (uint64)intended_amount /
+				(uint64)t->num_accepted_cargos
+		);
 	}
 
 	/* Determine profit */
