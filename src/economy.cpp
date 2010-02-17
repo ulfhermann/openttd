@@ -965,10 +965,13 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 		/* if you deliver the intended amount for each cargo you will get the
 		 * same bonus as the monthly malus for RATING_OUTSTANDING
 		 */
-		t->ratings[company->index] += max((uint64)1, (uint64)num_pieces *
-				(uint64)RATING_DELIVERY_UP / (uint64)intended_amount /
-				(uint64)t->num_accepted_cargos
-		);
+		int16 rating = t->ratings[company->index];
+		uint64 new_rating = t->ratings[company->index] + max((uint64)1,
+				(uint64)num_pieces * (uint64)RATING_DELIVERY_UP /
+				(uint64)intended_amount / (uint64)t->num_accepted_cargos);
+
+		t->ratings[company->index] = Clamp(new_rating, RATING_MINIMUM, RATING_MAXIMUM);
+		assert((int)new_rating > rating);
 	}
 
 	/* Determine profit */
@@ -1038,13 +1041,13 @@ CargoPayment::~CargoPayment()
 
 	this->front->cargo_payment = NULL;
 
-	if (this->visual_profit == 0) return;
+	this->front->profit_this_year += this->visual_profit << 8;
+	if (this->visual_profit == 0 || _settings_game.economy.rating_payment) return;
 
 	CompanyID old_company = _current_company;
 	_current_company = this->front->owner;
 
 	SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->route_profit));
-	this->front->profit_this_year += this->visual_profit << 8;
 
 	if (this->route_profit != 0) {
 		if (IsLocalCompany() && !PlayVehicleSound(this->front, VSE_LOAD_UNLOAD)) {

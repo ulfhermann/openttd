@@ -44,6 +44,7 @@
 #include "townname_func.h"
 #include "townname_type.h"
 #include "core/random_func.hpp"
+#include "debug.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
@@ -716,15 +717,41 @@ static void TownTickHandler(Town *t)
 		t->grow_counter = i;
 	}
 
+	uint rating_sum = 0;
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
-		if (t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
+		if (!HasBit(t->have_ratings, c->index) || t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
 		// use a 32bit number for the calculation
 		uint rating = (uint)t->ratings[c->index];
 		rating *= RATING_DECREASE_PERCENTAGE;
 		rating >>= 8;
+		assert(rating < RATING_MAXIMUM);
+		assert(rating > 0);
 		t->ratings[c->index] = rating;
+		rating_sum += rating;
 	}
+
+	if (_settings_game.economy.rating_payment) {
+		if (rating_sum < RATING_MAXIMUM) rating_sum = RATING_MAXIMUM;
+		FOR_ALL_COMPANIES(c) {
+			if (!HasBit(t->have_ratings, c->index) || t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
+
+			CompanyID old_company = _current_company;
+			_current_company = c->index;
+			int64 sum = -(int64)t->population *	(int64)t->ratings[c->index] *
+					(int64)TOWN_GROWTH_FREQUENCY / (int64)rating_sum /
+					(int64)DAY_TICKS / (int64)30;
+			SubtractMoneyFromCompany(CommandCost(EXPENSES_TRAIN_INC, sum));
+			if (IsLocalCompany() && sum != 0) {
+				ShowCostOrIncomeAnimation(TileX(t->xy) * TILE_SIZE,
+						TileY(t->xy) * TILE_SIZE, TilePixelHeight(t->xy), sum
+				);
+			}
+			_current_company = old_company;
+
+		}
+	}
+
 
 	UpdateTownRadius(t);
 }
