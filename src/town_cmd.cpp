@@ -128,9 +128,11 @@ void Town::InitializeLayout(TownLayout layout)
 
 void Town::CountAcceptedCargos()
 {
-	this->num_accepted_cargos = 0;
+	this->sum_accepted_cargos_payment = 0;
 	for (CargoID c = 0; c < NUM_CARGO; ++c) {
-		if (this->acceptance[c] > 0) this->num_accepted_cargos++;
+		if (this->acceptance[c] > 0) {
+			this->sum_accepted_cargos_payment += CargoSpec::Get(c)->initial_payment;
+		}
 	}
 }
 

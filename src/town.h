@@ -113,7 +113,7 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	/* NOSAVE: The number of each type of building in the town. */
 	BuildingCounts<uint16> building_counts;
 
-	byte num_accepted_cargos;
+	uint32 sum_accepted_cargos_payment;
 	CargoArray acceptance;
 
 	/**

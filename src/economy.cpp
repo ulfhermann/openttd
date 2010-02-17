@@ -819,6 +819,29 @@ Money GetPrice(Price index, uint cost_factor, const GRFFile *grf_file, int shift
 	return cost;
 }
 
+static int GetTimeFactor(const CargoSpec *cs, byte transit_days) {
+	static const int MIN_TIME_FACTOR = 31;
+	static const int MAX_TIME_FACTOR = 255;
+
+	const int days1 = cs->transit_days[0];
+	const int days2 = cs->transit_days[1];
+	const int days_over_days1 = max(   transit_days - days1, 0);
+	const int days_over_days2 = max(days_over_days1 - days2, 0);
+
+	/*
+	 * The time factor is calculated based on the time it took
+	 * (transit_days) compared two cargo-depending values. The
+	 * range is divided into three parts:
+	 *
+	 *  - constant for fast transits
+	 *  - linear decreasing with time with a slope of -1 for medium transports
+	 *  - linear decreasing with time with a slope of -2 for slow transports
+	 *
+	 */
+	return max(MAX_TIME_FACTOR - days_over_days1 - days_over_days2, MIN_TIME_FACTOR);
+}
+
+
 Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, CargoID cargo_type)
 {
 	const CargoSpec *cs = CargoSpec::Get(cargo_type);
@@ -844,27 +867,7 @@ Money GetTransportedGoodsIncome(uint num_pieces, uint dist, byte transit_days, C
 		}
 	}
 
-	static const int MIN_TIME_FACTOR = 31;
-	static const int MAX_TIME_FACTOR = 255;
-
-	const int days1 = cs->transit_days[0];
-	const int days2 = cs->transit_days[1];
-	const int days_over_days1 = max(   transit_days - days1, 0);
-	const int days_over_days2 = max(days_over_days1 - days2, 0);
-
-	/*
-	 * The time factor is calculated based on the time it took
-	 * (transit_days) compared two cargo-depending values. The
-	 * range is divided into three parts:
-	 *
-	 *  - constant for fast transits
-	 *  - linear decreasing with time with a slope of -1 for medium transports
-	 *  - linear decreasing with time with a slope of -2 for slow transports
-	 *
-	 */
-	const int time_factor = max(MAX_TIME_FACTOR - days_over_days1 - days_over_days2, MIN_TIME_FACTOR);
-
-	return BigMulS(dist * time_factor * num_pieces, cs->current_payment, 21);
+	return BigMulS(dist * GetTimeFactor(cs, transit_days) * num_pieces, cs->current_payment, 21);
 }
 
 /** The industries we've currently brought cargo to. */
@@ -956,12 +959,22 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
 
 	Town *t = st->town;
-	if (t->num_accepted_cargos > 0) { // there are towns without a single house
-		uint intended_amount = max(1U, _economy.global_production[cargo_type] * t->acceptance[cargo_type] / (_economy.global_acceptance[cargo_type] + 1));
-		/* if you deliver the intended amout for each cargo you will get the same bonus as the monthly
-		 * malus for RATING_OUTSTANDING
+	if (t->sum_accepted_cargos_payment > 0) {
+		/* there are towns without a single house */
+		uint intended_amount = max(1U, _economy.global_production[cargo_type] *
+				t->acceptance[cargo_type] /
+				(_economy.global_acceptance[cargo_type] + 1)
+		);
+		/* if you deliver the intended amount for each cargo with time factor
+		 * 128 you will get the same bonus as the monthly malus for
+		 * RATING_OUTSTANDING
 		 */
-		t->ratings[company->index] += max(1U, RATING_DELIVERY_UP * num_pieces / intended_amount / t->num_accepted_cargos);
+		t->ratings[company->index] += max((uint64)1, ((uint64)num_pieces *
+				(uint64)RATING_DELIVERY_UP * (uint64)GetTimeFactor(cs,
+				days_in_transit) * (uint64)cs->initial_payment /
+				(uint64)intended_amount /
+				(uint64)t->sum_accepted_cargos_payment) >> 7
+		);
 	}
 
 	/* Determine profit */
