@@ -20,12 +20,38 @@
 #include "fileio_func.h"
 #include "fios.h"
 
+GRFConfig::GRFConfig(const char *filename)
+{
+	if (filename != NULL) this->filename = strdup(filename);
+}
+
+GRFConfig::~GRFConfig()
+{
+	/* GCF_COPY as in NOT strdupped/alloced the filename, name and info */
+	if (!HasBit(this->flags, GCF_COPY)) {
+		free(this->filename);
+		free(this->name);
+		free(this->info);
+		delete this->error;
+	}
+}
 
 GRFConfig *_all_grfs;
 GRFConfig *_grfconfig;
 GRFConfig *_grfconfig_newgame;
 GRFConfig *_grfconfig_static;
 
+GRFError::GRFError(StringID severity, StringID message) :
+	message(message),
+	severity(severity)
+{
+}
+
+GRFError::~GRFError()
+{
+	free(this->custom_message);
+	free(this->data);
+}
 
 /**
  * Update the palettes of the graphics from the config file.
@@ -58,7 +84,7 @@ static bool CalcGRFMD5Sum(GRFConfig *config)
 		size -= len;
 		checksum.Append(buffer, len);
 	}
-	checksum.Finish(config->md5sum);
+	checksum.Finish(config->ident.md5sum);
 
 	FioFCloseFile(f);
 
@@ -78,7 +104,7 @@ bool FillGRFDetails(GRFConfig *config, bool is_static)
 	LoadNewGRFFile(config, CONFIG_SLOT, GLS_FILESCAN);
 
 	/* Skip if the grfid is 0 (not read) or 0xFFFFFFFF (ttdp system grf) */
-	if (config->grfid == 0 || config->grfid == 0xFFFFFFFF || config->IsOpenTTDBaseGRF()) return false;
+	if (config->ident.grfid == 0 || config->ident.grfid == 0xFFFFFFFF || config->IsOpenTTDBaseGRF()) return false;
 
 	if (is_static) {
 		/* Perform a 'safety scan' for static GRFs */
@@ -94,32 +120,13 @@ bool FillGRFDetails(GRFConfig *config, bool is_static)
 }
 
 
-void ClearGRFConfig(GRFConfig **config)
-{
-	/* GCF_COPY as in NOT strdupped/alloced the filename, name and info */
-	if (!HasBit((*config)->flags, GCF_COPY)) {
-		free((*config)->filename);
-		free((*config)->name);
-		free((*config)->info);
-
-		if ((*config)->error != NULL) {
-			free((*config)->error->custom_message);
-			free((*config)->error->data);
-			free((*config)->error);
-		}
-	}
-	free(*config);
-	*config = NULL;
-}
-
-
 /* Clear a GRF Config list */
 void ClearGRFConfigList(GRFConfig **config)
 {
 	GRFConfig *c, *next;
 	for (c = *config; c != NULL; c = next) {
 		next = c->next;
-		ClearGRFConfig(&c);
+		delete c;
 	}
 	*config = NULL;
 }
@@ -132,15 +139,16 @@ void ClearGRFConfigList(GRFConfig **config)
  */
 GRFConfig *DuplicateGRFConfig(const GRFConfig *c)
 {
-	GRFConfig *config = MallocT<GRFConfig>(1);
+	GRFConfig *config = new GRFConfig();
 	*config = *c;
 
 	if (c->filename != NULL) config->filename = strdup(c->filename);
 	if (c->name     != NULL) config->name = strdup(c->name);
 	if (c->info     != NULL) config->info = strdup(c->info);
 	if (c->error    != NULL) {
-		config->error = MallocT<GRFError>(1);
-		memcpy(config->error, c->error, sizeof(GRFError));
+		config->error = new GRFError(c->error->severity, c->error->message);
+		config->error->num_params = c->error->num_params;
+		memcpy(config->error->param_value, c->error->param_value, sizeof(config->error->param_value));
 		if (c->error->data           != NULL) config->error->data = strdup(c->error->data);
 		if (c->error->custom_message != NULL) config->error->custom_message = strdup(c->error->custom_message);
 	}
@@ -193,10 +201,10 @@ static void RemoveDuplicatesFromGRFConfigList(GRFConfig *list)
 	if (list == NULL) return;
 
 	for (prev = list, cur = list->next; cur != NULL; prev = cur, cur = cur->next) {
-		if (cur->grfid != list->grfid) continue;
+		if (cur->ident.grfid != list->ident.grfid) continue;
 
 		prev->next = cur->next;
-		ClearGRFConfig(&cur);
+		delete cur;
 		cur = prev; // Just go back one so it continues as normal later on
 	}
 
@@ -250,35 +258,35 @@ GRFListCompatibility IsGoodGRFConfigList()
 	GRFListCompatibility res = GLC_ALL_GOOD;
 
 	for (GRFConfig *c = _grfconfig; c != NULL; c = c->next) {
-		const GRFConfig *f = FindGRFConfig(c->grfid, c->md5sum);
+		const GRFConfig *f = FindGRFConfig(c->ident.grfid, c->ident.md5sum);
 		if (f == NULL) {
 			char buf[256];
 
 			/* If we have not found the exactly matching GRF try to find one with the
 			 * same grfid, as it most likely is compatible */
-			f = FindGRFConfig(c->grfid);
+			f = FindGRFConfig(c->ident.grfid);
 			if (f != NULL) {
-				md5sumToString(buf, lastof(buf), c->md5sum);
-				DEBUG(grf, 1, "NewGRF %08X (%s) not found; checksum %s. Compatibility mode on", BSWAP32(c->grfid), c->filename, buf);
+				md5sumToString(buf, lastof(buf), c->ident.md5sum);
+				DEBUG(grf, 1, "NewGRF %08X (%s) not found; checksum %s. Compatibility mode on", BSWAP32(c->ident.grfid), c->filename, buf);
 				SetBit(c->flags, GCF_COMPATIBLE);
 
 				/* Non-found has precedence over compatibility load */
 				if (res != GLC_NOT_FOUND) res = GLC_COMPATIBLE;
-				GamelogGRFCompatible(f);
+				GamelogGRFCompatible(&f->ident);
 				goto compatible_grf;
 			}
 
 			/* No compatible grf was found, mark it as disabled */
-			md5sumToString(buf, lastof(buf), c->md5sum);
-			DEBUG(grf, 0, "NewGRF %08X (%s) not found; checksum %s", BSWAP32(c->grfid), c->filename, buf);
+			md5sumToString(buf, lastof(buf), c->ident.md5sum);
+			DEBUG(grf, 0, "NewGRF %08X (%s) not found; checksum %s", BSWAP32(c->ident.grfid), c->filename, buf);
 
-			GamelogGRFRemove(c->grfid);
+			GamelogGRFRemove(c->ident.grfid);
 
 			c->status = GCS_NOT_FOUND;
 			res = GLC_NOT_FOUND;
 		} else {
 compatible_grf:
-			DEBUG(grf, 1, "Loading GRF %08X from %s", BSWAP32(f->grfid), f->filename);
+			DEBUG(grf, 1, "Loading GRF %08X from %s", BSWAP32(f->ident.grfid), f->filename);
 			/* The filename could be the filename as in the savegame. As we need
 			 * to load the GRF here, we need the correct filename, so overwrite that
 			 * in any case and set the name and info when it is not set already.
@@ -287,7 +295,7 @@ compatible_grf:
 			if (!HasBit(c->flags, GCF_COPY)) {
 				free(c->filename);
 				c->filename = strdup(f->filename);
-				memcpy(c->md5sum, f->md5sum, sizeof(c->md5sum));
+				memcpy(c->ident.md5sum, f->ident.md5sum, sizeof(c->ident.md5sum));
 				if (c->name == NULL && f->name != NULL) c->name = strdup(f->name);
 				if (c->info == NULL && f->info != NULL) c->info = strdup(f->info);
 				c->error = NULL;
@@ -313,8 +321,7 @@ public:
 
 bool GRFFileScanner::AddFile(const char *filename, size_t basepath_length)
 {
-	GRFConfig *c = CallocT<GRFConfig>(1);
-	c->filename = strdup(filename + basepath_length);
+	GRFConfig *c = new GRFConfig(filename + basepath_length);
 
 	bool added = true;
 	if (FillGRFDetails(c, false)) {
@@ -326,7 +333,7 @@ bool GRFFileScanner::AddFile(const char *filename, size_t basepath_length)
 			GRFConfig **pd, *d;
 			bool stop = false;
 			for (pd = &_all_grfs; (d = *pd) != NULL; pd = &d->next) {
-				if (c->grfid == d->grfid && memcmp(c->md5sum, d->md5sum, sizeof(c->md5sum)) == 0) added = false;
+				if (c->ident.grfid == d->ident.grfid && memcmp(c->ident.md5sum, d->ident.md5sum, sizeof(c->ident.md5sum)) == 0) added = false;
 				/* Because there can be multiple grfs with the same name, make sure we checked all grfs with the same name,
 				 *  before inserting the entry. So insert a new grf at the end of all grfs with the same name, instead of
 				 *  just after the first with the same name. Avoids doubles in the list. */
@@ -348,7 +355,7 @@ bool GRFFileScanner::AddFile(const char *filename, size_t basepath_length)
 	if (!added) {
 		/* File couldn't be opened, or is either not a NewGRF or is a
 		 * 'system' NewGRF or it's already known, so forget about it. */
-		ClearGRFConfig(&c);
+		delete c;
 	}
 
 	return added;
@@ -412,10 +419,10 @@ void ScanNewGRFFiles()
 const GRFConfig *FindGRFConfig(uint32 grfid, const uint8 *md5sum)
 {
 	for (const GRFConfig *c = _all_grfs; c != NULL; c = c->next) {
-		if (c->grfid == grfid) {
+		if (c->ident.grfid == grfid) {
 			if (md5sum == NULL) return c;
 
-			if (memcmp(md5sum, c->md5sum, sizeof(c->md5sum)) == 0) return c;
+			if (memcmp(md5sum, c->ident.md5sum, sizeof(c->ident.md5sum)) == 0) return c;
 		}
 	}
 
@@ -479,7 +486,7 @@ GRFConfig *GetGRFConfig(uint32 grfid, uint32 mask)
 	GRFConfig *c;
 
 	for (c = _grfconfig; c != NULL; c = c->next) {
-		if ((c->grfid & mask) == (grfid & mask)) return c;
+		if ((c->ident.grfid & mask) == (grfid & mask)) return c;
 	}
 
 	return NULL;
@@ -510,5 +517,5 @@ static const uint32 OPENTTD_GRAPHICS_BASE_GRF_ID = BSWAP32(0xFF4F5400);
  */
 bool GRFConfig::IsOpenTTDBaseGRF() const
 {
-	return (this->grfid & 0x00FFFFFF) == OPENTTD_GRAPHICS_BASE_GRF_ID;
+	return (this->ident.grfid & 0x00FFFFFF) == OPENTTD_GRAPHICS_BASE_GRF_ID;
 }
