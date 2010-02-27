@@ -172,11 +172,15 @@ static bool EnsureNoTrainOnTrack(TileIndex tile, Track track)
 	return !HasVehicleOnPos(tile, &rail_bits, &EnsureNoTrainOnTrackProc);
 }
 
-static bool CheckTrackCombination(TileIndex tile, TrackBits to_build, uint flags)
+/** Check that the new track bits may be built.
+ * @param tile %Tile to build on.
+ * @param to_build New track bits.
+ * @param flags    Flags of the operation.
+ * @return Succeeded or failed command.
+ */
+static CommandCost CheckTrackCombination(TileIndex tile, TrackBits to_build, uint flags)
 {
-	_error_message = STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION;
-
-	if (!IsPlainRail(tile)) return false;
+	if (!IsPlainRail(tile)) return_cmd_error(STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION);
 
 	/* So, we have a tile with tracks on it (and possibly signals). Let's see
 	 * what tracks first */
@@ -186,19 +190,19 @@ static bool CheckTrackCombination(TileIndex tile, TrackBits to_build, uint flags
 	/* Are we really building something new? */
 	if (current == future) {
 		/* Nothing new is being built */
-		_error_message = STR_ERROR_ALREADY_BUILT;
-		return false;
+		return_cmd_error(STR_ERROR_ALREADY_BUILT);
 	}
 
 	/* Let's see if we may build this */
 	if ((flags & DC_NO_RAIL_OVERLAP) || HasSignals(tile)) {
 		/* If we are not allowed to overlap (flag is on for ai companies or we have
 		 * signals on the tile), check that */
-		return future == TRACK_BIT_HORZ || future == TRACK_BIT_VERT;
-	} else {
-		/* Normally, we may overlap and any combination is valid */
-		return true;
+		if (future != TRACK_BIT_HORZ && future != TRACK_BIT_VERT) {
+			return_cmd_error((flags & DC_NO_RAIL_OVERLAP) ? STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION : STR_ERROR_MUST_REMOVE_SIGNALS_FIRST);
+		}
 	}
+	/* Normally, we may overlap and any combination is valid */
+	return CommandCost();
 }
 
 
@@ -382,12 +386,13 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 
 			if (!IsCompatibleRail(GetRailType(tile), railtype)) return_cmd_error(STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION);
 
-			if (!CheckTrackCombination(tile, trackbit, flags) ||
-					!EnsureNoTrainOnTrack(tile, track)) {
-				return CMD_ERROR;
-			}
+			CommandCost ret = CheckTrackCombination(tile, trackbit, flags);
+			ret.SetGlobalErrorMessage();
+			if (ret.Failed()) return ret;
 
-			CommandCost ret = CheckRailSlope(tileh, trackbit, GetTrackBits(tile), tile);
+			if (!EnsureNoTrainOnTrack(tile, track)) return CMD_ERROR;
+
+			ret = CheckRailSlope(tileh, trackbit, GetTrackBits(tile), tile);
 			if (ret.Failed()) return ret;
 			cost.AddCost(ret);
 
@@ -2182,7 +2187,9 @@ static void DrawTile_Track(TileInfo *ti)
 			SpriteID ground = GetCustomRailSprite(rti, ti->tile, RTSG_GROUND);
 
 			switch (GetRailDepotDirection(ti->tile)) {
+				case DIAGDIR_NE: if (!IsInvisibilitySet(TO_BUILDINGS)) break; // else FALL THROUGH
 				case DIAGDIR_SW: DrawGroundSprite(ground + RTO_X, PAL_NONE); break;
+				case DIAGDIR_NW: if (!IsInvisibilitySet(TO_BUILDINGS)) break; // else FALL THROUGH
 				case DIAGDIR_SE: DrawGroundSprite(ground + RTO_Y, PAL_NONE); break;
 				default: break;
 			}
@@ -2191,7 +2198,9 @@ static void DrawTile_Track(TileInfo *ti)
 				SpriteID overlay = GetCustomRailSprite(rti, ti->tile, RTSG_OVERLAY);
 
 				switch (GetRailDepotDirection(ti->tile)) {
+					case DIAGDIR_NE: if (!IsInvisibilitySet(TO_BUILDINGS)) break; // else FALL THROUGH
 					case DIAGDIR_SW: DrawGroundSprite(overlay + RTO_X, PALETTE_CRASH); break;
+					case DIAGDIR_NW: if (!IsInvisibilitySet(TO_BUILDINGS)) break; // else FALL THROUGH
 					case DIAGDIR_SE: DrawGroundSprite(overlay + RTO_Y, PALETTE_CRASH); break;
 					default: break;
 				}
@@ -2203,8 +2212,10 @@ static void DrawTile_Track(TileInfo *ti)
 			/* PBS debugging, draw reserved tracks darker */
 			if (_game_mode != GM_MENU && _settings_client.gui.show_track_reservation && HasDepotReservation(ti->tile)) {
 				switch (GetRailDepotDirection(ti->tile)) {
-					case DIAGDIR_SW: DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH); break;
-					case DIAGDIR_SE: DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH); break;
+					case DIAGDIR_NE: if (!IsInvisibilitySet(TO_BUILDINGS)) break; // else FALL THROUGH
+					case DIAGDIR_SW: DrawGroundSprite(rti->base_sprites.single_x, PALETTE_CRASH); break;
+					case DIAGDIR_NW: if (!IsInvisibilitySet(TO_BUILDINGS)) break; // else FALL THROUGH
+					case DIAGDIR_SE: DrawGroundSprite(rti->base_sprites.single_y, PALETTE_CRASH); break;
 					default: break;
 				}
 			}
