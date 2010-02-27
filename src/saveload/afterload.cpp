@@ -301,14 +301,14 @@ static void ResetSignalHandlers()
 static const GRFIdentifier *GetOverriddenIdentifier(const GRFConfig *c)
 {
 	const LoggedAction *la = &_gamelog_action[_gamelog_actions - 1];
-	if (la->at != GLAT_LOAD) return c;
+	if (la->at != GLAT_LOAD) return &c->ident;
 
 	const LoggedChange *lcend = &la->change[la->changes];
 	for (const LoggedChange *lc = la->change; lc != lcend; lc++) {
-		if (lc->ct == GLCT_GRFCOMPAT && lc->grfcompat.grfid == c->grfid) return &lc->grfcompat;
+		if (lc->ct == GLCT_GRFCOMPAT && lc->grfcompat.grfid == c->ident.grfid) return &lc->grfcompat;
 	}
 
-	return c;
+	return &c->ident;
 }
 
 /** Was the saveload crash because of missing NewGRFs? */
@@ -354,13 +354,13 @@ static void CDECL HandleSavegameLoadCrash(int signum)
 			const GRFIdentifier *replaced = GetOverriddenIdentifier(c);
 			char buf[40];
 			md5sumToString(buf, lastof(buf), replaced->md5sum);
-			p += seprintf(p, lastof(buffer), "NewGRF %08X (checksum %s) not found.\n  Loaded NewGRF \"%s\" with same GRF ID instead.\n", BSWAP32(c->grfid), buf, c->filename);
+			p += seprintf(p, lastof(buffer), "NewGRF %08X (checksum %s) not found.\n  Loaded NewGRF \"%s\" with same GRF ID instead.\n", BSWAP32(c->ident.grfid), buf, c->filename);
 			_saveload_crash_with_missing_newgrfs = true;
 		}
 		if (c->status == GCS_NOT_FOUND) {
 			char buf[40];
-			md5sumToString(buf, lastof(buf), c->md5sum);
-			p += seprintf(p, lastof(buffer), "NewGRF %08X (%s) not found; checksum %s.\n", BSWAP32(c->grfid), c->filename, buf);
+			md5sumToString(buf, lastof(buf), c->ident.md5sum);
+			p += seprintf(p, lastof(buffer), "NewGRF %08X (%s) not found; checksum %s.\n", BSWAP32(c->ident.grfid), c->filename, buf);
 			_saveload_crash_with_missing_newgrfs = true;
 		}
 	}
@@ -525,7 +525,7 @@ bool AfterLoadGame()
 		/* no station is determined by 'tile == INVALID_TILE' now (instead of '0') */
 		Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (st->airport_tile       == 0) st->airport_tile = INVALID_TILE;
+			if (st->airport.tile       == 0) st->airport.tile = INVALID_TILE;
 			if (st->dock_tile          == 0) st->dock_tile    = INVALID_TILE;
 			if (st->train_station.tile == 0) st->train_station.tile   = INVALID_TILE;
 		}
@@ -2061,6 +2061,16 @@ bool AfterLoadGame()
 					}
 					offset += atc[i].num_frames - 1;
 				}
+			}
+		}
+	}
+
+	if (CheckSavegameVersion(139)) {
+		Station *st;
+		FOR_ALL_STATIONS(st) {
+			if (st->airport.tile != INVALID_TILE) {
+				st->airport.w = st->GetAirportSpec()->size_x;
+				st->airport.h = st->GetAirportSpec()->size_y;
 			}
 		}
 	}
