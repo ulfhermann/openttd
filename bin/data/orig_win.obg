@@ -4,11 +4,30 @@
 ; Tycoon Deluxe for Windows CD.
 ;
 [metadata]
-name         = original_windows
-shortname    = TTDW
-version      = 0
-description  = Original Transport Tycoon Deluxe Windows edition graphics
-palette      = Windows
+name              = original_windows
+shortname         = TTDW
+version           = 0
+palette           = Windows
+description       = Original Transport Tycoon Deluxe Windows edition graphics.
+description.bg_BG = Оригинални графики на Transport Tycoon Deluxe за Windows.
+description.cs_CZ = Původní sada grafik Transport Tycoon Deluxe (verze pro Windows).
+description.de_DE = Original Transport Tycoon Deluxe Windows Basisgrafiken.
+description.en_GB = Original Transport Tycoon Deluxe Windows edition graphics.
+description.en_US = Original Transport Tycoon Deluxe Windows edition graphics.
+description.es_ES = Gráficos originales de Transport Tycoon Deluxe versión Windows.
+description.fi_FI = Alkuperäiset Transport Tycoon Deluxe Windows grafiikat.
+description.fr_FR = Graphiques originaux de Transport Tycoon Deluxe (version Windows).
+description.hr_HR = Originalna grafika za Transport Tycoon Deluxe Windows izdanje.
+description.hu_HU = Az eredeti Transport Tycoon Deluxe Windows verziójának grafikája.
+description.id_ID = Grafik orisinil Transport Tycoon Deluxe versi Windows.
+description.it_IT = Grafica originale di Transport Tycoon Deluxe, edizione Windows.
+description.nb_NO = Original grafikk fra Transport Tycoon Deluxe for Windows.
+description.nl_NL = Originele graphics van de Transport Tycoon Deluxe Windows-versie.
+description.pt_PT = Gráficos originais da edição Windows de Transport Tycoon Deluxe.
+description.ru_RU = Оригинальная графика из Transport Tycoon Deluxe для Windows.
+description.sl_SL = Originalna grafika Transport Tycoon Deluxe za različico oken(windows).
+description.sv_SE = Originalgrafiken från Transport Tycoon Deluxe, Windows-utgåvan.
+description.zh_TW = 原版 Transport Tycoon Deluxe Windows 版的圖形。
 
 [files]
 base         = TRG1R.GRF
@@ -28,4 +47,4 @@ OPENTTDW.GRF = 80346ea80de167068cfb975f93963941
 
 [origin]
 default      = You can find it on your Transport Tycoon Deluxe CD-ROM.
-OPENTTDW.GRF = This file was part of your installation.
+OPENTTDW.GRF = This file was part of your OpenTTD installation.
