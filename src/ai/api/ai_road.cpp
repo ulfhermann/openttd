@@ -528,8 +528,9 @@ static bool NeighbourHasReachableRoad(::RoadTypes rts, TileIndex start_tile, Dia
 	p2 |= drive_through ? 2 : 0;
 	p2 |= road_veh_type == ROADVEHTYPE_TRUCK ? 1 : 0;
 	p2 |= ::RoadTypeToRoadTypes(AIObject::GetRoadType()) << 2;
+	p2 |= entrance_dir << 6;
 	p2 |= (AIStation::IsValidStation(station_id) ? station_id : INVALID_STATION) << 16;
-	return AIObject::DoCommand(tile, entrance_dir, p2, CMD_BUILD_ROAD_STOP);
+	return AIObject::DoCommand(tile, 1 | 1 << 8, p2, CMD_BUILD_ROAD_STOP);
 }
 
 /* static */ bool AIRoad::BuildRoadStation(TileIndex tile, TileIndex front, RoadVehicleType road_veh_type, StationID station_id)
@@ -549,7 +550,7 @@ static bool NeighbourHasReachableRoad(::RoadTypes rts, TileIndex start_tile, Dia
 	EnforcePrecondition(false, ::TileX(start) == ::TileX(end) || ::TileY(start) == ::TileY(end));
 	EnforcePrecondition(false, IsRoadTypeAvailable(GetCurrentRoadType()));
 
-	return AIObject::DoCommand(end, start, (::TileY(start) != ::TileY(end) ? 4 : 0) | (start < end ? 1 : 2) | (AIObject::GetRoadType() << 3), CMD_REMOVE_LONG_ROAD);
+	return AIObject::DoCommand(start, end, (::TileY(start) != ::TileY(end) ? 4 : 0) | (start < end ? 1 : 2) | (AIObject::GetRoadType() << 3), CMD_REMOVE_LONG_ROAD);
 }
 
 /* static */ bool AIRoad::RemoveRoadFull(TileIndex start, TileIndex end)
@@ -559,7 +560,7 @@ static bool NeighbourHasReachableRoad(::RoadTypes rts, TileIndex start_tile, Dia
 	EnforcePrecondition(false, ::TileX(start) == ::TileX(end) || ::TileY(start) == ::TileY(end));
 	EnforcePrecondition(false, IsRoadTypeAvailable(GetCurrentRoadType()));
 
-	return AIObject::DoCommand(end, start, (::TileY(start) != ::TileY(end) ? 4 : 0) | (start < end ? 2 : 1) | (AIObject::GetRoadType() << 3), CMD_REMOVE_LONG_ROAD);
+	return AIObject::DoCommand(start, end, (::TileY(start) != ::TileY(end) ? 4 : 0) | (start < end ? 2 : 1) | (AIObject::GetRoadType() << 3), CMD_REMOVE_LONG_ROAD);
 }
 
 /* static */ bool AIRoad::RemoveRoadDepot(TileIndex tile)
@@ -577,7 +578,7 @@ static bool NeighbourHasReachableRoad(::RoadTypes rts, TileIndex start_tile, Dia
 	EnforcePrecondition(false, IsTileType(tile, MP_STATION));
 	EnforcePrecondition(false, IsRoadStop(tile));
 
-	return AIObject::DoCommand(tile, 0, GetRoadStopType(tile), CMD_REMOVE_ROAD_STOP);
+	return AIObject::DoCommand(tile, 1 | 1 << 8, GetRoadStopType(tile), CMD_REMOVE_ROAD_STOP);
 }
 
 /* static */ Money AIRoad::GetBuildCost(RoadType roadtype, BuildType build_type)

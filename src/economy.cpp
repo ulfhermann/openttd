@@ -27,6 +27,7 @@
 #include "newgrf_industries.h"
 #include "newgrf_industrytiles.h"
 #include "newgrf_station.h"
+#include "newgrf_airporttiles.h"
 #include "unmovable.h"
 #include "group.h"
 #include "strings_func.h"
@@ -667,6 +668,16 @@ void RecomputePrices()
 			price >>= -shift;
 		}
 
+		/* Make sure the price does not get reduced to zero.
+		 * Zero breaks quite a few commands that use a zero
+		 * cost to see whether something got changed or not
+		 * and based on that cause an error. When the price
+		 * is zero that fails even when things are done. */
+		if (price == 0) {
+			price = Clamp(_price_base_specs[i].start_price, -1, 1);
+			/* No base price should be zero, but be sure. */
+			assert(price != 0);
+		}
 		/* Store value */
 		_price[i] = price;
 	}
@@ -1292,6 +1303,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 			st->last_vehicle_type = v->type;
 
 			StationAnimationTrigger(st, st->xy, STAT_ANIM_CARGO_TAKEN, v->cargo_type);
+			AirportAnimationTrigger(st, AAT_STATION_CARGO_TAKEN, v->cargo_type);
 
 			unloading_time += cap;
 
