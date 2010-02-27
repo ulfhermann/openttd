@@ -35,6 +35,7 @@
 #include "newgrf_commons.h"
 #include "newgrf_townname.h"
 #include "newgrf_industries.h"
+#include "newgrf_airporttiles.h"
 #include "rev.h"
 #include "fios.h"
 #include "rail.h"
@@ -1048,11 +1049,11 @@ static ChangeInfoResult AircraftVehicleChangeInfo(uint engine, int numinfo, int 
 				avi->running_cost = buf->ReadByte();
 				break;
 
-			case 0x0F: // Passenger capacity
+			case PROP_AIRCRAFT_PASSENGER_CAPACITY: // 0x0F Passenger capacity
 				avi->passenger_capacity = buf->ReadWord();
 				break;
 
-			case 0x11: // Mail capacity
+			case PROP_AIRCRAFT_MAIL_CAPACITY: // 0x11 Mail capacity
 				avi->mail_capacity = buf->ReadByte();
 				break;
 
@@ -2648,6 +2649,93 @@ static ChangeInfoResult RailTypeReserveInfo(uint id, int numinfo, int prop, Byte
 	return ret;
 }
 
+static ChangeInfoResult AirportTilesChangeInfo(uint airtid, int numinfo, int prop, ByteReader *buf)
+{
+	ChangeInfoResult ret = CIR_SUCCESS;
+
+	if (airtid + numinfo > NUM_AIRPORTTILES) {
+		grfmsg(1, "AirportTileChangeInfo: Too many airport tiles loaded (%u), max (%u). Ignoring.", airtid + numinfo, NUM_AIRPORTTILES);
+		return CIR_INVALID_ID;
+	}
+
+	/* Allocate airport tile specs if they haven't been allocated already. */
+	if (_cur_grffile->airtspec == NULL) {
+		_cur_grffile->airtspec = CallocT<AirportTileSpec*>(NUM_AIRPORTTILES);
+	}
+
+	for (int i = 0; i < numinfo; i++) {
+		AirportTileSpec *tsp = _cur_grffile->airtspec[airtid + i];
+
+		if (prop != 0x08 && tsp == NULL) {
+			grfmsg(2, "AirportTileChangeInfo: Attempt to modify undefined airport tile %u. Ignoring.", airtid + i);
+			return CIR_INVALID_ID;
+		}
+
+		switch (prop) {
+			case 0x08: { // Substitute airport tile type
+				AirportTileSpec **tilespec = &_cur_grffile->airtspec[airtid + i];
+				byte subs_id = buf->ReadByte();
+
+				if (subs_id >= NEW_AIRPORTTILE_OFFSET) {
+					/* The substitute id must be one of the original airport tiles. */
+					grfmsg(2, "AirportTileChangeInfo: Attempt to use new airport tile %u as substitute airport tile for %u. Ignoring.", subs_id, airtid + i);
+					continue;
+				}
+
+				/* Allocate space for this airport tile. */
+				if (*tilespec == NULL) {
+					*tilespec = CallocT<AirportTileSpec>(1);
+					tsp = *tilespec;
+
+					memcpy(tsp, AirportTileSpec::Get(subs_id), sizeof(AirportTileSpec));
+					tsp->enabled = true;
+
+					tsp->animation_info = 0xFFFF;
+
+					tsp->grf_prop.local_id = airtid + i;
+					tsp->grf_prop.subst_id = subs_id;
+					tsp->grf_prop.grffile = _cur_grffile;
+					_airporttile_mngr.AddEntityID(airtid + i, _cur_grffile->grfid, subs_id); // pre-reserve the tile slot
+				}
+			} break;
+
+			case 0x09: { // Airport tile override
+				byte override = buf->ReadByte();
+
+				/* The airport tile being overridden must be an original airport tile. */
+				if (override >= NEW_AIRPORTTILE_OFFSET) {
+					grfmsg(2, "AirportTileChangeInfo: Attempt to override new airport tile %u with airport tile id %u. Ignoring.", override, airtid + i);
+					continue;
+				}
+
+				_airporttile_mngr.Add(airtid + i, _cur_grffile->grfid, override);
+			} break;
+
+			case 0x0E: // Callback flags
+				tsp->callback_flags = buf->ReadByte();
+				break;
+
+			case 0x0F: // Animation information
+				tsp->animation_info = buf->ReadWord();
+				break;
+
+			case 0x10: // Animation speed
+				tsp->animation_speed = buf->ReadByte();
+				break;
+
+			case 0x11: // Animation triggers
+				tsp->animation_triggers = buf->ReadByte();
+				break;
+
+			default:
+				ret = CIR_UNKNOWN;
+				break;
+		}
+	}
+
+	return ret;
+}
+
 static bool HandleChangeInfoResult(const char *caller, ChangeInfoResult cir, uint8 feature, uint8 property)
 {
 	switch (cir) {
@@ -2668,8 +2756,8 @@ static bool HandleChangeInfoResult(const char *caller, ChangeInfoResult cir, uin
 			/* No debug message for an invalid ID, as it has already been output */
 			_skip_sprites = -1;
 			_cur_grfconfig->status = GCS_DISABLED;
-			_cur_grfconfig->error  = CallocT<GRFError>(1);
-			_cur_grfconfig->error->severity = STR_NEWGRF_ERROR_MSG_FATAL;
+			delete _cur_grfconfig->error;
+			_cur_grfconfig->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL);
 			_cur_grfconfig->error->message  = (cir == CIR_INVALID_ID) ? STR_NEWGRF_ERROR_INVALID_ID : STR_NEWGRF_ERROR_UNKNOWN_PROPERTY;
 			return true;
 	}
@@ -2707,6 +2795,7 @@ static void FeatureChangeInfo(ByteReader *buf)
 		/* GSF_SIGNALS */      NULL,
 		/* GSF_OBJECTS */      NULL,
 		/* GSF_RAILTYPES */    RailTypeChangeInfo,
+		/* GSF_AIRPORTTILES */ AirportTilesChangeInfo,
 	};
 
 	uint8 feature  = buf->ReadByte();
@@ -3076,6 +3165,7 @@ static void NewSpriteGroup(ByteReader *buf)
 				}
 
 				case GSF_TOWNHOUSE:
+				case GSF_AIRPORTTILES:
 				case GSF_INDUSTRYTILES: {
 					byte num_spriteset_ents   = _cur_grffile->spriteset_numents;
 					byte num_spritesets       = _cur_grffile->spriteset_numsets;
@@ -3550,6 +3640,37 @@ static void RailTypeMapSpriteGroup(ByteReader *buf, uint8 idcount)
 	buf->ReadWord();
 }
 
+static void AirportTileMapSpriteGroup(ByteReader *buf, uint8 idcount)
+{
+	uint8 *airptiles = AllocaM(uint8, idcount);
+	for (uint i = 0; i < idcount; i++) {
+		airptiles[i] = buf->ReadByte();
+	}
+
+	/* Skip the cargo type section, we only care about the default group */
+	uint8 cidcount = buf->ReadByte();
+	buf->Skip(cidcount * 3);
+
+	uint16 groupid = buf->ReadWord();
+	if (!IsValidGroupID(groupid, "AirportTileMapSpriteGroup")) return;
+
+	if (_cur_grffile->airtspec == NULL) {
+		grfmsg(1, "AirportTileMapSpriteGroup: No airport tiles defined, skipping");
+		return;
+	}
+
+	for (uint i = 0; i < idcount; i++) {
+		AirportTileSpec *airtsp = _cur_grffile->airtspec[airptiles[i]];
+
+		if (airtsp == NULL) {
+			grfmsg(1, "AirportTileMapSpriteGroup: Airport tile %d undefined, skipping", airptiles[i]);
+			continue;
+		}
+
+		airtsp->grf_prop.spritegroup = _cur_grffile->spritegroups[groupid];
+	}
+}
+
 
 /* Action 0x03 */
 static void FeatureMapSpriteGroup(ByteReader *buf)
@@ -3628,6 +3749,10 @@ static void FeatureMapSpriteGroup(ByteReader *buf)
 		case GSF_RAILTYPES:
 			RailTypeMapSpriteGroup(buf, idcount);
 			break;
+
+		case GSF_AIRPORTTILES:
+			AirportTileMapSpriteGroup(buf, idcount);
+			return;
 
 		default:
 			grfmsg(1, "FeatureMapSpriteGroup: Unsupported feature %d, skipping", feature);
@@ -3717,6 +3842,14 @@ static void FeatureNewName(ByteReader *buf)
 							grfmsg(1, "FeatureNewName: Attempt to name undefined station 0x%X, ignoring", GB(id, 0, 8));
 						} else {
 							_cur_grffile->stations[GB(id, 0, 8)]->name = AddGRFString(_cur_grffile->grfid, id, lang, new_scheme, name, STR_UNDEFINED);
+						}
+						break;
+
+					case 0xC7: // Airporttile name
+						if (_cur_grffile->airtspec == NULL || _cur_grffile->airtspec[GB(id, 0, 8)] == NULL) {
+							grfmsg(1, "FeatureNewName: Attempt to name undefined airport tile 0x%X, ignoring", GB(id, 0, 8));
+						} else {
+							_cur_grffile->airtspec[GB(id, 0, 8)]->name = AddGRFString(_cur_grffile->grfid, id, lang, new_scheme, name, STR_UNDEFINED);
 						}
 						break;
 
@@ -4125,7 +4258,7 @@ static void CfgApply(ByteReader *buf)
 		return;
 	}
 
-	GRFLocation location(_cur_grfconfig->grfid, _nfo_line + 1);
+	GRFLocation location(_cur_grfconfig->ident.grfid, _nfo_line + 1);
 	GRFLineToSpriteOverride::iterator it = _grf_line_to_action6_sprite_override.find(location);
 	if (it != _grf_line_to_action6_sprite_override.end()) {
 		free(preload_sprite);
@@ -4198,18 +4331,12 @@ static void CfgApply(ByteReader *buf)
  */
 static void DisableStaticNewGRFInfluencingNonStaticNewGRFs(GRFConfig *c)
 {
-	if (c->error != NULL) {
-		free(c->error->custom_message);
-		free(c->error->data);
-		free(c->error);
-	}
+	delete c->error;
 	c->status = GCS_DISABLED;
-	c->error  = CallocT<GRFError>(1);
+	c->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC);
 	c->error->data = strdup(_cur_grfconfig->name);
-	c->error->severity = STR_NEWGRF_ERROR_MSG_FATAL;
-	c->error->message  = STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC;
 
-	ClearTemporaryNewGRFData(GetFileByGRFID(c->grfid));
+	ClearTemporaryNewGRFData(GetFileByGRFID(c->ident.grfid));
 }
 
 /* Action 0x07
@@ -4383,7 +4510,7 @@ static void ScanInfo(ByteReader *buf)
 	buf->ReadByte();
 	uint32 grfid  = buf->ReadDWord();
 
-	_cur_grfconfig->grfid = grfid;
+	_cur_grfconfig->ident.grfid = grfid;
 
 	/* GRF IDs starting with 0xFF are reserved for internal TTDPatch use */
 	if (GB(grfid, 24, 8) == 0xFF) SetBit(_cur_grfconfig->flags, GCF_SYSTEM);
@@ -4416,9 +4543,8 @@ static void GRFInfo(ByteReader *buf)
 
 	if (_cur_stage < GLS_RESERVE && _cur_grfconfig->status != GCS_UNKNOWN) {
 		_cur_grfconfig->status = GCS_DISABLED;
-		_cur_grfconfig->error  = CallocT<GRFError>(1);
-		_cur_grfconfig->error->severity = STR_NEWGRF_ERROR_MSG_FATAL;
-		_cur_grfconfig->error->message  = STR_NEWGRF_ERROR_MULTIPLE_ACTION_8;
+		delete _cur_grfconfig->error;
+		_cur_grfconfig->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_MULTIPLE_ACTION_8);
 
 		_skip_sprites = -1;
 		return;
@@ -4556,9 +4682,7 @@ static void GRFLoadError(ByteReader *buf)
 		return;
 	}
 
-	GRFError *error = CallocT<GRFError>(1);
-
-	error->severity = sevstr[severity];
+	GRFError *error = new GRFError(sevstr[severity]);
 
 	if (message_id == 0xFF) {
 		/* This is a custom error message. */
@@ -5053,7 +5177,7 @@ static void SafeGRFInhibit(ByteReader *buf)
 		uint32 grfid = buf->ReadDWord();
 
 		/* GRF is unsafe it if tries to deactivate other GRFs */
-		if (grfid != _cur_grfconfig->grfid) {
+		if (grfid != _cur_grfconfig->ident.grfid) {
 			SetBit(_cur_grfconfig->flags, GCF_UNSAFE);
 
 			/* Skip remainder of GRF */
@@ -5426,17 +5550,12 @@ static void TranslateGRFStrings(ByteReader *buf)
 	if (c->status == GCS_INITIALISED) {
 		/* If the file is not active but will be activated later, give an error
 		 * and disable this file. */
-		GRFError *error = CallocT<GRFError>(1);
+		delete _cur_grfconfig->error;
+		_cur_grfconfig->error = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_LOAD_AFTER);
 
 		char tmp[256];
 		GetString(tmp, STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE, lastof(tmp));
-		error->data = strdup(tmp);
-
-		error->message  = STR_NEWGRF_ERROR_LOAD_AFTER;
-		error->severity = STR_NEWGRF_ERROR_MSG_FATAL;
-
-		if (_cur_grfconfig->error != NULL) free(_cur_grfconfig->error);
-		_cur_grfconfig->error = error;
+		_cur_grfconfig->error->data = strdup(tmp);
 
 		_cur_grfconfig->status = GCS_DISABLED;
 		ClearTemporaryNewGRFData(_cur_grffile);
@@ -5648,6 +5767,21 @@ static void ResetCustomHouses()
 	}
 }
 
+static void ResetCustomAirports()
+{
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		AirportTileSpec **&airporttilespec = (*file)->airtspec;
+		if (airporttilespec != NULL) {
+			for (uint i = 0; i < NUM_AIRPORTTILES; i++) {
+				free(airporttilespec[i]);
+			}
+			free(airporttilespec);
+			airporttilespec = NULL;
+		}
+	}
+}
+
 static void ResetCustomIndustries()
 {
 	const GRFFile * const *end = _grf_files.End();
@@ -5714,9 +5848,7 @@ static void ResetNewGRFErrors()
 {
 	for (GRFConfig *c = _grfconfig; c != NULL; c = c->next) {
 		if (!HasBit(c->flags, GCF_COPY) && c->error != NULL) {
-			free(c->error->custom_message);
-			free(c->error->data);
-			free(c->error);
+			delete c->error;
 			c->error = NULL;
 		}
 	}
@@ -5767,6 +5899,10 @@ static void ResetNewGRFData()
 	/* Reset station classes */
 	ResetStationClasses();
 	ResetCustomStations();
+
+	/* Reset airport-related structures */
+	ResetCustomAirports();
+	AirportTileSpec::ResetAirportTiles();
 
 	/* Reset canal sprite groups and flags */
 	memset(_water_feature, 0, sizeof(_water_feature));
@@ -6105,6 +6241,26 @@ static void FinaliseIndustriesArray()
 	}
 }
 
+/**
+ * Add all new airports to the airport array. Airport properties can be set at any
+ * time in the GRF file, so we can only add a airport spec to the airport array
+ * after the file has finished loading.
+ */
+static void FinaliseAirportsArray()
+{
+	const GRFFile * const *end = _grf_files.End();
+	for (GRFFile **file = _grf_files.Begin(); file != end; file++) {
+		AirportTileSpec **&airporttilespec = (*file)->airtspec;
+		if (airporttilespec != NULL) {
+			for (int i = 0; i < NUM_AIRPORTTILES; i++) {
+				if (airporttilespec[i] != NULL && airporttilespec[i]->enabled) {
+					_airporttile_mngr.SetEntitySpec(airporttilespec[i]);
+				}
+			}
+		}
+	}
+}
+
 /* Here we perform initial decoding of some special sprites (as are they
  * described at http://www.ttdpatch.net/src/newgrf.txt, but this is only a very
  * partial implementation yet).
@@ -6148,7 +6304,7 @@ static void DecodeSpecialSprite(byte *buf, uint num, GrfLoadingStage stage)
 		/* 0x13 */ { NULL,     NULL,      NULL,            NULL,           NULL,              TranslateGRFStrings, },
 	};
 
-	GRFLocation location(_cur_grfconfig->grfid, _nfo_line);
+	GRFLocation location(_cur_grfconfig->ident.grfid, _nfo_line);
 
 	GRFLineToSpriteOverride::iterator it = _grf_line_to_action6_sprite_override.find(location);
 	if (it == _grf_line_to_action6_sprite_override.end()) {
@@ -6189,9 +6345,8 @@ static void DecodeSpecialSprite(byte *buf, uint num, GrfLoadingStage stage)
 
 		_skip_sprites = -1;
 		_cur_grfconfig->status = GCS_DISABLED;
-		_cur_grfconfig->error  = CallocT<GRFError>(1);
-		_cur_grfconfig->error->severity = STR_NEWGRF_ERROR_MSG_FATAL;
-		_cur_grfconfig->error->message  = STR_NEWGRF_ERROR_READ_BOUNDS;
+		delete _cur_grfconfig->error;
+		_cur_grfconfig->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_READ_BOUNDS);
 	}
 }
 
@@ -6221,9 +6376,7 @@ void LoadNewGRFFile(GRFConfig *config, uint file_index, GrfLoadingStage stage)
 	if (file_index > LAST_GRF_SLOT) {
 		DEBUG(grf, 0, "'%s' is not loaded as the maximum number of GRFs has been reached", filename);
 		config->status = GCS_DISABLED;
-		config->error  = CallocT<GRFError>(1);
-		config->error->severity = STR_NEWGRF_ERROR_MSG_FATAL;
-		config->error->message  = STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED;
+		config->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED);
 		return;
 	}
 
@@ -6269,9 +6422,8 @@ void LoadNewGRFFile(GRFConfig *config, uint file_index, GrfLoadingStage stage)
 			if (_skip_sprites == 0) {
 				grfmsg(0, "LoadNewGRFFile: Unexpected sprite, disabling");
 				config->status = GCS_DISABLED;
-				config->error  = CallocT<GRFError>(1);
-				config->error->severity = STR_NEWGRF_ERROR_MSG_FATAL;
-				config->error->message  = STR_NEWGRF_ERROR_UNEXPECTED_SPRITE;
+				delete config->error;
+				config->error  = new GRFError(STR_NEWGRF_ERROR_MSG_FATAL, STR_NEWGRF_ERROR_UNEXPECTED_SPRITE);
 				break;
 			}
 
@@ -6475,6 +6627,9 @@ static void AfterLoadGRFs()
 	/* build the routemap legend, based on the available cargos */
 	BuildLinkStatsLegend();
 
+	/* Add all new airports to the airports array. */
+	FinaliseAirportsArray();
+
 	/* Update the townname generators list */
 	InitGRFTownGeneratorNames();
 
@@ -6570,7 +6725,7 @@ void LoadNewGRF(uint load_index, uint file_index)
 				SetBit(c->flags, GCF_RESERVED);
 			} else if (stage == GLS_ACTIVATION) {
 				ClrBit(c->flags, GCF_RESERVED);
-				assert(GetFileByGRFID(c->grfid) == _cur_grffile);
+				assert(GetFileByGRFID(c->ident.grfid) == _cur_grffile);
 				ClearTemporaryNewGRFData(_cur_grffile);
 				BuildCargoTranslationMap();
 				DEBUG(sprite, 2, "LoadNewGRF: Currently %i sprites are loaded", _cur_spriteid);
