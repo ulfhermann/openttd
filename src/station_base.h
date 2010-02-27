@@ -134,7 +134,7 @@ public:
 		return ret;
 	}
 
-	FORCEINLINE void Increase(uint sent)
+	FORCEINLINE void Increase(int sent)
 	{
 		this->sent += sent;
 	}
@@ -257,15 +257,15 @@ struct GoodsEntry {
 	/**
 	 * update the flow stats for count cargo from source sent to next
 	 */
-	void UpdateFlowStats(StationID source, uint count, StationID next);
-	void UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next);
-	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count);
+	void UpdateFlowStats(StationID source, int count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, int count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, int count);
 
 	/**
 	 * update the flow stats for count cargo that cannot be delivered here
 	 * return the direction where it is sent
 	 */
-	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
+	StationID UpdateFlowStatsTransfer(StationID source, int count, StationID curr);
 };
 
 
