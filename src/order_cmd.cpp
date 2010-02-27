@@ -408,14 +408,24 @@ static void DeleteOrderWarnings(const Vehicle *v)
 	DeleteVehicleNews(v->index, STR_NEWS_VEHICLE_HAS_INVALID_ENTRY);
 }
 
-
-static TileIndex GetOrderLocation(const Order& o)
+/**
+ * Returns a tile somewhat representing the order destination (not suitable for pathfinding).
+ * @param v The vehicle to get the location for.
+ * @return destination of order, or INVALID_TILE if none.
+ */
+TileIndex Order::GetLocation(const Vehicle *v) const
 {
-	switch (o.GetType()) {
-		default: NOT_REACHED();
-		case OT_GOTO_WAYPOINT: return Waypoint::Get(o.GetDestination())->xy;
-		case OT_GOTO_STATION:  return Station::Get(o.GetDestination())->xy;
-		case OT_GOTO_DEPOT:    return Depot::Get(o.GetDestination())->xy;
+	switch (this->GetType()) {
+		case OT_GOTO_WAYPOINT:
+		case OT_GOTO_STATION:
+			return BaseStation::Get(this->GetDestination())->xy;
+
+		case OT_GOTO_DEPOT:
+			if ((this->GetDepotActionType() & ODATFB_NEAREST_DEPOT) != 0) return INVALID_TILE;
+			return (v->type == VEH_AIRCRAFT) ? Station::Get(this->GetDestination())->xy : Depot::Get(this->GetDestination())->xy;
+
+		default:
+			return INVALID_TILE;
 	}
 }
 
@@ -433,7 +443,10 @@ static uint GetOrderDistance(const Order *prev, const Order *cur, const Vehicle 
 		return max(dist1, dist2);
 	}
 
-	return DistanceManhattan(GetOrderLocation(*prev), GetOrderLocation(*cur));
+	TileIndex prev_tile = prev->GetLocation(v);
+	TileIndex cur_tile = cur->GetLocation(v);
+	if (prev_tile == INVALID_TILE || cur_tile == INVALID_TILE) return 0;
+	return DistanceManhattan(prev_tile, cur_tile);
 }
 
 /** Add an order to the orderlist of a vehicle.

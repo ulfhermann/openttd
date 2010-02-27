@@ -13,9 +13,9 @@
 #define AIRPORTTILES_H
 
 /** Writes all airport tile properties in the AirportTile struct */
-#define AT(num_frames, anim_speed) {(1 << 8) | num_frames, anim_speed}
+#define AT(num_frames, anim_speed) {(1 << 8) | num_frames, anim_speed, STR_NULL, 0, 0, 0, true, {INVALID_AIRPORTTILE, 0, NULL, NULL, INVALID_AIRPORTTILE}}
 /** Writes an airport tile without animation in the AirportTile struct */
-#define AT_NOANIM {0xFFFF, 2}
+#define AT_NOANIM {0xFFFF, 2, STR_NULL, 0, 0, 0, true, {INVALID_AIRPORTTILE, 0, NULL, NULL, INVALID_AIRPORTTILE}}
 
 /** All default airport tiles.
  * @see AirportTiles for a list of names. */
@@ -55,7 +55,7 @@ static const AirportTileSpec _origin_airporttile_specs[] = {
 	AT_NOANIM,
 
 	AT_NOANIM,
-	AT(12, 2), // APT_RADAR_GRASS_FENCE_SW
+	AT(11, 2), // APT_RADAR_GRASS_FENCE_SW
 	AT_NOANIM,
 	AT_NOANIM,
 	AT_NOANIM,
@@ -63,7 +63,7 @@ static const AirportTileSpec _origin_airporttile_specs[] = {
 	AT_NOANIM,
 	AT_NOANIM,
 	AT_NOANIM,
-	AT(4, 1), // APT_GRASS_FENCE_NE_FLAG
+	AT(3, 1), // APT_GRASS_FENCE_NE_FLAG
 
 	AT_NOANIM,
 	AT_NOANIM,
@@ -77,8 +77,8 @@ static const AirportTileSpec _origin_airporttile_specs[] = {
 	AT_NOANIM,
 
 	AT_NOANIM,
-	AT(12, 2), // APT_RADAR_FENCE_SW
-	AT(12, 2), // APT_RADAR_FENCE_NE
+	AT(11, 2), // APT_RADAR_FENCE_SW
+	AT(11, 2), // APT_RADAR_FENCE_NE
 	AT_NOANIM,
 	AT_NOANIM,
 	AT_NOANIM,
@@ -101,10 +101,10 @@ static const AirportTileSpec _origin_airporttile_specs[] = {
 	AT_NOANIM,
 	AT_NOANIM,
 	AT_NOANIM,
-	AT(4, 1), // APT_GRASS_FENCE_NE_FLAG_2
+	AT(3, 1), // APT_GRASS_FENCE_NE_FLAG_2
 };
 
-assert_compile(NUM_AIRPORTTILES == lengthof(_origin_airporttile_specs));
+assert_compile(NEW_AIRPORTTILE_OFFSET == lengthof(_origin_airporttile_specs));
 
 #undef AT_NOANIM
 #undef AT

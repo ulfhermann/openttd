@@ -44,7 +44,7 @@ void ShowNewGRFError()
 		for (uint i = 0; i < c->error->num_params; i++) {
 			SetDParam(6 + i, c->error->param_value[i]);
 		}
-		ShowErrorMessage(STR_NEWGRF_ERROR_FATAL_POPUP, INVALID_STRING_ID, 0, 0, true);
+		ShowErrorMessage(STR_NEWGRF_ERROR_FATAL_POPUP, INVALID_STRING_ID, WL_CRITICAL);
 		break;
 	}
 }
@@ -100,12 +100,12 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint right, uint 
 	}
 
 	/* Prepare and draw GRF ID */
-	snprintf(buff, lengthof(buff), "%08X", BSWAP32(c->grfid));
+	snprintf(buff, lengthof(buff), "%08X", BSWAP32(c->ident.grfid));
 	SetDParamStr(0, buff);
 	y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_GRF_ID);
 
 	/* Prepare and draw MD5 sum */
-	md5sumToString(buff, lastof(buff), c->md5sum);
+	md5sumToString(buff, lastof(buff), c->ident.md5sum);
 	SetDParamStr(0, buff);
 	y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_MD5SUM);
 
@@ -369,8 +369,8 @@ public:
 
 					/* Find last entry in the list, checking for duplicate grfid on the way */
 					for (list = this->list; *list != NULL; list = &(*list)->next) {
-						if ((*list)->grfid == src->grfid) {
-							ShowErrorMessage(STR_NEWGRF_DUPLICATE_GRFID, INVALID_STRING_ID, 0, 0);
+						if ((*list)->ident.grfid == src->ident.grfid) {
+							ShowErrorMessage(STR_NEWGRF_DUPLICATE_GRFID, INVALID_STRING_ID, WL_INFO);
 							return;
 						}
 					}
@@ -850,7 +850,7 @@ struct NewGRFWindow : public Window {
 
 			case SNGRFS_CONTENT_DOWNLOAD:
 				if (!_network_available) {
-					ShowErrorMessage(STR_NETWORK_ERROR_NOTAVAILABLE, INVALID_STRING_ID, 0, 0);
+					ShowErrorMessage(STR_NETWORK_ERROR_NOTAVAILABLE, INVALID_STRING_ID, WL_ERROR);
 				} else {
 #if defined(ENABLE_NETWORK)
 				/* Only show the things in the current list, or everything when nothing's selected */
@@ -862,9 +862,9 @@ struct NewGRFWindow : public Window {
 						ci->type = CONTENT_TYPE_NEWGRF;
 						ci->state = ContentInfo::DOES_NOT_EXIST;
 						ttd_strlcpy(ci->name, c->name != NULL ? c->name : c->filename, lengthof(ci->name));
-						ci->unique_id = BSWAP32(c->grfid);
-						memcpy(ci->md5sum, c->md5sum, sizeof(ci->md5sum));
-						if (HasBit(c->flags, GCF_COMPATIBLE)) GamelogGetOriginalGRFMD5Checksum(c->grfid, ci->md5sum);
+						ci->unique_id = BSWAP32(c->ident.grfid);
+						memcpy(ci->md5sum, c->ident.md5sum, sizeof(ci->md5sum));
+						if (HasBit(c->flags, GCF_COMPATIBLE)) GamelogGetOriginalGRFMD5Checksum(c->ident.grfid, ci->md5sum);
 						*cv.Append() = ci;
 					}
 					ShowNetworkContentListWindow(cv.Length() == 0 ? NULL : &cv, CONTENT_TYPE_NEWGRF);
@@ -943,7 +943,7 @@ struct NewGRFWindow : public Window {
 				for (GRFConfig *c = this->list; c != NULL; c = c->next) {
 					if (c->status != GCS_NOT_FOUND) continue;
 
-					const GRFConfig *f = FindGRFConfig(c->grfid, c->md5sum);
+					const GRFConfig *f = FindGRFConfig(c->ident.grfid, c->ident.md5sum);
 					if (f == NULL) continue;
 
 					free(c->filename);
