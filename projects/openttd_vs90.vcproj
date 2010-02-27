@@ -1177,6 +1177,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\newgrf_airport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_airporttiles.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\newgrf_callbacks.h"
 				>
 			</File>
@@ -3202,6 +3210,14 @@
 			>
 			<File
 				RelativePath=".\..\src\newgrf.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_airport.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_airporttiles.cpp"
 				>
 			</File>
 			<File
