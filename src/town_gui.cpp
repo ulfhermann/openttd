@@ -462,7 +462,7 @@ public:
 				if (this->CanDeleteTown()) {
 					delete this->town;
 				} else {
-					ShowErrorMessage(STR_ERROR_TOWN_CAN_T_DELETE, INVALID_STRING_ID, 0, 0);
+					ShowErrorMessage(STR_ERROR_TOWN_CAN_T_DELETE, INVALID_STRING_ID, WL_INFO);
 				}
 				break;
 		}
@@ -482,7 +482,7 @@ public:
 				/* Non-oil rig stations are always a problem. */
 				if (!(st->facilities & FACIL_AIRPORT) || st->airport_type != AT_OILRIG) return false;
 				/* We can only automatically delete oil rigs *if* there's no vehicle on them. */
-				if (DoCommand(st->airport_tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
+				if (DoCommand(st->airport.tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
 			}
 		}
 
@@ -1149,7 +1149,7 @@ public:
 				_generating_world = true;
 				UpdateNearestTownForRoadTiles(true);
 				if (!GenerateTowns(this->town_layout)) {
-					ShowErrorMessage(STR_ERROR_CAN_T_GENERATE_TOWN, STR_ERROR_NO_SPACE_FOR_TOWN, 0, 0);
+					ShowErrorMessage(STR_ERROR_CAN_T_GENERATE_TOWN, STR_ERROR_NO_SPACE_FOR_TOWN, WL_INFO);
 				}
 				UpdateNearestTownForRoadTiles(false);
 				_generating_world = false;

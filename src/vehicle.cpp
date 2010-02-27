@@ -202,7 +202,7 @@ void ShowNewGrfVehicleError(EngineID engine, StringID part1, StringID part2, GRF
 		SetBit(grfconfig->grf_bugs, bug_type);
 		SetDParamStr(0, grfconfig->name);
 		SetDParam(1, engine);
-		ShowErrorMessage(part1, part2, 0, 0, true);
+		ShowErrorMessage(part1, part2, WL_CRITICAL);
 		if (!_networking) DoCommand(0, critical ? PM_PAUSED_ERROR : PM_PAUSED_NORMAL, 1, DC_EXEC, CMD_PAUSE);
 	}
 
@@ -1469,7 +1469,7 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	if (!e->CanCarryCargo()) return 0;
 
 	if (mail_capacity != NULL && e->type == VEH_AIRCRAFT && IsCargoInClass(v->cargo_type, CC_PASSENGERS)) {
-		*mail_capacity = e->u.air.mail_capacity;
+		*mail_capacity = GetVehicleProperty(v, PROP_AIRCRAFT_MAIL_CAPACITY, e->u.air.mail_capacity);
 	}
 	CargoID default_cargo = e->GetDefaultCargoType();
 
@@ -1484,10 +1484,10 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	/* Get capacity according to property resp. CB */
 	uint capacity;
 	switch (e->type) {
-		case VEH_TRAIN:    capacity = GetVehicleProperty(v, PROP_TRAIN_CARGO_CAPACITY,   e->u.rail.capacity); break;
-		case VEH_ROAD:     capacity = GetVehicleProperty(v, PROP_ROADVEH_CARGO_CAPACITY, e->u.road.capacity); break;
-		case VEH_SHIP:     capacity = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY,    e->u.ship.capacity); break;
-		case VEH_AIRCRAFT: capacity = e->u.air.passenger_capacity; break;
+		case VEH_TRAIN:    capacity = GetVehicleProperty(v, PROP_TRAIN_CARGO_CAPACITY,        e->u.rail.capacity); break;
+		case VEH_ROAD:     capacity = GetVehicleProperty(v, PROP_ROADVEH_CARGO_CAPACITY,      e->u.road.capacity); break;
+		case VEH_SHIP:     capacity = GetVehicleProperty(v, PROP_SHIP_CARGO_CAPACITY,         e->u.ship.capacity); break;
+		case VEH_AIRCRAFT: capacity = GetVehicleProperty(v, PROP_AIRCRAFT_PASSENGER_CAPACITY, e->u.air.passenger_capacity); break;
 		default: NOT_REACHED();
 	}
 
@@ -1496,7 +1496,7 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	if (e->type != VEH_SHIP) {
 		if (e->type == VEH_AIRCRAFT) {
 			if (!IsCargoInClass(v->cargo_type, CC_PASSENGERS)) {
-				capacity += e->u.air.mail_capacity;
+				capacity += GetVehicleProperty(v, PROP_AIRCRAFT_MAIL_CAPACITY, e->u.air.mail_capacity);
 			}
 			if (v->cargo_type == CT_MAIL) return capacity;
 		} else {
