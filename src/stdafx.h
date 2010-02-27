@@ -51,6 +51,9 @@
 	#define UINT16_MAX (65535U)
 	#define INT16_MAX  (32767)
 	#define INT16_MIN  (-INT16_MAX - 1)
+	#define UINT8_MAX  (255)
+	#define INT8_MAX   (127)
+	#define INT8_MIN   (-INT8_MAX - 1)
 #endif
 
 #include <cstdio>
@@ -221,6 +224,15 @@
 	#define S_ISREG(mode) (mode & S_IFREG)
 
 #endif /* defined(_MSC_VER) */
+
+#if defined(DOS)
+	/* The DOS port does not have all signals/signal functions. */
+	#define strsignal(sig) ""
+	/* Use 'no floating point' for bus errors; SIGBUS does not
+	 * exist for does, SIGNOFP not for other platforms. So it's
+	 * fairly safe the interchange those. */
+	#define SIGBUS SIGNOFP
+#endif
 
 #if defined(WINCE)
 	#define strdup _strdup
