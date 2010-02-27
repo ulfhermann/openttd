@@ -546,9 +546,8 @@ public:
 	/**
 	 * Truncate where each destination loses roughly the same percentage of its cargo.
 	 * This is done by randomizing the selection of packets to be removed.
-	 * Also updates the flow stats accordingly by decreasing "sent".
 	 */
-	void RandomTruncate(uint max_remaining, GoodsEntry *ge);
+	void RandomTruncate(uint max_remaining);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
