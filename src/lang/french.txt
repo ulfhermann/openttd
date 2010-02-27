@@ -2122,6 +2122,7 @@ STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Coordonn
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Construit le{NBSP}: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Classe de station{NBSP}: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}Type de station{NBSP}: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Nom de la case d'aéroport{NBSP}: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF{NBSP}: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}Cargaison acceptée{NBSP}: {LTBLUE}
 STR_LAND_AREA_INFORMATION_CARGO_EIGHTS                          :({COMMA}/8 {STRING})
@@ -2379,7 +2380,7 @@ STR_NEWGRF_ERROR_READ_BOUNDS                                    :Lecture après 
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Attention!
-STR_NEWGRF_CONFIRMATION_TEXT                                    :{YELLOW}Vous êtes sur le point de faire des changements dans une partie en cours; cela peut faire planter OpenTTD.{}Êtes-vous absolument sûr{NBSP}?
+STR_NEWGRF_CONFIRMATION_TEXT                                    :{YELLOW}Vous êtes sur le point de faire des changements dans une partie en cours. Cela peut faire planter OpenTTD.{}Êtes-vous absolument sûr{NBSP}?
 
 STR_NEWGRF_DUPLICATE_GRFID                                      :{WHITE}Ajout impossible{NBSP}: GRF ID en double
 STR_NEWGRF_COMPATIBLE_LOADED                                    :{ORANGE}Fichier exact non trouvé (GRF compatible chargé)
@@ -2904,10 +2905,10 @@ STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Affiche 
 STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Afficher les détails du navire
 STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Afficher les détails de l'aéronef
 
-STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Action courante du train - cliquer pour le démarrer/l'arrêter
-STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Comportement courant du véhicule - cliquer pour le démarrer/l'arrêter
-STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Action courante du navire - cliquer pour le démarrer/l'arrêter
-STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Action courante de l'aéronef - cliquer pour le démarrer/l'arrêter
+STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Action courante du train - cliquer pour le démarrer/l'arrêter. Ctrl-clic pour centrer la vue sur la destination.
+STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Action courante du véhicule routier - cliquer pour le démarrer/l'arrêter. Ctrl-clic pour centrer la vue sur la destination
+STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Action courante du navire - cliquer pour le démarrer/l'arrêter. Ctrl-clic pour centrer la vue sur la destination
+STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Action courante de l'aéronef - cliquer pour le démarrer/l'arrêter. Ctrl-clic pour centrer la vue sur la destination
 
 # Messages in the start stop button in the vehicle view
 STR_VEHICLE_STATUS_LOADING_UNLOADING                            :{LTBLUE}Chargement/déchargement
@@ -3308,6 +3309,9 @@ STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}... ne p
 STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Avertissement de redimensionnement
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Trop redimensionner la carte source n'est pas recommandé. Continuer la génération{NBSP}?
 
+# Soundset messages
+STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Seul les effets sonores de secours ont été trouvés. Si vous voulez des effets sonores, installez un pack de sons via le système de téléchargement de contenus.
+
 # Screenshot related messages
 STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Copie d'écran enregistrée avec succès sous '{STRING}'
 STR_ERROR_SCREENSHOT_FAILED                                     :{WHITE}Copie d'écran a échoué!
@@ -3330,7 +3334,7 @@ STR_ERROR_ALREADY_BUILT                                         :{WHITE}... déj
 STR_ERROR_OWNED_BY                                              :{WHITE}... appartient à {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... appartient à une autre compagnie
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Le nom doit être unique
-STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}{STRING} présente
+STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}{1:STRING} présente
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}La municipalité de {TOWN} refuse cette opération
@@ -3422,6 +3426,7 @@ STR_ERROR_CAN_T_REMOVE_BUS_STATION                              :{WHITE}Impossib
 STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Impossible de supprimer la station de camions...
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Impossible de retirer la station de tramway pour passagers...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Impossible de retirer la station de tramway pour fret...
+STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Vous devez d'abord retirer l'arrêt de bus
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Vous devez d'abord détruire la gare
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Vous devez d'abord détruire l'arrêt d'autobus
@@ -3475,6 +3480,7 @@ STR_ERROR_AUTOREPLACE_MONEY_LIMIT                               :(limite d'argen
 
 # Rail construction errors
 STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION                          :{WHITE}Combinaison de rail impossible
+STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Vous devez d'abord retirer les signaux
 STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Aucuns rails convenables
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Vous devez d'abord enlever les rails
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}La route est à sens unique ou bloquée
