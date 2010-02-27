@@ -712,7 +712,7 @@ static const OldChunks station_chunk[] = {
 
 	OCL_NULL( 4 ), ///< bus/lorry tile
 	OCL_SVAR(   OC_TILE, Station, train_station.tile ),
-	OCL_SVAR(   OC_TILE, Station, airport_tile ),
+	OCL_SVAR(   OC_TILE, Station, airport.tile ),
 	OCL_SVAR(   OC_TILE, Station, dock_tile ),
 	OCL_SVAR(  OC_UINT8, Station, train_station.w ),
 
@@ -1519,12 +1519,11 @@ static bool LoadTTDPatchExtraChunks(LoadgameState *ls, int num)
 					uint32 grfid = ReadUint32(ls);
 
 					if (ReadByte(ls) == 1) {
-						GRFConfig *c = CallocT<GRFConfig>(1);
-						c->grfid = grfid;
-						c->filename = strdup("TTDP game, no information");
+						GRFConfig *c = new GRFConfig("TTDP game, no information");
+						c->ident.grfid = grfid;
 
 						AppendToGRFConfigList(&_grfconfig, c);
-						DEBUG(oldloader, 3, "TTDPatch game using GRF file with GRFID %0X", BSWAP32(c->grfid));
+						DEBUG(oldloader, 3, "TTDPatch game using GRF file with GRFID %0X", BSWAP32(c->ident.grfid));
 					}
 					len -= 5;
 				};
