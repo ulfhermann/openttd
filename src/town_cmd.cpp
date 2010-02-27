@@ -1844,7 +1844,7 @@ bool GenerateTowns(TownLayout layout)
 		/* Get a unique name for the town. */
 		if (!GenerateTownName(&townnameparts)) continue;
 		/* try 20 times to create a random-sized town for the first loop. */
-		if (CreateRandomTown(20, townnameparts, TS_RANDOM, city, layout) != NULL) num++; // if creation successfull, raise a flag
+		if (CreateRandomTown(20, townnameparts, TS_RANDOM, city, layout) != NULL) num++; // If creation was successful, raise a flag.
 	} while (--n);
 
 	if (num != 0) return true;
@@ -2380,7 +2380,7 @@ void ExpandTown(Town *t)
 	 * but do this only onces per openttd run. */
 	static bool warned_no_roads = false;
 	if (!_settings_game.economy.allow_town_roads && !warned_no_roads) {
-		ShowErrorMessage(STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS, INVALID_STRING_ID, 0, 0);
+		ShowErrorMessage(STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS, INVALID_STRING_ID, WL_WARNING);
 		warned_no_roads = true;
 	}
 
@@ -2524,7 +2524,7 @@ static void TownActionBribe(Town *t)
 
 		/* only show errormessage to the executing player. All errors are handled command.c
 		 * but this is special, because it can only 'fail' on a DC_EXEC */
-		if (IsLocalCompany()) ShowErrorMessage(STR_ERROR_BRIBE_FAILED, STR_ERROR_BRIBE_FAILED_2, 0, 0);
+		if (IsLocalCompany()) ShowErrorMessage(STR_ERROR_BRIBE_FAILED, STR_ERROR_BRIBE_FAILED_2, WL_INFO);
 
 		/* decrease by a lot!
 		 * ChangeTownRating is only for stuff in demolishing. Bribe failure should
@@ -2733,20 +2733,19 @@ static void UpdateTownUnwanted(Town *t)
  * Checks whether the local authority allows construction of a new station (rail, road, airport, dock) on the given tile
  * @param tile The tile where the station shall be constructed.
  * @param flags Command flags. DC_NO_TEST_TOWN_RATING is tested.
+ * @return Succeeded or failed command.
  */
-bool CheckIfAuthorityAllowsNewStation(TileIndex tile, DoCommandFlag flags)
+CommandCost CheckIfAuthorityAllowsNewStation(TileIndex tile, DoCommandFlag flags)
 {
-	if (!Company::IsValidID(_current_company) || (flags & DC_NO_TEST_TOWN_RATING)) return true;
+	if (!Company::IsValidID(_current_company) || (flags & DC_NO_TEST_TOWN_RATING)) return CommandCost();
 
 	Town *t = ClosestTownFromTile(tile, _settings_game.economy.dist_local_authority);
-	if (t == NULL) return true;
+	if (t == NULL) return CommandCost();
 
-	if (t->ratings[_current_company] > RATING_VERYPOOR) return true;
+	if (t->ratings[_current_company] > RATING_VERYPOOR) return CommandCost();
 
-	_error_message = STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS;
 	SetDParam(0, t->index);
-
-	return false;
+	return_cmd_error(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS);
 }
 
 
