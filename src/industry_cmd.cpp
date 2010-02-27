@@ -490,7 +490,7 @@ static CommandCost ClearTile_Industry(TileIndex tile, DoCommandFlag flags)
 			(_current_company == OWNER_WATER &&
 				((indspec->behaviour & INDUSTRYBEH_BUILT_ONWATER) ||
 				HasBit(GetIndustryTileSpec(GetIndustryGfx(tile))->slopes_refused, 5)))) {
-		SetDParam(0, indspec->name);
+		SetDParam(1, indspec->name);
 		return_cmd_error(flags & DC_AUTO ? STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY : INVALID_STRING_ID);
 	}
 
@@ -1284,27 +1284,27 @@ static CheckNewIndustryProc * const _check_new_industry_procs[CHECK_END] = {
 /** Find a town for the industry, while checking for multiple industries in the same town.
  * @param tile Position of the industry to build.
  * @param type Industry type.
- * @param [out] err_mesg Error message, if any.
- * @return Town for the new industry, \c NULL if no good town can be found.
+ * @param [out] town Pointer to return town for the new industry, \c NULL is written if no good town can be found.
+ * @return Succeeded or failed command.
+ *
+ * @precond \c *t != NULL
+ * @postcon \c *t points to a town on success, and \c NULL on failure.
  */
-static Town *FindTownForIndustry(TileIndex tile, int type)
+static CommandCost FindTownForIndustry(TileIndex tile, int type, Town **t)
 {
-	Town *t;
+	*t = ClosestTownFromTile(tile, UINT_MAX);
+
+	if (_settings_game.economy.multiple_industry_per_town) return CommandCost();
+
 	const Industry *i;
-
-	t = ClosestTownFromTile(tile, UINT_MAX);
-
-	if (_settings_game.economy.multiple_industry_per_town) return t;
-
 	FOR_ALL_INDUSTRIES(i) {
-		if (i->type == (byte)type &&
-				i->town == t) {
-			_error_message = STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN;
-			return NULL;
+		if (i->type == (byte)type && i->town == *t) {
+			*t = NULL;
+			return_cmd_error(STR_ERROR_ONLY_ONE_ALLOWED_PER_TOWN);
 		}
 	}
 
-	return t;
+	return CommandCost();
 }
 
 bool IsSlopeRefused(Slope current, Slope refused)
@@ -1324,9 +1324,16 @@ bool IsSlopeRefused(Slope current, Slope refused)
 	return false;
 }
 
-static bool CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable *it, uint itspec_index, int type, bool *custom_shape_check = NULL)
+/** Are the tiles of the industry free?
+ * @param tile                     Position to check.
+ * @param it                       Industry tiles table.
+ * @param itspec_index             The index of the itsepc to build/fund
+ * @param type                     Type of the industry.
+ * @param [out] custom_shape_check Perform custom check for the site.
+ * @return Failed or succeeded command.
+ */
+static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable *it, uint itspec_index, int type, bool *custom_shape_check = NULL)
 {
-	_error_message = STR_ERROR_SITE_UNSUITABLE;
 	bool refused_slope = false;
 	bool custom_shape = false;
 
@@ -1335,28 +1342,30 @@ static bool CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable 
 		TileIndex cur_tile = TileAddWrap(tile, it->ti.x, it->ti.y);
 
 		if (!IsValidTile(cur_tile)) {
-			return false;
+			return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 		}
 
 		if (gfx == GFX_WATERTILE_SPECIALCHECK) {
 			if (!IsTileType(cur_tile, MP_WATER) ||
 					GetTileSlope(cur_tile, NULL) != SLOPE_FLAT) {
-				return false;
+				return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 			}
 		} else {
-			if (!EnsureNoVehicleOnGround(cur_tile)) return false;
-			if (MayHaveBridgeAbove(cur_tile) && IsBridgeAbove(cur_tile)) return false;
+			if (!EnsureNoVehicleOnGround(cur_tile)) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
+			if (MayHaveBridgeAbove(cur_tile) && IsBridgeAbove(cur_tile)) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 
 			const IndustryTileSpec *its = GetIndustryTileSpec(gfx);
 
 			IndustryBehaviour ind_behav = GetIndustrySpec(type)->behaviour;
 
 			/* Perform land/water check if not disabled */
-			if (!HasBit(its->slopes_refused, 5) && (IsWaterTile(cur_tile) == !(ind_behav & INDUSTRYBEH_BUILT_ONWATER))) return false;
+			if (!HasBit(its->slopes_refused, 5) && (IsWaterTile(cur_tile) == !(ind_behav & INDUSTRYBEH_BUILT_ONWATER))) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 
 			if (HasBit(its->callback_mask, CBM_INDT_SHAPE_CHECK)) {
 				custom_shape = true;
-				if (!PerformIndustryTileSlopeCheck(tile, cur_tile, its, type, gfx, itspec_index)) return false;
+				CommandCost ret = PerformIndustryTileSlopeCheck(tile, cur_tile, its, type, gfx, itspec_index);
+				ret.SetGlobalErrorMessage();
+				if (ret.Failed()) return ret;
 			} else {
 				Slope tileh = GetTileSlope(cur_tile, NULL);
 				refused_slope |= IsSlopeRefused(tileh, its->slopes_refused);
@@ -1365,22 +1374,21 @@ static bool CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable 
 			if ((ind_behav & (INDUSTRYBEH_ONLY_INTOWN | INDUSTRYBEH_TOWN1200_MORE)) || // Tile must be a house
 					((ind_behav & INDUSTRYBEH_ONLY_NEARTOWN) && IsTileType(cur_tile, MP_HOUSE))) { // Tile is allowed to be a house (and it is a house)
 				if (!IsTileType(cur_tile, MP_HOUSE)) {
-					_error_message = STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS;
-					return false;
+					return_cmd_error(STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS);
 				}
 
 				/* Clear the tiles as OWNER_TOWN to not affect town rating, and to not clear protected buildings */
 				CompanyID old_company = _current_company;
 				_current_company = OWNER_TOWN;
-				bool not_clearable = DoCommand(cur_tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed();
+				CommandCost ret = DoCommand(cur_tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed();
 				_current_company = old_company;
 
-				if (not_clearable) return false;
+				if (ret.Failed()) return ret;
 			} else {
 				/* Clear the tiles, but do not affect town ratings */
-				bool not_clearable = DoCommand(cur_tile, 0, 0, DC_AUTO | DC_NO_TEST_TOWN_RATING | DC_NO_MODIFY_TOWN_RATING, CMD_LANDSCAPE_CLEAR).Failed();
+				CommandCost ret = DoCommand(cur_tile, 0, 0, DC_AUTO | DC_NO_TEST_TOWN_RATING | DC_NO_MODIFY_TOWN_RATING, CMD_LANDSCAPE_CLEAR);
 
-				if (not_clearable) return false;
+				if (ret.Failed()) return ret;
 			}
 		}
 	} while ((++it)->ti.x != -0x80);
@@ -1390,22 +1398,29 @@ static bool CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable 
 	/* It is almost impossible to have a fully flat land in TG, so what we
 	 *  do is that we check if we can make the land flat later on. See
 	 *  CheckIfCanLevelIndustryPlatform(). */
-	return !refused_slope || (_settings_game.game_creation.land_generator == LG_TERRAGENESIS && _generating_world && !custom_shape && !_ignore_restrictions);
+	if (!refused_slope || (_settings_game.game_creation.land_generator == LG_TERRAGENESIS && _generating_world && !custom_shape && !_ignore_restrictions)) {
+		return CommandCost();
+	}
+	return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 }
 
-static bool CheckIfIndustryIsAllowed(TileIndex tile, int type, const Town *t)
+/** Is the industry allowed to be built at this place for the town?
+ * @param tile Tile to construct the industry.
+ * @param type Type of the industry.
+ * @param t    Town authority that the industry belongs to.
+ * @return Succeeded or failed command.
+ */
+static CommandCost CheckIfIndustryIsAllowed(TileIndex tile, int type, const Town *t)
 {
 	if ((GetIndustrySpec(type)->behaviour & INDUSTRYBEH_TOWN1200_MORE) && t->population < 1200) {
-		_error_message = STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200;
-		return false;
+		return_cmd_error(STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200);
 	}
 
 	if ((GetIndustrySpec(type)->behaviour & INDUSTRYBEH_ONLY_NEARTOWN) && DistanceMax(t->xy, tile) > 9) {
-		_error_message = STR_ERROR_SITE_UNSUITABLE;
-		return false;
+		return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 	}
 
-	return true;
+	return CommandCost();
 }
 
 static bool CheckCanTerraformSurroundingTiles(TileIndex tile, uint height, int internal)
@@ -1516,14 +1531,19 @@ static bool CheckIfCanLevelIndustryPlatform(TileIndex tile, DoCommandFlag flags,
 }
 
 
-static bool CheckIfFarEnoughFromIndustry(TileIndex tile, int type)
+/** Check that the new industry is far enough from other industries.
+ * @param tile Tile to construct the industry.
+ * @param type Type of the new industry.
+ * @return Succeeded or failed command.
+ */
+static CommandCost CheckIfFarEnoughFromIndustry(TileIndex tile, int type)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 	const Industry *i;
 
 	if (_settings_game.economy.same_industry_close && indspec->IsRawIndustry())
 		/* Allow primary industries to be placed close to any other industry */
-		return true;
+		return CommandCost();
 
 	FOR_ALL_INDUSTRIES(i) {
 		/* Within 14 tiles from another industry is considered close */
@@ -1537,8 +1557,7 @@ static bool CheckIfFarEnoughFromIndustry(TileIndex tile, int type)
 				_game_mode != GM_EDITOR || // editor must not be stopped
 				!_settings_game.economy.same_industry_close ||
 				!_settings_game.economy.multiple_industry_per_town)) {
-			_error_message = STR_ERROR_INDUSTRY_TOO_CLOSE;
-			return false;
+			return_cmd_error(STR_ERROR_INDUSTRY_TOO_CLOSE);
 		}
 
 		/* check if there are any conflicting industry types around */
@@ -1546,11 +1565,10 @@ static bool CheckIfFarEnoughFromIndustry(TileIndex tile, int type)
 				i->type == indspec->conflicting[1] ||
 				i->type == indspec->conflicting[2]) &&
 				in_low_distance) {
-			_error_message = STR_ERROR_INDUSTRY_TOO_CLOSE;
-			return false;
+			return_cmd_error(STR_ERROR_INDUSTRY_TOO_CLOSE);
 		}
 	}
-	return true;
+	return CommandCost();
 }
 
 /** Production level maximum, minimum and default values.
@@ -1696,45 +1714,54 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const Ind
  * @param itspec_index the index of the itsepc to build/fund
  * @param seed random seed (possibly) used by industries
  * @param founder Founder of the industry
- * @return the pointer of the newly created industry, or NULL if it failed
+ * @param ip Pointer to store newly created industry.
+ * @return Succeeded or failed command.
+ *
+ * @post \c *ip contains the newly created industry if all checks are successful and the \a flags request actual creation, else it contains \c NULL afterwards.
  */
-static Industry *CreateNewIndustryHelper(TileIndex tile, IndustryType type, DoCommandFlag flags, const IndustrySpec *indspec, uint itspec_index, uint32 seed, Owner founder)
+static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, DoCommandFlag flags, const IndustrySpec *indspec, uint itspec_index, uint32 seed, Owner founder, Industry **ip)
 {
 	assert(itspec_index < indspec->num_table);
 	const IndustryTileTable *it = indspec->table[itspec_index];
 	bool custom_shape_check = false;
 
-	if (!CheckIfIndustryTilesAreFree(tile, it, itspec_index, type, &custom_shape_check)) return NULL;
+	*ip = NULL;
+
+	CommandCost ret = CheckIfIndustryTilesAreFree(tile, it, itspec_index, type, &custom_shape_check);
+	if (ret.Failed()) return ret;
 
 	if (HasBit(GetIndustrySpec(type)->callback_mask, CBM_IND_LOCATION)) {
-		if (!CheckIfCallBackAllowsCreation(tile, type, itspec_index, seed)) return NULL;
+		ret = CheckIfCallBackAllowsCreation(tile, type, itspec_index, seed);
 	} else {
-		CommandCost ret = _check_new_industry_procs[indspec->check_proc](tile);
-		ret.SetGlobalErrorMessage();
-		if (ret.Failed()) return NULL;
+		ret = _check_new_industry_procs[indspec->check_proc](tile);
+	}
+	if (ret.Failed()) return ret;
+
+	if (!custom_shape_check && _settings_game.game_creation.land_generator == LG_TERRAGENESIS && _generating_world &&
+			!_ignore_restrictions && !CheckIfCanLevelIndustryPlatform(tile, DC_NO_WATER, it, type)) {
+		return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 	}
 
-	if (!custom_shape_check && _settings_game.game_creation.land_generator == LG_TERRAGENESIS && _generating_world && !_ignore_restrictions && !CheckIfCanLevelIndustryPlatform(tile, DC_NO_WATER, it, type)) return NULL;
-	if (!CheckIfFarEnoughFromIndustry(tile, type)) return NULL;
+	ret = CheckIfFarEnoughFromIndustry(tile, type);
+	if (ret.Failed()) return ret;
 
-	Town *t = FindTownForIndustry(tile, type);
-	if (t == NULL) return NULL;
+	Town *t = NULL;
+	ret = FindTownForIndustry(tile, type, &t);
+	if (ret.Failed()) return ret;
+	assert(t != NULL);
 
-	if (!CheckIfIndustryIsAllowed(tile, type, t)) return NULL;
+	ret = CheckIfIndustryIsAllowed(tile, type, t);
+	if (ret.Failed()) return ret;
 
-	if (!Industry::CanAllocateItem()) return NULL;
+	if (!Industry::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_INDUSTRIES);
 
 	if (flags & DC_EXEC) {
-		Industry *i = new Industry(tile);
+		*ip = new Industry(tile);
 		if (!custom_shape_check) CheckIfCanLevelIndustryPlatform(tile, DC_NO_WATER | DC_EXEC, it, type);
-		DoCreateNewIndustry(i, tile, type, it, itspec_index, t, OWNER_NONE, founder);
-
-		return i;
+		DoCreateNewIndustry(*ip, tile, type, it, itspec_index, t, OWNER_NONE, founder);
 	}
 
-	/* We need to return a non-NULL pointer to tell we have created an industry.
-	 * However, we haven't created a real one (no DC_EXEC), so return a fake one. */
-	return (Industry *)-1;
+	return CommandCost();
 }
 
 /** Build/Fund an industry
@@ -1763,7 +1790,7 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		return CMD_ERROR;
 	}
 
-	const Industry *ind = NULL;
+	Industry *ind = NULL;
 	if (_game_mode != GM_EDITOR && _settings_game.construction.raw_industry_construction == 2 && indspec->IsRawIndustry()) {
 		if (flags & DC_EXEC) {
 			/* Prospected industries are build as OWNER_TOWN to not e.g. be build on owned land of the founder */
@@ -1778,10 +1805,9 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 					 * because parameter evaluation order is not guaranteed in the c++ standard
 					 */
 					tile = RandomTile();
-					ind = CreateNewIndustryHelper(tile, it, flags, indspec, RandomRange(indspec->num_table), p2, founder);
-					if (ind != NULL) {
-						break;
-					}
+					CommandCost ret = CreateNewIndustryHelper(tile, it, flags, indspec, RandomRange(indspec->num_table), p2, founder, &ind);
+					ret.SetGlobalErrorMessage();
+					if (ret.Succeeded()) break;
 				}
 			}
 			_current_company = founder;
@@ -1792,26 +1818,33 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		int num = GB(p1, 8, 8);
 		if (num >= count) return CMD_ERROR;
 
-		_error_message = STR_ERROR_SITE_UNSUITABLE;
+		CommandCost ret = CommandCost(STR_ERROR_SITE_UNSUITABLE);
+		ret.SetGlobalErrorMessage();
 		do {
-			if (--count < 0) return CMD_ERROR;
+			if (--count < 0) return ret;
 			if (--num < 0) num = indspec->num_table - 1;
-		} while (!CheckIfIndustryTilesAreFree(tile, itt[num], num, it));
+			ret = CheckIfIndustryTilesAreFree(tile, itt[num], num, it);
+			ret.SetGlobalErrorMessage();
+		} while (ret.Failed());
 
-		ind = CreateNewIndustryHelper(tile, it, flags, indspec, num, p2, _current_company);
-		if (ind == NULL) return CMD_ERROR;
+		ret = CreateNewIndustryHelper(tile, it, flags, indspec, num, p2, _current_company, &ind);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 	}
 
-	if ((flags & DC_EXEC) && _game_mode != GM_EDITOR && ind != NULL) {
-		SetDParam(0, indspec->name);
-		if (indspec->new_industry_text > STR_LAST_STRINGID) {
-			SetDParam(1, STR_TOWN_NAME);
-			SetDParam(2, ind->town->index);
-		} else {
-			SetDParam(1, ind->town->index);
+	if (flags & DC_EXEC) {
+		assert(ind != NULL);
+		if (_game_mode != GM_EDITOR) {
+			SetDParam(0, indspec->name);
+			if (indspec->new_industry_text > STR_LAST_STRINGID) {
+				SetDParam(1, STR_TOWN_NAME);
+				SetDParam(2, ind->town->index);
+			} else {
+				SetDParam(1, ind->town->index);
+			}
+			AddIndustryNewsItem(indspec->new_industry_text, NS_INDUSTRY_OPEN, ind->index);
+			AI::BroadcastNewEvent(new AIEventIndustryOpen(ind->index));
 		}
-		AddIndustryNewsItem(indspec->new_industry_text, NS_INDUSTRY_OPEN, ind->index);
-		AI::BroadcastNewEvent(new AIEventIndustryOpen(ind->index));
 	}
 
 	return CommandCost(EXPENSES_OTHER, indspec->GetConstructionCost());
@@ -1823,7 +1856,11 @@ static Industry *CreateNewIndustry(TileIndex tile, IndustryType type)
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 
 	uint32 seed = Random();
-	return CreateNewIndustryHelper(tile, type, DC_EXEC, indspec, RandomRange(indspec->num_table), seed, OWNER_NONE);
+	Industry *i = NULL;
+	CommandCost ret = CreateNewIndustryHelper(tile, type, DC_EXEC, indspec, RandomRange(indspec->num_table), seed, OWNER_NONE, &i);
+	assert(i != NULL || ret.Failed());
+	ret.SetGlobalErrorMessage();
+	return i;
 }
 
 /**
@@ -1921,7 +1958,7 @@ void GenerateIndustries()
 	for (uint i = 0; i < total_amount; i++) {
 		uint32 r = RandomRange(total_prob);
 		IndustryType it = 0;
-		while (it < NUM_INDUSTRYTYPES && r > industry_probs[it]) {
+		while (it < NUM_INDUSTRYTYPES && r >= industry_probs[it]) {
 			r -= industry_probs[it];
 			it++;
 		}
