@@ -561,7 +561,7 @@ STR_PERFORMANCE_DETAIL_MONEY                                    :{BLACK}Raha:
 STR_PERFORMANCE_DETAIL_LOAN                                     :{BLACK}Laina:
 STR_PERFORMANCE_DETAIL_TOTAL                                    :{BLACK}Yhteensä:
 ############ End of order list
-STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Liikennevälineiden määrä; tähän kuuluvat ajoneuvot, junat, laivat ja lentokoneet
+STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Liikennevälineiden määrä. Tähän kuuluvat ajoneuvot, junat, laivat ja lentokoneet
 STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP                         :{BLACK}Asemien osien määrä. Kaikki osat asemista (esim. rautatieasema, bussipysäkki, lentokenttä) lasketaan, vaikka ne olisivat yhdistettynä yhdeksi asemaksi.
 STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP                       :{BLACK}Vähätuottoisimman ajoneuvon tulo (kaikkien yli 2 vuotta vanhojen ajoneuvojen)
 STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP                       :{BLACK}Viimeisen 12 neljänneksen vähätuottoisimman kuun käteistuoton määrä
@@ -2121,6 +2121,7 @@ STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Koordina
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Rakennettu: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Aseman luokka: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}Aseman tyyppi: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Lentokentän ruudun nimi: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}Vastaanottaa rahtia: {LTBLUE}
 STR_LAND_AREA_INFORMATION_CARGO_EIGHTS                          :({COMMA}/8 {STRING})
@@ -2903,10 +2904,10 @@ STR_VEHICLE_VIEW_ROAD_VEHICLE_SHOW_DETAILS_TOOLTIP              :{BLACK}Näytä 
 STR_VEHICLE_VIEW_SHIP_SHOW_DETAILS_TOOLTIP                      :{BLACK}Näytä laivan tiedot.
 STR_VEHICLE_VIEW_AIRCRAFT_SHOW_DETAILS_TOOLTIP                  :{BLACK}Näytä lentokoneen tiedot.
 
-STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Valitun junan toiminnot - napsauta tässä pysäyttääksesi/lähettääksesi.
-STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Nykyisen ajoneuvon toiminnot - napsauta tässä pysäyttääksesi/laittaaksesi liikkeelle.
-STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Nykyisen laivat toiminnot - napsauta tässä pysäyttääksesi/laittaaksesi liikkeelle.
-STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Nykyisen lentokoneen toiminnot - napsauta tässä pysäyttääksesi/laittaaksesi liikkeelle.
+STR_VEHICLE_VIEW_TRAIN_STATE_START_STOP_TOOLTIP                 :{BLACK}Valitun junan toiminnot - napsauta pysäyttääksesi/käynnistääksesi junan. Ctrl+Click vierittääksesi kohteeseen
+STR_VEHICLE_VIEW_ROAD_VEHICLE_STATE_START_STOP_TOOLTIP          :{BLACK}Nykyisen ajoneuvon toiminnot - napsauta pysäyttääksesi/käynnistääksesi ajoneuvon. Ctrl+Click vierittääksesi kohteeseen
+STR_VEHICLE_VIEW_SHIP_STATE_START_STOP_TOOLTIP                  :{BLACK}Nykyisen laivat toiminnot - napsauta pysäyttääksesi/käynnistääksesi laivan. Ctrl+Click vierittääksesi kohteeseen
+STR_VEHICLE_VIEW_AIRCRAFT_STATE_START_STOP_TOOLTIP              :{BLACK}Nykyisen lentokoneen toiminnot - napsauta pysäyttääksesi/käynnistääksesi lentokoneen. Ctrl+Click vierittääksesi kohteeseen
 
 # Messages in the start stop button in the vehicle view
 STR_VEHICLE_STATUS_LOADING_UNLOADING                            :{LTBLUE}Lastataan/puretaan
@@ -3307,6 +3308,9 @@ STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}...kuvan
 STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Mittakaava-varoitus
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Lähdekartan koon liiallinen muuttaminen ei ole suositeltavaa. Haluatko jatkaa?
 
+# Soundset messages
+STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Vain tilapäinen äänipaketti löydetty. Jos haluat ääniä, asenna äänipaketti Online-sisältö -palvelulla.
+
 # Screenshot related messages
 STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Kuvakaappaus tallennettu nimellä '{STRING}'.
 STR_ERROR_SCREENSHOT_FAILED                                     :{WHITE}Kuvakaappaus epäonnistui!
@@ -3329,7 +3333,7 @@ STR_ERROR_ALREADY_BUILT                                         :{WHITE}...se on
 STR_ERROR_OWNED_BY                                              :{WHITE}... omistaja: {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... alueen omistaa toinen yhtiö
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Nimen täytyy olla uniikki
-STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}{STRING} on tiellä.
+STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}{1:STRING} on tiellä.
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN}: paikallisviranomaiset kieltäytyvät.
@@ -3376,6 +3380,7 @@ STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Tietyöt
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Kaupunkia ei voida poistaa...{}Asema tai varikko viittaa kaupunkiin tai kaupungin omistamaa ruutua ei voida poistaa
 
 # Industry related errors
+STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... liian paljon teollisuutta
 STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Teollisuusaluetta ei voi luoda...
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}{STRING}: tähän ei voi rakentaa...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Teollisuustyyppiä ei voi rakentaa tähän...
@@ -3421,6 +3426,7 @@ STR_ERROR_CAN_T_REMOVE_BUS_STATION                              :{WHITE}Linja-au
 STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Kuorma-auto asemaa ei voida poistaa...
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Ei voi poistaa asemaa.
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Ei voi poistaa rahtiasemaa.
+STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Pysäkki täytyy poistaa ensin
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Rautatieasema pitää tuhota ensin.
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Linja-autoasema pitää purkaa ensin.
@@ -3474,6 +3480,7 @@ STR_ERROR_AUTOREPLACE_MONEY_LIMIT                               :(rahoitusraja)
 
 # Rail construction errors
 STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION                          :{WHITE}Mahdoton ratayhdistelmä.
+STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Opastimet täytyy poistaa ensin
 STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Ei kelvollista rautatietä.
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Rautatie pitää poistaa ensin.
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}Tie on yksisuuntainen tai suljettu
