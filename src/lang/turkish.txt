@@ -1166,6 +1166,10 @@ STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Kenarlar
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}İstasyon genişleme sınırı: {ORANGE}{STRING} {RED}Uyarı: Yüksek değerler oyunu yavaşlatır
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Helikopterler helipadlerde otomatik servise girsin: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LINK_TERRAFORM_TOOLBAR                       :{LTBLUE}Arazi araç çubuğunu diğer araç çubuklarına bağla: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR                         :{LTBLUE}Küçük haritada kullanılan toprak rengi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_GREEN                   :Yeşil
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_DARK_GREEN              :Koyu yeşil
+STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Mor
 STR_CONFIG_SETTING_REVERSE_SCROLLING                            :{LTBLUE}Fareyle kaydırma hareketini ters çevir: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOOTH_SCROLLING                             :{LTBLUE}Düzgün viewport kaydırması: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MEASURE_TOOLTIP                              :{LTBLUE}İnşa araçları kullanılırken ölçüm ipucu göster: {ORANGE}{STRING}
@@ -2118,6 +2122,7 @@ STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Koordina
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Yapım: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}İstasyon sınıfı: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}İstasyon türü: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Havalimanı karesi adı: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}İstenen: {LTBLUE}
 STR_LAND_AREA_INFORMATION_CARGO_EIGHTS                          :({COMMA}/8 {STRING})
@@ -3215,6 +3220,8 @@ STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}YZ ayarl
 STR_AI_DEBUG_RELOAD                                             :{BLACK}YZ'yı baştan yükle
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}YZ'yı öldür, kodu tekrar yükle ve YZ'yı tekrar başlat
 
+STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD YZ desteği olmadan derlenmiş...
+STR_ERROR_NO_AI_SUB                                             :{WHITE}... hiç YZ yok!
 
 STR_ERROR_AI_NO_AI_FOUND                                        :Yüklenecek uygun bir YZ bulunamadı.{}Bu YZ boş bir YZ'dir ve hiçbir şey yapmaz.{}'Çevrimiçi İçerik" sistemiyle pekçok YZ'yi indirebilirsiniz.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Çalışan YZ'lerden biri çakıldı. Lütfen bu durumu AI Hata Ayıklama Penceresi görüntüsüyle birlikte YZ'nin yazarına bildirin.
@@ -3302,6 +3309,9 @@ STR_ERROR_BMPMAP_IMAGE_TYPE                                     :{WHITE}...resim
 STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Ölcek uyarısı
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Kaynak haritanin boyutunu değiştirmek önerilmez. Harita oluşturmaya devam edilsin mi?
 
+# Soundset messages
+STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Yalnız yedek ses kümesi bulundu. Ses istiyorsanız, içerik indirme sisteminden ses kümesi indirin.
+
 # Screenshot related messages
 STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Ekran görüntüsü '{STRING}' olarak kaydedildi
 STR_ERROR_SCREENSHOT_FAILED                                     :{WHITE}Ekran görüntüsü alınamadı!
@@ -3324,7 +3334,7 @@ STR_ERROR_ALREADY_BUILT                                         :{WHITE}... zate
 STR_ERROR_OWNED_BY                                              :{WHITE}... sahibi {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... alan başka bir şirkete ait
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}İsim daha önce kullanılmamış olmalı
-STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}yolda {STRING} var
+STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}yolda {1:STRING} var
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN} belediyesi buna izin vermiyor
@@ -3368,8 +3378,10 @@ STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... çok
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}...haritada boş yer yok
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Şehir yol yapmayacak. Yol yapımını Gelişmiş Ayarlar->Ekonomi->Şehirler'den etkinleştirebilirsiniz.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Yol çalışmaları
+STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Bu kasaba silinemiyor...{}Bir istasyon ya da garaj kasabaya atıfta bulunuyor ya da bir kasaba karesi kaldırılamıyor
 
 # Industry related errors
+STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... çok fazla fabrika var
 STR_ERROR_CAN_T_GENERATE_INDUSTRIES                             :{WHITE}Fabrika yapılamıyor...
 STR_ERROR_CAN_T_BUILD_HERE                                      :{WHITE}Buraya {STRING} yapılamaz...
 STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY                         :{WHITE}Buraya bu fabrikadan yapılamaz...
@@ -3380,6 +3392,7 @@ STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS_WITH_POPULATION_OF_1200    :{WHITE}... yaln
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_RAINFOREST                       :{WHITE}... yalnızca yağmur ormanlarında yapılabilir
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_DESERT                           :{WHITE}... yalnızca çöllerde yapılabilir
 STR_ERROR_CAN_ONLY_BE_BUILT_IN_TOWNS                            :{WHITE}... yalnızca şehirlerde yapılabilir
+STR_ERROR_CAN_ONLY_BE_BUILT_IN_LOW_AREAS                        :{WHITE}... yalnız alçak bölgelere yapılabilir
 STR_ERROR_CAN_ONLY_BE_POSITIONED                                :{WHITE}... sadece haritanın kenarlarına yerleştirilebilir
 STR_ERROR_FOREST_CAN_ONLY_BE_PLANTED                            :{WHITE}... orman sadece kar sınırı üzerinde olabilir
 
@@ -3414,6 +3427,7 @@ STR_ERROR_CAN_T_REMOVE_BUS_STATION                              :{WHITE}Otobüs 
 STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Kamyon durağı kaldırılamaz...
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Yolcu tramvayı istasyonu kaldırılamıyor...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Yük tramvayı istasyonu kaldırılamıyor...
+STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Önce durağı kaldırmalısınız
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Önce tren istasyonu yıkılmalı
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Önce otobüs durağı yıkılmalı
@@ -3467,6 +3481,7 @@ STR_ERROR_AUTOREPLACE_MONEY_LIMIT                               :(para yetmedi)
 
 # Rail construction errors
 STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION                          :{WHITE}İmkansiz ray birleşimi
+STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Önce işaretleri kaldırmalısınız
 STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Uygun ray yok
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Önce ray kaldırılmalı
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}Yol tek yönlü veya kapalı
