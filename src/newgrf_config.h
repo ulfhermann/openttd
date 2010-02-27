@@ -13,6 +13,7 @@
 #define NEWGRF_CONFIG_H
 
 #include "strings_type.h"
+#include "core/alloc_type.hpp"
 
 /** GRF config bit flags */
 enum GCF_Flags {
@@ -55,7 +56,10 @@ struct GRFIdentifier {
 };
 
 /** Information about why GRF had problems during initialisation */
-struct GRFError {
+struct GRFError : ZeroedMemoryAllocator {
+	GRFError(StringID severity, StringID message = 0);
+	~GRFError();
+
 	char *custom_message;  ///< Custom message (if present)
 	char *data;            ///< Additional data for message and custom_message
 	StringID message;      ///< Default message
@@ -65,7 +69,11 @@ struct GRFError {
 };
 
 /** Information about GRF, used in the game and (part of it) in savegames */
-struct GRFConfig : public GRFIdentifier {
+struct GRFConfig : ZeroedMemoryAllocator {
+	GRFConfig(const char *filename = NULL);
+	~GRFConfig();
+
+	GRFIdentifier ident; ///< grfid and md5sum to uniquely identify newgrfs
 	char *filename;     ///< Filename - either with or without full path
 	char *name;         ///< NOSAVE: GRF name (Action 0x08)
 	char *info;         ///< NOSAVE: GRF info (author, copyright, ...) (Action 0x08)
@@ -94,7 +102,6 @@ GRFConfig *GetGRFConfig(uint32 grfid, uint32 mask = 0xFFFFFFFF);
 GRFConfig **CopyGRFConfigList(GRFConfig **dst, const GRFConfig *src, bool init_only);
 void AppendStaticGRFConfigs(GRFConfig **dst);
 void AppendToGRFConfigList(GRFConfig **dst, GRFConfig *el);
-void ClearGRFConfig(GRFConfig **config);
 void ClearGRFConfigList(GRFConfig **config);
 void ResetGRFConfig(bool defaults);
 GRFListCompatibility IsGoodGRFConfigList();

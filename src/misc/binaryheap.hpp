@@ -12,216 +12,271 @@
 #ifndef  BINARYHEAP_HPP
 #define  BINARYHEAP_HPP
 
+/* Enable it if you suspect binary heap doesn't work well */
+#define BINARYHEAP_CHECK 0
+
+#if BINARYHEAP_CHECK
+	#define CHECK_CONSISTY() this->CheckConsistency()
+#else
+	#define CHECK_CONSISTY() ;
+#endif
+
 /**
  * Binary Heap as C++ template.
+ *  A carrier which keeps it's items automaticaly holds the smallest item at
+ *  the first position. The order of items is maintained by using a binary tree.
+ *  The implementation is used for priority queue's.
  *
- * For information about Binary Heap algotithm,
- *   see: http://www.policyalmanac.org/games/binaryHeaps.htm
+ * @par Usage information:
+ * Item of the binary heap should support the 'lower-than' operator '<'.
+ * It is used for comparing items before moving them to their position.
  *
- * Implementation specific notes:
+ * @par
+ * This binary heap allocates just the space for item pointers. The items
+ * are allocated elsewhere.
  *
- * 1) It allocates space for item pointers (array). Items are allocated elsewhere.
+ * @par Implementation notes:
+ * Internaly the first item is never used, because that simplifies the
+ * implementation.
  *
- * 2) ItemPtr [0] is never used. Total array size is max_items + 1, because we
- *    use indices 1..max_items instead of zero based C indexing.
+ * @par
+ * For further information about the Binary Heap algotithm, see
+ * http://www.policyalmanac.org/games/binaryHeaps.htm
  *
- * 3) Item of the binary heap should support these public members:
- *    - 'lower-than' operator '<' - used for comparing items before moving
- *
+ * @tparam T Type of the items stored in the binary heap
  */
-
-template <class Titem_>
+template <class T>
 class CBinaryHeapT {
-public:
-	typedef Titem_ *ItemPtr;
 private:
-	int                     m_size;     ///< Number of items in the heap
-	int                     m_max_size; ///< Maximum number of items the heap can hold
-	ItemPtr                *m_items;    ///< The heap item pointers
+	uint items;    ///< Number of items in the heap
+	uint capacity; ///< Maximum number of items the heap can hold
+	T **data;      ///< The pointer to the heap item pointers
 
 public:
-	explicit CBinaryHeapT(int max_items = 102400)
-		: m_size(0)
-		, m_max_size(max_items)
+	explicit CBinaryHeapT(uint max_items)
+		: items(0)
+		, capacity(max_items)
 	{
-		m_items = new ItemPtr[max_items + 1];
+		this->data = MallocT<T *>(max_items + 1);
 	}
 
 	~CBinaryHeapT()
 	{
-		Clear();
-		delete [] m_items;
-		m_items = NULL;
+		this->Clear();
+		free(this->data);
+		this->data = NULL;
 	}
 
-public:
-	/** Return the number of items stored in the priority queue.
-	 *  @return number of items in the queue */
-	FORCEINLINE int Size() const {return m_size;};
+protected:
+	/**
+	 * Get position for fixing a gap (downwards).
+	 *  The gap is moved downwards in the binary tree until it
+	 *  is in order again.
+	 *
+	 * @param gap The position of the gap
+	 * @param item The proposed item for filling the gap
+	 * @return The (gap)position where the item fits
+	 */
+	FORCEINLINE uint HeapifyDown(uint gap, T *item)
+	{
+		assert(gap != 0);
 
-	/** Test if the priority queue is empty.
-	 *  @return true if empty */
-	FORCEINLINE bool IsEmpty() const {return (m_size == 0);};
+		/* The first child of the gap is at [parent * 2] */
+		uint child = gap * 2;
 
-	/** Test if the priority queue is full.
-	 *  @return true if full. */
-	FORCEINLINE bool IsFull() const {return (m_size >= m_max_size);};
-
-	/** Find the smallest item in the priority queue.
-	 *  Return the smallest item, or throw assert if empty. */
-	FORCEINLINE Titem_& GetHead() {assert(!IsEmpty()); return *m_items[1];}
-
-	/** Insert new item into the priority queue, maintaining heap order.
-	 *  @return false if the queue is full. */
-	bool Push(Titem_& new_item);
-
-	/** Remove and return the smallest item from the priority queue. */
-	FORCEINLINE Titem_& PopHead() {Titem_& ret = GetHead(); RemoveHead(); return ret;};
-
-	/** Remove the smallest item from the priority queue. */
-	void RemoveHead();
-
-	/** Remove item specified by index */
-	void RemoveByIdx(int idx);
-
-	/** return index of the item that matches (using &item1 == &item2) the given item. */
-	int FindLinear(const Titem_& item) const;
-
-	/** Make the priority queue empty.
-	 * All remaining items will remain untouched. */
-	void Clear() {m_size = 0;};
-
-	/** verifies the heap consistency (added during first YAPF debug phase) */
-	void CheckConsistency();
-};
-
-
-template <class Titem_>
-FORCEINLINE bool CBinaryHeapT<Titem_>::Push(Titem_& new_item)
-{
-	if (IsFull()) return false;
-
-	/* make place for new item */
-	int gap = ++m_size;
-	/* Heapify up */
-	for (int parent = gap / 2; (parent > 0) && (new_item < *m_items[parent]); gap = parent, parent /= 2)
-		m_items[gap] = m_items[parent];
-	m_items[gap] = &new_item;
-	CheckConsistency();
-	return true;
-}
-
-template <class Titem_>
-FORCEINLINE void CBinaryHeapT<Titem_>::RemoveHead()
-{
-	assert(!IsEmpty());
-
-	/* at index 1 we have a gap now */
-	int gap = 1;
-
-	/* Heapify down:
-	 *   last item becomes a candidate for the head. Call it new_item. */
-	Titem_& new_item = *m_items[m_size--];
-
-	/* now we must maintain relation between parent and its children:
-	 *   parent <= any child
-	 * from head down to the tail */
-	int child  = 2; // first child is at [parent * 2]
-
-	/* while children are valid */
-	while (child <= m_size) {
-		/* choose the smaller child */
-		if (child < m_size && *m_items[child + 1] < *m_items[child])
-			child++;
-		/* is it smaller than our parent? */
-		if (!(*m_items[child] < new_item)) {
-			/* the smaller child is still bigger or same as parent => we are done */
-			break;
-		}
-		/* if smaller child is smaller than parent, it will become new parent */
-		m_items[gap] = m_items[child];
-		gap = child;
-		/* where do we have our new children? */
-		child = gap * 2;
-	}
-	/* move last item to the proper place */
-	if (m_size > 0) m_items[gap] = &new_item;
-	CheckConsistency();
-}
-
-template <class Titem_>
-inline void CBinaryHeapT<Titem_>::RemoveByIdx(int idx)
-{
-	/* at position idx we have a gap now */
-	int gap = idx;
-	Titem_& last = *m_items[m_size];
-	if (idx < m_size) {
-		assert(idx >= 1);
-		m_size--;
-		/* and the candidate item for fixing this gap is our last item 'last'
-		 * Move gap / last item up: */
-		while (gap > 1)
-		{
-			/* compare [gap] with its parent */
-			int parent = gap / 2;
-			if (last < *m_items[parent]) {
-				m_items[gap] = m_items[parent];
-				gap = parent;
-			} else {
-				/* we don't need to continue upstairs */
-				break;
-			}
-		}
-
-		/* Heapify (move gap) down: */
-		while (true) {
-			/* where we do have our children? */
-			int child  = gap * 2; // first child is at [parent * 2]
-			if (child > m_size) break;
+		/* while children are valid */
+		while (child <= this->items) {
 			/* choose the smaller child */
-			if (child < m_size && *m_items[child + 1] < *m_items[child])
+			if (child < this->items && *this->data[child + 1] < *this->data[child])
 				child++;
 			/* is it smaller than our parent? */
-			if (!(*m_items[child] < last)) {
+			if (!(*this->data[child] < *item)) {
 				/* the smaller child is still bigger or same as parent => we are done */
 				break;
 			}
 			/* if smaller child is smaller than parent, it will become new parent */
-			m_items[gap] = m_items[child];
+			this->data[gap] = this->data[child];
 			gap = child;
+			/* where do we have our new children? */
+			child = gap * 2;
 		}
-		/* move parent to the proper place */
-		if (m_size > 0) m_items[gap] = &last;
-	} else {
-		assert(idx == m_size);
-		m_size--;
+		return gap;
 	}
-	CheckConsistency();
-}
 
-template <class Titem_>
-inline int CBinaryHeapT<Titem_>::FindLinear(const Titem_& item) const
-{
-	if (IsEmpty()) return 0;
-	for (ItemPtr *ppI = m_items + 1, *ppLast = ppI + m_size; ppI <= ppLast; ppI++) {
-		if (*ppI == &item) {
-			return ppI - m_items;
+	/**
+	 * Get position for fixing a gap (upwards).
+	 *  The gap is moved upwards in the binary tree until the
+	 *  is in order again.
+	 *
+	 * @param gap The position of the gap
+	 * @param item The proposed item for filling the gap
+	 * @return The (gap)position where the item fits
+	 */
+	FORCEINLINE uint HeapifyUp(uint gap, T *item)
+	{
+		assert(gap != 0);
+
+		uint parent;
+
+		while (gap > 1) {
+			/* compare [gap] with its parent */
+			parent = gap / 2;
+			if (!(*item < *this->data[parent])) {
+				/* we don't need to continue upstairs */
+				break;
+			}
+			this->data[gap] = this->data[parent];
+			gap = parent;
 		}
+		return gap;
 	}
-	return 0;
-}
 
-template <class Titem_>
-FORCEINLINE void CBinaryHeapT<Titem_>::CheckConsistency()
-{
-	/* enable it if you suspect binary heap doesn't work well */
-#if 0
-	for (int child = 2; child <= m_size; child++) {
-		int parent = child / 2;
-		assert(!(m_items[child] < m_items[parent]));
+#if BINARYHEAP_CHECK
+	/** Verify the heap consistency */
+	FORCEINLINE void CheckConsistency()
+	{
+		for (uint child = 2; child <= this->items; child++) {
+			uint parent = child / 2;
+			assert(!(*this->data[child] < *this->data[parent]));
+		}
 	}
 #endif
-}
 
+public:
+	/**
+	 * Get the number of items stored in the priority queue.
+	 *
+	 *  @return The number of items in the queue
+	 */
+	FORCEINLINE uint Length() const { return this->items; }
+
+	/**
+	 * Test if the priority queue is empty.
+	 *
+	 * @return True if empty
+	 */
+	FORCEINLINE bool IsEmpty() const { return this->items == 0; }
+
+	/**
+	 * Test if the priority queue is full.
+	 *
+	 * @return True if full.
+	 */
+	FORCEINLINE bool IsFull() const { return this->items >= this->capacity; }
+
+	/**
+	 * Get the smallest item in the binary tree.
+	 *
+	 * @return The smallest item, or throw assert if empty.
+	 */
+	FORCEINLINE T *Begin()
+	{
+		assert(!this->IsEmpty());
+		return this->data[1];
+	}
+
+	/**
+	 * Get the LAST item in the binary tree.
+	 *
+	 * @note The last item is not neccesary the biggest!
+	 *
+	 * @return The last item
+	 */
+	FORCEINLINE T *End()
+	{
+		return this->data[1 + this->items];
+	}
+
+	/**
+	 * Insert new item into the priority queue, maintaining heap order.
+	 *
+	 * @param new_item The pointer to the new item
+	 */
+	FORCEINLINE void Include(T *new_item)
+	{
+		if (this->IsFull()) {
+			this->capacity *= 2;
+			this->data = ReallocT<T*>(this->data, this->capacity + 1);
+		}
+
+		/* Make place for new item. A gap is now at the end of the tree. */
+		uint gap = this->HeapifyUp(++items, new_item);
+		this->data[gap] = new_item;
+		CHECK_CONSISTY();
+	}
+
+	/**
+	 * Remove and return the smallest (and also first) item
+	 *  from the priority queue.
+	 *
+	 * @return The pointer to the removed item
+	 */
+	FORCEINLINE T *Shift()
+	{
+		assert(!this->IsEmpty());
+
+		T *first = this->Begin();
+
+		this->items--;
+		/* at index 1 we have a gap now */
+		T *last = this->End();
+		uint gap = this->HeapifyDown(1, last);
+		/* move last item to the proper place */
+		if (!this->IsEmpty()) this->data[gap] = last;
+
+		CHECK_CONSISTY();
+		return first;
+	}
+
+	/**
+	 * Remove item at given index from the priority queue.
+	 *
+	 * @param index The position of the item in the heap
+	 */
+	FORCEINLINE void Remove(uint index)
+	{
+		if (index < this->items) {
+			assert(index != 0);
+			this->items--;
+			/* at position index we have a gap now */
+
+			T *last = this->End();
+			/* Fix binary tree up and downwards */
+			uint gap = this->HeapifyUp(index, last);
+			gap = this->HeapifyDown(gap, last);
+			/* move last item to the proper place */
+			if (!this->IsEmpty()) this->data[gap] = last;
+		} else {
+			assert(index == this->items);
+			this->items--;
+		}
+		CHECK_CONSISTY();
+	}
+
+	/**
+	 * Search for an item in the priority queue.
+	 *  Matching is done by comparing adress of the
+	 *  item.
+	 *
+	 * @param item The reference to the item
+	 * @return The index of the item or zero if not found
+	 */
+	FORCEINLINE uint FindIndex(const T &item) const
+	{
+		if (this->IsEmpty()) return 0;
+		for (T **ppI = this->data + 1, **ppLast = ppI + this->items; ppI <= ppLast; ppI++) {
+			if (*ppI == &item) {
+				return ppI - this->data;
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Make the priority queue empty.
+	 * All remaining items will remain untouched.
+	 */
+	FORCEINLINE void Clear() { this->items = 0; }
+};
 
 #endif /* BINARYHEAP_HPP */

@@ -33,6 +33,7 @@
 #include "window_func.h"
 #include "tilehighlight_func.h"
 #include "querystring_gui.h"
+#include "console_func.h"
 #include "core/geometry_func.hpp"
 
 #include "table/strings.h"
@@ -157,6 +158,7 @@ public:
 
 		td.station_class = STR_NULL;
 		td.station_name = STR_NULL;
+		td.airport_tile_name = STR_NULL;
 
 		td.grf = NULL;
 
@@ -240,6 +242,13 @@ public:
 		if (td.station_name != STR_NULL) {
 			SetDParam(0, td.station_name);
 			GetString(this->landinfo_data[line_nr], STR_LAND_AREA_INFORMATION_STATION_TYPE, lastof(this->landinfo_data[line_nr]));
+			line_nr++;
+		}
+
+		/* Station type name */
+		if (td.airport_tile_name != STR_NULL) {
+			SetDParam(0, td.airport_tile_name);
+			GetString(this->landinfo_data[line_nr], STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME, lastof(this->landinfo_data[line_nr]));
 			line_nr++;
 		}
 
@@ -682,17 +691,33 @@ public:
  * Display an error message in a window.
  * @param summary_msg  General error message showed in first line. Must be valid.
  * @param detailed_msg Detailed error message showed in second line. Can be INVALID_STRING_ID.
+ * @param wl           Message severity
  * @param x            World X position (TileVirtX) of the error location. Set both x and y to 0 to just center the message when there is no related error tile.
  * @param y            World Y position (TileVirtY) of the error location. Set both x and y to 0 to just center the message when there is no related error tile.
- * @param no_timeout   Set to true, if the message is that important that it should not close automatically after some time.
  */
-void ShowErrorMessage(StringID summary_msg, StringID detailed_msg, int x, int y, bool no_timeout)
+void ShowErrorMessage(StringID summary_msg, StringID detailed_msg, WarningLevel wl, int x, int y)
 {
-	DeleteWindowById(WC_ERRMSG, 0);
+	if (summary_msg == STR_NULL) summary_msg = STR_EMPTY;
+
+	if (wl != WL_INFO) {
+		/* Print message to console */
+		char buf[DRAW_STRING_BUFFER];
+		char *b = GetString(buf, summary_msg, lastof(buf));
+		if (detailed_msg != INVALID_STRING_ID) {
+			b += seprintf(b, lastof(buf), " ");
+			GetString(b, detailed_msg, lastof(buf));
+		}
+		switch (wl) {
+			case WL_WARNING: IConsolePrint(CC_WARNING, buf); break;
+			default:         IConsoleError(buf); break;
+		};
+	}
+
+	bool no_timeout = wl == WL_CRITICAL;
 
 	if (_settings_client.gui.errmsg_duration == 0 && !no_timeout) return;
 
-	if (summary_msg == STR_NULL) summary_msg = STR_EMPTY;
+	DeleteWindowById(WC_ERRMSG, 0);
 
 	Point pt = {x, y};
 	const WindowDesc *desc = (detailed_msg != STR_ERROR_OWNED_BY || GetDParam(2) >= MAX_COMPANIES) ? &_errmsg_desc : &_errmsg_face_desc;
@@ -708,7 +733,7 @@ void ShowEstimatedCostOrIncome(Money cost, int x, int y)
 		msg = STR_MESSAGE_ESTIMATED_INCOME;
 	}
 	SetDParam(0, cost);
-	ShowErrorMessage(msg, INVALID_STRING_ID, x, y);
+	ShowErrorMessage(msg, INVALID_STRING_ID, WL_INFO, x, y);
 }
 
 void ShowCostOrIncomeAnimation(int x, int y, int z, Money cost)
@@ -1866,7 +1891,7 @@ public:
 
 			case SLWW_CONTENT_DOWNLOAD:
 				if (!_network_available) {
-					ShowErrorMessage(STR_NETWORK_ERROR_NOTAVAILABLE, INVALID_STRING_ID, 0, 0);
+					ShowErrorMessage(STR_NETWORK_ERROR_NOTAVAILABLE, INVALID_STRING_ID, WL_ERROR);
 				} else {
 #if defined(ENABLE_NETWORK)
 					switch (_saveload_mode) {
@@ -1914,7 +1939,7 @@ public:
 
 		if (this->IsWidgetLowered(SLWW_DELETE_SELECTION)) { // Delete button clicked
 			if (!FiosDelete(this->text.buf)) {
-				ShowErrorMessage(STR_ERROR_UNABLE_TO_DELETE_FILE, INVALID_STRING_ID, 0, 0);
+				ShowErrorMessage(STR_ERROR_UNABLE_TO_DELETE_FILE, INVALID_STRING_ID, WL_ERROR);
 			} else {
 				BuildFileList();
 				/* Reset file name to current date on successful delete */
