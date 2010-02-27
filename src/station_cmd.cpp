@@ -3061,7 +3061,7 @@ static void UpdateStationRating(Station *st)
 					waiting_changed = true;
 				}
 
-				if (waiting_changed) ge->cargo.Truncate(waiting);
+				if (waiting_changed) ge->cargo.RandomTruncate(waiting, ge);
 			}
 		}
 	}
@@ -3142,15 +3142,15 @@ void Station::RunAverages() {
 	}
 }
 
-void UpdateFlows(Station * st, Vehicle *front, StationID next_station_id) {
+void UpdateFlows(Station *st, Vehicle *front, StationID next_station_id) {
 	if (next_station_id == INVALID_STATION) {
 		return;
 	} else {
 		for (Vehicle *v = front; v != NULL; v = v->Next()) {
 			GoodsEntry *ge = &st->goods[v->cargo_type];
-			const CargoPacketList * packets = v->cargo.Packets();
+			const CargoPacketList *packets = v->cargo.Packets();
 			for(VehicleCargoList::ConstIterator i = packets->begin(); i != packets->end(); ++i) {
-				CargoPacket * p = *i;
+				CargoPacket *p = *i;
 				ge->UpdateFlowStats(p->SourceStation(), p->Count(), next_station_id);
 			}
 		}
@@ -3673,7 +3673,7 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
-void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count)
+void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, int count)
 {
 	FlowStat fs = *flow_it;
 	fs.Increase(count);
@@ -3681,7 +3681,7 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator 
 	flow_stats.insert(fs);
 }
 
-void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next)
+void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, int count, StationID next)
 {
 	FlowStatSet::iterator flow_it = flow_stats.begin();
 	while (flow_it != flow_stats.end()) {
@@ -3695,16 +3695,16 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID 
 	}
 }
 
-void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
+void GoodsEntry::UpdateFlowStats(StationID source, int count, StationID next)
 {
-	if (source == INVALID_STATION || next == INVALID_STATION || flows.empty()) return;
-	FlowStatSet & flow_stats = flows[source];
+	if (source == INVALID_STATION || next == INVALID_STATION || this->flows.empty()) return;
+	FlowStatSet &flow_stats = this->flows[source];
 	this->UpdateFlowStats(flow_stats, count, next);
 }
 
-StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
-	if (source == INVALID_STATION || flows.empty()) return INVALID_STATION;
-	FlowStatSet & flow_stats = flows[source];
+StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, int count, StationID curr) {
+	if (source == INVALID_STATION || this->flows.empty()) return INVALID_STATION;
+	FlowStatSet &flow_stats = this->flows[source];
 	FlowStatSet::iterator flow_it = flow_stats.begin();
 	while (flow_it != flow_stats.end()) {
 		StationID via = flow_it->Via();
@@ -3721,10 +3721,10 @@ StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, Stat
 
 FlowStat GoodsEntry::GetSumFlowVia(StationID via) const {
 	FlowStat ret(1, via);
-	for(FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
-		const FlowStatSet & flow_set = i->second;
+	for(FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
+		const FlowStatSet &flow_set = i->second;
 		for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
-			const FlowStat & flow = *j;
+			const FlowStat &flow = *j;
 			if (flow.Via() == via) {
 				ret += flow;
 			}
