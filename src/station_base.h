@@ -166,14 +166,15 @@ public:
 		}
 	};
 
-	FORCEINLINE FlowStat & operator+=(const FlowStat & other)
+	FORCEINLINE FlowStat &operator+=(const FlowStat &other)
 	{
 		assert(this->via == INVALID_STATION || other.via == INVALID_STATION || this->via == other.via);
-		this->via = other.via;
+		if (other.via != INVALID_STATION) this->via = other.via;
 		this->planned += other.planned;
 		uint sent = this->sent + other.sent;
 		if (sent > 0) {
 			this->length = (this->length * this->sent + other.length * other.sent) / sent;
+			assert(this->length > 0);
 		}
 		this->sent = sent;
 		return *this;
@@ -257,15 +258,15 @@ struct GoodsEntry {
 	/**
 	 * update the flow stats for count cargo from source sent to next
 	 */
-	void UpdateFlowStats(StationID source, int count, StationID next);
-	void UpdateFlowStats(FlowStatSet &flow_stats, int count, StationID next);
-	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, int count);
+	void UpdateFlowStats(StationID source, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next);
+	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count);
 
 	/**
 	 * update the flow stats for count cargo that cannot be delivered here
 	 * return the direction where it is sent
 	 */
-	StationID UpdateFlowStatsTransfer(StationID source, int count, StationID curr);
+	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
 };
 
 
