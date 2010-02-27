@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "station_base.h"
 #include "core/pool_func.hpp"
+#include "core/random_func.hpp"
 #include "economy_base.h"
 
 /* Initialize the cargopacket-pool */
@@ -556,10 +557,10 @@ uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID select
 	return orig_cap - cap;
 }
 
-void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry * ge) {
+void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry *ge) {
 	std::pair<Iterator, Iterator> range(packets.equal_range(to));
 	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
-		CargoPacket * packet = *it;
+		CargoPacket *packet = *it;
 		packets.erase(it++);
 		StationID next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
 		assert(next != to);
@@ -569,6 +570,30 @@ void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEn
 		 * This is why we check for GetKey above to avoid infinite loops
 		 */
 		packets.Insert(next, packet);
+	}
+}
+
+void StationCargoList::RandomTruncate(uint max_remaining, GoodsEntry *ge) {
+	uint prev_count = this->count;
+	while (this->count > max_remaining) {
+		for(Iterator it(packets.begin()); it != packets.end();) {
+			if (RandomRange(prev_count) < max_remaining) continue;
+			CargoPacket *packet = *it;
+			StationID next = it.GetKey();
+			uint diff = this->count - max_remaining;
+			if (packet->count > diff) {
+				packet->count -= diff;
+				this->count = max_remaining;
+				this->cargo_days_in_transit -= packet->days_in_transit * diff;
+				ge->UpdateFlowStats(packet->source, -diff, next);
+				return;
+			} else {
+				packets.erase(it++);
+				this->RemoveFromCache(packet);
+				ge->UpdateFlowStats(packet->source, -packet->count, next);
+				delete packet;
+			}
+		}
 	}
 }
 
