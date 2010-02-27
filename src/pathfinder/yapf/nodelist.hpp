@@ -49,7 +49,7 @@ protected:
 public:
 	/** default constructor */
 	CNodeList_HashTableT()
-		: m_open_queue(204800)
+		: m_open_queue(2048)
 	{
 		m_new_node = NULL;
 	}
@@ -93,9 +93,7 @@ public:
 	{
 		assert(m_closed.Find(item.GetKey()) == NULL);
 		m_open.Push(item);
-		/* TODO: check if m_open_queue is not full */
-		assert(!m_open_queue.IsFull());
-		m_open_queue.Push(item);
+		m_open_queue.Include(&item);
 		if (&item == m_new_node) {
 			m_new_node = NULL;
 		}
@@ -105,8 +103,7 @@ public:
 	FORCEINLINE Titem_ *GetBestOpenNode()
 	{
 		if (!m_open_queue.IsEmpty()) {
-			Titem_& item = m_open_queue.GetHead();
-			return &item;
+			return m_open_queue.Begin();
 		}
 		return NULL;
 	}
@@ -115,9 +112,9 @@ public:
 	FORCEINLINE Titem_ *PopBestOpenNode()
 	{
 		if (!m_open_queue.IsEmpty()) {
-			Titem_& item = m_open_queue.PopHead();
-			m_open.Pop(item);
-			return &item;
+			Titem_ *item = m_open_queue.Shift();
+			m_open.Pop(*item);
+			return item;
 		}
 		return NULL;
 	}
@@ -133,8 +130,8 @@ public:
 	FORCEINLINE Titem_& PopOpenNode(const Key& key)
 	{
 		Titem_& item = m_open.Pop(key);
-		int idxPop = m_open_queue.FindLinear(item);
-		m_open_queue.RemoveByIdx(idxPop);
+		uint idxPop = m_open_queue.FindIndex(item);
+		m_open_queue.Remove(idxPop);
 		return item;
 	}
 
