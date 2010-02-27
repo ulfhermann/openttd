@@ -573,7 +573,7 @@ void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEn
 	}
 }
 
-void StationCargoList::RandomTruncate(uint max_remaining, GoodsEntry *ge) {
+void StationCargoList::RandomTruncate(uint max_remaining) {
 	uint prev_count = this->count;
 	while (this->count > max_remaining) {
 		for(Iterator it(packets.begin()); it != packets.end();) {
@@ -585,12 +585,10 @@ void StationCargoList::RandomTruncate(uint max_remaining, GoodsEntry *ge) {
 				packet->count -= diff;
 				this->count = max_remaining;
 				this->cargo_days_in_transit -= packet->days_in_transit * diff;
-				ge->UpdateFlowStats(packet->source, -diff, next);
 				return;
 			} else {
 				packets.erase(it++);
 				this->RemoveFromCache(packet);
-				ge->UpdateFlowStats(packet->source, -packet->count, next);
 				delete packet;
 			}
 		}

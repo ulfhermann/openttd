@@ -3061,7 +3061,7 @@ static void UpdateStationRating(Station *st)
 					waiting_changed = true;
 				}
 
-				if (waiting_changed) ge->cargo.RandomTruncate(waiting, ge);
+				if (waiting_changed) ge->cargo.RandomTruncate(waiting);
 			}
 		}
 	}
@@ -3673,7 +3673,7 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
-void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, int count)
+void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count)
 {
 	FlowStat fs = *flow_it;
 	fs.Increase(count);
@@ -3681,7 +3681,7 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator 
 	flow_stats.insert(fs);
 }
 
-void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, int count, StationID next)
+void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next)
 {
 	FlowStatSet::iterator flow_it = flow_stats.begin();
 	while (flow_it != flow_stats.end()) {
@@ -3695,14 +3695,14 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, int count, StationID n
 	}
 }
 
-void GoodsEntry::UpdateFlowStats(StationID source, int count, StationID next)
+void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
 {
 	if (source == INVALID_STATION || next == INVALID_STATION || this->flows.empty()) return;
 	FlowStatSet &flow_stats = this->flows[source];
 	this->UpdateFlowStats(flow_stats, count, next);
 }
 
-StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, int count, StationID curr) {
+StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
 	if (source == INVALID_STATION || this->flows.empty()) return INVALID_STATION;
 	FlowStatSet &flow_stats = this->flows[source];
 	FlowStatSet::iterator flow_it = flow_stats.begin();
