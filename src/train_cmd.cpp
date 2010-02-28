@@ -2342,7 +2342,7 @@ static void ClearPathReservation(const Train *v, TileIndex tile, Trackdir track_
 		if (GetTunnelBridgeDirection(tile) == ReverseDiagDir(dir)) {
 			TileIndex end = GetOtherTunnelBridgeEnd(tile);
 
-			if (!HasVehicleOnTunnelBridge(tile, end, v)) {
+			if (TunnelBridgeIsFree(tile, end, v).Succeeded()) {
 				/* Free the reservation only if no other train is on the tiles. */
 				SetTunnelBridgeReservation(tile, false);
 				SetTunnelBridgeReservation(end, false);
@@ -3365,8 +3365,11 @@ static void TrainController(Train *v, Vehicle *nomove)
 						}
 
 						/* If we would reverse but are currently in a PBS block and
-						 * reversing of stuck trains is disabled, don't reverse. */
-						if (_settings_game.pf.wait_for_pbs_path == 255 && UpdateSignalsOnSegment(v->tile, enterdir, v->owner) == SIGSEG_PBS) {
+						 * reversing of stuck trains is disabled, don't reverse.
+						 * This does not apply if the reason for reversing is a one-way
+						 * signal blocking us, because a train would then be stuck forever. */
+						if (_settings_game.pf.wait_for_pbs_path == 255 && !HasOnewaySignalBlockingTrackdir(gp.new_tile, i) &&
+								UpdateSignalsOnSegment(v->tile, enterdir, v->owner) == SIGSEG_PBS) {
 							v->wait_counter = 0;
 							return;
 						}
