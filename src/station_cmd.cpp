@@ -3025,11 +3025,10 @@ static void UpdateStationRating(Station *st)
 			(rating += 10, age >= 1) ||
 			(rating += 13, true);
 
-			if (_settings_game.economy.cap_ratings_by_component) {
-				CargoID c_id = cs->Index();
-				uint component_cap = 128 + 128 * _link_graphs[c_id].GetComponentAcceptance(ge->last_component) / (GlobalCargoAcceptance::inst.Get(c_id) + 1);
-				rating = min(rating, component_cap);
-			}
+			CargoID c_id = cs->Index();
+			uint min_rating = 256 * (uint)_settings_game.economy.min_rating_by_component / 100;
+			uint component_cap = min_rating + (256 - min_rating) * _link_graphs[c_id].GetComponentAcceptance(ge->last_component) / (GlobalCargoAcceptance::inst.Get(c_id) + 1);
+			rating = min(rating, component_cap);
 
 			{
 				int or_ = ge->rating; // old rating
