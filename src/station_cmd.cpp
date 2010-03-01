@@ -2742,7 +2742,7 @@ static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 
 			if (spec->grffile != NULL) {
 				const GRFConfig *gc = GetGRFConfig(spec->grffile->grfid);
-				td->grf = gc->name;
+				td->grf = gc->GetName();
 			}
 		}
 	}
@@ -2753,7 +2753,7 @@ static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 
 		if (ats->grf_prop.grffile != NULL) {
 			const GRFConfig *gc = GetGRFConfig(ats->grf_prop.grffile->grfid);
-			td->grf = gc->name;
+			td->grf = gc->GetName();
 		}
 	}
 
