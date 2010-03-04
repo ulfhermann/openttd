@@ -579,7 +579,6 @@ void StationCargoList::RandomTruncate(uint max_remaining) {
 		for(Iterator it(packets.begin()); it != packets.end();) {
 			if (RandomRange(prev_count) < max_remaining) continue;
 			CargoPacket *packet = *it;
-			StationID next = it.GetKey();
 			uint diff = this->count - max_remaining;
 			if (packet->count > diff) {
 				packet->count -= diff;
