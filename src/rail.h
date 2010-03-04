@@ -186,7 +186,7 @@ struct RailtypeInfo {
 	/**
 	 * Cost multiplier for building this rail type
 	 */
-	uint8 cost_multiplier;
+	uint16 cost_multiplier;
 
 	/**
 	 * Acceleration type of this rail type
@@ -202,6 +202,11 @@ struct RailtypeInfo {
 	 * Unique 32 bit rail type identifier
 	 */
 	RailTypeLabel label;
+
+	/**
+	 * Colour on mini-map
+	 */
+	byte map_colour;
 
 	/**
 	 * Sprite groups for resolving sprites
