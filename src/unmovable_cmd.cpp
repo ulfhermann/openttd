@@ -49,6 +49,16 @@ static inline const UnmovableSpec *GetUnmovableSpec(UnmovableType type)
 	return &_original_unmovable[type];
 }
 
+/**
+ * destroy one tile of a HQ and update the global acceptance accordingly
+ * @param t the tile to be destroyed
+ */
+static inline void DestroyCompanyHQTile(TileIndex t)
+{
+	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
+	DoClearSquare(t);
+}
+
 /** Destroy a HQ.
  * During normal gameplay you can only implicitely destroy a HQ when you are
  * rebuilding it. Otherwise, only water can destroy it.
@@ -63,10 +73,10 @@ static CommandCost DestroyCompanyHQ(CompanyID cid, DoCommandFlag flags)
 	if (flags & DC_EXEC) {
 		TileIndex t = c->location_of_HQ;
 
-		DoClearSquare(t);
-		DoClearSquare(t + TileDiffXY(0, 1));
-		DoClearSquare(t + TileDiffXY(1, 0));
-		DoClearSquare(t + TileDiffXY(1, 1));
+		DestroyCompanyHQTile(t);
+		DestroyCompanyHQTile(t + TileDiffXY(0, 1));
+		DestroyCompanyHQTile(t + TileDiffXY(1, 0));
+		DestroyCompanyHQTile(t + TileDiffXY(1, 1));
 		c->location_of_HQ = INVALID_TILE; // reset HQ position
 		SetWindowDirty(WC_COMPANY, cid);
 
@@ -302,7 +312,7 @@ static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 	return CommandCost();
 }
 
-static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
+void ModifyAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
 {
 	if (!IsCompanyHQ(tile)) return;
 
@@ -312,17 +322,23 @@ static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, u
 	/* HQ level (depends on company performance) in the range 1..5. */
 	uint level = GetCompanyHQSize(tile) + 1;
 
-	/* Top town building generates 10, so to make HQ interesting, the top
-	 * type makes 20. */
-	acceptance[CT_PASSENGERS] += max(1U, level);
-	SetBit(*always_accepted, CT_PASSENGERS);
-
-	/* Top town building generates 4, HQ can make up to 8. The
+	/* Top town building generates 10 passengers, so to make HQ interesting,
+	 * the top type makes 20. 
+	 * Top town building generates 4 mail, HQ can make up to 8. The
 	 * proportion passengers:mail is different because such a huge
 	 * commercial building generates unusually high amount of mail
 	 * correspondence per physical visitor. */
-	acceptance[CT_MAIL] += max(1U, level / 2);
-	SetBit(*always_accepted, CT_MAIL);
+	if (mode == ACCEPTANCE_ADD) {
+		acceptance[CT_PASSENGERS] += max(1U, level);
+		acceptance[CT_MAIL] += max(1U, level / 2);
+	} else {
+		acceptance[CT_PASSENGERS] -= max(1U, level);
+		acceptance[CT_MAIL] -= max(1U, level / 2);
+	}
+	if (always_accepted != NULL) {
+		SetBit(*always_accepted, CT_PASSENGERS);
+		SetBit(*always_accepted, CT_MAIL);
+	}
 }
 
 
@@ -511,7 +527,7 @@ extern const TileTypeProcs _tile_type_unmovable_procs = {
 	DrawTile_Unmovable,             // draw_tile_proc
 	GetSlopeZ_Unmovable,            // get_slope_z_proc
 	ClearTile_Unmovable,            // clear_tile_proc
-	AddAcceptedCargo_Unmovable,     // add_accepted_cargo_proc
+	ModifyAcceptedCargo_Unmovable,  // modify_accepted_cargo_proc
 	GetTileDesc_Unmovable,          // get_tile_desc_proc
 	GetTileTrackStatus_Unmovable,   // get_tile_track_status_proc
 	ClickTile_Unmovable,            // click_tile_proc
