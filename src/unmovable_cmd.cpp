@@ -49,9 +49,12 @@ static inline const UnmovableSpec *GetUnmovableSpec(UnmovableType type)
 	return &_original_unmovable[type];
 }
 
+/**
+ * destroy one tile of a HQ and update the global acceptance accordingly
+ * @param t the tile to be destroyed
+ */
 static inline void DestroyCompanyHQTile(TileIndex t)
 {
-	/* HQs don't belong to towns, so no town acceptance is updated */
 	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
 	DoClearSquare(t);
 }
