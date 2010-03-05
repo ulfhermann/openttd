@@ -13,7 +13,6 @@
 #include "../industry.h"
 #include "../newgrf_commons.h"
 #include "../economy_func.h"
-#include "../town.h"
 
 #include "saveload.h"
 
@@ -163,7 +162,10 @@ static void Ptrs_INDY()
 	}
 }
 
-void UpdateGlobalIndustryStatistics() {
+/**
+ * update the global acceptance statistics with info about all industries.
+ */
+void UpdateAcceptanceIndustry() {
 	const Industry *i;
 	FOR_ALL_INDUSTRIES(i) {
 		TILE_AREA_LOOP(tile_cur, i->location) {
