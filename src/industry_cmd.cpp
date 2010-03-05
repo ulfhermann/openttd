@@ -392,11 +392,6 @@ static Foundation GetFoundation_Industry(TileIndex tile, Slope tileh)
 	return FlatteningFoundation(tileh);
 }
 
-void AddAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
-{
-	ModifyAcceptedCargo_Industry(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
-}
-
 void ModifyAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
 {
 	IndustryGfx gfx = GetIndustryGfx(tile);
@@ -2546,7 +2541,7 @@ extern const TileTypeProcs _tile_type_industry_procs = {
 	DrawTile_Industry,           // draw_tile_proc
 	GetSlopeZ_Industry,          // get_slope_z_proc
 	ClearTile_Industry,          // clear_tile_proc
-	AddAcceptedCargo_Industry,   // add_accepted_cargo_proc
+	ModifyAcceptedCargo_Industry,// modify_accepted_cargo_proc
 	GetTileDesc_Industry,        // get_tile_desc_proc
 	GetTileTrackStatus_Industry, // get_tile_track_status_proc
 	ClickTile_Industry,          // click_tile_proc

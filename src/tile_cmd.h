@@ -70,13 +70,19 @@ typedef void DrawTileProc(TileInfo *ti);
 typedef uint GetSlopeZProc(TileIndex tile, uint x, uint y);
 typedef CommandCost ClearTileProc(TileIndex tile, DoCommandFlag flags);
 
+enum AcceptanceMode {
+	ACCEPTANCE_ADD,
+	ACCEPTANCE_SUBTRACT,
+};
+
 /**
  * Tile callback function signature for obtaining cargo acceptance of a tile
  * @param tile            Tile queried for its accepted cargo
  * @param acceptance      Storage destination of the cargo acceptance in 1/8
+ * @param mode            Add or remove the acceptance
  * @param always_accepted Bitmask of always accepted cargo types
  */
-typedef void AddAcceptedCargoProc(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted);
+typedef void ModifyAcceptedCargoProc(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted);
 
 /**
  * Tile callback function signature for obtaining a tile description
@@ -132,11 +138,6 @@ typedef Foundation GetFoundationProc(TileIndex tile, Slope tileh);
  */
 typedef CommandCost TerraformTileProc(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new);
 
-enum AcceptanceMode {
-	ACCEPTANCE_ADD,
-	ACCEPTANCE_SUBTRACT,
-};
-
 /**
  * Set of callback functions for performing tile operations of a given tile type.
  * @see TileType */
@@ -144,7 +145,7 @@ struct TileTypeProcs {
 	DrawTileProc *draw_tile_proc;                  ///< Called to render the tile and its contents to the screen
 	GetSlopeZProc *get_slope_z_proc;
 	ClearTileProc *clear_tile_proc;
-	AddAcceptedCargoProc *add_accepted_cargo_proc; ///< Adds accepted cargo of the tile to cargo array supplied as parameter
+	ModifyAcceptedCargoProc *modify_accepted_cargo_proc; ///< Adds or removes accepted cargo of the tile to cargo array supplied as parameter
 	GetTileDescProc *get_tile_desc_proc;           ///< Get a description of a tile (for the 'land area information' tool)
 	GetTileTrackStatusProc *get_tile_track_status_proc; ///< Get available tracks and status of a tile
 	ClickTileProc *click_tile_proc;                ///< Called when tile is clicked
@@ -166,10 +167,9 @@ void GetTileDesc(TileIndex tile, TileDesc *td);
 
 static inline void AddAcceptedCargo(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
 {
-	AddAcceptedCargoProc *proc = _tile_type_procs[GetTileType(tile)]->add_accepted_cargo_proc;
+	ModifyAcceptedCargoProc *proc = _tile_type_procs[GetTileType(tile)]->modify_accepted_cargo_proc;
 	if (proc == NULL) return;
-	uint32 dummy = 0; // use dummy bitmask so there don't need to be several 'always_accepted != NULL' checks
-	proc(tile, acceptance, always_accepted == NULL ? &dummy : always_accepted);
+	proc(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
 }
 
 static inline void AddProducedCargo(TileIndex tile, CargoArray &produced)
