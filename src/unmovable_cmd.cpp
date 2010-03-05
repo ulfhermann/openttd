@@ -309,11 +309,6 @@ static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 	return CommandCost();
 }
 
-static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
-{
-	ModifyAcceptedCargo_Unmovable(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
-}
-
 void ModifyAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
 {
 	if (!IsCompanyHQ(tile)) return;
@@ -529,7 +524,7 @@ extern const TileTypeProcs _tile_type_unmovable_procs = {
 	DrawTile_Unmovable,             // draw_tile_proc
 	GetSlopeZ_Unmovable,            // get_slope_z_proc
 	ClearTile_Unmovable,            // clear_tile_proc
-	AddAcceptedCargo_Unmovable,     // add_accepted_cargo_proc
+	ModifyAcceptedCargo_Unmovable,  // modify_accepted_cargo_proc
 	GetTileDesc_Unmovable,          // get_tile_desc_proc
 	GetTileTrackStatus_Unmovable,   // get_tile_track_status_proc
 	ClickTile_Unmovable,            // click_tile_proc
