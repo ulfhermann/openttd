@@ -49,6 +49,10 @@ static inline const UnmovableSpec *GetUnmovableSpec(UnmovableType type)
 	return &_original_unmovable[type];
 }
 
+/**
+ * destroy one tile of a HQ and update the global acceptance accordingly
+ * @param t the tile to be destroyed
+ */
 static inline void DestroyCompanyHQTile(TileIndex t)
 {
 	/* HQs don't belong to towns, so no town acceptance is updated */
@@ -309,11 +313,6 @@ static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 	return CommandCost();
 }
 
-static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
-{
-	ModifyAcceptedCargo_Unmovable(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
-}
-
 void ModifyAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
 {
 	if (!IsCompanyHQ(tile)) return;
@@ -325,8 +324,8 @@ void ModifyAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, Accep
 	uint level = GetCompanyHQSize(tile) + 1;
 
 	/* Top town building generates 10 passengers, so to make HQ interesting,
-	 * the top type makes 20. */
-	/* Top town building generates 4 mail, HQ can make up to 8. The
+	 * the top type makes 20. 
+	 * Top town building generates 4 mail, HQ can make up to 8. The
 	 * proportion passengers:mail is different because such a huge
 	 * commercial building generates unusually high amount of mail
 	 * correspondence per physical visitor. */
@@ -531,7 +530,7 @@ extern const TileTypeProcs _tile_type_unmovable_procs = {
 	DrawTile_Unmovable,             // draw_tile_proc
 	GetSlopeZ_Unmovable,            // get_slope_z_proc
 	ClearTile_Unmovable,            // clear_tile_proc
-	AddAcceptedCargo_Unmovable,     // add_accepted_cargo_proc
+	ModifyAcceptedCargo_Unmovable,  // modify_accepted_cargo_proc
 	GetTileDesc_Unmovable,          // get_tile_desc_proc
 	GetTileTrackStatus_Unmovable,   // get_tile_track_status_proc
 	ClickTile_Unmovable,            // click_tile_proc
