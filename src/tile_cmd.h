@@ -169,8 +169,7 @@ static inline void AddAcceptedCargo(TileIndex tile, CargoArray &acceptance, uint
 {
 	ModifyAcceptedCargoProc *proc = _tile_type_procs[GetTileType(tile)]->modify_accepted_cargo_proc;
 	if (proc == NULL) return;
-	uint32 dummy = 0; // use dummy bitmask so there don't need to be several 'always_accepted != NULL' checks
-	proc(tile, acceptance, ACCEPTANCE_ADD, always_accepted == NULL ? &dummy : always_accepted);
+	proc(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
 }
 
 static inline void AddProducedCargo(TileIndex tile, CargoArray &produced)
