@@ -243,11 +243,6 @@ void LinkGraphJob::SpawnThread(CargoID cargo) {
 	}
 }
 
-uint LinkGraph::GetComponentAcceptance(LinkGraphComponentID id)
-{
-	return this->component_acceptance[id];
-}
-
 LinkGraphJob::LinkGraphJob(LinkGraphComponent * c) :
 	thread(NULL),
 	join_date(_date + c->GetSettings().recalc_interval),

@@ -32,7 +32,9 @@ master: gitmake-origin
 
 smallmap-zoom-in: master 
 
-supplyscale: components
+global-acceptance: master
+
+supplyscale: components global-acceptance
 
 cargodist: station-gui smallmap-stats warning-sign supplyscale
 
@@ -66,7 +68,7 @@ warning-sign: demands
 
 moving-average: master
 
-delivery-rating: master
+delivery-rating: master global-acceptance
 
 rating-weight: delivery-rating
 
@@ -74,7 +76,7 @@ rating-payment: delivery-rating
 
 alteconomy: rating-payment rating-weight
 
-push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy
+push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
 

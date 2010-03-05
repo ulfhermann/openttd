@@ -443,7 +443,7 @@ static uint GetAcceptanceMask(const Station *st)
 	uint mask = 0;
 
 	for (CargoID i = 0; i < NUM_CARGO; i++) {
-		if (HasBit(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE)) mask |= 1 << i;
+		if (st->goods[i].acceptance >= 8) mask |= 1 << i;
 	}
 	return mask;
 }
@@ -585,8 +585,6 @@ void UpdateStationAcceptance(Station *st, bool show_msg)
 		} else {
 			st->goods[i].acceptance = acceptance[i];
 		}
-
-		SB(st->goods[i].acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, amt >= 8);
 	}
 
 	/* Only show a message in case the acceptance was actually changed. */
@@ -2167,15 +2165,6 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 		st->rect.BeforeAddRect(tile, w, h, StationRect::ADD_TRY);
 
-		/* if airport was demolished while planes were en-route to it, the
-		 * positions can no longer be the same (v->u.air.pos), since different
-		 * airports have different indexes. So update all planes en-route to this
-		 * airport. Only update if
-		 * 1. airport is upgraded
-		 * 2. airport is added to existing station (unfortunately unavoideable)
-		 */
-		if (airport_upgrade) UpdateAirplanesOnNewStation(st);
-
 		const AirportTileTable *it = as->table[0];
 		do {
 			TileIndex cur_tile = tile + ToTileIndexDiff(it->ti);
@@ -2192,6 +2181,15 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			TileIndex cur_tile = tile + ToTileIndexDiff(it->ti);
 			AirportTileAnimationTrigger(st, cur_tile, AAT_BUILT);
 		} while ((++it)->ti.x != -0x80);
+
+		/* if airport was demolished while planes were en-route to it, the
+		 * positions can no longer be the same (v->u.air.pos), since different
+		 * airports have different indexes. So update all planes en-route to this
+		 * airport. Only update if
+		 * 1. airport is upgraded
+		 * 2. airport is added to existing station (unfortunately unavoideable)
+		 */
+		if (airport_upgrade) UpdateAirplanesOnNewStation(st);
 
 		st->UpdateVirtCoord();
 		UpdateStationAcceptance(st, false);
@@ -2964,12 +2962,12 @@ static void UpdateStationRating(Station *st)
 		/* Slowly increase the rating back to his original level in the case we
 		 *  didn't deliver cargo yet to this station. This happens when a bribe
 		 *  failed while you didn't moved that cargo yet to a station. */
-		if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP) && ge->rating < INITIAL_STATION_RATING) {
+		if (!ge->pickup && ge->rating < INITIAL_STATION_RATING) {
 			ge->rating++;
 		}
 
 		/* Only change the rating if we are moving this cargo */
-		if (HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+		if (ge->pickup) {
 			byte_inc_sat(&ge->days_since_pickup);
 
 			bool skip = false;
@@ -3027,7 +3025,7 @@ static void UpdateStationRating(Station *st)
 
 			CargoID c_id = cs->Index();
 			uint min_rating = 256 * (uint)_settings_game.economy.min_rating_by_component / 100;
-			uint component_cap = min_rating + (256 - min_rating) * _link_graphs[c_id].GetComponentAcceptance(ge->last_component) / (GlobalCargoAcceptance::inst.Get(c_id) + 1);
+			uint component_cap = min_rating + (256 - min_rating) * _link_graphs[c_id].GetComponentAcceptance(ge->last_component) / (_economy.global_acceptance[c_id] + 1);
 			rating = min(rating, component_cap);
 
 			{
@@ -3248,7 +3246,7 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
 				GoodsEntry *ge = &st->goods[i];
 
-				if (ge->acceptance_pickup != 0) {
+				if (ge->acceptance >= 8 || ge->pickup) {
 					ge->rating = Clamp(ge->rating + amount, 0, 255);
 				}
 			}
@@ -3260,7 +3258,7 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 {
 	GoodsEntry & good = st->goods[type];
 	good.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
-	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
+	good.pickup = true;
 	good.supply.Increase(amount);
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
@@ -3454,7 +3452,8 @@ void BuildOilRig(TileIndex tile)
 	st->rect.BeforeAddTile(tile, StationRect::ADD_FORCE);
 
 	for (CargoID j = 0; j < NUM_CARGO; j++) {
-		st->goods[j].acceptance_pickup = 0;
+		st->goods[j].pickup = false;
+		st->goods[j].acceptance = 0;
 		st->goods[j].days_since_pickup = 255;
 		st->goods[j].rating = INITIAL_STATION_RATING;
 		st->goods[j].last_speed = 0;

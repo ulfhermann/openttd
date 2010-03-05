@@ -145,28 +145,24 @@ public:
 
 
 struct GoodsEntry {
-	enum AcceptancePickup {
-		ACCEPTANCE,
-		PICKUP
-	};
-
 	GoodsEntry() :
-		acceptance_pickup(0),
+		pickup(false),
 		days_since_pickup(255),
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
 		last_age(255),
+		acceptance(0),
 		last_component(0)
 	{}
 
-	byte acceptance_pickup;
+	bool pickup;            ///< if true: Cargo of this type is generated or transferred here
 	byte days_since_pickup;
 	byte rating;
 	byte last_speed;
 	byte last_age;
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
 	SupplyMovingAverage supply;
-	uint acceptance;        ///< Accepted cargo (by houses, HQs, industry tiles)
+	uint acceptance;        ///< Sum of tile acceptance numbers for this cargo in catchment area of the station
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
 };

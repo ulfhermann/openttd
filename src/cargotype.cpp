@@ -19,7 +19,6 @@
 #include "table/cargo_const.h"
 
 CargoSpec CargoSpec::array[NUM_CARGO];
-GlobalCargoAcceptance GlobalCargoAcceptance::inst;
 
 /** Bitmask of cargo types available.
  * Initialized during a call to #SetupCargoForClimate.

@@ -13,6 +13,7 @@
 #include "../newgrf_house.h"
 #include "../newgrf_commons.h"
 #include "../town.h"
+#include "../economy_func.h"
 
 #include "saveload.h"
 
@@ -51,6 +52,8 @@ void UpdateHousesAndTowns()
 		town = Town::GetByTile(t);
 		IncreaseBuildingCount(town, house_id);
 		if (IsHouseCompleted(t)) town->population += HouseSpec::Get(house_id)->population;
+
+		ModifyAcceptedCargo_Town(t, _economy.global_acceptance, ACCEPTANCE_ADD);
 
 		/* Increase the number of houses for every house, but only once. */
 		if (GetHouseNorthPart(house_id) == 0) town->num_houses++;

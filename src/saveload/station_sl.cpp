@@ -235,6 +235,8 @@ const SaveLoad *GetLinkStatDesc() {
 	return linkstat_desc;
 }
 
+byte _old_acc_pickup;
+
 /**
  * Wrapper function to get the GoodsEntry's internal structure while
  * some of the variables itself are private.
@@ -244,7 +246,8 @@ const SaveLoad *GetGoodsDesc()
 {
 	static const SaveLoad goods_desc[] = {
 		SLEG_CONDVAR(            _waiting_acceptance, SLE_UINT16,                  0, 67),
-		 SLE_CONDVAR(GoodsEntry, acceptance_pickup,   SLE_UINT8,                  68, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _old_acc_pickup,     SLE_UINT8,                  68, SUPPLY_SV - 1),
+		 SLE_CONDVAR(GoodsEntry, pickup,              SLE_BOOL,            SUPPLY_SV, SL_MAX_VERSION),
 		 SLE_CONDVAR(GoodsEntry, acceptance,          SLE_UINT,            SUPPLY_SV, SL_MAX_VERSION),
 		SLE_CONDNULL(2,                                                           51, 67),
 		     SLE_VAR(GoodsEntry, days_since_pickup,   SLE_UINT8),
@@ -283,15 +286,18 @@ static void Load_STNS()
 			GoodsEntry *ge = &st->goods[i];
 			SlObject(ge, GetGoodsDesc());
 			if (CheckSavegameVersion(68)) {
-				SB(ge->acceptance_pickup, GoodsEntry::ACCEPTANCE, 1, HasBit(_waiting_acceptance, 15));
+				ge->acceptance = HasBit(_waiting_acceptance, 15) << 3;
 				if (GB(_waiting_acceptance, 0, 12) != 0) {
 					/* In old versions, enroute_from used 0xFF as INVALID_STATION */
 					StationID source = (CheckSavegameVersion(7) && _cargo_source == 0xFF) ? INVALID_STATION : _cargo_source;
 
 					/* Don't construct the packet with station here, because that'll fail with old savegames */
 					ge->cargo.Append(new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days, source, _cargo_source_xy, _cargo_source_xy, _cargo_feeder_share));
-					SB(ge->acceptance_pickup, GoodsEntry::PICKUP, 1, 1);
+					ge->pickup = true;
 				}
+			} else if (CheckSavegameVersion(SUPPLY_SV)) {
+				ge->acceptance = HasBit(_old_acc_pickup, 0) << 3; // ACCEPTANCE was 0
+				ge->pickup = HasBit(_old_acc_pickup, 1);          // PICKUP was 1
 			}
 		}
 

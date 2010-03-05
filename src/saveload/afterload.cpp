@@ -423,6 +423,16 @@ static void FixOwnerOfRailTrack(TileIndex t)
 	MakeClear(t, CLEAR_GRASS, 0);
 }
 
+static void UpdateTownsAndAcceptance()
+{
+	_economy.global_acceptance.Clear();
+
+	/* Check and update house and town values */
+	UpdateHousesAndTowns();
+	UpdateAcceptanceCompanyHQ();
+	UpdateAcceptanceIndustry();
+}
+
 bool AfterLoadGame()
 {
 	SetSignalHandlers();
@@ -1240,8 +1250,7 @@ bool AfterLoadGame()
 		}
 	}
 
-	/* Check and update house and town values */
-	UpdateHousesAndTowns();
+	UpdateTownsAndAcceptance();
 
 	if (CheckSavegameVersion(43)) {
 		for (TileIndex t = 0; t < map_size; t++) {
@@ -1427,7 +1436,7 @@ bool AfterLoadGame()
 		FOR_ALL_STATIONS(st) {
 			for (CargoID c = 0; c < NUM_CARGO; c++) {
 				st->goods[c].last_speed = 0;
-				if (st->goods[c].cargo.Count() != 0) SetBit(st->goods[c].acceptance_pickup, GoodsEntry::PICKUP);
+				if (st->goods[c].cargo.Count() != 0) st->goods[c].pickup = true;
 			}
 		}
 	}
@@ -2104,8 +2113,9 @@ void ReloadNewGRFData()
 	SetCachedEngineCounts();
 	/* update station graphics */
 	AfterLoadStations();
-	/* Check and update house and town values */
-	UpdateHousesAndTowns();
+
+	UpdateTownsAndAcceptance();
+
 	/* Update livery selection windows */
 	for (CompanyID i = COMPANY_FIRST; i < MAX_COMPANIES; i++) InvalidateWindowData(WC_COMPANY_COLOUR, i);
 	/* redraw the whole screen */

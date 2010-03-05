@@ -91,6 +91,9 @@ typedef std::list<LinkGraphJob *> JobList;
 
 class LinkGraph {
 public:
+	/**
+	 * maximum number of components in a link graph for each cargo
+	 */
 	static const uint MAX_COMPONENTS = 128;
 
 	LinkGraph();
@@ -120,7 +123,17 @@ public:
 	size_t GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}
 	void AddComponent(LinkGraphComponent * component, uint join);
-	uint GetComponentAcceptance(LinkGraphComponentID id);
+
+	/**
+	 * return sum of station acceptances of the last component with the given ID
+	 * @param id the id of the component to look for
+	 * @return the number mentioned above
+	 */
+	FORCEINLINE uint GetComponentAcceptance(LinkGraphComponentID id)
+	{
+		return this->component_acceptance[id];
+	}
+
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;
@@ -129,6 +142,10 @@ private:
 	friend const SaveLoad * GetLinkGraphDesc(uint);
 	void CreateComponent(Station * first);
 	LinkGraphComponentID current_component_id;
+
+	/**
+	 * sum of acceptance numbers of all stations in the component
+	 */
 	uint component_acceptance[MAX_COMPONENTS];
 	StationID current_station_id;
 	CargoID cargo;
