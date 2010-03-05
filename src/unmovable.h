@@ -14,8 +14,11 @@
 
 #include "economy_func.h"
 #include "strings_type.h"
+#include "tile_cmd.h"
 
 void UpdateCompanyHQ(Company *c, uint score);
+
+void ModifyAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted = NULL);
 
 struct UnmovableSpec {
 	StringID name;

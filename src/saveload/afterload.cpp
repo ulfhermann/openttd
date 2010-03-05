@@ -1242,6 +1242,8 @@ bool AfterLoadGame()
 
 	/* Check and update house and town values */
 	UpdateHousesAndTowns();
+	UpdateCompanyHQAcceptance();
+	UpdateGlobalIndustryStatistics();
 
 	if (CheckSavegameVersion(43)) {
 		for (TileIndex t = 0; t < map_size; t++) {
@@ -2104,8 +2106,14 @@ void ReloadNewGRFData()
 	SetCachedEngineCounts();
 	/* update station graphics */
 	AfterLoadStations();
+
+	_economy.global_acceptance.Clear();
+
 	/* Check and update house and town values */
 	UpdateHousesAndTowns();
+	UpdateCompanyHQAcceptance();
+	UpdateGlobalIndustryStatistics();
+
 	/* Update livery selection windows */
 	for (CompanyID i = COMPANY_FIRST; i < MAX_COMPANIES; i++) InvalidateWindowData(WC_COMPANY_COLOUR, i);
 	/* redraw the whole screen */
