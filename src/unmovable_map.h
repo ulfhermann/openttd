@@ -13,6 +13,7 @@
 #define UNMOVABLE_MAP_H
 
 #include "tile_map.h"
+#include "unmovable.h"
 
 /** Types of unmovable structure */
 enum UnmovableType {
@@ -135,7 +136,9 @@ static inline byte GetCompanyHQSize(TileIndex t)
 static inline void SetCompanyHQSize(TileIndex t, uint8 size)
 {
 	assert(IsTileType(t, MP_UNMOVABLE) && IsCompanyHQ(t));
+	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_SUBTRACT);
 	SB(_m[t].m3, 2, 3, size);
+	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_ADD);
 }
 
 /**
@@ -253,6 +256,7 @@ static inline void MakeUnmovableHQHelper(TileIndex t, uint8 section, Owner o)
 {
 	MakeUnmovable(t, UNMOVABLE_HQ, o);
 	SetCompanyHQSection(t, section);
+	ModifyAcceptedCargo_Unmovable(t, _economy.global_acceptance, ACCEPTANCE_ADD);
 }
 
 /**
