@@ -299,7 +299,10 @@ static void Ptrs_PLYR()
 	}
 }
 
-void UpdateCompanyHQAcceptance()
+/**
+ * update the global acceptance statistics with info about all HQs
+ */
+void UpdateAcceptanceCompanyHQ()
 {
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
