@@ -600,11 +600,6 @@ static inline void AddAcceptedCargoSetMask(CargoID cargo, uint amount, CargoArra
 	}
 }
 
-static void AddAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted = NULL)
-{
-	ModifyAcceptedCargo_Town(tile, acceptance, ACCEPTANCE_ADD, always_accepted);
-}
-
 void ModifyAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted)
 {
 	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
@@ -1854,7 +1849,7 @@ static inline void ClearMakeHouseTile(TileIndex tile, Town *t, byte counter, byt
 	MakeHouseTile(tile, t->index, counter, stage, type, random_bits);
 	if (HouseSpec::Get(type)->building_flags & BUILDING_IS_ANIMATED) AddAnimatedTile(tile);
 
-	AddAcceptedCargo_Town(tile, _economy.global_acceptance);
+	ModifyAcceptedCargo_Town(tile, _economy.global_acceptance, ACCEPTANCE_ADD);
 
 	MarkTileDirtyByTile(tile);
 }
@@ -2905,7 +2900,7 @@ extern const TileTypeProcs _tile_type_town_procs = {
 	DrawTile_Town,           // draw_tile_proc
 	GetSlopeZ_Town,          // get_slope_z_proc
 	ClearTile_Town,          // clear_tile_proc
-	AddAcceptedCargo_Town,   // add_accepted_cargo_proc
+	ModifyAcceptedCargo_Town,// modify_accepted_cargo_proc
 	GetTileDesc_Town,        // get_tile_desc_proc
 	GetTileTrackStatus_Town, // get_tile_track_status_proc
 	NULL,                    // click_tile_proc
