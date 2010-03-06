@@ -88,75 +88,6 @@ byte FreightWagonMult(CargoID cargo)
 	return _settings_game.vehicle.freight_trains;
 }
 
-
-/**
- * Recalculates the cached total power of a train. Should be called when the consist is changed
- */
-void Train::PowerChanged()
-{
-	assert(this->First() == this);
-
-	uint32 total_power = 0;
-	uint32 max_te = 0;
-	uint32 number_of_parts = 0;
-	uint16 max_rail_speed = this->tcache.cached_max_speed;
-
-	for (const Train *u = this; u != NULL; u = u->Next()) {
-		uint32 current_power = u->GetPower();
-		total_power += current_power;
-
-		/* Only powered parts add tractive effort */
-		if (current_power > 0) max_te += u->GetWeight() * u->GetTractiveEffort();
-		total_power += u->GetPoweredPartPower(this);
-		number_of_parts++;
-
-		/* Get minimum max speed for rail */
-		uint16 rail_speed = GetRailTypeInfo(GetRailType(u->tile))->max_speed;
-		if (rail_speed > 0) max_rail_speed = min(max_rail_speed, rail_speed);
-	}
-
-	this->tcache.cached_axle_resistance = 60 * number_of_parts;
-	this->tcache.cached_air_drag = 20 + 3 * number_of_parts;
-
-	max_te *= 10000; // Tractive effort in (tonnes * 1000 * 10 =) N
-	max_te /= 256;   // Tractive effort is a [0-255] coefficient
-	if (this->tcache.cached_power != total_power || this->tcache.cached_max_te != max_te) {
-		/* Stop the vehicle if it has no power */
-		if (total_power == 0) this->vehstatus |= VS_STOPPED;
-
-		this->tcache.cached_power = total_power;
-		this->tcache.cached_max_te = max_te;
-		SetWindowDirty(WC_VEHICLE_DETAILS, this->index);
-		SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
-	}
-
-	this->tcache.cached_max_rail_speed = max_rail_speed;
-}
-
-
-/**
- * Recalculates the cached weight of a train and its vehicles. Should be called each time the cargo on
- * the consist changes.
- */
-void Train::CargoChanged()
-{
-	assert(this->First() == this);
-	uint32 weight = 0;
-
-	for (Train *u = this; u != NULL; u = u->Next()) {
-		uint32 current_weight = u->GetWeight();
-		weight += current_weight;
-		u->tcache.cached_slope_resistance = current_weight * u->GetSlopeSteepness();
-	}
-
-	/* store consist weight in cache */
-	this->tcache.cached_weight = weight;
-
-	/* Now update train power (tractive effort is dependent on weight) */
-	this->PowerChanged();
-}
-
-
 /** Logs a bug in GRF and shows a warning message if this
  * is for the first time this happened.
  * @param u first vehicle of chain
@@ -498,76 +429,17 @@ int Train::GetCurrentMaxSpeed() const
 		}
 	}
 
-	return min(max_speed, this->tcache.cached_max_rail_speed);
-}
-
-/**
- * Calculates the acceleration of the vehicle under its current conditions.
- * @return Current acceleration of the vehicle.
- */
-
-int Train::GetAcceleration() const
-{
-	int32 speed = this->GetCurrentSpeed();
-
-	/* Weight is stored in tonnes */
-	int32 mass = this->tcache.cached_weight;
-
-	/* Power is stored in HP, we need it in watts. */
-	int32 power = this->tcache.cached_power * 746;
-
-	int32 resistance = 0;
-
-	bool maglev = this->GetAccelerationType() == 2;
-
-	const int area = 120;
-	if (!maglev) {
-		resistance = (13 * mass) / 10;
-		resistance += this->tcache.cached_axle_resistance;
-		resistance += (this->GetRollingFriction() * mass * speed) / 1000;
-		resistance += (area * this->tcache.cached_air_drag * speed * speed) / 10000;
-	} else {
-		resistance += (area * this->tcache.cached_air_drag * speed * speed) / 20000;
-	}
-
-	resistance += this->GetSlopeResistance();
-	resistance *= 4; //[N]
-
-	/* This value allows to know if the vehicle is accelerating or braking. */
-	AccelStatus mode = this->GetAccelerationStatus();
-
-	const int max_te = this->tcache.cached_max_te; // [N]
-	int force;
-	if (speed > 0) {
-		if (!maglev) {
-			force = power / speed; //[N]
-			force *= 22;
-			force /= 10;
-			if (mode == AS_ACCEL && force > max_te) force = max_te;
-		} else {
-			force = power / 25;
-		}
-	} else {
-		/* "kickoff" acceleration */
-		force = (mode == AS_ACCEL && !maglev) ? min(max_te, power) : power;
-		force = max(force, (mass * 8) + resistance);
-	}
-
-	if (mode == AS_ACCEL) {
-		return (force - resistance) / (mass * 2);
-	} else {
-		return min(-force - resistance, -10000) / mass;
-	}
+	return min(max_speed, this->acc_cache.cached_max_track_speed);
 }
 
 void Train::UpdateAcceleration()
 {
 	assert(this->IsFrontEngine());
 
-	this->max_speed = this->tcache.cached_max_rail_speed;
+	this->max_speed = this->acc_cache.cached_max_track_speed;
 
-	uint power = this->tcache.cached_power;
-	uint weight = this->tcache.cached_weight;
+	uint power = this->acc_cache.cached_power;
+	uint weight = this->acc_cache.cached_weight;
 	assert(weight != 0);
 	this->acceleration = Clamp(power / weight * 4, 1, 255);
 }
@@ -1605,21 +1477,21 @@ static void SwapTrainFlags(uint16 *swap_flag1, uint16 *swap_flag2)
 	uint16 flag2 = *swap_flag2;
 
 	/* Clear the flags */
-	ClrBit(*swap_flag1, VRF_GOINGUP);
-	ClrBit(*swap_flag1, VRF_GOINGDOWN);
-	ClrBit(*swap_flag2, VRF_GOINGUP);
-	ClrBit(*swap_flag2, VRF_GOINGDOWN);
+	ClrBit(*swap_flag1, GVF_GOINGUP_BIT);
+	ClrBit(*swap_flag1, GVF_GOINGDOWN_BIT);
+	ClrBit(*swap_flag2, GVF_GOINGUP_BIT);
+	ClrBit(*swap_flag2, GVF_GOINGDOWN_BIT);
 
 	/* Reverse the rail-flags (if needed) */
-	if (HasBit(flag1, VRF_GOINGUP)) {
-		SetBit(*swap_flag2, VRF_GOINGDOWN);
-	} else if (HasBit(flag1, VRF_GOINGDOWN)) {
-		SetBit(*swap_flag2, VRF_GOINGUP);
+	if (HasBit(flag1, GVF_GOINGUP_BIT)) {
+		SetBit(*swap_flag2, GVF_GOINGDOWN_BIT);
+	} else if (HasBit(flag1, GVF_GOINGDOWN_BIT)) {
+		SetBit(*swap_flag2, GVF_GOINGUP_BIT);
 	}
-	if (HasBit(flag2, VRF_GOINGUP)) {
-		SetBit(*swap_flag1, VRF_GOINGDOWN);
-	} else if (HasBit(flag2, VRF_GOINGDOWN)) {
-		SetBit(*swap_flag1, VRF_GOINGUP);
+	if (HasBit(flag2, GVF_GOINGUP_BIT)) {
+		SetBit(*swap_flag1, GVF_GOINGDOWN_BIT);
+	} else if (HasBit(flag2, GVF_GOINGDOWN_BIT)) {
+		SetBit(*swap_flag1, GVF_GOINGUP_BIT);
 	}
 }
 
@@ -1651,7 +1523,7 @@ static void ReverseTrainSwapVeh(Train *v, int l, int r)
 		Swap(a->tile,  b->tile);
 		Swap(a->z_pos, b->z_pos);
 
-		SwapTrainFlags(&a->flags, &b->flags);
+		SwapTrainFlags(&a->gv_flags, &b->gv_flags);
 
 		/* update other vars */
 		a->UpdateViewport(true, true);
@@ -2265,7 +2137,7 @@ static bool CheckTrainStayInDepot(Train *v)
 	}
 
 	/* if the train got no power, then keep it in the depot */
-	if (v->tcache.cached_power == 0) {
+	if (v->acc_cache.cached_power == 0) {
 		v->vehstatus |= VS_STOPPED;
 		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
 		return true;
@@ -2997,36 +2869,6 @@ static void TrainEnterStation(Train *v, StationID station)
 	StationAnimationTrigger(st, v->tile, STAT_ANIM_TRAIN_ARRIVES);
 }
 
-static byte AfterSetTrainPos(Train *v, bool new_tile)
-{
-	byte old_z = v->z_pos;
-	v->z_pos = GetSlopeZ(v->x_pos, v->y_pos);
-
-	if (new_tile) {
-		ClrBit(v->flags, VRF_GOINGUP);
-		ClrBit(v->flags, VRF_GOINGDOWN);
-
-		if (v->track == TRACK_BIT_X || v->track == TRACK_BIT_Y) {
-			/* Any track that isn't TRACK_BIT_X or TRACK_BIT_Y cannot be sloped.
-			 * To check whether the current tile is sloped, and in which
-			 * direction it is sloped, we get the 'z' at the center of
-			 * the tile (middle_z) and the edge of the tile (old_z),
-			 * which we then can compare. */
-			static const int HALF_TILE_SIZE = TILE_SIZE / 2;
-			static const int INV_TILE_SIZE_MASK = ~(TILE_SIZE - 1);
-
-			byte middle_z = GetSlopeZ((v->x_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE, (v->y_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE);
-
-			if (middle_z != v->z_pos) {
-				SetBit(v->flags, (middle_z > old_z) ? VRF_GOINGUP : VRF_GOINGDOWN);
-			}
-		}
-	}
-
-	VehicleMove(v, true);
-	return old_z;
-}
-
 /* Check if the vehicle is compatible with the specified tile */
 static inline bool CheckCompatibleRail(const Train *v, TileIndex tile)
 {
@@ -3450,7 +3292,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 				}
 
 				/* We need to update signal status, but after the vehicle position hash
-				 * has been updated by AfterSetTrainPos() */
+				 * has been updated by UpdateInclination() */
 				update_signals_crossing = true;
 
 				if (chosen_dir != v->direction) {
@@ -3509,7 +3351,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 		v->y_pos = gp.y;
 
 		/* update the Z position of the vehicle */
-		byte old_z = AfterSetTrainPos(v, (gp.new_tile != gp.old_tile));
+		byte old_z = v->UpdateInclination(gp.new_tile != gp.old_tile, false);
 
 		if (prev == NULL) {
 			/* This is the first vehicle in the train */
@@ -3665,9 +3507,9 @@ static void ChangeTrainDirRandomly(Train *v)
 			v->UpdateDeltaXY(v->direction);
 			v->cur_image = v->GetImage(v->direction);
 			/* Refrain from updating the z position of the vehicle when on
-			 * a bridge, because AfterSetTrainPos will put the vehicle under
+			 * a bridge, because UpdateInclination() will put the vehicle under
 			 * the bridge in that case */
-			if (v->track != TRACK_BIT_WORMHOLE) AfterSetTrainPos(v, false);
+			if (v->track != TRACK_BIT_WORMHOLE) v->UpdateInclination(false, false);
 		}
 	} while ((v = v->Next()) != NULL);
 }
