@@ -973,19 +973,26 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 	if (t->sum_accepted_cargos_payment > 0) {
 		/* there are towns without a single house */
 		uint intended_amount = max(1U, _economy.global_production[cargo_type] *
-				t->acceptance[cargo_type] /
-				(_economy.global_acceptance[cargo_type] + 1)
+			t->acceptance[cargo_type] /
+			(_economy.global_acceptance[cargo_type] + 1)
 		);
 		/* if you deliver the intended amount for each cargo with time factor
 		 * 128 you will get the same bonus as the monthly malus for
 		 * RATING_OUTSTANDING
 		 */
-		t->ratings[company->index] += max((uint64)1, ((uint64)num_pieces *
-				(uint64)RATING_DELIVERY_UP * (uint64)GetTimeFactor(cs,
-				days_in_transit) * (uint64)cs->initial_payment /
-				(uint64)intended_amount /
-				(uint64)t->sum_accepted_cargos_payment) >> 7
+		int16 rating = t->ratings[company->index];
+		int16 new_rating = rating + max((uint64)1, ((uint64)num_pieces *
+			(uint64)RATING_DELIVERY_UP * (uint64)GetTimeFactor(cs,
+			days_in_transit) * (uint64)cs->initial_payment /
+			(uint64)intended_amount / (uint64)t->sum_accepted_cargos_payment)
+			>> 7
 		);
+
+		t->ratings[company->index] = Clamp(new_rating, RATING_MINIMUM,
+			RATING_MAXIMUM
+		);
+
+		assert(new_rating > rating);
 	}
 
 	/* Determine profit */
