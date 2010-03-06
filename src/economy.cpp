@@ -976,10 +976,13 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 		/* if you deliver the intended amount for each cargo you will get the
 		 * same bonus as the monthly malus for RATING_OUTSTANDING
 		 */
-		t->ratings[company->index] += max((uint64)1, (uint64)num_pieces *
+		int16 rating = t->ratings[company->index];
+		int16 new_rating = Clamp(rating + max((uint64)1, (uint64)num_pieces *
 				(uint64)RATING_DELIVERY_UP / (uint64)intended_amount /
-				(uint64)t->num_accepted_cargos
+				(uint64)t->num_accepted_cargos), RATING_MINIMUM, RATING_MAXIMUM
 		);
+		t->ratings[company->index] = new_rating;
+		assert(new_rating > rating);
 	}
 
 	/* Determine profit */
