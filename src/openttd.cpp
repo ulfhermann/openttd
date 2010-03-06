@@ -313,6 +313,7 @@ static void InitializeDynamicVariables()
 	_house_mngr.ResetMapping();
 	_industry_mngr.ResetMapping();
 	_industile_mngr.ResetMapping();
+	_airporttile_mngr.ResetMapping();
 }
 
 
@@ -331,9 +332,6 @@ static void ShutdownGame()
 
 	/* stop the AI */
 	AI::Uninitialize(false);
-
-	/* Uninitialize airport state machines */
-	UnInitializeAirports();
 
 	/* Uninitialize variables that are allocated dynamically */
 	GamelogReset();
@@ -603,9 +601,6 @@ int ttd_main(int argc, char *argv[])
 
 	/* initialize screenshot formats */
 	InitializeScreenshotFormats();
-
-	/* initialize airport state machines */
-	InitializeAirports();
 
 	/* initialize all variables that are allocated dynamically */
 	InitializeDynamicVariables();

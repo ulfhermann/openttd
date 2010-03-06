@@ -376,17 +376,17 @@ bool StationRect::IsEmpty() const
 	return this->left == 0 || this->left > this->right || this->top > this->bottom;
 }
 
-bool StationRect::BeforeAddTile(TileIndex tile, StationRectMode mode)
+CommandCost StationRect::BeforeAddTile(TileIndex tile, StationRectMode mode)
 {
 	int x = TileX(tile);
 	int y = TileY(tile);
-	if (IsEmpty()) {
+	if (this->IsEmpty()) {
 		/* we are adding the first station tile */
 		if (mode != ADD_TEST) {
 			this->left = this->right = x;
 			this->top = this->bottom = y;
 		}
-	} else if (!PtInExtendedRect(x, y)) {
+	} else if (!this->PtInExtendedRect(x, y)) {
 		/* current rect is not empty and new point is outside this rect
 		 * make new spread-out rectangle */
 		Rect new_rect = {min(x, this->left), min(y, this->top), max(x, this->right), max(y, this->bottom)};
@@ -396,8 +396,7 @@ bool StationRect::BeforeAddTile(TileIndex tile, StationRectMode mode)
 		int h = new_rect.bottom - new_rect.top + 1;
 		if (mode != ADD_FORCE && (w > _settings_game.station.station_spread || h > _settings_game.station.station_spread)) {
 			assert(mode != ADD_TRY);
-			_error_message = STR_ERROR_STATION_TOO_SPREAD_OUT;
-			return false;
+			return_cmd_error(STR_ERROR_STATION_TOO_SPREAD_OUT);
 		}
 
 		/* spread-out ok, return true */
@@ -408,13 +407,18 @@ bool StationRect::BeforeAddTile(TileIndex tile, StationRectMode mode)
 	} else {
 		; // new point is inside the rect, we don't need to do anything
 	}
-	return true;
+	return CommandCost();
 }
 
-bool StationRect::BeforeAddRect(TileIndex tile, int w, int h, StationRectMode mode)
+CommandCost StationRect::BeforeAddRect(TileIndex tile, int w, int h, StationRectMode mode)
 {
-	return (mode == ADD_FORCE || (w <= _settings_game.station.station_spread && h <= _settings_game.station.station_spread)) && // important when the old rect is completely inside the new rect, resp. the old one was empty
-			this->BeforeAddTile(tile, mode) && this->BeforeAddTile(TILE_ADDXY(tile, w - 1, h - 1), mode);
+	if (mode == ADD_FORCE || (w <= _settings_game.station.station_spread && h <= _settings_game.station.station_spread)) {
+		/* Important when the old rect is completely inside the new rect, resp. the old one was empty. */
+		CommandCost ret = this->BeforeAddTile(tile, mode);
+		if (ret.Succeeded()) ret = this->BeforeAddTile(TILE_ADDXY(tile, w - 1, h - 1), mode);
+		return ret;
+	}
+	return CommandCost();
 }
 
 /**
@@ -489,17 +493,17 @@ bool StationRect::AfterRemoveTile(BaseStation *st, TileIndex tile)
 	return false; // non-empty remaining rect
 }
 
-bool StationRect::AfterRemoveRect(BaseStation *st, TileIndex tile, int w, int h)
+bool StationRect::AfterRemoveRect(BaseStation *st, TileArea ta)
 {
-	assert(PtInExtendedRect(TileX(tile), TileY(tile)));
-	assert(PtInExtendedRect(TileX(tile) + w - 1, TileY(tile) + h - 1));
+	assert(this->PtInExtendedRect(TileX(ta.tile), TileY(ta.tile)));
+	assert(this->PtInExtendedRect(TileX(ta.tile) + ta.w - 1, TileY(ta.tile) + ta.h - 1));
 
-	bool empty = this->AfterRemoveTile(st, tile);
-	if (w != 1 || h != 1) empty = empty || AfterRemoveTile(st, TILE_ADDXY(tile, w - 1, h - 1));
+	bool empty = this->AfterRemoveTile(st, ta.tile);
+	if (ta.w != 1 || ta.h != 1) empty = empty || this->AfterRemoveTile(st, TILE_ADDXY(ta.tile, ta.w - 1, ta.h - 1));
 	return empty;
 }
 
-StationRect& StationRect::operator = (Rect src)
+StationRect& StationRect::operator = (const Rect &src)
 {
 	this->left = src.left;
 	this->top = src.top;
