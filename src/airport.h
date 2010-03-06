@@ -35,8 +35,8 @@ enum {
 	AT_HELIDEPOT     =   6,
 	AT_INTERCON      =   7,
 	AT_HELISTATION   =   8,
-	NUM_AIRPORTS     =   9,
-	AT_OILRIG        =  15,
+	AT_OILRIG        =   9,
+	NUM_AIRPORTS     =  10,
 	AT_DUMMY         = 255
 };
 
@@ -185,8 +185,6 @@ struct AirportFTA {
 	byte heading;            ///< heading (current orders), guiding an airplane to its target on an airport
 };
 
-void InitializeAirports();
-void UnInitializeAirports();
 const AirportFTAClass *GetAirport(const byte airport_type);
 
 extern const byte * const _airport_sections[];
