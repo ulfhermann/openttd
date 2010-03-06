@@ -964,6 +964,7 @@ STR_CURRENCY_SEPARATOR                                          :{LTBLUE}Dividil
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SEPARATOR_TOOLTIP              :{BLACK}Difini apartigilon por via valuto
 
 STR_CURRENCY_PREFIX                                             :{LTBLUE}Prefikso: {ORANGE}{STRING}
+STR_CURRENCY_SET_CUSTOM_CURRENCY_PREFIX_TOOLTIP                 :{BLACK}Ekekti simbolon de via valuto
 STR_CURRENCY_SUFFIX                                             :{LTBLUE}Sufikso: {ORANGE}{STRING}
 STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP                 :{BLACK}Difini sufiksĉenon por via valuto
 
@@ -1783,8 +1784,10 @@ STR_CONTENT_NAME_CAPTION                                        :{BLACK}Nomo
 STR_CONTENT_NAME_CAPTION_TOOLTIP                                :{BLACK}Nomo de la enhavo
 STR_CONTENT_MATRIX_TOOLTIP                                      :{BLACK}Klaku linion por rigardi detalojn{}Klaku markobutonon por elekti elŝuton.
 STR_CONTENT_SELECT_ALL_CAPTION                                  :{BLACK}Elekti ĉiujn
+STR_CONTENT_SELECT_ALL_CAPTION_TOOLTIP                          :{BLACK}Marki ĉiujn enhavojn elŝutotan
 STR_CONTENT_SELECT_UPDATES_CAPTION                              :{BLACK}Elektu ĝisdatigojn.
 STR_CONTENT_UNSELECT_ALL_CAPTION                                :{BLACK}Malelekti ĉiujn
+STR_CONTENT_UNSELECT_ALL_CAPTION_TOOLTIP                        :{BLACK}Marki ĉiujn enhavojn neelŝutotan
 STR_CONTENT_FILTER_TITLE                                        :{BLACK}Etikeda/noma filtro:
 STR_CONTENT_DOWNLOAD_CAPTION                                    :{BLACK}Elŝuti
 STR_CONTENT_DOWNLOAD_CAPTION_TOOLTIP                            :{BLACK}Komencu elŝuti la elektitan enhavon.
@@ -1975,21 +1978,22 @@ STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Konstrui
 # Airport construction window
 STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Elekto de Flughaveno
 STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Elektu grandecon/tipon de flughaveno
+STR_STATION_BUILD_AIRPORT_CLASS_LABEL                           :{BLACK}Flughavena klaso
 
-STR_STATION_BUILD_AIRPORT_SMALL_AIRPORT                         :{BLACK}Malgranda flughaveno
-STR_STATION_BUILD_AIRPORT_CITY_AIRPORT                          :{BLACK}Urba flughaveno
-STR_STATION_BUILD_AIRPORT_METRO_AIRPORT                         :{BLACK}Ĉefurba
-STR_STATION_BUILD_AIRPORT_INTERNATIONAL_AIRPORT                 :{BLACK}Internacia
-STR_STATION_BUILD_AIRPORT_COMMUTER_AIRPORT                      :{BLACK}Urbeta flughaveno
-STR_STATION_BUILD_AIRPORT_INTERCONTINENTAL_AIRPORT              :{BLACK}Interkontinenta
-STR_STATION_BUILD_AIRPORT_HELIPORT                              :{BLACK}Helikopterejo
-STR_STATION_BUILD_AIRPORT_HELIDEPOT                             :{BLACK}Helikopterogaraĝo
-STR_STATION_BUILD_AIRPORT_HELISTATION                           :{BLACK}Helikopterstacio
+STR_AIRPORT_SMALL                                               :Malgranda flughaveno
+STR_AIRPORT_CITY                                                :Urba flughaveno
+STR_AIRPORT_METRO                                               :Ĉefurba
+STR_AIRPORT_INTERNATIONAL                                       :Internacia
+STR_AIRPORT_COMMUTER                                            :Urbeta flughaveno
+STR_AIRPORT_INTERCONTINENTAL                                    :Interkontinenta
+STR_AIRPORT_HELIPORT                                            :Helikopterejo
+STR_AIRPORT_HELIDEPOT                                           :Helikopterogaraĝo
+STR_AIRPORT_HELISTATION                                         :Helikopterstacio
 
-STR_STATION_BUILD_AIRPORT_SMALL_AIRPORTS                        :{BLACK}Malgrandaj flughavenoj
-STR_STATION_BUILD_AIRPORT_LARGE_AIRPORTS                        :{BLACK}Grandaj flughavenoj
-STR_STATION_BUILD_AIRPORT_HUB_AIRPORTS                          :{BLACK}Nabaj flughavenoj
-STR_STATION_BUILD_AIRPORT_HELIPORTS                             :{BLACK}Helikopterhaveno
+STR_AIRPORT_CLASS_SMALL                                         :Malgrandaj flughavenoj
+STR_AIRPORT_CLASS_LARGE                                         :Grandaj flughavenoj
+STR_AIRPORT_CLASS_HUB                                           :Nabaj flughavenoj
+STR_AIRPORT_CLASS_HELIPORTS                                     :Helikopterhaveno
 
 
 # Landscaping toolbar
