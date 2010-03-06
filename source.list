@@ -28,6 +28,7 @@ gamelog.cpp
 genworld.cpp
 gfx.cpp
 gfxinit.cpp
+ground_vehicle.cpp
 heightmap.cpp
 highscore.cpp
 ini.cpp
@@ -167,6 +168,7 @@ gfx_func.h
 gfx_type.h
 gfxinit.h
 graph_gui.h
+ground_vehicle.hpp
 group.h
 group_gui.h
 group_type.h
