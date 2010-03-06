@@ -671,7 +671,9 @@ CommandCost CheckBuildableTile(TileIndex tile, uint invalid_dirs, int &allowed_z
 		return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 	}
 
-	if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
+	CommandCost ret = EnsureNoVehicleOnGround(tile);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	uint z;
 	Slope tileh = GetTileSlope(tile, &z);
@@ -1157,7 +1159,9 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 		}
 
 		/* XXX can't we pack this in the "else" part of the if above? */
-		if (!st->rect.BeforeAddRect(tile_org, w_org, h_org, StationRect::ADD_TEST)) return CMD_ERROR;
+		CommandCost ret = st->rect.BeforeAddRect(tile_org, w_org, h_org, StationRect::ADD_TEST);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 	} else {
 		/* allocate and initialize new station */
 		if (!Station::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_STATIONS_LOADING);
@@ -1362,7 +1366,11 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 		if (!HasStationTileRail(tile)) continue;
 
 		/* If there is a vehicle on ground, do not allow to remove (flood) the tile */
-		if (!EnsureNoVehicleOnGround(tile)) continue;
+		CommandCost ret = EnsureNoVehicleOnGround(tile);
+		if (ret.Failed()) {
+			ret.SetGlobalErrorMessage();
+			continue;
+		}
 
 		/* Check ownership of station */
 		T *st = T::GetByTile(tile);
@@ -1400,7 +1408,6 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 			DoClearSquare(tile);
 			if (keep_rail) MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
 
-			st->rect.AfterRemoveTile(st, tile);
 			AddTrackToSignalBuffer(tile, track, owner);
 			YapfNotifyTrackLayoutChange(tile, track);
 
@@ -1427,6 +1434,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 	for (T **stp = affected_stations.Begin(); stp != affected_stations.End(); stp++) {
 		T *st = *stp;
 
+		st->rect.AfterRemoveRect(st, ta);
 		/* now we need to make the "spanned" area of the railway station smaller
 		 * if we deleted something at the edges.
 		 * we also need to adjust train_tile. */
@@ -1526,7 +1534,9 @@ CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 		/* for nonuniform stations, only remove tiles that are actually train station tiles */
 		if (!st->TileBelongsToRailStation(tile)) continue;
 
-		if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
+		CommandCost ret = EnsureNoVehicleOnGround(tile);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 
 		cost.AddCost(_price[PR_CLEAR_STATION_RAIL]);
 		if (flags & DC_EXEC) {
@@ -1546,7 +1556,7 @@ CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 	}
 
 	if (flags & DC_EXEC) {
-		st->rect.AfterRemoveRect(st, st->train_station.tile, st->train_station.w, st->train_station.h);
+		st->rect.AfterRemoveRect(st, st->train_station);
 
 		st->train_station.Clear();
 
@@ -1718,7 +1728,9 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 			return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION);
 		}
 
-		if (!st->rect.BeforeAddRect(roadstop_area.tile, roadstop_area.w, roadstop_area.h, StationRect::ADD_TEST)) return CMD_ERROR;
+		CommandCost ret = st->rect.BeforeAddRect(roadstop_area.tile, roadstop_area.w, roadstop_area.h, StationRect::ADD_TEST);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 	} else {
 		/* allocate and initialize new station */
 		if (!Station::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_STATIONS_LOADING);
@@ -1832,7 +1844,9 @@ static CommandCost RemoveRoadStop(TileIndex tile, DoCommandFlag flags)
 		/* remove the 'going through road stop' status from all vehicles on that tile */
 		if (flags & DC_EXEC) FindVehicleOnPos(tile, NULL, &ClearRoadStopStatusEnum);
 	} else {
-		if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
+		CommandCost ret = EnsureNoVehicleOnGround(tile);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 	}
 
 	if (flags & DC_EXEC) {
@@ -2045,7 +2059,9 @@ void UpdateAirportsNoise()
 /** Place an Airport.
  * @param tile tile where airport will be built
  * @param flags operation to perform
- * @param p1 airport type, @see airport.h
+ * @param p1
+ * - p1 = (bit  0- 7) - airport type, @see airport.h
+ * - p1 = (bit  8-15) - airport layout
  * @param p2 various bitstuffed elements
  * - p2 = (bit     0) - allow airports directly adjacent to other airports.
  * - p2 = (bit 16-31) - station ID to join (NEW_STATION if build new one)
@@ -2059,18 +2075,20 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	bool reuse = (station_to_join != NEW_STATION);
 	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
+	byte airport_type = GB(p1, 0, 8);
+	byte layout = GB(p1, 8, 8);
 
 	if (distant_join && (!_settings_game.station.distant_join_stations || !Station::IsValidID(station_to_join))) return CMD_ERROR;
 
-	if (p1 >= NUM_AIRPORTS) return CMD_ERROR;
+	if (airport_type >= NUM_AIRPORTS) return CMD_ERROR;
 
 	CommandCost ret = CheckIfAuthorityAllowsNewStation(tile, flags);
 	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	/* Check if a valid, buildable airport was chosen for construction */
-	const AirportSpec *as = AirportSpec::Get(p1);
-	if (!as->IsAvailable()) return CMD_ERROR;
+	const AirportSpec *as = AirportSpec::Get(airport_type);
+	if (!as->IsAvailable() || layout >= as->num_table) return CMD_ERROR;
 
 	Town *t = ClosestTownFromTile(tile, UINT_MAX);
 	int w = as->size_x;
@@ -2127,7 +2145,9 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION);
 		}
 
-		if (!st->rect.BeforeAddRect(tile, w, h, StationRect::ADD_TEST)) return CMD_ERROR;
+		CommandCost ret = st->rect.BeforeAddRect(tile, w, h, StationRect::ADD_TEST);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 
 		if (st->airport.tile != INVALID_TILE) {
 			return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT);
@@ -2162,7 +2182,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 		st->rect.BeforeAddRect(tile, w, h, StationRect::ADD_TRY);
 
-		const AirportTileTable *it = as->table[0];
+		const AirportTileTable *it = as->table[layout];
 		do {
 			TileIndex cur_tile = tile + ToTileIndexDiff(it->ti);
 			MakeAirport(cur_tile, st->owner, st->index, it->gfx);
@@ -2173,7 +2193,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		} while ((++it)->ti.x != -0x80);
 
 		/* Only call the animation trigger after all tiles have been built */
-		it = as->table[0];
+		it = as->table[layout];
 		do {
 			TileIndex cur_tile = tile + ToTileIndexDiff(it->ti);
 			AirportTileAnimationTrigger(st, cur_tile, AAT_BUILT);
@@ -2219,10 +2239,6 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 
 	tile = st->airport.tile;
 
-	const AirportSpec *as = st->GetAirportSpec();
-	int w = as->size_x;
-	int h = as->size_y;
-
 	CommandCost cost(EXPENSES_CONSTRUCTION);
 
 	const Aircraft *a;
@@ -2234,7 +2250,9 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 	TILE_AREA_LOOP(tile_cur, st->airport) {
 		if (!st->TileBelongsToAirport(tile_cur)) continue;
 
-		if (!EnsureNoVehicleOnGround(tile_cur)) return CMD_ERROR;
+		CommandCost ret = EnsureNoVehicleOnGround(tile_cur);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 
 		cost.AddCost(_price[PR_CLEAR_STATION_AIRPORT]);
 
@@ -2245,6 +2263,7 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 	}
 
 	if (flags & DC_EXEC) {
+		const AirportSpec *as = st->GetAirportSpec();
 		for (uint i = 0; i < as->nof_depots; ++i) {
 			DeleteWindowById(
 				WC_VEHICLE_DEPOT, st->GetHangarTile(i)
@@ -2257,7 +2276,7 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 		Town *nearest = AirportGetNearestTown(as, tile);
 		nearest->noise_reached -= GetAirportNoiseLevelForTown(as, nearest->xy, tile);
 
-		st->rect.AfterRemoveRect(st, tile, w, h);
+		st->rect.AfterRemoveRect(st, st->airport);
 
 		st->airport.Clear();
 		st->facilities &= ~FACIL_AIRPORT;
@@ -2376,9 +2395,11 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION);
 		}
 
-		if (!st->rect.BeforeAddRect(
+		CommandCost ret = st->rect.BeforeAddRect(
 				tile + ToTileIndexDiff(_dock_tileoffs_chkaround[direction]),
-				_dock_w_chk[direction], _dock_h_chk[direction], StationRect::ADD_TEST)) return CMD_ERROR;
+				_dock_w_chk[direction], _dock_h_chk[direction], StationRect::ADD_TEST);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 
 		if (st->dock_tile != INVALID_TILE) return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK);
 	} else {
@@ -2432,8 +2453,10 @@ static CommandCost RemoveDock(TileIndex tile, DoCommandFlag flags)
 	TileIndex tile1 = st->dock_tile;
 	TileIndex tile2 = tile1 + TileOffsByDiagDir(GetDockDirection(tile1));
 
-	if (!EnsureNoVehicleOnGround(tile1)) return CMD_ERROR;
-	if (!EnsureNoVehicleOnGround(tile2)) return CMD_ERROR;
+	CommandCost ret = EnsureNoVehicleOnGround(tile1);
+	if (ret.Succeeded()) ret = EnsureNoVehicleOnGround(tile2);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	if (flags & DC_EXEC) {
 		DoClearSquare(tile1);
