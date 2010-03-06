@@ -12,21 +12,17 @@
 #ifndef TRAIN_H
 #define TRAIN_H
 
-#include "vehicle_base.h"
 #include "newgrf_engine.h"
 #include "cargotype.h"
 #include "rail.h"
 #include "engine_base.h"
 #include "rail_map.h"
+#include "ground_vehicle.hpp"
 
 struct Train;
 
 enum VehicleRailFlags {
 	VRF_REVERSING         = 0,
-
-	/* used to calculate if train is going up or down */
-	VRF_GOINGUP           = 1,
-	VRF_GOINGDOWN         = 2,
 
 	/* used to store if a wagon is powered or not */
 	VRF_POWEREDWAGON      = 3,
@@ -56,24 +52,8 @@ bool TryPathReserve(Train *v, bool mark_as_stuck = false, bool first_tile_okay =
 
 int GetTrainStopLocation(StationID station_id, TileIndex tile, const Train *v, int *station_ahead, int *station_length);
 
-/**
- * Cached acceleration values.
- * All of these values except cached_slope_resistance are set only for the first part of a vehicle.
- */
-struct AccelerationCache {
-	/* cached values, recalculated when the cargo on a train changes (in addition to the conditions above) */
-	uint32 cached_weight;           ///< total weight of the consist.
-	uint32 cached_slope_resistance; ///< Resistance caused by weight when this vehicle part is at a slope
-	uint32 cached_max_te;           ///< max tractive effort of consist
-
-	/* cached values, recalculated on load and each time a vehicle is added to/removed from the consist. */
-	uint32 cached_power;            ///< total power of the consist.
-	uint32 cached_air_drag;         ///< Air drag coefficient of the vehicle
-	uint16 cached_axle_resistance;  ///< Resistance caused by the axles of the vehicle
-};
-
 /** Variables that are cached to improve performance and such */
-struct TrainCache : public AccelerationCache {
+struct TrainCache {
 	/* Cached wagon override spritegroup */
 	const struct SpriteGroup *cached_override;
 
@@ -86,7 +66,6 @@ struct TrainCache : public AccelerationCache {
 
 	/* cached max. speed / acceleration data */
 	uint16 cached_max_speed;    ///< max speed of the consist. (minimum of the max speed of all vehicles in the consist)
-	uint16 cached_max_rail_speed; ///< max consist speed limited by rail type
 	int cached_max_curve_speed; ///< max consist speed limited by curves
 
 	/**
@@ -102,16 +81,10 @@ struct TrainCache : public AccelerationCache {
 	EngineID first_engine;  ///< cached EngineID of the front vehicle. INVALID_ENGINE for the front vehicle itself.
 };
 
-/** What is the status of our acceleration? */
-enum AccelStatus {
-	AS_ACCEL, ///< We want to go faster, if possible ofcourse
-	AS_BRAKE  ///< We want to stop
-};
-
 /**
  * 'Train' is either a loco or a wagon.
  */
-struct Train : public SpecializedVehicle<Train, VEH_TRAIN> {
+struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	TrainCache tcache;
 
 	/* Link between the two ends of a multiheaded engine */
@@ -129,9 +102,11 @@ struct Train : public SpecializedVehicle<Train, VEH_TRAIN> {
 	uint16 wait_counter;
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
-	Train() : SpecializedVehicle<Train, VEH_TRAIN>() {}
+	Train() : GroundVehicle<Train, VEH_TRAIN>() {}
 	/** We want to 'destruct' the right class. */
 	virtual ~Train() { this->PreDestructor(); }
+
+	friend struct GroundVehicle<Train, VEH_TRAIN>; // GroundVehicle needs to use the acceleration functions defined at Train.
 
 	const char *GetTypeString() const { return "train"; }
 	void MarkDirty();
@@ -158,15 +133,12 @@ struct Train : public SpecializedVehicle<Train, VEH_TRAIN> {
 	int GetCurveSpeedLimit() const;
 
 	void ConsistChanged(bool same_length);
-	void CargoChanged();
-	void PowerChanged();
 
 	int UpdateSpeed();
 
 	void UpdateAcceleration();
 
 	int GetCurrentMaxSpeed() const;
-	int GetAcceleration() const;
 
 	/**
 	 * enum to handle train subtypes
@@ -477,25 +449,6 @@ protected: // These functions should not be called outside acceleration code.
 	}
 
 	/**
-	 * Calculates the total slope resistance for this vehicle.
-	 * @return Slope resistance.
-	 */
-	FORCEINLINE int32 GetSlopeResistance() const
-	{
-		int32 incl = 0;
-
-		for (const Train *u = this; u != NULL; u = u->Next()) {
-			if (HasBit(u->flags, VRF_GOINGUP)) {
-				incl += u->tcache.cached_slope_resistance;
-			} else if (HasBit(u->flags, VRF_GOINGDOWN)) {
-				incl -= u->tcache.cached_slope_resistance;
-			}
-		}
-
-		return incl;
-	}
-
-	/**
 	 * Allows to know the acceleration type of a vehicle.
 	 * @return Acceleration type of the vehicle.
 	 */
@@ -511,6 +464,34 @@ protected: // These functions should not be called outside acceleration code.
 	FORCEINLINE uint32 GetSlopeSteepness() const
 	{
 		return 20 * _settings_game.vehicle.train_slope_steepness; // 1% slope * slope steepness
+	}
+
+	/**
+	 * Gets the maximum speed of the vehicle, ignoring the limitations of the kind of track the vehicle is on.
+	 * @return Maximum speed of the vehicle.
+	 */
+	FORCEINLINE uint16 GetInitialMaxSpeed() const
+	{
+		return this->tcache.cached_max_speed;
+	}
+
+	/**
+	 * Gets the maximum speed allowed by the track for this vehicle.
+	 * @return Maximum speed allowed.
+	 */
+	FORCEINLINE uint16 GetMaxTrackSpeed() const
+	{
+		return GetRailTypeInfo(GetRailType(this->tile))->max_speed;
+	}
+
+	/**
+	 * Checks if the vehicle is at a tile that can be sloped.
+	 * @return True if the tile can be sloped.
+	 */
+	FORCEINLINE bool TileMayHaveSlopedTrack() const
+	{
+		/* Any track that isn't TRACK_BIT_X or TRACK_BIT_Y cannot be sloped. */
+		return this->track == TRACK_BIT_X || this->track == TRACK_BIT_Y;
 	}
 };
 
