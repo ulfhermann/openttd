@@ -2076,8 +2076,21 @@ bool AfterLoadGame()
 		Station *st;
 		FOR_ALL_STATIONS(st) {
 			if (st->airport.tile != INVALID_TILE) {
+				if (st->airport_type == 15) st->airport_type = AT_OILRIG;
 				st->airport.w = st->GetAirportSpec()->size_x;
 				st->airport.h = st->GetAirportSpec()->size_y;
+			}
+		}
+
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			/* Copy old GOINGUP / GOINGDOWN flags. */
+			if (HasBit(t->flags, 1)) {
+				ClrBit(t->flags, 1);
+				SetBit(t->gv_flags, GVF_GOINGUP_BIT);
+			} else if (HasBit(t->flags, 2)) {
+				ClrBit(t->flags, 2);
+				SetBit(t->gv_flags, GVF_GOINGDOWN_BIT);
 			}
 		}
 	}
