@@ -36,6 +36,7 @@
 #include "newgrf_townname.h"
 #include "newgrf_industries.h"
 #include "newgrf_airporttiles.h"
+#include "newgrf_airport.h"
 #include "rev.h"
 #include "fios.h"
 #include "rail.h"
@@ -5906,7 +5907,9 @@ static void ResetNewGRFData()
 	ResetCustomStations();
 
 	/* Reset airport-related structures */
+	ResetAirportClasses();
 	ResetCustomAirports();
+	AirportSpec::ResetAirports();
 	AirportTileSpec::ResetAirportTiles();
 
 	/* Reset canal sprite groups and flags */
@@ -6634,6 +6637,7 @@ static void AfterLoadGRFs()
 
 	/* Add all new airports to the airports array. */
 	FinaliseAirportsArray();
+	BindAirportSpecs();
 
 	/* Update the townname generators list */
 	InitGRFTownGeneratorNames();
