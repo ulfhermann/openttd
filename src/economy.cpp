@@ -981,9 +981,11 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 		 * RATING_OUTSTANDING
 		 */
 		int16 rating = t->ratings[company->index];
-		int16 new_rating = rating + max((uint64)1, (uint64)num_pieces *
-			(uint64)RATING_DELIVERY_UP / (uint64)intended_amount /
-			(uint64)t->num_accepted_cargos
+		int16 new_rating = rating + max((uint64)1, ((uint64)num_pieces *
+			(uint64)RATING_DELIVERY_UP * (uint64)GetTimeFactor(cs,
+			days_in_transit) * (uint64)cs->initial_payment /
+			(uint64)intended_amount / (uint64)t->sum_accepted_cargos_payment)
+			>> 7
 		);
 
 		t->ratings[company->index] = Clamp(new_rating, RATING_MINIMUM,
