@@ -179,7 +179,10 @@ static CommandCost IsValidTileForWaypoint(TileIndex tile, Axis axis, StationID *
 
 	Owner owner = GetTileOwner(tile);
 	if (!CheckOwnership(owner)) return CMD_ERROR;
-	if (!EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
+
+	CommandCost ret = EnsureNoVehicleOnGround(tile);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	Slope tileh = GetTileSlope(tile, NULL);
 	if (tileh != SLOPE_FLAT &&
@@ -270,7 +273,9 @@ CommandCost CmdBuildRailWaypoint(TileIndex start_tile, DoCommandFlag flags, uint
 			if (ret.Failed()) return ret;
 		}
 
-		if (!wp->rect.BeforeAddRect(start_tile, width, height, StationRect::ADD_TEST)) return CMD_ERROR;
+		CommandCost ret = wp->rect.BeforeAddRect(start_tile, width, height, StationRect::ADD_TEST);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 	} else {
 		/* allocate and initialize new waypoint */
 		if (!Waypoint::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_STATIONS_LOADING);
@@ -390,7 +395,11 @@ CommandCost RemoveBuoy(TileIndex tile, DoCommandFlag flags)
 
 	if (HasStationInUse(wp->index, INVALID_COMPANY)) return_cmd_error(STR_ERROR_BUOY_IS_IN_USE);
 	/* remove the buoy if there is a ship on tile when company goes bankrupt... */
-	if (!(flags & DC_BANKRUPT) && !EnsureNoVehicleOnGround(tile)) return CMD_ERROR;
+	if (!(flags & DC_BANKRUPT)) {
+		CommandCost ret = EnsureNoVehicleOnGround(tile);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
+	}
 
 	if (flags & DC_EXEC) {
 		wp->facilities &= ~FACIL_DOCK;

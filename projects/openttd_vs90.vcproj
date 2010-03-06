@@ -569,6 +569,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\ground_vehicle.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\heightmap.cpp"
 				>
 			</File>
@@ -1026,6 +1030,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\graph_gui.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\ground_vehicle.hpp"
 				>
 			</File>
 			<File
