@@ -324,6 +324,9 @@ void AfterLoadVehicles(bool part_of_load)
 			RoadVehicle *rv = RoadVehicle::From(v);
 			if (rv->IsRoadVehFront()) {
 				RoadVehUpdateCache(rv);
+				if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
+					rv->CargoChanged();
+				}
 			}
 		}
 	}
@@ -544,6 +547,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		 SLE_CONDVAR(Train, wait_counter,        SLE_UINT16,                 136, SL_MAX_VERSION),
 
 		SLE_CONDNULL(2, 2, 19),
+		 SLE_CONDVAR(Train, gv_flags,            SLE_UINT16,                 139, SL_MAX_VERSION),
 		/* reserve extra space in savegame here. (currently 11 bytes) */
 		SLE_CONDNULL(11, 2, SL_MAX_VERSION),
 
@@ -562,6 +566,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		     SLE_VAR(RoadVehicle, reverse_ctr,          SLE_UINT8),
 
 		SLE_CONDNULL(2,                                                               6,  68),
+		 SLE_CONDVAR(RoadVehicle, gv_flags,             SLE_UINT16,                 139, SL_MAX_VERSION),
 		SLE_CONDNULL(4,                                                              69, 130),
 		SLE_CONDNULL(2,                                                               6, 130),
 		/* reserve extra space in savegame here. (currently 16 bytes) */
