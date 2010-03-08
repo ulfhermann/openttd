@@ -126,6 +126,8 @@ struct GoodsEntry {
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
 		last_age(255),
+		supply(0),
+		supply_new(0),
 		last_component(0)
 	{}
 
