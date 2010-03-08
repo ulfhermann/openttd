@@ -3099,13 +3099,12 @@ static void UpdateStationRating(Station *st)
 
 uint GetMovingAverageLength(const Station *from, const Station *to)
 {
-	return _settings_game.economy.moving_average_length + (DistanceManhattan(from->xy, to->xy) >> 2);
+	return LinkStat::MIN_AVERAGE_LENGTH + (DistanceManhattan(from->xy, to->xy) >> 2);
 }
 
 void Station::RunAverages() {
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
 		GoodsEntry & good = this->goods[goods_index];
-		good.supply.Decrease();
 		LinkStatMap & links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
@@ -3248,7 +3247,14 @@ void OnTick_Station()
 
 void StationMonthlyLoop()
 {
-	/* not used */
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
+			GoodsEntry &good = st->goods[goods_index];
+			good.supply = good.supply_new;
+			good.supply_new = 0;
+		}
+	}
 }
 
 
@@ -3275,7 +3281,7 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	GoodsEntry & good = st->goods[type];
 	good.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
-	good.supply.Increase(amount);
+	good.supply_new += amount;
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
 	AirportAnimationTrigger(st, AAT_STATION_NEW_CARGO, type);
