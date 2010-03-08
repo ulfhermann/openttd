@@ -338,6 +338,14 @@ bool SaveloadCrashWithMissingNewGRFs();
 
 extern char _savegame_format[8];
 
-#define COUNTERS_SV 197
+/**
+ * save game versions used for the various branches
+ * TRUNK_SV is always the current trunk version.
+ */
+enum SaveGameVersions {
+	SV_TRUNK = 139,
+	SV_ALT_ECO_SW = SV_TRUNK + 100,
+	SV_DELIVERY_RATING,
+};
 
 #endif /* SAVELOAD_H */
