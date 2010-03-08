@@ -79,8 +79,6 @@ enum SLRefType {
 	REF_ORDERLIST     = 8,
 };
 
-#define SL_MAX_VERSION 255
-
 enum {
 	INC_VEHICLE_COMMON = 0,
 };
@@ -338,6 +336,14 @@ bool SaveloadCrashWithMissingNewGRFs();
 
 extern char _savegame_format[8];
 
-#define RESERVATION_SV 240
+/**
+ * save/load versions used for the various branches
+ * SL_TRUNK is always the current trunk version.
+ */
+enum SaveLoadVersions {
+	SL_TRUNK = 139,
+	SL_RESERVATION = SL_TRUNK + 50,
+	SL_MAX_VERSION = 255
+};
 
 #endif /* SAVELOAD_H */
