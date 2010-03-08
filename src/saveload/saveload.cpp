@@ -46,7 +46,7 @@
 
 #include "saveload_internal.h"
 
-extern const uint16 SAVEGAME_VERSION = MCF_SV;
+extern const uint16 SAVEGAME_VERSION = SL_MCF;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
