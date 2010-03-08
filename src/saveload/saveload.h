@@ -338,6 +338,4 @@ bool SaveloadCrashWithMissingNewGRFs();
 
 extern char _savegame_format[8];
 
-#define MOVING_AVERAGE_SV 149
-
 #endif /* SAVELOAD_H */
