@@ -716,12 +716,14 @@ static void TownTickHandler(Town *t)
 	if (_settings_game.economy.alt_economy) {
 		Company *c;
 		FOR_ALL_COMPANIES(c) {
-			if (t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
+			CompanyID index = c->index;
+			if (!HasBit(t->have_ratings, index) || t->ratings[index] < RATING_GROWTH_MAXIMUM) continue;
 			/* use a 32bit number for the calculation to avoid overflow */
-			uint rating = (uint)t->ratings[c->index];
+			uint rating = (uint)t->ratings[index];
 			rating *= RATING_DECREASE_PERCENTAGE;
 			rating >>= 8;
-			t->ratings[c->index] = rating;
+			assert(rating < RATING_MAXIMUM);
+			t->ratings[index] = rating;
 		}
 	}
 
