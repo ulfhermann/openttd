@@ -224,11 +224,11 @@ static StationID _station_id;
 
 const SaveLoad *GetLinkStatDesc() {
 	static const SaveLoad linkstat_desc[] = {
-		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		 SLE_END()
 	};
 	
@@ -257,9 +257,10 @@ const SaveLoad *GetGoodsDesc()
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, supply.supply,       SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply_new,          SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+	     SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,      SL_COMPONENTS, SL_MAX_VERSION),
 		SLE_END()
 	};
 
