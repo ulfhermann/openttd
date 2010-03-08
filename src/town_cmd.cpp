@@ -714,38 +714,40 @@ static void TownTickHandler(Town *t)
 		t->grow_counter = i;
 	}
 
-	uint rating_sum = 0;
-	Company *c;
-	FOR_ALL_COMPANIES(c) {
-		if (!HasBit(t->have_ratings, c->index) || t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
-		// use a 32bit number for the calculation
-		uint rating = (uint)t->ratings[c->index];
-		rating *= RATING_DECREASE_PERCENTAGE;
-		rating >>= 8;
-		assert(rating < RATING_MAXIMUM);
-		assert(rating > 0);
-		t->ratings[c->index] = rating;
-		rating_sum += rating;
-	}
 
-	if (_settings_game.economy.rating_payment) {
+	if (_settings_game.economy.alt_economy) {
+		uint rating_sum = 0;
+		Company *c;
+		FOR_ALL_COMPANIES(c) {
+			CompanyID index = c->index;
+			if (!HasBit(t->have_ratings, index) || t->ratings[index] < RATING_GROWTH_MAXIMUM) continue;
+			/* use a 32bit number for the calculation to avoid overflow */
+			uint rating = (uint)t->ratings[index];
+			rating *= RATING_DECREASE_PERCENTAGE;
+			rating >>= 8;
+			assert(rating < RATING_MAXIMUM);
+			t->ratings[index] = rating;
+			rating_sum += rating;
+		}
+
 		if (rating_sum < RATING_MAXIMUM) rating_sum = RATING_MAXIMUM;
 		FOR_ALL_COMPANIES(c) {
-			if (!HasBit(t->have_ratings, c->index) || t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
+			CompanyID index = c->index;
+			if (!HasBit(t->have_ratings, index) || t->ratings[index] < RATING_GROWTH_MAXIMUM || t->unwanted[index] > 0) continue;
 
 			CompanyID old_company = _current_company;
-			_current_company = c->index;
-			int64 sum = -(int64)t->population *	(int64)t->ratings[c->index] *
-					(int64)TOWN_GROWTH_FREQUENCY / (int64)rating_sum /
-					(int64)DAY_TICKS / (int64)30;
+			_current_company = index;
+			int64 sum = -(int64)t->population *	(int64)t->ratings[index] *
+				(int64)TOWN_GROWTH_FREQUENCY / (int64)rating_sum /
+				(int64)DAY_TICKS / (int64)30;
 			SubtractMoneyFromCompany(CommandCost(EXPENSES_TRAIN_INC, sum));
 			if (IsLocalCompany() && sum != 0) {
-				ShowCostOrIncomeAnimation(TileX(t->xy) * TILE_SIZE,
-						TileY(t->xy) * TILE_SIZE, TilePixelHeight(t->xy), sum
+				TileIndex xy = t->xy;
+				ShowCostOrIncomeAnimation(TileX(xy) * TILE_SIZE,
+					TileY(xy) * TILE_SIZE, TilePixelHeight(xy), sum
 				);
 			}
 			_current_company = old_company;
-
 		}
 	}
 

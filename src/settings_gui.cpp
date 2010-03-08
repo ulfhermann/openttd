@@ -1382,6 +1382,7 @@ static SettingEntry _settings_economy[] = {
 	SettingEntry("economy.smooth_economy"),
 	SettingEntry("economy.rating_payment"),
 	SettingEntry("economy.feeder_payment_share"),
+	SettingEntry("economy.alt_economy"),
 };
 /** Economy sub-page */
 static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_settings_economy)};
