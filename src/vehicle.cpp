@@ -452,6 +452,36 @@ CommandCost TunnelBridgeIsFree(TileIndex tile, TileIndex endtile, const Vehicle 
 	return CommandCost();
 }
 
+static Vehicle *EnsureNoTrainOnTrackProc(Vehicle *v, void *data)
+{
+	TrackBits rail_bits = *(TrackBits *)data;
+
+	if (v->type != VEH_TRAIN) return NULL;
+
+	Train *t = Train::From(v);
+	if ((t->track != rail_bits) && !TracksOverlap(t->track | rail_bits)) return NULL;
+
+	return v;
+}
+
+/**
+ * Tests if a vehicle interacts with the specified track bits.
+ * All track bits interact except parallel #TRACK_BIT_HORZ or #TRACK_BIT_VERT.
+ *
+ * @param tile The tile.
+ * @param track_bits The track bits.
+ * @return \c true if no train that interacts, is found. \c false if a train is found.
+ */
+CommandCost EnsureNoTrainOnTrackBits(TileIndex tile, TrackBits track_bits)
+{
+	/* Value v is not safe in MP games, however, it is used to generate a local
+	 * error message only (which may be different for different machines).
+	 * Such a message does not affect MP synchronisation.
+	 */
+	Vehicle *v = VehicleFromPos(tile, &track_bits, &EnsureNoTrainOnTrackProc, true);
+	if (v != NULL) return_cmd_error(STR_ERROR_TRAIN_IN_THE_WAY + v->type);
+	return CommandCost();
+}
 
 static void UpdateNewVehiclePosHash(Vehicle *v, bool remove)
 {

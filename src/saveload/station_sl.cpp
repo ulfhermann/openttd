@@ -224,11 +224,11 @@ static StationID _station_id;
 
 const SaveLoad *GetLinkStatDesc() {
 	static const SaveLoad linkstat_desc[] = {
-		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		 SLE_END()
 	};
 	
@@ -246,9 +246,9 @@ const SaveLoad *GetGoodsDesc()
 {
 	static const SaveLoad goods_desc[] = {
 		SLEG_CONDVAR(            _waiting_acceptance, SLE_UINT16,                  0, 67),
-		SLEG_CONDVAR(            _old_acc_pickup,     SLE_UINT8,                  68, SUPPLY_SV - 1),
-		 SLE_CONDVAR(GoodsEntry, pickup,              SLE_BOOL,            SUPPLY_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, acceptance,          SLE_UINT,            SUPPLY_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _old_acc_pickup,     SLE_UINT8,                  68, SL_SUPPLYSCALE - 1),
+		 SLE_CONDVAR(GoodsEntry, pickup,              SLE_BOOL,       SL_SUPPLYSCALE, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, acceptance,          SLE_UINT,       SL_SUPPLYSCALE, SL_MAX_VERSION),
 		SLE_CONDNULL(2,                                                           51, 67),
 		     SLE_VAR(GoodsEntry, days_since_pickup,   SLE_UINT8),
 		     SLE_VAR(GoodsEntry, rating,              SLE_UINT8),
@@ -261,9 +261,10 @@ const SaveLoad *GetGoodsDesc()
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
 		 SLE_CONDLST(GoodsEntry, cargo.packets,       REF_CARGO_PACKET,           68, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, supply.supply,       SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply_new,          SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+	     SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,      SL_COMPONENTS, SL_MAX_VERSION),
 		SLE_END()
 	};
 
@@ -295,7 +296,7 @@ static void Load_STNS()
 					ge->cargo.Append(new CargoPacket(GB(_waiting_acceptance, 0, 12), _cargo_days, source, _cargo_source_xy, _cargo_source_xy, _cargo_feeder_share));
 					ge->pickup = true;
 				}
-			} else if (CheckSavegameVersion(SUPPLY_SV)) {
+			} else if (CheckSavegameVersion(SL_SUPPLYSCALE)) {
 				ge->acceptance = HasBit(_old_acc_pickup, 0) << 3; // ACCEPTANCE was 0
 				ge->pickup = HasBit(_old_acc_pickup, 1);          // PICKUP was 1
 			}

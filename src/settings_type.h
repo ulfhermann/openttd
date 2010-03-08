@@ -349,8 +349,6 @@ struct EconomySettings {
 	TownFoundingByte found_town;             ///< town founding, @see TownFounding
 	bool   station_noise_level;              ///< build new airports when the town noise level is still within accepted limits
 	uint16 town_noise_population[3];         ///< population to base decision on noise evaluation (@see town_council_tolerance)
-	uint16 moving_average_unit;              ///< unit of time to use for calculating the moving averages
-	uint16 moving_average_length;            ///< minimum length of moving averages
 	uint8  min_rating_by_component;          ///< minimum rating cap by size of the linkgraph component
 };
 

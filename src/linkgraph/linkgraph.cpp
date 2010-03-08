@@ -24,7 +24,7 @@ void LinkGraph::CreateComponent(Station * first) {
 	first->goods[this->cargo].last_component = this->current_component_id;
 	component = new LinkGraphComponent(this->cargo, this->current_component_id);
 	GoodsEntry & good = first->goods[this->cargo];
-	node = component->AddNode(this->current_station_id, good.supply.Value(), good.acceptance);
+	node = component->AddNode(this->current_station_id, good.supply, good.acceptance);
 	this->component_acceptance[this->current_component_id] = good.acceptance;
 	index[this->current_station_id++] = node;
 	// find all stations belonging to the current component
@@ -47,7 +47,7 @@ void LinkGraph::CreateComponent(Station * first) {
 				GoodsEntry & good = target->goods[cargo];
 				good.last_component = this->current_component_id;
 				search_queue.push(target);
-				node = component->AddNode(target_id, good.supply.Value(), good.acceptance);
+				node = component->AddNode(target_id, good.supply, good.acceptance);
 				this->component_acceptance[this->current_component_id] += good.acceptance;
 				index[target_id] = node;
 			} else {
