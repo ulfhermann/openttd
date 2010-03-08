@@ -21,9 +21,9 @@ enum {
 const SaveLoad * GetLinkGraphComponentDesc() {
 
 	static const SaveLoad _component_desc[] = {
-		 SLE_CONDVAR(LinkGraphComponent, num_nodes,        SLE_UINT32, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraphComponent, index,            SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(                    _join_date,       SLE_INT32,  LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraphComponent, num_nodes,        SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraphComponent, index,            SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
+		SLEG_CONDVAR(                    _join_date,       SLE_INT32,  SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
@@ -59,10 +59,10 @@ const SaveLoad * GetLinkGraphComponentDesc() {
 const SaveLoad * GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad _linkgraph_desc[] = {
-		SLEG_CONDVAR(           _num_components,      SLE_UINT32, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, current_component_id, SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, current_station_id,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkGraph, cargo,                SLE_UINT8,  LINKGRAPH_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(           _num_components,      SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, current_component_id, SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, current_station_id,   SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkGraph, cargo,                SLE_UINT8,  SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
@@ -71,15 +71,15 @@ const SaveLoad * GetLinkGraphDesc(uint type) {
 	// edges and nodes are saved in the correct order, so we don't need to save their ids.
 
 	static const SaveLoad _node_desc[] = {
-		 SLE_CONDVAR(Node, supply,    SLE_UINT32, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Node, demand,    SLE_UINT32, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Node, station,   SLE_UINT16, LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, supply,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, demand,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+		 SLE_CONDVAR(Node, station,   SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
 	static const SaveLoad _edge_desc[] = {
-		 SLE_CONDVAR(Edge, distance,  SLE_UINT32, LINKGRAPH_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(Edge, capacity,  SLE_UINT32, LINKGRAPH_SV, SL_MAX_VERSION),
+		 SLE_CONDVAR(Edge, distance,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+		 SLE_CONDVAR(Edge, capacity,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
