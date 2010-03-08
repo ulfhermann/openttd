@@ -123,7 +123,9 @@ struct GoodsEntry {
 		days_since_pickup(255),
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
-		last_age(255)
+		last_age(255),
+		supply(0),
+		supply_new(0)
 	{}
 
 	byte acceptance_pickup;
