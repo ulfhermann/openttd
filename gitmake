@@ -68,7 +68,7 @@ warning-sign: demands
 
 moving-average: master
 
-alteconomy-switch
+alteconomy-switch: master
 
 delivery-rating: alteconomy-switch global-acceptance
 
