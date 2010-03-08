@@ -713,14 +713,16 @@ static void TownTickHandler(Town *t)
 		t->grow_counter = i;
 	}
 
-	Company *c;
-	FOR_ALL_COMPANIES(c) {
-		if (t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
-		// use a 32bit number for the calculation
-		uint rating = (uint)t->ratings[c->index];
-		rating *= RATING_DECREASE_PERCENTAGE;
-		rating >>= 8;
-		t->ratings[c->index] = rating;
+	if (_settings_game.economy.alt_economy) {
+		Company *c;
+		FOR_ALL_COMPANIES(c) {
+			if (t->ratings[c->index] < RATING_GROWTH_MAXIMUM) continue;
+			/* use a 32bit number for the calculation to avoid overflow */
+			uint rating = (uint)t->ratings[c->index];
+			rating *= RATING_DECREASE_PERCENTAGE;
+			rating >>= 8;
+			t->ratings[c->index] = rating;
+		}
 	}
 
 	UpdateTownRadius(t);
