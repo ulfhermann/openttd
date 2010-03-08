@@ -970,7 +970,7 @@ static Money DeliverGoods(int num_pieces, CargoID cargo_type, StationID dest, Ti
 	if (cs->town_effect == TE_WATER) st->town->new_act_water += accepted;
 
 	Town *t = st->town;
-	if (t->sum_accepted_cargos_payment > 0) {
+	if (_settings_game.economy.alt_economy && t->sum_accepted_cargos_payment > 0) {
 		/* there are towns without a single house */
 		uint intended_amount = max(1U, _economy.global_production[cargo_type] *
 			t->acceptance[cargo_type] /
