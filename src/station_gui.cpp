@@ -1552,7 +1552,7 @@ struct StationViewWindow : public Window {
 			if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) continue;
 
 			SetDParam(0, cs->name);
-			SetDParam(1, ge->supply.Value());
+			SetDParam(1, ge->supply);
 			SetDParam(3, ToPercent8(ge->rating));
 			SetDParam(2, STR_CARGO_RATING_APPALLING + (ge->rating >> 5));
 			DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT - 6, y, STR_STATION_VIEW_CARGO_SUPPLY_RATING);
