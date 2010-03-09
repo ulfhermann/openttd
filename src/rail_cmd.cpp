@@ -144,32 +144,18 @@ static const byte _track_sloped_sprites[14] = {
  *               11uuuudd => rail depot
  */
 
-
-Vehicle *EnsureNoTrainOnTrackProc(Vehicle *v, void *data)
-{
-	TrackBits rail_bits = *(TrackBits *)data;
-
-	if (v->type != VEH_TRAIN) return NULL;
-
-	Train *t = Train::From(v);
-	if ((t->track != rail_bits) && !TracksOverlap(t->track | rail_bits)) return NULL;
-
-	_error_message = STR_ERROR_TRAIN_IN_THE_WAY + v->type;
-	return v;
-}
-
 /**
  * Tests if a vehicle interacts with the specified track.
- * All track bits interact except parallel TRACK_BIT_HORZ or TRACK_BIT_VERT.
+ * All track bits interact except parallel #TRACK_BIT_HORZ or #TRACK_BIT_VERT.
  *
  * @param tile The tile.
  * @param track The track.
+ * @return Succeeded command (no train found), or a failed command (a train was found).
  */
-static bool EnsureNoTrainOnTrack(TileIndex tile, Track track)
+static CommandCost EnsureNoTrainOnTrack(TileIndex tile, Track track)
 {
 	TrackBits rail_bits = TrackToTrackBits(track);
-
-	return !HasVehicleOnPos(tile, &rail_bits, &EnsureNoTrainOnTrackProc);
+	return EnsureNoTrainOnTrackBits(tile, rail_bits);
 }
 
 /** Check that the new track bits may be built.
@@ -380,17 +366,18 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 
 	switch (GetTileType(tile)) {
 		case MP_RAILWAY: {
-			if (!CheckTileOwnership(tile)) return CMD_ERROR;
+			CommandCost ret = CheckTileOwnership(tile);
+			ret.SetGlobalErrorMessage();
+			if (ret.Failed()) return ret;
 
 			if (!IsPlainRail(tile)) return CMD_ERROR;
 
 			if (!IsCompatibleRail(GetRailType(tile), railtype)) return_cmd_error(STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION);
 
-			CommandCost ret = CheckTrackCombination(tile, trackbit, flags);
+			ret = CheckTrackCombination(tile, trackbit, flags);
+			if (ret.Succeeded()) ret = EnsureNoTrainOnTrack(tile, track);
 			ret.SetGlobalErrorMessage();
 			if (ret.Failed()) return ret;
-
-			if (!EnsureNoTrainOnTrack(tile, track)) return CMD_ERROR;
 
 			ret = CheckRailSlope(tileh, trackbit, GetTrackBits(tile), tile);
 			if (ret.Failed()) return ret;
@@ -529,11 +516,14 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 
 	switch (GetTileType(tile)) {
 		case MP_ROAD: {
-			if (!IsLevelCrossing(tile) ||
-					GetCrossingRailBits(tile) != trackbit ||
-					(_current_company != OWNER_WATER && !CheckTileOwnership(tile))) {
-				return CMD_ERROR;
+			if (!IsLevelCrossing(tile) || GetCrossingRailBits(tile) != trackbit) return CMD_ERROR;
+
+			if (_current_company != OWNER_WATER) {
+				CommandCost ret = CheckTileOwnership(tile);
+				ret.SetGlobalErrorMessage();
+				if (ret.Failed()) return ret;
 			}
+
 			if (!(flags & DC_BANKRUPT)) {
 				CommandCost ret = EnsureNoVehicleOnGround(tile);
 				ret.SetGlobalErrorMessage();
@@ -554,11 +544,17 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		case MP_RAILWAY: {
 			TrackBits present;
 
-			if (!IsPlainRail(tile) ||
-					(_current_company != OWNER_WATER && !CheckTileOwnership(tile)) ||
-					!EnsureNoTrainOnTrack(tile, track)) {
-				return CMD_ERROR;
+			if (!IsPlainRail(tile)) return CMD_ERROR;
+
+			if (_current_company != OWNER_WATER) {
+				CommandCost ret = CheckTileOwnership(tile);
+				ret.SetGlobalErrorMessage();
+				if (ret.Failed()) return ret;
 			}
+
+			CommandCost ret = EnsureNoTrainOnTrack(tile, track);
+			ret.SetGlobalErrorMessage();
+			if (ret.Failed()) return ret;
 
 			present = GetTrackBits(tile);
 			if ((present & trackbit) == 0) return CMD_ERROR;
@@ -911,14 +907,19 @@ CommandCost CmdBuildSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1,
 
 	/* You can only build signals on plain rail tiles, and the selected track must exist */
 	if (!ValParamTrackOrientation(track) || !IsPlainRailTile(tile) ||
-			!HasTrack(tile, track) || !EnsureNoTrainOnTrack(tile, track)) {
+			!HasTrack(tile, track)) {
 		return CMD_ERROR;
 	}
+	CommandCost ret = EnsureNoTrainOnTrack(tile, track);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	/* Protect against invalid signal copying */
 	if (p2 != 0 && (p2 & SignalOnTrack(track)) == 0) return CMD_ERROR;
 
-	if (!CheckTileOwnership(tile)) return CMD_ERROR;
+	ret = CheckTileOwnership(tile);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	{
 		/* See if this is a valid track combination for signals, (ie, no overlap) */
@@ -1269,13 +1270,19 @@ CommandCost CmdRemoveSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1
 	if (!ValParamTrackOrientation(track) ||
 			!IsPlainRailTile(tile) ||
 			!HasTrack(tile, track) ||
-			!EnsureNoTrainOnTrack(tile, track) ||
 			!HasSignalOnTrack(tile, track)) {
 		return CMD_ERROR;
 	}
+	CommandCost ret = EnsureNoTrainOnTrack(tile, track);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	/* Only water can remove signals from anyone */
-	if (_current_company != OWNER_WATER && !CheckTileOwnership(tile)) return CMD_ERROR;
+	if (_current_company != OWNER_WATER) {
+		CommandCost ret = CheckTileOwnership(tile);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
+	}
 
 	/* Do it? */
 	if (flags & DC_EXEC) {
@@ -1408,7 +1415,11 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			if (type == totype || (_settings_game.vehicle.disable_elrails && totype == RAILTYPE_RAIL && type == RAILTYPE_ELECTRIC)) continue;
 
 			/* Trying to convert other's rail */
-			if (!CheckTileOwnership(tile)) continue;
+			CommandCost ret = CheckTileOwnership(tile);
+			if (ret.Failed()) {
+				ret.SetGlobalErrorMessage();
+				continue;
+			}
 
 			SmallVector<Train *, 2> vehicles_affected;
 
@@ -1537,8 +1548,11 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 static CommandCost RemoveTrainDepot(TileIndex tile, DoCommandFlag flags)
 {
-	if (!CheckTileOwnership(tile) && _current_company != OWNER_WATER)
-		return CMD_ERROR;
+	if (_current_company != OWNER_WATER) {
+		CommandCost ret = CheckTileOwnership(tile);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
+	}
 
 	CommandCost ret = EnsureNoVehicleOnGround(tile);
 	ret.SetGlobalErrorMessage();
@@ -2723,10 +2737,10 @@ static VehicleEnterTileStatus VehicleEnter_Track(Vehicle *u, TileIndex tile, int
  */
 static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, uint z_old, Slope tileh_old, uint z_new, Slope tileh_new, TrackBits rail_bits)
 {
-	if (!_settings_game.construction.build_on_slopes || !AutoslopeEnabled()) return CMD_ERROR;
+	if (!_settings_game.construction.build_on_slopes || !AutoslopeEnabled()) return_cmd_error(STR_ERROR_MUST_REMOVE_RAILROAD_TRACK);
 
 	/* Is the slope-rail_bits combination valid in general? I.e. is it safe to call GetRailFoundation() ? */
-	if (CheckRailSlope(tileh_new, rail_bits, TRACK_BIT_NONE, tile).Failed()) return CMD_ERROR;
+	if (CheckRailSlope(tileh_new, rail_bits, TRACK_BIT_NONE, tile).Failed()) return_cmd_error(STR_ERROR_MUST_REMOVE_RAILROAD_TRACK);
 
 	/* Get the slopes on top of the foundations */
 	z_old += ApplyFoundationToSlope(GetRailFoundation(tileh_old, rail_bits), &tileh_old);
@@ -2740,13 +2754,15 @@ static CommandCost TestAutoslopeOnRailTile(TileIndex tile, uint flags, uint z_ol
 		case TRACK_BIT_UPPER: track_corner = CORNER_N; break;
 
 		/* Surface slope must not be changed */
-		default: return (((z_old != z_new) || (tileh_old != tileh_new)) ? CMD_ERROR : CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]));
+		default:
+			if (z_old != z_new || tileh_old != tileh_new) return_cmd_error(STR_ERROR_MUST_REMOVE_RAILROAD_TRACK);
+			return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	}
 
 	/* The height of the track_corner must not be changed. The rest ensures GetRailFoundation() already. */
 	z_old += GetSlopeZInCorner(RemoveHalftileSlope(tileh_old), track_corner);
 	z_new += GetSlopeZInCorner(RemoveHalftileSlope(tileh_new), track_corner);
-	if (z_old != z_new) return CMD_ERROR;
+	if (z_old != z_new) return_cmd_error(STR_ERROR_MUST_REMOVE_RAILROAD_TRACK);
 
 	CommandCost cost = CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	/* Make the ground dirty, if surface slope has changed */
@@ -2767,10 +2783,9 @@ static CommandCost TerraformTile_Track(TileIndex tile, DoCommandFlag flags, uint
 		/* Is there flat water on the lower halftile, that must be cleared expensively? */
 		bool was_water = (GetRailGroundType(tile) == RAIL_GROUND_WATER && IsSlopeWithOneCornerRaised(tileh_old));
 
-		_error_message = STR_ERROR_MUST_REMOVE_RAILROAD_TRACK;
-
 		/* First test autoslope. However if it succeeds we still have to test the rest, because non-autoslope terraforming is cheaper. */
 		CommandCost autoslope_result = TestAutoslopeOnRailTile(tile, flags, z_old, tileh_old, z_new, tileh_new, rail_bits);
+		autoslope_result.SetGlobalErrorMessage();
 
 		/* When there is only a single horizontal/vertical track, one corner can be terraformed. */
 		Corner allowed_corner;
