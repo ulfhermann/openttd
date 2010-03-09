@@ -48,6 +48,8 @@ private:
 	uint usage;
 
 public:
+	static const uint MIN_AVERAGE_LENGTH = 64;
+
 	friend const SaveLoad *GetLinkStatDesc();
 
 	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 0, uint frozen = 0, uint usage = 0) :
@@ -194,38 +196,6 @@ typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by 
 
 uint GetMovingAverageLength(const Station *from, const Station *to);
 
-class SupplyMovingAverage {
-private:
-	uint supply;
-
-public:
-	friend const SaveLoad *GetGoodsDesc();
-
-	FORCEINLINE SupplyMovingAverage(uint supply = 0) : supply(supply) {}
-
-	FORCEINLINE void Increase(uint value) {this->supply += value;}
-
-	FORCEINLINE void Decrease() {MovingAverage<SupplyMovingAverage>().Decrease(*this);}
-
-	FORCEINLINE uint Value() const {return MovingAverage<uint>().Monthly(this->supply);}
-
-	FORCEINLINE SupplyMovingAverage &operator/=(uint divident)
-		{this->supply = DivideApprox(this->supply, divident); return *this;}
-
-	FORCEINLINE SupplyMovingAverage &operator*=(uint factor)
-		{this->supply *= factor; return *this;}
-
-	FORCEINLINE SupplyMovingAverage operator/(uint divident) const
-		{return SupplyMovingAverage(DivideApprox(this->supply, divident));}
-
-	FORCEINLINE SupplyMovingAverage operator*(uint factor) const
-		{return SupplyMovingAverage(this->supply * factor);}
-
-	FORCEINLINE bool IsNull() const
-		{return this->supply == 0;}
-};
-
-
 struct GoodsEntry {
 	enum AcceptancePickup {
 		ACCEPTANCE,
@@ -238,6 +208,8 @@ struct GoodsEntry {
 		rating(INITIAL_STATION_RATING),
 		last_speed(0),
 		last_age(255),
+		supply(0),
+		supply_new(0),
 		last_component(0)
 	{}
 
@@ -247,7 +219,8 @@ struct GoodsEntry {
 	byte last_speed;
 	byte last_age;
 	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
-	SupplyMovingAverage supply;
+	uint supply;            ///< Cargo supplied last month
+	uint supply_new;        ///< Cargo supplied so far this month
 	FlowStatMap flows;      ///< The planned flows through this station
 	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
