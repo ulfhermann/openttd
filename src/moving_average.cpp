@@ -16,8 +16,7 @@
 
 template <class Titem> void RunAverages()
 {
-	uint interval = _settings_game.economy.moving_average_unit * DAY_TICKS;
-	for(uint id = _tick_counter % interval; id < Titem::GetPoolSize(); id += interval) {
+	for(uint id = _tick_counter % DAY_TICKS; id < Titem::GetPoolSize(); id += DAY_TICKS) {
 		Titem *item = Titem::GetIfValid(id);
 		if (item != NULL) {
 			item->RunAverages();
