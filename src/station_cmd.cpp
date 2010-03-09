@@ -3288,7 +3288,7 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	GoodsEntry & good = st->goods[type];
 	good.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	good.pickup = true;
-	good.supply += amount;
+	good.supply_new += amount;
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
 	AirportAnimationTrigger(st, AAT_STATION_NEW_CARGO, type);
