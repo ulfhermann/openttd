@@ -46,7 +46,7 @@
 
 #include "saveload_internal.h"
 
-extern const uint16 SAVEGAME_VERSION = CARGOMAP_SV;
+extern const uint16 SAVEGAME_VERSION = SL_CARGOMAP;
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 

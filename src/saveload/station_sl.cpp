@@ -225,11 +225,11 @@ static StationID _station_id;
 
 const SaveLoad *GetLinkStatDesc() {
 	static const SaveLoad linkstat_desc[] = {
-		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
 		 SLE_END()
 	};
 	
@@ -238,11 +238,11 @@ const SaveLoad *GetLinkStatDesc() {
 
 const SaveLoad *GetFlowStatDesc() {
 	static const SaveLoad _flowstat_desc[] = {
-		SLEG_CONDVAR(             _station_id,         SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(FlowStat,    via,                 SLE_UINT16,         FLOWMAP_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(FlowStat,    length,              SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(FlowStat,    planned,             SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(FlowStat,    sent,                SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
+		SLEG_CONDVAR(             _station_id,         SLE_UINT16,         SL_FLOWMAP, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    via,                 SLE_UINT16,         SL_FLOWMAP, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    length,              SLE_UINT32,         SL_FLOWMAP, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    planned,             SLE_UINT32,         SL_FLOWMAP, SL_MAX_VERSION),
+		 SLE_CONDVAR(FlowStat,    sent,                SLE_UINT32,         SL_FLOWMAP, SL_MAX_VERSION),
 		 SLE_END()
 	};
 
@@ -280,12 +280,13 @@ const SaveLoad *GetGoodsDesc()
 		     SLE_VAR(GoodsEntry, last_age,            SLE_UINT8),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_FILE_U32 | SLE_VAR_I64, 14, 64),
 		SLEG_CONDVAR(            _cargo_feeder_share, SLE_INT64,                  65, 67),
-		SLEG_CONDLST(            _packets,            REF_CARGO_PACKET,           68, CARGOMAP_SV - 1),
-		SLEG_CONDVAR(            _num_dests,          SLE_UINT32,        CARGOMAP_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, supply.supply,       SLE_UINT32,      CAPACITIES_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      CAPACITIES_SV, SL_MAX_VERSION),
-		SLEG_CONDVAR(            _num_flows,          SLE_UINT32,         FLOWMAP_SV, SL_MAX_VERSION),
-		 SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,       LINKGRAPH_SV, SL_MAX_VERSION),
+		SLEG_CONDLST(            _packets,            REF_CARGO_PACKET,           68, SL_CARGOMAP - 1),
+		SLEG_CONDVAR(            _num_dests,          SLE_UINT32,        SL_CARGOMAP, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		 SLE_CONDVAR(GoodsEntry, supply_new,          SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_links,          SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_CONDVAR(            _num_flows,          SLE_UINT32,         SL_FLOWMAP, SL_MAX_VERSION),
+	     SLE_CONDVAR(GoodsEntry, last_component,      SLE_UINT16,      SL_COMPONENTS, SL_MAX_VERSION),
 		SLE_END()
 	};
 
@@ -521,7 +522,7 @@ static void Load_STNN()
 					SlObject(&fs, GetFlowStatDesc());
 					flows[_station_id].insert(fs);
 				}
-				if (CheckSavegameVersion(CARGOMAP_SV -1)) {
+				if (CheckSavegameVersion(SL_CARGOMAP -1)) {
 					SwapPackets(ge);
 				} else {
 					StationCargoPair pair;
@@ -553,7 +554,7 @@ static void Ptrs_STNN()
 	FOR_ALL_STATIONS(st) {
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
-			if (CheckSavegameVersion(CARGOMAP_SV)) {
+			if (CheckSavegameVersion(SL_CARGOMAP)) {
 				SwapPackets(ge);
 				SlObject(ge, GetGoodsDesc());
 				SwapPackets(ge);
