@@ -1084,10 +1084,9 @@ class SmallMapWindow : public Window {
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
 				const LegendAndColour &tbl = _legend_table[this->map_type][i];
 				if (!tbl.show_on_map && supply_details != st) continue;
-				CargoID c = tbl.type;
-				const SupplyMovingAverage &supply = st->goods[c].supply;
-				if (!supply.IsNull()) {
-					q += supply.Value();
+				uint supply = st->goods[tbl.type].supply;
+				if (supply > 0) {
+					q += supply;
 					colour += tbl.colour;
 					numCargos++;
 				}
@@ -1446,7 +1445,7 @@ class SmallMapWindow : public Window {
 			const LegendAndColour &tbl = _legend_table[this->map_type][i];
 
 			CargoID c = tbl.type;
-			int supply = st->goods[c].supply.Value();
+			uint supply = st->goods[c].supply;
 			if (supply > 0) {
 				TextColour textcol = TC_BLACK;
 				if (tbl.show_on_map) {
