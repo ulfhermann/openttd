@@ -1170,11 +1170,39 @@ enum PerformanceRatingDetailsWidgets {
 	PRW_COMPANY_LAST  = PRW_COMPANY_FIRST + MAX_COMPANIES - 1,
 };
 
+static const StringID _performance_strings_classic[] = {
+	STR_PERFORMANCE_DETAIL_VEHICLES,
+	STR_PERFORMANCE_DETAIL_STATIONS,
+	STR_PERFORMANCE_DETAIL_MIN_PROFIT,
+	STR_PERFORMANCE_DETAIL_MIN_INCOME,
+	STR_PERFORMANCE_DETAIL_MAX_INCOME,
+	STR_PERFORMANCE_DETAIL_DELIVERED,
+	STR_PERFORMANCE_DETAIL_CARGO,
+	STR_PERFORMANCE_DETAIL_MONEY,
+	STR_PERFORMANCE_DETAIL_LOAN,
+	STR_PERFORMANCE_DETAIL_TOTAL
+};
+
+static const StringID _performance_strings_alteconomy[] = {
+	STR_PERFORMANCE_DETAIL_VEHICLES,
+	STR_PERFORMANCE_DETAIL_STATIONS,
+	STR_PERFORMANCE_DETAIL_RATINGS,
+	STR_PERFORMANCE_DETAIL_POPULATION,
+	STR_PERFORMANCE_DETAIL_PRODUCTION,
+	STR_PERFORMANCE_DETAIL_DELIVERED,
+	STR_PERFORMANCE_DETAIL_CARGO,
+	STR_PERFORMANCE_DETAIL_MONEY,
+	STR_PERFORMANCE_DETAIL_LOAN,
+	STR_PERFORMANCE_DETAIL_TOTAL
+};
+
 struct PerformanceRatingDetailWindow : Window {
 	static CompanyID company;
 	int timeout;
+	const StringID *performance_strings;
 
-	PerformanceRatingDetailWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
+	PerformanceRatingDetailWindow(const WindowDesc *desc, WindowNumber window_number) : Window(),
+		performance_strings(_settings_game.economy.alt_economy ? _performance_strings_alteconomy : _performance_strings_classic)
 	{
 		this->UpdateCompanyStats();
 
@@ -1212,7 +1240,7 @@ struct PerformanceRatingDetailWindow : Window {
 
 				uint score_info_width = 0;
 				for (uint i = SCORE_BEGIN; i < SCORE_END; i++) {
-					score_info_width = max(score_info_width, GetStringBoundingBox(STR_PERFORMANCE_DETAIL_VEHICLES + i).width);
+					score_info_width = max(score_info_width, GetStringBoundingBox(this->performance_strings[i]).width);
 				}
 				SetDParam(0, 1000);
 				score_info_width += GetStringBoundingBox(STR_BLACK_COMMA).width + WD_FRAMERECT_LEFT;
@@ -1275,19 +1303,20 @@ struct PerformanceRatingDetailWindow : Window {
 
 		/* Draw all the score parts */
 		int val    = _score_part[company][score_type];
-		int needed = _score_info[score_type].needed;
-		int score  = _score_info[score_type].score;
+		const ScoreInfo *score_info = _settings_game.economy.alt_economy ? _score_info_alteconomy : _score_info_classic;
+		int needed = score_info[score_type].needed;
+		int score  = score_info[score_type].score;
 
 		/* SCORE_TOTAL has his own rules ;) */
 		if (score_type == SCORE_TOTAL) {
-			for (ScoreID i = SCORE_BEGIN; i < SCORE_END; i++) score += _score_info[i].score;
+			for (ScoreID i = SCORE_BEGIN; i < SCORE_END; i++) score += score_info[i].score;
 			needed = SCORE_MAX;
 		}
 
 		uint bar_top  = r.top + WD_MATRIX_TOP;
 		uint text_top = bar_top + 2;
 
-		DrawString(this->score_info_left, this->score_info_right, text_top, STR_PERFORMANCE_DETAIL_VEHICLES + score_type);
+		DrawString(this->score_info_left, this->score_info_right, text_top, this->performance_strings[score_type]);
 
 		/* Draw the score */
 		SetDParam(0, score);
@@ -1321,7 +1350,15 @@ struct PerformanceRatingDetailWindow : Window {
 			case SCORE_MIN_PROFIT:
 			case SCORE_MIN_INCOME:
 			case SCORE_MAX_INCOME:
+				if (_settings_game.economy.alt_economy) {
+					DrawString(this->score_detail_left, this->score_detail_right, text_top, STR_PERFORMANCE_DETAIL_AMOUNT_INT);
+					break;
+				}
 			case SCORE_MONEY:
+				if (_settings_game.economy.alt_economy) {
+					DrawString(this->score_detail_left, this->score_detail_right, text_top, STR_PERFORMANCE_DETAIL_TIMES_VALUE);
+					break;
+				}
 			case SCORE_LOAN:
 				DrawString(this->score_detail_left, this->score_detail_right, text_top, STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY);
 				break;
@@ -1395,12 +1432,13 @@ CompanyID PerformanceRatingDetailWindow::company = INVALID_COMPANY;
  */
 static NWidgetBase *MakePerformanceDetailPanels(int *biggest_index)
 {
+	bool alt = _settings_game.economy.alt_economy;
 	const StringID performance_tips[] = {
 		STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP,
 		STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP,
-		STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP,
-		STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP,
-		STR_PERFORMANCE_DETAIL_MAX_INCOME_TOOLTIP,
+		alt ? STR_PERFORMANCE_DETAIL_RATINGS_TOOLTIP : STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP,
+		alt ? STR_PERFORMANCE_DETAIL_POPULATION_TOOLTIP : STR_PERFORMANCE_DETAIL_MIN_INCOME_TOOLTIP,
+		alt ? STR_PERFORMANCE_DETAIL_PRODUCTION_TOOLTIP : STR_PERFORMANCE_DETAIL_MAX_INCOME_TOOLTIP,
 		STR_PERFORMANCE_DETAIL_DELIVERED_TOOLTIP,
 		STR_PERFORMANCE_DETAIL_CARGO_TOOLTIP,
 		STR_PERFORMANCE_DETAIL_MONEY_TOOLTIP,

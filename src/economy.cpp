@@ -91,8 +91,8 @@ static inline uint32 BigMulSU(const uint32 a, const uint32 b, const uint8 shift)
 
 typedef SmallVector<Industry *, 16> SmallIndustryList;
 
-/* Score info */
-const ScoreInfo _score_info[] = {
+/* Score info for classic economy */
+const ScoreInfo _score_info_classic[] = {
 	{ SCORE_VEHICLES,        120, 100 },
 	{ SCORE_STATIONS,         80, 100 },
 	{ SCORE_MIN_PROFIT,    10000, 100 },
@@ -101,6 +101,20 @@ const ScoreInfo _score_info[] = {
 	{ SCORE_DELIVERED,     40000, 400 },
 	{ SCORE_CARGO,             8,  50 },
 	{ SCORE_MONEY,      10000000,  50 },
+	{ SCORE_LOAN,         250000,  50 },
+	{ SCORE_TOTAL,             0,   0 }
+};
+
+/* Score info for alternate economy */
+const ScoreInfo _score_info_alteconomy[] = {
+	{ SCORE_VEHICLES,       1000,-100 },
+	{ SCORE_STATIONS,        700,-100 },
+	{ SCORE_RATING,         1000, 800 },
+	{ SCORE_POPULATION,  5000000, 100 },
+	{ SCORE_PRODUCTION,    10000, 100 },
+	{ SCORE_DELIVERED,     40000, 300 },
+	{ SCORE_CARGO,             8,  50 },
+	{ SCORE_MONEY,            10,-200 },
 	{ SCORE_LOAN,         250000,  50 },
 	{ SCORE_TOTAL,             0,   0 }
 };
@@ -153,20 +167,136 @@ Money CalculateCompanyValue(const Company *c, bool including_loan)
 	return max(value, (Money)1);
 }
 
-/** if update is set to true, the economy is updated with this score
- *  (also the house is updated, should only be true in the on-tick event)
- * @param update the economy with calculated score
- * @param c company been evaluated
- * @return actual score of this company
- * */
-int UpdateCompanyRatingAndValue(Company *c, bool update)
-{
-	Owner owner = c->index;
-	int score = 0;
+class CompanyRatings {
+protected:
+	Company *company;
+	Owner owner;
+	Money company_value;
+	bool update;
+	int score;
+	const ScoreInfo *score_info;
 
-	memset(_score_part[owner], 0, sizeof(_score_part[owner]));
+public:
+	CompanyRatings(Company *c, bool update) :
+		company(c), owner(c->index), company_value(0), update(update), score(0)
+	{
+		memset(_score_part[this->owner], 0, sizeof(_score_part[this->owner]));
+	}
 
-	/* Count vehicles */
+	int CalcScores() {
+		/* Count vehicles */
+		this->CalcVehicleScore();
+		/* Count stations */
+		this->CalcStationScore();
+		/* Generate statistics depending on recent income statistics */
+		this->CalcIncomeScore();
+		/* get average of all town ratings and sum of served towns' populations */
+		this->CalcRatingScore();
+		/* generate score for production of funded industries */
+		this->CalcProductionScore();
+		/* Generate score depending on amount of transported cargo */
+		this->CalcDeliveredScore();
+		/* Generate score for variety of cargo */
+		this->CalcCargoScore();
+		/* Generate score for company's money */
+		this->CalcMoneyScore();
+		/* Generate score for loan */
+		this->CalcLoanScore();
+
+		/* Now we calculate the score for each item.. */
+		{
+			int total_score = 0;
+			int s;
+			score = 0;
+			for (ScoreID i = SCORE_BEGIN; i < SCORE_END; i++) {
+				/* Skip the total */
+				if (i == SCORE_TOTAL) continue;
+				/*  Check the score */
+				s = Clamp(_score_part[owner][i], 0,	this->score_info[i].needed) *
+						this->score_info[i].score /	this->score_info[i].needed;
+				score += s;
+				total_score += this->score_info[i].score;
+			}
+
+			_score_part[owner][SCORE_TOTAL] = score;
+
+			/*  We always want the score scaled to SCORE_MAX (1000) */
+			if (total_score != SCORE_MAX) score = score * SCORE_MAX / total_score;
+		}
+
+		if (update) {
+			this->company->old_economy[0].performance_history = score;
+			UpdateCompanyHQ(this->company, score);
+			this->company->old_economy[0].company_value = CalculateCompanyValue(this->company);
+		}
+
+		SetWindowDirty(WC_PERFORMANCE_DETAIL, 0);
+		return score;
+	}
+
+	virtual void CalcVehicleScore() {}
+
+	virtual void CalcStationScore()
+	{
+		uint num = 0;
+		const Station *st;
+
+		FOR_ALL_STATIONS(st) {
+			/* Only count stations that are actually serviced */
+			if (st->owner == this->owner && (st->time_since_load <= 20 || st->time_since_unload <= 20)) num += CountBits((byte)st->facilities);
+		}
+		_score_part[owner][SCORE_STATIONS] = num;
+	}
+
+	virtual void CalcIncomeScore() {}
+
+	virtual void CalcRatingScore() {}
+
+	virtual void CalcPopulationScore() {}
+
+	virtual void CalcProductionScore() {}
+
+	virtual void CalcDeliveredScore()
+	{
+		const CompanyEconomyEntry *cee;
+		int numec;
+		uint32 total_delivered;
+
+		numec = min(this->company->num_valid_stat_ent, 4);
+		if (numec != 0) {
+			cee = this->company->old_economy;
+			total_delivered = 0;
+			do {
+				total_delivered += cee->delivered_cargo;
+			} while (++cee, --numec);
+
+			_score_part[this->owner][SCORE_DELIVERED] = total_delivered;
+		}
+	}
+
+	virtual void CalcCargoScore()
+	{
+		uint num = CountBits(this->company->cargo_types);
+		_score_part[this->owner][SCORE_CARGO] = num;
+		if (this->update) this->company->cargo_types = 0;
+	}
+
+	virtual void CalcMoneyScore() {}
+
+	virtual void CalcLoanScore()
+	{
+		_score_part[this->owner][SCORE_LOAN] = ClampToI32(this->score_info[SCORE_LOAN].needed - this->company->current_loan);
+	}
+};
+
+class CompanyRatingsClassic : public CompanyRatings {
+public:
+	CompanyRatingsClassic(Company *c, bool update) : CompanyRatings(c, update)
+	{
+		score_info = _score_info_classic;
+	}
+
+	/* virtual */ void CalcVehicleScore()
 	{
 		Vehicle *v;
 		Money min_profit = 0;
@@ -174,7 +304,7 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 		uint num = 0;
 
 		FOR_ALL_VEHICLES(v) {
-			if (v->owner != owner) continue;
+			if (v->owner != this->owner) continue;
 			if (IsCompanyBuildableVehicleType(v->type) && v->IsPrimaryVehicle()) {
 				if (v->profit_last_year > 0) num++; // For the vehicle score only count profitable vehicles
 				if (v->age > 730) {
@@ -189,29 +319,17 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 
 		min_profit >>= 8; // remove the fract part
 
-		_score_part[owner][SCORE_VEHICLES] = num;
+		_score_part[this->owner][SCORE_VEHICLES] = num;
 		/* Don't allow negative min_profit to show */
 		if (min_profit > 0)
-			_score_part[owner][SCORE_MIN_PROFIT] = ClampToI32(min_profit);
+			_score_part[this->owner][SCORE_MIN_PROFIT] = ClampToI32(min_profit);
 	}
 
-	/* Count stations */
+	/* virtual */ void CalcIncomeScore()
 	{
-		uint num = 0;
-		const Station *st;
-
-		FOR_ALL_STATIONS(st) {
-			/* Only count stations that are actually serviced */
-			if (st->owner == owner && (st->time_since_load <= 20 || st->time_since_unload <= 20)) num += CountBits((byte)st->facilities);
-		}
-		_score_part[owner][SCORE_STATIONS] = num;
-	}
-
-	/* Generate statistics depending on recent income statistics */
-	{
-		int numec = min(c->num_valid_stat_ent, 12);
+		int numec = min(this->company->num_valid_stat_ent, 12);
 		if (numec != 0) {
-			const CompanyEconomyEntry *cee = c->old_economy;
+			const CompanyEconomyEntry *cee = this->company->old_economy;
 			Money min_income = cee->income + cee->expenses;
 			Money max_income = cee->income + cee->expenses;
 
@@ -221,78 +339,94 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 			} while (++cee, --numec);
 
 			if (min_income > 0) {
-				_score_part[owner][SCORE_MIN_INCOME] = ClampToI32(min_income);
+				_score_part[this->owner][SCORE_MIN_INCOME] = ClampToI32(min_income);
 			}
 
-			_score_part[owner][SCORE_MAX_INCOME] = ClampToI32(max_income);
+			_score_part[this->owner][SCORE_MAX_INCOME] = ClampToI32(max_income);
 		}
 	}
 
-	/* Generate score depending on amount of transported cargo */
+	/* virtual */ void CalcMoneyScore()
 	{
-		const CompanyEconomyEntry *cee;
-		int numec;
-		uint32 total_delivered;
-
-		numec = min(c->num_valid_stat_ent, 4);
-		if (numec != 0) {
-			cee = c->old_economy;
-			total_delivered = 0;
-			do {
-				total_delivered += cee->delivered_cargo;
-			} while (++cee, --numec);
-
-			_score_part[owner][SCORE_DELIVERED] = total_delivered;
+		if (this->company->money > 0) {
+			_score_part[owner][SCORE_MONEY] = ClampToI32(this->company->money);
 		}
 	}
+};
 
-	/* Generate score for variety of cargo */
+class CompanyRatingsAltEconomy : public CompanyRatings {
+public:
+	CompanyRatingsAltEconomy(Company *c, bool update) : CompanyRatings(c, update)
 	{
-		uint num = CountBits(c->cargo_types);
-		_score_part[owner][SCORE_CARGO] = num;
-		if (update) c->cargo_types = 0;
+		this->score_info = _score_info_alteconomy;
 	}
 
-	/* Generate score for company's money */
+	/* virtual */ void CalcVehicleScore()
 	{
-		if (c->money > 0) {
-			_score_part[owner][SCORE_MONEY] = ClampToI32(c->money);
-		}
-	}
-
-	/* Generate score for loan */
-	{
-		_score_part[owner][SCORE_LOAN] = ClampToI32(_score_info[SCORE_LOAN].needed - c->current_loan);
-	}
-
-	/* Now we calculate the score for each item.. */
-	{
-		int total_score = 0;
-		int s;
-		score = 0;
-		for (ScoreID i = SCORE_BEGIN; i < SCORE_END; i++) {
-			/* Skip the total */
-			if (i == SCORE_TOTAL) continue;
-			/*  Check the score */
-			s = Clamp(_score_part[owner][i], 0, _score_info[i].needed) * _score_info[i].score / _score_info[i].needed;
-			score += s;
-			total_score += _score_info[i].score;
+		Vehicle *v;
+		uint num = 0;
+		FOR_ALL_VEHICLES(v) {
+			if (v->owner == this->owner &&
+					IsCompanyBuildableVehicleType(v->type) &&
+					v->IsPrimaryVehicle()) {
+				num++;
+			}
 		}
 
-		_score_part[owner][SCORE_TOTAL] = score;
-
-		/*  We always want the score scaled to SCORE_MAX (1000) */
-		if (total_score != SCORE_MAX) score = score * SCORE_MAX / total_score;
+		_score_part[this->owner][SCORE_VEHICLES] = num;
 	}
 
-	if (update) {
-		c->old_economy[0].performance_history = score;
-		UpdateCompanyHQ(c, score);
-		c->old_economy[0].company_value = CalculateCompanyValue(c);
+	/* virtual */ void CalcRatingScore()
+	{
+		Town *t;
+		int rating = 0;
+		int population = 0;
+		FOR_ALL_TOWNS(t) {
+			if (HasBit(t->have_ratings, this->owner)) {
+				rating += t->ratings[this->owner];
+				population += t->population;
+			}
+		}
+		rating /= Town::GetNumItems();
+		_score_part[this->owner][SCORE_RATING] = rating;
+		_score_part[this->owner][SCORE_POPULATION] = population;
 	}
 
-	SetWindowDirty(WC_PERFORMANCE_DETAIL, 0);
-	return score;
+	/* virtual */ void CalcProductionScore()
+	{
+		Industry *i;
+		int production;
+		FOR_ALL_INDUSTRIES(i) {
+			if (i->founder != this->owner) continue;
+			for (uint cargo = 0; cargo < sizeof(i->produced_cargo); ++cargo) {
+				production += i->last_month_production[cargo];
+			}
+		}
+		_score_part[this->owner][SCORE_PRODUCTION] = production;
+	}
+
+	/* virtual */ void CalcMoneyScore()
+	{
+		if (this->company->money > 0) {
+			_score_part[this->owner][SCORE_MONEY] = this->company->money /
+					(this->company->old_economy[1].company_value + 1);
+		}
+	}
+};
+
+/** if update is set to true, the economy is updated with this score
+ *  (also the house is updated, should only be true in the on-tick event)
+ * @param update the economy with calculated score
+ * @param c company been evaluated
+ * @return actual score of this company
+ * */
+int UpdateCompanyRatingAndValue(Company *c, bool update)
+{
+	if (_settings_game.economy.alt_economy) {
+		return CompanyRatingsAltEconomy(c, update).CalcScores();
+	} else {
+		return CompanyRatingsClassic(c, update).CalcScores();
+	}
 }
 
 /*  use INVALID_OWNER as new_owner to delete the company. */
