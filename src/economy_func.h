@@ -21,7 +21,8 @@
 void ResetPriceBaseMultipliers();
 void SetPriceBaseMultiplier(Price price, int factor);
 
-extern const ScoreInfo _score_info[];
+extern const ScoreInfo _score_info_classic[];
+extern const ScoreInfo _score_info_alteconomy[];
 extern int _score_part[MAX_COMPANIES][SCORE_END];
 extern Economy _economy;
 /* Prices and also the fractional part. */

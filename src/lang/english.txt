@@ -549,6 +549,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detail
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_TIMES_VALUE                              :{BLACK}({NUM}x/{NUM}x company value)
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vehicles:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stations:
@@ -561,6 +562,9 @@ STR_PERFORMANCE_DETAIL_MONEY                                    :{BLACK}Money:
 STR_PERFORMANCE_DETAIL_LOAN                                     :{BLACK}Loan:
 STR_PERFORMANCE_DETAIL_TOTAL                                    :{BLACK}Total:
 ############ End of order list
+STR_PERFORMANCE_DETAIL_RATINGS                                  :{BLACK}Avg. town rating:
+STR_PERFORMANCE_DETAIL_POPULATION                               :{BLACK}Reached population:
+STR_PERFORMANCE_DETAIL_PRODUCTION                               :{BLACK}Founded ind. prod.:
 STR_PERFORMANCE_DETAIL_VEHICLES_TOOLTIP                         :{BLACK}Number of vehicles that turned a profit last year. This includes road vehicles, trains, ships and aircraft
 STR_PERFORMANCE_DETAIL_STATIONS_TOOLTIP                         :{BLACK}Number of recently-serviced station parts. Every part of a station (e.g. train station, bus stop, airport) is counted, even if they are connected as one station
 STR_PERFORMANCE_DETAIL_MIN_PROFIT_TOOLTIP                       :{BLACK}The profit of the vehicle with the lowest income (only vehicles older than two years are considered)
@@ -571,6 +575,9 @@ STR_PERFORMANCE_DETAIL_CARGO_TOOLTIP                            :{BLACK}Number o
 STR_PERFORMANCE_DETAIL_MONEY_TOOLTIP                            :{BLACK}Amount of money this company has in the bank
 STR_PERFORMANCE_DETAIL_LOAN_TOOLTIP                             :{BLACK}The amount of money this company has taken on loan
 STR_PERFORMANCE_DETAIL_TOTAL_TOOLTIP                            :{BLACK}Total points out of possible points
+STR_PERFORMANCE_DETAIL_RATINGS_TOOLTIP                          :{BLACK}Average town rating for this company
+STR_PERFORMANCE_DETAIL_POPULATION_TOOLTIP                       :{BLACK}Overall population of all towns where this company has a rating
+STR_PERFORMANCE_DETAIL_PRODUCTION_TOOLTIP                       :{BLACK}Monthly production of industries founded by this company
 
 # Music window
 STR_MUSIC_JAZZ_JUKEBOX_CAPTION                                  :{WHITE}Jazz Jukebox
