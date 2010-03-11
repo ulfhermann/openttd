@@ -76,9 +76,11 @@ rating-weight: delivery-rating
 
 rating-payment: delivery-rating
 
-alteconomy: rating-payment rating-weight
+score: alteconomy-switch
 
-push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch
+alteconomy: rating-payment rating-weight score
+
+push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
 
