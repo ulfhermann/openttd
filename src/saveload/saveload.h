@@ -341,7 +341,7 @@ extern char _savegame_format[8];
  * SL_TRUNK is always the current trunk version.
  */
 enum SaveLoadVersions {
-	SL_TRUNK = 139,
+	SL_TRUNK = 140,
 	SL_ALT_ECO_SW = SL_TRUNK + 100,
 	SL_DELIVERY_RATING,
 	SL_MAX_VERSION = 255
