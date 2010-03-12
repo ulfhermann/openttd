@@ -1163,8 +1163,6 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 {
 	assert(v->current_order.IsType(OT_LOADING));
 
-	assert(v->load_unload_ticks != 0);
-
 	StationID last_visited = v->last_station_visited;
 	Station *st = Station::Get(last_visited);
 
@@ -1175,7 +1173,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
-	if (--v->load_unload_ticks != 0) {
+	if (v->load_unload_ticks != 0) {
 		return cargos_reserved | ReserveConsist(st, v, next_station);
 	}
 
@@ -1407,10 +1405,28 @@ void LoadUnloadStation(Station *st)
 
 	uint32 cargos_reserved = 0;
 
+	Vehicle *last_loading = NULL;
 	std::list<Vehicle *>::iterator iter;
+
+	/* Check if anything will be loaded at all. Otherwise we don't need to reserve either */
+	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
+		Vehicle *v = *iter;
+
+		if ((v->vehstatus & (VS_STOPPED | VS_CRASHED))) continue;
+
+		assert(v->load_unload_ticks != 0);
+		if (--v->load_unload_ticks == 0) last_loading = v;
+	}
+
+	/* We only need to reserve and load/unload up to the last loading vehicle.
+	 * Further vehicles shouldn't take preference over earlier ones anyway.
+	 */
+	if (last_loading == NULL) return;
+
 	for (iter = st->loading_vehicles.begin(); iter != st->loading_vehicles.end(); ++iter) {
 		Vehicle *v = *iter;
 		if (!(v->vehstatus & (VS_STOPPED | VS_CRASHED))) cargos_reserved = LoadUnloadVehicle(v, cargos_reserved);
+		if (v == last_loading) break;
 	}
 
 	/* Call the production machinery of industries */
