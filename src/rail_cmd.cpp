@@ -343,7 +343,10 @@ static CommandCost CheckRailSlope(Slope tileh, TrackBits rail_bits, TrackBits ex
 }
 
 /* Validate functions for rail building */
-static inline bool ValParamTrackOrientation(Track track) {return IsValidTrack(track);}
+static inline bool ValParamTrackOrientation(Track track)
+{
+	return IsValidTrack(track);
+}
 
 /** Build a single piece of rail
  * @param tile tile  to build on
@@ -727,7 +730,7 @@ static CommandCost ValidateAutoDrag(Trackdir *trackdir, TileIndex start, TileInd
 	return CommandCost();
 }
 
-/** Build a stretch of railroad tracks.
+/** Build or remove a stretch of railroad tracks.
  * @param tile start tile of drag
  * @param flags operation to perform
  * @param p1 end tile of drag
@@ -741,7 +744,7 @@ static CommandCost ValidateAutoDrag(Trackdir *trackdir, TileIndex start, TileInd
  */
 static CommandCost CmdRailTrackHelper(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	CommandCost ret, total_cost(EXPENSES_CONSTRUCTION);
+	CommandCost total_cost(EXPENSES_CONSTRUCTION);
 	Track track = (Track)GB(p2, 4, 3);
 	bool remove = HasBit(p2, 7);
 	RailType railtype = (RailType)GB(p2, 0, 4);
@@ -751,20 +754,26 @@ static CommandCost CmdRailTrackHelper(TileIndex tile, DoCommandFlag flags, uint3
 	TileIndex end_tile = p1;
 	Trackdir trackdir = TrackToTrackdir(track);
 
-	if (ValidateAutoDrag(&trackdir, tile, end_tile).Failed()) return CMD_ERROR;
+	CommandCost ret = ValidateAutoDrag(&trackdir, tile, end_tile);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	if (flags & DC_EXEC) SndPlayTileFx(SND_20_SPLAT_2, tile);
 
+	bool had_success = false;
+	CommandCost last_error = CMD_ERROR;
 	for (;;) {
-		ret = DoCommand(tile, railtype, TrackdirToTrack(trackdir), flags, remove ? CMD_REMOVE_SINGLE_RAIL : CMD_BUILD_SINGLE_RAIL);
+		CommandCost ret = DoCommand(tile, railtype, TrackdirToTrack(trackdir), flags, remove ? CMD_REMOVE_SINGLE_RAIL : CMD_BUILD_SINGLE_RAIL);
 
 		if (ret.Failed()) {
-			if (_error_message != STR_ERROR_ALREADY_BUILT && !remove) {
-				if (HasBit(p2, 8)) return CMD_ERROR;
+			last_error = ret;
+			last_error.SetGlobalErrorMessage();
+			if (last_error.GetErrorMessage() != STR_ERROR_ALREADY_BUILT && !remove) {
+				if (HasBit(p2, 8)) return last_error;
 				break;
 			}
-			_error_message = INVALID_STRING_ID;
 		} else {
+			had_success = true;
 			total_cost.AddCost(ret);
 		}
 
@@ -776,7 +785,9 @@ static CommandCost CmdRailTrackHelper(TileIndex tile, DoCommandFlag flags, uint3
 		if (!IsDiagonalTrackdir(trackdir)) ToggleBit(trackdir, 0);
 	}
 
-	return (total_cost.GetCost() == 0) ? CommandCost(remove ? INVALID_STRING_ID : (_error_message == INVALID_STRING_ID ? STR_ERROR_ALREADY_BUILT : _error_message)) : total_cost;
+	if (had_success) return total_cost;
+	if (remove) return CMD_ERROR;
+	return last_error;
 }
 
 /** Build rail on a stretch of track.
@@ -851,7 +862,7 @@ CommandCost CmdBuildTrainDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	}
 
 	CommandCost cost = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (cost.Failed()) return CMD_ERROR;
+	if (cost.Failed()) return cost;
 
 	if (MayHaveBridgeAbove(tile) && IsBridgeAbove(tile)) return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 
@@ -1122,8 +1133,7 @@ static bool CheckSignalAutoFill(TileIndex &tile, Trackdir &trackdir, int &signal
  */
 static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	CommandCost ret, total_cost(EXPENSES_CONSTRUCTION);
-	bool err = true;
+	CommandCost total_cost(EXPENSES_CONSTRUCTION);
 	TileIndex start_tile = tile;
 
 	Track track = (Track)GB(p2, 0, 3);
@@ -1144,7 +1154,9 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 	 * since the original amount will be too dense (shorter tracks) */
 	signal_density *= 2;
 
-	if (ValidateAutoDrag(&trackdir, tile, end_tile).Failed()) return CMD_ERROR;
+	CommandCost ret = ValidateAutoDrag(&trackdir, tile, end_tile);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	track = TrackdirToTrack(trackdir); // trackdir might have changed, keep track in sync
 	Trackdir start_trackdir = trackdir;
@@ -1184,6 +1196,8 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 	 *              and convert all others to semaphore/signal
 	 * remove     - 1 remove signals, 0 build signals */
 	int signal_ctr = 0;
+	CommandCost last_error = CMD_ERROR;
+	bool had_success = false;
 	for (;;) {
 		/* only build/remove signals with the specified density */
 		if ((remove && autofill) || signal_ctr % signal_density == 0) {
@@ -1198,12 +1212,15 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 			if (HasBit(signal_dir, 0)) signals |= SignalAlongTrackdir(trackdir);
 			if (HasBit(signal_dir, 1)) signals |= SignalAgainstTrackdir(trackdir);
 
-			ret = DoCommand(tile, p1, signals, flags, remove ? CMD_REMOVE_SIGNALS : CMD_BUILD_SIGNALS);
+			CommandCost ret = DoCommand(tile, p1, signals, flags, remove ? CMD_REMOVE_SIGNALS : CMD_BUILD_SIGNALS);
 
 			/* Be user-friendly and try placing signals as much as possible */
 			if (ret.Succeeded()) {
-				err = false;
+				had_success = true;
 				total_cost.AddCost(ret);
+			} else {
+				last_error = ret;
+				last_error.SetGlobalErrorMessage();
 			}
 		}
 
@@ -1227,7 +1244,7 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 		}
 	}
 
-	return err ? CMD_ERROR : total_cost;
+	return had_success ? total_cost : last_error;
 }
 
 /** Build signals on a stretch of track.
@@ -1370,7 +1387,6 @@ static Vehicle *UpdateTrainPowerProc(Vehicle *v, void *data)
  */
 CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	CommandCost cost(EXPENSES_CONSTRUCTION);
 	RailType totype = (RailType)p2;
 
 	if (!ValParamRailtype(totype)) return CMD_ERROR;
@@ -1385,8 +1401,8 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	if (ex < sx) Swap(ex, sx);
 	if (ey < sy) Swap(ey, sy);
 
-	_error_message = STR_ERROR_NO_SUITABLE_RAILROAD_TRACK; // by default, there is no track to convert
-
+	CommandCost cost(EXPENSES_CONSTRUCTION);
+	CommandCost error = CommandCost(STR_ERROR_NO_SUITABLE_RAILROAD_TRACK); // by default, there is no track to convert.
 	for (uint x = sx; x <= ex; ++x) {
 		for (uint y = sy; y <= ey; ++y) {
 			TileIndex tile = TileXY(x, y);
@@ -1417,7 +1433,7 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			/* Trying to convert other's rail */
 			CommandCost ret = CheckTileOwnership(tile);
 			if (ret.Failed()) {
-				ret.SetGlobalErrorMessage();
+				error = ret;
 				continue;
 			}
 
@@ -1429,7 +1445,7 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				if (!IsCompatibleRail(type, totype)) {
 					CommandCost ret = EnsureNoVehicleOnGround(tile);
 					if (ret.Failed()) {
-						ret.SetGlobalErrorMessage();
+						error = ret;
 						continue;
 					}
 				}
@@ -1491,8 +1507,10 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 					/* When not coverting rail <-> el. rail, any vehicle cannot be in tunnel/bridge */
 					if (!IsCompatibleRail(GetRailType(tile), totype)) {
 						CommandCost ret = TunnelBridgeIsFree(tile, endtile);
-						ret.SetGlobalErrorMessage();
-						if (ret.Failed()) continue;
+						if (ret.Failed()) {
+							error = ret;
+							continue;
+						}
 					}
 
 					if (flags & DC_EXEC) {
@@ -1543,7 +1561,8 @@ CommandCost CmdConvertRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		}
 	}
 
-	return (cost.GetCost() == 0) ? CMD_ERROR : cost;
+	error.SetGlobalErrorMessage();
+	return (cost.GetCost() == 0) ? error : cost;
 }
 
 static CommandCost RemoveTrainDepot(TileIndex tile, DoCommandFlag flags)
@@ -1606,7 +1625,7 @@ static CommandCost ClearTile_Track(TileIndex tile, DoCommandFlag flags)
 			while (tracks != TRACK_BIT_NONE) {
 				Track track = RemoveFirstTrack(&tracks);
 				CommandCost ret = DoCommand(tile, 0, track, flags, CMD_REMOVE_SINGLE_RAIL);
-				if (ret.Failed()) return CMD_ERROR;
+				if (ret.Failed()) return ret;
 				cost.AddCost(ret);
 			}
 
