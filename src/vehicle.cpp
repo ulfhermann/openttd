@@ -1682,7 +1682,10 @@ void Vehicle::HandleLoading(bool mode)
 
 CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 {
-	if (!CheckOwnership(this->owner)) return CMD_ERROR;
+	CommandCost ret = CheckOwnership(this->owner);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
+
 	if (this->vehstatus & VS_CRASHED) return CMD_ERROR;
 	if (this->IsStoppedInDepot()) return CMD_ERROR;
 
