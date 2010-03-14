@@ -153,10 +153,13 @@ void InitializeTown();
 void ShowTownViewWindow(TownID town);
 void ExpandTown(Town *t);
 
+/** Action types that a company must ask permission for to a town authority.
+ * @see CheckforTownRating
+ */
 enum TownRatingCheckType {
-	ROAD_REMOVE         = 0,
-	TUNNELBRIDGE_REMOVE = 1,
-	TOWN_RATING_CHECK_TYPE_COUNT,
+	ROAD_REMOVE         = 0,      ///< Removal of a road owned by the town.
+	TUNNELBRIDGE_REMOVE = 1,      ///< Removal of a tunnel or bridge owned by the towb.
+	TOWN_RATING_CHECK_TYPE_COUNT, ///< Number of town checking action types.
 };
 
 /** This is the number of ticks between towns being processed for building new
@@ -176,7 +179,7 @@ enum {
 	TOWN_HAS_STADIUM    = 2    ///< There can be only one stadium by town.
 };
 
-bool CheckforTownRating(DoCommandFlag flags, Town *t, TownRatingCheckType type);
+CommandCost CheckforTownRating(DoCommandFlag flags, Town *t, TownRatingCheckType type);
 
 
 TileIndexDiff GetHouseNorthPart(HouseID &house);
