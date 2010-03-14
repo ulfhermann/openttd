@@ -586,10 +586,14 @@ CommandCost CmdBuildTunnel(TileIndex start_tile, DoCommandFlag flags, uint32 p1,
 }
 
 
-static inline bool CheckAllowRemoveTunnelBridge(TileIndex tile)
+/** Are we allowed to remove the tunnel or bridge at \a tile?
+ * @param tile End point of the tunnel or bridge.
+ * @return A succeeded command if the tunnel or bridge may be removed, a failed command otherwise.
+ */
+static inline CommandCost CheckAllowRemoveTunnelBridge(TileIndex tile)
 {
 	/* Floods can remove anything as well as the scenario editor */
-	if (_current_company == OWNER_WATER || _game_mode == GM_EDITOR) return true;
+	if (_current_company == OWNER_WATER || _game_mode == GM_EDITOR) return CommandCost();
 
 	switch (GetTunnelBridgeTransportType(tile)) {
 		case TRANSPORT_ROAD: {
@@ -602,17 +606,25 @@ static inline bool CheckAllowRemoveTunnelBridge(TileIndex tile)
 
 			/* We can remove unowned road and if the town allows it */
 			if (road_owner == OWNER_TOWN && !(_settings_game.construction.extra_dynamite || _cheats.magic_bulldozer.value)) {
-				return CheckTileOwnership(tile).Succeeded();
+				CommandCost ret = CheckTileOwnership(tile);
+				ret.SetGlobalErrorMessage();
+				return ret;
 			}
 			if (road_owner == OWNER_NONE || road_owner == OWNER_TOWN) road_owner = _current_company;
 			if (tram_owner == OWNER_NONE) tram_owner = _current_company;
 
-			return CheckOwnership(road_owner, tile) && CheckOwnership(tram_owner, tile);
+			CommandCost ret = CheckOwnership(road_owner, tile);
+			if (ret.Succeeded()) ret = CheckOwnership(tram_owner, tile);
+			ret.SetGlobalErrorMessage();
+			return ret;
 		}
 
 		case TRANSPORT_RAIL:
-		case TRANSPORT_WATER:
-			return CheckOwnership(GetTileOwner(tile));
+		case TRANSPORT_WATER: {
+			CommandCost ret = CheckOwnership(GetTileOwner(tile));
+			ret.SetGlobalErrorMessage();
+			return ret;
+		}
 
 		default: NOT_REACHED();
 	}
@@ -623,11 +635,13 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlag flags)
 	Town *t = NULL;
 	TileIndex endtile;
 
-	if (!CheckAllowRemoveTunnelBridge(tile)) return CMD_ERROR;
+	CommandCost ret = CheckAllowRemoveTunnelBridge(tile);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	endtile = GetOtherTunnelEnd(tile);
 
-	CommandCost ret = TunnelBridgeIsFree(tile, endtile);
+	ret = TunnelBridgeIsFree(tile, endtile);
 	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
@@ -638,10 +652,9 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlag flags)
 
 		/* Check if you are allowed to remove the tunnel owned by a town
 		 * Removal depends on difficulty settings */
-		if (!CheckforTownRating(flags, t, TUNNELBRIDGE_REMOVE)) {
-			SetDParam(0, t->index);
-			return_cmd_error(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS);
-		}
+		CommandCost ret = CheckforTownRating(flags, t, TUNNELBRIDGE_REMOVE);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 	}
 
 	/* checks if the owner is town then decrease town rating by RATING_TUNNEL_BRIDGE_DOWN_STEP until
@@ -690,11 +703,13 @@ static CommandCost DoClearBridge(TileIndex tile, DoCommandFlag flags)
 	TileIndex endtile;
 	Town *t = NULL;
 
-	if (!CheckAllowRemoveTunnelBridge(tile)) return CMD_ERROR;
+	CommandCost ret = CheckAllowRemoveTunnelBridge(tile);
+	ret.SetGlobalErrorMessage();
+	if (ret.Failed()) return ret;
 
 	endtile = GetOtherBridgeEnd(tile);
 
-	CommandCost ret = TunnelBridgeIsFree(tile, endtile);
+	ret = TunnelBridgeIsFree(tile, endtile);
 	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
@@ -706,10 +721,9 @@ static CommandCost DoClearBridge(TileIndex tile, DoCommandFlag flags)
 
 		/* Check if you are allowed to remove the bridge owned by a town
 		 * Removal depends on difficulty settings */
-		if (!CheckforTownRating(flags, t, TUNNELBRIDGE_REMOVE)) {
-			SetDParam(0, t->index);
-			return_cmd_error(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS);
-		}
+		CommandCost ret = CheckforTownRating(flags, t, TUNNELBRIDGE_REMOVE);
+		ret.SetGlobalErrorMessage();
+		if (ret.Failed()) return ret;
 	}
 
 	/* checks if the owner is town then decrease town rating by RATING_TUNNEL_BRIDGE_DOWN_STEP until
