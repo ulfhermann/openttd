@@ -1968,7 +1968,13 @@ public:
 					const NWidgetBase *wi = this->GetWidget<NWidgetBase>(SM_WIDGET_LEGEND); // Label panel
 					uint line = (pt.y - wi->pos_y - WD_FRAMERECT_TOP) / FONT_HEIGHT_SMALL;
 					uint columns = this->GetNumberColumnsLegend(wi->current_x);
-					uint entry_count = (this->map_type == SMT_INDUSTRY) ? _smallmap_industry_count : _smallmap_cargo_count;
+					uint entry_count = 0;
+					if (this->map_type == SMT_LINKSTATS) {
+						columns--; // one column is reserved for stats legend
+						entry_count = _smallmap_cargo_count;
+					} else {
+						entry_count = _smallmap_industry_count;
+					}
 					uint number_of_rows = max((entry_count + columns - 1) / columns, this->min_number_of_fixed_rows);
 					if (line >= number_of_rows) break;
 
