@@ -67,7 +67,7 @@ bool IsHangar(TileIndex t)
 	if (!IsAirport(t)) return false;
 
 	const Station *st = Station::GetByTile(t);
-	const AirportSpec *as = st->GetAirportSpec();
+	const AirportSpec *as = st->airport.GetSpec();
 
 	for (uint i = 0; i < as->nof_depots; i++) {
 		if (st->GetHangarTile(i) == t) return true;
@@ -414,7 +414,7 @@ void Station::UpdateVirtCoord()
 	Point pt = RemapCoords2(TileX(this->xy) * TILE_SIZE, TileY(this->xy) * TILE_SIZE);
 
 	pt.y -= 32;
-	if ((this->facilities & FACIL_AIRPORT) && this->airport_type == AT_OILRIG) pt.y -= 16;
+	if ((this->facilities & FACIL_AIRPORT) && this->airport.type == AT_OILRIG) pt.y -= 16;
 
 	SetDParam(0, this->index);
 	SetDParam(1, this->facilities);
@@ -2075,7 +2075,7 @@ void UpdateAirportsNoise()
 
 	FOR_ALL_STATIONS(st) {
 		if (st->airport.tile != INVALID_TILE) {
-			const AirportSpec *as = st->GetAirportSpec();
+			const AirportSpec *as = st->airport.GetSpec();
 			Town *nearest = AirportGetNearestTown(as, st->airport.tile);
 			nearest->noise_reached += GetAirportNoiseLevelForTown(as, nearest->xy, st->airport.tile);
 		}
@@ -2143,7 +2143,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		uint num = 0;
 		const Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (st->town == t && (st->facilities & FACIL_AIRPORT) && st->airport_type != AT_OILRIG) num++;
+			if (st->town == t && (st->facilities & FACIL_AIRPORT) && st->airport.type != AT_OILRIG) num++;
 		}
 		if (num >= 2) {
 			authority_refuse_message = STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT;
@@ -2188,7 +2188,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			st = new Station(tile);
 
 			st->town = t;
-			st->string_id = GenerateStationName(st, tile, !(GetAirport(p1)->flags & AirportFTAClass::AIRPLANES) ? STATIONNAMING_HELIPORT : STATIONNAMING_AIRPORT);
+			st->string_id = GenerateStationName(st, tile, !(GetAirport(airport_type)->flags & AirportFTAClass::AIRPLANES) ? STATIONNAMING_HELIPORT : STATIONNAMING_AIRPORT);
 
 			if (Company::IsValidID(_current_company)) {
 				SetBit(st->town->have_ratings, _current_company);
@@ -2196,19 +2196,22 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		}
 	}
 
-	cost.AddCost(_price[PR_BUILD_STATION_AIRPORT] * w * h);
+	const AirportTileTable *it = as->table[layout];
+	do {
+		cost.AddCost(_price[PR_BUILD_STATION_AIRPORT]);
+	} while ((++it)->ti.x != -0x80);
 
 	if (flags & DC_EXEC) {
 		/* Always add the noise, so there will be no need to recalculate when option toggles */
 		nearest->noise_reached += newnoise_level;
 
 		st->AddFacility(FACIL_AIRPORT, tile);
-		st->airport_type = (byte)p1;
-		st->airport_flags = 0;
+		st->airport.type = airport_type;
+		st->airport.flags = 0;
 
 		st->rect.BeforeAddRect(tile, w, h, StationRect::ADD_TRY);
 
-		const AirportTileTable *it = as->table[layout];
+		it = as->table[layout];
 		do {
 			TileIndex cur_tile = tile + ToTileIndexDiff(it->ti);
 			MakeAirport(cur_tile, st->owner, st->index, it->gfx);
@@ -2291,7 +2294,7 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 	}
 
 	if (flags & DC_EXEC) {
-		const AirportSpec *as = st->GetAirportSpec();
+		const AirportSpec *as = st->airport.GetSpec();
 		for (uint i = 0; i < as->nof_depots; ++i) {
 			DeleteWindowById(
 				WC_VEHICLE_DEPOT, st->GetHangarTile(i)
@@ -2801,6 +2804,9 @@ static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 				td->grf = gc->GetName();
 			}
 		}
+
+		const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(tile));
+		td->rail_speed = rti->max_speed;
 	}
 
 	if (IsAirport(tile)) {
@@ -2904,14 +2910,7 @@ static void AnimateTile_Station(TileIndex tile)
 	}
 
 	if (IsAirport(tile)) {
-		const AirportTileSpec *ats = AirportTileSpec::Get(GetStationGfx(tile));
-		uint16 mask = (1 << ats->animation_speed) - 1;
-		if (ats->animation_info != 0xFFFF && (_tick_counter & mask) == 0) {
-			uint8 next_frame = GetStationAnimationFrame(tile) + 1;
-			if (next_frame > GB(ats->animation_info, 0, 8)) next_frame = 0;
-			SetStationAnimationFrame(tile, next_frame);
-			MarkTileDirtyByTile(tile);
-		}
+		AnimateAirportTile(tile);
 	}
 }
 
@@ -3502,7 +3501,7 @@ void BuildOilRig(TileIndex tile)
 	MakeOilrig(tile, st->index, GetWaterClass(tile));
 
 	st->owner = OWNER_NONE;
-	st->airport_type = AT_OILRIG;
+	st->airport.type = AT_OILRIG;
 	st->airport.Add(tile);
 	st->dock_tile = tile;
 	st->facilities = FACIL_AIRPORT | FACIL_DOCK;
@@ -3533,7 +3532,7 @@ void DeleteOilRig(TileIndex tile)
 	st->dock_tile = INVALID_TILE;
 	st->airport.Clear();
 	st->facilities &= ~(FACIL_AIRPORT | FACIL_DOCK);
-	st->airport_flags = 0;
+	st->airport.flags = 0;
 
 	st->rect.AfterRemoveTile(st, tile);
 
