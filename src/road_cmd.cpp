@@ -608,7 +608,7 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 		default: {
 do_clear:;
-			CommandCost ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
+			CommandCost ret = DoCommand(tile, 0, 0, flags & ~DC_EXEC, CMD_LANDSCAPE_CLEAR);
 			if (ret.Failed()) return ret;
 			cost.AddCost(ret);
 			tile_cleared = true;
@@ -661,6 +661,10 @@ do_clear:;
 	}
 
 	if (flags & DC_EXEC) {
+		/* CmdBuildLongRoad calls us directly with DC_EXEC, so we may only clear the tile after all
+		 * fail/success tests have been done. */
+		if (tile_cleared) DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
+
 		switch (GetTileType(tile)) {
 			case MP_ROAD: {
 				RoadTileType rtt = GetRoadTileType(tile);
@@ -1531,6 +1535,10 @@ static void GetTileDesc_Road(TileIndex tile, TileDesc *td)
 			rail_owner = GetTileOwner(tile);
 			if (HasBit(rts, ROADTYPE_ROAD)) road_owner = GetRoadOwner(tile, ROADTYPE_ROAD);
 			if (HasBit(rts, ROADTYPE_TRAM)) tram_owner = GetRoadOwner(tile, ROADTYPE_TRAM);
+
+			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(tile));
+			td->rail_speed = rti->max_speed;
+
 			break;
 		}
 
