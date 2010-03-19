@@ -2179,6 +2179,7 @@ STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Airport 
 STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF: {LTBLUE}{RAW_STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}Cargo accepted: {LTBLUE}
 STR_LAND_AREA_INFORMATION_CARGO_EIGHTS                          :({COMMA}/8 {STRING})
+STR_LANG_AREA_INFORMATION_RAIL_SPEED_LIMIT                      :{BLACK}Rail speed limit: {LTBLUE}{VELOCITY}
 
 # Description of land area of different tiles
 STR_LAI_CLEAR_DESCRIPTION_ROCKS                                 :Rocks
@@ -4171,3 +4172,4 @@ STR_NUM                                                         :{BLACK}{NUM}
 STR_NUM_RELATION_2                                              :{BLACK}{NUM}/{NUM}
 STR_NUM_RELATION_3                                              :{BLACK}{NUM}/{NUM}/{NUM}
 STR_NUM_RELATION_4                                              :{BLACK}{NUM}/{NUM}/{NUM}/{NUM}
+STR_TOOLBAR_RAILTYPE_VELOCITY                                   :{STRING} ({VELOCITY})
