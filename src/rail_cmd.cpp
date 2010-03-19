@@ -503,7 +503,7 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	Track track = (Track)p2;
-	CommandCost cost(EXPENSES_CONSTRUCTION, _price[PR_CLEAR_RAIL] );
+	CommandCost cost(EXPENSES_CONSTRUCTION);
 	bool crossing = false;
 
 	if (!ValParamTrackOrientation((Track)p2)) return CMD_ERROR;
@@ -532,6 +532,8 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 				ret.SetGlobalErrorMessage();
 				if (ret.Failed()) return ret;
 			}
+
+			cost.AddCost(RailClearCost(GetRailType(tile)));
 
 			if (flags & DC_EXEC) {
 				if (HasReservedTracks(tile, trackbit)) {
@@ -562,6 +564,8 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 			present = GetTrackBits(tile);
 			if ((present & trackbit) == 0) return CMD_ERROR;
 			if (present == (TRACK_BIT_X | TRACK_BIT_Y)) crossing = true;
+
+			cost.AddCost(RailClearCost(GetRailType(tile)));
 
 			/* Charge extra to remove signals on the track, if they are there */
 			if (HasSignalOnTrack(tile, track))
@@ -2571,6 +2575,8 @@ static bool ClickTile_Track(TileIndex tile)
 
 static void GetTileDesc_Track(TileIndex tile, TileDesc *td)
 {
+	const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(tile));
+	td->rail_speed = rti->max_speed;
 	td->owner[0] = GetTileOwner(tile);
 	switch (GetRailTileType(tile)) {
 		case RAIL_TILE_NORMAL:
@@ -2644,6 +2650,11 @@ static void GetTileDesc_Track(TileIndex tile, TileDesc *td)
 
 		case RAIL_TILE_DEPOT:
 			td->str = STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT;
+			if (td->rail_speed > 0) {
+				td->rail_speed = min(td->rail_speed, 61);
+			} else {
+				td->rail_speed = 61;
+			}
 			break;
 
 		default:
