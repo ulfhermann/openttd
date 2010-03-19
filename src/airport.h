@@ -13,6 +13,7 @@
 #define AIRPORT_H
 
 #include "direction_type.h"
+#include "tile_type.h"
 
 /** Some airport-related constants */
 enum {
@@ -36,7 +37,9 @@ enum {
 	AT_INTERCON      =   7,
 	AT_HELISTATION   =   8,
 	AT_OILRIG        =   9,
-	NUM_AIRPORTS     =  10,
+	NEW_AIRPORT_OFFSET = 10,
+	NUM_AIRPORTS     =  128,
+	AT_INVALID       = 254,
 	AT_DUMMY         = 255
 };
 
@@ -179,14 +182,13 @@ DECLARE_ENUM_AS_BIT_SET(AirportFTAClass::Flags)
 /** Internal structure used in openttd - Finite sTate mAchine --> FTA */
 struct AirportFTA {
 	AirportFTA *next;        ///< possible extra movement choices from this position
-	uint64 block;            ///< 64 bit blocks (st->airport_flags), should be enough for the most complex airports
+	uint64 block;            ///< 64 bit blocks (st->airport.flags), should be enough for the most complex airports
 	byte position;           ///< the position that an airplane is at
 	byte next_position;      ///< next position from this position
 	byte heading;            ///< heading (current orders), guiding an airplane to its target on an airport
 };
 
 const AirportFTAClass *GetAirport(const byte airport_type);
-
-extern const byte * const _airport_sections[];
+byte GetVehiclePosOnBuild(TileIndex hangar_tile);
 
 #endif /* AIRPORT_H */
