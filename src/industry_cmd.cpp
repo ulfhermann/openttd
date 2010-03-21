@@ -56,7 +56,7 @@ void BuildOilRig(TileIndex tile);
 static byte _industry_sound_ctr;
 static TileIndex _industry_sound_tile;
 
-uint16 _industry_counts[NUM_INDUSTRYTYPES]; ///< Number of industries per type ingame
+uint16 Industry::counts[NUM_INDUSTRYTYPES];
 
 IndustrySpec _industry_specs[NUM_INDUSTRYTYPES];
 IndustryTileSpec _industry_tile_specs[NUM_INDUSTRYTILES];
@@ -134,7 +134,8 @@ Industry::~Industry()
 	if (CleaningPool()) return;
 
 	/* Industry can also be destroyed when not fully initialized.
-	 * This means that we do not have to clear tiles either. */
+	 * This means that we do not have to clear tiles either.
+	 * Also we must not decrement industry counts in that case. */
 	if (this->location.w == 0) return;
 
 	TILE_AREA_LOOP(tile_cur, this->location) {
@@ -1338,7 +1339,6 @@ static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTil
 			}
 		} else {
 			CommandCost ret = EnsureNoVehicleOnGround(cur_tile);
-			ret.SetGlobalErrorMessage();
 			if (ret.Failed()) return ret;
 			if (MayHaveBridgeAbove(cur_tile) && IsBridgeAbove(cur_tile)) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 
@@ -1352,7 +1352,6 @@ static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTil
 			if (HasBit(its->callback_mask, CBM_INDT_SHAPE_CHECK)) {
 				custom_shape = true;
 				CommandCost ret = PerformIndustryTileSlopeCheck(tile, cur_tile, its, type, gfx, itspec_index);
-				ret.SetGlobalErrorMessage();
 				if (ret.Failed()) return ret;
 			} else {
 				Slope tileh = GetTileSlope(cur_tile, NULL);
@@ -1519,40 +1518,23 @@ static bool CheckIfCanLevelIndustryPlatform(TileIndex tile, DoCommandFlag flags,
 }
 
 
-/** Check that the new industry is far enough from other industries.
+/** Check that the new industry is far enough from conflicting industries.
  * @param tile Tile to construct the industry.
  * @param type Type of the new industry.
  * @return Succeeded or failed command.
  */
-static CommandCost CheckIfFarEnoughFromIndustry(TileIndex tile, int type)
+static CommandCost CheckIfFarEnoughFromConflictingIndustry(TileIndex tile, int type)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 	const Industry *i;
-
-	if (_settings_game.economy.same_industry_close && indspec->IsRawIndustry())
-		/* Allow primary industries to be placed close to any other industry */
-		return CommandCost();
-
 	FOR_ALL_INDUSTRIES(i) {
 		/* Within 14 tiles from another industry is considered close */
-		bool in_low_distance = DistanceMax(tile, i->location.tile) <= 14;
-
-		/* check if an industry that accepts the same goods is nearby */
-		if (in_low_distance &&
-				!indspec->IsRawIndustry() && // not a primary industry?
-				indspec->accepts_cargo[0] == i->accepts_cargo[0] && (
-				/* at least one of those options must be true */
-				_game_mode != GM_EDITOR || // editor must not be stopped
-				!_settings_game.economy.same_industry_close ||
-				!_settings_game.economy.multiple_industry_per_town)) {
-			return_cmd_error(STR_ERROR_INDUSTRY_TOO_CLOSE);
-		}
+		if (DistanceMax(tile, i->location.tile) > 14) continue;
 
 		/* check if there are any conflicting industry types around */
-		if ((i->type == indspec->conflicting[0] ||
+		if (i->type == indspec->conflicting[0] ||
 				i->type == indspec->conflicting[1] ||
-				i->type == indspec->conflicting[2]) &&
-				in_low_distance) {
+				i->type == indspec->conflicting[2]) {
 			return_cmd_error(STR_ERROR_INDUSTRY_TOO_CLOSE);
 		}
 	}
@@ -1585,7 +1567,7 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, int type, const Ind
 
 	i->location = TileArea(tile, 1, 1);
 	i->type = type;
-	IncIndustryTypeCount(type);
+	Industry::IncIndustryTypeCount(type);
 
 	i->produced_cargo[0] = indspec->produced_cargo[0];
 	i->produced_cargo[1] = indspec->produced_cargo[1];
@@ -1734,7 +1716,7 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 		return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 	}
 
-	ret = CheckIfFarEnoughFromIndustry(tile, type);
+	ret = CheckIfFarEnoughFromConflictingIndustry(tile, type);
 	if (ret.Failed()) return ret;
 
 	const Town *t = NULL;
@@ -1798,7 +1780,6 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 					 */
 					tile = RandomTile();
 					CommandCost ret = CreateNewIndustryHelper(tile, it, flags, indspec, RandomRange(indspec->num_table), p2, founder, &ind);
-					ret.SetGlobalErrorMessage();
 					if (ret.Succeeded()) break;
 				}
 			}
@@ -1811,16 +1792,13 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		if (num >= count) return CMD_ERROR;
 
 		CommandCost ret = CommandCost(STR_ERROR_SITE_UNSUITABLE);
-		ret.SetGlobalErrorMessage();
 		do {
 			if (--count < 0) return ret;
 			if (--num < 0) num = indspec->num_table - 1;
 			ret = CheckIfIndustryTilesAreFree(tile, itt[num], num, it);
-			ret.SetGlobalErrorMessage();
 		} while (ret.Failed());
 
 		ret = CreateNewIndustryHelper(tile, it, flags, indspec, num, p2, _current_company, &ind);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
@@ -1849,7 +1827,6 @@ static Industry *CreateNewIndustry(TileIndex tile, IndustryType type)
 	Industry *i = NULL;
 	CommandCost ret = CreateNewIndustryHelper(tile, type, DC_EXEC, indspec, RandomRange(indspec->num_table), seed, OWNER_NONE, &i);
 	assert(i != NULL || ret.Failed());
-	ret.SetGlobalErrorMessage();
 	return i;
 }
 
@@ -2060,7 +2037,7 @@ static bool CheckIndustryCloseDownProtection(IndustryType type)
 
 	/* oil wells (or the industries with that flag set) are always allowed to closedown */
 	if ((indspec->behaviour & INDUSTRYBEH_DONT_INCR_PROD) && _settings_game.game_creation.landscape == LT_TEMPERATE) return false;
-	return (indspec->behaviour & INDUSTRYBEH_CANCLOSE_LASTINSTANCE) == 0 && GetIndustryTypeCount(type) <= 1;
+	return (indspec->behaviour & INDUSTRYBEH_CANCLOSE_LASTINSTANCE) == 0 && Industry::GetIndustryTypeCount(type) <= 1;
 }
 
 /**
@@ -2470,7 +2447,7 @@ void InitializeIndustries()
 {
 	_industry_pool.CleanPool();
 
-	ResetIndustryCounts();
+	Industry::ResetIndustryCounts();
 	_industry_sound_tile = 0;
 }
 
