@@ -71,7 +71,7 @@ bool IsHangar(TileIndex t)
 	const AirportSpec *as = st->airport.GetSpec();
 
 	for (uint i = 0; i < as->nof_depots; i++) {
-		if (st->GetHangarTile(i) == t) return true;
+		if (st->airport.GetHangarTile(i) == t) return true;
 	}
 
 	return false;
@@ -675,7 +675,6 @@ CommandCost CheckBuildableTile(TileIndex tile, uint invalid_dirs, int &allowed_z
 	}
 
 	CommandCost ret = EnsureNoVehicleOnGround(tile);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	uint z;
@@ -870,7 +869,6 @@ static CommandCost CheckFlatLandRoadStop(TileArea tile_area, DoCommandFlag flags
 						if (!_settings_game.construction.road_stop_on_town_road) return_cmd_error(STR_ERROR_DRIVE_THROUGH_ON_TOWN_ROAD);
 					} else if (!_settings_game.construction.road_stop_on_competitor_road && road_owner != OWNER_NONE) {
 						CommandCost ret = CheckOwnership(road_owner);
-						ret.SetGlobalErrorMessage();
 						if (ret.Failed()) return ret;
 					}
 					num_roadbits += CountBits(GetRoadBits(cur_tile, ROADTYPE_ROAD));
@@ -881,7 +879,6 @@ static CommandCost CheckFlatLandRoadStop(TileArea tile_area, DoCommandFlag flags
 					Owner tram_owner = GetRoadOwner(cur_tile, ROADTYPE_TRAM);
 					if (!_settings_game.construction.road_stop_on_competitor_road && tram_owner != OWNER_NONE) {
 						CommandCost ret = CheckOwnership(tram_owner);
-						ret.SetGlobalErrorMessage();
 						if (ret.Failed()) return ret;
 					}
 					num_roadbits += CountBits(GetRoadBits(cur_tile, ROADTYPE_TRAM));
@@ -1113,7 +1110,6 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 
 	/* Does the authority allow this? */
 	CommandCost ret = CheckIfAuthorityAllowsNewStation(tile_org, flags);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	if (!ValParamRailtype(rt)) return CMD_ERROR;
@@ -1154,7 +1150,6 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 
 	Station *st = NULL;
 	ret = FindJoiningStation(est, station_to_join, adjacent, new_location, &st);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	/* See if there is a deleted station close to us. */
@@ -1170,13 +1165,11 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 			if (!_settings_game.station.join_stations) return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD);
 
 			CommandCost ret = CanExpandRailStation(st, new_location, axis);
-			ret.SetGlobalErrorMessage();
 			if (ret.Failed()) return ret;
 		}
 
 		/* XXX can't we pack this in the "else" part of the if above? */
 		CommandCost ret = st->rect.BeforeAddRect(tile_org, w_org, h_org, StationRect::ADD_TEST);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	} else {
 		/* allocate and initialize new station */
@@ -1382,10 +1375,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 
 		/* If there is a vehicle on ground, do not allow to remove (flood) the tile */
 		CommandCost ret = EnsureNoVehicleOnGround(tile);
-		if (ret.Failed()) {
-			ret.SetGlobalErrorMessage();
-			continue;
-		}
+		if (ret.Failed()) continue;
 
 		/* Check ownership of station */
 		T *st = T::GetByTile(tile);
@@ -1393,10 +1383,7 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 
 		if (_current_company != OWNER_WATER) {
 			CommandCost ret = CheckOwnership(st->owner);
-			if (ret.Failed()) {
-				ret.SetGlobalErrorMessage();
-				continue;
-			}
+			if (ret.Failed()) continue;
 		}
 
 		/* Do not allow removing from stations if non-uniform stations are not enabled
@@ -1545,7 +1532,6 @@ CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 	/* Current company owns the station? */
 	if (_current_company != OWNER_WATER) {
 		CommandCost ret = CheckOwnership(st->owner);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
@@ -1561,7 +1547,6 @@ CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 		if (!st->TileBelongsToRailStation(tile)) continue;
 
 		CommandCost ret = EnsureNoVehicleOnGround(tile);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 
 		cost.AddCost(_price[PR_CLEAR_STATION_RAIL]);
@@ -1728,7 +1713,6 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (is_drive_through && !IsValidAxis((Axis)ddir)) return CMD_ERROR;
 
 	CommandCost ret = CheckIfAuthorityAllowsNewStation(tile, flags);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	/* Total road stop cost. */
@@ -1740,7 +1724,6 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 	Station *st = NULL;
 	ret = FindJoiningRoadStop(est, station_to_join, HasBit(p2, 5), roadstop_area, &st);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	/* Find a deleted station close to us */
@@ -1755,7 +1738,6 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		}
 
 		CommandCost ret = st->rect.BeforeAddRect(roadstop_area.tile, roadstop_area.w, roadstop_area.h, StationRect::ADD_TEST);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	} else {
 		/* allocate and initialize new station */
@@ -1849,7 +1831,6 @@ static CommandCost RemoveRoadStop(TileIndex tile, DoCommandFlag flags)
 
 	if (_current_company != OWNER_WATER) {
 		CommandCost ret = CheckOwnership(st->owner);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
@@ -1873,7 +1854,6 @@ static CommandCost RemoveRoadStop(TileIndex tile, DoCommandFlag flags)
 		if (flags & DC_EXEC) FindVehicleOnPos(tile, NULL, &ClearRoadStopStatusEnum);
 	} else {
 		CommandCost ret = EnsureNoVehicleOnGround(tile);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
@@ -2111,7 +2091,6 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (airport_type >= NUM_AIRPORTS) return CMD_ERROR;
 
 	CommandCost ret = CheckIfAuthorityAllowsNewStation(tile, flags);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	/* Check if a valid, buildable airport was chosen for construction */
@@ -2159,7 +2138,6 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 	Station *st = NULL;
 	ret = FindJoiningStation(INVALID_STATION, station_to_join, HasBit(p2, 0), TileArea(tile, w, h), &st);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	/* Distant join */
@@ -2174,7 +2152,6 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		}
 
 		CommandCost ret = st->rect.BeforeAddRect(tile, w, h, StationRect::ADD_TEST);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 
 		if (st->airport.tile != INVALID_TILE) {
@@ -2266,7 +2243,6 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 
 	if (_current_company != OWNER_WATER) {
 		CommandCost ret = CheckOwnership(st->owner);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
@@ -2284,7 +2260,6 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 		if (!st->TileBelongsToAirport(tile_cur)) continue;
 
 		CommandCost ret = EnsureNoVehicleOnGround(tile_cur);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 
 		cost.AddCost(_price[PR_CLEAR_STATION_AIRPORT]);
@@ -2297,9 +2272,9 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 
 	if (flags & DC_EXEC) {
 		const AirportSpec *as = st->airport.GetSpec();
-		for (uint i = 0; i < as->nof_depots; ++i) {
+		for (uint i = 0; i < st->airport.GetNumHangars(); ++i) {
 			DeleteWindowById(
-				WC_VEHICLE_DEPOT, st->GetHangarTile(i)
+				WC_VEHICLE_DEPOT, st->airport.GetHangarTile(i)
 			);
 		}
 
@@ -2384,13 +2359,11 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	if (IsWaterTile(tile)) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 
 	CommandCost ret = CheckIfAuthorityAllowsNewStation(tile, flags);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	if (MayHaveBridgeAbove(tile) && IsBridgeAbove(tile)) return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 
 	ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	TileIndex tile_cur = tile + TileOffsByDiagDir(direction);
@@ -2405,7 +2378,6 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	WaterClass wc = GetWaterClass(tile_cur);
 
 	ret = DoCommand(tile_cur, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	tile_cur += TileOffsByDiagDir(direction);
@@ -2418,7 +2390,6 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	ret = FindJoiningStation(INVALID_STATION, station_to_join, HasBit(p1, 0),
 			TileArea(tile + ToTileIndexDiff(_dock_tileoffs_chkaround[direction]),
 					_dock_w_chk[direction], _dock_h_chk[direction]), &st);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	/* Distant join */
@@ -2435,7 +2406,6 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		CommandCost ret = st->rect.BeforeAddRect(
 				tile + ToTileIndexDiff(_dock_tileoffs_chkaround[direction]),
 				_dock_w_chk[direction], _dock_h_chk[direction], StationRect::ADD_TEST);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 
 		if (st->dock_tile != INVALID_TILE) return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK);
@@ -2486,7 +2456,6 @@ static CommandCost RemoveDock(TileIndex tile, DoCommandFlag flags)
 {
 	Station *st = Station::GetByTile(tile);
 	CommandCost ret = CheckOwnership(st->owner);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	TileIndex tile1 = st->dock_tile;
@@ -2494,7 +2463,6 @@ static CommandCost RemoveDock(TileIndex tile, DoCommandFlag flags)
 
 	ret = EnsureNoVehicleOnGround(tile1);
 	if (ret.Succeeded()) ret = EnsureNoVehicleOnGround(tile2);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	if (flags & DC_EXEC) {
@@ -2919,14 +2887,15 @@ static void AnimateTile_Station(TileIndex tile)
 
 static bool ClickTile_Station(TileIndex tile)
 {
-	const BaseStation *st = BaseStation::GetByTile(tile);
+	const BaseStation *bst = BaseStation::GetByTile(tile);
 
-	if (st->facilities & FACIL_WAYPOINT) {
-		ShowWaypointWindow(Waypoint::From(st));
+	if (bst->facilities & FACIL_WAYPOINT) {
+		ShowWaypointWindow(Waypoint::From(bst));
 	} else if (IsHangar(tile)) {
-		ShowDepotWindow(tile, VEH_AIRCRAFT);
+		const Station *st = Station::From(bst);
+		ShowDepotWindow(st->airport.GetHangarTile(st->airport.GetHangarNum(tile)), VEH_AIRCRAFT);
 	} else {
-		ShowStationViewWindow(st->index);
+		ShowStationViewWindow(bst->index);
 	}
 	return true;
 }
@@ -3354,7 +3323,6 @@ CommandCost CmdRenameStation(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (st == NULL) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(st->owner);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	bool reset = StrEmpty(text);

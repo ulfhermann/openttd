@@ -187,12 +187,10 @@ CommandCost CmdSellLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (!IsOwnedLandTile(tile)) return CMD_ERROR;
 	if (_current_company != OWNER_WATER) {
 		CommandCost ret = CheckTileOwnership(tile);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
 	CommandCost ret = EnsureNoVehicleOnGround(tile);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	if (flags & DC_EXEC) DoClearSquare(tile);
@@ -522,7 +520,6 @@ static CommandCost TerraformTile_Unmovable(TileIndex tile, DoCommandFlag flags, 
 	/* Owned land remains unsold */
 	if (IsOwnedLand(tile)) {
 		CommandCost ret = CheckTileOwnership(tile);
-		ret.SetGlobalErrorMessage();
 		if (ret.Succeeded()) return CommandCost();
 	}
 
