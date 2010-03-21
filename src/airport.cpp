@@ -13,13 +13,13 @@
 #include "debug.h"
 #include "airport.h"
 #include "map_type.h"
-#include "table/airport_movement.h"
 #include "core/alloc_func.hpp"
 #include "date_func.h"
 #include "settings_type.h"
 #include "newgrf_airport.h"
 #include "station_base.h"
 #include "table/strings.h"
+#include "table/airport_movement.h"
 #include "table/airporttile_ids.h"
 
 /* Uncomment this to print out a full report of the airport-structure
@@ -397,7 +397,7 @@ byte GetVehiclePosOnBuild(TileIndex hangar_tile)
 	 * layout for #th position of depot. Since layout must start with a listing
 	 * of all depots, it is simple */
 	for (uint i = 0;; i++) {
-		if (st->GetHangarTile(i) == hangar_tile) {
+		if (st->airport.GetHangarTile(i) == hangar_tile) {
 			assert(apc->layout[i].heading == HANGAR);
 			return apc->layout[i].position;
 		}
