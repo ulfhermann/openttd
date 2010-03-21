@@ -1859,8 +1859,7 @@ public:
 					case SMT_INDUSTRY:
 						/* Industry name must be formatted, since it's not in tiny font in the specs.
 						 * So, draw with a parameter and use the STR_SMALLMAP_INDUSTRY string, which is tiny font */
-						assert(tbl->type < NUM_INDUSTRYTYPES);
-						SetDParam(1, _industry_counts[tbl->type]);
+						SetDParam(1, Industry::GetIndustryTypeCount(tbl->type));
 					case SMT_LINKSTATS:
 						SetDParam(0, tbl->legend);
 						if (!tbl->show_on_map) {
