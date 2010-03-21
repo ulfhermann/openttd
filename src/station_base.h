@@ -259,6 +259,47 @@ struct Airport : public TileArea {
 	{
 		return this->GetSpec()->fsm;
 	}
+
+	FORCEINLINE bool HasHangar() const
+	{
+		return this->GetSpec()->nof_depots > 0;
+	}
+
+	FORCEINLINE TileIndex GetHangarTile(uint hangar_num) const
+	{
+		const AirportSpec *as = this->GetSpec();
+		for (uint i = 0; i < as->nof_depots; i++) {
+			if (as->depot_table[i].hangar_num == hangar_num) {
+				return this->tile + ToTileIndexDiff(as->depot_table[i].ti);
+			}
+		}
+		NOT_REACHED();
+	}
+
+	FORCEINLINE uint GetHangarNum(TileIndex tile) const
+	{
+		const AirportSpec *as = this->GetSpec();
+		for (uint i = 0; i < as->nof_depots; i++) {
+			if (this->tile + ToTileIndexDiff(as->depot_table[i].ti) == tile) {
+				return as->depot_table[i].hangar_num;
+			}
+		}
+		NOT_REACHED();
+	}
+
+	FORCEINLINE uint GetNumHangars() const
+	{
+		uint num = 0;
+		uint counted = 0;
+		const AirportSpec *as = this->GetSpec();
+		for (uint i = 0; i < as->nof_depots; i++) {
+			if (!HasBit(counted, as->depot_table[i].hangar_num)) {
+				num++;
+				SetBit(counted, as->depot_table[i].hangar_num);
+			}
+		}
+		return num;
+	}
 };
 
 typedef SmallVector<Industry *, 2> IndustryVector;
@@ -325,13 +366,6 @@ public:
 	FORCEINLINE bool TileBelongsToAirport(TileIndex tile) const
 	{
 		return IsAirportTile(tile) && GetStationIndex(tile) == this->index;
-	}
-
-	FORCEINLINE TileIndex GetHangarTile(uint hangar_num) const
-	{
-		assert(this->airport.tile != INVALID_TILE);
-		assert(hangar_num < this->airport.GetSpec()->nof_depots);
-		return this->airport.tile + ToTileIndexDiff(this->airport.GetSpec()->depot_table[hangar_num]);
 	}
 
 	/* virtual */ uint32 GetNewGRFVariable(const ResolverObject *object, byte variable, byte parameter, bool *available) const;
