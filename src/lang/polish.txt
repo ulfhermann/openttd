@@ -1468,6 +1468,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL              :{LTBLUE}Model p
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :oryginalny
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :realistyczny
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Nachylenie zboczy dla pociągów {ORANGE}{STRING}%
+STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Nachylenie zboczy dla samochodów {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zabroń pociągom i statkom skręcać o 90 stopni: {ORANGE}{STRING} {LTBLUE} (nie z OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Połącz stacje budowane jedna obok drugiej: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Pozwól na łączenie stacji nie sąsiadujących bezpośrednio: {ORANGE}{STRING}
@@ -1482,7 +1483,6 @@ STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :budowa niedost�
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :jak inne przedsiębiorstwa
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :przez poszukiwanie
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Pozwól na wiele podobnych przedsiębiorstw w mieście: {ORANGE}{STRING}
-STR_CONFIG_SETTING_SAMEINDCLOSE                                 :{LTBLUE}Przedsiębiorstwa jednego typu mogą być budowane obok siebie: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Zawsze pokazuj datę w długim formacie w pasku statusu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Pokazuj sygnały po stronie jazdy: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Pokazuj okno finansów na koniec roku: {ORANGE}{STRING}
