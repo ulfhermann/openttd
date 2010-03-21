@@ -77,7 +77,6 @@ CommandCost CmdStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	switch (v->type) {
@@ -187,13 +186,19 @@ CommandCost CmdDepotSellAllVehicles(TileIndex tile, DoCommandFlag flags, uint32 
 	/* Get the list of vehicles in the depot */
 	BuildDepotVehicleList(vehicle_type, tile, &list, &list);
 
+	CommandCost last_error = CMD_ERROR;
+	bool had_success = false;
 	for (uint i = 0; i < list.Length(); i++) {
 		CommandCost ret = DoCommand(tile, list[i]->index, 1, flags, sell_command);
-		if (ret.Succeeded()) cost.AddCost(ret);
+		if (ret.Succeeded()) {
+			cost.AddCost(ret);
+			had_success = true;
+		} else {
+			last_error = ret;
+		}
 	}
 
-	if (cost.GetCost() == 0) return CMD_ERROR; // no vehicles to sell
-	return cost;
+	return had_success ? cost : last_error;
 }
 
 /**
@@ -274,7 +279,7 @@ static CommandCost GetRefitCost(EngineID engine_type)
  * @param new_cid      Cargotype to refit to
  * @param new_subtype  Cargo subtype to refit to
  * @param flags        Command flags
- * @return refit cost; or CMD_ERROR if no vehicle was actually refitable to the cargo
+ * @return Refit cost.
  */
 CommandCost RefitVehicle(Vehicle *v, bool only_this, CargoID new_cid, byte new_subtype, DoCommandFlag flags)
 {
@@ -354,6 +359,7 @@ static void CloneVehicleName(const Vehicle *src, Vehicle *dst)
 
 	/* Format buffer and determine starting number. */
 	int num;
+	byte padding = 0;
 	if (number_position == strlen(src->name)) {
 		/* No digit at the end, so start at number 2. */
 		strecpy(buf, src->name, lastof(buf));
@@ -364,13 +370,15 @@ static void CloneVehicleName(const Vehicle *src, Vehicle *dst)
 		/* Found digits, parse them and start at the next number. */
 		strecpy(buf, src->name, lastof(buf));
 		buf[number_position] = '\0';
-		num = strtol(&src->name[number_position], NULL, 10) + 1;
+		char *endptr;
+		num = strtol(&src->name[number_position], &endptr, 10) + 1;
+		padding = endptr - &src->name[number_position];
 	}
 
 	/* Check if this name is already taken. */
 	for (int max_iterations = 1000; max_iterations > 0; max_iterations--, num++) {
 		/* Attach the number to the temporary name. */
-		seprintf(&buf[number_position], lastof(buf), "%d", num);
+		seprintf(&buf[number_position], lastof(buf), "%0*d", padding, num);
 
 		/* Check the name is unique. */
 		if (IsUniqueVehicleName(buf)) {
@@ -411,7 +419,6 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	 */
 
 	CommandCost ret = CheckOwnership(v->owner);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	if (v->type == VEH_TRAIN && (!Train::From(v)->IsFrontEngine() || Train::From(v)->crash_anim_pos >= 4400)) return CMD_ERROR;
@@ -586,20 +593,23 @@ CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool s
 	GenerateVehicleSortList(&list, type, owner, id, vlw_flag);
 
 	/* Send all the vehicles to a depot */
+	bool had_success = false;
 	for (uint i = 0; i < list.Length(); i++) {
 		const Vehicle *v = list[i];
 		CommandCost ret = DoCommand(v->tile, v->index, (service ? 1 : 0) | DEPOT_DONT_CANCEL, flags, GetCmdSendToDepot(type));
 
-		/* Return 0 if DC_EXEC is not set this is a valid goto depot command)
-		 * In this case we know that at least one vehicle can be sent to a depot
-		 * and we will issue the command. We can now safely quit the loop, knowing
-		 * it will succeed at least once. With DC_EXEC we really need to send them to the depot */
-		if (ret.Succeeded() && !(flags & DC_EXEC)) {
-			return CommandCost();
+		if (ret.Succeeded()) {
+			had_success = true;
+
+			/* Return 0 if DC_EXEC is not set this is a valid goto depot command)
+			 * In this case we know that at least one vehicle can be sent to a depot
+			 * and we will issue the command. We can now safely quit the loop, knowing
+			 * it will succeed at least once. With DC_EXEC we really need to send them to the depot */
+			if (!(flags & DC_EXEC)) break;
 		}
 	}
 
-	return (flags & DC_EXEC) ? CommandCost() : CMD_ERROR;
+	return had_success ? CommandCost() : CMD_ERROR;
 }
 
 /** Give a custom name to your vehicle
@@ -616,7 +626,6 @@ CommandCost CmdRenameVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (v == NULL) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	bool reset = StrEmpty(text);
@@ -651,7 +660,6 @@ CommandCost CmdChangeServiceInt(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	if (v == NULL) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	uint16 serv_int = GetServiceIntervalClamped(p2, v->owner); // Double check the service interval from the user-input
