@@ -395,7 +395,7 @@ public:
 	/* virtual */ void CalcProductionScore()
 	{
 		Industry *i;
-		int production;
+		int production = 0;
 		FOR_ALL_INDUSTRIES(i) {
 			if (i->founder != this->owner) continue;
 			for (uint cargo = 0; cargo < sizeof(i->produced_cargo); ++cargo) {
