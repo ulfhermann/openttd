@@ -1,7 +1,7 @@
 
 VPATH=.:./.git/refs/heads/
 
-gitmake-all: cargodist diaglvl alteconomy
+gitmake-all: cargodist diaglvl alteconomy autogrow-goodsentries
 	touch gitmake-all
 
 check: clean gitmake-origin
