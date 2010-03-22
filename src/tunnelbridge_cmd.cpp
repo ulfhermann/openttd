@@ -66,28 +66,31 @@ void ResetBridges()
 	memcpy(&_bridge, &_orig_bridge, sizeof(_orig_bridge));
 }
 
-/** calculate the price factor for building a long bridge.
- * basically the cost delta is 1,1, 1, 2,2, 3,3,3, 4,4,4,4, 5,5,5,5,5, 6,6,6,6,6,6,  7,7,7,7,7,7,7,  8,8,8,8,8,8,8,8,
+/** Calculate the price factor for building a long bridge.
+ * Basically the cost delta is 1,1, 1, 2,2, 3,3,3, 4,4,4,4, 5,5,5,5,5, 6,6,6,6,6,6,  7,7,7,7,7,7,7,  8,8,8,8,8,8,8,8,
+ * @param length Length of the bridge.
+ * @return Price factor for the bridge.
  */
-int CalcBridgeLenCostFactor(int x)
+int CalcBridgeLenCostFactor(int length)
 {
-	int n;
-	int r;
+	if (length < 2) return length;
 
-	if (x < 2) return x;
-	x -= 2;
-	for (n = 0, r = 2;; n++) {
-		if (x <= n) return r + x * n;
-		r += n * n;
-		x -= n;
+	length -= 2;
+	int sum = 2;
+	for (int delta = 1;; delta++) {
+		for (int count = 0; count < delta; count++) {
+			if (length == 0) return sum;
+			sum += delta;
+			length--;
+		}
 	}
 }
 
 Foundation GetBridgeFoundation(Slope tileh, Axis axis)
 {
-	if ((tileh == SLOPE_FLAT) ||
-	    (((tileh == SLOPE_NE) || (tileh == SLOPE_SW)) && (axis == AXIS_X)) ||
-	    (((tileh == SLOPE_NW) || (tileh == SLOPE_SE)) && (axis == AXIS_Y))) return FOUNDATION_NONE;
+	if (tileh == SLOPE_FLAT ||
+			((tileh == SLOPE_NE || tileh == SLOPE_SW) && axis == AXIS_X) ||
+			((tileh == SLOPE_NW || tileh == SLOPE_SE) && axis == AXIS_Y)) return FOUNDATION_NONE;
 
 	return (HasSlopeHighestCorner(tileh) ? InclinedFoundation(axis) : FlatteningFoundation(tileh));
 }
@@ -192,8 +195,6 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 {
 	RailType railtype = INVALID_RAILTYPE;
 	RoadTypes roadtypes = ROADTYPES_NONE;
-	CommandCost cost(EXPENSES_CONSTRUCTION);
-	Owner owner;
 
 	/* unpack parameters */
 	BridgeType bridge_type = GB(p2, 0, 8);
@@ -263,6 +264,8 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 
 	if (z_start != z_end) return_cmd_error(STR_ERROR_BRIDGEHEADS_NOT_SAME_HEIGHT);
 
+	CommandCost cost(EXPENSES_CONSTRUCTION);
+	Owner owner;
 	if (IsBridgeTile(tile_start) && IsBridgeTile(tile_end) &&
 			GetOtherBridgeEnd(tile_start) == tile_end &&
 			GetTunnelBridgeTransportType(tile_start) == transport_type) {
@@ -478,7 +481,6 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 CommandCost CmdBuildTunnel(TileIndex start_tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	TransportType transport_type = (TransportType)GB(p1, 9, 1);
-	CommandCost cost(EXPENSES_CONSTRUCTION);
 
 	_build_tunnel_endtile = 0;
 	if (transport_type == TRANSPORT_RAIL) {
@@ -521,6 +523,7 @@ CommandCost CmdBuildTunnel(TileIndex start_tile, DoCommandFlag flags, uint32 p1,
 	/* Number of tiles at which the cost increase coefficient per tile is halved */
 	int tiles_bump = 25;
 
+	CommandCost cost(EXPENSES_CONSTRUCTION);
 	Slope end_tileh;
 	for (;;) {
 		end_tile += delta;
@@ -606,54 +609,48 @@ static inline CommandCost CheckAllowRemoveTunnelBridge(TileIndex tile)
 
 			/* We can remove unowned road and if the town allows it */
 			if (road_owner == OWNER_TOWN && !(_settings_game.construction.extra_dynamite || _cheats.magic_bulldozer.value)) {
-				CommandCost ret = CheckTileOwnership(tile);
-				ret.SetGlobalErrorMessage();
-				return ret;
+				return CheckTileOwnership(tile);
 			}
 			if (road_owner == OWNER_NONE || road_owner == OWNER_TOWN) road_owner = _current_company;
 			if (tram_owner == OWNER_NONE) tram_owner = _current_company;
 
 			CommandCost ret = CheckOwnership(road_owner, tile);
 			if (ret.Succeeded()) ret = CheckOwnership(tram_owner, tile);
-			ret.SetGlobalErrorMessage();
 			return ret;
 		}
 
 		case TRANSPORT_RAIL:
-		case TRANSPORT_WATER: {
-			CommandCost ret = CheckOwnership(GetTileOwner(tile));
-			ret.SetGlobalErrorMessage();
-			return ret;
-		}
+		case TRANSPORT_WATER:
+			return CheckOwnership(GetTileOwner(tile));
 
 		default: NOT_REACHED();
 	}
 }
 
+/** Remove a tunnel from the game, update town rating, etc.
+ * @param tile Tile containing one of the endpoints of the tunnel.
+ * @param flags Command flags.
+ * @return Succeeded or failed command.
+ */
 static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlag flags)
 {
-	Town *t = NULL;
-	TileIndex endtile;
-
 	CommandCost ret = CheckAllowRemoveTunnelBridge(tile);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
-	endtile = GetOtherTunnelEnd(tile);
+	TileIndex endtile = GetOtherTunnelEnd(tile);
 
 	ret = TunnelBridgeIsFree(tile, endtile);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
 	_build_tunnel_endtile = endtile;
 
+	Town *t = NULL;
 	if (IsTileOwner(tile, OWNER_TOWN) && _game_mode != GM_EDITOR) {
 		t = ClosestTownFromTile(tile, UINT_MAX); // town penalty rating
 
 		/* Check if you are allowed to remove the tunnel owned by a town
 		 * Removal depends on difficulty settings */
 		CommandCost ret = CheckforTownRating(flags, t, TUNNELBRIDGE_REMOVE);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
@@ -696,33 +693,31 @@ static CommandCost DoClearTunnel(TileIndex tile, DoCommandFlag flags)
 }
 
 
+/** Remove a bridge from the game, update town rating, etc.
+ * @param tile Tile containing one of the endpoints of the bridge.
+ * @param flags Command flags.
+ * @return Succeeded or failed command.
+ */
 static CommandCost DoClearBridge(TileIndex tile, DoCommandFlag flags)
 {
-	DiagDirection direction;
-	TileIndexDiff delta;
-	TileIndex endtile;
-	Town *t = NULL;
-
 	CommandCost ret = CheckAllowRemoveTunnelBridge(tile);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
-	endtile = GetOtherBridgeEnd(tile);
+	TileIndex endtile = GetOtherBridgeEnd(tile);
 
 	ret = TunnelBridgeIsFree(tile, endtile);
-	ret.SetGlobalErrorMessage();
 	if (ret.Failed()) return ret;
 
-	direction = GetTunnelBridgeDirection(tile);
-	delta = TileOffsByDiagDir(direction);
+	DiagDirection direction = GetTunnelBridgeDirection(tile);
+	TileIndexDiff delta = TileOffsByDiagDir(direction);
 
+	Town *t = NULL;
 	if (IsTileOwner(tile, OWNER_TOWN) && _game_mode != GM_EDITOR) {
 		t = ClosestTownFromTile(tile, UINT_MAX); // town penalty rating
 
 		/* Check if you are allowed to remove the bridge owned by a town
 		 * Removal depends on difficulty settings */
 		CommandCost ret = CheckforTownRating(flags, t, TUNNELBRIDGE_REMOVE);
-		ret.SetGlobalErrorMessage();
 		if (ret.Failed()) return ret;
 	}
 
@@ -772,6 +767,11 @@ static CommandCost DoClearBridge(TileIndex tile, DoCommandFlag flags)
 	return CommandCost(EXPENSES_CONSTRUCTION, (GetTunnelBridgeLength(tile, endtile) + 2) * _price[PR_CLEAR_BRIDGE]);
 }
 
+/** Remove a tunnel or a bridge from the game.
+ * @param tile Tile containing one of the endpoints.
+ * @param flags Command flags.
+ * @return Succeeded or failed command.
+ */
 static CommandCost ClearTile_TunnelBridge(TileIndex tile, DoCommandFlag flags)
 {
 	if (IsTunnel(tile)) {
@@ -781,8 +781,6 @@ static CommandCost ClearTile_TunnelBridge(TileIndex tile, DoCommandFlag flags)
 		if (flags & DC_AUTO) return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 		return DoClearBridge(tile, flags);
 	}
-
-	return CMD_ERROR;
 }
 
 /**
@@ -907,7 +905,6 @@ static void DrawBridgeTramBits(int x, int y, byte z, int offset, bool overlay, b
  */
 static void DrawTile_TunnelBridge(TileInfo *ti)
 {
-	SpriteID image;
 	TransportType transport_type = GetTunnelBridgeTransportType(ti->tile);
 	DiagDirection tunnelbridge_direction = GetTunnelBridgeDirection(ti->tile);
 
@@ -933,6 +930,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 
 		bool catenary = false;
 
+		SpriteID image;
 		if (transport_type == TRANSPORT_RAIL) {
 			image = GetRailTypeInfo(GetRailType(ti->tile))->base_sprites.tunnel;
 		} else {
