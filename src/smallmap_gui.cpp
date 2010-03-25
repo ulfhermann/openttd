@@ -30,6 +30,7 @@
 #include "company_func.h"
 #include "station_base.h"
 #include "company_base.h"
+#include "core/sort_func.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -176,6 +177,33 @@ static uint _industry_to_list_pos[NUM_INDUSTRYTYPES];
 /** Show heightmap in smallmap window. */
 static bool _smallmap_show_heightmap;
 
+/** Sort legends by their name. */
+static int CDECL LegendNameSorter(const LegendAndColour *a, const LegendAndColour *b)
+{
+	static char industry_name[2][64];
+
+	SetDParam(0, a->legend);
+	GetString(industry_name[0], STR_JUST_STRING, lastof(industry_name[0]));
+
+	SetDParam(0, b->legend);
+	GetString(industry_name[1], STR_JUST_STRING, lastof(industry_name[1]));
+
+	int r = strcmp(industry_name[0], industry_name[1]);
+	/* If the names are equal, sort by industry type. */
+	return (r != 0) ? r : (a->type - b->type);
+}
+
+void SortIndustriesLegend()
+{
+	/* Sort industries by name. */
+	GSortT(_legend_from_industries, _smallmap_industry_count, &LegendNameSorter);
+
+	/* Store widget number for each industry type. */
+	for (int i = 0; i < _smallmap_industry_count; i++) {
+		_industry_to_list_pos[_legend_from_industries[i].type] = i;
+	}
+}
+
 /**
  * Fills an array for the industries legends.
  */
@@ -194,8 +222,6 @@ void BuildIndustriesLegend()
 			_legend_from_industries[j].col_break = false;
 			_legend_from_industries[j].end = false;
 
-			/* Store widget number for this industry type */
-			_industry_to_list_pos[i] = j;
 			j++;
 		}
 	}
@@ -1757,6 +1783,7 @@ public:
 
 	virtual void OnInit()
 	{
+		SortIndustriesLegend();
 		uint min_width = 0;
 		this->min_number_of_columns = INDUSTRY_MIN_NUMBER_OF_COLUMNS;
 		this->min_number_of_fixed_rows = 0;
