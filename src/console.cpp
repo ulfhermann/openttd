@@ -192,45 +192,35 @@ bool GetArgumentInteger(uint32 *value, const char *arg)
 }
 
 /**
- * Perhaps ugly macro, but this saves us the trouble of writing the same function
- * twice, just with different variables. Yes, templates would be handy. It was
- * either this define or an even more ugly void* magic function
+ * Add an item to an alphabetically sorted list.
+ * @param base first item of the list
+ * @param item_new the item to add
  */
-#define IConsoleAddSorted(_base, item_new, IConsoleType, type)                 \
-{                                                                              \
-	IConsoleType *item, *item_before;                                            \
-	/* first command */                                                          \
-	if (_base == NULL) {                                                         \
-		_base = item_new;                                                          \
-		return;                                                                    \
-	}                                                                            \
-                                                                               \
-	item_before = NULL;                                                          \
-	item = _base;                                                                \
-                                                                               \
-	/* BEGIN - Alphabetically insert the commands into the linked list */        \
-	while (item != NULL) {                                                       \
-		int i = strcmp(item->name, item_new->name);                                \
-		if (i == 0) {                                                              \
-			IConsoleError(type " with this name already exists; insertion aborted"); \
-			free(item_new);                                                          \
-			return;                                                                  \
-		}                                                                          \
-                                                                               \
-		if (i > 0) break; /* insert at this position */                            \
-                                                                               \
-		item_before = item;                                                        \
-		item = item->next;                                                         \
-	}                                                                            \
-                                                                               \
-	if (item_before == NULL) {                                                   \
-		_base = item_new;                                                          \
-	} else {                                                                     \
-		item_before->next = item_new;                                              \
-	}                                                                            \
-                                                                               \
-	item_new->next = item;                                                       \
-	/* END - Alphabetical insert */                                              \
+template<class T>
+void IConsoleAddSorted(T **base, T *item_new)
+{
+	if (*base == NULL) {
+		*base = item_new;
+		return;
+	}
+
+	T *item_before = NULL;
+	T *item = *base;
+	/* The list is alphabetically sorted, insert the new item at the correct location */
+	while (item != NULL) {
+		if (strcmp(item->name, item_new->name) > 0) break; // insert here
+
+		item_before = item;
+		item = item->next;
+	}
+
+	if (item_before == NULL) {
+		*base = item_new;
+	} else {
+		item_before->next = item_new;
+	}
+
+	item_new->next = item;
 }
 
 /**
@@ -246,7 +236,7 @@ void IConsoleCmdRegister(const char *name, IConsoleCmdProc *proc, IConsoleHook *
 	item_new->proc = proc;
 	item_new->hook = hook;
 
-	IConsoleAddSorted(_iconsole_cmds, item_new, IConsoleCmd, "a command");
+	IConsoleAddSorted(&_iconsole_cmds, item_new);
 }
 
 /**
@@ -271,6 +261,11 @@ IConsoleCmd *IConsoleCmdGet(const char *name)
  */
 void IConsoleAliasRegister(const char *name, const char *cmd)
 {
+	if (IConsoleAliasGet(name) != NULL) {
+		IConsoleError("an alias with this name already exists; insertion aborted");
+		return;
+	}
+
 	char *new_alias = strdup(name);
 	char *cmd_aliased = strdup(cmd);
 	IConsoleAlias *item_new = MallocT<IConsoleAlias>(1);
@@ -279,7 +274,7 @@ void IConsoleAliasRegister(const char *name, const char *cmd)
 	item_new->cmdline = cmd_aliased;
 	item_new->name = new_alias;
 
-	IConsoleAddSorted(_iconsole_aliases, item_new, IConsoleAlias, "an alias");
+	IConsoleAddSorted(&_iconsole_aliases, item_new);
 }
 
 /**
@@ -466,12 +461,17 @@ void IConsoleCmdExec(const char *cmdstr)
 	 */
 	cmd = IConsoleCmdGet(tokens[0]);
 	if (cmd != NULL) {
-		if (cmd->hook == NULL || cmd->hook()) {
-			if (!cmd->proc(t_index, tokens)) { // index started with 0
-				cmd->proc(0, NULL); // if command failed, give help
-			}
+		ConsoleHookResult chr = (cmd->hook == NULL ? CHR_ALLOW : cmd->hook(true));
+		switch (chr) {
+			case CHR_ALLOW:
+				if (!cmd->proc(t_index, tokens)) { // index started with 0
+					cmd->proc(0, NULL); // if command failed, give help
+				}
+				return;
+
+			case CHR_DISALLOW: return;
+			case CHR_HIDE: break;
 		}
-		return;
 	}
 
 	t_index--;
