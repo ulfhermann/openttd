@@ -34,6 +34,7 @@
 #include "gamelog.h"
 #include "ai/ai.hpp"
 #include "ai/ai_config.hpp"
+#include "newgrf.h"
 #include "console_func.h"
 
 #ifdef ENABLE_NETWORK
@@ -46,7 +47,7 @@ static bool _script_running;
 
 /* console command defines */
 #define DEF_CONSOLE_CMD(function) static bool function(byte argc, char *argv[])
-#define DEF_CONSOLE_HOOK(function) static bool function()
+#define DEF_CONSOLE_HOOK(function) static ConsoleHookResult function(bool echo)
 
 
 /****************
@@ -55,10 +56,10 @@ static bool _script_running;
 
 #ifdef ENABLE_NETWORK
 
-static inline bool NetworkAvailable()
+static inline bool NetworkAvailable(bool echo)
 {
 	if (!_network_available) {
-		IConsoleError("You cannot use this command because there is no network available.");
+		if (echo) IConsoleError("You cannot use this command because there is no network available.");
 		return false;
 	}
 	return true;
@@ -66,49 +67,65 @@ static inline bool NetworkAvailable()
 
 DEF_CONSOLE_HOOK(ConHookServerOnly)
 {
-	if (!NetworkAvailable()) return false;
+	if (!NetworkAvailable(echo)) return CHR_DISALLOW;
 
 	if (!_network_server) {
-		IConsoleError("This command is only available to a network server.");
-		return false;
+		if (echo) IConsoleError("This command is only available to a network server.");
+		return CHR_DISALLOW;
 	}
-	return true;
+	return CHR_ALLOW;
 }
 
 DEF_CONSOLE_HOOK(ConHookClientOnly)
 {
-	if (!NetworkAvailable()) return false;
+	if (!NetworkAvailable(echo)) return CHR_DISALLOW;
 
 	if (_network_server) {
-		IConsoleError("This command is not available to a network server.");
-		return false;
+		if (echo) IConsoleError("This command is not available to a network server.");
+		return CHR_DISALLOW;
 	}
-	return true;
+	return CHR_ALLOW;
 }
 
 DEF_CONSOLE_HOOK(ConHookNeedNetwork)
 {
-	if (!NetworkAvailable()) return false;
+	if (!NetworkAvailable(echo)) return CHR_DISALLOW;
 
 	if (!_networking) {
-		IConsoleError("Not connected. This command is only available in multiplayer.");
-		return false;
+		if (echo) IConsoleError("Not connected. This command is only available in multiplayer.");
+		return CHR_DISALLOW;
 	}
-	return true;
+	return CHR_ALLOW;
 }
 
 DEF_CONSOLE_HOOK(ConHookNoNetwork)
 {
 	if (_networking) {
-		IConsoleError("This command is forbidden in multiplayer.");
-		return false;
+		if (echo) IConsoleError("This command is forbidden in multiplayer.");
+		return CHR_DISALLOW;
 	}
-	return true;
+	return CHR_ALLOW;
 }
 
 #else
 #	define ConHookNoNetwork NULL
 #endif /* ENABLE_NETWORK */
+
+DEF_CONSOLE_HOOK(ConHookNewGRFDeveloperTool)
+{
+	if (_settings_client.gui.newgrf_developer_tools) {
+		if (_game_mode == GM_MENU) {
+			if (echo) IConsoleError("This command is only available in game and editor.");
+			return CHR_DISALLOW;
+		}
+#ifdef ENABLE_NETWORK
+		return ConHookNoNetwork(echo);
+#else
+		return CHR_ALLOW;
+#endif
+	}
+	return CHR_HIDE;
+}
 
 static void IConsoleHelp(const char *str)
 {
@@ -808,7 +825,7 @@ DEF_CONSOLE_CMD(ConNetworkReconnect)
 
 	NetworkClientConnectGame(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port), playas);
 	return true;
-};
+}
 
 DEF_CONSOLE_CMD(ConNetworkConnect)
 {
@@ -1365,7 +1382,7 @@ DEF_CONSOLE_CMD(ConListCommands)
 
 	for (cmd = _iconsole_cmds; cmd != NULL; cmd = cmd->next) {
 		if (argv[1] == NULL || strstr(cmd->name, argv[1]) != NULL) {
-				IConsolePrintF(CC_DEFAULT, "%s", cmd->name);
+			if (cmd->hook == NULL || cmd->hook(false) != CHR_HIDE) IConsolePrintF(CC_DEFAULT, "%s", cmd->name);
 		}
 	}
 
@@ -1686,6 +1703,17 @@ DEF_CONSOLE_CMD(ConGamelogPrint)
 	return true;
 }
 
+DEF_CONSOLE_CMD(ConNewGRFReload)
+{
+	if (argc == 0) {
+		IConsoleHelp("Reloads all active NewGRFs from disk. Equivalent to reapplying NewGRFs via the settings, but without asking for confirmation. This might crash OpenTTD!");
+		return true;
+	}
+
+	ReloadNewGRFData();
+	return true;
+}
+
 #ifdef _DEBUG
 /******************
  *  debug commands
@@ -1826,4 +1854,7 @@ void IConsoleStdLibRegister()
 #ifdef _DEBUG
 	IConsoleDebugLibRegister();
 #endif
+
+	/* NewGRF development stuff */
+	IConsoleCmdRegister("reload_newgrfs",  ConNewGRFReload, ConHookNewGRFDeveloperTool);
 }
