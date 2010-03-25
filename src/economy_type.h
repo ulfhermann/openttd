@@ -54,7 +54,7 @@ enum ScoreID {
 	SCORE_MAX = 1000       ///< The max score that can be in the performance history
 	/* the scores together of score_info is allowed to be more! */
 };
-DECLARE_POSTFIX_INCREMENT(ScoreID);
+DECLARE_POSTFIX_INCREMENT(ScoreID)
 
 struct ScoreInfo {
 	byte id;    ///< Unique ID of the score
