@@ -29,6 +29,7 @@
 #include "effectvehicle_func.h"
 #include "landscape_type.h"
 #include "animated_tile_func.h"
+#include "economy_func.h"
 #include "core/random_func.hpp"
 
 #include "table/sprites.h"
@@ -673,7 +674,12 @@ void RunTileLoop()
 	assert((tile & ~TILELOOP_ASSERTMASK) == 0);
 	uint count = (MapSizeX() / TILELOOP_SIZE) * (MapSizeY() / TILELOOP_SIZE);
 	do {
+		if (tile == 0) {
+			_economy.global_acceptance = _economy.global_acceptance_new;
+			_economy.global_acceptance_new.Clear();
+		}
 		_tile_type_procs[GetTileType(tile)]->tile_loop_proc(tile);
+		AddAcceptedCargo(tile, _economy.global_acceptance_new, NULL);
 
 		if (TileX(tile) < MapSizeX() - TILELOOP_SIZE) {
 			tile += TILELOOP_SIZE; // no overflow

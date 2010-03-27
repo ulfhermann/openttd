@@ -48,6 +48,8 @@ static const SaveLoad _economy_desc[] = {
 	SLE_CONDVAR(Economy, industry_daily_change_counter, SLE_UINT32,                102, SL_MAX_VERSION),
 	SLE_CONDARR(Economy, global_production,    SLE_UINT, NUM_CARGO, SL_DELIVERY_RATING, SL_MAX_VERSION),
 	SLE_CONDARR(Economy, global_production_new,SLE_UINT, NUM_CARGO, SL_DELIVERY_RATING, SL_MAX_VERSION),
+	SLE_CONDARR(Economy, global_acceptance,         SLE_UINT, NUM_CARGO, SL_ACCEPTANCE, SL_MAX_VERSION),
+	SLE_CONDARR(Economy, global_acceptance_new,     SLE_UINT, NUM_CARGO, SL_ACCEPTANCE, SL_MAX_VERSION),
 	    SLE_END()
 };
 
