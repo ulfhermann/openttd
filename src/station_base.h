@@ -211,7 +211,7 @@ struct GoodsEntry {
 		last_age(255),
 		supply(0),
 		supply_new(0),
-		last_component(0)
+		last_component(INVALID_LINKGRAPH_COMPONENT)
 	{}
 
 	byte acceptance_pickup;

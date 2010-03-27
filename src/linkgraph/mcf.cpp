@@ -60,7 +60,7 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector & paths, bool c
 		annos.erase(i);
 		NodeID from = source->GetNode();
 		NodeID to = this->graph->GetFirstEdge(from);
-		while (to != Node::INVALID) {
+		while (to != INVALID_NODE) {
 			Edge & edge = graph->GetEdge(from, to);
 			assert(edge.distance < UINT_MAX);
 			if (create_new_paths || this->graph->GetNode(from).flows[source_station][graph->GetNode(to).station] > 0) {
@@ -146,7 +146,7 @@ void MCF1stPass::EliminateCycle(PathVector & path, Path * cycle_begin, uint flow
 
 bool MCF1stPass::EliminateCycles(PathVector & path, NodeID origin_id, NodeID next_id)
 {
-	static Path * invalid_path = new Path(Node::INVALID, true);
+	static Path * invalid_path = new Path(INVALID_NODE, true);
 	Path * at_next_pos = path[next_id];
 	if (at_next_pos == invalid_path) {
 		/* this node has already been searched */
