@@ -31,7 +31,8 @@ struct Economy {
 	uint64 inflation_payment;             ///< Cumulated inflation of cargo paypent since game start; 16 bit fractional part
 	CargoArray global_production;         ///< Cargo produced last month
 	CargoArray global_production_new;     ///< Cargo produced so far this month
-	CargoArray global_acceptance;         ///< Sum of all acceptance numbers of tiles on the map
+	CargoArray global_acceptance;         ///< Sum of all acceptance numbers of tiles on the map (last tile loop)
+	CargoArray global_acceptance_new;     ///< Sum of all acceptance numbers of tiles on the map under construction (current tile loop)
 
 	/* Old stuff for savegame conversion only */
 	Money old_max_loan_unround;           ///< Old: Unrounded max loan
