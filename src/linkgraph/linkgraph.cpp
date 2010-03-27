@@ -26,16 +26,16 @@ void LinkGraph::CreateComponent(Station * first) {
 
 	first->goods[this->cargo].last_component = this->current_component_id;
 	component = new LinkGraphComponent(this->cargo, this->current_component_id);
-	GoodsEntry & good = first->goods[this->cargo];
+	GoodsEntry &good = first->goods[this->cargo];
 	node = component->AddNode(this->current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 	index[this->current_station_id++] = node;
-	// find all stations belonging to the current component
+	/* find all stations belonging to the current component */
 	while(!search_queue.empty()) {
-		Station * source = search_queue.front();
+		Station *source = search_queue.front();
 		StationID source_id = source->index;
 		search_queue.pop();
-		GoodsEntry & good = source->goods[cargo];
-		LinkStatMap & links = good.link_stats;
+		GoodsEntry &good = source->goods[cargo];
+		LinkStatMap &links = good.link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			StationID target_id = i->first;
 			Station *target = Station::GetIfValid(target_id);
@@ -43,10 +43,10 @@ void LinkGraph::CreateComponent(Station * first) {
 				continue;
 			}
 			assert(target_id != source_id);
-			LinkStat & link_stat = i->second;
+			LinkStat &link_stat = i->second;
 			ReverseNodeIndex::iterator index_it = index.find(target_id);
 			if (index_it == index.end()) {
-				GoodsEntry & good = target->goods[cargo];
+				GoodsEntry &good = target->goods[cargo];
 				good.last_component = this->current_component_id;
 				search_queue.push(target);
 				node = component->AddNode(
@@ -62,9 +62,9 @@ void LinkGraph::CreateComponent(Station * first) {
 			component->AddEdge(index[source_id], node, link_stat.Capacity());
 		}
 	}
-	// here the list of nodes and edges for this component is complete.
+	/* here the list of nodes and edges for this component is complete. */
 	component->CalculateDistances();
-	LinkGraphJob * job = new LinkGraphJob(component);
+	LinkGraphJob *job = new LinkGraphJob(component);
 	assert(job != NULL);
 	job->SpawnThread(this->cargo);
 	this->jobs.push_back(job);
@@ -78,14 +78,15 @@ void LinkGraph::NextComponent()
 	StationID last_station_id = this->current_station_id;
 
 	do {
-		// find first station of next component
+		/* find first station of next component */
 		if (Station::IsValidID(this->current_station_id)) {
-			Station * station = Station::Get(this->current_station_id);
-			GoodsEntry & ge = station->goods[this->cargo];
-			if ((ge.last_component + this->current_component_id) % 2 != 0) {
-				// has not been seen in this run through the graph
+			Station *station = Station::Get(this->current_station_id);
+			GoodsEntry &ge = station->goods[this->cargo];
+			if (ge.last_component == INVALID_LINKGRAPH_COMPONENT ||
+					(ge.last_component + this->current_component_id) % 2 != 0) {
+				/* has not been seen in this run through the graph */
 
-				LinkStatMap & links = station->goods[cargo].link_stats;
+				LinkStatMap &links = station->goods[cargo].link_stats;
 				if (!links.empty()) {
 					this->current_component_id += 2;
 					CreateComponent(station);
@@ -111,8 +112,9 @@ void OnTick_LinkGraph()
 	bool join =  (_tick_counter + LinkGraph::COMPONENTS_JOIN_TICK)  % DAY_TICKS == 0;
 	if (spawn || join) {
 		for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
+			if (_settings_game.linkgraph.GetDistributionType(cargo) == DT_MANUAL) continue;
 			if ((_date + cargo) % _settings_game.linkgraph.recalc_interval == 0) {
-				LinkGraph & graph = _link_graphs[cargo];
+				LinkGraph &graph = _link_graphs[cargo];
 				if (spawn) {
 					graph.NextComponent();
 				} else {
@@ -123,7 +125,7 @@ void OnTick_LinkGraph()
 	}
 }
 
-LinkGraph::LinkGraph()  : current_component_id(1), current_station_id(0), cargo(CT_INVALID)
+LinkGraph::LinkGraph() : current_component_id(1), current_station_id(0), cargo(CT_INVALID)
 {
 	for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 		if (this == &(_link_graphs[i])) {
@@ -154,8 +156,8 @@ void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
 void LinkGraphComponent::CalculateDistances() {
 	for(NodeID i = 0; i < num_nodes; ++i) {
 		for(NodeID j = 0; j < i; ++j) {
-			Station * st1 = Station::Get(nodes[i].station);
-			Station * st2 = Station::Get(nodes[j].station);
+			Station *st1 = Station::Get(nodes[i].station);
+			Station *st2 = Station::Get(nodes[j].station);
 			uint distance = DistanceManhattan(st1->xy, st2->xy);
 			edges[i][j].distance = distance;
 			edges[j][i].distance = distance;
@@ -179,7 +181,7 @@ LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID col) :
 
 void LinkGraph::Join() {
 	while (!this->jobs.empty()) {
-		LinkGraphJob * job = this->jobs.front();
+		LinkGraphJob *job = this->jobs.front();
 		assert(job != NULL);
 
 		/* also join if join date is far in the future. This prevents excessive memory use when resetting time */
@@ -277,7 +279,7 @@ void Node::ExportFlows(FlowStatMap & station_flows, CargoID cargo) {
 	assert(flows.empty());
 }
 
-void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
+void LinkGraph::AddComponent(LinkGraphComponent *component, uint join) {
 	LinkGraphComponentID index = component->GetIndex();
 	for(NodeID i = 0; i < component->GetSize(); ++i) {
 		Station *station = Station::GetIfValid(component->GetNode(i).station);
@@ -285,7 +287,7 @@ void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 			station->goods[cargo].last_component = index;
 		}
 	}
-	LinkGraphJob * job = new LinkGraphJob(component, join);
+	LinkGraphJob *job = new LinkGraphJob(component, join);
 	assert(job != NULL);
 	job->SpawnThread(this->cargo);
 	this->jobs.push_back(job);
@@ -293,14 +295,14 @@ void LinkGraph::AddComponent(LinkGraphComponent * component, uint join) {
 
 void LinkGraphJob::Run() {
 	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
-		ComponentHandler * handler = *i;
+		ComponentHandler *handler = *i;
 		handler->Run(this->component);
 	}
 }
 
 LinkGraphJob::~LinkGraphJob() {
 	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
-		ComponentHandler * handler = *i;
+		ComponentHandler *handler = *i;
 		delete handler;
 	}
 	this->handlers.clear();
@@ -310,8 +312,8 @@ LinkGraphJob::~LinkGraphJob() {
 	delete this->thread;
 }
 
-void RunLinkGraphJob(void * j) {
-	LinkGraphJob * job = (LinkGraphJob *)j;
+void RunLinkGraphJob(void *j) {
+	LinkGraphJob *job = (LinkGraphJob *)j;
 	job->Run();
 }
 
@@ -360,7 +362,7 @@ void Path::UnFork() {
 Path::Path(NodeID n, bool source)  :
 	distance(source ? 0 : UINT_MAX),
 	capacity(source ? INT_MAX : INT_MIN),
-	flow(0), node(n), origin(source ? n : Node::INVALID),
+	flow(0), node(n), origin(source ? n : INVALID_NODE),
 	num_children(0), parent(NULL)
 {}
 
@@ -372,18 +374,19 @@ void LinkGraphJob::SpawnThread(CargoID cargo) {
 	AddHandler(new FlowMapper);
 	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
-		// Of course this will hang a bit.
-		// On the other hand, if you want to play games which make this hang noticably
-		// on a platform without threads then you'll probably get other problems first.
-		// OK:
-		// If someone comes and tells me that this hangs for him/her, I'll implement a
-		// smaller grained "Step" method for all handlers and add some more ticks where
-		// "Step" is called. No problem in principle.
+		/* Of course this will hang a bit.
+		 * On the other hand, if you want to play games which make this hang noticably
+		 * on a platform without threads then you'll probably get other problems first.
+		 * OK:
+		 * If someone comes and tells me that this hangs for him/her, I'll implement a
+		 * smaller grained "Step" method for all handlers and add some more ticks where
+		 * "Step" is called. No problem in principle.
+		 */
 		RunLinkGraphJob(this);
 	}
 }
 
-LinkGraphJob::LinkGraphJob(LinkGraphComponent * c) :
+LinkGraphJob::LinkGraphJob(LinkGraphComponent *c) :
 	thread(NULL),
 	join_date(_date + c->GetSettings().recalc_interval),
 	component(c)
@@ -391,7 +394,7 @@ LinkGraphJob::LinkGraphJob(LinkGraphComponent * c) :
 	DEBUG(misc, 2, "new job for cargo %d with index %d and join date %d at %d", c->GetCargo(), c->GetIndex(), join_date, _date);
 }
 
-LinkGraphJob::LinkGraphJob(LinkGraphComponent * c, Date join) :
+LinkGraphJob::LinkGraphJob(LinkGraphComponent *c, Date join) :
 	thread(NULL),
 	join_date(join),
 	component(c)
