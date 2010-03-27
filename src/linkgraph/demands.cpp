@@ -7,25 +7,10 @@
 #include "../cargotype.h"
 #include "../core/math_func.hpp"
 #include <list>
-#include <iostream>
 
 typedef std::list<NodeID> NodeList;
 
-void DemandCalculator::PrintDemandMatrix(LinkGraphComponent * graph) {
-	for (NodeID from = 0; from < graph->GetSize(); ++from) {
-		std::cout << graph->GetNode(from).station << "\t";
-		for(NodeID to = 0; to < graph->GetSize(); ++to) {
-			if (from == to) {
-				std::cout << graph->GetNode(from).supply << "\t";
-			} else {
-				std::cout << graph->GetEdge(from, to).distance << ":" << graph->GetEdge(from, to).demand << "\t";
-			}
-		}
-		std::cout << "\n";
-	}
-}
-
-void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
+void DemandCalculator::CalcDemand(LinkGraphComponent *graph) {
 	NodeList supplies;
 	NodeList demands;
 	uint supply_sum = 0;
@@ -70,9 +55,9 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 					continue;
 				}
 			}
-			Node & to = graph->GetNode(node2);
-			Edge & forward = graph->GetEdge(node1, node2);
-			Edge & backward = graph->GetEdge(node2, node1);
+			Node &to = graph->GetNode(node2);
+			Edge &forward = graph->GetEdge(node1, node2);
+			Edge &backward = graph->GetEdge(node2, node1);
 
 			int32 supply = from.supply;
 			if (this->mod_size > 0) {
@@ -126,19 +111,9 @@ void DemandCalculator::CalcDemand(LinkGraphComponent * graph) {
 	}
 }
 
-void DemandCalculator::Run(LinkGraphComponent * graph) {
+void DemandCalculator::Run(LinkGraphComponent *graph) {
 	CargoID cargo = graph->GetCargo();
-	const LinkGraphSettings & settings = graph->GetSettings();
-	DistributionType type = settings.demand_default;
-	if (IsCargoInClass(cargo, CC_PASSENGERS)) {
-		type = settings.demand_pax;
-	} else if (IsCargoInClass(cargo, CC_MAIL)) {
-		type = settings.demand_mail;
-	} else if (IsCargoInClass(cargo, CC_EXPRESS)) {
-		type = settings.demand_express;
-	} else if (IsCargoInClass(cargo, CC_ARMOURED)) {
-		type = settings.demand_armoured;
-	}
+	const LinkGraphSettings &settings = graph->GetSettings();
 
 	this->accuracy = settings.accuracy;
 	this->mod_size = settings.demand_size;
@@ -149,16 +124,15 @@ void DemandCalculator::Run(LinkGraphComponent * graph) {
 		this->mod_dist = 100 + over100 * over100;
 	}
 
-	switch (type) {
+	switch (settings.GetDistributionType(cargo)) {
 	case DT_SYMMETRIC:
 		CalcDemand(graph);
 		break;
-	case DT_ANTISYMMETRIC:
+	case DT_ASYMMETRIC:
 		this->mod_size = 0;
 		CalcDemand(graph);
 		break;
 	default:
-		/* ignore */
-		break;
+		NOT_REACHED();
 	}
 }
