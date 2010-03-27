@@ -1386,11 +1386,11 @@ static SettingsPage _settings_economy_page = {_settings_economy, lengthof(_setti
 
 static SettingEntry _settings_linkgraph[] = {
 	SettingEntry("linkgraph.recalc_interval"),
-	SettingEntry("linkgraph.demand_pax"),
-	SettingEntry("linkgraph.demand_mail"),
-	SettingEntry("linkgraph.demand_express"),
-	SettingEntry("linkgraph.demand_armoured"),
-	SettingEntry("linkgraph.demand_default"),
+	SettingEntry("linkgraph.distribution_pax"),
+	SettingEntry("linkgraph.distribution_mail"),
+	SettingEntry("linkgraph.distribution_express"),
+	SettingEntry("linkgraph.distribution_armoured"),
+	SettingEntry("linkgraph.distribution_default"),
 	SettingEntry("linkgraph.accuracy"),
 	SettingEntry("linkgraph.demand_distance"),
 	SettingEntry("linkgraph.demand_size"),

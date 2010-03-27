@@ -1105,10 +1105,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\linkgraph\demand_settings.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\linkgraph\linkgraph.h"
 				>
 			</File>
