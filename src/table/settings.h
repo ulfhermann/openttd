@@ -462,6 +462,11 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, economy.town_noise_population[2],    SLE_UINT16, 96, SL_MAX_VERSION, 0, 0,  4000,   800,   65535, 0, STR_NULL,                                  NULL),
 
 	 SDT_CONDVAR(GameSettings, linkgraph.recalc_interval,           SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION, 0, 0,16, 1, 4096, 1, STR_CONFIG_SETTING_LINKGRAPH_INTERVAL,     NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.distribution_pax,  SLE_UINT8,SL_COMPONENTS, SL_MAX_VERSION,0,MS,DT_SYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DISTRIBUTION_PAX, NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.distribution_mail, SLE_UINT8,SL_COMPONENTS,SL_MAX_VERSION,0,MS,DT_SYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DISTRIBUTION_MAIL, NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.distribution_express,SLE_UINT8,SL_COMPONENTS,SL_MAX_VERSION,0,MS,DT_ASYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS,NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.distribution_armoured,SLE_UINT8,SL_COMPONENTS,SL_MAX_VERSION,0,MS,DT_SYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED,NULL),
+	 SDT_CONDVAR(GameSettings, linkgraph.distribution_default,SLE_UINT8,SL_COMPONENTS,SL_MAX_VERSION,0,MS,DT_ASYMMETRIC,DT_BEGIN,DT_NUM-1,1,STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT,NULL),
 
 	 SDT_CONDVAR(GameSettings, pf.wait_for_pbs_path,                 SLE_UINT8,100, SL_MAX_VERSION, 0, 0,    30,     2,     255, 0, STR_NULL,                                  NULL),
 	SDT_CONDBOOL(GameSettings, pf.reserve_paths,                               100, SL_MAX_VERSION, 0, 0, false,                    STR_NULL,                                  NULL),
