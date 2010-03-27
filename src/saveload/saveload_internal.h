@@ -31,8 +31,6 @@ void AfterLoadStations();
 void AfterLoadRoadStops();
 void AfterLoadLabelMaps();
 void UpdateHousesAndTowns();
-void UpdateAcceptanceCompanyHQ();
-void UpdateAcceptanceIndustry();
 
 void UpdateOldAircraft();
 
