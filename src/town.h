@@ -17,7 +17,6 @@
 #include "command_type.h"
 #include "town_map.h"
 #include "subsidy_type.h"
-#include "tile_cmd.h"
 
 template <typename T>
 struct BuildingCounts {
@@ -203,7 +202,6 @@ void SetTownRatingTestMode(bool mode);
 uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t);
 bool GenerateTowns(TownLayout layout);
 
-void ModifyAcceptedCargo_Town(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted = NULL);
 
 /** Town actions of a company. */
 enum TownActions {

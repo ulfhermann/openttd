@@ -29,7 +29,8 @@ struct Economy {
 	uint32 industry_daily_increment;      ///< The value which will increment industry_daily_change_counter. Computed value. NOSAVE
 	uint64 inflation_prices;              ///< Cumulated inflation of prices since game start; 16 bit fractional part
 	uint64 inflation_payment;             ///< Cumulated inflation of cargo paypent since game start; 16 bit fractional part
-	CargoArray global_acceptance;         ///< Sum of all acceptance numbers of tiles on the map
+	CargoArray global_acceptance;         ///< Sum of all acceptance numbers of tiles on the map (last tile loop)
+	CargoArray global_acceptance_new;     ///< Sum of all acceptance numbers of tiles on the map under construction (current tile loop)
 
 	/* Old stuff for savegame conversion only */
 	Money old_max_loan_unround;           ///< Old: Unrounded max loan
