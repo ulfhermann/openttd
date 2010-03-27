@@ -342,6 +342,7 @@ extern char _savegame_format[8];
  */
 enum SaveLoadVersions {
 	SL_TRUNK = 140,
+	SL_ACCEPTANCE = SL_TRUNK + 5,
 	SL_ALT_ECO_SW = SL_TRUNK + 100,
 	SL_MAX_VERSION = 255
 };
