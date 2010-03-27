@@ -124,7 +124,7 @@ struct GoodsEntry {
 		acceptance(0),
 		supply(0),
 		supply_new(0),
-		last_component(0)
+		last_component(INVALID_LINKGRAPH_COMPONENT)
 	{}
 
 	bool pickup;            ///< if true: Cargo of this type is generated or transferred here

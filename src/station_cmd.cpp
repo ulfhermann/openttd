@@ -3048,9 +3048,14 @@ static void UpdateStationRating(Station *st)
 			(rating += 13, true);
 
 			CargoID c_id = cs->Index();
-			uint min_rating = 256 * (uint)_settings_game.economy.min_rating_by_component / 100;
-			uint component_cap = min_rating + (256 - min_rating) * _link_graphs[c_id].GetComponentAcceptance(ge->last_component) / (_economy.global_acceptance[c_id] + 1);
-			rating = min(rating, component_cap);
+			if (_settings_game.linkgraph.GetDistributionType(c_id) != DT_MANUAL) {
+				/* Only do that if automatic distribution is enabled.
+				 * Otherwise you can't play the popular "disconnected" style without lots of industries closing down.
+				 */
+				uint min_rating = 256 * (uint)_settings_game.economy.min_rating_by_component / 100;
+				uint component_cap = min_rating + (256 - min_rating) * _link_graphs[c_id].GetComponentAcceptance(ge->last_component) / (_economy.global_acceptance[c_id] + 1);
+				rating = min(rating, component_cap);
+			}
 
 			{
 				int or_ = ge->rating; // old rating
