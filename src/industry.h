@@ -17,7 +17,6 @@
 #include "subsidy_type.h"
 #include "industry_map.h"
 #include "tilearea_type.h"
-#include "tile_cmd.h"
 
 
 typedef Pool<Industry, IndustryID, 64, 64000> IndustryPool;
@@ -129,8 +128,6 @@ void ReleaseDisastersTargetingIndustry(IndustryID);
 
 /* industry_cmd.cpp */
 void SetIndustryDailyChanges();
-
-void ModifyAcceptedCargo_Industry(TileIndex tile, CargoArray &acceptance, AcceptanceMode mode, uint32 *always_accepted = NULL);
 
 #define FOR_ALL_INDUSTRIES_FROM(var, start) FOR_ALL_ITEMS_FROM(Industry, industry_index, var, start)
 #define FOR_ALL_INDUSTRIES(var) FOR_ALL_INDUSTRIES_FROM(var, 0)
