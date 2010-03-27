@@ -3048,7 +3048,7 @@ static void UpdateStationRating(Station *st)
 			(rating += 13, true);
 
 			CargoID c_id = cs->Index();
-			if (_settings_game.linkgraph.GetDistributionType(c_id) != DT_MANUAL) {
+			if (ge->last_component != INVALID_LINKGRAPH_COMPONENT && _settings_game.linkgraph.GetDistributionType(c_id) != DT_MANUAL) {
 				/* Only do that if automatic distribution is enabled.
 				 * Otherwise you can't play the popular "disconnected" style without lots of industries closing down.
 				 */
