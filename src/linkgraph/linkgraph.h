@@ -23,7 +23,6 @@ typedef std::map<StationID, FlowViaMap> FlowMap;
 
 class Node {
 public:
-	static const NodeID INVALID = UINT_MAX;
 	Node() : supply(0), undelivered_supply(0), demand(0), station(INVALID_STATION) {}
 	Node(StationID st, uint sup, uint dem) : supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
 	~Node();
@@ -42,7 +41,7 @@ typedef std::set<NodeID> ViaSet;
 
 class Edge {
 public:
-	Edge() : distance(0), capacity(0), demand(0), unsatisfied_demand(0), flow(0), next_edge(Node::INVALID) {}
+	Edge() : distance(0), capacity(0), demand(0), unsatisfied_demand(0), flow(0), next_edge(INVALID_NODE) {}
 	uint distance;
 	uint capacity;
 	uint demand;
@@ -57,8 +56,8 @@ class LinkGraphComponent {
 
 public:
 	LinkGraphComponent(CargoID cargo, LinkGraphComponentID c = 0);
-	Edge & GetEdge(NodeID from, NodeID to) {return edges[from][to];}
-	Node & GetNode(NodeID num) {return nodes[num];}
+	Edge &GetEdge(NodeID from, NodeID to) {return edges[from][to];}
+	Node &GetNode(NodeID num) {return nodes[num];}
 	uint GetSize() const {return num_nodes;}
 	void SetSize(uint size);
 	NodeID AddNode(StationID st, uint supply, uint demand);
@@ -66,10 +65,10 @@ public:
 	void CalculateDistances();
 	LinkGraphComponentID GetIndex() const {return index;}
 	CargoID GetCargo() const {return cargo;}
-	const LinkGraphSettings & GetSettings() const {return settings;}
+	const LinkGraphSettings &GetSettings() const {return settings;}
 	NodeID GetFirstEdge(NodeID from) {return edges[from][from].next_edge;}
 private:
-	friend const SaveLoad * GetLinkGraphComponentDesc();
+	friend const SaveLoad *GetLinkGraphComponentDesc();
 	LinkGraphSettings settings;
 	CargoID cargo;
 	uint num_nodes;
@@ -80,28 +79,28 @@ private:
 
 class ComponentHandler {
 public:
-	virtual void Run(LinkGraphComponent * component) = 0;
+	virtual void Run(LinkGraphComponent *component) = 0;
 	virtual ~ComponentHandler() {}
 };
 
 class LinkGraphJob {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
-	LinkGraphJob(LinkGraphComponent * c);
-	LinkGraphJob(LinkGraphComponent * c, Date join);
+	LinkGraphJob(LinkGraphComponent *c);
+	LinkGraphJob(LinkGraphComponent *c, Date join);
 
-	void AddHandler(ComponentHandler * handler) {this->handlers.push_back(handler);}
+	void AddHandler(ComponentHandler *handler) {this->handlers.push_back(handler);}
 	void Run();
 	void SpawnThread(CargoID cargo);
 	void Join() {if (this->thread != NULL) this->thread->Join();}
 	Date GetJoinDate() {return this->join_date;}
-	LinkGraphComponent * GetComponent() {return this->component;}
+	LinkGraphComponent *GetComponent() {return this->component;}
 	~LinkGraphJob();
 private:
 	/**
 	 * there cannot be two identical LinkGraphJobs,
 	 */
-	LinkGraphJob(const LinkGraphJob & other) {NOT_REACHED();}
+	LinkGraphJob(const LinkGraphJob &other) {NOT_REACHED();}
 	ThreadObject * thread;
 	Date join_date;
 	LinkGraphComponent * component;
@@ -138,14 +137,14 @@ public:
 	void Join();
 	size_t GetNumJobs() const {return jobs.size();}
 	JobList & GetJobs() {return jobs;}
-	void AddComponent(LinkGraphComponent * component, uint join);
+	void AddComponent(LinkGraphComponent *component, uint join);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21;
 	const static uint COMPONENTS_SPAWN_TICK = 58;
 
 private:
-	friend const SaveLoad * GetLinkGraphDesc(uint);
-	void CreateComponent(Station * first);
+	friend const SaveLoad *GetLinkGraphDesc(uint);
+	void CreateComponent(Station *first);
 	LinkGraphComponentID current_component_id;
 	StationID current_station_id;
 	CargoID cargo;
