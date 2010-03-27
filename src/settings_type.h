@@ -17,6 +17,8 @@
 #include "transport_type.h"
 #include "network/core/config.h"
 #include "company_type.h"
+#include "cargotype.h"
+#include "linkgraph/linkgraph_type.h"
 
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
@@ -352,7 +354,25 @@ struct EconomySettings {
 };
 
 struct LinkGraphSettings {
-	uint16 recalc_interval;                  ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	uint16 recalc_interval;                     ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	DistributionTypeByte distribution_pax;      ///< distribution type for passengers
+	DistributionTypeByte distribution_mail;     ///< distribution type for mail
+	DistributionTypeByte distribution_express;  ///< distribution type for express cargo class
+	DistributionTypeByte distribution_armoured; ///< distribution type for armoured cargo class
+	DistributionTypeByte distribution_default;  ///< distribution type for all other goods
+	FORCEINLINE DistributionType GetDistributionType(CargoID cargo) {
+		if (IsCargoInClass(cargo, CC_PASSENGERS)) {
+			return this->distribution_pax;
+		} else if (IsCargoInClass(cargo, CC_MAIL)) {
+			return this->distribution_mail;
+		} else if (IsCargoInClass(cargo, CC_EXPRESS)) {
+			return this->distribution_express;
+		} else if (IsCargoInClass(cargo, CC_ARMOURED)) {
+			return this->distribution_armoured;
+		} else {
+			return this->distribution_default;
+		}
+	}
 };
 
 /** Settings related to stations. */
