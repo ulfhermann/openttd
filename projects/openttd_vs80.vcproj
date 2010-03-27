@@ -1112,10 +1112,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\linkgraph\demand_settings.h"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\linkgraph\flowmapper.h"
 				>
 			</File>

@@ -17,7 +17,8 @@
 #include "transport_type.h"
 #include "network/core/config.h"
 #include "company_type.h"
-#include "linkgraph/demand_settings.h"
+#include "cargotype.h"
+#include "linkgraph/linkgraph_type.h"
 
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
@@ -353,16 +354,30 @@ struct EconomySettings {
 };
 
 struct LinkGraphSettings {
-	uint16 recalc_interval;                  ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
-	DistributionTypeByte demand_pax;         ///< demand calculation for passengers
-	DistributionTypeByte demand_mail;        ///< demand calculation for mail
-	DistributionTypeByte demand_express;     ///< demand calculation for express cargo class
-	DistributionTypeByte demand_armoured;    ///< demand calculation for armoured cargo class
-	DistributionTypeByte demand_default;     ///< demand calculation for all other goods
-	uint8 accuracy;                          ///< accuracy when calculating things on the link graph. low accuracy => low running time
-	uint8 demand_size;                       ///< influence of supply ("station size") on the demand function
-	uint8 demand_distance;                   ///< influence of distance between stations on the demand function
-	uint8 short_path_saturation;             ///< percentage up to which short paths are saturated before saturating most capacious paths
+	uint16 recalc_interval;                     ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	DistributionTypeByte distribution_pax;      ///< distribution type for passengers
+	DistributionTypeByte distribution_mail;     ///< distribution type for mail
+	DistributionTypeByte distribution_express;  ///< distribution type for express cargo class
+	DistributionTypeByte distribution_armoured; ///< distribution type for armoured cargo class
+	DistributionTypeByte distribution_default;  ///< distribution type for all other goods
+	uint8 accuracy;                             ///< accuracy when calculating things on the link graph. low accuracy => low running time
+	uint8 demand_size;                          ///< influence of supply ("station size") on the demand function
+	uint8 demand_distance;                      ///< influence of distance between stations on the demand function
+	uint8 short_path_saturation;                ///< percentage up to which short paths are saturated before saturating most capacious paths
+
+	FORCEINLINE DistributionType GetDistributionType(CargoID cargo) const {
+		if (IsCargoInClass(cargo, CC_PASSENGERS)) {
+			return this->distribution_pax;
+		} else if (IsCargoInClass(cargo, CC_MAIL)) {
+			return this->distribution_mail;
+		} else if (IsCargoInClass(cargo, CC_EXPRESS)) {
+			return this->distribution_express;
+		} else if (IsCargoInClass(cargo, CC_ARMOURED)) {
+			return this->distribution_armoured;
+		} else {
+			return this->distribution_default;
+		}
+	}
 };
 
 /** Settings related to stations. */
