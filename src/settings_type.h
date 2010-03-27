@@ -360,7 +360,8 @@ struct LinkGraphSettings {
 	DistributionTypeByte distribution_express;  ///< distribution type for express cargo class
 	DistributionTypeByte distribution_armoured; ///< distribution type for armoured cargo class
 	DistributionTypeByte distribution_default;  ///< distribution type for all other goods
-	FORCEINLINE DistributionType GetDistributionType(CargoID cargo) {
+
+	FORCEINLINE DistributionType GetDistributionType(CargoID cargo) const {
 		if (IsCargoInClass(cargo, CC_PASSENGERS)) {
 			return this->distribution_pax;
 		} else if (IsCargoInClass(cargo, CC_MAIL)) {
