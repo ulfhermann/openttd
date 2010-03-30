@@ -194,14 +194,13 @@ void LinkGraph::Join() {
 	}
 }
 
+/**
+ * add a preconstructed link graph component and build a LinkGraphJob around it.
+ * This is intended for loading a savegame.
+ * @param component the component to be added
+ * @param join the join time for the job
+ */
 void LinkGraph::AddComponent(LinkGraphComponent *component, uint join) {
-	LinkGraphComponentID index = component->GetIndex();
-	for(NodeID i = 0; i < component->GetSize(); ++i) {
-		Station *station = Station::GetIfValid(component->GetNode(i).station);
-		if (station != NULL) {
-			station->goods[cargo].last_component = index;
-		}
-	}
 	LinkGraphJob *job = new LinkGraphJob(component, join);
 	assert(job != NULL);
 	job->SpawnThread(this->cargo);
