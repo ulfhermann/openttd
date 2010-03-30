@@ -11,13 +11,19 @@ const SettingDesc *GetSettingDescription(uint index);
 static uint32 _num_components;
 static Date _join_date;
 
-enum {
+enum LinkGraphSaveLoadType {
 	LGRP_GRAPH = 0,
 	LGRP_COMPONENT = 1,
 	LGRP_NODE = 2,
 	LGRP_EDGE = 3,
 };
 
+/**
+ * Get a SaveLoad array for a linkgraph component. The settings struct is derived from
+ * the global settings saveload array. The exact entries are calcuated when the function
+ * is called the first time.
+ * @return an array of SaveLoad structs
+ */
 const SaveLoad *GetLinkGraphComponentDesc() {
 
 	static const SaveLoad _component_desc[] = {
@@ -33,26 +39,29 @@ const SaveLoad *GetLinkGraphComponentDesc() {
 	typedef std::vector<SaveLoad> SaveLoadVector;
 	static SaveLoadVector saveloads;
 	static const char *prefix = "linkgraph.";
-	size_t prefixlen = strlen(prefix);
 
-	int setting = 0;
-	const SettingDesc *desc = GetSettingDescription(setting);
-	while (desc->save.cmd != SL_END) {
-		if (desc->desc.name != NULL && strncmp(desc->desc.name, prefix, prefixlen) == 0) {
-			SaveLoad sl = desc->save;
-			char *&address = reinterpret_cast<char *&>(sl.address);
-			address -= offset_gamesettings;
-			address += offset_component;
-			saveloads.push_back(sl);
+	/* Build the component SaveLoad array on first call and don't touch it later on */
+	if (saveloads.empty()) {
+		size_t prefixlen = strlen(prefix);
+
+		int setting = 0;
+		const SettingDesc *desc = GetSettingDescription(setting);
+		while (desc->save.cmd != SL_END) {
+			if (desc->desc.name != NULL && strncmp(desc->desc.name, prefix, prefixlen) == 0) {
+				SaveLoad sl = desc->save;
+				char *&address = reinterpret_cast<char *&>(sl.address);
+				address -= offset_gamesettings;
+				address += offset_component;
+				saveloads.push_back(sl);
+			}
+			desc = GetSettingDescription(++setting);
 		}
-		desc = GetSettingDescription(++setting);
+
+		int i = 0;
+		do {
+			saveloads.push_back(_component_desc[i++]);
+		} while (saveloads.back().cmd != SL_END);
 	}
-
-	int i = 0;
-	do {
-		saveloads.push_back(_component_desc[i++]);
-	} while (saveloads.back().cmd != SL_END);
-
 	return &saveloads[0];
 }
 
@@ -68,7 +77,7 @@ const SaveLoad *GetLinkGraphDesc(uint type) {
 
 	static const SaveLoad * _component_desc = GetLinkGraphComponentDesc();
 
-	// edges and nodes are saved in the correct order, so we don't need to save their ids.
+	/* Edges and nodes are saved in the correct order, so we don't need to save their ids. */
 
 	static const SaveLoad _node_desc[] = {
 		 SLE_CONDVAR(Node, supply,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
