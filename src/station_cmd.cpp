@@ -3221,13 +3221,13 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 			LinkStatMap & link_stats = st->goods[v->cargo_type].link_stats;
 			LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
 			if (lstat_it == link_stats.end()) {
-				DEBUG(misc, 0, "frozen not in linkstat list.");
+				DEBUG(misc, 1, "frozen not in linkstat list.");
 				RecalcFrozen(st);
 				return;
 			} else {
 				LinkStat & link_stat = lstat_it->second;
 				if (link_stat.Frozen() < v->cargo_cap) {
-					DEBUG(misc, 0, "frozen is smaller than cargo cap.");
+					DEBUG(misc, 1, "frozen is smaller than cargo cap.");
 					RecalcFrozen(st);
 					return;
 				} else {
