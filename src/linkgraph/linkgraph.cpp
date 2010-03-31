@@ -124,9 +124,8 @@ void LinkGraph::NextComponent()
  */
 void OnTick_LinkGraph()
 {
-	bool spawn = (_tick_counter + LinkGraph::COMPONENTS_SPAWN_TICK) % DAY_TICKS == 0;
-	bool join =  (_tick_counter + LinkGraph::COMPONENTS_JOIN_TICK)  % DAY_TICKS == 0;
-	if (spawn || join) {
+	if (_date_fract == LinkGraph::COMPONENTS_SPAWN_TICK ||
+			_date_fract == LinkGraph::COMPONENTS_JOIN_TICK) {
 
 		LinkGraphSettings &settings = _settings_game.linkgraph;
 
@@ -139,9 +138,9 @@ void OnTick_LinkGraph()
 			/* don't calculate a link graph if the distribution is manual */
 			if (settings.GetDistributionType(cargo) == DT_MANUAL) continue;
 
-			if (spawn) {
+			if (_date_fract == LinkGraph::COMPONENTS_SPAWN_TICK) {
 				_link_graphs[cargo].NextComponent();
-			} else {
+			} else /* LinkGraph::COMPONENTS_JOIN_TICK */ {
 				_link_graphs[cargo].Join();
 			}
 		}
@@ -209,18 +208,18 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capaci
 }
 
 /**
- * Resize the component and either truncate it or fill it with empty nodes and
- * edges. Used when loading from save games.
- * @param size the desired number of nodes for the component
+ * Resize the component and fill it with empty nodes and edges. Used when
+ * loading from save games.
+ *
+ * WARNING: The nodes and edges are expected to be empty while num_nodes is
+ * expected to contain the desired size. Normally this is an invalid state,
+ * but just after loading the component's structure it is valid. This method
+ * should only be called from Load_LGRP; otherwise it is a NOP.
  */
-void LinkGraphComponent::SetSize(uint size)
+void LinkGraphComponent::SetSize()
 {
-	for(NodeID i = 0; i < min(this->num_nodes, size); ++i) {
-		this->edges[i].resize(size);
-	}
-	this->nodes.resize(size);
-	this->edges.resize(size, std::vector<Edge>(size));
-	this->num_nodes = size;
+	this->nodes.resize(this->num_nodes);
+	this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
 }
 
 /**
