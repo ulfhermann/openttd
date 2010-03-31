@@ -28,7 +28,7 @@ public:
 	 * @param sup supply of cargo at the station last month
 	 * @param dem acceptance for cargo at the station
 	 */
-	Node(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0) :
+	FORCEINLINE Node(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0) :
 		supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
 
 	uint supply;             ///< supply at the station
@@ -47,7 +47,7 @@ public:
 	 * @param distance length of the link as manhattan distance
 	 * @param capacity capacity of the link
 	 */
-	Edge(uint distance = 0, uint capacity = 0) :
+	FORCEINLINE Edge(uint distance = 0, uint capacity = 0) :
 		distance(distance), capacity(capacity), demand(0) {}
 
 	uint distance; ///< length of the link
@@ -90,8 +90,10 @@ public:
 	FORCEINLINE uint GetSize() const {return this->num_nodes;}
 
 	void SetSize(uint size);
+
 	NodeID AddNode(Station *st);
-	void AddEdge(NodeID from, NodeID to, uint distance, uint capacity);
+
+	FORCEINLINE void AddEdge(NodeID from, NodeID to, uint capacity);
 
 	/**
 	 * Get the ID of this component.

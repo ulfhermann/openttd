@@ -20,8 +20,8 @@ LinkGraph _link_graphs[NUM_CARGO];
  * 3. Start a link graph job with the new component.
  * @param first Station to start the search at
  */
-void LinkGraph::CreateComponent(Station *first) {
-
+void LinkGraph::CreateComponent(Station *first)
+{
 	LinkGraphComponent *component = new LinkGraphComponent(this->cargo,
 			this->current_component_id);
 
@@ -47,13 +47,9 @@ void LinkGraph::CreateComponent(Station *first) {
 				NodeID node = component->AddNode(target);
 				index[target] = node;
 
-				component->AddEdge(index[source], node,
-						DistanceManhattan(source->xy, target->xy),
-						i->second.Capacity());
+				component->AddEdge(index[source], node,	i->second.Capacity());
 			} else {
-				component->AddEdge(index[source], index_it->second,
-						DistanceManhattan(source->xy, index_it->first->xy),
-						i->second.Capacity());
+				component->AddEdge(index[source], index_it->second,	i->second.Capacity());
 			}
 		}
 	}
@@ -154,8 +150,11 @@ void OnTick_LinkGraph()
  * pass parameters to the link graph constructor when building _link_graphs I
  * don't see a way to avoid it.
  */
-LinkGraph::LinkGraph() : current_component_id(1), current_station_id(0),
-		cargo(CT_INVALID), current_job(NULL)
+LinkGraph::LinkGraph() :
+	current_component_id(1),
+	current_station_id(0),
+	cargo(CT_INVALID),
+	current_job(NULL)
 {
 	for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 		if (this == &(_link_graphs[i])) {
@@ -167,11 +166,14 @@ LinkGraph::LinkGraph() : current_component_id(1), current_station_id(0),
 
 /**
  * Add a node to the component and create empty edges associated with it. Set
- * the station's last_component to this component.
+ * the station's last_component to this component. Calculate the distances to all
+ * other nodes. The distances to _all_ nodes are important as the demand
+ * calculator relies on their availability.
  * @param st the new node's station
  * @return the new node's ID
  */
-NodeID LinkGraphComponent::AddNode(Station *st) {
+NodeID LinkGraphComponent::AddNode(Station *st)
+{
 	GoodsEntry &good = st->goods[cargo];
 	good.last_component = this->index;
 
@@ -179,7 +181,9 @@ NodeID LinkGraphComponent::AddNode(Station *st) {
 			HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE)));
 	this->edges.push_back(std::vector<Edge>(this->num_nodes + 1));
 	for(NodeID i = 0; i < this->num_nodes; ++i) {
-		this->edges[i].push_back(Edge());
+		uint distance = DistanceManhattan(st->xy, Station::Get(this->nodes[i].station)->xy);
+		this->edges[i].push_back(Edge(distance));
+		this->edges.back()[i].distance = distance;
 	}
 
 	return this->num_nodes++;
@@ -189,12 +193,11 @@ NodeID LinkGraphComponent::AddNode(Station *st) {
  * Fill an edge with values from a link.
  * @param from source node of the link
  * @param to destination node of the link
- * @param distance distance of the link
  * @param capacity capacity of the link
  */
-FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint distance, uint capacity) {
+FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity)
+{
 	assert(from != to);
-	this->edges[from][to].distance = distance;
 	this->edges[from][to].capacity = capacity;
 }
 
@@ -203,7 +206,8 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint distan
  * edges. Used when loading from save games.
  * @param size the desired number of nodes for the component
  */
-void LinkGraphComponent::SetSize(uint size) {
+void LinkGraphComponent::SetSize(uint size)
+{
 	for(NodeID i = 0; i < min(this->num_nodes, size); ++i) {
 		this->edges[i].resize(size);
 	}
@@ -228,7 +232,8 @@ LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID id) :
  * Merge the current job if the join date has passed or if it has been canceled
  * by resetting the date.
  */
-void LinkGraph::Join() {
+void LinkGraph::Join()
+{
 	if (this->current_job != NULL && (this->current_job->GetJoinDate() <= _date ||
 			this->current_job->GetJoinDate() >
 			_date + _settings_game.linkgraph.recalc_interval)) {
@@ -244,7 +249,8 @@ void LinkGraph::Join() {
  * @param component the component to be added
  * @param join the join time for the job
  */
-void LinkGraph::AddComponent(LinkGraphComponent *component, uint join) {
+void LinkGraph::AddComponent(LinkGraphComponent *component, uint join)
+{
 	assert(this->current_job == NULL);
 	this->current_job = new LinkGraphJob(component, join);
 	this->current_job->SpawnThread();
@@ -253,7 +259,8 @@ void LinkGraph::AddComponent(LinkGraphComponent *component, uint join) {
 /**
  * clean up the hadnlers, component and thread.
  */
-LinkGraphJob::~LinkGraphJob() {
+LinkGraphJob::~LinkGraphJob()
+{
 	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
 		ComponentHandler *handler = *i;
 		delete handler;
@@ -268,7 +275,8 @@ LinkGraphJob::~LinkGraphJob() {
  * Run all handlers for the given Job.
  * @param j a pointer to a link graph job
  */
-void LinkGraphJob::RunLinkGraphJob(void *j) {
+void LinkGraphJob::RunLinkGraphJob(void *j)
+{
 	LinkGraphJob *job = (LinkGraphJob *)j;
 	for (HandlerList::iterator i = job->handlers.begin(); i != job->handlers.end(); ++i) {
 		(*i)->Run(job->component);
@@ -279,7 +287,8 @@ void LinkGraphJob::RunLinkGraphJob(void *j) {
  * Spawn a thread if possible and run the link graph job in the thread. If
  * that's not possible run the job right now in the current thread.
  */
-void LinkGraphJob::SpawnThread() {
+void LinkGraphJob::SpawnThread()
+{
 	this->AddHandler(new DemandCalculator);
 	if (!ThreadObject::New(&(LinkGraphJob::RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
@@ -312,7 +321,8 @@ LinkGraphJob::LinkGraphJob(LinkGraphComponent *c, Date join) :
  * Clear the link graph: join all jobs and set current_station_id and
  * current_component_id to their start values.
  */
-void LinkGraph::Clear() {
+void LinkGraph::Clear()
+{
 	if (this->current_job != NULL) {
 		this->current_job->Join();
 		delete this->current_job;
@@ -325,6 +335,7 @@ void LinkGraph::Clear() {
 /**
  * Clear all link graphs. Used when loading a game.
  */
-void InitializeLinkGraphs() {
+void InitializeLinkGraphs()
+{
 	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 }
