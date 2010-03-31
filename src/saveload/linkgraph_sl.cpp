@@ -113,15 +113,23 @@ static void SaveLoad_LinkGraphComponent(LinkGraphComponent *comp) {
  */
 static void DoSave_LGRP(void *)
 {
+	static LinkGraphComponent empty_component(CT_INVALID);
+
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc());
-
 		LinkGraphJob *job = graph.GetCurrentJob();
-		LinkGraphComponent *comp = job->GetComponent();
-		_join_date = job->GetJoinDate();
-		SlObject(comp, GetLinkGraphComponentDesc());
-		SaveLoad_LinkGraphComponent(comp);
+		if (job != NULL) {
+			/* a job is currently running */
+			_join_date = job->GetJoinDate();
+			SlObject(job->GetComponent(), GetLinkGraphComponentDesc());
+			SaveLoad_LinkGraphComponent(job->GetComponent());
+		} else {
+			/* no job running, save an empty component */
+			_join_date = 0;
+			SlObject(&empty_component, GetLinkGraphComponentDesc());
+			SaveLoad_LinkGraphComponent(&empty_component);
+		}
 	}
 }
 
@@ -135,9 +143,14 @@ static void Load_LGRP()
 		SlObject(&graph, GetLinkGraphDesc());
 		LinkGraphComponent *comp = new LinkGraphComponent(cargo);
 		SlObject(comp, GetLinkGraphComponentDesc());
-		comp->SetSize(comp->GetSize());
-		SaveLoad_LinkGraphComponent(comp);
-		graph.AddComponent(comp, _join_date);
+		if (_join_date > 0) {
+			/* only load the job if it's valid */
+			comp->SetSize();
+			SaveLoad_LinkGraphComponent(comp);
+			graph.AddComponent(comp, _join_date);
+		} else {
+			delete comp;
+		}
 	}
 }
 
