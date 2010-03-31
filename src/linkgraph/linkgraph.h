@@ -108,7 +108,7 @@ public:
 	 */
 	FORCEINLINE uint GetSize() const {return this->num_nodes;}
 
-	void SetSize(uint size);
+	void SetSize();
 
 	NodeID AddNode(Station *st);
 
