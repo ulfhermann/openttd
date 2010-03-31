@@ -1,7 +1,6 @@
 /** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
 #include "linkgraph.h"
-#include "../date_func.h"
 #include "../variables.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
@@ -9,90 +8,85 @@
 #include "../moving_average.h"
 #include <queue>
 
+/**
+ * Global array of link graphs, one for each cargo.
+ */
 LinkGraph _link_graphs[NUM_CARGO];
 
-typedef std::map<StationID, NodeID> ReverseNodeIndex;
+/**
+ * 1. Build the link graph component containing the given station by using BFS on the link stats.
+ * 2. Set every included station's last_component to the new component's ID (this->current_component_id).
+ * 3. Start a link graph job with the new component.
+ * @param first Station to start the search at
+ */
+void LinkGraph::CreateComponent(Station *first) {
 
-void LinkGraph::CreateComponent(Station * first) {
-	ReverseNodeIndex index;
-	NodeID node = 0;
+	LinkGraphComponent *component = new LinkGraphComponent(this->cargo,
+			this->current_component_id);
+
+	std::map<Station *, NodeID> index;
+	index[first] = component->AddNode(first);
+
 	std::queue<Station *> search_queue;
-	LinkGraphComponent * component = NULL;
-
 	search_queue.push(first);
 
-	first->goods[this->cargo].last_component = this->current_component_id;
-	component = new LinkGraphComponent(this->cargo, this->current_component_id);
-	GoodsEntry &good = first->goods[this->cargo];
-	node = component->AddNode(this->current_station_id, good.supply, HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
-	index[this->current_station_id++] = node;
 	/* find all stations belonging to the current component */
 	while(!search_queue.empty()) {
 		Station *source = search_queue.front();
-		StationID source_id = source->index;
 		search_queue.pop();
-		GoodsEntry &good = source->goods[cargo];
-		LinkStatMap &links = good.link_stats;
+
+		LinkStatMap &links = source->goods[cargo].link_stats;
 		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
-			StationID target_id = i->first;
-			Station *target = Station::GetIfValid(target_id);
-			if (target == NULL) {
-				continue;
-			}
-			assert(target_id != source_id);
-			LinkStat &link_stat = i->second;
-			ReverseNodeIndex::iterator index_it = index.find(target_id);
+			Station *target = Station::GetIfValid(i->first);
+			if (target == NULL) continue;
+
+			std::map<Station *, NodeID>::iterator index_it = index.find(target);
 			if (index_it == index.end()) {
-				GoodsEntry &good = target->goods[cargo];
-				good.last_component = this->current_component_id;
 				search_queue.push(target);
-				node = component->AddNode(
-					target_id, good.supply,
-					HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE)
-				);
-				index[target_id] = node;
+				NodeID node = component->AddNode(target);
+				index[target] = node;
+
+				component->AddEdge(index[source], node,
+						DistanceManhattan(source->xy, target->xy),
+						i->second.Capacity());
 			} else {
-				node = index_it->second;
+				component->AddEdge(index[source], index_it->second,
+						DistanceManhattan(source->xy, index_it->first->xy),
+						i->second.Capacity());
 			}
-			
-			assert(!link_stat.IsNull());
-			component->AddEdge(index[source_id], node, link_stat.Capacity());
 		}
 	}
+
 	/* here the list of nodes and edges for this component is complete. */
-	component->CalculateDistances();
-	LinkGraphJob *job = new LinkGraphJob(component);
-	assert(job != NULL);
-	job->SpawnThread(this->cargo);
-	this->jobs.push_back(job);
+	assert(this->current_job == NULL);
+	this->current_job = new LinkGraphJob(component);
+	this->current_job->SpawnThread();
 }
 
+/**
+ * Looks for a suitable station to create the next link graph component from.
+ * Linearly searches all stations starting from current_station_id for one that
+ * hasn't been visited in this run over the link graph. The current run and the
+ * last run are differentiated by giving the components IDs divisible by 2
+ * every second run and ones not divisible by 2 on the other runs.
+ *
+ * If such a station is found current_station_id is set to that station's ID
+ * and CreateComponent is called with it.
+ *
+ * The search wraps around and changes current_component_id to 0 or 1
+ * accordingly. If the starting point is reached again it stops.
+ */
 void LinkGraph::NextComponent()
 {
-	while (!Station::IsValidID(this->current_station_id) && this->current_station_id > 0) {
-		--this->current_station_id;
-	}
 	StationID last_station_id = this->current_station_id;
 
 	do {
-		/* find first station of next component */
-		if (Station::IsValidID(this->current_station_id)) {
-			Station *station = Station::Get(this->current_station_id);
-			GoodsEntry &ge = station->goods[this->cargo];
-			if (ge.last_component == INVALID_LINKGRAPH_COMPONENT ||
-					(ge.last_component + this->current_component_id) % 2 != 0) {
-				/* has not been seen in this run through the graph */
 
-				LinkStatMap &links = station->goods[cargo].link_stats;
-				if (!links.empty()) {
-					this->current_component_id += 2;
-					CreateComponent(station);
-					return;
-				}
-			}
-		}
-
-		if (++this->current_station_id == Station::GetPoolSize()) {
+		if (++this->current_station_id >= Station::GetPoolSize()) {
+			/* Wrap around and recycle the component IDs. Use different
+			 * divisibility by 2 than in the last run so that we can find out
+			 * which stations haven't been seen in this run.
+			 */
 			this->current_station_id = 0;
 			if (this->current_component_id % 2 == 0) {
 				this->current_component_id = 1;
@@ -100,132 +94,192 @@ void LinkGraph::NextComponent()
 				this->current_component_id = 0;
 			}
 		}
+
+		/* find first station of next component */
+		Station *station = Station::GetIfValid(this->current_station_id);
+		if (station != NULL) {
+			GoodsEntry &ge = station->goods[this->cargo];
+			if (ge.last_component == INVALID_LINKGRAPH_COMPONENT ||
+					(ge.last_component + this->current_component_id) % 2 != 0) {
+				/* Different divisibility by 2: This station has not been seen
+				 * in the current run over the link graph.
+				 */
+
+				if (!ge.link_stats.empty()) {
+					this->current_component_id += 2;
+					CreateComponent(station);
+					return;
+				}
+			}
+		}
+
 	} while (this->current_station_id != last_station_id);
 }
 
+/**
+ * Spawn or join a link graph component if any link graph is due to do so.
+ * Spawning is done on COMPONENTS_SPAWN_TICK every day, joining on
+ * COMPONENT_JOIN_TICK. Each link graph is due every recalc_interval days.
+ */
 void OnTick_LinkGraph()
 {
 	bool spawn = (_tick_counter + LinkGraph::COMPONENTS_SPAWN_TICK) % DAY_TICKS == 0;
 	bool join =  (_tick_counter + LinkGraph::COMPONENTS_JOIN_TICK)  % DAY_TICKS == 0;
 	if (spawn || join) {
-		for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
-			if (_settings_game.linkgraph.GetDistributionType(cargo) == DT_MANUAL) continue;
-			if ((_date + cargo) % _settings_game.linkgraph.recalc_interval == 0) {
-				LinkGraph &graph = _link_graphs[cargo];
-				if (spawn) {
-					graph.NextComponent();
-				} else {
-					graph.Join();
-				}
+
+		LinkGraphSettings &settings = _settings_game.linkgraph;
+
+		/* This creates a fair distribution of all link graphs' turns over
+		 * the available dates.
+		 */
+		uint interval = settings.recalc_interval;
+		for (uint cargo = _date % interval; cargo < CT_END; cargo += interval) {
+
+			/* don't calculate a link graph if the distribution is manual */
+			if (settings.GetDistributionType(cargo) == DT_MANUAL) continue;
+
+			if (spawn) {
+				_link_graphs[cargo].NextComponent();
+			} else {
+				_link_graphs[cargo].Join();
 			}
 		}
 	}
 }
 
-LinkGraph::LinkGraph() : current_component_id(1), current_station_id(0), cargo(CT_INVALID)
+/**
+ * Create a link graph. Infer the cargo id from the position in the global link
+ * graphs array. This is sort of hackish, but as we don't get the chance to
+ * pass parameters to the link graph constructor when building _link_graphs I
+ * don't see a way to avoid it.
+ */
+LinkGraph::LinkGraph() : current_component_id(1), current_station_id(0),
+		cargo(CT_INVALID), current_job(NULL)
 {
 	for (CargoID i = CT_BEGIN; i != CT_END; ++i) {
 		if (this == &(_link_graphs[i])) {
-			cargo = i;
+			this->cargo = i;
+			break;
 		}
-	}
-}
-
-NodeID LinkGraphComponent::AddNode(StationID st, uint supply, uint demand) {
-	nodes.push_back(Node(st, supply, demand));
-	for(NodeID i = 0; i < num_nodes; ++i) {
-		edges[i].push_back(Edge());
-	}
-	edges.push_back(std::vector<Edge>(++num_nodes));
-	return num_nodes - 1;
-}
-
-void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity) {
-	assert(from != to);
-	edges[from][to].capacity = capacity;
-}
-
-void LinkGraphComponent::CalculateDistances() {
-	for(NodeID i = 0; i < num_nodes; ++i) {
-		for(NodeID j = 0; j < i; ++j) {
-			Station *st1 = Station::Get(nodes[i].station);
-			Station *st2 = Station::Get(nodes[j].station);
-			uint distance = DistanceManhattan(st1->xy, st2->xy);
-			edges[i][j].distance = distance;
-			edges[j][i].distance = distance;
-		}
-	}
-}
-
-void LinkGraphComponent::SetSize(uint size) {
-	num_nodes = size;
-	nodes.resize(num_nodes);
-	edges.resize(num_nodes, std::vector<Edge>(num_nodes));
-}
-
-LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID col) :
-	settings(_settings_game.linkgraph),
-	cargo(car),
-	num_nodes(0),
-	index(col)
-{
-}
-
-void LinkGraph::Join() {
-	while (!this->jobs.empty()) {
-		LinkGraphJob *job = this->jobs.front();
-		assert(job != NULL);
-
-		/* also join if join date is far in the future. This prevents excessive memory use when resetting time */
-		if (job->GetJoinDate() > _date && job->GetJoinDate() <= _date + _settings_game.linkgraph.recalc_interval) {
-			return;
-		}
-		job->Join();
-
-		delete job;
-		this->jobs.pop_front();
 	}
 }
 
 /**
- * add a preconstructed link graph component and build a LinkGraphJob around it.
+ * Add a node to the component and create empty edges associated with it. Set
+ * the station's last_component to this component.
+ * @param st the new node's station
+ * @return the new node's ID
+ */
+NodeID LinkGraphComponent::AddNode(Station *st) {
+	GoodsEntry &good = st->goods[cargo];
+	good.last_component = this->index;
+
+	this->nodes.push_back(Node(st->index, good.supply,
+			HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE)));
+	this->edges.push_back(std::vector<Edge>(this->num_nodes + 1));
+	for(NodeID i = 0; i < this->num_nodes; ++i) {
+		this->edges[i].push_back(Edge());
+	}
+
+	return this->num_nodes++;
+}
+
+/**
+ * Fill an edge with values from a link.
+ * @param from source node of the link
+ * @param to destination node of the link
+ * @param distance distance of the link
+ * @param capacity capacity of the link
+ */
+FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint distance, uint capacity) {
+	assert(from != to);
+	this->edges[from][to].distance = distance;
+	this->edges[from][to].capacity = capacity;
+}
+
+/**
+ * Resize the component and either truncate it or fill it with empty nodes and
+ * edges. Used when loading from save games.
+ * @param size the desired number of nodes for the component
+ */
+void LinkGraphComponent::SetSize(uint size) {
+	for(NodeID i = 0; i < min(this->num_nodes, size); ++i) {
+		this->edges[i].resize(size);
+	}
+	this->nodes.resize(size);
+	this->edges.resize(size, std::vector<Edge>(size));
+	this->num_nodes = size;
+}
+
+/**
+ * Create an empty component with the specified cargo and ID.
+ * @param car the cargo for this component
+ * @param id the ID for this component
+ */
+LinkGraphComponent::LinkGraphComponent(CargoID car, LinkGraphComponentID id) :
+	settings(_settings_game.linkgraph),
+	cargo(car),
+	num_nodes(0),
+	index(id)
+{}
+
+/**
+ * Merge the current job if the join date has passed or if it has been canceled
+ * by resetting the date.
+ */
+void LinkGraph::Join() {
+	if (this->current_job != NULL && (this->current_job->GetJoinDate() <= _date ||
+			this->current_job->GetJoinDate() >
+			_date + _settings_game.linkgraph.recalc_interval)) {
+		this->current_job->Join();
+		delete this->current_job;
+		this->current_job = NULL;
+	}
+}
+
+/**
+ * Add a preconstructed link graph component and build a LinkGraphJob around it.
  * This is intended for loading a savegame.
  * @param component the component to be added
  * @param join the join time for the job
  */
 void LinkGraph::AddComponent(LinkGraphComponent *component, uint join) {
-	LinkGraphJob *job = new LinkGraphJob(component, join);
-	assert(job != NULL);
-	job->SpawnThread(this->cargo);
-	this->jobs.push_back(job);
+	assert(this->current_job == NULL);
+	this->current_job = new LinkGraphJob(component, join);
+	this->current_job->SpawnThread();
 }
 
-void LinkGraphJob::Run() {
-	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
-		ComponentHandler *handler = *i;
-		handler->Run(this->component);
-	}
-}
-
+/**
+ * clean up the hadnlers, component and thread.
+ */
 LinkGraphJob::~LinkGraphJob() {
 	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
 		ComponentHandler *handler = *i;
 		delete handler;
 	}
-	this->handlers.clear();
 	DEBUG(misc, 2, "removing job for cargo %d with index %d and join date %d at %d", this->component->GetCargo(),
 			this->component->GetIndex(), this->join_date, _date);
 	delete this->component;
 	delete this->thread;
 }
 
-void RunLinkGraphJob(void *j) {
+/**
+ * Run all handlers for the given Job.
+ * @param j a pointer to a link graph job
+ */
+void LinkGraphJob::RunLinkGraphJob(void *j) {
 	LinkGraphJob *job = (LinkGraphJob *)j;
-	job->Run();
+	for (HandlerList::iterator i = job->handlers.begin(); i != job->handlers.end(); ++i) {
+		(*i)->Run(job->component);
+	}
 }
 
-void LinkGraphJob::SpawnThread(CargoID cargo) {
-	if (!ThreadObject::New(&(RunLinkGraphJob), this, &thread)) {
+/**
+ * Spawn a thread if possible and run the link graph job in the thread. If
+ * that's not possible run the job right now in the current thread.
+ */
+void LinkGraphJob::SpawnThread() {
+	if (!ThreadObject::New(&(LinkGraphJob::RunLinkGraphJob), this, &thread)) {
 		thread = NULL;
 		/* Of course this will hang a bit.
 		 * On the other hand, if you want to play games which make this hang noticably
@@ -235,18 +289,15 @@ void LinkGraphJob::SpawnThread(CargoID cargo) {
 		 * smaller grained "Step" method for all handlers and add some more ticks where
 		 * "Step" is called. No problem in principle.
 		 */
-		RunLinkGraphJob(this);
+		LinkGraphJob::RunLinkGraphJob(this);
 	}
 }
 
-LinkGraphJob::LinkGraphJob(LinkGraphComponent *c) :
-	thread(NULL),
-	join_date(_date + c->GetSettings().recalc_interval),
-	component(c)
-{
-	DEBUG(misc, 2, "new job for cargo %d with index %d and join date %d at %d", c->GetCargo(), c->GetIndex(), join_date, _date);
-}
-
+/**
+ * Create a link graph job from a component and a join date
+ * @param c the component to work on
+ * @param join the join date for the job
+ */
 LinkGraphJob::LinkGraphJob(LinkGraphComponent *c, Date join) :
 	thread(NULL),
 	join_date(join),
@@ -255,18 +306,23 @@ LinkGraphJob::LinkGraphJob(LinkGraphComponent *c, Date join) :
 	DEBUG(misc, 2, "new job for cargo %d with index %d and join date %d at %d", c->GetCargo(), c->GetIndex(), join_date, _date);
 }
 
+/**
+ * Clear the link graph: join all jobs and set current_station_id and
+ * current_component_id to their start values.
+ */
 void LinkGraph::Clear() {
-	for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
-		LinkGraphJob * job = *i;
-		assert(job != NULL);
-		job->Join();
-		delete job;
+	if (this->current_job != NULL) {
+		this->current_job->Join();
+		delete this->current_job;
+		this->current_job = NULL;
 	}
-	jobs.clear();
-	current_component_id = 1;
-	current_station_id = 0;
+	this->current_component_id = 1;
+	this->current_station_id = 0;
 }
 
+/**
+ * Clear all link graphs. Used when loading a game.
+ */
 void InitializeLinkGraphs() {
 	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Clear();
 }
