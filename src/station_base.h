@@ -19,7 +19,6 @@
 #include "industry_type.h"
 #include "linkgraph/linkgraph_type.h"
 #include "moving_average.h"
-#include <list>
 #include <map>
 
 typedef Pool<BaseStation, StationID, 32, 64000> StationPool;
@@ -127,16 +126,16 @@ struct GoodsEntry {
 		last_component(INVALID_LINKGRAPH_COMPONENT)
 	{}
 
-	bool pickup;            ///< if true: Cargo of this type is generated or transferred here
+	bool pickup;                         ///< if true: Cargo of this type is generated or transferred here
 	byte days_since_pickup;
 	byte rating;
 	byte last_speed;
 	byte last_age;
-	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
-	uint acceptance;        ///< Sum of tile acceptance numbers for this cargo in catchment area of the station
-	uint supply;            ///< Cargo supplied last month
-	uint supply_new;        ///< Cargo supplied so far this month
-	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
+	StationCargoList cargo;              ///< The cargo packets of cargo waiting in this station
+	uint acceptance;                     ///< Sum of tile acceptance numbers for this cargo in catchment area of the station
+	uint supply;                         ///< Cargo supplied last month
+	uint supply_new;                     ///< Cargo supplied so far this month
+	LinkStatMap link_stats;              ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
 };
 
