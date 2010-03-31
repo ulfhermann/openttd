@@ -261,13 +261,12 @@ void LinkGraph::AddComponent(LinkGraphComponent *component, uint join)
 }
 
 /**
- * clean up the hadnlers, component and thread.
+ * clean up the handlers, component and thread.
  */
 LinkGraphJob::~LinkGraphJob()
 {
 	for (HandlerList::iterator i = this->handlers.begin(); i != this->handlers.end(); ++i) {
-		ComponentHandler *handler = *i;
-		delete handler;
+		delete (*i);
 	}
 	DEBUG(misc, 2, "removing job for cargo %d with index %d and join date %d at %d", this->component->GetCargo(),
 			this->component->GetIndex(), this->join_date, _date);
