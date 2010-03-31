@@ -165,7 +165,9 @@ LinkGraph::LinkGraph() :
 
 /**
  * Add a node to the component and create empty edges associated with it. Set
- * the station's last_component to this component.
+ * the station's last_component to this component. Calculate the distances to all
+ * other nodes. The distances to _all_ nodes are important as the demand
+ * calculator relies on their availability.
  * @param st the new node's station
  * @return the new node's ID
  */
