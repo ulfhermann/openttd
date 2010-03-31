@@ -19,7 +19,6 @@
 #include "industry_type.h"
 #include "linkgraph/linkgraph_type.h"
 #include "moving_average.h"
-#include <list>
 #include <map>
 #include <set>
 
@@ -219,11 +218,11 @@ struct GoodsEntry {
 	byte rating;
 	byte last_speed;
 	byte last_age;
-	StationCargoList cargo; ///< The cargo packets of cargo waiting in this station
-	uint supply;            ///< Cargo supplied last month
-	uint supply_new;        ///< Cargo supplied so far this month
-	FlowStatMap flows;      ///< The planned flows through this station
-	LinkStatMap link_stats; ///< capacities and usage statistics for outgoing links
+	StationCargoList cargo;              ///< The cargo packets of cargo waiting in this station
+	uint supply;                         ///< Cargo supplied last month
+	uint supply_new;                     ///< Cargo supplied so far this month
+	FlowStatMap flows;                   ///< The planned flows through this station
+	LinkStatMap link_stats;              ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
 	
 	FlowStat GetSumFlowVia(StationID via) const;

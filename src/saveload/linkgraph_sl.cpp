@@ -8,19 +8,11 @@
 
 const SettingDesc *GetSettingDescription(uint index);
 
-static uint32 _num_components;
 static Date _join_date;
-
-enum LinkGraphSaveLoadType {
-	LGRP_GRAPH = 0,
-	LGRP_COMPONENT = 1,
-	LGRP_NODE = 2,
-	LGRP_EDGE = 3,
-};
 
 /**
  * Get a SaveLoad array for a linkgraph component. The settings struct is derived from
- * the global settings saveload array. The exact entries are calcuated when the function
+ * the global settings saveload array. The exact entries are calculated when the function
  * is called the first time.
  * @return an array of SaveLoad structs
  */
@@ -62,88 +54,92 @@ const SaveLoad *GetLinkGraphComponentDesc() {
 			saveloads.push_back(_component_desc[i++]);
 		} while (saveloads.back().cmd != SL_END);
 	}
+
 	return &saveloads[0];
 }
 
-const SaveLoad *GetLinkGraphDesc(uint type) {
+/**
+ * Get a SaveLoad description for a link graph.
+ * @return the SaveLoad array to save/load a link graph
+ */
+const SaveLoad *GetLinkGraphDesc() {
 
 	static const SaveLoad _linkgraph_desc[] = {
-		SLEG_CONDVAR(           _num_components,      SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraph, current_component_id, SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraph, current_station_id,   SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_CONDVAR(LinkGraph, cargo,                SLE_UINT8,  SL_COMPONENTS, SL_MAX_VERSION),
 		 SLE_END()
 	};
-
-	static const SaveLoad * _component_desc = GetLinkGraphComponentDesc();
-
-	/* Edges and nodes are saved in the correct order, so we don't need to save their ids. */
-
-	static const SaveLoad _node_desc[] = {
-		 SLE_CONDVAR(Node, supply,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
-		 SLE_CONDVAR(Node, demand,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
-		 SLE_CONDVAR(Node, station,   SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
-		 SLE_END()
-	};
-
-	static const SaveLoad _edge_desc[] = {
-		 SLE_CONDVAR(Edge, distance,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
-		 SLE_CONDVAR(Edge, capacity,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
-		 SLE_CONDVAR(Edge, next_edge, SLE_UINT32,        SL_MCF, SL_MAX_VERSION),
-		 SLE_END()
-	};
-
-	static const SaveLoad *_lgrp_descs[] = {
-		_linkgraph_desc,
-		_component_desc,
-		_node_desc,
-		_edge_desc,
-	};
-
-	return _lgrp_descs[type];
-
+	return _linkgraph_desc;
 }
 
+/* Edges and nodes are saved in the correct order, so we don't need to save their ids. */
+
+/**
+ * SaveLoad desc for a link graph node.
+ */
+static const SaveLoad _node_desc[] = {
+	 SLE_CONDVAR(Node, supply,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, demand,    SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Node, station,   SLE_UINT16, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_END()
+};
+
+/**
+ * SaveLoad desc for a link graph edge.
+ */
+static const SaveLoad _edge_desc[] = {
+	 SLE_CONDVAR(Edge, distance,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Edge, capacity,  SLE_UINT32, SL_COMPONENTS, SL_MAX_VERSION),
+	 SLE_CONDVAR(Edge, next_edge, SLE_UINT32,        SL_MCF, SL_MAX_VERSION),
+	 SLE_END()
+};
+
+/**
+ * Save/load a component of a link graph
+ * @param comp the component to be saved or loaded
+ */
 static void SaveLoad_LinkGraphComponent(LinkGraphComponent *comp) {
 	for (NodeID from = 0; from < comp->GetSize(); ++from) {
 		Node *node = &comp->GetNode(from);
-		SlObject(node, GetLinkGraphDesc(LGRP_NODE));
+		SlObject(node, _node_desc);
 		node->undelivered_supply = node->supply;
 		for (NodeID to = 0; to < comp->GetSize(); ++to) {
-			SlObject(&comp->GetEdge(from, to), GetLinkGraphDesc(LGRP_EDGE));
+			SlObject(&comp->GetEdge(from, to), _edge_desc);
 		}
 	}
 }
 
+/**
+ * Save all link graphs.
+ */
 static void DoSave_LGRP(void *)
 {
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
-		_num_components = (uint32)graph.GetNumJobs();
-		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
-		JobList &jobs = graph.GetJobs();
-		for (JobList::iterator i = jobs.begin(); i != jobs.end(); ++i) {
-			LinkGraphJob *job = *i;
-			LinkGraphComponent *comp = job->GetComponent();
-			_join_date = job->GetJoinDate();
-			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
-			SaveLoad_LinkGraphComponent(comp);
-		}
+		SlObject(&graph, GetLinkGraphDesc());
+
+		LinkGraphJob *job = graph.GetCurrentJob();
+		LinkGraphComponent *comp = job->GetComponent();
+		_join_date = job->GetJoinDate();
+		SlObject(comp, GetLinkGraphComponentDesc());
+		SaveLoad_LinkGraphComponent(comp);
 	}
 }
 
+/**
+ * Load all link graphs.
+ */
 static void Load_LGRP()
 {
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
-		SlObject(&graph, GetLinkGraphDesc(LGRP_GRAPH));
-		for (uint32 i = 0; i < _num_components; ++i) {
-			LinkGraphComponent *comp = new LinkGraphComponent(cargo);
-			SlObject(comp, GetLinkGraphDesc(LGRP_COMPONENT));
-			comp->SetSize(comp->GetSize());
-			SaveLoad_LinkGraphComponent(comp);
-			graph.AddComponent(comp, _join_date);
-		}
+		SlObject(&graph, GetLinkGraphDesc());
+		LinkGraphComponent *comp = new LinkGraphComponent(cargo);
+		SlObject(comp, GetLinkGraphComponentDesc());
+		comp->SetSize(comp->GetSize());
+		SaveLoad_LinkGraphComponent(comp);
+		graph.AddComponent(comp, _join_date);
 	}
 }
 

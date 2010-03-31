@@ -358,7 +358,7 @@ struct EconomySettings {
 };
 
 struct LinkGraphSettings {
-	uint16 recalc_interval;                     ///< minimum interval (in days) between subsequent recalculations of the same component of the link graph
+	uint16 recalc_interval;                     ///< minimum interval (in days) between subsequent calculations of components in the same link graph
 	DistributionTypeByte distribution_pax;      ///< distribution type for passengers
 	DistributionTypeByte distribution_mail;     ///< distribution type for mail
 	DistributionTypeByte distribution_express;  ///< distribution type for express cargo class
