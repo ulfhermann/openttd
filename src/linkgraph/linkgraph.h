@@ -59,7 +59,7 @@ public:
 	 * @param capacity capacity of the link
 	 */
 	FORCEINLINE Edge(uint distance = 0, uint capacity = 0) :
-		distance(distance), capacity(capacity), demand(0) {}
+		distance(distance), capacity(capacity), demand(0), unsatisfied_demand(0), flow(0), next_edge(INVALID_NODE) {}
 
 	uint distance;           ///< length of the link
 	uint capacity;           ///< capacity of the link
