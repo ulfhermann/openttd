@@ -43,7 +43,9 @@ public:
 		this->station = st;
 	}
 
-	~Node();
+	void Clear();
+
+	FORCEINLINE ~Node() {this->Clear();}
 
 	uint supply;             ///< supply at the station
 	uint undelivered_supply; ///< amount of supply that hasn't been distributed yet
