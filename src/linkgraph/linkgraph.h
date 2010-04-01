@@ -35,8 +35,13 @@ public:
 	 * @param sup supply of cargo at the station last month
 	 * @param dem acceptance for cargo at the station
 	 */
-	FORCEINLINE Node(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0) :
-		supply(sup), undelivered_supply(sup), demand(dem), station(st) {}
+	FORCEINLINE void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0)
+	{
+		this->supply = sup;
+		this->undelivered_supply = sup;
+		this->demand = dem;
+		this->station = st;
+	}
 
 	~Node();
 
@@ -63,8 +68,15 @@ public:
 	 * @param distance length of the link as manhattan distance
 	 * @param capacity capacity of the link
 	 */
-	FORCEINLINE Edge(uint distance = 0, uint capacity = 0) :
-		distance(distance), capacity(capacity), demand(0), unsatisfied_demand(0), flow(0), next_edge(INVALID_NODE) {}
+	FORCEINLINE void Init(uint distance = 0, uint capacity = 0)
+	{
+		this->distance = distance;
+		this->capacity = capacity;
+		this->demand = 0;
+		this->unsatisfied_demand = 0;
+		this->flow = 0;
+		this->next_edge = INVALID_NODE;
+	}
 
 	uint distance;           ///< length of the link
 	uint capacity;           ///< capacity of the link
@@ -85,7 +97,9 @@ class LinkGraphComponent {
 	typedef std::vector<std::vector<Edge> > EdgeMatrix;
 
 public:
-	LinkGraphComponent(CargoID cargo, LinkGraphComponentID c = 0);
+	LinkGraphComponent();
+
+	void Init(LinkGraphComponentID id);
 
 	/**
 	 * Get a reference to an edge.
@@ -139,9 +153,9 @@ public:
 	 */
 	FORCEINLINE NodeID GetFirstEdge(NodeID from) {return edges[from][from].next_edge;}
 
-private:
-	friend const SaveLoad *GetLinkGraphComponentDesc();
+	FORCEINLINE void Clear() {this->num_nodes = 0;}
 
+protected:
 	LinkGraphSettings settings; ///< Copy of _settings_game.linkgraph at creation time
 	CargoID cargo;              ///< Cargo of this component's link graph
 	uint num_nodes;             ///< Number of nodes in the component
@@ -151,7 +165,8 @@ private:
 };
 
 /**
- * A handler doing "something" on a link graph.
+ * A handler doing "something" on a link graph component. It must not keep any
+ * state as it is called concurrently from different threads.
  */
 class ComponentHandler {
 public:
@@ -168,41 +183,42 @@ public:
 };
 
 /**
- * A job to be executed on a link graph component. It contains a component and
- * a list of handlers to be run on it. It may or may not run in a thread and
- * contains a thread object for this option.
+ * A job to be executed on a link graph component. It inherits a component and
+ * keeps a static list of handlers to be run on it. It may or may not run in a
+ * thread and contains a thread object for this option.
  */
-class LinkGraphJob {
+class LinkGraphJob : public LinkGraphComponent {
 	typedef std::list<ComponentHandler *> HandlerList;
 public:
-	LinkGraphJob(LinkGraphComponent *c, Date join = _date + _settings_game.linkgraph.recalc_interval);
+
+	LinkGraphJob() : thread(NULL) {}
 
 	/**
 	 * Add a handler to the end of the list.
 	 * @param handler the handler to be added
 	 */
-	FORCEINLINE void AddHandler(ComponentHandler *handler)
-		{this->handlers.push_back(handler);}
+	static void AddHandler(ComponentHandler *handler)
+		{LinkGraphJob::_handlers.push_back(handler);}
+
+	static void ClearHandlers();
 
 	void SpawnThread();
 
 	/**
 	 * Join the calling thread with this job's thread if threading is enabled.
 	 */
-	FORCEINLINE void Join() {if (this->thread != NULL) this->thread->Join();}
+	FORCEINLINE void Join() {
+		if (this->thread != NULL) {
+			this->thread->Join();
+			delete this->thread;
+			this->thread = NULL;
+		}
+	}
 
 	/**
-	 * Get the date when the job should be finished and joined.
-	 * @return the join date
+	 * Destructor; Clean up the thread if it's there.
 	 */
-	FORCEINLINE Date GetJoinDate() {return this->join_date;}
-
-	/**
-	 * Get the component associated with this job.
-	 */
-	FORCEINLINE LinkGraphComponent *GetComponent() {return this->component;}
-
-	~LinkGraphJob();
+	~LinkGraphJob() {this->Join();}
 
 	static void RunLinkGraphJob(void *j);
 private:
@@ -213,38 +229,25 @@ private:
 	 */
 	LinkGraphJob(const LinkGraphJob &other) {NOT_REACHED();}
 
-	ThreadObject * thread;          ///< Thread the job is running in or NULL if it's running in the main thread
-	Date join_date;                 ///< Date when the job is to be finished and merged with the main game
-	LinkGraphComponent * component; ///< Component the job is working on
-	HandlerList handlers;           ///< Handlers the job is executing
+	ThreadObject *thread;           ///< Thread the job is running in or NULL if it's running in the main thread
+	static HandlerList _handlers;   ///< Handlers the job is executing
 };
 
 /**
- * A link graph consisting of several jobs and their associated components.
- *
+ * A link graph, inheriting one job.
  */
-class LinkGraph {
+class LinkGraph : public LinkGraphJob {
 public:
-	LinkGraph();
-	void Clear();
-
 	/**
-	 * Get the cargo type this link graph works on.
-	 * @return the cargo type
+	 * Create a link graph.
 	 */
-	FORCEINLINE CargoID GetCargo() const {return this->cargo;}
+	LinkGraph() : current_station_id(0) {}
+
+	void Init(CargoID cargo);
 
 	void NextComponent();
 
 	void Join();
-
-	/**
-	 * Get the current link graph job.
-	 * @return the job
-	 */
-	FORCEINLINE LinkGraphJob *GetCurrentJob() {return this->current_job;}
-
-	void AddComponent(LinkGraphComponent *component, uint join);
 
 	const static uint COMPONENTS_JOIN_TICK  = 21; ///< tick when jobs are joined every day
 	const static uint COMPONENTS_SPAWN_TICK = 58; ///< tick when jobs are spawned every day
@@ -254,10 +257,7 @@ private:
 
 	void CreateComponent(Station *first);
 
-	LinkGraphComponentID current_component_id; ///< ID of the last component created in this graph
-	StationID current_station_id;              ///< ID of the last station examined while creating components
-	CargoID cargo;                             ///< Cargo type this graph works on
-	LinkGraphJob *current_job;                 ///< The currently running job or NULL if there is none
+	StationID current_station_id; ///< ID of the last station examined while creating components
 };
 
 class Path {
