@@ -43,7 +43,9 @@ public:
 		this->station = st;
 	}
 
-	~Node();
+	void Clear();
+
+	FORCEINLINE ~Node() {this->Clear();}
 
 	void ExportFlows(FlowStatMap &station_flows, CargoID cargo);
 

@@ -163,6 +163,8 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 	if (do_resize) {
 		this->nodes.push_back(Node());
 		this->edges.push_back(std::vector<Edge>(this->num_nodes + 1));
+	} else {
+		this->nodes[this->num_nodes].Clear();
 	}
 
 	this->nodes[this->num_nodes].Init(st->index, good.supply,
@@ -428,11 +430,15 @@ void LinkGraph::Init(CargoID cargo)
 	this->LinkGraphComponent::cargo = cargo;
 }
 
-Node::~Node()
-{
+/**
+ * Clear a node and prepare it for recycling.
+ */
+void Node::Clear() {
 	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
 		delete (*i);
 	}
+	this->paths.clear();
+	this->flows.clear();
 }
 
 /**
