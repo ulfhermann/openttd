@@ -29,23 +29,12 @@ typedef std::map<StationID, FlowViaMap> FlowMap;
  */
 class Node {
 public:
+	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
+
 	/**
-	 * Create a node.
-	 * @param st ID of the associated station
-	 * @param sup supply of cargo at the station last month
-	 * @param dem acceptance for cargo at the station
+	 * Clear a node on destruction to delete paths that might remain.
 	 */
-	FORCEINLINE void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0)
-	{
-		this->supply = sup;
-		this->undelivered_supply = sup;
-		this->demand = dem;
-		this->station = st;
-	}
-
-	void Clear();
-
-	FORCEINLINE ~Node() {this->Clear();}
+	~Node() {this->Init();}
 
 	void ExportFlows(FlowStatMap &station_flows, CargoID cargo);
 
@@ -61,7 +50,10 @@ private:
 };
 
 /**
- * An edge in the link graph. Corresponds to a link between two stations.
+ * An edge in the link graph. Corresponds to a link between two stations or at
+ * least the distance between them. Edges from one node to itself contain the
+ * ID of the opposite Node of the first active edge (i.e. not just distance) in
+ * the column as next_edge.
  */
 class Edge {
 public:
@@ -155,6 +147,9 @@ public:
 	 */
 	FORCEINLINE NodeID GetFirstEdge(NodeID from) {return edges[from][from].next_edge;}
 
+	/**
+	 * Set the number of nodes to 0 to mark this component as done.
+	 */
 	FORCEINLINE void Clear() {this->num_nodes = 0;}
 
 protected:
