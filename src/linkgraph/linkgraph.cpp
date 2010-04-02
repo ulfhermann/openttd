@@ -162,8 +162,6 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 	if (do_resize) {
 		this->nodes.push_back(Node());
 		this->edges.push_back(std::vector<Edge>(this->num_nodes + 1));
-	} else {
-		this->nodes[this->num_nodes].Clear();
 	}
 
 	this->nodes[this->num_nodes].Init(st->index, good.supply,
@@ -206,9 +204,6 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capaci
  */
 void LinkGraphComponent::SetSize()
 {
-	for (int i = 0; i < min(this->num_nodes, this->nodes.size()); ++i) {
-		this->nodes[i].Clear();
-	}
 	if (this->nodes.size() < this->num_nodes) {
 		this->nodes.resize(this->num_nodes);
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
@@ -351,9 +346,18 @@ void LinkGraph::Init(CargoID cargo)
 }
 
 /**
- * Clear a node and prepare it for recycling.
+ * (Re-)initialize a node.
+ * @param st ID of the associated station
+ * @param sup supply of cargo at the station last month
+ * @param dem acceptance for cargo at the station
  */
-void Node::Clear() {
+void Node::Init(StationID st, uint sup, uint dem)
+{
+	this->supply = sup;
+	this->undelivered_supply = sup;
+	this->demand = dem;
+	this->station = st;
+
 	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
 		delete (*i);
 	}
