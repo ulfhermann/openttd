@@ -168,6 +168,10 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 			HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 
 	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
+
+	/* reset the first edge starting at the new node */
+	new_edges[this->num_nodes].next_edge = INVALID_NODE;
+
 	for(NodeID i = 0; i < this->num_nodes; ++i) {
 		uint distance = DistanceManhattan(st->xy, Station::Get(this->nodes[i].station)->xy);
 		if (do_resize) this->edges[i].push_back(Edge());
