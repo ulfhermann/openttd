@@ -165,10 +165,12 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 	this->nodes[this->num_nodes].Init(st->index, good.supply,
 			HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 
+	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
 	for(NodeID i = 0; i < this->num_nodes; ++i) {
 		uint distance = DistanceManhattan(st->xy, Station::Get(this->nodes[i].station)->xy);
 		if (do_resize) this->edges[i].push_back(Edge());
-		this->edges[this->num_nodes][i].Init(distance);
+		new_edges[i].Init(distance);
+		this->edges[i][this->num_nodes].Init(distance);
 	}
 
 	return this->num_nodes++;
@@ -228,6 +230,8 @@ void LinkGraphComponent::Init(LinkGraphComponentID id)
 void LinkGraph::Join()
 {
 	this->LinkGraphJob::Join();
+
+	this->LinkGraphComponent::Clear();
 }
 
 /**
