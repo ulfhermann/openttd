@@ -165,17 +165,21 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 	if (do_resize) {
 		this->nodes.push_back(Node());
 		this->edges.push_back(std::vector<Edge>(this->num_nodes + 1));
-	} else {
-		this->nodes[this->num_nodes].Clear();
 	}
 
 	this->nodes[this->num_nodes].Init(st->index, good.supply,
 			HasBit(good.acceptance_pickup, GoodsEntry::ACCEPTANCE));
 
+	std::vector<Edge> &new_edges = this->edges[this->num_nodes];
+
+	/* reset the first edge starting at the new node */
+	new_edges[this->num_nodes].next_edge = INVALID_NODE;
+
 	for(NodeID i = 0; i < this->num_nodes; ++i) {
 		uint distance = DistanceManhattan(st->xy, Station::Get(this->nodes[i].station)->xy);
 		if (do_resize) this->edges[i].push_back(Edge());
-		this->edges[this->num_nodes][i].Init(distance);
+		new_edges[i].Init(distance);
+		this->edges[i][this->num_nodes].Init(distance);
 	}
 	return this->num_nodes++;
 }
@@ -207,9 +211,6 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capaci
  */
 void LinkGraphComponent::SetSize()
 {
-	for (int i = 0; i < min(this->num_nodes, this->nodes.size()); ++i) {
-		this->nodes[i].Clear();
-	}
 	if (this->nodes.size() < this->num_nodes) {
 		this->nodes.resize(this->num_nodes);
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
@@ -318,6 +319,7 @@ void Node::ExportFlows(FlowStatMap &station_flows, CargoID cargo) {
 void LinkGraph::Join()
 {
 	this->LinkGraphJob::Join();
+
 	for(NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
 		Node &node = this->GetNode(node_id);
 		if (Station::IsValidID(node.station)) {
@@ -328,6 +330,8 @@ void LinkGraph::Join()
 			}
 		}
 	}
+
+	this->LinkGraphComponent::Clear();
 }
 
 /**
@@ -440,9 +444,18 @@ void LinkGraph::Init(CargoID cargo)
 }
 
 /**
- * Clear a node and prepare it for recycling.
+ * (Re-)initialize a node.
+ * @param st ID of the associated station
+ * @param sup supply of cargo at the station last month
+ * @param dem acceptance for cargo at the station
  */
-void Node::Clear() {
+void Node::Init(StationID st, uint sup, uint dem)
+{
+	this->supply = sup;
+	this->undelivered_supply = sup;
+	this->demand = dem;
+	this->station = st;
+
 	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
 		delete (*i);
 	}
