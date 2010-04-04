@@ -1662,7 +1662,7 @@ void Vehicle::LeaveStation()
 		}
 	} else {
 		this->CancelReservation(INVALID_STATION, st);
-		DEBUG(misc, 0, "orders are NULL");
+		DEBUG(misc, 1, "orders are NULL");
 		RecalcFrozen(st);
 	}
 
