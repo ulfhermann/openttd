@@ -77,6 +77,7 @@ void LinkGraph::CreateComponent(Station *first)
  */
 void LinkGraph::NextComponent()
 {
+	if (this->GetSize() > 0) return; // don't mess with running jobs (might happen when changing interval)
 	StationID last_station_id = this->current_station_id;
 	LinkGraphComponentID current_component_id = this->LinkGraphComponent::index;
 
@@ -230,6 +231,7 @@ LinkGraphComponent::LinkGraphComponent() :
  */
 void LinkGraphComponent::Init(LinkGraphComponentID id)
 {
+	assert(this->num_nodes == 0);
 	this->index = id;
 	this->settings = _settings_game.linkgraph;
 }
@@ -409,8 +411,9 @@ Path::Path(NodeID n, bool source)  :
  */
 void LinkGraphJob::SpawnThread()
 {
-	if (!ThreadObject::New(&(LinkGraphJob::RunLinkGraphJob), this, &thread)) {
-		thread = NULL;
+	assert(this->thread == NULL);
+	if (!ThreadObject::New(&(LinkGraphJob::RunLinkGraphJob), this, &(this->thread))) {
+		this->thread = NULL;
 		/* Of course this will hang a bit.
 		 * On the other hand, if you want to play games which make this hang noticably
 		 * on a platform without threads then you'll probably get other problems first.
@@ -462,12 +465,12 @@ void Node::Init(StationID st, uint sup, uint dem)
  */
 void InitializeLinkGraphs()
 {
+	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Init(c);
+
 	LinkGraphJob::ClearHandlers();
 	LinkGraphJob::AddHandler(new DemandCalculator);
 	LinkGraphJob::AddHandler(new MCF1stPass);
 	LinkGraphJob::AddHandler(new FlowMapper);
 	LinkGraphJob::AddHandler(new MCF2ndPass);
 	LinkGraphJob::AddHandler(new FlowMapper);
-
-	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Init(c);
 }
