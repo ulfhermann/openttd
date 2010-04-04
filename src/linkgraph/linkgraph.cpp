@@ -74,6 +74,7 @@ void LinkGraph::CreateComponent(Station *first)
  */
 void LinkGraph::NextComponent()
 {
+	if (this->GetSize() > 0) return; // don't mess with running jobs (might happen when changing interval)
 	StationID last_station_id = this->current_station_id;
 	LinkGraphComponentID current_component_id = this->LinkGraphComponent::index;
 
@@ -220,6 +221,7 @@ LinkGraphComponent::LinkGraphComponent() :
  */
 void LinkGraphComponent::Init(LinkGraphComponentID id)
 {
+	assert(this->num_nodes == 0);
 	this->index = id;
 	this->settings = _settings_game.linkgraph;
 }
@@ -263,8 +265,9 @@ void LinkGraph::Join()
  */
 void LinkGraphJob::SpawnThread()
 {
-	if (!ThreadObject::New(&(LinkGraphJob::RunLinkGraphJob), this, &thread)) {
-		thread = NULL;
+	assert(this->thread == NULL);
+	if (!ThreadObject::New(&(LinkGraphJob::RunLinkGraphJob), this, &(this->thread))) {
+		this->thread = NULL;
 		/* Of course this will hang a bit.
 		 * On the other hand, if you want to play games which make this hang noticably
 		 * on a platform without threads then you'll probably get other problems first.
@@ -296,6 +299,7 @@ void LinkGraph::Init(CargoID cargo)
  */
 void InitializeLinkGraphs()
 {
-	LinkGraphJob::ClearHandlers();
 	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Init(c);
+
+	LinkGraphJob::ClearHandlers();
 }
