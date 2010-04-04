@@ -1,7 +1,7 @@
 
 VPATH=.:./.git/refs/heads/
 
-gitmake-all: cargodist diaglvl alteconomy autogrow-goodsentries
+gitmake-all: cd diaglvl alteconomy autogrow-goodsentries
 	touch gitmake-all
 
 check: clean gitmake-origin
@@ -36,7 +36,7 @@ global-acceptance: master
 
 supplyscale: components global-acceptance
 
-cargodist: station-gui smallmap-stats warning-sign supplyscale
+cd: station-gui smallmap-stats warning-sign supplyscale
 
 station-gui: cargomap
 
@@ -86,7 +86,7 @@ pool-copy: master
 
 autogrow-goodsentries: autogrow-vector pool-copy
 
-push: master cargodist station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score autogrow-vector autogrow-goodsentries pool-copy
+push: master cd station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score autogrow-vector autogrow-goodsentries pool-copy
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
 
