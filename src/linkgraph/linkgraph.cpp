@@ -270,15 +270,15 @@ void Node::ExportNewFlows(FlowMap::iterator &source_flows_it, FlowStatSet &via_s
 	}
 	assert(source_flows.empty());
 
-	flows.erase(source_flows_it++);
+	this->flows.erase(source_flows_it++);
 }
 
-void Node::ExportFlows(FlowStatMap & station_flows, CargoID cargo) {
+void Node::ExportFlows(FlowStatMap &station_flows, CargoID cargo) {
 	FlowStatSet new_flows;
 	/* loop over all existing flows in the station and update them */
 	for(FlowStatMap::iterator flowmap_it = station_flows.begin(); flowmap_it != station_flows.end();) {
-		FlowMap::iterator source_flows_it = flows.find(flowmap_it->first);
-		if (source_flows_it == flows.end()) {
+		FlowMap::iterator source_flows_it = this->flows.find(flowmap_it->first);
+		if (source_flows_it == this->flows.end()) {
 			/* there are no flows for this source node anymore */
 			station_flows.erase(flowmap_it++);
 		} else {
@@ -306,11 +306,11 @@ void Node::ExportFlows(FlowStatMap & station_flows, CargoID cargo) {
 		}
 	}
 	/* loop over remaining flows (for other sources) in the node's map and insert them into the station */
-	for (FlowMap::iterator source_flows_it = flows.begin(); source_flows_it != flows.end();) {
-		FlowStatSet & via_set = station_flows[source_flows_it->first];
+	for (FlowMap::iterator source_flows_it = this->flows.begin(); source_flows_it != this->flows.end();) {
+		FlowStatSet &via_set = station_flows[source_flows_it->first];
 		ExportNewFlows(source_flows_it, via_set, cargo);
 	}
-	assert(flows.empty());
+	assert(this->flows.empty());
 }
 
 /**
