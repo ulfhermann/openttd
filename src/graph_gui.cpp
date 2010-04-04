@@ -199,25 +199,33 @@ protected:
 	byte colours[GRAPH_MAX_DATASETS];
 	OverflowSafeInt64 cost[GRAPH_MAX_DATASETS][GRAPH_NUM_MONTHS]; ///< Stored costs for the last #GRAPH_NUM_MONTHS months
 
-	int64 GetHighestValue(int initial_highest_value) const
+	/**
+	 * Get the highest value of the graph's data. Excluded data is ignored to allow showing smaller values in
+	 * better detail when disabling higher ones.
+	 * @return Highest value of the graph (ignoring disabled data).
+	 */
+	int64 GetHighestValue() const
 	{
-		OverflowSafeInt64 highest_value = initial_highest_value;
+		OverflowSafeInt64 highest_value = 0;
 
 		for (int i = 0; i < this->num_dataset; i++) {
-			if (!HasBit(this->excluded_data, i)) {
-				for (int j = 0; j < this->num_on_x_axis; j++) {
-					OverflowSafeInt64 datapoint = this->cost[i][j];
+			if (HasBit(this->excluded_data, i)) continue;
+			for (int j = 0; j < this->num_on_x_axis; j++) {
+				OverflowSafeInt64 datapoint = this->cost[i][j];
 
-					if (datapoint != INVALID_DATAPOINT) {
-						/* For now, if the graph has negative values the scaling is
-						 * symmetrical about the x axis, so take the absolute value
-						 * of each data point. */
-						highest_value = max(highest_value, abs(datapoint));
-					}
+				if (datapoint != INVALID_DATAPOINT) {
+					/* For now, if the graph has negative values the scaling is
+					 * symmetrical about the x axis, so take the absolute value
+					 * of each data point. */
+					highest_value = max(highest_value, abs(datapoint));
 				}
 			}
 		}
 
+		/* Prevent showing the highest value too close to the graph upper limit. */
+		highest_value = (11 * highest_value) / 10;
+		/* Avoid using zero as the highest value. */
+		if (highest_value == 0) highest_value = GRAPH_NUM_LINES_Y - 1;
 		/* Round up highest_value so that it will divide cleanly into the number of
 		 * axis labels used. */
 		int round_val = highest_value % (GRAPH_NUM_LINES_Y - 1);
@@ -274,13 +282,7 @@ protected:
 		r.left   += 9;
 		r.right  -= 5;
 
-		/* Start of with a highest_value of twice the height of the graph in pixels.
-		 * It's a bit arbitrary, but it makes the cargo payment graph look a little
-		 * nicer, and prevents division by zero when calculating where the datapoint
-		 * should be drawn. */
-		highest_value = r.bottom - r.top + 1;
-		if (!this->has_negative_values) highest_value *= 2;
-		highest_value = GetHighestValue(highest_value);
+		highest_value = GetHighestValue();
 
 		/* Get width for Y labels */
 		int label_width = GetYLabelWidth(highest_value);
@@ -806,13 +808,17 @@ enum CargoPaymentRatesWidgets {
 	CPW_HEADER,
 	CPW_GRAPH,
 	CPW_FOOTER,
+	CPW_ENABLE_CARGOS,
+	CPW_DISABLE_CARGOS,
 	CPW_CARGO_FIRST,
 };
 
 struct PaymentRatesGraphWindow : BaseGraphWindow {
+	bool first_init; ///< This value is true until the first initialization of the window has finished.
 	PaymentRatesGraphWindow(const WindowDesc *desc, WindowNumber window_number) :
 			BaseGraphWindow(CPW_GRAPH, false, STR_JUST_CURRCOMPACT)
 	{
+		this->first_init = true;
 		this->num_on_x_axis = 20;
 		this->num_vert_lines = 20;
 		this->month = 0xFF;
@@ -824,11 +830,37 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 
 		this->InitNested(desc, window_number);
 
+		this->UpdateLoweredWidgets();
+	}
+
+	virtual void OnInit()
+	{
+		/* UpdateLoweredWidgets needs to be called after a language or NewGRF change, but it can't be called before
+		 * InitNested is done. On the first init these functions are called in the correct order by the constructor. */
+		if (!this->first_init) {
+			/* Initialise the dataset */
+			this->OnHundredthTick();
+			this->UpdateLoweredWidgets();
+		}
+		this->first_init = false;
+	}
+
+	void UpdateExcludedData()
+	{
+		this->excluded_data = 0;
+
 		int i = 0;
 		const CargoSpec *cs;
-		FOR_ALL_CARGOSPECS(cs) {
-			this->SetWidgetLoweredState(CPW_CARGO_FIRST + cs->Index(), !HasBit(_legend_excluded_cargo, i));
+		FOR_ALL_SORTED_CARGOSPECS(cs) {
+			if (HasBit(_legend_excluded_cargo, cs->Index())) SetBit(this->excluded_data, i);
 			i++;
+		}
+	}
+
+	void UpdateLoweredWidgets()
+	{
+		for (int i = 0; i < _sorted_cargo_specs_size; i++) {
+			this->SetWidgetLoweredState(CPW_CARGO_FIRST + i, !HasBit(this->excluded_data, i));
 		}
 	}
 
@@ -839,7 +871,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 			return;
 		}
 
-		const CargoSpec *cs = CargoSpec::Get(widget - CPW_CARGO_FIRST);
+		const CargoSpec *cs = _sorted_cargo_specs[widget - CPW_CARGO_FIRST];
 		SetDParam(0, cs->name);
 		Dimension d = GetStringBoundingBox(STR_GRAPH_CARGO_PAYMENT_CARGO);
 		d.width += 14; // colour field
@@ -855,7 +887,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 			return;
 		}
 
-		const CargoSpec *cs = CargoSpec::Get(widget - CPW_CARGO_FIRST);
+		const CargoSpec *cs = _sorted_cargo_specs[widget - CPW_CARGO_FIRST];
 		bool rtl = _dynlang.text_dir == TD_RTL;
 
 		/* Since the buttons have no text, no images,
@@ -876,18 +908,46 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
-		if (widget >= CPW_CARGO_FIRST) {
-			int i = 0;
-			const CargoSpec *cs;
-			FOR_ALL_CARGOSPECS(cs) {
-				if (cs->Index() + CPW_CARGO_FIRST == widget) break;
-				i++;
-			}
+		switch (widget) {
+			case CPW_ENABLE_CARGOS:
+				/* Remove all cargos from the excluded lists. */
+				_legend_excluded_cargo = 0;
+				this->excluded_data = 0;
+				this->UpdateLoweredWidgets();
+				/* Toggle appeareance indicating the choice. */
+				this->LowerWidget(CPW_ENABLE_CARGOS);
+				this->RaiseWidget(CPW_DISABLE_CARGOS);
+				this->SetDirty();
+				break;
 
-			ToggleBit(_legend_excluded_cargo, i);
-			this->ToggleWidgetLoweredState(widget);
-			this->excluded_data = _legend_excluded_cargo;
-			this->SetDirty();
+			case CPW_DISABLE_CARGOS: {
+				/* Add all cargos to the excluded lists. */
+				int i = 0;
+				const CargoSpec *cs;
+				FOR_ALL_SORTED_CARGOSPECS(cs) {
+					SetBit(_legend_excluded_cargo, cs->Index());
+					SetBit(this->excluded_data, i);
+					i++;
+				}
+				this->UpdateLoweredWidgets();
+				/* Toggle appeareance indicating the choice. */
+				this->LowerWidget(CPW_DISABLE_CARGOS);
+				this->RaiseWidget(CPW_ENABLE_CARGOS);
+				this->SetDirty();
+			} break;
+
+			default:
+				if (widget >= CPW_CARGO_FIRST) {
+					int i = widget - CPW_CARGO_FIRST;
+					ToggleBit(_legend_excluded_cargo, _sorted_cargo_specs[i]->Index());
+					this->ToggleWidgetLoweredState(widget);
+					this->UpdateExcludedData();
+					/* Raise the two "all" buttons, as we have done a specific choice. */
+					this->RaiseWidget(CPW_ENABLE_CARGOS);
+					this->RaiseWidget(CPW_DISABLE_CARGOS);
+					this->SetDirty();
+				}
+				break;
 		}
 	}
 
@@ -898,16 +958,15 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 
 	virtual void OnHundredthTick()
 	{
-		this->excluded_data = _legend_excluded_cargo;
+		this->UpdateExcludedData();
 
 		int i = 0;
 		const CargoSpec *cs;
-		FOR_ALL_CARGOSPECS(cs) {
+		FOR_ALL_SORTED_CARGOSPECS(cs) {
 			this->colours[i] = cs->legend_colour;
 			for (uint j = 0; j != 20; j++) {
 				this->cost[i][j] = GetTransportedGoodsIncome(10, 20, j * 4 + 4, cs->Index());
 			}
-
 			i++;
 		}
 		this->num_dataset = i;
@@ -919,15 +978,14 @@ static NWidgetBase *MakeCargoButtons(int *biggest_index)
 {
 	NWidgetVertical *ver = new NWidgetVertical;
 
-	const CargoSpec *cs;
-	FOR_ALL_CARGOSPECS(cs) {
-		*biggest_index = CPW_CARGO_FIRST + cs->Index();
-		NWidgetBackground *leaf = new NWidgetBackground(WWT_PANEL, COLOUR_ORANGE, *biggest_index, NULL);
+	for (int i = 0; i < _sorted_cargo_specs_size; i++) {
+		NWidgetBackground *leaf = new NWidgetBackground(WWT_PANEL, COLOUR_ORANGE, CPW_CARGO_FIRST + i, NULL);
 		leaf->tool_tip = STR_GRAPH_CARGO_PAYMENT_TOGGLE_CARGO;
 		leaf->SetFill(1, 0);
 		leaf->SetLowered(true);
 		ver->Add(leaf);
 	}
+	*biggest_index = CPW_CARGO_FIRST + _sorted_cargo_specs_size - 1;
 	return ver;
 }
 
@@ -950,6 +1008,9 @@ static const NWidgetPart _nested_cargo_payment_rates_widgets[] = {
 				NWidget(WWT_EMPTY, COLOUR_GREY, CPW_GRAPH), SetMinimalSize(495, 0), SetFill(1, 1),
 				NWidget(NWID_VERTICAL),
 					NWidget(NWID_SPACER), SetMinimalSize(0, 24), SetFill(0, 0),
+						NWidget(WWT_TEXTBTN, COLOUR_ORANGE, CPW_ENABLE_CARGOS), SetDataTip(STR_GRAPH_CARGO_ENABLE_ALL, STR_GRAPH_CARGO_TOOLTIP_ENABLE_ALL),SetFill(1, 0),
+						NWidget(WWT_TEXTBTN, COLOUR_ORANGE, CPW_DISABLE_CARGOS), SetDataTip(STR_GRAPH_CARGO_DISABLE_ALL, STR_GRAPH_CARGO_TOOLTIP_DISABLE_ALL),SetFill(1, 0),
+						NWidget(NWID_SPACER), SetMinimalSize(0, 4), SetFill(0, 0),
 						NWidgetFunction(MakeCargoButtons),
 					NWidget(NWID_SPACER), SetMinimalSize(0, 24), SetFill(0, 1),
 				EndContainer(),
