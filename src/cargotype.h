@@ -131,8 +131,9 @@ void SetupCargoForClimate(LandscapeID l);
 CargoID GetCargoIDByLabel(CargoLabel cl);
 CargoID GetCargoIDByBitnum(uint8 bitnum);
 
-/* set up the cargos to be displayed in the smallmap's route legend */
-void BuildLinkStatsLegend();
+void InitializeSortedCargoSpecs();
+extern const CargoSpec *_sorted_cargo_specs[NUM_CARGO];
+extern uint8 _sorted_cargo_specs_size;
 
 /** Does cargo \a c have cargo class \a cc?
  * @param c  Cargo type.
@@ -147,5 +148,7 @@ static inline bool IsCargoInClass(CargoID c, CargoClass cc)
 #define FOR_ALL_CARGOSPECS_FROM(var, start) for (size_t cargospec_index = start; var = NULL, cargospec_index < CargoSpec::GetArraySize(); cargospec_index++) \
 		if ((var = CargoSpec::Get(cargospec_index))->IsValid())
 #define FOR_ALL_CARGOSPECS(var) FOR_ALL_CARGOSPECS_FROM(var, 0)
+
+#define FOR_ALL_SORTED_CARGOSPECS(var) for (uint8 index = 0; var = _sorted_cargo_specs[index], index < _sorted_cargo_specs_size; index++)
 
 #endif /* CARGOTYPE_H */

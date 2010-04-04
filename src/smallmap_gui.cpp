@@ -217,18 +217,14 @@ void BuildLinkStatsLegend()
 	/* Clear the legend */
 	memset(_legend_linkstats, 0, sizeof(_legend_linkstats));
 
-	uint i = 0;
-
-	for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
-		const CargoSpec *cs = CargoSpec::Get(c);
-		if (!cs->IsValid()) continue;
+	int i = 0;
+	for (; i < _sorted_cargo_specs_size; ++i) {
+		const CargoSpec *cs = _sorted_cargo_specs[i];
 
 		_legend_linkstats[i].legend = cs->name;
 		_legend_linkstats[i].colour = cs->legend_colour;
-		_legend_linkstats[i].type = c;
+		_legend_linkstats[i].type = cs->Index();
 		_legend_linkstats[i].show_on_map = true;
-
-		i++;
 	}
 
 	_legend_linkstats[i].col_break = true;
@@ -1378,7 +1374,7 @@ class SmallMapWindow : public Window {
 						TC_BLACK : TC_GREY;
 			}
 
-			SetDParam(0, STR_ABBREV_PASSENGERS + detail.legend->type);
+			SetDParam(0, CargoSpec::Get(detail.legend->type)->abbrev);
 			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK, detail.legend->show_on_map ? TC_BLACK : TC_GREY);
 			SetDParam(0, detail.capacity);
 			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_CAPACITY, textcol[STAT_CAPACITY]);
