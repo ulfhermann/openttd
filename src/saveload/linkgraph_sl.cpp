@@ -81,14 +81,12 @@ static const SaveLoad _edge_desc[] = {
  * @param comp the component to be saved or loaded
  */
 static void SaveLoad_LinkGraphComponent(LinkGraphComponent &comp) {
-	for (NodeID from = 0; from < comp.GetSize(); ++from) {
+	uint size = comp.GetSize();
+	for (NodeID from = 0; from < size; ++from) {
 		Node *node = &comp.GetNode(from);
-		node->Init();
 		SlObject(node, _node_desc);
-		for (NodeID to = 0; to < comp.GetSize(); ++to) {
-			Edge *edge = &comp.GetEdge(from, to);
-			edge->Init();
-			SlObject(edge, _edge_desc);
+		for (NodeID to = 0; to < size; ++to) {
+			SlObject(&comp.GetEdge(from, to), _edge_desc);
 		}
 	}
 }
@@ -112,6 +110,7 @@ static void Load_LGRP()
 {
 	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
+		assert(graph.GetSize() == 0);
 		SlObject(&graph, GetLinkGraphDesc());
 		graph.SetSize();
 		SaveLoad_LinkGraphComponent(graph);

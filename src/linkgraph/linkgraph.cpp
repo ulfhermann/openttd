@@ -193,16 +193,23 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capaci
  * Resize the component and fill it with empty nodes and edges. Used when
  * loading from save games.
  *
- * WARNING: The nodes and edges are expected to be empty while num_nodes is
- * expected to contain the desired size. Normally this is an invalid state,
- * but just after loading the component's structure it is valid. This method
- * should only be called from Load_LGRP; otherwise it is a NOP.
+ * WARNING: The nodes and edges are expected to contain anything while
+ * num_nodes is expected to contain the desired size. Normally this is an
+ * invalid state, but just after loading the component's structure it is valid.
+ * This method should only be called from Load_LGRP.
  */
 void LinkGraphComponent::SetSize()
 {
 	if (this->nodes.size() < this->num_nodes) {
 		this->nodes.resize(this->num_nodes);
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
+	}
+
+	for(uint i = 0; i < this->num_nodes; ++i) {
+		this->nodes[i].Init();
+		for (uint j = 0; j < this->num_nodes; ++j) {
+			this->edges[i][j].Init();
+		}
 	}
 }
 
