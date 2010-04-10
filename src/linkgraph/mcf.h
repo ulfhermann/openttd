@@ -9,10 +9,10 @@
 class DistanceAnnotation : public Path {
 public:
 	DistanceAnnotation(NodeID n, bool source = false) : Path(n, source) {}
-	bool IsBetter(const DistanceAnnotation * base, int cap, uint dist) const;
+	bool IsBetter(const DistanceAnnotation *base, int cap, uint dist) const;
 	uint GetAnnotation() const {return this->distance;}
 	struct comp {
-		bool operator()(const DistanceAnnotation * x, const DistanceAnnotation * y) const;
+		bool operator()(const DistanceAnnotation *x, const DistanceAnnotation *y) const;
 	};
 };
 
@@ -22,41 +22,45 @@ public:
 	bool IsBetter(const CapacityAnnotation * base, int cap, uint dist) const;
 	int GetAnnotation() const {return this->capacity;}
 	struct comp {
-		bool operator()(const CapacityAnnotation * x, const CapacityAnnotation * y) const;
+		bool operator()(const CapacityAnnotation *x, const CapacityAnnotation *y) const;
 	};
 };
 
 
 typedef std::vector<Path *> PathVector;
 
-class MultiCommodityFlow : public ComponentHandler {
-public:
-	virtual void Run(LinkGraphComponent * graph);
-	MultiCommodityFlow();
-	virtual ~MultiCommodityFlow() {}
+class MultiCommodityFlow {
 protected:
+	MultiCommodityFlow(LinkGraphComponent *graph) : graph(graph) {}
 	template<class ANNOTATION>
-		void Dijkstra(NodeID from, PathVector & paths, bool create_new_paths);
-	uint PushFlow(Edge & edge, Path * path, uint accuracy, bool positive_cap);
-	void SetVia(NodeID source, Path * path);
-	void CleanupPaths(NodeID source, PathVector & paths);
-	LinkGraphComponent * graph;
+		void Dijkstra(NodeID from, PathVector &paths, bool create_new_paths);
+	uint PushFlow(Edge &edge, Path *path, uint accuracy, bool positive_cap);
+	void CleanupPaths(NodeID source, PathVector &paths);
+
+	LinkGraphComponent *graph;
 };
 
 class MCF1stPass : public MultiCommodityFlow {
 private:
 	bool EliminateCycles();
-	bool EliminateCycles(PathVector & path, NodeID origin, Path * next);
-	bool EliminateCycles(PathVector & path, NodeID origin_id, NodeID next_id);
-	void EliminateCycle(PathVector & path, Path * cycle_begin, uint flow);
-	uint FindCycleFlow(const PathVector & path, const Path * cycle_begin);
+	bool EliminateCycles(PathVector &path, NodeID origin_id, NodeID next_id);
+	void EliminateCycle(PathVector &path, Path *cycle_begin, uint flow);
+	uint FindCycleFlow(const PathVector &path, const Path *cycle_begin);
 public:
-	virtual void Run(LinkGraphComponent * graph);
+	MCF1stPass(LinkGraphComponent *graph);
 };
 
 class MCF2ndPass : public MultiCommodityFlow {
 public:
-	virtual void Run(LinkGraphComponent * graph);
+	MCF2ndPass(LinkGraphComponent *graph);
+};
+
+template<class Tpass>
+class MCFHandler : public ComponentHandler {
+public:
+	virtual void Run(LinkGraphComponent *graph)
+		{Tpass pass(graph);}
+	virtual ~MCFHandler() {}
 };
 
 #endif /* MCF_H_ */
