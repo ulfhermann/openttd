@@ -7,10 +7,8 @@
 
 class FlowMapper : public ComponentHandler {
 public:
-	FlowMapper() : component(NULL) {}
-	void Run(LinkGraphComponent * c);
-private:
-	LinkGraphComponent * component;
+	virtual void Run(LinkGraphComponent *component);
+	virtual ~FlowMapper() {}
 };
 
 #endif /* FLOWMAPPER_H_ */

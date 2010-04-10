@@ -10,6 +10,10 @@
 
 typedef std::list<NodeID> NodeList;
 
+/**
+ * Do the actual demand calculation, called from constructor.
+ * @param graph the component to calculate the demands for
+ */
 void DemandCalculator::CalcDemand(LinkGraphComponent *graph) {
 	NodeList supplies;
 	NodeList demands;
@@ -113,7 +117,13 @@ void DemandCalculator::CalcDemand(LinkGraphComponent *graph) {
 	}
 }
 
-void DemandCalculator::Run(LinkGraphComponent *graph) {
+/**
+ * Create the DemandCalculator and immediately do the calculation.
+ * @param graph the component to calculate the demands for
+ */
+DemandCalculator::DemandCalculator(LinkGraphComponent *graph) :
+	max_distance(MapSizeX() + MapSizeY() + 1)
+{
 	CargoID cargo = graph->GetCargo();
 	const LinkGraphSettings &settings = graph->GetSettings();
 
@@ -128,11 +138,11 @@ void DemandCalculator::Run(LinkGraphComponent *graph) {
 
 	switch (settings.GetDistributionType(cargo)) {
 	case DT_SYMMETRIC:
-		CalcDemand(graph);
+		this->CalcDemand(graph);
 		break;
 	case DT_ASYMMETRIC:
 		this->mod_size = 0;
-		CalcDemand(graph);
+		this->CalcDemand(graph);
 		break;
 	default:
 		NOT_REACHED();
