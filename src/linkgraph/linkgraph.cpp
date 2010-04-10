@@ -310,5 +310,5 @@ void InitializeLinkGraphs()
 	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Init(c);
 
 	LinkGraphJob::ClearHandlers();
-	LinkGraphJob::AddHandler(new DemandCalculator);
+	LinkGraphJob::AddHandler(new DemandHandler);
 }
