@@ -901,6 +901,8 @@ STR_GRAPH_COMPANY_VALUES_CAPTION                                :{WHITE}Wartośc
 STR_GRAPH_CARGO_PAYMENT_RATES_CAPTION                           :{WHITE}Stawki za Ładunek
 STR_GRAPH_CARGO_PAYMENT_RATES_X_LABEL                           :{TINYFONT}{BLACK}Dni w transporcie
 STR_GRAPH_CARGO_PAYMENT_RATES_TITLE                             :{TINYFONT}{BLACK}Oplata za przewóz 10 jednostek (lub 10,000 litrów) ładunku na odległość 20 pól
+STR_GRAPH_CARGO_ENABLE_ALL                                      :{TINYFONT}{BLACK}Włącz wszystko
+STR_GRAPH_CARGO_DISABLE_ALL                                     :{TINYFONT}{BLACK}Wyłącz wszystko
 STR_GRAPH_CARGO_PAYMENT_TOGGLE_CARGO                            :{BLACK}Przełącznik wykresu ładunku wł./wył.
 STR_GRAPH_CARGO_PAYMENT_CARGO                                   :{TINYFONT}{BLACK}{STRING}
 
@@ -3608,6 +3610,8 @@ STR_AI_DEBUG_SETTINGS                                           :{BLACK}Ustawien
 STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Zmień ustawienia SI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Przeładuj SI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Zabij SI, przeładuj skrypt i zrestartuj SI
+STR_AI_DEBUG_CONTINUE                                           :{BLACK}Kontynuuj
+STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Odpauzowanie i kontynuuowanie SI
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD został zbudowany bez wsparcia dla SI...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... żadna SI nie jest dostępna!
@@ -3910,6 +3914,7 @@ STR_ERROR_BRIDGEHEADS_NOT_SAME_HEIGHT                           :{WHITE}Początk
 STR_ERROR_BRIDGE_TOO_LOW_FOR_TERRAIN                            :{WHITE}Most jest za nisko dla tego terenu
 STR_ERROR_START_AND_END_MUST_BE_IN                              :{WHITE}Początek i koniec muszą być w jednej linii
 STR_ERROR_ENDS_OF_BRIDGE_MUST_BOTH                              :{WHITE}... końce mostu muszą znajdować się na lądzie
+STR_ERROR_BRIDGE_TOO_LONG                                       :{WHITE}... za długi most
 
 # Tunnel related errors
 STR_ERROR_CAN_T_BUILD_TUNNEL_HERE                               :{WHITE}Nie można tutaj wybudować tunelu...
