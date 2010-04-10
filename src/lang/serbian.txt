@@ -3437,7 +3437,7 @@ STR_AI_DEBUG_BREAK_STR_ON_OFF_TOOLTIP                           :{BLACK}Uključu
 STR_AI_DEBUG_BREAK_ON_LABEL                                     :{BLACK}Prekid na:
 STR_AI_DEBUG_BREAK_STR_OSKTITLE                                 :{BLACK}Prekid na
 STR_AI_DEBUG_BREAK_STR_TOOLTIP                                  :{BLACK}Kada VI ispiše poruku koja se poklapa sa ovom niskom, partija se pauzira.
-STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Podudaranje malih i velikih slova
+STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Podudaranje vel. slova
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Uključuje/isključuje podudaranje malih i velikih slova tokom poređenja zapisanih VI poruka sa prekidnom niskom
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Nastavi
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Nastavlja partiju i VI
@@ -3744,6 +3744,7 @@ STR_ERROR_BRIDGEHEADS_NOT_SAME_HEIGHT                           :{WHITE}Krajevi 
 STR_ERROR_BRIDGE_TOO_LOW_FOR_TERRAIN                            :{WHITE}Most je nizak u odnosu na teren
 STR_ERROR_START_AND_END_MUST_BE_IN                              :{WHITE}Početak i kraj moraju biti u istoj liniji
 STR_ERROR_ENDS_OF_BRIDGE_MUST_BOTH                              :{WHITE}... oba kraja mosta moraju biti na čvrstom tlu
+STR_ERROR_BRIDGE_TOO_LONG                                       :{WHITE}... most je previše dugačak
 
 # Tunnel related errors
 STR_ERROR_CAN_T_BUILD_TUNNEL_HERE                               :{WHITE}Nije moguće ovde izgraditi tunel...
