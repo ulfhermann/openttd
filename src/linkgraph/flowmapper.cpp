@@ -2,8 +2,7 @@
 
 #include "flowmapper.h"
 
-void FlowMapper::Run(LinkGraphComponent * c) {
-	component = c;
+void FlowMapper::Run(LinkGraphComponent *component) {
 	for (NodeID node_id = 0; node_id < component->GetSize(); ++node_id) {
 		Node & prev_node = component->GetNode(node_id);
 		StationID prev = prev_node.station;
