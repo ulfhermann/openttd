@@ -3,15 +3,6 @@
 #include "mcf.h"
 #include "../core/math_func.hpp"
 
-MultiCommodityFlow::MultiCommodityFlow() :
-	graph(NULL)
-{}
-
-void MultiCommodityFlow::Run(LinkGraphComponent * g) {
-	assert(g->GetSettings().accuracy >= 1);
-	graph = g;
-}
-
 bool DistanceAnnotation::IsBetter(const DistanceAnnotation * base, int cap, uint dist) const {
 	if (cap > 0 && base->capacity > 0) {
 		if (this->capacity <= 0) {
@@ -61,9 +52,9 @@ void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths, bool cr
 		NodeID from = source->GetNode();
 		NodeID to = this->graph->GetFirstEdge(from);
 		while (to != INVALID_NODE) {
-			Edge & edge = graph->GetEdge(from, to);
+			Edge & edge = this->graph->GetEdge(from, to);
 			assert(edge.distance < UINT_MAX);
-			if (create_new_paths || this->graph->GetNode(from).flows[source_station][graph->GetNode(to).station] > 0) {
+			if (create_new_paths || this->graph->GetNode(from).flows[source_station][this->graph->GetNode(to).station] > 0) {
 				int capacity = edge.capacity;
 				if (create_new_paths) {
 					capacity *= this->graph->GetSettings().short_path_saturation;
@@ -116,7 +107,7 @@ void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector & paths) {
 uint MultiCommodityFlow::PushFlow(Edge &edge, Path * path, uint accuracy, bool positive_cap) {
 	uint flow = edge.unsatisfied_demand / accuracy;
 	if (flow == 0) flow = 1;
-	flow = path->AddFlow(flow, graph, positive_cap);
+	flow = path->AddFlow(flow, this->graph, positive_cap);
 	edge.unsatisfied_demand -= flow;
 	return flow;
 }
@@ -132,7 +123,7 @@ uint MCF1stPass::FindCycleFlow(const PathVector & path, const Path * cycle_begin
 	return flow;
 }
 
-void MCF1stPass::EliminateCycle(PathVector & path, Path * cycle_begin, uint flow)
+void MCF1stPass::EliminateCycle(PathVector &path, Path *cycle_begin, uint flow)
 {
 	Path * cycle_end = cycle_begin;
 	do {
@@ -176,7 +167,7 @@ bool MCF1stPass::EliminateCycles(PathVector & path, NodeID origin_id, NodeID nex
 			if (child->GetFlow() > 0) {
 				/* push one child into the path vector and search this child's children */
 				path[next_id] = child;
-				found = EliminateCycles(path, origin_id, child->GetNode()) || found;
+				found = this->EliminateCycles(path, origin_id, child->GetNode()) || found;
 			}
 		}
 		/* All paths departing from this node have been searched. Mark as resolved if no cycles found.
@@ -193,9 +184,9 @@ bool MCF1stPass::EliminateCycles(PathVector & path, NodeID origin_id, NodeID nex
 		/* this node has already been visited => we have a cycle
 		 * backtrack to find the exact flow
 		 */
-		uint flow = FindCycleFlow(path, at_next_pos);
+		uint flow = this->FindCycleFlow(path, at_next_pos);
 		if (flow > 0) {
-			EliminateCycle(path, at_next_pos, flow);
+			this->EliminateCycle(path, at_next_pos, flow);
 			return true;
 		} else {
 			return false;
@@ -211,16 +202,16 @@ bool MCF1stPass::EliminateCycles()
 	for (NodeID node = 0; node < size; ++node) {
 		/* starting at each node in the graph find all cycles involving this node */
 		std::fill(path.begin(), path.end(), (Path *)NULL);
-		cycles_found = EliminateCycles(path, node, node) || cycles_found;
+		cycles_found = this->EliminateCycles(path, node, node) || cycles_found;
 	}
 	return cycles_found;
 }
 
-void MCF1stPass::Run(LinkGraphComponent * graph) {
-	MultiCommodityFlow::Run(graph);
+MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
+{
 	PathVector paths;
-	uint size = graph->GetSize();
-	uint accuracy = graph->GetSettings().accuracy;
+	uint size = this->graph->GetSize();
+	uint accuracy = this->graph->GetSettings().accuracy;
 	bool more_loops = true;
 
 	while (more_loops) {
@@ -228,10 +219,10 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 
 		for (NodeID source = 0; source < size; ++source) {
 			/* first saturate the shortest paths */
-			Dijkstra<DistanceAnnotation>(source, paths, true);
+			this->Dijkstra<DistanceAnnotation>(source, paths, true);
 
 			for (NodeID dest = 0; dest < size; ++dest) {
-				Edge & edge = graph->GetEdge(source, dest);
+				Edge &edge = this->graph->GetEdge(source, dest);
 				if (edge.unsatisfied_demand > 0) {
 					Path *path = paths[dest];
 					assert(path != NULL);
@@ -239,13 +230,13 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 					 * but if no demand has been assigned yet, make an exception and allow
 					 * any valid path *once*.
 					 */
-					if (path->GetCapacity() > 0 && PushFlow(edge, path, accuracy, true) > 0) {
+					if (path->GetCapacity() > 0 && this->PushFlow(edge, path, accuracy, true) > 0) {
 						more_loops = (edge.unsatisfied_demand > 0); {
 							/* if a path has been found there is a chance we can find more */
 							more_loops = true;
 						}
 					} else if (edge.unsatisfied_demand == edge.demand && path->GetCapacity() > INT_MIN) {
-						PushFlow(edge, path, accuracy, false);
+						this->PushFlow(edge, path, accuracy, false);
 					}
 				}
 			}
@@ -258,22 +249,22 @@ void MCF1stPass::Run(LinkGraphComponent * graph) {
 	}
 }
 
-void MCF2ndPass::Run(LinkGraphComponent * graph) {
-	MultiCommodityFlow::Run(graph);
+MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
+{
 	PathVector paths;
-	uint size = graph->GetSize();
-	uint accuracy = graph->GetSettings().accuracy;
+	uint size = this->graph->GetSize();
+	uint accuracy = this->graph->GetSettings().accuracy;
 	bool demand_left = true;
 	while (demand_left) {
 		demand_left = false;
 		for (NodeID source = 0; source < size; ++source) {
 			/* Then assign all remaining demands */
-			Dijkstra<CapacityAnnotation>(source, paths, false);
+			this->Dijkstra<CapacityAnnotation>(source, paths, false);
 			for (NodeID dest = 0; dest < size; ++dest) {
-				Edge & edge = graph->GetEdge(source, dest);
+				Edge & edge = this->graph->GetEdge(source, dest);
 				Path * path = paths[dest];
 				if (edge.unsatisfied_demand > 0 && path->GetCapacity() > INT_MIN) {
-					PushFlow(edge, path, accuracy, false);
+					this->PushFlow(edge, path, accuracy, false);
 					if (edge.unsatisfied_demand > 0) {
 						demand_left = true;
 					}
