@@ -56,7 +56,8 @@ FORCEINLINE void AsymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID
  * @param graph the component to calculate the demands for
  */
 template<class Tscaler>
-void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler) {
+void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler)
+{
 	NodeList supplies;
 	NodeList demands;
 	uint num_supplies = 0;
