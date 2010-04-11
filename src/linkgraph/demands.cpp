@@ -20,21 +20,17 @@ typedef std::list<NodeID> NodeList;
  */
 void SymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, NodeID to_id, uint demand_forw)
 {
-	Node &from = graph->GetNode(from_id);
-	Node &to = graph->GetNode(to_id);
-
-	if (from.demand > 0) {
+	if (graph->GetNode(from_id).demand > 0) {
 		uint demand_back = demand_forw * this->mod_size / 100;
-		if (demand_back > to.undelivered_supply) {
-			demand_back = to.undelivered_supply;
+		uint undelivered = graph->GetNode(to_id).undelivered_supply;
+		if (demand_back > undelivered) {
+			demand_back = undelivered;
 			demand_forw = demand_back * 100 / this->mod_size;
 		}
-		graph->GetEdge(to_id, from_id).demand += demand_back;
-		to.undelivered_supply -= demand_back;
+		this->Scaler::SetDemands(graph, to_id, from_id, demand_back);
 	}
 
-	graph->GetEdge(from_id, to_id).demand += demand_forw;
-	from.undelivered_supply -= demand_forw;
+	this->Scaler::SetDemands(graph, from_id, to_id, demand_forw);
 }
 
 /**
@@ -45,9 +41,10 @@ void SymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, Nod
  * @þaram to_id The receiving node
  * @param demand_forw Demand calculated for the "forward" direction
  */
-FORCEINLINE void AsymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, NodeID to_id, uint demand_forw)
+FORCEINLINE void Scaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, NodeID to_id, uint demand_forw)
 {
-	graph->GetEdge(from_id, to_id).demand += demand_forw;
+	Edge &forward = graph->GetEdge(from_id, to_id);
+	forward.demand += demand_forw;
 	graph->GetNode(from_id).undelivered_supply -= demand_forw;
 }
 

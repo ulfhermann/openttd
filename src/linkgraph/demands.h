@@ -14,6 +14,8 @@
 class Scaler {
 public:
 	Scaler() : demand_per_node(0) {}
+
+	void SetDemands(LinkGraphComponent * graph, NodeID from, NodeID to, uint demand_forw);
 protected:
 	uint demand_per_node; ///< mean demand associated with each node
 };
@@ -102,8 +104,6 @@ public:
 	 */
 	FORCEINLINE bool DemandLeft(Node &to)
 		{return to.demand > 0;}
-
-	void SetDemands(LinkGraphComponent * graph, NodeID from, NodeID to, uint demand_forw);
 
 private:
 	uint demand_sum;
