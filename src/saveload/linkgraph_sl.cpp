@@ -114,6 +114,17 @@ static void Load_LGRP()
 		SlObject(&graph, GetLinkGraphDesc());
 		graph.SetSize();
 		SaveLoad_LinkGraphComponent(graph);
+	}
+}
+
+/**
+ * Spawn the threads for running link graph calculations.
+ * Has to be done after loading as the cargo classes might have changed.
+ */
+void AfterLoadLinkGraphs()
+{
+	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
+		LinkGraph &graph = _link_graphs[cargo];
 		if (graph.GetSize() > 0) graph.SpawnThread();
 	}
 }
