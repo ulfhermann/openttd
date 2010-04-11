@@ -115,7 +115,7 @@ public:
 
 	NodeID AddNode(Station *st);
 
-	FORCEINLINE void AddEdge(NodeID from, NodeID to, uint capacity);
+	void AddEdge(NodeID from, NodeID to, uint capacity);
 
 	/**
 	 * Get the ID of this component.

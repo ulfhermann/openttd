@@ -11,20 +11,61 @@
 typedef std::list<NodeID> NodeList;
 
 /**
+ * Set the demands between two nodes using the given base demand. In symmetric mode
+ * this sets demands in both directions.
+ * @param graph The link graph
+ * @param from_id The supplying node
+ * @þaram to_id The receiving node
+ * @param demand_forw Demand calculated for the "forward" direction
+ */
+void SymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, NodeID to_id, uint demand_forw)
+{
+	if (graph->GetNode(from_id).demand > 0) {
+		uint demand_back = demand_forw * this->mod_size / 100;
+		uint undelivered = graph->GetNode(to_id).undelivered_supply;
+		if (demand_back > undelivered) {
+			demand_back = undelivered;
+			demand_forw = demand_back * 100 / this->mod_size;
+		}
+		this->Scaler::SetDemands(graph, to_id, from_id, demand_back);
+	}
+
+	this->Scaler::SetDemands(graph, from_id, to_id, demand_forw);
+}
+
+/**
+ * Set the demands between two nodes using the given base demand. In asymmetric mode
+ * this only sets demand in the "forward" direction.
+ * @param graph The link graph
+ * @param from_id The supplying node
+ * @þaram to_id The receiving node
+ * @param demand_forw Demand calculated for the "forward" direction
+ */
+FORCEINLINE void Scaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, NodeID to_id, uint demand_forw)
+{
+	Edge &forward = graph->GetEdge(from_id, to_id);
+	forward.demand += demand_forw;
+	forward.unsatisfied_demand += demand_forw;
+	graph->GetNode(from_id).undelivered_supply -= demand_forw;
+}
+
+/**
  * Do the actual demand calculation, called from constructor.
  * @param graph the component to calculate the demands for
  */
-void DemandCalculator::CalcDemand(LinkGraphComponent *graph) {
+template<class Tscaler>
+void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler)
+{
 	NodeList supplies;
 	NodeList demands;
-	uint supply_sum = 0;
-	uint num_demands = 0;
 	uint num_supplies = 0;
+	uint num_demands = 0;
+
 	for(NodeID node = 0; node < graph->GetSize(); node++) {
-		Node & n = graph->GetNode(node);
+		Node &n = graph->GetNode(node);
+		scaler.AddNode(n);
 		if (n.supply > 0) {
 			supplies.push_back(node);
-			supply_sum += n.supply;
 			num_supplies++;
 		}
 		if (n.demand > 0) {
@@ -33,18 +74,20 @@ void DemandCalculator::CalcDemand(LinkGraphComponent *graph) {
 		}
 	}
 
-	if (supply_sum == 0 || num_demands == 0) {
-		return;
-	}
+	if (num_supplies == 0 || num_demands == 0) return;
 
-	uint demand_per_node = max(supply_sum / num_demands, (uint)1);
+	/* mean acceptance attributed to each node. If the distribution is
+	 * symmetric this is relative to remote supply, otherwise it is
+	 * relative to remote demand.
+	 */
+	scaler.SetDemandPerNode(num_demands);
 	uint chance = 0;
 
 	while(!supplies.empty() && !demands.empty()) {
 		NodeID node1 = supplies.front();
 		supplies.pop_front();
 
-		Node & from = graph->GetNode(node1);
+		Node &from = graph->GetNode(node1);
 
 		for(uint i = 0; i < num_demands; ++i) {
 			assert(!demands.empty());
@@ -60,59 +103,51 @@ void DemandCalculator::CalcDemand(LinkGraphComponent *graph) {
 				}
 			}
 			Node &to = graph->GetNode(node2);
-			Edge &forward = graph->GetEdge(node1, node2);
-			Edge &backward = graph->GetEdge(node2, node1);
 
-			int32 supply = from.supply;
-			if (this->mod_size > 0) {
-				supply = max(1, (int32)(supply * to.supply * this->mod_size / 100 / demand_per_node));
-			}
+			int32 supply = scaler.EffectiveSupply(from, to);
 			assert(supply > 0);
 
 			/* scale the distance by mod_dist around max_distance */
-			int32 distance = this->max_distance - (this->max_distance - (int32)forward.distance) * this->mod_dist / 100;
+			int32 distance = this->max_distance - (this->max_distance -
+					(int32)graph->GetEdge(node1, node2).distance) * this->mod_dist / 100;
 
 			/* scale the accuracy by distance around accuracy / 2 */
-			int32 divisor = this->accuracy * (this->mod_dist - 50) / 100 + this->accuracy * distance / this->max_distance + 1;
+			int32 divisor = this->accuracy * (this->mod_dist - 50) / 100 +
+					this->accuracy * distance / this->max_distance + 1;
+
 			assert(divisor > 0);
 
 			uint demand_forw = 0;
 			if (divisor < supply) {
+				/* at first only distribute demand if
+				 * effective supply / accuracy divisor >= 1
+				 * Others are too small or too far away to be considered.
+				 */
 				demand_forw = supply / divisor;
 			} else if (++chance > this->accuracy * num_demands * num_supplies) {
-				/* after some trying distribute demand also to other nodes */
+				/* After some trying, if there is still supply left, distribute
+				 * demand also to other nodes.
+				 */
 				demand_forw = 1;
 			}
 
 			demand_forw = min(demand_forw, from.undelivered_supply);
 
-			if (this->mod_size > 0 && from.demand > 0) {
-				uint demand_back = demand_forw * this->mod_size / 100;
-				if (demand_back > to.undelivered_supply) {
-					demand_back = to.undelivered_supply;
-					demand_forw = demand_back * 100 / this->mod_size;
-				}
-				backward.demand += demand_back;
-				backward.unsatisfied_demand += demand_back;
-				to.undelivered_supply -= demand_back;
-			}
+			scaler.SetDemands(graph, node1, node2, demand_forw);
 
-			forward.demand += demand_forw;
-			forward.unsatisfied_demand += demand_forw;
-			from.undelivered_supply -= demand_forw;
-
-			if (this->mod_size == 0 || to.undelivered_supply > 0) {
+			if (scaler.DemandLeft(to)) {
 				demands.push_back(node2);
 			} else {
 				num_demands--;
 			}
 
-			if (from.undelivered_supply == 0) {
-				break;
-			}
+			if (from.undelivered_supply == 0) break;
+
 		}
 		if (from.undelivered_supply != 0) {
 			supplies.push_back(node1);
+		} else {
+			num_supplies--;
 		}
 	}
 }
@@ -128,7 +163,6 @@ DemandCalculator::DemandCalculator(LinkGraphComponent *graph) :
 	const LinkGraphSettings &settings = graph->GetSettings();
 
 	this->accuracy = settings.accuracy;
-	this->mod_size = settings.demand_size;
 	this->mod_dist = settings.demand_distance;
 	if (this->mod_dist > 100) {
 		/* increase effect of mod_dist > 100 */
@@ -138,11 +172,10 @@ DemandCalculator::DemandCalculator(LinkGraphComponent *graph) :
 
 	switch (settings.GetDistributionType(cargo)) {
 	case DT_SYMMETRIC:
-		this->CalcDemand(graph);
+		this->CalcDemand<SymmetricScaler>(graph, SymmetricScaler(settings.demand_size));
 		break;
 	case DT_ASYMMETRIC:
-		this->mod_size = 0;
-		this->CalcDemand(graph);
+		this->CalcDemand<AsymmetricScaler>(graph, AsymmetricScaler());
 		break;
 	default:
 		NOT_REACHED();
