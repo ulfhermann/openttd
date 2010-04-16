@@ -595,14 +595,11 @@ static void HandleBankruptcyTakeover(Company *c)
 
 	SetBit(c->bankrupt_asked, best->index);
 
-	if (IsInteractiveCompany(best->index)) {
-		c->bankrupt_timeout = TAKE_OVER_TIMEOUT;
-		ShowBuyCompanyDialog(c->index);
-		return;
-	}
-
+	c->bankrupt_timeout = TAKE_OVER_TIMEOUT;
 	if (best->is_ai) {
 		AI::NewEvent(best->index, new AIEventCompanyAskMerger(c->index, ClampToI32(c->bankrupt_value)));
+	} else if (IsInteractiveCompany(best->index)) {
+		ShowBuyCompanyDialog(c->index);
 	}
 }
 
@@ -968,6 +965,13 @@ CommandCost CmdSetCompanyColour(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		}
 		ResetVehicleColourMap();
 		MarkWholeScreenDirty();
+
+		/* All graph related to companies use the company colour. */
+		InvalidateWindowData(WC_INCOME_GRAPH, 0);
+		InvalidateWindowData(WC_OPERATING_PROFIT, 0);
+		InvalidateWindowData(WC_DELIVERED_CARGO, 0);
+		InvalidateWindowData(WC_PERFORMANCE_HISTORY, 0);
+		InvalidateWindowData(WC_COMPANY_VALUE, 0);
 
 		/* Company colour data is indirectly cached. */
 		Vehicle *v;
