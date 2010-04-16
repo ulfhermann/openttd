@@ -222,7 +222,7 @@ struct StationNameInformation {
  * @param tile the tile to search
  * @param user_data the StationNameInformation to base the search on
  * @return true if the tile contains an industry that has not given
- *              it's name to one of the other stations in town.
+ *              its name to one of the other stations in town.
  */
 static bool FindNearIndustryName(TileIndex tile, void *user_data)
 {
@@ -769,7 +769,7 @@ static CommandCost CheckFlatLandRailStation(TileArea tile_area, DoCommandFlag fl
 				}
 			}
 		} else {
-			/* Rail type is only valid when building a railway station; in station to
+			/* Rail type is only valid when building a railway station; if station to
 			 * build isn't a rail station it's INVALID_RAILTYPE. */
 			if (rt != INVALID_RAILTYPE &&
 					IsPlainRailTile(tile_cur) && !HasSignals(tile_cur) &&
@@ -1097,7 +1097,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 {
 	/* Unpack parameters */
 	RailType rt    = (RailType)GB(p1, 0, 4);
-	Axis axis      = Extract<Axis, 4>(p1);
+	Axis axis      = Extract<Axis, 4, 1>(p1);
 	byte numtracks = GB(p1,  8, 8);
 	byte plat_len  = GB(p1, 16, 8);
 	bool adjacent  = HasBit(p1, 24);
