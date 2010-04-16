@@ -25,7 +25,7 @@ void SymmetricScaler::SetDemands(LinkGraphComponent * graph, NodeID from_id, Nod
 		uint undelivered = graph->GetNode(to_id).undelivered_supply;
 		if (demand_back > undelivered) {
 			demand_back = undelivered;
-			demand_forw = demand_back * 100 / this->mod_size;
+			demand_forw = max(1U, demand_back * 100 / this->mod_size);
 		}
 		this->Scaler::SetDemands(graph, to_id, from_id, demand_back);
 	}
