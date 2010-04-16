@@ -452,7 +452,7 @@ static bool NetworkHasJoiningClient()
 {
 	const NetworkClientSocket *cs;
 	FOR_ALL_CLIENT_SOCKETS(cs) {
-		if (cs->status >= STATUS_AUTH && cs->status < STATUS_ACTIVE) return true;
+		if (cs->status >= STATUS_AUTHORIZED && cs->status < STATUS_ACTIVE) return true;
 	}
 
 	return false;
@@ -548,7 +548,7 @@ NetworkRecvStatus NetworkCloseClient(NetworkClientSocket *cs, NetworkRecvStatus 
 	 */
 	if (cs->sock == INVALID_SOCKET) return status;
 
-	if (status != NETWORK_RECV_STATUS_CONN_LOST && !cs->HasClientQuit() && _network_server && cs->status > STATUS_INACTIVE) {
+	if (status != NETWORK_RECV_STATUS_CONN_LOST && !cs->HasClientQuit() && _network_server && cs->status >= STATUS_AUTHORIZED) {
 		/* We did not receive a leave message from this client... */
 		char client_name[NETWORK_CLIENT_NAME_LENGTH];
 		NetworkClientSocket *new_cs;
@@ -559,7 +559,7 @@ NetworkRecvStatus NetworkCloseClient(NetworkClientSocket *cs, NetworkRecvStatus 
 
 		/* Inform other clients of this... strange leaving ;) */
 		FOR_ALL_CLIENT_SOCKETS(new_cs) {
-			if (new_cs->status > STATUS_AUTH && cs != new_cs) {
+			if (new_cs->status > STATUS_AUTHORIZED && cs != new_cs) {
 				SEND_COMMAND(PACKET_SERVER_ERROR_QUIT)(new_cs, cs->client_id, NETWORK_ERROR_CONNECTION_LOST);
 			}
 		}
@@ -569,7 +569,7 @@ NetworkRecvStatus NetworkCloseClient(NetworkClientSocket *cs, NetworkRecvStatus 
 
 	if (_network_server) {
 		/* We just lost one client :( */
-		if (cs->status >= STATUS_AUTH) _network_game_info.clients_on--;
+		if (cs->status >= STATUS_AUTHORIZED) _network_game_info.clients_on--;
 		_network_clients_connected--;
 
 		SetWindowDirty(WC_CLIENT_LIST, 0);
@@ -1078,7 +1078,14 @@ void NetworkGameLoop()
 
 	if (_network_server) {
 		/* Log the sync state to check for in-syncedness of replays. */
-		if (_date_fract == 0) DEBUG(desync, 1, "sync: %08x; %02x; %08x; %08x", _date, _date_fract, _random.state[0], _random.state[1]);
+		if (_date_fract == 0) {
+			/* We don't want to log multiple times if paused. */
+			static Date last_log;
+			if (last_log != _date) {
+				DEBUG(desync, 1, "sync: %08x; %02x; %08x; %08x", _date, _date_fract, _random.state[0], _random.state[1]);
+				last_log = _date;
+			}
+		}
 
 #ifdef DEBUG_DUMP_COMMANDS
 		/* Loading of the debug commands from -ddesync>=1 */
@@ -1086,22 +1093,34 @@ void NetworkGameLoop()
 		static Date next_date = 0;
 		static uint32 next_date_fract;
 		static CommandPacket *cp = NULL;
+		static bool check_sync_state = false;
+		static uint32 sync_state[2];
 		if (f == NULL && next_date == 0) {
 			DEBUG(net, 0, "Cannot open commands.log");
 			next_date = 1;
 		}
 
 		while (f != NULL && !feof(f)) {
-			if (cp != NULL && _date == next_date && _date_fract == next_date_fract) {
-				_current_company = cp->company;
-				bool ret = DoCommandP(cp->tile, cp->p1, cp->p2, cp->cmd, NULL, cp->text);
-				DEBUG(net, 0, "injecting: %08x; %02x; %02x; %06x; %08x; %08x; %08x; \"%s\" -> %i", _date, _date_fract, (int)_current_company, cp->tile, cp->p1, cp->p2, cp->cmd, cp->text, (int)ret);
-				assert(ret);
-				free(cp);
-				cp = NULL;
+			if (_date == next_date && _date_fract == next_date_fract) {
+				if (cp != NULL) {
+					NetworkSend_Command(cp->tile, cp->p1, cp->p2, cp->cmd & ~CMD_FLAGS_MASK, NULL, cp->text, cp->company);
+					DEBUG(net, 0, "injecting: %08x; %02x; %02x; %06x; %08x; %08x; %08x; \"%s\" (%s)", _date, _date_fract, (int)_current_company, cp->tile, cp->p1, cp->p2, cp->cmd, cp->text, GetCommandName(cp->cmd));
+					free(cp);
+					cp = NULL;
+				}
+				if (check_sync_state) {
+					if (sync_state[0] == _random.state[0] && sync_state[1] == _random.state[1]) {
+						DEBUG(net, 0, "sync check: %08x; %02x; match", _date, _date_fract);
+					} else {
+						DEBUG(net, 0, "sync check: %08x; %02x; mismatch expected {%08x, %08x}, got {%08x, %08x}",
+									_date, _date_fract, sync_state[0], sync_state[1], _random.state[0], _random.state[1]);
+						NOT_REACHED();
+					}
+					check_sync_state = false;
+				}
 			}
 
-			if (cp != NULL) break;
+			if (cp != NULL || check_sync_state) break;
 
 			char buff[4096];
 			if (fgets(buff, lengthof(buff), f) == NULL) break;
@@ -1128,12 +1147,23 @@ void NetworkGameLoop()
 				int ret = sscanf(p + 6, "%x; %x", &next_date, &next_date_fract);
 				assert(ret == 2);
 				DEBUG(net, 0, "injecting pause for join at %08x:%02x; please join when paused", next_date, next_date_fract);
-				cp = MallocT<CommandPacket>(1);
+				cp = CallocT<CommandPacket>(1);
 				cp->company = COMPANY_SPECTATOR;
 				cp->cmd = CMD_PAUSE;
 				cp->p1 = PM_PAUSED_NORMAL;
 				cp->p2 = 1;
 				_ddc_fastforward = false;
+			} else if (strncmp(p, "sync: ", 6) == 0) {
+				int ret = sscanf(p + 6, "%x; %x; %x; %x", &next_date, &next_date_fract, &sync_state[0], &sync_state[1]);
+				assert(ret == 4);
+				check_sync_state = true;
+			} else if (strncmp(p, "msg: ", 5) == 0 || strncmp(p, "client: ", 8) == 0 ||
+						strncmp(p, "load: ", 6) == 0 || strncmp(p, "save: ", 6) == 0) {
+				/* A message that is not very important to the log playback, but part of the log. */
+			} else {
+				/* Can't parse a line; what's wrong here? */
+				DEBUG(net, 0, "trying to parse: %s", p);
+				NOT_REACHED();
 			}
 		}
 		if (f != NULL && feof(f)) {
