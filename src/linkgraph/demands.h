@@ -40,16 +40,17 @@ public:
 	 * @param num_demands the number of accepting nodes
 	 */
 	FORCEINLINE void SetDemandPerNode(uint num_demands)
-		{this->demand_per_node = max(this->supply_sum / num_demands, (uint)1);}
+		{this->demand_per_node = max(this->supply_sum / num_demands, 1U);}
 
 	/**
 	 * get the effective supply of one node towards another one. In symmetric
 	 * distribution the supply of the other node is weighed in.
 	 * @param from The supplying node
 	 * @param to The receiving node
+	 * @return the effective supply
 	 */
 	FORCEINLINE uint EffectiveSupply(const Node &from, const Node &to)
-		{return max(from.supply * to.supply * this->mod_size / 100 / this->demand_per_node, (uint)1);}
+		{return max(from.supply * max(1U, to.supply) * this->mod_size / 100 / this->demand_per_node, 1U);}
 
 	/**
 	 * Check if there is any acceptance left for this node. In symmetric distribution
@@ -58,7 +59,7 @@ public:
 	 * @param to The node to be checked
 	 */
 	FORCEINLINE bool DemandLeft(Node &to)
-		{return to.undelivered_supply > 0 && to.demand > 0;}
+		{return (to.supply == 0 || to.undelivered_supply > 0) && to.demand > 0;}
 
 	void SetDemands(LinkGraphComponent * graph, NodeID from, NodeID to, uint demand_forw);
 

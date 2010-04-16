@@ -117,7 +117,7 @@ void DemandCalculator::CalcDemand(LinkGraphComponent *graph, Tscaler scaler)
 			assert(divisor > 0);
 
 			uint demand_forw = 0;
-			if (divisor < supply) {
+			if (divisor <= supply) {
 				/* at first only distribute demand if
 				 * effective supply / accuracy divisor >= 1
 				 * Others are too small or too far away to be considered.
