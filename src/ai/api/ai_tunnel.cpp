@@ -25,7 +25,7 @@
 {
 	if (!::IsValidTile(tile)) return INVALID_TILE;
 
-	/* If it's a tunnel alread, take the easy way out! */
+	/* If it's a tunnel already, take the easy way out! */
 	if (IsTunnelTile(tile)) return ::GetOtherTunnelEnd(tile);
 
 	uint start_z;
@@ -77,10 +77,10 @@ static void _DoCommandReturnBuildTunnel1(class AIInstance *instance)
 
 	uint type = 0;
 	if (vehicle_type == AIVehicle::VT_ROAD) {
-		type |= (TRANSPORT_ROAD << 9);
+		type |= (TRANSPORT_ROAD << 8);
 		type |= ::RoadTypeToRoadTypes((::RoadType)AIObject::GetRoadType());
 	} else {
-		type |= (TRANSPORT_RAIL << 9);
+		type |= (TRANSPORT_RAIL << 8);
 		type |= AIRail::GetCurrentRailType();
 	}
 
