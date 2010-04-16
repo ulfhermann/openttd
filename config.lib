@@ -1181,7 +1181,7 @@ make_compiler_cflags() {
 			# GCC 4.2+ automatically assumes that signed overflows do
 			# not occur in signed arithmetics, whereas we are not
 			# sure that they will not happen. It furthermore complains
-			# about it's own optimized code in some places.
+			# about its own optimized code in some places.
 			flags="$flags -fno-strict-overflow"
 			ldflags="$ldflags -fno-strict-overflow"
 		fi
@@ -1330,6 +1330,10 @@ make_cflags_and_ldflags() {
 
 	if [ "$os" = "OSX" ]; then
 		LDFLAGS="$LDFLAGS -framework Cocoa"
+
+		# Add macports include dir which is not always set a default system dir. This avoids zillions of bogus warnings.
+		CFLAGS="$CFLAGS -isystem/opt/local/include"
+
 		if [ "$enable_dedicated" = "0" ] && ([ "$cpu_type" = "32" ] || [ "$enable_universal" != "0" ]); then
 			LIBS="$LIBS -framework QuickTime"
 		else
@@ -3169,6 +3173,7 @@ showhelp() {
 	echo "  --with-midi=midi               define which midi-player to use"
 	echo "  --with-midi-arg=arg            define which args to use for the"
 	echo "                                 midi-player"
+	echo "  --with-libtimidity             enables libtimidity support"
 	echo "  --with-allegrol[=allegro-config]"
 	echo "                                 enables Allegro video driver support"
 	echo "  --with-cocoa                   enables COCOA video driver (OSX ONLY)"
