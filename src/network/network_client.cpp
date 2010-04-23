@@ -463,6 +463,10 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_CLIENT_INFO)
 			 * Do not display that for now */
 		}
 
+		/* Make sure we're in the company the server tells us to be in,
+		 * for the rare case that we get moved while joining. */
+		if (client_id == _network_own_client_id) SetLocalCompany(!Company::IsValidID(playas) ? COMPANY_SPECTATOR : playas);
+
 		ci->client_playas = playas;
 		strecpy(ci->client_name, name, lastof(ci->client_name));
 
@@ -1021,6 +1025,19 @@ void NetworkClientSendRcon(const char *password, const char *command)
 void NetworkClientRequestMove(CompanyID company_id, const char *pass)
 {
 	SEND_COMMAND(PACKET_CLIENT_MOVE)(company_id, pass);
+}
+
+void NetworkClientsToSpectators(CompanyID cid)
+{
+	/* If our company is changing owner, go to spectators */
+	if (cid == _local_company) SetLocalCompany(COMPANY_SPECTATOR);
+
+	NetworkClientInfo *ci;
+	FOR_ALL_CLIENT_INFOS(ci) {
+		if (ci->client_playas != cid) continue;
+		NetworkTextMessage(NETWORK_ACTION_COMPANY_SPECTATOR, CC_DEFAULT, false, ci->client_name);
+		ci->client_playas = COMPANY_SPECTATOR;
+	}
 }
 
 void NetworkUpdateClientName()
