@@ -298,6 +298,11 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 /*  use INVALID_OWNER as new_owner to delete the company. */
 void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 {
+#ifdef ENABLE_NETWORK
+	/* In all cases, make spectators of clients connected to that company */
+	if (_networking) NetworkClientsToSpectators(old_owner);
+#endif /* ENABLE_NETWORK */
+
 	Town *t;
 	CompanyID old = _current_company;
 
@@ -472,21 +477,6 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	MarkWholeScreenDirty();
 }
 
-static void ChangeNetworkOwner(Owner current_owner, Owner new_owner)
-{
-#ifdef ENABLE_NETWORK
-	if (!_networking) return;
-
-	if (current_owner == _local_company) {
-		SetLocalCompany(new_owner);
-	}
-
-	if (!_network_server) return;
-
-	NetworkServerChangeOwner(current_owner, new_owner);
-#endif /* ENABLE_NETWORK */
-}
-
 static void CompanyCheckBankrupt(Company *c)
 {
 	/*  If the company has money again, it does not go bankrupt */
@@ -548,8 +538,6 @@ static void CompanyCheckBankrupt(Company *c)
 			SetDParamStr(2, cni->company_name);
 			AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_BANKRUPT, cni);
 
-			/* Remove the company */
-			ChangeNetworkOwner(c->index, COMPANY_SPECTATOR);
 			ChangeOwnershipOfCompanyItems(c->index, INVALID_OWNER);
 
 			if (c->is_ai) AI::Stop(c->index);
@@ -1206,7 +1194,7 @@ static void LoadUnloadVehicle(Vehicle *v, int *cargo_left)
 		byte load_amount = e->info.load_amount;
 
 		/* The default loadamount for mail is 1/4 of the load amount for passengers */
-		if (v->type == VEH_AIRCRAFT && !Aircraft::From(v)->IsNormalAircraft()) load_amount = (load_amount + 3) / 4;
+		if (v->type == VEH_AIRCRAFT && !Aircraft::From(v)->IsNormalAircraft()) load_amount = CeilDiv(load_amount, 4);
 
 		if (_settings_game.order.gradual_loading && HasBit(e->info.callback_mask, CBM_VEHICLE_LOAD_AMOUNT)) {
 			uint16 cb_load_amount = GetVehicleCallback(CBID_VEHICLE_LOAD_AMOUNT, 0, 0, v->engine_type, v);
@@ -1490,8 +1478,6 @@ static void DoAcquireCompany(Company *c)
 	AddCompanyNewsItem(STR_MESSAGE_NEWS_FORMAT, NS_COMPANY_MERGER, cni);
 	AI::BroadcastNewEvent(new AIEventCompanyMerger(ci, _current_company));
 
-	/* original code does this a little bit differently */
-	ChangeNetworkOwner(ci, _current_company);
 	ChangeOwnershipOfCompanyItems(ci, _current_company);
 
 	if (c->bankrupt_value == 0) {
@@ -1533,12 +1519,12 @@ extern int GetAmountOwnedBy(const Company *c, Owner owner);
 CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	CommandCost cost(EXPENSES_OTHER);
-
-	Company *c = Company::GetIfValid(p1);
+	CompanyID target_company = (CompanyID)p1;
+	Company *c = Company::GetIfValid(target_company);
 
 	/* Check if buying shares is allowed (protection against modified clients)
 	 * Cannot buy own shares */
-	if (c == NULL || !_settings_game.economy.allow_shares || _current_company == (CompanyID)p1) return CMD_ERROR;
+	if (c == NULL || !_settings_game.economy.allow_shares || _current_company == target_company) return CMD_ERROR;
 
 	/* Protect new companies from hostile takeovers */
 	if (_cur_year - c->inaugurated_year < 6) return_cmd_error(STR_ERROR_PROTECTED);
@@ -1564,7 +1550,7 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 				break;
 			}
 		}
-		SetWindowDirty(WC_COMPANY, p1);
+		SetWindowDirty(WC_COMPANY, target_company);
 	}
 	return cost;
 }
@@ -1579,11 +1565,12 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
  */
 CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Company *c = Company::GetIfValid(p1);
+	CompanyID target_company = (CompanyID)p1;
+	Company *c = Company::GetIfValid(target_company);
 
 	/* Check if selling shares is allowed (protection against modified clients)
 	 * Cannot sell own shares */
-	if (c == NULL || !_settings_game.economy.allow_shares || _current_company == (CompanyID)p1) return CMD_ERROR;
+	if (c == NULL || !_settings_game.economy.allow_shares || _current_company == target_company) return CMD_ERROR;
 
 	/* Those lines are here for network-protection (clients can be slow) */
 	if (GetAmountOwnedBy(c, _current_company) == 0) return CommandCost();
@@ -1596,7 +1583,7 @@ CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1
 		OwnerByte *b = c->share_owners;
 		while (*b != _current_company) b++; // share owners is guaranteed to contain company
 		*b = COMPANY_SPECTATOR;
-		SetWindowDirty(WC_COMPANY, p1);
+		SetWindowDirty(WC_COMPANY, target_company);
 	}
 	return CommandCost(EXPENSES_OTHER, cost);
 }
@@ -1614,7 +1601,8 @@ CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1
  */
 CommandCost CmdBuyCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Company *c = Company::GetIfValid(p1);
+	CompanyID target_company = (CompanyID)p1;
+	Company *c = Company::GetIfValid(target_company);
 	if (c == NULL) return CMD_ERROR;
 
 	/* Disable takeovers when not asked */
@@ -1624,7 +1612,7 @@ CommandCost CmdBuyCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	if (!_networking && _local_company == c->index) return CMD_ERROR;
 
 	/* Do not allow companies to take over themselves */
-	if ((CompanyID)p1 == _current_company) return CMD_ERROR;
+	if (target_company == _current_company) return CMD_ERROR;
 
 	/* Get the cost here as the company is deleted in DoAcquireCompany. */
 	CommandCost cost(EXPENSES_OTHER, c->bankrupt_value);
