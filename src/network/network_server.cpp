@@ -322,7 +322,7 @@ DEF_SERVER_SEND_COMMAND(PACKET_SERVER_MAP)
 	 *    nothing
 	 */
 
-	static FILE *file_pointer;
+	static FILE *file_pointer = NULL;
 	static uint sent_packets; // How many packets we did send succecfully last time
 
 	if (cs->status < STATUS_AUTHORIZED) {
@@ -337,9 +337,12 @@ DEF_SERVER_SEND_COMMAND(PACKET_SERVER_MAP)
 		/* Make a dump of the current game */
 		if (SaveOrLoad(filename, SL_SAVE, AUTOSAVE_DIR) != SL_OK) usererror("network savedump failed");
 
-		file_pointer = FioFOpenFile(filename, "rb", AUTOSAVE_DIR);
-		fseek(file_pointer, 0, SEEK_END);
+		if (file_pointer != NULL) fclose(file_pointer);
 
+		file_pointer = FioFOpenFile(filename, "rb", AUTOSAVE_DIR);
+		if (file_pointer == NULL) usererror("network savedump failed - could not open just saved dump");
+
+		fseek(file_pointer, 0, SEEK_END);
 		if (ftell(file_pointer) == 0) usererror("network savedump failed - zero sized savegame?");
 
 		/* Now send the _frame_counter and how many packets are coming */
@@ -382,6 +385,7 @@ DEF_SERVER_SEND_COMMAND(PACKET_SERVER_MAP)
 				 *  to send it is ready (maybe that happens like never ;)) */
 				cs->status = STATUS_DONE_MAP;
 				fclose(file_pointer);
+				file_pointer = NULL;
 
 				NetworkClientSocket *new_cs;
 				bool new_map_client = false;
@@ -656,7 +660,7 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMPANY_INFO)
 
 DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_NEWGRFS_CHECKED)
 {
-	if (cs->status != STATUS_INACTIVE) {
+	if (cs->status != STATUS_NEWGRFS_CHECK) {
 		/* Illegal call, return error and ignore the packet */
 		return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_NOT_EXPECTED);
 	}
@@ -739,7 +743,10 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_JOIN)
 	/* Make sure companies to which people try to join are not autocleaned */
 	if (Company::IsValidID(playas)) _network_company_states[playas].months_empty = 0;
 
+	cs->status = STATUS_NEWGRFS_CHECK;
+
 	if (_grfconfig == NULL) {
+		/* Behave as if we received PACKET_CLIENT_NEWGRFS_CHECKED */
 		return RECEIVE_COMMAND(PACKET_CLIENT_NEWGRFS_CHECKED)(cs, NULL);
 	}
 
@@ -1099,9 +1106,9 @@ void NetworkServerSendChat(NetworkAction action, DestType desttype, int dest, co
 		}
 		break;
 	case DESTTYPE_TEAM: {
-		bool show_local = true; // If this is false, the message is already displayed
-														/* on the client who did sent it.
-		 * Find all clients that belong to this company */
+		/* If this is false, the message is already displayed on the client who sent it. */
+		bool show_local = true;
+		/* Find all clients that belong to this company */
 		ci_to = NULL;
 		FOR_ALL_CLIENT_SOCKETS(cs) {
 			ci = cs->GetInfo();
@@ -1694,27 +1701,6 @@ void NetworkServerMonthlyLoop()
 	NetworkAutoCleanCompanies();
 }
 
-void NetworkServerChangeOwner(Owner current_owner, Owner new_owner)
-{
-	/* The server has to handle all administrative issues, for example
-	 * updating and notifying all clients of what has happened */
-	NetworkClientInfo *ci = NetworkFindClientInfoFromClientID(CLIENT_ID_SERVER);
-
-	/* The server has just changed from owner */
-	if (current_owner == ci->client_playas) {
-		ci->client_playas = new_owner;
-		NetworkUpdateClientInfo(CLIENT_ID_SERVER);
-	}
-
-	/* Find all clients that were in control of this company, and mark them as new_owner */
-	FOR_ALL_CLIENT_INFOS(ci) {
-		if (current_owner == ci->client_playas) {
-			ci->client_playas = new_owner;
-			NetworkUpdateClientInfo(ci->client_id);
-		}
-	}
-}
-
 const char *GetClientIP(NetworkClientInfo *ci)
 {
 	return ci->client_address.GetHostname();
@@ -1724,7 +1710,9 @@ void NetworkServerShowStatusToConsole()
 {
 	static const char * const stat_str[] = {
 		"inactive",
-		"authorizing",
+		"checking NewGRFs",
+		"authorizing (server password)",
+		"authorizing (company password)",
 		"authorized",
 		"waiting",
 		"loading map",
@@ -1732,6 +1720,7 @@ void NetworkServerShowStatusToConsole()
 		"ready",
 		"active"
 	};
+	assert_compile(lengthof(stat_str) == STATUS_END);
 
 	NetworkClientSocket *cs;
 	FOR_ALL_CLIENT_SOCKETS(cs) {
