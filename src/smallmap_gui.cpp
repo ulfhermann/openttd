@@ -1812,8 +1812,8 @@ public:
 
 	uint GetMaxNumberRowsLegend(uint columns) const {
 		uint number_of_rows = this->min_number_of_fixed_rows;
-		number_of_rows = max(number_of_rows, (_smallmap_industry_count + columns - 1) / columns);
-		number_of_rows = max(number_of_rows, (_smallmap_cargo_count + columns - 2) / (columns - 1));
+		number_of_rows = max(number_of_rows, CeilDiv(_smallmap_industry_count, columns));
+		number_of_rows = max(number_of_rows, CeilDiv(_smallmap_cargo_count, (columns - 1)));
 		return number_of_rows;
 	}
 
@@ -1971,7 +1971,7 @@ public:
 					} else {
 						entry_count = _smallmap_industry_count;
 					}
-					uint number_of_rows = max((entry_count + columns - 1) / columns, this->min_number_of_fixed_rows);
+					uint number_of_rows = max(CeilDiv(entry_count, columns), this->min_number_of_fixed_rows);
 					if (line >= number_of_rows) break;
 
 					bool rtl = _dynlang.text_dir == TD_RTL;
