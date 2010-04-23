@@ -27,7 +27,7 @@ enum RoadType {
 	INVALID_ROADTYPE = 0xFF ///< flag for invalid roadtype
 };
 DECLARE_POSTFIX_INCREMENT(RoadType)
-template <> struct EnumPropsT<RoadType> : MakeEnumPropsT<RoadType, byte, ROADTYPE_BEGIN, ROADTYPE_END, INVALID_ROADTYPE> {};
+template <> struct EnumPropsT<RoadType> : MakeEnumPropsT<RoadType, byte, ROADTYPE_BEGIN, ROADTYPE_END, INVALID_ROADTYPE, 2> {};
 
 /**
  * The different roadtypes we support, but then a bitmask of them
@@ -42,6 +42,7 @@ enum RoadTypes {
 	INVALID_ROADTYPES  = 0xFF                              ///< Invalid roadtypes
 };
 DECLARE_ENUM_AS_BIT_SET(RoadTypes)
+template <> struct EnumPropsT<RoadTypes> : MakeEnumPropsT<RoadTypes, byte, ROADTYPES_NONE, ROADTYPES_END, INVALID_ROADTYPES, 2> {};
 typedef SimpleTinyEnumT<RoadTypes, byte> RoadTypesByte;
 
 
@@ -65,9 +66,11 @@ enum RoadBits {
 	ROAD_S    = ROAD_SE | ROAD_SW,   ///< Road at the two southern edges
 	ROAD_W    = ROAD_NW | ROAD_SW,   ///< Road at the two western edges
 
-	ROAD_ALL  = ROAD_X  | ROAD_Y     ///< Full 4-way crossing
+	ROAD_ALL  = ROAD_X  | ROAD_Y,    ///< Full 4-way crossing
+
+	ROAD_END  = ROAD_ALL + 1         ///< Out-of-range roadbits, used for iterations
 };
 DECLARE_ENUM_AS_BIT_SET(RoadBits)
-template <> struct EnumPropsT<RoadBits> : MakeEnumPropsT<RoadBits, byte, ROAD_NONE, ROAD_ALL, ROAD_NONE, 4> {};
+template <> struct EnumPropsT<RoadBits> : MakeEnumPropsT<RoadBits, byte, ROAD_NONE, ROAD_END, ROAD_NONE, 4> {};
 
 #endif /* ROAD_TYPE_H */
