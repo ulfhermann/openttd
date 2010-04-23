@@ -97,7 +97,7 @@ CommandCost CmdDecreaseLoan(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			loan -= loan % LOAN_INTERVAL;
 			break;
 		case 2: // Repay the given amount of loan
-			if (p1 % LOAN_INTERVAL != 0 || (int32)p1 < LOAN_INTERVAL) return CMD_ERROR; // Invalid amount to loan
+			if (p1 % LOAN_INTERVAL != 0 || (int32)p1 < LOAN_INTERVAL || p1 > c->current_loan) return CMD_ERROR; // Invalid amount to loan
 			loan = p1;
 			break;
 	}
@@ -223,7 +223,7 @@ CommandCost CmdGiveMoney(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	CommandCost amount(EXPENSES_OTHER, min((Money)p1, (Money)20000000LL));
 
 	/* You can only transfer funds that is in excess of your loan */
-	if (c->money - c->current_loan < amount.GetCost() || amount.GetCost() <= 0) return CMD_ERROR;
+	if (c->money - c->current_loan < amount.GetCost() || amount.GetCost() < 0) return CMD_ERROR;
 	if (!_networking || !Company::IsValidID((CompanyID)p2)) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
