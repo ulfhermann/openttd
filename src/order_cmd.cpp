@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "debug.h"
+#include "cmd_helper.h"
 #include "command_func.h"
 #include "company_func.h"
 #include "news_func.h"
@@ -529,7 +530,7 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	Order new_order(p2);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
-	if (v == NULL) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
@@ -620,8 +621,6 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 						default: return CMD_ERROR;
 					}
 				}
-			} else {
-				if (!IsCompanyBuildableVehicleType(v)) return CMD_ERROR;
 			}
 
 			if (new_order.GetNonStopType() != ONSF_STOP_EVERYWHERE && v->type != VEH_TRAIN && v->type != VEH_ROAD) return CMD_ERROR;
@@ -813,7 +812,7 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 	Vehicle *v = Vehicle::GetIfValid(veh_id);
 
-	if (v == NULL) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
@@ -884,7 +883,7 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 	Vehicle *v = Vehicle::GetIfValid(veh_id);
 
-	if (v == NULL || sel_ord == v->cur_order_index || sel_ord >= v->GetNumOrders() || v->GetNumOrders() < 2) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle() || sel_ord == v->cur_order_index || sel_ord >= v->GetNumOrders() || v->GetNumOrders() < 2) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
@@ -924,7 +923,7 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	VehicleOrderID target_order = GB(p2, 16, 16);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
-	if (v == NULL) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
@@ -1003,13 +1002,13 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 {
 	VehicleOrderID sel_ord = GB(p1, 16, 16); // XXX - automatically truncated to 8 bits.
 	VehicleID veh          = GB(p1,  0, 16);
-	ModifyOrderFlags mof   = (ModifyOrderFlags)GB(p2,  0,  4);
-	uint16 data             = GB(p2, 4, 11);
+	ModifyOrderFlags mof   = Extract<ModifyOrderFlags, 0, 4>(p2);
+	uint16 data            = GB(p2, 4, 11);
 
 	if (mof >= MOF_END) return CMD_ERROR;
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
-	if (v == NULL) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
@@ -1237,7 +1236,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	VehicleID veh_dst = GB(p1,  0, 16);
 
 	Vehicle *dst = Vehicle::GetIfValid(veh_dst);
-	if (dst == NULL) return CMD_ERROR;
+	if (dst == NULL || !dst->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(dst->owner);
 	if (ret.Failed()) return ret;
@@ -1247,7 +1246,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 			Vehicle *src = Vehicle::GetIfValid(veh_src);
 
 			/* Sanity checks */
-			if (src == NULL || dst->type != src->type || dst == src) return CMD_ERROR;
+			if (src == NULL || !src->IsPrimaryVehicle() || dst->type != src->type || dst == src) return CMD_ERROR;
 
 			CommandCost ret = CheckOwnership(src->owner);
 			if (ret.Failed()) return ret;
@@ -1289,7 +1288,7 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 			Vehicle *src = Vehicle::GetIfValid(veh_src);
 
 			/* Sanity checks */
-			if (src == NULL || dst->type != src->type || dst == src) return CMD_ERROR;
+			if (src == NULL || !src->IsPrimaryVehicle() || dst->type != src->type || dst == src) return CMD_ERROR;
 
 			CommandCost ret = CheckOwnership(src->owner);
 			if (ret.Failed()) return ret;
@@ -1367,8 +1366,10 @@ CommandCost CmdOrderRefit(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	CargoID cargo = GB(p2, 0, 8);
 	byte subtype  = GB(p2, 8, 8);
 
+	if (cargo >= NUM_CARGO) return CMD_ERROR;
+
 	const Vehicle *v = Vehicle::GetIfValid(veh);
-	if (v == NULL) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
@@ -1523,7 +1524,7 @@ CommandCost CmdRestoreOrderIndex(TileIndex tile, DoCommandFlag flags, uint32 p1,
 
 	Vehicle *v = Vehicle::GetIfValid(p1);
 	/* Check the vehicle type and ownership, and if the service interval and order are in range */
-	if (v == NULL) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
