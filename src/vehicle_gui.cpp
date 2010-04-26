@@ -20,6 +20,7 @@
 #include "viewport_func.h"
 #include "newgrf_engine.h"
 #include "newgrf_text.h"
+#include "newgrf_debug.h"
 #include "waypoint_base.h"
 #include "roadveh.h"
 #include "train.h"
@@ -41,6 +42,7 @@
 #include "company_base.h"
 #include "engine_base.h"
 #include "engine_func.h"
+#include "newgrf.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -362,7 +364,6 @@ struct RefitWindow : public Window {
 	int sel;              ///< Index in refit options, \c -1 if nothing is selected.
 	RefitOption *cargo;   ///< Refit option selected by \v sel.
 	RefitList list;       ///< List of cargo types available for refitting.
-	uint length;          ///< For trains, the number of vehicles.
 	VehicleOrderID order; ///< If not #INVALID_VEH_ORDER_ID, selection is part of a refit order (rather than execute directly).
 
 	RefitWindow(const WindowDesc *desc, const Vehicle *v, VehicleOrderID order) : Window()
@@ -381,7 +382,6 @@ struct RefitWindow : public Window {
 		this->order = order;
 		this->sel  = -1;
 		BuildRefitList(v, &this->list);
-		if (v->type == VEH_TRAIN) this->length = CountVehiclesInChain(v);
 		this->vscroll.SetCount(this->list.Length());
 	}
 
@@ -409,28 +409,12 @@ struct RefitWindow : public Window {
 			if (this->sel == -1) this->vscroll.ScrollTowards(0);
 		} else {
 			/* Rebuild the refit list */
-			BuildRefitList(Vehicle::Get(this->window_number), &this->list);
-			this->vscroll.SetCount(this->list.Length());
+			this->OnInvalidateData(0);
 		}
 	}
 
 	virtual void OnPaint()
 	{
-		Vehicle *v = Vehicle::Get(this->window_number);
-
-		if (v->type == VEH_TRAIN) {
-			uint length = CountVehiclesInChain(v);
-
-			if (length != this->length) {
-				/* Consist length has changed, so rebuild the refit list */
-				BuildRefitList(v, &this->list);
-				this->length = length;
-			}
-		}
-
-		this->vscroll.SetCount(this->list.Length());
-
-		this->cargo = (this->sel >= 0 && this->sel < (int)this->list.Length()) ? &this->list[this->sel] : NULL;
 		this->DrawWidgets();
 	}
 
@@ -472,6 +456,22 @@ struct RefitWindow : public Window {
 		}
 	}
 
+	virtual void OnInvalidateData(int data)
+	{
+		switch (data) {
+			case 0: { // The consist lenght of the vehicle has changed; rebuild the entire list.
+				Vehicle *v = Vehicle::Get(this->window_number);
+				BuildRefitList(v, &this->list);
+				this->vscroll.SetCount(this->list.Length());
+			}
+			/* FALLTHROUGH */
+
+			case 1: // A new cargo has been selected.
+				this->cargo = (this->sel >= 0 && this->sel < (int)this->list.Length()) ? &this->list[this->sel] : NULL;
+				break;
+		}
+	}
+
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		switch (widget) {
@@ -479,9 +479,9 @@ struct RefitWindow : public Window {
 				int y = pt.y - this->GetWidget<NWidgetBase>(VRW_MATRIX)->pos_y;
 				if (y >= 0) {
 					this->sel = (y / (int)this->resize.step_height) + this->vscroll.GetPosition();
-					this->SetDirty();
+					this->InvalidateData(1);
 				}
-				/* FIXME We need to call some InvalidateData to make this->cargo valid */
+
 				if (click_count == 1) break;
 			}
 			/* FALL THROUGH */
@@ -1765,6 +1765,7 @@ static const NWidgetPart _nested_vehicle_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_GREY),
 		NWidget(WWT_CAPTION, COLOUR_GREY, VVW_WIDGET_CAPTION), SetDataTip(STR_VEHICLE_VIEW_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_DEBUGBOX, COLOUR_GREY),
 		NWidget(WWT_SHADEBOX, COLOUR_GREY),
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
@@ -1866,6 +1867,36 @@ static const uint32 _vehicle_command_translation_table[][4] = {
 		0xffffffff  // invalid for aircrafts
 	},
 };
+
+/**
+ * This is the Callback method after the cloning attempt of a vehicle
+ * @param result the result of the cloning command
+ * @param tile unused
+ * @param p1 vehicle ID
+ * @param p2 unused
+ */
+void CcStartStopVehicle(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
+{
+	if (result.Failed()) return;
+
+	const Vehicle *v = Vehicle::GetIfValid(p1);
+	if (v == NULL || !v->IsPrimaryVehicle() || v->owner != _local_company) return;
+
+	StringID msg = (v->vehstatus & VS_STOPPED) ? STR_VEHICLE_COMMAND_STOPPED : STR_VEHICLE_COMMAND_STARTED;
+	Point pt = RemapCoords(v->x_pos, v->y_pos, v->z_pos);
+	AddTextEffect(msg, pt.x, pt.y, DAY_TICKS, TE_RISING);
+}
+
+/**
+ * Executes #CMD_START_STOP_VEHICLE for given vehicle.
+ * @param v Vehicle to start/stop
+ * @param texteffect Should a texteffect be shown?
+ */
+void StartStopVehicle(const Vehicle *v, bool texteffect)
+{
+	assert(v->IsPrimaryVehicle());
+	DoCommandP(v->tile, v->index, 0, _vehicle_command_translation_table[VCT_CMD_START_STOP][v->type], texteffect ? CcStartStopVehicle : NULL);
+}
 
 /** Checks whether the vehicle may be refitted at the moment.*/
 static bool IsVehicleRefitable(const Vehicle *v)
@@ -2118,8 +2149,7 @@ public:
 					if (tile != INVALID_TILE) ScrollMainWindowToTile(tile);
 				} else {
 					/* Start/Stop */
-					DoCommandP(v->tile, v->index, 0,
-						_vehicle_command_translation_table[VCT_CMD_START_STOP][v->type]);
+					StartStopVehicle(v, false);
 				}
 				break;
 			case VVW_WIDGET_CENTER_MAIN_VIEH: {// center main view
@@ -2196,6 +2226,16 @@ public:
 				this->SetWidgetDirty(VVW_WIDGET_SELECT_REFIT_TURN);
 			}
 		}
+	}
+
+	virtual bool IsNewGRFInspectable() const
+	{
+		return ::IsNewGRFInspectable(GetGrfSpecFeature(Vehicle::Get(this->window_number)->type), this->window_number);
+	}
+
+	virtual void ShowNewGRFInspectWindow() const
+	{
+		::ShowNewGRFInspectWindow(GetGrfSpecFeature(Vehicle::Get(this->window_number)->type), this->window_number);
 	}
 };
 
