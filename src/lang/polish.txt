@@ -609,6 +609,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Zmień n
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Zamknij okno
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Tytuł okna - przeciągnij aby przesunąć okno
 STR_TOOLTIP_SHADE                                               :{BLACK}Zwiń okno - pokaż tylko nagłówek
+STR_TOOLTIP_DEBUG                                               :{BLACK}Pokaż informacje debugerra z NewGRF
 STR_TOOLTIP_STICKY                                              :{BLACK}Zaznacza to okno jako niezamykane dla funkcji 'Zamknij wszystkie okna'
 STR_TOOLTIP_RESIZE                                              :{BLACK}Kliknij i przeciągnij by zmienić rozmiar okna
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Przełącz duży/mały rozmiar okna
@@ -2744,6 +2745,19 @@ STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Dodaj za
 STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Przeskanuj pliki
 STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Odśwież listę dostępnych plików NewGRF
 
+# NewGRF inspect window
+STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Zbadaj - {STRING}
+STR_NEWGRF_INSPECT_PARENT_BUTTON                                :{BLACK}Poprzedni
+STR_NEWGRF_INSPECT_PARENT_TOOLTIP                               :{BLACK}Zbadaj obiekt z poprzedniego obszaru
+
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING} w {HEX}
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE                  :Typ szyn
+
+STR_NEWGRF_INSPECT_QUERY_CAPTION                                :{WHITE}NewGFR zmienna 60+parametr x (heksadecymalnie)
+
+# Sprite aligner window
+
+
 # NewGRF (self) generated warnings/errors
 STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Ostrzeżenie: {SILVER}{STRING}
@@ -3342,6 +3356,10 @@ STR_VEHICLE_STATUS_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL           :{LTBLUE}Serwisu
 STR_VEHICLE_STATUS_HEADING_FOR_HANGAR_SERVICE                   :{LTBLUE}Serwisuj w Hangarze na {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_HANGAR_SERVICE_VEL               :{LTBLUE}Serwisuj w Hangarze na {STATION}, {VELOCITY}
 
+# Vehicle stopped/started animations
+STR_VEHICLE_COMMAND_STOPPED_SMALL                               :{TINYFONT}{RED}Zatrzymany
+STR_VEHICLE_COMMAND_STOPPED                                     :{RED}Zatrzymany
+
 # Vehicle details
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Szczegóły)
 STR_VEHICLE_NAME_BUTTON                                         :{BLACK}Nazwa
@@ -3614,10 +3632,10 @@ STR_AI_DEBUG_SETTINGS                                           :{BLACK}Ustawien
 STR_AI_DEBUG_SETTINGS_TOOLTIP                                   :{BLACK}Zmień ustawienia SI
 STR_AI_DEBUG_RELOAD                                             :{BLACK}Przeładuj SI
 STR_AI_DEBUG_RELOAD_TOOLTIP                                     :{BLACK}Zabij SI, przeładuj skrypt i zrestartuj SI
-STR_AI_DEBUG_BREAK_STR_ON_OFF_TOOLTIP                           :{BLACK}Włącz/wyłącz przerwanie, kiedy wiadomość AI zgadza się z wiadomością przerywającą
+STR_AI_DEBUG_BREAK_STR_ON_OFF_TOOLTIP                           :{BLACK}Włącz/wyłącz przerwanie, kiedy wiadomość SI zgadza się z wiadomością przerywającą
 STR_AI_DEBUG_BREAK_ON_LABEL                                     :{BLACK}Zatrzymaj gdy:
 STR_AI_DEBUG_BREAK_STR_OSKTITLE                                 :{BLACK}Zatrzymaj gdy
-STR_AI_DEBUG_BREAK_STR_TOOLTIP                                  :{BLACK}Kiedy wiadomość AI zgadza się, gra zostaje wstrzymana.
+STR_AI_DEBUG_BREAK_STR_TOOLTIP                                  :{BLACK}Kiedy wiadomość SI zgadza się, gra zostaje wstrzymana.
 STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Uwzględnij wielkość
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Przełącz uwzględnianie wielkości liter przy porównywaniu wyrazu przerywającego
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Kontynuuj
@@ -3713,7 +3731,7 @@ STR_WARNING_HEIGHTMAP_SCALE_CAPTION                             :{WHITE}Ostrzeż
 STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Nie zaleca się zbyt dużej zmiany wielkości mapy źródłowej. Kontynuować tworzenie?
 
 # Soundset messages
-STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Znaleziono tylko podstawowy schemat dzwiękowy. Jeśli chcesz mieć pełny dzwięk, zainstaluj inny schemat dzwiękowy używając menadzera pobierania.
+STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Znaleziono tylko podstawowy schemat dźwiękowy. Jeśli chcesz mieć pełny dźwięk, zainstaluj inny schemat dźwiękowy używając menadżera pobierania.
 
 # Screenshot related messages
 STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Zrzut ekranu zapisany na dysk z powodzeniem '{STRING}'
