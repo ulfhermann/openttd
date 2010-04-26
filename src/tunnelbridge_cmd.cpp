@@ -470,10 +470,13 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 
 		if (c != NULL) bridge_len = CalcBridgeLenCostFactor(bridge_len);
 
-		cost.AddCost((int64)bridge_len * _price[PR_BUILD_BRIDGE] * GetBridgeSpec(bridge_type)->price >> 8);
+		if (transport_type != TRANSPORT_WATER) {
+			cost.AddCost((int64)bridge_len * _price[PR_BUILD_BRIDGE] * GetBridgeSpec(bridge_type)->price >> 8);
+		} else {
+			/* Aqueducts use a separate base cost. */
+			cost.AddCost((int64)bridge_len * _price[PR_BUILD_AQUEDUCT]);
+		}
 
-		/* Aqueducts are a little more expensive. */
-		if (transport_type == TRANSPORT_WATER) cost.AddCost((int64)bridge_len * _price[PR_CLEAR_WATER]);
 	}
 
 	return cost;
@@ -747,6 +750,8 @@ static CommandCost DoClearBridge(TileIndex tile, DoCommandFlag flags)
 		ChangeTownRating(t, RATING_TUNNEL_BRIDGE_DOWN_STEP, RATING_TUNNEL_BRIDGE_MINIMUM, flags);
 	}
 
+	Money base_cost = (GetTunnelBridgeTransportType(tile) != TRANSPORT_WATER) ? _price[PR_CLEAR_BRIDGE] : _price[PR_CLEAR_AQUEDUCT];
+
 	if (flags & DC_EXEC) {
 		/* read this value before actual removal of bridge */
 		bool rail = GetTunnelBridgeTransportType(tile) == TRANSPORT_RAIL;
@@ -784,7 +789,7 @@ static CommandCost DoClearBridge(TileIndex tile, DoCommandFlag flags)
 		}
 	}
 
-	return CommandCost(EXPENSES_CONSTRUCTION, (GetTunnelBridgeLength(tile, endtile) + 2) * _price[PR_CLEAR_BRIDGE]);
+	return CommandCost(EXPENSES_CONSTRUCTION, (GetTunnelBridgeLength(tile, endtile) + 2) * base_cost);
 }
 
 /** Remove a tunnel or a bridge from the game.
