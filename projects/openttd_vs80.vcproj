@@ -1228,6 +1228,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\newgrf_debug.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\newgrf_engine.h"
 				>
 			</File>
@@ -1893,6 +1897,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\network\network_gui.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_debug_gui.cpp"
 				>
 			</File>
 			<File
