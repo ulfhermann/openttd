@@ -131,6 +131,9 @@ static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout
 			break;
 	}
 
+	/* If the industry type is invalid, there is none and the closest is far away. */
+	if (ind_index >= NUM_INDUSTRYTYPES) return 0 | 0xFFFF;
+
 	if (layout_filter == 0) {
 		/* If the filter is 0, it could be because none was specified as well as being really a 0.
 		 * In either case, just do the regular var67 */
@@ -562,4 +565,15 @@ void IndustryProductionCallback(Industry *ind, int reason)
 	}
 
 	SetWindowDirty(WC_INDUSTRY_VIEW, ind->index);
+}
+
+/**
+ * Resolve a industry's spec and such so we can get a variable.
+ * @param ro    The resolver object to fill.
+ * @param index The industry ID to get the data from.
+ */
+void GetIndustryResolver(ResolverObject *ro, uint index)
+{
+	Industry *i = Industry::Get(index);
+	NewIndustryResolver(ro, i->location.tile, i, i->type);
 }
