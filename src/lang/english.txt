@@ -230,6 +230,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Rename
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Close window
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Window title - drag this to move window
 STR_TOOLTIP_SHADE                                               :{BLACK}Shade window - only show the title bar
+STR_TOOLTIP_DEBUG                                               :{BLACK}Show NewGRF debug information
 STR_TOOLTIP_STICKY                                              :{BLACK}Mark this window as uncloseable by the 'Close All Windows' key
 STR_TOOLTIP_RESIZE                                              :{BLACK}Click and drag to resize this window
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Toggle large/small window size
@@ -441,6 +442,7 @@ STR_ABOUT_MENU_AI_DEBUG                                         :AI debug
 STR_ABOUT_MENU_SCREENSHOT                                       :Screenshot (Ctrl+S)
 STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Giant screenshot (Ctrl+G)
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :About 'OpenTTD'
+STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Sprite aligner
 ############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
@@ -1093,7 +1095,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Original
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistic
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Slope steepness for trains {ORANGE}{STRING1}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Slope steepness for road vehicles {ORANGE}{STRING1}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Forbid trains and ships to make 90 deg turns: {ORANGE}{STRING1} {LTBLUE} (not with OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Forbid trains and ships from making 90° turns: {ORANGE}{STRING1} {LTBLUE} (not with OPF)
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Join train stations built next to each other: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Allow to join stations not directly adjacent: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Use improved loading algorithm: {ORANGE}{STRING1}
@@ -2366,6 +2368,30 @@ STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Add the 
 STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Rescan files
 STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Update the list of available NewGRF files
 
+# NewGRF inspect window
+STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspect - {STRING5}
+STR_NEWGRF_INSPECT_PARENT_BUTTON                                :{BLACK}Parent
+STR_NEWGRF_INSPECT_PARENT_TOOLTIP                               :{BLACK}Inspect the object of the parent scope
+
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING1} at {HEX}
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE                  :Rail type
+
+STR_NEWGRF_INSPECT_QUERY_CAPTION                                :{WHITE}NewGRF variable 60+x parameter (hexadecimal)
+
+# Sprite aligner window
+STR_SPRITE_ALIGNER_CAPTION                                      :{WHITE}Aligning sprite {COMMA} ({RAW_STRING})
+STR_SPRITE_ALIGNER_NEXT_BUTTON                                  :{BLACK}Next sprite
+STR_SPRITE_ALIGNER_NEXT_TOOLTIP                                 :{BLACK}Proceed to the next normal sprite, skipping any pseudo/recolour/font sprites and wrapping around at the end
+STR_SPRITE_ALIGNER_GOTO_BUTTON                                  :{BLACK}Go to sprite
+STR_SPRITE_ALIGNER_GOTO_TOOLTIP                                 :{BLACK}Go to the given sprite. If the sprite is not a normal sprite, proceed to the next normal sprite
+STR_SPRITE_ALIGNER_PREVIOUS_BUTTON                              :{BLACK}Previous sprite
+STR_SPRITE_ALIGNER_PREVIOUS_TOOLTIP                             :{BLACK}Proceed to the previous normal sprite, skipping any pseudo/recolour/font sprites and wrapping around at the begin
+STR_SPRITE_ALIGNER_SPRITE_TOOLTIP                               :{BLACK}Representation of the currently selected sprite. The alignment is ignored when drawing this sprite
+STR_SPRITE_ALIGNER_MOVE_TOOLTIP                                 :{BLACK}Move the sprite around, changing the X and Y offsets
+STR_SPRITE_ALIGNER_OFFSETS                                      :{BLACK}X offset: {NUM}, Y offset: {NUM}
+
+STR_SPRITE_ALIGNER_GOTO_CAPTION                                 :{WHITE}Go to sprite
+
 # NewGRF (self) generated warnings/errors
 STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{RAW_STRING}
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Warning: {SILVER}{RAW_STRING}
@@ -2957,6 +2983,12 @@ STR_VEHICLE_STATUS_HEADING_FOR_SHIP_DEPOT_SERVICE               :{LTBLUE}Service
 STR_VEHICLE_STATUS_HEADING_FOR_SHIP_DEPOT_SERVICE_VEL           :{LTBLUE}Service at {TOWN} Ship Depot, {VELOCITY}
 STR_VEHICLE_STATUS_HEADING_FOR_HANGAR_SERVICE                   :{LTBLUE}Service at {STATION} Hangar
 STR_VEHICLE_STATUS_HEADING_FOR_HANGAR_SERVICE_VEL               :{LTBLUE}Service at {STATION} Hangar, {VELOCITY}
+
+# Vehicle stopped/started animations
+STR_VEHICLE_COMMAND_STOPPED_SMALL                               :{TINYFONT}{RED}Stopped
+STR_VEHICLE_COMMAND_STOPPED                                     :{RED}Stopped
+STR_VEHICLE_COMMAND_STARTED_SMALL                               :{TINYFONT}{GREEN}Started
+STR_VEHICLE_COMMAND_STARTED                                     :{GREEN}Started
 
 # Vehicle details
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Details)
