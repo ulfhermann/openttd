@@ -26,6 +26,7 @@
 #include "newgrf.h"
 #include "newgrf_cargo.h"
 #include "newgrf_commons.h"
+#include "newgrf_debug.h"
 #include "newgrf_industries.h"
 #include "newgrf_industrytiles.h"
 #include "autoslope.h"
@@ -141,6 +142,8 @@ Industry::~Industry()
 	TILE_AREA_LOOP(tile_cur, this->location) {
 		if (IsTileType(tile_cur, MP_INDUSTRY)) {
 			if (GetIndustryIndex(tile_cur) == this->index) {
+				DeleteNewGRFInspectWindow(GSF_INDUSTRYTILES, tile_cur);
+
 				/* MakeWaterKeepingClass() can also handle 'land' */
 				MakeWaterKeepingClass(tile_cur, OWNER_NONE);
 
@@ -173,6 +176,7 @@ Industry::~Industry()
 
 	DeleteIndustryNews(this->index);
 	DeleteWindowById(WC_INDUSTRY_VIEW, this->index);
+	DeleteNewGRFInspectWindow(GSF_INDUSTRIES, this->index);
 
 	DeleteSubsidyWith(ST_INDUSTRY, this->index);
 	CargoPacket::InvalidateAllFrom(ST_INDUSTRY, this->index);
@@ -1761,6 +1765,10 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	/* If the setting for raw-material industries is not on, you cannot build raw-material industries.
 	 * Raw material industries are industries that do not accept cargo (at least for now) */
 	if (_game_mode != GM_EDITOR && _settings_game.construction.raw_industry_construction == 0 && indspec->IsRawIndustry()) {
+		return CMD_ERROR;
+	}
+
+	if (_game_mode != GM_EDITOR && !CheckIfCallBackAllowsAvailability(it, IACT_USERCREATION)) {
 		return CMD_ERROR;
 	}
 
