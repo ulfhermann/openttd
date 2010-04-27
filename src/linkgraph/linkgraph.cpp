@@ -1,3 +1,12 @@
+/* $Id$ */
+
+/*
+ * This file is part of OpenTTD.
+ * OpenTTD is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 2.
+ * OpenTTD is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
 #include "linkgraph.h"
@@ -20,6 +29,39 @@ LinkGraph _link_graphs[NUM_CARGO];
  * Handlers to be run for each job.
  */
 LinkGraphJob::HandlerList LinkGraphJob::_handlers;
+
+/**
+ * Create a node or clear it.
+ * @param st ID of the associated station
+ * @param sup supply of cargo at the station last month
+ * @param dem acceptance for cargo at the station
+ */
+void Node::Init(StationID st, uint sup, uint dem)
+{
+	this->supply = sup;
+	this->undelivered_supply = sup;
+	this->demand = dem;
+	this->station = st;
+
+	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
+		delete (*i);
+	}
+	this->paths.clear();
+	this->flows.clear();
+}
+
+/**
+ * Create an edge.
+ * @param distance length of the link as manhattan distance
+ * @param capacity capacity of the link
+ */
+FORCEINLINE void Edge::Init(uint distance, uint capacity)
+{
+	this->distance = distance;
+	this->capacity = capacity;
+	this->demand = 0;
+}
+
 
 /**
  * 1. Build the link graph component containing the given station by using BFS on the link stats.
@@ -227,10 +269,10 @@ void LinkGraphComponent::SetSize()
  * Create an empty component.
  */
 LinkGraphComponent::LinkGraphComponent() :
-	settings(_settings_game.linkgraph),
-	cargo(INVALID_CARGO),
-	num_nodes(0),
-	index(INVALID_LINKGRAPH_COMPONENT)
+		settings(_settings_game.linkgraph),
+		cargo(INVALID_CARGO),
+		num_nodes(0),
+		index(INVALID_LINKGRAPH_COMPONENT)
 {}
 
 /**
@@ -413,6 +455,17 @@ Path::Path(NodeID n, bool source)  :
 {}
 
 /**
+ * Join the calling thread with this job's thread if threading is enabled.
+ */
+FORCEINLINE void LinkGraphJob::Join() {
+	if (this->thread != NULL) {
+		this->thread->Join();
+		delete this->thread;
+		this->thread = NULL;
+	}
+}
+
+/**
  * Spawn a thread if possible and run the link graph job in the thread. If
  * that's not possible run the job right now in the current thread.
  */
@@ -445,26 +498,6 @@ void LinkGraph::Init(CargoID cargo)
 
 	this->current_station_id = 0;
 	this->LinkGraphComponent::cargo = cargo;
-}
-
-/**
- * (Re-)initialize a node.
- * @param st ID of the associated station
- * @param sup supply of cargo at the station last month
- * @param dem acceptance for cargo at the station
- */
-void Node::Init(StationID st, uint sup, uint dem)
-{
-	this->supply = sup;
-	this->undelivered_supply = sup;
-	this->demand = dem;
-	this->station = st;
-
-	for (PathSet::iterator i = this->paths.begin(); i != this->paths.end(); ++i) {
-		delete (*i);
-	}
-	this->paths.clear();
-	this->flows.clear();
 }
 
 /**
