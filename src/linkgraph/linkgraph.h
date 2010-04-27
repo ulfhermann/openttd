@@ -31,10 +31,10 @@ struct SaveLoad;
  */
 class Node {
 public:
-	uint supply;       ///< supply at the station
+	uint supply;             ///< supply at the station
 	uint undelivered_supply; ///< amount of supply that hasn't been distributed yet
-	uint demand;       ///< acceptance at the station
-	StationID station; ///< the station's ID
+	uint demand;             ///< acceptance at the station
+	StationID station;       ///< the station's ID
 
 	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
 };
