@@ -185,12 +185,6 @@ uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte par
 	}
 
 	if (industry == NULL) {
-		/* industry does not exist, only use those variables that are "safe" */
-		switch (variable) {
-			/* Manhattan distance of closes dry/water tile */
-			case 0x43: return GetClosestWaterDistance(tile, (indspec->behaviour & INDUSTRYBEH_BUILT_ONWATER) == 0);
-		}
-
 		DEBUG(grf, 1, "Unhandled property 0x%X (no available industry) in callback 0x%x", variable, object->callback);
 
 		*available = false;
@@ -204,6 +198,7 @@ uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte par
 			uint16 callback = indspec->callback_mask;
 			if (HasBit(callback, CBM_IND_PRODUCTION_CARGO_ARRIVAL) || HasBit(callback, CBM_IND_PRODUCTION_256_TICKS)) {
 				if ((indspec->behaviour & INDUSTRYBEH_PROD_MULTI_HNDLING) != 0) {
+					if (industry->prod_level == 0) return 0;
 					return min(industry->incoming_cargo_waiting[variable - 0x40] / industry->prod_level, (uint16)0xFFFF);
 				} else {
 					return min(industry->incoming_cargo_waiting[variable - 0x40], (uint16)0xFFFF);
@@ -345,18 +340,21 @@ static const SpriteGroup *IndustryResolveReal(const ResolverObject *object, cons
 
 static uint32 IndustryGetRandomBits(const ResolverObject *object)
 {
-	return object->u.industry.ind == NULL ? 0 : object->u.industry.ind->random;
+	const Industry *ind = object->u.industry.ind;
+	return ind != NULL ? ind->random: 0;
 }
 
 static uint32 IndustryGetTriggers(const ResolverObject *object)
 {
-	return object->u.industry.ind == NULL ? 0 : object->u.industry.ind->random_triggers;
+	const Industry *ind = object->u.industry.ind;
+	return ind != NULL ? ind->random_triggers : 0;
 }
 
 static void IndustrySetTriggers(const ResolverObject *object, int triggers)
 {
-	if (object->u.industry.ind == NULL) return;
-	object->u.industry.ind->random_triggers = triggers;
+	Industry *ind = object->u.industry.ind;
+	assert(ind != NULL && ind->index != INVALID_INDUSTRY);
+	ind->random_triggers = triggers;
 }
 
 static void NewIndustryResolver(ResolverObject *res, TileIndex tile, Industry *indus, IndustryType type)
@@ -454,9 +452,10 @@ uint32 IndustryLocationGetVariable(const ResolverObject *object, byte variable, 
  * @param type Type of industry to build.
  * @param layout Layout number.
  * @param seed Seed for the random generator.
+ * @param initial_random_bits The random bits the industry is going to have after construction.
  * @return Succeeded or failed command.
  */
-CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uint layout, uint32 seed)
+CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uint layout, uint32 seed, uint16 initial_random_bits)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 
@@ -470,6 +469,7 @@ CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uin
 	ind.type = type;
 	ind.selected_layout = layout;
 	ind.town = ClosestTownFromTile(tile, UINT_MAX);
+	ind.random = initial_random_bits;
 
 	NewIndustryResolver(&object, tile, &ind, type);
 	object.GetVariable = IndustryLocationGetVariable;
