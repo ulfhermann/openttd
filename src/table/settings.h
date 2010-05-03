@@ -625,7 +625,7 @@ const SettingDesc _settings[] = {
 	  SDTC_VAR(gui.station_gui_sort_by,       SLE_UINT8, S,  0,     0,        0,        1, 1, STR_NULL,                                       NULL),
 	  SDTC_VAR(gui.station_gui_sort_order,    SLE_UINT8, S,  0,     0,        0,        1, 1, STR_NULL,                                       NULL),
 #ifdef ENABLE_NETWORK
-	  SDTC_VAR(gui.network_chat_box_width,   SLE_UINT16, S,  0,   700,      200,    65535, 0, STR_NULL,                                       NULL),
+	  SDTC_VAR(gui.network_chat_box_width,   SLE_UINT16, S,  0,   620,      200,    65535, 0, STR_NULL,                                       NULL),
 	  SDTC_VAR(gui.network_chat_box_height,   SLE_UINT8, S,  0,    25,        5,      255, 0, STR_NULL,                                       NULL),
 
 	  SDTC_VAR(network.sync_freq,            SLE_UINT16,C|S,NO,   100,        0,      100, 0, STR_NULL,                                       NULL),
