@@ -216,6 +216,9 @@ STR_UNITS_VOLUME_LONG_SI                                        :{COMMA} m³
 
 STR_UNITS_FORCE_SI                                              :{COMMA} kN
 
+STR_UNITS_HEIGHT_IMPERIAL                                       :{COMMA} pies
+STR_UNITS_HEIGHT_SI                                             :{COMMA} m
+
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Escribe patrón de filtrado
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Introduce una palabra clave para filtrar la lista
@@ -251,8 +254,8 @@ STR_OSK_KEYBOARD_LAYOUT_CAPS                                    :~!@#$%^&*()_+|Q
 # Measurement tooltip
 STR_MEASURE_LENGTH                                              :{BLACK}Longitud: {NUM}
 STR_MEASURE_AREA                                                :{BLACK}Área: {NUM} x {NUM}
-STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Longitud: {NUM}{}Diferencia altura: {NUM} m
-STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Área: {NUM} x {NUM}{}Diferencia altura: {NUM} m
+STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Longitud: {NUM}{}Diferencia altura: {HEIGHT}
+STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Área: {NUM} x {NUM}{}Diferencia altura: {HEIGHT}
 
 
 # These are used in buttons
@@ -666,11 +669,6 @@ STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_STATIONS_AIRPORTS_DOCKS                    :{TINYFONT}{BLACK}Estaciones/Aeropuertos/Puertos
 STR_SMALLMAP_LEGENDA_BUILDINGS_INDUSTRIES                       :{TINYFONT}{BLACK}Edificios/Industrias
 STR_SMALLMAP_LEGENDA_VEHICLES                                   :{TINYFONT}{BLACK}Vehículos
-STR_SMALLMAP_LEGENDA_100M                                       :{TINYFONT}{BLACK}100m
-STR_SMALLMAP_LEGENDA_200M                                       :{TINYFONT}{BLACK}200m
-STR_SMALLMAP_LEGENDA_300M                                       :{TINYFONT}{BLACK}300m
-STR_SMALLMAP_LEGENDA_400M                                       :{TINYFONT}{BLACK}400m
-STR_SMALLMAP_LEGENDA_500M                                       :{TINYFONT}{BLACK}500m
 STR_SMALLMAP_LEGENDA_TRAINS                                     :{TINYFONT}{BLACK}Trenes
 STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{TINYFONT}{BLACK}Vehículos de carretera
 STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLACK}Barcos
@@ -4151,6 +4149,7 @@ STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
+STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
