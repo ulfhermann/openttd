@@ -374,8 +374,8 @@ STR_OSK_KEYBOARD_LAYOUT_CAPS                                    :~!@#$%^&*()_+|�
 # Measurement tooltip
 STR_MEASURE_LENGTH                                              :{BLACK}Довжина: {NUM}
 STR_MEASURE_AREA                                                :{BLACK}Ділянка: {NUM} x {NUM}
-STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Довжина: {NUM}{}Різниця висот: {NUM} м
-STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Ділянка: {NUM} x {NUM}{}Різниця висот: {NUM} м
+STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Довжина: {NUM}{}Різниця висот: {HEIGHT}
+STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Ділянка: {NUM} x {NUM}{}Різниця висот: {HEIGHT}
 
 
 # These are used in buttons
@@ -786,11 +786,6 @@ STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_STATIONS_AIRPORTS_DOCKS                    :{TINYFONT}{BLACK}Станції/Аеропорти/Порти
 STR_SMALLMAP_LEGENDA_BUILDINGS_INDUSTRIES                       :{TINYFONT}{BLACK}Будівлі/Виробництво
 STR_SMALLMAP_LEGENDA_VEHICLES                                   :{TINYFONT}{BLACK}Транспорт
-STR_SMALLMAP_LEGENDA_100M                                       :{TINYFONT}{BLACK}100м
-STR_SMALLMAP_LEGENDA_200M                                       :{TINYFONT}{BLACK}200м
-STR_SMALLMAP_LEGENDA_300M                                       :{TINYFONT}{BLACK}300м
-STR_SMALLMAP_LEGENDA_400M                                       :{TINYFONT}{BLACK}400м
-STR_SMALLMAP_LEGENDA_500M                                       :{TINYFONT}{BLACK}500м
 STR_SMALLMAP_LEGENDA_TRAINS                                     :{TINYFONT}{BLACK}Поїзди
 STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{TINYFONT}{BLACK}Авто
 STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLACK}Кораблі
