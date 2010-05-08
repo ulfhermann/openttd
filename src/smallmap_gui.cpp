@@ -1894,9 +1894,11 @@ public:
 	}
 
 	/**
-	 * Select and enable/disable a legend item. When CTRL is pressed, set all
-	 * items in the group defined by begin_legend_item and end_legend_item to
-	 * the opposite state.
+	 * Select and toggle a legend item. When CTRL is pressed, disable all other
+	 * items in the group defined by begin_legend_item and end_legend_item and
+	 * keep the clicked one enabled even if it was already enabled before. If
+	 * the other items in the group are all disabled already and CTRL is pressed
+	 * enable them instead.
 	 * @param click_pos the index of the item being selected
 	 * @param legend the legend from which we select
 	 * @param end_legend_item index one past the last item in the group to be inverted
