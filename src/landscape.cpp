@@ -837,6 +837,8 @@ static void CreateDesertOrRainForest()
 	for (TileIndex tile = 0; tile != MapSize(); ++tile) {
 		if ((tile % update_freq) == 0) IncreaseGeneratingWorldProgress(GWP_LANDSCAPE);
 
+		if (!IsValidTile(tile)) continue;
+
 		for (data = _make_desert_or_rainforest_data;
 				data != endof(_make_desert_or_rainforest_data); ++data) {
 			TileIndex t = AddTileIndexDiffCWrap(tile, *data);
@@ -854,6 +856,8 @@ static void CreateDesertOrRainForest()
 
 	for (TileIndex tile = 0; tile != MapSize(); ++tile) {
 		if ((tile % update_freq) == 0) IncreaseGeneratingWorldProgress(GWP_LANDSCAPE);
+
+		if (!IsValidTile(tile)) continue;
 
 		for (data = _make_desert_or_rainforest_data;
 				data != endof(_make_desert_or_rainforest_data); ++data) {

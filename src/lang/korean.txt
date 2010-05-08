@@ -251,8 +251,8 @@ STR_OSK_KEYBOARD_LAYOUT_CAPS                                    :~!@#$%^&*()_+|Q
 # Measurement tooltip
 STR_MEASURE_LENGTH                                              :{BLACK}길이: {NUM}
 STR_MEASURE_AREA                                                :{BLACK}넓이: {NUM} x {NUM}
-STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}길이: {NUM}{}고도차: {NUM} m
-STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}넓이: {NUM} x {NUM}{}고도차: {NUM} m
+STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}길이: {NUM}{}고도차: {HEIGHT}
+STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}넓이: {NUM} x {NUM}{}고도차: {HEIGHT}
 
 
 # These are used in buttons
@@ -663,11 +663,6 @@ STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_STATIONS_AIRPORTS_DOCKS                    :{TINYFONT}{BLACK}역/공항/항구
 STR_SMALLMAP_LEGENDA_BUILDINGS_INDUSTRIES                       :{TINYFONT}{BLACK}건물/산업시설
 STR_SMALLMAP_LEGENDA_VEHICLES                                   :{TINYFONT}{BLACK}차량
-STR_SMALLMAP_LEGENDA_100M                                       :{TINYFONT}{BLACK}100m
-STR_SMALLMAP_LEGENDA_200M                                       :{TINYFONT}{BLACK}200m
-STR_SMALLMAP_LEGENDA_300M                                       :{TINYFONT}{BLACK}300m
-STR_SMALLMAP_LEGENDA_400M                                       :{TINYFONT}{BLACK}400m
-STR_SMALLMAP_LEGENDA_500M                                       :{TINYFONT}{BLACK}500m
 STR_SMALLMAP_LEGENDA_TRAINS                                     :{TINYFONT}{BLACK}열차
 STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{TINYFONT}{BLACK}자동차
 STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLACK}선박
