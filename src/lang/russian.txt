@@ -341,6 +341,9 @@ STR_UNITS_VOLUME_LONG_SI                                        :{COMMA} м³
 
 STR_UNITS_FORCE_SI                                              :{COMMA} кН
 
+STR_UNITS_HEIGHT_IMPERIAL                                       :{COMMA} фут{P "" а ов}
+STR_UNITS_HEIGHT_SI                                             :{COMMA} м
+
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Введите строку фильтра
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Введите ключевое слово для фильтрации списка
@@ -376,8 +379,8 @@ STR_OSK_KEYBOARD_LAYOUT_CAPS                                    :~!@#$%^&*()_+|Q
 # Measurement tooltip
 STR_MEASURE_LENGTH                                              :{BLACK}Длина: {NUM}
 STR_MEASURE_AREA                                                :{BLACK}Площадь: {NUM} x {NUM}
-STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Длина: {NUM}{}Разница высот: {NUM} м
-STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Площадь: {NUM} x {NUM}{}Разница высот: {NUM} м
+STR_MEASURE_LENGTH_HEIGHTDIFF                                   :{BLACK}Длина: {NUM}{}Разница высот: {HEIGHT}
+STR_MEASURE_AREA_HEIGHTDIFF                                     :{BLACK}Площадь: {NUM} x {NUM}{}Разница высот: {HEIGHT}
 
 
 # These are used in buttons
@@ -568,7 +571,7 @@ STR_ABOUT_MENU_AI_DEBUG                                         :Отладка 
 STR_ABOUT_MENU_SCREENSHOT                                       :Снимок экрана (Ctrl-S)
 STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Полный снимок экрана (Ctrl-G)
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Об игре
-STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Выравниватель спрайта
+STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Выравнивание спрайтов
 ############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
@@ -810,11 +813,6 @@ STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_STATIONS_AIRPORTS_DOCKS                    :{TINYFONT}{BLACK}Станции/Аэропорты/Пристани
 STR_SMALLMAP_LEGENDA_BUILDINGS_INDUSTRIES                       :{TINYFONT}{BLACK}Строения/Предприятия
 STR_SMALLMAP_LEGENDA_VEHICLES                                   :{TINYFONT}{BLACK}Автотранспорт
-STR_SMALLMAP_LEGENDA_100M                                       :{TINYFONT}{BLACK}100м
-STR_SMALLMAP_LEGENDA_200M                                       :{TINYFONT}{BLACK}200м
-STR_SMALLMAP_LEGENDA_300M                                       :{TINYFONT}{BLACK}300м
-STR_SMALLMAP_LEGENDA_400M                                       :{TINYFONT}{BLACK}400м
-STR_SMALLMAP_LEGENDA_500M                                       :{TINYFONT}{BLACK}500м
 STR_SMALLMAP_LEGENDA_TRAINS                                     :{TINYFONT}{BLACK}Поезда
 STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{TINYFONT}{BLACK}Автотранспорт
 STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLACK}Суда
@@ -1973,7 +1971,7 @@ STR_CONTENT_DETAIL_SUBTITLE_SELECTED                            :{SILVER}Буд�
 STR_CONTENT_DETAIL_SUBTITLE_AUTOSELECTED                        :{SILVER}Этот модуль зависит от другого и будет загружен
 STR_CONTENT_DETAIL_SUBTITLE_ALREADY_HERE                        :{SILVER}Уже установлен
 STR_CONTENT_DETAIL_SUBTITLE_DOES_NOT_EXIST                      :{SILVER}Этот модуль неизвестен и не может быть загружен в OpenTTD
-STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}Это замена имеющ{G его ей его их}ся {STRING.gen}
+STR_CONTENT_DETAIL_UPDATE                                       :{SILVER}Это обновление имеющ{G его ей его их}ся {STRING.gen}
 STR_CONTENT_DETAIL_NAME                                         :{SILVER}Наименование: {WHITE}{STRING}
 STR_CONTENT_DETAIL_VERSION                                      :{SILVER}Версия: {WHITE}{STRING}
 STR_CONTENT_DETAIL_DESCRIPTION                                  :{SILVER}Описание: {WHITE}{STRING}
@@ -2017,7 +2015,7 @@ STR_CONTENT_DOWNLOAD_TITLE                                      :{WHITE}Загр
 STR_CONTENT_DOWNLOAD_INITIALISE                                 :{WHITE}Запрашиваем файлы...
 STR_CONTENT_DOWNLOAD_FILE                                       :{WHITE}Сейчас скачивается {STRING} ({NUM} из {NUM})
 STR_CONTENT_DOWNLOAD_COMPLETE                                   :{WHITE}Загрузка завершена
-STR_CONTENT_DOWNLOAD_PROGRESS_SIZE                              :{WHITE}{BYTES} из {BYTES} скачано ({NUM} %)
+STR_CONTENT_DOWNLOAD_PROGRESS_SIZE                              :{WHITE}{BYTES} из {BYTES} загружено ({NUM}%)
 
 # Content downloading error messages
 STR_CONTENT_ERROR_COULD_NOT_CONNECT                             :{WHITE}Не удалось соединиться с сервером контента...
@@ -2539,6 +2537,7 @@ STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Обно
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Просмотр - {STRING}
 STR_NEWGRF_INSPECT_PARENT_BUTTON                                :{BLACK}Родитель
+STR_NEWGRF_INSPECT_PARENT_TOOLTIP                               :{BLACK}Просмотр объекта в контексте родителя
 
 STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING} в {HEX}
 STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE                  :Тип рельсов
@@ -2556,7 +2555,7 @@ STR_SPRITE_ALIGNER_SPRITE_TOOLTIP                               :{BLACK}Пред
 STR_SPRITE_ALIGNER_MOVE_TOOLTIP                                 :{BLACK}Двигайте спрайт, изменяя смещение по X и по Y
 STR_SPRITE_ALIGNER_OFFSETS                                      :{BLACK}Смещение по X: {NUM}, Смещение по Y: {NUM}
 STR_SPRITE_ALIGNER_PICKER_BUTTON                                :{BLACK}Выбрать спрайт
-STR_SPRITE_ALIGNER_PICKER_TOOLTIP                               :{BLACK}Выберите спрайт c любого места на экране
+STR_SPRITE_ALIGNER_PICKER_TOOLTIP                               :{BLACK}Выберите любой спрайт на экране
 
 STR_SPRITE_ALIGNER_GOTO_CAPTION                                 :{WHITE}Перейти к спрайту
 
@@ -2587,7 +2586,7 @@ STR_NEWGRF_ERROR_READ_BOUNDS                                    :Данные в
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Осторожно!
 STR_NEWGRF_CONFIRMATION_TEXT                                    :{YELLOW}Вы модифицируете запущенную игру - это может привести к нестабильной работе.{}Вы действительно хотите это сделать?
 
-STR_NEWGRF_DUPLICATE_GRFID                                      :{WHITE}Невозможно добавить файл - дублируются GRF ID
+STR_NEWGRF_DUPLICATE_GRFID                                      :{WHITE}Невозможно добавить файл: дублируются GRF ID
 STR_NEWGRF_COMPATIBLE_LOADED                                    :{ORANGE}Соответствующий файл не найден (загружен совместимый GRF)
 
 STR_NEWGRF_COMPATIBLE_LOAD_WARNING                              :{WHITE}Вместо отсутствующих загружены совместимые файлы NewGRF
@@ -2935,20 +2934,20 @@ STR_BUY_VEHICLE_ROAD_VEHICLE_BUY_VEHICLE_TOOLTIP                :{BLACK}Купи
 STR_BUY_VEHICLE_SHIP_BUY_VEHICLE_TOOLTIP                        :{BLACK}Купить выбранный корабль
 STR_BUY_VEHICLE_AIRCRAFT_BUY_VEHICLE_TOOLTIP                    :{BLACK}Купить выбранный авиатранспорт
 
-STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Переимен.
-STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Переимен.
-STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Переимен.
-STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Переимен.
+STR_BUY_VEHICLE_TRAIN_RENAME_BUTTON                             :{BLACK}Переименовать
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_BUTTON                      :{BLACK}Переименовать
+STR_BUY_VEHICLE_SHIP_RENAME_BUTTON                              :{BLACK}Переименовать
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_BUTTON                          :{BLACK}Переименовать
 
-STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Переименовать тип вагона
-STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Переименовать автомобиль
-STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Переименовать
-STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Переименовать
+STR_BUY_VEHICLE_TRAIN_RENAME_TOOLTIP                            :{BLACK}Изменить название модели поезда
+STR_BUY_VEHICLE_ROAD_VEHICLE_RENAME_TOOLTIP                     :{BLACK}Изменить название модели автомобиля
+STR_BUY_VEHICLE_SHIP_RENAME_TOOLTIP                             :{BLACK}Изменить название модели корабля
+STR_BUY_VEHICLE_AIRCRAFT_RENAME_TOOLTIP                         :{BLACK}Изменить название модели возд. судна
 
-STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Переименовать тип вагона
-STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Переименовать автомобиль
-STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Переименовать
-STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Переименовать
+STR_QUERY_RENAME_TRAIN_TYPE_CAPTION                             :{WHITE}Название модели поезда
+STR_QUERY_RENAME_ROAD_VEHICLE_TYPE_CAPTION                      :{WHITE}Название модели автомобиля
+STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Название модели корабля
+STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Название модели возд. судна
 
 # Depot window
 STR_DEPOT_TRAIN_CAPTION                                         :{WHITE}Депо {TOWN}
@@ -2971,7 +2970,7 @@ STR_DEPOT_ROAD_VEHICLE_SELL_TOOLTIP                             :{BLACK}Пере
 STR_DEPOT_SHIP_SELL_TOOLTIP                                     :{BLACK}Перетащите сюда корабль, чтобы продать его
 STR_DEPOT_AIRCRAFT_SELL_TOOLTIP                                 :{BLACK}Перетащите сюда транспорт, чтобы продать его
 
-STR_DEPOT_DRAG_WHOLE_TRAIN_TO_SELL_TOOLTIP                      :{BLACK}Перетащите сюда локомотив для продажи всего поезда
+STR_DEPOT_DRAG_WHOLE_TRAIN_TO_SELL_TOOLTIP                      :{BLACK}Перетащите сюда локомотив для продажи всего состава
 
 STR_DEPOT_SELL_ALL_BUTTON_TRAIN_TOOLTIP                         :{BLACK}Продать все поезда в депо
 STR_DEPOT_SELL_ALL_BUTTON_ROAD_VEHICLE_TOOLTIP                  :{BLACK}Продать все авто в гараже
@@ -3172,10 +3171,10 @@ STR_VEHICLE_COMMAND_STARTED                                     :{GREEN}Запу
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Детали)
 STR_VEHICLE_NAME_BUTTON                                         :{BLACK}Имя
 
-STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Назвать поезд
-STR_VEHICLE_DETAILS_ROAD_VEHICLE_RENAME                         :{BLACK}Назвать автотранспорт
-STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Название корабля
-STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Название самолёта
+STR_VEHICLE_DETAILS_TRAIN_RENAME                                :{BLACK}Переименовать поезд
+STR_VEHICLE_DETAILS_ROAD_VEHICLE_RENAME                         :{BLACK}Переименовать автомобиль
+STR_VEHICLE_DETAILS_SHIP_RENAME                                 :{BLACK}Переименовать корабль
+STR_VEHICLE_DETAILS_AIRCRAFT_RENAME                             :{BLACK}Переименовать воздушное судно
 
 STR_VEHICLE_INFO_AGE_RUNNING_COST_YR                            :{BLACK}Возраст: {LTBLUE}{STRING}{BLACK}   Стоимость обслуживания: {LTBLUE}{CURRENCY}/год
 # The next two need to stay in this order
@@ -3197,15 +3196,15 @@ STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Ёмко
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Выручка перевозки: {LTBLUE}{CURRENCY}
 
-STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Осмотр каждые {LTBLUE}{COMMA}дней{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
+STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Осмотр каждые {LTBLUE}{COMMA} дней{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Интервал обслуж.: {LTBLUE}{COMMA}%{BLACK}   Последний раз: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Увеличить интервал обслуживания на 10. Ctrl+клик увеличивает интервал обслуживания на 5
 STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Уменьшить интервал обслуживания на 10. Ctrl+клик уменьшает интервал обслуживания на 5
 
-STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Назвать поезд
-STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Назвать автотранспорт
-STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Назвать корабль
-STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Назвать самолёт
+STR_QUERY_RENAME_TRAIN_CAPTION                                  :{WHITE}Название состава
+STR_QUERY_RENAME_ROAD_VEHICLE_CAPTION                           :{WHITE}Название автомобиля
+STR_QUERY_RENAME_SHIP_CAPTION                                   :{WHITE}Название корабля
+STR_QUERY_RENAME_AIRCRAFT_CAPTION                               :{WHITE}Название возд. судна
 
 # Extra buttons for train details windows
 STR_VEHICLE_DETAILS_TRAIN_ENGINE_BUILT_AND_VALUE                :{LTBLUE}{ENGINE}{BLACK}  Построен в {LTBLUE}{NUM} г.{BLACK} Стоимость: {LTBLUE}{CURRENCY}
@@ -3787,10 +3786,10 @@ STR_ERROR_CAN_T_REFIT_ROAD_VEHICLE                              :{WHITE}Нево
 STR_ERROR_CAN_T_REFIT_SHIP                                      :{WHITE}Не удалось переоборудовать корабль...
 STR_ERROR_CAN_T_REFIT_AIRCRAFT                                  :{WHITE}Не удалось переоборудовать самолёт...
 
-STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Невозможно назвать поезд...
+STR_ERROR_CAN_T_RENAME_TRAIN                                    :{WHITE}Невозможно переименовать поезд...
 STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE                             :{WHITE}Невозможно переименовать автомобиль...
-STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Не удалось назвать корабль...
-STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Не удалось назвать самолёт...
+STR_ERROR_CAN_T_RENAME_SHIP                                     :{WHITE}Невозможно переименовать корабль...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT                                 :{WHITE}Невозможно переименовать воздушное судно...
 
 STR_ERROR_CAN_T_STOP_START_TRAIN                                :{WHITE}Невозможно остановить/запустить поезд...
 STR_ERROR_CAN_T_STOP_START_ROAD_VEHICLE                         :{WHITE}Невозможно остановить/запустить автомобиль...
@@ -3807,10 +3806,10 @@ STR_ERROR_CAN_T_BUY_ROAD_VEHICLE                                :{WHITE}Не у�
 STR_ERROR_CAN_T_BUY_SHIP                                        :{WHITE}Не удалось купить корабль...
 STR_ERROR_CAN_T_BUY_AIRCRAFT                                    :{WHITE}Не удалось купить возд. транспорт...
 
-STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Не удалось переименовать вагон...
-STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Не удалось переименовать машину...
-STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Не удалось переименовать судно...
-STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Не удалось переименовать...
+STR_ERROR_CAN_T_RENAME_TRAIN_TYPE                               :{WHITE}Невозможно изменить название модели поезда...
+STR_ERROR_CAN_T_RENAME_ROAD_VEHICLE_TYPE                        :{WHITE}Невозможно изменить название модели автомобиля...
+STR_ERROR_CAN_T_RENAME_SHIP_TYPE                                :{WHITE}Невозможно изменить название модели корабля...
+STR_ERROR_CAN_T_RENAME_AIRCRAFT_TYPE                            :{WHITE}Невозможно изменить название модели возд. судна...
 
 STR_ERROR_CAN_T_SELL_TRAIN                                      :{WHITE}Не удалось продать поезд...
 STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}Не удалось продать машину...
@@ -4328,6 +4327,7 @@ STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
+STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}
 STR_TINY_BLACK_VEHICLE                                          :{TINYFONT}{BLACK}{VEHICLE}
 STR_TINY_RIGHT_ARROW                                            :{TINYFONT}{RIGHTARROW}
 
