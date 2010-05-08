@@ -80,33 +80,39 @@ enum SmallMapStats {
 };
 
 /** Macro for ordinary entry of LegendAndColour */
-#define MK(a, b) {a, b, INVALID_INDUSTRYTYPE, true, false, false}
-/** Macro for an entry with configurable colour. */
-#define MC(b) MK(0, b)
+#define MK(a, b) {a, b, {INVALID_INDUSTRYTYPE}, true, false, false}
+
+/** Macro for a height legend entry with configurable colour. */
+#define MC(height)  {0, STR_TINY_BLACK_HEIGHT, {height}, true, false, false}
+
 /** Macro for end of list marker in arrays of LegendAndColour */
-#define MKEND() {0, STR_NULL, INVALID_INDUSTRYTYPE, true, true, false}
+#define MKEND() {0, STR_NULL, {INVALID_INDUSTRYTYPE}, true, true, false}
+
 /** Macro for break marker in arrays of LegendAndColour.
  * It will have valid data, though */
-#define MS(a, b) {a, b, INVALID_INDUSTRYTYPE, true, false, true}
+#define MS(a, b) {a, b, {INVALID_INDUSTRYTYPE}, true, false, true}
 
 /** Structure for holding relevant data for legends in small map */
 struct LegendAndColour {
-	uint8 colour;      ///< colour of the item on the map
-	StringID legend;   ///< string corresponding to the coloured item
-	IndustryType type; ///< type of industry
-	bool show_on_map;  ///< for filtering industries, if true is shown on map in colour
-	bool end;          ///< this is the end of the list
-	bool col_break;    ///< perform a break and go one column further
+	uint8 colour;              ///< Colour of the item on the map.
+	StringID legend;           ///< String corresponding to the coloured item.
+	union {
+		IndustryType type; ///< Type of industry.
+		uint8 height;      ///< Height in tiles.
+	} u;
+	bool show_on_map;          ///< For filtering industries, if \c true, industry is shown on the map in colour.
+	bool end;                  ///< This is the end of the list.
+	bool col_break;            ///< Perform a column break and go further at the next column.
 };
 
 /** Legend text giving the colours to look for on the minimap */
 static LegendAndColour _legend_land_contours[] = {
 	/* The colours for the following values are set at BuildLandLegend() based on each colour scheme. */
-	MC(STR_SMALLMAP_LEGENDA_100M),
-	MC(STR_SMALLMAP_LEGENDA_200M),
-	MC(STR_SMALLMAP_LEGENDA_300M),
-	MC(STR_SMALLMAP_LEGENDA_400M),
-	MC(STR_SMALLMAP_LEGENDA_500M),
+	MC(0),
+	MC(4),
+	MC(8),
+	MC(12),
+	MC(14),
 
 	MS(0xD7, STR_SMALLMAP_LEGENDA_ROADS),
 	MK(0x0A, STR_SMALLMAP_LEGENDA_RAILROADS),
@@ -190,7 +196,7 @@ void BuildIndustriesLegend()
 		if (indsp->enabled) {
 			_legend_from_industries[j].legend = indsp->name;
 			_legend_from_industries[j].colour = indsp->map_colour;
-			_legend_from_industries[j].type = ind;
+			_legend_from_industries[j].u.type = ind;
 			_legend_from_industries[j].show_on_map = true;
 			_legend_from_industries[j].col_break = false;
 			_legend_from_industries[j].end = false;
@@ -223,7 +229,7 @@ void BuildLinkStatsLegend()
 
 		_legend_linkstats[i].legend = cs->name;
 		_legend_linkstats[i].colour = cs->legend_colour;
-		_legend_linkstats[i].type = cs->Index();
+		_legend_linkstats[i].u.type = cs->Index();
 		_legend_linkstats[i].show_on_map = true;
 	}
 
@@ -363,11 +369,9 @@ static const SmallMapColourScheme _heightmap_schemes[] = {
 
 void BuildLandLegend()
 {
-	_legend_land_contours[0].colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[0];
-	_legend_land_contours[1].colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[4];
-	_legend_land_contours[2].colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[8];
-	_legend_land_contours[3].colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[12];
-	_legend_land_contours[4].colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[14];
+	for (LegendAndColour *lc = _legend_land_contours; lc->legend == STR_TINY_BLACK_HEIGHT; lc++) {
+		lc->colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[lc->u.height];
+	}
 }
 
 struct AndOr {
@@ -1081,7 +1085,7 @@ class SmallMapWindow : public Window {
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
 				const LegendAndColour &tbl = _legend_table[this->map_type][i];
 				if (!tbl.show_on_map && supply_details != st) continue;
-				uint supply = st->goods[tbl.type].supply;
+				uint supply = st->goods[tbl.u.type].supply;
 				if (supply > 0) {
 					q += supply;
 					colour += tbl.colour;
@@ -1137,7 +1141,7 @@ class SmallMapWindow : public Window {
 
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
 				const LegendAndColour &cargo_entry = _legend_table[window->map_type][i];
-				CargoID cargo = cargo_entry.type;
+				CargoID cargo = cargo_entry.u.type;
 				if (cargo_entry.show_on_map || highlight || reverse_highlight) {
 					GoodsEntry &ge = Station::Get(sta)->goods[cargo];
 					FlowStat sum_flows = ge.GetSumFlowVia(stb);
@@ -1181,7 +1185,7 @@ class SmallMapWindow : public Window {
 					const LegendAndColour &tbl = _legend_table[window->map_type][i];
 					if (!tbl.show_on_map) continue;
 
-					CargoID c = tbl.type;
+					CargoID c = tbl.u.type;
 					const LinkStatMap & links = sta->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 						StationID from = sta->index;
@@ -1374,7 +1378,7 @@ class SmallMapWindow : public Window {
 						TC_BLACK : TC_GREY;
 			}
 
-			SetDParam(0, CargoSpec::Get(detail.legend->type)->abbrev);
+			SetDParam(0, CargoSpec::Get(detail.legend->u.type)->abbrev);
 			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK, detail.legend->show_on_map ? TC_BLACK : TC_GREY);
 			SetDParam(0, detail.capacity);
 			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_CAPACITY, textcol[STAT_CAPACITY]);
@@ -1441,7 +1445,7 @@ class SmallMapWindow : public Window {
 
 			const LegendAndColour &tbl = _legend_table[this->map_type][i];
 
-			CargoID c = tbl.type;
+			CargoID c = tbl.u.type;
 			uint supply = st->goods[c].supply;
 			if (supply > 0) {
 				TextColour textcol = TC_BLACK;
@@ -1856,7 +1860,7 @@ public:
 					case SMT_INDUSTRY:
 						/* Industry name must be formatted, since it's not in tiny font in the specs.
 						 * So, draw with a parameter and use the STR_SMALLMAP_INDUSTRY string, which is tiny font */
-						SetDParam(1, Industry::GetIndustryTypeCount(tbl->type));
+						SetDParam(1, Industry::GetIndustryTypeCount(tbl->u.type));
 					case SMT_LINKSTATS:
 						SetDParam(0, tbl->legend);
 						if (!tbl->show_on_map) {
@@ -1869,6 +1873,8 @@ public:
 						}
 						break;
 					default:
+						if (this->map_type == SMT_CONTOUR) SetDParam(0, tbl->u.height * TILE_HEIGHT_STEP);
+
 						/* Anything that is not an industry is using normal process */
 						GfxFillRect(x + blob_left, y + 1, x + blob_right, y + row_height - 1, 0);
 						DrawString(x + text_left, x + text_right, y, tbl->legend);
@@ -1885,6 +1891,38 @@ public:
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
+	}
+
+	/**
+	 * Select and enable/disable a legend item. When CTRL is pressed, set all
+	 * items in the group defined by begin_legend_item and end_legend_item to
+	 * the opposite state.
+	 * @param click_pos the index of the item being selected
+	 * @param legend the legend from which we select
+	 * @param end_legend_item index one past the last item in the group to be inverted
+	 * @param begin_legend_item index of the first item in the group to be inverted
+	 */
+	void SelectLegendItem(int click_pos, LegendAndColour *legend, int end_legend_item, int begin_legend_item = 0)
+	{
+		if (_ctrl_pressed) {
+			/* Disable all, except the clicked one */
+			bool changes = false;
+			for (int i = begin_legend_item; i != end_legend_item; i++) {
+				bool new_state = i == click_pos;
+				if (legend[i].show_on_map != new_state) {
+					changes = true;
+					legend[i].show_on_map = new_state;
+				}
+			}
+			if (!changes) {
+				/* Nothing changed? Then show all (again). */
+				for (int i = begin_legend_item; i != end_legend_item; i++) {
+					legend[i].show_on_map = true;
+				}
+			}
+		} else {
+			legend[click_pos].show_on_map = !legend[click_pos].show_on_map;
+		}
 	}
 
 	virtual void OnClick(Point pt, int widget, int click_count)
@@ -1983,18 +2021,16 @@ public:
 					int click_pos = (column * number_of_rows) + line;
 					if (this->map_type == SMT_INDUSTRY) {
 						if (click_pos < _smallmap_industry_count) {
-							_legend_from_industries[click_pos].show_on_map = !_legend_from_industries[click_pos].show_on_map;
+							this->SelectLegendItem(click_pos, _legend_from_industries, _smallmap_industry_count);
 						}
 					} else if (this->map_type == SMT_LINKSTATS) {
 						if (click_pos < _smallmap_cargo_count) {
-							_legend_linkstats[click_pos].show_on_map = !_legend_linkstats[click_pos].show_on_map;
+							this->SelectLegendItem(click_pos, _legend_linkstats, _smallmap_cargo_count);
 						} else {
-							uint stats_column = _smallmap_cargo_count / number_of_rows;
-							if (_smallmap_cargo_count % number_of_rows != 0) stats_column++;
-
+							uint stats_column = CeilDiv(_smallmap_cargo_count, number_of_rows);
 							if (column == stats_column && line < NUM_STATS) {
-								click_pos = _smallmap_cargo_count + line;
-								_legend_linkstats[click_pos].show_on_map = !_legend_linkstats[click_pos].show_on_map;
+								this->SelectLegendItem(_smallmap_cargo_count + line, _legend_linkstats,
+										_smallmap_cargo_count + NUM_STATS, _smallmap_cargo_count);
 							}
 						}
 					}
