@@ -318,22 +318,21 @@ uint VehicleCargoList::KeepPacket(Iterator &c)
 }
 
 
-uint VehicleCargoList::TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID next)
+uint VehicleCargoList::TransferPacket(Iterator &c, uint remaining_unload, StationCargoList *dest, CargoPayment *payment, StationID next)
 {
 	CargoPacket *p = this->MovePacket(c, remaining_unload);
 	p->feeder_share += payment->PayTransfer(p, p->count);
 	uint ret = p->count;
-	dest->cargo.Append(next, p);
-	SetBit(dest->acceptance_pickup, GoodsEntry::PICKUP);
+	dest->Append(next, p);
 	return ret;
 }
 
-/* static */ UnloadType VehicleCargoList::WillUnloadOld(byte flags, StationID curr_station, StationID source)
+UnloadType StationCargoList::WillUnloadOld(byte flags, StationID source)
 {
 	/* try to unload cargo */
 	bool move = (flags & (UL_DELIVER | UL_ACCEPTED | UL_TRANSFER)) != 0;
 	/* try to deliver cargo if unloading */
-	bool deliver = (flags & UL_ACCEPTED) && !(flags & UL_TRANSFER) && (source != curr_station);
+	bool deliver = (flags & UL_ACCEPTED) && !(flags & UL_TRANSFER) && (source != this->station->index);
 	/* transfer cargo if delivery was unsuccessful */
 	bool transfer = (flags & (UL_TRANSFER | UL_DELIVER)) != 0;
 	if (move) {
@@ -352,9 +351,9 @@ uint VehicleCargoList::TransferPacket(Iterator &c, uint remaining_unload, GoodsE
 	}
 }
 
-/* static */ UnloadType VehicleCargoList::WillUnloadCargoDist(byte flags, StationID curr_station, StationID next_station, StationID via, StationID source)
+UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next_station, StationID via, StationID source)
 {
-	if (via == curr_station) {
+	if (via == this->station->index) {
 		/* this is the final destination, deliver ... */
 		if (flags & UL_TRANSFER) {
 			/* .. except if explicitly told not to do so ... */
@@ -374,7 +373,7 @@ uint VehicleCargoList::TransferPacket(Iterator &c, uint remaining_unload, GoodsE
 			/* order overrides cargodist:
 			 * play by the old loading rules here as player is interfering with cargodist
 			 * try to deliver, as move has been forced upon us */
-			if ((flags & UL_ACCEPTED) && !(flags & UL_TRANSFER) && source != curr_station) {
+			if ((flags & UL_ACCEPTED) && !(flags & UL_TRANSFER) && source != this->station->index) {
 				return UL_DELIVER;
 			} else {
 				/* transfer cargo, as delivering didn't work */
@@ -401,50 +400,52 @@ void VehicleCargoList::SwapReserved()
 	this->reserved_count = 0;
 }
 
-uint VehicleCargoList::MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags order_flags, StationID curr_station, StationID next_station, CargoPayment *payment) {
+uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, StationID next_station, CargoPayment *payment)
+{
 	uint remaining_unload = max_unload;
 	uint unloaded;
+	byte flags = this->GetUnloadFlags(order_flags);
+	GoodsEntry *dest = &this->station->goods[this->cargo];
 	UnloadType action;
-	byte flags = GetUnloadFlags(dest, order_flags);
 
-	for(Iterator c = packets.begin(); c != packets.end() && remaining_unload > 0;) {
-		StationID source = (*c)->source;
-		FlowStatSet &flows = dest->flows[source];
+	for(VehicleCargoList::Iterator c = source->packets.begin(); c != source->packets.end() && remaining_unload > 0;) {
+		StationID cargo_source = (*c)->source;
+		FlowStatSet &flows = dest->flows[cargo_source];
 		FlowStatSet::iterator begin = flows.begin();
 		StationID via = (begin != flows.end() ? begin->Via() : INVALID_STATION);
 		if (via != INVALID_STATION && next_station != INVALID_STATION) {
 			/* use cargodist unloading*/
-			action = WillUnloadCargoDist(flags, curr_station, next_station, via, source);
+			action = this->WillUnloadCargoDist(flags, next_station, via, cargo_source);
 		} else {
 			/* there is no plan: use normal unloading */
-			action = WillUnloadOld(flags, curr_station, source);
+			action = this->WillUnloadOld(flags, cargo_source);
 		}
 
 		switch(action) {
 			case UL_DELIVER:
-				unloaded = this->DeliverPacket(c, remaining_unload, payment);
+				unloaded = source->DeliverPacket(c, remaining_unload, payment);
 				if (via != INVALID_STATION) {
-					if (via == curr_station) {
+					if (via == this->station->index) {
 						dest->UpdateFlowStats(flows, begin, unloaded);
 					} else {
-						dest->UpdateFlowStats(flows, unloaded, curr_station);
+						dest->UpdateFlowStats(flows, unloaded, this->station->index);
 					}
 				}
 				remaining_unload -= unloaded;
 				break;
 			case UL_TRANSFER:
 				/* TransferPacket may split the packet and return the transferred part */
-				if (via == curr_station) {
+				if (via == this->station->index) {
 					via = (++begin != flows.end()) ? begin->Via() : INVALID_STATION;
 				}
-				unloaded = this->TransferPacket(c, remaining_unload, dest, payment, via);
+				unloaded = source->TransferPacket(c, remaining_unload, this, payment, via);
 				if (via != INVALID_STATION) {
 					dest->UpdateFlowStats(flows, begin, unloaded);
 				}
 				remaining_unload -= unloaded;
 				break;
 			case UL_KEEP:
-				unloaded = this->KeepPacket(c);
+				unloaded = source->KeepPacket(c);
 				if (via != INVALID_STATION && next_station != INVALID_STATION) {
 					if (via == next_station) {
 						dest->UpdateFlowStats(flows, begin, unloaded);
@@ -495,10 +496,16 @@ void VehicleCargoList::AgeCargo()
 	}
 }
 
-/* static */ byte VehicleCargoList::GetUnloadFlags(GoodsEntry *dest, OrderUnloadFlags order_flags)
+/*
+ *
+ * Station cargo list implementation
+ *
+ */
+
+byte StationCargoList::GetUnloadFlags(OrderUnloadFlags order_flags)
 {
 	byte flags = 0;
-	if (HasBit(dest->acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
+	if (HasBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
 		flags |= UL_ACCEPTED;
 	}
 	if (order_flags & OUFB_UNLOAD) {
@@ -509,12 +516,6 @@ void VehicleCargoList::AgeCargo()
 	}
 	return flags;
 }
-
-/*
- *
- * Station cargo list implementation
- *
- */
 
 void StationCargoList::Append(StationID next, CargoPacket *cp)
 {
@@ -532,37 +533,38 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 
 	/* The packet could not be merged with another one */
 	list.push_back(cp);
+	SetBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::PICKUP);
 }
 
-uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place, bool reserve) {
+uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve) {
 	uint orig_cap = cap;
 	while(begin != end && cap > 0) {
-		cap -= this->MovePacket(dest, begin, cap, load_place, reserve);
+		cap -= this->MovePacket(dest, begin, cap, this->station->xy, reserve);
 	}
 	return orig_cap - cap;
 }
 
-uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID selected_station, TileIndex load_place, bool reserve) {
+uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID selected_station, bool reserve) {
 	uint orig_cap = cap;
 	if (selected_station != INVALID_STATION) {
 		std::pair<Iterator, Iterator> bounds(packets.equal_range(selected_station));
-		cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place, reserve);
+		cap -= MovePackets(dest, cap, bounds.first, bounds.second, reserve);
 		if (cap > 0) {
 			bounds = packets.equal_range(INVALID_STATION);
-			cap -= MovePackets(dest, cap, bounds.first, bounds.second, load_place, reserve);
+			cap -= MovePackets(dest, cap, bounds.first, bounds.second, reserve);
 		}
 	} else {
-		cap -= MovePackets(dest, cap, packets.begin(), packets.end(), load_place, reserve);
+		cap -= MovePackets(dest, cap, packets.begin(), packets.end(), reserve);
 	}
 	return orig_cap - cap;
 }
 
-void StationCargoList::RerouteStalePackets(StationID curr, StationID to, GoodsEntry *ge) {
+void StationCargoList::RerouteStalePackets(StationID to) {
 	std::pair<Iterator, Iterator> range(packets.equal_range(to));
 	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
 		CargoPacket *packet = *it;
 		packets.erase(it++);
-		StationID next = ge->UpdateFlowStatsTransfer(packet->source, packet->count, curr);
+		StationID next = this->station->goods[this->cargo].UpdateFlowStatsTransfer(packet->source, packet->count, this->station->index);
 		assert(next != to);
 
 		/* legal, as insert doesn't invalidate iterators in the MultiMap, however
@@ -604,6 +606,20 @@ void VehicleCargoList::InvalidateCache()
 		this->reserved_count += (*it)->count;
 	}
 }
+
+/**
+ * Assign the cargo list to a goods entry.
+ * @param station the station the cargo list is assigned to
+ * @param cargo the cargo the list is assigned to
+ */
+void StationCargoList::AssignTo(Station *station, CargoID cargo)
+{
+	assert(this->station == NULL);
+	assert(station != NULL && cargo != INVALID_CARGO);
+	this->station = station;
+	this->cargo = cargo;
+}
+
 
 /*
  * We have to instantiate everything we want to be usable.
