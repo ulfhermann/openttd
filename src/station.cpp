@@ -47,6 +47,11 @@ Station::Station(TileIndex tile) :
 	last_vehicle_type(VEH_INVALID)
 {
 	/* this->random_bits is set in Station::AddFacility() */
+
+	/* has to be done like this as we can't give arguments when constructing an array */
+	for (CargoID i = 0; i < NUM_CARGO; ++i) {
+		this->goods[i].cargo.AssignTo(this, i);
+	}
 }
 
 /**
@@ -75,7 +80,7 @@ Station::~Station()
 			GoodsEntry & ge = st->goods[c];
 			ge.link_stats.erase(this->index);
 			DeleteStaleFlows(st->index, c, this->index);
-			ge.cargo.RerouteStalePackets(this->index, this->index, &ge);
+			ge.cargo.RerouteStalePackets(this->index);
 		}
 	}
 
