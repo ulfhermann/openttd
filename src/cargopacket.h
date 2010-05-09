@@ -17,6 +17,7 @@
 #include "station_type.h"
 #include "order_type.h"
 #include "cargo_type.h"
+#include "cargotype.h"
 #include "vehicle_type.h"
 #include "core/multimap.hpp"
 #include <list>
@@ -24,7 +25,6 @@
 /** Unique identifier for a single cargo packet. */
 typedef uint32 CargoPacketID;
 struct CargoPacket;
-struct GoodsEntry;
 
 /** Type of the pool for cargo packets. */
 typedef Pool<CargoPacket, CargoPacketID, 1024, 1048576, true, false> CargoPacketPool;
@@ -303,10 +303,8 @@ typedef std::list<CargoPacket *> CargoPacketList;
  */
 class VehicleCargoList : public CargoList<VehicleCargoList, CargoPacketList> {
 protected:
-	static UnloadType WillUnloadOld(byte flags, StationID curr_station, StationID source);
-	static UnloadType WillUnloadCargoDist(byte flags, StationID curr_station, StationID next_station, StationID via, StationID source);
 
-	uint TransferPacket(Iterator &c, uint remaining_unload, GoodsEntry *dest, CargoPayment *payment, StationID next);
+	uint TransferPacket(Iterator &c, uint remaining_unload, StationCargoList *dest, CargoPayment *payment, StationID next);
 	uint DeliverPacket(Iterator &c, uint remaining_unload, CargoPayment *payment);
 	uint KeepPacket(Iterator &c);
 
@@ -331,35 +329,13 @@ protected:
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
-	static byte GetUnloadFlags(GoodsEntry *dest, OrderUnloadFlags order_flags);
-
 public:
+	/** the station cargo list needs to control the unloading */
+	friend class StationCargoList;
 	/** The super class ought to know what it's doing */
 	friend class CargoList<VehicleCargoList, CargoPacketList>;
 	/** The vehicles have a cargo list (and we want that saved). */
 	friend const struct SaveLoad *GetVehicleDescription(VehicleType vt);
-	/**
-	 * Moves the given amount of cargo from a vehicle to a station.
-	 * Depending on the value of flags and dest the side effects of this function differ:
-	 *  - dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
-	 *                        => MoveToStation sets OUF_UNLOAD_IF_POSSIBLE in the flags
-	 *                        packets are accepted here and may be unloaded and/or delivered (=destroyed);
-	 *                        if not using cargodist: all packets are unloaded and delivered
-	 *                        if using cargodist: only packets which have this station as final destination are unloaded and delivered
-	 *                        if using cargodist: other packets may or may not be unloaded, depending on next_station
-	 *                        if not set and using cargodist: packets may still be unloaded, but not delivered.
-	 *  - OUFB_UNLOAD: unload all packets unconditionally;
-	 *                        if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist)
-	 *  - OUFB_TRANSFER: don't deliver any packets;
-	 *                        overrides delivering aspect of OUF_UNLOAD_IF_POSSIBLE
-	 * @param dest         the destination to move the cargo to
-	 * @param max_unload   the maximum amount of cargo entities to move
-	 * @param flags        how to handle the moving (side effects)
-	 * @param curr_station the station where the cargo currently resides
-	 * @param next_station the next unloading station in the vehicle's order list
-	 * @return the number of cargo entities actually moved
-	 */
-	uint MoveToStation(GoodsEntry * dest, uint max_unload, OrderUnloadFlags flags, StationID curr_station, StationID next_station, CargoPayment *payment);
 
 	~VehicleCargoList();
 
@@ -502,6 +478,8 @@ public:
 	/** The stations, via GoodsEntry, have a CargoList. */
 	friend const struct SaveLoad *GetGoodsDesc();
 
+	StationCargoList() : station(NULL), cargo(INVALID_CARGO) {}
+
 	/**
 	 * Returns source of the first cargo packet in this list
 	 * @return the before mentioned source
@@ -526,7 +504,28 @@ public:
 				cp1->source_id       == cp2->source_id;
 	}
 
-	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, TileIndex load_place = INVALID_TILE, bool reserve = false);
+	/**
+	 * Moves the given amount of cargo from a vehicle to a station.
+	 * Depending on the value of flags the side effects of this function differ:
+	 * 	- OUFB_UNLOAD_IF_POSSIBLE and dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
+	 *  	packets are accepted here and may be unloaded and/or delivered (=destroyed);
+	 *  	if not using cargodist: all packets are unloaded and delivered
+	 *  	if using cargodist: only packets which have this station as final destination are unloaded and delivered
+	 *  	if using cargodist: other packets may or may not be unloaded, depending on next_station
+	 *  	if GoodsEntry::ACCEPTANCE is not set and using cargodist: packets may still be unloaded, but not delivered.
+	 *  - OUFB_UNLOAD: unload all packets unconditionally;
+	 *  	if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist)
+	 *  - OUFB_TRANSFER: don't deliver any packets;
+	 *  	overrides delivering aspect of OUFB_UNLOAD_IF_POSSIBLE
+	 * @param source       the vehicle cargo list to take the cargo from
+	 * @param max_unload   the maximum amount of cargo entities to move
+	 * @param flags        how to handle the moving (side effects)
+	 * @param next_station the next unloading station in the vehicle's order list
+	 * @return the number of cargo entities actually moved
+	 */
+	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, StationID next_station, CargoPayment *payment);
+
+	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, bool reserve = false);
 
 	/**
 	 * Appends the given cargo packet to the range of packets with the same next station
@@ -541,7 +540,7 @@ public:
 	/**
 	 * route all packets with station "to" as next hop to a different place, except "curr"
 	 */
-	void RerouteStalePackets(StationID curr, StationID to, GoodsEntry *ge);
+	void RerouteStalePackets(StationID to);
 
 	/**
 	 * Truncate where each destination loses roughly the same percentage of its cargo.
@@ -549,10 +548,22 @@ public:
 	 */
 	void RandomTruncate(uint max_remaining);
 
+	void AssignTo(Station *station, CargoID cargo);
+
+	UnloadType Offer(CargoPacket *packet);
+
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
 protected:
-	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, TileIndex load_place, bool reserve);
+	Station *station;
+	CargoID cargo;
+
+	byte GetUnloadFlags(OrderUnloadFlags order_flags);
+
+	UnloadType WillUnloadOld(byte flags, StationID source);
+	UnloadType WillUnloadCargoDist(byte flags, StationID next_station, StationID via, StationID source);
+
+	uint MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve);
 };
 
 #endif /* CARGOPACKET_H */
