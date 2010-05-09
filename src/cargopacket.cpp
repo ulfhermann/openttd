@@ -521,8 +521,9 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 {
 	assert(cp != NULL);
 	this->AddToCache(cp);
-	StationCargoPacketMap::List &list = this->packets[next];
+	SetBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::PICKUP);
 
+	StationCargoPacketMap::List &list = this->packets[next];
 	for (StationCargoPacketMap::List::reverse_iterator it(list.rbegin()); it != list.rend(); it++) {
 		CargoPacket *icp = *it;
 		if (StationCargoList::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
@@ -533,7 +534,6 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 
 	/* The packet could not be merged with another one */
 	list.push_back(cp);
-	SetBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::PICKUP);
 }
 
 uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve) {
