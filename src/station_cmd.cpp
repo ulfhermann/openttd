@@ -3350,7 +3350,7 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	}
 	CargoPacket * packet = new CargoPacket(st->index, st->xy, amount, source_type, source_id);
 	good.cargo.Append(next, packet);
-	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
+
 	good.supply_new += amount;
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
