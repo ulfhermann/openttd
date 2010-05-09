@@ -3142,7 +3142,7 @@ void Station::RunAverages() {
 				ls.Decrease();
 				if (ls.IsNull()) {
 					DeleteStaleFlows(this->index, goods_index, id);
-					good.cargo.RerouteStalePackets(this->index, id, &good);
+					good.cargo.RerouteStalePackets(id);
 					links.erase(i++);
 				} else {
 					++i;

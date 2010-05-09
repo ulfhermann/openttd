@@ -1120,18 +1120,18 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
  * @param next_station The next station the vehicle will stop at
  * @return bit field for the cargo classes with bit for the reserved cargos set (if anything was reserved).
  */
-uint32 ReserveConsist(Station * st, Vehicle * u, StationID next_station)
+uint32 ReserveConsist(Station *st, Vehicle *u, StationID next_station)
 {
 	uint32 ret = 0;
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
-		for (Vehicle * v = u; v != NULL; v = v->Next()) {
-			// only reserve if the vehicle is not unloading anymore. Otherwise we'll swap in reserved cargo
+		for (Vehicle *v = u; v != NULL; v = v->Next()) {
+			/* only reserve if the vehicle is not unloading anymore. Otherwise we'll swap in reserved cargo */
 			if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING)) continue;
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
-				StationCargoList & list = st->goods[v->cargo_type].cargo;
-				if (list.MoveTo(&v->cargo, cap, next_station, st->xy, true) > 0) {
+				StationCargoList &list = st->goods[v->cargo_type].cargo;
+				if (list.MoveTo(&v->cargo, cap, next_station, true) > 0) {
 					SetBit(ret, v->cargo_type);
 				}
 			}
@@ -1213,7 +1213,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 
 			payment->SetCargo(v->cargo_type);
-			uint delivered = v->cargo.MoveToStation(ge, amount_unloaded, unload_flags, last_visited, next_station, payment);
+			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags, next_station, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
@@ -1266,7 +1266,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			}
 			if (loaded < cap) {
 				assert(v->cargo.ReservedCount() == 0);
-				loaded += ge->cargo.MoveTo(&v->cargo, cap - loaded, next_station, st->xy);
+				loaded += ge->cargo.MoveTo(&v->cargo, cap - loaded, next_station);
 			}
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
