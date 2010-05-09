@@ -16,6 +16,7 @@
 #include "economy_type.h"
 #include "station_type.h"
 #include "cargo_type.h"
+#include "cargotype.h"
 #include "vehicle_type.h"
 #include <list>
 
@@ -395,6 +396,8 @@ public:
 	/** The stations, via GoodsEntry, have a CargoList. */
 	friend const struct SaveLoad *GetGoodsDesc();
 
+	StationCargoList() : station(NULL), cargo(INVALID_CARGO) {}
+
 	/**
 	 * Are two the two CargoPackets mergeable in the context of
 	 * a list of CargoPackets for a Vehicle?
@@ -409,6 +412,12 @@ public:
 				cp1->source_type     == cp2->source_type &&
 				cp1->source_id       == cp2->source_id;
 	}
+
+	void AssignTo(Station *station, CargoID cargo);
+
+private:
+	Station *station;
+	CargoID cargo;
 };
 
 #endif /* CARGOPACKET_H */
