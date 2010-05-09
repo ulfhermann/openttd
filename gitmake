@@ -58,7 +58,9 @@ diaglvl: tileiter
 
 tileiter: master
 
-cargomap: flowmapping-core texteff multimap reservation
+selfaware-stationcargo: master
+
+cargomap: flowmapping-core texteff multimap reservation selfaware-stationcargo
 
 reservation: master
 
@@ -86,7 +88,7 @@ pool-copy: master
 
 autogrow-goodsentries: autogrow-vector pool-copy
 
-push: master cd station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score autogrow-vector autogrow-goodsentries pool-copy
+push: master cd station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score autogrow-vector autogrow-goodsentries pool-copy selfaware-stationcargo
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
 
