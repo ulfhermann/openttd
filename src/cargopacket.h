@@ -481,15 +481,6 @@ public:
 	StationCargoList() : station(NULL), cargo(INVALID_CARGO) {}
 
 	/**
-	 * Returns source of the first cargo packet in this list
-	 * @return the before mentioned source
-	 */
-	FORCEINLINE StationID Source() const
-	{
-		return this->Empty() ? INVALID_STATION : this->packets.begin()->second.front()->source;
-	}
-
-	/**
 	 * Are two the two CargoPackets mergeable in the context of
 	 * a list of CargoPackets for a Vehicle?
 	 * @param cp1 the first CargoPacket
@@ -548,9 +539,16 @@ public:
 	 */
 	void RandomTruncate(uint max_remaining);
 
-	void AssignTo(Station *station, CargoID cargo);
+	/**
+	 * Returns source of the first cargo packet in this list
+	 * @return the before mentioned source
+	 */
+	FORCEINLINE StationID Source() const
+	{
+		return this->Empty() ? INVALID_STATION : this->packets.begin()->second.front()->source;
+	}
 
-	UnloadType Offer(CargoPacket *packet);
+	void AssignTo(Station *station, CargoID cargo);
 
 	static void InvalidateAllFrom(SourceType src_type, SourceID src);
 
