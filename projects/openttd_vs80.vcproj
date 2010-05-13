@@ -2000,6 +2000,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\depot_cmd.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\disaster_cmd.cpp"
 				>
 			</File>
@@ -2285,6 +2289,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\table\landscape_sprite.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\newgrf_debug_data.h"
 				>
 			</File>
 			<File
