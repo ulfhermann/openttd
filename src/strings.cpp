@@ -15,6 +15,7 @@
 #include "town.h"
 #include "screenshot.h"
 #include "waypoint_base.h"
+#include "depot_base.h"
 #include "industry.h"
 #include "newgrf_text.h"
 #include "fileio_func.h"
@@ -940,6 +941,24 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 					temp[1] = st->town->index;
 					temp[2] = st->index;
 					buff = GetStringWithArgs(buff, str, temp, last);
+				}
+				break;
+			}
+
+			case SCC_DEPOT_NAME: { // {DEPOT}
+				VehicleType vt = (VehicleType)GetInt32(&argv);
+				if (vt == VEH_AIRCRAFT) {
+					int64 temp[] = { GetInt32(&argv) };
+					buff = GetStringWithArgs(buff, STR_FORMAT_DEPOT_NAME_AIRCRAFT + vt, temp, last);
+					break;
+				}
+
+				const Depot *d = Depot::Get(GetInt32(&argv));
+				if (d->name != NULL) {
+					buff = strecpy(buff, d->name, last);
+				} else {
+					int64 temp[] = { d->town->index, d->town_cn + 1 };
+					buff = GetStringWithArgs(buff, STR_FORMAT_DEPOT_NAME_TRAIN + 2 * vt + (d->town_cn == 0 ? 0 : 1), temp, last);
 				}
 				break;
 			}

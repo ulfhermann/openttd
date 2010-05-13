@@ -79,11 +79,7 @@ enum SLRefType {
 	REF_ORDERLIST     = 8,
 };
 
-enum {
-	INC_VEHICLE_COMMON = 0,
-};
-
-enum {
+enum ChunkType {
 	CH_RIFF         =  0,
 	CH_ARRAY        =  1,
 	CH_SPARSE_ARRAY =  2,
@@ -341,7 +337,7 @@ extern char _savegame_format[8];
  * SL_TRUNK is always the current trunk version.
  */
 enum SaveLoadVersions {
-	SL_TRUNK = 140,
+	SL_TRUNK = 141,
 	SL_CAPACITIES = SL_TRUNK + 20,
 	SL_MAX_VERSION = 255
 };
