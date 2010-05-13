@@ -24,6 +24,9 @@
 #elif defined(__NDS__)
 	#include <nds/jtypes.h>
 	#define TROUBLED_INTS
+#elif defined(__NetBSD__)
+	#include <unistd.h>
+	#define _GNU_SOURCE
 #endif
 
 /* It seems that we need to include stdint.h before anything else
@@ -248,6 +251,7 @@
 
 		/* XXX - WinCE without MSVCRT doesn't support wfopen, so it seems */
 		#if !defined(WINCE)
+			namespace std { using ::_tfopen; }
 			#define fopen(file, mode) _tfopen(OTTD2FS(file), _T(mode))
 			#define unlink(file) _tunlink(OTTD2FS(file))
 		#endif /* WINCE */
@@ -416,7 +420,13 @@ void NORETURN CDECL error(const char *str, ...) WARN_FORMAT(1, 2);
 	#define _stricmp strcasecmp
 #endif
 
-#if !defined(MAX_PATH)
+#if defined(MAX_PATH)
+	/* It's already defined, no need to override */
+#elif defined(PATH_MAX) && PATH_MAX > 0
+	/* Use the value from PATH_MAX, if it exists */
+	#define MAX_PATH PATH_MAX
+#else
+	/* If all else fails, hardcode something :( */
 	#define MAX_PATH 260
 #endif
 
