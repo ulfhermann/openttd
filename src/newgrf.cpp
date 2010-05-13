@@ -180,9 +180,7 @@ public:
 
 typedef void (*SpecialSpriteHandler)(ByteReader *buf);
 
-enum {
-	MAX_STATIONS = 256,
-};
+static const uint MAX_STATIONS = 256;
 
 /* Temporary data used when loading only */
 struct GRFTempEngineData {
@@ -2185,7 +2183,6 @@ static ChangeInfoResult IndustrytilesChangeInfo(uint indtid, int numinfo, int pr
 
 				/* Allocate space for this industry. */
 				if (*tilespec == NULL) {
-					int tempid;
 					*tilespec = CallocT<IndustryTileSpec>(1);
 					tsp = *tilespec;
 
@@ -2201,7 +2198,7 @@ static ChangeInfoResult IndustrytilesChangeInfo(uint indtid, int numinfo, int pr
 					tsp->grf_prop.local_id = indtid + i;
 					tsp->grf_prop.subst_id = subs_id;
 					tsp->grf_prop.grffile = _cur_grffile;
-					tempid = _industile_mngr.AddEntityID(indtid + i, _cur_grffile->grfid, subs_id); // pre-reserve the tile slot
+					_industile_mngr.AddEntityID(indtid + i, _cur_grffile->grfid, subs_id); // pre-reserve the tile slot
 				}
 			} break;
 
@@ -6609,7 +6606,7 @@ static void FinaliseAirportsArray()
 
 		AirportTileSpec **&airporttilespec = (*file)->airtspec;
 		if (airporttilespec != NULL) {
-			for (int i = 0; i < NUM_AIRPORTTILES; i++) {
+			for (uint i = 0; i < NUM_AIRPORTTILES; i++) {
 				if (airporttilespec[i] != NULL && airporttilespec[i]->enabled) {
 					_airporttile_mngr.SetEntitySpec(airporttilespec[i]);
 				}
