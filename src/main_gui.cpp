@@ -128,7 +128,7 @@ void ShowNetworkGiveMoneyWindow(CompanyID company)
 
 /* Zooms a viewport in a window in or out
  * No button handling or what so ever */
-bool DoZoomInOutWindow(int how, Window *w)
+bool DoZoomInOutWindow(ZoomStateChange how, Window *w)
 {
 	ViewPort *vp;
 
@@ -136,6 +136,10 @@ bool DoZoomInOutWindow(int how, Window *w)
 	vp = w->viewport;
 
 	switch (how) {
+		case ZOOM_NONE:
+			/* On initialisation of the viewport we don't do anything. */
+			break;
+
 		case ZOOM_IN:
 			if (vp->zoom == ZOOM_LVL_MIN) return false;
 			vp->zoom = (ZoomLevel)((int)vp->zoom - 1);
