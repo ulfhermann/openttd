@@ -867,10 +867,10 @@ CommandCost CmdBuildTrainDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 
 	if (flags & DC_EXEC) {
 		Depot *d = new Depot(tile);
-		d->town_index = ClosestTownFromTile(tile, UINT_MAX)->index;
 
 		MakeRailDepot(tile, _current_company, d->index, dir, railtype);
 		MarkTileDirtyByTile(tile);
+		MakeDefaultName(d);
 
 		AddSideToSignalBuffer(tile, INVALID_DIAGDIR, _current_company);
 		YapfNotifyTrackLayoutChange(tile, DiagDirToDiagTrack(dir));
@@ -2129,7 +2129,7 @@ static void DrawTrackBits(TileInfo *ti, TrackBits track)
  * The addtion of 2 per enum is necessary in order to "jump" over the
  * green state sprite, all signal sprites being in pair,
  * starting with the off-red state */
-enum {
+enum SignalOffsets {
 	SIGNAL_TO_SOUTHWEST =  0,
 	SIGNAL_TO_NORTHEAST =  2,
 	SIGNAL_TO_SOUTHEAST =  4,
