@@ -312,9 +312,7 @@ private:
 	Town *town; ///< Town displayed by the window.
 
 public:
-	enum {
-		TVW_HEIGHT_NORMAL = 150,
-	};
+	static const int TVW_HEIGHT_NORMAL = 150;
 
 	TownViewWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
@@ -489,7 +487,7 @@ public:
 		/* Depots refer to towns. */
 		const Depot *d;
 		FOR_ALL_DEPOTS(d) {
-			if (d->town_index == this->town->index) return false;
+			if (d->town == this->town) return false;
 		}
 
 		/* Check all tiles for town ownership. */
