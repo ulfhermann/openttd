@@ -25,7 +25,7 @@ public:
 	 * Gets the number of industries.
 	 * @return The number of industries.
 	 * @post Return value is always non-negative.
-	 * @note The maximum valid IndustryID can be higher then the value returned.
+	 * @note The maximum valid IndustryID can be higher than the value returned.
 	 */
 	static int32 GetIndustryCount();
 
@@ -35,6 +35,16 @@ public:
 	 * @return True if and only if the industry is valid.
 	 */
 	static bool IsValidIndustry(IndustryID industry_id);
+
+	/**
+	 * Get the IndustryID of a tile, if there is an industry.
+	 * @param tile The tile to find the IndustryID of.
+	 * @return IndustryID of the industry.
+	 * @post Use IsValidIndustry() to see if the industry is valid.
+	 * @note GetIndustryID will return an invalid IndustryID for the
+	 *   station tile of industries with a dock/heliport.
+	 */
+	static IndustryID GetIndustryID(TileIndex tile);
 
 	/**
 	 * Get the name of the industry.
