@@ -1375,11 +1375,11 @@ void NetworkSocketHandler::Send_CompanyInformation(Packet *p, const Company *c, 
 	/* Send 1 if there is a passord for the company else send 0 */
 	p->Send_bool  (!StrEmpty(_network_company_states[c->index].password));
 
-	for (int i = 0; i < NETWORK_VEHICLE_TYPES; i++) {
+	for (uint i = 0; i < NETWORK_VEHICLE_TYPES; i++) {
 		p->Send_uint16(stats->num_vehicle[i]);
 	}
 
-	for (int i = 0; i < NETWORK_STATION_TYPES; i++) {
+	for (uint i = 0; i < NETWORK_STATION_TYPES; i++) {
 		p->Send_uint16(stats->num_station[i]);
 	}
 
@@ -1641,7 +1641,7 @@ void NetworkServer_Tick(bool send_frame)
 		/* Check if the speed of the client is what we can expect from a client */
 		if (cs->status == STATUS_ACTIVE) {
 			/* 1 lag-point per day */
-			int lag = NetworkCalculateLag(cs) / DAY_TICKS;
+			uint lag = NetworkCalculateLag(cs) / DAY_TICKS;
 			if (lag > 0) {
 				if (lag > 3) {
 					/* Client did still not report in after 4 game-day, drop him
@@ -1660,13 +1660,13 @@ void NetworkServer_Tick(bool send_frame)
 				cs->lag_test = 0;
 			}
 		} else if (cs->status == STATUS_PRE_ACTIVE) {
-			int lag = NetworkCalculateLag(cs);
+			uint lag = NetworkCalculateLag(cs);
 			if (lag > _settings_client.network.max_join_time) {
 				IConsolePrintF(CC_ERROR,"Client #%d is dropped because it took longer than %d ticks for him to join", cs->client_id, _settings_client.network.max_join_time);
 				NetworkCloseClient(cs, NETWORK_RECV_STATUS_SERVER_ERROR);
 			}
 		} else if (cs->status == STATUS_INACTIVE) {
-			int lag = NetworkCalculateLag(cs);
+			uint lag = NetworkCalculateLag(cs);
 			if (lag > 4 * DAY_TICKS) {
 				IConsolePrintF(CC_ERROR,"Client #%d is dropped because it took longer than %d ticks to start the joining process", cs->client_id, 4 * DAY_TICKS);
 				NetworkCloseClient(cs, NETWORK_RECV_STATUS_SERVER_ERROR);
@@ -1724,7 +1724,7 @@ void NetworkServerShowStatusToConsole()
 
 	NetworkClientSocket *cs;
 	FOR_ALL_CLIENT_SOCKETS(cs) {
-		int lag = NetworkCalculateLag(cs);
+		uint lag = NetworkCalculateLag(cs);
 		NetworkClientInfo *ci = cs->GetInfo();
 		const char *status;
 
