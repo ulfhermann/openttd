@@ -300,6 +300,7 @@ protected:
 	Path * parent;
 };
 
+void InitializeLinkGraphs();
 extern LinkGraph _link_graphs[NUM_CARGO];
 
 #endif /* LINKGRAPH_H_ */
