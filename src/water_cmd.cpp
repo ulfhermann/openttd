@@ -130,12 +130,12 @@ CommandCost CmdBuildShipDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 
 	if (flags & DC_EXEC) {
 		Depot *depot = new Depot(tile);
-		depot->town_index = ClosestTownFromTile(tile, UINT_MAX)->index;
 
 		MakeShipDepot(tile,  _current_company, depot->index, DEPOT_NORTH, axis, wc1);
 		MakeShipDepot(tile2, _current_company, depot->index, DEPOT_SOUTH, axis, wc2);
 		MarkTileDirtyByTile(tile);
 		MarkTileDirtyByTile(tile2);
+		MakeDefaultName(depot);
 	}
 
 	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_DEPOT_SHIP]);
@@ -1008,9 +1008,8 @@ void TileLoop_Water(TileIndex tile)
 
 		case FLOOD_DRYUP: {
 			Slope slope_here = GetFoundationSlope(tile, NULL) & ~SLOPE_HALFTILE_MASK & ~SLOPE_STEEP;
-			uint check_dirs = _flood_from_dirs[slope_here];
 			uint dir;
-			FOR_EACH_SET_BIT(dir, check_dirs) {
+			FOR_EACH_SET_BIT(dir, _flood_from_dirs[slope_here]) {
 				TileIndex dest = AddTileIndexDiffCWrap(tile, TileIndexDiffCByDir((Direction)dir));
 				if (dest == INVALID_TILE) continue;
 
@@ -1048,9 +1047,8 @@ void ConvertGroundTilesIntoWaterTiles()
 					break;
 
 				default:
-					uint check_dirs = _flood_from_dirs[slope & ~SLOPE_STEEP];
 					uint dir;
-					FOR_EACH_SET_BIT(dir, check_dirs) {
+					FOR_EACH_SET_BIT(dir, _flood_from_dirs[slope & ~SLOPE_STEEP]) {
 						TileIndex dest = TILE_ADD(tile, TileOffsByDir((Direction)dir));
 						Slope slope_dest = GetTileSlope(dest, NULL) & ~SLOPE_STEEP;
 						if (slope_dest == SLOPE_FLAT || IsSlopeWithOneCornerRaised(slope_dest)) {
