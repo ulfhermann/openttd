@@ -177,10 +177,6 @@ Function DetermineSVNVersion()
 					Do While oExec.Status = 0
 					Loop
 
-					If oExec.ExitCode = 1 Then
-						modified = 2
-					End If ' oExec.ExitCode = 1
-
 					Set oExec = WshShell.Exec("git symbolic-ref HEAD")
 					If Err.Number = 0 Then
 						line = oExec.StdOut.ReadLine()
