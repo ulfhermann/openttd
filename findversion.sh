@@ -87,7 +87,7 @@ if [ -d "$ROOT_DIR/.svn" ]; then
 	fi
 elif [ -d "$ROOT_DIR/.git" ]; then
 	# We are a git checkout
-	if [ -n "`git diff-index HEAD \"$SRC_DIR\"`" ]; then
+	if [ -n "`git status -u no --porcelain \"$SRC_DIR\"`" ]; then
 		MODIFIED="2"
 	fi
 	HASH=`LC_ALL=C git rev-parse --verify HEAD 2>/dev/null`
