@@ -763,8 +763,8 @@ class SmallMapWindow : public Window {
 	FORCEINLINE Point RemapTile(int tile_x, int tile_y) const
 	{
 		if (this->zoom > 0) {
-			int x_offset = tile_x - this->scroll_x / TILE_SIZE;
-			int y_offset = tile_y - this->scroll_y / TILE_SIZE;
+			int x_offset = tile_x - this->scroll_x / (int)TILE_SIZE;
+			int y_offset = tile_y - this->scroll_y / (int)TILE_SIZE;
 
 			/* For negative offsets, round towards -inf. */
 			if (x_offset < 0) x_offset -= this->zoom - 1;
