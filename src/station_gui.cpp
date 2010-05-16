@@ -1273,11 +1273,11 @@ struct StationViewWindow : public Window {
 	void EstimateDestinations(CargoID cargo, StationID source, StationID next, uint count, CargoDataEntry *dest) {
 		if (Station::IsValidID(next) && Station::IsValidID(source)) {
 			CargoDataEntry tmp;
-			FlowStatMap &flowmap = Station::Get(next)->goods[cargo].flows;
-			FlowStatMap::iterator map_it = flowmap.find(source);
+			const FlowStatMap &flowmap = Station::Get(next)->goods[cargo].flows;
+			FlowStatMap::const_iterator map_it = flowmap.find(source);
 			if (map_it != flowmap.end()) {
-				FlowStatSet &flows = map_it->second;
-				for (FlowStatSet::iterator i = flows.begin(); i != flows.end(); ++i) {
+				const FlowStatSet &flows = map_it->second;
+				for (FlowStatSet::const_iterator i = flows.begin(); i != flows.end(); ++i) {
 					tmp.InsertOrRetrieve(i->Via())->Update(i->Planned());
 				}
 			}
