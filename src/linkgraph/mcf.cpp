@@ -389,8 +389,8 @@ MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 			/* Then assign all remaining demands */
 			this->Dijkstra<CapacityAnnotation>(source, paths, false);
 			for (NodeID dest = 0; dest < size; ++dest) {
-				Edge & edge = this->graph->GetEdge(source, dest);
-				Path * path = paths[dest];
+				Edge &edge = this->graph->GetEdge(source, dest);
+				Path *path = paths[dest];
 				if (edge.unsatisfied_demand > 0 &&
 						path->GetCapacity() > INT_MIN)
 				{
