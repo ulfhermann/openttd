@@ -59,6 +59,9 @@ FORCEINLINE void Edge::Init(uint distance, uint capacity)
 	this->distance = distance;
 	this->capacity = capacity;
 	this->demand = 0;
+	this->unsatisfied_demand = 0;
+	this->flow = 0;
+	this->next_edge = INVALID_NODE;
 }
 
 
