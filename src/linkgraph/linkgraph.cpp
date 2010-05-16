@@ -60,6 +60,9 @@ FORCEINLINE void Edge::Init(uint distance, uint capacity)
 	this->distance = distance;
 	this->capacity = capacity;
 	this->demand = 0;
+	this->unsatisfied_demand = 0;
+	this->flow = 0;
+	this->next_edge = INVALID_NODE;
 }
 
 
@@ -82,8 +85,8 @@ void LinkGraph::CreateComponent(Station *first)
 		Station *source = search_queue.front();
 		search_queue.pop();
 
-		LinkStatMap &links = source->goods[this->cargo].link_stats;
-		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
+		const LinkStatMap &links = source->goods[this->cargo].link_stats;
+		for(LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 			Station *target = Station::GetIfValid(i->first);
 			if (target == NULL) continue;
 
@@ -253,6 +256,9 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capaci
 void LinkGraphComponent::SetSize()
 {
 	if (this->nodes.size() < this->num_nodes) {
+		for (EdgeMatrix::iterator i = this->edges.begin(); i != this->edges.end(); ++i) {
+			i->resize(this->num_nodes);
+		}
 		this->nodes.resize(this->num_nodes);
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
 	}

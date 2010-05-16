@@ -421,14 +421,15 @@ static void RealSave_STNN(BaseStation *bst)
 		Station *st = Station::From(bst);
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
-			LinkStatMap &stats = ge->link_stats;
+			const LinkStatMap &stats = ge->link_stats;
 			_num_links = (uint16)stats.size();
 			FlowStatMap & flows = ge->flows;
 			CountFlows(flows);
 			SlObject(ge, GetGoodsDesc());
-			for (LinkStatMap::iterator i = stats.begin(); i != stats.end(); ++i) {
+			for (LinkStatMap::const_iterator i = stats.begin(); i != stats.end(); ++i) {
 				_station_id = i->first;
-				SlObject(&(i->second), GetLinkStatDesc());
+				LinkStat ls(i->second);
+				SlObject(&ls, GetLinkStatDesc());
 			}
 			for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
 				_station_id = i->first;
