@@ -62,6 +62,9 @@ FORCEINLINE void Edge::Init(uint distance, uint capacity)
 	this->distance = distance;
 	this->capacity = capacity;
 	this->demand = 0;
+	this->unsatisfied_demand = 0;
+	this->flow = 0;
+	this->next_edge = INVALID_NODE;
 }
 
 
@@ -84,8 +87,8 @@ void LinkGraph::CreateComponent(Station *first)
 		Station *source = search_queue.front();
 		search_queue.pop();
 
-		LinkStatMap &links = source->goods[this->cargo].link_stats;
-		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
+		const LinkStatMap &links = source->goods[this->cargo].link_stats;
+		for(LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 			Station *target = Station::GetIfValid(i->first);
 			if (target == NULL) continue;
 
@@ -255,6 +258,9 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capaci
 void LinkGraphComponent::SetSize()
 {
 	if (this->nodes.size() < this->num_nodes) {
+		for (EdgeMatrix::iterator i = this->edges.begin(); i != this->edges.end(); ++i) {
+			i->resize(this->num_nodes);
+		}
 		this->nodes.resize(this->num_nodes);
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
 	}
@@ -308,7 +314,7 @@ void Node::ExportNewFlows(FlowMap::iterator &source_flows_it, FlowStatSet &via_s
 			if (planned > 0 && via != NULL) {
 				uint distance = GetMovingAverageLength(curr_station, via);
 				if (next != this->station) {
-					LinkStatMap & ls = curr_station->goods[cargo].link_stats;
+					const LinkStatMap &ls = curr_station->goods[cargo].link_stats;
 					if (ls.find(next) != ls.end()) {
 						via_set.insert(FlowStat(distance, next, planned, 0));
 					}
@@ -333,8 +339,8 @@ void Node::ExportFlows(FlowStatMap &station_flows, CargoID cargo) {
 			/* there are no flows for this source node anymore */
 			station_flows.erase(flowmap_it++);
 		} else {
-			FlowViaMap & source_flows = source_flows_it->second;
-			FlowStatSet & via_set = flowmap_it->second;
+			FlowViaMap &source_flows = source_flows_it->second;
+			FlowStatSet &via_set = flowmap_it->second;
 			/* loop over the station's flow stats for this source node and update them */
 			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end();) {
 				FlowViaMap::iterator update = source_flows.find(flowset_it->Via());

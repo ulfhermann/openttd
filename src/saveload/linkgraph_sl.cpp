@@ -96,7 +96,6 @@ static void SaveLoad_LinkGraphComponent(LinkGraphComponent &comp) {
 	for (NodeID from = 0; from < size; ++from) {
 		Node *node = &comp.GetNode(from);
 		SlObject(node, _node_desc);
-		node->undelivered_supply = node->supply;
 		for (NodeID to = 0; to < size; ++to) {
 			SlObject(&comp.GetEdge(from, to), _edge_desc);
 		}
@@ -126,6 +125,10 @@ static void Load_LGRP()
 		SlObject(&graph, GetLinkGraphDesc());
 		graph.SetSize();
 		SaveLoad_LinkGraphComponent(graph);
+		for (uint i = 0; i < graph.GetSize(); ++i) {
+			Node &node = graph.GetNode(i);
+			node.undelivered_supply = node.supply;
+		}
 	}
 }
 
