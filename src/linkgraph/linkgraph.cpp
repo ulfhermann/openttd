@@ -71,8 +71,8 @@ void LinkGraph::CreateComponent(Station *first)
 		Station *source = search_queue.front();
 		search_queue.pop();
 
-		LinkStatMap &links = source->goods[this->cargo].link_stats;
-		for(LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
+		const LinkStatMap &links = source->goods[this->cargo].link_stats;
+		for(LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 			Station *target = Station::GetIfValid(i->first);
 			if (target == NULL) continue;
 
