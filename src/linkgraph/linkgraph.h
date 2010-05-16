@@ -244,8 +244,9 @@ private:
 	/**
 	 * Private Copy-Constructor: there cannot be two identical LinkGraphJobs.
 	 * @param other hypothetical other job to be copied.
+	 * @note It's necessary to explicitly initialize the link graph component in order to silence some compile warnings
 	 */
-	LinkGraphJob(const LinkGraphJob &other) {NOT_REACHED();}
+	LinkGraphJob(const LinkGraphJob &other) : LinkGraphComponent(other) {NOT_REACHED();}
 };
 
 /**
