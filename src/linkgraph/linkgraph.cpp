@@ -235,6 +235,9 @@ FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capaci
 void LinkGraphComponent::SetSize()
 {
 	if (this->nodes.size() < this->num_nodes) {
+		for (EdgeMatrix::iterator i = this->edges.begin(); i != this->edges.end(); ++i) {
+			i->resize(this->num_nodes);
+		}
 		this->nodes.resize(this->num_nodes);
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
 	}
