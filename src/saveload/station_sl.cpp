@@ -247,9 +247,9 @@ const SaveLoad *GetFlowStatDesc() {
 	return _flowstat_desc;
 }
 
-void CountFlows(FlowStatMap & flows) {
+void CountFlows(const FlowStatMap &flows) {
 	_num_flows = 0;
-	for(FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
+	for(FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
 		_num_flows += (uint32)i->second.size();
 	}
 }
@@ -423,7 +423,7 @@ static void RealSave_STNN(BaseStation *bst)
 			GoodsEntry *ge = &st->goods[i];
 			const LinkStatMap &stats = ge->link_stats;
 			_num_links = (uint16)stats.size();
-			FlowStatMap & flows = ge->flows;
+			const FlowStatMap &flows = ge->flows;
 			CountFlows(flows);
 			SlObject(ge, GetGoodsDesc());
 			for (LinkStatMap::const_iterator i = stats.begin(); i != stats.end(); ++i) {
@@ -431,11 +431,11 @@ static void RealSave_STNN(BaseStation *bst)
 				LinkStat ls(i->second);
 				SlObject(&ls, GetLinkStatDesc());
 			}
-			for (FlowStatMap::iterator i = flows.begin(); i != flows.end(); ++i) {
+			for (FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
 				_station_id = i->first;
-				FlowStatSet & flow_set = i->second;
-				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
-					FlowStat fs = *j;
+				const FlowStatSet &flow_set = i->second;
+				for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+					FlowStat fs(*j);
 					SlObject(&fs, GetFlowStatDesc());
 				}
 			}
@@ -472,7 +472,7 @@ static void Load_STNN()
 			for (CargoID i = 0; i < NUM_CARGO; i++) {
 				GoodsEntry *ge = &st->goods[i];
 				LinkStatMap &stats = ge->link_stats;
-				FlowStatMap & flows = ge->flows;
+				FlowStatMap &flows = ge->flows;
 				SlObject(ge, GetGoodsDesc());
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {

@@ -312,7 +312,7 @@ void Node::ExportNewFlows(FlowMap::iterator &source_flows_it, FlowStatSet &via_s
 			if (planned > 0 && via != NULL) {
 				uint distance = GetMovingAverageLength(curr_station, via);
 				if (next != this->station) {
-					LinkStatMap & ls = curr_station->goods[cargo].link_stats;
+					const LinkStatMap &ls = curr_station->goods[cargo].link_stats;
 					if (ls.find(next) != ls.end()) {
 						via_set.insert(FlowStat(distance, next, planned, 0));
 					}
@@ -337,8 +337,8 @@ void Node::ExportFlows(FlowStatMap &station_flows, CargoID cargo) {
 			/* there are no flows for this source node anymore */
 			station_flows.erase(flowmap_it++);
 		} else {
-			FlowViaMap & source_flows = source_flows_it->second;
-			FlowStatSet & via_set = flowmap_it->second;
+			FlowViaMap &source_flows = source_flows_it->second;
+			FlowStatSet &via_set = flowmap_it->second;
 			/* loop over the station's flow stats for this source node and update them */
 			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end();) {
 				FlowViaMap::iterator update = source_flows.find(flowset_it->Via());

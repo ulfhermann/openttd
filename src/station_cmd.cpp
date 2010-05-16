@@ -3104,9 +3104,9 @@ static void UpdateStationRating(Station *st)
 }
 
 void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
-	FlowStatMap & flows = Station::Get(at)->goods[c_id].flows;
+	FlowStatMap &flows = Station::Get(at)->goods[c_id].flows;
 	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
-		FlowStatSet & s_flows = f_it->second;
+		FlowStatSet &s_flows = f_it->second;
 		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
 			if (s_it->Via() == to) {
 				s_flows.erase(s_it++);
@@ -3149,13 +3149,13 @@ void Station::RunAverages() {
 			}
 		}
 
-		FlowStatMap & flows = good.flows;
+		FlowStatMap &flows = good.flows;
 		for (FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
 			StationID source = i->first;
 			if (!Station::IsValidID(source)) {
 				flows.erase(i++);
 			} else {
-				FlowStatSet & flow_set = i->second;
+				FlowStatSet &flow_set = i->second;
 				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
 					if (Station::IsValidID(j->Via())) {
 						new_flows.insert(j->GetDecreasedCopy());
