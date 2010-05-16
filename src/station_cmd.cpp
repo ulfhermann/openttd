@@ -3122,15 +3122,15 @@ uint GetMovingAverageLength(const Station *from, const Station *to)
 
 void Station::RunAverages() {
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
-		GoodsEntry & good = this->goods[goods_index];
-		LinkStatMap & links = good.link_stats;
+		GoodsEntry &good = this->goods[goods_index];
+		LinkStatMap &links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
 			Station *other = Station::GetIfValid(id);
 			if (other == NULL) {
 				links.erase(i++);
 			} else {
-				LinkStat & ls = i->second;
+				LinkStat &ls = i->second;
 				ls.Decrease();
 				if (ls.IsNull()) {
 					links.erase(i++);
@@ -3142,21 +3142,21 @@ void Station::RunAverages() {
 	}
 }
 
-void RecalcFrozenIfLoading(const Vehicle * v) {
+void RecalcFrozenIfLoading(const Vehicle *v) {
 	if (v->current_order.IsType(OT_LOADING)) {
 		RecalcFrozen(Station::Get(v->last_station_visited));
 	}
 }
 
-void RecalcFrozen(Station * st) {
+void RecalcFrozen(Station *st) {
 	if (st->loading_vehicles.empty()) {
 		/* if no vehicles are there the frozen values are always correct */
 		return;
 	}
 
 	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
-		GoodsEntry & good = st->goods[goods_index];
-		LinkStatMap & links = good.link_stats;
+		GoodsEntry &good = st->goods[goods_index];
+		LinkStatMap &links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
 			i->second.Unfreeze();
 		}
@@ -3164,8 +3164,8 @@ void RecalcFrozen(Station * st) {
 
 	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
 	while(v_it != st->loading_vehicles.end()) {
-		const Vehicle * front = *v_it;
-		OrderList * orders = front->orders.list;
+		const Vehicle *front = *v_it;
+		OrderList *orders = front->orders.list;
 		if (orders != NULL) {
 			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
 			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
@@ -3180,14 +3180,14 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
 		if (v->cargo_cap > 0) {
-			LinkStatMap & link_stats = st->goods[v->cargo_type].link_stats;
+			LinkStatMap &link_stats = st->goods[v->cargo_type].link_stats;
 			LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
 			if (lstat_it == link_stats.end()) {
 				DEBUG(misc, 1, "frozen not in linkstat list.");
 				RecalcFrozen(st);
 				return;
 			} else {
-				LinkStat & link_stat = lstat_it->second;
+				LinkStat &link_stat = lstat_it->second;
 				if (link_stat.Frozen() < v->cargo_cap) {
 					DEBUG(misc, 1, "frozen is smaller than cargo cap.");
 					RecalcFrozen(st);
@@ -3211,13 +3211,10 @@ void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id,
 			LinkStatMap &stats = st->goods[v->cargo_type].link_stats;
 			LinkStatMap::iterator i = stats.find(next_station_id);
 			if (i == stats.end()) {
-				stats.insert(std::make_pair(next_station_id, LinkStat(
-					average_length, v->cargo_cap,
-					freeze ? v->cargo_cap : 0,
-					freeze ? 0 : v->cargo.Count()
-				)));
+				stats.insert(std::make_pair(next_station_id, LinkStat(average_length,
+						v->cargo_cap, freeze ? v->cargo_cap : 0, freeze ? 0 : v->cargo.Count())));
 			} else {
-				LinkStat & link_stat = i->second;
+				LinkStat &link_stat = i->second;
 				if (freeze) {
 					link_stat.Freeze(v->cargo_cap);
 				} else {
@@ -3296,7 +3293,7 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 
 static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceType source_type, SourceID source_id)
 {
-	GoodsEntry & good = st->goods[type];
+	GoodsEntry &good = st->goods[type];
 	good.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	good.pickup = true;
 	good.supply_new += amount;
