@@ -221,7 +221,6 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Skriv in sökfilter
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Skriv in ett sökord att filtrera listan efter
-STR_LIST_FILTER_TITLE                                           :{BLACK}Sökfilter:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Välj sorteringsordning (fallande/stigande)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Välj sortering
@@ -1795,7 +1794,7 @@ STR_NETWORK_MESSAGE_SERVER_SHUTDOWN                             :{WHITE}Servern 
 STR_NETWORK_MESSAGE_SERVER_REBOOT                               :{WHITE}Servern startar om...{}Var vänlig vänta...
 
 # Content downloading window
-STR_CONTENT_TITLE                                               :{WHITE}Innehåll laddas hem
+STR_CONTENT_TITLE                                               :{WHITE}Nedladdning av innehåll
 STR_CONTENT_TYPE_CAPTION                                        :{BLACK}Typ
 STR_CONTENT_TYPE_CAPTION_TOOLTIP                                :{BLACK}Typ av innehåll
 STR_CONTENT_NAME_CAPTION                                        :{BLACK}Namn
@@ -2321,6 +2320,11 @@ STR_GENERATION_PREPARING_GAME                                   :{BLACK}Förbere
 
 # NewGRF settings
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}NewGRF-inställningar
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}Detaljerad NewGRF-information
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}Aktiva NewGRF-filer
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}Inaktiva NewGRF-filer
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}Välj förinställning
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}Sökfilter:
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Ladda markerad förinställning
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Spara förinställning
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}Spara denna lista som en förinställning
@@ -2328,7 +2332,9 @@ STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}Namnge f
 STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Ta bort förinställningen
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}Ta bort markerad förinställning
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}Lägg till
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Lägg till en ny NewGRF-fil till listan
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}Lägg till den markerade NewGRF-filen till din konfiguration
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}Scanna om filer
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}Uppdatera listan med tillgängliga NewGRF-filer
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}Ta bort
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}Ta bort den markerade NewGRF-filen från listan
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Flytta upp
@@ -2356,13 +2362,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Matchande 
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Avstängd
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Skriv NewGRF parameterar
-
-# NewGRF add window
-STR_NEWGRF_ADD_CAPTION                                          :{WHITE}Tillgängliga NewGRF filer
-STR_NEWGRF_ADD_FILE                                             :{BLACK}Lägg till markering
-STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Lägg till den markerade NewGRF-filen till din konfiguration
-STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Scanna om filer
-STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Uppdatera listan med tillgängliga NewGRF-filer
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspektera - {STRING}
