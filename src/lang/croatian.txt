@@ -317,7 +317,6 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Unesi znak za filter
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Unesite ključnu riječ kako bi filtrirali popis
-STR_LIST_FILTER_TITLE                                           :{BLACK}Znak za filter:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Izaberi način sortiranja (silazno/uzlazno)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Izaberi kriterij za sortiranje
@@ -2417,6 +2416,11 @@ STR_GENERATION_PREPARING_GAME                                   :{BLACK}Priprema
 
 # NewGRF settings
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}NewGRF postavke
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}Detaljne NewGRF informacije
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}Aktivne NewGRF datoteke
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}Neaktivne NewGRF datoteke
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}Odaberi predložak:
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}Znak za filter:
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Učitaj unaprijed odabrane postavke
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Spremi zadano postavljanje
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}Spremi trenutni popis kao zadano postavljanje
@@ -2424,7 +2428,9 @@ STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}Upiši i
 STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Obriši zadano postavljanje
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}Obriši trenutno izabrano zadano postavljanje
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}Dodaj
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Dodaj NewGRF datoteku na popis
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}Dodaj odabrane NewGRF datoteke u svoju konfiguraciju
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}Ponovno skeniraj datoteke
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}Osvježi popis dostupnih NewGRF datoteka
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}Ukloni
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}Ukloni odabranu NewGRF datoteku s popisa
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Pomakni gore
@@ -2452,13 +2458,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Nije prona
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Onemogućeno
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Unesite NewGRF parametre
-
-# NewGRF add window
-STR_NEWGRF_ADD_CAPTION                                          :{WHITE}Dostupne NewGRF datoteke
-STR_NEWGRF_ADD_FILE                                             :{BLACK}Dodaj u izabrano
-STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Dodaj odabrane NewGRF datoteke u svoju konfiguraciju
-STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Ponovno skeniraj datoteke
-STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Osvježi popis dostupnih NewGRF datoteka
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Pregledaj - {STRING}
