@@ -707,26 +707,6 @@ NWidgetBase::NWidgetBase(WidgetType tp) : ZeroedMemoryAllocator()
  */
 
 /**
- * Store size and position.
- * @param sizing       Type of resizing to perform.
- * @param x            Horizontal offset of the widget relative to the left edge of the window.
- * @param y            Vertical offset of the widget relative to the top edge of the window.
- * @param given_width  Width allocated to the widget.
- * @param given_height Height allocated to the widget.
- */
-inline void NWidgetBase::StoreSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height)
-{
-	this->pos_x = x;
-	this->pos_y = y;
-	if (sizing == ST_SMALLEST) {
-		this->smallest_x = given_width;
-		this->smallest_y = given_height;
-	}
-	this->current_x = given_width;
-	this->current_y = given_height;
-}
-
-/**
  * @fn void NWidgetBase::Draw(const Window *w)
  * Draw the widgets of the tree.
  * The function calls #Window::DrawWidget for each widget with a non-negative index, after the widget itself is painted.
@@ -820,7 +800,7 @@ void NWidgetResizeBase::SetResize(uint resize_x, uint resize_y)
 
 void NWidgetResizeBase::AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl)
 {
-	StoreSizePosition(sizing, x, y, given_width, given_height);
+	this->StoreSizePosition(sizing, x, y, given_width, given_height);
 }
 
 /**
@@ -942,22 +922,6 @@ void NWidgetContainer::FillNestedArray(NWidgetBase **array, uint length)
 }
 
 /**
- * Return the biggest possible size of a nested widget.
- * @param base      Base size of the widget.
- * @param max_space Available space for the widget.
- * @param step      Stepsize of the widget.
- * @return Biggest possible size of the widget, assuming that \a base may only be incremented by \a step size steps.
- */
-static inline uint ComputeMaxSize(uint base, uint max_space, uint step)
-{
-	if (base >= max_space || step == 0) return base;
-	if (step == 1) return max_space;
-	int increment = max_space - base;
-	increment -= increment % step;
-	return base + increment;
-}
-
-/**
  * Widgets stacked on top of each other.
  */
 NWidgetStacked::NWidgetStacked() : NWidgetContainer(NWID_SELECTION)
@@ -1017,7 +981,7 @@ void NWidgetStacked::SetupSmallestSize(Window *w, bool init_array)
 void NWidgetStacked::AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl)
 {
 	assert(given_width >= this->smallest_x && given_height >= this->smallest_y);
-	StoreSizePosition(sizing, x, y, given_width, given_height);
+	this->StoreSizePosition(sizing, x, y, given_width, given_height);
 
 	if (this->shown_plane >= SZSP_BEGIN) return;
 
@@ -1193,7 +1157,7 @@ void NWidgetHorizontal::AssignSizePosition(SizingType sizing, uint x, uint y, ui
 	assert(given_width >= this->smallest_x && given_height >= this->smallest_y);
 
 	uint additional_length = given_width - this->smallest_x; // Additional width given to us.
-	StoreSizePosition(sizing, x, y, given_width, given_height);
+	this->StoreSizePosition(sizing, x, y, given_width, given_height);
 
 	/* In principle, the additional horizontal space is distributed evenly over the available resizable childs. Due to step sizes, this may not always be feasible.
 	 * To make resizing work as good as possible, first childs with biggest step sizes are done. These may get less due to rounding down.
@@ -1345,7 +1309,7 @@ void NWidgetVertical::AssignSizePosition(SizingType sizing, uint x, uint y, uint
 	assert(given_width >= this->smallest_x && given_height >= this->smallest_y);
 
 	int additional_length = given_height - this->smallest_y; // Additional height given to us.
-	StoreSizePosition(sizing, x, y, given_width, given_height);
+	this->StoreSizePosition(sizing, x, y, given_width, given_height);
 
 	/* Like the horizontal container, the vertical container also distributes additional height evenly, starting with the childs with the biggest resize steps.
 	 * It also stores computed widths and heights into current_x and current_y values of the child.
@@ -1544,7 +1508,7 @@ void NWidgetBackground::SetupSmallestSize(Window *w, bool init_array)
 
 void NWidgetBackground::AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl)
 {
-	StoreSizePosition(sizing, x, y, given_width, given_height);
+	this->StoreSizePosition(sizing, x, y, given_width, given_height);
 
 	if (this->child != NULL) {
 		uint x_offset = (rtl ? this->child->padding_right : this->child->padding_left);
