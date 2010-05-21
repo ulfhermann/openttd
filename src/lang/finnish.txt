@@ -221,7 +221,6 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Syötä suodatin teksti
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Syötä avainsana suodattaaksesi listan
-STR_LIST_FILTER_TITLE                                           :{BLACK}Suodatinteksti:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Valitse järjestys (laskeva/nouseva)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Valitse järjestyskriteeri
@@ -2321,6 +2320,11 @@ STR_GENERATION_PREPARING_GAME                                   :{BLACK}Valmiste
 
 # NewGRF settings
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}NewGRF-asetukset
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}Tarkat NewGRF-tiedot
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}Käytössä olevat NewGRF-tiedostot
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}Pois käytöstä olevat NewGRF-tiedostot
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}Valitse valmislista:
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}Suodatinteksti:
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Lataa valittu valmislista
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Tallenna valmislistaksi
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}Tallenna nykyinen lista valmislistaksi
@@ -2328,7 +2332,9 @@ STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}Syötä 
 STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Poista valmislista
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}Poista valittu valmislista
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}Lisää
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Lisää NewGRF-tiedosto listaan
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}Lisää valittu NewGRF-tiedosto peliin
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}Päivitä
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}Päivitä saatavilla olevien NewGRF-tiedostojen lista
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}Poista
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}Poista valittu NewGRF-tiedosto listalta
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Siirrä ylös
@@ -2356,13 +2362,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Sopivaa ti
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Ei käytössä
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Anna NewGRF-parametrit
-
-# NewGRF add window
-STR_NEWGRF_ADD_CAPTION                                          :{WHITE}NewGRF-tiedostot
-STR_NEWGRF_ADD_FILE                                             :{BLACK}Lisää valintaan
-STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Lisää valittu NewGRF-tiedosto peliin
-STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Päivitä
-STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Päivitä saatavilla olevien NewGRF-tiedostojen lista
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Tutki - {STRING}
@@ -2783,6 +2782,8 @@ STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Nimeä l
 # Depot window
 STR_DEPOT_CAPTION                                               :{WHITE}{DEPOT}
 
+STR_DEPOT_RENAME_TOOLTIP                                        :{BLACK}Vaihda varikon nimi
+STR_DEPOT_RENAME_DEPOT_CAPTION                                  :Nimeä varikko
 
 STR_DEPOT_NO_ENGINE                                             :{BLACK}-
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
@@ -3490,6 +3491,7 @@ STR_ERROR_CAN_T_BUILD_ROAD_DEPOT                                :{WHITE}Autovari
 STR_ERROR_CAN_T_BUILD_TRAM_DEPOT                                :{WHITE}Tähän ei voi rakentaa varikkoa.
 STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Telakkaa ei voi rakentaa.
 
+STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Varikon nimeä ei voi vaihtaa...
 
 STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Juna täytyy pysäyttää veturitallin sisällä
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... sen pitää olla pysähtyneenä huoltoasemalle
@@ -4094,6 +4096,7 @@ STR_VIEWPORT_WAYPOINT_TINY                                      :{TINYFONT}{WAYP
 # Simple strings to get specific types of data
 STR_COMPANY_NAME                                                :{COMPANY}
 STR_COMPANY_NAME_COMPANY_NUM                                    :{COMPANY} {COMPANYNUM}
+STR_DEPOT_NAME                                                  :{DEPOT}
 STR_ENGINE_NAME                                                 :{ENGINE}
 STR_GROUP_NAME                                                  :{GROUP}
 STR_INDUSTRY_NAME                                               :{INDUSTRY}
