@@ -222,7 +222,6 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Entrer le filtre
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Entrer un mot clé pour filtrer la liste
-STR_LIST_FILTER_TITLE                                           :{BLACK}Filtre{NBSP}:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Choisir l'ordre de tri croissant/décroissant
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Choisir le critère de tri
@@ -1857,15 +1856,15 @@ STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Impossib
 
 # Transparency settings window
 STR_TRANSPARENCY_CAPTION                                        :{WHITE}Options de transparence
-STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Transparence des noms de station. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_TREES_TOOLTIP                                   :{BLACK}Transparence des arbres. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_HOUSES_TOOLTIP                                  :{BLACK}Transparence des maisons. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_INDUSTRIES_TOOLTIP                              :{BLACK}Transparence des industries. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Transparence des éléments constructibles tels que stations, dépôts, points de contrôle et caténaire. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Transparence des ponts. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Transparence des structures telles que phares et antennes. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Transparence des caténaires. Ctrl-clic pour vérouiller.
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Transparence pour les indicateurs de chargement. Ctrl-clic pour vérouiller.
+STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Transparence des noms de station. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_TREES_TOOLTIP                                   :{BLACK}Transparence des arbres. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_HOUSES_TOOLTIP                                  :{BLACK}Transparence des maisons. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_INDUSTRIES_TOOLTIP                              :{BLACK}Transparence des industries. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Transparence des éléments constructibles tels que stations, dépôts, points de contrôle et caténaire. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Transparence des ponts. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Transparence des structures telles que phares et antennes. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Transparence des caténaires. Ctrl-clic pour vérrouiller.
+STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Transparence pour les indicateurs de chargement. Ctrl-clic pour vérrouiller.
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Basculer transparence/invisibilité
 
 # Base for station construction window(s)
@@ -2321,7 +2320,12 @@ STR_GENERATION_PREPARING_TILELOOP                               :{BLACK}Rafraîc
 STR_GENERATION_PREPARING_GAME                                   :{BLACK}Préparation du jeu
 
 # NewGRF settings
-STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}Paramètres Newgrf
+STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}Paramètres NewGRF
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}Information NewGRF détaillée
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}Fichiers NewGRF actifs
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}Fichiers NewGRF inactifs
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}Sélectionner la liste{NBSP}:
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}Filtre{NBSP}:
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Charger la liste sélectionnée
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Sauver la liste
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}Sauver la liste courante
@@ -2329,7 +2333,9 @@ STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}Entrer u
 STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Supprimer la liste
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}Supprimer la liste sélectionnée
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}Ajouter
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Ajouter un fichier NewGRF à la liste
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}Ajouter le fichier NewGRF sélectionné à votre configuration
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}Actualiser la liste
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}Mettre à jour la liste des fichiers NewGRF disponibles
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}Retirer
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}Retirer le fichier NewGRF sélectionné de la liste
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Monter
@@ -2357,13 +2363,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Fichier co
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Désactivé
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Entrer les paramètres NewGRF
-
-# NewGRF add window
-STR_NEWGRF_ADD_CAPTION                                          :{WHITE}Fichiers NewGRF disponibles
-STR_NEWGRF_ADD_FILE                                             :{BLACK}Ajouter à la sélection
-STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Ajouter le fichier NewGRF sélectionné à votre configuration
-STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Actualiser la liste
-STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Mettre à jour la liste des fichiers NewGRF disponibles
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspection - {STRING}
