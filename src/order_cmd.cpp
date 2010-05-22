@@ -267,15 +267,22 @@ const Order * OrderList::GetNext(const Order * curr) const
 	return next;
 }
 
-const Order * OrderList::GetNextStoppingOrder(const Order * next, uint hops, bool check_nonstop) const
+/**
+ * Recursively determine the next deterministic order to stop at a station.
+ * @param next the first order to check
+ * @param hops the number of orders we have already checked.
+ * @param check_nonstop if true regard orders without non-stop flag as nondeterministic
+ * @return the next stoppping order or NULL
+ */
+const Order *OrderList::GetNextStoppingOrder(const Order *next, uint hops, bool check_nonstop) const
 {
-	if (next == NULL || hops > GetNumOrders()) {
+	if (next == NULL || hops > this->GetNumOrders()) {
 		return NULL;
 	}
 
 	if (next->GetType() == OT_CONDITIONAL) {
-		const Order * skip_to = GetNextStoppingOrder(GetOrderAt(next->GetConditionSkipToOrder()), hops + 1, check_nonstop);
-		const Order * advance = GetNextStoppingOrder(next, hops + 1, check_nonstop);
+		const Order *skip_to = this->GetNextStoppingOrder(this->GetOrderAt(next->GetConditionSkipToOrder()), hops + 1, check_nonstop);
+		const Order *advance = this->GetNextStoppingOrder(this->GetNext(next), hops + 1, check_nonstop);
 		if (skip_to == advance) {
 			return skip_to; // skipping over non-stopping orders
 		} else {
@@ -283,23 +290,19 @@ const Order * OrderList::GetNextStoppingOrder(const Order * next, uint hops, boo
 		}
 	}
 
-	bool is_station = (next->GetType() == OT_GOTO_STATION);
-
 	if (check_nonstop) {
 		switch(next->GetNonStopType()) {
 		case ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS:
-			if (is_station) return next; // else fall through
+			if (next->GetType() == OT_GOTO_STATION) return next; // else fall through
 		case ONSF_NO_STOP_AT_ANY_STATION:
-			return GetNextStoppingOrder(GetNext(next), hops + 1, check_nonstop);
+			return GetNextStoppingOrder(this->GetNext(next), hops + 1, check_nonstop);
 		default: // nondeterministic
 			return NULL;
 		}
+	} else if (next->GetType() == OT_GOTO_STATION) {
+		return next;
 	} else {
-		if (is_station) {
-			return next;
-		} else {
-			return GetNextStoppingOrder(GetNext(next), hops + 1, check_nonstop);
-		}
+		return this->GetNextStoppingOrder(this->GetNext(next), hops + 1, check_nonstop);
 	}
 }
 
