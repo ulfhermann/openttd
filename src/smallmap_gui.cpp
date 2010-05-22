@@ -578,8 +578,8 @@ class SmallMapWindow : public Window {
 
 			return RemapCoords(x_offset / this->zoom, y_offset / this->zoom, 0);
 		} else {
-			int x_offset = tile_x * (-this->zoom) - this->scroll_x * (-this->zoom) / TILE_SIZE;
-			int y_offset = tile_y * (-this->zoom) - this->scroll_y * (-this->zoom) / TILE_SIZE;
+			int x_offset = tile_x * (-this->zoom) - this->scroll_x * (-this->zoom) / (int)TILE_SIZE;
+			int y_offset = tile_y * (-this->zoom) - this->scroll_y * (-this->zoom) / (int)TILE_SIZE;
 
 			return RemapCoords(x_offset, y_offset, 0);
 		}
