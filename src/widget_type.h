@@ -137,7 +137,7 @@ public:
 	 * @param bottom Amount of additional space below the widget.
 	 * @param left   Amount of additional space left of the widget.
 	 */
-	inline void SetPadding(uint8 top, uint8 right, uint8 bottom, uint8 left)
+	FORCEINLINE void SetPadding(uint8 top, uint8 right, uint8 bottom, uint8 left)
 	{
 		this->padding_top = top;
 		this->padding_right = right;
@@ -145,8 +145,8 @@ public:
 		this->padding_left = left;
 	};
 
-	inline uint GetHorizontalStepSize(SizingType sizing) const;
-	inline uint GetVerticalStepSize(SizingType sizing) const;
+	FORCEINLINE uint GetHorizontalStepSize(SizingType sizing) const;
+	FORCEINLINE uint GetVerticalStepSize(SizingType sizing) const;
 
 	virtual void Draw(const Window *w) = 0;
 	virtual void SetDirty(const Window *w) const;
@@ -177,14 +177,14 @@ public:
 	uint8 padding_left;   ///< Paddings added to the left of the widget. Managed by parent container widget.
 
 protected:
-	inline void StoreSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height);
+	FORCEINLINE void StoreSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height);
 };
 
 /**
  * Get the horizontal sizing step.
  * @param sizing Type of resize being performed.
  */
-inline uint NWidgetBase::GetHorizontalStepSize(SizingType sizing) const
+FORCEINLINE uint NWidgetBase::GetHorizontalStepSize(SizingType sizing) const
 {
 	return (sizing == ST_RESIZE) ? this->resize_x : this->fill_x;
 }
@@ -193,10 +193,31 @@ inline uint NWidgetBase::GetHorizontalStepSize(SizingType sizing) const
  * Get the vertical sizing step.
  * @param sizing Type of resize being performed.
  */
-inline uint NWidgetBase::GetVerticalStepSize(SizingType sizing) const
+FORCEINLINE uint NWidgetBase::GetVerticalStepSize(SizingType sizing) const
 {
 	return (sizing == ST_RESIZE) ? this->resize_y : this->fill_y;
 }
+
+/**
+ * Store size and position.
+ * @param sizing       Type of resizing to perform.
+ * @param x            Horizontal offset of the widget relative to the left edge of the window.
+ * @param y            Vertical offset of the widget relative to the top edge of the window.
+ * @param given_width  Width allocated to the widget.
+ * @param given_height Height allocated to the widget.
+ */
+FORCEINLINE void NWidgetBase::StoreSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height)
+{
+	this->pos_x = x;
+	this->pos_y = y;
+	if (sizing == ST_SMALLEST) {
+		this->smallest_x = given_width;
+		this->smallest_y = given_height;
+	}
+	this->current_x = given_width;
+	this->current_y = given_height;
+}
+
 
 /** Base class for a resizable nested widget.
  * @ingroup NestedWidgets */
@@ -484,6 +505,22 @@ private:
 	static Dimension resizebox_dimension; ///< Cached size of a resizebox widget.
 	static Dimension closebox_dimension;  ///< Cached size of a closebox widget.
 };
+
+/**
+ * Return the biggest possible size of a nested widget.
+ * @param base      Base size of the widget.
+ * @param max_space Available space for the widget.
+ * @param step      Stepsize of the widget.
+ * @return Biggest possible size of the widget, assuming that \a base may only be incremented by \a step size steps.
+ */
+static FORCEINLINE uint ComputeMaxSize(uint base, uint max_space, uint step)
+{
+	if (base >= max_space || step == 0) return base;
+	if (step == 1) return max_space;
+	uint increment = max_space - base;
+	increment -= increment % step;
+	return base + increment;
+}
 
 /**
  * @defgroup NestedWidgetParts Hierarchical widget parts
