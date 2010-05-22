@@ -221,7 +221,6 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Nhập chuỗi lọc
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Nhập từ khóa vào để lọc danh sách
-STR_LIST_FILTER_TITLE                                           :{BLACK}Lọc giá trị:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Chọn thứ tự sắp xếp (giảm dần/tăng dần)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Chọn tiêu chí sắp xếp
@@ -233,6 +232,7 @@ STR_BUTTON_RENAME                                               :{BLACK}Đổi t
 STR_TOOLTIP_CLOSE_WINDOW                                        :{BLACK}Đóng cửa sổ
 STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS                              :{BLACK}Tiêu đề cửa sổ - kéo nó để di chuyển cửa số
 STR_TOOLTIP_SHADE                                               :{BLACK}Thu gọn cửa sổ - Chỉ hiển thị thanh tiêu đề
+STR_TOOLTIP_DEBUG                                               :{BLACK}Hiện thông tin debug của NewGRF
 STR_TOOLTIP_STICKY                                              :{BLACK}Đánh dấu không-thể-đóng khi bấm nút "Đóng Tất Cả Cửa Sổ"
 STR_TOOLTIP_RESIZE                                              :{BLACK}Click và kéo để thay đổi kích thước cửa sổ
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Bật kích cỡ cửa sổ lớn/nhỏ
@@ -264,7 +264,7 @@ STR_SORT_BY_CAPTION_DATE                                        :{BLACK}Ngày th
 STR_SORT_BY_POPULATION                                          :Dân số
 STR_SORT_BY_NAME                                                :Tên
 STR_SORT_BY_PRODUCTION                                          :Sản lượng
-STR_SORT_BY_TYPE                                                :Loại
+STR_SORT_BY_TYPE                                                :Kiểu
 STR_SORT_BY_TRANSPORTED                                         :Dung lượng đã vận chuyển
 STR_SORT_BY_NUMBER                                              :Số
 STR_SORT_BY_PROFIT_LAST_YEAR                                    :Lợi nhuận năm trước
@@ -444,6 +444,7 @@ STR_ABOUT_MENU_AI_DEBUG                                         :AI debug
 STR_ABOUT_MENU_SCREENSHOT                                       :Chụp ảnh màn hình (Ctrl+S)
 STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Phóng to ảnh màn hình (Ctrl+G)
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Về 'OpenTTD'
+STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Trình điều chỉnh sprite
 ############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
@@ -2319,6 +2320,10 @@ STR_GENERATION_PREPARING_GAME                                   :{BLACK}Chuẩn 
 
 # NewGRF settings
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}Thiết lập NewGRF
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}Thông tin chi tiết của NewGRF
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}Các NewGRP đã kích hoạt
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}Các NewGRF chưa kích hoạt
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}Lọc giá trị:
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Nạp các thiết lập đã chọn
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Lưu thiết lập
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}Lưu danh sách này như là thiết lập
@@ -2326,7 +2331,9 @@ STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}Tên c�
 STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Xoá thiết lập
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}Xoá thiết lập đã chọn
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}Thêm
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Thêm NewGRF vào danh sách
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}Thêm NewGRF file đã chọn vào cấu hình
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}Quét lại file
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}Cập nhật danh sách NewGRF file sẵn có
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}Xoá
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}Xoá NewGRF đã chọn trong danh sách
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Dịch lên
@@ -2355,23 +2362,21 @@ STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Tắt
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Nhập NewGRF tham số
 
-# NewGRF add window
-STR_NEWGRF_ADD_CAPTION                                          :{WHITE}Các NewGRF file sẵn có
-STR_NEWGRF_ADD_FILE                                             :{BLACK}Thêm vào file
-STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Thêm NewGRF file đã chọn vào cấu hình
-STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Quét lại file
-STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Cập nhật danh sách NewGRF file sẵn có
-
 # NewGRF inspect window
 
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING} tại {HEX}
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE                  :Kiểu ray
 
 
 # Sprite aligner window
+STR_SPRITE_ALIGNER_CAPTION                                      :{WHITE}Điều chỉnh sprite {COMMA} ({STRING})
 STR_SPRITE_ALIGNER_NEXT_BUTTON                                  :{BLACK}Sprite tiếp
 STR_SPRITE_ALIGNER_GOTO_BUTTON                                  :{BLACK}Đi tới sprite
 STR_SPRITE_ALIGNER_PREVIOUS_BUTTON                              :{BLACK}Sprite trước
 STR_SPRITE_ALIGNER_MOVE_TOOLTIP                                 :{BLACK}Di chuyển sprite xung quanh, thay đổi X và Y offsets
 STR_SPRITE_ALIGNER_OFFSETS                                      :{BLACK}X offset: {NUM}, Y offset: {NUM}
+STR_SPRITE_ALIGNER_PICKER_BUTTON                                :{BLACK}Chọn sprite
+STR_SPRITE_ALIGNER_PICKER_TOOLTIP                               :{BLACK}Chọn sprite ở bất cứ đâu trên màn hình
 
 STR_SPRITE_ALIGNER_GOTO_CAPTION                                 :{WHITE}Đi tới sprite
 
@@ -2418,6 +2423,12 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Đoàn t
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' không hợp lệ.
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Danh mục hàng hoá/cải biến được cho '{1:ENGINE}' khác với danh mục mua được sau khi đã có. Việc này khiến cho việc tự thay thế hay là tự cải biến không chính xác.
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' gây ra một vòng lặp vô tận khi gọi hàm callback.
+
+# 'User removed essential NewGRFs'-placeholders for stuff without specs.
+STR_NEWGRF_INVALID_CARGO                                        :<sai kiểu hàng>
+STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
+STR_NEWGRF_INVALID_ENGINE                                       :<sai engine>
+STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<sai nhà máy>
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Danh sách biển hiệu - {COMMA} Biển hiệu
@@ -2766,7 +2777,10 @@ STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}Đổi t
 STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Đổi tên kiểu máy bay
 
 # Depot window
+STR_DEPOT_CAPTION                                               :{WHITE}{DEPOT}
 
+STR_DEPOT_RENAME_TOOLTIP                                        :{BLACK}Đổi tên xưởng
+STR_DEPOT_RENAME_DEPOT_CAPTION                                  :Đổi tên xưởng
 
 STR_DEPOT_NO_ENGINE                                             :{BLACK}-
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
@@ -2946,11 +2960,17 @@ STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Không 
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Nhắm tới {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Nhắm tới {WAYPOINT}, {VELOCITY}
 
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Nhắm tới {DEPOT}
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Nhắm tới {DEPOT}, {VELOCITY}
 
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Phục vụ tại {DEPOT}
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Phục vụ tại {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
 STR_VEHICLE_COMMAND_STOPPED_SMALL                               :{TINYFONT}{RED}Đã dừng
 STR_VEHICLE_COMMAND_STOPPED                                     :{RED}Đã dừng
+STR_VEHICLE_COMMAND_STARTED_SMALL                               :{TINYFONT}{GREEN}Đã chạy
+STR_VEHICLE_COMMAND_STARTED                                     :{GREEN}Đã chạy
 
 # Vehicle details
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Chi tiết)
@@ -3126,6 +3146,7 @@ STR_ORDER_TRAIN_DEPOT                                           :Xưởng tàu h
 STR_ORDER_ROAD_VEHICLE_DEPOT                                    :Xưởng ôtô
 STR_ORDER_SHIP_DEPOT                                            :Xưởng tàu thuỷ
 STR_ORDER_GO_TO_NEAREST_DEPOT_FORMAT                            :{0:STRING} {2:STRING} {1:STRING}
+STR_ORDER_GO_TO_DEPOT_FORMAT                                    :{STRING} {DEPOT}
 
 STR_ORDER_REFIT_ORDER                                           :(Cải biến thành {STRING})
 STR_ORDER_REFIT_STOP_ORDER                                      :(Cải biến thành {STRING} và dừng)
@@ -3463,6 +3484,7 @@ STR_ERROR_CAN_T_BUILD_ROAD_DEPOT                                :{WHITE}Không t
 STR_ERROR_CAN_T_BUILD_TRAM_DEPOT                                :{WHITE}Không thể xây bến xe điện ở đây...
 STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Không thể xây cảng ở đây...
 
+STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Không thể đổi tên xưởng...
 
 STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Tàu phải dừng lại ở trong xưởng
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... phải dừng trong xưởng ôtô
@@ -3520,6 +3542,7 @@ STR_ERROR_CAN_T_BUILD_AQUEDUCT_HERE                             :{WHITE}Không t
 
 # Tree related errors
 STR_ERROR_TREE_ALREADY_HERE                                     :{WHITE}... có cây cối rồi
+STR_ERROR_TREE_WRONG_TERRAIN_FOR_TREE_TYPE                      :{WHITE}... loại đất không thích hợp cho cây
 STR_ERROR_CAN_T_PLANT_TREE_HERE                                 :{WHITE}Không thể trồng cây ở đây...
 
 # Bridge related errors
@@ -4033,6 +4056,13 @@ STR_FORMAT_INDUSTRY_NAME                                        :{1:STRING} {0:T
 STR_FORMAT_WAYPOINT_NAME                                        :Điểm mốc {TOWN}
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Điểm mốc {TOWN} số #{COMMA}
 
+STR_FORMAT_DEPOT_NAME_TRAIN                                     :{TOWN} Xưởng Tàu Hỏa
+STR_FORMAT_DEPOT_NAME_TRAIN_SERIAL                              :{TOWN} Xưởng Tàu Hỏa #{COMMA}
+STR_FORMAT_DEPOT_NAME_ROAD_VEHICLE                              :{TOWN} Xưởng Xe Ôtô
+STR_FORMAT_DEPOT_NAME_ROAD_VEHICLE_SERIAL                       :{TOWN} Xưởng Xe Ôtô #{COMMA}
+STR_FORMAT_DEPOT_NAME_SHIP                                      :{TOWN} Xưởng Tàu
+STR_FORMAT_DEPOT_NAME_SHIP_SERIAL                               :{TOWN} Xưởng Tàu #{COMMA}
+STR_FORMAT_DEPOT_NAME_AIRCRAFT                                  :{STATION} Xưởng
 
 STR_UNKNOWN_STATION                                             :Ga,bến không biết
 STR_DEFAULT_SIGN_NAME                                           :Biển hiệu
