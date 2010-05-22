@@ -600,7 +600,6 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Wpisz słowo filtru
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Wpisz słowo kluczowe dla listy filtru
-STR_LIST_FILTER_TITLE                                           :{BLACK}Filtruj napis:
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Wybierz porządek sortowania (malejąco/rosnąco)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Wybierz kryterium sortowania
@@ -2701,6 +2700,11 @@ STR_GENERATION_PREPARING_GAME                                   :{BLACK}Przygoto
 
 # NewGRF settings
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}Ustawienia NewGRF
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}Szczegółowe informacje o NewGRF
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}Aktywne pliki NewGRF
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}Nieaktywne pliki NewGRF
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}Wybierz obecny:
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}Filtruj napis:
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}Załaduj wskazany stan ustawień
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}Zapisz schemat
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}Zapisz obecną listę jako stan ustawień
@@ -2708,7 +2712,9 @@ STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}Nadaj na
 STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}Usuń schemat
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}Usuń obecnie wskazany stan ustawień
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}Dodaj
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}Dodaj plik NewGRF do listy
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}Dodaj zaznaczony plik NewGRF do Twojego ustawienia
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}Przeskanuj pliki
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}Odśwież listę dostępnych plików NewGRF
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}Usuń
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}Usuń zaznaczony plik NewGRF z listy
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}Do góry
@@ -2736,13 +2742,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Nie znalez
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Niedostępny
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Wprowadź parametry NewGRF
-
-# NewGRF add window
-STR_NEWGRF_ADD_CAPTION                                          :{WHITE}Dostępne pliki NewGRF
-STR_NEWGRF_ADD_FILE                                             :{BLACK}Dodaj do listy
-STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}Dodaj zaznaczony plik NewGRF do Twojego ustawienia
-STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}Przeskanuj pliki
-STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}Odśwież listę dostępnych plików NewGRF
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Zbadaj - {STRING}
@@ -3353,8 +3352,8 @@ STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Zmierza
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Zmierza do {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Zmierza do {DEPOT}, {VELOCITY}
 
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Serwis w {DEPOT}
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Zmierza do zajezdni w {DEPOT}, {VELOCITY}
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Serwisuj w {DEPOT}
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Serwisuj w {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
 STR_VEHICLE_COMMAND_STOPPED_SMALL                               :{TINYFONT}{RED}Zatrzymany
