@@ -527,8 +527,13 @@ class SmallMapWindow : public Window {
 	 * save the Vehicle's old position here, so that we don't get glitches when redrawing
 	 */
 	struct VehicleAndPosition {
-		VehicleAndPosition(const Vehicle *v) : tile(v->tile), vehicle(v->index) {}
-		TileIndex tile;
+		VehicleAndPosition(const Vehicle *v) : vehicle(v->index)
+		{
+			this->position.x = v->x_pos;
+			this->position.y = v->y_pos;
+		}
+
+		Point position;
 		VehicleID vehicle;
 	};
 
@@ -814,13 +819,11 @@ class SmallMapWindow : public Window {
 	void DrawVehicles(const DrawPixelInfo *dpi, Blitter *blitter) const
 	{
 		for(VehicleList::const_iterator i = this->vehicles_on_map.begin(); i != this->vehicles_on_map.end(); ++i) {
-			const Vehicle *v = Vehicle::GetIfValid((*i).vehicle);
+			const Vehicle *v = Vehicle::GetIfValid(i->vehicle);
 			if (v == NULL) continue;
 
-			TileIndex tile = (*i).tile;
-
-			/* Remap into flat coordinates. */
-			Point pt = this->RemapTile(TileX(tile), TileY(tile));
+			/* Remap into flat coordinates. We have to do that again to account for scrolling */
+			Point pt = RemapTile(i->position.x / (int)TILE_SIZE, i->position.y / (int)TILE_SIZE);
 
 			int y = pt.y - dpi->top;
 			int x = pt.x - this->subscroll - 3 - dpi->left; // Offset X coordinate.
@@ -1016,7 +1019,7 @@ class SmallMapWindow : public Window {
 			if (v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) continue;
 
 			/* Remap into flat coordinates. */
-			Point pos = RemapTile(TileX(v->tile), TileY(v->tile));
+			Point pos = RemapTile(v->x_pos / (int)TILE_SIZE, v->y_pos / (int)TILE_SIZE);
 
 			/* Check if rhombus is inside bounds */
 			if (IsInsideMM(pos.x, -2 * scale, wi->current_x + 2 * scale) &&
