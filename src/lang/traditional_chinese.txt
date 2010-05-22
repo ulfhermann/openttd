@@ -221,7 +221,6 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} 公尺
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}輸入篩選字串
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}輸入篩選所使用的關鍵字，對於清單……
-STR_LIST_FILTER_TITLE                                           :{BLACK}篩選字串：
 
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}選擇排序 (逆序／順序)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}選擇排序項目
@@ -2321,6 +2320,11 @@ STR_GENERATION_PREPARING_GAME                                   :{BLACK}準備�
 
 # NewGRF settings
 STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}NewGRF 設定
+STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}NewGRF 詳細資訊
+STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}啟用 NewGRF 檔案
+STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}停用 NewGRF 檔案
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}選擇預置值：
+STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}篩選字串：
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}載入所選的設定值
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}儲存設定值
 STR_NEWGRF_SETTINGS_PRESET_SAVE_TOOLTIP                         :{BLACK}儲存目前清單為設定值
@@ -2328,7 +2332,9 @@ STR_NEWGRF_SETTINGS_PRESET_SAVE_QUERY                           :{BLACK}輸入�
 STR_NEWGRF_SETTINGS_PRESET_DELETE                               :{BLACK}刪除設定值
 STR_NEWGRF_SETTINGS_PRESET_DELETE_TOOLTIP                       :{BLACK}刪除目前所選的設定值
 STR_NEWGRF_SETTINGS_ADD                                         :{BLACK}新增
-STR_NEWGRF_SETTINGS_ADD_TOOLTIP                                 :{BLACK}為清單加入新的 NewGRF 檔
+STR_NEWGRF_SETTINGS_ADD_FILE_TOOLTIP                            :{BLACK}將選定的 NewGRF 加入目前設定
+STR_NEWGRF_SETTINGS_RESCAN_FILES                                :{BLACK}重新掃描檔案
+STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP                        :{BLACK}更新可用的 NewGRF 檔案清單
 STR_NEWGRF_SETTINGS_REMOVE                                      :{BLACK}移除
 STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP                              :{BLACK}從清單移除選定的 NewGRF 檔
 STR_NEWGRF_SETTINGS_MOVEUP                                      :{BLACK}上移
@@ -2356,13 +2362,6 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}找不到�
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}關閉
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}輸入 NewGRF 參數
-
-# NewGRF add window
-STR_NEWGRF_ADD_CAPTION                                          :{WHITE}可用的 NewGRF 檔案
-STR_NEWGRF_ADD_FILE                                             :{BLACK}加入設定
-STR_NEWGRF_ADD_FILE_TOOLTIP                                     :{BLACK}將選定的 NewGRF 加入目前設定
-STR_NEWGRF_ADD_RESCAN_FILES                                     :{BLACK}重新掃描檔案
-STR_NEWGRF_ADD_RESCAN_FILES_TOOLTIP                             :{BLACK}更新可用的 NewGRF 檔案清單
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}變數檢查 - {STRING}
@@ -2433,6 +2432,13 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}「{1:CO
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF「{0:STRING}」提供了錯誤的資訊。
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}購買清單中「{1:ENGINE}」的貨物／改裝資訊和購買後的資訊不同。 這可能會導致自動更新／取代時無法正確的改裝交通工具。
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}「{1:STRING}」會導致產量 Callback 時發生無窮迴圈的錯誤。
+
+# 'User removed essential NewGRFs'-placeholders for stuff without specs.
+STR_NEWGRF_INVALID_CARGO                                        :<無效貨物>
+STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
+STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} / <無效貨物>
+STR_NEWGRF_INVALID_ENGINE                                       :<無效機車頭>
+STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<無效工業>
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}標誌清單 - 標誌 {COMMA} 個
@@ -2781,6 +2787,7 @@ STR_QUERY_RENAME_SHIP_TYPE_CAPTION                              :{WHITE}重新�
 STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}重新命名飛機種類
 
 # Depot window
+STR_DEPOT_CAPTION                                               :{WHITE}{DEPOT}
 
 STR_DEPOT_RENAME_TOOLTIP                                        :{BLACK}修改機場名稱
 STR_DEPOT_RENAME_DEPOT_CAPTION                                  :重新命名機廠
@@ -2955,15 +2962,19 @@ STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}正在停�
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}沒有電力
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}正在等候路徑開放
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}正前往：{STATION}
-STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}正前往：{STATION}，{VELOCITY}
+STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}正前往 {STATION}
+STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}正前往 {STATION}，{VELOCITY}
 STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}沒有指令
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}沒有指令，{VELOCITY}
 
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}正前往 {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}正前往 {WAYPOINT}，{VELOCITY}
 
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}正前往 {DEPOT}
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}正前往 {DEPOT}，{VELOCITY}
 
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}正在維護於 {DEPOT}
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}正在維護於 {DEPOT}，{VELOCITY}
 
 # Vehicle stopped/started animations
 STR_VEHICLE_COMMAND_STOPPED_SMALL                               :{TINYFONT}{RED}已停止
@@ -3145,6 +3156,7 @@ STR_ORDER_TRAIN_DEPOT                                           :機廠
 STR_ORDER_ROAD_VEHICLE_DEPOT                                    :車庫
 STR_ORDER_SHIP_DEPOT                                            :船塢
 STR_ORDER_GO_TO_NEAREST_DEPOT_FORMAT                            :{STRING} {STRING} {STRING}
+STR_ORDER_GO_TO_DEPOT_FORMAT                                    :{STRING} {DEPOT}
 
 STR_ORDER_REFIT_ORDER                                           :(改裝成 {STRING})
 STR_ORDER_REFIT_STOP_ORDER                                      :(裝載 {STRING} 並停止)
@@ -4059,8 +4071,11 @@ STR_FORMAT_WAYPOINT_NAME                                        :{TOWN} 號誌�
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :{TOWN} 第 {COMMA} 號誌站
 
 STR_FORMAT_DEPOT_NAME_TRAIN                                     :{TOWN} 鐵路機廠
+STR_FORMAT_DEPOT_NAME_TRAIN_SERIAL                              :{TOWN} 鐵路機廠 #{COMMA}
 STR_FORMAT_DEPOT_NAME_ROAD_VEHICLE                              :{TOWN} 車廠
+STR_FORMAT_DEPOT_NAME_ROAD_VEHICLE_SERIAL                       :{TOWN} 車廠 #{COMMA}
 STR_FORMAT_DEPOT_NAME_SHIP                                      :{TOWN} 船塢
+STR_FORMAT_DEPOT_NAME_SHIP_SERIAL                               :{TOWN} 船塢 #{COMMA}
 STR_FORMAT_DEPOT_NAME_AIRCRAFT                                  :{STATION} 機棚
 
 STR_UNKNOWN_STATION                                             :未知車站
