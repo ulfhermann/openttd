@@ -590,14 +590,21 @@ void StationCargoList::CountAndTruncate(uint max_remaining, StationCargoAmountMa
 			CargoPacket *packet = *it;
 			if (loop == 0) cargo_per_source[packet->source] += packet->count;
 
-			if (RandomRange(prev_count) < max_remaining) continue;
+			if (RandomRange(prev_count) < max_remaining) {
+				++it;
+				continue;
+			}
 
 			uint diff = this->count - max_remaining;
 			if (packet->count > diff) {
 				packet->count -= diff;
 				this->count = max_remaining;
 				this->cargo_days_in_transit -= packet->days_in_transit * diff;
-				if (loop > 0) return;
+				if (loop > 0) {
+					return;
+				} else {
+					++it;
+				}
 			} else {
 				packets.erase(it++);
 				this->RemoveFromCache(packet);
