@@ -467,6 +467,7 @@ public:
 };
 
 typedef MultiMap<StationID, CargoPacket *> StationCargoPacketMap;
+typedef std::map<StationID, uint> StationCargoAmountMap;
 
 /**
  * CargoList that is used for stations.
@@ -533,11 +534,7 @@ public:
 	 */
 	void RerouteStalePackets(StationID to);
 
-	/**
-	 * Truncate where each destination loses roughly the same percentage of its cargo.
-	 * This is done by randomizing the selection of packets to be removed.
-	 */
-	void RandomTruncate(uint max_remaining);
+	void CountAndTruncate(uint max_remaining, StationCargoAmountMap &cargo_per_source);
 
 	/**
 	 * Returns source of the first cargo packet in this list

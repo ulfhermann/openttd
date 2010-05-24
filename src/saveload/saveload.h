@@ -345,6 +345,7 @@ enum SaveLoadVersions {
 	SL_MCF,
 	SL_FLOWMAP,
 	SL_CARGOMAP,
+	SL_EXT_RATING,
 	SL_MAX_VERSION = 255
 };
 
