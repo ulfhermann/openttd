@@ -47,6 +47,7 @@
 #include "core/pool_func.hpp"
 #include "newgrf.h"
 #include "engine_base.h"
+#include "core/backup_type.hpp"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -438,7 +439,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 #endif /* ENABLE_NETWORK */
 
 	Town *t;
-	CompanyID old = _current_company;
+	Backup<CompanyByte> cur_company(_current_company, old_owner, FILE_LINE);
 
 	assert(old_owner != new_owner);
 
@@ -447,7 +448,6 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 		uint i;
 
 		/* See if the old_owner had shares in other companies */
-		_current_company = old_owner;
 		FOR_ALL_COMPANIES(c) {
 			for (i = 0; i < 4; i++) {
 				if (c->share_owners[i] == old_owner) {
@@ -461,9 +461,10 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 		}
 
 		/* Sell all the shares that people have on this company */
+		Backup<CompanyByte> cur_company2(_current_company, FILE_LINE);
 		c = Company::Get(old_owner);
 		for (i = 0; i < 4; i++) {
-			_current_company = c->share_owners[i];
+			cur_company2.Change(c->share_owners[i]);
 			if (_current_company != INVALID_OWNER) {
 				/* Sell the shares */
 				CommandCost res = DoCommand(0, old_owner, 0, DC_EXEC, CMD_SELL_SHARE_IN_COMPANY);
@@ -472,9 +473,8 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 				SubtractMoneyFromCompany(res);
 			}
 		}
+		cur_company2.Restore();
 	}
-
-	_current_company = old_owner;
 
 	/* Temporarily increase the company's money, to be sure that
 	 * removing his/her property doesn't fail because of lack of money.
@@ -606,7 +606,7 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	/* Change colour of existing windows */
 	if (new_owner != INVALID_OWNER) ChangeWindowOwner(old_owner, new_owner);
 
-	_current_company = old;
+	cur_company.Restore();
 
 	MarkWholeScreenDirty();
 }
@@ -687,11 +687,13 @@ static void CompaniesGenStatistics()
 	Station *st;
 	Company *c;
 
+	Backup<CompanyByte> cur_company(_current_company, FILE_LINE);
 	FOR_ALL_STATIONS(st) {
-		_current_company = st->owner;
+		cur_company.Change(st->owner);
 		CommandCost cost(EXPENSES_PROPERTY, _price[PR_STATION_VALUE] >> 1);
 		SubtractMoneyFromCompany(cost);
 	}
+	cur_company.Restore();
 
 	if (!HasBit(1 << 0 | 1 << 3 | 1 << 6 | 1 << 9, _cur_month))
 		return;
@@ -820,8 +822,9 @@ static void CompaniesPayInterest()
 {
 	const Company *c;
 
+	Backup<CompanyByte> cur_company(_current_company, FILE_LINE);
 	FOR_ALL_COMPANIES(c) {
-		_current_company = c->index;
+		cur_company.Change(c->index);
 
 		/* Over a year the paid interest should be "loan * interest percentage",
 		 * but... as that number is likely not dividable by 12 (pay each month),
@@ -839,6 +842,7 @@ static void CompaniesPayInterest()
 
 		SubtractMoneyFromCompany(CommandCost(EXPENSES_OTHER, _price[PR_STATION_VALUE] >> 2));
 	}
+	cur_company.Restore();
 }
 
 static void HandleEconomyFluctuations()
@@ -1157,8 +1161,7 @@ CargoPayment::~CargoPayment()
 
 	if (this->visual_profit == 0) return;
 
-	CompanyID old_company = _current_company;
-	_current_company = this->front->owner;
+	Backup<CompanyByte> cur_company(_current_company, this->front->owner, FILE_LINE);
 
 	SubtractMoneyFromCompany(CommandCost(this->front->GetExpenseType(true), -this->route_profit));
 	this->front->profit_this_year += this->visual_profit << 8;
@@ -1173,7 +1176,7 @@ CargoPayment::~CargoPayment()
 		ShowFeederIncomeAnimation(this->front->x_pos, this->front->y_pos, this->front->z_pos, this->visual_profit);
 	}
 
-	_current_company = old_company;
+	cur_company.Restore();
 }
 
 /**
@@ -1560,8 +1563,6 @@ void CompaniesMonthlyLoop()
 		RecomputePrices();
 	}
 	CompaniesPayInterest();
-	/* Reset the _current_company flag */
-	_current_company = OWNER_NONE;
 	HandleEconomyFluctuations();
 }
 
@@ -1591,14 +1592,14 @@ static void DoAcquireCompany(Company *c)
 	}
 
 	value = CalculateCompanyValue(c) >> 2;
-	CompanyID old_company = _current_company;
+	Backup<CompanyByte> cur_company(_current_company, FILE_LINE);
 	for (i = 0; i != 4; i++) {
 		if (c->share_owners[i] != COMPANY_SPECTATOR) {
-			_current_company = c->share_owners[i];
+			cur_company.Change(c->share_owners[i]);
 			SubtractMoneyFromCompany(CommandCost(EXPENSES_OTHER, -value));
 		}
 	}
-	_current_company = old_company;
+	cur_company.Restore();
 
 	if (c->is_ai) AI::Stop(c->index);
 
