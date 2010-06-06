@@ -30,11 +30,9 @@ master: gitmake-origin
 	git merge trunk
 	test -e gitmake-build && make -j`cat gitmake-build` || true
 
-findversion: master
+smallmap-zoom-in: master 
 
-smallmap-zoom-in: findversion 
-
-global-acceptance: findversion
+global-acceptance: master 
 
 supplyscale: components global-acceptance
 
@@ -48,7 +46,7 @@ station-gui: cargomap
 
 smallmap-stats: smallmap-zoom-in cargomap
 
-texteff: findversion
+texteff: master 
 
 flowmapping-core: mcf
 
@@ -62,21 +60,21 @@ capacities: moving-average
 
 diaglvl: tileiter
 
-tileiter: findversion
+tileiter: master 
 
-selfaware-stationcargo: findversion
+selfaware-stationcargo: master 
 
 cargomap: flowmapping-core texteff multimap reservation selfaware-stationcargo
 
-reservation: findversion
+reservation: master 
 
-multimap: findversion
+multimap: master 
 
 warning-sign: demands
 
-moving-average: findversion
+moving-average: master 
 
-alteconomy-switch: findversion
+alteconomy-switch: master 
 
 delivery-rating: alteconomy-switch global-acceptance
 
@@ -88,13 +86,13 @@ score: alteconomy-switch
 
 alteconomy: rating-payment rating-weight score
 
-autogrow-vector: findversion
+autogrow-vector: master 
 
-pool-copy: findversion
+pool-copy: master 
 
 autogrow-goodsentries: autogrow-vector pool-copy
 
-push: master cdo cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score autogrow-vector autogrow-goodsentries pool-copy selfaware-stationcargo findversion
+push: master cdo cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score autogrow-vector autogrow-goodsentries pool-copy selfaware-stationcargo
 	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
 	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
 
