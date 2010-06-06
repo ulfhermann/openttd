@@ -1145,6 +1145,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 	if (cost.Failed()) return cost;
 	/* Add construction expenses. */
 	cost.AddCost((numtracks * _price[PR_BUILD_STATION_RAIL] + _price[PR_BUILD_STATION_RAIL_LENGTH]) * plat_len);
+	cost.AddCost(numtracks * plat_len * RailBuildCost(rt));
 
 	Station *st = NULL;
 	ret = FindJoiningStation(est, station_to_join, adjacent, new_location, &st);
@@ -1683,8 +1684,6 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	bool reuse = (station_to_join != NEW_STATION);
 	if (!reuse) station_to_join = INVALID_STATION;
 	bool distant_join = (station_to_join != INVALID_STATION);
-	Owner tram_owner = _current_company;
-	Owner road_owner = _current_company;
 
 	uint8 width = (uint8)GB(p1, 0, 8);
 	uint8 lenght = (uint8)GB(p1, 8, 8);
@@ -1780,6 +1779,9 @@ CommandCost CmdBuildRoadStop(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 			RoadStopType rs_type = type ? ROADSTOP_TRUCK : ROADSTOP_BUS;
 			if (is_drive_through) {
+				RoadTypes cur_rts = IsNormalRoadTile(cur_tile) ? GetRoadTypes(cur_tile) : ROADTYPES_NONE;
+				Owner road_owner = HasBit(cur_rts, ROADTYPE_ROAD) ? GetRoadOwner(cur_tile, ROADTYPE_ROAD) : _current_company;
+				Owner tram_owner = HasBit(cur_rts, ROADTYPE_TRAM) ? GetRoadOwner(cur_tile, ROADTYPE_TRAM) : _current_company;
 				MakeDriveThroughRoadStop(cur_tile, st->owner, road_owner, tram_owner, st->index, rs_type, rts, DiagDirToAxis(ddir));
 				road_stop->MakeDriveThrough();
 			} else {
