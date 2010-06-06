@@ -1,7 +1,7 @@
 
 VPATH=.:./.git/refs/heads/
 
-gitmake-all: cdo cd diaglvl alteconomy autogrow-goodsentries
+gitmake-all: cd diaglvl
 	touch gitmake-all
 
 check: clean gitmake-origin
@@ -31,12 +31,6 @@ master: gitmake-origin
 	test -e gitmake-build && make -j`cat gitmake-build` || true
 
 smallmap-zoom-in: master 
-
-global-acceptance: master 
-
-supplyscale: components global-acceptance
-
-cdo: station-gui smallmap-stats warning-sign supplyscale
 
 cd: station-gui smallmap-stats warning-sign ext-rating
 
@@ -74,25 +68,6 @@ warning-sign: demands
 
 moving-average: master 
 
-alteconomy-switch: master 
-
-delivery-rating: alteconomy-switch global-acceptance
-
-rating-weight: delivery-rating
-
-rating-payment: delivery-rating
-
-score: alteconomy-switch
-
-alteconomy: rating-payment rating-weight score
-
-autogrow-vector: master 
-
-pool-copy: master 
-
-autogrow-goodsentries: autogrow-vector pool-copy
-
-push: master cdo cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average supplyscale delivery-rating rating-weight rating-payment alteconomy global-acceptance alteconomy-switch score autogrow-vector autogrow-goodsentries pool-copy selfaware-stationcargo
-	git push ulf@laramies.com:~/fonsinchen/openttd.git $(^F)
-	rsync -av --delete patches ulf@laramies.com:~/fonsinchen/
+push: master cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average selfaware-stationcargo
+	git push github $(^F)
 
