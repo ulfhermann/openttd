@@ -21,6 +21,7 @@
 #include "company_func.h"
 #include "company_gui.h"
 #include "company_base.h"
+#include "core/backup_type.hpp"
 
 #include "table/strings.h"
 
@@ -221,17 +222,17 @@ CommandCost CmdGiveMoney(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 
 	const Company *c = Company::Get(_current_company);
 	CommandCost amount(EXPENSES_OTHER, min((Money)p1, (Money)20000000LL));
+	CompanyID dest_company = (CompanyID)p2;
 
 	/* You can only transfer funds that is in excess of your loan */
 	if (c->money - c->current_loan < amount.GetCost() || amount.GetCost() < 0) return CMD_ERROR;
-	if (!_networking || !Company::IsValidID((CompanyID)p2)) return CMD_ERROR;
+	if (!_networking || !Company::IsValidID(dest_company)) return CMD_ERROR;
 
 	if (flags & DC_EXEC) {
 		/* Add money to company */
-		CompanyID old_company = _current_company;
-		_current_company = (CompanyID)p2;
+		Backup<CompanyByte> cur_company(_current_company, dest_company, FILE_LINE);
 		SubtractMoneyFromCompany(CommandCost(EXPENSES_OTHER, -amount.GetCost()));
-		_current_company = old_company;
+		cur_company.Restore();
 	}
 
 	/* Subtract money from local-company */
