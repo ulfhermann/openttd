@@ -45,6 +45,7 @@
 #include "townname_func.h"
 #include "townname_type.h"
 #include "core/random_func.hpp"
+#include "core/backup_type.hpp"
 
 #include "table/strings.h"
 #include "table/town_land.h"
@@ -527,7 +528,7 @@ static void TileLoop_Town(TileIndex tile)
 		}
 	}
 
-	_current_company = OWNER_TOWN;
+	Backup<CompanyByte> cur_company(_current_company, OWNER_TOWN, FILE_LINE);
 
 	if ((hs->building_flags & BUILDING_HAS_1_TILE) &&
 			HasBit(t->flags, TOWN_IS_FUNDED) &&
@@ -542,7 +543,7 @@ static void TileLoop_Town(TileIndex tile)
 		if (GB(r, 24, 8) >= 12) BuildTownHouse(t, tile);
 	}
 
-	_current_company = OWNER_NONE;
+	cur_company.Restore();
 }
 
 static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlag flags)
@@ -1322,8 +1323,7 @@ static bool GrowTown(Town *t)
 	};
 
 	/* Current "company" is a town */
-	CompanyID old_company = _current_company;
-	_current_company = OWNER_TOWN;
+	Backup<CompanyByte> cur_company(_current_company, OWNER_TOWN, FILE_LINE);
 
 	TileIndex tile = t->xy; // The tile we are working with ATM
 
@@ -1332,7 +1332,7 @@ static bool GrowTown(Town *t)
 	for (ptr = _town_coord_mod; ptr != endof(_town_coord_mod); ++ptr) {
 		if (GetTownRoadBits(tile) != ROAD_NONE) {
 			int r = GrowTownAtRoad(t, tile);
-			_current_company = old_company;
+			cur_company.Restore();
 			return r != 0;
 		}
 		tile = TILE_ADD(tile, ToTileIndexDiff(*ptr));
@@ -1347,7 +1347,7 @@ static bool GrowTown(Town *t)
 			if (!IsTileType(tile, MP_HOUSE) && GetTileSlope(tile, NULL) == SLOPE_FLAT) {
 				if (DoCommand(tile, 0, 0, DC_AUTO | DC_NO_WATER, CMD_LANDSCAPE_CLEAR).Succeeded()) {
 					DoCommand(tile, GenRandomRoadBits(), t->index, DC_EXEC | DC_AUTO, CMD_BUILD_ROAD);
-					_current_company = old_company;
+					cur_company.Restore();
 					return true;
 				}
 			}
@@ -1355,7 +1355,7 @@ static bool GrowTown(Town *t)
 		}
 	}
 
-	_current_company = old_company;
+	cur_company.Restore();
 	return false;
 }
 
@@ -2409,10 +2409,9 @@ static bool DoBuildStatueOfCompany(TileIndex tile, TownID town_id)
 		return false;
 	}
 
-	CompanyID old = _current_company;
-	_current_company = OWNER_NONE;
+	Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
 	CommandCost r = DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
-	_current_company = old;
+	cur_company.Restore();
 
 	if (r.Failed()) return false;
 
