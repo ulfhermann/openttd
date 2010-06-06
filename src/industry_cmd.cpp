@@ -43,6 +43,7 @@
 #include "ai/ai.hpp"
 #include "core/pool_func.hpp"
 #include "subsidy_func.h"
+#include "core/backup_type.hpp"
 
 #include "table/strings.h"
 #include "table/industry_land.h"
@@ -1041,17 +1042,17 @@ void PlantRandomFarmField(const Industry *i)
 static bool SearchLumberMillTrees(TileIndex tile, void *user_data)
 {
 	if (IsTileType(tile, MP_TREES) && GetTreeGrowth(tile) > 2) { ///< 3 and up means all fully grown trees
-		CompanyID old_company = _current_company;
 		/* found a tree */
 
-		_current_company = OWNER_NONE;
+		Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
+
 		_industry_sound_ctr = 1;
 		_industry_sound_tile = tile;
 		SndPlayTileFx(SND_38_CHAINSAW, tile);
 
 		DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
 
-		_current_company = old_company;
+		cur_company.Restore();
 		return true;
 	}
 	return false;
@@ -1322,10 +1323,11 @@ bool IsSlopeRefused(Slope current, Slope refused)
  * @param itspec_index             The index of the itsepc to build/fund
  * @param type                     Type of the industry.
  * @param initial_random_bits      The random bits the industry is going to have after construction.
+ * @param founder Industry founder
  * @param [out] custom_shape_check Perform custom check for the site.
  * @return Failed or succeeded command.
  */
-static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable *it, uint itspec_index, int type, uint16 initial_random_bits, bool *custom_shape_check = NULL)
+static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTileTable *it, uint itspec_index, int type, uint16 initial_random_bits, Owner founder, bool *custom_shape_check = NULL)
 {
 	bool refused_slope = false;
 	bool custom_shape = false;
@@ -1357,7 +1359,7 @@ static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTil
 
 			if (HasBit(its->callback_mask, CBM_INDT_SHAPE_CHECK)) {
 				custom_shape = true;
-				CommandCost ret = PerformIndustryTileSlopeCheck(tile, cur_tile, its, type, gfx, itspec_index, initial_random_bits);
+				CommandCost ret = PerformIndustryTileSlopeCheck(tile, cur_tile, its, type, gfx, itspec_index, initial_random_bits, founder);
 				if (ret.Failed()) return ret;
 			} else {
 				Slope tileh = GetTileSlope(cur_tile, NULL);
@@ -1371,10 +1373,9 @@ static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTil
 				}
 
 				/* Clear the tiles as OWNER_TOWN to not affect town rating, and to not clear protected buildings */
-				CompanyID old_company = _current_company;
-				_current_company = OWNER_TOWN;
+				Backup<CompanyByte> cur_company(_current_company, OWNER_TOWN, FILE_LINE);
 				CommandCost ret = DoCommand(cur_tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
-				_current_company = old_company;
+				cur_company.Restore();
 
 				if (ret.Failed()) return ret;
 			} else {
@@ -1484,8 +1485,7 @@ static bool CheckIfCanLevelIndustryPlatform(TileIndex tile, DoCommandFlag flags,
 
 	/* _current_company is OWNER_NONE for randomly generated industries and in editor, or the company who funded or prospected the industry.
 	 * Perform terraforming as OWNER_TOWN to disable autoslope and town ratings. */
-	CompanyID old_company = _current_company;
-	_current_company = OWNER_TOWN;
+	Backup<CompanyByte> cur_company(_current_company, OWNER_TOWN, FILE_LINE);
 
 	TILE_LOOP(tile_walk, size_x, size_y, cur_tile) {
 		curh = TileHeight(tile_walk);
@@ -1493,13 +1493,13 @@ static bool CheckIfCanLevelIndustryPlatform(TileIndex tile, DoCommandFlag flags,
 			/* This tile needs terraforming. Check if we can do that without
 			 *  damaging the surroundings too much. */
 			if (!CheckCanTerraformSurroundingTiles(tile_walk, h, 0)) {
-				_current_company = old_company;
+				cur_company.Restore();
 				return false;
 			}
 			/* This is not 100% correct check, but the best we can do without modifying the map.
 			 *  What is missing, is if the difference in height is more than 1.. */
 			if (DoCommand(tile_walk, SLOPE_N, (curh > h) ? 0 : 1, flags & ~DC_EXEC, CMD_TERRAFORM_LAND).Failed()) {
-				_current_company = old_company;
+				cur_company.Restore();
 				return false;
 			}
 		}
@@ -1519,7 +1519,7 @@ static bool CheckIfCanLevelIndustryPlatform(TileIndex tile, DoCommandFlag flags,
 		}
 	}
 
-	_current_company = old_company;
+	cur_company.Restore();
 	return true;
 }
 
@@ -1619,6 +1619,21 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, IndustryType type, 
 	i->last_month_production[1] = i->production_rate[1] * 8;
 	i->founder = founder;
 
+	i->construction_date = _date;
+	i->construction_type = (_game_mode == GM_EDITOR) ? ICT_SCENARIO_EDITOR :
+			(_generating_world ? ICT_MAP_GENERATION : ICT_NORMAL_GAMEPLAY);
+
+	/* Adding 1 here makes it conform to specs of var44 of varaction2 for industries
+	 * 0 = created prior of newindustries
+	 * else, chosen layout + 1 */
+	i->selected_layout = layout + 1;
+
+	if (!_generating_world) i->last_month_production[0] = i->last_month_production[1] = 0;
+
+	i->prod_level = PRODLEVEL_DEFAULT;
+
+	/* Call callbacks after the regular fields got initialised. */
+
 	if (HasBit(indspec->callback_mask, CBM_IND_DECIDE_COLOUR)) {
 		uint16 res = GetIndustryCallback(CBID_INDUSTRY_DECIDE_COLOUR, 0, 0, i, type, INVALID_TILE);
 		if (res != CALLBACK_FAILED) i->random_colour = GB(res, 0, 4);
@@ -1642,18 +1657,7 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, IndustryType type, 
 		}
 	}
 
-	i->construction_date = _date;
-	i->construction_type = (_game_mode == GM_EDITOR) ? ICT_SCENARIO_EDITOR :
-			(_generating_world ? ICT_MAP_GENERATION : ICT_NORMAL_GAMEPLAY);
-
-	/* Adding 1 here makes it conform to specs of var44 of varaction2 for industries
-	 * 0 = created prior of newindustries
-	 * else, chosen layout + 1 */
-	i->selected_layout = layout + 1;
-
-	if (!_generating_world) i->last_month_production[0] = i->last_month_production[1] = 0;
-
-	i->prod_level = PRODLEVEL_DEFAULT;
+	/* Plant the tiles */
 
 	do {
 		TileIndex cur_tile = tile + ToTileIndexDiff(it->ti);
@@ -1709,11 +1713,11 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 
 	*ip = NULL;
 
-	CommandCost ret = CheckIfIndustryTilesAreFree(tile, it, itspec_index, type, random_initial_bits, &custom_shape_check);
+	CommandCost ret = CheckIfIndustryTilesAreFree(tile, it, itspec_index, type, random_initial_bits, founder, &custom_shape_check);
 	if (ret.Failed()) return ret;
 
 	if (HasBit(GetIndustrySpec(type)->callback_mask, CBM_IND_LOCATION)) {
-		ret = CheckIfCallBackAllowsCreation(tile, type, itspec_index, random_var8f, random_initial_bits);
+		ret = CheckIfCallBackAllowsCreation(tile, type, itspec_index, random_var8f, random_initial_bits, founder);
 	} else {
 		ret = _check_new_industry_procs[indspec->check_proc](tile);
 	}
@@ -1785,8 +1789,7 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	if (_game_mode != GM_EDITOR && _settings_game.construction.raw_industry_construction == 2 && indspec->IsRawIndustry()) {
 		if (flags & DC_EXEC) {
 			/* Prospected industries are build as OWNER_TOWN to not e.g. be build on owned land of the founder */
-			CompanyID founder = _current_company;
-			_current_company = OWNER_TOWN;
+			Backup<CompanyByte> cur_company(_current_company, OWNER_TOWN, FILE_LINE);
 			/* Prospecting has a chance to fail, however we cannot guarantee that something can
 			 * be built on the map, so the chance gets lower when the map is fuller, but there
 			 * is nothing we can really do about that. */
@@ -1796,11 +1799,11 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 					 * because parameter evaluation order is not guaranteed in the c++ standard
 					 */
 					tile = RandomTile();
-					CommandCost ret = CreateNewIndustryHelper(tile, it, flags, indspec, RandomRange(indspec->num_table), random_var8f, random_initial_bits, founder, &ind);
+					CommandCost ret = CreateNewIndustryHelper(tile, it, flags, indspec, RandomRange(indspec->num_table), random_var8f, random_initial_bits, cur_company.GetOriginalValue(), &ind);
 					if (ret.Succeeded()) break;
 				}
 			}
-			_current_company = founder;
+			cur_company.Restore();
 		}
 	} else {
 		int count = indspec->num_table;
@@ -1812,7 +1815,7 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		do {
 			if (--count < 0) return ret;
 			if (--num < 0) num = indspec->num_table - 1;
-			ret = CheckIfIndustryTilesAreFree(tile, itt[num], num, it, random_initial_bits);
+			ret = CheckIfIndustryTilesAreFree(tile, itt[num], num, it, random_initial_bits, _current_company);
 		} while (ret.Failed());
 
 		ret = CreateNewIndustryHelper(tile, it, flags, indspec, num, random_var8f, random_initial_bits, _current_company, &ind);
@@ -1888,8 +1891,7 @@ static const byte _numof_industry_table[]= {
  */
 static void PlaceInitialIndustry(IndustryType type, bool try_hard)
 {
-	CompanyID old_company = _current_company;
-	_current_company = OWNER_NONE;
+	Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
 
 	IncreaseGeneratingWorldProgress(GWP_INDUSTRY);
 
@@ -1897,7 +1899,7 @@ static void PlaceInitialIndustry(IndustryType type, bool try_hard)
 		if (CreateNewIndustry(RandomTile(), type) != NULL) break;
 	}
 
-	_current_company = old_company;
+	cur_company.Restore();
 }
 
 /**
@@ -2413,8 +2415,7 @@ void IndustryDailyLoop()
 		return;  // Nothing to do? get out
 	}
 
-	CompanyID old_company = _current_company;
-	_current_company = OWNER_NONE;
+	Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
 
 	/* perform the required industry changes for the day */
 	for (uint16 j = 0; j < change_loop; j++) {
@@ -2430,7 +2431,7 @@ void IndustryDailyLoop()
 		}
 	}
 
-	_current_company = old_company;
+	cur_company.Restore();
 
 	/* production-change */
 	InvalidateWindowData(WC_INDUSTRY_DIRECTORY, 0, 1);
@@ -2439,8 +2440,7 @@ void IndustryDailyLoop()
 void IndustryMonthlyLoop()
 {
 	Industry *i;
-	CompanyID old_company = _current_company;
-	_current_company = OWNER_NONE;
+	Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
 
 	FOR_ALL_INDUSTRIES(i) {
 		UpdateIndustryStatistics(i);
@@ -2452,7 +2452,7 @@ void IndustryMonthlyLoop()
 		}
 	}
 
-	_current_company = old_company;
+	cur_company.Restore();
 
 	/* production-change */
 	InvalidateWindowData(WC_INDUSTRY_DIRECTORY, 0, 1);
