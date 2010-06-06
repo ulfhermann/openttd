@@ -44,7 +44,7 @@ Window *_z_front_window = NULL;
 Window *_z_back_window  = NULL;
 
 /*
- * Window that currently have focus. - The main purpose is to generate
+ * Window that currently has focus. - The main purpose is to generate
  * FocusLost events, not to give next window in z-order focus when a
  * window is closed.
  */
@@ -56,10 +56,10 @@ int _scrollbar_start_pos;
 int _scrollbar_size;
 byte _scroller_click_timeout;
 
-bool _scrolling_scrollbar;
-bool _scrolling_viewport;
+bool _scrolling_scrollbar; ///< A scrollbar is being scrolled with the mouse.
+bool _scrolling_viewport;  ///< A viewport is being scrolled with the mouse.
 
-byte _special_mouse_mode;
+SpecialMouseMode _special_mouse_mode; ///< Mode of the mouse.
 
 /** Window description constructor. */
 WindowDesc::WindowDesc(WindowPosition def_pos, int16 def_width, int16 def_height,
@@ -1285,7 +1285,7 @@ void InitWindowSystem()
 	_z_front_window = NULL;
 	_focused_window = NULL;
 	_mouseover_last_w = NULL;
-	_scrolling_viewport = 0;
+	_scrolling_viewport = false;
 
 	NWidgetLeaf::InvalidateDimensionCache(); // Reset cached sizes of several widgets.
 }
@@ -1362,10 +1362,13 @@ static void HandlePlacePresize()
 	w->OnPlacePresize(pt, TileVirtXY(pt.x, pt.y));
 }
 
-static bool HandleDragDrop()
+/** Handle drop in mouse dragging mode (#WSM_DRAGDROP).
+ * @return State of handling the event.
+ */
+static EventState HandleDragDrop()
 {
-	if (_special_mouse_mode != WSM_DRAGDROP) return true;
-	if (_left_button_down) return false;
+	if (_special_mouse_mode != WSM_DRAGDROP) return ES_NOT_HANDLED;
+	if (_left_button_down) return ES_HANDLED;
 
 	Window *w = GetCallbackWnd();
 
@@ -1379,13 +1382,16 @@ static bool HandleDragDrop()
 
 	ResetObjectToPlace();
 
-	return false;
+	return ES_HANDLED;
 }
 
-static bool HandleMouseDrag()
+/** Handle dragging in mouse dragging mode (#WSM_DRAGDROP).
+ * @return State of handling the event.
+ */
+static EventState HandleMouseDrag()
 {
-	if (_special_mouse_mode != WSM_DRAGDROP) return true;
-	if (!_left_button_down || (_cursor.delta.x == 0 && _cursor.delta.y == 0)) return true;
+	if (_special_mouse_mode != WSM_DRAGDROP) return ES_NOT_HANDLED;
+	if (!_left_button_down || (_cursor.delta.x == 0 && _cursor.delta.y == 0)) return ES_NOT_HANDLED;
 
 	Window *w = GetCallbackWnd();
 
@@ -1397,10 +1403,11 @@ static bool HandleMouseDrag()
 		w->OnMouseDrag(pt, GetWidgetFromPos(w, pt.x, pt.y));
 	}
 
-	return false;
+	return ES_HANDLED;
 }
 
-static bool HandleMouseOver()
+/** Report position of the mouse to the underlying window. */
+static void HandleMouseOver()
 {
 	Window *w = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
 
@@ -1420,9 +1427,6 @@ static bool HandleMouseOver()
 		const NWidgetCore *widget = w->nested_root->GetWidgetFromPos(pt.x, pt.y);
 		if (widget != NULL) w->OnMouseOver(pt, widget->index);
 	}
-
-	/* Mouseover never stops execution */
-	return true;
 }
 
 /**
@@ -1526,13 +1530,16 @@ static void PreventHiding(int *nx, int *ny, const Rect &rect, const Window *v, i
 
 static bool _dragging_window; ///< A window is being dragged or resized.
 
-static bool HandleWindowDragging()
+/** Handle dragging/resizing of a window.
+ * @return State of handling the event.
+ */
+static EventState HandleWindowDragging()
 {
 	/* Get out immediately if no window is being dragged at all. */
-	if (!_dragging_window) return true;
+	if (!_dragging_window) return ES_NOT_HANDLED;
 
 	/* If button still down, but cursor hasn't moved, there is nothing to do. */
-	if (_left_button_down && _cursor.delta.x == 0 && _cursor.delta.y == 0) return false;
+	if (_left_button_down && _cursor.delta.x == 0 && _cursor.delta.y == 0) return ES_HANDLED;
 
 	/* Otherwise find the window... */
 	Window *w;
@@ -1652,7 +1659,7 @@ static bool HandleWindowDragging()
 			w->top  = ny;
 
 			w->SetDirty();
-			return false;
+			return ES_HANDLED;
 		} else if (w->flags4 & WF_SIZING) {
 			/* Stop the sizing if the left mouse button was released */
 			if (!_left_button_down) {
@@ -1690,7 +1697,7 @@ static bool HandleWindowDragging()
 			}
 
 			/* Window already on size */
-			if (x == 0 && y == 0) return false;
+			if (x == 0 && y == 0) return ES_HANDLED;
 
 			/* Now find the new cursor pos.. this is NOT _cursor, because we move in steps. */
 			_drag_delta.y += y;
@@ -1705,12 +1712,12 @@ static bool HandleWindowDragging()
 
 			/* ResizeWindow sets both pre- and after-size to dirty for redrawal */
 			ResizeWindow(w, x, y);
-			return false;
+			return ES_HANDLED;
 		}
 	}
 
 	_dragging_window = false;
-	return false;
+	return ES_HANDLED;
 }
 
 /**
@@ -1748,13 +1755,15 @@ static void StartWindowSizing(Window *w, bool to_left)
 	DeleteWindowById(WC_DROPDOWN_MENU, 0);
 }
 
-
-static bool HandleScrollbarScrolling()
+/** handle scrollbar scrolling with the mouse.
+ * @return State of handling the event.
+ */
+static EventState HandleScrollbarScrolling()
 {
 	Window *w;
 
 	/* Get out quickly if no item is being scrolled */
-	if (!_scrolling_scrollbar) return true;
+	if (!_scrolling_scrollbar) return ES_NOT_HANDLED;
 
 	/* Find the scrolling window */
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
@@ -1789,33 +1798,36 @@ static bool HandleScrollbarScrolling()
 				sb->SetPosition(pos);
 				w->SetDirty();
 			}
-			return false;
+			return ES_HANDLED;
 		}
 	}
 
 	_scrolling_scrollbar = false;
-	return false;
+	return ES_HANDLED;
 }
 
-static bool HandleViewportScroll()
+/** Handle viewport scrolling with the mouse.
+ * @return State of handling the event.
+ */
+static EventState HandleViewportScroll()
 {
 	bool scrollwheel_scrolling = _settings_client.gui.scrollwheel_scrolling == 1 && (_cursor.v_wheel != 0 || _cursor.h_wheel != 0);
 
-	if (!_scrolling_viewport) return true;
+	if (!_scrolling_viewport) return ES_NOT_HANDLED;
 
 	Window *w = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
 
 	if (!(_right_button_down || scrollwheel_scrolling || (_settings_client.gui.left_mouse_btn_scrolling && _left_button_down)) || w == NULL) {
 		_cursor.fix_at = false;
 		_scrolling_viewport = false;
-		return true;
+		return ES_NOT_HANDLED;
 	}
 
 	if (w == FindWindowById(WC_MAIN_WINDOW, 0) && w->viewport->follow_vehicle != INVALID_VEHICLE) {
 		/* If the main window is following a vehicle, then first let go of it! */
 		const Vehicle *veh = Vehicle::Get(w->viewport->follow_vehicle);
 		ScrollMainWindowTo(veh->x_pos, veh->y_pos, veh->z_pos, true); // This also resets follow_vehicle
-		return true;
+		return ES_NOT_HANDLED;
 	}
 
 	Point delta;
@@ -1840,7 +1852,7 @@ static bool HandleViewportScroll()
 
 	_cursor.delta.x = 0;
 	_cursor.delta.y = 0;
-	return false;
+	return ES_HANDLED;
 }
 
 /** Check if a window can be made top-most window, and if so do
@@ -1906,16 +1918,9 @@ static bool MaybeBringWindowToFront(Window *w)
  */
 void HandleKeypress(uint32 raw_key)
 {
-	/*
-	 * During the generation of the world, there might be
-	 * another thread that is currently building for example
-	 * a road. To not interfere with those tasks, we should
-	 * NOT change the _current_company here.
-	 *
-	 * This is not necessary either, as the only events that
-	 * can be handled are the 'close application' events
-	 */
-	if (!IsGeneratingWorld()) _current_company = _local_company;
+	/* World generation is multithreaded and messes with companies.
+	 * But there is no company related window open anyway, so _current_company is not used. */
+	assert(IsGeneratingWorld() || _local_company == _current_company);
 
 	/* Setup event */
 	uint16 key     = GB(raw_key,  0, 16);
@@ -1938,14 +1943,14 @@ void HandleKeypress(uint32 raw_key)
 	/* Check if the focused window has a focused editbox */
 	if (EditBoxInGlobalFocus()) {
 		/* All input will in this case go to the focused window */
-		if (_focused_window->OnKeyPress(key, keycode) == Window::ES_HANDLED) return;
+		if (_focused_window->OnKeyPress(key, keycode) == ES_HANDLED) return;
 	}
 
 	/* Call the event, start with the uppermost window, but ignore the toolbar. */
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_FRONT(w) {
 		if (w->window_class == WC_MAIN_TOOLBAR) continue;
-		if (w->OnKeyPress(key, keycode) == Window::ES_HANDLED) return;
+		if (w->OnKeyPress(key, keycode) == ES_HANDLED) return;
 	}
 
 	w = FindWindowById(WC_MAIN_TOOLBAR, 0);
@@ -1961,7 +1966,7 @@ void HandleCtrlChanged()
 	/* Call the event, start with the uppermost window. */
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_FRONT(w) {
-		if (w->OnCTRLStateChange() == Window::ES_HANDLED) return;
+		if (w->OnCTRLStateChange() == ES_HANDLED) return;
 	}
 }
 
@@ -2016,7 +2021,7 @@ enum MouseClick {
 	TIME_BETWEEN_DOUBLE_CLICK = 500, ///< Time between 2 left clicks before it becoming a double click, in ms
 };
 
-extern bool VpHandlePlaceSizingDrag();
+extern EventState VpHandlePlaceSizingDrag();
 
 static void ScrollMainViewport(int x, int y)
 {
@@ -2071,16 +2076,21 @@ static void HandleKeyScrolling()
 
 static void MouseLoop(MouseClick click, int mousewheel)
 {
+	/* World generation is multithreaded and messes with companies.
+	 * But there is no company related window open anyway, so _current_company is not used. */
+	assert(IsGeneratingWorld() || _local_company == _current_company);
+
 	HandlePlacePresize();
 	UpdateTileSelection();
 
-	if (!VpHandlePlaceSizingDrag())  return;
-	if (!HandleMouseDrag())          return;
-	if (!HandleDragDrop())           return;
-	if (!HandleWindowDragging())     return;
-	if (!HandleScrollbarScrolling()) return;
-	if (!HandleViewportScroll())     return;
-	if (!HandleMouseOver())          return;
+	if (VpHandlePlaceSizingDrag()  == ES_HANDLED) return;
+	if (HandleMouseDrag()          == ES_HANDLED) return;
+	if (HandleDragDrop()           == ES_HANDLED) return;
+	if (HandleWindowDragging()     == ES_HANDLED) return;
+	if (HandleScrollbarScrolling() == ES_HANDLED) return;
+	if (HandleViewportScroll()     == ES_HANDLED) return;
+
+	HandleMouseOver();
 
 	bool scrollwheel_scrolling = _settings_client.gui.scrollwheel_scrolling == 1 && (_cursor.v_wheel != 0 || _cursor.h_wheel != 0);
 	if (click == MC_NONE && mousewheel == 0 && !scrollwheel_scrolling) return;
@@ -2170,20 +2180,13 @@ static void MouseLoop(MouseClick click, int mousewheel)
  */
 void HandleMouseEvents()
 {
+	/* World generation is multithreaded and messes with companies.
+	 * But there is no company related window open anyway, so _current_company is not used. */
+	assert(IsGeneratingWorld() || _local_company == _current_company);
+
 	static int double_click_time = 0;
 	static int double_click_x = 0;
 	static int double_click_y = 0;
-
-	/*
-	 * During the generation of the world, there might be
-	 * another thread that is currently building for example
-	 * a road. To not interfere with those tasks, we should
-	 * NOT change the _current_company here.
-	 *
-	 * This is not necessary either, as the only events that
-	 * can be handled are the 'close application' events
-	 */
-	if (!IsGeneratingWorld()) _current_company = _local_company;
 
 	/* Mouse event? */
 	MouseClick click = MC_NONE;
@@ -2267,6 +2270,10 @@ static void CheckSoftLimit()
  */
 void InputLoop()
 {
+	/* World generation is multithreaded and messes with companies.
+	 * But there is no company related window open anyway, so _current_company is not used. */
+	assert(IsGeneratingWorld() || _local_company == _current_company);
+
 	CheckSoftLimit();
 	HandleKeyScrolling();
 

@@ -87,6 +87,11 @@ if [ -d "$ROOT_DIR/.svn" ]; then
 	fi
 elif [ -d "$ROOT_DIR/.git" ]; then
 	# We are a git checkout
+	# Refresh the index to make sure file stat info is in sync, then look for modifications
+	git update-index --refresh >/dev/null
+	if [ -n "`git diff-index HEAD \"$SRC_DIR\"`" ]; then
+		MODIFIED="2"
+	fi
 	HASH=`LC_ALL=C git rev-parse --verify HEAD 2>/dev/null`
 	REV="g`echo $HASH | cut -c1-8`"
 	BRANCH=`git branch|grep '[*]' | sed 's@\* @@;s@^master$@@'`
@@ -96,7 +101,7 @@ elif [ -d "$ROOT_DIR/.hg" ]; then
 	if [ -n "`hg status \"$SRC_DIR\" | grep -v '^?'`" ]; then
 		MODIFIED="2"
 	fi
-	HASH=`LC_ALL=C hg parents --template="{node}"`
+	HASH=`LC_ALL=C hg id -i | cut -c1-12`
 	REV="h`echo $HASH | cut -c1-8`"
 	BRANCH=`hg branch | sed 's@^default$@@'`
 	REV_NR=`LC_ALL=C hg log -r $HASH:0 -k "svn" -l 1 --template "{desc}\n" "$SRC_DIR" | grep "^(svn r[0-9]*)" | head -n 1 | sed "s@.*(svn r\([0-9]*\)).*@\1@"`
