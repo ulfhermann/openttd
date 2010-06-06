@@ -10,6 +10,7 @@
 /** @file ai_core.cpp Implementation of AI. */
 
 #include "../stdafx.h"
+#include "../core/backup_type.hpp"
 #include "../core/bitmath_func.hpp"
 #include "../company_base.h"
 #include "../company_func.h"
@@ -47,12 +48,14 @@
 		config->ChangeAI(info->GetName(), -1, false, true);
 	}
 
-	_current_company = company;
+	Backup<CompanyByte> cur_company(_current_company, company, FILE_LINE);
 	Company *c = Company::Get(company);
 
 	c->ai_info = info;
 	assert(c->ai_instance == NULL);
 	c->ai_instance = new AIInstance(info);
+
+	cur_company.Restore();
 
 	InvalidateWindowData(WC_AI_DEBUG, 0, -1);
 	return;
@@ -68,13 +71,15 @@
 	assert(_settings_game.difficulty.competitor_speed <= 4);
 	if ((AI::frame_counter & ((1 << (4 - _settings_game.difficulty.competitor_speed)) - 1)) != 0) return;
 
+	Backup<CompanyByte> cur_company(_current_company, FILE_LINE);
 	const Company *c;
 	FOR_ALL_COMPANIES(c) {
 		if (c->is_ai) {
-			_current_company = c->index;
+			cur_company.Change(c->index);
 			c->ai_instance->GameLoop();
 		}
 	}
+	cur_company.Restore();
 
 	/* Occasionally collect garbage; every 255 ticks do one company.
 	 * Effectively collecting garbage once every two months per AI. */
@@ -82,8 +87,6 @@
 		CompanyID cid = (CompanyID)GB(AI::frame_counter, 8, 4);
 		if (Company::IsValidAiID(cid)) Company::Get(cid)->ai_instance->CollectGarbage();
 	}
-
-	_current_company = OWNER_NONE;
 }
 
 /* static */ uint AI::GetTick()
@@ -95,14 +98,13 @@
 {
 	if (_networking && !_network_server) return;
 
-	CompanyID old_company = _current_company;
-	_current_company = company;
+	Backup<CompanyByte> cur_company(_current_company, company, FILE_LINE);
 	Company *c = Company::Get(company);
 
 	delete c->ai_instance;
 	c->ai_instance = NULL;
 
-	_current_company = old_company;
+	cur_company.Restore();
 
 	InvalidateWindowData(WC_AI_DEBUG, 0, -1);
 	DeleteWindowById(WC_AI_SETTINGS, company);
@@ -112,11 +114,10 @@
 {
 	if (_networking && !_network_server) return;
 
-	CompanyID old_company = _current_company;
-	_current_company = company;
+	Backup<CompanyByte> cur_company(_current_company, company, FILE_LINE);
 	Company::Get(company)->ai_instance->Suspend();
 
-	_current_company = old_company;
+	cur_company.Restore();
 }
 
 /* static */ void AI::KillAll()
@@ -202,10 +203,9 @@
 	}
 
 	/* Queue the event */
-	CompanyID old_company = _current_company;
-	_current_company = company;
+	Backup<CompanyByte> cur_company(_current_company, company, FILE_LINE);
 	AIEventController::InsertEvent(event);
-	_current_company = old_company;
+	cur_company.Restore();
 
 	event->Release();
 }
@@ -249,10 +249,9 @@ void CcAI(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 		Company *c = Company::GetIfValid(company);
 		assert(c != NULL && c->ai_instance != NULL);
 
-		CompanyID old_company = _current_company;
-		_current_company = company;
+		Backup<CompanyByte> cur_company(_current_company, company, FILE_LINE);
 		c->ai_instance->Save();
-		_current_company = old_company;
+		cur_company.Restore();
 	} else {
 		AIInstance::SaveEmpty();
 	}
@@ -264,10 +263,9 @@ void CcAI(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 		Company *c = Company::GetIfValid(company);
 		assert(c != NULL && c->ai_instance != NULL);
 
-		CompanyID old_company = _current_company;
-		_current_company = company;
+		Backup<CompanyByte> cur_company(_current_company, company, FILE_LINE);
 		c->ai_instance->Load(version);
-		_current_company = old_company;
+		cur_company.Restore();
 	} else {
 		/* Read, but ignore, the load data */
 		AIInstance::LoadEmpty();
