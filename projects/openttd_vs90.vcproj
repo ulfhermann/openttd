@@ -1681,6 +1681,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\core\backup_type.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\core\bitmath_func.cpp"
 				>
 			</File>
@@ -1810,6 +1814,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\engine_gui.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\fios_gui.cpp"
 				>
 			</File>
 			<File

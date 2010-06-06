@@ -346,6 +346,7 @@ video/cocoa/cocoa_v.h
 core/alloc_func.cpp
 core/alloc_func.hpp
 core/alloc_type.hpp
+core/backup_type.hpp
 core/bitmath_func.cpp
 core/bitmath_func.hpp
 core/endian_func.hpp
@@ -380,6 +381,7 @@ date_gui.cpp
 depot_gui.cpp
 dock_gui.cpp
 engine_gui.cpp
+fios_gui.cpp
 genworld_gui.cpp
 graph_gui.cpp
 group_gui.cpp
