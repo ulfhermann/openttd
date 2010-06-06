@@ -65,6 +65,7 @@
 #include "engine_func.h"
 #include "core/random_func.hpp"
 #include "rail_gui.h"
+#include "core/backup_type.hpp"
 
 #include "newgrf_commons.h"
 
@@ -404,7 +405,6 @@ void MakeNewgameSettingsLive()
 #endif /* ENABLE_AI */
 }
 
-byte _savegame_sort_order;
 #if defined(UNIX) && !defined(__MORPHOS__)
 extern void DedicatedFork();
 #endif
@@ -679,7 +679,6 @@ int ttd_main(int argc, char *argv[])
 	}
 	free(musicdriver);
 
-	_savegame_sort_order = SORT_BY_DATE | SORT_DESCENDING;
 	/* Initialize the zoom level of the screen to normal */
 	_screen.zoom = ZOOM_LVL_NORMAL;
 
@@ -808,7 +807,6 @@ static void MakeNewGameDone()
 	IConsoleCmdExec("exec scripts/game_start.scr 0");
 
 	SetLocalCompany(COMPANY_FIRST);
-	_current_company = _local_company;
 
 	InitializeRailGUI();
 
@@ -819,6 +817,8 @@ static void MakeNewGameDone()
 		NetworkChangeCompanyPassword(_settings_client.network.default_company_pass);
 	}
 #endif /* ENABLE_NETWORK */
+
+	if (_settings_client.gui.pause_on_newgame) DoCommandP(0, PM_PAUSED_NORMAL, 1, CMD_PAUSE);
 
 	MarkWholeScreenDirty();
 }
@@ -894,7 +894,6 @@ static void StartScenario()
 	StartupDisasters();
 
 	SetLocalCompany(COMPANY_FIRST);
-	_current_company = _local_company;
 	Company *c = Company::Get(COMPANY_FIRST);
 	c->settings = _settings_client.company;
 
@@ -1215,8 +1214,7 @@ void StateGameLoop()
 
 		/* All these actions has to be done from OWNER_NONE
 		 *  for multiplayer compatibility */
-		CompanyID old_company = _current_company;
-		_current_company = OWNER_NONE;
+		Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
 
 		AnimateAnimatedTiles();
 		IncreaseDate();
@@ -1229,8 +1227,10 @@ void StateGameLoop()
 
 		CallWindowTickEvent();
 		NewsLoop();
-		_current_company = old_company;
+		cur_company.Restore();
 	}
+
+	assert(_current_company == _local_company);
 }
 
 /** Create an autosave. The default name is "autosave#.sav". However with
@@ -1270,7 +1270,7 @@ void GameLoop()
 	if (_do_autosave) {
 		_do_autosave = false;
 		DoAutosave();
-		RedrawAutosave();
+		SetWindowDirty(WC_STATUS_BAR, 0);
 	}
 
 	/* switch game mode? */
