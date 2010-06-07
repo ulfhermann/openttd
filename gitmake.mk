@@ -6,11 +6,11 @@ gitmake-all: cd diaglvl
 	touch gitmake-all
 	git checkout patches
 	rm -rf patches/current
-	mv patches-tmp/* patches
-	mkdir patches-tmp/current
-	git add patches/*
-	git add patches/current/*
-	git commit -a -m "patches for version `cat patches/current/TRUNK_VERSION.txt`"
+	mv patches/* .
+	mkdir patches/current
+	git add *.diff
+	git add current/*
+	git commit -a -m "patches for version `cat current/TRUNK_VERSION.txt`"
 	git checkout gitmake
 
 check: clean gitmake-origin
@@ -18,8 +18,8 @@ check: clean gitmake-origin
 
 clean:
 	rm -f gitmake-origin
-	rm -rf patches-tmp
-	mkdir -p patches-tmp/current
+	rm -rf patches
+	mkdir -p patches/current
 
 %:
 	git checkout ${@}-tmp
@@ -32,7 +32,7 @@ clean:
 gitmake-origin:
 	git fetch git://git.openttd.org/openttd/trunk.git master:master
 	git log master | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
-	cp gitmake-origin patches-tmp/current/TRUNK_VERSION.txt
+	cp gitmake-origin patches/current/TRUNK_VERSION.txt
 	git diff --numstat master gitmake | grep -v .gitignore | grep -v gitmake | grep -v make_diffs && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 gitmake: gitmake-origin
