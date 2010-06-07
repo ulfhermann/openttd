@@ -4,6 +4,14 @@ VPATH=.:./.git/refs/heads/
 
 gitmake-all: cd diaglvl
 	touch gitmake-all
+	git checkout patches
+	rm -rf patches/current
+	mv patches-tmp/* patches
+	mkdir patches-tmp/current
+	git add patches/*
+	git add patches/current/*
+	git commit -m "patches for version `cat patches/current/TRUNK_VERSION.txt`"
+	git checkout gitmake
 
 check: clean gitmake-origin
 	echo "check OK"
