@@ -1,3 +1,4 @@
+#!/usr/bin/make -f
 
 VPATH=.:./.git/refs/heads/
 
