@@ -10,7 +10,7 @@ gitmake-all: cd diaglvl
 	mkdir patches-tmp/current
 	git add patches/*
 	git add patches/current/*
-	git commit -m "patches for version `cat patches/current/TRUNK_VERSION.txt`"
+	git commit -a -m "patches for version `cat patches/current/TRUNK_VERSION.txt`"
 	git checkout gitmake
 
 check: clean gitmake-origin
