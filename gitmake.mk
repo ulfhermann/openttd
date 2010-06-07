@@ -5,7 +5,7 @@ VPATH=.:./.git/refs/heads/
 gitmake-all: cd diaglvl
 	touch gitmake-all
 	git checkout patches
-	rm -rf patches/current
+	rm -rf current
 	mv patches/* .
 	mkdir patches/current
 	git add *.diff
