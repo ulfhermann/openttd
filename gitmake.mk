@@ -20,17 +20,17 @@ clean:
 	./make_diffs
 
 gitmake-origin:
-	git fetch git://git.openttd.org/openttd/trunk.git master:trunk
-	git log trunk | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
+	git fetch git://git.openttd.org/openttd/trunk.git master:master
+	git log master | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
 	cp gitmake-origin patches/current/TRUNK_VERSION.txt
-	git diff --numstat trunk master | grep -v .gitignore | grep -v gitmake | grep -v make_diffs && touch gitmake-origin || touch -t 197001010100 gitmake-origin
+	git diff --numstat master gitmake | grep -v .gitignore | grep -v gitmake | grep -v make_diffs && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
-master: gitmake-origin
+gitmake: gitmake-origin
 	git checkout $@
-	git merge trunk
+	git merge master
 	test -e gitmake-build && make -j`cat gitmake-build` || true
 
-smallmap-zoom-in: master 
+smallmap-zoom-in: gitmake 
 
 cd: station-gui smallmap-stats warning-sign ext-rating
 
@@ -40,7 +40,7 @@ station-gui: cargomap
 
 smallmap-stats: smallmap-zoom-in cargomap
 
-texteff: master 
+texteff: gitmake 
 
 flowmapping-core: mcf
 
@@ -54,20 +54,20 @@ capacities: moving-average
 
 diaglvl: tileiter
 
-tileiter: master 
+tileiter: gitmake 
 
-selfaware-stationcargo: master 
+selfaware-stationcargo: gitmake 
 
 cargomap: flowmapping-core texteff multimap reservation selfaware-stationcargo
 
-reservation: master 
+reservation: gitmake 
 
-multimap: master 
+multimap: gitmake 
 
 warning-sign: demands
 
-moving-average: master 
+moving-average: gitmake 
 
-push: master cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average selfaware-stationcargo
+push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation warning-sign moving-average selfaware-stationcargo
 	git push github $(^F)
 
