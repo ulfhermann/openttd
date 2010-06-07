@@ -19,7 +19,7 @@ src/rev.cpp
 .project
 data/
 media/openttd.desktop
-patches/
+patches-tmp/
 old/
 grf/
 docs/own
