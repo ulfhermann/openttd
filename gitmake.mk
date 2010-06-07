@@ -10,7 +10,8 @@ check: clean gitmake-origin
 
 clean:
 	rm -f gitmake-origin
-	rm -f patches/current/*
+	rm -rf patches-tmp
+	mkdir -p patches-tmp/current
 
 %:
 	git checkout ${@}-tmp
@@ -23,7 +24,7 @@ clean:
 gitmake-origin:
 	git fetch git://git.openttd.org/openttd/trunk.git master:master
 	git log master | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
-	cp gitmake-origin patches/current/TRUNK_VERSION.txt
+	cp gitmake-origin patches-tmp/current/TRUNK_VERSION.txt
 	git diff --numstat master gitmake | grep -v .gitignore | grep -v gitmake | grep -v make_diffs && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 gitmake: gitmake-origin
