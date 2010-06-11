@@ -60,10 +60,16 @@ Station::Station(TileIndex tile) :
 	last_vehicle_type(VEH_INVALID)
 {
 	/* this->random_bits is set in Station::AddFacility() */
+
+	/* has to be done like this as we can't give arguments when constructing an array */
+	for (CargoID i = 0; i < NUM_CARGO; ++i) {
+		this->goods[i].cargo.AssignTo(this, i);
+	}
 }
 
 /**
- * Clean up a station by clearing vehicle orders and invalidating windows.
+ * Clean up a station by clearing vehicle orders, invalidating windows and
+ * removing link stats.
  * Aircraft-Hangar orders need special treatment here, as the hangars are
  * actually part of a station (tiletype is STATION), but the order type
  * is OT_GOTO_DEPOT.
@@ -80,6 +86,16 @@ Station::~Station()
 	FOR_ALL_AIRCRAFT(a) {
 		if (!a->IsNormalAircraft()) continue;
 		if (a->targetairport == this->index) a->targetairport = INVALID_STATION;
+	}
+
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for (CargoID c = 0; c < NUM_CARGO; ++c) {
+			GoodsEntry &ge = st->goods[c];
+			ge.link_stats.erase(this->index);
+			DeleteStaleFlows(st->index, c, this->index);
+			ge.cargo.RerouteStalePackets(this->index);
+		}
 	}
 
 	Vehicle *v;

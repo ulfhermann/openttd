@@ -2889,8 +2889,6 @@ int Train::UpdateSpeed()
 
 static void TrainEnterStation(Train *v, StationID station)
 {
-	v->last_station_visited = station;
-
 	/* check if a train ever visited this station before */
 	Station *st = Station::Get(station);
 	if (!(st->had_vehicle_of_type & HVOT_TRAIN)) {
@@ -2905,7 +2903,7 @@ static void TrainEnterStation(Train *v, StationID station)
 		AI::NewEvent(v->owner, new AIEventStationFirstVehicle(st->index, v->index));
 	}
 
-	v->BeginLoading();
+	v->BeginLoading(station);
 
 	StationAnimationTrigger(st, v->tile, STAT_ANIM_TRAIN_ARRIVES);
 }

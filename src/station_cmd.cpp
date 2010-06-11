@@ -48,6 +48,7 @@
 #include "core/random_func.hpp"
 #include "company_base.h"
 #include "newgrf.h"
+#include "moving_average.h"
 #include "table/airporttile_ids.h"
 #include "newgrf_airporttiles.h"
 
@@ -3091,7 +3092,7 @@ static void UpdateStationRating(Station *st)
 					waiting_changed = true;
 				}
 
-				if (waiting_changed) ge->cargo.Truncate(waiting);
+				if (waiting_changed) ge->cargo.RandomTruncate(waiting);
 			}
 		}
 	}
@@ -3101,6 +3102,202 @@ static void UpdateStationRating(Station *st)
 		SetWindowDirty(WC_STATION_VIEW, index); // update whole window
 	} else {
 		SetWindowWidgetDirty(WC_STATION_VIEW, index, SVW_RATINGLIST); // update only ratings list
+	}
+}
+
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+	FlowStatMap &flows = Station::Get(at)->goods[c_id].flows;
+	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
+		FlowStatSet &s_flows = f_it->second;
+		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
+			if (s_it->Via() == to) {
+				s_flows.erase(s_it++);
+			} else {
+				++s_it;
+			}
+		}
+		if (s_flows.empty()) {
+			flows.erase(f_it++);
+		} else {
+			++f_it;
+		}
+	}
+}
+
+/**
+ * get the length of a moving average for a link between two stations
+ * @param from the source station
+ * @param to the destination station
+ * @return the moving average length
+ */
+uint GetMovingAverageLength(const Station *from, const Station *to)
+{
+	return LinkStat::MIN_AVERAGE_LENGTH + (DistanceManhattan(from->xy, to->xy) >> 2);
+}
+
+/**
+ * Run the moving average decrease function for all link stats.
+ */
+void Station::RunAverages() {
+	FlowStatSet new_flows;
+	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+		LinkStatMap &links = this->goods[goods_index].link_stats;
+		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
+			StationID id = i->first;
+			Station *other = Station::GetIfValid(id);
+			if (other == NULL) {
+				this->goods[goods_index].cargo.RerouteStalePackets(id);
+				links.erase(i++);
+			} else {
+				LinkStat &ls = i->second;
+				ls.Decrease();
+				if (ls.IsNull()) {
+					DeleteStaleFlows(this->index, goods_index, id);
+					this->goods[goods_index].cargo.RerouteStalePackets(id);
+					links.erase(i++);
+				} else {
+					++i;
+				}
+			}
+		}
+
+		FlowStatMap &flows = this->goods[goods_index].flows;
+		for (FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
+			StationID source = i->first;
+			if (!Station::IsValidID(source)) {
+				flows.erase(i++);
+			} else {
+				FlowStatSet &flow_set = i->second;
+				for (FlowStatSet::iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+					if (Station::IsValidID(j->Via())) {
+						new_flows.insert(j->GetDecreasedCopy());
+					}
+				}
+				flow_set.swap(new_flows);
+				new_flows.clear();
+				++i;
+			}
+		}
+	}
+}
+
+void UpdateFlows(Station *st, Vehicle *front, StationID next_station_id) {
+	if (next_station_id == INVALID_STATION) {
+		return;
+	} else {
+		for (Vehicle *v = front; v != NULL; v = v->Next()) {
+			GoodsEntry *ge = &st->goods[v->cargo_type];
+			const CargoPacketList *packets = v->cargo.Packets();
+			for(VehicleCargoList::ConstIterator i = packets->begin(); i != packets->end(); ++i) {
+				CargoPacket *p = *i;
+				ge->UpdateFlowStats(p->SourceStation(), p->Count(), next_station_id);
+			}
+		}
+	}
+}
+
+/**
+ * Recalculate the frozen value of the station the given vehicle is loading at
+ * if the vehicle is loading.
+ * @param v the vehicle to be examined
+ */
+void RecalcFrozenIfLoading(const Vehicle *v) {
+	if (v->current_order.IsType(OT_LOADING)) {
+		RecalcFrozen(Station::Get(v->last_station_visited));
+	}
+}
+
+/**
+ * Recalculate all frozen values for all link stats of a station. This is done
+ * by adding up the capacities of all loading vehicles.
+ * @param st the station
+ */
+void RecalcFrozen(Station *st) {
+	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+		GoodsEntry &good = st->goods[goods_index];
+		LinkStatMap &links = good.link_stats;
+		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
+			i->second.Unfreeze();
+		}
+	}
+
+	std::list<Vehicle *>::iterator v_it = st->loading_vehicles.begin();
+	while(v_it != st->loading_vehicles.end()) {
+		const Vehicle *front = *v_it;
+		OrderList *orders = front->orders.list;
+		if (orders != NULL) {
+			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index,
+					front->type == VEH_ROAD || front->type == VEH_TRAIN);
+			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
+				IncreaseStats(st, front, next_station_id, true);
+			}
+		}
+		++v_it;
+	}
+}
+
+/**
+ * Decrease the frozen values of all link stats associated with vehicles in the
+ * given consist (ie the consist is leaving the station).
+ * @param st the station to decrease the frozen values on
+ * @param front the first vehicle in the consist
+ * @param next_station_id the station the vehicle is leaving for
+ */
+void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id) {
+	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
+	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
+		if (v->cargo_cap > 0) {
+			LinkStatMap &link_stats = st->goods[v->cargo_type].link_stats;
+			LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
+			if (lstat_it == link_stats.end()) {
+				DEBUG(misc, 1, "frozen not in linkstat list.");
+				RecalcFrozen(st);
+				return;
+			} else {
+				LinkStat &link_stat = lstat_it->second;
+				if (link_stat.Frozen() < v->cargo_cap) {
+					DEBUG(misc, 1, "frozen is smaller than cargo cap.");
+					RecalcFrozen(st);
+					return;
+				} else {
+					link_stat.Unfreeze(v->cargo_cap);
+				}
+				assert(!link_stat.IsNull());
+			}
+		}
+	}
+}
+
+/**
+ * Either freeze or increase capacity for all link stats associated with vehicles
+ * in the given consist.
+ * @param st the station to get the link stats from
+ * @param front the first vehicle in the consist
+ * @param next_station_id the station the consist will be travelling to next
+ * @param freeze if true, freeze capacity, otherwise increase capacity
+ */
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze) {
+	Station *next = Station::GetIfValid(next_station_id);
+	assert(st->index != next_station_id && next != NULL);
+	uint average_length = GetMovingAverageLength(st, next);
+
+	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
+		if (v->cargo_cap > 0) {
+			LinkStatMap &stats = st->goods[v->cargo_type].link_stats;
+			LinkStatMap::iterator i = stats.find(next_station_id);
+			if (i == stats.end()) {
+				stats.insert(std::make_pair(next_station_id, LinkStat(average_length,
+						v->cargo_cap, freeze ? v->cargo_cap : 0, freeze ? 0 : v->cargo.Count())));
+			} else {
+				LinkStat &link_stat = i->second;
+				if (freeze) {
+					link_stat.Freeze(v->cargo_cap);
+				} else {
+					link_stat.Increase(v->cargo_cap, v->cargo.Count());
+				}
+				assert(!link_stat.IsNull());
+			}
+		}
 	}
 }
 
@@ -3120,6 +3317,8 @@ void OnTick_Station()
 {
 	if (_game_mode == GM_EDITOR) return;
 
+	RunAverages<Station>();
+
 	BaseStation *st;
 	FOR_ALL_BASE_STATIONS(st) {
 		StationHandleSmallTick(st);
@@ -3138,7 +3337,13 @@ void OnTick_Station()
 
 void StationMonthlyLoop()
 {
-	/* not used */
+	Station *st;
+	FOR_ALL_STATIONS(st) {
+		for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+			st->goods[goods_index].supply = st->goods[goods_index].supply_new;
+			st->goods[goods_index].supply_new = 0;
+		}
+	}
 }
 
 
@@ -3162,8 +3367,18 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 
 static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceType source_type, SourceID source_id)
 {
-	st->goods[type].cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
-	SetBit(st->goods[type].acceptance_pickup, GoodsEntry::PICKUP);
+	GoodsEntry &good = st->goods[type];
+	StationID id = st->index;
+	StationID next = INVALID_STATION;
+	FlowStatSet &flow_stats = good.flows[id];
+	FlowStatSet::iterator i = flow_stats.begin();
+	if (i != flow_stats.end()) {
+		next = i->Via();
+		good.UpdateFlowStats(flow_stats, i, amount);
+	}
+
+	good.cargo.Append(next, new CargoPacket(st->index, st->xy, amount, source_type, source_id));
+	good.supply_new += amount;
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
 	AirportAnimationTrigger(st, AAT_STATION_NEW_CARGO, type);
@@ -3525,6 +3740,65 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
+void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count)
+{
+	FlowStat fs = *flow_it;
+	fs.Increase(count);
+	flow_stats.erase(flow_it);
+	flow_stats.insert(fs);
+}
+
+void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next)
+{
+	FlowStatSet::iterator flow_it = flow_stats.begin();
+	while (flow_it != flow_stats.end()) {
+		StationID via = flow_it->Via();
+		if (via == next) { //usually the first one is the correct one
+			this->UpdateFlowStats(flow_stats, flow_it, count);
+			return;
+		} else {
+			++flow_it;
+		}
+	}
+}
+
+void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
+{
+	if (source == INVALID_STATION || next == INVALID_STATION || this->flows.empty()) return;
+	FlowStatSet &flow_stats = this->flows[source];
+	this->UpdateFlowStats(flow_stats, count, next);
+}
+
+StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
+	if (source == INVALID_STATION || this->flows.empty()) return INVALID_STATION;
+	FlowStatSet &flow_stats = this->flows[source];
+	FlowStatSet::iterator flow_it = flow_stats.begin();
+	while (flow_it != flow_stats.end()) {
+		StationID via = flow_it->Via();
+		if (via != curr) {
+			UpdateFlowStats(flow_stats, flow_it, count);
+			return via;
+		}
+		else {
+			++flow_it;
+		}
+	}
+	return INVALID_STATION;
+}
+
+FlowStat GoodsEntry::GetSumFlowVia(StationID via) const {
+	FlowStat ret(1, via);
+	for(FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
+		const FlowStatSet &flow_set = i->second;
+		for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
+			const FlowStat &flow = *j;
+			if (flow.Via() == via) {
+				ret += flow;
+			}
+		}
+	}
+	return ret;
+}
 
 extern const TileTypeProcs _tile_type_station_procs = {
 	DrawTile_Station,           // draw_tile_proc
