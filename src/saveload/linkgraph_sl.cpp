@@ -105,7 +105,7 @@ static void SaveLoad_LinkGraphComponent(LinkGraphComponent &comp) {
  */
 static void DoSave_LGRP(void *)
 {
-	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
+	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
 		SlObject(&graph, GetLinkGraphDesc());
 		SaveLoad_LinkGraphComponent(graph);
@@ -117,7 +117,7 @@ static void DoSave_LGRP(void *)
  */
 static void Load_LGRP()
 {
-	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
+	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
 		assert(graph.GetSize() == 0);
 		SlObject(&graph, GetLinkGraphDesc());
@@ -132,7 +132,7 @@ static void Load_LGRP()
  */
 void AfterLoadLinkGraphs()
 {
-	for(CargoID cargo = CT_BEGIN; cargo != CT_END; ++cargo) {
+	for(CargoID cargo = 0; cargo < NUM_CARGO; ++cargo) {
 		LinkGraph &graph = _link_graphs[cargo];
 		if (graph.GetSize() > 0) graph.SpawnThread();
 	}
