@@ -508,7 +508,6 @@ static void Ptrs_STNN()
 		for (CargoID i = 0; i < NUM_CARGO; i++) {
 			GoodsEntry *ge = &st->goods[i];
 			SlObject(ge, GetGoodsDesc());
-			// as there are no pointers in the link stats we don't have to consider them
 		}
 		SlObject(st, _station_desc);
 	}

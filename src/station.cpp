@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "company_func.h"
+#include "company_base.h"
 #include "roadveh.h"
 #include "functions.h"
 #include "window_func.h"
@@ -34,6 +35,18 @@ BaseStation::~BaseStation()
 {
 	free(this->name);
 	free(this->speclist);
+
+	if (CleaningPool()) return;
+
+	Owner owner = this->owner;
+	if (!Company::IsValidID(owner)) owner = _local_company;
+	WindowNumber wno = (this->index << 16) | VLW_STATION_LIST | owner;
+	DeleteWindowById(WC_TRAINS_LIST, wno | (VEH_TRAIN << 11));
+	DeleteWindowById(WC_ROADVEH_LIST, wno | (VEH_ROAD << 11));
+	DeleteWindowById(WC_SHIPS_LIST, wno | (VEH_SHIP << 11));
+	DeleteWindowById(WC_AIRCRAFT_LIST, wno | (VEH_AIRCRAFT << 11));
+
+	this->sign.MarkDirty();
 }
 
 Station::Station(TileIndex tile) :
@@ -50,7 +63,8 @@ Station::Station(TileIndex tile) :
 }
 
 /**
- * Clean up a station by clearing vehicle orders and invalidating windows.
+ * Clean up a station by clearing vehicle orders, invalidating windows and
+ * removing link stats.
  * Aircraft-Hangar orders need special treatment here, as the hangars are
  * actually part of a station (tiletype is STATION), but the order type
  * is OT_GOTO_DEPOT.
@@ -69,10 +83,10 @@ Station::~Station()
 		if (a->targetairport == this->index) a->targetairport = INVALID_STATION;
 	}
 
-	Station * st;
+	Station *st;
 	FOR_ALL_STATIONS(st) {
-		for (CargoID c = CT_BEGIN; c != CT_END; ++c) {
-			GoodsEntry & ge = st->goods[c];
+		for (CargoID c = 0; c < NUM_CARGO; ++c) {
+			GoodsEntry &ge = st->goods[c];
 			ge.link_stats.erase(this->index);
 			DeleteStaleFlows(st->index, c, this->index);
 		}
@@ -86,15 +100,9 @@ Station::~Station()
 		}
 	}
 
-	this->sign.MarkDirty();
 	InvalidateWindowData(WC_STATION_LIST, this->owner, 0);
 
 	DeleteWindowById(WC_STATION_VIEW, index);
-	WindowNumber wno = (this->index << 16) | VLW_STATION_LIST | this->owner;
-	DeleteWindowById(WC_TRAINS_LIST, wno | (VEH_TRAIN << 11));
-	DeleteWindowById(WC_ROADVEH_LIST, wno | (VEH_ROAD << 11));
-	DeleteWindowById(WC_SHIPS_LIST, wno | (VEH_SHIP << 11));
-	DeleteWindowById(WC_AIRCRAFT_LIST, wno | (VEH_AIRCRAFT << 11));
 
 	/* Now delete all orders that go to the station */
 	RemoveOrderFromAllVehicles(OT_GOTO_STATION, this->index);

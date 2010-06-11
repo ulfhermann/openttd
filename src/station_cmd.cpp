@@ -3124,16 +3124,24 @@ void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
 	}
 }
 
+/**
+ * get the length of a moving average for a link between two stations
+ * @param from the source station
+ * @param to the destination station
+ * @return the moving average length
+ */
 uint GetMovingAverageLength(const Station *from, const Station *to)
 {
 	return LinkStat::MIN_AVERAGE_LENGTH + (DistanceManhattan(from->xy, to->xy) >> 2);
 }
 
+/**
+ * Run the moving average decrease function for all link stats.
+ */
 void Station::RunAverages() {
 	FlowStatSet new_flows;
-	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
-		GoodsEntry &good = this->goods[goods_index];
-		LinkStatMap &links = good.link_stats;
+	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+		LinkStatMap &links = this->goods[goods_index].link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
 			Station *other = Station::GetIfValid(id);
@@ -3151,7 +3159,7 @@ void Station::RunAverages() {
 			}
 		}
 
-		FlowStatMap &flows = good.flows;
+		FlowStatMap &flows = this->goods[goods_index].flows;
 		for (FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
 			StationID source = i->first;
 			if (!Station::IsValidID(source)) {
@@ -3171,19 +3179,24 @@ void Station::RunAverages() {
 	}
 }
 
+/**
+ * Recalculate the frozen value of the station the given vehicle is loading at
+ * if the vehicle is loading.
+ * @param v the vehicle to be examined
+ */
 void RecalcFrozenIfLoading(const Vehicle *v) {
 	if (v->current_order.IsType(OT_LOADING)) {
 		RecalcFrozen(Station::Get(v->last_station_visited));
 	}
 }
 
+/**
+ * Recalculate all frozen values for all link stats of a station. This is done
+ * by adding up the capacities of all loading vehicles.
+ * @param st the station
+ */
 void RecalcFrozen(Station *st) {
-	if (st->loading_vehicles.empty()) {
-		/* if no vehicles are there the frozen values are always correct */
-		return;
-	}
-
-	for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
+	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
 		GoodsEntry &good = st->goods[goods_index];
 		LinkStatMap &links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
@@ -3196,7 +3209,8 @@ void RecalcFrozen(Station *st) {
 		const Vehicle *front = *v_it;
 		OrderList *orders = front->orders.list;
 		if (orders != NULL) {
-			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index, front->type == VEH_ROAD || front->type == VEH_TRAIN);
+			StationID next_station_id = orders->GetNextStoppingStation(front->cur_order_index,
+					front->type == VEH_ROAD || front->type == VEH_TRAIN);
 			if (next_station_id != INVALID_STATION && next_station_id != st->index) {
 				IncreaseStats(st, front, next_station_id, true);
 			}
@@ -3205,6 +3219,13 @@ void RecalcFrozen(Station *st) {
 	}
 }
 
+/**
+ * Decrease the frozen values of all link stats associated with vehicles in the
+ * given consist (ie the consist is leaving the station).
+ * @param st the station to decrease the frozen values on
+ * @param front the first vehicle in the consist
+ * @param next_station_id the station the vehicle is leaving for
+ */
 void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id) {
 	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
@@ -3230,6 +3251,14 @@ void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id
 	}
 }
 
+/**
+ * Either freeze or increase capacity for all link stats associated with vehicles
+ * in the given consist.
+ * @param st the station to get the link stats from
+ * @param front the first vehicle in the consist
+ * @param next_station_id the station the consist will be travelling to next
+ * @param freeze if true, freeze capacity, otherwise increase capacity
+ */
 void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze) {
 	Station *next = Station::GetIfValid(next_station_id);
 	assert(st->index != next_station_id && next != NULL);
@@ -3276,7 +3305,7 @@ void OnTick_Station()
 	BaseStation *st;
 	FOR_ALL_BASE_STATIONS(st) {
 		StationHandleSmallTick(st);
-		
+
 		/* Run 250 tick interval trigger for station animation.
 		 * Station index is included so that triggers are not all done
 		 * at the same time. */
@@ -3293,10 +3322,9 @@ void StationMonthlyLoop()
 {
 	Station *st;
 	FOR_ALL_STATIONS(st) {
-		for(int goods_index = CT_BEGIN; goods_index != CT_END; ++goods_index) {
-			GoodsEntry &good = st->goods[goods_index];
-			good.supply = good.supply_new;
-			good.supply_new = 0;
+		for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+			st->goods[goods_index].supply = st->goods[goods_index].supply_new;
+			st->goods[goods_index].supply_new = 0;
 		}
 	}
 }
@@ -3322,10 +3350,9 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 
 static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceType source_type, SourceID source_id)
 {
-	GoodsEntry &good = st->goods[type];
-	good.cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
-	SetBit(good.acceptance_pickup, GoodsEntry::PICKUP);
-	good.supply_new += amount;
+	st->goods[type].cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
+	SetBit(st->goods[type].acceptance_pickup, GoodsEntry::PICKUP);
+	st->goods[type].supply_new += amount;
 
 	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
 	AirportAnimationTrigger(st, AAT_STATION_NEW_CARGO, type);
