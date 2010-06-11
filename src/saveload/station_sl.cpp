@@ -564,7 +564,6 @@ static void Ptrs_STNN()
 					SlObject(const_cast<StationCargoPair *>(&(*it)), _cargo_list_desc);
 				}
 			}
-			// as there are no pointers in the link stats we don't have to consider them
 		}
 		SlObject(st, _station_desc);
 	}
