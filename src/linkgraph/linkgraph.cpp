@@ -177,7 +177,7 @@ void OnTick_LinkGraph()
 		 * the available dates.
 		 */
 		uint interval = settings.recalc_interval;
-		for (uint cargo = _date % interval; cargo < CT_END; cargo += interval) {
+		for (uint cargo = _date % interval; cargo < NUM_CARGO; cargo += interval) {
 
 			/* don't calculate a link graph if the distribution is manual */
 			if (settings.GetDistributionType(cargo) == DT_MANUAL) continue;
@@ -511,7 +511,7 @@ void LinkGraph::Init(CargoID cargo)
  */
 void InitializeLinkGraphs()
 {
-	for (CargoID c = CT_BEGIN; c != CT_END; ++c) _link_graphs[c].Init(c);
+	for (CargoID c = 0; c < NUM_CARGO; ++c) _link_graphs[c].Init(c);
 
 	LinkGraphJob::ClearHandlers();
 	LinkGraphJob::AddHandler(new DemandHandler);

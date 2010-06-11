@@ -26,7 +26,7 @@ clean:
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
 	git merge ${@}-tmp
-	test -e gitmake-build && make -j`cat gitmake-build` || true
+	[ ! -e gitmake-build ] || make -j`cat gitmake-build`
 	./make_diffs
 
 gitmake-origin:
@@ -38,7 +38,7 @@ gitmake-origin:
 gitmake: gitmake-origin
 	git checkout $@
 	git merge master
-	test -e gitmake-build && make -j`cat gitmake-build` || true
+	[ ! -e gitmake-build ] || make -j`cat gitmake-build`
 
 smallmap-zoom-in: gitmake 
 
