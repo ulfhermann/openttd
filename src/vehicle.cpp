@@ -1576,13 +1576,16 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	return capacity;
 }
 
-
-void Vehicle::BeginLoading(StationID last_station_id)
+/**
+ * Start loading the vehicle and set last_station_visited in the process.
+ * @param curr_station_id ID of the station the vehicle has arrived at
+ */
+void Vehicle::BeginLoading(StationID curr_station_id)
 {
 	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
-			this->current_order.GetDestination() == this->last_station_visited) {
+			this->current_order.GetDestination() == curr_station_id) {
 		current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
 
@@ -1597,25 +1600,25 @@ void Vehicle::BeginLoading(StationID last_station_id)
 		current_order.MakeLoading(false);
 	}
 
-	StationID curr_station_id = this->last_station_visited;
-	Station * curr_station = Station::Get(curr_station_id);
+	Station *curr_station = Station::Get(curr_station_id);
 	curr_station->loading_vehicles.push_back(this);
 
 	StationID next_station_id = INVALID_STATION;
-	OrderList * orders = this->orders.list;
+	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
 		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->type == VEH_ROAD || this->type == VEH_TRAIN);
 	}
 
-	if (last_station_id != INVALID_STATION && last_station_id != curr_station_id) {
-		IncreaseStats(Station::Get(last_station_id), this, curr_station_id, false);
+	if (this->last_station_visited != INVALID_STATION && this->last_station_visited != curr_station_id) {
+		IncreaseStats(Station::Get(this->last_station_visited), this, curr_station_id, false);
 	}
 
 	if (next_station_id != INVALID_STATION && next_station_id != curr_station_id) {
 		IncreaseStats(curr_station, this, next_station_id, true);
 	}
 
-	PrepareUnload(this);
+	this->last_station_visited = curr_station_id;
+	PrepareUnload(this); // refers to this->last_station_visited for the distance
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
@@ -1640,7 +1643,7 @@ void Vehicle::LeaveStation()
 	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
 
-	OrderList * orders = this->orders.list;
+	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
 		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->type == VEH_ROAD || this->type == VEH_TRAIN);
 		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
