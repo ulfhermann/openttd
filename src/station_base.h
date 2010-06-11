@@ -26,11 +26,19 @@ extern StationPool _station_pool;
 
 static const byte INITIAL_STATION_RATING = 175;
 
+/**
+ * Link statistics. They include figures for capacity and usage of a link. Both
+ * are moving averages which are increased for every vehicle arriving at the
+ * destination station and decreased in regular intervals. Additionally while a
+ * vehicle is loading at the source station part of the capacity is frozen and
+ * prevented from being decreased. This is done so that the link won't break
+ * down all the time when the typical "full load" order is used.
+ */
 class LinkStat : private MovingAverage<uint> {
 private:
 	/**
 	 * capacity of the link.
-	 * This is a moving average use MovingAverage::Monthly() to get a meaningful value 
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
 	 */
 	uint capacity;
 	
@@ -41,18 +49,24 @@ private:
 	
 	/**
 	 * usage of the link.
-	 * This is a moving average use MovingAverage::Monthly() to get a meaningful value 
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
 	 */
 	uint usage;
 
 public:
-	static const uint MIN_AVERAGE_LENGTH = 64;
+	/**
+	 * minimum length of moving averages for capacity and usage
+	 */
+	static const uint MIN_AVERAGE_LENGTH = 96;
 
 	friend const SaveLoad *GetLinkStatDesc();
 
 	FORCEINLINE LinkStat(uint distance = 1, uint capacity = 0, uint frozen = 0, uint usage = 0) :
 		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
 
+	/**
+	 * reset everything to 0
+	 */
 	FORCEINLINE void Clear()
 	{
 		this->capacity = 0;
@@ -60,49 +74,85 @@ public:
 		this->frozen = 0;
 	}
 
+	/**
+	 * apply the moving averages to usage and capacity
+	 */
 	FORCEINLINE void Decrease()
 	{
 		this->MovingAverage<uint>::Decrease(this->usage);
 		this->capacity = max(this->MovingAverage<uint>::Decrease(this->capacity), this->frozen);
 	}
 
+	/**
+	 * get an estimate of the current the capacity
+	 * @return the capacity
+	 */
 	FORCEINLINE uint Capacity() const
 	{
 		return this->MovingAverage<uint>::Monthly(this->capacity);
 	}
 
+	/**
+	 * get an estimage of the current usage
+	 * @return the usage
+	 */
 	FORCEINLINE uint Usage() const
 	{
 		return this->MovingAverage<uint>::Monthly(this->usage);
 	}
 
+	/**
+	 * get the amount of frozen capacity
+	 */
 	FORCEINLINE uint Frozen() const
 	{
 		return this->frozen;
 	}
 
+	/**
+	 * add some capacity and usage
+	 * @param capacity the additional capacity
+	 * @param usage the additional usage
+	 */
 	FORCEINLINE void Increase(uint capacity, uint usage)
 	{
 		this->capacity += capacity;
 		this->usage += usage;
 	}
 
+	/**
+	 * freeze some of the capacity and prevent it from being decreased by the
+	 * moving average
+	 * @param capacity the amount of capacity to be frozen
+	 */
 	FORCEINLINE void Freeze(uint capacity)
 	{
 		this->frozen += capacity;
 		this->capacity = max(this->frozen, this->capacity);
 	}
 
+	/**
+	 * thaw some of the frozen capacity and make it available for Decrease()
+	 * @oaram capacity the capacity to be thawed
+	 */
 	FORCEINLINE void Unfreeze(uint capacity)
 	{
 		this->frozen -= capacity;
 	}
 
+	/**
+	 * thaw all frozen capacity
+	 */
 	FORCEINLINE void Unfreeze()
 	{
 		this->frozen = 0;
 	}
 
+	/**
+	 * check if the capacity is 0. This is necessary as Capacity() might return
+	 * 0 even if there is a miniscule amount of capacity left
+	 * @return if capacity is 0
+	 */
 	FORCEINLINE bool IsNull() const
 	{
 		return this->capacity == 0;
