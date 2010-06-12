@@ -9,10 +9,15 @@
 
 /** @file moving_average.cpp Implementation of moving average functions */
 
-
 #include "moving_average.h"
 #include "variables.h"
 
+/**
+ * Run moving average decrease function on all items from a pool which are due
+ * this tick. This function expects to be run every tick. It calls a method
+ * "RunAverages()" on all items for which id % DAY_TICKS == _tick_counter % DAY_TICKS.
+ * So each item is called once a day.
+ */
 template <class Titem> void RunAverages()
 {
 	for(uint id = _tick_counter % DAY_TICKS; id < Titem::GetPoolSize(); id += DAY_TICKS) {
@@ -21,5 +26,18 @@ template <class Titem> void RunAverages()
 			item->RunAverages();
 		}
 	}
+}
+
+/**
+ * Decrease the given value using this moving average
+ * @param value the moving average value to be decreased
+ * @return the decreased value
+ */
+template <class Tvalue>
+FORCEINLINE Tvalue &MovingAverage<Tvalue>::Decrease(Tvalue &value) const
+{
+	value *= this->length;
+	value /= (this->length + 1);
+	return value;
 }
 
