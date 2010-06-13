@@ -36,8 +36,8 @@ enum StationViewWidgets {
 	SVW_RENAME     = 10, ///< 'Rename' button
 	SVW_TRAINS     = 11, ///< List of scheduled trains button
 	SVW_ROADVEHS,        ///< List of scheduled road vehs button
-	SVW_PLANES,          ///< List of scheduled planes button
 	SVW_SHIPS,           ///< List of scheduled ships button
+	SVW_PLANES,          ///< List of scheduled planes button
 };
 
 /** Types of cargo to display for station coverage. */
