@@ -5,9 +5,8 @@ VPATH=.:./.git/refs/heads/
 gitmake-all: cd diaglvl
 	touch gitmake-all
 	git checkout patches
-	rm -rf current
+	mv patches/current/* current/
 	mv patches/* .
-	mkdir patches/current
 	git add *.diff
 	git add current/*
 	git commit --allow-empty -m "patches for version `cat current/TRUNK_VERSION.txt`"
