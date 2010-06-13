@@ -444,7 +444,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				break;
 
 			case SNGRFS_MOVE_UP: { // Move GRF up
-				if (this->active_sel == NULL) break;
+				if (this->active_sel == NULL || !this->editable) break;
 
 				int pos = 0;
 				for (GRFConfig **pc = &this->actives; *pc != NULL; pc = &(*pc)->next, pos++) {
@@ -463,7 +463,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			}
 
 			case SNGRFS_MOVE_DOWN: { // Move GRF down
-				if (this->active_sel == NULL) break;
+				if (this->active_sel == NULL || !this->editable) break;
 
 				int pos = 1; // Start at 1 as we swap the selected newgrf with the next one
 				for (GRFConfig **pc = &this->actives; *pc != NULL; pc = &(*pc)->next, pos++) {
@@ -498,7 +498,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			}
 			/* Fall through with double click. */
 			case SNGRFS_REMOVE: { // Remove GRF
-				if (this->active_sel == NULL) break;
+				if (this->active_sel == NULL || !this->editable) break;
 
 				/* Choose the next GRF file to be the selected file. */
 				GRFConfig *newsel = this->active_sel->next;
@@ -539,7 +539,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			}
 			/* Fall through with double click. */
 			case SNGRFS_ADD: {
-				if (this->avail_sel == NULL) break;
+				if (this->avail_sel == NULL || !this->editable) break;
 
 				GRFConfig **list;
 				/* Find last entry in the list, checking for duplicate grfid on the way */
@@ -566,6 +566,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			}
 
 			case SNGRFS_APPLY_CHANGES: // Apply changes made to GRF list
+				if (!this->editable) break;
 				if (this->execute) {
 					ShowQuery(
 						STR_NEWGRF_POPUP_CAUTION_CAPTION,
@@ -582,7 +583,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				break;
 
 			case SNGRFS_SET_PARAMETERS: { // Edit parameters
-				if (this->active_sel == NULL) break;
+				if (this->active_sel == NULL || !this->editable || !this->show_params) break;
 
 				this->query_widget = widget;
 				static char buff[512];
@@ -593,7 +594,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			}
 
 			case SNGRFS_TOGGLE_PALETTE:
-				if (this->active_sel != NULL) {
+				if (this->active_sel != NULL || !this->editable) {
 					this->active_sel->windows_paletted ^= true;
 					this->SetDirty();
 				}
@@ -604,9 +605,9 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 					ShowErrorMessage(STR_NETWORK_ERROR_NOTAVAILABLE, INVALID_STRING_ID, WL_ERROR);
 				} else {
 #if defined(ENABLE_NETWORK)
-				this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
+					this->DeleteChildWindows(WC_QUERY_STRING); // Remove the parameter query window
 
-				/* Only show the things in the current list, or everything when nothing's selected */
+					/* Only show the things in the current list, or everything when nothing's selected */
 					ContentVector cv;
 					for (const GRFConfig *c = this->actives; c != NULL; c = c->next) {
 						if (c->status != GCS_NOT_FOUND && !HasBit(c->flags, GCF_COMPATIBLE)) continue;
@@ -616,8 +617,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 						ci->state = ContentInfo::DOES_NOT_EXIST;
 						ttd_strlcpy(ci->name, c->GetName(), lengthof(ci->name));
 						ci->unique_id = BSWAP32(c->ident.grfid);
-						memcpy(ci->md5sum, c->ident.md5sum, sizeof(ci->md5sum));
-						if (HasBit(c->flags, GCF_COMPATIBLE)) GamelogGetOriginalGRFMD5Checksum(c->ident.grfid, ci->md5sum);
+						memcpy(ci->md5sum, HasBit(c->flags, GCF_COMPATIBLE) ? c->original_md5sum : c->ident.md5sum, sizeof(ci->md5sum));
 						*cv.Append() = ci;
 					}
 					ShowNetworkContentListWindow(cv.Length() == 0 ? NULL : &cv, CONTENT_TYPE_NEWGRF);
@@ -638,6 +638,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 
 	virtual void OnDropdownSelect(int widget, int index)
 	{
+		if (!this->editable) return;
 		if (index == -1) {
 			ClearGRFConfigList(&this->actives);
 			this->preset = -1;
@@ -678,7 +679,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				break;
 
 			case SNGRFS_SET_PARAMETERS: {
-				if (this->active_sel == NULL) return;
+				if (this->active_sel == NULL || !this->editable || !this->show_params) return;
 
 				/* Parse our new "int list" */
 				GRFConfig *c = this->active_sel;
