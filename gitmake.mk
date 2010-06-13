@@ -6,7 +6,7 @@ gitmake-all: cd diaglvl
 	touch gitmake-all
 	git checkout patches
 	mv patches/current/* current/
-	mv patches/* .
+	mv patches/*.diff .
 	git add *.diff
 	git add current/*
 	git commit --allow-empty -m "patches for version `cat current/TRUNK_VERSION.txt`"
