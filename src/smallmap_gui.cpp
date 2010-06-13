@@ -646,7 +646,11 @@ class SmallMapWindow : public Window {
 	};
 
 	/**
-	 * save the Vehicle's old position here, so that we don't get glitches when redrawing
+	 * Save the Vehicle's old position here, so that we don't get glitches when
+	 * redrawing.
+	 * The glitches happen when a vehicle occupies a larger area (zoom-in) and
+	 * a partial redraw happens which only covers part of the vehicle. If the
+	 * vehicle has moved in the meantime, it looks ugly afterwards.
 	 */
 	struct VehicleAndPosition {
 		VehicleAndPosition(const Vehicle *v) : vehicle(v->index)
@@ -660,7 +664,7 @@ class SmallMapWindow : public Window {
 	};
 
 	typedef std::list<VehicleAndPosition> VehicleList;
-	VehicleList vehicles_on_map;
+	VehicleList vehicles_on_map; ///< cached vehicle positions to avoid glitches
 	
 	/** Available kinds of zoomlevel changes. */
 	enum ZoomLevelChange {
@@ -756,7 +760,7 @@ class SmallMapWindow : public Window {
 	int zoom;        ///< Zoom level. Bigger number means more zoom-out (further away).
 
 	static const uint8 FORCE_REFRESH_PERIOD = 0x1F; ///< map is redrawn after that many ticks
-	static const uint8 REFRESH_NEXT_TICK = 1;
+	static const uint8 REFRESH_NEXT_TICK = 1;       ///< if refresh has this value the map is redrawn in the next tick
 	uint8 refresh; ///< refresh counter, zeroed every FORCE_REFRESH_PERIOD ticks
 
 	/**
@@ -785,13 +789,13 @@ class SmallMapWindow : public Window {
 	}
 
 	/**
-	 * Determine the tile relative to the base tile of the smallmap, and the pixel position at
-	 * that tile for a point in the smallmap.
+	 * Determine the world coordinates relative to the base tile of the smallmap, and the pixel position at
+	 * that location for a point in the smallmap.
 	 * @param px       Horizontal coordinate of the pixel.
 	 * @param py       Vertical coordinate of the pixel.
 	 * @param sub[out] Pixel position at the tile (0..3).
 	 * @param add_sub  Add current #subscroll to the position.
-	 * @return Tile being displayed at the given position relative to #scroll_x and #scroll_y.
+	 * @return world coordinates being displayed at the given position relative to #scroll_x and #scroll_y.
 	 * @note The #subscroll offset is already accounted for.
 	 */
 	FORCEINLINE Point PixelToWorld(int px, int py, int *sub, bool add_sub = true) const
@@ -960,8 +964,8 @@ class SmallMapWindow : public Window {
 	 * Draws one column of tiles of the small map in a certain mode onto the screen buffer, skipping the shifted rows in between.
 	 *
 	 * @param dst Pointer to a part of the screen buffer to write to.
-	 * @param xc The X coordinate of the first tile in the column.
-	 * @param yc The Y coordinate of the first tile in the column
+	 * @param xc The world X coordinate of the rightmost place in the column.
+	 * @param yc The world Y coordinate of the topmost place in the column.
 	 * @param pitch Number of pixels to advance in the screen buffer each time a pixel is written.
 	 * @param reps Number of lines to draw
 	 * @param start_pos Position of first pixel to draw.
@@ -1669,6 +1673,9 @@ class SmallMapWindow : public Window {
 		}
 	}
 
+	/**
+	 * recalculate which vehicles are visible and their positions.
+	 */
 	void RecalcVehiclePositions() {
 		this->vehicles_on_map.clear();
 		const Vehicle *v;
