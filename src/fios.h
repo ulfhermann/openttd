@@ -14,8 +14,63 @@
 
 #include "strings_type.h"
 #include "core/smallvec_type.hpp"
+#include "core/smallmap_type.hpp"
 #include "core/enum_type.hpp"
 #include "gfx_type.h"
+#include "date_type.h"
+#include "settings_type.h"
+#include "company_base.h"
+#include "newgrf_config.h"
+
+
+typedef SmallMap<uint, CompanyProperties *> CompanyPropertiesMap;
+
+/**
+ * Container for loading in mode SL_LOAD_CHECK.
+ */
+struct LoadCheckData {
+	bool checkable;     ///< True if the savegame could be checked by SL_LOAD_CHECK. (Old savegames are not checkable.)
+	StringID error;     ///< Error message from loading. INVALID_STRING_ID if no error.
+	char *error_data;   ///< Data to pass to SetDParamStr when displaying #error.
+
+	uint32 map_size_x, map_size_y;
+	Date current_date;
+
+	GameSettings settings;
+
+	CompanyPropertiesMap companies;               ///< Company information.
+
+	GRFConfig *grfconfig;                         ///< NewGrf configuration from save.
+	GRFListCompatibility grf_compatibility;       ///< Summary state of NewGrfs, whether missing files or only compatible found.
+
+	LoadCheckData() : error_data(NULL), grfconfig(NULL)
+	{
+		this->Clear();
+	}
+
+	/**
+	 * Check whether loading the game resulted in errors.
+	 * @return true if errors were encountered.
+	 */
+	bool HasErrors()
+	{
+		return this->checkable && this->error != INVALID_STRING_ID;
+	}
+
+	/**
+	 * Check whether the game uses any NewGrfs.
+	 * @return true if NewGrfs are used.
+	 */
+	bool HasNewGrfs()
+	{
+		return this->checkable && this->error == INVALID_STRING_ID && this->grfconfig != NULL;
+	}
+
+	void Clear();
+};
+
+extern LoadCheckData _load_check_data;
+
 
 enum FileSlots {
 	/**
