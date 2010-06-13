@@ -13,8 +13,11 @@
 #include "../company_base.h"
 #include "../company_func.h"
 #include "../company_manager_face.h"
+#include "../fios.h"
 
 #include "saveload.h"
+
+#include "table/strings.h"
 
 /**
  * Converts an old company manager's face format to the new company manager's face format
@@ -88,56 +91,60 @@ CompanyManagerFace ConvertFromOldCompanyManagerFace(uint32 face)
 
 /* Save/load of companies */
 static const SaveLoad _company_desc[] = {
-	    SLE_VAR(Company, name_2,          SLE_UINT32),
-	    SLE_VAR(Company, name_1,          SLE_STRINGID),
-	SLE_CONDSTR(Company, name,            SLE_STR, 0,                       84, SL_MAX_VERSION),
+	    SLE_VAR(CompanyProperties, name_2,          SLE_UINT32),
+	    SLE_VAR(CompanyProperties, name_1,          SLE_STRINGID),
+	SLE_CONDSTR(CompanyProperties, name,            SLE_STR, 0,                       84, SL_MAX_VERSION),
 
-	    SLE_VAR(Company, president_name_1, SLE_UINT16),
-	    SLE_VAR(Company, president_name_2, SLE_UINT32),
-	SLE_CONDSTR(Company, president_name,  SLE_STR, 0,                       84, SL_MAX_VERSION),
+	    SLE_VAR(CompanyProperties, president_name_1, SLE_UINT16),
+	    SLE_VAR(CompanyProperties, president_name_2, SLE_UINT32),
+	SLE_CONDSTR(CompanyProperties, president_name,  SLE_STR, 0,                       84, SL_MAX_VERSION),
 
-	    SLE_VAR(Company, face,            SLE_UINT32),
+	    SLE_VAR(CompanyProperties, face,            SLE_UINT32),
 
 	/* money was changed to a 64 bit field in savegame version 1. */
-	SLE_CONDVAR(Company, money,                 SLE_VAR_I64 | SLE_FILE_I32,  0, 0),
-	SLE_CONDVAR(Company, money,                 SLE_INT64,                   1, SL_MAX_VERSION),
+	SLE_CONDVAR(CompanyProperties, money,                 SLE_VAR_I64 | SLE_FILE_I32,  0, 0),
+	SLE_CONDVAR(CompanyProperties, money,                 SLE_INT64,                   1, SL_MAX_VERSION),
 
-	SLE_CONDVAR(Company, current_loan,          SLE_VAR_I64 | SLE_FILE_I32,  0, 64),
-	SLE_CONDVAR(Company, current_loan,          SLE_INT64,                  65, SL_MAX_VERSION),
+	SLE_CONDVAR(CompanyProperties, current_loan,          SLE_VAR_I64 | SLE_FILE_I32,  0, 64),
+	SLE_CONDVAR(CompanyProperties, current_loan,          SLE_INT64,                  65, SL_MAX_VERSION),
 
-	    SLE_VAR(Company, colour,                SLE_UINT8),
-	    SLE_VAR(Company, money_fraction,        SLE_UINT8),
-	SLE_CONDVAR(Company, avail_railtypes,       SLE_UINT8,                   0, 57),
-	    SLE_VAR(Company, block_preview,         SLE_UINT8),
+	    SLE_VAR(CompanyProperties, colour,                SLE_UINT8),
+	    SLE_VAR(CompanyProperties, money_fraction,        SLE_UINT8),
+	SLE_CONDVAR(CompanyProperties, avail_railtypes,       SLE_UINT8,                   0, 57),
+	    SLE_VAR(CompanyProperties, block_preview,         SLE_UINT8),
 
-	SLE_CONDVAR(Company, cargo_types,           SLE_FILE_U16 | SLE_VAR_U32,  0, 93),
-	SLE_CONDVAR(Company, cargo_types,           SLE_UINT32,                 94, SL_MAX_VERSION),
-	SLE_CONDVAR(Company, location_of_HQ,        SLE_FILE_U16 | SLE_VAR_U32,  0,  5),
-	SLE_CONDVAR(Company, location_of_HQ,        SLE_UINT32,                  6, SL_MAX_VERSION),
-	SLE_CONDVAR(Company, last_build_coordinate, SLE_FILE_U16 | SLE_VAR_U32,  0,  5),
-	SLE_CONDVAR(Company, last_build_coordinate, SLE_UINT32,                  6, SL_MAX_VERSION),
-	SLE_CONDVAR(Company, inaugurated_year,      SLE_FILE_U8  | SLE_VAR_I32,  0, 30),
-	SLE_CONDVAR(Company, inaugurated_year,      SLE_INT32,                  31, SL_MAX_VERSION),
+	SLE_CONDVAR(CompanyProperties, cargo_types,           SLE_FILE_U16 | SLE_VAR_U32,  0, 93),
+	SLE_CONDVAR(CompanyProperties, cargo_types,           SLE_UINT32,                 94, SL_MAX_VERSION),
+	SLE_CONDVAR(CompanyProperties, location_of_HQ,        SLE_FILE_U16 | SLE_VAR_U32,  0,  5),
+	SLE_CONDVAR(CompanyProperties, location_of_HQ,        SLE_UINT32,                  6, SL_MAX_VERSION),
+	SLE_CONDVAR(CompanyProperties, last_build_coordinate, SLE_FILE_U16 | SLE_VAR_U32,  0,  5),
+	SLE_CONDVAR(CompanyProperties, last_build_coordinate, SLE_UINT32,                  6, SL_MAX_VERSION),
+	SLE_CONDVAR(CompanyProperties, inaugurated_year,      SLE_FILE_U8  | SLE_VAR_I32,  0, 30),
+	SLE_CONDVAR(CompanyProperties, inaugurated_year,      SLE_INT32,                  31, SL_MAX_VERSION),
 
-	    SLE_ARR(Company, share_owners,          SLE_UINT8, 4),
+	    SLE_ARR(CompanyProperties, share_owners,          SLE_UINT8, 4),
 
-	    SLE_VAR(Company, num_valid_stat_ent,    SLE_UINT8),
+	    SLE_VAR(CompanyProperties, num_valid_stat_ent,    SLE_UINT8),
 
-	    SLE_VAR(Company, quarters_of_bankruptcy,SLE_UINT8),
-	SLE_CONDVAR(Company, bankrupt_asked,        SLE_FILE_U8  | SLE_VAR_U16,  0, 103),
-	SLE_CONDVAR(Company, bankrupt_asked,        SLE_UINT16,                104, SL_MAX_VERSION),
-	    SLE_VAR(Company, bankrupt_timeout,      SLE_INT16),
-	SLE_CONDVAR(Company, bankrupt_value,        SLE_VAR_I64 | SLE_FILE_I32,  0, 64),
-	SLE_CONDVAR(Company, bankrupt_value,        SLE_INT64,                  65, SL_MAX_VERSION),
+	    SLE_VAR(CompanyProperties, quarters_of_bankruptcy,SLE_UINT8),
+	SLE_CONDVAR(CompanyProperties, bankrupt_asked,        SLE_FILE_U8  | SLE_VAR_U16,  0, 103),
+	SLE_CONDVAR(CompanyProperties, bankrupt_asked,        SLE_UINT16,                104, SL_MAX_VERSION),
+	    SLE_VAR(CompanyProperties, bankrupt_timeout,      SLE_INT16),
+	SLE_CONDVAR(CompanyProperties, bankrupt_value,        SLE_VAR_I64 | SLE_FILE_I32,  0, 64),
+	SLE_CONDVAR(CompanyProperties, bankrupt_value,        SLE_INT64,                  65, SL_MAX_VERSION),
 
 	/* yearly expenses was changed to 64-bit in savegame version 2. */
-	SLE_CONDARR(Company, yearly_expenses,       SLE_FILE_I32 | SLE_VAR_I64, 3 * 13, 0, 1),
-	SLE_CONDARR(Company, yearly_expenses,       SLE_INT64, 3 * 13,                  2, SL_MAX_VERSION),
+	SLE_CONDARR(CompanyProperties, yearly_expenses,       SLE_FILE_I32 | SLE_VAR_I64, 3 * 13, 0, 1),
+	SLE_CONDARR(CompanyProperties, yearly_expenses,       SLE_INT64, 3 * 13,                  2, SL_MAX_VERSION),
 
-	SLE_CONDVAR(Company, is_ai,                 SLE_BOOL,                    2, SL_MAX_VERSION),
+	SLE_CONDVAR(CompanyProperties, is_ai,                 SLE_BOOL,                    2, SL_MAX_VERSION),
 	SLE_CONDNULL(1, 107, 111), ///< is_noai
 	SLE_CONDNULL(1, 4, 99),
 
+	SLE_END()
+};
+
+static const SaveLoad _company_settings_desc[] = {
 	/* Engine renewal settings */
 	SLE_CONDNULL(512, 16, 18),
 	SLE_CONDREF(Company, engine_renew_list,            REF_ENGINE_RENEWS,   19, SL_MAX_VERSION),
@@ -152,6 +159,29 @@ static const SaveLoad _company_desc[] = {
 	SLE_CONDVAR(Company, settings.vehicle.servint_roadveh,   SLE_UINT16,     120, SL_MAX_VERSION),
 	SLE_CONDVAR(Company, settings.vehicle.servint_aircraft,  SLE_UINT16,     120, SL_MAX_VERSION),
 	SLE_CONDVAR(Company, settings.vehicle.servint_ships,     SLE_UINT16,     120, SL_MAX_VERSION),
+
+	/* Reserve extra space in savegame here. (currently 63 bytes) */
+	SLE_CONDNULL(63, 2, SL_MAX_VERSION),
+
+	SLE_END()
+};
+
+static const SaveLoad _company_settings_skip_desc[] = {
+	/* Engine renewal settings */
+	SLE_CONDNULL(512, 16, 18),
+	SLE_CONDNULL(2, 19, 68),                 // engine_renew_list
+	SLE_CONDNULL(4, 69, SL_MAX_VERSION),     // engine_renew_list
+	SLE_CONDNULL(1, 16, SL_MAX_VERSION),     // settings.engine_renew
+	SLE_CONDNULL(2, 16, SL_MAX_VERSION),     // settings.engine_renew_months
+	SLE_CONDNULL(4, 16, SL_MAX_VERSION),     // settings.engine_renew_money
+	SLE_CONDNULL(1,  2, SL_MAX_VERSION),     // settings.renew_keep_length
+
+	/* Default vehicle settings */
+	SLE_CONDNULL(1, 120, SL_MAX_VERSION),    // settings.vehicle.servint_ispercent
+	SLE_CONDNULL(2, 120, SL_MAX_VERSION),    // settings.vehicle.servint_trains
+	SLE_CONDNULL(2, 120, SL_MAX_VERSION),    // settings.vehicle.servint_roadveh
+	SLE_CONDNULL(2, 120, SL_MAX_VERSION),    // settings.vehicle.servint_aircraft
+	SLE_CONDNULL(2, 120, SL_MAX_VERSION),    // settings.vehicle.servint_ships
 
 	/* Reserve extra space in savegame here. (currently 63 bytes) */
 	SLE_CONDNULL(63, 2, SL_MAX_VERSION),
@@ -226,14 +256,20 @@ static const SaveLoad _company_livery_desc[] = {
 	SLE_END()
 };
 
-static void SaveLoad_PLYR(Company *c)
+static void SaveLoad_PLYR_common(Company *c, CompanyProperties *cprops)
 {
 	int i;
 
-	SlObject(c, _company_desc);
+	SlObject(cprops, _company_desc);
+	if (c != NULL) {
+		SlObject(c, _company_settings_desc);
+	} else {
+		char nothing;
+		SlObject(&nothing, _company_settings_skip_desc);
+	}
 
 	/* Keep backwards compatible for savegames, so load the old AI block */
-	if (CheckSavegameVersion(107) && c->is_ai) {
+	if (CheckSavegameVersion(107) && cprops->is_ai) {
 		CompanyOldAI old_ai;
 		char nothing;
 
@@ -244,31 +280,44 @@ static void SaveLoad_PLYR(Company *c)
 	}
 
 	/* Write economy */
-	SlObject(&c->cur_economy, _company_economy_desc);
+	SlObject(&cprops->cur_economy, _company_economy_desc);
 
 	/* Write old economy entries. */
-	for (i = 0; i < c->num_valid_stat_ent; i++) {
-		SlObject(&c->old_economy[i], _company_economy_desc);
+	for (i = 0; i < cprops->num_valid_stat_ent; i++) {
+		SlObject(&cprops->old_economy[i], _company_economy_desc);
 	}
 
 	/* Write each livery entry. */
 	int num_liveries = CheckSavegameVersion(63) ? LS_END - 4 : (CheckSavegameVersion(85) ? LS_END - 2: LS_END);
-	for (i = 0; i < num_liveries; i++) {
-		SlObject(&c->livery[i], _company_livery_desc);
-	}
+	if (c != NULL) {
+		for (i = 0; i < num_liveries; i++) {
+			SlObject(&c->livery[i], _company_livery_desc);
+		}
 
-	if (num_liveries < LS_END) {
-		/* We want to insert some liveries somewhere in between. This means some have to be moved. */
-		memmove(&c->livery[LS_FREIGHT_WAGON], &c->livery[LS_PASSENGER_WAGON_MONORAIL], (LS_END - LS_FREIGHT_WAGON) * sizeof(c->livery[0]));
-		c->livery[LS_PASSENGER_WAGON_MONORAIL] = c->livery[LS_MONORAIL];
-		c->livery[LS_PASSENGER_WAGON_MAGLEV]   = c->livery[LS_MAGLEV];
-	}
+		if (num_liveries < LS_END) {
+			/* We want to insert some liveries somewhere in between. This means some have to be moved. */
+			memmove(&c->livery[LS_FREIGHT_WAGON], &c->livery[LS_PASSENGER_WAGON_MONORAIL], (LS_END - LS_FREIGHT_WAGON) * sizeof(c->livery[0]));
+			c->livery[LS_PASSENGER_WAGON_MONORAIL] = c->livery[LS_MONORAIL];
+			c->livery[LS_PASSENGER_WAGON_MAGLEV]   = c->livery[LS_MAGLEV];
+		}
 
-	if (num_liveries == LS_END - 4) {
-		/* Copy bus/truck liveries over to trams */
-		c->livery[LS_PASSENGER_TRAM] = c->livery[LS_BUS];
-		c->livery[LS_FREIGHT_TRAM]   = c->livery[LS_TRUCK];
+		if (num_liveries == LS_END - 4) {
+			/* Copy bus/truck liveries over to trams */
+			c->livery[LS_PASSENGER_TRAM] = c->livery[LS_BUS];
+			c->livery[LS_FREIGHT_TRAM]   = c->livery[LS_TRUCK];
+		}
+	} else {
+		/* Skip liveries */
+		Livery dummy_livery;
+		for (i = 0; i < num_liveries; i++) {
+			SlObject(&dummy_livery, _company_livery_desc);
+		}
 	}
+}
+
+static void SaveLoad_PLYR(Company *c)
+{
+	SaveLoad_PLYR_common(c, c);
 }
 
 static void Save_PLYR()
@@ -290,15 +339,39 @@ static void Load_PLYR()
 	}
 }
 
+static void Check_PLYR()
+{
+	int index;
+	while ((index = SlIterateArray()) != -1) {
+		CompanyProperties *cprops = new CompanyProperties();
+		memset(cprops, 0, sizeof(*cprops));
+		SaveLoad_PLYR_common(NULL, cprops);
+
+		/* We do not load old custom names */
+		if (CheckSavegameVersion(84))
+		{
+			if (GB(cprops->name_1, 11, 5) == 15) {
+				cprops->name_1 = STR_GAME_SAVELOAD_NOT_AVAILABLE;
+			}
+
+			if (GB(cprops->president_name_1, 11, 5) == 15) {
+				cprops->president_name_1 = STR_GAME_SAVELOAD_NOT_AVAILABLE;
+			}
+		}
+
+		if (!_load_check_data.companies.Insert(index, cprops)) delete cprops;
+	}
+}
+
 static void Ptrs_PLYR()
 {
 	Company *c;
 	FOR_ALL_COMPANIES(c) {
-		SlObject(c, _company_desc);
+		SlObject(c, _company_settings_desc);
 	}
 }
 
 
 extern const ChunkHandler _company_chunk_handlers[] = {
-	{ 'PLYR', Save_PLYR, Load_PLYR, Ptrs_PLYR, CH_ARRAY | CH_LAST},
+	{ 'PLYR', Save_PLYR, Load_PLYR, Ptrs_PLYR, Check_PLYR, CH_ARRAY | CH_LAST},
 };
