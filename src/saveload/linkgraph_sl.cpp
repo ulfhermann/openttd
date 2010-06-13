@@ -143,5 +143,5 @@ static void Save_LGRP() {
 }
 
 extern const ChunkHandler _linkgraph_chunk_handlers[] = {
-	{ 'LGRP', Save_LGRP,      Load_LGRP,	NULL,      CH_LAST},
+	{ 'LGRP', Save_LGRP, Load_LGRP, NULL, NULL, CH_LAST},
 };
