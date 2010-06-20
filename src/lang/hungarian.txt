@@ -1716,8 +1716,8 @@ STR_NETWORK_GAME_LOBBY_CURRENT_BALANCE                          :{SILVER}Jelenle
 STR_NETWORK_GAME_LOBBY_LAST_YEARS_INCOME                        :{SILVER}Előző évi bevétel: {WHITE}{CURRENCY}
 STR_NETWORK_GAME_LOBBY_PERFORMANCE                              :{SILVER}Teljesítmény: {WHITE}{NUM}
 
-STR_NETWORK_GAME_LOBBY_VEHICLES                                 :{SILVER}Járművek: {WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {PLANE}, {NUM} {SHIP}
-STR_NETWORK_GAME_LOBBY_STATIONS                                 :{SILVER}Állomások: {WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {PLANE}, {NUM} {SHIP}
+STR_NETWORK_GAME_LOBBY_VEHICLES                                 :{SILVER}Járművek: {WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {SHIP}, {NUM} {PLANE}
+STR_NETWORK_GAME_LOBBY_STATIONS                                 :{SILVER}Állomások: {WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {SHIP}, {NUM} {PLANE}
 STR_NETWORK_GAME_LOBBY_PLAYERS                                  :{SILVER}Játékosok: {WHITE}{STRING}
 
 STR_NETWORK_GAME_LOBBY_NEW_COMPANY                              :{BLACK}Új vállalat
@@ -2310,6 +2310,12 @@ STR_SAVELOAD_DELETE_BUTTON                                      :{BLACK}Töröl
 STR_SAVELOAD_DELETE_TOOLTIP                                     :{BLACK}A kijelölt mentés törlése
 STR_SAVELOAD_SAVE_BUTTON                                        :{BLACK}Ment
 STR_SAVELOAD_SAVE_TOOLTIP                                       :{BLACK}A játék elmentése a választott néven
+STR_SAVELOAD_LOAD_BUTTON                                        :{BLACK}Betölt
+STR_SAVELOAD_LOAD_TOOLTIP                                       :{BLACK}Betölti a kiválasztott játékmentést
+STR_SAVELOAD_DETAIL_CAPTION                                     :{BLACK}Részletek
+STR_SAVELOAD_DETAIL_NOT_AVAILABLE                               :{BLACK}Nincs elérhető információ.
+STR_SAVELOAD_DETAIL_COMPANY_INDEX                               :{SILVER}{COMMA}: {WHITE}{STRING}
+STR_SAVELOAD_DETAIL_GRFSTATUS                                   :{SILVER}NewGRF: {WHITE}{STRING}
 
 STR_SAVELOAD_OSKTITLE                                           :{BLACK}Add meg a játékmentés nevét
 
@@ -2487,6 +2493,12 @@ STR_NEWGRF_COMPATIBLE_LOAD_WARNING                              :{WHITE}Kompatib
 STR_NEWGRF_DISABLED_WARNING                                     :{WHITE}Hiányzó GRF fájlokat kikapcsoltam
 STR_NEWGRF_UNPAUSE_WARNING_TITLE                                :{YELLOW}Hiányzó GRF fájlok
 STR_NEWGRF_UNPAUSE_WARNING                                      :{WHITE}A játék folytatásától az OpenTTD lefagyhat.{}Ne jelentsd be az ismétlődő lefagyásokat egyesével.{}Biztosan folytatni akarod?
+
+# NewGRF status
+STR_NEWGRF_LIST_NONE                                            :Nincs
+STR_NEWGRF_LIST_ALL_FOUND                                       :Minden fájl
+STR_NEWGRF_LIST_COMPATIBLE                                      :{YELLOW}Talált kompatibilis fájlok
+STR_NEWGRF_LIST_MISSING                                         :{RED}Hiányzó fájlok
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}A '{0:STRING}' viselkedése valószínűleg ütközést vagy összeomlást okoz.
@@ -3398,6 +3410,7 @@ STR_GAME_SAVELOAD_ERROR_TOO_NEW_SAVEGAME                        :A játékállá
 STR_GAME_SAVELOAD_ERROR_FILE_NOT_READABLE                       :A fájl nem olvasható
 STR_GAME_SAVELOAD_ERROR_FILE_NOT_WRITEABLE                      :A fájl nem írható
 STR_GAME_SAVELOAD_ERROR_DATA_INTEGRITY_CHECK_FAILED             :Adat integritás hiba
+STR_GAME_SAVELOAD_NOT_AVAILABLE                                 :<nem elérhető>
 STR_WARNING_LOADGAME_REMOVED_TRAMS                              :{WHITE}A játék olyan verzióban lett elmentve, ami nem támogatja a villamosokat. Az összes villamos törölve lett.
 
 # Map generation messages
@@ -3704,6 +3717,7 @@ STR_ERROR_AIRCRAFT_NOT_AVAILABLE                                :{WHITE}A repül
 STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}Túl sok jármű van a játékban
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}Nem változtathatod meg a javítási időközt...
 
+STR_ERROR_VEHICLE_IS_DESTROYED                                  :{WHITE}... jármű megsemmisült
 
 # Specific vehicle errors
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}Nem haladhatja meg a vonat a megállj jelzést...
