@@ -1051,7 +1051,7 @@ class SmallMapWindow : public Window {
 		}
 	}
 
-	inline Point GetStationMiddle(const Station * st) const {
+	inline Point GetStationMiddle(const Station *st) const {
 		int x = (st->rect.right + st->rect.left + 1) / 2;
 		int y = (st->rect.bottom + st->rect.top + 1) / 2;
 		Point ret = this->RemapTile(x, y);
@@ -1121,20 +1121,24 @@ class SmallMapWindow : public Window {
 		virtual void Highlight() {}
 		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) = 0;
 
+		bool IsLinkVisible()
+		{
+			return !((this->pta.x < _cur_dpi->left && this->ptb.x < _cur_dpi->left) ||
+					(this->pta.y < _cur_dpi->top && this->ptb.y < _cur_dpi->top) ||
+					(this->pta.x - _cur_dpi->left > _cur_dpi->width && this->ptb.x - _cur_dpi->left > _cur_dpi->width) ||
+					(this->pta.y - _cur_dpi->top > _cur_dpi->height && this->ptb.y - _cur_dpi->top > _cur_dpi->height));
+		}
+
 		Point pta, ptb;
 		bool search_link_details;
 		LinkDetails link_details;
 		const SmallMapWindow * window;
 
 		void DrawLink(StationID sta, StationID stb) {
-
-			this->pta = window->GetStationMiddle(Station::Get(sta));
-			this->ptb = window->GetStationMiddle(Station::Get(stb));
-
 			bool highlight_empty = this->search_link_details && this->link_details.Empty();
 			bool highlight =
 					(sta == this->link_details.sta && stb == this->link_details.stb) ||
-					(highlight_empty && window->CheckLinkSelected(&pta, &ptb));
+					(highlight_empty && window->CheckLinkSelected(&this->pta, &this->ptb));
 			bool reverse_empty = this->link_details.b_to_a.empty();
 			bool reverse_highlight = (sta == this->link_details.stb && stb == this->link_details.sta);
 			if (highlight_empty && highlight) {
@@ -1156,7 +1160,7 @@ class SmallMapWindow : public Window {
 					LinkStatMap::const_iterator i = ls_map.find(stb);
 					if (i != ls_map.end()) {
 						const LinkStat &link_stat = i->second;
-						AddLink(link_stat, sum_flows, cargo_entry);
+						this->AddLink(link_stat, sum_flows, cargo_entry);
 						if (highlight_empty && highlight) {
 							this->link_details.a_to_b.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
 						} else if (reverse_empty && reverse_highlight) {
@@ -1168,10 +1172,11 @@ class SmallMapWindow : public Window {
 		}
 
 		virtual void DrawForwBackLinks(StationID sta, StationID stb) {
-			DrawLink(sta, stb);
-			DrawContent();
-			DrawLink(stb, sta);
-			DrawContent();
+			this->DrawLink(sta, stb);
+			this->DrawContent();
+			Swap(this->pta, this->ptb);
+			this->DrawLink(stb, sta);
+			this->DrawContent();
 		}
 
 	public:
@@ -1185,7 +1190,7 @@ class SmallMapWindow : public Window {
 			std::set<StationID> seen_stations;
 			std::set<std::pair<StationID, StationID> > seen_links;
 
-			const Station * sta;
+			const Station *sta;
 			FOR_ALL_STATIONS(sta) {
 				if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
 				for (int i = 0; i < _smallmap_cargo_count; ++i) {
@@ -1193,7 +1198,7 @@ class SmallMapWindow : public Window {
 					if (!tbl.show_on_map) continue;
 
 					CargoID c = tbl.u.type;
-					const LinkStatMap & links = sta->goods[c].link_stats;
+					const LinkStatMap &links = sta->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 						StationID from = sta->index;
 						StationID to = i->first;
@@ -1202,8 +1207,11 @@ class SmallMapWindow : public Window {
 
 							if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
 							if (seen_links.find(std::make_pair(to, from)) != seen_links.end()) continue;
+							this->pta = this->window->GetStationMiddle(sta);
+							this->ptb = this->window->GetStationMiddle(stb);
+							if (!this->IsLinkVisible()) continue;
 
-							DrawForwBackLinks(sta->index, stb->index);
+							this->DrawForwBackLinks(sta->index, stb->index);
 							seen_stations.insert(to);
 						}
 						seen_links.insert(std::make_pair(from, to));
@@ -1226,9 +1234,9 @@ class SmallMapWindow : public Window {
 		bool highlight;
 
 		virtual void DrawForwBackLinks(StationID sta, StationID stb) {
-			DrawLink(sta, stb);
-			DrawLink(stb, sta);
-			DrawContent();
+			this->DrawLink(sta, stb);
+			this->DrawLink(stb, sta);
+			this->DrawContent();
 		}
 
 		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) {
@@ -1648,7 +1656,7 @@ class SmallMapWindow : public Window {
 		return abs(this->cursor.x - pt->x) < 7 && abs(this->cursor.y - pt->y) < 7;
 	}
 
-	bool CheckLinkSelected(Point * pta, Point * ptb) const {
+	bool CheckLinkSelected(Point *pta, Point *ptb) const {
 		if (this->cursor.x == -1 && this->cursor.y == -1) return false;
 		if (CheckStationSelected(pta) || CheckStationSelected(ptb)) return false;
 		if (pta->x > ptb->x) Swap(pta, ptb);
