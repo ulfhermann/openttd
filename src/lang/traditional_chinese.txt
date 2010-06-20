@@ -1652,8 +1652,8 @@ STR_NETWORK_GAME_LOBBY_CURRENT_BALANCE                          :{SILVER}目前�
 STR_NETWORK_GAME_LOBBY_LAST_YEARS_INCOME                        :{SILVER}去年收入：{WHITE}{CURRENCY}
 STR_NETWORK_GAME_LOBBY_PERFORMANCE                              :{SILVER}效率：{WHITE}{NUM}
 
-STR_NETWORK_GAME_LOBBY_VEHICLES                                 :{SILVER}交通工具：{WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {PLANE}, {NUM} {SHIP}
-STR_NETWORK_GAME_LOBBY_STATIONS                                 :{SILVER}車站：{WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {PLANE}, {NUM} {SHIP}
+STR_NETWORK_GAME_LOBBY_VEHICLES                                 :{SILVER}交通工具：{WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {SHIP}, {NUM} {PLANE}
+STR_NETWORK_GAME_LOBBY_STATIONS                                 :{SILVER}車站：{WHITE}{NUM} {TRAIN}, {NUM} {LORRY}, {NUM} {BUS}, {NUM} {SHIP}, {NUM} {PLANE}
 STR_NETWORK_GAME_LOBBY_PLAYERS                                  :{SILVER}玩家：{WHITE}{STRING}
 
 STR_NETWORK_GAME_LOBBY_NEW_COMPANY                              :{BLACK}新公司
@@ -2423,6 +2423,8 @@ STR_NEWGRF_COMPATIBLE_LOAD_WARNING                              :{WHITE}已為�
 STR_NEWGRF_DISABLED_WARNING                                     :{WHITE}找不到的 GRF 檔已被關閉
 STR_NEWGRF_UNPAUSE_WARNING_TITLE                                :{YELLOW}缺少某些 GRF 檔案
 STR_NEWGRF_UNPAUSE_WARNING                                      :{WHITE}取消暫停可能會讓 OpenTTD 當掉，請不要回報之後的當機情形。{}您真的要取消暫停嗎？
+
+# NewGRF status
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}NewGRF「{0:STRING}」的行為可能會造成失去同步或當機
@@ -3640,6 +3642,7 @@ STR_ERROR_AIRCRAFT_NOT_AVAILABLE                                :{WHITE}飛機�
 STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}遊戲中已有太多交通工具
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}不能更改檢修週期...
 
+STR_ERROR_VEHICLE_IS_DESTROYED                                  :{WHITE}... 交通工具已摧毀
 
 # Specific vehicle errors
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}無法讓列車通過險阻號誌...
