@@ -1121,18 +1121,19 @@ class SmallMapWindow : public Window {
 		virtual void Highlight() {}
 		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) = 0;
 
-		bool IsLinkVisible()
+		FORCEINLINE bool IsLinkVisible()
 		{
-			return !((this->pta.x < _cur_dpi->left && this->ptb.x < _cur_dpi->left) ||
-					(this->pta.y < _cur_dpi->top && this->ptb.y < _cur_dpi->top) ||
-					(this->pta.x - _cur_dpi->left > _cur_dpi->width && this->ptb.x - _cur_dpi->left > _cur_dpi->width) ||
-					(this->pta.y - _cur_dpi->top > _cur_dpi->height && this->ptb.y - _cur_dpi->top > _cur_dpi->height));
+			const NWidgetBase *wi = this->window->GetWidget<NWidgetCore>(SM_WIDGET_MAP);
+			return !((this->pta.x < 0 && this->ptb.x < 0) ||
+					(this->pta.y < 0 && this->ptb.y < 0) ||
+					(this->pta.x > (int)wi->current_x && this->ptb.x > (int)wi->current_x) ||
+					(this->pta.y > (int)wi->current_y && this->ptb.y > (int)wi->current_y));
 		}
 
 		Point pta, ptb;
 		bool search_link_details;
 		LinkDetails link_details;
-		const SmallMapWindow * window;
+		const SmallMapWindow *window;
 
 		void DrawLink(StationID sta, StationID stb) {
 			bool highlight_empty = this->search_link_details && this->link_details.Empty();
