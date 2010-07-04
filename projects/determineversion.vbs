@@ -96,7 +96,7 @@ Function DetermineSVNVersion()
 	Dim sTortoise
 	' First, try with 32-bit architecture
 	sTortoise = ReadRegistryKey("HKLM", "SOFTWARE\TortoiseSVN", "Directory", 32)
-	If sTortoise = "" Then
+	If sTortoise = "" Or IsNull(sTortoise) Then
 		' No 32-bit version of TortoiseSVN installed, try 64-bit version (doesn't hurt on 32-bit machines, it returns nothing or is ignored)
 		sTortoise = ReadRegistryKey("HKLM", "SOFTWARE\TortoiseSVN", "Directory", 64)
 	End If
@@ -203,6 +203,17 @@ Function DetermineSVNVersion()
 						revision = Mid(oExec.StdOut.ReadLine(), 7)
 						revision = Mid(revision, 1, InStr(revision, ")") - 1)
 					End If ' Err.Number = 0
+					If revision = "" Then
+						' No revision? Maybe it is a custom git-svn clone
+						' Reset error number as WshShell.Exec will not do that on success
+						Err.Clear
+						Set oExec = WshShell.Exec("git log --pretty=format:%b --grep=" & Chr(34) & "git-svn-id:.*@[0-9]*" & Chr(34) & " -1 ../src")
+						If Err.Number = 0 Then
+							revision = oExec.StdOut.ReadLine()
+							revision = Mid(revision, InStr(revision, "@") + 1)
+							revision = Mid(revision, 1, InStr(revision, " ") - 1)
+						End If ' Err.Number = 0
+					End If ' revision = ""
 				End If ' Err.Number = 0
 			End If ' oExec.ExitCode = 0
 		End If ' Err.Number = 0
