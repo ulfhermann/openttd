@@ -30,6 +30,7 @@
 #include "landscape_type.h"
 #include "tilehighlight_func.h"
 #include "strings_func.h"
+#include "hotkeys.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -132,16 +133,6 @@ bool GUIPlaceProcDragXY(ViewportDragDropSelectionProcess proc, TileIndex start_t
 }
 
 typedef void OnButtonClick(Window *w);
-
-static const uint16 _terraform_keycodes[] = {
-	'Q',
-	'W',
-	'E',
-	'D',
-	'U',
-	'I',
-	'O',
-};
 
 static void PlaceProc_BuyLand(TileIndex tile)
 {
@@ -248,13 +239,10 @@ struct TerraformToolbarWindow : Window {
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
 	{
-		for (uint i = 0; i != lengthof(_terraform_keycodes); i++) {
-			if (keycode == _terraform_keycodes[i]) {
-				_terraform_button_proc[i](this);
-				return ES_HANDLED;
-			}
-		}
-		return ES_NOT_HANDLED;
+		int num = CheckHotkeyMatch(terraform_hotkeys, keycode, this);
+		if (num == -1) return ES_NOT_HANDLED;
+		this->OnClick(Point(), num, 1);
+		return ES_HANDLED;
 	}
 
 	virtual void OnPlaceObject(Point pt, TileIndex tile)
@@ -293,7 +281,21 @@ struct TerraformToolbarWindow : Window {
 	{
 		this->RaiseButtons();
 	}
+
+	static Hotkey<TerraformToolbarWindow> terraform_hotkeys[];
 };
+
+Hotkey<TerraformToolbarWindow> TerraformToolbarWindow::terraform_hotkeys[] = {
+	Hotkey<TerraformToolbarWindow>('Q' | WKC_GLOBAL_HOTKEY, "lower", TTW_LOWER_LAND),
+	Hotkey<TerraformToolbarWindow>('W' | WKC_GLOBAL_HOTKEY, "raise", TTW_RAISE_LAND),
+	Hotkey<TerraformToolbarWindow>('E' | WKC_GLOBAL_HOTKEY, "level", TTW_LEVEL_LAND),
+	Hotkey<TerraformToolbarWindow>('D' | WKC_GLOBAL_HOTKEY, "dynamite", TTW_DEMOLISH),
+	Hotkey<TerraformToolbarWindow>('U', "buyland", TTW_BUY_LAND),
+	Hotkey<TerraformToolbarWindow>('I', "trees", TTW_PLANT_TREES),
+	Hotkey<TerraformToolbarWindow>('O', "placesign", TTW_PLACE_SIGN),
+	HOTKEY_LIST_END(TerraformToolbarWindow)
+};
+Hotkey<TerraformToolbarWindow> *_terraform_hotkeys = TerraformToolbarWindow::terraform_hotkeys;
 
 static const NWidgetPart _nested_terraform_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
@@ -353,14 +355,13 @@ Window *ShowTerraformToolbar(Window *link)
 	return w;
 }
 
-void ShowTerraformToolbarWithTool(uint16 key, uint16 keycode)
+EventState TerraformToolbarGlobalHotkeys(uint16 key, uint16 keycode)
 {
-	Window *w = FindWindowById(WC_SCEN_LAND_GEN, 0);
-
-	if (w == NULL) w = ShowTerraformToolbar(NULL);
-	if (w == NULL) return;
-
-	w->OnKeyPress(key, keycode);
+	int num = CheckHotkeyMatch<TerraformToolbarWindow>(_terraform_hotkeys, keycode, NULL, true);
+	if (num == -1) return ES_NOT_HANDLED;
+	Window *w = ShowTerraformToolbar(NULL);
+	if (w == NULL) return ES_NOT_HANDLED;
+	return w->OnKeyPress(key, keycode);
 }
 
 static byte _terraform_size = 1;
@@ -576,17 +577,6 @@ static void EditorTerraformClick_Transmitter(Window *w)
 	HandlePlacePushButton(w, ETTW_PLACE_TRANSMITTER, SPR_CURSOR_TRANSMITTER, HT_RECT, PlaceProc_Transmitter);
 }
 
-static const uint16 _editor_terraform_keycodes[] = {
-	'D',
-	'Q',
-	'W',
-	'E',
-	'R',
-	'T',
-	'Y'
-};
-
-typedef void OnButtonClick(Window *w);
 static OnButtonClick * const _editor_terraform_button_proc[] = {
 	EditorTerraformClick_Dynamite,
 	EditorTerraformClick_LowerBigLand,
@@ -664,13 +654,10 @@ struct ScenarioEditorLandscapeGenerationWindow : Window {
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
 	{
-		for (uint i = 0; i != lengthof(_editor_terraform_keycodes); i++) {
-			if (keycode == _editor_terraform_keycodes[i]) {
-				_editor_terraform_button_proc[i](this);
-				return ES_HANDLED;
-			}
-		}
-		return ES_NOT_HANDLED;
+		int num = CheckHotkeyMatch(terraform_editor_hotkeys, keycode, this);
+		if (num == -1) return ES_NOT_HANDLED;
+		this->OnClick(Point(), num, 1);
+		return ES_HANDLED;
 	}
 
 	virtual void OnClick(Point pt, int widget, int click_count)
@@ -749,7 +736,22 @@ struct ScenarioEditorLandscapeGenerationWindow : Window {
 		this->RaiseButtons();
 		this->SetDirty();
 	}
+
+	static Hotkey<ScenarioEditorLandscapeGenerationWindow> terraform_editor_hotkeys[];
 };
+
+Hotkey<ScenarioEditorLandscapeGenerationWindow> ScenarioEditorLandscapeGenerationWindow::terraform_editor_hotkeys[] = {
+	Hotkey<ScenarioEditorLandscapeGenerationWindow>('D' | WKC_GLOBAL_HOTKEY, "dynamite", ETTW_DEMOLISH),
+	Hotkey<ScenarioEditorLandscapeGenerationWindow>('Q' | WKC_GLOBAL_HOTKEY, "lower", ETTW_LOWER_LAND),
+	Hotkey<ScenarioEditorLandscapeGenerationWindow>('W' | WKC_GLOBAL_HOTKEY, "raise", ETTW_RAISE_LAND),
+	Hotkey<ScenarioEditorLandscapeGenerationWindow>('E' | WKC_GLOBAL_HOTKEY, "level", ETTW_LEVEL_LAND),
+	Hotkey<ScenarioEditorLandscapeGenerationWindow>('R', "rocky", ETTW_PLACE_ROCKS),
+	Hotkey<ScenarioEditorLandscapeGenerationWindow>('T', "desertlighthouse", ETTW_PLACE_DESERT_LIGHTHOUSE),
+	Hotkey<ScenarioEditorLandscapeGenerationWindow>('Y', "transmitter", ETTW_PLACE_TRANSMITTER),
+	HOTKEY_LIST_END(ScenarioEditorLandscapeGenerationWindow)
+};
+
+Hotkey<ScenarioEditorLandscapeGenerationWindow> *_terraform_editor_hotkeys = ScenarioEditorLandscapeGenerationWindow::terraform_editor_hotkeys;
 
 static const WindowDesc _scen_edit_land_gen_desc(
 	WDP_AUTO, 0, 0,
@@ -763,12 +765,11 @@ Window *ShowEditorTerraformToolbar()
 	return AllocateWindowDescFront<ScenarioEditorLandscapeGenerationWindow>(&_scen_edit_land_gen_desc, 0);
 }
 
-void ShowEditorTerraformToolbarWithTool(uint16 key, uint16 keycode)
+EventState TerraformToolbarEditorGlobalHotkeys(uint16 key, uint16 keycode)
 {
-	Window *w = FindWindowById(WC_SCEN_LAND_GEN, 0);
-
-	if (w == NULL) w = ShowEditorTerraformToolbar();
-	if (w == NULL) return;
-
-	w->OnKeyPress(key, keycode);
+	int num = CheckHotkeyMatch<ScenarioEditorLandscapeGenerationWindow>(_terraform_editor_hotkeys, keycode, NULL, true);
+	if (num == -1) return ES_NOT_HANDLED;
+	Window *w = ShowEditorTerraformToolbar();
+	if (w == NULL) return ES_NOT_HANDLED;
+	return w->OnKeyPress(key, keycode);
 }
