@@ -66,6 +66,7 @@
 #include "core/random_func.hpp"
 #include "rail_gui.h"
 #include "core/backup_type.hpp"
+#include "hotkeys.h"
 
 #include "newgrf_commons.h"
 
@@ -575,6 +576,7 @@ int ttd_main(int argc, char *argv[])
 	AI::Uninitialize(true);
 	CheckConfig();
 	LoadFromHighScore();
+	LoadHotkeysFromConfig();
 
 	if (resolution.width != 0) { _cur_resolution = resolution; }
 	if (startyear != INVALID_YEAR) _settings_newgame.game_creation.starting_year = startyear;
@@ -758,6 +760,7 @@ int ttd_main(int argc, char *argv[])
 	/* only save config if we have to */
 	if (save_config) {
 		SaveToConfig();
+		SaveHotkeysToConfig();
 		SaveToHighScore();
 	}
 
@@ -854,6 +857,50 @@ void StartupDisasters();
 extern void StartupEconomy();
 
 /**
+ * Load the specified savegame but on error do different things.
+ * If loading fails due to corrupt savegame, bad version, etc. go back to
+ * a previous correct state. In the menu for example load the intro game again.
+ * @param filename file to be loaded
+ * @param mode mode of loading, either SL_LOAD or SL_OLD_LOAD
+ * @param newgm switch to this mode of loading fails due to some unknown error
+ * @param subdir default directory to look for filename, set to 0 if not needed
+ */
+bool SafeSaveOrLoad(const char *filename, int mode, GameMode newgm, Subdirectory subdir)
+{
+	GameMode ogm = _game_mode;
+
+	_game_mode = newgm;
+	assert(mode == SL_LOAD || mode == SL_OLD_LOAD);
+	switch (SaveOrLoad(filename, mode, subdir)) {
+		case SL_OK: return true;
+
+		case SL_REINIT:
+			if (_network_dedicated) {
+				/*
+				 * We need to reinit a network map...
+				 * We can't simply load the intro game here as that game has many
+				 * special cases which make clients desync immediately. So we fall
+				 * back to just generating a new game with the current settings.
+				 */
+				DEBUG(net, 0, "Loading game failed, so a new (random) game will be started!");
+				MakeNewGame(false, true);
+				return false;
+			}
+
+			switch (ogm) {
+				default:
+				case GM_MENU:   LoadIntroGame();      break;
+				case GM_EDITOR: MakeNewEditorWorld(); break;
+			}
+			return false;
+
+		default:
+			_game_mode = ogm;
+			return false;
+	}
+}
+
+/**
  * Start Scenario starts a new game based on a scenario.
  * Eg 'New Game' --> select a preset scenario
  * This starts a scenario based on your current difficulty settings
@@ -879,10 +926,10 @@ static void StartScenario()
 	ResetGRFConfig(true);
 
 	/* Load game */
-	if (SaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, SCENARIO_DIR) != SL_OK) {
-		LoadIntroGame();
+	if (!SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_NORMAL, SCENARIO_DIR)) {
 		SetDParamStr(0, GetSaveLoadErrorString());
 		ShowErrorMessage(STR_JUST_RAW_STRING, INVALID_STRING_ID, WL_ERROR);
+		return;
 	}
 
 	_settings_game.difficulty = _settings_newgame.difficulty;
@@ -898,37 +945,6 @@ static void StartScenario()
 	c->settings = _settings_client.company;
 
 	MarkWholeScreenDirty();
-}
-
-/** Load the specified savegame but on error do different things.
- * If loading fails due to corrupt savegame, bad version, etc. go back to
- * a previous correct state. In the menu for example load the intro game again.
- * @param filename file to be loaded
- * @param mode mode of loading, either SL_LOAD or SL_OLD_LOAD
- * @param newgm switch to this mode of loading fails due to some unknown error
- * @param subdir default directory to look for filename, set to 0 if not needed
- */
-bool SafeSaveOrLoad(const char *filename, int mode, GameMode newgm, Subdirectory subdir)
-{
-	GameMode ogm = _game_mode;
-
-	_game_mode = newgm;
-	assert(mode == SL_LOAD || mode == SL_OLD_LOAD);
-	switch (SaveOrLoad(filename, mode, subdir)) {
-		case SL_OK: return true;
-
-		case SL_REINIT:
-			switch (ogm) {
-				default:
-				case GM_MENU:   LoadIntroGame();      break;
-				case GM_EDITOR: MakeNewEditorWorld(); break;
-			}
-			return false;
-
-		default:
-			_game_mode = ogm;
-			return false;
-	}
 }
 
 void SwitchToMode(SwitchMode new_mode)
@@ -995,7 +1011,6 @@ void SwitchToMode(SwitchMode new_mode)
 			ResetWindowSystem();
 
 			if (!SafeSaveOrLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_NORMAL, NO_DIRECTORY)) {
-				LoadIntroGame();
 				SetDParamStr(0, GetSaveLoadErrorString());
 				ShowErrorMessage(STR_JUST_RAW_STRING, INVALID_STRING_ID, WL_ERROR);
 			} else {
