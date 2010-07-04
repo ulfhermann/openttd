@@ -1275,8 +1275,12 @@ static WindowDesc _vehicle_list_desc(
 static void ShowVehicleListWindowLocal(CompanyID company, uint16 VLW_flag, VehicleType vehicle_type, uint16 unique_number)
 {
 	if (!Company::IsValidID(company)) {
-		_vehicle_list_desc.flags |= WDF_CONSTRUCTION;
 		company = _local_company;
+		/* This can happen when opening the vehicle list as a spectator.
+		 * While it would be cleaner to check this somewhere else, having
+		 * it here reduces code duplication */
+		if (!Company::IsValidID(company)) return;
+		_vehicle_list_desc.flags |= WDF_CONSTRUCTION;
 	} else {
 		_vehicle_list_desc.flags &= ~WDF_CONSTRUCTION;
 	}
@@ -2121,7 +2125,7 @@ public:
 
 		/* draw the flag plus orders */
 		DrawSprite(v->vehstatus & VS_STOPPED ? SPR_FLAG_VEH_STOPPED : SPR_FLAG_VEH_RUNNING, PAL_NONE, WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP);
-		DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, str, TC_FROMSTRING, SA_CENTER);
+		DrawString(r.left + WD_FRAMERECT_LEFT + 6, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, str, TC_FROMSTRING, SA_HOR_CENTER);
 	}
 
 	virtual void OnClick(Point pt, int widget, int click_count)
