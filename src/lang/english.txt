@@ -1274,6 +1274,7 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :2x2 grid
 STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :3x3 grid
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :random
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Towns are allowed to build roads: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_ALLOW_TOWN_LEVEL_CROSSINGS                   :{LTBLUE}Towns are allowed to build level crossings: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Allow town controlled noise level for airports: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Founding towns in game: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :forbidden
@@ -3569,6 +3570,7 @@ STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Must rem
 STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}No suitable railway track
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Must remove railway track first
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}Road is one way or blocked
+STR_ERROR_CROSSING_DISALLOWED                                   :{WHITE}Level crossings not allowed for this rail type
 STR_ERROR_CAN_T_BUILD_SIGNALS_HERE                              :{WHITE}Can't build signals here...
 STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Can't build railway track here...
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Can't remove railway track from here...
