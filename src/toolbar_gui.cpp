@@ -45,6 +45,7 @@
 #include "graph_gui.h"
 #include "textbuf_gui.h"
 #include "newgrf_debug.h"
+#include "hotkeys.h"
 
 #include "network/network.h"
 #include "network/network_gui.h"
@@ -54,7 +55,7 @@
 #include "table/sprites.h"
 
 RailType _last_built_railtype;
-static RoadType _last_built_roadtype;
+RoadType _last_built_roadtype;
 
 enum ToolbarMode {
 	TB_NORMAL,
@@ -663,7 +664,7 @@ static void ToolbarBuildRailClick(Window *w)
 static void MenuClickBuildRail(int index)
 {
 	_last_built_railtype = (RailType)index;
-	ShowBuildRailToolbar(_last_built_railtype, -1);
+	ShowBuildRailToolbar(_last_built_railtype);
 }
 
 /* --- Road button menu --- */
@@ -1224,6 +1225,39 @@ static ToolbarButtonProc * const _toolbar_button_procs[] = {
 	ToolbarSwitchClick,
 };
 
+enum MainToolbarHotkeys {
+	MTHK_PAUSE,
+	MTHK_FASTFORWARD,
+	MTHK_SETTINGS,
+	MTHK_SAVEGAME,
+	MTHK_SMALLMAP,
+	MTHK_TOWNDIRECTORY,
+	MTHK_SUBSIDIES,
+	MTHK_STATIONS,
+	MTHK_FINANCES,
+	MTHK_COMPANIES,
+	MTHK_GRAPHS,
+	MTHK_LEAGUE,
+	MTHK_INDUSTRIES,
+	MTHK_TRAIN_LIST,
+	MTHK_ROADVEH_LIST,
+	MTHK_SHIP_LIST,
+	MTHK_AIRCRAFT_LIST,
+	MTHK_ZOOM_IN,
+	MTHK_ZOOM_OUT,
+	MTHK_BUILD_RAIL,
+	MTHK_BUILD_ROAD,
+	MTHK_BUILD_DOCKS,
+	MTHK_BUILD_AIRPORT,
+	MTHK_BUILD_TREES,
+	MTHK_MUSIC,
+	MTHK_SMALL_SCREENSHOT,
+	MTHK_GIANT_SCREENSHOT,
+	MTHK_CHEATS,
+	MTHK_TERRAFORM,
+	MTHK_EXTRA_VIEWPORT,
+};
+
 struct MainToolbarWindow : Window {
 	MainToolbarWindow(const WindowDesc *desc) : Window()
 	{
@@ -1263,45 +1297,37 @@ struct MainToolbarWindow : Window {
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
 	{
-		switch (keycode) {
-			case WKC_F1: case WKC_PAUSE: ToolbarPauseClick(this); break;
-			case WKC_F2: ShowGameOptions(); break;
-			case WKC_F3: MenuClickSaveLoad(); break;
-			case WKC_F4: ShowSmallMap(); break;
-			case WKC_F5: ShowTownDirectory(); break;
-			case WKC_F6: ShowSubsidiesList(); break;
-			case WKC_F7: ShowCompanyStations(_local_company); break;
-			case WKC_F8: ShowCompanyFinances(_local_company); break;
-			case WKC_F9: ShowCompany(_local_company); break;
-			case WKC_F10: ShowOperatingProfitGraph(); break;
-			case WKC_F11: ShowCompanyLeagueTable(); break;
-			case WKC_F12: ShowBuildIndustryWindow(); break;
-			case WKC_SHIFT | WKC_F1: ShowVehicleListWindow(_local_company, VEH_TRAIN); break;
-			case WKC_SHIFT | WKC_F2: ShowVehicleListWindow(_local_company, VEH_ROAD); break;
-			case WKC_SHIFT | WKC_F3: ShowVehicleListWindow(_local_company, VEH_SHIP); break;
-			case WKC_SHIFT | WKC_F4: ShowVehicleListWindow(_local_company, VEH_AIRCRAFT); break;
-			case WKC_NUM_PLUS: // Fall through
-			case WKC_EQUALS: // Fall through
-			case WKC_SHIFT | WKC_EQUALS: // Fall through
-			case WKC_SHIFT | WKC_F5: ToolbarZoomInClick(this); break;
-			case WKC_NUM_MINUS: // Fall through
-			case WKC_MINUS: // Fall through
-			case WKC_SHIFT | WKC_MINUS: // Fall through
-			case WKC_SHIFT | WKC_F6: ToolbarZoomOutClick(this); break;
-			case WKC_SHIFT | WKC_F7: if (CanBuildVehicleInfrastructure(VEH_TRAIN)) ShowBuildRailToolbar(_last_built_railtype, -1); break;
-			case WKC_SHIFT | WKC_F8: ShowBuildRoadToolbar(_last_built_roadtype); break;
-			case WKC_SHIFT | WKC_F9: ShowBuildDocksToolbar(); break;
-			case WKC_SHIFT | WKC_F10: if (CanBuildVehicleInfrastructure(VEH_AIRCRAFT)) ShowBuildAirToolbar(); break;
-			case WKC_SHIFT | WKC_F11: ShowBuildTreesToolbar(); break;
-			case WKC_SHIFT | WKC_F12: ShowMusicWindow(); break;
-			case WKC_CTRL  | 'S': MenuClickSmallScreenshot(); break;
-			case WKC_CTRL  | 'G': MenuClickWorldScreenshot(); break;
-			case WKC_CTRL | WKC_ALT | 'C': if (!_networking) ShowCheatWindow(); break;
-			case 'A': if (CanBuildVehicleInfrastructure(VEH_TRAIN)) ShowBuildRailToolbar(_last_built_railtype, 4); break; // Invoke Autorail
-			case 'L': ShowTerraformToolbar(); break;
-			case 'Q': case 'W': case 'E': case 'D': ShowTerraformToolbarWithTool(key, keycode); break;
-			case 'M': ShowSmallMap(); break;
-			case 'V': ShowExtraViewPortWindow(); break;
+		switch (CheckHotkeyMatch(maintoolbar_hotkeys, keycode, this)) {
+			case MTHK_PAUSE: ToolbarPauseClick(this); break;
+			case MTHK_FASTFORWARD: ToolbarFastForwardClick(this); break;
+			case MTHK_SETTINGS: ShowGameOptions(); break;
+			case MTHK_SAVEGAME: MenuClickSaveLoad(); break;
+			case MTHK_SMALLMAP: ShowSmallMap(); break;
+			case MTHK_TOWNDIRECTORY: ShowTownDirectory(); break;
+			case MTHK_SUBSIDIES: ShowSubsidiesList(); break;
+			case MTHK_STATIONS: ShowCompanyStations(_local_company); break;
+			case MTHK_FINANCES: ShowCompanyFinances(_local_company); break;
+			case MTHK_COMPANIES: ShowCompany(_local_company); break;
+			case MTHK_GRAPHS: ShowOperatingProfitGraph(); break;
+			case MTHK_LEAGUE: ShowCompanyLeagueTable(); break;
+			case MTHK_INDUSTRIES: ShowBuildIndustryWindow(); break;
+			case MTHK_TRAIN_LIST: ShowVehicleListWindow(_local_company, VEH_TRAIN); break;
+			case MTHK_ROADVEH_LIST: ShowVehicleListWindow(_local_company, VEH_ROAD); break;
+			case MTHK_SHIP_LIST: ShowVehicleListWindow(_local_company, VEH_SHIP); break;
+			case MTHK_AIRCRAFT_LIST: ShowVehicleListWindow(_local_company, VEH_AIRCRAFT); break;
+			case MTHK_ZOOM_IN: ToolbarZoomInClick(this); break;
+			case MTHK_ZOOM_OUT: ToolbarZoomOutClick(this); break;
+			case MTHK_BUILD_RAIL: if (CanBuildVehicleInfrastructure(VEH_TRAIN)) ShowBuildRailToolbar(_last_built_railtype); break;
+			case MTHK_BUILD_ROAD: ShowBuildRoadToolbar(_last_built_roadtype); break;
+			case MTHK_BUILD_DOCKS: ShowBuildDocksToolbar(); break;
+			case MTHK_BUILD_AIRPORT: if (CanBuildVehicleInfrastructure(VEH_AIRCRAFT)) ShowBuildAirToolbar(); break;
+			case MTHK_BUILD_TREES: ShowBuildTreesToolbar(); break;
+			case MTHK_MUSIC: ShowMusicWindow(); break;
+			case MTHK_SMALL_SCREENSHOT: MenuClickSmallScreenshot(); break;
+			case MTHK_GIANT_SCREENSHOT: MenuClickWorldScreenshot(); break;
+			case MTHK_CHEATS: if (!_networking) ShowCheatWindow(); break;
+			case MTHK_TERRAFORM: ShowTerraformToolbar(); break;
+			case MTHK_EXTRA_VIEWPORT: ShowExtraViewPortWindow(); break;
 			default: return ES_NOT_HANDLED;
 		}
 		return ES_HANDLED;
@@ -1341,7 +1367,49 @@ struct MainToolbarWindow : Window {
 	{
 		if (FindWindowById(WC_MAIN_WINDOW, 0) != NULL) HandleZoomMessage(this, FindWindowById(WC_MAIN_WINDOW, 0)->viewport, TBN_ZOOMIN, TBN_ZOOMOUT);
 	}
+
+	static Hotkey<MainToolbarWindow> maintoolbar_hotkeys[];
 };
+
+const uint16 _maintoolbar_pause_keys[] = {WKC_F1, WKC_PAUSE, 0};
+const uint16 _maintoolbar_zoomin_keys[] = {WKC_NUM_PLUS, WKC_EQUALS, WKC_SHIFT | WKC_EQUALS, WKC_SHIFT | WKC_F5, 0};
+const uint16 _maintoolbar_zoomout_keys[] = {WKC_NUM_MINUS, WKC_MINUS, WKC_SHIFT | WKC_MINUS, WKC_SHIFT | WKC_F6, 0};
+const uint16 _maintoolbar_smallmap_keys[] = {WKC_F4, 'M', 0};
+
+Hotkey<MainToolbarWindow> MainToolbarWindow::maintoolbar_hotkeys[] = {
+	Hotkey<MainToolbarWindow>(_maintoolbar_pause_keys, "pause", MTHK_PAUSE),
+	Hotkey<MainToolbarWindow>((uint16)0, "fastforward", MTHK_FASTFORWARD),
+	Hotkey<MainToolbarWindow>(WKC_F2, "settings", MTHK_SETTINGS),
+	Hotkey<MainToolbarWindow>(WKC_F3, "saveload", MTHK_SAVEGAME),
+	Hotkey<MainToolbarWindow>(_maintoolbar_smallmap_keys, "smallmap", MTHK_SMALLMAP),
+	Hotkey<MainToolbarWindow>(WKC_F5, "town_list", MTHK_TOWNDIRECTORY),
+	Hotkey<MainToolbarWindow>(WKC_F6, "subsidies", MTHK_SUBSIDIES),
+	Hotkey<MainToolbarWindow>(WKC_F7, "station_list", MTHK_STATIONS),
+	Hotkey<MainToolbarWindow>(WKC_F8, "finances", MTHK_FINANCES),
+	Hotkey<MainToolbarWindow>(WKC_F9, "companies", MTHK_COMPANIES),
+	Hotkey<MainToolbarWindow>(WKC_F10, "graphs", MTHK_GRAPHS),
+	Hotkey<MainToolbarWindow>(WKC_F11, "league", MTHK_LEAGUE),
+	Hotkey<MainToolbarWindow>(WKC_F12, "industry_list", MTHK_INDUSTRIES),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F1, "train_list", MTHK_TRAIN_LIST),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F2, "roadveh_list", MTHK_ROADVEH_LIST),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F3, "ship_list", MTHK_SHIP_LIST),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F4, "aircraft_list", MTHK_AIRCRAFT_LIST),
+	Hotkey<MainToolbarWindow>(_maintoolbar_zoomin_keys, "zoomin", MTHK_ZOOM_IN),
+	Hotkey<MainToolbarWindow>(_maintoolbar_zoomout_keys, "zoomout", MTHK_ZOOM_OUT),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F7, "build_rail", MTHK_BUILD_RAIL),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F8, "build_road", MTHK_BUILD_ROAD),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F9, "build_docks", MTHK_BUILD_DOCKS),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F10, "build_airport", MTHK_BUILD_AIRPORT),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F11, "build_trees", MTHK_BUILD_TREES),
+	Hotkey<MainToolbarWindow>(WKC_SHIFT | WKC_F12, "music", MTHK_MUSIC),
+	Hotkey<MainToolbarWindow>(WKC_CTRL  | 'S', "small_screenshot", MTHK_SMALL_SCREENSHOT),
+	Hotkey<MainToolbarWindow>(WKC_CTRL  | 'G', "giant_screenshot", MTHK_GIANT_SCREENSHOT),
+	Hotkey<MainToolbarWindow>(WKC_CTRL | WKC_ALT | 'C', "cheats", MTHK_CHEATS),
+	Hotkey<MainToolbarWindow>('L', "terraform", MTHK_TERRAFORM),
+	Hotkey<MainToolbarWindow>('V', "extra_viewport", MTHK_EXTRA_VIEWPORT),
+	HOTKEY_LIST_END(MainToolbarWindow)
+};
+Hotkey<MainToolbarWindow> *_maintoolbar_hotkeys = MainToolbarWindow::maintoolbar_hotkeys;
 
 static NWidgetBase *MakeMainToolbar(int *biggest_index)
 {
@@ -1434,6 +1502,29 @@ static ToolbarButtonProc * const _scen_toolbar_button_procs[] = {
 	ToolbarSwitchClick,
 };
 
+enum MainToolbarEditorHotkeys {
+	MTEHK_PAUSE,
+	MTEHK_FASTFORWARD,
+	MTEHK_SETTINGS,
+	MTEHK_SAVEGAME,
+	MTEHK_GENLAND,
+	MTEHK_GENTOWN,
+	MTEHK_GENINDUSTRY,
+	MTEHK_BUILD_ROAD,
+	MTEHK_BUILD_DOCKS,
+	MTEHK_BUILD_TREES,
+	MTEHK_SIGN,
+	MTEHK_MUSIC,
+	MTEHK_LANDINFO,
+	MTEHK_SMALL_SCREENSHOT,
+	MTEHK_GIANT_SCREENSHOT,
+	MTEHK_ZOOM_IN,
+	MTEHK_ZOOM_OUT,
+	MTEHK_TERRAFORM,
+	MTEHK_SMALLMAP,
+	MTEHK_EXTRA_VIEWPORT,
+};
+
 struct ScenarioEditorToolbarWindow : Window {
 public:
 	ScenarioEditorToolbarWindow(const WindowDesc *desc) : Window()
@@ -1458,16 +1549,16 @@ public:
 		switch (widget) {
 			case TBSE_DATEPANEL:
 				SetDParam(0, ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1));
-				DrawString(r.left, r.right, (this->height - FONT_HEIGHT_NORMAL) / 2, STR_WHITE_DATE_LONG, TC_FROMSTRING, SA_CENTER);
+				DrawString(r.left, r.right, (this->height - FONT_HEIGHT_NORMAL) / 2, STR_WHITE_DATE_LONG, TC_FROMSTRING, SA_HOR_CENTER);
 				break;
 
 			case TBSE_SPACERPANEL: {
 				int height = r.bottom - r.top;
 				if (height > 2 * FONT_HEIGHT_NORMAL) {
-					DrawString(r.left, r.right, (height + 1) / 2 - FONT_HEIGHT_NORMAL, STR_SCENEDIT_TOOLBAR_OPENTTD, TC_FROMSTRING, SA_CENTER);
-					DrawString(r.left, r.right, (height + 1) / 2, STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR, TC_FROMSTRING, SA_CENTER);
+					DrawString(r.left, r.right, (height + 1) / 2 - FONT_HEIGHT_NORMAL, STR_SCENEDIT_TOOLBAR_OPENTTD, TC_FROMSTRING, SA_HOR_CENTER);
+					DrawString(r.left, r.right, (height + 1) / 2, STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR, TC_FROMSTRING, SA_HOR_CENTER);
 				} else {
-					DrawString(r.left, r.right, (height - FONT_HEIGHT_NORMAL) / 2, STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR, TC_FROMSTRING, SA_CENTER);
+					DrawString(r.left, r.right, (height - FONT_HEIGHT_NORMAL) / 2, STR_SCENEDIT_TOOLBAR_SCENARIO_EDITOR, TC_FROMSTRING, SA_HOR_CENTER);
 				}
 			} break;
 		}
@@ -1505,38 +1596,27 @@ public:
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
 	{
-		switch (keycode) {
-			case WKC_F1: case WKC_PAUSE: ToolbarPauseClick(this); break;
-			case WKC_F2: ShowGameOptions(); break;
-			case WKC_F3: MenuClickSaveLoad(); break;
-			case WKC_F4: ToolbarScenGenLand(this); break;
-			case WKC_F5: ToolbarScenGenTown(this); break;
-			case WKC_F6: ToolbarScenGenIndustry(this); break;
-			case WKC_F7: ToolbarScenBuildRoad(this); break;
-			case WKC_F8: ToolbarScenBuildDocks(this); break;
-			case WKC_F9: ToolbarScenPlantTrees(this); break;
-			case WKC_F10: ToolbarScenPlaceSign(this); break;
-			case WKC_F11: ShowMusicWindow(); break;
-			case WKC_F12: PlaceLandBlockInfo(); break;
-			case WKC_CTRL | 'S': MenuClickSmallScreenshot(); break;
-			case WKC_CTRL | 'G': MenuClickWorldScreenshot(); break;
-
-			/* those following are all fall through */
-			case WKC_NUM_PLUS:
-			case WKC_EQUALS:
-			case WKC_SHIFT | WKC_EQUALS:
-			case WKC_SHIFT | WKC_F5: ToolbarZoomInClick(this); break;
-
-			/* those following are all fall through */
-			case WKC_NUM_MINUS:
-			case WKC_MINUS:
-			case WKC_SHIFT | WKC_MINUS:
-			case WKC_SHIFT | WKC_F6: ToolbarZoomOutClick(this); break;
-
-			case 'L': ShowEditorTerraformToolbar(); break;
-			case 'Q': case 'W': case 'E': case 'D': ShowEditorTerraformToolbarWithTool(key, keycode); break;
-			case 'M': ShowSmallMap(); break;
-			case 'V': ShowExtraViewPortWindow(); break;
+		switch (CheckHotkeyMatch(scenedit_maintoolbar_hotkeys, keycode, this)) {
+			case MTEHK_PAUSE: ToolbarPauseClick(this); break;
+			case MTEHK_FASTFORWARD: ToolbarFastForwardClick(this); break;
+			case MTEHK_SETTINGS: ShowGameOptions(); break;
+			case MTEHK_SAVEGAME: MenuClickSaveLoad(); break;
+			case MTEHK_GENLAND: ToolbarScenGenLand(this); break;
+			case MTEHK_GENTOWN: ToolbarScenGenTown(this); break;
+			case MTEHK_GENINDUSTRY: ToolbarScenGenIndustry(this); break;
+			case MTEHK_BUILD_ROAD: ToolbarScenBuildRoad(this); break;
+			case MTEHK_BUILD_DOCKS: ToolbarScenBuildDocks(this); break;
+			case MTEHK_BUILD_TREES: ToolbarScenPlantTrees(this); break;
+			case MTEHK_SIGN: ToolbarScenPlaceSign(this); break;
+			case MTEHK_MUSIC: ShowMusicWindow(); break;
+			case MTEHK_LANDINFO: PlaceLandBlockInfo(); break;
+			case MTEHK_SMALL_SCREENSHOT: MenuClickSmallScreenshot(); break;
+			case MTEHK_GIANT_SCREENSHOT: MenuClickWorldScreenshot(); break;
+			case MTEHK_ZOOM_IN: ToolbarZoomInClick(this); break;
+			case MTEHK_ZOOM_OUT: ToolbarZoomOutClick(this); break;
+			case MTHK_TERRAFORM: ShowEditorTerraformToolbar(); break;
+			case MTEHK_SMALLMAP: ShowSmallMap(); break;
+			case MTHK_EXTRA_VIEWPORT: ShowExtraViewPortWindow(); break;
 			default: return ES_NOT_HANDLED;
 		}
 		return ES_HANDLED;
@@ -1588,7 +1668,34 @@ public:
 
 		this->SetDirty();
 	}
+
+	static Hotkey<ScenarioEditorToolbarWindow> scenedit_maintoolbar_hotkeys[];
 };
+
+Hotkey<ScenarioEditorToolbarWindow> ScenarioEditorToolbarWindow::scenedit_maintoolbar_hotkeys[] = {
+	Hotkey<ScenarioEditorToolbarWindow>(_maintoolbar_pause_keys, "pause", MTEHK_PAUSE),
+	Hotkey<ScenarioEditorToolbarWindow>((uint16)0, "fastforward", MTEHK_FASTFORWARD),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F2, "settings", MTEHK_SETTINGS),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F3, "saveload", MTEHK_SAVEGAME),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F4, "town_list", MTEHK_GENLAND),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F5, "subsidies", MTEHK_GENTOWN),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F6, "station_list", MTEHK_GENINDUSTRY),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F7, "finances", MTEHK_BUILD_ROAD),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F8, "companies", MTEHK_BUILD_DOCKS),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F9, "graphs", MTEHK_BUILD_TREES),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F10, "league", MTEHK_SIGN),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F11, "industry_list", MTEHK_MUSIC),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_F12, "train_list", MTEHK_LANDINFO),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_CTRL  | 'S', "small_screenshot", MTEHK_SMALL_SCREENSHOT),
+	Hotkey<ScenarioEditorToolbarWindow>(WKC_CTRL  | 'G', "giant_screenshot", MTEHK_GIANT_SCREENSHOT),
+	Hotkey<ScenarioEditorToolbarWindow>(_maintoolbar_zoomin_keys, "zoomin", MTEHK_ZOOM_IN),
+	Hotkey<ScenarioEditorToolbarWindow>(_maintoolbar_zoomout_keys, "zoomout", MTEHK_ZOOM_OUT),
+	Hotkey<ScenarioEditorToolbarWindow>('L', "terraform", MTEHK_TERRAFORM),
+	Hotkey<ScenarioEditorToolbarWindow>('M', "smallmap", MTEHK_SMALLMAP),
+	Hotkey<ScenarioEditorToolbarWindow>('V', "extra_viewport", MTEHK_EXTRA_VIEWPORT),
+	HOTKEY_LIST_END(ScenarioEditorToolbarWindow)
+};
+Hotkey<ScenarioEditorToolbarWindow> *_scenedit_maintoolbar_hotkeys = ScenarioEditorToolbarWindow::scenedit_maintoolbar_hotkeys;
 
 static const NWidgetPart _nested_toolb_scen_inner_widgets[] = {
 	NWidget(WWT_IMGBTN, COLOUR_GREY, TBSE_PAUSE), SetDataTip(SPR_IMG_PAUSE, STR_TOOLBAR_TOOLTIP_PAUSE_GAME),
