@@ -97,7 +97,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib dxguid.lib libfreetype2.lib libicu.lib"
+				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib libfreetype2.lib libicu.lib"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames=""
@@ -197,7 +197,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib dxguid.lib libfreetype2.lib libicu.lib"
+				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib libfreetype2.lib libicu.lib"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
@@ -310,7 +310,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib dxguid.lib libfreetype2.lib libicu.lib"
+				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib libfreetype2.lib libicu.lib"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames=""
@@ -413,7 +413,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib dxguid.lib libfreetype2.lib libicu.lib"
+				AdditionalDependencies="winmm.lib ws2_32.lib libpng.lib zlibstat.lib lzo2.lib libfreetype2.lib libicu.lib"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
@@ -581,6 +581,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\highscore.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\hotkeys.cpp"
 				>
 			</File>
 			<File
@@ -1065,6 +1069,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\highscore.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\hotkeys.h"
 				>
 			</File>
 			<File
