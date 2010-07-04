@@ -62,12 +62,36 @@ static void GfxMainBlitter(const Sprite *sprite, int x, int y, BlitterMode mode,
 /**
  * Text drawing parameters, which can change while drawing a line, but are kept between multiple parts
  * of the same text, e.g. on line breaks.
- **/
+ */
 struct DrawStringParams {
 	FontSize fontsize;
 	TextColour cur_colour, prev_colour;
 
 	DrawStringParams(TextColour colour) : fontsize(FS_NORMAL), cur_colour(colour), prev_colour(colour) {}
+
+	/** Switch to new colour \a c.
+	 * @param c New colour to use.
+	 */
+	FORCEINLINE void SetColour(TextColour c)
+	{
+		assert(c >=  TC_BLUE && c <= TC_BLACK);
+		this->prev_colour = this->cur_colour;
+		this->cur_colour = c;
+	}
+
+	/** Switch to previous colour. */
+	FORCEINLINE void SetPreviousColour()
+	{
+		Swap(this->cur_colour, this->prev_colour);
+	}
+
+	/** Switch to using a new font \a f.
+	 * @param f New font to use.
+	 */
+	FORCEINLINE void SetFontSize(FontSize f)
+	{
+		this->fontsize = f;
+	}
 };
 
 static ReusableBuffer<uint8> _cursor_backup;
@@ -503,7 +527,7 @@ static int DrawString(int left, int right, int top, char *str, const char *last,
 			continue;
 		}
 
-		if ((align & SA_MASK) != SA_LEFT) {
+		if ((align & SA_HOR_MASK) != SA_LEFT) {
 			DEBUG(grf, 1, "Using SETX and/or SETXY when not aligned to the left. Fixing alignment...");
 
 			/* For left alignment and change the left so it will roughly be in the
@@ -530,7 +554,7 @@ static int DrawString(int left, int right, int top, char *str, const char *last,
 	}
 
 	/* In case we have a RTL language we swap the alignment. */
-	if (!(align & SA_FORCE) && _dynlang.text_dir == TD_RTL && align != SA_CENTER) align ^= SA_RIGHT;
+	if (!(align & SA_FORCE) && _dynlang.text_dir == TD_RTL && !(align & SA_STRIP) && (align & SA_HOR_MASK) != SA_HOR_CENTER) align ^= SA_RIGHT;
 
 	for (UChar **iter = setx_offsets.Begin(); iter != setx_offsets.End(); iter++) {
 		UChar *to_draw = *iter;
@@ -551,14 +575,14 @@ static int DrawString(int left, int right, int top, char *str, const char *last,
 		 * seen as lastof(todraw) and width as lengthof(todraw). They differ by 1.
 		 * So most +1/-1 additions are to move from lengthof to 'indices'.
 		 */
-		switch (align & SA_MASK) {
+		switch (align & SA_HOR_MASK) {
 			case SA_LEFT:
 				/* right + 1 = left + w */
 				left = initial_left + offset;
 				right = left + w - 1;
 				break;
 
-			case SA_CENTER:
+			case SA_HOR_CENTER:
 				left  = RoundDivSU(initial_right + 1 + initial_left - w, 2);
 				/* right + 1 = left + w */
 				right = left + w - 1;
@@ -581,7 +605,7 @@ static int DrawString(int left, int right, int top, char *str, const char *last,
 		}
 	}
 
-	return align == SA_RIGHT ? min_left : max_right;
+	return (align & SA_HOR_MASK) == SA_RIGHT ? min_left : max_right;
 }
 
 /**
@@ -641,14 +665,13 @@ int DrawString(int left, int right, int top, StringID str, TextColour colour, St
  * @param str string to check and correct for length restrictions
  * @param last the last valid location (for '\0') in the buffer of str
  * @param maxw the maximum width the string can have on one line
- * @param start_fontsize Fontsize to start the text with
+ * @param size Fontsize to start the text with
  * @return return a 32bit wide number consisting of 2 packed values:
  *  0 - 15 the number of lines ADDED to the string
  * 16 - 31 the fontsize in which the length calculation was done at
  */
-uint32 FormatStringLinebreaks(char *str, const char *last, int maxw, FontSize start_fontsize)
+uint32 FormatStringLinebreaks(char *str, const char *last, int maxw, FontSize size)
 {
-	FontSize size = start_fontsize;
 	int num = 0;
 
 	assert(maxw > 0);
@@ -801,12 +824,10 @@ Dimension GetStringMultiLineBoundingBox(StringID str, const Dimension &suggestio
  * @param bottom The bottom most position to draw on.
  * @param str    String to draw.
  * @param colour Colour used for drawing the string, see DoDrawString() for details
- * @param align  The alignment of the string when drawing left-to-right. In the
- *               case a right-to-left language is chosen this is inverted so it
- *               will be drawn in the right direction.
+ * @param align  The horizontal and vertical alignment of the string.
  * @param underline Whether to underline all strings
  *
- * @return The bottom to where we have written.
+ * @return If \a align is #SA_BOTTOM, the top to where we have written, else the bottom to where we have written.
  */
 int DrawStringMultiLine(int left, int right, int top, int bottom, StringID str, TextColour colour, StringAlignment align, bool underline)
 {
@@ -821,43 +842,78 @@ int DrawStringMultiLine(int left, int right, int top, int bottom, StringID str, 
 	GetString(buffer, str, lastof(buffer));
 
 	uint32 tmp = FormatStringLinebreaks(buffer, lastof(buffer), maxw);
-	int num = GB(tmp, 0, 16);
+	int num = GB(tmp, 0, 16) + 1;
 
 	int mt = GetCharacterHeight((FontSize)GB(tmp, 16, 16));
-	int total_height = (num + 1) * mt;
+	int total_height = num * mt;
 
+	int skip_lines = 0;
 	if (total_height > maxh) {
-		/* Check there's room enough for at least one line. */
-		if (maxh < mt) return top;
-
-		num = maxh / mt - 1;
-		total_height = (num + 1) * mt;
+		if (maxh < mt) return top; //  Not enough room for a single line.
+		if ((align & SA_VERT_MASK) == SA_BOTTOM) {
+			skip_lines = num;
+			num = maxh / mt;
+			skip_lines -= num;
+		} else {
+			num = maxh / mt;
+		}
+		total_height = num * mt;
 	}
 
-	int y = (align == SA_CENTER) ? RoundDivSU(bottom + top - total_height, 2) : top;
+	int y;
+	switch (align & SA_VERT_MASK) {
+		case SA_TOP:
+			y = top;
+			break;
+
+		case SA_VERT_CENTER:
+			y = RoundDivSU(bottom + top - total_height, 2);
+			break;
+
+		case SA_BOTTOM:
+			y = bottom - total_height;
+			break;
+
+		default: NOT_REACHED();
+	}
+
 	const char *src = buffer;
-
 	DrawStringParams params(colour);
-
+	int written_top = bottom; // Uppermost position of rendering a line of text
 	for (;;) {
-		char buf2[DRAW_STRING_BUFFER];
-		strecpy(buf2, src, lastof(buf2));
-		DrawString(left, right, y, buf2, lastof(buf2), params, align, underline, false);
+		if (skip_lines == 0) {
+			char buf2[DRAW_STRING_BUFFER];
+			strecpy(buf2, src, lastof(buf2));
+			DrawString(left, right, y, buf2, lastof(buf2), params, align, underline, false);
+			if (written_top > y) written_top = y;
+			y += mt;
+			num--;
+		}
 
 		for (;;) {
 			WChar c = Utf8Consume(&src);
 			if (c == 0) {
-				y += mt;
-				if (--num < 0) {
-					return y;
-				}
 				break;
 			} else if (c == SCC_SETX) {
 				src++;
 			} else if (c == SCC_SETXY) {
 				src += 2;
+			} else if (skip_lines > 0) {
+				/* Skipped drawing, so do additional processing to update params. */
+				if (c >= SCC_BLUE && c <= SCC_BLACK) {
+					params.SetColour((TextColour)(c - SCC_BLUE));
+				} else if (c == SCC_PREVIOUS_COLOUR) { // Revert to the previous colour.
+					params.SetPreviousColour();
+				} else if (c == SCC_TINYFONT) {
+					params.SetFontSize(FS_SMALL);
+				} else if (c == SCC_BIGFONT) {
+					params.SetFontSize(FS_LARGE);
+				}
+
 			}
 		}
+		if (skip_lines > 0) skip_lines--;
+		if (num == 0) return ((align & SA_VERT_MASK) == SA_BOTTOM) ? written_top : y;
 	}
 }
 
@@ -989,19 +1045,18 @@ skip_cont:;
 			y += GetCharacterHeight(params.fontsize);
 			goto check_bounds;
 		} else if (c >= SCC_BLUE && c <= SCC_BLACK) { // change colour?
-			params.prev_colour = params.cur_colour;
-			params.cur_colour = (TextColour)(c - SCC_BLUE);
+			params.SetColour((TextColour)(c - SCC_BLUE));
 			goto switch_colour;
 		} else if (c == SCC_PREVIOUS_COLOUR) { // revert to the previous colour
-			Swap(params.cur_colour, params.prev_colour);
+			params.SetPreviousColour();
 			goto switch_colour;
 		} else if (c == SCC_SETX || c == SCC_SETXY) { // {SETX}/{SETXY}
 			/* The characters are handled before calling this. */
 			NOT_REACHED();
 		} else if (c == SCC_TINYFONT) { // {TINYFONT}
-			params.fontsize = FS_SMALL;
+			params.SetFontSize(FS_SMALL);
 		} else if (c == SCC_BIGFONT) { // {BIGFONT}
-			params.fontsize = FS_LARGE;
+			params.SetFontSize(FS_LARGE);
 		} else {
 			DEBUG(misc, 0, "[utf8] unknown string command character %d", c);
 		}
