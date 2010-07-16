@@ -1340,6 +1340,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Automat
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Automatska zamena nakon {ORANGE}{STRING}{LTBLUE} meseci po ostarenju
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Najmanja potrebna količina novca za zamenu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Trajanje ispisa poruka o grešci: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Odlaganje događaja pri zadržavanju pokazivača: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Odlaganje događaja pri zadržavanju pokazivača: {ORANGE}isključeno
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Prikazivanje broja populacije pored naziva naselja: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Oblikovanje reljefa: {ORANGE}{STRING}
@@ -2092,7 +2094,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Izgradnj
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Izgradnja železničke signalizacije. Ctrl uključuje semafore/svetlosne signale{}Prevlačenjem se grade signali duž prave linije pruge. Ctrl gradi signale do sledeće raskrsnice{}Ctrl+Klik uključuje otvaranje prozora za izbor signala
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Izgradnja železničkog mosta
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Izgradnja železničkog tunela
-STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Izgradnja/Uklanjanje železničkih pruga,signalizacije, putnih tačaka i stanica (kad je uključeno). Držanjem Ctrl takođe se uklanja pruga sa putnih tačaka i stanica
+STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Izgradnja/Uklanjanje železničkih pruga, signalizacije, putnih tačaka i stanica (kad je uključeno). Držanjem Ctrl takođe se uklanja pruga sa putnih tačaka i stanica
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Promena/Nadogradnja vrste pruge
 
 # Rail depot construction window
@@ -2255,7 +2257,7 @@ STR_TREES_RANDOM_TREES_TOOLTIP                                  :{BLACK}Zasadi d
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Oblikovanje reljefa
 STR_TERRAFORM_TOOLTIP_PLACE_ROCKY_AREAS_ON_LANDSCAPE            :{BLACK}Postavi stenovita područja na reljef
 STR_TERRAFORM_TOOLTIP_PLACE_LIGHTHOUSE                          :{BLACK}Postavi svetionik
-STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA                        :{BLACK}Definiši pustinjsku oblast.{}Pritisni i drži Ctrl da je ukloniš
+STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA                        :{BLACK}Definisanje pustinjske oblasti.{}Držanjem Ctrl se uklanja
 STR_TERRAFORM_TOOLTIP_PLACE_TRANSMITTER                         :{BLACK}Postavi predajnik
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Uvećaj područje koje treba sniziti/povisiti
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Smanji područje koje treba sniziti/povisiti
@@ -2645,7 +2647,7 @@ STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRI
 STR_NEWGRF_INVALID_CARGO                                        :<nevažeći tovar>
 STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} <nevažeć{P i a eg} tovar{P 0 "" a a}>
-STR_NEWGRF_INVALID_ENGINE                                       :<nevažeća mašina>
+STR_NEWGRF_INVALID_ENGINE                                       :<nevažeći model vozila>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<nevažeća industrija>
 
 # Sign list window
@@ -2726,7 +2728,7 @@ STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                :{BLACK}Klikom n
 
 # Station list window
 STR_STATION_LIST_TOOLTIP                                        :{BLACK}Imena stanica - klik na ime centrira pogled na stanicu. Ctrl+Klik otvara novi pogled na to mesto
-STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE                        :{BLACK}Držite Ctrl kako biste označili više od jedne stavke
+STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE                        :{BLACK}Držanjem Ctrl moguće je označiti više od jedne stavke
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} Stanic{P a e a}
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
 STR_STATION_LIST_WAYPOINT                                       :{YELLOW}{WAYPOINT}
@@ -3005,10 +3007,10 @@ STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} vozil{P o a a}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
-STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Vozovi - kliknite na voz za podatke, prevucite vozilo da bi dodali/sklonili iz kompozicije
-STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Vozila - kliknite na vozilo za podatke
-STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Brodovi - kliknite na brod za podatke
-STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Letilice - kliknite na letilicu za podatke
+STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Vozovi - prevlačenjem se vozila dodaju/uklanjaju iz kompozicije, desni klik na voz za podatke o njemu, CTRL i desni klik za podatke o kompoziciji
+STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Vozila - desni klik na vozilo za podatke o njemu
+STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Brodovi - desni klik na brod za podatke o njemu
+STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Letilice - desni klik na letilicu za podatke o njoj
 
 STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Ovde prevucite šinsko vozilo kako biste ga prodali
 STR_DEPOT_ROAD_VEHICLE_SELL_TOOLTIP                             :{BLACK}Ovde prevucite drumsko vozilo kako biste ga prodali
@@ -3695,6 +3697,7 @@ STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Nemoguć
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Nemoguće je ukloniti putničku tramvajsku stanicu odatle...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Nemoguće je ukloniti teretnu tramvajsku stanicu odatle...
 STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Potrebno je prvo ukloniti stajalište
+STR_ERROR_THERE_IS_NO_STATION                                   :{WHITE}...tu nema stanice
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Potrebno je prvo srušiti železničku stanicu
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Potrebno je prvo srušiti autobusku stanicu
@@ -3760,6 +3763,8 @@ STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Izgradnj
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Nemoguće je ukloniti železničku prugu odatle...
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Nemoguće je ukloniti signalizaciju odatle...
 STR_ERROR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                     :{WHITE}Signalizacije se ovde ne može promeniti...
+STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}...tu nema železničke pruge
+STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}...tu nema signalizacije
 
 STR_ERROR_CAN_T_CONVERT_RAIL                                    :{WHITE}Vrsta pruge se ovde ne može promeniti...
 
@@ -3770,6 +3775,8 @@ STR_ERROR_CAN_T_BUILD_ROAD_HERE                                 :{WHITE}Izgradnj
 STR_ERROR_CAN_T_BUILD_TRAMWAY_HERE                              :{WHITE}Izgradnja tramvajske pruge ovde nije moguća...
 STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Nemoguće je ukloniti put odatle...
 STR_ERROR_CAN_T_REMOVE_TRAMWAY_FROM                             :{WHITE}Nemoguće je ukloniti tramvajsku prugu odatle...
+STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}...tu nema puta
+STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}...tu nema tramvajske pruge
 
 # Waterway construction errors
 STR_ERROR_CAN_T_BUILD_CANALS                                    :{WHITE}Ovde je nemoguća izgradnja kanala...

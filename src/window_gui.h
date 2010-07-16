@@ -654,8 +654,17 @@ public:
 	 * A click with the right mouse button has been made on the window.
 	 * @param pt     the point inside the window that has been clicked.
 	 * @param widget the clicked widget.
+	 * @return true if the click was actually handled, i.e. do not show a
+	 *         tooltip if tooltip-on-right-click is enabled.
 	 */
-	virtual void OnRightClick(Point pt, int widget) {}
+	virtual bool OnRightClick(Point pt, int widget) { return false; }
+
+	/**
+	 * The mouse is hovering over a widget in the window, perform an action for it, like opening a custom tooltip.
+	 * @param pt     The point where the mouse is hovering.
+	 * @param widget The widget where the mouse is hovering.
+	 */
+	virtual void OnHover(Point pt, int widget) {}
 
 	/**
 	 * An 'object' is being dragged at the provided position, highlight the target if possible.
@@ -894,7 +903,13 @@ Wcls *AllocateWindowDescFront(const WindowDesc *desc, int window_number)
 void RelocateAllWindows(int neww, int newh);
 
 /* misc_gui.cpp */
-void GuiShowTooltips(StringID str, uint paramcount = 0, const uint64 params[] = NULL, bool use_left_mouse_button = false);
+enum TooltipCloseCondition {
+	TCC_RIGHT_CLICK,
+	TCC_LEFT_CLICK,
+	TCC_HOVER,
+};
+
+void GuiShowTooltips(StringID str, uint paramcount = 0, const uint64 params[] = NULL, TooltipCloseCondition close_tooltip = TCC_HOVER);
 
 /* widget.cpp */
 int GetWidgetFromPos(const Window *w, int x, int y);
@@ -913,6 +928,7 @@ extern byte _scroller_click_timeout;
 
 extern bool _scrolling_scrollbar;
 extern bool _scrolling_viewport;
+extern bool _mouse_hovering;
 
 /** Mouse modes. */
 enum SpecialMouseMode {

@@ -329,7 +329,7 @@ Foundation GetRailFoundation(Slope tileh, TrackBits bits)
 static CommandCost CheckRailSlope(Slope tileh, TrackBits rail_bits, TrackBits existing, TileIndex tile)
 {
 	/* don't allow building on the lower side of a coast */
-	if (IsTileType(tile, MP_WATER) || (IsTileType(tile, MP_RAILWAY) && (GetRailGroundType(tile) == RAIL_GROUND_WATER))) {
+	if (GetFloodingBehaviour(tile) != FLOOD_NONE) {
 		if (!IsSteepSlope(tileh) && ((~_valid_tracks_on_leveled_foundation[tileh] & (rail_bits | existing)) != 0)) return_cmd_error(STR_ERROR_CAN_T_BUILD_ON_WATER);
 	}
 
@@ -408,12 +408,8 @@ CommandCost CmdBuildSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		}
 
 		case MP_ROAD: {
-#define M(x) (1 << (x))
 			/* Level crossings may only be built on these slopes */
-			if (!HasBit(M(SLOPE_SEN) | M(SLOPE_ENW) | M(SLOPE_NWS) | M(SLOPE_NS) | M(SLOPE_WSE) | M(SLOPE_EW) | M(SLOPE_FLAT), tileh)) {
-				return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
-			}
-#undef M
+			if (!HasBit(VALID_LEVEL_CROSSING_SLOPES, tileh)) return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 
 			CommandCost ret = EnsureNoVehicleOnGround(tile);
 			if (ret.Failed()) return ret;
@@ -521,7 +517,7 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 
 	switch (GetTileType(tile)) {
 		case MP_ROAD: {
-			if (!IsLevelCrossing(tile) || GetCrossingRailBits(tile) != trackbit) return CMD_ERROR;
+			if (!IsLevelCrossing(tile) || GetCrossingRailBits(tile) != trackbit) return_cmd_error(STR_ERROR_THERE_IS_NO_RAILROAD_TRACK);
 
 			if (_current_company != OWNER_WATER) {
 				CommandCost ret = CheckTileOwnership(tile);
@@ -549,8 +545,8 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 
 		case MP_RAILWAY: {
 			TrackBits present;
-
-			if (!IsPlainRail(tile)) return CMD_ERROR;
+			/* There are no rails present at depots. */
+			if (!IsPlainRail(tile)) return_cmd_error(STR_ERROR_THERE_IS_NO_RAILROAD_TRACK);
 
 			if (_current_company != OWNER_WATER) {
 				CommandCost ret = CheckTileOwnership(tile);
@@ -561,7 +557,7 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 			if (ret.Failed()) return ret;
 
 			present = GetTrackBits(tile);
-			if ((present & trackbit) == 0) return CMD_ERROR;
+			if ((present & trackbit) == 0) return_cmd_error(STR_ERROR_THERE_IS_NO_RAILROAD_TRACK);
 			if (present == (TRACK_BIT_X | TRACK_BIT_Y)) crossing = true;
 
 			cost.AddCost(RailClearCost(GetRailType(tile)));
@@ -594,7 +590,7 @@ CommandCost CmdRemoveSingleRail(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 			break;
 		}
 
-		default: return CMD_ERROR;
+		default: return_cmd_error(STR_ERROR_THERE_IS_NO_RAILROAD_TRACK);
 	}
 
 	if (flags & DC_EXEC) {
@@ -774,6 +770,9 @@ static CommandCost CmdRailTrackHelper(TileIndex tile, DoCommandFlag flags, uint3
 				if (HasBit(p2, 8)) return last_error;
 				break;
 			}
+
+			/* Ownership errors are more important. */
+			if (last_error.GetErrorMessage() == STR_ERROR_OWNED_BY && remove) break;
 		} else {
 			had_success = true;
 			total_cost.AddCost(ret);
@@ -924,7 +923,7 @@ CommandCost CmdBuildSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	/* You can only build signals on plain rail tiles, and the selected track must exist */
 	if (!ValParamTrackOrientation(track) || !IsPlainRailTile(tile) ||
 			!HasTrack(tile, track)) {
-		return CMD_ERROR;
+		return_cmd_error(STR_ERROR_THERE_IS_NO_RAILROAD_TRACK);
 	}
 	CommandCost ret = EnsureNoTrainOnTrack(tile, track);
 	if (ret.Failed()) return ret;
@@ -949,7 +948,7 @@ CommandCost CmdBuildSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	if (HasBit(p1, 17) && HasSignalOnTrack(tile, track)) return CommandCost();
 
 	/* you can not convert a signal if no signal is on track */
-	if (convert_signal && !HasSignalOnTrack(tile, track)) return CMD_ERROR;
+	if (convert_signal && !HasSignalOnTrack(tile, track)) return_cmd_error(STR_ERROR_THERE_ARE_NO_SIGNALS);
 
 	CommandCost cost;
 	if (!HasSignalOnTrack(tile, track)) {
@@ -1150,7 +1149,7 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 	TileIndex end_tile = p1;
 	if (signal_density == 0 || signal_density > 20) return CMD_ERROR;
 
-	if (!IsPlainRailTile(tile)) return CMD_ERROR;
+	if (!IsPlainRailTile(tile)) return_cmd_error(STR_ERROR_THERE_IS_NO_RAILROAD_TRACK);
 
 	/* for vertical/horizontal tracks, double the given signals density
 	 * since the original amount will be too dense (shorter tracks) */
@@ -1221,7 +1220,11 @@ static CommandCost CmdSignalTrackHelper(TileIndex tile, DoCommandFlag flags, uin
 				had_success = true;
 				total_cost.AddCost(ret);
 			} else {
-				last_error = ret;
+				/* The "No railway" error is the least important one. */
+				if (ret.GetErrorMessage() != STR_ERROR_THERE_IS_NO_RAILROAD_TRACK ||
+						last_error.GetErrorMessage() == INVALID_STRING_ID) {
+					last_error = ret;
+				}
 			}
 		}
 
@@ -1285,11 +1288,11 @@ CommandCost CmdRemoveSingleSignal(TileIndex tile, DoCommandFlag flags, uint32 p1
 {
 	Track track = Extract<Track, 0, 3>(p1);
 
-	if (!ValParamTrackOrientation(track) ||
-			!IsPlainRailTile(tile) ||
-			!HasTrack(tile, track) ||
-			!HasSignalOnTrack(tile, track)) {
-		return CMD_ERROR;
+	if (!ValParamTrackOrientation(track) || !IsPlainRailTile(tile) || !HasTrack(tile, track)) {
+		return_cmd_error(STR_ERROR_THERE_IS_NO_RAILROAD_TRACK);
+	}
+	if (!HasSignalOnTrack(tile, track)) {
+		return_cmd_error(STR_ERROR_THERE_ARE_NO_SIGNALS);
 	}
 	CommandCost ret = EnsureNoTrainOnTrack(tile, track);
 	if (ret.Failed()) return ret;
@@ -1788,8 +1791,9 @@ static void DrawTrackFence_WE_2(const TileInfo *ti, SpriteID base_image)
 
 static void DrawTrackDetails(const TileInfo *ti, const RailtypeInfo *rti)
 {
-	/* Base sprite for track fences. */
-	SpriteID base_image = GetCustomRailSprite(rti, ti->tile, RTSG_FENCES);
+	/* Base sprite for track fences.
+	 * Note: Halftile slopes only have fences on the upper part. */
+	SpriteID base_image = GetCustomRailSprite(rti, ti->tile, RTSG_FENCES, IsHalftileSlope(ti->tileh));
 	if (base_image == 0) base_image = SPR_TRACK_FENCE_FLAT_X;
 
 	switch (GetRailGroundType(ti->tile)) {
@@ -1948,6 +1952,8 @@ static void DrawTrackBitsOverlay(TileInfo *ti, TrackBits track, const RailtypeIn
 
 	if (IsValidCorner(halftile_corner)) {
 		DrawFoundation(ti, HalftileFoundation(halftile_corner));
+		overlay = GetCustomRailSprite(rti, ti->tile, RTSG_OVERLAY, true);
+		ground = GetCustomRailSprite(rti, ti->tile, RTSG_GROUND, true);
 
 		/* Draw higher halftile-overlay: Use the sloped sprites with three corners raised. They probably best fit the lightning. */
 		Slope fake_slope = SlopeWithThreeCornersRaised(OppositeCorner(halftile_corner));
