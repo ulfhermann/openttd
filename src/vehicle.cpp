@@ -972,7 +972,7 @@ void CheckVehicleBreakdown(Vehicle *v)
 
 void AgeVehicle(Vehicle *v)
 {
-	if (v->age < 65535) v->age++;
+	if (v->age < MAX_DAY) v->age++;
 
 	int age = v->age - v->max_age;
 	if (age == DAYS_IN_LEAP_YEAR * 0 || age == DAYS_IN_LEAP_YEAR * 1 ||
@@ -1073,11 +1073,14 @@ void VehicleEnterDepot(Vehicle *v)
 			SetWindowClassesDirty(WC_ROADVEH_LIST);
 			break;
 
-		case VEH_SHIP:
+		case VEH_SHIP: {
 			SetWindowClassesDirty(WC_SHIPS_LIST);
-			Ship::From(v)->state = TRACK_BIT_DEPOT;
-			RecalcShipStuff(Ship::From(v));
+			Ship *ship = Ship::From(v);
+			ship->state = TRACK_BIT_DEPOT;
+			ship->UpdateViewport(true, true);
+			SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
 			break;
+		}
 
 		case VEH_AIRCRAFT:
 			SetWindowClassesDirty(WC_AIRCRAFT_LIST);
@@ -1652,12 +1655,7 @@ void Vehicle::LeaveStation()
 		/* Trigger station animation (trains only) */
 		if (IsTileType(this->tile, MP_STATION)) StationAnimationTrigger(st, this->tile, STAT_ANIM_TRAIN_DEPARTS);
 
-		/* Try to reserve a path when leaving the station as we
-		 * might not be marked as wanting a reservation, e.g.
-		 * when an overlength train gets turned around in a station. */
-		if (UpdateSignalsOnSegment(this->tile, TrackdirToExitdir(this->GetVehicleTrackdir()), this->owner) == SIGSEG_PBS || _settings_game.pf.reserve_paths) {
-			TryPathReserve(Train::From(this), true, true);
-		}
+		SetBit(Train::From(this)->flags, VRF_LEAVING_STATION);
 	}
 }
 
