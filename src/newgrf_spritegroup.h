@@ -334,8 +334,8 @@ struct ResolverObject {
 		struct {
 			CargoID cargo_type;
 			uint8 default_selection;
-			IndustryType src_industry;
-			IndustryType dst_industry;
+			uint8 src_industry;            ///< Source industry substitute type. 0xFF for "town", 0xFE for "unknown".
+			uint8 dst_industry;            ///< Destination industry substitute type. 0xFF for "town", 0xFE for "unknown".
 			uint8 distance;
 			AIConstructionEvent event;
 			uint8 count;
@@ -343,6 +343,7 @@ struct ResolverObject {
 		} generic;
 		struct {
 			TileIndex tile;
+			bool upper_halftile;           ///< Are we resolving sprites for the upper halftile?
 		} routes;
 		struct {
 			const struct Station *st;
