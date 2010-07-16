@@ -1653,7 +1653,8 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_BETTER_ROADS                     :lepsze drogi
 STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :siatka 2x2
 STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :siatka 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :losowy
-STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Miasta mogą budować drogi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Miasta, które mogą budować drogi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_TOWN_LEVEL_CROSSINGS                   :{LTBLUE}Miasta, które mogą budować przejazdy kolejowe: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Pozwól miastom kontrolować poziom hałasu dla lotnisk: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Zakładanie miast w grze: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :zabronione
@@ -3869,6 +3870,7 @@ STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Nie moż
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Nie można usunąć przystanku tramwajowego...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Nie można usunąć tramwajowej stacji załadunkowej...
 STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Należy najpierw usunąć przystanek
+STR_ERROR_THERE_IS_NO_STATION                                   :{WHITE}...brak stacji
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Należy najpierw usunąć stację kolejową
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Należy najpierw usunąć przystanek autobusowy
@@ -3928,11 +3930,14 @@ STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Należy 
 STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Nieodpowiednie tory
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Należy najpierw usunąć tory
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}Droga jest jednokierunkowa lub zablokowana
+STR_ERROR_CROSSING_DISALLOWED                                   :{WHITE}Przejazd kolejowy nie dozwolony dla tego typu torów
 STR_ERROR_CAN_T_BUILD_SIGNALS_HERE                              :{WHITE}Nie można tutaj postawić sygnałów...
 STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Nie można tutaj ułożyć torów...
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Nie można stąd usunąć torów...
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Nie można stąd usunąć sygnałów...
 STR_ERROR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                     :{WHITE}Nie można tutaj zmienić sygnałów...
+STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}...brak torów kolejowych
+STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}...brak sygnałów
 
 STR_ERROR_CAN_T_CONVERT_RAIL                                    :{WHITE}Nie można zmienić typu torów w tym miejscu...
 
@@ -3943,6 +3948,8 @@ STR_ERROR_CAN_T_BUILD_ROAD_HERE                                 :{WHITE}Nie moż
 STR_ERROR_CAN_T_BUILD_TRAMWAY_HERE                              :{WHITE}Nie można tutaj zbudować torowiska...
 STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Nie można usunąć drogi z tego miejsca...
 STR_ERROR_CAN_T_REMOVE_TRAMWAY_FROM                             :{WHITE}Nie można usunąć torowiska z tego miejsca...
+STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}...brak drogi
+STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}...brak torowiska tramwajowego
 
 # Waterway construction errors
 STR_ERROR_CAN_T_BUILD_CANALS                                    :{WHITE}Nie można tutaj zbudować kanału...
