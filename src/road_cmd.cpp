@@ -52,11 +52,6 @@ bool RoadVehiclesAreBuilt()
 	return false;
 }
 
-#define M(x) (1 << (x))
-/* Level crossings may only be built on these slopes */
-static const uint32 VALID_LEVEL_CROSSING_SLOPES = (M(SLOPE_SEN) | M(SLOPE_ENW) | M(SLOPE_NWS) | M(SLOPE_NS) | M(SLOPE_WSE) | M(SLOPE_EW) | M(SLOPE_FLAT));
-#undef M
-
 /* Invalid RoadBits on slopes  */
 static const RoadBits _invalid_tileh_slopes_road[2][15] = {
 	/* The inverse of the mixable RoadBits on a leveled slope */
@@ -185,7 +180,7 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 {
 	RoadTypes rts = GetRoadTypes(tile);
 	/* The tile doesn't have the given road type */
-	if (!HasBit(rts, rt)) return CMD_ERROR;
+	if (!HasBit(rts, rt)) return_cmd_error(rt == ROADTYPE_TRAM ? STR_ERROR_THERE_IS_NO_TRAMWAY : STR_ERROR_THERE_IS_NO_ROAD);
 
 	switch (GetTileType(tile)) {
 		case MP_ROAD: {
@@ -276,7 +271,7 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 
 			/* limit the bits to delete to the existing bits. */
 			pieces &= present;
-			if (pieces == ROAD_NONE) return CMD_ERROR;
+			if (pieces == ROAD_NONE) return_cmd_error(rt == ROADTYPE_TRAM ? STR_ERROR_THERE_IS_NO_TRAMWAY : STR_ERROR_THERE_IS_NO_ROAD);
 
 			/* Now set present what it will be after the remove */
 			present ^= pieces;
@@ -866,6 +861,9 @@ CommandCost CmdRemoveLongRoad(TileIndex start_tile, DoCommandFlag flags, uint32 
 				had_success = true;
 			} else {
 				last_error = ret;
+
+				/* Ownership errors are more important. */
+				if (last_error.GetErrorMessage() == STR_ERROR_OWNED_BY) break;
 			}
 		}
 
