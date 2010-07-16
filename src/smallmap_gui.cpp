@@ -1077,7 +1077,8 @@ class SmallMapWindow : public Window {
 
 		const Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (st->owner != _local_company && Company::IsValidID(st->owner)) continue;
+			if ((st->owner != _local_company && Company::IsValidID(st->owner)) ||
+					st->rect.IsEmpty()) continue;
 
 			Point pt = GetStationMiddle(st);
 
@@ -1099,8 +1100,7 @@ class SmallMapWindow : public Window {
 					numCargos++;
 				}
 			}
-			if (numCargos > 1)
-				colour /= numCargos;
+			if (numCargos > 1) colour /= numCargos;
 
 			uint r = 2;
 			if (q >= 10) r++;
@@ -1119,7 +1119,7 @@ class SmallMapWindow : public Window {
 	protected:
 		virtual void DrawContent() = 0;
 		virtual void Highlight() {}
-		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) = 0;
+		virtual void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, const LegendAndColour &cargo_entry) = 0;
 
 		FORCEINLINE bool IsLinkVisible()
 		{
@@ -1207,7 +1207,9 @@ class SmallMapWindow : public Window {
 							const Station *stb = Station::Get(to);
 
 							if (stb->owner != _local_company && Company::IsValidID(stb->owner)) continue;
+							if (sta->rect.IsEmpty() || stb->rect.IsEmpty()) continue;
 							if (seen_links.find(std::make_pair(to, from)) != seen_links.end()) continue;
+
 							this->pta = this->window->GetStationMiddle(sta);
 							this->ptb = this->window->GetStationMiddle(stb);
 							if (!this->IsLinkVisible()) continue;
