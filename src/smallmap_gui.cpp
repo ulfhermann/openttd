@@ -1310,7 +1310,7 @@ class SmallMapWindow : public Window {
 			default:
 				NOT_REACHED();
 			}
-			DrawString(ptm.x, ptm.x + this->window->ColumnWidth(), ptm.y, str , TC_BLACK);
+			DrawString(ptm.x, ptm.x + this->window->ColumnWidth(), ptm.y, str, TC_WHITE);
 			this->Clear();
 		}
 	};

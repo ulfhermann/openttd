@@ -4240,8 +4240,8 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
-STR_NUM                                                         :{BLACK}{NUM}
-STR_NUM_RELATION_2                                              :{BLACK}{NUM}/{NUM}
-STR_NUM_RELATION_3                                              :{BLACK}{NUM}/{NUM}/{NUM}
-STR_NUM_RELATION_4                                              :{BLACK}{NUM}/{NUM}/{NUM}/{NUM}
+STR_NUM                                                         :{NUM}
+STR_NUM_RELATION_2                                              :{NUM}/{NUM}
+STR_NUM_RELATION_3                                              :{NUM}/{NUM}/{NUM}
+STR_NUM_RELATION_4                                              :{NUM}/{NUM}/{NUM}/{NUM}
 STR_TOOLBAR_RAILTYPE_VELOCITY                                   :{STRING} ({VELOCITY})
