@@ -59,6 +59,7 @@ byte _scroller_click_timeout;
 
 bool _scrolling_scrollbar; ///< A scrollbar is being scrolled with the mouse.
 bool _scrolling_viewport;  ///< A viewport is being scrolled with the mouse.
+bool _mouse_hovering;      ///< The mouse is hovering over the same point.
 
 SpecialMouseMode _special_mouse_mode; ///< Mode of the mouse.
 
@@ -382,6 +383,26 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, int click_count)
 static void DispatchRightClickEvent(Window *w, int x, int y)
 {
 	NWidgetCore *wid = w->nested_root->GetWidgetFromPos(x, y);
+	if (wid == NULL) return;
+
+	/* No widget to handle, or the window is not interested in it. */
+	if (wid->index >= 0) {
+		Point pt = { x, y };
+		if (w->OnRightClick(pt, wid->index)) return;
+	}
+
+	if (_settings_client.gui.hover_delay == 0 && wid->tool_tip != 0) GuiShowTooltips(wid->tool_tip, 0, NULL, TCC_RIGHT_CLICK);
+}
+
+/**
+ * Dispatch hover of the mouse over a window.
+ * @param w Window to dispatch event in.
+ * @param x X coordinate of the click.
+ * @param y Y coordinate of the click.
+ */
+static void DispatchHoverEvent(Window *w, int x, int y)
+{
+	NWidgetCore *wid = w->nested_root->GetWidgetFromPos(x, y);
 
 	/* No widget to handle */
 	if (wid == NULL) return;
@@ -396,7 +417,7 @@ static void DispatchRightClickEvent(Window *w, int x, int y)
 	if (wid->index < 0) return;
 
 	Point pt = { x, y };
-	w->OnRightClick(pt, wid->index);
+	w->OnHover(pt, wid->index);
 }
 
 /**
@@ -1287,6 +1308,7 @@ void InitWindowSystem()
 	_focused_window = NULL;
 	_mouseover_last_w = NULL;
 	_scrolling_viewport = false;
+	_mouse_hovering = false;
 
 	NWidgetLeaf::InvalidateDimensionCache(); // Reset cached sizes of several widgets.
 }
@@ -2019,11 +2041,12 @@ enum MouseClick {
 	MC_LEFT,
 	MC_RIGHT,
 	MC_DOUBLE_LEFT,
+	MC_HOVER,
 
 	MAX_OFFSET_DOUBLE_CLICK = 5,     ///< How much the mouse is allowed to move to call it a double click
 	TIME_BETWEEN_DOUBLE_CLICK = 500, ///< Time between 2 left clicks before it becoming a double click, in ms
+	MAX_OFFSET_HOVER = 5,            ///< Maximum mouse movement before stopping a hover event.
 };
-
 extern EventState VpHandlePlaceSizingDrag();
 
 static void ScrollMainViewport(int x, int y)
@@ -2103,7 +2126,7 @@ static void MouseLoop(MouseClick click, int mousewheel)
 	Window *w = FindWindowFromPt(x, y);
 	if (w == NULL) return;
 
-	if (!MaybeBringWindowToFront(w)) return;
+	if (click != MC_HOVER && !MaybeBringWindowToFront(w)) return;
 	ViewPort *vp = IsPtInWindowViewport(w, x, y);
 
 	/* Don't allow any action in a viewport if either in menu of in generating world */
@@ -2174,6 +2197,8 @@ static void MouseLoop(MouseClick click, int mousewheel)
 
 				/* fallthough */
 			case MC_RIGHT: DispatchRightClickEvent(w, x - w->left, y - w->top); break;
+
+			case MC_HOVER: DispatchHoverEvent(w, x - w->left, y - w->top); break;
 		}
 	}
 }
@@ -2188,21 +2213,19 @@ void HandleMouseEvents()
 	assert(IsGeneratingWorld() || _local_company == _current_company);
 
 	static int double_click_time = 0;
-	static int double_click_x = 0;
-	static int double_click_y = 0;
+	static Point double_click_pos = {0, 0};
 
 	/* Mouse event? */
 	MouseClick click = MC_NONE;
 	if (_left_button_down && !_left_button_clicked) {
 		click = MC_LEFT;
 		if (double_click_time != 0 && _realtime_tick - double_click_time   < TIME_BETWEEN_DOUBLE_CLICK &&
-			  double_click_x != 0    && abs(_cursor.pos.x - double_click_x) < MAX_OFFSET_DOUBLE_CLICK  &&
-			  double_click_y != 0    && abs(_cursor.pos.y - double_click_y) < MAX_OFFSET_DOUBLE_CLICK) {
+				double_click_pos.x != 0 && abs(_cursor.pos.x - double_click_pos.x) < MAX_OFFSET_DOUBLE_CLICK  &&
+				double_click_pos.y != 0 && abs(_cursor.pos.y - double_click_pos.y) < MAX_OFFSET_DOUBLE_CLICK) {
 			click = MC_DOUBLE_LEFT;
 		}
 		double_click_time = _realtime_tick;
-		double_click_x = _cursor.pos.x;
-		double_click_y = _cursor.pos.y;
+		double_click_pos = _cursor.pos;
 		_left_button_clicked = true;
 		_input_events_this_tick++;
 	} else if (_right_button_clicked) {
@@ -2216,6 +2239,25 @@ void HandleMouseEvents()
 		mousewheel = _cursor.wheel;
 		_cursor.wheel = 0;
 		_input_events_this_tick++;
+	}
+
+	static uint32 hover_time = 0;
+	static Point hover_pos = {0, 0};
+
+	if (_settings_client.gui.hover_delay > 0) {
+		if (click != MC_NONE || mousewheel != 0 || _left_button_down || _right_button_down ||
+				hover_pos.x == 0 || abs(_cursor.pos.x - hover_pos.x) >= MAX_OFFSET_HOVER  ||
+				hover_pos.y == 0 || abs(_cursor.pos.y - hover_pos.y) >= MAX_OFFSET_HOVER) {
+			hover_pos = _cursor.pos;
+			hover_time = _realtime_tick;
+			_mouse_hovering = false;
+		} else {
+			if (hover_time != 0 && _realtime_tick > hover_time + _settings_client.gui.hover_delay * 1000) {
+				click = MC_HOVER;
+				_input_events_this_tick++;
+				_mouse_hovering = true;
+			}
+		}
 	}
 
 	/* Handle sprite picker before any GUI interaction */
