@@ -20,7 +20,6 @@
 #include "company_base.h"
 #include "company_gui.h"
 #include "network/network.h"
-#include "variables.h"
 #include "strings_func.h"
 #include "sound_func.h"
 #include "economy_func.h"
@@ -36,6 +35,7 @@
 #include "core/geometry_func.hpp"
 #include "station_base.h"
 #include "depot_base.h"
+#include "genworld.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -1061,7 +1061,6 @@ public:
 		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, MAX_LENGTH_TOWN_NAME_PIXELS);
 		this->RandomTownName();
 		this->UpdateButtons(true);
-		this->SetFocusedWidget(TSEW_TOWNNAME_EDITBOX);
 	}
 
 	void RandomTownName()

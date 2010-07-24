@@ -14,9 +14,9 @@
 #include "command_func.h"
 #include "tunnel_map.h"
 #include "bridge_map.h"
-#include "variables.h"
 #include "functions.h"
 #include "economy_func.h"
+#include "genworld.h"
 
 #include "table/strings.h"
 
