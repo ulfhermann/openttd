@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "openttd.h"
 #include "heightmap.h"
-#include "variables.h"
 #include "debug.h"
 #include "genworld.h"
 #include "network/network.h"
@@ -358,7 +357,6 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 		/* snprintf() always outputs trailing '\0', so whole buffer can be used */
 		snprintf(this->edit_str_buf, this->edit_str_size, "%u", _settings_newgame.game_creation.generation_seed);
 		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, 120);
-		this->SetFocusedWidget(GLAND_RANDOM_EDITBOX);
 		this->caption = STR_NULL;
 		this->afilter = CS_NUMERAL;
 
