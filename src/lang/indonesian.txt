@@ -1145,6 +1145,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Perbaru
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Perbarui otomatis kendaraan {ORANGE}{STRING}{LTBLUE} bulan sblm/sesudah usia maks.
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Minimal dana tersedia untuk perbaruan otomatis: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Durasi pesan kesalahan: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Waktu tunggu hover event: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Waktu tunggu hover event: {ORANGE}dimatikan
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Tampilkan populasi kota di label nama kota: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Pembangkit dataran: {ORANGE}{STRING}
@@ -1274,6 +1276,7 @@ STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :kotak 2x2
 STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :kotak 3x3
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :acak
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Kota mengijinkan untuk membuat jalan: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_TOWN_LEVEL_CROSSINGS                   :{LTBLUE}Kota yang diperbolehkan untuk membangun perlintasan tingkat: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NOISE_LEVEL                                  :{LTBLUE}Ijinkan kota mengatur tingkat kebisingan bandara : {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_FOUNDING                                :{LTBLUE}Mendirikan kota pada permainan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_FOUNDING_FORBIDDEN                      :dilarang
@@ -1896,7 +1899,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Bangun s
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Membangun sinyal kereta. Ctrl - berganti sinyal bendera-lampu.
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Membangun Jembatan rel
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Membangun terowongan kereta
-STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Membangun/bongkar rel kereta, sinyal
+STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Membangun/bongkar rel kereta, sinyal, waypoint, dan stasiun. Tekan Ctrl juga dapat membongkar rel pada waypoint dan stasiun
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Konversi jenis rel
 
 # Rail depot construction window
@@ -2059,7 +2062,7 @@ STR_TREES_RANDOM_TREES_TOOLTIP                                  :{BLACK}Menanam 
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Pertumbuhan Wilayah
 STR_TERRAFORM_TOOLTIP_PLACE_ROCKY_AREAS_ON_LANDSCAPE            :{BLACK}Meletakkan bebatuan pada lansekap
 STR_TERRAFORM_TOOLTIP_PLACE_LIGHTHOUSE                          :{BLACK}Menempatkan Mercusuar
-STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA                        :{BLACK}Menentukan wilayah gurun {} Klik dan tahan CTRL untuk menghapusnya
+STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA                        :{BLACK}Membuat wilayah gurun.{}Tahan CTRL untuk membatalkannya
 STR_TERRAFORM_TOOLTIP_PLACE_TRANSMITTER                         :{BLACK}Meletakkan Pemancar
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Tambah ukuran area untuk menurunkan/menaikkan
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Kurangi ukuran area untuk menurunkan/menaikkan
@@ -2449,7 +2452,7 @@ STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRI
 STR_NEWGRF_INVALID_CARGO                                        :<kargo tidak valid>
 STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} dari <kargo tidak valid>
-STR_NEWGRF_INVALID_ENGINE                                       :<mesin tidak valid>
+STR_NEWGRF_INVALID_ENGINE                                       :<model kendaraan tidak valid>
 STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<industri tidak valid>
 
 # Sign list window
@@ -2809,10 +2812,10 @@ STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} kendaraan{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
-STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Kereta - klik untuk info kereta, drag kendaraan untuk menambah atau membuang dari rangkaian
-STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Kendaraan - klik pada kendaraan untuk informasi
-STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Kapal - klik pada kapal untuk menampilkan informasi
-STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Pesawat - klik pada pesawat untuk informasi
+STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Kereta - tahan klik kiri untuk menambah/mengurangi dari kereta, klik kanan untuk informasi. Tahan Ctrl untuk membuat kedua fungsi berlaku pada rangkaian berikut
+STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Kendaraan - klik kanan pada kendaraan untuk informasi
+STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Kapal - klik kanan pada kapal untuk informasi
+STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Pesawat - klik kanan pada pesawat untuk informasi
 
 STR_DEPOT_TRAIN_SELL_TOOLTIP                                    :{BLACK}Drag kereta ke sini untuk menjualnya
 STR_DEPOT_ROAD_VEHICLE_SELL_TOOLTIP                             :{BLACK}Drag kendaraan ke sini untuk menjualnya
@@ -3483,6 +3486,7 @@ STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Tidak da
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Tidak dapat membongkar stasiun trem...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Tidak dapat membongkar stasiun kargo trem...
 STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Terminal harus di hancurkan dulu.
+STR_ERROR_THERE_IS_NO_STATION                                   :{WHITE}...tidak ada stasiun di sini
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Harus menghancurkan jalur rel stasiun terlebih dahul
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Harus menghancurkan stasiun bis terlebih dahulu
@@ -3542,11 +3546,14 @@ STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Sinyal h
 STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Tidak tersedia rel yang sesuai
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Harus membongkar rel terlebih dahulu
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}Jalan satu arah atau ada yang menghalangi
+STR_ERROR_CROSSING_DISALLOWED                                   :{WHITE}Perlintasan tingkat tidak diperbolehkan pada tipe rel ini
 STR_ERROR_CAN_T_BUILD_SIGNALS_HERE                              :{WHITE}Tidak dapat membangun sinyal disini
 STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Tidak dapat membangun jalur rel disini
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Tidak dapat menghapus jalur rel dari sini
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Tidak dapat menghapus sinyal dari sini
 STR_ERROR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                     :{WHITE}Tidak dapat mengubah sinyal ini...
+STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}...tidak ada rel
+STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}...tidak ada sinyal
 
 STR_ERROR_CAN_T_CONVERT_RAIL                                    :{WHITE}Tidak dapat mengubah tipe rel disini...
 
@@ -3557,6 +3564,8 @@ STR_ERROR_CAN_T_BUILD_ROAD_HERE                                 :{WHITE}Tidak da
 STR_ERROR_CAN_T_BUILD_TRAMWAY_HERE                              :{WHITE}Tidak dapat membangun jalan trem disini...
 STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Tidak dapat membongkar jalan di sini...
 STR_ERROR_CAN_T_REMOVE_TRAMWAY_FROM                             :{WHITE}Tidak dapat membongkar jalan trem disini...
+STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}...tidak ada jalan
+STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}...tidak ada jalur trem
 
 # Waterway construction errors
 STR_ERROR_CAN_T_BUILD_CANALS                                    :{WHITE}Tidak dapat membangun kanal disini...

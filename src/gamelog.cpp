@@ -13,12 +13,12 @@
 #include "openttd.h"
 #include "saveload/saveload.h"
 #include "core/alloc_func.hpp"
-#include "variables.h"
 #include "string_func.h"
 #include "settings_type.h"
 #include "gamelog_internal.h"
 #include "console_func.h"
 #include "debug.h"
+#include "date_func.h"
 #include "rev.h"
 
 #include <stdarg.h>

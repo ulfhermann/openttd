@@ -18,10 +18,10 @@
 #include "strings_func.h"
 #include "table/strings.h"
 #include "core/sort_func.hpp"
-#include "variables.h"
 #include "debug.h"
 
 HighScore _highscore_table[5][5]; // 4 difficulty-settings (+ network); top 5
+char *_highscore_file; ///< The file to store the highscore data in.
 
 static const StringID _endgame_perf_titles[] = {
 	STR_HIGHSCORE_PERFORMANCE_TITLE_BUSINESSMAN,
