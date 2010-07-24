@@ -13,9 +13,9 @@
 
 #ifdef ENABLE_NETWORK
 
-#if defined(UNIX) && !defined(__MORPHOS__)
+char *_log_file; ///< File to reroute output of a forked OpenTTD to
 
-#include "variables.h"
+#if defined(UNIX) && !defined(__MORPHOS__)
 
 #include <unistd.h>
 
