@@ -274,41 +274,41 @@ const Order *OrderList::GetNext(const Order *curr) const
 }
 
 /**
- * Recursively determine the next deterministic order to stop at a station.
+ * Recursively determine the next deterministic station to stop at.
  * @param next the first order to check
  * @param hops the number of orders we have already checked.
  * @param check_nonstop if true regard orders without non-stop flag as nondeterministic
- * @return the next stoppping order or NULL
+ * @return the next stoppping station or INVALID_STATION
  */
-const Order *OrderList::GetNextStoppingOrder(const Order *next, uint hops, bool check_nonstop) const
+StationID OrderList::GetNextStoppingStation(const Order *next, uint hops, bool check_nonstop) const
 {
 	if (next == NULL || hops > this->GetNumOrders()) {
-		return NULL;
+		return INVALID_STATION;
 	}
 
 	if (next->GetType() == OT_CONDITIONAL) {
-		const Order *skip_to = this->GetNextStoppingOrder(this->GetOrderAt(next->GetConditionSkipToOrder()), hops + 1, check_nonstop);
-		const Order *advance = this->GetNextStoppingOrder(this->GetNext(next), hops + 1, check_nonstop);
+		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), hops + 1, check_nonstop);
+		StationID advance = this->GetNextStoppingStation(this->GetNext(next), hops + 1, check_nonstop);
 		if (skip_to == advance) {
 			return skip_to; // skipping over non-stopping orders
 		} else {
-			return NULL; // nondeterministic
+			return INVALID_STATION; // nondeterministic
 		}
 	}
 
 	if (check_nonstop) {
 		switch(next->GetNonStopType()) {
 		case ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS:
-			if (next->GetType() == OT_GOTO_STATION) return next; // else fall through
+			if (next->GetType() == OT_GOTO_STATION) return next->GetDestination(); // else fall through
 		case ONSF_NO_STOP_AT_ANY_STATION:
-			return GetNextStoppingOrder(this->GetNext(next), hops + 1, check_nonstop);
+			return GetNextStoppingStation(this->GetNext(next), hops + 1, check_nonstop);
 		default: // nondeterministic
-			return NULL;
+			return INVALID_STATION;
 		}
 	} else if (next->GetType() == OT_GOTO_STATION) {
-		return next;
+		return next->GetDestination();
 	} else {
-		return this->GetNextStoppingOrder(this->GetNext(next), hops + 1, check_nonstop);
+		return this->GetNextStoppingStation(this->GetNext(next), hops + 1, check_nonstop);
 	}
 }
 
@@ -324,12 +324,7 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id, bool check_n
 		curr = this->GetFirstOrder();
 		if (curr == NULL) return INVALID_STATION;
 	}
-	const Order *next = this->GetNextStoppingOrder(this->GetNext(curr), 1, check_nonstop);
-	if (next == NULL) {
-		return INVALID_STATION;
-	} else {
-		return next->GetDestination();
-	}
+	return this->GetNextStoppingStation(this->GetNext(curr), 1, check_nonstop);
 }
 
 void OrderList::InsertOrderAt(Order *new_order, int index)

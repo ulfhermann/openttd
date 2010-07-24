@@ -32,7 +32,6 @@
 #include "news_func.h"
 #include "town.h"
 #include "company_func.h"
-#include "variables.h"
 #include "strings_func.h"
 #include "date_func.h"
 #include "functions.h"
@@ -47,6 +46,9 @@
 
 #include "table/strings.h"
 #include "table/sprites.h"
+
+/** Delay counter for considering the next disaster. */
+uint16 _disaster_delay;
 
 enum DisasterSubType {
 	ST_ZEPPELINER,

@@ -26,6 +26,7 @@
 #include "station_base.h"
 #include "engine_base.h"
 #include "company_base.h"
+#include "newgrf_railtype.h"
 
 struct WagonOverride {
 	EngineID *train_id;
@@ -644,6 +645,12 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 		case 0x48: return Engine::Get(v->engine_type)->flags; // Vehicle Type Info
 		case 0x49: return v->build_year;
 
+		case 0x4A: {
+			if (v->type != VEH_TRAIN) return 0;
+			RailType rt = GetTileRailType(v->tile);
+			return (HasPowerOnRail(Train::From(v)->railtype, rt) ? 0x100 : 0) | GetReverseRailTypeTranslation(rt, object->grffile);
+		}
+
 		/* Variables which use the parameter */
 		case 0x60: // Count consist's engine ID occurance
 			//EngineID engine = GetNewEngineID(GetEngineGRF(v->engine_type), v->type, parameter);
@@ -666,11 +673,10 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 				const Train *u = t->IsWagon() && HasBit(t->vehicle_flags, VRF_POWEREDWAGON) ? t->First() : t;
 				RailType railtype = GetRailType(v->tile);
 				bool powered = t->IsEngine() || (t->IsWagon() && HasBit(t->vehicle_flags, VRF_POWEREDWAGON));
-				bool has_power = powered && HasPowerOnRail(u->railtype, railtype);
-				bool is_electric = powered && u->railtype == RAILTYPE_ELECTRIC;
+				bool has_power = HasPowerOnRail(u->railtype, railtype);
 
-				if (has_power) SetBit(modflags, 5);
-				if (is_electric && !has_power) SetBit(modflags, 6);
+				if (powered && has_power) SetBit(modflags, 5);
+				if (powered && !has_power) SetBit(modflags, 6);
 				if (HasBit(t->flags, VRF_TOGGLE_REVERSE)) SetBit(modflags, 8);
 			}
 			if (HasBit(v->vehicle_flags, VF_BUILT_AS_PROTOTYPE)) SetBit(modflags, 10);
@@ -834,6 +840,8 @@ static const SpriteGroup *VehicleResolveReal(const ResolverObject *object, const
 	bool in_motion = !v->First()->current_order.IsType(OT_LOADING);
 
 	uint totalsets = in_motion ? group->num_loaded : group->num_loading;
+
+	if (totalsets == 0) return NULL;
 
 	uint set = (v->cargo.Count() * totalsets) / max((uint16)1, v->cargo_cap);
 	set = min(set, totalsets - 1);
