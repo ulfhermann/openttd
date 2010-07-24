@@ -18,7 +18,6 @@
 #include "pathfinder/yapf/yapf_cache.h"
 #include "depot_base.h"
 #include "newgrf.h"
-#include "variables.h"
 #include "autoslope.h"
 #include "tunnelbridge_map.h"
 #include "window_func.h"
@@ -37,6 +36,7 @@
 #include "core/random_func.hpp"
 #include "newgrf_railtype.h"
 #include "date_func.h"
+#include "genworld.h"
 
 #include "table/strings.h"
 

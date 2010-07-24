@@ -97,6 +97,13 @@ const StringID BaseVehicleListWindow::vehicle_sorter_names[] = {
 	INVALID_STRING_ID
 };
 
+const StringID BaseVehicleListWindow::vehicle_depot_name[] = {
+	STR_VEHICLE_LIST_SEND_TRAIN_TO_DEPOT,
+	STR_VEHICLE_LIST_SEND_ROAD_VEHICLE_TO_DEPOT,
+	STR_VEHICLE_LIST_SEND_SHIP_TO_DEPOT,
+	STR_VEHICLE_LIST_SEND_AIRCRAFT_TO_HANGAR
+};
+
 void BaseVehicleListWindow::BuildVehicleList(Owner owner, uint16 index, uint16 window_type)
 {
 	if (!this->vehicles.NeedRebuild()) return;
@@ -123,6 +130,50 @@ void BaseVehicleListWindow::BuildVehicleList(Owner owner, uint16 index, uint16 w
 
 	this->vehicles.RebuildDone();
 	this->vscroll.SetCount(this->vehicles.Length());
+}
+
+/**
+ * Compute the size for the Action dropdown.
+ * @param show_autoreplace If true include the autoreplace item.
+ * @param show_group If true include group-related stuff.
+ * @return Required size.
+ */
+Dimension BaseVehicleListWindow::GetActionDropdownSize(bool show_autoreplace, bool show_group)
+{
+	Dimension d = {0, 0};
+
+	if (show_autoreplace) d = maxdim(d, GetStringBoundingBox(STR_VEHICLE_LIST_REPLACE_VEHICLES));
+	d = maxdim(d, GetStringBoundingBox(STR_VEHICLE_LIST_SEND_FOR_SERVICING));
+	d = maxdim(d, GetStringBoundingBox(this->vehicle_depot_name[this->vehicle_type]));
+
+	if (show_group) {
+		d = maxdim(d, GetStringBoundingBox(STR_GROUP_ADD_SHARED_VEHICLE));
+		d = maxdim(d, GetStringBoundingBox(STR_GROUP_REMOVE_ALL_VEHICLES));
+	}
+
+	return d;
+}
+
+/**
+ * Display the Action dropdown window.
+ * @param show_autoreplace If true include the autoreplace item.
+ * @param show_group If true include group-related stuff.
+ * @return Itemlist for dropdown
+ */
+DropDownList *BaseVehicleListWindow::BuildActionDropdownList(bool show_autoreplace, bool show_group)
+{
+	DropDownList *list = new DropDownList();
+
+	if (show_autoreplace) list->push_back(new DropDownListStringItem(STR_VEHICLE_LIST_REPLACE_VEHICLES, ADI_REPLACE, false));
+	list->push_back(new DropDownListStringItem(STR_VEHICLE_LIST_SEND_FOR_SERVICING, ADI_SERVICE, false));
+	list->push_back(new DropDownListStringItem(this->vehicle_depot_name[this->vehicle_type], ADI_DEPOT, false));
+
+	if (show_group) {
+		list->push_back(new DropDownListStringItem(STR_GROUP_ADD_SHARED_VEHICLE, ADI_ADD_SHARED, false));
+		list->push_back(new DropDownListStringItem(STR_GROUP_REMOVE_ALL_VEHICLES, ADI_REMOVE_ALL, false));
+	}
+
+	return list;
 }
 
 /* cached values for VehicleNameSorter to spare many GetString() calls */
@@ -812,7 +863,7 @@ static const NWidgetPart _nested_vehicle_list[] = {
 	EndContainer(),
 
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_GREY, VLW_WIDGET_LIST), SetMinimalSize(248, 0), SetFill(1, 0),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VLW_WIDGET_LIST), SetMinimalSize(248, 0), SetFill(1, 0), SetResize(1, 1),
 		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VLW_WIDGET_SCROLLBAR),
 	EndContainer(),
 
@@ -1036,23 +1087,30 @@ public:
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
-		if (widget != VLW_WIDGET_LIST) return;
+		switch (widget) {
+			case VLW_WIDGET_LIST:
+				resize->height = GetVehicleListHeight(this->vehicle_type, 1);
 
-		resize->width = 0;
-		resize->height = GetVehicleListHeight(this->vehicle_type, 1);
+				switch (this->vehicle_type) {
+					case VEH_TRAIN:
+					case VEH_ROAD:
+						size->height = 6 * resize->height;
+						break;
+					case VEH_SHIP:
+					case VEH_AIRCRAFT:
+						size->height = 4 * resize->height;
+						break;
+					default: NOT_REACHED();
+				}
+				break;
 
-		switch (this->vehicle_type) {
-			case VEH_TRAIN:
-				resize->width = 1;
-				/* Fallthrough */
-			case VEH_ROAD:
-				size->height = 6 * resize->height;
+			case VLW_WIDGET_MANAGE_VEHICLES_DROPDOWN: {
+				Dimension d = this->GetActionDropdownSize((this->window_number & VLW_MASK) == VLW_STANDARD, false);
+				d.height += padding.height;
+				d.width  += padding.width;
+				*size = maxdim(*size, d);
 				break;
-			case VEH_SHIP:
-			case VEH_AIRCRAFT:
-				size->height = 4 * resize->height;
-				break;
-			default: NOT_REACHED();
+			}
 		}
 	}
 
@@ -1174,23 +1232,8 @@ public:
 				break;
 
 			case VLW_WIDGET_MANAGE_VEHICLES_DROPDOWN: {
-				static StringID action_str[] = {
-					STR_VEHICLE_LIST_REPLACE_VEHICLES,
-					STR_VEHICLE_LIST_SEND_FOR_SERVICING,
-					STR_NULL,
-					INVALID_STRING_ID
-				};
-
-				static const StringID depot_name[] = {
-					STR_VEHICLE_LIST_SEND_TRAIN_TO_DEPOT,
-					STR_VEHICLE_LIST_SEND_ROAD_VEHICLE_TO_DEPOT,
-					STR_VEHICLE_LIST_SEND_SHIP_TO_DEPOT,
-					STR_VEHICLE_LIST_SEND_AIRCRAFT_TO_HANGAR
-				};
-
-				/* XXX - Substite string since the dropdown cannot handle dynamic strings */
-				action_str[2] = depot_name[this->vehicle_type];
-				ShowDropDownMenu(this, action_str, 0, VLW_WIDGET_MANAGE_VEHICLES_DROPDOWN, 0, (this->window_number & VLW_MASK) == VLW_STANDARD ? 0 : 1);
+				DropDownList *list = this->BuildActionDropdownList((this->window_number & VLW_MASK) == VLW_STANDARD, false);
+				ShowDropDownList(this, list, 0, VLW_WIDGET_MANAGE_VEHICLES_DROPDOWN);
 				break;
 			}
 
@@ -1212,14 +1255,14 @@ public:
 				assert(this->vehicles.Length() != 0);
 
 				switch (index) {
-					case 0: // Replace window
+					case ADI_REPLACE: // Replace window
 						ShowReplaceGroupVehicleWindow(DEFAULT_GROUP, this->vehicle_type);
 						break;
-					case 1: // Send for servicing
+					case ADI_SERVICE: // Send for servicing
 						DoCommandP(0, GB(this->window_number, 16, 16) /* StationID or OrderID (depending on VLW) */,
 							(this->window_number & VLW_MASK) | DEPOT_MASS_SEND | DEPOT_SERVICE, GetCmdSendToDepot(this->vehicle_type));
 						break;
-					case 2: // Send to Depots
+					case ADI_DEPOT: // Send to Depots
 						DoCommandP(0, GB(this->window_number, 16, 16) /* StationID or OrderID (depending on VLW) */,
 							(this->window_number & VLW_MASK) | DEPOT_MASS_SEND, GetCmdSendToDepot(this->vehicle_type));
 						break;
