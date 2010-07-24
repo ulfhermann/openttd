@@ -13,7 +13,6 @@
 #include "openttd.h"
 #include "landscape.h"
 #include "company_func.h"
-#include "variables.h"
 #include "thread/thread.h"
 #include "command_func.h"
 #include "genworld.h"
@@ -61,6 +60,9 @@ GenWorldInfo _gw;
 ThreadMutex *_genworld_mapgen_mutex = ThreadMutex::New();
 /** Rights for the painting */
 ThreadMutex *_genworld_paint_mutex = ThreadMutex::New();
+
+/** Whether we are generating the map or not. */
+bool _generating_world;
 
 /**
  * Tells if the world generation is done in a thread or not.
