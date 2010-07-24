@@ -10,7 +10,7 @@
 /** @file moving_average.cpp Implementation of moving average functions */
 
 #include "moving_average.h"
-#include "variables.h"
+#include "date_func.h"
 
 /**
  * Run moving average decrease function on all items from a pool which are due
