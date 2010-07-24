@@ -13,7 +13,6 @@
 #include "demands.h"
 #include "mcf.h"
 #include "flowmapper.h"
-#include "../variables.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
