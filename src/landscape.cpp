@@ -18,7 +18,6 @@
 #include "viewport_func.h"
 #include "command_func.h"
 #include "landscape.h"
-#include "variables.h"
 #include "void_map.h"
 #include "tgp.h"
 #include "genworld.h"
@@ -63,8 +62,8 @@ const TileTypeProcs * const _tile_type_procs[16] = {
 	&_tile_type_unmovable_procs,    ///< Callback functions for MP_UNMOVABLE tiles
 };
 
-/* landscape slope => sprite */
-const byte _tileh_to_sprite[32] = {
+/** landscape slope => sprite */
+extern const byte _slope_to_sprite_offset[32] = {
 	0, 1, 2, 3, 4, 5, 6,  7, 8, 9, 10, 11, 12, 13, 14, 0,
 	0, 0, 0, 0, 0, 0, 0, 16, 0, 0,  0, 17,  0, 15, 18, 0,
 };
