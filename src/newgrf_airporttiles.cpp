@@ -23,11 +23,11 @@
 #include "landscape.h"
 #include "company_base.h"
 #include "town.h"
-#include "variables.h"
 #include "functions.h"
 #include "core/random_func.hpp"
 #include "table/strings.h"
 #include "table/airporttiles.h"
+#include "date_func.h"
 
 
 AirportTileSpec AirportTileSpec::tiles[NUM_AIRPORTTILES];

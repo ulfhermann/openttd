@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "fileio_func.h"
-#include "variables.h"
 #include "debug.h"
 #include "fios.h"
 #include "string_func.h"
@@ -44,7 +43,7 @@ struct Fio {
 	FILE *handles[MAX_FILE_SLOTS];         ///< array of file handles we can have open
 	byte buffer_start[FIO_BUFFER_SIZE];    ///< local buffer when read from file
 	const char *filenames[MAX_FILE_SLOTS]; ///< array of filenames we (should) have open
-	char *shortnames[MAX_FILE_SLOTS];///< array of short names for spriteloader's use
+	char *shortnames[MAX_FILE_SLOTS];      ///< array of short names for spriteloader's use
 #if defined(LIMITED_FDS)
 	uint open_handles;                     ///< current amount of open handles
 	uint usage_count[MAX_FILE_SLOTS];      ///< count how many times this file has been opened
@@ -52,6 +51,12 @@ struct Fio {
 };
 
 static Fio _fio;
+
+/** Whether the working directory should be scanned. */
+static bool _do_scan_working_directory = true;
+
+extern char *_config_file;
+extern char *_highscore_file;
 
 /* Get current position in file */
 size_t FioGetPos()
@@ -876,6 +881,33 @@ void ChangeWorkingDirectory(const char *exe)
 }
 
 /**
+ * Whether we should scan the working directory.
+ * It should not be scanned if it's the root or
+ * the home directory as in both cases a big data
+ * directory can cause huge amounts of unrelated
+ * files scanned. Furthermore there are nearly no
+ * use cases for the home/root directory to have
+ * OpenTTD directories.
+ * @return true if it should be scanned.
+ */
+bool DoScanWorkingDirectory()
+{
+	/* No working directory, so nothing to do. */
+	if (_searchpaths[SP_WORKING_DIR] == NULL) return false;
+
+	/* Working directory is root, so do nothing. */
+	if (strcmp(_searchpaths[SP_WORKING_DIR], PATHSEP) == 0) return false;
+
+	/* No personal/home directory, so the working directory won't be that. */
+	if (_searchpaths[SP_PERSONAL_DIR] == NULL) return true;
+
+	char tmp[MAX_PATH];
+	snprintf(tmp, lengthof(tmp), "%s%s", _searchpaths[SP_WORKING_DIR], PERSONAL_DIR);
+	AppendPathSeparator(tmp, MAX_PATH);
+	return strcmp(tmp, _searchpaths[SP_PERSONAL_DIR]) != 0;
+}
+
+/**
  * Determine the base (personal dir and game data dir) paths
  * @param exe the path to the executable
  */
@@ -920,6 +952,8 @@ void DetermineBasePaths(const char *exe)
 	_searchpaths[SP_WORKING_DIR] = strdup(tmp);
 #endif
 
+	_do_scan_working_directory = DoScanWorkingDirectory();
+
 	/* Change the working directory to that one of the executable */
 	ChangeWorkingDirectory(exe);
 	if (getcwd(tmp, MAX_PATH) == NULL) *tmp = '\0';
@@ -960,7 +994,10 @@ void DeterminePaths(const char *exe)
 	DetermineBasePaths(exe);
 
 	Searchpath sp;
-	FOR_ALL_SEARCHPATHS(sp) DEBUG(misc, 4, "%s added as search path", _searchpaths[sp]);
+	FOR_ALL_SEARCHPATHS(sp) {
+		if (sp == SP_WORKING_DIR && !_do_scan_working_directory) continue;
+		DEBUG(misc, 4, "%s added as search path", _searchpaths[sp]);
+	}
 
 	if (_config_file != NULL) {
 		_personal_dir = strdup(_config_file);
@@ -997,7 +1034,6 @@ void DeterminePaths(const char *exe)
 	DEBUG(misc, 3, "%s found as personal directory", _personal_dir);
 
 	_highscore_file = str_fmt("%shs.dat", _personal_dir);
-	_log_file = str_fmt("%sopenttd.log",  _personal_dir);
 	extern char *_hotkeys_file;
 	_hotkeys_file = str_fmt("%shotkeys.cfg",  _personal_dir);
 
@@ -1028,6 +1064,9 @@ void DeterminePaths(const char *exe)
 		FioCreateDirectory(tmp);
 		free(tmp);
 	}
+
+	extern char *_log_file;
+	_log_file = str_fmt("%sopenttd.log",  _personal_dir);
 #else /* ENABLE_NETWORK */
 	/* If we don't have networking, we don't need to make the directory. But
 	 * if it exists we keep it, otherwise remove it from the search paths. */
@@ -1178,6 +1217,9 @@ uint FileScanner::Scan(const char *extension, Subdirectory sd, bool tars, bool r
 	uint num = 0;
 
 	FOR_ALL_SEARCHPATHS(sp) {
+		/* Don't search in the working directory */
+		if (sp == SP_WORKING_DIR && !_do_scan_working_directory) continue;
+
 		FioAppendDirectory(path, MAX_PATH, sp, sd);
 		num += ScanPath(this, extension, path, strlen(path), recursive);
 	}
