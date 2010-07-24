@@ -33,7 +33,6 @@
 #include "town.h"
 #include "signs_base.h"
 #include "signs_func.h"
-#include "variables.h"
 #include "vehicle_base.h"
 #include "vehicle_gui.h"
 #include "blitter/factory.hpp"
@@ -851,7 +850,7 @@ static void DrawTileSelectionRect(const TileInfo *ti, PaletteID pal)
 		}
 		sel += opposite_corner;
 	} else {
-		sel = SPR_SELECT_TILE + _tileh_to_sprite[ti->tileh];
+		sel = SPR_SELECT_TILE + SlopeToSpriteOffset(ti->tileh);
 	}
 	DrawSelectionSprite(sel, pal, ti, 7, FOUNDATION_PART_NORMAL);
 }
