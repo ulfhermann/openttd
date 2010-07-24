@@ -24,7 +24,6 @@
 #include "../depot_base.h"
 #include "../date_func.h"
 #include "../vehicle_func.h"
-#include "../variables.h"
 #include "../effectvehicle_base.h"
 #include "../core/mem_func.hpp"
 #include "../core/alloc_type.hpp"
@@ -1552,6 +1551,8 @@ static bool LoadTTDPatchExtraChunks(LoadgameState *ls, int num)
 }
 
 extern TileIndex _cur_tileloop_tile;
+extern uint16 _disaster_delay;
+extern byte _trees_tick_ctr;
 static const OldChunks main_chunk[] = {
 	OCL_ASSERT( OC_TTD, 0 ),
 	OCL_ASSERT( OC_TTO, 0 ),
