@@ -11,11 +11,6 @@
 
 #include "stdafx.h"
 
-#define VARDEF
-#include "variables.h"
-#undef VARDEF
-
-
 #include "blitter/factory.hpp"
 #include "sound/sound_driver.hpp"
 #include "music/music_driver.hpp"
@@ -90,6 +85,7 @@ void CallWindowTickEvent();
 extern void SetDifficultyLevel(int mode, DifficultySettings *gm_opt);
 extern Company *DoStartupNewCompany(bool is_ai, CompanyID company = INVALID_COMPANY);
 extern void ShowOSErrorBox(const char *buf, bool system);
+extern char *_config_file;
 
 /**
  * Error handling for fatal user errors.
@@ -350,7 +346,9 @@ static void ShutdownGame()
 	_engine_pool.CleanPool();
 	_company_pool.CleanPool();
 
+#ifdef ENABLE_NETWORK
 	free(_config_file);
+#endif
 
 	/* Close all and any open filehandles */
 	FioCloseAll();
@@ -434,12 +432,14 @@ int ttd_main(int argc, char *argv[])
 	uint16 dedicated_port = 0;
 	char *join_server_password = NULL;
 	char *join_company_password = NULL;
+
+	extern bool _dedicated_forks;
+	_dedicated_forks = false;
 #endif /* ENABLE_NETWORK */
 
 	_game_mode = GM_MENU;
 	_switch_mode = SM_MENU;
 	_switch_mode_errorstr = INVALID_STRING_ID;
-	_dedicated_forks = false;
 	_config_file = NULL;
 
 	/* The last param of the following function means this:
@@ -565,10 +565,9 @@ int ttd_main(int argc, char *argv[])
 	BaseSounds::FindSets();
 	BaseMusic::FindSets();
 
-#if defined(UNIX) && !defined(__MORPHOS__)
+#if defined(ENABLE_NETWORK) && defined(UNIX) && !defined(__MORPHOS__)
 	/* We must fork here, or we'll end up without some resources we need (like sockets) */
-	if (_dedicated_forks)
-		DedicatedFork();
+	if (_dedicated_forks) DedicatedFork();
 #endif
 
 	AI::Initialize();
@@ -1323,7 +1322,6 @@ void GameLoop()
 
 	extern int _caret_timer;
 	_caret_timer += 3;
-	_palette_animation_counter += 8;
 	CursorTick();
 
 #ifdef ENABLE_NETWORK
