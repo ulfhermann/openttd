@@ -33,7 +33,7 @@ STR_CARGO_PLURAL_MAIL                                           :Почта
 STR_CARGO_PLURAL_OIL                                            :Нефть
 STR_CARGO_PLURAL_LIVESTOCK                                      :Выльăх
 STR_CARGO_PLURAL_GOODS                                          :Таварĕсем
-STR_CARGO_PLURAL_GRAIN                                          :Пĕрчĕ
+STR_CARGO_PLURAL_GRAIN                                          :Пĕрче
 STR_CARGO_PLURAL_WOOD                                           :Йывăç
 STR_CARGO_PLURAL_IRON_ORE                                       :Тимĕр
 STR_CARGO_PLURAL_STEEL                                          :Хурçă
@@ -53,6 +53,7 @@ STR_CARGO_PLURAL_TOYS                                           :Теттесе�
 STR_CARGO_PLURAL_CANDY                                          :Канфетсем
 STR_CARGO_PLURAL_COLA                                           :Кола
 STR_CARGO_PLURAL_COTTON_CANDY                                   :Сахăр ваткĕ
+STR_CARGO_PLURAL_BUBBLES                                        :Хӑмпӑҫӑмсем
 STR_CARGO_PLURAL_TOFFEE                                         :Карамель
 STR_CARGO_PLURAL_BATTERIES                                      :Батарейкасем
 STR_CARGO_PLURAL_PLASTIC                                        :Пластик
@@ -86,6 +87,7 @@ STR_CARGO_SINGULAR_TOY                                          :Тетте
 STR_CARGO_SINGULAR_CANDY                                        :Канфетсем
 STR_CARGO_SINGULAR_COLA                                         :Кола
 STR_CARGO_SINGULAR_COTTON_CANDY                                 :Сахăр ваткĕ
+STR_CARGO_SINGULAR_BUBBLE                                       :Хӑмпӑҫӑм
 STR_CARGO_SINGULAR_TOFFEE                                       :Карамель
 STR_CARGO_SINGULAR_BATTERY                                      :Батарейкасем
 STR_CARGO_SINGULAR_PLASTIC                                      :Пластик
@@ -102,6 +104,33 @@ STR_ABBREV_COAL                                                 :{TINYFONT}КӐ
 STR_ABBREV_MAIL                                                 :{TINYFONT}ПО
 STR_ABBREV_OIL                                                  :{TINYFONT}НЕ
 STR_ABBREV_LIVESTOCK                                            :{TINYFONT}ВЫ
+STR_ABBREV_GOODS                                                :{TINYFONT}ТВ
+STR_ABBREV_GRAIN                                                :{TINYFONT}ПР
+STR_ABBREV_WOOD                                                 :{TINYFONT}ЙВ
+STR_ABBREV_IRON_ORE                                             :{TINYFONT}ТМ
+STR_ABBREV_STEEL                                                :{TINYFONT}ХР
+STR_ABBREV_VALUABLES                                            :{TINYFONT}КП
+STR_ABBREV_COPPER_ORE                                           :{TINYFONT}ПХ
+STR_ABBREV_MAIZE                                                :{TINYFONT}КК
+STR_ABBREV_FRUIT                                                :{TINYFONT}ҪМ
+STR_ABBREV_DIAMONDS                                             :{TINYFONT}КА
+STR_ABBREV_FOOD                                                 :{TINYFONT}АП
+STR_ABBREV_PAPER                                                :{TINYFONT}ХТ
+STR_ABBREV_GOLD                                                 :{TINYFONT}ЫЛ
+STR_ABBREV_WATER                                                :{TINYFONT}ШВ
+STR_ABBREV_WHEAT                                                :{TINYFONT}ТЛ
+STR_ABBREV_RUBBER                                               :{TINYFONT}КЧ
+STR_ABBREV_SUGAR                                                :{TINYFONT}СХ
+STR_ABBREV_TOYS                                                 :{TINYFONT}ТТ
+STR_ABBREV_SWEETS                                               :{TINYFONT}КН
+STR_ABBREV_COLA                                                 :{TINYFONT}КЛ
+STR_ABBREV_CANDYFLOSS                                           :{TINYFONT}СВ
+STR_ABBREV_BUBBLES                                              :{TINYFONT}ХМ
+STR_ABBREV_TOFFEE                                               :{TINYFONT}КР
+STR_ABBREV_BATTERIES                                            :{TINYFONT}БТ
+STR_ABBREV_PLASTIC                                              :{TINYFONT}ПЛ
+STR_ABBREV_FIZZY_DRINKS                                         :{TINYFONT}ГШ
+STR_ABBREV_NONE                                                 :{TINYFONT}ҪУК
 STR_ABBREV_ALL                                                  :{TINYFONT}ПӖРМАЙ
 
 # 'Mode' of transport for cargoes
@@ -142,6 +171,8 @@ STR_BUTTON_CANCEL                                               :{BLACK}Улӑш
 STR_BUTTON_OK                                                   :{BLACK}Юрӗ
 
 # On screen keyboard window
+STR_OSK_KEYBOARD_LAYOUT                                         :`1234567890-=\qwertyuiop[]asdfghjkl;'  zxcvbnm,./ .
+STR_OSK_KEYBOARD_LAYOUT_CAPS                                    :~!@#$%^&*()_+|QWERTYUIOP{{}}ASDFGHJKL:"  ZXCVBNM<>? .
 
 # Measurement tooltip
 STR_MEASURE_LENGTH                                              :{BLACK}Тӑршшӗ: {NUM}
@@ -157,18 +188,35 @@ STR_SORT_BY_POPULATION                                          :Ҫынисем
 STR_SORT_BY_NAME                                                :Ячӗ
 STR_SORT_BY_PRODUCTION                                          :Тухӑҫлӑх
 STR_SORT_BY_TYPE                                                :Тип
+STR_SORT_BY_TRANSPORTED                                         :Кӑларӑм
+STR_SORT_BY_AGE                                                 :Ӳсӗм
+STR_SORT_BY_RELIABILITY                                         :Шанчӑклӑх
+STR_SORT_BY_MODEL                                               :Модель
+STR_SORT_BY_VALUE                                               :Хак
+STR_SORT_BY_LENGTH                                              :Тӑршшӗ
+STR_SORT_BY_COST                                                :Хак
+STR_SORT_BY_POWER                                               :Хӑватлӑх
 
 # Tooltips for the main toolbar
+STR_TOOLBAR_TOOLTIP_PAUSE_GAME                                  :{BLACK}Вӑййи тӑхтав
+STR_TOOLBAR_TOOLTIP_FORWARD                                     :{BLACK}Вӑййи хӑвӑртлат
+STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Майлаштару
 
 # Extra tooltips for the scenario editor toolbar
+STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
 
 ############ range for SE file menu starts
+STR_SCENEDIT_FILE_MENU_SEPARATOR                                :
+STR_SCENEDIT_FILE_MENU_QUIT                                     :Вӗҫле
 ############ range for SE file menu starts
 
 ############ range for settings menu starts
+STR_SETTINGS_MENU_GAME_OPTIONS                                  :Вӑййи майлаштару
+STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF майлаштару
 ############ range ends here
 
 ############ range for file menu starts
+STR_FILE_MENU_EXIT                                              :Тух
 ############ range ends here
 
 ############ range for map menu starts
@@ -177,6 +225,7 @@ STR_SORT_BY_TYPE                                                :Тип
 ############ end of the 'Town' dropdown
 
 ############ range for subsidies menu starts
+STR_SUBSIDIES_MENU_SUBSIDIES                                    :Грантсем
 ############ range ends here
 
 ############ range for graph menu starts
@@ -204,52 +253,178 @@ STR_SORT_BY_TYPE                                                :Тип
 ############ range ends here
 
 ############ range for music menu starts
+STR_TOOLBAR_SOUND_MUSIC                                         :Сасӑ/Юрӑ-кӗвӗ
 ############ range ends here
 
 ############ range for message menu starts
 ############ range ends here
 
 ############ range for about menu starts
+STR_ABOUT_MENU_SEPARATOR                                        :
+STR_ABOUT_MENU_SCREENSHOT                                       :Экран сӑнӗ (Ctrl+S)
+STR_ABOUT_MENU_ABOUT_OPENTTD                                    :'OpenTTD' çинчен
 ############ range ends here
 
 ############ range for days starts (also used for the place in the highscore window)
+STR_ORDINAL_NUMBER_1ST                                          :1мӗш
+STR_ORDINAL_NUMBER_2ND                                          :2мӗш
+STR_ORDINAL_NUMBER_3RD                                          :3-мӗш
+STR_ORDINAL_NUMBER_4TH                                          :4-мӗш
+STR_ORDINAL_NUMBER_5TH                                          :5-мӗш
+STR_ORDINAL_NUMBER_6TH                                          :6-мӗш
+STR_ORDINAL_NUMBER_7TH                                          :7-мӗш
+STR_ORDINAL_NUMBER_8TH                                          :8-мӗш
+STR_ORDINAL_NUMBER_9TH                                          :9-мӗш
+STR_ORDINAL_NUMBER_10TH                                         :10-мӗш
+STR_ORDINAL_NUMBER_11TH                                         :11-мӗш
+STR_ORDINAL_NUMBER_12TH                                         :12-мӗш
+STR_ORDINAL_NUMBER_13TH                                         :13-мӗш
+STR_ORDINAL_NUMBER_14TH                                         :14-мӗш
+STR_ORDINAL_NUMBER_15TH                                         :15-мӗш
+STR_ORDINAL_NUMBER_16TH                                         :16-мӗш
+STR_ORDINAL_NUMBER_17TH                                         :17-мӗш
+STR_ORDINAL_NUMBER_18TH                                         :18-мӗш
+STR_ORDINAL_NUMBER_19TH                                         :19-мӗш
+STR_ORDINAL_NUMBER_20TH                                         :20-мӗш
+STR_ORDINAL_NUMBER_21ST                                         :21-мӗш
+STR_ORDINAL_NUMBER_22ND                                         :22-мӗш
+STR_ORDINAL_NUMBER_23RD                                         :23-мӗш
+STR_ORDINAL_NUMBER_24TH                                         :24-мӗш
+STR_ORDINAL_NUMBER_25TH                                         :25-мӗш
+STR_ORDINAL_NUMBER_26TH                                         :26-мӗш
+STR_ORDINAL_NUMBER_27TH                                         :27-мӗш
+STR_ORDINAL_NUMBER_28TH                                         :28-мӗш
+STR_ORDINAL_NUMBER_29TH                                         :29-мӗш
+STR_ORDINAL_NUMBER_30TH                                         :30-мӗш
+STR_ORDINAL_NUMBER_31ST                                         :31-мӗш
 ############ range for days ends
 
 ############ range for months starts
+STR_MONTH_ABBREV_JAN                                            :Кӑр
+STR_MONTH_ABBREV_FEB                                            :Нар
+STR_MONTH_ABBREV_MAR                                            :Пуш
+STR_MONTH_ABBREV_APR                                            :Ака
+STR_MONTH_ABBREV_MAY                                            :Ҫу
+STR_MONTH_ABBREV_JUN                                            :Ҫӗр
+STR_MONTH_ABBREV_JUL                                            :Утӑ
+STR_MONTH_ABBREV_AUG                                            :Ҫур
+STR_MONTH_ABBREV_SEP                                            :Авӑ
+STR_MONTH_ABBREV_OCT                                            :Юпа
+STR_MONTH_ABBREV_NOV                                            :Чӳк
+STR_MONTH_ABBREV_DEC                                            :Раш
 
+STR_MONTH_JAN                                                   :Кӑрлач
+STR_MONTH_FEB                                                   :Нарӑс
+STR_MONTH_MAR                                                   :Пуш
+STR_MONTH_APR                                                   :Ака
+STR_MONTH_MAY                                                   :Ҫу
+STR_MONTH_JUN                                                   :Ҫӗртме
+STR_MONTH_JUL                                                   :Утӑ
+STR_MONTH_AUG                                                   :Ҫурла
+STR_MONTH_SEP                                                   :Авӑн
+STR_MONTH_OCT                                                   :Юпа
+STR_MONTH_NOV                                                   :Чӳк
+STR_MONTH_DEC                                                   :Раштав
 ############ range for months ends
 
 # Graph window
+STR_GRAPH_KEY_BUTTON                                            :{BLACK}Уҫӑ
+STR_GRAPH_X_LABEL_MONTH                                         :{TINYFONT}{STRING}{} {STRING}
+STR_GRAPH_X_LABEL_MONTH_YEAR                                    :{TINYFONT}{STRING}{} {STRING}{}{NUM}
+STR_GRAPH_Y_LABEL                                               :{TINYFONT}{STRING}
+STR_GRAPH_Y_LABEL_NUMBER                                        :{TINYFONT}{COMMA}
 
 
+STR_GRAPH_CARGO_PAYMENT_CARGO                                   :{TINYFONT}{BLACK}{STRING}
 
 
 # Graph key window
 
 # Company league window
+STR_COMPANY_LEAGUE_COMPANY_NAME                                 :{ORANGE}{COMPANY} {BLACK}{COMPANYNUM} '{STRING}'
+STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_ENGINEER                   :Инженер
+STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_DIRECTOR                   :Директор
+STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_PRESIDENT                  :Президент
+STR_COMPANY_LEAGUE_PERFORMANCE_TITLE_TYCOON                     :Хуҫа(Tycoon)
 
 # Performance detail window
+STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Вакки-тӗвекки
+STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
+STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
+STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
 ############ Those following lines need to be in this order!!
+STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Ҫул-йӗр:
+STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Станцисем:
+STR_PERFORMANCE_DETAIL_CARGO                                    :{BLACK}Тиев:
+STR_PERFORMANCE_DETAIL_MONEY                                    :{BLACK}Укҫӑ:
+STR_PERFORMANCE_DETAIL_LOAN                                     :{BLACK}Кивҫен:
+STR_PERFORMANCE_DETAIL_TOTAL                                    :{BLACK}Пурӗ:
 ############ End of order list
 
 # Music window
+STR_MUSIC_RULER_MIN                                             :{TINYFONT}{BLACK}ЧИ САХ(MIN)
+STR_MUSIC_RULER_MAX                                             :{TINYFONT}{BLACK}ЧИ НУМ(MAX)
+STR_MUSIC_RULER_MARKER                                          :{TINYFONT}{BLACK}'
+STR_MUSIC_TRACK_NONE                                            :{TINYFONT}{DKGREEN}--
+STR_MUSIC_TRACK_DIGIT                                           :{TINYFONT}{DKGREEN}{ZEROFILL_NUM}
+STR_MUSIC_TITLE_NONE                                            :{TINYFONT}{DKGREEN}------
+STR_MUSIC_TITLE_NAME                                            :{TINYFONT}{DKGREEN}"{STRING}"
+STR_MUSIC_TRACK                                                 :{TINYFONT}{BLACK}Кӗвӗ
+STR_MUSIC_XTITLE                                                :{TINYFONT}{BLACK}Ят
 
 
 # Playlist window
+STR_PLAYLIST_TRACK_NAME                                         :{TINYFONT}{LTBLUE}{ZEROFILL_NUM} "{STRING}"
+STR_PLAYLIST_CLEAR                                              :{TINYFONT}{BLACK}Тасат
+STR_PLAYLIST_SAVE                                               :{TINYFONT}{BLACK}Упра
 
 # Highscore window
+STR_HIGHSCORE_POSITION                                          :{BIGFONT}{BLACK}{COMMA}.
+STR_HIGHSCORE_NAME                                              :{BIGFONT}{PRESIDENTNAME}, {COMPANY}
+STR_HIGHSCORE_STATS                                             :{BIGFONT}'{STRING}'   ({COMMA})
 
 # Smallmap window
+STR_SMALLMAP_CAPTION                                            :{WHITE}Карттӑ - {STRING}
 
+STR_SMALLMAP_TYPE_VEHICLES                                      :Ҫул-йӗр
+STR_SMALLMAP_TYPE_VEGETATION                                    :Йывăç-курӑк
+STR_SMALLMAP_TYPE_OWNERS                                        :Хуҫасем
 
+STR_SMALLMAP_LEGENDA_ROADS                                      :{TINYFONT}{BLACK}Ҫулсем
+STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLACK}Чукун ҫулсем
+STR_SMALLMAP_LEGENDA_VEHICLES                                   :{TINYFONT}{BLACK}Ҫул-йӗр
+STR_SMALLMAP_LEGENDA_TRAINS                                     :{TINYFONT}{BLACK}Пуйăссем
+STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{TINYFONT}{BLACK}Транспорт ҫул
+STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLACK}Карапсем
+STR_SMALLMAP_LEGENDA_AIRCRAFT                                   :{TINYFONT}{BLACK}Сывлӑш ҫул-йӗрӗ
+STR_SMALLMAP_LEGENDA_FOREST                                     :{TINYFONT}{BLACK}Вӑрман
+STR_SMALLMAP_LEGENDA_FIELDS                                     :{TINYFONT}{BLACK}Уйсем
+STR_SMALLMAP_LEGENDA_TREES                                      :{TINYFONT}{BLACK}Йывӑссем
+STR_SMALLMAP_LEGENDA_ROCKS                                      :{TINYFONT}{BLACK}Ту хысакӗсем
+STR_SMALLMAP_LEGENDA_WATER                                      :{TINYFONT}{BLACK}Шыв
+STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLACK}Пуш хир
+STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}Юр
 
+STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 
 # Status bar messages
+STR_STATUSBAR_COMPANY_NAME                                      :{SILVER}- -  {COMPANY}  - -
+STR_STATUSBAR_PAUSED                                            :{YELLOW}*  *  ТӐХТАВ  *  *
+STR_STATUSBAR_AUTOSAVE                                          :{RED}ХӐЙ УПРАВ
+STR_STATUSBAR_SAVING_GAME                                       :{RED}*  *  ВӐЙЙИ УПРАВ  *  *
 
 # News message history
+STR_MESSAGE_NEWS_FORMAT                                         :{STRING}  -  {STRING}
 
 # Message settings window
+STR_NEWS_MESSAGE_CAPTION                                        :{WHITE}Пӗлтерӳ
+STR_NEWS_MESSAGE_OPTIONS_CAPTION                                :{WHITE}Майлаштару пӗлтерӗвӗ
+STR_NEWS_MESSAGES_OFF                                           :Сӳнтер
+STR_NEWS_MESSAGES_SUMMARY                                       :Кӗске
+STR_NEWS_MESSAGES_FULL                                          :Тулли
 
+STR_NEWS_MESSAGE_TYPE_SUBSIDIES                                 :{YELLOW}Грантсем
 
 
 
@@ -276,6 +451,7 @@ STR_SORT_BY_TYPE                                                :Тип
 # Game options window
 
 ############ start of currency region
+STR_GAME_OPTIONS_CURRENCY_RUR                                   :Вырӑсла тенкӗ (RUR)
 ############ end of currency region
 
 
@@ -285,13 +461,38 @@ STR_SORT_BY_TYPE                                                :Тип
 
 
 ############ start of townname region
+STR_GAME_OPTIONS_TOWN_NAME_ORIGINAL_ENGLISH                     :Акӑлчан
+STR_GAME_OPTIONS_TOWN_NAME_FRENCH                               :Францири
+STR_GAME_OPTIONS_TOWN_NAME_GERMAN                               :Нимӗҫ
+STR_GAME_OPTIONS_TOWN_NAME_ADDITIONAL_ENGLISH                   :Акӑлчан (Хушма)
+STR_GAME_OPTIONS_TOWN_NAME_SILLY                                :Акӑлчан (Кулӑшма)
+STR_GAME_OPTIONS_TOWN_NAME_SWEDISH                              :Шведла
+STR_GAME_OPTIONS_TOWN_NAME_DUTCH                                :Голланд
+STR_GAME_OPTIONS_TOWN_NAME_FINNISH                              :Финла
+STR_GAME_OPTIONS_TOWN_NAME_POLISH                               :Поляк
+STR_GAME_OPTIONS_TOWN_NAME_SLOVAK                               :Словак
+STR_GAME_OPTIONS_TOWN_NAME_HUNGARIAN                            :Венгрла
+STR_GAME_OPTIONS_TOWN_NAME_AUSTRIAN                             :Австри
+STR_GAME_OPTIONS_TOWN_NAME_ROMANIAN                             :Рим
+STR_GAME_OPTIONS_TOWN_NAME_CZECH                                :Чехла
+STR_GAME_OPTIONS_TOWN_NAME_SWISS                                :Швеци
+STR_GAME_OPTIONS_TOWN_NAME_DANISH                               :Датчан
+STR_GAME_OPTIONS_TOWN_NAME_TURKISH                              :Турккӑла
+STR_GAME_OPTIONS_TOWN_NAME_ITALIAN                              :Итали
+STR_GAME_OPTIONS_TOWN_NAME_CATALAN                              :Катталун
 ############ end of townname region
 
+STR_GAME_OPTIONS_AUTOSAVE_FRAME                                 :{BLACK}Хӑй управ
 
+STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF                          :Сӳнтер
 
+STR_GAME_OPTIONS_LANGUAGE                                       :{BLACK}Чӗлхи
 
+STR_GAME_OPTIONS_FULLSCREEN                                     :{BLACK}Тулли экран
 
+STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Экрана сӑнарлама пултарни
 
+STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Формат экран сӑнӗ
 
 
 
@@ -301,32 +502,61 @@ STR_SORT_BY_TYPE                                                :Тип
 
 
 
+STR_CURRENCY_PREFIX                                             :{LTBLUE}Префикс: {ORANGE}{STRING}
+STR_CURRENCY_SUFFIX                                             :{LTBLUE}Суффикс: {ORANGE}{STRING}
 
 
+STR_CURRENCY_PREVIEW                                            :{LTBLUE}Малтанласа пӑхса тухни: {ORANGE}{CURRENCY}
 
 # Difficulty level window
 
 ############ range for difficulty levels starts
+STR_DIFFICULTY_LEVEL_EASY                                       :{BLACK}Ҫӑмӑл
+STR_DIFFICULTY_LEVEL_MEDIUM                                     :{BLACK}Вӑтам
+STR_DIFFICULTY_LEVEL_HARD                                       :{BLACK}Йывӑр
+STR_DIFFICULTY_LEVEL_CUSTOM                                     :{BLACK}Харпӑр хӑй
 ############ range for difficulty levels ends
 
+STR_DIFFICULTY_LEVEL_SAVE                                       :{BLACK}Упра
 
 ############ range for difficulty settings starts
+STR_DIFFICULTY_LEVEL_SETTING_ECONOMY                            :{LTBLUE}Экономика: {ORANGE}{STRING}
+STR_DIFFICULTY_LEVEL_SETTING_DISASTERS                          :{LTBLUE}Инкек: {ORANGE}{STRING}
 ############ range for difficulty settings ends
 
+STR_NONE                                                        :Ҫук
+STR_NUM_CUSTOM                                                  :Харпӑр хӑй
+
+STR_VARIETY_NONE                                                :Ҫук
+
+
+
+STR_DISASTER_NONE                                               :Ҫук
+
+STR_SUBSIDY_X1_5                                                :x1.5
+STR_SUBSIDY_X2                                                  :x2
+STR_SUBSIDY_X3                                                  :x3
+STR_SUBSIDY_X4                                                  :x4
 
 
 
 
-
-
-
-
-
+STR_DISASTERS_OFF                                               :Сӳнтер
+STR_DISASTERS_ON                                                :Ҫут
 
 
 
 # Advanced settings window
 
+STR_CONFIG_SETTING_OFF                                          :Сӳнтер
+STR_CONFIG_SETTING_ON                                           :Ҫут
+STR_CONFIG_SETTING_DISABLED                                     :хастар мар
+STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Чӑн
+STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Реаллӑ
+STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Чӑн
+STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Реаллӑ
+STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :ҫук
+STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :ҫук
 
 
 

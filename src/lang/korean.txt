@@ -528,6 +528,8 @@ STR_GRAPH_CARGO_PAYMENT_RATES_X_LABEL                           :{TINYFONT}{BLAC
 STR_GRAPH_CARGO_PAYMENT_RATES_TITLE                             :{TINYFONT}{BLACK}10 단위(1만 리터)의 화물을 20칸 거리만큼 운송할 때의 운송비 지급량
 STR_GRAPH_CARGO_ENABLE_ALL                                      :{TINYFONT}{BLACK}모두 사용
 STR_GRAPH_CARGO_DISABLE_ALL                                     :{TINYFONT}{BLACK}모두 사용 안함
+STR_GRAPH_CARGO_TOOLTIP_ENABLE_ALL                              :{BLACK}화물 운송단가 비율 그래프에서 모든 화물을 표시
+STR_GRAPH_CARGO_TOOLTIP_DISABLE_ALL                             :{BLACK}화물 운송단가 비율 그래프에서 모든 화물을 표시안함
 STR_GRAPH_CARGO_PAYMENT_TOGGLE_CARGO                            :{BLACK}이 화물에 대한 그래프 켜기/끄기
 STR_GRAPH_CARGO_PAYMENT_CARGO                                   :{TINYFONT}{BLACK}{STRING}
 
@@ -1143,6 +1145,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}차량�
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}차량이 최고수명의 {ORANGE}{STRING}{LTBLUE}개월 전/후이면 자동 교체
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}교체를 위한 자동 교체 최소 요구 자금 : {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}오류 메시지 표시 : {ORANGE}{STRING}초 동안
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}마우스를 갖다 댈때 도구팁이 뜨는 데 걸리는 시간: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}마우스를 갖다 댈때 도구팁이 뜨는 데 걸리는 시간: {ORANGE}도구팁 사용 안함
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}도시명 옆에 인구를 표시함 : {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}지형 만들기: {ORANGE}{STRING}
@@ -2247,6 +2251,7 @@ STR_SAVELOAD_SAVE_BUTTON                                        :{BLACK}저장
 STR_SAVELOAD_SAVE_TOOLTIP                                       :{BLACK}선택한 이름으로 현재 게임을 저장합니다
 STR_SAVELOAD_LOAD_BUTTON                                        :{BLACK}불러오기
 STR_SAVELOAD_LOAD_TOOLTIP                                       :{BLACK}선택한 게임을 불러옵니다
+STR_SAVELOAD_DETAIL_CAPTION                                     :{BLACK}게임 상세 정보
 STR_SAVELOAD_DETAIL_NOT_AVAILABLE                               :{BLACK}사용가능한 정보 없음.
 STR_SAVELOAD_DETAIL_COMPANY_INDEX                               :{SILVER}{COMMA}: {WHITE}{STRING}
 STR_SAVELOAD_DETAIL_GRFSTATUS                                   :{SILVER}NewGRF: {WHITE}{STRING}
@@ -2327,6 +2332,7 @@ STR_NEWGRF_SETTINGS_CAPTION                                     :{WHITE}NewGRF �
 STR_NEWGRF_SETTINGS_INFO_TITLE                                  :{WHITE}NewGRF 상세 정보
 STR_NEWGRF_SETTINGS_ACTIVE_LIST                                 :{WHITE}활성화된 NewGRF 파일
 STR_NEWGRF_SETTINGS_INACTIVE_LIST                               :{WHITE}비활성화된 NewGRF 파일
+STR_NEWGRF_SETTINGS_SELECT_PRESET                               :{ORANGE}프리셋 선택:
 STR_NEWGRF_FILTER_TITLE                                         :{ORANGE}필터링할 문자열:
 STR_NEWGRF_SETTINGS_PRESET_LIST_TOOLTIP                         :{BLACK}선택한 프리셋을 불러옵니다
 STR_NEWGRF_SETTINGS_PRESET_SAVE                                 :{BLACK}프리셋 저장
@@ -2413,6 +2419,8 @@ STR_NEWGRF_UNPAUSE_WARNING                                      :{WHITE}일시�
 
 # NewGRF status
 STR_NEWGRF_LIST_NONE                                            :없음
+STR_NEWGRF_LIST_ALL_FOUND                                       :필요한 모든 GRF파일 있음
+STR_NEWGRF_LIST_COMPATIBLE                                      :{YELLOW}호환되는 파일을 찾았습니다.
 STR_NEWGRF_LIST_MISSING                                         :{RED}파일 없음
 
 # NewGRF 'it's broken' warnings
@@ -2950,16 +2958,24 @@ STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}기관차 
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}빈 경로 탐색중
 
 STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}{STATION}{G 0 "으" ""}로 향하는 중
-STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}{STATION}{G 0 "으" ""}로 향하는 중 ({VELOCITY})
+STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}{STATION}{G 0 "으" ""}로 향하는 중, ({VELOCITY})
 STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}경로 없음
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}경로 없음 ({VELOCITY})
 
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}{WAYPOINT}{G 0 "으" ""}로 향하는 중
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}{WAYPOINT}{G 0 "으" ""}로 향하는 중, {VELOCITY}
+STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}{WAYPOINT}{G 0 "으" ""}로 향하는 중, ({VELOCITY})
 
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}{DEPOT}{G 0 "으" ""}로 향하는 중
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}{DEPOT}{G 0 "으" ""}로 향하는 중, ({VELOCITY})
 
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}{DEPOT}{G 0 "으" ""}로 점검하러 가는 중
+STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}{DEPOT}{G 0 "으" ""}로 점검하러 가는 중, ({VELOCITY})
 
 # Vehicle stopped/started animations
+STR_VEHICLE_COMMAND_STOPPED_SMALL                               :{TINYFONT}{RED}정지
+STR_VEHICLE_COMMAND_STOPPED                                     :{RED}정지
+STR_VEHICLE_COMMAND_STARTED_SMALL                               :{TINYFONT}{GREEN}출발
+STR_VEHICLE_COMMAND_STARTED                                     :{GREEN}출발
 
 # Vehicle details
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (상세정보)
@@ -3611,7 +3627,7 @@ STR_ERROR_CAN_T_SELL_ROAD_VEHICLE                               :{WHITE}자동�
 STR_ERROR_CAN_T_SELL_SHIP                                       :{WHITE}선박을 팔 수 없습니다...
 STR_ERROR_CAN_T_SELL_AIRCRAFT                                   :{WHITE}항공기를 팔 수 없습니다...
 
-STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE                            :{WHITE}열차는 불가능합니다
+STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE                            :{WHITE}이 열차는 사용 불가능합니다
 STR_ERROR_ROAD_VEHICLE_NOT_AVAILABLE                            :{WHITE}차량은 불가능합니다
 STR_ERROR_SHIP_NOT_AVAILABLE                                    :{WHITE}선박은 불가능합니다
 STR_ERROR_AIRCRAFT_NOT_AVAILABLE                                :{WHITE}항공기는 불가능합니다
@@ -3619,6 +3635,7 @@ STR_ERROR_AIRCRAFT_NOT_AVAILABLE                                :{WHITE}항공�
 STR_ERROR_TOO_MANY_VEHICLES_IN_GAME                             :{WHITE}게임에 차량이 너무 많습니다!
 STR_ERROR_CAN_T_CHANGE_SERVICING                                :{WHITE}점검 기간 간격을 바꿀 수 없습니다...
 
+STR_ERROR_VEHICLE_IS_DESTROYED                                  :{WHITE}... 차량이 파괴되었습니다.
 
 # Specific vehicle errors
 STR_ERROR_CAN_T_MAKE_TRAIN_PASS_SIGNAL                          :{WHITE}너무 위험해서 신호를 무시할 수 없습니다...

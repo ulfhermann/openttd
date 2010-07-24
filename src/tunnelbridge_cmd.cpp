@@ -20,7 +20,6 @@
 #include "cmd_helper.h"
 #include "command_func.h"
 #include "town.h"
-#include "variables.h"
 #include "train.h"
 #include "ship.h"
 #include "roadveh.h"
@@ -1060,7 +1059,7 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		if (!ice) {
 			DrawClearLandTile(ti, 3);
 		} else {
-			DrawGroundSprite(SPR_FLAT_SNOW_DESERT_TILE + _tileh_to_sprite[ti->tileh], PAL_NONE);
+			DrawGroundSprite(SPR_FLAT_SNOW_DESERT_TILE + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
 		}
 
 		/* draw ramp */
