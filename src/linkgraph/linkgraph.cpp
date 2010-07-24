@@ -10,7 +10,6 @@
 /** @file linkgraph.cpp Definition of link graph classes used for cargo distribution. */
 
 #include "linkgraph.h"
-#include "../variables.h"
 #include "../map_func.h"
 #include "../core/bitmath_func.hpp"
 #include "../debug.h"
