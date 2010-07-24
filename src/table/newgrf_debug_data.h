@@ -7,7 +7,7 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file newgrf_debug_data.cpp Data 'tables' for NewGRF debugging. */
+/** @file newgrf_debug_data.h Data 'tables' for NewGRF debugging. */
 
 /* Helper for filling property tables */
 #define NIP(prop, base, variable, type, name) { name, cpp_offsetof(base, variable), cpp_sizeof(base, variable), prop, type }
@@ -55,6 +55,7 @@ static const NIVariable _niv_vehicles[] = {
 	NIV(0x47, "vehicle cargo info"),
 	NIV(0x48, "vehicle type info"),
 	NIV(0x49, "year of construction"),
+	NIV(0x4A, "current rail type info"),
 	NIV(0x60, "count vehicle id occurrences"),
 	NIV_END()
 };
