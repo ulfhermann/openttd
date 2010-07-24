@@ -411,8 +411,9 @@ static uint SlReadSimpleGamma()
 			i &= ~0x40;
 			if (HasBit(i, 5)) {
 				i &= ~0x20;
-				if (HasBit(i, 4))
+				if (HasBit(i, 4)) {
 					SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Unsupported gamma");
+				}
 				i = (i << 8) | SlReadByte();
 			}
 			i = (i << 8) | SlReadByte();
@@ -540,8 +541,9 @@ void SlSetLength(size_t length)
 					break;
 				case CH_ARRAY:
 					assert(_sl.last_array_index <= _sl.array_index);
-					while (++_sl.last_array_index <= _sl.array_index)
+					while (++_sl.last_array_index <= _sl.array_index) {
 						SlWriteArrayLength(1);
+					}
 					SlWriteArrayLength(length + 1);
 					break;
 				case CH_SPARSE_ARRAY:
@@ -1522,8 +1524,7 @@ static size_t ReadZlib()
 
 		/* inflate the data */
 		r = inflate(&_z, 0);
-		if (r == Z_STREAM_END)
-			break;
+		if (r == Z_STREAM_END) break;
 
 		if (r != Z_OK) SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_INTERNAL_ERROR, "inflate() failed");
 	} while (_z.avail_out);
@@ -1571,8 +1572,8 @@ static void WriteZlibLoop(z_streamp z, byte *p, size_t len, int mode)
 		if ((n = sizeof(buf) - z->avail_out) != 0) {
 			if (fwrite(buf, n, 1, _sl.fh) != 1) SlError(STR_GAME_SAVELOAD_ERROR_FILE_NOT_WRITEABLE);
 		}
-		if (r == Z_STREAM_END)
-			break;
+		if (r == Z_STREAM_END) break;
+
 		if (r != Z_OK) SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_INTERNAL_ERROR, "zlib returned error code");
 	} while (z->avail_in || !z->avail_out);
 }
