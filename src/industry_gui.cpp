@@ -459,9 +459,8 @@ public:
 		switch (widget) {
 			case DPIW_MATRIX_WIDGET: {
 				const IndustrySpec *indsp;
-				int y = (pt.y - this->GetWidget<NWidgetBase>(DPIW_MATRIX_WIDGET)->pos_y) / this->resize.step_height + this->vscroll.GetPosition();
-
-				if (y >= 0 && y < count) { // Is it within the boundaries of available data?
+				int y = this->vscroll.GetScrolledRowFromWidget(pt.y, this, DPIW_MATRIX_WIDGET);
+				if (y < this->count) { // Is it within the boundaries of available data?
 					this->selected_index = y;
 					this->selected_type = this->index[y];
 					indsp = (this->selected_type == INVALID_INDUSTRYTYPE) ? NULL : GetIndustrySpec(this->selected_type);
@@ -1194,11 +1193,7 @@ public:
 				break;
 
 			case IDW_INDUSTRY_LIST: {
-				int y = (pt.y - this->GetWidget<NWidgetBase>(widget)->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
-				uint16 p;
-
-				if (!IsInsideMM(y, 0, this->vscroll.GetCapacity())) return;
-				p = y + this->vscroll.GetPosition();
+				uint p = this->vscroll.GetScrolledRowFromWidget(pt.y, this, IDW_INDUSTRY_LIST, WD_FRAMERECT_TOP);
 				if (p < this->industries.Length()) {
 					if (_ctrl_pressed) {
 						ShowExtraViewPortWindow(this->industries[p]->location.tile);
@@ -1290,7 +1285,7 @@ static const NWidgetPart _nested_industry_cargoes_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, ICW_PANEL), SetResize(1, 1), SetMinimalSize(200, 90), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_BROWN, ICW_PANEL), SetResize(1, 10), SetMinimalSize(200, 90), EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, ICW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
@@ -1300,7 +1295,7 @@ static const NWidgetPart _nested_industry_cargoes_widgets[] = {
 
 /** Window description for the industry cargoes window. */
 static const WindowDesc _industry_cargoes_desc(
-	WDP_AUTO, 300, 200,
+	WDP_AUTO, 300, 210,
 	WC_INDUSTRY_CARGOES, WC_NONE,
 	0,
 	_nested_industry_cargoes_widgets, lengthof(_nested_industry_cargoes_widgets)
@@ -2147,7 +2142,8 @@ struct IndustryCargoesWindow : public Window {
 
 		this->ShortenCargoColumn(1, 1, num_indrows);
 		this->ShortenCargoColumn(3, 1, num_indrows);
-		this->vscroll.SetCount(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height);
+		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
+		this->vscroll.SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
 		this->SetDirty();
 	}
 
@@ -2210,7 +2206,8 @@ struct IndustryCargoesWindow : public Window {
 		}
 
 		this->ShortenCargoColumn(1, 1, num_indrows);
-		this->vscroll.SetCount(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height);
+		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
+		this->vscroll.SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
 		this->SetDirty();
 	}
 
@@ -2239,7 +2236,8 @@ struct IndustryCargoesWindow : public Window {
 		if (this->ind_cargo >= NUM_INDUSTRYTYPES) left_pos += (CargoesField::industry_width + CargoesField::CARGO_FIELD_WIDTH) / 2;
 		int last_column = (this->ind_cargo < NUM_INDUSTRYTYPES) ? 4 : 2;
 
-		int vpos = -this->vscroll.GetPosition();
+		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
+		int vpos = -this->vscroll.GetPosition() * nwp->resize_y;
 		for (uint i = 0; i < this->fields.Length(); i++) {
 			int row_height = (i == 0) ? CargoesField::small_height : CargoesField::normal_height;
 			if (vpos + row_height >= 0) {
@@ -2274,11 +2272,11 @@ struct IndustryCargoesWindow : public Window {
 	 */
 	bool CalculatePositionInWidget(Point pt, Point *fieldxy, Point *xy)
 	{
-		NWidgetBase *nw = this->GetWidget<NWidgetBase>(ICW_PANEL);
+		const NWidgetBase *nw = this->GetWidget<NWidgetBase>(ICW_PANEL);
 		pt.x -= nw->pos_x;
 		pt.y -= nw->pos_y;
 
-		int vpos = WD_FRAMERECT_TOP + CargoesField::small_height - this->vscroll.GetPosition();
+		int vpos = WD_FRAMERECT_TOP + CargoesField::small_height - this->vscroll.GetPosition() * nw->resize_y;
 		if (pt.y < vpos) return false;
 
 		int row = (pt.y - vpos) / CargoesField::normal_height; // row is relative to row 1.
