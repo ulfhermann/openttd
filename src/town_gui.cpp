@@ -259,8 +259,7 @@ public:
 	{
 		switch (widget) {
 			case TWA_COMMAND_LIST: {
-				int y = (pt.y - this->GetWidget<NWidgetBase>(TWA_COMMAND_LIST)->pos_y - 1) / FONT_HEIGHT_NORMAL;
-
+				int y = this->GetRowFromWidget(pt.y, TWA_COMMAND_LIST, 1, FONT_HEIGHT_NORMAL);
 				if (!IsInsideMM(y, 0, 5)) return;
 
 				y = GetNthSetBit(GetMaskOfTownActions(NULL, _local_company, this->town), y + this->vscroll.GetPosition() - 1);
@@ -874,12 +873,7 @@ public:
 				break;
 
 			case TDW_CENTERTOWN: { // Click on Town Matrix
-				uint16 id_v = (pt.y - this->GetWidget<NWidgetBase>(widget)->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height;
-
-				if (id_v >= this->vscroll.GetCapacity()) return; // click out of bounds
-
-				id_v += this->vscroll.GetPosition();
-
+				uint id_v = this->vscroll.GetScrolledRowFromWidget(pt.y, this, TDW_CENTERTOWN, WD_FRAMERECT_TOP);
 				if (id_v >= this->towns.Length()) return; // click out of town bounds
 
 				const Town *t = this->towns[id_v];
