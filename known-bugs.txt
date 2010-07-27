@@ -82,6 +82,15 @@ Long delay between switching songs/music
 	is the default driver for OpenTTD. You can change this default by
 	setting the "musicdriver" in your openttd.cfg to "dmusic".
 
+Custom vehicle type name is incorrectly aligned
+	Some NewGRFs use sprites that are bigger than normal in the "buy
+	vehicle" window. Due to this they have to encode an offset for the
+	vehicle type name. Upon renaming the vehicle type this encoded offset
+	is stripped from the name because the "edit box" cannot show this
+	encoding. As a result the custom vehicle type names will get the
+	default alignment. The only way to (partly) fix this is by adding
+	spaces to the custom name.
+
 Clipping problems [FS#119]
 	In some cases sprites are not drawn as one would expect. Examples of
 	this are aircraft that might be hidden below the runway or trees that
@@ -193,11 +202,3 @@ OpenTTD not properly resizing with SDL on X [FS#3305]
 	Window managers that are known to exhibit this behaviour are KDE's
 	and GNOME's. With the XFCE's and LXDE's window managers the resize
 	event is sent when the user releases the mouse.
-
-Content files not properly extracted with zlib 1.2.3.5-1.2.4 [FS#3753]
-	With zlib 1.2.3.5 up to and including 1.2.4 the function "gzeof",
-	which tells when we read the whole file, is broken in such a way
-	that OpenTTD thinks it has extracted and written the whole file
-	while the last few hundred/thousand bytes are not extracted yet.
-	This causes problems for everything that is downloaded from the
-	online content system when using one of those versions of zlib.
