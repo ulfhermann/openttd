@@ -1798,6 +1798,12 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 			return true;
 
 		case OT_GOTO_DEPOT:
+			if ((order->GetDepotOrderType() & ODTFB_SERVICE) && !v->NeedsServicing()) {
+				UpdateVehicleTimetable(v, true);
+				v->IncrementOrderIndex();
+				break;
+			}
+
 			if (v->current_order.GetDepotActionType() & ODATFB_NEAREST_DEPOT) {
 				/* We need to search for the nearest depot (hangar). */
 				TileIndex location;
@@ -1822,9 +1828,6 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 					return true;
 				}
 
-				UpdateVehicleTimetable(v, true);
-				v->IncrementOrderIndex();
-			} else if ((order->GetDepotOrderType() & ODTFB_SERVICE) && !v->NeedsServicing()) {
 				UpdateVehicleTimetable(v, true);
 				v->IncrementOrderIndex();
 			} else {
