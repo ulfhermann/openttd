@@ -2117,6 +2117,17 @@ STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY                         :{BLACK}Prospect
 STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}Construire
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Fonder
 
+# Industry cargoes window
+STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION                           :{WHITE}Chaine d'industries pour l'industrie {STRING}
+STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}Chaine d'industries pour le type de marchandise {STRING}
+STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}Industries fournisseuses
+STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Industries clientes
+STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Maisons
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Cliquer sur l'industrie pour voir ses fournisseurs et ses clients
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Cliquer sur le type de marchandise pour voir ses fournisseurs et ses clients
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Afficher la chaine
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Afficher les industries fournisseuses et clientes du type de marchandise
+
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Information sur le Terrain
 STR_LAND_AREA_INFORMATION_COST_TO_CLEAR_N_A                     :{BLACK}Coût si démolition{NBSP}: {LTBLUE}N/D
@@ -3487,7 +3498,7 @@ STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Impossib
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Impossible de retirer la station de tramway pour passagers...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Impossible de retirer la station de tramway pour fret...
 STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Vous devez d'abord retirer l'arrêt de bus
-STR_ERROR_THERE_IS_NO_STATION                                   :{WHITE}...il n'y a pas de station ici
+STR_ERROR_THERE_IS_NO_STATION                                   :{WHITE}... il n'y a pas de station ici
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Vous devez d'abord détruire la gare
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Vous devez d'abord détruire l'arrêt d'autobus
@@ -3553,8 +3564,8 @@ STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Impossib
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Impossible de retirer les rails d'ici...
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Impossible de retirer les signaux d'ici...
 STR_ERROR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                     :{WHITE}Impossible de convertir les signaux...
-STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}...il n'y a pas de voie ferrée
-STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}...il n'y pas de signaux
+STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}... il n'y a pas de voie ferrée
+STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}... il n'y pas de signaux
 
 STR_ERROR_CAN_T_CONVERT_RAIL                                    :{WHITE}Impossible de convertir le type de rail...
 
@@ -3565,8 +3576,8 @@ STR_ERROR_CAN_T_BUILD_ROAD_HERE                                 :{WHITE}Impossib
 STR_ERROR_CAN_T_BUILD_TRAMWAY_HERE                              :{WHITE}Impossible de construire une section de tramway ici...
 STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Impossible de retirer la route ici...
 STR_ERROR_CAN_T_REMOVE_TRAMWAY_FROM                             :{WHITE}Impossible de retirer la section de tramway d'ici...
-STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}...il n'y a pas de route
-STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}...il n'y a pas de tramway
+STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}... il n'y a pas de route
+STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}... il n'y a pas de tramway
 
 # Waterway construction errors
 STR_ERROR_CAN_T_BUILD_CANALS                                    :{WHITE}Impossible de construire un canal ici...
