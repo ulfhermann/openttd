@@ -537,12 +537,7 @@ public:
 	{
 		switch (widget) {
 			case SLW_LIST: {
-				uint32 id_v = (pt.y - this->GetWidget<NWidgetBase>(SLW_LIST)->pos_y - WD_FRAMERECT_TOP) / FONT_HEIGHT_NORMAL;
-
-				if (id_v >= this->vscroll.GetCapacity()) return; // click out of bounds
-
-				id_v += this->vscroll.GetPosition();
-
+				uint id_v = this->vscroll.GetScrolledRowFromWidget(pt.y, this, SLW_LIST, 0, FONT_HEIGHT_NORMAL);
 				if (id_v >= this->stations.Length()) return; // click out of list bound
 
 				const Station *st = this->stations[id_v];
@@ -1568,9 +1563,9 @@ struct StationViewWindow : public Window {
 	{
 		if (row < 0 || (uint)row >= displayed_rows.size()) return;
 		if (_ctrl_pressed) {
-			scroll_to_row = row;
+			this->scroll_to_row = row;
 		} else {
-			RowDisplay & display = displayed_rows[row];
+			RowDisplay &display = displayed_rows[row];
 			if (display.filter == &expanded_rows) {
 				HandleCargoWaitingClick<CargoID>(display.filter, display.next_cargo);
 			} else {
@@ -1584,7 +1579,7 @@ struct StationViewWindow : public Window {
 	{
 		switch (widget) {
 			case SVW_WAITING:
-				this->HandleCargoWaitingClick((pt.y - this->GetWidget<NWidgetBase>(SVW_WAITING)->pos_y - WD_FRAMERECT_TOP) / FONT_HEIGHT_NORMAL);
+				this->HandleCargoWaitingClick(this->vscroll.GetScrolledRowFromWidget(pt.y, this, SVW_WAITING, WD_FRAMERECT_TOP, FONT_HEIGHT_NORMAL) - this->vscroll.GetPosition());
 				break;
 
 			case SVW_LOCATION:
@@ -1965,7 +1960,7 @@ struct SelectStationWindow : Window {
 	{
 		if (widget != JSW_PANEL) return;
 
-		uint32 st_index = (pt.y - this->GetWidget<NWidgetBase>(JSW_PANEL)->pos_y - WD_FRAMERECT_TOP) / this->resize.step_height + this->vscroll.GetPosition();
+		uint st_index = this->vscroll.GetScrolledRowFromWidget(pt.y, this, JSW_PANEL, WD_FRAMERECT_TOP);
 		bool distant_join = (st_index > 0);
 		if (distant_join) st_index--;
 
