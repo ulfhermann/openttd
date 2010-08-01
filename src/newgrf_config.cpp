@@ -16,24 +16,64 @@
 #include "gamelog.h"
 #include "network/network_func.h"
 #include "gfx_func.h"
+#include "newgrf_text.h"
+#include "window_func.h"
 
 #include "fileio_func.h"
 #include "fios.h"
 
-GRFConfig::GRFConfig(const char *filename)
+/**
+ * Create a new GRFConfig.
+ * @param filename Set the filename of this GRFConfig to filename. The argument
+ *   is copied so the original string isn't needed after the constructor.
+ */
+GRFConfig::GRFConfig(const char *filename) :
+	num_valid_params(lengthof(param))
 {
 	if (filename != NULL) this->filename = strdup(filename);
 }
 
+/**
+ * Create a new GRFConfig that is a deep copy of an existing config.
+ * @param config The GRFConfig object to make a copy of.
+ */
+GRFConfig::GRFConfig(const GRFConfig &config) :
+	ident(config.ident),
+	version(config.version),
+	flags(config.flags & ~GCF_COPY),
+	status(config.status),
+	grf_bugs(config.grf_bugs),
+	num_params(config.num_params),
+	num_valid_params(config.num_valid_params),
+	palette(config.palette)
+{
+	MemCpyT<uint8>(this->original_md5sum, config.original_md5sum, lengthof(this->original_md5sum));
+	MemCpyT<uint32>(this->param, config.param, lengthof(this->param));
+	if (config.filename != NULL) this->filename = strdup(config.filename);
+	this->name = DuplicateGRFText(config.name);
+	this->info = DuplicateGRFText(config.info);
+	if (config.error    != NULL) this->error    = new GRFError(*config.error);
+	for (uint i = 0; i < config.param_info.Length(); i++) {
+		if (config.param_info[i] == NULL) {
+			*this->param_info.Append() = NULL;
+		} else {
+			*this->param_info.Append() = new GRFParameterInfo(*config.param_info[i]);
+		}
+	}
+}
+
+/** Cleanup a GRFConfig object. */
 GRFConfig::~GRFConfig()
 {
-	/* GCF_COPY as in NOT strdupped/alloced the filename, name and info */
+	/* GCF_COPY as in NOT strdupped/alloced the filename and info */
 	if (!HasBit(this->flags, GCF_COPY)) {
 		free(this->filename);
-		free(this->name);
-		free(this->info);
+		CleanUpGRFText(this->info);
 		delete this->error;
 	}
+	CleanUpGRFText(this->name);
+
+	for (uint i = 0; i < this->param_info.Length(); i++) delete this->param_info[i];
 }
 
 /**
@@ -43,8 +83,8 @@ GRFConfig::~GRFConfig()
  */
 const char *GRFConfig::GetName() const
 {
-	if (StrEmpty(this->name)) return this->filename;
-	return this->name;
+	const char *name = GetGRFStringFromGRFText(this->name);
+	return StrEmpty(name) ? this->filename : name;
 }
 
 /**
@@ -53,7 +93,23 @@ const char *GRFConfig::GetName() const
  */
 const char *GRFConfig::GetDescription() const
 {
-	return this->info;
+	return GetGRFStringFromGRFText(this->info);
+}
+
+/**
+ * Set the palette of this GRFConfig to something suitable.
+ * That is either the setting coming from the NewGRF or
+ * the globally used palette.
+ */
+void GRFConfig::SetSuitablePalette()
+{
+	PaletteType pal;
+	switch (this->palette & GRFP_GRF_MASK) {
+		case GRFP_GRF_DOS:     pal = PAL_DOS;      break;
+		case GRFP_GRF_WINDOWS: pal = PAL_WINDOWS;  break;
+		default:               pal = _use_palette; break;
+	}
+	SB(this->palette, GRFP_USE_BIT, 1, pal == PAL_WINDOWS ? GRFP_USE_WINDOWS : GRFP_USE_DOS);
 }
 
 GRFConfig *_all_grfs;
@@ -61,16 +117,113 @@ GRFConfig *_grfconfig;
 GRFConfig *_grfconfig_newgame;
 GRFConfig *_grfconfig_static;
 
+/**
+ * Construct a new GRFError.
+ * @param severity The severity of this error.
+ * @param message The actual error-string.
+ */
 GRFError::GRFError(StringID severity, StringID message) :
 	message(message),
 	severity(severity)
 {
 }
 
+/**
+ * Create a new GRFError that is a deep copy of an existing error message.
+ * @param error The GRFError object to make a copy of.
+ */
+GRFError::GRFError(const GRFError &error) :
+	custom_message(error.custom_message),
+	data(error.data),
+	message(error.message),
+	severity(error.severity),
+	num_params(error.num_params)
+{
+	if (error.custom_message != NULL) this->custom_message = strdup(error.custom_message);
+	if (error.data           != NULL) this->data           = strdup(error.data);
+	memcpy(this->param_value, error.param_value, sizeof(this->param_value));
+}
+
 GRFError::~GRFError()
 {
 	free(this->custom_message);
 	free(this->data);
+}
+
+/**
+ * Create a new empty GRFParameterInfo object.
+ * @param nr The newgrf parameter that is changed.
+ */
+GRFParameterInfo::GRFParameterInfo(uint nr) :
+	name(NULL),
+	desc(NULL),
+	type(PTYPE_UINT_ENUM),
+	min_value(0),
+	max_value(UINT32_MAX),
+	param_nr(nr),
+	first_bit(0),
+	num_bit(32)
+{}
+
+/**
+ * Create a new GRFParameterInfo object that is a deep copy of an existing
+ *   parameter info object.
+ * @param info The GRFParameterInfo object to make a copy of.
+ */
+GRFParameterInfo::GRFParameterInfo(GRFParameterInfo &info) :
+	name(DuplicateGRFText(info.name)),
+	desc(DuplicateGRFText(info.desc)),
+	type(info.type),
+	min_value(info.min_value),
+	max_value(info.max_value),
+	param_nr(info.param_nr),
+	first_bit(info.first_bit),
+	num_bit(info.num_bit)
+{
+	for (uint i = 0; i < info.value_names.Length(); i++) {
+		SmallPair<uint32, GRFText *> *data = info.value_names.Get(i);
+		this->value_names.Insert(data->first, DuplicateGRFText(data->second));
+	}
+}
+
+/** Cleanup all parameter info. */
+GRFParameterInfo::~GRFParameterInfo()
+{
+	CleanUpGRFText(this->name);
+	CleanUpGRFText(this->desc);
+	for (uint i = 0; i < this->value_names.Length(); i++) {
+		SmallPair<uint32, GRFText *> *data = this->value_names.Get(i);
+		CleanUpGRFText(data->second);
+	}
+}
+
+/**
+ * Get the value of this user-changeable parameter from the given config.
+ * @param config The GRFConfig to get the value from.
+ * @return The value of this parameter.
+ */
+uint32 GRFParameterInfo::GetValue(struct GRFConfig *config) const
+{
+	/* GB doesn't work correctly with nbits == 32, so handle that case here. */
+	if (this->num_bit == 32) return config->param[this->param_nr];
+	return GB(config->param[this->param_nr], this->first_bit, this->num_bit);
+}
+
+/**
+ * Set the value of this user-changeable parameter in the given config.
+ * @param config The GRFConfig to set the value in.
+ * @param value The new value.
+ */
+void GRFParameterInfo::SetValue(struct GRFConfig *config, uint32 value)
+{
+	/* SB doesn't work correctly with nbits == 32, so handle that case here. */
+	if (this->num_bit == 32) {
+		config->param[this->param_nr] = value;
+	} else {
+		SB(config->param[this->param_nr], this->first_bit, this->num_bit, value);
+	}
+	config->num_params = max<uint>(config->num_params, this->param_nr + 1);
+	SetWindowClassesDirty(WC_GAME_OPTIONS); // Is always the newgrf window
 }
 
 /**
@@ -83,8 +236,8 @@ GRFError::~GRFError()
  */
 void UpdateNewGRFConfigPalette()
 {
-	for (GRFConfig *c = _grfconfig_newgame; c != NULL; c = c->next) c->windows_paletted = (_use_palette == PAL_WINDOWS);
-	for (GRFConfig *c = _grfconfig_static;  c != NULL; c = c->next) c->windows_paletted = (_use_palette == PAL_WINDOWS);
+	for (GRFConfig *c = _grfconfig_newgame; c != NULL; c = c->next) c->SetSuitablePalette();
+	for (GRFConfig *c = _grfconfig_static;  c != NULL; c = c->next) c->SetSuitablePalette();
 }
 
 /** Calculate the MD5 sum for a GRF, and store it in the config.
@@ -141,7 +294,7 @@ bool FillGRFDetails(GRFConfig *config, bool is_static)
 		if (HasBit(config->flags, GCF_UNSAFE)) return false;
 	}
 
-	config->windows_paletted = (_use_palette == PAL_WINDOWS);
+	config->SetSuitablePalette();
 
 	return CalcGRFMD5Sum(config);
 }
@@ -162,32 +315,6 @@ void ClearGRFConfigList(GRFConfig **config)
 }
 
 
-/**
- * Make a deep copy of a GRFConfig.
- * @param c the grfconfig to copy
- * @return A pointer to a new grfconfig that's a copy of the original
- */
-GRFConfig *DuplicateGRFConfig(const GRFConfig *c)
-{
-	GRFConfig *config = new GRFConfig();
-	*config = *c;
-
-	if (c->filename != NULL) config->filename = strdup(c->filename);
-	if (c->name     != NULL) config->name = strdup(c->name);
-	if (c->info     != NULL) config->info = strdup(c->info);
-	if (c->error    != NULL) {
-		config->error = new GRFError(c->error->severity, c->error->message);
-		config->error->num_params = c->error->num_params;
-		memcpy(config->error->param_value, c->error->param_value, sizeof(config->error->param_value));
-		if (c->error->data           != NULL) config->error->data = strdup(c->error->data);
-		if (c->error->custom_message != NULL) config->error->custom_message = strdup(c->error->custom_message);
-	}
-
-	ClrBit(config->flags, GCF_COPY);
-
-	return config;
-}
-
 /** Copy a GRF Config list
  * @param dst pointer to destination list
  * @param src pointer to source list values
@@ -198,7 +325,7 @@ GRFConfig **CopyGRFConfigList(GRFConfig **dst, const GRFConfig *src, bool init_o
 	/* Clear destination as it will be overwritten */
 	ClearGRFConfigList(dst);
 	for (; src != NULL; src = src->next) {
-		GRFConfig *c = DuplicateGRFConfig(src);
+		GRFConfig *c = new GRFConfig(*src);
 
 		ClrBit(c->flags, GCF_INIT_ONLY);
 		if (init_only) SetBit(c->flags, GCF_INIT_ONLY);
@@ -279,7 +406,7 @@ void ResetGRFConfig(bool defaults)
  * @param grfconfig GrfConfig to check
  * @return will return any of the following 3 values:<br>
  * <ul>
- * <li> GLC_ALL_GOOD: No problems occured, all GRF files were found and loaded
+ * <li> GLC_ALL_GOOD: No problems occurred, all GRF files were found and loaded
  * <li> GLC_COMPATIBLE: For one or more GRF's no exact match was found, but a
  *     compatible GRF with the same grfid was found and used instead
  * <li> GLC_NOT_FOUND: For one or more GRF's no match was found at all
@@ -328,8 +455,8 @@ compatible_grf:
 				free(c->filename);
 				c->filename = strdup(f->filename);
 				memcpy(c->ident.md5sum, f->ident.md5sum, sizeof(c->ident.md5sum));
-				if (c->name == NULL && f->name != NULL) c->name = strdup(f->name);
-				if (c->info == NULL && f->info != NULL) c->info = strdup(f->info);
+				if (c->name == NULL) c->name = DuplicateGRFText(f->name);
+				if (c->info == NULL) c->info = DuplicateGRFText(f->info);
 				c->error = NULL;
 			}
 		}
@@ -453,11 +580,14 @@ void ScanNewGRFFiles()
  */
 const GRFConfig *FindGRFConfig(uint32 grfid, const uint8 *md5sum)
 {
+	const GRFConfig *best = NULL;
 	for (const GRFConfig *c = _all_grfs; c != NULL; c = c->next) {
-		if (c->ident.HasGrfIdentifier(grfid, md5sum)) return c;
+		if (!c->ident.HasGrfIdentifier(grfid, md5sum)) continue;
+		if (md5sum != NULL) return c;
+		if (best == NULL || c->version > best->version) best = c;
 	}
 
-	return NULL;
+	return best;
 }
 
 #ifdef ENABLE_NETWORK

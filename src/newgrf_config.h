@@ -14,6 +14,7 @@
 
 #include "strings_type.h"
 #include "core/alloc_type.hpp"
+#include "core/smallmap_type.hpp"
 
 /** GRF config bit flags */
 enum GCF_Flags {
@@ -49,6 +50,24 @@ enum GRFListCompatibility {
 	GLC_NOT_FOUND   ///< At least one GRF couldn't be found (higher priority than GLC_COMPATIBLE)
 };
 
+/** Information that can/has to be stored about a GRF's palette. */
+enum GRFPalette {
+	GRFP_USE_BIT     = 0,   ///< The bit used for storing the palette to use.
+	GRFP_GRF_OFFSET  = 2,   ///< The offset of the GRFP_GRF data.
+	GRFP_GRF_SIZE    = 2,   ///< The size of the GRFP_GRF data.
+
+	GRFP_USE_DOS     = 0x0, ///< The palette state is set to use the DOS palette.
+	GRFP_USE_WINDOWS = 0x1, ///< The palette state is set to use the Windows palette.
+	GRFP_USE_MASK    = 0x1, ///< Bitmask to get only the use palette use states.
+
+	GRFP_GRF_UNSET   = 0x0 << GRFP_GRF_OFFSET,          ///< The NewGRF provided no information.
+	GRFP_GRF_DOS     = 0x1 << GRFP_GRF_OFFSET,          ///< The NewGRF says the DOS palette can be used.
+	GRFP_GRF_WINDOWS = 0x2 << GRFP_GRF_OFFSET,          ///< The NewGRF says the Windows palette can be used.
+	GRFP_GRF_ANY     = GRFP_GRF_DOS | GRFP_GRF_WINDOWS, ///< The NewGRF says any palette can be used.
+	GRFP_GRF_MASK    = GRFP_GRF_ANY,                    ///< Bitmask to get only the NewGRF supplied information.
+};
+
+
 /** Basic data to distinguish a GRF. Used in the server list window */
 struct GRFIdentifier {
 	uint32 grfid;     ///< GRF ID (defined by Action 0x08)
@@ -70,6 +89,7 @@ struct GRFIdentifier {
 /** Information about why GRF had problems during initialisation */
 struct GRFError : ZeroedMemoryAllocator {
 	GRFError(StringID severity, StringID message = 0);
+	GRFError(const GRFError &error);
 	~GRFError();
 
 	char *custom_message;  ///< Custom message (if present)
@@ -80,31 +100,63 @@ struct GRFError : ZeroedMemoryAllocator {
 	uint32 param_value[2]; ///< Values of GRF parameters to show for message and custom_message
 };
 
+/** The possible types of a newgrf parameter. */
+enum GRFParameterType {
+	PTYPE_UINT_ENUM, ///< The parameter allows a range of numbers, each of which can have a special name
+	PTYPE_BOOL,      ///< The parameter is either 0 or 1
+	PTYPE_END,       ///< Invalid parameter type
+};
+
+/** Information about one grf parameter. */
+struct GRFParameterInfo {
+	GRFParameterInfo(uint nr);
+	GRFParameterInfo(GRFParameterInfo &info);
+	~GRFParameterInfo();
+	struct GRFText *name;  ///< The name of this parameter
+	struct GRFText *desc;  ///< The description of this parameter
+	GRFParameterType type; ///< The type of this parameter
+	uint32 min_value;      ///< The minimal value this parameter can have
+	uint32 max_value;      ///< The maximal value of this parameter
+	byte param_nr;         ///< GRF parameter to store content in
+	byte first_bit;        ///< First bit to use in the GRF parameter
+	byte num_bit;          ///< Number of bits to use for this parameter
+	SmallMap<uint32, struct GRFText *, 8> value_names; ///< Names for each value.
+
+	uint32 GetValue(struct GRFConfig *config) const;
+	void SetValue(struct GRFConfig *config, uint32 value);
+};
+
 /** Information about GRF, used in the game and (part of it) in savegames */
 struct GRFConfig : ZeroedMemoryAllocator {
 	GRFConfig(const char *filename = NULL);
+	GRFConfig(const GRFConfig &config);
 	~GRFConfig();
 
-	GRFIdentifier ident; ///< grfid and md5sum to uniquely identify newgrfs
+	GRFIdentifier ident;       ///< grfid and md5sum to uniquely identify newgrfs
 	uint8 original_md5sum[16]; ///< MD5 checksum of original file if only a 'compatible' file was loaded
-	char *filename;     ///< Filename - either with or without full path
-	char *name;         ///< NOSAVE: GRF name (Action 0x08)
-	char *info;         ///< NOSAVE: GRF info (author, copyright, ...) (Action 0x08)
-	GRFError *error;    ///< NOSAVE: Error/Warning during GRF loading (Action 0x0B)
+	char *filename;            ///< Filename - either with or without full path
+	struct GRFText *name;      ///< NOSAVE: GRF name (Action 0x08)
+	struct GRFText *info;      ///< NOSAVE: GRF info (author, copyright, ...) (Action 0x08)
+	GRFError *error;           ///< NOSAVE: Error/Warning during GRF loading (Action 0x0B)
 
-	uint8 flags;        ///< NOSAVE: GCF_Flags, bitset
-	GRFStatus status;   ///< NOSAVE: GRFStatus, enum
-	uint32 grf_bugs;    ///< NOSAVE: bugs in this GRF in this run, @see enum GRFBugs
-	uint32 param[0x80]; ///< GRF parameters
-	uint8 num_params;   ///< Number of used parameters
-	bool windows_paletted;  ///< Whether the NewGRF is Windows paletted or not
+	uint32 version;            ///< NOSAVE: Version a NewGRF can set so only the newest NewGRF is shown
+	uint8 flags;               ///< NOSAVE: GCF_Flags, bitset
+	GRFStatus status;          ///< NOSAVE: GRFStatus, enum
+	uint32 grf_bugs;           ///< NOSAVE: bugs in this GRF in this run, @see enum GRFBugs
+	uint32 param[0x80];        ///< GRF parameters
+	uint8 num_params;          ///< Number of used parameters
+	uint8 num_valid_params;    ///< NOSAVE: Number of valid parameters (action 0x14)
+	uint8 palette;             ///< GRFPalette, bitset
+	SmallVector<GRFParameterInfo *, 4> param_info; ///< NOSAVE: extra information about the parameters
 
-	struct GRFConfig *next; ///< NOSAVE: Next item in the linked list
+	struct GRFConfig *next;    ///< NOSAVE: Next item in the linked list
 
 	bool IsOpenTTDBaseGRF() const;
 
 	const char *GetName() const;
 	const char *GetDescription() const;
+
+	void SetSuitablePalette();
 };
 
 extern GRFConfig *_all_grfs;          ///< First item in list of all scanned NewGRFs
@@ -123,7 +175,6 @@ void ResetGRFConfig(bool defaults);
 GRFListCompatibility IsGoodGRFConfigList(GRFConfig *grfconfig);
 bool FillGRFDetails(GRFConfig *config, bool is_static);
 char *GRFBuildParamList(char *dst, const GRFConfig *c, const char *last);
-GRFConfig *DuplicateGRFConfig(const GRFConfig *c);
 
 /* In newgrf_gui.cpp */
 void ShowNewGRFSettings(bool editable, bool show_params, bool exec_changes, GRFConfig **config);
