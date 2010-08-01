@@ -1887,10 +1887,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}연결�
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}분리된 웨이포인트를 새로 만들기
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}철로 건설
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}전기철로 건설
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}모노레일 건설
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}자기부상열차 건설
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :철로 건설
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :전기철로 건설
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :모노레일 건설
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :자기부상열차 건설
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}철로를 건설합니다. Ctrl키는 철로의 건설/제거를 전환합니다.
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}철로 자동건설 모드로 철로를 만듭니다. Ctrl키는 철로의 건설/제거를 전환합니다.
@@ -2384,6 +2384,11 @@ STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}사용안�
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}NewGRF 파라미터 입력
 
+# NewGRF parameters window
+STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}NewGRF 파라미터 바꾸기
+STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}닫기
+STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :파라미터 {NUM}
+
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}NEWGRF 검사 - {STRING}
 STR_NEWGRF_INSPECT_PARENT_BUTTON                                :{BLACK}상위 단계
@@ -2711,10 +2716,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}항공�
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}올해 수입: {CURRENCY} (작년: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}사용 가능 열차
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}사용 가능 자동차
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}사용 가능 선박
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}사용 가능 항공기
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :사용 가능 열차
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :사용 가능 자동차
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :사용 가능 선박
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :사용 가능 항공기
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}이 차량 타입에 사용할 수 있는 기관차의 목록 보기
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}관리
@@ -2755,15 +2760,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :모든 차량 �
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}그룹 이름 바꾸기
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}새 열차
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}새 전기 열차
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}새 모노레일
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}새 자기부상열차
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :새 열차
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :새 전기 열차
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :새 모노레일
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :새 자기부상열차
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}새 열차
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}새 자동차
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}새 선박
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}새 항공기
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :새 열차
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :새 자동차
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :새 선박
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :새 항공기
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}가격: {GOLD}{CURRENCY}{BLACK} 중량: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}속력: {GOLD}{VELOCITY}{BLACK} 힘: {GOLD}{POWER}
@@ -3225,8 +3230,8 @@ STR_TIMETABLE_TOOLTIP                                           :{BLACK}시간�
 
 STR_TIMETABLE_NO_TRAVEL                                         :운행정보 없음
 STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :여행 (시간표 없음)
-STR_TIMETABLE_TRAVEL_FOR                                        :{STRING}로 여행
-STR_TIMETABLE_STAY_FOR                                          :그리고 {STRING}에 머무름
+STR_TIMETABLE_TRAVEL_FOR                                        :{STRING} 동안 운행
+STR_TIMETABLE_STAY_FOR                                          :그리고 {STRING} 동안 머무름
 STR_TIMETABLE_AND_TRAVEL_FOR                                    :그리고 {STRING}(으)로 이동
 STR_TIMETABLE_DAYS                                              :{COMMA} 일
 STR_TIMETABLE_TICKS                                             :{COMMA} 틱
@@ -3449,6 +3454,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... 맵�
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}도시가 도로를 짓지 않을 것입니다. [고급설정->경제->도시]에서 도로를 지을 수 있도록 설정을 변경하실 수 있습니다.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}도로 작업이 진행중입니다
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}이 도시를 삭제할 수 없습니다...{}도시 또는 도시가 소유하고 있는 타일에 있는 역이나 차고때문에 제거할 수 없습니다.
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... 이 도시의 중심에 동상을 세우기 적합한 장소가 없습니다.
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... 산업시설이 너무 많습니다!

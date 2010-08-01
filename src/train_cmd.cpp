@@ -1468,7 +1468,7 @@ static inline void SetLastSpeed(Train *v, int spd)
 static void MarkTrainAsStuck(Train *v)
 {
 	if (!HasBit(v->flags, VRF_TRAIN_STUCK)) {
-		/* It is the first time the problem occured, set the "train stuck" flag. */
+		/* It is the first time the problem occurred, set the "train stuck" flag. */
 		SetBit(v->flags, VRF_TRAIN_STUCK);
 
 		v->wait_counter = 0;
@@ -3639,7 +3639,7 @@ static bool TrainApproachingLineEnd(Train *v, bool signal)
 	 * for other directions, it will be 1, 3, 5, ..., 15 */
 	switch (v->direction) {
 		case DIR_N : x = ~x + ~y + 25; break;
-		case DIR_NW: x = y;            // FALLTHROUGH
+		case DIR_NW: x = y;            // FALL THROUGH
 		case DIR_NE: x = ~x + 16;      break;
 		case DIR_E : x = ~x + y + 9;   break;
 		case DIR_SE: x = y;            break;
