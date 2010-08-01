@@ -46,7 +46,168 @@
 
 #include "saveload_internal.h"
 
-extern const uint16 SAVEGAME_VERSION = SL_MCF;
+/*
+ * Previous savegame versions, the trunk revision where they were
+ * introduced and the released version that had that particular
+ * savegame version.
+ * Up to savegame version 18 there is a minor version as well.
+ *
+ *    1.0         0.1.x, 0.2.x
+ *    2.0         0.3.0
+ *    2.1         0.3.1, 0.3.2
+ *    3.x         lost
+ *    4.0     1
+ *    4.1   122   0.3.3, 0.3.4
+ *    4.2  1222   0.3.5
+ *    4.3  1417
+ *    4.4  1426
+ *    5.0  1429
+ *    5.1  1440
+ *    5.2  1525   0.3.6
+ *    6.0  1721
+ *    6.1  1768
+ *    7.0  1770
+ *    8.0  1786
+ *    9.0  1909
+ *   10.0  2030
+ *   11.0  2033
+ *   11.1  2041
+ *   12.1  2046
+ *   13.1  2080   0.4.0, 0.4.0.1
+ *   14.0  2441
+ *   15.0  2499
+ *   16.0  2817
+ *   16.1  3155
+ *   17.0  3212
+ *   17.1  3218
+ *   18    3227
+ *   19    3396
+ *   20    3403
+ *   21    3472   0.4.x
+ *   22    3726
+ *   23    3915
+ *   24    4150
+ *   25    4259
+ *   26    4466
+ *   27    4757
+ *   28    4987
+ *   29    5070
+ *   30    5946
+ *   31    5999
+ *   32    6001
+ *   33    6440
+ *   34    6455
+ *   35    6602
+ *   36    6624
+ *   37    7182
+ *   38    7195
+ *   39    7269
+ *   40    7326
+ *   41    7348   0.5.x
+ *   42    7573
+ *   43    7642
+ *   44    8144
+ *   45    8501
+ *   46    8705
+ *   47    8735
+ *   48    8935
+ *   49    8969
+ *   50    8973
+ *   51    8978
+ *   52    9066
+ *   53    9316
+ *   54    9613
+ *   55    9638
+ *   56    9667
+ *   57    9691
+ *   58    9762
+ *   59    9779
+ *   60    9874
+ *   61    9892
+ *   62    9905
+ *   63    9956
+ *   64   10006
+ *   65   10210
+ *   66   10211
+ *   67   10236
+ *   68   10266
+ *   69   10319
+ *   70   10541
+ *   71   10567
+ *   72   10601
+ *   73   10903
+ *   74   11030
+ *   75   11107
+ *   76   11139
+ *   77   11172
+ *   78   11176
+ *   79   11188
+ *   80   11228
+ *   81   11244
+ *   82   11410
+ *   83   11589
+ *   84   11822
+ *   85   11874
+ *   86   12042
+ *   87   12129
+ *   88   12134
+ *   89   12160
+ *   90   12293
+ *   91   12347
+ *   92   12381   0.6.x
+ *   93   12648
+ *   94   12816
+ *   95   12924
+ *   96   13226
+ *   97   13256
+ *   98   13375
+ *   99   13838
+ *  100   13952
+ *  101   14233
+ *  102   14332
+ *  103   14598
+ *  104   14735
+ *  105   14803
+ *  106   14919
+ *  107   15027
+ *  108   15045
+ *  109   15075
+ *  110   15148
+ *  111   15190
+ *  112   15290
+ *  113   15340
+ *  114   15601
+ *  115   15695
+ *  116   15893   0.7.x
+ *  117   16037
+ *  118   16129
+ *  119   16242
+ *  120   16439
+ *  121   16694
+ *  122   16855
+ *  123   16909
+ *  124   16993
+ *  125   17113
+ *  126   17433
+ *  127   17439
+ *  128   18281
+ *  129   18292
+ *  130   18404
+ *  131   18481
+ *  132   18522
+ *  133   18674
+ *  134   18703
+ *  135   18719
+ *  136   18764
+ *  137   18912
+ *  138   18942   1.0.x
+ *  139   19346
+ *  140   19382
+ *  141   19799
+ *  142   20003
+ *  143   20048
+ */
+extern const uint16 SAVEGAME_VERSION = SL_MCF; ///< current savegame version of OpenTTD
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -193,9 +354,14 @@ static void SlNullPointers()
 	assert(_sl.action == SLA_NULL);
 }
 
-/** Error handler, calls longjmp to simulate an exception.
- * @todo this was used to have a central place to handle errors, but it is
- * pretty ugly, and seriously interferes with any multithreaded approaches */
+/**
+ * Error handler. Sets everything up to show an error message and to clean
+ * up the mess of a partial savegame load.
+ * @param string The translatable error message to show.
+ * @param extra_msg An extra error message coming from one of the APIs.
+ * @note This function does never return as it throws an exception to
+ *       break out of all the saveload code.
+ */
 static void NORETURN SlError(StringID string, const char *extra_msg = NULL)
 {
 	/* Distinguish between loading into _load_check_data vs. normal save/load. */
@@ -216,12 +382,13 @@ static void NORETURN SlError(StringID string, const char *extra_msg = NULL)
 	throw std::exception();
 }
 
-typedef void (*AsyncSaveFinishProc)();
-static AsyncSaveFinishProc _async_save_finish = NULL;
-static ThreadObject *_save_thread;
+typedef void (*AsyncSaveFinishProc)();                ///< Callback for when the savegame loading is finished.
+static AsyncSaveFinishProc _async_save_finish = NULL; ///< Callback to call when the savegame loading is finished.
+static ThreadObject *_save_thread;                    ///< The thread we're using to compress and write a savegame
 
 /**
  * Called by save thread to tell we finished saving.
+ * @param proc The callback to call when saving is done.
  */
 static void SetAsyncSaveFinish(AsyncSaveFinishProc proc)
 {
@@ -262,45 +429,10 @@ static void SlReadFill()
 	_sl.offs_base += len;
 }
 
-static inline size_t SlGetOffs() {return _sl.offs_base - (_sl.bufe - _sl.bufp);}
-static inline uint SlReadArrayLength();
-
-/** Return the size in bytes of a certain type of normal/atomic variable
- * as it appears in memory. See VarTypes
- * @param conv VarType type of variable that is used for calculating the size
- * @return Return the size of this type in bytes */
-static inline uint SlCalcConvMemLen(VarType conv)
+static inline size_t SlGetOffs()
 {
-	static const byte conv_mem_size[] = {1, 1, 1, 2, 2, 4, 4, 8, 8, 0};
-	byte length = GB(conv, 4, 4);
-
-	switch (length << 4) {
-		case SLE_VAR_STRB:
-		case SLE_VAR_STRBQ:
-		case SLE_VAR_STR:
-		case SLE_VAR_STRQ:
-			return SlReadArrayLength();
-
-		default:
-			assert(length < lengthof(conv_mem_size));
-			return conv_mem_size[length];
-	}
+	return _sl.offs_base - (_sl.bufe - _sl.bufp);
 }
-
-/** Return the size in bytes of a certain type of normal/atomic variable
- * as it appears in a saved game. See VarTypes
- * @param conv VarType type of variable that is used for calculating the size
- * @return Return the size of this type in bytes */
-static inline byte SlCalcConvFileLen(VarType conv)
-{
-	static const byte conv_file_size[] = {1, 1, 2, 2, 4, 4, 8, 8, 2};
-	byte length = GB(conv, 0, 4);
-	assert(length < lengthof(conv_file_size));
-	return conv_file_size[length];
-}
-
-/** Return the size in bytes of a reference (pointer) */
-static inline size_t SlCalcRefLen() {return CheckSavegameVersion(69) ? 2 : 4;}
 
 /** Flush the output buffer by writing to disk with the given reader.
  * If the buffer pointer has not yet been set up, set it up now. Usually
@@ -460,12 +592,74 @@ static inline uint SlGetGammaLength(size_t i)
 	return 1 + (i >= (1 << 7)) + (i >= (1 << 14)) + (i >= (1 << 21));
 }
 
-static inline uint SlReadSparseIndex() {return SlReadSimpleGamma();}
-static inline void SlWriteSparseIndex(uint index) {SlWriteSimpleGamma(index);}
+static inline uint SlReadSparseIndex()
+{
+	return SlReadSimpleGamma();
+}
 
-static inline uint SlReadArrayLength() {return SlReadSimpleGamma();}
-static inline void SlWriteArrayLength(size_t length) {SlWriteSimpleGamma(length);}
-static inline uint SlGetArrayLength(size_t length) {return SlGetGammaLength(length);}
+static inline void SlWriteSparseIndex(uint index)
+{
+	SlWriteSimpleGamma(index);
+}
+
+static inline uint SlReadArrayLength()
+{
+	return SlReadSimpleGamma();
+}
+
+static inline void SlWriteArrayLength(size_t length)
+{
+	SlWriteSimpleGamma(length);
+}
+
+static inline uint SlGetArrayLength(size_t length)
+{
+	return SlGetGammaLength(length);
+}
+
+/**
+ * Return the size in bytes of a certain type of normal/atomic variable
+ * as it appears in memory. See VarTypes
+ * @param conv VarType type of variable that is used for calculating the size
+ * @return Return the size of this type in bytes
+ */
+static inline uint SlCalcConvMemLen(VarType conv)
+{
+	static const byte conv_mem_size[] = {1, 1, 1, 2, 2, 4, 4, 8, 8, 0};
+	byte length = GB(conv, 4, 4);
+
+	switch (length << 4) {
+		case SLE_VAR_STRB:
+		case SLE_VAR_STRBQ:
+		case SLE_VAR_STR:
+		case SLE_VAR_STRQ:
+			return SlReadArrayLength();
+
+		default:
+			assert(length < lengthof(conv_mem_size));
+			return conv_mem_size[length];
+	}
+}
+
+/**
+ * Return the size in bytes of a certain type of normal/atomic variable
+ * as it appears in a saved game. See VarTypes
+ * @param conv VarType type of variable that is used for calculating the size
+ * @return Return the size of this type in bytes
+ */
+static inline byte SlCalcConvFileLen(VarType conv)
+{
+	static const byte conv_file_size[] = {1, 1, 2, 2, 4, 4, 8, 8, 2};
+	byte length = GB(conv, 0, 4);
+	assert(length < lengthof(conv_file_size));
+	return conv_file_size[length];
+}
+
+/** Return the size in bytes of a reference (pointer) */
+static inline size_t SlCalcRefLen()
+{
+	return CheckSavegameVersion(69) ? 2 : 4;
+}
 
 void SlSetArrayIndex(uint index)
 {
@@ -575,23 +769,28 @@ static void SlCopyBytes(void *ptr, size_t length)
 	switch (_sl.action) {
 		case SLA_LOAD_CHECK:
 		case SLA_LOAD:
-			for (; length != 0; length--) { *p++ = SlReadByteInternal(); }
+			for (; length != 0; length--) *p++ = SlReadByteInternal();
 			break;
 		case SLA_SAVE:
-			for (; length != 0; length--) { SlWriteByteInternal(*p++); }
+			for (; length != 0; length--) SlWriteByteInternal(*p++);
 			break;
 		default: NOT_REACHED();
 	}
 }
 
-/* Get the length of the current object */
-size_t SlGetFieldLength() {return _sl.obj_len;}
+/** Get the length of the current object */
+size_t SlGetFieldLength()
+{
+	return _sl.obj_len;
+}
 
-/** Return a signed-long version of the value of a setting
+/**
+ * Return a signed-long version of the value of a setting
  * @param ptr pointer to the variable
  * @param conv type of variable, can be a non-clean
  * type, eg one with other flags because it is parsed
- * @return returns the value of the pointer-setting */
+ * @return returns the value of the pointer-setting
+ */
 int64 ReadValue(const void *ptr, VarType conv)
 {
 	switch (GetVarMemType(conv)) {
@@ -609,11 +808,13 @@ int64 ReadValue(const void *ptr, VarType conv)
 	}
 }
 
-/** Write the value of a setting
+/**
+ * Write the value of a setting
  * @param ptr pointer to the variable
  * @param conv type of variable, can be a non-clean type, eg
  *             with other flags. It is parsed upon read
- * @param val the new value being given to the variable */
+ * @param val the new value being given to the variable
+ */
 void WriteValue(void *ptr, VarType conv, int64 val)
 {
 	switch (GetVarMemType(conv)) {
@@ -688,26 +889,30 @@ static void SlSaveLoadConv(void *ptr, VarType conv)
 	}
 }
 
-/** Calculate the net length of a string. This is in almost all cases
+/**
+ * Calculate the net length of a string. This is in almost all cases
  * just strlen(), but if the string is not properly terminated, we'll
  * resort to the maximum length of the buffer.
  * @param ptr pointer to the stringbuffer
  * @param length maximum length of the string (buffer). If -1 we don't care
  * about a maximum length, but take string length as it is.
- * @return return the net length of the string */
+ * @return return the net length of the string
+ */
 static inline size_t SlCalcNetStringLen(const char *ptr, size_t length)
 {
 	if (ptr == NULL) return 0;
 	return min(strlen(ptr), length - 1);
 }
 
-/** Calculate the gross length of the string that it
+/**
+ * Calculate the gross length of the string that it
  * will occupy in the savegame. This includes the real length, returned
  * by SlCalcNetStringLen and the length that the index will occupy.
  * @param ptr pointer to the stringbuffer
  * @param length maximum length of the string (buffer size, etc.)
  * @param conv type of data been used
- * @return return the gross length of the string */
+ * @return return the gross length of the string
+ */
 static inline size_t SlCalcStringLen(const void *ptr, size_t length, VarType conv)
 {
 	size_t len;
@@ -735,7 +940,8 @@ static inline size_t SlCalcStringLen(const void *ptr, size_t length, VarType con
  * Save/Load a string.
  * @param ptr the string being manipulated
  * @param length of the string (full length)
- * @param conv must be SLE_FILE_STRING */
+ * @param conv must be SLE_FILE_STRING
+ */
 static void SlString(void *ptr, size_t length, VarType conv)
 {
 	switch (_sl.action) {
@@ -859,9 +1065,104 @@ void SlArray(void *array, size_t length, VarType conv)
 }
 
 
-static size_t ReferenceToInt(const void *obj, SLRefType rt);
-static void *IntToReference(size_t index, SLRefType rt);
+/**
+ * Pointers cannot be saved to a savegame, so this functions gets
+ * the index of the item, and if not available, it hussles with
+ * pointers (looks really bad :()
+ * Remember that a NULL item has value 0, and all
+ * indeces have +1, so vehicle 0 is saved as index 1.
+ * @param obj The object that we want to get the index of
+ * @param rt SLRefType type of the object the index is being sought of
+ * @return Return the pointer converted to an index of the type pointed to
+ */
+static size_t ReferenceToInt(const void *obj, SLRefType rt)
+{
+	assert(_sl.action == SLA_SAVE);
 
+	if (obj == NULL) return 0;
+
+	switch (rt) {
+		case REF_VEHICLE_OLD: // Old vehicles we save as new onces
+		case REF_VEHICLE:   return ((const  Vehicle*)obj)->index + 1;
+		case REF_STATION:   return ((const  Station*)obj)->index + 1;
+		case REF_TOWN:      return ((const     Town*)obj)->index + 1;
+		case REF_ORDER:     return ((const    Order*)obj)->index + 1;
+		case REF_ROADSTOPS: return ((const RoadStop*)obj)->index + 1;
+		case REF_ENGINE_RENEWS: return ((const EngineRenew*)obj)->index + 1;
+		case REF_CARGO_PACKET:  return ((const CargoPacket*)obj)->index + 1;
+		case REF_ORDERLIST:     return ((const   OrderList*)obj)->index + 1;
+		default: NOT_REACHED();
+	}
+}
+
+/**
+ * Pointers cannot be loaded from a savegame, so this function
+ * gets the index from the savegame and returns the appropiate
+ * pointer from the already loaded base.
+ * Remember that an index of 0 is a NULL pointer so all indeces
+ * are +1 so vehicle 0 is saved as 1.
+ * @param index The index that is being converted to a pointer
+ * @param rt SLRefType type of the object the pointer is sought of
+ * @return Return the index converted to a pointer of any type
+ */
+static void *IntToReference(size_t index, SLRefType rt)
+{
+	assert_compile(sizeof(size_t) <= sizeof(void *));
+
+	assert(_sl.action == SLA_PTRS);
+
+	/* After version 4.3 REF_VEHICLE_OLD is saved as REF_VEHICLE,
+	 * and should be loaded like that */
+	if (rt == REF_VEHICLE_OLD && !CheckSavegameVersionOldStyle(4, 4)) {
+		rt = REF_VEHICLE;
+	}
+
+	/* No need to look up NULL pointers, just return immediately */
+	if (index == (rt == REF_VEHICLE_OLD ? 0xFFFF : 0)) return NULL;
+
+	/* Correct index. Old vehicles were saved differently:
+	 * invalid vehicle was 0xFFFF, now we use 0x0000 for everything invalid. */
+	if (rt != REF_VEHICLE_OLD) index--;
+
+	switch (rt) {
+		case REF_ORDERLIST:
+			if (OrderList::IsValidID(index)) return OrderList::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid OrderList");
+
+		case REF_ORDER:
+			if (Order::IsValidID(index)) return Order::Get(index);
+			/* in old versions, invalid order was used to mark end of order list */
+			if (CheckSavegameVersionOldStyle(5, 2)) return NULL;
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Order");
+
+		case REF_VEHICLE_OLD:
+		case REF_VEHICLE:
+			if (Vehicle::IsValidID(index)) return Vehicle::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Vehicle");
+
+		case REF_STATION:
+			if (Station::IsValidID(index)) return Station::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Station");
+
+		case REF_TOWN:
+			if (Town::IsValidID(index)) return Town::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Town");
+
+		case REF_ROADSTOPS:
+			if (RoadStop::IsValidID(index)) return RoadStop::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid RoadStop");
+
+		case REF_ENGINE_RENEWS:
+			if (EngineRenew::IsValidID(index)) return EngineRenew::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid EngineRenew");
+
+		case REF_CARGO_PACKET:
+			if (CargoPacket::IsValidID(index)) return CargoPacket::Get(index);
+			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid CargoPacket");
+
+		default: NOT_REACHED();
+	}
+}
 
 /**
  * Return the size in bytes of a list
@@ -1219,12 +1520,34 @@ static void SlLoadCheckChunk(const ChunkHandler *ch)
 	}
 }
 
-/* Stub Chunk handlers to only calculate length and do nothing else */
-static ChunkSaveLoadProc *_tmp_proc_1;
-static inline void SlStubSaveProc2(void *arg) {_tmp_proc_1();}
-static void SlStubSaveProc() {SlAutolength(SlStubSaveProc2, NULL);}
+/**
+ * Stub Chunk handlers to only calculate length and do nothing else.
+ * The intended chunk handler that should be called.
+ */
+static ChunkSaveLoadProc *_stub_save_proc;
 
-/** Save a chunk of data (eg. vehicles, stations, etc.). Each chunk is
+/**
+ * Stub Chunk handlers to only calculate length and do nothing else.
+ * Actually call the intended chunk handler.
+ * @param arg ignored parameter.
+ */
+static inline void SlStubSaveProc2(void *arg)
+{
+	_stub_save_proc();
+}
+
+/**
+ * Stub Chunk handlers to only calculate length and do nothing else.
+ * Call SlAutoLenth with our stub save proc that will eventually
+ * call the intended chunk handler.
+ */
+static void SlStubSaveProc()
+{
+	SlAutolength(SlStubSaveProc2, NULL);
+}
+
+/**
+ * Save a chunk of data (eg. vehicles, stations, etc.). Each chunk is
  * prefixed by an ID identifying it, followed by data, and terminator where appropiate
  * @param ch The chunkhandler that will be used for the operation
  */
@@ -1240,7 +1563,7 @@ static void SlSaveChunk(const ChunkHandler *ch)
 
 	if (ch->flags & CH_AUTO_LENGTH) {
 		/* Need to calculate the length. Solve that by calling SlAutoLength in the save_proc. */
-		_tmp_proc_1 = proc;
+		_stub_save_proc = proc;
 		proc = SlStubSaveProc;
 	}
 
@@ -1276,7 +1599,8 @@ static void SlSaveChunks()
 	SlWriteUint32(0);
 }
 
-/** Find the ChunkHandler that will be used for processing the found
+/**
+ * Find the ChunkHandler that will be used for processing the found
  * chunk in the savegame or in memory
  * @param id the chunk in question
  * @return returns the appropiate chunkhandler
@@ -1597,105 +1921,6 @@ static void UninitWriteZlib()
  ************* END OF CODE *****************
  *******************************************/
 
-/**
- * Pointers cannot be saved to a savegame, so this functions gets
- * the index of the item, and if not available, it hussles with
- * pointers (looks really bad :()
- * Remember that a NULL item has value 0, and all
- * indeces have +1, so vehicle 0 is saved as index 1.
- * @param obj The object that we want to get the index of
- * @param rt SLRefType type of the object the index is being sought of
- * @return Return the pointer converted to an index of the type pointed to
- */
-static size_t ReferenceToInt(const void *obj, SLRefType rt)
-{
-	assert(_sl.action == SLA_SAVE);
-
-	if (obj == NULL) return 0;
-
-	switch (rt) {
-		case REF_VEHICLE_OLD: // Old vehicles we save as new onces
-		case REF_VEHICLE:   return ((const  Vehicle*)obj)->index + 1;
-		case REF_STATION:   return ((const  Station*)obj)->index + 1;
-		case REF_TOWN:      return ((const     Town*)obj)->index + 1;
-		case REF_ORDER:     return ((const    Order*)obj)->index + 1;
-		case REF_ROADSTOPS: return ((const RoadStop*)obj)->index + 1;
-		case REF_ENGINE_RENEWS: return ((const EngineRenew*)obj)->index + 1;
-		case REF_CARGO_PACKET:  return ((const CargoPacket*)obj)->index + 1;
-		case REF_ORDERLIST:     return ((const   OrderList*)obj)->index + 1;
-		default: NOT_REACHED();
-	}
-}
-
-/**
- * Pointers cannot be loaded from a savegame, so this function
- * gets the index from the savegame and returns the appropiate
- * pointer from the already loaded base.
- * Remember that an index of 0 is a NULL pointer so all indeces
- * are +1 so vehicle 0 is saved as 1.
- * @param index The index that is being converted to a pointer
- * @param rt SLRefType type of the object the pointer is sought of
- * @return Return the index converted to a pointer of any type
- */
-static void *IntToReference(size_t index, SLRefType rt)
-{
-	assert_compile(sizeof(size_t) <= sizeof(void *));
-
-	assert(_sl.action == SLA_PTRS);
-
-	/* After version 4.3 REF_VEHICLE_OLD is saved as REF_VEHICLE,
-	 * and should be loaded like that */
-	if (rt == REF_VEHICLE_OLD && !CheckSavegameVersionOldStyle(4, 4)) {
-		rt = REF_VEHICLE;
-	}
-
-	/* No need to look up NULL pointers, just return immediately */
-	if (index == (rt == REF_VEHICLE_OLD ? 0xFFFF : 0)) return NULL;
-
-	/* Correct index. Old vehicles were saved differently:
-	 * invalid vehicle was 0xFFFF, now we use 0x0000 for everything invalid. */
-	if (rt != REF_VEHICLE_OLD) index--;
-
-	switch (rt) {
-		case REF_ORDERLIST:
-			if (OrderList::IsValidID(index)) return OrderList::Get(index);
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid OrderList");
-
-		case REF_ORDER:
-			if (Order::IsValidID(index)) return Order::Get(index);
-			/* in old versions, invalid order was used to mark end of order list */
-			if (CheckSavegameVersionOldStyle(5, 2)) return NULL;
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Order");
-
-		case REF_VEHICLE_OLD:
-		case REF_VEHICLE:
-			if (Vehicle::IsValidID(index)) return Vehicle::Get(index);
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Vehicle");
-
-		case REF_STATION:
-			if (Station::IsValidID(index)) return Station::Get(index);
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Station");
-
-		case REF_TOWN:
-			if (Town::IsValidID(index)) return Town::Get(index);
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid Town");
-
-		case REF_ROADSTOPS:
-			if (RoadStop::IsValidID(index)) return RoadStop::Get(index);
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid RoadStop");
-
-		case REF_ENGINE_RENEWS:
-			if (EngineRenew::IsValidID(index)) return EngineRenew::Get(index);
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid EngineRenew");
-
-		case REF_CARGO_PACKET:
-			if (CargoPacket::IsValidID(index)) return CargoPacket::Get(index);
-			SlError(STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME, "Referencing invalid CargoPacket");
-
-		default: NOT_REACHED();
-	}
-}
-
 /** The format for a reader/writer type of a savegame */
 struct SaveLoadFormat {
 	const char *name;                     ///< name of the compressor/decompressor (debug-only)
@@ -1784,7 +2009,7 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 extern bool AfterLoadGame();
 extern bool LoadOldSaveGame(const char *file);
 
-/** Small helper function to close the to be loaded savegame an signal error */
+/** Small helper function to close the to be loaded savegame and signal error */
 static inline SaveOrLoadResult AbortSaveLoad()
 {
 	if (_sl.fh != NULL) fclose(_sl.fh);
@@ -1793,9 +2018,11 @@ static inline SaveOrLoadResult AbortSaveLoad()
 	return SL_ERROR;
 }
 
-/** Update the gui accordingly when starting saving
+/**
+ * Update the gui accordingly when starting saving
  * and set locks on saveload. Also turn off fast-forward cause with that
- * saving takes Aaaaages */
+ * saving takes Aaaaages
+ */
 static void SaveFileStart()
 {
 	_ts.ff_state = _fast_forward;
@@ -1806,8 +2033,7 @@ static void SaveFileStart()
 	_ts.saveinprogress = true;
 }
 
-/** Update the gui accordingly when saving is done and release locks
- * on saveload */
+/** Update the gui accordingly when saving is done and release locks on saveload. */
 static void SaveFileDone()
 {
 	if (_game_mode != GM_MENU) _fast_forward = _ts.ff_state;
@@ -1885,8 +2111,7 @@ static SaveOrLoadResult SaveFileToDisk(bool threaded)
 		if (threaded) SetAsyncSaveFinish(SaveFileDone);
 
 		return SL_OK;
-	}
-	catch (...) {
+	} catch (...) {
 		AbortSaveLoad();
 		if (_sl.excpt_uninit != NULL) _sl.excpt_uninit();
 
@@ -2137,7 +2362,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb, boo
 				GamelogStartAction(GLAT_LOAD);
 
 				/* After loading fix up savegame for any internal changes that
-				 * might've occured since then. If it fails, load back the old game */
+				 * might have occurred since then. If it fails, load back the old game. */
 				if (!AfterLoadGame()) {
 					GamelogStopAction();
 					return SL_REINIT;
@@ -2148,8 +2373,7 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb, boo
 		}
 
 		return SL_OK;
-	}
-	catch (...) {
+	} catch (...) {
 		AbortSaveLoad();
 
 		/* deinitialize compressor. */

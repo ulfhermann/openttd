@@ -458,12 +458,11 @@ public:
 	{
 		switch (widget) {
 			case DPIW_MATRIX_WIDGET: {
-				const IndustrySpec *indsp;
 				int y = this->vscroll.GetScrolledRowFromWidget(pt.y, this, DPIW_MATRIX_WIDGET);
 				if (y < this->count) { // Is it within the boundaries of available data?
 					this->selected_index = y;
 					this->selected_type = this->index[y];
-					indsp = (this->selected_type == INVALID_INDUSTRYTYPE) ? NULL : GetIndustrySpec(this->selected_type);
+					const IndustrySpec *indsp = (this->selected_type == INVALID_INDUSTRYTYPE) ? NULL : GetIndustrySpec(this->selected_type);
 
 					this->SetDirty();
 
@@ -871,7 +870,7 @@ static void UpdateIndustryProduction(Industry *i)
 	}
 }
 
-/** Widget definition of the view industy gui */
+/** Widget definition of the view industry gui */
 static const NWidgetPart _nested_industry_view_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_CREAM),
@@ -894,7 +893,7 @@ static const NWidgetPart _nested_industry_view_widgets[] = {
 	EndContainer(),
 };
 
-/** Window definition of the view industy gui */
+/** Window definition of the view industry gui */
 static const WindowDesc _industry_view_desc(
 	WDP_AUTO, 260, 120,
 	WC_INDUSTRY_VIEW, WC_NONE,
@@ -915,7 +914,7 @@ enum IndustryDirectoryWidgets {
 	IDW_SCROLLBAR,
 };
 
-/** Widget definition of the industy directory gui */
+/** Widget definition of the industry directory gui */
 static const NWidgetPart _nested_industry_directory_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_BROWN),
@@ -1256,7 +1255,7 @@ const StringID IndustryDirectoryWindow::sorter_names[] = {
 };
 
 
-/** Window definition of the industy directory gui */
+/** Window definition of the industry directory gui */
 static const WindowDesc _industry_directory_desc(
 	WDP_AUTO, 428, 190,
 	WC_INDUSTRY_DIRECTORY, WC_NONE,
