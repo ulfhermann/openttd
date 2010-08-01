@@ -1886,10 +1886,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Gabungka
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Pisahkan waypoint
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Pembangun Rel Kereta
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Konstruksi Rel Kereta Listrik
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Pembangunan Monorel
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Pembangunan Maglev
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :Pembangun Rel Kereta
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Konstruksi Rel Kereta Listrik
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Pembangunan Monorel
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Pembangunan Maglev
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Bangun rel. Ctrl untuk mengganti mode bangun/bongkar pada konstruksi rel
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Bangun rel kereta menggunakan mode Autorail. Ctrl untuk mengganti mode bangun/bongkar pada konstruksi rel
@@ -2710,10 +2710,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Pesawat 
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Laba tahun ini: {CURRENCY} (tahun lalu: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Kereta tersedia
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Kendaraan tersedia
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}Kapal tersedia
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Pesawat tersedia
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :Kereta tersedia
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :Kendaraan tersedia
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :Kapal tersedia
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :Pesawat tersedia
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Lihat daftar desain mesin yang tersedia untuk kendaraan tipe ini
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Atur Daftar
@@ -2754,15 +2754,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Jual semua
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Ubah nama kelompok
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Kereta Baru
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Kereta listrik baru
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Monorel Baru
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Maglev Baru
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :Kereta Baru
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :Kereta listrik baru
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :Monorel Baru
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :Maglev Baru
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Semua Kereta
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Kendaraan Baru
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Kapal Baru
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Buat Pesawat
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :Semua Kereta
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :Kendaraan Baru
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :Kapal Baru
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Buat Pesawat
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Biaya: {GOLD}{CURRENCY}{BLACK} Berat: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Kecepatan: {GOLD}{VELOCITY}{BLACK} Daya: {GOLD}{POWER}
@@ -3448,6 +3448,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... tida
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Kota tidak akan membangun jalan. Anda dapat mengaktifkan pembangunan jalan pada menu Pengaturan Lanjutan->Ekonomi->Kota.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Jalan sedang dikerjakan
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Tidak dapat menghancurkan kota ini...{}Suatu stasiun atau depo tergantung pada kota ini atau kotak milik kota tidak dapat dihapus
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... tidak ada tempat yang cocok untuk patung di tengah kota ini
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... terlalu banyak industri
@@ -3563,7 +3564,7 @@ STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Tidak da
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Tidak dapat menghapus jalur rel dari sini
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Tidak dapat menghapus sinyal dari sini
 STR_ERROR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                     :{WHITE}Tidak dapat mengubah sinyal ini...
-STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}...tidak ada rel
+STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}... tidak ada rel
 STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}...tidak ada sinyal
 
 STR_ERROR_CAN_T_CONVERT_RAIL                                    :{WHITE}Tidak dapat mengubah tipe rel disini...
@@ -3575,8 +3576,8 @@ STR_ERROR_CAN_T_BUILD_ROAD_HERE                                 :{WHITE}Tidak da
 STR_ERROR_CAN_T_BUILD_TRAMWAY_HERE                              :{WHITE}Tidak dapat membangun jalan trem disini...
 STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Tidak dapat membongkar jalan di sini...
 STR_ERROR_CAN_T_REMOVE_TRAMWAY_FROM                             :{WHITE}Tidak dapat membongkar jalan trem disini...
-STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}...tidak ada jalan
-STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}...tidak ada jalur trem
+STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}... tidak ada jalan
+STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}... tidak ada jalur trem
 
 # Waterway construction errors
 STR_ERROR_CAN_T_BUILD_CANALS                                    :{WHITE}Tidak dapat membangun kanal disini...
