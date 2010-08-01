@@ -1886,10 +1886,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Controle
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Bouw een losstaande controlepost
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Bouw spoorwegen
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Bouw geëlektrificeerde spoorwegen
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Bouw monorail-spoorwegen
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Bouw magneetzweeftrein-spoorwegen
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :Bouw spoorwegen
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Bouw geëlektrificeerde spoorwegen
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Bouw monorail-spoorwegen
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Bouw magneetzweeftrein-spoorwegen
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Plaats spoor. Ctrl wisselt tussen bouwen/verwijderen van het spoor
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Bouw spoor met de Autorail-methode. Ctrl wisselt tussen bouwen/verwijderen van het spoor
@@ -2373,6 +2373,7 @@ STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP                :{BLACK}Kijk of 
 
 STR_NEWGRF_SETTINGS_FILENAME                                    :{BLACK}Bestandsnaam: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_GRF_ID                                      :{BLACK}GRF-ID: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_VERSION                                     :{BLACK}Versie: {SILVER}{NUM}
 STR_NEWGRF_SETTINGS_MD5SUM                                      :{BLACK}MD5sum: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PALETTE                                     :{BLACK}Palet: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Parameters: {SILVER}{STRING}
@@ -2382,6 +2383,11 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Bestand ni
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Uitgeschakeld
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}NewGRF-parameters ingeven
+
+# NewGRF parameters window
+STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}NewGRF parameters wijzigen
+STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Sluiten
+STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parameter {NUM}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Inspecteer - {STRING}
@@ -2710,10 +2716,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Vliegtui
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Winst dit jaar: {CURRENCY} (vorig jaar: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Beschikbare railvoertuigen
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Beschikbare wegvoertuigen
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}Beschikbare schepen
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Beschikbare vliegtuigen
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :Beschikbare railvoertuigen
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :Beschikbare wegvoertuigen
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :Beschikbare schepen
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :Beschikbare vliegtuigen
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Bekijk een lijst van beschikbare ontwerpen voor dit type voertuig.
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Beheer lijst
@@ -2754,15 +2760,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Verwijder alle 
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Hernoem een groep
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Nieuwe railvoertuigen
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Nieuwe elektrische railvoertuigen
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Nieuwe monorailrailvoertuigen
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Nieuwe zweefrailvoertuigen
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :Nieuwe railvoertuigen
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :Nieuwe elektrische railvoertuigen
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :Nieuwe monorailrailvoertuigen
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :Nieuwe zweefrailvoertuigen
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Railvoertuigen
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Nieuwe wegvoertuigen
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Nieuwe schepen
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Nieuwe vliegtuigen
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :Railvoertuigen
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :Nieuwe wegvoertuigen
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :Nieuwe schepen
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Nieuwe vliegtuigen
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Kosten: {GOLD}{CURRENCY}{BLACK} Gewicht: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Snelheid: {GOLD}{VELOCITY}{BLACK} Kracht: {GOLD}{POWER}
@@ -3448,6 +3454,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... er i
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}De plaats bouwt geen wegen. Het bouwen van wegen kan aangezet worden via Geavanceerde Instellingen->Economie->Plaatsen.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Wegwerkzaamheden in uitvoering
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Kan deze plaats niet verwijderen...{}Een station of depot verwijst naar deze plaats of een door de plaats beheerde tegel kan niet worden verwijderd
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... er is geen geschikte plaats voor een standbeeld in het centrum van dit dorp
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... teveel industrieën
