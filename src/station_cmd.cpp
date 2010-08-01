@@ -3157,10 +3157,14 @@ void Station::RunAverages() {
 			}
 		}
 
+		if (_settings_game.linkgraph.GetDistributionType(goods_index) == DT_MANUAL) {
+			this->goods[goods_index].flows.clear();
+			continue;
+		}
+
 		FlowStatMap &flows = this->goods[goods_index].flows;
 		for (FlowStatMap::iterator i = flows.begin(); i != flows.end();) {
-			StationID source = i->first;
-			if (!Station::IsValidID(source)) {
+			if (!Station::IsValidID(i->first)) {
 				flows.erase(i++);
 			} else {
 				FlowStatSet &flow_set = i->second;
