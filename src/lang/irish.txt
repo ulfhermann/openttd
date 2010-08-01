@@ -1886,10 +1886,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Ceangail
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Tóg pointe bealaigh ar leithligh
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Tógáil Iarnróid
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Tógáil Iarnróid Leicrithe
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Tógáil Iarnróid Aonráille
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Tógáil Maglev
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :Tógáil Iarnróid
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Tógáil Iarnróid Leicrithe
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Tógáil Iarnróid Aonráille
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Tógáil Maglev
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Tóg ráillí iarnróid. Déanann Ctrl tóg/bain a scoránú agus tú ag tógáil iarnróid
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Tóg ráille iarnróid ag úsáid an mód Uathráillí. Déanann Ctrl tóg/bain a scoránú do thógail iarnróid
@@ -1899,7 +1899,7 @@ STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION                 :{BLACK}Tóg st�
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_SIGNALS                 :{BLACK}Tóg comharthaí iarnróid. Déantar comharthaí séamafóir/solais a scoránú le Ctrl{}Is féidir tarraingt le comharthaí a thógáil feadh píosa díreach iarnróid. Tógtar comharthaí chomh fada leis an gcéad acomhal eile le Ctrl{}Déantar fuinneog roghnú na gcomharthaí a oscailt nó gan oscailt le Ctrl
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_BRIDGE                  :{BLACK}Tóg droichead iarnróid
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TUNNEL                  :{BLACK}Tóg tollán iarnróid
-STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Athraigh idir tógáil/baint le haghaidh ráillí iarnróid, comharthaí, pointí bealaigh agus stáisiúin. Má choinnítear Ctrl síos, baintear ráillí ó phointí bealaigh agus ó stáisiúin freisin
+STR_RAIL_TOOLBAR_TOOLTIP_TOGGLE_BUILD_REMOVE_FOR                :{BLACK}Athraigh idir tógáil/baint le haghaidh ráillí iarnróid, comharthaí, pointí bealaigh agus stáisiúin. Coinnigh síos Ctrl chun ráillí a bhaint ó phointí bealaigh agus ó stáisiúin freisin
 STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL                           :{BLACK}Tiontaigh/Uasghrádaigh an cineál ráille
 
 # Rail depot construction window
@@ -2117,10 +2117,15 @@ STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}Tóg
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Maoinigh
 
 # Industry cargoes window
+STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION                           :{WHITE}Slabhra na dtionscal don tionscal {STRING}
 STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}Slabhra na dtionscal le haghaidh lastas {STRING}
 STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}Tionscail á tháirgeadh
 STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Tionscail a ghlacann leis
 STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Tithe
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Cliceáil ar an tionscal chun a sholáthróirí agus a chustaiméirí a fheiceáil
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Cliceáil ar an lastas chun a soláthróirí agus a chustaiméirí a fheiceáil
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Taispeáin an slabhra
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Taispeáin na tionscadail a dhéanann lastas a sholáthar agus a ghlacann leis
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Faisnéis faoin bPíosa Talún
@@ -2705,10 +2710,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Aerárth
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Brabús i mbliana: {CURRENCY} (anuraidh: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Traenacha atá ar fáil
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Feithiclí atá le fáil
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}Longa atá le fáil
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Aerárthaigh atá le fáil
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :Traenacha atá ar fáil
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :Feithiclí atá le fáil
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :Longa atá le fáil
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :Aerárthaigh atá le fáil
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Féach liosta de na dearthaí innill atá ar fáil don chineál feithicle seo.
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Bainistigh liosta
@@ -2749,15 +2754,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Bain gach feith
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Athainmnigh grúpa
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Feithiclí Iarnróid Nua
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Feithiclí Iarnróid Leictreacha Nua
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Feithiclí Aonráille Nua
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Feithiclí Maglev Nua
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :Feithiclí Iarnróid Nua
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :Feithiclí Iarnróid Leictreacha Nua
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :Feithiclí Aonráille Nua
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :Feithiclí Maglev Nua
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Feithiclí Iarnróid Nua
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Feithiclí Bóthair Nua
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Longa Nua
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Aerárthaigh Nua
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :Feithiclí Iarnróid Nua
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :Feithiclí Bóthair Nua
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :Longa Nua
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Aerárthaigh Nua
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Costas: {GOLD}{CURRENCY}{BLACK} Meáchan: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Luas: {GOLD}{VELOCITY}{BLACK} Cumhacht: {GOLD}{POWER}
@@ -2818,7 +2823,7 @@ STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} {P fh fh fh bhf f}eithicil{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CARGO                                 :{}{CARGO} ({SHORTCARGO})
 
-STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Traenacha - cliceáil ar thraein le haghaidh faisnéise, tarraing feithicil lena chur leis an traein nó a bhaint de
+STR_DEPOT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Traenacha - tarraing feithicil le cléchlicáil le cur leis an traein nó le baint de, deaschliceáil le haghaidh faisnéise. Coinnigh síos Ctrl agus cuirfear an dá rud i bhfeidhm ar an slabhra a leanas
 STR_DEPOT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Feithiclí - deaschliceáil ar fheithicil le faisnéis a fháil
 STR_DEPOT_SHIP_LIST_TOOLTIP                                     :{BLACK}Longa - deaschliceáil ar long le faisnéis a fháil
 STR_DEPOT_AIRCRAFT_LIST_TOOLTIP                                 :{BLACK}Aerárthaigh - deaschliceáil ar aerárthach le faisnéis a fháil
@@ -3443,6 +3448,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... níl
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Ní thógfaidh an baile seo bóithre. Is féidir leat tógáil bóithre a chumasú in Ardsocruithe->Geilleagar->Bailte.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Tá oibreacha bóthair ar bun
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Ní féidir an baile seo a scriosadh...{}Ní féidir stáisiún nó iosta atá ag tagairt don bhaile nó do thíle atá faoi úinéireacht an bhaile a bhaint
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... níl aon suíomh oiriúnach don dealbh i lár an bhaile seo
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... an iomarca tionscal
@@ -3570,7 +3576,7 @@ STR_ERROR_CAN_T_BUILD_ROAD_HERE                                 :{WHITE}Ní féi
 STR_ERROR_CAN_T_BUILD_TRAMWAY_HERE                              :{WHITE}Ní féidir trambhealach a thógáil anseo...
 STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Ní féidir bóthair a bhaint as seo...
 STR_ERROR_CAN_T_REMOVE_TRAMWAY_FROM                             :{WHITE}Ní féidir trambhealach a bhaint as seo...
-STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}... níl aon bhóthair ann
+STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}... níl aon bhóthar ann
 STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}... níl aon trambhealach ann
 
 # Waterway construction errors
