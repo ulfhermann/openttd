@@ -2056,10 +2056,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Объе
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Поставить отдельную точку пути
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Железные дороги
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Электрифицированные ж/д
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Монорельс
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Магнитные поезда
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :Железные дороги
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Электрифицированные ж/д
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Монорельс
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Магнитные поезда
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Строительство железной дороги. При нажатом Ctrl - удаление путей.
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Строительство ж/д путей в автоматическом режиме. При нажатом Ctrl - удаление путей.
@@ -2543,6 +2543,7 @@ STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP                :{BLACK}Отме
 
 STR_NEWGRF_SETTINGS_FILENAME                                    :{BLACK}Имя файла: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_GRF_ID                                      :{BLACK}GRF ID: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_VERSION                                     :{BLACK}Версия: {SILVER}{NUM}
 STR_NEWGRF_SETTINGS_MD5SUM                                      :{BLACK}Сумма MD5: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PALETTE                                     :{BLACK}Палитра: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Параметры: {SILVER}{STRING}
@@ -2552,6 +2553,11 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Файл �
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Отключено
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Введите параметры файла NewGRF
+
+# NewGRF parameters window
+STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Изменить параметры NewGRF
+STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Закрыть
+STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Параметр {NUM}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Просмотр - {STRING}
@@ -2880,10 +2886,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Авиа
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Прибыль в этом году: {CURRENCY} (прошлый год: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Доступные поезда
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Доступные автомобили
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}Доступные суда
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Доступные самолёты
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :Доступные поезда
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :Доступные автомобили
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :Доступные суда
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :Доступные самолёты
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Список доступного транспорта
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Организация
@@ -2924,15 +2930,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Удалить 
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Название группы
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Новый поезд
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Новый электропоезд
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Новый монорельсовый поезд
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Новый магниторельсовый поезд
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :Новый поезд
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :Новый электропоезд
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :Новый монорельсовый поезд
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :Новый магниторельсовый поезд
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Новый поезд
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Новый автомобиль
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Новый корабль
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Новый авиатранспорт
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :Новый поезд
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :Новый автомобиль
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :Новый корабль
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Новый авиатранспорт
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Цена: {GOLD}{CURRENCY}{BLACK} Вес: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Скорость: {GOLD}{VELOCITY}{BLACK} Мощность: {GOLD}{POWER}
@@ -3628,6 +3634,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... не
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Города не строят дорог. Вы можете включить стоительство дорог в Расш. настройки->Экономика->Города.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Идут дорожные работы...
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Невозможно уничтожить город:{}к нему относится станция или депо, либо невозможно очистить одну из занимаемых им клеток.
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}...в центре города нет места для статуи
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... слишком много предприятий
@@ -4053,8 +4060,8 @@ STR_SV_STNAME_FALLBACK                                          :г.{NBSP}{STRIN
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_KIRBY_PAUL_TANK_STEAM        :Паровоз Kirby Paul Tank
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MJS_250_DIESEL               :Тепловоз MJS 250
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_PLODDYPHUT_CHOO_CHOO         :Паровоз Ploddyphut «Чу-Чу»
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_POWERNAUT_CHOO_CHOO          :Паровоз Powernaut Choo-Choo
-STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MIGHTYMOVER_CHOO_CHOO        :Паровоз Mightymover «Чу-чу»
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_POWERNAUT_CHOO_CHOO          :Паровоз Powernaut «Чу-Чу»
+STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_MIGHTYMOVER_CHOO_CHOO        :Паровоз Mightymover «Чу-Чу»
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_PLODDYPHUT_DIESEL            :Тепловоз Ploddyphut
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_POWERNAUT_DIESEL             :Тепловоз Powernaut
 STR_VEHICLE_NAME_TRAIN_ENGINE_RAIL_WILLS_2_8_0_STEAM            :Паровоз Wills 2-8-0
@@ -4088,7 +4095,7 @@ STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_WOOD_TRUCK                    :Вагон дл
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_IRON_ORE_HOPPER               :Хоппер для железной руды
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_STEEL_TRUCK                   :Вагон для стали
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_ARMORED_VAN                   :Бронированный вагон
-STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_FOOD_VAN                      :Рефрижератор
+STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_FOOD_VAN                      :Рефрижератор (продукты)
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_PAPER_TRUCK                   :Вагон для бумаги
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_COPPER_ORE_HOPPER             :Хоппер для медной руды
 STR_VEHICLE_NAME_TRAIN_WAGON_RAIL_WATER_TANKER                  :Водная цистерна
@@ -4118,7 +4125,7 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_WOOD_TRUCK                :Вагон дл
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_IRON_ORE_HOPPER           :Хоппер для железной руды
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_STEEL_TRUCK               :Вагон для стали
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_ARMORED_VAN               :Бронированный вагон
-STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_FOOD_VAN                  :Рефрижератор
+STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_FOOD_VAN                  :Рефрижератор (продукты)
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_PAPER_TRUCK               :Вагон для бумаги
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_COPPER_ORE_HOPPER         :Хоппер для медной руды
 STR_VEHICLE_NAME_TRAIN_WAGON_MONORAIL_WATER_TANKER              :Водная цистерна
@@ -4150,11 +4157,11 @@ STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_WOOD_TRUCK                  :Вагон дл
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_IRON_ORE_HOPPER             :Хоппер для железной руды
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_STEEL_TRUCK                 :Вагон для стали
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_ARMORED_VAN                 :Бронированный вагон
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FOOD_VAN                    :Рефрижератор
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FOOD_VAN                    :Рефрижератор (продукты)
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_PAPER_TRUCK                 :Вагон для бумаги
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COPPER_ORE_HOPPER           :Хоппер для медной руды
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_WATER_TANKER                :Водная цистерна
-STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FRUIT_TRUCK                 :Рефрижератор для фруктов
+STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_FRUIT_TRUCK                 :Рефрижератор (фрукты)
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_RUBBER_TRUCK                :Вагон для каучука
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_SUGAR_TRUCK                 :Вагон для сахара
 STR_VEHICLE_NAME_TRAIN_WAGON_MAGLEV_COTTON_CANDY_HOPPER         :Хоппер для сахарной ваты

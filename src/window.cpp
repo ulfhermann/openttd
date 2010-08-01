@@ -36,7 +36,7 @@
 #include "table/sprites.h"
 
 static Point _drag_delta; ///< delta between mouse cursor and upper left corner of dragged window
-static Window *_mouseover_last_w = NULL; ///< Window of the last MOUSEOVER event
+static Window *_mouseover_last_w = NULL; ///< Window of the last #MOUSEOVER event.
 
 /** List of windows opened at the screen sorted from the front. */
 Window *_z_front_window = NULL;
@@ -45,7 +45,7 @@ Window *_z_back_window  = NULL;
 
 /*
  * Window that currently has focus. - The main purpose is to generate
- * FocusLost events, not to give next window in z-order focus when a
+ * #FocusLost events, not to give next window in z-order focus when a
  * window is closed.
  */
 Window *_focused_window;
@@ -1974,7 +1974,7 @@ void HandleKeypress(uint32 raw_key)
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || _local_company == _current_company);
+	assert(IsGeneratingWorld() || IsLocalCompany());
 
 	/* Setup event */
 	uint16 key     = GB(raw_key,  0, 16);
@@ -2135,7 +2135,7 @@ static void MouseLoop(MouseClick click, int mousewheel)
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || _local_company == _current_company);
+	assert(IsGeneratingWorld() || IsLocalCompany());
 
 	HandlePlacePresize();
 	UpdateTileSelection();
@@ -2241,7 +2241,7 @@ void HandleMouseEvents()
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || _local_company == _current_company);
+	assert(IsGeneratingWorld() || IsLocalCompany());
 
 	static int double_click_time = 0;
 	static Point double_click_pos = {0, 0};
@@ -2348,7 +2348,7 @@ void InputLoop()
 {
 	/* World generation is multithreaded and messes with companies.
 	 * But there is no company related window open anyway, so _current_company is not used. */
-	assert(IsGeneratingWorld() || _local_company == _current_company);
+	assert(IsGeneratingWorld() || IsLocalCompany());
 
 	CheckSoftLimit();
 	HandleKeyScrolling();
@@ -2654,7 +2654,7 @@ void ChangeVehicleViewports(VehicleID from_index, VehicleID to_index)
 /**
  * Relocate all windows to fit the new size of the game application screen
  * @param neww New width of the game application screen
- * @param newh New height of the game appliction screen
+ * @param newh New height of the game application screen.
  */
 void RelocateAllWindows(int neww, int newh)
 {
@@ -2672,8 +2672,8 @@ void RelocateAllWindows(int neww, int newh)
 			continue; // don't modify top,left
 		}
 
-		/* XXX - this probably needs something more sane. For example specying
-		 * in a 'backup'-desc that the window should always be centred. */
+		/* XXX - this probably needs something more sane. For example specifying
+		 * in a 'backup'-desc that the window should always be centered. */
 		switch (w->window_class) {
 			case WC_MAIN_TOOLBAR:
 				if (neww - w->width != 0) ResizeWindow(w, min(neww, 640) - w->width, 0);

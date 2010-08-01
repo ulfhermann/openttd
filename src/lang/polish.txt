@@ -2266,10 +2266,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Połącz
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Zbuduj oddzielny pkt. orientacyjny
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Konstrukcja torowiska
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Konstrukcja torowiska elektryfikowanego
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Konstrukcja torowiska jednoszynowego
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Konstrukcja torowiska MagLev
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :Konstrukcja torowiska
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Konstrukcja torowiska elektryfikowanego
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Konstrukcja torowiska jednoszynowego
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Konstrukcja torowiska MagLev
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Budowa torów kolejowych. Ctrl przełącza buduj/usuń dla konstrukcji kolejowych
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Zbuduj tory kolejowe za pomocą trybu Autotory. Ctrl przełącza buduj/usuń dla konstrukcji kolejowych
@@ -2495,6 +2495,17 @@ STR_FUND_INDUSTRY_INDUSTRY_BUILD_COST                           :{BLACK}Koszt: {
 STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY                         :{BLACK}Zleć poszukiwanie
 STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}Zbuduj
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Ufunduj
+
+# Industry cargoes window
+STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION                           :{WHITE}Kolejność przetwarzania dla {STRING}
+STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}Kolejność przetwarzania dla {STRING}
+STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}Przedsiębiorstwa produkujące
+STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Przedsiębiorstwa odbierające
+STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Domy
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Kliknij na przedsiębiorstwie aby zobaczyć jego dostawców i odbiorców
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Kliknij na towar aby zobaczyć jego dostawców i odbiorców
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Łańcuch przetwarzania
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Wyświetla dostawców i odbiorców dla towaru
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Informacja o terenie
@@ -3079,10 +3090,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Samolot 
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Zysk w tym roku: {CURRENCY} (ostatni rok: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Dostępne lokomotywy
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Dostępne pojazdy
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}Dostępne statki
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Dostępny samolot
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :Dostępne lokomotywy
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :Dostępne pojazdy
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :Dostępne statki
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :Dostępny samolot
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Zobacz listę dostępnych projektów silników dla tego typu pojazdów.
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Zarządzaj listą
@@ -3123,15 +3134,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Usuń wszystkie
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Zmień nazwę grupy
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Nowe pociągi
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Nowe elektryczne pojazdy szynowe
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Nowe pociągi jednoszynowe
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Nowe pociągi MagLev
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :Nowe pociągi
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :Nowe elektryczne pojazdy szynowe
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :Nowe pociągi jednoszynowe
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :Nowe pociągi MagLev
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Nowe Pojazdy Szynowe
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Nowy pojazd drogowy
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Nowe statki
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Nowy samolot
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :Nowe Pojazdy Szynowe
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :Nowy pojazd drogowy
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :Nowe statki
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Nowy samolot
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Koszt: {GOLD}{CURRENCY}{BLACK} Waga: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Prędkość: {GOLD}{VELOCITY}{BLACK} Moc: {GOLD}{POWER}
@@ -3823,6 +3834,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... nie 
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Miasto nie będzie budować dróg. Możesz zezwolić na budowę dróg poprzez Ustawienia zaawansowane->Ekonomia->Miasta.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Trwają roboty drogowe
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Nie można usunąć tego miasta...{}Stacja lub zajezdnia przynależy do tego miasta lub obszar miasta nie może być usunięty
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... w centrum tego miasta nie ma odpowiedniego miejsca na statułę
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... zbyt wiele przedsiębiorstw
@@ -3938,8 +3950,8 @@ STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Nie moż
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Nie można stąd usunąć torów...
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Nie można stąd usunąć sygnałów...
 STR_ERROR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                     :{WHITE}Nie można tutaj zmienić sygnałów...
-STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}...brak torów kolejowych
-STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}...brak sygnałów
+STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}... brak torów kolejowych
+STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}... brak sygnałów
 
 STR_ERROR_CAN_T_CONVERT_RAIL                                    :{WHITE}Nie można zmienić typu torów w tym miejscu...
 
