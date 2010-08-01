@@ -39,8 +39,8 @@
 
 #include "table/strings.h"
 
-CompanyByte _local_company;
-CompanyByte _current_company;
+CompanyByte _local_company;   ///< Company controlled by the human player at this client. Can also be #COMPANY_SPECTATOR.
+CompanyByte _current_company; ///< Company currently doing an action.
 /* NOSAVE: can be determined from company structs */
 Colours _company_colours[MAX_COMPANIES];
 CompanyManagerFace _company_manager_face; ///< for company manager face storage in openttd.cfg
@@ -77,7 +77,7 @@ void Company::PostDestructor(size_t index)
 	InvalidateWindowData(WC_GRAPH_LEGEND, 0, (int)index);
 	InvalidateWindowData(WC_PERFORMANCE_DETAIL, 0, (int)index);
 	InvalidateWindowData(WC_COMPANY_LEAGUE, 0, 0);
-	/* If the currently shown error message has this company in it, the close it. */
+	/* If the currently shown error message has this company in it, then close it. */
 	InvalidateWindowData(WC_ERRMSG, 0);
 }
 
@@ -97,7 +97,7 @@ void SetLocalCompany(CompanyID new_company)
 	InvalidateWindowData(WC_SEND_NETWORK_MSG, DESTTYPE_TEAM, _local_company);
 #endif
 
-	assert(_current_company == _local_company);
+	assert(IsLocalCompany());
 
 	_current_company = _local_company = new_company;
 
@@ -461,7 +461,7 @@ void ResetCompanyLivery(Company *c)
 /**
  * Create a new company and sets all company variables default values
  *
- * @param is_ai is a ai company?
+ * @param is_ai is an AI company?
  * @param company CompanyID to use for the new company
  * @return the company struct
  */
