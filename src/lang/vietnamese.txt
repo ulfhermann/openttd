@@ -1145,6 +1145,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Tự th
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Tự thay mới ph.tiện vào {ORANGE}{STRING}{LTBLUE} tháng trước/sau khi quá tuổi
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Số tiền tối thiểu cần cho việc tự thay mới ph.tiện: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Khoảng thời gian hiện báo lỗi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Trễ với các sự kiện hiện ra: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Trễ với các sự kiện hiện ra: {ORANGE}tắt
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Hiện dân số đô thị trong nhãn tên của đô thị: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Tạo nền đất: {ORANGE}{STRING}
@@ -1884,10 +1886,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Nối đ
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Tạo một điểm mốc riêng rẽ
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Xây dựng đường ray
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Xây dựng đường ray điện
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Xây dựng đường ray đơn
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Xây dựng ray đệm từ
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :Xây dựng đường ray
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Xây dựng đường ray điện
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Xây dựng đường ray đơn
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Xây dựng ray đệm từ
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Xây dựng đường ray. Ctrl để đổi chế độ xây/phá đường ray
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Xây dựng đường ray dùng cơ chế tự xây. Ctrl để đổi chế độ xây/phá đường ray
@@ -2113,6 +2115,17 @@ STR_FUND_INDUSTRY_INDUSTRY_BUILD_COST                           :{BLACK}Chi phí
 STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY                         :{BLACK}Viễn cảnh
 STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}Xây
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Góp vốn
+
+# Industry cargoes window
+STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION                           :{WHITE}Chuỗi cung ứng cho nhà máy {STRING}
+STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}Chuỗi cung ứng hàng hoá {STRING}
+STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}Nhà máy sản xuất
+STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Nhà máy nhận
+STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Nhà kho
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Click vào nhà máy để xem nhà cung cấp cho nó và khách hàng của nó
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Click vào hàng hoá để xem nhà sản xuất và khách hàng
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Hiển thị chuỗi cung ứng
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Hiển thị khả năng cung ứng và chấp nhận hàng hoá của nhà máy
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Thông tin về vùng đất
@@ -2697,10 +2710,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Máy bay
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Lợi nhuận năm nay: {CURRENCY} (năm ngoái: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Tàu sẵn có
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Xe sẵn có
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}Các tàu thuỷ sẵn có
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Máy bay sẵn có
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :Tàu sẵn có
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :Xe sẵn có
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :Các tàu thuỷ sẵn có
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :Máy bay sẵn có
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Xam danh sách các động cơ thiết kế cho loại toa xe này.
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Quản lý danh sách
@@ -2741,15 +2754,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Xoá tất cả
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Đổi tên nhóm
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Tàu Hỏa Mới
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Tàu Điện Mới
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Tàu Đơn Ray Mới
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Tàu Đệm Từ Mới
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :Tàu Hỏa Mới
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :Tàu Điện Mới
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :Tàu Đơn Ray Mới
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :Tàu Đệm Từ Mới
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Tàu Hỏa Mới
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Xe Cộ Mới
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Tàu Mới
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Máy Bay Mới
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :Tàu Hỏa Mới
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :Xe Cộ Mới
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :Tàu Mới
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Máy Bay Mới
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Chi phí: {GOLD}{CURRENCY}{BLACK} Tải trọng: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Tốc độ: {GOLD}{VELOCITY}{BLACK} Công suất: {GOLD}{POWER}
@@ -3435,6 +3448,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... khô
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Độ thị sẽ không xây dựng đường phố. Bạn có thể bật tính năng này ở menu Advanced Settings->Economy->Towns.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Xây dựng cầu đường đang tiến hành
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Không thể xoá đo thị này...{}Có một ga, bến hoặc xưởng thuộc đô thị hoặc là 1 ô đất của đô thị không thể xoá được.
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... không có nơi nào hợp lý để dựng tượng đài ở trung tâm đô thị này
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... quá nhiều nhà máy
@@ -3484,6 +3498,7 @@ STR_ERROR_CAN_T_REMOVE_TRUCK_STATION                            :{WHITE}Không t
 STR_ERROR_CAN_T_REMOVE_PASSENGER_TRAM_STATION                   :{WHITE}Không thể xoá bến xe điện...
 STR_ERROR_CAN_T_REMOVE_CARGO_TRAM_STATION                       :{WHITE}Không thể xoá trạm bốc dỡ xe điện...
 STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST                           :{WHITE}Phải dỡ bỏ bến xe buýt trước
+STR_ERROR_THERE_IS_NO_STATION                                   :{WHITE}... không có ga/bến ở đây
 
 STR_ERROR_MUST_DEMOLISH_RAILROAD                                :{WHITE}Phải bỏ nhà ga tàu hoả trước
 STR_ERROR_MUST_DEMOLISH_BUS_STATION_FIRST                       :{WHITE}Phải bỏ bến xe buýt trước
@@ -3549,6 +3564,8 @@ STR_ERROR_CAN_T_BUILD_RAILROAD_TRACK                            :{WHITE}Không t
 STR_ERROR_CAN_T_REMOVE_RAILROAD_TRACK                           :{WHITE}Không thể phá bỏ đường ray ở đây...
 STR_ERROR_CAN_T_REMOVE_SIGNALS_FROM                             :{WHITE}Không thể phá bỏ đèn hiệu ở đây...
 STR_ERROR_SIGNAL_CAN_T_CONVERT_SIGNALS_HERE                     :{WHITE}Không thể chuyển đổi đèn hiệu ở đây...
+STR_ERROR_THERE_IS_NO_RAILROAD_TRACK                            :{WHITE}... không có đường ray xe lửa
+STR_ERROR_THERE_ARE_NO_SIGNALS                                  :{WHITE}... không có đèn hiệu nào
 
 STR_ERROR_CAN_T_CONVERT_RAIL                                    :{WHITE}Không thể đổi kiểu đường ray ở đây...
 
@@ -3559,6 +3576,8 @@ STR_ERROR_CAN_T_BUILD_ROAD_HERE                                 :{WHITE}Không t
 STR_ERROR_CAN_T_BUILD_TRAMWAY_HERE                              :{WHITE}Không thể xây đường xe điện ở đây...
 STR_ERROR_CAN_T_REMOVE_ROAD_FROM                                :{WHITE}Không thể phá dỡ đường ôtô ở đây...
 STR_ERROR_CAN_T_REMOVE_TRAMWAY_FROM                             :{WHITE}Không thể phá dỡ đường xe điện ở đây...
+STR_ERROR_THERE_IS_NO_ROAD                                      :{WHITE}... không có đường bộ
+STR_ERROR_THERE_IS_NO_TRAMWAY                                   :{WHITE}... không có đường ray xe điện
 
 # Waterway construction errors
 STR_ERROR_CAN_T_BUILD_CANALS                                    :{WHITE}Không thể xây kênh đào ở đây...

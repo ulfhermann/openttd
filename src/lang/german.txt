@@ -1887,10 +1887,10 @@ STR_JOIN_WAYPOINT_CAPTION                                       :{WHITE}Verbinde
 STR_JOIN_WAYPOINT_CREATE_SPLITTED_WAYPOINT                      :{YELLOW}Errichte einen getrennten Wegpunkt
 
 # Rail construction toolbar
-STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :{WHITE}Gleis- / Bahnhofsbau
-STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :{WHITE}Bau elektrifizierter Strecken
-STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :{WHITE}Einschienenbahnbau
-STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :{WHITE}Magnetschwebebahnbau
+STR_RAIL_TOOLBAR_RAILROAD_CONSTRUCTION_CAPTION                  :Gleis- / Bahnhofsbau
+STR_RAIL_TOOLBAR_ELRAIL_CONSTRUCTION_CAPTION                    :Bau elektrifizierter Strecken
+STR_RAIL_TOOLBAR_MONORAIL_CONSTRUCTION_CAPTION                  :Einschienenbahnbau
+STR_RAIL_TOOLBAR_MAGLEV_CONSTRUCTION_CAPTION                    :Magnetschwebebahnbau
 
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_TRACK                   :{BLACK}Gleise legen. Strg halten, um zwischen Bauen und Entfernen umzuschalten
 STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL                         :{BLACK}Gleise legen mit automatischer Wahl der Ausrichtung. Strg halten, um zwischen Bauen und Entfernen umzuschalten
@@ -2711,10 +2711,10 @@ STR_VEHICLE_LIST_AIRCRAFT_TOOLTIP                               :{BLACK}Flugzeug
 
 STR_VEHICLE_LIST_PROFIT_THIS_YEAR_LAST_YEAR                     :{TINYFONT}{BLACK}Gewinn im laufenden Jahr: {CURRENCY} (vergangenes Jahr: {CURRENCY})
 
-STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :{BLACK}Verfügbare Züge
-STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :{BLACK}Verfügbare Fahrzeuge
-STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :{BLACK}Verfügbare Schiffe
-STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :{BLACK}Verfügbare Flugzeuge
+STR_VEHICLE_LIST_AVAILABLE_TRAINS                               :Verfügbare Züge
+STR_VEHICLE_LIST_AVAILABLE_ROAD_VEHICLES                        :Verfügbare Fahrzeuge
+STR_VEHICLE_LIST_AVAILABLE_SHIPS                                :Verfügbare Schiffe
+STR_VEHICLE_LIST_AVAILABLE_AIRCRAFT                             :Verfügbare Flugzeuge
 STR_VEHICLE_LIST_AVAILABLE_ENGINES_TOOLTIP                      :{BLACK}Verfügbare Fahrzeuge für diesen Fahrzeugtyp auflisten
 
 STR_VEHICLE_LIST_MANAGE_LIST                                    :{BLACK}Liste verwalten
@@ -2755,15 +2755,15 @@ STR_GROUP_REMOVE_ALL_VEHICLES                                   :Liste leeren
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Gruppe umbenennen
 
 # Build vehicle window
-STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :{WHITE}Neues Schienenfahrzeug
-STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :{WHITE}Neue E-Loks
-STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :{WHITE}Neues Einschienenbahn-Fahrzeug
-STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :{WHITE}Neue Magnetzüge
+STR_BUY_VEHICLE_TRAIN_RAIL_CAPTION                              :Neues Schienenfahrzeug
+STR_BUY_VEHICLE_TRAIN_ELRAIL_CAPTION                            :Neue elektrische Schienenfahrzeuge
+STR_BUY_VEHICLE_TRAIN_MONORAIL_CAPTION                          :Neues Einschienenbahn-Fahrzeug
+STR_BUY_VEHICLE_TRAIN_MAGLEV_CAPTION                            :Neue Magnetzüge
 
-STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :{WHITE}Neue Eisenbahnfahrzeuge
-STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :{WHITE}Neue Fahrzeuge
-STR_BUY_VEHICLE_SHIP_CAPTION                                    :{WHITE}Neue Schiffe
-STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :{WHITE}Neue Flugzeuge
+STR_BUY_VEHICLE_TRAIN_ALL_CAPTION                               :Neue Eisenbahnfahrzeuge
+STR_BUY_VEHICLE_ROAD_VEHICLE_CAPTION                            :Neue Fahrzeuge
+STR_BUY_VEHICLE_SHIP_CAPTION                                    :Neue Schiffe
+STR_BUY_VEHICLE_AIRCRAFT_CAPTION                                :Neue Flugzeuge
 
 STR_PURCHASE_INFO_COST_WEIGHT                                   :{BLACK}Kosten: {GOLD}{CURRENCY}{BLACK} Gewicht: {GOLD}{WEIGHT_S}
 STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Geschw.: {GOLD}{VELOCITY}{BLACK} Leistung: {GOLD}{POWER}
@@ -2910,25 +2910,25 @@ STR_REPLACE_VEHICLE_ROAD_VEHICLE                                :Straßenfahrzeu
 STR_REPLACE_VEHICLE_SHIP                                        :Schiff
 STR_REPLACE_VEHICLE_AIRCRAFT                                    :Flugzeug
 
-STR_REPLACE_HELP_LEFT_ARRAY                                     :{BLACK}Zu ersetzenden Loktyp auswählen
-STR_REPLACE_HELP_RIGHT_ARRAY                                    :{BLACK}Loktyp auswählen, der anstelle des links gewählten Loktyps verwendet werden soll
+STR_REPLACE_HELP_LEFT_ARRAY                                     :{BLACK}Zu ersetzenden Fahrzeugtyp auswählen
+STR_REPLACE_HELP_RIGHT_ARRAY                                    :{BLACK}Fahrzeugtyp auswählen, der anstelle des links gewählten Typs verwendet werden soll
 
 STR_REPLACE_VEHICLES_START                                      :{BLACK}Fahrzeugersetzung an
-STR_REPLACE_HELP_START_BUTTON                                   :{BLACK}Klick zum Ersetzen des Loktyps auf der linken Seite mit dem auf der rechten Seite
+STR_REPLACE_HELP_START_BUTTON                                   :{BLACK}Klick zum Ersetzen des Fahrzeugtyps auf der linken Seite mit dem auf der rechten Seite
 STR_REPLACE_NOT_REPLACING                                       :{BLACK}Keine Ersetzung
 STR_REPLACE_NOT_REPLACING_VEHICLE_SELECTED                      :{BLACK}Kein Fahrzeug gewählt
 STR_REPLACE_VEHICLES_STOP                                       :{BLACK}Fahrzeugersetzung aus
-STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Klick zum Abbrechen der Ersetzung des Loktyps auf der linken Seite
+STR_REPLACE_HELP_STOP_BUTTON                                    :{BLACK}Klick zum Abbrechen der Ersetzung des Fahrzeugtyps auf der linken Seite
 
 STR_REPLACE_ENGINE_WAGON_SELECT                                 :{BLACK}Ersetzen: {ORANGE}{STRING}
 STR_REPLACE_ENGINE_WAGON_SELECT_HELP                            :{BLACK}Umschalter für Lok- oder Waggonersetzung
-STR_REPLACE_ENGINES                                             :Loks
+STR_REPLACE_ENGINES                                             :Schienenfahrzeuge
 STR_REPLACE_WAGONS                                              :Waggons
 
 STR_REPLACE_HELP_RAILTYPE                                       :{BLACK}Gleistyp auswählen, für den Loks ersetzt werden sollen
-STR_REPLACE_HELP_REPLACE_INFO_TAB                               :{BLACK}Hier wird angezeigt, gegen welche Lok die auf der linken Seite gewählte ersetzt wird
+STR_REPLACE_HELP_REPLACE_INFO_TAB                               :{BLACK}Hier wird angezeigt, gegen welches Fahrzeug das auf der linken Seite gewählte ersetzt wird
 STR_REPLACE_RAIL_VEHICLES                                       :Eisenbahn
-STR_REPLACE_ELRAIL_VEHICLES                                     :E-Loks
+STR_REPLACE_ELRAIL_VEHICLES                                     :elektrische Schienenfahrzeuge
 STR_REPLACE_MONORAIL_VEHICLES                                   :Einschienenbahn
 STR_REPLACE_MAGLEV_VEHICLES                                     :Magnetschwebebahn
 
