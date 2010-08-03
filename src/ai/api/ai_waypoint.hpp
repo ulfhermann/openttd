@@ -21,6 +21,7 @@
  */
 class AIWaypoint : public AIBaseStation {
 public:
+	/** Get the name of this class to identify it towards squirrel. */
 	static const char *GetClassName() { return "AIWaypoint"; }
 
 	/**
@@ -28,9 +29,9 @@ public:
 	 */
 	enum WaypointType {
 		/* Values are important, as they represent the internal state of the game. */
-		WAYPOINT_RAIL      = 0x01, //!< Rail waypoint
-		WAYPOINT_BUOY      = 0x10, //!< Buoy
-		WAYPOINT_ANY       = 0x11, //!< All waypoint types
+		WAYPOINT_RAIL      = 0x01, ///< Rail waypoint
+		WAYPOINT_BUOY      = 0x10, ///< Buoy
+		WAYPOINT_ANY       = 0x11, ///< All waypoint types
 	};
 
 	/**

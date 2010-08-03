@@ -7,14 +7,18 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file elrail_data.h Stores all the data for overhead wire and pylon drawing.
- *  @see elrail.c */
+/**
+ * @file elrail_data.h Stores all the data for overhead wire and pylon drawing.
+ *  @see elrail.c
+ */
 
 #ifndef ELRAIL_DATA_H
 #define ELRAIL_DATA_H
 
-/** Tile Location group.
- * This defines whether the X and or Y coordinate of a tile is even */
+/**
+ * Tile Location group.
+ * This defines whether the X and or Y coordinate of a tile is even
+ */
 enum TLG {
 	XEVEN_YEVEN = 0,
 	XEVEN_YODD  = 1,
@@ -23,9 +27,11 @@ enum TLG {
 	TLG_END
 };
 
-/** When determining the pylon configuration on the edge, two tiles are taken
+/**
+ * When determining the pylon configuration on the edge, two tiles are taken
  * into account: the tile being drawn itself (the home tile, the one in
- * ti->tile), and the neighbouring tile */
+ * ti->tile), and the neighbouring tile
+ */
 enum TileSource {
 	TS_HOME      = 0,
 	TS_NEIGHBOUR = 1,
@@ -43,9 +49,11 @@ static const byte AllowedPPPonPCP[DIAGDIR_END] = {
 	1 << DIR_N | 1 << DIR_NE | 1 << DIR_E  | 1 << DIR_S | 1 << DIR_SW | 1 << DIR_W,
 };
 
-/** Which of the PPPs are inside the tile. For the two PPPs on the tile border
+/**
+ * Which of the PPPs are inside the tile. For the two PPPs on the tile border
  * the following system is used: if you rotate the PCP so that it is in the
- * north, the eastern PPP belongs to the tile. */
+ * north, the eastern PPP belongs to the tile.
+ */
 static const byte OwnedPPPonPCP[DIAGDIR_END] = {
 	1 << DIR_SE | 1 << DIR_S  | 1 << DIR_SW | 1 << DIR_W,
 	1 << DIR_N  | 1 << DIR_SW | 1 << DIR_W  | 1 << DIR_NW,
@@ -64,10 +72,12 @@ static const DiagDirection PCPpositions[TRACK_END][2] = {
 };
 
 #define PCP_NOT_ON_TRACK 0xFF
-/** Preferred points of each trackbit. Those are the ones perpendicular to the
+/**
+ * Preferred points of each trackbit. Those are the ones perpendicular to the
  * track, plus the point in extension of the track (to mark end-of-track). PCPs
  * which are not on either end of the track are fully preferred.
- * @see PCPpositions */
+ * @see PCPpositions
+ */
 static const byte PreferredPPPofTrackAtPCP[TRACK_END][DIAGDIR_END] = {
 	{    // X
 		1 << DIR_NE | 1 << DIR_SE | 1 << DIR_NW, // NE
@@ -106,9 +116,11 @@ static const byte PreferredPPPofTrackAtPCP[TRACK_END][DIAGDIR_END] = {
 
 #define NUM_IGNORE_GROUPS 3
 #define IGNORE_NONE 0xFF
-/** In case we have a staight line, we place pylon only every two tiles,
+/**
+ * In case we have a staight line, we place pylon only every two tiles,
  * so there are certain tiles which we ignore. A straight line is found if
- * we have exactly two PPPs. */
+ * we have exactly two PPPs.
+ */
 static const byte IgnoredPCP[NUM_IGNORE_GROUPS][TLG_END][DIAGDIR_END] = {
 	{   // Ignore group 1, X and Y tracks
 		{     // X even, Y even
@@ -395,7 +407,8 @@ static const SortableSpriteStruct CatenarySpriteData_Tunnel[] = {
 };
 
 
-/** Refers to a certain element of the catenary.
+/**
+ * Refers to a certain element of the catenary.
  * Identifiers for Wires:
  * <ol><li>Direction of the wire</li>
  * <li>Slope of the tile for diagonals, placement inside the track for horiz/vertical pieces</li>

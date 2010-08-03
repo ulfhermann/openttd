@@ -40,7 +40,8 @@
 	FORCEINLINE mask_t operator ~(mask_t m) {return (mask_t)(~(int)m);}
 
 
-/** Informative template class exposing basic enumeration properties used by several
+/**
+ * Informative template class exposing basic enumeration properties used by several
  *  other templates below. Here we have only forward declaration. For each enum type
  *  we will create specialization derived from MakeEnumPropsT<>.
  *  i.e.:
@@ -50,7 +51,8 @@
  */
 template <typename Tenum_t> struct EnumPropsT;
 
-/** Helper template class that makes basic properties of given enumeration type visible
+/**
+ * Helper template class that makes basic properties of given enumeration type visible
  *  from outsize. It is used as base class of several EnumPropsT specializations each
  *  dedicated to one of commonly used enumeration types.
  *  @param Tenum_t enumeration type that you want to describe
@@ -72,13 +74,15 @@ struct MakeEnumPropsT {
 
 
 
-/** In some cases we use byte or uint16 to store values that are defined as enum. It is
+/**
+ * In some cases we use byte or uint16 to store values that are defined as enum. It is
  *  necessary in order to control the sizeof() such values. Some compilers make enum
  *  the same size as int (4 or 8 bytes instead of 1 or 2). As a consequence the strict
  *  compiler type - checking causes errors like:
  *     'HasPowerOnRail' : cannot convert parameter 1 from 'byte' to 'RailType' when
  *  u->u.rail.railtype is passed as argument or type RailType. In such cases it is better
- *  to teach the compiler that u->u.rail.railtype is to be treated as RailType. */
+ *  to teach the compiler that u->u.rail.railtype is to be treated as RailType.
+ */
 template <typename Tenum_t> struct TinyEnumT;
 
 /** The general declaration of TinyEnumT<> (above) */

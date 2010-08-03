@@ -121,7 +121,8 @@ static int CDECL IndustryTypeNameSorter(const IndustryType *a, const IndustryTyp
 	return (r != 0) ? r : (*a - *b);
 }
 
-/** Initialize the list of sorted industry types.
+/**
+ * Initialize the list of sorted industry types.
  */
 void SortIndustryTypes()
 {
@@ -134,7 +135,8 @@ void SortIndustryTypes()
 	QSortT(_sorted_industry_types, NUM_INDUSTRYTYPES, &IndustryTypeNameSorter);
 }
 
-/** Command callback. In case of failure to build an industry, show an error message.
+/**
+ * Command callback. In case of failure to build an industry, show an error message.
  * @param result Result of the command.
  * @param tile   Tile where the industry is placed.
  * @param p1     Additional data of the #CMD_BUILD_INDUSTRY command.
@@ -329,7 +331,8 @@ public:
 				/* Set it to something more sane :) */
 				size->height = height * FONT_HEIGHT_NORMAL + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 				size->width  = d.width + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
-			} break;
+				break;
+			}
 
 			case DPIW_FUND_WIDGET: {
 				Dimension d = GetStringBoundingBox(STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY);
@@ -445,7 +448,8 @@ public:
 						}
 					}
 				}
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -478,7 +482,8 @@ public:
 					this->SetWidgetsDisabledState(!this->enabled[this->selected_index], DPIW_DISPLAY_WIDGET, DPIW_FUND_WIDGET, WIDGET_LIST_END);
 					if (this->enabled[this->selected_index] && click_count > 1) this->OnClick(pt, DPIW_FUND_WIDGET, 1);
 				}
-			} break;
+				break;
+			}
 
 			case DPIW_DISPLAY_WIDGET:
 				if (this->selected_type != INVALID_INDUSTRYTYPE) ShowIndustryCargoesWindow(this->selected_type);
@@ -502,7 +507,8 @@ public:
 				} else {
 					HandlePlacePushButton(this, DPIW_FUND_WIDGET, SPR_CURSOR_INDUSTRY, HT_RECT, NULL);
 				}
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -661,7 +667,8 @@ public:
 		}
 	}
 
-	/** Draw the text in the #IVW_INFO panel.
+	/**
+	 * Draw the text in the #IVW_INFO panel.
 	 * @param left  Left edge of the panel.
 	 * @param right Right edge of the panel.
 	 * @param top   Top edge of the panel.
@@ -803,7 +810,8 @@ public:
 						ShowQueryString(STR_JUST_INT, STR_CONFIG_GAME_PRODUCTION, 10, 100, this, CS_ALPHANUMERAL, QSF_NONE);
 					}
 				}
-			} break;
+				break;
+			}
 
 			case IVW_GOTO: {
 				Industry *i = Industry::Get(this->window_number);
@@ -1138,7 +1146,8 @@ public:
 					y += this->resize.step_height;
 					if (++n == this->vscroll.GetCapacity()) break; // max number of industries in 1 window
 				}
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -1200,7 +1209,8 @@ public:
 						ScrollMainWindowToTile(this->industries[p]->location.tile);
 					}
 				}
-			} break;
+				break;
+			}
 		}
 	}
 

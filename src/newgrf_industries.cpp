@@ -100,7 +100,8 @@ static uint32 GetClosestIndustry(TileIndex tile, IndustryType type, const Indust
 	return best_dist;
 }
 
-/** Implementation of both var 67 and 68
+/**
+ * Implementation of both var 67 and 68
  * since the mechanism is almost the same, it is easier to regroup them on the same
  * function.
  * @param param_setID parameter given to the callback, which is the set id, or the local id, in our terminology
@@ -154,12 +155,14 @@ static uint32 GetCountAndDistanceOfClosestInstance(byte param_setID, byte layout
 	return count << 16 | GB(closest_dist, 0, 16);
 }
 
-/** This function implements the industries variables that newGRF defines.
+/**
+ * This function implements the industries variables that newGRF defines.
  * @param object the object that we want to query
  * @param variable that is queried
  * @param parameter unused
  * @param available will return false if ever the variable asked for does not exist
- * @return the value stored in the corresponding variable*/
+ * @return the value stored in the corresponding variable
+ */
 uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte parameter, bool *available)
 {
 	const Industry *industry = object->u.industry.ind;
@@ -447,7 +450,8 @@ uint32 IndustryLocationGetVariable(const ResolverObject *object, byte variable, 
 	return IndustryGetVariable(object, variable, parameter, available);
 }
 
-/** Check that the industry callback allows creation of the industry.
+/**
+ * Check that the industry callback allows creation of the industry.
  * @param tile %Tile to build the industry.
  * @param type Type of industry to build.
  * @param layout Layout number.

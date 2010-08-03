@@ -7,7 +7,8 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file disaster_cmd.cpp
+/**
+ * @file disaster_cmd.cpp
  * All disaster/easter egg vehicles are handled here.
  * The general flow of control for the disaster vehicles is as follows:
  * <ol>
@@ -128,8 +129,10 @@ static void DisasterVehicleUpdateImage(DisasterVehicle *v)
 	v->cur_image = img;
 }
 
-/** Initialize a disaster vehicle. These vehicles are of type VEH_DISASTER, are unclickable
- * and owned by nobody */
+/**
+ * Initialize a disaster vehicle. These vehicles are of type VEH_DISASTER, are unclickable
+ * and owned by nobody
+ */
 static void InitializeDisasterVehicle(DisasterVehicle *v, int x, int y, byte z, Direction direction, byte subtype)
 {
 	v->x_pos = x;
@@ -670,8 +673,10 @@ bool DisasterVehicle::Tick()
 typedef void DisasterInitProc();
 
 
-/** Zeppeliner which crashes on a small airport if one found,
- * otherwise crashes on a random tile */
+/**
+ * Zeppeliner which crashes on a small airport if one found,
+ * otherwise crashes on a random tile
+ */
 static void Disaster_Zeppeliner_Init()
 {
 	if (!Vehicle::CanAllocateItem(2)) return;
@@ -698,8 +703,10 @@ static void Disaster_Zeppeliner_Init()
 }
 
 
-/** Ufo which flies around aimlessly from the middle of the map a bit
- * until it locates a road vehicle which it targets and then destroys */
+/**
+ * Ufo which flies around aimlessly from the middle of the map a bit
+ * until it locates a road vehicle which it targets and then destroys
+ */
 static void Disaster_Small_Ufo_Init()
 {
 	if (!Vehicle::CanAllocateItem(2)) return;
@@ -844,8 +851,10 @@ static void Disaster_Big_Submarine_Init()
 }
 
 
-/** Coal mine catastrophe, destroys a stretch of 30 tiles of
- * land in a certain direction */
+/**
+ * Coal mine catastrophe, destroys a stretch of 30 tiles of
+ * land in a certain direction
+ */
 static void Disaster_CoalMine_Init()
 {
 	int index = GB(Random(), 0, 4);
@@ -927,7 +936,8 @@ void StartupDisasters()
 	ResetDisasterDelay();
 }
 
-/** Marks all disasters targeting this industry in such a way
+/**
+ * Marks all disasters targeting this industry in such a way
  * they won't call Industry::Get(v->dest_tile) on invalid industry anymore.
  * @param i deleted industry
  */
@@ -943,7 +953,8 @@ void ReleaseDisastersTargetingIndustry(IndustryID i)
 	}
 }
 
-/** Notify disasters that we are about to delete a vehicle. So make them head elsewhere.
+/**
+ * Notify disasters that we are about to delete a vehicle. So make them head elsewhere.
  * @param vehicle deleted vehicle
  */
 void ReleaseDisastersTargetingVehicle(VehicleID vehicle)
