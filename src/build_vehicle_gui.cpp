@@ -711,7 +711,8 @@ int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number)
 	return y;
 }
 
-/** Engine drawing loop
+/**
+ * Engine drawing loop
  * @param type Type of vehicle (VEH_*)
  * @param l The left most location of the list
  * @param r The right most location of the list
@@ -1072,7 +1073,8 @@ struct BuildVehicleWindow : Window {
 					SetBit(hidden_mask, 9);
 				}
 				ShowDropDownMenu(this, _sort_listing[this->vehicle_type], this->sort_criteria, BUILD_VEHICLE_WIDGET_SORT_DROPDOWN, 0, hidden_mask);
-			} break;
+				break;
+			}
 
 			case BUILD_VEHICLE_WIDGET_CARGO_FILTER_DROPDOWN: // Select cargo filtering criteria dropdown menu
 				ShowDropDownMenu(this, this->cargo_filter_texts, this->cargo_filter_criteria, BUILD_VEHICLE_WIDGET_CARGO_FILTER_DROPDOWN, 0, 0);

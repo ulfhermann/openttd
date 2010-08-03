@@ -62,10 +62,12 @@ uint16 Industry::counts[NUM_INDUSTRYTYPES];
 IndustrySpec _industry_specs[NUM_INDUSTRYTYPES];
 IndustryTileSpec _industry_tile_specs[NUM_INDUSTRYTILES];
 
-/** This function initialize the spec arrays of both
+/**
+ * This function initialize the spec arrays of both
  * industry and industry tiles.
  * It adjusts the enabling of the industry too, based on climate availability.
- * This will allow for clearer testings */
+ * This will allow for clearer testings
+ */
 void ResetIndustries()
 {
 	memset(&_industry_specs, 0, sizeof(_industry_specs));
@@ -92,7 +94,7 @@ void ResetIndustries()
  * @param tile that is queried
  * @pre IsTileType(tile, MP_INDUSTRY)
  * @return general type for this industry, as defined in industry.h
- **/
+ */
 IndustryType GetIndustryType(TileIndex tile)
 {
 	assert(IsTileType(tile, MP_INDUSTRY));
@@ -109,7 +111,7 @@ IndustryType GetIndustryType(TileIndex tile)
  * @param thistype of industry (which is the index in _industry_specs)
  * @pre thistype < NUM_INDUSTRYTYPES
  * @return a pointer to the corresponding industry spec
- **/
+ */
 const IndustrySpec *GetIndustrySpec(IndustryType thistype)
 {
 	assert(thistype < NUM_INDUSTRYTYPES);
@@ -123,7 +125,7 @@ const IndustrySpec *GetIndustrySpec(IndustryType thistype)
  * @param gfx of industrytile (which is the index in _industry_tile_specs)
  * @pre gfx < INVALID_INDUSTRYTILE
  * @return a pointer to the corresponding industrytile spec
- **/
+ */
 const IndustryTileSpec *GetIndustryTileSpec(IndustryGfx gfx)
 {
 	assert(gfx < INVALID_INDUSTRYTILE);
@@ -691,7 +693,8 @@ static void AnimateTile_Industry(TileIndex tile)
 				SetIndustryAnimationState(tile, m);
 				MarkTileDirtyByTile(tile);
 			}
-		} break;
+			break;
+		}
 	}
 }
 
@@ -745,7 +748,8 @@ static void MakeIndustryTileBigger(TileIndex tile)
 				GetIndustryIndex(tile) == GetIndustryIndex(other)) {
 			BuildOilRig(tile);
 		}
-	} break;
+		break;
+	}
 
 	case GFX_TOY_FACTORY:
 	case GFX_BUBBLE_CATCHER:
@@ -1117,7 +1121,8 @@ void OnTick_Industry()
 	}
 }
 
-/** Check the conditions of #CHECK_NOTHING (Always succeeds).
+/**
+ * Check the conditions of #CHECK_NOTHING (Always succeeds).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1126,7 +1131,8 @@ static CommandCost CheckNewIndustry_NULL(TileIndex tile)
 	return CommandCost();
 }
 
-/** Check the conditions of #CHECK_FOREST (Industry should be build above snow-line in arctic climate).
+/**
+ * Check the conditions of #CHECK_FOREST (Industry should be build above snow-line in arctic climate).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1140,7 +1146,8 @@ static CommandCost CheckNewIndustry_Forest(TileIndex tile)
 	return CommandCost();
 }
 
-/** Check the conditions of #CHECK_REFINERY (Industry should be positioned near edge of the map).
+/**
+ * Check the conditions of #CHECK_REFINERY (Industry should be positioned near edge of the map).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1154,7 +1161,8 @@ static CommandCost CheckNewIndustry_OilRefinery(TileIndex tile)
 
 extern bool _ignore_restrictions;
 
-/** Check the conditions of #CHECK_OIL_RIG (Industries at sea should be positioned near edge of the map).
+/**
+ * Check the conditions of #CHECK_OIL_RIG (Industries at sea should be positioned near edge of the map).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1167,7 +1175,8 @@ static CommandCost CheckNewIndustry_OilRig(TileIndex tile)
 	return_cmd_error(STR_ERROR_CAN_ONLY_BE_POSITIONED);
 }
 
-/** Check the conditions of #CHECK_FARM (Industry should be below snow-line in arctic).
+/**
+ * Check the conditions of #CHECK_FARM (Industry should be below snow-line in arctic).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1181,7 +1190,8 @@ static CommandCost CheckNewIndustry_Farm(TileIndex tile)
 	return CommandCost();
 }
 
-/** Check the conditions of #CHECK_PLANTATION (Industry should NOT be in the desert).
+/**
+ * Check the conditions of #CHECK_PLANTATION (Industry should NOT be in the desert).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1193,7 +1203,8 @@ static CommandCost CheckNewIndustry_Plantation(TileIndex tile)
 	return CommandCost();
 }
 
-/** Check the conditions of #CHECK_WATER (Industry should be in the desert).
+/**
+ * Check the conditions of #CHECK_WATER (Industry should be in the desert).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1205,7 +1216,8 @@ static CommandCost CheckNewIndustry_Water(TileIndex tile)
 	return CommandCost();
 }
 
-/** Check the conditions of #CHECK_LUMBERMILL (Industry should be in the rain forest).
+/**
+ * Check the conditions of #CHECK_LUMBERMILL (Industry should be in the rain forest).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1217,7 +1229,8 @@ static CommandCost CheckNewIndustry_Lumbermill(TileIndex tile)
 	return CommandCost();
 }
 
-/** Check the conditions of #CHECK_BUBBLEGEN (Industry should be in low land).
+/**
+ * Check the conditions of #CHECK_BUBBLEGEN (Industry should be in low land).
  * @param tile %Tile to perform the checking.
  * @return Succeeded or failed command.
  */
@@ -1229,7 +1242,8 @@ static CommandCost CheckNewIndustry_BubbleGen(TileIndex tile)
 	return CommandCost();
 }
 
-/** Industrytype check function signature.
+/**
+ * Industrytype check function signature.
  * @param tile %Tile to check.
  * @return Succeeded or failed command.
  */
@@ -1248,7 +1262,8 @@ static CheckNewIndustryProc * const _check_new_industry_procs[CHECK_END] = {
 	CheckNewIndustry_OilRig,      ///< CHECK_OIL_RIG
 };
 
-/** Find a town for the industry, while checking for multiple industries in the same town.
+/**
+ * Find a town for the industry, while checking for multiple industries in the same town.
  * @param tile Position of the industry to build.
  * @param type Industry type.
  * @param [out] town Pointer to return town for the new industry, \c NULL is written if no good town can be found.
@@ -1291,7 +1306,8 @@ bool IsSlopeRefused(Slope current, Slope refused)
 	return false;
 }
 
-/** Are the tiles of the industry free?
+/**
+ * Are the tiles of the industry free?
  * @param tile                     Position to check.
  * @param it                       Industry tiles table.
  * @param itspec_index             The index of the itsepc to build/fund
@@ -1372,7 +1388,8 @@ static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTil
 	return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 }
 
-/** Is the industry allowed to be built at this place for the town?
+/**
+ * Is the industry allowed to be built at this place for the town?
  * @param tile Tile to construct the industry.
  * @param type Type of the industry.
  * @param t    Town authority that the industry belongs to.
@@ -1492,7 +1509,8 @@ static bool CheckIfCanLevelIndustryPlatform(TileIndex tile, DoCommandFlag flags,
 }
 
 
-/** Check that the new industry is far enough from conflicting industries.
+/**
+ * Check that the new industry is far enough from conflicting industries.
  * @param tile Tile to construct the industry.
  * @param type Type of the new industry.
  * @return Succeeded or failed command.
@@ -1515,9 +1533,11 @@ static CommandCost CheckIfFarEnoughFromConflictingIndustry(TileIndex tile, int t
 	return CommandCost();
 }
 
-/** Production level maximum, minimum and default values.
+/**
+ * Production level maximum, minimum and default values.
  * It is not a value been really used in order to change, but rather an indicator
- * of how the industry is behaving. */
+ * of how the industry is behaving.
+ */
 enum ProductionLevels {
 	PRODLEVEL_CLOSURE = 0x00,  ///< signal set to actually close the industry
 	PRODLEVEL_MINIMUM = 0x04,  ///< below this level, the industry is set to be closing
@@ -1659,7 +1679,8 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, IndustryType type, 
 	Station::RecomputeIndustriesNearForAll();
 }
 
-/** Helper function for Build/Fund an industry
+/**
+ * Helper function for Build/Fund an industry
  * @param tile tile where industry is built
  * @param type of industry to build
  * @param flags of operations to conduct
@@ -1668,7 +1689,7 @@ static void DoCreateNewIndustry(Industry *i, TileIndex tile, IndustryType type, 
  * @param seed random seed (possibly) used by industries
  * @param initial_random_bits The random bits the industry is going to have after construction.
  * @param founder Founder of the industry
- * @param ip Pointer to store newly created industry.
+ * @param [out] ip Pointer to store newly created industry.
  * @return Succeeded or failed command.
  *
  * @post \c *ip contains the newly created industry if all checks are successful and the \a flags request actual creation, else it contains \c NULL afterwards.
@@ -1718,7 +1739,8 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 	return CommandCost();
 }
 
-/** Build/Fund an industry
+/**
+ * Build/Fund an industry
  * @param tile tile where industry is built
  * @param flags of operations to conduct
  * @param p1 various bitstuffed elements
@@ -1844,7 +1866,7 @@ static uint32 GetScaledIndustryProbability(IndustryType it, bool *force_at_least
 }
 
 /** Number of industries on a 256x256 map */
-static const byte _numof_industry_table[]= {
+static const byte _numof_industry_table[] = {
 	0,    // none
 	10,   // very low
 	25,   // low
@@ -1922,6 +1944,10 @@ void GenerateIndustries()
 	}
 }
 
+/**
+ * Monthly update of industry statistics.
+ * @param i Industry to update.
+ */
 static void UpdateIndustryStatistics(Industry *i)
 {
 	for (byte j = 0; j < lengthof(i->produced_cargo); j++) {
@@ -1945,7 +1971,7 @@ static void UpdateIndustryStatistics(Industry *i)
 /** Simple helper that will collect data for the generation of industries */
 struct ProbabilityHelper {
 	uint16 prob;      ///< probability
-	IndustryType ind; ///< industry id correcponding
+	IndustryType ind; ///< Industry id.
 };
 
 /**
@@ -2161,7 +2187,8 @@ static void ReportNewsProductionChangeIndustry(Industry *ind, CargoID type, int 
 static const uint PERCENT_TRANSPORTED_60 = 153;
 static const uint PERCENT_TRANSPORTED_80 = 204;
 
-/** Change industry production or do closure
+/**
+ * Change industry production or do closure
  * @param i Industry for which changes are performed
  * @param monthly true if it's the monthly call, false if it's the random call
  */
@@ -2363,11 +2390,13 @@ static void ChangeIndustryProduction(Industry *i, bool monthly)
 	}
 }
 
-/** Daily handler for the industry changes
+/**
+ * Daily handler for the industry changes
  * Taking the original map size of 256*256, the number of random changes was always of just one unit.
  * But it cannot be the same on smaller or bigger maps. That number has to be scaled up or down.
  * For small maps, it implies that less than one change per month is required, while on bigger maps,
- * it would be way more. The daily loop handles those changes. */
+ * it would be way more. The daily loop handles those changes.
+ */
 void IndustryDailyLoop()
 {
 	_economy.industry_daily_change_counter += _economy.industry_daily_increment;
