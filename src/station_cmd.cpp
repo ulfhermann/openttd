@@ -433,7 +433,8 @@ void UpdateAllStationVirtCoords()
 	}
 }
 
-/** Get a mask of the cargo types that the station accepts.
+/**
+ * Get a mask of the cargo types that the station accepts.
  * @param st Station to query
  * @return the expected mask
  */
@@ -447,7 +448,8 @@ static uint GetAcceptanceMask(const Station *st)
 	return mask;
 }
 
-/** Items contains the two cargo names that are to be accepted or rejected.
+/**
+ * Items contains the two cargo names that are to be accepted or rejected.
  * msg is the string id of the message to display.
  */
 static void ShowRejectOrAcceptNews(const Station *st, uint num_items, CargoID *cargo, StringID msg)
@@ -550,7 +552,8 @@ CargoArray GetAcceptanceAroundTiles(TileIndex tile, int w, int h, int rad, uint3
 	return acceptance;
 }
 
-/** Update the acceptance for a station.
+/**
+ * Update the acceptance for a station.
  * @param st Station to update
  * @param show_msg controls whether to display a message that acceptance was changed.
  */
@@ -643,7 +646,8 @@ static void UpdateStationSignCoord(BaseStation *st)
 	st->UpdateVirtCoord();
 }
 
-/** This is called right after a station was deleted.
+/**
+ * This is called right after a station was deleted.
  * It checks if the whole station is free of substations, and if so, the station will be
  * deleted after a little while.
  * @param st Station
@@ -660,7 +664,8 @@ static void DeleteStationIfEmpty(BaseStation *st)
 
 CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
 
-/** Checks if the given tile is buildable, flat and has a certain height.
+/**
+ * Checks if the given tile is buildable, flat and has a certain height.
  * @param tile TileIndex to check.
  * @param invalid_dirs Prohibited directions for slopes (set of #DiagDirection).
  * @param allowed_z Height allowed for the tile. If allowed_z is negative, it will be set to the height of this tile.
@@ -712,7 +717,8 @@ CommandCost CheckBuildableTile(TileIndex tile, uint invalid_dirs, int &allowed_z
 	return cost;
 }
 
-/** Tries to clear the given area.
+/**
+ * Tries to clear the given area.
  * @param tile_area Area to check.
  * @param flags Operation to perform.
  * @return The cost in case of success, or an error code if it failed.
@@ -735,7 +741,8 @@ CommandCost CheckFlatLand(TileArea tile_area, DoCommandFlag flags)
 	return cost;
 }
 
-/** Checks if a rail station can be built at the given area.
+/**
+ * Checks if a rail station can be built at the given area.
  * @param tile_area Area to check.
  * @param flags Operation to perform.
  * @param invalid_dirs Prohibited directions (set of #DiagDirection).
@@ -808,7 +815,8 @@ static CommandCost CheckFlatLandRailStation(TileArea tile_area, DoCommandFlag fl
 	return cost;
 }
 
-/** Checks if a road stop can be built at the given tile.
+/**
+ * Checks if a road stop can be built at the given tile.
  * @param tile_area Area to check.
  * @param flags Operation to perform.
  * @param invalid_dirs Prohibited directions (set of DiagDirections).
@@ -1462,7 +1470,8 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 	return total_cost;
 }
 
-/** Remove a single tile from a rail station.
+/**
+ * Remove a single tile from a rail station.
  * This allows for custom-built station with holes and weird layouts
  * @param start tile of station piece to remove
  * @param flags operation to perform
@@ -1496,7 +1505,8 @@ CommandCost CmdRemoveFromRailStation(TileIndex start, DoCommandFlag flags, uint3
 	return ret;
 }
 
-/** Remove a single tile from a waypoint.
+/**
+ * Remove a single tile from a waypoint.
  * This allows for custom-built waypoint with holes and weird layouts
  * @param start tile of waypoint piece to remove
  * @param flags operation to perform
@@ -1660,7 +1670,8 @@ static CommandCost FindJoiningRoadStop(StationID existing_stop, StationID statio
 	return FindJoiningBaseStation<Station, STR_ERROR_MUST_REMOVE_ROAD_STOP_FIRST>(existing_stop, station_to_join, adjacent, ta, st);
 }
 
-/** Build a bus or truck stop.
+/**
+ * Build a bus or truck stop.
  * @param tile Northernmost tile of the stop.
  * @param flags Operation to perform.
  * @param p1 bit 0..7: Width of the road stop.
@@ -1911,7 +1922,8 @@ static CommandCost RemoveRoadStop(TileIndex tile, DoCommandFlag flags)
 	return CommandCost(EXPENSES_CONSTRUCTION, _price[is_truck ? PR_CLEAR_STATION_TRUCK : PR_CLEAR_STATION_BUS]);
 }
 
-/** Remove bus or truck stops.
+/**
+ * Remove bus or truck stops.
  * @param tile Northernmost tile of the removal area.
  * @param flags Operation to perform.
  * @param p1 bit 0..7: Width of the removal area.
@@ -1991,7 +2003,8 @@ static uint GetMinimalAirportDistanceToTile(const AirportSpec *as, TileIndex tow
 	return dx + dy;
 }
 
-/** Get a possible noise reduction factor based on distance from town center.
+/**
+ * Get a possible noise reduction factor based on distance from town center.
  * The further you get, the less noise you generate.
  * So all those folks at city council can now happily slee...  work in their offices
  * @param as airport information
@@ -2065,7 +2078,8 @@ void UpdateAirportsNoise()
 	}
 }
 
-/** Place an Airport.
+/**
+ * Place an Airport.
  * @param tile tile where airport will be built
  * @param flags operation to perform
  * @param p1
@@ -2337,7 +2351,8 @@ static const TileIndexDiffC _dock_tileoffs_chkaround[] = {
 static const byte _dock_w_chk[4] = { 2, 1, 2, 1 };
 static const byte _dock_h_chk[4] = { 1, 2, 1, 2 };
 
-/** Build a dock/haven.
+/**
+ * Build a dock/haven.
  * @param tile tile where dock will be built
  * @param flags operation to perform
  * @param p1 (bit 0) - allow docks directly adjacent to other docks.
@@ -2864,7 +2879,7 @@ static void TileLoop_Station(TileIndex tile)
 
 		case STATION_DOCK:
 			if (GetTileSlope(tile, NULL) != SLOPE_FLAT) break; // only handle water part
-		/* FALL THROUGH */
+			/* FALL THROUGH */
 		case STATION_OILRIG: //(station part)
 		case STATION_BUOY:
 			TileLoop_Water(tile);
@@ -3374,7 +3389,8 @@ static bool IsUniqueStationName(const char *name)
 	return true;
 }
 
-/** Rename a station
+/**
+ * Rename a station
  * @param tile unused
  * @param flags operation to perform
  * @param p1 station ID that is to be renamed

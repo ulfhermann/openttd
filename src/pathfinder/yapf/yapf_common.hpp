@@ -146,8 +146,10 @@ public:
 		return bDest;
 	}
 
-	/** Called by YAPF to calculate cost estimate. Calculates distance to the destination
-	 *  adds it to the actual cost from origin and stores the sum to the Node::m_estimate */
+	/**
+	 * Called by YAPF to calculate cost estimate. Calculates distance to the destination
+	 *  adds it to the actual cost from origin and stores the sum to the Node::m_estimate
+	 */
 	inline bool PfCalcEstimate(Node& n)
 	{
 		static const int dg_dir_to_x_offs[] = {-1, 0, 1, 0};
@@ -174,10 +176,12 @@ public:
 	}
 };
 
-/** YAPF template that uses Ttypes template argument to determine all YAPF
+/**
+ * YAPF template that uses Ttypes template argument to determine all YAPF
  *  components (base classes) from which the actual YAPF is composed.
  *  For example classes consult: CYapfRail_TypesT template and its instantiations:
- *  CYapfRail1, CYapfRail2, CYapfRail3, CYapfAnyDepotRail1, CYapfAnyDepotRail2, CYapfAnyDepotRail3 */
+ *  CYapfRail1, CYapfRail2, CYapfRail3, CYapfAnyDepotRail1, CYapfAnyDepotRail2, CYapfAnyDepotRail3
+ */
 template <class Ttypes>
 class CYapfT
 	: public Ttypes::PfBase         ///< Instance of CYapfBaseT - main YAPF loop and support base class

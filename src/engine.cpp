@@ -38,8 +38,10 @@ INSTANTIATE_POOL_METHODS(Engine)
 
 EngineOverrideManager _engine_mngr;
 
-/** Year that engine aging stops. Engines will not reduce in reliability
- * and no more engines will be introduced */
+/**
+ * Year that engine aging stops. Engines will not reduce in reliability
+ * and no more engines will be introduced
+ */
 static Year _year_engine_aging_stops;
 
 /** Number of engines of each vehicle type in original engine data */
@@ -205,6 +207,10 @@ uint Engine::GetDisplayDefaultCapacity(uint16 *mail_capacity) const
 	}
 }
 
+/**
+ * Return how much the running costs of this engine are.
+ * @return Yearly running cost of the engine.
+ */
 Money Engine::GetRunningCost() const
 {
 	Price base_price;
@@ -238,6 +244,10 @@ Money Engine::GetRunningCost() const
 	return GetPrice(base_price, cost_factor, this->grffile, -8);
 }
 
+/**
+ * Return how much a new engine costs.
+ * @return Cost of the engine.
+ */
 Money Engine::GetCost() const
 {
 	Price base_price;
@@ -399,7 +409,8 @@ EngineID EngineOverrideManager::GetID(VehicleType type, uint16 grf_local_id, uin
 	return INVALID_ENGINE;
 }
 
-/** Sets cached values in Company::num_vehicles and Group::num_vehicles
+/**
+ * Sets cached values in Company::num_vehicles and Group::num_vehicles
  */
 void SetCachedEngineCounts()
 {
@@ -497,6 +508,7 @@ static void CalcEngineReliability(Engine *e)
 	SetWindowClassesDirty(WC_REPLACE_VEHICLE);
 }
 
+/** Compute the value for #_year_engine_aging_stops. */
 void SetYearEngineAgingStops()
 {
 	/* Determine last engine aging year, default to 2050 as previously. */
@@ -521,7 +533,6 @@ void SetYearEngineAgingStops()
 void StartupOneEngine(Engine *e, Date aging_date)
 {
 	const EngineInfo *ei = &e->info;
-	uint32 r;
 
 	e->age = 0;
 	e->flags = 0;
@@ -530,7 +541,7 @@ void StartupOneEngine(Engine *e, Date aging_date)
 	/* Don't randomise the start-date in the first two years after gamestart to ensure availability
 	 * of engines in early starting games.
 	 * Note: TTDP uses fixed 1922 */
-	r = Random();
+	uint32 r = Random();
 	e->intro_date = ei->base_intro <= ConvertYMDToDate(_settings_game.game_creation.starting_year + 2, 0, 1) ? ei->base_intro : (Date)GB(r, 0, 9) + ei->base_intro;
 	if (e->intro_date <= _date) {
 		e->age = (aging_date - e->intro_date) >> 5;
@@ -596,16 +607,21 @@ static void AcceptEnginePreview(EngineID eid, CompanyID company)
 	}
 }
 
+/**
+ * Get the N-th best company.
+ * @param pp Value N, 1 means best, 2 means second best, etc.
+ * @return N-th best company if it exists, #INVALID_COMPANY otherwise.
+ */
 static CompanyID GetBestCompany(uint8 pp)
 {
-	const Company *c;
-	int32 best_hist;
 	CompanyID best_company;
 	CompanyMask mask = 0;
 
 	do {
-		best_hist = -1;
+		int32 best_hist = -1;
 		best_company = INVALID_COMPANY;
+
+		const Company *c;
 		FOR_ALL_COMPANIES(c) {
 			if (c->block_preview == 0 && !HasBit(mask, c->index) &&
 					c->old_economy[0].performance_history > best_hist) {
@@ -622,6 +638,7 @@ static CompanyID GetBestCompany(uint8 pp)
 	return best_company;
 }
 
+/** Daily check to offer an exclusive engine preview to the companies. */
 void EnginesDailyLoop()
 {
 	if (_cur_year >= _year_engine_aging_stops) return;
@@ -653,7 +670,8 @@ void EnginesDailyLoop()
 	}
 }
 
-/** Accept an engine prototype. XXX - it is possible that the top-company
+/**
+ * Accept an engine prototype. XXX - it is possible that the top-company
  * changes while you are waiting to accept the offer? Then it becomes invalid
  * @param tile unused
  * @param flags operation to perfom
@@ -672,6 +690,11 @@ CommandCost CmdWantEnginePreview(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	return CommandCost();
 }
 
+/**
+ * An engine has become available for general use.
+ * Also handle the exclusive engine preview contract.
+ * @param e Engine generally available as of now.
+ */
 static void NewVehicleAvailable(Engine *e)
 {
 	Vehicle *v;
@@ -766,7 +789,8 @@ static bool IsUniqueEngineName(const char *name)
 	return true;
 }
 
-/** Rename an engine.
+/**
+ * Rename an engine.
  * @param tile unused
  * @param flags operation to perfom
  * @param p1 engine ID to rename
@@ -802,7 +826,8 @@ CommandCost CmdRenameEngine(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 }
 
 
-/** Check if an engine is buildable.
+/**
+ * Check if an engine is buildable.
  * @param engine  index of the engine to check.
  * @param type    the type the engine should be.
  * @param company index of the company.

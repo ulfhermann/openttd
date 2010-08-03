@@ -254,7 +254,8 @@ public:
 	void ConvertFromOldSavegame();
 };
 
-/** Shared order list linking together the linked list of orders and the list
+/**
+ * Shared order list linking together the linked list of orders and the list
  *  of vehicles sharing this order list.
  */
 struct OrderList : OrderListPool::PoolItem<&_orderlist_pool> {
@@ -277,7 +278,8 @@ public:
 		: first(NULL), num_orders(num_orders), num_vehicles(0), first_shared(NULL),
 		  timetable_duration(0) { }
 
-	/** Create an order list with the given order chain for the given vehicle.
+	/**
+	 * Create an order list with the given order chain for the given vehicle.
 	 *  @param chain pointer to the first order of the order chain
 	 *  @param v any vehicle using this orderlist
 	 */
@@ -316,13 +318,15 @@ public:
 
 	/**
 	 * Get number of orders in the order list.
-	 * @return number of orders in the chain. */
+	 * @return number of orders in the chain.
+	 */
 	inline VehicleOrderID GetNumOrders() const { return this->num_orders; }
 
 	/**
 	 * Insert a new order into the order chain.
 	 * @param new_order is the order to insert into the chain.
-	 * @param index is the position where the order is supposed to be inserted. */
+	 * @param index is the position where the order is supposed to be inserted.
+	 */
 	void InsertOrderAt(Order *new_order, int index);
 
 	/**
@@ -334,7 +338,8 @@ public:
 	/**
 	 * Move an order to another position within the order list.
 	 * @param from is the zero-based position of the order to move.
-	 * @param to is the zero-based position where the order is moved to. */
+	 * @param to is the zero-based position where the order is moved to.
+	 */
 	void MoveOrder(int from, int to);
 
 	/**
