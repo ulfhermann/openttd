@@ -13,12 +13,14 @@
 #include "debug.h"
 #include "town.h"
 
-/** This function implements the town variables that newGRF defines.
+/**
+ * This function implements the town variables that newGRF defines.
  * @param variable that is queried
  * @param parameter unused
  * @param available will return false if ever the variable asked for does not exist
  * @param t is of course the town we are inquiring
- * @return the value stored in the corresponding variable*/
+ * @return the value stored in the corresponding variable
+ */
 uint32 TownGetVariable(byte variable, byte parameter, bool *available, const Town *t)
 {
 	switch (variable) {

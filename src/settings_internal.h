@@ -16,10 +16,12 @@
 #include "settings_type.h"
 #include "strings_type.h"
 
-/** Convention/Type of settings. This is then further specified if necessary
+/**
+ * Convention/Type of settings. This is then further specified if necessary
  * with the SLE_ (SLE_VAR/SLE_FILE) enums in saveload.h
  * @see VarTypes
- * @see SettingDescBase */
+ * @see SettingDescBase
+ */
 enum SettingDescTypeLong {
 	/* 4 bytes allocated a maximum of 16 types for GenericType */
 	SDT_BEGIN       = 0,
