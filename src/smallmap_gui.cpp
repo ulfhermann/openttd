@@ -88,8 +88,10 @@ enum SmallMapStats {
 /** Macro for end of list marker in arrays of LegendAndColour */
 #define MKEND() {0, STR_NULL, {INVALID_INDUSTRYTYPE}, true, true, false}
 
-/** Macro for break marker in arrays of LegendAndColour.
- * It will have valid data, though */
+/**
+ * Macro for break marker in arrays of LegendAndColour.
+ * It will have valid data, though
+ */
 #define MS(a, b) {a, b, {INVALID_INDUSTRYTYPE}, true, false, true}
 
 /** Structure for holding relevant data for legends in small map */
@@ -174,8 +176,10 @@ static const LegendAndColour _legend_land_owners[] = {
 #undef MS
 #undef MKEND
 
-/** Allow room for all industries, plus a terminator entry
- * This is required in order to have the indutry slots all filled up */
+/**
+ * Allow room for all industries, plus a terminator entry
+ * This is required in order to have the indutry slots all filled up
+ */
 static LegendAndColour _legend_from_industries[NUM_INDUSTRYTYPES + 1];
 /* For connecting industry type to position in industries list(small map legend) */
 static uint _industry_to_list_pos[NUM_INDUSTRYTYPES];
@@ -867,7 +871,8 @@ class SmallMapWindow : public Window {
 		return scroll;
 	}
 
-	/** Initialize or change the zoom level.
+	/**
+	 * Initialize or change the zoom level.
 	 * @param change  Way to change the zoom level.
 	 * @param zoom_pt Position to keep fixed while zooming.
 	 * @pre \c *zoom_pt should contain a point in the smallmap display when zooming in or out.
@@ -1735,7 +1740,8 @@ public:
 		this->SmallMapCenterOnCurrentPos();
 	}
 
-	/** Compute maximal required height of the legends.
+	/**
+	 * Compute maximal required height of the legends.
 	 * @return Maximally needed height for displaying the smallmap legends in pixels.
 	 */
 	inline uint GetMaxLegendHeight() const
@@ -1743,7 +1749,8 @@ public:
 		return WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM + this->GetMaxNumberRowsLegend(this->min_number_of_columns) * FONT_HEIGHT_SMALL;
 	}
 
-	/** Compute minimal required width of the legends.
+	/**
+	 * Compute minimal required width of the legends.
 	 * @return Minimally needed width for displaying the smallmap legends in pixels.
 	 */
 	inline uint GetMinLegendWidth() const
@@ -1751,7 +1758,8 @@ public:
 		return WD_FRAMERECT_LEFT + this->min_number_of_columns * this->column_width;
 	}
 
-	/** Return number of columns that can be displayed in \a width pixels.
+	/**
+	 * Return number of columns that can be displayed in \a width pixels.
 	 * @return Number of columns to display.
 	 */
 	inline uint GetNumberColumnsLegend(uint width) const
@@ -1759,7 +1767,8 @@ public:
 		return width / this->column_width;
 	}
 
-	/** Compute height given a width.
+	/**
+	 * Compute height given a width.
 	 * @return Needed height for displaying the smallmap legends in pixels.
 	 */
 	uint GetLegendHeight(uint width) const
@@ -1817,7 +1826,8 @@ public:
 				DrawPixelInfo new_dpi;
 				if (!FillDrawPixelInfo(&new_dpi, r.left + 1, r.top + 1, r.right - r.left - 1, r.bottom - r.top - 1)) return;
 				this->DrawSmallMap(&new_dpi);
-			} break;
+				break;
+			}
 
 			case SM_WIDGET_LEGEND: {
 				DrawLegend(r);
@@ -1975,7 +1985,8 @@ public:
 				w->viewport->dest_scrollpos_y = pt.y - (w->viewport->virtual_height >> 1);
 
 				this->SetDirty();
-			} break;
+				break;
+			}
 
 			case SM_WIDGET_ZOOM_IN:
 			case SM_WIDGET_ZOOM_OUT: {

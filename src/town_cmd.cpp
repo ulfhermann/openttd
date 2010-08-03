@@ -21,7 +21,7 @@
 #include "company_base.h"
 #include "news_func.h"
 #include "gui.h"
-#include "unmovable_map.h"
+#include "unmovable.h"
 #include "genworld.h"
 #include "newgrf_debug.h"
 #include "newgrf_house.h"
@@ -45,6 +45,7 @@
 #include "townname_type.h"
 #include "core/random_func.hpp"
 #include "core/backup_type.hpp"
+#include "depot_base.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
@@ -420,7 +421,8 @@ static void MakeSingleHouseBigger(TileIndex tile)
 	MarkTileDirtyByTile(tile);
 }
 
-/** Make the house advance in its construction stages until completion
+/**
+ * Make the house advance in its construction stages until completion
  * @param tile TileIndex of house
  */
 static void MakeTownHouseBigger(TileIndex tile)
@@ -1191,7 +1193,8 @@ static void GrowTownInTile(TileIndex *tile_ptr, RoadBits cur_rb, DiagDirection t
 	GrowTownWithRoad(t1, tile, rcmd);
 }
 
-/** Returns "growth" if a house was built, or no if the build failed.
+/**
+ * Returns "growth" if a house was built, or no if the build failed.
  * @param t town to inquiry
  * @param tile to inquiry
  * @return something other than zero(0)if town expansion was possible
@@ -1275,7 +1278,8 @@ static RoadBits GenRandomRoadBits()
 	return (RoadBits)((ROAD_NW << a) + (ROAD_NW << b));
 }
 
-/** Grow the town
+/**
+ * Grow the town
  * @param t town to grow
  * @return true iff a house was built
  */
@@ -1761,7 +1765,8 @@ static Town *CreateRandomTown(uint attempts, uint32 townnameparts, TownSize size
 
 static const byte _num_initial_towns[4] = {5, 11, 23, 46};  // very low, low, normal, high
 
-/** This function will generate a certain amount of towns, with a certain layout
+/**
+ * This function will generate a certain amount of towns, with a certain layout
  * It can be called from the scenario editor (i.e.: generate Random Towns)
  * as well as from world creation.
  * @param layout which towns will be set to, when created
@@ -1807,7 +1812,8 @@ bool GenerateTowns(TownLayout layout)
 }
 
 
-/** Returns the bit corresponding to the town zone of the specified tile
+/**
+ * Returns the bit corresponding to the town zone of the specified tile
  * @param t Town on which town zone is to be found
  * @param tile TileIndex where town zone needs to be found
  * @return the bit position of the given zone, as defined in HouseZones
@@ -2012,7 +2018,7 @@ static inline bool TownLayoutAllows2x2HouseHere(Town *t, TileIndex tile)
  * @param maxz all tiles should have the same height
  * @param noslope are slopes forbidden?
  * @param second diagdir from first tile to second tile
- **/
+ */
 static bool CheckTownBuild2House(TileIndex *tile, Town *t, uint maxz, bool noslope, DiagDirection second)
 {
 	/* 'tile' is already checked in BuildTownHouse() - CanBuildHouseHere() and slope test */
@@ -2037,7 +2043,7 @@ static bool CheckTownBuild2House(TileIndex *tile, Town *t, uint maxz, bool noslo
  * @param t town
  * @param maxz all tiles should have the same height
  * @param noslope are slopes forbidden?
- **/
+ */
 static bool CheckTownBuild2x2House(TileIndex *tile, Town *t, uint maxz, bool noslope)
 {
 	TileIndex tile2 = *tile;
@@ -2278,7 +2284,8 @@ void ClearTownHouse(Town *t, TileIndex tile)
 	if (eflags & BUILDING_HAS_4_TILES) DoClearTownHouseHelper(tile + TileDiffXY(1, 1), t, ++house);
 }
 
-/** Rename a town (server-only).
+/**
+ * Rename a town (server-only).
  * @param tile unused
  * @param flags type of operation
  * @param p1 town ID to rename
@@ -2309,32 +2316,105 @@ CommandCost CmdRenameTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	return CommandCost();
 }
 
-/** Called from GUI */
-void ExpandTown(Town *t)
+/**
+ * Expand a town (scenario editor only).
+ * @param tile Unused.
+ * @param flags Type of operation.
+ * @param p1 Town ID to expand.
+ * @param p2 Unused.
+ * @param text Unused.
+ * @return Empty cost or an error.
+ */
+CommandCost CmdExpandTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	/* Warn the users if towns are not allowed to build roads,
-	 * but do this only onces per openttd run. */
-	static bool warned_no_roads = false;
-	if (!_settings_game.economy.allow_town_roads && !warned_no_roads) {
-		ShowErrorMessage(STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS, INVALID_STRING_ID, WL_WARNING);
-		warned_no_roads = true;
+	if (_game_mode != GM_EDITOR) return CMD_ERROR;
+	Town *t = Town::GetIfValid(p1);
+	if (t == NULL) return CMD_ERROR;
+
+	if (flags & DC_EXEC) {
+		/* The more houses, the faster we grow */
+		uint amount = RandomRange(ClampToU16(t->num_houses / 10)) + 3;
+		t->num_houses += amount;
+		UpdateTownRadius(t);
+
+		uint n = amount * 10;
+		do GrowTown(t); while (--n);
+
+		t->num_houses -= amount;
+		UpdateTownRadius(t);
+
+		UpdateTownMaxPass(t);
 	}
 
-	/* The more houses, the faster we grow */
-	uint amount = RandomRange(ClampToU16(t->num_houses / 10)) + 3;
-	t->num_houses += amount;
-	UpdateTownRadius(t);
-
-	uint n = amount * 10;
-	do GrowTown(t); while (--n);
-
-	t->num_houses -= amount;
-	UpdateTownRadius(t);
-
-	UpdateTownMaxPass(t);
+	return CommandCost();
 }
 
-/** Factor in the cost of each town action.
+/**
+ * Delete a town (scenario editor only).
+ * @param tile Unused.
+ * @param flags Type of operation.
+ * @param p1 Town ID to delete.
+ * @param p2 Unused.
+ * @param text Unused.
+ * @return Empty cost or an error.
+ */
+CommandCost CmdDeleteTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	if (_game_mode != GM_EDITOR) return CMD_ERROR;
+	Town *t = Town::GetIfValid(p1);
+	if (t == NULL) return CMD_ERROR;
+
+	/* Stations refer to towns. */
+	const Station *st;
+	FOR_ALL_STATIONS(st) {
+		if (st->town == t) {
+			/* Non-oil rig stations are always a problem. */
+			if (!(st->facilities & FACIL_AIRPORT) || st->airport.type != AT_OILRIG) return CMD_ERROR;
+			/* We can only automatically delete oil rigs *if* there's no vehicle on them. */
+			CommandCost ret = DoCommand(st->airport.tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
+			if (ret.Failed()) return ret;
+		}
+	}
+
+	/* Depots refer to towns. */
+	const Depot *d;
+	FOR_ALL_DEPOTS(d) {
+		if (d->town == t) return CMD_ERROR;
+	}
+
+	/* Check all tiles for town ownership. */
+	for (TileIndex tile = 0; tile < MapSize(); ++tile) {
+		switch (GetTileType(tile)) {
+			case MP_ROAD:
+				if (HasTownOwnedRoad(tile) && GetTownIndex(tile) == t->index) {
+					/* Can we clear this tile? */
+					CommandCost ret = DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
+					if (ret.Failed()) return ret;
+				}
+				break;
+
+			case MP_TUNNELBRIDGE:
+				if (IsTileOwner(tile, OWNER_TOWN) &&
+						ClosestTownFromTile(tile, UINT_MAX) == t) {
+					/* Can we clear this bridge? */
+					CommandCost ret = DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
+					if (ret.Failed()) return ret;
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	/* The town destructor will delete everything related to the town. */
+	if (flags & DC_EXEC) delete t;
+
+	return CommandCost();
+}
+
+/**
+ * Factor in the cost of each town action.
  * @see TownActions
  */
 const byte _town_action_costs[TACT_COUNT] = {
@@ -2424,7 +2504,7 @@ static CommandCost TownActionBuildStatue(Town *t, DoCommandFlag flags)
 	if (CircularTileSearch(&tile, 9, SearchTileForStatue, NULL)) {
 		if (flags & DC_EXEC) {
 			DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
-			MakeStatue(tile, _current_company, t->index);
+			BuildUnmovable(UNMOVABLE_STATUE, tile, _current_company, t->index);
 			SetBit(t->statues, _current_company); // Once found and built, "inform" the Town.
 			MarkTileDirtyByTile(tile);
 		}
@@ -2506,7 +2586,8 @@ static TownActionProc * const _town_action_proc[] = {
 	TownActionBribe
 };
 
-/** Get a list of available actions to do at a town.
+/**
+ * Get a list of available actions to do at a town.
  * @param nump if not NULL add put the number of available actions in it
  * @param cid the company that is querying the town
  * @param t the town that is queried
@@ -2548,7 +2629,8 @@ uint GetMaskOfTownActions(int *nump, CompanyID cid, const Town *t)
 	return buttons;
 }
 
-/** Do a town action.
+/**
+ * Do a town action.
  * This performs an action such as advertising, building a statue, funding buildings,
  * but also bribing the town-council
  * @param tile unused
@@ -2617,8 +2699,10 @@ static void UpdateTownGrowRate(Town *t)
 	ClrBit(t->flags, TOWN_IS_FUNDED);
 	if (_settings_game.economy.town_growth_rate == 0 && t->fund_buildings_months == 0) return;
 
-	/** Towns are processed every TOWN_GROWTH_FREQUENCY ticks, and this is the
-	 * number of times towns are processed before a new building is built. */
+	/**
+	 * Towns are processed every TOWN_GROWTH_FREQUENCY ticks, and this is the
+	 * number of times towns are processed before a new building is built.
+	 */
 	static const uint16 _grow_count_values[2][6] = {
 		{ 120, 120, 120, 100,  80,  60 }, // Fund new buildings has been activated
 		{ 320, 420, 300, 220, 160, 100 }  // Normal values
@@ -2702,10 +2786,11 @@ CommandCost CheckIfAuthorityAllowsNewStation(TileIndex tile, DoCommandFlag flags
 	return_cmd_error(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS);
 }
 
-/** Return the town closest to the given tile within \a threshold.
+/**
+ * Return the town closest to the given tile within \a threshold.
  * @param tile      Starting point of the search.
  * @param threshold Biggest allowed distance to the town.
- * @return Closest town to \a tile withinh \a threshold, or \c NULL if there is no such town.
+ * @return Closest town to \a tile within \a threshold, or \c NULL if there is no such town.
  *
  * @note This function only uses distance, the #ClosestTownFromTile function also takes town ownership into account.
  */
@@ -2726,7 +2811,14 @@ Town *CalcClosestTownFromTile(TileIndex tile, uint threshold)
 	return best_town;
 }
 
-
+/**
+ * Return the town closest (in distance or ownership) to a given tile, within a given threshold.
+ * @param tile      Starting point of the search.
+ * @param threshold Biggest allowed distance to the town.
+ * @return Closest town to \a tile within \a threshold, or \c NULL if there is no such town.
+ *
+ * @note If you only care about distance, you can use the #CalcClosestTownFromTile function.
+ */
 Town *ClosestTownFromTile(TileIndex tile, uint threshold)
 {
 	switch (GetTileType(tile)) {
@@ -2760,12 +2852,17 @@ Town *ClosestTownFromTile(TileIndex tile, uint threshold)
 	}
 }
 
-static bool _town_rating_test = false;
-static SmallMap<const Town *, int, 4> _town_test_ratings;
+static bool _town_rating_test = false; ///< If \c true, town rating is in test-mode.
+static SmallMap<const Town *, int, 4> _town_test_ratings; ///< Map of towns to modified ratings, while in town rating test-mode.
 
+/**
+ * Switch the town rating to test-mode, to allow commands to be tested without affecting current ratings.
+ * The function is safe to use in nested calls.
+ * @param mode Test mode switch (\c true means go to test-mode, \c false means leave test-mode).
+ */
 void SetTownRatingTestMode(bool mode)
 {
-	static int ref_count = 0;
+	static int ref_count = 0; // Number of times test-mode is switched on.
 	if (mode) {
 		if (ref_count == 0) {
 			_town_test_ratings.Clear();
@@ -2778,6 +2875,11 @@ void SetTownRatingTestMode(bool mode)
 	_town_rating_test = !(ref_count == 0);
 }
 
+/**
+ * Get the rating of a town for the #_current_company.
+ * @param t Town to get the rating from.
+ * @return Rating of the current company in the given town.
+ */
 static int GetRating(const Town *t)
 {
 	if (_town_rating_test) {
@@ -2793,12 +2895,12 @@ static int GetRating(const Town *t)
  * Changes town rating of the current company
  * @param t Town to affect
  * @param add Value to add
- * @param max Minimum (add < 0) resp. maximum (add > 0) rating that should be archievable with this change
+ * @param max Minimum (add < 0) resp. maximum (add > 0) rating that should be achievable with this change.
  * @param flags Command flags, especially DC_NO_MODIFY_TOWN_RATING is tested
  */
 void ChangeTownRating(Town *t, int add, int max, DoCommandFlag flags)
 {
-	/* if magic_bulldozer cheat is active, town doesn't penaltize for removing stuff */
+	/* if magic_bulldozer cheat is active, town doesn't penalize for removing stuff */
 	if (t == NULL || (flags & DC_NO_MODIFY_TOWN_RATING) ||
 			!Company::IsValidID(_current_company) ||
 			(_cheats.magic_bulldozer.value && add < 0)) {

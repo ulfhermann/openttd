@@ -41,9 +41,11 @@ bool MyShowCursor(bool show)
 	return !show;
 }
 
-/** Helper function needed by dynamically loading libraries
+/**
+ * Helper function needed by dynamically loading libraries
  * XXX: Hurray for MS only having an ANSI GetProcAddress function
- * on normal windows and no Wide version except for in Windows Mobile/CE */
+ * on normal windows and no Wide version except for in Windows Mobile/CE
+ */
 bool LoadLibraryList(Function proc[], const char *dll)
 {
 	while (*dll != '\0') {
@@ -566,7 +568,8 @@ void CSleep(int milliseconds)
  * @param name pointer to a valid string that will be converted (local, or wide)
  * @return pointer to the converted string; if failed string is of zero-length
  * @see the current code-page comes from video\win32_v.cpp, event-notification
- * WM_INPUTLANGCHANGE */
+ * WM_INPUTLANGCHANGE
+ */
 const char *FS2OTTD(const TCHAR *name)
 {
 	static char utf8_buf[512];
@@ -603,7 +606,8 @@ const char *FS2OTTD(const TCHAR *name)
  * @param name pointer to a valid string that will be converted (UTF8)
  * @return pointer to the converted string; if failed string is of zero-length
  * @see the current code-page comes from video\win32_v.cpp, event-notification
- * WM_INPUTLANGCHANGE */
+ * WM_INPUTLANGCHANGE
+ */
 const TCHAR *OTTD2FS(const char *name)
 {
 	static TCHAR system_buf[512];
@@ -631,12 +635,14 @@ const TCHAR *OTTD2FS(const char *name)
 }
 
 
-/** Convert to OpenTTD's encoding from that of the environment in
+/**
+ * Convert to OpenTTD's encoding from that of the environment in
  * UNICODE. OpenTTD encoding is UTF8, local is wide
  * @param name pointer to a valid string that will be converted
  * @param utf8_buf pointer to a valid buffer that will receive the converted string
  * @param buflen length in characters of the receiving buffer
- * @return pointer to utf8_buf. If conversion fails the string is of zero-length */
+ * @return pointer to utf8_buf. If conversion fails the string is of zero-length
+ */
 char *convert_from_fs(const wchar_t *name, char *utf8_buf, size_t buflen)
 {
 	int len = WideCharToMultiByte(CP_UTF8, 0, name, -1, utf8_buf, (int)buflen, NULL, NULL);
@@ -649,13 +655,15 @@ char *convert_from_fs(const wchar_t *name, char *utf8_buf, size_t buflen)
 }
 
 
-/** Convert from OpenTTD's encoding to that of the environment in
+/**
+ * Convert from OpenTTD's encoding to that of the environment in
  * UNICODE. OpenTTD encoding is UTF8, local is wide
  * @param name pointer to a valid string that will be converted
  * @param utf16_buf pointer to a valid wide-char buffer that will receive the
  * converted string
  * @param buflen length in wide characters of the receiving buffer
- * @return pointer to utf16_buf. If conversion fails the string is of zero-length */
+ * @return pointer to utf16_buf. If conversion fails the string is of zero-length
+ */
 wchar_t *convert_to_fs(const char *name, wchar_t *utf16_buf, size_t buflen)
 {
 	int len = MultiByteToWideChar(CP_UTF8, 0, name, -1, utf16_buf, (int)buflen);
@@ -667,10 +675,12 @@ wchar_t *convert_to_fs(const char *name, wchar_t *utf16_buf, size_t buflen)
 	return utf16_buf;
 }
 
-/** Our very own SHGetFolderPath function for support of windows operating
+/**
+ * Our very own SHGetFolderPath function for support of windows operating
  * systems that don't have this function (eg Win9x, etc.). We try using the
  * native function, and if that doesn't exist we will try a more crude approach
- * of environment variables and hope for the best */
+ * of environment variables and hope for the best
+ */
 HRESULT OTTDSHGetFolderPath(HWND hwnd, int csidl, HANDLE hToken, DWORD dwFlags, LPTSTR pszPath)
 {
 	static HRESULT (WINAPI *SHGetFolderPath)(HWND, int, HANDLE, DWORD, LPTSTR) = NULL;
