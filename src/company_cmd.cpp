@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "engine_base.h"
+#include "company_base.h"
 #include "company_func.h"
 #include "company_gui.h"
 #include "town.h"
@@ -22,14 +23,11 @@
 #include "network/network_base.h"
 #include "ai/ai.hpp"
 #include "company_manager_face.h"
-#include "group.h"
 #include "window_func.h"
 #include "strings_func.h"
 #include "gfx_func.h"
 #include "date_func.h"
 #include "sound_func.h"
-#include "autoreplace_func.h"
-#include "autoreplace_gui.h"
 #include "rail.h"
 #include "core/pool_func.hpp"
 #include "settings_func.h"
@@ -41,15 +39,19 @@
 
 CompanyByte _local_company;   ///< Company controlled by the human player at this client. Can also be #COMPANY_SPECTATOR.
 CompanyByte _current_company; ///< Company currently doing an action.
-/* NOSAVE: can be determined from company structs */
-Colours _company_colours[MAX_COMPANIES];
+Colours _company_colours[MAX_COMPANIES];  ///< NOSAVE: can be determined from company structs.
 CompanyManagerFace _company_manager_face; ///< for company manager face storage in openttd.cfg
 uint _next_competitor_start;              ///< the number of ticks before the next AI is started
 uint _cur_company_tick_index;             ///< used to generate a name for one company that doesn't have a name yet per tick
 
-CompanyPool _company_pool("Company");
+CompanyPool _company_pool("Company"); ///< Pool of companies.
 INSTANTIATE_POOL_METHODS(Company)
 
+/**
+ * Constructor.
+ * @param name_1 Name of the company.
+ * @param is_ai  A computer program is running for this company.
+ */
 Company::Company(uint16 name_1, bool is_ai)
 {
 	this->name_1 = name_1;
@@ -59,6 +61,7 @@ Company::Company(uint16 name_1, bool is_ai)
 	InvalidateWindowData(WC_PERFORMANCE_DETAIL, 0, INVALID_COMPANY);
 }
 
+/** Destructor. */
 Company::~Company()
 {
 	free(this->num_engines);
@@ -108,14 +111,23 @@ void SetLocalCompany(CompanyID new_company)
 	MarkWholeScreenDirty();
 }
 
+/**
+ * Get the colour for DrawString-subroutines which matches the colour of the company.
+ * @param company Company to get the colour of.
+ * @return Colour of \a company.
+ */
 uint16 GetDrawStringCompanyColour(CompanyID company)
 {
-	/* Get the colour for DrawString-subroutines which matches the colour
-	 * of the company */
 	if (!Company::IsValidID(company)) return _colour_gradient[COLOUR_WHITE][4] | IS_PALETTE_COLOUR;
 	return (_colour_gradient[_company_colours[company]][4]) | IS_PALETTE_COLOUR;
 }
 
+/**
+ * Draw the icon of a company.
+ * @param c Company that needs its icon drawn.
+ * @param x Horizontal coordinate of the icon.
+ * @param y Vertical coordinate of the icon.
+ */
 void DrawCompanyIcon(CompanyID c, int x, int y)
 {
 	DrawSprite(SPR_COMPANY_ICON, COMPANY_SPRITE_COLOUR(c), x, y);
@@ -152,6 +164,10 @@ bool IsValidCompanyManagerFace(CompanyManagerFace cmf)
 	return true;
 }
 
+/**
+ * Refresh all windows owned by a company.
+ * @param company Company that changed, and needs its windows refreshed.
+ */
 void InvalidateCompanyWindows(const Company *company)
 {
 	CompanyID cid = company->index;
@@ -178,6 +194,11 @@ bool CheckCompanyHasMoney(CommandCost &cost)
 	return true;
 }
 
+/**
+ * Deduct costs of a command from the money of a company.
+ * @param c Company to pay the bill.
+ * @param cost Money to pay.
+ */
 static void SubtractMoneyFromAnyCompany(Company *c, CommandCost cost)
 {
 	if (cost.GetCost() == 0) return;
@@ -203,12 +224,21 @@ static void SubtractMoneyFromAnyCompany(Company *c, CommandCost cost)
 	InvalidateCompanyWindows(c);
 }
 
+/**
+ * Subtract money from the #_current_company, if the company is valid.
+ * @param cost Money to pay.
+ */
 void SubtractMoneyFromCompany(CommandCost cost)
 {
 	Company *c = Company::GetIfValid(_current_company);
 	if (c != NULL) SubtractMoneyFromAnyCompany(c, cost);
 }
 
+/**
+ * Subtract money from a company, including the money fraction.
+ * @param company Company paying the bill.
+ * @param cst     Cost of a command.
+ */
 void SubtractMoneyFromCompanyFract(CompanyID company, CommandCost cst)
 {
 	Company *c = Company::Get(company);
@@ -287,30 +317,30 @@ CommandCost CheckTileOwnership(TileIndex tile)
 	return_cmd_error(STR_ERROR_OWNED_BY);
 }
 
+/**
+ * Generate the name of a company from the last build coordinate.
+ * @param c Company to give a name.
+ */
 static void GenerateCompanyName(Company *c)
 {
-	TileIndex tile;
-	Town *t;
-	StringID str;
-	Company *cc;
-	uint32 strp;
 	/* Reserve space for extra unicode character. We need to do this to be able
 	 * to detect too long company name. */
 	char buffer[MAX_LENGTH_COMPANY_NAME_BYTES + MAX_CHAR_LENGTH];
 
 	if (c->name_1 != STR_SV_UNNAMED) return;
+	if (c->last_build_coordinate == 0) return;
 
-	tile = c->last_build_coordinate;
-	if (tile == 0) return;
+	Town *t = ClosestTownFromTile(c->last_build_coordinate, UINT_MAX);
 
-	t = ClosestTownFromTile(tile, UINT_MAX);
-
+	StringID str;
+	uint32 strp;
 	if (t->name == NULL && IsInsideMM(t->townnametype, SPECSTR_TOWNNAME_START, SPECSTR_TOWNNAME_LAST + 1)) {
 		str = t->townnametype - SPECSTR_TOWNNAME_START + SPECSTR_PLAYERNAME_START;
 		strp = t->townnameparts;
 
 verify_name:;
 		/* No companies must have this name already */
+		Company *cc;
 		FOR_ALL_COMPANIES(cc) {
 			if (cc->name_1 == str && cc->name_2 == strp) goto bad_town_name;
 		}
@@ -369,6 +399,10 @@ static const Colours _similar_colour[COLOUR_END][2] = {
 	{ COLOUR_GREY,       INVALID_COLOUR    }, // COLOUR_WHITE
 };
 
+/**
+ * Generate a company colour.
+ * @return Generated company colour.
+ */
 static Colours GenerateCompanyColour()
 {
 	Colours colours[COLOUR_END];
@@ -421,6 +455,10 @@ static Colours GenerateCompanyColour()
 	NOT_REACHED();
 }
 
+/**
+ * Generate a random president name of a company.
+ * @param c Company that needs a new president name.
+ */
 static void GeneratePresidentName(Company *c)
 {
 	for (;;) {
@@ -509,12 +547,14 @@ Company *DoStartupNewCompany(bool is_ai, CompanyID company = INVALID_COMPANY)
 	return c;
 }
 
+/** Start the next competitor now. */
 void StartupCompanies()
 {
 	_next_competitor_start = 0;
 }
 
 #ifdef ENABLE_AI
+/** Start a new competitor company if possible. */
 static void MaybeStartNewCompany()
 {
 #ifdef ENABLE_NETWORK
@@ -537,6 +577,7 @@ static void MaybeStartNewCompany()
 }
 #endif /* ENABLE_AI */
 
+/** Initialize the pool of companies. */
 void InitializeCompanies()
 {
 	_company_pool.CleanPool();
@@ -627,6 +668,10 @@ void OnTick_Companies()
 	_cur_company_tick_index = (_cur_company_tick_index + 1) % MAX_COMPANIES;
 }
 
+/**
+ * A year has passed, update the economic data of all companies, and perhaps show the
+ * financial overview window of the local company.
+ */
 void CompaniesYearlyLoop()
 {
 	Company *c;
@@ -649,48 +694,10 @@ void CompaniesYearlyLoop()
 	}
 }
 
-/** Change engine renewal parameters
- * @param tile unused
- * @param flags operation to perform
- * @param p1 packed data
- *   - bits 16-31 = engine group
- * @param p2 packed data
- *   - bits  0-15 = old engine type
- *   - bits 16-31 = new engine type
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdSetAutoReplace(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	Company *c = Company::GetIfValid(_current_company);
-	if (c == NULL) return CMD_ERROR;
-
-	EngineID old_engine_type = GB(p2, 0, 16);
-	EngineID new_engine_type = GB(p2, 16, 16);
-	GroupID id_g = GB(p1, 16, 16);
-	CommandCost cost;
-
-	if (!Group::IsValidID(id_g) && !IsAllGroupID(id_g) && !IsDefaultGroupID(id_g)) return CMD_ERROR;
-	if (!Engine::IsValidID(old_engine_type)) return CMD_ERROR;
-
-	if (new_engine_type != INVALID_ENGINE) {
-		if (!Engine::IsValidID(new_engine_type)) return CMD_ERROR;
-		if (!CheckAutoreplaceValidity(old_engine_type, new_engine_type, _current_company)) return CMD_ERROR;
-
-		cost = AddEngineReplacementForCompany(c, old_engine_type, new_engine_type, id_g, flags);
-	} else {
-		cost = RemoveEngineReplacementForCompany(c, old_engine_type, id_g, flags);
-	}
-
-	if ((flags & DC_EXEC) && IsLocalCompany()) InvalidateAutoreplaceWindow(old_engine_type, id_g);
-
-	return cost;
-}
-
 /**
  * Fill the CompanyNewsInformation struct with the required data.
  * @param c the current company.
- * @param other the other company.
+ * @param other the other company (use \c NULL if not relevant).
  */
 void CompanyNewsInformation::FillData(const Company *c, const Company *other)
 {
@@ -713,7 +720,8 @@ void CompanyNewsInformation::FillData(const Company *c, const Company *other)
 
 }
 
-/** Control the companies: add, delete, etc.
+/**
+ * Control the companies: add, delete, etc.
  * @param tile unused
  * @param flags operation to perform
  * @param p1 various functionality
@@ -821,7 +829,8 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				}
 			}
 #endif /* ENABLE_NETWORK */
-		} break;
+			break;
+		}
 
 		case 1: // Make a new AI company
 			if (!(flags & DC_EXEC)) return CommandCost();
@@ -854,7 +863,8 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			CompanyID c_index = c->index;
 			delete c;
 			AI::BroadcastNewEvent(new AIEventCompanyBankrupt(c_index));
-		} break;
+			break;
+		}
 
 		default: return CMD_ERROR;
 	}
@@ -862,7 +872,8 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	return CommandCost();
 }
 
-/** Change the company manager's face.
+/**
+ * Change the company manager's face.
  * @param tile unused
  * @param flags operation to perform
  * @param p1 unused
@@ -883,7 +894,8 @@ CommandCost CmdSetCompanyManagerFace(TileIndex tile, DoCommandFlag flags, uint32
 	return CommandCost();
 }
 
-/** Change the company's company-colour
+/**
+ * Change the company's company-colour
  * @param tile unused
  * @param flags operation to perform
  * @param p1 bitstuffed:
@@ -976,6 +988,11 @@ CommandCost CmdSetCompanyColour(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 	return CommandCost();
 }
 
+/**
+ * Is the given name in use as name of a company?
+ * @param name Name to search.
+ * @return \c true if the name us unique (that is, not in use), else \c false.
+ */
 static bool IsUniqueCompanyName(const char *name)
 {
 	const Company *c;
@@ -987,7 +1004,8 @@ static bool IsUniqueCompanyName(const char *name)
 	return true;
 }
 
-/** Change the name of the company.
+/**
+ * Change the name of the company.
  * @param tile unused
  * @param flags operation to perform
  * @param p1 unused
@@ -1014,6 +1032,11 @@ CommandCost CmdRenameCompany(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	return CommandCost();
 }
 
+/**
+ * Is the given name in use as president name of a company?
+ * @param name Name to search.
+ * @return \c true if the name us unique (that is, not in use), else \c false.
+ */
 static bool IsUniquePresidentName(const char *name)
 {
 	const Company *c;
@@ -1025,7 +1048,8 @@ static bool IsUniquePresidentName(const char *name)
 	return true;
 }
 
-/** Change the name of the president.
+/**
+ * Change the name of the president.
  * @param tile unused
  * @param flags operation to perform
  * @param p1 unused
