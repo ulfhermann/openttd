@@ -38,6 +38,7 @@ GRFConfig::GRFConfig(const char *filename) :
  * @param config The GRFConfig object to make a copy of.
  */
 GRFConfig::GRFConfig(const GRFConfig &config) :
+	ZeroedMemoryAllocator(),
 	ident(config.ident),
 	version(config.version),
 	flags(config.flags & ~GCF_COPY),
@@ -133,6 +134,7 @@ GRFError::GRFError(StringID severity, StringID message) :
  * @param error The GRFError object to make a copy of.
  */
 GRFError::GRFError(const GRFError &error) :
+	ZeroedMemoryAllocator(),
 	custom_message(error.custom_message),
 	data(error.data),
 	message(error.message),
@@ -240,7 +242,8 @@ void UpdateNewGRFConfigPalette()
 	for (GRFConfig *c = _grfconfig_static;  c != NULL; c = c->next) c->SetSuitablePalette();
 }
 
-/** Calculate the MD5 sum for a GRF, and store it in the config.
+/**
+ * Calculate the MD5 sum for a GRF, and store it in the config.
  * @param config GRF to compute.
  * @return MD5 sum was successfully computed
  */
@@ -268,7 +271,8 @@ static bool CalcGRFMD5Sum(GRFConfig *config)
 }
 
 
-/** Find the GRFID of a given grf, and calculate its md5sum.
+/**
+ * Find the GRFID of a given grf, and calculate its md5sum.
  * @param config    grf to fill.
  * @param is_static grf is static.
  * @return Operation was successfully completed.
@@ -282,6 +286,7 @@ bool FillGRFDetails(GRFConfig *config, bool is_static)
 
 	/* Find and load the Action 8 information */
 	LoadNewGRFFile(config, CONFIG_SLOT, GLS_FILESCAN);
+	config->SetSuitablePalette();
 
 	/* Skip if the grfid is 0 (not read) or 0xFFFFFFFF (ttdp system grf) */
 	if (config->ident.grfid == 0 || config->ident.grfid == 0xFFFFFFFF || config->IsOpenTTDBaseGRF()) return false;
@@ -294,13 +299,12 @@ bool FillGRFDetails(GRFConfig *config, bool is_static)
 		if (HasBit(config->flags, GCF_UNSAFE)) return false;
 	}
 
-	config->SetSuitablePalette();
-
 	return CalcGRFMD5Sum(config);
 }
 
 
-/** Clear a GRF Config list, freeing all nodes.
+/**
+ * Clear a GRF Config list, freeing all nodes.
  * @param config Start of the list.
  * @post \a config is set to \c NULL.
  */
@@ -315,11 +319,13 @@ void ClearGRFConfigList(GRFConfig **config)
 }
 
 
-/** Copy a GRF Config list
+/**
+ * Copy a GRF Config list
  * @param dst pointer to destination list
  * @param src pointer to source list values
  * @param init_only the copied GRF will be processed up to GLS_INIT
- * @return pointer to the last value added to the destination list */
+ * @return pointer to the last value added to the destination list
+ */
 GRFConfig **CopyGRFConfigList(GRFConfig **dst, const GRFConfig *src, bool init_only)
 {
 	/* Clear destination as it will be overwritten */
@@ -381,9 +387,11 @@ void AppendStaticGRFConfigs(GRFConfig **dst)
 	RemoveDuplicatesFromGRFConfigList(*dst);
 }
 
-/** Appends an element to a list of GRFs
+/**
+ * Appends an element to a list of GRFs
  * @param dst the head of the list to add to
- * @param el the new tail to be */
+ * @param el the new tail to be
+ */
 void AppendToGRFConfigList(GRFConfig **dst, GRFConfig *el)
 {
 	GRFConfig **tail = dst;
@@ -402,7 +410,8 @@ void ResetGRFConfig(bool defaults)
 }
 
 
-/** Check if all GRFs in the GRF config from a savegame can be loaded.
+/**
+ * Check if all GRFs in the GRF config from a savegame can be loaded.
  * @param grfconfig GrfConfig to check
  * @return will return any of the following 3 values:<br>
  * <ul>
@@ -410,7 +419,8 @@ void ResetGRFConfig(bool defaults)
  * <li> GLC_COMPATIBLE: For one or more GRF's no exact match was found, but a
  *     compatible GRF with the same grfid was found and used instead
  * <li> GLC_NOT_FOUND: For one or more GRF's no match was found at all
- * </ul> */
+ * </ul>
+ */
 GRFListCompatibility IsGoodGRFConfigList(GRFConfig *grfconfig)
 {
 	GRFListCompatibility res = GLC_ALL_GOOD;
@@ -539,6 +549,8 @@ void ScanNewGRFFiles()
 {
 	ClearGRFConfigList(&_all_grfs);
 
+	TarScanner::DoScan();
+
 	DEBUG(grf, 1, "Scanning for NewGRFs");
 	uint num = GRFFileScanner::DoScan();
 
@@ -573,7 +585,8 @@ void ScanNewGRFFiles()
 }
 
 
-/** Find a NewGRF in the scanned list.
+/**
+ * Find a NewGRF in the scanned list.
  * @param grfid GRFID to look for,
  * @param md5sum Expected MD5 sum (set to \c NULL if not relevant).
  * @return The matching grf, if it exists in #_all_grfs, else \c NULL.
@@ -641,7 +654,8 @@ char *FindUnknownGRFName(uint32 grfid, uint8 *md5sum, bool create)
 #endif /* ENABLE_NETWORK */
 
 
-/** Retrieve a NewGRF from the current config by its grfid.
+/**
+ * Retrieve a NewGRF from the current config by its grfid.
  * @param grfid grf to look for.
  * @param mask  GRFID mask to allow for partial matching.
  * @return The grf config, if it exists, else \c NULL.

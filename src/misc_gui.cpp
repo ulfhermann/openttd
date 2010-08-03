@@ -899,7 +899,8 @@ struct TooltipsWindow : public Window
 	}
 };
 
-/** Shows a tooltip
+/**
+ * Shows a tooltip
  * @param str String to be displayed
  * @param paramcount number of params to deal with
  * @param params (optional) up to 5 pieces of additional information that may be added to a tooltip
@@ -1095,7 +1096,8 @@ bool MoveTextBufferPos(Textbuf *tb, int navmode)
  * @param maxsize maximum size in bytes, including terminating '\0'
  * @param maxwidth maximum length in pixels of this buffer. If reached, buffer
  * cannot grow, even if maxsize would allow because there is space. Width
- * of zero '0' means the buffer is only restricted by maxsize */
+ * of zero '0' means the buffer is only restricted by maxsize
+ */
 void InitializeTextBuffer(Textbuf *tb, char *buf, uint16 maxsize, uint16 maxwidth)
 {
 	assert(maxsize != 0);
@@ -1363,9 +1365,10 @@ struct QueryStringWindow : public QueryStringBaseWindow
 			case HEBR_EDITING: {
 				Window *osk = FindWindowById(WC_OSK, 0);
 				if (osk != NULL && osk->parent == this) osk->InvalidateData();
-			} break;
+				break;
+			}
 			case HEBR_CONFIRM: this->OnOk();
-			/* FALL THROUGH */
+				/* FALL THROUGH */
 			case HEBR_CANCEL: delete this; break; // close window, abandon changes
 			case HEBR_NOT_FOCUSED: break;
 		}
@@ -1409,7 +1412,8 @@ static const WindowDesc _query_string_desc(
 	_nested_query_string_widgets, lengthof(_nested_query_string_widgets)
 );
 
-/** Show a query popup window with a textbox in it.
+/**
+ * Show a query popup window with a textbox in it.
  * @param str StringID for the text shown in the textbox
  * @param caption StringID of text shown in caption of querywindow
  * @param maxsize maximum size in bytes (including terminating '\0')
@@ -1515,7 +1519,8 @@ struct QueryWindow : public Window {
 					proc(parent, true);
 					proc = NULL;
 				}
-			} break;
+				break;
+			}
 			case QUERY_WIDGET_NO:
 				delete this;
 				break;
@@ -1562,7 +1567,8 @@ static const WindowDesc _query_desc(
 	_nested_query_widgets, lengthof(_nested_query_widgets)
 );
 
-/** Show a modal confirmation window with standard 'yes' and 'no' buttons
+/**
+ * Show a modal confirmation window with standard 'yes' and 'no' buttons
  * The window is aligned to the centre of its parent.
  * @param caption string shown as window caption
  * @param message string that will be shown for the window

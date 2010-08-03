@@ -44,6 +44,7 @@ enum StationSpecFlags {
  * where index is computed as (x * platforms) + platform. */
 typedef byte *StationLayout;
 
+/** Station specification. */
 struct StationSpec {
 	const struct GRFFile *grffile; ///< ID of GRF file station belongs to.
 	int localidx; ///< Index within GRF file of station.
@@ -64,7 +65,8 @@ struct StationSpec {
 	 */
 	byte disallowed_lengths;
 
-	/** Number of tile layouts.
+	/**
+	 * Number of tile layouts.
 	 * A minimum of 8 is required is required for stations.
 	 * 0-1 = plain platform
 	 * 2-3 = platform with building
@@ -75,7 +77,8 @@ struct StationSpec {
 	DrawTileSprites *renderdata; ///< Array of tile layouts.
 	bool copied_renderdata;
 
-	/** Cargo threshold for choosing between little and lots of cargo
+	/**
+	 * Cargo threshold for choosing between little and lots of cargo
 	 * @note little/lots are equivalent to the moving/loading states for vehicles
 	 */
 	uint16 cargo_threshold;

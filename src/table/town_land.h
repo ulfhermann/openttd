@@ -9,7 +9,8 @@
 
 /** @file town_land.h Sprites to use and how to display them for town tiles. */
 
-/** Writes the data into the Town Tile Drawing Struct
+/**
+ * Writes the data into the Town Tile Drawing Struct
  * @param s1 The first sprite of the building, mostly the ground sprite
  * @param p1 The first sprite's palette of the building, mostly the ground sprite
  * @param s2 The second sprite of the building.
@@ -20,7 +21,8 @@
  * @param h the height of the sprite
  * @param dz the virtual height of the sprite
  * @param p set to 1 if a lift is present ()
- * @see DrawBuildingsTileStruct */
+ * @see DrawBuildingsTileStruct
+ */
 #define M(s1, p1, s2, p2, sx, sy, w, h, dz, p) { { s1, p1 }, { s2, p2 }, sx, sy, w, h, dz, p}
 
 /** structure of houses graphics*/
@@ -1790,7 +1792,8 @@ static const DrawBuildingsTileStruct _town_draw_tile_data[] = {
 /** Make sure we have the right number of elements: 4 variants * 4 build stages for each house */
 assert_compile(lengthof(_town_draw_tile_data) == (NEW_HOUSE_OFFSET) * 4 * 4);
 
-/** Describes the data that defines each house in the game
+/**
+ * Describes the data that defines each house in the game
  * @param mnd introduction year of the house
  * @param mxd last year it can be built
  * @param p   population
@@ -1826,7 +1829,8 @@ static const HouseSpec _original_house_specs[] = {
 	 * +-building_flags   |    |    |                                               |    |    |    |    |
 	 * +-building_availability |    |                                               |    |    |    |    |
 	 * +-cargoID accepted |    |    |                                               |    |    |    |    |
-	 * |   |         |    |    |    |                                               |    |    |    |    | */
+	 * |   |         |    |    |    |                                               |    |    |    |    |
+	 */
 	MS(1963, MAX_YEAR, 187, 150, STR_TOWN_BUILDING_NAME_TALL_OFFICE_BLOCK_1,      140,  70,   8,   3,   4,
 	   TILE_SIZE_1x1,
 	   HZ_TEMP | HZ_ZON5,

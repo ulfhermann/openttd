@@ -210,6 +210,24 @@ protected: // These functions should not be called outside acceleration code.
 		return RoadVehInfo(this->engine_type)->tractive_effort;
 	}
 
+ 	/**
+	 * Gets the area used for calculating air drag.
+	 * @return Area of the engine.
+	 */
+	FORCEINLINE byte GetAirDragArea() const
+	{
+		return 60;
+	}
+
+	/**
+	 * Gets the air drag coefficient of this vehicle.
+	 * @return Air drag value from the engine.
+	 */
+	FORCEINLINE byte GetAirDrag() const
+	{
+		return RoadVehInfo(this->engine_type)->air_drag;
+	}
+
 	/**
 	 * Checks the current acceleration status of this vehicle.
 	 * @return Acceleration status.
@@ -262,7 +280,8 @@ protected: // These functions should not be called outside acceleration code.
 	 */
 	FORCEINLINE uint16 GetInitialMaxSpeed() const
 	{
-		return this->max_speed;
+		/* Road vehicles use a *2 conversion factor. */
+		return this->max_speed / 2;
 	}
 
 	/**
