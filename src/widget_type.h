@@ -219,8 +219,10 @@ FORCEINLINE void NWidgetBase::StoreSizePosition(SizingType sizing, uint x, uint 
 }
 
 
-/** Base class for a resizable nested widget.
- * @ingroup NestedWidgets */
+/**
+ * Base class for a resizable nested widget.
+ * @ingroup NestedWidgets
+ */
 class NWidgetResizeBase : public NWidgetBase {
 public:
 	NWidgetResizeBase(WidgetType tp, uint fill_x, uint fill_y);
@@ -257,8 +259,10 @@ enum NWidgetDisplay {
 };
 DECLARE_ENUM_AS_BIT_SET(NWidgetDisplay)
 
-/** Base class for a 'real' widget.
- * @ingroup NestedWidgets */
+/**
+ * Base class for a 'real' widget.
+ * @ingroup NestedWidgets
+ */
 class NWidgetCore : public NWidgetResizeBase {
 public:
 	NWidgetCore(WidgetType tp, Colours colour, uint fill_x, uint fill_y, uint16 widget_data, StringID tool_tip);
@@ -314,8 +318,10 @@ inline bool NWidgetCore::IsDisabled() const
 }
 
 
-/** Baseclass for container widgets.
- * @ingroup NestedWidgets */
+/**
+ * Baseclass for container widgets.
+ * @ingroup NestedWidgets
+ */
 class NWidgetContainer : public NWidgetBase {
 public:
 	NWidgetContainer(WidgetType tp);
@@ -343,7 +349,8 @@ enum StackedZeroSizePlanes {
 	SZSP_BEGIN = SZSP_VERTICAL,  ///< First zero-size plane.
 };
 
-/** Stacked widgets, widgets all occupying the same space in the window.
+/**
+ * Stacked widgets, widgets all occupying the same space in the window.
  * #NWID_SELECTION allows for selecting one of several panels (planes) to tbe displayed. All planes must have the same size.
  * Since all planes are also initialized, switching between different planes can be done while the window is displayed.
  *
@@ -397,8 +404,10 @@ protected:
 	uint8 pip_post;           ///< Amount of space after last widget.
 };
 
-/** Horizontal container.
- * @ingroup NestedWidgets */
+/**
+ * Horizontal container.
+ * @ingroup NestedWidgets
+ */
 class NWidgetHorizontal : public NWidgetPIPContainer {
 public:
 	NWidgetHorizontal(NWidContainerFlags flags = NC_NONE);
@@ -407,8 +416,10 @@ public:
 	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl);
 };
 
-/** Horizontal container that doesn't change the direction of the widgets for RTL languages.
- * @ingroup NestedWidgets */
+/**
+ * Horizontal container that doesn't change the direction of the widgets for RTL languages.
+ * @ingroup NestedWidgets
+ */
 class NWidgetHorizontalLTR : public NWidgetHorizontal {
 public:
 	NWidgetHorizontalLTR(NWidContainerFlags flags = NC_NONE);
@@ -416,8 +427,10 @@ public:
 	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl);
 };
 
-/** Vertical container.
- * @ingroup NestedWidgets */
+/**
+ * Vertical container.
+ * @ingroup NestedWidgets
+ */
 class NWidgetVertical : public NWidgetPIPContainer {
 public:
 	NWidgetVertical(NWidContainerFlags flags = NC_NONE);
@@ -427,8 +440,10 @@ public:
 };
 
 
-/** Spacer widget.
- * @ingroup NestedWidgets */
+/**
+ * Spacer widget.
+ * @ingroup NestedWidgets
+ */
 class NWidgetSpacer : public NWidgetResizeBase {
 public:
 	NWidgetSpacer(int length, int height);
@@ -441,8 +456,10 @@ public:
 	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
 };
 
-/** Nested widget with a child.
- * @ingroup NestedWidgets */
+/**
+ * Nested widget with a child.
+ * @ingroup NestedWidgets
+ */
 class NWidgetBackground : public NWidgetCore {
 public:
 	NWidgetBackground(WidgetType tp, Colours colour, int index, NWidgetPIPContainer *child = NULL);
@@ -472,7 +489,8 @@ private:
  * If the #display_flags field contains the #ND_NO_TRANSPARENCY bit, the viewport will disable transparency.
  * Shading to grey-scale is controlled with the #ND_SHADE_GREY bit (used for B&W news papers), the #ND_SHADE_DIMMED gives dimmed colours (for colour news papers).
  * @todo Class derives from #NWidgetCore, but does not use #colour, #widget_data, or #tool_tip.
- * @ingroup NestedWidgets */
+ * @ingroup NestedWidgets
+ */
 class NWidgetViewport : public NWidgetCore {
 public:
 	NWidgetViewport(int index);
@@ -485,8 +503,10 @@ public:
 	void UpdateViewportCoordinates(Window *w);
 };
 
-/** Leaf widget.
- * @ingroup NestedWidgets */
+/**
+ * Leaf widget.
+ * @ingroup NestedWidgets
+ */
 class NWidgetLeaf : public NWidgetCore {
 public:
 	NWidgetLeaf(WidgetType tp, Colours colour, int index, uint16 data, StringID tip);
@@ -569,49 +589,62 @@ static FORCEINLINE uint ComputeMaxSize(uint base, uint max_space, uint step)
  * @see NestedWidgets
  */
 
-/** Widget part for storing data and tooltip information.
- * @ingroup NestedWidgetParts */
+/**
+ * Widget part for storing data and tooltip information.
+ * @ingroup NestedWidgetParts
+ */
 struct NWidgetPartDataTip {
 	uint16 data;      ///< Data value of the widget.
 	StringID tooltip; ///< Tooltip of the widget.
 };
 
-/** Widget part for storing basic widget information.
- * @ingroup NestedWidgetParts */
+/**
+ * Widget part for storing basic widget information.
+ * @ingroup NestedWidgetParts
+ */
 struct NWidgetPartWidget {
 	Colours colour; ///< Widget colour.
 	int16 index;    ///< Widget index in the widget array.
 };
 
-/** Widget part for storing padding.
- * @ingroup NestedWidgetParts */
+/**
+ * Widget part for storing padding.
+ * @ingroup NestedWidgetParts
+ */
 struct NWidgetPartPaddings {
 	uint8 top, right, bottom, left; ///< Paddings for all directions.
 };
 
-/** Widget part for storing pre/inter/post spaces.
- * @ingroup NestedWidgetParts */
+/**
+ * Widget part for storing pre/inter/post spaces.
+ * @ingroup NestedWidgetParts
+ */
 struct NWidgetPartPIP {
 	uint8 pre, inter, post; ///< Amount of space before/between/after child widgets.
 };
 
-/** Widget part for storing minimal text line data.
- * @ingroup NestedWidgetParts */
+/**
+ * Widget part for storing minimal text line data.
+ * @ingroup NestedWidgetParts
+ */
 struct NWidgetPartTextLines {
 	uint8 lines;   ///< Number of text lines.
 	uint8 spacing; ///< Extra spacing around lines.
 	FontSize size; ///< Font size of text lines.
 };
 
-/** Pointer to function returning a nested widget.
+/**
+ * Pointer to function returning a nested widget.
  * @param biggest_index Pointer to storage for collecting the biggest index used in the nested widget.
  * @return Nested widget (tree).
  * @post \c *biggest_index must contain the value of the biggest index in the returned tree.
  */
 typedef NWidgetBase *NWidgetFunctionType(int *biggest_index);
 
-/** Partial widget specification to allow NWidgets to be written nested.
- * @ingroup NestedWidgetParts */
+/**
+ * Partial widget specification to allow NWidgets to be written nested.
+ * @ingroup NestedWidgetParts
+ */
 struct NWidgetPart {
 	WidgetType type;                         ///< Type of the part. @see NWidgetPartType.
 	union {
@@ -710,7 +743,8 @@ static inline NWidgetPart EndContainer()
 	return part;
 }
 
-/** Widget part function for setting the data and tooltip.
+/**
+ * Widget part function for setting the data and tooltip.
  * @param data Data of the widget.
  * @param tip  Tooltip of the widget.
  * @ingroup NestedWidgetParts

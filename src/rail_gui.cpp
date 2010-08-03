@@ -110,24 +110,31 @@ static void PlaceRail_AutoRail(TileIndex tile)
 /**
  * Try to add an additional rail-track at the entrance of a depot
  * @param tile  Tile to use for adding the rail-track
- * @param extra Track to add
+ * @param dir   Direction to check for already present tracks
+ * @param track Track to add
  * @see CcRailDepot()
  */
-static void PlaceExtraDepotRail(TileIndex tile, uint16 extra)
+static void PlaceExtraDepotRail(TileIndex tile, DiagDirection dir, Track track)
 {
 	if (GetRailTileType(tile) != RAIL_TILE_NORMAL) return;
-	if ((GetTrackBits(tile) & GB(extra, 8, 8)) == 0) return;
+	if ((GetTrackBits(tile) & DiagdirReachesTracks(dir)) == 0) return;
 
-	DoCommandP(tile, _cur_railtype, extra & 0xFF, CMD_BUILD_SINGLE_RAIL);
+	DoCommandP(tile, _cur_railtype, track, CMD_BUILD_SINGLE_RAIL);
 }
 
 /** Additional pieces of track to add at the entrance of a depot. */
-static const uint16 _place_depot_extra[12] = {
-	0x0604, 0x2102, 0x1202, 0x0505,  // First additional track for directions 0..3
-	0x2400, 0x2801, 0x1800, 0x1401,  // Second additional track
-	0x2203, 0x0904, 0x0A05, 0x1103,  // Third additional track
+static const Track _place_depot_extra_track[12] = {
+	TRACK_LEFT,  TRACK_UPPER, TRACK_UPPER, TRACK_RIGHT, // First additional track for directions 0..3
+	TRACK_X,     TRACK_Y,     TRACK_X,     TRACK_Y,     // Second additional track
+	TRACK_LOWER, TRACK_LEFT,  TRACK_RIGHT, TRACK_LOWER, // Third additional track
 };
 
+/** Direction to check for existing track pieces. */
+static const DiagDirection _place_depot_extra_dir[12] = {
+	DIAGDIR_SE, DIAGDIR_SW, DIAGDIR_SE, DIAGDIR_SW,
+	DIAGDIR_SW, DIAGDIR_NW, DIAGDIR_NE, DIAGDIR_SE,
+	DIAGDIR_NW, DIAGDIR_NE, DIAGDIR_NW, DIAGDIR_NE,
+};
 
 void CcRailDepot(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
@@ -141,9 +148,9 @@ void CcRailDepot(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2
 	tile += TileOffsByDiagDir(dir);
 
 	if (IsTileType(tile, MP_RAILWAY)) {
-		PlaceExtraDepotRail(tile, _place_depot_extra[dir]);
-		PlaceExtraDepotRail(tile, _place_depot_extra[dir + 4]);
-		PlaceExtraDepotRail(tile, _place_depot_extra[dir + 8]);
+		PlaceExtraDepotRail(tile, _place_depot_extra_dir[dir], _place_depot_extra_track[dir]);
+		PlaceExtraDepotRail(tile, _place_depot_extra_dir[dir + 4], _place_depot_extra_track[dir + 4]);
+		PlaceExtraDepotRail(tile, _place_depot_extra_dir[dir + 8], _place_depot_extra_track[dir + 8]);
 	}
 }
 
@@ -312,7 +319,8 @@ enum RailToolbarWidgets {
 };
 
 
-/** Toggles state of the Remove button of Build rail toolbar
+/**
+ * Toggles state of the Remove button of Build rail toolbar
  * @param w window the button belongs to
  */
 static void ToggleRailButton_Remove(Window *w)
@@ -324,7 +332,8 @@ static void ToggleRailButton_Remove(Window *w)
 	SetSelectionRed(_remove_button_clicked);
 }
 
-/** Updates the Remove button because of Ctrl state change
+/**
+ * Updates the Remove button because of Ctrl state change
  * @param w window the button belongs to
  * @return true iff the remove buton was changed
  */
@@ -635,7 +644,8 @@ struct BuildRailToolbarWindow : Window {
 		if (_settings_client.gui.link_terraform_toolbar) DeleteWindowById(WC_SCEN_LAND_GEN, 0, false);
 	}
 
-	/** Configures the rail toolbar for railtype given
+	/**
+	 * Configures the rail toolbar for railtype given
 	 * @param railtype the railtype to display
 	 */
 	void SetupRailToolbar(RailType railtype)
@@ -654,7 +664,8 @@ struct BuildRailToolbarWindow : Window {
 		this->GetWidget<NWidgetCore>(RTW_BUILD_TUNNEL)->widget_data = rti->gui_sprites.build_tunnel;
 	}
 
-	/** Switch to another rail type.
+	/**
+	 * Switch to another rail type.
 	 * @param railtype New rail type.
 	 */
 	void ModifyRailType(RailType railtype)
@@ -1313,7 +1324,8 @@ public:
 				SndPlayFx(SND_15_BEEP);
 				this->SetDirty();
 				DeleteWindowById(WC_SELECT_STATION, 0);
-			} break;
+				break;
+			}
 
 			case BRSW_HIGHLIGHT_OFF:
 			case BRSW_HIGHLIGHT_ON:
@@ -1938,7 +1950,8 @@ bool ResetSignalVariant(int32 p = 0)
 	return true;
 }
 
-/** Resets the rail GUI - sets default railtype to build
+/**
+ * Resets the rail GUI - sets default railtype to build
  * and resets the signal GUI
  */
 void InitializeRailGUI()

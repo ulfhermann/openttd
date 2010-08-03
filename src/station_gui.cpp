@@ -723,7 +723,8 @@ const StringID CompanyStationsWindow::sorter_names[] = {
 	INVALID_STRING_ID
 };
 
-/** Make a horizontal row of cargo buttons, starting at widget #SLW_CARGOSTART.
+/**
+ * Make a horizontal row of cargo buttons, starting at widget #SLW_CARGOSTART.
  * @param biggest_index Pointer to store biggest used widget number of the buttons.
  * @return Horizontal row.
  */
@@ -1506,7 +1507,8 @@ struct StationViewWindow : public Window {
 		this->SetDirty();
 	}
 
-	/** Draw accepted cargo in the #SVW_ACCEPTLIST widget.
+	/**
+	 * Draw accepted cargo in the #SVW_ACCEPTLIST widget.
 	 * @param r Rectangle of the widget.
 	 * @return Number of lines needed for drawing the accepted cargo.
 	 */
@@ -1523,7 +1525,8 @@ struct StationViewWindow : public Window {
 		return CeilDiv(bottom - r.top - WD_FRAMERECT_TOP, FONT_HEIGHT_NORMAL);
 	}
 
-	/** Draw cargo ratings in the #SVW_ACCEPTLIST widget.
+	/**
+	 * Draw cargo ratings in the #SVW_ACCEPTLIST widget.
 	 * @param r Rectangle of the widget.
 	 * @return Number of lines needed for drawing the cargo ratings.
 	 */
@@ -1825,7 +1828,7 @@ static bool AddNearbyStation(TileIndex tile, void *user_data)
  * @param distant_join Search for adjacent stations (false) or stations fully
  *                     within station spread
  * @tparam T the type of station to look for
- **/
+ */
 template <class T>
 static const T *FindStationsNearby(TileArea ta, bool distant_join)
 {

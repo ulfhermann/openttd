@@ -389,7 +389,8 @@ void NetworkHandlePauseChange(PauseMode prev_mode, PauseMode changed_mode)
 			char buffer[DRAW_STRING_BUFFER];
 			GetString(buffer, str, lastof(buffer));
 			NetworkTextMessage(NETWORK_ACTION_SERVER_MESSAGE, CC_DEFAULT, false, NULL, buffer);
-		} break;
+			break;
+		}
 
 		default:
 			return;
@@ -470,12 +471,14 @@ static void CheckPauseOnJoin()
 	CheckPauseHelper(NetworkHasJoiningClient(), PM_PAUSED_JOIN);
 }
 
-/** Converts a string to ip/port/company
+/**
+ * Converts a string to ip/port/company
  *  Format: IP:port#company
  *
  * connection_string will be re-terminated to seperate out the hostname, and company and port will
  * be set to the company and port strings given by the user, inside the memory area originally
- * occupied by connection_string. */
+ * occupied by connection_string.
+ */
 void ParseConnectionString(const char **company, const char **port, char *connection_string)
 {
 	bool ipv6 = (strchr(connection_string, ':') != strrchr(connection_string, ':'));

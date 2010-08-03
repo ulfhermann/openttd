@@ -16,7 +16,8 @@
 #include "../core/mem_func.hpp"
 #include <new>
 
-/** Base class for simple binary blobs.
+/**
+ * Base class for simple binary blobs.
  *  Item is byte.
  *  The word 'simple' means:
  *    - no configurable allocator type (always made from heap)
@@ -102,8 +103,10 @@ protected:
 		return (BlobHeader*)MallocT<byte>(num_bytes);
 	}
 
-	/** Return header pointer to the static BlobHeader with
-	 * both items and capacity containing zero */
+	/**
+	 * Return header pointer to the static BlobHeader with
+	 * both items and capacity containing zero
+	 */
 	static FORCEINLINE BlobHeader *Zero()
 	{
 		return const_cast<BlobHeader *>(&ByteBlob::hdrEmpty[1]);
@@ -231,8 +234,10 @@ public:
 		}
 	}
 
-	/** Reallocate if there is no free space for num_bytes bytes.
-	 *  @return pointer to the new data to be added */
+	/**
+	 * Reallocate if there is no free space for num_bytes bytes.
+	 *  @return pointer to the new data to be added
+	 */
 	FORCEINLINE byte *Prepare(size_t num_bytes)
 	{
 		size_t new_size = Length() + num_bytes;
@@ -240,8 +245,10 @@ public:
 		return data + Length();
 	}
 
-	/** Increase Length() by num_bytes.
-	 *  @return pointer to the new data added */
+	/**
+	 * Increase Length() by num_bytes.
+	 *  @return pointer to the new data added
+	 */
 	FORCEINLINE byte *Append(size_t num_bytes)
 	{
 		byte *pNewData = Prepare(num_bytes);
@@ -286,13 +293,15 @@ public:
 	}
 };
 
-/** Blob - simple dynamic T array. T (template argument) is a placeholder for any type.
+/**
+ * Blob - simple dynamic T array. T (template argument) is a placeholder for any type.
  *  T can be any integral type, pointer, or structure. Using Blob instead of just plain C array
  *  simplifies the resource management in several ways:
  *  1. When adding new item(s) it automatically grows capacity if needed.
  *  2. When variable of type Blob comes out of scope it automatically frees the data buffer.
  *  3. Takes care about the actual data size (number of used items).
- *  4. Dynamically constructs only used items (as opposite of static array which constructs all items) */
+ *  4. Dynamically constructs only used items (as opposite of static array which constructs all items)
+ */
 template <typename T>
 class CBlobT : public ByteBlob {
 	/* make template arguments public: */
@@ -380,8 +389,10 @@ public:
 		return (T*)base::Append(num_items * type_size);
 	}
 
-	/** Ensures that given number of items can be added to the end of Blob. Returns pointer to the
-	 *  first free (unused) item */
+	/**
+	 * Ensures that given number of items can be added to the end of Blob. Returns pointer to the
+	 *  first free (unused) item
+	 */
 	FORCEINLINE T *MakeFreeSpace(size_t num_items)
 	{
 		return (T*)base::Prepare(num_items * type_size);
