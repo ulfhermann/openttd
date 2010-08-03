@@ -30,6 +30,7 @@
 #include "sprite.h"
 #include "company_base.h"
 #include "core/geometry_func.hpp"
+#include "unmovable.h"
 
 #include "table/strings.h"
 
@@ -141,7 +142,8 @@ enum CompanyFinancesWindowWidgets {
 	CFW_REPAY_LOAN,    ///< Decrease loan
 };
 
-/** Draw the expenses categories.
+/**
+ * Draw the expenses categories.
  * @param r Available space for drawing.
  * @note The environment must provide padding at the left and right of \a r.
  */
@@ -168,7 +170,8 @@ static void DrawCategories(const Rect &r)
 	DrawString(r.left, r.right, y + EXP_LINESPACE, STR_FINANCES_TOTAL_CAPTION, TC_FROMSTRING, SA_RIGHT);
 }
 
-/** Draw an amount of money.
+/**
+ * Draw an amount of money.
  * @param amount Amount of money to draw,
  * @param left   Left coordinate of the space to draw in.
  * @param right  Right coordinate of the space to draw in.
@@ -185,7 +188,8 @@ static void DrawPrice(Money amount, int left, int right, int top)
 	DrawString(left, right, top, str, TC_FROMSTRING, SA_RIGHT);
 }
 
-/** Draw a column with prices.
+/**
+ * Draw a column with prices.
  * @param r    Available space for drawing.
  * @param year Year being drawn.
  * @param tbl  Pointer to table of amounts for \a year.
@@ -278,7 +282,8 @@ static const NWidgetPart _nested_company_finances_widgets[] = {
 	EndContainer(),
 };
 
-/** Window class displaying the company finances.
+/**
+ * Window class displaying the company finances.
  * @todo #money_width should be calculated dynamically.
  */
 struct CompanyFinancesWindow : Window {
@@ -387,7 +392,8 @@ struct CompanyFinancesWindow : Window {
 		}
 	}
 
-	/** Setup the widgets in the nested tree, such that the finances window is displayed properly.
+	/**
+	 * Setup the widgets in the nested tree, such that the finances window is displayed properly.
 	 * @note After setup, the window must be (re-)initialized.
 	 */
 	void SetupWidgets()
@@ -477,7 +483,8 @@ static const WindowDesc _company_finances_desc(
 	_nested_company_finances_widgets, lengthof(_nested_company_finances_widgets)
 );
 
-/** Open the finances window of a company.
+/**
+ * Open the finances window of a company.
  * @param company Company to show finances of.
  * @pre is company a valid company.
  */
@@ -645,7 +652,8 @@ public:
 				for (const StringID *id = _colour_dropdown; id != endof(_colour_dropdown); id++) {
 					size->width = max(size->width, GetStringBoundingBox(*id).width + 34);
 				}
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -1144,7 +1152,8 @@ public:
 		this->UpdateData();
 	}
 
-	/** Select planes to display to the user with the #NWID_SELECTION widgets #SCMFW_WIDGET_SEL_LOADSAVE, #SCMFW_WIDGET_SEL_MALEFEMALE, and #SCMFW_WIDGET_SEL_PARTS.
+	/**
+	 * Select planes to display to the user with the #NWID_SELECTION widgets #SCMFW_WIDGET_SEL_LOADSAVE, #SCMFW_WIDGET_SEL_MALEFEMALE, and #SCMFW_WIDGET_SEL_PARTS.
 	 * @param advanced Display advanced face management window.
 	 */
 	void SelectDisplayPlanes(bool advanced)
@@ -1814,7 +1823,8 @@ struct CompanyWindow : Window
 
 					size->width = max(size->width, GetStringBoundingBox(STR_COMPANY_VIEW_SHARES_OWNED_BY).width);
 				}
-			} break;
+				break;
+			}
 
 #ifdef ENABLE_NETWORK
 			case CW_WIDGET_HAS_PASSWORD:
@@ -1868,7 +1878,8 @@ struct CompanyWindow : Window
 						}
 					}
 				}
-			} break;
+				break;
+			}
 
 			case CW_WIDGET_DESC_OWNERS: {
 				const Company *c2;
@@ -1884,7 +1895,8 @@ struct CompanyWindow : Window
 						y += FONT_HEIGHT_NORMAL;
 					}
 				}
-			} break;
+				break;
+			}
 
 #ifdef ENABLE_NETWORK
 			case CW_WIDGET_HAS_PASSWORD:
@@ -2001,7 +2013,7 @@ struct CompanyWindow : Window
 
 	virtual void OnPlaceObject(Point pt, TileIndex tile)
 	{
-		if (DoCommandP(tile, 0, 0, CMD_BUILD_COMPANY_HQ | CMD_MSG(STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS))) {
+		if (DoCommandP(tile, UNMOVABLE_HQ, 0, CMD_BUILD_UNMOVABLE | CMD_MSG(STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS))) {
 			ResetObjectToPlace();
 			this->RaiseButtons();
 		}
@@ -2102,14 +2114,16 @@ struct BuyCompanyWindow : Window {
 			case BCW_FACE: {
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				DrawCompanyManagerFace(c->face, c->colour, r.left, r.top);
-			} break;
+				break;
+			}
 
 			case BCW_QUESTION: {
 				const Company *c = Company::Get((CompanyID)this->window_number);
 				SetDParam(0, c->index);
 				SetDParam(1, c->bankrupt_value);
 				DrawStringMultiLine(r.left, r.right, r.top, r.bottom, STR_BUY_COMPANY_MESSAGE, TC_FROMSTRING, SA_CENTER);
-			} break;
+				break;
+			}
 		}
 	}
 

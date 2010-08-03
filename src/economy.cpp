@@ -126,7 +126,6 @@ static PriceMultipliers _price_base_multiplier;
 Money CalculateCompanyValue(const Company *c, bool including_loan)
 {
 	Owner owner = c->index;
-	Money value = 0;
 
 	Station *st;
 	uint num = 0;
@@ -135,7 +134,7 @@ Money CalculateCompanyValue(const Company *c, bool including_loan)
 		if (st->owner == owner) num += CountBits((byte)st->facilities);
 	}
 
-	value += num * _price[PR_STATION_VALUE] * 25;
+	Money value = num * _price[PR_STATION_VALUE] * 25;
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
@@ -156,12 +155,14 @@ Money CalculateCompanyValue(const Company *c, bool including_loan)
 	return max(value, (Money)1);
 }
 
-/** if update is set to true, the economy is updated with this score
+/**
+ * if update is set to true, the economy is updated with this score
  *  (also the house is updated, should only be true in the on-tick event)
  * @param update the economy with calculated score
  * @param c company been evaluated
  * @return actual score of this company
- * */
+ *
+ */
 int UpdateCompanyRatingAndValue(Company *c, bool update)
 {
 	Owner owner = c->index;
@@ -291,7 +292,7 @@ int UpdateCompanyRatingAndValue(Company *c, bool update)
 
 	if (update) {
 		c->old_economy[0].performance_history = score;
-		UpdateCompanyHQ(c, score);
+		UpdateCompanyHQ(c->location_of_HQ, score);
 		c->old_economy[0].company_value = CalculateCompanyValue(c);
 	}
 
@@ -480,6 +481,10 @@ void ChangeOwnershipOfCompanyItems(Owner old_owner, Owner new_owner)
 	MarkWholeScreenDirty();
 }
 
+/**
+ * Check for bankruptcy of a company. Called every three months.
+ * @param c Company to check.
+ */
 static void CompanyCheckBankrupt(Company *c)
 {
 	/*  If the company has money again, it does not go bankrupt */
@@ -518,7 +523,7 @@ static void CompanyCheckBankrupt(Company *c)
 				free(cni);
 				break;
 			}
-			/* Else, falltrue to case 4... */
+			/* FALL THROUGH to case 4... */
 		}
 		default:
 		case 4:
@@ -551,10 +556,13 @@ static void CompanyCheckBankrupt(Company *c)
 	}
 }
 
+/**
+ * Update the finances of all companies.
+ * Pay for the stations, update the history graph, update ratings and company values, and deal with bankruptcy.
+ */
 static void CompaniesGenStatistics()
 {
 	Station *st;
-	Company *c;
 
 	Backup<CompanyByte> cur_company(_current_company, FILE_LINE);
 	FOR_ALL_STATIONS(st) {
@@ -566,6 +574,7 @@ static void CompaniesGenStatistics()
 
 	if (!HasBit(1 << 0 | 1 << 3 | 1 << 6 | 1 << 9, _cur_month)) return;
 
+	Company *c;
 	FOR_ALL_COMPANIES(c) {
 		memmove(&c->old_economy[1], &c->old_economy[0], sizeof(c->old_economy) - sizeof(c->old_economy[0]));
 		c->old_economy[0] = c->cur_economy;
@@ -686,6 +695,7 @@ void RecomputePrices()
 	SetWindowDirty(WC_PAYMENT_RATES, 0);
 }
 
+/** Let all companies pay the monthly interest on their loan. */
 static void CompaniesPayInterest()
 {
 	const Company *c;
@@ -1075,11 +1085,11 @@ void CargoPayment::PayFinalDelivery(const CargoPacket *cp, uint count)
 Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 {
 	Money profit = GetTransportedGoodsIncome(
-		count,
-		/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
-		DistanceManhattan(cp->LoadedAtXY(), Station::Get(this->current_station)->xy),
-		cp->DaysInTransit(),
-		this->ct);
+			count,
+			/* pay transfer vehicle for only the part of transfer it has done: ie. cargo_loaded_at_xy to here */
+			DistanceManhattan(cp->LoadedAtXY(), Station::Get(this->current_station)->xy),
+			cp->DaysInTransit(),
+			this->ct);
 
 	profit = profit * _settings_game.economy.feeder_payment_share / 100;
 
@@ -1343,7 +1353,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				/* if the aircraft carries passengers and is NOT full, then
 				 * continue loading, no matter how much mail is in */
 				if ((v->type == VEH_AIRCRAFT && IsCargoInClass(v->cargo_type, CC_PASSENGERS) && v->cargo_cap > v->cargo.OnboardCount()) ||
-						(cargo_not_full && (cargo_full & ~cargo_not_full) == 0)) { // There are still non-full cargos
+						(cargo_not_full && (cargo_full & ~cargo_not_full) == 0)) { // There are still non-full cargoes
 					finished_loading = false;
 				}
 			} else if (cargo_not_full != 0) {
@@ -1425,6 +1435,9 @@ void LoadUnloadStation(Station *st)
 	_cargo_delivery_destinations.Clear();
 }
 
+/**
+ * Monthly update of the economic data (of the companies as well as economic fluctuations).
+ */
 void CompaniesMonthlyLoop()
 {
 	CompaniesGenStatistics();
@@ -1438,9 +1451,6 @@ void CompaniesMonthlyLoop()
 
 static void DoAcquireCompany(Company *c)
 {
-	Company *owner;
-	int i;
-	Money value;
 	CompanyID ci = c->index;
 
 	CompanyNewsInformation *cni = MallocT<CompanyNewsInformation>(1);
@@ -1457,13 +1467,13 @@ static void DoAcquireCompany(Company *c)
 	ChangeOwnershipOfCompanyItems(ci, _current_company);
 
 	if (c->bankrupt_value == 0) {
-		owner = Company::Get(_current_company);
+		Company *owner = Company::Get(_current_company);
 		owner->current_loan += c->current_loan;
 	}
 
-	value = CalculateCompanyValue(c) >> 2;
+	Money value = CalculateCompanyValue(c) >> 2;
 	Backup<CompanyByte> cur_company(_current_company, FILE_LINE);
-	for (i = 0; i != 4; i++) {
+	for (int i = 0; i != 4; i++) {
 		if (c->share_owners[i] != COMPANY_SPECTATOR) {
 			cur_company.Change(c->share_owners[i]);
 			SubtractMoneyFromCompany(CommandCost(EXPENSES_OTHER, -value));
@@ -1484,7 +1494,8 @@ static void DoAcquireCompany(Company *c)
 
 extern int GetAmountOwnedBy(const Company *c, Owner owner);
 
-/** Acquire shares in an opposing company.
+/**
+ * Acquire shares in an opposing company.
  * @param tile unused
  * @param flags type of operation
  * @param p1 company to buy the shares from
@@ -1514,12 +1525,11 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	cost.AddCost(CalculateCompanyValue(c) >> 2);
 	if (flags & DC_EXEC) {
 		OwnerByte *b = c->share_owners;
-		int i;
 
 		while (*b != COMPANY_SPECTATOR) b++; // share owners is guaranteed to contain at least one COMPANY_SPECTATOR
 		*b = _current_company;
 
-		for (i = 0; c->share_owners[i] == _current_company;) {
+		for (int i = 0; c->share_owners[i] == _current_company;) {
 			if (++i == 4) {
 				c->bankrupt_value = 0;
 				DoAcquireCompany(c);
@@ -1531,7 +1541,8 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	return cost;
 }
 
-/** Sell shares in an opposing company.
+/**
+ * Sell shares in an opposing company.
  * @param tile unused
  * @param flags type of operation
  * @param p1 company to sell the shares from
@@ -1564,7 +1575,8 @@ CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1
 	return CommandCost(EXPENSES_OTHER, cost);
 }
 
-/** Buy up another company.
+/**
+ * Buy up another company.
  * When a competing company is gone bankrupt you get the chance to purchase
  * that company.
  * @todo currently this only works for AI companies

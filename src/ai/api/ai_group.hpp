@@ -20,6 +20,7 @@
  */
 class AIGroup : public AIObject {
 public:
+	/** Get the name of this class to identify it towards squirrel. */
 	static const char *GetClassName() { return "AIGroup"; }
 
 	/**
@@ -27,9 +28,9 @@ public:
 	 */
 	enum GroupID {
 		/* Values are important, as they represent the internal state of the game (see group_type.h). */
-		GROUP_ALL = 0xFFFD,     //!< All vehicles are in this group.
-		GROUP_DEFAULT = 0xFFFE, //!< Vehicles not put in any other group are in this one.
-		GROUP_INVALID = 0xFFFF, //!< An invalid group id.
+		GROUP_ALL = 0xFFFD,     ///< All vehicles are in this group.
+		GROUP_DEFAULT = 0xFFFE, ///< Vehicles not put in any other group are in this one.
+		GROUP_INVALID = 0xFFFF, ///< An invalid group id.
 	};
 
 	/**
