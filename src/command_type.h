@@ -151,8 +151,7 @@ enum Commands {
 	CMD_BUILD_SIGNALS,                ///< build a signal
 	CMD_REMOVE_SIGNALS,               ///< remove a signal
 	CMD_TERRAFORM_LAND,               ///< terraform a tile
-	CMD_PURCHASE_LAND_AREA,           ///< purchase a tile
-	CMD_SELL_LAND_AREA,               ///< sell a bought tile before
+	CMD_BUILD_UNMOVABLE,              ///< build something unmovable
 	CMD_BUILD_TUNNEL,                 ///< build a tunnel
 
 	CMD_REMOVE_FROM_RAIL_STATION,     ///< remove a (rectangle of) tiles from a rail station
@@ -196,9 +195,8 @@ enum Commands {
 
 	CMD_BUILD_INDUSTRY,               ///< build a new industry
 
-	CMD_BUILD_COMPANY_HQ,             ///< build the company headquarter
 	CMD_SET_COMPANY_MANAGER_FACE,     ///< set the manager's face of the company
-	CMD_SET_COMPANY_COLOUR,            ///< set the colour of the company
+	CMD_SET_COMPANY_COLOUR,           ///< set the colour of the company
 
 	CMD_INCREASE_LOAN,                ///< increase the loan from the bank
 	CMD_DECREASE_LOAN,                ///< decrease the loan from the bank
@@ -235,6 +233,8 @@ enum Commands {
 	CMD_FOUND_TOWN,                   ///< found a town
 	CMD_RENAME_TOWN,                  ///< rename a town
 	CMD_DO_TOWN_ACTION,               ///< do a action from the town detail window (like advertises or bribe)
+	CMD_EXPAND_TOWN,                  ///< expand a town
+	CMD_DELETE_TOWN,                  ///< delete a town
 
 	CMD_SELL_SHIP,                    ///< sell a ship
 	CMD_BUILD_SHIP,                   ///< build a new ship

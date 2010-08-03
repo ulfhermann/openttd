@@ -316,7 +316,8 @@ static void InitializeDynamicVariables()
 }
 
 
-/** Unitializes drivers, frees allocated memory, cleans pools, ...
+/**
+ * Unitializes drivers, frees allocated memory, cleans pools, ...
  * Generally, prepares the game for shutting down
  */
 static void ShutdownGame()
@@ -507,7 +508,8 @@ int ttd_main(int argc, char *argv[])
 				CreateConsole();
 #endif
 				if (mgo.opt != NULL) SetDebugString(mgo.opt);
-			} break;
+				break;
+			}
 		case 'e': _switch_mode = SM_EDITOR; break;
 		case 'i':
 			/* there is an argument, it is not empty, and it is exactly 1 char long */
@@ -1272,8 +1274,10 @@ void StateGameLoop()
 	assert(IsLocalCompany());
 }
 
-/** Create an autosave. The default name is "autosave#.sav". However with
- * the setting 'keep_all_autosave' the name defaults to company-name + date */
+/**
+ * Create an autosave. The default name is "autosave#.sav". However with
+ * the setting 'keep_all_autosave' the name defaults to company-name + date
+ */
 static void DoAutosave()
 {
 	char buf[MAX_PATH];

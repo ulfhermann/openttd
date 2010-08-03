@@ -370,7 +370,8 @@ static void BuildRefitList(const Vehicle *v, RefitList *refit_list)
 	} while ((v->type == VEH_TRAIN || v->type == VEH_ROAD) && (u = u->Next()) != NULL);
 }
 
-/** Draw the list of available refit options for a consist and highlight the selected refit option (if any).
+/**
+ * Draw the list of available refit options for a consist and highlight the selected refit option (if any).
  * @param *list First vehicle in consist to get the refit-options of
  * @param sel   Selected refit cargo-type in the window
  * @param pos   Position of the selected item in caller widow
@@ -515,8 +516,8 @@ struct RefitWindow : public Window {
 				Vehicle *v = Vehicle::Get(this->window_number);
 				BuildRefitList(v, &this->list);
 				this->vscroll.SetCount(this->list.Length());
+				/* FALL THROUGH */
 			}
-			/* FALL THROUGH */
 
 			case 1: // A new cargo has been selected.
 				this->cargo = (this->sel >= 0 && this->sel < (int)this->list.Length()) ? &this->list[this->sel] : NULL;
@@ -532,8 +533,9 @@ struct RefitWindow : public Window {
 				this->InvalidateData(1);
 
 				if (click_count == 1) break;
+				/* FALL THROUGH */
 			}
-			/* FALL THROUGH */
+
 			case VRW_REFITBUTTON: // refit button
 				if (this->cargo != NULL) {
 					const Vehicle *v = Vehicle::Get(this->window_number);
@@ -580,7 +582,8 @@ static const WindowDesc _vehicle_refit_desc(
 	_nested_vehicle_refit_widgets, lengthof(_nested_vehicle_refit_widgets)
 );
 
-/** Show the refit window for a vehicle
+/**
+ * Show the refit window for a vehicle
  * @param *v The vehicle to show the refit window for
  * @param order of the vehicle ( ? )
  * @param parent the parent window of the refit window
@@ -775,7 +778,8 @@ static int CDECL VehicleLengthSorter(const Vehicle * const *a, const Vehicle * c
 			const RoadVehicle *u;
 			for (u = RoadVehicle::From(*a); u != NULL; u = u->Next()) r += u->rcache.cached_veh_length;
 			for (u = RoadVehicle::From(*b); u != NULL; u = u->Next()) r -= u->rcache.cached_veh_length;
-		} break;
+			break;
+		}
 
 		default: NOT_REACHED();
 	}
@@ -1149,7 +1153,8 @@ public:
 						break;
 					default: NOT_REACHED();
 				}
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -1220,7 +1225,8 @@ public:
 
 				const Vehicle *v = this->vehicles[id_v];
 				ShowVehicleViewWindow(v);
-			} break;
+				break;
+			}
 
 			case VLW_WIDGET_AVAILABLE_VEHICLES:
 				ShowBuildVehicleWindow(INVALID_TILE, this->vehicle_type);
@@ -1523,7 +1529,8 @@ struct VehicleDetailsWindow : Window {
 				SetDParam(0, STR_VEHICLE_INFO_AGE);
 				dim = maxdim(dim, GetStringBoundingBox(STR_VEHICLE_INFO_AGE_RUNNING_COST_YR));
 				size->width = dim.width + WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
-			} break;
+				break;
+			}
 
 			case VLD_WIDGET_MIDDLE_DETAILS: {
 				const Vehicle *v = Vehicle::Get(this->window_number);
@@ -1683,7 +1690,8 @@ struct VehicleDetailsWindow : Window {
 					DrawVehicleImage(v, sprite_left + WD_FRAMERECT_LEFT, sprite_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, 0);
 				}
 				DrawVehicleDetails(v, text_left + WD_FRAMERECT_LEFT, text_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->tab);
-			} break;
+				break;
+			}
 
 			case VLD_WIDGET_SERVICING_INTERVAL:
 				/* Draw service interval text */
@@ -1724,7 +1732,8 @@ struct VehicleDetailsWindow : Window {
 				SetDParam(0, v->index);
 				ShowQueryString(STR_VEHICLE_NAME, STR_QUERY_RENAME_TRAIN_CAPTION + v->type,
 						MAX_LENGTH_VEHICLE_NAME_BYTES, MAX_LENGTH_VEHICLE_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
-			} break;
+				break;
+			}
 
 			case VLD_WIDGET_INCREASE_SERVICING_INTERVAL:   // increase int
 			case VLD_WIDGET_DECREASE_SERVICING_INTERVAL: { // decrease int
@@ -1736,7 +1745,8 @@ struct VehicleDetailsWindow : Window {
 				if (mod == v->service_interval) return;
 
 				DoCommandP(v->tile, v->index, mod, CMD_CHANGE_SERVICE_INT | CMD_MSG(STR_ERROR_CAN_T_CHANGE_SERVICING));
-			} break;
+				break;
+			}
 
 			case VLD_WIDGET_DETAILS_CARGO_CARRIED:
 			case VLD_WIDGET_DETAILS_TRAIN_VEHICLES:
@@ -1848,7 +1858,8 @@ static const WindowDesc _vehicle_view_desc(
 	_nested_vehicle_view_widgets, lengthof(_nested_vehicle_view_widgets)
 );
 
-/** Vehicle view window descriptor for trains. Only minimum_height and
+/**
+ * Vehicle view window descriptor for trains. Only minimum_height and
  *  default_height are different for train view.
  */
 static const WindowDesc _train_view_desc(
@@ -1965,7 +1976,8 @@ private:
 		SEL_RT_BASEPLANE = SEL_RT_REFIT,      ///< First plane of the #VVW_WIDGET_SELECT_REFIT_TURN stacked widget.
 	};
 
-	/** Display a plane in the window.
+	/**
+	 * Display a plane in the window.
 	 * @param plane Plane to show.
 	 */
 	void SelectPlane(PlaneSelections plane)
@@ -2054,7 +2066,8 @@ public:
 				if (v->type != VEH_TRAIN) {
 					size->height = 0;
 					size->width = 0;
-				} break;
+				}
+				break;
 
 			case VVW_WIDGET_VIEWPORT:
 				size->width = VV_INITIAL_VIEWPORT_WIDTH;
@@ -2123,7 +2136,8 @@ public:
 					SetDParam(0, v->current_order.GetDestination());
 					SetDParam(1, v->GetDisplaySpeed());
 					str = STR_VEHICLE_STATUS_HEADING_FOR_STATION + _settings_client.gui.vehicle_speed;
-				} break;
+					break;
+				}
 
 				case OT_GOTO_DEPOT: {
 					SetDParam(0, v->type);
@@ -2134,7 +2148,8 @@ public:
 					} else {
 						str = STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE + _settings_client.gui.vehicle_speed;
 					}
-				} break;
+					break;
+				}
 
 				case OT_LOADING:
 					str = STR_VEHICLE_STATUS_LOADING_UNLOADING;
@@ -2194,7 +2209,8 @@ public:
 				} else {
 					ScrollMainWindowTo(v->x_pos, v->y_pos, v->z_pos);
 				}
-			} break;
+				break;
+			}
 
 			case VVW_WIDGET_GOTO_DEPOT: // goto hangar
 				DoCommandP(v->tile, v->index, _ctrl_pressed ? DEPOT_SERVICE : 0, GetCmdSendToDepot(v));

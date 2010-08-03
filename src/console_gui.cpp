@@ -290,7 +290,8 @@ struct IConsoleWindow : Window
 				IConsoleClearCommand();
 
 				if (cmd != NULL) IConsoleCmdExec(cmd);
-			} break;
+				break;
+			}
 
 			case WKC_CTRL | WKC_RETURN:
 				_iconsole_mode = (_iconsole_mode == ICONSOLE_FULL) ? ICONSOLE_OPENED : ICONSOLE_FULL;
@@ -343,6 +344,7 @@ struct IConsoleWindow : Window
 				} else {
 					return ES_NOT_HANDLED;
 				}
+				break;
 		}
 		return ES_HANDLED;
 	}
