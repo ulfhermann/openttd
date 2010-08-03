@@ -33,8 +33,6 @@
 #include "townname_func.h"
 #include "townname_type.h"
 #include "core/geometry_func.hpp"
-#include "station_base.h"
-#include "depot_base.h"
 #include "genworld.h"
 
 #include "table/sprites.h"
@@ -453,68 +451,23 @@ public:
 				ShowQueryString(STR_TOWN_NAME, STR_TOWN_VIEW_RENAME_TOWN_BUTTON, MAX_LENGTH_TOWN_NAME_BYTES, MAX_LENGTH_TOWN_NAME_PIXELS, this, CS_ALPHANUMERAL, QSF_ENABLE_DEFAULT);
 				break;
 
-			case TVW_EXPAND: // expand town - only available on Scenario editor
-				ExpandTown(this->town);
+			case TVW_EXPAND: { // expand town - only available on Scenario editor
+				/* Warn the user if towns are not allowed to build roads, but do this only once per OpenTTD run. */
+				static bool _warn_town_no_roads = false;
+
+				if (!_settings_game.economy.allow_town_roads && !_warn_town_no_roads) {
+					ShowErrorMessage(STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS, INVALID_STRING_ID, WL_WARNING);
+					_warn_town_no_roads = true;
+				}
+
+				DoCommandP(0, this->window_number, 0, CMD_EXPAND_TOWN | CMD_MSG(STR_ERROR_CAN_T_EXPAND_TOWN));
 				break;
+			}
 
 			case TVW_DELETE: // delete town - only available on Scenario editor
-				if (this->CanDeleteTown()) {
-					delete this->town;
-				} else {
-					ShowErrorMessage(STR_ERROR_TOWN_CAN_T_DELETE, INVALID_STRING_ID, WL_INFO);
-				}
+				DoCommandP(0, this->window_number, 0, CMD_DELETE_TOWN | CMD_MSG(STR_ERROR_TOWN_CAN_T_DELETE));
 				break;
 		}
-	}
-
-	/**
-	 * Can we delete the town?
-	 * Or in other words, does anything refer to this town?
-	 * @return true if it's possible
-	 */
-	bool CanDeleteTown() const
-	{
-		/* Stations refer to towns. */
-		const Station *st;
-		FOR_ALL_STATIONS(st) {
-			if (st->town == this->town) {
-				/* Non-oil rig stations are always a problem. */
-				if (!(st->facilities & FACIL_AIRPORT) || st->airport.type != AT_OILRIG) return false;
-				/* We can only automatically delete oil rigs *if* there's no vehicle on them. */
-				if (DoCommand(st->airport.tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
-			}
-		}
-
-		/* Depots refer to towns. */
-		const Depot *d;
-		FOR_ALL_DEPOTS(d) {
-			if (d->town == this->town) return false;
-		}
-
-		/* Check all tiles for town ownership. */
-		for (TileIndex tile = 0; tile < MapSize(); ++tile) {
-			switch (GetTileType(tile)) {
-				case MP_ROAD:
-					if (HasTownOwnedRoad(tile) && GetTownIndex(tile) == this->town->index) {
-						/* Can we clear this tile? */
-						if (DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
-					}
-					break;
-
-				case MP_TUNNELBRIDGE:
-					if (IsTileOwner(tile, OWNER_TOWN) &&
-							ClosestTownFromTile(tile, UINT_MAX) == this->town) {
-						/* Can we clear this bridge? */
-						if (DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR).Failed()) return false;
-					}
-					break;
-
-				default:
-					break;
-			}
-		}
-
-		return true;
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
@@ -806,7 +759,8 @@ public:
 					y += this->resize.step_height;
 					if (++n == this->vscroll.GetCapacity()) break; // max number of towns in 1 window
 				}
-			} break;
+				break;
+			}
 		}
 	}
 

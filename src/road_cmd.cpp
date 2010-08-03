@@ -168,7 +168,8 @@ CommandCost CheckAllowRemoveRoad(TileIndex tile, RoadBits remove, Owner owner, R
 }
 
 
-/** Delete a piece of road.
+/**
+ * Delete a piece of road.
  * @param tile tile where to remove road from
  * @param flags operation to perform
  * @param pieces roadbits to remove
@@ -186,20 +187,23 @@ static CommandCost RemoveRoad(TileIndex tile, DoCommandFlag flags, RoadBits piec
 		case MP_ROAD: {
 			CommandCost ret = EnsureNoVehicleOnGround(tile);
 			if (ret.Failed()) return ret;
-		} break;
+			break;
+		}
 
 		case MP_STATION: {
 			if (!IsDriveThroughStopTile(tile)) return CMD_ERROR;
 
 			CommandCost ret = EnsureNoVehicleOnGround(tile);
 			if (ret.Failed()) return ret;
-		} break;
+			break;
+		}
 
 		case MP_TUNNELBRIDGE: {
 			if (GetTunnelBridgeTransportType(tile) != TRANSPORT_ROAD) return CMD_ERROR;
 			CommandCost ret = TunnelBridgeIsFree(tile, GetOtherTunnelBridgeEnd(tile));
 			if (ret.Failed()) return ret;
-		} break;
+			break;
+		}
 
 		default:
 			return CMD_ERROR;
@@ -435,7 +439,8 @@ static CommandCost CheckRoadSlope(Slope tileh, RoadBits *pieces, RoadBits existi
 	return CMD_ERROR;
 }
 
-/** Build a piece of road.
+/**
+ * Build a piece of road.
  * @param tile tile where to build road
  * @param flags operation to perform
  * @param p1 bit 0..3 road pieces to build (RoadBits)
@@ -520,7 +525,8 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 						}
 						return_cmd_error(STR_ERROR_ALREADY_BUILT);
 					}
-				} break;
+					break;
+				}
 
 				case ROAD_TILE_CROSSING:
 					other_bits = GetCrossingRoadBits(tile);
@@ -594,7 +600,8 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			pieces = curbits; // we need to pay for both roadbits
 
 			if (HasTileRoadType(tile, rt)) return_cmd_error(STR_ERROR_ALREADY_BUILT);
-		} break;
+			break;
+		}
 
 		case MP_TUNNELBRIDGE: {
 			if (GetTunnelBridgeTransportType(tile) != TRANSPORT_ROAD) goto do_clear;
@@ -603,7 +610,8 @@ CommandCost CmdBuildRoad(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			/* Don't allow adding roadtype to the bridge/tunnel when vehicles are already driving on it */
 			CommandCost ret = TunnelBridgeIsFree(tile, GetOtherTunnelBridgeEnd(tile));
 			if (ret.Failed()) return ret;
-		} break;
+			break;
+		}
 
 		default: {
 do_clear:;
@@ -611,7 +619,8 @@ do_clear:;
 			if (ret.Failed()) return ret;
 			cost.AddCost(ret);
 			tile_cleared = true;
-		} break;
+			break;
+		}
 	}
 
 	if (other_bits != pieces) {
@@ -672,7 +681,8 @@ do_clear:;
 					if (rt == ROADTYPE_ROAD) SetTownIndex(tile, p2);
 				}
 				if (rtt != ROAD_TILE_CROSSING) SetRoadBits(tile, existing | pieces, rt);
-			} break;
+				break;
+			}
 
 			case MP_TUNNELBRIDGE: {
 				TileIndex other_end = GetOtherTunnelBridgeEnd(tile);
@@ -690,7 +700,8 @@ do_clear:;
 
 					for (TileIndex t = tile + delta; t != other_end; t += delta) MarkTileDirtyByTile(t);
 				}
-			} break;
+				break;
+			}
 
 			case MP_STATION:
 				assert(IsDriveThroughStopTile(tile));
@@ -714,7 +725,8 @@ do_clear:;
 	return cost;
 }
 
-/** Build a long piece of road.
+/**
+ * Build a long piece of road.
  * @param start_tile start tile of drag (the building cost will appear over this tile)
  * @param flags operation to perform
  * @param p1 end tile of drag
@@ -808,7 +820,8 @@ CommandCost CmdBuildLongRoad(TileIndex start_tile, DoCommandFlag flags, uint32 p
 	return had_success ? cost : last_error;
 }
 
-/** Remove a long piece of road.
+/**
+ * Remove a long piece of road.
  * @param start_tile start tile of drag
  * @param flags operation to perform
  * @param p1 end tile of drag
@@ -882,7 +895,8 @@ CommandCost CmdRemoveLongRoad(TileIndex start_tile, DoCommandFlag flags, uint32 
 	return had_success ? cost : last_error;
 }
 
-/** Build a road depot.
+/**
+ * Build a road depot.
  * @param tile tile where to build the depot
  * @param flags operation to perform
  * @param p1 bit 0..1 entrance direction (DiagDirection)
@@ -1601,7 +1615,8 @@ static VehicleEnterTileStatus VehicleEnter_Road(Vehicle *v, TileIndex tile, int 
 				InvalidateWindowData(WC_VEHICLE_DEPOT, rv->tile);
 				return VETSB_ENTERED_WORMHOLE;
 			}
-		} break;
+			break;
+		}
 
 		default: break;
 	}
