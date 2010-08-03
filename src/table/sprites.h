@@ -7,7 +7,8 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file sprites.h
+/**
+ * @file sprites.h
  * This file contails all sprite-related enums and defines. These consist mainly of
  * the sprite numbers and a bunch of masks and macros to handle sprites and to get
  * rid of all the magic numbers in the code.
@@ -1451,9 +1452,11 @@ enum Modifiers {
 	PALETTE_MODIFIER_COLOUR       = RECOLOUR_BIT,
 };
 
-/** Masks needed for sprite operations.
+/**
+ * Masks needed for sprite operations.
  * @note Do not modify this enum. Alter SpriteSetup instead
- * @see SpriteSetup */
+ * @see SpriteSetup
+ */
 enum SpriteMasks {
 	/** Maximum number of sprites that can be loaded at a given time. */
 	MAX_SPRITES = 1 << SPRITE_WIDTH,
