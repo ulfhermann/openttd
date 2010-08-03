@@ -14,10 +14,12 @@
 
 #include "../core/alloc_func.hpp"
 
-/** fixed size array
+/**
+ * fixed size array
  *  Upon construction it preallocates fixed size block of memory
  *  for all items, but doesn't construct them. Item's construction
- *  is delayed. */
+ *  is delayed.
+ */
 template <class T, uint C>
 struct FixedSizeArray {
 protected:
@@ -32,8 +34,10 @@ protected:
 	static const uint Tsize = sizeof(T);                // size of item
 	static const uint HeaderSize = sizeof(ArrayHeader); // size of header
 
-	/** the only member of fixed size array is pointer to the block
-	 *  of C array of items. Header can be found on the offset -sizeof(ArrayHeader). */
+	/**
+	 * the only member of fixed size array is pointer to the block
+	 *  of C array of items. Header can be found on the offset -sizeof(ArrayHeader).
+	 */
 	T *data;
 
 	/** return reference to the array header (non-const) */

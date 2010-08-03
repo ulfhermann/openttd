@@ -884,7 +884,8 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_MAP_OK)
 	return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_NOT_EXPECTED);
 }
 
-/** The client has done a command and wants us to handle it
+/**
+ * The client has done a command and wants us to handle it
  * @param *cs the connected client that has sent the command
  * @param *p the packet in which the command was sent
  */
@@ -921,7 +922,8 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
 		return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_KICKED);
 	}
 
-	/** Only CMD_COMPANY_CTRL is always allowed, for the rest, playas needs
+	/**
+	 * Only CMD_COMPANY_CTRL is always allowed, for the rest, playas needs
 	 * to match the company in the packet. If it doesn't, the client has done
 	 * something pretty naughty (or a bug), and will be kicked
 	 */
@@ -931,7 +933,8 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
 		return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_COMPANY_MISMATCH);
 	}
 
-	/** @todo CMD_COMPANY_CTRL with p1 = 0 announces a new company to the server. To give the
+	/**
+	 * @todo CMD_COMPANY_CTRL with p1 = 0 announces a new company to the server. To give the
 	 * company the correct ID, the server injects p2 and executes the command. Any other p1
 	 * is prohibited. Pretty ugly and should be redone together with its function.
 	 * @see CmdCompanyCtrl()
@@ -1149,8 +1152,8 @@ void NetworkServerSendChat(NetworkAction action, DestType desttype, int dest, co
 				}
 			}
 		}
-		}
 		break;
+	}
 	default:
 		DEBUG(net, 0, "[server] received unknown chat destination type %d. Doing broadcast instead", desttype);
 		/* FALL THROUGH */
@@ -1770,7 +1773,7 @@ void NetworkServerUpdateCompanyPassworded(CompanyID company_id, bool passworded)
  * @param client_id id of the client we want to move.
  * @param company_id id of the company we want to move the client to.
  * @return void
- **/
+ */
 void NetworkServerDoMove(ClientID client_id, CompanyID company_id)
 {
 	/* Only allow non-dedicated servers and normal clients to be moved */
