@@ -1613,6 +1613,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\unmovable_type.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\vehicle_base.h"
 				>
 			</File>

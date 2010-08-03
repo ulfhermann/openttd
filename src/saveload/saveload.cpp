@@ -7,7 +7,8 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file saveload.cpp
+/**
+ * @file saveload.cpp
  * All actions handling saving and loading goes on in this file. The general actions
  * are as follows for saving a game (loading is analogous):
  * <ol>
@@ -206,6 +207,7 @@
  *  141   19799
  *  142   20003
  *  143   20048
+ *  144   20334
  */
 extern const uint16 SAVEGAME_VERSION = SL_MCF; ///< current savegame version of OpenTTD
 
@@ -434,7 +436,8 @@ static inline size_t SlGetOffs()
 	return _sl.offs_base - (_sl.bufe - _sl.bufp);
 }
 
-/** Flush the output buffer by writing to disk with the given reader.
+/**
+ * Flush the output buffer by writing to disk with the given reader.
  * If the buffer pointer has not yet been set up, set it up now. Usually
  * only called when the buffer is full, or there is no more data to be processed
  */
@@ -453,7 +456,8 @@ static void SlWriteFill()
 	_sl.bufe = _sl.buf + _sl.bufsize;
 }
 
-/** Read in a single byte from file. If the temporary buffer is full,
+/**
+ * Read in a single byte from file. If the temporary buffer is full,
  * flush it to its final destination
  * @return return the read byte from file
  */
@@ -466,7 +470,8 @@ static inline byte SlReadByteInternal()
 /** Wrapper for SlReadByteInternal */
 byte SlReadByte() {return SlReadByteInternal();}
 
-/** Write away a single byte from memory. If the temporary buffer is full,
+/**
+ * Write away a single byte from memory. If the temporary buffer is full,
  * flush it to its destination (file)
  * @param b the byte that is currently written
  */
@@ -516,7 +521,8 @@ static inline void SlWriteUint64(uint64 x)
 	SlWriteUint32((uint32)x);
 }
 
-/** Read in bytes from the file/data structure but don't do
+/**
+ * Read in bytes from the file/data structure but don't do
  * anything with them, discarding them in effect
  * @param length The amount of bytes that is being treated this way
  */
@@ -1246,9 +1252,11 @@ static inline bool SlIsObjectValidInSavegame(const SaveLoad *sld)
 	return true;
 }
 
-/** Are we going to load this variable when loading a savegame or not?
+/**
+ * Are we going to load this variable when loading a savegame or not?
  * @note If the variable is skipped it is skipped in the savegame
- * bytestream itself as well, so there is no need to skip it somewhere else */
+ * bytestream itself as well, so there is no need to skip it somewhere else
+ */
 static inline bool SlSkipVariableOnLoad(const SaveLoad *sld)
 {
 	if ((sld->conv & SLF_NETWORK_NO) && _sl.action != SLA_SAVE && _networking && !_network_server) {
@@ -1889,7 +1897,7 @@ static void WriteZlibLoop(z_streamp z, byte *p, size_t len, int mode)
 		 * According to the author of zlib it is not a bug and it won't be fixed.
 		 * http://groups.google.com/group/comp.compression/browse_thread/thread/b154b8def8c2a3ef/cdf9b8729ce17ee2
 		 * [Mark Adler, Feb 24 2004, 'zlib-1.2.1 valgrind warnings' in the newgroup comp.compression]
-		 **/
+		 */
 		r = deflate(z, mode);
 
 		/* bytes were emitted? */
@@ -2068,7 +2076,8 @@ static void SaveFileError()
 	SaveFileDone();
 }
 
-/** We have written the whole game into memory, _memory_savegame, now find
+/**
+ * We have written the whole game into memory, _memory_savegame, now find
  * and appropiate compressor and start writing to file.
  */
 static SaveOrLoadResult SaveFileToDisk(bool threaded)

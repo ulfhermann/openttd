@@ -699,7 +699,8 @@ bool AfterLoadGame()
 						return false;
 					}
 					SB(_m[t].m6, 3, 3, st);
-				} break;
+					break;
+				}
 			}
 		}
 	}
@@ -1791,11 +1792,23 @@ bool AfterLoadGame()
 			if (IsTileType(t, MP_UNMOVABLE) && HasBit(_m[t].m5, 7)) {
 				/* Move size and part identification of HQ out of the m5 attribute,
 				 * on new locations */
-				uint8 old_m5 = _m[t].m5;
+				_m[t].m3 = GB(_m[t].m5, 0, 5);
 				_m[t].m5 = UNMOVABLE_HQ;
-				SetCompanyHQSize(t, GB(old_m5, 2, 3));
-				SetCompanyHQSection(t, GB(old_m5, 0, 2));
 			}
+		}
+	}
+	if (CheckSavegameVersion(144)) {
+		for (TileIndex t = 0; t < map_size; t++) {
+			if (!IsTileType(t, MP_UNMOVABLE)) continue;
+
+			/* Reordering/generalisation of the unmovable bits. */
+			UnmovableType type = GetUnmovableType(t);
+			SetUnmovableAnimationStage(t, type == UNMOVABLE_HQ ? GB(_m[t].m3, 2, 3) : 0);
+			SetUnmovableOffset(t, type == UNMOVABLE_HQ ? GB(_m[t].m3, 1, 1) | GB(_m[t].m3, 0, 1) << 4 : 0);
+
+			/* Make sure those bits are clear as well! */
+			_m[t].m4 = 0;
+			_me[t].m7 = 0;
 		}
 	}
 
@@ -2154,12 +2167,14 @@ bool AfterLoadGame()
 	return true;
 }
 
-/** Reload all NewGRF files during a running game. This is a cut-down
+/**
+ * Reload all NewGRF files during a running game. This is a cut-down
  * version of AfterLoadGame().
  * XXX - We need to reset the vehicle position hash because with a non-empty
  * hash AfterLoadVehicles() will loop infinitely. We need AfterLoadVehicles()
  * to recalculate vehicle data as some NewGRF vehicle sets could have been
- * removed or added and changed statistics */
+ * removed or added and changed statistics
+ */
 void ReloadNewGRFData()
 {
 	/* reload grf data */

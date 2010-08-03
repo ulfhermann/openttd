@@ -45,9 +45,11 @@ extern const TileTypeProcs
 	_tile_type_tunnelbridge_procs,
 	_tile_type_unmovable_procs;
 
-/** Tile callback functions for each type of tile.
+/**
+ * Tile callback functions for each type of tile.
  * @ingroup TileCallbackGroup
- * @see TileType */
+ * @see TileType
+ */
 const TileTypeProcs * const _tile_type_procs[16] = {
 	&_tile_type_clear_procs,        ///< Callback functions for MP_CLEAR tiles
 	&_tile_type_rail_procs,         ///< Callback functions for MP_RAILWAY tiles
@@ -74,7 +76,8 @@ extern const byte _slope_to_sprite_offset[32] = {
  * If it is \c NULL, a static snowline height is used, as set by \c _settings_game.game_creation.snow_line.
  * Otherwise it points to a table loaded from a newGRF file, that describes the variable snowline
  * @ingroup SnowLineGroup
- * @see GetSnowLine() GameCreationSettings */
+ * @see GetSnowLine() GameCreationSettings
+ */
 static SnowLine *_snow_line = NULL;
 
 /**
@@ -485,7 +488,8 @@ void DoClearSquare(TileIndex tile)
 	MarkTileDirtyByTile(tile);
 }
 
-/** Returns information about trackdirs and signal states.
+/**
+ * Returns information about trackdirs and signal states.
  * If there is any trackbit at 'side', return all trackdirbits.
  * For TRANSPORT_ROAD, return no trackbits if there is no roadbit (of given subtype) at given side.
  * @param tile tile to get info about
@@ -588,7 +592,8 @@ void ClearSnowLine()
 	_snow_line = NULL;
 }
 
-/** Clear a piece of landscape
+/**
+ * Clear a piece of landscape
  * @param tile tile to clear
  * @param flags of operation to conduct
  * @param p1 unused
@@ -601,7 +606,8 @@ CommandCost CmdLandscapeClear(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 	return _tile_type_procs[GetTileType(tile)]->clear_tile_proc(tile, flags);
 }
 
-/** Clear a big piece of landscape
+/**
+ * Clear a big piece of landscape
  * @param tile end tile of area dragging
  * @param flags of operation to conduct
  * @param p1 start tile of area dragging
@@ -901,7 +907,8 @@ void GenerateLandscape(byte mode)
 				for (uint i = ScaleByMapSize(GB(r, 9, 7) + 450); i != 0; --i) {
 					GenerateTerrain(4, flag);
 				}
-			} break;
+				break;
+			}
 
 			case LT_TROPIC: {
 				uint32 r = Random();
@@ -920,7 +927,8 @@ void GenerateLandscape(byte mode)
 				for (uint i = ScaleByMapSize(GB(r, 17, 7) + 410); i != 0; --i) {
 					GenerateTerrain(3, flag);
 				}
-			} break;
+				break;
+			}
 
 			default: {
 				uint32 r = Random();
@@ -929,7 +937,8 @@ void GenerateLandscape(byte mode)
 				for (; i != 0; --i) {
 					GenerateTerrain(_settings_game.difficulty.terrain_type, 0);
 				}
-			} break;
+				break;
+			}
 		}
 	}
 
