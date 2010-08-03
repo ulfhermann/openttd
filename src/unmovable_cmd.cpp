@@ -35,223 +35,200 @@
 #include "table/sprites.h"
 #include "table/unmovable_land.h"
 
-/**
- * Accessor for array _original_unmovable.
- * This will ensure at once : proper access and
- * not allowing modifications of it.
- * @param type of unmovable (which is the index in _original_unmovable)
- * @pre type < UNMOVABLE_MAX
- * @return a pointer to the corresponding unmovable spec
- **/
-static inline const UnmovableSpec *GetUnmovableSpec(UnmovableType type)
+/* static */ const UnmovableSpec *UnmovableSpec::Get(UnmovableType index)
 {
-	assert(type < UNMOVABLE_MAX);
-	return &_original_unmovable[type];
+	assert(index < UNMOVABLE_MAX);
+	return &_original_unmovable[index];
 }
 
-/** Destroy a HQ.
- * During normal gameplay you can only implicitely destroy a HQ when you are
- * rebuilding it. Otherwise, only water can destroy it.
- * @param cid Company requesting the destruction of his HQ
- * @param flags docommand flags of calling function
- * @return cost of the operation
- */
-static CommandCost DestroyCompanyHQ(CompanyID cid, DoCommandFlag flags)
+/* static */ const UnmovableSpec *UnmovableSpec::GetByTile(TileIndex tile)
 {
-	Company *c = Company::Get(cid);
+	return UnmovableSpec::Get(GetUnmovableType(tile));
+}
 
-	if (flags & DC_EXEC) {
-		TileIndex t = c->location_of_HQ;
+void BuildUnmovable(UnmovableType type, TileIndex tile, CompanyID owner, uint index)
+{
+	const UnmovableSpec *spec = UnmovableSpec::Get(type);
 
-		DoClearSquare(t);
-		DoClearSquare(t + TileDiffXY(0, 1));
-		DoClearSquare(t + TileDiffXY(1, 0));
-		DoClearSquare(t + TileDiffXY(1, 1));
-		c->location_of_HQ = INVALID_TILE; // reset HQ position
-		SetWindowDirty(WC_COMPANY, cid);
-
-		CargoPacket::InvalidateAllFrom(ST_HEADQUARTERS, cid);
+	TileArea ta(tile, GB(spec->size, 0, 4), GB(spec->size, 4, 4));
+	TILE_AREA_LOOP(t, ta) {
+		TileIndex offset = t - tile;
+		MakeUnmovable(t, type, owner, TileY(offset) << 4 | TileX(offset), index);
+		MarkTileDirtyByTile(t);
 	}
-
-	/* cost of relocating company is 1% of company value */
-	return CommandCost(EXPENSES_PROPERTY, CalculateCompanyValue(c) / 100);
 }
 
-void UpdateCompanyHQ(Company *c, uint score)
+/**
+ * Increase the animation stage of a whole structure.
+ * @param northern The northern tile of the structure.
+ * @pre GetUnmovableOffset(northern) == 0
+ */
+void IncreaseAnimationStage(TileIndex northern)
 {
-	byte val;
-	TileIndex tile = c->location_of_HQ;
+	assert(GetUnmovableOffset(northern) == 0);
+	const UnmovableSpec *spec = UnmovableSpec::GetByTile(northern);
 
+	TileArea ta(northern, GB(spec->size, 0, 4), GB(spec->size, 4, 4));
+	TILE_AREA_LOOP(t, ta) {
+		SetUnmovableAnimationStage(t, GetUnmovableAnimationStage(t) + 1);
+		MarkTileDirtyByTile(t);
+	}
+}
+
+/** We encode the company HQ size in the animation stage. */
+#define GetCompanyHQSize GetUnmovableAnimationStage
+/** We encode the company HQ size in the animation stage. */
+#define IncreaseCompanyHQSize IncreaseAnimationStage
+
+void UpdateCompanyHQ(TileIndex tile, uint score)
+{
 	if (tile == INVALID_TILE) return;
 
+	byte val;
 	(val = 0, score < 170) ||
 	(val++, score < 350) ||
 	(val++, score < 520) ||
 	(val++, score < 720) ||
 	(val++, true);
 
-	EnlargeCompanyHQ(tile, val);
-
-	MarkTileDirtyByTile(tile);
-	MarkTileDirtyByTile(tile + TileDiffXY(0, 1));
-	MarkTileDirtyByTile(tile + TileDiffXY(1, 0));
-	MarkTileDirtyByTile(tile + TileDiffXY(1, 1));
+	while (GetCompanyHQSize(tile) < val) {
+		IncreaseCompanyHQSize(tile);
+	}
 }
 
 extern CommandCost CheckFlatLand(TileArea tile_area, DoCommandFlag flags);
+static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags);
 
-/** Build or relocate the HQ. This depends if the HQ is already built or not
- * @param tile tile where the HQ will be built or relocated to
+/**
+ * Build an unmovable object
+ * @param tile tile where the object will be located
  * @param flags type of operation
- * @param p1 unused
+ * @param p1 the object type to build
  * @param p2 unused
  * @param text unused
  * @return the cost of this operation or an error
  */
-CommandCost CmdBuildCompanyHQ(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdBuildUnmovable(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	Company *c = Company::Get(_current_company);
 	CommandCost cost(EXPENSES_PROPERTY);
 
-	cost = CheckFlatLand(TileArea(tile, 2, 2), flags);
+	UnmovableType type = (UnmovableType)GB(p1, 0, 8);
+	if (type >= UNMOVABLE_MAX) return CMD_ERROR;
+
+	const UnmovableSpec *spec = UnmovableSpec::Get(type);
+	if (spec->flags & OBJECT_FLAG_ONLY_IN_SCENEDIT && (_game_mode != GM_EDITOR || _current_company != OWNER_NONE)) return CMD_ERROR;
+	if (spec->flags & OBJECT_FLAG_ONLY_IN_GAME && (_game_mode != GM_NORMAL || _current_company > MAX_COMPANIES)) return CMD_ERROR;
+
+	int size_x = GB(spec->size, 0, 4);
+	int size_y = GB(spec->size, 4, 4);
+	TileArea ta(tile, size_x, size_y);
+
+	if (spec->flags & OBJECT_FLAG_REQUIRE_FLAT) {
+		TILE_AREA_LOOP(tile_cur, ta) {
+			if (GetTileSlope(tile, NULL) != SLOPE_FLAT) return_cmd_error(STR_ERROR_FLAT_LAND_REQUIRED);
+		}
+	}
+
+	/* If we require flat land, we've already tested that.
+	 * So we only need to check for clear land. */
+	if (spec->flags & (OBJECT_FLAG_HAS_NO_FOUNDATION | OBJECT_FLAG_REQUIRE_FLAT)) {
+		TILE_AREA_LOOP(tile_cur, ta) {
+			cost.AddCost(DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR));
+		}
+	} else {
+		cost.AddCost(CheckFlatLand(ta, flags));
+	}
 	if (cost.Failed()) return cost;
 
-	if (c->location_of_HQ != INVALID_TILE) { // Moving HQ
-		cost.AddCost(DestroyCompanyHQ(_current_company, flags));
+	int hq_score = 0;
+	switch (type) {
+		case UNMOVABLE_OWNED_LAND:
+			if (IsTileType(tile, MP_UNMOVABLE) &&
+					IsTileOwner(tile, _current_company) &&
+					IsOwnedLand(tile)) {
+				return_cmd_error(STR_ERROR_YOU_ALREADY_OWN_IT);
+			}
+			break;
+
+		case UNMOVABLE_HQ: {
+			Company *c = Company::Get(_current_company);
+			if (c->location_of_HQ != INVALID_TILE) {
+				/* We need to persuade a bit harder to remove the old HQ. */
+				_current_company = OWNER_WATER;
+				cost.AddCost(ClearTile_Unmovable(c->location_of_HQ, flags));
+				_current_company = c->index;
+			}
+
+			if (flags & DC_EXEC) {
+				hq_score = UpdateCompanyRatingAndValue(c, false);
+				c->location_of_HQ = tile;
+				SetWindowDirty(WC_COMPANY, c->index);
+			}
+			break;
+		}
+
+		default: break;
 	}
 
 	if (flags & DC_EXEC) {
-		int score = UpdateCompanyRatingAndValue(c, false);
+		BuildUnmovable(type, tile, _current_company);
 
-		c->location_of_HQ = tile;
-
-		MakeCompanyHQ(tile, _current_company);
-
-		UpdateCompanyHQ(c, score);
-		SetWindowDirty(WC_COMPANY, c->index);
+		/* Make sure the HQ starts at the right size. */
+		if (type == UNMOVABLE_HQ) UpdateCompanyHQ(tile, hq_score);
 	}
 
+	cost.AddCost(UnmovableSpec::Get(type)->GetBuildCost() * size_x * size_y);
 	return cost;
 }
 
-/** Purchase a land area. Actually you only purchase one tile, so
- * the name is a bit confusing ;p
- * @param tile the tile the company is purchasing
- * @param flags for this command type
- * @param p1 unused
- * @param p2 unused
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdPurchaseLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	CommandCost cost(EXPENSES_CONSTRUCTION);
-
-	if (IsOwnedLandTile(tile) && IsTileOwner(tile, _current_company)) {
-		return_cmd_error(STR_ERROR_YOU_ALREADY_OWN_IT);
-	}
-
-	cost = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	if (cost.Failed()) return cost;
-
-	if (flags & DC_EXEC) {
-		MakeOwnedLand(tile, _current_company);
-		MarkTileDirtyByTile(tile);
-	}
-
-	cost.AddCost(GetUnmovableSpec(UNMOVABLE_OWNED_LAND)->GetBuildingCost());
-	return cost;
-}
-
-/** Sell a land area. Actually you only sell one tile, so
- * the name is a bit confusing ;p
- * @param tile the tile the company is selling
- * @param flags for this command type
- * @param p1 unused
- * @param p2 unused
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdSellLandArea(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	if (!IsOwnedLandTile(tile)) return CMD_ERROR;
-	if (_current_company != OWNER_WATER) {
-		CommandCost ret = CheckTileOwnership(tile);
-		if (ret.Failed()) return ret;
-	}
-
-	CommandCost ret = EnsureNoVehicleOnGround(tile);
-	if (ret.Failed()) return ret;
-
-	if (flags & DC_EXEC) DoClearSquare(tile);
-
-	return CommandCost(EXPENSES_CONSTRUCTION, - GetUnmovableSpec(UNMOVABLE_OWNED_LAND)->GetRemovalCost());
-}
 
 static Foundation GetFoundation_Unmovable(TileIndex tile, Slope tileh);
 
 static void DrawTile_Unmovable(TileInfo *ti)
 {
-	DrawFoundation(ti, GetFoundation_Unmovable(ti->tile, ti->tileh));
-	switch (GetUnmovableType(ti->tile)) {
-		default: NOT_REACHED();
-		case UNMOVABLE_TRANSMITTER:
-		case UNMOVABLE_LIGHTHOUSE: {
-			const DrawTileSeqStruct *dtu = &_draw_tile_transmitterlighthouse_data[GetUnmovableType(ti->tile)];
+	UnmovableType type = GetUnmovableType(ti->tile);
+	const UnmovableSpec *spec = UnmovableSpec::Get(type);
+	if ((spec->flags & OBJECT_FLAG_HAS_NO_FOUNDATION) == 0) DrawFoundation(ti, GetFoundation_Unmovable(ti->tile, ti->tileh));
 
-			DrawClearLandTile(ti, 2);
+	const DrawTileSprites *dts = NULL;
+	Owner to = GetTileOwner(ti->tile);
+	PaletteID palette = to == OWNER_NONE ? PAL_NONE : COMPANY_SPRITE_COLOUR(to);
 
-			if (IsInvisibilitySet(TO_STRUCTURES)) break;
+	if (type == UNMOVABLE_HQ) {
+		uint8 offset = GetUnmovableOffset(ti->tile);
+		dts = &_unmovable_hq[GetCompanyHQSize(ti->tile) << 2 | GB(offset, 4, 1) << 1 | GB(offset, 0, 1)];
+	} else {
+		dts = &_unmovables[type];
+	}
 
+	if (spec->flags & OBJECT_FLAG_HAS_NO_FOUNDATION) {
+		/* If an object has no foundation, but tries to draw a (flat) ground
+		 * type... we have to be nice and convert that for them. */
+		switch (dts->ground.sprite) {
+			case SPR_FLAT_BARE_LAND:          DrawClearLandTile(ti, 0); break;
+			case SPR_FLAT_1_THIRD_GRASS_TILE: DrawClearLandTile(ti, 1); break;
+			case SPR_FLAT_2_THIRD_GRASS_TILE: DrawClearLandTile(ti, 2); break;
+			case SPR_FLAT_GRASS_TILE:         DrawClearLandTile(ti, 3); break;
+			default: DrawGroundSprite(dts->ground.sprite, palette);     break;
+		}
+	} else {
+		DrawGroundSprite(dts->ground.sprite, palette);
+	}
+
+	if (!IsInvisibilitySet(TO_STRUCTURES)) {
+		const DrawTileSeqStruct *dtss;
+		foreach_draw_tile_seq(dtss, dts->seq) {
 			AddSortableSpriteToDraw(
-				dtu->image.sprite, PAL_NONE, ti->x | dtu->delta_x, ti->y | dtu->delta_y,
-				dtu->size_x, dtu->size_y, dtu->size_z, ti->z,
+				dtss->image.sprite, palette,
+				ti->x + dtss->delta_x, ti->y + dtss->delta_y,
+				dtss->size_x, dtss->size_y,
+				dtss->size_z, ti->z + dtss->delta_z,
 				IsTransparencySet(TO_STRUCTURES)
 			);
-			break;
-		}
-
-		case UNMOVABLE_STATUE:
-			DrawGroundSprite(SPR_CONCRETE_GROUND, PAL_NONE);
-
-			if (IsInvisibilitySet(TO_STRUCTURES)) break;
-
-			AddSortableSpriteToDraw(SPR_STATUE_COMPANY, COMPANY_SPRITE_COLOUR(GetTileOwner(ti->tile)), ti->x, ti->y, 16, 16, 25, ti->z, IsTransparencySet(TO_STRUCTURES));
-			break;
-
-		case UNMOVABLE_OWNED_LAND:
-			DrawClearLandTile(ti, 0);
-
-			AddSortableSpriteToDraw(
-				SPR_BOUGHT_LAND, COMPANY_SPRITE_COLOUR(GetTileOwner(ti->tile)),
-				ti->x + TILE_SIZE / 2, ti->y + TILE_SIZE / 2, 1, 1, BB_HEIGHT_UNDER_BRIDGE, GetSlopeZ(ti->x + TILE_SIZE / 2, ti->y + TILE_SIZE / 2)
-			);
-			DrawBridgeMiddle(ti);
-			break;
-
-		case UNMOVABLE_HQ: {
-			assert(IsCompanyHQ(ti->tile));
-
-			PaletteID palette = COMPANY_SPRITE_COLOUR(GetTileOwner(ti->tile));
-
-			const DrawTileSprites *t = &_unmovable_display_datas[GetCompanyHQSize(ti->tile) << 2 | GetCompanyHQSection(ti->tile)];
-			DrawGroundSprite(t->ground.sprite, palette);
-
-			if (IsInvisibilitySet(TO_STRUCTURES)) break;
-
-			const DrawTileSeqStruct *dtss;
-			foreach_draw_tile_seq(dtss, t->seq) {
-				AddSortableSpriteToDraw(
-					dtss->image.sprite, palette,
-					ti->x + dtss->delta_x, ti->y + dtss->delta_y,
-					dtss->size_x, dtss->size_y,
-					dtss->size_z, ti->z + dtss->delta_z,
-					IsTransparencySet(TO_STRUCTURES)
-				);
-			}
-			break;
 		}
 	}
+
+	if (spec->flags & OBJECT_FLAG_ALLOW_UNDER_BRIDGE) DrawBridgeMiddle(ti);
 }
 
 static uint GetSlopeZ_Unmovable(TileIndex tile, uint x, uint y)
@@ -273,38 +250,69 @@ static Foundation GetFoundation_Unmovable(TileIndex tile, Slope tileh)
 
 static CommandCost ClearTile_Unmovable(TileIndex tile, DoCommandFlag flags)
 {
-	if (IsCompanyHQ(tile)) {
-		if (_current_company == OWNER_WATER) {
-			return DestroyCompanyHQ(GetTileOwner(tile), DC_EXEC);
-		} else {
-			return_cmd_error(flags & DC_AUTO ? STR_ERROR_COMPANY_HEADQUARTERS_IN : INVALID_STRING_ID);
+	UnmovableType type = GetUnmovableType(tile);
+	const UnmovableSpec *spec = UnmovableSpec::Get(type);
+
+	/* Get to the northern most tile. */
+	tile -= GetUnmovableOffset(tile);
+
+	/* Water can remove everything! */
+	if (_current_company != OWNER_WATER) {
+		if ((spec->flags & OBJECT_FLAG_AUTOREMOVE) == 0 && flags & DC_AUTO) {
+			/* No automatic removal by overbuilding stuff. */
+			return_cmd_error(type == UNMOVABLE_HQ ? STR_ERROR_COMPANY_HEADQUARTERS_IN : STR_ERROR_OBJECT_IN_THE_WAY);
+		} else if (_game_mode == GM_EDITOR) {
+			/* No further limitations for the editor. */
+		} else if (GetTileOwner(tile) == OWNER_NONE) {
+			/* Owned by nobody, so we can only remove it with brute force! */
+			if (!_cheats.magic_bulldozer.value) return CMD_ERROR;
+		} else if (CheckTileOwnership(tile).Failed()) {
+			/* We don't own it!. */
+			return_cmd_error(STR_ERROR_OWNED_BY);
+		} else if ((spec->flags & OBJECT_FLAG_AUTOREMOVE) == 0 && !_cheats.magic_bulldozer.value) {
+			/* In the game editor or with cheats we can remove, otherwise we can't. */
+			return CMD_ERROR;
 		}
 	}
 
-	if (IsOwnedLand(tile)) {
-		return DoCommand(tile, 0, 0, flags, CMD_SELL_LAND_AREA);
-	}
+	int size_x = GB(spec->size, 0, 4);
+	int size_y = GB(spec->size, 4, 4);
+	TileArea ta(tile, size_x, size_y);
 
-	/* checks if you're allowed to remove unmovable things */
-	if (_game_mode != GM_EDITOR && _current_company != OWNER_WATER && ((flags & DC_AUTO) || !_cheats.magic_bulldozer.value)) {
-		return_cmd_error((flags & DC_AUTO) ? STR_ERROR_OBJECT_IN_THE_WAY : INVALID_STRING_ID);
-	}
+	CommandCost cost(EXPENSES_CONSTRUCTION, spec->GetClearCost() * size_x * size_y);
+	if (spec->flags & OBJECT_FLAG_CLEAR_INCOME) cost.MultiplyCost(-1); // They get an income!
 
-	if (IsStatue(tile)) {
-		if (flags & DC_AUTO) return_cmd_error(STR_ERROR_OBJECT_IN_THE_WAY);
+	switch (type) {
+		case UNMOVABLE_HQ: {
+			Company *c = Company::Get(GetTileOwner(tile));
+			if (flags & DC_EXEC) {
+				c->location_of_HQ = INVALID_TILE; // reset HQ position
+				SetWindowDirty(WC_COMPANY, c->index);
+				CargoPacket::InvalidateAllFrom(ST_HEADQUARTERS, c->index);
+			}
 
-		if (flags & DC_EXEC) {
-			TownID town = GetStatueTownID(tile);
-			ClrBit(Town::Get(town)->statues, GetTileOwner(tile));
-			SetWindowDirty(WC_TOWN_AUTHORITY, town);
+			/* cost of relocating company is 1% of company value */
+			cost = CommandCost(EXPENSES_PROPERTY, CalculateCompanyValue(c) / 100);
+			break;
 		}
+
+		case UNMOVABLE_STATUE:
+			if (flags & DC_EXEC) {
+				TownID town = GetStatueTownID(tile);
+				ClrBit(Town::Get(town)->statues, GetTileOwner(tile));
+				SetWindowDirty(WC_TOWN_AUTHORITY, town);
+			}
+			break;
+
+		default:
+			break;
 	}
 
 	if (flags & DC_EXEC) {
-		DoClearSquare(tile);
+		TILE_AREA_LOOP(tile_cur, ta) DoClearSquare(tile_cur);
 	}
 
-	return CommandCost();
+	return cost;
 }
 
 static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, uint32 *always_accepted)
@@ -333,7 +341,7 @@ static void AddAcceptedCargo_Unmovable(TileIndex tile, CargoArray &acceptance, u
 
 static void GetTileDesc_Unmovable(TileIndex tile, TileDesc *td)
 {
-	td->str = GetUnmovableSpec(GetUnmovableType(tile))->name;
+	td->str = UnmovableSpec::GetByTile(tile)->name;
 	td->owner[0] = GetTileOwner(tile);
 }
 
@@ -430,7 +438,7 @@ void GenerateUnmovables()
 		if (IsTileType(tile, MP_CLEAR) && GetTileSlope(tile, &h) == SLOPE_FLAT && h >= TILE_HEIGHT * 4 && !IsBridgeAbove(tile)) {
 			if (IsRadioTowerNearby(tile)) continue;
 
-			MakeTransmitter(tile);
+			BuildUnmovable(UNMOVABLE_TRANSMITTER, tile);
 			IncreaseGeneratingWorldProgress(GWP_UNMOVABLE);
 			if (--radiotower_to_build == 0) break;
 		}
@@ -464,7 +472,7 @@ void GenerateUnmovables()
 		for (int j = 0; j < 19; j++) {
 			uint h;
 			if (IsTileType(tile, MP_CLEAR) && GetTileSlope(tile, &h) == SLOPE_FLAT && h <= TILE_HEIGHT * 2 && !IsBridgeAbove(tile)) {
-				MakeLighthouse(tile);
+				BuildUnmovable(UNMOVABLE_LIGHTHOUSE, tile);
 				IncreaseGeneratingWorldProgress(GWP_UNMOVABLE);
 				lighthouses_to_build--;
 				assert(tile < MapSize());
@@ -502,13 +510,19 @@ static void ChangeTileOwner_Unmovable(TileIndex tile, Owner old_owner, Owner new
 
 static CommandCost TerraformTile_Unmovable(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)
 {
-	/* Owned land remains unsold */
-	if (IsOwnedLand(tile)) {
-		CommandCost ret = CheckTileOwnership(tile);
-		if (ret.Succeeded()) return CommandCost();
+	UnmovableType type = GetUnmovableType(tile);
+	const UnmovableSpec *spec = UnmovableSpec::Get(type);
+
+	if (spec->flags & OBJECT_FLAG_REQUIRE_FLAT) {
+		/* If a flat tile is required by the object, then terraforming is never good. */
+		return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 	}
 
-	if (AutoslopeEnabled() && (IsStatue(tile) || IsCompanyHQ(tile))) {
+	if (IsOwnedLand(tile)) {
+		/* Owned land remains unsold */
+		CommandCost ret = CheckTileOwnership(tile);
+		if (ret.Succeeded()) return CommandCost();
+	} else if (AutoslopeEnabled()) {
 		if (!IsSteepSlope(tileh_new) && (z_new + GetSlopeMaxZ(tileh_new) == GetTileMaxZ(tile))) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	}
 
