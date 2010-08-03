@@ -22,6 +22,7 @@
  */
 class AIStation : public AIBaseStation {
 public:
+	/** Get the name of this class to identify it towards squirrel. */
 	static const char *GetClassName() { return "AIStation"; }
 
 	/**
@@ -46,12 +47,12 @@ public:
 	 */
 	enum StationType {
 		/* Values are important, as they represent the internal state of the game. */
-		STATION_TRAIN      = 0x01, //!< Train station
-		STATION_TRUCK_STOP = 0x02, //!< Truck station
-		STATION_BUS_STOP   = 0x04, //!< Bus station
-		STATION_AIRPORT    = 0x08, //!< Airport
-		STATION_DOCK       = 0x10, //!< Dock
-		STATION_ANY        = 0x1F, //!< All station types
+		STATION_TRAIN      = 0x01, ///< Train station
+		STATION_TRUCK_STOP = 0x02, ///< Truck station
+		STATION_BUS_STOP   = 0x04, ///< Bus station
+		STATION_AIRPORT    = 0x08, ///< Airport
+		STATION_DOCK       = 0x10, ///< Dock
+		STATION_ANY        = 0x1F, ///< All station types
 	};
 
 	/**

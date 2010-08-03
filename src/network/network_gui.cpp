@@ -64,9 +64,11 @@ void SortNetworkLanguages()
 	QSortT(_language_dropdown, NETLANG_COUNT - 1, &StringIDSorter);
 }
 
-/** Update the network new window because a new server is
+/**
+ * Update the network new window because a new server is
  * found on the network.
- * @param unselect unselect the currently selected item */
+ * @param unselect unselect the currently selected item
+ */
 void UpdateNetworkGameWindow(bool unselect)
 {
 	InvalidateWindowData(WC_NETWORK_WINDOW, 0, unselect ? 1 : 0);
@@ -279,9 +281,11 @@ protected:
 		return strcasecmp((*a)->info.server_name, (*b)->info.server_name);
 	}
 
-	/** Sort servers by the amount of clients online on a
+	/**
+	 * Sort servers by the amount of clients online on a
 	 * server. If the two servers have the same amount, the one with the
-	 * higher maximum is preferred. */
+	 * higher maximum is preferred.
+	 */
 	static int CDECL NGameClientSorter(NetworkGameList * const *a, NetworkGameList * const *b)
 	{
 		/* Reverse as per default we are interested in most-clients first */
@@ -317,8 +321,10 @@ protected:
 		return (r != 0) ? r : NGameDateSorter(a, b);
 	}
 
-	/** Sort servers by joinability. If both servers are the
-	 * same, prefer the non-passworded server first. */
+	/**
+	 * Sort servers by joinability. If both servers are the
+	 * same, prefer the non-passworded server first.
+	 */
 	static int CDECL NGameAllowedSorter(NetworkGameList * const *a, NetworkGameList * const *b)
 	{
 		/* The servers we do not know anything about (the ones that did not reply) should be at the bottom) */
@@ -540,7 +546,8 @@ public:
 					this->DrawServerLine(ngl, y, ngl == this->server);
 					y += this->resize.step_height;
 				}
-			} break;
+				break;
+			}
 
 			case NGWW_LASTJOINED:
 				/* Draw the last joined server, if any */
@@ -696,7 +703,8 @@ public:
 
 				/* FIXME the disabling should go into some InvalidateData, which is called instead of the SetDirty */
 				if (click_count > 1 && !this->IsWidgetDisabled(NGWW_JOIN)) this->OnClick(pt, NGWW_JOIN, 1);
-			} break;
+				break;
+			}
 
 			case NGWW_LASTJOINED: {
 				NetworkGameList *last_joined = NetworkGameListAddItem(NetworkAddress(_settings_client.network.last_host, _settings_client.network.last_port));
@@ -716,7 +724,8 @@ public:
 					/* FIXME the disabling should go into some InvalidateData, which is called instead of the SetDirty */
 					if (click_count > 1 && !this->IsWidgetDisabled(NGWW_JOIN)) this->OnClick(pt, NGWW_JOIN, 1);
 				}
-			} break;
+				break;
+			}
 
 			case NGWW_FIND: // Find server automatically
 				switch (_settings_client.network.lan_internet) {
@@ -1171,7 +1180,8 @@ struct NetworkStartServerWindow : public QueryStringBaseWindow {
 
 				this->map = (y == 0) ? NULL : _fios_items.Get(y - 1);
 				this->SetDirty();
-			} break;
+				break;
+			}
 
 			case NSSW_CONNTYPE_BTN: // Connection type
 				ShowDropDownMenu(this, _connection_types_dropdown, _settings_client.network.server_advertise, NSSW_CONNTYPE_BTN, 0, 0); // do it for widget NSSW_CONNTYPE_BTN
@@ -1227,7 +1237,8 @@ struct NetworkStartServerWindow : public QueryStringBaseWindow {
 					}
 				}
 				ShowDropDownMenu(this, _language_dropdown, sel, NSSW_LANGUAGE_BTN, 0, 0);
-			} break;
+				break;
+			}
 
 			case NSSW_START: // Start game
 				_is_network_server = true;
@@ -1631,7 +1642,8 @@ struct NetworkLobbyWindow : public Window {
 
 				/* FIXME the disabling should go into some InvalidateData, which is called instead of the SetDirty */
 				if (click_count > 1 && !this->IsWidgetDisabled(NLWW_JOIN)) this->OnClick(pt, NLWW_JOIN, 1);
-			} break;
+				break;
+			}
 
 			case NLWW_JOIN:     // Join company
 				/* Button can be clicked only when it is enabled */
@@ -2300,8 +2312,8 @@ struct NetworkCompanyPasswordWindow : public QueryStringBaseWindow {
 		switch (widget) {
 			case NCPWW_OK:
 				this->OnOk();
+				/* FALL THROUGH */
 
-			/* FALL THROUGH */
 			case NCPWW_CANCEL:
 				delete this;
 				break;

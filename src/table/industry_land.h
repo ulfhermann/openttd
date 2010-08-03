@@ -45,7 +45,8 @@ struct DrawIndustryCoordinates {
  * @param h height of the sprite
  * @param dz virtual height of the sprite
  * @param p this allows to specify a special drawing procedure.
- * @see DrawBuildingsTileStruct */
+ * @see DrawBuildingsTileStruct
+ */
 #define M(s1, p1, s2, p2, sx, sy, w, h, dz, p) { { s1, p1 }, { s2, p2 }, sx, sy, w, h, dz, p }
 
 /** Structure for industry tiles drawing */
@@ -862,7 +863,8 @@ static const DrawIndustryCoordinates _drawtile_proc1[5] = {
 	{ 8, 41},
 };
 
-/** this is ONLY used for Toy Factory.
+/**
+ * this is ONLY used for Toy Factory.
  * 255 means no drawing
  * @param img1 offset from base sprite SPR_IT_SUGAR_MINE_SIEVE
  * @param img2 offset from base sprite SPR_IT_SUGAR_MINE_CLOUDS

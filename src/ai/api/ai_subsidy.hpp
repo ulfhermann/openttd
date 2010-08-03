@@ -20,6 +20,7 @@
  */
 class AISubsidy : public AIObject {
 public:
+	/** Get the name of this class to identify it towards squirrel. */
 	static const char *GetClassName() { return "AISubsidy"; }
 
 	/**
@@ -27,9 +28,9 @@ public:
 	 * @note The list of values may grow in future.
 	 */
 	enum SubsidyParticipantType {
-		SPT_INDUSTRY =    0, //!< Subsidy participant is an industry
-		SPT_TOWN     =    1, //!< Subsidy participant is a town
-		SPT_INVALID  = 0xFF, //!< Invalid/unknown participant type
+		SPT_INDUSTRY =    0, ///< Subsidy participant is an industry
+		SPT_TOWN     =    1, ///< Subsidy participant is a town
+		SPT_INVALID  = 0xFF, ///< Invalid/unknown participant type
 	};
 
 	/**
