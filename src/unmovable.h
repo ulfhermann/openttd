@@ -14,17 +14,80 @@
 
 #include "economy_func.h"
 #include "strings_type.h"
+#include "unmovable_type.h"
 
-void UpdateCompanyHQ(Company *c, uint score);
+/**
+ * Update the CompanyHQ to the state associated with the given score
+ * @param tile  The (northern) tile of the company HQ, or INVALID_TILE.
+ * @param score The current (performance) score of the company.
+ */
+void UpdateCompanyHQ(TileIndex tile, uint score);
 
+/**
+ * Actually build the unmovable object.
+ * @param type  The type of object to build.
+ * @param tile  The tile to build the northern tile of the object on.
+ * @param owner The owner of the object.
+ * @param index A (generic) index to be stored on the tile, e.g. TownID for statues.
+ * @pre All preconditions for building the object at that location
+ *      are met, e.g. slope and clearness of tiles are checked.
+ */
+void BuildUnmovable(UnmovableType type, TileIndex tile, CompanyID owner = OWNER_NONE, uint index = 0);
+
+
+/** Various object behaviours. */
+enum ObjectFlags {
+	OBJECT_FLAG_NONE               =       0, ///< Just nothing.
+	OBJECT_FLAG_ONLY_IN_SCENEDIT   = 1 <<  0, ///< Object can only be constructed in the scenario editor.
+	OBJECT_FLAG_CANNOT_REMOVE      = 1 <<  1, ///< Object can not be removed.
+	OBJECT_FLAG_AUTOREMOVE         = 1 <<  2, ///< Object get automatically removed (like "owned land").
+	OBJECT_FLAG_BUILT_ON_WATER     = 1 <<  3, ///< Object can be built on water (not required).
+	OBJECT_FLAG_CLEAR_INCOME       = 1 <<  4, ///< When object is cleared a positive income is generated instead of a cost.
+	OBJECT_FLAG_HAS_NO_FOUNDATION  = 1 <<  5, ///< Do not display foundations when on a slope.
+	OBJECT_FLAG_ANIMATION          = 1 <<  6, ///< Object has animated tiles.
+	OBJECT_FLAG_ONLY_IN_GAME       = 1 <<  7, ///< Object can only be built in game.
+	OBJECT_FLAG_2CC_COLOUR         = 1 <<  8, ///< Object wants 2CC colour mapping.
+	OBJECT_FLAG_NOT_ON_LAND        = 1 <<  9, ///< Object can not be on land, implicitly sets #OBJECT_FLAG_BUILT_ON_WATER.
+	OBJECT_FLAG_DRAW_WATER         = 1 << 10, ///< Object wants to be drawn on water.
+	OBJECT_FLAG_ALLOW_UNDER_BRIDGE = 1 << 11, ///< Object can built under a bridge.
+	OBJECT_FLAG_REQUIRE_FLAT       = 1 << 12, ///< Object can only be build of flat land, i.e. not on foundations!
+};
+DECLARE_ENUM_AS_BIT_SET(ObjectFlags)
+
+
+/** An (unmovable) object that isn't use for transport, industries or houses. */
 struct UnmovableSpec {
-	StringID name;
-	uint8 buy_cost_multiplier;
-	uint8 sell_cost_multiplier;
+	StringID name;               ///< The name for this object.
+	uint8 size;                  ///< The size of this objects; low nibble for X, high nibble for Y.
+	uint8 build_cost_multiplier; ///< Build cost multiplier per tile.
+	uint8 clear_cost_multiplier; ///< Clear cost multiplier per tile.
+	ObjectFlags flags;           ///< Flags/settings related to the object.
 
-	Money GetRemovalCost() const { return (_price[PR_CLEAR_UNMOVABLE] * this->sell_cost_multiplier); }
-	Money GetBuildingCost() const { return (_price[PR_BUILD_UNMOVABLE] * this->buy_cost_multiplier); }
+	/**
+	 * Get the cost for building a structure of this type.
+	 * @return The cost for building.
+	 */
+	Money GetBuildCost() const { return (_price[PR_BUILD_UNMOVABLE] * this->build_cost_multiplier); }
 
+	/**
+	 * Get the cost for clearing a structure of this type.
+	 * @return The cost for clearing.
+	 */
+	Money GetClearCost() const { return (_price[PR_CLEAR_UNMOVABLE] * this->clear_cost_multiplier); }
+
+	/**
+	 * Get the specification associated with a specific UnmovableType.
+	 * @param index The unmovable type to fetch.
+	 * @return The specification.
+	 */
+	static const UnmovableSpec *Get(UnmovableType index);
+
+	/**
+	 * Get the specification associated with a tile.
+	 * @param tile The tile to fetch the data for.
+	 * @return The specification.
+	 */
+	static const UnmovableSpec *GetByTile(TileIndex tile);
 };
 
 

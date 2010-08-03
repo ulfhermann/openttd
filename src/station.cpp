@@ -150,8 +150,10 @@ RoadStop *Station::GetPrimaryRoadStop(const RoadVehicle *v) const
 	return rs;
 }
 
-/** Called when new facility is built on the station. If it is the first facility
- * it initializes also 'xy' and 'random_bits' members */
+/**
+ * Called when new facility is built on the station. If it is the first facility
+ * it initializes also 'xy' and 'random_bits' members
+ */
 void Station::AddFacility(StationFacility new_facility_bit, TileIndex facil_xy)
 {
 	if (this->facilities == FACIL_NONE) {
@@ -227,7 +229,8 @@ void Station::MarkTilesDirty(bool cargo_change) const
 	return length;
 }
 
-/** Determines the catchment radius of the station
+/**
+ * Determines the catchment radius of the station
  * @return The radius
  */
 uint Station::GetCatchmentRadius() const
