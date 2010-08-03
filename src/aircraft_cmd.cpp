@@ -7,8 +7,10 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file aircraft_cmd.cpp
- * This file deals with aircraft and airport movements functionalities */
+/**
+ * @file aircraft_cmd.cpp
+ * This file deals with aircraft and airport movements functionalities
+ */
 
 #include "stdafx.h"
 #include "aircraft.h"
@@ -70,8 +72,10 @@ void Aircraft::UpdateDeltaXY(Direction direction)
 }
 
 
-/** this maps the terminal to its corresponding state and block flag
- *  currently set for 10 terms, 4 helipads */
+/**
+ * this maps the terminal to its corresponding state and block flag
+ *  currently set for 10 terms, 4 helipads
+ */
 static const byte _airport_terminal_state[] = {2, 3, 4, 5, 6, 7, 19, 20, 0, 0, 8, 9, 21, 22};
 static const byte _airport_terminal_flag[] =  {0, 1, 2, 3, 4, 5, 22, 23, 0, 0, 6, 7, 24, 25};
 
@@ -100,7 +104,8 @@ enum HelicopterRotorStates {
 	HRS_ROTOR_MOVING_3,
 };
 
-/** Find the nearest hangar to v
+/**
+ * Find the nearest hangar to v
  * INVALID_STATION is returned, if the company does not have any suitable
  * airports (like helipads only)
  * @param v vehicle looking for a hangar
@@ -137,9 +142,11 @@ static StationID FindNearestHangar(const Aircraft *v)
 }
 
 #if 0
-/** Check if given vehicle has a goto hangar in his orders
+/**
+ * Check if given vehicle has a goto hangar in his orders
  * @param v vehicle to inquiry
- * @return true if vehicle v has an airport in the schedule, that has a hangar */
+ * @return true if vehicle v has an airport in the schedule, that has a hangar
+ */
 static bool HaveHangarInOrderList(Aircraft *v)
 {
 	const Order *order;
@@ -213,7 +220,8 @@ void DrawAircraftEngine(int left, int right, int preferred_x, int y, EngineID en
 	}
 }
 
-/** Get the size of the sprite of an aircraft sprite heading west (used for lists)
+/**
+ * Get the size of the sprite of an aircraft sprite heading west (used for lists)
  * @param engine The engine to get the sprite from
  * @param width The width of the sprite
  * @param height The height of the sprite
@@ -226,7 +234,8 @@ void GetAircraftSpriteSize(EngineID engine, uint &width, uint &height)
 	height = spr->height;
 }
 
-/** Build an aircraft.
+/**
+ * Build an aircraft.
  * @param tile tile of depot where aircraft is built
  * @param flags for command
  * @param p1 aircraft type being built (engine)
@@ -383,7 +392,8 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 }
 
 
-/** Sell an aircraft.
+/**
+ * Sell an aircraft.
  * @param tile unused
  * @param flags for command type
  * @param p1 vehicle ID to be sold
@@ -431,7 +441,8 @@ bool Aircraft::FindClosestDepot(TileIndex *location, DestinationID *destination,
 	return true;
 }
 
-/** Send an aircraft to the hangar.
+/**
+ * Send an aircraft to the hangar.
  * @param tile unused
  * @param flags for command type
  * @param p1 vehicle ID to send to the hangar
@@ -456,7 +467,8 @@ CommandCost CmdSendAircraftToHangar(TileIndex tile, DoCommandFlag flags, uint32 
 }
 
 
-/** Refits an aircraft to the specified cargo type.
+/**
+ * Refits an aircraft to the specified cargo type.
  * @param tile unused
  * @param flags for command type
  * @param p1 vehicle ID of the aircraft to refit
@@ -634,7 +646,8 @@ void SetAircraftPosition(Aircraft *v, int x, int y, int z)
 	}
 }
 
-/** Handle Aircraft specific tasks when a an Aircraft enters a hangar
+/**
+ * Handle Aircraft specific tasks when a an Aircraft enters a hangar
  * @param *v Vehicle that enters the hangar
  */
 void HandleAircraftEnterHangar(Aircraft *v)
@@ -1952,7 +1965,8 @@ bool Aircraft::Tick()
 }
 
 
-/** Returns aircraft's target station if v->target_airport
+/**
+ * Returns aircraft's target station if v->target_airport
  * is a valid station with airport.
  * @param v vehicle to get target airport for
  * @return pointer to target station, NULL if invalid

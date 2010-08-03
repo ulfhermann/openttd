@@ -7,7 +7,8 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file settings.cpp
+/**
+ * @file settings.cpp
  * All actions handling saving and loading of the settings/configuration goes on in this file.
  * The file consists of three parts:
  * <ol>
@@ -94,11 +95,13 @@ static const char * const _list_group_names[] = {
 	NULL
 };
 
-/** Find the index value of a ONEofMANY type in a string seperated by |
+/**
+ * Find the index value of a ONEofMANY type in a string seperated by |
  * @param many full domain of values the ONEofMANY setting can have
  * @param one the current value of the setting for which a value needs found
  * @param onelen force calculation of the *one parameter
- * @return the integer index of the full-list, or -1 if not found */
+ * @return the integer index of the full-list, or -1 if not found
+ */
 static int LookupOneOfMany(const char *many, const char *one, size_t onelen = 0)
 {
 	const char *s;
@@ -121,11 +124,13 @@ static int LookupOneOfMany(const char *many, const char *one, size_t onelen = 0)
 	}
 }
 
-/** Find the set-integer value MANYofMANY type in a string
+/**
+ * Find the set-integer value MANYofMANY type in a string
  * @param many full domain of values the MANYofMANY setting can have
  * @param str the current string value of the setting, each individual
  * of seperated by a whitespace,tab or | character
- * @return the 'fully' set integer, or -1 if a set is not found */
+ * @return the 'fully' set integer, or -1 if a set is not found
+ */
 static uint32 LookupManyOfMany(const char *many, const char *str)
 {
 	const char *s;
@@ -150,12 +155,14 @@ static uint32 LookupManyOfMany(const char *many, const char *str)
 	return res;
 }
 
-/** Parse an integerlist string and set each found value
+/**
+ * Parse an integerlist string and set each found value
  * @param p the string to be parsed. Each element in the list is seperated by a
  * comma or a space character
  * @param items pointer to the integerlist-array that will be filled with values
  * @param maxitems the maximum number of elements the integerlist-array has
- * @return returns the number of items found, or -1 on an error */
+ * @return returns the number of items found, or -1 on an error
+ */
 int ParseIntList(const char *p, int *items, int maxitems)
 {
 	int n = 0; // number of items read so far
@@ -193,12 +200,14 @@ int ParseIntList(const char *p, int *items, int maxitems)
 	return n;
 }
 
-/** Load parsed string-values into an integer-array (intlist)
+/**
+ * Load parsed string-values into an integer-array (intlist)
  * @param str the string that contains the values (and will be parsed)
  * @param array pointer to the integer-arrays that will be filled
  * @param nelems the number of elements the array holds. Maximum is 64 elements
  * @param type the type of elements the array holds (eg INT8, UINT16, etc.)
- * @return return true on success and false on error */
+ * @return return true on success and false on error
+ */
 static bool LoadIntList(const char *str, void *array, int nelems, VarType type)
 {
 	int items[64];
@@ -232,13 +241,15 @@ static bool LoadIntList(const char *str, void *array, int nelems, VarType type)
 	return true;
 }
 
-/** Convert an integer-array (intlist) to a string representation. Each value
+/**
+ * Convert an integer-array (intlist) to a string representation. Each value
  * is seperated by a comma or a space character
  * @param buf output buffer where the string-representation will be stored
  * @param last last item to write to in the output buffer
  * @param array pointer to the integer-arrays that is read from
  * @param nelems the number of elements the array holds.
- * @param type the type of elements the array holds (eg INT8, UINT16, etc.) */
+ * @param type the type of elements the array holds (eg INT8, UINT16, etc.)
+ */
 static void MakeIntList(char *buf, const char *last, const void *array, int nelems, VarType type)
 {
 	int i, v = 0;
@@ -259,11 +270,13 @@ static void MakeIntList(char *buf, const char *last, const void *array, int nele
 	}
 }
 
-/** Convert a ONEofMANY structure to a string representation.
+/**
+ * Convert a ONEofMANY structure to a string representation.
  * @param buf output buffer where the string-representation will be stored
  * @param last last item to write to in the output buffer
  * @param many the full-domain string of possible values
- * @param id the value of the variable and whose string-representation must be found */
+ * @param id the value of the variable and whose string-representation must be found
+ */
 static void MakeOneOfMany(char *buf, const char *last, const char *many, int id)
 {
 	int orig_id = id;
@@ -284,12 +297,14 @@ static void MakeOneOfMany(char *buf, const char *last, const char *many, int id)
 	*buf = '\0';
 }
 
-/** Convert a MANYofMANY structure to a string representation.
+/**
+ * Convert a MANYofMANY structure to a string representation.
  * @param buf output buffer where the string-representation will be stored
  * @param last last item to write to in the output buffer
  * @param many the full-domain string of possible values
  * @param x the value of the variable and whose string-representation must
- *        be found in the bitmasked many string */
+ *        be found in the bitmasked many string
+ */
 static void MakeManyOfMany(char *buf, const char *last, const char *many, uint32 x)
 {
 	const char *start;
@@ -317,10 +332,12 @@ static void MakeManyOfMany(char *buf, const char *last, const char *many, uint32
 	*buf = '\0';
 }
 
-/** Convert a string representation (external) of a setting to the internal rep.
+/**
+ * Convert a string representation (external) of a setting to the internal rep.
  * @param desc SettingDesc struct that holds all information about the variable
  * @param orig_str input string that will be parsed based on the type of desc
- * @return return the parsed value of the setting */
+ * @return return the parsed value of the setting
+ */
 static const void *StringToVal(const SettingDescBase *desc, const char *orig_str)
 {
 	const char *str = orig_str == NULL ? "" : orig_str;
@@ -360,13 +377,15 @@ static const void *StringToVal(const SettingDescBase *desc, const char *orig_str
 	return NULL;
 }
 
-/** Set the value of a setting and if needed clamp the value to
+/**
+ * Set the value of a setting and if needed clamp the value to
  * the preset minimum and maximum.
  * @param ptr the variable itself
  * @param sd pointer to the 'information'-database of the variable
  * @param val signed long version of the new value
  * @pre SettingDesc is of type SDT_BOOLX, SDT_NUMX,
- * SDT_ONEOFMANY or SDT_MANYOFMANY. Other types are not supported as of now */
+ * SDT_ONEOFMANY or SDT_MANYOFMANY. Other types are not supported as of now
+ */
 static void Write_ValidateSetting(void *ptr, const SettingDesc *sd, int32 val)
 {
 	const SettingDescBase *sdb = &sd->desc;
@@ -395,7 +414,8 @@ static void Write_ValidateSetting(void *ptr, const SettingDesc *sd, int32 val)
 			case SLE_VAR_I32: {
 				/* Override the minimum value. No value below sdb->min, except special value 0 */
 				if (!(sdb->flags & SGF_0ISDISABLED) || val != 0) val = Clamp(val, sdb->min, sdb->max);
-			} break;
+				break;
+			}
 			case SLE_VAR_U32: {
 				/* Override the minimum value. No value below sdb->min, except special value 0 */
 				uint min = ((sdb->flags & SGF_0ISDISABLED) && (uint)val <= (uint)sdb->min) ? 0 : sdb->min;
@@ -411,12 +431,14 @@ static void Write_ValidateSetting(void *ptr, const SettingDesc *sd, int32 val)
 	WriteValue(ptr, sd->save.conv, (int64)val);
 }
 
-/** Load values from a group of an IniFile structure into the internal representation
+/**
+ * Load values from a group of an IniFile structure into the internal representation
  * @param ini pointer to IniFile structure that holds administrative information
  * @param sd pointer to SettingDesc structure whose internally pointed variables will
  *        be given values
  * @param grpname the group of the IniFile to search in for the new values
- * @param object pointer to the object been loaded */
+ * @param object pointer to the object been loaded
+ */
 static void IniLoadSettings(IniFile *ini, const SettingDesc *sd, const char *grpname, void *object)
 {
 	IniGroup *group;
@@ -494,7 +516,8 @@ static void IniLoadSettings(IniFile *ini, const SettingDesc *sd, const char *grp
 	}
 }
 
-/** Save the values of settings to the inifile.
+/**
+ * Save the values of settings to the inifile.
  * @param ini pointer to IniFile structure
  * @param sd read-only SettingDesc structure which contains the unmodified,
  *        loaded values of the configuration file and various information about it
@@ -585,7 +608,8 @@ static void IniSaveSettings(IniFile *ini, const SettingDesc *sd, const char *grp
 			case SDT_MANYOFMANY: MakeManyOfMany(buf, lastof(buf), sdb->many, i); break;
 			default: NOT_REACHED();
 			}
-		} break;
+			break;
+		}
 
 		case SDT_STRING:
 			switch (GetVarMemType(sld->conv)) {
@@ -616,7 +640,8 @@ static void IniSaveSettings(IniFile *ini, const SettingDesc *sd, const char *grp
 	}
 }
 
-/** Loads all items from a 'grpname' section into a list
+/**
+ * Loads all items from a 'grpname' section into a list
  * The list parameter can be a NULL pointer, in this case nothing will be
  * saved and a callback function should be defined that will take over the
  * list-handling and store the data itself somewhere.
@@ -637,7 +662,8 @@ static void IniLoadSettingList(IniFile *ini, const char *grpname, StringList *li
 	}
 }
 
-/** Saves all items from a list into the 'grpname' section
+/**
+ * Saves all items from a list into the 'grpname' section
  * The list parameter can be a NULL pointer, in this case a callback function
  * should be defined that will provide the source data to be saved.
  * @param ini IniFile handle to the ini file where the destination data is saved
@@ -980,7 +1006,8 @@ static bool CheckRoadSide(int p1)
 	return _game_mode == GM_MENU || !RoadVehiclesAreBuilt();
 }
 
-/** Conversion callback for _gameopt_settings_game.landscape
+/**
+ * Conversion callback for _gameopt_settings_game.landscape
  * It converts (or try) between old values and the new ones,
  * without losing initial setting of the user
  * @param value that was read from config file
@@ -1155,10 +1182,12 @@ static void HandleOldDiffCustom(bool savegame)
 	}
 }
 
-/** tries to convert newly introduced news settings based on old ones
+/**
+ * tries to convert newly introduced news settings based on old ones
  * @param name pointer to the string defining name of the old news config
  * @param value pointer to the string defining value of the old news config
- * @returns true if conversion could have been made */
+ * @returns true if conversion could have been made
+ */
 static bool ConvertOldNewsSetting(const char *name, const char *value)
 {
 	if (strcasecmp(name, "openclose") == 0) {
@@ -1537,7 +1566,8 @@ static const SettingDesc *GetSettingDescription(uint index)
 	return &_settings[index];
 }
 
-/** Network-safe changing of settings (server-only).
+/**
+ * Network-safe changing of settings (server-only).
  * @param tile unused
  * @param flags operation to perform
  * @param p1 the index of the setting in the SettingDesc array which identifies it
@@ -1591,7 +1621,8 @@ CommandCost CmdChangeSetting(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	return CommandCost();
 }
 
-/** Change one of the per-company settings.
+/**
+ * Change one of the per-company settings.
  * @param tile unused
  * @param flags operation to perform
  * @param p1 the index of the setting in the _company_settings array which identifies it
@@ -1627,7 +1658,8 @@ CommandCost CmdChangeCompanySetting(TileIndex tile, DoCommandFlag flags, uint32 
 	return CommandCost();
 }
 
-/** Top function to save the new value of an element of the Settings struct
+/**
+ * Top function to save the new value of an element of the Settings struct
  * @param index offset in the SettingDesc array of the Settings struct which
  * identifies the setting member we want to change
  * @param value new value of the setting
@@ -1666,7 +1698,8 @@ bool SetSettingValue(uint index, int32 value, bool force_newgame)
 	return false;
 }
 
-/** Top function to save the new value of an element of the Settings struct
+/**
+ * Top function to save the new value of an element of the Settings struct
  * @param index offset in the SettingDesc array of the CompanySettings struct
  * which identifies the setting member we want to change
  * @param value new value of the setting
@@ -1894,10 +1927,12 @@ void IConsoleListSettings(const char *prefilter)
 	IConsolePrintF(CC_WARNING, "Use 'setting' command to change a value");
 }
 
-/** Save and load handler for settings
+/**
+ * Save and load handler for settings
  * @param osd SettingDesc struct containing all information
  * @param object can be either NULL in which case we load global variables or
- * a pointer to a struct which is getting saved */
+ * a pointer to a struct which is getting saved
+ */
 static void LoadSettings(const SettingDesc *osd, void *object)
 {
 	for (; osd->save.cmd != SL_END; osd++) {
@@ -1909,19 +1944,23 @@ static void LoadSettings(const SettingDesc *osd, void *object)
 	}
 }
 
-/** Loadhandler for a list of global variables
+/**
+ * Loadhandler for a list of global variables
  * @param sdg pointer for the global variable list SettingDescGlobVarList
  * @note this is actually a stub for LoadSettings with the
- * object pointer set to NULL */
+ * object pointer set to NULL
+ */
 static inline void LoadSettingsGlobList(const SettingDescGlobVarList *sdg)
 {
 	LoadSettings((const SettingDesc*)sdg, NULL);
 }
 
-/** Save and load handler for settings
+/**
+ * Save and load handler for settings
  * @param sd SettingDesc struct containing all information
  * @param object can be either NULL in which case we load global variables or
- * a pointer to a struct which is getting saved */
+ * a pointer to a struct which is getting saved
+ */
 static void SaveSettings(const SettingDesc *sd, void *object)
 {
 	/* We need to write the CH_RIFF header, but unfortunately can't call
@@ -1939,9 +1978,11 @@ static void SaveSettings(const SettingDesc *sd, void *object)
 	}
 }
 
-/** Savehandler for a list of global variables
+/**
+ * Savehandler for a list of global variables
  * @note this is actually a stub for SaveSettings with the
- * object pointer set to NULL */
+ * object pointer set to NULL
+ */
 static inline void SaveSettingsGlobList(const SettingDescGlobVarList *sdg)
 {
 	SaveSettings((const SettingDesc*)sdg, NULL);

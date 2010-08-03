@@ -7,22 +7,21 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file ai_subsidylist.hpp List all the subsidies. */
+/** @file unmovable_map.h Types related to unmovable tiles. */
 
-#ifndef AI_SUBSIDYLIST_HPP
-#define AI_SUBSIDYLIST_HPP
+#ifndef UNMOVABLE_TYPE_H
+#define UNMOVABLE_TYPE_H
 
-#include "ai_abstractlist.hpp"
-
-/**
- * Creates a list of all current subsidies.
- * @ingroup AIList
- */
-class AISubsidyList : public AIAbstractList {
-public:
-	/** Get the name of this class to identify it towards squirrel. */
-	static const char *GetClassName() { return "AISubsidyList"; }
-	AISubsidyList();
+/** Types of unmovable structure */
+enum UnmovableType {
+	UNMOVABLE_TRANSMITTER = 0,    ///< The large antenna
+	UNMOVABLE_LIGHTHOUSE  = 1,    ///< The nice lighthouse
+	UNMOVABLE_STATUE      = 2,    ///< Statue in towns
+	UNMOVABLE_OWNED_LAND  = 3,    ///< Owned land 'flag'
+	UNMOVABLE_HQ          = 4,    ///< HeadQuarter of a player
+	UNMOVABLE_MAX,
 };
 
-#endif /* AI_SUBSIDYLIST_HPP */
+struct UnmovableSpec;
+
+#endif /* UNMOVABLE_MAP_H */

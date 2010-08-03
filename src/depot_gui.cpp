@@ -159,8 +159,10 @@ static void TrainDepotMoveVehicle(const Vehicle *wagon, VehicleID sel, const Veh
 	DoCommandP(v->tile, v->index + ((wagon == NULL ? INVALID_VEHICLE : wagon->index) << 16), _ctrl_pressed ? 1 : 0, CMD_MOVE_RAIL_VEHICLE | CMD_MSG(STR_ERROR_CAN_T_MOVE_VEHICLE));
 }
 
-/** Array containing the cell size in pixels of the #DEPOT_WIDGET_MATRIX widget for each vehicle type.
- * @note The train vehicle type uses the entire row for each train. */
+/**
+ * Array containing the cell size in pixels of the #DEPOT_WIDGET_MATRIX widget for each vehicle type.
+ * @note The train vehicle type uses the entire row for each train.
+ */
 static Dimension _base_block_sizes[4];
 
 static void InitBlocksizeForShipAircraft(VehicleType type)
@@ -194,8 +196,10 @@ static void InitBlocksizeForShipAircraft(VehicleType type)
 	_base_block_sizes[type].height = max(GetVehicleHeight(type), max_height);
 }
 
-/** Set the size of the blocks in the window so we can be sure that they are big enough for the vehicle sprites in the current game.
- * @note Calling this function once for each game is enough. */
+/**
+ * Set the size of the blocks in the window so we can be sure that they are big enough for the vehicle sprites in the current game.
+ * @note Calling this function once for each game is enough.
+ */
 void InitDepotWindowBlockSizes()
 {
 	_base_block_sizes[VEH_TRAIN].width = 0;
@@ -244,7 +248,8 @@ struct DepotWindow : Window {
 		DeleteWindowById(WC_BUILD_VEHICLE, this->window_number);
 	}
 
-	/** Draw a vehicle in the depot window in the box with the top left corner at x,y.
+	/**
+	 * Draw a vehicle in the depot window in the box with the top left corner at x,y.
 	 * @param v     Vehicle to draw.
 	 * @param left  Left side of the box to draw in.
 	 * @param right Right side of the box to draw in.
@@ -281,7 +286,8 @@ struct DepotWindow : Window {
 				DrawAircraftImage(v, image_left, image_right,
 									y + max(spr->height + spr->y_offs - 14, 0), // tall sprites needs an y offset
 									this->sel);
-			} break;
+				break;
+			}
 			default: NOT_REACHED();
 		}
 
@@ -456,7 +462,8 @@ struct DepotWindow : Window {
 		return MODE_DRAG_VEHICLE;
 	}
 
-	/** Handle click in the depot matrix.
+	/**
+	 * Handle click in the depot matrix.
 	 * @param x Horizontal position in the matrix widget in pixels.
 	 * @param y Vertical position in the matrix widget in pixels.
 	 */
@@ -506,7 +513,8 @@ struct DepotWindow : Window {
 					}
 					_cursor.vehchain = _ctrl_pressed;
 				}
-			} break;
+				break;
+			}
 
 			case MODE_SHOW_VEHICLE: // show info window
 				ShowVehicleViewWindow(v);
@@ -654,7 +662,8 @@ struct DepotWindow : Window {
 				}
 				fill->width = resize->width;
 				fill->height = resize->height;
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -736,7 +745,7 @@ struct DepotWindow : Window {
 				} else {
 					ResetObjectToPlace();
 				}
-					break;
+				break;
 
 			case DEPOT_WIDGET_LOCATION:
 				if (_ctrl_pressed) {
@@ -948,7 +957,8 @@ struct DepotWindow : Window {
 				} else if (this->GetVehicleFromDepotWndPt(pt.x - nwi->pos_x, pt.y - nwi->pos_y, &v, NULL) == MODE_DRAG_VEHICLE && v != NULL && sel == v->index) {
 					ShowVehicleViewWindow(v);
 				}
-			} break;
+				break;
+			}
 
 			case DEPOT_WIDGET_SELL: case DEPOT_WIDGET_SELL_CHAIN: {
 				if (this->IsWidgetDisabled(widget)) return;
@@ -970,7 +980,8 @@ struct DepotWindow : Window {
 				}
 
 				if (!DoCommandP(v->tile, v->index, sell_cmd, GetCmdSellVeh(v->type)) && is_engine) _backup_orders_tile = 0;
-			} break;
+				break;
+			}
 
 			default:
 				this->sel = INVALID_VEHICLE;
@@ -1026,7 +1037,8 @@ static void DepotSellAllConfirmationCallback(Window *win, bool confirmed)
 	}
 }
 
-/** Opens a depot window
+/**
+ * Opens a depot window
  * @param tile The tile where the depot/hangar is located
  * @param type The type of vehicles in the depot
  */
@@ -1046,7 +1058,8 @@ void ShowDepotWindow(TileIndex tile, VehicleType type)
 	new DepotWindow(desc, tile, type);
 }
 
-/** Removes the highlight of a vehicle in a depot window
+/**
+ * Removes the highlight of a vehicle in a depot window
  * @param *v Vehicle to remove all highlights from
  */
 void DeleteDepotHighlightOfVehicle(const Vehicle *v)
