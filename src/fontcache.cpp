@@ -42,8 +42,10 @@ FreeTypeSettings _freetype;
 static const byte FACE_COLOUR   = 1;
 static const byte SHADOW_COLOUR = 2;
 
-/** Get the font loaded into a Freetype face by using a font-name.
- * If no appropiate font is found, the function returns an error */
+/**
+ * Get the font loaded into a Freetype face by using a font-name.
+ * If no appropiate font is found, the function returns an error
+ */
 #ifdef WIN32
 #include <windows.h>
 #include <shlobj.h> /* SHGetFolderPath */

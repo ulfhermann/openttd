@@ -86,7 +86,8 @@ static void MarkCanalsAndRiversAroundDirty(TileIndex tile)
 }
 
 
-/** Build a ship depot.
+/**
+ * Build a ship depot.
  * @param tile tile where ship depot is built
  * @param flags type of operation
  * @param p1 bit 0 depot orientation (Axis)
@@ -183,7 +184,8 @@ static CommandCost RemoveShipDepot(TileIndex tile, DoCommandFlag flags)
 	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_CLEAR_DEPOT_SHIP]);
 }
 
-/** Builds a lock.
+/**
+ * Builds a lock.
  * @param tile Central tile of the lock.
  * @param dir Uphill direction.
  * @param flags Operation to perform.
@@ -244,7 +246,8 @@ static CommandCost DoBuildLock(TileIndex tile, DiagDirection dir, DoCommandFlag 
 	return cost;
 }
 
-/** Remove a lock.
+/**
+ * Remove a lock.
  * @param tile Central tile of the lock.
  * @param flags Operation to perform.
  * @return The cost in case of success, or an error code if it failed.
@@ -277,7 +280,8 @@ static CommandCost RemoveLock(TileIndex tile, DoCommandFlag flags)
 	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_CLEAR_LOCK]);
 }
 
-/** Builds a lock.
+/**
+ * Builds a lock.
  * @param tile tile where to place the lock
  * @param flags type of operation
  * @param p1 unused
@@ -296,7 +300,8 @@ CommandCost CmdBuildLock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	return DoBuildLock(tile, dir, flags);
 }
 
-/** Build a piece of canal.
+/**
+ * Build a piece of canal.
  * @param tile end tile of stretch-dragging
  * @param flags type of operation
  * @param p1 start tile of stretch-dragging
@@ -344,7 +349,8 @@ CommandCost CmdBuildCanal(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 						MakeSea(tile);
 						break;
 					}
-				/* FALL THROUGH */
+					/* FALL THROUGH */
+
 				default:
 					MakeCanal(tile, _current_company, Random());
 					break;
@@ -668,12 +674,14 @@ static void DrawTile_Water(TileInfo *ti)
 		case WATER_TILE_COAST: {
 			DrawShoreTile(ti->tileh);
 			DrawBridgeMiddle(ti);
-		} break;
+			break;
+		}
 
 		case WATER_TILE_LOCK: {
 			const WaterDrawTileStruct *t = _lock_display_seq[GetSection(ti->tile)];
 			DrawWaterStuff(ti, t, 0, ti->z > t[3].delta_y ? 24 : 0, true);
-		} break;
+			break;
+		}
 
 		case WATER_TILE_DEPOT:
 			DrawWaterClassGround(ti);
@@ -897,7 +905,8 @@ void DoFloodTile(TileIndex target)
 					flooded = true;
 					break;
 				}
-			/* FALL THROUGH */
+				/* FALL THROUGH */
+
 			case MP_CLEAR:
 				if (DoCommand(target, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR).Succeeded()) {
 					MakeShore(target);

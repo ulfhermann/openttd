@@ -73,7 +73,7 @@ static void GenerateRockyArea(TileIndex end, TileIndex start)
 		switch (GetTileType(tile)) {
 			case MP_TREES:
 				if (GetTreeGround(tile) == TREE_GROUND_SHORE) continue;
-			/* FALL THROUGH */
+				/* FALL THROUGH */
 			case MP_CLEAR:
 				MakeClear(tile, CLEAR_ROCKS, 3);
 				break;
@@ -95,7 +95,7 @@ static void GenerateRockyArea(TileIndex end, TileIndex start)
  * @return Returns true if the action was found and handled, and false otherwise. This
  * allows for additional implements that are more local. For example X_Y drag
  * of convertrail which belongs in rail_gui.cpp and not terraform_gui.cpp
- **/
+ */
 bool GUIPlaceProcDragXY(ViewportDragDropSelectionProcess proc, TileIndex start_tile, TileIndex end_tile)
 {
 	if (!_settings_game.construction.freeform_edges) {
@@ -135,7 +135,7 @@ typedef void OnButtonClick(Window *w);
 
 static void PlaceProc_BuyLand(TileIndex tile)
 {
-	DoCommandP(tile, 0, 0, CMD_PURCHASE_LAND_AREA | CMD_MSG(STR_ERROR_CAN_T_PURCHASE_THIS_LAND), CcPlaySound1E);
+	DoCommandP(tile, UNMOVABLE_OWNED_LAND, 0, CMD_BUILD_UNMOVABLE | CMD_MSG(STR_ERROR_CAN_T_PURCHASE_THIS_LAND), CcPlaySound1E);
 }
 
 void PlaceProc_DemolishArea(TileIndex tile)
@@ -303,22 +303,22 @@ static const NWidgetPart _nested_terraform_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_LOWER_LAND), SetMinimalSize(22,22),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_LOWER_LAND), SetMinimalSize(22, 22),
 								SetFill(0, 1), SetDataTip(SPR_IMG_TERRAFORM_DOWN, STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_RAISE_LAND), SetMinimalSize(22,22),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_RAISE_LAND), SetMinimalSize(22, 22),
 								SetFill(0, 1), SetDataTip(SPR_IMG_TERRAFORM_UP, STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_LEVEL_LAND), SetMinimalSize(22,22),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_LEVEL_LAND), SetMinimalSize(22, 22),
 								SetFill(0, 1), SetDataTip(SPR_IMG_LEVEL_LAND, STR_LANDSCAPING_LEVEL_LAND_TOOLTIP),
 
 		NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetMinimalSize(4, 22), EndContainer(),
 
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_DEMOLISH), SetMinimalSize(22,22),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_DEMOLISH), SetMinimalSize(22, 22),
 								SetFill(0, 1), SetDataTip(SPR_IMG_DYNAMITE, STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_BUY_LAND), SetMinimalSize(22,22),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_BUY_LAND), SetMinimalSize(22, 22),
 								SetFill(0, 1), SetDataTip(SPR_IMG_BUY_LAND, STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_PLANT_TREES), SetMinimalSize(22,22),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_PLANT_TREES), SetMinimalSize(22, 22),
 								SetFill(0, 1), SetDataTip(SPR_IMG_PLANTTREES, STR_SCENEDIT_TOOLBAR_PLANT_TREES),
-		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_PLACE_SIGN), SetMinimalSize(22,22),
+		NWidget(WWT_IMGBTN, COLOUR_DARK_GREEN, TTW_PLACE_SIGN), SetMinimalSize(22, 22),
 								SetFill(0, 1), SetDataTip(SPR_IMG_SIGN, STR_SCENEDIT_TOOLBAR_PLACE_SIGN),
 	EndContainer(),
 };
@@ -433,26 +433,12 @@ static void PlaceProc_RockyArea(TileIndex tile)
 
 static void PlaceProc_LightHouse(TileIndex tile)
 {
-	/* not flat || not(trees || clear without bridge above) */
-	if (GetTileSlope(tile, NULL) != SLOPE_FLAT || !(IsTileType(tile, MP_TREES) || (IsTileType(tile, MP_CLEAR) && !IsBridgeAbove(tile)))) {
-		return;
-	}
-
-	MakeLighthouse(tile);
-	MarkTileDirtyByTile(tile);
-	SndPlayTileFx(SND_1F_SPLAT, tile);
+	DoCommandP(tile, UNMOVABLE_LIGHTHOUSE, 0, CMD_BUILD_UNMOVABLE | CMD_MSG(STR_ERROR_CAN_T_BUILD_OBJECT), CcTerraform);
 }
 
 static void PlaceProc_Transmitter(TileIndex tile)
 {
-	/* not flat || not(trees || clear without bridge above) */
-	if (GetTileSlope(tile, NULL) != SLOPE_FLAT || !(IsTileType(tile, MP_TREES) || (IsTileType(tile, MP_CLEAR) && !IsBridgeAbove(tile)))) {
-		return;
-	}
-
-	MakeTransmitter(tile);
-	MarkTileDirtyByTile(tile);
-	SndPlayTileFx(SND_1F_SPLAT, tile);
+	DoCommandP(tile, UNMOVABLE_TRANSMITTER, 0, CMD_BUILD_UNMOVABLE | CMD_MSG(STR_ERROR_CAN_T_BUILD_OBJECT), CcTerraform);
 }
 
 static void PlaceProc_DesertArea(TileIndex tile)
@@ -587,9 +573,11 @@ static OnButtonClick * const _editor_terraform_button_proc[] = {
 };
 
 
-/** Callback function for the scenario editor 'reset landscape' confirmation window
+/**
+ * Callback function for the scenario editor 'reset landscape' confirmation window
  * @param w Window unused
- * @param confirmed boolean value, true when yes was clicked, false otherwise */
+ * @param confirmed boolean value, true when yes was clicked, false otherwise
+ */
 static void ResetLandscapeConfirmationCallback(Window *w, bool confirmed)
 {
 	if (confirmed) {
@@ -676,7 +664,8 @@ struct ScenarioEditorLandscapeGenerationWindow : Window {
 
 					SndPlayFx(SND_15_BEEP);
 					this->SetDirty();
-				} break;
+					break;
+				}
 				case ETTW_NEW_SCENARIO: // gen random land
 					this->HandleButtonClick(widget);
 					ShowCreateScenario();

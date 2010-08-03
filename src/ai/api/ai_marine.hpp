@@ -20,6 +20,7 @@
  */
 class AIMarine : public AIObject {
 public:
+	/** Get the name of this class to identify it towards squirrel. */
 	static const char *GetClassName() { return "AIMarine"; }
 
 	/**
@@ -37,9 +38,9 @@ public:
 	 * Types of water-related objects in the game.
 	 */
 	enum BuildType {
-		BT_DOCK,  //!< Build a dock
-		BT_DEPOT, //!< Build a ship depot
-		BT_BUOY,  //!< Build a buoy
+		BT_DOCK,  ///< Build a dock
+		BT_DEPOT, ///< Build a ship depot
+		BT_BUOY,  ///< Build a buoy
 	};
 
 	/**
@@ -106,6 +107,7 @@ public:
 	 * @exception AIMarine::ERR_MARINE_MUST_BE_BUILT_ON_WATER
 	 * @return Whether the water depot has been/can be build or not.
 	 * @note A WaterDepot is 1 tile in width, and 2 tiles in length.
+	 * @note The depot will be built towards the south from 'tile', not necessarily towards 'front'.
 	 */
 	static bool BuildWaterDepot(TileIndex tile, TileIndex front);
 
