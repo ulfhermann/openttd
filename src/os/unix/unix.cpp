@@ -126,9 +126,11 @@ const char *GetCurrentLocale(const char *param);
 
 #define INTERNALCODE "UTF-8"
 
-/** Try and try to decipher the current locale from environmental
+/**
+ * Try and try to decipher the current locale from environmental
  * variables. MacOSX is hardcoded, other OS's are dynamic. If no suitable
- * locale can be found, don't do any conversion "" */
+ * locale can be found, don't do any conversion ""
+ */
 static const char *GetLocalCode()
 {
 #if defined(__APPLE__)
@@ -174,9 +176,11 @@ static const char *convert_tofrom_fs(iconv_t convd, const char *name)
 	return buf;
 }
 
-/** Convert from OpenTTD's encoding to that of the local environment
+/**
+ * Convert from OpenTTD's encoding to that of the local environment
  * @param name pointer to a valid string that will be converted
- * @return pointer to a new stringbuffer that contains the converted string */
+ * @return pointer to a new stringbuffer that contains the converted string
+ */
 const char *OTTD2FS(const char *name)
 {
 	static iconv_t convd = (iconv_t)(-1);
@@ -193,9 +197,11 @@ const char *OTTD2FS(const char *name)
 	return convert_tofrom_fs(convd, name);
 }
 
-/** Convert to OpenTTD's encoding from that of the local environment
+/**
+ * Convert to OpenTTD's encoding from that of the local environment
  * @param name pointer to a valid string that will be converted
- * @return pointer to a new stringbuffer that contains the converted string */
+ * @return pointer to a new stringbuffer that contains the converted string
+ */
 const char *FS2OTTD(const char *name)
 {
 	static iconv_t convd = (iconv_t)(-1);

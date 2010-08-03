@@ -300,7 +300,8 @@ DEF_CONSOLE_CMD(ConLoad)
 
 				strecpy(_file_to_saveload.name, FiosBrowseTo(item), lastof(_file_to_saveload.name));
 				strecpy(_file_to_saveload.title, item->title, lastof(_file_to_saveload.title));
-			} break;
+				break;
+			}
 			default: IConsolePrintF(CC_ERROR, "%s: Not a savegame.", file);
 		}
 	} else {
@@ -1162,6 +1163,19 @@ DEF_CONSOLE_CMD(ConRescanAI)
 }
 #endif /* ENABLE_AI */
 
+DEF_CONSOLE_CMD(ConRescanNewGRF)
+{
+	if (argc == 0) {
+		IConsoleHelp("Rescan the data dir for NewGRFs. Usage: 'rescan_newgrf'");
+		return true;
+	}
+
+	ScanNewGRFFiles();
+	InvalidateWindowData(WC_GAME_OPTIONS, 0, 1);
+
+	return true;
+}
+
 DEF_CONSOLE_CMD(ConGetSeed)
 {
 	if (argc == 0) {
@@ -1743,6 +1757,7 @@ void IConsoleStdLibRegister()
 	IConsoleCmdRegister("setting_newgame", ConSettingNewgame);
 	IConsoleCmdRegister("list_settings",ConListSettings);
 	IConsoleCmdRegister("gamelog",      ConGamelogPrint);
+	IConsoleCmdRegister("rescan_newgrf", ConRescanNewGRF);
 
 	IConsoleAliasRegister("dir",          "ls");
 	IConsoleAliasRegister("del",          "rm %+");

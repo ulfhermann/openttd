@@ -346,7 +346,8 @@ public:
 				if (str != STR_ERROR_UNABLE_TO_READ_DRIVE) SetDParam(0, tot);
 				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + FONT_HEIGHT_NORMAL + WD_FRAMERECT_TOP, str);
 				DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, path, TC_BLACK);
-			} break;
+				break;
+			}
 
 			case SLWW_DRIVES_DIRECTORIES_LIST: {
 				GfxFillRect(r.left + 1, r.top + 1, r.right, r.bottom, 0xD7);
@@ -362,7 +363,8 @@ public:
 					y += this->resize.step_height;
 					if (y >= this->vscroll.GetCapacity() * this->resize.step_height + r.top + WD_FRAMERECT_TOP) break;
 				}
-			} break;
+				break;
+			}
 
 			case SLWW_DETAILS: {
 				GfxFillRect(r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP,
@@ -455,7 +457,8 @@ public:
 						}
 					}
 				}
-			} break;
+				break;
+			}
 		}
 	}
 
@@ -655,7 +658,7 @@ public:
 				this->selected = NULL;
 				_load_check_data.Clear();
 				BuildFileList();
-			/* FALL THROUGH */
+				/* FALL THROUGH */
 			case 1:
 				/* Selection changes */
 				if (_saveload_mode == SLD_LOAD_GAME || _saveload_mode == SLD_LOAD_SCENARIO) {
@@ -693,8 +696,10 @@ static const WindowDesc _save_dialog_desc(
 	_nested_save_dialog_widgets, lengthof(_nested_save_dialog_widgets)
 );
 
-/** These values are used to convert the file/operations mode into a corresponding file type.
- * So each entry, as expressed by the related comment, is based on the enum   */
+/**
+ * These values are used to convert the file/operations mode into a corresponding file type.
+ * So each entry, as expressed by the related comment, is based on the enum
+ */
 static const FileType _file_modetotype[] = {
 	FT_SAVEGAME,  ///< used for SLD_LOAD_GAME
 	FT_SCENARIO,  ///< used for SLD_LOAD_SCENARIO

@@ -357,8 +357,9 @@ void AfterLoadVehicles(bool part_of_load)
 				RoadVehicle *rv = RoadVehicle::From(v);
 				rv->roadtype = HasBit(EngInfo(v->First()->engine_type)->misc_flags, EF_ROAD_TRAM) ? ROADTYPE_TRAM : ROADTYPE_ROAD;
 				rv->compatible_roadtypes = RoadTypeToRoadTypes(rv->roadtype);
-			}
 				/* FALL THROUGH */
+			}
+
 			case VEH_TRAIN:
 			case VEH_SHIP:
 				v->cur_image = v->GetImage(v->direction);
@@ -525,8 +526,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		 SLE_CONDVAR(Vehicle, current_order_time,    SLE_UINT32,                  67, SL_MAX_VERSION),
 		 SLE_CONDVAR(Vehicle, lateness_counter,      SLE_INT32,                   67, SL_MAX_VERSION),
 
-		/* reserve extra space in savegame here. (currently 10 bytes) */
-		SLE_CONDNULL(10,                                                           2, SL_MAX_VERSION),
+		SLE_CONDNULL(10,                                                           2, 143), // old reserved space
 
 		     SLE_END()
 	};
@@ -548,8 +548,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 
 		SLE_CONDNULL(2, 2, 19),
 		 SLE_CONDVAR(Train, gv_flags,            SLE_UINT16,                 139, SL_MAX_VERSION),
-		/* reserve extra space in savegame here. (currently 11 bytes) */
-		SLE_CONDNULL(11, 2, SL_MAX_VERSION),
+		SLE_CONDNULL(11, 2, 143), // old reserved space
 
 		     SLE_END()
 	};
@@ -569,8 +568,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		 SLE_CONDVAR(RoadVehicle, gv_flags,             SLE_UINT16,                 139, SL_MAX_VERSION),
 		SLE_CONDNULL(4,                                                              69, 130),
 		SLE_CONDNULL(2,                                                               6, 130),
-		/* reserve extra space in savegame here. (currently 16 bytes) */
-		SLE_CONDNULL(16,                                                              2, SL_MAX_VERSION),
+		SLE_CONDNULL(16,                                                              2, 143), // old reserved space
 
 		     SLE_END()
 	};
@@ -580,8 +578,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		SLE_VEH_INCLUDE(),
 		     SLE_VAR(Ship, state, SLE_UINT8),
 
-		/* reserve extra space in savegame here. (currently 16 bytes) */
-		SLE_CONDNULL(16, 2, SL_MAX_VERSION),
+		SLE_CONDNULL(16, 2, 143), // old reserved space
 
 		     SLE_END()
 	};
@@ -603,8 +600,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 
 		 SLE_CONDVAR(Aircraft, turn_counter,          SLE_UINT8,                  136, SL_MAX_VERSION),
 
-		/* reserve extra space in savegame here. (currently 13 bytes) */
-		SLE_CONDNULL(13,                                                           2, SL_MAX_VERSION),
+		SLE_CONDNULL(13,                                                           2, 143), // old reserved space
 
 		     SLE_END()
 	};
@@ -633,8 +629,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 
 		 SLE_CONDVAR(Vehicle, spritenum,             SLE_UINT8,                    2, SL_MAX_VERSION),
 
-		/* reserve extra space in savegame here. (currently 15 bytes) */
-		SLE_CONDNULL(15,                                                           2, SL_MAX_VERSION),
+		SLE_CONDNULL(15,                                                           2, 143), // old reserved space
 
 		     SLE_END()
 	};
@@ -671,8 +666,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		     SLE_VAR(DisasterVehicle, image_override,            SLE_UINT16),
 		     SLE_VAR(DisasterVehicle, big_ufo_destroyer_target,  SLE_UINT16),
 
-		/* reserve extra space in savegame here. (currently 16 bytes) */
-		SLE_CONDNULL(16,                                                           2, SL_MAX_VERSION),
+		SLE_CONDNULL(16,                                                           2, 143), // old reserved space
 
 		     SLE_END()
 	};
