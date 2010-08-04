@@ -15,6 +15,7 @@
 #include "gfx_type.h"
 #include "tile_type.h"
 #include "newgrf_generic.h"
+#include "newgrf_callbacks.h"
 
 /**
  * List of different canal 'features'.
@@ -31,12 +32,17 @@ enum CanalFeature {
 	CF_END,
 };
 
+/** Flags controlling the display of canals. */
+enum CanalFeatureFlag {
+	CFF_HAS_FLAT_SPRITE = 0, ///< Additional flat ground sprite in the beginning.
+};
 
+/** Information about a water feature. */
 struct WaterFeature {
-	const SpriteGroup *group;
-	const GRFFile *grffile;   ///< newgrf where 'group' belongs to
-	uint8 callback_mask;       ///< Bitmask of canal callbacks that have to be called
-	uint8 flags;
+	const SpriteGroup *group; ///< Sprite group to start resolving.
+	const GRFFile *grffile;   ///< NewGRF where 'group' belongs to.
+	uint8 callback_mask;      ///< Bitmask of canal callbacks that have to be called.
+	uint8 flags;              ///< Flags controlling display.
 };
 
 
@@ -51,5 +57,8 @@ extern WaterFeature _water_feature[CF_END];
  * @return Base sprite returned by GRF, or 0 if none.
  */
 SpriteID GetCanalSprite(CanalFeature feature, TileIndex tile);
+
+uint16 GetCanalCallback(CallbackID callback, uint32 param1, uint32 param2, CanalFeature feature, TileIndex tile);
+uint GetCanalSpriteOffset(CanalFeature feature, TileIndex tile, uint cur_offset);
 
 #endif /* NEWGRF_CANAL_H */
