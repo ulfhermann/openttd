@@ -3448,6 +3448,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Cette co
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Ne peut plus bâtir de villes
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Impossible de renommer la ville...
 STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Impossible de construire une ville ici...
+STR_ERROR_CAN_T_EXPAND_TOWN                                     :{WHITE}Impossible d'étendre la ville...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... trop près du bord de la carte
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... trop près d'une autre ville
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... trop de villes
@@ -3496,6 +3497,8 @@ STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Trop pr�
 STR_ERROR_CAN_T_RENAME_STATION                                  :{WHITE}Impossible de renommer la gare...
 STR_ERROR_DRIVE_THROUGH_ON_TOWN_ROAD                            :{WHITE}... cette route appartient à une ville
 STR_ERROR_DRIVE_THROUGH_DIRECTION                               :{WHITE}... mauvaise orientation de la route
+STR_ERROR_DRIVE_THROUGH_CORNER                                  :{WHITE}... les arrêts ne peuvent pas avoir de virages
+STR_ERROR_DRIVE_THROUGH_JUNCTION                                :{WHITE}... les arrêts ne peuvent pas avoir de jonctions
 
 # Station destruction related errors
 STR_ERROR_CAN_T_REMOVE_PART_OF_STATION                          :{WHITE}Impossible de supprimer une partie de la gare...
@@ -3619,6 +3622,7 @@ STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Le tunne
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Impossible de creuser pour faire déboucher le tunnel
 
 # Unmovable related errors
+STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Impossible de construire l'objet...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Objet présent
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... siège de la compagnie présent
 STR_ERROR_CAN_T_PURCHASE_THIS_LAND                              :{WHITE}Impossible d'acheter ce terrain...
