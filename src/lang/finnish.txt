@@ -3447,6 +3447,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Tällä 
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Kaupunkeja ei voi rakentaa
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Kaupungin nimeä ei voi vaihtaa.
 STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Kaupunkia ei voi rakentaa tähän...
+STR_ERROR_CAN_T_EXPAND_TOWN                                     :{WHITE}Kaupunkia ei voi laajentaa...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... liian lähellä kartan reunaa.
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... liian lähellä toista kaupunkia.
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... liian monta kaupunkia.
@@ -3495,6 +3496,8 @@ STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Liian l�
 STR_ERROR_CAN_T_RENAME_STATION                                  :{WHITE}Asemaa ei voi nimetä uudelleen.
 STR_ERROR_DRIVE_THROUGH_ON_TOWN_ROAD                            :{WHITE}... kaupunki omistaa tien
 STR_ERROR_DRIVE_THROUGH_DIRECTION                               :{WHITE}... tie on väärin päin
+STR_ERROR_DRIVE_THROUGH_CORNER                                  :{WHITE}... läpiajettavissa pysäkeissä ei voi olla kulmia
+STR_ERROR_DRIVE_THROUGH_JUNCTION                                :{WHITE}... läpiajettavissa pysäkeissä ei voi olla risteyksiä
 
 # Station destruction related errors
 STR_ERROR_CAN_T_REMOVE_PART_OF_STATION                          :{WHITE}Aseman osaa ei voi poistaa...
@@ -3618,6 +3621,7 @@ STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Tunneli 
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Maata ei voi kaivaa tunnelin toisessa päässä.
 
 # Unmovable related errors
+STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Kohdetta ei voida rakentaa...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Objekti on tiellä.
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... yhtiön päärakennus on tiellä.
 STR_ERROR_CAN_T_PURCHASE_THIS_LAND                              :{WHITE}Maa-aluetta ei voi hankkia...
