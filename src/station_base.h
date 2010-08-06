@@ -18,6 +18,7 @@
 #include "cargopacket.h"
 #include "industry_type.h"
 #include "linkgraph/linkgraph_type.h"
+#include "newgrf_storage.h"
 #include "moving_average.h"
 #include <map>
 #include <set>
@@ -295,10 +296,15 @@ struct GoodsEntry {
 
 /** All airport-related information. Only valid if tile != INVALID_TILE. */
 struct Airport : public TileArea {
+	typedef PersistentStorageArray<int32, 16> PersistentStorage;
+
 	Airport() : TileArea(INVALID_TILE, 0, 0) {}
 
-	uint64 flags; ///< stores which blocks on the airport are taken. was 16 bit earlier on, then 32
-	byte type;    ///< Type of this airport, @see AirportTypes.
+	uint64 flags;       ///< stores which blocks on the airport are taken. was 16 bit earlier on, then 32
+	byte type;          ///< Type of this airport, @see AirportTypes.
+	byte layout;        ///< Airport layout number.
+	Direction rotation; ///< How this airport is rotated.
+	PersistentStorage psa; ///< Persistent storage for NewGRF airports
 
 	/**
 	 * Get the AirportSpec that from the airport type of this airport. If there
@@ -329,6 +335,30 @@ struct Airport : public TileArea {
 	}
 
 	/**
+	 * Add the tileoffset to the base tile of this airport but rotate it first.
+	 * The base tile is the northernmost tile of this airport. This function
+	 * helps to make sure that getting the tile of a hangar works even for
+	 * rotated airport layouts without requiring a rotated array of hangar tiles.
+	 * @param tidc The tilediff to add to the airport tile.
+	 * @return The tile of this airport plus the rotated offset.
+	 */
+	FORCEINLINE TileIndex GetRotatedTileFromOffset(TileIndexDiffC tidc) const
+	{
+		const AirportSpec *as = this->GetSpec();
+		switch (this->rotation) {
+			case DIR_N: return this->tile + ToTileIndexDiff(tidc);
+
+			case DIR_E: return this->tile + TileDiffXY(tidc.y, as->size_x - 1 - tidc.x);
+
+			case DIR_S: return this->tile + TileDiffXY(as->size_x - 1 - tidc.x, as->size_y - 1 - tidc.y);
+
+			case DIR_W: return this->tile + TileDiffXY(as->size_y - 1 - tidc.y, tidc.x);
+
+			default: NOT_REACHED();
+		}
+	}
+
+	/**
 	 * Get the first tile of the given hangar.
 	 * @param hangar_num The hangar to get the location of.
 	 * @pre hangar_num < GetNumHangars().
@@ -339,7 +369,7 @@ struct Airport : public TileArea {
 		const AirportSpec *as = this->GetSpec();
 		for (uint i = 0; i < as->nof_depots; i++) {
 			if (as->depot_table[i].hangar_num == hangar_num) {
-				return this->tile + ToTileIndexDiff(as->depot_table[i].ti);
+				return this->GetRotatedTileFromOffset(as->depot_table[i].ti);
 			}
 		}
 		NOT_REACHED();
@@ -355,7 +385,7 @@ struct Airport : public TileArea {
 	{
 		const AirportSpec *as = this->GetSpec();
 		for (uint i = 0; i < as->nof_depots; i++) {
-			if (this->tile + ToTileIndexDiff(as->depot_table[i].ti) == tile) {
+			if (this->GetRotatedTileFromOffset(as->depot_table[i].ti) == tile) {
 				return as->depot_table[i].hangar_num;
 			}
 		}
