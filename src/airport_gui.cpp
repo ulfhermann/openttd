@@ -24,18 +24,22 @@
 #include "company_base.h"
 #include "station_type.h"
 #include "newgrf_airport.h"
+#include "newgrf_callbacks.h"
 #include "widgets/dropdown_type.h"
 #include "core/geometry_func.hpp"
 #include "hotkeys.h"
+#include "sprite.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
 
 static AirportClassID _selected_airport_class; ///< the currently visible airport class
 static int _selected_airport_index;            ///< the index of the selected airport in the current class or -1
+static byte _selected_airport_layout;          ///< selected airport layout number.
 
 static void ShowBuildAirportPicker(Window *parent);
 
+SpriteID GetCustomAirportSprite(const AirportSpec *as, byte layout);
 
 void CcBuildAirport(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p2)
 {
@@ -52,6 +56,7 @@ static void PlaceAirport(TileIndex tile)
 	SB(p2, 16, 16, INVALID_STATION); // no station to join
 
 	uint32 p1 = GetAirportSpecFromClass(_selected_airport_class, _selected_airport_index)->GetIndex();
+	p1 |= _selected_airport_layout << 8;
 	CommandContainer cmdcont = { tile, p1, p2, CMD_BUILD_AIRPORT | CMD_MSG(STR_ERROR_CAN_T_BUILD_AIRPORT_HERE), CcBuildAirport, "" };
 	ShowSelectStationIfNeeded(cmdcont, TileArea(tile, _thd.size.x / TILE_SIZE, _thd.size.y / TILE_SIZE));
 }
@@ -197,6 +202,11 @@ enum AirportPickerWidgets {
 	BAIRW_CLASS_DROPDOWN,
 	BAIRW_AIRPORT_LIST,
 	BAIRW_SCROLLBAR,
+	BAIRW_LAYOUT_NUM,
+	BAIRW_LAYOUT_DECREASE,
+	BAIRW_LAYOUT_INCREASE,
+	BAIRW_AIRPORT_SPRITE,
+	BAIRW_EXTRA_TEXT,
 	BAIRW_BOTTOMPANEL,
 	BAIRW_COVERAGE_LABEL,
 	BAIRW_BTN_DONTHILIGHT,
@@ -204,6 +214,7 @@ enum AirportPickerWidgets {
 };
 
 class BuildAirportWindow : public PickerWindowBase {
+	SpriteID preview_sprite; ///< Cached airport preview sprite.
 	int line_height;
 
 	/** Build a dropdown list of available airport classes */
@@ -240,9 +251,27 @@ public:
 
 	virtual void SetStringParameters(int widget) const
 	{
-		if (widget != BAIRW_CLASS_DROPDOWN) return;
+		switch (widget) {
+			case BAIRW_CLASS_DROPDOWN:
+				SetDParam(0, GetAirportClassName(_selected_airport_class));
+				break;
 
-		SetDParam(0, GetAirportClassName(_selected_airport_class));
+			case BAIRW_LAYOUT_NUM:
+				SetDParam(0, STR_EMPTY);
+				if (_selected_airport_index != -1) {
+					const AirportSpec *as = GetAirportSpecFromClass(_selected_airport_class, _selected_airport_index);
+					StringID string = GetAirportTextCallback(as, _selected_airport_layout, CBID_AIRPORT_LAYOUT_NAME);
+					if (string != STR_UNDEFINED) {
+						SetDParam(0, string);
+					} else if (as->num_table > 1) {
+						SetDParam(0, STR_STATION_BUILD_AIRPORT_LAYOUT_NAME);
+						SetDParam(1, _selected_airport_layout + 1);
+					}
+				}
+				break;
+
+			default: break;
+		}
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
@@ -273,22 +302,75 @@ public:
 				break;
 			}
 
+			case BAIRW_AIRPORT_SPRITE:
+				for (int i = 0; i < NUM_AIRPORTS; i++) {
+					const AirportSpec *as = AirportSpec::Get(i);
+					if (!as->enabled) continue;
+					for (byte layout = 0; layout < as->num_table; layout++) {
+						SpriteID sprite = GetCustomAirportSprite(as, layout);
+						if (sprite != 0) {
+							Dimension d = GetSpriteSize(sprite);
+							d.width += WD_FRAMERECT_LEFT + WD_FRAMERECT_RIGHT;
+							d.height += WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
+							*size = maxdim(d, *size);
+						}
+					}
+				}
+				break;
+
+			case BAIRW_EXTRA_TEXT:
+				for (int i = NEW_AIRPORT_OFFSET; i < NUM_AIRPORTS; i++) {
+					const AirportSpec *as = AirportSpec::Get(i);
+					if (!as->enabled) continue;
+					for (byte layout = 0; layout < as->num_table; layout++) {
+						StringID string = GetAirportTextCallback(as, layout, CBID_AIRPORT_ADDITIONAL_TEXT);
+						if (string == STR_UNDEFINED) continue;
+
+						/* STR_BLACK_STRING is used to start the string with {BLACK} */
+						SetDParam(0, string);
+						Dimension d = GetStringMultiLineBoundingBox(STR_BLACK_STRING, *size);
+						*size = maxdim(d, *size);
+					}
+				}
+				break;
+
 			default: break;
 		}
 	}
 
 	virtual void DrawWidget(const Rect &r, int widget) const
 	{
-		if (widget != BAIRW_AIRPORT_LIST) return;
-
-		int y = r.top;
-		for (uint i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < GetNumAirportsInClass(_selected_airport_class); i++) {
-			const AirportSpec *as = GetAirportSpecFromClass(_selected_airport_class, i);
-			if (!as->IsAvailable()) {
-				GfxFillRect(r.left + 1, y + 1, r.right - 1, y + this->line_height - 2, 0, FILLRECT_CHECKER);
+		switch (widget) {
+			case BAIRW_AIRPORT_LIST: {
+				int y = r.top;
+				for (uint i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < GetNumAirportsInClass(_selected_airport_class); i++) {
+					const AirportSpec *as = GetAirportSpecFromClass(_selected_airport_class, i);
+					if (!as->IsAvailable()) {
+						GfxFillRect(r.left + 1, y + 1, r.right - 1, y + this->line_height - 2, 0, FILLRECT_CHECKER);
+					}
+					DrawString(r.left + WD_MATRIX_LEFT, r.right + WD_MATRIX_RIGHT, y + WD_MATRIX_TOP, as->name, ((int)i == _selected_airport_index) ? TC_WHITE : TC_BLACK);
+					y += this->line_height;
+				}
+				break;
 			}
-			DrawString(r.left + WD_MATRIX_LEFT, r.right + WD_MATRIX_RIGHT, y + WD_MATRIX_TOP, as->name, ((int)i == _selected_airport_index) ? TC_WHITE : TC_BLACK);
-			y += this->line_height;
+
+			case BAIRW_AIRPORT_SPRITE:
+				if (this->preview_sprite != 0) {
+					Dimension d = GetSpriteSize(this->preview_sprite);
+					DrawSprite(this->preview_sprite, COMPANY_SPRITE_COLOUR(_local_company), (r.left + r.right - d.width) / 2, (r.top + r.bottom - d.height) / 2);
+				}
+				break;
+
+			case BAIRW_EXTRA_TEXT:
+				if (_selected_airport_index != -1) {
+					const AirportSpec *as = GetAirportSpecFromClass(_selected_airport_class, _selected_airport_index);
+					StringID string = GetAirportTextCallback(as, _selected_airport_layout, CBID_AIRPORT_ADDITIONAL_TEXT);
+					if (string != STR_UNDEFINED) {
+						SetDParam(0, string);
+						DrawStringMultiLine(r.left, r.right, r.top, r.bottom, STR_BLACK_STRING);
+					}
+				}
+				break;
 		}
 	}
 
@@ -328,6 +410,12 @@ public:
 	void SelectOtherAirport(int airport_index)
 	{
 		_selected_airport_index = airport_index;
+		_selected_airport_layout = 0;
+
+		if (_selected_airport_index != -1) {
+			const AirportSpec *as = GetAirportSpecFromClass(_selected_airport_class, _selected_airport_index);
+			this->preview_sprite = GetCustomAirportSprite(as, _selected_airport_layout);
+		}
 
 		this->UpdateSelectSize();
 		this->SetDirty();
@@ -337,9 +425,18 @@ public:
 	{
 		if (_selected_airport_index == -1) {
 			SetTileSelectSize(1, 1);
+			this->DisableWidget(BAIRW_LAYOUT_DECREASE);
+			this->DisableWidget(BAIRW_LAYOUT_INCREASE);
 		} else {
 			const AirportSpec *as = GetAirportSpecFromClass(_selected_airport_class, _selected_airport_index);
-			SetTileSelectSize(as->size_x, as->size_y);
+			int w = as->size_x;
+			int h = as->size_y;
+			Direction rotation = as->rotation[_selected_airport_layout];
+			if (rotation == DIR_E || rotation == DIR_W) Swap(w, h);
+			SetTileSelectSize(w, h);
+
+			this->SetWidgetDisabledState(BAIRW_LAYOUT_DECREASE, _selected_airport_layout == 0);
+			this->SetWidgetDisabledState(BAIRW_LAYOUT_INCREASE, _selected_airport_layout + 1 >= as->num_table);
 
 			int rad = _settings_game.station.modified_catchment ? as->catchment : (uint)CA_UNMODIFIED;
 			if (_settings_client.gui.station_show_coverage) SetTileSelectBigSize(-rad, -rad, 2 * rad, 2 * rad);
@@ -368,6 +465,18 @@ public:
 				this->SetDirty();
 				SndPlayFx(SND_15_BEEP);
 				this->UpdateSelectSize();
+				break;
+
+			case BAIRW_LAYOUT_DECREASE:
+				_selected_airport_layout--;
+				this->UpdateSelectSize();
+				this->SetDirty();
+				break;
+
+			case BAIRW_LAYOUT_INCREASE:
+				_selected_airport_layout++;
+				this->UpdateSelectSize();
+				this->SetDirty();
 				break;
 		}
 	}
@@ -431,6 +540,13 @@ static const NWidgetPart _nested_build_airport_widgets[] = {
 			NWidget(WWT_MATRIX, COLOUR_GREY, BAIRW_AIRPORT_LIST), SetFill(1, 0), SetDataTip(0x501, STR_NULL),
 			NWidget(WWT_SCROLLBAR, COLOUR_GREY, BAIRW_SCROLLBAR),
 		EndContainer(),
+		NWidget(NWID_HORIZONTAL),
+			NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, BAIRW_LAYOUT_DECREASE), SetMinimalSize(12, 0),SetDataTip(AWV_DECREASE, STR_NULL),
+			NWidget(WWT_LABEL, COLOUR_GREY, BAIRW_LAYOUT_NUM), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_BLACK_STRING, STR_NULL),
+			NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, BAIRW_LAYOUT_INCREASE), SetMinimalSize(12, 0), SetDataTip(AWV_INCREASE, STR_NULL),
+		EndContainer(),
+		NWidget(WWT_EMPTY, COLOUR_DARK_GREEN, BAIRW_AIRPORT_SPRITE), SetFill(1, 0),
+		NWidget(WWT_EMPTY, COLOUR_DARK_GREEN, BAIRW_EXTRA_TEXT), SetFill(1, 0), SetMinimalSize(150, 0),
 	EndContainer(),
 	/* Bottom panel. */
 	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, BAIRW_BOTTOMPANEL), SetPIP(2, 2, 2),
