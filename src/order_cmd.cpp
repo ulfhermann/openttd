@@ -314,17 +314,28 @@ StationID OrderList::GetNextStoppingStation(const Order *next, uint hops, bool c
 
 /**
  * Get the next station the vehicle will stop at, if that is deterministic.
- * @param curr_id the ID of the current order
+ * @param curr_order the ID of the current order
+ * @param curr_station the station the vehicle is just visiting or INVALID_STATION
  * @param check_nonstop if true regard orders without non-stop flag as nondeterministic
  * @return The ID of the next station the vehicle will stop at or INVALID_STATION
  */
-StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_id, bool check_nonstop) const {
-	const Order *curr = this->GetOrderAt(curr_id);
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, bool check_nonstop) const {
+	const Order *curr = this->GetOrderAt(curr_order);
 	if (curr == NULL) {
 		curr = this->GetFirstOrder();
 		if (curr == NULL) return INVALID_STATION;
 	}
-	return this->GetNextStoppingStation(this->GetNext(curr), 1, check_nonstop);
+
+	/* If we're not at a station or the current order doesn't yield the station
+	 * we're at, we have to check the current order; otherwise we have to check
+	 * the next one.
+	 */
+	if (curr_station == INVALID_STATION || curr->GetType() != OT_GOTO_STATION ||
+			curr_station != curr->GetDestination()) {
+		return this->GetNextStoppingStation(curr, 0, check_nonstop);
+	} else {
+		return this->GetNextStoppingStation(this->GetNext(curr), 1, check_nonstop);
+	}
 }
 
 void OrderList::InsertOrderAt(Order *new_order, int index)
