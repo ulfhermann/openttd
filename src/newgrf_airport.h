@@ -16,6 +16,7 @@
 #include "map_type.h"
 #include "strings_type.h"
 #include "newgrf_commons.h"
+#include "gfx_type.h"
 
 /* Copy from station_map.h */
 typedef byte StationGfx;
@@ -59,6 +60,7 @@ struct HangarTileTable {
 struct AirportSpec {
 	const struct AirportFTAClass *fsm;     ///< the finite statemachine for the default airports
 	const AirportTileTable * const *table; ///< list of the tiles composing the airport
+	Direction *rotation;                   ///< the rotation of each tiletable
 	byte num_table;                        ///< number of elements in the table
 	const HangarTileTable *depot_table;    ///< gives the position of the depots on the airports
 	byte nof_depots;                       ///< the number of hangar tiles in this airport
@@ -71,6 +73,7 @@ struct AirportSpec {
 	StringID name;                         ///< name of this airport
 	TTDPAirportType ttd_airport_type;      ///< ttdpatch airport type (Small/Large/Helipad/Oilrig)
 	AirportClassID aclass;                 ///< the class to which this airport type belongs
+	SpriteID preview_sprite;               ///< preview sprite for this airport
 	/* Newgrf data */
 	bool enabled;                          ///< entity still avaible (by default true).newgrf can disable it, though
 	GRFFileProps grf_prop;                 ///< properties related the the grf file
@@ -113,5 +116,7 @@ uint GetNumAirportsInClass(AirportClassID id);
 
 void BindAirportSpecs();
 const AirportSpec *GetAirportSpecFromClass(AirportClassID aclass, uint airport);
+
+StringID GetAirportTextCallback(const AirportSpec *as, byte layout, uint16 callback);
 
 #endif /* NEWGRF_AIRPORT_H */
