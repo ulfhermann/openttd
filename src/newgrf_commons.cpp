@@ -22,6 +22,7 @@
 #include "station_map.h"
 #include "tree_map.h"
 #include "tunnelbridge_map.h"
+#include "genworld.h"
 #include "core/mem_func.hpp"
 
 /**
@@ -157,7 +158,7 @@ uint16 OverrideManagerBase::GetSubstituteID(uint16 entity_id)
  */
 void HouseOverrideManager::SetEntitySpec(const HouseSpec *hs)
 {
-	HouseID house_id = this->AddEntityID(hs->local_id, hs->grffile->grfid, hs->substitute_id);
+	HouseID house_id = this->AddEntityID(hs->grf_prop.local_id, hs->grf_prop.grffile->grfid, hs->grf_prop.subst_id);
 
 	if (house_id == invalid_ID) {
 		grfmsg(1, "House.SetEntitySpec: Too many houses allocated. Ignoring.");
@@ -170,9 +171,9 @@ void HouseOverrideManager::SetEntitySpec(const HouseSpec *hs)
 	for (int i = 0; i != max_offset; i++) {
 		HouseSpec *overridden_hs = HouseSpec::Get(i);
 
-		if (entity_overrides[i] != hs->local_id || grfid_overrides[i] != hs->grffile->grfid) continue;
+		if (entity_overrides[i] != hs->grf_prop.local_id || grfid_overrides[i] != hs->grf_prop.grffile->grfid) continue;
 
-		overridden_hs->override = house_id;
+		overridden_hs->grf_prop.override = house_id;
 		entity_overrides[i] = invalid_ID;
 		grfid_overrides[i] = 0;
 	}
@@ -296,7 +297,7 @@ void IndustryTileOverrideManager::SetEntitySpec(const IndustryTileSpec *its)
  * @return value corresponding to the grf expected format:
  *         Terrain type: 0 normal, 1 desert, 2 rainforest, 4 on or above snowline
  */
-uint32 GetTerrainType(TileIndex tile, bool upper_halftile)
+uint32 GetTerrainType(TileIndex tile, TileContext context)
 {
 	switch (_settings_game.game_creation.landscape) {
 		case LT_TROPIC: return GetTropicZone(tile);
@@ -304,39 +305,54 @@ uint32 GetTerrainType(TileIndex tile, bool upper_halftile)
 			bool has_snow;
 			switch (GetTileType(tile)) {
 				case MP_CLEAR:
+					/* During map generation the snowstate may not be valid yet, as the tileloop may not have run yet. */
+					if (_generating_world) goto genworld;
 					has_snow = IsSnowTile(tile) && GetClearDensity(tile) >= 2;
 					break;
 
 				case MP_RAILWAY: {
+					/* During map generation the snowstate may not be valid yet, as the tileloop may not have run yet. */
+					if (_generating_world) goto genworld; // we do not care about foundations here
 					RailGroundType ground = GetRailGroundType(tile);
-					has_snow = (ground == RAIL_GROUND_ICE_DESERT || (upper_halftile && ground == RAIL_GROUND_HALF_SNOW));
+					has_snow = (ground == RAIL_GROUND_ICE_DESERT || (context == TCX_UPPER_HALFTILE && ground == RAIL_GROUND_HALF_SNOW));
 					break;
 				}
 
 				case MP_ROAD:
+					/* During map generation the snowstate may not be valid yet, as the tileloop may not have run yet. */
+					if (_generating_world) goto genworld; // we do not care about foundations here
 					has_snow = IsOnSnow(tile);
 					break;
 
 				case MP_TREES: {
+					/* During map generation the snowstate may not be valid yet, as the tileloop may not have run yet. */
+					if (_generating_world) goto genworld;
 					TreeGround ground = GetTreeGround(tile);
 					has_snow = (ground == TREE_GROUND_SNOW_DESERT || ground == TREE_GROUND_ROUGH_SNOW) && GetTreeDensity(tile) >= 2;
 					break;
 				}
 
 				case MP_TUNNELBRIDGE:
-					has_snow = HasTunnelBridgeSnowOrDesert(tile);
+					if (context == TCX_ON_BRIDGE) {
+						has_snow = (GetBridgeHeight(tile) > GetSnowLine());
+					} else {
+						/* During map generation the snowstate may not be valid yet, as the tileloop may not have run yet. */
+						if (_generating_world) goto genworld; // we do not care about foundations here
+						has_snow = HasTunnelBridgeSnowOrDesert(tile);
+					}
 					break;
 
 				case MP_STATION:
 				case MP_HOUSE:
 				case MP_INDUSTRY:
-				case MP_UNMOVABLE:
+				case MP_OBJECT:
 					/* These tiles usually have a levelling foundation. So use max Z */
 					has_snow = (GetTileMaxZ(tile) > GetSnowLine());
 					break;
 
 				case MP_VOID:
 				case MP_WATER:
+				genworld:
 					has_snow = (GetTileZ(tile) > GetSnowLine());
 					break;
 
