@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "openttd.h"
 #include "gui.h"
+#include "sound_func.h"
+#include "window_func.h"
 #include "textbuf_gui.h"
 #include "command_func.h"
 #include "viewport_func.h"
@@ -34,11 +36,15 @@
 #include "core/random_func.hpp"
 #include "core/backup_type.hpp"
 #include "genworld.h"
+#include "smallmap_gui.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
 
 bool _ignore_restrictions;
+uint64 _displayed_industries; ///< Communication from the industry chain window to the smallmap window about what industries to display.
+
+assert_compile(NUM_INDUSTRYTYPES <= 64); // Make sure all industry types fit in _displayed_industries.
 
 /** Cargo suffix type (for which window is it requested) */
 enum CargoSuffixType {
@@ -1289,6 +1295,7 @@ void ShowIndustryDirectory()
 /** Widget numbers of the industry cargoes window, */
 enum IndustryCargoesWidgets {
 	ICW_CAPTION,
+	ICW_NOTIFY,
 	ICW_PANEL,
 	ICW_SCROLLBAR,
 };
@@ -1302,7 +1309,14 @@ static const NWidgetPart _nested_industry_cargoes_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, ICW_PANEL), SetResize(1, 10), SetMinimalSize(200, 90), EndContainer(),
+		NWidget(NWID_VERTICAL),
+			NWidget(WWT_PANEL, COLOUR_BROWN, ICW_PANEL), SetResize(1, 10), SetMinimalSize(200, 90), EndContainer(),
+			NWidget(NWID_HORIZONTAL),
+				NWidget(WWT_TEXTBTN, COLOUR_BROWN, ICW_NOTIFY),
+					SetDataTip(STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP, STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP),
+				NWidget(WWT_PANEL, COLOUR_BROWN), SetFill(1, 0), SetResize(1, 0), EndContainer(),
+			EndContainer(),
+		EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, ICW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
@@ -1338,6 +1352,7 @@ struct CargoesField {
 	static const int HOR_CARGO_WIDTH, HOR_CARGO_SPACE;
 	static const int CARGO_FIELD_WIDTH;
 	static const int VERT_CARGO_SPACE, VERT_CARGO_EDGE;
+	static const int BLOB_DISTANCE, BLOB_WIDTH, BLOB_HEIGHT;
 
 	static const int INDUSTRY_LINE_COLOUR;
 	static const int CARGO_LINE_COLOUR;
@@ -1533,8 +1548,21 @@ struct CargoesField {
 				GfxDrawLine(xpos2, ypos1, xpos2, ypos2, INDUSTRY_LINE_COLOUR);
 				ypos += (normal_height - FONT_HEIGHT_NORMAL) / 2;
 				if (this->u.industry.ind_type < NUM_INDUSTRYTYPES) {
-					SetDParam(0, GetIndustrySpec(this->u.industry.ind_type)->name);
+					const IndustrySpec *indsp = GetIndustrySpec(this->u.industry.ind_type);
+					SetDParam(0, indsp->name);
 					DrawString(xpos, xpos2, ypos, STR_JUST_STRING, TC_WHITE, SA_HOR_CENTER);
+
+					/* Draw the industry legend. */
+					int blob_left, blob_right;
+					if (_dynlang.text_dir == TD_RTL) {
+						blob_right = xpos2 - BLOB_DISTANCE;
+						blob_left  = blob_right - BLOB_WIDTH;
+					} else {
+						blob_left  = xpos + BLOB_DISTANCE;
+						blob_right = blob_left + BLOB_WIDTH;
+					}
+					GfxFillRect(blob_left,     ypos2 - BLOB_DISTANCE - BLOB_HEIGHT,     blob_right,     ypos2 - BLOB_DISTANCE,     0); // Border
+					GfxFillRect(blob_left + 1, ypos2 - BLOB_DISTANCE - BLOB_HEIGHT + 1, blob_right - 1, ypos2 - BLOB_DISTANCE - 1, indsp->map_colour);
 				} else {
 					DrawString(xpos, xpos2, ypos, STR_INDUSTRY_CARGOES_HOUSES, TC_FROMSTRING, SA_HOR_CENTER);
 				}
@@ -1747,6 +1775,10 @@ const int CargoesField::HOR_CARGO_WIDTH        = 15; ///< Width of a vertical ca
 const int CargoesField::HOR_CARGO_SPACE        =  5; ///< Amount of horizontal space between two vertical cargoes.
 const int CargoesField::VERT_CARGO_EDGE        =  4; ///< Amount of vertical space between top/bottom and the top/bottom connected cargo at an industry.
 const int CargoesField::VERT_CARGO_SPACE       =  4; ///< Amount of vertical space between two connected cargoes at an industry.
+
+const int CargoesField::BLOB_DISTANCE =  5; ///< Distance of the industry legend colour from the edge of the industry box.
+const int CargoesField::BLOB_WIDTH    = 12; ///< Width of the industry legend colour, including border.
+const int CargoesField::BLOB_HEIGHT   =  9; ///< Height of the industry legend colour, including border
 
 /** Width of a #CFT_CARGO field. */
 const int CargoesField::CARGO_FIELD_WIDTH = HOR_CARGO_BORDER_SPACE * 2 + HOR_CARGO_WIDTH * MAX_CARGOES + HOR_CARGO_SPACE * (MAX_CARGOES - 1);
@@ -2091,6 +2123,18 @@ struct IndustryCargoesWindow : public Window {
 	}
 
 	/**
+	 * Notify smallmap that new displayed industries have been selected (in #_displayed_industries).
+	 */
+	void NotifySmallmap()
+	{
+		if (!this->IsWidgetLowered(ICW_NOTIFY)) return;
+
+		/* Only notify the smallmap window if it exists. In particular, do not
+		 * bring it to the front to prevent messing up any nice layout of the user. */
+		InvalidateWindowClassesData(WC_SMALLMAP, 0);
+	}
+
+	/**
 	 * Compute what and where to display for industry type \a it.
 	 * @param it Industry type to display.
 	 */
@@ -2098,6 +2142,7 @@ struct IndustryCargoesWindow : public Window {
 	{
 		this->GetWidget<NWidgetCore>(ICW_CAPTION)->widget_data = STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION;
 		this->ind_cargo = it;
+		_displayed_industries = 1 << it;
 
 		this->fields.Clear();
 		CargoesRow *row = this->fields.Append();
@@ -2141,10 +2186,12 @@ struct IndustryCargoesWindow : public Window {
 
 			if (HasCommonValidCargo(central_sp->accepts_cargo, lengthof(central_sp->accepts_cargo), indsp->produced_cargo, lengthof(indsp->produced_cargo))) {
 				this->PlaceIndustry(1 + supp_count * num_indrows / num_supp, 0, it);
+				SetBit(_displayed_industries, it);
 				supp_count++;
 			}
 			if (HasCommonValidCargo(central_sp->produced_cargo, lengthof(central_sp->produced_cargo), indsp->accepts_cargo, lengthof(indsp->accepts_cargo))) {
 				this->PlaceIndustry(1 + cust_count * num_indrows / num_cust, 4, it);
+				SetBit(_displayed_industries, it);
 				cust_count++;
 			}
 		}
@@ -2162,6 +2209,7 @@ struct IndustryCargoesWindow : public Window {
 		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
 		this->vscroll.SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
 		this->SetDirty();
+		this->NotifySmallmap();
 	}
 
 	/**
@@ -2172,6 +2220,7 @@ struct IndustryCargoesWindow : public Window {
 	{
 		this->GetWidget<NWidgetCore>(ICW_CAPTION)->widget_data = STR_INDUSTRY_CARGOES_CARGO_CAPTION;
 		this->ind_cargo = cid + NUM_INDUSTRYTYPES;
+		_displayed_industries = 0;
 
 		this->fields.Clear();
 		CargoesRow *row = this->fields.Append();
@@ -2206,10 +2255,12 @@ struct IndustryCargoesWindow : public Window {
 
 			if (HasCommonValidCargo(&cid, 1, indsp->produced_cargo, lengthof(indsp->produced_cargo))) {
 				this->PlaceIndustry(1 + supp_count * num_indrows / num_supp, 0, it);
+				SetBit(_displayed_industries, it);
 				supp_count++;
 			}
 			if (HasCommonValidCargo(&cid, 1, indsp->accepts_cargo, lengthof(indsp->accepts_cargo))) {
 				this->PlaceIndustry(1 + cust_count * num_indrows / num_cust, 2, it);
+				SetBit(_displayed_industries, it);
 				cust_count++;
 			}
 		}
@@ -2226,14 +2277,25 @@ struct IndustryCargoesWindow : public Window {
 		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
 		this->vscroll.SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
 		this->SetDirty();
+		this->NotifySmallmap();
 	}
 
 	/**
-	 * Notify the window to display another industry type.
-	 * @param data The new industry type to display.
+	 * Notify the window about external events.
+	 * - data = 0 .. NUM_INDUSTRYTYPES - 1: Display the chain around the given industry.
+	 * - data = NUM_INDUSTRYTYPES: Stop sending updates to the smallmap window.
+	 * @param data The event.
 	 */
 	virtual void OnInvalidateData(int data)
 	{
+		if (data == NUM_INDUSTRYTYPES) {
+			if (this->IsWidgetLowered(ICW_NOTIFY)) {
+				this->RaiseWidget(ICW_NOTIFY);
+				this->SetWidgetDirty(ICW_NOTIFY);
+			}
+			return;
+		}
+
 		assert(data >= 0 && data < NUM_INDUSTRYTYPES);
 		this->ComputeIndustryDisplay(data);
 	}
@@ -2328,32 +2390,46 @@ struct IndustryCargoesWindow : public Window {
 
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
-		if (widget != ICW_PANEL) return;
+		switch (widget) {
+			case ICW_PANEL: {
+				Point fieldxy, xy;
+				if (!CalculatePositionInWidget(pt, &fieldxy, &xy)) return;
 
-		Point fieldxy, xy;
-		if (!CalculatePositionInWidget(pt, &fieldxy, &xy)) return;
+				const CargoesField *fld = this->fields[fieldxy.y].columns + fieldxy.x;
+				switch (fld->type) {
+					case CFT_INDUSTRY:
+						if (fld->u.industry.ind_type < NUM_INDUSTRYTYPES) this->ComputeIndustryDisplay(fld->u.industry.ind_type);
+						break;
 
-		const CargoesField *fld = this->fields[fieldxy.y].columns + fieldxy.x;
-		switch (fld->type) {
-			case CFT_INDUSTRY:
-				if (fld->u.industry.ind_type < NUM_INDUSTRYTYPES) this->ComputeIndustryDisplay(fld->u.industry.ind_type);
-				break;
+					case CFT_CARGO: {
+						CargoesField *lft = (fieldxy.x > 0) ? this->fields[fieldxy.y].columns + fieldxy.x - 1 : NULL;
+						CargoesField *rgt = (fieldxy.x < 4) ? this->fields[fieldxy.y].columns + fieldxy.x + 1 : NULL;
+						CargoID cid = fld->CargoClickedAt(lft, rgt, xy);
+						if (cid != INVALID_CARGO) this->ComputeCargoDisplay(cid);
+						break;
+					}
 
-			case CFT_CARGO: {
-				CargoesField *lft = (fieldxy.x > 0) ? this->fields[fieldxy.y].columns + fieldxy.x - 1 : NULL;
-				CargoesField *rgt = (fieldxy.x < 4) ? this->fields[fieldxy.y].columns + fieldxy.x + 1 : NULL;
-				CargoID cid = fld->CargoClickedAt(lft, rgt, xy);
-				if (cid != INVALID_CARGO) this->ComputeCargoDisplay(cid);
+					case CFT_CARGO_LABEL: {
+						CargoID cid = fld->CargoLabelClickedAt(xy);
+						if (cid != INVALID_CARGO) this->ComputeCargoDisplay(cid);
+						break;
+					}
+
+					default:
+						break;
+				}
 				break;
 			}
 
-			case CFT_CARGO_LABEL: {
-				CargoID cid = fld->CargoLabelClickedAt(xy);
-				if (cid != INVALID_CARGO) this->ComputeCargoDisplay(cid);
-				break;
-			}
+			case ICW_NOTIFY:
+				this->ToggleWidgetLoweredState(ICW_NOTIFY);
+				this->SetWidgetDirty(ICW_NOTIFY);
+				SndPlayFx(SND_15_BEEP);
 
-			default:
+				if (this->IsWidgetLowered(ICW_NOTIFY)) {
+					if (FindWindowByClass(WC_SMALLMAP) == NULL) ShowSmallMap();
+					this->NotifySmallmap();
+				}
 				break;
 		}
 	}

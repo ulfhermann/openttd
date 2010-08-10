@@ -13,10 +13,11 @@
 #define NEWGRF_STATION_H
 
 #include "newgrf_callbacks.h"
+#include "newgrf_class.h"
+#include "newgrf_commons.h"
 #include "sprite.h"
 #include "direction_type.h"
 #include "cargo_type.h"
-#include "strings_type.h"
 #include "station_type.h"
 #include "rail_type.h"
 
@@ -46,13 +47,9 @@ typedef byte *StationLayout;
 
 /** Station specification. */
 struct StationSpec {
-	const struct GRFFile *grffile; ///< ID of GRF file station belongs to.
-	int localidx; ///< Index within GRF file of station.
-
-	bool allocated; ///< Flag whether this station has been added to a station class list
-
-	StationClassID sclass; ///< The class to which this spec belongs.
-	StringID name; ///< Name of this station.
+	GRFFilePropsBase grf_prop; ///< Properties related the the grf file
+	StationClassID cls_id;     ///< The class to which this spec belongs.
+	StringID name;             ///< Name of this station.
 
 	/**
 	 * Bitmask of number of platforms available for the station.
@@ -111,28 +108,10 @@ struct StationSpec {
 	const struct SpriteGroup *spritegroup[NUM_CARGO + 3];
 };
 
-/**
- * Struct containing information relating to station classes.
- */
-struct StationClass {
-	uint32 id;          ///< ID of this class, e.g. 'DFLT', 'WAYP', etc.
-	StringID name;      ///< Name of this class.
-	uint stations;      ///< Number of stations in this class.
-	StationSpec **spec; ///< Array of station specifications.
-};
+/** Struct containing information relating to station classes. */
+typedef NewGRFClass<StationSpec, StationClassID, STAT_CLASS_MAX> StationClass;
 
-void ResetStationClasses();
-StationClassID AllocateStationClass(uint32 cls);
-void SetStationClassName(StationClassID sclass, StringID name);
-StringID GetStationClassName(StationClassID sclass);
 const StationSpec *GetStationSpec(TileIndex t);
-
-uint GetNumStationClasses();
-uint GetNumCustomStations(StationClassID sclass);
-
-void SetCustomStationSpec(StationSpec *statspec);
-const StationSpec *GetCustomStationSpec(StationClassID sclass, uint station);
-const StationSpec *GetCustomStationSpecByGrf(uint32 grfid, byte localidx, int *index);
 
 /* Evaluate a tile's position within a station, and return the result a bitstuffed format. */
 uint32 GetPlatformInfo(Axis axis, byte tile, int platforms, int length, int x, int y, bool centred);

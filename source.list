@@ -210,6 +210,8 @@ newgrf_airporttiles.h
 newgrf_callbacks.h
 newgrf_canal.h
 newgrf_cargo.h
+newgrf_class.h
+newgrf_class_func.h
 newgrf_commons.h
 newgrf_config.h
 newgrf_debug.h
@@ -233,6 +235,8 @@ news_type.h
 music/null_m.h
 sound/null_s.h
 video/null_v.h
+object.h
+object_type.h
 openttd.h
 order_base.h
 order_func.h
@@ -308,8 +312,6 @@ transparency.h
 transparency_gui.h
 transport_type.h
 tunnelbridge.h
-unmovable.h
-unmovable_type.h
 vehicle_base.h
 vehicle_func.h
 vehicle_gui.h
@@ -437,10 +439,10 @@ clear_cmd.cpp
 company_cmd.cpp
 depot_cmd.cpp
 disaster_cmd.cpp
-dummy_land.cpp
 group_cmd.cpp
 industry_cmd.cpp
 misc_cmd.cpp
+object_cmd.cpp
 order_cmd.cpp
 rail_cmd.cpp
 road_cmd.cpp
@@ -454,8 +456,8 @@ town_cmd.cpp
 train_cmd.cpp
 tree_cmd.cpp
 tunnelbridge_cmd.cpp
-unmovable_cmd.cpp
 vehicle_cmd.cpp
+void_cmd.cpp
 water_cmd.cpp
 waypoint_cmd.cpp
 
@@ -512,6 +514,7 @@ table/genland.h
 table/industry_land.h
 table/landscape_sprite.h
 table/newgrf_debug_data.h
+table/object_land.h
 table/palette_convert.h
 table/palettes.h
 table/pricebase.h
@@ -529,7 +532,6 @@ table/track_land.h
 table/train_cmd.h
 table/tree_land.h
 table/unicode.h
-table/unmovable_land.h
 table/water_land.h
 
 # MD5
@@ -785,6 +787,7 @@ bridge_map.cpp
 bridge_map.h
 clear_map.h
 industry_map.h
+object_map.h
 rail_map.h
 road_map.cpp
 road_map.h
@@ -795,7 +798,6 @@ tree_map.h
 tunnel_map.cpp
 tunnel_map.h
 tunnelbridge_map.h
-unmovable_map.h
 void_map.h
 water_map.h
 
