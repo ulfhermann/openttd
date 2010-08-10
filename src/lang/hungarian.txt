@@ -1148,6 +1148,10 @@ STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Építm
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Élethűbben méretezett állomási vonzáskörzetek bekapcsolása: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Települési tulajdonú utak/hidak/alagutak rombolásának engedélyezése: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Óriásvonatok engedélyezése: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Mozdonyok kipufogógáz/füst mennyisége: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Nincs
+STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Eredeti
+STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Valósághű
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Vonatok gyorsulási módja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Eredeti
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Valósághű
@@ -1333,7 +1337,7 @@ STR_CONFIG_SETTING_CYCLE_SIGNAL_NORMAL                          :Csak normál
 STR_CONFIG_SETTING_CYCLE_SIGNAL_PBS                             :Csak irányjelzők
 STR_CONFIG_SETTING_CYCLE_SIGNAL_ALL                             :Mind
 
-STR_CONFIG_SETTING_TOWN_LAYOUT                                  :{LTBLUE}Új települések útépítési mintája: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TOWN_LAYOUT                                  :{LTBLUE}Új települések úthálózati elrendezése: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_LAYOUT_DEFAULT                          :alapértelmezett
 STR_CONFIG_SETTING_TOWN_LAYOUT_BETTER_ROADS                     :jobb utak
 STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :2x2-es háló
@@ -1472,7 +1476,7 @@ STR_CHEATS_TOOLTIP                                              :{BLACK}A kijel�
 STR_CHEATS_WARNING                                              :{BLACK}Figyelem! Te épp a versenytársaidat készülöd elárulni. Sose felejtsd el, hogy egy ilyen szégyenletes tett sose merül feledésbe.
 STR_CHEAT_MONEY                                                 :{LTBLUE}Tőkeemelés {CURRENCY}
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Irányított vállalat: {ORANGE}{COMMA}
-STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Csodabuldózer (lerombol gazdasági épületeket, stb): {ORANGE}{STRING}
+STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Csodabuldózer (lerombol gazdasági épületeket, mozgathatatlan objektumokat): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Alagutak keresztezhessék egymást: {ORANGE}{STRING}
 STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Építés szünet módban: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Jet-repülők nem fognak (gyakran) lezuhanni a kis repülőtereken: {ORANGE} {STRING}
@@ -2089,6 +2093,7 @@ STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Repülő
 STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Repülőtér beállítása
 STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Repülőtér méretének/típusának kiválasztása
 STR_STATION_BUILD_AIRPORT_CLASS_LABEL                           :{BLACK}Repülőtér osztálya
+STR_STATION_BUILD_AIRPORT_LAYOUT_NAME                           :{BLACK}Elrendezés {NUM}
 
 STR_AIRPORT_SMALL                                               :Kicsi
 STR_AIRPORT_CITY                                                :Városi
@@ -2163,7 +2168,7 @@ STR_FOUND_TOWN_CITY                                             :{BLACK}Város
 STR_FOUND_TOWN_CITY_TOOLTIP                                     :{BLACK}Átlagosnál gyorsabban növekedő városok{}Beállítástól függően nagyobbak alapításkor
 
 STR_FOUND_TOWN_ROAD_LAYOUT                                      :{YELLOW}Település úthálózat építési mintája:
-STR_FOUND_TOWN_SELECT_TOWN_ROAD_LAYOUT                          :{BLACK}Válassz úthálózati mintát ehhez a városhoz
+STR_FOUND_TOWN_SELECT_TOWN_ROAD_LAYOUT                          :{BLACK}Válassz úthálózati elrendezést ehhez a városhoz
 STR_FOUND_TOWN_SELECT_LAYOUT_ORIGINAL                           :{BLACK}Eredeti
 STR_FOUND_TOWN_SELECT_LAYOUT_BETTER_ROADS                       :{BLACK}Jobb utak
 STR_FOUND_TOWN_SELECT_LAYOUT_2X2_GRID                           :{BLACK}2x2-es háló
@@ -2299,10 +2304,10 @@ STR_LAI_BRIDGE_DESCRIPTION_ROAD_TUBULAR_STEEL                   :Cső közúti h
 
 STR_LAI_BRIDGE_DESCRIPTION_AQUEDUCT                             :Akvadukt
 
-STR_LAI_UNMOVABLE_DESCRIPTION_TRANSMITTER                       :Rádióadó-torony
-STR_LAI_UNMOVABLE_DESCRIPTION_LIGHTHOUSE                        :Világítótorony
-STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_HEADQUARTERS              :Vállalat székháza
-STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Vállalat által birtokolt föld
+STR_LAI_OBJECT_DESCRIPTION_TRANSMITTER                          :Rádióadó-torony
+STR_LAI_OBJECT_DESCRIPTION_LIGHTHOUSE                           :Világítótorony
+STR_LAI_OBJECT_DESCRIPTION_COMPANY_HEADQUARTERS                 :Vállalat székháza
+STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Vállalat által birtokolt föld
 
 # About OpenTTD window
 STR_ABOUT_OPENTTD                                               :{WHITE}Az OpenTTD-ről
@@ -2396,7 +2401,7 @@ STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% k
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Térkép létrehozása
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Fák generálása
-STR_GENERATION_UNMOVABLE_GENERATION                             :{BLACK}Mozgathatatlan létesítmények létrehozása
+STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Mozgathatatlan létesítmények létrehozása
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Durva és köves területek generálása
 STR_GENERATION_SETTINGUP_GAME                                   :{BLACK}Játék beállítása
 STR_GENERATION_PREPARING_TILELOOP                               :{BLACK}Mezők véglegesítése
@@ -3473,7 +3478,7 @@ STR_ERROR_ALREADY_BUILT                                         :{WHITE}... már
 STR_ERROR_OWNED_BY                                              :{WHITE}... {STRING} tulajdona
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... a terület más vállalaté
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}A névnek egyedinek kell lennie
-STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}...{1:STRING} van az útban
+STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}...{1:STRING} van az útban
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN} önkormányzata nem engedélyezi
@@ -3684,7 +3689,7 @@ STR_ERROR_ANOTHER_TUNNEL_IN_THE_WAY                             :{WHITE}Másik a
 STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Az alagút vége a pályán kívülre esik
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Nem lehet kiásni a földet az alagút túloldalán
 
-# Unmovable related errors
+# Object related errors
 STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Nem építhető objektum...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Objektum van az útban
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... vállalat székháza van az útban
