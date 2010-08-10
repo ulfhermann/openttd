@@ -1084,6 +1084,10 @@ STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Permiti
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Dimensionamento mais realista de áreas de abrangência: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Permitir remoção de mais estradas, pontes, etc: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Permitir a construção de comboios muito longos: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Quantidade de fumo/faíscas locomotivas: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Nenhum
+STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Original
+STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Realista
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Modelo de aceleração de comboios: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Original
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realista
@@ -1127,7 +1131,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :nenhum
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :reduzido
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normal
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{LTBLUE}Permitir estações de passagem em estradas das cidades: {ORANGE}{STRING}
-STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Permitir a passagem para estradas do adversário: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :{LTBLUE}Permitir estações de passagem em estradas do adversário: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADJACENT_STATIONS                            :{LTBLUE}Permitir construção de estações adjacentes: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES                              :{LTBLUE}Utilizar múltiplos conjuntos NewGRF de veículos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Não é possivel mudar quando já existem veículos.
@@ -2025,6 +2029,7 @@ STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Construi
 STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Selecção de Aeroporto
 STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Seleccionar tamanho/tipo de aeroporto
 STR_STATION_BUILD_AIRPORT_CLASS_LABEL                           :{BLACK}Classe do aeroporto
+STR_STATION_BUILD_AIRPORT_LAYOUT_NAME                           :{BLACK}Disposição {NUM}
 
 STR_AIRPORT_SMALL                                               :Pequeno
 STR_AIRPORT_CITY                                                :Cidade
@@ -2235,10 +2240,10 @@ STR_LAI_BRIDGE_DESCRIPTION_ROAD_TUBULAR_STEEL                   :Ponte de estrad
 
 STR_LAI_BRIDGE_DESCRIPTION_AQUEDUCT                             :Aqueduto
 
-STR_LAI_UNMOVABLE_DESCRIPTION_TRANSMITTER                       :Transmissor
-STR_LAI_UNMOVABLE_DESCRIPTION_LIGHTHOUSE                        :Farol
-STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_HEADQUARTERS              :Sede de Empresa
-STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Terreno propriedade de uma empresa
+STR_LAI_OBJECT_DESCRIPTION_TRANSMITTER                          :Transmissor
+STR_LAI_OBJECT_DESCRIPTION_LIGHTHOUSE                           :Farol
+STR_LAI_OBJECT_DESCRIPTION_COMPANY_HEADQUARTERS                 :Sede de Empresa
+STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Terreno propriedade de uma empresa
 
 # About OpenTTD window
 STR_ABOUT_OPENTTD                                               :{WHITE}Sobre o OpenTTD...
@@ -2332,7 +2337,7 @@ STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% c
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}A gerar mundo
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}A gerar árvores
-STR_GENERATION_UNMOVABLE_GENERATION                             :{BLACK}Geração inamovível
+STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Geração inamovível
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}A gerar zonas rochosas e montanhosas
 STR_GENERATION_SETTINGUP_GAME                                   :{BLACK}Definindo jogo
 STR_GENERATION_PREPARING_TILELOOP                               :{BLACK}A preparar o terreno
@@ -3409,7 +3414,7 @@ STR_ERROR_ALREADY_BUILT                                         :{WHITE}... já 
 STR_ERROR_OWNED_BY                                              :{WHITE}... propriedade de {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... a área é propriedade de outra empresa
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Nome deve ser único
-STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}{1:STRING} no caminho
+STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}{1:STRING} no caminho
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}A autoridade local de {TOWN} não autoriza
@@ -3447,6 +3452,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Esta emp
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Não é possível construir cidades
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}Não é possível renomear cidade...
 STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Não é possível construir uma cidade aqui...
+STR_ERROR_CAN_T_EXPAND_TOWN                                     :{WHITE}Não é possível expandir cidade...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... muito perto da borda do mapa
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... muito perto de outra cidade
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... demasiadas cidades
@@ -3495,6 +3501,8 @@ STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Demasiad
 STR_ERROR_CAN_T_RENAME_STATION                                  :{WHITE}Não pode alterar o nome da estação...
 STR_ERROR_DRIVE_THROUGH_ON_TOWN_ROAD                            :{WHITE}... esta estrada é detida pela cidade
 STR_ERROR_DRIVE_THROUGH_DIRECTION                               :{WHITE}... estrada orientada na direcção incorrecta
+STR_ERROR_DRIVE_THROUGH_CORNER                                  :{WHITE}... estações de passagem não podem ter curvas
+STR_ERROR_DRIVE_THROUGH_JUNCTION                                :{WHITE}... estações de passagem não podem ter cruzamentos
 
 # Station destruction related errors
 STR_ERROR_CAN_T_REMOVE_PART_OF_STATION                          :{WHITE}Não é possível remover parte da estação...
@@ -3617,7 +3625,8 @@ STR_ERROR_ANOTHER_TUNNEL_IN_THE_WAY                             :{WHITE}Há outr
 STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}O túnel terminaria fora do mapa
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Não é possível escavar o terreno para o outro lado do túnel
 
-# Unmovable related errors
+# Object related errors
+STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Não é possível construir objecto...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Objecto no caminho
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... sede de empresa no caminho
 STR_ERROR_CAN_T_PURCHASE_THIS_LAND                              :{WHITE}Não é possível comprar esta área de terreno...

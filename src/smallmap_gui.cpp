@@ -401,7 +401,7 @@ static const AndOr _smallmap_contours_andor[] = {
 	{MKCOLOUR(0x00000000), MKCOLOUR(0xFFFFFFFF)}, // MP_VOID
 	{MKCOLOUR(0xB5B5B5B5), MKCOLOUR(0x00000000)}, // MP_INDUSTRY
 	{MKCOLOUR(0x00000000), MKCOLOUR(0xFFFFFFFF)}, // MP_TUNNELBRIDGE
-	{MKCOLOUR(0x00B5B500), MKCOLOUR(0xFF0000FF)}, // MP_UNMOVABLE
+	{MKCOLOUR(0x00B5B500), MKCOLOUR(0xFF0000FF)}, // MP_OBJECT
 	{MKCOLOUR(0x000A0A00), MKCOLOUR(0xFF0000FF)},
 };
 
@@ -417,7 +417,7 @@ static const AndOr _smallmap_vehicles_andor[] = {
 	{MKCOLOUR(0x00000000), MKCOLOUR(0xFFFFFFFF)}, // MP_VOID
 	{MKCOLOUR(0xB5B5B5B5), MKCOLOUR(0x00000000)}, // MP_INDUSTRY
 	{MKCOLOUR(0x00000000), MKCOLOUR(0xFFFFFFFF)}, // MP_TUNNELBRIDGE
-	{MKCOLOUR(0x00B5B500), MKCOLOUR(0xFF0000FF)}, // MP_UNMOVABLE
+	{MKCOLOUR(0x00B5B500), MKCOLOUR(0xFF0000FF)}, // MP_OBJECT
 	{MKCOLOUR(0x00D7D700), MKCOLOUR(0xFF0000FF)},
 };
 
@@ -433,7 +433,7 @@ static const byte _tiletype_importance[] = {
 	1, // MP_VOID
 	6, // MP_INDUSTRY
 	8, // MP_TUNNELBRIDGE
-	2, // MP_UNMOVABLE
+	2, // MP_OBJECT
 	0,
 };
 
@@ -1958,8 +1958,27 @@ public:
 		}
 	}
 
+	/*
+	 * Select a new map type.
+	 * @param map_type New map type.
+	 */
+	void SwitchMapType(SmallMapType map_type)
+	{
+		this->RaiseWidget(this->map_type + SM_WIDGET_CONTOUR);
+		this->map_type = map_type;
+		this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
+
+		/* Hide Enable all/Disable all buttons if is not industry type small map */
+		this->GetWidget<NWidgetStacked>(SM_WIDGET_SELECTINDUSTRIES)->SetDisplayedPlane(this->map_type != SMT_INDUSTRY && this->map_type != SMT_LINKSTATS);
+
+		this->SetDirty();
+	}
+
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
+		/* User clicked something, notify the industry chain window to stop sending newly selected industries. */
+		InvalidateWindowClassesData(WC_INDUSTRY_CARGOES, NUM_INDUSTRYTYPES);
+
 		switch (widget) {
 			case SM_WIDGET_MAP: { // Map window
 				/*
@@ -2004,14 +2023,7 @@ public:
 			case SM_WIDGET_ROUTES:     // Show transport routes
 			case SM_WIDGET_VEGETATION: // Show vegetation
 			case SM_WIDGET_OWNERS:     // Show land owners
-				this->RaiseWidget(this->map_type + SM_WIDGET_CONTOUR);
-				this->map_type = (SmallMapType)(widget - SM_WIDGET_CONTOUR);
-				this->LowerWidget(this->map_type + SM_WIDGET_CONTOUR);
-
-				/* Hide Enable all/Disable all buttons if is not industry type small map */
-				this->GetWidget<NWidgetStacked>(SM_WIDGET_SELECTINDUSTRIES)->SetDisplayedPlane(this->map_type != SMT_INDUSTRY && this->map_type != SMT_LINKSTATS);
-
-				this->SetDirty();
+				this->SwitchMapType((SmallMapType)(widget - SM_WIDGET_CONTOUR));
 				SndPlayFx(SND_15_BEEP);
 				break;
 
@@ -2112,6 +2124,21 @@ public:
 		}
 	}
 
+
+	/**
+	 * Notifications for the smallmap window.
+	 * - data = 0: Displayed industries at the industry chain window have changed.
+	 */
+	virtual void OnInvalidateData(int data)
+	{
+		extern uint64 _displayed_industries;
+		if (this->map_type != SMT_INDUSTRY) this->SwitchMapType(SMT_INDUSTRY);
+
+		for (int i = 0; i != _smallmap_industry_count; i++) {
+			_legend_from_industries[i].show_on_map = HasBit(_displayed_industries, _legend_from_industries[i].u.type);
+		}
+		this->SetDirty();
+	}
 
 	virtual bool OnRightClick(Point pt, int widget)
 	{
