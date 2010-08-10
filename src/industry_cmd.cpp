@@ -481,7 +481,7 @@ static CommandCost ClearTile_Industry(TileIndex tile, DoCommandFlag flags)
 				((indspec->behaviour & INDUSTRYBEH_BUILT_ONWATER) ||
 				HasBit(GetIndustryTileSpec(GetIndustryGfx(tile))->slopes_refused, 5)))) {
 		SetDParam(1, indspec->name);
-		return_cmd_error(flags & DC_AUTO ? STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY : INVALID_STRING_ID);
+		return_cmd_error(flags & DC_AUTO ? STR_ERROR_GENERIC_OBJECT_IN_THE_WAY : INVALID_STRING_ID);
 	}
 
 	if (flags & DC_EXEC) {
@@ -2065,18 +2065,11 @@ static bool CheckIndustryCloseDownProtection(IndustryType type)
  */
 static void CanCargoServiceIndustry(CargoID cargo, Industry *ind, bool *c_accepts, bool *c_produces)
 {
-	const IndustrySpec *indspec = GetIndustrySpec(ind->type);
+	if (cargo == CT_INVALID) return;
 
 	/* Check for acceptance of cargo */
 	for (byte j = 0; j < lengthof(ind->accepts_cargo); j++) {
-		if (ind->accepts_cargo[j] == CT_INVALID) continue;
-		if (cargo == ind->accepts_cargo[j]) {
-			if (HasBit(indspec->callback_mask, CBM_IND_REFUSE_CARGO)) {
-				uint16 res = GetIndustryCallback(CBID_INDUSTRY_REFUSE_CARGO,
-						0, GetReverseCargoTranslation(cargo, indspec->grf_prop.grffile),
-						ind, ind->type, ind->location.tile);
-				if (res == 0) continue;
-			}
+		if (cargo == ind->accepts_cargo[j] && !IndustryTemporarilyRefusesCargo(ind, cargo)) {
 			*c_accepts = true;
 			break;
 		}
@@ -2084,7 +2077,6 @@ static void CanCargoServiceIndustry(CargoID cargo, Industry *ind, bool *c_accept
 
 	/* Check for produced cargo */
 	for (byte j = 0; j < lengthof(ind->produced_cargo); j++) {
-		if (ind->produced_cargo[j] == CT_INVALID) continue;
 		if (cargo == ind->produced_cargo[j]) {
 			*c_produces = true;
 			break;
