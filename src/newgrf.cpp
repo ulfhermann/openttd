@@ -1151,7 +1151,7 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 
 				/* Swap classid because we read it in BE meaning WAYP or DFLT */
 				uint32 classid = buf->ReadDWord();
-				(*spec)->sclass = AllocateStationClass(BSWAP32(classid));
+				(*spec)->cls_id = StationClass::Allocate(BSWAP32(classid));
 				break;
 			}
 
@@ -1581,9 +1581,9 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
 				MemCpyT(housespec, HouseSpec::Get(subs_id));
 
 				housespec->enabled = true;
-				housespec->local_id = hid + i;
-				housespec->substitute_id = subs_id;
-				housespec->grffile = _cur_grffile;
+				housespec->grf_prop.local_id = hid + i;
+				housespec->grf_prop.subst_id = subs_id;
+				housespec->grf_prop.grffile = _cur_grffile;
 				housespec->random_colour[0] = 0x04;  // those 4 random colours are the base colour
 				housespec->random_colour[1] = 0x08;  // for all new houses
 				housespec->random_colour[2] = 0x0C;  // they stand for red, blue, orange and green
@@ -3885,10 +3885,15 @@ static void StationMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
+		if (statspec->grf_prop.grffile != NULL) {
+			grfmsg(1, "StationMapSpriteGroup: Station with ID 0x%02X mapped multiple times, skipping", stations[i]);
+			continue;
+		}
+
 		statspec->spritegroup[CT_DEFAULT] = _cur_grffile->spritegroups[groupid];
-		statspec->grffile = _cur_grffile;
-		statspec->localidx = stations[i];
-		SetCustomStationSpec(statspec);
+		statspec->grf_prop.grffile = _cur_grffile;
+		statspec->grf_prop.local_id = stations[i];
+		StationClass::Assign(statspec);
 	}
 }
 
@@ -3920,7 +3925,7 @@ static void TownHouseMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
-		hs->spritegroup = _cur_grffile->spritegroups[groupid];
+		hs->grf_prop.spritegroup = _cur_grffile->spritegroups[groupid];
 	}
 }
 
@@ -4270,8 +4275,8 @@ static void FeatureNewName(ByteReader *buf)
 						if (_cur_grffile->stations == NULL || _cur_grffile->stations[GB(id, 0, 8)] == NULL) {
 							grfmsg(1, "FeatureNewName: Attempt to name undefined station 0x%X, ignoring", GB(id, 0, 8));
 						} else {
-							StationClassID sclass = _cur_grffile->stations[GB(id, 0, 8)]->sclass;
-							SetStationClassName(sclass, AddGRFString(_cur_grffile->grfid, id, lang, new_scheme, name, STR_UNDEFINED));
+							StationClassID cls_id = _cur_grffile->stations[GB(id, 0, 8)]->cls_id;
+							StationClass::SetName(cls_id, AddGRFString(_cur_grffile->grfid, id, lang, new_scheme, name, STR_UNDEFINED));
 						}
 						break;
 
@@ -6759,11 +6764,11 @@ static void ResetNewGRFData()
 	ResetIndustries();
 
 	/* Reset station classes */
-	ResetStationClasses();
+	StationClass::Reset();
 	ResetCustomStations();
 
 	/* Reset airport-related structures */
-	ResetAirportClasses();
+	AirportClass::Reset();
 	ResetCustomAirports();
 	AirportSpec::ResetAirports();
 	AirportTileSpec::ResetAirportTiles();
@@ -7043,7 +7048,7 @@ static void FinaliseHouseArray()
 						(next2 == NULL || !next2->enabled || (next2->building_flags & BUILDING_HAS_1_TILE) != 0 ||
 						next3 == NULL || !next3->enabled || (next3->building_flags & BUILDING_HAS_1_TILE) != 0))) {
 				hs->enabled = false;
-				DEBUG(grf, 1, "FinaliseHouseArray: %s defines house %d as multitile, but no suitable tiles follow. Disabling house.", (*file)->filename, hs->local_id);
+				DEBUG(grf, 1, "FinaliseHouseArray: %s defines house %d as multitile, but no suitable tiles follow. Disabling house.", (*file)->filename, hs->grf_prop.local_id);
 				continue;
 			}
 
@@ -7053,7 +7058,7 @@ static void FinaliseHouseArray()
 			if (((hs->building_flags & BUILDING_HAS_2_TILES) != 0 && next1->population != 0) ||
 					((hs->building_flags & BUILDING_HAS_4_TILES) != 0 && (next2->population != 0 || next3->population != 0))) {
 				hs->enabled = false;
-				DEBUG(grf, 1, "FinaliseHouseArray: %s defines multitile house %d with non-zero population on additional tiles. Disabling house.", (*file)->filename, hs->local_id);
+				DEBUG(grf, 1, "FinaliseHouseArray: %s defines multitile house %d with non-zero population on additional tiles. Disabling house.", (*file)->filename, hs->grf_prop.local_id);
 				continue;
 			}
 
