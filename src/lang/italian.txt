@@ -199,18 +199,18 @@ STR_UNITS_VELOCITY_IMPERIAL                                     :{COMMA} mph
 STR_UNITS_VELOCITY_METRIC                                       :{COMMA} km/h
 STR_UNITS_VELOCITY_SI                                           :{COMMA} m/s
 
-STR_UNITS_POWER_IMPERIAL                                        :{COMMA}hp
-STR_UNITS_POWER_METRIC                                          :{COMMA}hp
-STR_UNITS_POWER_SI                                              :{COMMA}kW
+STR_UNITS_POWER_IMPERIAL                                        :{COMMA} hp
+STR_UNITS_POWER_METRIC                                          :{COMMA} hp
+STR_UNITS_POWER_SI                                              :{COMMA} kW
 
-STR_UNITS_WEIGHT_SHORT_METRIC                                   :{COMMA}t
-STR_UNITS_WEIGHT_SHORT_SI                                       :{COMMA}kg
+STR_UNITS_WEIGHT_SHORT_METRIC                                   :{COMMA} t
+STR_UNITS_WEIGHT_SHORT_SI                                       :{COMMA} kg
 
 STR_UNITS_WEIGHT_LONG_METRIC                                    :{COMMA} tonnellat{P a e}
 STR_UNITS_WEIGHT_LONG_SI                                        :{COMMA} kg
 
-STR_UNITS_VOLUME_SHORT_METRIC                                   :{COMMA}l
-STR_UNITS_VOLUME_SHORT_SI                                       :{COMMA}m³
+STR_UNITS_VOLUME_SHORT_METRIC                                   :{COMMA} l
+STR_UNITS_VOLUME_SHORT_SI                                       :{COMMA} m³
 
 STR_UNITS_VOLUME_LONG_METRIC                                    :{COMMA} litr{P o i}
 STR_UNITS_VOLUME_LONG_SI                                        :{COMMA} m³
@@ -780,7 +780,7 @@ STR_NEWS_NEW_TOWN                                               :{BLACK}{BIGFONT
 STR_NEWS_INDUSTRY_CONSTRUCTION                                  :{BIGFONT}{BLACK}Nuov{G o o a} {STRING} in costruzione vicino a {TOWN}!
 STR_NEWS_INDUSTRY_PLANTED                                       :{BIGFONT}{BLACK}Nuov{G 0 o o a} {STRING} piantat{G 0 o o a} vicino a {TOWN}!
 
-STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{STRING} annuncia imminente chiusura!!
+STR_NEWS_INDUSTRY_CLOSURE_GENERAL                               :{BIGFONT}{BLACK}{G Il L' La} {STRING} annuncia imminente chiusura!!
 STR_NEWS_INDUSTRY_CLOSURE_SUPPLY_PROBLEMS                       :{BIGFONT}{BLACK}Per problemi di rifornimenti {G il l' la} {STRING} annuncia imminente chiusura!
 STR_NEWS_INDUSTRY_CLOSURE_LACK_OF_TREES                         :{BIGFONT}{BLACK}La mancanza di alberi vicini costringe la {STRING} ad imminente chiusura!
 
@@ -1086,6 +1086,10 @@ STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Consent
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Consenti aree di copertura più realistiche: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Consenti la rimozione di strade, ponti, etc. delle città: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Consenti la costruzione di treni molto lunghi: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Quantità di fumo/scintille delle locomotive: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Nessuno
+STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Originale
+STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Realistica
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Modello accelerazione dei treni: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Originale
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistico
@@ -1410,7 +1414,7 @@ STR_CHEATS_TOOLTIP                                              :{BLACK}Le casel
 STR_CHEATS_WARNING                                              :{BLACK}Attenzione! Stai per tradire i tuoi avversari. Ricordati che un così grande disonore sarà ricordato per l'eternità.
 STR_CHEAT_MONEY                                                 :{LTBLUE}Aumenta denaro di {CURRENCY}
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Compagnia controllata: {ORANGE}{COMMA}
-STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Bulldozer magico (rimuove industrie e oggetti inamovibili): {ORANGE}{STRING}
+STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Bulldozer magico (rimuove industrie e oggetti fissi): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}I tunnel possono incrociarsi tra loro: {ORANGE}{STRING}
 STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Consenti costruzione in pausa: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}I jet non si schiantano (frequentemente) nei piccoli aeroporti: {ORANGE} {STRING}
@@ -2027,6 +2031,7 @@ STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Costruis
 STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Selezione aeroporto
 STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Seleziona dimensione/tipo di aeroporto
 STR_STATION_BUILD_AIRPORT_CLASS_LABEL                           :{BLACK}Classe aeroporto
+STR_STATION_BUILD_AIRPORT_LAYOUT_NAME                           :{BLACK}Disposizione {NUM}
 
 STR_AIRPORT_SMALL                                               :Piccolo
 STR_AIRPORT_CITY                                                :Cittadino
@@ -2237,10 +2242,10 @@ STR_LAI_BRIDGE_DESCRIPTION_ROAD_TUBULAR_STEEL                   :Ponte stradale 
 
 STR_LAI_BRIDGE_DESCRIPTION_AQUEDUCT                             :Acquedotto
 
-STR_LAI_UNMOVABLE_DESCRIPTION_TRANSMITTER                       :Trasmettitore
-STR_LAI_UNMOVABLE_DESCRIPTION_LIGHTHOUSE                        :Faro
-STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_HEADQUARTERS              :Sede della compagnia
-STR_LAI_UNMOVABLE_DESCRIPTION_COMPANY_OWNED_LAND                :Terreno posseduto dalla compagnia
+STR_LAI_OBJECT_DESCRIPTION_TRANSMITTER                          :Trasmettitore
+STR_LAI_OBJECT_DESCRIPTION_LIGHTHOUSE                           :Faro
+STR_LAI_OBJECT_DESCRIPTION_COMPANY_HEADQUARTERS                 :Sede della compagnia
+STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Terreno posseduto dalla compagnia
 
 # About OpenTTD window
 STR_ABOUT_OPENTTD                                               :{WHITE}Informazioni su OpenTTD
@@ -2334,7 +2339,7 @@ STR_GENERATION_PROGRESS                                         :{WHITE}{NUM}% c
 STR_GENERATION_PROGRESS_NUM                                     :{BLACK}{NUM} / {NUM}
 STR_GENERATION_WORLD_GENERATION                                 :{BLACK}Generazione mondo
 STR_GENERATION_TREE_GENERATION                                  :{BLACK}Generazione alberi
-STR_GENERATION_UNMOVABLE_GENERATION                             :{BLACK}Generazione oggetti inamovibili
+STR_GENERATION_OBJECT_GENERATION                                :{BLACK}Generazione oggetti inamovibili
 STR_GENERATION_CLEARING_TILES                                   :{BLACK}Generazione aree brulle e rocciose
 STR_GENERATION_SETTINGUP_GAME                                   :{BLACK}Impostazione partita
 STR_GENERATION_PREPARING_TILELOOP                               :{BLACK}Generazione riquadri del terreno
@@ -3411,7 +3416,7 @@ STR_ERROR_ALREADY_BUILT                                         :{WHITE}... già
 STR_ERROR_OWNED_BY                                              :{WHITE}... posseduto da {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... l'area appartiene a un'altra compagnia
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Il nome deve essere univoco
-STR_ERROR_UNMOVABLE_OBJECT_IN_THE_WAY                           :{WHITE}{1:STRING} di mezzo
+STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}{1:STRING} di mezzo
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}L'autorità locale di {TOWN} non lo autorizza
@@ -3622,7 +3627,7 @@ STR_ERROR_ANOTHER_TUNNEL_IN_THE_WAY                             :{WHITE}Altro tu
 STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Il tunnel terminerebbe fuori dalla mappa
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Impossibile scavare il terreno all'altra estremità del tunnel
 
-# Unmovable related errors
+# Object related errors
 STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Impossibile costruire l'oggetto...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Oggetto di mezzo
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... sede della compagnia di mezzo

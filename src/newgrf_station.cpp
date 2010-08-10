@@ -29,10 +29,28 @@
 #include "tunnelbridge_map.h"
 #include "newgrf.h"
 #include "core/random_func.hpp"
+#include "newgrf_class_func.h"
 
 #include "table/strings.h"
 
-static StationClass _station_classes[STAT_CLASS_MAX];
+template <typename Tspec, typename Tid, Tid Tmax>
+/* static */ void NewGRFClass<Tspec, Tid, Tmax>::InsertDefaults()
+{
+	/* Set up initial data */
+	classes[0].global_id = 'DFLT';
+	classes[0].name = STR_STATION_CLASS_DFLT;
+	classes[0].count = 1;
+	classes[0].spec = MallocT<StationSpec*>(1);
+	classes[0].spec[0] = NULL;
+
+	classes[1].global_id = 'WAYP';
+	classes[1].name = STR_STATION_CLASS_WAYP;
+	classes[1].count = 1;
+	classes[1].spec = MallocT<StationSpec*>(1);
+	classes[1].spec[0] = NULL;
+}
+
+INSTANTIATE_NEWGRF_CLASS_METHODS(StationClass, StationSpec, StationClassID, STAT_CLASS_MAX)
 
 static const uint MAX_SPECLIST = 255;
 
@@ -74,158 +92,6 @@ struct ETileArea : TileArea {
 		}
 	}
 };
-
-
-/**
- * Reset station classes to their default state.
- * This includes initialising the Default and Waypoint classes with an empty
- * entry, for standard stations and waypoints.
- */
-void ResetStationClasses()
-{
-	for (StationClassID i = STAT_CLASS_BEGIN; i < STAT_CLASS_MAX; i++) {
-		_station_classes[i].id = 0;
-		_station_classes[i].name = STR_EMPTY;
-		_station_classes[i].stations = 0;
-
-		free(_station_classes[i].spec);
-		_station_classes[i].spec = NULL;
-	}
-
-	/* Set up initial data */
-	_station_classes[0].id = 'DFLT';
-	_station_classes[0].name = STR_STATION_CLASS_DFLT;
-	_station_classes[0].stations = 1;
-	_station_classes[0].spec = MallocT<StationSpec*>(1);
-	_station_classes[0].spec[0] = NULL;
-
-	_station_classes[1].id = 'WAYP';
-	_station_classes[1].name = STR_STATION_CLASS_WAYP;
-	_station_classes[1].stations = 1;
-	_station_classes[1].spec = MallocT<StationSpec*>(1);
-	_station_classes[1].spec[0] = NULL;
-}
-
-/**
- * Allocate a station class for the given class id.
- * @param cls A 32 bit value identifying the class.
- * @return Index into _station_classes of allocated class.
- */
-StationClassID AllocateStationClass(uint32 cls)
-{
-	for (StationClassID i = STAT_CLASS_BEGIN; i < STAT_CLASS_MAX; i++) {
-		if (_station_classes[i].id == cls) {
-			/* ClassID is already allocated, so reuse it. */
-			return i;
-		} else if (_station_classes[i].id == 0) {
-			/* This class is empty, so allocate it to the ClassID. */
-			_station_classes[i].id = cls;
-			return i;
-		}
-	}
-
-	grfmsg(2, "StationClassAllocate: already allocated %d classes, using default", STAT_CLASS_MAX);
-	return STAT_CLASS_DFLT;
-}
-
-/** Set the name of a custom station class */
-void SetStationClassName(StationClassID sclass, StringID name)
-{
-	assert(sclass < STAT_CLASS_MAX);
-	_station_classes[sclass].name = name;
-}
-
-/** Retrieve the name of a custom station class */
-StringID GetStationClassName(StationClassID sclass)
-{
-	assert(sclass < STAT_CLASS_MAX);
-	return _station_classes[sclass].name;
-}
-
-/**
- * Get the number of station classes in use.
- * @return Number of station classes.
- */
-uint GetNumStationClasses()
-{
-	uint i;
-	for (i = 0; i < STAT_CLASS_MAX && _station_classes[i].id != 0; i++) {}
-	return i;
-}
-
-/**
- * Return the number of stations for the given station class.
- * @param sclass Index of the station class.
- * @return Number of stations in the class.
- */
-uint GetNumCustomStations(StationClassID sclass)
-{
-	assert(sclass < STAT_CLASS_MAX);
-	return _station_classes[sclass].stations;
-}
-
-/**
- * Tie a station spec to its station class.
- * @param statspec The station spec.
- */
-void SetCustomStationSpec(StationSpec *statspec)
-{
-	StationClass *station_class;
-	int i;
-
-	/* If the station has already been allocated, don't reallocate it. */
-	if (statspec->allocated) return;
-
-	assert(statspec->sclass < STAT_CLASS_MAX);
-	station_class = &_station_classes[statspec->sclass];
-
-	i = station_class->stations++;
-	station_class->spec = ReallocT(station_class->spec, station_class->stations);
-
-	station_class->spec[i] = statspec;
-	statspec->allocated = true;
-}
-
-/**
- * Retrieve a station spec from a class.
- * @param sclass Index of the station class.
- * @param station The station index with the class.
- * @return The station spec.
- */
-const StationSpec *GetCustomStationSpec(StationClassID sclass, uint station)
-{
-	assert(sclass < STAT_CLASS_MAX);
-	if (station < _station_classes[sclass].stations) return _station_classes[sclass].spec[station];
-
-	/* If the custom station isn't defined any more, then the GRF file
-	 * probably was not loaded. */
-	return NULL;
-}
-
-/**
- * Retrieve a station spec by GRF location.
- * @param grfid    GRF ID of station spec.
- * @param localidx Index within GRF file of station spec.
- * @param index    Pointer to return the index of the station spec in its station class. If NULL then not used.
- * @return The station spec.
- */
-const StationSpec *GetCustomStationSpecByGrf(uint32 grfid, byte localidx, int *index)
-{
-	uint j;
-
-	for (StationClassID i = STAT_CLASS_BEGIN; i < STAT_CLASS_MAX; i++) {
-		for (j = 0; j < _station_classes[i].stations; j++) {
-			const StationSpec *statspec = _station_classes[i].spec[j];
-			if (statspec == NULL) continue;
-			if (statspec->grffile->grfid == grfid && statspec->localidx == localidx) {
-				if (index != NULL) *index = j;
-				return statspec;
-			}
-		}
-	}
-
-	return NULL;
-}
 
 
 /* Evaluate a tile's position within a station, and return the result a bit-stuffed format.
@@ -439,7 +305,7 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 			if (!HasBit(_svc.valid, 1)) { _svc.v41 = GetPlatformInfoHelper(tile, true,  false, false); SetBit(_svc.valid, 1); }
 			return _svc.v41;
 
-		case 0x42: return GetTerrainType(tile) | (GetReverseRailTypeTranslation(GetRailType(tile), object->u.station.statspec->grffile) << 8);
+		case 0x42: return GetTerrainType(tile) | (GetReverseRailTypeTranslation(GetRailType(tile), object->u.station.statspec->grf_prop.grffile) << 8);
 		case 0x43: return st->owner; // Station owner
 		case 0x44: return HasStationReservation(tile) ? 7 : 4; // PBS status
 		case 0x45:
@@ -529,7 +395,7 @@ uint32 Station::GetNewGRFVariable(const ResolverObject *object, byte variable, b
 
 	/* Handle cargo variables with parameter, 0x60 to 0x65 */
 	if (variable >= 0x60 && variable <= 0x65) {
-		CargoID c = GetCargoTranslation(parameter, object->u.station.statspec->grffile);
+		CargoID c = GetCargoTranslation(parameter, object->u.station.statspec->grf_prop.grffile);
 
 		if (c == CT_INVALID) return 0;
 		const GoodsEntry *ge = &this->goods[c];
@@ -606,7 +472,7 @@ static const SpriteGroup *StationResolveReal(const ResolverObject *object, const
 	uint cargo = 0;
 	CargoID cargo_type = object->u.station.cargo_type;
 
-	if (bst == NULL || statspec->sclass == STAT_CLASS_WAYP) {
+	if (bst == NULL || statspec->cls_id == STAT_CLASS_WAYP) {
 		return group->loading[0];
 	}
 
@@ -668,7 +534,7 @@ static void NewStationResolver(ResolverObject *res, const StationSpec *statspec,
 	res->trigger         = 0;
 	res->reseed          = 0;
 	res->count           = 0;
-	res->grffile         = (statspec != NULL ? statspec->grffile : NULL);
+	res->grffile         = (statspec != NULL ? statspec->grf_prop.grffile : NULL);
 }
 
 static const SpriteGroup *ResolveStation(ResolverObject *object)
@@ -813,8 +679,8 @@ int AllocateSpecToStation(const StationSpec *statspec, BaseStation *st, bool exe
 		}
 
 		st->speclist[i].spec     = statspec;
-		st->speclist[i].grfid    = statspec->grffile->grfid;
-		st->speclist[i].localidx = statspec->localidx;
+		st->speclist[i].grfid    = statspec->grf_prop.grffile->grfid;
+		st->speclist[i].localidx = statspec->grf_prop.local_id;
 	}
 
 	return i;
@@ -881,7 +747,7 @@ bool DrawStationTile(int x, int y, RailType railtype, Axis axis, StationClassID 
 	PaletteID palette = COMPANY_SPRITE_COLOUR(_local_company);
 	uint tile = 2;
 
-	statspec = GetCustomStationSpec(sclass, station);
+	statspec = StationClass::Get(sclass, station);
 	if (statspec == NULL) return false;
 
 	uint relocation = GetCustomStationRelocation(statspec, NULL, INVALID_TILE);
@@ -989,7 +855,7 @@ void AnimateStationTile(TileIndex tile)
 
 			/* If the lower 7 bits of the upper byte of the callback
 			 * result are not empty, it is a sound effect. */
-			if (GB(callback, 8, 7) != 0) PlayTileSound(ss->grffile, GB(callback, 8, 7), tile);
+			if (GB(callback, 8, 7) != 0) PlayTileSound(ss->grf_prop.grffile, GB(callback, 8, 7), tile);
 		}
 	}
 
@@ -1027,7 +893,7 @@ static void ChangeStationAnimationFrame(const StationSpec *ss, const BaseStation
 
 	/* If the lower 7 bits of the upper byte of the callback
 	 * result are not empty, it is a sound effect. */
-	if (GB(callback, 8, 7) != 0) PlayTileSound(ss->grffile, GB(callback, 8, 7), tile);
+	if (GB(callback, 8, 7) != 0) PlayTileSound(ss->grf_prop.grffile, GB(callback, 8, 7), tile);
 }
 
 void StationAnimationTrigger(const BaseStation *st, TileIndex tile, StatAnimTrigger trigger, CargoID cargo_type)
@@ -1056,7 +922,7 @@ void StationAnimationTrigger(const BaseStation *st, TileIndex tile, StatAnimTrig
 				if (cargo_type == CT_INVALID) {
 					cargo = CT_INVALID;
 				} else {
-					cargo = GetReverseCargoTranslation(cargo_type, ss->grffile);
+					cargo = GetReverseCargoTranslation(cargo_type, ss->grf_prop.grffile);
 				}
 				ChangeStationAnimationFrame(ss, st, tile, random_bits, trigger, cargo);
 			}

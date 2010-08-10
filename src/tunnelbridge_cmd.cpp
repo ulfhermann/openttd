@@ -16,7 +16,7 @@
 #include "stdafx.h"
 #include "rail_map.h"
 #include "landscape.h"
-#include "unmovable.h"
+#include "object.h"
 #include "viewport_func.h"
 #include "cmd_helper.h"
 #include "command_func.h"
@@ -395,8 +395,8 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 					if (z_start < GetBridgeHeight(tile)) goto not_valid_below;
 					break;
 
-				case MP_UNMOVABLE: {
-					const UnmovableSpec *spec = UnmovableSpec::GetByTile(tile);
+				case MP_OBJECT: {
+					const ObjectSpec *spec = ObjectSpec::GetByTile(tile);
 					if ((spec->flags & OBJECT_FLAG_ALLOW_UNDER_BRIDGE) == 0) goto not_valid_below;
 					break;
 				}
@@ -1253,7 +1253,7 @@ void DrawBridgeMiddle(const TileInfo *ti)
 	} else if (transport_type == TRANSPORT_RAIL) {
 		const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(rampsouth));
 		if (rti->UsesOverlay()) {
-			SpriteID surface = GetCustomRailSprite(rti, ti->tile, RTSG_BRIDGE);
+			SpriteID surface = GetCustomRailSprite(rti, rampsouth, RTSG_BRIDGE, TCX_ON_BRIDGE);
 			if (surface != 0) {
 				AddSortableSpriteToDraw(surface + axis, PAL_NONE, x, y, 16, 16, 0, bridge_z, IsTransparencySet(TO_BRIDGES));
 			}
@@ -1396,12 +1396,17 @@ static void TileLoop_TunnelBridge(TileIndex tile)
 {
 	bool snow_or_desert = HasTunnelBridgeSnowOrDesert(tile);
 	switch (_settings_game.game_creation.landscape) {
-		case LT_ARCTIC:
-			if (snow_or_desert != (GetTileZ(tile) > GetSnowLine())) {
+		case LT_ARCTIC: {
+			/* As long as we do not have a snow density, we want to use the density
+			 * from the entry endge. For tunnels this is the lowest point for bridges the highest point.
+			 * (Independent of foundations) */
+			uint z = IsBridge(tile) ? GetTileMaxZ(tile) : GetTileZ(tile);
+			if (snow_or_desert != (z > GetSnowLine())) {
 				SetTunnelBridgeSnowOrDesert(tile, !snow_or_desert);
 				MarkTileDirtyByTile(tile);
 			}
 			break;
+		}
 
 		case LT_TROPIC:
 			if (GetTropicZone(tile) == TROPICZONE_DESERT && !snow_or_desert) {
