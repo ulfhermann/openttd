@@ -20,7 +20,7 @@
 #include "network/network_gui.h"
 #include "network/network_func.h"
 #include "economy_func.h"
-#include "vehicle_base.h"
+#include "vehicle_func.h"
 #include "newgrf.h"
 #include "company_manager_face.h"
 #include "strings_func.h"
@@ -30,7 +30,7 @@
 #include "sprite.h"
 #include "company_base.h"
 #include "core/geometry_func.hpp"
-#include "unmovable.h"
+#include "object.h"
 
 #include "table/strings.h"
 
@@ -1852,19 +1852,10 @@ struct CompanyWindow : Window
 				break;
 
 			case CW_WIDGET_DESC_VEHICLE_COUNTS: {
-				uint amounts[] = { 0, 0, 0, 0 };
+				uint amounts[4];
+				CountCompanyVehicles((CompanyID)this->window_number, amounts);
+
 				int y = r.top;
-
-				const Vehicle *v;
-				FOR_ALL_VEHICLES(v) {
-					if (v->owner == c->index) {
-						if (v->IsPrimaryVehicle()) {
-							assert((size_t)v->type < lengthof(amounts));
-							amounts[v->type]++;
-						}
-					}
-				}
-
 				if (amounts[0] + amounts[1] + amounts[2] + amounts[3] == 0) {
 					DrawString(r.left, r.right, y, STR_COMPANY_VIEW_VEHICLES_NONE);
 				} else {
@@ -2013,7 +2004,7 @@ struct CompanyWindow : Window
 
 	virtual void OnPlaceObject(Point pt, TileIndex tile)
 	{
-		if (DoCommandP(tile, UNMOVABLE_HQ, 0, CMD_BUILD_UNMOVABLE | CMD_MSG(STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS))) {
+		if (DoCommandP(tile, OBJECT_HQ, 0, CMD_BUILD_OBJECT | CMD_MSG(STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS))) {
 			ResetObjectToPlace();
 			this->RaiseButtons();
 		}
