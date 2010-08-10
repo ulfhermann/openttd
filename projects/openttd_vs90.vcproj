@@ -1189,6 +1189,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\newgrf_class.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_class_func.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\newgrf_commons.h"
 				>
 			</File>
@@ -1278,6 +1286,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\video\null_v.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\object.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\object_type.h"
 				>
 			</File>
 			<File
@@ -1578,14 +1594,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\tunnelbridge.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\unmovable.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\unmovable_type.h"
 				>
 			</File>
 			<File
@@ -2021,10 +2029,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\dummy_land.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\..\src\group_cmd.cpp"
 				>
 			</File>
@@ -2034,6 +2038,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\misc_cmd.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\object_cmd.cpp"
 				>
 			</File>
 			<File
@@ -2089,11 +2097,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\unmovable_cmd.cpp"
+				RelativePath=".\..\src\vehicle_cmd.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\vehicle_cmd.cpp"
+				RelativePath=".\..\src\void_cmd.cpp"
 				>
 			</File>
 			<File
@@ -2309,6 +2317,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\table\object_land.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\table\palette_convert.h"
 				>
 			</File>
@@ -2374,10 +2386,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\table\unicode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\table\unmovable_land.h"
 				>
 			</File>
 			<File
@@ -3325,6 +3333,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\object_map.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\rail_map.h"
 				>
 			</File>
@@ -3362,10 +3374,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\tunnelbridge_map.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\unmovable_map.h"
 				>
 			</File>
 			<File
