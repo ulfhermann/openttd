@@ -14,7 +14,7 @@
 
 #include "date_type.h"
 #include "map_type.h"
-#include "strings_type.h"
+#include "newgrf_class.h"
 #include "newgrf_commons.h"
 #include "gfx_type.h"
 
@@ -72,11 +72,11 @@ struct AirportSpec {
 	Year max_year;                         ///< last year the airport is available
 	StringID name;                         ///< name of this airport
 	TTDPAirportType ttd_airport_type;      ///< ttdpatch airport type (Small/Large/Helipad/Oilrig)
-	AirportClassID aclass;                 ///< the class to which this airport type belongs
+	AirportClassID cls_id;                 ///< the class to which this airport type belongs
 	SpriteID preview_sprite;               ///< preview sprite for this airport
 	/* Newgrf data */
 	bool enabled;                          ///< entity still avaible (by default true).newgrf can disable it, though
-	GRFFileProps grf_prop;                 ///< properties related the the grf file
+	struct GRFFileProps grf_prop;          ///< properties related the the grf file
 
 	static const AirportSpec *Get(byte type);
 	static AirportSpec *GetWithoutOverride(byte type);
@@ -99,23 +99,9 @@ private:
 };
 
 /** Information related to airport classes. */
-struct AirportClass {
-	uint32 id;          ///< ID of this class, e.g. 'SMAL', 'LARG', 'HUB_', 'HELI', etc.
-	StringID name;      ///< name of this class
-	uint airports;      ///< number of airports in this class
-	AirportSpec **spec; ///< array of airport specifications
-};
-
-void ResetAirportClasses();
-AirportClassID AllocateAirportClass(uint32 cls);
-void SetAirportClassName(AirportClassID id, StringID name);
-StringID GetAirportClassName(AirportClassID id);
-
-uint GetNumAirportClasses();
-uint GetNumAirportsInClass(AirportClassID id);
+typedef NewGRFClass<AirportSpec, AirportClassID, APC_MAX> AirportClass;
 
 void BindAirportSpecs();
-const AirportSpec *GetAirportSpecFromClass(AirportClassID aclass, uint airport);
 
 StringID GetAirportTextCallback(const AirportSpec *as, byte layout, uint16 callback);
 
