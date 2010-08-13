@@ -357,7 +357,7 @@ static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 intern
 		EngineID engine = _engine_mngr.GetID(type, internal_id, scope_grfid);
 		if (engine != INVALID_ENGINE) {
 			Engine *e = Engine::Get(engine);
-			if (e->grffile == NULL) e->grffile = file;
+			if (e->grf_prop.grffile == NULL) e->grf_prop.grffile = file;
 			return e;
 		}
 	}
@@ -367,8 +367,8 @@ static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 intern
 	if (engine != INVALID_ENGINE) {
 		Engine *e = Engine::Get(engine);
 
-		if (e->grffile == NULL) {
-			e->grffile = file;
+		if (e->grf_prop.grffile == NULL) {
+			e->grf_prop.grffile = file;
 			grfmsg(5, "Replaced engine at index %d for GRFID %x, type %d, index %d", e->index, BSWAP32(file->grfid), type, internal_id);
 		}
 
@@ -387,7 +387,7 @@ static Engine *GetNewEngine(const GRFFile *file, VehicleType type, uint16 intern
 
 	/* ... it's not, so create a new one based off an existing engine */
 	Engine *e = new Engine(type, internal_id);
-	e->grffile = file;
+	e->grf_prop.grffile = file;
 
 	/* Reserve the engine slot */
 	assert(_engine_mngr.Length() == e->index);
@@ -3870,7 +3870,7 @@ static void StationMapSpriteGroup(ByteReader *buf, uint8 idcount)
 				continue;
 			}
 
-			statspec->spritegroup[ctype] = _cur_grffile->spritegroups[groupid];
+			statspec->grf_prop.spritegroup[ctype] = _cur_grffile->spritegroups[groupid];
 		}
 	}
 
@@ -3890,7 +3890,7 @@ static void StationMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
-		statspec->spritegroup[CT_DEFAULT] = _cur_grffile->spritegroups[groupid];
+		statspec->grf_prop.spritegroup[CT_DEFAULT] = _cur_grffile->spritegroups[groupid];
 		statspec->grf_prop.grffile = _cur_grffile;
 		statspec->grf_prop.local_id = stations[i];
 		StationClass::Assign(statspec);
@@ -3925,7 +3925,7 @@ static void TownHouseMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
-		hs->grf_prop.spritegroup = _cur_grffile->spritegroups[groupid];
+		hs->grf_prop.spritegroup[0] = _cur_grffile->spritegroups[groupid];
 	}
 }
 
@@ -3956,7 +3956,7 @@ static void IndustryMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
-		indsp->grf_prop.spritegroup = _cur_grffile->spritegroups[groupid];
+		indsp->grf_prop.spritegroup[0] = _cur_grffile->spritegroups[groupid];
 	}
 }
 
@@ -3987,7 +3987,7 @@ static void IndustrytileMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
-		indtsp->grf_prop.spritegroup = _cur_grffile->spritegroups[groupid];
+		indtsp->grf_prop.spritegroup[0] = _cur_grffile->spritegroups[groupid];
 	}
 }
 
@@ -4075,7 +4075,7 @@ static void AirportMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
-		as->grf_prop.spritegroup = _cur_grffile->spritegroups[groupid];
+		as->grf_prop.spritegroup[0] = _cur_grffile->spritegroups[groupid];
 	}
 }
 
@@ -4106,7 +4106,7 @@ static void AirportTileMapSpriteGroup(ByteReader *buf, uint8 idcount)
 			continue;
 		}
 
-		airtsp->grf_prop.spritegroup = _cur_grffile->spritegroups[groupid];
+		airtsp->grf_prop.spritegroup[0] = _cur_grffile->spritegroups[groupid];
 	}
 }
 
@@ -4317,22 +4317,6 @@ static void FeatureNewName(ByteReader *buf)
 						break;
 				}
 				break;
-
-#if 0
-				case GSF_CANALS:
-				case GSF_BRIDGES:
-					AddGRFString(_cur_spriteid, id, lang, name);
-					switch (GB(id, 8, 8)) {
-						case 0xC9: // House name
-						default:
-							grfmsg(7, "FeatureNewName: Unsupported ID (0x%04X)", id);
-					}
-					break;
-
-				default :
-					grfmsg(7, "FeatureNewName: Unsupported feature (0x%02X)", feature);
-					break;
-#endif
 		}
 	}
 }
@@ -6925,7 +6909,7 @@ static void CalculateRefitMasks()
 		/* Did the newgrf specify any refitting? If not, use defaults. */
 		if (_gted[engine].refitmask_valid) {
 			if (ei->refit_mask != 0) {
-				const GRFFile *file = e->grffile;
+				const GRFFile *file = e->grf_prop.grffile;
 				if (file != NULL && file->cargo_max != 0) {
 					/* Apply cargo translation table to the refit mask */
 					uint num_cargo = min(32, file->cargo_max);
@@ -6987,7 +6971,7 @@ static void FinaliseEngineArray()
 	Engine *e;
 
 	FOR_ALL_ENGINES(e) {
-		if (e->grffile == NULL) {
+		if (e->grf_prop.grffile == NULL) {
 			const EngineIDMapping &eid = _engine_mngr[e->index];
 			if (eid.grfid != INVALID_GRFID || eid.internal_id != eid.substitute_id) {
 				e->info.string_id = STR_NEWGRF_INVALID_ENGINE;
