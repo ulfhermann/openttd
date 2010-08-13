@@ -129,7 +129,7 @@ void BaseVehicleListWindow::BuildVehicleList(Owner owner, uint16 index, uint16 w
 	}
 
 	this->vehicles.RebuildDone();
-	this->vscroll.SetCount(this->vehicles.Length());
+	this->vscroll->SetCount(this->vehicles.Length());
 }
 
 /**
@@ -418,11 +418,13 @@ struct RefitWindow : public Window {
 	RefitOption *cargo;   ///< Refit option selected by \v sel.
 	RefitList list;       ///< List of cargo types available for refitting.
 	VehicleOrderID order; ///< If not #INVALID_VEH_ORDER_ID, selection is part of a refit order (rather than execute directly).
+	Scrollbar *vscroll;
 
 	RefitWindow(const WindowDesc *desc, const Vehicle *v, VehicleOrderID order) : Window()
 	{
 		this->CreateNestedTree(desc);
 
+		this->vscroll = this->GetScrollbar(VRW_SCROLLBAR);
 		this->GetWidget<NWidgetCore>(VRW_SELECTHEADER)->tool_tip = STR_REFIT_TRAIN_LIST_TOOLTIP + v->type;
 		this->GetWidget<NWidgetCore>(VRW_MATRIX)->tool_tip       = STR_REFIT_TRAIN_LIST_TOOLTIP + v->type;
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(VRW_REFITBUTTON);
@@ -435,7 +437,7 @@ struct RefitWindow : public Window {
 		this->order = order;
 		this->sel  = -1;
 		BuildRefitList(v, &this->list);
-		this->vscroll.SetCount(this->list.Length());
+		this->vscroll->SetCount(this->list.Length());
 	}
 
 	virtual void OnInit()
@@ -446,20 +448,20 @@ struct RefitWindow : public Window {
 
 			/* Rebuild the refit list */
 			BuildRefitList(Vehicle::Get(this->window_number), &this->list);
-			this->vscroll.SetCount(this->list.Length());
+			this->vscroll->SetCount(this->list.Length());
 			this->sel = -1;
 			this->cargo = NULL;
 			for (uint i = 0; i < this->list.Length(); i++) {
 				if (this->list[i] == current_refit_option) {
 					this->sel = i;
 					this->cargo = &this->list[i];
-					this->vscroll.ScrollTowards(i);
+					this->vscroll->ScrollTowards(i);
 					break;
 				}
 			}
 
 			/* If the selected refit option was not found, scroll the window to the initial position. */
-			if (this->sel == -1) this->vscroll.ScrollTowards(0);
+			if (this->sel == -1) this->vscroll->ScrollTowards(0);
 		} else {
 			/* Rebuild the refit list */
 			this->OnInvalidateData(0);
@@ -490,7 +492,7 @@ struct RefitWindow : public Window {
 	{
 		switch (widget) {
 			case VRW_MATRIX:
-				DrawVehicleRefitWindow(this->list, this->sel, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->resize.step_height, r);
+				DrawVehicleRefitWindow(this->list, this->sel, this->vscroll->GetPosition(), this->vscroll->GetCapacity(), this->resize.step_height, r);
 				break;
 
 			case VRW_INFOPANEL:
@@ -515,7 +517,7 @@ struct RefitWindow : public Window {
 			case 0: { // The consist lenght of the vehicle has changed; rebuild the entire list.
 				Vehicle *v = Vehicle::Get(this->window_number);
 				BuildRefitList(v, &this->list);
-				this->vscroll.SetCount(this->list.Length());
+				this->vscroll->SetCount(this->list.Length());
 				/* FALL THROUGH */
 			}
 
@@ -529,7 +531,7 @@ struct RefitWindow : public Window {
 	{
 		switch (widget) {
 			case VRW_MATRIX: { // listbox
-				this->sel = this->vscroll.GetScrolledRowFromWidget(pt.y, this, VRW_MATRIX);
+				this->sel = this->vscroll->GetScrolledRowFromWidget(pt.y, this, VRW_MATRIX);
 				this->InvalidateData(1);
 
 				if (click_count == 1) break;
@@ -552,8 +554,8 @@ struct RefitWindow : public Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, VRW_MATRIX);
-		this->GetWidget<NWidgetCore>(VRW_MATRIX)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll->SetCapacityFromWidget(this, VRW_MATRIX);
+		this->GetWidget<NWidgetCore>(VRW_MATRIX)->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 };
 
@@ -565,8 +567,8 @@ static const NWidgetPart _nested_vehicle_refit_widgets[] = {
 	NWidget(WWT_TEXTBTN, COLOUR_GREY, VRW_SELECTHEADER), SetDataTip(STR_REFIT_TITLE, STR_NULL), SetResize(1, 0),
 	/* Matrix + scrollbar. */
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_GREY, VRW_MATRIX), SetMinimalSize(228, 112), SetResize(1, 14), SetFill(1, 1), SetDataTip(0x801, STR_NULL),
-		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VRW_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VRW_MATRIX), SetMinimalSize(228, 112), SetResize(1, 14), SetFill(1, 1), SetDataTip(0x801, STR_NULL), SetScrollbar(VRW_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, VRW_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VRW_INFOPANEL), SetMinimalTextLines(2, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
@@ -864,8 +866,8 @@ static const NWidgetPart _nested_vehicle_list[] = {
 	EndContainer(),
 
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_GREY, VLW_WIDGET_LIST), SetMinimalSize(248, 0), SetFill(1, 0), SetResize(1, 1),
-		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VLW_WIDGET_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VLW_WIDGET_LIST), SetMinimalSize(248, 0), SetFill(1, 0), SetResize(1, 1), SetScrollbar(VLW_WIDGET_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, VLW_WIDGET_SCROLLBAR),
 	EndContainer(),
 
 	NWidget(NWID_HORIZONTAL),
@@ -983,8 +985,8 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle, int
 	int vehicle_button_x = rtl ? right - 8 : left;
 
 	int y = r.top;
-	uint max = min(this->vscroll.GetPosition() + this->vscroll.GetCapacity(), this->vehicles.Length());
-	for (uint i = this->vscroll.GetPosition(); i < max; ++i) {
+	uint max = min(this->vscroll->GetPosition() + this->vscroll->GetCapacity(), this->vehicles.Length());
+	for (uint i = this->vscroll->GetPosition(); i < max; ++i) {
 		const Vehicle *v = this->vehicles[i];
 		StringID str;
 
@@ -1057,13 +1059,15 @@ public:
 			default: NOT_REACHED();
 		}
 
+		this->CreateNestedTree(desc);
+
+		this->vscroll = this->GetScrollbar(VLW_WIDGET_SCROLLBAR);
+
 		this->vehicles.SetListing(*this->sorting);
 		this->vehicles.ForceRebuild();
 		this->vehicles.NeedResort();
 		this->BuildVehicleList(company, GB(window_number, 16, 16), window_type);
 		this->SortVehicleList();
-
-		this->CreateNestedTree(desc);
 
 		/* Set up the window widgets */
 		this->GetWidget<NWidgetCore>(VLW_WIDGET_LIST)->tool_tip = STR_VEHICLE_LIST_TRAIN_LIST_TOOLTIP + this->vehicle_type;
@@ -1130,26 +1134,26 @@ public:
 							* and we should close the window when deleting the order      */
 							NOT_REACHED();
 						}
-						SetDParam(0, this->vscroll.GetCount());
+						SetDParam(0, this->vscroll->GetCount());
 						break;
 
 					case VLW_STANDARD: // Company Name
 						SetDParam(0, STR_COMPANY_NAME);
 						SetDParam(1, index);
-						SetDParam(3, this->vscroll.GetCount());
+						SetDParam(3, this->vscroll->GetCount());
 						break;
 
 					case VLW_STATION_LIST: // Station/Waypoint Name
 						SetDParam(0, Station::IsExpected(BaseStation::Get(index)) ? STR_STATION_NAME : STR_WAYPOINT_NAME);
 						SetDParam(1, index);
-						SetDParam(3, this->vscroll.GetCount());
+						SetDParam(3, this->vscroll->GetCount());
 						break;
 
 					case VLW_DEPOT_LIST:
 						SetDParam(0, STR_DEPOT_CAPTION);
 						SetDParam(1, this->vehicle_type);
 						SetDParam(2, index);
-						SetDParam(3, this->vscroll.GetCount());
+						SetDParam(3, this->vscroll->GetCount());
 						break;
 					default: NOT_REACHED();
 				}
@@ -1220,7 +1224,7 @@ public:
 				return;
 
 			case VLW_WIDGET_LIST: { // Matrix to show vehicles
-				uint id_v = this->vscroll.GetScrolledRowFromWidget(pt.y, this, VLW_WIDGET_LIST);
+				uint id_v = this->vscroll->GetScrolledRowFromWidget(pt.y, this, VLW_WIDGET_LIST);
 				if (id_v >= this->vehicles.Length()) return; // click out of list bound
 
 				const Vehicle *v = this->vehicles[id_v];
@@ -1289,8 +1293,8 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, VLW_WIDGET_LIST);
-		this->GetWidget<NWidgetCore>(VLW_WIDGET_LIST)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll->SetCapacityFromWidget(this, VLW_WIDGET_LIST);
+		this->GetWidget<NWidgetCore>(VLW_WIDGET_LIST)->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -1407,9 +1411,9 @@ static const NWidgetPart _nested_nontrain_vehicle_details_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_TOP_DETAILS), SetMinimalSize(405, 42), SetResize(1, 0), EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_MIDDLE_DETAILS), SetMinimalSize(405, 45), SetResize(1, 0), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(0, 1),
+		NWidget(WWT_PUSHARROWBTN, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(0, 1),
 				SetDataTip(AWV_DECREASE, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
-		NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(0, 1),
+		NWidget(WWT_PUSHARROWBTN, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(0, 1),
 				SetDataTip(AWV_INCREASE, STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP),
 		NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_SERVICING_INTERVAL), SetFill(1, 1), SetResize(1, 0), EndContainer(),
 		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
@@ -1427,13 +1431,13 @@ static const NWidgetPart _nested_train_vehicle_details_widgets[] = {
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_TOP_DETAILS), SetResize(1, 0), SetMinimalSize(405, 42), EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_GREY, VLD_WIDGET_MATRIX), SetResize(1, 1), SetMinimalSize(393, 45), SetDataTip(0x701, STR_NULL), SetFill(1, 0),
-		NWidget(WWT_SCROLLBAR, COLOUR_GREY, VLD_WIDGET_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_GREY, VLD_WIDGET_MATRIX), SetResize(1, 1), SetMinimalSize(393, 45), SetDataTip(0x701, STR_NULL), SetFill(1, 0), SetScrollbar(VLD_WIDGET_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, VLD_WIDGET_SCROLLBAR),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(0, 1),
+		NWidget(WWT_PUSHARROWBTN, COLOUR_GREY, VLD_WIDGET_DECREASE_SERVICING_INTERVAL), SetFill(0, 1),
 				SetDataTip(AWV_DECREASE, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
-		NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(0, 1),
+		NWidget(WWT_PUSHARROWBTN, COLOUR_GREY, VLD_WIDGET_INCREASE_SERVICING_INTERVAL), SetFill(0, 1),
 				SetDataTip(AWV_INCREASE, STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP),
 		NWidget(WWT_PANEL, COLOUR_GREY, VLD_WIDGET_SERVICING_INTERVAL), SetFill(1, 1), SetResize(1, 0), EndContainer(),
 	EndContainer(),
@@ -1460,13 +1464,16 @@ extern void DrawAircraftDetails(const Aircraft *v, int left, int right, int y);
 /** Class for managing the vehicle details window. */
 struct VehicleDetailsWindow : Window {
 	TrainDetailsWindowTabs tab; ///< For train vehicles: which tab is displayed.
+	Scrollbar *vscroll;
 
 	/** Initialize a newly created vehicle details window */
 	VehicleDetailsWindow(const WindowDesc *desc, WindowNumber window_number) : Window()
 	{
-		this->InitNested(desc, window_number);
+		const Vehicle *v = Vehicle::Get(window_number);
 
-		const Vehicle *v = Vehicle::Get(this->window_number);
+		this->CreateNestedTree(desc);
+		this->vscroll = (v->type == VEH_TRAIN ? this->GetScrollbar(VLD_WIDGET_SCROLLBAR) : NULL);
+		this->FinishInitNested(desc, window_number);
 
 		this->GetWidget<NWidgetCore>(VLD_WIDGET_RENAME_VEHICLE)->tool_tip = STR_VEHICLE_DETAILS_TRAIN_RENAME + v->type;
 
@@ -1669,7 +1676,7 @@ struct VehicleDetailsWindow : Window {
 
 			case VLD_WIDGET_MATRIX:
 				/* For trains only. */
-				DrawVehicleDetails(v, r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, r.top + WD_MATRIX_TOP, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->tab);
+				DrawVehicleDetails(v, r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, r.top + WD_MATRIX_TOP, this->vscroll->GetPosition(), this->vscroll->GetCapacity(), this->tab);
 				break;
 
 			case VLD_WIDGET_MIDDLE_DETAILS: {
@@ -1689,7 +1696,7 @@ struct VehicleDetailsWindow : Window {
 
 					DrawVehicleImage(v, sprite_left + WD_FRAMERECT_LEFT, sprite_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, 0);
 				}
-				DrawVehicleDetails(v, text_left + WD_FRAMERECT_LEFT, text_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, this->vscroll.GetPosition(), this->vscroll.GetCapacity(), this->tab);
+				DrawVehicleDetails(v, text_left + WD_FRAMERECT_LEFT, text_right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, 0, 0, this->tab);
 				break;
 			}
 
@@ -1712,7 +1719,7 @@ struct VehicleDetailsWindow : Window {
 
 		if (v->type == VEH_TRAIN) {
 			this->DisableWidget(this->tab + VLD_WIDGET_DETAILS_CARGO_CARRIED);
-			this->vscroll.SetCount(GetTrainDetailsWndVScroll(v->index, this->tab));
+			this->vscroll->SetCount(GetTrainDetailsWndVScroll(v->index, this->tab));
 		}
 
 		/* Disable service-scroller when interval is set to disabled */
@@ -1777,8 +1784,8 @@ struct VehicleDetailsWindow : Window {
 	{
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(VLD_WIDGET_MATRIX);
 		if (nwi != NULL) {
-			this->vscroll.SetCapacityFromWidget(this, VLD_WIDGET_MATRIX);
-			nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+			this->vscroll->SetCapacityFromWidget(this, VLD_WIDGET_MATRIX);
+			nwi->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 		}
 	}
 };

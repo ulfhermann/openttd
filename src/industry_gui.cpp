@@ -179,8 +179,8 @@ static const NWidgetPart _nested_build_industry_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_DARK_GREEN),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, DPIW_MATRIX_WIDGET), SetDataTip(0x801, STR_FUND_INDUSTRY_SELECTION_TOOLTIP), SetFill(1, 0), SetResize(1, 1),
-		NWidget(WWT_SCROLLBAR, COLOUR_DARK_GREEN, DPIW_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_DARK_GREEN, DPIW_MATRIX_WIDGET), SetDataTip(0x801, STR_FUND_INDUSTRY_SELECTION_TOOLTIP), SetFill(1, 0), SetResize(1, 1), SetScrollbar(DPIW_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_DARK_GREEN, DPIW_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_DARK_GREEN, DPIW_INFOPANEL), SetResize(1, 0),
 	EndContainer(),
@@ -209,6 +209,7 @@ class BuildIndustryWindow : public Window {
 	uint16 count;                               ///< How many industries are loaded
 	IndustryType index[NUM_INDUSTRYTYPES + 1];  ///< Type of industry, in the order it was loaded
 	bool enabled[NUM_INDUSTRYTYPES + 1];        ///< availability state, coming from CBID_INDUSTRY_AVAILABLE (if ever)
+	Scrollbar *vscroll;
 
 	/** The offset for the text in the matrix. */
 	static const int MATRIX_TEXT_OFFSET = 17;
@@ -259,7 +260,7 @@ class BuildIndustryWindow : public Window {
 			this->selected_type = this->index[0];
 		}
 
-		this->vscroll.SetCount(this->count);
+		this->vscroll->SetCount(this->count);
 	}
 
 	/** Update status of the fund and display-chain widgets. */
@@ -279,7 +280,10 @@ public:
 
 		this->callback_timer = DAY_TICKS;
 
-		this->InitNested(&_build_industry_desc, 0);
+		this->CreateNestedTree(&_build_industry_desc);
+		this->vscroll = this->GetScrollbar(DPIW_SCROLLBAR);
+		this->FinishInitNested(&_build_industry_desc, 0);
+
 		this->SetButtons();
 	}
 
@@ -381,16 +385,16 @@ public:
 	{
 		switch (widget) {
 			case DPIW_MATRIX_WIDGET:
-				for (byte i = 0; i < this->vscroll.GetCapacity() && i + this->vscroll.GetPosition() < this->count; i++) {
+				for (byte i = 0; i < this->vscroll->GetCapacity() && i + this->vscroll->GetPosition() < this->count; i++) {
 					int x = r.left + WD_MATRIX_LEFT;
 					int y = r.top + WD_MATRIX_TOP + i * this->resize.step_height;
-					bool selected = this->selected_index == i + this->vscroll.GetPosition();
+					bool selected = this->selected_index == i + this->vscroll->GetPosition();
 
-					if (this->index[i + this->vscroll.GetPosition()] == INVALID_INDUSTRYTYPE) {
+					if (this->index[i + this->vscroll->GetPosition()] == INVALID_INDUSTRYTYPE) {
 						DrawString(x + MATRIX_TEXT_OFFSET, r.right - WD_MATRIX_RIGHT, y, STR_FUND_INDUSTRY_MANY_RANDOM_INDUSTRIES, selected ? TC_WHITE : TC_ORANGE);
 						continue;
 					}
-					const IndustrySpec *indsp = GetIndustrySpec(this->index[i + this->vscroll.GetPosition()]);
+					const IndustrySpec *indsp = GetIndustrySpec(this->index[i + this->vscroll->GetPosition()]);
 
 					/* Draw the name of the industry in white is selected, otherwise, in orange */
 					DrawString(x + MATRIX_TEXT_OFFSET, r.right - WD_MATRIX_RIGHT, y, indsp->name, selected ? TC_WHITE : TC_ORANGE);
@@ -476,7 +480,7 @@ public:
 	{
 		switch (widget) {
 			case DPIW_MATRIX_WIDGET: {
-				int y = this->vscroll.GetScrolledRowFromWidget(pt.y, this, DPIW_MATRIX_WIDGET);
+				int y = this->vscroll->GetScrolledRowFromWidget(pt.y, this, DPIW_MATRIX_WIDGET);
 				if (y < this->count) { // Is it within the boundaries of available data?
 					this->selected_index = y;
 					this->selected_type = this->index[y];
@@ -529,8 +533,8 @@ public:
 	virtual void OnResize()
 	{
 		/* Adjust the number of items in the matrix depending of the resize */
-		this->vscroll.SetCapacityFromWidget(this, DPIW_MATRIX_WIDGET);
-		this->GetWidget<NWidgetCore>(DPIW_MATRIX_WIDGET)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll->SetCapacityFromWidget(this, DPIW_MATRIX_WIDGET);
+		this->GetWidget<NWidgetCore>(DPIW_MATRIX_WIDGET)->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
 	virtual void OnPlaceObject(Point pt, TileIndex tile)
@@ -951,10 +955,10 @@ static const NWidgetPart _nested_industry_directory_widgets[] = {
 				NWidget(WWT_DROPDOWN, COLOUR_BROWN, IDW_DROPDOWN_CRITERIA), SetDataTip(STR_JUST_STRING, STR_TOOLTIP_SORT_CRITERIA),
 				NWidget(WWT_PANEL, COLOUR_BROWN), SetResize(1, 0), EndContainer(),
 			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_BROWN, IDW_INDUSTRY_LIST), SetDataTip(0x0, STR_INDUSTRY_DIRECTORY_LIST_CAPTION), SetResize(1, 1), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_BROWN, IDW_INDUSTRY_LIST), SetDataTip(0x0, STR_INDUSTRY_DIRECTORY_LIST_CAPTION), SetResize(1, 1), SetScrollbar(IDW_SCROLLBAR), EndContainer(),
 		EndContainer(),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, IDW_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_BROWN, IDW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
 		EndContainer(),
 	EndContainer(),
@@ -977,6 +981,7 @@ protected:
 	static GUIIndustryList::SortFunction * const sorter_funcs[];
 
 	GUIIndustryList industries;
+	Scrollbar *vscroll;
 
 	/** (Re)Build industries list */
 	void BuildSortIndustriesList()
@@ -991,7 +996,7 @@ protected:
 
 			this->industries.Compact();
 			this->industries.RebuildDone();
-			this->vscroll.SetCount(this->industries.Length()); // Update scrollbar as well.
+			this->vscroll->SetCount(this->industries.Length()); // Update scrollbar as well.
 		}
 
 		if (!this->industries.Sort()) return;
@@ -1117,12 +1122,15 @@ protected:
 public:
 	IndustryDirectoryWindow(const WindowDesc *desc, WindowNumber number) : Window()
 	{
+		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(IDW_SCROLLBAR);
+
 		this->industries.SetListing(this->last_sorting);
 		this->industries.SetSortFuncs(IndustryDirectoryWindow::sorter_funcs);
 		this->industries.ForceRebuild();
 		this->BuildSortIndustriesList();
 
-		this->InitNested(desc, 0);
+		this->FinishInitNested(desc, 0);
 	}
 
 	~IndustryDirectoryWindow()
@@ -1154,11 +1162,11 @@ public:
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, STR_INDUSTRY_DIRECTORY_NONE);
 					break;
 				}
-				for (uint i = this->vscroll.GetPosition(); i < this->industries.Length(); i++) {
+				for (uint i = this->vscroll->GetPosition(); i < this->industries.Length(); i++) {
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, this->GetIndustryString(this->industries[i]));
 
 					y += this->resize.step_height;
-					if (++n == this->vscroll.GetCapacity()) break; // max number of industries in 1 window
+					if (++n == this->vscroll->GetCapacity()) break; // max number of industries in 1 window
 				}
 				break;
 			}
@@ -1215,7 +1223,7 @@ public:
 				break;
 
 			case IDW_INDUSTRY_LIST: {
-				uint p = this->vscroll.GetScrolledRowFromWidget(pt.y, this, IDW_INDUSTRY_LIST, WD_FRAMERECT_TOP);
+				uint p = this->vscroll->GetScrolledRowFromWidget(pt.y, this, IDW_INDUSTRY_LIST, WD_FRAMERECT_TOP);
 				if (p < this->industries.Length()) {
 					if (_ctrl_pressed) {
 						ShowExtraViewPortWindow(this->industries[p]->location.tile);
@@ -1238,7 +1246,7 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, IDW_INDUSTRY_LIST);
+		this->vscroll->SetCapacityFromWidget(this, IDW_INDUSTRY_LIST);
 	}
 
 	virtual void OnHundredthTick()
@@ -1310,7 +1318,7 @@ static const NWidgetPart _nested_industry_cargoes_widgets[] = {
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_PANEL, COLOUR_BROWN, ICW_PANEL), SetResize(1, 10), SetMinimalSize(200, 90), EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_BROWN, ICW_PANEL), SetResize(1, 10), SetMinimalSize(200, 90), SetScrollbar(ICW_SCROLLBAR), EndContainer(),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_TEXTBTN, COLOUR_BROWN, ICW_NOTIFY),
 					SetDataTip(STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP, STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP),
@@ -1318,7 +1326,7 @@ static const NWidgetPart _nested_industry_cargoes_widgets[] = {
 			EndContainer(),
 		EndContainer(),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, ICW_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_BROWN, ICW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
 		EndContainer(),
 	EndContainer(),
@@ -1929,10 +1937,14 @@ struct IndustryCargoesWindow : public Window {
 	Fields fields;  ///< Fields to display in the #ICW_PANEL.
 	uint ind_cargo; ///< If less than #NUM_INDUSTRYTYPES, an industry type, else a cargo id + NUM_INDUSTRYTYPES.
 
+	Scrollbar *vscroll;
+
 	IndustryCargoesWindow(int id) : Window()
 	{
 		this->OnInit();
-		this->InitNested(&_industry_cargoes_desc, 0);
+		this->CreateNestedTree(&_industry_cargoes_desc);
+		this->vscroll = this->GetScrollbar(ICW_SCROLLBAR);
+		this->FinishInitNested(&_industry_cargoes_desc, 0);
 		this->OnInvalidateData(id);
 	}
 
@@ -2142,7 +2154,7 @@ struct IndustryCargoesWindow : public Window {
 	{
 		this->GetWidget<NWidgetCore>(ICW_CAPTION)->widget_data = STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION;
 		this->ind_cargo = it;
-		_displayed_industries = 1 << it;
+		_displayed_industries = 1ULL << it;
 
 		this->fields.Clear();
 		CargoesRow *row = this->fields.Append();
@@ -2207,7 +2219,7 @@ struct IndustryCargoesWindow : public Window {
 		this->ShortenCargoColumn(1, 1, num_indrows);
 		this->ShortenCargoColumn(3, 1, num_indrows);
 		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
-		this->vscroll.SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
+		this->vscroll->SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
 		this->SetDirty();
 		this->NotifySmallmap();
 	}
@@ -2275,7 +2287,7 @@ struct IndustryCargoesWindow : public Window {
 
 		this->ShortenCargoColumn(1, 1, num_indrows);
 		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
-		this->vscroll.SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
+		this->vscroll->SetCount(CeilDiv(WD_FRAMETEXT_TOP + WD_FRAMETEXT_BOTTOM + CargoesField::small_height + num_indrows * CargoesField::normal_height, nwp->resize_y));
 		this->SetDirty();
 		this->NotifySmallmap();
 	}
@@ -2316,7 +2328,7 @@ struct IndustryCargoesWindow : public Window {
 		int last_column = (this->ind_cargo < NUM_INDUSTRYTYPES) ? 4 : 2;
 
 		const NWidgetBase *nwp = this->GetWidget<NWidgetBase>(ICW_PANEL);
-		int vpos = -this->vscroll.GetPosition() * nwp->resize_y;
+		int vpos = -this->vscroll->GetPosition() * nwp->resize_y;
 		for (uint i = 0; i < this->fields.Length(); i++) {
 			int row_height = (i == 0) ? CargoesField::small_height : CargoesField::normal_height;
 			if (vpos + row_height >= 0) {
@@ -2355,7 +2367,7 @@ struct IndustryCargoesWindow : public Window {
 		pt.x -= nw->pos_x;
 		pt.y -= nw->pos_y;
 
-		int vpos = WD_FRAMERECT_TOP + CargoesField::small_height - this->vscroll.GetPosition() * nw->resize_y;
+		int vpos = WD_FRAMERECT_TOP + CargoesField::small_height - this->vscroll->GetPosition() * nw->resize_y;
 		if (pt.y < vpos) return false;
 
 		int row = (pt.y - vpos) / CargoesField::normal_height; // row is relative to row 1.
@@ -2480,7 +2492,7 @@ struct IndustryCargoesWindow : public Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, ICW_PANEL);
+		this->vscroll->SetCapacityFromWidget(this, ICW_PANEL);
 	}
 };
 
