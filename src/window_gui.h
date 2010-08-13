@@ -184,132 +184,6 @@ enum WindowDefaultFlag {
 };
 
 /**
- * Scrollbar data structure
- */
-class Scrollbar {
-private:
-	const bool is_vertical; ///< Scrollbar has vertical orientation.
-	uint16 count;           ///< Number of elements in the list.
-	uint16 cap;             ///< Number of visible elements of the scroll bar.
-	uint16 pos;             ///< Index of first visible item of the list.
-
-public:
-	Scrollbar(bool is_vertical) : is_vertical(is_vertical)
-	{
-	}
-
-	/**
-	 * Gets the number of elements in the list
-	 * @return the number of elements
-	 */
-	FORCEINLINE uint16 GetCount() const
-	{
-		return this->count;
-	}
-
-	/**
-	 * Gets the number of visible elements of the scrollbar
-	 * @return the number of visible elements
-	 */
-	FORCEINLINE uint16 GetCapacity() const
-	{
-		return this->cap;
-	}
-
-	/**
-	 * Gets the position of the first visible element in the list
-	 * @return the position of the element
-	 */
-	FORCEINLINE uint16 GetPosition() const
-	{
-		return this->pos;
-	}
-
-	/**
-	 * Checks whether given current item is visible in the list
-	 * @param item to check
-	 * @return true iff the item is visible
-	 */
-	FORCEINLINE bool IsVisible(uint16 item) const
-	{
-		return IsInsideBS(item, this->GetPosition(), this->GetCapacity());
-	}
-
-	/**
-	 * Sets the number of elements in the list
-	 * @param num the number of elements in the list
-	 * @note updates the position if needed
-	 */
-	void SetCount(int num)
-	{
-		assert(num >= 0);
-		assert(num <= MAX_UVALUE(uint16));
-
-		this->count = num;
-		num -= this->cap;
-		if (num < 0) num = 0;
-		if (num < this->pos) this->pos = num;
-	}
-
-	/**
-	 * Set the capacity of visible elements.
-	 * @param capacity the new capacity
-	 * @note updates the position if needed
-	 */
-	void SetCapacity(int capacity)
-	{
-		assert(capacity > 0);
-		assert(capacity <= MAX_UVALUE(uint16));
-
-		this->cap = capacity;
-		if (this->cap + this->pos > this->count) this->pos = max(0, this->count - this->cap);
-	}
-
-	void SetCapacityFromWidget(Window *w, int widget, int padding = 0);
-
-	/**
-	 * Sets the position of the first visible element
-	 * @param position the position of the element
-	 */
-	void SetPosition(int position)
-	{
-		assert(position >= 0);
-		assert(this->count <= this->cap ? (position == 0) : (position + this->cap <= this->count));
-		this->pos = position;
-	}
-
-	/**
-	 * Updates the position of the first visible element by the given amount.
-	 * If the position would be too low or high it will be clamped appropriately
-	 * @param difference the amount of change requested
-	 */
-	void UpdatePosition(int difference)
-	{
-		if (difference == 0) return;
-		this->SetPosition(Clamp(this->pos + difference, 0, max(this->count - this->cap, 0)));
-	}
-
-	/**
-	 * Scroll towards the given position; if the item is visible nothing
-	 * happens, otherwise it will be shown either at the bottom or top of
-	 * the window depending on where in the list it was.
-	 * @param position the position to scroll towards.
-	 */
-	void ScrollTowards(int position)
-	{
-		if (position < this->GetPosition()) {
-			/* scroll up to the item */
-			this->SetPosition(position);
-		} else if (position >= this->GetPosition() + this->GetCapacity()) {
-			/* scroll down so that the item is at the bottom */
-			this->SetPosition(position - this->GetCapacity() + 1);
-		}
-	}
-
-	int GetScrolledRowFromWidget(int clickpos, const Window * const w, int widget, int padding = 0, int line_height = -1) const;
-};
-
-/**
  * Data structure for resizing a window
  */
 struct ResizeInfo {
@@ -382,9 +256,6 @@ public:
 	int width;  ///< width of the window (number of pixels to the right in x direction)
 	int height; ///< Height of the window (number of pixels down in y direction)
 
-	Scrollbar hscroll;  ///< Horizontal scroll bar
-	Scrollbar vscroll;  ///< First vertical scroll bar
-	Scrollbar vscroll2; ///< Second vertical scroll bar
 	ResizeInfo resize;  ///< Resize information
 
 	Owner owner;        ///< The owner of the content shown in this window. Company colour is acquired from this variable.
@@ -398,6 +269,8 @@ public:
 	NWidgetStacked *shade_select;    ///< Selection widget (#NWID_SELECTION) to use for shading the window. If \c NULL, window cannot shade.
 	Dimension unshaded_size;         ///< Last known unshaded size (only valid while shaded).
 
+	int scrolling_scrollbar;         ///< Widgetindex of just being dragged scrollbar. -1 of none is active.
+
 	Window *parent;                  ///< Parent window.
 	Window *z_front;                 ///< The window in front of us in z-order.
 	Window *z_back;                  ///< The window behind us in z-order.
@@ -407,10 +280,12 @@ public:
 	template <class NWID>
 	inline NWID *GetWidget(uint widnum);
 
+	const Scrollbar *GetScrollbar(uint widnum) const;
+	Scrollbar *GetScrollbar(uint widnum);
 
 	void InitNested(const WindowDesc *desc, WindowNumber number = 0);
 	void CreateNestedTree(const WindowDesc *desc, bool fill_nested = true);
-	void FinishInitNested(const WindowDesc *desc, WindowNumber window_number);
+	void FinishInitNested(const WindowDesc *desc, WindowNumber window_number = 0);
 
 	/**
 	 * Sets the enabled/disabled status of a widget.
@@ -871,22 +746,17 @@ enum WindowFlags {
 	WF_TIMEOUT_BEGIN     = 7,       ///< The initial value for the timeout
 	WF_TIMEOUT_MASK      = 7,       ///< Window timeout counter bit mask (3 bits)
 	WF_DRAGGING          = 1 <<  3, ///< Window is being dragged
-	WF_SCROLL_UP         = 1 <<  4, ///< Upper scroll button has been pressed, @see ScrollbarClickHandler()
-	WF_SCROLL_DOWN       = 1 <<  5, ///< Lower scroll button has been pressed, @see ScrollbarClickHandler()
-	WF_SCROLL_MIDDLE     = 1 <<  6, ///< Scrollbar scrolling, @see ScrollbarClickHandler()
-	WF_SCROLL2           = 1 <<  7,
-	WF_HSCROLL           = 1 <<  8,
-	WF_SIZING_RIGHT      = 1 <<  9, ///< Window is being resized towards the right.
-	WF_SIZING_LEFT       = 1 << 10, ///< Window is being resized towards the left.
+	WF_SIZING_RIGHT      = 1 <<  4, ///< Window is being resized towards the right.
+	WF_SIZING_LEFT       = 1 <<  5, ///< Window is being resized towards the left.
 	WF_SIZING            = WF_SIZING_RIGHT | WF_SIZING_LEFT, ///< Window is being resized.
-	WF_STICKY            = 1 << 11, ///< Window is made sticky by user
+	WF_STICKY            = 1 <<  6, ///< Window is made sticky by user
 
-	WF_DISABLE_VP_SCROLL = 1 << 12, ///< Window does not do autoscroll, @see HandleAutoscroll()
+	WF_DISABLE_VP_SCROLL = 1 <<  7, ///< Window does not do autoscroll, @see HandleAutoscroll()
 
-	WF_WHITE_BORDER_ONE  = 1 << 13,
-	WF_WHITE_BORDER_MASK = 1 << 14 | WF_WHITE_BORDER_ONE,
+	WF_WHITE_BORDER_ONE  = 1 <<  8,
+	WF_WHITE_BORDER_MASK = 1 <<  9 | WF_WHITE_BORDER_ONE,
 
-	WF_CENTERED          = 1 << 15, ///< Window is centered and shall stay centered after ReInit
+	WF_CENTERED          = 1 << 10, ///< Window is centered and shall stay centered after ReInit
 };
 
 Window *BringWindowToFrontById(WindowClass cls, WindowNumber number);
@@ -931,7 +801,6 @@ extern int _scrollbar_start_pos;
 extern int _scrollbar_size;
 extern byte _scroller_click_timeout;
 
-extern bool _scrolling_scrollbar;
 extern bool _scrolling_viewport;
 extern bool _mouse_hovering;
 
@@ -949,6 +818,6 @@ Window *GetCallbackWnd();
 void SetFocusedWindow(Window *w);
 bool EditBoxInGlobalFocus();
 
-void ScrollbarClickHandler(Window *w, const NWidgetCore *nw, int x, int y);
+void ScrollbarClickHandler(Window *w, NWidgetCore *nw, int x, int y);
 
 #endif /* WINDOW_GUI_H */

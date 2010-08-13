@@ -142,7 +142,7 @@ static inline Owner GetTileOwner(TileIndex tile)
 	assert(!IsTileType(tile, MP_HOUSE));
 	assert(!IsTileType(tile, MP_INDUSTRY));
 
-	return (Owner)_m[tile].m1;
+	return (Owner)GB(_m[tile].m1, 0, 5);
 }
 
 /**
@@ -162,7 +162,7 @@ static inline void SetTileOwner(TileIndex tile, Owner owner)
 	assert(!IsTileType(tile, MP_HOUSE));
 	assert(!IsTileType(tile, MP_INDUSTRY));
 
-	_m[tile].m1 = owner;
+	SB(_m[tile].m1, 0, 5, owner);
 }
 
 /**
@@ -206,4 +206,35 @@ Slope GetTileSlope(TileIndex tile, uint *h);
 uint GetTileZ(TileIndex tile);
 uint GetTileMaxZ(TileIndex tile);
 
-#endif /* TILE_TYPE_H */
+
+/**
+ * Calculate a hash value from a tile position
+ *
+ * @param x The X coordinate
+ * @param y The Y coordinate
+ * @return The hash of the tile
+ */
+static inline uint TileHash(uint x, uint y)
+{
+	uint hash = x >> 4;
+	hash ^= x >> 6;
+	hash ^= y >> 4;
+	hash -= y >> 6;
+	return hash;
+}
+
+/**
+ * Get the last two bits of the TileHash
+ *  from a tile position.
+ *
+ * @see TileHash()
+ * @param x The X coordinate
+ * @param y The Y coordinate
+ * @return The last two bits from hash of the tile
+ */
+static inline uint TileHash2Bit(uint x, uint y)
+{
+	return GB(TileHash(x, y), 0, 2);
+}
+
+#endif /* TILE_MAP_H */
