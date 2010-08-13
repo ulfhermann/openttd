@@ -106,6 +106,7 @@ class ReplaceVehicleWindow : public Window {
 	GroupID sel_group;            ///< Group selected to replace.
 	int details_height;           ///< Minimal needed height of the details panels (found so far).
 	RailType sel_railtype;        ///< Type of rail tracks selected.
+	Scrollbar *vscroll[2];
 
 	/**
 	 * Figure out if an engine should be added to a list.
@@ -171,7 +172,7 @@ class ReplaceVehicleWindow : public Window {
 		if (this->engines[0].NeedRebuild()) {
 			/* We need to rebuild the left engines list */
 			this->GenerateReplaceVehList(true);
-			this->vscroll.SetCount(this->engines[0].Length());
+			this->vscroll[0]->SetCount(this->engines[0].Length());
 			if (this->reset_sel_engine && this->sel_engine[0] == INVALID_ENGINE && this->engines[0].Length() != 0) {
 				this->sel_engine[0] = this->engines[0][0];
 			}
@@ -185,7 +186,7 @@ class ReplaceVehicleWindow : public Window {
 				this->sel_engine[1] = INVALID_ENGINE;
 			} else {
 				this->GenerateReplaceVehList(false);
-				this->vscroll2.SetCount(this->engines[1].Length());
+				this->vscroll[1]->SetCount(this->engines[1].Length());
 				if (this->reset_sel_engine && this->sel_engine[1] == INVALID_ENGINE && this->engines[1].Length() != 0) {
 					this->sel_engine[1] = this->engines[1][0];
 				}
@@ -226,7 +227,10 @@ public:
 		this->sel_engine[0] = INVALID_ENGINE;
 		this->sel_engine[1] = INVALID_ENGINE;
 
-		this->InitNested(desc, vehicletype);
+		this->CreateNestedTree(desc);
+		this->vscroll[0] = this->GetScrollbar(RVW_WIDGET_LEFT_SCROLLBAR);
+		this->vscroll[1] = this->GetScrollbar(RVW_WIDGET_RIGHT_SCROLLBAR);
+		this->FinishInitNested(desc, vehicletype);
 
 		this->owner = _local_company;
 		this->sel_group = id_g;
@@ -339,8 +343,8 @@ public:
 			case RVW_WIDGET_LEFT_MATRIX:
 			case RVW_WIDGET_RIGHT_MATRIX: {
 				int side = (widget == RVW_WIDGET_LEFT_MATRIX) ? 0 : 1;
-				EngineID start  = side == 0 ? this->vscroll.GetPosition() : this->vscroll2.GetPosition(); // what is the offset for the start (scrolling)
-				EngineID end    = min((side == 0 ? this->vscroll.GetCapacity() : this->vscroll2.GetCapacity()) + start, this->engines[side].Length());
+				EngineID start  = this->vscroll[side]->GetPosition(); // what is the offset for the start (scrolling)
+				EngineID end    = min(this->vscroll[side]->GetCapacity() + start, this->engines[side].Length());
 
 				/* Do the actual drawing */
 				DrawEngineList((VehicleType)this->window_number, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP,
@@ -450,15 +454,13 @@ public:
 
 			case RVW_WIDGET_LEFT_MATRIX:
 			case RVW_WIDGET_RIGHT_MATRIX: {
-				uint i;
 				byte click_side;
 				if (widget == RVW_WIDGET_LEFT_MATRIX) {
-					i = this->vscroll.GetScrolledRowFromWidget(pt.y, this, RVW_WIDGET_LEFT_MATRIX);
 					click_side = 0;
 				} else {
-					i = this->vscroll2.GetScrolledRowFromWidget(pt.y, this, RVW_WIDGET_RIGHT_MATRIX);
 					click_side = 1;
 				}
+				uint i = this->vscroll[click_side]->GetScrolledRowFromWidget(pt.y, this, widget);
 				size_t engine_count = this->engines[click_side].Length();
 
 				EngineID e = engine_count > i ? this->engines[click_side][i] : INVALID_ENGINE;
@@ -480,8 +482,8 @@ public:
 		if (temp == sel_railtype) return; // we didn't select a new one. No need to change anything
 		sel_railtype = temp;
 		/* Reset scrollbar positions */
-		this->vscroll.SetPosition(0);
-		this->vscroll2.SetPosition(0);
+		this->vscroll[0]->SetPosition(0);
+		this->vscroll[1]->SetPosition(0);
 		/* Rebuild the lists */
 		this->engines[0].ForceRebuild();
 		this->engines[1].ForceRebuild();
@@ -491,11 +493,11 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, RVW_WIDGET_LEFT_MATRIX);
-		this->vscroll2.SetCapacityFromWidget(this, RVW_WIDGET_RIGHT_MATRIX);
+		this->vscroll[0]->SetCapacityFromWidget(this, RVW_WIDGET_LEFT_MATRIX);
+		this->vscroll[1]->SetCapacityFromWidget(this, RVW_WIDGET_RIGHT_MATRIX);
 
 		this->GetWidget<NWidgetCore>(RVW_WIDGET_LEFT_MATRIX)->widget_data =
-				this->GetWidget<NWidgetCore>(RVW_WIDGET_RIGHT_MATRIX)->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+				this->GetWidget<NWidgetCore>(RVW_WIDGET_RIGHT_MATRIX)->widget_data = (this->vscroll[0]->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
 	virtual void OnInvalidateData(int data)
@@ -516,10 +518,10 @@ static const NWidgetPart _nested_replace_rail_vehicle_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_LEFT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_LEFT_ARRAY), SetResize(1, 1),
-		NWidget(WWT_SCROLLBAR, COLOUR_GREY, RVW_WIDGET_LEFT_SCROLLBAR),
-		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_RIGHT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_RIGHT_ARRAY), SetResize(1, 1),
-		NWidget(WWT_SCROLL2BAR, COLOUR_GREY, RVW_WIDGET_RIGHT_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_LEFT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_LEFT_ARRAY), SetResize(1, 1), SetScrollbar(RVW_WIDGET_LEFT_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, RVW_WIDGET_LEFT_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_RIGHT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_RIGHT_ARRAY), SetResize(1, 1), SetScrollbar(RVW_WIDGET_RIGHT_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, RVW_WIDGET_RIGHT_SCROLLBAR),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 		NWidget(WWT_PANEL, COLOUR_GREY, RVW_WIDGET_LEFT_DETAILS), SetMinimalSize(228, 102), SetResize(1, 0), EndContainer(),
@@ -556,10 +558,10 @@ static const NWidgetPart _nested_replace_vehicle_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
-		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_LEFT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_LEFT_ARRAY), SetResize(1, 1),
-		NWidget(WWT_SCROLLBAR, COLOUR_GREY, RVW_WIDGET_LEFT_SCROLLBAR),
-		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_RIGHT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_RIGHT_ARRAY), SetResize(1, 1),
-		NWidget(WWT_SCROLL2BAR, COLOUR_GREY, RVW_WIDGET_RIGHT_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_LEFT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_LEFT_ARRAY), SetResize(1, 1), SetScrollbar(RVW_WIDGET_LEFT_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, RVW_WIDGET_LEFT_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_GREY, RVW_WIDGET_RIGHT_MATRIX), SetMinimalSize(216, 0), SetFill(1, 1), SetDataTip(0x1, STR_REPLACE_HELP_RIGHT_ARRAY), SetResize(1, 1), SetScrollbar(RVW_WIDGET_RIGHT_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, RVW_WIDGET_RIGHT_SCROLLBAR),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 		NWidget(WWT_PANEL, COLOUR_GREY, RVW_WIDGET_LEFT_DETAILS), SetMinimalSize(228, 92), SetResize(1, 0), EndContainer(),
