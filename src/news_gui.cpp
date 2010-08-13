@@ -951,9 +951,13 @@ struct MessageHistoryWindow : Window {
 	int line_height; /// < Height of a single line in the news histoy window including spacing.
 	int date_width;  /// < Width needed for the date part.
 
+	Scrollbar *vscroll;
+
 	MessageHistoryWindow(const WindowDesc *desc) : Window()
 	{
-		this->InitNested(desc); // Initializes 'this->line_height' and 'this->date_width'.
+		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(MHW_SCROLLBAR);
+		this->FinishInitNested(desc); // Initializes 'this->line_height' and 'this->date_width'.
 		this->OnInvalidateData(0);
 	}
 
@@ -983,7 +987,7 @@ struct MessageHistoryWindow : Window {
 
 		/* Find the first news item to display. */
 		NewsItem *ni = _latest_news;
-		for (int n = this->vscroll.GetPosition(); n > 0; n--) {
+		for (int n = this->vscroll->GetPosition(); n > 0; n--) {
 			ni = ni->prev;
 			if (ni == NULL) return;
 		}
@@ -995,7 +999,7 @@ struct MessageHistoryWindow : Window {
 		uint date_right = rtl ? r.right - WD_FRAMERECT_RIGHT : r.left + WD_FRAMERECT_LEFT + this->date_width;
 		uint news_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.left + WD_FRAMERECT_LEFT + this->date_width + WD_FRAMERECT_RIGHT;
 		uint news_right = rtl ? r.right - WD_FRAMERECT_RIGHT - this->date_width - WD_FRAMERECT_RIGHT : r.right - WD_FRAMERECT_RIGHT;
-		for (int n = this->vscroll.GetCapacity(); n > 0; n--) {
+		for (int n = this->vscroll->GetCapacity(); n > 0; n--) {
 			SetDParam(0, ni->date);
 			DrawString(date_left, date_right, y, STR_SHORT_DATE);
 
@@ -1009,7 +1013,7 @@ struct MessageHistoryWindow : Window {
 
 	virtual void OnInvalidateData(int data)
 	{
-		this->vscroll.SetCount(_total_news);
+		this->vscroll->SetCount(_total_news);
 	}
 
 	virtual void OnClick(Point pt, int widget, int click_count)
@@ -1018,7 +1022,7 @@ struct MessageHistoryWindow : Window {
 			NewsItem *ni = _latest_news;
 			if (ni == NULL) return;
 
-			for (int n = this->vscroll.GetScrolledRowFromWidget(pt.y, this, MHW_BACKGROUND, WD_FRAMERECT_TOP, this->line_height); n > 0; n--) {
+			for (int n = this->vscroll->GetScrolledRowFromWidget(pt.y, this, MHW_BACKGROUND, WD_FRAMERECT_TOP, this->line_height); n > 0; n--) {
 				ni = ni->prev;
 				if (ni == NULL) return;
 			}
@@ -1029,7 +1033,7 @@ struct MessageHistoryWindow : Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacity(this->GetWidget<NWidgetBase>(MHW_BACKGROUND)->current_y / this->line_height);
+		this->vscroll->SetCapacity(this->GetWidget<NWidgetBase>(MHW_BACKGROUND)->current_y / this->line_height);
 	}
 };
 
@@ -1045,10 +1049,10 @@ static const NWidgetPart _nested_message_history[] = {
 	EndContainer(),
 
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_BROWN, MHW_BACKGROUND), SetMinimalSize(200, 125), SetDataTip(0x0, STR_MESSAGE_HISTORY_TOOLTIP), SetResize(1, 12),
+		NWidget(WWT_PANEL, COLOUR_BROWN, MHW_BACKGROUND), SetMinimalSize(200, 125), SetDataTip(0x0, STR_MESSAGE_HISTORY_TOOLTIP), SetResize(1, 12), SetScrollbar(MHW_SCROLLBAR),
 		EndContainer(),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_SCROLLBAR, COLOUR_BROWN, MHW_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_BROWN, MHW_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_BROWN),
 		EndContainer(),
 	EndContainer(),
@@ -1238,7 +1242,7 @@ static NWidgetBase *MakeButtonsColumn(int *biggest_index)
 	for (int i = 0; i < NT_END; i++) {
 		NWidgetHorizontal *hor = new NWidgetHorizontal;
 		/* [<] button. */
-		NWidgetLeaf *leaf = new NWidgetLeaf(NWID_BUTTON_ARROW, COLOUR_YELLOW, widnum, AWV_DECREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		NWidgetLeaf *leaf = new NWidgetLeaf(WWT_PUSHARROWBTN, COLOUR_YELLOW, widnum, AWV_DECREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
 		leaf->SetFill(1, 1);
 		hor->Add(leaf);
 		/* Label. */
@@ -1246,7 +1250,7 @@ static NWidgetBase *MakeButtonsColumn(int *biggest_index)
 		leaf->SetFill(1, 1);
 		hor->Add(leaf);
 		/* [>] button. */
-		leaf = new NWidgetLeaf(NWID_BUTTON_ARROW, COLOUR_YELLOW, widnum + 2, AWV_INCREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		leaf = new NWidgetLeaf(WWT_PUSHARROWBTN, COLOUR_YELLOW, widnum + 2, AWV_INCREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
 		leaf->SetFill(1, 1);
 		hor->Add(leaf);
 		vert_buttons->Add(hor);

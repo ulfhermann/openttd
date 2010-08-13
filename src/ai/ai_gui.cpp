@@ -52,15 +52,18 @@ struct AIListWindow : public Window {
 	int selected;
 	CompanyID slot;
 	int line_height; // Height of a row in the matrix widget.
+	Scrollbar *vscroll;
 
 	AIListWindow(const WindowDesc *desc, CompanyID slot) : Window(),
 		slot(slot)
 	{
 		this->ai_info_list = AI::GetUniqueInfoList();
 
-		this->InitNested(desc); // Initializes 'this->line_height' as side effect.
+		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(AIL_WIDGET_SCROLLBAR);
+		this->FinishInitNested(desc); // Initializes 'this->line_height' as side effect.
 
-		this->vscroll.SetCount((int)this->ai_info_list->size() + 1);
+		this->vscroll->SetCount((int)this->ai_info_list->size() + 1);
 
 		/* Try if we can find the currently selected AI */
 		this->selected = -1;
@@ -99,13 +102,13 @@ struct AIListWindow : public Window {
 				/* Draw a list of all available AIs. */
 				int y = this->GetWidget<NWidgetBase>(AIL_WIDGET_LIST)->pos_y;
 				/* First AI in the list is hardcoded to random */
-				if (this->vscroll.IsVisible(0)) {
+				if (this->vscroll->IsVisible(0)) {
 					DrawString(r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_LEFT, y + WD_MATRIX_TOP, STR_AI_CONFIG_RANDOM_AI, this->selected == -1 ? TC_WHITE : TC_BLACK);
 					y += this->line_height;
 				}
 				AIInfoList::const_iterator it = this->ai_info_list->begin();
 				for (int i = 1; it != this->ai_info_list->end(); i++, it++) {
-					if (this->vscroll.IsVisible(i)) {
+					if (this->vscroll->IsVisible(i)) {
 						DrawString(r.left + WD_MATRIX_LEFT, r.right - WD_MATRIX_RIGHT, y + WD_MATRIX_TOP, (*it).second->GetName(), (this->selected == i - 1) ? TC_WHITE : TC_BLACK);
 						y += this->line_height;
 					}
@@ -156,7 +159,7 @@ struct AIListWindow : public Window {
 	{
 		switch (widget) {
 			case AIL_WIDGET_LIST: { // Select one of the AIs
-				int sel = this->vscroll.GetScrolledRowFromWidget(pt.y, this, AIL_WIDGET_LIST, 0, this->line_height) - 1;
+				int sel = this->vscroll->GetScrolledRowFromWidget(pt.y, this, AIL_WIDGET_LIST, 0, this->line_height) - 1;
 				if (sel < (int)this->ai_info_list->size()) {
 					this->selected = sel;
 					this->SetDirty();
@@ -183,8 +186,8 @@ struct AIListWindow : public Window {
 	virtual void OnResize()
 	{
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(AIL_WIDGET_LIST);
-		this->vscroll.SetCapacity(nwi->current_y / this->line_height);
-		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll->SetCapacity(nwi->current_y / this->line_height);
+		nwi->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 };
 
@@ -195,8 +198,8 @@ static const NWidgetPart _nested_ai_list_widgets[] = {
 		NWidget(WWT_CAPTION, COLOUR_MAUVE), SetDataTip(STR_AI_LIST_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_MAUVE, AIL_WIDGET_LIST), SetMinimalSize(188, 112), SetFill(1, 1), SetResize(1, 1), SetDataTip(0x501, STR_AI_LIST_TOOLTIP),
-		NWidget(WWT_SCROLLBAR, COLOUR_MAUVE, AIL_WIDGET_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_MAUVE, AIL_WIDGET_LIST), SetMinimalSize(188, 112), SetFill(1, 1), SetResize(1, 1), SetDataTip(0x501, STR_AI_LIST_TOOLTIP), SetScrollbar(AIL_WIDGET_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, AIL_WIDGET_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_MAUVE, AIL_WIDGET_INFO_BG), SetMinimalTextLines(8, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM), SetResize(1, 0),
 	EndContainer(),
@@ -246,6 +249,7 @@ struct AISettingsWindow : public Window {
 	int timeout;
 	int clicked_row;
 	int line_height; // Height of a row in the matrix widget.
+	Scrollbar *vscroll;
 
 	AISettingsWindow(const WindowDesc *desc, CompanyID slot) : Window(),
 		slot(slot),
@@ -254,11 +258,13 @@ struct AISettingsWindow : public Window {
 	{
 		this->ai_config = AIConfig::GetConfig(slot);
 
-		this->InitNested(desc, slot);  // Initializes 'this->line_height' as side effect.
+		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(AIS_WIDGET_SCROLLBAR);
+		this->FinishInitNested(desc, slot);  // Initializes 'this->line_height' as side effect.
 
 		this->SetWidgetDisabledState(AIS_WIDGET_RESET, _game_mode != GM_MENU);
 
-		this->vscroll.SetCount((int)this->ai_config->GetConfigList()->size());
+		this->vscroll->SetCount((int)this->ai_config->GetConfigList()->size());
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
@@ -284,35 +290,36 @@ struct AISettingsWindow : public Window {
 		AIConfig *config = this->ai_config;
 		AIConfigItemList::const_iterator it = config->GetConfigList()->begin();
 		int i = 0;
-		for (; !this->vscroll.IsVisible(i); i++) it++;
+		for (; !this->vscroll->IsVisible(i); i++) it++;
 
 		bool rtl = _dynlang.text_dir == TD_RTL;
 		uint buttons_left = rtl ? r.right - 23 : r.left + 4;
-		uint value_left   = r.left + (rtl ? WD_FRAMERECT_LEFT : 28);
-		uint value_right  = r.right - (rtl ? 28 : WD_FRAMERECT_RIGHT);
-		uint text_left    = r.left + (rtl ? WD_FRAMERECT_LEFT : 54);
-		uint text_right   = r.right - (rtl ? 54 : WD_FRAMERECT_RIGHT);
+		uint text_left    = r.left + (rtl ? WD_FRAMERECT_LEFT : 28);
+		uint text_right   = r.right - (rtl ? 28 : WD_FRAMERECT_RIGHT);
 
 
 		int y = r.top;
-		for (; this->vscroll.IsVisible(i) && it != config->GetConfigList()->end(); i++, it++) {
+		for (; this->vscroll->IsVisible(i) && it != config->GetConfigList()->end(); i++, it++) {
 			int current_value = config->GetSetting((*it).name);
 			bool editable = (_game_mode == GM_MENU) || ((it->flags & AICONFIG_INGAME) != 0);
 
-			uint x = rtl ? r.right : r.left;
+			SetDParamStr(0, (*it).description);
+
 			if (((*it).flags & AICONFIG_BOOLEAN) != 0) {
 				DrawFrameRect(buttons_left, y  + 2, buttons_left + 19, y + 10, (current_value != 0) ? COLOUR_GREEN : COLOUR_RED, (current_value != 0) ? FR_LOWERED : FR_NONE);
+				SetDParam(1, current_value == 0 ? STR_CONFIG_SETTING_OFF : STR_CONFIG_SETTING_ON);
 			} else {
 				DrawArrowButtons(buttons_left, y + 2, COLOUR_YELLOW, (this->clicked_button == i) ? 1 + (this->clicked_increase != rtl) : 0, editable && current_value > (*it).min_value, editable && current_value < (*it).max_value);
 				if (it->labels != NULL && it->labels->Find(current_value) != it->labels->End()) {
-					x = DrawString(value_left, value_right, y + WD_MATRIX_TOP, it->labels->Find(current_value)->second, TC_ORANGE);
+					SetDParam(1, STR_JUST_RAW_STRING);
+					SetDParamStr(2, it->labels->Find(current_value)->second);
 				} else {
-					SetDParam(0, current_value);
-					x = DrawString(value_left, value_right, y + WD_MATRIX_TOP, STR_JUST_INT, TC_ORANGE);
+					SetDParam(1, STR_JUST_INT);
+					SetDParam(2, current_value);
 				}
 			}
 
-			DrawString(max(rtl ? 0U : x + 3, text_left), min(rtl ? x - 3 : r.right, text_right), y + WD_MATRIX_TOP, (*it).description, TC_LIGHT_BLUE);
+			DrawString(text_left, text_right, y + WD_MATRIX_TOP, STR_AI_SETTINGS_SETTING, TC_LIGHT_BLUE);
 			y += this->line_height;
 		}
 	}
@@ -334,7 +341,7 @@ struct AISettingsWindow : public Window {
 		switch (widget) {
 			case AIS_WIDGET_BACKGROUND: {
 				const NWidgetBase *wid = this->GetWidget<NWidgetBase>(AIS_WIDGET_BACKGROUND);
-				int num = (pt.y - wid->pos_y) / this->line_height + this->vscroll.GetPosition();
+				int num = (pt.y - wid->pos_y) / this->line_height + this->vscroll->GetPosition();
 				if (num >= (int)this->ai_config->GetConfigList()->size()) break;
 
 				AIConfigItemList::const_iterator it = this->ai_config->GetConfigList()->begin();
@@ -405,8 +412,8 @@ struct AISettingsWindow : public Window {
 	virtual void OnResize()
 	{
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(AIS_WIDGET_BACKGROUND);
-		this->vscroll.SetCapacity(nwi->current_y / this->line_height);
-		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll->SetCapacity(nwi->current_y / this->line_height);
+		nwi->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
 	virtual void OnTick()
@@ -425,8 +432,8 @@ static const NWidgetPart _nested_ai_settings_widgets[] = {
 		NWidget(WWT_CAPTION, COLOUR_MAUVE), SetDataTip(STR_AI_SETTINGS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_MAUVE, AIS_WIDGET_BACKGROUND), SetMinimalSize(188, 182), SetResize(1, 1), SetFill(1, 0), SetDataTip(0x501, STR_NULL),
-		NWidget(WWT_SCROLLBAR, COLOUR_MAUVE, AIS_WIDGET_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_MAUVE, AIS_WIDGET_BACKGROUND), SetMinimalSize(188, 182), SetResize(1, 1), SetFill(1, 0), SetDataTip(0x501, STR_NULL), SetScrollbar(AIS_WIDGET_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, AIS_WIDGET_SCROLLBAR),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
@@ -481,8 +488,8 @@ static const NWidgetPart _nested_ai_config_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_MAUVE, AIC_WIDGET_BACKGROUND),
 		NWidget(NWID_VERTICAL), SetPIP(4, 4, 4),
 			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 10),
-				NWidget(NWID_BUTTON_ARROW, COLOUR_YELLOW, AIC_WIDGET_DECREASE), SetFill(0, 1), SetDataTip(AWV_DECREASE, STR_NULL),
-				NWidget(NWID_BUTTON_ARROW, COLOUR_YELLOW, AIC_WIDGET_INCREASE), SetFill(0, 1), SetDataTip(AWV_INCREASE, STR_NULL),
+				NWidget(WWT_PUSHARROWBTN, COLOUR_YELLOW, AIC_WIDGET_DECREASE), SetFill(0, 1), SetDataTip(AWV_DECREASE, STR_NULL),
+				NWidget(WWT_PUSHARROWBTN, COLOUR_YELLOW, AIC_WIDGET_INCREASE), SetFill(0, 1), SetDataTip(AWV_INCREASE, STR_NULL),
 				NWidget(NWID_SPACER), SetMinimalSize(6, 0),
 				NWidget(WWT_TEXT, COLOUR_MAUVE, AIC_WIDGET_NUMBER), SetDataTip(STR_DIFFICULTY_LEVEL_SETTING_MAXIMUM_NO_COMPETITORS, STR_NULL), SetFill(1, 0), SetPadding(1, 0, 0, 0),
 			EndContainer(),
@@ -492,8 +499,8 @@ static const NWidgetPart _nested_ai_config_widgets[] = {
 			EndContainer(),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_MATRIX, COLOUR_MAUVE, AIC_WIDGET_LIST), SetMinimalSize(288, 112), SetFill(1, 0), SetDataTip(0x801, STR_AI_CONFIG_LIST_TOOLTIP),
-			NWidget(WWT_SCROLLBAR, COLOUR_MAUVE, AIC_WIDGET_SCROLLBAR),
+			NWidget(WWT_MATRIX, COLOUR_MAUVE, AIC_WIDGET_LIST), SetMinimalSize(288, 112), SetFill(1, 0), SetDataTip(0x801, STR_AI_CONFIG_LIST_TOOLTIP), SetScrollbar(AIC_WIDGET_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, AIC_WIDGET_SCROLLBAR),
 		EndContainer(),
 		NWidget(NWID_SPACER), SetMinimalSize(0, 9),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(5, 0, 5),
@@ -519,15 +526,17 @@ static const WindowDesc _ai_config_desc(
 struct AIConfigWindow : public Window {
 	CompanyID selected_slot; ///< The currently selected AI slot or \c INVALID_COMPANY.
 	int line_height;         ///< Height of a single AI-name line.
+	Scrollbar *vscroll;
 
 	AIConfigWindow() : Window()
 	{
 		this->InitNested(&_ai_config_desc); // Initializes 'this->line_height' as a side effect.
+		this->vscroll = this->GetScrollbar(AIC_WIDGET_SCROLLBAR);
 		this->selected_slot = INVALID_COMPANY;
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(AIC_WIDGET_LIST);
-		this->vscroll.SetCapacity(nwi->current_y / this->line_height);
-		this->vscroll.SetCount(MAX_COMPANIES);
-		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll->SetCapacity(nwi->current_y / this->line_height);
+		this->vscroll->SetCount(MAX_COMPANIES);
+		nwi->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 		this->OnInvalidateData(0);
 	}
 
@@ -566,7 +575,7 @@ struct AIConfigWindow : public Window {
 		switch (widget) {
 			case AIC_WIDGET_LIST: {
 				int y = r.top;
-				for (int i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < MAX_COMPANIES; i++) {
+				for (int i = this->vscroll->GetPosition(); this->vscroll->IsVisible(i) && i < MAX_COMPANIES; i++) {
 					StringID text;
 
 					if (AIConfig::GetConfig((CompanyID)i)->GetInfo() != NULL) {
@@ -603,7 +612,7 @@ struct AIConfigWindow : public Window {
 			}
 
 			case AIC_WIDGET_LIST: { // Select a slot
-				this->selected_slot = (CompanyID)this->vscroll.GetScrolledRowFromWidget(pt.y, this, widget, 0, this->line_height);
+				this->selected_slot = (CompanyID)this->vscroll->GetScrolledRowFromWidget(pt.y, this, widget, 0, this->line_height);
 				this->InvalidateData();
 				if (click_count > 1 && this->selected_slot != INVALID_COMPANY) ShowAIListWindow((CompanyID)this->selected_slot);
 				break;
@@ -613,7 +622,7 @@ struct AIConfigWindow : public Window {
 				if (this->selected_slot > 1) {
 					Swap(_settings_newgame.ai_config[this->selected_slot], _settings_newgame.ai_config[this->selected_slot - 1]);
 					this->selected_slot--;
-					this->vscroll.ScrollTowards(this->selected_slot);
+					this->vscroll->ScrollTowards(this->selected_slot);
 					this->InvalidateData();
 				}
 				break;
@@ -622,7 +631,7 @@ struct AIConfigWindow : public Window {
 				if (this->selected_slot < _settings_newgame.difficulty.max_no_competitors) {
 					Swap(_settings_newgame.ai_config[this->selected_slot], _settings_newgame.ai_config[this->selected_slot + 1]);
 					this->selected_slot++;
-					this->vscroll.ScrollTowards(this->selected_slot);
+					this->vscroll->ScrollTowards(this->selected_slot);
 					this->InvalidateData();
 				}
 				break;
@@ -708,10 +717,12 @@ struct AIDebugWindow : public QueryStringBaseWindow {
 	static char break_string[MAX_BREAK_STR_STRING_LENGTH]; ///< The string to match to the AI output
 	static bool case_sensitive_break_check;                ///< Is the matching done case-sensitive
 	int highlight_row;                                     ///< The output row that matches the given string, or -1
+	Scrollbar *vscroll;
 
 	AIDebugWindow(const WindowDesc *desc, WindowNumber number) : QueryStringBaseWindow(MAX_BREAK_STR_STRING_LENGTH)
 	{
 		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(AID_WIDGET_SCROLLBAR);
 		this->show_break_box = _settings_client.gui.ai_developer_tools;
 		this->GetWidget<NWidgetStacked>(AID_BREAK_STRING_WIDGETS)->SetDisplayedPlane(this->show_break_box ? 0 : SZSP_HORIZONTAL);
 		this->FinishInitNested(desc, number);
@@ -824,8 +835,8 @@ struct AIDebugWindow : public QueryStringBaseWindow {
 		cur_company.Restore();
 
 		int scroll_count = (log == NULL) ? 0 : log->used;
-		if (this->vscroll.GetCount() != scroll_count) {
-			this->vscroll.SetCount(scroll_count);
+		if (this->vscroll->GetCount() != scroll_count) {
+			this->vscroll->SetCount(scroll_count);
 
 			/* We need a repaint */
 			this->SetWidgetDirty(AID_WIDGET_SCROLLBAR);
@@ -835,20 +846,20 @@ struct AIDebugWindow : public QueryStringBaseWindow {
 
 		/* Detect when the user scrolls the window. Enable autoscroll when the
 		 * bottom-most line becomes visible. */
-		if (this->last_vscroll_pos != this->vscroll.GetPosition()) {
-			this->autoscroll = this->vscroll.GetPosition() >= log->used - this->vscroll.GetCapacity();
+		if (this->last_vscroll_pos != this->vscroll->GetPosition()) {
+			this->autoscroll = this->vscroll->GetPosition() >= log->used - this->vscroll->GetCapacity();
 		}
 		if (this->autoscroll) {
-			int scroll_pos = max(0, log->used - this->vscroll.GetCapacity());
-			if (scroll_pos != this->vscroll.GetPosition()) {
-				this->vscroll.SetPosition(scroll_pos);
+			int scroll_pos = max(0, log->used - this->vscroll->GetCapacity());
+			if (scroll_pos != this->vscroll->GetPosition()) {
+				this->vscroll->SetPosition(scroll_pos);
 
 				/* We need a repaint */
 				this->SetWidgetDirty(AID_WIDGET_SCROLLBAR);
 				this->SetWidgetDirty(AID_WIDGET_LOG_PANEL);
 			}
 		}
-		this->last_vscroll_pos = this->vscroll.GetPosition();
+		this->last_vscroll_pos = this->vscroll->GetPosition();
 	}
 
 	virtual void SetStringParameters(int widget) const
@@ -880,7 +891,7 @@ struct AIDebugWindow : public QueryStringBaseWindow {
 				if (log == NULL) return;
 
 				int y = this->top_offset;
-				for (int i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < log->used; i++) {
+				for (int i = this->vscroll->GetPosition(); this->vscroll->IsVisible(i) && i < log->used; i++) {
 					int pos = (i + log->pos + 1 - log->used + log->count) % log->count;
 					if (log->lines[pos] == NULL) break;
 
@@ -916,11 +927,11 @@ struct AIDebugWindow : public QueryStringBaseWindow {
 		Backup<CompanyByte> cur_company(_current_company, ai_debug_company, FILE_LINE);
 		AILog::LogData *log = (AILog::LogData *)AIObject::GetLogPointer();
 		cur_company.Restore();
-		this->vscroll.SetCount((log == NULL) ? 0 : log->used);
+		this->vscroll->SetCount((log == NULL) ? 0 : log->used);
 
 		this->LowerWidget(ai_debug_company + AID_WIDGET_COMPANY_BUTTON_START);
 		this->autoscroll = true;
-		this->last_vscroll_pos = this->vscroll.GetPosition();
+		this->last_vscroll_pos = this->vscroll->GetPosition();
 		this->SetDirty();
 		/* Close AI settings window to prevent confusion */
 		DeleteWindowByClass(WC_AI_SETTINGS);
@@ -1034,7 +1045,7 @@ struct AIDebugWindow : public QueryStringBaseWindow {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, AID_WIDGET_LOG_PANEL);
+		this->vscroll->SetCapacityFromWidget(this, AID_WIDGET_LOG_PANEL);
 	}
 };
 
@@ -1102,7 +1113,7 @@ static const NWidgetPart _nested_ai_debug_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_VERTICAL),
 			/* Log panel */
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_LOG_PANEL), SetMinimalSize(287, 180), SetResize(1, 1),
+			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_LOG_PANEL), SetMinimalSize(287, 180), SetResize(1, 1), SetScrollbar(AID_WIDGET_SCROLLBAR),
 			EndContainer(),
 			/* Break string widgets */
 			NWidget(NWID_SELECTION, INVALID_COLOUR, AID_BREAK_STRING_WIDGETS),
@@ -1120,7 +1131,7 @@ static const NWidgetPart _nested_ai_debug_widgets[] = {
 			EndContainer(),
 		EndContainer(),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_SCROLLBAR, COLOUR_GREY, AID_WIDGET_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_GREY, AID_WIDGET_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_GREY),
 		EndContainer(),
 	EndContainer(),
