@@ -16,8 +16,8 @@
 #include "tile_type.h"
 
 /** Some airport-related constants */
-static const uint MAX_TERMINALS =  10;                       ///< maximum number of terminals per airport
-static const uint MAX_HELIPADS  =   4;                       ///< maximum number of helipads per airport
+static const uint MAX_TERMINALS =   8;                       ///< maximum number of terminals per airport
+static const uint MAX_HELIPADS  =   3;                       ///< maximum number of helipads per airport
 static const uint MAX_ELEMENTS  = 255;                       ///< maximum number of aircraft positions at airport
 
 static const uint NUM_AIRPORTTILES       = 256;              ///< total number of airport tiles
@@ -78,8 +78,7 @@ enum AirportMovementStates {
 	TERM7          = 19,
 	TERM8          = 20,
 	HELIPAD3       = 21,
-	HELIPAD4       = 22,
-	MAX_HEADINGS   = 22,
+	MAX_HEADINGS   = 21,
 };
 
 /* Movement Blocks on Airports
@@ -113,10 +112,7 @@ static const uint64
 	/* blocks for new airports */
 	TERM7_block              = 1ULL << 22,
 	TERM8_block              = 1ULL << 23,
-	TERM9_block              = 1ULL << 24,
 	HELIPAD3_block           = 1ULL << 24,
-	TERM10_block             = 1ULL << 25,
-	HELIPAD4_block           = 1ULL << 25,
 	HANGAR1_AREA_block       = 1ULL << 26,
 	OUT_WAY2_block           = 1ULL << 27,
 	IN_WAY2_block            = 1ULL << 28,
@@ -154,7 +150,7 @@ public:
 	AirportFTAClass(
 		const AirportMovingData *moving_data,
 		const byte *terminals,
-		const byte *helipads,
+		const byte num_helipads,
 		const byte *entry_points,
 		Flags flags,
 		const AirportFTAbuildup *apFA,
@@ -172,7 +168,7 @@ public:
 	const AirportMovingData *moving_data;
 	struct AirportFTA *layout;            ///< state machine for airport
 	const byte *terminals;
-	const byte *helipads;
+	const byte num_helipads;              ///< Number of helipads on this airport. When 0 helicopters will go to normal terminals.
 	Flags flags;
 	byte nofelements;                     ///< number of positions the airport consists of
 	const byte *entry_points;             ///< when an airplane arrives at this airport, enter it at position entry_point, index depends on direction

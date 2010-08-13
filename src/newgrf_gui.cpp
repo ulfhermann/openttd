@@ -142,6 +142,7 @@ struct NewGRFParametersWindow : public Window {
 	int timeout;           ///< How long before we unpress the last-pressed button?
 	uint clicked_row;      ///< The selected parameter
 	int line_height;       ///< Height of a row in the matrix widget.
+	Scrollbar *vscroll;
 
 	NewGRFParametersWindow(const WindowDesc *desc, GRFConfig *c) : Window(),
 		grf_config(c),
@@ -149,9 +150,10 @@ struct NewGRFParametersWindow : public Window {
 		timeout(0),
 		clicked_row(UINT_MAX)
 	{
-		this->InitNested(desc);  // Initializes 'this->line_height' as side effect.
-
-		this->vscroll.SetCount(c->num_valid_params);
+		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(GRFPAR_WIDGET_SCROLLBAR);
+		this->FinishInitNested(desc);  // Initializes 'this->line_height' as side effect.
+		this->vscroll->SetCount(c->num_valid_params);
 	}
 
 	/**
@@ -202,52 +204,42 @@ struct NewGRFParametersWindow : public Window {
 
 		bool rtl = _dynlang.text_dir == TD_RTL;
 		uint buttons_left = rtl ? r.right - 23 : r.left + 4;
-		uint value_left   = r.left + (rtl ? WD_FRAMERECT_LEFT : 28);
-		uint value_right  = r.right - (rtl ? 28 : WD_FRAMERECT_RIGHT);
-		uint text_left    = r.left + (rtl ? WD_FRAMERECT_LEFT : 54);
-		uint text_right   = r.right - (rtl ? 54 : WD_FRAMERECT_RIGHT);
+		uint text_left    = r.left + (rtl ? WD_FRAMERECT_LEFT : 28);
+		uint text_right   = r.right - (rtl ? 28 : WD_FRAMERECT_RIGHT);
 
 		int y = r.top;
-		for (uint i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < this->grf_config->num_valid_params; i++) {
+		for (uint i = this->vscroll->GetPosition(); this->vscroll->IsVisible(i) && i < this->grf_config->num_valid_params; i++) {
 			GRFParameterInfo *par_info = (i < this->grf_config->param_info.Length()) ? this->grf_config->param_info[i] : NULL;
 			if (par_info == NULL) par_info = GetDummyParameterInfo(i);
 			uint32 current_value = par_info->GetValue(this->grf_config);
 			bool selected = (i == this->clicked_row);
 
-			uint x = rtl ? r.right : r.left;
 			if (par_info->type == PTYPE_BOOL) {
 				DrawFrameRect(buttons_left, y  + 2, buttons_left + 19, y + 10, (current_value != 0) ? COLOUR_GREEN : COLOUR_RED, (current_value != 0) ? FR_LOWERED : FR_NONE);
+				SetDParam(2, par_info->GetValue(this->grf_config) == 0 ? STR_CONFIG_SETTING_OFF : STR_CONFIG_SETTING_ON);
 			} else if (par_info->type == PTYPE_UINT_ENUM) {
 				DrawArrowButtons(buttons_left, y + 2, COLOUR_YELLOW, (this->clicked_button == i) ? 1 + (this->clicked_increase != rtl) : 0, current_value > par_info->min_value, current_value < par_info->max_value);
-				bool draw_numeric = true;
+				SetDParam(2, STR_JUST_INT);
+				SetDParam(3, current_value);
 				if (par_info->value_names.Find(current_value) != par_info->value_names.End()) {
 					const char *label = GetGRFStringFromGRFText(par_info->value_names.Find(current_value)->second);
 					if (label != NULL) {
-						x = DrawString(value_left, value_right, y + WD_MATRIX_TOP, label, TC_ORANGE);
-						draw_numeric = false;
+						SetDParam(2, STR_JUST_RAW_STRING);
+						SetDParamStr(3, label);
 					}
-				}
-				if (draw_numeric) {
-					SetDParam(0, current_value);
-					x = DrawString(value_left, value_right, y + WD_MATRIX_TOP, STR_JUST_INT, TC_ORANGE);
 				}
 			}
 
-			int left  = max(rtl ? 0U : x + 3, text_left);
-			int right = min(rtl ? x - 3 : r.right, text_right);
 			const char *name = GetGRFStringFromGRFText(par_info->name);
 			if (name != NULL) {
-				x = DrawString(left, right, y + WD_MATRIX_TOP, name, selected ? TC_WHITE : TC_LIGHT_BLUE);
+				SetDParam(0, STR_JUST_RAW_STRING);
+				SetDParamStr(1, name);
 			} else {
-				SetDParam(0, i + 1);
-				x = DrawString(left, right, y + WD_MATRIX_TOP, STR_NEWGRF_PARAMETERS_DEFAULT_NAME, selected ? TC_WHITE : TC_LIGHT_BLUE);
+				SetDParam(0, STR_NEWGRF_PARAMETERS_DEFAULT_NAME);
+				SetDParam(1, i + 1);
 			}
-			if (par_info->type == PTYPE_BOOL) {
-				left  = max(rtl ? 0U : x + 3, text_left);
-				right = min(rtl ? x - 3 : r.right, text_right);
-				StringID str = par_info->GetValue(this->grf_config) == 0 ? STR_CONFIG_SETTING_OFF : STR_CONFIG_SETTING_ON;
-				DrawString(left, right, y + WD_MATRIX_TOP, str, selected ? TC_WHITE : TC_LIGHT_BLUE);
-			}
+
+			DrawString(text_left, text_right, y + WD_MATRIX_TOP, STR_NEWGRF_PARAMETERS_SETTING, selected ? TC_WHITE : TC_LIGHT_BLUE);
 			y += this->line_height;
 		}
 	}
@@ -256,7 +248,7 @@ struct NewGRFParametersWindow : public Window {
 	{
 		switch (widget) {
 			case GRFPAR_WIDGET_BACKGROUND: {
-				uint num = this->vscroll.GetScrolledRowFromWidget(pt.y, this, GRFPAR_WIDGET_BACKGROUND);
+				uint num = this->vscroll->GetScrolledRowFromWidget(pt.y, this, GRFPAR_WIDGET_BACKGROUND);
 				if (num >= this->grf_config->num_valid_params) break;
 				if (this->clicked_row != num) {
 					DeleteChildWindows(WC_QUERY_STRING);
@@ -321,8 +313,8 @@ struct NewGRFParametersWindow : public Window {
 	virtual void OnResize()
 	{
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(GRFPAR_WIDGET_BACKGROUND);
-		this->vscroll.SetCapacity(nwi->current_y / this->line_height);
-		nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+		this->vscroll->SetCapacity(nwi->current_y / this->line_height);
+		nwi->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 	}
 
 	virtual void OnTick()
@@ -342,8 +334,8 @@ static const NWidgetPart _nested_newgrf_parameter_widgets[] = {
 		NWidget(WWT_CAPTION, COLOUR_MAUVE), SetDataTip(STR_NEWGRF_PARAMETERS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_MATRIX, COLOUR_MAUVE, GRFPAR_WIDGET_BACKGROUND), SetMinimalSize(188, 182), SetResize(1, 1), SetFill(1, 0), SetDataTip(0x501, STR_NULL),
-		NWidget(WWT_SCROLLBAR, COLOUR_MAUVE, GRFPAR_WIDGET_SCROLLBAR),
+		NWidget(WWT_MATRIX, COLOUR_MAUVE, GRFPAR_WIDGET_BACKGROUND), SetMinimalSize(188, 182), SetResize(1, 1), SetFill(1, 0), SetDataTip(0x501, STR_NULL), SetScrollbar(GRFPAR_WIDGET_SCROLLBAR),
+		NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, GRFPAR_WIDGET_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_MAUVE, GRFPAR_WIDGET_DESCRIPTION), SetResize(1, 0), SetFill(1, 0),
 	EndContainer(),
@@ -438,6 +430,9 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 	bool execute;               ///< On pressing 'apply changes' are grf changes applied immediately, or only list is updated.
 	int preset;                 ///< Selected preset.
 
+	Scrollbar *vscroll;
+	Scrollbar *vscroll2;
+
 	NewGRFWindow(const WindowDesc *desc, bool editable, bool show_params, bool execute, GRFConfig **orig_list) : QueryStringBaseWindow(EDITBOX_MAX_SIZE)
 	{
 		this->avail_sel   = NULL;
@@ -453,7 +448,11 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 		CopyGRFConfigList(&this->actives, *orig_list, false);
 		GetGRFPresetList(&_grf_preset_list);
 
-		this->InitNested(desc);
+		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(SNGRFS_SCROLLBAR);
+		this->vscroll2 = this->GetScrollbar(SNGRFS_SCROLL2BAR);
+		this->FinishInitNested(desc);
+
 		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, EDITBOX_MAX_LENGTH);
 		this->SetFocusedWidget(SNGRFS_FILTER);
 
@@ -530,8 +529,8 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, SNGRFS_FILE_LIST);
-		this->vscroll2.SetCapacityFromWidget(this, SNGRFS_AVAIL_LIST);
+		this->vscroll->SetCapacityFromWidget(this, SNGRFS_FILE_LIST);
+		this->vscroll2->SetCapacityFromWidget(this, SNGRFS_AVAIL_LIST);
 	}
 
 	virtual void SetStringParameters(int widget) const
@@ -608,7 +607,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 
 				int i = 0;
 				for (const GRFConfig *c = this->actives; c != NULL; c = c->next, i++) {
-					if (this->vscroll.IsVisible(i)) {
+					if (this->vscroll->IsVisible(i)) {
 						const char *text = c->GetName();
 						bool h = (this->active_sel == c);
 						PaletteID pal = this->GetPalette(c);
@@ -630,8 +629,8 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				uint step_height = this->GetWidget<NWidgetBase>(SNGRFS_AVAIL_LIST)->resize_y;
 				int offset_y = (step_height - FONT_HEIGHT_NORMAL) / 2;
 				uint y = r.top + WD_FRAMERECT_TOP;
-				uint min_index = this->vscroll2.GetPosition();
-				uint max_index = min(min_index + this->vscroll2.GetCapacity(), this->avails.Length());
+				uint min_index = this->vscroll2->GetPosition();
+				uint max_index = min(min_index + this->vscroll2->GetCapacity(), this->avails.Length());
 
 				for (uint i = min_index; i < max_index; i++) {
 					const GRFConfig *c = this->avails[i];
@@ -709,7 +708,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 						break;
 					}
 				}
-				this->vscroll.ScrollTowards(pos);
+				this->vscroll->ScrollTowards(pos);
 				this->preset = -1;
 				this->InvalidateData();
 				break;
@@ -728,14 +727,14 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 						break;
 					}
 				}
-				this->vscroll.ScrollTowards(pos);
+				this->vscroll->ScrollTowards(pos);
 				this->preset = -1;
 				this->InvalidateData();
 				break;
 			}
 
 			case SNGRFS_FILE_LIST: { // Select an active GRF.
-				uint i = this->vscroll.GetScrolledRowFromWidget(pt.y, this, SNGRFS_FILE_LIST);
+				uint i = this->vscroll->GetScrolledRowFromWidget(pt.y, this, SNGRFS_FILE_LIST);
 
 				GRFConfig *c;
 				for (c = this->actives; c != NULL && i > 0; c = c->next, i--) {}
@@ -779,7 +778,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			}
 
 			case SNGRFS_AVAIL_LIST: { // Select a non-active GRF.
-				uint i = this->vscroll2.GetScrolledRowFromWidget(pt.y, this, SNGRFS_AVAIL_LIST);
+				uint i = this->vscroll2->GetScrolledRowFromWidget(pt.y, this, SNGRFS_AVAIL_LIST);
 				this->active_sel = NULL;
 				DeleteWindowByClass(WC_GRF_PARAMETERS);
 				if (i < this->avails.Length()) {
@@ -970,11 +969,11 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				int i = 0;
 				for (const GRFConfig *c = this->actives; c != NULL; c = c->next, i++) {}
 
-				this->vscroll.SetCapacityFromWidget(this, SNGRFS_FILE_LIST);
-				this->vscroll.SetCount(i);
+				this->vscroll->SetCapacityFromWidget(this, SNGRFS_FILE_LIST);
+				this->vscroll->SetCount(i);
 
-				this->vscroll2.SetCapacityFromWidget(this, SNGRFS_AVAIL_LIST);
-				if (this->avail_pos >= 0) this->vscroll2.ScrollTowards(this->avail_pos);
+				this->vscroll2->SetCapacityFromWidget(this, SNGRFS_AVAIL_LIST);
+				if (this->avail_pos >= 0) this->vscroll2->ScrollTowards(this->avail_pos);
 				break;
 			}
 		}
@@ -1044,12 +1043,12 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 
 			case WKC_PAGEUP:
 				/* scroll up a page */
-				this->avail_pos = (this->avail_pos < this->vscroll2.GetCapacity()) ? 0 : this->avail_pos - this->vscroll2.GetCapacity();
+				this->avail_pos = (this->avail_pos < this->vscroll2->GetCapacity()) ? 0 : this->avail_pos - this->vscroll2->GetCapacity();
 				break;
 
 			case WKC_PAGEDOWN:
 				/* scroll down a page */
-				this->avail_pos = min(this->avail_pos + this->vscroll2.GetCapacity(), (int)this->avails.Length() - 1);
+				this->avail_pos = min(this->avail_pos + this->vscroll2->GetCapacity(), (int)this->avails.Length() - 1);
 				break;
 
 			case WKC_HOME:
@@ -1075,7 +1074,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 		if (this->avails.Length() == 0) this->avail_pos = -1;
 		if (this->avail_pos >= 0) {
 			this->avail_sel = this->avails[this->avail_pos];
-			this->vscroll2.ScrollTowards(this->avail_pos);
+			this->vscroll2->ScrollTowards(this->avail_pos);
 			this->InvalidateData(0);
 		}
 
@@ -1149,7 +1148,7 @@ private:
 			if (this->avail_pos < 0) this->avail_sel = NULL;
 		}
 
-		this->vscroll2.SetCount(this->avails.Length()); // Update the scrollbar
+		this->vscroll2->SetCount(this->avails.Length()); // Update the scrollbar
 	}
 };
 
@@ -1385,10 +1384,10 @@ static const NWidgetPart _nested_newgrf_actives_widgets[] = {
 		NWidget(NWID_HORIZONTAL), SetPadding(0, 2, 0, 2),
 			NWidget(WWT_PANEL, COLOUR_MAUVE),
 				NWidget(WWT_INSET, COLOUR_MAUVE, SNGRFS_FILE_LIST), SetMinimalSize(100, 1), SetPadding(2, 2, 2, 2),
-						SetFill(1, 1), SetResize(1, 1),
+						SetFill(1, 1), SetResize(1, 1), SetScrollbar(SNGRFS_SCROLLBAR),
 				EndContainer(),
 			EndContainer(),
-			NWidget(WWT_SCROLLBAR, COLOUR_MAUVE, SNGRFS_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, SNGRFS_SCROLLBAR),
 		EndContainer(),
 		/* Buttons. */
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPadding(2, 2, 2, 2), SetPIP(0, WD_RESIZEBOX_WIDTH, 0),
@@ -1419,10 +1418,10 @@ static const NWidgetPart _nested_newgrf_availables_widgets[] = {
 		NWidget(NWID_HORIZONTAL), SetPadding(0, 2, 0, 2),
 			NWidget(WWT_PANEL, COLOUR_MAUVE),
 				NWidget(WWT_INSET, COLOUR_MAUVE, SNGRFS_AVAIL_LIST), SetMinimalSize(100, 1), SetPadding(2, 2, 2, 2),
-						SetFill(1, 1), SetResize(1, 1),
+						SetFill(1, 1), SetResize(1, 1), SetScrollbar(SNGRFS_SCROLL2BAR),
 				EndContainer(),
 			EndContainer(),
-			NWidget(WWT_SCROLL2BAR, COLOUR_MAUVE, SNGRFS_SCROLL2BAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, SNGRFS_SCROLL2BAR),
 		EndContainer(),
 		/* Left side, available grfs, buttons. */
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPadding(2, 2, 2, 2), SetPIP(0, WD_RESIZEBOX_WIDTH, 0),
