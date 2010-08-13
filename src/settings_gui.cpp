@@ -746,11 +746,11 @@ static NWidgetBase *MakeDifficultyOptionsWidgets(int *biggest_index)
 		NWidgetHorizontal *hor = new NWidgetHorizontal;
 
 		/* [<] button. */
-		NWidgetLeaf *leaf = new NWidgetLeaf(NWID_BUTTON_ARROW, COLOUR_YELLOW, widnum, AWV_DECREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		NWidgetLeaf *leaf = new NWidgetLeaf(WWT_PUSHARROWBTN, COLOUR_YELLOW, widnum, AWV_DECREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
 		hor->Add(leaf);
 
 		/* [>] button. */
-		leaf = new NWidgetLeaf(NWID_BUTTON_ARROW, COLOUR_YELLOW, widnum + 1, AWV_INCREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
+		leaf = new NWidgetLeaf(WWT_PUSHARROWBTN, COLOUR_YELLOW, widnum + 1, AWV_INCREASE, STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST);
 		hor->Add(leaf);
 
 		/* Some spacing between the text and the description */
@@ -1504,6 +1504,8 @@ struct GameSettingsWindow : Window {
 	SettingEntry *valuewindow_entry; ///< If non-NULL, pointer to setting for which a value-entering window has been opened
 	SettingEntry *clicked_entry; ///< If non-NULL, pointer to a clicked numeric setting (with a depressed left or right button)
 
+	Scrollbar *vscroll;
+
 	GameSettingsWindow(const WindowDesc *desc) : Window()
 	{
 		static bool first_time = true;
@@ -1521,9 +1523,11 @@ struct GameSettingsWindow : Window {
 		this->valuewindow_entry = NULL; // No setting entry for which a entry window is opened
 		this->clicked_entry = NULL; // No numeric setting buttons are depressed
 
-		this->InitNested(desc, 0);
+		this->CreateNestedTree(desc);
+		this->vscroll = this->GetScrollbar(SETTINGSEL_SCROLLBAR);
+		this->FinishInitNested(desc, 0);
 
-		this->vscroll.SetCount(_settings_main_page.Length());
+		this->vscroll->SetCount(_settings_main_page.Length());
 	}
 
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
@@ -1541,7 +1545,7 @@ struct GameSettingsWindow : Window {
 		if (widget != SETTINGSEL_OPTIONSPANEL) return;
 
 		_settings_main_page.Draw(settings_ptr, r.left + SETTINGTREE_LEFT_OFFSET, r.right - SETTINGTREE_RIGHT_OFFSET, r.top + SETTINGTREE_TOP_OFFSET,
-				this->vscroll.GetPosition(), this->vscroll.GetPosition() + this->vscroll.GetCapacity());
+				this->vscroll->GetPosition(), this->vscroll->GetPosition() + this->vscroll->GetCapacity());
 	}
 
 	virtual void OnPaint()
@@ -1553,7 +1557,7 @@ struct GameSettingsWindow : Window {
 	{
 		if (widget != SETTINGSEL_OPTIONSPANEL) return;
 
-		uint btn = this->vscroll.GetScrolledRowFromWidget(pt.y, this, SETTINGSEL_OPTIONSPANEL, SETTINGTREE_TOP_OFFSET - 1);
+		uint btn = this->vscroll->GetScrolledRowFromWidget(pt.y, this, SETTINGSEL_OPTIONSPANEL, SETTINGTREE_TOP_OFFSET - 1);
 		if (btn == INT_MAX) return;
 
 		uint cur_row = 0;
@@ -1567,7 +1571,7 @@ struct GameSettingsWindow : Window {
 		if ((pe->flags & SEF_KIND_MASK) == SEF_SUBTREE_KIND) {
 			pe->d.sub.folded = !pe->d.sub.folded; // Flip 'folded'-ness of the sub-page
 
-			this->vscroll.SetCount(_settings_main_page.Length());
+			this->vscroll->SetCount(_settings_main_page.Length());
 			this->SetDirty();
 			return;
 		}
@@ -1695,7 +1699,7 @@ struct GameSettingsWindow : Window {
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, SETTINGSEL_OPTIONSPANEL, SETTINGTREE_TOP_OFFSET + SETTINGTREE_BOTTOM_OFFSET);
+		this->vscroll->SetCapacityFromWidget(this, SETTINGSEL_OPTIONSPANEL, SETTINGTREE_TOP_OFFSET + SETTINGTREE_BOTTOM_OFFSET);
 	}
 };
 
@@ -1707,9 +1711,9 @@ static const NWidgetPart _nested_settings_selection_widgets[] = {
 		NWidget(WWT_CAPTION, COLOUR_MAUVE), SetDataTip(STR_CONFIG_SETTING_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_MAUVE, SETTINGSEL_OPTIONSPANEL), SetMinimalSize(400, 174), EndContainer(),
+		NWidget(WWT_PANEL, COLOUR_MAUVE, SETTINGSEL_OPTIONSPANEL), SetMinimalSize(400, 174), SetScrollbar(SETTINGSEL_SCROLLBAR), EndContainer(),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_SCROLLBAR, COLOUR_MAUVE, SETTINGSEL_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, SETTINGSEL_SCROLLBAR),
 			NWidget(WWT_RESIZEBOX, COLOUR_MAUVE),
 		EndContainer(),
 	EndContainer(),
@@ -1962,8 +1966,8 @@ static const NWidgetPart _nested_cust_currency_widgets[] = {
 	NWidget(WWT_PANEL, COLOUR_GREY),
 		NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPIP(7, 3, 0),
 			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 5),
-				NWidget(NWID_BUTTON_ARROW, COLOUR_YELLOW, CUSTCURR_RATE_DOWN), SetDataTip(AWV_DECREASE, STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP),
-				NWidget(NWID_BUTTON_ARROW, COLOUR_YELLOW, CUSTCURR_RATE_UP), SetDataTip(AWV_INCREASE, STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP),
+				NWidget(WWT_PUSHARROWBTN, COLOUR_YELLOW, CUSTCURR_RATE_DOWN), SetDataTip(AWV_DECREASE, STR_CURRENCY_DECREASE_EXCHANGE_RATE_TOOLTIP),
+				NWidget(WWT_PUSHARROWBTN, COLOUR_YELLOW, CUSTCURR_RATE_UP), SetDataTip(AWV_INCREASE, STR_CURRENCY_INCREASE_EXCHANGE_RATE_TOOLTIP),
 				NWidget(NWID_SPACER), SetMinimalSize(5, 0),
 				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_RATE), SetDataTip(STR_CURRENCY_EXCHANGE_RATE, STR_CURRENCY_SET_EXCHANGE_RATE_TOOLTIP), SetFill(1, 0),
 			EndContainer(),
@@ -1983,8 +1987,8 @@ static const NWidgetPart _nested_cust_currency_widgets[] = {
 				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_SUFFIX), SetDataTip(STR_CURRENCY_SUFFIX, STR_CURRENCY_SET_CUSTOM_CURRENCY_SUFFIX_TOOLTIP), SetFill(1, 0),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL), SetPIP(10, 0, 5),
-				NWidget(NWID_BUTTON_ARROW, COLOUR_YELLOW, CUSTCURR_YEAR_DOWN), SetDataTip(AWV_DECREASE, STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
-				NWidget(NWID_BUTTON_ARROW, COLOUR_YELLOW, CUSTCURR_YEAR_UP), SetDataTip(AWV_INCREASE, STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
+				NWidget(WWT_PUSHARROWBTN, COLOUR_YELLOW, CUSTCURR_YEAR_DOWN), SetDataTip(AWV_DECREASE, STR_CURRENCY_DECREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
+				NWidget(WWT_PUSHARROWBTN, COLOUR_YELLOW, CUSTCURR_YEAR_UP), SetDataTip(AWV_INCREASE, STR_CURRENCY_INCREASE_CUSTOM_CURRENCY_TO_EURO_TOOLTIP),
 				NWidget(NWID_SPACER), SetMinimalSize(5, 0),
 				NWidget(WWT_TEXT, COLOUR_BLUE, CUSTCURR_YEAR), SetDataTip(STR_JUST_STRING, STR_CURRENCY_SET_CUSTOM_CURRENCY_TO_EURO_TOOLTIP), SetFill(1, 0),
 			EndContainer(),
