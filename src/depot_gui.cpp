@@ -44,11 +44,13 @@
 enum DepotWindowWidgets {
 	DEPOT_WIDGET_CAPTION,
 	DEPOT_WIDGET_SELL,
+	DEPOT_WIDGET_SHOW_SELL_CHAIN,
 	DEPOT_WIDGET_SELL_CHAIN,
 	DEPOT_WIDGET_SELL_ALL,
 	DEPOT_WIDGET_AUTOREPLACE,
 	DEPOT_WIDGET_MATRIX,
 	DEPOT_WIDGET_V_SCROLL, ///< Vertical scrollbar
+	DEPOT_WIDGET_SHOW_H_SCROLL,
 	DEPOT_WIDGET_H_SCROLL, ///< Horizontal scrollbar
 	DEPOT_WIDGET_BUILD,
 	DEPOT_WIDGET_CLONE,
@@ -70,16 +72,20 @@ static const NWidgetPart _nested_train_depot_widgets[] = {
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_VERTICAL),
-			NWidget(WWT_MATRIX, COLOUR_GREY, DEPOT_WIDGET_MATRIX), SetDataTip(0x0, STR_NULL), SetResize(1, 1),
-			NWidget(WWT_HSCROLLBAR, COLOUR_GREY, DEPOT_WIDGET_H_SCROLL),
+			NWidget(WWT_MATRIX, COLOUR_GREY, DEPOT_WIDGET_MATRIX), SetDataTip(0x0, STR_NULL), SetResize(1, 1), SetScrollbar(DEPOT_WIDGET_V_SCROLL),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, DEPOT_WIDGET_SHOW_H_SCROLL),
+				NWidget(NWID_HSCROLLBAR, COLOUR_GREY, DEPOT_WIDGET_H_SCROLL),
+			EndContainer(),
 		EndContainer(),
 		NWidget(NWID_VERTICAL),
 			NWidget(WWT_IMGBTN, COLOUR_GREY, DEPOT_WIDGET_SELL), SetDataTip(0x0, STR_NULL), SetResize(0, 1), SetFill(0, 1),
-			NWidget(WWT_IMGBTN, COLOUR_GREY, DEPOT_WIDGET_SELL_CHAIN), SetDataTip(SPR_SELL_CHAIN_TRAIN, STR_DEPOT_DRAG_WHOLE_TRAIN_TO_SELL_TOOLTIP), SetResize(0, 1), SetFill(0, 1),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, DEPOT_WIDGET_SHOW_SELL_CHAIN),
+				NWidget(WWT_IMGBTN, COLOUR_GREY, DEPOT_WIDGET_SELL_CHAIN), SetDataTip(SPR_SELL_CHAIN_TRAIN, STR_DEPOT_DRAG_WHOLE_TRAIN_TO_SELL_TOOLTIP), SetResize(0, 1), SetFill(0, 1),
+			EndContainer(),
 			NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, DEPOT_WIDGET_SELL_ALL), SetDataTip(0x0, STR_NULL),
 			NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, DEPOT_WIDGET_AUTOREPLACE), SetDataTip(0x0, STR_NULL),
 		EndContainer(),
-		NWidget(WWT_SCROLLBAR, COLOUR_GREY, DEPOT_WIDGET_V_SCROLL),
+		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, DEPOT_WIDGET_V_SCROLL),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, DEPOT_WIDGET_BUILD), SetDataTip(0x0, STR_NULL), SetFill(1, 1), SetResize(1, 0),
@@ -222,6 +228,9 @@ struct DepotWindow : Window {
 	bool generate_list;
 	VehicleList vehicle_list;
 	VehicleList wagon_list;
+	uint num_columns;       ///< Number of columns.
+	Scrollbar *hscroll;     ///< Only for trains.
+	Scrollbar *vscroll;
 
 	DepotWindow(const WindowDesc *desc, TileIndex tile, VehicleType type) : Window()
 	{
@@ -231,10 +240,16 @@ struct DepotWindow : Window {
 		this->vehicle_over = INVALID_VEHICLE;
 		this->generate_list = true;
 		this->type = type;
+		this->num_columns = 1; // for non-trains this gets set in FinishInitNested()
 
 		this->CreateNestedTree(desc);
+		this->hscroll = (this->type == VEH_TRAIN ? this->GetScrollbar(DEPOT_WIDGET_H_SCROLL) : NULL);
+		this->vscroll = this->GetScrollbar(DEPOT_WIDGET_V_SCROLL);
 		/* Don't show 'rename button' of aircraft hangar */
 		this->GetWidget<NWidgetStacked>(DEPOT_WIDGET_SHOW_RENAME)->SetDisplayedPlane(type == VEH_AIRCRAFT ? SZSP_NONE : 0);
+		/* Only train depots have a horizontal scrollbar and a 'sell chain' button */
+		this->GetWidget<NWidgetStacked>(DEPOT_WIDGET_SHOW_H_SCROLL)->SetDisplayedPlane(type == VEH_TRAIN ? 0 : SZSP_HORIZONTAL);
+		this->GetWidget<NWidgetStacked>(DEPOT_WIDGET_SHOW_SELL_CHAIN)->SetDisplayedPlane(type == VEH_TRAIN ? 0 : SZSP_NONE);
 		this->SetupWidgetData(type);
 		this->FinishInitNested(desc, tile);
 
@@ -271,7 +286,7 @@ struct DepotWindow : Window {
 
 				uint x_space = free_wagon ? TRAININFO_DEFAULT_VEHICLE_WIDTH : 0;
 				DrawTrainImage(u, image_left + (rtl ? 0 : x_space), image_right - (rtl ? x_space : 0), sprite_y - 1,
-						this->sel, free_wagon ? 0 : this->hscroll.GetPosition(), this->vehicle_over);
+						this->sel, free_wagon ? 0 : this->hscroll->GetPosition(), this->vehicle_over);
 
 				/* Number of wagons relative to a standard length wagon (rounded up) */
 				SetDParam(0, CeilDiv(u->tcache.cached_total_length, 8));
@@ -325,7 +340,7 @@ struct DepotWindow : Window {
 		uint16 rows_in_display   = GB(mat_data, MAT_ROW_START, MAT_ROW_BITS);
 		uint16 boxes_in_each_row = GB(mat_data, MAT_COL_START, MAT_COL_BITS);
 
-		uint16 num = this->vscroll.GetPosition() * boxes_in_each_row;
+		uint16 num = this->vscroll->GetPosition() * boxes_in_each_row;
 		int maxval = min(this->vehicle_list.Length(), num + (rows_in_display * boxes_in_each_row));
 		int y;
 		for (y = r.top + 1; num < maxval; y += this->resize.step_height) { // Draw the rows
@@ -341,7 +356,7 @@ struct DepotWindow : Window {
 			}
 		}
 
-		maxval = min(this->vehicle_list.Length() + this->wagon_list.Length(), (this->vscroll.GetPosition() * boxes_in_each_row) + (rows_in_display * boxes_in_each_row));
+		maxval = min(this->vehicle_list.Length() + this->wagon_list.Length(), (this->vscroll->GetPosition() * boxes_in_each_row) + (rows_in_display * boxes_in_each_row));
 
 		/* draw the train wagons, that do not have an engine in front */
 		for (; num < maxval; num++, y += this->resize.step_height) {
@@ -384,15 +399,15 @@ struct DepotWindow : Window {
 		} else {
 			xt = x / this->resize.step_width;
 			xm = x % this->resize.step_width;
-			if (xt >= this->hscroll.GetCapacity()) return MODE_ERROR;
+			if (xt >= this->num_columns) return MODE_ERROR;
 		}
 		ym = y % this->resize.step_height;
 
 		uint row = y / this->resize.step_height;
-		if (row >= this->vscroll.GetCapacity()) return MODE_ERROR;
+		if (row >= this->vscroll->GetCapacity()) return MODE_ERROR;
 
 		uint boxes_in_each_row = GB(matrix_widget->widget_data, MAT_COL_START, MAT_COL_BITS);
-		uint pos = ((row + this->vscroll.GetPosition()) * boxes_in_each_row) + xt;
+		uint pos = ((row + this->vscroll->GetPosition()) * boxes_in_each_row) + xt;
 
 		if (this->vehicle_list.Length() + this->wagon_list.Length() <= pos) {
 			/* Clicking on 'line' / 'block' without a vehicle */
@@ -410,7 +425,7 @@ struct DepotWindow : Window {
 		if (this->vehicle_list.Length() > pos) {
 			*veh = this->vehicle_list[pos];
 			/* Skip vehicles that are scrolled off the list */
-			x += this->hscroll.GetPosition();
+			if (this->type == VEH_TRAIN) x += this->hscroll->GetPosition();
 		} else {
 			pos -= this->vehicle_list.Length();
 			*veh = this->wagon_list[pos];
@@ -553,8 +568,6 @@ struct DepotWindow : Window {
 	 */
 	void SetupWidgetData(VehicleType type)
 	{
-		if (type != VEH_TRAIN) this->GetWidget<NWidgetCore>(DEPOT_WIDGET_SELL_CHAIN)->fill_y = 0; // Disable vertical filling of chain-sell widget for non-train windows.
-
 		this->GetWidget<NWidgetCore>(DEPOT_WIDGET_STOP_ALL)->tool_tip     = STR_DEPOT_MASS_STOP_DEPOT_TRAIN_TOOLTIP + type;
 		this->GetWidget<NWidgetCore>(DEPOT_WIDGET_START_ALL)->tool_tip    = STR_DEPOT_MASS_START_DEPOT_TRAIN_TOOLTIP + type;
 		this->GetWidget<NWidgetCore>(DEPOT_WIDGET_SELL)->tool_tip         = STR_DEPOT_TRAIN_SELL_TOOLTIP + type;
@@ -617,15 +630,6 @@ struct DepotWindow : Window {
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
-			case DEPOT_WIDGET_SELL_CHAIN:
-			case DEPOT_WIDGET_H_SCROLL:
-				/* Hide the 'sell chain' and the horizontal scrollbar when not a train depot. */
-				if (this->type != VEH_TRAIN) {
-					size->height = 0;
-					resize->height = 0;
-				}
-				break;
-
 			case DEPOT_WIDGET_MATRIX: {
 				uint min_height = 0;
 
@@ -693,10 +697,10 @@ struct DepotWindow : Window {
 				max_width = max(max_width, width);
 			}
 			/* Always have 1 empty row, so people can change the setting of the train */
-			this->vscroll.SetCount(this->vehicle_list.Length() + this->wagon_list.Length() + 1);
-			this->hscroll.SetCount(max_width);
+			this->vscroll->SetCount(this->vehicle_list.Length() + this->wagon_list.Length() + 1);
+			this->hscroll->SetCount(max_width);
 		} else {
-			this->vscroll.SetCount(CeilDiv(this->vehicle_list.Length(), this->hscroll.GetCapacity()));
+			this->vscroll->SetCount(CeilDiv(this->vehicle_list.Length(), this->num_columns));
 		}
 
 		/* Setup disabled buttons. */
@@ -1005,13 +1009,13 @@ struct DepotWindow : Window {
 	virtual void OnResize()
 	{
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(DEPOT_WIDGET_MATRIX);
-		this->vscroll.SetCapacityFromWidget(this, DEPOT_WIDGET_MATRIX);
+		this->vscroll->SetCapacityFromWidget(this, DEPOT_WIDGET_MATRIX);
 		if (this->type == VEH_TRAIN) {
-			this->hscroll.SetCapacity(nwi->current_x - this->header_width - this->count_width);
-			nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
+			this->hscroll->SetCapacity(nwi->current_x - this->header_width - this->count_width);
+			nwi->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (1 << MAT_COL_START);
 		} else {
-			this->hscroll.SetCapacityFromWidget(this, DEPOT_WIDGET_MATRIX);
-			nwi->widget_data = (this->vscroll.GetCapacity() << MAT_ROW_START) + (this->hscroll.GetCapacity() << MAT_COL_START);
+			this->num_columns = nwi->current_x / nwi->resize_x;
+			nwi->widget_data = (this->vscroll->GetCapacity() << MAT_ROW_START) + (this->num_columns << MAT_COL_START);
 		}
 	}
 
