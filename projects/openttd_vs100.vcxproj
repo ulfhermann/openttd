@@ -724,6 +724,7 @@
     <ClCompile Include="..\src\saveload\map_sl.cpp" />
     <ClCompile Include="..\src\saveload\misc_sl.cpp" />
     <ClCompile Include="..\src\saveload\newgrf_sl.cpp" />
+    <ClInclude Include="..\src\saveload\newgrf_sl.h" />
     <ClCompile Include="..\src\saveload\oldloader.cpp" />
     <ClInclude Include="..\src\saveload\oldloader.h" />
     <ClCompile Include="..\src\saveload\oldloader_sl.cpp" />
@@ -1015,7 +1016,6 @@
     <ClInclude Include="..\src\misc\blob.hpp" />
     <ClCompile Include="..\src\misc\countedobj.cpp" />
     <ClInclude Include="..\src\misc\countedptr.hpp" />
-    <ClInclude Include="..\src\misc\crc32.hpp" />
     <ClCompile Include="..\src\misc\dbg_helpers.cpp" />
     <ClInclude Include="..\src\misc\dbg_helpers.h" />
     <ClInclude Include="..\src\misc\fixedsizearray.hpp" />

@@ -65,11 +65,11 @@ public:
 	void Add(uint8 local_id, uint32 grfid, uint entity_type);
 	virtual uint16 AddEntityID(byte grf_local_id, uint32 grfid, byte substitute_id);
 
-	uint16 GetSubstituteID(uint16 entity_id);
-	virtual uint16 GetID(uint8 grf_local_id, uint32 grfid);
+	uint16 GetSubstituteID(uint16 entity_id) const;
+	virtual uint16 GetID(uint8 grf_local_id, uint32 grfid) const;
 
-	inline uint16 GetMaxMapping() { return max_new_entities; }
-	inline uint16 GetMaxOffset() { return max_offset; }
+	inline uint16 GetMaxMapping() const { return max_new_entities; }
+	inline uint16 GetMaxOffset() const { return max_offset; }
 };
 
 
@@ -89,7 +89,7 @@ public:
 			OverrideManagerBase(offset, maximum, invalid) {}
 
 	virtual uint16 AddEntityID(byte grf_local_id, uint32 grfid, byte substitute_id);
-	virtual uint16 GetID(uint8 grf_local_id, uint32 grfid);
+	virtual uint16 GetID(uint8 grf_local_id, uint32 grfid) const;
 	void SetEntitySpec(IndustrySpec *inds);
 };
 
@@ -135,25 +135,35 @@ uint32 GetTerrainType(TileIndex tile, TileContext context = TCX_NORMAL);
 TileIndex GetNearbyTile(byte parameter, TileIndex tile);
 uint32 GetNearbyTileInformation(TileIndex tile);
 
-/** Data related to the handling of grf files. */
+/**
+ * Data related to the handling of grf files.
+ * @tparam Tcnt Number of spritegroups
+ */
+template <size_t Tcnt>
 struct GRFFilePropsBase {
-	/** Set all data constructor for the props. */
-	GRFFilePropsBase(uint local_id, const struct GRFFile *grffile) : local_id(local_id), grffile(grffile) {}
-	/** Simple constructor for the props. */
-	GRFFilePropsBase() {}
-	uint16 local_id;                      ///< id defined by the grf file for this entity
-	const struct GRFFile *grffile;        ///< grf file that introduced this entity
+	GRFFilePropsBase() : local_id(0), grffile(0)
+	{
+		/* The lack of some compilers to provide default constructors complying to the specs
+		 * requires us to zero the stuff ourself. */
+		memset(spritegroup, 0, sizeof(spritegroup));
+	}
+
+	uint16 local_id;                             ///< id defined by the grf file for this entity
+	const struct GRFFile *grffile;               ///< grf file that introduced this entity
+	const struct SpriteGroup *spritegroup[Tcnt]; ///< pointer to the different sprites of the entity
 };
 
 /** Data related to the handling of grf files. */
-struct GRFFileProps : GRFFilePropsBase {
+struct GRFFileProps : GRFFilePropsBase<1> {
 	/** Set all default data constructor for the props. */
 	GRFFileProps(uint16 subst_id) :
-			GRFFilePropsBase(0, NULL), subst_id(subst_id), spritegroup(NULL), override(subst_id) {}
+			GRFFilePropsBase<1>(), subst_id(subst_id), override(subst_id)
+	{
+	}
+
 	/** Simple constructor for the props. */
-	GRFFileProps() : GRFFilePropsBase() {}
+	GRFFileProps() : GRFFilePropsBase<1>() {}
 	uint16 subst_id;
-	struct SpriteGroup *spritegroup;      ///< pointer to the different sprites of the entity
 	uint16 override;                      ///< id of the entity been replaced by
 };
 
