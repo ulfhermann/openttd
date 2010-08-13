@@ -69,14 +69,17 @@ static void DeleteDropDownList(DropDownList *list)
 
 /** Widget numbers of the dropdown menu. */
 enum DropdownMenuWidgets {
-	DDM_ITEMS,  ///< Panel showing the dropdown items.
-	DDM_SCROLL, ///< Scrollbar.
+	DDM_ITEMS,        ///< Panel showing the dropdown items.
+	DDM_SHOW_SCROLL,  ///< Hide scrollbar if too few items.
+	DDM_SCROLL,       ///< Scrollbar.
 };
 
 static const NWidgetPart _nested_dropdown_menu_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PANEL, COLOUR_END, DDM_ITEMS), SetMinimalSize(1, 1), EndContainer(),
-		NWidget(WWT_SCROLLBAR, COLOUR_END, DDM_SCROLL),
+		NWidget(WWT_PANEL, COLOUR_END, DDM_ITEMS), SetMinimalSize(1, 1), SetScrollbar(DDM_SCROLL), EndContainer(),
+		NWidget(NWID_SELECTION, INVALID_COLOUR, DDM_SHOW_SCROLL),
+			NWidget(NWID_VSCROLLBAR, COLOUR_END, DDM_SCROLL),
+		EndContainer(),
 	EndContainer(),
 };
 
@@ -99,6 +102,7 @@ struct DropdownWindow : Window {
 	bool instant_close;           ///< Close the window when the mouse button is raised.
 	int scrolling;                ///< If non-zero, auto-scroll the item list (one time).
 	Point position;               ///< Position of the topleft corner of the window.
+	Scrollbar *vscroll;
 
 	/**
 	 * Create a dropdown menu.
@@ -119,17 +123,17 @@ struct DropdownWindow : Window {
 
 		this->CreateNestedTree(&_dropdown_desc);
 
+		this->vscroll = this->GetScrollbar(DDM_SCROLL);
+
 		uint items_width = size.width - (scroll ? WD_VSCROLLBAR_WIDTH : 0);
 		NWidgetCore *nwi = this->GetWidget<NWidgetCore>(DDM_ITEMS);
 		nwi->SetMinimalSize(items_width, size.height + 4);
 		nwi->colour = wi_colour;
 
 		nwi = this->GetWidget<NWidgetCore>(DDM_SCROLL);
-		if (scroll) {
-			nwi->colour = wi_colour;
-		} else {
-			nwi->min_x = 0; // Make scrollbar invisible.
-		}
+		nwi->colour = wi_colour;
+
+		this->GetWidget<NWidgetStacked>(DDM_SHOW_SCROLL)->SetDisplayedPlane(scroll ? 0 : SZSP_NONE);
 
 		this->FinishInitNested(&_dropdown_desc, 0);
 		this->flags4 &= ~WF_WHITE_BORDER_MASK;
@@ -142,8 +146,8 @@ struct DropdownWindow : Window {
 		}
 
 		/* Capacity is the average number of items visible */
-		this->vscroll.SetCapacity(size.height * (uint16)list->size() / list_height);
-		this->vscroll.SetCount((uint16)list->size());
+		this->vscroll->SetCapacity(size.height * (uint16)list->size() / list_height);
+		this->vscroll->SetCount((uint16)list->size());
 
 		this->parent_wnd_class = parent->window_class;
 		this->parent_wnd_num   = parent->window_number;
@@ -192,7 +196,7 @@ struct DropdownWindow : Window {
 		NWidgetBase *nwi = this->GetWidget<NWidgetBase>(DDM_ITEMS);
 		int y     = _cursor.pos.y - this->top - nwi->pos_y - 2;
 		int width = nwi->current_x - 4;
-		int pos   = this->vscroll.GetPosition();
+		int pos   = this->vscroll->GetPosition();
 
 		const DropDownList *list = this->list;
 
@@ -227,7 +231,7 @@ struct DropdownWindow : Window {
 		TextColour colour = (TextColour)this->GetWidget<NWidgetCore>(widget)->colour;
 
 		int y = r.top + 2;
-		int pos = this->vscroll.GetPosition();
+		int pos = this->vscroll->GetPosition();
 		for (DropDownList::const_iterator it = this->list->begin(); it != this->list->end(); ++it) {
 			const DropDownListItem *item = *it;
 			int item_height = item->Height(r.right - r.left + 1);
@@ -263,12 +267,12 @@ struct DropdownWindow : Window {
 	virtual void OnTick()
 	{
 		if (this->scrolling != 0) {
-			int pos = this->vscroll.GetPosition();
+			int pos = this->vscroll->GetPosition();
 
-			this->vscroll.UpdatePosition(this->scrolling);
+			this->vscroll->UpdatePosition(this->scrolling);
 			this->scrolling = 0;
 
-			if (pos != this->vscroll.GetPosition()) {
+			if (pos != this->vscroll->GetPosition()) {
 				this->SetDirty();
 			}
 		}
