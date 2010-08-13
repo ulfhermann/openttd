@@ -2133,6 +2133,8 @@ STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Fare cli
 STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Fare clic sul carico per visualizzarne fornitori e clienti
 STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Catena distributiva
 STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Mostra la catena di industrie fornitrici e clienti
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP                            :{BLACK}Collega alla minimappa
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP                    :{BLACK}Seleziona le industrie visualizzate anche sulla minimappa
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Informazioni sull'area di terreno
@@ -2146,7 +2148,7 @@ STR_LAND_AREA_INFORMATION_TRAM_OWNER                            :{BLACK}Propriet
 STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}Proprietario ferrovia: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY                       :{BLACK}Autorità locale: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Nessuna
-STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Coordinate: {LTBLUE}{NUM}x{NUM}x{NUM} ({STRING})
+STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Coordinate: {LTBLUE}{NUM} x {NUM} x {NUM} ({STRING})
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Costruito il: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Categoria stazione: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}Tipo stazione: {LTBLUE}{STRING}
@@ -2313,7 +2315,7 @@ STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}Manuale
 STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}Rotazione heightmap:
 STR_MAPGEN_HEIGHTMAP_NAME                                       :{BLACK}Nome heightmap:
 STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Dim.:
-STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} * {NUM}
+STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} x {NUM}
 
 STR_MAPGEN_RANDOM_SEED_OSKTITLE                                 :{BLACK}Inserire un seme casuale
 STR_MAPGEN_SNOW_LINE_QUERY_CAPT                                 :{WHITE}Cambia l'altezza delle nevi perenni
