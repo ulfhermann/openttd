@@ -99,8 +99,8 @@ static const NWidgetPart _nested_load_dialog_widgets[] = {
 			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
 				NWidget(NWID_HORIZONTAL),
 					NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetFill(1, 1), SetPadding(2, 1, 2, 2),
-							SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(1, 10), EndContainer(),
-					NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
+							SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(1, 10), SetScrollbar(SLWW_SCROLLBAR), EndContainer(),
+					NWidget(NWID_VSCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
 				EndContainer(),
 				NWidget(NWID_SELECTION, INVALID_COLOUR, SLWW_CONTENT_DOWNLOAD_SEL),
 					NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_CONTENT_DOWNLOAD), SetResize(1, 0),
@@ -139,8 +139,8 @@ static const NWidgetPart _nested_load_heightmap_dialog_widgets[] = {
 		NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetFill(1, 1), SetPadding(2, 1, 2, 2),
-						SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(1, 10), EndContainer(),
-				NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
+						SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(1, 10), SetScrollbar(SLWW_SCROLLBAR), EndContainer(),
+				NWidget(NWID_VSCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
 			EndContainer(),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SLWW_CONTENT_DOWNLOAD), SetResize(1, 0),
@@ -170,8 +170,8 @@ static const NWidgetPart _nested_save_dialog_widgets[] = {
 			NWidget(WWT_PANEL, COLOUR_GREY, SLWW_FILE_BACKGROUND),
 				NWidget(NWID_HORIZONTAL),
 					NWidget(WWT_INSET, COLOUR_GREY, SLWW_DRIVES_DIRECTORIES_LIST), SetPadding(2, 1, 0, 2),
-							SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(1, 10), EndContainer(),
-					NWidget(WWT_SCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
+							SetDataTip(0x0, STR_SAVELOAD_LIST_TOOLTIP), SetResize(1, 10), SetScrollbar(SLWW_SCROLLBAR), EndContainer(),
+					NWidget(NWID_VSCROLLBAR, COLOUR_GREY, SLWW_SCROLLBAR),
 				EndContainer(),
 				NWidget(WWT_EDITBOX, COLOUR_GREY, SLWW_SAVE_OSK_TITLE), SetPadding(3, 2, 2, 2), SetFill(1, 0), SetResize(1, 0),
 						SetDataTip(STR_SAVELOAD_OSKTITLE, STR_SAVELOAD_EDITBOX_TOOLTIP),
@@ -240,6 +240,7 @@ struct SaveLoadWindow : public QueryStringBaseWindow {
 private:
 	FiosItem o_dir;
 	const FiosItem *selected;
+	Scrollbar *vscroll;
 public:
 
 	void GenerateFileName()
@@ -269,9 +270,10 @@ public:
 		this->afilter = CS_ALPHANUMERAL;
 		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, 240);
 
-		this->CreateNestedTree(desc);
+		this->CreateNestedTree(desc, true);
 		if (mode == SLD_LOAD_GAME) this->GetWidget<NWidgetStacked>(SLWW_CONTENT_DOWNLOAD_SEL)->SetDisplayedPlane(SZSP_HORIZONTAL);
 		this->GetWidget<NWidgetCore>(SLWW_WINDOWTITLE)->widget_data = saveload_captions[mode];
+		this->vscroll = this->GetScrollbar(SLWW_SCROLLBAR);
 
 		this->FinishInitNested(desc, 0);
 
@@ -353,7 +355,7 @@ public:
 				GfxFillRect(r.left + 1, r.top + 1, r.right, r.bottom, 0xD7);
 
 				uint y = r.top + WD_FRAMERECT_TOP;
-				for (uint pos = this->vscroll.GetPosition(); pos < _fios_items.Length(); pos++) {
+				for (uint pos = this->vscroll->GetPosition(); pos < _fios_items.Length(); pos++) {
 					const FiosItem *item = _fios_items.Get(pos);
 
 					if (item == this->selected) {
@@ -361,7 +363,7 @@ public:
 					}
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y, item->title, _fios_colours[item->type]);
 					y += this->resize.step_height;
-					if (y >= this->vscroll.GetCapacity() * this->resize.step_height + r.top + WD_FRAMERECT_TOP) break;
+					if (y >= this->vscroll->GetCapacity() * this->resize.step_height + r.top + WD_FRAMERECT_TOP) break;
 				}
 				break;
 			}
@@ -483,7 +485,7 @@ public:
 			MakeSortedSaveGameList();
 		}
 
-		this->vscroll.SetCount(_fios_items.Length());
+		this->vscroll->SetCount(_fios_items.Length());
 		this->DrawWidgets();
 
 		if (_saveload_mode == SLD_SAVE_GAME || _saveload_mode == SLD_SAVE_SCENARIO) {
@@ -534,7 +536,7 @@ public:
 				break;
 
 			case SLWW_DRIVES_DIRECTORIES_LIST: { // Click the listbox
-				int y = this->vscroll.GetScrolledRowFromWidget(pt.y, this, SLWW_DRIVES_DIRECTORIES_LIST, WD_FRAMERECT_TOP);
+				int y = this->vscroll->GetScrolledRowFromWidget(pt.y, this, SLWW_DRIVES_DIRECTORIES_LIST, WD_FRAMERECT_TOP);
 				if (y == INT_MAX) return;
 
 				const FiosItem *file = _fios_items.Get(y);
@@ -647,7 +649,7 @@ public:
 
 	virtual void OnResize()
 	{
-		this->vscroll.SetCapacityFromWidget(this, SLWW_DRIVES_DIRECTORIES_LIST);
+		this->vscroll->SetCapacityFromWidget(this, SLWW_DRIVES_DIRECTORIES_LIST);
 	}
 
 	virtual void OnInvalidateData(int data)
