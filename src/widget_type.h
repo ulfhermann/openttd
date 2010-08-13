@@ -50,21 +50,18 @@ enum WidgetType {
 	WWT_INSET,      ///< Pressed (inset) panel, most commonly used as combo box _text_ area
 	WWT_IMGBTN,     ///< Button with image
 	WWT_IMGBTN_2,   ///< Button with diff image when clicked
-
+	WWT_ARROWBTN,   ///< Button with an arrow
 	WWT_TEXTBTN,    ///< Button with text
 	WWT_TEXTBTN_2,  ///< Button with diff text when clicked
 	WWT_LABEL,      ///< Centered label
 	WWT_TEXT,       ///< Pure simple text
 	WWT_MATRIX,     ///< Grid of rows and columns. @see MatrixWidgetValues
-	WWT_SCROLLBAR,  ///< Vertical scrollbar
 	WWT_FRAME,      ///< Frame
 	WWT_CAPTION,    ///< Window caption (window title between closebox and stickybox)
 
-	WWT_HSCROLLBAR, ///< Horizontal scrollbar
 	WWT_SHADEBOX,   ///< Shade box (at top-right of a window, between caption and stickybox)
 	WWT_STICKYBOX,  ///< Sticky box (normally at top-right of a window)
 	WWT_DEBUGBOX,   ///< NewGRF debug box (between shade box and caption)
-	WWT_SCROLL2BAR, ///< 2nd vertical scrollbar
 	WWT_RESIZEBOX,  ///< Resize box (normally at bottom-right of a window)
 	WWT_CLOSEBOX,   ///< Close box (at top-left of a window)
 	WWT_DROPDOWN,   ///< Drop down list
@@ -79,7 +76,8 @@ enum WidgetType {
 	NWID_SELECTION,       ///< Stacked widgets, only one visible at a time (eg in a panel with tabs).
 	NWID_VIEWPORT,        ///< Nested widget containing a viewport.
 	NWID_BUTTON_DROPDOWN, ///< Button with a drop-down.
-	NWID_BUTTON_ARROW,    ///< Button with an arrow
+	NWID_HSCROLLBAR,      ///< Horizontal scrollbar
+	NWID_VSCROLLBAR,      ///< Vertical scrollbar
 
 	/* Nested widget part types. */
 	WPT_RESIZE,       ///< Widget part for specifying resizing.
@@ -91,15 +89,17 @@ enum WidgetType {
 	WPT_PIPSPACE,     ///< Widget part for specifying pre/inter/post space for containers.
 	WPT_ENDCONTAINER, ///< Widget part to denote end of a container.
 	WPT_FUNCTION,     ///< Widget part for calling a user function.
+	WPT_SCROLLBAR,    ///< Widget part for attaching a scrollbar.
 
 	/* Pushable window widget types. */
 	WWT_MASK = 0x7F,
 
-	WWB_PUSHBUTTON  = 1 << 7,
+	WWB_PUSHBUTTON    = 1 << 7,
 
-	WWT_PUSHBTN     = WWT_PANEL   | WWB_PUSHBUTTON,
-	WWT_PUSHTXTBTN  = WWT_TEXTBTN | WWB_PUSHBUTTON,
-	WWT_PUSHIMGBTN  = WWT_IMGBTN  | WWB_PUSHBUTTON,
+	WWT_PUSHBTN       = WWT_PANEL    | WWB_PUSHBUTTON,
+	WWT_PUSHTXTBTN    = WWT_TEXTBTN  | WWB_PUSHBUTTON,
+	WWT_PUSHIMGBTN    = WWT_IMGBTN   | WWB_PUSHBUTTON,
+	WWT_PUSHARROWBTN  = WWT_ARROWBTN | WWB_PUSHBUTTON,
 };
 
 /** Different forms of sizing nested widgets, using NWidgetBase::AssignSizePosition() */
@@ -249,6 +249,9 @@ enum NWidgetDisplay {
 	NDB_SHADE_DIMMED    = 4, ///< Display dimmed colours in the viewport.
 	/* Button dropdown widget. */
 	NDB_DROPDOWN_ACTIVE = 5, ///< Dropdown menu of the button dropdown widget is active. @see #NWID_BUTTON_DRPDOWN
+	/* Scrollbar widget. */
+	NDB_SCROLLBAR_UP    = 6, ///< Up-button is lowered bit.
+	NDB_SCROLLBAR_DOWN  = 7, ///< Down-button is lowered bit.
 
 	ND_LOWERED  = 1 << NDB_LOWERED,                ///< Bit value of the lowered flag.
 	ND_DISABLED = 1 << NDB_DISABLED,               ///< Bit value of the disabled flag.
@@ -256,6 +259,8 @@ enum NWidgetDisplay {
 	ND_SHADE_GREY      = 1 << NDB_SHADE_GREY,      ///< Bit value of the 'shade to grey' flag.
 	ND_SHADE_DIMMED    = 1 << NDB_SHADE_DIMMED,    ///< Bit value of the 'dimmed colours' flag.
 	ND_DROPDOWN_ACTIVE = 1 << NDB_DROPDOWN_ACTIVE, ///< Bit value of the 'dropdown active' flag.
+	ND_SCROLLBAR_UP    = 1 << NDB_SCROLLBAR_UP,    ///< Bit value of the 'scrollbar up' flag.
+	ND_SCROLLBAR_DOWN  = 1 << NDB_SCROLLBAR_DOWN,  ///< Bit value of the 'scrollbar down' flag.
 };
 DECLARE_ENUM_AS_BIT_SET(NWidgetDisplay)
 
@@ -278,13 +283,12 @@ public:
 	/* virtual */ void FillNestedArray(NWidgetBase **array, uint length);
 	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
 
-	virtual Scrollbar *FindScrollbar(Window *w, bool allow_next = true) const = 0;
-
 	NWidgetDisplay disp_flags; ///< Flags that affect display and interaction with the widget.
 	Colours colour;            ///< Colour of this widget.
 	int index;                 ///< Index of the nested widget in the widget array of the window (\c -1 means 'not used').
 	uint16 widget_data;        ///< Data of the widget. @see Widget::data
 	StringID tool_tip;         ///< Tooltip of the widget. @see Widget::tootips
+	int scrollbar_index;       ///< Index of an attached scrollbar.
 };
 
 /**
@@ -476,7 +480,6 @@ public:
 	/* virtual */ void Draw(const Window *w);
 	/* virtual */ NWidgetCore *GetWidgetFromPos(int x, int y);
 	/* virtual */ NWidgetBase *GetWidgetOfType(WidgetType tp);
-	/* virtual */ Scrollbar *FindScrollbar(Window *w, bool allow_next = true) const;
 
 private:
 	NWidgetPIPContainer *child; ///< Child widget.
@@ -497,10 +500,148 @@ public:
 
 	/* virtual */ void SetupSmallestSize(Window *w, bool init_array);
 	/* virtual */ void Draw(const Window *w);
-	/* virtual */ Scrollbar *FindScrollbar(Window *w, bool allow_next = true) const;
 
 	void InitializeViewport(Window *w, uint32 follow_flags, ZoomLevel zoom);
 	void UpdateViewportCoordinates(Window *w);
+};
+
+/**
+ * Scrollbar data structure
+ */
+class Scrollbar {
+private:
+	const bool is_vertical; ///< Scrollbar has vertical orientation.
+	uint16 count;           ///< Number of elements in the list.
+	uint16 cap;             ///< Number of visible elements of the scroll bar.
+	uint16 pos;             ///< Index of first visible item of the list.
+
+public:
+	Scrollbar(bool is_vertical) : is_vertical(is_vertical)
+	{
+	}
+
+	/**
+	 * Gets the number of elements in the list
+	 * @return the number of elements
+	 */
+	FORCEINLINE uint16 GetCount() const
+	{
+		return this->count;
+	}
+
+	/**
+	 * Gets the number of visible elements of the scrollbar
+	 * @return the number of visible elements
+	 */
+	FORCEINLINE uint16 GetCapacity() const
+	{
+		return this->cap;
+	}
+
+	/**
+	 * Gets the position of the first visible element in the list
+	 * @return the position of the element
+	 */
+	FORCEINLINE uint16 GetPosition() const
+	{
+		return this->pos;
+	}
+
+	/**
+	 * Checks whether given current item is visible in the list
+	 * @param item to check
+	 * @return true iff the item is visible
+	 */
+	FORCEINLINE bool IsVisible(uint16 item) const
+	{
+		return IsInsideBS(item, this->GetPosition(), this->GetCapacity());
+	}
+
+	/**
+	 * Sets the number of elements in the list
+	 * @param num the number of elements in the list
+	 * @note updates the position if needed
+	 */
+	void SetCount(int num)
+	{
+		assert(num >= 0);
+		assert(num <= MAX_UVALUE(uint16));
+
+		this->count = num;
+		num -= this->cap;
+		if (num < 0) num = 0;
+		if (num < this->pos) this->pos = num;
+	}
+
+	/**
+	 * Set the capacity of visible elements.
+	 * @param capacity the new capacity
+	 * @note updates the position if needed
+	 */
+	void SetCapacity(int capacity)
+	{
+		assert(capacity > 0);
+		assert(capacity <= MAX_UVALUE(uint16));
+
+		this->cap = capacity;
+		if (this->cap + this->pos > this->count) this->pos = max(0, this->count - this->cap);
+	}
+
+	void SetCapacityFromWidget(Window *w, int widget, int padding = 0);
+
+	/**
+	 * Sets the position of the first visible element
+	 * @param position the position of the element
+	 */
+	void SetPosition(int position)
+	{
+		assert(position >= 0);
+		assert(this->count <= this->cap ? (position == 0) : (position + this->cap <= this->count));
+		this->pos = position;
+	}
+
+	/**
+	 * Updates the position of the first visible element by the given amount.
+	 * If the position would be too low or high it will be clamped appropriately
+	 * @param difference the amount of change requested
+	 */
+	void UpdatePosition(int difference)
+	{
+		if (difference == 0) return;
+		this->SetPosition(Clamp(this->pos + difference, 0, max(this->count - this->cap, 0)));
+	}
+
+	/**
+	 * Scroll towards the given position; if the item is visible nothing
+	 * happens, otherwise it will be shown either at the bottom or top of
+	 * the window depending on where in the list it was.
+	 * @param position the position to scroll towards.
+	 */
+	void ScrollTowards(int position)
+	{
+		if (position < this->GetPosition()) {
+			/* scroll up to the item */
+			this->SetPosition(position);
+		} else if (position >= this->GetPosition() + this->GetCapacity()) {
+			/* scroll down so that the item is at the bottom */
+			this->SetPosition(position - this->GetCapacity() + 1);
+		}
+	}
+
+	int GetScrolledRowFromWidget(int clickpos, const Window * const w, int widget, int padding = 0, int line_height = -1) const;
+};
+
+/**
+ * Nested widget to display and control a scrollbar in a window.
+ * Also assign the scrollbar to other widgets using #SetScrollbar() to make the mousewheel work.
+ * @ingroup NestedWidgets
+ */
+class NWidgetScrollbar : public NWidgetCore, public Scrollbar {
+public:
+	NWidgetScrollbar(WidgetType tp, Colours colour, int index);
+
+	/* virtual */ void SetupSmallestSize(Window *w, bool init_array);
+	/* virtual */ void Draw(const Window *w);
 };
 
 /**
@@ -513,7 +654,6 @@ public:
 
 	/* virtual */ void SetupSmallestSize(Window *w, bool init_array);
 	/* virtual */ void Draw(const Window *w);
-	/* virtual */ Scrollbar *FindScrollbar(Window *w, bool allow_next = true) const;
 
 	bool ButtonHit(const Point &pt);
 
@@ -807,6 +947,23 @@ static inline NWidgetPart SetPIP(uint8 pre, uint8 inter, uint8 post)
 	part.u.pip.pre = pre;
 	part.u.pip.inter = inter;
 	part.u.pip.post = post;
+
+	return part;
+}
+
+/**
+ * Attach a scrollbar to a widget.
+ * The scrollbar is controlled when using the mousewheel on the widget.
+ * Multipe widgets can refer to the same scrollbar to make the mousewheel work in all of them.
+ * @param index Widget index of the scrollbar.
+ * @ingroup NestedWidgetParts
+ */
+static inline NWidgetPart SetScrollbar(int index)
+{
+	NWidgetPart part;
+
+	part.type = WPT_SCROLLBAR;
+	part.u.widget.index = index;
 
 	return part;
 }

@@ -56,7 +56,6 @@ int _scrollbar_start_pos;
 int _scrollbar_size;
 byte _scroller_click_timeout;
 
-bool _scrolling_scrollbar; ///< A scrollbar is being scrolled with the mouse.
 bool _scrolling_viewport;  ///< A viewport is being scrolled with the mouse.
 bool _mouse_hovering;      ///< The mouse is hovering over the same point.
 
@@ -99,36 +98,25 @@ int Window::GetRowFromWidget(int clickpos, int widget, int padding, int line_hei
 }
 
 /**
- * Compute the row of a scrolled widget that a user clicked in.
- * @param clickpos    Vertical position of the mouse click (without taking scrolling into account).
- * @param widget      Widget number of the widget clicked in.
- * @param padding     Amount of empty space between the widget edge and the top of the first row. Default value is \c 0.
- * @param line_height Height of a single row. A negative value means using the vertical resize step of the widget.
- * @return Row number clicked at. If clicked at a wrong position, #INT_MAX is returned.
+ * Return the Scrollbar to a widget index.
+ * @param widnum Scrollbar widget index
+ * @return Scrollbar to the widget
  */
-int Scrollbar::GetScrolledRowFromWidget(int clickpos, const Window * const w, int widget, int padding, int line_height) const
+const Scrollbar *Window::GetScrollbar(uint widnum) const
 {
-	uint pos = w->GetRowFromWidget(clickpos, widget, padding, line_height);
-	if (pos != INT_MAX) pos += this->GetPosition();
-	return (pos >= this->GetCount()) ? INT_MAX : pos;
+	return this->GetWidget<NWidgetScrollbar>(widnum);
 }
 
 /**
- * Set capacity of visible elements from the size and resize properties of a widget.
- * @param w       Window.
- * @param widget  Widget with size and resize properties.
- * @param padding Padding to subtract from the size.
- * @note Updates the position if needed.
+ * Return the Scrollbar to a widget index.
+ * @param widnum Scrollbar widget index
+ * @return Scrollbar to the widget
  */
-void Scrollbar::SetCapacityFromWidget(Window *w, int widget, int padding)
+Scrollbar *Window::GetScrollbar(uint widnum)
 {
-	NWidgetBase *nwid = w->GetWidget<NWidgetBase>(widget);
-	if (this->is_vertical) {
-		this->SetCapacity(((int)nwid->current_y - padding) / (int)nwid->resize_y);
-	} else {
-		this->SetCapacity(((int)nwid->current_x - padding) / (int)nwid->resize_x);
-	}
+	return this->GetWidget<NWidgetScrollbar>(widnum);
 }
+
 
 /**
  * Set the window that has the focus
@@ -291,7 +279,7 @@ static void StartWindowSizing(Window *w, bool to_left);
  */
 static void DispatchLeftClickEvent(Window *w, int x, int y, int click_count)
 {
-	const NWidgetCore *nw = w->nested_root->GetWidgetFromPos(x, y);
+	NWidgetCore *nw = w->nested_root->GetWidgetFromPos(x, y);
 	WidgetType widget_type = (nw != NULL) ? nw->type : WWT_EMPTY;
 
 	bool focused_widget_changed = false;
@@ -341,17 +329,11 @@ static void DispatchLeftClickEvent(Window *w, int x, int y, int click_count)
 	 * list's own button, then we should not process the click any further. */
 	if (HideDropDownMenu(w) == widget_index && widget_index >= 0) return;
 
-	switch (widget_type) {
-		/* special widget handling for buttons*/
-		case WWT_PANEL   | WWB_PUSHBUTTON: // WWT_PUSHBTN
-		case WWT_IMGBTN  | WWB_PUSHBUTTON: // WWT_PUSHIMGBTN
-		case WWT_TEXTBTN | WWB_PUSHBUTTON: // WWT_PUSHTXTBTN
-			w->HandleButtonClick(widget_index);
-			break;
+	if ((widget_type & ~WWB_PUSHBUTTON) < WWT_LAST && (widget_type & WWB_PUSHBUTTON)) w->HandleButtonClick(widget_index);
 
-		case WWT_SCROLLBAR:
-		case WWT_SCROLL2BAR:
-		case WWT_HSCROLLBAR:
+	switch (widget_type) {
+		case NWID_VSCROLLBAR:
+		case NWID_HSCROLLBAR:
 			ScrollbarClickHandler(w, nw, x, y);
 			break;
 
@@ -469,7 +451,7 @@ static void DispatchMouseWheelEvent(Window *w, const NWidgetCore *nwid, int whee
 	}
 
 	/* Scroll the widget attached to the scrollbar. */
-	Scrollbar *sb = nwid->FindScrollbar(w);
+	Scrollbar *sb = (nwid->scrollbar_index >= 0 ? w->GetScrollbar(nwid->scrollbar_index) : NULL);
 	if (sb != NULL && sb->GetCount() > sb->GetCapacity()) {
 		sb->UpdatePosition(wheel);
 		w->SetDirty();
@@ -1316,7 +1298,7 @@ void Window::InitNested(const WindowDesc *desc, WindowNumber window_number)
 }
 
 /** Empty constructor, initialization has been moved to #InitNested() called from the constructor of the derived class. */
-Window::Window() : hscroll(false), vscroll(true), vscroll2(true)
+Window::Window() : scrolling_scrollbar(-1)
 {
 }
 
@@ -1392,9 +1374,15 @@ static void DecreaseWindowCounters()
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_FRONT(w) {
 		/* Unclick scrollbar buttons if they are pressed. */
-		if (w->flags4 & (WF_SCROLL_DOWN | WF_SCROLL_UP)) {
-			w->flags4 &= ~(WF_SCROLL_DOWN | WF_SCROLL_UP);
-			w->SetDirty();
+		for (uint i = 0; i < w->nested_array_size; i++) {
+			NWidgetBase *nwid = w->nested_array[i];
+			if (nwid != NULL && (nwid->type == NWID_HSCROLLBAR || nwid->type == NWID_VSCROLLBAR)) {
+				NWidgetScrollbar *sb = static_cast<NWidgetScrollbar*>(nwid);
+				if (sb->disp_flags & (ND_SCROLLBAR_UP | ND_SCROLLBAR_DOWN)) {
+					sb->disp_flags &= ~(ND_SCROLLBAR_UP | ND_SCROLLBAR_DOWN);
+					sb->SetDirty(w);
+				}
+			}
 		}
 		w->OnMouseLoop();
 	}
@@ -1833,33 +1821,23 @@ static void StartWindowSizing(Window *w, bool to_left)
 static EventState HandleScrollbarScrolling()
 {
 	Window *w;
-
-	/* Get out quickly if no item is being scrolled */
-	if (!_scrolling_scrollbar) return ES_NOT_HANDLED;
-
-	/* Find the scrolling window */
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
-		if (w->flags4 & WF_SCROLL_MIDDLE) {
+		if (w->scrolling_scrollbar >= 0) {
 			/* Abort if no button is clicked any more. */
 			if (!_left_button_down) {
-				w->flags4 &= ~WF_SCROLL_MIDDLE;
+				w->scrolling_scrollbar = -1;
 				w->SetDirty();
-				break;
+				return ES_HANDLED;
 			}
 
 			int i;
-			Scrollbar *sb;
+			NWidgetScrollbar *sb = w->GetWidget<NWidgetScrollbar>(w->scrolling_scrollbar);
 			bool rtl = false;
 
-			if (w->flags4 & WF_HSCROLL) {
-				sb = &w->hscroll;
+			if (sb->type == NWID_HSCROLLBAR) {
 				i = _cursor.pos.x - _cursorpos_drag_start.x;
 				rtl = _dynlang.text_dir == TD_RTL;
-			} else if (w->flags4 & WF_SCROLL2) {
-				sb = &w->vscroll2;
-				i = _cursor.pos.y - _cursorpos_drag_start.y;
 			} else {
-				sb = &w->vscroll;
 				i = _cursor.pos.y - _cursorpos_drag_start.y;
 			}
 
@@ -1874,8 +1852,7 @@ static EventState HandleScrollbarScrolling()
 		}
 	}
 
-	_scrolling_scrollbar = false;
-	return ES_HANDLED;
+	return ES_NOT_HANDLED;
 }
 
 /**

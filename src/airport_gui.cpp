@@ -216,6 +216,7 @@ enum AirportPickerWidgets {
 class BuildAirportWindow : public PickerWindowBase {
 	SpriteID preview_sprite; ///< Cached airport preview sprite.
 	int line_height;
+	Scrollbar *vscroll;
 
 	/** Build a dropdown list of available airport classes */
 	static DropDownList *BuildAirportClassDropDown()
@@ -232,15 +233,19 @@ class BuildAirportWindow : public PickerWindowBase {
 public:
 	BuildAirportWindow(const WindowDesc *desc, Window *parent) : PickerWindowBase(parent)
 	{
-		this->vscroll.SetCapacity(5);
-		this->vscroll.SetPosition(0);
-		this->InitNested(desc, TRANSPORT_AIR);
+		this->CreateNestedTree(desc);
+
+		this->vscroll = this->GetScrollbar(BAIRW_SCROLLBAR);
+		this->vscroll->SetCapacity(5);
+		this->vscroll->SetPosition(0);
+
+		this->FinishInitNested(desc, TRANSPORT_AIR);
 
 		this->SetWidgetLoweredState(BAIRW_BTN_DONTHILIGHT, !_settings_client.gui.station_show_coverage);
 		this->SetWidgetLoweredState(BAIRW_BTN_DOHILIGHT, _settings_client.gui.station_show_coverage);
 		this->OnInvalidateData();
 
-		this->vscroll.SetCount(AirportClass::GetCount(_selected_airport_class));
+		this->vscroll->SetCount(AirportClass::GetCount(_selected_airport_class));
 		this->SelectFirstAvailableAirport(true);
 	}
 
@@ -298,7 +303,7 @@ public:
 				}
 
 				this->line_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP + WD_MATRIX_BOTTOM;
-				size->height = this->vscroll.GetCapacity() * this->line_height;
+				size->height = this->vscroll->GetCapacity() * this->line_height;
 				break;
 			}
 
@@ -343,7 +348,7 @@ public:
 		switch (widget) {
 			case BAIRW_AIRPORT_LIST: {
 				int y = r.top;
-				for (uint i = this->vscroll.GetPosition(); this->vscroll.IsVisible(i) && i < AirportClass::GetCount(_selected_airport_class); i++) {
+				for (uint i = this->vscroll->GetPosition(); this->vscroll->IsVisible(i) && i < AirportClass::GetCount(_selected_airport_class); i++) {
 					const AirportSpec *as = AirportClass::Get(_selected_airport_class, i);
 					if (!as->IsAvailable()) {
 						GfxFillRect(r.left + 1, y + 1, r.right - 1, y + this->line_height - 2, 0, FILLRECT_CHECKER);
@@ -451,8 +456,8 @@ public:
 				break;
 
 			case BAIRW_AIRPORT_LIST: {
-				int num_clicked = this->vscroll.GetPosition() + (pt.y - this->nested_array[widget]->pos_y) / this->line_height;
-				if (num_clicked >= this->vscroll.GetCount()) break;
+				int num_clicked = this->vscroll->GetPosition() + (pt.y - this->nested_array[widget]->pos_y) / this->line_height;
+				if (num_clicked >= this->vscroll->GetCount()) break;
 				const AirportSpec *as = AirportClass::Get(_selected_airport_class, num_clicked);
 				if (as->IsAvailable()) this->SelectOtherAirport(num_clicked);
 				break;
@@ -518,7 +523,7 @@ public:
 	{
 		assert(widget == BAIRW_CLASS_DROPDOWN);
 		_selected_airport_class = (AirportClassID)index;
-		this->vscroll.SetCount(AirportClass::GetCount(_selected_airport_class));
+		this->vscroll->SetCount(AirportClass::GetCount(_selected_airport_class));
 		this->SelectFirstAvailableAirport(false);
 	}
 
@@ -537,13 +542,13 @@ static const NWidgetPart _nested_build_airport_widgets[] = {
 		NWidget(WWT_LABEL, COLOUR_DARK_GREEN), SetDataTip(STR_STATION_BUILD_AIRPORT_CLASS_LABEL, STR_NULL), SetFill(1, 0),
 		NWidget(WWT_DROPDOWN, COLOUR_GREY, BAIRW_CLASS_DROPDOWN), SetFill(1, 0), SetDataTip(STR_BLACK_STRING, STR_NULL),
 		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_MATRIX, COLOUR_GREY, BAIRW_AIRPORT_LIST), SetFill(1, 0), SetDataTip(0x501, STR_NULL),
-			NWidget(WWT_SCROLLBAR, COLOUR_GREY, BAIRW_SCROLLBAR),
+			NWidget(WWT_MATRIX, COLOUR_GREY, BAIRW_AIRPORT_LIST), SetFill(1, 0), SetDataTip(0x501, STR_NULL), SetScrollbar(BAIRW_SCROLLBAR),
+			NWidget(NWID_VSCROLLBAR, COLOUR_GREY, BAIRW_SCROLLBAR),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, BAIRW_LAYOUT_DECREASE), SetMinimalSize(12, 0),SetDataTip(AWV_DECREASE, STR_NULL),
+			NWidget(WWT_PUSHARROWBTN, COLOUR_GREY, BAIRW_LAYOUT_DECREASE), SetMinimalSize(12, 0),SetDataTip(AWV_DECREASE, STR_NULL),
 			NWidget(WWT_LABEL, COLOUR_GREY, BAIRW_LAYOUT_NUM), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_BLACK_STRING, STR_NULL),
-			NWidget(NWID_BUTTON_ARROW, COLOUR_GREY, BAIRW_LAYOUT_INCREASE), SetMinimalSize(12, 0), SetDataTip(AWV_INCREASE, STR_NULL),
+			NWidget(WWT_PUSHARROWBTN, COLOUR_GREY, BAIRW_LAYOUT_INCREASE), SetMinimalSize(12, 0), SetDataTip(AWV_INCREASE, STR_NULL),
 		EndContainer(),
 		NWidget(WWT_EMPTY, COLOUR_DARK_GREEN, BAIRW_AIRPORT_SPRITE), SetFill(1, 0),
 		NWidget(WWT_EMPTY, COLOUR_DARK_GREEN, BAIRW_EXTRA_TEXT), SetFill(1, 0), SetMinimalSize(150, 0),
