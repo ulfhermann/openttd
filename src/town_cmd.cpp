@@ -47,6 +47,8 @@
 #include "core/random_func.hpp"
 #include "core/backup_type.hpp"
 #include "depot_base.h"
+#include "object_map.h"
+#include "object_base.h"
 
 #include "table/strings.h"
 #include "table/town_land.h"
@@ -65,33 +67,31 @@ Town::~Town()
 
 	if (CleaningPool()) return;
 
-	Industry *i;
-
 	/* Delete town authority window
 	 * and remove from list of sorted towns */
 	DeleteWindowById(WC_TOWN_VIEW, this->index);
 
-	/* Delete all industries belonging to the town */
-	FOR_ALL_INDUSTRIES(i) if (i->town == this) delete i;
+	/* Check no industry is related to us. */
+	const Industry *i;
+	FOR_ALL_INDUSTRIES(i) assert(i->town != this);
 
-	/* Go through all tiles and delete those belonging to the town */
+	/* ... and no object is related to us. */
+	const Object *o;
+	FOR_ALL_OBJECTS(o) assert(o->town != this);
+
+	/* Check no tile is related to us. */
 	for (TileIndex tile = 0; tile < MapSize(); ++tile) {
 		switch (GetTileType(tile)) {
 			case MP_HOUSE:
-				if (Town::GetByTile(tile) == this) DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
+				assert(GetTownIndex(tile) != this->index);
 				break;
 
 			case MP_ROAD:
-				/* Cached nearest town is updated later (after this town has been deleted) */
-				if (HasTownOwnedRoad(tile) && GetTownIndex(tile) == this->index) {
-					DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
-				}
+				assert(!HasTownOwnedRoad(tile) || GetTownIndex(tile) != this->index);
 				break;
 
 			case MP_TUNNELBRIDGE:
-				if (IsTileOwner(tile, OWNER_TOWN) &&
-						ClosestTownFromTile(tile, UINT_MAX) == this)
-					DoCommand(tile, 0, 0, DC_EXEC, CMD_LANDSCAPE_CLEAR);
+				assert(!IsTileOwner(tile, OWNER_TOWN) || ClosestTownFromTile(tile, UINT_MAX) != this);
 				break;
 
 			default:
@@ -115,6 +115,12 @@ void Town::PostDestructor(size_t index)
 {
 	InvalidateWindowData(WC_TOWN_DIRECTORY, 0, 0);
 	UpdateNearestTownForRoadTiles(false);
+
+	/* Give objects a new home! */
+	Object *o;
+	FOR_ALL_OBJECTS(o) {
+		if (o->town == NULL) o->town = CalcClosestTownFromTile(o->location.tile, UINT_MAX);
+	}
 }
 
 /**
@@ -2372,7 +2378,7 @@ CommandCost CmdDeleteTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 			/* Non-oil rig stations are always a problem. */
 			if (!(st->facilities & FACIL_AIRPORT) || st->airport.type != AT_OILRIG) return CMD_ERROR;
 			/* We can only automatically delete oil rigs *if* there's no vehicle on them. */
-			CommandCost ret = DoCommand(st->airport.tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
+			CommandCost ret = DoCommand(st->airport.tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 			if (ret.Failed()) return ret;
 		}
 	}
@@ -2385,30 +2391,52 @@ CommandCost CmdDeleteTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 
 	/* Check all tiles for town ownership. */
 	for (TileIndex tile = 0; tile < MapSize(); ++tile) {
+		bool try_clear = false;
 		switch (GetTileType(tile)) {
 			case MP_ROAD:
-				if (HasTownOwnedRoad(tile) && GetTownIndex(tile) == t->index) {
-					/* Can we clear this tile? */
-					CommandCost ret = DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
-					if (ret.Failed()) return ret;
-				}
+				try_clear = HasTownOwnedRoad(tile) && GetTownIndex(tile) == t->index;
 				break;
 
 			case MP_TUNNELBRIDGE:
-				if (IsTileOwner(tile, OWNER_TOWN) &&
-						ClosestTownFromTile(tile, UINT_MAX) == t) {
-					/* Can we clear this bridge? */
-					CommandCost ret = DoCommand(tile, 0, 0, DC_NONE, CMD_LANDSCAPE_CLEAR);
-					if (ret.Failed()) return ret;
+				try_clear = IsTileOwner(tile, OWNER_TOWN) && ClosestTownFromTile(tile, UINT_MAX) == t;
+				break;
+
+			case MP_HOUSE:
+				try_clear = GetTownIndex(tile) == t->index;
+				break;
+
+			case MP_INDUSTRY:
+				try_clear = Industry::GetByTile(tile)->town == t;
+				break;
+
+			case MP_OBJECT:
+				if (Town::GetNumItems() == 1) {
+					/* No towns will be left, remove it! */
+					try_clear = true;
+				} else {
+					Object *o = Object::GetByTile(tile);
+					if (o->town == t) {
+						if (GetObjectType(tile) == OBJECT_STATUE) {
+							/* Statue... always remove. */
+							try_clear = true;
+						} else {
+							/* Tell to find a new town. */
+							o->town = NULL;
+						}
+					}
 				}
 				break;
 
 			default:
 				break;
 		}
+		if (try_clear) {
+			CommandCost ret = DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
+			if (ret.Failed()) return ret;
+		}
 	}
 
-	/* The town destructor will delete everything related to the town. */
+	/* The town destructor will delete the other things related to the town. */
 	if (flags & DC_EXEC) delete t;
 
 	return CommandCost();
