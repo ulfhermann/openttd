@@ -1313,6 +1313,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\object_base.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\object_type.h"
 				>
 			</File>
@@ -2214,6 +2218,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\saveload\newgrf_sl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\saveload\object_sl.cpp"
 				>
 			</File>
 			<File
