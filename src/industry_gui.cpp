@@ -331,7 +331,7 @@ public:
 					}
 					d = maxdim(d, GetStringBoundingBox(str));
 
-					/* Draw the produced cargos, if any. Otherwhise, will print "Nothing" */
+					/* Draw the produced cargoes, if any. Otherwise, will print "Nothing". */
 					GetAllCargoSuffixes(3, CST_FUND, NULL, this->index[i], indsp, indsp->produced_cargo, cargo_suffix);
 					str = STR_INDUSTRY_VIEW_PRODUCES_CARGO;
 					p = 0;
@@ -422,7 +422,7 @@ public:
 					y += FONT_HEIGHT_NORMAL;
 				}
 
-				/* Draw the accepted cargos, if any. Otherwhise, will print "Nothing" */
+				/* Draw the accepted cargoes, if any. Otherwise, will print "Nothing". */
 				char cargo_suffix[3][512];
 				GetAllCargoSuffixes(0, CST_FUND, NULL, this->selected_type, indsp, indsp->accepts_cargo, cargo_suffix);
 				StringID str = STR_INDUSTRY_VIEW_REQUIRES_CARGO;
@@ -438,7 +438,7 @@ public:
 				DrawString(left, right, y, str);
 				y += FONT_HEIGHT_NORMAL;
 
-				/* Draw the produced cargos, if any. Otherwhise, will print "Nothing" */
+				/* Draw the produced cargoes, if any. Otherwise, will print "Nothing". */
 				GetAllCargoSuffixes(3, CST_FUND, NULL, this->selected_type, indsp, indsp->produced_cargo, cargo_suffix);
 				str = STR_INDUSTRY_VIEW_PRODUCES_CARGO;
 				p = 0;
@@ -623,16 +623,6 @@ void ShowBuildIndustryWindow()
 
 static void UpdateIndustryProduction(Industry *i);
 
-static inline bool IsProductionMinimum(const Industry *i, int pt)
-{
-	return i->production_rate[pt] == 0;
-}
-
-static inline bool IsProductionMaximum(const Industry *i, int pt)
-{
-	return i->production_rate[pt] >= 255;
-}
-
 static inline bool IsProductionAlterable(const Industry *i)
 {
 	return ((_game_mode == GM_EDITOR || _cheats.setup_prod.value) &&
@@ -755,7 +745,7 @@ public:
 			/* Let's put out those buttons.. */
 			if (IsProductionAlterable(i)) {
 				DrawArrowButtons(left + WD_FRAMETEXT_LEFT, y, COLOUR_YELLOW, (this->clicked_line == j + 1) ? this->clicked_button : 0,
-						!IsProductionMinimum(i, j), !IsProductionMaximum(i, j));
+						i->production_rate[j] > 0, i->production_rate[j] < 255);
 			}
 			y += FONT_HEIGHT_NORMAL;
 		}
@@ -807,12 +797,12 @@ public:
 					if (IsInsideMM(x, left, left + 20) ) {
 						/* Clicked buttons, decrease or increase production */
 						if (x < left + 10) {
-							if (IsProductionMinimum(i, line)) return;
+							if (i->production_rate[line] <= 0) return;
 							i->production_rate[line] = max(i->production_rate[line] / 2, 0);
 						} else {
 							/* a zero production industry is unlikely to give anything but zero, so push it a little bit */
 							int new_prod = i->production_rate[line] == 0 ? 1 : i->production_rate[line] * 2;
-							if (IsProductionMaximum(i, line)) return;
+							if (i->production_rate[line] >= 255) return;
 							i->production_rate[line] = minu(new_prod, 255);
 						}
 
@@ -1269,7 +1259,7 @@ public:
 Listing IndustryDirectoryWindow::last_sorting = {false, 0};
 const Industry *IndustryDirectoryWindow::last_industry = NULL;
 
-/* Availible station sorting functions */
+/* Available station sorting functions. */
 GUIIndustryList::SortFunction * const IndustryDirectoryWindow::sorter_funcs[] = {
 	&IndustryNameSorter,
 	&IndustryTypeSorter,
