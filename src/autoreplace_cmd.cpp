@@ -309,7 +309,7 @@ static inline CommandCost StartStopVehicle(const Vehicle *v, bool evaluate_callb
  */
 static inline CommandCost MoveVehicle(const Vehicle *v, const Vehicle *after, DoCommandFlag flags, bool whole_chain)
 {
-	return DoCommand(0, v->index | (after != NULL ? after->index : INVALID_VEHICLE) << 16, whole_chain ? 1 : 0, flags, CMD_MOVE_RAIL_VEHICLE);
+	return DoCommand(0, v->index | (whole_chain ? 1 : 0) << 20, after != NULL ? after->index : INVALID_VEHICLE, flags, CMD_MOVE_RAIL_VEHICLE);
 }
 
 /**
@@ -323,7 +323,7 @@ static CommandCost CopyHeadSpecificThings(Vehicle *old_head, Vehicle *new_head, 
 	CommandCost cost = CommandCost();
 
 	/* Share orders */
-	if (cost.Succeeded() && old_head != new_head) cost.AddCost(DoCommand(0, (old_head->index << 16) | new_head->index, CO_SHARE, DC_EXEC, CMD_CLONE_ORDER));
+	if (cost.Succeeded() && old_head != new_head) cost.AddCost(DoCommand(0, new_head->index | CO_SHARE << 30, old_head->index, DC_EXEC, CMD_CLONE_ORDER));
 
 	/* Copy group membership */
 	if (cost.Succeeded() && old_head != new_head) cost.AddCost(DoCommand(0, old_head->group_id, new_head->index, DC_EXEC, CMD_ADD_VEHICLE_GROUP));
@@ -459,6 +459,7 @@ static CommandCost ReplaceChain(Vehicle **chain, DoCommandFlag flags, bool wagon
 
 			/* Append engines to the new chain
 			 * We do this from back to front, so that the head of the temporary vehicle chain does not change all the time.
+			 * That way we also have less trouble when exceeding the unitnumber limit.
 			 * OTOH the vehicle attach callback is more expensive this way :s */
 			Train *last_engine = NULL; ///< Shall store the last engine unit after this step
 			if (cost.Succeeded()) {
@@ -466,6 +467,13 @@ static CommandCost ReplaceChain(Vehicle **chain, DoCommandFlag flags, bool wagon
 					Train *append = (new_vehs[i] != NULL ? new_vehs[i] : old_vehs[i]);
 
 					if (RailVehInfo(append->engine_type)->railveh_type == RAILVEH_WAGON) continue;
+
+					if (new_vehs[i] != NULL) {
+						/* Move the old engine to a separate row with DC_AUTOREPLACE. Else
+						 * moving the wagon in front may fail later due to unitnumber limit.
+						 * (We have to attach wagons without DC_AUTOREPLACE.) */
+						MoveVehicle(old_vehs[i], NULL, DC_EXEC | DC_AUTOREPLACE, false);
+					}
 
 					if (last_engine == NULL) last_engine = append;
 					cost.AddCost(MoveVehicle(append, new_head, DC_EXEC, false));
