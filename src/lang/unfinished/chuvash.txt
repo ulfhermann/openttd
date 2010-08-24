@@ -649,12 +649,29 @@ STR_OSNAME_SUNOS                                                :SunOS
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Вӑййи ан килӗш
 
 # Cheat window
+STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Виҫеллӗ климат
+STR_CHEAT_SWITCH_CLIMATE_SUB_ARCTIC_LANDSCAPE                   :Сивӗ климат
+STR_CHEAT_SWITCH_CLIMATE_SUB_TROPICAL_LANDSCAPE                 :Тропик климат
+STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE                      :Вӑйӑ пахчи
+STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Тӳрлет кун: {ORANGE}{DATE_SHORT}
 
 # Livery window
 
 
+STR_LIVERY_DEFAULT                                              :Яланхи тӗс
+STR_LIVERY_STEAM                                                :Пӑравус
+STR_LIVERY_DIESEL                                               :Ӑшӑвус(Diesel Engine)
+STR_LIVERY_ELECTRIC                                             :Электровоз(Electric Engine)
+STR_LIVERY_MONORAIL                                             :Пӗр-релсӑ Локомотив(Monorail Engine)
+STR_LIVERY_MAGLEV                                               :Маглев Локомотив
 STR_LIVERY_DMU                                                  :DMU
 STR_LIVERY_EMU                                                  :EMU
+STR_LIVERY_PASSENGER_WAGON_STEAM                                :Пасажир Вакун(Парӑвус)
+STR_LIVERY_PASSENGER_WAGON_DIESEL                               :Пасажир Вакун(Ӑшӑвус)
+STR_LIVERY_PASSENGER_WAGON_ELECTRIC                             :Пасажир Вакун(Электровоз)
+STR_LIVERY_PASSENGER_WAGON_MONORAIL                             :Пасажир Вакун(Пӗр-релсӑ)
+STR_LIVERY_PASSENGER_WAGON_MAGLEV                               :Пасажир Вакун(Маглев)
+STR_LIVERY_FREIGHT_WAGON                                        :Ҫӑк Вакун
 STR_LIVERY_BUS                                                  :Автобус
 STR_LIVERY_TRUCK                                                :Ҫӑк машинаи
 STR_LIVERY_PASSENGER_SHIP                                       :Пассажирсем карап
@@ -675,18 +692,71 @@ STR_FACE_ADVANCED                                               :{BLACK}Хушм
 STR_FACE_SIMPLE                                                 :{BLACK}Ансат
 STR_FACE_LOAD                                                   :{BLACK}Тие
 STR_FACE_SAVE                                                   :{BLACK}Упра
+STR_FACE_EUROPEAN                                               :{BLACK}Европӑ
+STR_FACE_AFRICAN                                                :{BLACK}Африкан
+STR_FACE_YES                                                    :Ҫапла
+STR_FACE_NO                                                     :Ҫук
+STR_FACE_HAIR                                                   :Ҫӳҫ:
+STR_FACE_EYEBROWS                                               :Куҫ харши:
+STR_FACE_EYECOLOUR                                              :Куҫ тӗс:
+STR_FACE_GLASSES                                                :Куҫлӑх:
+STR_FACE_GLASSES_TOOLTIP                                        :{BLACK}Куҫлӑх яр
+STR_FACE_GLASSES_TOOLTIP_2                                      :{BLACK}Тӳрлет куҫлӑх
+STR_FACE_NOSE                                                   :Сӑмса:
+STR_FACE_LIPS                                                   :Тута:
+STR_FACE_MOUSTACHE                                              :Мӑйӑх:
+STR_FACE_CHIN                                                   :Янах:
+STR_FACE_JACKET                                                 :Пиншак:
+STR_FACE_COLLAR                                                 :Ҫуха:
+STR_FACE_TIE                                                    :Галстук:
+STR_FACE_EARRING                                                :Алка:
 
 # Network server list
+STR_NETWORK_SERVER_LIST_CONNECTION                              :{BLACK}Ҫыхӑну:
+STR_NETWORK_SERVER_LIST_LAN                                     :LAN
+STR_NETWORK_SERVER_LIST_INTERNET                                :Тетел
+STR_NETWORK_SERVER_LIST_PLAYER_NAME                             :{BLACK}Вӑйӑҫӑ ят:
+
+STR_NETWORK_SERVER_LIST_GAME_NAME                               :{BLACK}Ят
+STR_NETWORK_SERVER_LIST_GAME_NAME_TOOLTIP                       :{BLACK}Ят вӑйӑлла
+STR_NETWORK_SERVER_LIST_GENERAL_ONLINE                          :{BLACK}{COMMA}/{COMMA} - {COMMA}/{COMMA}
+STR_NETWORK_SERVER_LIST_CLIENTS_CAPTION                         :{BLACK}Вӑйӑҫӑсем
+STR_NETWORK_SERVER_LIST_MAP_SIZE_SHORT                          :{BLACK}{COMMA}x{COMMA}
+STR_NETWORK_SERVER_LIST_MAP_SIZE_CAPTION                        :{BLACK}Виҫе картти
+STR_NETWORK_SERVER_LIST_DATE_CAPTION                            :{BLACK}Кун
+STR_NETWORK_SERVER_LIST_DATE_CAPTION_TOOLTIP                    :{BLACK}Хальхи кун
+STR_NETWORK_SERVER_LIST_YEARS_CAPTION                           :{BLACK}Ҫул
+STR_NETWORK_SERVER_LIST_INFO_ICONS_TOOLTIP                      :{BLACK}Чӗлхе, сервер версиӗ, т. ыт. те.
 
 
+STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}ВӐЙЙИ ИНФОРМАЦИ
+STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Вӑйӑҫӑсем: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
+STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Чӗлхи: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Ҫӗр пичӗ: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_MAP_SIZE                                :{SILVER}Виҫе картти: {WHITE}{COMMA}x{COMMA}
+STR_NETWORK_SERVER_LIST_SERVER_VERSION                          :{SILVER}Сервер версиӗ: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_SERVER_ADDRESS                          :{SILVER}Сервер адресӗ: {WHITE}{STRING}
+STR_NETWORK_SERVER_LIST_START_DATE                              :{SILVER}Пуҫламӑш кун: {WHITE}{DATE_SHORT}
+STR_NETWORK_SERVER_LIST_CURRENT_DATE                            :{SILVER}Хальхи кун: {WHITE}{DATE_SHORT}
+STR_NETWORK_SERVER_LIST_PASSWORD                                :{SILVER}Вӑрттӑн сӑмаха хӳтеленнӗ
+STR_NETWORK_SERVER_LIST_SERVER_OFFLINE                          :{SILVER}ҪЫХӐНМАСӐР СЕРВЕР
+STR_NETWORK_SERVER_LIST_SERVER_FULL                             :{SILVER}СЕРВЕР ТУЛЛИ
+STR_NETWORK_SERVER_LIST_VERSION_MISMATCH                        :{SILVER}ХИРӖҪӲ ВЕРСИ
+STR_NETWORK_SERVER_LIST_GRF_MISMATCH                            :{SILVER}ХИРӖҪӲ NEWGRF
 
+STR_NETWORK_SERVER_LIST_REFRESH                                 :{BLACK}Сервер ҫӗнет
 
-
+STR_NETWORK_SERVER_LIST_FIND_SERVER                             :{BLACK}Сервер туп
+STR_NETWORK_SERVER_LIST_ADD_SERVER                              :{BLACK}Сервер хуш
+STR_NETWORK_SERVER_LIST_START_SERVER                            :{BLACK}Сервер пуҫ
 
 
 # Start new multiplayer server
 
+STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Вӑййи ят:
+STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Вырнаҫтар вӑрттӑн сӑмахӗ
 
+STR_NETWORK_START_SERVER_LAN_INTERNET                           :Вырӑнти Тӗвӗлӗх/Тетел
 
 
 
@@ -843,6 +913,7 @@ STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Укҫа
 
 
 # World generation
+STR_MAPGEN_MAPSIZE                                              :{BLACK}Виҫа картти:
 
 # Strings for map borders at game generation
 
