@@ -2372,9 +2372,5 @@ void CcBuildPrimaryVehicle(const CommandCost &result, TileIndex tile, uint32 p1,
 	if (result.Failed()) return;
 
 	const Vehicle *v = Vehicle::Get(_new_vehicle_id);
-	if (v->tile == _backup_orders_tile) {
-		_backup_orders_tile = 0;
-		RestoreVehicleOrders(v);
-	}
 	ShowVehicleViewWindow(v);
 }

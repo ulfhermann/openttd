@@ -442,8 +442,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Información so
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Activar consola
 STR_ABOUT_MENU_AI_DEBUG                                         :Depuración de IA
-STR_ABOUT_MENU_SCREENSHOT                                       :Captura de pantalla (Ctrl-S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Captura gigante (Ctrl+G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Captura de pantalla
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Captura con zoom
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Captura de mapa completo
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Acerca de 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Alineador de sprites
 ############ range ends here
@@ -559,6 +560,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detalle
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}Mostrar detalles de esta empresa
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vehículos:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Estaciones:
@@ -1757,6 +1759,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}El servi
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}Se ha prohibido tu acceso al servidor
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}Has sido expulsado del servidor
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}No se permiten trucos en este servidor
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Estabas enviando demasiados comandos al servidor
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :error general
@@ -1774,6 +1777,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :error en el id 
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :expulsado por el servidor
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :ha intentado usar un truco
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :servidor lleno
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :estaba enviando demasiados comandos
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2395,6 +2399,8 @@ STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Introduc
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Cambiar parámetros NewGRF
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Cerrar
+STR_NEWGRF_PARAMETERS_RESET                                     :{BLACK}Reset
+STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Fijar todos los parámetros a su valor por defecto
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parámetro {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 
@@ -2446,6 +2452,7 @@ STR_NEWGRF_ERROR_INVALID_ID                                     :Intento de usar
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} contiene un sprite corrupto. Todos los sprites corruptos serán mostrados como un interrogante rojo (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Contiene múltiples entradas Action 8.
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Lectura después del final del pseudo-sprite.
+STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}Al conjunto de gráficos base actualmente en uso le faltan algunos sprites.{}El conjunto de gráficos base debe ser actualizado.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Precaución!
@@ -2467,6 +2474,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Ficheros q
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}Problema con el NewGRF '{STRING}' puede causar desincronización o cuelgues
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}Cambia el estado de vagón con potencia para '{1:ENGINE}' cuando no está dentro de un depósito
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Cambia la longitud del vehículo para '{1:ENGINE}' cuando no está dentro de un depósito
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Tren '{VEHICLE}' perteneciente a '{COMPANY}' tiene una longitud incorrecta. Puede ser debido a problemas con los NewGRF. El juego puede fallar.
 
@@ -2483,6 +2491,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<industria inco
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista de carteles - {COMMA} Carteles
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Comprobar mayúsculas/minúsculas
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Borrar filtro
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Activa/desactiva la comprobación de mayúsculas y minúsculas al filtrar la lista de carteles
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Borrar texto de filtrado
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Editar texto del cartel
@@ -3298,10 +3310,11 @@ STR_AI_DEBUG_BREAK_STR_ON_OFF_TOOLTIP                           :{BLACK}Activar 
 STR_AI_DEBUG_BREAK_ON_LABEL                                     :{BLACK}Pausa activada:
 STR_AI_DEBUG_BREAK_STR_OSKTITLE                                 :{BLACK}Pausa activada
 STR_AI_DEBUG_BREAK_STR_TOOLTIP                                  :{BLACK}Cuando el mensaje de log de una IA coincide con esta cadena, el juego se pausa.
-STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Cadena de parada
-STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Activar / desactivar comparación de mensajes de log de la IA con la cadena de parada
+STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Comprobar mayúsculas/minúsculas
+STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Activa/desactiva la comprobación de mayúsculas y minúsculas al comparar los mensajes de log de la IA con la cadena de parada
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Continuar
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Despausar y hacer que la IA continúe
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Mostrar salida de depuración de esta IA
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD está compilado sin soporte para IA...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... no hay IAs disponibles!
@@ -3538,7 +3551,7 @@ STR_ERROR_CAN_T_CHANGE_WAYPOINT_NAME                            :{WHITE}No se pu
 STR_ERROR_CAN_T_REMOVE_TRAIN_WAYPOINT                           :{WHITE}No se puede retirar punto de ruta aquí...
 STR_ERROR_MUST_REMOVE_RAILWAYPOINT_FIRST                        :{WHITE}Primero se debe retirar punto de ruta para trenes
 STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}... boya en medio
-STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... boya en uso!
+STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... boya en uso por otra compañía!
 
 # Depot related errors
 STR_ERROR_CAN_T_BUILD_TRAIN_DEPOT                               :{WHITE}No se puede construir depósito aquí...
@@ -3548,10 +3561,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}No se pu
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}No se puede renombrar depósito...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}El tren debe detenerse dentro del depósito
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}... debe ser detenido dentro de un depósito
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... debe ser detenido dentro de un depósito
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}El barco debe estar detenido en un astillero
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}La aeronave debe estar detenida en un hangar
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}... debe ser detenido dentro de un astillero
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... debe ser detenido dentro de un hangar
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Los trenes únicamente pueden ser modificarse estando detenidos dentro de un depósito
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Tren demasiado largo
