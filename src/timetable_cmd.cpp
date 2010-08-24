@@ -49,15 +49,12 @@ static void ChangeTimetable(Vehicle *v, VehicleOrderID order_number, uint16 time
  * @param tile Not used.
  * @param flags Operation to perform.
  * @param p1 Various bitstuffed elements
- * - p1 = (bit  0-15) - Vehicle with the orders to change.
- * - p1 = (bit 16-23) - Order index to modify.
- * - p1 = (bit    24) - Whether to change the waiting time or the travelling
+ * - p1 = (bit  0-19) - Vehicle with the orders to change.
+ * - p1 = (bit 20-27) - Order index to modify.
+ * - p1 = (bit    28) - Whether to change the waiting time or the travelling
  *                      time.
- * - p1 = (bit    25) - Whether p2 contains waiting and travelling time.
  * @param p2 The amount of time to wait.
- * - p2 = (bit  0-15) - Waiting or travelling time as specified by p1 bit 24 if p1 bit 25 is not set,
- *                      Travelling time if p1 bit 25 is set.
- * - p2 = (bit 16-31) - Waiting time if p1 bit 25 is set
+ * - p2 = (bit  0-15) - Waiting or travelling time as specified by p1 bit 28
  * @param text unused
  * @return the cost of this operation or an error
  */
@@ -65,7 +62,7 @@ CommandCost CmdChangeTimetable(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 {
 	if (!_settings_game.order.timetabling) return CMD_ERROR;
 
-	VehicleID veh = GB(p1, 0, 16);
+	VehicleID veh = GB(p1, 0, 20);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
@@ -73,19 +70,15 @@ CommandCost CmdChangeTimetable(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 
-	VehicleOrderID order_number = GB(p1, 16, 8);
+	VehicleOrderID order_number = GB(p1, 20, 8);
 	Order *order = v->GetOrder(order_number);
 	if (order == NULL) return CMD_ERROR;
 
-	bool packed_time = HasBit(p1, 25);
-	bool is_journey = HasBit(p1, 24) || packed_time;
+	bool is_journey = HasBit(p1, 28);
 
 	int wait_time   = order->wait_time;
 	int travel_time = order->travel_time;
-	if (packed_time) {
-		travel_time = GB(p2, 0, 16);
-		wait_time   = GB(p2, 16, 16);
-	} else if (is_journey) {
+	if (is_journey) {
 		travel_time = GB(p2, 0, 16);
 	} else {
 		wait_time   = GB(p2, 0, 16);
@@ -119,7 +112,7 @@ CommandCost CmdChangeTimetable(TileIndex tile, DoCommandFlag flags, uint32 p1, u
  * @param tile Not used.
  * @param flags Operation to perform.
  * @param p1 Various bitstuffed elements
- * - p1 = (bit  0-15) - Vehicle with the orders to change.
+ * - p1 = (bit  0-19) - Vehicle with the orders to change.
  * @param p2 unused
  * @param text unused
  * @return the cost of this operation or an error
@@ -128,7 +121,7 @@ CommandCost CmdSetVehicleOnTime(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 {
 	if (!_settings_game.order.timetabling) return CMD_ERROR;
 
-	VehicleID veh = GB(p1, 0, 16);
+	VehicleID veh = GB(p1, 0, 20);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
@@ -149,13 +142,15 @@ CommandCost CmdSetVehicleOnTime(TileIndex tile, DoCommandFlag flags, uint32 p1, 
  * @param tile Not used.
  * @param flags Operation to perform.
  * @param p1 Vehicle id.
- * @param p2 The timetable start date in ticks.
+ * @param p2 The timetable start date.
+ * @param text Not used.
+ * @return The error or cost of the operation.
  */
 CommandCost CmdSetTimetableStart(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	if (!_settings_game.order.timetabling) return CMD_ERROR;
 
-	Vehicle *v = Vehicle::GetIfValid(GB(p1, 0, 16));
+	Vehicle *v = Vehicle::GetIfValid(GB(p1, 0, 20));
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
@@ -196,7 +191,7 @@ CommandCost CmdAutofillTimetable(TileIndex tile, DoCommandFlag flags, uint32 p1,
 {
 	if (!_settings_game.order.timetabling) return CMD_ERROR;
 
-	VehicleID veh = GB(p1, 0, 16);
+	VehicleID veh = GB(p1, 0, 20);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;

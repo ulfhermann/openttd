@@ -66,7 +66,7 @@
 
 	AIList *list = new AIList();
 	for (size_t i = 0; i < lengthof(ins->produced_cargo); i++) {
-		if (ins->produced_cargo[i] != CT_INVALID) list->AddItem(ins->produced_cargo[i], 0);
+		if (ins->produced_cargo[i] != CT_INVALID) list->AddItem(ins->produced_cargo[i]);
 	}
 
 	return list;
@@ -80,7 +80,7 @@
 
 	AIList *list = new AIList();
 	for (size_t i = 0; i < lengthof(ins->accepts_cargo); i++) {
-		if (ins->accepts_cargo[i] != CT_INVALID) list->AddItem(ins->accepts_cargo[i], 0);
+		if (ins->accepts_cargo[i] != CT_INVALID) list->AddItem(ins->accepts_cargo[i]);
 	}
 
 	return list;

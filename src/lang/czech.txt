@@ -511,8 +511,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Informace o zem
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Zobrazit nebo skrýt konzoli
 STR_ABOUT_MENU_AI_DEBUG                                         :Ladění AI
-STR_ABOUT_MENU_SCREENSHOT                                       :Screenshot (Ctrl-S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Obrovský screenshot (Ctrl+G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Screenshot
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Přiblíženo na screenshot
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Screenshot celé mapy
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :O 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Zarovnávání spritů
 ############ range ends here
@@ -2185,6 +2186,13 @@ STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}Postavit
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Financovat
 
 # Industry cargoes window
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP                            :{BLACK}Odkaz na malou mapu
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP.nom                        :{BLACK}Odkaz na malou mapu
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP.gen                        :{BLACK}Odkazu na malou mapu
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP.dat                        :{BLACK}Odkazu na malou mapu
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP.acc                        :{BLACK}Odkaz na malou mapu
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP.loc                        :{BLACK}Odkazu na malou mapu
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP.ins                        :{BLACK}Odkazem na malou mapu
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Informace o uzemí
@@ -2198,7 +2206,7 @@ STR_LAND_AREA_INFORMATION_TRAM_OWNER                            :{BLACK}Majitel 
 STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}Majitel tratě: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY                       :{BLACK}Místní správa: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Nic
-STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Souřadnice: {LTBLUE}{NUM}x{NUM}x{NUM} ({STRING})
+STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Souřadnice: {LTBLUE}{NUM} x {NUM} x {NUM} ({STRING})
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Postaveno: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Třída stanice: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}Druh stanice: {LTBLUE}{STRING}
@@ -2365,7 +2373,7 @@ STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}vlastní
 STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}Otočení výškové mapy:
 STR_MAPGEN_HEIGHTMAP_NAME                                       :{BLACK}Jméno výškové mapy:
 STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Velikost:
-STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} * {NUM}
+STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} x {NUM}
 
 STR_MAPGEN_RANDOM_SEED_OSKTITLE                                 :{BLACK}Zadej náhodné číslo
 STR_MAPGEN_SNOW_LINE_QUERY_CAPT                                 :{WHITE}Změnit výšku sněžne čáry
@@ -2447,6 +2455,7 @@ STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Zadej pa
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Úprava nastavení parametrů
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Zavřít
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parametr {NUM}
+STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Zkoumání - {STRING}
@@ -2517,7 +2526,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}některé 
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}Chování grafiky '{0:STRING}' by mohlo způsobit desynchronizaci a/nebo pád hry.
-STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Mění délku vozidla '{1:ENGINE}', které není v depu.
+STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Změnilo délku vozidla '{1:ENGINE}', když nebylo v depu.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Vlak '{VEHICLE}' patřící '{COMPANY}' nemá platnou délku. Pravděpodobně to způsobila nějaká grafika. Hra se může desynchronizovat nebo spadnout.
 
 STR_NEWGRF_BUGGY                                                :{WHITE}Grafika '{0:STRING}' poskytuje neplatné informace.
@@ -3399,6 +3408,7 @@ STR_AI_LIST_CANCEL_TOOLTIP                                      :{BLACK}Neměnit
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}Parametery AI
 STR_AI_SETTINGS_CLOSE                                           :{BLACK}Zavřít
 STR_AI_SETTINGS_RESET                                           :{BLACK}Obnovit nastavení
+STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORANGE}{STRING}
 
 # Vehicle loading indicators
 STR_PERCENT_UP_SMALL                                            :{TINYFONT}{WHITE}{NUM}%{UPARROW}
@@ -3600,10 +3610,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Zde nelz
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Nelze přejmenovat depo...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Vlak musí stát v depu
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}Vlak musí stát v depu
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... musí být zastaven v garáži
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Loď musí být zastavena v depu
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Letadlo musí být zastaveno v hangáru
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}Loď musí být zastavena v depu
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}Letadlo musí být zastaveno v hangáru
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Vlaky lze měnit, jen když stojí v depu
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Příliš dlouhý vlak
@@ -3683,6 +3693,14 @@ STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Tunel by
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Nelze vyrovnat zemi na druhém konci tunelu
 
 # Object related errors
+STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... příliš mnoho objektů
+STR_ERROR_TOO_MANY_OBJECTS.nom                                  :{WHITE}... příliš mnoho objektů
+STR_ERROR_TOO_MANY_OBJECTS.gen                                  :{WHITE}... příliš mnoha objektů
+STR_ERROR_TOO_MANY_OBJECTS.dat                                  :{WHITE}... příliš mnoha objektům
+STR_ERROR_TOO_MANY_OBJECTS.acc                                  :{WHITE}... příliš mnoho objektů
+STR_ERROR_TOO_MANY_OBJECTS.voc                                  :{WHITE}... příliš mnoho objektů!
+STR_ERROR_TOO_MANY_OBJECTS.loc                                  :{WHITE}... příliš mnoha objektech
+STR_ERROR_TOO_MANY_OBJECTS.ins                                  :{WHITE}... příliš mnoha objekty
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}V cestě je objekt
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... v cestě je ředitelství společnosti
 STR_ERROR_CAN_T_PURCHASE_THIS_LAND                              :{WHITE}Nelze zakoupit tento pozemek...

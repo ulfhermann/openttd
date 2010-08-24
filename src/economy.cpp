@@ -1176,6 +1176,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	bool completely_emptied = true;
 	bool anything_unloaded = false;
 	bool anything_loaded   = false;
+	bool full_load_amount  = false;
 	uint32 cargo_not_full  = 0;
 	uint32 cargo_full      = 0;
 
@@ -1254,8 +1255,8 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			continue;
 		}
 
-		/* Do not pick up goods when we have no-load set. */
-		if (u->current_order.GetLoadType() & OLFB_NO_LOAD) continue;
+		/* Do not pick up goods when we have no-load set or loading is stopped. */
+		if (u->current_order.GetLoadType() & OLFB_NO_LOAD || HasBit(u->vehicle_flags, VF_STOP_LOADING)) continue;
 
 		/* update stats */
 		int t;
@@ -1276,17 +1277,20 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		 * has capacity for it, load it on the vehicle. */
 		int cap_left = v->cargo_cap - v->cargo.OnboardCount();
 		if (cap_left > 0) {
-			uint cap = cap_left;
-			if (_settings_game.order.gradual_loading) cap = min(cap, load_amount);
+			if (_settings_game.order.gradual_loading) cap_left = min(cap_left, load_amount);
 			if (v->cargo.Empty()) TriggerVehicle(v, VEHICLE_TRIGGER_NEW_CARGO);
 
 			uint reserved_count = v->cargo.ReservedCount();
 			uint station_count = ge->cargo.Count();
+
+			if (station_count + reserved_count >= (uint)cap_left) full_load_amount = true;
+
 			if (_settings_game.order.improved_load) {
-				v->cargo.LoadReserved(cap);
+				v->cargo.LoadReserved(cap_left);
 			}
+
 			if (v->cargo.ReservedCount() == 0) {
-				ge->cargo.MoveTo(&v->cargo, cap - reserved_count, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
+				ge->cargo.MoveTo(&v->cargo, cap_left - reserved_count, StationCargoList::MTA_CARGO_LOAD, NULL, st->xy);
 			}
 			uint loaded = reserved_count + station_count - v->cargo.ReservedCount() - ge->cargo.Count();
 
@@ -1333,6 +1337,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 	if (!anything_unloaded) delete payment;
 
+	ClrBit(u->vehicle_flags, VF_STOP_LOADING);
 	if (anything_loaded || anything_unloaded) {
 		if (_settings_game.order.gradual_loading) {
 			/* The time it takes to load one 'slice' of cargo or passengers depends
@@ -1341,6 +1346,8 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			unloading_time = gradual_loading_wait_time[v->type];
 		}
+		/* We loaded less cargo than possible and it's not full load, stop loading. */
+		if (!anything_unloaded && !full_load_amount && !(v->current_order.GetLoadType() & OLFB_FULL_LOAD)) SetBit(u->vehicle_flags, VF_STOP_LOADING);
 	} else {
 		bool finished_loading = true;
 		if (v->current_order.GetLoadType() & OLFB_FULL_LOAD) {

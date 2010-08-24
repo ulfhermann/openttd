@@ -515,6 +515,9 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_ERROR)
 		case NETWORK_ERROR_CHEATER:
 			_switch_mode_errorstr = STR_NETWORK_ERROR_CHEATER;
 			break;
+		case NETWORK_ERROR_TOO_MANY_COMMANDS:
+			_switch_mode_errorstr = STR_NETWORK_ERROR_TOO_MANY_COMMANDS;
+			break;
 		default:
 			_switch_mode_errorstr = STR_NETWORK_ERROR_LOSTCONNECTION;
 	}
@@ -742,16 +745,13 @@ DEF_CLIENT_RECEIVE_COMMAND(PACKET_SERVER_COMMAND)
 	const char *err = MY_CLIENT->Recv_Command(p, &cp);
 	cp.frame    = p->Recv_uint32();
 	cp.my_cmd   = p->Recv_bool();
-	cp.next     = NULL;
 
 	if (err != NULL) {
 		IConsolePrintF(CC_ERROR, "WARNING: %s from server, dropping...", err);
 		return NETWORK_RECV_STATUS_MALFORMED_PACKET;
 	}
 
-	/* The server did send us this command..
-	 *  queue it in our own queue, so we can handle it in the upcoming frame! */
-	NetworkAddCommandQueue(cp);
+	MY_CLIENT->incoming_queue.Append(&cp);
 
 	return NETWORK_RECV_STATUS_OKAY;
 }
