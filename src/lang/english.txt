@@ -444,8 +444,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Land area infor
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Toggle console
 STR_ABOUT_MENU_AI_DEBUG                                         :AI debug
-STR_ABOUT_MENU_SCREENSHOT                                       :Screenshot (Ctrl+S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Giant screenshot (Ctrl+G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Screenshot
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Zoomed in screenshot
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Whole map screenshot
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :About 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Sprite aligner
 ############ range ends here
@@ -561,6 +562,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detail
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}View details about this company
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vehicles:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stations:
@@ -1786,6 +1788,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}The serv
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}You are banned from this server
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}You were kicked out of the game
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}Cheating is not allowed on this server
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}You were sending too many commands to the server
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :general error
@@ -1803,6 +1806,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :wrong company i
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :kicked by server
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :was trying to use a cheat
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :server full
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :was sending too many commands
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2424,6 +2428,8 @@ STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Enter Ne
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Change NewGRF parameters
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Close
+STR_NEWGRF_PARAMETERS_RESET                                     :{BLACK}Reset
+STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Set all parameters to their default value
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parameter {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING1}: {ORANGE}{STRING1}
 
@@ -2475,6 +2481,7 @@ STR_NEWGRF_ERROR_INVALID_ID                                     :Attempt to use 
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{RAW_STRING} contains a corrupt sprite. All corrupt sprites will be shown as a red question mark (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Contains multiple Action 8 entries.
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Read past end of pseudo-sprite.
+STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}The currently used base graphics set is missing a number of sprites.{}Please update the base graphics set.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Caution!
@@ -2496,7 +2503,8 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Missing fi
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}Behaviour of NewGRF '{0:RAW_STRING}' is likely to cause desyncs and/or crashes.
-STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}It changes vehicle length for '{1:ENGINE}' when not inside a depot.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}It changed powered-wagon state for '{1:ENGINE}' when not inside a depot.
+STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}It changed vehicle length for '{1:ENGINE}' when not inside a depot.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Train '{VEHICLE}' belonging to '{COMPANY}' has invalid length. It is probably caused by problems with NewGRFs. Game may desync or crash.
 
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:RAW_STRING}' provides incorrect information.
@@ -2512,6 +2520,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<invalid indust
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Sign List - {COMMA} Sign{P "" s}
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Match case
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Clear filter
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Toggle matching case when comparing sign names against the filter string
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Clear filter string
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Edit sign text
@@ -3354,6 +3366,7 @@ STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Match ca
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Toggle matching case when comparing AI log messages against the break string
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Continue
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Unpause and continue the AI
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}View debug output of this AI
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD is built without AI support...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... no AIs are available!
@@ -3590,7 +3603,7 @@ STR_ERROR_CAN_T_CHANGE_WAYPOINT_NAME                            :{WHITE}Can't ch
 STR_ERROR_CAN_T_REMOVE_TRAIN_WAYPOINT                           :{WHITE}Can't remove train waypoint here...
 STR_ERROR_MUST_REMOVE_RAILWAYPOINT_FIRST                        :{WHITE}Must remove rail waypoint first
 STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}... buoy in the way
-STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... buoy is in use!
+STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... buoy is in use by another company!
 
 # Depot related errors
 STR_ERROR_CAN_T_BUILD_TRAIN_DEPOT                               :{WHITE}Can't build train depot here...
@@ -3600,10 +3613,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Can't bu
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Can't rename depot...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Train must be stopped inside a depot
-STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... must be stopped inside a road vehicle depot
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Ship must be stopped in depot
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Aircraft must be stopped in hangar
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}... must be stopped inside a depot
+STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... must be stopped inside a depot
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}... must be stopped inside a depot
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... must be stopped inside a hangar
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Trains can only be altered when stopped inside a depot
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Train too long

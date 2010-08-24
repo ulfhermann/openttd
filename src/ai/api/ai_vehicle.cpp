@@ -65,13 +65,13 @@
 
 /* static */ VehicleID AIVehicle::BuildVehicle(TileIndex depot, EngineID engine_id)
 {
-	EnforcePrecondition(INVALID_VEHICLE, AIEngine::IsBuildable(engine_id));
+	EnforcePrecondition(VEHICLE_INVALID, AIEngine::IsBuildable(engine_id));
 
 	::VehicleType type = ::Engine::Get(engine_id)->type;
 
-	EnforcePreconditionCustomError(INVALID_VEHICLE, !AIGameSettings::IsDisabledVehicleType((AIVehicle::VehicleType)type), AIVehicle::ERR_VEHICLE_BUILD_DISABLED);
+	EnforcePreconditionCustomError(VEHICLE_INVALID, !AIGameSettings::IsDisabledVehicleType((AIVehicle::VehicleType)type), AIVehicle::ERR_VEHICLE_BUILD_DISABLED);
 
-	if (!AIObject::DoCommand(depot, engine_id, 0, ::GetCmdBuildVeh(type), NULL, &AIInstance::DoCommandReturnVehicleID)) return INVALID_VEHICLE;
+	if (!AIObject::DoCommand(depot, engine_id, 0, ::GetCmdBuildVeh(type), NULL, &AIInstance::DoCommandReturnVehicleID)) return VEHICLE_INVALID;
 
 	/* In case of test-mode, we return VehicleID 0 */
 	return 0;
@@ -81,7 +81,7 @@
 {
 	EnforcePrecondition(false, IsValidVehicle(vehicle_id));
 
-	if (!AIObject::DoCommand(depot, vehicle_id, share_orders, CMD_CLONE_VEHICLE, NULL, &AIInstance::DoCommandReturnVehicleID)) return INVALID_VEHICLE;
+	if (!AIObject::DoCommand(depot, vehicle_id, share_orders, CMD_CLONE_VEHICLE, NULL, &AIInstance::DoCommandReturnVehicleID)) return VEHICLE_INVALID;
 
 	/* In case of test-mode, we return VehicleID 0 */
 	return 0;
@@ -102,7 +102,7 @@
 		while (dest_wagon-- > 0) w = w->GetNextUnit();
 	}
 
-	return AIObject::DoCommand(0, v->index | ((w == NULL ? INVALID_VEHICLE : w->index) << 16), move_attached_wagons ? 1 : 0, CMD_MOVE_RAIL_VEHICLE);
+	return AIObject::DoCommand(0, v->index | (move_attached_wagons ? 1 : 0) << 20, w == NULL ? ::INVALID_VEHICLE : w->index, CMD_MOVE_RAIL_VEHICLE);
 }
 
 /* static */ bool AIVehicle::MoveWagon(VehicleID source_vehicle_id, int source_wagon, int dest_vehicle_id, int dest_wagon)
@@ -137,7 +137,7 @@
 	EnforcePrecondition(false, IsValidVehicle(vehicle_id));
 
 	const Vehicle *v = ::Vehicle::Get(vehicle_id);
-	return AIObject::DoCommand(0, vehicle_id, v->type == VEH_TRAIN ? 1 : 0, GetCmdSellVeh(v));
+	return AIObject::DoCommand(0, vehicle_id | (v->type == VEH_TRAIN ? 1 : 0) << 20, 0, GetCmdSellVeh(v));
 }
 
 /* static */ bool AIVehicle::_SellWagonInternal(VehicleID vehicle_id, int wagon, bool sell_attached_wagons)
@@ -148,7 +148,7 @@
 	const Train *v = ::Train::Get(vehicle_id);
 	while (wagon-- > 0) v = v->GetNextUnit();
 
-	return AIObject::DoCommand(0, v->index, sell_attached_wagons ? 1 : 0, CMD_SELL_RAIL_WAGON);
+	return AIObject::DoCommand(0, v->index | (sell_attached_wagons ? 1 : 0) << 20, 0, CMD_SELL_VEHICLE);
 }
 
 /* static */ bool AIVehicle::SellWagon(VehicleID vehicle_id, int wagon)

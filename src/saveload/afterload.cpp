@@ -569,9 +569,12 @@ bool AfterLoadGame()
 		default: break;
 	}
 
+	/* The value of _date_fract got divided, so make sure that old games are converted correctly. */
+	if (CheckSavegameVersionOldStyle(11, 1)) _date_fract /= 885;
+
 	/* Update current year
 	 * must be done before loading sprites as some newgrfs check it */
-	SetDate(_date);
+	SetDate(_date, _date_fract);
 
 	/* Force dynamic engines off when loading older savegames */
 	if (CheckSavegameVersion(95)) _settings_game.vehicle.dynamic_engines = 0;
@@ -2224,6 +2227,26 @@ bool AfterLoadGame()
 	if (CheckSavegameVersion(142)) {
 		Depot *d;
 		FOR_ALL_DEPOTS(d) d->build_date = _date;
+	}
+
+	/* In old versions it was possible to remove an airport while a plane was
+	 * taking off or landing. This gives all kind of problems when building
+	 * another airport in the same station so we don't allow that anymore.
+	 * For old savegames with such aircraft we just throw them in the air and
+	 * treat the aircraft like they were flying already. */
+	if (CheckSavegameVersion(146)) {
+		Aircraft *v;
+		FOR_ALL_AIRCRAFT(v) {
+			if (!v->IsNormalAircraft()) continue;
+			Station *st = GetTargetAirportIfValid(v);
+			if (st == NULL && v->state != FLYING) {
+				v->state = FLYING;
+				UpdateAircraftCache(v);
+				AircraftNextAirportPos_and_Order(v);
+				/* get aircraft back on running altitude */
+				if ((v->vehstatus & VS_CRASHED) == 0) SetAircraftPosition(v, v->x_pos, v->y_pos, GetAircraftFlyingAltitude(v));
+			}
+		}
 	}
 
 	/* Road stops is 'only' updating some caches */
