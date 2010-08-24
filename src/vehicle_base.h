@@ -21,6 +21,7 @@
 #include "engine_type.h"
 #include "order_func.h"
 #include "transport_type.h"
+#include "group_type.h"
 
 enum VehStatus {
 	VS_HIDDEN          = 0x01,
@@ -40,6 +41,7 @@ enum VehicleFlags {
 	VF_TIMETABLE_STARTED,       ///< Whether the vehicle has started running on the timetable yet.
 	VF_AUTOFILL_TIMETABLE,      ///< Whether the vehicle should fill in the timetable automatically.
 	VF_AUTOFILL_PRES_WAIT_TIME, ///< Whether non-destructive auto-fill should preserve waiting times
+	VF_STOP_LOADING,            ///< Don't load anymore during the next load cycle.
 };
 
 /** Cached oftenly queried (NewGRF) values */
@@ -51,7 +53,8 @@ struct VehicleCache {
 	uint32 cached_var43; ///< Cache for NewGRF var 43
 };
 
-typedef Pool<Vehicle, VehicleID, 512, 64000> VehiclePool;
+/** A vehicle pool for a little over 1 million vehicles. */
+typedef Pool<Vehicle, VehicleID, 512, 0xFF000> VehiclePool;
 extern VehiclePool _vehicle_pool;
 
 /* Some declarations of functions, so we can make them friendly */

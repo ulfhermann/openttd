@@ -483,8 +483,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Informacije o t
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Vklopi/Izklopi konzolo
 STR_ABOUT_MENU_AI_DEBUG                                         :UI razhroščevanje
-STR_ABOUT_MENU_SCREENSHOT                                       :Zajemi sliko (Ctrl-S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Zajemi celostno sliko (Ctrl-G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Zajemi sliko
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Zajemi približano sliko
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Zajemi celostno sliko
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :O 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Uravnavanje sličice
 ############ range ends here
@@ -600,6 +601,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detajl
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}Podrobnosti o podjetju
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vozila:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Postaje:
@@ -835,7 +837,7 @@ STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_FARM                      :{BIGFONT}{BLACK
 STR_NEWS_INDUSTRY_PRODUCTION_INCREASE_SMOOTH                    :{BIGFONT}{BLACK}{STRING} proizvodnja v {INDUSTRY} narašča za {COMMA}%!
 STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_GENERAL                   :{BIGFONT}{BLACK}{INDUSTRY} proizvodnja upada za 50%
 STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_FARM                      :{BIGFONT}{BLACK}Insekti so povzročili opustošenje v {INDUSTRY}!{}Proizvodnja zmanjšana za 50%
-STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_SMOOTH                    :{BIGFONT}{BLACK}{STRING} proizvodnja v {INDUSTRY} vpada za {COMMA}%!
+STR_NEWS_INDUSTRY_PRODUCTION_DECREASE_SMOOTH                    :{BIGFONT}{BLACK}{STRING} proizvodnja v {INDUSTRY} upada za {COMMA}%!
 
 STR_NEWS_TRAIN_IS_WAITING                                       :{WHITE}{VEHICLE} čaka v garaži
 STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE} čaka v garaži
@@ -1191,6 +1193,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Samoobn
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Samoobnovi, ko je vozilo {ORANGE}{STRING}{LTBLUE} mesecev pred/po največji starosti
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Samoobnovi najmanj potrebnega denarja za obnovo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Trajanje sporočila o napaki: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Zamik lebdenja: {ORANGE}{STRING}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Zamik lebdenja: {ORANGE}onemogočeno
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Prikaz števila prebivalcev ob imenu mesta: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Urejevalnik terena: {ORANGE}{STRING}
@@ -1796,6 +1800,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}Strežni
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}Izvrzen/a si iz tega streznika
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}Brcnjen/a si bil/a iz igre
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}Goljufanje ni dovoljeno na tem strežniku
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Pošiljal si preveč ukazov strežniku
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :splošna napaka
@@ -1813,6 +1818,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :napačna oznaka
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :brcnjen od gostitelja
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :je poskusil/a uporabiti goljufanje
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :gostitelj zaseden
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :je pošiljal preveč ukazov
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2162,10 +2168,17 @@ STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}Zgradi
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Ustanovi
 
 # Industry cargoes window
+STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION                           :{WHITE}Industrijska veriga za industrijo {STRING}
+STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}Industrijska veriga za tovor {STRING}
 STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}Proizvajajoče industrije
 STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Sprejemajoče industrije
 STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Hiše
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Klikni na industrijo za ogled strank in dobaviteljev
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Klikni na tovor za ogled strank in dobaviteljev
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Prikaži verigo
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Prikaži oskrbo s tovorom in pripadajoče industrije
 STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP                            :{BLACK}Poveži z zemljevidom
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP                    :{BLACK}Izberi prikazane industrije tudi na zemljevidu
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Informacije o zemljišču
@@ -2425,6 +2438,7 @@ STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Onemogoče
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Vnesi NewGRF parametre
 
 # NewGRF parameters window
+STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Spremeni NewGRF parametre
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Zapri
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parameter {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
@@ -2498,7 +2512,8 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Manjkajoč
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}Ozadje NewGRFa '{0:STRING}' lahko povzroči desinhronizacijo in sesutje igre.
-STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Spremeni dolžino vozila za '{1:ENGINE}' ko ni v garaži.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}Vozilo '{1:ENGINE}' je spremenilo status obratovanja, ko ni bilo znotraj garaže.
+STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Spremenila se je dolžina vozila za '{1:ENGINE}' ko ni bil v garaži.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Vlak '{VEHICLE}' , ki pripada družbi '{COMPANY}', ima neveljavno dolžino. Najbrž vsebuje probleme povezane z NewGRF. Igra se lahko sesuje.
 
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{STRING}' javlja napačno informacijo.
@@ -2514,6 +2529,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<neveljavna ind
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Seznam oznak - {COMMA} oznak{P a i e ""}
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Ujemanje začetnic
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Počisti filter
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Vključi ujemanje začetnic pri primerjanju imen znakov s filtrom
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Počisti filter
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Uredi znak
@@ -3333,6 +3352,7 @@ STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Ujemanje
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Preklopi način ujemanja pri primerjanju dnevnika UI z napako
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Nadaljuj
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Nadaljuj izvajanje UI
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Oglej si razhroščevalni izpis UI
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD je zgrajen brez podpore za UI...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... ni nobene UI na voljo!
@@ -3496,6 +3516,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... ni v
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Mesta ne bodo gradila cest. Lahko omogočiš gradnjo cest v Napredne nastavitve->Ekonomija->Mesta.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Cestna dela napredujejo
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Ni mogoče zbrisati mesta...{}Postaja ali garaža se nanaša na to mesto ali pa področje v lastnini mesta ne more biti odstranjeno
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... ni primernega mesta za kip v centru tega mesta
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... preveliko število industrij
@@ -3536,6 +3557,8 @@ STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Preblizu
 STR_ERROR_CAN_T_RENAME_STATION                                  :{WHITE}Ni mogoče preimenovati postaje
 STR_ERROR_DRIVE_THROUGH_ON_TOWN_ROAD                            :{WHITE}... ta cesta je last mesta
 STR_ERROR_DRIVE_THROUGH_DIRECTION                               :{WHITE}... cesta je obrnjena napačno
+STR_ERROR_DRIVE_THROUGH_CORNER                                  :{WHITE}... postanki ne smejo imeti vogalov
+STR_ERROR_DRIVE_THROUGH_JUNCTION                                :{WHITE}... postanki ne smejo imeti odcepov
 
 # Station destruction related errors
 STR_ERROR_CAN_T_REMOVE_PART_OF_STATION                          :{WHITE}Ni mogoče odstraniti dela postaje...
@@ -3576,10 +3599,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Tukaj ni
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Ni mogoče preimenovati garaže...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Vlak mora biti ustavljen v garaži
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}Vlak mora biti ustavljen v garaži
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... mora biti ustavljen v garaži cestnih vozil
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Ladja mora biti ustavljena in v garaži
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Letalo mora biti ustavljeno v hangarju
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}Ladja mora biti ustavljena in v garaži
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}Letalo mora biti ustavljeno v hangarju
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Vlaki so lahko spremenjeni šele, ko stojijo v garaži
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Vlak je predolg

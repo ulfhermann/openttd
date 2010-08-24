@@ -443,6 +443,7 @@ STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Konsol aç/kapa
 STR_ABOUT_MENU_AI_DEBUG                                         :YZ hata ayıklama
 STR_ABOUT_MENU_SCREENSHOT                                       :Ekran Görüntüsü (Ctrl-S)
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Ekran fotoğrafında yaklaşıldı
 STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Dev ekran görüntüsü (Ctrl-G)
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :'OpenTTD' Hakkında
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Sprayt hizalayıcı
@@ -559,6 +560,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detay
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}Bu şirket hakkındaki ayrıntıları göster
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Araçlar:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}İstasyonlar:
@@ -1085,6 +1087,10 @@ STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Binalar
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Daha gerçekçi kapsama alanı: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Şehrin yollarını, köprülerini yıkma izinli: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Çok uzun trenlere izin ver: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Lokomotif duman/kıvılcım miktarı: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Hiçbiri
+STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Orijinal
+STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Gerçekçi
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Tren ivme modeli: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Orjinal
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Gerçekçi
@@ -1753,6 +1759,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}Sunucu d
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}Sunucuya girmeniz yasaklandı
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}Oyundan atıldınız
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}Bu sunucuda hileler kapalı
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Sunucuya çok fazla komut gönderiyordunuz
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :genel hata
@@ -1770,6 +1777,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :DoCommand için
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :sunucu tarafından atıldı
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :hile yapmaya çalıştı
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :sunucu dolu
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :çok fazla komut gönderiyordu
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2026,6 +2034,7 @@ STR_TOOLBAR_AIRCRAFT_BUILD_AIRPORT_TOOLTIP                      :{BLACK}Havalima
 STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Havalimanı seçimi
 STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Havalimanı boyutunu seç
 STR_STATION_BUILD_AIRPORT_CLASS_LABEL                           :{BLACK}Havalimanı sınıfı
+STR_STATION_BUILD_AIRPORT_LAYOUT_NAME                           :{BLACK}Yerleşim {NUM}
 
 STR_AIRPORT_SMALL                                               :Küçük
 STR_AIRPORT_CITY                                                :Şehirlerarası
@@ -2116,6 +2125,19 @@ STR_FUND_INDUSTRY_INDUSTRY_BUILD_COST                           :{BLACK}Fiyat: {
 STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY                         :{BLACK}Tetkik arama
 STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}İnşa et
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Parayla Yap
+
+# Industry cargoes window
+STR_INDUSTRY_CARGOES_INDUSTRY_CAPTION                           :{WHITE}{STRING} fabrikası için sanayi zinciri
+STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}{STRING} kargo tipi için sanayi zinciri
+STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}Üreten fabrikalar
+STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Kabul eden fabrikalar
+STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Evler
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Sağlayanlarını ve müşterilerini görmek için fabrikayı tıklayın
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Sağlayanlarını ve müşterilerini görmek için kargoyu tıklayın
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Zinciri göster
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Kargo sağlayan ve kabul eden fabrikaları göster
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP                            :{BLACK}Küçük haritaya bağla
+STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP                    :{BLACK}Gösterilen fabrikaları küçük haritada da seç
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Arazi Bilgisi
@@ -2363,6 +2385,7 @@ STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP                :{BLACK}Eksik i�
 
 STR_NEWGRF_SETTINGS_FILENAME                                    :{BLACK}Dosya adı: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_GRF_ID                                      :{BLACK}GRF ID: {SILVER}{STRING}
+STR_NEWGRF_SETTINGS_VERSION                                     :{BLACK}Sürüm: {SILVER}{NUM}
 STR_NEWGRF_SETTINGS_MD5SUM                                      :{BLACK}MD5sum: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PALETTE                                     :{BLACK}Palet: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Seçenekler: {SILVER}{STRING}
@@ -2372,6 +2395,12 @@ STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Eşleşen 
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Etkisiz
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}NewGRF seçeneklerini girin
+
+# NewGRF parameters window
+STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}NewGRF parametrelerini değiştir
+STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Kapat
+STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parametre {NUM}
+STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}İncele - {STRING}
@@ -2421,6 +2450,7 @@ STR_NEWGRF_ERROR_INVALID_ID                                     :Geçersiz ID ku
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} bozuk bir sprayt içeriyor. Tüm bozuk spraytlar kırmızı bir soru işareti (?) olarak görünecektir.
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Birden fazla Action 8 girişi içeriyor.
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Pseudo-sprite bitiminden sonrasını okudu
+STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}Kullanımda olan temel grafik kümesi bazı spraytları içermiyor.{}Lütfen temel grafik kümesini güncelleyin.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Uyarı!
@@ -2442,6 +2472,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Eksik dosy
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}NewGRF '{0:STRING}' davranışı muhtemelen senkron kaybı ve/veya çakılmalara neden olacak.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}'{1:ENGINE}' için enerjilendirilmiş wagon durumunu depo dışındayken değiştirdi
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}'{1:ENGINE}' için hangar içinde değilken araç uzunluğunu değiştirir.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}'{VEHICLE}' adlı tren '{COMPANY}' şirketine ait olup uzunluğu geçersizdir. Muhtemelen NewGRF'lerle ilgili bir problemden kaynaklanıyor. Oyun senkron kaybına uğrayabilir ya da çakılabilir.
 
@@ -2458,6 +2489,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<geçersiz fabr
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Tabela Listesi - {COMMA} Tabela
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Büyük/küçük harf eşleştir
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Süzgeci temizle
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Tabela adlarını süzgeç metniyle karşılaştırırken büyük/küçük harf eşleştirmeyi aç/kapa
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Süzgeç metnini temizle
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Tabelayı değiştir
@@ -3277,6 +3312,7 @@ STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Büyük/
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}YZ log iletilerini durma metni ile karşılaştırırken büyük/küçük harf eşleşmesini aç/kapa
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Devam et
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}YZ'yi devam ettir
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Bu YZ için hata ayıklama çıktısı göster
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD YZ desteği olmadan derlenmiş...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... hiç YZ yok!
@@ -3318,6 +3354,7 @@ STR_AI_LIST_CANCEL_TOOLTIP                                      :{BLACK}YZ'yi de
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}YZ Parametreleri
 STR_AI_SETTINGS_CLOSE                                           :{BLACK}Kapat
 STR_AI_SETTINGS_RESET                                           :{BLACK}Yeniden başlat
+STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORANGE}{STRING}
 
 # Vehicle loading indicators
 STR_PERCENT_UP_SMALL                                            :{TINYFONT}{WHITE}%{NUM}{UPARROW}
@@ -3431,6 +3468,7 @@ STR_ERROR_PROTECTED                                             :{WHITE}Bu şirk
 STR_ERROR_CAN_T_GENERATE_TOWN                                   :{WHITE}Şehir kurulamaz
 STR_ERROR_CAN_T_RENAME_TOWN                                     :{WHITE}İsim değiştirilemiyor...
 STR_ERROR_CAN_T_FOUND_TOWN_HERE                                 :{WHITE}Buraya şehir yapılamıyor...
+STR_ERROR_CAN_T_EXPAND_TOWN                                     :{WHITE}Şehir genişletilemiyor...
 STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... haritanin kenarına çok yakın
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... başka bir şehire çok yakın
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... çok fazla şehir var
@@ -3438,6 +3476,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... hari
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Şehir yol yapmayacak. Yol yapımını Gelişmiş Ayarlar->Ekonomi->Şehirler'den etkinleştirebilirsiniz.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Yol çalışmaları
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Bu kasaba silinemiyor...{}Bir istasyon ya da garaj kasabaya atıfta bulunuyor ya da bir kasaba karesi kaldırılamıyor
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... bu şehrin merkezinde heykel için uygun bir yer yok
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... çok fazla fabrika var
@@ -3478,6 +3517,8 @@ STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT                          :{WHITE}Başka b
 STR_ERROR_CAN_T_RENAME_STATION                                  :{WHITE}İsim değiştirilemiyor...
 STR_ERROR_DRIVE_THROUGH_ON_TOWN_ROAD                            :{WHITE}... bu yol belediyeye ait
 STR_ERROR_DRIVE_THROUGH_DIRECTION                               :{WHITE}... yol yanlış yönde
+STR_ERROR_DRIVE_THROUGH_CORNER                                  :{WHITE}... yol üstü durakların köşeleri olamaz
+STR_ERROR_DRIVE_THROUGH_JUNCTION                                :{WHITE}... yol üstü durakların kavşağı olamaz
 
 # Station destruction related errors
 STR_ERROR_CAN_T_REMOVE_PART_OF_STATION                          :{WHITE}İstasyonun parçasi kaldırılamaz...
@@ -3518,10 +3559,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Buraya t
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Depo yeniden adlandırılamıyor
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Tren garda durdurulmalı
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}Tren garda durdurulmalı
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... bir araba garajında duruyor olmalı
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Gemi tersanede durdurulmalı
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Uçak hangarda durdurulmalı
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}Gemi tersanede durdurulmalı
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}Uçak hangarda durdurulmalı
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Sadece garda durdurulmuş trenler üzerinde işlem yapılabilir
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Tren çok uzun
@@ -3601,6 +3642,8 @@ STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Tünel h
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Tünelin diğer ucunda düzeltme yapılmasi gerekiyor
 
 # Object related errors
+STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... çok fazla nesne var
+STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Nesne inşa edilemiyor...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Yolda birsey var
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... yolda şirket binası var
 STR_ERROR_CAN_T_PURCHASE_THIS_LAND                              :{WHITE}Burası satın alınamaz...
