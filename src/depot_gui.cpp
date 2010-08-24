@@ -30,6 +30,7 @@
 #include "tilehighlight_func.h"
 #include "window_gui.h"
 #include "vehiclelist.h"
+#include "order_backup.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -162,7 +163,7 @@ static void TrainDepotMoveVehicle(const Vehicle *wagon, VehicleID sel, const Veh
 
 	if (wagon == v) return;
 
-	DoCommandP(v->tile, v->index + ((wagon == NULL ? INVALID_VEHICLE : wagon->index) << 16), _ctrl_pressed ? 1 : 0, CMD_MOVE_RAIL_VEHICLE | CMD_MSG(STR_ERROR_CAN_T_MOVE_VEHICLE));
+	DoCommandP(v->tile, v->index | (_ctrl_pressed ? 1 : 0) << 20, wagon == NULL ? INVALID_VEHICLE : wagon->index, CMD_MOVE_RAIL_VEHICLE | CMD_MSG(STR_ERROR_CAN_T_MOVE_VEHICLE));
 }
 
 /**
@@ -254,13 +255,13 @@ struct DepotWindow : Window {
 		this->FinishInitNested(desc, tile);
 
 		this->owner = GetTileOwner(tile);
-		_backup_orders_tile = 0;
-
+		OrderBackup::Reset();
 	}
 
 	~DepotWindow()
 	{
 		DeleteWindowById(WC_BUILD_VEHICLE, this->window_number);
+		OrderBackup::Reset(this->window_number);
 	}
 
 	/**
@@ -975,15 +976,7 @@ struct DepotWindow : Window {
 				this->SetDirty();
 
 				int sell_cmd = (v->type == VEH_TRAIN && (widget == DEPOT_WIDGET_SELL_CHAIN || _ctrl_pressed)) ? 1 : 0;
-
-				bool is_engine = (v->type != VEH_TRAIN || Train::From(v)->IsFrontEngine());
-
-				if (is_engine) {
-					_backup_orders_tile = v->tile;
-					BackupVehicleOrders(v);
-				}
-
-				if (!DoCommandP(v->tile, v->index, sell_cmd, GetCmdSellVeh(v->type)) && is_engine) _backup_orders_tile = 0;
+				DoCommandP(v->tile, v->index | sell_cmd << 20 | MAKE_ORDER_BACKUP_FLAG, 0, GetCmdSellVeh(v->type));
 				break;
 			}
 
