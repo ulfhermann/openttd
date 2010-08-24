@@ -820,8 +820,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Informacje o te
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Przełącz konsolę
 STR_ABOUT_MENU_AI_DEBUG                                         :Odpluskwianie SI
-STR_ABOUT_MENU_SCREENSHOT                                       :Zrzut ekranu (Ctrl+S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Gigantyczny zrzut ekranu (Ctrl+G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Zrzut ekranu
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Zrzut powiększenia bez okien
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Zrzut ekranu całej mapy
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Info o 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Wyrównywanie sprite-ów
 ############ range ends here
@@ -937,6 +938,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Szczegó
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}Pokaż szczegóły tej firmy
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Pojazdy:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stacje:
@@ -2136,6 +2138,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}Serwer j
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}Masz zabroniony dostęp do tego serwera
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}Zostałeś wyrzucony z serwera
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}Ułatwienia są niedozwolone na tym serwerze
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Wysyłano zbyt dużo komend na serwer
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :błąd ogólny
@@ -2153,6 +2156,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :zła nazwa firm
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :wyrzucony przez serwer
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :próbował użyć ułatwień
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :serwer jest pełny
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :wysyłał zbyt wiele komend
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2825,6 +2829,7 @@ STR_NEWGRF_ERROR_INVALID_ID                                     :Próba użycia 
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} zawiera uszkodzoną teksturę. Wszystkie uszkodzone tekstury będą pokazane jako czerwony znak zapytania (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Zawiera wiele wpisów Action 8
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Odczyt poza koniec pseudo obrazków.
+STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}Aktualnie używany zestaw grafik jest niekompletny.{}Proszę zaktualizować podstawowy zestaw grafik.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Uwaga!
@@ -2846,6 +2851,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Brakujące
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}Zachowanie NewGRF '{0:STRING}' może powodować desynchronizacje i/lub błędy.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}Zmienia stan wagonu dla '{1:ENGINE}' gdy nie jest w zajezdni.
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Zmienia długość pojazdu dla '{1:ENGINE}' gdy nie jest w zajezdni.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Pociąg '{VEHICLE}' należący do '{COMPANY}' ma niepoprawną długość. Prawdopodobnie spowodowane jest to problemami z NewGRFami. Gra może stracić synchronizację lub się zawiesić.
 
@@ -2862,6 +2868,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<nieprawidłowy
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Lista napisów - {COMMA} napis{P "" y ów}
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Wielkość znaków
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Czyść filtr
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Przełącza uwzględnianie wielkości znaków przy porównywaniu tekstu napisu z filtrem
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Czyści pole filtru
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Edycja tekstu napisu
@@ -3687,13 +3697,14 @@ STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Uwzględ
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Przełącz uwzględnianie wielkości liter przy porównywaniu wyrazu przerywającego
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Kontynuuj
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Odpauzowanie i kontynuuowanie SI
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Pokaż okno debugowania tej SI
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD został zbudowany bez wsparcia dla SI...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... żadna SI nie jest dostępna!
 
 STR_ERROR_AI_NO_AI_FOUND                                        :Nie znaleziono SI do wczytania.{}SI jest nieaktywne i nic nie robi.{}Możesz ściągnąć SI z 'Dodatki Online' w głównym menu gry.
 STR_ERROR_AI_PLEASE_REPORT_CRASH                                :{WHITE}Jedna z działających SI przestała działać. Prosimy o zgłoszenie tego autorowi SI dołączając zrzut ekranu okna odpluskwiania SI.
-STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}Okno debugowania AI jest dostępne tylko w serwerze
+STR_ERROR_AI_DEBUG_SERVER_ONLY                                  :{YELLOW}Okno debugowania SI jest dostępne tylko w serwerze
 
 # AI configuration window
 STR_AI_CONFIG_CAPTION                                           :{WHITE}Konfiguracja SI
@@ -3923,7 +3934,7 @@ STR_ERROR_CAN_T_CHANGE_WAYPOINT_NAME                            :{WHITE}Nie moż
 STR_ERROR_CAN_T_REMOVE_TRAIN_WAYPOINT                           :{WHITE}Nie można usunąć stąd kolejowego punktu orientacyjnego...
 STR_ERROR_MUST_REMOVE_RAILWAYPOINT_FIRST                        :{WHITE}Musisz usunąć najpierw punkt nawigacyjny
 STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}... boja na drodze
-STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... boja w użyciu!
+STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... boja w użyciu przez inna firmę!
 
 # Depot related errors
 STR_ERROR_CAN_T_BUILD_TRAIN_DEPOT                               :{WHITE}Nie można tutaj wybudować zajezdni...
@@ -3933,10 +3944,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Nie moż
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Nie można zmienić nazwy zajezdni...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Pociąg musi być zatrzymany w zajezdni
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}... musi być zatrzymany w zajezdni
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... musi być zatrzymany w zajezdni samochodowej
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Statek musi być zatrzymany w stoczni
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Samolot musi być zatrzymany w hangarze
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}... musi być zatrzymany w stoczni
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... musi być zatrzymany w hangarze
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Pociąg może być modyfikowany tylko gdy jest zatrzymany w zajezdni
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Pociąg jest zbyt długi
