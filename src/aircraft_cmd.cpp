@@ -45,30 +45,39 @@
 
 void Aircraft::UpdateDeltaXY(Direction direction)
 {
-	uint32 x;
-#define MKIT(a, b, c, d) ((a & 0xFF) << 24) | ((b & 0xFF) << 16) | ((c & 0xFF) << 8) | ((d & 0xFF) << 0)
+	this->x_offs = -1;
+	this->y_offs = -1;
+	this->x_extent = 2;
+	this->y_extent = 2;
+
 	switch (this->subtype) {
 		default: NOT_REACHED();
+
 		case AIR_AIRCRAFT:
 		case AIR_HELICOPTER:
 			switch (this->state) {
+				default: break;
 				case ENDTAKEOFF:
 				case LANDING:
 				case HELILANDING:
-				case FLYING:     x = MKIT(24, 24, -1, -1); break;
-				default:         x = MKIT( 2,  2, -1, -1); break;
+				case FLYING:
+					this->x_extent = 24;
+					this->y_extent = 24;
+					break;
 			}
 			this->z_extent = 5;
 			break;
-		case AIR_SHADOW:     this->z_extent = 1; x = MKIT(2,  2,  0,  0); break;
-		case AIR_ROTOR:      this->z_extent = 1; x = MKIT(2,  2, -1, -1); break;
-	}
-#undef MKIT
 
-	this->x_offs        = GB(x,  0, 8);
-	this->y_offs        = GB(x,  8, 8);
-	this->x_extent      = GB(x, 16, 8);
-	this->y_extent      = GB(x, 24, 8);
+		case AIR_SHADOW:
+			this->z_extent = 1;
+			this->x_offs = 0;
+			this->y_offs = 0;
+			break;
+
+		case AIR_ROTOR:
+			this->z_extent = 1;
+			break;
+	}
 }
 
 static bool AirportMove(Aircraft *v, const AirportFTAClass *apc);
@@ -206,48 +215,29 @@ void GetAircraftSpriteSize(EngineID engine, uint &width, uint &height)
 
 /**
  * Build an aircraft.
- * @param tile tile of depot where aircraft is built
- * @param flags for command
- * @param p1 aircraft type being built (engine)
- * @param p2 unused
- * @param text unused
- * @return the cost of this operation or an error
+ * @param tile     tile of the depot where aircraft is built.
+ * @param flags    type of operation.
+ * @param e        the engine to build.
+ * @param data     unused.
+ * @param ret[out] the vehicle that has been built.
+ * @return the cost of this operation or an error.
  */
-CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, const Engine *e, uint16 data, Vehicle **ret)
 {
-	EngineID eid = GB(p1, 0, 16);
-	if (!IsEngineBuildable(eid, VEH_AIRCRAFT, _current_company)) return_cmd_error(STR_ERROR_AIRCRAFT_NOT_AVAILABLE);
-
-	const Engine *e = Engine::Get(eid);
 	const AircraftVehicleInfo *avi = &e->u.air;
-	CommandCost value(EXPENSES_NEW_VEHICLES, e->GetCost());
-
-	/* Engines without valid cargo should not be available */
-	if (e->GetDefaultCargoType() == CT_INVALID) return CMD_ERROR;
-
-	/* to just query the cost, it is not neccessary to have a valid tile (automation/AI) */
-	if (flags & DC_QUERY_COST) return value;
-
-	if (!IsHangarTile(tile) || !IsTileOwner(tile, _current_company)) return CMD_ERROR;
+	const Station *st = Station::GetByTile(tile);
 
 	/* Prevent building aircraft types at places which can't handle them */
-	if (!CanVehicleUseStation(eid, Station::GetByTile(tile))) return CMD_ERROR;
+	if (!CanVehicleUseStation(e->index, st)) return CMD_ERROR;
 
-	/* We will need to allocate 2 or 3 vehicle structs, depending on type */
-	if (!Vehicle::CanAllocateItem(avi->subtype & AIR_CTOL ? 2 : 3)) {
-		return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
-	}
-
-	UnitID unit_num = (flags & DC_AUTOREPLACE) ? 0 : GetFreeUnitNumber(VEH_AIRCRAFT);
-	if (unit_num > _settings_game.vehicle.max_aircraft) {
-		return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
-	}
+	/* Make sure all aircraft end up in the first tile of the hanger. */
+	tile = st->airport.GetHangarTile(st->airport.GetHangarNum(tile));
 
 	if (flags & DC_EXEC) {
 		Aircraft *v = new Aircraft(); // aircraft
 		Aircraft *u = new Aircraft(); // shadow
+		*ret = v;
 
-		v->unitnumber = unit_num;
 		v->direction = DIR_SE;
 
 		v->owner = u->owner = _current_company;
@@ -279,12 +269,11 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 		v->max_speed = avi->max_speed;
 		v->acceleration = avi->acceleration;
-		v->engine_type = eid;
-		u->engine_type = eid;
+		v->engine_type = e->index;
+		u->engine_type = e->index;
 
 		v->subtype = (avi->subtype & AIR_CTOL ? AIR_AIRCRAFT : AIR_HELICOPTER);
 		v->UpdateDeltaXY(INVALID_DIR);
-		v->value = value.GetCost();
 
 		u->subtype = AIR_SHADOW;
 		u->UpdateDeltaXY(INVALID_DIR);
@@ -329,7 +318,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		/* Aircraft with 3 vehicles (chopper)? */
 		if (v->subtype == AIR_HELICOPTER) {
 			Aircraft *w = new Aircraft();
-			w->engine_type = eid;
+			w->engine_type = e->index;
 			w->direction = DIR_N;
 			w->owner = _current_company;
 			w->x_pos = v->x_pos;
@@ -347,50 +336,11 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 			u->SetNext(w);
 			VehicleMove(w, false);
 		}
-
-		InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
-		InvalidateWindowClassesData(WC_AIRCRAFT_LIST, 0);
-		SetWindowDirty(WC_COMPANY, v->owner);
-		if (IsLocalCompany()) {
-			InvalidateAutoreplaceWindow(v->engine_type, v->group_id); // updates the replace Aircraft window
-		}
-
-		Company::Get(_current_company)->num_engines[eid]++;
 	}
 
-	return value;
+	return CommandCost();
 }
 
-
-/**
- * Sell an aircraft.
- * @param tile unused
- * @param flags for command type
- * @param p1 vehicle ID to be sold
- * @param p2 unused
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdSellAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	Aircraft *v = Aircraft::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
-
-	CommandCost ret = CheckOwnership(v->owner);
-	if (ret.Failed()) return ret;
-
-	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_AIRCRAFT_MUST_BE_STOPPED);
-
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_VEHICLE_IS_DESTROYED);
-
-	ret = CommandCost(EXPENSES_NEW_VEHICLES, -v->value);
-
-	if (flags & DC_EXEC) {
-		delete v;
-	}
-
-	return ret;
-}
 
 bool Aircraft::FindClosestDepot(TileIndex *location, DestinationID *destination, bool *reverse)
 {
@@ -434,49 +384,6 @@ CommandCost CmdSendAircraftToHangar(TileIndex tile, DoCommandFlag flags, uint32 
 	if (v == NULL) return CMD_ERROR;
 
 	return v->SendToDepot(flags, (DepotCommand)(p2 & DEPOT_COMMAND_MASK));
-}
-
-
-/**
- * Refits an aircraft to the specified cargo type.
- * @param tile unused
- * @param flags for command type
- * @param p1 vehicle ID of the aircraft to refit
- * @param p2 various bitstuffed elements
- * - p2 = (bit 0-7) - the new cargo type to refit to
- * - p2 = (bit 8-15) - the new cargo subtype to refit to
- * - p2 = (bit 16) - refit only this vehicle (ignored)
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdRefitAircraft(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	byte new_subtype = GB(p2, 8, 8);
-
-	Aircraft *v = Aircraft::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
-
-	CommandCost ret = CheckOwnership(v->owner);
-	if (ret.Failed()) return ret;
-
-	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_AIRCRAFT_MUST_BE_STOPPED);
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_VEHICLE_IS_DESTROYED);
-
-	/* Check cargo */
-	CargoID new_cid = GB(p2, 0, 8);
-	if (new_cid >= NUM_CARGO) return CMD_ERROR;
-
-	CommandCost cost = RefitVehicle(v, true, new_cid, new_subtype, flags);
-
-	if (flags & DC_EXEC) {
-		v->colourmap = PAL_NONE; // invalidate vehicle colour map
-		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
-		InvalidateWindowClassesData(WC_AIRCRAFT_LIST, 0);
-	}
-	v->InvalidateNewGRFCacheOfChain(); // always invalidate; querycost might have filled it
-
-	return cost;
 }
 
 
@@ -1949,37 +1856,13 @@ void UpdateAirplanesOnNewStation(const Station *st)
 {
 	/* only 1 station is updated per function call, so it is enough to get entry_point once */
 	const AirportFTAClass *ap = st->airport.GetFTA();
+	Direction rotation = st->airport.tile == INVALID_TILE ? DIR_N : st->airport.rotation;
 
 	Aircraft *v;
 	FOR_ALL_AIRCRAFT(v) {
-		if (v->IsNormalAircraft()) {
-			if (v->targetairport == st->index) { // if heading to this airport
-				/* update position of airplane. If plane is not flying, landing, or taking off
-				 * you cannot delete airport, so it doesn't matter */
-				if (v->state >= FLYING) { // circle around
-					Direction rotation = st->airport.tile == INVALID_TILE ? DIR_N : st->airport.rotation;
-					v->pos = v->previous_pos = AircraftGetEntryPoint(v, ap, rotation);
-					v->state = FLYING;
-					UpdateAircraftCache(v);
-					/* landing plane needs to be reset to flying height (only if in pause mode upgrade,
-					 * in normal mode, plane is reset in AircraftController. It doesn't hurt for FLYING */
-					GetNewVehiclePosResult gp = GetNewVehiclePos(v);
-					/* set new position x,y,z */
-					SetAircraftPosition(v, gp.x, gp.y, GetAircraftFlyingAltitude(v));
-				} else {
-					assert(v->state == ENDTAKEOFF || v->state == HELITAKEOFF);
-					byte takeofftype = (v->subtype == AIR_HELICOPTER) ? HELITAKEOFF : ENDTAKEOFF;
-					/* search in airportdata for that heading
-					 * easiest to do, since this doesn't happen a lot */
-					for (uint cnt = 0; cnt < ap->nofelements; cnt++) {
-						if (ap->layout[cnt].heading == takeofftype) {
-							v->pos = ap->layout[cnt].position;
-							UpdateAircraftCache(v);
-							break;
-						}
-					}
-				}
-			}
-		}
+		if (!v->IsNormalAircraft() || v->targetairport != st->index) continue;
+		assert(v->state == FLYING);
+		v->pos = v->previous_pos = AircraftGetEntryPoint(v, ap, rotation);
+		UpdateAircraftCache(v);
 	}
 }

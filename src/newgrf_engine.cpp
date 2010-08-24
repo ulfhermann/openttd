@@ -441,13 +441,13 @@ static uint8 LiveryHelper(EngineID engine, const Vehicle *v)
 
 	if (v == NULL) {
 		if (!Company::IsValidID(_current_company)) return 0;
-		l = GetEngineLivery(engine, _current_company, INVALID_ENGINE, NULL);
+		l = GetEngineLivery(engine, _current_company, INVALID_ENGINE, NULL, LIT_ALL);
 	} else if (v->type == VEH_TRAIN) {
-		l = GetEngineLivery(v->engine_type, v->owner, Train::From(v)->tcache.first_engine, v);
+		l = GetEngineLivery(v->engine_type, v->owner, Train::From(v)->tcache.first_engine, v, LIT_ALL);
 	} else if (v->type == VEH_ROAD) {
-		l = GetEngineLivery(v->engine_type, v->owner, RoadVehicle::From(v)->rcache.first_engine, v);
+		l = GetEngineLivery(v->engine_type, v->owner, RoadVehicle::From(v)->rcache.first_engine, v, LIT_ALL);
 	} else {
-		l = GetEngineLivery(v->engine_type, v->owner, INVALID_ENGINE, v);
+		l = GetEngineLivery(v->engine_type, v->owner, INVALID_ENGINE, v, LIT_ALL);
 	}
 
 	return l->colour1 + l->colour2 * 16;
@@ -670,9 +670,10 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 
 			if (v->type == VEH_TRAIN) {
 				const Train *t = Train::From(v);
-				const Train *u = t->IsWagon() && HasBit(t->vehicle_flags, VRF_POWEREDWAGON) ? t->First() : t;
+				bool is_powered_wagon = HasBit(t->flags, VRF_POWEREDWAGON);
+				const Train *u = is_powered_wagon ? t->First() : t; // for powered wagons the engine defines the type of engine (i.e. railtype)
 				RailType railtype = GetRailType(v->tile);
-				bool powered = t->IsEngine() || (t->IsWagon() && HasBit(t->vehicle_flags, VRF_POWEREDWAGON));
+				bool powered = t->IsEngine() || is_powered_wagon;
 				bool has_power = HasPowerOnRail(u->railtype, railtype);
 
 				if (powered && has_power) SetBit(modflags, 5);

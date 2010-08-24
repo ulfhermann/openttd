@@ -47,9 +47,6 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -345,6 +342,7 @@
     <ClCompile Include="..\src\network\network_server.cpp" />
     <ClCompile Include="..\src\network\network_udp.cpp" />
     <ClCompile Include="..\src\openttd.cpp" />
+    <ClCompile Include="..\src\order_backup.cpp" />
     <ClCompile Include="..\src\os_timer.cpp" />
     <ClCompile Include="..\src\pbs.cpp" />
     <ClCompile Include="..\src\rail.cpp" />
@@ -508,6 +506,7 @@
     <ClInclude Include="..\src\object_base.h" />
     <ClInclude Include="..\src\object_type.h" />
     <ClInclude Include="..\src\openttd.h" />
+    <ClInclude Include="..\src\order_backup.h" />
     <ClInclude Include="..\src\order_base.h" />
     <ClInclude Include="..\src\order_func.h" />
     <ClInclude Include="..\src\order_type.h" />
@@ -843,7 +842,6 @@
     <ClCompile Include="..\src\ai\ai_scanner.cpp" />
     <ClInclude Include="..\src\ai\ai_scanner.hpp" />
     <ClInclude Include="..\src\ai\ai_storage.hpp" />
-    <ClInclude Include="..\src\ai\api\ai_abstractlist.hpp" />
     <ClInclude Include="..\src\ai\api\ai_accounting.hpp" />
     <ClInclude Include="..\src\ai\api\ai_airport.hpp" />
     <ClInclude Include="..\src\ai\api\ai_base.hpp" />
@@ -897,7 +895,6 @@
     <ClInclude Include="..\src\ai\api\ai_vehiclelist.hpp" />
     <ClInclude Include="..\src\ai\api\ai_waypoint.hpp" />
     <ClInclude Include="..\src\ai\api\ai_waypointlist.hpp" />
-    <ClCompile Include="..\src\ai\api\ai_abstractlist.cpp" />
     <ClCompile Include="..\src\ai\api\ai_accounting.cpp" />
     <ClCompile Include="..\src\ai\api\ai_airport.cpp" />
     <ClCompile Include="..\src\ai\api\ai_base.cpp" />
@@ -1090,17 +1087,6 @@
     <ClCompile Include="..\src\thread\thread_win32.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\src\os\windows\win64.asm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <PreserveIdentifierCase Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">1</PreserveIdentifierCase>
-      <PreservePublicAndExternSymbolCase Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</PreservePublicAndExternSymbolCase>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <PreserveIdentifierCase Condition="'$(Configuration)|$(Platform)'=='Release|x64'">1</PreserveIdentifierCase>
-      <PreservePublicAndExternSymbolCase Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</PreservePublicAndExternSymbolCase>
-      <FileType>Document</FileType>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\media\openttd.ico" />
     <None Include="..\readme.txt" />
   </ItemGroup>
@@ -1119,7 +1105,4 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
-  </ImportGroup>
 </Project>
