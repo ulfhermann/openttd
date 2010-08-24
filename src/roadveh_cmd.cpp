@@ -202,50 +202,22 @@ void RoadVehUpdateCache(RoadVehicle *v)
 
 /**
  * Build a road vehicle.
- * @param tile tile of depot where road vehicle is built
- * @param flags operation to perform
- * @param p1 bus/truck type being built (engine)
- * @param p2 unused
- * @param text unused
- * @return the cost of this operation or an error
+ * @param tile     tile of the depot where road vehicle is built.
+ * @param flags    type of operation.
+ * @param e        the engine to build.
+ * @param data     unused.
+ * @param ret[out] the vehicle that has been built.
+ * @return the cost of this operation or an error.
  */
-CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdBuildRoadVehicle(TileIndex tile, DoCommandFlag flags, const Engine *e, uint16 data, Vehicle **ret)
 {
-	EngineID eid = GB(p1, 0, 16);
-	if (!IsEngineBuildable(eid, VEH_ROAD, _current_company)) return_cmd_error(STR_ERROR_ROAD_VEHICLE_NOT_AVAILABLE);
-
-	const Engine *e = Engine::Get(eid);
-	/* Engines without valid cargo should not be available */
-	if (e->GetDefaultCargoType() == CT_INVALID) return CMD_ERROR;
-
-	CommandCost cost(EXPENSES_NEW_VEHICLES, e->GetCost());
-	if (flags & DC_QUERY_COST) return cost;
-
-	/* The ai_new queries the vehicle cost before building the route,
-	 * so we must check against cheaters no sooner than now. --pasky */
-	if (!IsRoadDepotTile(tile)) return CMD_ERROR;
-	if (!IsTileOwner(tile, _current_company)) return CMD_ERROR;
-
 	if (HasTileRoadType(tile, ROADTYPE_TRAM) != HasBit(e->info.misc_flags, EF_ROAD_TRAM)) return_cmd_error(STR_ERROR_DEPOT_WRONG_DEPOT_TYPE);
-
-	uint num_vehicles = 1 + CountArticulatedParts(eid, false);
-
-	/* Allow for the front and the articulated parts */
-	if (!Vehicle::CanAllocateItem(num_vehicles)) {
-		return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
-	}
-
-	/* find the first free roadveh id */
-	UnitID unit_num = (flags & DC_AUTOREPLACE) ? 0 : GetFreeUnitNumber(VEH_ROAD);
-	if (unit_num > _settings_game.vehicle.max_roadveh) {
-		return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
-	}
 
 	if (flags & DC_EXEC) {
 		const RoadVehicleInfo *rvi = &e->u.road;
 
 		RoadVehicle *v = new RoadVehicle();
-		v->unitnumber = unit_num;
+		*ret = v;
 		v->direction = DiagDirToDir(GetRoadDepotDirection(tile));
 		v->owner = _current_company;
 
@@ -262,11 +234,10 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		v->spritenum = rvi->image_index;
 		v->cargo_type = e->GetDefaultCargoType();
 		v->cargo_cap = rvi->capacity;
-		v->value = cost.GetCost();
 
 		v->last_station_visited = INVALID_STATION;
 		v->max_speed = rvi->max_speed;
-		v->engine_type = eid;
+		v->engine_type = e->index;
 		v->rcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
 		v->reliability = e->reliability;
@@ -304,19 +275,10 @@ CommandCost CmdBuildRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 		VehicleMove(v, false);
 
-		InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
-		InvalidateWindowClassesData(WC_ROADVEH_LIST, 0);
-		SetWindowDirty(WC_COMPANY, v->owner);
-		if (IsLocalCompany()) {
-			InvalidateAutoreplaceWindow(v->engine_type, v->group_id); // updates the replace Road window
-		}
-
-		Company::Get(_current_company)->num_engines[eid]++;
-
 		CheckConsistencyOfArticulatedVehicle(v);
 	}
 
-	return cost;
+	return CommandCost();
 }
 
 bool RoadVehicle::IsStoppedInDepot() const
@@ -330,38 +292,6 @@ bool RoadVehicle::IsStoppedInDepot() const
 		if (v->state != RVSB_IN_DEPOT || v->tile != tile) return false;
 	}
 	return true;
-}
-
-/**
- * Sell a road vehicle.
- * @param tile unused
- * @param flags operation to perform
- * @param p1 vehicle ID to be sold
- * @param p2 unused
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdSellRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	RoadVehicle *v = RoadVehicle::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
-
-	CommandCost ret = CheckOwnership(v->owner);
-	if (ret.Failed()) return ret;
-
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_VEHICLE_IS_DESTROYED);
-
-	if (!v->IsStoppedInDepot()) {
-		return_cmd_error(STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT);
-	}
-
-	ret = CommandCost(EXPENSES_NEW_VEHICLES, -v->value);
-
-	if (flags & DC_EXEC) {
-		delete v;
-	}
-
-	return ret;
 }
 
 static FindDepotData FindClosestRoadDepot(const RoadVehicle *v, int max_distance)
@@ -1760,50 +1690,4 @@ Trackdir RoadVehicle::GetVehicleTrackdir() const
 	/* If vehicle's state is a valid track direction (vehicle is not turning around) return it,
 	 * otherwise transform it into a valid track direction */
 	return (Trackdir)((IsReversingRoadTrackdir((Trackdir)this->state)) ? (this->state - 6) : this->state);
-}
-
-
-/**
- * Refit a road vehicle to the specified cargo type
- * @param tile unused
- * @param flags operation to perform
- * @param p1 Vehicle ID of the vehicle to refit
- * @param p2 Bitstuffed elements
- * - p2 = (bit 0-7) - the new cargo type to refit to
- * - p2 = (bit 8-15) - the new cargo subtype to refit to
- * - p2 = (bit 16) - refit only this vehicle
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdRefitRoadVeh(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	CargoID new_cid = GB(p2, 0, 8);
-	byte new_subtype = GB(p2, 8, 8);
-	bool only_this = HasBit(p2, 16);
-
-	RoadVehicle *v = RoadVehicle::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
-
-	CommandCost ret = CheckOwnership(v->owner);
-	if (ret.Failed()) return ret;
-
-	if (!v->IsStoppedInDepot()) return_cmd_error(STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT);
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_VEHICLE_IS_DESTROYED);
-
-	if (new_cid >= NUM_CARGO) return CMD_ERROR;
-
-	CommandCost cost = RefitVehicle(v, only_this, new_cid, new_subtype, flags);
-
-	if (flags & DC_EXEC) {
-		RoadVehicle *front = v->First();
-		RoadVehUpdateCache(front);
-		if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) front->CargoChanged();
-		InvalidateWindowData(WC_VEHICLE_DETAILS, front->index);
-		SetWindowDirty(WC_VEHICLE_DEPOT, front->tile);
-		InvalidateWindowClassesData(WC_ROADVEH_LIST, 0);
-	} else {
-		v->InvalidateNewGRFCacheOfChain(); // always invalidate; querycost might have filled it
-	}
-
-	return cost;
 }

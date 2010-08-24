@@ -661,13 +661,14 @@ public:
 				} else {
 					int extra = (r.bottom - r.top + 1 - this->height_summary - this->height_detailed - WD_PAR_VSEP_WIDE) / 2;
 
+					/* Note: NewGRF supplied error message often do not start with a colour code, so default to white. */
 					int top = r.top + WD_FRAMERECT_TOP;
 					int bottom = top + this->height_summary + extra;
-					DrawStringMultiLine(r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMETEXT_RIGHT, top, bottom, this->summary_msg, TC_FROMSTRING, SA_CENTER);
+					DrawStringMultiLine(r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMETEXT_RIGHT, top, bottom, this->summary_msg, TC_WHITE, SA_CENTER);
 
 					bottom = r.bottom - WD_FRAMERECT_BOTTOM;
 					top = bottom - this->height_detailed - extra;
-					DrawStringMultiLine(r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMETEXT_RIGHT, top, bottom, this->detailed_msg, TC_FROMSTRING, SA_CENTER);
+					DrawStringMultiLine(r.left + WD_FRAMETEXT_LEFT, r.right - WD_FRAMETEXT_RIGHT, top, bottom, this->detailed_msg, TC_WHITE, SA_CENTER);
 				}
 
 				SwitchToNormalRefStack(); // Switch back to the normal text ref. stack for NewGRF texts.
@@ -851,7 +852,7 @@ struct TooltipsWindow : public Window
 		 * go below window, flip it so it is shown above the cursor */
 		pt.y = Clamp(_cursor.pos.y + _cursor.size.y + _cursor.offs.y + 5, scr_top, scr_bot);
 		if (pt.y + sm_height > scr_bot) pt.y = min(_cursor.pos.y + _cursor.offs.y - 5, scr_bot) - sm_height;
-		pt.x = Clamp(_cursor.pos.x - (sm_width >> 1), 0, _screen.width - sm_width);
+		pt.x = sm_width >= _screen.width ? 0 : Clamp(_cursor.pos.x - (sm_width >> 1), 0, _screen.width - sm_width);
 
 		return pt;
 	}
@@ -889,8 +890,14 @@ struct TooltipsWindow : public Window
 
 	virtual void OnMouseLoop()
 	{
+		/* Always close tooltips when the cursor is not in our window. */
+		if (!_cursor.in_window) {
+			delete this;
+			return;
+		}
+
 		/* We can show tooltips while dragging tools. These are shown as long as
-		 * we are dragging the tool. Normal tooltips work with rmb */
+		 * we are dragging the tool. Normal tooltips work with hover or rmb. */
 		switch (this->close_cond) {
 			case TCC_RIGHT_CLICK: if (!_right_button_down) delete this; break;
 			case TCC_LEFT_CLICK: if (!_left_button_down) delete this; break;
