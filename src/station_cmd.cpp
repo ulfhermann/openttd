@@ -50,6 +50,7 @@
 #include "moving_average.h"
 #include "table/airporttile_ids.h"
 #include "newgrf_airporttiles.h"
+#include "order_backup.h"
 
 #include "table/strings.h"
 
@@ -2107,7 +2108,6 @@ void UpdateAirportsNoise()
  */
 CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	bool airport_upgrade = true;
 	StationID station_to_join = GB(p2, 16, 16);
 	bool reuse = (station_to_join != NEW_STATION);
 	if (!reuse) station_to_join = INVALID_STATION;
@@ -2189,8 +2189,6 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			return_cmd_error(STR_ERROR_TOO_CLOSE_TO_ANOTHER_AIRPORT);
 		}
 	} else {
-		airport_upgrade = false;
-
 		/* allocate and initialize new station */
 		if (!Station::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_STATIONS_LOADING);
 
@@ -2240,14 +2238,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			AirportTileAnimationTrigger(st, cur_tile, AAT_BUILT);
 		} while ((++it)->ti.x != -0x80);
 
-		/* if airport was demolished while planes were en-route to it, the
-		 * positions can no longer be the same (v->u.air.pos), since different
-		 * airports have different indexes. So update all planes en-route to this
-		 * airport. Only update if
-		 * 1. airport is upgraded
-		 * 2. airport is added to existing station (unfortunately unavoideable)
-		 */
-		if (airport_upgrade) UpdateAirplanesOnNewStation(st);
+		UpdateAirplanesOnNewStation(st);
 
 		st->UpdateVirtCoord();
 		UpdateStationAcceptance(st, false);
@@ -2298,6 +2289,7 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 		cost.AddCost(_price[PR_CLEAR_STATION_AIRPORT]);
 
 		if (flags & DC_EXEC) {
+			if (IsHangarTile(tile_cur)) OrderBackup::Reset(tile_cur, false);
 			DeleteAnimatedTile(tile_cur);
 			DoClearSquare(tile_cur);
 			DeleteNewGRFInspectWindow(GSF_AIRPORTTILES, tile_cur);
@@ -2340,15 +2332,15 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 
 /**
  * Tests whether the company's vehicles have this station in orders
- * When company == INVALID_COMPANY, then check all vehicles
  * @param station station ID
- * @param company company ID, INVALID_COMPANY to disable the check
+ * @param include_company If true only check vehicles of \a company, if false only check vehicles of other companies
+ * @param company company ID
  */
-bool HasStationInUse(StationID station, CompanyID company)
+bool HasStationInUse(StationID station, bool include_company, CompanyID company)
 {
 	const Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
-		if (company == INVALID_COMPANY || v->owner == company) {
+		if ((v->owner == company) == include_company) {
 			const Order *order;
 			FOR_VEHICLE_ORDERS(v, order) {
 				if ((order->IsType(OT_GOTO_STATION) || order->IsType(OT_GOTO_WAYPOINT)) && order->GetDestination() == station) {

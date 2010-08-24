@@ -17,6 +17,7 @@
 #include "network.h"
 #include "../command_func.h"
 #include "../company_func.h"
+#include "../settings_type.h"
 
 /** Table with all the callbacks we'll use for conversion*/
 static CommandCallback * const _callback_table[] = {
@@ -52,30 +53,62 @@ static CommandCallback * const _callback_table[] = {
 	/* 0x19 */ CcStartStopVehicle,
 };
 
-/** Local queue of packets */
-static CommandPacket *_local_command_queue = NULL;
+/**
+ * Append a CommandPacket at the end of the queue.
+ * @param p The packet to append to the queue.
+ * @note A new instance of the CommandPacket will be made.
+ */
+void CommandQueue::Append(CommandPacket *p)
+{
+	CommandPacket *add = MallocT<CommandPacket>(1);
+	*add = *p;
+	add->next = NULL;
+	if (this->first == NULL) {
+		this->first = add;
+	} else {
+		this->last->next = add;
+	}
+	this->last = add;
+	this->count++;
+}
 
 /**
- * Add a command to the local or client socket command queue,
- * based on the socket.
- * @param cp the command packet to add
- * @param cs the socket to send to (NULL = locally)
+ * Return the first item in the queue and remove it from the queue.
+ * @return the first item in the queue.
  */
-void NetworkAddCommandQueue(CommandPacket cp, NetworkClientSocket *cs)
+CommandPacket *CommandQueue::Pop()
 {
-	CommandPacket *new_cp = MallocT<CommandPacket>(1);
-	*new_cp = cp;
-
-	CommandPacket **begin = (cs == NULL ? &_local_command_queue : &cs->command_queue);
-
-	if (*begin == NULL) {
-		*begin = new_cp;
-	} else {
-		CommandPacket *c = *begin;
-		while (c->next != NULL) c = c->next;
-		c->next = new_cp;
+	CommandPacket *ret = this->first;
+	if (ret != NULL) {
+		this->first = this->first->next;
+		this->count--;
 	}
+	return ret;
 }
+
+/**
+ * Return the first item in the queue, but don't remove it.
+ * @return the first item in the queue.
+ */
+CommandPacket *CommandQueue::Peek()
+{
+	return this->first;
+}
+
+/** Free everything that is in the queue. */
+void CommandQueue::Free()
+{
+	CommandPacket *cp;
+	while ((cp = this->Pop()) != NULL) {
+		free(cp);
+	}
+	assert(this->count == 0);
+}
+
+/** Local queue of packets waiting for handling. */
+static CommandQueue _local_wait_queue;
+/** Local queue of packets waiting for execution. */
+static CommandQueue _local_execution_queue;
 
 /**
  * Prepare a DoCommand to be send over the network
@@ -93,7 +126,6 @@ void NetworkSend_Command(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, Comma
 
 	CommandPacket c;
 	c.company  = company;
-	c.next     = NULL;
 	c.tile     = tile;
 	c.p1       = p1;
 	c.p2       = p2;
@@ -112,15 +144,7 @@ void NetworkSend_Command(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, Comma
 		c.frame = _frame_counter_max + 1;
 		c.my_cmd = true;
 
-		NetworkAddCommandQueue(c);
-
-		/* Only the local client (in this case, the server) gets the callback */
-		c.callback = 0;
-		/* And we queue it for delivery to the clients */
-		NetworkClientSocket *cs;
-		FOR_ALL_CLIENT_SOCKETS(cs) {
-			if (cs->status > STATUS_MAP_WAIT) NetworkAddCommandQueue(c, cs);
-		}
+		_local_wait_queue.Append(&c);
 		return;
 	}
 
@@ -141,11 +165,10 @@ void NetworkSend_Command(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, Comma
  */
 void NetworkSyncCommandQueue(NetworkClientSocket *cs)
 {
-	for (CommandPacket *p = _local_command_queue; p != NULL; p = p->next) {
+	for (CommandPacket *p = _local_execution_queue.Peek(); p != NULL; p = p->next) {
 		CommandPacket c = *p;
 		c.callback = 0;
-		c.next = NULL;
-		NetworkAddCommandQueue(c, cs);
+		cs->outgoing_queue.Append(&c);
 	}
 }
 
@@ -156,26 +179,26 @@ void NetworkExecuteLocalCommandQueue()
 {
 	assert(IsLocalCompany());
 
-	while (_local_command_queue != NULL) {
+	CommandQueue &queue = (_network_server ? _local_execution_queue : NetworkClientSocket::Get(0)->incoming_queue);
 
+	CommandPacket *cp;
+	while ((cp = queue.Peek()) != NULL) {
 		/* The queue is always in order, which means
 		 * that the first element will be executed first. */
-		if (_frame_counter < _local_command_queue->frame) break;
+		if (_frame_counter < cp->frame) break;
 
-		if (_frame_counter > _local_command_queue->frame) {
+		if (_frame_counter > cp->frame) {
 			/* If we reach here, it means for whatever reason, we've already executed
 			 * past the command we need to execute. */
 			error("[net] Trying to execute a packet in the past!");
 		}
-
-		CommandPacket *cp = _local_command_queue;
 
 		/* We can execute this command */
 		_current_company = cp->company;
 		cp->cmd |= CMD_NETWORK_COMMAND;
 		DoCommandP(cp, cp->my_cmd);
 
-		_local_command_queue = _local_command_queue->next;
+		queue.Pop();
 		free(cp);
 	}
 
@@ -188,11 +211,60 @@ void NetworkExecuteLocalCommandQueue()
  */
 void NetworkFreeLocalCommandQueue()
 {
-	/* Free all queued commands */
-	while (_local_command_queue != NULL) {
-		CommandPacket *p = _local_command_queue;
-		_local_command_queue = _local_command_queue->next;
-		free(p);
+	_local_execution_queue.Free();
+}
+
+/**
+ * "Send" a particular CommandPacket to all clients.
+ * @param cp    The command that has to be distributed.
+ * @param owner The client that owns the command,
+ */
+static void DistributeCommandPacket(CommandPacket cp, const NetworkClientSocket *owner)
+{
+	CommandCallback *callback = cp.callback;
+	cp.frame = _frame_counter_max + 1;
+
+	NetworkClientSocket *cs;
+	FOR_ALL_CLIENT_SOCKETS(cs) {
+		if (cs->status >= STATUS_MAP) {
+			/* Callbacks are only send back to the client who sent them in the
+			 *  first place. This filters that out. */
+			cp.callback = (cs != owner) ? NULL : callback;
+			cp.my_cmd = (cs == owner);
+			cs->outgoing_queue.Append(&cp);
+		}
+	}
+
+	cp.callback = (cs != owner) ? NULL : callback;
+	cp.my_cmd = (cs == owner);
+	_local_execution_queue.Append(&cp);
+}
+
+/**
+ * "Send" a particular CommandQueue to all clients.
+ * @param queue The queue of commands that has to be distributed.
+ * @param owner The client that owns the commands,
+ */
+static void DistributeQueue(CommandQueue *queue, const NetworkClientSocket *owner)
+{
+	int to_go = _settings_client.network.commands_per_frame;
+
+	CommandPacket *cp;
+	while (--to_go >= 0 && (cp = queue->Pop()) != NULL) {
+		DistributeCommandPacket(*cp, owner);
+		free(cp);
+	}
+}
+
+void NetworkDistributeCommands()
+{
+	/* First send the server's commands. */
+	DistributeQueue(&_local_wait_queue, NULL);
+
+	/* Then send the queues of the others. */
+	NetworkClientSocket *cs;
+	FOR_ALL_CLIENT_SOCKETS(cs) {
+		DistributeQueue(&cs->incoming_queue, cs);
 	}
 }
 

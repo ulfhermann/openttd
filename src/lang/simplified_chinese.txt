@@ -2395,6 +2395,7 @@ STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}输入 N
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}调整 NewGRF 参数
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}关闭
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :参数 {NUM}
+STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}检查 - {STRING}
@@ -2465,6 +2466,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}缺失文�
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}NewGRF '{0:STRING}'的行为可能造成同步错误或是崩溃。
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}{1:ENGINE}机车车厢的状态没在车库内发生变动
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}当车辆不在车库中时,这将改变 '{1:ENGINE}' 的车辆长度.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}列车 '{VEHICLE}' 属于 '{COMPANY}' 使长度无效化了. 这可能是NewGRF导致的. 有可能会发生崩溃或同步错误.
 
@@ -2481,6 +2483,9 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<invalid indust
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}标志列表 - {COMMA} 个标志
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}符合大小写
+STR_SIGN_LIST_CLEAR                                             :{BLACK}消除过滤条件
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}清除过滤字符串
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}标记标志文字
@@ -3341,6 +3346,7 @@ STR_AI_LIST_CANCEL_TOOLTIP                                      :{BLACK}不修�
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}AI 特征
 STR_AI_SETTINGS_CLOSE                                           :{BLACK}关闭
 STR_AI_SETTINGS_RESET                                           :{BLACK}重设
+STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORANGE}{STRING}
 
 # Vehicle loading indicators
 STR_PERCENT_UP_SMALL                                            :{TINYFONT}{WHITE}{NUM}%{UPARROW}
@@ -3545,10 +3551,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}不能�
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}无法重命名车库...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}列车必须停在一个车库中
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}列车必须停在一个车库中
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}……必须完全停在一个车库中
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}船只必须停靠在船坞内。
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}飞机必须在机库中停止
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}船只必须停靠在船坞内。
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}飞机必须在机库中停止
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}只有列车停在车库中时才能更改挂车
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}列车过长
@@ -3628,6 +3634,7 @@ STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}隧道�
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}隧道出口的地形无法处理
 
 # Object related errors
+STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... 对象物太多
 STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}无法建立物件...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}目标处有其他物体
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}目标处有公司总部

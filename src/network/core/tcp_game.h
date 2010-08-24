@@ -74,6 +74,25 @@ enum TCPPacketType {
 /** Packet that wraps a command */
 struct CommandPacket;
 
+/** A queue of CommandPackets. */
+class CommandQueue {
+	CommandPacket *first; ///< The first packet in the queue.
+	CommandPacket *last;  ///< The last packet in the queue; only valid when first != NULL.
+	uint count;           ///< The number of items in the queue.
+
+public:
+	/** Initialise the command queue. */
+	CommandQueue() : first(NULL), last(NULL) {}
+	/** Clear the command queue. */
+	~CommandQueue() { this->Free(); }
+	void Append(CommandPacket *p);
+	CommandPacket *Pop();
+	CommandPacket *Peek();
+	void Free();
+	/** Get the number of items in the queue. */
+	uint Count() const { return this->count; }
+};
+
 /** Status of a client */
 enum ClientStatus {
 	STATUS_INACTIVE,     ///< The client is not connected nor active
@@ -106,7 +125,8 @@ public:
 
 	ClientStatus status;      ///< Status of this client
 
-	CommandPacket *command_queue; ///< The command-queue awaiting delivery
+	CommandQueue incoming_queue; ///< The command-queue awaiting handling
+	CommandQueue outgoing_queue; ///< The command-queue awaiting delivery
 
 	NetworkRecvStatus CloseConnection(bool error = true);
 

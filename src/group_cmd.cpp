@@ -23,6 +23,7 @@
 #include "string_func.h"
 #include "company_func.h"
 #include "core/pool_func.hpp"
+#include "order_backup.h"
 
 #include "table/strings.h"
 
@@ -126,7 +127,7 @@ CommandCost CmdDeleteGroup(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		}
 
 		/* Update backupped orders if needed */
-		if (_backup_orders_data.group == g->index) _backup_orders_data.group = DEFAULT_GROUP;
+		OrderBackup::ClearGroup(g->index);
 
 		/* If we set an autoreplace for the group we delete, remove it. */
 		if (_current_company < MAX_COMPANIES) {
@@ -204,7 +205,7 @@ CommandCost CmdRenameGroup(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
  * @param p1   index of array group
  *   - p1 bit 0-15 : GroupID
  * @param p2   vehicle to add to a group
- *   - p2 bit 0-15 : VehicleID
+ *   - p2 bit 0-19 : VehicleID
  * @param text unused
  * @return the cost of this operation or an error
  */
