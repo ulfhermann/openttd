@@ -29,13 +29,17 @@ uint16 _tick_counter;  ///< Ever incrementing (and sometimes wrapping) tick coun
 
 /**
  * Set the date.
- * @param date New date
+ * @param date  New date
+ * @param fract The number of ticks that have passed on this date.
  */
-void SetDate(Date date)
+void SetDate(Date date, DateFract fract)
 {
+	assert(fract < DAY_TICKS);
+
 	YearMonthDay ymd;
 
 	_date = date;
+	_date_fract = fract;
 	ConvertDateToYMD(date, &ymd);
 	_cur_year = ymd.year;
 	_cur_month = ymd.month;

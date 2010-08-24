@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "depot_base.h"
+#include "order_backup.h"
 #include "order_func.h"
 #include "window_func.h"
 #include "core/pool_func.hpp"
@@ -25,6 +26,9 @@ INSTANTIATE_POOL_METHODS(Depot)
 Depot::~Depot()
 {
 	if (CleaningPool()) return;
+
+	/* Clear the order backup. */
+	OrderBackup::Reset(this->xy, false);
 
 	/* Clear the depot from all order-lists */
 	RemoveOrderFromAllVehicles(OT_GOTO_DEPOT, this->index);

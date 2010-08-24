@@ -203,7 +203,7 @@ static const NWidgetPart _nested_ai_list_widgets[] = {
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_MAUVE, AIL_WIDGET_INFO_BG), SetMinimalTextLines(8, WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM), SetResize(1, 0),
 	EndContainer(),
-		NWidget(NWID_HORIZONTAL),
+	NWidget(NWID_HORIZONTAL),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 			NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, AIL_WIDGET_ACCEPT), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_AI_LIST_ACCEPT, STR_AI_LIST_ACCEPT_TOOLTIP),
 			NWidget(WWT_PUSHTXTBTN, COLOUR_MAUVE, AIL_WIDGET_CANCEL), SetResize(1, 0), SetFill(1, 0), SetDataTip(STR_AI_LIST_CANCEL, STR_AI_LIST_CANCEL_TOOLTIP),
@@ -303,23 +303,33 @@ struct AISettingsWindow : public Window {
 			int current_value = config->GetSetting((*it).name);
 			bool editable = (_game_mode == GM_MENU) || ((it->flags & AICONFIG_INGAME) != 0);
 
-			SetDParamStr(0, (*it).description);
+			StringID str;
+			TextColour colour;
+			uint idx = 0;
+			if (StrEmpty((*it).description)) {
+				str = STR_JUST_STRING;
+				colour = TC_ORANGE;
+			} else {
+				str = STR_AI_SETTINGS_SETTING;
+				colour = TC_LIGHT_BLUE;
+				SetDParamStr(idx++, (*it).description);
+			}
 
 			if (((*it).flags & AICONFIG_BOOLEAN) != 0) {
 				DrawFrameRect(buttons_left, y  + 2, buttons_left + 19, y + 10, (current_value != 0) ? COLOUR_GREEN : COLOUR_RED, (current_value != 0) ? FR_LOWERED : FR_NONE);
-				SetDParam(1, current_value == 0 ? STR_CONFIG_SETTING_OFF : STR_CONFIG_SETTING_ON);
+				SetDParam(idx++, current_value == 0 ? STR_CONFIG_SETTING_OFF : STR_CONFIG_SETTING_ON);
 			} else {
 				DrawArrowButtons(buttons_left, y + 2, COLOUR_YELLOW, (this->clicked_button == i) ? 1 + (this->clicked_increase != rtl) : 0, editable && current_value > (*it).min_value, editable && current_value < (*it).max_value);
 				if (it->labels != NULL && it->labels->Find(current_value) != it->labels->End()) {
-					SetDParam(1, STR_JUST_RAW_STRING);
-					SetDParamStr(2, it->labels->Find(current_value)->second);
+					SetDParam(idx++, STR_JUST_RAW_STRING);
+					SetDParamStr(idx++, it->labels->Find(current_value)->second);
 				} else {
-					SetDParam(1, STR_JUST_INT);
-					SetDParam(2, current_value);
+					SetDParam(idx++, STR_JUST_INT);
+					SetDParam(idx++, current_value);
 				}
 			}
 
-			DrawString(text_left, text_right, y + WD_MATRIX_TOP, STR_AI_SETTINGS_SETTING, TC_LIGHT_BLUE);
+			DrawString(text_left, text_right, y + WD_MATRIX_TOP, str, colour);
 			y += this->line_height;
 		}
 	}
@@ -691,7 +701,7 @@ enum AIDebugWindowWidgets {
 	AID_WIDGET_LOG_PANEL,
 	AID_WIDGET_SCROLLBAR,
 	AID_WIDGET_COMPANY_BUTTON_START,
-	AID_WIDGET_COMPANY_BUTTON_END = AID_WIDGET_COMPANY_BUTTON_START + 14,
+	AID_WIDGET_COMPANY_BUTTON_END = AID_WIDGET_COMPANY_BUTTON_START + MAX_COMPANIES - 1,
 	AID_BREAK_STRING_WIDGETS,
 	AID_WIDGET_BREAK_STR_ON_OFF_BTN,
 	AID_WIDGET_BREAK_STR_EDIT_BOX,
@@ -950,8 +960,8 @@ struct AIDebugWindow : public QueryStringBaseWindow {
 		switch (widget) {
 			case AID_WIDGET_RELOAD_TOGGLE:
 				/* First kill the company of the AI, then start a new one. This should start the current AI again */
-				DoCommandP(0, 2, ai_debug_company, CMD_COMPANY_CTRL);
-				DoCommandP(0, 1, ai_debug_company, CMD_COMPANY_CTRL);
+				DoCommandP(0, 2 | ai_debug_company << 16, 0, CMD_COMPANY_CTRL);
+				DoCommandP(0, 1 | ai_debug_company << 16, 0, CMD_COMPANY_CTRL);
 				break;
 
 			case AID_WIDGET_SETTINGS:
@@ -1056,6 +1066,12 @@ char AIDebugWindow::break_string[MAX_BREAK_STR_STRING_LENGTH] = "";
 bool AIDebugWindow::break_check_enabled = true;
 bool AIDebugWindow::case_sensitive_break_check = false;
 
+/** Make a number of rows with buttons for each company for the AI debug window. */
+NWidgetBase *MakeCompanyButtonRowsAIDebug(int *biggest_index)
+{
+	return MakeCompanyButtonRows(biggest_index, AID_WIDGET_COMPANY_BUTTON_START, AID_WIDGET_COMPANY_BUTTON_END, 8, STR_AI_DEBUG_SELECT_AI_TOOLTIP);
+}
+
 /** Widgets for the AI debug window. */
 static const NWidgetPart _nested_ai_debug_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
@@ -1065,45 +1081,7 @@ static const NWidgetPart _nested_ai_debug_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_GREY),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_VIEW),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 1), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 2), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 3), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 4), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 5), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 6), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 7), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
-		EndContainer(),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 8), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 9), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 10), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 11), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 12), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 13), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(WWT_PANEL, COLOUR_GREY, AID_WIDGET_COMPANY_BUTTON_START + 14), SetMinimalSize(37, 13), SetResize(1, 0), SetDataTip(0x0, STR_GRAPH_KEY_COMPANY_SELECTION_TOOLTIP),
-			EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(39, 0), SetResize(1, 0),
-		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 1), SetResize(1, 0),
+		NWidgetFunction(MakeCompanyButtonRowsAIDebug), SetPadding(0, 2, 1, 2),
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_TEXTBTN, COLOUR_GREY, AID_WIDGET_NAME_TEXT), SetFill(1, 0), SetResize(1, 0), SetDataTip(STR_JUST_STRING, STR_AI_DEBUG_NAME_TOOLTIP),
