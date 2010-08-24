@@ -177,15 +177,16 @@ enum Commands {
 
 	CMD_PLANT_TREE,                   ///< plant a tree
 
-	CMD_BUILD_RAIL_VEHICLE,           ///< build a rail vehicle
+	CMD_BUILD_VEHICLE,                ///< build a vehicle
+	CMD_SELL_VEHICLE,                 ///< sell a vehicle
+	CMD_REFIT_VEHICLE,                ///< refit the cargo space of a vehicle
+
 	CMD_MOVE_RAIL_VEHICLE,            ///< move a rail vehicle (in the depot)
-
-	CMD_SELL_RAIL_WAGON,              ///< sell a rail wagon
-
 	CMD_SEND_TRAIN_TO_DEPOT,          ///< send a train to a depot
 	CMD_FORCE_TRAIN_PROCEED,          ///< proceed a train to pass a red signal
 	CMD_REVERSE_TRAIN_DIRECTION,      ///< turn a train around
 
+	CMD_CLEAR_ORDER_BACKUP,           ///< clear the order backup of a given user/tile
 	CMD_MODIFY_ORDER,                 ///< modify an order (like set full-load)
 	CMD_SKIP_TO_ORDER,                ///< skip an order to the next of specific one
 	CMD_DELETE_ORDER,                 ///< delete an order
@@ -210,19 +211,13 @@ enum Commands {
 	CMD_RENAME_STATION,               ///< rename a station
 	CMD_RENAME_DEPOT,                 ///< rename a depot
 
-	CMD_SELL_AIRCRAFT,                ///< sell an aircraft
-	CMD_BUILD_AIRCRAFT,               ///< build an aircraft
 	CMD_SEND_AIRCRAFT_TO_HANGAR,      ///< send an aircraft to a hanger
-	CMD_REFIT_AIRCRAFT,               ///< refit the cargo space of an aircraft
 
 	CMD_PLACE_SIGN,                   ///< place a sign
 	CMD_RENAME_SIGN,                  ///< rename a sign
 
-	CMD_BUILD_ROAD_VEH,               ///< build a road vehicle
-	CMD_SELL_ROAD_VEH,                ///< sell a road vehicle
 	CMD_SEND_ROADVEH_TO_DEPOT,        ///< send a road vehicle to the depot
 	CMD_TURN_ROADVEH,                 ///< turn a road vehicle around
-	CMD_REFIT_ROAD_VEH,               ///< refit the cargo space of a road vehicle
 
 	CMD_PAUSE,                        ///< pause the game
 
@@ -236,10 +231,7 @@ enum Commands {
 	CMD_EXPAND_TOWN,                  ///< expand a town
 	CMD_DELETE_TOWN,                  ///< delete a town
 
-	CMD_SELL_SHIP,                    ///< sell a ship
-	CMD_BUILD_SHIP,                   ///< build a new ship
 	CMD_SEND_SHIP_TO_DEPOT,           ///< send a ship to a depot
-	CMD_REFIT_SHIP,                   ///< refit the cargo space of a ship
 
 	CMD_ORDER_REFIT,                  ///< change the refit informaction of an order (for "goto depot" )
 	CMD_CLONE_ORDER,                  ///< clone (and share) an order
@@ -251,8 +243,6 @@ enum Commands {
 	CMD_COMPANY_CTRL,                 ///< used in multiplayer to create a new companies etc.
 	CMD_LEVEL_LAND,                   ///< level land
 
-	CMD_REFIT_RAIL_VEHICLE,           ///< refit the cargo space of a train
-	CMD_RESTORE_ORDER_INDEX,          ///< restore vehicle order-index and service interval
 	CMD_BUILD_LOCK,                   ///< build a lock
 
 	CMD_BUILD_SIGNAL_TRACK,           ///< add signals along a track (by dragging)
@@ -342,6 +332,7 @@ enum CommandFlags {
 	CMD_ALL_TILES = 0x10, ///< allow this command also on MP_VOID tiles
 	CMD_NO_TEST   = 0x20, ///< the command's output may differ between test and execute due to town rating changes etc.
 	CMD_NO_WATER  = 0x40, ///< set the DC_NO_WATER flag on this command
+	CMD_CLIENT_ID = 0x80, ///< set p2 with the ClientID of the sending client.
 };
 
 /**

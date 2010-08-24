@@ -91,10 +91,6 @@
     <Filter Include="Threading">
       <UniqueIdentifier>{c76ff9f1-1e62-46d8-8d55-000000000029}</UniqueIdentifier>
     </Filter>
-    <Filter Include="64-bit Specific Files">
-      <UniqueIdentifier>{d55d5f1f-aa07-4839-80d7-5ae158609e61}</UniqueIdentifier>
-      <Extensions>asm</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\airport.cpp">
@@ -236,6 +232,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\openttd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\order_backup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\os_timer.cpp">
@@ -725,6 +724,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\openttd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\order_backup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\order_base.h">
@@ -1732,9 +1734,6 @@
     <ClInclude Include="..\src\ai\ai_storage.hpp">
       <Filter>AI Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ai\api\ai_abstractlist.hpp">
-      <Filter>AI API</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\ai\api\ai_accounting.hpp">
       <Filter>AI API</Filter>
     </ClInclude>
@@ -1894,9 +1893,6 @@
     <ClInclude Include="..\src\ai\api\ai_waypointlist.hpp">
       <Filter>AI API</Filter>
     </ClInclude>
-    <ClCompile Include="..\src\ai\api\ai_abstractlist.cpp">
-      <Filter>AI API Implementation</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\ai\api\ai_accounting.cpp">
       <Filter>AI API Implementation</Filter>
     </ClCompile>
@@ -2471,10 +2467,5 @@
   <ItemGroup>
     <None Include="..\media\openttd.ico" />
     <None Include="..\readme.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="..\src\os\windows\win64.asm">
-      <Filter>64-bit Specific Files</Filter>
-    </MASM>
   </ItemGroup>
 </Project>

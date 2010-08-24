@@ -891,12 +891,14 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_MAP_OK)
  */
 DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
 {
-	NetworkClientSocket *new_cs;
-
 	/* The client was never joined.. so this is impossible, right?
 	 *  Ignore the packet, give the client a warning, and close his connection */
 	if (cs->status < STATUS_DONE_MAP || cs->HasClientQuit()) {
 		return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_NOT_EXPECTED);
+	}
+
+	if (cs->incoming_queue.Count() >= _settings_client.network.max_commands_in_queue) {
+		return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_TOO_MANY_COMMANDS);
 	}
 
 	CommandPacket cp;
@@ -933,12 +935,6 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
 		return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_COMPANY_MISMATCH);
 	}
 
-	/**
-	 * @todo CMD_COMPANY_CTRL with p1 = 0 announces a new company to the server. To give the
-	 * company the correct ID, the server injects p2 and executes the command. Any other p1
-	 * is prohibited. Pretty ugly and should be redone together with its function.
-	 * @see CmdCompanyCtrl()
-	 */
 	if (cp.cmd == CMD_COMPANY_CTRL) {
 		if (cp.p1 != 0 || cp.company != COMPANY_SPECTATOR) {
 			return SEND_COMMAND(PACKET_SERVER_ERROR)(cs, NETWORK_ERROR_CHEATER);
@@ -949,32 +945,11 @@ DEF_SERVER_RECEIVE_COMMAND(PACKET_CLIENT_COMMAND)
 			NetworkServerSendChat(NETWORK_ACTION_SERVER_MESSAGE, DESTTYPE_CLIENT, ci->client_id, "cannot create new company, server full", CLIENT_ID_SERVER);
 			return NETWORK_RECV_STATUS_OKAY;
 		}
-
-		cp.p2 = cs->client_id;
 	}
 
-	/* The frame can be executed in the same frame as the next frame-packet
-	 *  That frame just before that frame is saved in _frame_counter_max */
-	cp.frame = _frame_counter_max + 1;
-	cp.next  = NULL;
+	if (GetCommandFlags(cp.cmd) & CMD_CLIENT_ID) cp.p2 = cs->client_id;
 
-	CommandCallback *callback = cp.callback;
-
-	/* Queue the command for the clients (are send at the end of the frame
-	 *   if they can handle it ;)) */
-	FOR_ALL_CLIENT_SOCKETS(new_cs) {
-		if (new_cs->status >= STATUS_MAP) {
-			/* Callbacks are only send back to the client who sent them in the
-			 *  first place. This filters that out. */
-			cp.callback = (new_cs != cs) ? NULL : callback;
-			cp.my_cmd = (new_cs == cs);
-			NetworkAddCommandQueue(cp, new_cs);
-		}
-	}
-
-	cp.callback = NULL;
-	cp.my_cmd = false;
-	NetworkAddCommandQueue(cp);
+	cs->incoming_queue.Append(&cp);
 	return NETWORK_RECV_STATUS_OKAY;
 }
 
@@ -1505,7 +1480,7 @@ static void NetworkAutoCleanCompanies()
 			/* Is the company empty for autoclean_unprotected-months, and is there no protection? */
 			if (_settings_client.network.autoclean_unprotected != 0 && _network_company_states[c->index].months_empty > _settings_client.network.autoclean_unprotected && StrEmpty(_network_company_states[c->index].password)) {
 				/* Shut the company down */
-				DoCommandP(0, 2, c->index, CMD_COMPANY_CTRL);
+				DoCommandP(0, 2 | c->index << 16, 0, CMD_COMPANY_CTRL);
 				IConsolePrintF(CC_DEFAULT, "Auto-cleaned company #%d with no password", c->index + 1);
 			}
 			/* Is the company empty for autoclean_protected-months, and there is a protection? */
@@ -1519,7 +1494,7 @@ static void NetworkAutoCleanCompanies()
 			/* Is the company empty for autoclean_novehicles-months, and has no vehicles? */
 			if (_settings_client.network.autoclean_novehicles != 0 && _network_company_states[c->index].months_empty > _settings_client.network.autoclean_novehicles && vehicles_in_company[c->index] == 0) {
 				/* Shut the company down */
-				DoCommandP(0, 2, c->index, CMD_COMPANY_CTRL);
+				DoCommandP(0, 2 | c->index << 16, 0, CMD_COMPANY_CTRL);
 				IConsolePrintF(CC_DEFAULT, "Auto-cleaned company #%d with no vehicles", c->index + 1);
 			}
 		} else {
@@ -1618,11 +1593,8 @@ void NetworkServer_ReadPackets(NetworkClientSocket *cs)
 static void NetworkHandleCommandQueue(NetworkClientSocket *cs)
 {
 	CommandPacket *cp;
-
-	while ( (cp = cs->command_queue) != NULL) {
+	while ((cp = cs->outgoing_queue.Pop()) != NULL) {
 		SEND_COMMAND(PACKET_SERVER_COMMAND)(cs, cp);
-
-		cs->command_queue = cp->next;
 		free(cp);
 	}
 }
