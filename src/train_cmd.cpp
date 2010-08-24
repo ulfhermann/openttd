@@ -41,6 +41,7 @@
 #include "engine_base.h"
 #include "engine_func.h"
 #include "newgrf.h"
+#include "order_backup.h"
 
 #include "table/strings.h"
 #include "table/train_cmd.h"
@@ -130,6 +131,57 @@ void CheckTrainsLengths()
 }
 
 /**
+ * Update visual effect, power and acceleration caches.
+ * Called when a vehicle in the consist enters a different railtype.
+ */
+void Train::RailtypeChanged()
+{
+	for (Train *u = this; u != NULL; u = u->Next()) {
+		/* The wagon-is-powered-state should not change, so the weight does not change. */
+		u->UpdateVisualEffect(false);
+	}
+	this->PowerChanged();
+	if (this->IsFrontEngine()) this->UpdateAcceleration();
+}
+
+/**
+ * Update the cached visual effect.
+ * @param allow_power_change true if the wagon-is-powered-state may change.
+ */
+void Train::UpdateVisualEffect(bool allow_power_change)
+{
+	byte powered_before = this->tcache.cached_vis_effect & 0x80;
+
+	const Engine *e = Engine::Get(this->engine_type);
+	if (e->u.rail.visual_effect != 0) {
+		this->tcache.cached_vis_effect = e->u.rail.visual_effect;
+	} else {
+		if (this->IsWagon() || this->IsArticulatedPart()) {
+			/* Wagons and articulated parts have no effect by default */
+			this->tcache.cached_vis_effect = 0x40;
+		} else if (e->u.rail.engclass == 0) {
+			/* Steam is offset by -4 units */
+			this->tcache.cached_vis_effect = 4;
+		} else {
+			/* Diesel fumes and sparks come from the centre */
+			this->tcache.cached_vis_effect = 8;
+		}
+	}
+
+	/* Check powered wagon / visual effect callback */
+	if (HasBit(e->info.callback_mask, CBM_TRAIN_WAGON_POWER)) {
+		uint16 callback = GetVehicleCallback(CBID_TRAIN_WAGON_POWER, 0, 0, this->engine_type, this);
+
+		if (callback != CALLBACK_FAILED) this->tcache.cached_vis_effect = GB(callback, 0, 8);
+	}
+
+	if (!allow_power_change && powered_before != (this->tcache.cached_vis_effect & 0x80)) {
+		this->tcache.cached_vis_effect ^= 0x80;
+		ShowNewGrfVehicleError(this->engine_type, STR_NEWGRF_BROKEN, STR_NEWGRF_BROKEN_POWERED_WAGON, GBUG_VEH_POWERED_WAGON, false);
+	}
+}
+
+/**
  * Recalculates the cached stuff of a train. Should be called each time a vehicle is added
  * to/removed from the chain, and when the game is loaded.
  * Note: this needs to be called too for 'wagon chains' (in the depot, without an engine)
@@ -185,27 +237,8 @@ void Train::ConsistChanged(bool same_length)
 		/* Reset colour map */
 		u->colourmap = PAL_NONE;
 
-		if (rvi_u->visual_effect != 0) {
-			u->tcache.cached_vis_effect = rvi_u->visual_effect;
-		} else {
-			if (u->IsWagon() || u->IsArticulatedPart()) {
-				/* Wagons and articulated parts have no effect by default */
-				u->tcache.cached_vis_effect = 0x40;
-			} else if (rvi_u->engclass == 0) {
-				/* Steam is offset by -4 units */
-				u->tcache.cached_vis_effect = 4;
-			} else {
-				/* Diesel fumes and sparks come from the centre */
-				u->tcache.cached_vis_effect = 8;
-			}
-		}
-
-		/* Check powered wagon / visual effect callback */
-		if (HasBit(e_u->info.callback_mask, CBM_TRAIN_WAGON_POWER)) {
-			uint16 callback = GetVehicleCallback(CBID_TRAIN_WAGON_POWER, 0, 0, u->engine_type, u);
-
-			if (callback != CALLBACK_FAILED) u->tcache.cached_vis_effect = GB(callback, 0, 8);
-		}
+		/* Update powered-wagon-status and visual effect */
+		u->UpdateVisualEffect(true);
 
 		if (rvi_v->pow_wag_power != 0 && rvi_u->railveh_type == RAILVEH_WAGON &&
 				UsesWagonOverride(u) && !HasBit(u->tcache.cached_vis_effect, 7)) {
@@ -542,32 +575,27 @@ void DrawTrainEngine(int left, int right, int preferred_x, int y, EngineID engin
 	}
 }
 
-static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandFlag flags)
+/**
+ * Build a railroad wagon.
+ * @param tile     tile of the depot where rail-vehicle is built.
+ * @param flags    type of operation.
+ * @param e        the engine to build.
+ * @param ret[out] the vehicle that has been built.
+ * @return the cost of this operation or an error.
+ */
+static CommandCost CmdBuildRailWagon(TileIndex tile, DoCommandFlag flags, const Engine *e, Vehicle **ret)
 {
-	const Engine *e = Engine::Get(engine);
 	const RailVehicleInfo *rvi = &e->u.rail;
-	CommandCost value(EXPENSES_NEW_VEHICLES, e->GetCost());
-
-	/* Engines without valid cargo should not be available */
-	if (e->GetDefaultCargoType() == CT_INVALID) return CMD_ERROR;
-
-	if (flags & DC_QUERY_COST) return value;
 
 	/* Check that the wagon can drive on the track in question */
 	if (!IsCompatibleRail(rvi->railtype, GetRailType(tile))) return CMD_ERROR;
 
-	uint num_vehicles = 1 + CountArticulatedParts(engine, false);
-
-	/* Allow for the wagon and the articulated parts */
-	if (!Vehicle::CanAllocateItem(num_vehicles)) {
-		return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
-	}
-
 	if (flags & DC_EXEC) {
 		Train *v = new Train();
+		*ret = v;
 		v->spritenum = rvi->image_index;
 
-		v->engine_type = engine;
+		v->engine_type = e->index;
 		v->tcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
 		DiagDirection dir = GetRailDepotDirection(tile);
@@ -592,7 +620,6 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 
 		v->cargo_type = e->GetDefaultCargoType();
 		v->cargo_cap = rvi->capacity;
-		v->value = value.GetCost();
 
 		v->railtype = rvi->railtype;
 
@@ -610,12 +637,6 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 		v->First()->ConsistChanged(false);
 		UpdateTrainGroupID(v->First());
 
-		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
-		if (IsLocalCompany()) {
-			InvalidateAutoreplaceWindow(v->engine_type, v->group_id); // updates the replace Train window
-		}
-		Company::Get(_current_company)->num_engines[engine]++;
-
 		CheckConsistencyOfArticulatedVehicle(v);
 
 		/* Try to connect the vehicle to one of free chains of wagons. */
@@ -623,16 +644,16 @@ static CommandCost CmdBuildRailWagon(EngineID engine, TileIndex tile, DoCommandF
 		FOR_ALL_TRAINS(w) {
 			if (w->tile == tile &&              ///< Same depot
 					w->IsFreeWagon() &&             ///< A free wagon chain
-					w->engine_type == engine &&     ///< Same type
+					w->engine_type == e->index &&   ///< Same type
 					w->First() != v &&              ///< Don't connect to ourself
 					!(w->vehstatus & VS_CRASHED)) { ///< Not crashed/flooded
-				DoCommand(0, v->index | (w->Last()->index << 16), 1, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
+				DoCommand(0, v->index | 1 << 20, w->Last()->index, DC_EXEC, CMD_MOVE_RAIL_VEHICLE);
 				break;
 			}
 		}
 	}
 
-	return value;
+	return CommandCost();
 }
 
 /** Move all free vehicles in the depot to the train */
@@ -642,7 +663,7 @@ static void NormalizeTrainVehInDepot(const Train *u)
 	FOR_ALL_TRAINS(v) {
 		if (v->IsFreeWagon() && v->tile == u->tile &&
 				v->track == TRACK_BIT_DEPOT) {
-			if (DoCommand(0, v->index | (u->index << 16), 1, DC_EXEC,
+			if (DoCommand(0, v->index | 1 << 20, u->index, DC_EXEC,
 					CMD_MOVE_RAIL_VEHICLE).Failed())
 				break;
 		}
@@ -683,52 +704,22 @@ static void AddRearEngineToMultiheadedTrain(Train *v)
 
 /**
  * Build a railroad vehicle.
- * @param tile tile of the depot where rail-vehicle is built
- * @param flags type of operation
- * @param p1 engine type id
- * @param p2 bit 1 prevents any free cars from being added to the train
- * @param text unused
- * @return the cost of this operation or an error
+ * @param tile     tile of the depot where rail-vehicle is built.
+ * @param flags    type of operation.
+ * @param e        the engine to build.
+ * @param data     bit 0 prevents any free cars from being added to the train.
+ * @param ret[out] the vehicle that has been built.
+ * @return the cost of this operation or an error.
  */
-CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, const Engine *e, uint16 data, Vehicle **ret)
 {
-	EngineID eid = GB(p1, 0, 16);
-	/* Check if the engine-type is valid (for the company) */
-	if (!IsEngineBuildable(eid, VEH_TRAIN, _current_company)) return_cmd_error(STR_ERROR_RAIL_VEHICLE_NOT_AVAILABLE);
-
-	const Engine *e = Engine::Get(eid);
 	const RailVehicleInfo *rvi = &e->u.rail;
-	CommandCost value(EXPENSES_NEW_VEHICLES, e->GetCost());
 
-	/* Engines with CT_INVALID should not be available */
-	if (e->GetDefaultCargoType() == CT_INVALID) return CMD_ERROR;
-
-	if (flags & DC_QUERY_COST) return value;
-
-	/* Check if the train is actually being built in a depot belonging
-	 * to the company. Doesn't matter if only the cost is queried */
-	if (!IsRailDepotTile(tile)) return CMD_ERROR;
-	if (!IsTileOwner(tile, _current_company)) return CMD_ERROR;
-
-	if (rvi->railveh_type == RAILVEH_WAGON) return CmdBuildRailWagon(eid, tile, flags);
-
-	uint num_vehicles =
-		(rvi->railveh_type == RAILVEH_MULTIHEAD ? 2 : 1) +
-		CountArticulatedParts(eid, false);
+	if (rvi->railveh_type == RAILVEH_WAGON) return CmdBuildRailWagon(tile, flags, e, ret);
 
 	/* Check if depot and new engine uses the same kind of tracks *
 	 * We need to see if the engine got power on the tile to avoid electric engines in non-electric depots */
 	if (!HasPowerOnRail(rvi->railtype, GetRailType(tile))) return CMD_ERROR;
-
-	/* Allow for the dual-heads and the articulated parts */
-	if (!Vehicle::CanAllocateItem(num_vehicles)) {
-		return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
-	}
-
-	UnitID unit_num = (flags & DC_AUTOREPLACE) ? 0 : GetFreeUnitNumber(VEH_TRAIN);
-	if (unit_num > _settings_game.vehicle.max_trains) {
-		return_cmd_error(STR_ERROR_TOO_MANY_VEHICLES_IN_GAME);
-	}
 
 	if (flags & DC_EXEC) {
 		DiagDirection dir = GetRailDepotDirection(tile);
@@ -736,7 +727,7 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		int y = TileY(tile) * TILE_SIZE + _vehicle_initial_y_fract[dir];
 
 		Train *v = new Train();
-		v->unitnumber = unit_num;
+		*ret = v;
 		v->direction = DiagDirToDir(dir);
 		v->tile = tile;
 		v->owner = _current_company;
@@ -749,10 +740,9 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		v->cargo_type = e->GetDefaultCargoType();
 		v->cargo_cap = rvi->capacity;
 		v->max_speed = rvi->max_speed;
-		v->value = value.GetCost();
 		v->last_station_visited = INVALID_STATION;
 
-		v->engine_type = eid;
+		v->engine_type = e->index;
 		v->tcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
 		v->reliability = e->reliability;
@@ -786,23 +776,14 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
 		v->ConsistChanged(false);
 		UpdateTrainGroupID(v);
 
-		if (!HasBit(p2, 1) && !(flags & DC_AUTOREPLACE)) { // check if the cars should be added to the new vehicle
+		if (!HasBit(data, 0) && !(flags & DC_AUTOREPLACE)) { // check if the cars should be added to the new vehicle
 			NormalizeTrainVehInDepot(v);
 		}
-
-		InvalidateWindowData(WC_VEHICLE_DEPOT, v->tile);
-		InvalidateWindowClassesData(WC_TRAINS_LIST, 0);
-		SetWindowDirty(WC_COMPANY, v->owner);
-		if (IsLocalCompany()) {
-			InvalidateAutoreplaceWindow(v->engine_type, v->group_id); // updates the replace Train window
-		}
-
-		Company::Get(_current_company)->num_engines[eid]++;
 
 		CheckConsistencyOfArticulatedVehicle(v);
 	}
 
-	return value;
+	return CommandCost();
 }
 
 
@@ -1072,9 +1053,10 @@ static CommandCost CheckTrainAttachment(Train *t)
  * @param dst          The destination chain after constructing the train.
  * @param original_dst The original source chain.
  * @param dst          The source chain after constructing the train.
+ * @param check_limit  Whether to check the vehicle limit.
  * @return possible error of this command.
  */
-static CommandCost ValidateTrains(Train *original_dst, Train *dst, Train *original_src, Train *src)
+static CommandCost ValidateTrains(Train *original_dst, Train *dst, Train *original_src, Train *src, bool check_limit)
 {
 	/* Check whether we may actually construct the trains. */
 	CommandCost ret = CheckTrainAttachment(src);
@@ -1083,7 +1065,7 @@ static CommandCost ValidateTrains(Train *original_dst, Train *dst, Train *origin
 	if (ret.Failed()) return ret;
 
 	/* Check whether we need to build a new train. */
-	return CheckNewTrain(original_dst, dst, original_src, src);
+	return check_limit ? CheckNewTrain(original_dst, dst, original_src, src) : CommandCost();
 }
 
 /**
@@ -1162,17 +1144,17 @@ static void NormaliseTrainHead(Train *head)
  * @param flags type of operation
  *              Note: DC_AUTOREPLACE is set when autoreplace tries to undo its modifications or moves vehicles to temporary locations inside the depot.
  * @param p1 various bitstuffed elements
- * - p1 (bit  0 - 15) source vehicle index
- * - p1 (bit 16 - 31) what wagon to put the source wagon AFTER, XXX - INVALID_VEHICLE to make a new line
- * @param p2 (bit 0) move all vehicles following the source vehicle
+ * - p1 (bit  0 - 19) source vehicle index
+ * - p1 (bit      20) move all vehicles following the source vehicle
+ * @param p2 what wagon to put the source wagon AFTER, XXX - INVALID_VEHICLE to make a new line
  * @param text unused
  * @return the cost of this operation or an error
  */
 CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	VehicleID s = GB(p1, 0, 16);
-	VehicleID d = GB(p1, 16, 16);
-	bool move_chain = HasBit(p2, 0);
+	VehicleID s = GB(p1, 0, 20);
+	VehicleID d = GB(p2, 0, 20);
+	bool move_chain = HasBit(p1, 20);
 
 	Train *src = Train::GetIfValid(s);
 	if (src == NULL) return CMD_ERROR;
@@ -1254,7 +1236,7 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		/* If the autoreplace flag is set we do not need to test for the validity
 		 * because we are going to revert the train to its original state. As we
 		 * assume the original state was correct autoreplace can skip this. */
-		CommandCost ret = ValidateTrains(original_dst_head, dst_head, original_src_head, src_head);
+		CommandCost ret = ValidateTrains(original_dst_head, dst_head, original_src_head, src_head, true);
 		if (ret.Failed()) {
 			/* Restore the train we had. */
 			RestoreTrainBackup(original_src);
@@ -1339,39 +1321,25 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 
 /**
  * Sell a (single) train wagon/engine.
- * @param tile unused
  * @param flags type of operation
- * @param p1 the wagon/engine index
- * @param p2 the selling mode
- * - p2 = 0: only sell the single dragged wagon/engine (and any belonging rear-engines)
- * - p2 = 1: sell the vehicle and all vehicles following it in the chain
- *           if the wagon is dragged, don't delete the possibly belonging rear-engine to some front
- * @param text unused
+ * @param t     the train wagon to sell
+ * @param data  the selling mode
+ * - data = 0: only sell the single dragged wagon/engine (and any belonging rear-engines)
+ * - data = 1: sell the vehicle and all vehicles following it in the chain
+ *             if the wagon is dragged, don't delete the possibly belonging rear-engine to some front
+ * @param user  the user for the order backup.
  * @return the cost of this operation or an error
  */
-CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+CommandCost CmdSellRailWagon(DoCommandFlag flags, Vehicle *t, uint16 data, uint32 user)
 {
 	/* Check if we deleted a vehicle window */
 	Window *w = NULL;
 
-	Train *v = Train::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
-
-	CommandCost ret = CheckOwnership(v->owner);
-	if (ret.Failed()) return ret;
-
 	/* Sell a chain of vehicles or not? */
-	bool sell_chain = HasBit(p2, 0);
+	bool sell_chain = HasBit(data, 0);
 
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_VEHICLE_IS_DESTROYED);
-
-	v = v->GetFirstEnginePart();
+	Train *v = Train::From(t)->GetFirstEnginePart();
 	Train *first = v->First();
-
-	/* make sure the vehicle is stopped in the depot */
-	if (!first->IsStoppedInDepot()) {
-		return_cmd_error(STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT);
-	}
 
 	if (v->IsRearDualheaded()) return_cmd_error(STR_ERROR_REAR_ENGINE_FOLLOW_FRONT);
 
@@ -1388,7 +1356,7 @@ CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	ArrangeTrains(&sell_head, NULL, &new_head, v, sell_chain);
 
 	/* We don't need to validate the second train; it's going to be sold. */
-	ret = ValidateTrains(NULL, NULL, first, new_head);
+	CommandCost ret = ValidateTrains(NULL, NULL, first, new_head, (flags & DC_AUTOREPLACE) == 0);
 	if (ret.Failed()) {
 		/* Restore the train we had. */
 		RestoreTrainBackup(original);
@@ -1416,6 +1384,8 @@ CommandCost CmdSellRailWagon(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 
 			/* If we deleted a window then open a new one for the 'new' train */
 			if (IsLocalCompany() && w != NULL) ShowVehicleViewWindow(new_head);
+		} else if (v->IsPrimaryVehicle() && data & (MAKE_ORDER_BACKUP_FLAG >> 20)) {
+			OrderBackup::Backup(v, user);
 		}
 
 		/* We need to update the information about the train. */
@@ -1556,7 +1526,7 @@ static void ReverseTrainSwapVeh(Train *v, int l, int r)
 	}
 
 	/* Update power of the train in case tiles were different rail type. */
-	v->PowerChanged();
+	v->RailtypeChanged();
 }
 
 
@@ -1920,52 +1890,6 @@ CommandCost CmdForceTrainProceed(TileIndex tile, DoCommandFlag flags, uint32 p1,
 	}
 
 	return CommandCost();
-}
-
-/**
- * Refits a train to the specified cargo type.
- * @param tile unused
- * @param flags type of operation
- * @param p1 vehicle ID of the train to refit
- * @param p2 various bitstuffed elements
- * - p2 = (bit 0-7) - the new cargo type to refit to
- * - p2 = (bit 8-15) - the new cargo subtype to refit to
- * - p2 = (bit 16) - refit only this vehicle
- * @param text unused
- * @return the cost of this operation or an error
- */
-CommandCost CmdRefitRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
-{
-	CargoID new_cid = GB(p2, 0, 8);
-	byte new_subtype = GB(p2, 8, 8);
-	bool only_this = HasBit(p2, 16);
-
-	Train *v = Train::GetIfValid(p1);
-	if (v == NULL) return CMD_ERROR;
-
-	CommandCost ret = CheckOwnership(v->owner);
-	if (ret.Failed()) return ret;
-
-	if (!v->IsStoppedInDepot()) return_cmd_error(STR_TRAIN_MUST_BE_STOPPED);
-	if (v->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_VEHICLE_IS_DESTROYED);
-
-	/* Check cargo */
-	if (new_cid >= NUM_CARGO) return CMD_ERROR;
-
-	CommandCost cost = RefitVehicle(v, only_this, new_cid, new_subtype, flags);
-
-	/* Update the train's cached variables */
-	if (flags & DC_EXEC) {
-		Train *front = v->First();
-		front->ConsistChanged(false);
-		SetWindowDirty(WC_VEHICLE_DETAILS, front->index);
-		SetWindowDirty(WC_VEHICLE_DEPOT, front->tile);
-		InvalidateWindowClassesData(WC_TRAINS_LIST, 0);
-	} else {
-		v->InvalidateNewGRFCacheOfChain(); // always invalidate; querycost might have filled it
-	}
-
-	return cost;
 }
 
 /**
@@ -3355,8 +3279,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 					v->tile = gp.new_tile;
 
 					if (GetTileRailType(gp.new_tile) != GetTileRailType(gp.old_tile)) {
-						v->First()->PowerChanged();
-						v->First()->UpdateAcceleration();
+						v->First()->RailtypeChanged();
 					}
 
 					v->track = chosen_track;

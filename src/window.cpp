@@ -54,7 +54,7 @@ Point _cursorpos_drag_start;
 
 int _scrollbar_start_pos;
 int _scrollbar_size;
-byte _scroller_click_timeout;
+byte _scroller_click_timeout = 0;
 
 bool _scrolling_viewport;  ///< A viewport is being scrolled with the mouse.
 bool _mouse_hovering;      ///< The mouse is hovering over the same point.
@@ -446,7 +446,7 @@ static void DispatchMouseWheelEvent(Window *w, const NWidgetCore *nwid, int whee
 
 	/* Using wheel on caption/shade-box shades or unshades the window. */
 	if (nwid->type == WWT_CAPTION || nwid->type == WWT_SHADEBOX) {
-		w->SetShaded(!w->IsShaded());
+		w->SetShaded(wheel < 0);
 		return;
 	}
 
@@ -1373,14 +1373,16 @@ static void DecreaseWindowCounters()
 {
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_FRONT(w) {
-		/* Unclick scrollbar buttons if they are pressed. */
-		for (uint i = 0; i < w->nested_array_size; i++) {
-			NWidgetBase *nwid = w->nested_array[i];
-			if (nwid != NULL && (nwid->type == NWID_HSCROLLBAR || nwid->type == NWID_VSCROLLBAR)) {
-				NWidgetScrollbar *sb = static_cast<NWidgetScrollbar*>(nwid);
-				if (sb->disp_flags & (ND_SCROLLBAR_UP | ND_SCROLLBAR_DOWN)) {
-					sb->disp_flags &= ~(ND_SCROLLBAR_UP | ND_SCROLLBAR_DOWN);
-					sb->SetDirty(w);
+		if (_scroller_click_timeout == 0) {
+			/* Unclick scrollbar buttons if they are pressed. */
+			for (uint i = 0; i < w->nested_array_size; i++) {
+				NWidgetBase *nwid = w->nested_array[i];
+				if (nwid != NULL && (nwid->type == NWID_HSCROLLBAR || nwid->type == NWID_VSCROLLBAR)) {
+					NWidgetScrollbar *sb = static_cast<NWidgetScrollbar*>(nwid);
+					if (sb->disp_flags & (ND_SCROLLBAR_UP | ND_SCROLLBAR_DOWN)) {
+						sb->disp_flags &= ~(ND_SCROLLBAR_UP | ND_SCROLLBAR_DOWN);
+						sb->SetDirty(w);
+					}
 				}
 			}
 		}
@@ -2275,7 +2277,7 @@ void HandleMouseEvents()
 	static Point hover_pos = {0, 0};
 
 	if (_settings_client.gui.hover_delay > 0) {
-		if (click != MC_NONE || mousewheel != 0 || _left_button_down || _right_button_down ||
+		if (!_cursor.in_window || click != MC_NONE || mousewheel != 0 || _left_button_down || _right_button_down ||
 				hover_pos.x == 0 || abs(_cursor.pos.x - hover_pos.x) >= MAX_OFFSET_HOVER  ||
 				hover_pos.y == 0 || abs(_cursor.pos.y - hover_pos.y) >= MAX_OFFSET_HOVER) {
 			hover_pos = _cursor.pos;
@@ -2500,11 +2502,7 @@ void InvalidateWindowClassesData(WindowClass cls, int data)
  */
 void CallWindowTickEvent()
 {
-	if (_scroller_click_timeout > 3) {
-		_scroller_click_timeout -= 3;
-	} else {
-		_scroller_click_timeout = 0;
-	}
+	if (_scroller_click_timeout != 0) _scroller_click_timeout--;
 
 	Window *w;
 	FOR_ALL_WINDOWS_FROM_FRONT(w) {

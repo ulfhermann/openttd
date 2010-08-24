@@ -36,6 +36,7 @@ void InitializeVehicles();
 void InitializeDepots();
 void InitializeEngineRenews();
 void InitializeOrders();
+void InitializeOrderBackups();
 void InitializeClearLand();
 void InitializeRailGui();
 void InitializeRoadGui();
@@ -67,23 +68,23 @@ void InitializeGame(uint size_x, uint size_y, bool reset_date, bool reset_settin
 	_pause_mode = PM_UNPAUSED;
 	_fast_forward = 0;
 	_tick_counter = 0;
-	_date_fract = 0;
 	_cur_tileloop_tile = 0;
 	_thd.redsq = INVALID_TILE;
 	if (reset_settings) MakeNewgameSettingsLive();
 
-	InitializeSound();
-	InitializeMusic();
-
 	if (reset_date) {
-		SetDate(ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1));
+		SetDate(ConvertYMDToDate(_settings_game.game_creation.starting_year, 0, 1), 0);
 		InitializeOldNames();
 	}
+
+	InitializeSound();
+	InitializeMusic();
 
 	InitializeEngineRenews();
 	InitializeVehicles();
 	InitializeDepots();
 	InitializeOrders();
+	InitializeOrderBackups();
 	InitializeGroup();
 
 	InitNewsItemStructs();
