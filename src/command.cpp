@@ -14,6 +14,7 @@
 #include "landscape.h"
 #include "gui.h"
 #include "command_func.h"
+#include "network/network_type.h"
 #include "network/network.h"
 #include "genworld.h"
 #include "newgrf_storage.h"
@@ -77,21 +78,22 @@ CommandProc CmdBuildBuoy;
 
 CommandProc CmdPlantTree;
 
-CommandProc CmdBuildRailVehicle;
 CommandProc CmdMoveRailVehicle;
 
-CommandProc CmdSellRailWagon;
+CommandProc CmdBuildVehicle;
+CommandProc CmdSellVehicle;
+CommandProc CmdRefitVehicle;
 
 CommandProc CmdSendTrainToDepot;
 CommandProc CmdForceTrainProceed;
 CommandProc CmdReverseTrainDirection;
 
+CommandProc CmdClearOrderBackup;
 CommandProc CmdModifyOrder;
 CommandProc CmdSkipToOrder;
 CommandProc CmdDeleteOrder;
 CommandProc CmdInsertOrder;
 CommandProc CmdChangeServiceInt;
-CommandProc CmdRestoreOrderIndex;
 
 CommandProc CmdBuildIndustry;
 
@@ -112,19 +114,13 @@ CommandProc CmdRenamePresident;
 CommandProc CmdRenameStation;
 CommandProc CmdRenameDepot;
 
-CommandProc CmdSellAircraft;
-CommandProc CmdBuildAircraft;
 CommandProc CmdSendAircraftToHangar;
-CommandProc CmdRefitAircraft;
 
 CommandProc CmdPlaceSign;
 CommandProc CmdRenameSign;
 
-CommandProc CmdBuildRoadVeh;
-CommandProc CmdSellRoadVeh;
 CommandProc CmdSendRoadVehToDepot;
 CommandProc CmdTurnRoadVeh;
-CommandProc CmdRefitRoadVeh;
 
 CommandProc CmdPause;
 
@@ -141,10 +137,7 @@ CommandProc CmdDeleteTown;
 CommandProc CmdChangeSetting;
 CommandProc CmdChangeCompanySetting;
 
-CommandProc CmdSellShip;
-CommandProc CmdBuildShip;
 CommandProc CmdSendShipToDepot;
-CommandProc CmdRefitShip;
 
 CommandProc CmdOrderRefit;
 CommandProc CmdCloneOrder;
@@ -159,8 +152,6 @@ CommandProc CmdBuildLock;
 CommandProc CmdCompanyCtrl;
 
 CommandProc CmdLevelLand;
-
-CommandProc CmdRefitRailVehicle;
 
 CommandProc CmdBuildSignalTrack;
 CommandProc CmdRemoveSignalTrack;
@@ -229,14 +220,17 @@ static const Command _command_proc_table[] = {
 	DEF_CMD(CmdBuildShipDepot,                          CMD_AUTO), // CMD_BUILD_SHIP_DEPOT
 	DEF_CMD(CmdBuildBuoy,                               CMD_AUTO), // CMD_BUILD_BUOY
 	DEF_CMD(CmdPlantTree,                               CMD_AUTO), // CMD_PLANT_TREE
-	DEF_CMD(CmdBuildRailVehicle,                               0), // CMD_BUILD_RAIL_VEHICLE
-	DEF_CMD(CmdMoveRailVehicle,                                0), // CMD_MOVE_RAIL_VEHICLE
 
-	DEF_CMD(CmdSellRailWagon,                                  0), // CMD_SELL_RAIL_WAGON
+	DEF_CMD(CmdBuildVehicle,                       CMD_CLIENT_ID), // CMD_BUILD_VEHICLE
+	DEF_CMD(CmdSellVehicle,                        CMD_CLIENT_ID), // CMD_SELL_VEHICLE
+	DEF_CMD(CmdRefitVehicle,                                   0), // CMD_REFIT_VEHICLE
+
+	DEF_CMD(CmdMoveRailVehicle,                                0), // CMD_MOVE_RAIL_VEHICLE
 	DEF_CMD(CmdSendTrainToDepot,                               0), // CMD_SEND_TRAIN_TO_DEPOT
 	DEF_CMD(CmdForceTrainProceed,                              0), // CMD_FORCE_TRAIN_PROCEED
 	DEF_CMD(CmdReverseTrainDirection,                          0), // CMD_REVERSE_TRAIN_DIRECTION
 
+	DEF_CMD(CmdClearOrderBackup,                   CMD_CLIENT_ID), // CMD_CLEAR_ORDER_BACKUP
 	DEF_CMD(CmdModifyOrder,                                    0), // CMD_MODIFY_ORDER
 	DEF_CMD(CmdSkipToOrder,                                    0), // CMD_SKIP_TO_ORDER
 	DEF_CMD(CmdDeleteOrder,                                    0), // CMD_DELETE_ORDER
@@ -262,20 +256,13 @@ static const Command _command_proc_table[] = {
 	DEF_CMD(CmdRenameStation,                                  0), // CMD_RENAME_STATION
 	DEF_CMD(CmdRenameDepot,                                    0), // CMD_RENAME_DEPOT
 
-	DEF_CMD(CmdSellAircraft,                                   0), // CMD_SELL_AIRCRAFT
-
-	DEF_CMD(CmdBuildAircraft,                                  0), // CMD_BUILD_AIRCRAFT
 	DEF_CMD(CmdSendAircraftToHangar,                           0), // CMD_SEND_AIRCRAFT_TO_HANGAR
-	DEF_CMD(CmdRefitAircraft,                                  0), // CMD_REFIT_AIRCRAFT
 
 	DEF_CMD(CmdPlaceSign,                                      0), // CMD_PLACE_SIGN
 	DEF_CMD(CmdRenameSign,                                     0), // CMD_RENAME_SIGN
 
-	DEF_CMD(CmdBuildRoadVeh,                                   0), // CMD_BUILD_ROAD_VEH
-	DEF_CMD(CmdSellRoadVeh,                                    0), // CMD_SELL_ROAD_VEH
 	DEF_CMD(CmdSendRoadVehToDepot,                             0), // CMD_SEND_ROADVEH_TO_DEPOT
 	DEF_CMD(CmdTurnRoadVeh,                                    0), // CMD_TURN_ROADVEH
-	DEF_CMD(CmdRefitRoadVeh,                                   0), // CMD_REFIT_ROAD_VEH
 
 	DEF_CMD(CmdPause,                                 CMD_SERVER), // CMD_PAUSE
 
@@ -289,10 +276,7 @@ static const Command _command_proc_table[] = {
 	DEF_CMD(CmdExpandTown,                           CMD_OFFLINE), // CMD_EXPAND_TOWN
 	DEF_CMD(CmdDeleteTown,                           CMD_OFFLINE), // CMD_DELETE_TOWN
 
-	DEF_CMD(CmdSellShip,                                       0), // CMD_SELL_SHIP
-	DEF_CMD(CmdBuildShip,                                      0), // CMD_BUILD_SHIP
 	DEF_CMD(CmdSendShipToDepot,                                0), // CMD_SEND_SHIP_TO_DEPOT
-	DEF_CMD(CmdRefitShip,                                      0), // CMD_REFIT_SHIP
 
 	DEF_CMD(CmdOrderRefit,                                     0), // CMD_ORDER_REFIT
 	DEF_CMD(CmdCloneOrder,                                     0), // CMD_CLONE_ORDER
@@ -301,12 +285,10 @@ static const Command _command_proc_table[] = {
 
 	DEF_CMD(CmdMoneyCheat,                           CMD_OFFLINE), // CMD_MONEY_CHEAT
 	DEF_CMD(CmdBuildCanal,                              CMD_AUTO), // CMD_BUILD_CANAL
-	DEF_CMD(CmdCompanyCtrl,                        CMD_SPECTATOR), // CMD_COMPANY_CTRL
+	DEF_CMD(CmdCompanyCtrl,        CMD_SPECTATOR | CMD_CLIENT_ID), // CMD_COMPANY_CTRL
 
 	DEF_CMD(CmdLevelLand, CMD_ALL_TILES | CMD_NO_TEST | CMD_AUTO), // CMD_LEVEL_LAND; test run might clear tiles multiple times, in execution that only happens once
 
-	DEF_CMD(CmdRefitRailVehicle,                               0), // CMD_REFIT_RAIL_VEHICLE
-	DEF_CMD(CmdRestoreOrderIndex,                              0), // CMD_RESTORE_ORDER_INDEX
 	DEF_CMD(CmdBuildLock,                               CMD_AUTO), // CMD_BUILD_LOCK
 
 	DEF_CMD(CmdBuildSignalTrack,                        CMD_AUTO), // CMD_BUILD_SIGNAL_TRACK
@@ -518,6 +500,11 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 	int x = TileX(tile) * TILE_SIZE;
 	int y = TileY(tile) * TILE_SIZE;
 
+#ifdef ENABLE_NETWORK
+	/* Only set p2 when the command does not come from the network. */
+	if (!(cmd & CMD_NETWORK_COMMAND) && GetCommandFlags(cmd) & CMD_CLIENT_ID && p2 == 0) p2 = CLIENT_ID_SERVER;
+#endif
+
 	CommandCost res = DoCommandPInternal(tile, p1, p2, cmd, callback, text, my_cmd, estimate_only);
 	if (res.Failed()) {
 		/* Only show the error when it's for us. */
@@ -586,6 +573,11 @@ CommandCost DoCommandPInternal(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd,
 	uint cmd_flags = GetCommandFlags(cmd);
 	/* Flags get send to the DoCommand */
 	DoCommandFlag flags = CommandFlagsToDCFlags(cmd_flags);
+
+#ifdef ENABLE_NETWORK
+	/* Make sure p2 is properly set to a ClientID. */
+	assert(!(cmd_flags & CMD_CLIENT_ID) || p2 != 0);
+#endif
 
 	/* Do not even think about executing out-of-bounds tile-commands */
 	if (tile != 0 && (tile >= MapSize() || (!IsValidTile(tile) && (cmd_flags & CMD_ALL_TILES) == 0))) return_dcpi(CMD_ERROR, false);

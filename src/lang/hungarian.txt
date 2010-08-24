@@ -425,7 +425,7 @@ STR_SETTINGS_MENU_TRANSPARENT_SIGNS                             :Állomásnevek 
 
 ############ range for file menu starts
 STR_FILE_MENU_SAVE_GAME                                         :Játék mentése
-STR_FILE_MENU_LOAD_GAME                                         :Jaték betöltése
+STR_FILE_MENU_LOAD_GAME                                         :Játék betöltése
 STR_FILE_MENU_QUIT_GAME                                         :Kilépés a játékból
 STR_FILE_MENU_EXIT                                              :Kilépés
 ############ range ends here
@@ -504,8 +504,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Terület-inform
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Átváltás konzolra
 STR_ABOUT_MENU_AI_DEBUG                                         :MI debug
-STR_ABOUT_MENU_SCREENSHOT                                       :Képmentés (Ctrl+S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Óriás képmentés (Ctrl+G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Képmentés
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Kinagyított képmentés
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Képmentés teljes térképről
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Az 'OpenTTD'-ről
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Sprite elhelyező
 ############ range ends here
@@ -621,6 +622,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Részlet
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}Cég részletes megtekintése
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Járművek:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Állomások:
@@ -1820,6 +1822,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}A szerve
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}Ki vagy tiltva erről a szerverről
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}Ki lettél rúgva a szerverről
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}Ez a szerver nem engedi a csalást
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Túl sok parancsot küldtél a szervernek
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :általános hiba
@@ -1837,6 +1840,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :hibás vállala
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :a szerver kirúgott
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :csalni próbált
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :a szerver megtelt
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :túl sok parancsot küldött
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2210,7 +2214,7 @@ STR_LAND_AREA_INFORMATION_TRAM_OWNER                            :{BLACK}A villam
 STR_LAND_AREA_INFORMATION_RAIL_OWNER                            :{BLACK}A vasúti pálya tulajdonosa: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY                       :{BLACK}Helyi önkormányzat: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Nincs
-STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Koordináták: {LTBLUE}{NUM}x{NUM}x{NUM} ({STRING})
+STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Koordináták: {LTBLUE}{NUM} x {NUM} x {NUM} ({STRING})
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Épült: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Állomás osztálya: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}Állomás típusa: {LTBLUE}{STRING}
@@ -2377,7 +2381,7 @@ STR_MAPGEN_BORDER_MANUAL                                        :{BLACK}Kézi
 STR_MAPGEN_HEIGHTMAP_ROTATION                                   :{BLACK}Magasságtérkép elforgatása:
 STR_MAPGEN_HEIGHTMAP_NAME                                       :{BLACK}Magasságtérkép neve:
 STR_MAPGEN_HEIGHTMAP_SIZE_LABEL                                 :{BLACK}Méret:
-STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} * {NUM}
+STR_MAPGEN_HEIGHTMAP_SIZE                                       :{ORANGE}{NUM} x {NUM}
 
 STR_MAPGEN_RANDOM_SEED_OSKTITLE                                 :{BLACK}Irj be egy tetszőleges számot
 STR_MAPGEN_SNOW_LINE_QUERY_CAPT                                 :{WHITE}Hóhatár megváltoztatása
@@ -2458,7 +2462,10 @@ STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Adj meg 
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}NewGRF paraméterek megváltoztatása
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Bezárás
+STR_NEWGRF_PARAMETERS_RESET                                     :{BLACK}Alapértelmezett
+STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Összes paraméter alapértelmezettre állítása
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Paraméter {NUM}
+STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 
 # NewGRF inspect window
 STR_NEWGRF_INSPECT_CAPTION                                      :{WHITE}Megtekintés - {STRING}
@@ -2496,8 +2503,8 @@ STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} nem 
 STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} a TTD {STRING} verziójához van.
 STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} úgy lett tervezve, hogy együtt lesz használva ezzel: {STRING}
 STR_NEWGRF_ERROR_INVALID_PARAMETER                              :Hibás paraméterérték ehhez: {1:STRING}: paraméter {STRING} ({NUM})
-STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} muszáj hogy betöltődjön ezelőtt: {STRING}.
-STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} muszáj hogy ezután töltődjön be: {STRING}.
+STR_NEWGRF_ERROR_LOAD_BEFORE                                    :{1:STRING} muszáj, hogy betöltődjön ezelőtt: {STRING}.
+STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} muszáj, hogy ezután töltődjön be: {STRING}.
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} csak a {STRING} vagy nagyobb verziójú OpenTTD-vel működik.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :az adott GRF fájl célja egy másik lefordítása
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Túl sok NewGRF van betöltve.
@@ -2508,6 +2515,7 @@ STR_NEWGRF_ERROR_INVALID_ID                                     :Érvénytelen I
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} hibás sprite-ot tartalmaz. Minden hibás sprite piros kérdőjellel (?) kerül jelölésre.
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Túl sok Action 8 bejegyzést tartalmaz.
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Ál-sprite távoli végének olvasása.
+STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}A jelenleg használt grafikus alapcsomagból hiányzik számos sprite.{}Kérlek frissítsd a grafikus alapcsomagot!
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Figyelem!
@@ -2529,7 +2537,8 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Hiányzó 
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}A '{0:STRING}' viselkedése valószínűleg ütközést vagy összeomlást okoz.
-STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Megváltoztatja '{1:ENGINE}' jármű hosszát mikor nincs bent a járműtelepen.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}Megváltoztatta '{1:ENGINE}' meghajtott vagon-állapotát mikor nem volt bent a járműtelepen.
+STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Megváltoztatta '{1:ENGINE}' jármű hosszát mikor nem volt bent a járműtelepen.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}A '{1:COMPANY}' vállalat '{0:VEHICLE}'-jelű vonatának érvénytelen a hossza. Ezt a NewGRF-ek okozhatják. A játék elszállhat - lefagyhat.
 
 STR_NEWGRF_BUGGY                                                :{WHITE}A(z) '{0:STRING}' NewGRF helytelen információt tartalmaz.
@@ -2545,6 +2554,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<érvénytelen 
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Feliratok listája ({COMMA} db)
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Egyezés
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Szűrő törlése
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Egyezés ki/bekapcsolása a feliratok szövegei és a szűrő kulcsszó összehasonlítása közben
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Szűrő kulcsszó törlése
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Felirat szerkesztése
@@ -3211,7 +3224,7 @@ STR_ORDER_DROP_HALT_DEPOT                                       :Maradj ott
 STR_ORDER_SERVICE_TOOLTIP                                       :{BLACK}Célpont kihagyása, ha javítás szükséges
 
 STR_ORDER_CONDITIONAL_VARIABLE_TOOLTIP                          :{BLACK}A jármű adata ami alapján ugrani szeretnénk a parancssorban
-STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Rakodási állapot
+STR_ORDER_CONDITIONAL_LOAD_PERCENTAGE                           :Rakomány százaléka
 STR_ORDER_CONDITIONAL_RELIABILITY                               :Megbízhatóság
 STR_ORDER_CONDITIONAL_MAX_SPEED                                 :Maximális sebesség
 STR_ORDER_CONDITIONAL_AGE                                       :Életkor (év)
@@ -3364,6 +3377,7 @@ STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Egyezés
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}AI naplóbejegyzések a megállítási sorral való összehasonlításnál szóegyezés be/ki
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Folytatás
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Játék folytatása és MI visszakapcsolása
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}A MI kimeneti nyomonkövetésének megtekintése
 
 STR_ERROR_NO_AI                                                 :{WHITE}Az OpenTTD MI támogatás nélül lett fordítva...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... nincs elérhető MI!
@@ -3405,6 +3419,7 @@ STR_AI_LIST_CANCEL_TOOLTIP                                      :{BLACK}MI vált
 STR_AI_SETTINGS_CAPTION                                         :{WHITE}MI paraméterek
 STR_AI_SETTINGS_CLOSE                                           :{BLACK}Bezárás
 STR_AI_SETTINGS_RESET                                           :{BLACK}Visszaállítás
+STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORANGE}{STRING}
 
 # Vehicle loading indicators
 STR_PERCENT_UP_SMALL                                            :{TINYFONT}{WHITE}{NUM}%{UPARROW}
@@ -3559,7 +3574,7 @@ STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... csak
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Túl sok az állomás/rakodóhely
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Túl sok vasútállomás-rész
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Túl sok buszmegálló
-STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Túl sok teherautó-rakodóhely
+STR_ERROR_TOO_MANY_TRUCK_STOPS                                  :{WHITE}Túl sok a teherautó-rakodóhely
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_RAILROAD                         :{WHITE}Túl közel van egy másik vasútállomáshoz
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_STATION                          :{WHITE}Túl közel van egy másik állomáshoz/rakodóhelyhez
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_DOCK                             :{WHITE}Túl közel van egy másik kikötőhöz
@@ -3609,10 +3624,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Nem ép�
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Nem nevezheted át a járműtelepet...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}A járműtelepen kellene állnia ehhez
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}... járműtelepen kellene állnia ehhez
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... garázsban kellene állnia ehhez
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}A dokkban kellene állnia ehhez
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}A hangárban kellene állnia ehhez
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}... dokkban kellene állnia ehhez
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... hangárban kellene állnia ehhez
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Csak a járműtelepen álló vonatokat lehet megváltoztatni
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Túl hosszú a vonat
@@ -3692,6 +3707,7 @@ STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Az alag�
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Nem lehet kiásni a földet az alagút túloldalán
 
 # Object related errors
+STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... túl sok az objektum
 STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Nem építhető objektum...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Objektum van az útban
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... vállalat székháza van az útban

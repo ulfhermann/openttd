@@ -60,7 +60,7 @@ public:
 		ERR_VEHICLE_IS_DESTROYED,               // [STR_ERROR_VEHICLE_IS_DESTROYED]
 
 		/** Vehicle is not in a depot */
-		ERR_VEHICLE_NOT_IN_DEPOT,               // [STR_ERROR_AIRCRAFT_MUST_BE_STOPPED, STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT, STR_TRAIN_MUST_BE_STOPPED, STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT]
+		ERR_VEHICLE_NOT_IN_DEPOT,               // [STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR, STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT, STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT, STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT]
 
 		/** Vehicle is flying */
 		ERR_VEHICLE_IN_FLIGHT,                  // [STR_ERROR_AIRCRAFT_IS_IN_FLIGHT]
@@ -97,7 +97,7 @@ public:
 		VS_INVALID = 0xFF, ///< An invalid vehicle state.
 	};
 
-	static const int VEHICLE_INVALID = -1; ///< Invalid VehicleID.
+	static const VehicleID VEHICLE_INVALID = 0xFFFFF; ///< Invalid VehicleID.
 
 	/**
 	 * Checks whether the given vehicle is valid and owned by you.

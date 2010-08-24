@@ -537,8 +537,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Podaci o zemlji
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Otvori konzolu
 STR_ABOUT_MENU_AI_DEBUG                                         :Debugiranje UI
-STR_ABOUT_MENU_SCREENSHOT                                       :Slika zaslona (Ctrl+S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Ogromna slika zaslona (Ctrl+G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Slika zaslona
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Zumirano u slici zaslona
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Slika zaslona cijele mape
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :O 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Poravnjanje sprite-a
 ############ range ends here
@@ -654,6 +655,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detalji
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}Pogledaj detalje za ovu kompaniju
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Vozila:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Postaje:
@@ -1852,6 +1854,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}Posluži
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}Zabranjen ti je pristup ovom poslužitelju
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}Izbačen si iz igre
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}Na ovome poslužitelju varanje nije dopušteno
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Slali ste previše naredbi na server
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :opća greška
@@ -1869,6 +1872,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :krivi id tvrtke
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :izbačen od strane poslužitelja
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :je pokušao varati
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :poslužitelj je pun
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :slao je previše naredbi
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2490,6 +2494,8 @@ STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Unesite 
 # NewGRF parameters window
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Promijeni NewGRF parametre
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Zatvori
+STR_NEWGRF_PARAMETERS_RESET                                     :{BLACK}Resetiraj
+STR_NEWGRF_PARAMETERS_RESET_TOOLTIP                             :{BLACK}Namjesti sve parametre na osnovne vrijednosti
 STR_NEWGRF_PARAMETERS_DEFAULT_NAME                              :Parametar {NUM}
 STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORANGE}{STRING}
 
@@ -2541,6 +2547,7 @@ STR_NEWGRF_ERROR_INVALID_ID                                     :Pokušaj uporab
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} sadrži neispravan grafički znak. Svi neispravni grafički znakovi bit će pokazani kao crveni upitnik (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Sadrži mnoge Action 8 unose.
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Učitavanje izvan kraja pseudo-spritea.
+STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}Baznom grafičkom setu u uporabi nedostaju neki spriteovi.{}Molim, ažurirajte bazni grafički set.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Oprez!
@@ -2562,7 +2569,8 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Nedostaju 
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}Ponašanje NewGRF '{0:STRING}' će vjerojatno uzrokovati deharmonizaciju i/ili rušenje igre.
-STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Ovo mijenja dužinu vozila za '{1:ENGINE}' kada vozilo nije unutar spremišta.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}Vagon '{1:ENGINE}' promijenjen status motoriziranogt vagona kad nije u depou.
+STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Ovo mijenja dužinu vozila za '{1:ENGINE}' kada vozilo nije unutar depoa.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Vlak'{VEHICLE}' koji pripada tvrtci '{COMPANY}' neispravne je dužine. Uzrok problema je vjerojatno u NewGRF-ovima. Igra će se možda deharmonizirati ili srušiti.
 
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' daje netočne informacije.
@@ -2578,6 +2586,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<pogrešna indu
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Popis znakova - {COMMA} znak{P "" a ova}
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Velika i mala slova
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Poništi filter
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Koristi/ne koristi velika i mala slova kod usporedbe imena oznaka sa imenima sa slijedom filtera
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Poništi slijed filtera
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Izmijeni tekst znaka
@@ -3397,6 +3409,7 @@ STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Prilagod
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Prilagodi veličinu slova kod uspoređivanja zapisa UI poruka sa prekidnim nizom
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Nastavi
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Prekini pauzu i nastavi UI
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Pogledaj izvještaj otklanjanja neispravnosti za ovu UI
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD je izrađen bez podrške za UI-u...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... nema dostupnih UI-a!
@@ -3633,7 +3646,7 @@ STR_ERROR_CAN_T_CHANGE_WAYPOINT_NAME                            :{WHITE}Nije mog
 STR_ERROR_CAN_T_REMOVE_TRAIN_WAYPOINT                           :{WHITE}Nije moguće ukloniti željezničko čvorište odavde...
 STR_ERROR_MUST_REMOVE_RAILWAYPOINT_FIRST                        :{WHITE}Najprije je potrebno ukloniti željezničko čvorište
 STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}... plutača na putu
-STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... plutača je u uporabi!
+STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... plutača je u uporabi od strane druge kompanije!
 
 # Depot related errors
 STR_ERROR_CAN_T_BUILD_TRAIN_DEPOT                               :{WHITE}Ovdje nije moguće izgraditi spremište vlakova...
@@ -3643,10 +3656,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Ovdje ni
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Nije moguće preimenovati depo...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Vlak mora biti zaustavljen unutar spremišta
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}... mora biti zaustavljen unutar spremišta
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... mora biti zaustavljen unutar spremišta cestovnih vozila
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Brod mora biti zaustavljen u spremištu
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Zrakoplov mora biti zaustavljen u hangaru
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}... mora biti zaustavljen u spremištu
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... mora biti zaustavljen u hangaru
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Vlakovi mogu biti izmjenjeni jedino kad su zaustavljeni u spremištu
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Predugačak vlak
