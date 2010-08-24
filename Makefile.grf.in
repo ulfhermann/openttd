@@ -22,6 +22,8 @@ ROOT_DIR = !!ROOT_DIR!!
 GRF_DIR  = $(ROOT_DIR)/media/extra_grf
 BIN_DIR  = !!BIN_DIR!!/data
 OBJS_DIR = !!GRF_OBJS_DIR!!
+OS       = !!OS!!
+STAGE    = !!STAGE!!
 
 # Check if we want to show what we are doing
 ifdef VERBOSE
@@ -33,8 +35,11 @@ else
 endif
 
 # Some configurational settings for your environment.
-GRFCODEC := grfcodec
-NFORENUM := $(shell [ `which nforenum 2>/dev/null` ] && echo "nforenum" || echo "renum")
+# If GRFCodec doesn't know a command, it'll exit with a non-zero exit code.
+GRFCODEC := $(shell grfcodec -s -v >/dev/null 2>/dev/null && echo "grfcodec -s" || echo "grfcodec")
+# Old NFORenums don't give an error code when a parameter isn't known, so we have to work around that.
+NFORENUM := $(shell [ `nforenum -s -v 2>/dev/null | wc -l ` -eq 1 ] && echo "nforenum -s" || echo "nforenum")
+MD5SUM   := $(shell [ "$(OS)" = "OSX" ] && echo "md5 -r" || echo "md5sum")
 
 # Some "should not be changed" settings.
 NFO_FILES    := $(GRF_DIR)/*.nfo
@@ -52,13 +57,17 @@ $(BIN_DIR)/openttd.grf: $(PCX_FILES) $(NFO_FILES) $(OBJS_DIR)/sprites
 	@# Only try; if nforenum isn't available, just retouch the file as they likely didn't need it anyway.
 	$(Q) ($(NFORENUM) -? > /dev/null 2>&1 && $(MAKE) $(OBJS_DIR)/openttd.grf && cp $(OBJS_DIR)/openttd.grf $(BIN_DIR)/openttd.grf) || ([ -e $(BIN_DIR)/openttd.grf ] && touch $(BIN_DIR)/openttd.grf && echo "no NFORenum and GRFCodec found, skipping rebuild of openttd.grf...") || (echo "no NFORenum and GRFCodec found, but no openttd.grf either. Install NFORenum and GRFCodec." && exit 1)
 
+# Yeah, we'd like to use -i in the sed, but Mac OS X's sed and GNU sed just can't agree on the usage of -i. In any case either one of them fails.
 $(OBJS_DIR)/openttd.grf: $(PCX_FILES) $(NFO_FILES) $(OBJS_DIR)/sprites
+	$(E) '$(STAGE) Assembling openttd.nfo'
 	$(Q)-cp $(PCX_FILES) $(OBJS_DIR)/sprites 2> /dev/null
 	$(Q) gcc -I$(GRF_DIR) -C -E - < "$(GRF_DIR)/openttd.nfo" | sed -e '/^#/d' -e '/^$$/d' > $(OBJS_DIR)/sprites/openttd.nfo
 	$(Q) $(NFORENUM) $(OBJS_DIR)/sprites/openttd.nfo
+	$(E) '$(STAGE) Compiling openttd.grf'
 	$(Q) $(GRFCODEC) -e -m1 $(OBJS_DIR)/openttd.grf
 	$(Q) cp $(OBJS_DIR)/openttd.grf $(BIN_DIR)/openttd.grf
-	$(Q) for grf in $(BIN_DIR)/orig*.obg; do sed 's/^OPENTTD.GRF  = [0-9a-f]*$$/OPENTTD.GRF  = '`md5sum $(BIN_DIR)/openttd.grf | sed 's@ .*@@'`'/' -i $$grf; done
+	$(E) '$(STAGE) Updating base graphics sets'
+	$(Q) for grf in $(BIN_DIR)/orig*.obg; do sed 's/^OPENTTD.GRF  = [0-9a-f]*$$/OPENTTD.GRF  = '`$(MD5SUM) $(BIN_DIR)/openttd.grf | sed 's@ .*@@'`'/' $$grf > $$grf.tmp && mv $$grf.tmp $$grf; done
 
 # Clean up temporary files.
 clean:

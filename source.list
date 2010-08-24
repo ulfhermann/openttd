@@ -46,6 +46,7 @@ network/network_gamelist.cpp
 network/network_server.cpp
 network/network_udp.cpp
 openttd.cpp
+order_backup.cpp
 os_timer.cpp
 pbs.cpp
 rail.cpp
@@ -234,6 +235,7 @@ object.h
 object_base.h
 object_type.h
 openttd.h
+order_backup.h
 order_base.h
 order_func.h
 order_type.h
@@ -610,7 +612,6 @@ ai/ai_scanner.hpp
 ai/ai_storage.hpp
 
 # AI API
-ai/api/ai_abstractlist.hpp
 ai/api/ai_accounting.hpp
 ai/api/ai_airport.hpp
 ai/api/ai_base.hpp
@@ -666,7 +667,6 @@ ai/api/ai_waypoint.hpp
 ai/api/ai_waypointlist.hpp
 
 # AI API Implementation
-ai/api/ai_abstractlist.cpp
 ai/api/ai_accounting.cpp
 ai/api/ai_airport.cpp
 ai/api/ai_base.cpp

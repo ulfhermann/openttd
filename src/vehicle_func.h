@@ -43,7 +43,6 @@ void ResetVehiclePosHash();
 void ResetVehicleColourMap();
 
 byte GetBestFittingSubType(Vehicle *v_from, Vehicle *v_for);
-CommandCost RefitVehicle(Vehicle *v, bool only_this, CargoID new_cid, byte new_subtype, DoCommandFlag flags);
 
 void ViewportAddVehicles(DrawPixelInfo *dpi);
 
@@ -93,7 +92,7 @@ static inline bool IsCompanyBuildableVehicleType(const BaseVehicle *v)
 	return IsCompanyBuildableVehicleType(v->type);
 }
 
-const struct Livery *GetEngineLivery(EngineID engine_type, CompanyID company, EngineID parent_engine_type, const Vehicle *v);
+const struct Livery *GetEngineLivery(EngineID engine_type, CompanyID company, EngineID parent_engine_type, const Vehicle *v, byte livery_setting);
 
 /**
  * Get the colour map for an engine. This used for unbuilt engines in the user interface.

@@ -441,8 +441,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Landinformatie
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Schakel console aan/uit
 STR_ABOUT_MENU_AI_DEBUG                                         :AI Debug
-STR_ABOUT_MENU_SCREENSHOT                                       :Screenshot (Ctrl+S)
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Groot screenshot (Ctrl+G)
+STR_ABOUT_MENU_SCREENSHOT                                       :Screenshot
+STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :ingezoomde schermprint
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Hele kaart schermprint
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Over OpenTTD
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Afbeelding uitlijner
 ############ range ends here
@@ -558,6 +559,7 @@ STR_PERFORMANCE_DETAIL_KEY                                      :{BLACK}Detail
 STR_PERFORMANCE_DETAIL_AMOUNT_CURRENCY                          :{BLACK}({CURRCOMPACT}/{CURRCOMPACT})
 STR_PERFORMANCE_DETAIL_AMOUNT_INT                               :{BLACK}({COMMA}/{COMMA})
 STR_PERFORMANCE_DETAIL_PERCENT                                  :{WHITE}{NUM}%
+STR_PERFORMANCE_DETAIL_SELECT_COMPANY_TOOLTIP                   :{BLACK}Toon details van dit bedrijf
 ############ Those following lines need to be in this order!!
 STR_PERFORMANCE_DETAIL_VEHICLES                                 :{BLACK}Voertuigen:
 STR_PERFORMANCE_DETAIL_STATIONS                                 :{BLACK}Stations:
@@ -1756,6 +1758,7 @@ STR_NETWORK_ERROR_SERVER_FULL                                   :{WHITE}De serve
 STR_NETWORK_ERROR_SERVER_BANNED                                 :{WHITE}Je bent verbannen van deze server
 STR_NETWORK_ERROR_KICKED                                        :{WHITE}Je bent van de server geschopt
 STR_NETWORK_ERROR_CHEATER                                       :{WHITE}Valsspelen is niet toegestaan op deze server
+STR_NETWORK_ERROR_TOO_MANY_COMMANDS                             :{WHITE}Je stuurde teveel commando's naar de server
 
 ############ Leave those lines in this order!!
 STR_NETWORK_ERROR_CLIENT_GENERAL                                :algemene fout
@@ -1773,6 +1776,7 @@ STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :verkeerd bedrij
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :eruit geschopt door server
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :probeerde vals te spelen
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :server is vol
+STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :stuurde te veel commando's
 ############ End of leave-in-this-order
 
 # Network related errors
@@ -2445,6 +2449,7 @@ STR_NEWGRF_ERROR_INVALID_ID                                     :Poging tot gebr
 STR_NEWGRF_ERROR_CORRUPT_SPRITE                                 :{YELLOW}{STRING} bevat een ongeldige afbeelding. Alle ongeldige afbeeldingen worden getoond als een rood vraagteken (?).
 STR_NEWGRF_ERROR_MULTIPLE_ACTION_8                              :Bevat meerdere 'Action 8'-elementen.
 STR_NEWGRF_ERROR_READ_BOUNDS                                    :Lees voorbij einde van pseudo-sprite.
+STR_NEWGRF_ERROR_MISSING_SPRITES                                :{WHITE}De huidige basis graphics-set mist een aantal sprites..{}Werk de graphics-set bij aub.
 
 # NewGRF related 'general' warnings
 STR_NEWGRF_POPUP_CAUTION_CAPTION                                :{WHITE}Waarschuwing!
@@ -2466,6 +2471,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Ontbrekend
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}Gedrag van NewGRF '{0:STRING}' zal waarschijnlijk desynchronisatiefouten (desyncs) en/of crashes veroorzaken.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}Wagon '{1:ENGINE}' gewijzigde status van aandrijfeenheid wanneer niet in een depot
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Het verandert de lengte van voertuig '{1:ENGINE}' terwijl het niet in een depot is.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Trein '{VEHICLE}' behorend bij '{COMPANY}' heeft een ongeldige lengte. Het is waarschijnlijk veroorzaakt door problemen met NewGRFs. Het spel kan desynchroniseren of vastlopen.
 
@@ -2482,6 +2488,10 @@ STR_NEWGRF_INVALID_INDUSTRYTYPE                                 :<ongeldig bedri
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Bordenlijst - {COMMA} bord{P "" en}
+STR_SIGN_LIST_MATCH_CASE                                        :{BLACK}Hoofdletter gevoelig
+STR_SIGN_LIST_CLEAR                                             :{BLACK}Verwijder filter
+STR_SIGN_LIST_MATCH_CASE_TOOLTIP                                :{BLACK}Verwissel hoofdlettergevoeligheid bij het vergelijken van bordnamen met het filter
+STR_SIGN_LIST_CLEAR_TOOLTIP                                     :{BLACK}Verwijderd het filter
 
 # Sign window
 STR_EDIT_SIGN_CAPTION                                           :{WHITE}Wijzig tekst van bord
@@ -3301,6 +3311,7 @@ STR_AI_DEBUG_MATCH_CASE                                         :{BLACK}Hoofdlet
 STR_AI_DEBUG_MATCH_CASE_TOOLTIP                                 :{BLACK}Hoofdlettergevoeligheid bij vergelijken van AI logberichten t.o.v. de afbreekstring aan/uitzetten
 STR_AI_DEBUG_CONTINUE                                           :{BLACK}Doorgaan
 STR_AI_DEBUG_CONTINUE_TOOLTIP                                   :{BLACK}Het spel vervolgen en de AI voortzetten
+STR_AI_DEBUG_SELECT_AI_TOOLTIP                                  :{BLACK}Toon debug gegevens van deze AI
 
 STR_ERROR_NO_AI                                                 :{WHITE}OpenTTD is gecompileerd zonder AI ondersteuning...
 STR_ERROR_NO_AI_SUB                                             :{WHITE}... geen AI's beschikbaar!
@@ -3537,7 +3548,7 @@ STR_ERROR_CAN_T_CHANGE_WAYPOINT_NAME                            :{WHITE}Kan naam
 STR_ERROR_CAN_T_REMOVE_TRAIN_WAYPOINT                           :{WHITE}Kan hier treincontrolepost niet weghalen...
 STR_ERROR_MUST_REMOVE_RAILWAYPOINT_FIRST                        :{WHITE}Controlepost moet eerst verwijderd worden
 STR_ERROR_BUOY_IN_THE_WAY                                       :{WHITE}... boei in de weg
-STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... boei is in gebruik!
+STR_ERROR_BUOY_IS_IN_USE                                        :{WHITE}... boei is in gebruik door een ander bedrijf!
 
 # Depot related errors
 STR_ERROR_CAN_T_BUILD_TRAIN_DEPOT                               :{WHITE}Kan hier geen treindepot bouwen...
@@ -3547,10 +3558,10 @@ STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Kan dok 
 
 STR_ERROR_CAN_T_RENAME_DEPOT                                    :{WHITE}Kan depot niet hernoemen...
 
-STR_TRAIN_MUST_BE_STOPPED                                       :{WHITE}Trein moet gestopt zijn in depot
+STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}... moet gestopt zijn in een depot
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... moet gestopt zijn binnen een wegvoertuigdepot
-STR_ERROR_SHIP_MUST_BE_STOPPED_IN_DEPOT                         :{WHITE}Schip moet gestopt zijn binnen een dok
-STR_ERROR_AIRCRAFT_MUST_BE_STOPPED                              :{WHITE}Vliegtuig moet gestopt zijn in een hangar
+STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}... moet gestopt zijn binnen een dok
+STR_ERROR_AIRCRAFT_MUST_BE_STOPPED_INSIDE_HANGAR                :{WHITE}... moet gestopt zijn in een hangar
 
 STR_ERROR_TRAINS_CAN_ONLY_BE_ALTERED_INSIDE_A_DEPOT             :{WHITE}Treinen kunnen alleen aangepast worden als ze gestopt zijn binnen een depot
 STR_ERROR_TRAIN_TOO_LONG                                        :{WHITE}Trein te lang
@@ -3630,6 +3641,7 @@ STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Tunnel e
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Kan geen land uitgraven voor andere uiteinde tunnel
 
 # Object related errors
+STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... te veel objecten
 STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Kan object niet bouwen...
 STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Object in de weg
 STR_ERROR_COMPANY_HEADQUARTERS_IN                               :{WHITE}... bedrijfshoofdkwartier in de weg
