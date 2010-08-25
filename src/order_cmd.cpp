@@ -1779,29 +1779,15 @@ bool ProcessOrders(Vehicle *v)
 	 * it won't hit the point in code where may_reverse is checked)
 	 */
 	bool may_reverse = v->current_order.IsType(OT_NOTHING);
+	StationID update_last_visited = INVALID_STATION;
 
 	/* Check if we've reached a 'via' destination. */
 	if (((v->current_order.IsType(OT_GOTO_STATION) && (v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION)) || v->current_order.IsType(OT_GOTO_WAYPOINT)) &&
 			IsTileType(v->tile, MP_STATION) &&
 			v->current_order.GetDestination() == GetStationIndex(v->tile)) {
-		StationID last_visited = v->current_order.GetDestination();
+		update_last_visited = v->current_order.GetDestination();
 		UpdateVehicleTimetable(v, true);
 		v->IncrementOrderIndex();
-
-		/* We set the last visited station here because we do not want
-		 * the train to stop at this 'via' station if the next order
-		 * is a no-non-stop order; in that case not setting the last
-		 * visited station will cause the vehicle to still stop.
-		 *
-		 * However, this interferes with cargodist. The last station
-		 * visited should be the last station the vehicle has actually
-		 * stopped at. If the order isn't non-stop this doesn't matter
-		 * as cargodist will go crazy anyway. So we can set it in that
-		 * case.
-		 *
-		 * It will look ugly in the link graph, though ...
-		 */
-		if (!(v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS)) v->last_station_visited = last_visited;
 	}
 
 	/* Get the current order */
@@ -1839,6 +1825,23 @@ bool ProcessOrders(Vehicle *v)
 
 		case VEH_ROAD:
 		case VEH_TRAIN:
+			/* We set the last visited station here because we do not want
+			 * the train to stop at this 'via' station if the next order
+			 * is a no-non-stop order; in that case not setting the last
+			 * visited station will cause the vehicle to still stop.
+			 *
+			 * However, this interferes with cargodist. The last station
+			 * visited should be the last station the vehicle has actually
+			 * stopped at. If the order isn't non-stop this doesn't matter
+			 * as cargodist will go crazy anyway. So we can set it in that
+			 * case.
+			 */
+			if (update_last_visited != INVALID_STATION && !(v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS)) {
+				if (Station::IsValidID(v->last_station_visited)) {
+					IncreaseStats(Station::Get(v->last_station_visited), v, update_last_visited, false);
+				}
+				v->last_station_visited = update_last_visited;
+			}
 			break;
 
 		case VEH_AIRCRAFT:
