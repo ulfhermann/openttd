@@ -630,6 +630,12 @@
     <ClInclude Include="..\src\newgrf_airporttiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\newgrf_animation_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\newgrf_animation_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\newgrf_callbacks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -667,6 +673,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\newgrf_industrytiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\newgrf_object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\newgrf_properties.h">
@@ -2161,6 +2170,9 @@
       <Filter>NewGRF</Filter>
     </ClCompile>
     <ClCompile Include="..\src\newgrf_industrytiles.cpp">
+      <Filter>NewGRF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\newgrf_object.cpp">
       <Filter>NewGRF</Filter>
     </ClCompile>
     <ClCompile Include="..\src\newgrf_railtype.cpp">
