@@ -157,17 +157,6 @@ static inline void SetIndustryGfx(TileIndex t, IndustryGfx gfx)
 }
 
 /**
- * Tests if the industry tile was built on water.
- * @param t the industry tile
- * @return true iff on water
- */
-static inline bool IsIndustryTileOnWater(TileIndex t)
-{
-	assert(IsTileType(t, MP_INDUSTRY));
-	return (GetWaterClass(t) != WATER_CLASS_INVALID);
-}
-
-/**
  * Returns this indutry tile's construction counter value
  * @param tile the tile to query
  * @pre IsTileType(tile, MP_INDUSTRY)
@@ -229,29 +218,6 @@ static inline void SetIndustryAnimationLoop(TileIndex tile, byte count)
 }
 
 /**
- * Get the animation state
- * @param tile the tile to get the animation state of
- * @pre IsTileType(tile, MP_INDUSTRY)
- */
-static inline byte GetIndustryAnimationState(TileIndex tile)
-{
-	assert(IsTileType(tile, MP_INDUSTRY));
-	return _m[tile].m3;
-}
-
-/**
- * Set the animation state
- * @param tile the tile to set the animation state of
- * @param state the new animation state
- * @pre IsTileType(tile, MP_INDUSTRY)
- */
-static inline void SetIndustryAnimationState(TileIndex tile, byte state)
-{
-	assert(IsTileType(tile, MP_INDUSTRY));
-	_m[tile].m3 = state;
-}
-
-/**
  * Get the random bits for this tile.
  * Used for grf callbacks
  * @param tile TileIndex of the tile to query
@@ -261,7 +227,7 @@ static inline void SetIndustryAnimationState(TileIndex tile, byte state)
 static inline byte GetIndustryRandomBits(TileIndex tile)
 {
 	assert(IsTileType(tile, MP_INDUSTRY));
-	return _me[tile].m7;
+	return _m[tile].m3;
 }
 
 /**
@@ -274,7 +240,7 @@ static inline byte GetIndustryRandomBits(TileIndex tile)
 static inline void SetIndustryRandomBits(TileIndex tile, byte bits)
 {
 	assert(IsTileType(tile, MP_INDUSTRY));
-	_me[tile].m7 = bits;
+	_m[tile].m3 = bits;
 }
 
 /**
@@ -317,12 +283,12 @@ static inline void MakeIndustry(TileIndex t, IndustryID index, IndustryGfx gfx, 
 	SetTileType(t, MP_INDUSTRY);
 	_m[t].m1 = 0;
 	_m[t].m2 = index;
-	_m[t].m3 = 0;
+	SetIndustryRandomBits(t, random); // m3
 	_m[t].m4 = 0;
 	SetIndustryGfx(t, gfx); // m5, part of m6
 	SetIndustryTriggers(t, 0); // rest of m6
-	SetIndustryRandomBits(t, random); // m7
 	SetWaterClass(t, wc);
+	_me[t].m7 = 0;
 }
 
 #endif /* INDUSTRY_MAP_H */

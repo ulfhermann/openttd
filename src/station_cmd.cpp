@@ -13,7 +13,6 @@
 #include "aircraft.h"
 #include "bridge_map.h"
 #include "cmd_helper.h"
-#include "landscape.h"
 #include "viewport_func.h"
 #include "command_func.h"
 #include "town.h"
@@ -46,7 +45,6 @@
 #include "debug.h"
 #include "core/random_func.hpp"
 #include "company_base.h"
-#include "newgrf.h"
 #include "table/airporttile_ids.h"
 #include "newgrf_airporttiles.h"
 #include "order_backup.h"
@@ -1240,7 +1238,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 		if (statspec != NULL) {
 			/* Include this station spec's animation trigger bitmask
 			 * in the station's cached copy. */
-			st->cached_anim_triggers |= statspec->anim_triggers;
+			st->cached_anim_triggers |= statspec->animation.triggers;
 		}
 
 		tile_delta = (axis == AXIS_X ? TileDiffXY(1, 0) : TileDiffXY(0, 1));
@@ -1277,7 +1275,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 
 				SetCustomStationSpecIndex(tile, specindex);
 				SetStationTileRandomBits(tile, GB(Random(), 0, 4));
-				SetStationAnimationFrame(tile, 0);
+				SetAnimationFrame(tile, 0);
 
 				if (statspec != NULL) {
 					/* Use a fixed axis for GetPlatformInfo as our platforms / numtracks are always the right way around */
@@ -1288,7 +1286,7 @@ CommandCost CmdBuildRailStation(TileIndex tile_org, DoCommandFlag flags, uint32 
 					if (callback != CALLBACK_FAILED && callback < 8) SetStationGfx(tile, (callback & ~1) + axis);
 
 					/* Trigger station animation -- after building? */
-					StationAnimationTrigger(st, tile, STAT_ANIM_BUILT);
+					TriggerStationAnimation(st, tile, SAT_BUILT);
 				}
 
 				tile += tile_delta;
@@ -2227,7 +2225,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			SetStationTileRandomBits(cur_tile, GB(Random(), 0, 4));
 			st->airport.Add(cur_tile);
 
-			if (AirportTileSpec::Get(GetTranslatedAirportTileID(it->gfx))->animation_info != 0xFFFF) AddAnimatedTile(cur_tile);
+			if (AirportTileSpec::Get(GetTranslatedAirportTileID(it->gfx))->animation.status != ANIM_STATUS_NO_ANIMATION) AddAnimatedTile(cur_tile);
 		} while ((++it)->ti.x != -0x80);
 
 		/* Only call the animation trigger after all tiles have been built */
@@ -2494,12 +2492,11 @@ static CommandCost RemoveDock(TileIndex tile, DoCommandFlag flags)
 
 	if (flags & DC_EXEC) {
 		DoClearSquare(tile1);
+		MarkTileDirtyByTile(tile1);
 		MakeWaterKeepingClass(tile2, st->owner);
 
 		st->rect.AfterRemoveTile(st, tile1);
 		st->rect.AfterRemoveTile(st, tile2);
-
-		MarkTileDirtyByTile(tile2);
 
 		st->dock_tile = INVALID_TILE;
 		st->facilities &= ~FACIL_DOCK;
@@ -2578,19 +2575,19 @@ static void DrawTile_Station(TileInfo *ti)
 		}
 		switch (gfx) {
 			case APT_RADAR_GRASS_FENCE_SW:
-				t = &_station_display_datas_airport_radar_grass_fence_sw[GetStationAnimationFrame(ti->tile)];
+				t = &_station_display_datas_airport_radar_grass_fence_sw[GetAnimationFrame(ti->tile)];
 				break;
 			case APT_GRASS_FENCE_NE_FLAG:
-				t = &_station_display_datas_airport_flag_grass_fence_ne[GetStationAnimationFrame(ti->tile)];
+				t = &_station_display_datas_airport_flag_grass_fence_ne[GetAnimationFrame(ti->tile)];
 				break;
 			case APT_RADAR_FENCE_SW:
-				t = &_station_display_datas_airport_radar_fence_sw[GetStationAnimationFrame(ti->tile)];
+				t = &_station_display_datas_airport_radar_fence_sw[GetAnimationFrame(ti->tile)];
 				break;
 			case APT_RADAR_FENCE_NE:
-				t = &_station_display_datas_airport_radar_fence_ne[GetStationAnimationFrame(ti->tile)];
+				t = &_station_display_datas_airport_radar_fence_ne[GetAnimationFrame(ti->tile)];
 				break;
 			case APT_GRASS_FENCE_NE_FLAG_2:
-				t = &_station_display_datas_airport_flag_grass_fence_ne_2[GetStationAnimationFrame(ti->tile)];
+				t = &_station_display_datas_airport_flag_grass_fence_ne_2[GetAnimationFrame(ti->tile)];
 				break;
 		}
 	}
@@ -2807,7 +2804,7 @@ static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 	}
 
 	if (IsAirport(tile)) {
-		const AirportTileSpec *ats = AirportTileSpec::Get(GetAirportGfx(tile));
+		const AirportTileSpec *ats = AirportTileSpec::GetByTile(tile);
 		td->airport_tile_name = ats->name;
 
 		if (ats->grf_prop.grffile != NULL) {
@@ -3153,8 +3150,8 @@ void OnTick_Station()
 		if ((_tick_counter + st->index) % 250 == 0) {
 			/* Stop processing this station if it was deleted */
 			if (!StationHandleBigTick(st)) continue;
-			StationAnimationTrigger(st, st->xy, STAT_ANIM_250_TICKS);
-			if (Station::IsExpected(st)) AirportAnimationTrigger(Station::From(st), AAT_STATION_250_ticks);
+			TriggerStationAnimation(st, st->xy, SAT_250_TICKS);
+			if (Station::IsExpected(st)) AirportAnimationTrigger(Station::From(st), AAT_STATION_250_TICKS);
 		}
 	}
 }
@@ -3188,7 +3185,7 @@ static void UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceT
 	st->goods[type].cargo.Append(new CargoPacket(st->index, st->xy, amount, source_type, source_id));
 	SetBit(st->goods[type].acceptance_pickup, GoodsEntry::PICKUP);
 
-	StationAnimationTrigger(st, st->xy, STAT_ANIM_NEW_CARGO, type);
+	TriggerStationAnimation(st, st->xy, SAT_NEW_CARGO, type);
 	AirportAnimationTrigger(st, AAT_STATION_NEW_CARGO, type);
 
 	SetWindowDirty(WC_STATION_VIEW, st->index);
@@ -3400,7 +3397,6 @@ void DeleteOilRig(TileIndex tile)
 	Station *st = Station::GetByTile(tile);
 
 	MakeWaterKeepingClass(tile, OWNER_NONE);
-	MarkTileDirtyByTile(tile);
 
 	st->dock_tile = INVALID_TILE;
 	st->airport.Clear();

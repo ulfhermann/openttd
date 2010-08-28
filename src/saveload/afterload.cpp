@@ -22,7 +22,6 @@
 #include "../industry.h"
 #include "../clear_map.h"
 #include "../vehicle_func.h"
-#include "../debug.h"
 #include "../string_func.h"
 #include "../date_func.h"
 #include "../roadveh.h"
@@ -31,7 +30,6 @@
 #include "../waypoint_base.h"
 #include "../roadstop_base.h"
 #include "../tunnelbridge_map.h"
-#include "../landscape.h"
 #include "../pathfinder/yapf/yapf_cache.h"
 #include "../elrail_func.h"
 #include "../signs_func.h"
@@ -48,9 +46,7 @@
 #include "../animated_tile_func.h"
 #include "../subsidy_base.h"
 #include "../subsidy_func.h"
-#include "../company_base.h"
 #include "../newgrf.h"
-#include "../engine_base.h"
 #include "../engine_func.h"
 #include "../rail_gui.h"
 #include "../core/backup_type.hpp"
@@ -570,7 +566,7 @@ bool AfterLoadGame()
 	}
 
 	/* The value of _date_fract got divided, so make sure that old games are converted correctly. */
-	if (CheckSavegameVersionOldStyle(11, 1)) _date_fract /= 885;
+	if (CheckSavegameVersionOldStyle(11, 1) || (CheckSavegameVersion(147) && _date_fract > DAY_TICKS)) _date_fract /= 885;
 
 	/* Update current year
 	 * must be done before loading sprites as some newgrfs check it */
@@ -1283,19 +1279,19 @@ bool AfterLoadGame()
 			if (IsTileType(t, MP_INDUSTRY)) {
 				switch (GetIndustryGfx(t)) {
 					case GFX_POWERPLANT_SPARKS:
-						SetIndustryAnimationState(t, GB(_m[t].m1, 2, 5));
+						_m[t].m3 = GB(_m[t].m1, 2, 5);
 						break;
 
 					case GFX_OILWELL_ANIMATED_1:
 					case GFX_OILWELL_ANIMATED_2:
 					case GFX_OILWELL_ANIMATED_3:
-						SetIndustryAnimationState(t, GB(_m[t].m1, 0, 2));
+						_m[t].m3 = GB(_m[t].m1, 0, 2);
 						break;
 
 					case GFX_COAL_MINE_TOWER_ANIMATED:
 					case GFX_COPPER_MINE_TOWER_ANIMATED:
 					case GFX_GOLD_MINE_TOWER_ANIMATED:
-						 SetIndustryAnimationState(t, _m[t].m1);
+						 _m[t].m3 = _m[t].m1;
 						 break;
 
 					default: // No animation states to change
@@ -1684,7 +1680,8 @@ bool AfterLoadGame()
 		/* Increase HouseAnimationFrame from 5 to 7 bits */
 		for (TileIndex t = 0; t < map_size; t++) {
 			if (IsTileType(t, MP_HOUSE) && GetHouseType(t) >= NEW_HOUSE_OFFSET) {
-				SetHouseAnimationFrame(t, GB(_m[t].m6, 3, 5));
+				SB(_m[t].m6, 2, 6, GB(_m[t].m6, 3, 5));
+				SB(_m[t].m3, 5, 1, 0);
 			}
 		}
 	}
@@ -2175,7 +2172,7 @@ bool AfterLoadGame()
 						break;
 					}
 					if (old_gfx < atc[i].old_start + atc[i].num_frames) {
-						SetStationAnimationFrame(t, old_gfx - atc[i].old_start);
+						SetAnimationFrame(t, old_gfx - atc[i].old_start);
 						SetStationGfx(t, atc[i].old_start - offset);
 						break;
 					}
@@ -2245,6 +2242,38 @@ bool AfterLoadGame()
 				AircraftNextAirportPos_and_Order(v);
 				/* get aircraft back on running altitude */
 				if ((v->vehstatus & VS_CRASHED) == 0) SetAircraftPosition(v, v->x_pos, v->y_pos, GetAircraftFlyingAltitude(v));
+			}
+		}
+	}
+
+	/* Move the animation frame to the same location (m7) for all objects. */
+	if (CheckSavegameVersion(147)) {
+		for (TileIndex t = 0; t < map_size; t++) {
+			switch (GetTileType(t)) {
+				case MP_HOUSE:
+					if (GetHouseType(t) >= NEW_HOUSE_OFFSET) {
+						uint per_proc = _me[t].m7;
+						_me[t].m7 = GB(_m[t].m6, 2, 6) | (GB(_m[t].m3, 5, 1) << 6);
+						SB(_m[t].m3, 5, 1, 0);
+						SB(_m[t].m6, 2, 6, min(per_proc, 63));
+					}
+					break;
+
+				case MP_INDUSTRY: {
+					uint rand = _me[t].m7;
+					_me[t].m7 = _m[t].m3;
+					_m[t].m3 = rand;
+					break;
+				}
+
+				case MP_OBJECT:
+					_me[t].m7 = _m[t].m3;
+					_m[t].m3 = 0;
+					break;
+
+				default:
+					/* For stations/airports it's already at m7 */
+					break;
 			}
 		}
 	}

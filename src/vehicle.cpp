@@ -11,11 +11,9 @@
 
 #include "stdafx.h"
 #include "gui.h"
-#include "debug.h"
 #include "roadveh.h"
 #include "ship.h"
 #include "spritecache.h"
-#include "landscape.h"
 #include "timetable.h"
 #include "viewport_func.h"
 #include "news_func.h"
@@ -25,7 +23,6 @@
 #include "train.h"
 #include "aircraft.h"
 #include "newgrf_debug.h"
-#include "newgrf_engine.h"
 #include "newgrf_sound.h"
 #include "newgrf_station.h"
 #include "group.h"
@@ -40,7 +37,6 @@
 #include "autoreplace_gui.h"
 #include "station_base.h"
 #include "ai/ai.hpp"
-#include "core/smallmap_type.hpp"
 #include "depot_func.h"
 #include "network/network.h"
 #include "core/pool_func.hpp"
@@ -48,12 +44,12 @@
 #include "articulated_vehicles.h"
 #include "roadstop_base.h"
 #include "core/random_func.hpp"
-#include "engine_base.h"
-#include "newgrf.h"
 #include "core/backup_type.hpp"
 #include "order_backup.h"
+#include "sound_func.h"
+#include "effectvehicle_func.h"
+#include "effectvehicle_base.h"
 
-#include "table/sprites.h"
 #include "table/strings.h"
 
 #define GEN_HASH(x, y) ((GB((y), 6, 6) << 6) + GB((x), 7, 6))
@@ -990,6 +986,66 @@ void CheckVehicleBreakdown(Vehicle *v)
 	}
 }
 
+bool Vehicle::HandleBreakdown()
+{
+	/* Possible states for Vehicle::breakdown_ctr
+	 * 0  - vehicle is running normally
+	 * 1  - vehicle is currently broken down
+	 * 2  - vehicle is going to break down now
+	 * >2 - vehicle is counting down to the actual breakdown event */
+	switch (this->breakdown_ctr) {
+		case 0:
+			return false;
+
+		case 2:
+			this->breakdown_ctr = 1;
+
+			if (this->breakdowns_since_last_service != 255) {
+				this->breakdowns_since_last_service++;
+			}
+
+			this->MarkDirty();
+			SetWindowDirty(WC_VEHICLE_VIEW, this->index);
+			SetWindowDirty(WC_VEHICLE_DETAILS, this->index);
+
+			if (this->type == VEH_AIRCRAFT) {
+				/* Aircraft just need this flag, the rest is handled elsewhere */
+				this->vehstatus |= VS_AIRCRAFT_BROKEN;
+			} else {
+				this->cur_speed = 0;
+
+				if (!PlayVehicleSound(this, VSE_BREAKDOWN)) {
+					SndPlayVehicleFx((_settings_game.game_creation.landscape != LT_TOYLAND) ?
+						(this->type == VEH_TRAIN ? SND_10_TRAIN_BREAKDOWN : SND_0F_VEHICLE_BREAKDOWN) :
+						(this->type == VEH_TRAIN ? SND_3A_COMEDY_BREAKDOWN_2 : SND_35_COMEDY_BREAKDOWN), this);
+				}
+
+				if (!(this->vehstatus & VS_HIDDEN)) {
+					EffectVehicle *u = CreateEffectVehicleRel(this, 4, 4, 5, EV_BREAKDOWN_SMOKE);
+					if (u != NULL) u->animation_state = this->breakdown_delay * 2;
+				}
+			}
+			/* FALL THROUGH */
+		case 1:
+			/* Aircraft breakdowns end only when arriving at the airport */
+			if (this->type == VEH_AIRCRAFT) return false;
+
+			/* For trains this function is called twice per tick, so decrease v->breakdown_delay at half the rate */
+			if ((this->tick_counter & (this->type == VEH_TRAIN ? 3 : 1)) == 0) {
+				if (--this->breakdown_delay == 0) {
+					this->breakdown_ctr = 0;
+					this->MarkDirty();
+					SetWindowDirty(WC_VEHICLE_VIEW, this->index);
+				}
+			}
+			return true;
+
+		default:
+			if (!this->current_order.IsType(OT_LOADING)) this->breakdown_ctr--;
+			return false;
+	}
+}
+
 void AgeVehicle(Vehicle *v)
 {
 	if (v->age < MAX_DAY) v->age++;
@@ -1684,7 +1740,7 @@ void Vehicle::LeaveStation()
 
 	if (this->type == VEH_TRAIN && !(this->vehstatus & VS_CRASHED)) {
 		/* Trigger station animation (trains only) */
-		if (IsTileType(this->tile, MP_STATION)) StationAnimationTrigger(st, this->tile, STAT_ANIM_TRAIN_DEPARTS);
+		if (IsTileType(this->tile, MP_STATION)) TriggerStationAnimation(st, this->tile, SAT_TRAIN_DEPARTS);
 
 		SetBit(Train::From(this)->flags, VRF_LEAVING_STATION);
 	}
