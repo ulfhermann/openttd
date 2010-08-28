@@ -15,23 +15,18 @@
 #include "waypoint_base.h"
 #include "roadstop_base.h"
 #include "newgrf_cargo.h"
-#include "newgrf_commons.h"
 #include "newgrf_station.h"
 #include "newgrf_spritegroup.h"
 #include "newgrf_sound.h"
 #include "newgrf_railtype.h"
 #include "town.h"
 #include "newgrf_town.h"
-#include "date_func.h"
 #include "company_func.h"
-#include "animated_tile_func.h"
-#include "functions.h"
 #include "tunnelbridge_map.h"
 #include "newgrf.h"
-#include "core/random_func.hpp"
+#include "newgrf_animation_base.h"
 #include "newgrf_class_func.h"
 
-#include "table/strings.h"
 
 template <typename Tspec, typename Tid, Tid Tmax>
 /* static */ void NewGRFClass<Tspec, Tid, Tmax>::InsertDefaults()
@@ -325,13 +320,13 @@ static uint32 StationGetVariable(const ResolverObject *object, byte variable, by
 			return _svc.v49;
 
 		case 0x4A: // Animation frame of tile
-			return GetStationAnimationFrame(tile);
+			return GetAnimationFrame(tile);
 
 		/* Variables which use the parameter */
 		/* Variables 0x60 to 0x65 are handled separately below */
 		case 0x66: // Animation frame of nearby tile
 			if (parameter != 0) tile = GetNearbyTile(parameter, tile);
-			return st->TileBelongsToRailStation(tile) ? GetStationAnimationFrame(tile) : UINT_MAX;
+			return st->TileBelongsToRailStation(tile) ? GetAnimationFrame(tile) : UINT_MAX;
 
 		case 0x67: { // Land info of nearby tile
 			Axis axis = GetRailStationAxis(tile);
@@ -811,92 +806,24 @@ bool IsStationTileElectrifiable(TileIndex tile)
 		!HasBit(statspec->wires, GetStationGfx(tile));
 }
 
+/** Helper class for animation control. */
+struct StationAnimationBase : public AnimationBase<StationAnimationBase, StationSpec, BaseStation, GetStationCallback> {
+	static const CallbackID cb_animation_speed      = CBID_STATION_ANIMATION_SPEED;
+	static const CallbackID cb_animation_next_frame = CBID_STATION_ANIM_NEXT_FRAME;
+
+	static const StationCallbackMask cbm_animation_speed      = CBM_STATION_ANIMATION_SPEED;
+	static const StationCallbackMask cbm_animation_next_frame = CBM_STATION_ANIMATION_NEXT_FRAME;
+};
+
 void AnimateStationTile(TileIndex tile)
 {
 	const StationSpec *ss = GetStationSpec(tile);
 	if (ss == NULL) return;
 
-	const BaseStation *st = BaseStation::GetByTile(tile);
-
-	uint8 animation_speed = ss->anim_speed;
-
-	if (HasBit(ss->callback_mask, CBM_STATION_ANIMATION_SPEED)) {
-		uint16 callback = GetStationCallback(CBID_STATION_ANIMATION_SPEED, 0, 0, ss, st, tile);
-		if (callback != CALLBACK_FAILED) animation_speed = Clamp(callback & 0xFF, 0, 16);
-	}
-
-	if (_tick_counter % (1 << animation_speed) != 0) return;
-
-	uint8 frame      = GetStationAnimationFrame(tile);
-	uint8 num_frames = ss->anim_frames;
-
-	bool frame_set_by_callback = false;
-
-	if (HasBit(ss->callback_mask, CBM_STATION_ANIMATION_NEXT_FRAME)) {
-		uint32 param = HasBit(ss->flags, SSF_CB141_RANDOM_BITS) ? Random() : 0;
-		uint16 callback = GetStationCallback(CBID_STATION_ANIM_NEXT_FRAME, param, 0, ss, st, tile);
-
-		if (callback != CALLBACK_FAILED) {
-			frame_set_by_callback = true;
-
-			switch (callback & 0xFF) {
-				case 0xFF:
-					DeleteAnimatedTile(tile);
-					break;
-
-				case 0xFE:
-					frame_set_by_callback = false;
-					break;
-
-				default:
-					frame = callback & 0xFF;
-					break;
-			}
-
-			/* If the lower 7 bits of the upper byte of the callback
-			 * result are not empty, it is a sound effect. */
-			if (GB(callback, 8, 7) != 0) PlayTileSound(ss->grf_prop.grffile, GB(callback, 8, 7), tile);
-		}
-	}
-
-	if (!frame_set_by_callback) {
-		if (frame < num_frames) {
-			frame++;
-		} else if (frame == num_frames && HasBit(ss->anim_status, 0)) {
-			/* This animation loops, so start again from the beginning */
-			frame = 0;
-		} else {
-			/* This animation doesn't loop, so stay here */
-			DeleteAnimatedTile(tile);
-		}
-	}
-
-	SetStationAnimationFrame(tile, frame);
-	MarkTileDirtyByTile(tile);
+	StationAnimationBase::AnimateTile(ss, BaseStation::GetByTile(tile), tile, HasBit(ss->flags, SSF_CB141_RANDOM_BITS));
 }
 
-
-static void ChangeStationAnimationFrame(const StationSpec *ss, const BaseStation *st, TileIndex tile, uint16 random_bits, StatAnimTrigger trigger, CargoID cargo_type)
-{
-	uint16 callback = GetStationCallback(CBID_STATION_ANIM_START_STOP, (random_bits << 16) | Random(), (uint8)trigger | (cargo_type << 8), ss, st, tile);
-	if (callback == CALLBACK_FAILED) return;
-
-	switch (callback & 0xFF) {
-		case 0xFD: /* Do nothing. */         break;
-		case 0xFE: AddAnimatedTile(tile);    break;
-		case 0xFF: DeleteAnimatedTile(tile); break;
-		default:
-			SetStationAnimationFrame(tile, callback);
-			AddAnimatedTile(tile);
-			break;
-	}
-
-	/* If the lower 7 bits of the upper byte of the callback
-	 * result are not empty, it is a sound effect. */
-	if (GB(callback, 8, 7) != 0) PlayTileSound(ss->grf_prop.grffile, GB(callback, 8, 7), tile);
-}
-
-void StationAnimationTrigger(const BaseStation *st, TileIndex tile, StatAnimTrigger trigger, CargoID cargo_type)
+void TriggerStationAnimation(const BaseStation *st, TileIndex tile, StationAnimationTrigger trigger, CargoID cargo_type)
 {
 	/* List of coverage areas for each animation trigger */
 	static const TriggerArea tas[] = {
@@ -917,14 +844,14 @@ void StationAnimationTrigger(const BaseStation *st, TileIndex tile, StatAnimTrig
 	TILE_AREA_LOOP(tile, area) {
 		if (st->TileBelongsToRailStation(tile)) {
 			const StationSpec *ss = GetStationSpec(tile);
-			if (ss != NULL && HasBit(ss->anim_triggers, trigger)) {
+			if (ss != NULL && HasBit(ss->animation.triggers, trigger)) {
 				CargoID cargo;
 				if (cargo_type == CT_INVALID) {
 					cargo = CT_INVALID;
 				} else {
 					cargo = GetReverseCargoTranslation(cargo_type, ss->grf_prop.grffile);
 				}
-				ChangeStationAnimationFrame(ss, st, tile, random_bits, trigger, cargo);
+				StationAnimationBase::ChangeAnimationFrame(CBID_STATION_ANIM_START_STOP, ss, st, tile, (random_bits << 16) | Random(), (uint8)trigger | (cargo << 8));
 			}
 		}
 	}
@@ -942,7 +869,7 @@ void StationUpdateAnimTriggers(BaseStation *st)
 	 * of this station. */
 	for (uint i = 0; i < st->num_specs; i++) {
 		const StationSpec *ss = st->speclist[i].spec;
-		if (ss != NULL) st->cached_anim_triggers |= ss->anim_triggers;
+		if (ss != NULL) st->cached_anim_triggers |= ss->animation.triggers;
 	}
 }
 
