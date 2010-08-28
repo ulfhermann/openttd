@@ -14,7 +14,6 @@
 #include "industry.h"
 #include "newgrf.h"
 #include "newgrf_industries.h"
-#include "newgrf_commons.h"
 #include "newgrf_text.h"
 #include "newgrf_town.h"
 #include "newgrf_cargo.h"
@@ -251,7 +250,7 @@ uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte par
 		case 0x63:
 			tile = GetNearbyTile(parameter, tile);
 			if (IsTileType(tile, MP_INDUSTRY) && Industry::GetByTile(tile) == industry) {
-				return GetIndustryAnimationState(tile);
+				return GetAnimationFrame(tile);
 			}
 			return 0xFFFFFFFF;
 

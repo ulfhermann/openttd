@@ -25,7 +25,6 @@
 #include "genworld.h"
 #include "newgrf_debug.h"
 #include "newgrf_house.h"
-#include "newgrf_commons.h"
 #include "newgrf_text.h"
 #include "newgrf_config.h"
 #include "autoslope.h"
@@ -39,7 +38,6 @@
 #include "animated_tile_func.h"
 #include "date_func.h"
 #include "subsidy_func.h"
-#include "core/smallmap_type.hpp"
 #include "core/pool_func.hpp"
 #include "town.h"
 #include "townname_func.h"
@@ -411,18 +409,12 @@ static void MakeSingleHouseBigger(TileIndex tile)
 	IncHouseConstructionTick(tile);
 	if (GetHouseConstructionTick(tile) != 0) return;
 
-	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
-
-	/* Check and/or  */
-	if (HasBit(hs->callback_mask, CBM_HOUSE_CONSTRUCTION_STATE_CHANGE)) {
-		uint16 callback_res = GetHouseCallback(CBID_HOUSE_CONSTRUCTION_STATE_CHANGE, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
-		if (callback_res != CALLBACK_FAILED) ChangeHouseAnimationFrame(hs->grf_prop.grffile, tile, callback_res);
-	}
+	AnimateNewHouseConstruction(tile);
 
 	if (IsHouseCompleted(tile)) {
 		/* Now that construction is complete, we can add the population of the
 		 * building to the town. */
-		ChangePopulation(Town::GetByTile(tile), hs->population);
+		ChangePopulation(Town::GetByTile(tile), HouseSpec::Get(GetHouseType(tile))->population);
 		ResetHouseAge(tile);
 	}
 	MarkTileDirtyByTile(tile);
