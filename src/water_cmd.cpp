@@ -37,7 +37,6 @@
 #include "core/backup_type.hpp"
 #include "date_func.h"
 
-#include "table/sprites.h"
 #include "table/strings.h"
 
 /**
@@ -137,8 +136,6 @@ CommandCost CmdBuildShipDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, ui
 
 void MakeWaterKeepingClass(TileIndex tile, Owner o)
 {
-	assert(IsTileType(tile, MP_WATER) || (IsTileType(tile, MP_STATION) && (IsBuoy(tile) || IsDock(tile) || IsOilRig(tile))) || IsTileType(tile, MP_INDUSTRY));
-
 	WaterClass wc = GetWaterClass(tile);
 
 	/* Autoslope might turn an originally canal or river tile into land */
@@ -147,12 +144,18 @@ void MakeWaterKeepingClass(TileIndex tile, Owner o)
 
 	if (wc == WATER_CLASS_SEA && z > 0) wc = WATER_CLASS_CANAL;
 
+	/* Zero map array and terminate animation */
+	DoClearSquare(tile);
+
+	/* Maybe change to water */
 	switch (wc) {
 		case WATER_CLASS_SEA:   MakeSea(tile);                break;
 		case WATER_CLASS_CANAL: MakeCanal(tile, o, Random()); break;
 		case WATER_CLASS_RIVER: MakeRiver(tile, Random());    break;
-		default:                DoClearSquare(tile);          break;
+		default: break;
 	}
+
+	MarkTileDirtyByTile(tile);
 }
 
 static CommandCost RemoveShipDepot(TileIndex tile, DoCommandFlag flags)
@@ -176,8 +179,6 @@ static CommandCost RemoveShipDepot(TileIndex tile, DoCommandFlag flags)
 
 		MakeWaterKeepingClass(tile,  GetTileOwner(tile));
 		MakeWaterKeepingClass(tile2, GetTileOwner(tile2));
-		MarkTileDirtyByTile(tile);
-		MarkTileDirtyByTile(tile2);
 	}
 
 	return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_CLEAR_DEPOT_SHIP]);
@@ -270,8 +271,6 @@ static CommandCost RemoveLock(TileIndex tile, DoCommandFlag flags)
 		DoClearSquare(tile);
 		MakeWaterKeepingClass(tile + delta, GetTileOwner(tile));
 		MakeWaterKeepingClass(tile - delta, GetTileOwner(tile));
-		MarkTileDirtyByTile(tile - delta);
-		MarkTileDirtyByTile(tile + delta);
 		MarkCanalsAndRiversAroundDirty(tile - delta);
 		MarkCanalsAndRiversAroundDirty(tile + delta);
 	}
@@ -497,8 +496,10 @@ static bool IsWateredTile(TileIndex tile, Direction from)
 			if ((IsTileType(src_tile, MP_STATION) && IsOilRig(src_tile)) ||
 			    (IsTileType(src_tile, MP_INDUSTRY) && GetIndustryIndex(src_tile) == GetIndustryIndex(tile))) return true;
 
-			return IsIndustryTileOnWater(tile);
+			return IsTileOnWater(tile);
 		}
+
+		case MP_OBJECT: return IsTileOnWater(tile);
 
 		case MP_TUNNELBRIDGE: return GetTunnelBridgeTransportType(tile) == TRANSPORT_WATER && ReverseDiagDir(GetTunnelBridgeDirection(tile)) == DirToDiagDir(from);
 
@@ -932,9 +933,12 @@ FloodingBehaviour GetFloodingBehaviour(TileIndex tile)
 			if (IsCoast(tile)) {
 				Slope tileh = GetTileSlope(tile, NULL);
 				return (IsSlopeWithOneCornerRaised(tileh) ? FLOOD_ACTIVE : FLOOD_DRYUP);
-			} else {
-				return (GetWaterClass(tile) == WATER_CLASS_SEA) ? FLOOD_ACTIVE : FLOOD_NONE;
 			}
+			/* FALL THROUGH */
+		case MP_STATION:
+		case MP_INDUSTRY:
+		case MP_OBJECT:
+			return (GetWaterClass(tile) == WATER_CLASS_SEA) ? FLOOD_ACTIVE : FLOOD_NONE;
 
 		case MP_RAILWAY:
 			if (GetRailGroundType(tile) == RAIL_GROUND_WATER) {
@@ -944,15 +948,6 @@ FloodingBehaviour GetFloodingBehaviour(TileIndex tile)
 
 		case MP_TREES:
 			return (GetTreeGround(tile) == TREE_GROUND_SHORE ? FLOOD_DRYUP : FLOOD_NONE);
-
-		case MP_STATION:
-			if (IsBuoy(tile) || (IsDock(tile) && GetTileSlope(tile, NULL) == SLOPE_FLAT) || IsOilRig(tile)) {
-				return (GetWaterClass(tile) == WATER_CLASS_SEA ? FLOOD_ACTIVE : FLOOD_NONE);
-			}
-			return FLOOD_NONE;
-
-		case MP_INDUSTRY:
-			return ((IsIndustryTileOnWater(tile) && GetWaterClass(tile) == WATER_CLASS_SEA) ? FLOOD_ACTIVE : FLOOD_NONE);
 
 		default:
 			return FLOOD_NONE;
