@@ -140,31 +140,6 @@ static inline void SetLiftPosition(TileIndex t, byte pos)
 }
 
 /**
- * Get the current animation frame for this house
- * @param t the tile
- * @pre IsTileType(t, MP_HOUSE)
- * @return frame number
- */
-static inline byte GetHouseAnimationFrame(TileIndex t)
-{
-	assert(IsTileType(t, MP_HOUSE));
-	return GB(_m[t].m6, 2, 6) | (GB(_m[t].m3, 5, 1) << 6);
-}
-
-/**
- * Set a new animation frame for this house
- * @param t the tile
- * @param frame the new frame number
- * @pre IsTileType(t, MP_HOUSE)
- */
-static inline void SetHouseAnimationFrame(TileIndex t, byte frame)
-{
-	assert(IsTileType(t, MP_HOUSE));
-	SB(_m[t].m6, 2, 6, GB(frame, 0, 6));
-	SB(_m[t].m3, 5, 1, GB(frame, 6, 1));
-}
-
-/**
  * Get the completion of this house
  * @param t the tile
  * @return true if it is, false if it is not
@@ -184,31 +159,6 @@ static inline void SetHouseCompleted(TileIndex t, bool status)
 {
 	assert(IsTileType(t, MP_HOUSE));
 	SB(_m[t].m3, 7, 1, !!status);
-}
-
-/**
- * Make the tile a house.
- * @param t tile index
- * @param tid Town index
- * @param counter of construction step
- * @param stage of construction (used for drawing)
- * @param type of house.  Index into house specs array
- * @param random_bits required for newgrf houses
- * @pre IsTileType(t, MP_CLEAR)
- */
-static inline void MakeHouseTile(TileIndex t, TownID tid, byte counter, byte stage, HouseID type, byte random_bits)
-{
-	assert(IsTileType(t, MP_CLEAR));
-
-	SetTileType(t, MP_HOUSE);
-	_m[t].m1 = random_bits;
-	_m[t].m2 = tid;
-	_m[t].m3 = 0;
-	SetHouseType(t, type);
-	SetHouseCompleted(t, stage == TOWN_HOUSE_COMPLETED);
-	_m[t].m5 = IsHouseCompleted(t) ? 0 : (stage << 3 | counter);
-	SetHouseAnimationFrame(t, 0);
-	_me[t].m7 = HouseSpec::Get(type)->processing_time;
 }
 
 /**
@@ -365,7 +315,7 @@ static inline byte GetHouseTriggers(TileIndex t)
 static inline byte GetHouseProcessingTime(TileIndex t)
 {
 	assert(IsTileType(t, MP_HOUSE));
-	return _me[t].m7;
+	return GB(_m[t].m6, 2, 6);
 }
 
 /**
@@ -377,7 +327,7 @@ static inline byte GetHouseProcessingTime(TileIndex t)
 static inline void SetHouseProcessingTime(TileIndex t, byte time)
 {
 	assert(IsTileType(t, MP_HOUSE));
-	_me[t].m7 = time;
+	SB(_m[t].m6, 2, 6, time);
 }
 
 /**
@@ -388,7 +338,32 @@ static inline void SetHouseProcessingTime(TileIndex t, byte time)
 static inline void DecHouseProcessingTime(TileIndex t)
 {
 	assert(IsTileType(t, MP_HOUSE));
-	_me[t].m7--;
+	_m[t].m6 -= 1 << 2;
+}
+
+/**
+ * Make the tile a house.
+ * @param t tile index
+ * @param tid Town index
+ * @param counter of construction step
+ * @param stage of construction (used for drawing)
+ * @param type of house.  Index into house specs array
+ * @param random_bits required for newgrf houses
+ * @pre IsTileType(t, MP_CLEAR)
+ */
+static inline void MakeHouseTile(TileIndex t, TownID tid, byte counter, byte stage, HouseID type, byte random_bits)
+{
+	assert(IsTileType(t, MP_CLEAR));
+
+	SetTileType(t, MP_HOUSE);
+	_m[t].m1 = random_bits;
+	_m[t].m2 = tid;
+	_m[t].m3 = 0;
+	SetHouseType(t, type);
+	SetHouseCompleted(t, stage == TOWN_HOUSE_COMPLETED);
+	_m[t].m5 = IsHouseCompleted(t) ? 0 : (stage << 3 | counter);
+	SetAnimationFrame(t, 0);
+	SetHouseProcessingTime(t, HouseSpec::Get(type)->processing_time);
 }
 
 #endif /* TOWN_MAP_H */
