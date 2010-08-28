@@ -18,10 +18,9 @@
 #include "bridge_map.h"
 #include "genworld.h"
 #include "autoslope.h"
-#include "transparency.h"
 #include "functions.h"
+#include "water.h"
 #include "window_func.h"
-#include "vehicle_func.h"
 #include "company_gui.h"
 #include "cheat_type.h"
 #include "landscape_type.h"
@@ -32,10 +31,10 @@
 #include "core/pool_func.hpp"
 #include "object_map.h"
 #include "object_base.h"
+#include "newgrf_object.h"
 #include "date_func.h"
 
 #include "table/strings.h"
-#include "table/sprites.h"
 #include "table/object_land.h"
 
 ObjectPool _object_pool("Object");
@@ -52,17 +51,6 @@ void InitializeObjects()
 	_object_pool.CleanPool();
 }
 
-/* static */ const ObjectSpec *ObjectSpec::Get(ObjectType index)
-{
-	assert(index < OBJECT_MAX);
-	return &_original_objects[index];
-}
-
-/* static */ const ObjectSpec *ObjectSpec::GetByTile(TileIndex tile)
-{
-	return ObjectSpec::Get(GetObjectType(tile));
-}
-
 void BuildObject(ObjectType type, TileIndex tile, CompanyID owner, Town *town)
 {
 	const ObjectSpec *spec = ObjectSpec::Get(type);
@@ -76,7 +64,8 @@ void BuildObject(ObjectType type, TileIndex tile, CompanyID owner, Town *town)
 	assert(o->town != NULL);
 
 	TILE_AREA_LOOP(t, ta) {
-		MakeObject(t, type, owner, o->index, WATER_CLASS_INVALID);
+		WaterClass wc = (IsWaterTile(t) ? GetWaterClass(t) : WATER_CLASS_INVALID);
+		MakeObject(t, type, owner, o->index, wc, Random());
 		MarkTileDirtyByTile(t);
 	}
 }
@@ -89,13 +78,13 @@ static void IncreaseAnimationStage(TileIndex tile)
 {
 	TileArea ta = Object::GetByTile(tile)->location;
 	TILE_AREA_LOOP(t, ta) {
-		SetObjectAnimationStage(t, GetObjectAnimationStage(t) + 1);
+		SetAnimationFrame(t, GetAnimationFrame(t) + 1);
 		MarkTileDirtyByTile(t);
 	}
 }
 
 /** We encode the company HQ size in the animation stage. */
-#define GetCompanyHQSize GetObjectAnimationStage
+#define GetCompanyHQSize GetAnimationFrame
 /** We encode the company HQ size in the animation stage. */
 #define IncreaseCompanyHQSize IncreaseAnimationStage
 
@@ -145,18 +134,9 @@ CommandCost CmdBuildObject(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	int size_y = GB(spec->size, 4, 4);
 	TileArea ta(tile, size_x, size_y);
 
-	if (spec->flags & OBJECT_FLAG_REQUIRE_FLAT) {
-		TILE_AREA_LOOP(tile_cur, ta) {
-			if (GetTileSlope(tile, NULL) != SLOPE_FLAT) return_cmd_error(STR_ERROR_FLAT_LAND_REQUIRED);
-		}
-	}
-
-	/* If we require flat land, we've already tested that.
-	 * So we only need to check for clear land. */
-	if (spec->flags & (OBJECT_FLAG_HAS_NO_FOUNDATION | OBJECT_FLAG_REQUIRE_FLAT)) {
-		TILE_AREA_LOOP(tile_cur, ta) {
-			cost.AddCost(DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR));
-		}
+	if (type == OBJECT_OWNED_LAND) {
+		/* Owned land is special as it can be placed on any slope. */
+		cost.AddCost(DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR));
 	} else {
 		cost.AddCost(CheckFlatLand(ta, flags));
 	}
@@ -164,6 +144,11 @@ CommandCost CmdBuildObject(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 	int hq_score = 0;
 	switch (type) {
+		case OBJECT_TRANSMITTER:
+		case OBJECT_LIGHTHOUSE:
+			if (GetTileSlope(tile, NULL) != SLOPE_FLAT) return_cmd_error(STR_ERROR_FLAT_LAND_REQUIRED);
+			break;
+
 		case OBJECT_OWNED_LAND:
 			if (IsTileType(tile, MP_OBJECT) &&
 					IsTileOwner(tile, _current_company) &&
@@ -328,7 +313,7 @@ static CommandCost ClearTile_Object(TileIndex tile, DoCommandFlag flags)
 	}
 
 	if (flags & DC_EXEC) {
-		TILE_AREA_LOOP(tile_cur, ta) DoClearSquare(tile_cur);
+		TILE_AREA_LOOP(tile_cur, ta) MakeWaterKeepingClass(tile_cur, GetTileOwner(tile_cur));
 		delete o;
 	}
 
@@ -368,6 +353,8 @@ static void GetTileDesc_Object(TileIndex tile, TileDesc *td)
 
 static void TileLoop_Object(TileIndex tile)
 {
+	if (IsTileOnWater(tile)) TileLoop_Water(tile);
+
 	if (!IsCompanyHQ(tile)) return;
 
 	/* HQ accepts passenger and mail; but we have to divide the values
@@ -531,18 +518,12 @@ static void ChangeTileOwner_Object(TileIndex tile, Owner old_owner, Owner new_ow
 static CommandCost TerraformTile_Object(TileIndex tile, DoCommandFlag flags, uint z_new, Slope tileh_new)
 {
 	ObjectType type = GetObjectType(tile);
-	const ObjectSpec *spec = ObjectSpec::Get(type);
 
-	if (spec->flags & OBJECT_FLAG_REQUIRE_FLAT) {
-		/* If a flat tile is required by the object, then terraforming is never good. */
-		return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
-	}
-
-	if (IsOwnedLand(tile)) {
+	if (type == OBJECT_OWNED_LAND) {
 		/* Owned land remains unsold */
 		CommandCost ret = CheckTileOwnership(tile);
 		if (ret.Succeeded()) return CommandCost();
-	} else if (AutoslopeEnabled()) {
+	} else if (AutoslopeEnabled() && type != OBJECT_TRANSMITTER && type != OBJECT_LIGHTHOUSE) {
 		if (!IsSteepSlope(tileh_new) && (z_new + GetSlopeMaxZ(tileh_new) == GetTileMaxZ(tile))) return CommandCost(EXPENSES_CONSTRUCTION, _price[PR_BUILD_FOUNDATION]);
 	}
 
