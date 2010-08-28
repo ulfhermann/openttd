@@ -18,16 +18,12 @@
 #include "newgrf_spritegroup.h"
 #include "newgrf_town.h"
 #include "newgrf_sound.h"
-#include "newgrf_commons.h"
-#include "functions.h"
 #include "company_func.h"
-#include "animated_tile_func.h"
 #include "company_base.h"
 #include "town.h"
-#include "core/random_func.hpp"
 #include "sprite.h"
 #include "genworld.h"
-#include "date_func.h"
+#include "newgrf_animation_base.h"
 
 static BuildingCounts<uint32> _building_counts;
 static HouseClassMapping _class_mapping[HOUSE_CLASS_MAX];
@@ -286,7 +282,7 @@ static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte
 		case 0x45: return _generating_world ? 1 : 0;
 
 		/* Current animation frame. */
-		case 0x46: return IsTileType(tile, MP_HOUSE) ? GetHouseAnimationFrame(tile) : 0;
+		case 0x46: return IsTileType(tile, MP_HOUSE) ? GetAnimationFrame(tile) : 0;
 
 		/* Position of the house */
 		case 0x47: return TileY(tile) << 16 | TileX(tile);
@@ -309,7 +305,7 @@ static uint32 HouseGetVariable(const ResolverObject *object, byte variable, byte
 		/* Current animation frame of nearby house tiles */
 		case 0x63: {
 			TileIndex testtile = GetNearbyTile(parameter, tile);
-			return IsTileType(testtile, MP_HOUSE) ? GetHouseAnimationFrame(testtile) : 0;
+			return IsTileType(testtile, MP_HOUSE) ? GetAnimationFrame(testtile) : 0;
 		}
 
 		/* Cargo acceptance history of nearby stations */
@@ -369,7 +365,7 @@ static const SpriteGroup *HouseResolveReal(const ResolverObject *object, const R
  *
  * Returns a resolver object to be used with feature 07 spritegroups.
  */
-static void NewHouseResolver(ResolverObject *res, HouseID house_id, TileIndex tile, Town *town)
+static void NewHouseResolver(ResolverObject *res, HouseID house_id, TileIndex tile, const Town *town)
 {
 	res->GetRandomBits = HouseGetRandomBits;
 	res->GetTriggers   = HouseGetTriggers;
@@ -394,7 +390,7 @@ static void NewHouseResolver(ResolverObject *res, HouseID house_id, TileIndex ti
 	res->grffile         = (hs != NULL ? hs->grf_prop.grffile : NULL);
 }
 
-uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, HouseID house_id, Town *town, TileIndex tile, bool not_yet_constructed, uint8 initial_random_bits)
+uint16 GetHouseCallback(CallbackID callback, uint32 param1, uint32 param2, HouseID house_id, const Town *town, TileIndex tile, bool not_yet_constructed, uint8 initial_random_bits)
 {
 	ResolverObject object;
 	const SpriteGroup *group;
@@ -471,82 +467,36 @@ void DrawNewHouseTile(TileInfo *ti, HouseID house_id)
 	}
 }
 
+/* Simple wrapper for GetHouseCallback to keep the animation unified. */
+uint16 GetSimpleHouseCallback(CallbackID callback, uint32 param1, uint32 param2, const HouseSpec *spec, const Town *town, TileIndex tile)
+{
+	return GetHouseCallback(callback, param1, param2, spec - HouseSpec::Get(0), town, tile);
+}
+
+/** Helper class for animation control. */
+struct HouseAnimationBase : public AnimationBase<HouseAnimationBase, HouseSpec, Town, GetSimpleHouseCallback> {
+	static const CallbackID cb_animation_speed      = CBID_HOUSE_ANIMATION_SPEED;
+	static const CallbackID cb_animation_next_frame = CBID_HOUSE_ANIMATION_NEXT_FRAME;
+
+	static const HouseCallbackMask cbm_animation_speed      = CBM_HOUSE_ANIMATION_SPEED;
+	static const HouseCallbackMask cbm_animation_next_frame = CBM_HOUSE_ANIMATION_NEXT_FRAME;
+};
+
 void AnimateNewHouseTile(TileIndex tile)
 {
 	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
-	byte animation_speed = hs->animation_speed;
-	bool frame_set_by_callback = false;
+	if (hs == NULL) return;
 
-	if (HasBit(hs->callback_mask, CBM_HOUSE_ANIMATION_SPEED)) {
-		uint16 callback_res = GetHouseCallback(CBID_HOUSE_ANIMATION_SPEED, 0, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
-		if (callback_res != CALLBACK_FAILED) animation_speed = Clamp(callback_res & 0xFF, 2, 16);
-	}
-
-	/* An animation speed of 2 means the animation frame changes 4 ticks, and
-	 * increasing this value by one doubles the wait. 2 is the minimum value
-	 * allowed for animation_speed, which corresponds to 120ms, and 16 is the
-	 * maximum, corresponding to around 33 minutes. */
-	if (_tick_counter % (1 << animation_speed) != 0) return;
-
-	byte frame      = GetHouseAnimationFrame(tile);
-	byte num_frames = GB(hs->animation_frames, 0, 7);
-
-	if (HasBit(hs->callback_mask, CBM_HOUSE_ANIMATION_NEXT_FRAME)) {
-		uint32 param = (hs->extra_flags & CALLBACK_1A_RANDOM_BITS) ? Random() : 0;
-		uint16 callback_res = GetHouseCallback(CBID_HOUSE_ANIMATION_NEXT_FRAME, param, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
-
-		if (callback_res != CALLBACK_FAILED) {
-			frame_set_by_callback = true;
-
-			switch (callback_res & 0xFF) {
-				case 0xFF:
-					DeleteAnimatedTile(tile);
-					break;
-				case 0xFE:
-					/* Carry on as normal. */
-					frame_set_by_callback = false;
-					break;
-				default:
-					frame = callback_res & 0xFF;
-					break;
-			}
-
-			/* If the lower 7 bits of the upper byte of the callback
-			 * result are not empty, it is a sound effect. */
-			if (GB(callback_res, 8, 7) != 0) PlayTileSound(hs->grf_prop.grffile, GB(callback_res, 8, 7), tile);
-		}
-	}
-
-	if (!frame_set_by_callback) {
-		if (frame < num_frames) {
-			frame++;
-		} else if (frame == num_frames && HasBit(hs->animation_frames, 7)) {
-			/* This animation loops, so start again from the beginning */
-			frame = 0;
-		} else {
-			/* This animation doesn't loop, so stay here */
-			DeleteAnimatedTile(tile);
-		}
-	}
-
-	SetHouseAnimationFrame(tile, frame);
-	MarkTileDirtyByTile(tile);
+	HouseAnimationBase::AnimateTile(hs, Town::GetByTile(tile), tile, HasBit(hs->extra_flags, CALLBACK_1A_RANDOM_BITS));
 }
 
-void ChangeHouseAnimationFrame(const GRFFile *file, TileIndex tile, uint16 callback_result)
+void AnimateNewHouseConstruction(TileIndex tile)
 {
-	switch (callback_result & 0xFF) {
-		case 0xFD: /* Do nothing. */         break;
-		case 0xFE: AddAnimatedTile(tile);    break;
-		case 0xFF: DeleteAnimatedTile(tile); break;
-		default:
-			SetHouseAnimationFrame(tile, callback_result & 0xFF);
-			AddAnimatedTile(tile);
-			break;
+	const HouseSpec *hs = HouseSpec::Get(GetHouseType(tile));
+
+	if (HasBit(hs->callback_mask, CBM_HOUSE_CONSTRUCTION_STATE_CHANGE)) {
+		HouseAnimationBase::ChangeAnimationFrame(CBID_HOUSE_CONSTRUCTION_STATE_CHANGE, hs, Town::GetByTile(tile), tile, 0, 0);
 	}
-	/* If the lower 7 bits of the upper byte of the callback
-	 * result are not empty, it is a sound effect. */
-	if (GB(callback_result, 8, 7) != 0) PlayTileSound(file, GB(callback_result, 8, 7), tile);
 }
 
 bool CanDeleteHouse(TileIndex tile)
@@ -573,9 +523,7 @@ static void AnimationControl(TileIndex tile, uint16 random_bits)
 
 	if (HasBit(hs->callback_mask, CBM_HOUSE_ANIMATION_START_STOP)) {
 		uint32 param = (hs->extra_flags & SYNCHRONISED_CALLBACK_1B) ? (GB(Random(), 0, 16) | random_bits << 16) : Random();
-		uint16 callback_res = GetHouseCallback(CBID_HOUSE_ANIMATION_START_STOP, param, 0, GetHouseType(tile), Town::GetByTile(tile), tile);
-
-		if (callback_res != CALLBACK_FAILED) ChangeHouseAnimationFrame(hs->grf_prop.grffile, tile, callback_res);
+		HouseAnimationBase::ChangeAnimationFrame(CBID_HOUSE_ANIMATION_START_STOP, hs, Town::GetByTile(tile), tile, param, 0);
 	}
 }
 

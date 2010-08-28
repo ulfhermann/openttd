@@ -14,7 +14,6 @@
 
 #include "stdafx.h"
 #include "aircraft.h"
-#include "debug.h"
 #include "landscape.h"
 #include "news_func.h"
 #include "vehicle_gui.h"
@@ -30,18 +29,15 @@
 #include "functions.h"
 #include "cheat_type.h"
 #include "company_base.h"
-#include "autoreplace_gui.h"
 #include "ai/ai.hpp"
 #include "company_func.h"
 #include "effectvehicle_func.h"
 #include "station_base.h"
 #include "engine_base.h"
-#include "engine_func.h"
 #include "core/random_func.hpp"
 #include "core/backup_type.hpp"
 
 #include "table/strings.h"
-#include "table/sprites.h"
 
 void Aircraft::UpdateDeltaXY(Direction direction)
 {
@@ -1042,20 +1038,6 @@ static bool HandleCrashedAircraft(Aircraft *v)
 	return true;
 }
 
-static void HandleBrokenAircraft(Aircraft *v)
-{
-	if (v->breakdown_ctr != 1) {
-		v->breakdown_ctr = 1;
-		v->vehstatus |= VS_AIRCRAFT_BROKEN;
-
-		if (v->breakdowns_since_last_service != 255) {
-			v->breakdowns_since_last_service++;
-		}
-		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
-		SetWindowDirty(WC_VEHICLE_DETAILS, v->index);
-	}
-}
-
 
 static void HandleAircraftSmoke(Aircraft *v)
 {
@@ -1793,14 +1775,7 @@ static bool AircraftEventHandler(Aircraft *v, int loop)
 
 	if (v->vehstatus & VS_STOPPED) return true;
 
-	/* aircraft is broken down? */
-	if (v->breakdown_ctr != 0) {
-		if (v->breakdown_ctr <= 2) {
-			HandleBrokenAircraft(v);
-		} else {
-			if (!v->current_order.IsType(OT_LOADING)) v->breakdown_ctr--;
-		}
-	}
+	v->HandleBreakdown();
 
 	HandleAircraftSmoke(v);
 	ProcessOrders(v);
