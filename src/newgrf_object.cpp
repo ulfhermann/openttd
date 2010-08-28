@@ -7,16 +7,22 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file rail_gui.h Functions/types etc. related to the rail GUI. */
+/** @file newgrf_object.cpp Handling of object NewGRFs. */
 
-#ifndef RAIL_GUI_H
-#define RAIL_GUI_H
+#include "stdafx.h"
+#include "newgrf_object.h"
+#include "object_map.h"
 
-#include "rail_type.h"
+extern const ObjectSpec _original_objects[];
 
-struct Window *ShowBuildRailToolbar(RailType railtype);
-void ReinitGuiAfterToggleElrail(bool disable);
-bool ResetSignalVariant(int32 = 0);
-void InitializeRailGUI();
+/* static */ const ObjectSpec *ObjectSpec::Get(ObjectType index)
+{
+	assert(index < OBJECT_MAX);
+	return &_original_objects[index];
+}
 
-#endif /* RAIL_GUI_H */
+/* static */ const ObjectSpec *ObjectSpec::GetByTile(TileIndex tile)
+{
+	return ObjectSpec::Get(GetObjectType(tile));
+}
+

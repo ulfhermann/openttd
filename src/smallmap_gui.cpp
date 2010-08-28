@@ -32,7 +32,6 @@
 #include "company_base.h"
 
 #include "table/strings.h"
-#include "table/sprites.h"
 
 #include <cmath>
 #include <vector>

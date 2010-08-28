@@ -12,7 +12,6 @@
 #ifndef OBJECT_MAP_H
 #define OBJECT_MAP_H
 
-#include "tile_map.h"
 #include "water_map.h"
 #include "object_type.h"
 
@@ -107,27 +106,15 @@ static inline bool IsStatueTile(TileIndex t)
 }
 
 /**
- * Get animation stage/counter of this tile.
- * @param t The tile to query.
+ * Get the random bits of this tile.
+ * @param t The tile to get the bits for.
  * @pre IsTileType(t, MP_OBJECT)
- * @return The animation 'stage' of the tile.
+ * @return The random bits.
  */
-static inline byte GetObjectAnimationStage(TileIndex t)
+static inline byte GetObjectRandomBits(TileIndex t)
 {
 	assert(IsTileType(t, MP_OBJECT));
 	return _m[t].m3;
-}
-
-/**
- * Set animation stage/counter of this tile.
- * @param t     The tile to query.
- * @param stage The stage of this tile.
- * @pre IsTileType(t, MP_OBJECT)
- */
-static inline void SetObjectAnimationStage(TileIndex t, uint8 stage)
-{
-	assert(IsTileType(t, MP_OBJECT));
-	_m[t].m3 = stage;
 }
 
 
@@ -139,14 +126,15 @@ static inline void SetObjectAnimationStage(TileIndex t, uint8 stage)
  * @param o      The new owner of the tile.
  * @param index  Index to the object.
  * @param wc     Water class for this obect.
+ * @param random Random data to store on the tile
  */
-static inline void MakeObject(TileIndex t, ObjectType u, Owner o, ObjectID index, WaterClass wc)
+static inline void MakeObject(TileIndex t, ObjectType u, Owner o, ObjectID index, WaterClass wc, byte random)
 {
 	SetTileType(t, MP_OBJECT);
 	SetTileOwner(t, o);
 	SetWaterClass(t, wc);
 	_m[t].m2 = index;
-	_m[t].m3 = 0;
+	_m[t].m3 = random;
 	_m[t].m4 = 0;
 	_m[t].m5 = u;
 	SB(_m[t].m6, 2, 4, 0);
