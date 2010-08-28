@@ -14,19 +14,16 @@
 #include "viewport_func.h"
 #include "landscape.h"
 #include "newgrf.h"
-#include "newgrf_commons.h"
 #include "newgrf_industries.h"
 #include "newgrf_industrytiles.h"
 #include "newgrf_sound.h"
 #include "newgrf_text.h"
 #include "industry.h"
-#include "functions.h"
 #include "town.h"
 #include "command_func.h"
-#include "animated_tile_func.h"
 #include "water.h"
 #include "sprite.h"
-#include "date_func.h"
+#include "newgrf_animation_base.h"
 
 #include "table/strings.h"
 
@@ -87,7 +84,7 @@ static uint32 IndustryTileGetVariable(const ResolverObject *object, byte variabl
 		case 0x43: return GetRelativePosition(tile, inds->location.tile);
 
 		/* Animation frame. Like house variable 46 but can contain anything 0..FF. */
-		case 0x44: return (IsTileType(tile, MP_INDUSTRY)) ? GetIndustryAnimationState(tile) : 0;
+		case 0x44: return (IsTileType(tile, MP_INDUSTRY)) ? GetAnimationFrame(tile) : 0;
 
 		/* Land info of nearby tiles */
 		case 0x60: return GetNearbyIndustryTileInformation(parameter, tile, inds == NULL ? (IndustryID)INVALID_INDUSTRY : inds->index);
@@ -96,7 +93,7 @@ static uint32 IndustryTileGetVariable(const ResolverObject *object, byte variabl
 		case 0x61:
 			tile = GetNearbyTile(parameter, tile);
 			if (IsTileType(tile, MP_INDUSTRY) && Industry::GetByTile(tile) == inds) {
-				return GetIndustryAnimationState(tile);
+				return GetAnimationFrame(tile);
 			}
 			return UINT_MAX;
 
@@ -189,7 +186,7 @@ static void IndustryDrawTileLayout(const TileInfo *ti, const TileLayoutSpriteGro
 	if (GB(image, 0, SPRITE_WIDTH) != 0) {
 		/* If the ground sprite is the default flat water sprite, draw also canal/river borders
 		 * Do not do this if the tile's WaterClass is 'land'. */
-		if (image == SPR_FLAT_WATER_TILE && IsIndustryTileOnWater(ti->tile)) {
+		if (image == SPR_FLAT_WATER_TILE && IsTileOnWater(ti->tile)) {
 			DrawWaterClassGround(ti);
 		} else {
 			DrawGroundSprite(image, GroundSpritePaletteTransform(image, pal, GENERAL_SPRITE_COLOUR(rnd_colour)));
@@ -297,99 +294,36 @@ CommandCost PerformIndustryTileSlopeCheck(TileIndex ind_base_tile, TileIndex ind
 	}
 }
 
-void AnimateNewIndustryTile(TileIndex tile)
+/* Simple wrapper for GetHouseCallback to keep the animation unified. */
+uint16 GetSimpleIndustryCallback(CallbackID callback, uint32 param1, uint32 param2, const IndustryTileSpec *spec, const Industry *ind, TileIndex tile)
 {
-	Industry *ind = Industry::GetByTile(tile);
-	IndustryGfx gfx = GetIndustryGfx(tile);
-	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
-	byte animation_speed = itspec->animation_speed;
-
-	if (HasBit(itspec->callback_mask, CBM_INDT_ANIM_SPEED)) {
-		uint16 callback_res = GetIndustryTileCallback(CBID_INDTILE_ANIMATION_SPEED, 0, 0, gfx, ind, tile);
-		if (callback_res != CALLBACK_FAILED) animation_speed = Clamp(callback_res & 0xFF, 0, 16);
-	}
-
-	/* An animation speed of 2 means the animation frame changes 4 ticks, and
-	 * increasing this value by one doubles the wait. 0 is the minimum value
-	 * allowed for animation_speed, which corresponds to 30ms, and 16 is the
-	 * maximum, corresponding to around 33 minutes. */
-	if ((_tick_counter % (1 << animation_speed)) != 0) return;
-
-	bool frame_set_by_callback = false;
-	byte frame = GetIndustryAnimationState(tile);
-	uint16 num_frames = GB(itspec->animation_info, 0, 8);
-
-	if (HasBit(itspec->callback_mask, CBM_INDT_ANIM_NEXT_FRAME)) {
-		uint16 callback_res = GetIndustryTileCallback(CBID_INDTILE_ANIM_NEXT_FRAME,
-				(itspec->special_flags & INDTILE_SPECIAL_NEXTFRAME_RANDOMBITS) ? Random() : 0, 0, gfx, ind, tile);
-
-		if (callback_res != CALLBACK_FAILED) {
-			frame_set_by_callback = true;
-
-			switch (callback_res & 0xFF) {
-				case 0xFF:
-					DeleteAnimatedTile(tile);
-					break;
-				case 0xFE:
-					/* Carry on as normal. */
-					frame_set_by_callback = false;
-					break;
-				default:
-					frame = callback_res & 0xFF;
-					break;
-			}
-
-			/* If the lower 7 bits of the upper byte of the callback
-			 * result are not empty, it is a sound effect. */
-			if (GB(callback_res, 8, 7) != 0) PlayTileSound(itspec->grf_prop.grffile, GB(callback_res, 8, 7), tile);
-		}
-	}
-
-	if (!frame_set_by_callback) {
-		if (frame < num_frames) {
-			frame++;
-		} else if (frame == num_frames && GB(itspec->animation_info, 8, 8) == 1) {
-			/* This animation loops, so start again from the beginning */
-			frame = 0;
-		} else {
-			/* This animation doesn't loop, so stay here */
-			DeleteAnimatedTile(tile);
-		}
-	}
-
-	SetIndustryAnimationState(tile, frame);
-	MarkTileDirtyByTile(tile);
+	return GetIndustryTileCallback(callback, param1, param2, spec - GetIndustryTileSpec(0), const_cast<Industry *>(ind), tile);
 }
 
-static void ChangeIndustryTileAnimationFrame(const IndustryTileSpec *itspec, TileIndex tile, IndustryAnimationTrigger iat, uint32 random_bits, IndustryGfx gfx, Industry *ind)
+/** Helper class for animation control. */
+struct IndustryAnimationBase : public AnimationBase<IndustryAnimationBase, IndustryTileSpec, Industry, GetSimpleIndustryCallback> {
+	static const CallbackID cb_animation_speed      = CBID_INDTILE_ANIMATION_SPEED;
+	static const CallbackID cb_animation_next_frame = CBID_INDTILE_ANIM_NEXT_FRAME;
+
+	static const IndustryTileCallbackMask cbm_animation_speed      = CBM_INDT_ANIM_SPEED;
+	static const IndustryTileCallbackMask cbm_animation_next_frame = CBM_INDT_ANIM_NEXT_FRAME;
+};
+
+void AnimateNewIndustryTile(TileIndex tile)
 {
-	uint16 callback_res = GetIndustryTileCallback(CBID_INDTILE_ANIM_START_STOP, random_bits, iat, gfx, ind, tile);
-	if (callback_res == CALLBACK_FAILED) return;
+	const IndustryTileSpec *itspec = GetIndustryTileSpec(GetIndustryGfx(tile));
+	if (itspec == NULL) return;
 
-	switch (callback_res & 0xFF) {
-		case 0xFD: /* Do nothing. */         break;
-		case 0xFE: AddAnimatedTile(tile);    break;
-		case 0xFF: DeleteAnimatedTile(tile); break;
-		default:
-			SetIndustryAnimationState(tile, callback_res & 0xFF);
-			AddAnimatedTile(tile);
-			break;
-	}
-
-	/* If the lower 7 bits of the upper byte of the callback
-	 * result are not empty, it is a sound effect. */
-	if (GB(callback_res, 8, 7) != 0) PlayTileSound(itspec->grf_prop.grffile, GB(callback_res, 8, 7), tile);
+	IndustryAnimationBase::AnimateTile(itspec, Industry::GetByTile(tile), tile, (itspec->special_flags & INDTILE_SPECIAL_NEXTFRAME_RANDOMBITS) != 0);
 }
 
 bool StartStopIndustryTileAnimation(TileIndex tile, IndustryAnimationTrigger iat, uint32 random)
 {
-	IndustryGfx gfx = GetIndustryGfx(tile);
-	const IndustryTileSpec *itspec = GetIndustryTileSpec(gfx);
+	const IndustryTileSpec *itspec = GetIndustryTileSpec(GetIndustryGfx(tile));
 
-	if (!HasBit(itspec->animation_triggers, iat)) return false;
+	if (!HasBit(itspec->animation.triggers, iat)) return false;
 
-	Industry *ind = Industry::GetByTile(tile);
-	ChangeIndustryTileAnimationFrame(itspec, tile, iat, random, gfx, ind);
+	IndustryAnimationBase::ChangeAnimationFrame(CBID_INDTILE_ANIM_START_STOP, itspec, Industry::GetByTile(tile), tile, random, iat);
 	return true;
 }
 

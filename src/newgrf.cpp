@@ -29,23 +29,19 @@
 #include "newgrf_house.h"
 #include "newgrf_sound.h"
 #include "newgrf_station.h"
-#include "industry.h"
+#include "industrytype.h"
 #include "newgrf_canal.h"
-#include "newgrf_commons.h"
 #include "newgrf_townname.h"
 #include "newgrf_industries.h"
 #include "newgrf_airporttiles.h"
 #include "newgrf_airport.h"
 #include "rev.h"
 #include "fios.h"
-#include "rail.h"
 #include "strings_func.h"
 #include "date_func.h"
 #include "string_func.h"
 #include "network/network.h"
 #include <map>
-#include "core/alloc_type.hpp"
-#include "core/mem_func.hpp"
 #include "smallmap_gui.h"
 #include "genworld.h"
 #include "gui.h"
@@ -1324,16 +1320,16 @@ static ChangeInfoResult StationChangeInfo(uint stid, int numinfo, int prop, Byte
 				break;
 
 			case 0x16: // Animation info
-				statspec->anim_frames = buf->ReadByte();
-				statspec->anim_status = buf->ReadByte();
+				statspec->animation.frames = buf->ReadByte();
+				statspec->animation.status = buf->ReadByte();
 				break;
 
 			case 0x17: // Animation speed
-				statspec->anim_speed = buf->ReadByte();
+				statspec->animation.speed = buf->ReadByte();
 				break;
 
 			case 0x18: // Animation triggers
-				statspec->anim_triggers = buf->ReadWord();
+				statspec->animation.triggers = buf->ReadWord();
 				break;
 
 			default:
@@ -1684,7 +1680,7 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
 			}
 
 			case 0x16: // Periodic refresh multiplier
-				housespec->processing_time = buf->ReadByte();
+				housespec->processing_time = min(buf->ReadByte(), 63);
 				break;
 
 			case 0x17: // Four random colours to use
@@ -1700,11 +1696,13 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
 				break;
 
 			case 0x1A: // Animation frames
-				housespec->animation_frames = buf->ReadByte();
+				housespec->animation.frames = buf->ReadByte();
+				housespec->animation.status = GB(housespec->animation.frames, 7, 1);
+				SB(housespec->animation.frames, 7, 1, 0);
 				break;
 
 			case 0x1B: // Animation speed
-				housespec->animation_speed = Clamp(buf->ReadByte(), 2, 16);
+				housespec->animation.speed = Clamp(buf->ReadByte(), 2, 16);
 				break;
 
 			case 0x1C: // Class of the building type
@@ -2271,15 +2269,16 @@ static ChangeInfoResult IndustrytilesChangeInfo(uint indtid, int numinfo, int pr
 				break;
 
 			case 0x0F: // Animation information
-				tsp->animation_info = buf->ReadWord();
+				tsp->animation.frames = buf->ReadByte();
+				tsp->animation.status = buf->ReadByte();
 				break;
 
 			case 0x10: // Animation speed
-				tsp->animation_speed = buf->ReadByte();
+				tsp->animation.speed = buf->ReadByte();
 				break;
 
 			case 0x11: // Triggers for callback 25
-				tsp->animation_triggers = buf->ReadByte();
+				tsp->animation.triggers = buf->ReadByte();
 				break;
 
 			case 0x12: // Special flags
@@ -3091,7 +3090,7 @@ static ChangeInfoResult AirportTilesChangeInfo(uint airtid, int numinfo, int pro
 					memcpy(tsp, AirportTileSpec::Get(subs_id), sizeof(AirportTileSpec));
 					tsp->enabled = true;
 
-					tsp->animation_info = 0xFFFF;
+					tsp->animation.status = ANIM_STATUS_NO_ANIMATION;
 
 					tsp->grf_prop.local_id = airtid + i;
 					tsp->grf_prop.subst_id = subs_id;
@@ -3114,20 +3113,21 @@ static ChangeInfoResult AirportTilesChangeInfo(uint airtid, int numinfo, int pro
 				break;
 			}
 
-			case 0x0E: // Callback flags
-				tsp->callback_flags = buf->ReadByte();
+			case 0x0E: // Callback mask
+				tsp->callback_mask = buf->ReadByte();
 				break;
 
 			case 0x0F: // Animation information
-				tsp->animation_info = buf->ReadWord();
+				tsp->animation.frames = buf->ReadByte();
+				tsp->animation.status = buf->ReadByte();
 				break;
 
 			case 0x10: // Animation speed
-				tsp->animation_speed = buf->ReadByte();
+				tsp->animation.speed = buf->ReadByte();
 				break;
 
 			case 0x11: // Animation triggers
-				tsp->animation_triggers = buf->ReadByte();
+				tsp->animation.triggers = buf->ReadByte();
 				break;
 
 			default:
