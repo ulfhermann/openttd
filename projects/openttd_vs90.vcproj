@@ -255,7 +255,7 @@
 				FavorSizeOrSpeed="2"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\objs\langs;..\src\3rdparty\squirrel\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64;WITH_ASSERT"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64;WITH_ASSERT"
 				StringPooling="true"
 				ExceptionHandling="1"
 				RuntimeLibrary="0"
@@ -359,7 +359,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\objs\langs;..\src\3rdparty\squirrel\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WIN32_ENABLE_DIRECTMUSIC_SUPPORT;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;WITH_ZLIB;WITH_LZO;WITH_PNG;WITH_FREETYPE;WITH_ICU;ENABLE_NETWORK;ENABLE_AI;WITH_PERSONAL_DIR;PERSONAL_DIR=\&quot;OpenTTD\&quot;;_SQ64"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -1172,6 +1172,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\newgrf_animation_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_animation_type.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\newgrf_callbacks.h"
 				>
 			</File>
@@ -1221,6 +1229,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\newgrf_industrytiles.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_object.h"
 				>
 			</File>
 			<File
@@ -3285,6 +3297,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\newgrf_industrytiles.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\newgrf_object.cpp"
 				>
 			</File>
 			<File
