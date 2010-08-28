@@ -40,7 +40,6 @@
 #include "../gamelog.h"
 #include "../string_func.h"
 #include "../engine_base.h"
-#include "../company_base.h"
 #include "../fios.h"
 
 #include "table/strings.h"
@@ -210,6 +209,7 @@
  *  144   20334
  *  145   20376
  *  146   20446
+ *  147   20621
  */
 extern const uint16 SAVEGAME_VERSION = SL_FLOWMAP; ///< current savegame version of OpenTTD
 
