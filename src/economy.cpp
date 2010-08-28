@@ -22,7 +22,6 @@
 #include "aircraft.h"
 #include "train.h"
 #include "newgrf_cargo.h"
-#include "newgrf_engine.h"
 #include "newgrf_sound.h"
 #include "newgrf_industries.h"
 #include "newgrf_industrytiles.h"
@@ -46,11 +45,9 @@
 #include "economy_base.h"
 #include "core/pool_func.hpp"
 #include "newgrf.h"
-#include "engine_base.h"
 #include "core/backup_type.hpp"
 
 #include "table/strings.h"
-#include "table/sprites.h"
 #include "table/pricebase.h"
 
 
@@ -1313,7 +1310,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 				st->time_since_load = 0;
 				st->last_vehicle_type = v->type;
 
-				StationAnimationTrigger(st, st->xy, STAT_ANIM_CARGO_TAKEN, v->cargo_type);
+				TriggerStationAnimation(st, st->xy, SAT_CARGO_TAKEN, v->cargo_type);
 				AirportAnimationTrigger(st, AAT_STATION_CARGO_TAKEN, v->cargo_type);
 
 				unloading_time += loaded;
