@@ -11,8 +11,10 @@
 
 #include "../stdafx.h"
 #include "../object_base.h"
+#include "../object_map.h"
 
 #include "saveload.h"
+#include "newgrf_sl.h"
 
 static const SaveLoad _object_desc[] = {
 	    SLE_VAR(Object, location.tile,              SLE_UINT32),
@@ -20,6 +22,7 @@ static const SaveLoad _object_desc[] = {
 	    SLE_VAR(Object, location.h,                 SLE_FILE_U8 | SLE_VAR_U16),
 	    SLE_REF(Object, town,                       REF_TOWN),
 	    SLE_VAR(Object, build_date,                 SLE_UINT32),
+	SLE_CONDVAR(Object, colour,                     SLE_UINT8,                  148, SL_MAX_VERSION),
 
 	SLE_END()
 };
@@ -49,9 +52,26 @@ static void Ptrs_OBJS()
 	Object *o;
 	FOR_ALL_OBJECTS(o) {
 		SlObject(o, _object_desc);
+		if (CheckSavegameVersion(148) && !IsTileType(o->location.tile, MP_OBJECT)) {
+			/* Due to a small bug stale objects could remain. */
+			delete o;
+		} else {
+			Object::IncTypeCount(GetObjectType(o->location.tile));
+		}
 	}
 }
 
+static void Save_OBID()
+{
+	Save_NewGRFMapping(_object_mngr);
+}
+
+static void Load_OBID()
+{
+	Load_NewGRFMapping(_object_mngr);
+}
+
 extern const ChunkHandler _object_chunk_handlers[] = {
+	{ 'OBID', Save_OBID, Load_OBID, NULL,      NULL, CH_ARRAY },
 	{ 'OBJS', Save_OBJS, Load_OBJS, Ptrs_OBJS, NULL, CH_ARRAY | CH_LAST},
 };
