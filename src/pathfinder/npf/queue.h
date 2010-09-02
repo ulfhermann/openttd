@@ -7,7 +7,7 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file queue.h Simple Queue/Hash implementations. */
+/** @file queue.h Binary heap implementation, hash implementation. */
 
 #ifndef QUEUE_H
 #define QUEUE_H
@@ -18,91 +18,45 @@
 //#define HASH_STATS
 
 
-struct Queue;
-typedef bool Queue_PushProc(Queue *q, void *item, int priority);
-typedef void *Queue_PopProc(Queue *q);
-typedef bool Queue_DeleteProc(Queue *q, void *item, int priority);
-typedef void Queue_ClearProc(Queue *q, bool free_values);
-typedef void Queue_FreeProc(Queue *q, bool free_values);
-
-struct InsSortNode {
-	void *item;
-	int priority;
-	InsSortNode *next;
-};
-
 struct BinaryHeapNode {
 	void *item;
 	int priority;
 };
 
 
-struct Queue {
-	/*
-	 * Pushes an element into the queue, at the appropriate place for the queue.
-	 * Requires the queue pointer to be of an appropriate type, of course.
-	 */
-	Queue_PushProc *push;
-	/*
-	 * Pops the first element from the queue. What exactly is the first element,
-	 * is defined by the exact type of queue.
-	 */
-	Queue_PopProc *pop;
-	/*
-	 * Deletes the item from the queue. priority should be specified if
-	 * known, which speeds up the deleting for some queue's. Should be -1
-	 * if not known.
-	 */
-	Queue_DeleteProc *del;
+/**
+ * Binary Heap.
+ * For information, see: http://www.policyalmanac.org/games/binaryHeaps.htm
+ */
+struct BinaryHeap {
+	static const int BINARY_HEAP_BLOCKSIZE;
+	static const int BINARY_HEAP_BLOCKSIZE_BITS;
+	static const int BINARY_HEAP_BLOCKSIZE_MASK;
 
-	/* Clears the queue, by removing all values from it. Its state is
-	 * effectively reset. If free_items is true, each of the items cleared
-	 * in this way are free()'d.
-	 */
-	Queue_ClearProc *clear;
-	/* Frees the queue, by reclaiming all memory allocated by it. After
-	 * this it is no longer usable. If free_items is true, any remaining
-	 * items are free()'d too.
-	 */
-	Queue_FreeProc *free;
+	void Init(uint max_size);
 
-	union {
-		struct {
-			InsSortNode *first;
-		} inssort;
-		struct {
-			uint max_size;
-			uint size;
-			uint blocks; ///< The amount of blocks for which space is reserved in elements
-			BinaryHeapNode **elements;
-		} binaryheap;
-	} data;
+	bool Push(void *item, int priority);
+	void *Pop();
+	bool Delete(void *item, int priority);
+	void Clear(bool free_values);
+	void Free(bool free_values);
+
+	/**
+	 * Get an element from the #elements.
+	 * @param i Element to access (starts at offset \c 1).
+	 * @return Value of the element.
+	 */
+	FORCEINLINE BinaryHeapNode &GetElement(uint i)
+	{
+		assert(i > 0);
+		return this->elements[(i - 1) >> BINARY_HEAP_BLOCKSIZE_BITS][(i - 1) & BINARY_HEAP_BLOCKSIZE_MASK];
+	}
+
+	uint max_size;
+	uint size;
+	uint blocks; ///< The amount of blocks for which space is reserved in elements
+	BinaryHeapNode **elements;
 };
-
-
-/**
- * Insertion Sorter
- */
-
-/* Initializes a inssort and allocates internal memory. There is no maximum
- * size */
-void init_InsSort(Queue *q);
-
-
-/*
- *  Binary Heap
- *  For information, see:
- *   http://www.policyalmanac.org/games/binaryHeaps.htm
- */
-
-/* The amount of elements that will be malloc'd at a time */
-#define BINARY_HEAP_BLOCKSIZE_BITS 10
-
-/**
- * Initializes a binary heap and allocates internal memory for maximum of
- * max_size elements
- */
-void init_BinaryHeap(Queue *q, uint max_size);
 
 
 /*
