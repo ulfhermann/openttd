@@ -41,7 +41,6 @@ void NetworkReboot();
 void NetworkDisconnect(bool blocking = false);
 void NetworkGameLoop();
 void NetworkUDPGameLoop();
-void NetworkUDPCloseAll();
 void ParseConnectionString(const char **company, const char **port, char *connection_string);
 void NetworkStartDebugLog(NetworkAddress address);
 void NetworkPopulateCompanyStats(NetworkCompanyStats *stats);
@@ -68,14 +67,11 @@ bool NetworkServerStart();
 void NetworkServerUpdateCompanyPassworded(CompanyID company_id, bool passworded);
 bool NetworkServerChangeClientName(ClientID client_id, const char *new_name);
 
-NetworkClientInfo *NetworkFindClientInfoFromIndex(ClientIndex index);
 NetworkClientInfo *NetworkFindClientInfoFromClientID(ClientID client_id);
-NetworkClientInfo *NetworkFindClientInfoFromIP(const char *ip);
 const char *GetClientIP(NetworkClientInfo *ci);
 
 void NetworkServerDoMove(ClientID client_id, CompanyID company_id);
 void NetworkServerSendRcon(ClientID client_id, ConsoleColour colour_code, const char *string);
-void NetworkServerSendError(ClientID client_id, NetworkErrorCode error);
 void NetworkServerSendChat(NetworkAction action, DestType type, int dest, const char *msg, ClientID from_id, int64 data = 0);
 
 void NetworkServerKickClient(ClientID client_id);
