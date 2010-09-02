@@ -1875,6 +1875,7 @@ bool AfterLoadGame()
 					o->build_date    = _date;
 					o->town          = type == OBJECT_STATUE ? Town::Get(_m[t].m2) : CalcClosestTownFromTile(t, UINT_MAX);
 					_m[t].m2 = o->index;
+					Object::IncTypeCount(type);
 				} else {
 					/* We're at an offset, so get the ID from our "root". */
 					TileIndex northern_tile = t - TileXY(GB(offset, 0, 4), GB(offset, 4, 4));
@@ -2274,6 +2275,24 @@ bool AfterLoadGame()
 				default:
 					/* For stations/airports it's already at m7 */
 					break;
+			}
+		}
+	}
+
+	/* Add (random) colour to all objects. */
+	if (CheckSavegameVersion(148)) {
+		Object *o;
+		FOR_ALL_OBJECTS(o) {
+			Owner owner = GetTileOwner(o->location.tile);
+			o->colour = (owner == OWNER_NONE) ? Random() & 0xF : Company::Get(owner)->livery->colour1;
+		}
+	}
+
+	if (CheckSavegameVersion(149)) {
+		for (TileIndex t = 0; t < map_size; t++) {
+			if (!IsTileType(t, MP_STATION)) continue;
+			if (!IsBuoy(t) && !IsOilRig(t) && !(IsDock(t) && GetTileSlope(t, NULL) == SLOPE_FLAT)) {
+				SetWaterClass(t, WATER_CLASS_INVALID);
 			}
 		}
 	}
