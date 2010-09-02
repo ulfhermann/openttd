@@ -397,6 +397,7 @@ STR_SCENEDIT_TOOLBAR_INDUSTRY_GENERATION                        :{BLACK}Gazdasá
 STR_SCENEDIT_TOOLBAR_ROAD_CONSTRUCTION                          :{BLACK}Út építése
 STR_SCENEDIT_TOOLBAR_PLANT_TREES                                :{BLACK}Faültetés
 STR_SCENEDIT_TOOLBAR_PLACE_SIGN                                 :{BLACK}Felirat lerakása
+STR_SCENEDIT_TOOLBAR_PLACE_OBJECT                               :{BLACK}Objektum elhelyezése
 
 ############ range for SE file menu starts
 STR_SCENEDIT_FILE_MENU_SAVE_SCENARIO                            :Pálya mentése
@@ -1175,6 +1176,7 @@ STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Kézi n
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :nincs
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :mint általában
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :kutatás támogatása
+STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Gazdasági épületek körüli sík terület: {ORANGE}{STRING} mező
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Több ugyanolyan gazdasági épület településenként: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Mindig teljes dátum a képernyőn: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Jelzők a menetirány szerinti oldalon legyenek: {ORANGE}{STRING}
@@ -2123,6 +2125,16 @@ STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Egy pont
 STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Talajszintezés
 STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Földterület megvétele későbbi használatra
 
+# Object construction window
+STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Objektum kiválaszás
+STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Építendő objektum kiválasztása
+STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Objektumosztály
+STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Objektum előnézete
+STR_OBJECT_BUILD_SIZE                                           :{BLACK}Méret: {GOLD}{NUM} x {NUM} mező
+
+STR_OBJECT_CLASS_LTHS                                           :Világítótornyok
+STR_OBJECT_CLASS_TRNS                                           :Adótornyok
+
 # Tree planting window (last two for SE only)
 STR_PLANT_TREE_CAPTION                                          :{WHITE}Fák
 STR_PLANT_TREE_TOOLTIP                                          :{BLACK}Válaszd ki, melyik fát ülteted
@@ -2134,9 +2146,7 @@ STR_TREES_RANDOM_TREES_TOOLTIP                                  :{BLACK}Véletle
 # Land generation window (SE)
 STR_TERRAFORM_TOOLBAR_LAND_GENERATION_CAPTION                   :{WHITE}Táj szerkesztése
 STR_TERRAFORM_TOOLTIP_PLACE_ROCKY_AREAS_ON_LANDSCAPE            :{BLACK}Sziklás területek elhelyezése a térképen
-STR_TERRAFORM_TOOLTIP_PLACE_LIGHTHOUSE                          :{BLACK}Világítótorony építése
 STR_TERRAFORM_TOOLTIP_DEFINE_DESERT_AREA                        :{BLACK}Sivatagot hoz létre.{}Nyomj Ctrl-t az eltávolításához
-STR_TERRAFORM_TOOLTIP_PLACE_TRANSMITTER                         :{BLACK}Adótorony építése
 STR_TERRAFORM_TOOLTIP_INCREASE_SIZE_OF_LAND_AREA                :{BLACK}Az emelendő/süllyesztendő földterület növelése
 STR_TERRAFORM_TOOLTIP_DECREASE_SIZE_OF_LAND_AREA                :{BLACK}Az emelendő/süllyesztendő földterület csökkentése
 STR_TERRAFORM_TOOLTIP_GENERATE_RANDOM_LAND                      :{BLACK}Véletlenszerű táj készítése
@@ -2218,6 +2228,8 @@ STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Koordin�
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Épült: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Állomás osztálya: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}Állomás típusa: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORT_CLASS                         :{BLACK}Repülőtér osztály: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORT_NAME                          :{BLACK}Repülőtér név: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Repülőtér mező név: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}Elfogad: {LTBLUE}
@@ -2473,6 +2485,7 @@ STR_NEWGRF_INSPECT_PARENT_BUTTON                                :{BLACK}Szülő
 STR_NEWGRF_INSPECT_PARENT_TOOLTIP                               :{BLACK}Objektum megtekintése szülőterületen
 
 STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING} {HEX}-ban
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_OBJECT                     :Objektum
 STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE                  :Pályatípus
 
 STR_NEWGRF_INSPECT_QUERY_CAPTION                                :{WHITE}NewGRF változó 60+x paraméter (hexadecimális)
