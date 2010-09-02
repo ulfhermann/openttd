@@ -62,7 +62,7 @@ static OpenListNode *AyStarMain_OpenList_IsInList(AyStar *aystar, const AyStarNo
 static OpenListNode *AyStarMain_OpenList_Pop(AyStar *aystar)
 {
 	/* Return the item the Queue returns.. the best next OpenList item. */
-	OpenListNode *res = (OpenListNode*)aystar->OpenListQueue.pop(&aystar->OpenListQueue);
+	OpenListNode *res = (OpenListNode*)aystar->OpenListQueue.Pop();
 	if (res != NULL) {
 		Hash_Delete(&aystar->OpenListHash, res->path.node.tile, res->path.node.direction);
 	}
@@ -82,7 +82,7 @@ static void AyStarMain_OpenList_Add(AyStar *aystar, PathNode *parent, const AySt
 	Hash_Set(&aystar->OpenListHash, node->tile, node->direction, new_node);
 
 	/* Add it to the queue */
-	aystar->OpenListQueue.push(&aystar->OpenListQueue, new_node, f);
+	aystar->OpenListQueue.Push(new_node, f);
 }
 
 /*
@@ -127,7 +127,7 @@ static int AyStarMain_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNod
 		uint i;
 		/* Yes, check if this g value is lower.. */
 		if (new_g > check->g) return AYSTAR_DONE;
-		aystar->OpenListQueue.del(&aystar->OpenListQueue, check, 0);
+		aystar->OpenListQueue.Delete(check, 0);
 		/* It is lower, so change it to this item */
 		check->g = new_g;
 		check->path.parent = closedlist_parent;
@@ -136,7 +136,7 @@ static int AyStarMain_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNod
 			check->path.node.user_data[i] = current->user_data[i];
 		}
 		/* Readd him in the OpenListQueue */
-		aystar->OpenListQueue.push(&aystar->OpenListQueue, check, new_f);
+		aystar->OpenListQueue.Push(check, new_f);
 	} else {
 		/* A new node, add him to the OpenList */
 		AyStarMain_OpenList_Add(aystar, closedlist_parent, current, new_f, new_g);
@@ -203,7 +203,7 @@ static int AyStarMain_Loop(AyStar *aystar)
  */
 static void AyStarMain_Free(AyStar *aystar)
 {
-	aystar->OpenListQueue.free(&aystar->OpenListQueue, false);
+	aystar->OpenListQueue.Free(false);
 	/* 2nd argument above is false, below is true, to free the values only
 	 * once */
 	delete_Hash(&aystar->OpenListHash, true);
@@ -221,7 +221,7 @@ void AyStarMain_Clear(AyStar *aystar)
 {
 	/* Clean the Queue, but not the elements within. That will be done by
 	 * the hash. */
-	aystar->OpenListQueue.clear(&aystar->OpenListQueue, false);
+	aystar->OpenListQueue.Clear(false);
 	/* Clean the hashes */
 	clear_Hash(&aystar->OpenListHash, true);
 	clear_Hash(&aystar->ClosedListHash, true);
@@ -296,7 +296,7 @@ void init_AyStar(AyStar *aystar, Hash_HashProc hash, uint num_buckets)
 	 *  BinaryHeap allocates a block of 1024 nodes
 	 *  When that one gets full it reserves another one, till this number
 	 *  That is why it can stay this high */
-	init_BinaryHeap(&aystar->OpenListQueue, 102400);
+	aystar->OpenListQueue.Init(102400);
 
 	aystar->addstart  = AyStarMain_AddStartNode;
 	aystar->main      = AyStarMain_Main;
