@@ -145,7 +145,7 @@ void SetFocusedWindow(Window *w)
  * has a edit box as focused widget, or if a console is focused.
  * @return returns true if an edit box is in global focus or if the focused window is a console, else false
  */
-bool EditBoxInGlobalFocus()
+static bool EditBoxInGlobalFocus()
 {
 	if (_focused_window == NULL) return false;
 
@@ -1487,57 +1487,6 @@ static void HandleMouseOver()
 	}
 }
 
-/**
- * Resize the window.
- * Update all the widgets of a window based on their resize flags
- * Both the areas of the old window and the new sized window are set dirty
- * ensuring proper redrawal.
- * @param w       Window to resize
- * @param delta_x Delta x-size of changed window (positive if larger, etc.)
- * @param delta_y Delta y-size of changed window
- */
-void ResizeWindow(Window *w, int delta_x, int delta_y)
-{
-	if (delta_x != 0 || delta_y != 0) {
-		w->SetDirty();
-
-		uint new_xinc = max(0, (w->nested_root->resize_x == 0) ? 0 : (int)(w->nested_root->current_x - w->nested_root->smallest_x) + delta_x);
-		uint new_yinc = max(0, (w->nested_root->resize_y == 0) ? 0 : (int)(w->nested_root->current_y - w->nested_root->smallest_y) + delta_y);
-		assert(w->nested_root->resize_x == 0 || new_xinc % w->nested_root->resize_x == 0);
-		assert(w->nested_root->resize_y == 0 || new_yinc % w->nested_root->resize_y == 0);
-
-		w->nested_root->AssignSizePosition(ST_RESIZE, 0, 0, w->nested_root->smallest_x + new_xinc, w->nested_root->smallest_y + new_yinc, _dynlang.text_dir == TD_RTL);
-		w->width  = w->nested_root->current_x;
-		w->height = w->nested_root->current_y;
-	}
-
-	/* Always call OnResize to make sure everything is initialised correctly if it needs to be. */
-	w->OnResize();
-	w->SetDirty();
-}
-
-/**
- * Return the top of the main view available for general use.
- * @return Uppermost vertical coordinate available.
- * @note Above the upper y coordinate is often the main toolbar.
- */
-int GetMainViewTop()
-{
-	Window *w = FindWindowById(WC_MAIN_TOOLBAR, 0);
-	return (w == NULL) ? 0 : w->top + w->height;
-}
-
-/**
- * Return the bottom of the main view available for general use.
- * @return The vertical coordinate of the first unusable row, so 'top + height <= bottom' gives the correct result.
- * @note At and below the bottom y coordinate is often the status bar.
- */
-int GetMainViewBottom()
-{
-	Window *w = FindWindowById(WC_STATUS_BAR, 0);
-	return (w == NULL) ? _screen.height : w->top;
-}
-
 /** The minimum number of pixels of the title bar must be visible in both the X or Y direction */
 static const int MIN_VISIBLE_TITLE_BAR = 13;
 
@@ -1586,6 +1535,94 @@ static void PreventHiding(int *nx, int *ny, const Rect &rect, const Window *v, i
 	} else {
 		*ny = safe_y;
 	}
+}
+
+/**
+ * Make sure at least a part of the caption bar is still visible by moving
+ * the window if necessary.
+ * @param w The window to check.
+ * @param nx The proposed new x-location of the window.
+ * @param ny The proposed new y-location of the window.
+ */
+static void EnsureVisibleCaption(Window *w, int nx, int ny)
+{
+	/* Search for the title bar rectangle. */
+	Rect caption_rect;
+	const NWidgetBase *caption = w->nested_root->GetWidgetOfType(WWT_CAPTION);
+	if (caption != NULL) {
+		caption_rect.left   = caption->pos_x;
+		caption_rect.right  = caption->pos_x + caption->current_x;
+		caption_rect.top    = caption->pos_y;
+		caption_rect.bottom = caption->pos_y + caption->current_y;
+
+		/* Make sure the window doesn't leave the screen */
+		nx = Clamp(nx, MIN_VISIBLE_TITLE_BAR - caption_rect.right, _screen.width - MIN_VISIBLE_TITLE_BAR - caption_rect.left);
+		ny = Clamp(ny, 0, _screen.height - MIN_VISIBLE_TITLE_BAR);
+
+		/* Make sure the title bar isn't hidden behind the main tool bar or the status bar. */
+		PreventHiding(&nx, &ny, caption_rect, FindWindowById(WC_MAIN_TOOLBAR, 0), w->left, PHD_DOWN);
+		PreventHiding(&nx, &ny, caption_rect, FindWindowById(WC_STATUS_BAR,   0), w->left, PHD_UP);
+
+		if (w->viewport != NULL) {
+			w->viewport->left += nx - w->left;
+			w->viewport->top  += ny - w->top;
+		}
+	}
+	w->left = nx;
+	w->top  = ny;
+}
+
+/**
+ * Resize the window.
+ * Update all the widgets of a window based on their resize flags
+ * Both the areas of the old window and the new sized window are set dirty
+ * ensuring proper redrawal.
+ * @param w       Window to resize
+ * @param delta_x Delta x-size of changed window (positive if larger, etc.)
+ * @param delta_y Delta y-size of changed window
+ */
+void ResizeWindow(Window *w, int delta_x, int delta_y)
+{
+	if (delta_x != 0 || delta_y != 0) {
+		w->SetDirty();
+
+		uint new_xinc = max(0, (w->nested_root->resize_x == 0) ? 0 : (int)(w->nested_root->current_x - w->nested_root->smallest_x) + delta_x);
+		uint new_yinc = max(0, (w->nested_root->resize_y == 0) ? 0 : (int)(w->nested_root->current_y - w->nested_root->smallest_y) + delta_y);
+		assert(w->nested_root->resize_x == 0 || new_xinc % w->nested_root->resize_x == 0);
+		assert(w->nested_root->resize_y == 0 || new_yinc % w->nested_root->resize_y == 0);
+
+		w->nested_root->AssignSizePosition(ST_RESIZE, 0, 0, w->nested_root->smallest_x + new_xinc, w->nested_root->smallest_y + new_yinc, _dynlang.text_dir == TD_RTL);
+		w->width  = w->nested_root->current_x;
+		w->height = w->nested_root->current_y;
+	}
+
+	EnsureVisibleCaption(w, w->left, w->top);
+
+	/* Always call OnResize to make sure everything is initialised correctly if it needs to be. */
+	w->OnResize();
+	w->SetDirty();
+}
+
+/**
+ * Return the top of the main view available for general use.
+ * @return Uppermost vertical coordinate available.
+ * @note Above the upper y coordinate is often the main toolbar.
+ */
+int GetMainViewTop()
+{
+	Window *w = FindWindowById(WC_MAIN_TOOLBAR, 0);
+	return (w == NULL) ? 0 : w->top + w->height;
+}
+
+/**
+ * Return the bottom of the main view available for general use.
+ * @return The vertical coordinate of the first unusable row, so 'top + height <= bottom' gives the correct result.
+ * @note At and below the bottom y coordinate is often the status bar.
+ */
+int GetMainViewBottom()
+{
+	Window *w = FindWindowById(WC_STATUS_BAR, 0);
+	return (w == NULL) ? _screen.height : w->top;
 }
 
 static bool _dragging_window; ///< A window is being dragged or resized.
@@ -1695,29 +1732,7 @@ static EventState HandleWindowDragging()
 				}
 			}
 
-			/* Search for the title bar rectangle. */
-			Rect caption_rect;
-			const NWidgetBase *caption = w->nested_root->GetWidgetOfType(WWT_CAPTION);
-			assert(caption != NULL);
-			caption_rect.left   = caption->pos_x;
-			caption_rect.right  = caption->pos_x + caption->current_x;
-			caption_rect.top    = caption->pos_y;
-			caption_rect.bottom = caption->pos_y + caption->current_y;
-
-			/* Make sure the window doesn't leave the screen */
-			nx = Clamp(nx, MIN_VISIBLE_TITLE_BAR - caption_rect.right, _screen.width - MIN_VISIBLE_TITLE_BAR - caption_rect.left);
-			ny = Clamp(ny, 0, _screen.height - MIN_VISIBLE_TITLE_BAR);
-
-			/* Make sure the title bar isn't hidden behind the main tool bar or the status bar. */
-			PreventHiding(&nx, &ny, caption_rect, FindWindowById(WC_MAIN_TOOLBAR, 0), w->left, PHD_DOWN);
-			PreventHiding(&nx, &ny, caption_rect, FindWindowById(WC_STATUS_BAR,   0), w->left, PHD_UP);
-
-			if (w->viewport != NULL) {
-				w->viewport->left += nx - w->left;
-				w->viewport->top  += ny - w->top;
-			}
-			w->left = nx;
-			w->top  = ny;
+			EnsureVisibleCaption(w, nx, ny);
 
 			w->SetDirty();
 			return ES_HANDLED;
@@ -2604,6 +2619,10 @@ void ReInitAllWindows()
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
 		w->ReInit();
 	}
+#ifdef ENABLE_NETWORK
+	void NetworkReInitChatBoxSize();
+	NetworkReInitChatBoxSize();
+#endif
 
 	/* Make sure essential parts of all windows are visible */
 	RelocateAllWindows(_cur_resolution.width, _cur_resolution.height);
