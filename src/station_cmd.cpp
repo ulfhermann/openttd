@@ -667,11 +667,12 @@ CommandCost ClearTile_Station(TileIndex tile, DoCommandFlag flags);
  * @param tile TileIndex to check.
  * @param invalid_dirs Prohibited directions for slopes (set of #DiagDirection).
  * @param allowed_z Height allowed for the tile. If allowed_z is negative, it will be set to the height of this tile.
+ * @param check_bridge Check for the existance of a bridge.
  * @return The cost in case of success, or an error code if it failed.
  */
-CommandCost CheckBuildableTile(TileIndex tile, uint invalid_dirs, int &allowed_z)
+CommandCost CheckBuildableTile(TileIndex tile, uint invalid_dirs, int &allowed_z, bool check_bridge = true)
 {
-	if (MayHaveBridgeAbove(tile) && IsBridgeAbove(tile)) {
+	if (check_bridge && MayHaveBridgeAbove(tile) && IsBridgeAbove(tile)) {
 		return_cmd_error(STR_ERROR_MUST_DEMOLISH_BRIDGE_FIRST);
 	}
 
@@ -2804,10 +2805,17 @@ static void GetTileDesc_Station(TileIndex tile, TileDesc *td)
 	}
 
 	if (IsAirport(tile)) {
+		const AirportSpec *as = Station::GetByTile(tile)->airport.GetSpec();
+		td->airport_class = AirportClass::GetName(as->cls_id);
+		td->airport_name = as->name;
+
 		const AirportTileSpec *ats = AirportTileSpec::GetByTile(tile);
 		td->airport_tile_name = ats->name;
 
-		if (ats->grf_prop.grffile != NULL) {
+		if (as->grf_prop.grffile != NULL) {
+			const GRFConfig *gc = GetGRFConfig(as->grf_prop.grffile->grfid);
+			td->grf = gc->GetName();
+		} else if (ats->grf_prop.grffile != NULL) {
 			const GRFConfig *gc = GetGRFConfig(ats->grf_prop.grffile->grfid);
 			td->grf = gc->GetName();
 		}
