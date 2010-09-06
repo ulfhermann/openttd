@@ -32,8 +32,8 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 0xFFF000, true, false> CargoPacke
 extern CargoPacketPool _cargopacket_pool;
 
 template <class Tinst, class Tcont> class CargoList;
-class StationCargoList;
-class VehicleCargoList;
+class StationCargoList; // forward-declare, so we can use it in VehicleCargoList::Unreserve
+class VehicleCargoList; // forward-declare, so we can use it in CargoList::MovePacket
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -53,7 +53,6 @@ private:
 	/** The CargoList caches, thus needs to know about it. */
 	template <class Tinst, class Tcont> friend class CargoList;
 	friend class VehicleCargoList;
-	friend class ReservationList;
 	friend class StationCargoList;
 	/** We want this to be saved, right? */
 	friend const struct SaveLoad *GetCargoPacketDesc();
@@ -191,15 +190,13 @@ public:
  */
 #define FOR_ALL_CARGOPACKETS(var) FOR_ALL_CARGOPACKETS_FROM(var, 0)
 
+/** Kind of actions that could be done with packets on unloading */
 enum UnloadType {
 	UL_KEEP     = 0,      ///< keep cargo on vehicle
 	UL_DELIVER  = 1 << 0, ///< deliver cargo
 	UL_TRANSFER = 1 << 1, ///< transfer cargo
 	UL_ACCEPTED = 1 << 2, ///< cargo is accepted
 };
-
-class StationCargoList;
-class VehicleCargoList;
 
 /**
  * Simple collection class for a list of cargo packets
@@ -221,7 +218,7 @@ protected:
 	uint count;                 ///< Cache for the number of cargo entities
 	uint cargo_days_in_transit; ///< Cache for the sum of number of days in transit of each entity; comparable to man-hours
 
-	Tcont packets;               ///< The cargo packets in this list
+	Tcont packets;              ///< The cargo packets in this list
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -237,7 +234,7 @@ protected:
 	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
-	CargoPacket *MovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
+	CargoPacket *RemovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
 
 	uint MovePacket(StationCargoList *dest, StationID next, Iterator &it, uint cap);
 
@@ -313,20 +310,10 @@ protected:
 
 	CargoPacketList reserved; ///< The packets reserved for unloading in this list
 	Money feeder_share;       ///< Cache for the feeder share
-	uint reserved_count;      ///< count(reserved)
+	uint reserved_count;      ///< Cache for the number of reserved cargo entities
 
-	/**
-	 * Update the cache to reflect adding of this packet.
-	 * Increases count, feeder share and days_in_transit
-	 * @param cp a new packet to be inserted
-	 */
 	void AddToCache(const CargoPacket *cp);
 
-	/**
-	 * Update the cached values to reflect the removal of this packet.
-	 * Decreases count, feeder share and days_in_transit
-	 * @param cp Packet to be removed from cache
-	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
 public:
@@ -348,27 +335,14 @@ public:
 		return this->feeder_share;
 	}
 
-	/**
-	 * tries to merge the packet with another one in the packets list.
-	 * if no fitting packet is found, appends it.
-	 * @param cp the packet to be inserted
-	 */
 	void MergeOrPush(CargoPacket *cp);
 
-	/**
-	 * Appends the given cargo packet
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param cp the cargo packet to add
-	 * @param check_merge if true, check existing packets in the list for mergability
-	 * @pre cp != NULL
-	 */
 	void Append(CargoPacket *cp);
 
 	/**
 	 * Returns sum of cargo on board the vehicle (ie not only
-	 * reserved)
-	 * @return cargo on board the vehicle
+	 * reserved).
+	 * @return cargo on board the vehicle.
 	 */
 	FORCEINLINE uint OnboardCount() const
 	{
@@ -376,8 +350,8 @@ public:
 	}
 
 	/**
-	 * Returns sum of cargo reserved for the vehicle
-	 * @return cargo reserved for the vehicle
+	 * Returns sum of cargo reserved for the vehicle.
+	 * @return cargo reserved for the vehicle.
 	 */
 	FORCEINLINE uint ReservedCount() const
 	{
@@ -385,8 +359,8 @@ public:
 	}
 
 	/**
-	 * Returns a pointer to the reserved cargo list (so you can iterate over it etc).
-	 * @return pointer to the reserved list
+	 * Returns a pointer to the reserved cargo list.
+	 * @return pointer to the reserved list.
 	 */
 	FORCEINLINE const CargoPacketList *Reserved() const
 	{
@@ -411,27 +385,12 @@ public:
 		}
 	}
 
-	/**
-	 * Reserves a packet for later loading
-	 */
 	void Reserve(CargoPacket *cp);
 
-	/**
-	 * Returns all reserved cargo to the station
-	 */
 	void Unreserve(StationID next, StationCargoList *dest);
 
-	/**
-	 * load packets from the reserved list
-	 * @params count the number of cargo to load
-	 * @return true if there are still packets that might be loaded from the reservation list
-	 */
 	uint LoadReserved(uint count);
 
-	/**
-	 * swap the reserved and packets lists when starting to load cargo.
-	 * @pre this->packets.empty()
-	 */
 	void SwapReserved();
 
 	/**
@@ -442,11 +401,6 @@ public:
 	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 
-	/**
-	 * Moves the given amount of cargo to another vehicle (during autoreplace).
-	 * @param dest         the destination to move the cargo to
-	 * @param max_load     the maximum amount of cargo entities to move
-	 */
 	uint MoveTo(VehicleCargoList *dest, uint cap);
 
 	/**
@@ -495,48 +449,14 @@ public:
 				cp1->source_id       == cp2->source_id;
 	}
 
-	/**
-	 * Moves the given amount of cargo from a vehicle to a station.
-	 * Depending on the value of flags the side effects of this function differ:
-	 * 	- OUFB_UNLOAD_IF_POSSIBLE and dest->acceptance_pickup & GoodsEntry::ACCEPTANCE:
-	 *  	packets are accepted here and may be unloaded and/or delivered (=destroyed);
-	 *  	if not using cargodist: all packets are unloaded and delivered
-	 *  	if using cargodist: only packets which have this station as final destination are unloaded and delivered
-	 *  	if using cargodist: other packets may or may not be unloaded, depending on next_station
-	 *  	if GoodsEntry::ACCEPTANCE is not set and using cargodist: packets may still be unloaded, but not delivered.
-	 *  - OUFB_UNLOAD: unload all packets unconditionally;
-	 *  	if OUF_UNLOAD_IF_POSSIBLE set and OUFB_TRANSFER not set: also deliver packets (no matter if using cargodist)
-	 *  - OUFB_TRANSFER: don't deliver any packets;
-	 *  	overrides delivering aspect of OUFB_UNLOAD_IF_POSSIBLE
-	 * @param source       the vehicle cargo list to take the cargo from
-	 * @param max_unload   the maximum amount of cargo entities to move
-	 * @param flags        how to handle the moving (side effects)
-	 * @param next_station the next unloading station in the vehicle's order list
-	 * @return the number of cargo entities actually moved
-	 */
 	uint TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags flags, StationID next_station, CargoPayment *payment);
 
 	uint MoveTo(VehicleCargoList *dest, uint cap, StationID next_station, bool reserve = false);
 
-	/**
-	 * Appends the given cargo packet to the range of packets with the same next station
-	 * @warning After appending this packet may not exist anymore!
-	 * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
-	 * @param next the next hop
-	 * @param cp the cargo packet to add
-	 * @pre cp != NULL
-	 */
 	void Append(StationID next, CargoPacket *cp);
 
-	/**
-	 * route all packets with station "to" as next hop to a different place, except "curr"
-	 */
 	void RerouteStalePackets(StationID to);
 
-	/**
-	 * Truncate where each destination loses roughly the same percentage of its cargo.
-	 * This is done by randomizing the selection of packets to be removed.
-	 */
 	void RandomTruncate(uint max_remaining);
 
 	/**
