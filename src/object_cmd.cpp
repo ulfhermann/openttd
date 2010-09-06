@@ -34,6 +34,7 @@
 #include "newgrf_config.h"
 #include "newgrf_object.h"
 #include "date_func.h"
+#include "newgrf_debug.h"
 
 #include "table/strings.h"
 #include "table/object_land.h"
@@ -165,12 +166,13 @@ CommandCost CmdBuildObject(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		bool allow_water = (spec->flags & (OBJECT_FLAG_BUILT_ON_WATER | OBJECT_FLAG_NOT_ON_LAND)) != 0;
 		bool allow_ground = (spec->flags & OBJECT_FLAG_NOT_ON_LAND) == 0;
 		TILE_AREA_LOOP(t, ta) {
-			if (IsWaterTile(t)) {
+			if (HasTileWaterClass(t) && IsTileOnWater(t)) {
 				if (!allow_water) return_cmd_error(STR_ERROR_CAN_T_BUILD_ON_WATER);
-				/* For water tiles we want to "just" check whether the tile is water and
-				 * can be cleared, i.e. it's not filled. We won't be paying though. */
-				CommandCost ret = DoCommand(t, 0, 0, flags & ~(DC_EXEC | DC_NO_WATER), CMD_LANDSCAPE_CLEAR);
-				if (ret.Failed()) return ret;
+				if (!IsWaterTile(t)) {
+					/* Normal water tiles don't have to be cleared. For all other tile types clear
+					 * the tile but leave the water. */
+					cost.AddCost(DoCommand(t, 0, 0, flags & ~DC_NO_WATER, CMD_LANDSCAPE_CLEAR));
+				}
 			} else {
 				if (!allow_ground) return_cmd_error(STR_ERROR_MUST_BE_BUILT_ON_WATER);
 				/* For non-water tiles, we'll have to clear it before building. */
@@ -338,9 +340,15 @@ static Foundation GetFoundation_Object(TileIndex tile, Slope tileh)
 static void ReallyClearObjectTile(Object *o)
 {
 	Object::DecTypeCount(GetObjectType(o->location.tile));
-	TILE_AREA_LOOP(tile_cur, o->location) MakeWaterKeepingClass(tile_cur, GetTileOwner(tile_cur));
+	TILE_AREA_LOOP(tile_cur, o->location) {
+		DeleteNewGRFInspectWindow(GSF_OBJECTS, tile_cur);
+
+		MakeWaterKeepingClass(tile_cur, GetTileOwner(tile_cur));
+	}
 	delete o;
 }
+
+SmallVector<ClearedObjectArea, 4> _cleared_object_areas;
 
 static CommandCost ClearTile_Object(TileIndex tile, DoCommandFlag flags)
 {
@@ -351,12 +359,19 @@ static CommandCost ClearTile_Object(TileIndex tile, DoCommandFlag flags)
 	Object *o = Object::GetByTile(tile);
 	TileArea ta = o->location;
 
+	ClearedObjectArea *cleared_area = _cleared_object_areas.Append();
+	cleared_area->first_tile = tile;
+	cleared_area->area = ta;
+
 	CommandCost cost(EXPENSES_CONSTRUCTION, spec->GetClearCost() * ta.w * ta.h / 5);
 	if (spec->flags & OBJECT_FLAG_CLEAR_INCOME) cost.MultiplyCost(-1); // They get an income!
 
 	/* Water can remove everything! */
 	if (_current_company != OWNER_WATER) {
-		if ((spec->flags & OBJECT_FLAG_AUTOREMOVE) == 0 && flags & DC_AUTO) {
+		if ((flags & DC_NO_WATER) && IsTileOnWater(tile)) {
+			/* There is water under the object, treat it as water tile. */
+			return_cmd_error(STR_ERROR_CAN_T_BUILD_ON_WATER);
+		} else if (!(spec->flags & OBJECT_FLAG_AUTOREMOVE) && (flags & DC_AUTO)) {
 			/* No automatic removal by overbuilding stuff. */
 			return_cmd_error(type == OBJECT_HQ ? STR_ERROR_COMPANY_HEADQUARTERS_IN : STR_ERROR_OBJECT_IN_THE_WAY);
 		} else if (_game_mode == GM_EDITOR) {
