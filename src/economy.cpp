@@ -1121,11 +1121,11 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 }
 
 /**
- * reserves cargo if the full load order and improved_load is set.
+ * Reserves cargo if the full load order and improved_load is set.
  * @param st The station where the consist is loading at the moment
  * @param u The front of the loading vehicle consist
  * @param next_station The next station the vehicle will stop at
- * @return bit field for the cargo classes with bit for the reserved cargos set (if anything was reserved).
+ * @return bit field for the cargo classes with bits for the reserved cargos set (if anything was reserved).
  */
 uint32 ReserveConsist(Station *st, Vehicle *u, StationID next_station)
 {
@@ -1133,8 +1133,27 @@ uint32 ReserveConsist(Station *st, Vehicle *u, StationID next_station)
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
 		for (Vehicle *v = u; v != NULL; v = v->Next()) {
-			/* only reserve if the vehicle is not unloading anymore. Otherwise we'll swap in reserved cargo */
+			/* Only reserve if the vehicle is not unloading anymore.
+			 *
+			 * The packets that are kept in the vehicle because they have the
+			 * same destination as the vehicle are stored in the reservation
+			 * list while unloading for performance reasons. The reservation
+			 * list is swapped with the onboard list after unloading. This
+			 * doesn't increase the load/unload time. So if we start reserving
+			 * cargo before unloading has stopped we'll load that cargo for free
+			 * later. Like this there is a slightly increased probability that
+			 * another vehicle which has arrived later loads cargo that should
+			 * be loaded by this vehicle but as the algorithm isn't perfect in
+			 * that regard anyway we can tolerate it.
+			 *
+			 * The algorithm isn't perfect as it only counts free capacity for
+			 * reservation. If another vehicle arrives later but unloads faster
+			 * than this one, this vehicle won't reserve all the cargo it may
+			 * be able to take after fully unloading. So the other vehicle may
+			 * load it even if it has arrived later.
+			 */
 			if (HasBit(v->vehicle_flags, VF_CARGO_UNLOADING)) continue;
+
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
 				StationCargoList &list = st->goods[v->cargo_type].cargo;
