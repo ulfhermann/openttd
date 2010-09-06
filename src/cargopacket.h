@@ -30,8 +30,7 @@ typedef Pool<CargoPacket, CargoPacketID, 1024, 0xFFF000, true, false> CargoPacke
 extern CargoPacketPool _cargopacket_pool;
 
 template <class Tinst> class CargoList;
-class StationCargoList;
-class VehicleCargoList;
+class StationCargoList; // forward-declare, so we can use it in VehicleCargoList::Unreserve
 extern const struct SaveLoad *GetCargoPacketDesc();
 
 /**
@@ -215,11 +214,6 @@ protected:
 
 	List packets;               ///< The cargo packets in this list
 
-	/**
-	 * tries to merge the packet with another one in the packets list.
-	 * if no fitting packet is found, appends it.
-	 * @param cp the packet to be inserted
-	 */
 	void MergeOrPush(CargoPacket *cp);
 
 	/**
@@ -333,7 +327,7 @@ protected:
 
 	List reserved;       ///< The packets reserved for unloading in this list
 	Money feeder_share;  ///< Cache for the feeder share
-	uint reserved_count; ///< count(reserved)
+	uint reserved_count; ///< Cache for the number of reserved cargo entities
 
 	/**
 	 * Update the cache to reflect adding of this packet.
@@ -366,8 +360,8 @@ public:
 
 	/**
 	 * Returns sum of cargo on board the vehicle (ie not only
-	 * reserved)
-	 * @return cargo on board the vehicle
+	 * reserved).
+	 * @return cargo on board the vehicle.
 	 */
 	FORCEINLINE uint OnboardCount() const
 	{
@@ -375,8 +369,8 @@ public:
 	}
 
 	/**
-	 * Returns sum of cargo reserved for the vehicle
-	 * @return cargo reserved for the vehicle
+	 * Returns sum of cargo reserved for the vehicle.
+	 * @return cargo reserved for the vehicle.
 	 */
 	FORCEINLINE uint ReservedCount() const
 	{
@@ -384,8 +378,8 @@ public:
 	}
 
 	/**
-	 * Returns a pointer to the reserved cargo list (so you can iterate over it etc).
-	 * @return pointer to the reserved list
+	 * Returns a pointer to the reserved cargo list.
+	 * @return pointer to the reserved list.
 	 */
 	FORCEINLINE const List *Reserved() const
 	{
@@ -410,21 +404,10 @@ public:
 		}
 	}
 
-	/**
-	 * Reserves a packet for later loading
-	 */
 	void Reserve(CargoPacket *cp);
 
-	/**
-	 * Returns all reserved cargo to the station
-	 */
 	void Unreserve(StationCargoList *dest);
 
-	/**
-	 * load packets from the reserved list
-	 * @params count the number of cargo to load
-	 * @return true if there are still packets that might be loaded from the reservation list
-	 */
 	bool LoadReserved(uint count);
 
 	/**
