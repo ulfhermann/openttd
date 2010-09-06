@@ -49,13 +49,13 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
 }
 
 CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id) :
-	feeder_share(feeder_share),
-	count(count),
-	days_in_transit(days_in_transit),
-	source_id(source_id),
-	source(source),
-	source_xy(source_xy),
-	loaded_at_xy(loaded_at_xy)
+		feeder_share(feeder_share),
+		count(count),
+		days_in_transit(days_in_transit),
+		source_id(source_id),
+		source(source),
+		source_xy(source_xy),
+		loaded_at_xy(loaded_at_xy)
 {
 	assert(count != 0);
 	this->source_type = source_type;
@@ -74,7 +74,12 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
 	}
 }
 
-CargoPacket * CargoPacket::Split(uint new_size)
+/**
+ * Split this packet in two and return the split off part.
+ * @param new_size size of the remaining part
+ * @return the split off part
+ */
+CargoPacket *CargoPacket::Split(uint new_size)
 {
 	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
 	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
@@ -83,6 +88,10 @@ CargoPacket * CargoPacket::Split(uint new_size)
 	return cp_new;
 }
 
+/**
+ * Merge another packet into this one
+ * @param cp the packet to be merged in
+ */
 void CargoPacket::Merge(CargoPacket *cp)
 {
 	this->count += cp->count;
@@ -287,7 +296,7 @@ VehicleCargoList::~VehicleCargoList()
 }
 
 uint VehicleCargoList::DeliverPacket(Iterator &c, uint remaining_unload, CargoPayment *payment) {
-	CargoPacket * p = *c;
+	CargoPacket *p = *c;
 	uint loaded = 0;
 	if (p->count <= remaining_unload) {
 		payment->PayFinalDelivery(p, p->count);
