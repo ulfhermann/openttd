@@ -718,7 +718,10 @@ void StationCargoList::RandomTruncate(uint max_remaining) {
 	uint prev_count = this->count;
 	while (this->count > max_remaining) {
 		for(Iterator it(this->packets.begin()); it != this->packets.end();) {
-			if (RandomRange(prev_count) < max_remaining) continue;
+			if (RandomRange(prev_count) < max_remaining) {
+				++it;
+				continue;
+			}
 			CargoPacket *packet = *it;
 			uint diff = this->count - max_remaining;
 			if (packet->count > diff) {
