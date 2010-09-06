@@ -112,6 +112,11 @@ void CargoList<Tinst>::AddToCache(const CargoPacket *cp)
 	this->cargo_days_in_transit += cp->days_in_transit * cp->count;
 }
 
+/**
+ * Tries to merge the packet with another one in the packets list.
+ * if no fitting packet is found, appends it.
+ * @param cp the packet to be inserted
+ */
 template <class Tinst>
 void CargoList<Tinst>::MergeOrPush(CargoPacket *cp)
 {
@@ -130,13 +135,12 @@ void CargoList<Tinst>::MergeOrPush(CargoPacket *cp)
 	this->packets.push_back(cp);
 }
 
-
 template <class Tinst>
 void CargoList<Tinst>::Append(CargoPacket *cp)
 {
 	assert(cp != NULL);
 	static_cast<Tinst *>(this)->AddToCache(cp);
-	MergeOrPush(cp);
+	this->MergeOrPush(cp);
 }
 
 
@@ -167,6 +171,10 @@ void CargoList<Tinst>::Truncate(uint max_remaining)
 	}
 }
 
+/**
+ * Reserves a packet for later loading and adds it to the cache.
+ * @param cp the packet to be reserved
+ */
 void VehicleCargoList::Reserve(CargoPacket *cp)
 {
 	assert(cp != NULL);
@@ -175,7 +183,10 @@ void VehicleCargoList::Reserve(CargoPacket *cp)
 	this->reserved.push_back(cp);
 }
 
-
+/**
+ * Returns all reserved cargo to the station and removes it from the cache.
+ * @param dest the station the cargo is returned to
+ */
 void VehicleCargoList::Unreserve(StationCargoList *dest)
 {
 	Iterator it(this->reserved.begin());
@@ -188,6 +199,11 @@ void VehicleCargoList::Unreserve(StationCargoList *dest)
 	}
 }
 
+/**
+ * Load packets from the reservation list.
+ * @params count the number of cargo to load
+ * @return true if there are still packets that might be loaded from the reservation list
+ */
 bool VehicleCargoList::LoadReserved(uint max_move)
 {
 	Iterator it(this->reserved.begin());
@@ -239,6 +255,15 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 
 				case MTA_RESERVE:
 					cp->loaded_at_xy = data;
+					/* this reinterpret cast is nasty. The method should be
+					 * refactored to get rid of it. However, as this is only
+					 * a step on the way to cargodist and the whole method is
+					 * rearranged in a later step we can tolerate it to make the
+					 * patches smaller.
+					 * MTA_RESERVE can only happen if dest is a vehicle, so we
+					 * cannot crash here. I don't know a way to assert that,
+					 * though.
+					 */
 					reinterpret_cast<VehicleCargoList *>(dest)->Reserve(cp);
 					continue;
 
@@ -286,6 +311,7 @@ bool CargoList<Tinst>::MoveTo(Tother_inst *dest, uint max_move, MoveToAction mta
 			}
 
 			if (mta == MTA_RESERVE) {
+				/* nasty reinterpret cast, see above */
 				reinterpret_cast<VehicleCargoList *>(dest)->Reserve(cp_new);
 			} else {
 				dest->Append(cp_new);

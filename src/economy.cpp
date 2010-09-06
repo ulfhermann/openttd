@@ -1114,20 +1114,20 @@ void PrepareUnload(Vehicle *front_v)
 }
 
 /**
- * reserves cargo if the full load order and improved_load is set.
+ * Reserves cargo if the full load order and improved_load is set.
  * @param st The station where the consist is loading at the moment
  * @param u The front of the loading vehicle consist
- * @return bit field for the cargo classes with bit for the reserved cargos set (if anything was reserved).
+ * @return bit field for the cargo classes with bits for the reserved cargos set (if anything was reserved).
  */
-uint32 ReserveConsist(Station * st, Vehicle * u)
+uint32 ReserveConsist(Station *st, Vehicle *u)
 {
 	uint32 ret = 0;
 	if (_settings_game.order.improved_load && (u->current_order.GetLoadType() & OLFB_FULL_LOAD)) {
 		/* Update reserved cargo */
-		for (Vehicle * v = u; v != NULL; v = v->Next()) {
+		for (Vehicle *v = u; v != NULL; v = v->Next()) {
 			int cap = v->cargo_cap - v->cargo.Count();
 			if (cap > 0) {
-				StationCargoList & list = st->goods[v->cargo_type].cargo;
+				StationCargoList &list = st->goods[v->cargo_type].cargo;
 				list.MoveTo(&v->cargo, cap, StationCargoList::MTA_RESERVE, NULL, st->xy);
 				SetBit(ret, v->cargo_type);
 			}
