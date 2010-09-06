@@ -40,6 +40,7 @@
 #include "core/pool_func.hpp"
 #include "subsidy_func.h"
 #include "core/backup_type.hpp"
+#include "object_base.h"
 
 #include "table/strings.h"
 #include "table/industry_land.h"
@@ -1336,7 +1337,7 @@ static CommandCost CheckIfIndustryTilesAreFree(TileIndex tile, const IndustryTil
 			IndustryBehaviour ind_behav = GetIndustrySpec(type)->behaviour;
 
 			/* Perform land/water check if not disabled */
-			if (!HasBit(its->slopes_refused, 5) && (IsWaterTile(cur_tile) == !(ind_behav & INDUSTRYBEH_BUILT_ONWATER))) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
+			if (!HasBit(its->slopes_refused, 5) && ((HasTileWaterClass(cur_tile) && IsTileOnWater(cur_tile)) == !(ind_behav & INDUSTRYBEH_BUILT_ONWATER))) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 
 			if (HasBit(its->callback_mask, CBM_INDT_SHAPE_CHECK)) {
 				custom_shape = true;
@@ -1694,7 +1695,9 @@ static CommandCost CreateNewIndustryHelper(TileIndex tile, IndustryType type, Do
 
 	*ip = NULL;
 
+	SmallVector<ClearedObjectArea, 1> object_areas(_cleared_object_areas);
 	CommandCost ret = CheckIfIndustryTilesAreFree(tile, it, itspec_index, type, random_initial_bits, founder, &custom_shape_check);
+	_cleared_object_areas = object_areas;
 	if (ret.Failed()) return ret;
 
 	if (HasBit(GetIndustrySpec(type)->callback_mask, CBM_IND_LOCATION)) {
@@ -1794,10 +1797,12 @@ CommandCost CmdBuildIndustry(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 		if (num >= count) return CMD_ERROR;
 
 		CommandCost ret = CommandCost(STR_ERROR_SITE_UNSUITABLE);
+		SmallVector<ClearedObjectArea, 1> object_areas(_cleared_object_areas);
 		do {
 			if (--count < 0) return ret;
 			if (--num < 0) num = indspec->num_table - 1;
 			ret = CheckIfIndustryTilesAreFree(tile, itt[num], num, it, random_initial_bits, _current_company);
+			_cleared_object_areas = object_areas;
 		} while (ret.Failed());
 
 		ret = CreateNewIndustryHelper(tile, it, flags, indspec, num, random_var8f, random_initial_bits, _current_company, &ind);
@@ -1835,11 +1840,11 @@ static Industry *CreateNewIndustry(TileIndex tile, IndustryType type)
 
 /**
  * Compute the appearance probability for an industry during map creation.
- * @param it Industrytype to compute for
- * @param force_at_least_one Returns whether at least one instance should be forced on map creation
- * @return relative probability for the industry to appear
+ * @param it Industry type to compute.
+ * @param [out] force_at_least_one Returns whether at least one instance should be forced on map creation.
+ * @return Relative probability for the industry to appear.
  */
-static uint32 GetScaledIndustryProbability(IndustryType it, bool *force_at_least_one)
+static uint32 GetScaledIndustryGenerationProbability(IndustryType it, bool *force_at_least_one)
 {
 	const IndustrySpec *ind_spc = GetIndustrySpec(it);
 	uint32 chance = ind_spc->appear_creation[_settings_game.game_creation.landscape] * 16; // * 16 to increase precision
@@ -1858,14 +1863,79 @@ static uint32 GetScaledIndustryProbability(IndustryType it, bool *force_at_least
 	}
 }
 
-/** Number of industries on a 256x256 map */
-static const byte _numof_industry_table[] = {
-	0,    // none
-	10,   // very low
-	25,   // low
-	55,   // normal
-	80,   // high
-};
+/**
+ * Compute the probability for constructing a new industry during game play.
+ * @param it Industry type to compute.
+ * @return Relative probability for the industry to appear.
+ */
+static uint16 GetIndustryGamePlayProbability(IndustryType it)
+{
+	const IndustrySpec *ind_spc = GetIndustrySpec(it);
+	byte chance = ind_spc->appear_ingame[_settings_game.game_creation.landscape];
+	if (!ind_spc->enabled || chance == 0 || ind_spc->num_table == 0 ||
+			((ind_spc->behaviour & INDUSTRYBEH_BEFORE_1950) && _cur_year > 1950) ||
+			((ind_spc->behaviour & INDUSTRYBEH_AFTER_1960) && _cur_year < 1960) ||
+			!CheckIfCallBackAllowsAvailability(it, IACT_RANDOMCREATION)) {
+		return 0;
+	}
+	return chance;
+}
+
+/**
+ * Get wanted number of industries on the map.
+ * @return Wanted number of industries at the map.
+ */
+static uint GetNumberOfIndustries()
+{
+	/* Number of industries on a 256x256 map. */
+	static const uint16 numof_industry_table[] = {
+		0,    // none
+		10,   // very low
+		25,   // low
+		55,   // normal
+		80,   // high
+	};
+
+	assert(_settings_game.difficulty.number_industries < lengthof(numof_industry_table));
+	uint difficulty = (_game_mode != GM_EDITOR) ? _settings_game.difficulty.number_industries : 1;
+	return ScaleByMapSize(numof_industry_table[difficulty]);
+}
+
+/**
+ * Advertise about a new industry opening.
+ * @param ind Industry being opened.
+ */
+static void AdvertiseIndustryOpening(Industry *ind)
+{
+	const IndustrySpec *ind_spc = GetIndustrySpec(ind->type);
+	SetDParam(0, ind_spc->name);
+	if (ind_spc->new_industry_text > STR_LAST_STRINGID) {
+		SetDParam(1, STR_TOWN_NAME);
+		SetDParam(2, ind->town->index);
+	} else {
+		SetDParam(1, ind->town->index);
+	}
+	AddIndustryNewsItem(ind_spc->new_industry_text, NS_INDUSTRY_OPEN, ind->index);
+	AI::BroadcastNewEvent(new AIEventIndustryOpen(ind->index));
+}
+
+/**
+ * Try to place the industry in the game.
+ * Since there is no feedback why placement fails, there is no other option
+ * than to try a few times before concluding it does not work.
+ * @param type     Industry type of the desired industry.
+ * @param try_hard Try very hard to find a place. (Used to place at least one industry per type.)
+ * @return Pointer to created industry, or \c NULL if creation failed.
+ */
+static Industry *PlaceIndustry(IndustryType type, bool try_hard)
+{
+	uint tries = try_hard ? 10000u : 2000u;
+	for (; tries > 0; tries--) {
+		Industry *ind = CreateNewIndustry(RandomTile(), type);
+		if (ind != NULL) return ind;
+	}
+	return NULL;
+}
 
 /**
  * Try to build a industry on the map.
@@ -1877,10 +1947,7 @@ static void PlaceInitialIndustry(IndustryType type, bool try_hard)
 	Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
 
 	IncreaseGeneratingWorldProgress(GWP_INDUSTRY);
-
-	for (uint i = 0; i < (try_hard ? 10000u : 2000u); i++) {
-		if (CreateNewIndustry(RandomTile(), type) != NULL) break;
-	}
+	PlaceIndustry(type, try_hard);
 
 	cur_company.Restore();
 }
@@ -1891,9 +1958,7 @@ static void PlaceInitialIndustry(IndustryType type, bool try_hard)
  */
 void GenerateIndustries()
 {
-	assert(_settings_game.difficulty.number_industries < lengthof(_numof_industry_table));
-	uint difficulty = (_game_mode != GM_EDITOR) ? _settings_game.difficulty.number_industries : 1;
-	uint total_amount = ScaleByMapSize(_numof_industry_table[difficulty]);
+	uint total_amount = GetNumberOfIndustries();
 
 	/* Do not create any industries? */
 	if (total_amount == 0) return;
@@ -1904,7 +1969,7 @@ void GenerateIndustries()
 	uint num_forced = 0;
 
 	for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
-		industry_probs[it] = GetScaledIndustryProbability(it, force_at_least_one + it);
+		industry_probs[it] = GetScaledIndustryGenerationProbability(it, force_at_least_one + it);
 		total_prob += industry_probs[it];
 		if (force_at_least_one[it]) num_forced++;
 	}
@@ -1978,16 +2043,9 @@ static void MaybeNewIndustry()
 	uint16 probability_max = 0;
 
 	/* Generate a list of all possible industries that can be built. */
-	const IndustrySpec *ind_spc;
 	for (IndustryType j = 0; j < NUM_INDUSTRYTYPES; j++) {
-		ind_spc = GetIndustrySpec(j);
-		byte chance = ind_spc->appear_ingame[_settings_game.game_creation.landscape];
-
-		if (!ind_spc->enabled || chance == 0 || ind_spc->num_table == 0) continue;
-
-		/* If there is no Callback CBID_INDUSTRY_AVAILABLE or if this one did not fail,
-		 * and if appearing chance for this landscape is above 0, this industry can be chosen */
-		if (CheckIfCallBackAllowsAvailability(j, IACT_RANDOMCREATION)) {
+		uint16 chance = GetIndustryGamePlayProbability(j);
+		if (chance > 0) {
 			probability_max += chance;
 			/* adds the result for this industry */
 			cumulative_probs[num].ind = j;
@@ -2006,29 +2064,11 @@ static void MaybeNewIndustry()
 		if (cumulative_probs[j].prob >= rndtype) break;
 	}
 
-	ind_spc = GetIndustrySpec(cumulative_probs[j].ind);
-	/*  Check if it is allowed */
-	if ((ind_spc->behaviour & INDUSTRYBEH_BEFORE_1950) && _cur_year > 1950) return;
-	if ((ind_spc->behaviour & INDUSTRYBEH_AFTER_1960) && _cur_year < 1960) return;
-
 	/* try to create 2000 times this industry */
-	Industry *ind; // Will receive the industry's creation pointer.
-	num = 2000;
-	for (;;) {
-		ind = CreateNewIndustry(RandomTile(), cumulative_probs[j].ind);
-		if (ind != NULL) break;
-		if (--num == 0) return;
-	}
+	Industry *ind = PlaceIndustry(cumulative_probs[j].ind, false);
+	if (ind == NULL) return;
 
-	SetDParam(0, ind_spc->name);
-	if (ind_spc->new_industry_text > STR_LAST_STRINGID) {
-		SetDParam(1, STR_TOWN_NAME);
-		SetDParam(2, ind->town->index);
-	} else {
-		SetDParam(1, ind->town->index);
-	}
-	AddIndustryNewsItem(ind_spc->new_industry_text, NS_INDUSTRY_OPEN, ind->index);
-	AI::BroadcastNewEvent(new AIEventIndustryOpen(ind->index));
+	AdvertiseIndustryOpening(ind);
 }
 
 /**
