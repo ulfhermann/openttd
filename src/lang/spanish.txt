@@ -2165,6 +2165,8 @@ STR_LAND_AREA_INFORMATION_LANDINFO_COORDS                       :{BLACK}Coordena
 STR_LAND_AREA_INFORMATION_BUILD_DATE                            :{BLACK}Construido: {LTBLUE}{DATE_LONG}
 STR_LAND_AREA_INFORMATION_STATION_CLASS                         :{BLACK}Clase de estación: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_STATION_TYPE                          :{BLACK}Tipo de estación: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORT_CLASS                         :{BLACK}Clase del aeropuerto: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORT_NAME                          :{BLACK}Nombre del aeropuerto: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Nombre de casilla de aeropuerto: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_NEWGRF_NAME                           :{BLACK}NewGRF: {LTBLUE}{STRING}
 STR_LAND_AREA_INFORMATION_CARGO_ACCEPTED                        :{BLACK}Carga aceptada: {LTBLUE}
@@ -2786,7 +2788,7 @@ STR_GROUP_DELETE_TOOLTIP                                        :{BLACK}Borrar e
 STR_GROUP_RENAME_TOOLTIP                                        :{BLACK}Renombrar el grupo seleccionado
 STR_GROUP_REPLACE_PROTECTION_TOOLTIP                            :{BLACK}Click para proteger este grupo del auto reemplazado global
 
-STR_GROUP_ADD_SHARED_VEHICLE                                    :Todos los vehículos compartidos
+STR_GROUP_ADD_SHARED_VEHICLE                                    :Añadir vehículos con órdenes compartidas
 STR_GROUP_REMOVE_ALL_VEHICLES                                   :Quitar todos los vehículos
 
 STR_GROUP_RENAME_CAPTION                                        :{BLACK}Renombrar un grupo
