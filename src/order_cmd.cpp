@@ -1835,8 +1835,11 @@ bool ProcessOrders(Vehicle *v)
 			 * stopped at. If the order isn't non-stop this doesn't matter
 			 * as cargodist will go crazy anyway. So we can set it in that
 			 * case.
+			 *
+			 * Station::IsValidID(update_last_visited) also makes sure we don't
+			 * do this for waypoints.
 			 */
-			if (update_last_visited != INVALID_STATION && !(v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS)) {
+			if (Station::IsValidID(update_last_visited) && !(v->current_order.GetNonStopType() & ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS)) {
 				if (Station::IsValidID(v->last_station_visited)) {
 					IncreaseStats(Station::Get(v->last_station_visited), v, update_last_visited, false);
 				}
