@@ -201,9 +201,11 @@ STR_SORT_BY_POWER                                               :Хӑватлӑ�
 STR_TOOLBAR_TOOLTIP_PAUSE_GAME                                  :{BLACK}Вӑййи тӑхтав
 STR_TOOLBAR_TOOLTIP_FORWARD                                     :{BLACK}Вӑййи хӑвӑртлат
 STR_TOOLBAR_TOOLTIP_OPTIONS                                     :{BLACK}Майлаштару
+STR_TOOLBAR_TOOLTIP_BUILD_AIRPORTS                              :{BLACK}Аэропорт ларт
 
 # Extra tooltips for the scenario editor toolbar
 STR_SCENEDIT_TOOLBAR_OPENTTD                                    :{YELLOW}OpenTTD
+STR_SCENEDIT_TOOLBAR_PLACE_OBJECT                               :{BLACK}Объект вырӑнӗ
 
 ############ range for SE file menu starts
 STR_SCENEDIT_FILE_MENU_SEPARATOR                                :
@@ -247,6 +249,7 @@ STR_SUBSIDIES_MENU_SUBSIDIES                                    :Грантсе�
 ############ range ends here
 
 ############ range for airport construction menu starts
+STR_AIRCRAFT_MENU_AIRPORT_CONSTRUCTION                          :Аэропорт ҫурт
 ############ range ends here
 
 ############ range for landscaping menu starts
@@ -393,12 +396,14 @@ STR_SMALLMAP_TYPE_OWNERS                                        :Хуҫасем
 
 STR_SMALLMAP_LEGENDA_ROADS                                      :{TINYFONT}{BLACK}Ҫулсем
 STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLACK}Чукун ҫулсем
+STR_SMALLMAP_LEGENDA_STATIONS_AIRPORTS_DOCKS                    :{TINYFONT}{BLACK}Станцисем/Аэропортсем/Портсем
 STR_SMALLMAP_LEGENDA_VEHICLES                                   :{TINYFONT}{BLACK}Ҫул-йӗр
 STR_SMALLMAP_LEGENDA_TRAINS                                     :{TINYFONT}{BLACK}Пуйăссем
 STR_SMALLMAP_LEGENDA_ROAD_VEHICLES                              :{TINYFONT}{BLACK}Транспорт ҫул
 STR_SMALLMAP_LEGENDA_SHIPS                                      :{TINYFONT}{BLACK}Карапсем
 STR_SMALLMAP_LEGENDA_AIRCRAFT                                   :{TINYFONT}{BLACK}Сывлӑш ҫул-йӗрӗ
 STR_SMALLMAP_LEGENDA_FOREST                                     :{TINYFONT}{BLACK}Вӑрман
+STR_SMALLMAP_LEGENDA_AIRPORT_HELIPORT                           :{TINYFONT}{BLACK}Аэропорт/Вертолёт лаптӑк
 STR_SMALLMAP_LEGENDA_FIELDS                                     :{TINYFONT}{BLACK}Уйсем
 STR_SMALLMAP_LEGENDA_TREES                                      :{TINYFONT}{BLACK}Йывӑссем
 STR_SMALLMAP_LEGENDA_ROCKS                                      :{TINYFONT}{BLACK}Ту хысакӗсем
@@ -561,6 +566,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Реаллӑ
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :ҫук
 STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :ҫук
 
+STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Аэропорт кивел мар: {ORANGE}{STRING}
 
 
 STR_CONFIG_SETTING_LAND_GENERATOR_ORIGINAL                      :Чӑн
@@ -850,13 +856,39 @@ STR_CONTENT_DETAIL_VERSION                                      :{SILVER}Вер�
 # Dock construction window
 
 # Airport toolbar
+STR_TOOLBAR_AIRCRAFT_CAPTION                                    :{WHITE}Аэропортсем
 
 # Airport construction window
+STR_STATION_BUILD_AIRPORT_CAPTION                               :{WHITE}Аэропорт суйлани
+STR_STATION_BUILD_AIRPORT_TOOLTIP                               :{BLACK}Пысӑкӑш суйлани/Аэропорт тӗсӗ
+STR_STATION_BUILD_AIRPORT_CLASS_LABEL                           :{BLACK}Аэропорт класс
+STR_STATION_BUILD_AIRPORT_LAYOUT_NAME                           :{BLACK}Хутлӑх{NUM}
 
+STR_AIRPORT_SMALL                                               :Пӗчӗк
+STR_AIRPORT_CITY                                                :Хула
+STR_AIRPORT_METRO                                               :Тӗп хулин
+STR_AIRPORT_INTERNATIONAL                                       :Тӗнчери
+STR_AIRPORT_COMMUTER                                            :Хула ҫумӗнчи
+STR_AIRPORT_INTERCONTINENTAL                                    :Ҫӗр-шывсем хушшинчи
+STR_AIRPORT_HELIPORT                                            :Вертолёт лаптӑк
+STR_AIRPORT_HELIDEPOT                                           :Вертолёт депо
+STR_AIRPORT_HELISTATION                                         :Вертолёт станци
 
+STR_AIRPORT_CLASS_SMALL                                         :Пӗчӗк аэропортсем
+STR_AIRPORT_CLASS_LARGE                                         :Пысӑк аэропортсем
+STR_AIRPORT_CLASS_HUB                                           :Вар аэропорт
+STR_AIRPORT_CLASS_HELIPORTS                                     :Вертолёт лаптӑксем
 
 
 # Landscaping toolbar
+
+# Object construction window
+STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Объект суйлани
+STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Объект класс
+STR_OBJECT_BUILD_SIZE                                           :{BLACK}Виҫе: {GOLD}{NUM} x {NUM} тӑваткалсем
+
+STR_OBJECT_CLASS_LTHS                                           :Маяксем
+STR_OBJECT_CLASS_TRNS                                           :Передатчиксем
 
 # Tree planting window (last two for SE only)
 
@@ -896,6 +928,9 @@ STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Укҫа
 
 # Land area window
 STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Ҫук
+STR_LAND_AREA_INFORMATION_AIRPORT_CLASS                         :{BLACK}Аэропорт класс: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORT_NAME                          :{BLACK}Аэропорт ят: {LTBLUE}{STRING}
+STR_LAND_AREA_INFORMATION_AIRPORTTILE_NAME                      :{BLACK}Аэропорт лаптӑк ят: {LTBLUE}{STRING}
 
 # Description of land area of different tiles
 
@@ -904,6 +939,7 @@ STR_LAND_AREA_INFORMATION_LOCAL_AUTHORITY_NONE                  :Ҫук
 # Houses come directly from their building names
 
 
+STR_LAI_STATION_DESCRIPTION_AIRPORT                             :Аэропорт
 
 
 # Industries come directly from their industry names
@@ -947,6 +983,8 @@ STR_NEWGRF_PARAMETERS_SETTING                                   :{STRING}: {ORAN
 
 # NewGRF inspect window
 
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING}'ра {HEX}
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_OBJECT                     :Объект
 
 
 # Sprite aligner window
@@ -1243,6 +1281,9 @@ STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORAN
 # Tunnel related errors
 
 # Object related errors
+STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... тивӗҫсӗр нумай объект
+STR_ERROR_CAN_T_BUILD_OBJECT                                    :{WHITE}Объект ларт мар...
+STR_ERROR_OBJECT_IN_THE_WAY                                     :{WHITE}Ҫул ҫинче чару
 
 # Group related errors
 
@@ -1283,6 +1324,7 @@ STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORAN
 STR_SV_EMPTY                                                    :
 
 STR_SV_STNAME                                                   :{STRING}
+STR_SV_STNAME_AIRPORT                                           :{STRING} Аэропорт
 ##id 0x6020
 ############ end of savegame specific region!
 
