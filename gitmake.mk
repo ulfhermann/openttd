@@ -24,6 +24,7 @@ clean:
 	git checkout ${@}-tmp
 	for branch in $(^F); do git merge $${branch}; done 
 	git checkout $@
+	projects/generate
 	git merge ${@}-tmp
 	[ ! -e gitmake-build ] || make -j`cat gitmake-build`
 	./make_diffs
