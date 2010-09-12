@@ -17,9 +17,45 @@
 #include "company_type.h"
 #include "tile_type.h"
 
+/** Vehicle List type flags */
+enum VehicleListType {
+	VL_STANDARD,
+	VL_SHARED_ORDERS,
+	VL_STATION_LIST,
+	VL_DEPOT_LIST,
+	VL_GROUP_LIST,
+	VLT_END
+};
+
+/** The information about a vehicle list. */
+struct VehicleListIdentifier {
+	VehicleListType type; ///< The type of vehicle list.
+	VehicleType vtype;    ///< The vehicle type associated with this list.
+	CompanyID company;    ///< The company associated with this list.
+	uint32 index;         ///< A vehicle list type specific index.
+
+	uint32 Pack();
+	bool Unpack(uint32 data);
+
+	/**
+	 * Create a simple vehicle list.
+	 * @param type    List type.
+	 * @param vtype   Vehicle type associated with this list.
+	 * @param company Company associated with this list.
+	 * @param index   Optional type specific index.
+	 */
+	VehicleListIdentifier(VehicleListType type, VehicleType vtype, CompanyID company, uint index = 0) :
+		type(type), vtype(vtype), company(company), index(index) {}
+
+	VehicleListIdentifier(uint32 data);
+
+	/** Simple empty constructor. In this case you must set everything! */
+	VehicleListIdentifier() {}
+};
+
 typedef SmallVector<const Vehicle *, 32> VehicleList;
 
-bool GenerateVehicleSortList(VehicleList *list, VehicleType type, Owner owner, uint32 index, uint16 window_type);
+bool GenerateVehicleSortList(VehicleList *list, const VehicleListIdentifier &identifier);
 void BuildDepotVehicleList(VehicleType type, TileIndex tile, VehicleList *engine_list, VehicleList *wagon_list, bool individual_wagons = false);
 
 #endif /* VEHICLELIST_H */
