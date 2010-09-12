@@ -13,6 +13,7 @@
 #define VEHICLE_GUI_BASE_H
 
 #include "sortlist_type.h"
+#include "vehiclelist.h"
 #include "window_gui.h"
 #include "widgets/dropdown_type.h"
 
@@ -21,9 +22,9 @@ typedef GUIList<const Vehicle*> GUIVehicleList;
 struct BaseVehicleListWindow : public Window {
 	GUIVehicleList vehicles;  ///< The list of vehicles
 	Listing *sorting;         ///< Pointer to the vehicle type related sorting.
-	VehicleType vehicle_type; ///< The vehicle type that is sorted
 	byte unitnumber_digits;   ///< The number of digits of the highest unit number
 	Scrollbar *vscroll;
+	VehicleListIdentifier vli; ///< Identifier of the vehicle list we want to currently show.
 
 	enum ActionDropdownItem {
 		ADI_REPLACE,
@@ -37,14 +38,14 @@ struct BaseVehicleListWindow : public Window {
 	static const StringID vehicle_sorter_names[];
 	static GUIVehicleList::SortFunction * const vehicle_sorter_funcs[];
 
-	BaseVehicleListWindow() : Window()
+	BaseVehicleListWindow(WindowNumber wno) : Window(), vli(wno)
 	{
 		this->vehicles.SetSortFuncs(this->vehicle_sorter_funcs);
 	}
 
 	void DrawVehicleListItems(VehicleID selected_vehicle, int line_height, const Rect &r) const;
 	void SortVehicleList();
-	void BuildVehicleList(Owner owner, uint16 index, uint16 window_type);
+	void BuildVehicleList();
 	Dimension GetActionDropdownSize(bool show_autoreplace, bool show_group);
 	DropDownList *BuildActionDropdownList(bool show_autoreplace, bool show_group);
 };
