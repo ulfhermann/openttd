@@ -58,10 +58,10 @@ const uint32 _veh_refit_proc_table[] = {
 
 const uint32 _send_to_depot_proc_table[] = {
 	/* TrainGotoDepot has a nice randomizer in the pathfinder, which causes desyncs... */
-	CMD_SEND_TRAIN_TO_DEPOT     | CMD_MSG(STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT) | CMD_NO_TEST_IF_IN_NETWORK,
-	CMD_SEND_ROADVEH_TO_DEPOT   | CMD_MSG(STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT),
-	CMD_SEND_SHIP_TO_DEPOT      | CMD_MSG(STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT),
-	CMD_SEND_AIRCRAFT_TO_HANGAR | CMD_MSG(STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR),
+	CMD_SEND_VEHICLE_TO_DEPOT | CMD_MSG(STR_ERROR_CAN_T_SEND_TRAIN_TO_DEPOT) | CMD_NO_TEST_IF_IN_NETWORK,
+	CMD_SEND_VEHICLE_TO_DEPOT | CMD_MSG(STR_ERROR_CAN_T_SEND_ROAD_VEHICLE_TO_DEPOT),
+	CMD_SEND_VEHICLE_TO_DEPOT | CMD_MSG(STR_ERROR_CAN_T_SEND_SHIP_TO_DEPOT),
+	CMD_SEND_VEHICLE_TO_DEPOT | CMD_MSG(STR_ERROR_CAN_T_SEND_AIRCRAFT_TO_HANGAR),
 };
 
 
@@ -433,32 +433,28 @@ CommandCost CmdStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, 
  * Starts or stops a lot of vehicles
  * @param tile Tile of the depot where the vehicles are started/stopped (only used for depots)
  * @param flags type of operation
- * @param p1 Station/Order/Depot ID (only used for vehicle list windows)
- * @param p2 bitmask
- *   - bit 0-4 Vehicle type
- *   - bit 5 false = start vehicles, true = stop vehicles
- *   - bit 6 if set, then it's a vehicle list window, not a depot and Tile is ignored in this case
- *   - bit 8-11 Vehicle List Window type (ignored unless bit 6 is set)
+ * @param p1 bitmask
+ *   - bit 0 false = start vehicles, true = stop vehicles
+ *   - bit 1 if set, then it's a vehicle list window, not a depot and Tile is ignored in this case
+ * @param p2 packed VehicleListIdentifier
  * @param text unused
  * @return the cost of this operation or an error
  */
 CommandCost CmdMassStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
 	VehicleList list;
-	VehicleType vehicle_type = Extract<VehicleType, 0, 3>(p2);
-	bool start_stop = HasBit(p2, 5);
-	bool vehicle_list_window = HasBit(p2, 6);
+	bool start_stop = HasBit(p1, 0);
+	bool vehicle_list_window = HasBit(p1, 1);
 
-	if (!IsCompanyBuildableVehicleType(vehicle_type)) return CMD_ERROR;
+	VehicleListIdentifier vli;
+	if (!vli.Unpack(p2)) return CMD_ERROR;
+	if (!IsCompanyBuildableVehicleType(vli.vtype)) return CMD_ERROR;
 
 	if (vehicle_list_window) {
-		uint32 id = p1;
-		uint16 window_type = p2 & VLW_MASK;
-
-		if (!GenerateVehicleSortList(&list, vehicle_type, _current_company, id, window_type)) return CMD_ERROR;
+		if (!GenerateVehicleSortList(&list, vli)) return CMD_ERROR;
 	} else {
 		/* Get the list of vehicles in the depot */
-		BuildDepotVehicleList(vehicle_type, tile, &list, NULL);
+		BuildDepotVehicleList(vli.vtype, tile, &list, NULL);
 	}
 
 	for (uint i = 0; i < list.Length(); i++) {
@@ -467,7 +463,7 @@ CommandCost CmdMassStartStopVehicle(TileIndex tile, DoCommandFlag flags, uint32 
 		if (!!(v->vehstatus & VS_STOPPED) != start_stop) continue;
 
 		if (!vehicle_list_window) {
-			if (vehicle_type == VEH_TRAIN) {
+			if (vli.vtype == VEH_TRAIN) {
 				if (!Train::From(v)->IsInDepot()) continue;
 			} else {
 				if (!(v->vehstatus & VS_HIDDEN)) continue;
@@ -805,25 +801,22 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 
 /**
  * Send all vehicles of type to depots
- * @param type type of vehicle
- * @param flags the flags used for DoCommand()
+ * @param flags   the flags used for DoCommand()
  * @param service should the vehicles only get service in the depots
- * @param owner owner of the vehicles to send
- * @param vlw_flag tells what kind of list requested the goto depot
- * @param id general purpose id whoms meaning is given by @c vlw_flag; e.g. StationID for station lists
+ * @param vli     identifier of the vehicle list
  * @return 0 for success and CMD_ERROR if no vehicle is able to go to depot
  */
-CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool service, Owner owner, uint16 vlw_flag, uint32 id)
+static CommandCost SendAllVehiclesToDepot(DoCommandFlag flags, bool service, const VehicleListIdentifier &vli)
 {
 	VehicleList list;
 
-	if (!GenerateVehicleSortList(&list, type, owner, id, vlw_flag)) return CMD_ERROR;
+	if (!GenerateVehicleSortList(&list, vli)) return CMD_ERROR;
 
 	/* Send all the vehicles to a depot */
 	bool had_success = false;
 	for (uint i = 0; i < list.Length(); i++) {
 		const Vehicle *v = list[i];
-		CommandCost ret = DoCommand(v->tile, v->index, (service ? 1 : 0) | DEPOT_DONT_CANCEL, flags, GetCmdSendToDepot(type));
+		CommandCost ret = DoCommand(v->tile, v->index | (service ? DEPOT_SERVICE : 0U) | DEPOT_DONT_CANCEL, 0, flags, GetCmdSendToDepot(vli.vtype));
 
 		if (ret.Succeeded()) {
 			had_success = true;
@@ -837,6 +830,32 @@ CommandCost SendAllVehiclesToDepot(VehicleType type, DoCommandFlag flags, bool s
 	}
 
 	return had_success ? CommandCost() : CMD_ERROR;
+}
+
+/**
+ * Send a vehicle to the depot.
+ * @param tile unused
+ * @param flags for command type
+ * @param p1 bitmask
+ * - p1 0-20: bitvehicle ID to send to the depot
+ * - p1 bits 25-8  - DEPOT_ flags (see vehicle_type.h)
+ * @param p2 packed VehicleListIdentifier.
+ * @param text unused
+ * @return the cost of this operation or an error
+ */
+CommandCost CmdSendVehicleToDepot(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	if (p1 & DEPOT_MASS_SEND) {
+		/* Mass goto depot requested */
+		VehicleListIdentifier vli;
+		if (!vli.Unpack(p2)) return CMD_ERROR;
+		return SendAllVehiclesToDepot(flags, (p1 & DEPOT_SERVICE) != 0, vli);
+	}
+
+	Vehicle *v = Vehicle::GetIfValid(GB(p1, 0, 20));
+	if (v == NULL) return CMD_ERROR;
+
+	return v->SendToDepot(flags, (DepotCommand)(p1 & DEPOT_COMMAND_MASK));
 }
 
 /**
