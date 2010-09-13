@@ -270,7 +270,7 @@ void VehicleCargoList::Unreserve(StationID next, StationCargoList *dest)
 
 /**
  * Load packets from the reservation list.
- * @params count the number of cargo to load
+ * @params max_move the number of cargo to load
  * @return the amount of cargo actually loaded
  */
 uint VehicleCargoList::LoadReserved(uint max_move)
@@ -297,7 +297,8 @@ uint VehicleCargoList::LoadReserved(uint max_move)
 }
 
 /**
- * Move a single packet or part of it from this list to a vehicle.
+ * Move a single packet or part of it from this list to a vehicle and increment
+ * the given iterator.
  * @param dest the vehicle cargo list to move to
  * @param it an iterator pointing to the packet
  * @param cap maximum amount of cargo to be moved
@@ -319,7 +320,8 @@ uint CargoList<Tinst, Tcont>::MovePacket(VehicleCargoList *dest, Iterator &it, u
 }
 
 /**
- * Move a single packet or part of it from this list to a station.
+ * Move a single packet or part of it from this list to a station and increment
+ * the given iterator.
  * @param dest the station cargo list to move to
  * @param next the next station the packet will travel to
  * @param it iterator pointing to the packet
@@ -336,7 +338,8 @@ uint CargoList<Tinst, Tcont>::MovePacket(StationCargoList *dest, StationID next,
 }
 
 /**
- * remove a single packet or part of it from this list.
+ * Remove a single packet or part of it from this list and increment the given
+ * iterator.
  * @param it iterator pointing to the packet
  * @param cap maximum amount of cargo to be moved
  * @param load_place new loaded_at for the packet or INVALID_TILE if the current
@@ -388,9 +391,12 @@ VehicleCargoList::~VehicleCargoList()
 }
 
 /**
- * Deliver a specific packet or part of it to a station and handle payment.
+ * Deliver a specific packet or part of it to a station and handle payment. The
+ * given iterator is incremented in the process.
  * @param it iterator pointing to the packet to be delivered
- * @param remaining_unload max
+ * @param cap maximum amount of cargo to be unloaded
+ * @param payment the payment object to use for payment
+ * @return the amount of cargo actually unloaded
  */
 uint VehicleCargoList::DeliverPacket(Iterator &it, uint cap, CargoPayment *payment) {
 	CargoPacket *p = *it;
@@ -414,25 +420,50 @@ uint VehicleCargoList::DeliverPacket(Iterator &it, uint cap, CargoPayment *payme
 	return unloaded;
 }
 
-uint VehicleCargoList::KeepPacket(Iterator &c)
+/**
+ * Keep a packet in the vehicle while unloading by temporarily moving it to the
+ * reservation list. The given iterator is incremented in the process.
+ * @param it iterator pointing to the packet
+ * @return size of the packet
+ */
+uint VehicleCargoList::KeepPacket(Iterator &it)
 {
-	CargoPacket *cp = *c;
+	CargoPacket *cp = *it;
 	this->reserved.push_back(cp);
 	this->reserved_count += cp->count;
-	this->packets.erase(c++);
+	this->packets.erase(it++);
 	return cp->count;
 }
 
-
-uint VehicleCargoList::TransferPacket(Iterator &c, uint remaining_unload, StationCargoList *dest, CargoPayment *payment, StationID next)
+/**
+ * Transfer a packet to a station, but don't deliver it. Increment the given
+ * iterator in the process.
+ * @param it iterator pointing to a packet in the list
+ * @param cap maximum amount of cargo to be transferred
+ * @param dest cargo list of the station the cargo should be transferred to
+ * @param payment payment object to be updated with the resulting transfer
+ *                credits
+ * @param next ID of the station the cargo wants to go to next
+ * @return the amount of cargo actually moved
+ */
+uint VehicleCargoList::TransferPacket(Iterator &it, uint cap, StationCargoList *dest, CargoPayment *payment, StationID next)
 {
-	CargoPacket *p = this->RemovePacket(c, remaining_unload);
-	p->feeder_share += payment->PayTransfer(p, p->count);
-	uint ret = p->count;
-	dest->Append(next, p);
+	CargoPacket *cp = this->RemovePacket(it, cap);
+	cp->feeder_share += payment->PayTransfer(cp, cp->count);
+	uint ret = cp->count;
+	dest->Append(next, cp);
 	return ret;
 }
 
+/**
+ * Determine what a cargo packet arriving at the station this list belongs to
+ * will do, using the "old", non-cargodist algorithm.
+ * @param flags unload flags telling if the cargo is accepted and what order
+ *        flags there are
+ * @param source ID of the packets source station
+ * @return an unload type (deliver, transfer, keep) telling what to do with the
+ *         packet
+ */
 UnloadType StationCargoList::WillUnloadOld(byte flags, StationID source)
 {
 	/* try to unload cargo */
@@ -457,7 +488,20 @@ UnloadType StationCargoList::WillUnloadOld(byte flags, StationID source)
 	}
 }
 
-UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next_station, StationID via, StationID source)
+/**
+ * Determine what a cargo packet arriving at the station this list belongs to
+ * will do, using the Cargodist algorithm.
+ * @param flags  unload flags telling if the cargo is accepted and what order
+ *               flags there are
+ * @param next   The station the vehicle the cargo is coming from will
+ *               visit next (or INVALID_STATION if unknown)
+ * @param via    The station the cargo wants to go to next. If that is this
+ *               station the cargo wants to be delivered.
+ * @param source ID of the packets source station
+ * @return an unload type (deliver, transfer, keep) telling what to do with the
+ *         packet
+ */
+UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next, StationID via, StationID source)
 {
 	if (via == this->station->index) {
 		/* this is the final destination, deliver ... */
@@ -483,13 +527,12 @@ UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next_stat
 				return UL_DELIVER;
 			} else {
 				/* transfer cargo, as delivering didn't work */
-				/* plan might still be fulfilled as the packet can be picked up by another vehicle travelling to "via" */
 				return UL_TRANSFER;
 			}
 		} else if (flags & UL_TRANSFER) {
-			/* transfer forced, plan still fulfilled as above */
+			/* transfer forced */
 			return UL_TRANSFER;
-		} else if (next_station == via) {
+		} else if (next == via) {
 			/* vehicle goes to the packet's next hop or has nondeterministic order: keep the packet*/
 			return UL_KEEP;
 		} else {
@@ -500,7 +543,9 @@ UnloadType StationCargoList::WillUnloadCargoDist(byte flags, StationID next_stat
 }
 
 /**
- * swap the reserved and packets lists when starting to load cargo.
+ * Swap the reserved and packets lists when starting to load cargo. Pull in the
+ * "kept" packets which were stored in the reservation list so that we don't
+ * have to iterate over them all the time.
  * @pre this->packets.empty()
  */
 void VehicleCargoList::SwapReserved()
@@ -526,10 +571,11 @@ void VehicleCargoList::SwapReserved()
  * @param source       the vehicle cargo list to take the cargo from
  * @param max_unload   the maximum amount of cargo entities to move
  * @param flags        how to handle the moving (side effects)
- * @param next_station the next unloading station in the vehicle's order list
+ * @param next         the next unloading station in the vehicle's order list
+ * @param payment      the payment object to be updated when delivering/transferring
  * @return the number of cargo entities actually moved
  */
-uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, StationID next_station, CargoPayment *payment)
+uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, OrderUnloadFlags order_flags, StationID next, CargoPayment *payment)
 {
 	uint remaining_unload = max_unload;
 	uint unloaded;
@@ -542,9 +588,9 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 		FlowStatSet &flows = dest->flows[cargo_source];
 		FlowStatSet::iterator begin = flows.begin();
 		StationID via = (begin != flows.end() ? begin->Via() : INVALID_STATION);
-		if (via != INVALID_STATION && next_station != INVALID_STATION) {
+		if (via != INVALID_STATION && next != INVALID_STATION) {
 			/* use cargodist unloading*/
-			action = this->WillUnloadCargoDist(flags, next_station, via, cargo_source);
+			action = this->WillUnloadCargoDist(flags, next, via, cargo_source);
 		} else {
 			/* there is no plan: use normal unloading */
 			action = this->WillUnloadOld(flags, cargo_source);
@@ -575,11 +621,11 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 				break;
 			case UL_KEEP:
 				unloaded = source->KeepPacket(c);
-				if (via != INVALID_STATION && next_station != INVALID_STATION) {
-					if (via == next_station) {
+				if (via != INVALID_STATION && next != INVALID_STATION) {
+					if (via == next) {
 						dest->UpdateFlowStats(flows, begin, unloaded);
 					} else {
-						dest->UpdateFlowStats(flows, unloaded, next_station);
+						dest->UpdateFlowStats(flows, unloaded, next);
 					}
 				}
 				break;
@@ -615,7 +661,8 @@ void VehicleCargoList::AddToCache(const CargoPacket *cp)
 /**
  * Moves the given amount of cargo to another vehicle (during autoreplace).
  * @param dest         the destination to move the cargo to
- * @param max_load     the maximum amount of cargo entities to move
+ * @param cap          the maximum amount of cargo entities to move
+ * @return             the amount of cargo actually moved
  */
 uint VehicleCargoList::MoveTo(VehicleCargoList *dest, uint cap)
 {
@@ -648,7 +695,12 @@ void VehicleCargoList::AgeCargo()
  *
  */
 
-byte StationCargoList::GetUnloadFlags(OrderUnloadFlags order_flags)
+/**
+ * build unload flags from order flags and station acceptance.
+ * @param order_flags order flags to check for forced transfer/deliver
+ * @return some combination of UL_ACCEPTED, UL_DELIVER and UL_TRANSFER
+ */
+FORCEINLINE byte StationCargoList::GetUnloadFlags(OrderUnloadFlags order_flags)
 {
 	byte flags = 0;
 	if (HasBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::ACCEPTANCE)) {
@@ -711,14 +763,14 @@ uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator be
  * Move suitable packets from this list to a vehicle.
  * @param dest the vehicle cargo list to move packets to
  * @param cap the maximum amount of cargo to be moved
- * @param selected_station the next station the vehicle will stop at
+ * @param next the next station the vehicle will stop at
  * @param reserve if the packets should be loaded on or reserved for the vehicle
  * @return the amount of cargo that has been moved
  */
-uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID selected_station, bool reserve) {
+uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, bool reserve) {
 	uint orig_cap = cap;
-	if (selected_station != INVALID_STATION) {
-		std::pair<Iterator, Iterator> bounds(this->packets.equal_range(selected_station));
+	if (next != INVALID_STATION) {
+		std::pair<Iterator, Iterator> bounds(this->packets.equal_range(next));
 		cap -= this->MovePackets(dest, cap, bounds.first, bounds.second, reserve);
 		if (cap > 0) {
 			bounds = this->packets.equal_range(INVALID_STATION);
@@ -753,7 +805,7 @@ void StationCargoList::RerouteStalePackets(StationID to) {
 /**
  * Truncate where each destination loses roughly the same percentage of its cargo.
  * This is done by randomizing the selection of packets to be removed.
- * @param max_remaining maximum amount of cargo to keep in the station.
+ * @param max_remaining maximum amount of cargo to keep in the list.
  */
 void StationCargoList::RandomTruncate(uint max_remaining) {
 	uint prev_count = this->count;
