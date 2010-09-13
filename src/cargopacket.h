@@ -190,8 +190,6 @@ protected:
 
 	List packets;               ///< The cargo packets in this list
 
-	void MergeOrPush(CargoPacket *cp);
-
 	void AddToCache(const CargoPacket *cp);
 
 	void RemoveFromCache(const CargoPacket *cp);
@@ -238,7 +236,7 @@ public:
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
 
-	void Append(CargoPacket *cp);
+	void Append(CargoPacket *cp, bool update_cache = true);
 
 	void Truncate(uint max_remaining);
 
