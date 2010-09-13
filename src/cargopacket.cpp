@@ -27,14 +27,26 @@ void InitializeCargoPackets()
 	_cargopacket_pool.CleanPool();
 }
 
+/**
+ * Create a new packet for savegame loading.
+ */
 CargoPacket::CargoPacket()
 {
 	this->source_type = ST_INDUSTRY;
 	this->source_id   = INVALID_SOURCE;
 }
 
-/* NOTE: We have to zero memory ourselves here because we are using a 'new'
- * that, in contrary to all other pools, does not memset to 0. */
+/**
+ * Creates a new cargo packet
+ * @param source      the source station of the packet
+ * @param source_xy   the source location of the packet
+ * @param count       the number of cargo entities to put in this packet
+ * @param source_type the 'type' of source the packet comes from (for subsidies)
+ * @param source_id   the actual source of the packet (for subsidies)
+ * @pre count != 0
+ * @note We have to zero memory ourselves here because we are using a 'new'
+ * that, in contrary to all other pools, does not memset to 0.
+ */
 CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id) :
 	feeder_share(0),
 	count(count),
@@ -48,6 +60,20 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
 	this->source_type  = source_type;
 }
 
+/**
+ * Creates a new cargo packet. Initializes the fields that cannot be changed later.
+ * Used when loading or splitting packets.
+ * @param count           the number of cargo entities to put in this packet
+ * @param days_in_transit number of days the cargo has been in transit
+ * @param source          the station the cargo was initially loaded
+ * @param source_xy       the station location the cargo was initially loaded
+ * @param loaded_at_xy    the location the cargo was loaded last
+ * @param feeder_share    feeder share the packet has already accumulated
+ * @param source_type     the 'type' of source the packet comes from (for subsidies)
+ * @param source_id       the actual source of the packet (for subsidies)
+ * @note We have to zero memory ourselves here because we are using a 'new'
+ * that, in contrary to all other pools, does not memset to 0.
+ */
 CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id) :
 		feeder_share(feeder_share),
 		count(count),
@@ -117,6 +143,9 @@ FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
  *
  */
 
+/**
+ * destroy the cargolist ("frees" all cargo packets)
+ */
 template <class Tinst, class Tcont>
 CargoList<Tinst, Tcont>::~CargoList()
 {
@@ -125,6 +154,11 @@ CargoList<Tinst, Tcont>::~CargoList()
 	}
 }
 
+/**
+ * Update the cached values to reflect the removal of this packet.
+ * Decreases count and days_in_transit
+ * @param cp Packet to be removed from cache
+ */
 template <class Tinst, class Tcont>
 void CargoList<Tinst, Tcont>::RemoveFromCache(const CargoPacket *cp)
 {
@@ -132,6 +166,11 @@ void CargoList<Tinst, Tcont>::RemoveFromCache(const CargoPacket *cp)
 	this->cargo_days_in_transit -= cp->days_in_transit * cp->count;
 }
 
+/**
+ * Update the cache to reflect adding of this packet.
+ * Increases count and days_in_transit
+ * @param cp a new packet to be inserted
+ */
 template <class Tinst, class Tcont>
 void CargoList<Tinst, Tcont>::AddToCache(const CargoPacket *cp)
 {
@@ -175,7 +214,11 @@ void VehicleCargoList::Append(CargoPacket *cp)
 	this->MergeOrPush(cp);
 }
 
-
+/**
+ * Truncates the cargo in this list to the given amount. It leaves the
+ * first count cargo entities and removes the rest.
+ * @param max_remaining the maximum amount of entities to be in the list after the command
+ */
 template <class Tinst, class Tcont>
 void CargoList<Tinst, Tcont>::Truncate(uint max_remaining)
 {
@@ -327,6 +370,9 @@ CargoPacket *CargoList<Tinst, Tcont>::RemovePacket(Iterator &it, uint cap, TileI
 	return packet;
 }
 
+/**
+ * Invalidates the cached data and rebuilds it.
+ */
 template <class Tinst, class Tcont>
 void CargoList<Tinst, Tcont>::InvalidateCache()
 {
@@ -588,7 +634,9 @@ uint VehicleCargoList::MoveTo(VehicleCargoList *dest, uint cap)
 	return orig_cap - cap;
 }
 
-
+/**
+ * Ages the all cargo in this list.
+ */
 void VehicleCargoList::AgeCargo()
 {
 	for (ConstIterator it(this->packets.begin()); it != this->packets.end(); it++) {
@@ -738,6 +786,9 @@ void StationCargoList::RandomTruncate(uint max_remaining) {
 	}
 }
 
+/**
+ * Invalidates the cached data and rebuilds it.
+ */
 void VehicleCargoList::InvalidateCache()
 {
 	this->feeder_share = 0;

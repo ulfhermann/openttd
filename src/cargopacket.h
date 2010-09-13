@@ -60,34 +60,10 @@ public:
 	/** Maximum number of items in a single cargo packet. */
 	static const uint16 MAX_COUNT = UINT16_MAX;
 
-	/**
-	 * Create a new packet for savegame loading.
-	 */
 	CargoPacket();
 
-	/**
-	 * Creates a new cargo packet
-	 * @param source      the source station of the packet
-	 * @param source_xy   the source location of the packet
-	 * @param count       the number of cargo entities to put in this packet
-	 * @param source_type the 'type' of source the packet comes from (for subsidies)
-	 * @param source_id   the actual source of the packet (for subsidies)
-	 * @pre count != 0
-	 */
 	CargoPacket(StationID source, TileIndex source_xy, uint16 count, SourceType source_type, SourceID source_id);
 
-	/**
-	 * Creates a new cargo packet. Initializes the fields that cannot be changed later.
-	 * Used when loading or splitting packets.
-	 * @param count           the number of cargo entities to put in this packet
-	 * @param days_in_transit number of days the cargo has been in transit
-	 * @param source          the station the cargo was initially loaded
-	 * @param source_xy       the station location the cargo was initially loaded
-	 * @param loaded_at_xy    the location the cargo was loaded last
-	 * @param feeder_share    feeder share the packet has already accumulated
-	 * @param source_type     the 'type' of source the packet comes from (for subsidies)
-	 * @param source_id       the actual source of the packet (for subsidies)
-	 */
 	CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share = 0, SourceType source_type = ST_INDUSTRY, SourceID source_id = INVALID_SOURCE);
 
 	/** Destroy the packet */
@@ -220,18 +196,8 @@ protected:
 
 	Tcont packets;              ///< The cargo packets in this list
 
-	/**
-	 * Update the cache to reflect adding of this packet.
-	 * Increases count and days_in_transit
-	 * @param cp a new packet to be inserted
-	 */
 	void AddToCache(const CargoPacket *cp);
 
-	/**
-	 * Update the cached values to reflect the removal of this packet.
-	 * Decreases count and days_in_transit
-	 * @param cp Packet to be removed from cache
-	 */
 	void RemoveFromCache(const CargoPacket *cp);
 
 	CargoPacket *RemovePacket(Iterator &it, uint cap, TileIndex load_place = INVALID_TILE);
@@ -243,7 +209,7 @@ protected:
 public:
 	/** Create the cargo list */
 	CargoList() {}
-	/** And destroy it ("frees" all cargo packets) */
+
 	~CargoList();
 
 	/**
@@ -282,14 +248,8 @@ public:
 		return this->count == 0 ? 0 : this->cargo_days_in_transit / this->count;
 	}
 
-	/**
-	 * Truncates the cargo in this list to the given amount. It leaves the
-	 * first count cargo entities and removes the rest.
-	 * @param max_remaining the maximum amount of entities to be in the list after the command
-	 */
 	void Truncate(uint max_remaining);
 
-	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 };
 
@@ -393,12 +353,8 @@ public:
 
 	void SwapReserved();
 
-	/**
-	 * Ages the all cargo in this list
-	 */
 	void AgeCargo();
 
-	/** Invalidates the cached data and rebuild it */
 	void InvalidateCache();
 
 	uint MoveTo(VehicleCargoList *dest, uint cap);
