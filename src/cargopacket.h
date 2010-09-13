@@ -295,9 +295,7 @@ public:
 		return this->feeder_share;
 	}
 
-	void MergeOrPush(CargoPacket *cp);
-
-	void Append(CargoPacket *cp);
+	void Append(CargoPacket *cp, bool update_cache = true);
 
 	/**
 	 * Returns sum of cargo on board the vehicle (ie not only

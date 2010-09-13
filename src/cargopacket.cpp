@@ -179,12 +179,19 @@ void CargoList<Tinst, Tcont>::AddToCache(const CargoPacket *cp)
 }
 
 /**
- * Tries to merge the packet with another one in the packets list.
- * if no fitting packet is found, appends it.
- * @param cp the packet to be inserted
+ * Appends the given cargo packet. Tries to merge it with another one in the
+ * packets list. if no fitting packet is found, appends it.
+ * @warning After appending this packet may not exist anymore!
+ * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
+ * @param cp the cargo packet to add
+ * @param update_cache if false, the cache is not updated; used when loading from
+ *        the reservation list
+ * @pre cp != NULL
  */
-void VehicleCargoList::MergeOrPush(CargoPacket *cp)
+void VehicleCargoList::Append(CargoPacket *cp, bool update_cache)
 {
+	assert(cp != NULL);
+	if (update_cache) this->AddToCache(cp);
 	for (CargoPacketList::reverse_iterator it(this->packets.rbegin()); it != this->packets.rend(); it++) {
 		CargoPacket *icp = *it;
 		if (VehicleCargoList::AreMergable(icp, cp) && icp->count + cp->count <= CargoPacket::MAX_COUNT) {
@@ -198,20 +205,6 @@ void VehicleCargoList::MergeOrPush(CargoPacket *cp)
 
 	/* The packet could not be merged with another one */
 	this->packets.push_back(cp);
-}
-
-/**
- * Appends the given cargo packet
- * @warning After appending this packet may not exist anymore!
- * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
- * @param cp the cargo packet to add
- * @pre cp != NULL
- */
-void VehicleCargoList::Append(CargoPacket *cp)
-{
-	assert(cp != NULL);
-	this->AddToCache(cp);
-	this->MergeOrPush(cp);
 }
 
 /**
@@ -291,11 +284,11 @@ uint VehicleCargoList::LoadReserved(uint max_move)
 			max_move -= cp->count;
 			this->reserved.erase(it++);
 			this->reserved_count -= cp->count;
-			this->MergeOrPush(cp);
+			this->Append(cp, false);
 		} else {
 			cp->count -= max_move;
 			CargoPacket *cp_new = new CargoPacket(max_move, cp->days_in_transit, cp->source, cp->source_xy, cp->loaded_at_xy, 0, cp->source_type, cp->source_id);
-			this->MergeOrPush(cp_new);
+			this->Append(cp_new, false);
 			this->reserved_count -= max_move;
 			max_move = 0;
 		}
