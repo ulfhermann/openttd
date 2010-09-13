@@ -79,7 +79,7 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
  * @param new_size size of the remaining part
  * @return the split off part
  */
-CargoPacket *CargoPacket::Split(uint new_size)
+FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
 {
 	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
 	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
@@ -92,7 +92,7 @@ CargoPacket *CargoPacket::Split(uint new_size)
  * Merge another packet into this one
  * @param cp the packet to be merged in
  */
-void CargoPacket::Merge(CargoPacket *cp)
+FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
 {
 	this->count += cp->count;
 	this->feeder_share += cp->feeder_share;
@@ -166,7 +166,6 @@ void VehicleCargoList::MergeOrPush(CargoPacket *cp)
  * @warning After appending this packet may not exist anymore!
  * @note Do not use the cargo packet anymore after it has been appended to this CargoList!
  * @param cp the cargo packet to add
- * @param check_merge if true, check existing packets in the list for mergability
  * @pre cp != NULL
  */
 void VehicleCargoList::Append(CargoPacket *cp)
@@ -218,6 +217,7 @@ void VehicleCargoList::Reserve(CargoPacket *cp)
 
 /**
  * Returns all reserved cargo to the station and removes it from the cache.
+ * @param ID of next the station the cargo wants to go next
  * @param dest the station the cargo is returned to
  */
 void VehicleCargoList::Unreserve(StationID next, StationCargoList *dest)
@@ -235,7 +235,7 @@ void VehicleCargoList::Unreserve(StationID next, StationCargoList *dest)
 /**
  * Load packets from the reservation list.
  * @params count the number of cargo to load
- * @return true if there are still packets that might be loaded from the reservation list
+ * @return the amount of cargo actually loaded
  */
 uint VehicleCargoList::LoadReserved(uint max_move)
 {
