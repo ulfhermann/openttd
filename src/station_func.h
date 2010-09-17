@@ -55,7 +55,7 @@ void RecalcFrozenIfLoading(const Vehicle * v);
 
 void IncreaseStats(Station *st, const Vehicle *v, StationID next_station_id, bool freeze);
 
-void UpdateFlows(Station * st, Vehicle *v, StationID next_station_id);
+void UpdateFlowsPassThrough(Station * st, Vehicle *v, StationID next_station_id);
 
 void DeleteStaleFlows(StationID at, CargoID c_id, StationID to);
 

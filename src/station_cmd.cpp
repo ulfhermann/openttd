@@ -3213,7 +3213,14 @@ void Station::RunAverages() {
 	}
 }
 
-void UpdateFlows(Station *st, Vehicle *front, StationID next_station_id) {
+/**
+ * update the flow stats for the consist starting with the given vehicle and
+ * travelling to the given next station without unloading here.
+ * @param st the station for which the flows should be updated
+ * @param from the first vehicle in the consist
+ * @param next_station_id the ID of the station the consist is travelling next
+ */
+void UpdateFlowsPassThrough(Station *st, Vehicle *front, StationID next_station_id) {
 	if (next_station_id == INVALID_STATION) {
 		return;
 	} else {
@@ -3772,6 +3779,12 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 	return DoCommand(tile, 0, 0, flags, CMD_LANDSCAPE_CLEAR);
 }
 
+/**
+ * update the flow stats for a specific entry.
+ * @param flow_stats the flow stats to update
+ * @param flow_it an iterator pointing to an entry in flow_stats
+ * @param count the amount by which the flow should be increased
+ */
 void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count)
 {
 	FlowStat fs = *flow_it;
@@ -3780,6 +3793,12 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator 
 	flow_stats.insert(fs);
 }
 
+/**
+ * update the flow stats for a specific next station
+ * @param flow_stats the flow stats to update
+ * @param count the amount by which the flow should be increased
+ * @param next the next hop for which the flow stats should be updated
+ */
 void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next)
 {
 	FlowStatSet::iterator flow_it = flow_stats.begin();
@@ -3794,6 +3813,12 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID 
 	}
 }
 
+/**
+ * update the flow stats for "count" cargo from "source" sent to "next"
+ * @param source the ID of station the cargo is from
+ * @param count the amount of cargo
+ * @param next ID of the station the cargo is travelling to
+ */
 void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
 {
 	if (source == INVALID_STATION || next == INVALID_STATION || this->flows.empty()) return;
@@ -3801,6 +3826,13 @@ void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
 	this->UpdateFlowStats(flow_stats, count, next);
 }
 
+/**
+ * update the flow stats for "count" cargo that cannot be delivered here.
+ * @param source the ID of station where the cargo is from
+ * @param count the amount of cargo
+ * @param curr the ID of station where it is stored for now
+ * @return the ID of the station where the cargo is sent next
+ */
 StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
 	if (source == INVALID_STATION || this->flows.empty()) return INVALID_STATION;
 	FlowStatSet &flow_stats = this->flows[source];

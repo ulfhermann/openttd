@@ -274,20 +274,12 @@ struct GoodsEntry {
 	FlowStatMap flows;                   ///< The planned flows through this station
 	LinkStatMap link_stats;              ///< capacities and usage statistics for outgoing links
 	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
-	
 	FlowStat GetSumFlowVia(StationID via) const;
 
-	/**
-	 * update the flow stats for count cargo from source sent to next
-	 */
 	void UpdateFlowStats(StationID source, uint count, StationID next);
 	void UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next);
 	void UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count);
 
-	/**
-	 * update the flow stats for count cargo that cannot be delivered here
-	 * return the direction where it is sent
-	 */
 	StationID UpdateFlowStatsTransfer(StationID source, uint count, StationID curr);
 };
 
