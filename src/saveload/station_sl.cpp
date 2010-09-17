@@ -300,21 +300,25 @@ static const SaveLoad _cargo_list_desc[] = {
 	SLE_END()
 };
 
+/**
+ * swap the temporary packets with the packets without specific destination in
+ * the given goods entry. Assert that at least one of those is empty.
+ * @param ge the goods entry to swap with
+ */
 static void SwapPackets(GoodsEntry *ge)
 {
 	StationCargoPacketMap &ge_packets = const_cast<StationCargoPacketMap &>(*ge->cargo.Packets());
 
 	if (_packets.empty()) {
-		std::map<StationID, std::list<CargoPacket *> >::iterator it  = ge_packets.find(INVALID_STATION);
+		std::map<StationID, std::list<CargoPacket *> >::iterator it(ge_packets.find(INVALID_STATION));
 		if (it == ge_packets.end()) {
 			return;
 		} else {
 			it->second.swap(_packets);
 		}
 	} else {
-		std::list<CargoPacket *> &list = ge_packets[INVALID_STATION];
-		assert(list.empty());
-		list.swap(_packets);
+		assert(ge_packets[INVALID_STATION].empty());
+		ge_packets[INVALID_STATION].swap(_packets);
 	}
 }
 
@@ -514,7 +518,6 @@ static void Load_STNN()
 				LinkStatMap &stats = ge->link_stats;
 				FlowStatMap &flows = ge->flows;
 				SlObject(ge, GetGoodsDesc());
-
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, GetLinkStatDesc());
