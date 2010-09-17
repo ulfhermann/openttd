@@ -3029,7 +3029,6 @@ static void UpdateStationRating(Station *st)
 
 			bool skip = false;
 			int rating = 0;
-
 			uint waiting = ge->cargo.Count();
 
 			/* average amount of cargo per destination */
