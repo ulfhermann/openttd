@@ -32,6 +32,7 @@
 #include "settings_type.h"
 #include "newgrf_debug.h"
 #include "hotkeys.h"
+#include "toolbar_gui.h"
 
 #include "table/sprites.h"
 
@@ -1052,7 +1053,8 @@ static bool IsGoodAutoPlace1(int left, int top, int width, int height, Point &po
 	int right  = width + left;
 	int bottom = height + top;
 
-	if (left < 0 || top < 22 || right > _screen.width || bottom > _screen.height) return false;
+	const Window *main_toolbar = FindWindowByClass(WC_MAIN_TOOLBAR);
+	if (left < 0 || (main_toolbar != NULL && top < main_toolbar->height) || right > _screen.width || bottom > _screen.height) return false;
 
 	/* Make sure it is not obscured by any window. */
 	const Window *w;
@@ -1121,7 +1123,8 @@ static Point GetAutoPlacePosition(int width, int height)
 	Point pt;
 
 	/* First attempt, try top-left of the screen */
-	if (IsGoodAutoPlace1(0, 24, width, height, pt)) return pt;
+	const Window *main_toolbar = FindWindowByClass(WC_MAIN_TOOLBAR);
+	if (IsGoodAutoPlace1(0, main_toolbar != NULL ? main_toolbar->height + 2 : 2, width, height, pt)) return pt;
 
 	/* Second attempt, try around all existing windows with a distance of 2 pixels.
 	 * The new window must be entirely on-screen, and not overlap with an existing window.
@@ -2690,7 +2693,7 @@ void RelocateAllWindows(int neww, int newh)
 		 * in a 'backup'-desc that the window should always be centered. */
 		switch (w->window_class) {
 			case WC_MAIN_TOOLBAR:
-				if (neww - w->width != 0) ResizeWindow(w, min(neww, 640) - w->width, 0);
+				ResizeWindow(w, min(neww, *_preferred_toolbar_size) - w->width, 0);
 
 				top = w->top;
 				left = PositionMainToolbar(w); // changes toolbar orientation
