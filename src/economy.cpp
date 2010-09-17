@@ -1095,9 +1095,11 @@ Money CargoPayment::PayTransfer(const CargoPacket *cp, uint count)
 
 /**
  * Prepare the vehicle to be unloaded.
+ * @param curr_station the station where the consist is at the moment
  * @param front_v the vehicle to be unloaded
+ * @param next_station_id id of the station the consist will be traveling next
  */
-void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_station_id)
+void PrepareUnload(Station *curr_station, Vehicle *front_v, StationID next_station_id)
 {
 	/* At this moment loading cannot be finished */
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
@@ -1107,7 +1109,7 @@ void PrepareUnload(Station * curr_station, Vehicle *front_v, StationID next_stat
 
 	if ((front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) != 0) {
 		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
-		UpdateFlows(curr_station, front_v, next_station_id);
+		UpdateFlowsPassThrough(curr_station, front_v, next_station_id);
 	} else {
 		for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
 			if (v->cargo_cap > 0 && !v->cargo.Empty()) {
@@ -1181,10 +1183,10 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	Station *st = Station::Get(last_visited);
 
 	StationID next_station = INVALID_STATION;
-	OrderList * orders = v->orders.list;
+	OrderList *orders = v->orders.list;
 	if (orders != NULL) {
-		next_station = orders->GetNextStoppingStation(v->cur_order_index, last_visited,
-			v->type == VEH_TRAIN || v->type == VEH_ROAD);
+		next_station = orders->GetNextStoppingStation(v->cur_order_index,
+				last_visited, v->type == VEH_TRAIN || v->type == VEH_ROAD);
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
