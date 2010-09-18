@@ -220,6 +220,11 @@ static const SaveLoad _station_speclist_desc[] = {
 
 static StationID _station_id;
 
+/**
+ * Wrapper function to get the LinkStat's internal structure while
+ * some of the variables are private.
+ * @return the saveload description for LinkStat.
+ */
 const SaveLoad *GetLinkStatDesc() {
 	static const SaveLoad linkstat_desc[] = {
 		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
@@ -400,14 +405,12 @@ static void RealSave_STNN(BaseStation *bst)
 
 	if (!waypoint) {
 		Station *st = Station::From(bst);
-		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			GoodsEntry *ge = &st->goods[i];
-			const LinkStatMap &stats = ge->link_stats;
-			_num_links = (uint16)stats.size();
-			SlObject(ge, GetGoodsDesc());
-			for (LinkStatMap::const_iterator i = stats.begin(); i != stats.end(); ++i) {
-				_station_id = i->first;
-				LinkStat ls(i->second);
+		for (CargoID c = 0; c < NUM_CARGO; c++) {
+			_num_links = (uint16)st->goods[c].link_stats.size();
+			SlObject(&st->goods[c], GetGoodsDesc());
+			for (LinkStatMap::const_iterator it(st->goods[c].link_stats.begin()); it != st->goods[c].link_stats.end(); ++it) {
+				_station_id = it->first;
+				LinkStat ls(it->second);
 				SlObject(&ls, GetLinkStatDesc());
 			}
 		}
@@ -440,15 +443,13 @@ static void Load_STNN()
 
 		if (!waypoint) {
 			Station *st = Station::From(bst);
-			for (CargoID i = 0; i < NUM_CARGO; i++) {
-				GoodsEntry *ge = &st->goods[i];
-				LinkStatMap &stats = ge->link_stats;
-				SlObject(ge, GetGoodsDesc());
+			for (CargoID c = 0; c < NUM_CARGO; c++) {
+				SlObject(&st->goods[c], GetGoodsDesc());
 				LinkStat ls;
 				for (uint16 i = 0; i < _num_links; ++i) {
 					SlObject(&ls, GetLinkStatDesc());
 					assert(!ls.IsNull());
-					stats[_station_id] = ls;
+					st->goods[c].link_stats[_station_id] = ls;
 				}
 			}
 		}
