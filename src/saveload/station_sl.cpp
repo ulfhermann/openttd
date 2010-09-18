@@ -409,7 +409,7 @@ static void RealSave_STNN(BaseStation *bst)
 			SlObject(&st->goods[c], GetGoodsDesc());
 			for (LinkStatMap::const_iterator it(st->goods[c].link_stats.begin()); it != st->goods[c].link_stats.end(); ++it) {
 				_station_id = it->first;
-				LinkStat ls(it->second);
+				LinkStat ls(it->second); // make a copy to avoid constness problems
 				SlObject(&ls, GetLinkStatDesc());
 			}
 		}
