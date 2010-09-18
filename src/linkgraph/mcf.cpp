@@ -152,9 +152,7 @@ void MultiCommodityFlow::CleanupPaths(NodeID source_id, PathVector &paths) {
 	for(PathVector::iterator i = paths.begin(); i != paths.end(); ++i) {
 		Path *path = *i;
 		if (path != NULL) {
-			if (path->GetParent() == source) {
-				path->UnFork();
-			}
+			if (path->GetParent() == source) path->UnFork();
 			while (path != source && path != NULL && path->GetFlow() == 0) {
 				Path *parent = path->GetParent();
 				path->UnFork();
