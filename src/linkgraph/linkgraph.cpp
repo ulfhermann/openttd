@@ -352,7 +352,7 @@ void LinkGraph::Init(CargoID cargo)
 }
 
 /**
- * Inititialize all link graphs. Used when loading a game.
+ * Initialize all link graphs. Used when loading a game.
  */
 void InitializeLinkGraphs()
 {
