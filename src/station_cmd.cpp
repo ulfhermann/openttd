@@ -3238,28 +3238,6 @@ void Station::RunAverages() {
 }
 
 /**
- * update the flow stats for the consist starting with the given vehicle and
- * travelling to the given next station without unloading here.
- * @param st the station for which the flows should be updated
- * @param from the first vehicle in the consist
- * @param next_station_id the ID of the station the consist is travelling next
- */
-void UpdateFlowsPassThrough(Station *st, Vehicle *front, StationID next_station_id) {
-	if (next_station_id == INVALID_STATION) {
-		return;
-	} else {
-		for (Vehicle *v = front; v != NULL; v = v->Next()) {
-			GoodsEntry *ge = &st->goods[v->cargo_type];
-			const CargoPacketList *packets = v->cargo.Packets();
-			for(VehicleCargoList::ConstIterator i = packets->begin(); i != packets->end(); ++i) {
-				CargoPacket *p = *i;
-				ge->UpdateFlowStats(p->SourceStation(), p->Count(), next_station_id);
-			}
-		}
-	}
-}
-
-/**
  * Recalculate the frozen value of the station the given vehicle is loading at
  * if the vehicle is loading.
  * @param v the vehicle to be examined
