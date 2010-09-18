@@ -39,7 +39,7 @@ typedef std::map<StationID, FlowViaMap> FlowMap;
 class Node {
 public:
 
-	void ExportFlows(FlowStatMap &station_flows, CargoID cargo);
+	void ExportFlows(CargoID cargo);
 
 	uint supply;             ///< supply at the station
 	uint undelivered_supply; ///< amount of supply that hasn't been distributed yet
@@ -56,7 +56,7 @@ public:
 	void Init(StationID st = INVALID_STATION, uint sup = 0, uint dem = 0);
 
 private:
-	void ExportNewFlows(FlowMap::iterator &source_flows_it, FlowStatSet &via_set, CargoID cargo);
+	void ExportNewFlows(FlowMap::iterator &it, FlowStatSet &via_set, CargoID cargo);
 };
 
 /**

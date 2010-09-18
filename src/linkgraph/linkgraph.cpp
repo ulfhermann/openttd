@@ -292,12 +292,17 @@ void LinkGraphComponent::Init(LinkGraphComponentID id)
 
 
 /**
- * exports all entries in the FlowViaMap pointed to by source_flows it and erases it afterwards
+ * Exports all entries in the FlowViaMap pointed to by "source_flows_it", erases the source
+ * flows and increments the iterator afterwards.
+ * @param it iterator pointing to the flows to be exported into the main game state
+ * @param dest the flow stats to which the flows shall be exported
+ * @param cargo the cargo we're exporting flows for (used to check if the link stats for the new
+ *        flows still exist)
  */
-void Node::ExportNewFlows(FlowMap::iterator &source_flows_it, FlowStatSet &via_set, CargoID cargo)
+void Node::ExportNewFlows(FlowMap::iterator &it, FlowStatSet &dest, CargoID cargo)
 {
-	StationID source = source_flows_it->first;
-	FlowViaMap &source_flows = source_flows_it->second;
+	StationID source = it->first;
+	FlowViaMap &source_flows = it->second;
 	if (!Station::IsValidID(source)) {
 		source_flows.clear();
 	} else {
@@ -313,10 +318,10 @@ void Node::ExportNewFlows(FlowMap::iterator &source_flows_it, FlowStatSet &via_s
 				if (next != this->station) {
 					const LinkStatMap &ls = curr_station->goods[cargo].link_stats;
 					if (ls.find(next) != ls.end()) {
-						via_set.insert(FlowStat(distance, next, planned, 0));
+						dest.insert(FlowStat(distance, next, planned, 0));
 					}
 				} else {
-					via_set.insert(FlowStat(distance, next, planned, 0));
+					dest.insert(FlowStat(distance, next, planned, 0));
 				}
 			}
 			source_flows.erase(update++);
@@ -324,45 +329,49 @@ void Node::ExportNewFlows(FlowMap::iterator &source_flows_it, FlowStatSet &via_s
 	}
 	assert(source_flows.empty());
 
-	this->flows.erase(source_flows_it++);
+	this->flows.erase(it++);
 }
 
-void Node::ExportFlows(FlowStatMap &station_flows, CargoID cargo) {
+/**
+ * Export all flows of this node to the main game state.
+ * @param cargo the cargo we're exporting flows for.
+ */
+void Node::ExportFlows(CargoID cargo) {
+	FlowStatMap &station_flows = Station::Get(this->station)->goods[cargo].flows;
 	FlowStatSet new_flows;
 	/* loop over all existing flows in the station and update them */
-	for(FlowStatMap::iterator flowmap_it = station_flows.begin(); flowmap_it != station_flows.end();) {
-		FlowMap::iterator source_flows_it = this->flows.find(flowmap_it->first);
-		if (source_flows_it == this->flows.end()) {
+	for(FlowStatMap::iterator station_outer_it(station_flows.begin()); station_outer_it != station_flows.end();) {
+		FlowMap::iterator node_outer_it(this->flows.find(station_outer_it->first));
+		if (node_outer_it == this->flows.end()) {
 			/* there are no flows for this source node anymore */
-			station_flows.erase(flowmap_it++);
+			station_flows.erase(station_outer_it++);
 		} else {
-			FlowViaMap &source_flows = source_flows_it->second;
-			FlowStatSet &via_set = flowmap_it->second;
+			FlowViaMap &source = node_outer_it->second;
+			FlowStatSet &dest = station_outer_it->second;
 			/* loop over the station's flow stats for this source node and update them */
-			for (FlowStatSet::iterator flowset_it = via_set.begin(); flowset_it != via_set.end();) {
-				FlowViaMap::iterator update = source_flows.find(flowset_it->Via());
-				if (update != source_flows.end()) {
-					assert(update->second >= 0);
-					if (update->second > 0) {
-						new_flows.insert(FlowStat(*flowset_it, update->second));
+			for (FlowStatSet::iterator station_inner_it(dest.begin()); station_inner_it != dest.end();) {
+				FlowViaMap::iterator node_inner_it(source.find(station_inner_it->Via()));
+				if (node_inner_it != source.end()) {
+					assert(node_inner_it->second >= 0);
+					if (node_inner_it->second > 0) {
+						new_flows.insert(FlowStat(*station_inner_it, node_inner_it->second));
 					}
-					source_flows.erase(update);
+					source.erase(node_inner_it);
 				}
-				via_set.erase(flowset_it++);
+				dest.erase(station_inner_it++);
 			}
 			/* swap takes constant time, so we swap instead of adding all entries */
-			via_set.swap(new_flows);
+			dest.swap(new_flows);
 			assert(new_flows.empty());
 			/* insert remaining flows for this source node */
-			ExportNewFlows(source_flows_it, via_set, cargo);
-			/* source_flows is dangling here */
-			++flowmap_it;
+			ExportNewFlows(node_outer_it, dest, cargo);
+			/* careful: source_flows is dangling here */
+			++station_outer_it;
 		}
 	}
 	/* loop over remaining flows (for other sources) in the node's map and insert them into the station */
-	for (FlowMap::iterator source_flows_it = this->flows.begin(); source_flows_it != this->flows.end();) {
-		FlowStatSet &via_set = station_flows[source_flows_it->first];
-		ExportNewFlows(source_flows_it, via_set, cargo);
+	for (FlowMap::iterator it(this->flows.begin()); it != this->flows.end();) {
+		ExportNewFlows(it, station_flows[it->first], cargo);
 	}
 	assert(this->flows.empty());
 }
@@ -377,7 +386,7 @@ void LinkGraph::Join()
 	for(NodeID node_id = 0; node_id < this->GetSize(); ++node_id) {
 		Node &node = this->GetNode(node_id);
 		if (Station::IsValidID(node.station)) {
-			node.ExportFlows(Station::Get(node.station)->goods[cargo].flows, cargo);
+			node.ExportFlows(this->cargo);
 		}
 	}
 

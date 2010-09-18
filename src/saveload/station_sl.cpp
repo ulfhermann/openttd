@@ -234,6 +234,11 @@ const SaveLoad *GetLinkStatDesc() {
 	return linkstat_desc;
 }
 
+/**
+ * Wrapper function to get the FlowStats's internal structure while
+ * some of the variables are private.
+ * @return the saveload description for FlowStat.
+ */
 const SaveLoad *GetFlowStatDesc() {
 	static const SaveLoad _flowstat_desc[] = {
 		SLEG_CONDVAR(             _station_id,         SLE_UINT16,         SL_FLOWMAP, SL_MAX_VERSION),
@@ -245,13 +250,6 @@ const SaveLoad *GetFlowStatDesc() {
 	};
 
 	return _flowstat_desc;
-}
-
-void CountFlows(const FlowStatMap &flows) {
-	_num_flows = 0;
-	for(FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
-		_num_flows += (uint32)i->second.size();
-	}
 }
 
 /**
@@ -422,23 +420,22 @@ static void RealSave_STNN(BaseStation *bst)
 
 	if (!waypoint) {
 		Station *st = Station::From(bst);
-		for (CargoID i = 0; i < NUM_CARGO; i++) {
-			GoodsEntry *ge = &st->goods[i];
-			const LinkStatMap &stats = ge->link_stats;
-			_num_links = (uint16)stats.size();
-			const FlowStatMap &flows = ge->flows;
-			CountFlows(flows);
-			SlObject(ge, GetGoodsDesc());
-			for (LinkStatMap::const_iterator i = stats.begin(); i != stats.end(); ++i) {
-				_station_id = i->first;
-				LinkStat ls(i->second);
+		for (CargoID c = 0; c < NUM_CARGO; c++) {
+			_num_links = (uint16)st->goods[c].link_stats.size();
+			_num_flows = 0;
+			for(FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
+				_num_flows += (uint32)it->second.size();
+			}
+			SlObject(&st->goods[c], GetGoodsDesc());
+			for (LinkStatMap::const_iterator it(st->goods[c].link_stats.begin()); it != st->goods[c].link_stats.end(); ++it) {
+				_station_id = it->first;
+				LinkStat ls(it->second); // make a copy to avoid constness problems
 				SlObject(&ls, GetLinkStatDesc());
 			}
-			for (FlowStatMap::const_iterator i = flows.begin(); i != flows.end(); ++i) {
-				_station_id = i->first;
-				const FlowStatSet &flow_set = i->second;
-				for (FlowStatSet::const_iterator j = flow_set.begin(); j != flow_set.end(); ++j) {
-					FlowStat fs(*j);
+			for (FlowStatMap::const_iterator outer_it(st->goods[c].flows.begin()); outer_it != st->goods[c].flows.end(); ++outer_it) {
+				_station_id = outer_it->first;
+				for (FlowStatSet::const_iterator inner_it(outer_it->second.begin()); inner_it != outer_it->second.end(); ++inner_it) {
+					FlowStat fs(*inner_it); // make a copy to avoid constness problems
 					SlObject(&fs, GetFlowStatDesc());
 				}
 			}
