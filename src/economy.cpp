@@ -1104,12 +1104,24 @@ void PrepareUnload(Station *curr_station, Vehicle *front_v, StationID next_stati
 	/* At this moment loading cannot be finished */
 	ClrBit(front_v->vehicle_flags, VF_LOADING_FINISHED);
 
-	/* Start unloading in at the first possible moment */
+	/* Start unloading at the first possible moment */
 	front_v->load_unload_ticks = 1;
 
 	if ((front_v->current_order.GetUnloadType() & OUFB_NO_UNLOAD) != 0) {
-		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation */
-		UpdateFlowsPassThrough(curr_station, front_v, next_station_id);
+		/* vehicle will keep all its cargo and LoadUnloadVehicle will never call MoveToStation,
+		 * so we have to update the flow stats here.
+		 */
+		if (next_station_id == INVALID_STATION) {
+			return;
+		} else {
+			for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
+				const CargoPacketList *packets = v->cargo.Packets();
+				for(VehicleCargoList::ConstIterator i(packets->begin()); i != packets->end(); ++i) {
+					curr_station->goods[v->cargo_type].UpdateFlowStats(
+							(*i)->SourceStation(), (*i)->Count(), next_station_id);
+				}
+			}
+		}
 	} else {
 		for (Vehicle *v = front_v; v != NULL; v = v->Next()) {
 			if (v->cargo_cap > 0 && !v->cargo.Empty()) {
