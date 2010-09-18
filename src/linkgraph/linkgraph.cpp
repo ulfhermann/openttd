@@ -322,48 +322,69 @@ void LinkGraph::Join()
 	_handlers.clear();
 }
 
-void Path::Fork(Path * base, int cap, uint dist) {
-	capacity = min(base->capacity, cap);
-	distance = base->distance + dist;
-	assert(distance > 0);
-	if (parent != base) {
-		if (parent != NULL) {
-			parent->num_children--;
-		}
-		parent = base;
-		parent->num_children++;
+/**
+ * add this path as a new child to the given base path, thus making this path
+ * a "fork" of the base path.
+ * @param base the path to fork from
+ * @param cap maximum capacity of the new path
+ * @param dist distance of the new leg
+ */
+void Path::Fork(Path *base, int cap, uint dist) {
+	this->capacity = min(base->capacity, cap);
+	this->distance = base->distance + dist;
+	assert(this->distance > 0);
+	if (this->parent != base) {
+		this->UnFork();
+		this->parent = base;
+		this->parent->num_children++;
 	}
-	origin = base->origin;
+	this->origin = base->origin;
 }
 
-uint Path::AddFlow(uint f, LinkGraphComponent * graph, bool only_positive) {
-	if (parent != NULL) {
-		Edge & edge = graph->GetEdge(parent->node, node);
+/**
+ * Push some flow along a path and register the path in the nodes it passes if
+ * successful.
+ * @param new_flow amount of flow to push
+ * @param graph the link graph component this node belongs to
+ * @param only_positive if true, don't push more flow than there is capacity
+ * @return the amount of flow actually pushed
+ */
+uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive) {
+	if (this->parent != NULL) {
+		Edge &edge = graph->GetEdge(this->parent->node, this->node);
 		if (only_positive) {
 			uint usable_cap = edge.capacity * graph->GetSettings().short_path_saturation / 100;
 			if(usable_cap > edge.flow) {
-				f = min(f, usable_cap - edge.flow);
+				new_flow = min(new_flow, usable_cap - edge.flow);
 			} else {
 				return 0;
 			}
 		}
-		f = parent->AddFlow(f, graph, only_positive);
-		if (f > 0) {
-			graph->GetNode(parent->node).paths.insert(this);
+		new_flow = this->parent->AddFlow(new_flow, graph, only_positive);
+		if (new_flow > 0) {
+			graph->GetNode(this->parent->node).paths.insert(this);
 		}
-		edge.flow += f;
+		edge.flow += new_flow;
 	}
-	flow += f;
-	return f;
+	this->flow += new_flow;
+	return new_flow;
 }
 
-void Path::UnFork() {
-	if (parent != NULL) {
-		parent->num_children--;
-		parent = NULL;
+/**
+ * detach this path from its parent.
+ */
+FORCEINLINE void Path::UnFork() {
+	if (this->parent != NULL) {
+		this->parent->num_children--;
+		this->parent = NULL;
 	}
 }
 
+/**
+ * create a leg of a path in the link graph.
+ * @param n id of the link graph node this path passes
+ * @param source if true, this is the first leg of the path
+ */
 Path::Path(NodeID n, bool source)  :
 	distance(source ? 0 : UINT_MAX),
 	capacity(source ? INT_MAX : INT_MIN),

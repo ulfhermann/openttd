@@ -38,7 +38,6 @@ typedef std::map<StationID, FlowViaMap> FlowMap;
  */
 class Node {
 public:
-
 	uint supply;             ///< supply at the station
 	uint undelivered_supply; ///< amount of supply that hasn't been distributed yet
 	uint demand;             ///< acceptance at the station
@@ -63,7 +62,6 @@ public:
  */
 class Edge {
 public:
-
 	uint distance;           ///< length of the link
 	uint capacity;           ///< capacity of the link
 	uint demand;             ///< transport demand between the nodes
@@ -272,29 +270,52 @@ private:
 	void CreateComponent(Station *first);
 };
 
+/**
+ * A leg of a path in the link graph. Paths can form trees by being "forked".
+ */
 class Path {
 public:
 	Path(NodeID n, bool source = false);
-	NodeID GetNode() const {return node;}
-	NodeID GetOrigin() const {return origin;}
-	Path * GetParent() {return parent;}
-	int GetCapacity() const {return capacity;}
-	uint GetDistance() const {return distance;}
-	void Fork(Path * base, int cap, uint dist);
-	void ReduceFlow(uint f) {flow -= f;}
-	void AddFlow(uint f) {flow += f;}
-	uint AddFlow(uint f, LinkGraphComponent * graph, bool only_positive);
-	uint GetFlow() const {return flow;}
-	uint GetNumChildren() const {return num_children;}
+
+	/** get the node this leg passes. */
+	FORCEINLINE NodeID GetNode() const {return this->node;}
+
+	/** get the overall origin of the path. */
+	FORCEINLINE NodeID GetOrigin() const {return this->origin;}
+
+	/** get the parent leg of this one. */
+	FORCEINLINE Path *GetParent() {return this->parent;}
+
+	/** get the overall capacity of the path. */
+	FORCEINLINE int GetCapacity() const {return this->capacity;}
+
+	/** get the overall distance of the path. */
+	FORCEINLINE uint GetDistance() const {return this->distance;}
+
+	/** reduce the flow on this leg only by the specified amount. */
+	FORCEINLINE void ReduceFlow(uint f) {this->flow -= f;}
+
+	/** increase the flow on this leg only by the specified amount. */
+	FORCEINLINE void AddFlow(uint f) {this->flow += f;}
+
+	/** get the flow on this leg. */
+	FORCEINLINE uint GetFlow() const {return this->flow;}
+
+	/** get the number of "forked off" child legs of this one */
+	FORCEINLINE uint GetNumChildren() const {return this->num_children;}
+
+	uint AddFlow(uint f, LinkGraphComponent *graph, bool only_positive);
+	void Fork(Path *base, int cap, uint dist);
 	void UnFork();
+
 protected:
-	uint distance;
+	uint distance;     ///< sum(distance of all legs up to this one)
 	int capacity;      ///< this capacity is edge.capacity - edge.flow for the current run of dijkstra
 	uint flow;         ///< this is the flow the current run of the mcf solver assigns
-	NodeID node;
-	NodeID origin;
-	uint num_children;
-	Path * parent;
+	NodeID node;       ///< the link graph node this leg passes
+	NodeID origin;     ///< the link graph node this path originates from
+	uint num_children; ///< the number of child legs that have been forked from this path
+	Path *parent;      ///< the parent leg of this one
 };
 
 void InitializeLinkGraphs();
