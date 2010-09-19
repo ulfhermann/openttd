@@ -305,7 +305,8 @@ void LinkGraph::Join()
 /**
  * Join the calling thread with this job's thread if threading is enabled.
  */
-FORCEINLINE void LinkGraphJob::Join() {
+FORCEINLINE void LinkGraphJob::Join()
+{
 	if (this->thread != NULL) {
 		this->thread->Join();
 		delete this->thread;
