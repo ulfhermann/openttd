@@ -329,7 +329,8 @@ void LinkGraph::Join()
  * @param cap maximum capacity of the new path
  * @param dist distance of the new leg
  */
-void Path::Fork(Path *base, int cap, uint dist) {
+void Path::Fork(Path *base, int cap, uint dist)
+{
 	this->capacity = min(base->capacity, cap);
 	this->distance = base->distance + dist;
 	assert(this->distance > 0);
@@ -349,7 +350,8 @@ void Path::Fork(Path *base, int cap, uint dist) {
  * @param only_positive if true, don't push more flow than there is capacity
  * @return the amount of flow actually pushed
  */
-uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive) {
+uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
+{
 	if (this->parent != NULL) {
 		Edge &edge = graph->GetEdge(this->parent->node, this->node);
 		if (only_positive) {
@@ -368,16 +370,6 @@ uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
 	}
 	this->flow += new_flow;
 	return new_flow;
-}
-
-/**
- * detach this path from its parent.
- */
-FORCEINLINE void Path::UnFork() {
-	if (this->parent != NULL) {
-		this->parent->num_children--;
-		this->parent = NULL;
-	}
 }
 
 /**

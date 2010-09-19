@@ -304,9 +304,19 @@ public:
 	/** get the number of "forked off" child legs of this one */
 	FORCEINLINE uint GetNumChildren() const {return this->num_children;}
 
+	/**
+	 * detach this path from its parent.
+	 */
+	FORCEINLINE void UnFork()
+	{
+		if (this->parent != NULL) {
+			this->parent->num_children--;
+			this->parent = NULL;
+		}
+	}
+	
 	uint AddFlow(uint f, LinkGraphComponent *graph, bool only_positive);
 	void Fork(Path *base, int cap, uint dist);
-	void UnFork();
 
 protected:
 	uint distance;     ///< sum(distance of all legs up to this one)
