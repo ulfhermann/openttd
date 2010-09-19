@@ -54,6 +54,10 @@ enum ExtraTreePlacement {
 /** Determines when to consider building more trees. */
 byte _trees_tick_ctr;
 
+static const uint16 DEFAULT_TREE_STEPS = 1000;             ///< Default number of attempts for placing trees.
+static const uint16 DEFAULT_RAINFOREST_TREE_STEPS = 15000; ///< Default number of attempts for placing extra trees at rainforest in tropic.
+static const uint16 EDITOR_TREE_DIV = 5;                   ///< Game editor tree generation divisor factor.
+
 /**
  * Tests if a tile can be converted to MP_TREES
  * This is true for clear ground without farms or rocks.
@@ -176,42 +180,31 @@ static void PlaceTree(TileIndex tile, uint32 r)
 }
 
 /**
- * Place some amount of trees around a given tile.
+ * Creates a number of tree groups.
+ * The number of trees in each group depends on how many trees are actually placed around the given tile.
  *
- * This function adds some trees around a given tile. As this function use
- * the Random() call it depends on the random how many trees are actually placed
- * around the given tile.
- *
- * @param tile The center of the trees to add
+ * @param num_groups Number of tree groups to place.
  */
-static void DoPlaceMoreTrees(TileIndex tile)
+static void PlaceTreeGroups(uint num_groups)
 {
-	uint i;
-
-	for (i = 0; i < 1000; i++) {
-		uint32 r = Random();
-		int x = GB(r, 0, 5) - 16;
-		int y = GB(r, 8, 5) - 16;
-		uint dist = abs(x) + abs(y);
-		TileIndex cur_tile = TileAddWrap(tile, x, y);
-
-		if (cur_tile != INVALID_TILE && dist <= 13 && CanPlantTreesOnTile(cur_tile, true)) {
-			PlaceTree(cur_tile, r);
-		}
-	}
-}
-
-/**
- * Place more trees on the map.
- *
- * This function add more trees to the map.
- */
-static void PlaceMoreTrees()
-{
-	uint i = ScaleByMapSize(GB(Random(), 0, 5) + 25);
 	do {
-		DoPlaceMoreTrees(RandomTile());
-	} while (--i);
+		TileIndex center_tile = RandomTile();
+
+		for (uint i = 0; i < DEFAULT_TREE_STEPS; i++) {
+			uint32 r = Random();
+			int x = GB(r, 0, 5) - 16;
+			int y = GB(r, 8, 5) - 16;
+			uint dist = abs(x) + abs(y);
+			TileIndex cur_tile = TileAddWrap(center_tile, x, y);
+
+			IncreaseGeneratingWorldProgress(GWP_TREE);
+
+			if (cur_tile != INVALID_TILE && dist <= 13 && CanPlantTreesOnTile(cur_tile, true)) {
+				PlaceTree(cur_tile, r);
+			}
+		}
+
+	} while (--num_groups);
 }
 
 /**
@@ -225,9 +218,7 @@ static void PlaceMoreTrees()
  */
 static void PlaceTreeAtSameHeight(TileIndex tile, uint height)
 {
-	uint i;
-
-	for (i = 0; i < 1000; i++) {
+	for (uint i = 0; i < DEFAULT_TREE_STEPS; i++) {
 		uint32 r = Random();
 		int x = GB(r, 0, 5) - 16;
 		int y = GB(r, 8, 5) - 16;
@@ -258,7 +249,8 @@ void PlaceTreesRandomly()
 {
 	uint i, j, ht;
 
-	i = ScaleByMapSize(1000);
+	i = ScaleByMapSize(DEFAULT_TREE_STEPS);
+	if (_game_mode == GM_EDITOR) i /= EDITOR_TREE_DIV;
 	do {
 		uint32 r = Random();
 		TileIndex tile = RandomTileSeed(r);
@@ -275,13 +267,9 @@ void PlaceTreesRandomly()
 			ht = GetTileZ(tile);
 			/* The higher we get, the more trees we plant */
 			j = GetTileZ(tile) / TILE_HEIGHT * 2;
+			/* Above snowline more trees! */
+			if (_settings_game.game_creation.landscape == LT_ARCTIC && ht > GetSnowLine()) j *= 3;
 			while (j--) {
-				/* Above snowline more trees! */
-				if (_settings_game.game_creation.landscape == LT_ARCTIC && ht > GetSnowLine()) {
-					PlaceTreeAtSameHeight(tile, ht);
-					PlaceTreeAtSameHeight(tile, ht);
-				};
-
 				PlaceTreeAtSameHeight(tile, ht);
 			}
 		}
@@ -289,7 +277,8 @@ void PlaceTreesRandomly()
 
 	/* place extra trees at rainforest area */
 	if (_settings_game.game_creation.landscape == LT_TROPIC) {
-		i = ScaleByMapSize(15000);
+		i = ScaleByMapSize(DEFAULT_RAINFOREST_TREE_STEPS);
+		if (_game_mode == GM_EDITOR) i /= EDITOR_TREE_DIV;
 
 		do {
 			uint32 r = Random();
@@ -316,18 +305,20 @@ void GenerateTrees()
 
 	if (_settings_game.game_creation.tree_placer == TP_NONE) return;
 
-	if (_settings_game.game_creation.landscape != LT_TOYLAND) PlaceMoreTrees();
-
 	switch (_settings_game.game_creation.tree_placer) {
 		case TP_ORIGINAL: i = _settings_game.game_creation.landscape == LT_ARCTIC ? 15 : 6; break;
 		case TP_IMPROVED: i = _settings_game.game_creation.landscape == LT_ARCTIC ?  4 : 2; break;
 		default: NOT_REACHED();
 	}
 
-	total = ScaleByMapSize(1000);
-	if (_settings_game.game_creation.landscape == LT_TROPIC) total += ScaleByMapSize(15000);
+	total = ScaleByMapSize(DEFAULT_TREE_STEPS);
+	if (_settings_game.game_creation.landscape == LT_TROPIC) total += ScaleByMapSize(DEFAULT_RAINFOREST_TREE_STEPS);
 	total *= i;
+	uint num_groups = (_settings_game.game_creation.landscape != LT_TOYLAND) ? ScaleByMapSize(GB(Random(), 0, 5) + 25) : 0;
+	total += num_groups * DEFAULT_TREE_STEPS;
 	SetGeneratingWorldProgress(GWP_TREE, total);
+
+	if (num_groups != 0) PlaceTreeGroups(num_groups);
 
 	for (; i != 0; i--) {
 		PlaceTreesRandomly();
