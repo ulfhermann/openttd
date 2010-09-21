@@ -211,6 +211,7 @@
  *  146   20446
  *  147   20621
  *  148   20659
+ *  149   20832
  */
 extern const uint16 SAVEGAME_VERSION = SL_DEMANDS; ///< current savegame version of OpenTTD
 
