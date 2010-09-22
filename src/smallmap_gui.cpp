@@ -2111,15 +2111,16 @@ public:
 
 	virtual void OnMouseOver(Point pt, int widget) {
 		static Point invalid = {-1, -1};
-		if (pt.x != cursor.x || pt.y != cursor.y) {
-			this->refresh = 1;
-			if (widget == SM_WIDGET_MAP) {
+		if (widget == SM_WIDGET_MAP) {
+			const NWidgetBase *wid = this->GetWidget<NWidgetBase>(SM_WIDGET_MAP);
+			pt.x -= wid->pos_x;
+			pt.y -= wid->pos_y;
+			if (pt.x != cursor.x || pt.y != cursor.y) {
+				this->refresh = 1;
 				cursor = pt;
-				cursor.x -= WD_FRAMERECT_LEFT;
-				cursor.y -= WD_FRAMERECT_TOP + WD_CAPTION_HEIGHT;
-			} else {
-				cursor = invalid;
 			}
+		} else {
+			cursor = invalid;
 		}
 	}
 
