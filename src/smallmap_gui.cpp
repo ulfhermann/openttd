@@ -684,9 +684,9 @@ class SmallMapWindow : public Window {
 	 */
 	void SetZoomLevel(ZoomLevelChange change, const Point *zoom_pt)
 	{
-		static const int zoomlevels[] = {-8, -4, -2, 1, 2, 4, 6, 8}; // Available zoom levels. Bigger number means more zoom-out (further away).
+		static const int zoomlevels[] = {-4, -2, 1, 2, 4, 6, 8}; // Available zoom levels. Bigger number means more zoom-out (further away).
 		static const int MIN_ZOOM_INDEX = 0;
-		static const int DEFAULT_ZOOM_INDEX = 3;
+		static const int DEFAULT_ZOOM_INDEX = 2;
 		static const int MAX_ZOOM_INDEX = lengthof(zoomlevels) - 1;
 
 		int new_index, cur_index, sub;
@@ -830,7 +830,7 @@ class SmallMapWindow : public Window {
 			const Vehicle *v = Vehicle::GetIfValid(i->vehicle);
 			if (v == NULL) continue;
 
-			/* Remap into flat coordinates. We have to do that again to account for scrolling */
+			/* Remap into flat coordinates. */
 			Point pt = RemapTile(i->position.x / (int)TILE_SIZE, i->position.y / (int)TILE_SIZE);
 
 			int y = pt.y - dpi->top;
@@ -1029,7 +1029,7 @@ class SmallMapWindow : public Window {
 			if (v->type == VEH_EFFECT) continue;
 			if (v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) continue;
 
-			/* Remap into flat coordinates. */
+			/* Remap into flat coordinates. We have to do that again in DrawVehicles to account for scrolling. */
 			Point pos = RemapTile(v->x_pos / (int)TILE_SIZE, v->y_pos / (int)TILE_SIZE);
 
 			/* Check if rhombus is inside bounds */
