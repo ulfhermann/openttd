@@ -1173,7 +1173,7 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	bool completely_emptied = true;
 	bool anything_unloaded = false;
 	bool anything_loaded   = false;
-	bool full_load_amount  = false;
+	uint32 full_load_amount = 0;
 	uint32 cargo_not_full  = 0;
 	uint32 cargo_full      = 0;
 
@@ -1280,7 +1280,12 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint reserved_count = v->cargo.ReservedCount();
 			uint station_count = ge->cargo.Count();
 
-			if (station_count + reserved_count >= (uint)cap_left) full_load_amount = true;
+			/* Store whether the maximum possible load amount was loaded or not.*/
+			if (station_count + reserved_count >= (uint)cap_left) {
+				SetBit(full_load_amount, v->cargo_type);
+			} else {
+				ClrBit(full_load_amount, v->cargo_type);
+			}
 
 			if (_settings_game.order.improved_load) {
 				v->cargo.LoadReserved(cap_left);
@@ -1343,8 +1348,12 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			unloading_time = gradual_loading_wait_time[v->type];
 		}
-		/* We loaded less cargo than possible and it's not full load, stop loading. */
-		if (!anything_unloaded && !full_load_amount && !(v->current_order.GetLoadType() & OLFB_FULL_LOAD)) SetBit(u->vehicle_flags, VF_STOP_LOADING);
+		/* We loaded less cargo than possible for all cargo types and it's not full
+		 * load and we're not supposed to wait any longer: stop loading. */
+		if (!anything_unloaded && full_load_amount == 0 && !(v->current_order.GetLoadType() & OLFB_FULL_LOAD) &&
+				(!_settings_game.order.timetabling || v->current_order_time >= (uint)max(v->current_order.wait_time - v->lateness_counter, 0))) {
+			SetBit(v->vehicle_flags, VF_STOP_LOADING);
+		}
 	} else {
 		bool finished_loading = true;
 		if (v->current_order.GetLoadType() & OLFB_FULL_LOAD) {
