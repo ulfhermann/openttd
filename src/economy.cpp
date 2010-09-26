@@ -1280,13 +1280,6 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint reserved_count = v->cargo.ReservedCount();
 			uint station_count = ge->cargo.Count();
 
-			/* Store whether the maximum possible load amount was loaded or not.*/
-			if (station_count + reserved_count >= (uint)cap_left) {
-				SetBit(full_load_amount, v->cargo_type);
-			} else {
-				ClrBit(full_load_amount, v->cargo_type);
-			}
-
 			if (_settings_game.order.improved_load) {
 				v->cargo.LoadReserved(cap_left);
 			}
@@ -1296,6 +1289,12 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			}
 			uint loaded = reserved_count + station_count - v->cargo.ReservedCount() - ge->cargo.Count();
 
+			/* Store whether the maximum possible load amount was loaded or not.*/
+			if (loaded == (uint)cap_left) {
+				SetBit(full_load_amount, v->cargo_type);
+			} else {
+				ClrBit(full_load_amount, v->cargo_type);
+			}
 
 			/* TODO: Regarding this, when we do gradual loading, we
 			 * should first unload all vehicles and then start
