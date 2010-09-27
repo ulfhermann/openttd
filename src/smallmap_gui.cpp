@@ -63,20 +63,7 @@ enum SmallMapWindowWidgets {
 
 static int _smallmap_industry_count; ///< Number of used industries
 
-/* number of cargos in the link stats legend */
-static int _smallmap_cargo_count;
-
-enum SmallMapStats {
-	STAT_CAPACITY,
-	STAT_BEGIN = STAT_CAPACITY,
-	STAT_USAGE,
-	STAT_PLANNED,
-	STAT_SENT,
-	STAT_TEXT,
-	STAT_GRAPH,
-	STAT_END,
-	NUM_STATS = STAT_END,
-};
+static int _smallmap_cargo_count; ///< number of cargos in the link stats legend
 
 /** Macro for ordinary entry of LegendAndColour */
 #define MK(a, b) {a, b, {INVALID_INDUSTRYTYPE}, true, false, false}
@@ -170,6 +157,7 @@ static const LegendAndColour _legend_land_owners[] = {
 	MK(0x20, STR_SMALLMAP_LEGENDA_INDUSTRIES),
 	MKEND()
 };
+
 #undef MK
 #undef MC
 #undef MS
@@ -216,7 +204,7 @@ void BuildIndustriesLegend()
 	_smallmap_industry_count = j;
 }
 
-static LegendAndColour _legend_linkstats[NUM_CARGO + NUM_STATS + 1];
+static LegendAndColour _legend_linkstats[NUM_CARGO + 1];
 
 /**
  * Populate legend table for the route map view.
@@ -226,7 +214,7 @@ void BuildLinkStatsLegend()
 	/* Clear the legend */
 	memset(_legend_linkstats, 0, sizeof(_legend_linkstats));
 
-	int i = 0;
+	uint i = 0;
 	for (; i < _sorted_cargo_specs_size; ++i) {
 		const CargoSpec *cs = _sorted_cargo_specs[i];
 
@@ -236,50 +224,9 @@ void BuildLinkStatsLegend()
 		_legend_linkstats[i].show_on_map = true;
 	}
 
-	_legend_linkstats[i].col_break = true;
+	_legend_linkstats[i].end = true;
 
 	_smallmap_cargo_count = i;
-
-	/* the colours cannot be resolved before the gfx system is initialized.
-	 * So we have to build the legend when creating the window.
-	 */
-	for (uint st = 0; st < NUM_STATS; ++st) {
-		LegendAndColour & legend_entry = _legend_linkstats[i + st];
-		switch(st) {
-		case STAT_CAPACITY:
-			legend_entry.colour = _colour_gradient[COLOUR_WHITE][7];
-			legend_entry.legend = STR_SMALLMAP_LEGENDA_CAPACITY;
-			legend_entry.show_on_map = true;
-			break;
-		case STAT_USAGE:
-			legend_entry.colour = _colour_gradient[COLOUR_GREY][1];
-			legend_entry.legend = STR_SMALLMAP_LEGENDA_USAGE;
-			legend_entry.show_on_map = false;
-			break;
-		case STAT_PLANNED:
-			legend_entry.colour = _colour_gradient[COLOUR_RED][5];
-			legend_entry.legend = STR_SMALLMAP_LEGENDA_PLANNED;
-			legend_entry.show_on_map = true;
-			break;
-		case STAT_SENT:
-			legend_entry.colour = _colour_gradient[COLOUR_YELLOW][5];
-			legend_entry.legend = STR_SMALLMAP_LEGENDA_SENT;
-			legend_entry.show_on_map = false;
-			break;
-		case STAT_TEXT:
-			legend_entry.colour = _colour_gradient[COLOUR_GREY][7];
-			legend_entry.legend = STR_SMALLMAP_LEGENDA_SHOW_TEXT;
-			legend_entry.show_on_map = false;
-			break;
-		case STAT_GRAPH:
-			legend_entry.colour = _colour_gradient[COLOUR_GREY][7];
-			legend_entry.legend = STR_SMALLMAP_LEGENDA_SHOW_GRAPH;
-			legend_entry.show_on_map = true;
-			break;
-		}
-	}
-
-	_legend_linkstats[i + NUM_STATS].end = true;
 }
 
 static const LegendAndColour * const _legend_table[] = {
@@ -698,27 +645,25 @@ class SmallMapWindow : public Window {
 			this->Clear();
 		}
 
-		void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow)
+		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow)
 		{
 			this->capacity += orig_link.Capacity();
 			this->usage += orig_link.Usage();
 			this->planned += orig_flow.Planned();
-			this->sent += orig_flow.Sent();
 		}
 
 		void Clear()
 		{
-			capacity = usage = planned = sent = 0;
+			this->capacity = this->usage = this->planned = 0;
 		}
 
 		uint capacity;
 		uint usage;
 		uint planned;
-		uint sent;
 	};
 
 	struct CargoDetail : public BaseCargoDetail {
-		CargoDetail(const LegendAndColour * c, const LinkStat &ls, const FlowStat &fs) : legend(c)
+		CargoDetail(const LegendAndColour *c, const LinkStat &ls, const FlowStat &fs) : legend(c)
 		{
 			this->AddLink(ls, fs);
 		}
@@ -729,7 +674,7 @@ class SmallMapWindow : public Window {
 	typedef std::vector<CargoDetail> StatVector;
 
 	struct LinkDetails {
-		LinkDetails() {Clear();}
+		LinkDetails() {this->Clear();}
 
 		StationID sta;
 		StationID stb;
@@ -1156,7 +1101,7 @@ class SmallMapWindow : public Window {
 			}
 
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
-				const LegendAndColour &cargo_entry = _legend_table[window->map_type][i];
+				const LegendAndColour &cargo_entry = _legend_table[this->window->map_type][i];
 				CargoID cargo = cargo_entry.u.type;
 				if (cargo_entry.show_on_map || highlight || reverse_highlight) {
 					GoodsEntry &ge = Station::Get(sta)->goods[cargo];
@@ -1176,18 +1121,12 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		virtual void DrawForwBackLinks(StationID sta, StationID stb) {
-			this->DrawLink(sta, stb);
-			this->DrawContent();
-			Swap(this->pta, this->ptb);
-			this->DrawLink(stb, sta);
-			this->DrawContent();
-		}
+		virtual void DrawForwBackLinks(StationID sta, StationID stb) = 0;
 
 	public:
 		virtual ~LinkDrawer() {}
 
-		LinkDetails DrawLinks(const SmallMapWindow * w, bool search)
+		LinkDetails DrawLinks(const SmallMapWindow *w, bool search)
 		{
 			this->link_details.Clear();
 			this->window = w;
@@ -1231,23 +1170,27 @@ class SmallMapWindow : public Window {
 
 	};
 
-	class LinkLineDrawer : public LinkDrawer {
+	class LinkValueDrawer : public LinkDrawer, public BaseCargoDetail {
+	protected:
+
+		virtual void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, const LegendAndColour &cargo_entry)
+		{
+			this->BaseCargoDetail::AddLink(orig_link, orig_flow);
+		}
+	};
+
+	class LinkLineDrawer : public LinkValueDrawer {
 	public:
 		LinkLineDrawer() : highlight(false) {}
 
 	protected:
-		typedef std::set<uint16> ColourSet;
-		ColourSet colours;
 		bool highlight;
 
 		virtual void DrawForwBackLinks(StationID sta, StationID stb) {
 			this->DrawLink(sta, stb);
 			this->DrawLink(stb, sta);
 			this->DrawContent();
-		}
-
-		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry) {
-			this->colours.insert(cargo_entry.colour);
+			this->Clear();
 		}
 
 		virtual void Highlight() {
@@ -1256,110 +1199,24 @@ class SmallMapWindow : public Window {
 
 		virtual void DrawContent() {
 			uint colour = 0;
-			uint num_colours = 0;
-			for (ColourSet::iterator i = colours.begin(); i != colours.end(); ++i) {
-				colour += *i;
-				num_colours++;
+			uint usage_or_plan = max(this->usage, this->planned);
+
+			if (this->capacity > usage_or_plan * 3) {
+				colour = _colour_gradient[COLOUR_WHITE][7];
+			} else if (this->capacity > usage_or_plan) {
+				colour = _colour_gradient[COLOUR_GREEN][4];
+			} else if (this->capacity * 2 > usage_or_plan) {
+				colour = _colour_gradient[COLOUR_YELLOW][4];
+			} else {
+				colour = _colour_gradient[COLOUR_RED][4];
 			}
-			colour /= num_colours;
 			byte border_colour = _colour_gradient[COLOUR_GREY][highlight ? 3 : 1];
 			GfxDrawLine(this->pta.x - 1, this->pta.y, this->ptb.x - 1, this->ptb.y, border_colour);
 			GfxDrawLine(this->pta.x + 1, this->pta.y, this->ptb.x + 1, this->ptb.y, border_colour);
 			GfxDrawLine(this->pta.x, this->pta.y - 1, this->ptb.x, this->ptb.y - 1, border_colour);
 			GfxDrawLine(this->pta.x, this->pta.y + 1, this->ptb.x, this->ptb.y + 1, border_colour);
 			GfxDrawLine(this->pta.x, this->pta.y, this->ptb.x, this->ptb.y, colour);
-			this->colours.clear();
 			this->highlight = false;
-		}
-	};
-
-	class LinkValueDrawer : public LinkDrawer, public BaseCargoDetail {
-	protected:
-
-		virtual void AddLink(const LinkStat & orig_link, const FlowStat & orig_flow, const LegendAndColour &cargo_entry)
-		{
-			this->BaseCargoDetail::AddLink(orig_link, orig_flow);
-		}
-	};
-
-	class LinkTextDrawer : public LinkValueDrawer {
-	protected:
-		virtual void DrawContent() {
-			Point ptm;
-			ptm.x = (this->pta.x + 2*this->ptb.x) / 3;
-			ptm.y = (this->pta.y + 2*this->ptb.y) / 3;
-			int nums = 0;
-			if (_legend_linkstats[_smallmap_cargo_count + STAT_CAPACITY].show_on_map) {
-				SetDParam(nums++, this->capacity);
-			}
-			if (_legend_linkstats[_smallmap_cargo_count + STAT_USAGE].show_on_map) {
-				SetDParam(nums++, this->usage);
-			}
-			if (_legend_linkstats[_smallmap_cargo_count + STAT_PLANNED].show_on_map) {
-				SetDParam(nums++, this->planned);
-			}
-			if (_legend_linkstats[_smallmap_cargo_count + STAT_SENT].show_on_map) {
-				SetDParam(nums++, this->sent);
-			}
-			StringID str;
-			switch (nums) {
-			case 0:
-				str = STR_EMPTY; break;
-			case 1:
-				str = STR_NUM; break;
-			case 2:
-				str = STR_NUM_RELATION_2; break;
-			case 3:
-				str = STR_NUM_RELATION_3; break;
-			case 4:
-				str = STR_NUM_RELATION_4; break;
-			default:
-				NOT_REACHED();
-			}
-			DrawString(ptm.x, ptm.x + this->window->ColumnWidth(), ptm.y, str, TC_WHITE);
-			this->Clear();
-		}
-	};
-
-	class LinkGraphDrawer : public LinkValueDrawer {
-		typedef std::multimap<uint, byte, std::greater<uint> > SizeMap;
-	protected:
-		virtual void DrawContent() {
-			Point ptm;
-			SizeMap sizes;
-			/* these floats only serve to calculate the size of the coloured boxes for capacity, usage, planned, sent
-			 * they are not reused anywhere, so it's network safe.
-			 */
-			const LegendAndColour *legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_USAGE;
-			if (legend_entry->show_on_map && this->usage > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->usage), legend_entry->colour));
-			}
-			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_CAPACITY;
-			if (legend_entry->show_on_map && this->capacity > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->capacity), legend_entry->colour));
-			}
-			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_PLANNED;
-			if (legend_entry->show_on_map && this->planned > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->planned),  legend_entry->colour));
-			}
-			legend_entry = _legend_linkstats + _smallmap_cargo_count + STAT_SENT;
-			if (legend_entry->show_on_map && this->sent > 0) {
-				sizes.insert(std::make_pair((uint)sqrt((float)this->sent), legend_entry->colour));
-			}
-
-			ptm.x = (this->pta.x + this->ptb.x) / 2;
-			ptm.y = (this->pta.y + this->ptb.y) / 2;
-
-			for (SizeMap::iterator i = sizes.begin(); i != sizes.end(); ++i) {
-				if (this->pta.x > this->ptb.x) {
-					ptm.x -= 1;
-					GfxFillRect(ptm.x - i->first / 2, ptm.y - i->first * 2, ptm.x, ptm.y, i->second);
-				} else {
-					ptm.x += 1;
-					GfxFillRect(ptm.x, ptm.y - i->first * 2, ptm.x + i->first / 2, ptm.y, i->second);
-				}
-			}
-			this->Clear();
 		}
 	};
 
@@ -1372,8 +1229,7 @@ class SmallMapWindow : public Window {
 				GetStringBoundingBox(STR_ABBREV_PASSENGERS).width +
 				GetStringBoundingBox(STR_SMALLMAP_LINK_CAPACITY).width +
 				GetStringBoundingBox(STR_SMALLMAP_LINK_USAGE).width +
-				GetStringBoundingBox(STR_SMALLMAP_LINK_PLANNED).width +
-				GetStringBoundingBox(STR_SMALLMAP_LINK_SENT).width;
+				GetStringBoundingBox(STR_SMALLMAP_LINK_PLANNED).width;
 		uint entries_per_row = (right - x_orig) / entry_width;
 		if (details.empty()) {
 			DrawString(x, x + entry_width, y, STR_TINY_NOTHING, TC_BLACK);
@@ -1389,27 +1245,19 @@ class SmallMapWindow : public Window {
 				}
 			}
 			uint x_next = x + entry_width;
-			if (detail.legend->show_on_map) {
-				GfxFillRect(x, y + 1, x + LEGEND_BLOB_WIDTH, y + FONT_HEIGHT_SMALL - 1, 0); // outer border of the legend colour
-			}
+			GfxFillRect(x, y + 1, x + LEGEND_BLOB_WIDTH, y + FONT_HEIGHT_SMALL - 1, 0); // outer border of the legend colour
 			GfxFillRect(x + 1, y + 2, x + LEGEND_BLOB_WIDTH - 1, y + FONT_HEIGHT_SMALL - 2, detail.legend->colour); // legend colour
 			x += LEGEND_BLOB_WIDTH + WD_FRAMERECT_LEFT;
-			TextColour textcol[4];
-			for (int stat = STAT_CAPACITY; stat <= STAT_SENT; ++stat) {
-				textcol[stat] = (detail.legend->show_on_map && _legend_linkstats[_smallmap_cargo_count + stat].show_on_map) ?
-						TC_BLACK : TC_GREY;
-			}
 
 			SetDParam(0, CargoSpec::Get(detail.legend->u.type)->abbrev);
-			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK, detail.legend->show_on_map ? TC_BLACK : TC_GREY);
+			TextColour tc = detail.legend->show_on_map ? TC_BLACK : TC_GREY;
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK, tc);
 			SetDParam(0, detail.capacity);
-			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_CAPACITY, textcol[STAT_CAPACITY]);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_CAPACITY, tc);
 			SetDParam(0, detail.usage);
-			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_USAGE, textcol[STAT_USAGE]);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_USAGE, tc);
 			SetDParam(0, detail.planned);
-			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_PLANNED, textcol[STAT_PLANNED]);
-			SetDParam(0, detail.sent);
-			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_SENT, textcol[STAT_SENT]);
+			x = DrawString(x, x_next - 1, y, STR_SMALLMAP_LINK_PLANNED, tc);
 			x = x_next;
 		}
 		return y + FONT_HEIGHT_SMALL;
@@ -1639,15 +1487,6 @@ class SmallMapWindow : public Window {
 			this->link_details = lines.DrawLinks(this, true);
 
 			this->supply_details = DrawStationDots();
-
-			if (_legend_linkstats[_smallmap_cargo_count + STAT_TEXT].show_on_map) {
-				LinkTextDrawer text;
-				text.DrawLinks(this, false);
-			}
-			if (_legend_linkstats[_smallmap_cargo_count + STAT_GRAPH].show_on_map) {
-				LinkGraphDrawer graph;
-				graph.DrawLinks(this, false);
-			}
 		}
 
 		/* Draw town names */
@@ -1856,7 +1695,7 @@ public:
 		uint x = r.left + WD_FRAMERECT_LEFT;
 		if (this->supply_details != INVALID_STATION) {
 			this->DrawSupplyDetails(x, y_org, r.bottom - WD_FRAMERECT_BOTTOM);
-		} else if (!link_details.Empty()) {
+		} else if (!this->link_details.Empty()) {
 			this->DrawLinkDetails(x, y_org, r.right - WD_FRAMERECT_RIGHT, r.bottom - WD_FRAMERECT_BOTTOM);
 		} else {
 			uint columns = this->GetNumberColumnsLegend(r.right - r.left + 1);
@@ -2071,12 +1910,6 @@ public:
 					} else if (this->map_type == SMT_LINKSTATS) {
 						if (click_pos < _smallmap_cargo_count) {
 							this->SelectLegendItem(click_pos, _legend_linkstats, _smallmap_cargo_count);
-						} else {
-							uint stats_column = CeilDiv(_smallmap_cargo_count, number_of_rows);
-							if (column == stats_column && line < NUM_STATS) {
-								this->SelectLegendItem(_smallmap_cargo_count + line, _legend_linkstats,
-										_smallmap_cargo_count + NUM_STATS, _smallmap_cargo_count);
-							}
 						}
 					}
 					this->SetDirty();
