@@ -173,6 +173,16 @@ static uint _industry_to_list_pos[NUM_INDUSTRYTYPES];
 /** Show heightmap in smallmap window. */
 static bool _smallmap_show_heightmap;
 
+static uint8 _smallmap_link_colours[] = {
+	0x0f, 0x0e, 0x67, 0x66,
+	0x65, 0x64, 0x63, 0x5b,
+	0x5c, 0xce, 0xcf, 0xd0,
+	0xd1, 0x43, 0xbe, 0xbd,
+	0xbc, 0xbb, 0xba, 0xb9,
+	0xb8, 0xb7, 0xb6, 0xb5,
+	0xb4, 0xb3, 0xb2, 0xd7,
+};
+
 /**
  * Fills an array for the industries legends.
  */
@@ -1198,24 +1208,15 @@ class SmallMapWindow : public Window {
 		}
 
 		virtual void DrawContent() {
-			uint colour = 0;
-			uint usage_or_plan = max(this->usage, this->planned);
+			uint usage_or_plan = min(this->capacity * 2, max(this->usage, this->planned));
 
-			if (this->capacity > usage_or_plan * 3) {
-				colour = _colour_gradient[COLOUR_WHITE][7];
-			} else if (this->capacity > usage_or_plan) {
-				colour = _colour_gradient[COLOUR_GREEN][4];
-			} else if (this->capacity * 2 > usage_or_plan) {
-				colour = _colour_gradient[COLOUR_YELLOW][4];
-			} else {
-				colour = _colour_gradient[COLOUR_RED][4];
-			}
 			byte border_colour = _colour_gradient[COLOUR_GREY][highlight ? 3 : 1];
 			GfxDrawLine(this->pta.x - 1, this->pta.y, this->ptb.x - 1, this->ptb.y, border_colour);
 			GfxDrawLine(this->pta.x + 1, this->pta.y, this->ptb.x + 1, this->ptb.y, border_colour);
 			GfxDrawLine(this->pta.x, this->pta.y - 1, this->ptb.x, this->ptb.y - 1, border_colour);
 			GfxDrawLine(this->pta.x, this->pta.y + 1, this->ptb.x, this->ptb.y + 1, border_colour);
-			GfxDrawLine(this->pta.x, this->pta.y, this->ptb.x, this->ptb.y, colour);
+			GfxDrawLine(this->pta.x, this->pta.y, this->ptb.x, this->ptb.y,
+					_smallmap_link_colours[usage_or_plan * lengthof(_smallmap_link_colours) / (this->capacity * 2 + 1)]);
 			this->highlight = false;
 		}
 	};
