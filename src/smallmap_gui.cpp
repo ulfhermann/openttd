@@ -180,7 +180,7 @@ static uint8 _smallmap_link_colours[] = {
 	0xd1, 0x43, 0xbe, 0xbd,
 	0xbc, 0xbb, 0xba, 0xb9,
 	0xb8, 0xb7, 0xb6, 0xb5,
-	0xb4, 0xb3, 0xb2, 0xd7,
+	0xb4, 0xb3, 0xb2, 0xd7
 };
 
 /**
@@ -655,13 +655,6 @@ class SmallMapWindow : public Window {
 			this->Clear();
 		}
 
-		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow)
-		{
-			this->capacity += orig_link.Capacity();
-			this->usage += orig_link.Usage();
-			this->planned += orig_flow.Planned();
-		}
-
 		void Clear()
 		{
 			this->capacity = this->usage = this->planned = 0;
@@ -676,6 +669,13 @@ class SmallMapWindow : public Window {
 		CargoDetail(const LegendAndColour *c, const LinkStat &ls, const FlowStat &fs) : legend(c)
 		{
 			this->AddLink(ls, fs);
+		}
+
+		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow)
+		{
+			this->capacity += orig_link.Capacity();
+			this->usage += orig_link.Usage();
+			this->planned += orig_flow.Planned();
 		}
 
 		const LegendAndColour *legend;
@@ -1010,7 +1010,7 @@ class SmallMapWindow : public Window {
 		}
 	}
 
-	inline Point GetStationMiddle(const Station *st) const {
+	FORCEINLINE Point GetStationMiddle(const Station *st) const {
 		int x = (st->rect.right + st->rect.left + 1) / 2;
 		int y = (st->rect.bottom + st->rect.top + 1) / 2;
 		Point ret = this->RemapTile(x, y);
@@ -1073,74 +1073,18 @@ class SmallMapWindow : public Window {
 		return (supply_details == NULL) ? INVALID_STATION : supply_details->index;
 	}
 
-	class LinkDrawer {
-
-	protected:
-		virtual void DrawContent() = 0;
-		virtual void Highlight() {}
-		virtual void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, const LegendAndColour &cargo_entry) = 0;
-
-		FORCEINLINE bool IsLinkVisible()
-		{
-			const NWidgetBase *wi = this->window->GetWidget<NWidgetCore>(SM_WIDGET_MAP);
-			return !((this->pta.x < 0 && this->ptb.x < 0) ||
-					(this->pta.y < 0 && this->ptb.y < 0) ||
-					(this->pta.x > (int)wi->current_x && this->ptb.x > (int)wi->current_x) ||
-					(this->pta.y > (int)wi->current_y && this->ptb.y > (int)wi->current_y));
-		}
-
-		Point pta, ptb;
-		bool search_link_details;
-		LinkDetails link_details;
-		const SmallMapWindow *window;
-
-		void DrawLink(StationID sta, StationID stb) {
-			bool highlight_empty = this->search_link_details && this->link_details.Empty();
-			bool highlight =
-					(sta == this->link_details.sta && stb == this->link_details.stb) ||
-					(highlight_empty && window->CheckLinkSelected(&this->pta, &this->ptb));
-			bool reverse_empty = this->link_details.b_to_a.empty();
-			bool reverse_highlight = (sta == this->link_details.stb && stb == this->link_details.sta);
-			if (highlight_empty && highlight) {
-				this->link_details.sta = sta;
-				this->link_details.stb = stb;
-			}
-
-			if (highlight || reverse_highlight) {
-				this->Highlight();
-			}
-
-			for (int i = 0; i < _smallmap_cargo_count; ++i) {
-				const LegendAndColour &cargo_entry = _legend_table[this->window->map_type][i];
-				CargoID cargo = cargo_entry.u.type;
-				if (cargo_entry.show_on_map || highlight || reverse_highlight) {
-					GoodsEntry &ge = Station::Get(sta)->goods[cargo];
-					FlowStat sum_flows = ge.GetSumFlowVia(stb);
-					const LinkStatMap &ls_map = ge.link_stats;
-					LinkStatMap::const_iterator i = ls_map.find(stb);
-					if (i != ls_map.end()) {
-						const LinkStat &link_stat = i->second;
-						this->AddLink(link_stat, sum_flows, cargo_entry);
-						if (highlight_empty && highlight) {
-							this->link_details.a_to_b.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
-						} else if (reverse_empty && reverse_highlight) {
-							this->link_details.b_to_a.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
-						}
-					}
-				}
-			}
-		}
-
-		virtual void DrawForwBackLinks(StationID sta, StationID stb) = 0;
+	class LinkLineDrawer : public BaseCargoDetail {
 
 	public:
-		virtual ~LinkDrawer() {}
 
-		LinkDetails DrawLinks(const SmallMapWindow *w, bool search)
+		LinkLineDrawer(const SmallMapWindow *w) : window(w), highlight(false)
+		{
+			this->pta.x = this->pta.y = this->ptb.x = this->ptb.y = -1;
+		}
+
+		LinkDetails DrawLinks()
 		{
 			this->link_details.Clear();
-			this->window = w;
-			this->search_link_details = search;
 			std::set<StationID> seen_stations;
 			std::set<std::pair<StationID, StationID> > seen_links;
 
@@ -1178,43 +1122,85 @@ class SmallMapWindow : public Window {
 			return this->link_details;
 		}
 
-	};
-
-	class LinkValueDrawer : public LinkDrawer, public BaseCargoDetail {
 	protected:
 
-		virtual void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, const LegendAndColour &cargo_entry)
-		{
-			this->BaseCargoDetail::AddLink(orig_link, orig_flow);
-		}
-	};
-
-	class LinkLineDrawer : public LinkValueDrawer {
-	public:
-		LinkLineDrawer() : highlight(false) {}
-
-	protected:
+		Point pta, ptb;
+		LinkDetails link_details;
+		const SmallMapWindow *window;
 		bool highlight;
 
-		virtual void DrawForwBackLinks(StationID sta, StationID stb) {
+		FORCEINLINE bool IsLinkVisible()
+		{
+			const NWidgetBase *wi = this->window->GetWidget<NWidgetCore>(SM_WIDGET_MAP);
+			return !((this->pta.x < 0 && this->ptb.x < 0) ||
+					(this->pta.y < 0 && this->ptb.y < 0) ||
+					(this->pta.x > (int)wi->current_x && this->ptb.x > (int)wi->current_x) ||
+					(this->pta.y > (int)wi->current_y && this->ptb.y > (int)wi->current_y));
+		}
+
+		void DrawLink(StationID sta, StationID stb) {
+			bool highlight_empty = this->link_details.Empty();
+			bool highlight =
+					(sta == this->link_details.sta && stb == this->link_details.stb) ||
+					(highlight_empty && window->CheckLinkSelected(&this->pta, &this->ptb));
+			bool reverse_empty = this->link_details.b_to_a.empty();
+			bool reverse_highlight = (sta == this->link_details.stb && stb == this->link_details.sta);
+			if (highlight_empty && highlight) {
+				this->link_details.sta = sta;
+				this->link_details.stb = stb;
+			}
+
+			if (highlight || reverse_highlight) {
+				this->highlight = true;
+			}
+
+			for (int i = 0; i < _smallmap_cargo_count; ++i) {
+				const LegendAndColour &cargo_entry = _legend_table[this->window->map_type][i];
+				CargoID cargo = cargo_entry.u.type;
+				if (cargo_entry.show_on_map || highlight || reverse_highlight) {
+					GoodsEntry &ge = Station::Get(sta)->goods[cargo];
+					FlowStat sum_flows = ge.GetSumFlowVia(stb);
+					const LinkStatMap &ls_map = ge.link_stats;
+					LinkStatMap::const_iterator i = ls_map.find(stb);
+					if (i != ls_map.end()) {
+						const LinkStat &link_stat = i->second;
+						this->AddLink(link_stat, sum_flows, cargo_entry);
+						if (highlight_empty && highlight) {
+							this->link_details.a_to_b.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
+						} else if (reverse_empty && reverse_highlight) {
+							this->link_details.b_to_a.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
+						}
+					}
+				}
+			}
+		}
+
+		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, const LegendAndColour &cargo_entry)
+		{
+			uint new_cap = orig_link.Capacity();
+			uint new_usg = orig_link.Usage();
+			uint new_plan = orig_flow.Planned();
+			if (this->capacity == 0 || int(this->capacity - max(this->usage, this->planned)) > int(new_cap - max(new_usg, new_plan))) {
+				this->capacity = new_cap;
+				this->usage = new_usg;
+				this->planned = new_plan;
+			}
+		}
+
+		void DrawForwBackLinks(StationID sta, StationID stb) {
 			this->DrawLink(sta, stb);
 			this->DrawLink(stb, sta);
 			this->DrawContent();
 			this->Clear();
 		}
 
-		virtual void Highlight() {
-			this->highlight = true;
-		}
-
-		virtual void DrawContent() {
-			uint usage_or_plan = min(this->capacity * 2, max(this->usage, this->planned));
-
+		void DrawContent() {
 			byte border_colour = _colour_gradient[COLOUR_GREY][highlight ? 3 : 1];
 			GfxDrawLine(this->pta.x - 1, this->pta.y, this->ptb.x - 1, this->ptb.y, border_colour);
 			GfxDrawLine(this->pta.x + 1, this->pta.y, this->ptb.x + 1, this->ptb.y, border_colour);
 			GfxDrawLine(this->pta.x, this->pta.y - 1, this->ptb.x, this->ptb.y - 1, border_colour);
 			GfxDrawLine(this->pta.x, this->pta.y + 1, this->ptb.x, this->ptb.y + 1, border_colour);
+			uint usage_or_plan = min(this->capacity * 2, max(this->usage, this->planned));
 			GfxDrawLine(this->pta.x, this->pta.y, this->ptb.x, this->ptb.y,
 					_smallmap_link_colours[usage_or_plan * lengthof(_smallmap_link_colours) / (this->capacity * 2 + 1)]);
 			this->highlight = false;
@@ -1484,8 +1470,8 @@ class SmallMapWindow : public Window {
 		if (this->map_type == SMT_CONTOUR || this->map_type == SMT_VEHICLES) this->DrawVehicles(dpi, blitter);
 
 		if (this->map_type == SMT_LINKSTATS && _game_mode == GM_NORMAL) {
-			LinkLineDrawer lines;
-			this->link_details = lines.DrawLinks(this, true);
+			LinkLineDrawer lines(this);
+			this->link_details = lines.DrawLinks();
 
 			this->supply_details = DrawStationDots();
 		}
