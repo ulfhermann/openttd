@@ -356,7 +356,7 @@ extern bool _do_autosave;
  * SL_TRUNK is always the current trunk version.
  */
 enum SaveLoadVersions {
-	SL_TRUNK = 149,
+	SL_TRUNK = 150,
 	SL_CAPACITIES = SL_TRUNK + 20,
 	SL_COMPONENTS,
 	SL_DEMANDS = SL_COMPONENTS + 20,
