@@ -174,13 +174,9 @@ static uint _industry_to_list_pos[NUM_INDUSTRYTYPES];
 static bool _smallmap_show_heightmap;
 
 static uint8 _smallmap_link_colours[] = {
-	0x0f, 0x0e, 0x67, 0x66,
-	0x65, 0x64, 0x63, 0x5b,
-	0x5c, 0xce, 0xcf, 0xd0,
-	0xd1, 0x43, 0xbe, 0xbd,
-	0xbc, 0xbb, 0xba, 0xb9,
-	0xb8, 0xb7, 0xb6, 0xb5,
-	0xb4, 0xb3, 0xb2, 0xd7
+	0x0f, 0xd1, 0xd0, 0x57,
+	0x55, 0x53, 0xbf, 0xbd,
+	0xba, 0xb9, 0xb7, 0xb5
 };
 
 /**
@@ -1180,7 +1176,9 @@ class SmallMapWindow : public Window {
 			uint new_cap = orig_link.Capacity();
 			uint new_usg = orig_link.Usage();
 			uint new_plan = orig_flow.Planned();
-			if (this->capacity == 0 || int(this->capacity - max(this->usage, this->planned)) > int(new_cap - max(new_usg, new_plan))) {
+
+			if (max(this->usage, this->planned) * 8 / (this->capacity + 1) < 
+					max(new_usg, new_plan) * 8 / (new_cap + 1)) {
 				this->capacity = new_cap;
 				this->usage = new_usg;
 				this->planned = new_plan;
