@@ -29,9 +29,6 @@
 #include "../../core/alloc_func.hpp"
 #include "aystar.h"
 
-static int _aystar_stats_open_size;
-static int _aystar_stats_closed_size;
-
 /* This looks in the Hash if a node exists in ClosedList
  *  If so, it returns the PathNode, else NULL */
 static PathNode *AyStarMain_ClosedList_IsInList(AyStar *aystar, const AyStarNode *node)
@@ -87,31 +84,29 @@ static void AyStarMain_OpenList_Add(AyStar *aystar, PathNode *parent, const AySt
 
 /*
  * Checks one tile and calculate his f-value
- *  return values:
- * AYSTAR_DONE : indicates we are done
  */
-static int AyStarMain_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNode *parent)
+void AyStar::CheckTile(AyStarNode *current, OpenListNode *parent)
 {
 	int new_f, new_g, new_h;
 	PathNode *closedlist_parent;
 	OpenListNode *check;
 
 	/* Check the new node against the ClosedList */
-	if (AyStarMain_ClosedList_IsInList(aystar, current) != NULL) return AYSTAR_DONE;
+	if (AyStarMain_ClosedList_IsInList(this, current) != NULL) return;
 
 	/* Calculate the G-value for this node */
-	new_g = aystar->CalculateG(aystar, current, parent);
+	new_g = this->CalculateG(this, current, parent);
 	/* If the value was INVALID_NODE, we don't do anything with this node */
-	if (new_g == AYSTAR_INVALID_NODE) return AYSTAR_DONE;
+	if (new_g == AYSTAR_INVALID_NODE) return;
 
 	/* There should not be given any other error-code.. */
 	assert(new_g >= 0);
 	/* Add the parent g-value to the new g-value */
 	new_g += parent->g;
-	if (aystar->max_path_cost != 0 && (uint)new_g > aystar->max_path_cost) return AYSTAR_DONE;
+	if (this->max_path_cost != 0 && (uint)new_g > this->max_path_cost) return;
 
 	/* Calculate the h-value */
-	new_h = aystar->CalculateH(aystar, current, parent);
+	new_h = this->CalculateH(this, current, parent);
 	/* There should not be given any error-code.. */
 	assert(new_h >= 0);
 
@@ -119,15 +114,15 @@ static int AyStarMain_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNod
 	new_f = new_g + new_h;
 
 	/* Get the pointer to the parent in the ClosedList (the currentone is to a copy of the one in the OpenList) */
-	closedlist_parent = AyStarMain_ClosedList_IsInList(aystar, &parent->path.node);
+	closedlist_parent = AyStarMain_ClosedList_IsInList(this, &parent->path.node);
 
 	/* Check if this item is already in the OpenList */
-	check = AyStarMain_OpenList_IsInList(aystar, current);
+	check = AyStarMain_OpenList_IsInList(this, current);
 	if (check != NULL) {
 		uint i;
 		/* Yes, check if this g value is lower.. */
-		if (new_g > check->g) return AYSTAR_DONE;
-		aystar->OpenListQueue.Delete(check, 0);
+		if (new_g > check->g) return;
+		this->OpenListQueue.Delete(check, 0);
 		/* It is lower, so change it to this item */
 		check->g = new_g;
 		check->path.parent = closedlist_parent;
@@ -136,13 +131,11 @@ static int AyStarMain_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNod
 			check->path.node.user_data[i] = current->user_data[i];
 		}
 		/* Readd him in the OpenListQueue */
-		aystar->OpenListQueue.Push(check, new_f);
+		this->OpenListQueue.Push(check, new_f);
 	} else {
 		/* A new node, add him to the OpenList */
-		AyStarMain_OpenList_Add(aystar, closedlist_parent, current, new_f, new_g);
+		AyStarMain_OpenList_Add(this, closedlist_parent, current, new_f, new_g);
 	}
-
-	return AYSTAR_DONE;
 }
 
 /*
@@ -156,40 +149,40 @@ static int AyStarMain_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNod
  *   AYSTAR_FOUND_END_NODE : indicates we found the end. Path_found now is true, and in path is the path found.
  *   AYSTAR_STILL_BUSY : indicates we have done this tile, did not found the path yet, and have items left to try.
  */
-static int AyStarMain_Loop(AyStar *aystar)
+int AyStar::Loop()
 {
 	int i;
 
 	/* Get the best node from OpenList */
-	OpenListNode *current = AyStarMain_OpenList_Pop(aystar);
+	OpenListNode *current = AyStarMain_OpenList_Pop(this);
 	/* If empty, drop an error */
 	if (current == NULL) return AYSTAR_EMPTY_OPENLIST;
 
 	/* Check for end node and if found, return that code */
-	if (aystar->EndNodeCheck(aystar, current) == AYSTAR_FOUND_END_NODE) {
-		if (aystar->FoundEndNode != NULL) {
-			aystar->FoundEndNode(aystar, current);
+	if (this->EndNodeCheck(this, current) == AYSTAR_FOUND_END_NODE) {
+		if (this->FoundEndNode != NULL) {
+			this->FoundEndNode(this, current);
 		}
 		free(current);
 		return AYSTAR_FOUND_END_NODE;
 	}
 
 	/* Add the node to the ClosedList */
-	AyStarMain_ClosedList_Add(aystar, &current->path);
+	AyStarMain_ClosedList_Add(this, &current->path);
 
 	/* Load the neighbours */
-	aystar->GetNeighbours(aystar, current);
+	this->GetNeighbours(this, current);
 
 	/* Go through all neighbours */
-	for (i = 0; i < aystar->num_neighbours; i++) {
+	for (i = 0; i < this->num_neighbours; i++) {
 		/* Check and add them to the OpenList if needed */
-		aystar->checktile(aystar, &aystar->neighbours[i], current);
+		this->CheckTile(&this->neighbours[i], current);
 	}
 
 	/* Free the node */
 	free(current);
 
-	if (aystar->max_search_nodes != 0 && Hash_Size(&aystar->ClosedListHash) >= aystar->max_search_nodes) {
+	if (this->max_search_nodes != 0 && Hash_Size(&this->ClosedListHash) >= this->max_search_nodes) {
 		/* We've expanded enough nodes */
 		return AYSTAR_LIMIT_REACHED;
 	} else {
@@ -201,13 +194,13 @@ static int AyStarMain_Loop(AyStar *aystar)
 /*
  * This function frees the memory it allocated
  */
-static void AyStarMain_Free(AyStar *aystar)
+void AyStar::Free()
 {
-	aystar->OpenListQueue.Free(false);
+	this->OpenListQueue.Free(false);
 	/* 2nd argument above is false, below is true, to free the values only
 	 * once */
-	delete_Hash(&aystar->OpenListHash, true);
-	delete_Hash(&aystar->ClosedListHash, true);
+	delete_Hash(&this->OpenListHash, true);
+	delete_Hash(&this->ClosedListHash, true);
 #ifdef AYSTAR_DEBUG
 	printf("[AyStar] Memory free'd\n");
 #endif
@@ -217,14 +210,14 @@ static void AyStarMain_Free(AyStar *aystar)
  * This function make the memory go back to zero
  *  This function should be called when you are using the same instance again.
  */
-void AyStarMain_Clear(AyStar *aystar)
+void AyStar::Clear()
 {
 	/* Clean the Queue, but not the elements within. That will be done by
 	 * the hash. */
-	aystar->OpenListQueue.Clear(false);
+	this->OpenListQueue.Clear(false);
 	/* Clean the hashes */
-	clear_Hash(&aystar->OpenListHash, true);
-	clear_Hash(&aystar->ClosedListHash, true);
+	clear_Hash(&this->OpenListHash, true);
+	clear_Hash(&this->ClosedListHash, true);
 
 #ifdef AYSTAR_DEBUG
 	printf("[AyStar] Cleared AyStar\n");
@@ -238,15 +231,15 @@ void AyStarMain_Clear(AyStar *aystar)
  *   AYSTAR_NO_PATH : indicates that there was no path found.
  *   AYSTAR_STILL_BUSY : indicates we have done some checked, that we did not found the path yet, and that we still have items left to try.
  * When the algorithm is done (when the return value is not AYSTAR_STILL_BUSY)
- * aystar->clear() is called. Note that when you stop the algorithm halfway,
- * you should still call clear() yourself!
+ * this->Clear() is called. Note that when you stop the algorithm halfway,
+ * you should still call Clear() yourself!
  */
-int AyStarMain_Main(AyStar *aystar)
+int AyStar::Main()
 {
 	int r, i = 0;
 	/* Loop through the OpenList
 	 *  Quit if result is no AYSTAR_STILL_BUSY or is more than loops_per_tick */
-	while ((r = aystar->loop(aystar)) == AYSTAR_STILL_BUSY && (aystar->loops_per_tick == 0 || ++i < aystar->loops_per_tick)) { }
+	while ((r = this->Loop()) == AYSTAR_STILL_BUSY && (this->loops_per_tick == 0 || ++i < this->loops_per_tick)) { }
 #ifdef AYSTAR_DEBUG
 	switch (r) {
 		case AYSTAR_FOUND_END_NODE: printf("[AyStar] Found path!\n"); break;
@@ -257,9 +250,7 @@ int AyStarMain_Main(AyStar *aystar)
 #endif
 	if (r != AYSTAR_STILL_BUSY) {
 		/* We're done, clean up */
-		_aystar_stats_open_size = aystar->OpenListHash.size;
-		_aystar_stats_closed_size = aystar->ClosedListHash.size;
-		aystar->clear(aystar);
+		this->Clear();
 	}
 
 	switch (r) {
@@ -277,13 +268,13 @@ int AyStarMain_Main(AyStar *aystar)
  * clear() automatically when the algorithm finishes
  * g is the cost for starting with this node.
  */
-static void AyStarMain_AddStartNode(AyStar *aystar, AyStarNode *start_node, uint g)
+void AyStar::AddStartNode(AyStarNode *start_node, uint g)
 {
 #ifdef AYSTAR_DEBUG
 	printf("[AyStar] Starting A* Algorithm from node (%d, %d, %d)\n",
 		TileX(start_node->tile), TileY(start_node->tile), start_node->direction);
 #endif
-	AyStarMain_OpenList_Add(aystar, NULL, start_node, 0, g);
+	AyStarMain_OpenList_Add(this, NULL, start_node, 0, g);
 }
 
 void init_AyStar(AyStar *aystar, Hash_HashProc hash, uint num_buckets)
@@ -297,11 +288,4 @@ void init_AyStar(AyStar *aystar, Hash_HashProc hash, uint num_buckets)
 	 *  When that one gets full it reserves another one, till this number
 	 *  That is why it can stay this high */
 	aystar->OpenListQueue.Init(102400);
-
-	aystar->addstart  = AyStarMain_AddStartNode;
-	aystar->main      = AyStarMain_Main;
-	aystar->loop      = AyStarMain_Loop;
-	aystar->free      = AyStarMain_Free;
-	aystar->clear     = AyStarMain_Clear;
-	aystar->checktile = AyStarMain_CheckTile;
 }
