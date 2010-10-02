@@ -1057,11 +1057,9 @@ class SmallMapWindow : public Window {
 			}
 			if (numCargos > 1) colour /= numCargos;
 
-			uint r = 2;
-			if (q >= 10) r++;
+			uint r = 1;
 			if (q >= 20) r++;
-			if (q >= 40) r++;
-			if (q >= 80) r++;
+			if (q >= 90) r++;
 			if (q >= 160) r++;
 
 			DrawVertex(pt.x, pt.y, r, colour, _colour_gradient[COLOUR_GREY][supply_details == st ? 3 : 1]);
@@ -1069,7 +1067,7 @@ class SmallMapWindow : public Window {
 		return (supply_details == NULL) ? INVALID_STATION : supply_details->index;
 	}
 
-	class LinkLineDrawer : public BaseCargoDetail {
+	class LinkLineDrawer {
 
 	public:
 
@@ -1121,6 +1119,7 @@ class SmallMapWindow : public Window {
 	protected:
 
 		Point pta, ptb;
+		BaseCargoDetail forward, backward;
 		LinkDetails link_details;
 		const SmallMapWindow *window;
 		bool highlight;
@@ -1134,36 +1133,37 @@ class SmallMapWindow : public Window {
 					(this->pta.y > (int)wi->current_y && this->ptb.y > (int)wi->current_y));
 		}
 
-		void DrawLink(StationID sta, StationID stb) {
+		void DrawLink(StationID sta, StationID stb, bool backward) {
 			bool highlight_empty = this->link_details.Empty();
 			bool highlight =
 					(sta == this->link_details.sta && stb == this->link_details.stb) ||
 					(highlight_empty && window->CheckLinkSelected(&this->pta, &this->ptb));
-			bool reverse_empty = this->link_details.b_to_a.empty();
-			bool reverse_highlight = (sta == this->link_details.stb && stb == this->link_details.sta);
 			if (highlight_empty && highlight) {
 				this->link_details.sta = sta;
 				this->link_details.stb = stb;
 			}
 
-			if (highlight || reverse_highlight) {
+			bool backward_empty = this->link_details.b_to_a.empty();
+			bool highlight_backward = (sta == this->link_details.stb && stb == this->link_details.sta);
+
+			if (highlight || highlight_backward) {
 				this->highlight = true;
 			}
 
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
 				const LegendAndColour &cargo_entry = _legend_table[this->window->map_type][i];
 				CargoID cargo = cargo_entry.u.type;
-				if (cargo_entry.show_on_map || highlight || reverse_highlight) {
+				if (cargo_entry.show_on_map || highlight || highlight_backward) {
 					GoodsEntry &ge = Station::Get(sta)->goods[cargo];
 					FlowStat sum_flows = ge.GetSumFlowVia(stb);
 					const LinkStatMap &ls_map = ge.link_stats;
 					LinkStatMap::const_iterator i = ls_map.find(stb);
 					if (i != ls_map.end()) {
 						const LinkStat &link_stat = i->second;
-						this->AddLink(link_stat, sum_flows, cargo_entry);
+						this->AddLink(link_stat, sum_flows, backward ? this->backward : this->forward);
 						if (highlight_empty && highlight) {
 							this->link_details.a_to_b.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
-						} else if (reverse_empty && reverse_highlight) {
+						} else if (backward_empty && highlight_backward) {
 							this->link_details.b_to_a.push_back(CargoDetail(&cargo_entry, link_stat, sum_flows));
 						}
 					}
@@ -1171,37 +1171,48 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, const LegendAndColour &cargo_entry)
+		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, BaseCargoDetail &cargo)
 		{
 			uint new_cap = orig_link.Capacity();
 			uint new_usg = orig_link.Usage();
 			uint new_plan = orig_flow.Planned();
 
-			if (max(this->usage, this->planned) * 8 / (this->capacity + 1) < 
-					max(new_usg, new_plan) * 8 / (new_cap + 1)) {
-				this->capacity = new_cap;
-				this->usage = new_usg;
-				this->planned = new_plan;
+			if (cargo.capacity == 0 ||
+					max(cargo.usage, cargo.planned) * 8 / (cargo.capacity + 1) < max(new_usg, new_plan) * 8 / (new_cap + 1)) {
+				cargo.capacity = new_cap;
+				cargo.usage = new_usg;
+				cargo.planned = new_plan;
 			}
 		}
 
 		void DrawForwBackLinks(StationID sta, StationID stb) {
-			this->DrawLink(sta, stb);
-			this->DrawLink(stb, sta);
+			this->DrawLink(sta, stb, false);
+			this->DrawLink(stb, sta, true);
 			this->DrawContent();
-			this->Clear();
+			this->highlight = false;
+			this->forward.Clear();
+			this->backward.Clear();
 		}
 
 		void DrawContent() {
-			byte border_colour = _colour_gradient[COLOUR_GREY][highlight ? 3 : 1];
-			GfxDrawLine(this->pta.x - 1, this->pta.y, this->ptb.x - 1, this->ptb.y, border_colour);
-			GfxDrawLine(this->pta.x + 1, this->pta.y, this->ptb.x + 1, this->ptb.y, border_colour);
-			GfxDrawLine(this->pta.x, this->pta.y - 1, this->ptb.x, this->ptb.y - 1, border_colour);
-			GfxDrawLine(this->pta.x, this->pta.y + 1, this->ptb.x, this->ptb.y + 1, border_colour);
-			uint usage_or_plan = min(this->capacity * 2, max(this->usage, this->planned));
-			GfxDrawLine(this->pta.x, this->pta.y, this->ptb.x, this->ptb.y,
-					_smallmap_link_colours[usage_or_plan * lengthof(_smallmap_link_colours) / (this->capacity * 2 + 1)]);
-			this->highlight = false;
+			GfxDrawLine(this->pta.x, this->pta.y, this->ptb.x, this->ptb.y, _colour_gradient[COLOUR_GREY][1]);
+
+			int direction_y = (this->pta.x < this->ptb.x ? 1 : -1);
+			int direction_x = (this->pta.y > this->ptb.y ? 1 : -1);;
+
+			if (this->forward.capacity > 0) {
+				uint usage_or_plan = min(this->forward.capacity * 2, max(this->forward.usage, this->forward.planned));
+				int colour = _smallmap_link_colours[usage_or_plan * lengthof(_smallmap_link_colours) / (this->forward.capacity * 2 + 1)];
+				GfxDrawLine(this->pta.x + direction_x, this->pta.y, this->ptb.x + direction_x, this->ptb.y, colour);
+				GfxDrawLine(this->pta.x, this->pta.y + direction_y, this->ptb.x, this->ptb.y + direction_y, colour);
+			}
+
+			if (this->backward.capacity > 0) {
+				uint usage_or_plan = min(this->backward.capacity * 2, max(this->backward.usage, this->backward.planned));
+				int colour = _smallmap_link_colours[usage_or_plan * lengthof(_smallmap_link_colours) / (this->backward.capacity * 2 + 1)];
+				GfxDrawLine(this->pta.x - direction_x, this->pta.y, this->ptb.x - direction_x, this->ptb.y, colour);
+				GfxDrawLine(this->pta.x, this->pta.y - direction_y, this->ptb.x, this->ptb.y - direction_y, colour);
+			}
 		}
 	};
 
