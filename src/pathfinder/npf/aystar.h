@@ -103,14 +103,6 @@ typedef void AyStar_GetNeighbours(AyStar *aystar, OpenListNode *current);
  */
 typedef void AyStar_FoundEndNode(AyStar *aystar, OpenListNode *current);
 
-/* For internal use, see aystar.cpp */
-typedef void AyStar_AddStartNode(AyStar *aystar, AyStarNode *start_node, uint g);
-typedef int AyStar_Main(AyStar *aystar);
-typedef int AyStar_Loop(AyStar *aystar);
-typedef int AyStar_CheckTile(AyStar *aystar, AyStarNode *current, OpenListNode *parent);
-typedef void AyStar_Free(AyStar *aystar);
-typedef void AyStar_Clear(AyStar *aystar);
-
 struct AyStar {
 /* These fields should be filled before initting the AyStar, but not changed
  * afterwards (except for user_data and user_path)! (free and init again to change them) */
@@ -133,7 +125,7 @@ struct AyStar {
 	void *user_target;
 	uint user_data[10];
 
-	/* How many loops are there called before AyStarMain_Main gives
+	/* How many loops are there called before Main() gives
 	 * control back to the caller. 0 = until done */
 	byte loops_per_tick;
 	/* If the g-value goes over this number, it stops searching
@@ -148,13 +140,13 @@ struct AyStar {
 	byte num_neighbours;
 
 	/* These will contain the methods for manipulating the AyStar. Only
-	 * main() should be called externally */
-	AyStar_AddStartNode *addstart;
-	AyStar_Main *main;
-	AyStar_Loop *loop;
-	AyStar_Free *free;
-	AyStar_Clear *clear;
-	AyStar_CheckTile *checktile;
+	 * Main() should be called externally */
+	void AddStartNode(AyStarNode *start_node, uint g);
+	int Main();
+	int Loop();
+	void Free();
+	void Clear();
+	void CheckTile(AyStarNode *current, OpenListNode *parent);
 
 	/* These will contain the open and closed lists */
 
@@ -167,9 +159,6 @@ struct AyStar {
 	Hash OpenListHash;
 };
 
-
-int AyStarMain_Main(AyStar *aystar);
-void AyStarMain_Clear(AyStar *aystar);
 
 /* Initialize an AyStar. You should fill all appropriate fields before
  * callling init_AyStar (see the declaration of AyStar for which fields are
