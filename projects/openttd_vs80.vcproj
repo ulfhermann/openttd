@@ -459,6 +459,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\cargodest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\cargomonitor.cpp"
 				>
 			</File>

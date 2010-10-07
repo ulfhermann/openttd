@@ -297,6 +297,7 @@
     <ClCompile Include="..\src\autoreplace.cpp" />
     <ClCompile Include="..\src\bmp.cpp" />
     <ClCompile Include="..\src\cargoaction.cpp" />
+    <ClCompile Include="..\src\cargodest.cpp" />
     <ClCompile Include="..\src\cargomonitor.cpp" />
     <ClCompile Include="..\src\cargopacket.cpp" />
     <ClCompile Include="..\src\cargotype.cpp" />
