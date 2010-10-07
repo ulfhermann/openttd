@@ -5,6 +5,7 @@ articulated_vehicles.cpp
 autoreplace.cpp
 bmp.cpp
 cargoaction.cpp
+cargodest.cpp
 cargomonitor.cpp
 cargopacket.cpp
 cargotype.cpp

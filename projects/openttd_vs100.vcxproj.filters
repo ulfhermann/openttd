@@ -120,6 +120,9 @@
     <ClCompile Include="..\src\cargoaction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\cargodest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\cargomonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
