@@ -1533,18 +1533,6 @@ static CommandCost CheckIfFarEnoughFromConflictingIndustry(TileIndex tile, int t
 }
 
 /**
- * Production level maximum, minimum and default values.
- * It is not a value been really used in order to change, but rather an indicator
- * of how the industry is behaving.
- */
-enum ProductionLevels {
-	PRODLEVEL_CLOSURE = 0x00,  ///< signal set to actually close the industry
-	PRODLEVEL_MINIMUM = 0x04,  ///< below this level, the industry is set to be closing
-	PRODLEVEL_DEFAULT = 0x10,  ///< default level set when the industry is created
-	PRODLEVEL_MAXIMUM = 0x80,  ///< the industry is running at full speed
-};
-
-/**
  * Put an industry on the map.
  * @param i       Just allocated poolitem, mostly empty.
  * @param tile    North tile of the industry.
@@ -2030,6 +2018,20 @@ static void UpdateIndustryStatistics(Industry *i)
 	}
 }
 
+/**
+ * Recompute #production_rate for current #prod_level.
+ * This function is only valid when not using smooth economy.
+ */
+void Industry::RecomputeProductionMultipliers()
+{
+	const IndustrySpec *indspec = GetIndustrySpec(this->type);
+	assert(!indspec->UsesSmoothEconomy());
+
+	/* Rates are rounded up, so e.g. oilrig always produces some passengers */
+	this->production_rate[0] = min(CeilDiv(indspec->production_rate[0] * this->prod_level, PRODLEVEL_DEFAULT), 0xFF);
+	this->production_rate[1] = min(CeilDiv(indspec->production_rate[1] * this->prod_level, PRODLEVEL_DEFAULT), 0xFF);
+}
+
 /** Simple helper that will collect data for the generation of industries */
 struct ProbabilityHelper {
 	uint16 prob;      ///< probability
@@ -2371,11 +2373,7 @@ static void ChangeIndustryProduction(Industry *i, bool monthly)
 
 	/* Recalculate production_rate
 	 * For non-smooth economy these should always be synchronized with prod_level */
-	if (recalculate_multipliers) {
-		/* Rates are rounded up, so e.g. oilrig always produces some passengers */
-		i->production_rate[0] = min(CeilDiv(indspec->production_rate[0] * i->prod_level, PRODLEVEL_DEFAULT), 0xFF);
-		i->production_rate[1] = min(CeilDiv(indspec->production_rate[1] * i->prod_level, PRODLEVEL_DEFAULT), 0xFF);
-	}
+	if (recalculate_multipliers) i->RecomputeProductionMultipliers();
 
 	/* Close if needed and allowed */
 	if (closeit && !CheckIndustryCloseDownProtection(i->type)) {
