@@ -243,39 +243,46 @@ void BinaryHeap::Init(uint max_size)
  * Hash
  */
 
-void init_Hash(Hash *h, Hash_HashProc *hash, uint num_buckets)
+/**
+ * Builds a new hash in an existing struct. Make sure that hash() always
+ * returns a hash less than num_buckets! Call delete_hash after use
+ */
+void Hash::Init(Hash_HashProc *hash, uint num_buckets)
 {
 	/* Allocate space for the Hash, the buckets and the bucket flags */
 	uint i;
 
-	assert(h != NULL);
 #ifdef HASH_DEBUG
-	debug("Allocated hash: %p", h);
+	debug("Allocated hash: %p", this);
 #endif
-	h->hash = hash;
-	h->size = 0;
-	h->num_buckets = num_buckets;
-	h->buckets = (HashNode*)MallocT<byte>(num_buckets * (sizeof(*h->buckets) + sizeof(*h->buckets_in_use)));
+	this->hash = hash;
+	this->size = 0;
+	this->num_buckets = num_buckets;
+	this->buckets = (HashNode*)MallocT<byte>(num_buckets * (sizeof(*this->buckets) + sizeof(*this->buckets_in_use)));
 #ifdef HASH_DEBUG
-	debug("Buckets = %p", h->buckets);
+	debug("Buckets = %p", this->buckets);
 #endif
-	h->buckets_in_use = (bool*)(h->buckets + num_buckets);
-	for (i = 0; i < num_buckets; i++) h->buckets_in_use[i] = false;
+	this->buckets_in_use = (bool*)(this->buckets + num_buckets);
+	for (i = 0; i < num_buckets; i++) this->buckets_in_use[i] = false;
 }
 
-
-void delete_Hash(Hash *h, bool free_values)
+/**
+ * Deletes the hash and cleans up. Only cleans up memory allocated by new_Hash
+ * & friends. If free is true, it will call free() on all the values that
+ * are left in the hash.
+ */
+void Hash::Delete(bool free_values)
 {
 	uint i;
 
 	/* Iterate all buckets */
-	for (i = 0; i < h->num_buckets; i++) {
-		if (h->buckets_in_use[i]) {
+	for (i = 0; i < this->num_buckets; i++) {
+		if (this->buckets_in_use[i]) {
 			HashNode *node;
 
 			/* Free the first value */
-			if (free_values) free(h->buckets[i].value);
-			node = h->buckets[i].next;
+			if (free_values) free(this->buckets[i].value);
+			node = this->buckets[i].next;
 			while (node != NULL) {
 				HashNode *prev = node;
 
@@ -287,16 +294,16 @@ void delete_Hash(Hash *h, bool free_values)
 			}
 		}
 	}
-	free(h->buckets);
+	free(this->buckets);
 	/* No need to free buckets_in_use, it is always allocated in one
 	 * malloc with buckets */
 #ifdef HASH_DEBUG
-	debug("Freeing Hash: %p", h);
+	debug("Freeing Hash: %p", this);
 #endif
 }
 
 #ifdef HASH_STATS
-static void stat_Hash(const Hash *h)
+void Hash::PrintStatistics() const
 {
 	uint used_buckets = 0;
 	uint max_collision = 0;
@@ -305,13 +312,13 @@ static void stat_Hash(const Hash *h)
 	uint i;
 
 	for (i = 0; i < lengthof(usage); i++) usage[i] = 0;
-	for (i = 0; i < h->num_buckets; i++) {
+	for (i = 0; i < this->num_buckets; i++) {
 		uint collision = 0;
-		if (h->buckets_in_use[i]) {
+		if (this->buckets_in_use[i]) {
 			const HashNode *node;
 
 			used_buckets++;
-			for (node = &h->buckets[i]; node != NULL; node = node->next) collision++;
+			for (node = &this->buckets[i]; node != NULL; node = node->next) collision++;
 			if (collision > max_collision) max_collision = collision;
 		}
 		if (collision >= lengthof(usage)) collision = lengthof(usage) - 1;
@@ -326,7 +333,7 @@ static void stat_Hash(const Hash *h)
 		"Nodes used: %d\n"
 		"Non empty buckets: %d\n"
 		"Max collision: %d\n",
-		h->num_buckets, h->size, used_buckets, max_collision
+		this->num_buckets, this->size, used_buckets, max_collision
 	);
 	printf("{ ");
 	for (i = 0; i <= max_collision; i++) {
@@ -346,23 +353,26 @@ static void stat_Hash(const Hash *h)
 }
 #endif
 
-void clear_Hash(Hash *h, bool free_values)
+/**
+ * Cleans the hash, but keeps the memory allocated
+ */
+void Hash::Clear(bool free_values)
 {
 	uint i;
 
 #ifdef HASH_STATS
-	if (h->size > 2000) stat_Hash(h);
+	if (this->size > 2000) stat_Hash(this);
 #endif
 
 	/* Iterate all buckets */
-	for (i = 0; i < h->num_buckets; i++) {
-		if (h->buckets_in_use[i]) {
+	for (i = 0; i < this->num_buckets; i++) {
+		if (this->buckets_in_use[i]) {
 			HashNode *node;
 
-			h->buckets_in_use[i] = false;
+			this->buckets_in_use[i] = false;
 			/* Free the first value */
-			if (free_values) free(h->buckets[i].value);
-			node = h->buckets[i].next;
+			if (free_values) free(this->buckets[i].value);
+			node = this->buckets[i].next;
 			while (node != NULL) {
 				HashNode *prev = node;
 
@@ -372,7 +382,7 @@ void clear_Hash(Hash *h, bool free_values)
 			}
 		}
 	}
-	h->size = 0;
+	this->size = 0;
 }
 
 /**
@@ -383,29 +393,29 @@ void clear_Hash(Hash *h, bool free_values)
  * bucket, or NULL if it is empty. prev can also be NULL, in which case it is
  * not used for output.
  */
-static HashNode *Hash_FindNode(const Hash *h, uint key1, uint key2, HashNode** prev_out)
+HashNode *Hash::FindNode(uint key1, uint key2, HashNode** prev_out) const
 {
-	uint hash = h->hash(key1, key2);
+	uint hash = this->hash(key1, key2);
 	HashNode *result = NULL;
 
 #ifdef HASH_DEBUG
 	debug("Looking for %u, %u", key1, key2);
 #endif
 	/* Check if the bucket is empty */
-	if (!h->buckets_in_use[hash]) {
+	if (!this->buckets_in_use[hash]) {
 		if (prev_out != NULL) *prev_out = NULL;
 		result = NULL;
 	/* Check the first node specially */
-	} else if (h->buckets[hash].key1 == key1 && h->buckets[hash].key2 == key2) {
+	} else if (this->buckets[hash].key1 == key1 && this->buckets[hash].key2 == key2) {
 		/* Save the value */
-		result = h->buckets + hash;
+		result = this->buckets + hash;
 		if (prev_out != NULL) *prev_out = NULL;
 #ifdef HASH_DEBUG
 		debug("Found in first node: %p", result);
 #endif
 	/* Check all other nodes */
 	} else {
-		HashNode *prev = h->buckets + hash;
+		HashNode *prev = this->buckets + hash;
 		HashNode *node;
 
 		for (node = prev->next; node != NULL; node = node->next) {
@@ -427,11 +437,16 @@ static HashNode *Hash_FindNode(const Hash *h, uint key1, uint key2, HashNode** p
 	return result;
 }
 
-void *Hash_Delete(Hash *h, uint key1, uint key2)
+/**
+ * Deletes the value with the specified key pair from the hash and returns
+ * that value. Returns NULL when the value was not present. The value returned
+ * is _not_ free()'d!
+ */
+void *Hash::DeleteValue(uint key1, uint key2)
 {
 	void *result;
 	HashNode *prev; // Used as output var for below function call
-	HashNode *node = Hash_FindNode(h, key1, key2, &prev);
+	HashNode *node = this->FindNode(key1, key2, &prev);
 
 	if (node == NULL) {
 		/* not found */
@@ -452,8 +467,8 @@ void *Hash_Delete(Hash *h, uint key1, uint key2)
 		} else {
 			/* This was the last in this bucket
 			 * Mark it as empty */
-			uint hash = h->hash(key1, key2);
-			h->buckets_in_use[hash] = false;
+			uint hash = this->hash(key1, key2);
+			this->buckets_in_use[hash] = false;
 		}
 	} else {
 		/* It is in another node
@@ -466,15 +481,18 @@ void *Hash_Delete(Hash *h, uint key1, uint key2)
 		free(node);
 #endif
 	}
-	if (result != NULL) h->size--;
+	if (result != NULL) this->size--;
 	return result;
 }
 
-
-void *Hash_Set(Hash *h, uint key1, uint key2, void *value)
+/**
+ * Sets the value associated with the given key pair to the given value.
+ * Returns the old value if the value was replaced, NULL when it was not yet present.
+ */
+void *Hash::Set(uint key1, uint key2, void *value)
 {
 	HashNode *prev;
-	HashNode *node = Hash_FindNode(h, key1, key2, &prev);
+	HashNode *node = this->FindNode(key1, key2, &prev);
 
 	if (node != NULL) {
 		/* Found it */
@@ -486,9 +504,9 @@ void *Hash_Set(Hash *h, uint key1, uint key2, void *value)
 	/* It is not yet present, let's add it */
 	if (prev == NULL) {
 		/* The bucket is still empty */
-		uint hash = h->hash(key1, key2);
-		h->buckets_in_use[hash] = true;
-		node = h->buckets + hash;
+		uint hash = this->hash(key1, key2);
+		this->buckets_in_use[hash] = true;
+		node = this->buckets + hash;
 	} else {
 		/* Add it after prev */
 		node = MallocT<HashNode>(1);
@@ -498,21 +516,20 @@ void *Hash_Set(Hash *h, uint key1, uint key2, void *value)
 	node->key1 = key1;
 	node->key2 = key2;
 	node->value = value;
-	h->size++;
+	this->size++;
 	return NULL;
 }
 
-void *Hash_Get(const Hash *h, uint key1, uint key2)
+/**
+ * Gets the value associated with the given key pair, or NULL when it is not
+ * present.
+ */
+void *Hash::Get(uint key1, uint key2) const
 {
-	HashNode *node = Hash_FindNode(h, key1, key2, NULL);
+	HashNode *node = this->FindNode(key1, key2, NULL);
 
 #ifdef HASH_DEBUG
 	debug("Found node: %p", node);
 #endif
 	return (node != NULL) ? node->value : NULL;
-}
-
-uint Hash_Size(const Hash *h)
-{
-	return h->size;
 }
