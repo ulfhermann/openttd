@@ -41,10 +41,23 @@ struct CargoSourceSink {
 	/** Sum of the destination weights for each cargo type. */
 	uint cargo_links_weight[NUM_CARGO];
 
+	virtual ~CargoSourceSink();
+
 	/** Get the type of this entity. */
 	virtual SourceType GetType() const = 0;
 	/** Get the source ID corresponding with this entity. */
 	virtual SourceID GetID() const = 0;
+
+	/**
+	 * Test if a demand link to a destination exists.
+	 * @param cid Cargo type for which a link should be searched.
+	 * @param dest Destination to search for.
+	 * @return True if a link to the destination is present.
+	 */
+	bool HasLinkTo(CargoID cid, const CargoSourceSink *dest) const
+	{
+		return this->cargo_links[cid].Contains(CargoLink(const_cast<CargoSourceSink *>(dest)));
+	}
 
 	void SaveCargoSourceSink();
 	void LoadCargoSourceSink();
