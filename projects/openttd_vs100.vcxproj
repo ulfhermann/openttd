@@ -296,6 +296,7 @@
     <ClCompile Include="..\src\articulated_vehicles.cpp" />
     <ClCompile Include="..\src\autoreplace.cpp" />
     <ClCompile Include="..\src\bmp.cpp" />
+    <ClCompile Include="..\src\cargodest.cpp" />
     <ClCompile Include="..\src\cargopacket.cpp" />
     <ClCompile Include="..\src\cargotype.cpp" />
     <ClCompile Include="..\src\cheat.cpp" />

@@ -4,6 +4,7 @@ animated_tile.cpp
 articulated_vehicles.cpp
 autoreplace.cpp
 bmp.cpp
+cargodest.cpp
 cargopacket.cpp
 cargotype.cpp
 cheat.cpp
