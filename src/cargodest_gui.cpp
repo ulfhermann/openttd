@@ -18,6 +18,8 @@
 #include "town.h"
 #include "industry.h"
 #include "string_func.h"
+#include "gui.h"
+#include "viewport_func.h"
 
 #include "table/strings.h"
 
@@ -146,4 +148,29 @@ uint CargoDestinationList::DrawList(uint left, uint right, uint y) const
 	}
 
 	return y + FONT_HEIGHT_NORMAL;
+}
+
+/**
+ * Handle click event onto the destination list.
+ * @param y Position of the click in relative to the top of the destination list.
+ */
+void CargoDestinationList::OnClick(uint y) const
+{
+	/* Subtract caption height. */
+	y -= WD_PAR_VSEP_WIDE + 2 * FONT_HEIGHT_NORMAL;
+
+	/* Calculate line from click pos. */
+	y /= FONT_HEIGHT_NORMAL;
+	if (y >= this->link_list.Length()) return;
+
+	/* Move viewpoint to the position of the destination. */
+	const CargoLink *l = this->link_list[y].link;
+	if (l->dest == NULL) return;
+
+	TileIndex xy = l->dest->GetType() == ST_TOWN ? static_cast<const Town *>(l->dest)->xy : static_cast<const Industry *>(l->dest)->location.tile;
+	if (_ctrl_pressed) {
+		ShowExtraViewPortWindow(xy);
+	} else {
+		ScrollMainWindowToTile(xy);
+	}
 }
