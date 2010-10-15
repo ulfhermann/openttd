@@ -41,6 +41,8 @@ public:
 
 	uint GetListHeight() const;
 	uint DrawList(uint left, uint right, uint y) const;
+
+	void OnClick(uint y) const;
 };
 
 #endif /* CARGODEST_GUI_H */
