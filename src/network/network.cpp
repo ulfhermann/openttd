@@ -43,8 +43,6 @@
 bool _ddc_fastforward = true;
 #endif /* DEBUG_DUMP_COMMANDS */
 
-DECLARE_POSTFIX_INCREMENT(ClientID)
-
 assert_compile(NetworkClientInfoPool::MAX_SIZE == NetworkClientSocketPool::MAX_SIZE);
 
 NetworkClientInfoPool _networkclientinfo_pool("NetworkClientInfo");
@@ -94,8 +92,6 @@ static SocketList _listensockets;
 
 /* The amount of clients connected */
 static byte _network_clients_connected = 0;
-/* The identifier counter for new clients (is never decreased) */
-static ClientID _network_client_id = CLIENT_ID_FIRST;
 
 /* Some externs / forwards */
 extern void StateGameLoop();
@@ -283,7 +279,7 @@ static void NetworkClientError(NetworkRecvStatus res, NetworkClientSocket *cs)
 	/* This means we fucked up and the server closed the connection */
 	if (res != NETWORK_RECV_STATUS_SERVER_ERROR && res != NETWORK_RECV_STATUS_SERVER_FULL &&
 			res != NETWORK_RECV_STATUS_SERVER_BANNED) {
-		SEND_COMMAND(PACKET_CLIENT_ERROR)(errorno);
+		MyClient::SendError(errorno);
 	}
 
 	_switch_mode = SM_MENU;
@@ -483,31 +479,19 @@ void ParseConnectionString(const char **company, const char **port, char *connec
  *   Used both by the server and the client */
 static NetworkClientSocket *NetworkAllocClient(SOCKET s)
 {
-	if (_network_server) {
-		/* Can we handle a new client? */
-		if (_network_clients_connected >= MAX_CLIENTS) return NULL;
-		if (_network_game_info.clients_on >= _settings_client.network.max_clients) return NULL;
-
-		/* Register the login */
-		_network_clients_connected++;
+	if (!_network_server) {
+		return new ClientNetworkGameSocketHandler(s);
 	}
 
-	NetworkClientSocket *cs = new NetworkClientSocket(INVALID_CLIENT_ID);
-	cs->sock = s;
-	cs->last_frame = _frame_counter;
-	cs->last_frame_server = _frame_counter;
+	/* Can we handle a new client? */
+	if (_network_clients_connected >= MAX_CLIENTS) return NULL;
+	if (_network_game_info.clients_on >= _settings_client.network.max_clients) return NULL;
 
-	if (_network_server) {
-		cs->client_id = _network_client_id++;
-		NetworkClientInfo *ci = new NetworkClientInfo(cs->client_id);
-		cs->SetInfo(ci);
-		ci->client_playas = COMPANY_INACTIVE_CLIENT;
-		ci->join_date = _date;
+	/* Register the login */
+	_network_clients_connected++;
 
-		SetWindowDirty(WC_CLIENT_LIST, 0);
-	}
-
-	return cs;
+	SetWindowDirty(WC_CLIENT_LIST, 0);
+	return new ServerNetworkGameSocketHandler(s);
 }
 
 /* Close a connection */
@@ -649,7 +633,7 @@ static void NetworkClose()
 
 	FOR_ALL_CLIENT_SOCKETS(cs) {
 		if (!_network_server) {
-			SEND_COMMAND(PACKET_CLIENT_QUIT)();
+			MyClient::SendQuit();
 			cs->Send_Packets();
 		}
 		NetworkCloseClient(cs, NETWORK_RECV_STATUS_CONN_LOST);
@@ -703,7 +687,7 @@ public:
 	{
 		_networking = true;
 		NetworkAllocClient(s);
-		SEND_COMMAND(PACKET_CLIENT_COMPANY_INFO)();
+		MyClient::SendCompanyInformationQuery();
 	}
 };
 
@@ -955,14 +939,14 @@ static bool NetworkReceive()
 		cs->writable = !!FD_ISSET(cs->sock, &write_fd);
 		if (FD_ISSET(cs->sock, &read_fd)) {
 			if (_network_server) {
-				NetworkServer_ReadPackets(cs);
+				cs->Recv_Packets();
 			} else {
 				NetworkRecvStatus res;
 
 				/* The client already was quiting! */
 				if (cs->HasClientQuit()) return false;
 
-				res = NetworkClient_ReadPackets(cs);
+				res = cs->Recv_Packets();
 				if (res != NETWORK_RECV_STATUS_OKAY) {
 					/* The client made an error of which we can not recover
 					 *   close the client and drop back to main menu */
@@ -1019,7 +1003,7 @@ static bool NetworkDoClientLoop()
 			 *   frame as he is.. so we can start playing! */
 			if (_network_first_time) {
 				_network_first_time = false;
-				SEND_COMMAND(PACKET_CLIENT_ACK)();
+				MyClient::SendAck();
 			}
 
 			_sync_frame = 0;
