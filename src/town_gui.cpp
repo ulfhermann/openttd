@@ -320,6 +320,7 @@ private:
 	Town *town; ///< Town displayed by the window.
 
 	CargoDestinationList dest_list; ///< Sorted list of demand destinations.
+	uint dest_list_top; ///< Top coordinate of the destination list in the #TVW_INFOPANEL widget.
 
 public:
 	static const int TVW_HEIGHT_NORMAL = 150;
@@ -475,6 +476,10 @@ public:
 			case TVW_DELETE: // delete town - only available on Scenario editor
 				DoCommandP(0, this->window_number, 0, CMD_DELETE_TOWN | CMD_MSG(STR_ERROR_TOWN_CAN_T_DELETE));
 				break;
+
+			case TVW_INFOPANEL: // jump to demand destination
+				this->dest_list.OnClick(pt.y - this->dest_list_top - this->GetWidget<NWidgetBase>(widget)->pos_y);
+				break;
 		}
 	}
 
@@ -491,7 +496,7 @@ public:
 	 * Gets the desired height for the information panel.
 	 * @return the desired height in pixels.
 	 */
-	uint GetDesiredInfoHeight() const
+	uint GetDesiredInfoHeight()
 	{
 		uint aimed_height = 3 * FONT_HEIGHT_NORMAL + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
 
@@ -509,6 +514,7 @@ public:
 
 		if (_settings_game.economy.station_noise_level) aimed_height += FONT_HEIGHT_NORMAL;
 
+		this->dest_list_top = aimed_height - FONT_HEIGHT_NORMAL;
 		aimed_height += this->dest_list.GetListHeight();
 
 		return aimed_height;
