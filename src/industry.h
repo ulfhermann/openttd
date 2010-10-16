@@ -89,6 +89,24 @@ struct Industry : IndustryPool::PoolItem<&_industry_pool>, CargoSourceSink {
 		return this->index;
 	}
 
+	/* virtual */ bool AcceptsCargo(CargoID cid) const
+	{
+		if (HasBit(this->produced_accepted_mask, cid)) return true;
+
+		for (uint i = 0; i < lengthof(this->accepts_cargo); i++) {
+			if (this->accepts_cargo[i] == cid) return true;
+		}
+		return false;
+	}
+
+	/* virtual */ bool SuppliesCargo(CargoID cid) const
+	{
+		for (uint i = 0; i < lengthof(this->produced_cargo); i++) {
+			if (this->produced_cargo[i] == cid) return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Check if a given tile belongs to this industry.
 	 * @param tile The tile to check.
