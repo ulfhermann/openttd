@@ -59,6 +59,11 @@ struct CargoSourceSink {
 		return this->cargo_links[cid].Contains(CargoLink(const_cast<CargoSourceSink *>(dest)));
 	}
 
+	/** Is this cargo accepted? */
+	virtual bool AcceptsCargo(CargoID cid) const = 0;
+	/** Is this cargo produced? */
+	virtual bool SuppliesCargo(CargoID cid) const = 0;
+
 	void SaveCargoSourceSink();
 	void LoadCargoSourceSink();
 	void PtrsCargoSourceSink();
