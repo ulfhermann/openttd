@@ -17,17 +17,9 @@
 
 #include "../network.h"
 #include "../network_internal.h"
-#include "../../core/pool_func.hpp"
 #include "../../debug.h"
 
 #include "table/strings.h"
-
-/** Make very sure the preconditions given in network_type.h are actually followed */
-assert_compile(MAX_CLIENT_SLOTS > MAX_CLIENTS);
-assert_compile(NetworkClientSocketPool::MAX_SIZE == MAX_CLIENT_SLOTS);
-
-NetworkClientSocketPool _networkclientsocket_pool("NetworkClientSocket");
-INSTANTIATE_POOL_METHODS(NetworkClientSocket)
 
 /**
  * Create a new socket for the game connection.
@@ -35,7 +27,6 @@ INSTANTIATE_POOL_METHODS(NetworkClientSocket)
  */
 NetworkGameSocketHandler::NetworkGameSocketHandler(SOCKET s)
 {
-	this->status            = STATUS_INACTIVE;
 	this->sock              = s;
 	this->last_frame        = _frame_counter;
 	this->last_frame_server = _frame_counter;
@@ -47,7 +38,6 @@ NetworkGameSocketHandler::NetworkGameSocketHandler(SOCKET s)
  * For clients: close connection and drop back to main-menu
  * For servers: close connection and that is it
  * @return the new status
- * TODO: needs to be splitted when using client and server socket packets
  */
 NetworkRecvStatus NetworkGameSocketHandler::CloseConnection(bool error)
 {
@@ -61,7 +51,7 @@ NetworkRecvStatus NetworkGameSocketHandler::CloseConnection(bool error)
 		return NETWORK_RECV_STATUS_CONN_LOST;
 	}
 
-	return NetworkCloseClient(this, error ? NETWORK_RECV_STATUS_SERVER_ERROR : NETWORK_RECV_STATUS_CONN_LOST);
+	return this->CloseConnection(error ? NETWORK_RECV_STATUS_SERVER_ERROR : NETWORK_RECV_STATUS_CONN_LOST);
 }
 
 
@@ -76,7 +66,7 @@ NetworkRecvStatus NetworkGameSocketHandler::CloseConnection(bool error)
  * @param p the packet to handle
  * @return #NetworkRecvStatus of handling.
  */
-NetworkRecvStatus NetworkClientSocket::HandlePacket(Packet *p)
+NetworkRecvStatus NetworkGameSocketHandler::HandlePacket(Packet *p)
 {
 	PacketGameType type = (PacketGameType)p->Recv_uint8();
 
@@ -95,7 +85,9 @@ NetworkRecvStatus NetworkClientSocket::HandlePacket(Packet *p)
 		GAME_COMMAND(PACKET_SERVER_WELCOME)
 		GAME_COMMAND(PACKET_CLIENT_GETMAP)
 		GAME_COMMAND(PACKET_SERVER_WAIT)
-		GAME_COMMAND(PACKET_SERVER_MAP)
+		GAME_COMMAND(PACKET_SERVER_MAP_BEGIN)
+		GAME_COMMAND(PACKET_SERVER_MAP_DATA)
+		GAME_COMMAND(PACKET_SERVER_MAP_DONE)
 		GAME_COMMAND(PACKET_CLIENT_MAP_OK)
 		GAME_COMMAND(PACKET_SERVER_JOIN)
 		GAME_COMMAND(PACKET_SERVER_FRAME)
@@ -141,7 +133,7 @@ NetworkRecvStatus NetworkClientSocket::HandlePacket(Packet *p)
  * HandlePacket is returned.
  * @return #NetworkRecvStatus of the last handled packet.
  */
-NetworkRecvStatus NetworkClientSocket::Recv_Packets()
+NetworkRecvStatus NetworkGameSocketHandler::Recv_Packets()
 {
 	Packet *p;
 	while ((p = this->Recv_Packet()) != NULL) {
@@ -159,7 +151,7 @@ NetworkRecvStatus NetworkClientSocket::Recv_Packets()
  * @param type the packet type to create the stub for
  */
 #define DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(type) \
-NetworkRecvStatus NetworkClientSocket::NetworkPacketReceive_## type ##_command(Packet *p) \
+NetworkRecvStatus NetworkGameSocketHandler::NetworkPacketReceive_## type ##_command(Packet *p) \
 { \
 	DEBUG(net, 0, "[tcp/game] received illegal packet type %d from client %d", \
 			type, this->client_id); \
@@ -180,7 +172,9 @@ DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_COMPANY_PASSWORD)
 DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_WELCOME)
 DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_GETMAP)
 DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_WAIT)
-DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP)
+DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_BEGIN)
+DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_DATA)
+DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_DONE)
 DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_CLIENT_MAP_OK)
 DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_JOIN)
 DEFINE_UNAVAILABLE_GAME_RECEIVE_COMMAND(PACKET_SERVER_FRAME)
