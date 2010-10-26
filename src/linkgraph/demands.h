@@ -25,15 +25,13 @@ protected:
  */
 class SymmetricScaler : public Scaler {
 public:
-	FORCEINLINE SymmetricScaler(uint mod_size) :
-		mod_size(mod_size), supply_sum(0) {}
+	FORCEINLINE SymmetricScaler(uint mod_size) : mod_size(mod_size), supply_sum(0) {}
 
 	/**
 	 * count a node's supply into the sum of supplies
 	 * @param node the node
 	 */
-	FORCEINLINE void AddNode(const Node &node)
-		{this->supply_sum += node.supply;}
+	FORCEINLINE void AddNode(const Node &node) {this->supply_sum += node.supply;}
 
 	/**
 	 * calculate the mean demand per node using the sum of supplies
@@ -79,8 +77,7 @@ public:
 	 * count a node's demand into the sum of demands
 	 * @param node The node to be counted
 	 */
-	FORCEINLINE void AddNode(const Node &node)
-		{this->demand_sum += node.demand;}
+	FORCEINLINE void AddNode(const Node &node) {this->demand_sum += node.demand;}
 
 	/**
 	 * calculate the mean demand per node using the sum of demands
@@ -103,8 +100,7 @@ public:
 	 * nodes always accept as long as their demand > 0.
 	 * @param to The node to be checked
 	 */
-	FORCEINLINE bool DemandLeft(Node &to)
-		{return to.demand > 0;}
+	FORCEINLINE bool DemandLeft(Node &to) {return to.demand > 0;}
 
 private:
 	uint demand_sum;
@@ -139,8 +135,7 @@ public:
 	 * Call the demand calculator on the given component-
 	 * @param graph the component to calculate the demands for.
 	 */
-	virtual void Run(LinkGraphComponent *graph)
-		{DemandCalculator c(graph);}
+	virtual void Run(LinkGraphComponent *graph) {DemandCalculator c(graph);}
 
 	/**
 	 * Virtual destructor has to be defined because of virtual Run().
