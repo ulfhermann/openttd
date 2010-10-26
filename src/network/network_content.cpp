@@ -32,7 +32,7 @@ ClientNetworkContentSocketHandler _network_content_client;
 /** Wrapper function for the HasProc */
 static bool HasGRFConfig(const ContentInfo *ci, bool md5sum)
 {
-	return FindGRFConfig(BSWAP32(ci->unique_id), md5sum ? ci->md5sum : NULL) != NULL;
+	return FindGRFConfig(BSWAP32(ci->unique_id), md5sum ? FGCM_EXACT : FGCM_ANY, md5sum ? ci->md5sum : NULL) != NULL;
 }
 
 /**
@@ -737,27 +737,11 @@ void ClientNetworkContentSocketHandler::SendReceive()
 		return;
 	}
 
-	fd_set read_fd, write_fd;
-	struct timeval tv;
-
-	FD_ZERO(&read_fd);
-	FD_ZERO(&write_fd);
-
-	FD_SET(this->sock, &read_fd);
-	FD_SET(this->sock, &write_fd);
-
-	tv.tv_sec = tv.tv_usec = 0; // don't block at all.
-#if !defined(__MORPHOS__) && !defined(__AMIGA__)
-	select(FD_SETSIZE, &read_fd, &write_fd, NULL, &tv);
-#else
-	WaitSelect(FD_SETSIZE, &read_fd, &write_fd, NULL, &tv, NULL);
-#endif
-	if (FD_ISSET(this->sock, &read_fd)) {
+	if (this->CanSendReceive()) {
 		this->Recv_Packets();
 		this->lastActivity = _realtime_tick;
 	}
 
-	this->writable = !!FD_ISSET(this->sock, &write_fd);
 	this->Send_Packets();
 }
 
