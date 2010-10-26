@@ -534,8 +534,6 @@ void InitializeLinkGraphs()
 
 	LinkGraphJob::ClearHandlers();
 	LinkGraphJob::AddHandler(new DemandHandler);
-	LinkGraphJob::AddHandler(new MCFHandler<MCF1stPass>);
-	LinkGraphJob::AddHandler(new FlowMapper);
-	LinkGraphJob::AddHandler(new MCFHandler<MCF2ndPass>);
+	LinkGraphJob::AddHandler(new MCFHandler);
 	LinkGraphJob::AddHandler(new FlowMapper);
 }
