@@ -596,6 +596,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\network\network_admin.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\network\network_client.cpp"
 				>
 			</File>
@@ -1117,6 +1121,10 @@
 			</File>
 			<File
 				RelativePath=".\..\src\network\network.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\network\network_admin.h"
 				>
 			</File>
 			<File
@@ -3532,11 +3540,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\network\core\tcp_admin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\network\core\tcp_admin.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\network\core\tcp_http.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\..\src\network\core\tcp_http.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\network\core\tcp_listen.h"
 				>
 			</File>
 			<File
