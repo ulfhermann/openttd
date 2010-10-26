@@ -173,7 +173,7 @@ void DeleteWindowViewport(Window *w)
  * @param height Height of the viewport
  * @param follow_flags Flags controlling the viewport.
  *        - If bit 31 is set, the lower 16 bits are the vehicle that the viewport should follow.
- *        - If bit 31 is clear, it is a tile position.
+ *        - If bit 31 is clear, it is a #TileIndex.
  * @param zoom Zoomlevel to display
  */
 void InitializeWindowViewport(Window *w, int x, int y,
@@ -1886,11 +1886,33 @@ bool ScrollWindowTo(int x, int y, int z, Window *w, bool instant)
 	return true;
 }
 
+/**
+ * Scrolls the viewport in a window to a given location.
+ * @param tile    Desired tile to center on.
+ * @param w       %Window containing the viewport.
+ * @param instant Jump to the location instead of slowly moving to it.
+ * @return Destination of the viewport was changed (to activate other actions when the viewport is already at the desired position).
+ */
+bool ScrollWindowToTile(TileIndex tile, Window *w, bool instant)
+{
+	return ScrollWindowTo(TileX(tile) * TILE_SIZE, TileY(tile) * TILE_SIZE, -1, w, instant);
+}
+
+/**
+ * Scrolls the viewport of the main window to a given location.
+ * @param tile    Desired tile to center on.
+ * @param instant Jump to the location instead of slowly moving to it.
+ * @return Destination of the viewport was changed (to activate other actions when the viewport is already at the desired position).
+ */
 bool ScrollMainWindowToTile(TileIndex tile, bool instant)
 {
 	return ScrollMainWindowTo(TileX(tile) * TILE_SIZE + TILE_SIZE / 2, TileY(tile) * TILE_SIZE + TILE_SIZE / 2, -1, instant);
 }
 
+/**
+ * Set a tile to display a red error square.
+ * @param tile Tile that should show the red error square.
+ */
 void SetRedErrorSquare(TileIndex tile)
 {
 	TileIndex old;
