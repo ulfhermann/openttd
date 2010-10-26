@@ -225,6 +225,9 @@
     <ClCompile Include="..\src\network\network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\network\network_admin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\network\network_client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -622,6 +625,9 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClInclude Include="..\src\network\network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\network\network_admin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\network\network_base.h">
@@ -2373,10 +2379,19 @@
     <ClInclude Include="..\src\network\core\tcp_game.h">
       <Filter>Network Core</Filter>
     </ClInclude>
+    <ClCompile Include="..\src\network\core\tcp_admin.cpp">
+      <Filter>Network Core</Filter>
+    </ClCompile>
+    <ClInclude Include="..\src\network\core\tcp_admin.h">
+      <Filter>Network Core</Filter>
+    </ClInclude>
     <ClCompile Include="..\src\network\core\tcp_http.cpp">
       <Filter>Network Core</Filter>
     </ClCompile>
     <ClInclude Include="..\src\network\core\tcp_http.h">
+      <Filter>Network Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\network\core\tcp_listen.h">
       <Filter>Network Core</Filter>
     </ClInclude>
     <ClCompile Include="..\src\network\core\udp.cpp">
