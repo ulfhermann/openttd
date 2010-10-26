@@ -2400,6 +2400,7 @@ STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP                :{BLACK}Kiểm t
 STR_NEWGRF_SETTINGS_FILENAME                                    :{BLACK}Tên file: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_GRF_ID                                      :{BLACK}GRF ID: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_VERSION                                     :{BLACK}Phiên bản: {SILVER}{NUM}
+STR_NEWGRF_SETTINGS_MIN_VERSION                                 :{BLACK}Phiên bản phù hợp tối thiểu: {SILVER}{NUM}
 STR_NEWGRF_SETTINGS_MD5SUM                                      :{BLACK}MD5sum: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PALETTE                                     :{BLACK}Bảng màu: {SILVER}{STRING}
 STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Tham số: {SILVER}{STRING}
@@ -2724,6 +2725,7 @@ STR_INDUSTRY_VIEW_CAPTION                                       :{WHITE}{INDUSTR
 STR_INDUSTRY_VIEW_PRODUCTION_LAST_MONTH_TITLE                   :{BLACK}Sản lượng tháng trước:
 STR_INDUSTRY_VIEW_TRANSPORTED                                   :{YELLOW}{CARGO}{STRING}{BLACK} ({COMMA}% đã vận chuyển)
 STR_INDUSTRY_VIEW_LOCATION_TOOLTIP                              :{BLACK}Xem vị trí trung tâm của nhà máy. Ctrl+Click mở cửa sổ mới để xem
+STR_INDUSTRY_VIEW_PRODUCTION_LEVEL                              :{BLACK}Mức sản lượng: {YELLOW}{COMMA}%
 
 ############ range for requires starts
 STR_INDUSTRY_VIEW_REQUIRES_CARGO                                :{BLACK}Yêu cầu: {YELLOW}{STRING}{STRING}
@@ -2739,6 +2741,7 @@ STR_INDUSTRY_VIEW_PRODUCES_CARGO_CARGO                          :{BLACK}Sản xu
 ############ range for produces ends
 
 STR_CONFIG_GAME_PRODUCTION                                      :{WHITE}Thay đổi sản lượng (bội số của 8, max 2040)
+STR_CONFIG_GAME_PRODUCTION_LEVEL                                :{WHITE}Thay đổi mức sản lượng (theo phần trăm, cao nhất 800%)
 
 # Vehicle lists
 STR_VEHICLE_LIST_TRAIN_CAPTION                                  :{WHITE}{STRING} - {COMMA} Tàu hoả
@@ -3764,7 +3767,7 @@ STR_ERROR_CAN_T_CHANGE_SIGN_NAME                                :{WHITE}Không t
 STR_ERROR_CAN_T_DELETE_SIGN                                     :{WHITE}Không thể xoá biển hiệu...
 
 # Translatable comment for OpenTTD's desktop shortcut
-STR_DESKTOP_SHORTCUT_COMMENT                                    :Một bản sao của Transport Tycoon Deluxe
+STR_DESKTOP_SHORTCUT_COMMENT                                    :Một trò chơi mô phỏng dựa trên Transport Tycoon Deluxe
 
 ##id 0x2000
 # Town building names
