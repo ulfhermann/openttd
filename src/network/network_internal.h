@@ -50,11 +50,7 @@ extern bool _ddc_fastforward;
 #define _ddc_fastforward (false)
 #endif /* DEBUG_DUMP_COMMANDS */
 
-enum MapPacket {
-	MAP_PACKET_START,
-	MAP_PACKET_NORMAL,
-	MAP_PACKET_END,
-};
+typedef class ServerNetworkGameSocketHandler NetworkClientSocket;
 
 
 enum NetworkJoinStatus {
@@ -166,21 +162,12 @@ void NetworkFreeLocalCommandQueue();
 void NetworkSyncCommandQueue(NetworkClientSocket *cs);
 
 /* from network.c */
-NetworkRecvStatus NetworkCloseClient(NetworkClientSocket *cs, NetworkRecvStatus status);
+void NetworkError(StringID error_string);
 void NetworkTextMessage(NetworkAction action, ConsoleColour colour, bool self_send, const char *name, const char *str = "", int64 data = 0);
-void NetworkGetClientName(char *clientname, size_t size, const NetworkClientSocket *cs);
 uint NetworkCalculateLag(const NetworkClientSocket *cs);
 NetworkClientSocket *NetworkFindClientStateFromClientID(ClientID client_id);
 StringID GetNetworkErrorMsg(NetworkErrorCode err);
 bool NetworkFindName(char new_name[NETWORK_CLIENT_NAME_LENGTH]);
-
-/* Macros to make life a bit more easier */
-#define DEF_SERVER_RECEIVE_COMMAND(type) NetworkRecvStatus NetworkPacketReceive_ ## type ## _command(NetworkClientSocket *cs, Packet *p)
-#define DEF_SERVER_SEND_COMMAND(type) NetworkRecvStatus NetworkPacketSend_ ## type ## _command(NetworkClientSocket *cs)
-#define DEF_SERVER_SEND_COMMAND_PARAM(type) NetworkRecvStatus NetworkPacketSend_ ## type ## _command
-
-#define SEND_COMMAND(type) NetworkPacketSend_ ## type ## _command
-#define RECEIVE_COMMAND(type) NetworkPacketReceive_ ## type ## _command
 
 #endif /* ENABLE_NETWORK */
 #endif /* NETWORK_INTERNAL_H */

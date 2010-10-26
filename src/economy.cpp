@@ -534,6 +534,7 @@ static void CompanyCheckBankrupt(Company *c)
 			CompanyID c_index = c->index;
 			delete c;
 			AI::BroadcastNewEvent(new AIEventCompanyBankrupt(c_index));
+			CompanyAdminBankrupt(c_index);
 	}
 }
 
@@ -1538,6 +1539,7 @@ CommandCost CmdBuyShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1,
 			}
 		}
 		SetWindowDirty(WC_COMPANY, target_company);
+		CompanyAdminUpdate(c);
 	}
 	return cost;
 }
@@ -1572,6 +1574,7 @@ CommandCost CmdSellShareInCompany(TileIndex tile, DoCommandFlag flags, uint32 p1
 		while (*b != _current_company) b++; // share owners is guaranteed to contain company
 		*b = COMPANY_SPECTATOR;
 		SetWindowDirty(WC_COMPANY, target_company);
+		CompanyAdminUpdate(c);
 	}
 	return CommandCost(EXPENSES_OTHER, cost);
 }
