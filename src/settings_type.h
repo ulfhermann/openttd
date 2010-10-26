@@ -133,9 +133,12 @@ struct NetworkSettings {
 	uint16 max_join_time;                                 ///< maximum amount of time, in game ticks, a client may take to join
 	bool   pause_on_join;                                 ///< pause the game when people join
 	uint16 server_port;                                   ///< port the server listens on
+	uint16 server_admin_port;                             ///< port the server listens on for the admin network
+	bool   server_admin_chat;                             ///< allow private chat for the server to be distributed to the admin network
 	char   server_name[NETWORK_NAME_LENGTH];              ///< name of the server
-	char   server_password[NETWORK_PASSWORD_LENGTH];      ///< passowrd for joining this server
-	char   rcon_password[NETWORK_PASSWORD_LENGTH];        ///< passowrd for rconsole (server side)
+	char   server_password[NETWORK_PASSWORD_LENGTH];      ///< password for joining this server
+	char   rcon_password[NETWORK_PASSWORD_LENGTH];        ///< password for rconsole (server side)
+	char   admin_password[NETWORK_PASSWORD_LENGTH];       ///< password for the admin network
 	bool   server_advertise;                              ///< advertise the server to the masterserver
 	uint8  lan_internet;                                  ///< search on the LAN or internet for servers
 	char   client_name[NETWORK_CLIENT_NAME_LENGTH];       ///< name of the player (as client)
