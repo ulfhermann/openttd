@@ -526,6 +526,8 @@ public:
 		if (this->viewport != NULL) {
 			NWidgetViewport *nvp = this->GetWidget<NWidgetViewport>(TVW_VIEWPORT);
 			nvp->UpdateViewportCoordinates(this);
+
+			ScrollWindowToTile(this->town->xy, this, true); // Re-center viewport.
 		}
 	}
 
@@ -784,7 +786,7 @@ public:
 			case TDW_SORTNAME:
 			case TDW_SORTPOPULATION: {
 				Dimension d = GetStringBoundingBox(this->GetWidget<NWidgetCore>(widget)->widget_data);
-				d.width += padding.width + WD_SORTBUTTON_ARROW_WIDTH * 2; // Doubled since the word is centered, also looks nice.
+				d.width += padding.width + WD_SORTBUTTON_ARROW_WIDTH * 2; // Doubled since the string is centred and it also looks better.
 				d.height += padding.height;
 				*size = maxdim(*size, d);
 				break;

@@ -16,6 +16,7 @@
 #include "../strings_func.h"
 #include "../command_func.h"
 #include "../date_func.h"
+#include "network_admin.h"
 #include "network_client.h"
 #include "network_server.h"
 #include "network_content.h"
@@ -87,11 +88,8 @@ extern NetworkUDPSocketHandler *_udp_client_socket; ///< udp client socket
 extern NetworkUDPSocketHandler *_udp_server_socket; ///< udp server socket
 extern NetworkUDPSocketHandler *_udp_master_socket; ///< udp master socket
 
-/* The listen socket for the server */
-static SocketList _listensockets;
-
 /* The amount of clients connected */
-static byte _network_clients_connected = 0;
+byte _network_clients_connected = 0;
 
 /* Some externs / forwards */
 extern void StateGameLoop();
@@ -135,19 +133,6 @@ NetworkClientSocket *NetworkFindClientStateFromClientID(ClientID client_id)
 	}
 
 	return NULL;
-}
-
-/* NetworkGetClientName is a server-safe function to get the name of the client
- *  if the user did not send it yet, Client #<no> is used. */
-void NetworkGetClientName(char *client_name, size_t size, const NetworkClientSocket *cs)
-{
-	const NetworkClientInfo *ci = cs->GetInfo();
-
-	if (StrEmpty(ci->client_name)) {
-		snprintf(client_name, size, "Client #%4d", cs->client_id);
-	} else {
-		ttd_strlcpy(client_name, ci->client_name, size);
-	}
 }
 
 byte NetworkSpectatorCount()
@@ -217,7 +202,13 @@ void NetworkTextMessage(NetworkAction action, ConsoleColour colour, bool self_se
 	SetDParamStr(0, name);
 	SetDParamStr(1, str);
 	SetDParam(2, data);
-	GetString(message, strid, lastof(message));
+
+	/* All of these strings start with "***". These characters are interpreted as both left-to-right and
+	 * right-to-left characters depending on the context. As the next text might be an user's name, the
+	 * user name's characters will influence the direction of the "***" instead of the language setting
+	 * of the game. Manually set the direction of the "***" by inserting a text-direction marker. */
+	char *msg_ptr = message + Utf8Encode(message, _dynlang.text_dir == TD_LTR ? CHAR_TD_LRM : CHAR_TD_RLM);
+	GetString(msg_ptr, strid, lastof(message));
 
 	DEBUG(desync, 1, "msg: %08x; %02x; %s", _date, _date_fract, message);
 	IConsolePrintF(colour, "%s", message);
@@ -240,51 +231,11 @@ uint NetworkCalculateLag(const NetworkClientSocket *cs)
 
 /* There was a non-recoverable error, drop back to the main menu with a nice
  *  error */
-static void NetworkError(StringID error_string)
+void NetworkError(StringID error_string)
 {
 	_switch_mode = SM_MENU;
 	extern StringID _switch_mode_errorstr;
 	_switch_mode_errorstr = error_string;
-}
-
-static void ServerStartError(const char *error)
-{
-	DEBUG(net, 0, "[server] could not start network: %s",error);
-	NetworkError(STR_NETWORK_ERROR_SERVER_START);
-}
-
-static void NetworkClientError(NetworkRecvStatus res, NetworkClientSocket *cs)
-{
-	/* First, send a CLIENT_ERROR to the server, so he knows we are
-	 *  disconnection (and why!) */
-	NetworkErrorCode errorno;
-
-	/* We just want to close the connection.. */
-	if (res == NETWORK_RECV_STATUS_CLOSE_QUERY) {
-		cs->NetworkSocketHandler::CloseConnection();
-		NetworkCloseClient(cs, res);
-		_networking = false;
-
-		DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
-		return;
-	}
-
-	switch (res) {
-		case NETWORK_RECV_STATUS_DESYNC:          errorno = NETWORK_ERROR_DESYNC; break;
-		case NETWORK_RECV_STATUS_SAVEGAME:        errorno = NETWORK_ERROR_SAVEGAME_FAILED; break;
-		case NETWORK_RECV_STATUS_NEWGRF_MISMATCH: errorno = NETWORK_ERROR_NEWGRF_MISMATCH; break;
-		default:                                  errorno = NETWORK_ERROR_GENERAL; break;
-	}
-
-	/* This means we fucked up and the server closed the connection */
-	if (res != NETWORK_RECV_STATUS_SERVER_ERROR && res != NETWORK_RECV_STATUS_SERVER_FULL &&
-			res != NETWORK_RECV_STATUS_SERVER_BANNED) {
-		MyClient::SendError(errorno);
-	}
-
-	_switch_mode = SM_MENU;
-	NetworkCloseClient(cs, res);
-	_networking = false;
 }
 
 /**
@@ -392,7 +343,7 @@ static uint NetworkCountActiveClients()
 	uint count = 0;
 
 	FOR_ALL_CLIENT_SOCKETS(cs) {
-		if (cs->status != STATUS_ACTIVE) continue;
+		if (cs->status != NetworkClientSocket::STATUS_ACTIVE) continue;
 		if (!Company::IsValidID(cs->GetInfo()->client_playas)) continue;
 		count++;
 	}
@@ -421,7 +372,7 @@ static bool NetworkHasJoiningClient()
 {
 	const NetworkClientSocket *cs;
 	FOR_ALL_CLIENT_SOCKETS(cs) {
-		if (cs->status >= STATUS_AUTHORIZED && cs->status < STATUS_ACTIVE) return true;
+		if (cs->status >= NetworkClientSocket::STATUS_AUTHORIZED && cs->status < NetworkClientSocket::STATUS_ACTIVE) return true;
 	}
 
 	return false;
@@ -475,177 +426,50 @@ void ParseConnectionString(const char **company, const char **port, char *connec
 	}
 }
 
-/* Creates a new client from a socket
- *   Used both by the server and the client */
-static NetworkClientSocket *NetworkAllocClient(SOCKET s)
+/* static */ void ServerNetworkGameSocketHandler::AcceptConnection(SOCKET s, const NetworkAddress &address)
 {
-	if (!_network_server) {
-		return new ClientNetworkGameSocketHandler(s);
-	}
-
-	/* Can we handle a new client? */
-	if (_network_clients_connected >= MAX_CLIENTS) return NULL;
-	if (_network_game_info.clients_on >= _settings_client.network.max_clients) return NULL;
-
 	/* Register the login */
 	_network_clients_connected++;
 
 	SetWindowDirty(WC_CLIENT_LIST, 0);
-	return new ServerNetworkGameSocketHandler(s);
+	ServerNetworkGameSocketHandler *cs = new ServerNetworkGameSocketHandler(s);
+	cs->GetInfo()->client_address = address; // Save the IP of the client
 }
 
-/* Close a connection */
-NetworkRecvStatus NetworkCloseClient(NetworkClientSocket *cs, NetworkRecvStatus status)
-{
-	assert(status != NETWORK_RECV_STATUS_OKAY);
-	/*
-	 * Sending a message just before leaving the game calls cs->Send_Packets.
-	 * This might invoke this function, which means that when we close the
-	 * connection after cs->Send_Packets we will close an already closed
-	 * connection. This handles that case gracefully without having to make
-	 * that code any more complex or more aware of the validity of the socket.
-	 */
-	if (cs->sock == INVALID_SOCKET) return status;
-
-	if (status != NETWORK_RECV_STATUS_CONN_LOST && !cs->HasClientQuit() && _network_server && cs->status >= STATUS_AUTHORIZED) {
-		/* We did not receive a leave message from this client... */
-		char client_name[NETWORK_CLIENT_NAME_LENGTH];
-		NetworkClientSocket *new_cs;
-
-		NetworkGetClientName(client_name, sizeof(client_name), cs);
-
-		NetworkTextMessage(NETWORK_ACTION_LEAVE, CC_DEFAULT, false, client_name, NULL, STR_NETWORK_ERROR_CLIENT_CONNECTION_LOST);
-
-		/* Inform other clients of this... strange leaving ;) */
-		FOR_ALL_CLIENT_SOCKETS(new_cs) {
-			if (new_cs->status > STATUS_AUTHORIZED && cs != new_cs) {
-				SEND_COMMAND(PACKET_SERVER_ERROR_QUIT)(new_cs, cs->client_id, NETWORK_ERROR_CONNECTION_LOST);
-			}
-		}
-	}
-
-	DEBUG(net, 1, "Closed client connection %d", cs->client_id);
-
-	if (_network_server) {
-		/* We just lost one client :( */
-		if (cs->status >= STATUS_AUTHORIZED) _network_game_info.clients_on--;
-		_network_clients_connected--;
-
-		SetWindowDirty(WC_CLIENT_LIST, 0);
-	}
-
-	cs->Send_Packets(true);
-
-	delete cs->GetInfo();
-	delete cs;
-
-	return status;
-}
-
-/* For the server, to accept new clients */
-static void NetworkAcceptClients(SOCKET ls)
-{
-	for (;;) {
-		struct sockaddr_storage sin;
-		memset(&sin, 0, sizeof(sin));
-		socklen_t sin_len = sizeof(sin);
-		SOCKET s = accept(ls, (struct sockaddr*)&sin, &sin_len);
-		if (s == INVALID_SOCKET) return;
-
-		SetNonBlocking(s); // XXX error handling?
-
-		NetworkAddress address(sin, sin_len);
-		DEBUG(net, 1, "Client connected from %s on frame %d", address.GetHostname(), _frame_counter);
-
-		SetNoDelay(s); // XXX error handling?
-
-		/* Check if the client is banned */
-		bool banned = false;
-		for (char **iter = _network_ban_list.Begin(); iter != _network_ban_list.End(); iter++) {
-			banned = address.IsInNetmask(*iter);
-			if (banned) {
-				Packet p(PACKET_SERVER_BANNED);
-				p.PrepareToSend();
-
-				DEBUG(net, 1, "Banned ip tried to join (%s), refused", *iter);
-
-				send(s, (const char*)p.buffer, p.size, 0);
-				closesocket(s);
-				break;
-			}
-		}
-		/* If this client is banned, continue with next client */
-		if (banned) continue;
-
-		NetworkClientSocket *cs = NetworkAllocClient(s);
-		if (cs == NULL) {
-			/* no more clients allowed?
-			 * Send to the client that we are full! */
-			Packet p(PACKET_SERVER_FULL);
-			p.PrepareToSend();
-
-			send(s, (const char*)p.buffer, p.size, 0);
-			closesocket(s);
-
-			continue;
-		}
-
-		/* a new client has connected. We set him at inactive for now
-		 *  maybe he is only requesting server-info. Till he has sent a PACKET_CLIENT_MAP_OK
-		 *  the client stays inactive */
-		cs->status = STATUS_INACTIVE;
-
-		cs->GetInfo()->client_address = address; // Save the IP of the client
-	}
-}
-
-/* Set up the listen socket for the server */
-static bool NetworkListen()
-{
-	assert(_listensockets.Length() == 0);
-
-	NetworkAddressList addresses;
-	GetBindAddresses(&addresses, _settings_client.network.server_port);
-
-	for (NetworkAddress *address = addresses.Begin(); address != addresses.End(); address++) {
-		address->Listen(SOCK_STREAM, &_listensockets);
-	}
-
-	if (_listensockets.Length() == 0) {
-		ServerStartError("Could not create listening socket");
-		return false;
-	}
-
-	return true;
-}
-
-/** Resets both pools used for network clients */
-static void InitializeNetworkPools()
+/**
+ * Resets the pools used for network clients, and the admin pool if needed.
+ * @param close_admins Whether the admin pool has to be cleared as well.
+ */
+static void InitializeNetworkPools(bool close_admins = true)
 {
 	_networkclientsocket_pool.CleanPool();
 	_networkclientinfo_pool.CleanPool();
+	if (close_admins) _networkadminsocket_pool.CleanPool();
 }
 
-/* Close all current connections */
-static void NetworkClose()
+/**
+ * Close current connections.
+ * @param close_admins Whether the admin connections have to be closed as well.
+ */
+void NetworkClose(bool close_admins)
 {
-	NetworkClientSocket *cs;
-
-	FOR_ALL_CLIENT_SOCKETS(cs) {
-		if (!_network_server) {
-			MyClient::SendQuit();
-			cs->Send_Packets();
-		}
-		NetworkCloseClient(cs, NETWORK_RECV_STATUS_CONN_LOST);
-	}
-
 	if (_network_server) {
-		/* We are a server, also close the listensocket */
-		for (SocketList::iterator s = _listensockets.Begin(); s != _listensockets.End(); s++) {
-			closesocket(s->second);
+		if (close_admins) {
+			ServerNetworkAdminSocketHandler *as;
+			FOR_ALL_ADMIN_SOCKETS(as) {
+				as->CloseConnection(true);
+			}
 		}
-		_listensockets.Clear();
-		DEBUG(net, 1, "[tcp] closed listeners");
+
+		NetworkClientSocket *cs;
+		FOR_ALL_CLIENT_SOCKETS(cs) {
+			cs->CloseConnection(NETWORK_RECV_STATUS_CONN_LOST);
+		}
+		ServerNetworkGameSocketHandler::CloseListeners();
+		ServerNetworkAdminSocketHandler::CloseListeners();
+	} else if (MyClient::my_client != NULL) {
+		MyClient::SendQuit();
+		MyClient::my_client->CloseConnection(NETWORK_RECV_STATUS_CONN_LOST);
 	}
 
 	TCPConnecter::KillAll();
@@ -658,13 +482,13 @@ static void NetworkClose()
 	free(_network_company_states);
 	_network_company_states = NULL;
 
-	InitializeNetworkPools();
+	InitializeNetworkPools(close_admins);
 }
 
 /* Inits the network (cleans sockets and stuff) */
-static void NetworkInitialize()
+static void NetworkInitialize(bool close_admins = true)
 {
-	InitializeNetworkPools();
+	InitializeNetworkPools(close_admins);
 	NetworkUDPInitialize();
 
 	_sync_frame = 0;
@@ -686,7 +510,7 @@ public:
 	virtual void OnConnect(SOCKET s)
 	{
 		_networking = true;
-		NetworkAllocClient(s);
+		new ClientNetworkGameSocketHandler(s);
 		MyClient::SendCompanyInformationQuery();
 	}
 };
@@ -769,7 +593,7 @@ public:
 	virtual void OnConnect(SOCKET s)
 	{
 		_networking = true;
-		NetworkAllocClient(s);
+		new ClientNetworkGameSocketHandler(s);
 		IConsoleCmdExec("exec scripts/on_client.scr 0");
 		NetworkClient_Connected();
 	}
@@ -826,9 +650,12 @@ bool NetworkServerStart()
 	IConsoleCmdExec("exec scripts/pre_server.scr 0");
 	if (_network_dedicated) IConsoleCmdExec("exec scripts/pre_dedicated.scr 0");
 
-	NetworkDisconnect();
-	NetworkInitialize();
-	if (!NetworkListen()) return false;
+	NetworkDisconnect(false, false);
+	NetworkInitialize(false);
+	if (!ServerNetworkGameSocketHandler::Listen(_settings_client.network.server_port)) return false;
+
+	/* Only listen for admins when the password isn't empty. */
+	if (!StrEmpty(_settings_client.network.admin_password) && !ServerNetworkAdminSocketHandler::Listen(_settings_client.network.server_admin_port)) return false;
 
 	/* Try to start UDP-server */
 	_network_udp_server = _udp_server_socket->Listen();
@@ -856,6 +683,10 @@ bool NetworkServerStart()
 	_network_last_advertise_frame = 0;
 	_network_need_advertise = true;
 	NetworkUDPAdvertise();
+
+	/* welcome possibly still connected admins - this can only happen on a dedicated server. */
+	if (_network_dedicated) ServerNetworkAdminSocketHandler::WelcomeAll();
+
 	return true;
 }
 
@@ -866,25 +697,42 @@ void NetworkReboot()
 	if (_network_server) {
 		NetworkClientSocket *cs;
 		FOR_ALL_CLIENT_SOCKETS(cs) {
-			SEND_COMMAND(PACKET_SERVER_NEWGAME)(cs);
+			cs->SendNewGame();
 			cs->Send_Packets();
+		}
+
+		ServerNetworkAdminSocketHandler *as;
+		FOR_ALL_ADMIN_SOCKETS(as) {
+			as->SendNewGame();
+			as->Send_Packets();
 		}
 	}
 
-	NetworkClose();
+	/* For non-dedicated servers we have to kick the admins as we are not
+	 * certain that we will end up in a new network game. */
+	NetworkClose(!_network_dedicated);
 }
 
 /**
  * We want to disconnect from the host/clients.
- * @param blocking whether to wait till everything has been closed
+ * @param blocking whether to wait till everything has been closed.
+ * @param close_admins Whether the admin sockets need to be closed as well.
  */
-void NetworkDisconnect(bool blocking)
+void NetworkDisconnect(bool blocking, bool close_admins)
 {
 	if (_network_server) {
 		NetworkClientSocket *cs;
 		FOR_ALL_CLIENT_SOCKETS(cs) {
-			SEND_COMMAND(PACKET_SERVER_SHUTDOWN)(cs);
+			cs->SendShutdown();
 			cs->Send_Packets();
+		}
+
+		if (close_admins) {
+			ServerNetworkAdminSocketHandler *as;
+			FOR_ALL_ADMIN_SOCKETS(as) {
+				as->SendShutdown();
+				as->Send_Packets();
+			}
 		}
 	}
 
@@ -892,7 +740,7 @@ void NetworkDisconnect(bool blocking)
 
 	DeleteWindowById(WC_NETWORK_STATUS_WINDOW, 0);
 
-	NetworkClose();
+	NetworkClose(close_admins);
 
 	/* Reinitialize the UDP stack, i.e. close all existing connections. */
 	NetworkUDPInitialize();
@@ -904,116 +752,23 @@ void NetworkDisconnect(bool blocking)
  */
 static bool NetworkReceive()
 {
-	NetworkClientSocket *cs;
-	fd_set read_fd, write_fd;
-	struct timeval tv;
-
-	FD_ZERO(&read_fd);
-	FD_ZERO(&write_fd);
-
-	FOR_ALL_CLIENT_SOCKETS(cs) {
-		FD_SET(cs->sock, &read_fd);
-		FD_SET(cs->sock, &write_fd);
+	if (_network_server) {
+		ServerNetworkAdminSocketHandler::Receive();
+		return ServerNetworkGameSocketHandler::Receive();
+	} else {
+		return ClientNetworkGameSocketHandler::Receive();
 	}
-
-	/* take care of listener port */
-	for (SocketList::iterator s = _listensockets.Begin(); s != _listensockets.End(); s++) {
-		FD_SET(s->second, &read_fd);
-	}
-
-	tv.tv_sec = tv.tv_usec = 0; // don't block at all.
-#if !defined(__MORPHOS__) && !defined(__AMIGA__)
-	int n = select(FD_SETSIZE, &read_fd, &write_fd, NULL, &tv);
-#else
-	int n = WaitSelect(FD_SETSIZE, &read_fd, &write_fd, NULL, &tv, NULL);
-#endif
-	if (n == -1 && !_network_server) NetworkError(STR_NETWORK_ERROR_LOSTCONNECTION);
-
-	/* accept clients.. */
-	for (SocketList::iterator s = _listensockets.Begin(); s != _listensockets.End(); s++) {
-		if (FD_ISSET(s->second, &read_fd)) NetworkAcceptClients(s->second);
-	}
-
-	/* read stuff from clients */
-	FOR_ALL_CLIENT_SOCKETS(cs) {
-		cs->writable = !!FD_ISSET(cs->sock, &write_fd);
-		if (FD_ISSET(cs->sock, &read_fd)) {
-			if (_network_server) {
-				cs->Recv_Packets();
-			} else {
-				NetworkRecvStatus res;
-
-				/* The client already was quiting! */
-				if (cs->HasClientQuit()) return false;
-
-				res = cs->Recv_Packets();
-				if (res != NETWORK_RECV_STATUS_OKAY) {
-					/* The client made an error of which we can not recover
-					 *   close the client and drop back to main menu */
-					NetworkClientError(res, cs);
-					return false;
-				}
-			}
-		}
-	}
-	return _networking;
 }
 
 /* This sends all buffered commands (if possible) */
 static void NetworkSend()
 {
-	NetworkClientSocket *cs;
-	FOR_ALL_CLIENT_SOCKETS(cs) {
-		if (cs->writable) {
-			cs->Send_Packets();
-
-			if (cs->status == STATUS_MAP) {
-				/* This client is in the middle of a map-send, call the function for that */
-				SEND_COMMAND(PACKET_SERVER_MAP)(cs);
-			}
-		}
+	if (_network_server) {
+		ServerNetworkAdminSocketHandler::Send();
+		ServerNetworkGameSocketHandler::Send();
+	} else {
+		ClientNetworkGameSocketHandler::Send();
 	}
-}
-
-static bool NetworkDoClientLoop()
-{
-	_frame_counter++;
-
-	NetworkExecuteLocalCommandQueue();
-
-	StateGameLoop();
-
-	/* Check if we are in sync! */
-	if (_sync_frame != 0) {
-		if (_sync_frame == _frame_counter) {
-#ifdef NETWORK_SEND_DOUBLE_SEED
-			if (_sync_seed_1 != _random.state[0] || _sync_seed_2 != _random.state[1]) {
-#else
-			if (_sync_seed_1 != _random.state[0]) {
-#endif
-				NetworkError(STR_NETWORK_ERROR_DESYNC);
-				DEBUG(desync, 1, "sync_err: %08x; %02x", _date, _date_fract);
-				DEBUG(net, 0, "Sync error detected!");
-				NetworkClientError(NETWORK_RECV_STATUS_DESYNC, NetworkClientSocket::Get(0));
-				return false;
-			}
-
-			/* If this is the first time we have a sync-frame, we
-			 *   need to let the server know that we are ready and at the same
-			 *   frame as he is.. so we can start playing! */
-			if (_network_first_time) {
-				_network_first_time = false;
-				MyClient::SendAck();
-			}
-
-			_sync_frame = 0;
-		} else if (_sync_frame < _frame_counter) {
-			DEBUG(net, 1, "Missed frame for sync-test (%d / %d)", _sync_frame, _frame_counter);
-			_sync_frame = 0;
-		}
-	}
-
-	return true;
 }
 
 /* We have to do some UDP checking */
@@ -1173,11 +928,11 @@ void NetworkGameLoop()
 		/* Make sure we are at the frame were the server is (quick-frames) */
 		if (_frame_counter_server > _frame_counter) {
 			while (_frame_counter_server > _frame_counter) {
-				if (!NetworkDoClientLoop()) break;
+				if (!ClientNetworkGameSocketHandler::GameLoop()) break;
 			}
 		} else {
 			/* Else, keep on going till _frame_counter_max */
-			if (_frame_counter_max > _frame_counter) NetworkDoClientLoop();
+			if (_frame_counter_max > _frame_counter) ClientNetworkGameSocketHandler::GameLoop();
 		}
 	}
 
