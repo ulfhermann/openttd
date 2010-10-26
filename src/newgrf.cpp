@@ -5062,12 +5062,13 @@ static void SkipIf(ByteReader *buf)
 
 	/*
 	 * Parameter (variable in specs) 0x88 can only have GRF ID checking
-	 * conditions, except conditions 0x0B and 0x0C (cargo availability)
-	 * as those ignore the parameter. So, when the condition type is
-	 * either of those, the specific variable 0x88 code is skipped, so
-	 * the "general" code for the cargo availability conditions kicks in.
+	 * conditions, except conditions 0x0B, 0x0C (cargo availability) and
+	 * 0x0D, 0x0E (Rail type availability) as those ignore the parameter.
+	 * So, when the condition type is one of those, the specific variable
+	 * 0x88 code is skipped, so the "general" code for the cargo
+	 * availability conditions kicks in.
 	 */
-	if (param == 0x88 && condtype != 0x0B && condtype != 0x0C) {
+	if (param == 0x88 && (condtype < 0x0B || condtype > 0x0E)) {
 		/* GRF ID checks */
 
 		GRFConfig *c = GetGRFConfig(cond_val, mask);
@@ -6326,11 +6327,31 @@ static bool ChangeGRFVersion(size_t len, ByteReader *buf)
 		grfmsg(2, "StaticGRFInfo: expected 4 bytes for 'INFO'->'VRSN' but got " PRINTF_SIZE ", ignoring this field", len);
 		buf->Skip(len);
 	} else {
-		_cur_grfconfig->version = buf->ReadDWord();
+		/* Set min_loadable_version as well (default to minimal compatibility) */
+		_cur_grfconfig->version = _cur_grfconfig->min_loadable_version = buf->ReadDWord();
 	}
 	return true;
 }
 
+/** Callback function for 'INFO'->'MINV' to the minimum compatible version of the NewGRF. */
+static bool ChangeGRFMinVersion(size_t len, ByteReader *buf)
+{
+	if (len != 4) {
+		grfmsg(2, "StaticGRFInfo: expected 4 bytes for 'INFO'->'MINV' but got " PRINTF_SIZE ", ignoring this field", len);
+		buf->Skip(len);
+	} else {
+		_cur_grfconfig->min_loadable_version = buf->ReadDWord();
+		if (_cur_grfconfig->version == 0) {
+			grfmsg(2, "StaticGRFInfo: 'MINV' defined before 'VRSN' or 'VRSN' set to 0, ignoring this field");
+			_cur_grfconfig->min_loadable_version = 0;
+		}
+		if (_cur_grfconfig->version < _cur_grfconfig->min_loadable_version) {
+			grfmsg(2, "StaticGRFInfo: 'MINV' defined as %d, limiting it to 'VRSN'", _cur_grfconfig->min_loadable_version);
+			_cur_grfconfig->min_loadable_version = _cur_grfconfig->version;
+		}
+	}
+	return true;
+}
 
 static GRFParameterInfo *_cur_parameter; ///< The parameter which info is currently changed by the newgrf.
 
@@ -6583,6 +6604,7 @@ AllowedSubtags _tags_info[] = {
 	AllowedSubtags('NPAR', ChangeGRFNumUsedParams),
 	AllowedSubtags('PALS', ChangeGRFPalette),
 	AllowedSubtags('VRSN', ChangeGRFVersion),
+	AllowedSubtags('MINV', ChangeGRFMinVersion),
 	AllowedSubtags('PARA', HandleParameterInfo),
 	AllowedSubtags()
 };
