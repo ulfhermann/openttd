@@ -46,6 +46,9 @@
 BridgeSpec _bridge[MAX_BRIDGES];
 TileIndex _build_tunnel_endtile;
 
+/* Z position of the bridge sprites relative to bridge height (downwards) */
+static const int BRIDGE_Z_START = 3;
+
 /** Reset the data been eventually changed by the grf loaded. */
 void ResetBridges()
 {
@@ -822,6 +825,42 @@ static CommandCost ClearTile_TunnelBridge(TileIndex tile, DoCommandFlag flags)
 }
 
 /**
+ * Draw a single pillar sprite.
+ * @param psid      Pillarsprite
+ * @param x         Pillar X
+ * @param y         Pillar Y
+ * @param z         Pillar Z
+ * @param w         Bounding box size in X direction
+ * @param h         Bounding box size in Y direction
+ * @param subsprite Optional subsprite for drawing halfpillars
+ */
+static inline void DrawPillar(const PalSpriteID *psid, int x, int y, int z, int w, int h, const SubSprite *subsprite)
+{
+	static const int PILLAR_Z_OFFSET = TILE_HEIGHT - BRIDGE_Z_START; ///< Start offset of pillar wrt. bridge (downwards)
+	AddSortableSpriteToDraw(psid->sprite, psid->pal, x, y, w, h, BB_HEIGHT_UNDER_BRIDGE - PILLAR_Z_OFFSET, z, IsTransparencySet(TO_BRIDGES), 0, 0, -PILLAR_Z_OFFSET, subsprite);
+}
+
+/**
+ * Draw two bridge pillars (north and south).
+ * @param z_bottom Bottom Z
+ * @param z_top    Top Z
+ * @param psid     Pillarsprite
+ * @param x        Pillar X
+ * @param y        Pillar Y
+ * @param w        Bounding box size in X direction
+ * @param h        Bounding box size in Y direction
+ * @return Reached Z at the bottom
+ */
+static int DrawPillarColumn(int z_bottom, int z_top, const PalSpriteID *psid, int x, int y, int w, int h)
+{
+	int cur_z;
+	for (cur_z = z_top; cur_z >= z_bottom; cur_z -= TILE_HEIGHT) {
+		DrawPillar(psid, x, y, cur_z, w, h, NULL);
+	}
+	return cur_z;
+}
+
+/**
  * Draws the pillars under high bridges.
  *
  * @param psid Image and palette of a bridge pillar.
@@ -834,50 +873,48 @@ static CommandCost ClearTile_TunnelBridge(TileIndex tile, DoCommandFlag flags)
  */
 static void DrawBridgePillars(const PalSpriteID *psid, const TileInfo *ti, Axis axis, bool drawfarpillar, int x, int y, int z_bridge)
 {
-	/* Do not draw bridge pillars if they are invisible */
-	if (IsInvisibilitySet(TO_BRIDGES)) return;
+	static const int bounding_box_size[2]  = {16, 2}; ///< bounding box size of pillars along bridge direction
+	static const int back_pillar_offset[2] = { 0, 9}; ///< sprite position offset of back facing pillar
 
-	SpriteID image = psid->sprite;
+	static const int INF = 1000; ///< big number compared to sprite size
+	static const SubSprite half_pillar_sub_sprite[2][2] = {
+		{ {  -14, -INF, INF, INF }, { -INF, -INF, -15, INF } }, // X axis, north and south
+		{ { -INF, -INF,  15, INF }, {   16, -INF, INF, INF } }, // Y axis, north and south
+	};
 
-	if (image != 0) {
-		/* "side" specifies the side the pillars stand on.
-		 * The length of the pillars is then set to the height of the bridge over the corners of this edge.
-		 *
-		 *                axis==AXIS_X  axis==AXIS_Y
-		 *   side==false      SW            NW
-		 *   side==true       NE            SE
-		 *
-		 * I have no clue, why this was done this way.
-		 */
-		bool side = HasBit(image, 0);
+	if (psid->sprite == 0) return;
 
-		/* "dir" means the edge the pillars stand on */
-		DiagDirection dir = AxisToDiagDir(axis);
-		if (side != (axis == AXIS_Y)) dir = ReverseDiagDir(dir);
+	/* Determine ground height under pillars */
+	DiagDirection south_dir = AxisToDiagDir(axis);
+	int z_front_north = ti->z;
+	int z_back_north = ti->z;
+	int z_front_south = ti->z;
+	int z_back_south = ti->z;
+	GetSlopeZOnEdge(ti->tileh, south_dir, &z_front_south, &z_back_south);
+	GetSlopeZOnEdge(ti->tileh, ReverseDiagDir(south_dir), &z_front_north, &z_back_north);
 
-		/* Determine ground height under pillars */
-		int front_height = ti->z;
-		int back_height = ti->z;
-		GetSlopeZOnEdge(ti->tileh, dir, &front_height, &back_height);
+	/* Shared height of pillars */
+	int z_front = max(z_front_north, z_front_south);
+	int z_back = max(z_back_north, z_back_south);
 
-		/* x and y size of bounding-box of pillars */
-		int w = (axis == AXIS_X ? 16 : 2);
-		int h = (axis == AXIS_X ? 2 : 16);
-		/* sprite position of back facing pillar */
-		int x_back = x - (axis == AXIS_X ? 0 : 9);
-		int y_back = y - (axis == AXIS_X ? 9 : 0);
+	/* x and y size of bounding-box of pillars */
+	int w = bounding_box_size[axis];
+	int h = bounding_box_size[OtherAxis(axis)];
+	/* sprite position of back facing pillar */
+	int x_back = x - back_pillar_offset[axis];
+	int y_back = y - back_pillar_offset[OtherAxis(axis)];
 
-		for (int cur_z = z_bridge; cur_z >= front_height || cur_z >= back_height; cur_z -= TILE_HEIGHT) {
-			/* Draw front facing pillar */
-			if (cur_z >= front_height) {
-				AddSortableSpriteToDraw(image, psid->pal, x, y, w, h, BB_HEIGHT_UNDER_BRIDGE - 5, cur_z, IsTransparencySet(TO_BRIDGES), 0, 0, -5);
-			}
+	/* Draw front pillars */
+	int bottom_z = DrawPillarColumn(z_front, z_bridge, psid, x, y, w, h);
+	if (z_front_north < z_front) DrawPillar(psid, x, y, bottom_z, w, h, &half_pillar_sub_sprite[axis][0]);
+	if (z_front_south < z_front) DrawPillar(psid, x, y, bottom_z, w, h, &half_pillar_sub_sprite[axis][1]);
 
-			/* Draw back facing pillar, but not the highest part directly under the bridge-floor */
-			if (drawfarpillar && cur_z >= back_height && cur_z < z_bridge - (int)TILE_HEIGHT) {
-				AddSortableSpriteToDraw(image, psid->pal, x_back, y_back, w, h, BB_HEIGHT_UNDER_BRIDGE - 5, cur_z, IsTransparencySet(TO_BRIDGES), 0, 0, -5);
-			}
-		}
+	/* Draw back pillars, skip top two parts, which are hidden by the bridge */
+	int z_bridge_back = z_bridge - 2 * (int)TILE_HEIGHT;
+	if (drawfarpillar && (z_back_north <= z_bridge_back || z_back_south <= z_bridge_back)) {
+		bottom_z = DrawPillarColumn(z_back, z_bridge_back, psid, x_back, y_back, w, h);
+		if (z_back_north < z_back) DrawPillar(psid, x_back, y_back, bottom_z, w, h, &half_pillar_sub_sprite[axis][0]);
+		if (z_back_south < z_back) DrawPillar(psid, x_back, y_back, bottom_z, w, h, &half_pillar_sub_sprite[axis][1]);
 	}
 }
 
@@ -1174,9 +1211,6 @@ void DrawBridgeMiddle(const TileInfo *ti)
 	 *
 	 */
 
-	/* Z position of the bridge sprites relative to bridge height (downwards) */
-	static const int BRIDGE_Z_START = 3;
-
 	if (!IsBridgeAbove(ti->tile)) return;
 
 	TileIndex rampnorth = GetNorthernBridgeEnd(ti->tile);
@@ -1451,12 +1485,7 @@ static void ChangeTileOwner_TunnelBridge(TileIndex tile, Owner old_owner, Owner 
 static const byte _tunnel_fractcoord_1[4]    = {0x8E, 0x18, 0x81, 0xE8};
 static const byte _tunnel_fractcoord_2[4]    = {0x81, 0x98, 0x87, 0x38};
 static const byte _tunnel_fractcoord_3[4]    = {0x82, 0x88, 0x86, 0x48};
-static const byte _exit_tunnel_track[4]      = {1, 2, 1, 2};
 
-/** Get the trackdir of the exit of a tunnel */
-static const Trackdir _road_exit_tunnel_state[DIAGDIR_END] = {
-	TRACKDIR_X_SW, TRACKDIR_Y_NW, TRACKDIR_X_NE, TRACKDIR_Y_SE
-};
 static const byte _road_exit_tunnel_frame[4] = {2, 7, 9, 4};
 
 static const byte _tunnel_fractcoord_4[4]    = {0x52, 0x85, 0x98, 0x29};
@@ -1469,17 +1498,16 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 	int z = GetSlopeZ(x, y) - v->z_pos;
 
 	if (abs(z) > 2) return VETSB_CANNOT_ENTER;
+	/* Direction into the wormhole */
 	const DiagDirection dir = GetTunnelBridgeDirection(tile);
+	/* Direction of the vehicle */
+	const DiagDirection vdir = DirToDiagDir(v->direction);
 
 	if (IsTunnel(tile)) {
-		byte fc;
-		DiagDirection vdir;
+		byte fc = (x & 0xF) + (y << 4);
 
 		if (v->type == VEH_TRAIN) {
 			Train *t = Train::From(v);
-			fc = (x & 0xF) + (y << 4);
-
-			vdir = DirToDiagDir(t->direction);
 
 			if (t->track != TRACK_BIT_WORMHOLE && dir == vdir) {
 				if (t->IsFrontEngine() && fc == _tunnel_fractcoord_1[dir]) {
@@ -1499,15 +1527,13 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 			if (dir == ReverseDiagDir(vdir) && fc == _tunnel_fractcoord_3[dir] && z == 0) {
 				/* We're at the tunnel exit ?? */
 				t->tile = tile;
-				t->track = (TrackBits)_exit_tunnel_track[dir];
+				t->track = DiagDirToDiagTrackBits(vdir);
 				assert(t->track);
 				t->vehstatus &= ~VS_HIDDEN;
 				return VETSB_ENTERED_WORMHOLE;
 			}
 		} else if (v->type == VEH_ROAD) {
 			RoadVehicle *rv = RoadVehicle::From(v);
-			fc = (x & 0xF) + (y << 4);
-			vdir = DirToDiagDir(v->direction);
 
 			/* Enter tunnel? */
 			if (rv->state != RVSB_WORMHOLE && dir == vdir) {
@@ -1529,7 +1555,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 					) &&
 					z == 0) {
 				rv->tile = tile;
-				rv->state = _road_exit_tunnel_state[dir];
+				rv->state = DiagDirToDiagTrackdir(vdir);
 				rv->frame = _road_exit_tunnel_frame[dir];
 				rv->vehstatus &= ~VS_HIDDEN;
 				return VETSB_ENTERED_WORMHOLE;
@@ -1545,7 +1571,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 			if (v->cur_speed > spd) v->cur_speed = spd;
 		}
 
-		if (DirToDiagDir(v->direction) == dir) {
+		if (vdir == dir) {
 			switch (dir) {
 				default: NOT_REACHED();
 				case DIAGDIR_NE: if ((x & 0xF) != 0)             return VETSB_CONTINUE; break;
@@ -1578,13 +1604,13 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				default: NOT_REACHED();
 			}
 			return VETSB_ENTERED_WORMHOLE;
-		} else if (DirToDiagDir(v->direction) == ReverseDiagDir(dir)) {
+		} else if (vdir == ReverseDiagDir(dir)) {
 			v->tile = tile;
 			switch (v->type) {
 				case VEH_TRAIN: {
 					Train *t = Train::From(v);
 					if (t->track == TRACK_BIT_WORMHOLE) {
-						t->track = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
+						t->track = DiagDirToDiagTrackBits(vdir);
 						return VETSB_ENTERED_WORMHOLE;
 					}
 					break;
@@ -1593,7 +1619,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				case VEH_ROAD: {
 					RoadVehicle *rv = RoadVehicle::From(v);
 					if (rv->state == RVSB_WORMHOLE) {
-						rv->state = _road_exit_tunnel_state[dir];
+						rv->state = DiagDirToDiagTrackdir(vdir);
 						rv->frame = 0;
 						return VETSB_ENTERED_WORMHOLE;
 					}
@@ -1603,7 +1629,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				case VEH_SHIP: {
 					Ship *ship = Ship::From(v);
 					if (ship->state == TRACK_BIT_WORMHOLE) {
-						ship->state = (DiagDirToAxis(dir) == AXIS_X ? TRACK_BIT_X : TRACK_BIT_Y);
+						ship->state = DiagDirToDiagTrackBits(vdir);
 						return VETSB_ENTERED_WORMHOLE;
 					}
 					break;
