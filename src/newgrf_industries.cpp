@@ -236,19 +236,19 @@ uint32 IndustryGetVariable(const ResolverObject *object, byte variable, byte par
 		case 0x46: return industry->construction_date; // Date when built - long format - (in days)
 
 		/* Get industry ID at offset param */
-		case 0x60: return GetIndustryIDAtOffset(GetNearbyTile(parameter, industry->location.tile), industry, object->grffile->grfid);
+		case 0x60: return GetIndustryIDAtOffset(GetNearbyTile(parameter, industry->location.tile, false), industry, object->grffile->grfid);
 
 		/* Get random tile bits at offset param */
 		case 0x61:
-			tile = GetNearbyTile(parameter, tile);
+			tile = GetNearbyTile(parameter, tile, false);
 			return (IsTileType(tile, MP_INDUSTRY) && Industry::GetByTile(tile) == industry) ? GetIndustryRandomBits(tile) : 0;
 
 		/* Land info of nearby tiles */
-		case 0x62: return GetNearbyIndustryTileInformation(parameter, tile, INVALID_INDUSTRY);
+		case 0x62: return GetNearbyIndustryTileInformation(parameter, tile, INVALID_INDUSTRY, false);
 
 		/* Animation stage of nearby tiles */
 		case 0x63:
-			tile = GetNearbyTile(parameter, tile);
+			tile = GetNearbyTile(parameter, tile, false);
 			if (IsTileType(tile, MP_INDUSTRY) && Industry::GetByTile(tile) == industry) {
 				return GetAnimationFrame(tile);
 			}
@@ -458,9 +458,10 @@ uint32 IndustryLocationGetVariable(const ResolverObject *object, byte variable, 
  * @param seed Seed for the random generator.
  * @param initial_random_bits The random bits the industry is going to have after construction.
  * @param founder Industry founder
+ * @param creation_type The circumstances the industry is created under.
  * @return Succeeded or failed command.
  */
-CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uint layout, uint32 seed, uint16 initial_random_bits, Owner founder)
+CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uint layout, uint32 seed, uint16 initial_random_bits, Owner founder, IndustryAvailabilityCallType creation_type)
 {
 	const IndustrySpec *indspec = GetIndustrySpec(type);
 
@@ -480,6 +481,7 @@ CommandCost CheckIfCallBackAllowsCreation(TileIndex tile, IndustryType type, uin
 	NewIndustryResolver(&object, tile, &ind, type);
 	object.GetVariable = IndustryLocationGetVariable;
 	object.callback = CBID_INDUSTRY_LOCATION;
+	object.callback_param2 = creation_type;
 	_industry_creation_random_bits = seed;
 
 	group = SpriteGroup::Resolve(GetIndustrySpec(type)->grf_prop.spritegroup[0], &object);
