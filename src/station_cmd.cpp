@@ -1434,9 +1434,11 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 				}
 			}
 
+			bool build_rail = keep_rail && !IsStationTileBlocked(tile);
+
 			DoClearSquare(tile);
 			DeleteNewGRFInspectWindow(GSF_STATIONS, tile);
-			if (keep_rail) MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
+			if (build_rail) MakeRailNormal(tile, owner, TrackToTrackBits(track), rt);
 
 			st->rect.AfterRemoveTile(st, tile);
 			AddTrackToSignalBuffer(tile, track, owner);
