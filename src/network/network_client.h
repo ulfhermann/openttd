@@ -17,8 +17,30 @@
 #include "network_internal.h"
 
 /** Class for handling the client side of the game connection. */
-class ClientNetworkGameSocketHandler : public NetworkGameSocketHandler {
+class ClientNetworkGameSocketHandler : public ZeroedMemoryAllocator, public NetworkGameSocketHandler {
+private:
+	FILE *download_file; ///< Handle used for downloading the savegame.
+
+	/** Status of the connection with the server. */
+	enum ServerStatus {
+		STATUS_INACTIVE,      ///< The client is not connected nor active.
+		STATUS_COMPANY_INFO,  ///< We are trying to get company information.
+		STATUS_JOIN,          ///< We are trying to join a server.
+		STATUS_NEWGRFS_CHECK, ///< Last action was checking NewGRFs.
+		STATUS_AUTH_GAME,     ///< Last action was requesting game (server) password.
+		STATUS_AUTH_COMPANY,  ///< Last action was requestion company password.
+		STATUS_AUTHORIZED,    ///< The client is authorized at the server.
+		STATUS_MAP_WAIT,      ///< The client is waiting as someone else is downloading the map.
+		STATUS_MAP,           ///< The client is downloading the map.
+		STATUS_ACTIVE,        ///< The client is active within in the game.
+		STATUS_END            ///< Must ALWAYS be on the end of this list!! (period)
+	};
+
+	ServerStatus status; ///< Status of the connection with the server.
+
 protected:
+	friend void NetworkExecuteLocalCommandQueue();
+	friend void NetworkClose(bool close_admins);
 	static ClientNetworkGameSocketHandler *my_client;
 
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_FULL);
@@ -30,7 +52,9 @@ protected:
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_NEED_COMPANY_PASSWORD);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_WELCOME);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_WAIT);
-	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP);
+	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_BEGIN);
+	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_DATA);
+	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_DONE);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_JOIN);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_FRAME);
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_SYNC);
@@ -53,6 +77,9 @@ public:
 	ClientNetworkGameSocketHandler(SOCKET s);
 	~ClientNetworkGameSocketHandler();
 
+	NetworkRecvStatus CloseConnection(NetworkRecvStatus status);
+	void ClientError(NetworkRecvStatus res);
+
 	static NetworkRecvStatus SendCompanyInformationQuery();
 
 	static NetworkRecvStatus SendJoin();
@@ -69,6 +96,10 @@ public:
 	static NetworkRecvStatus SendSetName(const char *name);
 	static NetworkRecvStatus SendRCon(const char *password, const char *command);
 	static NetworkRecvStatus SendMove(CompanyID company, const char *password);
+
+	static void Send();
+	static bool Receive();
+	static bool GameLoop();
 };
 
 typedef ClientNetworkGameSocketHandler MyClient;

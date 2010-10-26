@@ -392,6 +392,7 @@ static const char * const _credits[] = {
 	"  Michael Lutz (michi_cc) - Path based signals",
 	"  Owen Rudge (orudge) - Forum host, OS/2 port",
 	"  Peter Nelson (peter1138) - Spiritual descendant from NewGRF gods",
+	"  Ingo von Borstel (planetmaker) - Support",
 	"  Remko Bijker (Rubidium) - Lead coder and way more",
 	"  Zden\xC4\x9Bk Sojka (SmatZ) - Bug finder and fixer",
 	"  Jos\xC3\xA9 Soler (Terkhen) - General coding",

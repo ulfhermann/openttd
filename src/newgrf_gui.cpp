@@ -81,9 +81,13 @@ static void ShowNewGRFInfo(const GRFConfig *c, uint x, uint y, uint right, uint 
 	SetDParamStr(0, buff);
 	y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_GRF_ID);
 
-	if (_settings_client.gui.newgrf_developer_tools && c->version != 0) {
+	if ((_settings_client.gui.newgrf_developer_tools || _settings_client.gui.newgrf_show_old_versions) && c->version != 0) {
 		SetDParam(0, c->version);
 		y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_VERSION);
+	}
+	if ((_settings_client.gui.newgrf_developer_tools || _settings_client.gui.newgrf_show_old_versions) && c->min_loadable_version != 0) {
+		SetDParam(0, c->min_loadable_version);
+		y = DrawStringMultiLine(x, right, y, bottom, STR_NEWGRF_SETTINGS_MIN_VERSION);
 	}
 
 	/* Prepare and draw MD5 sum */
@@ -258,7 +262,7 @@ struct NewGRFParametersWindow : public Window {
 				DrawArrowButtons(buttons_left, y + 2, COLOUR_YELLOW, (this->clicked_button == i) ? 1 + (this->clicked_increase != rtl) : 0, current_value > par_info->min_value, current_value < par_info->max_value);
 				SetDParam(2, STR_JUST_INT);
 				SetDParam(3, current_value);
-				if (par_info->value_names.Find(current_value) != par_info->value_names.End()) {
+				if (par_info->value_names.Contains(current_value)) {
 					const char *label = GetGRFStringFromGRFText(par_info->value_names.Find(current_value)->second);
 					if (label != NULL) {
 						SetDParam(2, STR_JUST_RAW_STRING);
@@ -1035,7 +1039,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 					bool compatible = HasBit(c->flags, GCF_COMPATIBLE);
 					if (c->status != GCS_NOT_FOUND && !compatible) continue;
 
-					const GRFConfig *f = FindGRFConfig(c->ident.grfid, compatible ? c->original_md5sum : c->ident.md5sum);
+					const GRFConfig *f = FindGRFConfig(c->ident.grfid, FGCM_EXACT, compatible ? c->original_md5sum : c->ident.md5sum);
 					if (f == NULL) continue;
 
 					*l = new GRFConfig(*f);
@@ -1211,7 +1215,7 @@ private:
 			if (_settings_client.gui.newgrf_show_old_versions) {
 				*this->avails.Append() = c;
 			} else {
-				const GRFConfig *best = FindGRFConfig(c->ident.grfid, NULL);
+				const GRFConfig *best = FindGRFConfig(c->ident.grfid, FGCM_NEWEST);
 				/*
 				 * If the best version is 0, then all NewGRF with this GRF ID
 				 * have version 0, so for backward compatability reasons we
