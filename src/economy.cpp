@@ -1184,21 +1184,34 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 	OrderList *orders = v->orders.list;
 	if (orders != NULL) {
 		const Order *first = orders->GetOrderAt(v->cur_order_index);
-		const Order *order = (first == NULL) ? NULL : orders->GetNext(first);
-		do {
-			order = orders->GetNextStoppingOrder(order, v->type == VEH_TRAIN || v->type == VEH_ROAD);
-			if (order != NULL) {
-				next_stations.push_back(order->GetDestination());
-				if ((order->GetLoadType() & OLFB_NO_LOAD) == 0) break;
-				if (order == first) break;
-			} else {
-				/* if the order is NULL we most likely have a nondeterministic one
-				 * It could also be no stopping order at all, but that's a stupid
-				 * thing to do anyway.
-				 */
-				next_stations.push_front(INVALID_STATION);
+		const Order *order = NULL;
+		if (first == NULL) {
+			first = orders->GetFirstOrder();
+			order = first;
+		} else {
+			order = orders->GetNext(first);
+		}
+
+		if (first == NULL) {
+			next_stations.push_front(INVALID_STATION);
+		} else {
+			while(true) {
+				order = orders->GetNextStoppingOrder(order,	v->type == VEH_TRAIN || v->type == VEH_ROAD);
+				if (order != NULL) {
+					next_stations.push_back(order->GetDestination());
+					if ((order->GetLoadType() & OLFB_NO_LOAD) == 0) break;
+					if (order == first) break;
+				} else {
+					/* if the order is NULL we most likely have a nondeterministic one
+					 * It could also be no stopping order at all, but that's a stupid
+					 * thing to do anyway.
+					 */
+					next_stations.push_front(INVALID_STATION);
+					break;
+				}
+				order = orders->GetNext(order);
 			}
-		} while (order != NULL);
+		}
 	}
 
 	/* We have not waited enough time till the next round of loading/unloading */
