@@ -732,6 +732,10 @@ void Load_VEHS()
 			v->last_station_visited = INVALID_STATION;
 		}
 
+		if (CheckSavegameVersion(SL_CAPACITIES)) {
+			v->last_loading_station = INVALID_STATION;
+		}
+
 		if (CheckSavegameVersion(5)) {
 			/* Convert the current_order.type (which is a mix of type and flags, because
 			 *  in those versions, they both were 4 bits big) to type and flags */
