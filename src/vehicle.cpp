@@ -1728,8 +1728,8 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 				curr_station_id, this->type == VEH_ROAD || this->type == VEH_TRAIN);
 	}
 
-	if (this->last_station_visited != INVALID_STATION && this->last_station_visited != curr_station_id) {
-		IncreaseStats(Station::Get(this->last_station_visited), this, curr_station_id, false);
+	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != curr_station_id) {
+		IncreaseStats(Station::Get(this->last_loading_station), this, curr_station_id, false);
 	}
 
 	if (next_station_id != INVALID_STATION && next_station_id != curr_station_id) {
@@ -1737,6 +1737,16 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 	}
 
 	this->last_station_visited = curr_station_id;
+	if ((current_order.GetLoadType() & OLFB_NO_LOAD) == 0) {
+		/* if the vehicle can load here set the last loading station */
+		this->last_loading_station = curr_station_id;
+	} else if ((current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) != 0) {
+		/* if the vehicle cannot load and has to unload or transfer everything
+		 * set the last loading station to invalid as it will leave empty.
+		 */
+		this->last_loading_station = INVALID_STATION;
+	}
+
 	PrepareUnload(curr_station, this, next_station_id); // refers to this->last_station_visited for the distance
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
