@@ -735,6 +735,7 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		v->cargo_cap = rvi->capacity;
 		v->max_speed = rvi->max_speed;
 		v->last_station_visited = INVALID_STATION;
+		v->last_loading_station = INVALID_STATION;
 
 		v->engine_type = e->index;
 		v->tcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
