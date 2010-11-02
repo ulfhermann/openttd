@@ -262,6 +262,7 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, const Engine *
 
 		v->name = NULL;
 		v->last_station_visited = INVALID_STATION;
+		v->last_loading_station = INVALID_STATION;
 
 		v->max_speed = avi->max_speed;
 		v->acceleration = avi->acceleration;
