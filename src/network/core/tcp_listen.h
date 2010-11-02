@@ -1,4 +1,4 @@
-/* $Id: tcp.h 20933 2010-10-15 19:33:08Z rubidium $ */
+/* $Id$ */
 
 /*
  * This file is part of OpenTTD.
@@ -8,7 +8,7 @@
  */
 
 /**
- * @file tcp.h Basic functions to listen for TCP connections.
+ * @file tcp_listen.h Basic functions to listen for TCP connections.
  */
 
 #ifndef NETWORK_CORE_TCP_LISTEN_H
