@@ -103,6 +103,9 @@ Station::~Station()
 		if (v->last_station_visited == this->index) {
 			v->last_station_visited = INVALID_STATION;
 		}
+		if (v->last_loading_station == this->index) {
+			v->last_loading_station = INVALID_STATION;
+		}
 	}
 
 	InvalidateWindowData(WC_STATION_LIST, this->owner, 0);
