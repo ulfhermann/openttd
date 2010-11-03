@@ -429,9 +429,10 @@ void LinkGraph::Join()
  * @param cap maximum capacity of the new path
  * @param dist distance of the new leg
  */
-void Path::Fork(Path *base, int cap, uint dist)
+void Path::Fork(Path *base, uint cap, int free_cap, uint dist)
 {
 	this->capacity = min(base->capacity, cap);
+	this->free_capacity = min(base->free_capacity, free_cap);
 	this->distance = base->distance + dist;
 	assert(this->distance > 0);
 	if (this->parent != base) {
@@ -479,7 +480,8 @@ uint Path::AddFlow(uint new_flow, LinkGraphComponent *graph, bool only_positive)
  */
 Path::Path(NodeID n, bool source)  :
 	distance(source ? 0 : UINT_MAX),
-	capacity(source ? INT_MAX : INT_MIN),
+	capacity(0),
+	free_capacity(source ? INT_MAX : INT_MIN),
 	flow(0), node(n), origin(source ? n : INVALID_NODE),
 	num_children(0), parent(NULL)
 {}
@@ -540,6 +542,8 @@ void InitializeLinkGraphs()
 
 	LinkGraphJob::ClearHandlers();
 	LinkGraphJob::AddHandler(new DemandHandler);
-	LinkGraphJob::AddHandler(new MCFHandler);
+	LinkGraphJob::AddHandler(new MCFHandler<MCF1stPass>);
+	LinkGraphJob::AddHandler(new FlowMapper);
+	LinkGraphJob::AddHandler(new MCFHandler<MCF2ndPass>);
 	LinkGraphJob::AddHandler(new FlowMapper);
 }
