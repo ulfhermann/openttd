@@ -12,8 +12,8 @@
  * @return true if base + the new edge would be better than the path associated
  * with this annotation.
  */
-bool DistanceAnnotation::IsBetter(const DistanceAnnotation *base, int cap,
-		uint dist) const
+bool DistanceAnnotation::IsBetter(const DistanceAnnotation *base, uint cap,
+		int free_cap, uint dist) const
 {
 	/* If any of the paths is disconnected, the other one is better. If both
 	 * are disconnected, this path is better.
@@ -24,74 +24,100 @@ bool DistanceAnnotation::IsBetter(const DistanceAnnotation *base, int cap,
 		return true;
 	}
 
-	if (cap > 0 && base->capacity > 0) {
-		if (this->capacity > 0) {
-			/* If both paths have capacity left, compare their distances. */
-			return base->distance + dist < this->distance;
-		} else {
-			/* If the other path has capacity left and this one hasn't, the
-			 * other one's better.
-			 */
-			return true;
-		}
+	if (free_cap > 0 && base->free_capacity > 0) {
+		/* If both paths have capacity left, compare their distances.
+		 * If the other path has capacity left and this one hasn't, the
+		 * other one's better.
+		 */
+		return this->free_capacity > 0 ? (base->distance + dist < this->distance) : true;
 	} else {
-		if (this->capacity > 0) {
-			/* If the other path doesn't have capacity left, but this one has,
-			 * this one is better.
-			 */
-			return false;
-		} else {
-			/* If both paths are out of capacity, do the regular distance
-			 * comparison.
-			 */
-			return base->distance + dist < this->distance;
-		}
+		/* If the other path doesn't have capacity left, but this one has,
+		 * this one is better.
+		 * If both paths are out of capacity, do the regular distance
+		 * comparison.
+		 */
+		return this->free_capacity > 0 ? false : (base->distance + dist < this->distance);
 	}
 }
 
 /**
- * A slightly modified Dijkstra algorithm. It uses the short_path_saturation
- * setting to artificially decrease capacities.
+ * Determines if an extension to the given Path with the given parameters is
+ * better than this path.
+ * @param base the other path
+ * @param cap the capacity of the new edge to be added to base
+ * @param dist the distance of the new edge
+ * @return true if base + the new edge would be better than the path associated
+ * with this annotation.
+ */
+bool CapacityAnnotation::IsBetter(const CapacityAnnotation *base, uint cap,
+		int free_cap, uint dist) const
+{
+	int min_cap = (min(base->free_capacity, free_cap) << 4) / (min(base->capacity, cap) + 1);
+	int this_cap = this->GetCapacityRatio();
+	if (min_cap == this_cap) {
+		/* If the capacities are the same and the other path isn't disconnected
+		 * choose the shorter path.
+		 */
+		return base->distance == UINT_MAX ? false : (base->distance + dist < this->distance);
+	} else {
+		return min_cap > this_cap;
+	}
+}
+
+/**
+ * A slightly modified Dijkstra algorithm. Grades the paths not necessarily by
+ * distance, but by the value Tannotation computes. It can also be configured
+ * to only use paths already created before and not create new ones. If this is
+ * not done it uses the short_path_saturation setting to artificially decrease
+ * capacities. If a path has already been created is determined by checking the
+ * flows associated with its nodes.
+ * @tparam Tannotation the annotation to be used
  * @param source_node the node where the algorithm starts.
  * @param paths a container for the paths to be calculated
+ * @param create_new_paths if false, only use paths already seen before,
+ *                         otherwise artificially limit the capacity
  */
-void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths)
+template<class Tannotation>
+void MultiCommodityFlow::Dijkstra(NodeID source_node, PathVector &paths,
+		bool create_new_paths)
 {
-	typedef std::set<DistanceAnnotation *, DistanceAnnotation::comp> AnnoSet;
+	typedef std::set<Tannotation *, typename Tannotation::comp> AnnoSet;
 	uint size = this->graph->GetSize();
+	StationID source_station = this->graph->GetNode(source_node).station;
 	AnnoSet annos;
 	paths.resize(size, NULL);
 	for (NodeID node = 0; node < size; ++node) {
-		DistanceAnnotation *anno = new DistanceAnnotation(node, node == source_node);
+		Tannotation *anno = new Tannotation(node, node == source_node);
 		annos.insert(anno);
 		paths[node] = anno;
 	}
 	while(!annos.empty()) {
-		AnnoSet::iterator i = annos.begin();
-		DistanceAnnotation *source = *i;
+		typename AnnoSet::iterator i = annos.begin();
+		Tannotation *source = *i;
 		annos.erase(i);
 		NodeID from = source->GetNode();
 		NodeID to = this->graph->GetFirstEdge(from);
 		while (to != INVALID_NODE) {
 			Edge &edge = this->graph->GetEdge(from, to);
 			assert(edge.distance < UINT_MAX);
-
-			int capacity = edge.capacity;
-			capacity *=	this->graph->GetSettings().short_path_saturation;
-			capacity /= 100;
-			if (capacity == 0) capacity = 1;
-			assert(capacity > 0);
-
-			capacity -= edge.flow;
-			/* punish in-between stops a little */
-			uint distance = edge.distance + 1;
-			DistanceAnnotation *dest = static_cast<DistanceAnnotation *>(paths[to]);
-			if (dest->IsBetter(source, capacity, distance)) {
-				annos.erase(dest);
-				dest->Fork(source, capacity, distance);
-				annos.insert(dest);
+			if (create_new_paths ||
+					this->graph->GetNode(from).flows[source_station]
+					[this->graph->GetNode(to).station] > 0) {
+				uint capacity = edge.capacity;
+				if (create_new_paths) {
+					capacity *= this->graph->GetSettings().short_path_saturation;
+					capacity /= 100;
+					if (capacity == 0) capacity = 1;
+				}
+				/* punish in-between stops a little */
+				uint distance = edge.distance + 1;
+				Tannotation *dest = static_cast<Tannotation *>(paths[to]);
+				if (dest->IsBetter(source, capacity, capacity - edge.flow, distance)) {
+					annos.erase(dest);
+					dest->Fork(source, capacity, capacity - edge.flow, distance);
+					annos.insert(dest);
+				}
 			}
-
 			to = edge.next_edge;
 		}
 	}
@@ -149,7 +175,7 @@ uint MultiCommodityFlow::PushFlow(Edge &edge, Path *path, uint accuracy,
  * @param cycle_begin the path to start at
  * @return the flow along the cycle
  */
-uint MultiCommodityFlow::FindCycleFlow(const PathVector &path, const Path *cycle_begin)
+uint MCF1stPass::FindCycleFlow(const PathVector &path, const Path *cycle_begin)
 {
 	uint flow = UINT_MAX;
 	const Path *cycle_end = cycle_begin;
@@ -166,7 +192,7 @@ uint MultiCommodityFlow::FindCycleFlow(const PathVector &path, const Path *cycle
  * @param cycle_begin a part the cycle to start at
  * @param flow the flow along the cycle
  */
-void MultiCommodityFlow::EliminateCycle(PathVector &path, Path *cycle_begin, uint flow)
+void MCF1stPass::EliminateCycle(PathVector &path, Path *cycle_begin, uint flow)
 {
 	Path *cycle_end = cycle_begin;
 	do {
@@ -187,8 +213,7 @@ void MultiCommodityFlow::EliminateCycle(PathVector &path, Path *cycle_begin, uin
  * @param next_id the next node to be checked
  * @return if any cycles have been found and eliminated
  */
-bool MultiCommodityFlow::EliminateCycles(PathVector &path, NodeID origin_id,
-		NodeID next_id)
+bool MCF1stPass::EliminateCycles(PathVector &path, NodeID origin_id, NodeID next_id)
 {
 	static Path *invalid_path = new Path(INVALID_NODE, true);
 	Path *at_next_pos = path[next_id];
@@ -217,7 +242,8 @@ bool MultiCommodityFlow::EliminateCycles(PathVector &path, NodeID origin_id,
 		}
 		bool found = false;
 		/* search the next hops for nodes we have already visited */
-		for (PathViaMap::iterator via_it = next_hops.begin(); via_it != next_hops.end(); ++via_it)
+		for (PathViaMap::iterator via_it = next_hops.begin();
+				via_it != next_hops.end(); ++via_it)
 		{
 			Path *child = via_it->second;
 			if (child->GetFlow() > 0) {
@@ -233,11 +259,7 @@ bool MultiCommodityFlow::EliminateCycles(PathVector &path, NodeID origin_id,
 		 * could be found in this branch, thus it has to be searched again next
 		 * time we spot it.
 		 */
-		if (found) {
-			path[next_id] = NULL;
-		} else {
-			path[next_id] = invalid_path;
-		}
+		path[next_id] = found ? NULL : invalid_path;
 		return found;
 	} else {
 		/* this node has already been visited => we have a cycle
@@ -258,7 +280,7 @@ bool MultiCommodityFlow::EliminateCycles(PathVector &path, NodeID origin_id,
  * potential cycles.
  * @return if any cycles have been found and eliminated.
  */
-bool MultiCommodityFlow::EliminateCycles()
+bool MCF1stPass::EliminateCycles()
 {
 	bool cycles_found = false;
 	uint size = this->graph->GetSize();
@@ -274,10 +296,10 @@ bool MultiCommodityFlow::EliminateCycles()
 }
 
 /**
- * Run the MCF calculation.
+ * Run the first pass of the MCF calculation.
  * @param graph the component to calculate.
  */
-MultiCommodityFlow::MultiCommodityFlow(LinkGraphComponent *graph) : graph(graph)
+MCF1stPass::MCF1stPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
 {
 	PathVector paths;
 	uint size = this->graph->GetSize();
@@ -288,8 +310,8 @@ MultiCommodityFlow::MultiCommodityFlow(LinkGraphComponent *graph) : graph(graph)
 		more_loops = false;
 
 		for (NodeID source = 0; source < size; ++source) {
-			/* saturate the shortest paths */
-			this->Dijkstra(source, paths);
+			/* first saturate the shortest paths */
+			this->Dijkstra<DistanceAnnotation>(source, paths, true);
 
 			for (NodeID dest = 0; dest < size; ++dest) {
 				Edge &edge = this->graph->GetEdge(source, dest);
@@ -300,16 +322,14 @@ MultiCommodityFlow::MultiCommodityFlow(LinkGraphComponent *graph) : graph(graph)
 					 * available capacity. But if no demand has been assigned
 					 * yet, make an exception and allow any valid path *once*.
 					 */
-					if (path->GetCapacity() > 0 && this->PushFlow(edge, path,
-							accuracy, true) > 0)
-					{
+					if (path->GetFreeCapacity() > 0 && this->PushFlow(edge, path,
+							accuracy, true) > 0) {
 						/* if a path has been found there is a chance we can
 						 * find more
 						 */
 						more_loops = (edge.unsatisfied_demand > 0);
 					} else if (edge.unsatisfied_demand == edge.demand &&
-							path->GetCapacity() > INT_MIN)
-					{
+							path->GetFreeCapacity() > INT_MIN) {
 						this->PushFlow(edge, path, accuracy, false);
 					}
 				}
@@ -321,10 +341,71 @@ MultiCommodityFlow::MultiCommodityFlow(LinkGraphComponent *graph) : graph(graph)
 }
 
 /**
- * Compare two distance annotations. Implements a relation that creates a weak
- * order without duplicates. Avoid accidentally deleting different paths of the
- * same distance in a set. When the annotation is the same node IDs are
- * compared, so there are no equal ranges.
+ * Run the second pass of the MCF calculation.
+ * @param graph the component to calculate.
+ */
+MCF2ndPass::MCF2ndPass(LinkGraphComponent *graph) : MultiCommodityFlow(graph)
+{
+	PathVector paths;
+	uint size = this->graph->GetSize();
+	uint accuracy = this->graph->GetSettings().accuracy;
+	bool demand_left = true;
+	while (demand_left) {
+		demand_left = false;
+		for (NodeID source = 0; source < size; ++source) {
+			/* Then assign all remaining demands */
+			this->Dijkstra<CapacityAnnotation>(source, paths, false);
+			for (NodeID dest = 0; dest < size; ++dest) {
+				Edge &edge = this->graph->GetEdge(source, dest);
+				Path *path = paths[dest];
+				if (edge.unsatisfied_demand > 0 && path->GetFreeCapacity() > INT_MIN)
+				{
+					this->PushFlow(edge, path, accuracy, false);
+					if (edge.unsatisfied_demand > 0) demand_left = true;
+				}
+			}
+			CleanupPaths(source, paths);
+		}
+	}
+}
+
+/**
+ * Relation that creates a weak order without duplicates.
+ * Avoid accidentally deleting different paths of the same capacity/distance in
+ * a set. When the annotation is the same node IDs are compared, so there are
+ * no equal ranges.
+ * @tparam T the type to be compared on
+ * @param x_anno the first value
+ * @param y_anno the second value
+ * @param x the node id associated with the first value
+ * @param y the node id associated with the second value
+ */
+template <typename T>
+bool greater(T x_anno, T y_anno, NodeID x, NodeID y) {
+	if (x_anno > y_anno) {
+		return true;
+	} else if (x_anno < y_anno) {
+		return false;
+	} else {
+		return x > y;
+	}
+}
+
+/**
+ * Compare two capacity annotations.
+ * @param x the first capacity annotation
+ * @param y the second capacity annotation
+ * @return if x is better than y
+ */
+bool CapacityAnnotation::comp::operator()(const CapacityAnnotation *x,
+		const CapacityAnnotation *y) const
+{
+	return x != y && greater<int>(x->GetAnnotation(), y->GetAnnotation(),
+			x->GetNode(), y->GetNode());
+}
+
+/**
+ * Compare two distance annotations.
  * @param x the first distance annotation
  * @param y the second distance annotation
  * @return if x is better than y
@@ -332,13 +413,6 @@ MultiCommodityFlow::MultiCommodityFlow(LinkGraphComponent *graph) : graph(graph)
 bool DistanceAnnotation::comp::operator()(const DistanceAnnotation *x,
 		const DistanceAnnotation *y) const
 {
-	if (x == y) {
-		return false;
-	} else if (x->GetDistance() > y->GetDistance()) {
-		return true;
-	} else if (x->GetDistance() < y->GetDistance()) {
-		return false;
-	} else {
-		return x->GetNode() > y->GetNode();
-	}
+	return x != y && !greater<uint>(x->GetAnnotation(), y->GetAnnotation(),
+			x->GetNode(), y->GetNode());
 }
