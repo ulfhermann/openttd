@@ -290,7 +290,15 @@ public:
 	FORCEINLINE Path *GetParent() {return this->parent;}
 
 	/** get the overall capacity of the path. */
-	FORCEINLINE int GetCapacity() const {return this->capacity;}
+	FORCEINLINE uint GetCapacity() const {return this->capacity;}
+
+	/** get the free capacity of the path. */
+	FORCEINLINE int GetFreeCapacity() const {return this->free_capacity;}
+
+	/** get ratio of free * 16 (so that we get fewer 0) /
+	 * overall capacity + 1 (so that we don't divide by 0)
+	 */
+	FORCEINLINE int GetCapacityRatio() const {return (this->free_capacity << 4) / (this->capacity + 1);}
 
 	/** get the overall distance of the path. */
 	FORCEINLINE uint GetDistance() const {return this->distance;}
@@ -319,11 +327,12 @@ public:
 	}
 	
 	uint AddFlow(uint f, LinkGraphComponent *graph, bool only_positive);
-	void Fork(Path *base, int cap, uint dist);
+	void Fork(Path *base, uint cap, int free_cap, uint dist);
 
 protected:
 	uint distance;     ///< sum(distance of all legs up to this one)
-	int capacity;      ///< this capacity is edge.capacity - edge.flow for the current run of dijkstra
+	uint capacity;     ///< this capacity is min(capacity) fom all edges
+	int free_capacity; ///< this capacity is min(edge.capacity - edge.flow) for the current run of dijkstra
 	uint flow;         ///< this is the flow the current run of the mcf solver assigns
 	NodeID node;       ///< the link graph node this leg passes
 	NodeID origin;     ///< the link graph node this path originates from
