@@ -1746,7 +1746,7 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 			IncreaseStats(curr_station, this, next_station_id, true);
 		}
 	}
-	
+
 	PrepareUnload(this); // refers to this->last_station_visited for the distance
 
 	SetWindowDirty(GetWindowClassForVehicleType(this->type), this->owner);
