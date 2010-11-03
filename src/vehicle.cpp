@@ -1732,17 +1732,19 @@ void Vehicle::BeginLoading(StationID curr_station_id)
 	}
 
 	this->last_station_visited = curr_station_id;
-	if ((current_order.GetLoadType() & OLFB_NO_LOAD) == 0) {
-		/* if the vehicle can load here set the last loading station */
-		this->last_loading_station = curr_station_id;
-		if (next_station_id != INVALID_STATION && next_station_id != curr_station_id) {
-			IncreaseStats(curr_station, this, next_station_id, true);
-		}
-	} else if ((current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) != 0) {
+	if ((this->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) != 0 && 
+			(this->current_order.GetLoadType() & OLFB_NO_LOAD) != 0) {
 		/* if the vehicle cannot load and has to unload or transfer everything
 		 * set the last loading station to invalid as it will leave empty.
 		 */
 		this->last_loading_station = INVALID_STATION;
+	} else if (this->last_loading_station != INVALID_STATION || (this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0) {
+		/* if the vehicle can load here or can stop with cargo loaded set the last loading station */
+		this->last_loading_station = curr_station_id;
+		if (next_station_id != INVALID_STATION && next_station_id != curr_station_id) {
+			/* freeze stats for the next link */
+			IncreaseStats(curr_station, this, next_station_id, true);
+		}
 	}
 
 	PrepareUnload(this); // refers to this->last_station_visited for the distance
