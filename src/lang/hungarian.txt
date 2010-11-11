@@ -348,6 +348,7 @@ STR_SORT_BY_RATING_MIN                                          :Legkevesebb rak
 STR_SORT_BY_ENGINE_ID                                           :JárműID
 STR_SORT_BY_COST                                                :Ár
 STR_SORT_BY_POWER                                               :Telj.
+STR_SORT_BY_TRACTIVE_EFFORT                                     :Vonóerő
 STR_SORT_BY_INTRO_DATE                                          :Bevezetési dátum
 STR_SORT_BY_RUNNING_COST                                        :Üzemeltetési ktsg.
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Telj./Üzemeltetési ktsg.
@@ -2526,7 +2527,7 @@ STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} musz
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} csak a {STRING} vagy nagyobb verziójú OpenTTD-vel működik.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :az adott GRF fájl célja egy másik lefordítása
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Túl sok NewGRF van betöltve.
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :{STRING} betöltése mint statikus NewGRF {STRING} mellett ütközést okozhat.
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :{2:STRING} betöltése mint statikus NewGRF {4:STRING} mellett ütközést okozhat.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Váratlan sprite.
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Ismeretlen "Action 0" tulajdonság.
 STR_NEWGRF_ERROR_INVALID_ID                                     :Érvénytelen ID-használati kisérlet.

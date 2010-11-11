@@ -35,6 +35,7 @@
 #include "string_func.h"
 #include "company_base.h"
 #include "smallmap_gui.h"
+#include "debug.h"
 
 #include "table/strings.h"
 #include "table/control_codes.h"
@@ -1302,6 +1303,22 @@ extern void SortNetworkLanguages();
 static inline void SortNetworkLanguages() {}
 #endif /* ENABLE_NETWORK */
 
+bool LanguagePackHeader::IsValid() const
+{
+	return
+			this->ident        == TO_LE32(LanguagePackHeader::IDENT) &&
+			this->version      == TO_LE32(LANGUAGE_PACK_VERSION) &&
+			this->plural_form  <  LANGUAGE_MAX_PLURAL &&
+			this->text_dir     <= 1 &&
+			this->newgrflangid < MAX_LANG &&
+			StrValid(this->name,                           lastof(this->name)) &&
+			StrValid(this->own_name,                       lastof(this->own_name)) &&
+			StrValid(this->isocode,                        lastof(this->isocode)) &&
+			StrValid(this->digit_group_separator,          lastof(this->digit_group_separator)) &&
+			StrValid(this->digit_group_separator_currency, lastof(this->digit_group_separator_currency)) &&
+			StrValid(this->digit_decimal_separator,        lastof(this->digit_decimal_separator));
+}
+
 bool ReadLanguagePack(int lang_index)
 {
 	/* Current language pack */
@@ -1313,9 +1330,7 @@ bool ReadLanguagePack(int lang_index)
 	const char *end = (char *)lang_pack + len + 1;
 
 	/* We need at least one byte of lang_pack->data */
-	if (end <= lang_pack->data ||
-			lang_pack->ident != TO_LE32(LANGUAGE_PACK_IDENT) ||
-			lang_pack->version != TO_LE32(LANGUAGE_PACK_VERSION)) {
+	if (end <= lang_pack->data || !lang_pack->IsValid()) {
 		free(lang_pack);
 		return false;
 	}
@@ -1452,9 +1467,7 @@ static bool GetLanguageFileHeader(const char *file, LanguagePack *hdr)
 	size_t read = fread(hdr, sizeof(*hdr), 1, f);
 	fclose(f);
 
-	bool ret = read == 1 &&
-			hdr->ident == TO_LE32(LANGUAGE_PACK_IDENT) &&
-			hdr->version == TO_LE32(LANGUAGE_PACK_VERSION);
+	bool ret = read == 1 && hdr->IsValid();
 
 	/* Convert endianness for the windows language ID */
 	if (ret) hdr->winlangid = FROM_LE16(hdr->winlangid);
@@ -1491,6 +1504,7 @@ static int GetLanguageList(Language *langs, int start, int max, const char *path
 			/* Check whether the file is of the correct version */
 			LanguagePack hdr;
 			if (!GetLanguageFileHeader(langs[i].file, &hdr)) {
+				DEBUG(misc, 3, "%s is not a valid language file", langs[i].file);
 				free(langs[i].file);
 				continue;
 			}

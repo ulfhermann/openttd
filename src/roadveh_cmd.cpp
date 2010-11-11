@@ -191,6 +191,9 @@ void RoadVehUpdateCache(RoadVehicle *v)
 		/* Invalidate the vehicle colour map */
 		u->colourmap = PAL_NONE;
 	}
+
+	uint max_speed = GetVehicleProperty(v, PROP_ROADVEH_SPEED, 0);
+	v->vcache.cached_max_speed = (max_speed != 0) ? max_speed * 4 : RoadVehInfo(v->engine_type)->max_speed;
 }
 
 /**
@@ -229,7 +232,6 @@ CommandCost CmdBuildRoadVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		v->cargo_cap = rvi->capacity;
 
 		v->last_station_visited = INVALID_STATION;
-		v->max_speed = rvi->max_speed;
 		v->engine_type = e->index;
 		v->rcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
@@ -384,17 +386,17 @@ void RoadVehicle::UpdateDeltaXY(Direction direction)
  */
 FORCEINLINE int RoadVehicle::GetCurrentMaxSpeed() const
 {
-	if (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) return this->max_speed;
+	if (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) return this->vcache.cached_max_speed;
 
-	int max_speed = this->max_speed;
+	int max_speed = this->vcache.cached_max_speed;
 
 	/* Limit speed to 50% while reversing, 75% in curves. */
 	for (const RoadVehicle *u = this; u != NULL; u = u->Next()) {
 		if (this->state <= RVSB_TRACKDIR_MASK && IsReversingRoadTrackdir((Trackdir)this->state)) {
-			max_speed = this->max_speed / 2;
+			max_speed = this->vcache.cached_max_speed / 2;
 			break;
 		} else if ((u->direction & 1) == 0) {
-			max_speed = this->max_speed * 3 / 4;
+			max_speed = this->vcache.cached_max_speed * 3 / 4;
 		}
 	}
 
@@ -604,6 +606,11 @@ static RoadVehicle *RoadVehFindCloseTo(RoadVehicle *v, int x, int y, Direction d
 	return RoadVehicle::From(rvf.best);
 }
 
+/**
+ * A road vehicle arrives at a station. If it is the first time, create a news item.
+ * @param v  Road vehicle that arrived.
+ * @param st Station where the road vehicle arrived.
+ */
 static void RoadVehArrivesAt(const RoadVehicle *v, Station *st)
 {
 	if (v->IsBus()) {
@@ -662,7 +669,8 @@ static int RoadVehAccelerate(RoadVehicle *v)
 
 	/* Apply bridge speed limit */
 	if (v->state == RVSB_WORMHOLE && !(v->vehstatus & VS_HIDDEN)) {
-		v->cur_speed = min(v->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
+		RoadVehicle *first = v->First();
+		first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
 	}
 
 	/* Update statusbar only if speed has changed to save CPU time */
@@ -748,7 +756,7 @@ static void RoadVehCheckOvertake(RoadVehicle *v, RoadVehicle *u)
 	od.v = v;
 	od.u = u;
 
-	if (u->max_speed >= v->max_speed &&
+	if (u->vcache.cached_max_speed >= v->vcache.cached_max_speed &&
 			!(u->vehstatus & VS_STOPPED) &&
 			u->cur_speed != 0) {
 		return;
@@ -801,7 +809,7 @@ static void RoadZPosAffectSpeed(RoadVehicle *v, byte old_z)
 		v->cur_speed = v->cur_speed * 232 / 256; // slow down by ~10%
 	} else {
 		uint16 spd = v->cur_speed + 2;
-		if (spd <= v->max_speed) v->cur_speed = spd;
+		if (spd <= v->vcache.cached_max_speed) v->cur_speed = spd;
 	}
 }
 
