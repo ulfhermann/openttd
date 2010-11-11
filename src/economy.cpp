@@ -1239,11 +1239,22 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint cargo_count = v->cargo.OnboardCount();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 
+			uint prev_count = ge->cargo.Count();
 			payment->SetCargo(v->cargo_type);
 			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags, next_station, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
+
+			if (ge->cargo.Count() > prev_count) {
+				/* something has been transferred. The station windows need updating. */
+				dirty_station = true;
+				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+					InvalidateWindowData(WC_STATION_LIST, last_visited);
+					SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+				}
+			}
+
 			anything_unloaded = true;
 			dirty_vehicle = true;
 
@@ -1268,10 +1279,19 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		/* update stats */
 		int t;
 		switch (u->type) {
-			case VEH_TRAIN:    t = Train::From(u)->tcache.cached_max_speed; break;
-			case VEH_ROAD:     t = u->max_speed / 2;        break;
-			case VEH_SHIP:     t = u->max_speed;            break;
-			case VEH_AIRCRAFT: t = u->max_speed * 10 / 128; break; // convert to old units
+			case VEH_TRAIN: /* FALL THROUGH */
+			case VEH_SHIP:
+				t = u->vcache.cached_max_speed;
+				break;
+
+			case VEH_ROAD:
+				t = u->vcache.cached_max_speed / 2;
+				break;
+
+			case VEH_AIRCRAFT:
+				t = Aircraft::From(u)->GetSpeedOldUnits(); // Convert to old units.
+				break;
+
 			default: NOT_REACHED();
 		}
 
