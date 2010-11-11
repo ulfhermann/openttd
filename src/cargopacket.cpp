@@ -727,7 +727,6 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 {
 	assert(cp != NULL);
 	this->AddToCache(cp);
-	SetBit(this->station->goods[this->cargo].acceptance_pickup, GoodsEntry::PICKUP);
 
 	StationCargoPacketMap::List &list = this->packets[next];
 	for (StationCargoPacketMap::List::reverse_iterator it(list.rbegin()); it != list.rend(); it++) {

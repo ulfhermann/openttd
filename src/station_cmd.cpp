@@ -3386,25 +3386,30 @@ void ModifyStationRatingAround(TileIndex tile, Owner owner, int amount, uint rad
 
 static uint UpdateStationWaiting(Station *st, CargoID type, uint amount, SourceType source_type, SourceID source_id)
 {
-	amount += st->goods[type].amount_fract;
-	st->goods[type].amount_fract = GB(amount, 0, 8);
+	GoodsEntry &ge = st->goods[type];
+	amount += ge.amount_fract;
+	ge.amount_fract = GB(amount, 0, 8);
 
 	amount >>= 8;
 	/* No new "real" cargo item yet. */
 	if (amount == 0) return 0;
 
-	GoodsEntry &good = st->goods[type];
 	StationID id = st->index;
 	StationID next = INVALID_STATION;
-	FlowStatSet &flow_stats = good.flows[id];
+	FlowStatSet &flow_stats = ge.flows[id];
 	FlowStatSet::iterator i = flow_stats.begin();
 	if (i != flow_stats.end()) {
 		next = i->Via();
-		good.UpdateFlowStats(flow_stats, i, amount);
+		ge.UpdateFlowStats(flow_stats, i, amount);
 	}
 
-	good.cargo.Append(next, new CargoPacket(st->index, st->xy, amount, source_type, source_id));
-	good.supply_new += amount;
+	ge.cargo.Append(next, new CargoPacket(st->index, st->xy, amount, source_type, source_id));
+	ge.supply_new += amount;
+
+	if (!HasBit(ge.acceptance_pickup, GoodsEntry::PICKUP)) {
+		InvalidateWindowData(WC_STATION_LIST, st->index);
+		SetBit(ge.acceptance_pickup, GoodsEntry::PICKUP);
+	}
 
 	TriggerStationAnimation(st, st->xy, SAT_NEW_CARGO, type);
 	AirportAnimationTrigger(st, AAT_STATION_NEW_CARGO, type);

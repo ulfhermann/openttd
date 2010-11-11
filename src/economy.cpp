@@ -1244,6 +1244,12 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
+
+			if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+				InvalidateWindowData(WC_STATION_LIST, last_visited);
+				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+			}
+
 			anything_unloaded = true;
 			dirty_vehicle = true;
 
@@ -1268,10 +1274,19 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		/* update stats */
 		int t;
 		switch (u->type) {
-			case VEH_TRAIN:    t = Train::From(u)->tcache.cached_max_speed; break;
-			case VEH_ROAD:     t = u->max_speed / 2;        break;
-			case VEH_SHIP:     t = u->max_speed;            break;
-			case VEH_AIRCRAFT: t = u->max_speed * 10 / 128; break; // convert to old units
+			case VEH_TRAIN: /* FALL THROUGH */
+			case VEH_SHIP:
+				t = u->vcache.cached_max_speed;
+				break;
+
+			case VEH_ROAD:
+				t = u->vcache.cached_max_speed / 2;
+				break;
+
+			case VEH_AIRCRAFT:
+				t = Aircraft::From(u)->GetSpeedOldUnits(); // Convert to old units.
+				break;
+
 			default: NOT_REACHED();
 		}
 
