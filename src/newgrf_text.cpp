@@ -259,7 +259,7 @@ char *TranslateTTDPatchCodes(uint32 grfid, const char *str)
 			case 0x84: d += Utf8Encode(d, SCC_NEWGRF_PRINT_DATE + c - 0x82); break;
 			case 0x85: d += Utf8Encode(d, SCC_NEWGRF_DISCARD_WORD);       break;
 			case 0x86: d += Utf8Encode(d, SCC_NEWGRF_ROTATE_TOP_4_WORDS); break;
-			case 0x87: d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_LITRES);  break;
+			case 0x87: d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_VOLUME);  break;
 			case 0x88: d += Utf8Encode(d, SCC_BLUE);    break;
 			case 0x89: d += Utf8Encode(d, SCC_SILVER);  break;
 			case 0x8A: d += Utf8Encode(d, SCC_GOLD);    break;
@@ -305,6 +305,12 @@ char *TranslateTTDPatchCodes(uint32 grfid, const char *str)
 						break;
 					case 0x0B:
 						d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_QWORD);
+						break;
+					case 0x0C:
+						d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_STATION_NAME);
+						break;
+					case 0x0D:
+						d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_WEIGHT);
 						break;
 
 					default:
@@ -716,7 +722,9 @@ uint RemapNewGRFStringControlCode(uint scc, char *buf_start, char **buff, const 
 
 			case SCC_NEWGRF_PRINT_HEX_WORD:
 			case SCC_NEWGRF_PRINT_WORD_SPEED:
-			case SCC_NEWGRF_PRINT_WORD_LITRES:
+			case SCC_NEWGRF_PRINT_WORD_VOLUME:
+			case SCC_NEWGRF_PRINT_WORD_WEIGHT:
+			case SCC_NEWGRF_PRINT_WORD_STATION_NAME:
 			case SCC_NEWGRF_PRINT_UNSIGNED_WORD:  *argv = _newgrf_textrefstack->PopUnsignedWord();  break;
 
 			case SCC_NEWGRF_PRINT_DATE:
@@ -764,8 +772,14 @@ uint RemapNewGRFStringControlCode(uint scc, char *buf_start, char **buff, const 
 		case SCC_NEWGRF_PRINT_WORD_SPEED:
 			return SCC_VELOCITY;
 
-		case SCC_NEWGRF_PRINT_WORD_LITRES:
+		case SCC_NEWGRF_PRINT_WORD_VOLUME:
 			return SCC_VOLUME;
+
+		case SCC_NEWGRF_PRINT_WORD_WEIGHT:
+			return SCC_WEIGHT;
+
+		case SCC_NEWGRF_PRINT_WORD_STATION_NAME:
+			return SCC_STATION_NAME;
 
 		case SCC_NEWGRF_DISCARD_WORD:
 		case SCC_NEWGRF_ROTATE_TOP_4_WORDS:

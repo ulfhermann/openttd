@@ -493,7 +493,11 @@ enum ShowNewGRFStateWidgets {
 	SNGRFS_TOGGLE_PALETTE,
 	SNGRFS_APPLY_CHANGES,
 	SNGRFS_RESCAN_FILES,
+	SNGRFS_RESCAN_FILES2,
 	SNGRFS_CONTENT_DOWNLOAD,
+	SNGRFS_CONTENT_DOWNLOAD2,
+	SNGRFS_SHOW_REMOVE, ///< Select active list buttons (0 = normal, 1 = simple layout).
+	SNGRFS_SHOW_APPLY,  ///< Select display of the buttons below the 'details'.
 };
 
 /**
@@ -544,6 +548,9 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 		this->CreateNestedTree(desc);
 		this->vscroll = this->GetScrollbar(SNGRFS_SCROLLBAR);
 		this->vscroll2 = this->GetScrollbar(SNGRFS_SCROLL2BAR);
+
+		this->GetWidget<NWidgetStacked>(SNGRFS_SHOW_REMOVE)->SetDisplayedPlane(this->editable ? 0 : 1);
+		this->GetWidget<NWidgetStacked>(SNGRFS_SHOW_APPLY)->SetDisplayedPlane(this->editable ? 0 : SZSP_HORIZONTAL);
 		this->FinishInitNested(desc);
 
 		InitializeTextBuffer(&this->text, this->edit_str_buf, this->edit_str_size, EDITBOX_MAX_LENGTH);
@@ -610,7 +617,8 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				break;
 			}
 
-			case SNGRFS_CONTENT_DOWNLOAD: {
+			case SNGRFS_CONTENT_DOWNLOAD:
+			case SNGRFS_CONTENT_DOWNLOAD2: {
 				Dimension d = GetStringBoundingBox(STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_BUTTON);
 				*size = maxdim(d, GetStringBoundingBox(STR_INTRO_ONLINE_CONTENT));
 				size->width  += padding.width;
@@ -643,7 +651,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 	virtual void OnPaint()
 	{
 		this->DrawWidgets();
-		this->DrawEditBox(SNGRFS_FILTER);
+		if (this->editable) this->DrawEditBox(SNGRFS_FILTER);
 	}
 
 	/**
@@ -942,6 +950,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				break;
 
 			case SNGRFS_CONTENT_DOWNLOAD:
+			case SNGRFS_CONTENT_DOWNLOAD2:
 				if (!_network_available) {
 					ShowErrorMessage(STR_NETWORK_ERROR_NOTAVAILABLE, INVALID_STRING_ID, WL_ERROR);
 				} else {
@@ -967,6 +976,7 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 				break;
 
 			case SNGRFS_RESCAN_FILES:
+			case SNGRFS_RESCAN_FILES2:
 				ScanNewGRFFiles();
 				this->avail_sel = NULL;
 				this->avail_pos = -1;
@@ -1104,23 +1114,32 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 			has_missing    |= c->status == GCS_NOT_FOUND;
 			has_compatible |= HasBit(c->flags, GCF_COMPATIBLE);
 		}
+		uint16 widget_data;
+		StringID tool_tip;
 		if (has_missing || has_compatible) {
-			this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD)->widget_data = STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_BUTTON;
-			this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD)->tool_tip    = STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP;
+			widget_data = STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_BUTTON;
+			tool_tip    = STR_NEWGRF_SETTINGS_FIND_MISSING_CONTENT_TOOLTIP;
 		} else {
-			this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD)->widget_data = STR_INTRO_ONLINE_CONTENT;
-			this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD)->tool_tip    = STR_INTRO_TOOLTIP_ONLINE_CONTENT;
+			widget_data = STR_INTRO_ONLINE_CONTENT;
+			tool_tip    = STR_INTRO_TOOLTIP_ONLINE_CONTENT;
 		}
+		this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD)->widget_data  = widget_data;
+		this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD)->tool_tip     = tool_tip;
+		this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD2)->widget_data = widget_data;
+		this->GetWidget<NWidgetCore>(SNGRFS_CONTENT_DOWNLOAD2)->tool_tip    = tool_tip;
+
 		this->SetWidgetDisabledState(SNGRFS_PRESET_SAVE, has_missing);
 	}
 
 	virtual void OnMouseLoop()
 	{
-		this->HandleEditBox(SNGRFS_FILTER);
+		if (this->editable) this->HandleEditBox(SNGRFS_FILTER);
 	}
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
 	{
+		if (!this->editable) return ES_NOT_HANDLED;
+
 		switch (keycode) {
 			case WKC_UP:
 				/* scroll up by one */
@@ -1174,6 +1193,8 @@ struct NewGRFWindow : public QueryStringBaseWindow {
 
 	virtual void OnOSKInput(int wid)
 	{
+		if (!this->editable) return;
+
 		this->avails.SetFilterState(!StrEmpty(this->edit_str_buf));
 		this->avails.ForceRebuild();
 		this->InvalidateData(0);
@@ -1270,6 +1291,7 @@ public:
 	NWidgetBase *avs; ///< Widget with the available grfs list and buttons.
 	NWidgetBase *acs; ///< Widget with the active grfs list and buttons.
 	NWidgetBase *inf; ///< Info panel.
+	bool editable;    ///< Editable status of the parent NewGRF window (if \c false, drop all widgets that make the window editable).
 
 	NWidgetNewGRFDisplay(NWidgetBase *avs, NWidgetBase *acs, NWidgetBase *inf) : NWidgetContainer(NWID_HORIZONTAL)
 	{
@@ -1280,10 +1302,17 @@ public:
 		this->Add(this->avs);
 		this->Add(this->acs);
 		this->Add(this->inf);
+
+		this->editable = true; // Temporary setting, 'real' value is set in SetupSmallestSize().
 	}
 
 	virtual void SetupSmallestSize(Window *w, bool init_array)
 	{
+		/* Copy state flag from the window. */
+		assert(dynamic_cast<NewGRFWindow *>(w) != NULL);
+		NewGRFWindow *ngw = (NewGRFWindow *)w;
+		this->editable = ngw->editable;
+
 		this->avs->SetupSmallestSize(w, init_array);
 		this->acs->SetupSmallestSize(w, init_array);
 		this->inf->SetupSmallestSize(w, init_array);
@@ -1332,7 +1361,7 @@ public:
 		/* Use 2 or 3 colmuns? */
 		uint min_three_columns = min_avs_width + min_acs_width + min_inf_width + 2 * INTER_COLUMN_SPACING;
 		uint min_two_columns   = min_list_width + min_inf_width + INTER_COLUMN_SPACING;
-		bool use_three_columns = (min_three_columns + MIN_EXTRA_FOR_3_COLUMNS <= given_width);
+		bool use_three_columns = this->editable && (min_three_columns + MIN_EXTRA_FOR_3_COLUMNS <= given_width);
 
 		/* Info panel is a seperate column in both modes. Compute its width first. */
 		uint extra_width, inf_width;
@@ -1397,12 +1426,12 @@ public:
 			uint acs_width = ComputeMaxSize(this->acs->smallest_x, this->acs->smallest_x + acs_extra_width + extra_width,
 					this->acs->GetHorizontalStepSize(sizing));
 
-			uint min_avs_height = this->avs->smallest_y + this->avs->padding_top + this->avs->padding_bottom;
+			uint min_avs_height = (!this->editable) ? 0 : this->avs->smallest_y + this->avs->padding_top + this->avs->padding_bottom + INTER_LIST_SPACING;
 			uint min_acs_height = this->acs->smallest_y + this->acs->padding_top + this->acs->padding_bottom;
-			uint extra_height = given_height - min_acs_height - min_avs_height - INTER_LIST_SPACING;
+			uint extra_height = given_height - min_acs_height - min_avs_height;
 
 			uint avs_height = ComputeMaxSize(this->avs->smallest_y, this->avs->smallest_y + extra_height / 2, this->avs->GetVerticalStepSize(sizing));
-			extra_height -= avs_height - this->avs->smallest_y;
+			if (this->editable) extra_height -= avs_height - this->avs->smallest_y;
 			uint acs_height = ComputeMaxSize(this->acs->smallest_y, this->acs->smallest_y + extra_height, this->acs->GetVerticalStepSize(sizing));
 
 			/* Assign size and position to the childs. */
@@ -1413,17 +1442,26 @@ public:
 
 				uint ypos = y + this->acs->padding_top;
 				this->acs->AssignSizePosition(sizing, x + this->acs->padding_left, ypos, acs_width, acs_height, rtl);
-				ypos += acs_height + this->acs->padding_bottom + INTER_LIST_SPACING + this->avs->padding_top;
-				this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, ypos, avs_width, avs_height, rtl);
+				if (this->editable) {
+					ypos += acs_height + this->acs->padding_bottom + INTER_LIST_SPACING + this->avs->padding_top;
+					this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, ypos, avs_width, avs_height, rtl);
+				} else {
+					this->avs->AssignSizePosition(sizing, 0, 0, this->avs->smallest_x, this->avs->smallest_y, rtl);
+				}
 			} else {
 				uint ypos = y + this->acs->padding_top;
 				this->acs->AssignSizePosition(sizing, x + this->acs->padding_left, ypos, acs_width, acs_height, rtl);
-				ypos += acs_height + this->acs->padding_bottom + INTER_LIST_SPACING + this->avs->padding_top;
-				this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, ypos, avs_width, avs_height, rtl);
-				x += max(this->acs->current_x + this->acs->padding_left + this->acs->padding_right,
-						this->avs->current_x + this->avs->padding_left + this->avs->padding_right) + INTER_COLUMN_SPACING;
-
-				x += this->inf->padding_left;
+				if (this->editable) {
+					ypos += acs_height + this->acs->padding_bottom + INTER_LIST_SPACING + this->avs->padding_top;
+					this->avs->AssignSizePosition(sizing, x + this->avs->padding_left, ypos, avs_width, avs_height, rtl);
+				} else {
+					this->avs->AssignSizePosition(sizing, 0, 0, this->avs->smallest_x, this->avs->smallest_y, rtl);
+				}
+				uint dx = this->acs->current_x + this->acs->padding_left + this->acs->padding_right;
+				if (this->editable) {
+					dx = max(dx, this->avs->current_x + this->avs->padding_left + this->avs->padding_right);
+				}
+				x += dx + INTER_COLUMN_SPACING + this->inf->padding_left;
 				this->inf->AssignSizePosition(sizing, x, y + this->inf->padding_top, inf_width, inf_height, rtl);
 			}
 		}
@@ -1433,7 +1471,7 @@ public:
 	{
 		if (!IsInsideBS(x, this->pos_x, this->current_x) || !IsInsideBS(y, this->pos_y, this->current_y)) return NULL;
 
-		NWidgetCore *nw = this->avs->GetWidgetFromPos(x, y);
+		NWidgetCore *nw = (this->editable) ? this->avs->GetWidgetFromPos(x, y) : NULL;
 		if (nw == NULL) nw = this->acs->GetWidgetFromPos(x, y);
 		if (nw == NULL) nw = this->inf->GetWidgetFromPos(x, y);
 		return nw;
@@ -1441,7 +1479,7 @@ public:
 
 	virtual void Draw(const Window *w)
 	{
-		this->avs->Draw(w);
+		if (this->editable) this->avs->Draw(w);
 		this->acs->Draw(w);
 		this->inf->Draw(w);
 	}
@@ -1481,14 +1519,23 @@ static const NWidgetPart _nested_newgrf_actives_widgets[] = {
 			NWidget(NWID_VSCROLLBAR, COLOUR_MAUVE, SNGRFS_SCROLLBAR),
 		EndContainer(),
 		/* Buttons. */
-		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPadding(2, 2, 2, 2), SetPIP(0, WD_RESIZEBOX_WIDTH, 0),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_REMOVE), SetFill(1, 0), SetResize(1, 0),
-					SetDataTip(STR_NEWGRF_SETTINGS_REMOVE, STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP),
-			NWidget(NWID_VERTICAL),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_UP), SetFill(1, 0), SetResize(1, 0),
-						SetDataTip(STR_NEWGRF_SETTINGS_MOVEUP, STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP),
-				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_DOWN), SetFill(1, 0), SetResize(1, 0),
-						SetDataTip(STR_NEWGRF_SETTINGS_MOVEDOWN, STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP),
+		NWidget(NWID_SELECTION, INVALID_COLOUR, SNGRFS_SHOW_REMOVE),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPadding(2, 2, 2, 2), SetPIP(0, WD_RESIZEBOX_WIDTH, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_REMOVE), SetFill(1, 0), SetResize(1, 0),
+						SetDataTip(STR_NEWGRF_SETTINGS_REMOVE, STR_NEWGRF_SETTINGS_REMOVE_TOOLTIP),
+				NWidget(NWID_VERTICAL),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_UP), SetFill(1, 0), SetResize(1, 0),
+							SetDataTip(STR_NEWGRF_SETTINGS_MOVEUP, STR_NEWGRF_SETTINGS_MOVEUP_TOOLTIP),
+					NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_MOVE_DOWN), SetFill(1, 0), SetResize(1, 0),
+							SetDataTip(STR_NEWGRF_SETTINGS_MOVEDOWN, STR_NEWGRF_SETTINGS_MOVEDOWN_TOOLTIP),
+				EndContainer(),
+			EndContainer(),
+
+			NWidget(NWID_VERTICAL, NC_EQUALSIZE), SetPadding(2, 2, 2, 2),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_RESCAN_FILES2), SetFill(1, 0), SetResize(1, 0),
+						SetDataTip(STR_NEWGRF_SETTINGS_RESCAN_FILES, STR_NEWGRF_SETTINGS_RESCAN_FILES_TOOLTIP),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_CONTENT_DOWNLOAD2), SetFill(1, 0), SetResize(1, 0),
+						SetDataTip(STR_INTRO_ONLINE_CONTENT, STR_INTRO_TOOLTIP_ONLINE_CONTENT),
 			EndContainer(),
 		EndContainer(),
 	EndContainer(),
@@ -1534,16 +1581,18 @@ static const NWidgetPart _nested_newgrf_infopanel_widgets[] = {
 		NWidget(WWT_EMPTY, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO_TITLE), SetFill(1, 0), SetResize(1, 0),
 		NWidget(WWT_EMPTY, COLOUR_MAUVE, SNGRFS_NEWGRF_INFO), SetFill(1, 1), SetResize(1, 1), SetMinimalSize(150, 100),
 	EndContainer(),
-	/* Right side, buttons. */
-	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(0, WD_RESIZEBOX_WIDTH, 0),
-		NWidget(NWID_VERTICAL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_SET_PARAMETERS), SetFill(1, 0), SetResize(1, 0),
-					SetDataTip(STR_NEWGRF_SETTINGS_SET_PARAMETERS, STR_NULL),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_TOGGLE_PALETTE), SetFill(1, 0), SetResize(1, 0),
-					SetDataTip(STR_NEWGRF_SETTINGS_TOGGLE_PALETTE, STR_NEWGRF_SETTINGS_TOGGLE_PALETTE_TOOLTIP),
+	NWidget(NWID_SELECTION, INVALID_COLOUR, SNGRFS_SHOW_APPLY),
+		/* Right side, buttons. */
+		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(0, WD_RESIZEBOX_WIDTH, 0),
+			NWidget(NWID_VERTICAL),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_SET_PARAMETERS), SetFill(1, 0), SetResize(1, 0),
+						SetDataTip(STR_NEWGRF_SETTINGS_SET_PARAMETERS, STR_NULL),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_TOGGLE_PALETTE), SetFill(1, 0), SetResize(1, 0),
+						SetDataTip(STR_NEWGRF_SETTINGS_TOGGLE_PALETTE, STR_NEWGRF_SETTINGS_TOGGLE_PALETTE_TOOLTIP),
+			EndContainer(),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_APPLY_CHANGES), SetFill(1, 0), SetResize(1, 0),
+					SetDataTip(STR_NEWGRF_SETTINGS_APPLY_CHANGES, STR_NULL),
 		EndContainer(),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_YELLOW, SNGRFS_APPLY_CHANGES), SetFill(1, 0), SetResize(1, 0),
-				SetDataTip(STR_NEWGRF_SETTINGS_APPLY_CHANGES, STR_NULL),
 	EndContainer(),
 };
 

@@ -13,7 +13,6 @@
 static bool v_PositionMainToolbar(int32 p1);
 static bool PopulationInLabelActive(int32 p1);
 static bool RedrawScreen(int32 p1);
-static bool ReinitWindows(int32 p1);
 static bool RedrawSmallmap(int32 p1);
 static bool InvalidateDetailsWindow(int32 p1);
 static bool InvalidateStationBuildWindow(int32 p1);
@@ -40,6 +39,7 @@ static bool ChangeDynamicEngines(int32 p1);
 static bool StationCatchmentChanged(int32 p1);
 static bool InvalidateVehTimetableWindow(int32 p1);
 static bool InvalidateCompanyLiveryWindow(int32 p1);
+static bool InvalidateNewGRFChangeWindows(int32 p1);
 static bool InvalidateIndustryViewWindow(int32 p1);
 
 #ifdef ENABLE_NETWORK
@@ -93,7 +93,7 @@ static bool UpdateClientConfigValues(int32 p1);
  */
 
 #define NSD_GENERAL(name, def, cmd, guiflags, min, max, interval, many, str, proc, load)\
-	{name, (const void*)(ptrdiff_t)(def), {(byte)cmd}, {(uint16)guiflags}, min, max, interval, many, str, proc, load}
+	{name, (const void*)(size_t)(def), {(byte)cmd}, {(uint16)guiflags}, min, max, interval, many, str, proc, load}
 
 /* Macros for various objects to go in the configuration file.
  * This section is for global variables */
@@ -321,7 +321,7 @@ static const SettingDesc _gameopt_settings[] = {
 	/* There are only 21 predefined town_name values (0-20), but you can have more with newgrf action F so allow these bigger values (21-255). Invalid values will fallback to english on use and (undefined string) in GUI. */
 	    SDT_OMANY(GameSettings, game_creation.town_name,  SLE_UINT8,                     0, 0, 0, 255, _town_names, STR_NULL, NULL, NULL),
 	    SDT_OMANY(GameSettings, game_creation.landscape,  SLE_UINT8,                     0, 0, 0, 3, _climates, STR_NULL, NULL, ConvertLandscape),
-	      SDT_VAR(GameSettings, game_creation.snow_line,  SLE_UINT8,                     0, 0, DEF_SNOWLINE_HEIGHT * TILE_HEIGHT, MIN_SNOWLINE_HEIGHT * TILE_HEIGHT, DEF_SNOWLINE_HEIGHT * TILE_HEIGHT, 0, STR_NULL, NULL),
+	      SDT_VAR(GameSettings, game_creation.snow_line,  SLE_UINT8,                     0, 0, DEF_SNOWLINE_HEIGHT * TILE_HEIGHT, MIN_SNOWLINE_HEIGHT * TILE_HEIGHT, MAX_SNOWLINE_HEIGHT * TILE_HEIGHT, 0, STR_NULL, NULL),
 	 SDT_CONDNULL(                                                1,  0, 22),
  SDTC_CONDOMANY(              gui.autosave,             SLE_UINT8, 23, SL_MAX_VERSION, S, 0, 1, 4, _autosave_interval, STR_NULL, NULL),
 	    SDT_OMANY(GameSettings, vehicle.road_side,        SLE_UINT8,                     0, 0, 1, 1, _roadsides, STR_NULL, NULL, NULL),
@@ -364,7 +364,7 @@ const SettingDesc _settings[] = {
 	/* There are only 21 predefined town_name values (0-20), but you can have more with newgrf action F so allow these bigger values (21-255). Invalid values will fallback to english on use and (undefined string) in GUI. */
  SDT_CONDOMANY(GameSettings, game_creation.town_name,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, 0, 255, _town_names,      STR_NULL,                                  NULL, NULL),
  SDT_CONDOMANY(GameSettings, game_creation.landscape,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, 0,   3, _climates,        STR_NULL,                                  NULL, ConvertLandscape),
-	 SDT_CONDVAR(GameSettings, game_creation.snow_line,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, DEF_SNOWLINE_HEIGHT * TILE_HEIGHT, MIN_SNOWLINE_HEIGHT * TILE_HEIGHT, DEF_SNOWLINE_HEIGHT * TILE_HEIGHT, 0, STR_NULL,     NULL),
+	 SDT_CONDVAR(GameSettings, game_creation.snow_line,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, DEF_SNOWLINE_HEIGHT * TILE_HEIGHT, MIN_SNOWLINE_HEIGHT * TILE_HEIGHT, MAX_SNOWLINE_HEIGHT * TILE_HEIGHT, 0, STR_NULL,     NULL),
  SDT_CONDOMANY(GameSettings, vehicle.road_side,                    SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, 1,   1, _roadsides,       STR_NULL,                                  CheckRoadSide, NULL),
 
 	    SDT_BOOL(GameSettings, construction.build_on_slopes,                                        0,NN,  true,                    STR_CONFIG_SETTING_BUILDONSLOPES,          NULL),
@@ -440,7 +440,7 @@ const SettingDesc _settings[] = {
 	    SDT_BOOL(GameSettings, economy.bribe,                                                       0, 0,  true,                    STR_CONFIG_SETTING_BRIBE,                  NULL),
 	SDT_CONDBOOL(GameSettings, economy.exclusive_rights,                        79, SL_MAX_VERSION, 0, 0,  true,                    STR_CONFIG_SETTING_ALLOW_EXCLUSIVE,        NULL),
 	SDT_CONDBOOL(GameSettings, economy.give_money,                              79, SL_MAX_VERSION, 0, 0,  true,                    STR_CONFIG_SETTING_ALLOW_GIVE_MONEY,       NULL),
-	     SDT_VAR(GameSettings, game_creation.snow_line_height,       SLE_UINT8,                     0, 0, DEF_SNOWLINE_HEIGHT, MIN_SNOWLINE_HEIGHT, DEF_SNOWLINE_HEIGHT, 0, STR_CONFIG_SETTING_SNOWLINE_HEIGHT, NULL),
+	     SDT_VAR(GameSettings, game_creation.snow_line_height,       SLE_UINT8,                     0, 0, DEF_SNOWLINE_HEIGHT, MIN_SNOWLINE_HEIGHT, MAX_SNOWLINE_HEIGHT, 0, STR_CONFIG_SETTING_SNOWLINE_HEIGHT, NULL),
 	SDT_CONDNULL(                                                            4,  0, 143),
 	     SDT_VAR(GameSettings, game_creation.starting_year,          SLE_INT32,                     0,NC,DEF_START_YEAR,MIN_YEAR,MAX_YEAR,1,STR_CONFIG_SETTING_STARTING_YEAR,  NULL),
 	SDT_CONDNULL(                                                            4,  0, 104),
@@ -625,8 +625,9 @@ const SettingDesc _settings[] = {
 	 SDTC_BOOL(gui.show_date_in_logs,                    S,  0, false,                        STR_NULL,                                       NULL),
 #endif
 	  SDTC_VAR(gui.developer,                 SLE_UINT8, S,  0,     1,        0,        2, 0, STR_NULL,                                       NULL),
-	 SDTC_BOOL(gui.newgrf_developer_tools,               S,  0, false,                        STR_NULL,                                       ReinitWindows),
+	 SDTC_BOOL(gui.newgrf_developer_tools,               S,  0, false,                        STR_NULL,                                       InvalidateNewGRFChangeWindows),
 	 SDTC_BOOL(gui.ai_developer_tools,                   S,  0, false,                        STR_NULL,                                       NULL),
+	 SDTC_BOOL(gui.scenario_developer,                   S,  0, false,                        STR_NULL,                                       InvalidateNewGRFChangeWindows),
 	 SDTC_BOOL(gui.newgrf_show_old_versions,             S,  0, false,                        STR_NULL,                                       NULL),
 	  SDTC_VAR(gui.console_backlog_timeout,  SLE_UINT16, S,  0,   100,       10,    65500, 0, STR_NULL,                                       NULL),
 	  SDTC_VAR(gui.console_backlog_length,   SLE_UINT16, S,  0,   100,       10,    65500, 0, STR_NULL,                                       NULL),

@@ -702,18 +702,6 @@ static bool RedrawScreen(int32 p1)
 }
 
 /**
- * Reinitalise all windows, i.e. construct their windows
- * from the begin. For example to show a particular button
- * that was previously hidden.
- * @param p1 ignored
- */
-static bool ReinitWindows(int32 p1)
-{
-	ReInitAllWindows();
-	return true;
-}
-
-/**
  * Redraw the smallmap after a colour scheme change.
  * @param p1 Callback parameter.
  * @return Always true.
@@ -890,6 +878,21 @@ static bool InvalidateVehTimetableWindow(int32 p1)
 	return true;
 }
 
+/**
+ * Update any possible saveload window and delete any newgrf dialogue as
+ * its widget parts might change. Reinit all windows as it allows access to the
+ * newgrf debug button.
+ * @param p1 unused.
+ * @return Always true.
+ */
+static bool InvalidateNewGRFChangeWindows(int32 p1)
+{
+	InvalidateWindowClassesData(WC_SAVELOAD);
+	DeleteWindowByClass(WC_GAME_OPTIONS);
+	ReInitAllWindows();
+	return true;
+}
+
 static bool InvalidateCompanyLiveryWindow(int32 p1)
 {
 	InvalidateWindowClassesData(WC_COMPANY_COLOUR);
@@ -941,14 +944,18 @@ void SetDifficultyLevel(int mode, DifficultySettings *gm_opt)
 	}
 }
 
-/**
- * Checks the difficulty levels read from the configuration and
- * forces them to be correct when invalid.
- */
-static void CheckDifficultyLevels()
+/** Checks if any settings are set to incorrect values, and sets them to correct values in that case. */
+static void ValidateSettings()
 {
+	/* Force the difficulty levels to correct values if they are invalid. */
 	if (_settings_newgame.difficulty.diff_level != 3) {
 		SetDifficultyLevel(_settings_newgame.difficulty.diff_level, &_settings_newgame.difficulty);
+	}
+
+	/* Do not allow a custom sea level with the original land generator. */
+	if (_settings_newgame.game_creation.land_generator == 0 &&
+			_settings_newgame.difficulty.quantity_sea_lakes == CUSTOM_SEA_LEVEL_NUMBER_DIFFICULTY) {
+		_settings_newgame.difficulty.quantity_sea_lakes = CUSTOM_SEA_LEVEL_MIN_PERCENTAGE;
 	}
 }
 
@@ -1477,7 +1484,7 @@ void LoadFromConfig()
 	IniLoadSettings(ini, _gameopt_settings, "gameopt", &_settings_newgame);
 	HandleOldDiffCustom(false);
 
-	CheckDifficultyLevels();
+	ValidateSettings();
 	delete ini;
 }
 
