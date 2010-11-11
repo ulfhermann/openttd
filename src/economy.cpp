@@ -1239,15 +1239,20 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			uint cargo_count = v->cargo.OnboardCount();
 			uint amount_unloaded = _settings_game.order.gradual_loading ? min(cargo_count, load_amount) : cargo_count;
 
+			uint prev_count = ge->cargo.Count();
 			payment->SetCargo(v->cargo_type);
 			uint delivered = ge->cargo.TakeFrom(&v->cargo, amount_unloaded, unload_flags, next_station, payment);
 
 			st->time_since_unload = 0;
 			unloading_time += delivered;
 
-			if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
-				InvalidateWindowData(WC_STATION_LIST, last_visited);
-				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+			if (ge->cargo.Count() > prev_count) {
+				/* something has been transferred. The station windows need updating. */
+				dirty_station = true;
+				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+					InvalidateWindowData(WC_STATION_LIST, last_visited);
+					SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+				}
 			}
 
 			anything_unloaded = true;
