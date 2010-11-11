@@ -153,6 +153,11 @@ static void CheckIfShipNeedsService(Vehicle *v)
 	SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 }
 
+void Ship::UpdateCache()
+{
+	this->vcache.cached_max_speed = GetVehicleProperty(this, PROP_SHIP_SPEED, ShipVehInfo(this->engine_type)->max_speed);
+}
+
 Money Ship::GetRunningCost() const
 {
 	const Engine *e = Engine::Get(this->engine_type);
@@ -296,7 +301,7 @@ static bool ShipAccelerate(Vehicle *v)
 	uint spd;
 	byte t;
 
-	spd = min(v->cur_speed + 1, GetVehicleProperty(v, PROP_SHIP_SPEED, v->max_speed));
+	spd = min(v->cur_speed + 1, v->vcache.cached_max_speed);
 
 	/* updates statusbar only if speed have changed to save CPU time */
 	if (spd != v->cur_speed) {
@@ -317,6 +322,11 @@ static bool ShipAccelerate(Vehicle *v)
 	return (t < v->progress);
 }
 
+/**
+ * Ship arrives at a dock. If it is the first time, send out a news item.
+ * @param v  Ship that arrived.
+ * @param st Station being visited.
+ */
 static void ShipArrivesAt(const Vehicle *v, Station *st)
 {
 	/* Check if station was ever visited before */
@@ -595,7 +605,6 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, const Engine *e, u
 
 		v->last_station_visited = INVALID_STATION;
 		v->last_loading_station = INVALID_STATION;
-		v->max_speed = svi->max_speed;
 		v->engine_type = e->index;
 
 		v->reliability = e->reliability;
@@ -610,6 +619,8 @@ CommandCost CmdBuildShip(TileIndex tile, DoCommandFlag flags, const Engine *e, u
 		v->build_year = _cur_year;
 		v->cur_image = SPR_IMG_QUERY;
 		v->random_bits = VehicleRandomBits();
+
+		v->UpdateCache();
 
 		if (e->flags & ENGINE_EXCLUSIVE_PREVIEW) SetBit(v->vehicle_flags, VF_BUILT_AS_PROTOTYPE);
 
