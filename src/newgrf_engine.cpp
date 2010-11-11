@@ -512,21 +512,21 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 			return GetEngineGRFID(v->engine_type);
 
 		case 0x40: // Get length of consist
-			if (!HasBit(v->vcache.cache_valid, 0)) {
-				v->vcache.cached_var40 = PositionHelper(v, false);
-				SetBit(v->vcache.cache_valid, 0);
+			if (!HasBit(v->grf_cache.cache_valid, NCVV_POSITION_CONSIST_LENGTH)) {
+				v->grf_cache.position_consist_length = PositionHelper(v, false);
+				SetBit(v->grf_cache.cache_valid, NCVV_POSITION_CONSIST_LENGTH);
 			}
-			return v->vcache.cached_var40;
+			return v->grf_cache.position_consist_length;
 
 		case 0x41: // Get length of same consecutive wagons
-			if (!HasBit(v->vcache.cache_valid, 1)) {
-				v->vcache.cached_var41 = PositionHelper(v, true);
-				SetBit(v->vcache.cache_valid, 1);
+			if (!HasBit(v->grf_cache.cache_valid, NCVV_POSITION_SAME_ID_LENGTH)) {
+				v->grf_cache.position_same_id_length = PositionHelper(v, true);
+				SetBit(v->grf_cache.cache_valid, NCVV_POSITION_SAME_ID_LENGTH);
 			}
-			return v->vcache.cached_var41;
+			return v->grf_cache.position_same_id_length;
 
 		case 0x42: // Consist cargo information
-			if (!HasBit(v->vcache.cache_valid, 2)) {
+			if (!HasBit(v->grf_cache.cache_valid, NCVV_CONSIST_CARGO_INFORMATION)) {
 				const Vehicle *u;
 				byte cargo_classes = 0;
 				uint8 common_cargos[NUM_CARGO];
@@ -576,17 +576,17 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 				}
 
 				uint8 common_bitnum = (common_cargo_type == CT_INVALID ? 0xFF : CargoSpec::Get(common_cargo_type)->bitnum);
-				v->vcache.cached_var42 = cargo_classes | (common_bitnum << 8) | (common_subtype << 16) | (user_def_data << 24);
-				SetBit(v->vcache.cache_valid, 2);
+				v->grf_cache.consist_cargo_information = cargo_classes | (common_bitnum << 8) | (common_subtype << 16) | (user_def_data << 24);
+				SetBit(v->grf_cache.cache_valid, NCVV_CONSIST_CARGO_INFORMATION);
 			}
-			return v->vcache.cached_var42;
+			return v->grf_cache.consist_cargo_information;
 
 		case 0x43: // Company information
-			if (!HasBit(v->vcache.cache_valid, 3)) {
-				v->vcache.cached_var43 = v->owner | (Company::IsHumanID(v->owner) ? 0 : 0x10000) | (LiveryHelper(v->engine_type, v) << 24);
-				SetBit(v->vcache.cache_valid, 3);
+			if (!HasBit(v->grf_cache.cache_valid, NCVV_COMPANY_INFORMATION)) {
+				v->grf_cache.company_information = v->owner | (Company::IsHumanID(v->owner) ? 0 : 0x10000) | (LiveryHelper(v->engine_type, v) << 24);
+				SetBit(v->grf_cache.cache_valid, NCVV_COMPANY_INFORMATION);
 			}
-			return v->vcache.cached_var43;
+			return v->grf_cache.company_information;
 
 		case 0x44: // Aircraft information
 			if (v->type != VEH_AIRCRAFT) return UINT_MAX;
@@ -715,8 +715,16 @@ static uint32 VehicleGetVariable(const ResolverObject *object, byte variable, by
 		case 0x17: return v->tick_counter;
 		case 0x18:
 		case 0x19: {
-			uint max_speed = v->type == VEH_TRAIN ? Train::From(v)->tcache.cached_max_speed : v->max_speed;
-			if (v->type == VEH_AIRCRAFT) max_speed = max_speed * 10 / 128;
+			uint max_speed;
+			switch (v->type) {
+				case VEH_AIRCRAFT:
+					max_speed = Aircraft::From(v)->GetSpeedOldUnits(); // Convert to old units.
+					break;
+
+				default:
+					max_speed = v->vcache.cached_max_speed;
+					break;
+			}
 			return (variable - 0x80) == 0x18 ? max_speed : GB(max_speed, 8, 8);
 		}
 		case 0x1A: return v->x_pos;

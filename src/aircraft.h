@@ -17,7 +17,7 @@
 
 struct Aircraft;
 
-/** An aircraft can be one ot those types */
+/** An aircraft can be one of those types. */
 enum AircraftSubType {
 	AIR_HELICOPTER = 0, ///< an helicopter
 	AIR_AIRCRAFT   = 2, ///< an airplane
@@ -27,7 +27,7 @@ enum AircraftSubType {
 
 
 /**
- * Handle Aircraft specific tasks when a an Aircraft enters a hangar
+ * Handle Aircraft specific tasks when an Aircraft enters a hangar
  * @param *v Vehicle that enters the hangar
  */
 void HandleAircraftEnterHangar(Aircraft *v);
@@ -58,27 +58,18 @@ void AircraftNextAirportPos_and_Order(Aircraft *v);
 void SetAircraftPosition(Aircraft *v, int x, int y, int z);
 byte GetAircraftFlyingAltitude(const Aircraft *v);
 
-/** Cached oftenly queried (NewGRF) values */
-struct AircraftCache {
-	uint16 cached_max_speed; ///< Cached maximum speed of the aircraft.
-};
-
 /**
  * Aircraft, helicopters, rotors and their shadows belong to this class.
  */
 struct Aircraft : public SpecializedVehicle<Aircraft, VEH_AIRCRAFT> {
-	AircraftCache acache; ///< Cache of often used calculated values
-
-	uint16 crashed_counter;
-	byte pos;
-	byte previous_pos;
-	StationID targetairport;
-	byte state;
+	uint16 crashed_counter;        ///< Timer for handling crash animations.
+	byte pos;                      ///< Next desired position of the aircraft.
+	byte previous_pos;             ///< Previous desired position of the aircraft.
+	StationID targetairport;       ///< Airport to go to next.
+	byte state;                    ///< State of the airport. @see AirportMovementStates
 	DirectionByte last_direction;
-	byte number_consecutive_turns;
-
-	/** Ticks between each turn to prevent > 45 degree turns. */
-	byte turn_counter;
+	byte number_consecutive_turns; ///< Protection to prevent the aircraft of making a lot of turns in order to reach a specific point.
+	byte turn_counter;             ///< Ticks between each turn to prevent > 45 degree turns.
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
 	Aircraft() : SpecializedVehicle<Aircraft, VEH_AIRCRAFT>() {}
@@ -89,10 +80,11 @@ struct Aircraft : public SpecializedVehicle<Aircraft, VEH_AIRCRAFT> {
 	void MarkDirty();
 	void UpdateDeltaXY(Direction direction);
 	ExpensesType GetExpenseType(bool income) const { return income ? EXPENSES_AIRCRAFT_INC : EXPENSES_AIRCRAFT_RUN; }
-	bool IsPrimaryVehicle() const { return this->IsNormalAircraft(); }
+	bool IsPrimaryVehicle() const                  { return this->IsNormalAircraft(); }
 	SpriteID GetImage(Direction direction) const;
-	int GetDisplaySpeed() const { return this->cur_speed; }
-	int GetDisplayMaxSpeed() const { return this->max_speed; }
+	int GetDisplaySpeed() const    { return this->cur_speed; }
+	int GetDisplayMaxSpeed() const { return this->vcache.cached_max_speed; }
+	int GetSpeedOldUnits() const   { return this->vcache.cached_max_speed * 10 / 128; }
 	Money GetRunningCost() const;
 	bool IsInDepot() const { return (this->vehstatus & VS_HIDDEN) != 0 && IsHangarTile(this->tile); }
 	bool Tick();
@@ -116,6 +108,9 @@ struct Aircraft : public SpecializedVehicle<Aircraft, VEH_AIRCRAFT> {
 	}
 };
 
+/**
+ * Macro for iterating over all aircrafts.
+ */
 #define FOR_ALL_AIRCRAFT(var) FOR_ALL_VEHICLES_OF_TYPE(Aircraft, var)
 
 SpriteID GetRotorImage(const Aircraft *v);
