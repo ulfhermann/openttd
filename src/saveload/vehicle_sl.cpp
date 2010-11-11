@@ -180,7 +180,8 @@ void UpdateOldAircraft()
 
 			AircraftLeaveHangar(a); // make airplane visible if it was in a depot for example
 			a->vehstatus &= ~VS_STOPPED; // make airplane moving
-			a->cur_speed = a->max_speed; // so aircraft don't have zero speed while in air
+			UpdateAircraftCache(a);
+			a->cur_speed = a->vcache.cached_max_speed; // so aircraft don't have zero speed while in air
 			if (!a->current_order.IsType(OT_GOTO_STATION) && !a->current_order.IsType(OT_GOTO_DEPOT)) {
 				/* reset current order so aircraft doesn't have invalid "station-only" order */
 				a->current_order.MakeDummy();
@@ -313,20 +314,32 @@ void AfterLoadVehicles(bool part_of_load)
 	FOR_ALL_VEHICLES(v) {
 		assert(v->first != NULL);
 
-		if (v->type == VEH_TRAIN) {
-			Train *t = Train::From(v);
-			if (t->IsFrontEngine() || t->IsFreeWagon()) {
-				t->tcache.last_speed = t->cur_speed; // update displayed train speed
-				t->ConsistChanged(false);
-			}
-		} else if (v->type == VEH_ROAD) {
-			RoadVehicle *rv = RoadVehicle::From(v);
-			if (rv->IsRoadVehFront()) {
-				RoadVehUpdateCache(rv);
-				if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
-					rv->CargoChanged();
+		switch (v->type) {
+			case VEH_TRAIN: {
+				Train *t = Train::From(v);
+				if (t->IsFrontEngine() || t->IsFreeWagon()) {
+					t->tcache.last_speed = t->cur_speed; // update displayed train speed
+					t->ConsistChanged(false);
 				}
+				break;
 			}
+
+			case VEH_ROAD: {
+				RoadVehicle *rv = RoadVehicle::From(v);
+				if (rv->IsRoadVehFront()) {
+					RoadVehUpdateCache(rv);
+					if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
+						rv->CargoChanged();
+					}
+				}
+				break;
+			}
+
+			case VEH_SHIP:
+				Ship::From(v)->UpdateCache();
+				break;
+
+			default: break;
 		}
 	}
 
@@ -431,7 +444,7 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		SLE_CONDNULL(5,                                                            0,  57),
 		     SLE_VAR(Vehicle, engine_type,           SLE_UINT16),
 
-		     SLE_VAR(Vehicle, max_speed,             SLE_UINT16),
+		SLE_CONDNULL(2,                                                            0,  151),
 		     SLE_VAR(Vehicle, cur_speed,             SLE_UINT16),
 		     SLE_VAR(Vehicle, subspeed,              SLE_UINT8),
 		     SLE_VAR(Vehicle, acceleration,          SLE_UINT8),

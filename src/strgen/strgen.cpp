@@ -13,6 +13,7 @@
 #include "../core/alloc_func.hpp"
 #include "../core/endian_func.hpp"
 #include "../core/math_func.hpp"
+#include "../core/mem_func.hpp"
 #include "../string_func.h"
 #include "../strings_type.h"
 #include "strgen.h"
@@ -62,11 +63,11 @@ struct LangString {
 	uint16 hash_next;      // next hash entry
 	uint16 index;
 	int line;              // line of string in source-file
-	Case *english_case;    // cases for english
 	Case *translated_case; // cases for foreign
 };
 
 static LangString *_strings[65536];
+static LanguagePackHeader _lang; ///< Header information about a language.
 
 
 #define HASH_SIZE 32767
@@ -77,16 +78,8 @@ static int _put_pos;
 static int _next_string_id;
 
 static uint32 _hash;
-static char _lang_name[32], _lang_ownname[32], _lang_isocode[16];
-static char _lang_digit_group_separator[8];
-static char _lang_digit_group_separator_currency[8];
-static char _lang_digit_decimal_separator[8];
-static byte _lang_pluralform;
-static byte _lang_textdir;
-static uint16 _lang_winlangid;
-static uint8 _lang_newgrflangid;
-#define MAX_NUM_GENDER 8
-static char _genders[MAX_NUM_GENDER][16];
+#define MAX_NUM_GENDERS 8
+static char _genders[MAX_NUM_GENDERS][16];
 static uint _numgenders;
 
 /* contains the name of all cases. */
@@ -352,16 +345,16 @@ static void EmitPlural(char *buf, int value)
 		error("%s: No plural words", _cur_ident);
 	}
 
-	if (_plural_forms[_lang_pluralform].plural_count != nw) {
+	if (_plural_forms[_lang.plural_form].plural_count != nw) {
 		if (_translated) {
 			error("%s: Invalid number of plural forms. Expecting %d, found %d.", _cur_ident,
-				_plural_forms[_lang_pluralform].plural_count, nw);
+				_plural_forms[_lang.plural_form].plural_count, nw);
 		} else {
 			if ((_show_todo & 2) != 0) strgen_warning("'%s' is untranslated. Tweaking english string to allow compilation for plural forms", _cur_ident);
-			if (nw > _plural_forms[_lang_pluralform].plural_count) {
-				nw = _plural_forms[_lang_pluralform].plural_count;
+			if (nw > _plural_forms[_lang.plural_form].plural_count) {
+				nw = _plural_forms[_lang.plural_form].plural_count;
 			} else {
-				for (; nw < _plural_forms[_lang_pluralform].plural_count; nw++) {
+				for (; nw < _plural_forms[_lang.plural_form].plural_count; nw++) {
 					words[nw] = words[nw - 1];
 				}
 			}
@@ -385,14 +378,14 @@ static void EmitGender(char *buf, int value)
 
 		/* This is a {G=DER} command */
 		for (nw = 0; ; nw++) {
-			if (nw >= MAX_NUM_GENDER) error("G argument '%s' invalid", buf);
+			if (nw >= MAX_NUM_GENDERS) error("G argument '%s' invalid", buf);
 			if (strcmp(buf, _genders[nw]) == 0) break;
 		}
 		/* now nw contains the gender index */
 		PutUtf8(SCC_GENDER_INDEX);
 		PutByte(nw);
 	} else {
-		const char *words[MAX_NUM_GENDER];
+		const char *words[MAX_NUM_GENDERS];
 
 		/* This is a {G 0 foo bar two} command.
 		 * If no relative number exists, default to +0 */
@@ -403,7 +396,7 @@ static void EmitGender(char *buf, int value)
 			error("Command '%s' can't have a gender", cmd == NULL ? "<empty>" : cmd->cmd);
 		}
 
-		for (nw = 0; nw < MAX_NUM_GENDER; nw++) {
+		for (nw = 0; nw < MAX_NUM_GENDERS; nw++) {
 			words[nw] = ParseWord(&buf);
 			if (words[nw] == NULL) break;
 		}
@@ -512,64 +505,66 @@ static const CmdStruct *ParseCommandString(const char **str, char *param, int *a
 }
 
 
-static void HandlePragma(char *str)
+static void HandlePragma(char *str, bool master)
 {
 	if (!memcmp(str, "id ", 3)) {
 		_next_string_id = strtoul(str + 3, NULL, 0);
 	} else if (!memcmp(str, "name ", 5)) {
-		strecpy(_lang_name, str + 5, lastof(_lang_name));
+		strecpy(_lang.name, str + 5, lastof(_lang.name));
 	} else if (!memcmp(str, "ownname ", 8)) {
-		strecpy(_lang_ownname, str + 8, lastof(_lang_ownname));
+		strecpy(_lang.own_name, str + 8, lastof(_lang.own_name));
 	} else if (!memcmp(str, "isocode ", 8)) {
-		strecpy(_lang_isocode, str + 8, lastof(_lang_isocode));
+		strecpy(_lang.isocode, str + 8, lastof(_lang.isocode));
 	} else if (!memcmp(str, "plural ", 7)) {
-		_lang_pluralform = atoi(str + 7);
-		if (_lang_pluralform >= lengthof(_plural_forms)) {
-			error("Invalid pluralform %d", _lang_pluralform);
+		_lang.plural_form = atoi(str + 7);
+		if (_lang.plural_form >= lengthof(_plural_forms)) {
+			error("Invalid pluralform %d", _lang.plural_form);
 		}
 	} else if (!memcmp(str, "textdir ", 8)) {
 		if (!memcmp(str + 8, "ltr", 3)) {
-			_lang_textdir = TD_LTR;
+			_lang.text_dir = TD_LTR;
 		} else if (!memcmp(str + 8, "rtl", 3)) {
-			_lang_textdir = TD_RTL;
+			_lang.text_dir = TD_RTL;
 		} else {
 			error("Invalid textdir %s", str + 8);
 		}
 	} else if (!memcmp(str, "digitsep ", 9)) {
 		str += 9;
-		strecpy(_lang_digit_group_separator, strcmp(str, "{NBSP}") == 0 ? NBSP : str, lastof(_lang_digit_group_separator));
+		strecpy(_lang.digit_group_separator, strcmp(str, "{NBSP}") == 0 ? NBSP : str, lastof(_lang.digit_group_separator));
 	} else if (!memcmp(str, "digitsepcur ", 12)) {
 		str += 12;
-		strecpy(_lang_digit_group_separator_currency, strcmp(str, "{NBSP}") == 0 ? NBSP : str, lastof(_lang_digit_group_separator_currency));
+		strecpy(_lang.digit_group_separator_currency, strcmp(str, "{NBSP}") == 0 ? NBSP : str, lastof(_lang.digit_group_separator_currency));
 	} else if (!memcmp(str, "decimalsep ", 11)) {
 		str += 11;
-		strecpy(_lang_digit_decimal_separator, strcmp(str, "{NBSP}") == 0 ? NBSP : str, lastof(_lang_digit_decimal_separator));
+		strecpy(_lang.digit_decimal_separator, strcmp(str, "{NBSP}") == 0 ? NBSP : str, lastof(_lang.digit_decimal_separator));
 	} else if (!memcmp(str, "winlangid ", 10)) {
 		const char *buf = str + 10;
 		long langid = strtol(buf, NULL, 16);
 		if (langid > (long)UINT16_MAX || langid < 0) {
 			error("Invalid winlangid %s", buf);
 		}
-		_lang_winlangid = (uint16)langid;
+		_lang.winlangid = (uint16)langid;
 	} else if (!memcmp(str, "grflangid ", 10)) {
 		const char *buf = str + 10;
 		long langid = strtol(buf, NULL, 16);
 		if (langid >= 0x7F || langid < 0) {
 			error("Invalid grflangid %s", buf);
 		}
-		_lang_newgrflangid = (uint8)langid;
+		_lang.newgrflangid = (uint8)langid;
 	} else if (!memcmp(str, "gender ", 7)) {
+		if (master) error("Genders are not allowed in the base translation.");
 		char *buf = str + 7;
 
 		for (;;) {
 			const char *s = ParseWord(&buf);
 
 			if (s == NULL) break;
-			if (_numgenders >= MAX_NUM_GENDER) error("Too many genders, max %d", MAX_NUM_GENDER);
+			if (_numgenders >= MAX_NUM_GENDERS) error("Too many genders, max %d", MAX_NUM_GENDERS);
 			strecpy(_genders[_numgenders], s, lastof(_genders[_numgenders]));
 			_numgenders++;
 		}
 	} else if (!memcmp(str, "case ", 5)) {
+		if (master) error("Cases are not allowed in the base translation.");
 		char *buf = str + 5;
 
 		for (;;) {
@@ -693,7 +688,7 @@ static bool CheckCommandsMatch(char *a, char *b, const char *name)
 static void HandleString(char *str, bool master)
 {
 	if (*str == '#') {
-		if (str[1] == '#' && str[2] != '#') HandlePragma(str + 2);
+		if (str[1] == '#' && str[2] != '#') HandlePragma(str + 2, master);
 		return;
 	}
 
@@ -730,13 +725,13 @@ static void HandleString(char *str, bool master)
 	LangString *ent = HashFind(str);
 
 	if (master) {
-		if (ent != NULL && casep == NULL) {
-			strgen_error("String name '%s' is used multiple times", str);
+		if (casep != NULL) {
+			strgen_error("Cases in the base translation are not supported.");
 			return;
 		}
 
-		if (ent == NULL && casep != NULL) {
-			strgen_error("Base string name '%s' doesn't exist yet. Define it before defining a case.", str);
+		if (ent != NULL) {
+			strgen_error("String name '%s' is used multiple times", str);
 			return;
 		}
 
@@ -756,17 +751,7 @@ static void HandleString(char *str, bool master)
 			HashAdd(str, ent);
 		}
 
-		if (casep != NULL) {
-			Case *c = MallocT<Case>(1);
-
-			c->caseidx = ResolveCaseName(casep, strlen(casep));
-			c->string = strdup(s);
-			c->next = ent->english_case;
-			ent->english_case = c;
-		} else {
-			ent->english = strdup(s);
-		}
-
+		ent->english = strdup(s);
 	} else {
 		if (ent == NULL) {
 			strgen_warning("String name '%s' does not exist in master file", str);
@@ -824,16 +809,11 @@ static void ParseFile(const char *file, bool english)
 	_file = file;
 
 	/* For each new file we parse, reset the genders, and language codes */
+	MemSetT(&_lang, 0);
 	_numgenders = 0;
-	_lang_name[0] = _lang_ownname[0] = _lang_isocode[0] = '\0';
-	strecpy(_lang_digit_group_separator, ",", lastof(_lang_digit_group_separator));
-	strecpy(_lang_digit_group_separator_currency, ",", lastof(_lang_digit_group_separator_currency));
-	strecpy(_lang_digit_decimal_separator, ".", lastof(_lang_digit_decimal_separator));
-	_lang_textdir = TD_LTR;
-	_lang_winlangid = 0x0000; // neutral language code
-	_lang_newgrflangid = 0; // standard english
-	/* TODO:!! We can't reset the cases. In case the translated strings
-	 * derive some strings from english.... */
+	strecpy(_lang.digit_group_separator, ",", lastof(_lang.digit_group_separator));
+	strecpy(_lang.digit_group_separator_currency, ",", lastof(_lang.digit_group_separator_currency));
+	strecpy(_lang.digit_decimal_separator, ".", lastof(_lang.digit_decimal_separator));
 
 	in = fopen(file, "r");
 	if (in == NULL) error("Cannot open file");
@@ -845,7 +825,7 @@ static void ParseFile(const char *file, bool english)
 	}
 	fclose(in);
 
-	if (StrEmpty(_lang_name) || StrEmpty(_lang_ownname) || StrEmpty(_lang_isocode)) {
+	if (StrEmpty(_lang.name) || StrEmpty(_lang.own_name) || StrEmpty(_lang.isocode)) {
 		error("Language must include ##name, ##ownname and ##isocode");
 	}
 }
@@ -955,8 +935,8 @@ static void WriteStringsH(const char *filename)
 	fprintf(_output_file, "\nstatic const StringID STR_LAST_STRINGID = 0x%X;\n\n", next - 1);
 
 	fprintf(_output_file,
-		"static const uint LANGUAGE_PACK_IDENT = 0x474E414C; // Big Endian value for 'LANG' (LE is 0x 4C 41 4E 47)\n"
-		"static const uint LANGUAGE_PACK_VERSION = 0x%X;\n\n", (uint)_hash
+		"static const uint LANGUAGE_PACK_VERSION = 0x%X;\n"
+		"static const uint LANGUAGE_MAX_PLURAL = %d;\n\n", (uint)_hash, (uint)lengthof(_plural_forms)
 	);
 
 	fprintf(_output_file, "#endif /* TABLE_STRINGS_H */\n");
@@ -1066,35 +1046,23 @@ static void WriteLength(FILE *f, uint length)
 static void WriteLangfile(const char *filename)
 {
 	uint in_use[32];
-	LanguagePackHeader hdr;
 
 	_output_filename = filename;
 	_output_file = fopen(filename, "wb");
 	if (_output_file == NULL) error("can't open %s", filename);
 
-	memset(&hdr, 0, sizeof(hdr));
 	for (int i = 0; i != 32; i++) {
 		uint n = CountInUse(i);
 
 		in_use[i] = n;
-		hdr.offsets[i] = TO_LE16(n);
+		_lang.offsets[i] = TO_LE16(n);
 	}
 
-	/* see line 655: fprintf(..."\tLANGUAGE_PACK_IDENT = 0x474E414C,...) */
-	hdr.ident = TO_LE32(0x474E414C); // Big Endian value for 'LANG'
-	hdr.version = TO_LE32(_hash);
-	hdr.plural_form = _lang_pluralform;
-	hdr.text_dir = _lang_textdir;
-	hdr.winlangid = TO_LE16(_lang_winlangid);
-	hdr.newgrflangid = _lang_newgrflangid;
-	strecpy(hdr.name, _lang_name, lastof(hdr.name));
-	strecpy(hdr.own_name, _lang_ownname, lastof(hdr.own_name));
-	strecpy(hdr.isocode, _lang_isocode, lastof(hdr.isocode));
-	strecpy(hdr.digit_group_separator, _lang_digit_group_separator, lastof(hdr.digit_group_separator));
-	strecpy(hdr.digit_group_separator_currency, _lang_digit_group_separator_currency, lastof(hdr.digit_group_separator_currency));
-	strecpy(hdr.digit_decimal_separator, _lang_digit_decimal_separator, lastof(hdr.digit_decimal_separator));
+	_lang.ident = TO_LE32(LanguagePackHeader::IDENT);
+	_lang.version = TO_LE32(_hash);
+	_lang.winlangid = TO_LE16(_lang.winlangid);
 
-	fwrite(&hdr, sizeof(hdr), 1, _output_file);
+	fwrite(&_lang, sizeof(_lang), 1, _output_file);
 
 	for (int i = 0; i != 32; i++) {
 		for (uint j = 0; j != in_use[i]; j++) {
@@ -1129,7 +1097,7 @@ static void WriteLangfile(const char *filename)
 				casep = ls->translated_case;
 				cmdp = ls->translated;
 			} else {
-				casep = ls->english_case;
+				casep = NULL;
 				cmdp = ls->english;
 			}
 
