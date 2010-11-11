@@ -285,7 +285,7 @@ Money Engine::GetCost() const
 }
 
 /**
- * Returns max speed for display purposes
+ * Returns max speed of the engine for display purposes
  * @return max speed in km-ish/h
  */
 uint Engine::GetDisplayMaxSpeed() const
@@ -294,8 +294,10 @@ uint Engine::GetDisplayMaxSpeed() const
 		case VEH_TRAIN:
 			return GetEngineProperty(this->index, PROP_TRAIN_SPEED, this->u.rail.max_speed);
 
-		case VEH_ROAD:
-			return this->u.road.max_speed / 2;
+		case VEH_ROAD: {
+			uint max_speed = GetEngineProperty(this->index, PROP_ROADVEH_SPEED, 0);
+			return (max_speed != 0) ? max_speed * 2 : this->u.road.max_speed / 2;
+		}
 
 		case VEH_SHIP:
 			return GetEngineProperty(this->index, PROP_SHIP_SPEED, this->u.ship.max_speed) / 2;
@@ -312,6 +314,12 @@ uint Engine::GetDisplayMaxSpeed() const
 	}
 }
 
+/**
+ * Returns the power of the engine for display
+ * and sorting purposes.
+ * Only trains and road vehicles have power
+ * @return power in display units hp
+ */
 uint Engine::GetPower() const
 {
 	/* Only trains and road vehicles have 'power'. */
@@ -326,7 +334,7 @@ uint Engine::GetPower() const
 }
 
 /**
- * Returns the weight for display purposes.
+ * Returns the weight of the engine for display purposes.
  * For dual-headed train-engines this is the weight of both heads
  * @return weight in display units metric tons
  */
@@ -344,7 +352,7 @@ uint Engine::GetDisplayWeight() const
 }
 
 /**
- * Returns the tractive effort for display purposes.
+ * Returns the tractive effort of the engine for display purposes.
  * For dual-headed train-engines this is the tractive effort of both heads
  * @return tractive effort in display units kN
  */
@@ -362,7 +370,7 @@ uint Engine::GetDisplayMaxTractiveEffort() const
 }
 
 /**
- * Returns the vehicle's life length in days.
+ * Returns the vehicle's (not model's!) life length in days.
  * @return the life length
  */
 Date Engine::GetLifeLengthInDays() const
