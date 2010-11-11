@@ -686,7 +686,7 @@ uint ShowRefitOptionsList(int left, int right, int y, EngineID engine)
 	} else {
 		/* Check if we are able to refit to more cargo types and unable to. If
 		 * so, invert the cargo types to list those that we can't refit to. */
-		if (CountBits(cmask ^ lmask) < CountBits(cmask)) {
+		if (CountBits(cmask ^ lmask) < CountBits(cmask) && CountBits(cmask ^ lmask) <= 7) {
 			cmask ^= lmask;
 			b = InlineString(b, STR_PURCHASE_INFO_ALL_BUT);
 		}
@@ -806,12 +806,7 @@ static int CDECL VehicleReliabilitySorter(const Vehicle * const *a, const Vehicl
 /** Sort vehicles by their max speed */
 static int CDECL VehicleMaxSpeedSorter(const Vehicle * const *a, const Vehicle * const *b)
 {
-	int r = 0;
-	if ((*a)->type == VEH_TRAIN && (*b)->type == VEH_TRAIN) {
-		r = Train::From(*a)->tcache.cached_max_speed - Train::From(*b)->tcache.cached_max_speed;
-	} else {
-		r = (*a)->max_speed - (*b)->max_speed;
-	}
+	int r = (*a)->vcache.cached_max_speed - (*b)->vcache.cached_max_speed;
 	return (r != 0) ? r : VehicleNumberSorter(a, b);
 }
 
