@@ -173,7 +173,7 @@ static CommandCost CheckBridgeSlopeSouth(Axis axis, Slope *tileh, uint *z)
 CommandCost CheckBridgeAvailability(BridgeType bridge_type, uint bridge_len, DoCommandFlag flags)
 {
 	if (flags & DC_QUERY_COST) {
-		if (bridge_len <= (_settings_game.construction.longbridges ? 100U : 16U)) return CommandCost();
+		if (bridge_len <= (_settings_game.construction.longbridges ? MAX_BRIDGE_LENGTH_LONGBRIDGES : MAX_BRIDGE_LENGTH)) return CommandCost();
 		return_cmd_error(STR_ERROR_BRIDGE_TOO_LONG);
 	}
 
@@ -183,7 +183,7 @@ CommandCost CheckBridgeAvailability(BridgeType bridge_type, uint bridge_len, DoC
 	if (b->avail_year > _cur_year) return CMD_ERROR;
 
 	uint max = b->max_length;
-	if (max >= 16 && _settings_game.construction.longbridges) max = 100;
+	if (max >= MAX_BRIDGE_LENGTH && _settings_game.construction.longbridges) max = MAX_BRIDGE_LENGTH_LONGBRIDGES;
 
 	if (b->min_length > bridge_len) return CMD_ERROR;
 	if (bridge_len <= max) return CommandCost();
@@ -257,7 +257,7 @@ CommandCost CmdBuildBridge(TileIndex end_tile, DoCommandFlag flags, uint32 p1, u
 		CommandCost ret = CheckBridgeAvailability(bridge_type, bridge_len, flags);
 		if (ret.Failed()) return ret;
 	} else {
-		if (bridge_len > (_settings_game.construction.longbridges ? 100U : 16U)) return_cmd_error(STR_ERROR_BRIDGE_TOO_LONG);
+		if (bridge_len > (_settings_game.construction.longbridges ? MAX_BRIDGE_LENGTH_LONGBRIDGES : MAX_BRIDGE_LENGTH)) return_cmd_error(STR_ERROR_BRIDGE_TOO_LONG);
 	}
 
 	uint z_start;
@@ -1481,17 +1481,38 @@ static void ChangeTileOwner_TunnelBridge(TileIndex tile, Owner old_owner, Owner 
 	}
 }
 
+/**
+ * Frame when the 'enter tunnel' sound should be played. This is the second
+ * frame on a tile, so the sound is played shortly after entering the tunnel
+ * tile, while the vehicle is still visible.
+ */
+static const byte TUNNEL_SOUND_FRAME = 1;
 
-static const byte _tunnel_fractcoord_1[4]    = {0x8E, 0x18, 0x81, 0xE8};
-static const byte _tunnel_fractcoord_2[4]    = {0x81, 0x98, 0x87, 0x38};
-static const byte _tunnel_fractcoord_3[4]    = {0x82, 0x88, 0x86, 0x48};
+/**
+ * Frame when a train should be hidden in a tunnel with a certain direction.
+ * This differs per direction, because of visibility / bounding box issues.
+ * Note that direction, in this case, is the direction leading into the tunnel.
+ * When entering a tunnel, hide the train when it reaches the given frame.
+ * When leaving a tunnel, show the train when it is one frame further
+ * to the 'outside', i.e. at (TILE_SIZE-1) - (frame) + 1
+ */
+static const byte _train_tunnel_frame[DIAGDIR_END] = {14, 9, 7, 12};
 
-static const byte _road_exit_tunnel_frame[4] = {2, 7, 9, 4};
+/**
+ * Frame when a road vehicle enters a tunnel with a certain direction.
+ * This differs per direction, like for trains. To make it even more fun,
+ * the entry and exit frames are not consistent. This is the entry frame,
+ * the road vehicle should be hidden when it reaches this frame.
+ */
+static const byte _road_enter_tunnel_frame[DIAGDIR_END] = {13, 8, 8, 13};
 
-static const byte _tunnel_fractcoord_4[4]    = {0x52, 0x85, 0x98, 0x29};
-static const byte _tunnel_fractcoord_5[4]    = {0x92, 0x89, 0x58, 0x25};
-static const byte _tunnel_fractcoord_6[4]    = {0x92, 0x89, 0x56, 0x45};
-static const byte _tunnel_fractcoord_7[4]    = {0x52, 0x85, 0x96, 0x49};
+/**
+ * Frame when a road vehicle exits a tunnel with a certain direction.
+ * Note that 'direction' refers to the tunnel direction, not the
+ * vehicle direction. As stated above, this frame is not the same as the
+ * entry frame, for unclear (historical?) reasons.
+ */
+static const byte _road_exit_tunnel_frame[DIAGDIR_END] = {2, 7, 9, 4};
 
 static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex tile, int x, int y)
 {
@@ -1502,21 +1523,23 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 	const DiagDirection dir = GetTunnelBridgeDirection(tile);
 	/* Direction of the vehicle */
 	const DiagDirection vdir = DirToDiagDir(v->direction);
+	/* New position of the vehicle on the tile */
+	byte pos = (DiagDirToAxis(vdir) == AXIS_X ? x : y) & TILE_UNIT_MASK;
+	/* Number of units moved by the vehicle since entering the tile */
+	byte frame = (vdir == DIAGDIR_NE || vdir == DIAGDIR_NW) ? TILE_SIZE - 1 - pos : pos;
 
 	if (IsTunnel(tile)) {
-		byte fc = (x & 0xF) + (y << 4);
-
 		if (v->type == VEH_TRAIN) {
 			Train *t = Train::From(v);
 
 			if (t->track != TRACK_BIT_WORMHOLE && dir == vdir) {
-				if (t->IsFrontEngine() && fc == _tunnel_fractcoord_1[dir]) {
+				if (t->IsFrontEngine() && frame == TUNNEL_SOUND_FRAME) {
 					if (!PlayVehicleSound(t, VSE_TUNNEL) && RailVehInfo(t->engine_type)->engclass == 0) {
 						SndPlayVehicleFx(SND_05_TRAIN_THROUGH_TUNNEL, v);
 					}
 					return VETSB_CONTINUE;
 				}
-				if (fc == _tunnel_fractcoord_2[dir]) {
+				if (frame == _train_tunnel_frame[dir]) {
 					t->tile = tile;
 					t->track = TRACK_BIT_WORMHOLE;
 					t->vehstatus |= VS_HIDDEN;
@@ -1524,7 +1547,7 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				}
 			}
 
-			if (dir == ReverseDiagDir(vdir) && fc == _tunnel_fractcoord_3[dir] && z == 0) {
+			if (dir == ReverseDiagDir(vdir) && frame == TILE_SIZE - _train_tunnel_frame[dir] && z == 0) {
 				/* We're at the tunnel exit ?? */
 				t->tile = tile;
 				t->track = DiagDirToDiagTrackBits(vdir);
@@ -1537,8 +1560,9 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 
 			/* Enter tunnel? */
 			if (rv->state != RVSB_WORMHOLE && dir == vdir) {
-				if (fc == _tunnel_fractcoord_4[dir] ||
-						fc == _tunnel_fractcoord_5[dir]) {
+				if (frame == _road_enter_tunnel_frame[dir]) {
+					/* Frame should be equal to the next frame number in the RV's movement */
+					assert(frame == rv->frame + 1);
 					rv->tile = tile;
 					rv->state = RVSB_WORMHOLE;
 					rv->vehstatus |= VS_HIDDEN;
@@ -1548,37 +1572,28 @@ static VehicleEnterTileStatus VehicleEnter_TunnelBridge(Vehicle *v, TileIndex ti
 				}
 			}
 
-			if (dir == ReverseDiagDir(vdir) && (
-						/* We're at the tunnel exit ?? */
-						fc == _tunnel_fractcoord_6[dir] ||
-						fc == _tunnel_fractcoord_7[dir]
-					) &&
-					z == 0) {
+			/* We're at the tunnel exit ?? */
+			if (dir == ReverseDiagDir(vdir) && frame == _road_exit_tunnel_frame[dir] && z == 0) {
 				rv->tile = tile;
 				rv->state = DiagDirToDiagTrackdir(vdir);
-				rv->frame = _road_exit_tunnel_frame[dir];
+				rv->frame = frame;
 				rv->vehstatus &= ~VS_HIDDEN;
 				return VETSB_ENTERED_WORMHOLE;
 			}
 		}
 	} else { // IsBridge(tile)
-
-		if (v->IsPrimaryVehicle() && v->type != VEH_SHIP) {
+		if (v->type != VEH_SHIP) {
 			/* modify speed of vehicle */
 			uint16 spd = GetBridgeSpec(GetBridgeType(tile))->speed;
 
 			if (v->type == VEH_ROAD) spd *= 2;
-			if (v->cur_speed > spd) v->cur_speed = spd;
+			Vehicle *first = v->First();
+			first->cur_speed = min(first->cur_speed, spd);
 		}
 
 		if (vdir == dir) {
-			switch (dir) {
-				default: NOT_REACHED();
-				case DIAGDIR_NE: if ((x & 0xF) != 0)             return VETSB_CONTINUE; break;
-				case DIAGDIR_SE: if ((y & 0xF) != TILE_SIZE - 1) return VETSB_CONTINUE; break;
-				case DIAGDIR_SW: if ((x & 0xF) != TILE_SIZE - 1) return VETSB_CONTINUE; break;
-				case DIAGDIR_NW: if ((y & 0xF) != 0)             return VETSB_CONTINUE; break;
-			}
+			/* Vehicle enters bridge at the last frame inside this tile. */
+			if (frame != TILE_SIZE - 1) return VETSB_CONTINUE;
 			switch (v->type) {
 				case VEH_TRAIN: {
 					Train *t = Train::From(v);

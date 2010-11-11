@@ -1205,7 +1205,10 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 			 * accept cargo that was loaded at the same station. */
 			if ((u->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) && (!accepted || v->cargo.OnboardCount() == cargo_count)) {
 				remaining = v->cargo.MoveTo(&ge->cargo, amount_unloaded, u->current_order.GetUnloadType() & OUFB_TRANSFER ? VehicleCargoList::MTA_TRANSFER : VehicleCargoList::MTA_UNLOAD, payment);
-				SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+				if (!HasBit(ge->acceptance_pickup, GoodsEntry::PICKUP)) {
+					InvalidateWindowData(WC_STATION_LIST, last_visited);
+					SetBit(ge->acceptance_pickup, GoodsEntry::PICKUP);
+				}
 
 				dirty_vehicle = dirty_station = true;
 			} else if (!accepted) {
@@ -1243,10 +1246,19 @@ static uint32 LoadUnloadVehicle(Vehicle *v, uint32 cargos_reserved)
 		/* update stats */
 		int t;
 		switch (u->type) {
-			case VEH_TRAIN:    t = Train::From(u)->tcache.cached_max_speed; break;
-			case VEH_ROAD:     t = u->max_speed / 2;        break;
-			case VEH_SHIP:     t = u->max_speed;            break;
-			case VEH_AIRCRAFT: t = u->max_speed * 10 / 128; break; // convert to old units
+			case VEH_TRAIN: /* FALL THROUGH */
+			case VEH_SHIP:
+				t = u->vcache.cached_max_speed;
+				break;
+
+			case VEH_ROAD:
+				t = u->vcache.cached_max_speed / 2;
+				break;
+
+			case VEH_AIRCRAFT:
+				t = Aircraft::From(u)->GetSpeedOldUnits(); // Convert to old units.
+				break;
+
 			default: NOT_REACHED();
 		}
 
