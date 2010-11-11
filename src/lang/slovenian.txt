@@ -327,6 +327,7 @@ STR_SORT_BY_RATING_MIN                                          :Najnižja ocena
 STR_SORT_BY_ENGINE_ID                                           :ID motorja (klasično urejanje)
 STR_SORT_BY_COST                                                :Cena
 STR_SORT_BY_POWER                                               :Moč
+STR_SORT_BY_TRACTIVE_EFFORT                                     :Vlečna moč
 STR_SORT_BY_INTRO_DATE                                          :Datum uvedbe
 STR_SORT_BY_RUNNING_COST                                        :Cena delovanja
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Moč/Cena delovanja
@@ -2504,7 +2505,7 @@ STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} je p
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} potrebuje OpenTTD različico {STRING} ali boljšo.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF datoteka je bila narejena za prevod
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Preveč NewGrf-jev je naloženih.
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Nalaganje {STRING} kot statični NewGRF z/s {STRING} lahko povzroči desinhronizacijo.
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Nalaganje {2:STRING} kot statični NewGRF z/s {4:STRING} lahko povzroči desinhronizacijo.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Nepričakovana sličica.
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Neznan ukaz 0 lastnosti.
 STR_NEWGRF_ERROR_INVALID_ID                                     :Poskus uporabe neveljavnega ID-ja.
@@ -3809,7 +3810,7 @@ STR_ERROR_CAN_T_CHANGE_SIGN_NAME                                :{WHITE}Ne more�
 STR_ERROR_CAN_T_DELETE_SIGN                                     :{WHITE}Nemogoče brisanje znaka...
 
 # Translatable comment for OpenTTD's desktop shortcut
-STR_DESKTOP_SHORTCUT_COMMENT                                    :Klon Transport Tycoona Deluxe
+STR_DESKTOP_SHORTCUT_COMMENT                                    :Simulacija, temelječa na Transport Tycoonu Deluxe
 
 ##id 0x2000
 # Town building names
