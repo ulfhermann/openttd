@@ -285,7 +285,7 @@ void Train::ConsistChanged(bool same_length)
 	}
 
 	/* store consist weight/max speed in cache */
-	this->tcache.cached_max_speed = max_speed;
+	this->vcache.cached_max_speed = max_speed;
 	this->tcache.cached_tilt = train_can_tilt;
 	this->tcache.cached_max_curve_speed = this->GetCurveSpeedLimit();
 
@@ -465,8 +465,6 @@ int Train::GetCurrentMaxSpeed() const
 void Train::UpdateAcceleration()
 {
 	assert(this->IsFrontEngine());
-
-	this->max_speed = this->acc_cache.cached_max_track_speed;
 
 	uint power = this->acc_cache.cached_power;
 	uint weight = this->acc_cache.cached_weight;
@@ -733,7 +731,6 @@ CommandCost CmdBuildRailVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		v->spritenum = rvi->image_index;
 		v->cargo_type = e->GetDefaultCargoType();
 		v->cargo_cap = rvi->capacity;
-		v->max_speed = rvi->max_speed;
 		v->last_station_visited = INVALID_STATION;
 
 		v->engine_type = e->index;
@@ -1984,7 +1981,7 @@ static void HandleLocomotiveSmokeCloud(const Train *v)
 				 * third of its maximum speed spectrum. Steam emission finally normalises at very close to train's maximum speed.
 				 * REGULATION:
 				 * - instead of 1, 4 / 2^smoke_amount (max. 2) is used to provide sufficient regulation to steam puffs' amount. */
-				if (GB(v->tick_counter, 0, ((4 >> _settings_game.vehicle.smoke_amount) + ((u->cur_speed * 3) / u->tcache.cached_max_speed))) == 0) {
+				if (GB(v->tick_counter, 0, ((4 >> _settings_game.vehicle.smoke_amount) + ((u->cur_speed * 3) / u->vcache.cached_max_speed))) == 0) {
 					CreateEffectVehicleRel(v, x, y, 10, EV_STEAM_SMOKE);
 					sound = true;
 				}
@@ -2002,8 +1999,8 @@ static void HandleLocomotiveSmokeCloud(const Train *v)
 				 * REGULATION:
 				 * - up to which speed a diesel train is emitting smoke (with reduced/small setting only until 1/2 of max_speed),
 				 * - in Chance16 - the last value is 512 / 2^smoke_amount (max. smoke when 128 = smoke_amount of 2). */
-				if (u->cur_speed < (u->tcache.cached_max_speed >> (2 >> _settings_game.vehicle.smoke_amount)) &&
-						Chance16((64 - ((u->cur_speed << 5) / u->tcache.cached_max_speed) + (32 >> (u->acc_cache.cached_power >> 10)) - (32 >> (u->acc_cache.cached_weight >> 9))), (512 >> _settings_game.vehicle.smoke_amount))) {
+				if (u->cur_speed < (u->vcache.cached_max_speed >> (2 >> _settings_game.vehicle.smoke_amount)) &&
+						Chance16((64 - ((u->cur_speed << 5) / u->vcache.cached_max_speed) + (32 >> (u->acc_cache.cached_power >> 10)) - (32 >> (u->acc_cache.cached_weight >> 9))), (512 >> _settings_game.vehicle.smoke_amount))) {
 					CreateEffectVehicleRel(v, 0, 0, 10, EV_DIESEL_SMOKE);
 					sound = true;
 				}
@@ -2017,7 +2014,7 @@ static void HandleLocomotiveSmokeCloud(const Train *v)
 				 * REGULATION:
 				 * - in Chance16 the last value is 360 / 2^smoke_amount (max. sparks when 90 = smoke_amount of 2). */
 				if (GB(v->tick_counter, 0, 2) == 0 &&
-						Chance16((6 - ((u->cur_speed << 2) / u->tcache.cached_max_speed)), (360 >> _settings_game.vehicle.smoke_amount))) {
+						Chance16((6 - ((u->cur_speed << 2) / u->vcache.cached_max_speed)), (360 >> _settings_game.vehicle.smoke_amount))) {
 					CreateEffectVehicleRel(v, 0, 0, 10, EV_ELECTRIC_SPARK);
 					sound = true;
 				}
@@ -2781,14 +2778,16 @@ void Train::MarkDirty()
 int Train::UpdateSpeed()
 {
 	uint accel;
+	uint16 max_speed;
 
 	switch (_settings_game.vehicle.train_acceleration_model) {
 		default: NOT_REACHED();
 		case AM_ORIGINAL:
+			max_speed = this->acc_cache.cached_max_track_speed;
 			accel = this->acceleration * (this->GetAccelerationStatus() == AS_BRAKE ? -4 : 2);
 			break;
 		case AM_REALISTIC:
-			this->max_speed = this->GetCurrentMaxSpeed();
+			max_speed = this->GetCurrentMaxSpeed();
 			accel = this->GetAcceleration();
 			break;
 	}
@@ -2796,8 +2795,8 @@ int Train::UpdateSpeed()
 	uint spd = this->subspeed + accel;
 	this->subspeed = (byte)spd;
 	{
-		int tempmax = this->max_speed;
-		if (this->cur_speed > this->max_speed) {
+		int tempmax = max_speed;
+		if (this->cur_speed > max_speed) {
 			tempmax = this->cur_speed - (this->cur_speed / 10) - 1;
 		}
 		this->cur_speed = spd = Clamp(this->cur_speed + ((int)spd >> 8), 0, tempmax);
@@ -2810,6 +2809,11 @@ int Train::UpdateSpeed()
 	return scaled_spd;
 }
 
+/**
+ * Trains enters a station, send out a news item if it is the first train, and start loading.
+ * @param v Train that entered the station.
+ * @param station Station visited.
+ */
 static void TrainEnterStation(Train *v, StationID station)
 {
 	v->last_station_visited = station;
@@ -2871,7 +2875,7 @@ static inline void AffectSpeedByZChange(Train *v, byte old_z)
 		v->cur_speed -= (v->cur_speed * rsp->z_up >> 8);
 	} else {
 		uint16 spd = v->cur_speed + rsp->z_down;
-		if (spd <= v->max_speed) v->cur_speed = spd;
+		if (spd <= v->acc_cache.cached_max_track_speed) v->cur_speed = spd;
 	}
 }
 
@@ -3292,8 +3296,8 @@ static void TrainController(Train *v, Vehicle *nomove)
 			 * - for tunnels, only the part when the vehicle is not visible (part of enter/exit tile too)
 			 * - for bridges, only the middle part - without the bridge heads */
 			if (!(v->vehstatus & VS_HIDDEN)) {
-				v->cur_speed =
-					min(v->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed);
+				Train *first = v->First();
+				first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed);
 			}
 
 			if (IsTileType(gp.new_tile, MP_TUNNELBRIDGE) && HasBit(VehicleEnterTile(v, gp.new_tile, gp.x, gp.y), VETS_ENTERED_WORMHOLE)) {
