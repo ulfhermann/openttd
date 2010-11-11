@@ -76,7 +76,6 @@ struct TrainCache {
 	bool cached_tilt;           ///< train can tilt; feature provides a bonus in curves
 
 	/* cached max. speed / acceleration data */
-	uint16 cached_max_speed;    ///< max speed of the consist. (minimum of the max speed of all vehicles in the consist)
 	int cached_max_curve_speed; ///< max consist speed limited by curves
 
 	/**
@@ -127,7 +126,7 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	bool IsPrimaryVehicle() const { return this->IsFrontEngine(); }
 	SpriteID GetImage(Direction direction) const;
 	int GetDisplaySpeed() const { return this->tcache.last_speed; }
-	int GetDisplayMaxSpeed() const { return this->tcache.cached_max_speed; }
+	int GetDisplayMaxSpeed() const { return this->vcache.cached_max_speed; }
 	Money GetRunningCost() const;
 	int GetDisplayImageWidth(Point *offset = NULL) const;
 	bool IsInDepot() const;
@@ -439,11 +438,12 @@ protected: // These functions should not be called outside acceleration code.
 
 	/**
 	 * Gets the area used for calculating air drag.
-	 * @return Area of the engine.
+	 * @return Area of the engine in m^2.
 	 */
 	FORCEINLINE byte GetAirDragArea() const
 	{
-		return 120;
+		/* Air drag is higher in tunnels due to the limited cross-section. */
+		return (this->track == TRACK_BIT_WORMHOLE && this->vehstatus & VS_HIDDEN) ? 28 : 14;
 	}
 
 	/**
@@ -466,20 +466,24 @@ protected: // These functions should not be called outside acceleration code.
 
 	/**
 	 * Calculates the current speed of this vehicle.
-	 * @return Current speed in mph.
+	 * @return Current speed in km/h-ish.
 	 */
 	FORCEINLINE uint16 GetCurrentSpeed() const
 	{
-		return this->cur_speed * 10 / 16;
+		return this->cur_speed;
 	}
 
 	/**
 	 * Returns the rolling friction coefficient of this vehicle.
-	 * @return Rolling friction coefficient in [1e-3].
+	 * @return Rolling friction coefficient in [1e-4].
 	 */
 	FORCEINLINE uint32 GetRollingFriction() const
 	{
-		return 35;
+		/* Rolling friction for steel on steel is between 0.1% and 0.2%,
+		 * but we use a higher value here to get better game-play results.
+		 * The friction coefficient increases with speed in a way that
+		 * it doubles at 512 km/h, triples at 1024 km/h and so on. */
+		return 30 * (512 + this->GetCurrentSpeed()) / 512;
 	}
 
 	/**
@@ -497,16 +501,7 @@ protected: // These functions should not be called outside acceleration code.
 	 */
 	FORCEINLINE uint32 GetSlopeSteepness() const
 	{
-		return 20 * _settings_game.vehicle.train_slope_steepness; // 1% slope * slope steepness
-	}
-
-	/**
-	 * Gets the maximum speed of the vehicle, ignoring the limitations of the kind of track the vehicle is on.
-	 * @return Maximum speed of the vehicle.
-	 */
-	FORCEINLINE uint16 GetInitialMaxSpeed() const
-	{
-		return this->tcache.cached_max_speed;
+		return _settings_game.vehicle.train_slope_steepness;
 	}
 
 	/**
