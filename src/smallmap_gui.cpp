@@ -1698,7 +1698,7 @@ public:
 
 			uint number_of_rows = this->GetNumberRowsLegend(columns);
 
-			bool rtl = _dynlang.text_dir == TD_RTL;
+			bool rtl = _current_text_dir == TD_RTL;
 			uint y_org = r.top + WD_FRAMERECT_TOP;
 			uint x = rtl ? r.right - this->column_width - WD_FRAMERECT_RIGHT : r.left + WD_FRAMERECT_LEFT;
 			uint y = y_org;
@@ -1892,7 +1892,7 @@ public:
 					uint number_of_rows = max(CeilDiv(entry_count, columns), this->min_number_of_fixed_rows);
 					if (line >= number_of_rows) break;
 
-					bool rtl = _dynlang.text_dir == TD_RTL;
+					bool rtl = _current_text_dir == TD_RTL;
 					int x = pt.x - wi->pos_x;
 					if (rtl) x = wi->current_x - x;
 					uint column = (x - WD_FRAMERECT_LEFT) / this->column_width;

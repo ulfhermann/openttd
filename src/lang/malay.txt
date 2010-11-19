@@ -165,14 +165,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}NO
 STR_ABBREV_ALL                                                  :{TINYFONT}ALL
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :penumpang
-STR_BAGS                                                        :beg
-STR_TONS                                                        :tan
-STR_LITERS                                                      :liter
-STR_ITEMS                                                       :barangan
-STR_CRATES                                                      :kotak
-STR_RES_OTHER                                                   :lain
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} penumpang
+STR_BAGS                                                        :{COMMA} beg
+STR_TONS                                                        :{COMMA} tan
+STR_LITERS                                                      :{COMMA} liter
+STR_ITEMS                                                       :{COMMA} barangan
+STR_CRATES                                                      :{COMMA} kotak
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :lain
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Biru Gelap
@@ -1090,7 +1089,7 @@ STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Model p
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Asal
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistik
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Kecerunan bukit untuk keretapi {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Halangkan keretapi dan kapal daripada membuat pusingan 90 darjah: {ORANGE}{STRING} {LTBLUE} (bukan dengan OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Halangkan keretapi dan kapal daripada membuat pusingan 90 darjah: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Sambungkan stesen keretapi yang dibina bersebelahan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Benarkan penyambungan stesen yang tidak bersebelahan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Gunakan algoritma muatan yang diperbaiki: {ORANGE}{STRING}
