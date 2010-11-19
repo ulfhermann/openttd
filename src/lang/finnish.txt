@@ -165,14 +165,12 @@ STR_ABBREV_NONE                                                 :{TINYFONT}EI
 STR_ABBREV_ALL                                                  :{TINYFONT}KAIKKI
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :matkustajaa
-STR_BAGS                                                        :säkkiä
-STR_TONS                                                        :tonnia
-STR_LITERS                                                      :litraa
-STR_ITEMS                                                       :erää
-STR_CRATES                                                      :laatikkoa
-STR_RES_OTHER                                                   :muu
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} matkustaja{P "" a}
+STR_BAGS                                                        :{COMMA} säkki{P "" ä}
+STR_TONS                                                        :{COMMA} tonni{P "" a}
+STR_LITERS                                                      :{COMMA} litra{P "" a}
+STR_ITEMS                                                       :{COMMA} erä{P "" ä}
+STR_CRATES                                                      :{COMMA} laatikko{P "" a}
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Tummansininen
@@ -943,6 +941,7 @@ STR_GAME_OPTIONS_FULLSCREEN_TOOLTIP                             :{BLACK}Valitse 
 
 STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Näytön tarkkuus
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}Valitse käytettävä näytön tarkkuus
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :muu
 
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Kuvakaappauksen muoto
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Valitse kuvankaappauksen muoto.
@@ -1091,7 +1090,7 @@ STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Salli m
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Realistisemman kokoiset vaikutusalueet: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Kaupungin omistamien teiden, siltojen, jne. raivaaminen sallittu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Erittäin pitkien junien rakentaminen: {ORANGE}{STRING}
-STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Veturin savun/kipinöiden määrä: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Kulkuneuvon savun/kipinöiden määrä: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Ei yhtään
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Alkuperäinen
 STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Realistinen
@@ -1103,7 +1102,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Alkuperäinen
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistinen
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Mäkien jyrkkyys junille {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Mäkien jyrkkyys ajoneuvoille {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}90-asteen käännökset kielletty junilta ja laivoilta: {ORANGE}{STRING} {LTBLUE} (ei OPF:n kanssa)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}90 asteen käännökset kielletty junilta ja laivoilta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Yhdistä vierekkäiset rautatieasemat: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Salli ei-vierekkäisten asemien yhdistäminen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Käytä kehittyneempää lastausalgoritmia: {ORANGE}{STRING}
@@ -1154,17 +1153,17 @@ STR_CONFIG_SETTING_ORDER_REVIEW_ON                              :kaikille ajoneu
 STR_CONFIG_SETTING_WARN_INCOME_LESS                             :{LTBLUE}Varoita, jos kulkuneuvon tulos on negatiivinen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_VEHICLES                        :{LTBLUE}Ajoneuvot eivät vanhene: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Uudista ajoneuvo automaattisesti, kun se vanhenee: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Uudista ajoneuvo automaattisesti {ORANGE}{STRING}{LTBLUE} kuukautta ennen/jälkeen enimmäisiän
+STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Uudista ajoneuvo automaattisesti {ORANGE}{STRING}{LTBLUE} kuukau{P 0:1 si tta} ennen/jälkeen enimmäisiän
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Vähimmäisrahamäärä ajoneuvon automaattiseen uudistukseen: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Virheilmoituksen kesto: {ORANGE}{STRING}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Osoittimen päälläpitotapahtumien viive: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Virheilmoituksen kesto: {ORANGE}{STRING} sekunti{P 0:1 "" a}
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Osoittimen päälläpitotapahtumien viive: {ORANGE}{STRING} sekunti{P 0:1 "" a}
 STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Osoittimen päälläpitotapahtumien viive: {ORANGE}ei käytössä
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Näytä kaupungin asukasluku kaupungin nimessä: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Maastogeneraattori: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LAND_GENERATOR_ORIGINAL                      :Alkuperäinen
 STR_CONFIG_SETTING_LAND_GENERATOR_TERRA_GENESIS                 :TerraGenesis
-STR_CONFIG_SETTING_OIL_REF_EDGE_DISTANCE                        :{LTBLUE}Suurin etäisyys reunasta öljyjalostamolle{ORANGE}{STRING}
+STR_CONFIG_SETTING_OIL_REF_EDGE_DISTANCE                        :{LTBLUE}Suurin etäisyys reunalta öljyjalostamolle: {ORANGE}{STRING} ruutu{P 0:1 "" a}
 STR_CONFIG_SETTING_SNOWLINE_HEIGHT                              :{LTBLUE}Lumirajan korkeus: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN                         :{LTBLUE}Maaston epätasaisuus (vain TerraGenesis) : {ORANGE}{STRING}
 STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN_VERY_SMOOTH             :Erittäin tasainen
@@ -1197,7 +1196,7 @@ STR_CONFIG_SETTING_LIVERIES                                     :{LTBLUE}Näytä
 STR_CONFIG_SETTING_LIVERIES_NONE                                :Ei yhtään
 STR_CONFIG_SETTING_LIVERIES_OWN                                 :Oma yritys
 STR_CONFIG_SETTING_LIVERIES_ALL                                 :Kaikki yritykset
-STR_CONFIG_SETTING_PREFER_TEAMCHAT                              :{LTBLUE}Suosi ryhmäkeskustelua <ENTER> näppäimellä: {ORANGE}{STRING}
+STR_CONFIG_SETTING_PREFER_TEAMCHAT                              :{LTBLUE}Suosi ryhmäkeskustelua <ENTER>-näppäimellä: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SCROLLWHEEL_SCROLLING                        :{LTBLUE}Hiiren rullan toiminta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SCROLLWHEEL_ZOOM                             :kartan lähentäminen/loitontaminen
 STR_CONFIG_SETTING_SCROLLWHEEL_SCROLL                           :kartan vieritys
@@ -1237,7 +1236,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Näytä
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Pidä rakennustyökalut aktiivisina käytön jälkeen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Ryhmitä kulut yhtiön rahoitusikkunassa: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Näytä rakennustyökalut, vaikka sopivaa ajoneuvoa ei ole: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Näytä rakennustyökalut, vaikka sopivia ajoneuvoja ei ole saatavilla: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Junia/pelaaja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Ajoneuvoja/pelaaja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Lentokoneita/pelaaja: {ORANGE}{STRING}
@@ -1269,7 +1268,7 @@ STR_CONFIG_SETTING_STARTING_YEAR                                :{LTBLUE}Aloitus
 STR_CONFIG_SETTING_SMOOTH_ECONOMY                               :{LTBLUE}Tasainen talous (enemmän pieniä muutoksia): {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_SHARES                                 :{LTBLUE}Salli osakkeiden ostaminen muista yhtiöistä: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FEEDER_PAYMENT_SHARE                         :{LTBLUE}Tuotoista syöttöjärjestelmiin maksettava osuus: {ORANGE}{STRING}%
-STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}Vedettäessä aseta opastimien väleiksi: {ORANGE}{STRING} ruutu(a)
+STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}Vedettäessä aseta opastimien väleiksi: {ORANGE}{STRING} ruutu{P 0:1 "" a}
 STR_CONFIG_SETTING_SEMAPHORE_BUILD_BEFORE_DATE                  :{LTBLUE}Rakenna oletuksena siipiopastimia ennen vuotta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_SIGNAL_GUI                            :{LTBLUE}Käytä graafista opastinkäyttöliittymää: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_SIGNAL_TYPE                          :{LTBLUE}Oletusarvoinen opastintyyppi: {ORANGE}{STRING}
@@ -1284,8 +1283,8 @@ STR_CONFIG_SETTING_CYCLE_SIGNAL_ALL                             :Kaikki
 STR_CONFIG_SETTING_TOWN_LAYOUT                                  :{LTBLUE}Uusissa kaupungeissa käytettävä tiekaava: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TOWN_LAYOUT_DEFAULT                          :oletus
 STR_CONFIG_SETTING_TOWN_LAYOUT_BETTER_ROADS                     :parempia teitä
-STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :2x2 ruudukko
-STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :3x3 ruudukko
+STR_CONFIG_SETTING_TOWN_LAYOUT_2X2_GRID                         :2x2-ruudukko
+STR_CONFIG_SETTING_TOWN_LAYOUT_3X3_GRID                         :3x3-ruudukko
 STR_CONFIG_SETTING_TOWN_LAYOUT_RANDOM                           :satunnainen
 STR_CONFIG_SETTING_ALLOW_TOWN_ROADS                             :{LTBLUE}Kaupungit saavat rakentaa teitä: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_TOWN_LEVEL_CROSSINGS                   :{LTBLUE}Kaupungit saavat rakentaa tasoristeyksiä: {ORANGE}{STRING}
@@ -1301,9 +1300,13 @@ STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_RAINFOREST              :vain sademetsii
 STR_CONFIG_SETTING_EXTRA_TREE_PLACEMENT_ALL                     :kaikkialle
 
 STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Päätyökalupalkin sijainti: {ORANGE}{STRING}
-STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :vasen
+STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :vasemmalla
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :keskellä
-STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :oikea
+STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :oikealla
+STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Tilarivin sijainti: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :vasemmalla
+STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :keskellä
+STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :oikealla
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Ikkunan kiinniottosäde: {ORANGE}{STRING} pikseliä
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Ikkunan kiinniottosäde: {ORANGE}pois päältä
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Ikkunoiden rajoitus (ei-kiinnitetyt): {ORANGE}{STRING}
@@ -2125,8 +2128,8 @@ STR_FOUND_TOWN_ROAD_LAYOUT                                      :{YELLOW}Kaupung
 STR_FOUND_TOWN_SELECT_TOWN_ROAD_LAYOUT                          :{BLACK}Valitse tiekaava tälle kaupungille
 STR_FOUND_TOWN_SELECT_LAYOUT_ORIGINAL                           :{BLACK}Alkuperäinen
 STR_FOUND_TOWN_SELECT_LAYOUT_BETTER_ROADS                       :{BLACK}Parempia teitä
-STR_FOUND_TOWN_SELECT_LAYOUT_2X2_GRID                           :{BLACK}2x2 ruudukko
-STR_FOUND_TOWN_SELECT_LAYOUT_3X3_GRID                           :{BLACK}3x3 ruudukko
+STR_FOUND_TOWN_SELECT_LAYOUT_2X2_GRID                           :{BLACK}2x2-ruudukko
+STR_FOUND_TOWN_SELECT_LAYOUT_3X3_GRID                           :{BLACK}3x3-ruudukko
 STR_FOUND_TOWN_SELECT_LAYOUT_RANDOM                             :{BLACK}Sattumanvarainen
 
 # Fund new industry window
@@ -2306,10 +2309,10 @@ STR_MAPGEN_NUMBER_OF_INDUSTRIES                                 :{BLACK}Teollisu
 STR_MAPGEN_SNOW_LINE_HEIGHT                                     :{BLACK}Lumilinjan korkeus:
 STR_MAPGEN_SNOW_LINE_UP                                         :{BLACK}Siirrä lumilinjaa yksi ylöspäin
 STR_MAPGEN_SNOW_LINE_DOWN                                       :{BLACK}Siirrä lumilinjan korkeutta yksi alaspäin
-STR_MAPGEN_RANDOM_SEED                                          :{BLACK}Satunnaisluku-siemen:
-STR_MAPGEN_RANDOM_SEED_HELP                                     :{BLACK}Klikkaa antaaksesi satunnaisluku-siemen
+STR_MAPGEN_RANDOM_SEED                                          :{BLACK}Satunnaislukusiemen:
+STR_MAPGEN_RANDOM_SEED_HELP                                     :{BLACK}Klikkaa antaaksesi satunnaislukusiemenen
 STR_MAPGEN_RANDOM                                               :{BLACK}Satunnainen
-STR_MAPGEN_RANDOM_HELP                                          :{BLACK}Vaihda maaston luomisessa käytettävä satunnaisluku-siemen
+STR_MAPGEN_RANDOM_HELP                                          :{BLACK}Vaihda maaston luomisessa käytettävä satunnaislukusiemen
 STR_MAPGEN_LAND_GENERATOR                                       :{BLACK}Maastogeneraattori:
 STR_MAPGEN_TREE_PLACER                                          :{BLACK}Puiden algoritmi:
 STR_MAPGEN_TERRAIN_TYPE                                         :{BLACK}Maaston tyyppi:
@@ -2497,7 +2500,7 @@ STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Se muutt
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Yhtiölle '{1:COMPANY}' kuuluvan junan '{0:VEHICLE}' pituus on virheellinen. Tämä johtuu luultavasti NewGRF:ien ongelmista. Peli saattaa nykiä tai kaatua.
 
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' antaa väärää tietoa.
-STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Rahti/uudelleensovitus tiedot kulkuneuvolle '{1:ENGINE}' ovat eri kuin ostolistassa rakentamisen jälkeen. Tämä voi aiheuttaa, että kulkuneuvon korvaus ei uudelleensovita oikein.
+STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Rahti/uudelleensovitustiedot kulkuneuvolle '{1:ENGINE}' ovat eri kuin ostolistassa rakentamisen jälkeen. Tämä voi aiheuttaa, että kulkuneuvon korvaus ei uudelleensovita oikein.
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' aiheutti ikuisen silmukan tuotannon callback-funktiossa.
 
 # 'User removed essential NewGRFs'-placeholders for stuff without specs.
@@ -2817,7 +2820,7 @@ STR_PURCHASE_INFO_SPEED                                         :{BLACK}Nopeus: 
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Käyttökukustannus: {GOLD}{CURRENCY}/vuosi
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Kapasiteetti: {GOLD}{CARGO} {STRING}
 STR_PURCHASE_INFO_REFITTABLE                                    :(sovitettava)
-STR_PURCHASE_INFO_DESIGNED_LIFE                                 :{BLACK}Suunniteltu: {GOLD}{NUM}{BLACK} Elinikä: {GOLD}{COMMA} vuotta
+STR_PURCHASE_INFO_DESIGNED_LIFE                                 :{BLACK}Suunniteltu: {GOLD}{NUM}{BLACK} Elinikä: {GOLD}{COMMA} vuo{P si tta}
 STR_PURCHASE_INFO_RELIABILITY                                   :{BLACK}Enimmäisluotettavuus: {GOLD}{COMMA}%
 STR_PURCHASE_INFO_COST                                          :{BLACK}Kulu: {GOLD}{CURRENCY}
 STR_PURCHASE_INFO_WEIGHT_CWEIGHT                                :{BLACK}Paino: {GOLD}{WEIGHT_S} ({WEIGHT_S})
@@ -3121,6 +3124,7 @@ STR_VEHICLE_DETAILS_TRAIN_ARTICULATED_RV_CAPACITY               :{BLACK}Kapasite
 STR_REFIT_CAPTION                                               :{WHITE}{VEHICLE} (sovita)
 STR_REFIT_TITLE                                                 :{GOLD}Valitse kuljetettava rahtityyppi:
 STR_REFIT_NEW_CAPACITY_COST_OF_REFIT                            :{BLACK}Uusi kapasiteetti: {GOLD}{CARGO}{}{BLACK}Sovituksen kustannus: {GOLD}{CURRENCY}
+STR_REFIT_NEW_CAPACITY_COST_OF_AIRCRAFT_REFIT                   :{BLACK}Uusi kapasiteetti: {GOLD}{CARGO}, {GOLD}{CARGO}{}{BLACK}Sovituksen kustannus: {GOLD}{CURRENCY}
 
 STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Valitse junan rahtityyppi
 STR_REFIT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Valitse ajoneuvolla ajettava rahti
