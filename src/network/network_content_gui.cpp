@@ -87,6 +87,8 @@ public:
 	/** Free whatever we've allocated */
 	~NetworkContentDownloadStatusWindow()
 	{
+		TarScanner::DoScan();
+
 		/* Tell all the backends about what we've downloaded */
 		for (ContentType *iter = this->receivedTypes.Begin(); iter != this->receivedTypes.End(); iter++) {
 			switch (*iter) {
@@ -94,6 +96,7 @@ public:
 				case CONTENT_TYPE_AI_LIBRARY:
 					AI::Rescan();
 					SetWindowClassesDirty(WC_AI_DEBUG);
+					InvalidateWindowData(WC_AI_LIST, 0, 1);
 					break;
 
 				case CONTENT_TYPE_BASE_GRAPHICS:

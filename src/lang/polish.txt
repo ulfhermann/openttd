@@ -538,20 +538,19 @@ STR_ABBREV_NONE                                                 :{TINYFONT}0
 STR_ABBREV_ALL                                                  :{TINYFONT}+
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :pasażerów
-STR_BAGS                                                        :worki
-STR_BAGS.d                                                      :worków
-STR_BAGS.c                                                      :workom
-STR_BAGS.b                                                      :worki
-STR_BAGS.n                                                      :workami
-STR_BAGS.m                                                      :workach
-STR_BAGS.w                                                      :worki
-STR_TONS                                                        :ton
-STR_LITERS                                                      :litrów
-STR_ITEMS                                                       :sztuk
-STR_CRATES                                                      :skrzyń
-STR_RES_OTHER                                                   :inna
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} pasażerów
+STR_BAGS                                                        :{COMMA} worki
+STR_BAGS.d                                                      :{COMMA} worków
+STR_BAGS.c                                                      :{COMMA} workom
+STR_BAGS.b                                                      :{COMMA} worki
+STR_BAGS.n                                                      :{COMMA} workami
+STR_BAGS.m                                                      :{COMMA} workach
+STR_BAGS.w                                                      :{COMMA} worki
+STR_TONS                                                        :{COMMA} ton
+STR_LITERS                                                      :{COMMA} litrów
+STR_ITEMS                                                       :{COMMA} sztuk
+STR_CRATES                                                      :{COMMA} skrzyń
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :inna
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Ciemnoniebieski
@@ -1483,7 +1482,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :oryginalny
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :realistyczny
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Nachylenie zboczy dla pociągów {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Nachylenie zboczy dla samochodów {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zabroń pociągom i statkom skręcać o 90 stopni: {ORANGE}{STRING} {LTBLUE} (nie z OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zabroń pociągom i statkom skręcać o 90 stopni: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Połącz stacje budowane jedna obok drugiej: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Pozwól na łączenie stacji nie sąsiadujących bezpośrednio: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Użyj ulepszonego algorytmu załadunku: {ORANGE}{STRING}
@@ -1684,6 +1683,10 @@ STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Pozycja
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :z lewej strony
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :wyśrodkowany
 STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :z prawej strony
+STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Pozycja paska stanu: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Lewo
+STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Środek
+STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Prawo
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Strefa przyciągania okien: {ORANGE}{STRING} pkt
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Strefa przyciągania okien: {ORANGE}niedostępne
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Miękkie ograniczenie okna: {ORANGE}{STRING}
@@ -3884,7 +3887,7 @@ STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... nie 
 STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Miasto nie będzie budować dróg. Możesz zezwolić na budowę dróg poprzez Ustawienia zaawansowane->Ekonomia->Miasta.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Trwają roboty drogowe
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Nie można usunąć tego miasta...{}Stacja lub zajezdnia przynależy do tego miasta lub obszar miasta nie może być usunięty
-STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... w centrum tego miasta nie ma odpowiedniego miejsca na statułę
+STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... w centrum tego miasta nie ma odpowiedniego miejsca na pomnik
 
 # Industry related errors
 STR_ERROR_TOO_MANY_INDUSTRIES                                   :{WHITE}... zbyt wiele przedsiębiorstw
@@ -4154,7 +4157,7 @@ STR_ERROR_CAN_T_CHANGE_SIGN_NAME                                :{WHITE}Nie moż
 STR_ERROR_CAN_T_DELETE_SIGN                                     :{WHITE}Nie można usunąć napisu...
 
 # Translatable comment for OpenTTD's desktop shortcut
-STR_DESKTOP_SHORTCUT_COMMENT                                    :Klon Transport Tycoon Deluxe
+STR_DESKTOP_SHORTCUT_COMMENT                                    :Gra symulacyjna oparta na Transport Tycoon Deluxe
 
 ##id 0x2000
 # Town building names

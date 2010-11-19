@@ -166,14 +166,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}NO
 STR_ABBREV_ALL                                                  :{TINYFONT}TOT
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :passatgers
-STR_BAGS                                                        :sacs
-STR_TONS                                                        :tones
-STR_LITERS                                                      :litres
-STR_ITEMS                                                       :caps
-STR_CRATES                                                      :palets
-STR_RES_OTHER                                                   :altres
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} passatgers
+STR_BAGS                                                        :{COMMA} sacs
+STR_TONS                                                        :{COMMA} tones
+STR_LITERS                                                      :{COMMA} litres
+STR_ITEMS                                                       :{COMMA} caps
+STR_CRATES                                                      :{COMMA} palets
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :altres
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Blau Fosc
@@ -286,6 +285,7 @@ STR_SORT_BY_RATING_MIN                                          :Rati de càrreg
 STR_SORT_BY_ENGINE_ID                                           :IDMotor (ordre clàssic)
 STR_SORT_BY_COST                                                :Cost
 STR_SORT_BY_POWER                                               :Potència
+STR_SORT_BY_TRACTIVE_EFFORT                                     :Esforç de tracció
 STR_SORT_BY_INTRO_DATE                                          :Data de llançament
 STR_SORT_BY_RUNNING_COST                                        :Cost d'utilització
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Potència/Cost d'utilització
@@ -1103,7 +1103,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Original
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realístic
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Inclinació de les pujades per als trens {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Inclinació de les pujades per als vehicles {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Prohibeix fer girs de 90 graus als trens i vaixells: {ORANGE}{STRING} {LTBLUE} (no amb OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Prohibeix fer girs de 90 graus als trens i vaixells: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Ajunta estacions de tren fetes al costat d'una altra: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Permet ajuntar estacions no annexes: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Utilitza algorisme millorat de càrrega: {ORANGE}{STRING}

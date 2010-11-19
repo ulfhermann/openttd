@@ -47,6 +47,8 @@
 #include "genworld.h"
 #include "gui.h"
 #include "vehicle_func.h"
+#include "language.h"
+#include "vehicle_base.h"
 
 #include "table/strings.h"
 #include "table/build_industry.h"
@@ -709,8 +711,13 @@ static ChangeInfoResult RailVehicleChangeInfo(uint engine, int numinfo, int prop
 				break;
 
 			case 0x22: // Visual effect
-				/** @see note in engine.h about rvi->visual_effect */
 				rvi->visual_effect = buf->ReadByte();
+				/* Avoid accidentally setting visual_effect to the default value
+				 * Since bit 6 (disable effects) is set anyways, we can safely erase some bits. */
+				if (rvi->visual_effect == VE_DEFAULT) {
+					assert(HasBit(rvi->visual_effect, VE_DISABLE_EFFECT));
+					SB(rvi->visual_effect, VE_TYPE_START, VE_TYPE_COUNT, 0);
+				}
 				break;
 
 			case 0x23: // Powered wagons weight bonus
@@ -884,6 +891,16 @@ static ChangeInfoResult RoadVehicleChangeInfo(uint engine, int numinfo, int prop
 				AlterVehicleListOrder(e->index, buf->ReadExtendedByte());
 				break;
 
+			case 0x21: // Visual effect
+				rvi->visual_effect = buf->ReadByte();
+				/* Avoid accidentally setting visual_effect to the default value
+				 * Since bit 6 (disable effects) is set anyways, we can safely erase some bits. */
+				if (rvi->visual_effect == VE_DEFAULT) {
+					assert(HasBit(rvi->visual_effect, VE_DISABLE_EFFECT));
+					SB(rvi->visual_effect, VE_TYPE_START, VE_TYPE_COUNT, 0);
+				}
+				break;
+
 			default:
 				ret = CommonVehicleChangeInfo(ei, prop, buf);
 				break;
@@ -998,6 +1015,16 @@ static ChangeInfoResult ShipVehicleChangeInfo(uint engine, int numinfo, int prop
 
 			case 0x1B: // Alter purchase list sort order
 				AlterVehicleListOrder(e->index, buf->ReadExtendedByte());
+				break;
+
+			case 0x1C: // Visual effect
+				svi->visual_effect = buf->ReadByte();
+				/* Avoid accidentally setting visual_effect to the default value
+				 * Since bit 6 (disable effects) is set anyways, we can safely erase some bits. */
+				if (svi->visual_effect == VE_DEFAULT) {
+					assert(HasBit(svi->visual_effect, VE_DISABLE_EFFECT));
+					SB(svi->visual_effect, VE_TYPE_START, VE_TYPE_COUNT, 0);
+				}
 				break;
 
 			default:
@@ -1764,6 +1791,19 @@ static ChangeInfoResult TownHouseChangeInfo(uint hid, int numinfo, int prop, Byt
 	return ret;
 }
 
+/**
+ * Get the language map associated with a given NewGRF and language.
+ * @param grfid       The NewGRF to get the map for.
+ * @param language_id The (NewGRF) language ID to get the map for.
+ * @return the LanguageMap, or NULL if it couldn't be found.
+ */
+/* static */ const LanguageMap *LanguageMap::GetLanguageMap(uint32 grfid, uint8 language_id)
+{
+	/* LanguageID "MAX_LANG", i.e. 7F is any. This language can't have a gender/case mapping, but has to be handled gracefully. */
+	const GRFFile *grffile = GetFileByGRFID(grfid);
+	return (grffile != NULL && grffile->language_map != NULL && language_id < MAX_LANG) ? &grffile->language_map[language_id] : NULL;
+}
+
 static ChangeInfoResult GlobalVarChangeInfo(uint gvid, int numinfo, int prop, ByteReader *buf)
 {
 	ChangeInfoResult ret = CIR_SUCCESS;
@@ -1896,6 +1936,66 @@ static ChangeInfoResult GlobalVarChangeInfo(uint gvid, int numinfo, int prop, By
 				buf->Skip(4);
 				break;
 
+			case 0x13:   // Gender translation table
+			case 0x14:   // Case translation table
+			case 0x15: { // Plural form translation
+				uint curidx = gvid + i; // The current index, i.e. language.
+				const LanguageMetadata *lang = curidx < MAX_LANG ? GetLanguage(curidx) : NULL;
+				if (lang == NULL) {
+					grfmsg(1, "GlobalVarChangeInfo: Language %d is not known, ignoring", curidx);
+					/* Skip over the data. */
+					while (buf->ReadByte() != 0) {
+						buf->ReadString();
+					}
+					break;
+				}
+
+				if (_cur_grffile->language_map == NULL) _cur_grffile->language_map = new LanguageMap[MAX_LANG];
+
+				if (prop == 0x15) {
+					uint plural_form = buf->ReadByte();
+					if (plural_form >= LANGUAGE_MAX_PLURAL) {
+						grfmsg(1, "GlobalVarChanceInfo: Plural form %d is out of range, ignoring", plural_form);
+					} else {
+						_cur_grffile->language_map[curidx].plural_form = plural_form;
+					}
+					break;
+				}
+
+				byte newgrf_id = buf->ReadByte(); // The NewGRF (custom) identifier.
+				while (newgrf_id != 0) {
+					const char *name = buf->ReadString(); // The name for the OpenTTD identifier.
+
+					/* We'll just ignore the UTF8 identifier character. This is (fairly)
+					 * safe as OpenTTD's strings gender/cases are usually in ASCII which
+					 * is just a subset of UTF8, or they need the bigger UTF8 characters
+					 * such as Cyrillic. Thus we will simply assume they're all UTF8. */
+					WChar c;
+					size_t len = Utf8Decode(&c, name);
+					if (c == NFO_UTF8_IDENTIFIER) name += len;
+
+					LanguageMap::Mapping map;
+					map.newgrf_id = newgrf_id;
+					if (prop == 0x13) {
+						map.openttd_id = lang->GetGenderIndex(name);
+						if (map.openttd_id >= MAX_NUM_GENDERS) {
+							grfmsg(1, "GlobalVarChangeInfo: Gender name %s is not known, ignoring", name);
+						} else {
+							*_cur_grffile->language_map[curidx].gender_map.Append() = map;
+						}
+					} else {
+						map.openttd_id = lang->GetCaseIndex(name);
+						if (map.openttd_id >= MAX_NUM_CASES) {
+							grfmsg(1, "GlobalVarChangeInfo: Case name %s is not known, ignoring", name);
+						} else {
+							*_cur_grffile->language_map[curidx].case_map.Append() = map;
+						}
+					}
+					newgrf_id = buf->ReadByte();
+				}
+				break;
+			}
+
 			default:
 				ret = CIR_UNKNOWN;
 				break;
@@ -1912,6 +2012,7 @@ static ChangeInfoResult GlobalVarReserveInfo(uint gvid, int numinfo, int prop, B
 	for (int i = 0; i < numinfo; i++) {
 		switch (prop) {
 			case 0x08: // Cost base factor
+			case 0x15: // Plural form translation
 				buf->ReadByte();
 				break;
 
@@ -1972,6 +2073,13 @@ static ChangeInfoResult GlobalVarReserveInfo(uint gvid, int numinfo, int prop, B
 				break;
 			}
 
+			case 0x13: // Gender translation table
+			case 0x14: // Case translation table
+				while (buf->ReadByte() != 0) {
+					buf->ReadString();
+				}
+				break;
+
 			default:
 				ret = CIR_UNKNOWN;
 				break;
@@ -2015,14 +2123,20 @@ static ChangeInfoResult CargoChangeInfo(uint cid, int numinfo, int prop, ByteRea
 				_string_to_grf_mapping[&cs->name_single] = _cur_grffile->grfid;
 				break;
 
-			case 0x0B:
-				/* String for units of cargo. This is different in OpenTTD to TTDPatch
-				 * (e.g. 10 tonnes of coal) */
+			case 0x0B: // String for singular quantity of cargo (e.g. 1 tonne of coal)
+			case 0x1B: // String for cargo units
+				/* String for units of cargo. This is different in OpenTTD
+				 * (e.g. tonnes) to TTDPatch (e.g. {COMMA} tonne of coal).
+				 * Property 1B is used to set OpenTTD's behaviour. */
 				cs->units_volume = buf->ReadWord();
 				_string_to_grf_mapping[&cs->units_volume] = _cur_grffile->grfid;
 				break;
 
-			case 0x0C: // String for quantity of cargo (e.g. 10 tonnes of coal)
+			case 0x0C: // String for plural quantity of cargo (e.g. 10 tonnes of coal)
+			case 0x1C: // String for any amount of cargo
+				/* Strings for an amount of cargo. This is different in OpenTTD
+				 * (e.g. {WEIGHT} of coal) to TTDPatch (e.g. {COMMA} tonnes of coal).
+				 * Property 1C is used to set OpenTTD's behaviour. */
 				cs->quantifier = buf->ReadWord();
 				_string_to_grf_mapping[&cs->quantifier] = _cur_grffile->grfid;
 				break;
@@ -5373,7 +5487,7 @@ static void GRFLoadError(ByteReader *buf)
 		if (buf->HasData()) {
 			const char *message = buf->ReadString();
 
-			error->custom_message = TranslateTTDPatchCodes(_cur_grffile->grfid, message);
+			error->custom_message = TranslateTTDPatchCodes(_cur_grffile->grfid, lang, message);
 		} else {
 			grfmsg(7, "GRFLoadError: No custom message supplied.");
 			error->custom_message = strdup("");
@@ -5385,7 +5499,7 @@ static void GRFLoadError(ByteReader *buf)
 	if (buf->HasData()) {
 		const char *data = buf->ReadString();
 
-		error->data = TranslateTTDPatchCodes(_cur_grffile->grfid, data);
+		error->data = TranslateTTDPatchCodes(_cur_grffile->grfid, lang, data);
 	} else {
 		grfmsg(7, "GRFLoadError: No message data supplied.");
 		error->data = strdup("");
@@ -5926,7 +6040,7 @@ static void FeatureTownName(ByteReader *buf)
 
 			const char *name = buf->ReadString();
 
-			char *lang_name = TranslateTTDPatchCodes(grfid, name);
+			char *lang_name = TranslateTTDPatchCodes(grfid, lang, name);
 			grfmsg(6, "FeatureTownName: lang 0x%X -> '%s'", lang, lang_name);
 			free(lang_name);
 
@@ -5972,7 +6086,7 @@ static void FeatureTownName(ByteReader *buf)
 				townname->partlist[id][i].parts[j].data.id = ref_id;
 			} else {
 				const char *text = buf->ReadString();
-				townname->partlist[id][i].parts[j].data.text = TranslateTTDPatchCodes(grfid, text);
+				townname->partlist[id][i].parts[j].data.text = TranslateTTDPatchCodes(grfid, 0, text);
 				grfmsg(6, "FeatureTownName: part %d, text %d, '%s' (with probability %d)", i, j, townname->partlist[id][i].parts[j].data.text, prob);
 			}
 			townname->partlist[id][i].parts[j].prob = prob;
@@ -6990,6 +7104,7 @@ static void ResetNewGRF()
 		free(f->filename);
 		free(f->cargo_list);
 		free(f->railtype_list);
+		delete [] f->language_map;
 		free(f);
 	}
 
