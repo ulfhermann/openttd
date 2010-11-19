@@ -28,6 +28,7 @@
 #include "widgets/dropdown_func.h"
 #include "engine_gui.h"
 #include "cargotype.h"
+#include "core/geometry_func.hpp"
 
 #include "table/strings.h"
 
@@ -841,7 +842,7 @@ void DrawEngineList(VehicleType type, int l, int r, int y, const GUIEngineList *
 	assert_compile(lengthof(sprite_y_offsets) == lengthof(sprite_widths));
 	assert(max <= eng_list->Length());
 
-	bool rtl = _dynlang.text_dir == TD_RTL;
+	bool rtl = _current_text_dir == TD_RTL;
 	int step_size = GetEngineListHeight(type);
 	int sprite_width = sprite_widths[type];
 
@@ -1261,6 +1262,14 @@ struct BuildVehicleWindow : Window {
 			case BUILD_VEHICLE_WIDGET_PANEL:
 				size->height = this->details_height;
 				break;
+
+			case BUILD_VEHICLE_WIDGET_SORT_ASSENDING_DESCENDING: {
+				Dimension d = GetStringBoundingBox(this->GetWidget<NWidgetCore>(widget)->widget_data);
+				d.width += padding.width + WD_SORTBUTTON_ARROW_WIDTH * 2; // Doubled since the string is centred and it also looks better.
+				d.height += padding.height;
+				*size = maxdim(*size, d);
+				break;
+			}
 		}
 	}
 

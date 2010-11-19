@@ -204,6 +204,7 @@ static void ShowHelp()
 	p = BlitterFactoryBase::GetBlittersInfo(p, lastof(buf));
 
 	/* We need to initialize the AI, so it finds the AIs */
+	TarScanner::DoScan();
 	AI::Initialize();
 	p = AI::GetConsoleList(p, lastof(buf));
 	AI::Uninitialize(true);
@@ -581,6 +582,7 @@ int ttd_main(int argc, char *argv[])
 	if (_dedicated_forks) DedicatedFork();
 #endif
 
+	TarScanner::DoScan();
 	AI::Initialize();
 	LoadFromConfig();
 	AI::Uninitialize(true);
@@ -601,6 +603,7 @@ int ttd_main(int argc, char *argv[])
 	_cur_resolution.height = ClampU(_cur_resolution.height, 1, UINT16_MAX);
 
 #if defined(ENABLE_NETWORK)
+	if (dedicated) DEBUG(net, 0, "Starting dedicated version %s", _openttd_revision);
 	if (dedicated_host) {
 		_network_bind_list.Clear();
 		*_network_bind_list.Append() = strdup(dedicated_host);
@@ -1109,6 +1112,7 @@ void SwitchToMode(SwitchMode new_mode)
 
 	if (_switch_mode_errorstr != INVALID_STRING_ID) {
 		ShowErrorMessage(_switch_mode_errorstr, INVALID_STRING_ID, WL_CRITICAL);
+		_switch_mode_errorstr = INVALID_STRING_ID;
 	}
 }
 

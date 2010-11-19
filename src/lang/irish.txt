@@ -165,14 +165,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}TD
 STR_ABBREV_ALL                                                  :{TINYFONT}GACH
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :paisinéirí
-STR_BAGS                                                        :málaí
-STR_TONS                                                        :tonaí
-STR_LITERS                                                      :lítear
-STR_ITEMS                                                       :míreanna
-STR_CRATES                                                      :crátaí
-STR_RES_OTHER                                                   :eile
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} paisinéirí
+STR_BAGS                                                        :{COMMA} málaí
+STR_TONS                                                        :{COMMA} tonaí
+STR_LITERS                                                      :{COMMA} lítear
+STR_ITEMS                                                       :{COMMA} míreanna
+STR_CRATES                                                      :{COMMA} crátaí
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :eile
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Gorm Dorcha
@@ -1103,7 +1102,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Bunaidh
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Réalaíoch
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Géire na fána do thraenacha {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Géire na fána d'fheithiclí bóthair {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Cuir cosc ar thraenacha agus ar longa casadh 90° a dhéanamh: {ORANGE}{STRING} {LTBLUE} (not with OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Cuir cosc ar thraenacha agus ar longa casadh 90° a dhéanamh: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Ceangail stáisiúin traenach a thógtar in aice lena chéile: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Ceadaigh stáisiúin a changal nach bhfuil taobh lena gcéile: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Úsáid an algartam lódála feabhsaithe: {ORANGE}{STRING}
