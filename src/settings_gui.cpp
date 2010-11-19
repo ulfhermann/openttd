@@ -32,6 +32,7 @@
 #include "viewport_func.h"
 #include "core/geometry_func.hpp"
 #include "ai/ai.hpp"
+#include "language.h"
 #include <map>
 
 #include "table/sprites.h"
@@ -190,8 +191,8 @@ struct GameOptionsWindow : Window {
 			case GOW_ROADSIDE_DROPDOWN:   SetDParam(0, STR_GAME_OPTIONS_ROAD_VEHICLES_DROPDOWN_LEFT + this->opt->vehicle.road_side); break;
 			case GOW_TOWNNAME_DROPDOWN:   SetDParam(0, TownName(this->opt->game_creation.town_name)); break;
 			case GOW_AUTOSAVE_DROPDOWN:   SetDParam(0, _autosave_dropdown[_settings_client.gui.autosave]); break;
-			case GOW_LANG_DROPDOWN:       SetDParam(0, SPECSTR_LANGUAGE_START + _dynlang.curr); break;
-			case GOW_RESOLUTION_DROPDOWN: SetDParam(0, GetCurRes() == _num_resolutions ? STR_RES_OTHER : SPECSTR_RESOLUTION_START + GetCurRes()); break;
+			case GOW_LANG_DROPDOWN:       SetDParamStr(0, _current_language->own_name); break;
+			case GOW_RESOLUTION_DROPDOWN: SetDParam(0, GetCurRes() == _num_resolutions ? STR_GAME_OPTIONS_RESOLUTION_OTHER : SPECSTR_RESOLUTION_START + GetCurRes()); break;
 			case GOW_SCREENSHOT_DROPDOWN: SetDParam(0, SPECSTR_SCREENSHOT_START + _cur_screenshot_format); break;
 			case GOW_BASE_GRF_DROPDOWN:   SetDParamStr(0, BaseGraphics::GetUsedSet()->name); break;
 			case GOW_BASE_GRF_STATUS:     SetDParam(0, BaseGraphics::GetUsedSet()->GetNumInvalid()); break;
@@ -315,14 +316,18 @@ struct GameOptionsWindow : Window {
 
 				/* Sort language names */
 				LangList langs;
-				for (int i = 0; i < _dynlang.num; i++) langs[SPECSTR_LANGUAGE_START + i] = i;
+				int current_lang = 0;
+				for (int i = 0; i < (int)_languages.Length(); i++) {
+					if (&_languages[i] == _current_language) current_lang = i;
+					langs[SPECSTR_LANGUAGE_START + i] = i;
+				}
 
 				DropDownList *list = new DropDownList();
 				for (LangList::iterator it = langs.begin(); it != langs.end(); it++) {
 					list->push_back(new DropDownListStringItem((*it).first, (*it).second, false));
 				}
 
-				ShowDropDownList(this, list, _dynlang.curr, GOW_LANG_DROPDOWN);
+				ShowDropDownList(this, list, current_lang, GOW_LANG_DROPDOWN);
 				break;
 			}
 
@@ -413,7 +418,7 @@ struct GameOptionsWindow : Window {
 				break;
 
 			case GOW_LANG_DROPDOWN: // Change interface language
-				ReadLanguagePack(index);
+				ReadLanguagePack(&_languages[index]);
 				CheckForMissingGlyphsInLoadedLanguagePack();
 				UpdateAllVirtCoords();
 				ReInitAllWindows();
@@ -490,7 +495,7 @@ static const NWidgetPart _nested_game_options_widgets[] = {
 					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_TOWNNAME_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_BLACK_STRING, STR_GAME_OPTIONS_TOWN_NAMES_DROPDOWN_TOOLTIP), SetFill(1, 0),
 				EndContainer(),
 				NWidget(WWT_FRAME, COLOUR_GREY), SetDataTip(STR_GAME_OPTIONS_LANGUAGE, STR_NULL),
-					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_LANG_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_BLACK_STRING, STR_GAME_OPTIONS_LANGUAGE_TOOLTIP), SetFill(1, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_LANG_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_BLACK_RAW_STRING, STR_GAME_OPTIONS_LANGUAGE_TOOLTIP), SetFill(1, 0),
 				EndContainer(),
 				NWidget(WWT_FRAME, COLOUR_GREY), SetDataTip(STR_GAME_OPTIONS_SCREENSHOT_FORMAT, STR_NULL),
 					NWidget(WWT_DROPDOWN, COLOUR_GREY, GOW_SCREENSHOT_DROPDOWN), SetMinimalSize(150, 12), SetDataTip(STR_BLACK_STRING, STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP), SetFill(1, 0),
@@ -1046,7 +1051,7 @@ uint SettingEntry::Draw(GameSettings *settings_ptr, int left, int right, int bas
 {
 	if (cur_row >= max_row) return cur_row;
 
-	bool rtl = _dynlang.text_dir == TD_RTL;
+	bool rtl = _current_text_dir == TD_RTL;
 	int offset = rtl ? -4 : 4;
 	int level_width = rtl ? -LEVEL_WIDTH : LEVEL_WIDTH;
 
@@ -1126,7 +1131,7 @@ void SettingEntry::DrawSetting(GameSettings *settings_ptr, const SettingDesc *sd
 	bool editable = true;
 	bool disabled = false;
 
-	bool rtl = _dynlang.text_dir == TD_RTL;
+	bool rtl = _current_text_dir == TD_RTL;
 	uint buttons_left = rtl ? right - 19 : left;
 	uint text_left  = left + (rtl ? 0 : 25);
 	uint text_right = right - (rtl ? 25 : 0);
@@ -1295,6 +1300,7 @@ static SettingEntry _settings_ui[] = {
 	SettingEntry("gui.errmsg_duration"),
 	SettingEntry("gui.hover_delay"),
 	SettingEntry("gui.toolbar_pos"),
+	SettingEntry("gui.statusbar_pos"),
 	SettingEntry("gui.pause_on_newgame"),
 	SettingEntry("gui.advanced_vehicle_list"),
 	SettingEntry("gui.timetable_in_ticks"),
@@ -1456,7 +1462,6 @@ static SettingEntry _settings_vehicles_trains[] = {
 	SettingEntry("vehicle.train_acceleration_model"),
 	SettingEntry("vehicle.train_slope_steepness"),
 	SettingEntry("vehicle.mammoth_trains"),
-	SettingEntry("vehicle.smoke_amount"),
 	SettingEntry("gui.lost_train_warn"),
 	SettingEntry("vehicle.wagon_speed_limits"),
 	SettingEntry("vehicle.disable_elrails"),
@@ -1486,6 +1491,7 @@ static SettingEntry _settings_vehicles[] = {
 	SettingEntry("vehicle.dynamic_engines"),
 	SettingEntry("vehicle.roadveh_acceleration_model"),
 	SettingEntry("vehicle.roadveh_slope_steepness"),
+	SettingEntry("vehicle.smoke_amount"),
 };
 /** Vehicles sub-page */
 static SettingsPage _settings_vehicles_page = {_settings_vehicles, lengthof(_settings_vehicles)};
@@ -1581,7 +1587,7 @@ struct GameSettingsWindow : Window {
 
 		if (pe == NULL) return;  // Clicked below the last setting of the page
 
-		int x = (_dynlang.text_dir == TD_RTL ? this->width - pt.x : pt.x) - SETTINGTREE_LEFT_OFFSET - (pe->level + 1) * LEVEL_WIDTH;  // Shift x coordinate
+		int x = (_current_text_dir == TD_RTL ? this->width - pt.x : pt.x) - SETTINGTREE_LEFT_OFFSET - (pe->level + 1) * LEVEL_WIDTH;  // Shift x coordinate
 		if (x < 0) return;  // Clicked left of the entry
 
 		if ((pe->flags & SEF_KIND_MASK) == SEF_SUBTREE_KIND) {
@@ -1646,7 +1652,7 @@ struct GameSettingsWindow : Window {
 							this->clicked_entry->SetButtons(0);
 						}
 						this->clicked_entry = pe;
-						this->clicked_entry->SetButtons((x >= 10) != (_dynlang.text_dir == TD_RTL) ? SEF_RIGHT_DEPRESSED : SEF_LEFT_DEPRESSED);
+						this->clicked_entry->SetButtons((x >= 10) != (_current_text_dir == TD_RTL) ? SEF_RIGHT_DEPRESSED : SEF_LEFT_DEPRESSED);
 						this->flags4 |= WF_TIMEOUT_BEGIN;
 						_left_button_clicked = false;
 					}
@@ -1768,7 +1774,7 @@ void DrawArrowButtons(int x, int y, Colours button_colour, byte state, bool clic
 	DrawSprite(SPR_ARROW_RIGHT, PAL_NONE, x + WD_IMGBTN_LEFT + 10, y + WD_IMGBTN_TOP);
 
 	/* Grey out the buttons that aren't clickable */
-	bool rtl = _dynlang.text_dir == TD_RTL;
+	bool rtl = _current_text_dir == TD_RTL;
 	if (rtl ? !clickable_right : !clickable_left) {
 		GfxFillRect(x +  1, y + 1, x +  1 + 8, y + 8, colour, FILLRECT_CHECKER);
 	}

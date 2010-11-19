@@ -166,14 +166,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}NENIU
 STR_ABBREV_ALL                                                  :{TINYFONT}ĈIU
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :pasaĝeroj
-STR_BAGS                                                        :sakoj
-STR_TONS                                                        :tunoj
-STR_LITERS                                                      :litroj
-STR_ITEMS                                                       :pecoj
-STR_CRATES                                                      :kestoj
-STR_RES_OTHER                                                   :alia
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} pasaĝeroj
+STR_BAGS                                                        :{COMMA} sakoj
+STR_TONS                                                        :{COMMA} tunoj
+STR_LITERS                                                      :{COMMA} litroj
+STR_ITEMS                                                       :{COMMA} pecoj
+STR_CRATES                                                      :{COMMA} kestoj
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :alia
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Malhelblua
@@ -1088,7 +1087,7 @@ STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realisme
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Originale
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realisme
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Kruteco de deklivo por vagonaroj {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Vagonaroj kaj ŝipoj ne ort-turniĝu: {ORANGE}{STRING} {LTBLUE} (ne uzu kun NPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Vagonaroj kaj ŝipoj ne ort-turniĝu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Ligu stacidomojn konstruatajn unu apud la alia: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Permesu ligi staciojn ne rekte najbarajn: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Uzu plibonigitan ŝarĝalgoritmon: {ORANGE}{STRING}

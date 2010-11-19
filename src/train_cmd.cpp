@@ -139,43 +139,6 @@ void Train::RailtypeChanged()
 }
 
 /**
- * Update the cached visual effect.
- * @param allow_power_change true if the wagon-is-powered-state may change.
- */
-void Train::UpdateVisualEffect(bool allow_power_change)
-{
-	byte powered_before = this->tcache.cached_vis_effect & 0x80;
-
-	const Engine *e = Engine::Get(this->engine_type);
-	if (e->u.rail.visual_effect != 0) {
-		this->tcache.cached_vis_effect = e->u.rail.visual_effect;
-	} else {
-		if (this->IsWagon() || this->IsArticulatedPart()) {
-			/* Wagons and articulated parts have no effect by default */
-			this->tcache.cached_vis_effect = 0x40;
-		} else if (e->u.rail.engclass == 0) {
-			/* Steam is offset by -4 units */
-			this->tcache.cached_vis_effect = 4;
-		} else {
-			/* Diesel fumes and sparks come from the centre */
-			this->tcache.cached_vis_effect = 8;
-		}
-	}
-
-	/* Check powered wagon / visual effect callback */
-	if (HasBit(e->info.callback_mask, CBM_TRAIN_WAGON_POWER)) {
-		uint16 callback = GetVehicleCallback(CBID_TRAIN_WAGON_POWER, 0, 0, this->engine_type, this);
-
-		if (callback != CALLBACK_FAILED) this->tcache.cached_vis_effect = GB(callback, 0, 8);
-	}
-
-	if (!allow_power_change && powered_before != (this->tcache.cached_vis_effect & 0x80)) {
-		this->tcache.cached_vis_effect ^= 0x80;
-		ShowNewGrfVehicleError(this->engine_type, STR_NEWGRF_BROKEN, STR_NEWGRF_BROKEN_POWERED_WAGON, GBUG_VEH_POWERED_WAGON, false);
-	}
-}
-
-/**
  * Recalculates the cached stuff of a train. Should be called each time a vehicle is added
  * to/removed from the chain, and when the game is loaded.
  * Note: this needs to be called too for 'wagon chains' (in the depot, without an engine)
@@ -235,7 +198,7 @@ void Train::ConsistChanged(bool same_length)
 		u->UpdateVisualEffect(true);
 
 		if (rvi_v->pow_wag_power != 0 && rvi_u->railveh_type == RAILVEH_WAGON &&
-				UsesWagonOverride(u) && !HasBit(u->tcache.cached_vis_effect, 7)) {
+				UsesWagonOverride(u) && !HasBit(u->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER)) {
 			/* wagon is powered */
 			SetBit(u->flags, VRF_POWEREDWAGON); // cache 'powered' status
 		} else {
@@ -1252,7 +1215,7 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 		 *     a) the 'next' part is a wagon that becomes a free wagon chain.
 		 *     b) the 'next' part is an engine that becomes a front engine.
 		 *     c) there is no 'next' part, nothing else happens
-		 *  3) front engine gets moved to later in the current train, it is not an engine anymore.
+		 *  3) front engine gets moved to later in the current train, it is not a front engine anymore.
 		 *     a) the 'next' part is a wagon that becomes a free wagon chain.
 		 *     b) the 'next' part is an engine that becomes a front engine.
 		 *  4) free wagon gets moved
@@ -1271,14 +1234,15 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 			DeleteWindowById(WC_VEHICLE_DETAILS, src->index);
 			DeleteWindowById(WC_VEHICLE_TIMETABLE, src->index);
 
-			/* We are going to be move to another train. So we
-			 * are no part of this group anymore. In case we
-			 * are not moving group... well, then we do not need
-			 * to move.
-			 * Or we are moving to later in the train and our
-			 * new head isn't a front engine anymore.
-			 */
-			if (dst_head != NULL ? dst_head != src : !src_head->IsFrontEngine()) {
+			/* We are going to be moved to a different train, and
+			 * we were the front engine of the original train. */
+			if (dst_head != NULL && dst_head != src && (src_head == NULL || !src_head->IsFrontEngine())) {
+				DecreaseGroupNumVehicle(src->group_id);
+			}
+
+			/* The front engine is going to be moved later in the
+			 * current train, and it will not be a train anymore. */
+			if (dst_head == NULL && !src_head->IsFrontEngine()) {
 				DecreaseGroupNumVehicle(src->group_id);
 			}
 
@@ -1287,6 +1251,12 @@ CommandCost CmdMoveRailVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, u
 			DeleteVehicleOrders(src);
 			RemoveVehicleFromGroup(src);
 			src->unitnumber = 0;
+		}
+
+		/* We were a front engine and we are becoming one for a different train.
+		 * Increase the group counter accordingly. */
+		if (original_src_head == src && dst_head == src) {
+			IncreaseGroupNumVehicle(src->group_id);
 		}
 
 		/* We weren't a front engine but are becoming one. So
@@ -1915,118 +1885,6 @@ bool Train::FindClosestDepot(TileIndex *location, DestinationID *destination, bo
 	if (reverse     != NULL) *reverse     = tfdd.reverse;
 
 	return true;
-}
-
-static const int8 _vehicle_smoke_pos[8] = {
-	1, 1, 1, 0, -1, -1, -1, 0
-};
-
-static void HandleLocomotiveSmokeCloud(const Train *v)
-{
-	bool sound = false;
-
-	/* Do not show any locomotive smoke/sparks when smoke_amount is set to none (0) or train is:
-	 * slowing down or stopped (by the player) or
-	 * it is ordered to reverse direction (by player) so it is slowing down to do it or
-	 * its current speed is less than 2 km-ish/h or
-	 * it is entering station with an order to stop there and its speed is equal to maximum station entering speed. */
-	if (_settings_game.vehicle.smoke_amount == 0 ||
-			v->vehstatus & (VS_TRAIN_SLOWING | VS_STOPPED) ||
-			HasBit(v->flags, VRF_REVERSING) ||
-			v->cur_speed < 2 ||
-			(IsRailStationTile(v->tile) && v->IsFrontEngine() && v->current_order.ShouldStopAtStation(v, GetStationIndex(v->tile)) &&
-			v->cur_speed >= v->Train::GetCurrentMaxSpeed())) {
-		return;
-	}
-
-	const Train *u = v;
-
-	do {
-		const RailVehicleInfo *rvi = RailVehInfo(v->engine_type);
-		int effect_offset = GB(v->tcache.cached_vis_effect, 0, 4) - 8;
-		byte effect_type = GB(v->tcache.cached_vis_effect, 4, 2);
-		bool disable_effect = HasBit(v->tcache.cached_vis_effect, 6);
-
-		/* no smoke? */
-		if ((rvi->railveh_type == RAILVEH_WAGON && effect_type == 0) ||
-				disable_effect ||
-				v->vehstatus & VS_HIDDEN) {
-			continue;
-		}
-
-		/* No smoke in depots or tunnels */
-		if (IsRailDepotTile(v->tile) || IsTunnelTile(v->tile)) continue;
-
-		/* No sparks for electric vehicles on non-electrified tracks. */
-		if (!HasPowerOnRail(v->railtype, GetTileRailType(v->tile))) continue;
-
-		if (effect_type == 0) {
-			/* Use default effect type for engine class. */
-			effect_type = rvi->engclass;
-		} else {
-			effect_type--;
-		}
-
-		int x = _vehicle_smoke_pos[v->direction] * effect_offset;
-		int y = _vehicle_smoke_pos[(v->direction + 2) % 8] * effect_offset;
-
-		if (HasBit(v->flags, VRF_REVERSE_DIRECTION)) {
-			x = -x;
-			y = -y;
-		}
-
-		switch (effect_type) {
-			case 0:
-				/* Steam smoke - amount is gradually falling until train reaches its maximum speed, after that it's normal.
-				 * Details: while train's current speed is gradually increasing, steam plumes' density decreases by one third each
-				 * third of its maximum speed spectrum. Steam emission finally normalises at very close to train's maximum speed.
-				 * REGULATION:
-				 * - instead of 1, 4 / 2^smoke_amount (max. 2) is used to provide sufficient regulation to steam puffs' amount. */
-				if (GB(v->tick_counter, 0, ((4 >> _settings_game.vehicle.smoke_amount) + ((u->cur_speed * 3) / u->vcache.cached_max_speed))) == 0) {
-					CreateEffectVehicleRel(v, x, y, 10, EV_STEAM_SMOKE);
-					sound = true;
-				}
-				break;
-
-			case 1:
-				/* Diesel smoke - thicker when train is starting, gradually subsiding till locomotive reaches its maximum speed
-				 * when it stops.
-				 * Details: Train's (max.) speed spectrum is divided into 32 parts. When max. speed is reached, chance for smoke
-				 * emission erodes by 32 (1/4). Power and train's weight come in handy too to either increase smoke emission in
-				 * 6 steps (1000HP each) if the power is low or decrease smoke emission in 6 steps (512 tonnes each) if the train
-				 * isn't overweight. Power and weight contributions are expressed in a way that neither extreme power, nor
-				 * extreme weight can ruin the balance (e.g. FreightWagonMultiplier) in the formula. When the train reaches
-				 * maximum speed no diesel_smoke is emitted as train has enough traction to keep locomotive running optimally.
-				 * REGULATION:
-				 * - up to which speed a diesel train is emitting smoke (with reduced/small setting only until 1/2 of max_speed),
-				 * - in Chance16 - the last value is 512 / 2^smoke_amount (max. smoke when 128 = smoke_amount of 2). */
-				if (u->cur_speed < (u->vcache.cached_max_speed >> (2 >> _settings_game.vehicle.smoke_amount)) &&
-						Chance16((64 - ((u->cur_speed << 5) / u->vcache.cached_max_speed) + (32 >> (u->acc_cache.cached_power >> 10)) - (32 >> (u->acc_cache.cached_weight >> 9))), (512 >> _settings_game.vehicle.smoke_amount))) {
-					CreateEffectVehicleRel(v, 0, 0, 10, EV_DIESEL_SMOKE);
-					sound = true;
-				}
-				break;
-
-			case 2:
-				/* Electric train's spark - more often occurs when train is departing (more load)
-				 * Details: Electric locomotives are usually at least twice as powerful as their diesel counterparts, so spark
-				 * emissions are kept simple. Only when starting, creating huge force are sparks more likely to happen, but when
-				 * reaching its max. speed, quarter by quarter of it, chance decreases untill the usuall 2,22% at train's top speed.
-				 * REGULATION:
-				 * - in Chance16 the last value is 360 / 2^smoke_amount (max. sparks when 90 = smoke_amount of 2). */
-				if (GB(v->tick_counter, 0, 2) == 0 &&
-						Chance16((6 - ((u->cur_speed << 2) / u->vcache.cached_max_speed)), (360 >> _settings_game.vehicle.smoke_amount))) {
-					CreateEffectVehicleRel(v, 0, 0, 10, EV_ELECTRIC_SPARK);
-					sound = true;
-				}
-				break;
-
-			default:
-				break;
-		}
-	} while ((v = v->Next()) != NULL);
-
-	if (sound) PlayVehicleSound(u, VSE_TRAIN_EFFECT);
 }
 
 void Train::PlayLeaveStationSound() const
@@ -2800,7 +2658,9 @@ int Train::UpdateSpeed()
 		if (this->cur_speed > max_speed) {
 			tempmax = this->cur_speed - (this->cur_speed / 10) - 1;
 		}
-		this->cur_speed = spd = Clamp(this->cur_speed + ((int)spd >> 8), 0, tempmax);
+		/* Force a minimum speed of 1 km/h when realistic acceleration is on and the train is not braking. */
+		int min_speed = (_settings_game.vehicle.train_acceleration_model == AM_ORIGINAL || this->GetAccelerationStatus() == AS_BRAKE) ? 0 : 2;
+		this->cur_speed = spd = Clamp(this->cur_speed + ((int)spd >> 8), min_speed, tempmax);
 	}
 
 	int scaled_spd = this->GetAdvanceSpeed(spd);
@@ -3730,7 +3590,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 
 	if (CheckTrainStayInDepot(v)) return true;
 
-	if (!mode) HandleLocomotiveSmokeCloud(v);
+	if (!mode) v->ShowVisualEffect();
 
 	/* We had no order but have an order now, do look ahead. */
 	if (!valid_order && !v->current_order.IsType(OT_NOTHING)) {

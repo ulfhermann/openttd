@@ -229,14 +229,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}ΤΠ
 STR_ABBREV_ALL                                                  :{TINYFONT}ΟΛΑ
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :Επιβάτες
-STR_BAGS                                                        :Σάκκοι
-STR_TONS                                                        :Τόνοι
-STR_LITERS                                                      :Λίτρα
-STR_ITEMS                                                       :αντικείμενα
-STR_CRATES                                                      :Κουτιά
-STR_RES_OTHER                                                   :άλλη
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} Επιβάτες
+STR_BAGS                                                        :{COMMA} Σάκκοι
+STR_TONS                                                        :{COMMA} Τόνοι
+STR_LITERS                                                      :{COMMA} Λίτρα
+STR_ITEMS                                                       :{COMMA} αντικείμενα
+STR_CRATES                                                      :{COMMA} Κουτιά
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :άλλη
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Σκούρο Μπλε
@@ -1190,7 +1189,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Αρχικό
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Ρεαλιστικό
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Υπερβολική κλίση γραμμης τρένων κατά {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Υπερβολική κλίση για τα οχήματα δρόμου {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Απαγόρευση στα τρένα και πλοια να κάνουν στροφες 90°: {ORANGE}{STRING} {LTBLUE} (οχι με OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Απαγόρευση στα τρένα και πλοια να κάνουν στροφες 90°: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Συνένωση σταθμών τρένων χτισμένων δίπλα σε άλλο: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Να επιτρέπεται η συνένωση μη παρακείμενων σταθμών: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Χρησιμοποίηση βελτιωμένου αλγόριθμου φόρτωσης: {ORANGE}{STRING}

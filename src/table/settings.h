@@ -11,6 +11,7 @@
 
 /* Begin - Callback Functions for the various settings */
 static bool v_PositionMainToolbar(int32 p1);
+static bool v_PositionStatusbar(int32 p1);
 static bool PopulationInLabelActive(int32 p1);
 static bool RedrawScreen(int32 p1);
 static bool RedrawSmallmap(int32 p1);
@@ -249,6 +250,8 @@ static const SettingDescGlobVarList _win32_settings[] = {
 };
 #endif /* WIN32 */
 
+extern char _config_language_file[MAX_PATH];
+
 static const SettingDescGlobVarList _misc_settings[] = {
 	SDTG_MMANY("display_opt",     SLE_UINT8, S, 0, _display_opt,       (1 << DO_SHOW_TOWN_NAMES | 1 << DO_SHOW_STATION_NAMES | 1 << DO_SHOW_SIGNS | 1 << DO_FULL_ANIMATION | 1 << DO_FULL_DETAIL | 1 << DO_SHOW_WAYPOINT_NAMES), "SHOW_TOWN_NAMES|SHOW_STATION_NAMES|SHOW_SIGNS|FULL_ANIMATION||FULL_DETAIL|WAYPOINTS", STR_NULL, NULL),
 	 SDTG_BOOL("news_ticker_sound",          S, 0, _news_ticker_sound,     true,    STR_NULL, NULL),
@@ -260,7 +263,7 @@ static const SettingDescGlobVarList _misc_settings[] = {
 	  SDTG_STR("musicdriver",      SLE_STRQ, S, 0, _ini_musicdriver,       NULL,    STR_NULL, NULL),
 	  SDTG_STR("sounddriver",      SLE_STRQ, S, 0, _ini_sounddriver,       NULL,    STR_NULL, NULL),
 	  SDTG_STR("blitter",          SLE_STRQ, S, 0, _ini_blitter,           NULL,    STR_NULL, NULL),
-	  SDTG_STR("language",         SLE_STRB, S, 0, _dynlang.curr_file,     NULL,    STR_NULL, NULL),
+	  SDTG_STR("language",         SLE_STRB, S, 0, _config_language_file,  NULL,    STR_NULL, NULL),
 	SDTG_CONDLIST("resolution",  SLE_INT, 2, S, 0, _cur_resolution,   "640,480",    STR_NULL, NULL, 0, SL_MAX_VERSION), // workaround for implicit lengthof() in SDTG_LIST
 	  SDTG_STR("screenshot_format",SLE_STRB, S, 0, _screenshot_format_name,NULL,    STR_NULL, NULL),
 	  SDTG_STR("savegame_format",  SLE_STRB, S, 0, _savegame_format,       NULL,    STR_NULL, NULL),
@@ -576,6 +579,7 @@ const SettingDesc _settings[] = {
 	  SDTC_VAR(gui.errmsg_duration,           SLE_UINT8, S,  0,     5,        0,       20, 0, STR_CONFIG_SETTING_ERRMSG_DURATION,             NULL),
 	  SDTC_VAR(gui.hover_delay,               SLE_UINT8, S, D0,     2,        1,        5, 0, STR_CONFIG_SETTING_HOVER_DELAY,                 NULL),
 	  SDTC_VAR(gui.toolbar_pos,               SLE_UINT8, S, MS,     1,        0,        2, 0, STR_CONFIG_SETTING_TOOLBAR_POS,                 v_PositionMainToolbar),
+	  SDTC_VAR(gui.statusbar_pos,             SLE_UINT8, S, MS,     1,        0,        2, 0, STR_CONFIG_SETTING_STATUSBAR_POS,               v_PositionStatusbar),
 	  SDTC_VAR(gui.window_snap_radius,        SLE_UINT8, S, D0,    10,        1,       32, 0, STR_CONFIG_SETTING_SNAP_RADIUS,                 NULL),
 	  SDTC_VAR(gui.window_soft_limit,         SLE_UINT8, S, D0,    20,        5,      255, 1, STR_CONFIG_SETTING_SOFT_LIMIT,                  NULL),
 	 SDTC_BOOL(gui.population_in_label,                  S,  0,  true,                        STR_CONFIG_SETTING_POPULATION_IN_LABEL,         PopulationInLabelActive),

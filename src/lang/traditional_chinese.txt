@@ -165,14 +165,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}無
 STR_ABBREV_ALL                                                  :{TINYFONT}全
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :乘客
-STR_BAGS                                                        :包
-STR_TONS                                                        :噸
-STR_LITERS                                                      :公升
-STR_ITEMS                                                       :件
-STR_CRATES                                                      :箱
-STR_RES_OTHER                                                   :其它
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} 乘客
+STR_BAGS                                                        :{COMMA} 包
+STR_TONS                                                        :{COMMA} 噸
+STR_LITERS                                                      :{COMMA} 公升
+STR_ITEMS                                                       :{COMMA} 件
+STR_CRATES                                                      :{COMMA} 箱
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :其它
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :暗藍
@@ -285,6 +284,7 @@ STR_SORT_BY_RATING_MIN                                          :最低運輸評
 STR_SORT_BY_ENGINE_ID                                           :引擎編號
 STR_SORT_BY_COST                                                :價值
 STR_SORT_BY_POWER                                               :功率
+STR_SORT_BY_TRACTIVE_EFFORT                                     :牽引力
 STR_SORT_BY_INTRO_DATE                                          :登場日期
 STR_SORT_BY_RUNNING_COST                                        :營運成本
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :功率／營運成本
@@ -1101,7 +1101,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :原版
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :真實
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}列車最大坡度 {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}車輛最大坡度 {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}禁止列車及船舶直角轉向：{ORANGE}{STRING} {LTBLUE} (OPF 模式下不適用)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}禁止列車及船舶直角轉向：{ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}合併建在一起的車站：{ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}允許將不相鄰的車站與附近的車站結合：{ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}使用改善後的裝載演算法：{ORANGE}{STRING}
@@ -1301,6 +1301,10 @@ STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}主工�
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :靠左
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :置中
 STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :靠右
+STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}狀態列顯示位置：{ORANGE}{STRING}
+STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :左側
+STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :中間
+STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :右側
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}視窗吸附距離：{ORANGE}{STRING} px
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}視窗吸附距離：{ORANGE}關閉
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}視窗軟性限制 (不貼齊)：{ORANGE}{STRING}
