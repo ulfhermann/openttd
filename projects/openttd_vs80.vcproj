@@ -1099,6 +1099,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\language.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\linkgraph\demands.h"
 				>
 			</File>
@@ -1512,10 +1516,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\stdafx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\strgen\strgen.h"
 				>
 			</File>
 			<File
