@@ -64,9 +64,30 @@ struct NewGRFCache {
 	uint8  cache_valid;               ///< Bitset that indicates which cache values are valid.
 };
 
+/** Meaning of the various bits of the visual effect. */
+enum VisualEffect {
+	VE_OFFSET_START        = 0, ///< First bit that contains the offset (0 = front, 8 = centre, 15 = rear)
+	VE_OFFSET_COUNT        = 4, ///< Number of bits used for the offset
+	VE_OFFSET_CENTRE       = 8, ///< Value of offset corresponding to a position above the centre of the vehicle
+
+	VE_TYPE_START          = 4, ///< First bit used for the type of effect
+	VE_TYPE_COUNT          = 2, ///< Number of bits used for the effect type
+	VE_TYPE_DEFAULT        = 0, ///< Use default from engine class
+	VE_TYPE_STEAM          = 1, ///< Steam plumes
+	VE_TYPE_DIESEL         = 2, ///< Diesel fumes
+	VE_TYPE_ELECTRIC       = 3, ///< Electric sparks
+
+	VE_DISABLE_EFFECT      = 6, ///< Flag to disable visual effect
+	VE_DISABLE_WAGON_POWER = 7, ///< Flag to disable wagon power
+
+	VE_DEFAULT = 0xFF,          ///< Default value to indicate that visual effect should be based on engine class
+};
+
 /** Cached often queried values common to all vehicles. */
 struct VehicleCache {
 	uint16 cached_max_speed; ///< Maximum speed of the consist (minimum of the max speed of all vehicles in the consist).
+
+	byte cached_vis_effect;  ///< Visual effect to show (see #VisualEffect)
 };
 
 /** A vehicle pool for a little over 1 million vehicles. */
@@ -594,6 +615,18 @@ public:
 	 * @return the cost of the depot action.
 	 */
 	CommandCost SendToDepot(DoCommandFlag flags, DepotCommand command);
+
+	/**
+	 * Update the cached visual effect.
+	 * @param allow_power_change true if the wagon-is-powered-state may change.
+	 */
+	void UpdateVisualEffect(bool allow_power_change = true);
+
+	/*
+	 * Draw visual effects (smoke and/or sparks) for a vehicle chain.
+	 * @pre this->IsPrimaryVehicle()
+	 */
+	void ShowVisualEffect() const;
 
 	/**
 	 * Increments cur_order_index, keeps care of the wrap-around and invalidates the GUI.

@@ -497,7 +497,7 @@ static void TileLoop_Town(TileIndex tile)
 		if (GB(r, 0, 8) < hs->population) {
 			uint amt = GB(r, 0, 8) / 8 + 1;
 
-			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
 			t->new_max_pass += amt;
 			t->new_act_pass += MoveGoodsToStation(CT_PASSENGERS, amt, ST_TOWN, t->index, stations.GetStations());
 		}
@@ -505,7 +505,7 @@ static void TileLoop_Town(TileIndex tile)
 		if (GB(r, 8, 8) < hs->mail_generation) {
 			uint amt = GB(r, 8, 8) / 8 + 1;
 
-			if (_economy.fluct <= 0) amt = (amt + 1) >> 1;
+			if (EconomyIsInRecession()) amt = (amt + 1) >> 1;
 			t->new_max_mail += amt;
 			t->new_act_mail += MoveGoodsToStation(CT_MAIL, amt, ST_TOWN, t->index, stations.GetStations());
 		}
@@ -1513,7 +1513,7 @@ static bool IsUniqueTownName(const char *name)
  *            3..5 town road layout (@see TownLayout)
  *               6 use random location (randomize \c tile )
  * @param p2 town name parts
- * @param text unused
+ * @param text Custom name for the town. If empty, the town name parts will be used.
  * @return the cost of this operation or an error
  */
 CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
