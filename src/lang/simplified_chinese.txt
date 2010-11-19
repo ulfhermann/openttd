@@ -165,14 +165,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}无
 STR_ABBREV_ALL                                                  :{TINYFONT}全
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :旅客
-STR_BAGS                                                        :邮件
-STR_TONS                                                        :英吨
-STR_LITERS                                                      :升
-STR_ITEMS                                                       :件
-STR_CRATES                                                      :件
-STR_RES_OTHER                                                   :其他
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} 旅客
+STR_BAGS                                                        :{COMMA} 邮件
+STR_TONS                                                        :{COMMA} 英吨
+STR_LITERS                                                      :{COMMA} 升
+STR_ITEMS                                                       :{COMMA} 件
+STR_CRATES                                                      :{COMMA} 件
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :其他
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :深蓝色
@@ -1101,7 +1100,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :TTD原版
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :改良真实版
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}坡度对列车速度的影响 {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}坡度对汽车速度的影响 {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}禁止列车和轮船 90 度转弯：{ORANGE}{STRING} {LTBLUE} (无需 OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}禁止列车和轮船 90 度转弯：{ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}将相邻的火车站进行整合：{ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}允许非毗邻站台合并：{ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}使用进阶的装货算法：{ORANGE}{STRING}

@@ -222,14 +222,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}EI
 STR_ABBREV_ALL                                                  :{TINYFONT}KÕIK
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :reisijad
-STR_BAGS                                                        :kotti
-STR_TONS                                                        :tonni
-STR_LITERS                                                      :liitrit
-STR_ITEMS                                                       :ühikut
-STR_CRATES                                                      :kasti
-STR_RES_OTHER                                                   :muu
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} reisijad
+STR_BAGS                                                        :{COMMA} kotti
+STR_TONS                                                        :{COMMA} tonni
+STR_LITERS                                                      :{COMMA} liitrit
+STR_ITEMS                                                       :{COMMA} ühikut
+STR_CRATES                                                      :{COMMA} kasti
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :muu
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Tumesinine
@@ -1153,7 +1152,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Algupärane
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistlik
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Järsakute kalde suurus rongide jaoks {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Järsakute kalde suurus maanteesõidukite jaoks {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Rongidel ja laevadel keelatakse 90 kraadised pöörded: {ORANGE}{STRING} {LTBLUE} (ei tööta OPF-ga)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Rongidel ja laevadel keelatakse 90 kraadised pöörded: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Kõrvuti ehitatud jaamade ühendamine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Mitte kõrvuti asetsevate jaamade liitmine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Täiustatud laadimisalgoritm: {ORANGE}{STRING}
