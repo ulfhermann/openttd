@@ -62,14 +62,14 @@ static bool DrawScrollingStatusText(const NewsItem *ni, int scroll_pos, int left
 	if (!FillDrawPixelInfo(&tmp_dpi, left, top, right - left, bottom)) return true;
 
 	int width = GetStringBoundingBox(buffer).width;
-	int pos = (_dynlang.text_dir == TD_RTL) ? (scroll_pos - width) : (right - scroll_pos - left);
+	int pos = (_current_text_dir == TD_RTL) ? (scroll_pos - width) : (right - scroll_pos - left);
 
 	DrawPixelInfo *old_dpi = _cur_dpi;
 	_cur_dpi = &tmp_dpi;
 	DrawString(pos, INT16_MAX, 0, buffer, TC_LIGHT_BLUE, SA_LEFT | SA_FORCE);
 	_cur_dpi = old_dpi;
 
-	return (_dynlang.text_dir == TD_RTL) ? (pos < right - left) : (pos + width > 0);
+	return (_current_text_dir == TD_RTL) ? (pos < right - left) : (pos + width > 0);
 }
 
 enum StatusbarWidget {
@@ -95,11 +95,12 @@ struct StatusBarWindow : Window {
 		this->reminder_timeout = REMINDER_STOP;
 
 		this->InitNested(desc);
+		PositionStatusbar(this);
 	}
 
 	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
 	{
-		Point pt = { (_screen.width - max(sm_width, desc->default_width)) / 2, _screen.height - sm_height };
+		Point pt = { 0, _screen.height - sm_height };
 		return pt;
 	}
 
@@ -238,7 +239,7 @@ static const NWidgetPart _nested_main_status_widgets[] = {
 	EndContainer(),
 };
 
-static const WindowDesc _main_status_desc(
+static WindowDesc _main_status_desc(
 	WDP_MANUAL, 640, 12,
 	WC_STATUS_BAR, WC_NONE,
 	WDF_UNCLICK_BUTTONS | WDF_NO_FOCUS,
@@ -253,6 +254,8 @@ bool IsNewsTickerShown()
 	const StatusBarWindow *w = dynamic_cast<StatusBarWindow*>(FindWindowById(WC_STATUS_BAR, 0));
 	return w != NULL && w->ticker_scroll < StatusBarWindow::TICKER_STOP;
 }
+
+int16 *_preferred_statusbar_size = &_main_status_desc.default_width; ///< Pointer to the default size for the status toolbar.
 
 void ShowStatusBar()
 {

@@ -21,9 +21,13 @@
 #include "newgrf.h"
 #include "strings_func.h"
 #include "newgrf_storage.h"
+#include "newgrf_text.h"
 #include "string_func.h"
 #include "date_type.h"
 #include "debug.h"
+#include "core/alloc_type.hpp"
+#include "core/smallmap_type.hpp"
+#include "language.h"
 
 #include "table/strings.h"
 #include "table/control_codes.h"
@@ -42,14 +46,14 @@ StringID TTDPStringIDToOTTDStringIDMapping(StringID str)
 {
 	/* StringID table for TextIDs 0x4E->0x6D */
 	static const StringID units_volume[] = {
-		STR_NOTHING,    STR_PASSENGERS, STR_TONS,       STR_BAGS,
+		STR_ITEMS,      STR_PASSENGERS, STR_TONS,       STR_BAGS,
 		STR_LITERS,     STR_ITEMS,      STR_CRATES,     STR_TONS,
 		STR_TONS,       STR_TONS,       STR_TONS,       STR_BAGS,
 		STR_TONS,       STR_TONS,       STR_TONS,       STR_BAGS,
 		STR_TONS,       STR_TONS,       STR_BAGS,       STR_LITERS,
-		STR_TONS,       STR_LITERS,     STR_TONS,       STR_NOTHING,
-		STR_BAGS,       STR_LITERS,     STR_TONS,       STR_NOTHING,
-		STR_TONS,       STR_NOTHING,    STR_LITERS,     STR_NOTHING
+		STR_TONS,       STR_LITERS,     STR_TONS,       STR_ITEMS,
+		STR_BAGS,       STR_LITERS,     STR_TONS,       STR_ITEMS,
+		STR_TONS,       STR_ITEMS,      STR_LITERS,     STR_ITEMS
 	};
 
 	/* A string straight from a NewGRF; no need to remap this as it's already mapped. */
@@ -121,25 +125,35 @@ enum GRFExtendedLanguages {
  */
 struct GRFText {
 public:
-	static GRFText *New(byte langid, const char *text)
+	/**
+	 * Allocate, and assign a new GRFText with the given text.
+	 * As these strings can have string terminations in them, e.g.
+	 * due to "choice lists" we (sometimes) cannot rely on detecting
+	 * the length by means of strlen. Also, if the length of already
+	 * known not scanning the whole string is more efficient.
+	 * @param langid The language of the text.
+	 * @param text   The text to store in the new GRFText.
+	 * @param len    The length of the text.
+	 */
+	static GRFText *New(byte langid, const char *text, size_t len)
 	{
-		return new (strlen(text) + 1) GRFText(langid, text);
+		return new (len) GRFText(langid, text, len);
 	}
 
 	/**
 	 * Create a copy of this GRFText.
-	 * @param orig the grftext to copy
-	 * @return an exact copy of the given text
+	 * @param orig the grftext to copy.
+	 * @return an exact copy of the given text.
 	 */
 	static GRFText *Copy(GRFText *orig)
 	{
-		return GRFText::New(orig->langid, orig->text);
+		return GRFText::New(orig->langid, orig->text, orig->len);
 	}
 
 	/**
 	 * Helper allocation function to disallow something.
 	 * Don't allow simple 'news'; they wouldn't have enough memory.
-	 * @param size the amount of space not to allocate
+	 * @param size the amount of space not to allocate.
 	 */
 	void *operator new(size_t size)
 	{
@@ -147,17 +161,26 @@ public:
 	}
 
 	/**
-	 * Free the memory we allocated
-	 * @param p memory to free
+	 * Free the memory we allocated.
+	 * @param p memory to free.
 	 */
 	void operator delete(void *p)
 	{
 		free(p);
 	}
 private:
-	GRFText(byte langid_, const char *text_) : next(NULL), langid(langid_)
+	/**
+	 * Actually construct the GRFText.
+	 * @param langid_ The language of the text.
+	 * @param text_   The text to store in this GRFText.
+	 * @param len_    The length of the text to store.
+	 */
+	GRFText(byte langid_, const char *text_, size_t len_) : next(NULL), len(len_), langid(langid_)
 	{
-		strcpy(text, text_);
+		/* We need to use memcpy instead of strcpy due to
+		 * the possibility of "choice lists" and therefor
+		 * intermediate string terminators. */
+		memcpy(this->text, text_, len);
 	}
 
 	/**
@@ -172,9 +195,10 @@ private:
 	}
 
 public:
-	GRFText *next;
-	byte langid;
-	char text[];
+	GRFText *next; ///< The next GRFText in this chain.
+	size_t len;    ///< The length of the stored string, used for copying.
+	byte langid;   ///< The language associated with this GRFText.
+	char text[];   ///< The actual (translated) text.
 };
 
 
@@ -195,8 +219,178 @@ static uint _num_grf_texts = 0;
 static GRFTextEntry _grf_text[(1 << TABSIZE) * 3];
 static byte _currentLangID = GRFLX_ENGLISH;  ///< by default, english is used.
 
+/**
+ * Get the mapping from the NewGRF supplied ID to OpenTTD's internal ID.
+ * @param newgrf_id The NewGRF ID to map.
+ * @param gender    Whether to map genders or cases.
+ * @return The, to OpenTTD's internal ID, mapped index, or -1 if there is no mapping.
+ */
+int LanguageMap::GetMapping(int newgrf_id, bool gender) const
+{
+	const SmallVector<Mapping, 1> &map = gender ? this->gender_map : this->case_map;
+	for (const Mapping *m = map.Begin(); m != map.End(); m++) {
+		if (m->newgrf_id == newgrf_id) return m->openttd_id;
+	}
+	return -1;
+}
 
-char *TranslateTTDPatchCodes(uint32 grfid, const char *str)
+/**
+ * Get the mapping from OpenTTD's internal ID to the NewGRF supplied ID.
+ * @param openttd_id The OpenTTD ID to map.
+ * @param gender     Whether to map genders or cases.
+ * @return The, to the NewGRF supplied ID, mapped index, or -1 if there is no mapping.
+ */
+int LanguageMap::GetReverseMapping(int openttd_id, bool gender) const
+{
+	const SmallVector<Mapping, 1> &map = gender ? this->gender_map : this->case_map;
+	for (const Mapping *m = map.Begin(); m != map.End(); m++) {
+		if (m->openttd_id == openttd_id) return m->newgrf_id;
+	}
+	return -1;
+}
+
+/** Helper structure for mapping choice lists. */
+struct UnmappedChoiceList : ZeroedMemoryAllocator {
+	/** Clean everything up. */
+	~UnmappedChoiceList()
+	{
+		for (SmallPair<byte, char *> *p = this->strings.Begin(); p < this->strings.End(); p++) {
+			free(p->second);
+		}
+	}
+
+	/**
+	 * Initialise the mapping.
+	 * @param type   The type of mapping.
+	 * @param old_d  The old begin of the string, i.e. from where to start writing again.
+	 * @param offset The offset to get the plural/gender from.
+	 */
+	UnmappedChoiceList(StringControlCode type, char *old_d, int offset) :
+		type(type), old_d(old_d), offset(offset)
+	{
+	}
+
+	StringControlCode type; ///< The type of choice list.
+	char *old_d;            ///< The old/original location of the "d" local variable.
+	int offset;             ///< The offset for the plural/gender form.
+
+	/** Mapping of NewGRF supplied ID to the different strings in the choice list. */
+	SmallMap<byte, char *> strings;
+
+	/**
+	 * Flush this choice list into the old d variable.
+	 * @param lm  The current language mapping.
+	 * @return The new location of the output string.
+	 */
+	char *Flush(const LanguageMap *lm)
+	{
+		if (!this->strings.Contains(0)) {
+			/* In case of a (broken) NewGRF without a default,
+			 * assume an empty string. */
+			grfmsg(1, "choice list misses default value");
+			this->strings[0] = strdup("");
+		}
+
+		char *d = old_d;
+		if (lm == NULL && this->type != SCC_PLURAL_LIST) {
+			NOT_REACHED();
+			/* In case there is no mapping, just ignore everything but the default. */
+			size_t len = strlen(this->strings[0]);
+			memcpy(d, this->strings[0], len);
+			return d + len;
+		}
+
+		d += Utf8Encode(d, this->type);
+
+		if (this->type == SCC_SWITCH_CASE) {
+			/*
+			 * Format for case switch:
+			 * <NUM CASES> <CASE1> <LEN1> <STRING1> <CASE2> <LEN2> <STRING2> <CASE3> <LEN3> <STRING3> <STRINGDEFAULT>
+			 * Each LEN is printed using 2 bytes in big endian order.
+			 */
+
+			/* "<NUM CASES>" */
+			int count = 0;
+			for (uint8 i = 0; i < _current_language->num_cases; i++) {
+				/* Count the ones we have a mapped string for. */
+				if (this->strings.Contains(lm->GetReverseMapping(i, false))) count++;
+			}
+			*d++ = count;
+
+			for (uint8 i = 0; i < _current_language->num_cases; i++) {
+				/* Resolve the string we're looking for. */
+				int idx = lm->GetReverseMapping(i, false);
+				if (!this->strings.Contains(idx)) continue;
+				char *str = this->strings[idx];
+
+				/* "<CASEn>" */
+				*d++ = i;
+
+				/* "<LENn>" */
+				size_t len = strlen(str);
+				*d++ = GB(len, 8, 8);
+				*d++ = GB(len, 0, 8);
+
+				/* "<STRINGn>" */
+				memcpy(d, str, len);
+				d += len;
+				*d++ = '\0';
+			}
+
+			/* "<STRINGDEFAULT>" */
+			size_t len = strlen(this->strings[0]);
+			memcpy(d, this->strings[0], len);
+			d += len;
+			*d++ = '\0';
+		} else {
+			if (this->type == SCC_PLURAL_LIST) {
+				*d++ = lm->plural_form;
+			}
+
+			/*
+			 * Format for choice list:
+			 * <OFFSET> <NUM CHOICES> <LENs> <STRINGs>
+			 */
+
+			/* "<OFFSET>" */
+			*d++ = this->offset - 0x80;
+
+			/* "<NUM CHOICES>" */
+			int count = (this->type == SCC_GENDER_LIST ? _current_language->num_genders : LANGUAGE_MAX_PLURAL_FORMS);
+			*d++ = count;
+
+			/* "<LENs>" */
+			for (int i = 0; i < count; i++) {
+				int idx = (this->type == SCC_GENDER_LIST ? lm->GetReverseMapping(i, true) : i + 1);
+				const char *str = this->strings[this->strings.Contains(idx) ? idx : 0];
+				size_t len = strlen(str) + 1;
+				if (len > 0xFF) grfmsg(1, "choice list string is too long");
+				*d++ = GB(len, 0, 8);
+			}
+
+			/* "<STRINGs>" */
+			for (int i = 0; i < count; i++) {
+				int idx = (this->type == SCC_GENDER_LIST ? lm->GetReverseMapping(i, true) : i + 1);
+				const char *str = this->strings[this->strings.Contains(idx) ? idx : 0];
+				size_t len = strlen(str);
+				memcpy(d, str, len);
+				d += len;
+				*d++ = '\0';
+			}
+		}
+		return d;
+	}
+};
+
+/**
+ * Translate TTDPatch string codes into something OpenTTD can handle (better).
+ * @param grfid       The (NewGRF) ID associated with this string
+ * @param language_id The (NewGRF) language ID associated with this string.
+ * @param str         The string to translate.
+ * @param [out] olen  The length of the final string.
+ * @return The translated string.
+ */
+char *TranslateTTDPatchCodes(uint32 grfid, uint8 language_id, const char *str, int *olen)
 {
 	char *tmp = MallocT<char>(strlen(str) * 10 + 1); // Allocate space to allow for expansion
 	char *d = tmp;
@@ -204,8 +398,10 @@ char *TranslateTTDPatchCodes(uint32 grfid, const char *str)
 	WChar c;
 	size_t len = Utf8Decode(&c, str);
 
-	if (c == 0x00DE) {
-		/* The thorn ('þ') indicates a unicode string to TTDPatch */
+	/* Helper variable for a possible (string) mapping. */
+	UnmappedChoiceList *mapping = NULL;
+
+	if (c == NFO_UTF8_IDENTIFIER) {
 		unicode = true;
 		str += len;
 	}
@@ -277,40 +473,91 @@ char *TranslateTTDPatchCodes(uint32 grfid, const char *str)
 			case 0x96: d += Utf8Encode(d, SCC_GRAY);    break;
 			case 0x97: d += Utf8Encode(d, SCC_DKBLUE);  break;
 			case 0x98: d += Utf8Encode(d, SCC_BLACK);   break;
-			case 0x9A:
-				switch (*str++) {
-					case 0: // FALL THROUGH
-					case 1:
-						d += Utf8Encode(d, SCC_NEWGRF_PRINT_QWORD_CURRENCY);
-						break;
-					case 3: {
+			case 0x9A: {
+				int code = *str++;
+				switch (code) {
+					case 0x00: // FALL THROUGH
+					case 0x01: d += Utf8Encode(d, SCC_NEWGRF_PRINT_QWORD_CURRENCY); break;
+					/* 0x02: ignore next colour byte is not supported. It works on the final
+					 * string and as such hooks into the string drawing routine. At that
+					 * point many things already happened, such as splitting up of strings
+					 * when drawn over multiple lines or right-to-left translations, which
+					 * make the behaviour peculiar, e.g. only happening at specific width
+					 * of windows. Or we need to add another pass over the string to just
+					 * support this. As such it is not implemented in OpenTTD. */
+					case 0x03: {
 						uint16 tmp  = ((uint8)*str++);
 						tmp        |= ((uint8)*str++) << 8;
 						d += Utf8Encode(d, SCC_NEWGRF_PUSH_WORD);
 						d += Utf8Encode(d, tmp);
 						break;
 					}
-					case 4:
+					case 0x04:
 						d += Utf8Encode(d, SCC_NEWGRF_UNPRINT);
 						d += Utf8Encode(d, *str++);
 						break;
-					case 6:
-						d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_BYTE);
+					case 0x06: d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_BYTE);          break;
+					case 0x07: d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_WORD);          break;
+					case 0x08: d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_DWORD);         break;
+					/* 0x09, 0x0A are TTDPatch internal use only string codes. */
+					case 0x0B: d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_QWORD);         break;
+					case 0x0C: d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_STATION_NAME); break;
+					case 0x0D: d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_WEIGHT);       break;
+					case 0x0E:
+					case 0x0F: {
+						const LanguageMap *lm = LanguageMap::GetLanguageMap(grfid, language_id);
+						int index = *str++;
+						int mapped = lm != NULL ? lm->GetMapping(index, code == 0x0E) : -1;
+						if (mapped >= 0) {
+							d += Utf8Encode(d, code == 0x0E ? SCC_GENDER_INDEX : SCC_SETCASE);
+							d += Utf8Encode(d, mapped);
+						}
 						break;
-					case 7:
-						d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_WORD);
+					}
+
+					case 0x10:
+					case 0x11:
+						if (mapping == NULL) {
+							if (code == 0x10) str++; // Skip the index
+							grfmsg(1, "choice list %s marker found when not expected", code == 0x10 ? "next" : "default");
+							break;
+						} else {
+							/* Terminate the previous string. */
+							*d = '\0';
+							int index = (code == 0x10 ? *str++ : 0);
+							if (mapping->strings.Contains(index)) {
+								grfmsg(1, "duplicate choice list string, ignoring");
+								d++;
+							} else {
+								d = mapping->strings[index] = MallocT<char>(strlen(str) * 10 + 1);
+							}
+						}
 						break;
-					case 8:
-						d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_DWORD);
+
+					case 0x12:
+						if (mapping == NULL) {
+							grfmsg(1, "choice list end marker found when not expected");
+						} else {
+							/* Terminate the previous string. */
+							*d = '\0';
+
+							/* Now we can start flushing everything and clean everything up. */
+							d = mapping->Flush(LanguageMap::GetLanguageMap(grfid, language_id));
+							delete mapping;
+							mapping = NULL;
+						}
 						break;
-					case 0x0B:
-						d += Utf8Encode(d, SCC_NEWGRF_PRINT_HEX_QWORD);
-						break;
-					case 0x0C:
-						d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_STATION_NAME);
-						break;
-					case 0x0D:
-						d += Utf8Encode(d, SCC_NEWGRF_PRINT_WORD_WEIGHT);
+
+					case 0x13:
+					case 0x14:
+					case 0x15:
+						if (mapping != NULL) {
+							grfmsg(1, "choice lists can't be stacked, it's going to get messy now...");
+							if (code != 0x14) str++;
+						} else {
+							static const StringControlCode mp[] = { SCC_GENDER_LIST, SCC_SWITCH_CASE, SCC_PLURAL_LIST };
+							mapping = new UnmappedChoiceList(mp[code - 0x13], d, code == 0x14 ? 0 : *str++);
+						}
 						break;
 
 					default:
@@ -318,21 +565,22 @@ char *TranslateTTDPatchCodes(uint32 grfid, const char *str)
 						break;
 				}
 				break;
+			}
 
-			case 0x9E: d += Utf8Encode(d, 0x20AC); break; // Euro
-			case 0x9F: d += Utf8Encode(d, 0x0178); break; // Y with diaeresis
-			case 0xA0: d += Utf8Encode(d, SCC_UPARROW); break;
-			case 0xAA: d += Utf8Encode(d, SCC_DOWNARROW); break;
-			case 0xAC: d += Utf8Encode(d, SCC_CHECKMARK); break;
-			case 0xAD: d += Utf8Encode(d, SCC_CROSS); break;
-			case 0xAF: d += Utf8Encode(d, SCC_RIGHTARROW); break;
-			case 0xB4: d += Utf8Encode(d, SCC_TRAIN); break;
-			case 0xB5: d += Utf8Encode(d, SCC_LORRY); break;
-			case 0xB6: d += Utf8Encode(d, SCC_BUS); break;
-			case 0xB7: d += Utf8Encode(d, SCC_PLANE); break;
-			case 0xB8: d += Utf8Encode(d, SCC_SHIP); break;
+			case 0x9E: d += Utf8Encode(d, 0x20AC);             break; // Euro
+			case 0x9F: d += Utf8Encode(d, 0x0178);             break; // Y with diaeresis
+			case 0xA0: d += Utf8Encode(d, SCC_UPARROW);        break;
+			case 0xAA: d += Utf8Encode(d, SCC_DOWNARROW);      break;
+			case 0xAC: d += Utf8Encode(d, SCC_CHECKMARK);      break;
+			case 0xAD: d += Utf8Encode(d, SCC_CROSS);          break;
+			case 0xAF: d += Utf8Encode(d, SCC_RIGHTARROW);     break;
+			case 0xB4: d += Utf8Encode(d, SCC_TRAIN);          break;
+			case 0xB5: d += Utf8Encode(d, SCC_LORRY);          break;
+			case 0xB6: d += Utf8Encode(d, SCC_BUS);            break;
+			case 0xB7: d += Utf8Encode(d, SCC_PLANE);          break;
+			case 0xB8: d += Utf8Encode(d, SCC_SHIP);           break;
 			case 0xB9: d += Utf8Encode(d, SCC_SUPERSCRIPT_M1); break;
-			case 0xBC: d += Utf8Encode(d, SCC_SMALLUPARROW); break;
+			case 0xBC: d += Utf8Encode(d, SCC_SMALLUPARROW);   break;
 			case 0xBD: d += Utf8Encode(d, SCC_SMALLDOWNARROW); break;
 			default:
 				/* Validate any unhandled character */
@@ -342,8 +590,14 @@ char *TranslateTTDPatchCodes(uint32 grfid, const char *str)
 		}
 	}
 
+	if (mapping != NULL) {
+		grfmsg(1, "choice list was incomplete, the whole list is ignored");
+		delete mapping;
+	}
+
 	*d = '\0';
-	tmp = ReallocT(tmp, strlen(tmp) + 1);
+	if (olen != NULL) *olen = d - tmp + 1;
+	tmp = ReallocT(tmp, d - tmp + 1);
 	return tmp;
 }
 
@@ -380,8 +634,9 @@ void AddGRFTextToList(GRFText **list, GRFText *text_to_add)
  */
 void AddGRFTextToList(struct GRFText **list, byte langid, uint32 grfid, const char *text_to_add)
 {
-	char *translatedtext = TranslateTTDPatchCodes(grfid, text_to_add);
-	GRFText *newtext = GRFText::New(langid, translatedtext);
+	int len;
+	char *translatedtext = TranslateTTDPatchCodes(grfid, langid, text_to_add, &len);
+	GRFText *newtext = GRFText::New(langid, translatedtext, len);
 	free(translatedtext);
 
 	AddGRFTextToList(list, newtext);
@@ -395,7 +650,7 @@ void AddGRFTextToList(struct GRFText **list, byte langid, uint32 grfid, const ch
  */
 void AddGRFTextToList(struct GRFText **list, const char *text_to_add)
 {
-	AddGRFTextToList(list, GRFText::New(0x7F, text_to_add));
+	AddGRFTextToList(list, GRFText::New(0x7F, text_to_add, strlen(text_to_add) + 1));
 }
 
 /**
@@ -449,9 +704,10 @@ StringID AddGRFString(uint32 grfid, uint16 stringid, byte langid_to_add, bool ne
 	/* Too many strings allocated, return empty */
 	if (id == lengthof(_grf_text)) return STR_EMPTY;
 
-	translatedtext = TranslateTTDPatchCodes(grfid, text_to_add);
+	int len;
+	translatedtext = TranslateTTDPatchCodes(grfid, langid_to_add, text_to_add, &len);
 
-	GRFText *newtext = GRFText::New(langid_to_add, translatedtext);
+	GRFText *newtext = GRFText::New(langid_to_add, translatedtext, len);
 
 	free(translatedtext);
 
