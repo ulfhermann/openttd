@@ -165,14 +165,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}لا 
 STR_ABBREV_ALL                                                  :{TINYFONT}الكل
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :ركاب
-STR_BAGS                                                        :صناديق
-STR_TONS                                                        :اطنان/طن
-STR_LITERS                                                      :لتر
-STR_ITEMS                                                       :وحدة
-STR_CRATES                                                      :صناديق
-STR_RES_OTHER                                                   :اخرى
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} ركاب
+STR_BAGS                                                        :{COMMA} صناديق
+STR_TONS                                                        :{COMMA} اطنان/طن
+STR_LITERS                                                      :{COMMA} لتر
+STR_ITEMS                                                       :{COMMA} وحدة
+STR_CRATES                                                      :{COMMA} صناديق
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :اخرى
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :ازرق غامق
@@ -1102,7 +1101,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :اصلي
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :واقعي
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}تدرج ميلان سكة القطار {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}نسبة الميلان للعربات {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}منع القطارات والسفن من الدوران بزاوية تسعين درجة : {ORANGE}{STRING} {LTBLUE} (not with OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}منع القطارات والسفن من الدوران بزاوية تسعين درجة : {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}ربط محطات القطار المبنيه بجوار بعض: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE} السماح بربط محطتين غير متجاورتين : {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}أستخدام خوارزمية التحميل المحسنه: {ORANGE}{STRING}
