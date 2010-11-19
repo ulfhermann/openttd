@@ -143,4 +143,34 @@ void ReleaseDisastersTargetingIndustry(IndustryID);
 #define FOR_ALL_INDUSTRIES_FROM(var, start) FOR_ALL_ITEMS_FROM(Industry, industry_index, var, start)
 #define FOR_ALL_INDUSTRIES(var) FOR_ALL_INDUSTRIES_FROM(var, 0)
 
+/** Data for managing the number of industries of a single industry type. */
+struct IndustryTypeBuildData {
+	uint32 probability;  ///< Relative probability of building this industry.
+	byte   min_number;   ///< Smallest number of industries that should exist (either \c 0 or \c 1).
+	uint16 target_count; ///< Desired number of industries of this type.
+	uint16 max_wait;     ///< Starting number of turns to wait (copied to #wait_count).
+	uint16 wait_count;   ///< Number of turns to wait before trying to build again.
+
+	void Reset();
+
+	bool GetIndustryTypeData(IndustryType it);
+};
+
+/**
+ * Data for managing the number and type of industries in the game.
+ */
+struct IndustryBuildData {
+	IndustryTypeBuildData builddata[NUM_INDUSTRYTYPES]; ///< Industry build data for every industry type.
+	uint32 wanted_inds; ///< Number of wanted industries (bits 31-16), and a fraction (bits 15-0).
+
+	void Reset();
+
+	void SetupTargetCount();
+	void TryBuildNewIndustry();
+
+	void MonthlyLoop();
+};
+
+extern IndustryBuildData _industry_builder;
+
 #endif /* INDUSTRY_H */

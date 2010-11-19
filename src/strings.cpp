@@ -30,7 +30,7 @@
 #include "date_func.h"
 #include "vehicle_base.h"
 #include "engine_base.h"
-#include "strgen/strgen.h"
+#include "language.h"
 #include "townname_func.h"
 #include "string_func.h"
 #include "company_base.h"
@@ -40,8 +40,12 @@
 #include "table/strings.h"
 #include "table/control_codes.h"
 
-DynamicLanguages _dynlang;     ///< Language information of the program.
-uint64 _decode_parameters[20]; ///< Global array of string parameters. To access, use #SetDParam.
+char _config_language_file[MAX_PATH];             ///< The file (name) stored in the configuration.
+LanguageList _languages;                          ///< The actual list of language meta data.
+const LanguageMetadata *_current_language = NULL; ///< The currently loaded language.
+
+TextDirection _current_text_dir; ///< Text direction of the currently selected language.
+uint64 _decode_parameters[20];   ///< Global array of string parameters. To access, use #SetDParam.
 
 static char *StationGetSpecialString(char *buff, int x, const char *last);
 static char *GetSpecialTownNameString(char *buff, int ind, uint32 seed, const char *last);
@@ -371,12 +375,18 @@ static char *FormatGenericCurrency(char *buff, const CurrencySpec *spec, Money n
 	return buff;
 }
 
-static int DeterminePluralForm(int64 count)
+/**
+ * Determine the "plural" index given a plural form and a number.
+ * @param count       The number to get the plural index of.
+ * @param plural_form The plural form we want an index for.
+ * @return The plural index for the given form.
+ */
+static int DeterminePluralForm(int64 count, int plural_form)
 {
 	/* The absolute value determines plurality */
 	uint64 n = abs(count);
 
-	switch (_langpack->plural_form) {
+	switch (plural_form) {
 		default:
 			NOT_REACHED();
 
@@ -665,15 +675,7 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 					}
 
 					default:
-						if (cargo_str >= 0xE000 && cargo_str < 0xF800) {
-							/* NewGRF strings from Action 4 use a different format here,
-							 * of e.g. "x tonnes of coal", so process accordingly. */
-							buff = GetStringWithArgs(buff, cargo_str, argv++, last);
-						} else {
-							buff = FormatCommaNumber(buff, GetInt32(&argv), last);
-							buff = strecpy(buff, " ", last);
-							buff = strecpy(buff, GetStringPtr(cargo_str), last);
-						}
+						buff = GetStringWithArgs(buff, cargo_str, argv++, last);
 						break;
 				}
 				break;
@@ -871,8 +873,9 @@ static char *FormatString(char *buff, const char *str, int64 *argv, uint casei, 
 				break;
 
 			case SCC_PLURAL_LIST: { // {P}
+				int plural_form = *str++;          // contains the plural form for this string
 				int64 v = argv_orig[(byte)*str++]; // contains the number that determines plural
-				str = ParseStringChoice(str, DeterminePluralForm(v), &buff, last);
+				str = ParseStringChoice(str, DeterminePluralForm(v, plural_form), &buff, last);
 				break;
 			}
 
@@ -1276,7 +1279,7 @@ static char *GetSpecialNameString(char *buff, int ind, int64 *argv, const char *
 	if (IsInsideMM(ind, (SPECSTR_LANGUAGE_START - 0x70E4), (SPECSTR_LANGUAGE_END - 0x70E4) + 1)) {
 		int i = ind - (SPECSTR_LANGUAGE_START - 0x70E4);
 		return strecpy(buff,
-			i == _dynlang.curr ? _langpack->own_name : _dynlang.ent[i].name, last);
+			&_languages[i] == _current_language ? _current_language->own_name : _languages[i].name, last);
 	}
 
 	/* resolution size? */
@@ -1311,6 +1314,8 @@ bool LanguagePackHeader::IsValid() const
 			this->plural_form  <  LANGUAGE_MAX_PLURAL &&
 			this->text_dir     <= 1 &&
 			this->newgrflangid < MAX_LANG &&
+			this->num_genders  < MAX_NUM_GENDERS &&
+			this->num_cases    < MAX_NUM_CASES &&
 			StrValid(this->name,                           lastof(this->name)) &&
 			StrValid(this->own_name,                       lastof(this->own_name)) &&
 			StrValid(this->isocode,                        lastof(this->isocode)) &&
@@ -1319,11 +1324,11 @@ bool LanguagePackHeader::IsValid() const
 			StrValid(this->digit_decimal_separator,        lastof(this->digit_decimal_separator));
 }
 
-bool ReadLanguagePack(int lang_index)
+bool ReadLanguagePack(const LanguageMetadata *lang)
 {
 	/* Current language pack */
 	size_t len;
-	LanguagePack *lang_pack = (LanguagePack *)ReadFileToMem(_dynlang.ent[lang_index].file, &len, 200000);
+	LanguagePack *lang_pack = (LanguagePack *)ReadFileToMem(lang->file, &len, 200000);
 	if (lang_pack == NULL) return false;
 
 	/* End of read data (+ terminating zero added in ReadFileToMem()) */
@@ -1381,12 +1386,12 @@ bool ReadLanguagePack(int lang_index)
 	free(_langpack_offs);
 	_langpack_offs = langpack_offs;
 
-	const char *c_file = strrchr(_dynlang.ent[lang_index].file, PATHSEPCHAR) + 1;
-	strecpy(_dynlang.curr_file, c_file, lastof(_dynlang.curr_file));
+	_current_language = lang;
+	_current_text_dir = (TextDirection)_current_language->text_dir;
+	const char *c_file = strrchr(_current_language->file, PATHSEPCHAR) + 1;
+	strecpy(_config_language_file, c_file, lastof(_config_language_file));
+	SetCurrentGrfLangID(_current_language->newgrflangid);
 
-	_dynlang.curr = lang_index;
-	_dynlang.text_dir = (TextDirection)lang_pack->text_dir;
-	SetCurrentGrfLangID(_langpack->newgrflangid);
 	InitializeSortedCargoSpecs();
 	SortIndustryTypes();
 	BuildIndustriesLegend();
@@ -1437,20 +1442,17 @@ int CDECL StringIDSorter(const StringID *a, const StringID *b)
 }
 
 /**
- * Checks whether the given language is already found.
- * @param langs    languages we've found so fa
- * @param max      the length of the language list
- * @param language name of the language to check
- * @return true if and only if a language file with the same name has not been found
+ * Get the language with the given NewGRF language ID.
+ * @param newgrflangid NewGRF languages ID to check.
+ * @return The language's metadata, or NULL if it is not known.
  */
-static bool UniqueLanguageFile(const Language *langs, uint max, const char *language)
+const LanguageMetadata *GetLanguage(byte newgrflangid)
 {
-	for (uint i = 0; i < max; i++) {
-		const char *f_name = strrchr(langs[i].file, PATHSEPCHAR) + 1;
-		if (strcmp(f_name, language) == 0) return false; // duplicates
+	for (const LanguageMetadata *lang = _languages.Begin(); lang != _languages.End(); lang++) {
+		if (newgrflangid == lang->newgrflangid) return lang;
 	}
 
-	return true;
+	return NULL;
 }
 
 /**
@@ -1459,7 +1461,7 @@ static bool UniqueLanguageFile(const Language *langs, uint max, const char *lang
  * @param hdr  the place to write the header information to
  * @return true if and only if the language file is of a compatible version
  */
-static bool GetLanguageFileHeader(const char *file, LanguagePack *hdr)
+static bool GetLanguageFileHeader(const char *file, LanguagePackHeader *hdr)
 {
 	FILE *f = fopen(file, "rb");
 	if (f == NULL) return false;
@@ -1476,44 +1478,34 @@ static bool GetLanguageFileHeader(const char *file, LanguagePack *hdr)
 
 /**
  * Gets a list of languages from the given directory.
- * @param langs the list to write to
- * @param start the initial offset in the list
- * @param max   the length of the language list
  * @param path  the base directory to search in
- * @return the number of added languages
  */
-static int GetLanguageList(Language *langs, int start, int max, const char *path)
+static void GetLanguageList(const char *path)
 {
-	int i = start;
-
 	DIR *dir = ttd_opendir(path);
 	if (dir != NULL) {
 		struct dirent *dirent;
-		while ((dirent = readdir(dir)) != NULL && i < max) {
+		while ((dirent = readdir(dir)) != NULL) {
 			const char *d_name    = FS2OTTD(dirent->d_name);
 			const char *extension = strrchr(d_name, '.');
 
 			/* Not a language file */
 			if (extension == NULL || strcmp(extension, ".lng") != 0) continue;
 
-			/* Filter any duplicate language-files, first-come first-serve */
-			if (!UniqueLanguageFile(langs, i, d_name)) continue;
-
-			langs[i].file = str_fmt("%s%s", path, d_name);
+			LanguageMetadata lmd;
+			seprintf(lmd.file, lastof(lmd.file), "%s%s", path, d_name);
 
 			/* Check whether the file is of the correct version */
-			LanguagePack hdr;
-			if (!GetLanguageFileHeader(langs[i].file, &hdr)) {
-				DEBUG(misc, 3, "%s is not a valid language file", langs[i].file);
-				free(langs[i].file);
-				continue;
+			if (!GetLanguageFileHeader(lmd.file, &lmd)) {
+				DEBUG(misc, 3, "%s is not a valid language file", lmd.file);
+			} else if (GetLanguage(lmd.newgrflangid) != NULL) {
+				DEBUG(misc, 3, "%s's language ID is already known", lmd.file);
+			} else {
+				*_languages.Append() = lmd;
 			}
-
-			i++;
 		}
 		closedir(dir);
 	}
-	return i - start;
 }
 
 /**
@@ -1523,59 +1515,45 @@ static int GetLanguageList(Language *langs, int start, int max, const char *path
 void InitializeLanguagePacks()
 {
 	Searchpath sp;
-	Language files[MAX_LANG];
-	uint language_count = 0;
 
 	FOR_ALL_SEARCHPATHS(sp) {
 		char path[MAX_PATH];
 		FioAppendDirectory(path, lengthof(path), sp, LANG_DIR);
-		language_count += GetLanguageList(files, language_count, lengthof(files), path);
+		GetLanguageList(path);
 	}
-	if (language_count == 0) usererror("No available language packs (invalid versions?)");
+	if (_languages.Length() == 0) usererror("No available language packs (invalid versions?)");
 
 	/* Acquire the locale of the current system */
 	const char *lang = GetCurrentLocale("LC_MESSAGES");
 	if (lang == NULL) lang = "en_GB";
 
-	int chosen_language   = -1; ///< Matching the language in the configuartion file or the current locale
-	int language_fallback = -1; ///< Using pt_PT for pt_BR locale when pt_BR is not available
-	int en_GB_fallback    =  0; ///< Fallback when no locale-matching language has been found
+	const LanguageMetadata *chosen_language   = NULL; ///< Matching the language in the configuartion file or the current locale
+	const LanguageMetadata *language_fallback = NULL; ///< Using pt_PT for pt_BR locale when pt_BR is not available
+	const LanguageMetadata *en_GB_fallback    = _languages.Begin(); ///< Fallback when no locale-matching language has been found
 
-	DynamicLanguages *dl = &_dynlang;
-	dl->num = 0;
-	/* Fill the dynamic languages structures */
-	for (uint i = 0; i < language_count; i++) {
-		/* File read the language header */
-		LanguagePack hdr;
-		if (!GetLanguageFileHeader(files[i].file, &hdr)) continue;
-
-		dl->ent[dl->num].file = files[i].file;
-		dl->ent[dl->num].name = strdup(hdr.name);
-
+	/* Find a proper language. */
+	for (const LanguageMetadata *lng = _languages.Begin(); lng != _languages.End(); lng++) {
 		/* We are trying to find a default language. The priority is by
 		 * configuration file, local environment and last, if nothing found,
-		 * english. If def equals -1, we have not picked a default language */
-		const char *lang_file = strrchr(dl->ent[dl->num].file, PATHSEPCHAR) + 1;
-		if (strcmp(lang_file, dl->curr_file) == 0) chosen_language = dl->num;
-
-		if (chosen_language == -1) {
-			if (strcmp (hdr.isocode, "en_GB") == 0) en_GB_fallback    = dl->num;
-			if (strncmp(hdr.isocode, lang, 5) == 0) chosen_language   = dl->num;
-			if (strncmp(hdr.isocode, lang, 2) == 0) language_fallback = dl->num;
+		 * english. */
+		const char *lang_file = strrchr(lng->file, PATHSEPCHAR) + 1;
+		if (strcmp(lang_file, _config_language_file) == 0) {
+			chosen_language = lng;
+			break;
 		}
 
-		dl->num++;
+		if (strcmp (lng->isocode, "en_GB") == 0) en_GB_fallback    = lng;
+		if (strncmp(lng->isocode, lang, 5) == 0) chosen_language   = lng;
+		if (strncmp(lng->isocode, lang, 2) == 0) language_fallback = lng;
 	}
-
-	if (dl->num == 0) usererror("Invalid version of language packs");
 
 	/* We haven't found the language in the config nor the one in the locale.
 	 * Now we set it to one of the fallback languages */
-	if (chosen_language == -1) {
-		chosen_language = (language_fallback != -1) ? language_fallback : en_GB_fallback;
+	if (chosen_language == NULL) {
+		chosen_language = (language_fallback != NULL) ? language_fallback : en_GB_fallback;
 	}
 
-	if (!ReadLanguagePack(chosen_language)) usererror("Can't read language pack '%s'", dl->ent[chosen_language].file);
+	if (!ReadLanguagePack(chosen_language)) usererror("Can't read language pack '%s'", chosen_language->file);
 }
 
 /**
@@ -1701,7 +1679,7 @@ void CheckForMissingGlyphsInLoadedLanguagePack()
 	 * exactly three characters, so it replaces the "XXX" with
 	 * the colour marker.
 	 */
-	if (_dynlang.text_dir != TD_LTR) {
+	if (_current_text_dir != TD_LTR) {
 		static char *err_str = strdup("XXXThis version of OpenTTD does not support right-to-left languages. Recompile with icu enabled.");
 		Utf8Encode(err_str, SCC_YELLOW);
 		SetDParamStr(0, err_str);

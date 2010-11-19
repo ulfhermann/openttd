@@ -59,6 +59,7 @@ uint16 Industry::counts[NUM_INDUSTRYTYPES];
 
 IndustrySpec _industry_specs[NUM_INDUSTRYTYPES];
 IndustryTileSpec _industry_tile_specs[NUM_INDUSTRYTILES];
+IndustryBuildData _industry_builder; ///< In-game manager of industries.
 
 /**
  * This function initialize the spec arrays of both
@@ -497,7 +498,7 @@ static void TransportIndustryGoods(TileIndex tile)
 			i->produced_cargo_waiting[j] -= cw;
 
 			/* fluctuating economy? */
-			if (_economy.fluct <= 0) cw = (cw + 1) / 2;
+			if (EconomyIsInRecession()) cw = (cw + 1) / 2;
 
 			i->this_month_production[j] += cw;
 
@@ -1866,18 +1867,26 @@ static uint32 GetScaledIndustryGenerationProbability(IndustryType it, bool *forc
 /**
  * Compute the probability for constructing a new industry during game play.
  * @param it Industry type to compute.
+ * @param [out] min_number Minimal number of industries that should exist at the map.
  * @return Relative probability for the industry to appear.
  */
-static uint16 GetIndustryGamePlayProbability(IndustryType it)
+static uint16 GetIndustryGamePlayProbability(IndustryType it, byte *min_number)
 {
+	if (_settings_game.difficulty.number_industries == 0) {
+		*min_number = 0;
+		return 0;
+	}
+
 	const IndustrySpec *ind_spc = GetIndustrySpec(it);
 	byte chance = ind_spc->appear_ingame[_settings_game.game_creation.landscape];
 	if (!ind_spc->enabled || chance == 0 || ind_spc->num_table == 0 ||
 			((ind_spc->behaviour & INDUSTRYBEH_BEFORE_1950) && _cur_year > 1950) ||
 			((ind_spc->behaviour & INDUSTRYBEH_AFTER_1960) && _cur_year < 1960) ||
 			!CheckIfCallBackAllowsAvailability(it, IACT_RANDOMCREATION)) {
+		*min_number = 0;
 		return 0;
 	}
+	*min_number = (ind_spc->behaviour & INDUSTRYBEH_CANCLOSE_LASTINSTANCE) ? 1 : 0;
 	return chance;
 }
 
@@ -1905,7 +1914,7 @@ static uint GetNumberOfIndustries()
  * Advertise about a new industry opening.
  * @param ind Industry being opened.
  */
-static void AdvertiseIndustryOpening(Industry *ind)
+static void AdvertiseIndustryOpening(const Industry *ind)
 {
 	const IndustrySpec *ind_spc = GetIndustrySpec(ind->type);
 	SetDParam(0, ind_spc->name);
@@ -1953,6 +1962,52 @@ static void PlaceInitialIndustry(IndustryType type, bool try_hard)
 }
 
 /**
+ * Get total number of industries existing in the game.
+ * @return Number of industries currently in the game.
+ */
+static uint GetCurrentTotalNumberOfIndustries()
+{
+	int total = 0;
+	for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) total += Industry::GetIndustryTypeCount(it);
+	return total;
+}
+
+
+/** Reset the entry. */
+void IndustryTypeBuildData::Reset()
+{
+	this->probability  = 0;
+	this->min_number   = 0;
+	this->target_count = 0;
+	this->max_wait     = 1;
+	this->wait_count   = 0;
+}
+
+/** Completely reset the industry build data. */
+void IndustryBuildData::Reset()
+{
+	this->wanted_inds = GetCurrentTotalNumberOfIndustries() << 16;
+
+	for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
+		this->builddata[it].Reset();
+	}
+}
+
+/** Monthly update of industry build data. */
+void IndustryBuildData::MonthlyLoop()
+{
+	static const int NEWINDS_PER_MONTH = 0x38000 / (10 * 12); // lower 16 bits is a float fraction, 3.5 industries per decade, divided by 10 * 12 months.
+	if (_settings_game.difficulty.number_industries == 0) return; // 'no industries' setting,
+
+	/* To prevent running out of unused industries for the player to connect,
+	 * add a fraction of new industries each month, but only if the manager can keep up. */
+	uint max_behind = 1 + min(99u, ScaleByMapSize(3)); // At most 2 industries for small maps, and 100 at the biggest map (about 6 months industry build attempts).
+	if (GetCurrentTotalNumberOfIndustries() + max_behind >= (this->wanted_inds >> 16)) {
+		this->wanted_inds += ScaleByMapSize(NEWINDS_PER_MONTH);
+	}
+}
+
+/**
  * This function will create random industries during game creation.
  * It will scale the amount of industries by mapsize and difficulty level.
  */
@@ -1994,13 +2049,15 @@ void GenerateIndustries()
 	for (uint i = 0; i < total_amount; i++) {
 		uint32 r = RandomRange(total_prob);
 		IndustryType it = 0;
-		while (it < NUM_INDUSTRYTYPES && r >= industry_probs[it]) {
+		while (r >= industry_probs[it]) {
 			r -= industry_probs[it];
 			it++;
+			assert(it < NUM_INDUSTRYTYPES);
 		}
-		assert(it < NUM_INDUSTRYTYPES && industry_probs[it] > 0);
+		assert(industry_probs[it] > 0);
 		PlaceInitialIndustry(it, false);
 	}
+	_industry_builder.Reset();
 }
 
 /**
@@ -2041,48 +2098,129 @@ void Industry::RecomputeProductionMultipliers()
 	this->production_rate[1] = min(CeilDiv(indspec->production_rate[1] * this->prod_level, PRODLEVEL_DEFAULT), 0xFF);
 }
 
-/** Simple helper that will collect data for the generation of industries */
-struct ProbabilityHelper {
-	uint16 prob;      ///< probability
-	IndustryType ind; ///< Industry id.
-};
+
+/**
+ * Set the #probability and #min_number fields for the industry type \a it for a running game.
+ * @param it Industry type.
+ * @return At least one of the fields has changed value.
+ */
+bool IndustryTypeBuildData::GetIndustryTypeData(IndustryType it)
+{
+	byte min_number;
+	uint32 probability = GetIndustryGamePlayProbability(it, &min_number);
+	bool changed = min_number != this->min_number || probability != this->probability;
+	this->min_number = min_number;
+	this->probability = probability;
+	return changed;
+}
+
+/** Decide how many industries of each type are needed. */
+void IndustryBuildData::SetupTargetCount()
+{
+	bool changed = false;
+	uint num_planned = 0; // Number of industries planned in the industry build data.
+	for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
+		changed |= this->builddata[it].GetIndustryTypeData(it);
+		num_planned += this->builddata[it].target_count;
+	}
+	uint total_amount = this->wanted_inds >> 16; // Desired total number of industries.
+	changed |= num_planned != total_amount;
+	if (!changed) return; // All industries are still the same, no need to re-randomize.
+
+	/* Initialize the target counts. */
+	uint force_build = 0;  // Number of industries that should always be available.
+	uint32 total_prob = 0; // Sum of probabilities.
+	for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
+		IndustryTypeBuildData *ibd = this->builddata + it;
+		force_build += ibd->min_number;
+		ibd->target_count = ibd->min_number;
+		total_prob += ibd->probability;
+	}
+
+	/* Subtract forced industries from the number of industries available for construction. */
+	total_amount = (total_amount <= force_build) ? 0 : total_amount - force_build;
+
+	/* Assign number of industries that should be aimed for, by using the probability as a weight. */
+	while (total_amount > 0) {
+		uint32 r = RandomRange(total_prob);
+		IndustryType it = 0;
+		while (r >= this->builddata[it].probability) {
+			r -= this->builddata[it].probability;
+			it++;
+			assert(it < NUM_INDUSTRYTYPES);
+		}
+		assert(this->builddata[it].probability > 0);
+		this->builddata[it].target_count++;
+		total_amount--;
+	}
+}
 
 /**
  * Try to create a random industry, during gameplay
  */
-static void MaybeNewIndustry()
+void IndustryBuildData::TryBuildNewIndustry()
 {
-	uint num = 0;
-	ProbabilityHelper cumulative_probs[NUM_INDUSTRYTYPES]; // probability collector
-	uint16 probability_max = 0;
+	this->SetupTargetCount();
 
-	/* Generate a list of all possible industries that can be built. */
-	for (IndustryType j = 0; j < NUM_INDUSTRYTYPES; j++) {
-		uint16 chance = GetIndustryGamePlayProbability(j);
-		if (chance > 0) {
-			probability_max += chance;
-			/* adds the result for this industry */
-			cumulative_probs[num].ind = j;
-			cumulative_probs[num++].prob = probability_max;
+	int missing = 0;       // Number of industries that need to be build.
+	uint count = 0;        // Number of industry types eligible for build.
+	uint32 total_prob = 0; // Sum of probabilities.
+	IndustryType forced_build = NUM_INDUSTRYTYPES; // Industry type that should be forcibly build.
+	for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
+		int difference = this->builddata[it].target_count - Industry::GetIndustryTypeCount(it);
+		missing += difference;
+		if (this->builddata[it].wait_count > 0) continue; // This type may not be built now.
+		if (difference > 0) {
+			if (Industry::GetIndustryTypeCount(it) == 0 && this->builddata[it].min_number > 0) {
+				/* An industry that should exist at least once, is not available. Force it, trying the most needed one first. */
+				if (forced_build == NUM_INDUSTRYTYPES ||
+						difference > this->builddata[forced_build].target_count - Industry::GetIndustryTypeCount(forced_build)) {
+					forced_build = it;
+				}
+			}
+			total_prob += difference;
+			count++;
 		}
 	}
 
-	/* Abort if there is no industry buildable */
-	if (probability_max == 0) return;
+	if (EconomyIsInRecession() || (forced_build == NUM_INDUSTRYTYPES && (missing <= 0 || total_prob == 0))) count = 0; // Skip creation of an industry.
 
-	/* Find a random type, with maximum being what has been evaluate above*/
-	IndustryType rndtype = RandomRange(probability_max);
-	IndustryType j;
-	for (j = 0; j < NUM_INDUSTRYTYPES; j++) {
-		/* and choose the index of the industry that matches as close as possible this random type */
-		if (cumulative_probs[j].prob >= rndtype) break;
+	if (count >= 1) {
+		/* If not forced, pick a weighted random industry to build.
+		 * For the case that count == 1, there is no need to draw a random number. */
+		IndustryType it;
+		if (forced_build != NUM_INDUSTRYTYPES) {
+			it = forced_build;
+		} else {
+			/* Non-forced, select an industry type to build (weighted random). */
+			uint32 r = 0; // Initialized to silence the compiler.
+			if (count > 1) r = RandomRange(total_prob);
+			for (it = 0; it < NUM_INDUSTRYTYPES; it++) {
+				if (this->builddata[it].wait_count > 0) continue; // Type may not be built now.
+				int difference = this->builddata[it].target_count - Industry::GetIndustryTypeCount(it);
+				if (difference <= 0) continue; // Too many of this kind.
+				if (count == 1) break;
+				if (r < (uint)difference) break;
+				r -= difference;
+			}
+			assert(it < NUM_INDUSTRYTYPES && this->builddata[it].target_count > Industry::GetIndustryTypeCount(it));
+		}
+
+		/* Try to create the industry. */
+		const Industry *ind = PlaceIndustry(it, IACT_RANDOMCREATION, false);
+		if (ind == NULL) {
+			this->builddata[it].wait_count = this->builddata[it].max_wait + 1; // Compensate for decrementing below.
+			this->builddata[it].max_wait = min(1000, this->builddata[it].max_wait + 2);
+		} else {
+			AdvertiseIndustryOpening(ind);
+			this->builddata[it].max_wait = max(this->builddata[it].max_wait / 2, 1); // Reduce waiting time of the industry type.
+		}
 	}
 
-	/* try to create 2000 times this industry */
-	Industry *ind = PlaceIndustry(cumulative_probs[j].ind, IACT_RANDOMCREATION, false);
-	if (ind == NULL) return;
-
-	AdvertiseIndustryOpening(ind);
+	/* Decrement wait counters. */
+	for (IndustryType it = 0; it < NUM_INDUSTRYTYPES; it++) {
+		if (this->builddata[it].wait_count > 0) this->builddata[it].wait_count--;
+	}
 }
 
 /**
@@ -2450,10 +2588,14 @@ void IndustryDailyLoop()
 	Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
 
 	/* perform the required industry changes for the day */
+
+	uint perc = 3; // Between 3% and 9% chance of creating a new industry.
+	if ((_industry_builder.wanted_inds >> 16) > GetCurrentTotalNumberOfIndustries()) {
+		perc = min(9u, perc + (_industry_builder.wanted_inds >> 16) - GetCurrentTotalNumberOfIndustries());
+	}
 	for (uint16 j = 0; j < change_loop; j++) {
-		/* 3% chance that we start a new industry */
-		if (Chance16(3, 100)) {
-			MaybeNewIndustry();
+		if (Chance16(perc, 100)) {
+			_industry_builder.TryBuildNewIndustry();
 		} else {
 			Industry *i = Industry::GetRandom();
 			if (i != NULL) {
@@ -2472,6 +2614,8 @@ void IndustryDailyLoop()
 void IndustryMonthlyLoop()
 {
 	Backup<CompanyByte> cur_company(_current_company, OWNER_NONE, FILE_LINE);
+
+	_industry_builder.MonthlyLoop();
 
 	Industry *i;
 	FOR_ALL_INDUSTRIES(i) {
@@ -2497,6 +2641,8 @@ void InitializeIndustries()
 
 	Industry::ResetIndustryCounts();
 	_industry_sound_tile = 0;
+
+	_industry_builder.Reset();
 }
 
 bool IndustrySpec::IsRawIndustry() const

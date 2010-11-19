@@ -328,6 +328,8 @@ struct NewsWindow : Window {
 				nvp->disp_flags |= ND_SHADE_DIMMED;
 			}
 		}
+
+		PositionNewsMessage(this);
 	}
 
 	void DrawNewsBorder(const Rect &r) const
@@ -342,7 +344,7 @@ struct NewsWindow : Window {
 
 	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
 	{
-		Point pt = { (_screen.width - max(sm_width, desc->default_width)) / 2, _screen.height };
+		Point pt = { 0, _screen.height };
 		return pt;
 	}
 
@@ -994,7 +996,7 @@ struct MessageHistoryWindow : Window {
 
 		/* Fill the widget with news items. */
 		int y = r.top + this->top_spacing;
-		bool rtl = _dynlang.text_dir == TD_RTL;
+		bool rtl = _current_text_dir == TD_RTL;
 		uint date_left  = rtl ? r.right - WD_FRAMERECT_RIGHT - this->date_width : r.left + WD_FRAMERECT_LEFT;
 		uint date_right = rtl ? r.right - WD_FRAMERECT_RIGHT : r.left + WD_FRAMERECT_LEFT + this->date_width;
 		uint news_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.left + WD_FRAMERECT_LEFT + this->date_width + WD_FRAMERECT_RIGHT;

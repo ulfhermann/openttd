@@ -452,7 +452,7 @@ public:
 				break;
 
 			case SLW_LIST: {
-				bool rtl = _dynlang.text_dir == TD_RTL;
+				bool rtl = _current_text_dir == TD_RTL;
 				int max = min(this->vscroll->GetPosition() + this->vscroll->GetCapacity(), this->stations.Length());
 				int y = r.top + WD_FRAMERECT_TOP;
 				for (int i = this->vscroll->GetPosition(); i < max; ++i) { // do until max number of stations of owner
@@ -860,7 +860,7 @@ static void DrawCargoIcons(CargoID i, uint waiting, int left, int right, int y)
 
 	SpriteID sprite = CargoSpec::Get(i)->GetCargoIcon();
 
-	int x = _dynlang.text_dir == TD_RTL ? left : right - num * 10;
+	int x = _current_text_dir == TD_RTL ? left : right - num * 10;
 	do {
 		DrawSprite(sprite, PAL_NONE, x, y);
 		x += 10;
@@ -1488,7 +1488,7 @@ struct StationViewWindow : public Window {
 					}
 				}
 				
-				bool rtl = _dynlang.text_dir == TD_RTL;
+				bool rtl = _current_text_dir == TD_RTL;
 				int text_left    = rtl ? r.left + this->expand_shrink_width : r.left + WD_FRAMERECT_LEFT + column * this->expand_shrink_width;
 				int text_right   = rtl ? r.right - WD_FRAMERECT_LEFT - column * this->expand_shrink_width : r.right - this->expand_shrink_width;
 				int shrink_left  = rtl ? r.left + WD_FRAMERECT_LEFT : r.right - this->expand_shrink_width + WD_FRAMERECT_LEFT;
