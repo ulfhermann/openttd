@@ -1087,6 +1087,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\language.h"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\livery.h"
 				>
 			</File>
@@ -1484,10 +1488,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\stdafx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\strgen\strgen.h"
 				>
 			</File>
 			<File

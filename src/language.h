@@ -7,10 +7,16 @@
  * See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with OpenTTD. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file strgen.h Language pack header for strgen (needs to match). */
+/** @file language.h Information about languages and their files. */
 
-#ifndef STRGEN_H
-#define STRGEN_H
+#ifndef LANGUAGE_H
+#define LANGUAGE_H
+
+#include "core/smallvec_type.hpp"
+
+static const uint8 CASE_GENDER_LEN = 16; ///< The (maximum) length of a case/gender string.
+static const uint8 MAX_NUM_GENDERS =  8; ///< Maximum number of supported genders.
+static const uint8 MAX_NUM_CASES   = 16; ///< Maximum number of supported cases.
 
 /** Header of a language file. */
 struct LanguagePackHeader {
@@ -41,15 +47,62 @@ struct LanguagePackHeader {
 	 */
 	uint16 winlangid;   ///< windows language id
 	uint8 newgrflangid; ///< newgrf language id
-	byte pad[3];        ///< pad header to be a multiple of 4
+	uint8 num_genders;  ///< the number of genders of this language
+	uint8 num_cases;    ///< the number of cases of this language
+	byte pad[1];        ///< pad header to be a multiple of 4
+
+	char genders[MAX_NUM_GENDERS][CASE_GENDER_LEN]; ///< the genders used by this translation
+	char cases[MAX_NUM_CASES][CASE_GENDER_LEN];     ///< the cases used by this translation
 
 	/**
 	 * Check whether the header is a valid header for OpenTTD.
 	 * @return true iff the header is deemed valid.
 	 */
 	bool IsValid() const;
-};
 
+	/**
+	 * Get the index for the given gender.
+	 * @param gender_str The string representation of the gender.
+	 * @return The index of the gender, or MAX_NUM_GENDERS when the gender is unknown.
+	 */
+	uint8 GetGenderIndex(const char *gender_str) const
+	{
+		for (uint8 i = 0; i < MAX_NUM_GENDERS; i++) {
+			if (strcmp(gender_str, this->genders[i]) == 0) return i;
+		}
+		return MAX_NUM_GENDERS;
+	}
+
+	/**
+	 * Get the index for the given case.
+	 * @param case_str The string representation of the case.
+	 * @return The index of the case, or MAX_NUM_CASES when the case is unknown.
+	 */
+	uint8 GetCaseIndex(const char *case_str) const
+	{
+		for (uint8 i = 0; i < MAX_NUM_CASES; i++) {
+			if (strcmp(case_str, this->cases[i]) == 0) return i;
+		}
+		return MAX_NUM_CASES;
+	}
+};
 assert_compile(sizeof(LanguagePackHeader) % 4 == 0);
 
-#endif /* STRGEN_H */
+/** Metadata about a single language. */
+struct LanguageMetadata : public LanguagePackHeader {
+	char file[MAX_PATH]; ///< Name of the file we read this data from.
+};
+
+/** Type for the list of language meta data. */
+typedef SmallVector<LanguageMetadata, 4> LanguageList;
+
+/** The actual list of language meta data. */
+extern LanguageList _languages;
+
+/** The currently loaded language. */
+extern const LanguageMetadata *_current_language;
+
+bool ReadLanguagePack(const LanguageMetadata *lang);
+const LanguageMetadata *GetLanguage(byte newgrflangid);
+
+#endif /* LANGUAGE_H */

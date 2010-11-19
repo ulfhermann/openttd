@@ -165,14 +165,12 @@ STR_ABBREV_NONE                                                 :{TINYFONT}NÃO
 STR_ABBREV_ALL                                                  :{TINYFONT}TUDO
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :passageiros
-STR_BAGS                                                        :sacos
-STR_TONS                                                        :toneladas
-STR_LITERS                                                      :litros
-STR_ITEMS                                                       :itens
-STR_CRATES                                                      :caixas
-STR_RES_OTHER                                                   :outros
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} passageiros
+STR_BAGS                                                        :{COMMA} sacos
+STR_TONS                                                        :{COMMA} toneladas
+STR_LITERS                                                      :{COMMA} litros
+STR_ITEMS                                                       :{COMMA} itens
+STR_CRATES                                                      :{COMMA} caixas
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Azul Escuro
@@ -943,6 +941,7 @@ STR_GAME_OPTIONS_FULLSCREEN_TOOLTIP                             :{BLACK}Seleccio
 
 STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Resolução do ecrã
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}Seleccione a resolução do ecrã que deseja utilizar
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :outros
 
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Formato da captura de ecrã
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Seleccione o formato de captura de ecrã que deseja utilizar
@@ -1103,7 +1102,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Original
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realista
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Declive das inclinações para comboios {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Inclinação das subidas para veículos de estrada {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Proibir comboios e barcos fazer curvas de 90 graus: {ORANGE}{STRING} {LTBLUE} (Não com OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Proibir comboios e barcos fazer curvas de 90 graus: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Juntar estações ferroviárias construídas pegadas: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Permitir juntar estações não adjacentes: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Usar algoritmo de carregamento melhorado: {ORANGE}{STRING}
@@ -1209,7 +1208,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_COMMAND                  :Clique para com
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_CONTROL                  :Clique para controlo
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :Desligado
 
-STR_CONFIG_SETTING_LEFT_MOUSE_BTN_SCROLLING                     :{LTBLUE}Deslocar com botão direito: {ORANGE}{STRING}
+STR_CONFIG_SETTING_LEFT_MOUSE_BTN_SCROLLING                     :{LTBLUE}Deslocar com botão esquerdo: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :{LTBLUE}Usar formato de data {ORANGE}{STRING}{LTBLUE} para jogos gravados.
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_LONG               :longo (31 Dez 2008)
@@ -1304,6 +1303,10 @@ STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Posiç�
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Esquerda
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Centro
 STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :Direita
+STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Posição da barra de estado: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Esquerda
+STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Centro
+STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Direita
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Raio de atracção de janelas: {ORANGE}{STRING} px
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Raio de atracção de janelas: {ORANGE}desactivado
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Limite visual da janela (não-pegajoso): {ORANGE}{STRING}
