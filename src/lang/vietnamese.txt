@@ -165,14 +165,12 @@ STR_ABBREV_NONE                                                 :{TINYFONT}K0
 STR_ABBREV_ALL                                                  :{TINYFONT}Tất
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :hành khách
-STR_BAGS                                                        :túi
-STR_TONS                                                        :tấn
-STR_LITERS                                                      :lít
-STR_ITEMS                                                       :cái
-STR_CRATES                                                      :thùng
-STR_RES_OTHER                                                   :khác
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} hành khách
+STR_BAGS                                                        :{COMMA} túi
+STR_TONS                                                        :{COMMA} tấn
+STR_LITERS                                                      :{COMMA} lít
+STR_ITEMS                                                       :{COMMA} cái
+STR_CRATES                                                      :{COMMA} thùng
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Xanh da trời đậm
@@ -943,6 +941,7 @@ STR_GAME_OPTIONS_FULLSCREEN_TOOLTIP                             :{BLACK}Đánh d
 
 STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Độ phân giải màn hình
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}Chọn độ phân giải màn hình để sử dụng
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :khác
 
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Định dạng ảnh màn hình
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Chọn định dạng ảnh màn hình để sử dụng
@@ -1103,7 +1102,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Nguyên bản
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Giống thực tế
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Độ dốc khi vượt dốc cho tàu hoả {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Độ dốc cho xe ôtô là {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Ngăn tàu hỏa và tàu thủy chuyển hướng 90 độ: {ORANGE}{STRING} {LTBLUE} (không áp dụng với OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Ngăn tàu hỏa và tàu thủy chuyển hướng 90 độ: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Gộp chung ga tàu hoả xây sát nhau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Cho phép gộp ga, bến, cảng không sát nhau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Sử dụng thuật toán bốc/dỡ hàng cải tiến: {ORANGE}{STRING}
@@ -1154,17 +1153,17 @@ STR_CONFIG_SETTING_ORDER_REVIEW_ON                              :tất cả ph.t
 STR_CONFIG_SETTING_WARN_INCOME_LESS                             :{LTBLUE}Cảnh báo nếu thu nhập của ph.tiện bị âm: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_VEHICLES                        :{LTBLUE}Ph.tiện không bao giờ thành đồ cổ: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Tự thay mới ph.tiện nếu nó hết tuổi: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Tự thay mới ph.tiện vào {ORANGE}{STRING}{LTBLUE} tháng trước/sau khi quá tuổi
+STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Tự thay mới phương tiện vào {ORANGE}{STRING}{LTBLUE} tháng trước/sau khi quá tuổi
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Số tiền tối thiểu cần cho việc tự thay mới ph.tiện: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Khoảng thời gian hiện báo lỗi: {ORANGE}{STRING}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Trễ với các sự kiện hiện ra: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Khoảng thời gian hiện báo lỗi: {ORANGE}{STRING} giây
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Độ trễ với các sự kiện hiện ra: {ORANGE}{STRING} giây
 STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Trễ với các sự kiện hiện ra: {ORANGE}tắt
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Hiện dân số đô thị trong nhãn tên của đô thị: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Tạo nền đất: {ORANGE}{STRING}
 STR_CONFIG_SETTING_LAND_GENERATOR_ORIGINAL                      :Nguyên bản
 STR_CONFIG_SETTING_LAND_GENERATOR_TERRA_GENESIS                 :Đất liền
-STR_CONFIG_SETTING_OIL_REF_EDGE_DISTANCE                        :{LTBLUE}Khoảng cách tối đa từ mép bản đồ tới nhà máy lọc dầu {ORANGE}{STRING}
+STR_CONFIG_SETTING_OIL_REF_EDGE_DISTANCE                        :{LTBLUE}Khoảng cách tối đa từ mép bản đồ tới Nhà máy lọc dầu {ORANGE}{STRING} ô
 STR_CONFIG_SETTING_SNOWLINE_HEIGHT                              :{LTBLUE}Độ cao tuyết phủ: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN                         :{LTBLUE}Độ gồ ghề của địa chất (cho TerraGenesis) : {ORANGE}{STRING}
 STR_CONFIG_SETTING_ROUGHNESS_OF_TERRAIN_VERY_SMOOTH             :Rất Phẳng
@@ -1304,6 +1303,10 @@ STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Vị tr
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Trái
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Giữa
 STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :Phải
+STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Vị trí thanh trạng thái: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Bên trái
+STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Ở giữa
+STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Bên phải
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Phạm vi neo cửa sổ: {ORANGE}{STRING} px
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Phạm vi neo cửa sổ: {ORANGE}tắt
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Giới hạn số lượng cửa sổ (không-neo): {ORANGE}{STRING}
@@ -1320,8 +1323,8 @@ STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Hệ s�
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Bỏ đi những khúc đường ngớ ngẩn khi xây dựng đường: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Giao Diện
-STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Xây Đựng
-STR_CONFIG_SETTING_VEHICLES                                     :{ORANGE}Ph.Tiện
+STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Xây Dựng
+STR_CONFIG_SETTING_VEHICLES                                     :{ORANGE}Phương Tiện
 STR_CONFIG_SETTING_STATIONS                                     :{ORANGE}Ga, bến, cảng
 STR_CONFIG_SETTING_ECONOMY                                      :{ORANGE}Kinh Tế
 STR_CONFIG_SETTING_AI                                           :{ORANGE}Đối Thủ
@@ -3121,6 +3124,7 @@ STR_VEHICLE_DETAILS_TRAIN_ARTICULATED_RV_CAPACITY               :{BLACK}Sức ch
 STR_REFIT_CAPTION                                               :{WHITE}{VEHICLE} (Cải biến)
 STR_REFIT_TITLE                                                 :{GOLD}Chọn loại hàng hoá để chở:
 STR_REFIT_NEW_CAPACITY_COST_OF_REFIT                            :{BLACK}Sức chứa mới: {GOLD}{CARGO}{}{BLACK}Chi phí cải biến: {GOLD}{CURRENCY}
+STR_REFIT_NEW_CAPACITY_COST_OF_AIRCRAFT_REFIT                   :{BLACK}Sức chứa mới: {GOLD}{CARGO}, {GOLD}{CARGO}{}{BLACK}Giá thành: {GOLD}{CURRENCY}
 
 STR_REFIT_TRAIN_LIST_TOOLTIP                                    :{BLACK}Chọn loại hàng mà tàu sẽ vận chuyển
 STR_REFIT_ROAD_VEHICLE_LIST_TOOLTIP                             :{BLACK}Chọn loại hàng mà xe sẽ vận chuyển
@@ -3349,14 +3353,14 @@ STR_AI_CONFIG_LIST_TOOLTIP                                      :{BLACK}Tất c�
 STR_AI_CONFIG_HUMAN_PLAYER                                      :Nhân vật người
 STR_AI_CONFIG_RANDOM_AI                                         :AI Ngẫu Nhiên
 
-STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Di chuyển lên trên
+STR_AI_CONFIG_MOVE_UP                                           :{BLACK}Di Chuyển Lên Trên
 STR_AI_CONFIG_MOVE_UP_TOOLTIP                                   :{BLACK}Di chuyển AI lên trên danh sách
-STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Di chuyển xuống
+STR_AI_CONFIG_MOVE_DOWN                                         :{BLACK}Di Chuyển Xuống
 STR_AI_CONFIG_MOVE_DOWN_TOOLTIP                                 :{BLACK}Di chuyển AI xuống dưới danh sách
 
 STR_AI_CONFIG_CHANGE                                            :{BLACK}Chọn AI
 STR_AI_CONFIG_CHANGE_TOOLTIP                                    :{BLACK}Nạp một AI khác
-STR_AI_CONFIG_CONFIGURE                                         :{BLACK}Cấu hình
+STR_AI_CONFIG_CONFIGURE                                         :{BLACK}Cấu Hình
 STR_AI_CONFIG_CONFIGURE_TOOLTIP                                 :{BLACK}Cấu hình tham số cho AI
 
 # Available AIs window
