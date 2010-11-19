@@ -165,14 +165,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}NO
 STR_ABBREV_ALL                                                  :{TINYFONT}ALL
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :Passagéier
-STR_BAGS                                                        :Säck
-STR_TONS                                                        :Tonnen
-STR_LITERS                                                      :Liter
-STR_ITEMS                                                       :Objeten
-STR_CRATES                                                      :Këschten
-STR_RES_OTHER                                                   :Aaneres
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{COMMA} Passagéier
+STR_BAGS                                                        :{COMMA} Säck
+STR_TONS                                                        :{COMMA} Tonnen
+STR_LITERS                                                      :{COMMA} Liter
+STR_ITEMS                                                       :{COMMA} Objeten
+STR_CRATES                                                      :{COMMA} Këschten
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :Aaneres
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Donkelblo
@@ -285,6 +284,7 @@ STR_SORT_BY_RATING_MIN                                          :Nidregsten Lued
 STR_SORT_BY_ENGINE_ID                                           :ID (klassësch Sortéierung)
 STR_SORT_BY_COST                                                :Käschten
 STR_SORT_BY_POWER                                               :Kraaft
+STR_SORT_BY_TRACTIVE_EFFORT                                     :Zéikraaft
 STR_SORT_BY_INTRO_DATE                                          :Aféirungsdatum
 STR_SORT_BY_RUNNING_COST                                        :Betriebskäschten
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Kraaft/Betriebskäschten
@@ -1102,7 +1102,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Original
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistësch
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Neigungsstärkt fir Zich{ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Steigung fir Stroossengefierer {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Verbidd Zich an Schëffer fir 90 Grad Kéieren ze maachen: {ORANGE}{STRING} {LTBLUE} (nët mat NTP)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Verbidd Zich an Schëffer fir 90 Grad Kéieren ze maachen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Nopergaren zesummensetzen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Erlaabt Statiounen zesummen ze setzen och wann se net direkt uneneen leien: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Benotz verbesserten Luedalgorithmus: {ORANGE}{STRING}
@@ -1303,6 +1303,10 @@ STR_CONFIG_SETTING_TOOLBAR_POS                                  :{LTBLUE}Positio
 STR_CONFIG_SETTING_TOOLBAR_POS_LEFT                             :Lénks
 STR_CONFIG_SETTING_TOOLBAR_POS_CENTER                           :Zentréiert
 STR_CONFIG_SETTING_TOOLBAR_POS_RIGHT                            :Riets
+STR_CONFIG_SETTING_STATUSBAR_POS                                :{LTBLUE}Positioun vun der Statusbar: {ORANGE}{STRING}
+STR_CONFIG_SETTING_STATUSBAR_POS_LEFT                           :Lenks
+STR_CONFIG_SETTING_STATUSBAR_POS_CENTER                         :Mëtt
+STR_CONFIG_SETTING_STATUSBAR_POS_RIGHT                          :Riets
 STR_CONFIG_SETTING_SNAP_RADIUS                                  :{LTBLUE}Fënsteren rasten bei: {ORANGE}{STRING} px
 STR_CONFIG_SETTING_SNAP_RADIUS_DISABLED                         :{LTBLUE}Fënsteren rasten bei: {ORANGE}ausgeschalt
 STR_CONFIG_SETTING_SOFT_LIMIT                                   :{LTBLUE}Fënster soft limit (non-sticky): {ORANGE}{STRING}

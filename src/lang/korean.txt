@@ -166,14 +166,13 @@ STR_ABBREV_NONE                                                 :{TINYFONT}NO
 STR_ABBREV_ALL                                                  :{TINYFONT}ALL
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :{G=m}승객
-STR_BAGS                                                        :{G=f}자루
-STR_TONS                                                        :{G=m}톤
-STR_LITERS                                                      :{G=f}리터
-STR_ITEMS                                                       :{G=m}품목
-STR_CRATES                                                      :{G=f}상자
-STR_RES_OTHER                                                   :{G=f}기타
-STR_NOTHING                                                     :
+STR_PASSENGERS                                                  :{G=m}{COMMA} 승객
+STR_BAGS                                                        :{G=f}{COMMA} 자루
+STR_TONS                                                        :{G=m}{COMMA} 톤
+STR_LITERS                                                      :{G=f}{COMMA} 리터
+STR_ITEMS                                                       :{G=m}{COMMA} 품목
+STR_CRATES                                                      :{G=f}{COMMA} 상자
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :{G=f}기타
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :짙은 파랑
@@ -1104,7 +1103,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :기본값
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :현실적
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}열차를 위한 경사면의 경사도: {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}자동차를 위한 경사면의 경사도 {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}열차/선박의 90도 회전을 금지함: {ORANGE}{STRING} {LTBLUE} (OPF로 불가)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}열차/선박의 90도 회전을 금지함: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}바로 옆에 역이 있으면 그 역의 이름으로 건설 (새로운 이름X) : {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}역이 붙어있지 않아도 같은 이름으로 역을 짓는 것을 허용: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}향상된 수송 알고리즘 사용 : {ORANGE}{STRING}
